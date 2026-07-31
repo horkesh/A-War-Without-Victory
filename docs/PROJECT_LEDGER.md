@@ -24435,3 +24435,365 @@ The verification run also exposed a current-main TypeScript mismatch: MapLibre r
 **Verification:** Assisted-execution plus camera-lifecycle pack passed 5 files / 125 tests after the camera test's required red failure. `npm.cmd run typecheck` passed. `npm.cmd run ci:structural-fingerprint:check` passed at `4fcdb21ab4bcff14` with final state hash `b4411ca087401148`. `npm.cmd run qa:player-journeys` passed 44 files / 756 tests. `npm.cmd run desktop:release:check` passed after installing the committed nested tactical-map dependencies. The serial fast-suite wrapper exceeded a 20-minute command cap, and a direct scenario-inclusive `npm.cmd run test:vitest -- --pool=forks --reporter=dot` retry exceeded a 40-minute cap; neither emitted a summary, neither left orphaned workers, and neither is claimed as passing.
 
 **Determinism and scope:** No simulation, scenario, startup snapshot, baseline, serialization, faction-selection, or order-merge code changed in this pass. The two comparison artifacts are byte-identical, and the structural fingerprint remains on the accepted floor. The only runtime change is a tactical-map camera-padding guard for omitted MapLibre padding sides. `docs/10_canon/FORAWWV.md` was not edited; no package, installer, tag, publication, commit, push, or PR was created.
+
+## 2026-07-30 - D2 presidential judgment-loop friction remediation
+
+**Type:** UI/read-model change / owner-play friction remediation / player-visible truth correction.
+
+**Owner evidence:** The first current-`main` RBiH D2 owner diary completed ten turns and scored President feel 3/5. It identified three Desk -> Decision -> Advance friction moments: a required opening signature was buried behind generic review routing; a loss aftermath implied that the president owed an answer when no grounded action existed; and reviewing that aftermath did not settle the same-session advance docket. The diary and screenshots remain at `docs/40_reports/playtests/20260730_rbih_diary.md` and `docs/40_reports/playtests/evidence/`.
+
+**Friction changes:**
+- A sole live presidential blocker now appears as one direct `SIGNATURE REQUIRED` action in the Warroom status dock and President's Desk, routed through the blocker’s existing canonical action/id. Multiple blockers retain the review surface.
+- Desk and advance clearance now distinguish `Your signature is required`, `Staff recommends review`, and `No presidential act required`. A clear week advances explicitly as `Advance while holding present policy`; a reviewed recommendation advances with recorded decisions.
+- Reviewing the current turn's aftermath removes that compact card from the same-session pre-advance readiness count without deleting its durable Decision Room, Records, or Chronicle record. Reloading restores review availability; no persisted UI or save state was added.
+- The post-turn consequence strip is headed `What followed` / `Šta je uslijedilo`. A loss with no grounded desk action now says that no presidential act is required and recommends holding policy instead of inventing a choice.
+
+**Bug corrections, separate from friction:**
+- Turn aftermath now marks its territory breakdown complete only when notable gained/lost counts reconcile with the net control delta. An incomplete breakdown reports notable changes plus the remaining net changes instead of showing a misleading exact `0 gained / 0 lost`.
+- The peace-to-war opening force summary reports personnel, tanks, or artillery only when every contributing brigade reports that metric. Otherwise it renders localized `Unreported` / `Nije prijavljeno`, so missing enemy intelligence cannot appear as an exact zero. Brigade counts remain exact.
+
+**Localization and determinism:** All new player-facing copy has EN/BCS parity. The changes derive display state only from already-loaded blockers, aftermath, summary, and formation data; they add no randomness, timestamps, simulation commands, scenario behavior, serialization, or save-schema fields.
+
+**TDD and verification:**
+- The focused red run produced 13 expected failures across direct signature routing, deliberate hold language, reviewed-aftermath acknowledgement, incomplete-delta wording, and unreported opening metrics.
+- The focused green run passed 6 files / 98 tests.
+- The first broad host run exposed one strict quiet-digest shape-classifier incompatibility with the derived `breakdownComplete` field. After adding that field to the known territory shape, its isolated 11-test regression and the fresh broad host run passed; final broad result: 16 files / 237 tests.
+- `npm.cmd run qa:player-journeys` passed 44 files / 761 tests.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run desktop:map:build` passed with 1,340 modules transformed. This compiled the renderer only; it did not package or alter release state.
+- `git diff --check` passed.
+
+**Documentation:** Design and execution rationale are recorded in `docs/plans/2026-07-30-presidential-judgment-loop-design.md` and `docs/plans/2026-07-30-presidential-judgment-loop-implementation.md`; `docs/40_reports/GUI_MASTER.md` points at this D2 remediation and keeps a fresh owner play as the subjective 5/5 validation gate.
+
+**Scope:** Local UI/read-model, tests, and documentation only. No simulation, scenario, baseline, startup snapshot, save schema, package, installer, tag, release state, staging, commit, push, PR, or remote publication changed.
+
+## 2026-07-30 - D2 RS owner diary, ten-turn historical run
+
+**Type:** Owner playtest evidence / D2 gate assessment / no code fix.
+
+Ran a fresh RS campaign through exact turn 10 using the release-built `npm run desktop` Electron route and an isolated user-data profile. The build was `main` at `b8ff530de08fa23cf38103d8da9557da56296130` plus the local D2 judgment-loop tracked diff present at launch (`b9c8d913c7cc16c115cbf4c3b784e30c3324af33`). No package or installer was created.
+
+Historical discipline:
+- Selected `Adopt all six goals` and `Always allow paramilitary deployment` through UI-labeled historical defaults.
+- Accepted Cutileiro using the normalized RS disposition in `WAR_TERMINATION_SPEC.md`.
+- Authorized nine dossiers explicitly labeled as historical operation authorizations with staff recommendations.
+- Did not invent a reserve transfer, leadership gesture, commander change, authored operation, or discretionary force launch.
+
+Player result:
+- Reached 15 Jun 1992 / turn 10 in about 14 play minutes and saved a valid RS end state at SHA-256 `6C478B8207AF70CA9C428A47466F3235A4E032B8B2EE4D60BDABAE53F1C134EA`.
+- President feel scored 4/5. The direct `SIGNATURE REQUIRED` route, historical-default labeling, consequence memory, `Unreported` opening metrics, and partial territory-breakdown copy all reproduced correctly.
+- The three worst frictions were six separate accepts for one opening historical-operation packet, two rotating Main Staff reserve requests recurring across the whole run without a hold/defer doctrine, and `URG 5–7` status counts remaining louder than the Desk's truthful `REQUIRED 0`.
+
+Confirmed bugs, kept separate from friction:
+- Visible Cutileiro acceptance unloaded the embedded tactical frame and did not persist; the same canonical `resolvePeacePlan('cutileiro', 'accepted')` bridge action succeeded during diagnostic recovery.
+- Advancing while the completed turn-3 aftermath remained open unloaded the frame and left state at turn 3.
+- Main-menu Continue was disabled during recovery despite a loaded RS campaign and populated tactical frame.
+- Final Cutileiro history recorded `RBiH accepted / HRHB rejected / RS accepted`, contradicting the normalized canon dispositions `RBiH rejects / RS and HRHB accept`.
+
+Evidence is in `docs/40_reports/playtests/20260730_rs_diary.md` and `docs/40_reports/playtests/evidence/20260730_session02_rs/`: 35 screenshots, copied turn-10 save, desktop logs, runtime diagnostics, and session metrics. After recovery, the renderer diagnostic window recorded 19 console messages, zero console errors, zero page errors, and the standard Electron insecure-CSP warning; desktop stderr contains only the DevTools endpoint. The only stdout warning was a non-fatal operation-validation skip because HRHB already owned Operation Jackal's objectives.
+
+**Scope:** Evidence and documentation only for this diary turn. No code fix, simulation/scenario change, save-schema edit, package, installer, tag, release-state change, staging, commit, push, PR, or publication was performed.
+
+## 2026-07-30 - D2 RS bug-first and friction remediation
+
+**Type:** Confirmed bug repair / presidential-loop friction implementation / historical and deterministic behavior correction.
+
+**Owner direction:** After the RS ten-turn diary scored President feel 4/5, the owner authorized fixing the four confirmed bugs first and then the three worst Desk -> Decision -> Advance frictions. The original diary remains the historical observation; this entry records the follow-up and does not award a new subjective grade.
+
+**Bug repairs:**
+- Embedded mutation calls now retain the newest `game-state-updated` payload while an invocation is active, return `awwv-bridge:response` to the initiating renderer first, and then broadcast the durable projected state to every subscriber.
+- A Warroom `advance-turn` command closes a completed Turn Aftermath before Advance owns the flow.
+- Legacy main-menu Continue availability synchronizes after canonical state application and on every menu open.
+- Non-player peace-plan responses use explicit historical dispositions whenever decision mode is not emergent. Emergent mode retains the existing scorer.
+
+**Friction corrections:**
+- Historical opening operations expose one sequential packet authorization over the existing canonical `acceptProposal` actions. Stable dossier order, stop-on-first-failure behavior, an accessible receipt, and individual exception dossiers are retained.
+- Army reserve dossiers expose `Hold at Main Staff`. The existing reserve decision history records the player disposition and suggested brigade; routine generation suppresses that held brigade, while authored enclave-relief or critical commander-request signals bypass the hold. No new save-schema field or numeric doctrine threshold was introduced.
+- The collapsed Warroom dock separates `REQUIRED n` from `STAFF REVIEW n`; raw urgency remains inside the expanded staff docket and no longer competes with the presidential obligation count.
+
+**Localization, canon, and determinism:** New copy has EN/BCS parity. Historical-mode tests record the authored Cutileiro disposition `RBiH rejected / RS accepted / HRHB accepted`; the live desktop smoke remained intentionally emergent and therefore used its scorer. Packet execution preserves canonical action order. Standing holds use existing deterministic reserve history and authored override signals. No randomness, timestamp-derived simulation input, scenario source, startup snapshot, baseline, structural fingerprint, or save schema changed.
+
+**TDD and verification:**
+- The bug red gate failed 4 assertions before implementation; its green gate passed 4 files / 56 tests.
+- The friction focused gate passed 5 files / 116 tests after its required red assertions.
+- The combined focused gate passed 8 files / 172 tests.
+- `npm.cmd run qa:player-journeys` passed 44 files / 761 tests.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run desktop:release:check` passed, building the map, simulation bundle, and Warroom renderer without packaging.
+- `npm.cmd run canon:check` passed, including baseline regression.
+- `git diff --check` passed before documentation reconciliation.
+
+**Fresh Electron smoke:** Launched `node_modules/electron/dist/electron.exe .` against the built local outputs with an isolated profile. The live path proved clean RS startup; direct required-versus-staff-review semantics; one-click authorization of all six historical opening operations; enabled recovery Continue; visible Cutileiro acceptance with a durable emergent-mode history; and two zero-authority Main Staff holds that reduced the reserve docket from two items to zero. Because desktop New Campaign intentionally writes `decision_mode: emergent`, the live bot split is not claimed as historical-mode proof; that branch is covered by its focused regression. The exact already-open-aftermath -> Advance stack was not recreated live and is likewise claimed only through its regression test. Evidence is under `docs/40_reports/playtests/evidence/20260730_session02_rs/post_fix/`.
+
+**Scope:** All changes remain local in the existing dirty workspace. No staging, commit, push, PR, package, installer, tag, branch, publication, or release-state change was performed.
+
+## 2026-07-30 - D2 RBiH owner diary, sixty-turn historical run
+
+**Type:** Owner playtest evidence / historical decision audit / D2 full-campaign cadence assessment / no code fix.
+
+Ran a fresh RBiH campaign from 6 April 1992 through exact turn 60 / 31 May 1993 in an isolated Electron profile. `npm.cmd run desktop:release:check` passed, then the desktop shell was launched directly against the freshly built local outputs. The run used `main` at `b8ff530de08fa23cf38103d8da9557da56296130` plus the existing local implementation diff; the tracked-diff fingerprint captured at session close was `cb43b21e85a8f3124d85179acb08f72b95c8d6da6cfd1daae7d5b1cf817bc847`. No package or installer was created.
+
+**Historical discipline:** Selected the civic multi-ethnic RBiH platform; rejected Cutileiro; refused paramilitary deployment; retained the multi-ethnic officer corps; subscribed to the London Principles; engaged with and accepted Vance-Owen; and selected the UI historical response to Srebrenica demilitarization. Informational officer arrivals were acknowledged without appointments. No commander change, reserve transfer, leadership gesture, authored operation, forced launch, or convoy decision was invented. Three late officer cards without historical-default controls were left pending.
+
+**Result:** The run took about 19.4 minutes (`0.32` minutes per turn). RBiH ended at 23.47% territorial control, RS at 64.12%, and HRHB at 12.40%, with RBiH–HRHB at open war. The state records 9,280 killed, 37,788 wounded, 5,304 missing/captured, and 162,271 RBiH personnel. Player lifetime Command Authority spend was zero; no RBiH operation history, operation opportunity, reserve request, or grounded presidential military directive surfaced over 60 turns. The final quicksave and autosave are byte-identical at 4,784,598 bytes and SHA-256 `D83DFAAC2027900C149E5A64D48201F834FCA0E6E18B83BB0491CC7F1DC3BB93`.
+
+**President feel:** `3/5`. The best moment was the 19 April 1993 Srebrenica demilitarization decision, which joined enclave survival, diplomacy, credibility, and historical guidance in one presidential choice. The three worst Desk -> Decision -> Advance moments were the duplicate Vance-Owen acceptance prompt, the extended historical-restraint/no-lever Advance cadence, and the late three-card officer queue without historical grounding.
+
+**Confirmed bugs, separate from friction:**
+- Vance-Owen acceptance was recorded through the turn-39 event surface, then required again through the turn-40 peace-plan gate, contrary to the single player-decision-owner invariant.
+- `Operation Neretva '93` fired on 31 May 1993 even though the repository's historical research dates it to September.
+- Army HQ described strained 2nd Corps relations “following recent presidential interventions” despite zero lifetime Command Authority spend and no player military directive; the underlying `ignored_stance` friction recurred at turns 20, 40, and 60.
+- A pending Rasim Delić replacement recommendation caused Army HQ to omit the still-active incumbent Sefer Halilović.
+
+**Friction, not bugs:** A valid quiet week has no required presidential act, but this campaign's aggregate cadence left historical RBiH play with too few authored judgment packets and no positive hold/doctrine expression. Officer cards lacked historical-default provenance and split the Delić succession into arrival and replacement review. Records count labels also obscured their limited display scope relative to the full saved decision history.
+
+**Diagnostics and artifacts:** Evidence is in `docs/40_reports/playtests/20260730_rbih_60turn_diary.md` and `docs/40_reports/playtests/evidence/20260730_session03_rbih_60turn/`: 43 screenshots, both final saves, 61 turn-metric rows covering turns 0–60 without gaps, session/runtime JSON, and desktop logs. Browser capture recorded 133 console messages, zero console errors, zero warnings, zero page errors, zero failed requests, and no unexpected navigation. Desktop logs had zero error/fatal/exception patterns and two retained non-fatal operation-validation skips because RS already controlled every objective. All 90 player combat formations had a location. Save hash equality proves close-of-session state consistency only; this single run is not replay-determinism proof.
+
+**Triage:** Fix duplicate diplomatic ownership first, historical event timing second, and then the RBiH historical-restraint/staff-packet cadence and officer succession UX. Reaching `5/5` requires one canonical diplomatic owner, historically tight event dates, positive historical restraint, grounded consolidated succession, and a command narrative that never invents presidential action.
+
+**Scope:** Evidence and documentation only for this diary run. No simulation/scenario behavior, save schema, startup snapshot, baseline, package, installer, tag, branch, release state, staging, commit, push, PR, or publication changed. The pre-existing dirty implementation workspace was preserved.
+
+## 2026-07-30 - D2 RBiH 60-turn bug-first and decision-cadence remediation
+
+**Type:** Confirmed bug repair / historically grounded event-cadence correction / Desk information-architecture correction.
+
+**Owner direction:** Fix the confirmed bugs before friction, with special attention to the observed 19-turn decision drought. Preserve historical discipline and do not invent presidential decisions.
+
+**Confirmed bug repairs:**
+- Vance-Owen event resolution delegates the accept/reject response to the canonical peace-plan resolver. Synchronization uses a core event resolver to avoid a module cycle, records one durable event receipt plus one peace-plan history row, and consumes duplicate pending work. This enforces `Engine_Invariants_v0_9_0.md` §10.5.
+- `Operation Neretva '93` now opens at turns 74–76, covering its September 1993 historical window instead of permitting a turn-60 / 31 May appearance. The dependent Grabovica/Uzdol event also begins at turn 74, corresponding to the 8–9 and 14 September killings and preserving prerequisite chronology. The local event research cites *Balkan Battlegrounds* vol. II, pp. 434–435 for the mid-September Neretva fighting.
+- Commander-strain projection now includes a deterministic source breakdown. Army HQ copy distinguishes presidential intervention, commander friction, exhaustion, mixed causes, and none, preventing `ignored_stance` from being narrated as a player action.
+- Persisted active status controls incumbent display while a player succession decision is pending; `available_until_turn` schedules a transition but no longer visually executes an unresolved player decision. This follows the player-incumbent rule in `Engine_Invariants_v0_9_0.md` §15.1.
+- Both historical-successor selection and automatic vacancy fill enforce the existing enclave-compatibility rule. Avdo Palić therefore remains locked to Žepa and cannot be proposed or assigned to mainland 2nd Corps.
+- When a newly available officer already owns an unacknowledged actionable replacement matter that turn, the redundant unacknowledged informational arrival is removed from the Desk queue. Officer availability and the replacement decision remain durable; only duplicate player work is consolidated.
+
+**Friction remediation:**
+- The already-authored `rbih_minority_retention_1992` decision moves from turns 22–28 to turns 12–16. Historical grounding is the April 1992 Patriotic League/TO integration and reorganization plus the event's existing Divjak, Šiber, and multi-ethnic ARBiH source packet. The historical response remains `retain_minorities`; no option or outcome changed.
+- The already-authored `london_conference_1992` decision now opens at turn 20 and can be enabled either by its accumulated-pressure route or a bounded 3–10 week chain after `concentration_camps_revealed_1992`. Pressure reaches readiness on the first eligible week. The source note cites the 6 August 1992 ITN reporting, the 26–27 August London Conference statement (UN S/24795), the 28 August Mazowiecki report, and the ICTY Karadžić judgment. This implements the existing emergent-event design's camps-revealed-or-pressure route.
+- The measured opening decision sequence changes from turns `0, 3, 22, 25` to `0, 3, 12, 20`; the specific 19-turn drought falls to 9 turns. A full 60-turn replay produced `0, 3, 12, 20, 38, 39, 54`.
+- The later turn-20 to turn-38 interval remains 18 turns because no other authored RBiH presidential decision exists there. It is explicitly retained rather than filled with invented policy. Existing clear-Desk Advance copy still frames that action as holding present policy.
+- Records labels now separate `Desk Decisions` from `Chronicle Decisions` in EN and BCS, explaining why their counts legitimately differ.
+
+**Classification correction:** The Palić proposal and duplicate Delić cards were originally recorded as personnel UX friction. Root-cause tests proved assignment-compatibility and duplicate-work correctness defects, so they are fixed and classified as bugs. The archive count scope and long authored-cadence gaps remain friction.
+
+**Files:** `src/sim/events/resolve_decision.ts`, new `src/sim/events/resolve_decision_core.ts`, `src/sim/negotiation/peace_plans.ts`, `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1993.json`, `src/sim/combat/officer_system.ts`, `src/ui/map/data/command_strain.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/data/types.ts`, `src/ui/map/utils/officerUtils.ts`, Army HQ briefing/card components, EN/BCS messages, focused regressions, `docs/40_reports/GUI_MASTER.md`, and the RBiH diary remediation appendix.
+
+**TDD and replay evidence:**
+- Vance-Owen, Neretva timing, strain provenance, incumbent display, Palić enclave compatibility, duplicate Delić queue work, historical event cadence, and archive-scope assertions were observed red before their implementations.
+- The combined focused gate passed 8 files / 213 tests after implementation.
+- The broader event catalog/runtime gate passed 15 files / 326 tests with 5 pre-existing skips, including raw timeline ordering and prerequisite chronology.
+- `qa:player-journeys` passed 44 files / 761 tests.
+- TypeScript, tactical-map, desktop-simulation-bundle, and Warroom compile gates passed without packaging.
+- The canon determinism static scan passed. Baseline regression then reported the expected `apr1992_52w` `activity_summary.json` mismatch (`64306b...` expected, `f6d88f...` actual) caused by the intentional event retiming. The approved manifest was not overwritten.
+- A fresh deterministic desktop-simulation replay reached turn 60 with the decision sequence above. Its player-facing final RBiH officer queue contained the Delić-for-Halilović replacement only, with neither a Palić mainland proposal nor a duplicate Delić arrival.
+- This replay was not a packaged Electron UI session and does not replace the original screenshots or award a new subjective President-feel score.
+- The timing changes intentionally affect scenario/baseline outputs. No baseline or startup snapshot was regenerated.
+
+**Canon and historical compliance:** The work preserves the Game Bible §§3/21 presidential role and exactly five military levers: it adds no direct unit order or sixth lever. Existing event decisions are retimed within cited historical windows, and the historical responses remain unchanged. Vance-Owen and incumbent behavior follow Engine Invariants §§10.5 and 15.1. The original diary's `3/5` grade remains authoritative until a fresh Electron owner run.
+
+**Scope:** Local behavior, scenario timing, read-model/UI copy, tests, and documentation only in the existing dirty workspace. No staging, commit, push, PR, package, installer, tag, branch, publication, baseline refresh, startup-snapshot write, or release-state change was performed.
+
+## 2026-07-30 - D2 RBiH post-remediation sixty-turn Electron owner diary
+
+**Type:** Owner playtest evidence / post-remediation regression audit / historical decision-cadence assessment / no code fix.
+
+Ran a fresh RBiH campaign from 6 April 1992 through exact turn 60 / 31 May 1993 in an isolated Electron profile, using the already-built local desktop outputs on `main` at `b8ff530de08fa23cf38103d8da9557da56296130`. The launch was an unpackaged Electron development build, not an installer or package. The existing tracked implementation diff fingerprint was `217d6fd0d8297bcd7692eb118a9269f1639c5e69`.
+
+**Historical discipline:** Selected the civic multi-ethnic state, rejected Cutileiro, refused paramilitary deployment, retained the multi-ethnic officer corps, subscribed to the London Principles, engaged with and accepted Vance-Owen, and chose the documented concealed-weapons response at Srebrenica. The duplicate turn-40 Vance-Owen gate was answered consistently with the already-recorded turn-39 acceptance. No commander appointment, reserve movement, authored operation, forced launch, convoy response, or leadership gesture was invented. Four officer matters without a historical-default control remained pending.
+
+**Result:** President feel remains `3/5`. The opening cadence repair held with decisions at turns `0, 1, 3, 12, 20`, replacing the prior opening drought with a 9-turn interval. The later London-to-Vance-Owen gap remained 18 turns. Command Authority stayed at `100/100` with zero lifetime spend and the player operation history remained empty. Final player-visible RBiH control was 23.5%; casualties were 9,279 killed, 37,786 wounded, and 5,304 missing/captured; personnel at arms were 162,271.
+
+**Confirmed bugs, separate from friction:**
+- Vance-Owen acceptance was recorded at turn 39, then required again by the turn-40 peace-plan modal. RBiH capital records the plan accepted, while `peace_plan_history` remains empty.
+- `Safe Areas With Teeth` fired on 7 December 1992 while naming UNSCR 819, 824, and 836; Army HQ Records also filed later-1993 consequence material ahead of its historical window.
+- Army HQ/map player-visible territory was 23.5%, while the same saved turn summary reported RBiH at 30.29%.
+
+**Friction, not bugs:** The turn-20→38 no-choice interval remains the worst Desk -> Decision -> Advance problem. Four personnel cards accumulated without clear acknowledgement-versus-appointment semantics or historical recommendations. Army HQ communicated critical state-survival and cohesion conditions but did not convert them into a grounded proposal or existing-lever recommendation, leaving all Authority unused.
+
+**Fixes verified:** Neretva and Grabovica/Uzdol did not appear by 31 May 1993. Gen. Sefer Halilović remained visible while Delić was pending. No Palić mainland proposal appeared, and Delić produced one replacement matter rather than duplicate arrival/replacement work.
+
+**Evidence:** `docs/40_reports/playtests/20260730_rbih_60turn_postfix_diary.md` and `docs/40_reports/playtests/evidence/20260730_session04_rbih_60turn_postfix/`. The bundle contains 56 screenshots (55 valid; one explicitly marked missed-click capture), 60 metric rows covering turns 1-60, the exact turn-60 autosave, event timeline, final-state analysis, and runtime diagnostics. Final save SHA-256 is `15c1c938ec4ceadac12eb4e3a38521f560452fcfb12ea1c0d3c03ac7f377d4b4`. Post-recovery turns 41-60 recorded 58 console messages with zero console errors, warnings, page errors, or failed requests. Pre-turn-40 console arrays were lost during the automation connection reset; the copied turn-41 autosave and production Electron native-load recovery are documented in the diagnostic JSON.
+
+**Scope:** Evidence and documentation only. No simulation/scenario behavior, save schema, baseline, startup snapshot, stage, commit, push, branch, PR, package, installer, tag, publication, or release-state change was performed. The existing dirty implementation workspace was preserved.
+
+## 2026-07-30 - D2 RBiH post-diary findings remediation
+
+**Type:** Confirmed bug repair / historical chronology correction / non-decision staff-cadence improvement / personnel and Army HQ friction repair.
+
+**Owner direction:** Fix every finding from the post-remediation 60-turn RBiH Electron diary, bugs first and friction second, while preserving historical play and avoiding invented presidential decisions.
+
+**Bug repairs and classification correction:**
+- The turn-39 Vance-Owen event response now owns the canonical peace-plan resolution even when it arrives before the legacy negotiation scheduler. It materializes the pending plan, applies historical non-player responses, records one event receipt plus one peace-plan history row, and consumes both pending surfaces. The turn-40 duplicate gate is removed.
+- The accelerated safe-areas consequence cannot fire before turn 61 / 7 June 1993, after UNSCR 836. Ahmići, Sovići/Doljani, Trusina, East Mostar, and the HVO central-Bosnia offensive now begin in their April-May 1993 calendar windows.
+- The general safe-areas card is now the turn-57 / 10 May 1993 Resolution 824 expansion to six safe areas; it no longer duplicates the Resolution 819 Srebrenica declaration.
+- The reported `23.5%` UI versus `30.29%` saved territory mismatch was withdrawn. Save inspection proved `turn_summaries[0]` is turn 60 at RBiH `23.47%`, while `turn_summaries[-1]` is turn 1 at `30.29%`. The diary and diagnostic JSON were corrected; no product code changed for this false positive.
+
+**Friction remediation:**
+- The later London-to-Vance-Owen interval remains free of fabricated choices. At turn 24, when the sourced ARBiH corps structures enter service, the Desk receives an informational corps-reorganization staff brief grounded in *Balkan Battlegrounds*, vol. I and the repository OOB. It is visibly filed, requires no signature, and is excluded from actionable-decision counts.
+- Officer-availability cards now state that the officer entered the reserve pool and that filing the notice makes no appointment or reassignment. Replacement cards name the historical staff recommendation and state that the incumbent remains in command while the matter is pending.
+- Army HQ derives a deterministic presidential handoff from command strain, readiness/threat, and already-filed review/reserve work. Filed matters route to the existing Decision Room. Critical reporting without a filed executable matter routes to the President's Desk with explicit hold-present-policy language and no direct-unit-order fiction.
+- Army HQ now exposes an explicit `President's Desk` return, eliminating the pointer-blocked global Desk dead end.
+- The Electron QA harness was updated from the retired `Acknowledge arrival` matcher to `File availability notice`.
+
+**TDD and verification:**
+- Sequential Vance-Owen, historical first-turn chronology, turn-24 staff contact, personnel semantics, and Army HQ handoff/navigation assertions were each observed failing before implementation. The first broad journey run additionally caught the retired `army_hq_briefing` action token; the staff brief was corrected to a canonical non-actionable Desk packet. The first Electron smoke caught the stale harness label before any state mutation.
+- The combined core/UI focused gate passed 6 files / 168 tests; the corrected route/handoff gate passed 4 files / 83 tests.
+- `npm.cmd run qa:player-journeys` passed 44 files / 763 tests.
+- `npm.cmd run typecheck`, `npm.cmd run desktop:map:build` (1,341 modules), and `npm.cmd run desktop:sim:build` passed. These were unpackaged builds only.
+- `canon:check` passed its determinism static scan. Its baseline phase reported the expected intentional `apr1992_52w` `activity_summary.json` mismatch (`64306b...` approved versus `43a60b...` current); the approved baseline was not overwritten.
+- `git diff --check` passed.
+- A read-only unpackaged Electron smoke loaded the exact turn-60 save, verified the personnel cards/modal, filed Army HQ handoff, and Army HQ-to-Desk route, with zero console errors, page errors, or failed requests. All four officer matters remained pending and autosave SHA-256 stayed `15c1c938ec4ceadac12eb4e3a38521f560452fcfb12ea1c0d3c03ac7f377d4b4`.
+
+**Evidence:** `docs/40_reports/playtests/20260730_rbih_60turn_postfix_diary.md`, `docs/40_reports/playtests/evidence/20260730_session04_rbih_60turn_postfix/remediation-smoke.json`, and screenshots 57-60 in the same evidence directory.
+
+**Canon and historical compliance:** No sixth military lever or direct unit-order authority was added. Historical events are constrained to sourced calendar windows. The decision drought receives staff context rather than a made-up player choice. Existing five-lever ownership, player decision ownership, and pending-incumbent semantics remain intact.
+
+**Scope:** Local simulation behavior, scenario event timing, UI/read models, EN/BCS copy, QA harness, tests, reports, and ledger only in the existing dirty workspace. No staging, commit, push, PR, package, installer, tag, branch, publication, baseline refresh, startup-snapshot write, or release-state change was performed.
+
+## 2026-07-30 - D2 RBiH 80-turn findings remediation
+
+**Type:** Confirmed bug repair / staged diplomatic ownership / non-decision historical staff guidance / Desk and Army HQ friction remediation.
+
+**Owner direction:** Fix all findings from the 80-turn RBiH Electron diary, bugs before friction, while preserving historical play and avoiding invented decisions.
+
+**Bug repairs:**
+- Owen-Stoltenberg now has two explicit historical stages for an RBiH player. The turn-70 Presidency event records conditional acceptance or an early terminal rejection. Conditional acceptance consumes the legacy pending plan but does not write final peace history or end the war. The turn-72 Assembly event owns the final RBiH disposition and writes one peace-plan-history row. Legacy peace-plan modal and Desk surfaces are suppressed while either event owner is pending.
+- The Presidency historical default now uses `bot_response_logic: "historical"` and cites UN S/26486 for conditional acceptance and UN S/26922 for the Assembly rejection. The event acceptance/taxonomy diagnostic inventory moved by exactly one sourced, approved-default row.
+- Officer replacement matters route `Open personnel` to Army HQ Briefing, where the historical-successor control exists. Arrival notices retain the Personnel route.
+- `Personnel Directives` 12px headings now use full `text-text-secondary`, removing the measured 3.67:1 opacity-derived contrast failure.
+
+**Friction remediation:**
+- The turn-24 ARBiH corps-reorganization situation is a reviewable Army HQ Briefing handoff with a sourced recommendation to preserve unified, multi-ethnic command and hold present policy unless staff files a specific exception. It remains informational, requires no signature, and is excluded from actionable-decision counts.
+- The capped Authority header explains reserve-power doctrine and the displayed overflow reserve limit. It legitimizes restraint without adding a fictitious Command Authority spend.
+- Army HQ strategic objectives name a deterministic responsible owner. Only a filed political decision, operation, or reserve request renders an interactive next lever; otherwise Summary renders a non-interactive hold-present-policy status.
+
+**Documentation propagation:** Updated `Systems_Manual_v0_9_0.md`, `Rulebook_v0_9_0.md`, `WAR_TERMINATION_SPEC.md`, `DESKTOP_GUI_IPC_CONTRACT.md`, and `MAP_UI_MASTER.md` for staged Owen-Stoltenberg ownership and truthful objective actionability. Updated the living GUI master and appended a remediation section to the 80-turn diary. No uncertain structural references were left unresolved; historical reports other than the current diary appendix were not rewritten.
+
+**Verification:**
+- Focused bug regressions passed 6 files / 157 tests; focused friction regressions passed 4 files / 95 tests; the combined focused gate passed 10 files / 214 tests.
+- `npm.cmd run qa:player-journeys` passed 44 files / 764 tests.
+- The tactical-map and desktop-simulation compile targets passed without packaging.
+- Event catalog/runtime diagnostics, TypeScript, canon/static determinism, and diff-integrity results are recorded in the final task handoff after their fresh completion run.
+
+**Canon and historical compliance:** The work adds no decision, sixth military lever, direct unit order, or automatic Authority spend. It separates the documented RBiH Presidency conditional acceptance from the later Assembly rejection, while retaining normalized non-player terminal dispositions. All new read-model selection and event delegation is deterministic and uses stable identifiers.
+
+**Scope:** Local scenario event data, event/negotiation resolution, UI/read models, EN/BCS copy, tests, living canon/engineering documentation, the current diary appendix, and this append-only ledger entry only in the existing dirty workspace. No staging, commit, push, PR, branch change, package, installer, tag, publication, baseline refresh, or release-state change was performed.
+
+**Post-entry verification completion:**
+- Event catalog/runtime diagnostics passed 5 files / 130 tests. TypeScript passed, the determinism static scan passed 1 file / 1 test, and `git diff --check` passed.
+- The full `canon:check` then reached the expected intentional `apr1992_52w` baseline mismatch: approved `64306b433ff4ce23378661132277bd128e5d7bb4aa6ce6e4af7323392f0dfd9a`, current `43a60b29dfec41d67f50f8efb6e2572917071a209fc659bb86f0aa4eebd97f22`. The approved manifest was not overwritten.
+- A fresh isolated Electron smoke loaded the immutable turn-80 save, verified the Authority-cap cue and the named/non-interactive strategic-objective handoff, and captured zero console errors, warnings, page errors, or failed requests during the inspected window. The source save stayed at SHA-256 `0241584e3a5a4e8eccab7265871304749c67dfa55e35448cb9b252032b07402f`. Four already-acknowledged notification overlays were filed in isolated state; no response option or turn advance occurred.
+- Electron evidence: `docs/40_reports/playtests/evidence/20260730_session14_rbih_80turn_complete/findings-remediation-smoke.json` and its two referenced screenshots. The personnel route and staged diplomacy remain covered by focused red/green regressions rather than this turn-80 live smoke.
+
+## 2026-07-31 - D2 HRHB 80-turn findings remediation and polish
+
+**Type:** Confirmed bug repair / historical-diplomatic outcome correction / authored-decision cadence repair / presidential signature and reserve-context polish / Electron QA hardening.
+
+**Owner direction:** Fix every finding from the HRHB 80-turn Electron diary, bugs before friction, and polish the resulting flow. Preserve historical play; do not commit, push, package, or change release state.
+
+**Confirmed bugs fixed:**
+- The primary HRHB text blue moved from `#4080b8` to the contrast-audited `#6d99c3`.
+- The event-decision UI exposes the mounted event id, and the Electron runner now uses the same deterministic priority as the UI: required first, earlier fire turn, then strict ASCII id. Exact response receipts bind to that visible identity.
+- Required event decisions precede reserve requests in every runner mode.
+- Counter proof is adaptive to exact formations that remain reachable after normal viewport/detail churn and requires at least one verified formation when formations exist.
+- Elite reserve loans no longer recall a healthy brigade merely because twelve turns elapsed. Operation end, fitness, target-corps loss, and explicit presidential recall remain valid recall causes.
+- Fresh emergent HRHB state allowed every bot delegation to accept Cutileiro and manufactured a turn-one terminal settlement. When the player gives the documented response, Cutileiro now replays the documented final record—RBiH rejected; RS and HRHB accepted. Counterfactual player responses and later plans remain emergent.
+
+**Friction and polish remediation:**
+- Two source-backed 1992 HRHB decisions fill the turn-17-to-35 gap: Posavina/Orašje posture at turns 26–28 and joint defence of Jajce at turns 29–31, sourced to *Balkan Battlegrounds* Vol. I pp. 181–184. Historical defaults are calibration-inert apart from trace flags, dimensions, and cost annotations. Neretva and Grabovica/Uzdol were excluded because they belong to 1993.
+- Tagged historical operation authorizations are signature-required blockers before advance. They render authorize/withhold guidance, hand off to Army HQ, and count/deep-link under War Direction. Ordinary proposals remain advisory under Command & Personnel.
+- Repeat elite-release dossiers expose prior same-brigade/corps approvals, cumulative Authority committed, and the latest recall reason where available.
+- Historical non-strategic Electron runs resolve tagged historical authorizations but do not invent decisions for ordinary staff proposals.
+
+**Electron-discovered QA integration fixes:**
+- The stronger Operation Jackal gate exposed a stale Command Surface route. Historical operation reviews now route through the production War Direction card while retaining their stable `command:review-proposal:*` dossier id.
+- The final stack-member proof used an unbounded raw DOM close click. It now uses an exact Playwright locator click and bounded detached-state wait, preventing silent final-tour hangs.
+
+**Documentation propagation:** Updated `Engine_Invariants_v0_9_0.md` and `Systems_Manual_v0_9_0.md` for Cutileiro and reserve ownership, `MAP_UI_MASTER.md` for historical-operation and recurrence presentation, the implementation plan, the HRHB diary remediation appendix, and the machine-readable evidence record.
+
+**Verification:**
+- Focused combined regression passed 13 files / 348 tests.
+- `npm.cmd run qa:player-journeys` passed 44 files / 766 tests.
+- TypeScript, harness syntax, and `git diff --check` passed. The latter emitted one pre-existing unrelated CRLF warning for `tests/command_authority_strain_signals.test.ts`.
+- Unpackaged builds passed: tactical map (1,341 modules), desktop simulation, and War Room (659 modules).
+- Canon determinism static scan passed 1 file / 1 test. Baseline comparison reached the expected intentional `apr1992_52w` `activity_summary.json` mismatch: approved `64306b433ff4ce23378661132277bd128e5d7bb4aa6ce6e4af7323392f0dfd9a`, current `4cbf5af7d4df29bac7d29386bca4a6fe7a04d89819e852abd55eb8af82b8bf24`. The approved baseline was not overwritten.
+- The broad `npm test` slice remains incomplete: separate 5-minute and 10-minute attempts timed out without a captured assertion failure.
+
+**Electron evidence:** A clean unpackaged HRHB run reached exact turn 32 with zero blockers. Historical Cutileiro acceptance continued past turn one; Operation Jackal resolved at turn 8; repeat reserve packets were exercised at turns 11 and 23; and the new historical responses were recorded at turns 26 and 29. Its optional final tour later hit the now-fixed unbounded detail-close hang after exact-turn proof. A focused follow-up completed the full final tour with identical before/after state and autosave hashes and zero console, page, network, or main-process stderr errors; its overall harness result remained red only on intentional peace-modal and map-legend occlusion classifications. Evidence: `docs/40_reports/playtests/evidence/20260730_session15_hrhb_80turn/findings-remediation-20260731.json`.
+
+**Presidential-feel handling:** The original diary's `3/5` remains the last subjective score. The remediation run was a 32-turn verification, not a new full owner diary, so no replacement score is claimed.
+
+**Scope:** Local simulation behavior, scenario event data, UI/read models, EN/BCS copy, QA harness, tests, canon/engineering documentation, diary appendix, evidence JSON, and this append-only ledger entry only in the existing dirty workspace. No staging, commit, push, PR, branch change, package, installer, tag, publication, baseline refresh, startup-snapshot write, or release-state change was performed. The original repository autosave was restored exactly to SHA-256 `df5fcc3d43d86dc231a55659c98a5628774634a33759586dcdf95f5cf3cf1084`.
+
+## 2026-07-31 - Operational/Tactical Group audit converted to executable closeout lane
+
+**Type:** Docs-only implementation planning / roadmap and command-board status correction.
+
+**Owner direction:** Convert the operational/tactical-group implementation findings into an actionable, immediately executable plan and wire it into the roadmap and command board.
+
+**Status correction:** The earlier “Tactical Groups = FULLY DONE” shorthand is superseded by **CORE LIVE / CLOSEOUT OPEN**. The donor-backed offensive TG core is activated and covered by a focused 20-file / 195-test audit pack, but the audit found incomplete TG status/cohesion-duration lifecycle, incomplete Army-HQ operation lifecycle with stale cap-reducing `planning` records and stale `tg_id` links, missing dissolution participation telemetry, a second legacy formation-based OG producer, and duplicate default promotion identity. Standing OG is now tracked as **PHASE B LIVE / DOCTRINE-GATED** because sectors/reserve commitment are live, ADR-0007 Phase C is retired, and broader canon shared-cost wording requires a Pyrrhic verdict before new combat code.
+
+**Execution packet:** Added `docs/plans/2026-07-31-operational-tactical-group-closeout-implementation-plan.md`. Phases 0–2 are immediately executable in an isolated `codex/op-tg-closeout` worktree: deterministic save audit, TG/Army-HQ lifecycle synchronization, and terminal dissolution telemetry. Canonical TG exhaustion/cap-tail behavior, promotion-history correction, and Standing-OG aftermath each have explicit behavior/history/governance stop gates. The plan includes exact files, red/green tests, deterministic scenario gates, old-save requirements, `/simplify`/commit boundaries, closeout propagation, and a copy-ready execution prompt.
+
+**Planning propagation:** Added the plan to `docs/plans/README.md`, opened a P1 active/gated row in `docs/plans/COMMAND_BOARD.md`, inserted current-status supersessions beside the historical six-system audit, and added a 2026-07-31 amendment to `docs/plans/MASTER_ROADMAP.md`. D2 evidence work may continue, but D3 may not treat the operational-group system as closed until the executable phases are green or explicitly waived.
+
+**Scope:** Documentation and planning authority only. No simulation code, state/schema, save, scenario data, baseline manifest, canon/FORAWWV text, package version, tag, packaging, release state, branch, commit, push, or PR was changed or authorized.
+
+## 2026-07-31 - RS 104-week diary bug repair and friction remediation plan
+
+**Type:** Confirmed simulation/UI/copy/QA repair / historical chronology correction / adjacent event-catalog contract repair / executable friction planning.
+
+**Owner direction:** Fix the bugs from the RS 104-week Electron diary, keep bugs separate from friction, produce an actionable plan for every friction moment, and explain why the Foča and Zvornik takeover records appeared only around June.
+
+**Root causes and fixes:**
+
+- Owen-Stoltenberg used generic emergent bot scoring for non-player RBiH in an RS campaign. That could convert RBiH's authored final rejection into acceptance and make an RS acceptance appear unanimous at turn 70. `buildBotResponses` now preserves the RBiH historical disposition for this faction-owned Presidency-to-Assembly sequence, while leaving other bot positions and player choice intact.
+- Foča and Zvornik were not delayed by pressure accumulation or the decision-event cap. Both JSON rows explicitly had `turn_min: 10`. Balkan Battlegrounds Vol. I p. 187 dates Zvornik's capture to 9-10 April and Foča's capture to April, so both record events now use turns 1-3 and retain their `RS controls municipality >= 0.5` condition.
+- The Army HQ product handoff was correct: filed executive work routes to Decision Room; critical reporting without a filed executable matter routes to the Desk. The stock Electron driver incorrectly asserted Decision Room unconditionally. The handoff now exposes `data-handoff-route`, and QA asserts and tours the derived destination. The diary keeps its original observation and carries the corrected harness-bug classification in an appendix.
+- Peace-plan decorative header layers could cover title content and intercept pointer tests, and the canonical `union_3_republics` label was absent. The art/gradient are now aria-hidden and pointer-inert beneath an isolated content layer, with canonical institutional model labels.
+- Operation-conclusion templates prepended `operation` to already-authored operation names. EN/BCS copy now renders the supplied name verbatim.
+- Broader verification caught two existing late-1992 HRHB reviews with source notes but no machine-readable `historical_source`, plus an expanded London Conference source note that had lost the sensitive-history boundary sentence. The Orašje/Jajce rows now cite Balkan Battlegrounds Vol. I pp. 181-184 explicitly, the London note retains its provenance and boundary, and the catalog/acceptance inventories include the two production-ready reviews.
+
+**Friction disposition:** Added `docs/plans/2026-07-31-rs-104week-friction-remediation-plan.md` and indexed it in `docs/plans/README.md`. The execution order is: one cross-surface Required/Recommended/Monitor/Record contract; deterministic siege/enclave brief consolidation; authored operation objective/staging OSID map focus and dossier return; an all-faction cadence audit followed only by sourced initiatives with a Historian stop gate; responsive Army HQ composition and one hold-posture statement; then a bounded two-chip active-path row with an accessible `+N` popover. A fresh RS 104-week Electron diary is the final acceptance gate. No fictional decision is authorized to fill a quiet interval.
+
+**TDD evidence:** The first focused run was RED with six failures covering non-player RBiH Owen-Stoltenberg acceptance, both late takeover windows, route-unaware Army HQ QA, peace-header structure/labeling, and duplicate operation copy. The same focused set then passed 5 files / 104 tests. Adjacent catalog gates exposed stale/missing source contracts and their dependent inventory fixtures; after repair, the final relevant command passed 16 files / 320 tests.
+
+**Verification:**
+
+- `npm.cmd run qa:player-journeys`: 44 files / 766 tests passed.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run desktop:map:build`: passed, 1,341 modules transformed.
+- `npm.cmd run desktop:sim:build`: passed and regenerated only the unpackaged local desktop simulation bundle/startup check.
+- `npm.cmd run canon:check`: determinism static scan passed 1 file / 1 test. Baseline comparison stopped at `apr1992_52w` `activity_summary.json`, approved `64306b433ff4ce23378661132277bd128e5d7bb4aa6ce6e4af7323392f0dfd9a`, current `4cbf5af7d4df29bac7d29386bca4a6fe7a04d89819e852abd55eb8af82b8bf24`. The approved baseline was not overwritten.
+- `git diff --check`: passed with one pre-existing unrelated CRLF warning for `tests/command_authority_strain_signals.test.ts`.
+
+**Documentation:** Updated `MAP_UI_MASTER.md`, the living GUI master, and the RS 104-week diary remediation appendix. The original diary's `3/5` President-feel score and captured run evidence remain unchanged.
+
+**Scope:** Local code, scenario/event metadata, tests, documentation, and QA harness only in the existing dirty workspace. No stage, commit, push, PR, branch change, package, installer, tag, baseline approval/refresh, or release-state action was performed.
+
+## 2026-07-31 - D2 owner-diary remediation packet local verification and housekeeping gate repair
+
+**Type:** Accumulated D2 implementation closeout / deterministic-baseline approval / repository hygiene guard repair.
+
+**Scope consolidated:** Collected the seven RBiH, RS, and HRHB owner-play diaries; their retained Electron screenshots, saves, manifests, progress traces, and diagnostics; the bug-first/friction-second remediation code and tests; the six executable follow-up plans; and the living canon, engineering, planning, report-index, and backlog propagation into one reviewable closeout packet. The immutable diary observations and recorded President-feel scores remain unchanged.
+
+**Housekeeping repair:** The legacy lifecycle-term gate was intrinsically noisy because it recursively scanned immutable historical reports, agent notes, generated playtest evidence, and its own regular-expression definitions. The gate now targets maintained runtime, tests, scenario data, tooling, and active canon/engineering documentation. Historical/generated surfaces are explicitly excluded, intentional compatibility/history references in the maintained surface carry `legacy-phase-term-ok`, and a Vitest scope contract proves both exclusions and retained coverage.
+
+**Fresh verification:**
+
+- `npm.cmd run test:all`: 1,207 files passed, 4 skipped; 11,747 tests passed, 29 skipped.
+- `npm.cmd run qa:player-journeys`: 44 files / 766 tests passed.
+- `npx.cmd vitest run tests/lifecycle_legacy_terms_gate.test.ts tests/test_discovery_contract.test.ts --reporter=dot`: 2 files / 6 tests passed.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run repo:eol:check`: passed.
+- `npm.cmd run lifecycle:check`: zero unannotated legacy lifecycle terms.
+- `npm.cmd run test:baselines`: every approved scenario matched.
+- `npm.cmd run canon:check`: passed static determinism and strict baseline comparison.
+- `npm.cmd run desktop:startup-snapshot:check`: passed.
+- `npm.cmd run ci:structural-fingerprint:check`: passed at `4fcdb21ab4bcff14`.
+- `npm.cmd run desktop:release:check`: tactical-map build (1,341 modules), desktop simulation bundle/startup check, and Warroom build (659 modules) passed. This was an unpackaged build check only.
+- `git diff --check`: passed.
+
+**Repository state:** The detached generated-only worktree and ignored temporary Electron/profile residue were removed after exact-path validation. Twenty historical stashes remain intentionally preserved as recovery data. Remaining remote topic heads are to be joined to `main` by a history-only administrative merge and deleted only after the integrated `main` publication succeeds; that publication/ref proof is recorded in a subsequent ledger entry.
+
+**Release boundary:** No installer or distributable package was produced. No package version, tag, GitHub release, or release state changed.

@@ -459,7 +459,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.blockingDecisionCount).toBe(0);
   });
 
-  it('keeps unresolved operation authorizations reviewable without hard-blocking advance', () => {
+  it('requires unresolved historical operation authorization before advance', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({
         player_faction: 'RS',
@@ -479,15 +479,15 @@ describe('buildPreAdvanceCommandReviewView', () => {
       } as Partial<LoadedGameState>),
     });
 
-    expect(view.blockingDecisionCount).toBe(0);
-    expect(view.status).toBe('review');
-    expect(view.headline).toBe('Recommended before advance');
+    expect(view.blockingDecisionCount).toBe(1);
+    expect(view.status).toBe('blocked');
+    expect(view.headline).toBe('Review before advance');
     expect(view.items).toHaveLength(1);
     expect(view.items[0]).toMatchObject({
       id: 'command:review-proposal:historical_op_drina',
-      severity: 'warning',
+      severity: 'blocking',
       title: 'Operation Drina',
-      actionLabel: 'Review recommendation',
+      actionLabel: 'Authorize before advance',
     });
   });
 
@@ -559,6 +559,33 @@ describe('buildPreAdvanceCommandReviewView', () => {
       ['army-hq-summary', { kind: 'army-hq-tab', tab: 'summary' }],
       ['turn-aftermath-records', { kind: 'army-hq-aftermath-record', turn: 31 }],
     ]);
+  });
+
+  it('does not keep the retained aftermath turn as a separate pre-advance obligation', () => {
+    const state = makeState({
+      latestTurnSummary: makeSummary({
+        turn: 31,
+        displacement_total: 1600,
+      }),
+      turnSummaries: [makeSummary({
+        turn: 31,
+        displacement_total: 1600,
+      })],
+    });
+
+    const unreviewed = buildPreAdvanceCommandReviewView({ state });
+    const reviewed = buildPreAdvanceCommandReviewView({
+      state,
+      reviewedAftermathTurn: 31,
+    });
+
+    expect(unreviewed.items.map((item) => item.id)).toContain('turn:31:hard-turn');
+    expect(reviewed.items.map((item) => item.id)).not.toContain('turn:31:hard-turn');
+    expect(reviewed.sourceHandoffs.map((handoff) => handoff.id))
+      .not.toContain('turn-aftermath-records');
+    expect(reviewed.metrics.hardTurns).toBe(0);
+    expect(reviewed.metrics.advanceReviewCount).toBe(0);
+    expect(reviewed.status).toBe('clear');
   });
 
   it('returns a safe unavailable state when no campaign is loaded', () => {

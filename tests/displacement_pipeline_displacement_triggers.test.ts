@@ -1,6 +1,6 @@
 /**
  * Phase F Step 2: Displacement trigger conditions tests.
- * - Trigger evaluator returns bounded deltas only for front-active settlements when phase_ii.
+ * - Trigger evaluator returns bounded deltas only for front-active settlements when phase_ii. // legacy-phase-term-ok
  * - Deterministic: same state + edges => same deltas.
  * - No triggers in phase_0 / peace phase.
  */

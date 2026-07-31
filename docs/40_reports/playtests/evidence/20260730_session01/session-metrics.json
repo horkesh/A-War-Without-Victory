@@ -1,0 +1,159 @@
+{
+  "session": "20260730_session01",
+  "faction": "RBiH",
+  "freshCampaign": true,
+  "start": {
+    "turn": 0,
+    "date": "6 Apr 1992"
+  },
+  "end": {
+    "turn": 10,
+    "date": "15 Jun 1992",
+    "gameOver": false
+  },
+  "historicalDecisionDoctrine": "Use an explicit HISTORICAL DEFAULT when present; otherwise use the repository's documented historical default. Do not create discretionary military decisions without a grounded historical prompt.",
+  "decisions": [
+    {
+      "turn": 0,
+      "title": "What Is Bosnia?",
+      "response": "Civic multi-ethnic republic",
+      "basis": "UI-labeled HISTORICAL DEFAULT",
+      "evidence": "08-what-is-bosnia-choice.png"
+    },
+    {
+      "turn": 1,
+      "title": "Cutileiro / Lisbon peace proposal",
+      "response": "Reject plan",
+      "basis": "Documented normalized historical default in docs/10_canon/WAR_TERMINATION_SPEC.md",
+      "evidence": "11-turn01-cutileiro-proposal.png"
+    },
+    {
+      "turn": 3,
+      "title": "Paramilitary Authorization Policy",
+      "response": "Refuse paramilitary deployment",
+      "basis": "UI-labeled HISTORICAL DEFAULT",
+      "evidence": "14-turn03-paramilitary-historical-default.png"
+    }
+  ],
+  "playerViewTurnMetrics": [
+    {
+      "turn": 1,
+      "date": "13 Apr 1992",
+      "territoryNet": -10,
+      "friendlyBattles": 9,
+      "totalBattles": 10,
+      "friendlyCasualties": 6225,
+      "opposingCasualties": 1284,
+      "displaced": 0
+    },
+    {
+      "turn": 2,
+      "date": "20 Apr 1992",
+      "territoryNet": -8,
+      "friendlyBattles": 11,
+      "totalBattles": 11,
+      "friendlyCasualties": 1194,
+      "opposingCasualties": 830,
+      "displaced": 0
+    },
+    {
+      "turn": 3,
+      "date": "27 Apr 1992",
+      "territoryNet": -16,
+      "friendlyBattles": 16,
+      "totalBattles": 17,
+      "friendlyCasualties": 967,
+      "opposingCasualties": 705,
+      "displaced": 0
+    },
+    {
+      "turn": 4,
+      "date": "4 May 1992",
+      "territoryNet": -10,
+      "friendlyBattles": 10,
+      "totalBattles": 11,
+      "friendlyCasualties": 990,
+      "opposingCasualties": 540,
+      "displaced": 12790
+    },
+    {
+      "turn": 5,
+      "date": "11 May 1992",
+      "territoryNet": -9,
+      "friendlyBattles": 7,
+      "totalBattles": 9,
+      "friendlyCasualties": 984,
+      "opposingCasualties": 505,
+      "displaced": 467081
+    },
+    {
+      "turn": 6,
+      "date": "18 May 1992",
+      "territoryNet": -6,
+      "friendlyBattles": 4,
+      "totalBattles": 5,
+      "friendlyCasualties": 99,
+      "opposingCasualties": 319,
+      "displaced": 42507
+    },
+    {
+      "turn": 7,
+      "date": "25 May 1992",
+      "territoryNet": -2,
+      "friendlyBattles": 0,
+      "totalBattles": 0,
+      "friendlyCasualties": 0,
+      "opposingCasualties": 0,
+      "displaced": 57258,
+      "diagnostic": "Player-facing report simultaneously displayed 0 gained / 0 lost."
+    },
+    {
+      "turn": 8,
+      "date": "1 Jun 1992",
+      "territoryNet": -1,
+      "friendlyBattles": 1,
+      "totalBattles": 3,
+      "friendlyCasualties": 27,
+      "opposingCasualties": 101,
+      "displaced": 63366
+    },
+    {
+      "turn": 9,
+      "date": "8 Jun 1992",
+      "territoryNet": 0,
+      "friendlyBattles": 0,
+      "totalBattles": 1,
+      "friendlyCasualties": 0,
+      "opposingCasualties": 0,
+      "displaced": 52508
+    },
+    {
+      "turn": 10,
+      "date": "15 Jun 1992",
+      "territoryNet": -2,
+      "friendlyBattles": 3,
+      "totalBattles": 4,
+      "friendlyCasualties": 359,
+      "opposingCasualties": 336,
+      "displaced": 26013
+    }
+  ],
+  "commandAuthority": {
+    "startCurrent": 100,
+    "endCurrent": 100,
+    "endReserve": 15,
+    "reserveMax": 15,
+    "spent": 0,
+    "grossRecoveryDerivedFromVisibleTurnReadouts": 42,
+    "overflowLostAfterReserveCap": 27,
+    "turnsAtCurrentCap": 10,
+    "turnsEndingAtReserveCap": 7,
+    "endRecoveryPerTurn": 4,
+    "endRecoverySource": "quiet-front restraint"
+  },
+  "serializedEndState": {
+    "turnSummaryCount": 10,
+    "paramilitaryPolicy": "always_deny",
+    "pendingProposalReviews": 0
+  }
+}

@@ -36,7 +36,6 @@ export interface EliteLoanState {
 /** Minimum turns on loan before army AI will consider voluntary recall (prevents thrash). */
 export const ELITE_LOAN_MIN_DURATION = 6;
 /** Hard cap: force recall after this many turns regardless of op status (prevents indefinite loans). */
-export const ELITE_LOAN_MAX_DURATION = 12;
 /** Turns of cooldown between loans. */
 export const ELITE_LOAN_COOLDOWN = 4;
 /** Fraction of loan-start personnel lost that triggers forced recall. */

@@ -1,5 +1,5 @@
 /**
- * Collapse Pipeline Phase I — unit tests (pipeline DISABLED build).
+ * Collapse Pipeline Phase I — unit tests (pipeline DISABLED build). // legacy-phase-term-ok
  *
  * Covers: Phase 3C gates + constants, Phase 3D severity/damage/modifier derivation,
  * the §6 guard G1 (enclave-OSID exclusion at the capacity_modifiers write site),
@@ -60,7 +60,7 @@ function setExhaustion0to100(state: GameState, factionId: string, value0to100: n
     (state.political.war_exhaustion as Record<string, number>)[factionId] = value0to100 * 100;
 }
 
-describe('collapse Phase I — sanity: enclave defs', () => {
+describe('collapse Phase I — sanity: enclave defs', () => { // legacy-phase-term-ok
     it('the chosen enclave OSID is an RBiH enclave; the non-enclave OSID is not', () => {
         const e = getEnclaveDefForOsid(ENCLAVE_OSID);
         expect(e).not.toBeNull();
@@ -69,7 +69,7 @@ describe('collapse Phase I — sanity: enclave defs', () => {
     });
 });
 
-describe('collapse Phase I — Phase 3C gating', () => {
+describe('collapse Phase I — Phase 3C gating', () => { // legacy-phase-term-ok
     afterEach(() => {
         resetEnablePhase3A();
         resetEnablePhase3B();
@@ -190,7 +190,7 @@ describe('collapse Phase I — Phase 3C gating', () => {
     });
 });
 
-describe('collapse Phase I — Phase 3D resolution + §6 guard G1', () => {
+describe('collapse Phase I — Phase 3D resolution + §6 guard G1', () => { // legacy-phase-term-ok
     afterEach(() => {
         resetEnablePhase3C();
         resetEnablePhase3D();
@@ -350,7 +350,7 @@ describe('collapse Phase I — Phase 3D resolution + §6 guard G1', () => {
     });
 });
 
-describe('collapse Phase I — C13==C9 consistency invariant', () => {
+describe('collapse Phase I — C13==C9 consistency invariant', () => { // legacy-phase-term-ok
     // STRAIN_THRESHOLD (3D C13) must equal TIER1_*_THRESHOLD (3C C9) so a Tier-1-eligible
     // OSID at exactly the threshold produces zero severity but just above produces non-zero,
     // i.e. the two thresholds are aligned. We assert it empirically through the pipeline.

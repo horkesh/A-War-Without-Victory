@@ -859,7 +859,7 @@ export interface SettlementHoldoutState {
 
 /**
  * Canonical phase names (game phase, not turn sub-phase).
- * Phase 0 = Pre-War; Peace phase = Early War (Phase_Specifications_v0_3_0, Phase_0/Phase_I specs).
+ * Phase 0 = Pre-War; Peace phase = Early War (Phase_Specifications_v0_3_0, Phase_0/Phase_I specs). // legacy-phase-term-ok
  */
 export type PhaseName = 'peace' | 'war';
 

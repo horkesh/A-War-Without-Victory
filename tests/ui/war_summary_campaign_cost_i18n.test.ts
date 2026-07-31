@@ -252,13 +252,64 @@ describe('War Summary campaign cost localization', () => {
         expect(objectives[0]?.textContent).toContain('Protect state survival');
         expect(objectives[0]?.textContent).toContain('StatusCritical');
         expect(objectives[0]?.textContent).toContain('TrendWorsening');
-        expect(objectives[0]?.textContent).toContain('Responsible command1st Corps');
+        expect(objectives[0]?.textContent).toContain('Responsible owner1st Corps');
         expect(objectives[0]?.textContent).toContain('Current commitment4 front contacts / 2 thinly held');
         expect(objectives[0]?.textContent).toContain('Last relevant consequenceTurn 8: territorial control was lost.');
         expect(objectives[2]?.textContent).toContain('StatusUnreported');
-        expect(objectives[2]?.textContent).toContain('Responsible commandUnreported');
+        expect(objectives[2]?.textContent).toContain('Responsible ownerPresidency');
         expect(within(section).getAllByRole('button', { name: /Decision Room: Review/i }).length).toBeGreaterThan(0);
         expect(within(section).getAllByRole('button', { name: /Army HQ: Review/i }).length).toBeGreaterThan(0);
+    });
+
+    it('does not duplicate the Operation prefix in the latest military consequence', () => {
+        storeState.loadedGameState = {
+            ...stateWithStrategicObjectives(),
+            operationHistory: [{
+                operation_id: 'op_cerska_kamenica',
+                operation_name: 'Operation Cerska-Kamenica',
+                operation_display_name: 'Operation Cerska-Kamenica',
+                corps_id: 'arbih_1st_corps',
+                faction: 'RBiH',
+                started_turn: 4,
+                ended_turn: 9,
+            }],
+        } as LoadedGameState;
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const section = screen.getByRole('region', { name: 'Strategic Objectives' });
+        expect(section.textContent).toContain('Turn 9: Operation Cerska-Kamenica concluded.');
+        expect(section.textContent).not.toContain('operation Operation Cerska-Kamenica');
+    });
+
+    it('names fallback owners and shows honest hold statuses when no command request or signature is filed', () => {
+        const base = stateWithStrategicObjectives();
+        storeState.loadedGameState = {
+            ...base,
+            formations: [
+                ...base.formations.filter((formation) => formation.kind !== 'corps'),
+                {
+                    id: 'arbih_general_staff', faction: 'RBiH', name: 'General Staff ARBiH', kind: 'army_hq',
+                    readiness: 'ready', status: 'active', createdTurn: 0, tags: [],
+                },
+            ],
+            operations: undefined,
+            pendingReserveRequests: undefined,
+            pendingEventDecisions: undefined,
+            pendingPeacePlan: undefined,
+            pendingDayton: undefined,
+            pendingCounterOffers: undefined,
+        } as LoadedGameState;
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const section = screen.getByRole('region', { name: 'Strategic Objectives' });
+        const objectives = within(section).getAllByRole('article');
+        expect(objectives[0]?.textContent).toContain('Responsible ownerGeneral Staff ARBiH');
+        expect(objectives[2]?.textContent).toContain('Responsible ownerPresidency');
+        expect(section.textContent).toContain('No filed command request — hold present policy');
+        expect(section.textContent).toContain('No signature due — hold present policy');
+        expect(within(section).queryAllByRole('button')).toHaveLength(0);
     });
 
     it('renders strategic objective labels and unavailable truth in BCS', () => {
@@ -269,7 +320,7 @@ describe('War Summary campaign cost localization', () => {
 
         const section = screen.getByRole('region', { name: 'Strateski ciljevi' });
         expect(section.textContent).toContain('Zastiti opstanak drzave');
-        expect(section.textContent).toContain('Odgovorna komanda');
+        expect(section.textContent).toContain('Odgovorna institucija');
         expect(section.textContent).toContain('Sljedeca dostupna poluga');
         expect(section.textContent).toContain('Posljednja relevantna posljedica');
         expect(section.textContent).toContain('Nije prijavljeno');

@@ -112,11 +112,12 @@ describe('event acceptance diagnostic report', () => {
         // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
         // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992 (no response options).
         // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json).
+        // 297 → 299: +2 sourced HRHB October/November 1992 decision events.
         // Each carries a historical_default_response_id + markers + source_note,
         // so the debt counts below (missing_*) are unchanged — only the totals move.
-        expect(first.summary.total_events).toBe(297);
-        expect(first.summary.required_response_events).toBe(74);
-        expect(first.summary.production_modal_authoring_ready_events).toBe(45);
+        expect(first.summary.total_events).toBe(299);
+        expect(first.summary.required_response_events).toBe(76);
+        expect(first.summary.production_modal_authoring_ready_events).toBe(47);
         expect(first.summary.acceptance_status).toBe('NOT_READY');
         expect(first.summary.full_catalog_accepted).toBe(false);
         // +6 from the 6 new leadership-action events (address_to_nation /
@@ -124,11 +125,13 @@ describe('event acceptance diagnostic report', () => {
         // no historical default/marker (required-response debt), so they add to
         // missing_approved_default / historical_default / historical_marker debt.
         // They DO carry a source_note, so missing_source_note is unchanged.
-        expect(first.summary.missing_approved_default_events).toBe(16);
-        expect(first.summary.missing_historical_default_response_id_events).toBe(19);
-        expect(first.summary.missing_historical_marker_events).toBe(19);
+        // 16 → 15: Owen-Stoltenberg's Presidency stage now carries the
+        // historically sourced conditional-acceptance default and historical bot policy.
+        expect(first.summary.missing_approved_default_events).toBe(15);
+        expect(first.summary.missing_historical_default_response_id_events).toBe(18);
+        expect(first.summary.missing_historical_marker_events).toBe(18);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(11);
+        expect(first.summary.missing_source_note_events).toBe(10);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {
@@ -284,6 +287,8 @@ describe('event acceptance diagnostic report', () => {
             'rbih_paramilitary_policy_1992',
             'hrhb_1992_graz_cooperation_collapse',
             'rbih_minority_retention_1992',
+            'hrhb_posavina_orasje_posture_1992',
+            'hrhb_jajce_joint_defense_1992',
             'gornji_vakuf_clashes_1993',
             'ic_pressure_vopp_engagement',
             'vance_owen_plan_1993',

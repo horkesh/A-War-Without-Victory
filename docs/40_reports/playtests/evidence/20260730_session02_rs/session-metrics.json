@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "session": "20260730_session02_rs",
+  "faction": "RS",
+  "scenario": "Fresh April 1992 campaign",
+  "start": {
+    "turn": 0,
+    "date": "6 Apr 1992"
+  },
+  "end": {
+    "turn": 10,
+    "date": "15 Jun 1992",
+    "phase": "war",
+    "save": "quicksave-turn10.json",
+    "sha256": "6C478B8207AF70CA9C428A47466F3235A4E032B8B2EE4D60BDABAE53F1C134EA"
+  },
+  "build": {
+    "branch": "main",
+    "head": "b8ff530de08fa23cf38103d8da9557da56296130",
+    "trackedDiffHashAtLaunch": "b9c8d913c7cc16c115cbf4c3b784e30c3324af33",
+    "packageVersion": "0.9.9-beta.1"
+  },
+  "timing": {
+    "firstLaunchScreenshotLocal": "2026-07-30T10:02:47+02:00",
+    "finalDeskScreenshotLocal": "2026-07-30T10:16:38+02:00",
+    "playMinutesRounded": 14,
+    "minutesPerTurn": 1.4
+  },
+  "turns": [
+    { "turn": 1, "date": "13 Apr 1992", "territoryNet": 8, "battles": 10, "ownCasualties": 1310, "displaced": 0, "presidentialWork": "Accept Cutileiro Plan" },
+    { "turn": 2, "date": "20 Apr 1992", "territoryNet": 6, "battles": 11, "ownCasualties": 729, "displaced": 0, "presidentialWork": "Always allow paramilitary deployment" },
+    { "turn": 3, "date": "27 Apr 1992", "territoryNet": 4, "battles": 6, "ownCasualties": 239, "displaced": 0, "presidentialWork": "No required decision" },
+    { "turn": 4, "date": "4 May 1992", "territoryNet": 3, "battles": 7, "ownCasualties": 457, "displaced": 11637, "presidentialWork": "No required decision" },
+    { "turn": 5, "date": "11 May 1992", "territoryNet": 2, "battles": 4, "ownCasualties": 410, "displaced": 492065, "presidentialWork": "No required decision" },
+    { "turn": 6, "date": "18 May 1992", "territoryNet": 2, "battles": 2, "ownCasualties": 193, "displaced": 37924, "presidentialWork": "Authorize Operation Corridor" },
+    { "turn": 7, "date": "25 May 1992", "territoryNet": 2, "battles": 0, "ownCasualties": 0, "displaced": 28893, "presidentialWork": "No required decision" },
+    { "turn": 8, "date": "1 Jun 1992", "territoryNet": 3, "battles": 1, "ownCasualties": 83, "displaced": 26974, "presidentialWork": "Authorize Operation Foca" },
+    { "turn": 9, "date": "8 Jun 1992", "territoryNet": 4, "battles": 2, "ownCasualties": 99, "displaced": 16255, "presidentialWork": "No required decision" },
+    { "turn": 10, "date": "15 Jun 1992", "territoryNet": 4, "battles": 3, "ownCasualties": 187, "displaced": 28025, "presidentialWork": "Authorize Operation Podrinje Sweep" }
+  ],
+  "decisions": [
+    { "turn": 0, "decision": "The Assembly Speaks", "response": "Adopt all six goals", "basis": "UI historical default" },
+    { "turn": 0, "decision": "Historical operation authorization packet", "response": "Accept Operation Herzegovina, Prijedor, Drina, Koridor, Visegrad, and Prsten", "basis": "Each dossier identified the plan as a historical operation authorization and carried a staff recommendation" },
+    { "turn": 1, "decision": "Cutileiro / Lisbon peace proposal", "response": "Accept plan", "basis": "WAR_TERMINATION_SPEC historical-default disposition for RS; the same canonical IPC action was required after the visible modal unloaded the frame" },
+    { "turn": 2, "decision": "Paramilitary Authorization Policy", "response": "Always allow paramilitary deployment", "basis": "UI historical default" },
+    { "turn": 6, "decision": "Operation Corridor", "response": "Accept", "basis": "Historical operation authorization and staff recommendation" },
+    { "turn": 8, "decision": "Operation Foca", "response": "Accept", "basis": "Historical operation authorization and staff recommendation" },
+    { "turn": 10, "decision": "Operation Podrinje Sweep", "response": "Accept", "basis": "Historical operation authorization and staff recommendation" }
+  ],
+  "declinedToInvent": [
+    "No reserve transfer request was approved or denied because the rotating requests had no UI historical default or citation-backed historical disposition.",
+    "No front visit, broadcast, decoration, commander replacement, authored operation, or discretionary force launch was selected."
+  ],
+  "commandAuthority": {
+    "spent": 0,
+    "lifetimeSpent": 0,
+    "finalCurrent": 100,
+    "finalMaximum": 100,
+    "finalReserve": 15,
+    "finalReserveMaximum": 15,
+    "earnedRetained": 15,
+    "grossEarned": "Not serialized; not claimed",
+    "overflowWasted": "Not exactly reconstructible from the final save; current authority remained capped and the reserve was visibly capped by turn 6"
+  },
+  "finalHistoricalStateChecks": {
+    "paramilitaryPolicy": "always_allow",
+    "acceptedHistoricalOperationAuthorizations": 9,
+    "pendingEventDecisions": 0,
+    "pendingPeacePlan": false,
+    "cutileiroResponses": {
+      "RS": "accepted",
+      "RBiH": "accepted",
+      "HRHB": "rejected"
+    }
+  },
+  "screenshots": 35
+}

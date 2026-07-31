@@ -1,0 +1,87 @@
+{
+  "session": "20260730_session03_rbih_60turn",
+  "runtime": {
+    "branch": "main",
+    "commit": "b8ff530de08fa23cf38103d8da9557da56296130",
+    "tracked_diff_fingerprint_at_session_close": "cb43b21e85a8f3124d85179acb08f72b95c8d6da6cfd1daae7d5b1cf817bc847",
+    "package_version": "0.9.9-beta.1",
+    "electron_version": "41.0.3",
+    "chrome_version": "146.0.7680.80",
+    "build_check": "npm.cmd run desktop:release:check — PASS",
+    "launch": "node_modules\\electron\\dist\\electron.exe . --remote-debugging-port=9232 --user-data-dir=F:\\A-War-Without-Victory\\tmp-playtest-rbih-60turn\\session03-profile",
+    "packaged_artifact_created": false,
+    "launch_scope": "Electron desktop shell using freshly release-built local outputs; not a loose browser and not a packaged installer."
+  },
+  "final_state": {
+    "turn": 60,
+    "date": "1993-05-31",
+    "phase": "war",
+    "player_faction": "RBiH",
+    "decision_mode": "emergent",
+    "game_over": false,
+    "turn_summaries": 60,
+    "event_decision_log_all_factions": 22,
+    "event_decisions_player": 7,
+    "officer_events_all_factions": 114,
+    "pending_player_officer_events": 3,
+    "operation_history_all_factions": 14,
+    "operation_history_player": 0,
+    "operation_opportunities_player": 0,
+    "command_authority_current": 100,
+    "command_authority_cap": 100,
+    "command_authority_lifetime_spent": 0,
+    "reserve_current": 15,
+    "reserve_cap": 15,
+    "territory_control": {
+      "RBiH": 0.2347,
+      "RS": 0.6412,
+      "HRHB": 0.124
+    },
+    "casualties": {
+      "killed": 9280,
+      "wounded": 37788,
+      "missing_or_captured": 5304
+    },
+    "rbih_personnel": 162271,
+    "international_standing": 90,
+    "internal_cohesion": 0,
+    "negotiation_capital": 110,
+    "rbih_hrhb_relation": -1,
+    "rbih_hrhb_state": "open war"
+  },
+  "save_integrity": {
+    "quicksave_file": "turn60-quicksave.json",
+    "autosave_file": "turn60-autosave.json",
+    "quicksave_bytes": 4784598,
+    "autosave_bytes": 4784598,
+    "quicksave_sha256": "D83DFAAC2027900C149E5A64D48201F834FCA0E6E18B83BB0491CC7F1DC3BB93",
+    "autosave_sha256": "D83DFAAC2027900C149E5A64D48201F834FCA0E6E18B83BB0491CC7F1DC3BB93",
+    "byte_identical": true
+  },
+  "browser_diagnostics": {
+    "console_messages": 133,
+    "console_errors": 0,
+    "console_warnings": 0,
+    "page_errors": 0,
+    "failed_requests": 0,
+    "frame_navigations": 2,
+    "unexpected_navigation": false
+  },
+  "desktop_logs": {
+    "stdout_errors": 0,
+    "stderr_errors": 0,
+    "warnings": [
+      "Operation Jajce skipped: all 5 objectives already controlled by RS",
+      "Operation Bosanski Novi skipped: all 3 objectives already controlled by RS"
+    ],
+    "stderr_note": "Only the DevTools endpoint was emitted."
+  },
+  "state_integrity": {
+    "turn_metric_rows_including_turn_zero": 61,
+    "missing_turns": [],
+    "player_combat_formations": 90,
+    "ungrouped_player_reserves": 12,
+    "player_combat_formations_missing_location": 0
+  },
+  "determinism_scope": "This was one owner run. Identical quicksave and autosave hashes prove close-of-session internal state consistency, not replay determinism."
+}

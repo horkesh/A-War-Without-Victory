@@ -71,6 +71,12 @@ tools/tmp_*.cjs
 # Codex temp diagnostic artifacts (do not track)
 .codex_tmp*
 tmp_gui_observation/
+tmp-paradox-qa-*/
+tmp-playtest-*/
+tmp-zepa-trace/
+
+# Electron browser profiles are disposable QA runtime state, not playtest evidence.
+docs/40_reports/playtests/evidence/**/electron-user-data/
 
 # Sector audit snapshots (research only, do not track)
 tmp_sector_audit/

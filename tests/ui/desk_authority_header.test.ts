@@ -61,6 +61,20 @@ describe('DeskAuthorityHeader', () => {
     expect(screen.getByTestId('desk-authority-cadence').textContent).toMatch(/one directive every 3 turns/i);
   });
 
+  it('explains a full balance as reserve power rather than a spend quota', () => {
+    renderHeader({ current: 100, max: 100, reserve: 15, reserveMax: 15, spentThisTurn: 0, lifetimeSpent: 0, lastRecovery: 9 });
+
+    expect(screen.getByTestId('desk-authority-capacity-cue').textContent).toMatch(/reserve power, not a weekly quota/i);
+    expect(screen.getByTestId('desk-authority-capacity-cue').textContent).toMatch(/reserve limit/i);
+    expect(screen.getByTestId('desk-authority-capacity-cue').textContent).toMatch(/deliberate directive/i);
+  });
+
+  it('does not show the full-balance cue below capacity', () => {
+    renderHeader({ current: 99, max: 100, reserve: 15, reserveMax: 15, spentThisTurn: 0, lifetimeSpent: 0 });
+
+    expect(screen.queryByTestId('desk-authority-capacity-cue')).toBeNull();
+  });
+
   it('renders each lever cost from the canonical constants', () => {
     renderHeader({ current: 100, max: 100, spentThisTurn: 0, lifetimeSpent: 0 });
     const levers = screen.getAllByTestId('desk-authority-lever');

@@ -139,9 +139,9 @@ describe('production modal-ready event catalog rendering', () => {
   it('renders every accepted ready row as a complete player-facing decision modal', () => {
     const report = buildEventAcceptanceReport();
 
-    expect(report.summary.production_modal_authoring_ready_events).toBe(45);
-    // 71 → 74: +3 HRHB Jul–Sep 1992 required-response decision events.
-    expect(report.summary.required_response_events).toBe(74);
+    expect(report.summary.production_modal_authoring_ready_events).toBe(47);
+    // 71 → 74: +3 HRHB Jul–Sep decisions; 74 → 76: +2 sourced October 1992 reviews.
+    expect(report.summary.required_response_events).toBe(76);
 
     for (const row of report.production_modal_authoring_ready_rows) {
       const event = loadEvent(row.file, row.id);

@@ -13,14 +13,13 @@ describe('event presidential acceptance diagnostic', () => {
         expect(stableStringify(first, 2)).toBe(stableStringify(second, 2));
         // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
         // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992 (no response options).
-        // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json).
-        // The probed/surfaced subset (44) is unchanged — the new events are not in
-        // the production-modal-authoring-ready probe set yet.
-        expect(first.summary.catalog_total_events).toBe(297);
-        expect(first.summary.catalog_required_response_events).toBe(74);
+        // The two sourced late-1992 HRHB posture reviews join the production-ready
+        // probe set; one staff-recommendation row remains intentionally skipped.
+        expect(first.summary.catalog_total_events).toBe(299);
+        expect(first.summary.catalog_required_response_events).toBe(76);
         expect(first.summary.catalog_production_modal_authoring_ready_events).toBe(catalog.production_modal_authoring_ready_rows.length);
         expect(first.summary.catalog_acceptance_status).toBe('NOT_READY');
-        expect(first.summary.probed_event_count).toBe(44);
+        expect(first.summary.probed_event_count).toBe(46);
         expect(first.summary.staff_recommendation_modal_ready_skipped_count).toBe(1);
         expect(first.summary.status).toBe('READY');
         expect(first.failures).toEqual([]);
@@ -29,7 +28,7 @@ describe('event presidential acceptance diagnostic', () => {
     it('surfaces every production-ready event as a pending presidential decision for the responding player', () => {
         const report = buildEventPresidentialAcceptanceReport();
 
-        expect(report.rows).toHaveLength(44);
+        expect(report.rows).toHaveLength(46);
         for (const row of report.rows) {
             expect(row.player_surface.status, row.event_id).toBe('surfaced');
             expect(row.player_surface.fired_count, row.event_id).toBe(1);
@@ -37,7 +36,7 @@ describe('event presidential acceptance diagnostic', () => {
             expect(row.player_surface.pending_event_ids, row.event_id).toEqual([row.event_id]);
             expect(row.player_surface.decision_log_count, row.event_id).toBe(0);
         }
-        expect(report.summary.player_surfaced_count).toBe(44);
+        expect(report.summary.player_surfaced_count).toBe(46);
     });
 
     it('resolves every player pending decision with one historical player decision-log row', () => {
@@ -50,7 +49,7 @@ describe('event presidential acceptance diagnostic', () => {
             expect(row.player_resolve.decision_source, row.event_id).toBe('player');
             expect(row.player_resolve.response_id, row.event_id).toBe(row.historical_default_response_id);
         }
-        expect(report.summary.player_resolved_log_count).toBe(44);
+        expect(report.summary.player_resolved_log_count).toBe(46);
     });
 
     it('auto-resolves every production-ready event in headless mode on the historical default', () => {
@@ -65,7 +64,7 @@ describe('event presidential acceptance diagnostic', () => {
             expect(row.headless_auto.response_id, row.event_id).toBe(row.historical_default_response_id);
             expect(row.headless_auto.historical_default_match, row.event_id).toBe(true);
         }
-        expect(report.summary.headless_auto_resolved_count).toBe(44);
+        expect(report.summary.headless_auto_resolved_count).toBe(46);
         expect(report.summary.stuck_pending_count).toBe(0);
     });
 

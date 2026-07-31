@@ -22,6 +22,7 @@ import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getActiveLocale, t, type MessageKey } from '../i18n';
 import { buildReserveRequestPresentation, buildReserveRequestSummary } from './reserveRequestPresentation';
 import { looksLikeRawPlayerFacingToken } from '../utils/playerSafeText';
+import { isPeacePlanOwnedByPendingEvent } from '../utils/peacePlanDismissal';
 import { PARAMILITARY_TARGET_AVG_POPULATION } from '../../../state/formation_constants';
 
 export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
@@ -37,8 +38,12 @@ export interface InboxItem {
     updateCount?: number;
     /** Source record ids represented by this card, source order preserved. */
     sourceIds?: string[];
+    /** Optional card-specific action copy for informational handoffs. */
+    actionLabel?: string;
+    /** Keep a selected informational situation visible in the Desk packet. */
+    includeInDeskPacket?: boolean;
     /** Which panel/modal to open when clicked */
-    action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'convoy_decision_modal' | 'army_reserve' | 'army_hq_personnel' | 'decision_room' | 'dismiss_intelligence_notification' | 'none';
+    action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'convoy_decision_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_briefing' | 'decision_room' | 'dismiss_intelligence_notification' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
 }
@@ -52,6 +57,7 @@ function opportunityProposalIdFromAction(action: string | null | undefined, fall
 
 export function isAdvanceBlockingInboxItem(item: Pick<InboxItem, 'type' | 'severity'>): boolean {
     if (item.type === 'event_decision') return item.severity === 'blocking';
+    if (item.type === 'autonomy_proposal') return item.severity === 'blocking';
     const gatePolicy = getDecisionSurfaceForInboxType(item.type)?.gatePolicy;
     return gatePolicy === 'hard_block' || gatePolicy === 'modal_required';
 }
@@ -227,7 +233,7 @@ export function deriveInboxItems(
 
     // 2. Pending peace plan
     const peacePlan = state.pendingPeacePlan;
-    if (peacePlan) {
+    if (peacePlan && !isPeacePlanOwnedByPendingEvent(peacePlan, state.pendingEventDecisions)) {
         items.push({
             id: `peace:${peacePlan.planId}`,
             type: 'peace_plan',
@@ -309,24 +315,24 @@ export function deriveInboxItems(
                 items.push({
                     id: `command:review-proposal:${review.prop.id}`,
                     type: 'autonomy_proposal',
-                    severity: 'normal',
+                    severity: 'blocking',
                     title: review.operationName,
                     subtitle: t('inbox.item.historicalOperation.subtitle'),
                     action: autonomySurface.inboxAction,
-                    priority: 35,
+                    priority: 20,
                 });
             }
         } else if (historicalOperationReviews.length > 1) {
             items.push({
                 id: 'command:review-proposal:historical-ops',
                 type: 'autonomy_proposal',
-                severity: 'normal',
+                severity: 'blocking',
                 title: t('inbox.item.historicalOperation.groupTitle'),
                 subtitle: t('inbox.item.historicalOperation.groupSubtitle', { count: historicalOperationReviews.length }),
                 updateCount: historicalOperationReviews.length,
                 sourceIds: historicalOperationReviews.map((review) => review.prop.id),
                 action: autonomySurface.inboxAction,
-                priority: 35,
+                priority: 20,
             });
         }
     }
@@ -437,6 +443,8 @@ export function deriveInboxItems(
             if (!evt) continue;
             const commandInterpretation = events.some((event) => isCommandInterpretationOfficerEvent(event.type));
             const armyCoOperationProposal = events.some((event) => event.type === 'army_co_proposes_op');
+            const replacement = evt.type === 'replacement_suggested';
+            const availability = evt.type === 'officer_available';
             items.push({
                 id: `officer:${key}`,
                 type: 'officer_event',
@@ -445,12 +453,21 @@ export function deriveInboxItems(
                     ? armyCoOperationProposal
                         ? t('inbox.item.officer.title.autonomousOperationProposal')
                         : t('inbox.item.officer.title.commandInterpretation')
-                    : evt.type === 'replacement_suggested'
+                    : replacement
                         ? t('inbox.item.officer.title.commanderReplacement')
-                        : t('inbox.item.officer.title.personnelMatter'),
-                subtitle: evt.officer_name
-                    ? t('inbox.item.officer.subtitle.regarding', { officer: evt.officer_name })
-                    : t('inbox.item.officer.subtitle.fallback'),
+                        : availability
+                            ? t('inbox.item.officer.title.availabilityNotice')
+                            : t('inbox.item.officer.title.personnelMatter'),
+                subtitle: replacement && evt.officer_name
+                    ? t('inbox.item.officer.subtitle.replacement', {
+                        officer: evt.officer_name,
+                        incumbent: evt.current_commander_name ?? t('inbox.item.officer.currentCommanderFallback'),
+                    })
+                    : availability && evt.officer_name
+                        ? t('inbox.item.officer.subtitle.availability', { officer: evt.officer_name })
+                        : evt.officer_name
+                            ? t('inbox.item.officer.subtitle.regarding', { officer: evt.officer_name })
+                            : t('inbox.item.officer.subtitle.fallback'),
                 updateCount: events.length,
                 sourceIds: events.map(event => event.event_id),
                 action: commandInterpretation ? 'decision_room' : officerSurface.inboxAction,
@@ -478,6 +495,28 @@ export function deriveInboxItems(
     // 7. Situation highlights (informational, from turn summary + state)
     const turn = state.turn ?? 0;
     const dateStr = turnToDateString(turn);
+
+    const rbihCorpsReorganization =
+        playerFaction === 'RBiH'
+        && turn === 24
+        && state.formations.some(formation => (
+            formation.faction === 'RBiH'
+            && formation.kind === 'corps'
+            && formation.createdTurn <= turn
+        ));
+    if (rbihCorpsReorganization) {
+        items.push({
+            id: 'sit:rbih-corps-reorganization:24',
+            type: 'situation',
+            severity: 'info',
+            title: t('inbox.item.rbihCorpsReorganization.title'),
+            subtitle: t('inbox.item.rbihCorpsReorganization.subtitle'),
+            action: 'army_hq_briefing',
+            actionLabel: t('inbox.item.rbihCorpsReorganization.action'),
+            includeInDeskPacket: true,
+            priority: 58,
+        });
+    }
 
     // Territory changes from recent control events (current turn only).
     // Turn 0 control records are scenario setup, not player-visible wartime gains/losses.

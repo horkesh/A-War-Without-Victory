@@ -23,7 +23,7 @@ function makeAftermathView(overrides: Partial<TurnAftermathView> = {}): TurnAfte
     headline: 'No territorial change this turn.',
     narrativeLine: 'A quiet week is still a week of depletion, waiting, and staff work.',
     tone: 'quiet',
-    territory: { friendlyNet: 0, gains: 0, losses: 0, notable: [] },
+    territory: { friendlyNet: 0, gains: 0, losses: 0, breakdownComplete: true, notable: [] },
     combat: {
       battleCount: 0,
       friendlyBattleCount: 0,

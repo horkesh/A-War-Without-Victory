@@ -285,4 +285,14 @@ All former single-topic backlog docs are archived to **docs/_old/40_reports/back
 
 ---
 
+## 17. Current D2 residuals (2026-07-31)
+
+| Backlog item | Priority | Owner / Disposition |
+|---|---|---|
+| **RS 104-week Desk → Decision → Advance friction** | P0 product follow-up | Execute [2026-07-31-rs-104week-friction-remediation-plan.md](../plans/2026-07-31-rs-104week-friction-remediation-plan.md): align Required/Recommended/Monitor/Record semantics; consolidate repeat siege/enclave briefs; connect operation dossiers to map focus; audit all-faction decision cadence before authoring any sourced initiative; make Army HQ responsive; add a bounded accessible active-path summary. A fresh RS 104-week Electron diary is the acceptance gate. |
+| **Operational/Tactical Group lifecycle and convergence** | P1 active / gated | Execute Phases 0–2 of [2026-07-31-operational-tactical-group-closeout-implementation-plan.md](../plans/2026-07-31-operational-tactical-group-closeout-implementation-plan.md). Behavior/history/doctrine phases retain their named stop gates; do not revive retired Standing-OG Phase C or invent promotion identities. |
+| **New President-feel score after remediation** | D2 owner validation | Do not infer a score from tests. Run a fresh long-form Electron owner diary after the active friction lane is implemented and preserve the prior scores as pre-fix evidence. |
+
+---
+
 *For implemented work, see [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md). For lessons learned, see [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md).*

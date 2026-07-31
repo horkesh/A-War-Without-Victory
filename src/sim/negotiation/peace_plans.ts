@@ -16,12 +16,15 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { computePoliticalPeacePlanResponse } from '../political/political_peace_plan.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
-import { resolveEventDecision } from '../events/resolve_decision.js';
+import { resolveEventDecisionCore } from '../events/resolve_decision_core.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 const CUTILEIRO_PLAN_ID = 'cutileiro';
 const DAYTON_PLAN_ID = 'dayton';
 const VANCE_OWEN_EVENT_ID = 'vance_owen_plan_1993';
+const OWEN_STOLTENBERG_PLAN_ID = 'owen_stoltenberg';
+const OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID = 'owen_stoltenberg_plan_1993';
+const OWEN_STOLTENBERG_ASSEMBLY_EVENT_ID = 'os_rbih_tactical_acceptance_1993';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // War week helper
@@ -52,7 +55,24 @@ function ensureNegotiationState(state: GameState): NegotiationState {
             peace_plan_history: [],
         };
     }
-    return state.military.negotiation;
+    const negotiation = state.military.negotiation;
+    // Save compatibility: older and diagnostic states may carry a partial
+    // negotiation object. This boundary owns the writable collection
+    // invariants used by resolution and its consequences.
+    if (!Array.isArray(negotiation.peace_plan_history)) {
+        negotiation.peace_plan_history = [];
+    }
+    if (!negotiation.capital) {
+        negotiation.capital = {};
+    }
+    if (!negotiation.patron_relationships) {
+        negotiation.patron_relationships = {};
+    }
+    for (const faction of CANONICAL_FACTIONS) {
+        negotiation.capital[faction] ??= createEmptyCapital();
+        negotiation.patron_relationships[faction] ??= createDefaultPatronRelationship(faction);
+    }
+    return negotiation;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -118,6 +138,35 @@ function computeBotResponse(
     );
 }
 
+function buildBotResponses(
+    state: GameState,
+    plan: PeacePlanDefinition,
+    playerFaction: FactionId | undefined,
+): Record<string, 'accepted' | 'rejected'> {
+    const historicalResolution = state.meta.decision_mode !== 'emergent';
+    const botResponses: Record<string, 'accepted' | 'rejected'> = {};
+    for (const faction of CANONICAL_FACTIONS) {
+        if (playerFaction != null && faction === playerFaction) continue;
+        const historicalResponse = plan.historical_responses[faction];
+        // Owen-Stoltenberg's RBiH position is owned by the documented
+        // Presidency -> Assembly sequence. When another faction is the player,
+        // the non-player RBiH path therefore keeps its normalized terminal
+        // Assembly rejection even in an otherwise emergent campaign. Letting a
+        // generic political score pre-accept here can end the war before that
+        // faction-owned final disposition is reached.
+        const useFactionOwnedHistoricalDisposition =
+            plan.id === OWEN_STOLTENBERG_PLAN_ID
+            && faction === 'RBiH';
+        if ((historicalResolution || useFactionOwnedHistoricalDisposition) && historicalResponse == null) {
+            throw new Error(`Peace plan ${plan.id} has no historical response for ${faction}`);
+        }
+        botResponses[faction] = historicalResolution || useFactionOwnedHistoricalDisposition
+            ? historicalResponse!
+            : computeBotResponse(state, plan, faction);
+    }
+    return botResponses;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Main evaluation (called from pipeline)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -162,24 +211,12 @@ export function evaluatePeacePlans(state: GameState): void {
         if (alreadyOffered) continue;
 
         const playerFaction = state.meta.player_faction;
-        const historicalHeadless =
-            playerFaction == null
-            && state.meta.decision_mode !== 'emergent';
 
         // A no-player headless state computes every faction. Player sessions leave
         // the selected faction pending for the existing desktop resolution path.
-        // Historical calibration uses documented outcomes, not the emergent scorer.
-        const botResponses: Record<string, 'accepted' | 'rejected'> = {};
-        for (const faction of CANONICAL_FACTIONS) {
-            if (playerFaction != null && faction === playerFaction) continue;
-            const historicalResponse = plan.historical_responses[faction];
-            if (historicalHeadless && historicalResponse == null) {
-                throw new Error(`Peace plan ${plan.id} has no historical response for ${faction}`);
-            }
-            botResponses[faction] = historicalHeadless
-                ? historicalResponse!
-                : computeBotResponse(state, plan, faction);
-        }
+        // Historical campaigns use documented outcomes for every non-player faction;
+        // only explicit emergent mode delegates those responses to the scorer.
+        const botResponses = buildBotResponses(state, plan, playerFaction);
 
         // Create pending peace plan
         neg.pending_peace_plan = {
@@ -218,7 +255,7 @@ export function synchronizeVanceOwenEventDecision(
         decision => decision.event_id === VANCE_OWEN_EVENT_ID && decision.faction === playerFaction,
     ) === true;
     if (!existingReceipt) {
-        resolveEventDecision(
+        resolveEventDecisionCore(
             state,
             VANCE_OWEN_EVENT_ID,
             playerResponse === 'accepted' ? 'accept' : 'reject',
@@ -230,6 +267,170 @@ export function synchronizeVanceOwenEventDecision(
             decision.event_id === VANCE_OWEN_EVENT_ID
             && decision.faction === playerFaction
         ));
+}
+
+/**
+ * Resolve the Vance-Owen event as the canonical owner even when its event card
+ * arrives one turn before the negotiation scheduler would create the legacy
+ * peace-plan surface.
+ */
+export function resolveVanceOwenEventDecision(
+    state: GameState,
+    playerResponse: 'accepted' | 'rejected',
+): { all_accepted: boolean; rejection_factions: FactionId[] } {
+    const playerFaction = state.meta.player_faction ?? 'RBiH';
+    const hasPendingEvent = state.military.pending_event_decisions?.some(decision => (
+        decision.event_id === VANCE_OWEN_EVENT_ID
+        && decision.faction === playerFaction
+    )) === true;
+    if (!hasPendingEvent) {
+        throw new Error(`No pending decision for event_id "${VANCE_OWEN_EVENT_ID}"`);
+    }
+
+    const neg = ensureNegotiationState(state);
+    const existingHistory = (neg.peace_plan_history ?? []).find(entry => entry.plan_id === 'vance_owen');
+    if (existingHistory) {
+        resolveEventDecisionCore(
+            state,
+            VANCE_OWEN_EVENT_ID,
+            playerResponse === 'accepted' ? 'accept' : 'reject',
+        );
+        return {
+            all_accepted: CANONICAL_FACTIONS.every(
+                faction => existingHistory.responses[faction] === 'accepted',
+            ),
+            rejection_factions: CANONICAL_FACTIONS.filter(
+                faction => existingHistory.responses[faction] !== 'accepted',
+            ),
+        };
+    }
+
+    if (!neg.pending_peace_plan) {
+        const plan = getPeacePlanById('vance_owen');
+        if (!plan) throw new Error('Unknown peace plan ID: vance_owen');
+        neg.pending_peace_plan = {
+            plan_id: plan.id,
+            turn_offered: state.meta.turn,
+            bot_responses: buildBotResponses(state, plan, playerFaction),
+        };
+    } else if (neg.pending_peace_plan.plan_id !== 'vance_owen') {
+        throw new Error(
+            `Cannot resolve Vance-Owen while peace plan "${neg.pending_peace_plan.plan_id}" is pending`,
+        );
+    }
+
+    return resolvePeacePlan(state, 'vance_owen', playerResponse);
+}
+
+function hasPendingEventDecision(
+    state: GameState,
+    eventId: string,
+    playerFaction: FactionId,
+): boolean {
+    return state.military.pending_event_decisions?.some(decision => (
+        decision.event_id === eventId
+        && decision.faction === playerFaction
+    )) === true;
+}
+
+function getPeacePlanResolution(
+    history: PeacePlanResponse,
+): { all_accepted: boolean; rejection_factions: FactionId[] } {
+    const rejectionFactions = CANONICAL_FACTIONS.filter(
+        faction => history.responses[faction] !== 'accepted',
+    );
+    return {
+        all_accepted: rejectionFactions.length === 0,
+        rejection_factions: rejectionFactions,
+    };
+}
+
+function ensureOwenStoltenbergPendingPlan(
+    state: GameState,
+    playerFaction: FactionId,
+): void {
+    const neg = ensureNegotiationState(state);
+    if (neg.pending_peace_plan?.plan_id === OWEN_STOLTENBERG_PLAN_ID) return;
+    if (neg.pending_peace_plan) {
+        throw new Error(
+            `Cannot resolve Owen-Stoltenberg while peace plan "${neg.pending_peace_plan.plan_id}" is pending`,
+        );
+    }
+
+    const plan = getPeacePlanById(OWEN_STOLTENBERG_PLAN_ID);
+    if (!plan) throw new Error(`Unknown peace plan ID: ${OWEN_STOLTENBERG_PLAN_ID}`);
+    neg.pending_peace_plan = {
+        plan_id: plan.id,
+        turn_offered: (state.meta.war_start_turn ?? 0) + plan.trigger_week,
+        bot_responses: buildBotResponses(state, plan, playerFaction),
+    };
+}
+
+/**
+ * The first RBiH Owen-Stoltenberg event is the Presidency stage. Historical
+ * conditional acceptance keeps the framework alive for the Assembly vote and
+ * must not be recorded as final tripartite peace.
+ */
+export function resolveOwenStoltenbergPresidencyDecision(
+    state: GameState,
+    responseId: 'accept' | 'reject',
+): { all_accepted: boolean; rejection_factions: FactionId[] } {
+    const playerFaction = state.meta.player_faction ?? 'RBiH';
+    if (!hasPendingEventDecision(state, OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID, playerFaction)) {
+        throw new Error(`No pending decision for event_id "${OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID}"`);
+    }
+
+    resolveEventDecisionCore(state, OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID, responseId);
+
+    const neg = ensureNegotiationState(state);
+    const existingHistory = (neg.peace_plan_history ?? []).find(
+        entry => entry.plan_id === OWEN_STOLTENBERG_PLAN_ID,
+    );
+    if (existingHistory) return getPeacePlanResolution(existingHistory);
+
+    if (responseId === 'accept') {
+        if (neg.pending_peace_plan?.plan_id === OWEN_STOLTENBERG_PLAN_ID) {
+            neg.pending_peace_plan = undefined;
+        }
+        return { all_accepted: false, rejection_factions: [] };
+    }
+
+    ensureOwenStoltenbergPendingPlan(state, playerFaction);
+    return resolvePeacePlan(state, OWEN_STOLTENBERG_PLAN_ID, 'rejected');
+}
+
+/**
+ * The Assembly event owns the final RBiH Owen-Stoltenberg response. It writes
+ * one negotiation-history row only after the Presidency stage has completed.
+ */
+export function resolveOwenStoltenbergAssemblyDecision(
+    state: GameState,
+    responseId: 'reject_via_assembly' | 'accept_for_optics',
+): { all_accepted: boolean; rejection_factions: FactionId[] } {
+    const playerFaction = state.meta.player_faction ?? 'RBiH';
+    if (!hasPendingEventDecision(state, OWEN_STOLTENBERG_ASSEMBLY_EVENT_ID, playerFaction)) {
+        throw new Error(`No pending decision for event_id "${OWEN_STOLTENBERG_ASSEMBLY_EVENT_ID}"`);
+    }
+
+    resolveEventDecisionCore(state, OWEN_STOLTENBERG_ASSEMBLY_EVENT_ID, responseId);
+
+    const neg = ensureNegotiationState(state);
+    const existingHistory = (neg.peace_plan_history ?? []).find(
+        entry => entry.plan_id === OWEN_STOLTENBERG_PLAN_ID,
+    );
+    if (existingHistory) {
+        if (neg.pending_peace_plan?.plan_id === OWEN_STOLTENBERG_PLAN_ID) {
+            neg.pending_peace_plan = undefined;
+        }
+        return getPeacePlanResolution(existingHistory);
+    }
+
+    ensureOwenStoltenbergPendingPlan(state, playerFaction);
+    return resolvePeacePlan(
+        state,
+        OWEN_STOLTENBERG_PLAN_ID,
+        responseId === 'accept_for_optics' ? 'accepted' : 'rejected',
+    );
 }
 
 /**
@@ -258,14 +459,35 @@ export function resolvePeacePlan(
 
     const playerFaction = state.meta.player_faction ?? 'RBiH';
 
+    if (
+        planId === OWEN_STOLTENBERG_PLAN_ID
+        && hasPendingEventDecision(state, OWEN_STOLTENBERG_PRESIDENCY_EVENT_ID, playerFaction)
+    ) {
+        return resolveOwenStoltenbergPresidencyDecision(
+            state,
+            playerResponse === 'accepted' ? 'accept' : 'reject',
+        );
+    }
+
     if (planId === 'vance_owen') {
         synchronizeVanceOwenEventDecision(state, playerResponse, playerFaction);
     }
 
+    // Cutileiro is a pre-war disposition replayed at the April 1992 start for
+    // completeness. When the player chooses their documented response, resolve
+    // the whole pre-war record as documented rather than letting week-one
+    // emergent signals rewrite the other signatories and manufacture an
+    // ahistorical unanimous settlement before play begins.
+    const replayDocumentedCutileiroOutcome =
+        planId === CUTILEIRO_PLAN_ID
+        && plan.historical_responses[playerFaction] === playerResponse;
+
     // Build complete response map: bot responses + player response
     const allResponses: Record<string, 'accepted' | 'rejected' | 'pending'> = {};
     for (const faction of CANONICAL_FACTIONS) {
-        if (faction === playerFaction) {
+        if (replayDocumentedCutileiroOutcome) {
+            allResponses[faction] = plan.historical_responses[faction] ?? 'rejected';
+        } else if (faction === playerFaction) {
             allResponses[faction] = playerResponse;
         } else {
             allResponses[faction] = neg.pending_peace_plan.bot_responses[faction] ?? 'rejected';

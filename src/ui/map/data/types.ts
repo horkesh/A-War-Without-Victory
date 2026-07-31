@@ -279,6 +279,8 @@ export interface FormationView {
     commandStrain?: number;
     /** Player-facing label derived from commandStrain. */
     commandStrainLabel?: 'healthy' | 'strained' | 'compromised';
+    /** Provenance of the currently contributing command-strain sources. */
+    commandStrainSource?: import('./command_strain.js').CommandStrainSource;
     /**
      * Unresolved warlord friction event types for this corps's active commander.
      * Derived on-read from state.military.friction_events. Empty array = no friction.

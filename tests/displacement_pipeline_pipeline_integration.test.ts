@@ -80,7 +80,7 @@ test('runTurn rejects peace phase (state pipeline owns peace)', async () => {
     await expect(runTurn(state, { seed: 'pf-pipe-i', settlementEdges: edges })).rejects.toThrow(/unsupported lifecycle phase "peace"/);
 });
 
-test.skip('phase_ii runTurn includes phase-f-displacement after phase-e-rear-zone-derivation', async () => {
+test.skip('phase_ii runTurn includes phase-f-displacement after phase-e-rear-zone-derivation', async () => { // legacy-phase-term-ok
     const state = minimalPhaseIIState();
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { report } = await runTurn(state, { seed: 'pf-pipe-ii', settlementEdges: edges });

@@ -99,6 +99,35 @@ describe('PeacePlanModal', () => {
         expect(screen.getByText('Presidential Decision Required')).toBeTruthy();
     });
 
+    it('keeps decorative header layers behind the title and names every canonical institutional model', () => {
+        installIpc();
+
+        render(createElement(PeacePlanModal, {
+            plan: makeVanceOwenPlan({
+                planId: 'owen_stoltenberg',
+                planName: 'Owen-Stoltenberg Plan',
+                institutionalModel: 'union_3_republics',
+            }),
+            onDismiss: vi.fn(),
+        }));
+
+        const header = screen.getByTestId('peace-plan-header');
+        const art = screen.getByTestId('peace-plan-header-art');
+        const overlay = screen.getByTestId('peace-plan-header-overlay');
+        const content = screen.getByTestId('peace-plan-header-content');
+
+        expect(header.className).toContain('isolate');
+        expect(art.getAttribute('alt')).toBe('');
+        expect(art.getAttribute('aria-hidden')).toBe('true');
+        expect(art.className).toContain('pointer-events-none');
+        expect(overlay.getAttribute('aria-hidden')).toBe('true');
+        expect(overlay.className).toContain('pointer-events-none');
+        expect(content.className).toContain('relative');
+        expect(screen.getByRole('heading', { name: 'Owen-Stoltenberg Plan' })).toBeTruthy();
+        expect(screen.getByText('Union of Three Republics')).toBeTruthy();
+        expect(document.body.textContent).not.toContain('Unspecified institutional model');
+    });
+
     it('does not disclose precomputed faction responses before the player commits', () => {
         installIpc();
 

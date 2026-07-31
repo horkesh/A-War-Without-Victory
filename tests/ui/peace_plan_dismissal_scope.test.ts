@@ -39,11 +39,25 @@ describe('peace plan dismissal scope', () => {
         expect(shouldShowPeacePlanModal(contactGroup, dismissedKey)).toBe(true);
     });
 
+    it('suppresses the legacy Owen-Stoltenberg modal while its canonical event stage is pending', () => {
+        const plan = makePlan('owen_stoltenberg', 70);
+        const pendingEventDecisions = [{
+            event_id: 'owen_stoltenberg_plan_1993',
+            event_title: 'Owen-Stoltenberg Presidency Review',
+            turn_fired: 70,
+            faction: 'RBiH',
+            response_options: [],
+        }];
+
+        expect(shouldShowPeacePlanModal(plan, null, pendingEventDecisions)).toBe(false);
+    });
+
     it('guards App wiring against a single global dismissed boolean', () => {
         const appSource = readFileSync(join(process.cwd(), 'src/ui/map/App.tsx'), 'utf8');
 
         expect(appSource).toContain('dismissedPeacePlanKey');
         expect(appSource).toContain('shouldShowPeacePlanModal');
+        expect(appSource).toContain('loadedGameState?.pendingEventDecisions');
         expect(appSource).not.toContain('const [peacePlanDismissed, setPeacePlanDismissed] = useState(false)');
     });
 });

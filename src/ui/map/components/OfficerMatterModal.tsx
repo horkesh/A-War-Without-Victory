@@ -11,7 +11,7 @@ interface OfficerMatterModalProps {
   itemId: string | null;
   state: LoadedGameState | null;
   onClose: () => void;
-  onOpenPersonnel: () => void;
+  onOpenPersonnel: (target: 'briefing' | 'personnel') => void;
 }
 
 function stripOfficerPrefix(itemId: string): string {
@@ -66,8 +66,18 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
   const acknowledgeLabel = event?.type === 'replacement_suggested'
     ? t('decisionModal.officer.keepCurrentCommander')
     : event?.type === 'officer_available'
-      ? t('decisionModal.officer.acknowledgeArrival')
+      ? t('decisionModal.officer.fileAvailabilityNotice')
       : t('decisionModal.officer.acknowledge');
+  const guidance = event?.type === 'replacement_suggested'
+    ? t('decisionModal.officer.replacementGuidance', {
+      officer: event.officer_name ?? t('decisionModal.officer.staffFallback'),
+      incumbent: event.current_commander_name ?? t('inbox.item.officer.currentCommanderFallback'),
+    })
+    : event?.type === 'officer_available'
+      ? t('decisionModal.officer.availabilityGuidance', {
+        officer: event.officer_name ?? t('decisionModal.officer.staffFallback'),
+      })
+      : null;
 
   const acknowledge = async () => {
     if (!event) return;
@@ -103,13 +113,28 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
         <div className="space-y-2 px-5 py-4 text-[12px]">
           <div className="font-bold text-text-primary">{event.officer_name ?? event.current_commander_name ?? t('decisionModal.officer.staffFallback')}</div>
           <div className="text-xs uppercase tracking-[0.12em] text-text-muted">{officerEventTypeLabel(event.type)}</div>
+          {guidance && (
+            <div
+              data-testid="officer-matter-semantics"
+              className="border border-amber-400/25 bg-amber-400/[0.06] px-3 py-3 leading-relaxed text-text-secondary"
+            >
+              {guidance}
+            </div>
+          )}
           {event.reason && <div className="border border-panel-border bg-panel-card px-3 py-3 text-text-secondary">{event.reason}</div>}
         </div>
       )}
       <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
         <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.officer.close')}</button>
         <button type="button" onClick={acknowledge} disabled={!event} className="border border-panel-border bg-black/20 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-primary disabled:opacity-40">{acknowledgeLabel}</button>
-        <button type="button" onClick={onOpenPersonnel} disabled={!event} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.officer.openPersonnel')}</button>
+        <button
+          type="button"
+          onClick={() => onOpenPersonnel(event?.type === 'replacement_suggested' ? 'briefing' : 'personnel')}
+          disabled={!event}
+          className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40"
+        >
+          {t('decisionModal.officer.openPersonnel')}
+        </button>
       </div>
     </Modal>
   );

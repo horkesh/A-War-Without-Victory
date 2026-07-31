@@ -1,0 +1,71 @@
+{
+  "session": "20260730_session01",
+  "buildCommit": "b8ff530de08fa23cf38103d8da9557da56296130",
+  "appVersion": "0.9.9-beta.1",
+  "runtime": {
+    "electron": "41.0.3",
+    "chrome": "146.0.7680.80",
+    "os": "Windows 10 x64",
+    "platform": "Win32",
+    "language": "en-US",
+    "devicePixelRatio": 1.5,
+    "viewport": {
+      "width": 1386,
+      "height": 837
+    }
+  },
+  "launch": {
+    "command": "npm run desktop -- --remote-debugging-port=9223 --user-data-dir=<isolated-session-profile>",
+    "environment": {
+      "AWWV_PLAYTEST_TELEMETRY": "1"
+    },
+    "packagingPerformed": false
+  },
+  "runtimeConsole": {
+    "protocol": "Chrome DevTools Protocol attached to the packaged Electron tactical surface",
+    "exceptionCount": 0,
+    "browserLogEntryCount": 0,
+    "consoleMessageCount": 24,
+    "consoleLevels": [
+      "log"
+    ],
+    "uniqueLoadMarkers": [
+      "6 Apr 1992 (war) — 148 formations, 822 control entries",
+      "13 Apr 1992 (war) — 155 formations, 822 control entries",
+      "20 Apr 1992 (war) — 158 formations, 822 control entries",
+      "27 Apr 1992 (war) — 150 formations, 822 control entries",
+      "4 May 1992 (war) — 143 formations, 822 control entries",
+      "11 May 1992 (war) — 144 formations, 822 control entries",
+      "18 May 1992 (war) — 137 formations, 822 control entries",
+      "25 May 1992 (war) — 136 formations, 822 control entries",
+      "1 Jun 1992 (war) — 139 formations, 822 control entries",
+      "8 Jun 1992 (war) — 140 formations, 822 control entries",
+      "15 Jun 1992 (war) — 141 formations, 822 control entries"
+    ]
+  },
+  "processLogs": {
+    "desktop-stdout.log": {
+      "bytes": 38926,
+      "sha256": "1E7B54D1AE79B7007FBFC23DF99DFC1F2F4A177C4ACD7F0E1FCBE09F6A6E9DF1",
+      "summary": "Successful desktop release-check/build output, tactical-map server startup, and normal brigade-assignment diagnostics; no error, exception, failed, fatal, or warning pattern."
+    },
+    "desktop-stderr.log": {
+      "bytes": 99,
+      "sha256": "F51036150D95F1184EE7223B7FC908A71A8404611C9657B462AF198144B72A7F",
+      "summary": "DevTools listening endpoint only."
+    }
+  },
+  "inAppDiagnostics": {
+    "exportFile": "local-playtest-evidence.json",
+    "crashDiagnosticsConsent": false,
+    "breadcrumbs": 0,
+    "crashReports": 0
+  },
+  "save": {
+    "path": "saves/quicksave.json",
+    "bytes": 3730113,
+    "sha256": "413DF74E63D1BF64843631297340E1D67DC27FE9A7A2D6A44D5DC6A03643C603",
+    "quickSaveResult": "ok"
+  },
+  "applicationClosedAfterSave": true
+}

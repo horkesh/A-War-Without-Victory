@@ -252,6 +252,10 @@ These are gating-only assertions (prevent invalid treaties).
 
 Resolving the Vance-Owen peace-plan decision has one player-decision owner. The resolution must produce one durable event-decision receipt and one peace-plan-history chronology row; a duplicate pending event for the same choice must be consumed, not resolved as a second player decision.
 
+### 10.6 Cutileiro documented disposition
+
+If the player gives the documented Cutileiro response, all three final responses must be normalized to the documented pre-war record: RBiH rejected; RS and HRHB accepted. The player response remains durable, but HRHB acceptance alone must not manufacture a unanimous turn-one settlement. A counterfactual player response remains emergent. This exception applies only to Cutileiro; an actually unanimous peace-triggering treaty remains terminal under §10.1.
+
 ## 11. Determinism Invariants
 
 ### 11.1 No Randomness
@@ -447,7 +451,7 @@ Elite brigades maintain `is_elite: true` on the formation definition. Elite stat
 ### 16.2 Loan Lifecycle
 
 Loan state is tracked via `EliteLoanState` on the formation:
-- Loans are op-tied (no fixed expiry). Brigade stays until operation concludes, player recalls, or forced recall triggers.
+- Loans are op-tied (no fixed expiry). Brigade stays until operation concludes, player recalls, or forced recall triggers. Elapsed turns alone must never recall a healthy brigade while its supported operation remains active.
 - Forced recall triggers: >= 30% casualties from loan start, morale < 35, or >= 50% personnel loss.
 - Cooldown of `ELITE_LOAN_COOLDOWN = 4` turns between loans.
 - Minimum loan duration: `ELITE_LOAN_MIN_DURATION = 6` turns before voluntary recall.
@@ -477,7 +481,7 @@ The following systems have been fully removed from the codebase and must not be 
 |---|---|---|
 | **Zone of Control (ZoC)** | 2026-03-02 | Local front density (`local_front_defense.ts`), `BRIGADE_OPERATIONAL_FRONTAGE_CAP=48` |
 | **Area of Responsibility (AoR)** | 2026-03-04 | `location_osid` only; corps sectors for territory assignment |
-| **Phase I / Phase II terminology** | 2026-03-07 | **Peace** phase and **War** phase |
+| **Phase I / Phase II terminology** | 2026-03-07 | **Peace** phase and **War** phase | <!-- legacy-phase-term-ok -->
 | **Independent brigade attacks** | n500 | Ops-only attack via `CorpsOperation` (see 6.3) |
 | **Brigade destruction in combat** | n500 | `forceRetreatWithPenalties()` (see 6.2) |
 | **Sector coverage penalty** | n500 | Unified sector defense (see 6.5) |
@@ -489,7 +493,7 @@ The following systems have been fully removed from the codebase and must not be 
 - **v0.9.0** (2026-05-05): Filename + body version-bump pass. §6.2.4 morale-collapse override (LANE-NIGHTSHIFT-N4-CANON-AMENDMENT, commit `58624617`, 2026-05-03; gated behind `MORALE_OVERRIDE_ENABLED`, default false; counter increments diagnostically with flag off). v0.8 Command Chain integration: §15 Officer System covers named-officer succession, AI commander intelligence, Phase 0 panel pattern, replay-buffer streaming, Tier 2 perf integration. References to `equipment_quality_modifier` substrate (Wave 3, commit `658241df`) and the `must_hold` variable multiplier substrate (R2-1, commit `e4c661d5`) become normative wherever they were already implementation-noted in supporting docs. No invariant relaxed; no new invariant added beyond the morale-collapse override clause.
 - **v0.7.0** (2026-03-15): Brigade no-destruction, ops-only attack, officer succession, cold front, elite loan invariants. Removed Systems appendix. Enclave/Sarajevo detail. Morale retreat resistance floors.
 - **v0.7.3**: Single-phase (War only) model. Peace phase and Phase 0 removed.
-- **v0.6.0**: Two-phase (Peace/War) model. Purged Phase I/II terminology.
+- **v0.6.0**: Two-phase (Peace/War) model. Purged Phase I/II terminology. <!-- legacy-phase-term-ok -->
 - **v0.5.0**: OSID model, supply reserves, paramilitary lifecycle.
 
 ---

@@ -45,7 +45,7 @@ function makeAftermathView(): TurnAftermathView {
         headline: 'After-action report available.',
         narrativeLine: 'The front traded ground without mercy, leaving staff to sort signal from noise.',
         tone: 'mixed',
-        territory: { friendlyNet: -1, gains: 1, losses: 2, notable: [] },
+        territory: { friendlyNet: -1, gains: 1, losses: 2, breakdownComplete: true, notable: [] },
         combat: {
             battleCount: 2,
             friendlyBattleCount: 1,

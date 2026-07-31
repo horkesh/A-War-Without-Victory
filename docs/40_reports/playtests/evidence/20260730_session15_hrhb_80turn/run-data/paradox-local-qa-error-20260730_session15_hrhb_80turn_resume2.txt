@@ -1,0 +1,6 @@
+Error: No new exact event decision receipt was recorded for zagreb_restrains_boban_vopp
+    at assertExactEventDecisionReceipt (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:169:21)
+    at handleCurrentSurface (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:3741:29)
+    at async playTurns (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4138:21)
+    at async runFaction (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4505:22)
+    at async F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4575:5

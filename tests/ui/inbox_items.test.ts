@@ -103,6 +103,51 @@ describe('deriveInboxItems — paramilitary requests', () => {
     });
 });
 
+describe('deriveInboxItems — historically grounded staff contact', () => {
+    it('surfaces the RBiH corps reorganization at turn 24 as review, not an invented choice', () => {
+        const state = makeStub({
+            turn: 24,
+            player_faction: 'RBiH',
+            formations: [
+                { id: 'arbih_general_staff', name: 'General Staff ARBiH', faction: 'RBiH', kind: 'army_hq', createdTurn: 24 },
+                { id: 'arbih_1st_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps', createdTurn: 24 },
+                { id: 'arbih_2nd_corps', name: '2nd Corps', faction: 'RBiH', kind: 'corps', createdTurn: 24 },
+            ] as LoadedGameState['formations'],
+        });
+
+        const items = deriveInboxItems(state, null);
+        const briefing = items.find((item) => item.id === 'sit:rbih-corps-reorganization:24');
+
+        expect(briefing).toMatchObject({
+            type: 'situation',
+            severity: 'info',
+            action: 'army_hq_briefing',
+            title: 'ARBiH Corps Reorganization',
+            actionLabel: 'Review staff recommendation',
+            includeInDeskPacket: true,
+        });
+        expect(briefing?.subtitle).toContain('September–December 1992');
+        expect(briefing?.subtitle).toContain('unified, multi-ethnic Army command');
+        expect(briefing?.subtitle).toContain('Hold present policy');
+        expect(briefing?.subtitle).toContain('Authority in reserve');
+        expect(briefing?.subtitle).toContain('No presidential signature is required');
+        expect(countActionableItems(items)).toBe(0);
+    });
+
+    it('does not fabricate the corps-reorganization briefing outside its authored week', () => {
+        const state = makeStub({
+            turn: 25,
+            player_faction: 'RBiH',
+            formations: [
+                { id: 'arbih_1st_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps', createdTurn: 24 },
+            ] as LoadedGameState['formations'],
+        });
+
+        expect(deriveInboxItems(state, null)
+            .some((item) => item.id.startsWith('sit:rbih-corps-reorganization:'))).toBe(false);
+    });
+});
+
 // ---------------------------------------------------------------------------
 // 1. Event decisions
 // ---------------------------------------------------------------------------
@@ -347,6 +392,33 @@ describe('deriveInboxItems — peace plan', () => {
         expect(peaceItems[0].action).toBe('peace_plan_modal');
         expect(peaceItems[0].title).toBe('Vance-Owen Peace Plan');
         expect(peaceItems[0].id).toBe('peace:vance_owen');
+    });
+
+    it('does not duplicate Owen-Stoltenberg when its canonical Presidency event is pending', () => {
+        const state = makeStub({
+            turn: 70,
+            pendingPeacePlan: {
+                planId: 'owen_stoltenberg',
+                planName: 'Owen-Stoltenberg Plan',
+                narrative: 'A tripartite framework.',
+                turnOffered: 70,
+                proposedSplit: { RBiH: 33, RS: 52, HRHB: 15 },
+                institutionalModel: 'union_3_republics',
+                botResponses: { RS: 'accepted', HRHB: 'accepted' },
+            },
+            pendingEventDecisions: [{
+                event_id: 'owen_stoltenberg_plan_1993',
+                event_title: 'Owen-Stoltenberg Presidency Review',
+                turn_fired: 70,
+                faction: 'RBiH',
+                response_options: [{ id: 'accept', label: 'Conditionally accept', effects: [] }],
+            }],
+        });
+
+        const items = deriveInboxItems(state, null);
+
+        expect(items.filter((item) => item.id === 'event:owen_stoltenberg_plan_1993')).toHaveLength(1);
+        expect(items.filter((item) => item.id === 'peace:owen_stoltenberg')).toHaveLength(0);
     });
 
     it('falls back to "Peace Proposal" when planName is undefined', () => {
@@ -621,7 +693,7 @@ describe('deriveInboxItems — officer events', () => {
         expect(officerItems[0].subtitle).toContain('Sefer Halilovic');
     });
 
-    it('uses generic title for non-replacement officer events', () => {
+    it('describes an officer arrival as a non-appointing availability notice', () => {
         const state = makeStub({
             player_faction: 'RS',
             pendingOfficerEvents: [
@@ -641,7 +713,8 @@ describe('deriveInboxItems — officer events', () => {
         });
         const items = deriveInboxItems(state, null);
         const officerItems = items.filter(i => i.type === 'officer_event');
-        expect(officerItems[0].title).toBe('Personnel Matter');
+        expect(officerItems[0].title).toBe('Officer Availability Notice');
+        expect(officerItems[0].subtitle).toContain('does not appoint');
     });
 
     it('routes command interpretation officer events to Decision Room command review', () => {
@@ -905,8 +978,10 @@ describe('deriveInboxItems — autonomy proposals', () => {
 
         expect(proposal.type).toBe('autonomy_proposal');
         expect(proposal.title).toBe('Operation Kotor Varos');
-        expect(proposal.subtitle).toBe('Authorization recommended; does not block advance.');
+        expect(proposal.severity).toBe('blocking');
+        expect(proposal.subtitle).toBe('Presidential signature required before advance.');
         expect(proposal.action).toBe('decision_room');
+        expect(hasBlockingItems(items)).toBe(true);
     });
 
     it('groups multiple historical operation authorizations into one inbox packet', () => {
@@ -948,7 +1023,8 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(proposalItems[0]).toMatchObject({
             id: 'command:review-proposal:historical-ops',
             title: 'Operation authorizations',
-            subtitle: '2 operation plans are awaiting optional authorization review.',
+            subtitle: '2 operation plans require presidential signatures before advance.',
+            severity: 'blocking',
             updateCount: 2,
             sourceIds: ['PROP_0_op_drina', 'PROP_0_op_prijedor'],
             action: 'decision_room',

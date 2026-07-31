@@ -1,0 +1,5 @@
+Error: Insufficient exact formation-counter coverage: required 12, verified 5
+    at mapInteractionProbe (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:2682:13)
+    at async surfaceTour (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:3246:3)
+    at async runFaction (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4479:7)
+    at async F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4572:5

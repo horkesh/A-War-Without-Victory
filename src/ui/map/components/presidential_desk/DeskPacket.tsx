@@ -11,7 +11,10 @@ export interface DeskPacketProps {
 
 export function DeskPacket({ items, onAction, requiredItemIds }: DeskPacketProps) {
   const blockers = items.filter((item) => effectiveInboxSeverity(item) === 'blocking' || requiredItemIds?.has(item.id));
-  const otherDecisions = items.filter((item) => !blockers.includes(item) && item.type !== 'situation');
+  const otherDecisions = items.filter((item) =>
+    !blockers.includes(item)
+    && (item.type !== 'situation' || item.includeInDeskPacket === true)
+  );
 
   return (
     <section className="min-h-0" aria-label={t('desk.packet.ariaLabel')}>

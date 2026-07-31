@@ -34,6 +34,7 @@ const TOKENS = {
   'status-danger': '#f47068',
   'faction-rs-subtle': '#e08080',
   'faction-rbih-subtle': '#79b07f',
+  'faction-hrhb': '#6d99c3',
   'faction-hrhb-subtle': '#6d99c3',
 } as const;
 
@@ -51,6 +52,7 @@ describe('accessibility P0 contrast tokens', () => {
       ['status-danger', 'panel-bg'],
       ['faction-rs-subtle', 'panel-bg'],
       ['faction-rbih-subtle', 'panel-bg'],
+      ['faction-hrhb', 'panel-bg'],
       ['faction-hrhb-subtle', 'panel-bg'],
     ];
 

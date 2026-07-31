@@ -18,6 +18,7 @@ import {
   type WarroomPriorityDocketTone,
 } from '../../data/warroomPriorityDocket';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
+import { derivePresidentialBlockers, type PresidentialBlocker } from '../../data/presidentialBlockers';
 import { Z } from '../../../shared/zIndex';
 import { t } from '../../i18n';
 
@@ -25,6 +26,7 @@ export interface WarroomStatusBarProps {
   onReviewPriorities?: () => void;
   onReviewItem?: (item: WarroomPriorityDocketItem) => void;
   onReviewTarget?: (target: PresidentialDecisionRoomNavigationTarget) => void;
+  onResolveBlocker?: (action: PresidentialBlocker['action'], itemId: string) => void;
 }
 
 function priorityClass(tone: WarroomPriorityDocketTone): string {
@@ -177,13 +179,22 @@ function PriorityDocketPanel({
   );
 }
 
-export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTarget }: WarroomStatusBarProps) {
+export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTarget, onResolveBlocker }: WarroomStatusBarProps) {
   const [priorityDocketOpen, setPriorityDocketOpen] = useState(false);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
+  const turnAftermath = useGameStore((s) => s.turnAftermath);
 
   const docket = useMemo(
-    () => buildWarroomPriorityDocketView({ state: loadedGameState, osidNameMap: osidDisplayNames }),
+    () => buildWarroomPriorityDocketView({
+      state: loadedGameState,
+      osidNameMap: osidDisplayNames,
+      reviewedAftermathTurn: turnAftermath?.turn ?? null,
+    }),
+    [loadedGameState, osidDisplayNames, turnAftermath?.turn],
+  );
+  const blockers = useMemo(
+    () => derivePresidentialBlockers(loadedGameState, osidDisplayNames),
     [loadedGameState, osidDisplayNames],
   );
 
@@ -193,13 +204,15 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   const isWar = phase.toLowerCase().includes('war');
   const pendingReviewCount = docket.metrics.pendingReviews;
   const hasPendingReviews = pendingReviewCount > 0;
-  const { advanceReviewCount, urgentCount } = docket.metrics;
+  const { advanceReviewCount } = docket.metrics;
   const canReviewPriorities = docket.canOpenBoard && Boolean(onReviewPriorities);
+  const singleBlocker = blockers.length === 1 ? blockers[0] : null;
+  const canResolveSingleBlocker = singleBlocker != null && Boolean(onResolveBlocker);
   const reviewPrioritiesLabel = canReviewPriorities
-    ? t('warroom.reviewPrioritiesAria', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })
+    ? t('warroom.reviewPrioritiesAria', { advance: advanceReviewCount, pending: pendingReviewCount })
     : t('warroom.reviewPrioritiesUnavailableAria', { reason: docket.statusLabel });
   const reviewPrioritiesTitle = canReviewPriorities
-    ? t('warroom.reviewPrioritiesTitle', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })
+    ? t('warroom.reviewPrioritiesTitle', { advance: advanceReviewCount, pending: pendingReviewCount })
     : t('warroom.reviewPrioritiesUnavailableTitle', { reason: docket.statusLabel });
 
   const handleOpenBoard = () => {
@@ -223,7 +236,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
       className="absolute bottom-[2%] right-[2%] flex max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded bg-black/90 px-3 py-1.5 font-mono text-xs text-amber-400 pointer-events-auto select-none"
       style={{ backdropFilter: 'blur(4px)', zIndex: Z.PRIORITY_DOCKET }}
     >
-      {priorityDocketOpen && (
+      {priorityDocketOpen && !canResolveSingleBlocker && (
         <PriorityDocketPanel
           docket={docket}
           canReviewPriorities={canReviewPriorities}
@@ -244,22 +257,42 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
         {isWar ? t('warroom.status.phase.war') : t('warroom.status.phase.peace')}
       </span>
 
-      {/* Decision Room priority pulse */}
-      <button
-        type="button"
-        onClick={() => setPriorityDocketOpen((open) => !open)}
-        disabled={!canReviewPriorities}
-        title={reviewPrioritiesTitle}
-        className={`flex items-center gap-1 rounded border px-2 py-0.5 text-[12px] font-bold uppercase tracking-[0.06em] transition-colors disabled:cursor-default disabled:opacity-60 ${priorityClass(docket.tone)}`}
-        aria-label={reviewPrioritiesLabel}
-        aria-controls="warroom-priority-docket-panel"
-        aria-expanded={priorityDocketOpen}
-      >
-        <span>{t('warroom.priorities')}</span>
-        <span className="tabular-nums">{advanceReviewCount}</span>
-        {urgentCount > 0 && <span className="text-xs">{t('warroom.urgentShort', { count: urgentCount })}</span>}
-        {hasPendingReviews && <span className="h-1.5 w-1.5 rounded-full bg-amber-300 animate-pulse" aria-hidden="true" />}
-      </button>
+      <span className={`rounded border px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.06em] ${
+        blockers.length > 0
+          ? 'border-red-700/70 bg-red-950/50 text-red-200'
+          : 'border-neutral-700/70 bg-neutral-950/55 text-neutral-300'
+      }`}>
+        {t('warroom.requiredCount', { count: blockers.length })}
+      </span>
+
+      {/* A single required signature is the primary presidential action. */}
+      {canResolveSingleBlocker ? (
+        <button
+          type="button"
+          onClick={() => onResolveBlocker?.(singleBlocker.action, singleBlocker.id)}
+          title={t('warroom.signatureRequiredAria', { title: singleBlocker.title })}
+          aria-label={t('warroom.signatureRequiredAria', { title: singleBlocker.title })}
+          className="flex items-center gap-1 rounded border border-red-600/75 bg-red-950/55 px-2 py-0.5 text-[12px] font-bold uppercase tracking-[0.06em] text-red-200 transition-colors hover:bg-red-900/55"
+        >
+          <span>{t('warroom.signatureRequired')}</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-red-300 animate-pulse" aria-hidden="true" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setPriorityDocketOpen((open) => !open)}
+          disabled={!canReviewPriorities}
+          title={reviewPrioritiesTitle}
+          className={`flex items-center gap-1 rounded border px-2 py-0.5 text-[12px] font-bold uppercase tracking-[0.06em] transition-colors disabled:cursor-default disabled:opacity-60 ${priorityClass(docket.tone)}`}
+          aria-label={reviewPrioritiesLabel}
+          aria-controls="warroom-priority-docket-panel"
+          aria-expanded={priorityDocketOpen}
+        >
+          <span>{t('warroom.staffReview')}</span>
+          <span className="tabular-nums">{advanceReviewCount}</span>
+          {hasPendingReviews && <span className="h-1.5 w-1.5 rounded-full bg-amber-300 animate-pulse" aria-hidden="true" />}
+        </button>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 
 # Source, docs, data, and web assets use LF across platforms.
 .gitattributes text eol=lf
+.gitignore text eol=lf
 .editorconfig text eol=lf
 *.ts text eol=lf
 *.tsx text eol=lf

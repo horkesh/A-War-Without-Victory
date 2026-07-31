@@ -514,8 +514,35 @@ describe('desktop player-visible state projection', () => {
     const subscriptionBlock = source.slice(subscriptionStart, subscriptionEnd);
 
     expect(subscriptionStart).toBeGreaterThanOrEqual(0);
-    expect(subscriptionBlock).toContain('this.applyGameStateFromJson(stateJson, { showShell: false');
+    expect(subscriptionBlock).toContain('this.handleDesktopGameStateUpdated(stateJson);');
     expect(subscriptionBlock).not.toContain('this.showScreen(');
     expect(subscriptionBlock).not.toContain('this.showLoadedGameShellScene(');
+  });
+
+  it('delivers an embedded mutation response before broadcasting its resulting state update', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'ui', 'warroom', 'warroom.ts'), 'utf8');
+    const invokeStart = source.indexOf('private async handleEmbeddedBridgeInvoke');
+    const invokeEnd = source.indexOf('private broadcastEmbeddedBridgeEvent', invokeStart);
+    const invokeBlock = source.slice(invokeStart, invokeEnd);
+
+    expect(source).toContain('private pendingEmbeddedGameStateJson: string | null = null;');
+    expect(source).toContain('this.handleDesktopGameStateUpdated(stateJson);');
+    expect(invokeBlock).toContain('this.flushPendingEmbeddedGameState();');
+    expect(invokeBlock.indexOf("type: 'awwv-bridge:response'"))
+      .toBeLessThan(invokeBlock.indexOf('this.flushPendingEmbeddedGameState();'));
+  });
+
+  it('synchronizes Continue availability when canonical campaign state becomes available', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'ui', 'warroom', 'warroom.ts'), 'utf8');
+    const applyStart = source.indexOf('private applyGameStateFromJson');
+    const applyEnd = source.indexOf('/** STEP 1:', applyStart);
+    const applyBlock = source.slice(applyStart, applyEnd);
+    const menuStart = source.indexOf('private showMainMenu');
+    const menuEnd = source.indexOf('/** STEP 2:', menuStart);
+    const menuBlock = source.slice(menuStart, menuEnd);
+
+    expect(source).toContain('private syncContinueAvailability(): void');
+    expect(applyBlock).toContain('this.syncContinueAvailability();');
+    expect(menuBlock).toContain('this.syncContinueAvailability();');
   });
 });

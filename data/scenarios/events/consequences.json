@@ -557,8 +557,8 @@
     "narrative": "UNSCR 819, 824, and 836 arrive in the counterfactual with the mandate and the rules of engagement the historical resolutions lacked. Dutch and French detachments arrive at Srebrenica, Gorazde, Zepa, and Bihac with artillery and close-air-support tasking, not only with logistic and observer roles. VRS corps commanders in Drinski and eastern axes receive written guidance that operations against those perimeters will be met with NATO response. The arithmetic of the enclaves changes: they cease to be siege objectives and begin to be diplomatic preconditions.",
     "category": "diplomatic",
     "trigger": {
-      "turn_min": 35,
-      "turn_max": 55,
+      "turn_min": 61,
+      "turn_max": 80,
       "phase": "war",
       "requires_events": ["csq_early_war_crimes_tribunal_1993"]
     },
@@ -1337,7 +1337,7 @@
     "narrative": "On 16 April 1993 the HVO Viteska Brigade enters Ahmici at dawn. The village burns before the day is out; 116 civilians are killed in the operation. From that morning onward the alliance that had existed on paper for ten months is a written fiction and the war between HVO and ARBiH is a matter of specific coordinates. Mate Boban's Herceg-Bosna pursues the Banovina-border programme it had always intended; Zagreb's material support, which had been hedged under the joint-front arrangement, flows more openly. Viteska, Busovaca, and the Nikola Subic-Zrinski brigades move against ARBiH positions in the Lasva and Neretva valleys. The arithmetic is simple: the HVO has the initiative for a season, and it will use it.",
     "category": "military",
     "trigger": {
-      "turn_min": 48,
+      "turn_min": 54,
       "turn_max": 56,
       "phase": "war",
       "condition": {

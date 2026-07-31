@@ -5,11 +5,11 @@
 
 import type { GameState, JNATransitionState } from '../../state/game_state.js';
 
-/** Legacy Phase I §4.6.1: withdrawal progress per turn before terminal event truth. */
+/** Legacy Phase I §4.6.1: withdrawal progress per turn before terminal event truth. */ // legacy-phase-term-ok
 const WITHDRAWAL_PER_TURN = 0.05;
-/** Legacy Phase I §4.6.2: asset transfer to RS per turn (JNA_Total_Assets × 0.05). */
+/** Legacy Phase I §4.6.2: asset transfer to RS per turn (JNA_Total_Assets × 0.05). */ // legacy-phase-term-ok
 const ASSET_TRANSFER_PER_TURN = 0.05;
-/** Legacy Phase I §6.1 completion thresholds. */
+/** Legacy Phase I §6.1 completion thresholds. */ // legacy-phase-term-ok
 const WITHDRAWAL_COMPLETE_THRESHOLD = 0.95;
 const ASSET_COMPLETE_THRESHOLD = 0.9;
 

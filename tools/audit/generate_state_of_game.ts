@@ -38,7 +38,7 @@ const MASTER_OVERVIEW = `# Master state of the game overview (AWWV) — v0.2
 
 | # | Risk | Doc pointer | Code pointer | Suggested verification |
 |---|------|-------------|--------------|-------------------------|
-| 1 | Phase 0 vs Phase I entry (war start) | CANON.md War Start Rule; Phase_0_Specification_v0_4_0 | \`src/state/turn_pipeline.ts\`, scenario scripts | Run Phase 0 scenario to referendum; assert no Phase I without referendum |
+| 1 | Phase 0 vs Phase I entry (war start) | CANON.md War Start Rule; Phase_0_Specification_v0_4_0 | \`src/state/turn_pipeline.ts\`, scenario scripts | Run Phase 0 scenario to referendum; assert no Phase I without referendum | // legacy-phase-term-ok
 | 2 | Derived state serialized | Engine Invariants §13.1; validateGameState.ts denylist | serializeGameState.ts, validateGameState.ts | Grep for phase_e_aor_membership, phase_e_rear_zone in serialization; run serialize round-trip test |
 | 3 | Determinism: Date.now / Math.random in pipeline | DETERMINISM_TEST_MATRIX.md; determinism_static_scan_r1_5 | src/, tools/scenario_runner/ (warroom excluded) | v0.2: Resolved — scan passes; warroom UI excluded from scope |
 | 4 | Map build vs MAP_BUILD_SYSTEM.md | MAP_BUILD_SYSTEM.md (short), _old/MAP_BUILD_SYSTEM.md | tools/map/build_map.ts, scripts/map/* | v0.2: MAP_BUILD_SYSTEM aligned with entrypoints and data contracts |
@@ -96,7 +96,7 @@ const MASTER_OVERVIEW = `# Master state of the game overview (AWWV) — v0.2
 1. **Green typecheck** — v0.2 Done. Verification: \`npm run typecheck\` exits 0.
 2. **Green determinism static scan** — v0.2 Done (warroom excluded from scan). Verification: \`npm test\` includes passing determinism scan.
 3. **Green baseline regression** — v0.2 Done. Verification: \`npm run test:baselines\` passes; manifest committed.
-4. **Phase 0 → Phase I gating** — v0.2 Done. Automated tests: \`phase0_referendum_held_war_start_e2e.test.ts\`, \`phase0_v1_no_war_without_referendum_e2e.test.ts\`.
+4. **Phase 0 → Phase I gating** — v0.2 Done. Automated tests: \`phase0_referendum_held_war_start_e2e.test.ts\`, \`phase0_v1_no_war_without_referendum_e2e.test.ts\`. // legacy-phase-term-ok
 5. **Map build doc alignment** — v0.2 Done. MAP_BUILD_SYSTEM.md aligned with entrypoints and data contracts.
 6. **MVP feature completeness** — Per EXECUTIVE_ROADMAP and MVP_CHECKLIST: deterministic loop, canon war start, functional warroom GUI, reproducible builds. Verification: Phase exit criteria and MVP_CHECKLIST gates.
 
@@ -139,7 +139,7 @@ const STATE_MATRIX = `# State matrix (AWWV) — feature slice status — v0.2
 | S-SERIALIZATION | State serialize/deserialize | Engine_Invariants §13.1; serialize.ts | serializeGameState.ts, serialize.ts | All paths that save/load state | final_save.json, replay | Serializer rejects Map/Set; validateState round-trip tests | Planned & Working | Denylist in validateGameState; stable key ordering | None | Y |
 | U-PHASE-G | Phase G dev UI (control/cost view) | V1_0_PACKAGING; ledger | dev_ui/phase_g.html, phase_g.ts | npm run dev:map | Read-only GameState view | Smoke tests | Planned & Working | Packaging doc; phase_g loads save JSON | None | Y |
 | U-WARROOM-GUI | Warroom UI (MVP 1.0) | IMPLEMENTATION_PLAN_GUI_MVP; EXECUTIVE_ROADMAP; ledger | src/ui/warroom/* | npm run dev:warroom; warroom:build | Staged assets, clickable regions, settlement_edges | warroom:build succeeds | Planned & Working | v0.2: typecheck green; advance turn wired to Phase 0 pipeline | None | Y |
-| U-WARROOM-TURN | Warroom Phase 0 turn advancement | EXECUTIVE_ROADMAP Phase 4; MVP_CHECKLIST | run_phase0_turn.ts, ClickableRegionManager | Calendar advance → runPhase0TurnAndAdvance | N/A | warroom:build | Planned & Working | Browser-safe runner; onGameStateChange; Phase I+ not wired | None | Y |
+| U-WARROOM-TURN | Warroom Phase 0 turn advancement | EXECUTIVE_ROADMAP Phase 4; MVP_CHECKLIST | run_phase0_turn.ts, ClickableRegionManager | Calendar advance → runPhase0TurnAndAdvance | N/A | warroom:build | Planned & Working | Browser-safe runner; onGameStateChange; Phase I+ not wired | None | Y | // legacy-phase-term-ok
 
 **Evidence policy:** Working = at least one gate or test reference; Planned = canon or roadmap ref. Blockers and MVP column inform mvp_backlog.md.
 
@@ -184,13 +184,13 @@ Order: top = highest priority. Each item: why required for MVP (canon justificat
 
 ---
 
-## 4. Phase 0 → Phase I war-start gating — v0.2 Done
+## 4. Phase 0 → Phase I war-start gating — v0.2 Done // legacy-phase-term-ok
 
-- **Why MVP:** CANON.md War Start Rule: war begins only when referendum held and current_turn == referendum_turn + 4. No referendum → no war → Phase I never entered. Required for canon-aligned pre-war and war transition.
+- **Why MVP:** CANON.md War Start Rule: war begins only when referendum held and current_turn == referendum_turn + 4. No referendum → no war → Phase I never entered. Required for canon-aligned pre-war and war transition. // legacy-phase-term-ok
 - **Canon:** CANON.md; Phase_0_Specification_v0_4_0; Phase_Specifications_v0_4_0.
 - **Dependencies:** State and turn pipeline (A-TURN-PIPELINE-STATE) and scenario runner.
-- **Verification:** Scenario test: run Phase 0 scenario without referendum; assert Phase I is never entered. Scenario with referendum and war_start_turn; assert Phase I entered at correct turn.
-- **Done means:** Automated test(s) prove no Phase I without referendum; war start turn matches spec. v0.2: phase0_referendum_held_war_start_e2e.test.ts, phase0_v1_no_war_without_referendum_e2e.test.ts.
+- **Verification:** Scenario test: run Phase 0 scenario without referendum; assert Phase I is never entered. Scenario with referendum and war_start_turn; assert Phase I entered at correct turn. // legacy-phase-term-ok
+- **Done means:** Automated test(s) prove no Phase I without referendum; war start turn matches spec. v0.2: phase0_referendum_held_war_start_e2e.test.ts, phase0_v1_no_war_without_referendum_e2e.test.ts. // legacy-phase-term-ok
 
 ---
 

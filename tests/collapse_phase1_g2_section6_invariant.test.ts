@@ -1,5 +1,5 @@
 /**
- * Collapse §6 GUARD G2 invariant (Phase I spec §4.2, hardened in Phase IV-b D1).
+ * Collapse §6 GUARD G2 invariant (Phase I spec §4.2, hardened in Phase IV-b D1). // legacy-phase-term-ok
  *
  * G2 is the defense-in-depth regression that asserts the genocide-rupture floor is
  * intact: with collapse in the pipeline, (a) Srebrenica falls to RS, (b) the

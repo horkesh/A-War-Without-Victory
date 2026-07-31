@@ -412,12 +412,13 @@ describe('Chain 5 — RS Max Aggression: ahistorical path fires chain', () => {
         evaluateEvents(noPrior, rng, 40, CSQ_EVENTS);
         expect(noPrior.military.fired_event_ids).not.toContain('csq_accelerated_safe_areas_1993');
 
-        // With prior tribunal fired (and in w35-w55 window) → fires and blocks RS ops in enclave munis
-        const withPrior = makeRSChainState(40, {
+        // With prior tribunal fired (and in the calendar-correct w61-w80 window)
+        // → fires and blocks RS ops in enclave munis.
+        const withPrior = makeRSChainState(61, {
             flags: { rs_strategic_goals: 'aggressive' },
             firedEvents: ['csq_early_war_crimes_tribunal_1993'],
         });
-        evaluateEvents(withPrior, rng, 40, CSQ_EVENTS);
+        evaluateEvents(withPrior, rng, 61, CSQ_EVENTS);
         expect(withPrior.military.fired_event_ids).toContain('csq_accelerated_safe_areas_1993');
         const restrictions = withPrior.military.event_constraints?.scope_restrictions ?? [];
         const rsBlock = restrictions.find(r =>
@@ -425,8 +426,8 @@ describe('Chain 5 — RS Max Aggression: ahistorical path fires chain', () => {
         );
         expect(rsBlock).toBeDefined();
         expect(rsBlock?.blocked_municipalities).toEqual(['bihac', 'srebrenica', 'gorazde', 'zepa']);
-        // expires_turn stamped as currentTurn + duration_turns = 40 + 40 = 80
-        expect(rsBlock?.expires_turn).toBe(80);
+        // expires_turn stamped as currentTurn + duration_turns = 61 + 40 = 101
+        expect(rsBlock?.expires_turn).toBe(101);
     });
 
     it('csq_early_nato_threshold_1994 requires war_crimes_above RS 10 and pushes aggression_modifier', () => {
@@ -839,9 +840,9 @@ describe('hrhb_political_goal historical ordering fix', () => {
 // Phase 2 (ARBiH counter-offensive) emerges organically once alliance breaks.
 
 describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
-    it('does NOT fire before w48', () => {
-        const state = makeChain1State(40, { flags: { hrhb_political_goal: 'croat_republic' } });
-        evaluateEvents(state, rng, 40, CSQ_EVENTS);
+    it('does NOT fire before w54', () => {
+        const state = makeChain1State(53, { flags: { hrhb_political_goal: 'croat_republic' } });
+        evaluateEvents(state, rng, 53, CSQ_EVENTS);
         expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
     });
 
@@ -851,10 +852,10 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
         expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
     });
 
-    it('fires w48-w56 under croat_republic and lands all five effect kinds', () => {
-        const state = makeChain1State(52, { flags: { hrhb_political_goal: 'croat_republic' } });
+    it('fires w54-w56 under croat_republic and lands all five effect kinds', () => {
+        const state = makeChain1State(54, { flags: { hrhb_political_goal: 'croat_republic' } });
         state.political.war_alliance_rbih_hrhb = 1.0;
-        evaluateEvents(state, rng, 52, CSQ_EVENTS);
+        evaluateEvents(state, rng, 54, CSQ_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_hvo_central_bosnia_offensive_1993');
         expect(state.military.fired_event_ids).not.toContain('csq_alliance_holds_past_w35');
         expect(state.military.event_flags?.hvo_arbih_war_active).toBe(true);
@@ -867,13 +868,13 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
         const locks = state.military.alliance_locks ?? [];
         const ceilingLock = locks.find(l => l.mode === 'ceiling' && l.value === 0.0);
         expect(ceilingLock).toBeDefined();
-        expect(ceilingLock?.expires_turn).toBe(112);
+        expect(ceilingLock?.expires_turn).toBe(114);
 
         // aggression_modifier HRHB +0.25 duration 14
         const aggMods = state.military.event_aggression_modifiers ?? [];
         const hrhbAgg = aggMods.find(m => m.faction === 'HRHB' && m.delta === 0.25);
         expect(hrhbAgg).toBeDefined();
-        expect(hrhbAgg?.expires_turn).toBe(66); // 52 + 14
+        expect(hrhbAgg?.expires_turn).toBe(68); // 54 + 14
 
         // bot_priority_shift HRHB with central-Bosnia munis
         const shifts = state.military.bot_priority_shifts ?? [];
@@ -882,13 +883,13 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
         expect(hrhbShift?.add_objectives).toEqual(
             expect.arrayContaining(['vitez', 'busovaca', 'novi_travnik', 'gornji_vakuf', 'prozor', 'kiseljak', 'travnik', 'kakanj', 'fojnica', 'mostar']),
         );
-        expect(hrhbShift?.expires_turn).toBe(66); // 52 + 14
+        expect(hrhbShift?.expires_turn).toBe(68); // 54 + 14
     });
 
     it('keeps the rupture combat-enabled after the same-turn alliance update', () => {
-        const state = makeChain1State(52, { flags: { hrhb_political_goal: 'croat_republic' } });
+        const state = makeChain1State(54, { flags: { hrhb_political_goal: 'croat_republic' } });
         state.political.war_alliance_rbih_hrhb = 1.0;
-        evaluateEvents(state, rng, 52, CSQ_EVENTS);
+        evaluateEvents(state, rng, 54, CSQ_EVENTS);
         const report = updateAllianceValue(state);
 
         expect(state.military.fired_event_ids).not.toContain('csq_alliance_holds_past_w35');

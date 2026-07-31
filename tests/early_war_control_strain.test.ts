@@ -127,7 +127,7 @@ test('getFactionTotalControlStrain returns sum for faction-controlled municipali
     expect(rsTotal).toBe(3);
 });
 
-test('war runTurn default path omits phase_i control strain report', async () => {
+test('war runTurn default path omits phase_i control strain report', async () => { // legacy-phase-term-ok
     const state = stateWithMunicipalitiesAndControl();
     const { report } = await runTurn(state, { seed: state.meta.seed });
     expect(report.war_control_strain).toBe(undefined);

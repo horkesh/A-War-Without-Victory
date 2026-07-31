@@ -50,7 +50,12 @@ import { deserializeState, serializeState } from '../state/serialize.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { asArray, asRecord } from '../state/schema_validators.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
-import { canEliteLoanReachCorpsTerritory, deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
+import {
+    canEliteLoanReachCorpsTerritory,
+    deployEliteLoan,
+    holdReserveAtMainStaff,
+    recallEliteLoan,
+} from '../sim/combat/army_reserve_system.js';
 import { ELITE_DEPLOY_COST } from '../ui/map/utils/commandAuthority.js';
 import { resolvePlayerParamilitaryDecisions } from '../sim/combat/paramilitary_sweep.js';
 
@@ -64,6 +69,7 @@ export { resolveDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.
 export { evaluateBotResponse } from '../sim/negotiation/bot_negotiation.js';
 export { createAiClient } from '../sim/ai_commander/ai_client.js';
 export { getAdvisorRecommendation } from '../sim/ai_commander/player_advisor.js';
+export { holdReserveAtMainStaff };
 
 // Event definitions are static per build. Load + validate once per events dir and
 // reuse across turns — the scenario runner likewise loads them once before its loop.

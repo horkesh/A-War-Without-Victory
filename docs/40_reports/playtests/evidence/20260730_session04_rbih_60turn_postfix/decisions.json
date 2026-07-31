@@ -1,0 +1,65 @@
+[
+  {
+    "turn": 0,
+    "eventId": "rbih_state_identity",
+    "decision": "What Is Bosnia?",
+    "choice": "Civic multi-ethnic republic",
+    "basis": "UI-labeled historical default"
+  },
+  {
+    "turn": 1,
+    "planId": "cutileiro",
+    "decision": "Cutileiro / Lisbon proposal",
+    "choice": "Reject Plan",
+    "basis": "Repository-normalized RBiH historical disposition"
+  },
+  {
+    "turn": 3,
+    "eventId": "rbih_paramilitary_policy_1992",
+    "decision": "Paramilitary Authorization Policy",
+    "choice": "Refuse paramilitary deployment",
+    "basis": "UI-labeled historical default"
+  },
+  {
+    "turn": 12,
+    "eventId": "rbih_minority_retention_1992",
+    "decision": "Minority Officer Retention",
+    "choice": "Retain the multi-ethnic officer corps",
+    "basis": "UI-labeled historical default"
+  },
+  {
+    "turn": 20,
+    "eventId": "london_conference_1992",
+    "decision": "London Conference",
+    "choice": "Subscribe to the London Principles",
+    "basis": "UI-labeled historical default"
+  },
+  {
+    "turn": 38,
+    "eventId": "ic_pressure_vopp_engagement",
+    "decision": "Vance-Owen Engagement Pressure",
+    "choice": "Acknowledge the message",
+    "basis": "UI-labeled historical default"
+  },
+  {
+    "turn": 39,
+    "eventId": "vance_owen_plan_1993",
+    "decision": "Vance-Owen Peace Plan",
+    "choice": "Accept the Vance-Owen Plan",
+    "basis": "UI-labeled historical default"
+  },
+  {
+    "turn": 40,
+    "eventId": "peace_plan:vance_owen",
+    "decision": "Duplicate Vance-Owen peace-plan layer",
+    "choice": "Accept plan",
+    "basis": "Same historical disposition already selected at turn 39; duplicate required UI"
+  },
+  {
+    "turn": 54,
+    "eventId": "srebrenica_demilitarization_1993",
+    "decision": "Srebrenica Demilitarization Agreement",
+    "choice": "Comply in appearance, hide weapons",
+    "basis": "UI-labeled historical default"
+  }
+]

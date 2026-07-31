@@ -148,7 +148,7 @@ test('RS declared increases militia growth; second runTurn shows higher RS stren
     expect(rsSecond >= rsFirst).toBeTruthy();
 });
 
-test('war runTurn default path omits phase_i militia emergence report', async () => {
+test('war runTurn default path omits phase_i militia emergence report', async () => { // legacy-phase-term-ok
     const state = stateWithMunicipalities();
     const { report } = await runTurn(state, { seed: state.meta.seed });
     expect(report.militia_emergence).toBe(undefined);

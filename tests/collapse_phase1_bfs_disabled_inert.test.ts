@@ -1,5 +1,5 @@
 /**
- * Collapse Phase I — DISABLED-turn inertness of the Phase 3C supply-reachability BFS
+ * Collapse Phase I — DISABLED-turn inertness of the Phase 3C supply-reachability BFS // legacy-phase-term-ok
  * (Codex #375 P2 fix).
  *
  * The 3C war-phase step's spatial gate (spec C8) reads computeSupplyReachabilityOsid —
@@ -80,7 +80,7 @@ function makeContext() {
 
 const step3c = warPhases.find(p => p.name === 'phase3c-exhaustion-collapse-gating')!;
 
-describe('collapse Phase I — Phase 3C BFS is inert on a DISABLED turn (#375 P2)', () => {
+describe('collapse Phase I — Phase 3C BFS is inert on a DISABLED turn (#375 P2)', () => { // legacy-phase-term-ok
     afterEach(() => {
         resetEnablePhase3A();
         resetEnablePhase3B();

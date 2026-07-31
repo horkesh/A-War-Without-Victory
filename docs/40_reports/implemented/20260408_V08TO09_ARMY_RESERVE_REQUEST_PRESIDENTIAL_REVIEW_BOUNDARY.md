@@ -1,4 +1,4 @@
-# 2026-04-08 — Army Reserve Request / Presidential Review Boundary
+# 2026-04-08 ï¿½ Army Reserve Request / Presidential Review Boundary
 
 ## Summary
 
@@ -75,7 +75,7 @@ The panel also shows deterministic summary counts:
 `ArmyHQModal` now passes a reserve-desk callback into `PresidentialAttentionPanel`.
 
 That callback:
-- finds the current faction’s `army_hq` formation
+- finds the current factionï¿½s `army_hq` formation
 - sets `selectedArmyHqId`
 - closes the Army HQ modal
 

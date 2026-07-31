@@ -1,0 +1,7 @@
+Error: Pending reserve request could not open Decision Room: req:1:hvo_central_bosnia:defensive_gap
+    at handleCurrentSurface (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:3620:40)
+    at async drainTransientSurfaces (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:3875:21)
+    at async lightTurnCheckpointTour (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4001:3)
+    at async playTurns (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4192:7)
+    at async runFaction (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4523:22)
+    at async F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4593:5

@@ -726,6 +726,28 @@ describe('Event Decisions', () => {
         expect(state.military.event_flags!['owen_stoltenberg_accepted']).toBe(true);
     });
 
+    it('models Owen-Stoltenberg as conditional Presidency acceptance followed by an Assembly vote', () => {
+        const presidency = loadEventFromFile('data/scenarios/events/war_1993.json', 'owen_stoltenberg_plan_1993');
+        const assembly = loadEventFromFile('data/scenarios/events/war_1993.json', 'os_rbih_tactical_acceptance_1993');
+        const presidencyAccept = presidency.response_options?.find((option) => option.id === 'accept');
+        const presidencyReject = presidency.response_options?.find((option) => option.id === 'reject');
+        const assemblyCondition = assembly.trigger.condition as {
+            type?: string;
+            conditions?: Array<{ type?: string; flag?: string; value?: unknown }>;
+        };
+
+        expect(presidency.historical_default_response_id).toBe('accept');
+        expect(presidencyAccept?.historical_marker).toBe('historical_default');
+        expect(presidencyReject?.historical_marker).toBe('counterfactual');
+        expect(presidency.source_note).toContain('Presidency');
+        expect(assemblyCondition.type).toBe('and');
+        expect(assemblyCondition.conditions).toContainEqual(expect.objectContaining({
+            type: 'flag_equals',
+            flag: 'owen_stoltenberg_accepted',
+            value: true,
+        }));
+    });
+
     it('A3: reject branches do NOT set the acceptance flag (bridge is acceptance-only)', () => {
         const event = loadEventFromFile('data/scenarios/events/war_1993.json', 'vance_owen_plan_1993');
         const state = makeMinimalState('RBiH');

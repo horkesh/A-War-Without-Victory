@@ -180,14 +180,19 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
   const setPending = useGameStore((s) => s.setAdvanceTurnPending);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
+  const turnAftermath = useGameStore((s) => s.turnAftermath);
   const loadSave = useGameStore((s) => s.loadSave);
   const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
   const setLoadError = useGameStore((s) => s.setLoadError);
   const ipc = useIPC();
   const [advancing, setAdvancing] = useState(false);
   const review = useMemo(
-    () => buildPreAdvanceCommandReviewView({ state: loadedGameState, osidNameMap: osidDisplayNames }),
-    [loadedGameState, osidDisplayNames],
+    () => buildPreAdvanceCommandReviewView({
+      state: loadedGameState,
+      osidNameMap: osidDisplayNames,
+      reviewedAftermathTurn: turnAftermath?.turn ?? null,
+    }),
+    [loadedGameState, osidDisplayNames, turnAftermath?.turn],
   );
   const blockers = useMemo(
     () => derivePresidentialBlockers(loadedGameState, osidDisplayNames),
@@ -359,7 +364,15 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
               <div id="advance-turn-title" className="text-xs font-bold uppercase tracking-wider text-accent-gold">
                 {t('advanceTurn.title')}
               </div>
-              <div className="mt-0.5 text-sm font-bold text-text-primary">{t('advanceTurn.confirmQuestion')}</div>
+              <div className="mt-0.5 text-sm font-bold text-text-primary">
+                {t(
+                  review.status === 'clear'
+                    ? 'advanceTurn.clearQuestion'
+                    : review.status === 'review'
+                      ? 'advanceTurn.reviewQuestion'
+                      : 'advanceTurn.confirmQuestion',
+                )}
+              </div>
             </div>
             <div className={`border px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] ${statusClass(review.status)}`}>
               {review.headline}
@@ -369,7 +382,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
 
         <div className="space-y-3 px-4 py-3">
           <div className="text-xs leading-snug text-text-secondary">
-            {t('advanceTurn.warning')}
+            {t(review.status === 'clear' ? 'advanceTurn.holdRecommendation' : 'advanceTurn.warning')}
           </div>
 
           {(review.status === 'blocked' || blockers.length > 0) && (
@@ -455,7 +468,15 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
             disabled={advancing || review.status === 'blocked' || blockers.length > 0}
             className="border border-accent-gold/70 bg-accent-gold px-3 py-1.5 text-xs font-bold uppercase text-black transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {advancing ? t('advanceTurn.advancing') : t('advanceTurn.advance')}
+            {advancing
+              ? t('advanceTurn.advancing')
+              : t(
+                review.status === 'clear'
+                  ? 'advanceTurn.advanceHoldingPolicy'
+                  : review.status === 'review'
+                    ? 'advanceTurn.advanceRecordedDecisions'
+                    : 'advanceTurn.advance',
+              )}
           </button>
           {review.canReviewPriorities && (
             <button

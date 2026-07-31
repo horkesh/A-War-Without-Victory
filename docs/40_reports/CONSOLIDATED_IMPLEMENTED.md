@@ -980,3 +980,11 @@ Report: `docs/40_reports/implemented/20260713_PARAMILITARY_TRUTH_FIXES.md`
 Paramilitary sweeps now stop after week 20, clear readiness on dissolution, write civilian deaths into population availability, and attribute their control flips separately from combat. Focused verification passed 4 files / 79 tests plus typecheck; the shared baseline drift was recorded without refreshing artifacts.
 
 ---
+
+# 2026-07-31 D2 Owner Diary Remediation and Repository Closeout
+
+Report: `docs/40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md`
+
+Seven RBiH/RS/HRHB Electron owner diaries now preserve 10-, 60-, 80-, and 104-turn evidence. Their bug-first remediation closes duplicated diplomatic ownership, historical-default peace responses, early Foča/Zvornik chronology, 1992/1993 event separation, officer and reserve truth, Army HQ/Desk handoffs, priority semantics, presentation/accessibility defects, and diary-harness assumptions. The original diary scores remain evidence rather than being rewritten after fixes. Remaining RS 104-week friction and Operational/Tactical Group lifecycle work stays in the consolidated backlog.
+
+---

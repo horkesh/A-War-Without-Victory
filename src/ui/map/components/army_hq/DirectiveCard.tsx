@@ -180,6 +180,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
   const isAddressNation = directive.lever === 'address_nation';
   const isDecorateUnit = directive.lever === 'decorate_unit';
   const isReviewProposal = directive.lever === 'review_proposal';
+  const isEliteDeploy = directive.lever === 'elite_deploy';
   // The three initiatable presidential leadership gestures share an async
   // availability query + single CA-cost confirm.
   const isLeadershipGesture = isFrontVisit || isAddressNation || isDecorateUnit;
@@ -389,6 +390,23 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
       const result = await ipc.rejectProposal(proposalId);
       if (!result.ok) markFailed(result.error ?? 'Failed to withhold approval.');
       else { resetTransient(); markIssued(); }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleHoldAtMainStaff = async () => {
+    if (busy || directive.lever !== 'elite_deploy') return;
+    const requestId = typeof directive.payload.requestId === 'string' ? directive.payload.requestId : '';
+    if (!requestId) { setLoadError('Directive is missing its reserve-request context.'); return; }
+    setBusy(true);
+    try {
+      const result = await ipc.holdReserveAtMainStaff(requestId);
+      if (!result.ok) markFailed(result.error ?? 'Failed to retain reserve at Main Staff.');
+      else {
+        resetTransient();
+        publishReceipt({ kind: 'success', message: t('directive.receipt.reserveHeld') });
+      }
     } finally {
       setBusy(false);
     }
@@ -630,7 +648,11 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
             ['armyReserve.presentation.travelTime', reservePresentation.travelTime],
             ['armyReserve.presentation.expectedEffect', reservePresentation.expectedEffect],
             ['armyReserve.presentation.opportunityCost', reservePresentation.opportunityCost],
-          ].map(([labelKey, value]) => (
+            ['armyReserve.presentation.priorAuthorizations', reservePresentation.priorAuthorizations],
+            ['armyReserve.presentation.cumulativeAuthority', reservePresentation.cumulativeAuthority],
+            ['armyReserve.presentation.lastRecall', reservePresentation.lastRecall],
+          ].filter((entry): entry is [MessageKey, string] => typeof entry[1] === 'string')
+            .map(([labelKey, value]) => (
             <div key={labelKey} className="grid grid-cols-[8.5rem_minmax(0,1fr)] gap-2 py-0.5">
               <span className="text-text-secondary">{t(labelKey as MessageKey)}</span>
               <span className="min-w-0 text-text-primary">{value}</span>
@@ -808,7 +830,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               : t('directive.issue.costTitle', { cost, current: authCurrent }))
             : t('directive.issue.insufficientTitle', { cost, current: authCurrent });
         return (
-          <div className={`mt-2 grid gap-2 ${isReviewProposal ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-[1fr_auto]'}`}>
+          <div className={`mt-2 grid gap-2 ${isReviewProposal || isEliteDeploy ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-[1fr_auto]'}`}>
             <button
               type="button"
               onClick={handleConfirm}
@@ -833,6 +855,17 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
                 className="h-7 min-w-0 whitespace-nowrap rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
               >
                 {busy ? t('directive.button.withholding') : t('directive.button.withhold')}
+              </button>
+            )}
+            {isEliteDeploy && (
+              <button
+                type="button"
+                onClick={() => { void handleHoldAtMainStaff(); }}
+                disabled={busy}
+                title={t('directive.reserveHold.title')}
+                className="h-7 min-w-0 whitespace-nowrap rounded border border-sky-400/35 bg-sky-400/10 px-2 text-xs font-bold uppercase tracking-[0.08em] text-sky-200 transition hover:bg-sky-400/20 disabled:opacity-40"
+              >
+                {busy ? t('directive.button.holdingReserve') : t('directive.button.holdReserve')}
               </button>
             )}
             <button

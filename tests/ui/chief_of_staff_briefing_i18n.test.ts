@@ -496,4 +496,36 @@ describe('Chief of Staff briefing localization', () => {
         expect(container.textContent).not.toContain('BRIEFING');
         expect(container.textContent).not.toContain('Chief of Main Staff');
     });
+
+    it('attributes commander-originated friction without blaming presidential intervention', () => {
+        const base = makeMockLoadedGameState();
+        const state = {
+            ...base,
+            turn: 20,
+            latestTurnSummary: null,
+            formations: [
+                ...base.formations,
+                {
+                    id: 'rbih_1_corps',
+                    faction: 'RBiH',
+                    name: '1st Corps',
+                    kind: 'corps',
+                    readiness: 'active',
+                    cohesion: 70,
+                    fatigue: 10,
+                    status: 'active',
+                    createdTurn: 1,
+                    tags: [],
+                    personnel: 10000,
+                    commandStrainLabel: 'strained',
+                    commandStrainSource: 'commander_friction',
+                },
+            ],
+        } as LoadedGameState;
+
+        const briefing = flatten(generateCoSBriefing([], state, 'RBiH'));
+
+        expect(briefing).toContain('unresolved command incident');
+        expect(briefing).not.toMatch(/presidential intervention|direct intervention|override/i);
+    });
 });

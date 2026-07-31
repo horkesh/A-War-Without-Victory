@@ -142,7 +142,10 @@ test('52-week Electron QA supports bounded major-surface checkpoint tours', () =
     assert.match(harness, /clickTestId\(frame, 'toolbar-route-chronicle'/);
     assert.match(harness, /Army HQ exposed no corps commands/);
     assert.match(harness, /clickTestId\(frame, 'army-hq-decision-room-open'/);
-    assert.match(harness, /army hq handoff did not open Decision Room/);
+    assert.match(harness, /getAttribute\('data-handoff-route'\)/);
+    assert.match(harness, /handoffRoute === 'decision_room'/);
+    assert.match(harness, /handoffRoute === 'desk'/);
+    assert.match(harness, /president-desk-shell/);
     assert.doesNotMatch(harness, /decisionRoomDeepDive\(page, frame, faction, events, 'decision-room-from-army-hq'\)\.catch/);
     assert.match(harness, /drillTestId/);
     assert.match(harness, /drillExpectedSelector/);
@@ -158,7 +161,12 @@ test('52-week Electron QA supports bounded major-surface checkpoint tours', () =
         'center-hit-tested counters must not be rejected merely because their rectangles partially overlap',
     );
     assert.match(harness, /formationSample: counters\.filter/);
-    assert.match(harness, /Math\.min\(12, counters\.formationSample\.length\)/);
+    assert.doesNotMatch(
+        extractFunctionSource(harness, 'mapInteractionProbe'),
+        /verifiedCounterIds\.size !== requiredCounterVerifications/,
+        'viewport churn must not turn the first counter sample into a fixed exact-cardinality quota',
+    );
+    assert.match(harness, /assessCounterVerificationCoverage/);
     assert.match(
         extractFunctionSource(harness, 'mapInteractionProbe'),
         /const currentFormationSample = currentCounters\?\.formationSample \?\? \[\]/,
@@ -481,6 +489,55 @@ test('events proposals and peace plans resolve only through exact visible UI con
     assert.match(harness, /clickExactVisibleButton\(frame, responseLabel/);
 });
 
+test('historical operation proposals route through the blocking Decision category without changing their stable card id', () => {
+    const harness = readHarness();
+    const proposalDecisionRoomRoute = loadFunction<(
+        reviewId: string,
+        proposedAction: string | null,
+    ) => { categoryId: string; priorityCardId: string; actionLabel: string }>(
+        harness,
+        'proposalDecisionRoomRoute',
+    );
+
+    assert.deepEqual(
+        proposalDecisionRoomRoute(
+            'PROP_JACKAL',
+            'HISTORICAL_OP:preplanned:hvo_southeast_herzegovina:Operation Jackal',
+        ),
+        {
+            categoryId: 'war_direction',
+            priorityCardId: 'command:review-proposal:PROP_JACKAL',
+            actionLabel: 'Accept',
+        },
+    );
+    assert.deepEqual(
+        proposalDecisionRoomRoute('PROP_ORDINARY', 'APPROVE_OP:hvo_central_bosnia:plan_1'),
+        {
+            categoryId: 'command',
+            priorityCardId: 'command:review-proposal:PROP_ORDINARY',
+            actionLabel: 'Accept',
+        },
+    );
+    assert.deepEqual(
+        proposalDecisionRoomRoute('review-opportunity', 'OPPORTUNITY:opportunity-1'),
+        {
+            categoryId: 'war_direction',
+            priorityCardId: 'opportunity:opportunity-1',
+            actionLabel: 'Authorize',
+        },
+    );
+});
+
+test('stack-picker proof closes formation detail through a bounded exact UI control', () => {
+    const harness = readHarness();
+    const stackPickerSource = extractFunctionSource(harness, 'exerciseFormationStackPicker');
+
+    assert.match(stackPickerSource, /formation-detail-close/);
+    assert.match(stackPickerSource, /detailClose\.click\(\{ timeout: 5000 \}\)/);
+    assert.match(stackPickerSource, /detailPanel\.waitFor\(\{ state: 'detached', timeout: 5000 \}\)/);
+    assert.doesNotMatch(stackPickerSource, /close\.click\(\)/);
+});
+
 test('fresh RS ordinary proposal acceptance requires every visible ready-plan dossier field', () => {
     const harness = readHarness();
     const assertOrdinaryProposalDossierTruth = loadFunction<(
@@ -761,6 +818,36 @@ test('player proposals are selected in stable identity order and exact resolutio
     assert.match(extractFunctionSource(harness, 'handleCurrentSurface'), /assertExactProposalResolution/);
 });
 
+test('historical operation authorization is handled in every run mode without inventing ordinary proposal decisions', () => {
+    const harness = readHarness();
+    const strictAsciiCompare = loadFunction<(left: string, right: string) => number>(harness, 'strictAsciiCompare');
+    const isUnresolvedPlayerProposal = loadFunction<(proposal: Record<string, unknown>) => boolean>(
+        harness,
+        'isUnresolvedPlayerProposal',
+    );
+    const sortUnresolvedPlayerProposals = loadFunction<(
+        proposals: Array<Record<string, unknown>>,
+    ) => Array<Record<string, unknown>>>(harness, 'sortUnresolvedPlayerProposals', {
+        strictAsciiCompare,
+        isUnresolvedPlayerProposal,
+    });
+    const selectProposalForQa = loadFunction<(
+        proposals: Array<Record<string, unknown>>,
+        allowOrdinary: boolean,
+    ) => Record<string, unknown> | null>(harness, 'selectProposalForQa', {
+        sortUnresolvedPlayerProposals,
+    });
+    const proposals = [
+        { id: 'a-ordinary', proposed_action: 'APPROVE_OP:a', accepted: null, resolved_turn: null },
+        { id: 'z-historical', proposed_action: 'HISTORICAL_OP:triggered:hvo_corps:Operation Jackal', accepted: null, resolved_turn: null },
+    ];
+
+    assert.equal(selectProposalForQa(proposals, false)?.id, 'z-historical');
+    assert.equal(selectProposalForQa([proposals[0]], false), null);
+    assert.equal(selectProposalForQa([proposals[0]], true)?.id, 'a-ordinary');
+    assert.match(extractFunctionSource(harness, 'handleCurrentSurface'), /selectProposalForQa/);
+});
+
 test('visible event response is bound to a new exact player receipt', () => {
     const harness = readHarness();
     const assertExactEventDecisionReceipt = loadFunction<(
@@ -928,7 +1015,7 @@ test('officer handling opens the exact grouped matter and attributes its durable
     assert.match(readState, /officerEventDedupeKey/);
     assert.match(handler, /pendingOfficerMatterItems\?\.\[0\]/);
     assert.match(handler, /openDeskInboxItem\(frame, 'officer_event', officerMatter\.inboxItemId\)/);
-    assert.equal(officerResponseLabel({ eventType: 'officer_available' }), 'Acknowledge arrival');
+    assert.equal(officerResponseLabel({ eventType: 'officer_available' }), 'File availability notice');
     assert.equal(officerResponseLabel({ eventType: 'replacement_suggested' }), 'Keep current commander');
     assert.equal(officerResponseLabel({ eventType: 'order_pushback' }), 'Acknowledge');
     assert.match(handler, /const responseLabel = officerResponseLabel\(officerMatter\)/);
@@ -1134,7 +1221,7 @@ test('resume saves drain presidential blockers before any free-navigation probe'
     const initialTourIndex = runSource.indexOf('if (!skipInitialTour)');
     const peacePlanIndex = surfaceSource.indexOf('if (pendingState?.pendingPeacePlanId != null)');
     const daytonIndex = surfaceSource.indexOf('if ((pendingState?.pendingDayton ?? 0) > 0)');
-    const proposalIndex = surfaceSource.indexOf('if (strategicRun && (pendingState?.unresolvedProposalCount ?? 0) > 0)');
+    const proposalIndex = surfaceSource.indexOf('const qaProposal = selectProposalForQa');
 
     assert.ok(eventDecisionDrainIndex >= 0, 'resume setup must first resolve required event decisions');
     assert.ok(resumeDrainIndex > eventDecisionDrainIndex, 'resume setup must then drain every presidential blocker');
@@ -1163,18 +1250,91 @@ test('visible historical notices are acknowledged before routing state-backed ev
     const preTourSource = extractFunctionSource(harness, 'resolvePendingEventDecisionsBeforeFreeNavigation');
     const aftermathIndex = source.indexOf("frame.locator('[data-testid=\"turn-aftermath-close\"]')");
     const noticeIndex = source.indexOf('acknowledge-visible-event-notice');
-    const pendingEventIndex = source.indexOf('if (strategicRun && pendingEventId)');
+    const pendingEventIndex = source.indexOf('if (pendingEventId)');
+    const reserveIndex = source.indexOf("if ((pendingState?.reserveRequests ?? 0) > 0)");
 
     assert.ok(aftermathIndex >= 0, 'topmost turn aftermath needs an exact close action');
     assert.ok(noticeIndex > aftermathIndex, 'turn aftermath must be handled before notices obscured behind it');
     assert.ok(noticeIndex >= 0, 'topmost historical notice needs an exact visible action');
     assert.ok(pendingEventIndex > noticeIndex, 'visible modal stack order must precede state-backed routing');
+    assert.ok(reserveIndex > pendingEventIndex, 'required event decisions must resolve before reserve requests in every run mode');
+    assert.doesNotMatch(source, /if \(strategicRun && pendingEventId\)/);
     assert.match(source, /getAttribute\('data-event-id'\)/);
     assert.match(source, /eventNoticeId/);
     assert.match(preTourSource, /event-notice-acknowledge/);
     assert.match(preTourSource, /pre-tour-acknowledge-visible-event-notice/);
     assert.match(source, /turn-aftermath-action-event:\$\{pendingEventId\}/);
     assert.match(preTourSource, /turn-aftermath-action-event:\$\{pendingEventId\}/);
+});
+
+test('counter proof reports adaptive reachability without weakening exact identity', () => {
+    const harness = readHarness();
+    const assess = loadFunction<(
+        initialIds: string[],
+        attemptedIds: string[],
+        verifiedIds: string[],
+        requireFormationProof: boolean,
+    ) => {
+        ok: boolean;
+        initialTargetCount: number;
+        attemptedCount: number;
+        verifiedCount: number;
+        unavailableInitialIds: string[];
+    }>(harness, 'assessCounterVerificationCoverage');
+
+    assert.deepEqual(
+        JSON.parse(JSON.stringify(assess(
+            Array.from({ length: 12 }, (_, index) => `formation-${index + 1}`),
+            ['formation-1', 'formation-2', 'formation-3', 'formation-4', 'formation-5'],
+            ['formation-1', 'formation-2', 'formation-3', 'formation-4', 'formation-5'],
+            true,
+        ))),
+        {
+            ok: true,
+            initialTargetCount: 12,
+            attemptedCount: 5,
+            verifiedCount: 5,
+            unavailableInitialIds: [
+                'formation-6',
+                'formation-7',
+                'formation-8',
+                'formation-9',
+                'formation-10',
+                'formation-11',
+                'formation-12',
+            ],
+        },
+    );
+    assert.equal(assess(['formation-1'], [], [], true).ok, false);
+    assert.equal(assess([], [], [], false).ok, true);
+});
+
+test('pending event order and visible modal identity match the app selector', () => {
+    const harness = readHarness();
+    const compare = loadFunction<(left: any, right: any) => number>(
+        harness,
+        'comparePendingEventDecisionPriority',
+        { strictAsciiCompare: (left: string, right: string) => left < right ? -1 : left > right ? 1 : 0 },
+    );
+    const resolveIdentity = loadFunction<(pendingId: string | null, visibleId: string | null) => string | null>(
+        harness,
+        'resolveVisibleEventDecisionId',
+    );
+    const ordered = [
+        { id: 'evt-advisory', decision: { event_id: 'evt-advisory', turn_fired: 1, requires_player_response: false } },
+        { id: 'evt-required-new', decision: { event_id: 'evt-required-new', turn_fired: 9, requires_player_response: true } },
+        { id: 'evt-required-b', decision: { event_id: 'evt-required-b', turn_fired: 5, requires_player_response: true } },
+        { id: 'evt-required-a', decision: { event_id: 'evt-required-a', turn_fired: 5, requires_player_response: true } },
+    ].sort(compare);
+
+    assert.deepEqual(ordered.map((entry) => entry.id), [
+        'evt-required-a',
+        'evt-required-b',
+        'evt-required-new',
+        'evt-advisory',
+    ]);
+    assert.equal(resolveIdentity('evt-required-a', 'evt-required-b'), 'evt-required-b');
+    assert.equal(resolveIdentity('evt-required-a', null), 'evt-required-a');
 });
 
 test('historical notice evidence rejects duplicate event identities', () => {

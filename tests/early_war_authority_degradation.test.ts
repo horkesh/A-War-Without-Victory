@@ -109,7 +109,7 @@ test('Authority can degrade while control unchanged (political_controllers not t
     expect(typeof rbihAfter === 'number').toBeTruthy();
 });
 
-test('war runTurn default path omits phase_i authority report', async () => {
+test('war runTurn default path omits phase_i authority report', async () => { // legacy-phase-term-ok
     const state = stateWithDeclarations();
     const { report } = await runTurn(state, { seed: state.meta.seed });
     expect(report.authority_degradation).toBe(undefined);

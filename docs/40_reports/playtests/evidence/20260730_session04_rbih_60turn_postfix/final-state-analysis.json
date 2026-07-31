@@ -1,0 +1,663 @@
+{
+  "summary": {
+    "turn": 60,
+    "date": "1993-05-31",
+    "phase": "war",
+    "player": "RBiH",
+    "pendingEvents": [],
+    "pendingPlan": null,
+    "pendingOfficer": [
+      {
+        "id": "arrival_arbih_hadzihasanovic_t22",
+        "type": "officer_available",
+        "officer": "arbih_hadzihasanovic"
+      },
+      {
+        "id": "arrival_arbih_pasalic_t24",
+        "type": "officer_available",
+        "officer": "arbih_pasalic"
+      },
+      {
+        "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+        "type": "replacement_suggested",
+        "officer": "arbih_sadic"
+      },
+      {
+        "id": "army_replacement_arbih_halilovic_t60",
+        "type": "replacement_suggested",
+        "officer": "arbih_delic"
+      }
+    ],
+    "authority": {
+      "current": 100,
+      "last_recovery": 5.75,
+      "last_recovery_source": "international_standing",
+      "lifetime_spent": 0,
+      "max": 100,
+      "reserve": 15,
+      "reserve_max": 15,
+      "spent_this_turn": 0
+    },
+    "decisionLog": [
+      {
+        "turn": 0,
+        "event": "rbih_state_identity",
+        "response": "civic"
+      },
+      {
+        "turn": 3,
+        "event": "rbih_paramilitary_policy_1992",
+        "response": "always_deny"
+      },
+      {
+        "turn": 12,
+        "event": "rbih_minority_retention_1992",
+        "response": "retain_minorities"
+      },
+      {
+        "turn": 20,
+        "event": "london_conference_1992",
+        "response": "accept_principles"
+      },
+      {
+        "turn": 38,
+        "event": "ic_pressure_vopp_engagement",
+        "response": "acknowledge_pressure"
+      },
+      {
+        "turn": 39,
+        "event": "vance_owen_plan_1993",
+        "response": "accept"
+      },
+      {
+        "turn": 54,
+        "event": "srebrenica_demilitarization_1993",
+        "response": "hide_weapons"
+      }
+    ]
+  },
+  "uiVisibleTerritory": "23.5%",
+  "currentTurnSummaryTerritory": {
+    "HRHB": 0.124,
+    "RBiH": 0.2347,
+    "RS": 0.6412
+  },
+  "oldestTurnSummaryTerritory": {
+    "turn": 1,
+    "HRHB": 0.1464,
+    "RBiH": 0.3029,
+    "RS": 0.5507
+  },
+  "casualties": {
+    "equipment_lost": {
+      "aa_systems": 0,
+      "artillery": 37,
+      "tanks": 0
+    },
+    "killed": 9279,
+    "missing_captured": 5304,
+    "per_formation": {
+      "F_RBiH_0001": {
+        "killed": 279,
+        "missing_captured": 30,
+        "wounded": 971
+      },
+      "arbih_101st_mountain": {
+        "killed": 152,
+        "missing_captured": 62,
+        "wounded": 526
+      },
+      "arbih_102nd_motorized": {
+        "killed": 161,
+        "missing_captured": 78,
+        "wounded": 617
+      },
+      "arbih_104th_vitezka_motorized": {
+        "killed": 176,
+        "missing_captured": 67,
+        "wounded": 657
+      },
+      "arbih_105th_motorized": {
+        "killed": 50,
+        "missing_captured": 99,
+        "wounded": 307
+      },
+      "arbih_109th_mountain": {
+        "killed": 204,
+        "missing_captured": 80,
+        "wounded": 771
+      },
+      "arbih_10th_mountain": {
+        "killed": 34,
+        "missing_captured": 60,
+        "wounded": 165
+      },
+      "arbih_111th_vitezka_motorized": {
+        "killed": 93,
+        "missing_captured": 61,
+        "wounded": 426
+      },
+      "arbih_112th_vitezka_motorized": {
+        "killed": 77,
+        "missing_captured": 61,
+        "wounded": 393
+      },
+      "arbih_115th_mountain": {
+        "killed": 105,
+        "missing_captured": 63,
+        "wounded": 450
+      },
+      "arbih_123rd_light": {
+        "killed": 40,
+        "missing_captured": 16,
+        "wounded": 158
+      },
+      "arbih_124th_light_king_tvrtko": {
+        "killed": 97,
+        "missing_captured": 61,
+        "wounded": 420
+      },
+      "arbih_131st_light": {
+        "killed": 36,
+        "missing_captured": 14,
+        "wounded": 133
+      },
+      "arbih_141st_light": {
+        "killed": 91,
+        "missing_captured": 61,
+        "wounded": 382
+      },
+      "arbih_143rd_light": {
+        "killed": 71,
+        "missing_captured": 65,
+        "wounded": 324
+      },
+      "arbih_146th_light": {
+        "killed": 99,
+        "missing_captured": 63,
+        "wounded": 437
+      },
+      "arbih_147th_light": {
+        "killed": 52,
+        "missing_captured": 62,
+        "wounded": 270
+      },
+      "arbih_152nd_mountain": {
+        "killed": 84,
+        "missing_captured": 68,
+        "wounded": 347
+      },
+      "arbih_155th_motorized": {
+        "killed": 73,
+        "missing_captured": 61,
+        "wounded": 377
+      },
+      "arbih_161st_slavna_olovo_mountain": {
+        "killed": 151,
+        "missing_captured": 99,
+        "wounded": 623
+      },
+      "arbih_162nd_mountain": {
+        "killed": 79,
+        "missing_captured": 73,
+        "wounded": 336
+      },
+      "arbih_164th_mountain": {
+        "killed": 39,
+        "missing_captured": 13,
+        "wounded": 146
+      },
+      "arbih_165th_mountain": {
+        "killed": 144,
+        "missing_captured": 65,
+        "wounded": 567
+      },
+      "arbih_17th_muslim_light": {
+        "killed": 116,
+        "missing_captured": 54,
+        "wounded": 453
+      },
+      "arbih_17th_vitezka_mountain": {
+        "killed": 219,
+        "missing_captured": 73,
+        "wounded": 824
+      },
+      "arbih_181st_mountain": {
+        "killed": 100,
+        "missing_captured": 73,
+        "wounded": 425
+      },
+      "arbih_182nd_vitezka_light": {
+        "killed": 39,
+        "missing_captured": 14,
+        "wounded": 148
+      },
+      "arbih_185th_light": {
+        "killed": 33,
+        "missing_captured": 63,
+        "wounded": 207
+      },
+      "arbih_1st_mountain": {
+        "killed": 74,
+        "missing_captured": 70,
+        "wounded": 304
+      },
+      "arbih_213th_vitezka_mountain": {
+        "killed": 217,
+        "missing_captured": 106,
+        "wounded": 866
+      },
+      "arbih_215th_vitezka_mountain": {
+        "killed": 220,
+        "missing_captured": 76,
+        "wounded": 777
+      },
+      "arbih_217th_vitezka_mountain": {
+        "killed": 236,
+        "missing_captured": 114,
+        "wounded": 955
+      },
+      "arbih_221st_mountain": {
+        "killed": 167,
+        "missing_captured": 80,
+        "wounded": 630
+      },
+      "arbih_222nd_liberation": {
+        "killed": 107,
+        "missing_captured": 73,
+        "wounded": 474
+      },
+      "arbih_246th_vitezka_mountain": {
+        "killed": 295,
+        "missing_captured": 50,
+        "wounded": 1025
+      },
+      "arbih_250th_liberation": {
+        "killed": 175,
+        "missing_captured": 69,
+        "wounded": 627
+      },
+      "arbih_252nd_slavna_mountain": {
+        "killed": 151,
+        "missing_captured": 104,
+        "wounded": 648
+      },
+      "arbih_253rd_mountain": {
+        "killed": 151,
+        "missing_captured": 105,
+        "wounded": 649
+      },
+      "arbih_255th_slavna_mountain_hajrudin_mesi": {
+        "killed": 544,
+        "missing_captured": 60,
+        "wounded": 1882
+      },
+      "arbih_280th_east_bosnian_light": {
+        "killed": 120,
+        "missing_captured": 70,
+        "wounded": 512
+      },
+      "arbih_285th_light": {
+        "killed": 324,
+        "missing_captured": 34,
+        "wounded": 1123
+      },
+      "arbih_2nd_mountain": {
+        "killed": 99,
+        "missing_captured": 66,
+        "wounded": 379
+      },
+      "arbih_2nd_tuzla": {
+        "killed": 175,
+        "missing_captured": 108,
+        "wounded": 736
+      },
+      "arbih_303rd_vitezka_mountain": {
+        "killed": 76,
+        "missing_captured": 86,
+        "wounded": 359
+      },
+      "arbih_314th_slavna_liberation": {
+        "killed": 109,
+        "missing_captured": 66,
+        "wounded": 457
+      },
+      "arbih_327th_vitezka_mountain": {
+        "killed": 262,
+        "missing_captured": 75,
+        "wounded": 964
+      },
+      "arbih_330th_liberation": {
+        "killed": 107,
+        "missing_captured": 67,
+        "wounded": 451
+      },
+      "arbih_441st_vitezka_mountain": {
+        "killed": 90,
+        "missing_captured": 67,
+        "wounded": 365
+      },
+      "arbih_442nd_mountain": {
+        "killed": 40,
+        "missing_captured": 63,
+        "wounded": 203
+      },
+      "arbih_443rd_mountain": {
+        "killed": 52,
+        "missing_captured": 74,
+        "wounded": 287
+      },
+      "arbih_444th_mountain": {
+        "killed": 70,
+        "missing_captured": 51,
+        "wounded": 310
+      },
+      "arbih_445th_mountain": {
+        "killed": 45,
+        "missing_captured": 68,
+        "wounded": 204
+      },
+      "arbih_447th_liberation": {
+        "killed": 14,
+        "missing_captured": 57,
+        "wounded": 134
+      },
+      "arbih_448th_liberation": {
+        "killed": 13,
+        "missing_captured": 59,
+        "wounded": 89
+      },
+      "arbih_449th_eastern_herzegovina_mountain": {
+        "killed": 51,
+        "missing_captured": 67,
+        "wounded": 197
+      },
+      "arbih_450th_light": {
+        "killed": 59,
+        "missing_captured": 69,
+        "wounded": 230
+      },
+      "arbih_4th_muslim_light": {
+        "killed": 4,
+        "missing_captured": 57,
+        "wounded": 35
+      },
+      "arbih_501st_slavna_mountain": {
+        "killed": 174,
+        "missing_captured": 74,
+        "wounded": 725
+      },
+      "arbih_502nd_vitezka_mountain": {
+        "killed": 158,
+        "missing_captured": 71,
+        "wounded": 669
+      },
+      "arbih_503rd_slavna_mountain": {
+        "killed": 77,
+        "missing_captured": 65,
+        "wounded": 390
+      },
+      "arbih_505th_vitezka_mountain": {
+        "killed": 137,
+        "missing_captured": 70,
+        "wounded": 493
+      },
+      "arbih_506th_mountain": {
+        "killed": 28,
+        "missing_captured": 62,
+        "wounded": 210
+      },
+      "arbih_510th_bosnian_liberation": {
+        "killed": 86,
+        "missing_captured": 67,
+        "wounded": 412
+      },
+      "arbih_511th_slavna_mountain": {
+        "killed": 75,
+        "missing_captured": 83,
+        "wounded": 328
+      },
+      "arbih_517th_light": {
+        "killed": 71,
+        "missing_captured": 61,
+        "wounded": 343
+      },
+      "arbih_705th_slavna_mountain": {
+        "killed": 102,
+        "missing_captured": 61,
+        "wounded": 451
+      },
+      "arbih_706th_muslim_mountain": {
+        "killed": 180,
+        "missing_captured": 99,
+        "wounded": 748
+      },
+      "arbih_707th_slavna_mountain": {
+        "killed": 53,
+        "missing_captured": 69,
+        "wounded": 247
+      },
+      "arbih_712th_mountain": {
+        "killed": 151,
+        "missing_captured": 65,
+        "wounded": 570
+      },
+      "arbih_727th_slavna": {
+        "killed": 131,
+        "missing_captured": 65,
+        "wounded": 505
+      },
+      "arbih_737th_muslim_light": {
+        "killed": 89,
+        "missing_captured": 65,
+        "wounded": 400
+      },
+      "arbih_7th_vitezka_muslim_liberation": {
+        "killed": 56,
+        "missing_captured": 65,
+        "wounded": 269
+      },
+      "arbih_801st_light": {
+        "killed": 124,
+        "missing_captured": 68,
+        "wounded": 501
+      },
+      "arbih_802nd_light": {
+        "killed": 48,
+        "missing_captured": 60,
+        "wounded": 260
+      },
+      "arbih_808th_liberation": {
+        "killed": 224,
+        "missing_captured": 87,
+        "wounded": 868
+      },
+      "arbih_843rd_light": {
+        "killed": 60,
+        "missing_captured": 60,
+        "wounded": 288
+      },
+      "arbih_851st_vitezka_liberation": {
+        "killed": 48,
+        "missing_captured": 64,
+        "wounded": 270
+      },
+      "arbih_hvo_kralj_tvrtko": {
+        "killed": 95,
+        "missing_captured": 67,
+        "wounded": 419
+      },
+      "hrhb_108th_brko_brigade": {
+        "killed": 171,
+        "missing_captured": 86,
+        "wounded": 688
+      }
+    },
+    "wounded": 37786
+  },
+  "rbihPersonnel": 162271,
+  "formationCount": 184,
+  "rbihFormationCount": 96,
+  "formationsMissingLocation": [
+    "arbih_1st_corps",
+    "arbih_2nd_corps",
+    "arbih_3rd_corps",
+    "arbih_4th_corps",
+    "arbih_5th_corps",
+    "arbih_general_staff"
+  ],
+  "eventTurns": [
+    [
+      "rbih_state_identity",
+      0
+    ],
+    [
+      "rbih_paramilitary_policy_1992",
+      3
+    ],
+    [
+      "srebrenica_enclave_forms_1992",
+      9
+    ],
+    [
+      "mostar_liberation_1992",
+      12
+    ],
+    [
+      "rbih_minority_retention_1992",
+      12
+    ],
+    [
+      "london_conference_1992",
+      20
+    ],
+    [
+      "csq_paramilitary_authorization_refused",
+      21
+    ],
+    [
+      "csq_civic_identity_consolidation_1993",
+      30
+    ],
+    [
+      "csq_accelerated_safe_areas_1993",
+      35
+    ],
+    [
+      "ic_pressure_vopp_engagement",
+      38
+    ],
+    [
+      "vance_owen_plan_1993",
+      39
+    ],
+    [
+      "morillon_enters_srebrenica_1993",
+      48
+    ],
+    [
+      "srebrenica_shelling_1993",
+      49
+    ],
+    [
+      "east_mostar_siege_1993",
+      51
+    ],
+    [
+      "trusina_killings_1993",
+      53
+    ],
+    [
+      "srebrenica_demilitarization_1993",
+      54
+    ],
+    [
+      "un_resolution_819_srebrenica_1993",
+      54
+    ],
+    [
+      "un_safe_areas_declared_1993",
+      54
+    ],
+    [
+      "battle_of_travnik_1993",
+      60
+    ]
+  ],
+  "peacePlanHistory": [
+    {
+      "plan_id": "cutileiro",
+      "resolved": true,
+      "responses": {
+        "HRHB": "rejected",
+        "RBiH": "rejected",
+        "RS": "accepted"
+      },
+      "turn_offered": 0
+    },
+    {
+      "plan_id": "vance_owen",
+      "resolved": true,
+      "responses": {
+        "HRHB": "accepted",
+        "RBiH": "accepted",
+        "RS": "rejected"
+      },
+      "turn_offered": 40
+    }
+  ],
+  "peaceCapital": {
+    "accepted": [
+      "vance_owen"
+    ],
+    "rejected": [
+      "cutileiro"
+    ]
+  },
+  "operationHistoryCount": 0,
+  "pendingOfficer": [
+    {
+      "acknowledged": false,
+      "event_id": "arrival_arbih_hadzihasanovic_t22",
+      "faction": "RBiH",
+      "officer_id": "arbih_hadzihasanovic",
+      "turn": 22,
+      "type": "officer_available"
+    },
+    {
+      "acknowledged": false,
+      "event_id": "arrival_arbih_pasalic_t24",
+      "faction": "RBiH",
+      "officer_id": "arbih_pasalic",
+      "turn": 24,
+      "type": "officer_available"
+    },
+    {
+      "acknowledged": false,
+      "corps_id": "arbih_2nd_corps",
+      "current_commander_id": "arbih_knez",
+      "event_id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+      "faction": "RBiH",
+      "officer_id": "arbih_sadic",
+      "turn": 44,
+      "type": "replacement_suggested"
+    },
+    {
+      "acknowledged": false,
+      "corps_id": "arbih_main_staff",
+      "current_commander_id": "arbih_halilovic",
+      "event_id": "army_replacement_arbih_halilovic_t60",
+      "faction": "RBiH",
+      "officer_id": "arbih_delic",
+      "turn": 60,
+      "type": "replacement_suggested"
+    }
+  ],
+  "consoleSinceRecovery": {
+    "total": 58,
+    "errors": 0,
+    "warnings": 0
+  },
+  "pageErrorsSinceRecovery": [],
+  "requestFailuresSinceRecovery": []
+}

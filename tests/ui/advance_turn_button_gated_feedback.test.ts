@@ -2,7 +2,7 @@
 
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
@@ -161,6 +161,40 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
+  it('records a clear desk as deliberate restraint when advancing', () => {
+    setLoadedState(makeState());
+    useGameStore.setState({ advanceTurnPending: true });
+
+    render(createElement(AdvanceTurnModal, { onReviewPriorities: vi.fn() }));
+
+    expect(screen.getByText('No presidential act is required.')).toBeTruthy();
+    expect(screen.getByText('Staff recommends holding present policy.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Advance while holding present policy' })).toBeTruthy();
+  });
+
+  it('distinguishes optional staff review from the clear hold-course path', () => {
+    setLoadedState(makeState({
+      pendingReserveRequests: [{
+        request_id: 'reserve-advisory',
+        corps_id: 'vrs_drina',
+        faction: 'RS',
+        reason: 'defensive_gap',
+        priority: 40,
+        severityBand: 'routine',
+        travel_hops: 2,
+        description: 'Staff recommends reviewing reserve posture.',
+        suggested_brigade_id: null,
+        turn_requested: 40,
+      }],
+    } as Partial<LoadedGameState>));
+    useGameStore.setState({ advanceTurnPending: true });
+
+    render(createElement(AdvanceTurnModal, { onReviewPriorities: vi.fn() }));
+
+    expect(screen.getByText('Staff recommends review before the week closes.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Advance with recorded decisions' })).toBeTruthy();
+  });
+
   it('advance modal labels command and counter-offer review rows without Memory fallbacks', () => {
     setLoadedState(makeState({
       pendingCounterOffers: [
@@ -219,9 +253,9 @@ describe('ADVANCE_TURN gated feedback', () => {
     render(createElement(WarroomStatusBar, { onReviewPriorities }));
 
     expect(screen.queryByRole('button', { name: /resolve 2 pending decisions to continue/i })).toBeNull();
-    expect(screen.queryByRole('button', { name: /advance/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^advance/i })).toBeNull();
 
-    const prioritiesButton = screen.getByRole('button', { name: 'Review Warroom priorities: 1 turn review item, 1 urgent, 1 pending' });
+    const prioritiesButton = screen.getByRole('button', { name: 'Review staff docket: 1 before-advance, 1 pending' });
     expect(prioritiesButton.getAttribute('aria-expanded')).toBe('false');
 
     fireEvent.click(prioritiesButton);
@@ -230,9 +264,32 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.getByText('1 advance item / 1 urgent / 1 pending')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Open Decision Room' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: "Open President's Desk" })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Review Warroom priorities: 1 turn review item, 1 urgent, 1 pending' }).getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Review staff docket: 1 before-advance, 1 pending' }).getAttribute('aria-expanded')).toBe('true');
     expect(onReviewPriorities).not.toHaveBeenCalled();
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
+  });
+
+  it('separates required presidential obligations from staff review urgency', () => {
+    setLoadedState(makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 2,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 0,
+      },
+    }));
+
+    render(createElement(WarroomStatusBar, { onReviewPriorities: vi.fn() }));
+
+    expect(screen.getByText('REQUIRED 0')).toBeTruthy();
+    const staffReview = screen.getByRole('button', {
+      name: 'Review staff docket: 1 before-advance, 1 pending',
+    });
+    expect(within(staffReview).getByText('STAFF REVIEW')).toBeTruthy();
+    expect(within(staffReview).getByText('1')).toBeTruthy();
+    expect(staffReview.textContent).not.toContain('URG');
   });
 
   it('Warroom status dock explains disabled priority review controls', () => {
@@ -261,6 +318,35 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(onResolveBlocker).toHaveBeenCalledWith('paramilitary_review', 'paramilitary:40');
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
+  });
+
+  it('Warroom opens a single required signature directly from the status dock', () => {
+    const onResolveBlocker = vi.fn();
+    setLoadedState(makeState({
+      pendingEventDecisions: makeRequiredEventDecisions(1),
+      presidentialReviewQueue: {
+        pendingCount: 1,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 0,
+      },
+    }));
+
+    render(createElement(WarroomStatusBar, {
+      onReviewPriorities: vi.fn(),
+      onResolveBlocker,
+    }));
+
+    const signature = screen.getByRole('button', {
+      name: 'Open required signature: Required decision 1',
+    });
+    expect(signature.textContent).toContain('SIGNATURE REQUIRED');
+    fireEvent.click(signature);
+
+    expect(onResolveBlocker).toHaveBeenCalledWith('event_modal', 'event:required_event_1');
+    expect(screen.queryByText('Open Decision Room')).toBeNull();
   });
 
   it('advance clearance labels hard blocker families without enum-derived copy', () => {
@@ -295,13 +381,14 @@ describe('ADVANCE_TURN gated feedback', () => {
     render(createElement(WarroomStatusBar, { onReviewPriorities: vi.fn() }));
 
     expect(screen.getByText('RAT')).toBeTruthy();
-    expect(screen.getByText('PRIORITETI')).toBeTruthy();
+    expect(screen.getByText('OBAVEZNO 0')).toBeTruthy();
+    expect(screen.getByText('ŠTABNI PREGLED')).toBeTruthy();
     expect(screen.queryByText('NASTAVI')).toBeNull();
     expect(screen.queryByText('WAR')).toBeNull();
     expect(screen.queryByText('PRIORITIES')).toBeNull();
     expect(screen.queryByText('ADVANCE')).toBeNull();
 
-    fireEvent.click(screen.getByText('PRIORITETI'));
+    fireEvent.click(screen.getByText('ŠTABNI PREGLED'));
 
     expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
     expect(screen.getByText('Nijedna živa stavka Sobe odluka ne zahtijeva pregled prije nastavka.')).toBeTruthy();

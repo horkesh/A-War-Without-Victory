@@ -75,10 +75,10 @@ describe('Presidential Inbox officer event dedupe', () => {
         const officerItems = deriveInboxItems(state, null).filter((item) => item.type === 'officer_event');
 
         expect(officerItems).toHaveLength(2);
-        expect(officerItems.find((item) => item.title === 'Personnel Matter')).toMatchObject({
+        expect(officerItems.find((item) => item.title === 'Officer Availability Notice')).toMatchObject({
             id: 'officer:officer_available:ratko_mladic',
             updateCount: 4,
-            subtitle: 'Regarding Ratko Mladic.',
+            subtitle: 'Ratko Mladic is now available in the reserve pool. Reviewing this notice does not appoint or reassign anyone.',
         });
         expect(officerItems.find((item) => item.title === 'Commander Replacement')).toMatchObject({
             id: 'officer:replacement_suggested:ratko_mladic',
@@ -104,9 +104,9 @@ describe('Presidential Inbox officer event dedupe', () => {
         render(createElement(PresidentialInbox, { onAction }));
 
         expect(screen.getByText('+3 updates')).toBeTruthy();
-        expect(screen.getAllByText('Personnel Matter')).toHaveLength(1);
+        expect(screen.getAllByText('Officer Availability Notice')).toHaveLength(1);
 
-        fireEvent.click(screen.getByRole('button', { name: /personnel matter/i }));
+        fireEvent.click(screen.getByRole('button', { name: /officer availability notice/i }));
         expect(onAction).toHaveBeenCalledWith('army_hq_personnel', 'officer:officer_available:ratko_mladic');
     });
 

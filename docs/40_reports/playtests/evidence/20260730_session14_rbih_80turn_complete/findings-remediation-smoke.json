@@ -1,0 +1,48 @@
+{
+  "session": "20260730_session14_rbih_80turn_findings_remediation_smoke",
+  "mode": "Electron desktop, unpackaged production entry point against freshly built desktop outputs",
+  "sourceSave": "turn80-autosave.json",
+  "sourceSaveSha256Before": "0241584e3a5a4e8eccab7265871304749c67dfa55e35448cb9b252032b07402f",
+  "sourceSaveSha256After": "0241584e3a5a4e8eccab7265871304749c67dfa55e35448cb9b252032b07402f",
+  "loadedState": {
+    "turn": 80,
+    "playerFaction": "RBiH",
+    "turnAdvanced": false
+  },
+  "assertions": {
+    "authorityCapacityCueVisible": true,
+    "authorityCapacityCueExplainsReserveDoctrine": true,
+    "strategicObjectivesNameResponsibleOwners": true,
+    "militaryOwner": "General Staff ARBiH",
+    "politicalOwner": "Presidency",
+    "unfiledMilitaryLeverCopy": "No filed command request — hold present policy",
+    "unfiledPoliticalLeverCopy": "No signature due — hold present policy",
+    "strategicObjectivesButtonCount": 0,
+    "sourceSaveHashUnchanged": true
+  },
+  "screenshots": [
+    {
+      "file": "screenshots/20260730-findings-fix-smoke-01-hq-objectives.png",
+      "bytes": 174748,
+      "sha256": "5754a6b6be91f5e253ff46c9ed7fdf80dce56d87b7a6802d64354f9f8d9c4e31"
+    },
+    {
+      "file": "screenshots/20260730-findings-fix-smoke-02-authority-cap.png",
+      "bytes": 1464226,
+      "sha256": "782d44c2cffd985b25eeef232eb3d52fd38cdef2a13fceec0a98b8dd2be5d829"
+    }
+  ],
+  "diagnostics": {
+    "capturedWindow": "Post-reconnect HQ and Desk verification through screenshot capture",
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "pageErrors": [],
+    "requestFailures": []
+  },
+  "notificationHandling": "Four already-acknowledged event-notification overlays were filed in the isolated in-memory/profile state to reach the inspected surfaces. No response option was selected and no turn was advanced. The immutable source save remained byte-identical.",
+  "limitations": [
+    "The personnel replacement route is covered by the focused component regression rather than this turn-80 live smoke because the saved replacement matter was already receipted.",
+    "The staged Owen-Stoltenberg sequence is covered by simulation and UI ownership regressions rather than replaying the 80-turn campaign.",
+    "This smoke is not a new owner playtest and does not change the diary's President-feel score."
+  ]
+}

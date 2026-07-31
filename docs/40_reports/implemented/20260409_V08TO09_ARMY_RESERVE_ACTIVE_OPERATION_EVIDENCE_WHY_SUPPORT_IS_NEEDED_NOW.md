@@ -105,4 +105,4 @@ The reserve story now has a sharper evidence contract:
 - broader command-shell alert redesign
 
 ## Notes For Follow-On Work
-The next clean evidence lane is not to generalize active-operation copy to every offensive request. It is to preserve another driver’s owned trigger evidence only if the sim packet already has it. If not, stop rather than inventing pseudo-causality.
+The next clean evidence lane is not to generalize active-operation copy to every offensive request. It is to preserve another driverï¿½s owned trigger evidence only if the sim packet already has it. If not, stop rather than inventing pseudo-causality.

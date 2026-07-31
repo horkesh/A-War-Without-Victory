@@ -52,7 +52,6 @@ import type {
 import type { Osid } from './osid_adjacency.js';
 import {
     ELITE_LOAN_MIN_DURATION,
-    ELITE_LOAN_MAX_DURATION,
     ELITE_LOAN_COOLDOWN,
     ELITE_CASUALTY_THRESHOLD,
     ELITE_MORALE_RECALL,
@@ -530,6 +529,75 @@ function summarizeCommanderReserveNeed(
  * Scans all non-exempt corps and generates the highest-priority reserve request
  * per corps. Writes to state.military.pending_reserve_requests (replaces previous).
  */
+export const STANDING_RESERVE_HOLD_REASON =
+    'Standing hold: retain at Main Staff until enclave relief or a critical commander request.';
+
+function reserveRequestId(request: ArmyReserveRequest): string {
+    return request.request_id
+        ?? `req:${request.turn_requested}:${request.corps_id}:${request.reason}`;
+}
+
+function getStandingHoldBrigadeIds(state: GameState): Set<FormationId> {
+    const held = new Set<FormationId>();
+    for (const record of state.military.reserve_request_history ?? []) {
+        if (!record.brigade_id) continue;
+        if (record.outcome === 'accepted' || record.outcome === 'terminated') {
+            held.delete(record.brigade_id);
+            continue;
+        }
+        if (record.outcome === 'declined' && record.reason === STANDING_RESERVE_HOLD_REASON) {
+            held.add(record.brigade_id);
+        }
+    }
+    return held;
+}
+
+function standingHoldOverrideApplies(
+    reason: ReserveRequestReason,
+    commanderPriority: 'critical' | 'high' | 'medium' | 'low' | undefined,
+): boolean {
+    return reason === 'enclave_relief' || commanderPriority === 'critical';
+}
+
+/**
+ * Converts one pending release request into a durable standing Main Staff hold.
+ * The append-only decision history is the canonical receipt, so this adds no
+ * parallel state or save-schema field.
+ */
+export function holdReserveAtMainStaff(
+    state: GameState,
+    requestId: string,
+): { ok: true } | { ok: false; error: string } {
+    const pending = state.military.pending_reserve_requests ?? [];
+    const request = pending.find((entry) => reserveRequestId(entry) === requestId);
+    if (!request) return { ok: false, error: `Reserve request not found: ${requestId}` };
+    const brigadeId = request.suggested_brigade_id;
+    if (!brigadeId) return { ok: false, error: 'Reserve request has no suggested brigade to hold' };
+    const formation = state.military.formations?.[brigadeId];
+    if (!formation?.elite_loan_state) {
+        return { ok: false, error: `Suggested reserve is not an elite brigade: ${brigadeId}` };
+    }
+
+    const need = describeCorpsNeed(request.reason, request.description);
+    if (!state.military.reserve_request_history) state.military.reserve_request_history = [];
+    state.military.reserve_request_history.push({
+        request_id: reserveRequestId(request),
+        turn: state.meta.turn,
+        faction: request.faction,
+        corps_id: request.corps_id,
+        brigade_id: brigadeId,
+        outcome: 'declined',
+        reason: STANDING_RESERVE_HOLD_REASON,
+        decided_by: 'player',
+        purpose: request.purpose ?? need.purpose,
+        why_needed: request.why_needed ?? need.whyNeeded,
+        how_to_use: request.how_to_use ?? need.howToUse,
+    });
+    state.military.pending_reserve_requests = pending
+        .filter((entry) => reserveRequestId(entry) !== requestId);
+    return { ok: true };
+}
+
 export function generateArmyReserveRequests(
     state: GameState,
     adjacency: Map<Osid, Osid[]>
@@ -538,6 +606,7 @@ export function generateArmyReserveRequests(
     const corpsCommand = state.military.corps_command ?? {};
     const corpsSectors = state.military.corps_front_sectors ?? {};
     const turn = state.meta.turn;
+    const standingHoldBrigadeIds = getStandingHoldBrigadeIds(state);
 
     type CandidateEdge = {
         brigadeId: FormationId;
@@ -693,7 +762,9 @@ export function generateArmyReserveRequests(
 
         // Collect every feasible elite edge. Assignment happens after all corps
         // demands are known so one brigade cannot be promised more than once.
-        const availableElites = getAvailableElites(state, corpsFaction, turn);
+        const standingHoldOverride = standingHoldOverrideApplies(bestReason, commanderNeed?.priority);
+        const availableElites = getAvailableElites(state, corpsFaction, turn)
+            .filter((brigadeId) => standingHoldOverride || !standingHoldBrigadeIds.has(brigadeId));
         if (availableElites.length === 0) continue;
 
         const candidates: CandidateEdge[] = [];
@@ -1177,13 +1248,12 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         const sector = Object.keys(cfs).sort(strictCompare).map(k => cfs[k]).find(s => s.corps_id === corpsId);
         const threatHigh = sector ? sector.threat_ratio >= 1.5 : false;
 
-        // Hard cap: force recall after ELITE_LOAN_MAX_DURATION turns regardless of op status.
-        // Prevents elite brigades from being locked on_loan indefinitely by perpetually-executing ops.
-        const atMaxDuration = turnsSinceLoan >= ELITE_LOAN_MAX_DURATION;
+        // Operation-tied loans have no fixed expiry. Recall only when the
+        // receiving command no longer has an active operation or high threat.
 
-        // Op ended + no high threat → voluntary recall; or hard cap reached → forced recall
+        // An ended operation with no high threat releases the loan.
         const voluntaryRecall = !hasActiveOp && !threatHigh;
-        if (voluntaryRecall || atMaxDuration) {
+        if (voluntaryRecall) {
             const hadOp = episode?.reason === 'offensive_support' || episode?.reason === 'exploitation';
             recallEliteLoan(state, bid, hadOp ? 'op_complete' : 'need_expired', turn);
             continue;

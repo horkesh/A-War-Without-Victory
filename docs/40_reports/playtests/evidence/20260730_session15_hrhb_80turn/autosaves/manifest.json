@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "runSlug": "20260730_session15_hrhb_80turn_manifest",
+  "faction": "HRHB",
+  "harnessSha256": "ff7f409f5803fb0d3314fd9f673fa4975e91c64717af60bcc881063ad3c9bad3",
+  "gitHead": "b8ff530de08fa23cf38103d8da9557da56296130",
+  "workingTreeContentSha256": "f2462d6e98fd573773fb6521d284d51a5698a6d89f639e6be6d78556d0941151",
+  "workingTreeContentFileCount": 1047,
+  "initialScenarioProvenance": {
+    "sourceKind": "resume_save",
+    "scenarioKey": null,
+    "scenarioId": null,
+    "scenarioSeed": "harness-seed",
+    "scenarioSourcePath": null,
+    "scenarioSourceSha256": null,
+    "startupSnapshotPath": null,
+    "startupSnapshotSha256": null,
+    "initialAutosaveSha256": "df5fcc3d43d86dc231a55659c98a5628774634a33759586dcdf95f5cf3cf1084"
+  },
+  "initialStateHash": "604f44535f437871f3455ddcb89b68317b68b16574891f5609ebeec7a39f551c",
+  "initialAutosaveHash": "df5fcc3d43d86dc231a55659c98a5628774634a33759586dcdf95f5cf3cf1084",
+  "finalStateHash": "604f44535f437871f3455ddcb89b68317b68b16574891f5609ebeec7a39f551c",
+  "finalAutosaveHash": "df5fcc3d43d86dc231a55659c98a5628774634a33759586dcdf95f5cf3cf1084",
+  "initial": {
+    "path": "F:\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\20260730_session15_hrhb_80turn_manifest\\hrhb\\initial-autosave.json",
+    "sha256": "df5fcc3d43d86dc231a55659c98a5628774634a33759586dcdf95f5cf3cf1084",
+    "bytes": 5843365,
+    "verifiedSha256": "df5fcc3d43d86dc231a55659c98a5628774634a33759586dcdf95f5cf3cf1084",
+    "verifiedBytes": 5843365
+  },
+  "final": {
+    "path": "F:\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\20260730_session15_hrhb_80turn_manifest\\hrhb\\final-autosave.json",
+    "sha256": "df5fcc3d43d86dc231a55659c98a5628774634a33759586dcdf95f5cf3cf1084",
+    "bytes": 5843365,
+    "verifiedSha256": "df5fcc3d43d86dc231a55659c98a5628774634a33759586dcdf95f5cf3cf1084",
+    "verifiedBytes": 5843365
+  }
+}

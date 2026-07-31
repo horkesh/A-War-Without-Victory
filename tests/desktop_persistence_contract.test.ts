@@ -232,4 +232,19 @@ describe('desktop persistence contract', () => {
     expect(preload).toContain("getRuntimeFeatureFlags: () => ipcRenderer.invoke('get-runtime-feature-flags')");
     expect(useIpc).toContain('getRuntimeFeatureFlags');
   });
+
+  it('persists the Main Staff reserve hold through the complete desktop bridge', () => {
+    const electronMain = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+    const preload = readFileSync(resolve(process.cwd(), 'src/desktop/preload.cjs'), 'utf8');
+    const useIpc = readFileSync(resolve(process.cwd(), 'src/ui/map/desktop/useIPC.ts'), 'utf8');
+
+    expect(preload).toContain("holdReserveAtMainStaff: (requestId) => ipcRenderer.invoke('hold-reserve-at-main-staff'");
+    expect(useIpc).toContain('holdReserveAtMainStaff: (requestId: string)');
+    const handlerStart = electronMain.indexOf("ipcMain.handle('hold-reserve-at-main-staff'");
+    const handlerEnd = electronMain.indexOf("ipcMain.handle('decline-reserve-request'", handlerStart);
+    const handler = electronMain.slice(handlerStart, handlerEnd);
+    expect(handlerStart).toBeGreaterThanOrEqual(0);
+    expect(handler).toContain('sim.holdReserveAtMainStaff(state, requestId)');
+    expect(handler).toContain('writeCanonicalCurrentState(sim, state, _event.sender)');
+  });
 });

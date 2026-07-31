@@ -36,7 +36,7 @@ export default {
         'text-secondary': '#a89e90',
         'faction-rs': '#e08080',
         'faction-rbih': '#4a9a55',
-        'faction-hrhb': '#4080b8',
+        'faction-hrhb': '#6d99c3',
         'faction-rs-subtle': '#e08080',
         'faction-rbih-subtle': '#79b07f',
         'faction-hrhb-subtle': '#6d99c3',

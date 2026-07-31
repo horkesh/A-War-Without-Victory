@@ -101,6 +101,33 @@ describe('derivePresidentialBlockers', () => {
     expect(blockers).toHaveLength(0);
   });
 
+  it('blocks only tagged historical operation authorizations, not ordinary proposals', () => {
+    const blockers = derivePresidentialBlockers(makeState({
+      pendingProposalReviews: [
+        {
+          id: 'historical_jackal',
+          turn: 5,
+          faction: 'RBiH',
+          domain: 'ops',
+          description: 'Authorize Operation Jackal.',
+          proposed_action: 'HISTORICAL_OP:triggered:arbih_1st_corps:Operation Jackal',
+        },
+        {
+          id: 'ordinary_proposal',
+          turn: 5,
+          faction: 'RBiH',
+          domain: 'ops',
+          description: 'A general proposes a local operation.',
+          proposed_action: 'REQUEST_OPERATION:arbih_1st_corps',
+        },
+      ],
+    }), null);
+
+    expect(blockers.map((entry) => entry.id)).toEqual([
+      'command:review-proposal:historical_jackal',
+    ]);
+  });
+
   it('keeps convoy blockers player-facing and avoids raw faction/enclave ids', () => {
     const blockers = derivePresidentialBlockers(makeState({
       pendingConvoyDecisions: [

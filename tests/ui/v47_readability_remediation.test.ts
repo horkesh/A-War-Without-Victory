@@ -158,7 +158,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
   it('fits all proposal actions without ellipsis truncation', () => {
     const source = readComponent('army_hq', 'DirectiveCard.tsx');
 
-    expect(source).toContain("isReviewProposal ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-[1fr_auto]'");
+    expect(source).toContain("isReviewProposal || isEliteDeploy ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-[1fr_auto]'");
     expect(source).not.toContain("isReviewProposal ? 'grid-cols-[1fr_1fr_auto]' : 'grid-cols-[1fr_auto]'");
     expect(source).not.toContain('min-w-0 truncate rounded border border-panel-border/60');
   });
@@ -168,5 +168,12 @@ describe('RBiH v47 evidence-backed readability floor', () => {
 
     expect(source).toContain("import { Z } from '../../shared/zIndex';");
     expect(source).toContain('zIndex={Z.OVERLAY_LIGHT}');
+  });
+
+  it('keeps Presidential Attention section headings at the contrast-safe secondary color', () => {
+    const source = readComponent('army_hq', 'PresidentialAttentionPanel.tsx');
+
+    expect(source).not.toContain('text-text-secondary/70');
+    expect(source).toContain('tracking-[0.18em] text-text-secondary border-b');
   });
 });

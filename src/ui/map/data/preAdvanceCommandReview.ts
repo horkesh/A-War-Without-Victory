@@ -44,6 +44,8 @@ export interface PreAdvanceCommandReviewView {
 export interface PreAdvanceCommandReviewInput {
   state: LoadedGameState | null;
   osidNameMap?: Record<string, string> | null;
+  /** Current-session aftermath already presented to the player. Not persisted. */
+  reviewedAftermathTurn?: number | null;
 }
 
 function mapReadinessItem(card: PresidentialDecisionRoomCard): PreAdvanceCommandReviewItem {
@@ -95,8 +97,17 @@ export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewI
   const decisionRoom = buildPresidentialDecisionRoomView(input);
   const liveBlockers = derivePresidentialBlockers(input.state, input.osidNameMap ?? null);
   const hasLiveParamilitaryBlocker = liveBlockers.some((blocker) => blocker.type === 'paramilitary_request');
-  const readinessCards = decisionRoom.advanceReadiness.items
+  const candidateReadinessCards = decisionRoom.advanceReadiness.items
     .filter((card) => card.id !== 'paramilitary:pending' || hasLiveParamilitaryBlocker);
+  const reviewedAftermathCards = candidateReadinessCards.filter((card) => {
+    if (card.category !== 'turn' || input.reviewedAftermathTurn == null) return false;
+    const target = card.sourceHandoffTarget ?? card.navigationTarget;
+    return target.kind === 'army-hq-aftermath-record'
+      && target.turn === input.reviewedAftermathTurn;
+  });
+  const reviewedAftermathIds = new Set(reviewedAftermathCards.map((card) => card.id));
+  const readinessCards = candidateReadinessCards
+    .filter((card) => !reviewedAftermathIds.has(card.id));
   const items = readinessCards.map(mapReadinessItem);
   const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(readinessCards);
   const blockingDecisionCount = countBlockingDecisions(input.state);
@@ -117,6 +128,24 @@ export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewI
     blockingDecisionCount,
     items,
     sourceHandoffs,
-    metrics: decisionRoom.metrics,
+    metrics: {
+      ...decisionRoom.metrics,
+      urgentCount: Math.max(
+        0,
+        decisionRoom.metrics.urgentCount - reviewedAftermathCards.reduce(
+          (sum, card) => sum + (
+            card.severity === 'blocking' || card.severity === 'critical'
+              ? (card.countWeight ?? 1)
+              : 0
+          ),
+          0,
+        ),
+      ),
+      hardTurns: Math.max(0, decisionRoom.metrics.hardTurns - reviewedAftermathCards.length),
+      advanceReviewCount: readinessCards.reduce(
+        (sum, card) => sum + (card.countWeight ?? 1),
+        0,
+      ),
+    },
   };
 }

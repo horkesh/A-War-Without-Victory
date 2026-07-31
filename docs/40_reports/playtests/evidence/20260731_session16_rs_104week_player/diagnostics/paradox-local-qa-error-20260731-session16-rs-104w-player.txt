@@ -1,0 +1,6 @@
+Error: army hq handoff did not open Decision Room
+    at armyHqDeepDive (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:2589:11)
+    at async turnCheckpointTour (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4051:3)
+    at async playTurns (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4246:7)
+    at async runFaction (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4577:22)
+    at async F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4647:5

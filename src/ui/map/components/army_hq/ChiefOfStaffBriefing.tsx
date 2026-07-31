@@ -11,7 +11,7 @@ import { turnToDateString } from '../../utils/formatters';
 import { generateLetterHome } from '../../../../sim/letter_home.js';
 import type { LetterHomeInput } from '../../../../sim/letter_home.js';
 import letterHomeData from '../../../../../data/templates/letter_home_templates.json';
-import type { CommandStrainLabel } from '../../data/command_strain.js';
+import type { CommandStrainLabel, CommandStrainSource } from '../../data/command_strain.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { getActiveLocale, t, type MessageKey } from '../../i18n';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
@@ -146,6 +146,24 @@ const STRAIN_PHRASES: Record<CoSProfile['tone'], Record<'strained' | 'compromise
     },
 };
 
+const STRAIN_SOURCE_PHRASES: Record<
+    Exclude<CommandStrainSource, 'none' | 'presidential_intervention'>,
+    Record<'strained' | 'compromised', MessageKey>
+> = {
+    commander_friction: {
+        strained: 'chiefOfStaff.strain.commanderFriction.strained',
+        compromised: 'chiefOfStaff.strain.commanderFriction.compromised',
+    },
+    exhaustion: {
+        strained: 'chiefOfStaff.strain.exhaustion.strained',
+        compromised: 'chiefOfStaff.strain.exhaustion.compromised',
+    },
+    mixed: {
+        strained: 'chiefOfStaff.strain.mixed.strained',
+        compromised: 'chiefOfStaff.strain.mixed.compromised',
+    },
+};
+
 /**
  * Build strain paragraph segments for any player-faction corps with commandStrain > 0.
  * Returns a paragraph per strained corps, placed after the main operational summary.
@@ -163,7 +181,11 @@ function buildStrainParagraphs(state: LoadedGameState, faction: string, tone: Co
         const label: CommandStrainLabel | undefined = corps.commandStrainLabel;
         if (!label || label === 'healthy') continue;
         const corpsName = getPlayerSafeCorpsName(corps.name, corps.id, t('chiefOfStaff.corpsCommandFallback'));
-        const phrase = t(STRAIN_PHRASES[tone][label], { corpsName });
+        const source = corps.commandStrainSource ?? 'presidential_intervention';
+        const phraseKey = source === 'none' || source === 'presidential_intervention'
+            ? STRAIN_PHRASES[tone][label]
+            : STRAIN_SOURCE_PHRASES[source][label];
+        const phrase = t(phraseKey, { corpsName });
         paragraphs.push([text(phrase)]);
     }
     return paragraphs;

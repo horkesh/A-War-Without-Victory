@@ -1,0 +1,105 @@
+{
+  "date": "2026-07-31",
+  "source_diary": "docs/40_reports/playtests/20260730_hrhb_80turn_diary.md",
+  "git_head": "b8ff530de08fa23cf38103d8da9557da56296130",
+  "scope": "Local dirty-main remediation and unpackaged Electron verification; no commit, push, package, baseline refresh, or release-state change.",
+  "bugs_fixed": [
+    "HRHB primary text contrast",
+    "simultaneous required-event identity and ordering",
+    "required-event versus reserve priority",
+    "adaptive exact formation-counter coverage",
+    "healthy active-operation elite-loan fixed-expiry recall",
+    "Cutileiro historical HRHB acceptance manufacturing a unanimous turn-one settlement"
+  ],
+  "friction_and_polish": [
+    "Operation Jackal and other HISTORICAL_OP proposals require presidential signature before advance and route through War Direction",
+    "repeat reserve dossiers show prior approvals, cumulative Authority, and latest recall reason",
+    "turn-17-to-35 HRHB cadence gains sourced 1992 Posavina/Orasje and Jajce decisions at turns 26 and 29",
+    "ordinary staff proposals remain advisory and are not auto-decided in a historical QA run"
+  ],
+  "electron_exact_turn_run": {
+    "label": "20260731_hrhb_findings_remediation_v5",
+    "runtime": "unpackaged local Electron build",
+    "target_turn": 32,
+    "target_reached": true,
+    "target_checkpoint": "tmp-paradox-qa-20260710/screenshots/20260731_hrhb_findings_remediation_v5-hrhb-192-light-turn-32-pre-checkpoint-after-drain.png",
+    "target_checkpoint_blockers": {
+      "eventDecisions": 0,
+      "proposals": 0,
+      "paramilitary": 0,
+      "reserves": 0,
+      "convoys": 0,
+      "officerEvents": 0,
+      "peacePlan": 0,
+      "counterOffers": 0,
+      "dayton": 0,
+      "operationOpportunities": 0
+    },
+    "cutileiro": {
+      "player_response": "accepted",
+      "resolved": true,
+      "campaign_continued_past_turn_1": true
+    },
+    "operation_jackal": {
+      "proposal_id": "PROP_8_historical_op_preplanned_hvo_southeast_herzegovina_operation_jackal",
+      "accepted": true,
+      "resolved_turn": 8,
+      "unresolved_at_turn_32": false
+    },
+    "reserve_receipt_turns_through_32": [
+      1,
+      11,
+      23
+    ],
+    "new_historical_receipts": [
+      {
+        "event_id": "hrhb_posavina_orasje_posture_1992",
+        "turn": 26,
+        "response_id": "hold_orasje_bridgehead"
+      },
+      {
+        "event_id": "hrhb_jajce_joint_defense_1992",
+        "turn": 29,
+        "response_id": "maintain_joint_defense"
+      }
+    ],
+    "run_note": "The exact-turn objective completed. The optional final visual tour later exceeded the shell timeout after its stack-member proof because its raw DOM close click was unbounded; that QA-driver hang was repaired separately."
+  },
+  "electron_final_tour_smoke": {
+    "label": "20260731_hrhb_final_tour_close_smoke",
+    "target_turn": 1,
+    "full_tour_completed": true,
+    "completion_screenshot": "tmp-paradox-qa-20260710/screenshots/20260731_hrhb_final_tour_close_smoke-hrhb-136-final-turn-1-full-tour-complete.png",
+    "state_hash_before": "8ae977780aee2177041ab96799a9d551952685ad78f5b8882c6dfc065df5f75f",
+    "state_hash_after": "8ae977780aee2177041ab96799a9d551952685ad78f5b8882c6dfc065df5f75f",
+    "autosave_hash_before": "7c1f2b3cc25b1ca6f7bbf50c6e1971d330a2458b69ea66f40eca91ebfe5a9bb0",
+    "autosave_hash_after": "7c1f2b3cc25b1ca6f7bbf50c6e1971d330a2458b69ea66f40eca91ebfe5a9bb0",
+    "console_messages": 0,
+    "page_errors": 0,
+    "network_failures": 0,
+    "main_process_stderr": 0,
+    "overall_harness_result": "failed_after_tour_on_readability_diagnostics",
+    "readability_note": "The remaining classifier hits were intentional peace-modal overlay text and map-legend labels marked occluded despite accessible full text; no runtime error occurred."
+  },
+  "verification": {
+    "focused_regression": "13 files, 348 tests passed",
+    "player_journeys": "44 files, 766 tests passed",
+    "typecheck": "passed",
+    "builds": {
+      "desktop_map": "passed, 1341 modules",
+      "desktop_sim": "passed",
+      "warroom": "passed, 659 modules"
+    },
+    "canon_static_determinism": "1 file, 1 test passed",
+    "canon_baseline": {
+      "status": "expected intentional mismatch; approved baseline unchanged",
+      "scenario": "apr1992_52w",
+      "artifact": "activity_summary.json",
+      "expected_sha256": "64306b433ff4ce23378661132277bd128e5d7bb4aa6ce6e4af7323392f0dfd9a",
+      "actual_sha256": "4cbf5af7d4df29bac7d29386bca4a6fe7a04d89819e852abd55eb8af82b8bf24"
+    },
+    "full_fast_slice": "incomplete: two npm test attempts exceeded 5-minute and 10-minute command limits; no assertion failure was captured",
+    "diff_check": "passed with one pre-existing unrelated CRLF warning"
+  },
+  "restored_original_autosave_sha256": "df5fcc3d43d86dc231a55659c98a5628774634a33759586dcdf95f5cf3cf1084"
+}

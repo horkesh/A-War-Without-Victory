@@ -162,6 +162,7 @@ export const PRESIDENTIAL_COMMAND_CATEGORIES: readonly PresidentialCommandCatego
  */
 const PARAMILITARY_CARD_ID = 'paramilitary:pending';
 const SUPPLY_VISIBILITY_CARD_ID = 'supply:player-visibility';
+const HISTORICAL_OPERATION_REVIEW_CARD_PREFIX = 'command:review-proposal:';
 
 /** True when a card belongs to the Conscience & Atrocity bright-line card. */
 function isConscienceCard(cardId: string): boolean {
@@ -171,6 +172,12 @@ function isConscienceCard(cardId: string): boolean {
 /** True when a card belongs to the Home Front supply/economy card. */
 function isHomeFrontCard(cardId: string): boolean {
   return cardId === SUPPLY_VISIBILITY_CARD_ID;
+}
+
+/** Signature-required historical operations belong with war direction, not diplomacy. */
+function isHistoricalOperationReviewCard(card: PresidentialDecisionRoomCard): boolean {
+  return card.category === 'decision'
+    && card.id.startsWith(HISTORICAL_OPERATION_REVIEW_CARD_PREFIX);
 }
 
 /**
@@ -187,6 +194,8 @@ export function cardBelongsToPresidentialCommandCategory(
   if (isHomeFrontCard(card.id)) return false;
   if (categoryId === 'cat_conscience') return isConscienceCard(card.id);
   if (isConscienceCard(card.id)) return false;
+  if (categoryId === 'cat_war_direction' && isHistoricalOperationReviewCard(card)) return true;
+  if (isHistoricalOperationReviewCard(card)) return false;
   const category = getPresidentialCommandCategory(categoryId);
   if (!category) return false;
   return category.sources.includes(card.category);

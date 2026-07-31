@@ -359,7 +359,7 @@ describe('H1.7 scenario activity diagnostics', () => {
         await ensureRemoved(BASE_OUT);
     });
 
-    test('phase ii run_summary includes phase_ii_attack_resolution diagnostics block', async () => {
+    test('phase ii run_summary includes phase_ii_attack_resolution diagnostics block', async () => { // legacy-phase-term-ok
         const prereq = checkDataPrereqs({ baseDir: process.cwd() });
         if (!prereq.ok) {
             return;
@@ -382,7 +382,7 @@ describe('H1.7 scenario activity diagnostics', () => {
             };
         };
 
-        assert(runSummary.phase_ii_attack_resolution != null, 'phase_ii_attack_resolution should exist for phase_ii scenario runs');
+        assert(runSummary.phase_ii_attack_resolution != null, 'phase_ii_attack_resolution should exist for phase_ii scenario runs'); // legacy-phase-term-ok
         const diag = runSummary.phase_ii_attack_resolution!;
         assert(typeof diag.weeks_at_war === 'number', 'weeks_at_war should be a number');
         assert(typeof diag.weeks_with_orders === 'number', 'weeks_with_orders should be a number');

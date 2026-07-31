@@ -443,6 +443,8 @@ Peace treaties contain territorial clauses (transfer_settlements or recognize_co
 
 For the Vance-Owen plan, the peace-plan response is the single player choice. The campaign records one decision receipt and one peace-plan history entry; it does not present or record a duplicate event decision for the same response.
 
+For an RBiH player considering Owen-Stoltenberg, the Presidency review and Assembly ratification are successive historical stages rather than duplicate prompts. Conditional acceptance by the Presidency keeps the proposal alive; only the Assembly response records RBiH's final peace-plan disposition.
+
 ### 15.3 Territorial clauses
 
 Territorial clauses define settlement control transfers and recognition of control.

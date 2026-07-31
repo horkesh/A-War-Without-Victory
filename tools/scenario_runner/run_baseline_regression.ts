@@ -34,7 +34,7 @@ const BASE_TMP = join(process.cwd(), 'data', 'derived', 'scenario', '_baseline_t
 
 /**
  * Baseline scenarios: noop_4w (quick sanity), baseline_ops_4w (displacement activity).
- * No existing scenario sets war/declared so Phase I control flips do not occur; document gap.
+ * No existing scenario sets war/declared so Phase I control flips do not occur; document gap. // legacy-phase-term-ok
  */
 const DEFAULT_SCENARIOS: Array<{ id: string; scenario_path: string; weeks?: number }> = [
     { id: 'noop_4w', scenario_path: 'data/scenarios/noop_4w.json', weeks: 4 },

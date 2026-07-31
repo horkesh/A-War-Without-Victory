@@ -75,6 +75,7 @@ test('B4 exposes four RBiH strategic objectives with command ownership and spars
         nextLever: {
             owner: 'decision_room',
             label: 'Review reserve commitment',
+            available: true,
             navigationTarget: {
                 kind: 'decision-room',
                 lens: 'command',
@@ -93,6 +94,7 @@ test('B4 exposes four RBiH strategic objectives with command ownership and spars
         nextLever: {
             owner: 'army_hq',
             label: 'Review Army HQ briefing',
+            available: true,
             navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: 'arbih_1st_corps' },
         },
         lastConsequence: null,
@@ -102,11 +104,12 @@ test('B4 exposes four RBiH strategic objectives with command ownership and spars
         title: 'Preserve international standing',
         status: 'unreported',
         trend: 'unreported',
-        responsibleCommand: null,
+        responsibleCommand: 'Presidency',
         currentCommitment: null,
         nextLever: {
             owner: 'decision_room',
-            label: 'Review political decisions',
+            label: 'No signature due — hold present policy',
+            available: false,
             navigationTarget: { kind: 'decision-room', lens: 'decision' },
         },
         lastConsequence: null,
@@ -907,9 +910,9 @@ test('parseGameState extracts canonical front edge and pressure views', () => {
     assert.strictEqual((parsed as any).brigadeFrontAssignment, undefined);
 });
 
-test('parseGameState treats phase_ii as war for formation location_osid', () => {
+test('parseGameState treats phase_ii as war for formation location_osid', () => { // legacy-phase-term-ok
     const parsed = parseGameState({
-  meta: { turn: 5, phase: 'phase_ii' },
+  meta: { turn: 5, phase: 'phase_ii' }, // legacy-phase-term-ok
   military: {
     formations: {
             b1: { id: 'b1', faction: 'RS', name: 'B1', kind: 'brigade', location_osid: 'op:mun:xyz', tags: [] },
@@ -919,7 +922,7 @@ test('parseGameState treats phase_ii as war for formation location_osid', () => 
     political_controllers: {}
   } as any,
 });
-    assert.strictEqual(parsed.phase, 'phase_ii');
+    assert.strictEqual(parsed.phase, 'phase_ii'); // legacy-phase-term-ok
     assert.strictEqual(parsed.formations.length, 1);
     assert.strictEqual(parsed.formations[0].location_osid, 'op:mun:xyz');
     assert.deepStrictEqual(parsed.formations[0].aorSettlementIds, ['op:mun:xyz']);

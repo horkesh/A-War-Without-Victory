@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-07-15 (fresh RS exact-52 player/canon acceptance complete on `final-v17`; RBiH v47 remains the prior cross-faction proof; D2 remains open)
+**Updated:** 2026-07-30 (the post-remediation RBiH 60-turn diary findings are fixed locally; focused/broad/build/canon gates and a read-only unpackaged Electron smoke pass, while a fresh owner diary remains the subjective 5/5 validation gate)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **CURRENT D2 PRESIDENTIAL JUDGMENT LOOP (2026-07-30)** | [../plans/2026-07-30-presidential-judgment-loop-design.md](../plans/2026-07-30-presidential-judgment-loop-design.md), [../plans/2026-07-30-presidential-judgment-loop-implementation.md](../plans/2026-07-30-presidential-judgment-loop-implementation.md), and [../plans/2026-07-30-rs-bugs-and-friction-implementation.md](../plans/2026-07-30-rs-bugs-and-friction-implementation.md) - the RBiH and RS owner diaries scored 3/5 and 4/5, then the RS bug-first remediation repaired embedded mutation ordering, open-aftermath Advance ownership, recovery Continue availability, and historical-mode non-player peace-plan dispositions. The three RS frictions now have one historical-operation packet authorization, a persistent Main Staff reserve hold with authored critical/enclave override signals, and separate `REQUIRED` versus `STAFF REVIEW` dock readings. Fresh Electron evidence proves packet authorization, recovery Continue, durable visible Cutileiro acceptance, and the reserve-hold lifecycle; desktop New Campaign intentionally sets `decision_mode: emergent`, so its scored RBiH/HRHB response is not historical-mode proof. Historical dispositions are regression-proven, and the exact stacked aftermath-to-Advance path is also regression-covered rather than screenshot-proven. Evidence: [playtests/20260730_rbih_diary.md](playtests/20260730_rbih_diary.md), [playtests/20260730_rs_diary.md](playtests/20260730_rs_diary.md), and `playtests/evidence/20260730_session02_rs/post_fix/`. The original RS diary remains a 4/5 historical record; a fresh ten-turn owner diary, not implementation inference, is required to award 5/5. No package, installer, release, commit, or push was created. |
 | **CURRENT RS PLAYER/CANON GUI TRUTH (2026-07-15)** | [playtests/20260714_rs_52w_canon_player_experience.md](playtests/20260714_rs_52w_canon_player_experience.md) - fresh `final-v17` reached exact turn/max 52 with 468 screenshots in 59 manually inspected sheets, zero runtime diagnostics/blockers, no unlocated active combat formations, and complete RS operation, map/stack, Decision Room, Army HQ, archive, and route proof. The only new visual defect, a long event with its acknowledgement below the fold, was fixed with a persistent action footer and separately proven in Electron v18. |
 | **CURRENT RBiH REMEDIATION/GUI TRUTH (2026-07-12)** | [playtests/20260712_rbih_52w_remediation_replay.md](playtests/20260712_rbih_52w_remediation_replay.md) - fresh `final-v47` reached exact turn/max 52 with 334 screenshots in 42 manually inspected sheets, zero console/page/network diagnostics or unresolved required blockers, no unlocated active combat formations, 24 exact counter inspections, exact-member stack proof, explicit empty-category proof, complete major-route/deep-dive coverage, and live proof of recruitment, Assisted autonomy, and two Command Authority actions. Agent-actionable local work is closed; D2 and release are not complete. |
 | **GOVERNING GUI RUNWAY (2026-07-06 owner release review)** | [../plans/2026-07-06-presidential-gui-decision-access-overhaul-plan.md](../plans/2026-07-06-presidential-gui-decision-access-overhaul-plan.md) - execution-grade nine-packet plan, now implemented and merged through WP-9. Current owner action is the friction-diary protocol at [playtests/TEMPLATE.md](playtests/TEMPLATE.md); two clean diaries trigger D2 scheduling. Companion non-GUI lane from the same review: Command Authority economy - [../plans/2026-07-06-command-authority-economy-plan.md](../plans/2026-07-06-command-authority-economy-plan.md). |
@@ -638,3 +639,64 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Fresh profiles now start with soundscape enabled at conservative master volume, but playback stays gated behind first user gesture.
 - Provided `.ogg` cues play through the bundled audio asset map after unlock; Warroom, tactical map, Chronicle, and Records now request placeholder ambient beds that remain silent until owner assets land.
 - See `docs/PROJECT_LEDGER.md` / `2026-07-06 - WP-8 ambient audio floor`.
+
+## 2026-07-30 - RBiH 60-turn D2 owner diary
+
+- A fresh RBiH campaign reached exact turn 60 / 31 May 1993 through the release-built Electron desktop route, using only UI historical defaults or repository-normalized historical dispositions.
+- President feel remains `3/5`: the Srebrenica demilitarization decision was an excellent presidential moment, but a duplicate Vance-Owen prompt, an extended no-lever Advance cadence, and an ungrounded final officer queue prevent the D2 loop from reaching `5/5`.
+- Confirmed bugs remain separate from friction: duplicated Vance-Owen ownership, `Operation Neretva '93` firing months early, invented commander-intervention language, and a pending replacement hiding the active army commander.
+- See `docs/40_reports/playtests/20260730_rbih_60turn_diary.md` and `docs/40_reports/playtests/evidence/20260730_session03_rbih_60turn/`.
+
+## 2026-07-30 - RBiH 60-turn bug-first and cadence remediation
+
+- Vance-Owen now has one player-decision owner; the synchronized resolution yields one event receipt and one peace-plan history row while consuming duplicate pending work.
+- `Operation Neretva '93` is constrained to its September 1993 window.
+- Army HQ commander-strain copy now follows recorded provenance instead of inventing presidential intervention, and a pending succession continues to show the active incumbent.
+- Enclave-locked officers cannot be proposed or auto-assigned to incompatible mainland commands. A same-turn informational officer arrival is consolidated when the same officer already has an actionable replacement matter.
+- The original opening RBiH decision drought is reduced from 19 turns to 9 by moving the existing minority-retention decision to early summer and giving the existing London Conference decision its documented August media-to-conference trigger. No choice or lever was invented.
+- The deterministic 60-turn replay decision sequence is turns `0, 3, 12, 20, 38, 39, 54`. An 18-turn quiet interval remains between London and Vance-Owen; a fresh researched content/staff-packet design is required to close it honestly.
+- Records now distinguishes `Desk Decisions` from `Chronicle Decisions`, making the two archive scopes explicit.
+- The original Electron diary remains `3/5`; only a fresh Electron owner run can regrade President feel.
+- See the remediation appendix in `docs/40_reports/playtests/20260730_rbih_60turn_diary.md`.
+
+## 2026-07-30 - RBiH post-remediation 60-turn Electron owner diary
+
+- A fresh isolated RBiH Electron campaign reached exact turn 60 / 31 May 1993 using only UI historical defaults or a repository-normalized historical disposition.
+- The opening cadence fix held: the first decisions arrived at turns `0, 1, 3, 12, 20`, reducing the old opening drought to 9 turns. The later turn-20 to turn-38 interval remains the dominant historical-play friction.
+- President feel remains `3/5`. Srebrenica demilitarization is still the best presidential packet; Authority stayed at `100/100` with zero lifetime spend and no grounded operation/proposal handoff.
+- Confirmed bugs remain separate from friction: Vance-Owen acceptance was required at both turns 39 and 40, and `Safe Areas With Teeth` invoked UNSCR 819/824/836 on 7 December 1992. The reported territory mismatch was subsequently withdrawn: turn summaries are newest-first, so `23.47%` is the turn-60 value and `30.29%` is turn 1.
+- The Neretva/Grabovica-Uzdol timing repair held through this horizon; neither appeared by turn 60. Sefer Halilović remained visible while Delić was pending, no Palić mainland proposal appeared, and Delić produced one replacement card rather than duplicate arrival/replacement work.
+- See `docs/40_reports/playtests/20260730_rbih_60turn_postfix_diary.md` and `docs/40_reports/playtests/evidence/20260730_session04_rbih_60turn_postfix/`.
+
+## 2026-07-30 - RBiH post-diary findings remediation
+
+- The Vance-Owen event now materializes and resolves the canonical peace-plan state immediately, producing one event receipt and one peace-plan history row without a second required surface.
+- Safe-area consequence timing begins no earlier than UNSCR 836 in June 1993. Ahmići, Sovići/Doljani, Trusina, East Mostar, and the Resolution 824 expansion now have calendar-correct first turns; the Resolution 824 card no longer duplicates Resolution 819.
+- The turn-20→38 interval gains a sourced turn-24 ARBiH corps-reorganization staff brief. It is a filed informational packet with no signature or invented choice.
+- Personnel copy now distinguishes filing an availability notice from appointing or reassigning an officer, and replacement cards state the historical recommendation plus the incumbent-while-pending consequence.
+- Army HQ now routes filed staff matters to the existing Decision Room, describes critical conditions without inventing direct unit-order authority, and exposes a direct `President's Desk` return.
+- Focused correctness/UI regressions, 44 files / 763 player journeys, TypeScript, both unpackaged desktop builds, and the canon determinism scan pass. The baseline hash changes as expected from intentional event retiming and was not refreshed.
+- A read-only unpackaged Electron smoke loaded the exact turn-60 save, verified personnel semantics and Army HQ→Desk navigation, reported zero console/page/network errors, and preserved the autosave SHA-256 `15c1c938...d4b4`.
+- The diary's `3/5` score remains the last owner score; implementation evidence does not award `5/5`.
+
+## 2026-07-30 - RBiH 80-turn findings remediation
+
+- Owen-Stoltenberg now has historically staged ownership: the RBiH Presidency can conditionally accept at turn 70 without finalizing the treaty, and the Assembly owns the final turn-72 disposition. The legacy peace-plan modal and Desk item are suppressed while either canonical stage is pending.
+- Officer replacement matters route `Open personnel` to Army HQ Briefing, where `Appoint Historical Successor` is available; informational arrivals continue to route to Personnel.
+- The 12px `Personnel Directives` headings now use the full secondary-text token instead of the 70%-opacity variant that measured 3.67:1.
+- The turn-24 ARBiH corps-reorganization packet is now a sourced, reviewable staff recommendation that routes to Army HQ Briefing while remaining informational and excluded from actionable-decision counts.
+- A capped Authority meter explains that Authority is reserve power rather than a weekly quota and that overflow recovery banks only to the displayed reserve limit. It does not manufacture a spending opportunity.
+- Army HQ strategic objectives name the Presidency or the faction Army HQ as responsible owner. When no decision, operation, or reserve request is filed, the supposed next lever becomes a non-interactive hold-present-policy status rather than a generic review button.
+- An isolated Electron smoke against the immutable turn-80 save verified both the capped-Authority guidance and the four strategic-objective cards. The objective section contained zero buttons in the no-filed-action state, and the captured window had no console/page/network diagnostics.
+- The owner diary's `4/5` President-feel score remains authoritative until a fresh Electron owner run tests these changes; implementation evidence does not award `5/5`.
+
+## 2026-07-31 - RS 104-week bug repair and friction plan
+
+- Owen-Stoltenberg bot resolution now preserves the authored non-player RBiH rejection when the player is RS or HRHB, preventing an RS acceptance from unilaterally ending the war before the RBiH final disposition.
+- The reported Army HQ handoff failure was a QA-driver bug, not a product-navigation bug. The handoff now exposes its derived route, and Electron QA asserts either Decision Room for filed executive work or the Desk for critical reporting without a filed action.
+- Peace-plan title content is isolated above non-interactive decorative art, canonical model labels include `Union of Three Republics`, and operation-conclusion copy no longer produces `Operation Operation ...`.
+- Foča and Zvornik record events are now eligible during turns 1–3, while retaining the RS-control precondition. The former turn-10 lower bound had no simulation-pressure or queue cause and did not match the cited April chronology.
+- The broader event-catalog gate also closed two adjacent authoring defects: the late-1992 HRHB Orašje and Jajce reviews now expose explicit `historical_source` fields, and the expanded London Conference provenance retains the sensitive-history boundary statement.
+- The five remaining diary findings are friction, not bugs. The actionable remediation packet covers one cross-surface priority contract, siege/enclave brief consolidation, dossier-to-map focus, source-gated decision cadence, Army HQ ultrawide composition, and bounded active-path chips.
+- Verification passed 16 relevant files / 320 tests, 44 player-journey files / 766 tests, TypeScript, and both unpackaged desktop builds. The canon determinism scan passed; baseline comparison stopped at the intentionally unapproved `apr1992_52w` activity-summary drift, and the baseline was not refreshed.
+- See `docs/40_reports/playtests/20260731_rs_104week_player_diary.md` and `docs/plans/2026-07-31-rs-104week-friction-remediation-plan.md`. The diary's original `3/5` President-feel score remains authoritative until a fresh owner run.

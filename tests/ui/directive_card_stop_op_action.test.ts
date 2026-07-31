@@ -98,6 +98,7 @@ function installIpc(overrides: Record<string, unknown> = {}) {
     resolveOperationOpportunityDecision: vi.fn(async () => ({ ok: true })),
     stageCoReplacementOrder: vi.fn(async () => ({ ok: true })),
     approveReserveRequest: vi.fn(async () => ({ ok: true })),
+    holdReserveAtMainStaff: vi.fn(async () => ({ ok: true })),
     getFrontVisitAvailability: vi.fn(async () => ({
       ok: true,
       available: true,
@@ -484,6 +485,19 @@ describe('DirectiveCard stop-op action host', () => {
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
       'Directive staged for next turn',
     );
+  });
+
+  it('keeps a suggested elite at Main Staff without approving its deployment', async () => {
+    const bridge = installIpc();
+
+    render(React.createElement(DirectiveCard, { directive: eliteDeployDirective, gameState: baseGameState }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hold at Main Staff' }));
+
+    await waitFor(() => {
+      expect(bridge.holdReserveAtMainStaff).toHaveBeenCalledWith('reserve_request_alpha');
+    });
+    expect(bridge.approveReserveRequest).not.toHaveBeenCalled();
   });
 
   // Batch A — command-card routing (#126 / #119 / #274). Force-launch directives

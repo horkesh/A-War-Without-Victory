@@ -539,56 +539,6 @@
     ]
   },
   {
-    "id": "ahmici_massacre_1993",
-    "image": "event_ahmici_massacre_1993.webp",
-    "title": "Ahmici Massacre",
-    "narrative": "HVO forces, supported by the Jokers special police unit, launch a coordinated attack on the Bosniak village of Ahmici in the Lasva Valley. Over 100 civilians are killed, including women and children, and the village is systematically burned. The massacre becomes one of the most documented war crimes of the conflict and a defining atrocity of the Croat-Bosniak war.",
-    "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
-    "category": "humanitarian",
-    "trigger": {
-      "turn_min": 40,
-      "turn_max": 70,
-      "phase": "war",
-      "requires_events": [
-        "croat_bosniak_war_begins_1993"
-      ],
-      "condition": {
-        "type": "and",
-        "conditions": [
-          {
-            "type": "faction_controls_municipality",
-            "faction": "HRHB",
-            "municipality": "vitez",
-            "threshold": 0.5
-          },
-          {
-            "type": "flag_equals",
-            "flag": "hvo_arbih_tensions_rising",
-            "value": true
-          }
-        ]
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "humanitarian_impact",
-      "faction": "HRHB",
-      "war_crimes_delta": 3
-    },
-    "effects": [
-      {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "international_credibility",
-        "delta": -25
-      },
-      {
-        "kind": "narrative",
-        "text": "The Ahmici massacre shocks the international community. HVO credibility suffers a devastating blow."
-      }
-    ]
-  },
-  {
     "id": "us_envoy_appointed_1993",
     "title": "US Special Envoy — American Engagement Begins",
     "narrative": "President Clinton names Ambassador Reginald Bartholomew as the first US special envoy to Bosnia negotiations, signaling increased American engagement with the conflict. In May, Secretary of State Warren Christopher proposes a 'lift and strike' policy — lifting the arms embargo and using air strikes against VRS positions — but Britain and France reject it. Despite this setback, American diplomatic involvement has begun in earnest.",
@@ -695,48 +645,6 @@
       "faction": "RS",
       "delta": 5
     }
-  },
-  {
-    "id": "east_mostar_siege_1993",
-    "image": "event_siege_city_HRHB.webp",
-    "title": "HVO Besieges East Mostar",
-    "narrative": "HVO forces impose a complete blockade on the eastern bank of Mostar, cutting off the Bosniak population from food, water, and medical supplies. Systematic shelling targets the densely populated old town. An estimated 55,000 Bosniaks are trapped in increasingly desperate conditions as the HVO seeks to drive them from the city entirely.",
-    "category": "military",
-    "trigger": {
-      "turn_min": 45,
-      "turn_max": 80,
-      "phase": "war",
-      "requires_events": [
-        "croat_bosniak_war_begins_1993"
-      ],
-      "condition": {
-        "type": "flag_equals",
-        "flag": "mostar_liberated",
-        "value": true
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "humanitarian_impact",
-      "faction": "HRHB",
-      "war_crimes_delta": 2
-    },
-    "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": -5
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 5
-      },
-      {
-        "kind": "narrative",
-        "text": "East Mostar is besieged. 55,000 Bosniaks are trapped as HVO forces impose a total blockade on the eastern bank."
-      }
-    ]
   },
   {
     "id": "un_resolution_808_tribunal_1993",
@@ -1620,12 +1528,62 @@
     }
   },
   {
+    "id": "ahmici_massacre_1993",
+    "image": "event_ahmici_massacre_1993.webp",
+    "title": "Ahmici Massacre",
+    "narrative": "HVO forces, supported by the Jokers special police unit, launch a coordinated attack on the Bosniak village of Ahmici in the Lasva Valley. Over 100 civilians are killed, including women and children, and the village is systematically burned. The massacre becomes one of the most documented war crimes of the conflict and a defining atrocity of the Croat-Bosniak war.",
+    "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 54,
+      "turn_max": 70,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "faction_controls_municipality",
+            "faction": "HRHB",
+            "municipality": "vitez",
+            "threshold": 0.5
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hvo_arbih_tensions_rising",
+            "value": true
+          }
+        ]
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "HRHB",
+      "war_crimes_delta": 3
+    },
+    "effects": [
+      {
+        "kind": "negotiation_capital",
+        "faction": "HRHB",
+        "dimension": "international_credibility",
+        "delta": -25
+      },
+      {
+        "kind": "narrative",
+        "text": "The Ahmici massacre shocks the international community. HVO credibility suffers a devastating blow."
+      }
+    ]
+  },
+  {
     "id": "sovici_doljani_attack_1993",
     "title": "Sovici-Doljani Attack",
     "narrative": "HVO forces attack the Bosniak villages of Sovici and Doljani near Jablanica, detaining approximately 400 Bosniak civilians and capturing 70-75 ARBiH soldiers. The attack occurs simultaneously with the Ahmici massacre in the Lasva Valley, revealing coordinated HVO operations across both central Bosnia and Herzegovina.",
     "category": "military",
     "trigger": {
-      "turn_min": 53,
+      "turn_min": 54,
       "turn_max": 56,
       "phase": "war",
       "requires_events": [
@@ -1673,7 +1631,7 @@
     "narrative": "ARBiH forces kill 15 Croat civilians and 7 HVO prisoners of war in the village of Trusina near Konjic, on the same day as the Ahmici massacre. The reciprocal atrocities illustrate the descending cycle of ethnic violence that the Croat-Bosniak war has unleashed across central Bosnia.",
     "category": "humanitarian",
     "trigger": {
-      "turn_min": 53,
+      "turn_min": 54,
       "turn_max": 58,
       "phase": "war",
       "requires_events": [
@@ -1996,35 +1954,6 @@
     "historical_source": "UN A/54/549 (Secretary-General's report on the fall of Srebrenica, 15 November 1999), §§57-98 — partial/nominal compliance pattern. UN Security Council Resolution 819 (16 April 1993) declaring Srebrenica a safe area. Demilitarization Agreement of 18 April 1993 (Sarajevo airport, UN-brokered); Demilitarization Agreement of 8 May 1993 (Žepa extension). ICTY Krstić Trial Judgement (IT-98-33-T, 2 August 2001), §§16-28 — 1993 background narrative. General Philippe Morillon's visit to Srebrenica, 11 March 1993."
   },
   {
-    "id": "un_safe_areas_declared_1993",
-    "image": "event_un_presence.webp",
-    "title": "UN Declares Safe Areas",
-    "narrative": "The UN Security Council passes Resolution 819, declaring Srebrenica a safe area, followed by Resolution 824 extending protection to Sarajevo, Tuzla, Zepa, Gorazde, and Bihac. The resolutions promise protection without committing adequate military force to deliver it — a fatal gap between mandate and means that will have catastrophic consequences.",
-    "category": "diplomatic",
-    "trigger": {
-      "turn_min": 54,
-      "turn_max": 54,
-      "phase": "war"
-    },
-    "once": true,
-    "effect": {
-      "kind": "morale_change",
-      "faction": "RBiH",
-      "delta": 3
-    },
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
-        "kind": "narrative",
-        "text": "Six UN safe areas are declared. The promise of protection raises hope among besieged populations, but no credible enforcement mechanism exists."
-      }
-    ]
-  },
-  {
     "id": "milosevic_vopp_pressure",
     "title": "Milošević Orders Karadžić: Accept Vance-Owen",
     "narrative": "Milošević and Bulatović fly to Zvornik to personally demand that the Bosnian Serb Assembly accept the Vance-Owen Plan. Belgrade cannot sustain UN sanctions indefinitely — Pale's intransigence is destroying Serbia's economy.",
@@ -2332,6 +2261,79 @@
     "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 3251-3268 (FRY/Greek pressure for acceptance), 3447 (Karadzic pattern of sign-internationally / reject-domestically), 3471-3475 (Six Strategic Goals incompatibility with VOPP), 3526-3530 (Athens signature 2 May 1993, Bijeljina rejection 5-6 May 1993, referendum 15-16 May, Owen declaration 18 June). ICTY Mladic Trial Judgment (IT-09-92-T, 22 November 2017) paras. 3232-3243 (Mladic maps presented to the Assembly). ICTY Krajisnik Trial Judgment (IT-00-39-T, 27 September 2006) paras. 856-891 (Assembly proceedings, Krajisnik as Assembly President). Vance-Owen Peace Plan text: UN S/25221 (11 February 1993). UN Security Council Resolution 820 (17 April 1993). Balkan Battlegrounds Vol. II pp. 9-32, 28-31."
   },
   {
+    "id": "east_mostar_siege_1993",
+    "image": "event_siege_city_HRHB.webp",
+    "title": "HVO Besieges East Mostar",
+    "narrative": "HVO forces impose a complete blockade on the eastern bank of Mostar, cutting off the Bosniak population from food, water, and medical supplies. Systematic shelling targets the densely populated old town. An estimated 55,000 Bosniaks are trapped in increasingly desperate conditions as the HVO seeks to drive them from the city entirely.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 57,
+      "turn_max": 80,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
+      "condition": {
+        "type": "flag_equals",
+        "flag": "mostar_liberated",
+        "value": true
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "HRHB",
+      "war_crimes_delta": 2
+    },
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "HRHB",
+        "delta": -5
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "HRHB",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "East Mostar is besieged. 55,000 Bosniaks are trapped as HVO forces impose a total blockade on the eastern bank."
+      }
+    ]
+  },
+  {
+    "id": "un_safe_areas_declared_1993",
+    "image": "event_un_presence.webp",
+    "title": "UN Resolution 824 — Six Safe Areas",
+    "narrative": "The UN Security Council passes Resolution 824, extending safe-area status beyond Srebrenica to Sarajevo, Tuzla, Zepa, Gorazde, and Bihac. Six enclaves now carry a promise of protection without adequate military force to deliver it — a fatal gap between mandate and means.",
+    "source_note": "UN Security Council Resolution 824 (6 May 1993) grounds the expansion from Srebrenica to the five additional named safe areas.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 57,
+      "turn_max": 57,
+      "phase": "war"
+    },
+    "once": true,
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "narrative",
+        "text": "Six UN safe areas are declared. The promise of protection raises hope among besieged populations, but no credible enforcement mechanism exists."
+      }
+    ],
+    "historical_source": "UN Security Council Resolution 824 (1993), S/RES/824."
+  },
+  {
     "id": "icty_established_1993",
     "title": "ICTY Formally Established — Resolution 827",
     "narrative": "The UN Security Council unanimously passes Resolution 827, formally establishing the International Criminal Tribunal for the former Yugoslavia — the first war crimes court created by the UN since Nuremberg and Tokyo. The tribunal has jurisdiction over genocide, crimes against humanity, and violations of the laws of war committed in the former Yugoslavia since 1991. While indictments are years away, the era of impunity may be ending.",
@@ -2441,37 +2443,6 @@
       "faction": "RBiH",
       "delta": 5
     }
-  },
-  {
-    "id": "operation_neretva_93_1993",
-    "title": "Operation Neretva '93",
-    "narrative": "The ARBiH launches Operation Neretva '93 against HVO positions in Herzegovina and the Neretva Valley. The offensive aims to break the HVO siege of East Mostar and secure a corridor to the coast. Fierce fighting erupts around Jablanica and along the Neretva River as the ARBiH attempts to exploit its growing numerical advantage.",
-    "category": "military",
-    "trigger": {
-      "turn_min": 60,
-      "turn_max": 95,
-      "phase": "war",
-      "requires_events": [
-        "croat_bosniak_war_begins_1993"
-      ],
-      "condition": {
-        "type": "flag_equals",
-        "flag": "mostar_liberated",
-        "value": true
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "narrative",
-      "text": "The ARBiH launches Operation Neretva '93, striking at HVO positions in the Neretva Valley and around Mostar."
-    },
-    "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      }
-    ]
   },
   {
     "id": "un_resolution_836_force_1993",
@@ -3396,8 +3367,8 @@
   },
   {
     "id": "owen_stoltenberg_plan_1993",
-    "title": "Owen-Stoltenberg Plan Proposed",
-    "narrative": "International mediators David Owen and Thorvald Stoltenberg present a new peace plan proposing a loose union of three ethnic republics. The plan effectively legitimizes ethnic partition and is seen by the Bosnian government as rewarding aggression. Negotiations continue through the autumn amid ongoing fighting on all fronts.",
+    "title": "Owen-Stoltenberg: Presidency Review",
+    "narrative": "International mediators David Owen and Thorvald Stoltenberg present a loose union of three ethnic republics. This is the Presidency stage: Sarajevo may conditionally accept the framework while reserving the Drina-enclaves and Posavina questions for the final Assembly vote.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 70,
@@ -3410,7 +3381,16 @@
     ],
     "requires_player_response": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "capital_based",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept",
+    "historical_source": "UN S/26486 (23 September 1993, ICFY transmission recording the RBiH Presidency's conditional acceptance of 20 September 1993); UN S/26922 (21 December 1993, ICFY Steering Committee report recording the Assembly rejection of 29 September 1993); David Owen, Balkan Odyssey (1995).",
+    "source_note": "This row owns the first stage only: the RBiH Presidency's narrow, conditional acceptance. It does not settle the plan. The later os_rbih_tactical_acceptance_1993 row owns the decisive Assembly ratification or rejection.",
+    "staff_assessment": "Historical course: record the Presidency's conditional acceptance and carry the Drina-enclaves and Posavina reservations to the Assembly. Rejecting here ends Sarajevo's participation before the documented Assembly stage.",
+    "trigger_evidence": [
+      "The Owen-Stoltenberg tripartite framework has been presented to the RBiH Presidency.",
+      "The documented Presidency response was conditional acceptance, not final ratification (UN S/26486).",
+      "The Assembly retained the final decision (UN S/26922)."
+    ],
     "effect": {
       "kind": "narrative",
       "text": "The Owen-Stoltenberg Plan proposes a tripartite union of ethnic republics. Each faction must weigh the costs of acceptance or rejection."
@@ -3418,8 +3398,9 @@
     "response_options": [
       {
         "id": "accept",
-        "label": "Accept the Owen-Stoltenberg Framework",
-        "description": "Accepting brings international relief but concedes the principle of a unified Bosnia.",
+        "historical_marker": "historical_default",
+        "label": "Record the Presidency's Conditional Acceptance",
+        "description": "Keep the framework alive while reserving the Drina enclaves and Posavina corridor for the Assembly's final vote.",
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -3439,8 +3420,9 @@
       },
       {
         "id": "reject",
-        "label": "Reject Ethnic Partition",
-        "description": "Rejection defends sovereignty but prolongs the war and frustrates mediators.",
+        "historical_marker": "counterfactual",
+        "label": "Reject at the Presidency Stage",
+        "description": "End Sarajevo's participation before the documented Assembly vote, defending sovereignty while frustrating the mediators.",
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -3495,22 +3477,32 @@
         "owen_stoltenberg_plan_1993"
       ],
       "condition": {
-        "type": "or",
+        "type": "and",
         "conditions": [
           {
             "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "civic"
+            "flag": "owen_stoltenberg_accepted",
+            "value": true
           },
           {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "bosniak_national"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "pragmatic"
+            "type": "or",
+            "conditions": [
+              {
+                "type": "flag_equals",
+                "flag": "rbih_state_identity",
+                "value": "civic"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "rbih_state_identity",
+                "value": "bosniak_national"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "rbih_state_identity",
+                "value": "pragmatic"
+              }
+            ]
           }
         ]
       }
@@ -3894,12 +3886,43 @@
     "historical_source": "UNSCR 713 (25 September 1991) — comprehensive arms embargo on former-Yugoslavia. Balkan Battlegrounds Vol. II (CIA Office of Russian and European Analysis 2002) — 1993-95 ARBiH supply chronology + Silajdžić diplomatic posture + Iran-Croatia arms channel context. Alija Izetbegović, 'Inescapable Questions: Autobiographical Notes' (Islamic Foundation 2003) — UN General Assembly addresses + lift-and-strike argumentation. Richard Holbrooke, 'To End A War' (Random House 1998) chs. 4-6 — Clinton administration deliberation on lift-and-strike, August 1995 endgame. US Senate Foreign Relations Committee records — S.J. Res. 110 of 11 August 1993 (passed 70-30; Clinton vetoed); Dole-Lieberman amendment July-August 1995 (passed 69-29; Clinton vetoed 11 August 1995, override failed). UN A/54/549 (Secretary-General's report on Srebrenica, 15 November 1999) §§ on UNSCR 713 application + lift-and-strike diplomacy. ICTY Sefer Halilović IT-01-48-T Trial Judgment (16 November 2005) — ARBiH General Staff supply situation 1993. ICTY Karadžić IT-95-5/18-T Vol. III — international diplomatic context of Sarajevo's posture. ICTY Hadžihasanović & Kubura IT-01-47-T Trial Judgment (15 March 2006) — 3rd Corps + 7th Muslim Brigade integration context. US Senate Select Committee on Intelligence — 'Iranian Arms to Bosnia' hearings 1996-1997 (declassified portions). US embassy archived reporting on the Iran arms channel (declassified 2005-2010 tranches)."
   },
   {
+    "id": "operation_neretva_93_1993",
+    "title": "Operation Neretva '93",
+    "narrative": "The ARBiH launches Operation Neretva '93 against HVO positions in Herzegovina and the Neretva Valley. The offensive aims to break the HVO siege of East Mostar and secure a corridor to the coast. Fierce fighting erupts around Jablanica and along the Neretva River as the ARBiH attempts to exploit its growing numerical advantage.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 74,
+      "turn_max": 76,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
+      "condition": {
+        "type": "flag_equals",
+        "flag": "mostar_liberated",
+        "value": true
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The ARBiH launches Operation Neretva '93, striking at HVO positions in the Neretva Valley and around Mostar."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      }
+    ]
+  },
+  {
     "id": "grabovica_uzdol_massacres_1993",
     "title": "Grabovica and Uzdol Massacres",
     "narrative": "During Operation Neretva 93, ARBiH units from Sarajevo commit war crimes against Croat civilians: at least 13 villagers killed at Grabovica on September 8-9, and at least 29 civilians and one HVO POW killed at Uzdol on September 14. ICTY Chief of Staff Sefer Halilovic is indicted but acquitted due to insufficient evidence of effective command control over the perpetrators.",
     "category": "humanitarian",
     "trigger": {
-      "turn_min": 73,
+      "turn_min": 74,
       "turn_max": 76,
       "phase": "war",
       "requires_events": [

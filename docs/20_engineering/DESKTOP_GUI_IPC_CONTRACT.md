@@ -180,7 +180,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `resolve-peace-plan` (invoke)
   - Payload: `{ planId: string, response: 'accepted' | 'rejected' }`
   - Returns: `{ ok: boolean, error?: string, all_accepted?: boolean, rejection_factions?: string[] }`
-  - Behavior: resolves the pending plan through the canonical negotiation helper and persists it through the canonical mutation transaction. For `vance_owen`, the peace-plan path is the single decision owner: it synchronizes one durable event-decision receipt, consumes the duplicate pending Vance-Owen event, and appends one peace-plan-history row.
+  - Behavior: resolves the pending plan through the canonical negotiation helper and persists it through the canonical mutation transaction. For `vance_owen`, the peace-plan path is the single decision owner: it synchronizes one durable event-decision receipt, consumes the duplicate pending Vance-Owen event, and appends one peace-plan-history row. For an RBiH-player `owen_stoltenberg` plan, a pending Presidency or Assembly event owns the response instead: the legacy plan surface delegates to the Presidency stage, conditional acceptance clears the legacy pending plan without finalizing the treaty, and the Assembly stage writes the single final RBiH history row.
 
 ### Read-only query channels (no state mutation)
 

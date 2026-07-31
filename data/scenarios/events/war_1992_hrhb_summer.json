@@ -421,5 +421,240 @@
         "risk_level": 0.6
       }
     ]
+  },
+  {
+    "id": "hrhb_posavina_orasje_posture_1992",
+    "title": "After Bosanski Brod",
+    "narrative": "6 October 1992. Bosanski Brod has fallen after the VRS shifted its attack and broke the HV-HVO bridgehead. The withdrawal was carried out in good order, but the western Posavina position is gone. Orašje remains: HVO and Bosnian Army forces there still threaten the corridor, briefly cutting the road again in October, and a new VRS offensive is expected. The Presidency must decide whether Orašje remains the priority or whether the northern commitment is reduced.",
+    "category": "military",
+    "family": "hrhb_war_direction",
+    "source_tier": "balkan_battlegrounds",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 26,
+      "turn_max": 28,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "croat_republic" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "united_front" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "strategic_ambiguity" }
+        ]
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The HZ HB Presidency records its post-Bosanski Brod posture for the remaining Orašje bridgehead."
+    },
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "hold_orasje_bridgehead",
+    "historical_source": "Balkan Battlegrounds Vol. I, pp. 181-183 (Bosanski Brod bridgehead, 4-6 October breakthrough and withdrawal, and continued Orašje corridor pressure).",
+    "source_note": "Balkan Battlegrounds I pp.181-183: HV-HVO forces first stopped the Serb takeover of Bosanski Brod, then held a constricted bridgehead until the VRS breakthrough of 4 October and capture of the town on 6 October. The withdrawal of men and equipment was in good order. The remaining HVO/ARBiH position at Orašje continued to threaten and intermittently cut the corridor in September-November 1992; the November VRS offensive failed. Historical default preserves the documented Orašje commitment without inventing a retaking of Bosanski Brod.",
+    "staff_assessment": "Bosanski Brod cannot be restored by declaration. The historically grounded course is to preserve the remaining Orašje bridgehead and keep pressure on the corridor. A Brod counterattack would gamble the withdrawn force against the VRS breakthrough; abandoning the north would release formations but surrender the one Posavina position that remained in the fight.",
+    "trigger_evidence": [
+      "Bosanski Brod fell on 6 October after a shifted VRS attack broke the bridgehead.",
+      "Orašje remains in HVO/ARBiH hands and continues to threaten the corridor."
+    ],
+    "response_options": [
+      {
+        "id": "hold_orasje_bridgehead",
+        "branch_tag": "hrhb_posavina_hold_orasje",
+        "historical_marker": "historical_default",
+        "label": "Hold Orašje; preserve the corridor threat",
+        "description": "Accept the loss of Bosanski Brod and keep the surviving northern effort concentrated on Orašje. The bridgehead remains a live threat to the corridor and prepares for the VRS offensive to come.",
+        "sets_flags": {
+          "hrhb_1992_posavina_posture": "hold_orasje"
+        },
+        "effects": [
+          {
+            "kind": "cost_ledger_annotation",
+            "tag": "hrhb_orasje_commitment_1992",
+            "text": "October 1992: after Bosanski Brod fell, the HVO maintained the Orašje bridgehead and its threat to the corridor.",
+            "faction": "HRHB"
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "orasje_commitment_recorded",
+            "label": "Orašje commitment recorded",
+            "timing": "future",
+            "certainty": "guaranteed",
+            "opens_flags": [ "hrhb_1992_posavina_posture" ],
+            "material_effect_refs": [ "cost_ledger_annotation.hrhb_orasje_commitment_1992" ],
+            "explanation": "Historical record: the Orašje pocket remained held and defeated the November VRS offensive (BB1 p.182). Calibration-inert: the historical default records the posture but does not grant control, supply, or combat bonuses."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "military_credibility", "delta": 3 },
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 2 }
+        ],
+        "aggression_affinity": 0.1,
+        "risk_level": 0.5
+      },
+      {
+        "id": "counterattack_brod",
+        "branch_tag": "hrhb_posavina_counterattack_brod",
+        "historical_marker": "counterfactual",
+        "label": "Order an immediate Bosanski Brod counterattack",
+        "description": "Turn the orderly withdrawal around and try to restore the lost bridgehead before the VRS consolidates. It is a high-risk counterfactual commitment against the breakthrough force.",
+        "sets_flags": {
+          "hrhb_1992_posavina_posture": "counterattack_brod"
+        },
+        "effects": [
+          { "kind": "supply_delta", "faction": "HRHB", "delta": -8 },
+          { "kind": "patron_pressure", "faction": "HRHB", "delta": 4 },
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_brod_counterattack_1992", "text": "October 1992: an immediate counterattack toward Bosanski Brod was ordered after the VRS breakthrough.", "faction": "HRHB" }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "military_credibility", "delta": -4 },
+          { "faction": "HRHB", "dimension": "patron_confidence", "delta": 3 }
+        ],
+        "aggression_affinity": 0.8,
+        "risk_level": 0.9
+      },
+      {
+        "id": "reduce_northern_commitment",
+        "branch_tag": "hrhb_posavina_reduce_commitment",
+        "historical_marker": "counterfactual",
+        "label": "Reduce the northern commitment",
+        "description": "Preserve the withdrawn formations for the Herzegovinian and Central Bosnian heartland. Orašje receives a holding posture rather than the documented sustained commitment.",
+        "sets_flags": {
+          "hrhb_1992_posavina_posture": "reduced"
+        },
+        "effects": [
+          { "kind": "patron_pressure", "faction": "HRHB", "delta": -5 },
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_posavina_reduced_1992", "text": "October 1992: the HVO reduced its northern commitment after Bosanski Brod fell.", "faction": "HRHB" }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 3 },
+          { "faction": "HRHB", "dimension": "military_credibility", "delta": -5 }
+        ],
+        "aggression_affinity": -0.5,
+        "risk_level": 0.4
+      }
+    ]
+  },
+  {
+    "id": "hrhb_jajce_joint_defense_1992",
+    "title": "Jajce: The Alliance Under Fire",
+    "narrative": "Late October 1992. The VRS has tightened its three-axis assault on Jajce. A separate Croat-Serb ceasefire was signed on 9 October, then HVO and Muslim units on the main supply route exchanged fire on 21 October. Yet when the final VRS attack begins on 25 October, the HVO and Territorial Defence defenders still face it together. The Presidency must decide whether to keep that joint defence intact through the assault or break the command arrangement at the moment it is most exposed.",
+    "category": "military",
+    "family": "hrhb_war_direction",
+    "source_tier": "balkan_battlegrounds",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 29,
+      "turn_max": 31,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "croat_republic" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "united_front" },
+          { "type": "flag_equals", "flag": "hrhb_political_goal", "value": "strategic_ambiguity" }
+        ]
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The HZ HB Presidency records whether the mixed Jajce defence remains intact through the final VRS assault."
+    },
+    "requires_player_response": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "maintain_joint_defense",
+    "historical_source": "Balkan Battlegrounds Vol. I, pp. 183-184 (Jajce joint defence, alliance strain, and the 25-29 October 1992 VRS assault).",
+    "source_note": "Balkan Battlegrounds I pp.183-184: HVO and Bosnian Territorial Defence fielded more than 5,500 motivated defenders at Jajce, weakened by the lack of unified command and alliance disputes. Bosnian Croats signed a separate ceasefire on 9 October; Croat and Muslim units exchanged fire on the supply route on 21 October. Nevertheless, both defended Jajce hard during the VRS attack of 25-29 October and yielded only after four days. BB1 explicitly finds no evidence of a Croat-Serb deal over the fall. Historical default maintains the joint defence through defeat.",
+    "staff_assessment": "The alliance is frayed, not absent. Keeping the joint defence intact matches the documented four-day stand and rejects the unsupported deal narrative. Splitting command during the assault prioritizes Herceg-Bosna's chain of command over battlefield unity; an early withdrawal saves forces but concedes the salient before the documented defence is exhausted.",
+    "trigger_evidence": [
+      "The VRS final assault is advancing on three axes after months of step-by-step pressure.",
+      "Despite ceasefire politics and the 21 October clash, HVO and Territorial Defence units remain together in the Jajce defence."
+    ],
+    "response_options": [
+      {
+        "id": "maintain_joint_defense",
+        "branch_tag": "hrhb_jajce_maintain_joint_defense",
+        "historical_marker": "historical_default",
+        "label": "Maintain the joint defence",
+        "description": "Keep HVO and Territorial Defence units in the line through the final assault. The defenders fight together until the salient is militarily beaten, with withdrawal organized toward Travnik.",
+        "sets_flags": {
+          "hrhb_1992_jajce_posture": "joint_defense"
+        },
+        "effects": [
+          {
+            "kind": "cost_ledger_annotation",
+            "tag": "hrhb_jajce_joint_defense_1992",
+            "text": "October 1992: the HVO maintained the joint Jajce defence through the final VRS assault and organized withdrawal only after the position was beaten.",
+            "faction": "HRHB"
+          }
+        ],
+        "future_consequences": [
+          {
+            "id": "jajce_joint_defense_recorded",
+            "label": "Joint Jajce defence recorded",
+            "timing": "future",
+            "certainty": "guaranteed",
+            "opens_flags": [ "hrhb_1992_jajce_posture" ],
+            "material_effect_refs": [ "cost_ledger_annotation.hrhb_jajce_joint_defense_1992" ],
+            "explanation": "Historical record: HVO and TO defenders fought together until Jajce fell on 29 October, with no evidence of a deal (BB1 pp.183-184). Calibration-inert: the historical default does not change control, alliance, supply, or combat values."
+          }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "military_credibility", "delta": 3 },
+          { "faction": "HRHB", "dimension": "international_standing", "delta": 2 },
+          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 2 }
+        ],
+        "aggression_affinity": 0.1,
+        "risk_level": 0.7
+      },
+      {
+        "id": "separate_hvo_command",
+        "branch_tag": "hrhb_jajce_separate_command",
+        "historical_marker": "counterfactual",
+        "label": "Separate the HVO command",
+        "description": "Pull HVO units into a distinct chain of command during the assault. Political control is clearer, but the already-fractured battlefield command loses what unity it retains.",
+        "sets_flags": {
+          "hrhb_1992_jajce_posture": "separate_command"
+        },
+        "effects": [
+          { "kind": "alliance_change", "delta": -0.08 },
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_jajce_separate_command_1992", "text": "October 1992: the HVO separated its Jajce command during the final assault, weakening the mixed defence.", "faction": "HRHB" }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 4 },
+          { "faction": "HRHB", "dimension": "military_credibility", "delta": -5 },
+          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -4 }
+        ],
+        "aggression_affinity": 0.2,
+        "risk_level": 0.8
+      },
+      {
+        "id": "withdraw_before_assault",
+        "branch_tag": "hrhb_jajce_early_withdrawal",
+        "historical_marker": "counterfactual",
+        "label": "Withdraw before the final assault",
+        "description": "Abandon the salient before the documented four-day defence. More formations survive intact, but Jajce and the two power stations are conceded without the historical stand.",
+        "sets_flags": {
+          "hrhb_1992_jajce_posture": "early_withdrawal"
+        },
+        "effects": [
+          { "kind": "alliance_change", "delta": -0.05 },
+          { "kind": "patron_pressure", "faction": "HRHB", "delta": -4 },
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_jajce_early_withdrawal_1992", "text": "October 1992: the HVO ordered an early withdrawal from Jajce before the final VRS assault.", "faction": "HRHB" }
+        ],
+        "dimension_shifts": [
+          { "faction": "HRHB", "dimension": "military_credibility", "delta": -8 },
+          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 2 },
+          { "faction": "HRHB", "dimension": "international_standing", "delta": -3 }
+        ],
+        "aggression_affinity": -0.7,
+        "risk_level": 0.5
+      }
+    ]
   }
 ]

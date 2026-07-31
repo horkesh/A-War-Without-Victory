@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { buildLocalFronts } from '../src/sim/phase_ii/local_front_defense.js';
+import { buildLocalFronts } from '../src/sim/phase_ii/local_front_defense.js'; // legacy-phase-term-ok
 import type { GameState } from '../src/state/game_state.js';
 
 const data = JSON.parse(readFileSync('runs/apr1992_definitive_40w__205b3676c8fe3ce4__w40_n297/final_save.json', 'utf8'));

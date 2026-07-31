@@ -166,6 +166,7 @@ export interface TurnAftermathView {
     friendlyNet: number;
     gains: number;
     losses: number;
+    breakdownComplete: boolean;
     notable: TurnAftermathFlipView[];
   };
   combat: {
@@ -229,7 +230,7 @@ const TURN_AFTERMATH_VIEW_KEYS = [
   'judgment',
   'nextActions',
 ] as const;
-const TURN_AFTERMATH_TERRITORY_KEYS = ['friendlyNet', 'gains', 'losses', 'notable'] as const;
+const TURN_AFTERMATH_TERRITORY_KEYS = ['friendlyNet', 'gains', 'losses', 'breakdownComplete', 'notable'] as const;
 const TURN_AFTERMATH_FLIP_KEYS = ['osid', 'label', 'direction', 'significance', 'from', 'to'] as const;
 const TURN_AFTERMATH_COMBAT_KEYS = ['battleCount', 'friendlyBattleCount', 'friendlyCasualties', 'opposingCasualties', 'territoryFlipsFromBattles'] as const;
 const TURN_AFTERMATH_HUMANITARIAN_KEYS = ['displacedThisTurn', 'hotspotLabel'] as const;
@@ -506,9 +507,13 @@ function buildHeadline(tone: TurnAftermathTone, friendlyNet: number, hasSummary:
   return t('turnAftermath.headline.quiet');
 }
 
-function buildNarrativeLine(tone: TurnAftermathTone): string {
+function buildNarrativeLine(tone: TurnAftermathTone, actionableCount: number): string {
   if (tone === 'gain') return t('turnAftermath.narrative.gain');
-  if (tone === 'loss') return t('turnAftermath.narrative.loss');
+  if (tone === 'loss') {
+    return t(actionableCount > 0
+      ? 'turnAftermath.narrative.lossAction'
+      : 'turnAftermath.narrative.lossHold');
+  }
   if (tone === 'mixed') return t('turnAftermath.narrative.mixed');
   return t('turnAftermath.narrative.quiet');
 }
@@ -952,12 +957,13 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
     dateLabel: turnToDateString(turn),
     playerFaction,
     headline: buildHeadline(tone, friendlyNet, summary != null),
-    narrativeLine: buildNarrativeLine(tone),
+    narrativeLine: buildNarrativeLine(tone, nextActions.actionableCount),
     tone,
     territory: {
       friendlyNet,
       gains,
       losses,
+      breakdownComplete: gains - losses === friendlyNet,
       notable,
     },
     combat: {

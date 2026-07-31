@@ -153,7 +153,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                     <section className="rounded border border-panel-border bg-panel-bg p-3 space-y-2">
                         <div className="flex items-start justify-between gap-3">
                             <div>
-                                <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70">
+                                <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary">
                                     {t('attention.reserveRequests')}
                                 </div>
                                 <div className={`text-xs mt-1 font-semibold ${reserveSummary?.tone === 'critical' ? 'text-amber-400' : 'text-text-primary'}`}>
@@ -187,7 +187,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
 
             {pendingDecisions.length > 0 && (
                 <section className="space-y-2">
-                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary border-b border-panel-border pb-1">
                         {t('attention.presidentialDecisions')}
                     </div>
                     {pendingDecisions.map((decision) => (
@@ -216,7 +216,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
 
             {reviewQueue && reviewQueue.commandInterpretationCount > 0 && (
                 <section className="space-y-2">
-                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary border-b border-panel-border pb-1">
                         {t('attention.commandReactions')}
                     </div>
                     <OrderInterpretationPanel gameState={gameState} playerFaction={playerFaction} />
@@ -225,7 +225,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
 
             {personnelDirectives.length > 0 && (
                 <section className="space-y-2">
-                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary border-b border-panel-border pb-1">
                         {t('attention.personnelDirectives')}
                     </div>
                     {personnelDirectives.map((event) => {
@@ -259,6 +259,14 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                 {isReplacement && event.current_commander_name && (
                                     <div className="text-xs text-text-secondary">
                                         {t('attention.currentCommander')} <span className="text-text-primary font-semibold">{event.current_commander_name}</span>
+                                    </div>
+                                )}
+                                {isReplacement && (
+                                    <div className="rounded border border-amber-400/20 bg-amber-400/[0.05] px-2.5 py-2 text-xs leading-relaxed text-text-secondary">
+                                        {t('attention.replacementHistoricalGuidance', {
+                                            officer: event.officer_name,
+                                            incumbent: event.current_commander_name ?? t('inbox.item.officer.currentCommanderFallback'),
+                                        })}
                                     </div>
                                 )}
 

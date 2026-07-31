@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "packetKind": "local_playtest_evidence",
+  "appVersion": "0.9.9-beta.1",
+  "platform": "desktop",
+  "osFamily": "windows",
+  "currentSurface": "settings",
+  "preferences": {
+    "locale": "en",
+    "reduceMotion": false,
+    "colorblindPreset": "default",
+    "audio": {
+      "muted": false,
+      "masterVolume": 0.5
+    },
+    "crashDiagnosticsConsent": false
+  },
+  "counts": {
+    "breadcrumbs": 0,
+    "crashReports": 0
+  },
+  "breadcrumbs": [],
+  "crashReports": []
+}

@@ -161,7 +161,7 @@ test('formation without hq_sid is skipped', () => {
     assert.strictEqual(report.relocated, 0);
 });
 
-test.skip('phase II brigade HQ uses deepest available fallback when depth-2 not present', () => {
+test.skip('phase II brigade HQ uses deepest available fallback when depth-2 not present', () => { // legacy-phase-term-ok
     const formations: GameState['military']['formations'] = {
         b1: {
             id: 'b1' as FormationId,

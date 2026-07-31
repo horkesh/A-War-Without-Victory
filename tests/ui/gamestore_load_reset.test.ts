@@ -99,7 +99,7 @@ function dirtyStoreState(): void {
             headline: 'Test aftermath',
             narrativeLine: 'A quiet week is still a week of depletion, waiting, and staff work.',
             tone: 'quiet',
-            territory: { friendlyNet: 0, gains: 0, losses: 0, notable: [] },
+            territory: { friendlyNet: 0, gains: 0, losses: 0, breakdownComplete: true, notable: [] },
             combat: { battleCount: 0, friendlyBattleCount: 0, friendlyCasualties: 0, opposingCasualties: 0, territoryFlipsFromBattles: 0 },
             humanitarian: { displacedThisTurn: 0 },
             formations: { spawned: 0, destroyed: 0, ownSpawned: 0, ownDestroyed: 0 },

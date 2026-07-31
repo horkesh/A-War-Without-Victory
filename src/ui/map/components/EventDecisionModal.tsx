@@ -591,7 +591,11 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                 {/* Response options are first-class controls, not footnotes below
                     long dossier copy. Keeping them directly under the title
                     prevents required decisions from looking non-actionable. */}
-                <div className="mb-4" data-testid="event-decision-response-rail">
+                <div
+                    className="mb-4"
+                    data-testid="event-decision-response-rail"
+                    data-event-id={localizedDecision.event_id}
+                >
                     <div className="text-xs font-bold uppercase tracking-[0.15em] text-accent-gold mb-3">
                         {t('eventDecision.presidentialResponse')}
                     </div>

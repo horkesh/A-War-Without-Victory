@@ -8,6 +8,7 @@ import assert from 'node:assert';
 import { test } from 'vitest';
 import { compareEventCandidates, evaluateEvents, filterMutexCandidates } from '../src/sim/events/evaluate_events.js';
 import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
+import { updateEventReadiness } from '../src/sim/events/pressure_system.js';
 import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
 import { triggerMatches } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -529,6 +530,89 @@ test('triggerMatches: turn_min — event with turn_min 40 matches turn 40', () =
     const ev = TEST_HISTORICAL.find((e) => e.id === 'test_mid_war')!;
     const state = minimalState('war', 40);
     assert.strictEqual(triggerMatches(ev, state, 40), true);
+});
+
+test('Operation Neretva 93 cannot fire before its September 1993 historical window', () => {
+    const event = loadedEventById('operation_neretva_93_1993');
+    const earlyState = minimalState('war', 60);
+    earlyState.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
+    earlyState.military.event_flags = { mostar_liberated: true };
+
+    assert.strictEqual(event.trigger.turn_min, 74);
+    assert.strictEqual(triggerMatches(event, earlyState, 60), false);
+
+    const septemberState = minimalState('war', 74);
+    septemberState.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
+    septemberState.military.event_flags = { mostar_liberated: true };
+    assert.strictEqual(triggerMatches(event, septemberState, 74), true);
+});
+
+test('RBiH officer-corps posture breaks the opening decision drought in early summer 1992', () => {
+    const event = loadedEventById('rbih_minority_retention_1992');
+    const beforeWindow = minimalState('war', 11);
+    beforeWindow.military.event_flags = { rbih_state_identity: 'civic' };
+    const openingWindow = minimalState('war', 12);
+    openingWindow.military.event_flags = { rbih_state_identity: 'civic' };
+
+    assert.strictEqual(event.trigger.turn_min, 12);
+    assert.strictEqual(event.trigger.turn_max, 16);
+    assert.strictEqual(triggerMatches(event, beforeWindow, 11), false);
+    assert.strictEqual(triggerMatches(event, openingWindow, 12), true);
+});
+
+test('London Conference can emerge on its historical week from the camp-revelation chain', () => {
+    const event = loadedEventById('london_conference_1992');
+    const beforeConference = minimalState('war', 19);
+    beforeConference.military.event_last_fired_turn = {
+        concentration_camps_revealed_1992: 17,
+    };
+    const conferenceWeek = minimalState('war', 20);
+    conferenceWeek.meta.player_faction = 'RBiH';
+    conferenceWeek.military.event_last_fired_turn = {
+        concentration_camps_revealed_1992: 17,
+    };
+
+    assert.strictEqual(event.trigger.turn_min, 20);
+    assert.strictEqual(triggerMatches(event, beforeConference, 19), false);
+    assert.strictEqual(triggerMatches(event, conferenceWeek, 20), true);
+    updateEventReadiness(conferenceWeek, [event]);
+    const result = evaluateEvents(conferenceWeek, rejectRandomness, 20, [event]);
+    assert.deepStrictEqual(result.fired.map((fired) => fired.id), ['london_conference_1992']);
+});
+
+test('explicitly dated spring 1993 events cannot surface before their first historical week', () => {
+    const firstHistoricalTurns: ReadonlyArray<readonly [string, number]> = [
+        ['csq_accelerated_safe_areas_1993', 61],
+        ['csq_hvo_central_bosnia_offensive_1993', 54],
+        ['ahmici_massacre_1993', 54],
+        ['sovici_doljani_attack_1993', 54],
+        ['trusina_killings_1993', 54],
+        ['east_mostar_siege_1993', 57],
+        ['un_safe_areas_declared_1993', 57],
+    ];
+
+    for (const [eventId, firstTurn] of firstHistoricalTurns) {
+        const event = loadedEventById(eventId);
+        assert.strictEqual(
+            event.trigger.turn_min,
+            firstTurn,
+            `${eventId} should begin at turn ${firstTurn}`,
+        );
+        assert.strictEqual(
+            triggerMatches(event, minimalState('war', firstTurn - 1), firstTurn - 1),
+            false,
+            `${eventId} must not match one week early`,
+        );
+    }
+});
+
+test('the general safe-areas card is the turn-57 Resolution 824 expansion, not a duplicate Resolution 819 card', () => {
+    const event = loadedEventById('un_safe_areas_declared_1993');
+
+    assert.match(event.title ?? '', /824/);
+    assert.doesNotMatch(event.narrative ?? '', /Resolution 819/);
+    assert.strictEqual(event.trigger.turn_min, 57);
+    assert.strictEqual(event.trigger.turn_max, 57);
 });
 
 test('triggerMatches: turn_max — event with turn_max 80 does not match turn 81', () => {

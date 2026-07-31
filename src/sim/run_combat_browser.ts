@@ -29,7 +29,7 @@ export function runPhaseIITurn(
 ): { nextState: GameState; report: PhaseIITurnReport } {
     const working = cloneGameState(state);
     if (working.meta.phase !== 'war') {
-        throw new Error('runPhaseIITurn: state must be in phase_ii');
+        throw new Error('runPhaseIITurn: state must be in phase_ii'); // legacy-phase-term-ok
     }
 
     const report: PhaseIITurnReport = {

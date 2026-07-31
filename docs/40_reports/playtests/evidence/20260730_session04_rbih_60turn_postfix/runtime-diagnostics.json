@@ -1,0 +1,202 @@
+{
+  "session": "20260730_session04_rbih_60turn_postfix",
+  "startedAt": "2026-07-30T14:10:56.916Z",
+  "completedAt": "2026-07-30T14:49:23.102Z",
+  "runtime": {
+    "mode": "Electron desktop, unpackaged development launch against built desktop outputs",
+    "electronExecutable": "node_modules/electron/dist/electron.exe",
+    "packageVersion": "0.9.9-beta.1",
+    "profile": "tmp-playtest-rbih-60turn/session04-profile",
+    "player": "RBiH",
+    "turnStart": 0,
+    "turnEnd": 60,
+    "dateEnd": "1993-05-31"
+  },
+  "save": {
+    "file": "turn60-autosave.json",
+    "bytes": 4783665,
+    "sha256": "15c1c938ec4ceadac12eb4e3a38521f560452fcfb12ea1c0d3c03ac7f377d4b4"
+  },
+  "evidence": {
+    "screenshots": 56,
+    "validScreenshots": 55,
+    "invalidCaptures": [
+      "47-turn54-srebrenica-historical-default-recorded.png"
+    ],
+    "metricRows": 60,
+    "decisionRecords": 9,
+    "acknowledgementRecords": 43
+  },
+  "diagnostics": {
+    "consoleCaptureScope": "post-recovery native-load segment, turns 41-60; pre-turn-40 console arrays were lost when the browser-control kernel reset",
+    "consoleMessages": 58,
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "recoveryNotes": [
+      "Turn 40 duplicate Vance-Owen Accept interaction exceeded the control timeout; autosave proved turn 41 and was copied before process restart.",
+      "Renderer-only save import painted state but left the simulation engine empty; it was rejected after Advance returned No game loaded.",
+      "The production Electron load-state-dialog path was then exercised with only the native picker response test-hooked to the captured autosave; getCurrentGameState verified turn 41 before continuation."
+    ]
+  },
+  "final": {
+    "uiVisibleTerritoryPercent": 23.5,
+    "currentTurnSummaryTerritory": {
+      "turn": 60,
+      "HRHB": 0.124,
+      "RBiH": 0.2347,
+      "RS": 0.6412
+    },
+    "oldestTurnSummaryTerritory": {
+      "turn": 1,
+      "HRHB": 0.1464,
+      "RBiH": 0.3029,
+      "RS": 0.5507
+    },
+    "casualties": {
+      "killed": 9279,
+      "wounded": 37786,
+      "missing_or_captured": 5304
+    },
+    "rbihPersonnel": 162271,
+    "authority": {
+      "current": 100,
+      "last_recovery": 5.75,
+      "last_recovery_source": "international_standing",
+      "lifetime_spent": 0,
+      "max": 100,
+      "reserve": 15,
+      "reserve_max": 15,
+      "spent_this_turn": 0
+    },
+    "pendingEvents": [],
+    "pendingOfficerEvents": [
+      {
+        "event_id": "arrival_arbih_hadzihasanovic_t22",
+        "type": "officer_available",
+        "officer_id": "arbih_hadzihasanovic",
+        "turn": 22
+      },
+      {
+        "event_id": "arrival_arbih_pasalic_t24",
+        "type": "officer_available",
+        "officer_id": "arbih_pasalic",
+        "turn": 24
+      },
+      {
+        "event_id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+        "type": "replacement_suggested",
+        "officer_id": "arbih_sadic",
+        "turn": 44
+      },
+      {
+        "event_id": "army_replacement_arbih_halilovic_t60",
+        "type": "replacement_suggested",
+        "officer_id": "arbih_delic",
+        "turn": 60
+      }
+    ],
+    "eventDecisionLog": [
+      {
+        "decision_source": "player",
+        "event_id": "rbih_state_identity",
+        "faction": "RBiH",
+        "response_id": "civic",
+        "turn": 0
+      },
+      {
+        "decision_source": "player",
+        "event_id": "rbih_paramilitary_policy_1992",
+        "faction": "RBiH",
+        "response_id": "always_deny",
+        "turn": 3
+      },
+      {
+        "decision_source": "player",
+        "event_id": "rbih_minority_retention_1992",
+        "faction": "RBiH",
+        "response_id": "retain_minorities",
+        "turn": 12
+      },
+      {
+        "decision_source": "player",
+        "event_id": "london_conference_1992",
+        "faction": "RBiH",
+        "response_id": "accept_principles",
+        "turn": 20
+      },
+      {
+        "decision_source": "player",
+        "event_id": "ic_pressure_vopp_engagement",
+        "faction": "RBiH",
+        "response_id": "acknowledge_pressure",
+        "turn": 38
+      },
+      {
+        "decision_source": "player",
+        "event_id": "vance_owen_plan_1993",
+        "faction": "RBiH",
+        "response_id": "accept",
+        "turn": 39
+      },
+      {
+        "decision_source": "player",
+        "event_id": "srebrenica_demilitarization_1993",
+        "faction": "RBiH",
+        "response_id": "hide_weapons",
+        "turn": 54
+      }
+    ],
+    "peacePlanHistory": [
+      {
+        "plan_id": "cutileiro",
+        "resolved": true,
+        "responses": {
+          "HRHB": "rejected",
+          "RBiH": "rejected",
+          "RS": "accepted"
+        },
+        "turn_offered": 0
+      },
+      {
+        "plan_id": "vance_owen",
+        "resolved": true,
+        "responses": {
+          "HRHB": "accepted",
+          "RBiH": "accepted",
+          "RS": "rejected"
+        },
+        "turn_offered": 40
+      }
+    ],
+    "peaceCapital": {
+      "civilian_casualties_caused": 1355,
+      "civilians_under_protection": 2909362,
+      "combat_effective_brigades": 88,
+      "enclaves_held": [
+        "sarajevo",
+        "srebrenica",
+        "zepa",
+        "gorazde",
+        "bihac"
+      ],
+      "enclaves_lost": [],
+      "military_casualties_inflicted": 13116,
+      "military_casualties_taken": 51734,
+      "operations_launched": 0,
+      "operations_successful": 0,
+      "peace_plans_accepted": [
+        "vance_owen"
+      ],
+      "peace_plans_rejected": [
+        "cutileiro"
+      ],
+      "refugees_created": 258630,
+      "refugees_received": 596250,
+      "territory_controlled_km2": 12049.54099999999,
+      "territory_controlled_pct": 23.47133778495411,
+      "war_crimes_events": 6
+    }
+  }
+}

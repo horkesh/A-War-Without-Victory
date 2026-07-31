@@ -36,6 +36,66 @@ function formatNumber(n: number): string {
     return String(n);
 }
 
+export interface PeaceWarFactionSummary {
+    brigades: number;
+    personnel: number | null;
+    tanks: number | null;
+    artillery: number | null;
+}
+
+export function buildPeaceWarFactionSummaries(
+    formations: LoadedGameState['formations'],
+): Record<string, PeaceWarFactionSummary> {
+    const totals: Record<string, PeaceWarFactionSummary & {
+        personnelReports: number;
+        tankReports: number;
+        artilleryReports: number;
+    }> = {};
+    for (const formation of formations) {
+        if (formation.kind !== 'brigade') continue;
+        const faction = formation.faction;
+        if (!totals[faction]) {
+            totals[faction] = {
+                brigades: 0,
+                personnel: 0,
+                tanks: 0,
+                artillery: 0,
+                personnelReports: 0,
+                tankReports: 0,
+                artilleryReports: 0,
+            };
+        }
+        const summary = totals[faction];
+        summary.brigades += 1;
+        if (typeof formation.personnel === 'number' && Number.isFinite(formation.personnel)) {
+            summary.personnel = (summary.personnel ?? 0) + formation.personnel;
+            summary.personnelReports += 1;
+        }
+        if (typeof formation.composition?.tanks === 'number' && Number.isFinite(formation.composition.tanks)) {
+            summary.tanks = (summary.tanks ?? 0) + formation.composition.tanks;
+            summary.tankReports += 1;
+        }
+        if (typeof formation.composition?.artillery === 'number' && Number.isFinite(formation.composition.artillery)) {
+            summary.artillery = (summary.artillery ?? 0) + formation.composition.artillery;
+            summary.artilleryReports += 1;
+        }
+    }
+    return Object.fromEntries(Object.entries(totals).map(([faction, summary]) => [
+        faction,
+        {
+            brigades: summary.brigades,
+            personnel: summary.personnelReports === summary.brigades ? summary.personnel : null,
+            tanks: summary.tankReports === summary.brigades ? summary.tanks : null,
+            artillery: summary.artilleryReports === summary.brigades ? summary.artillery : null,
+        },
+    ]));
+}
+
+function formatReportedNumber(value: number | null, compact = false): string {
+    if (value == null) return t('peace.metricUnreported');
+    return compact ? formatNumber(value) : String(value);
+}
+
 // Player factions that have an authored "who you are" identity block.
 // Other player_faction values (or null) simply omit the block.
 const IDENTITY_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
@@ -105,18 +165,7 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
     const date = getPeaceWarTransitionDateLabel(state);
 
     // OOB summary per faction
-    const factionSummary: Record<string, { brigades: number; personnel: number; tanks: number; artillery: number }> = {};
-    for (const f of state.formations) {
-        if (f.kind !== 'brigade') continue;
-        const fid = f.faction;
-        if (!factionSummary[fid]) {
-            factionSummary[fid] = { brigades: 0, personnel: 0, tanks: 0, artillery: 0 };
-        }
-        factionSummary[fid].brigades += 1;
-        factionSummary[fid].personnel += f.personnel ?? 0;
-        factionSummary[fid].tanks += f.composition?.tanks ?? 0;
-        factionSummary[fid].artillery += f.composition?.artillery ?? 0;
-    }
+    const factionSummary = buildPeaceWarFactionSummaries(state.formations);
 
     const factionOrder = ['RBiH', 'RS', 'HRHB'];
 
@@ -163,9 +212,9 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
                             {summary && (
                                 <div className="flex gap-4 text-xs font-mono text-[#8a8578]">
                                     <span>{t('peace.brigadeCount', { count: summary.brigades })}</span>
-                                    <span>{t('peace.personnelShort', { count: formatNumber(summary.personnel) })}</span>
-                                    <span>{t('peace.tankCount', { count: summary.tanks })}</span>
-                                    <span>{t('peace.artyCount', { count: summary.artillery })}</span>
+                                    <span>{t('peace.personnelShort', { count: formatReportedNumber(summary.personnel, true) })}</span>
+                                    <span>{t('peace.tankCount', { count: formatReportedNumber(summary.tanks) })}</span>
+                                    <span>{t('peace.artyCount', { count: formatReportedNumber(summary.artillery) })}</span>
                                 </div>
                             )}
                         </div>

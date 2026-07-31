@@ -807,7 +807,11 @@ function App() {
   }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length, appScreen, shownEventModalIds, eventQueue.length]);
 
   const pendingPeacePlan = loadedGameState?.pendingPeacePlan;
-  const showPeacePlanModal = shouldShowPeacePlanModal(pendingPeacePlan, dismissedPeacePlanKey);
+  const showPeacePlanModal = shouldShowPeacePlanModal(
+    pendingPeacePlan,
+    dismissedPeacePlanKey,
+    loadedGameState?.pendingEventDecisions,
+  );
   const peaceWarTransitionActive = loadedGameState != null && shouldShowPeaceWarTransition(
     loadedGameState,
     peaceWarTransitionSeen,
@@ -1456,8 +1460,8 @@ function App() {
     setSummaryOpen(false);
   };
 
-  const openPersonnelFromDesk = () => {
-    openArmyHQTab(useGameStore.getState(), 'personnel');
+  const openPersonnelFromDesk = (target: 'briefing' | 'personnel') => {
+    openArmyHQTab(useGameStore.getState(), target);
     setSelectedOfficerMatterId(null);
     leaveWarroomForGame();
     setSummaryOpen(false);
@@ -1471,6 +1475,10 @@ function App() {
     }
     if (action === 'army_hq_personnel') {
       setSelectedOfficerMatterId(itemId);
+    }
+    if (action === 'army_hq_briefing') {
+      openArmyHQTab(gs, 'briefing');
+      leaveWarroomForGame();
     }
     if (action === 'event_modal') {
       const eventId = itemId.startsWith('event:') ? itemId.slice('event:'.length) : itemId;
@@ -1782,6 +1790,7 @@ function App() {
       <RootErrorBoundary zone="army hq">
         <ArmyHQModal
           onDecisionRoomNavigateTarget={openDecisionRoomTarget}
+          onReturnToDesk={openWarroomDeskFromField}
           eventCatalog={eventCatalogFull}
           onOpenRecruitment={openRecruitmentModal}
           onOpenAutonomy={() => {
@@ -1993,6 +2002,7 @@ function App() {
                   onReviewPriorities={reviewPreAdvancePriorities}
                   onReviewItem={reviewPreAdvanceItem}
                   onReviewTarget={reviewPreAdvanceTarget}
+                  onResolveBlocker={handlePresidentialInboxAction}
                 />
               ) : null
             )}
@@ -2010,6 +2020,9 @@ function App() {
               }
               if (!command) return;
               if (command.kind === 'advance-turn') {
+                if (turnAftermathOpen) {
+                  setTurnAftermathOpen(false);
+                }
                 setWarroomOverlaySurface(null);
                 setWarroomDeskOpen(false);
                 setWarroomDecisionRoomOpen(false);
@@ -2054,6 +2067,7 @@ function App() {
                 closeWarroomDesk();
               }}
               onReviewAdvance={() => useGameStore.getState().setAdvanceTurnPending(true)}
+              reviewedAftermathTurn={turnAftermath?.turn ?? null}
             />
           )}
           {commandStripOpen && (

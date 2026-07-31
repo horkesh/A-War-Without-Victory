@@ -1,0 +1,79 @@
+{
+  "runId": "20260730_session14_rbih_80turn_complete",
+  "runtime": "Electron production entry with freshly built unpackaged desktop outputs",
+  "packageVersion": "0.9.9-beta.1",
+  "git": {
+    "branch": "main",
+    "head": "b8ff530de08fa23cf38103d8da9557da56296130",
+    "workingTreeWasDirtyBeforeRun": true,
+    "segmentAContentSha256": "ca2d2baabdf6f769d47102f89e96eb168a23f3264e3d0170e553991ef1729b61",
+    "segmentBContentSha256": "f5489960cd8480c44c92690bd4080ed1038649ee757eeb8090469bf9ad5452a3"
+  },
+  "build": {
+    "commands": [
+      "npm.cmd run desktop:map:build",
+      "npm.cmd run desktop:sim:build"
+    ],
+    "packaged": false,
+    "reasonNotPackaged": "The owner explicitly prohibited packaging or release-state changes.",
+    "electronMainSha256": "0511a706fb52c3e3dd8373db2fe7128c422740b123bf09cd42e3bb74eff2c875",
+    "warroomIndexSha256": "8df10740e0f241211e5a1543d06e9d7ecbcad5e74cd6e4a2e8123ea3ade5262c",
+    "tacticalMapIndexSha256": "03f02a820cb8ba1b6172f77e65b83dd8c1290a7dcc883d4e8cfa17c8d95a19e8"
+  },
+  "campaignContinuity": {
+    "continuousCampaign": true,
+    "singleProcess": false,
+    "segmentA": {
+      "runId": "20260730_session07_rbih_80turn",
+      "startTurn": 0,
+      "endTurn": 44,
+      "consoleMessages": 0,
+      "pageErrors": 0,
+      "networkFailures": 0,
+      "mainProcessStderr": 0,
+      "termination": "The exact-response automation stopped instead of guessing when Open personnel exposed no historical-successor action on the Personnel tab."
+    },
+    "resume": {
+      "path": "turn44-resume-autosave.json",
+      "sha256": "4caf95409e33c2c00feeb6f75ac135a9b740eecd7eec2f3af679d029e9039d25",
+      "method": "Electron production native-load handler"
+    },
+    "segmentB": {
+      "runId": "20260730_session13_rbih_80turn_resume44",
+      "startTurn": 44,
+      "endTurn": 80,
+      "consoleMessages": 0,
+      "pageErrors": 0,
+      "networkFailures": 0,
+      "mainProcessStderr": 0,
+      "eventsLogged": 214
+    }
+  },
+  "completion": {
+    "targetTurn": 80,
+    "actualTurn": 80,
+    "playerFaction": "RBiH",
+    "phase": "war",
+    "inGameDate": "1993-10-18",
+    "finalSave": "turn80-autosave.json",
+    "finalSaveSha256": "0241584e3a5a4e8eccab7265871304749c67dfa55e35448cb9b252032b07402f",
+    "playthroughFinalScreenshot": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-213-playthrough-final.png",
+    "campaignStateCapturedBeforePostRunGate": true
+  },
+  "postRunReadabilityGate": {
+    "passed": false,
+    "campaignCompletionAffected": false,
+    "classification": "bug",
+    "finding": "Personnel Directives is below the required small-text contrast threshold.",
+    "occurrences": 4,
+    "fontSizePx": 12,
+    "contrastRatio": 3.67,
+    "selectorClass": "text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1",
+    "source": "segment-b-final-gate-error.txt"
+  },
+  "limitations": [
+    "This is one live Electron campaign, not replay-determinism proof.",
+    "The campaign used a hash-verified technical resume at turn 44.",
+    "Earlier aborted preflight and selector-validation attempts were excluded from campaign evidence."
+  ]
+}

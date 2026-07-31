@@ -145,7 +145,7 @@ test('runDisplacementHooks does not create duplicate hook for same municipality'
     expect(state.displacement.war_displacement_initiated!['MUN_A']).toBe(9);
 });
 
-test('war runTurn default path omits phase_i displacement hooks report', async () => {
+test('war runTurn default path omits phase_i displacement hooks report', async () => { // legacy-phase-term-ok
     const state = stateWithPhaseI();
     const { report } = await runTurn(state, { seed: 'disp-hooks-fixture' });
     expect(report.displacement_hooks).toBe(undefined);

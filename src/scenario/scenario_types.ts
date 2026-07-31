@@ -163,7 +163,7 @@ export interface Scenario {
     supply_reserves_enabled?: boolean;
     /**
      * Stuck-in-Peace-phase fallback: after this many Peace phase turns (since war_start_turn) without transition,
-     * force transition to War phase. Optional; when absent, default 52 is used for phase_0/phase_i starts.
+     * force transition to War phase. Optional; when absent, default 52 is used for phase_0/phase_i starts. // legacy-phase-term-ok
      * See docs/30_planning/PHASE_I_II_EDGE_CASES.md.
      */
     war_force_transition_after_turns?: number;

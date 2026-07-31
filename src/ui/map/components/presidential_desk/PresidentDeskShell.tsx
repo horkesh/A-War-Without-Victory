@@ -24,6 +24,8 @@ export interface PresidentDeskShellProps {
   onClose?: () => void;
   /** Open the advance-turn review modal for blockers or recommended staff review. */
   onReviewAdvance?: () => void;
+  /** Current-session aftermath already presented to the player. */
+  reviewedAftermathTurn?: number | null;
 }
 
 function factionTitle(state: LoadedGameState | null): string {
@@ -45,15 +47,21 @@ export function PresidentDeskShell({
   onOpenChronicle,
   onClose,
   onReviewAdvance,
+  reviewedAftermathTurn,
 }: PresidentDeskShellProps) {
   const shellRef = useRef<HTMLElement | null>(null);
   const items = deriveInboxItems(state, osidNameMap, eventCatalog);
   const actionableCount = countActionableItems(items);
-  const advanceReview = buildPreAdvanceCommandReviewView({ state, osidNameMap });
+  const advanceReview = buildPreAdvanceCommandReviewView({
+    state,
+    osidNameMap,
+    reviewedAftermathTurn,
+  });
   const presidentialBlockers = derivePresidentialBlockers(state, osidNameMap);
   const requiredItemIds = new Set(presidentialBlockers.map((blocker) => blocker.id));
   const blocked = advanceReview.status === 'blocked' || presidentialBlockers.length > 0;
   const reviewRecommended = !blocked && advanceReview.status === 'review';
+  const singleBlocker = presidentialBlockers.length === 1 ? presidentialBlockers[0] : null;
 
   useEffect(() => {
     if (onClose) shellRef.current?.focus();
@@ -116,10 +124,10 @@ export function PresidentDeskShell({
               blocked ? 'text-red-200' : reviewRecommended ? 'text-amber-200' : 'text-green-200'
             }`}>
               {blocked
-                ? t('desk.advance.blocked')
+                ? t('desk.advance.signatureRequired')
                 : reviewRecommended
-                  ? t('desk.advance.reviewRecommended')
-                  : t('desk.advance.ready')}
+                  ? t('desk.advance.staffReview')
+                  : t('desk.advance.noActRequired')}
             </div>
           </div>
         </div>
@@ -135,9 +143,17 @@ export function PresidentDeskShell({
           </button>
           <button
             type="button"
-            onClick={(blocked || reviewRecommended) && onReviewAdvance ? onReviewAdvance : onAdvance}
+            onClick={
+              blocked && singleBlocker
+                ? () => onAction(singleBlocker.action, singleBlocker.id)
+                : (blocked || reviewRecommended) && onReviewAdvance
+                  ? onReviewAdvance
+                  : onAdvance
+            }
             data-testid={
-              blocked
+              blocked && singleBlocker
+                ? 'desk-action-open-required-signature'
+                : blocked
                 ? 'desk-action-review-blockers'
                 : reviewRecommended
                   ? 'desk-action-review-priorities'
@@ -153,10 +169,12 @@ export function PresidentDeskShell({
             ].join(' ')}
           >
             {blocked
-              ? t('desk.action.reviewBlockers')
+              ? singleBlocker
+                ? t('desk.action.openRequiredSignature')
+                : t('desk.action.reviewBlockers')
               : reviewRecommended
-                ? t('desk.action.reviewPriorities')
-                : t('desk.action.advanceClearance')}
+                ? t('desk.action.reviewStaffRecommendation')
+                : t('desk.action.advanceHoldingPolicy')}
           </button>
         </div>
 

@@ -24,6 +24,7 @@ function makeView(): TurnAftermathView {
             friendlyNet: 1,
             gains: 1,
             losses: 0,
+            breakdownComplete: true,
             notable: [{
                 osid: 'op:bihac:kulen_vakuf',
                 label: 'Kulen Vakuf (Bihac)',
@@ -146,6 +147,32 @@ describe('TurnAftermathModal localization', () => {
             .toContain('Srebrenica route; 20 supply points.');
         expect(container.textContent).not.toMatch(/\bconvoy decision\b|convoy_decision/i);
     });
+
+    it('explains when notable territory changes do not reconcile to the net total', () => {
+        const view = makeView();
+        view.territory = {
+            friendlyNet: -2,
+            gains: 0,
+            losses: 0,
+            breakdownComplete: false,
+            notable: [],
+        };
+
+        render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        expect(screen.getByText('0 notable gains / 0 notable losses; net includes 2 other changes.')).toBeTruthy();
+        expect(screen.queryByText('0 gained / 0 lost')).toBeNull();
+    });
+
 
     it('routes top desk items as direct presidential review actions', () => {
         const view = makeView();

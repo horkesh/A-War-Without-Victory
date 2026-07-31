@@ -1,0 +1,377 @@
+[
+  {
+    "turn": 0,
+    "date": "1992-04-06",
+    "eventId": "rbih_state_identity"
+  },
+  {
+    "turn": 1,
+    "date": "1992-04-13",
+    "eventId": "rs_strategic_goals"
+  },
+  {
+    "turn": 2,
+    "date": "1992-04-20",
+    "eventId": "rs_paramilitary_policy_1992"
+  },
+  {
+    "turn": 3,
+    "date": "1992-04-27",
+    "eventId": "arms_embargo_impact_1992"
+  },
+  {
+    "turn": 3,
+    "date": "1992-04-27",
+    "eventId": "rbih_paramilitary_policy_1992"
+  },
+  {
+    "turn": 4,
+    "date": "1992-05-04",
+    "eventId": "battle_of_the_barracks_sarajevo"
+  },
+  {
+    "turn": 4,
+    "date": "1992-05-04",
+    "eventId": "battle_of_the_barracks_tuzla"
+  },
+  {
+    "turn": 4,
+    "date": "1992-05-04",
+    "eventId": "battle_of_the_barracks_visoko"
+  },
+  {
+    "turn": 4,
+    "date": "1992-05-04",
+    "eventId": "battle_of_the_barracks_zenica"
+  },
+  {
+    "turn": 4,
+    "date": "1992-05-04",
+    "eventId": "hrhb_political_goal"
+  },
+  {
+    "turn": 5,
+    "date": "1992-05-11",
+    "eventId": "hrhb_1992_graz_cooperation_collapse"
+  },
+  {
+    "turn": 5,
+    "date": "1992-05-11",
+    "eventId": "jna_withdrawal_1992"
+  },
+  {
+    "turn": 5,
+    "date": "1992-05-11",
+    "eventId": "sarajevo_siege_begins_1992"
+  },
+  {
+    "turn": 6,
+    "date": "1992-05-18",
+    "eventId": "bijeljina_killings_1992"
+  },
+  {
+    "turn": 6,
+    "date": "1992-05-18",
+    "eventId": "csq_accelerated_camps_discovery_1992"
+  },
+  {
+    "turn": 9,
+    "date": "1992-06-08",
+    "eventId": "srebrenica_enclave_forms_1992"
+  },
+  {
+    "turn": 10,
+    "date": "1992-06-15",
+    "eventId": "foca_1992"
+  },
+  {
+    "turn": 10,
+    "date": "1992-06-15",
+    "eventId": "zvornik_takeover_1992"
+  },
+  {
+    "turn": 11,
+    "date": "1992-06-22",
+    "eventId": "drina_valley_ethnic_cleansing_1992"
+  },
+  {
+    "turn": 12,
+    "date": "1992-06-29",
+    "eventId": "mostar_liberation_1992"
+  },
+  {
+    "turn": 12,
+    "date": "1992-06-29",
+    "eventId": "operation_corridor_1992"
+  },
+  {
+    "turn": 12,
+    "date": "1992-06-29",
+    "eventId": "rbih_minority_retention_1992"
+  },
+  {
+    "turn": 12,
+    "date": "1992-06-29",
+    "eventId": "visegrad_1992"
+  },
+  {
+    "turn": 13,
+    "date": "1992-07-06",
+    "eventId": "embargo_croatia_transit_1992"
+  },
+  {
+    "turn": 13,
+    "date": "1992-07-06",
+    "eventId": "hrhb_herceg_bosna_consolidation_1992"
+  },
+  {
+    "turn": 14,
+    "date": "1992-07-13",
+    "eventId": "hrhb_summer_alliance_strain_1992"
+  },
+  {
+    "turn": 14,
+    "date": "1992-07-13",
+    "eventId": "keraterm_camp_1992"
+  },
+  {
+    "turn": 14,
+    "date": "1992-07-13",
+    "eventId": "omarska_camp_1992"
+  },
+  {
+    "turn": 14,
+    "date": "1992-07-13",
+    "eventId": "prijedor_takeover_1992"
+  },
+  {
+    "turn": 14,
+    "date": "1992-07-13",
+    "eventId": "trnopolje_camp_1992"
+  },
+  {
+    "turn": 16,
+    "date": "1992-07-27",
+    "eventId": "hrhb_zagreb_supply_channel_1992"
+  },
+  {
+    "turn": 17,
+    "date": "1992-08-03",
+    "eventId": "concentration_camps_revealed_1992"
+  },
+  {
+    "turn": 18,
+    "date": "1992-08-10",
+    "eventId": "gorazde_pocket_consolidation_1992"
+  },
+  {
+    "turn": 18,
+    "date": "1992-08-10",
+    "eventId": "milosevic_isolation_warning_aug92"
+  },
+  {
+    "turn": 20,
+    "date": "1992-08-24",
+    "eventId": "csq_alliance_drift_silent_w20"
+  },
+  {
+    "turn": 20,
+    "date": "1992-08-24",
+    "eventId": "london_conference_1992"
+  },
+  {
+    "turn": 21,
+    "date": "1992-08-31",
+    "eventId": "csq_paramilitary_authorization_refused"
+  },
+  {
+    "turn": 23,
+    "date": "1992-09-14",
+    "eventId": "hvo_arbih_tensions_rise_1992"
+  },
+  {
+    "turn": 25,
+    "date": "1992-09-28",
+    "eventId": "csq_refugee_absorption_strain"
+  },
+  {
+    "turn": 28,
+    "date": "1992-10-19",
+    "eventId": "jajce_falls_1992"
+  },
+  {
+    "turn": 30,
+    "date": "1992-11-02",
+    "eventId": "csq_civic_identity_consolidation_1993"
+  },
+  {
+    "turn": 30,
+    "date": "1992-11-02",
+    "eventId": "csq_early_war_crimes_tribunal_1993"
+  },
+  {
+    "turn": 35,
+    "date": "1992-12-07",
+    "eventId": "csq_accelerated_safe_areas_1993"
+  },
+  {
+    "turn": 35,
+    "date": "1992-12-07",
+    "eventId": "csq_alliance_holds_past_w35"
+  },
+  {
+    "turn": 36,
+    "date": "1992-12-14",
+    "eventId": "gornji_vakuf_clashes_1993"
+  },
+  {
+    "turn": 38,
+    "date": "1992-12-28",
+    "eventId": "ic_pressure_vopp_engagement"
+  },
+  {
+    "turn": 39,
+    "date": "1993-01-04",
+    "eventId": "kravica_attack_1993"
+  },
+  {
+    "turn": 39,
+    "date": "1993-01-04",
+    "eventId": "vance_owen_plan_1993"
+  },
+  {
+    "turn": 40,
+    "date": "1993-01-11",
+    "eventId": "csq_refugee_labor_mobilization"
+  },
+  {
+    "turn": 40,
+    "date": "1993-01-11",
+    "eventId": "turajlic_assassination_1993"
+  },
+  {
+    "turn": 44,
+    "date": "1993-02-08",
+    "eventId": "us_envoy_appointed_1993"
+  },
+  {
+    "turn": 46,
+    "date": "1993-02-22",
+    "eventId": "un_resolution_808_tribunal_1993"
+  },
+  {
+    "turn": 46,
+    "date": "1993-02-22",
+    "eventId": "zagreb_restrains_boban_vopp"
+  },
+  {
+    "turn": 48,
+    "date": "1993-03-08",
+    "eventId": "csq_hvo_central_bosnia_offensive_1993"
+  },
+  {
+    "turn": 48,
+    "date": "1993-03-08",
+    "eventId": "morillon_enters_srebrenica_1993"
+  },
+  {
+    "turn": 49,
+    "date": "1993-03-15",
+    "eventId": "srebrenica_shelling_1993"
+  },
+  {
+    "turn": 50,
+    "date": "1993-03-22",
+    "eventId": "croat_bosniak_war_begins_1993"
+  },
+  {
+    "turn": 50,
+    "date": "1993-03-22",
+    "eventId": "csq_international_tribunal_observation"
+  },
+  {
+    "turn": 51,
+    "date": "1993-03-29",
+    "eventId": "central_bosnia_fighting_1993"
+  },
+  {
+    "turn": 51,
+    "date": "1993-03-29",
+    "eventId": "east_mostar_siege_1993"
+  },
+  {
+    "turn": 51,
+    "date": "1993-03-29",
+    "eventId": "hrhb_vance_owen_acceptance_1993"
+  },
+  {
+    "turn": 51,
+    "date": "1993-03-29",
+    "eventId": "un_nfz_enforcement_1993"
+  },
+  {
+    "turn": 52,
+    "date": "1993-04-05",
+    "eventId": "croatia_herceg_bosna_control_1993"
+  },
+  {
+    "turn": 52,
+    "date": "1993-04-05",
+    "eventId": "hrhb_central_bosnia_defense_1993"
+  },
+  {
+    "turn": 53,
+    "date": "1993-04-12",
+    "eventId": "sovici_doljani_attack_1993"
+  },
+  {
+    "turn": 53,
+    "date": "1993-04-12",
+    "eventId": "trusina_killings_1993"
+  },
+  {
+    "turn": 54,
+    "date": "1993-04-19",
+    "eventId": "milosevic_vopp_pressure"
+  },
+  {
+    "turn": 54,
+    "date": "1993-04-19",
+    "eventId": "srebrenica_demilitarization_1993"
+  },
+  {
+    "turn": 54,
+    "date": "1993-04-19",
+    "eventId": "un_resolution_819_srebrenica_1993"
+  },
+  {
+    "turn": 54,
+    "date": "1993-04-19",
+    "eventId": "un_resolution_820_sanctions_1993"
+  },
+  {
+    "turn": 54,
+    "date": "1993-04-19",
+    "eventId": "un_safe_areas_declared_1993"
+  },
+  {
+    "turn": 55,
+    "date": "1993-04-26",
+    "eventId": "vitez_kiseljak_pockets_1993"
+  },
+  {
+    "turn": 56,
+    "date": "1993-05-03",
+    "eventId": "rs_assembly_rejects_voplan_1993"
+  },
+  {
+    "turn": 60,
+    "date": "1993-05-31",
+    "eventId": "battle_of_travnik_1993"
+  },
+  {
+    "turn": 60,
+    "date": "1993-05-31",
+    "eventId": "icty_established_1993"
+  }
+]

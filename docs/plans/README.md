@@ -11,16 +11,20 @@
 | 1.0 go/no-go definition | [2026-06-08-v1.0-definition-of-done.md](2026-06-08-v1.0-definition-of-done.md) |
 | Pyrrhic decision register | [2026-06-07-owner-decision-backlog.md](2026-06-07-owner-decision-backlog.md) |
 | Execution-plan handoff standard | [PLAN_EXECUTION_STANDARD.md](PLAN_EXECUTION_STANDARD.md) |
+| Operational/Tactical Group lifecycle and convergence closeout | [2026-07-31-operational-tactical-group-closeout-implementation-plan.md](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
+| RS 104-week Desk -> Decision -> Advance friction remediation | [2026-07-31-rs-104week-friction-remediation-plan.md](2026-07-31-rs-104week-friction-remediation-plan.md) |
 | Post-D2 residuals and do-not-autobuild list | [POST_D2_RESIDUALS.md](POST_D2_RESIDUALS.md) |
 
 ## Current State
 
-As of 2026-07-15, the GUI decision-access runway remains merged, the RBiH remediation replay remains complete, and the owner-directed RS 52-week canon/player-experience packet is complete locally on fresh `rs-52w-canon-player-experience-final-v17`. The remaining 1.0 path is:
+As of 2026-07-31, the GUI decision-access runway remains merged and seven subsequent RBiH/RS/HRHB Electron owner diaries have exercised 10 to 104 turns. Their confirmed bugs have been remediated locally and are indexed in [the D2 owner diary closeout](../40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md). The remaining 1.0 path is:
 
-1. D2 owner full-campaign playthrough.
+1. Execute the active RS 104-week friction and Operational/Tactical Group closeout lanes, then run a fresh owner validation diary.
 2. D3 operator release gate.
 3. D4 final docs/release sweep.
 4. 1.0 tag.
+
+The 2026-07-31 operational/tactical-group audit supersedes the old “Tactical Groups = fully done” shorthand. The donor-backed offensive TG core is live and well tested, but lifecycle/AHQ status, dissolution telemetry, legacy-path convergence, and promotion identity still require closeout. Phases 0–2 of the [execution plan](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) are ready now; behavior-moving exhaustion, promotion-history, and Standing-OG doctrine work remain explicitly gated. D2 evidence work may continue, but D3 must not treat the system as fully closed until the command-board lane is green or explicitly waived.
 
 Historical execution packets in this folder are retained for traceability. Do not treat a dated plan as active unless the command board or this index points to it.
 

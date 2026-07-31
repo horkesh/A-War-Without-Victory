@@ -424,6 +424,8 @@ describe('decision family modals', () => {
             turn: 1,
             officer_id: 'second-officer',
             officer_name: 'Second Officer',
+            current_commander_id: 'incumbent-officer',
+            current_commander_name: 'Incumbent Officer',
             officer_competence: 4,
             officer_aggressiveness: 3,
             officer_defensive_skill: 4,
@@ -438,14 +440,46 @@ describe('decision family modals', () => {
 
     expect(screen.getByText('Second Officer')).toBeTruthy();
     expect(screen.queryByText('First Officer')).toBeNull();
+    expect(screen.getByText(/Historical staff recommendation: appoint Second Officer/)).toBeTruthy();
+    expect(screen.getByText(/Leaving this pending keeps Incumbent Officer in command/)).toBeTruthy();
 
-    expect(screen.queryByRole('button', { name: 'Acknowledge arrival' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'File availability notice' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Keep current commander' }));
     await waitFor(() => expect(acknowledgeOfficerEvent).toHaveBeenCalledWith('evt-second'));
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('labels a new officer arrival as an acknowledgement rather than a retention decision', () => {
+  it('routes replacement recommendations to the Briefing action that can appoint the successor', () => {
+    const onOpenPersonnel = vi.fn();
+    render(React.createElement(OfficerMatterModal, {
+      itemId: 'officer:replacement_suggested:successor',
+      state: makeState({
+        pendingOfficerEvents: [{
+          event_id: 'replacement-event',
+          type: 'replacement_suggested',
+          faction: 'RS',
+          turn: 1,
+          officer_id: 'successor',
+          officer_name: 'Historical Successor',
+          current_commander_id: 'incumbent',
+          current_commander_name: 'Incumbent Commander',
+          officer_competence: 4,
+          officer_aggressiveness: 3,
+          officer_defensive_skill: 4,
+          acknowledged: false,
+        }],
+      }),
+      onClose: vi.fn(),
+      onOpenPersonnel,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open personnel' }));
+
+    expect(onOpenPersonnel).toHaveBeenCalledWith('briefing');
+  });
+
+  it('labels a new officer arrival as filing a notice rather than an appointment', () => {
+    const onOpenPersonnel = vi.fn();
     render(React.createElement(OfficerMatterModal, {
       itemId: 'officer:arrival-event',
       state: makeState({
@@ -463,11 +497,16 @@ describe('decision family modals', () => {
         }],
       }),
       onClose: vi.fn(),
-      onOpenPersonnel: vi.fn(),
+      onOpenPersonnel,
     }));
 
-    expect(screen.getByRole('button', { name: 'Acknowledge arrival' })).toBeTruthy();
+    expect(screen.getByText(/adds Arriving Officer to the reserve pool/i)).toBeTruthy();
+    expect(screen.getByText(/does not appoint or reassign anyone/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'File availability notice' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Keep current commander' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open personnel' }));
+    expect(onOpenPersonnel).toHaveBeenCalledWith('personnel');
   });
 
   it('does not substitute the first officer matter when the requested id is stale', () => {

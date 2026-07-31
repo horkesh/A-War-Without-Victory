@@ -63,4 +63,17 @@ describe('presidential modal stack priority', () => {
     expect(eventModalRenderBlock).toContain('activeEventDecisionId === null');
     expect(eventModalRenderBlock).toContain('!turnAftermathOpen');
   });
+
+  it('acknowledges turn aftermath before opening Warroom advance review', () => {
+    const app = readApp();
+    const navigateStart = app.indexOf('onNavigate={(command) =>');
+    const advanceStart = app.indexOf("if (command.kind === 'advance-turn')", navigateStart);
+    const applyIndex = app.indexOf('applyShellCommand(command);', advanceStart);
+    const advanceBlock = app.slice(advanceStart, applyIndex);
+
+    expect(navigateStart).toBeGreaterThanOrEqual(0);
+    expect(advanceStart).toBeGreaterThan(navigateStart);
+    expect(advanceBlock).toContain('if (turnAftermathOpen)');
+    expect(advanceBlock).toContain('setTurnAftermathOpen(false);');
+  });
 });

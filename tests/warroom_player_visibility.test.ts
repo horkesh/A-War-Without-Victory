@@ -522,7 +522,7 @@ describe('warroom player visibility', () => {
 
     expect(source).not.toContain('Settlement ID');
     expect(source).not.toContain('Municipality ID');
-    expect(source).not.toContain('[PHASE II]');
+    expect(source).not.toContain('[PHASE II]'); // legacy-phase-term-ok
     expect(source).not.toContain('Modify Garrison');
     expect(source).toContain('Administrative Region');
     expect(source).toContain('Garrison Intelligence');

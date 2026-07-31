@@ -10,6 +10,8 @@ import {
     tickEliteLoans,
     evaluateArmyReserveAssignments,
     generateArmyReserveRequests,
+    holdReserveAtMainStaff,
+    STANDING_RESERVE_HOLD_REASON,
 } from '../src/sim/combat/army_reserve_system.js';
 import {
     classifyBrigadesByTerritory,
@@ -112,6 +114,7 @@ function makeState(overrides: {
     corps_command?: Record<string, any>;
     corps_front_sectors?: Record<string, any>;
     pending_reserve_requests?: any[];
+    reserve_request_history?: any[];
     player_faction?: string | null;
     turn?: number;
 } = {}): GameState {
@@ -128,6 +131,7 @@ function makeState(overrides: {
             corps_command: overrides.corps_command ?? {},
             corps_front_sectors: overrides.corps_front_sectors ?? {},
             pending_reserve_requests: overrides.pending_reserve_requests ?? [],
+            reserve_request_history: overrides.reserve_request_history ?? [],
             elite_brigade_tracker: {},
         },
         factions: [],
@@ -806,6 +810,39 @@ describe('tickEliteLoans', () => {
 
         // Still on loan (min duration not met)
         expect(brigade.elite_loan_state!.on_loan).toBe(true);
+    });
+
+    it('keeps a healthy elite on an active operation after the former twelve-turn cap', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'active_operation',
+                        phase: 'execution',
+                        participating_brigades: ['rs_1st_guards'],
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                sector_a: {
+                    corps_id: 'vrs_drina',
+                    threat_ratio: 2,
+                    assigned_brigade_ids: ['rs_1st_guards'],
+                },
+            },
+            turn: 13,
+        });
+        deployEliteLoan(state, 'rs_1st_guards', 'vrs_drina', 'offensive_support', 1, 0);
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        brigade.elite_loan_state!.loan_start_turn = 0;
+
+        tickEliteLoans(state, 13);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
     });
 
     it('voluntary recalls after min duration when op ended and threat low', () => {
@@ -1709,5 +1746,106 @@ describe('generateArmyReserveRequests', () => {
             /vrs_2nd_krajina|zone:|3 brigade\(s\)/,
         );
         expect(state.military.pending_reserve_requests?.[0].priority).toBeGreaterThan(0);
+    });
+
+    it('records a standing Main Staff hold against the suggested elite and clears the current request', () => {
+        const elite = makeElite('rs_1st_guards', 'RS', 'op:mun:o1');
+        const state = makeState({
+            formations: { rs_1st_guards: elite },
+            pending_reserve_requests: [{
+                request_id: 'req:10:vrs_drina:defensive_gap',
+                corps_id: 'vrs_drina',
+                faction: 'RS',
+                reason: 'defensive_gap',
+                priority: 70,
+                travel_hops: 1,
+                turn_requested: 10,
+                description: 'Drina Corps requests reinforcement.',
+                suggested_brigade_id: 'rs_1st_guards',
+            }],
+            player_faction: 'RS',
+            turn: 10,
+        });
+
+        expect(holdReserveAtMainStaff(state, 'req:10:vrs_drina:defensive_gap')).toEqual({ ok: true });
+        expect(state.military.pending_reserve_requests).toEqual([]);
+        expect(state.military.reserve_request_history).toEqual([
+            expect.objectContaining({
+                request_id: 'req:10:vrs_drina:defensive_gap',
+                brigade_id: 'rs_1st_guards',
+                outcome: 'declined',
+                decided_by: 'player',
+                reason: STANDING_RESERVE_HOLD_REASON,
+            }),
+        ]);
+    });
+
+    it('suppresses routine re-prompts for a held elite but re-prompts on a critical commander request', () => {
+        const adj = chainAdj(6);
+        const elite = makeElite('rs_1st_guards', 'RS', 'op:mun:o1');
+        const frontline = {
+            id: 'vrs_drina_bde_1',
+            faction: 'RS',
+            name: 'Drina Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            personnel: 1200,
+            morale: 65,
+            cohesion: 55,
+            corps_id: 'vrs_drina',
+            location_osid: 'op:mun:o3',
+            home_osid: 'op:mun:o3',
+        } as unknown as FormationState;
+        const state = makeState({
+            formations: {
+                rs_1st_guards: elite,
+                vrs_drina_bde_1: frontline,
+            },
+            corps_command: {
+                vrs_drina: {
+                    commander_reinforcement_requests: [],
+                    active_operations: [],
+                },
+            },
+            corps_front_sectors: {
+                sec_a: {
+                    corps_id: 'vrs_drina',
+                    threat_ratio: 2.6,
+                    assigned_brigade_ids: ['vrs_drina_bde_1'],
+                },
+            },
+            reserve_request_history: [{
+                request_id: 'req:9:vrs_drina:defensive_gap',
+                turn: 9,
+                faction: 'RS',
+                corps_id: 'vrs_drina',
+                brigade_id: 'rs_1st_guards',
+                outcome: 'declined',
+                reason: STANDING_RESERVE_HOLD_REASON,
+                decided_by: 'player',
+                purpose: 'defensive',
+                why_needed: 'Thin line.',
+                how_to_use: 'Reinforce the sector.',
+            }],
+            player_faction: 'RS',
+            turn: 10,
+        });
+        makeChainFriendlyToCorps(state, 'RS');
+
+        generateArmyReserveRequests(state, adj);
+        expect(state.military.pending_reserve_requests).toEqual([]);
+
+        state.military.corps_command!.vrs_drina!.commander_reinforcement_requests = [
+            { zone_id: 'zone:vrs_drina:birac', brigades_needed: 2, priority: 'critical' },
+        ];
+        state.meta.turn = 11;
+        generateArmyReserveRequests(state, adj);
+
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
+        expect(state.military.pending_reserve_requests?.[0]).toMatchObject({
+            commander_request_priority: 'critical',
+            suggested_brigade_id: 'rs_1st_guards',
+        });
     });
 });

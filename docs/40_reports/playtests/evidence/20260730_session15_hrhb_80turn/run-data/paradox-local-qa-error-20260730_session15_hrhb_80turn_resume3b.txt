@@ -1,0 +1,4 @@
+Error: Insufficient exact formation-counter coverage: required 5, verified 3
+    at mapInteractionProbe (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:2683:13)
+    at async runFaction (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4478:7)
+    at async F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4569:5

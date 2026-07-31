@@ -474,19 +474,30 @@ function StrategicObjectivesSection({ objectives }: { objectives: FactionStrateg
                                 />
                                 <div className="grid grid-cols-[8.5rem_minmax(0,1fr)] items-center gap-2 pt-0.5">
                                     <span className="text-text-secondary">{t('warSummary.objective.nextLever')}</span>
-                                    <button
-                                        type="button"
-                                        data-owner={objective.nextLever.owner}
-                                        onClick={() => openPresidentialDecisionRoomNavigationTarget(
-                                            objective.nextLever.navigationTarget,
-                                            useGameStore.getState(),
-                                        )}
-                                        aria-label={`${owner}: ${objective.nextLever.label}`}
-                                        className="min-h-7 min-w-0 rounded border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-left text-[12px] font-semibold text-amber-300 hover:bg-amber-400/15"
-                                    >
-                                        <span className="block text-text-secondary">{owner}</span>
-                                        <span className="block">{objective.nextLever.label}</span>
-                                    </button>
+                                    {objective.nextLever.available ? (
+                                        <button
+                                            type="button"
+                                            data-owner={objective.nextLever.owner}
+                                            onClick={() => openPresidentialDecisionRoomNavigationTarget(
+                                                objective.nextLever.navigationTarget,
+                                                useGameStore.getState(),
+                                            )}
+                                            aria-label={`${owner}: ${objective.nextLever.label}`}
+                                            className="min-h-7 min-w-0 rounded border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-left text-[12px] font-semibold text-amber-300 hover:bg-amber-400/15"
+                                        >
+                                            <span className="block text-text-secondary">{owner}</span>
+                                            <span className="block">{objective.nextLever.label}</span>
+                                        </button>
+                                    ) : (
+                                        <div
+                                            data-testid="strategic-objective-no-filed-action"
+                                            data-owner={objective.nextLever.owner}
+                                            className="min-h-7 min-w-0 rounded border border-panel-border bg-panel-bg/60 px-2 py-1 text-left text-[12px] font-semibold text-text-secondary"
+                                        >
+                                            <span className="block text-text-muted">{owner}</span>
+                                            <span className="block">{objective.nextLever.label}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </article>

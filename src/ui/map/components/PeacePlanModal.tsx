@@ -35,6 +35,9 @@ const INSTITUTIONAL_LABELS: Record<string, string> = {
     loose_confederation: 'Loose Confederation',
     unitary: 'Unitary State',
     '10_provinces': '10 Decentralized Provinces',
+    union_3_republics: 'Union of Three Republics',
+    '51_49_entities': '51/49 Entity Framework',
+    two_entities: 'Two-Entity Federation',
 };
 
 const FACTION_ORDER = ['RBiH', 'RS', 'HRHB'] as const;
@@ -138,27 +141,41 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
         >
             <>
                 {/* Header — document stamp */}
-                <div className="relative px-8 pt-8 pb-4 border-b-2 border-[#8a7a60]/30">
+                <div
+                    data-testid="peace-plan-header"
+                    className="relative isolate px-8 pt-8 pb-4 border-b-2 border-[#8a7a60]/30"
+                >
                     {headerImage && (
                         <img
                             src={headerImage}
-                            alt="Diplomatic decision header"
-                            className="absolute inset-x-0 top-0 h-28 w-full object-cover opacity-35"
+                            alt=""
+                            aria-hidden="true"
+                            data-testid="peace-plan-header-art"
+                            className="pointer-events-none absolute inset-x-0 top-0 h-28 w-full object-cover opacity-35"
                         />
                     )}
-                    <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#1b130c]/35 to-transparent" />
-                    <div className="absolute top-4 right-4 text-xs uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
+                    <div
+                        aria-hidden="true"
+                        data-testid="peace-plan-header-overlay"
+                        className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#1b130c]/35 to-transparent"
+                    />
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute top-4 right-4 text-xs uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded"
+                    >
                         DIPLOMATIC
                     </div>
-                    <div className="text-xs uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
-                        International Peace Proposal
-                    </div>
-                    <h2 id="peace-plan-title" className="text-[20px] font-bold text-[#2a2016] leading-tight">
-                        {plan.planName}
-                    </h2>
-                    <div className="text-xs text-[#6a5a40] mt-1"
-                         style={{ fontFamily: 'Courier New, monospace' }}>
-                        {t('peacePlan.proposedDate', { date: turnToDateString(plan.turnOffered) })}
+                    <div data-testid="peace-plan-header-content" className="relative">
+                        <div className="text-xs uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
+                            International Peace Proposal
+                        </div>
+                        <h2 id="peace-plan-title" className="text-[20px] font-bold text-[#2a2016] leading-tight">
+                            {plan.planName}
+                        </h2>
+                        <div className="text-xs text-[#6a5a40] mt-1"
+                             style={{ fontFamily: 'Courier New, monospace' }}>
+                            {t('peacePlan.proposedDate', { date: turnToDateString(plan.turnOffered) })}
+                        </div>
                     </div>
                 </div>
 

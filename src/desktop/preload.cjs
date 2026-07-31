@@ -92,6 +92,7 @@ contextBridge.exposeInMainWorld('awwv', {
   dismissEventNotification: (notificationId) => ipcRenderer.invoke('dismiss-event-notification', { notificationId }),
   respondToEventDecision: (eventId, responseId) => ipcRenderer.invoke('respond-to-event-decision', { eventId, responseId }),
   approveReserveRequest: (requestId, brigadeId, reason) => ipcRenderer.invoke('approve-reserve-request', { requestId, brigadeId, reason }),
+  holdReserveAtMainStaff: (requestId) => ipcRenderer.invoke('hold-reserve-at-main-staff', { requestId }),
   declineReserveRequest: (requestId, reason) => ipcRenderer.invoke('decline-reserve-request', { requestId, reason }),
   recallEliteBrigade: (brigadeId, reason) => ipcRenderer.invoke('recall-elite-brigade', { brigadeId, reason }),
   redirectReserveLoan: (brigadeId, newCorpsId) => ipcRenderer.invoke('redirect-reserve-loan', { brigadeId, newCorpsId }),

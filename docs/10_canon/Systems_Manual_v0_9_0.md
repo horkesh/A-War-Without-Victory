@@ -437,6 +437,8 @@ Report: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/2
 - Player manually recalls → `player_recall`.
 - Force-recall conditions → `casualty_threshold` (≥30% personnel lost), `morale_collapse` (morale < 35), `cohesion_collapse` (cohesion < 25), or `permanent_degradation` (≥50% personnel lost — elite status permanently revoked).
 
+Elapsed turns alone are not a recall condition. A healthy brigade supporting an active operation remains loaned beyond turn 12 or any other fixed duration; only the lifecycle conditions above may end the episode.
+
 **Request priority scoring:** Corps submit `ArmyReserveRequest` with a reason (`offensive_support`, `defensive_gap`, `exploitation`, `enclave_relief`). Raw priority is computed from operational need; geographic penalty (BFS hop distance from nearest available brigade to requesting corps) reduces the effective priority. `MAX_AUTO_DEPLOY_HOPS = 8` — bot AI will not auto-assign a brigade beyond this distance.
 
 **Implementation-note (request matching and movement continuity, 2026-07-15):** Feasible request-to-elite edges are matched globally in deterministic priority/corps/brigade order, so one brigade cannot be suggested to multiple simultaneous requests and one request receives at most one brigade. Once loaned, an elite formation outside the receiving corps territory retains or reacquires a legal column-movement order until it arrives, is recalled, or the loan otherwise ends.
@@ -854,6 +856,10 @@ Treaties contain territorial clauses (transfer_settlements or recognize_control_
 Any peace-triggering treaty must explicitly include brcko_special_status. Otherwise it is rejected with rejection_reason = brcko_unresolved.
 
 **Vance-Owen decision ownership (2026-07-12):** The peace-plan resolution is the single player-decision owner. Accepting or rejecting Vance-Owen synchronizes the matching event decision, consumes any duplicate pending event, writes one durable event-decision receipt, and appends one peace-plan-history chronology row. The event queue must not ask or record the same choice a second time.
+
+**Owen-Stoltenberg staged ownership (2026-07-30):** For an RBiH player, the Presidency review owns the documented conditional-acceptance stage and the later Assembly event owns the final RBiH disposition. Conditional acceptance at the Presidency clears the legacy peace-plan surface but does not append a final peace-plan-history row or end the war. The Assembly appends exactly one final chronology row. The legacy peace-plan modal and Desk item remain suppressed while either canonical stage is pending.
+
+**Cutileiro historical-disposition normalization (2026-07-31):** Cutileiro is a pre-war diplomatic record, not a week-one emergent settlement vote. When the player selects that faction's documented Cutileiro response, resolution normalizes all three delegations to the documented final disposition: RBiH rejected; RS and HRHB accepted. Because unanimity is absent, an HRHB historical acceptance does not end a live war campaign. A counterfactual player response continues to use the normal emergent response computation. This exception is limited to Cutileiro and does not weaken the terminal rule for an actually unanimous peace-triggering treaty.
 
 ### 20.3 Institutional competences
 

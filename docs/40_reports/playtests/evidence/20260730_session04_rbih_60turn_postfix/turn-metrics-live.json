@@ -1,0 +1,1047 @@
+[
+  {
+    "turn": 1,
+    "date": "1992-04-13",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 1405,
+    "wounded": 4963,
+    "missing_or_captured": 197,
+    "rbih_personnel": 42533,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 2,
+    "date": "1992-04-20",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 1713,
+    "wounded": 6141,
+    "missing_or_captured": 301,
+    "rbih_personnel": 41071,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 3,
+    "date": "1992-04-27",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 1968,
+    "wounded": 7128,
+    "missing_or_captured": 400,
+    "rbih_personnel": 39831,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [
+      "rbih_paramilitary_policy_1992"
+    ],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 4,
+    "date": "1992-05-04",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 2207,
+    "wounded": 8070,
+    "missing_or_captured": 498,
+    "rbih_personnel": 38572,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 5,
+    "date": "1992-05-11",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 2447,
+    "wounded": 8998,
+    "missing_or_captured": 589,
+    "rbih_personnel": 37322,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 6,
+    "date": "1992-05-18",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 2492,
+    "wounded": 9234,
+    "missing_or_captured": 660,
+    "rbih_personnel": 37165,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 7,
+    "date": "1992-05-25",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 2514,
+    "wounded": 9393,
+    "missing_or_captured": 729,
+    "rbih_personnel": 37143,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 8,
+    "date": "1992-06-01",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 2541,
+    "wounded": 9564,
+    "missing_or_captured": 800,
+    "rbih_personnel": 37523,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 9,
+    "date": "1992-06-08",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 2561,
+    "wounded": 9702,
+    "missing_or_captured": 869,
+    "rbih_personnel": 41856,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 10,
+    "date": "1992-06-15",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 2660,
+    "wounded": 10127,
+    "missing_or_captured": 950,
+    "rbih_personnel": 44778,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 11,
+    "date": "1992-06-22",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 2702,
+    "wounded": 10359,
+    "missing_or_captured": 1025,
+    "rbih_personnel": 47065,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 12,
+    "date": "1992-06-29",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 2821,
+    "wounded": 10852,
+    "missing_or_captured": 1103,
+    "rbih_personnel": 50455,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [
+      "rbih_minority_retention_1992"
+    ],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 13,
+    "date": "1992-07-06",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 3060,
+    "wounded": 11745,
+    "missing_or_captured": 1195,
+    "rbih_personnel": 53096,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 14,
+    "date": "1992-07-13",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 3257,
+    "wounded": 12484,
+    "missing_or_captured": 1279,
+    "rbih_personnel": 55862,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 15,
+    "date": "1992-07-20",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 3360,
+    "wounded": 12923,
+    "missing_or_captured": 1358,
+    "rbih_personnel": 59050,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 16,
+    "date": "1992-07-27",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 3529,
+    "wounded": 13580,
+    "missing_or_captured": 1444,
+    "rbih_personnel": 62065,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 17,
+    "date": "1992-08-03",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 3677,
+    "wounded": 14166,
+    "missing_or_captured": 1526,
+    "rbih_personnel": 64784,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 18,
+    "date": "1992-08-10",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 3813,
+    "wounded": 14723,
+    "missing_or_captured": 1611,
+    "rbih_personnel": 67459,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 19,
+    "date": "1992-08-17",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 3938,
+    "wounded": 15246,
+    "missing_or_captured": 1701,
+    "rbih_personnel": 69841,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 20,
+    "date": "1992-08-24",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4039,
+    "wounded": 15690,
+    "missing_or_captured": 1790,
+    "rbih_personnel": 71515,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [
+      "london_conference_1992"
+    ],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 21,
+    "date": "1992-08-31",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4149,
+    "wounded": 16161,
+    "missing_or_captured": 1880,
+    "rbih_personnel": 73291,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": []
+  },
+  {
+    "turn": 22,
+    "date": "1992-09-07",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4236,
+    "wounded": 16546,
+    "missing_or_captured": 1961,
+    "rbih_personnel": 75981,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22"
+    ]
+  },
+  {
+    "turn": 23,
+    "date": "1992-09-14",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4319,
+    "wounded": 16912,
+    "missing_or_captured": 2041,
+    "rbih_personnel": 77975,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22"
+    ]
+  },
+  {
+    "turn": 24,
+    "date": "1992-09-21",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4389,
+    "wounded": 17237,
+    "missing_or_captured": 2120,
+    "rbih_personnel": 79713,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 25,
+    "date": "1992-09-28",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4502,
+    "wounded": 17717,
+    "missing_or_captured": 2209,
+    "rbih_personnel": 81787,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 26,
+    "date": "1992-10-05",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4592,
+    "wounded": 18116,
+    "missing_or_captured": 2289,
+    "rbih_personnel": 84602,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 27,
+    "date": "1992-10-12",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4675,
+    "wounded": 18490,
+    "missing_or_captured": 2370,
+    "rbih_personnel": 87823,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 28,
+    "date": "1992-10-19",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4784,
+    "wounded": 18960,
+    "missing_or_captured": 2458,
+    "rbih_personnel": 90564,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 29,
+    "date": "1992-10-26",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4875,
+    "wounded": 19366,
+    "missing_or_captured": 2544,
+    "rbih_personnel": 94794,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 30,
+    "date": "1992-11-02",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 4971,
+    "wounded": 19788,
+    "missing_or_captured": 2629,
+    "rbih_personnel": 97468,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 31,
+    "date": "1992-11-09",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 5070,
+    "wounded": 20222,
+    "missing_or_captured": 2714,
+    "rbih_personnel": 99683,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 32,
+    "date": "1992-11-16",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 5170,
+    "wounded": 20661,
+    "missing_or_captured": 2799,
+    "rbih_personnel": 102738,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 33,
+    "date": "1992-11-23",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 5273,
+    "wounded": 21112,
+    "missing_or_captured": 2881,
+    "rbih_personnel": 104813,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 34,
+    "date": "1992-11-30",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 5373,
+    "wounded": 21562,
+    "missing_or_captured": 2963,
+    "rbih_personnel": 107271,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 35,
+    "date": "1992-12-07",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 5477,
+    "wounded": 22013,
+    "missing_or_captured": 3045,
+    "rbih_personnel": 110974,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 36,
+    "date": "1992-12-14",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 5619,
+    "wounded": 22599,
+    "missing_or_captured": 3132,
+    "rbih_personnel": 113219,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 37,
+    "date": "1992-12-21",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 5723,
+    "wounded": 23057,
+    "missing_or_captured": 3216,
+    "rbih_personnel": 116570,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 38,
+    "date": "1992-12-28",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 5866,
+    "wounded": 23651,
+    "missing_or_captured": 3306,
+    "rbih_personnel": 120647,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [
+      "ic_pressure_vopp_engagement"
+    ],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 39,
+    "date": "1993-01-04",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 5978,
+    "wounded": 24134,
+    "missing_or_captured": 3389,
+    "rbih_personnel": 123673,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [
+      "vance_owen_plan_1993"
+    ],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 40,
+    "date": "1993-01-11",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 6092,
+    "wounded": 24627,
+    "missing_or_captured": 3472,
+    "rbih_personnel": 126940,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 41,
+    "date": "1993-01-18",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 6207,
+    "wounded": 25126,
+    "missing_or_captured": 3555,
+    "rbih_personnel": 129733,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 42,
+    "date": "1993-01-25",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 6325,
+    "wounded": 25633,
+    "missing_or_captured": 3636,
+    "rbih_personnel": 132868,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 43,
+    "date": "1993-02-01",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 6457,
+    "wounded": 26195,
+    "missing_or_captured": 3722,
+    "rbih_personnel": 136015,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24"
+    ]
+  },
+  {
+    "turn": 44,
+    "date": "1993-02-08",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 6589,
+    "wounded": 26764,
+    "missing_or_captured": 3812,
+    "rbih_personnel": 138703,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 45,
+    "date": "1993-02-15",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 6719,
+    "wounded": 27321,
+    "missing_or_captured": 3901,
+    "rbih_personnel": 141026,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 46,
+    "date": "1993-02-22",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 6842,
+    "wounded": 27859,
+    "missing_or_captured": 3990,
+    "rbih_personnel": 143314,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 47,
+    "date": "1993-03-01",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 6966,
+    "wounded": 28404,
+    "missing_or_captured": 4080,
+    "rbih_personnel": 145306,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 48,
+    "date": "1993-03-08",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 7115,
+    "wounded": 29032,
+    "missing_or_captured": 4175,
+    "rbih_personnel": 146985,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 49,
+    "date": "1993-03-15",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 7330,
+    "wounded": 29886,
+    "missing_or_captured": 4272,
+    "rbih_personnel": 148117,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 50,
+    "date": "1993-03-22",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 7525,
+    "wounded": 30676,
+    "missing_or_captured": 4369,
+    "rbih_personnel": 149151,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 51,
+    "date": "1993-03-29",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 7720,
+    "wounded": 31452,
+    "missing_or_captured": 4464,
+    "rbih_personnel": 150172,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 52,
+    "date": "1993-04-05",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 7879,
+    "wounded": 32105,
+    "missing_or_captured": 4556,
+    "rbih_personnel": 151815,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 53,
+    "date": "1993-04-12",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 8075,
+    "wounded": 32888,
+    "missing_or_captured": 4651,
+    "rbih_personnel": 153369,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 54,
+    "date": "1993-04-19",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 8263,
+    "wounded": 33641,
+    "missing_or_captured": 4744,
+    "rbih_personnel": 154914,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [
+      "srebrenica_demilitarization_1993"
+    ],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 55,
+    "date": "1993-04-26",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 8427,
+    "wounded": 34318,
+    "missing_or_captured": 4837,
+    "rbih_personnel": 156417,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 56,
+    "date": "1993-05-03",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 8592,
+    "wounded": 35003,
+    "missing_or_captured": 4930,
+    "rbih_personnel": 157806,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 57,
+    "date": "1993-05-10",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 8759,
+    "wounded": 35691,
+    "missing_or_captured": 5025,
+    "rbih_personnel": 159091,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 58,
+    "date": "1993-05-17",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 8929,
+    "wounded": 36382,
+    "missing_or_captured": 5119,
+    "rbih_personnel": 160299,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 59,
+    "date": "1993-05-24",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 9102,
+    "wounded": 37082,
+    "missing_or_captured": 5213,
+    "rbih_personnel": 161324,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic"
+    ]
+  },
+  {
+    "turn": 60,
+    "date": "1993-05-31",
+    "rbih_control": 0.3029,
+    "rs_control": 0.5507,
+    "hrhb_control": 0.1464,
+    "killed": 9279,
+    "wounded": 37786,
+    "missing_or_captured": 5304,
+    "rbih_personnel": 162271,
+    "command_authority_current": 100,
+    "command_authority_spent": 0,
+    "pending_event_decisions": [],
+    "pending_player_officers": [
+      "arrival_arbih_hadzihasanovic_t22",
+      "arrival_arbih_pasalic_t24",
+      "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+      "army_replacement_arbih_halilovic_t60"
+    ]
+  }
+]

@@ -1,0 +1,7 @@
+Error: required-event-decision
+    at closeOpenSurface (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:2079:11)
+    at async clearOpenSurfaces (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:2093:10)
+    at async handleCurrentSurface (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:3569:7)
+    at async playTurns (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4132:21)
+    at async runFaction (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4499:22)
+    at async F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4569:5

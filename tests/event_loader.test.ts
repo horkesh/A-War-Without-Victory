@@ -85,7 +85,7 @@ function assertCatalogRowsThrow(rows: unknown[], expected: RegExp): void {
     );
 }
 
-test('loadEventDefinitions(0) returns the current 297-row catalog', () => {
+test('loadEventDefinitions(0) returns the current 299-row catalog', () => {
     const loaded = loadEventDefinitions(0);
 
     // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events in
@@ -96,7 +96,9 @@ test('loadEventDefinitions(0) returns the current 297-row catalog', () => {
     //   hrhb_herceg_bosna_consolidation_1992, hrhb_summer_alliance_strain_1992,
     //   hrhb_zagreb_supply_channel_1992. Calibration-inert (historical-default
     //   path carries only narrative / cost_ledger_annotation / read-model flags).
-    assert.strictEqual(loaded.length, 297);
+    // 297 → 299: +2 sourced HRHB October/November 1992 decision events:
+    //   hrhb_posavina_orasje_posture_1992, hrhb_jajce_withdrawal_posture_1992.
+    assert.strictEqual(loaded.length, 299);
 });
 
 test('loadEventDefinitions(0) returns deterministic order by trigger turn_min then id', () => {

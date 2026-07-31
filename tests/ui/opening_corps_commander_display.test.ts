@@ -80,7 +80,7 @@ describe('opening corps commander display', () => {
         expect(getFactionArmyCommander('RBiH', gameState)?.name).toBe('Sefer Halilovic');
     });
 
-    it('moves to the successor army commander on his availability turn', () => {
+    it('keeps the active incumbent visible while a player replacement decision is pending', () => {
         const gameState = state({
             turn: 60,
             namedOfficerData: [
@@ -90,6 +90,52 @@ describe('opening corps commander display', () => {
                     faction: 'RBiH',
                     rank: 'army_commander',
                     status: 'active',
+                    available_from_turn: 0,
+                    available_until_turn: 60,
+                }),
+                officer({
+                    id: 'arbih_delic',
+                    name: 'Rasim Delic',
+                    faction: 'RBiH',
+                    rank: 'army_commander',
+                    status: 'reserve',
+                    available_from_turn: 60,
+                }),
+            ],
+            pendingOfficerEvents: [{
+                event_id: 'army_replacement_arbih_halilovic_t60',
+                type: 'replacement_suggested',
+                faction: 'RBiH',
+                turn: 60,
+                officer_id: 'arbih_delic',
+                officer_name: 'Rasim Delic',
+                officer_competence: 4,
+                officer_aggressiveness: 3,
+                officer_defensive_skill: 3,
+                current_commander_id: 'arbih_halilovic',
+                current_commander_name: 'Sefer Halilovic',
+                current_commander_competence: 3,
+                current_commander_aggressiveness: 3,
+                current_commander_defensive_skill: 3,
+                corps_id: 'arbih_main_staff',
+                corps_name: 'ARBiH Main Staff',
+                acknowledged: false,
+            }],
+        });
+
+        expect(getFactionArmyCommander('RBiH', gameState)?.name).toBe('Sefer Halilovic');
+    });
+
+    it('moves to the successor army commander after the replacement is resolved', () => {
+        const gameState = state({
+            turn: 60,
+            namedOfficerData: [
+                officer({
+                    id: 'arbih_halilovic',
+                    name: 'Sefer Halilovic',
+                    faction: 'RBiH',
+                    rank: 'army_commander',
+                    status: 'relieved',
                     available_from_turn: 0,
                     available_until_turn: 60,
                 }),

@@ -1,7 +1,7 @@
 ﻿import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation, deriveReadinessTrend, isExhaustionContributingToStrain, EXHAUSTION_STRAIN_THRESHOLD, EXHAUSTION_STRAIN_SEVERE_THRESHOLD, deriveDelegationContext, deriveCorpsDelegationSummary } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, computeCorpsCommandStrainBreakdown, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation, deriveReadinessTrend, isExhaustionContributingToStrain, EXHAUSTION_STRAIN_THRESHOLD, EXHAUSTION_STRAIN_SEVERE_THRESHOLD, deriveDelegationContext, deriveCorpsDelegationSummary } from '../src/ui/map/data/command_strain.js';
 import type { OperationOutcomeCategory, OperationTrendSummary, PrimaryConstraint, ReadinessTrendDirection, DelegationPath } from '../src/ui/map/data/command_strain.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -173,6 +173,25 @@ describe('computeCorpsCommandStrain', () => {
         });
         // +3 (force-launch, age=0) + +2 (friction, age=0) = 5
         expect(computeCorpsCommandStrain('test-corps', state)).toBe(5);
+    });
+
+    it('preserves commander-friction provenance when the player made no intervention', () => {
+        const state = makeStrainState({
+            turn: 5,
+            officerId: 'officer-1',
+            officerCorpsId: 'test-corps',
+            frictionEvents: [
+                { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+            ],
+        });
+
+        expect(computeCorpsCommandStrainBreakdown('test-corps', state)).toEqual({
+            presidentialIntervention: 0,
+            commanderFriction: 2,
+            exhaustion: 0,
+            total: 2,
+            source: 'commander_friction',
+        });
     });
 });
 

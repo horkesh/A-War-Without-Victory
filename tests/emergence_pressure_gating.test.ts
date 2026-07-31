@@ -85,7 +85,7 @@ test('peace runTurn is rejected (war pipeline only)', async () => {
     );
 });
 
-test('phase_ii runTurn includes phase-e-pressure-update and runs exactly once per turn', async () => {
+test('phase_ii runTurn includes phase-e-pressure-update and runs exactly once per turn', async () => { // legacy-phase-term-ok
     const state = minimalPhaseIIState();
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { report } = await runTurn(state, { seed: 'gating-ii', settlementEdges: edges });

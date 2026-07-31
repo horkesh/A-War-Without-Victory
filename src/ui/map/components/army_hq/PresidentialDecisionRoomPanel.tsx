@@ -18,6 +18,7 @@ import {
   type PresidentialCommandCategoryId,
 } from '../../data/presidentialCategories';
 import { useGameStore } from '../../store/gameStore';
+import { useIPC } from '../../desktop/useIPC';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import { t } from '../../i18n';
 import { DirectiveCard, type DirectiveReceipt } from './DirectiveCard';
@@ -191,7 +192,7 @@ function PriorityCard({
 }
 
 function isHistoricalOperationAuthorizationCard(card: PresidentialDecisionRoomCard | undefined): boolean {
-  return card?.category === 'command'
+  return card?.category === 'decision'
     && card.directive?.lever === 'review_proposal'
     && card.sourceLabel === t('decisionRoom.card.historicalOperation.sourceLabel');
 }
@@ -215,13 +216,58 @@ function OperationsAuthorizationPacket({
   advanceSensitiveCardIds,
   onSelectCard,
   navigateTarget,
+  onDirectiveReceipt,
 }: {
   cards: PresidentialDecisionRoomCard[];
   selectedDossierCardId: string | null;
   advanceSensitiveCardIds: Set<string>;
   onSelectCard: (cardId: string) => void;
   navigateTarget: DecisionRoomNavigateTarget;
+  onDirectiveReceipt: (receipt: DirectiveReceipt) => void;
 }) {
+  const ipc = useIPC();
+  const [authorizing, setAuthorizing] = useState(false);
+  const handleAuthorizeHistoricalPacket = async () => {
+    if (authorizing || !ipc.isAvailable) return;
+    setAuthorizing(true);
+    let authorized = 0;
+    try {
+      for (const card of cards) {
+        const proposalId = typeof card.directive?.payload.proposalId === 'string'
+          ? card.directive.payload.proposalId
+          : '';
+        if (!proposalId) {
+          onDirectiveReceipt({
+            kind: 'error',
+            message: t('decisionRoom.historicalOperationPacket.failed', {
+              count: authorized,
+              reason: t('decisionRoom.historicalOperationPacket.missingProposal'),
+            }),
+          });
+          return;
+        }
+        const result = await ipc.acceptProposal(proposalId);
+        if (!result.ok) {
+          onDirectiveReceipt({
+            kind: 'error',
+            message: t('decisionRoom.historicalOperationPacket.failed', {
+              count: authorized,
+              reason: result.error ?? t('decisionRoom.historicalOperationPacket.unknownFailure'),
+            }),
+          });
+          return;
+        }
+        authorized += 1;
+      }
+      onDirectiveReceipt({
+        kind: 'success',
+        message: t('decisionRoom.historicalOperationPacket.authorized', { count: authorized }),
+      });
+    } finally {
+      setAuthorizing(false);
+    }
+  };
+
   return (
     <section
       data-testid="operations-authorization-packet"
@@ -238,6 +284,16 @@ function OperationsAuthorizationPacket({
         <span className="text-xs font-semibold text-text-secondary">
           {t('decisionRoom.historicalOperationPacket.count', { count: cards.length })}
         </span>
+        <button
+          type="button"
+          onClick={() => { void handleAuthorizeHistoricalPacket(); }}
+          disabled={authorizing || !ipc.isAvailable}
+          className="rounded border border-amber-400/45 bg-amber-400/15 px-2 py-1 text-xs font-bold uppercase tracking-[0.08em] text-amber-100 transition hover:bg-amber-400/25 disabled:cursor-default disabled:opacity-45"
+        >
+          {authorizing
+            ? t('decisionRoom.historicalOperationPacket.authorizing')
+            : t('decisionRoom.historicalOperationPacket.authorize')}
+        </button>
       </div>
       <div className="space-y-2">
         {cards.map((card) => (
@@ -588,6 +644,7 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
                     advanceSensitiveCardIds={advanceSensitiveCardIds}
                     onSelectCard={handleSelectCard}
                     navigateTarget={navigateTarget}
+                    onDirectiveReceipt={setActionReceipt}
                   />
                 );
               }

@@ -557,12 +557,12 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByRole('region', { name: 'Records archive summary' })).toBeTruthy();
         expect(screen.getByText('Archive Routes')).toBeTruthy();
         expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
-        expect(screen.getByText('Chronicle Filed')).toBeTruthy();
+        expect(screen.getByText('Chronicle Decisions')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'DECISION LOG' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'DESK DECISIONS' })).toBeTruthy();
         const archiveSummaryCopy = screen.getByTestId('records-archive-summary').textContent ?? '';
-        expect(archiveSummaryCopy).toMatch(/Decisions\s*0/);
-        expect(archiveSummaryCopy).toMatch(/Chronicle Filed\s*1/);
+        expect(archiveSummaryCopy).toMatch(/Desk Decisions\s*0/);
+        expect(archiveSummaryCopy).toMatch(/Chronicle Decisions\s*1/);
     });
 
     it('puts the authoritative operation lifecycle ledger before the territory chart', () => {
@@ -679,7 +679,7 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByRole('region', { name: 'Sažetak arhive zapisa' })).toBeTruthy();
         expect(screen.getByText('Putevi arhive')).toBeTruthy();
         expect(screen.getByText('Najnovija arhivirana odluka')).toBeTruthy();
-        expect(screen.getByText('U Hronici')).toBeTruthy();
+        expect(screen.getByText('Odluke u Hronici')).toBeTruthy();
         expect(screen.queryByText('Archive Routes')).toBeNull();
     });
 

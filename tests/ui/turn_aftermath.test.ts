@@ -440,10 +440,36 @@ describe('buildTurnAftermathView', () => {
 
     expect(loss?.tone).toBe('loss');
     expect(loss?.headline).toContain('-3');
-    expect(loss?.narrativeLine).toBe('The map contracted this week; command must decide whether to stabilize or answer.');
+    expect(loss?.narrativeLine).toBe('The map contracted this week. No presidential act is required; staff recommends holding present policy.');
+    expect(loss?.territory.breakdownComplete).toBe(false);
     expect(quiet?.tone).toBe('quiet');
     expect(quiet?.headline).toContain('No territorial change');
     expect(quiet?.narrativeLine).toBe('A quiet week is still a week of depletion, waiting, and staff work.');
+  });
+
+  it('marks a notable territory subset complete only when it reconciles to the net', () => {
+    const complete = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          territory_net: { RBiH: -2 },
+          notable_flips: [
+            { osid: 'op:a', mun_id: 'a', from: 'RBiH', to: 'RS', significance: 'generic' },
+            { osid: 'op:b', mun_id: 'b', from: 'RBiH', to: 'RS', significance: 'generic' },
+          ],
+        }),
+      }),
+    });
+    const partial = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          territory_net: { RBiH: -2 },
+          notable_flips: [],
+        }),
+      }),
+    });
+
+    expect(complete?.territory.breakdownComplete).toBe(true);
+    expect(partial?.territory.breakdownComplete).toBe(false);
   });
 
   it('treats turn-0 territory_net as scenario-start provenance, not net change', () => {

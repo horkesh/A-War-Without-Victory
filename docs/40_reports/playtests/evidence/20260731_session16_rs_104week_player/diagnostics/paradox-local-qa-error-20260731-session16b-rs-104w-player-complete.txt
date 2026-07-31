@@ -1,0 +1,4 @@
+Error: Campaign progress stalled at turn 70 after 4 unproductive advance attempts
+    at playTurns (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4249:13)
+    at async runFaction (F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4577:22)
+    at async F:\A-War-Without-Victory\tools\ui\paradox_local_qa.cjs:4647:5

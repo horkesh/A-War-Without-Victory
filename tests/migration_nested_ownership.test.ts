@@ -219,7 +219,7 @@ describe('nested migration ownership contracts', () => {
         ).toEqual(['c1:RS', 'c2:RBiH']);
     });
 
-    it('migrateState materializes missing nested Phase I sibling defaults at the canonical owners', () => {
+    it('migrateState materializes missing nested Phase I sibling defaults at the canonical owners', () => { // legacy-phase-term-ok
         const payload = JSON.stringify(migrationFixture({
         military: {
             formations: {},

@@ -1,0 +1,136 @@
+{
+  "session": "20260730_session03_rbih_60turn",
+  "started_at_local": "2026-07-30T13:59:44+02:00",
+  "ended_at_local": "2026-07-30T14:19:06+02:00",
+  "turns_played": 60,
+  "elapsed_minutes": 19.4,
+  "minutes_per_turn": 0.32,
+  "start": {
+    "turn": 0,
+    "date": "1992-04-06",
+    "territory_control": {
+      "RBiH": 0.315,
+      "RS": 0.5363,
+      "HRHB": 0.1487
+    }
+  },
+  "end": {
+    "turn": 60,
+    "date": "1993-05-31",
+    "territory_control": {
+      "RBiH": 0.2347,
+      "RS": 0.6412,
+      "HRHB": 0.124
+    },
+    "casualties": {
+      "killed": 9280,
+      "wounded": 37788,
+      "missing_or_captured": 5304
+    },
+    "player_personnel": 162271,
+    "international_standing": 90,
+    "internal_cohesion": 0,
+    "negotiation_capital": 110
+  },
+  "historical_player_decisions": [
+    {
+      "turn": 0,
+      "decision": "What Is Bosnia?",
+      "choice": "Civic multi-ethnic republic",
+      "basis": "UI-labeled historical default"
+    },
+    {
+      "turn": 1,
+      "decision": "Cutileiro / Lisbon proposal",
+      "choice": "Reject Plan",
+      "basis": "Normalized RBiH disposition in WAR_TERMINATION_SPEC.md"
+    },
+    {
+      "turn": 3,
+      "decision": "Paramilitary Authorization Policy",
+      "choice": "Refuse paramilitary deployment",
+      "basis": "UI-labeled historical default"
+    },
+    {
+      "turn": 22,
+      "decision": "Sarajevo officer corps posture",
+      "choice": "Retain multi-ethnic officer corps",
+      "basis": "UI-labeled historical default"
+    },
+    {
+      "turn": 25,
+      "decision": "London Conference",
+      "choice": "Subscribe to London Principles",
+      "basis": "UI-labeled historical default"
+    },
+    {
+      "turn": 38,
+      "decision": "Western pressure to engage with Vance-Owen",
+      "choice": "Acknowledge the message",
+      "basis": "UI-labeled historical default"
+    },
+    {
+      "turn": 39,
+      "decision": "Vance-Owen Peace Plan Presented",
+      "choice": "Accept the Vance-Owen Plan",
+      "basis": "UI-labeled historical default"
+    },
+    {
+      "turn": 40,
+      "decision": "Vance-Owen separate peace-plan prompt",
+      "choice": "Accept Plan",
+      "basis": "Repeated the already-established historical response; duplicate prompt recorded as a bug"
+    },
+    {
+      "turn": 54,
+      "decision": "Srebrenica Demilitarization Agreement",
+      "choice": "Comply in appearance, hide weapons",
+      "basis": "UI-labeled historical default"
+    }
+  ],
+  "informational_acknowledgements": [
+    {
+      "turn": 22,
+      "officer": "Enver Hadžihasanović",
+      "action": "Acknowledged arrival; no discretionary appointment"
+    },
+    {
+      "turn": 24,
+      "officer": "Ramiz Pašalić",
+      "action": "Acknowledged arrival; no discretionary appointment"
+    },
+    {
+      "turn": 44,
+      "officer": "Sakib Šadić",
+      "action": "Acknowledged arrival; no discretionary appointment"
+    }
+  ],
+  "pending_without_historical_default_at_turn_60": [
+    "Avdo Palić suggested as 2nd Corps replacement for Željko Knez",
+    "Rasim Delić arrival",
+    "Rasim Delić suggested as Main Staff replacement for Sefer Halilović"
+  ],
+  "decision_counts": {
+    "player_event_decisions": 7,
+    "peace_plan_responses": 2,
+    "duplicate_vance_owen_prompt": true,
+    "player_operation_authorizations": 0,
+    "player_reserve_transfers": 0,
+    "player_commander_changes": 0
+  },
+  "command_authority": {
+    "lifetime_spent": 0,
+    "final_current": 100,
+    "final_cap": 100,
+    "final_reserve_current": 15,
+    "final_reserve_cap": 15,
+    "exact_cumulative_income_and_overflow_serialized": false
+  },
+  "evidence": {
+    "screenshots": 43,
+    "turn_metric_rows_including_turn_zero": 61,
+    "save_hash_sha256": "D83DFAAC2027900C149E5A64D48201F834FCA0E6E18B83BB0491CC7F1DC3BB93",
+    "desktop_stdout": "desktop-stdout.log",
+    "desktop_stderr": "desktop-stderr.log"
+  }
+}

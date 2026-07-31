@@ -62,7 +62,7 @@ import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
 import { compareToHistorical } from '../../../sim/endgame/endgame_comparison.js';
 import type { DimensionShift, EventCategory, EventEffect } from '../../../sim/events/event_types.js';
 import historicalBaseline from '../../../../data/reference/historical_baseline.json';
-import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveRecoveryForecastToken, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
+import { computeCorpsCommandStrainBreakdown, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveRecoveryForecastToken, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
 import { summarizePlayerDecisions } from '../../../state/player_decision_manifest.js';
 import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
@@ -101,6 +101,7 @@ export interface FactionStrategicObjectiveView {
     nextLever: {
         owner: 'army_hq' | 'decision_room';
         label: string;
+        available: boolean;
         navigationTarget:
             | { kind: 'army-hq-tab'; tab: 'briefing' | 'summary' | 'records' | 'personnel' }
             | { kind: 'army-hq-corps-briefing'; corpsId: string | null }
@@ -178,6 +179,31 @@ function objectiveCommand(state: LoadedGameState, faction: string): string | nul
         : operation?.corps_name ?? null;
 }
 
+function objectiveResponsibleOwner(
+    state: LoadedGameState,
+    config: StrategicObjectiveConfig,
+    faction: string,
+    command: string | null,
+): string {
+    if (!config.militaryOwner) return t('warSummary.objective.owner.presidency');
+    if (command) return command;
+    const armyHq = state.formations
+        .filter((formation) => formation.faction === faction && formation.kind === 'army_hq')
+        .sort((a, b) => strictCompare(a.id, b.id))[0];
+    return armyHq
+        ? getPlayerSafeDisplayLabel(armyHq.name, t('warSummary.objective.owner.armyHq'))
+        : t('warSummary.objective.owner.armyHq');
+}
+
+function hasPendingPoliticalObjectiveDecision(state: LoadedGameState, faction: string): boolean {
+    return (state.pendingEventDecisions ?? []).some((decision) => decision.faction === faction)
+        || Boolean(state.pendingPeacePlan)
+        || Boolean(state.pendingDayton)
+        || (state.pendingCounterOffers?.length ?? 0) > 0
+        || (state.pendingConvoyDecisions?.length ?? 0) > 0
+        || (state.pendingParamilitaryRequests?.length ?? 0) > 0;
+}
+
 function objectiveCommitment(
     state: LoadedGameState,
     config: StrategicObjectiveConfig,
@@ -227,9 +253,13 @@ function objectiveLever(
     faction: string,
 ): FactionStrategicObjectiveView['nextLever'] {
     if (!config.militaryOwner) {
+        const available = hasPendingPoliticalObjectiveDecision(state, faction);
         return {
             owner: 'decision_room',
-            label: t('warSummary.objective.lever.politicalDecisions'),
+            label: t(available
+                ? 'warSummary.objective.lever.politicalDecisions'
+                : 'warSummary.objective.lever.noSignatureDue'),
+            available,
             navigationTarget: { kind: 'decision-room', lens: 'decision' },
         };
     }
@@ -241,6 +271,7 @@ function objectiveLever(
         return {
             owner: 'army_hq',
             label: t('warSummary.objective.lever.commandBriefing'),
+            available: true,
             navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: operation.corps_id },
         };
     }
@@ -252,6 +283,7 @@ function objectiveLever(
         return {
             owner: 'decision_room',
             label: t('warSummary.objective.lever.reserveCommitment'),
+            available: true,
             navigationTarget: {
                 kind: 'decision-room',
                 lens: 'command',
@@ -263,16 +295,25 @@ function objectiveLever(
         return {
             owner: 'army_hq',
             label: t('warSummary.objective.lever.reserveSelection'),
+            available: true,
             navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+        };
+    }
+
+    if (!operation) {
+        return {
+            owner: 'army_hq',
+            label: t('warSummary.objective.lever.noCommandRequest'),
+            available: false,
+            navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
         };
     }
 
     return {
         owner: 'army_hq',
         label: t('warSummary.objective.lever.commandBriefing'),
-        navigationTarget: operation
-            ? { kind: 'army-hq-corps-briefing', corpsId: operation.corps_id }
-            : { kind: 'army-hq-tab', tab: 'briefing' },
+        available: true,
+        navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: operation.corps_id },
     };
 }
 
@@ -325,7 +366,7 @@ export function buildFactionStrategicObjectiveViews(state: LoadedGameState): Fac
             title: t(config.titleKey),
             status: objectiveStatus(dimension?.effective_value),
             trend: objectiveTrend(dimension?.event_modifier),
-            responsibleCommand: config.militaryOwner ? command : null,
+            responsibleCommand: objectiveResponsibleOwner(state, config, faction, command),
             currentCommitment: objectiveCommitment(
                 state,
                 config,
@@ -924,9 +965,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         }
     }
 
-    // War-phase: use formation location_osid. Peace/legacy: use brigade_aor. Accept phase_ii value as war for backward compat.
+    // War-phase: use formation location_osid. Peace/legacy: use brigade_aor. Accept phase_ii value as war for backward compat. // legacy-phase-term-ok
     const brigadeAorByFormationId: Record<string, string[]> = {};
-    const isWarPhase = phase === 'war' || phase === 'phase_ii';
+    const isWarPhase = phase === 'war' || phase === 'phase_ii'; // legacy-phase-term-ok
     if (isWarPhase) {
         if (Object.keys(formationsRecord).length > 0) {
             for (const id of Object.keys(formationsRecord).sort()) {
@@ -1393,9 +1434,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 if (!cc) continue;
 
                 // ── Command Strain (derived on-read, not stored on GameState) ──────
-                const strain = computeCorpsCommandStrain(fv.id, state as GameState);
+                const strainBreakdown = computeCorpsCommandStrainBreakdown(fv.id, state as GameState);
+                const strain = strainBreakdown.total;
                 fv.commandStrain = strain;
                 fv.commandStrainLabel = getCommandStrainLabel(strain);
+                fv.commandStrainSource = strainBreakdown.source;
 
                 // ── Strain decay projection (Wave 10) ────────────────────────────
                 const projections = projectStrainDecay(fv.id, state as GameState, 5);
@@ -1424,7 +1467,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     last_plan_reason?: string;
                 } | null | undefined;
                 fv.situationAssessment = deriveCorpsSituationAssessment(
-                    cmdState, fv.corpsStance, fv.corpsExhaustion, strain,
+                    cmdState, fv.corpsStance, fv.corpsExhaustion, strain, strainBreakdown.source,
                 );
 
                 // ── Active friction events for this corps's commander ─────────────
@@ -2612,7 +2655,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         && playerFactionMatch(rawCommandBriefing.faction, playerFaction)
         ? toCommandBriefingView(rawCommandBriefing)
         : undefined;
-    const operationalSitrep = (phase === 'war' || phase === 'phase_ii')
+    const operationalSitrep = (phase === 'war' || phase === 'phase_ii') // legacy-phase-term-ok
         && playerFaction
         && state.displacement && typeof state.displacement === 'object'
         && hasFactionArray(gameState)

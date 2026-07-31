@@ -16,7 +16,8 @@ describe('event taxonomy diagnostic report', () => {
         // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
         // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992.
         // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json).
-        expect(rows).toHaveLength(297);
+        // 297 → 299: +2 sourced HRHB October/November 1992 decision events.
+        expect(rows).toHaveLength(299);
         expect([...new Set(rows.map((row) => row.file))]).toEqual([
             'data/scenarios/events/war_1992.json',
             'data/scenarios/events/war_1992_hrhb_summer.json',
@@ -26,18 +27,18 @@ describe('event taxonomy diagnostic report', () => {
             'data/scenarios/events/consequences.json',
         ]);
         expect(rows.map((row) => `${row.file_index}:${row.catalog_index}:${row.id}`).slice(0, 3)).toEqual([
+            '0:1:foca_1992',
             '0:0:rs_strategic_goals',
-            '0:2:rbih_state_identity',
-            '0:1:rs_paramilitary_policy_1992',
+            '0:2:zvornik_takeover_1992',
         ]);
     });
 
     it('reports one row per current event id and no duplicate ids', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
-        expect(report.summary.total_events).toBe(297);
+        expect(report.summary.total_events).toBe(299);
         expect(report.summary.duplicate_event_ids).toEqual([]);
-        expect(new Set(report.rows.map((row) => row.id)).size).toBe(297);
+        expect(new Set(report.rows.map((row) => row.id)).size).toBe(299);
     });
 
     it('classifies trigger emergence from phase, prerequisites, pressure, and condition types', () => {
@@ -55,7 +56,7 @@ describe('event taxonomy diagnostic report', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
         // 79 → 82: +3 HRHB Jul–Sep 1992 decision events (all carry response_options).
-        expect(report.summary.choice_events).toBe(82);
+        expect(report.summary.choice_events).toBe(84);
         // 210 → 214: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events are
         // pure flag-setters (no response_options), so they are no-choice events.
         // 214 → 215: +1 §6 atrocity-record event bijeljina_killings_1992
@@ -63,15 +64,18 @@ describe('event taxonomy diagnostic report', () => {
         // events are choice events, so no_choice_events is unchanged at 215.
         expect(report.summary.no_choice_events).toBe(215);
         // 71 → 74: the +3 HRHB summer-1992 events are required-response.
-        expect(report.summary.required_response_events).toBe(74);
+        expect(report.summary.required_response_events).toBe(76);
         // 79 → 82: the +3 HRHB summer-1992 events all carry title + narrative.
-        expect(report.summary.choice_rows_with_title_and_narrative).toBe(82);
-        expect(report.summary.choice_rows_with_source).toBe(71);
-        expect(report.summary.required_response_rows_with_source).toBe(67);
+        expect(report.summary.choice_rows_with_title_and_narrative).toBe(84);
+        // Owen-Stoltenberg's Presidency stage and the two late-1992 HRHB
+        // posture reviews carry explicit historical-source fields.
+        expect(report.summary.choice_rows_with_source).toBe(74);
+        expect(report.summary.required_response_rows_with_source).toBe(70);
         // 56 → 59: the +3 HRHB summer-1992 events each carry a historical_default_response_id.
-        expect(report.summary.historical_default_markers).toBe(59);
-        expect(report.summary.historical_default_ids).toBe(59);
-        expect(report.summary.modal_ready_events).toBe(45);
+        // 59 → 60: Owen-Stoltenberg's Presidency stage now carries its documented default.
+        expect(report.summary.historical_default_markers).toBe(62);
+        expect(report.summary.historical_default_ids).toBe(62);
+        expect(report.summary.modal_ready_events).toBe(47);
         expect(new Map(report.rows
             .filter((row) => row.future_consequence_count > 0)
             .map((row) => [row.id, row.future_consequence_count]))).toEqual(new Map([
@@ -87,6 +91,8 @@ describe('event taxonomy diagnostic report', () => {
             ['hrhb_herceg_bosna_consolidation_1992', 3],
             ['hrhb_summer_alliance_strain_1992', 3],
             ['hrhb_zagreb_supply_channel_1992', 3],
+            ['hrhb_posavina_orasje_posture_1992', 1],
+            ['hrhb_jajce_joint_defense_1992', 1],
             ['rs_assembly_rejects_voplan_1993', 2],
             ['rbih_nato_ultimatum_compliance_1994', 2],
             ['rbih_washington_agreement_1994', 2],
@@ -305,13 +311,15 @@ describe('event taxonomy diagnostic report', () => {
         const requiredRows = report.rows.filter((row) => row.requires_player_response);
 
         // 71 → 74: +3 HRHB Jul–Sep 1992 required-response decision events.
-        expect(requiredRows).toHaveLength(74);
+        expect(requiredRows).toHaveLength(76);
         expect(requiredRows.filter((row) => row.modal_ready).map((row) => row.id)).toEqual([
             'rbih_state_identity',
             'hrhb_political_goal',
             'rbih_paramilitary_policy_1992',
             'hrhb_1992_graz_cooperation_collapse',
             'rbih_minority_retention_1992',
+            'hrhb_posavina_orasje_posture_1992',
+            'hrhb_jajce_joint_defense_1992',
             'gornji_vakuf_clashes_1993',
             'ic_pressure_vopp_engagement',
             'vance_owen_plan_1993',
@@ -353,7 +361,7 @@ describe('event taxonomy diagnostic report', () => {
             'rs_dayton_acceptance_1995',
             'csq_patron_recovery_offer',
         ]);
-        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(45);
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(47);
     });
 
     it('classifies packet 3 target rows as finished modal-ready after authored defaults and source notes', () => {

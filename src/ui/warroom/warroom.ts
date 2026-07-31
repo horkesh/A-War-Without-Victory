@@ -44,6 +44,8 @@ class WarroomApp {
     private mapServerUrl: string | null = null;
     /** Embedded iframe subscribers keyed by event name. */
     private embeddedBridgeSubscribers = new Map<WindowProxy, { origin: string; events: Set<string> }>();
+    private embeddedBridgeInvokeDepth = 0;
+    private pendingEmbeddedGameStateJson: string | null = null;
     private unsubscribeDesktopGameState: (() => void) | null = null;
     private unsubscribeDesktopTurnReport: (() => void) | null = null;
     private pendingShellHandoff: ShellHandoffCommand | null = null;
@@ -115,8 +117,7 @@ class WarroomApp {
         }
         if (this.desktopBridge?.subscribeGameStateUpdated) {
             this.unsubscribeDesktopGameState = this.desktopBridge.subscribeGameStateUpdated((stateJson: string) => {
-                this.applyGameStateFromJson(stateJson, { showShell: false });
-                this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
+                this.handleDesktopGameStateUpdated(stateJson);
             });
         }
         if (this.desktopBridge?.subscribeTurnReportUpdated) {
@@ -295,6 +296,7 @@ class WarroomApp {
     private applyGameStateFromJson(stateJson: string, options?: { showShell?: boolean }): void {
         try {
             this.gameState = parsePlayerVisibleWarroomState(stateJson);
+            this.syncContinueAvailability();
             // Sync scenario epoch so date helpers produce correct calendar dates
             setScenarioStartDate(this.gameState.meta.scenario_start_date);
             // Defer DOM work to the next task so the triggering click is consumed and UI stays responsive.
@@ -365,6 +367,10 @@ class WarroomApp {
     /** STEP 1: Show the main menu title screen. */
     private showMainMenu(): void {
         this.showScreen('main-menu');
+        this.syncContinueAvailability();
+    }
+
+    private syncContinueAvailability(): void {
         const continueBtn = document.getElementById('mm-continue') as HTMLButtonElement | null;
         if (continueBtn) {
             continueBtn.disabled = !this.gameState;
@@ -831,6 +837,7 @@ class WarroomApp {
             target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: false, error: `Bridge method not found: ${data.method}` }, origin);
             return;
         }
+        this.embeddedBridgeInvokeDepth += 1;
         try {
             const args = Array.isArray(data.args) ? data.args : [];
             const result = await (method as (...fnArgs: unknown[]) => unknown)(...args);
@@ -838,7 +845,29 @@ class WarroomApp {
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: false, error: message }, origin);
+        } finally {
+            this.embeddedBridgeInvokeDepth = Math.max(0, this.embeddedBridgeInvokeDepth - 1);
+            if (this.embeddedBridgeInvokeDepth === 0) {
+                this.flushPendingEmbeddedGameState();
+            }
         }
+    }
+
+    private handleDesktopGameStateUpdated(stateJson: string): void {
+        if (this.embeddedBridgeInvokeDepth > 0) {
+            this.pendingEmbeddedGameStateJson = stateJson;
+            return;
+        }
+        this.applyGameStateFromJson(stateJson, { showShell: false });
+        this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
+    }
+
+    private flushPendingEmbeddedGameState(): void {
+        const stateJson = this.pendingEmbeddedGameStateJson;
+        if (!stateJson) return;
+        this.pendingEmbeddedGameStateJson = null;
+        this.applyGameStateFromJson(stateJson, { showShell: false });
+        this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
     }
 
     private broadcastEmbeddedBridgeEvent(eventName: string, payload: unknown): void {

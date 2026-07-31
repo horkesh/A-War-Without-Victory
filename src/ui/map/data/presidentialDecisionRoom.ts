@@ -1016,6 +1016,7 @@ function historicalOperationEvidence(
   const details = buildHistoricalOperationAuthorizationDetails(state, historicalOp, osidNameMap);
   return [
     t('decisionRoom.card.historicalOperation.evidence.kind'),
+    t('decisionRoom.card.historicalOperation.evidence.signatureRequired'),
     t('decisionRoom.card.historicalOperation.evidence.command', { command: details.command }),
     t('decisionRoom.card.historicalOperation.evidence.commander', { commander: details.commander }),
     details.force ? t('decisionRoom.card.historicalOperation.evidence.force', { force: details.force }) : null,
@@ -1103,8 +1104,8 @@ function addProposalReviewDirectiveCards(
     const domainLabel = proposalDomainLabel(review.domain);
     cards.push({
       id: `command:review-proposal:${review.id}`,
-      category: 'command',
-      severity: 'warning',
+      category: historicalOp ? 'decision' : 'command',
+      severity: historicalOp ? 'blocking' : 'warning',
       title: historicalOp
         ? historicalOp.operationName
         : ordinaryOperation?.op_name ?? t('decisionRoom.card.reviewProposal.title', {
@@ -1121,7 +1122,7 @@ function addProposalReviewDirectiveCards(
         ? t('decisionRoom.card.historicalOperation.sourceLabel')
         : t('decisionRoom.card.reviewProposal.sourceLabel'),
       actionLabel: historicalOp
-        ? t('decisionRoom.action.reviewRecommendation')
+        ? t('decisionRoom.action.authorizeBeforeAdvance')
         : t('decisionRoom.action.personnel'),
       evidence: historicalOp
         ? historicalOperationEvidence(state, historicalOp, historicalOperationReviewCount, osidNameMap)
@@ -1136,13 +1137,16 @@ function addProposalReviewDirectiveCards(
         : ordinaryOperation
           ? { kind: 'army-hq-corps-briefing', corpsId: ordinaryOperation.corps_id }
           : { kind: 'army-hq-tab', tab: 'personnel' },
+      ...(historicalOp
+        ? { sourceHandoffTarget: { kind: 'army-hq-corps-briefing' as const, corpsId: historicalOp.corpsId } }
+        : {}),
       directive: {
         lever: 'review_proposal',
         cost: 0,
         payload: { proposalId: review.id },
       },
       ...(historicalOp ? { preserveActionLabel: true } : {}),
-      urgencySort: 8,
+      urgencySort: historicalOp ? 0 : 8,
       sourceSort: `command:review-proposal:${review.id}`,
     });
   }
@@ -1265,6 +1269,11 @@ function addCommandPersonnelCards(
         t('decisionRoom.card.eliteDeploy.evidence.expectedEffect', { value: presentation.expectedEffect }),
         t('decisionRoom.card.eliteDeploy.evidence.weakenedPosition', { value: presentation.weakenedPosition }),
         t('decisionRoom.card.eliteDeploy.evidence.opportunityCost', { value: presentation.opportunityCost }),
+        ...(presentation.priorAuthorizations ? [
+          t('decisionRoom.card.eliteDeploy.evidence.priorAuthorizations', { value: presentation.priorAuthorizations }),
+          t('decisionRoom.card.eliteDeploy.evidence.cumulativeAuthority', { value: presentation.cumulativeAuthority ?? '0' }),
+          t('decisionRoom.card.eliteDeploy.evidence.lastRecall', { value: presentation.lastRecall ?? t('armyReserve.presentation.noneRecorded') }),
+        ] : []),
       ],
       navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
       ...(directive ? { directive } : {}),

@@ -1,4 +1,4 @@
-# 2026-04-07 — v0.8-to-v0.9 Startup Artifact Decoupling via Canonical In-Memory Builder
+# 2026-04-07 ï¿½ v0.8-to-v0.9 Startup Artifact Decoupling via Canonical In-Memory Builder
 
 ## Summary
 

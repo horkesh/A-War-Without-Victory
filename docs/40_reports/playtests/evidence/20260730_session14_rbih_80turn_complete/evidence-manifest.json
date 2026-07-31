@@ -1,0 +1,64 @@
+{
+  "runId": "20260730_session14_rbih_80turn_complete",
+  "manifestScope": "The 65 immutable raw evidence files present before derived diagnostics and this manifest were added.",
+  "rawFileCount": 65,
+  "rawBytes": 117638412,
+  "screenshotCount": 59,
+  "aggregateSha256": "5943f10a23ad7e14a1c4cb3b38126e3d9825a7e45a83150976724a2756a57873",
+  "aggregateMethod": "SHA-256 of sorted relative-path:sha256 rows joined with LF",
+  "primaryFiles": [
+    {
+      "path": "turn44-resume-autosave.json",
+      "bytes": 4382667,
+      "sha256": "4caf95409e33c2c00feeb6f75ac135a9b740eecd7eec2f3af679d029e9039d25"
+    },
+    {
+      "path": "turn80-autosave.json",
+      "bytes": 5067871,
+      "sha256": "0241584e3a5a4e8eccab7265871304749c67dfa55e35448cb9b252032b07402f"
+    },
+    {
+      "path": "segment-a-live-events.json",
+      "bytes": 6924397,
+      "sha256": "1edf54ef71f6fc67d131c529c8b59fdf4727d43ca04686d6c2d9071767899fdc"
+    },
+    {
+      "path": "segment-b-live-events.json",
+      "bytes": 9416497,
+      "sha256": "6ad25febd94f669112df359e9c953aa0d8740c1dca20325fbe2255cf582d4614"
+    },
+    {
+      "path": "segment-b-progress.json",
+      "bytes": 19616125,
+      "sha256": "2cb2e8cb0dea2365ba7109a21647611200b0311e1572e4e98ae168c4308bfefa"
+    },
+    {
+      "path": "segment-b-final-gate-error.txt",
+      "bytes": 2179,
+      "sha256": "202d627bb8ffe2a415296c9e48bfb440ec6bbd5a1196755ba951a187dc20a6b4"
+    }
+  ],
+  "selectedScreenshots": {
+    "launch": "screenshots/20260730_session07_rbih_80turn-rbih-000-launch-screen.png",
+    "sidePicker": "screenshots/20260730_session07_rbih_80turn-rbih-001-side-picker.png",
+    "civicIdentity": "screenshots/20260730_session07_rbih_80turn-rbih-005-pre-tour-event-before-response.png",
+    "cutileiro": "screenshots/20260730_session07_rbih_80turn-rbih-027-peace-plan-before-response.png",
+    "london": "screenshots/20260730_session07_rbih_80turn-rbih-099-strategic-pending-event-before-response.png",
+    "turn24StaffBrief": "screenshots/20260730_session07_rbih_80turn-rbih-114-turn-loop-47.png",
+    "personnelWrongDestination": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-004-officer-historical-replacement-personnel.png",
+    "personnelActualAction": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-005-officer-historical-replacement-briefing.png",
+    "owenStoltenbergPeacePlan": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-092-peace-plan-before-response.png",
+    "owenStoltenbergEvent": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-094-strategic-pending-event-before-response.png",
+    "assemblyRejection": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-098-strategic-pending-event-before-response.png",
+    "armsEmbargoAdvocacy": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-101-strategic-pending-event-before-response.png",
+    "neretva": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-104-handled-event-notice.png",
+    "grabovicaUzdol": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-106-handled-event-notice.png",
+    "abdic": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-109-strategic-pending-event-before-response.png",
+    "finalMap": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-128-light-turn-80-map.png",
+    "finalDecisionRoom": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-130-light-turn-80-decision-room.png",
+    "finalArmyHq": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-131-light-turn-80-army-hq.png",
+    "finalRecords": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-207-records.png",
+    "finalChronicle": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-208-chronicle.png",
+    "playthroughFinal": "screenshots/20260730_session13_rbih_80turn_resume44-rbih-213-playthrough-final.png"
+  }
+}

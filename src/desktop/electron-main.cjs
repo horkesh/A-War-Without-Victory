@@ -3316,6 +3316,23 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('hold-reserve-at-main-staff', async (_event, payload) => {
+    const { requestId } = payload || {};
+    if (!currentGameStateJson || typeof requestId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = sim.holdReserveAtMainStaff(state, requestId);
+      if (!result.ok) return result;
+      writeCanonicalCurrentState(sim, state, _event.sender);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('decline-reserve-request', async (_event, payload) => {
     const { requestId, reason } = payload || {};
     if (!currentGameStateJson || typeof requestId !== 'string') {

@@ -2162,22 +2162,143 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
     const reviewCard = view.cards.find((c) => c.id === 'command:review-proposal:rev_1');
 
     expect(reviewCard?.title).toBe('Operation Test Plan');
-    expect(reviewCard?.severity).toBe('warning');
-    expect(reviewCard?.actionLabel).toBe('Review recommendation');
+    expect(reviewCard?.category).toBe('decision');
+    expect(reviewCard?.severity).toBe('blocking');
+    expect(reviewCard?.actionLabel).toBe('Authorize before advance');
     expect(reviewCard?.sourceLabel).toBe('Operation authorization');
-    expect(reviewCard?.explanation).toBe('Staff recommends presidential authorization before launch, but this review is advisory and does not block ending the turn.');
+    expect(reviewCard?.explanation).toBe('This historical operation is ready for presidential authorization. Sign or withhold before ending the turn.');
     expect(reviewCard?.evidence.join(' ')).toContain('Historical operation authorization');
     expect(reviewCard?.evidence.join(' ')).toContain('Recommended staff review');
     expect(reviewCard?.evidence.join(' ')).toContain('1 operation authorization unresolved');
-    expect(reviewCard?.evidence.join(' ')).not.toContain('Presidential launch authority required');
+    expect(reviewCard?.evidence.join(' ')).toContain('Presidential launch authority required');
     expect(reviewCard?.sourceHandoffTarget).toEqual({
       kind: 'army-hq-corps-briefing',
       corpsId: 'arbih_1st_corps',
     });
-    expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
-    expect(view.advanceReadiness.headline).toBe('Recommended before advance');
+    expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
+    expect(view.advanceReadiness.headline).toBe('Review before advance');
     expect(view.advanceReadiness.items.map((item) => item.id)).toContain('command:review-proposal:rev_1');
-    expect(view.activeDossier?.advanceLabel).toBe('Recommended before advance');
+    expect(view.activeDossier?.advanceLabel).toBe('Review before advance');
+  });
+
+  it('adds recurrence and cumulative authority context to repeated reserve requests', () => {
+    const state = makeState({
+      player_faction: 'HRHB',
+      formations: [
+        {
+          id: 'hvo_main_staff',
+          faction: 'HRHB',
+          name: 'HVO Main Staff',
+          kind: 'corps',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+        },
+        {
+          id: 'hvo_central_bosnia',
+          faction: 'HRHB',
+          name: 'Central Bosnia OZ',
+          kind: 'corps',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+        },
+        {
+          id: 'hvo_vitezovi',
+          faction: 'HRHB',
+          name: 'Vitezovi',
+          kind: 'brigade',
+          corps_id: 'hvo_main_staff',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+          location_osid: 'op:mostar:mostar_2',
+          eliteLoanState: {
+            on_loan: false,
+            loaned_to_corps: null,
+            loan_start_turn: null,
+            turns_deployed: 0,
+            permanently_degraded: false,
+            in_cooldown: false,
+            current_episode_id: null,
+          },
+        },
+      ] as LoadedGameState['formations'],
+      pendingReserveRequests: [{
+        request_id: 'reserve_repeat',
+        corps_id: 'hvo_central_bosnia',
+        faction: 'HRHB',
+        reason: 'defensive_gap',
+        priority: 80,
+        severityBand: 'critical',
+        travel_hops: 2,
+        description: 'Central Bosnia requests Vitezovi again.',
+        suggested_brigade_id: 'hvo_vitezovi',
+        turn_requested: 28,
+      }] as LoadedGameState['pendingReserveRequests'],
+      reserveRequestHistory: [
+        {
+          request_id: 'reserve_prior_1',
+          turn: 8,
+          faction: 'HRHB',
+          corps_id: 'hvo_central_bosnia',
+          brigade_id: 'hvo_vitezovi',
+          outcome: 'accepted',
+          reason: 'defensive_gap',
+          decided_by: 'player',
+          purpose: 'defensive',
+          why_needed: 'Line under pressure.',
+          how_to_use: 'Reinforce the line.',
+        },
+        {
+          request_id: 'reserve_prior_2',
+          turn: 20,
+          faction: 'HRHB',
+          corps_id: 'hvo_central_bosnia',
+          brigade_id: 'hvo_vitezovi',
+          outcome: 'accepted',
+          reason: 'defensive_gap',
+          decided_by: 'player',
+          purpose: 'defensive',
+          why_needed: 'Line under pressure.',
+          how_to_use: 'Reinforce the line.',
+        },
+      ],
+      eliteBrigadeTracker: {
+        hvo_vitezovi: {
+          total_loans: 2,
+          total_turns_deployed: 24,
+          total_battles: 3,
+          total_casualties_taken: 20,
+          total_osids_captured: 0,
+          episodes: [{
+            episode_id: 1,
+            corps_id: 'hvo_central_bosnia',
+            reason: 'defensive_gap',
+            loan_start_turn: 12,
+            loan_end_turn: 24,
+            recall_reason: 'need_expired',
+            travel_hops: 2,
+            personnel_start: 1200,
+            casualties_taken: 20,
+            battles_fought: 3,
+            osids_captured: 0,
+          }],
+        },
+      },
+    });
+
+    const card = buildPresidentialDecisionRoomView({ state }).cards
+      .find((entry) => entry.id === 'command:elite-deploy:reserve_repeat');
+    const evidence = card?.evidence.join(' ') ?? '';
+
+    expect(evidence).toContain('Prior authorizations: 2');
+    expect(evidence).toContain('Cumulative authority spent: 50');
+    expect(evidence).toContain('Last recall:');
+    expect(evidence).toContain('Need Expired');
   });
 
   it('adds operation goals, command, commander, force, and provenance to historical authorizations', () => {

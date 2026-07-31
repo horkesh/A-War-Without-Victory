@@ -1,0 +1,51 @@
+{
+  "session": "20260730_session04_rbih_60turn_postfix_remediation_smoke",
+  "mode": "Electron desktop, unpackaged production entry point against freshly built desktop outputs",
+  "sourceSave": "turn60-autosave.json",
+  "sourceSaveSha256": "15c1c938ec4ceadac12eb4e3a38521f560452fcfb12ea1c0d3c03ac7f377d4b4",
+  "loadedState": {
+    "turn": 60,
+    "playerFaction": "RBiH",
+    "pendingOfficerMattersBefore": 4,
+    "pendingOfficerMattersAfter": 4
+  },
+  "assertions": {
+    "availabilityCardsExplainNoAppointmentOrReassignment": true,
+    "replacementCardsNameHistoricalRecommendationAndIncumbentWhilePending": true,
+    "availabilityModalSeparatesFilingFromAppointment": true,
+    "armyHqFiledItemsRouteToExistingDecisionRoom": true,
+    "armyHqHasExplicitPresidentDeskReturn": true,
+    "armyHqToDeskNavigationSucceeded": true,
+    "autosaveHashUnchanged": true
+  },
+  "screenshots": [
+    {
+      "file": "57-remediation-electron-president-desk.png",
+      "bytes": 1496993,
+      "sha256": "78291d345535234dea0fa935b55d44b7e6ed8697c39d12f302b80488b6371729"
+    },
+    {
+      "file": "58-remediation-electron-personnel-semantics.png",
+      "bytes": 626970,
+      "sha256": "254fbf8a28f3d6e851c57d93d4ab56d3928d85b30bfad69e4de1e87aa9f07286"
+    },
+    {
+      "file": "59-remediation-electron-army-hq-handoff.png",
+      "bytes": 260354,
+      "sha256": "4c48edccfab28d2b1dcc0f8200524fe866f1af1ea360f06cbaf8668536534b5b"
+    },
+    {
+      "file": "60-remediation-electron-army-hq-to-desk.png",
+      "bytes": 1496993,
+      "sha256": "78291d345535234dea0fa935b55d44b7e6ed8697c39d12f302b80488b6371729"
+    }
+  ],
+  "diagnostics": {
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "autosaveSha256Before": "15c1c938ec4ceadac12eb4e3a38521f560452fcfb12ea1c0d3c03ac7f377d4b4",
+    "autosaveSha256After": "15c1c938ec4ceadac12eb4e3a38521f560452fcfb12ea1c0d3c03ac7f377d4b4"
+  },
+  "harnessNote": "The first scripted smoke stopped before mutating state because its exact officer-button matcher still expected the retired Acknowledge arrival label. The matcher now expects File availability notice; the subsequent read-only Electron probe completed without responding to any officer matter."
+}

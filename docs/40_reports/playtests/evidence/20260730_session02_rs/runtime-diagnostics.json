@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "session": "20260730_session02_rs",
+  "launch": {
+    "command": "npm run desktop -- --remote-debugging-port=9224 --user-data-dir=<isolated-session-profile>",
+    "remoteDebuggingPort": 9224,
+    "isolatedUserData": true
+  },
+  "runtime": {
+    "appVersion": "0.9.9-beta.1",
+    "electron": "41.0.3",
+    "chrome": "146.0.7680.80"
+  },
+  "observedRendererDiagnosticsAfterFirstRecovery": {
+    "consoleMessages": 19,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "warnings": [
+      "Electron insecure Content-Security-Policy warning; Electron states this warning is suppressed in a packaged application."
+    ],
+    "playtestEvidenceStorageKeys": []
+  },
+  "desktopLogs": {
+    "stdout": "desktop.stdout.log",
+    "stderr": "desktop.stderr.log",
+    "stderrSummary": "DevTools listening endpoint only.",
+    "errorExceptionFailedFatalMatches": 0,
+    "warnings": [
+      "Operation Jackal was skipped at injection because HRHB already controlled all four objectives."
+    ]
+  },
+  "confirmedRuntimeFailures": [
+    {
+      "turn": 1,
+      "action": "Accept the Cutileiro Plan through the visible peace-plan modal",
+      "result": "The embedded tactical frame unloaded, the UI action did not persist, and the control call timed out. The canon-historical RS response was recovered by invoking the same exposed resolvePeacePlan('cutileiro', 'accepted') bridge action, then reloading the shell.",
+      "evidence": [
+        "11-turn1-cutileiro-rs-decision.png",
+        "12-timeout-blank-shell.png",
+        "13-recovered-turn1-after-peace-response.png"
+      ]
+    },
+    {
+      "turn": 3,
+      "action": "Use the Warroom Advance control while the completed aftermath report remained open",
+      "result": "The embedded tactical frame unloaded and the turn remained at 3. Reloading restored the autosave; closing/acknowledging the report before advancing allowed turn 4 to proceed.",
+      "evidence": [
+        "16-turn3-aftermath.png",
+        "18-turn3-advance-second-blank-shell.png",
+        "19-turn3-un-arms-embargo-event.png"
+      ]
+    },
+    {
+      "turn": 1,
+      "action": "Reload the Warroom shell during recovery",
+      "result": "The main-menu Continue button was disabled even though getCurrentGameState returned the loaded RS turn-1 campaign and the embedded tactical frame loaded that save. The evidence run exposed the already-loaded shell to continue.",
+      "evidence": [
+        "13-recovered-turn1-after-peace-response.png"
+      ]
+    }
+  ],
+  "diagnosticLimitations": [
+    "The browser-control kernel reset after each 30-second control timeout, so one continuous in-memory console/network array does not span the entire session.",
+    "The desktop stdout/stderr logs, final renderer diagnostic window, screenshots, autosave, and copied quicksave remain preserved.",
+    "The two unloaded-frame failures emitted no captured renderer exception."
+  ]
+}

@@ -1,6 +1,8 @@
 import { strictCompare } from '../../../state/validateGameState.js';
 import { formatPlayerFacingZoneLabel } from '../../../utils/player_facing_zone_label.js';
 import { getArmyReserveRequestSeverityCopy } from '../utils/armyReserveSeverity.js';
+import { ELITE_DEPLOY_COST } from '../utils/commandAuthority.js';
+import { turnToDateString } from '../utils/formatters.js';
 import { getOsidDisplayName } from '../utils/osidDisplayName.js';
 import {
   getPlayerSafeBrigadeName,
@@ -23,6 +25,9 @@ export interface ReserveRequestPresentation {
   expectedEffect: string;
   weakenedPosition: string;
   opportunityCost: string;
+  priorAuthorizations?: string;
+  cumulativeAuthority?: string;
+  lastRecall?: string;
   severity: string;
 }
 
@@ -31,6 +36,15 @@ function playerSafeCandidateName(name: string | null | undefined): string {
     ? getPlayerSafeDisplayLabel(name, 'Assigned brigade')
     : getPlayerSafeBrigadeName(name);
 }
+
+const RECALL_REASON_KEYS: Record<string, MessageKey> = {
+  op_complete: 'armyReserve.recall.opComplete',
+  need_expired: 'armyReserve.recall.needExpired',
+  player_recall: 'armyReserve.recall.playerRecall',
+  casualty_threshold: 'armyReserve.recall.casualties',
+  morale_collapse: 'armyReserve.recall.moraleCollapse',
+  permanent_degradation: 'armyReserve.status.degraded',
+};
 
 export function buildReserveRequestPresentation(
   state: LoadedGameState,
@@ -109,6 +123,25 @@ export function buildReserveRequestPresentation(
         opportunityCost,
       })
     : unavailable;
+  const priorAuthorizations = (state.reserveRequestHistory ?? []).filter((record) =>
+    record.brigade_id === request.suggested_brigade_id
+    && record.corps_id === request.corps_id
+    && record.outcome === 'accepted'
+    && record.decided_by === 'player'
+  ).length;
+  const candidateEpisodes = request.suggested_brigade_id
+    ? state.eliteBrigadeTracker?.[request.suggested_brigade_id]?.episodes ?? []
+    : [];
+  const lastClosedEpisode = [...candidateEpisodes]
+    .filter((episode) => episode.corps_id === request.corps_id && episode.loan_end_turn != null)
+    .sort((a, b) =>
+      (b.loan_end_turn ?? -1) - (a.loan_end_turn ?? -1)
+      || b.episode_id - a.episode_id
+    )[0];
+  const recallReasonKey = lastClosedEpisode?.recall_reason
+    ? RECALL_REASON_KEYS[lastClosedEpisode.recall_reason]
+    : undefined;
+  const hasRecurrenceContext = priorAuthorizations > 0 || lastClosedEpisode != null;
   return {
     requestingCommand,
     recipientSector,
@@ -121,6 +154,16 @@ export function buildReserveRequestPresentation(
     expectedEffect: effectKey ? t(effectKey) : unavailable,
     weakenedPosition,
     opportunityCost,
+    ...(hasRecurrenceContext ? {
+      priorAuthorizations: String(priorAuthorizations),
+      cumulativeAuthority: String(priorAuthorizations * ELITE_DEPLOY_COST),
+      lastRecall: lastClosedEpisode
+        ? t('armyReserve.presentation.lastRecallValue', {
+            date: turnToDateString(lastClosedEpisode.loan_end_turn ?? 0),
+            reason: recallReasonKey ? t(recallReasonKey) : t('armyReserve.recall.unknown'),
+          })
+        : t('armyReserve.presentation.noneRecorded'),
+    } : {}),
     severity: getArmyReserveRequestSeverityCopy(request.priority).label,
   };
 }

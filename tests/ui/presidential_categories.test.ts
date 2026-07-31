@@ -157,6 +157,22 @@ describe('presidential command categories — count derivation', () => {
     expect(diplomacy.count).toBe(1); // only the dayton manifest, not paramilitary
   });
 
+  it('routes historical operation signatures to War Direction, not Diplomacy', () => {
+    const historicalOperation = makeCard({
+      id: 'command:review-proposal:PROP_JACKAL',
+      category: 'decision',
+      severity: 'blocking',
+    });
+    const view = makeView([historicalOperation]);
+    const byId = new Map(derivePresidentialCommandCategoryCounts(view).map((count) => [count.id, count]));
+
+    expect(cardBelongsToPresidentialCommandCategory(historicalOperation, 'cat_war_direction')).toBe(true);
+    expect(cardBelongsToPresidentialCommandCategory(historicalOperation, 'cat_diplomacy')).toBe(false);
+    expect(byId.get('cat_war_direction')?.count).toBe(1);
+    expect(byId.get('cat_war_direction')?.urgentCount).toBe(1);
+    expect(byId.get('cat_diplomacy')?.count).toBe(0);
+  });
+
   it('routes supply visibility to Home Front, not War Direction', () => {
     const view = makeView([
       makeCard({ id: 'supply:player-visibility', category: 'operational', severity: 'critical' }),

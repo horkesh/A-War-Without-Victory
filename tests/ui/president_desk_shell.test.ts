@@ -105,6 +105,32 @@ describe('PresidentDeskShell', () => {
     expect(action.className).not.toContain('text-red-100');
   });
 
+  it('names a clear desk as deliberate restraint', () => {
+    renderDesk();
+
+    expect(screen.getByText('No presidential act required')).toBeTruthy();
+    expect(screen.getByTestId('desk-action-advance-clearance').textContent)
+      .toContain('Advance while holding present policy');
+  });
+
+  it('opens a single required signature directly from the desk primary action', () => {
+    const onAction = vi.fn();
+    renderDesk({
+      onAction,
+      state: makeState({
+        pendingParamilitaryRequests: [
+          { faction: 'RS', target_osid: 'bratunac_1', strength: 120, estimated_civilian_risk: 14 },
+        ],
+      }),
+      osidNameMap: { bratunac_1: 'Bratunac' },
+    });
+
+    expect(screen.getByText('Your signature is required')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('desk-action-open-required-signature'));
+
+    expect(onAction).toHaveBeenCalledWith('paramilitary_review', 'paramilitary:1');
+  });
+
   it('distinguishes optional review from a clear desk and opens advance review', () => {
     const onAdvance = vi.fn();
     const onReviewAdvance = vi.fn();
@@ -127,7 +153,7 @@ describe('PresidentDeskShell', () => {
       } as Partial<LoadedGameState>),
     });
 
-    expect(screen.getByText('Review recommended')).toBeTruthy();
+    expect(screen.getByText('Staff recommends review')).toBeTruthy();
     expect(screen.queryByText('Ready')).toBeNull();
     fireEvent.click(screen.getByTestId('desk-action-review-priorities'));
     expect(onReviewAdvance).toHaveBeenCalledOnce();
@@ -220,7 +246,7 @@ describe('PresidentDeskShell', () => {
       }),
     });
 
-    expect(screen.getByText('Recent Consequences')).toBeTruthy();
+    expect(screen.getByText('What followed')).toBeTruthy();
     expect(screen.getByText('Decisions')).toBeTruthy();
     expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
     expect(screen.getByText('Decision recorded')).toBeTruthy();
@@ -302,7 +328,7 @@ describe('PresidentDeskShell', () => {
       }),
     });
 
-    expect(screen.getByText('Blocked')).toBeTruthy();
+    expect(screen.getByText('Your signature is required')).toBeTruthy();
     expect(screen.queryByText('Ready')).toBeNull();
   });
 
@@ -321,7 +347,7 @@ describe('PresidentDeskShell', () => {
       } as Partial<LoadedGameState>),
     });
 
-    expect(screen.getByText('Blocked')).toBeTruthy();
+    expect(screen.getByText('Your signature is required')).toBeTruthy();
     expect(container.textContent).toMatch(/Required\s*1/);
     expect(screen.getAllByText('Required').length).toBeGreaterThan(0);
     expect(screen.queryByText('No signatures required')).toBeNull();
@@ -343,7 +369,7 @@ describe('PresidentDeskShell', () => {
       } as Partial<LoadedGameState>),
     });
 
-    expect(screen.getByText('Ready')).toBeTruthy();
+    expect(screen.getByText('No presidential act required')).toBeTruthy();
     expect(container.textContent).not.toMatch(/Required\s*1/);
     expect(screen.queryByTestId('desk-packet-item-convoy:convoy_answered')).toBeNull();
   });

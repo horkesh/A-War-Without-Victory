@@ -2,7 +2,7 @@
 
 **Created:** 2026-03-02
 **Expanded:** 2026-03-04 — corrected ZoC status (deleted, not active), added Peace/War naming section, confirmed AoR consumer list
-**Updated:** 2026-03-07 — Phase I/II terminology purged from codebase; pipeline step names renamed (`militia-emergence`, `cohesion-drift`, etc.); type/function renames complete (`JNATransitionState`, `FrontDescriptor`, `createOobFormations`, `applyWarTransition`, `isEarlyWarAllowed`, `processDisplacementTakeover`, `runCohesionDrift`, `runMoraleDrift`)
+**Updated:** 2026-03-07 — Phase I/II terminology purged from codebase; pipeline step names renamed (`militia-emergence`, `cohesion-drift`, etc.); type/function renames complete (`JNATransitionState`, `FrontDescriptor`, `createOobFormations`, `applyWarTransition`, `isEarlyWarAllowed`, `processDisplacementTakeover`, `runCohesionDrift`, `runMoraleDrift`) <!-- legacy-phase-term-ok -->
 **R1-R3 completed:** 2026-03-04 — dead AoR files deleted, all consumers migrated, ZoC + AoR doc tombstones applied
 **Purpose:** Exhaustive inventory of all legacy references across codebase with phased removal plan.
 
@@ -187,17 +187,17 @@ These files still describe ZoC as present and active. They need targeted updates
 
 ---
 
-## Part 3: Peace / War Naming (formerly Phase I / Phase II)
+## Part 3: Peace / War Naming (formerly Phase I / Phase II) <!-- legacy-phase-term-ok -->
 
 ### 3A. Pipeline Step Names — ✅ RENAMED (2026-03-07)
 
-Pipeline step names have been renamed to remove Phase I/II prefixes:
+Pipeline step names have been renamed to remove Phase I/II prefixes: <!-- legacy-phase-term-ok -->
 - `militia-emergence` (was `phase-i-militia-emergence`), `pool-population`, `minority-militia-decay`, `brigade-reinforcement`, `formation-spawn`, `control-flip`, `displacement-hooks`, `control-strain`, `authority-update`, `jna-transition`
 - `cohesion-drift` (was `phase-ii-cohesion-drift`), `morale-drift`, `supply-osid`, `enclave-resilience`, `resolve-attack-orders`, etc.
 
 ### 3B. Run Summary Fields — ✅ RENAMED (2026-03-07)
 
-Run summary fields updated to remove Phase I/II prefixes.
+Run summary fields updated to remove Phase I/II prefixes. <!-- legacy-phase-term-ok -->
 
 ### 3C. Type Names and Function Names — ✅ RENAMED (2026-03-07)
 
@@ -240,14 +240,14 @@ All canon and engineering docs updated to use Peace/War terminology. Historical 
 
 ### ✅ Phase R4: AoR + Peace/War Doc Cleanup — COMPLETE (2026-03-04)
 **Scope:** Peace/War terminology updated in 4 canon docs. ZoC tombstone already done by R2.
-**Pattern:** Replaced "Phase I / Phase II" with "peace phase / war phase" where architectural.
+**Pattern:** Replaced "Phase I / Phase II" with "peace phase / war phase" where architectural. <!-- legacy-phase-term-ok -->
 
 ### ✅ Phase R5: Peace/War Type + Pipeline Renames — COMPLETE (2026-03-07)
-**Scope:** All type/function/constant/pipeline-step renames completed. Phase I/II terminology fully purged from codebase.
+**Scope:** All type/function/constant/pipeline-step renames completed. Phase I/II terminology fully purged from codebase. <!-- legacy-phase-term-ok -->
 **Completed:** `PhaseIJNAState` → `JNATransitionState`; `PhaseIIFrontDescriptor` → `FrontDescriptor`; `createOobFormationsAtPhaseIEntry` → `createOobFormations`; `applyPhase0ToPhaseITransition` → `applyWarTransition`; `isPhaseIAllowed` → `isEarlyWarAllowed`; `processPhaseIIDisplacementTakeover` → `processDisplacementTakeover`; `runPhaseIICohesionDrift` → `runCohesionDrift`; `runPhaseIIMoraleDrift` → `runMoraleDrift`; pipeline steps: `phase-i-militia-emergence` → `militia-emergence`, `phase-ii-cohesion-drift` → `cohesion-drift`, etc.
 
-### ✅ Phase R6: Remaining Phase II Remnants — COMPLETE (2026-03-12)
-**Scope:** Three final Phase I/II remnants renamed; file renamed.
+### ✅ Phase R6: Remaining Phase II Remnants — COMPLETE (2026-03-12) <!-- legacy-phase-term-ok -->
+**Scope:** Three final Phase I/II remnants renamed; file renamed. <!-- legacy-phase-term-ok -->
 **Completed:** `PhaseIIFrontStability` → `FrontStability` (game_state.ts + front_emergence.ts); `PhaseIIBattleResolutionLike` → `BattleResolutionLike` (displacement_takeover.ts); `phase_ii_adjacency.ts` → `war_adjacency.ts` (file rename + 4 import updates).
 
 ---

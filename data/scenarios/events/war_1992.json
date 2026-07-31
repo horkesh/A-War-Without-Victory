@@ -871,6 +871,64 @@
     "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 2710-2715, 3447-3526 — Six Strategic Goals and JCE findings. ICTY Mladic Trial Judgment (IT-09-92-T, 22 November 2017) paras. 3232-3243 — commander's Assembly warning. ICJ Bosnia and Herzegovina v. Serbia and Montenegro (26 February 2007)."
   },
   {
+    "id": "foca_1992",
+    "title": "Foca: The Takeover and Its Aftermath",
+    "narrative": "The historical record of the takeover of Foca, at the confluence of the Drina and Cehotina rivers, is documented here. Across the Krnojelac, Kunarac and Karadzic judgments, the International Criminal Tribunal for the former Yugoslavia established the conditions at the KP Dom detention facility and convicted, in the Kunarac case, for sexual enslavement and rape as crimes against humanity, establishing those legal categories in international criminal law. The pre-war Bosniak community of the municipality was reduced to a residual presence by the end of 1992.",
+    "source_note": "ICTY findings in Prosecutor v. Kunarac et al. (IT-96-23-T & IT-96-23/1-T), Prosecutor v. Krnojelac (IT-97-25-T), and Prosecutor v. Karadzic (IT-95-5/18-T) ground this row's provenance for the takeover of Foca and the KP Dom detention facility. This is a representation-only historical-record row with no player response options; per Sensitive History Design Gate §1.3 Ring 3 #1/#2/#8: cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp operation, and detainee or victim selection are canon-refused and must not be re-authored as player decisions. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 1,
+      "turn_max": 3,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RS",
+        "municipality": "foca",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "foca_takeover_documented": true
+    },
+    "historical_source": "ICTY Kunarac et al. IT-96-23-T & IT-96-23/1-T (sexual enslavement and rape as crimes against humanity); ICTY Krnojelac IT-97-25-T (KP Dom detention facility); ICTY Karadzic IT-95-5/18-T (Foca scheduled municipality); Balkan Battlegrounds Vol. I, p. 187 (Foca captured in April 1992).",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Foca takeover is documented in the Codex."
+    }
+  },
+  {
+    "id": "zvornik_takeover_1992",
+    "title": "The Takeover of Zvornik",
+    "narrative": "The historical record of the takeover of Zvornik, on the right bank of the Drina opposite the Serbian town of Mali Zvornik, is documented here. The International Criminal Tribunal for the former Yugoslavia, in the Karadzic and Stanisic & Zupljanin judgments, found that crimes against humanity were committed in the takeover and that the police, paramilitaries, and military operated within a coordinated structure. The pre-war Bosniak majority of the municipality was reduced to small pockets by midsummer 1992.",
+    "source_note": "ICTY findings in Prosecutor v. Karadzic (IT-95-5/18-T), Prosecutor v. Stanisic & Zupljanin (IT-08-91-T), and Prosecutor v. Tolimir (IT-05-88/2-T) ground this row's provenance for the takeover of Zvornik. This is a representation-only historical-record row with no player response options; per Sensitive History Design Gate §1.3 Ring 3 #1/#2/#8: cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp operation, and victim selection are canon-refused and must not be re-authored as player decisions. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 1,
+      "turn_max": 3,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RS",
+        "municipality": "zvornik",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "sets_flags": {
+      "zvornik_takeover_documented": true
+    },
+    "historical_source": "ICTY Karadzic IT-95-5/18-T (Zvornik scheduled municipality); ICTY Stanisic & Zupljanin IT-08-91-T (Zvornik police and paramilitary operations); ICTY Tolimir IT-05-88/2-T (Drina Corps formation and Zvornik command); Balkan Battlegrounds Vol. I, p. 187 (Zvornik captured 9-10 April 1992).",
+    "effect": {
+      "kind": "narrative",
+      "text": "The historical record of the Zvornik takeover is documented in the Codex."
+    }
+  },
+  {
     "id": "rs_paramilitary_policy_1992",
     "title": "Paramilitary Authorization Policy",
     "narrative": "The Ministry of Interior has drafted a deployment protocol for the volunteer formations operating alongside the regular army. Arkan's Tigers, the White Eagles, the Yellow Wasps, the Red Berets — names known to the Crisis Staffs in Banja Luka and Prijedor, names that travel ahead of the columns into the villages. The pattern is documented: rear-area pocket cleanup, civilian columns moved off the land, detention sites established in the wake. The political files require a posture. Authorize on standing orders, review each deployment, or refuse the formations entry to the order of battle.",
@@ -1263,7 +1321,7 @@
           },
           {
             "id": "civic_to_minority_retention",
-            "label": "RBiH minority officer/recruitment retention decision (Aug 1992)",
+            "label": "RBiH minority officer/recruitment retention decision (early summer 1992)",
             "timing": "future",
             "certainty": "conditional",
             "opens_events": [
@@ -1538,7 +1596,7 @@
           },
           {
             "id": "bosniak_national_to_minority_retention",
-            "label": "RBiH minority officer/recruitment retention decision (Aug 1992)",
+            "label": "RBiH minority officer/recruitment retention decision (early summer 1992)",
             "timing": "future",
             "certainty": "conditional",
             "opens_events": [
@@ -1806,7 +1864,7 @@
           },
           {
             "id": "pragmatic_to_minority_retention",
-            "label": "RBiH minority officer/recruitment retention decision (Aug 1992)",
+            "label": "RBiH minority officer/recruitment retention decision (early summer 1992)",
             "timing": "future",
             "certainty": "conditional",
             "opens_events": [
@@ -4185,64 +4243,6 @@
     }
   },
   {
-    "id": "foca_1992",
-    "title": "Foca: The Takeover and Its Aftermath",
-    "narrative": "The historical record of the takeover of Foca, at the confluence of the Drina and Cehotina rivers, is documented here. Across the Krnojelac, Kunarac and Karadzic judgments, the International Criminal Tribunal for the former Yugoslavia established the conditions at the KP Dom detention facility and convicted, in the Kunarac case, for sexual enslavement and rape as crimes against humanity, establishing those legal categories in international criminal law. The pre-war Bosniak community of the municipality was reduced to a residual presence by the end of 1992.",
-    "source_note": "ICTY findings in Prosecutor v. Kunarac et al. (IT-96-23-T & IT-96-23/1-T), Prosecutor v. Krnojelac (IT-97-25-T), and Prosecutor v. Karadzic (IT-95-5/18-T) ground this row's provenance for the takeover of Foca and the KP Dom detention facility. This is a representation-only historical-record row with no player response options; per Sensitive History Design Gate §1.3 Ring 3 #1/#2/#8: cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp operation, and detainee or victim selection are canon-refused and must not be re-authored as player decisions. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
-    "category": "humanitarian",
-    "source_tier": "icty_icj_un",
-    "emergence_class": "compound",
-    "trigger": {
-      "turn_min": 10,
-      "turn_max": 30,
-      "phase": "war",
-      "condition": {
-        "type": "faction_controls_municipality",
-        "faction": "RS",
-        "municipality": "foca",
-        "threshold": 0.5
-      }
-    },
-    "once": true,
-    "sets_flags": {
-      "foca_takeover_documented": true
-    },
-    "historical_source": "ICTY Kunarac et al. IT-96-23-T & IT-96-23/1-T (sexual enslavement and rape as crimes against humanity); ICTY Krnojelac IT-97-25-T (KP Dom detention facility); ICTY Karadzic IT-95-5/18-T (Foca scheduled municipality); BB Vol. I, Drina valley April-June 1992.",
-    "effect": {
-      "kind": "narrative",
-      "text": "The historical record of the Foca takeover is documented in the Codex."
-    }
-  },
-  {
-    "id": "zvornik_takeover_1992",
-    "title": "The Takeover of Zvornik",
-    "narrative": "The historical record of the takeover of Zvornik, on the right bank of the Drina opposite the Serbian town of Mali Zvornik, is documented here. The International Criminal Tribunal for the former Yugoslavia, in the Karadzic and Stanisic & Zupljanin judgments, found that crimes against humanity were committed in the takeover and that the police, paramilitaries, and military operated within a coordinated structure. The pre-war Bosniak majority of the municipality was reduced to small pockets by midsummer 1992.",
-    "source_note": "ICTY findings in Prosecutor v. Karadzic (IT-95-5/18-T), Prosecutor v. Stanisic & Zupljanin (IT-08-91-T), and Prosecutor v. Tolimir (IT-05-88/2-T) ground this row's provenance for the takeover of Zvornik. This is a representation-only historical-record row with no player response options; per Sensitive History Design Gate §1.3 Ring 3 #1/#2/#8: cleansing, forced-displacement, civilian-targeting, paramilitary deployment, detention-camp operation, and victim selection are canon-refused and must not be re-authored as player decisions. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
-    "category": "humanitarian",
-    "source_tier": "icty_icj_un",
-    "emergence_class": "compound",
-    "trigger": {
-      "turn_min": 10,
-      "turn_max": 30,
-      "phase": "war",
-      "condition": {
-        "type": "faction_controls_municipality",
-        "faction": "RS",
-        "municipality": "zvornik",
-        "threshold": 0.5
-      }
-    },
-    "once": true,
-    "sets_flags": {
-      "zvornik_takeover_documented": true
-    },
-    "historical_source": "ICTY Karadzic IT-95-5/18-T (Zvornik scheduled municipality); ICTY Stanisic & Zupljanin IT-08-91-T (Zvornik police and paramilitary operations); ICTY Tolimir IT-05-88/2-T (Drina Corps formation and Zvornik command); BB Vol. I, Drina valley April 1992.",
-    "effect": {
-      "kind": "narrative",
-      "text": "The historical record of the Zvornik takeover is documented in the Codex."
-    }
-  },
-  {
     "id": "visegrad_1992",
     "title": "Visegrad: The Bridge on the Drina, 1992",
     "narrative": "The historical record of the takeover of Visegrad, beneath the Mehmed Pasa Sokolovic bridge, is documented here. In the Lukic & Lukic and Vasiljevic judgments, the International Criminal Tribunal for the former Yugoslavia established the legal findings on the mass killings in the town between June and October 1992, including the house-burnings on Pionirska street and at Bikavac, which the chamber found were the operational expression of a campaign to eliminate Bosniaks from the municipality. The pre-war Bosniak community was reduced to a few hundred survivors.",
@@ -4334,6 +4334,274 @@
     "sets_flags": {
       "corridor_secured": true
     }
+  },
+  {
+    "id": "rbih_minority_retention_1992",
+    "title": "Sarajevo Records Its Officer Corps Posture",
+    "narrative": "ARBiH command at the Sarajevo HQ records its posture toward minority retention. The wartime army still carries substantial Serb and Croat officers and recruits — Gen. Jovan Divjak holds Deputy Commander at HQ Sarajevo, mixed-ethnicity units anchor the city's defense, and the civic-republic platform makes multi-ethnic service a structural foundation of state legitimacy. A Bosniak-nationalist faction inside the SDA presses for ethnic vetting and purges. President Izetbegović and the General Staff weigh the response: retain the multi-ethnic officer corps and recruitment pool (the documented historical posture); execute a gradual purge over several months; mandate immediate ethnic vetting and dismissal; or move to federated single-ethnicity unit structures as a compromise. The decision shapes who fights for the republic, who funds it, and what civic claim the state can advance at the diplomatic table.",
+    "category": "political",
+    "family": "rbih_minority_retention",
+    "source_tier": "balkan_battlegrounds",
+    "emergence_class": "compound",
+    "trigger": {
+      "turn_min": 12,
+      "turn_max": 16,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "civic"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "pragmatic"
+          }
+        ]
+      }
+    },
+    "requires_enabled": true,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "retain_minorities",
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "Sarajevo records its minority-retention posture for the ARBiH officer corps and recruitment pool."
+    },
+    "source_note": "The multi-ethnic composition of the ARBiH was a defining structural feature of the wartime Republic of Bosnia and Herzegovina. The army retained substantial Serb and Croat officer corps and recruits throughout the war: Gen. Jovan Divjak (Serb, JNA-trained) served as Deputy Commander of the Sarajevo HQ from April 1992 through the war's end (memoir 'Sarajevo, Mon Amour' Buchet/Chastel 2004 + ARBiH command records); Stjepan Šiber (Croat) served as Deputy Commander General Staff; mixed-ethnicity units operated in Sarajevo defense, the Tuzla cantonment, and the Mostar east-bank defense. The civic-republic platform documented at B1 (`rbih_state_identity`) makes multi-ethnic officer/recruit retention a structural foundation of state legitimacy — Izetbegović and the General Staff resisted internal Bosniak-nationalist pressure for ethnic purges throughout the war. The documented historical posture is retain_minorities: no formal ethnic vetting, no institutional purge campaign, sustained recognition of minority service across the officer corps and recruitment base. Sources: Balkan Battlegrounds Vol. II (CIA Office of Russian and European Analysis 2002) chs. on ARBiH composition + 1st Corps Sarajevo defense + General Staff structure; ICTY context for Sarajevo defense organization (Galić IT-98-29-T, Dragomir Milošević IT-98-29/1-T, Karadžić IT-95-5/18-T trial records on ARBiH 1st Corps and Sarajevo HQ command structure); Jovan Divjak, 'Sarajevo, Mon Amour' (Buchet/Chastel 2004) — Divjak's Serb-ethnic ARBiH service as Deputy Commander Sarajevo HQ from April 1992; Marko Attila Hoare, 'How Bosnia Armed' (Saqi 2004) on the civic-republic posture preserving minority service through the war; ARBiH command records and General Staff order-of-battle documentation. §3.6 forward-looking guard (STRICT — identity-coupled lane): any future `csq_rbih_minority_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, ethnic-targeting, paramilitary-deployment, hostage-taking, civilian-targeting, or any sensitive-act response option. The minority-retention decision is a CONSTITUTIONAL-POLITICAL crisis lane (officer-corps composition; recruitment-pool ethnic policy; civic-republic legitimacy posture) — NOT operational ethnic-targeting. Even the purge counterfactuals (gradual_purge / mandatory_purge) are modeled as COHESION + LEGITIMACY + RECRUITMENT costs (internal_cohesion penalty, international_standing penalty, alliance_change penalty, recruitment_modifier penalty, patron_pressure spike) — NOT as atrocity rewards, NOT as ethnic-cleansing enabling, NOT as forced-displacement triggers. Any associated atrocity surfaces (the Drina-valley cleansing, central-Bosnia detention camps, Sarajevo siege fires, Goražde enclave operations, Stupni Do, Mostar siege) remain canon-gated through their existing event surfaces (drina_valley_ethnic_cleansing_1992, concentration_camps_revealed_1992, h5_croat_bosniak_war_atrocities, h8_mostar_bridge family slugs). The cost-floor topology reflects the civic-legitimacy stakes: retain_minorities (historical) carries POSITIVE multi-ethnic boosts (internal_cohesion +5, international_standing +15, alliance_change +0.05, recruitment_modifier 1.05x for 12 turns capturing the multi-ethnic recruitment pool expansion, negotiating_leverage +5); gradual_purge (counterfactual) carries moderate punitive costs (internal_cohesion -15, international_standing -10, alliance_change -0.05, negotiating_leverage -10); mandatory_purge (counterfactual, maximum punitive) carries severe costs (internal_cohesion -25, international_standing -30, alliance_change -0.15, recruitment_modifier 0.85x for 8 turns, patron_pressure +20 capturing US/EU recoil); federated_units (counterfactual, intermediate compromise) carries moderate mixed costs (internal_cohesion -10, alliance_change +0.05 modest Federation-track alignment, negotiating_leverage +5). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: alliance_change captures the RBiH↔HRHB Federation alliance proxy (positive on retain/federated; negative on purge counterfactuals as the civic platform that underwrites the Federation framework collapses); patron_pressure captures the US/EU recoil on mandatory_purge (Western diplomatic exposure to ARBiH ethnic vetting would trigger explicit patron-side pushback per Holbrooke ch. 4 + US embassy reporting); recruitment_modifier captures the multi-ethnic recruitment pool expansion (retain) vs Bosniak-only pool constriction (mandatory_purge). New event reuses existing RBIH_BRANCH_TAGS entries (`rbih_civic`, `rbih_bosniak`, `rbih_pragmatic`) — no vocabulary additions; no new carrier flags. This packet extends the RBiH chain (B1) by one downstream event (was 11, now 12 in `enables_events_runtime`).",
+    "staff_assessment": "The General Staff and President Izetbegović align on retain_minorities as the documented historical posture: the civic-republic platform's commitment to equal citizenship structurally requires multi-ethnic officer retention, and the operational reality — Divjak at Sarajevo HQ, Šiber on the General Staff, mixed-ethnicity units anchoring the defense of Sarajevo and central Bosnia — makes ethnic purges institutionally costly and diplomatically suicidal. The internal SDA-nationalist faction pressing for purges loses the institutional argument because the alternative (mandatory_purge) collapses three lanes simultaneously: international standing (US/EU recoil; Western diplomatic exposure), the Federation track (the civic platform underwrites the Washington Agreement framework), and the recruitment pool (Bosniak-only constriction in a war already manpower-stretched). The gradual_purge counterfactual occupies the middle band — slower visible damage but still cumulative civic-legitimacy and Federation-track costs. The federated_units counterfactual is the intermediate compromise: single-ethnicity unit structures preserve some institutional coherence at the cost of unified ARBiH command and the civic claim — modest Federation-track alignment but the civic-republic posture weakens.",
+    "trigger_evidence": [
+      "ARBiH command at HQ Sarajevo carries substantial Serb and Croat officer presence (Divjak, Šiber, multiple mixed-ethnicity units).",
+      "The SDA Bosniak-nationalist faction is pressing the Presidency for ethnic vetting and purges.",
+      "The civic-republic platform recorded at B1 (rbih_state_identity) makes the minority-retention posture a structural foundation of state legitimacy that must be explicitly declared."
+    ],
+    "response_options": [
+      {
+        "id": "retain_minorities",
+        "branch_tag": "rbih_civic",
+        "historical_marker": "historical_default",
+        "label": "Retain the multi-ethnic officer corps",
+        "description": "Reject the SDA-nationalist pressure for ethnic vetting. Keep Divjak at Sarajevo HQ, Šiber on the General Staff, and the mixed-ethnicity units intact. The civic-republic platform is preserved at the institutional level. Western diplomatic standing rises; the Federation-track alignment with HRHB strengthens; the multi-ethnic recruitment pool expands. The SDA-nationalist faction grumbles but loses the institutional argument.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          },
+          {
+            "kind": "alliance_change",
+            "delta": 0.05
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RBiH",
+            "pool_multiplier": 1.05,
+            "duration_turns": 12
+          }
+        ],
+        "sets_flags": {
+          "rbih_minority_retention": "retain"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.2,
+        "risk_level": 0.2
+      },
+      {
+        "id": "gradual_purge",
+        "branch_tag": "rbih_bosniak",
+        "historical_marker": "counterfactual",
+        "label": "Execute a gradual ethnic purge",
+        "description": "Initiate a slow-motion ethnic vetting program. Minority officers retain their commissions on paper but are rotated to non-command staff roles; Serb and Croat recruits face informal screening at induction. The civic-republic platform erodes by attrition rather than rupture. Western diplomatic exposure is moderated but cumulative; the Federation-track alignment with HRHB weakens; the SDA-nationalist faction is partly mollified.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 0
+          },
+          {
+            "kind": "alliance_change",
+            "delta": -0.05
+          }
+        ],
+        "sets_flags": {
+          "rbih_minority_retention": "gradual_purge"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -10
+          }
+        ],
+        "aggression_affinity": 0.2,
+        "risk_level": 0.5
+      },
+      {
+        "id": "mandatory_purge",
+        "branch_tag": "rbih_bosniak",
+        "historical_marker": "counterfactual",
+        "label": "Mandate immediate ethnic vetting and dismissal",
+        "description": "Issue a Presidency directive dismissing Serb and Croat officers from command roles. Divjak is removed from Sarajevo HQ; Šiber is sidelined from the General Staff; mixed-ethnicity units are restructured along single-ethnicity lines. The civic-republic platform collapses at the institutional level. Western patrons recoil (US/EU push back explicitly); the Federation-track alignment with HRHB ruptures; the multi-ethnic recruitment pool constricts to a Bosniak-only base; the SDA-nationalist faction is satisfied but the diplomatic and institutional damage is severe and durable.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": -3
+          },
+          {
+            "kind": "alliance_change",
+            "delta": -0.15
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": 20
+          },
+          {
+            "kind": "recruitment_modifier",
+            "faction": "RBiH",
+            "pool_multiplier": 0.85,
+            "duration_turns": 8
+          }
+        ],
+        "sets_flags": {
+          "rbih_minority_retention": "mandatory_purge"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -25
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -30
+          }
+        ],
+        "aggression_affinity": 0.4,
+        "risk_level": 0.8
+      },
+      {
+        "id": "federated_units",
+        "branch_tag": "rbih_pragmatic",
+        "historical_marker": "counterfactual",
+        "label": "Move to federated single-ethnicity units",
+        "description": "Reorganize ARBiH into federated single-ethnicity unit structures. Bosniak units, Serb units, and Croat units operate under unified command but with ethnic separation at the brigade level. The civic-republic posture weakens at the operational level but a Federation-style federated army shell is preserved on paper. The Federation-track alignment with HRHB modestly strengthens (institutional compatibility); the civic-republic claim takes a moderate hit; internal cohesion suffers from the structural reorganization mid-war.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 1
+          },
+          {
+            "kind": "alliance_change",
+            "delta": 0.05
+          }
+        ],
+        "sets_flags": {
+          "rbih_minority_retention": "federated_units"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": 0,
+        "risk_level": 0.4
+      }
+    ],
+    "notifications_to_other_factions": {
+      "retain_minorities": {
+        "RS": {
+          "headline": "Sarajevo affirms multi-ethnic ARBiH composition",
+          "body": "ARBiH command at HQ Sarajevo declares retention of the Serb and Croat officer corps and the multi-ethnic recruitment pool. Pale reads the declaration as a civic-legitimacy reinforcement against partition claims; the Divjak-at-Sarajevo-HQ posture remains intact."
+        },
+        "HRHB": {
+          "headline": "ARBiH keeps Croat officers and recruits",
+          "body": "Sarajevo's command structure preserves multi-ethnic composition. Mostar reads the Federation-track signal: the civic platform that would underwrite a future Washington-track alignment with HRHB holds at the institutional level."
+        }
+      },
+      "gradual_purge": {
+        "RS": {
+          "headline": "Sarajevo begins quiet ethnic vetting",
+          "body": "ARBiH minority officers are rotated to non-command staff roles. Pale reads the slow erosion of Sarajevo's civic claim — the SDA-nationalist faction is gaining ground even without a formal purge directive."
+        },
+        "HRHB": {
+          "headline": "Croat officers sidelined in ARBiH command",
+          "body": "Sarajevo begins gradual ethnic vetting at the operational level. Mostar reads the Federation-track weakening: the civic platform that would underwrite a unified army is eroding by attrition."
+        }
+      },
+      "mandatory_purge": {
+        "RS": {
+          "headline": "Sarajevo mandates ethnic dismissal in ARBiH",
+          "body": "ARBiH Presidency directive dismisses Serb and Croat officers from command roles. Divjak removed from HQ Sarajevo. Pale reads the civic-republic collapse — Sarajevo can no longer credibly claim the legitimacy ground at the diplomatic table."
+        },
+        "HRHB": {
+          "headline": "ARBiH purges Croat officers from command",
+          "body": "Sarajevo's mandatory ethnic vetting directive removes Croat officers from ARBiH command. Mostar reads the Federation-track rupture — the civic platform that would underwrite the Washington framework collapses at the institutional level."
+        }
+      },
+      "federated_units": {
+        "RS": {
+          "headline": "Sarajevo restructures ARBiH into ethnic federated units",
+          "body": "ARBiH reorganizes into federated single-ethnicity brigade structures under unified command. Pale reads the partial concession to ethnic separation logic — the civic-republic claim is weakening at the operational level."
+        },
+        "HRHB": {
+          "headline": "ARBiH adopts federated single-ethnicity structure",
+          "body": "Sarajevo reorganizes ARBiH into single-ethnicity brigades under unified command. Mostar reads the Federation-track compatibility — the institutional shell is more amenable to a future HVO-ARBiH joint Federation army architecture."
+        }
+      }
+    },
+    "historical_source": "Balkan Battlegrounds Vol. II (CIA Office of Russian and European Analysis 2002) — ARBiH composition + General Staff structure + 1st Corps Sarajevo defense. Jovan Divjak, 'Sarajevo, Mon Amour' (Buchet/Chastel 2004) — Divjak's Serb-ethnic ARBiH service as Deputy Commander of the Sarajevo HQ from April 1992 through the war's end. Marko Attila Hoare, 'How Bosnia Armed' (Saqi 2004) — civic-republic posture preserving minority service through the war. ICTY Galić IT-98-29-T Trial Judgement (5 December 2003) + ICTY Dragomir Milošević IT-98-29/1-T (12 December 2007) — Sarajevo defense organization and ARBiH 1st Corps command structure. ICTY Karadžić IT-95-5/18-T Trial Judgment (24 March 2016) Vol. III — ARBiH command structure context. ARBiH command records and General Staff order-of-battle documentation."
   },
   {
     "id": "embargo_croatia_transit_1992",
@@ -4744,147 +5012,6 @@
     "historical_source": "ITN broadcast 6 August 1992 (Penny Marshall, Ed Vulliamy, Ian Williams — Trnopolje/Omarska footage); ICTY Tadic IT-94-1-T §§154-237; ICTY Stakic IT-97-24-T §§88-168, §§220-300; ICTY Karadzic IT-95-5/18-T §§3289-3340, §§3473-3475; ICTY Brdanin IT-99-36-T §§540-558; ICTY Kvocka IT-98-30/1-T; UN Mazowiecki E/CN.4/1992/S-1/9 (28 Aug 1992); UNSCR 771; UNSCR 780; BB Vol. I pp. 198-229."
   },
   {
-    "id": "london_conference_1992",
-    "title": "London Conference on Yugoslavia",
-    "narrative": "The international community convenes in London to address the escalating Bosnian crisis. Western leaders demand an end to ethnic cleansing and the lifting of sieges. The conference produces declarations but no enforcement mechanism, establishing a pattern of diplomatic engagement without military commitment.",
-    "source_note": "Existing event/essay/project sources ground the row's institutional and diplomatic context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
-    "category": "diplomatic",
-    "family": "diplomacy_london",
-    "source_tier": "icty_icj_un",
-    "emergence_class": "exogenous",
-    "historical_source": "UN S/24795 (London Conference Statement of Principles, 26-27 Aug 1992); Karadzic IT-95-5/18-T Trial Judgment vol. I paragraphs 3324-3340; UN Security Council chronology of the International Conference on the Former Yugoslavia.",
-    "trigger": {
-      "turn_min": 16,
-      "turn_max": 30,
-      "phase": "war",
-      "condition": {
-        "type": "and",
-        "conditions": [
-          {
-            "type": "war_crimes_above",
-            "faction": "RS",
-            "threshold": 2
-          },
-          {
-            "type": "patron_pressure_above",
-            "faction": "RS",
-            "threshold": 15
-          }
-        ]
-      }
-    },
-    "once": true,
-    "requires_player_response": true,
-    "responding_faction": "RBiH",
-    "bot_response_logic": "historical",
-    "historical_default_response_id": "accept_principles",
-    "effect": {
-      "kind": "narrative",
-      "text": "The London Conference demands ceasefire and end to ethnic cleansing. All parties face pressure to comply."
-    },
-    "response_options": [
-      {
-        "id": "accept_principles",
-        "label": "Subscribe to the London Principles",
-        "description": "Subscribe to the Statement of Principles alongside the other Bosnian delegations. Improves international standing but may constrain military operations.",
-        "historical_marker": "historical_default",
-        "branch_tag": "diplomacy_london_subscribed",
-        "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 10
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -5
-          }
-        ],
-        "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": 10
-          }
-        ]
-      },
-      {
-        "id": "reject",
-        "label": "Reject Terms as Inadequate",
-        "description": "Denounce the conference as rewarding aggression. Damages credibility but preserves freedom of action.",
-        "historical_marker": "counterfactual",
-        "branch_tag": "diplomacy_london_rejected",
-        "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -5
-          },
-          {
-            "kind": "morale_change",
-            "faction": "RBiH",
-            "delta": 3
-          }
-        ],
-        "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": -5
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "military_credibility",
-            "delta": 3
-          }
-        ]
-      }
-    ],
-    "pressure": {
-      "base_rate": 1.5,
-      "threshold": 6,
-      "decay_rate": 0.3,
-      "modifiers": [
-        {
-          "condition": {
-            "type": "flag_equals",
-            "flag": "drina_cleansing_occurred",
-            "value": true
-          },
-          "rate_bonus": 1
-        }
-      ]
-    },
-    "enables_events": [
-      "vance_owen_plan_1993"
-    ],
-    "notifications_to_other_factions": {
-      "accept_principles": {
-        "HRHB": {
-          "headline": "Sarajevo subscribes to the London Principles",
-          "body": "RBiH subscribes to the Statement of Principles alongside the other Bosnian delegations. HVO staff read the move as improved international standing, with possible constraints on operations."
-        },
-        "RS": {
-          "headline": "Sarajevo subscribes to the London Principles",
-          "body": "RBiH subscribes to a diplomatic line framed around ceasefire, ending ethnic cleansing, and lifting sieges. Pale reads the decision as a credibility gain for Sarajevo, but also as a constraint on RBiH military freedom."
-        }
-      },
-      "reject": {
-        "HRHB": {
-          "headline": "Sarajevo rejects London terms as inadequate",
-          "body": "RBiH denounces the conference as rewarding aggression and preserves freedom of action. HVO staff note the morale value in Sarajevo, while international credibility takes a visible hit."
-        },
-        "RS": {
-          "headline": "Sarajevo rejects London terms as inadequate",
-          "body": "RBiH refuses the London formula and argues that declarations without enforcement reward aggression. Pale sees Sarajevo keeping military freedom at the cost of international credibility."
-        }
-      }
-    }
-  },
-  {
     "id": "gorazde_pocket_consolidation_1992",
     "title": "Operation Circle: The Gorazde Pocket Holds",
     "narrative": "The 1st and 31st Drina Strike Brigades of the ARBiH launch Operation Circle, a counteroffensive to push VRS forces out of Gorazde's eastern approaches. After weeks of fighting through August, the operation succeeds in consolidating the enclave's perimeter, securing outlying settlements and establishing a defensible pocket. Gorazde — the largest Bosniak-held enclave in the Drina valley — will endure under siege for the remainder of the war, but it will not fall.",
@@ -5002,6 +5129,158 @@
     ]
   },
   {
+    "id": "london_conference_1992",
+    "title": "London Conference on Yugoslavia",
+    "narrative": "The international community convenes in London to address the escalating Bosnian crisis. Western leaders demand an end to ethnic cleansing and the lifting of sieges. The conference produces declarations but no enforcement mechanism, establishing a pattern of diplomatic engagement without military commitment.",
+    "source_note": "The London Conference met on 26-27 August 1992. Its campaign trigger preserves two documented routes into that week: accumulated war-crimes and external-pressure state, or three weeks after the concentration-camp revelations associated with the 6 August ITN reporting. The second route is bounded to ten weeks so the media-to-conference chain cannot become an indefinite calendar fallback. Sources: UN S/24795; ITN reporting of 6 August 1992; UN Mazowiecki E/CN.4/1992/S-1/9 (28 August 1992); ICTY Karadzic IT-95-5/18-T Trial Judgment vol. I paragraphs 3324-3340. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "category": "diplomatic",
+    "family": "diplomacy_london",
+    "source_tier": "icty_icj_un",
+    "emergence_class": "exogenous",
+    "historical_source": "UN S/24795 (London Conference Statement of Principles, 26-27 Aug 1992); Karadzic IT-95-5/18-T Trial Judgment vol. I paragraphs 3324-3340; UN Security Council chronology of the International Conference on the Former Yugoslavia.",
+    "trigger": {
+      "turn_min": 20,
+      "turn_max": 28,
+      "phase": "war",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "and",
+            "conditions": [
+              {
+                "type": "war_crimes_above",
+                "faction": "RS",
+                "threshold": 2
+              },
+              {
+                "type": "patron_pressure_above",
+                "faction": "RS",
+                "threshold": 15
+              }
+            ]
+          },
+          {
+            "type": "week_since_event",
+            "event_id": "concentration_camps_revealed_1992",
+            "min_weeks": 3,
+            "max_weeks": 10
+          }
+        ]
+      }
+    },
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "accept_principles",
+    "effect": {
+      "kind": "narrative",
+      "text": "The London Conference demands ceasefire and end to ethnic cleansing. All parties face pressure to comply."
+    },
+    "response_options": [
+      {
+        "id": "accept_principles",
+        "label": "Subscribe to the London Principles",
+        "description": "Subscribe to the Statement of Principles alongside the other Bosnian delegations. Improves international standing but may constrain military operations.",
+        "historical_marker": "historical_default",
+        "branch_tag": "diplomacy_london_subscribed",
+        "effects": [
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 10
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -5
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 10
+          }
+        ]
+      },
+      {
+        "id": "reject",
+        "label": "Reject Terms as Inadequate",
+        "description": "Denounce the conference as rewarding aggression. Damages credibility but preserves freedom of action.",
+        "historical_marker": "counterfactual",
+        "branch_tag": "diplomacy_london_rejected",
+        "effects": [
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": -5
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
+        ]
+      }
+    ],
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0.3,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "drina_cleansing_occurred",
+            "value": true
+          },
+          "rate_bonus": 1
+        }
+      ]
+    },
+    "enables_events": [
+      "vance_owen_plan_1993"
+    ],
+    "notifications_to_other_factions": {
+      "accept_principles": {
+        "HRHB": {
+          "headline": "Sarajevo subscribes to the London Principles",
+          "body": "RBiH subscribes to the Statement of Principles alongside the other Bosnian delegations. HVO staff read the move as improved international standing, with possible constraints on operations."
+        },
+        "RS": {
+          "headline": "Sarajevo subscribes to the London Principles",
+          "body": "RBiH subscribes to a diplomatic line framed around ceasefire, ending ethnic cleansing, and lifting sieges. Pale reads the decision as a credibility gain for Sarajevo, but also as a constraint on RBiH military freedom."
+        }
+      },
+      "reject": {
+        "HRHB": {
+          "headline": "Sarajevo rejects London terms as inadequate",
+          "body": "RBiH denounces the conference as rewarding aggression and preserves freedom of action. HVO staff note the morale value in Sarajevo, while international credibility takes a visible hit."
+        },
+        "RS": {
+          "headline": "Sarajevo rejects London terms as inadequate",
+          "body": "RBiH refuses the London formula and argues that declarations without enforcement reward aggression. Pale sees Sarajevo keeping military freedom at the cost of international credibility."
+        }
+      }
+    }
+  },
+  {
     "id": "hvo_arbih_tensions_rise_1992",
     "title": "HVO-ARBiH Clash at Prozor",
     "narrative": "The fragile alliance between the HVO and ARBiH fractures openly at Prozor in central Bosnia. HVO forces attack Bosniak civilians and ARBiH positions in a calculated bid to assert Croat control over the town. Further clashes erupt near Novi Travnik. The incidents mark the first serious military confrontation between the two nominal allies.",
@@ -5065,274 +5344,6 @@
     "sets_flags": {
       "hvo_arbih_tensions_rising": true
     }
-  },
-  {
-    "id": "rbih_minority_retention_1992",
-    "title": "Sarajevo Records Its Officer Corps Posture",
-    "narrative": "ARBiH command at the Sarajevo HQ records its posture toward minority retention. The wartime army still carries substantial Serb and Croat officers and recruits — Gen. Jovan Divjak holds Deputy Commander at HQ Sarajevo, mixed-ethnicity units anchor the city's defense, and the civic-republic platform makes multi-ethnic service a structural foundation of state legitimacy. A Bosniak-nationalist faction inside the SDA presses for ethnic vetting and purges. President Izetbegović and the General Staff weigh the response: retain the multi-ethnic officer corps and recruitment pool (the documented historical posture); execute a gradual purge over several months; mandate immediate ethnic vetting and dismissal; or move to federated single-ethnicity unit structures as a compromise. The decision shapes who fights for the republic, who funds it, and what civic claim the state can advance at the diplomatic table.",
-    "category": "political",
-    "family": "rbih_minority_retention",
-    "source_tier": "balkan_battlegrounds",
-    "emergence_class": "compound",
-    "trigger": {
-      "turn_min": 22,
-      "turn_max": 28,
-      "phase": "war",
-      "condition": {
-        "type": "or",
-        "conditions": [
-          {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "civic"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "bosniak_national"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "pragmatic"
-          }
-        ]
-      }
-    },
-    "requires_enabled": true,
-    "once": true,
-    "requires_player_response": true,
-    "responding_faction": "RBiH",
-    "bot_response_logic": "historical",
-    "historical_default_response_id": "retain_minorities",
-    "pressure": {
-      "base_rate": 3,
-      "threshold": 3,
-      "decay_rate": 0
-    },
-    "effect": {
-      "kind": "narrative",
-      "text": "Sarajevo records its minority-retention posture for the ARBiH officer corps and recruitment pool."
-    },
-    "source_note": "The multi-ethnic composition of the ARBiH was a defining structural feature of the wartime Republic of Bosnia and Herzegovina. The army retained substantial Serb and Croat officer corps and recruits throughout the war: Gen. Jovan Divjak (Serb, JNA-trained) served as Deputy Commander of the Sarajevo HQ from April 1992 through the war's end (memoir 'Sarajevo, Mon Amour' Buchet/Chastel 2004 + ARBiH command records); Stjepan Šiber (Croat) served as Deputy Commander General Staff; mixed-ethnicity units operated in Sarajevo defense, the Tuzla cantonment, and the Mostar east-bank defense. The civic-republic platform documented at B1 (`rbih_state_identity`) makes multi-ethnic officer/recruit retention a structural foundation of state legitimacy — Izetbegović and the General Staff resisted internal Bosniak-nationalist pressure for ethnic purges throughout the war. The documented historical posture is retain_minorities: no formal ethnic vetting, no institutional purge campaign, sustained recognition of minority service across the officer corps and recruitment base. Sources: Balkan Battlegrounds Vol. II (CIA Office of Russian and European Analysis 2002) chs. on ARBiH composition + 1st Corps Sarajevo defense + General Staff structure; ICTY context for Sarajevo defense organization (Galić IT-98-29-T, Dragomir Milošević IT-98-29/1-T, Karadžić IT-95-5/18-T trial records on ARBiH 1st Corps and Sarajevo HQ command structure); Jovan Divjak, 'Sarajevo, Mon Amour' (Buchet/Chastel 2004) — Divjak's Serb-ethnic ARBiH service as Deputy Commander Sarajevo HQ from April 1992; Marko Attila Hoare, 'How Bosnia Armed' (Saqi 2004) on the civic-republic posture preserving minority service through the war; ARBiH command records and General Staff order-of-battle documentation. §3.6 forward-looking guard (STRICT — identity-coupled lane): any future `csq_rbih_minority_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, ethnic-targeting, paramilitary-deployment, hostage-taking, civilian-targeting, or any sensitive-act response option. The minority-retention decision is a CONSTITUTIONAL-POLITICAL crisis lane (officer-corps composition; recruitment-pool ethnic policy; civic-republic legitimacy posture) — NOT operational ethnic-targeting. Even the purge counterfactuals (gradual_purge / mandatory_purge) are modeled as COHESION + LEGITIMACY + RECRUITMENT costs (internal_cohesion penalty, international_standing penalty, alliance_change penalty, recruitment_modifier penalty, patron_pressure spike) — NOT as atrocity rewards, NOT as ethnic-cleansing enabling, NOT as forced-displacement triggers. Any associated atrocity surfaces (the Drina-valley cleansing, central-Bosnia detention camps, Sarajevo siege fires, Goražde enclave operations, Stupni Do, Mostar siege) remain canon-gated through their existing event surfaces (drina_valley_ethnic_cleansing_1992, concentration_camps_revealed_1992, h5_croat_bosniak_war_atrocities, h8_mostar_bridge family slugs). The cost-floor topology reflects the civic-legitimacy stakes: retain_minorities (historical) carries POSITIVE multi-ethnic boosts (internal_cohesion +5, international_standing +15, alliance_change +0.05, recruitment_modifier 1.05x for 12 turns capturing the multi-ethnic recruitment pool expansion, negotiating_leverage +5); gradual_purge (counterfactual) carries moderate punitive costs (internal_cohesion -15, international_standing -10, alliance_change -0.05, negotiating_leverage -10); mandatory_purge (counterfactual, maximum punitive) carries severe costs (internal_cohesion -25, international_standing -30, alliance_change -0.15, recruitment_modifier 0.85x for 8 turns, patron_pressure +20 capturing US/EU recoil); federated_units (counterfactual, intermediate compromise) carries moderate mixed costs (internal_cohesion -10, alliance_change +0.05 modest Federation-track alignment, negotiating_leverage +5). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: alliance_change captures the RBiH↔HRHB Federation alliance proxy (positive on retain/federated; negative on purge counterfactuals as the civic platform that underwrites the Federation framework collapses); patron_pressure captures the US/EU recoil on mandatory_purge (Western diplomatic exposure to ARBiH ethnic vetting would trigger explicit patron-side pushback per Holbrooke ch. 4 + US embassy reporting); recruitment_modifier captures the multi-ethnic recruitment pool expansion (retain) vs Bosniak-only pool constriction (mandatory_purge). New event reuses existing RBIH_BRANCH_TAGS entries (`rbih_civic`, `rbih_bosniak`, `rbih_pragmatic`) — no vocabulary additions; no new carrier flags. This packet extends the RBiH chain (B1) by one downstream event (was 11, now 12 in `enables_events_runtime`).",
-    "staff_assessment": "The General Staff and President Izetbegović align on retain_minorities as the documented historical posture: the civic-republic platform's commitment to equal citizenship structurally requires multi-ethnic officer retention, and the operational reality — Divjak at Sarajevo HQ, Šiber on the General Staff, mixed-ethnicity units anchoring the defense of Sarajevo and central Bosnia — makes ethnic purges institutionally costly and diplomatically suicidal. The internal SDA-nationalist faction pressing for purges loses the institutional argument because the alternative (mandatory_purge) collapses three lanes simultaneously: international standing (US/EU recoil; Western diplomatic exposure), the Federation track (the civic platform underwrites the Washington Agreement framework), and the recruitment pool (Bosniak-only constriction in a war already manpower-stretched). The gradual_purge counterfactual occupies the middle band — slower visible damage but still cumulative civic-legitimacy and Federation-track costs. The federated_units counterfactual is the intermediate compromise: single-ethnicity unit structures preserve some institutional coherence at the cost of unified ARBiH command and the civic claim — modest Federation-track alignment but the civic-republic posture weakens.",
-    "trigger_evidence": [
-      "ARBiH command at HQ Sarajevo carries substantial Serb and Croat officer presence (Divjak, Šiber, multiple mixed-ethnicity units).",
-      "The SDA Bosniak-nationalist faction is pressing the Presidency for ethnic vetting and purges.",
-      "The civic-republic platform recorded at B1 (rbih_state_identity) makes the minority-retention posture a structural foundation of state legitimacy that must be explicitly declared."
-    ],
-    "response_options": [
-      {
-        "id": "retain_minorities",
-        "branch_tag": "rbih_civic",
-        "historical_marker": "historical_default",
-        "label": "Retain the multi-ethnic officer corps",
-        "description": "Reject the SDA-nationalist pressure for ethnic vetting. Keep Divjak at Sarajevo HQ, Šiber on the General Staff, and the mixed-ethnicity units intact. The civic-republic platform is preserved at the institutional level. Western diplomatic standing rises; the Federation-track alignment with HRHB strengthens; the multi-ethnic recruitment pool expands. The SDA-nationalist faction grumbles but loses the institutional argument.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RBiH",
-            "delta": 3
-          },
-          {
-            "kind": "alliance_change",
-            "delta": 0.05
-          },
-          {
-            "kind": "recruitment_modifier",
-            "faction": "RBiH",
-            "pool_multiplier": 1.05,
-            "duration_turns": 12
-          }
-        ],
-        "sets_flags": {
-          "rbih_minority_retention": "retain"
-        },
-        "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "internal_cohesion",
-            "delta": 5
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": 15
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "negotiating_leverage",
-            "delta": 5
-          }
-        ],
-        "aggression_affinity": -0.2,
-        "risk_level": 0.2
-      },
-      {
-        "id": "gradual_purge",
-        "branch_tag": "rbih_bosniak",
-        "historical_marker": "counterfactual",
-        "label": "Execute a gradual ethnic purge",
-        "description": "Initiate a slow-motion ethnic vetting program. Minority officers retain their commissions on paper but are rotated to non-command staff roles; Serb and Croat recruits face informal screening at induction. The civic-republic platform erodes by attrition rather than rupture. Western diplomatic exposure is moderated but cumulative; the Federation-track alignment with HRHB weakens; the SDA-nationalist faction is partly mollified.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RBiH",
-            "delta": 0
-          },
-          {
-            "kind": "alliance_change",
-            "delta": -0.05
-          }
-        ],
-        "sets_flags": {
-          "rbih_minority_retention": "gradual_purge"
-        },
-        "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "internal_cohesion",
-            "delta": -15
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": -10
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "negotiating_leverage",
-            "delta": -10
-          }
-        ],
-        "aggression_affinity": 0.2,
-        "risk_level": 0.5
-      },
-      {
-        "id": "mandatory_purge",
-        "branch_tag": "rbih_bosniak",
-        "historical_marker": "counterfactual",
-        "label": "Mandate immediate ethnic vetting and dismissal",
-        "description": "Issue a Presidency directive dismissing Serb and Croat officers from command roles. Divjak is removed from Sarajevo HQ; Šiber is sidelined from the General Staff; mixed-ethnicity units are restructured along single-ethnicity lines. The civic-republic platform collapses at the institutional level. Western patrons recoil (US/EU push back explicitly); the Federation-track alignment with HRHB ruptures; the multi-ethnic recruitment pool constricts to a Bosniak-only base; the SDA-nationalist faction is satisfied but the diplomatic and institutional damage is severe and durable.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RBiH",
-            "delta": -3
-          },
-          {
-            "kind": "alliance_change",
-            "delta": -0.15
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": 20
-          },
-          {
-            "kind": "recruitment_modifier",
-            "faction": "RBiH",
-            "pool_multiplier": 0.85,
-            "duration_turns": 8
-          }
-        ],
-        "sets_flags": {
-          "rbih_minority_retention": "mandatory_purge"
-        },
-        "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "internal_cohesion",
-            "delta": -25
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": -30
-          }
-        ],
-        "aggression_affinity": 0.4,
-        "risk_level": 0.8
-      },
-      {
-        "id": "federated_units",
-        "branch_tag": "rbih_pragmatic",
-        "historical_marker": "counterfactual",
-        "label": "Move to federated single-ethnicity units",
-        "description": "Reorganize ARBiH into federated single-ethnicity unit structures. Bosniak units, Serb units, and Croat units operate under unified command but with ethnic separation at the brigade level. The civic-republic posture weakens at the operational level but a Federation-style federated army shell is preserved on paper. The Federation-track alignment with HRHB modestly strengthens (institutional compatibility); the civic-republic claim takes a moderate hit; internal cohesion suffers from the structural reorganization mid-war.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RBiH",
-            "delta": 1
-          },
-          {
-            "kind": "alliance_change",
-            "delta": 0.05
-          }
-        ],
-        "sets_flags": {
-          "rbih_minority_retention": "federated_units"
-        },
-        "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "internal_cohesion",
-            "delta": -10
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "negotiating_leverage",
-            "delta": 5
-          }
-        ],
-        "aggression_affinity": 0,
-        "risk_level": 0.4
-      }
-    ],
-    "notifications_to_other_factions": {
-      "retain_minorities": {
-        "RS": {
-          "headline": "Sarajevo affirms multi-ethnic ARBiH composition",
-          "body": "ARBiH command at HQ Sarajevo declares retention of the Serb and Croat officer corps and the multi-ethnic recruitment pool. Pale reads the declaration as a civic-legitimacy reinforcement against partition claims; the Divjak-at-Sarajevo-HQ posture remains intact."
-        },
-        "HRHB": {
-          "headline": "ARBiH keeps Croat officers and recruits",
-          "body": "Sarajevo's command structure preserves multi-ethnic composition. Mostar reads the Federation-track signal: the civic platform that would underwrite a future Washington-track alignment with HRHB holds at the institutional level."
-        }
-      },
-      "gradual_purge": {
-        "RS": {
-          "headline": "Sarajevo begins quiet ethnic vetting",
-          "body": "ARBiH minority officers are rotated to non-command staff roles. Pale reads the slow erosion of Sarajevo's civic claim — the SDA-nationalist faction is gaining ground even without a formal purge directive."
-        },
-        "HRHB": {
-          "headline": "Croat officers sidelined in ARBiH command",
-          "body": "Sarajevo begins gradual ethnic vetting at the operational level. Mostar reads the Federation-track weakening: the civic platform that would underwrite a unified army is eroding by attrition."
-        }
-      },
-      "mandatory_purge": {
-        "RS": {
-          "headline": "Sarajevo mandates ethnic dismissal in ARBiH",
-          "body": "ARBiH Presidency directive dismisses Serb and Croat officers from command roles. Divjak removed from HQ Sarajevo. Pale reads the civic-republic collapse — Sarajevo can no longer credibly claim the legitimacy ground at the diplomatic table."
-        },
-        "HRHB": {
-          "headline": "ARBiH purges Croat officers from command",
-          "body": "Sarajevo's mandatory ethnic vetting directive removes Croat officers from ARBiH command. Mostar reads the Federation-track rupture — the civic platform that would underwrite the Washington framework collapses at the institutional level."
-        }
-      },
-      "federated_units": {
-        "RS": {
-          "headline": "Sarajevo restructures ARBiH into ethnic federated units",
-          "body": "ARBiH reorganizes into federated single-ethnicity brigade structures under unified command. Pale reads the partial concession to ethnic separation logic — the civic-republic claim is weakening at the operational level."
-        },
-        "HRHB": {
-          "headline": "ARBiH adopts federated single-ethnicity structure",
-          "body": "Sarajevo reorganizes ARBiH into single-ethnicity brigades under unified command. Mostar reads the Federation-track compatibility — the institutional shell is more amenable to a future HVO-ARBiH joint Federation army architecture."
-        }
-      }
-    },
-    "historical_source": "Balkan Battlegrounds Vol. II (CIA Office of Russian and European Analysis 2002) — ARBiH composition + General Staff structure + 1st Corps Sarajevo defense. Jovan Divjak, 'Sarajevo, Mon Amour' (Buchet/Chastel 2004) — Divjak's Serb-ethnic ARBiH service as Deputy Commander of the Sarajevo HQ from April 1992 through the war's end. Marko Attila Hoare, 'How Bosnia Armed' (Saqi 2004) — civic-republic posture preserving minority service through the war. ICTY Galić IT-98-29-T Trial Judgement (5 December 2003) + ICTY Dragomir Milošević IT-98-29/1-T (12 December 2007) — Sarajevo defense organization and ARBiH 1st Corps command structure. ICTY Karadžić IT-95-5/18-T Trial Judgment (24 March 2016) Vol. III — ARBiH command structure context. ARBiH command records and General Staff order-of-battle documentation."
   },
   {
     "id": "jajce_falls_1992",

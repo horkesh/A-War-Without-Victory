@@ -37,6 +37,10 @@ import type { CorpsFrontSectorView, FormationView, NamedOfficerView, OperationVi
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import type { EventDefinition } from '../../../../sim/events/event_types';
 import { projectOperationLifecycle } from '../../data/operationLifecycleProjection';
+import {
+    buildArmyHqPresidentialHandoff,
+    type ArmyHqPresidentialHandoff,
+} from '../../data/armyHqPresidentialHandoff';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const HQ_TABS = [
@@ -53,6 +57,7 @@ export interface ArmyHQModalProps {
     eventCatalog?: ReadonlyMap<string, EventDefinition>;
     onOpenRecruitment?: () => void;
     onOpenAutonomy?: () => void;
+    onReturnToDesk?: () => void;
 }
 
 const FACTION_DISPLAY: Record<string, string> = {
@@ -62,11 +67,21 @@ const FACTION_DISPLAY: Record<string, string> = {
 };
 
 function DecisionRoomHandoff({
+    handoff,
     onNavigateTarget,
+    onReturnToDesk,
 }: {
+    handoff: ArmyHqPresidentialHandoff;
     onNavigateTarget?: (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
+    onReturnToDesk?: () => void;
 }) {
-    const disabled = !onNavigateTarget;
+    const routesToDesk = handoff.route === 'desk';
+    const disabled = routesToDesk ? !onReturnToDesk : !onNavigateTarget;
+    const detail = handoff.status === 'critical_hold'
+        ? t('armyHq.decisionRoomHandoff.criticalHold', { count: handoff.criticalCommandCount })
+        : handoff.status === 'filed_action'
+            ? t('armyHq.decisionRoomHandoff.filedAction', { count: handoff.filedActionCount })
+            : t('armyHq.decisionRoomHandoff.detail');
     return (
         <section
             data-testid="army-hq-decision-room-handoff"
@@ -76,16 +91,20 @@ function DecisionRoomHandoff({
                 {t('armyHq.decisionRoomHandoff.title')}
             </div>
             <div className="mt-1 text-xs leading-relaxed text-text-secondary">
-                {t('armyHq.decisionRoomHandoff.detail')}
+                {detail}
             </div>
             <button
                 type="button"
                 data-testid="army-hq-decision-room-open"
+                data-handoff-route={handoff.route}
                 disabled={disabled}
-                onClick={() => onNavigateTarget?.({ kind: 'decision-room', lens: 'all' })}
+                onClick={() => {
+                    if (routesToDesk) onReturnToDesk?.();
+                    else onNavigateTarget?.({ kind: 'decision-room', lens: 'all' });
+                }}
                 className="mt-2 h-8 rounded border border-amber-400/35 bg-amber-400/12 px-3 text-xs font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
             >
-                {t('armyHq.openDecisionRoom')}
+                {routesToDesk ? t('armyHq.returnDesk') : t('armyHq.openDecisionRoom')}
             </button>
         </section>
     );
@@ -173,6 +192,7 @@ export function ArmyHQModal({
     eventCatalog,
     onOpenRecruitment,
     onOpenAutonomy,
+    onReturnToDesk,
 }: ArmyHQModalProps = {}) {
     const open = useGameStore((s) => s.armyHQOpen);
     const setOpen = useGameStore((s) => s.setArmyHQOpen);
@@ -261,10 +281,16 @@ export function ArmyHQModal({
             generateForceReadiness(formations, operations, faction, threatCorpsIds)
                 .map((item) => [item.corpsId, item]),
         );
+        const presidentialHandoff = buildArmyHqPresidentialHandoff({
+            corpsFormations,
+            readiness: [...readinessByCorps.values()],
+            pendingReviewCount: state.presidentialReviewQueue?.pendingCount ?? 0,
+            pendingReserveCount: state.armyReserveQueue?.pendingCount ?? 0,
+        });
 
         return {
             formations, brigades, corpsFormations, totalPersonnelLabel, sectors, operations, executingOperationCount,
-            sectorsByCorps, opsByCorps, readinessByCorps,
+            sectorsByCorps, opsByCorps, readinessByCorps, presidentialHandoff,
             territoryPct, reserves,
             eff, commander, factionBattles, briefingItems
         };
@@ -455,6 +481,20 @@ export function ArmyHQModal({
                         >
                             {expandedCorpsId ? '← BACK' : '← FIELD'}
                         </button>
+                        {!expandedCorpsId && onReturnToDesk && (
+                            <button
+                                type="button"
+                                data-testid="army-hq-desk-return"
+                                onClick={() => {
+                                    setOpen(false);
+                                    onReturnToDesk();
+                                }}
+                                className="px-2 py-0.5 text-xs font-bold uppercase tracking-[0.14em] text-accent-gold border border-accent-gold/30 rounded-md hover:bg-accent-gold/10 transition-colors"
+                                title={t('armyHq.returnDeskTitle')}
+                            >
+                                {t('armyHq.returnDesk')}
+                            </button>
+                        )}
                         {!expandedCorpsId && shouldShowWarroomReturn(
                             typeof window !== 'undefined' ? window.location.search : '',
                             ipc.isAvailable,
@@ -597,7 +637,11 @@ export function ArmyHQModal({
                                             onCorpsClick={navigateToCorps}
                                         />
 
-                                        <DecisionRoomHandoff onNavigateTarget={onDecisionRoomNavigateTarget} />
+                                        <DecisionRoomHandoff
+                                            handoff={data.presidentialHandoff}
+                                            onNavigateTarget={onDecisionRoomNavigateTarget}
+                                            onReturnToDesk={onReturnToDesk}
+                                        />
 
                                         <RootErrorBoundary zone="presidential decisions">
                                             <PresidentialAttentionPanel

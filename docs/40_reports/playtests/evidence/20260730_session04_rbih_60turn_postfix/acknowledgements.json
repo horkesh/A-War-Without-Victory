@@ -1,0 +1,258 @@
+[
+  {
+    "turn": 3,
+    "type": "event_notice",
+    "id": "arms_embargo_impact_1992"
+  },
+  {
+    "turn": 4,
+    "type": "event_notice",
+    "id": "battle_of_the_barracks_sarajevo"
+  },
+  {
+    "turn": 4,
+    "type": "event_notice",
+    "id": "battle_of_the_barracks_tuzla"
+  },
+  {
+    "turn": 4,
+    "type": "event_notice",
+    "id": "battle_of_the_barracks_visoko"
+  },
+  {
+    "turn": 4,
+    "type": "event_notice",
+    "id": "battle_of_the_barracks_zenica"
+  },
+  {
+    "turn": 5,
+    "type": "event_notice",
+    "id": "jna_withdrawal_1992"
+  },
+  {
+    "turn": 5,
+    "type": "event_notice",
+    "id": "sarajevo_siege_begins_1992"
+  },
+  {
+    "turn": 6,
+    "type": "event_notice",
+    "id": "bijeljina_killings_1992"
+  },
+  {
+    "turn": 6,
+    "type": "event_notice",
+    "id": "csq_accelerated_camps_discovery_1992"
+  },
+  {
+    "turn": 9,
+    "type": "event_notice",
+    "id": "srebrenica_enclave_forms_1992"
+  },
+  {
+    "turn": 10,
+    "type": "event_notice",
+    "id": "foca_1992"
+  },
+  {
+    "turn": 10,
+    "type": "event_notice",
+    "id": "zvornik_takeover_1992"
+  },
+  {
+    "turn": 11,
+    "type": "event_notice",
+    "id": "drina_valley_ethnic_cleansing_1992"
+  },
+  {
+    "turn": 12,
+    "type": "event_notice",
+    "id": "mostar_liberation_1992"
+  },
+  {
+    "turn": 12,
+    "type": "event_notice",
+    "id": "operation_corridor_1992"
+  },
+  {
+    "turn": 12,
+    "type": "event_notice",
+    "id": "visegrad_1992"
+  },
+  {
+    "turn": 13,
+    "type": "event_notice",
+    "id": "embargo_croatia_transit_1992"
+  },
+  {
+    "turn": 14,
+    "type": "event_notice",
+    "id": "keraterm_camp_1992"
+  },
+  {
+    "turn": 14,
+    "type": "event_notice",
+    "id": "omarska_camp_1992"
+  },
+  {
+    "turn": 14,
+    "type": "event_notice",
+    "id": "prijedor_takeover_1992"
+  },
+  {
+    "turn": 14,
+    "type": "event_notice",
+    "id": "trnopolje_camp_1992"
+  },
+  {
+    "turn": 18,
+    "type": "event_notice",
+    "id": "gorazde_pocket_consolidation_1992"
+  },
+  {
+    "turn": 20,
+    "type": "event_notice",
+    "id": "csq_alliance_drift_silent_w20"
+  },
+  {
+    "turn": 21,
+    "type": "event_notice",
+    "id": "csq_paramilitary_authorization_refused"
+  },
+  {
+    "turn": 23,
+    "type": "event_notice",
+    "id": "hvo_arbih_tensions_rise_1992"
+  },
+  {
+    "turn": 25,
+    "type": "event_notice",
+    "id": "csq_refugee_absorption_strain"
+  },
+  {
+    "turn": 28,
+    "type": "event_notice",
+    "id": "jajce_falls_1992"
+  },
+  {
+    "turn": 30,
+    "type": "event_notice",
+    "id": "csq_civic_identity_consolidation_1993"
+  },
+  {
+    "turn": 30,
+    "type": "event_notice",
+    "id": "csq_early_war_crimes_tribunal_1993"
+  },
+  {
+    "turn": 35,
+    "type": "event_notice",
+    "id": "csq_accelerated_safe_areas_1993"
+  },
+  {
+    "turn": 35,
+    "type": "event_notice",
+    "id": "csq_alliance_holds_past_w35"
+  },
+  {
+    "turn": 39,
+    "type": "event_notice",
+    "id": "kravica_attack_1993"
+  },
+  {
+    "turn": 44,
+    "label": "pre-advance",
+    "dismissed": [
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:44:14.070Z"
+  },
+  {
+    "turn": 46,
+    "label": "pre-advance",
+    "dismissed": [
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:44:32.186Z"
+  },
+  {
+    "turn": 48,
+    "label": "pre-advance",
+    "dismissed": [
+      "event-notice",
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:44:41.903Z"
+  },
+  {
+    "turn": 49,
+    "label": "pre-advance",
+    "dismissed": [
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:44:46.823Z"
+  },
+  {
+    "turn": 50,
+    "label": "turn50-capture",
+    "dismissed": [
+      "event-notice",
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:44:53.558Z"
+  },
+  {
+    "turn": 51,
+    "label": "pre-advance",
+    "dismissed": [
+      "event-notice",
+      "event-notice",
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:45:07.738Z"
+  },
+  {
+    "turn": 52,
+    "label": "pre-advance",
+    "dismissed": [
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:45:12.451Z"
+  },
+  {
+    "turn": 53,
+    "label": "pre-advance",
+    "dismissed": [
+      "event-notice",
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:45:17.755Z"
+  },
+  {
+    "turn": 54,
+    "label": "pre-advance",
+    "dismissed": [
+      "event-notice",
+      "event-notice",
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:46:00.929Z"
+  },
+  {
+    "turn": 55,
+    "label": "pre-advance",
+    "dismissed": [
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:46:06.801Z"
+  },
+  {
+    "turn": 60,
+    "label": "turn60-final",
+    "dismissed": [
+      "event-notice",
+      "event-notice"
+    ],
+    "time": "2026-07-30T14:46:42.413Z"
+  }
+]

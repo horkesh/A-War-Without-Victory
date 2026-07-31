@@ -46,7 +46,9 @@ function isOfficerAvailableForTurn(state: LoadedGameState, officer: NamedOfficer
 }
 
 function isActiveOfficerAvailableForTurn(state: LoadedGameState, officer: NamedOfficerView): boolean {
-    return officerStatusFor(state, officer) === 'active' && isOfficerAvailableForTurn(state, officer);
+    if (officerStatusFor(state, officer) !== 'active') return false;
+    const turn = state.turn ?? 0;
+    return officer.available_from_turn == null || officer.available_from_turn <= turn;
 }
 
 function compareOpeningOfficer(a: NamedOfficerView, b: NamedOfficerView): number {

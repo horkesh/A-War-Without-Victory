@@ -2,7 +2,7 @@
 
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createElement } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 import { PresidentialDecisionRoomPanel } from '../../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
@@ -246,12 +246,13 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     expect(card.textContent).not.toMatch(/\bblocking\b/i);
   });
 
-  it('groups six opening operation authorizations into one packet without collapsing their choices', () => {
+  it('groups six opening operation authorizations into one packet with one historical authorization action', async () => {
     const operationNames = ['Drina', 'Prijedor', 'Koridor', 'Vrbas', 'Hercegovina', 'Podrinje'];
+    const acceptProposal = vi.fn(async (_proposalId: string) => ({ ok: true }));
     Object.defineProperty(window, 'awwv', {
       configurable: true,
       value: {
-        acceptProposal: async () => ({ ok: true }),
+        acceptProposal,
         rejectProposal: async () => ({ ok: true }),
       },
     });
@@ -280,7 +281,12 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     expect(within(packet).getByText('6 independent authorizations')).toBeTruthy();
     const cards = packet.querySelectorAll('[data-testid^="decision-room-priority-card-command:review-proposal:"]');
     expect(cards).toHaveLength(6);
-    expect(screen.queryByRole('button', { name: /accept all|authorize all/i })).toBeNull();
+    fireEvent.click(within(packet).getByRole('button', { name: 'Authorize historical packet' }));
+    await waitFor(() => {
+      expect(acceptProposal.mock.calls.map(([proposalId]) => proposalId)).toEqual(
+        operationNames.map((_name, index) => `opening_operation_${index + 1}`),
+      );
+    });
 
     for (const card of Array.from(cards)) {
       fireEvent.click(within(card as HTMLElement).getByRole('button', { name: 'Dossier' }));

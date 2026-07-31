@@ -165,6 +165,7 @@ export function ArmyHQCorpsCard({
         };
 
         const strain = corps.commandStrain;
+        const strainSource = corps.commandStrainSource ?? 'presidential_intervention';
         const commandStrainReported = typeof strain === 'number' && Number.isFinite(strain);
         const displayedStrain = commandStrainReported ? strain : 0;
         const strainLabel = normalizeCommandStrainLabel(displayedStrain, corps.commandStrainLabel);
@@ -179,7 +180,7 @@ export function ArmyHQCorpsCard({
         const recoveryForecastToken = corps.recoveryForecastToken ?? null;
         // Delegation Visibility Wave 1: standing delegation summary from active ops
         const delegationSummary = deriveCorpsDelegationSummary(operations);
-        return { totalPersonnel, totalPersonnelLabel, personnelTone, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, commandStrainReported, displayedStrain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
+        return { totalPersonnel, totalPersonnelLabel, personnelTone, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, strainSource, commandStrainReported, displayedStrain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     if (isWithdrawnEmptySyntheticJnaCommand(corps, gameState.formations, gameState.eventFlags)) {
@@ -410,9 +411,15 @@ export function ArmyHQCorpsCard({
                                     : 'bg-amber-900/30 border-amber-500/40 text-amber-400'
                             }`}
                             title={
-                                data.strainLabel === 'compromised'
-                                    ? t('armyHqCorps.commandCompromisedTitle')
-                                    : t('armyHqCorps.commandStrainedTitle')
+                                data.strainSource === 'commander_friction'
+                                    ? t('armyHqCorps.commandCommanderFrictionTitle')
+                                    : data.strainSource === 'exhaustion'
+                                        ? t('armyHqCorps.commandExhaustionTitle')
+                                        : data.strainSource === 'mixed'
+                                            ? t('armyHqCorps.commandMixedTitle')
+                                            : data.strainLabel === 'compromised'
+                                                ? t('armyHqCorps.commandCompromisedTitle')
+                                                : t('armyHqCorps.commandStrainedTitle')
                             }
                         >
                             {data.strainLabel === 'compromised' ? t('armyHqCorps.commandCompromised') : t('armyHqCorps.commandStrained')}

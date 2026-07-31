@@ -528,6 +528,65 @@ describe('processOfficerSuccession', () => {
         assert.equal(state.military.named_officers.vrs_sipcic?.status, 'active');
     });
 
+    it('does not suggest an enclave-locked officer as a corps successor', () => {
+        const outgoing = makeOfficer({
+            id: 'arbih_knez',
+            faction: 'RBiH',
+            available_until_turn: 44,
+            home_corps_id: 'arbih_2nd_corps',
+        });
+        const enclaveCommander = makeOfficer({
+            id: 'arbih_palic',
+            faction: 'RBiH',
+            pool_tier: 'tier_a',
+            home_corps_id: 'arbih_2nd_corps',
+            enclave_lock: { enclave_id: 'zepa' },
+        });
+        const historicalSuccessor = makeOfficer({
+            id: 'arbih_sadic',
+            faction: 'RBiH',
+            pool_tier: 'tier_a',
+            home_corps_id: 'arbih_2nd_corps',
+            available_from_turn: 44,
+        });
+        const state = makeMinimalState({
+            meta: {
+                turn: 44,
+                phase: 'war',
+                scenario_id: 'test',
+                player_faction: 'RBiH',
+            },
+        } as unknown as Partial<GameState>);
+        state.military.named_officer_data = [outgoing, enclaveCommander, historicalSuccessor];
+        state.military.named_officers = {
+            arbih_knez: makeOfficerState({
+                officer_id: 'arbih_knez',
+                assigned_corps_id: 'arbih_2nd_corps',
+            }),
+            arbih_palic: makeOfficerState({
+                officer_id: 'arbih_palic',
+                status: 'reserve',
+            }),
+            arbih_sadic: makeOfficerState({
+                officer_id: 'arbih_sadic',
+                status: 'reserve',
+            }),
+        };
+
+        processOfficerSuccession(state, new Set());
+
+        assert.deepEqual(state.military.pending_officer_events, [{
+            event_id: 'replacement:arbih_knez:arbih_2nd_corps:arbih_sadic',
+            type: 'replacement_suggested',
+            faction: 'RBiH',
+            turn: 44,
+            officer_id: 'arbih_sadic',
+            current_commander_id: 'arbih_knez',
+            corps_id: 'arbih_2nd_corps',
+            acknowledged: false,
+        }]);
+    });
+
     it('adds newly available officers to pool', () => {
         const data = [
             makeOfficer({ id: 'o1', faction: 'RS', available_from_turn: 5 }),
@@ -725,6 +784,38 @@ describe('validateOfficerData', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('succession assignment penalties', () => {
+    it('does not assign an enclave-locked reserve officer to a mainland corps vacancy', () => {
+        const enclaveCommander = makeOfficer({
+            id: 'arbih_palic',
+            faction: 'RBiH',
+            home_corps_id: 'arbih_2nd_corps',
+            enclave_lock: { enclave_id: 'zepa' },
+        });
+        const state = makeMinimalState({
+            meta: { turn: 44, phase: 'war', scenario_id: 'test' },
+        } as unknown as Partial<GameState>);
+        state.military.formations = {
+            arbih_2nd_corps: makeFormation({
+                id: 'arbih_2nd_corps',
+                faction: 'RBiH',
+                kind: 'corps_asset' as 'brigade',
+            }),
+        };
+        state.military.named_officer_data = [enclaveCommander];
+        state.military.named_officers = {
+            arbih_palic: makeOfficerState({
+                officer_id: 'arbih_palic',
+                status: 'reserve',
+            }),
+        };
+
+        const report = processOfficerSuccession(state, new Set());
+
+        assert.equal(state.military.named_officers.arbih_palic?.status, 'reserve');
+        assert.equal(state.military.named_officers.arbih_palic?.assigned_corps_id, null);
+        assert.equal(report.generic_replacements, 1);
+    });
+
     it('home corps gets no penalty', () => {
         const data = [
             makeOfficer({ id: 'cmd', faction: 'RS', home_corps_id: 'vrs_1kk', is_historical_start: true, historical_corps_id: 'vrs_1kk' }),

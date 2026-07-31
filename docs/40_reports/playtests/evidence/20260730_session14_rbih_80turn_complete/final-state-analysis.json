@@ -1,0 +1,245 @@
+{
+  "runId": "20260730_session14_rbih_80turn_complete",
+  "campaign": {
+    "faction": "RBiH",
+    "start": {
+      "turn": 0,
+      "date": "1992-04-06"
+    },
+    "end": {
+      "turn": 80,
+      "date": "1993-10-18",
+      "phase": "war"
+    },
+    "seed": "harness-seed"
+  },
+  "outcome": {
+    "territoryControlledFraction": 0.2347,
+    "territoryControlledPercentDisplayed": 23.5,
+    "fieldedPersonnel": 170000,
+    "casualties": {
+      "killed": 13032,
+      "wounded": 52626,
+      "missingOrCaptured": 7147
+    },
+    "commandAuthority": {
+      "current": 100,
+      "maximum": 100,
+      "reserve": 15,
+      "reserveMaximum": 15,
+      "lifetimeSpent": 0,
+      "lastRecovery": 5.25,
+      "lastRecoverySource": "international_standing"
+    },
+    "formations": {
+      "owned": 96,
+      "locatedOwned": 90
+    },
+    "playerOperationsLaunched": 0
+  },
+  "requiredBlockersAtEnd": {
+    "eventDecisions": 0,
+    "peacePlans": 0,
+    "convoyDecisions": 0,
+    "reserveRequests": 0,
+    "paramilitaryRequests": 0
+  },
+  "nonBlockingOfficerMattersAtEnd": 3,
+  "historicalDecisionRecord": [
+    {
+      "turn": 0,
+      "date": "1992-04-06",
+      "surface": "event",
+      "id": "rbih_state_identity",
+      "response": "civic"
+    },
+    {
+      "turn": 1,
+      "date": "1992-04-13",
+      "surface": "peace_plan",
+      "id": "cutileiro",
+      "response": "rejected"
+    },
+    {
+      "turn": 3,
+      "date": "1992-04-27",
+      "surface": "event",
+      "id": "rbih_paramilitary_policy_1992",
+      "response": "always_deny"
+    },
+    {
+      "turn": 12,
+      "date": "1992-06-29",
+      "surface": "event",
+      "id": "rbih_minority_retention_1992",
+      "response": "retain_minorities"
+    },
+    {
+      "turn": 20,
+      "date": "1992-08-24",
+      "surface": "event",
+      "id": "london_conference_1992",
+      "response": "accept_principles"
+    },
+    {
+      "turn": 38,
+      "date": "1992-12-28",
+      "surface": "event",
+      "id": "ic_pressure_vopp_engagement",
+      "response": "acknowledge_pressure"
+    },
+    {
+      "turn": 39,
+      "date": "1993-01-04",
+      "surface": "event_and_peace_plan",
+      "id": "vance_owen_plan_1993",
+      "response": "accept"
+    },
+    {
+      "turn": 54,
+      "date": "1993-04-19",
+      "surface": "event",
+      "id": "srebrenica_demilitarization_1993",
+      "response": "hide_weapons"
+    },
+    {
+      "turn": 70,
+      "date": "1993-08-09",
+      "surface": "event",
+      "id": "owen_stoltenberg_plan_1993",
+      "response": "accept",
+      "historicalMeaning": "conditional Presidency-stage acceptance"
+    },
+    {
+      "turn": 70,
+      "date": "1993-08-09",
+      "surface": "peace_plan",
+      "id": "owen_stoltenberg",
+      "response": "rejected",
+      "finding": "Contradicts the separately recorded same-turn Presidency-stage event."
+    },
+    {
+      "turn": 72,
+      "date": "1993-08-23",
+      "surface": "event",
+      "id": "os_rbih_tactical_acceptance_1993",
+      "response": "reject_via_assembly"
+    },
+    {
+      "turn": 73,
+      "date": "1993-08-30",
+      "surface": "event",
+      "id": "rbih_arms_embargo_lift_advocacy_1993",
+      "response": "lobby_for_lift_and_strike"
+    },
+    {
+      "turn": 77,
+      "date": "1993-09-27",
+      "surface": "event",
+      "id": "abdic_apwb_declared_1993",
+      "response": "suppress_apwb"
+    }
+  ],
+  "officerRecord": [
+    {
+      "turn": 22,
+      "officer": "Enver Hadzihasanovic",
+      "action": "filed arrival; no appointment"
+    },
+    {
+      "turn": 24,
+      "officer": "Zaim Pasalic",
+      "action": "filed arrival; no appointment"
+    },
+    {
+      "turn": 44,
+      "incumbent": "Zeljko Knez",
+      "successor": "Hazim Sadic",
+      "action": "appointed historical successor"
+    },
+    {
+      "turn": 60,
+      "incumbent": "Sefer Halilovic",
+      "successor": "Rasim Delic",
+      "action": "appointed historical successor"
+    },
+    {
+      "turn": 68,
+      "officer": "Vahid Karavelic",
+      "action": "filed arrival; no appointment"
+    },
+    {
+      "turn": 68,
+      "incumbent": "Mustafa Hajrulahovic Talijan",
+      "successor": "Nedzad Ajnadzic",
+      "action": "appointed historical successor"
+    },
+    {
+      "turn": 80,
+      "officer": "Mehmed Alagic",
+      "action": "filed arrival; no appointment"
+    },
+    {
+      "turn": 80,
+      "officer": "Sakib Budakovic",
+      "action": "filed arrival; no appointment"
+    },
+    {
+      "turn": 80,
+      "incumbent": "Ramiz Drekovic",
+      "successor": "Atif Dudakovic",
+      "action": "appointed historical successor"
+    }
+  ],
+  "chronologyChecks": [
+    {
+      "event": "UN safe areas declared",
+      "turn": 57,
+      "date": "1993-05-10",
+      "result": "held"
+    },
+    {
+      "event": "Accelerated safe areas / UNSCR 836",
+      "turn": 61,
+      "date": "1993-06-07",
+      "result": "held"
+    },
+    {
+      "event": "East Mostar siege",
+      "turn": 57,
+      "date": "1993-05-10",
+      "result": "held"
+    },
+    {
+      "event": "Trusina killings",
+      "turn": 55,
+      "date": "1993-04-26",
+      "result": "held"
+    },
+    {
+      "event": "Operation Neretva '93",
+      "turn": 74,
+      "date": "1993-09-06",
+      "result": "held"
+    },
+    {
+      "event": "Grabovica and Uzdol",
+      "turn": 75,
+      "date": "1993-09-13",
+      "result": "held"
+    }
+  ],
+  "agency": {
+    "requiredDecisionGap": {
+      "fromTurn": 20,
+      "toTurn": 38,
+      "inclusiveTurnSpan": 19,
+      "interveningAdvancesWithoutRequiredDecision": 17,
+      "turn24StaffBriefPresent": true,
+      "turn24StaffBriefCreatedPlayerLever": false
+    },
+    "authoredPlayerOperations": 0,
+    "proposalsPendingOrResolved": 0,
+    "inventedOrdersOrDecisions": 0
+  }
+}

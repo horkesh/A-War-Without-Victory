@@ -65,6 +65,20 @@ const COMPROMISED_THRESHOLD = 6;
 // ═══════════════════════════════════════════════════════════════════════════
 
 export type CommandStrainLabel = 'healthy' | 'strained' | 'compromised';
+export type CommandStrainSource =
+    | 'none'
+    | 'presidential_intervention'
+    | 'commander_friction'
+    | 'exhaustion'
+    | 'mixed';
+
+export interface CommandStrainBreakdown {
+    presidentialIntervention: number;
+    commanderFriction: number;
+    exhaustion: number;
+    total: number;
+    source: CommandStrainSource;
+}
 
 /** Exported for tests and UI: threshold at which exhaustion starts contributing to strain. */
 export { EXHAUSTION_STRAIN_THRESHOLD, EXHAUSTION_STRAIN_SEVERE_THRESHOLD };
@@ -96,9 +110,11 @@ export function isExhaustionContributingToStrain(corpsExhaustion: number): boole
  * @param state   - Raw GameState (not adapted). Read-only.
  * @returns integer strain score [0, ∞). 0 = healthy, 1–5 = strained, 6+ = compromised.
  */
-export function computeCorpsCommandStrain(corpsId: string, state: GameState): number {
+export function computeCorpsCommandStrainBreakdown(corpsId: string, state: GameState): CommandStrainBreakdown {
     const currentTurn = state.meta?.turn ?? 0;
-    let totalStrain = 0;
+    let presidentialIntervention = 0;
+    let commanderFriction = 0;
+    let exhaustion = 0;
 
     // ── Source 1: force-launched active operations on this corps ──────────
     const corps = state.military.corps_command?.[corpsId];
@@ -112,7 +128,7 @@ export function computeCorpsCommandStrain(corpsId: string, state: GameState): nu
             const launchTurn = op.started_turn ?? currentTurn;
             const turnAge = Math.max(0, currentTurn - launchTurn);
             const rawStrain = FORCE_LAUNCH_STRAIN;
-            totalStrain += Math.max(0, rawStrain - turnAge);
+            presidentialIntervention += Math.max(0, rawStrain - turnAge);
         }
     }
 
@@ -134,7 +150,7 @@ export function computeCorpsCommandStrain(corpsId: string, state: GameState): nu
             for (const event of officerEvents) {
                 const turnAge = Math.max(0, currentTurn - event.turn);
                 const rawStrain = FRICTION_EVENT_STRAIN;
-                totalStrain += Math.max(0, rawStrain - turnAge);
+                commanderFriction += Math.max(0, rawStrain - turnAge);
             }
         }
     }
@@ -143,15 +159,41 @@ export function computeCorpsCommandStrain(corpsId: string, state: GameState): nu
     // No decay — strain persists while the underlying condition persists.
     // Stabilization does not resolve exhaustion-driven strain.
     if (corps) {
-        const exhaustion = typeof corps.corps_exhaustion === 'number' ? corps.corps_exhaustion : 0;
-        if (exhaustion >= EXHAUSTION_STRAIN_SEVERE_THRESHOLD) {
-            totalStrain += EXHAUSTION_STRAIN_SEVERE;
-        } else if (exhaustion >= EXHAUSTION_STRAIN_THRESHOLD) {
-            totalStrain += EXHAUSTION_STRAIN_MILD;
+        const corpsExhaustion = typeof corps.corps_exhaustion === 'number' ? corps.corps_exhaustion : 0;
+        if (corpsExhaustion >= EXHAUSTION_STRAIN_SEVERE_THRESHOLD) {
+            exhaustion += EXHAUSTION_STRAIN_SEVERE;
+        } else if (corpsExhaustion >= EXHAUSTION_STRAIN_THRESHOLD) {
+            exhaustion += EXHAUSTION_STRAIN_MILD;
         }
     }
 
-    return Math.max(0, Math.round(totalStrain));
+    presidentialIntervention = Math.max(0, Math.round(presidentialIntervention));
+    commanderFriction = Math.max(0, Math.round(commanderFriction));
+    exhaustion = Math.max(0, Math.round(exhaustion));
+    const total = presidentialIntervention + commanderFriction + exhaustion;
+    const activeSourceCount = [
+        presidentialIntervention,
+        commanderFriction,
+        exhaustion,
+    ].filter(value => value > 0).length;
+    const source: CommandStrainSource =
+        activeSourceCount === 0 ? 'none'
+        : activeSourceCount > 1 ? 'mixed'
+        : presidentialIntervention > 0 ? 'presidential_intervention'
+        : commanderFriction > 0 ? 'commander_friction'
+        : 'exhaustion';
+
+    return {
+        presidentialIntervention,
+        commanderFriction,
+        exhaustion,
+        total,
+        source,
+    };
+}
+
+export function computeCorpsCommandStrain(corpsId: string, state: GameState): number {
+    return computeCorpsCommandStrainBreakdown(corpsId, state).total;
 }
 
 /**
@@ -823,6 +865,76 @@ export interface CorpsSituationAssessment {
  * @param commandStrain   - Current command strain score (derived).
  * @returns CorpsSituationAssessment — postureSummary is null when healthy.
  */
+function commandStrainConstraintCopy(
+    source: CommandStrainSource,
+    compromised: boolean,
+): {
+    dominantReason: string;
+    dominantReasonToken: CommandCopyToken;
+    reliefPath: string;
+    reliefPathToken: CommandCopyToken;
+} {
+    if (source === 'commander_friction') {
+        const dominantReason = compromised
+            ? 'Command relationship is compromised by unresolved commander incidents'
+            : 'Command relationship is strained after an unresolved commander incident';
+        const reliefPath = 'Review and acknowledge the commander incident or allow its strain to decay';
+        return {
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.commanderFriction', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.commanderFriction', reliefPath),
+        };
+    }
+    if (source === 'exhaustion') {
+        const dominantReason = compromised
+            ? 'Operational exhaustion has compromised the corps command cycle'
+            : 'Operational exhaustion is straining the corps command cycle';
+        const reliefPath = 'Reduce operational tempo so corps exhaustion can recover';
+        return {
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.commandExhaustion', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.commandExhaustion', reliefPath),
+        };
+    }
+    if (source === 'mixed') {
+        const dominantReason = compromised
+            ? 'Command relationship is compromised by multiple recorded pressures'
+            : 'Command relationship is strained by multiple recorded pressures';
+        const reliefPath = 'Address the recorded commander, intervention, and exhaustion pressures';
+        return {
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.commandMixed', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.commandMixed', reliefPath),
+        };
+    }
+
+    const dominantReason = compromised
+        ? 'Command relationship is compromised — offensive options restricted until stabilized'
+        : 'Command relationship under strain from recent presidential interventions';
+    const reliefPath = compromised
+        ? 'Stabilize the command relationship or allow natural strain decay over time'
+        : 'Avoid further direct interventions; strain decays naturally over time';
+    return {
+        dominantReason,
+        dominantReasonToken: copyToken(
+            compromised
+                ? 'commandStrain.situation.reason.commandCompromised'
+                : 'commandStrain.situation.reason.commandStrained',
+            dominantReason,
+        ),
+        reliefPath,
+        reliefPathToken: copyToken(
+            compromised
+                ? 'commandStrain.situation.relief.commandCompromised'
+                : 'commandStrain.situation.relief.commandStrained',
+            reliefPath,
+        ),
+    };
+}
+
 export function deriveCorpsSituationAssessment(
     commanderState: {
         zone_assessments?: Array<{
@@ -855,6 +967,7 @@ export function deriveCorpsSituationAssessment(
     corpsStance: string | undefined,
     corpsExhaustion: number | undefined,
     commandStrain: number | undefined,
+    commandStrainSource: CommandStrainSource = 'presidential_intervention',
 ): CorpsSituationAssessment {
     // No commander state → no assessment (pre-commander era saves)
     if (!commanderState) {
@@ -919,9 +1032,9 @@ export function deriveCorpsSituationAssessment(
     }
 
     if ((commandStrain ?? 0) >= COMPROMISED_THRESHOLD) {
-        institutionalFactors.push('Command relationship compromised — offensive options restricted');
+        institutionalFactors.push(commandStrainConstraintCopy(commandStrainSource, true).dominantReason);
     } else if ((commandStrain ?? 0) >= STRAINED_THRESHOLD) {
-        institutionalFactors.push('Command relationship under strain from recent interventions');
+        institutionalFactors.push(commandStrainConstraintCopy(commandStrainSource, false).dominantReason);
     }
 
     // ── Plan explanation ─────────────────────────────────────────────────
@@ -1018,7 +1131,7 @@ export function deriveCorpsSituationAssessment(
         reliefPathToken,
     } = classifyPrimaryConstraint(
         zones, threat, forces, plan, commanderState,
-        corpsStance, exhaustion, commandStrain ?? 0, totalDeficit, totalSurplus,
+        corpsStance, exhaustion, commandStrain ?? 0, commandStrainSource, totalDeficit, totalSurplus,
         combatEffective, totalBrigades, besiegedZones, mustHoldZones,
     );
 
@@ -1052,6 +1165,7 @@ function classifyPrimaryConstraint(
     corpsStance: string | undefined,
     exhaustion: number,
     commandStrain: number,
+    commandStrainSource: CommandStrainSource,
     totalDeficit: number,
     totalSurplus: number,
     combatEffective: number,
@@ -1199,14 +1313,10 @@ function classifyPrimaryConstraint(
         };
     }
     if (commandStrain >= COMPROMISED_THRESHOLD) {
-        const dominantReason = 'Command relationship is compromised — offensive options restricted until stabilized';
-        const reliefPath = 'Stabilize the command relationship or allow natural strain decay over time';
+        const copy = commandStrainConstraintCopy(commandStrainSource, true);
         return {
             primaryConstraint: 'institutional_strain',
-            dominantReason,
-            dominantReasonToken: copyToken('commandStrain.situation.reason.commandCompromised', dominantReason),
-            reliefPath,
-            reliefPathToken: copyToken('commandStrain.situation.relief.commandCompromised', reliefPath),
+            ...copy,
         };
     }
     if (corpsStance === 'defensive') {
@@ -1262,14 +1372,10 @@ function classifyPrimaryConstraint(
 
     // 8. Strained command (lower than compromised — notable but not blocking)
     if (commandStrain >= STRAINED_THRESHOLD) {
-        const dominantReason = 'Command relationship under strain from recent presidential interventions';
-        const reliefPath = 'Avoid further direct interventions; strain decays naturally over time';
+        const copy = commandStrainConstraintCopy(commandStrainSource, false);
         return {
             primaryConstraint: 'institutional_strain',
-            dominantReason,
-            dominantReasonToken: copyToken('commandStrain.situation.reason.commandStrained', dominantReason),
-            reliefPath,
-            reliefPathToken: copyToken('commandStrain.situation.relief.commandStrained', reliefPath),
+            ...copy,
         };
     }
 

@@ -78,6 +78,7 @@ function findHistoricalSuccessor(
             o.home_corps_id === corpsId &&
             o.available_from_turn <= turn &&
             (o.available_until_turn === undefined || o.available_until_turn > turn) &&
+            isEnclaveCompatible(o, corpsId, turn) &&
             (!currentState[o.id] || currentState[o.id].status === 'reserve')
         )
         .sort((a, b) => {
@@ -737,6 +738,25 @@ export function processOfficerSuccession(
     report.casualties.push(...armyLifecycle.casualties);
     report.departures.push(...armyLifecycle.departures);
 
+    // An actionable replacement matter subsumes the same officer's informational
+    // arrival notice. Keep one decision owner in the queue without discarding
+    // either the roster arrival or the replacement itself.
+    const replacementOfficerIds = new Set(
+        pendingEvents
+            .filter(event => event.type === 'replacement_suggested' && !event.acknowledged)
+            .map(event => event.officer_id),
+    );
+    for (let i = pendingEvents.length - 1; i >= 0; i--) {
+        const event = pendingEvents[i]!;
+        if (
+            event.type === 'officer_available'
+            && !event.acknowledged
+            && replacementOfficerIds.has(event.officer_id)
+        ) {
+            pendingEvents.splice(i, 1);
+        }
+    }
+
     // 4. Advance turns_in_command and reduce penalties
     for (const id of officerIds) {
         const os = officers[id]!;
@@ -775,7 +795,7 @@ export function processOfficerSuccession(
         if (existingCommander) {
             // C.3: HVO acting commanders get replaced once their delay is served
             if (existingCommander.state.acting_commander) {
-                const availableReplacement = findBestReplacement(officers, officerData, faction, corpsFormId);
+                const availableReplacement = findBestReplacement(officers, officerData, faction, corpsFormId, turn);
                 if (!availableReplacement) continue;
                 if (existingCommander.data.faction === 'HRHB') {
                     // D.4: Read delays from war_timeline if available, else hardcoded fallback
@@ -796,7 +816,7 @@ export function processOfficerSuccession(
         }
 
         // Find best available replacement from pool
-        const replacement = findBestReplacement(officers, officerData, faction, corpsFormId);
+        const replacement = findBestReplacement(officers, officerData, faction, corpsFormId, turn);
 
         if (replacement) {
             const os = officers[replacement.id]!;
@@ -882,7 +902,8 @@ function findBestReplacement(
     officers: Record<string, NamedOfficerState>,
     officerData: NamedOfficer[],
     faction: FactionId,
-    corpsId: string
+    corpsId: string,
+    currentTurn: number,
 ): NamedOfficer | null {
     const candidates: NamedOfficer[] = [];
 
@@ -892,6 +913,7 @@ function findBestReplacement(
 
         const os = officers[data.id];
         if (!os || os.status !== 'reserve') continue;
+        if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
 
         candidates.push(data);
     }

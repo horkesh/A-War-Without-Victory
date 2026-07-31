@@ -266,6 +266,7 @@ interface WindowAwwv {
     quickSave: () => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     openTacticalMapWindow: (payload?: { mode?: string }) => Promise<void>;
     approveReserveRequest: (requestId: string, brigadeId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
+    holdReserveAtMainStaff: (requestId: string) => Promise<{ ok: boolean; error?: string }>;
     declineReserveRequest: (requestId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
     recallEliteBrigade: (brigadeId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
     redirectReserveLoan: (brigadeId: string, newCorpsId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -643,6 +644,10 @@ export function useIPC() {
 
             approveReserveRequest: awwv
                 ? (requestId: string, brigadeId: string, reason?: string) => awwv.approveReserveRequest(requestId, brigadeId, reason)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            holdReserveAtMainStaff: awwv
+                ? (requestId: string) => awwv.holdReserveAtMainStaff(requestId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             declineReserveRequest: awwv

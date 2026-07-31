@@ -58,6 +58,7 @@ function familyLabel(item: InboxItem): string {
 }
 
 function actionLabel(item: InboxItem): string {
+  if (item.actionLabel) return item.actionLabel;
   const key = ACTION_LABEL_KEYS[item.type];
   if (key) return t(key);
   return getDecisionSurfaceForInboxType(item.type)?.actionLabel ?? t('desk.card.openFallback');

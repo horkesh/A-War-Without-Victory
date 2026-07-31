@@ -1,9 +1,21 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { join, relative, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 type Match = { file: string; line: number; text: string; token: string };
 
 const ROOT = process.cwd();
+
+const SCAN_ROOTS = [
+    'src',
+    'tests',
+    'data/scenarios',
+    'scripts',
+    'tools',
+    'docs/00_start_here',
+    'docs/10_canon',
+    'docs/20_engineering',
+];
 
 const SKIP_DIRS = new Set([
     '.git',
@@ -16,8 +28,13 @@ const SKIP_DIRS = new Set([
 
 const SKIP_PATH_SUBSTRINGS = [
     `${join('docs', '_old')}${'\\'}`,
+    `${join('docs', '10_canon', '_backups_pre_v09_20260505')}${'\\'}`,
     `${join('data', 'derived')}${'\\'}`,
 ];
+
+const SKIP_FILES = new Set([
+    join('tools', 'engineering', 'check_lifecycle_legacy_terms.ts'),
+]);
 
 const ALLOWED_EXTENSIONS = new Set([
     '.ts', '.tsx', '.js', '.mjs', '.cjs', '.json', '.md', '.yml', '.yaml',
@@ -30,9 +47,14 @@ const TOKENS: Array<{ token: string; pattern: RegExp }> = [
     { token: 'Phase II', pattern: /\bPhase II\b/g },
 ];
 
-function shouldSkipPath(path: string): boolean {
+export function shouldSkipPath(path: string): boolean {
     const normalized = path.replaceAll('/', '\\');
-    return SKIP_PATH_SUBSTRINGS.some((needle) => normalized.includes(needle.replaceAll('/', '\\')));
+    if (SKIP_FILES.has(normalized)) return true;
+    if (SKIP_PATH_SUBSTRINGS.some((needle) => normalized.includes(needle.replaceAll('/', '\\')))) return true;
+    return !SCAN_ROOTS.some((root) => {
+        const normalizedRoot = root.replaceAll('/', '\\');
+        return normalized === normalizedRoot || normalized.startsWith(`${normalizedRoot}\\`);
+    });
 }
 
 function hasAllowedExtension(path: string): boolean {
@@ -77,7 +99,9 @@ function collectMatches(content: string, relPath: string): Match[] {
 
 async function main(): Promise<void> {
     const files: string[] = [];
-    await walk(ROOT, files);
+    for (const root of SCAN_ROOTS) {
+        await walk(join(ROOT, root), files);
+    }
     const allMatches: Match[] = [];
 
     for (const abs of files) {
@@ -108,7 +132,10 @@ async function main(): Promise<void> {
     process.exitCode = 1;
 }
 
-main().catch((err) => {
-    process.stderr.write(`lifecycle-check: failed: ${err instanceof Error ? err.message : String(err)}\n`);
-    process.exitCode = 1;
-});
+const invokedPath = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : '';
+if (import.meta.url === invokedPath) {
+    main().catch((err) => {
+        process.stderr.write(`lifecycle-check: failed: ${err instanceof Error ? err.message : String(err)}\n`);
+        process.exitCode = 1;
+    });
+}

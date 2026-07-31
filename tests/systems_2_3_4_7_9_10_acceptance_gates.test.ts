@@ -18,7 +18,7 @@ async function ensureRemoved(dir: string): Promise<void> {
     }
 }
 
-test('systems 2/3/4/7/9/10 acceptance gates: phase_ii run populates required state', async () => {
+test('systems 2/3/4/7/9/10 acceptance gates: phase_ii run populates required state', async () => { // legacy-phase-term-ok
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });
     if (!prereq.ok) return;
 

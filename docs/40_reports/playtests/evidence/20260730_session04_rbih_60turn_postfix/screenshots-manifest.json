@@ -1,0 +1,2955 @@
+[
+  {
+    "index": 1,
+    "label": "clean-main-menu",
+    "file": "01-clean-main-menu.png",
+    "time": "2026-07-30T14:12:18.544Z",
+    "text": "BOSNIA-HERZEGOVINA, 1992–1995 A WAR WITHOUT VICTORY COMMAND POST WAR PHASE NEW CAMPAIGN LOAD SAVE CONTINUE V0.9.9-BETA.1 — WAR PHASE",
+    "sha256": "5164cbc6d20ca8a062c410f4721b5b66e316f01507daa89949781ac0c099a92c",
+    "bytes": 1726830,
+    "valid": true
+  },
+  {
+    "index": 2,
+    "label": "faction-picker",
+    "file": "02-faction-picker.png",
+    "time": "2026-07-30T14:12:28.159Z",
+    "text": "BOSNIA-HERZEGOVINA, 1992–1995 A WAR WITHOUT VICTORY COMMAND POST WAR PHASE NEW CAMPAIGN LOAD SAVE CONTINUE V0.9.9-BETA.1 — WAR PHASE",
+    "sha256": "5164cbc6d20ca8a062c410f4721b5b66e316f01507daa89949781ac0c099a92c",
+    "bytes": 1726830,
+    "valid": true
+  },
+  {
+    "index": 3,
+    "label": "faction-picker-after-mount-timeout",
+    "file": "03-faction-picker-after-mount-timeout.png",
+    "time": "2026-07-30T14:14:10.681Z",
+    "text": "BOSNIA-HERZEGOVINA, 1992–1995 A WAR WITHOUT VICTORY COMMAND POST WAR PHASE NEW CAMPAIGN LOAD SAVE CONTINUE V0.9.9-BETA.1 — WAR PHASE",
+    "sha256": "5164cbc6d20ca8a062c410f4721b5b66e316f01507daa89949781ac0c099a92c",
+    "bytes": 1726830,
+    "valid": true
+  },
+  {
+    "index": 4,
+    "label": "faction-picker-visible",
+    "file": "04-faction-picker-visible.png",
+    "time": "2026-07-30T14:14:21.612Z",
+    "text": "CHOOSE YOUR SIDE ← Choose your side. Other factions are controlled by AI. REPUBLIC OF BOSNIA AND HERZEGOVINA PRESIDENCY Armed forces: ARBiH HARD Surrounded and outgunned. Defend the cities. Survive the embargo. Hold until the world notices. REPUBLIKA SRPSKA PRESIDENCY Armed forces: VRS STANDARD Inherit the JNA arsenal. Seize the corridors. The clock is ticking—use your advantage before it fades. CROATIAN REPUBLIC OF HERZEG-BOSNIA PRESIDENCY Armed forces: HVO MODERATE Backed by Zagreb but squeezed between two wars. Will the alliance hold, or will you fight alone?",
+    "sha256": "9e0dacbd4032fa9fb92163dfbd402eaad3a80c2c92b5c1dbf46b78f9295e89dd",
+    "bytes": 219468,
+    "valid": true
+  },
+  {
+    "index": 5,
+    "label": "rbih-campaign-opening",
+    "file": "05-rbih-campaign-opening.png",
+    "time": "2026-07-30T14:14:37.875Z",
+    "text": "WAR BEGINS: 6 APR 1992 × DATE 6 Apr 1992 The referendum has been held. Armed conflict is now inevitable. WHO YOU ARE IDENTITY You are the President of the Presidency of the Republic of Bosnia and Herzegovina, recognized by the world on 6 April and besieged the same day. You preside over a multi-ethnic state that half its own citizens have taken up arms to dismantle. SITUATION Recognition arrived; weapons did not. An international arms embargo binds your hands while the heights above Sarajevo, Tuzla, and the Drina belong to a former federal army that kept its tanks and its officers. Your defenders are territorial units, police, and volunteers — Bosniak, Serb, Croat — outnumbered in guns by an order of magnitude. You hold the cities and little of the ground between them. The killing in Zvornik and Bijeljina has already begun. WHAT YOU CANNOT ESCAPE You must defend a civic republic with a citizen army that the fighting is already turning into a single-nation force — and you have no guns to spare for the gap between what you believe and what you can hold. ARBIH YOU The Army of the Republic of Bosnia and Herzegovina musters from territorial defense units, police, and volunteers. Poorly armed but defending homeland, its early survival depends on holding urban centers and buying time for organization. 78 brigades 48.7k pers 32 tanks 102 arty VRS The Army of Republika Srpska inherits JNA equipment, officers, and doctrine. Professional and heavily armed, the VRS holds a decisive early advantage but faces long-term attrition as reserves thin. 64 brigades Unreported pers Unreported tanks Unreported arty HVO The Croatian Defence Council organizes around western Herzegovina and central Bosnia enclaves. Capable but geographically fragmented, the HVO walks a tightrope between alliance with ARBiH and its own territorial ambitions. BEGIN PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 6 Apr 1992",
+    "sha256": "243aeac19c7146437d1cd7abd25c00f5a67e9580d73666f3735274250d4d633e",
+    "bytes": 593370,
+    "valid": true
+  },
+  {
+    "index": 6,
+    "label": "after-begin-command-post",
+    "file": "06-after-begin-command-post.png",
+    "time": "2026-07-30T14:14:47.334Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 1 SIGNATURE REQUIRED 6 Apr 1992",
+    "sha256": "0cc5835a7b511108c9fa41879dd8642fa2c97b7c6a6c04d119d1fd9dc003555e",
+    "bytes": 1728434,
+    "valid": true
+  },
+  {
+    "index": 7,
+    "label": "turn0-identity-decision",
+    "file": "07-turn0-identity-decision.png",
+    "time": "2026-07-30T14:15:08.342Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 6 Apr 1992 What Is Bosnia? PRESIDENTIAL RESPONSE Civic multi-ethnic republic HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. One republic, all citizens equal. Serbs and Croats serve alongside Bosniaks. The world respects this. Your nationalists resent it. Republic of Bosnia and Herzegovina morale +3 Republic of Bosnia and Herzegovina Int'l Standing +15 Republic of Bosnia and Herzegovina Internal Cohesion -5 Republic of Bosnia and Herzegovina Negotiating Leverage +10 Bosniak national state This is our land and our fight. Those who stand against us are not our citizens. Clear identity, clear purpose — but you lose minority soldiers and international sympathy. Republic of Bosnia and Herzegovina morale +5 Republic of Bosnia and Herzegovina / Herzeg-Bosna alliance -0.1 Republic of Bosnia and Herzegovina Internal Cohesion +15 Republic of Bosnia and Herzegovina Int'l Standing -20 Republic of Bosnia and Herzegovina Negotiating Leverage -10 Multi-ethnic in word, Bosniak in deed Maintain the civic rhetoric for the cameras. Build Bosniak institutions quietly. If the gap between words and reality is ever exposed, the damage will be worse than honesty. Republic of Bosnia and Herzegovina morale +2 Republic of Bosnia and Herzegovina Internal Cohesion +5 Republic of Bosnia and Herzegovina Int'l Standing +5 Republic of Bosnia and Herzegovina Negotiating Leverage -10 SITUATION Your Presidency must declare its vision for the state. The platform drafted in May declares a multi-ethnic, civic republic where all citizens are equal regardless of ethnicity. But the war is testing that ideal. Serb and Croat soldiers serve in your army — for now. Some in your party argue that this is a Bosniak struggle, not a civic one. The international community watches closely. Your declaration will shape who fights for you, who supports you, and what you are fighting for. STAFF ASSESSMENT The Sarajevo Presidency preserves its civic claim and international posture by keeping the republic defined around equal citizenship, while accepting friction with harder wartime national currents. TRIGGER EVIDENCE The May 1992 platform debate is before the Presidency. Wartime mobilization is forcing Sarajevo to state the political basis of the republic it claims to defend. DOSSIER CATEGORY Political FACTION / D",
+    "eventId": "rbih_state_identity",
+    "sha256": "b537e28cc960d66b5c19c02763be4612f54cc83465a15e4c693d88c7413ef1ec",
+    "bytes": 665295,
+    "valid": true
+  },
+  {
+    "index": 8,
+    "label": "turn0-identity-historical-default-recorded",
+    "file": "08-turn0-identity-historical-default-recorded.png",
+    "time": "2026-07-30T14:15:17.390Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 0 6 Apr 1992 Response recorded: Civic multi-ethnic republic.",
+    "sha256": "b4c1f7b6a83ac27df236a5a161049dc9a4fe457a9ac982e332e7871c75d4eeaf",
+    "bytes": 1709475,
+    "valid": true
+  },
+  {
+    "index": 9,
+    "label": "turn0-advance-review",
+    "file": "09-turn0-advance-review.png",
+    "time": "2026-07-30T14:16:16.360Z",
+    "text": "DIPLOMATIC INTERNATIONAL PEACE PROPOSAL Cutileiro Plan (Lisbon Agreement) Proposed: 6 Apr 1992 The EC-brokered Cutileiro Plan proposes dividing Bosnia-Herzegovina into three ethnically-defined cantons under a weak central government. Each constituent people would govern areas where they form a majority. The split would give Bosniaks and Serbs 44% each, with Croats receiving 12%. All three sides initially agreed in Lisbon, but the deal is fragile — rejection by any party will signal that partition cannot be achieved through negotiation alone. PROPOSED TERRITORIAL DIVISION Republic of Bosnia and Herzegovina 44% Republika Srpska 44% Croatian Republic of Herzeg-Bosnia 12% Institutional model: Ethnic Cantonization OTHER FACTION RESPONSES Other delegations have not disclosed their positions. PRESIDENTIAL DECISION REQUIRED ACCEPT PLAN REVIEW LATER REJECT PLAN PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 13 Apr 1992",
+    "sha256": "7d0de41c4d5de7024f58b7782483c596846bbc5e00ca68a0d616ab78c31f4f3d",
+    "bytes": 1728559,
+    "valid": true
+  },
+  {
+    "index": 10,
+    "label": "turn1-cutileiro-decision",
+    "file": "10-turn1-cutileiro-decision.png",
+    "time": "2026-07-30T14:17:48.563Z",
+    "text": "DIPLOMATIC INTERNATIONAL PEACE PROPOSAL Cutileiro Plan (Lisbon Agreement) Proposed: 6 Apr 1992 The EC-brokered Cutileiro Plan proposes dividing Bosnia-Herzegovina into three ethnically-defined cantons under a weak central government. Each constituent people would govern areas where they form a majority. The split would give Bosniaks and Serbs 44% each, with Croats receiving 12%. All three sides initially agreed in Lisbon, but the deal is fragile — rejection by any party will signal that partition cannot be achieved through negotiation alone. PROPOSED TERRITORIAL DIVISION Republic of Bosnia and Herzegovina 44% Republika Srpska 44% Croatian Republic of Herzeg-Bosnia 12% Institutional model: Ethnic Cantonization OTHER FACTION RESPONSES Other delegations have not disclosed their positions. PRESIDENTIAL DECISION REQUIRED ACCEPT PLAN REVIEW LATER REJECT PLAN PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 13 Apr 1992",
+    "plan": "cutileiro",
+    "historicalDisposition": "reject",
+    "sha256": "d53c24e8e3face6f0cd16bf1caf39b856537c118573d174d34b1907a5e0a58bb",
+    "bytes": 777835,
+    "valid": true
+  },
+  {
+    "index": 11,
+    "label": "turn1-cutileiro-rejected",
+    "file": "11-turn1-cutileiro-rejected.png",
+    "time": "2026-07-30T14:17:51.491Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 1 13 Apr 1992",
+    "sha256": "a63fcafcce8a35a3b7df3aad37d4d7acc476997be94df3ad2fe93f5e06533a34",
+    "bytes": 1728264,
+    "valid": true
+  },
+  {
+    "index": 12,
+    "label": "turn2-milestone",
+    "file": "12-turn2-milestone.png",
+    "time": "2026-07-30T14:19:00.444Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 2 20 Apr 1992",
+    "state": {
+      "turn": 2,
+      "date": "1992-04-20",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.25,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 9.5,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        }
+      ]
+    },
+    "sha256": "e4164039a44fb16a1ca47f5eb9cc5ce19fcdf79a250a6e84e0308d63d52c8271",
+    "bytes": 1728228,
+    "valid": true
+  },
+  {
+    "index": 13,
+    "label": "turn3-milestone",
+    "file": "13-turn3-milestone.png",
+    "time": "2026-07-30T14:19:05.381Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 27 Apr 1992 Paramilitary Authorization Policy PRESIDENTIAL RESPONSE Refuse paramilitary deployment HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Single chain of command. Irregular formations are integrated into regular ARBiH regiments under Main Staff authority or refused entry to the order of battle. The Patriotic League cadres are absorbed; the Sarajevo-area independent brigades will be brought to heel. International monitors note the posture; the hardline current inside SDA bristles at the constraint. Republic of Bosnia and Herzegovina Int'l Standing +5 Republic of Bosnia and Herzegovina Internal Cohesion -3 Review each deployment Each proposed deployment arrives in the Presidency files with a casualty projection. Regional ARBiH commanders lose blanket authority; the political center retains the decision. Operational tempo slows; the integration line softens; the international monitors note the reviews but reserve judgment until the pattern emerges. Republic of Bosnia and Herzegovina Int'l Standing -3 Republic of Bosnia and Herzegovina Internal Cohesion -2 Authorize paramilitary standing orders Standing authorization. The Patriotic League cadres, the Sarajevo-area independent brigades, the volunteer detachments — all operate on local commander authority without per-mission political review. This breaks with the documented Sarajevo posture. International monitors will read the pattern against Pale and Mostar; the ICTY paper trail will record the policy in its own terms. Each approved sweep records civilian casualties and increments the war-crimes counter through the existing engine surface. Republic of Bosnia and Herzegovina Int'l Standing -25 Republic of Bosnia and Herzegovina Negotiating Leverage -15 Republic of Bosnia and Herzegovina Internal Cohesion 0 SITUATION Sarajevo Presidency files. ARBiH command has forwarded a deployment protocol for the irregular formations that emerged in the spring — the Patriotic League cadres, the Green Berets, the Sarajevo-area independent brigades around Caco Topalovic and Celo Delalic, the volunteer detachments forming alongside the 7th Muslim Brigade. The Presidency posture toward integration is in question. The documented Sarajevo position, since the Patriotic League's absorption into ARBiH, has been a single chain",
+    "state": {
+      "turn": 3,
+      "date": "1992-04-27",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [
+        "rbih_paramilitary_policy_1992"
+      ],
+      "pendingPlan": null,
+      "pendingOfficer": [],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.25,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 13.75,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        }
+      ]
+    },
+    "sha256": "48159bb36ac390f3465674a2e68bb4e7f8e26ba11ec42cc90ae609c5239515ed",
+    "bytes": 692236,
+    "valid": true
+  },
+  {
+    "index": 14,
+    "label": "turn3-rbih_paramilitary_policy_1992-decision",
+    "file": "14-turn3-rbih_paramilitary_policy_1992-decision.png",
+    "time": "2026-07-30T14:20:33.674Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 27 Apr 1992 Paramilitary Authorization Policy PRESIDENTIAL RESPONSE Refuse paramilitary deployment HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Single chain of command. Irregular formations are integrated into regular ARBiH regiments under Main Staff authority or refused entry to the order of battle. The Patriotic League cadres are absorbed; the Sarajevo-area independent brigades will be brought to heel. International monitors note the posture; the hardline current inside SDA bristles at the constraint. Republic of Bosnia and Herzegovina Int'l Standing +5 Republic of Bosnia and Herzegovina Internal Cohesion -3 Review each deployment Each proposed deployment arrives in the Presidency files with a casualty projection. Regional ARBiH commanders lose blanket authority; the political center retains the decision. Operational tempo slows; the integration line softens; the international monitors note the reviews but reserve judgment until the pattern emerges. Republic of Bosnia and Herzegovina Int'l Standing -3 Republic of Bosnia and Herzegovina Internal Cohesion -2 Authorize paramilitary standing orders Standing authorization. The Patriotic League cadres, the Sarajevo-area independent brigades, the volunteer detachments — all operate on local commander authority without per-mission political review. This breaks with the documented Sarajevo posture. International monitors will read the pattern against Pale and Mostar; the ICTY paper trail will record the policy in its own terms. Each approved sweep records civilian casualties and increments the war-crimes counter through the existing engine surface. Republic of Bosnia and Herzegovina Int'l Standing -25 Republic of Bosnia and Herzegovina Negotiating Leverage -15 Republic of Bosnia and Herzegovina Internal Cohesion 0 SITUATION Sarajevo Presidency files. ARBiH command has forwarded a deployment protocol for the irregular formations that emerged in the spring — the Patriotic League cadres, the Green Berets, the Sarajevo-area independent brigades around Caco Topalovic and Celo Delalic, the volunteer detachments forming alongside the 7th Muslim Brigade. The Presidency posture toward integration is in question. The documented Sarajevo position, since the Patriotic League's absorption into ARBiH, has been a single chain",
+    "eventId": "rbih_paramilitary_policy_1992",
+    "historicalDefault": "always_deny",
+    "sha256": "48159bb36ac390f3465674a2e68bb4e7f8e26ba11ec42cc90ae609c5239515ed",
+    "bytes": 692236,
+    "valid": true
+  },
+  {
+    "index": 15,
+    "label": "turn3-rbih_paramilitary_policy_1992-historical-default-recorded",
+    "file": "15-turn3-rbih_paramilitary_policy_1992-historical-default-recorded.png",
+    "time": "2026-07-30T14:20:36.241Z",
+    "text": "EVENT × MILITARY Republic of Bosnia and Herzegovina UN Arms Embargo Strangles Bosnia The UN arms embargo, originally imposed on all of Yugoslavia, disproportionately impacts the fledgling Bosnian government. While the VRS inherits vast JNA stockpiles and the HVO receives supplies from Croatia, the ARBiH faces severe weapons shortages across all fronts. INTELLIGENCE ASSESSMENT The UN arms embargo leaves the ARBiH critically short of weapons and ammunition. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 27 Apr 1992 Response recorded: Refuse paramilitary deployment.",
+    "eventId": "rbih_paramilitary_policy_1992",
+    "choice": "Refuse paramilitary deployment",
+    "sha256": "5fc4f05885d7052adb832724698bded75440bfa08c1359c3f5e750b22c6ce068",
+    "bytes": 1135147,
+    "valid": true
+  },
+  {
+    "index": 16,
+    "label": "turn5-milestone",
+    "file": "16-turn5-milestone.png",
+    "time": "2026-07-30T14:20:58.028Z",
+    "text": "EVENT × 1 of 2 MILITARY Republic of Bosnia and Herzegovina Republika Srpska JNA Forces Begin Withdrawal from Bosnia The Yugoslav People's Army formally announces its withdrawal from Bosnia-Herzegovina. In practice, Bosnian Serb personnel simply change insignia, and massive quantities of heavy weapons, ammunition depots, and military infrastructure are transferred directly to the newly formed VRS. INTELLIGENCE ASSESSMENT ARBiH morale -5 The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 11 May 1992",
+    "state": {
+      "turn": 5,
+      "date": "1992-05-11",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        }
+      ]
+    },
+    "sha256": "5a51d9cb259ed3c082343164c517cf48f80b8a80ce3b86e55acc19dcbde29dc3",
+    "bytes": 1193478,
+    "valid": true
+  },
+  {
+    "index": 17,
+    "label": "turn10-milestone",
+    "file": "17-turn10-milestone.png",
+    "time": "2026-07-30T14:21:23.573Z",
+    "text": "EVENT × 1 of 2 HUMANITARIAN Foca The Takeover And Its Aftermath The historical record of the takeover of Foca, at the confluence of the Drina and Cehotina rivers, is documented here. Across the Krnojelac, Kunarac and Karadzic judgments, the International Criminal Tribunal for the former Yugoslavia established the conditions at the KP Dom detention facility and convicted, in the Kunarac case, for sexual enslavement and rape as crimes against humanity, establishing those legal categories in international criminal law. The pre-war Bosniak community of the municipality was reduced to a residual presence by the end of 1992. INTELLIGENCE ASSESSMENT The historical record of the Foca takeover is documented in the Codex. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 15 Jun 1992",
+    "state": {
+      "turn": 10,
+      "date": "1992-06-15",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        }
+      ]
+    },
+    "sha256": "7d794f5a522c5df8619d3db8d94679035628b516bab586bacaa77749c6976d8b",
+    "bytes": 1217039,
+    "valid": true
+  },
+  {
+    "index": 18,
+    "label": "turn10-president-desk",
+    "file": "18-turn10-president-desk.png",
+    "time": "2026-07-30T14:21:25.500Z",
+    "text": "EVENT × 1 of 2 HUMANITARIAN Foca The Takeover And Its Aftermath The historical record of the takeover of Foca, at the confluence of the Drina and Cehotina rivers, is documented here. Across the Krnojelac, Kunarac and Karadzic judgments, the International Criminal Tribunal for the former Yugoslavia established the conditions at the KP Dom detention facility and convicted, in the Kunarac case, for sexual enslavement and rape as crimes against humanity, establishing those legal categories in international criminal law. The pre-war Bosniak community of the municipality was reduced to a residual presence by the end of 1992. INTELLIGENCE ASSESSMENT The historical record of the Foca takeover is documented in the Codex. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 15 Jun 1992",
+    "state": {
+      "turn": 10,
+      "date": "1992-06-15",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        }
+      ]
+    },
+    "progress": [
+      {
+        "advanced": true,
+        "from": 3,
+        "to": 4,
+        "state": {
+          "turn": 4,
+          "date": "1992-05-04",
+          "phase": "war",
+          "player": "RBiH",
+          "pendingEvents": [],
+          "pendingPlan": null,
+          "pendingOfficer": [],
+          "authority": {
+            "current": 100,
+            "last_recovery": 4.25,
+            "last_recovery_source": "quiet_front_restraint",
+            "lifetime_spent": 0,
+            "max": 100,
+            "reserve": 15,
+            "reserve_max": 15,
+            "spent_this_turn": 0
+          },
+          "decisionLog": [
+            {
+              "turn": 0,
+              "event": "rbih_state_identity",
+              "response": "civic"
+            },
+            {
+              "turn": 3,
+              "event": "rbih_paramilitary_policy_1992",
+              "response": "always_deny"
+            }
+          ]
+        }
+      },
+      {
+        "advanced": true,
+        "from": 4,
+        "to": 5,
+        "state": {
+          "turn": 5,
+          "date": "1992-05-11",
+          "phase": "war",
+          "player": "RBiH",
+          "pendingEvents": [],
+          "pendingPlan": null,
+          "pendingOfficer": [],
+          "authority": {
+            "current": 100,
+            "last_recovery": 4,
+            "last_recovery_source": "quiet_front_restraint",
+            "lifetime_spent": 0,
+            "max": 100,
+            "reserve": 15,
+            "reserve_max": 15,
+            "spent_this_turn": 0
+          },
+          "decisionLog": [
+            {
+              "turn": 0,
+              "event": "rbih_state_identity",
+              "response": "civic"
+            },
+            {
+              "turn": 3,
+              "event": "rbih_paramilitary_policy_1992",
+              "response": "always_deny"
+            }
+          ]
+        }
+      },
+      {
+        "advanced": true,
+        "from": 5,
+        "to": 6,
+        "state": {
+          "turn": 6,
+          "date": "1992-05-18",
+          "phase": "war",
+          "player": "RBiH",
+          "pendingEvents": [],
+          "pendingPlan": null,
+          "pendingOfficer": [],
+          "authority": {
+            "current": 100,
+            "last_recovery": 4,
+            "last_recovery_source": "quiet_front_restraint",
+            "lifetime_spent": 0,
+            "max": 100,
+            "reserve": 15,
+            "reserve_max": 15,
+            "spent_this_turn": 0
+          },
+          "decisionLog": [
+            {
+              "turn": 0,
+              "event": "rbih_state_identity",
+              "response": "civic"
+            },
+            {
+              "turn": 3,
+              "event": "rbih_paramilitary_policy_1992",
+              "response": "always_deny"
+            }
+          ]
+        }
+      },
+      {
+        "advanced": true,
+        "from": 6,
+        "to": 7,
+        "state": {
+          "turn": 7,
+          "date": "1992-05-25",
+          "phase": "war",
+          "player": "RBiH",
+          "pendingEvents": [],
+          "pendingPlan": null,
+          "pendingOfficer": [],
+          "authority": {
+            "current": 100,
+            "last_recovery": 4,
+            "last_recovery_source": "quiet_front_restraint",
+            "lifetime_spent": 0,
+            "max": 100,
+            "reserve": 15,
+            "reserve_max": 15,
+            "spent_this_turn": 0
+          },
+          "decisionLog": [
+            {
+              "turn": 0,
+              "event": "rbih_state_identity",
+              "response": "civic"
+            },
+            {
+              "turn": 3,
+              "event": "rbih_paramilitary_policy_1992",
+              "response": "always_deny"
+            }
+          ]
+        }
+      },
+      {
+        "advanced": true,
+        "from": 7,
+        "to": 8,
+        "state": {
+          "turn": 8,
+          "date": "1992-06-01",
+          "phase": "war",
+          "player": "RBiH",
+          "pendingEvents": [],
+          "pendingPlan": null,
+          "pendingOfficer": [],
+          "authority": {
+            "current": 100,
+            "last_recovery": 4,
+            "last_recovery_source": "quiet_front_restraint",
+            "lifetime_spent": 0,
+            "max": 100,
+            "reserve": 15,
+            "reserve_max": 15,
+            "spent_this_turn": 0
+          },
+          "decisionLog": [
+            {
+              "turn": 0,
+              "event": "rbih_state_identity",
+              "response": "civic"
+            },
+            {
+              "turn": 3,
+              "event": "rbih_paramilitary_policy_1992",
+              "response": "always_deny"
+            }
+          ]
+        }
+      },
+      {
+        "advanced": true,
+        "from": 8,
+        "to": 9,
+        "state": {
+          "turn": 9,
+          "date": "1992-06-08",
+          "phase": "war",
+          "player": "RBiH",
+          "pendingEvents": [],
+          "pendingPlan": null,
+          "pendingOfficer": [],
+          "authority": {
+            "current": 100,
+            "last_recovery": 4,
+            "last_recovery_source": "quiet_front_restraint",
+            "lifetime_spent": 0,
+            "max": 100,
+            "reserve": 15,
+            "reserve_max": 15,
+            "spent_this_turn": 0
+          },
+          "decisionLog": [
+            {
+              "turn": 0,
+              "event": "rbih_state_identity",
+              "response": "civic"
+            },
+            {
+              "turn": 3,
+              "event": "rbih_paramilitary_policy_1992",
+              "response": "always_deny"
+            }
+          ]
+        }
+      },
+      {
+        "advanced": true,
+        "from": 9,
+        "to": 10,
+        "state": {
+          "turn": 10,
+          "date": "1992-06-15",
+          "phase": "war",
+          "player": "RBiH",
+          "pendingEvents": [],
+          "pendingPlan": null,
+          "pendingOfficer": [],
+          "authority": {
+            "current": 100,
+            "last_recovery": 4,
+            "last_recovery_source": "quiet_front_restraint",
+            "lifetime_spent": 0,
+            "max": 100,
+            "reserve": 15,
+            "reserve_max": 15,
+            "spent_this_turn": 0
+          },
+          "decisionLog": [
+            {
+              "turn": 0,
+              "event": "rbih_state_identity",
+              "response": "civic"
+            },
+            {
+              "turn": 3,
+              "event": "rbih_paramilitary_policy_1992",
+              "response": "always_deny"
+            }
+          ]
+        }
+      }
+    ],
+    "sha256": "7d794f5a522c5df8619d3db8d94679035628b516bab586bacaa77749c6976d8b",
+    "bytes": 1217039,
+    "valid": true
+  },
+  {
+    "index": 19,
+    "label": "turn12-milestone",
+    "file": "19-turn12-milestone.png",
+    "time": "2026-07-30T14:21:43.041Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 29 Jun 1992 Sarajevo Records Its Officer Corps Posture PRESIDENTIAL RESPONSE Retain the multi-ethnic officer corps HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Reject the SDA-nationalist pressure for ethnic vetting. Keep Divjak at Sarajevo HQ, Šiber on the General Staff, and the mixed-ethnicity units intact. The civic-republic platform is preserved at the institutional level. Western diplomatic standing rises; the Federation-track alignment with HRHB strengthens; the multi-ethnic recruitment pool expands. The SDA-nationalist faction grumbles but loses the institutional argument. Republic of Bosnia and Herzegovina morale +3 Republic of Bosnia and Herzegovina / Herzeg-Bosna alliance +0.05 Republic of Bosnia and Herzegovina Internal Cohesion +5 Republic of Bosnia and Herzegovina Int'l Standing +15 Republic of Bosnia and Herzegovina Negotiating Leverage +5 Execute a gradual ethnic purge Initiate a slow-motion ethnic vetting program. Minority officers retain their commissions on paper but are rotated to non-command staff roles; Serb and Croat recruits face informal screening at induction. The civic-republic platform erodes by attrition rather than rupture. Western diplomatic exposure is moderated but cumulative; the Federation-track alignment with HRHB weakens; the SDA-nationalist faction is partly mollified. Republic of Bosnia and Herzegovina morale 0 Republic of Bosnia and Herzegovina / Herzeg-Bosna alliance -0.05 Republic of Bosnia and Herzegovina Internal Cohesion -15 Republic of Bosnia and Herzegovina Int'l Standing -10 Republic of Bosnia and Herzegovina Negotiating Leverage -10 Mandate immediate ethnic vetting and dismissal Issue a Presidency directive dismissing Serb and Croat officers from command roles. Divjak is removed from Sarajevo HQ; Šiber is sidelined from the General Staff; mixed-ethnicity units are restructured along single-ethnicity lines. The civic-republic platform collapses at the institutional level. Western patrons recoil (US/EU push back explicitly); the Federation-track alignment with HRHB ruptures; the multi-ethnic recruitment pool constricts to a Bosniak-only base; the SDA-nationalist faction is satisfied but the diplomatic and institutional damage is severe and durable. Republic of Bosnia and Herzegovina morale -3 Republic of Bosni",
+    "state": {
+      "turn": 12,
+      "date": "1992-06-29",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [
+        "rbih_minority_retention_1992"
+      ],
+      "pendingPlan": null,
+      "pendingOfficer": [],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        }
+      ]
+    },
+    "sha256": "e4532073665337fbfc9538a7a05ee12cbf10e3ad69e69c835371a8dfe635586b",
+    "bytes": 697579,
+    "valid": true
+  },
+  {
+    "index": 20,
+    "label": "turn12-rbih_minority_retention_1992-decision",
+    "file": "20-turn12-rbih_minority_retention_1992-decision.png",
+    "time": "2026-07-30T14:21:49.451Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 29 Jun 1992 Sarajevo Records Its Officer Corps Posture PRESIDENTIAL RESPONSE Retain the multi-ethnic officer corps HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Reject the SDA-nationalist pressure for ethnic vetting. Keep Divjak at Sarajevo HQ, Šiber on the General Staff, and the mixed-ethnicity units intact. The civic-republic platform is preserved at the institutional level. Western diplomatic standing rises; the Federation-track alignment with HRHB strengthens; the multi-ethnic recruitment pool expands. The SDA-nationalist faction grumbles but loses the institutional argument. Republic of Bosnia and Herzegovina morale +3 Republic of Bosnia and Herzegovina / Herzeg-Bosna alliance +0.05 Republic of Bosnia and Herzegovina Internal Cohesion +5 Republic of Bosnia and Herzegovina Int'l Standing +15 Republic of Bosnia and Herzegovina Negotiating Leverage +5 Execute a gradual ethnic purge Initiate a slow-motion ethnic vetting program. Minority officers retain their commissions on paper but are rotated to non-command staff roles; Serb and Croat recruits face informal screening at induction. The civic-republic platform erodes by attrition rather than rupture. Western diplomatic exposure is moderated but cumulative; the Federation-track alignment with HRHB weakens; the SDA-nationalist faction is partly mollified. Republic of Bosnia and Herzegovina morale 0 Republic of Bosnia and Herzegovina / Herzeg-Bosna alliance -0.05 Republic of Bosnia and Herzegovina Internal Cohesion -15 Republic of Bosnia and Herzegovina Int'l Standing -10 Republic of Bosnia and Herzegovina Negotiating Leverage -10 Mandate immediate ethnic vetting and dismissal Issue a Presidency directive dismissing Serb and Croat officers from command roles. Divjak is removed from Sarajevo HQ; Šiber is sidelined from the General Staff; mixed-ethnicity units are restructured along single-ethnicity lines. The civic-republic platform collapses at the institutional level. Western patrons recoil (US/EU push back explicitly); the Federation-track alignment with HRHB ruptures; the multi-ethnic recruitment pool constricts to a Bosniak-only base; the SDA-nationalist faction is satisfied but the diplomatic and institutional damage is severe and durable. Republic of Bosnia and Herzegovina morale -3 Republic of Bosni",
+    "eventId": "rbih_minority_retention_1992",
+    "historicalDefault": "retain_minorities",
+    "sha256": "e4532073665337fbfc9538a7a05ee12cbf10e3ad69e69c835371a8dfe635586b",
+    "bytes": 697579,
+    "valid": true
+  },
+  {
+    "index": 21,
+    "label": "turn12-rbih_minority_retention_1992-historical-default-recorded",
+    "file": "21-turn12-rbih_minority_retention_1992-historical-default-recorded.png",
+    "time": "2026-07-30T14:21:52.037Z",
+    "text": "EVENT × 1 of 3 TERRITORIAL Mostar Liberated Joint HVO-ARBiH forces have pushed the JNA out of Mostar. The city is free — but the question of who controls it is already causing friction between your allies. The east bank is mostly Bosniak. The west bank is mostly Croat. The liberation was shared. The city may not be. INTELLIGENCE ASSESSMENT HVO morale +5 ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 29 Jun 1992 Response recorded: Retain the multi-ethnic officer corps.",
+    "eventId": "rbih_minority_retention_1992",
+    "choice": "Retain the multi-ethnic officer corps",
+    "sha256": "0da9691dbfc5751619c57e9cac31be47b9d44dbb9b5f2ee182ddec4b92a29137",
+    "bytes": 1078988,
+    "valid": true
+  },
+  {
+    "index": 22,
+    "label": "turn15-milestone",
+    "file": "22-turn15-milestone.png",
+    "time": "2026-07-30T14:22:19.225Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 20 Jul 1992",
+    "state": {
+      "turn": 15,
+      "date": "1992-07-20",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.5,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        }
+      ]
+    },
+    "sha256": "7521b317051dfc3187079ab80fca06a6a76f56d4a16fd25e7c55873afff658ca",
+    "bytes": 1724775,
+    "valid": true
+  },
+  {
+    "index": 23,
+    "label": "turn20-milestone",
+    "file": "23-turn20-milestone.png",
+    "time": "2026-07-30T14:22:41.213Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 24 Aug 1992 London Conference on Yugoslavia PRESIDENTIAL RESPONSE Subscribe to the London Principles HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Subscribe to the Statement of Principles alongside the other Bosnian delegations. Improves international standing but may constrain military operations. Republic of Bosnia and Herzegovina International Credibility +10 Republic of Bosnia and Herzegovina patron pressure -5 Republic of Bosnia and Herzegovina Int'l Standing +10 Reject Terms as Inadequate Denounce the conference as rewarding aggression. Damages credibility but preserves freedom of action. Republic of Bosnia and Herzegovina International Credibility -5 Republic of Bosnia and Herzegovina morale +3 Republic of Bosnia and Herzegovina Int'l Standing -5 Republic of Bosnia and Herzegovina Military Credibility +3 SITUATION The international community convenes in London to address the escalating Bosnian crisis. Western leaders demand an end to ethnic cleansing and the lifting of sieges. The conference produces declarations but no enforcement mechanism, establishing a pattern of diplomatic engagement without military commitment. DOSSIER CATEGORY Diplomatic FACTION / DATE Republic of Bosnia and Herzegovina / 24 Aug 1992 DECISION CONTEXT Source dossier: The London Conference met on 26-27 August 1992. Its campaign trigger preserves two documented routes into that week: accumulated war-crimes and external-pressure state, or three weeks after the concen... Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath. PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 24 Aug 1992",
+    "state": {
+      "turn": 20,
+      "date": "1992-08-24",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [
+        "london_conference_1992"
+      ],
+      "pendingPlan": null,
+      "pendingOfficer": [],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.5,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        }
+      ]
+    },
+    "sha256": "dad731dc1c6a91a54756b14de3ec57d647825a66179a9e4196a19986f00fbd61",
+    "bytes": 676951,
+    "valid": true
+  },
+  {
+    "index": 24,
+    "label": "turn20-london_conference_1992-decision",
+    "file": "24-turn20-london_conference_1992-decision.png",
+    "time": "2026-07-30T14:22:46.680Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 24 Aug 1992 London Conference on Yugoslavia PRESIDENTIAL RESPONSE Subscribe to the London Principles HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Subscribe to the Statement of Principles alongside the other Bosnian delegations. Improves international standing but may constrain military operations. Republic of Bosnia and Herzegovina International Credibility +10 Republic of Bosnia and Herzegovina patron pressure -5 Republic of Bosnia and Herzegovina Int'l Standing +10 Reject Terms as Inadequate Denounce the conference as rewarding aggression. Damages credibility but preserves freedom of action. Republic of Bosnia and Herzegovina International Credibility -5 Republic of Bosnia and Herzegovina morale +3 Republic of Bosnia and Herzegovina Int'l Standing -5 Republic of Bosnia and Herzegovina Military Credibility +3 SITUATION The international community convenes in London to address the escalating Bosnian crisis. Western leaders demand an end to ethnic cleansing and the lifting of sieges. The conference produces declarations but no enforcement mechanism, establishing a pattern of diplomatic engagement without military commitment. DOSSIER CATEGORY Diplomatic FACTION / DATE Republic of Bosnia and Herzegovina / 24 Aug 1992 DECISION CONTEXT Source dossier: The London Conference met on 26-27 August 1992. Its campaign trigger preserves two documented routes into that week: accumulated war-crimes and external-pressure state, or three weeks after the concen... Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath. PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 24 Aug 1992",
+    "eventId": "london_conference_1992",
+    "historicalDefault": "accept_principles",
+    "sha256": "dad731dc1c6a91a54756b14de3ec57d647825a66179a9e4196a19986f00fbd61",
+    "bytes": 676951,
+    "valid": true
+  },
+  {
+    "index": 25,
+    "label": "turn20-london_conference_1992-historical-default-recorded",
+    "file": "25-turn20-london_conference_1992-historical-default-recorded.png",
+    "time": "2026-07-30T14:22:49.381Z",
+    "text": "EVENT × DIPLOMATIC Croatian Republic of Herzeg-Bosnia Republic of Bosnia and Herzegovina The Silent Drift No declaration, no incident — the alliance simply thins. Joint patrols stop coordinating. Liaison officers are reassigned without replacements. The press communiqués grow shorter. By any measurable count the partnership still exists; in the practice of it the trust has gone elsewhere. Capitals on both sides note the change and adjust their expectations downward. INTELLIGENCE ASSESSMENT ARBiH cohesion -2 HVO cohesion -2 ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 24 Aug 1992 Response recorded: Subscribe to the London Principles.",
+    "eventId": "london_conference_1992",
+    "choice": "Subscribe to the London Principles",
+    "sha256": "cc251d21407708acfdd95b5a290bff62eb84a9f027357cd2d4595a80b923b9e4",
+    "bytes": 1190330,
+    "valid": true
+  },
+  {
+    "index": 26,
+    "label": "turn20-president-desk-clean",
+    "file": "26-turn20-president-desk-clean.png",
+    "time": "2026-07-30T14:22:58.986Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 24 Aug 1992 CLOSE AUTHORITY & DIRECTIVES The currency of command — and what it buys COMMAND AUTHORITY 100 / 100 Spent this turn: 0 Banked: 15 / 15 Authority is flowing from: quiet-front restraint At this pace: one directive every 6 turns LEVER COSTS Visit the front 10 CA Force-launch (held plan) 15 CA Author operation 25 CA Request operation 25 CA Halt operation 25 CA Force-launch (no proposal) 25 CA Release elite reserve 25 CA Replace commander 25 CA PRESIDENT'S DESK Decision Packet REQUIRED 0 No required signatures. The turn can advance, but advisory items may still deserve a call to Army HQ. STRATEGIC SITUATION Republic of Bosnia and Herzegovina 24 Aug 1992 DESK ITEMS 0 ADVANCE Staff recommends review CALL ARMY HQ REVIEW STAFF RECOMMENDATION WHAT FOLLOWED Last filed record: 24 Aug 1992 RECORDS BATTLES 1 DISPLACED 23481 EVENTS 0 DECISIONS 0 London Conference on Yugoslavia DECISION RECORDED Event decision / 24 Aug 1992 / Response recorded: Subscribe to the London Principles. OPEN CHRONICLE Sarajevo Records Its Officer Corps Posture DECISION RECORDED Event decision / 29 Jun 1992 / Response recorded: Retain the multi-ethnic officer corps. OPEN CHRONICLE",
+    "turn": 20,
+    "sha256": "95011786e565f16865b4227d6b719df79ef676f3cd145c068317575c7616b9c1",
+    "bytes": 1477073,
+    "valid": true
+  },
+  {
+    "index": 27,
+    "label": "turn20-army-hq",
+    "file": "27-turn20-army-hq.png",
+    "time": "2026-07-30T14:23:04.154Z",
+    "text": "5 2 5 2 2 2 2 2 2 2 PREPARING OPERATIONAL MAP... DESK WAR MAP ARMY HQ 24 AUG 1992 (WAR) RECORDS CHRONICLE CODEX Authority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability. AUTHORITY 100 ADVANCE TURN -> ARBIH COMMAND SITUATION ▼ TERRITORY ARBiH 23.2% SITUATION REPORT Widespread thinly held front sectors need staff review. Front posture: widespread contact; thinly held sectors: widespread Sustainment: 0 critical, 0 strained Operations: 0 active commands Priority fronts: Bacci (gorazde) - Kolovarice (gorazde); Bacci (gorazde) - Podkozara donja (gorazde) Weakest brigades: 246th Vitezka Mountain; 285th Light Brigade CAMPAIGN MILITARY CASUALTIES ARBiH 4,039 killed / 15,690 wounded / 1,790 missing or captured BOSNIAK-CROAT COORDINATION Alliance posture: strained INTERNATIONAL PRESSURE Current pressure: elevated (51) Sarajevo siege visibility visible Enclave humanitarian pressure dominant Displacement visibility minor Negotiation momentum dominant Diplomatic pressure rises as sieges, displacement, and negotiation strain become visible. Consequences: Drina blockade pressure HUMANITARIAN CONVOYS A humanitarian aid column on a contested route. NO CONVOY DECISIONS ARE PENDING. LOCAL SUPPORT NO LOCAL SUPPORT ORDER IS STAGED THIS TURN. OPERATIONAL SECURITY NO SECTORS ARE CURRENTLY UNDER AN OPERATIONAL-SECURITY SCREEN. DIPLOMACY NEGOTIATION CAPITAL Bargaining strength at the table (0-100), built from the six dimensions below. Republic of Bosnia and HerzegovinaWeak (43/100) Internal Cohesion 35 Int'l Standing 50 Military Credibility 40 Negotiating Leverage 49 International Backing 50 Territorial Legitimacy 28 ALERTS No active alerts. ARMY 80 ▼ ARBIH ARBiH / ARBiH CO: Gen. Sefer Halilović 78 fielded / 2 reserve ▼ UNGROUPED 3,780 2 fielded brigades TANKS 0/2 ARTY 2/3 STANCE UNREPORTED Rbih Donji Vakuf Brigade 1 RBiH kalesija Brigade 1 1ST CORPS 26,288 34 fielded brigades Commander: Mustafa Hajrulahović \"Talijan\" TANKS 21/30 ARTY 50/53 STANCE BALANCED ORDER OF BATTLE 2ND CORPS 13,149 14 fielded brigades Commander: Željko Knez TANKS 4/7 ARTY 25/32 STANCE BALANCED ORDER OF BATTLE 3RD CORPS 13,956 12 fielded brigades Commander: Selmo Cikotić TANKS 4/6 ARTY 16/17 STANCE BALANCED ORDER OF BATTLE 4TH CORPS 5,354 10 fielded brigades Commander: Midhad Hujdur \"Hujka\" TANKS 3/4 ARTY 10/10 STANCE BALAN",
+    "turn": 20,
+    "sha256": "02436be294a0d2ab8f99286ec2360adb5e5eb80ba83bb775110e1dc078487b92",
+    "bytes": 155920,
+    "valid": true
+  },
+  {
+    "index": 28,
+    "label": "turn25-milestone",
+    "file": "28-turn25-milestone.png",
+    "time": "2026-07-30T14:24:17.598Z",
+    "text": "EVENT × HUMANITARIAN Republic of Bosnia and Herzegovina Refugee Absorption Strain The numbers cross a threshold that the receiving faction's institutions have been warning about for months. Camps overspill into rented housing; municipal budgets divert from war administration to bread and shelter. The international press reports sympathetically. The internal politics splits between solidarity and exhaustion, and the cohesion of the absorbing side erodes by the same measure. INTELLIGENCE ASSESSMENT ARBiH supply -20 ARBiH cohesion -5 ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 28 Sep 1992",
+    "state": {
+      "turn": 25,
+      "date": "1992-09-28",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.5,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        }
+      ]
+    },
+    "sha256": "471fb95c5694a51dafcdcbe71089ea69670dc2b927394036b5a1e6b50b9e987c",
+    "bytes": 1200460,
+    "valid": true
+  },
+  {
+    "index": 29,
+    "label": "turn30-milestone",
+    "file": "29-turn30-milestone.png",
+    "time": "2026-07-30T14:24:42.783Z",
+    "text": "EVENT × 1 of 2 POLITICAL Republic of Bosnia and Herzegovina The Civic Platform Holds The Presidency's early pledge to a civic republic does not stay a communique. Through mixed units, municipal committees, and repeated diplomatic briefings, it becomes a working claim: Bosnia is not only a Bosniak war aim, even when Bosniaks carry the heaviest burden. The bargain is difficult and often resented, but it keeps minority cadres in the state project and gives foreign envoys a language they can still defend. INTELLIGENCE ASSESSMENT ARBiH cohesion +3 ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 2 Nov 1992",
+    "state": {
+      "turn": 30,
+      "date": "1992-11-02",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.75,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        }
+      ]
+    },
+    "sha256": "e7f1cb5bdf709868a649ce60a85cf4962ac4a99a3e5949e027f09ff2a9920be3",
+    "bytes": 1171766,
+    "valid": true
+  },
+  {
+    "index": 30,
+    "label": "turn30-president-desk",
+    "file": "30-turn30-president-desk.png",
+    "time": "2026-07-30T14:24:47.986Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 2 Nov 1992",
+    "state": {
+      "turn": 30,
+      "date": "1992-11-02",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.75,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        }
+      ]
+    },
+    "sha256": "90c754e5e763bd6e6ec616f6fec5b92705888ea57495fcc3045362af7d3875c6",
+    "bytes": 1724615,
+    "valid": true
+  },
+  {
+    "index": 31,
+    "label": "turn35-milestone",
+    "file": "31-turn35-milestone.png",
+    "time": "2026-07-30T14:25:23.232Z",
+    "text": "EVENT × 1 of 2 DIPLOMATIC Republika Srpska Safe Areas With Teeth UNSCR 819, 824, and 836 arrive in the counterfactual with the mandate and the rules of engagement the historical resolutions lacked. Dutch and French detachments arrive at Srebrenica, Gorazde, Zepa, and Bihac with artillery and close-air-support tasking, not only with logistic and observer roles. VRS corps commanders in Drinski and eastern axes receive written guidance that operations against those perimeters will be met with NATO response. The arithmetic of the enclaves changes: they cease to be siege objectives and begin to be diplomatic preconditions. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 7 Dec 1992",
+    "state": {
+      "turn": 35,
+      "date": "1992-12-07",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        }
+      ]
+    },
+    "sha256": "cf93b2ececb76820df8af5180d122e452a8756bcd31ee7813346c04d148f2fd9",
+    "bytes": 1170193,
+    "valid": true
+  },
+  {
+    "index": 32,
+    "label": "turn38-milestone",
+    "file": "32-turn38-milestone.png",
+    "time": "2026-07-30T14:25:39.460Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 28 Dec 1992 Western Powers Press Sarajevo: Engage with Vance-Owen PRESIDENTIAL RESPONSE Acknowledge the message HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Engage the Vance-Owen process to preserve Western confidence, while accepting some loss of leverage and domestic cohesion. Republic of Bosnia and Herzegovina Patron Confidence +8 Republic of Bosnia and Herzegovina Negotiating Leverage -5 Republic of Bosnia and Herzegovina Internal Cohesion -3 Maintain our position Hold Sarajevo's negotiating line despite mediator and Western pressure, preserving claims but risking international confidence. Republic of Bosnia and Herzegovina Patron Confidence -10 Republic of Bosnia and Herzegovina Negotiating Leverage +6 Republic of Bosnia and Herzegovina Military Credibility +3 SITUATION Western capitals and mediators increase pressure on Sarajevo to engage seriously with the Vance-Owen Peace Plan. The diplomatic sequence signals that refusal would risk isolating the government internationally. STAFF ASSESSMENT Acknowledging the pressure preserves international confidence but costs leverage and internal cohesion; resisting protects Sarajevo's position while risking diplomatic isolation. TRIGGER EVIDENCE The Vance-Owen process is entering its final acceptance window. UN S/25479 and UNSCR 820 show international pressure escalating around the plan. Sarajevo's continued engagement is becoming central to preserving Western diplomatic support. DOSSIER CATEGORY Diplomatic FACTION / DATE Republic of Bosnia and Herzegovina / 28 Dec 1992 DECISION CONTEXT Source dossier: The pressure is inferred from the Vance-Owen diplomatic sequence and Western/UN escalation around April 1993; this row avoids attributing an unsourced direct warning to any single mediator. Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath. PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 28 Dec 1992",
+    "state": {
+      "turn": 38,
+      "date": "1992-12-28",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [
+        "ic_pressure_vopp_engagement"
+      ],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        }
+      ]
+    },
+    "sha256": "3af1d9523a778efa0c46f75ccc3372a0d87e6fd3cb6b904e7bc05435c331bced",
+    "bytes": 690201,
+    "valid": true
+  },
+  {
+    "index": 33,
+    "label": "turn38-ic_pressure_vopp_engagement-decision",
+    "file": "33-turn38-ic_pressure_vopp_engagement-decision.png",
+    "time": "2026-07-30T14:25:54.800Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 28 Dec 1992 Western Powers Press Sarajevo: Engage with Vance-Owen PRESIDENTIAL RESPONSE Acknowledge the message HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Engage the Vance-Owen process to preserve Western confidence, while accepting some loss of leverage and domestic cohesion. Republic of Bosnia and Herzegovina Patron Confidence +8 Republic of Bosnia and Herzegovina Negotiating Leverage -5 Republic of Bosnia and Herzegovina Internal Cohesion -3 Maintain our position Hold Sarajevo's negotiating line despite mediator and Western pressure, preserving claims but risking international confidence. Republic of Bosnia and Herzegovina Patron Confidence -10 Republic of Bosnia and Herzegovina Negotiating Leverage +6 Republic of Bosnia and Herzegovina Military Credibility +3 SITUATION Western capitals and mediators increase pressure on Sarajevo to engage seriously with the Vance-Owen Peace Plan. The diplomatic sequence signals that refusal would risk isolating the government internationally. STAFF ASSESSMENT Acknowledging the pressure preserves international confidence but costs leverage and internal cohesion; resisting protects Sarajevo's position while risking diplomatic isolation. TRIGGER EVIDENCE The Vance-Owen process is entering its final acceptance window. UN S/25479 and UNSCR 820 show international pressure escalating around the plan. Sarajevo's continued engagement is becoming central to preserving Western diplomatic support. DOSSIER CATEGORY Diplomatic FACTION / DATE Republic of Bosnia and Herzegovina / 28 Dec 1992 DECISION CONTEXT Source dossier: The pressure is inferred from the Vance-Owen diplomatic sequence and Western/UN escalation around April 1993; this row avoids attributing an unsourced direct warning to any single mediator. Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath. PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 28 Dec 1992",
+    "eventId": "ic_pressure_vopp_engagement",
+    "historicalDefault": "acknowledge_pressure",
+    "sha256": "3af1d9523a778efa0c46f75ccc3372a0d87e6fd3cb6b904e7bc05435c331bced",
+    "bytes": 690201,
+    "valid": true
+  },
+  {
+    "index": 34,
+    "label": "turn38-ic_pressure_vopp_engagement-historical-default-recorded",
+    "file": "34-turn38-ic_pressure_vopp_engagement-historical-default-recorded.png",
+    "time": "2026-07-30T14:25:57.731Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 28 Dec 1992 Response recorded: Acknowledge the message.",
+    "eventId": "ic_pressure_vopp_engagement",
+    "choice": "Acknowledge the message",
+    "sha256": "d8144a8fb12da30b99620f7d9f16b90dddb2e665ab8b2d47f13e6b8b4022b568",
+    "bytes": 1707251,
+    "valid": true
+  },
+  {
+    "index": 35,
+    "label": "turn39-vance-owen-plan",
+    "file": "35-turn39-vance-owen-plan.png",
+    "time": "2026-07-30T14:26:02.040Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 4 Jan 1993 Vance-Owen Peace Plan Presented PRESIDENTIAL RESPONSE Accept the Vance-Owen Plan HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Accepting improves international credibility and may bring relief, but legitimizes territorial losses. Republic of Bosnia and Herzegovina International Credibility +10 Republic of Bosnia and Herzegovina patron pressure -5 Reject the Vance-Owen Plan Rejection preserves territorial claims but damages standing with the international community. Republic of Bosnia and Herzegovina International Credibility -10 Republic of Bosnia and Herzegovina morale +3 SITUATION The Vance-Owen Peace Plan proposes dividing Bosnia into ten semi-autonomous provinces based on ethnic and geographic criteria. The Bosnian Croat leadership endorses it, and RBiH reluctantly signs and accepts under pressure, but the Bosnian Serb assembly in Pale rejects it, dooming the most comprehensive peace effort to date. STAFF ASSESSMENT Acceptance keeps Sarajevo aligned with Western diplomacy and shifts pressure toward Pale, but it means tolerating an externally drafted ten-province formula. Rejection preserves claims while damaging credibility. TRIGGER EVIDENCE The Vance-Owen Peace Plan has been formally presented. Western and UN diplomacy is pressing the parties toward signatures. Pale's assembly response remains the decisive obstacle after Sarajevo's pressured acceptance. DOSSIER CATEGORY Diplomatic FACTION / DATE Republic of Bosnia and Herzegovina / 4 Jan 1993 DECISION CONTEXT Source dossier: The row represents Sarajevo's reluctant acceptance of the Vance-Owen framework under diplomatic pressure; it does not present the plan as a moral settlement or a delivered peace. Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath. PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 4 Jan 1993",
+    "state": {
+      "turn": 39,
+      "date": "1993-01-04",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [
+        "vance_owen_plan_1993"
+      ],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        }
+      ]
+    },
+    "advance": {
+      "advanced": true,
+      "from": 38,
+      "to": 39,
+      "state": {
+        "turn": 39,
+        "date": "1993-01-04",
+        "phase": "war",
+        "player": "RBiH",
+        "pendingEvents": [
+          "vance_owen_plan_1993"
+        ],
+        "pendingPlan": null,
+        "pendingOfficer": [
+          {
+            "id": "arrival_arbih_hadzihasanovic_t22",
+            "type": "officer_available",
+            "officer": "arbih_hadzihasanovic"
+          },
+          {
+            "id": "arrival_arbih_pasalic_t24",
+            "type": "officer_available",
+            "officer": "arbih_pasalic"
+          }
+        ],
+        "authority": {
+          "current": 100,
+          "last_recovery": 5,
+          "last_recovery_source": "quiet_front_restraint",
+          "lifetime_spent": 0,
+          "max": 100,
+          "reserve": 15,
+          "reserve_max": 15,
+          "spent_this_turn": 0
+        },
+        "decisionLog": [
+          {
+            "turn": 0,
+            "event": "rbih_state_identity",
+            "response": "civic"
+          },
+          {
+            "turn": 3,
+            "event": "rbih_paramilitary_policy_1992",
+            "response": "always_deny"
+          },
+          {
+            "turn": 12,
+            "event": "rbih_minority_retention_1992",
+            "response": "retain_minorities"
+          },
+          {
+            "turn": 20,
+            "event": "london_conference_1992",
+            "response": "accept_principles"
+          },
+          {
+            "turn": 38,
+            "event": "ic_pressure_vopp_engagement",
+            "response": "acknowledge_pressure"
+          }
+        ]
+      }
+    },
+    "sha256": "2e191b540c436c1d087e51f43b861f10919f158b8daf3c512eb581d82c8c5f79",
+    "bytes": 688409,
+    "valid": true
+  },
+  {
+    "index": 36,
+    "label": "turn39-vance_owen_plan_1993-decision",
+    "file": "36-turn39-vance_owen_plan_1993-decision.png",
+    "time": "2026-07-30T14:26:09.650Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 4 Jan 1993 Vance-Owen Peace Plan Presented PRESIDENTIAL RESPONSE Accept the Vance-Owen Plan HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Accepting improves international credibility and may bring relief, but legitimizes territorial losses. Republic of Bosnia and Herzegovina International Credibility +10 Republic of Bosnia and Herzegovina patron pressure -5 Reject the Vance-Owen Plan Rejection preserves territorial claims but damages standing with the international community. Republic of Bosnia and Herzegovina International Credibility -10 Republic of Bosnia and Herzegovina morale +3 SITUATION The Vance-Owen Peace Plan proposes dividing Bosnia into ten semi-autonomous provinces based on ethnic and geographic criteria. The Bosnian Croat leadership endorses it, and RBiH reluctantly signs and accepts under pressure, but the Bosnian Serb assembly in Pale rejects it, dooming the most comprehensive peace effort to date. STAFF ASSESSMENT Acceptance keeps Sarajevo aligned with Western diplomacy and shifts pressure toward Pale, but it means tolerating an externally drafted ten-province formula. Rejection preserves claims while damaging credibility. TRIGGER EVIDENCE The Vance-Owen Peace Plan has been formally presented. Western and UN diplomacy is pressing the parties toward signatures. Pale's assembly response remains the decisive obstacle after Sarajevo's pressured acceptance. DOSSIER CATEGORY Diplomatic FACTION / DATE Republic of Bosnia and Herzegovina / 4 Jan 1993 DECISION CONTEXT Source dossier: The row represents Sarajevo's reluctant acceptance of the Vance-Owen framework under diplomatic pressure; it does not present the plan as a moral settlement or a delivered peace. Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath. PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 4 Jan 1993",
+    "eventId": "vance_owen_plan_1993",
+    "historicalDefault": "accept",
+    "sha256": "2e191b540c436c1d087e51f43b861f10919f158b8daf3c512eb581d82c8c5f79",
+    "bytes": 688409,
+    "valid": true
+  },
+  {
+    "index": 37,
+    "label": "turn39-vance_owen_plan_1993-historical-default-recorded",
+    "file": "37-turn39-vance_owen_plan_1993-historical-default-recorded.png",
+    "time": "2026-07-30T14:26:12.469Z",
+    "text": "EVENT × MILITARY Republic of Bosnia and Herzegovina Republika Srpska Kravica Raid on Orthodox Christmas ARBiH forces under Naser Oric launch a raid from the Srebrenica enclave on the Serb village of Kravica on Orthodox Christmas Day, killing between 30-35 VRS soldiers and 11-13 Serb civilians. The attack provides the VRS a pretext for intensifying its spring offensive against the eastern enclaves. Oric is later indicted by the ICTY for failing to prevent crimes in the enclave's defense. INTELLIGENCE ASSESSMENT ARBiH morale +3 VRS operational aggression +0.1 for 12 turns ARBiH humanitarian impact +1 The Christmas raid on Kravica galvanizes VRS commanders. The Drina Corps begins preparations for an offensive to crush the eastern enclaves once and for all. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 4 Jan 1993 Response recorded: Accept the Vance-Owen Plan.",
+    "eventId": "vance_owen_plan_1993",
+    "choice": "Accept the Vance-Owen Plan",
+    "sha256": "22c4b05e5d6bbba45eeca2ba4f1ac75aecf2ae0508df26a15e1279da249d1049",
+    "bytes": 1318335,
+    "valid": true
+  },
+  {
+    "index": 38,
+    "label": "turn40-no-duplicate-peace-plan-check",
+    "file": "38-turn40-no-duplicate-peace-plan-check.png",
+    "time": "2026-07-30T14:26:18.058Z",
+    "text": "DIPLOMATIC INTERNATIONAL PEACE PROPOSAL Vance Owen Peace Plan Proposed: 11 Jan 1993 UN mediators Cyrus Vance and Lord Owen propose dividing Bosnia into 10 decentralized provinces — three Bosniak-majority, three Serb-majority, three Croat-majority, and a mixed Sarajevo district. The plan would require the VRS to withdraw from roughly 30% of the territory it currently holds. The Bosnian Serb assembly has indicated fierce opposition. Rejection by RS will dramatically increase international pressure and may trigger sanctions from Belgrade itself. PROPOSED TERRITORIAL DIVISION Republic of Bosnia and Herzegovina 39% Republika Srpska 43% Croatian Republic of Herzeg-Bosnia 18% Institutional model: 10 Decentralized Provinces OTHER FACTION RESPONSES Other delegations have not disclosed their positions. PRESIDENTIAL DECISION REQUIRED ACCEPT PLAN REVIEW LATER REJECT PLAN PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 11 Jan 1993",
+    "state": {
+      "turn": 40,
+      "date": "1993-01-11",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": "vance_owen",
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.75,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "advance": {
+      "advanced": true,
+      "from": 39,
+      "to": 40,
+      "state": {
+        "turn": 40,
+        "date": "1993-01-11",
+        "phase": "war",
+        "player": "RBiH",
+        "pendingEvents": [],
+        "pendingPlan": "vance_owen",
+        "pendingOfficer": [
+          {
+            "id": "arrival_arbih_hadzihasanovic_t22",
+            "type": "officer_available",
+            "officer": "arbih_hadzihasanovic"
+          },
+          {
+            "id": "arrival_arbih_pasalic_t24",
+            "type": "officer_available",
+            "officer": "arbih_pasalic"
+          }
+        ],
+        "authority": {
+          "current": 100,
+          "last_recovery": 4.75,
+          "last_recovery_source": "quiet_front_restraint",
+          "lifetime_spent": 0,
+          "max": 100,
+          "reserve": 15,
+          "reserve_max": 15,
+          "spent_this_turn": 0
+        },
+        "decisionLog": [
+          {
+            "turn": 0,
+            "event": "rbih_state_identity",
+            "response": "civic"
+          },
+          {
+            "turn": 3,
+            "event": "rbih_paramilitary_policy_1992",
+            "response": "always_deny"
+          },
+          {
+            "turn": 12,
+            "event": "rbih_minority_retention_1992",
+            "response": "retain_minorities"
+          },
+          {
+            "turn": 20,
+            "event": "london_conference_1992",
+            "response": "accept_principles"
+          },
+          {
+            "turn": 38,
+            "event": "ic_pressure_vopp_engagement",
+            "response": "acknowledge_pressure"
+          },
+          {
+            "turn": 39,
+            "event": "vance_owen_plan_1993",
+            "response": "accept"
+          }
+        ]
+      }
+    },
+    "sha256": "6ecb56cda67ff89c5e8bcda34cc6400370328d4098a9417466775e3a53c0fc4e",
+    "bytes": 985730,
+    "valid": true
+  },
+  {
+    "index": 39,
+    "label": "turn40-duplicate-vance-owen-plan-accepted",
+    "file": "39-turn40-duplicate-vance-owen-plan-accepted.png",
+    "time": "2026-07-30T14:26:35.090Z",
+    "text": "DIPLOMATIC INTERNATIONAL PEACE PROPOSAL Vance Owen Peace Plan Proposed: 11 Jan 1993 UN mediators Cyrus Vance and Lord Owen propose dividing Bosnia into 10 decentralized provinces — three Bosniak-majority, three Serb-majority, three Croat-majority, and a mixed Sarajevo district. The plan would require the VRS to withdraw from roughly 30% of the territory it currently holds. The Bosnian Serb assembly has indicated fierce opposition. Rejection by RS will dramatically increase international pressure and may trigger sanctions from Belgrade itself. PROPOSED TERRITORIAL DIVISION Republic of Bosnia and Herzegovina 39% Republika Srpska 43% Croatian Republic of Herzeg-Bosnia 18% Institutional model: 10 Decentralized Provinces OTHER FACTION RESPONSES Other delegations have not disclosed their positions. PRESIDENTIAL DECISION REQUIRED ACCEPT PLAN REVIEW LATER REJECT PLAN PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 11 Jan 1993",
+    "before": {
+      "turn": 40,
+      "date": "1993-01-11",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": "vance_owen",
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.75,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "after": {
+      "turn": 40,
+      "date": "1993-01-11",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": "vance_owen",
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.75,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "bug": "duplicate disposition required",
+    "sha256": "6ecb56cda67ff89c5e8bcda34cc6400370328d4098a9417466775e3a53c0fc4e",
+    "bytes": 985730,
+    "valid": true
+  },
+  {
+    "index": 40,
+    "label": "turn40-duplicate-vance-owen-plan-accepted-confirmed",
+    "file": "40-turn40-duplicate-vance-owen-plan-accepted-confirmed.png",
+    "time": "2026-07-30T14:29:53.349Z",
+    "text": "EVENT × 1 of 2 ECONOMIC Republic of Bosnia and Herzegovina The Camps Provide Hands The refugee camps in the receiving territory have been counted and re-counted; now they are surveyed. Working-age men and women from the displaced register are organized into labor brigades — for trench-digging, for road repair, for harvests under the war. The recruitment pool widens by the same amount that the rear-area cohesion thins. The bargain is registered. INTELLIGENCE ASSESSMENT ARBiH cohesion -2 ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 11 Jan 1993",
+    "state": {
+      "turn": 40,
+      "date": "1993-01-11",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 4.75,
+        "last_recovery_source": "quiet_front_restraint",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "bug": "duplicate disposition required; accepted consistently",
+    "sha256": "2786cdedfadc3f3dc52f685b16879beed2fd4f16d5040bd8019db70f0a33cc1e",
+    "bytes": 1166481,
+    "valid": true
+  },
+  {
+    "index": 41,
+    "label": "turn41-native-load-recovery-verified",
+    "file": "41-turn41-native-load-recovery-verified.png",
+    "time": "2026-07-30T14:43:24.120Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 18 Jan 1993",
+    "state": {
+      "turn": 41,
+      "date": "1993-01-18",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 3.25,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "sha256": "567ff373d7e316dd71b1cf4c0edf76a3035c64359cc9636f2858380a2ab1e900",
+    "bytes": 1724741,
+    "valid": true
+  },
+  {
+    "index": 42,
+    "label": "turn45-milestone",
+    "file": "42-turn45-milestone.png",
+    "time": "2026-07-30T14:44:18.883Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 15 Feb 1993",
+    "state": {
+      "turn": 45,
+      "date": "1993-02-15",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.25,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "sha256": "b52e1269855a04ae9066b11477d94ae4a125bdb00bc648146bb13835e89d3f09",
+    "bytes": 1724645,
+    "valid": true
+  },
+  {
+    "index": 43,
+    "label": "turn50-milestone",
+    "file": "43-turn50-milestone.png",
+    "time": "2026-07-30T14:44:51.862Z",
+    "text": "EVENT × 1 of 2 MILITARY Republic of Bosnia and Herzegovina Croat Bosniak War Erupts Full-scale fighting erupts between the HVO and the ARBiH across central Bosnia and Herzegovina. Emboldened by the Vance-Owen provincial map and Croatian political pressure, HVO forces launch coordinated offensives to secure territories claimed for Herceg-Bosna. What began as sporadic clashes at Prozor and Gornji Vakuf hardens into open warfare from mid-January 1993, opening a devastating second front for the Bosnian government. INTELLIGENCE ASSESSMENT HVO morale +5 The Croat-Bosniak alliance collapses. HVO and ARBiH forces engage in open warfare across central Bosnia. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 22 Mar 1993",
+    "state": {
+      "turn": 50,
+      "date": "1993-03-22",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.75,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "sha256": "8db4f41f94ea45c82a7129dc20625edbdb476e10c22659c0245b5acab7360968",
+    "bytes": 1547398,
+    "valid": true
+  },
+  {
+    "index": 44,
+    "label": "turn50-president-desk",
+    "file": "44-turn50-president-desk.png",
+    "time": "2026-07-30T14:44:54.723Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 22 Mar 1993 CLOSE AUTHORITY & DIRECTIVES The currency of command — and what it buys COMMAND AUTHORITY 100 / 100 Spent this turn: 0 Banked: 15 / 15 Authority is flowing from: international standing At this pace: one directive every 5 turns LEVER COSTS Visit the front 10 CA Force-launch (held plan) 15 CA Author operation 25 CA Request operation 25 CA Halt operation 25 CA Force-launch (no proposal) 25 CA Release elite reserve 25 CA Replace commander 25 CA PRESIDENT'S DESK Decision Packet REQUIRED 0 No required signatures. The turn can advance, but advisory items may still deserve a call to Army HQ. REVIEW PERSONNEL MATTER Personnel Matter Regarding Enver Hadžihasanović. REVIEW OFFICER REVIEW PERSONNEL MATTER Personnel Matter Regarding Arif Pašalić. REVIEW OFFICER REVIEW PERSONNEL MATTER Commander Replacement Regarding Hazim Šadić. REVIEW OFFICER STRATEGIC SITUATION Republic of Bosnia and Herzegovina 22 Mar 1993 DESK ITEMS 3 ADVANCE Staff recommends review CALL ARMY HQ REVIEW STAFF RECOMMENDATION WHAT FOLLOWED Last filed record: 22 Mar 1993 RECORDS BATTLES 1 DISPLACED 3519 EVENTS 0 DECISIONS 0 Vance-Owen Peace Plan Presented DECISION RECORDED Event decision / 4 Jan 1993 / Response recorded: Accept the Vance-Owen Plan. OPEN CHRONICLE Western Powers Press Sarajevo: Engage with Vance-Owen DECISION RECORDED Event decision / 28 Dec 1992 / Response recorded: Acknowledge the message. OPEN CHRONICLE",
+    "state": {
+      "turn": 50,
+      "date": "1993-03-22",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.75,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "sha256": "641faad54419eb63924bb90f973a0d757727f86cb553cb1174e01415344ce3ee",
+    "bytes": 1515161,
+    "valid": true
+  },
+  {
+    "index": 45,
+    "label": "turn54-milestone",
+    "file": "45-turn54-milestone.png",
+    "time": "2026-07-30T14:45:22.334Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 19 Apr 1993 Srebrenica Demilitarization Agreement PRESIDENTIAL RESPONSE Comply in appearance, hide weapons HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Surrender visible stocks while concealing reserves. The historical choice — preserving minimum defense capability. Republic of Bosnia and Herzegovina morale -2 Comply fully with disarmament Surrender all weapons as demanded. Gains international credibility but leaves the enclave with no combat-effective defensive capability under continued VRS pressure. Republic of Bosnia and Herzegovina morale -5 Republika Srpska patron pressure +5 Republic of Bosnia and Herzegovina Int'l Standing +10 Republic of Bosnia and Herzegovina Military Credibility -15 Republic of Bosnia and Herzegovina Internal Cohesion -5 Refuse disarmament Publicly reject the agreement. Maintains military capability but repudiates the UN safe-area framework and draws international condemnation and increased VRS pressure. Republic of Bosnia and Herzegovina morale +3 Republic of Bosnia and Herzegovina patron pressure +10 Republic of Bosnia and Herzegovina Int'l Standing -15 Republic of Bosnia and Herzegovina Patron Confidence -10 Republic of Bosnia and Herzegovina Negotiating Leverage -10 SITUATION Under intense international pressure following the VRS assault on Srebrenica, Generals Mladic and Halilovic sign a demilitarization agreement on April 17-18: the ARBiH is to surrender weapons under UNPROFOR supervision in exchange for a ceasefire and UN troop deployment. Implementation is flawed on both sides — the ARBiH hides weapons while the VRS continues to restrict humanitarian convoys. DOSSIER CATEGORY Diplomatic FACTION / DATE Republic of Bosnia and Herzegovina / 19 Apr 1993 DECISION CONTEXT Source dossier: ICTY Krstic and the Halilovic-Mladic agreement ground the row's demilitarization context. Per UN A/54/549 (Secretary-General's report on the fall of Srebrenica, 15 November 1999), paragraphs 57-98, an... Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath. PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 19 Apr 1993",
+    "state": {
+      "turn": 54,
+      "date": "1993-04-19",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [
+        "srebrenica_demilitarization_1993"
+      ],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.5,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "sha256": "f0c5fb87271e33995a95a53e6bffc2e44452a290bc58223702aec79af6c36591",
+    "bytes": 1328853,
+    "valid": true
+  },
+  {
+    "index": 46,
+    "label": "turn54-srebrenica-demilitarization-decision",
+    "file": "46-turn54-srebrenica-demilitarization-decision.png",
+    "time": "2026-07-30T14:45:31.352Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 19 Apr 1993 Srebrenica Demilitarization Agreement PRESIDENTIAL RESPONSE Comply in appearance, hide weapons HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Surrender visible stocks while concealing reserves. The historical choice — preserving minimum defense capability. Republic of Bosnia and Herzegovina morale -2 Comply fully with disarmament Surrender all weapons as demanded. Gains international credibility but leaves the enclave with no combat-effective defensive capability under continued VRS pressure. Republic of Bosnia and Herzegovina morale -5 Republika Srpska patron pressure +5 Republic of Bosnia and Herzegovina Int'l Standing +10 Republic of Bosnia and Herzegovina Military Credibility -15 Republic of Bosnia and Herzegovina Internal Cohesion -5 Refuse disarmament Publicly reject the agreement. Maintains military capability but repudiates the UN safe-area framework and draws international condemnation and increased VRS pressure. Republic of Bosnia and Herzegovina morale +3 Republic of Bosnia and Herzegovina patron pressure +10 Republic of Bosnia and Herzegovina Int'l Standing -15 Republic of Bosnia and Herzegovina Patron Confidence -10 Republic of Bosnia and Herzegovina Negotiating Leverage -10 SITUATION Under intense international pressure following the VRS assault on Srebrenica, Generals Mladic and Halilovic sign a demilitarization agreement on April 17-18: the ARBiH is to surrender weapons under UNPROFOR supervision in exchange for a ceasefire and UN troop deployment. Implementation is flawed on both sides — the ARBiH hides weapons while the VRS continues to restrict humanitarian convoys. DOSSIER CATEGORY Diplomatic FACTION / DATE Republic of Bosnia and Herzegovina / 19 Apr 1993 DECISION CONTEXT Source dossier: ICTY Krstic and the Halilovic-Mladic agreement ground the row's demilitarization context. Per UN A/54/549 (Secretary-General's report on the fall of Srebrenica, 15 November 1999), paragraphs 57-98, an... Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath. PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 19 Apr 1993",
+    "state": {
+      "turn": 54,
+      "date": "1993-04-19",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [
+        "srebrenica_demilitarization_1993"
+      ],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.5,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "historicalDefault": "conceal",
+    "sha256": "e73988bc7bc3d72e5ccde61d6a023868dfafd39469f38a79fe1dbfe3bc1be80c",
+    "bytes": 667693,
+    "valid": true
+  },
+  {
+    "index": 47,
+    "label": "turn54-option-click-missed-no-decision-recorded",
+    "file": "47-turn54-srebrenica-historical-default-recorded.png",
+    "time": "2026-07-30T14:45:31.919Z",
+    "text": "DECISION REQUIRED Republic of Bosnia and Herzegovina · 19 Apr 1993 Srebrenica Demilitarization Agreement PRESIDENTIAL RESPONSE Comply in appearance, hide weapons HISTORICAL DEFAULT This is the historically attested choice. You are free to choose any option. Surrender visible stocks while concealing reserves. The historical choice — preserving minimum defense capability. Republic of Bosnia and Herzegovina morale -2 Comply fully with disarmament Surrender all weapons as demanded. Gains international credibility but leaves the enclave with no combat-effective defensive capability under continued VRS pressure. Republic of Bosnia and Herzegovina morale -5 Republika Srpska patron pressure +5 Republic of Bosnia and Herzegovina Int'l Standing +10 Republic of Bosnia and Herzegovina Military Credibility -15 Republic of Bosnia and Herzegovina Internal Cohesion -5 Refuse disarmament Publicly reject the agreement. Maintains military capability but repudiates the UN safe-area framework and draws international condemnation and increased VRS pressure. Republic of Bosnia and Herzegovina morale +3 Republic of Bosnia and Herzegovina patron pressure +10 Republic of Bosnia and Herzegovina Int'l Standing -15 Republic of Bosnia and Herzegovina Patron Confidence -10 Republic of Bosnia and Herzegovina Negotiating Leverage -10 SITUATION Under intense international pressure following the VRS assault on Srebrenica, Generals Mladic and Halilovic sign a demilitarization agreement on April 17-18: the ARBiH is to surrender weapons under UNPROFOR supervision in exchange for a ceasefire and UN troop deployment. Implementation is flawed on both sides — the ARBiH hides weapons while the VRS continues to restrict humanitarian convoys. DOSSIER CATEGORY Diplomatic FACTION / DATE Republic of Bosnia and Herzegovina / 19 Apr 1993 DECISION CONTEXT Source dossier: ICTY Krstic and the Halilovic-Mladic agreement ground the row's demilitarization context. Per UN A/54/549 (Secretary-General's report on the fall of Srebrenica, 15 November 1999), paragraphs 57-98, an... Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath. PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE 19 Apr 1993",
+    "state": {
+      "turn": 54,
+      "date": "1993-04-19",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [
+        "srebrenica_demilitarization_1993"
+      ],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.5,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        }
+      ]
+    },
+    "choice": "Comply in appearance, hide weapons",
+    "invalidCapture": true,
+    "note": "Automation exact-text matcher did not match HISTORICAL DEFAULT suffix; no state change occurred.",
+    "sha256": "e73988bc7bc3d72e5ccde61d6a023868dfafd39469f38a79fe1dbfe3bc1be80c",
+    "bytes": 667693,
+    "valid": false
+  },
+  {
+    "index": 48,
+    "label": "turn54-srebrenica-historical-default-confirmed",
+    "file": "48-turn54-srebrenica-historical-default-confirmed.png",
+    "time": "2026-07-30T14:45:52.413Z",
+    "text": "EVENT × 1 of 3 DIPLOMATIC Republic of Bosnia and Herzegovina Republika Srpska UN Resolution 819 — Srebrenica Safe Area The UN Security Council passes Resolution 819, declaring Srebrenica a 'safe area' free from armed attack or any hostile act, and demanding an immediate VRS ceasefire and unimpeded humanitarian access. The declaration creates a promise of protection without committing the military means to enforce it. INTELLIGENCE ASSESSMENT ARBiH morale +3 VRS patron pressure +5 Srebrenica is declared a UN safe area. The VRS ignores the ceasefire demand while the UN lacks any credible enforcement mechanism. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 19 Apr 1993 Response recorded: Comply in appearance, hide weapons.",
+    "state": {
+      "turn": 54,
+      "date": "1993-04-19",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.5,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        },
+        {
+          "turn": 54,
+          "event": "srebrenica_demilitarization_1993",
+          "response": "hide_weapons"
+        }
+      ]
+    },
+    "choice": "Comply in appearance, hide weapons",
+    "sha256": "7b6a62970cf9e6d0d45e30bfd8f16d8623f3807204a4d5279d85a4a8690f096b",
+    "bytes": 1215869,
+    "valid": true
+  },
+  {
+    "index": 49,
+    "label": "turn55-milestone",
+    "file": "49-turn55-milestone.png",
+    "time": "2026-07-30T14:46:05.768Z",
+    "text": "EVENT × MILITARY Vitez Kiseljak Pockets Isolated As the Croat-Bosniak war intensifies, HVO garrisons in the Vitez-Busovaca pocket and the Kiseljak enclave become increasingly cut off from resupply by HVO main forces in western Herzegovina. The pockets must survive on local resources and intermittent VRS cooperation, while the ARBiH weighs the cost of an assault against the benefits of encirclement. INTELLIGENCE ASSESSMENT HVO morale -3 HVO supply -3 HVO defenders in central Bosnia fight with the desperation of encirclement. Each convoy that fails to reach them deepens the crisis. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 26 Apr 1993",
+    "state": {
+      "turn": 55,
+      "date": "1993-04-26",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.5,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        },
+        {
+          "turn": 54,
+          "event": "srebrenica_demilitarization_1993",
+          "response": "hide_weapons"
+        }
+      ]
+    },
+    "sha256": "bea21661b57dfa3fcda69dab85950df9b1f97bdf6f1825ab5e666f1470d8931f",
+    "bytes": 1674983,
+    "valid": true
+  },
+  {
+    "index": 50,
+    "label": "turn60-milestone",
+    "file": "50-turn60-milestone.png",
+    "time": "2026-07-30T14:46:28.331Z",
+    "text": "EVENT × 1 of 2 MILITARY Republic of Bosnia and Herzegovina Battle of Travnik — ARBiH Recaptures City The ARBiH 3rd Corps launches an offensive against HVO positions in Travnik, overwhelming the garrison within days. Thousands of Croat civilians flee across VRS lines rather than remain under ARBiH control. The loss of Travnik is a major setback for the HVO in central Bosnia, demonstrating the ARBiH's growing numerical superiority in the interior. INTELLIGENCE ASSESSMENT ARBiH morale +5 HVO morale -5 Travnik falls to the ARBiH. Croat civilians flee, and the HVO's position in central Bosnia begins its terminal decline. ACKNOWLEDGED PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 31 May 1993",
+    "state": {
+      "turn": 60,
+      "date": "1993-05-31",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        },
+        {
+          "id": "army_replacement_arbih_halilovic_t60",
+          "type": "replacement_suggested",
+          "officer": "arbih_delic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.75,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        },
+        {
+          "turn": 54,
+          "event": "srebrenica_demilitarization_1993",
+          "response": "hide_weapons"
+        }
+      ]
+    },
+    "sha256": "d43736df6f4a4d96be81404e6bfec9fec08dccd99ddcc3526d10bb3e15ae00ee",
+    "bytes": 1690469,
+    "valid": true
+  },
+  {
+    "index": 51,
+    "label": "turn60-president-desk-final",
+    "file": "51-turn60-president-desk-final.png",
+    "time": "2026-07-30T14:46:43.809Z",
+    "text": "PRESIDENT'S DESK COMMAND SURFACE DIPLOMACY INTELLIGENCE ARMY HQ CHRONICLE FACTION WAR MAP ADVANCE WAR REQUIRED 0 STAFF REVIEW 4 31 May 1993 CLOSE AUTHORITY & DIRECTIVES The currency of command — and what it buys COMMAND AUTHORITY 100 / 100 Spent this turn: 0 Banked: 15 / 15 Authority is flowing from: international standing At this pace: one directive every 5 turns LEVER COSTS Visit the front 10 CA Force-launch (held plan) 15 CA Author operation 25 CA Request operation 25 CA Halt operation 25 CA Force-launch (no proposal) 25 CA Release elite reserve 25 CA Replace commander 25 CA PRESIDENT'S DESK Decision Packet REQUIRED 0 No required signatures. The turn can advance, but advisory items may still deserve a call to Army HQ. REVIEW PERSONNEL MATTER Personnel Matter Regarding Enver Hadžihasanović. REVIEW OFFICER REVIEW PERSONNEL MATTER Personnel Matter Regarding Arif Pašalić. REVIEW OFFICER REVIEW PERSONNEL MATTER Commander Replacement Regarding Hazim Šadić. REVIEW OFFICER REVIEW PERSONNEL MATTER Commander Replacement Regarding Rasim Delić. REVIEW OFFICER STRATEGIC SITUATION Republic of Bosnia and Herzegovina 31 May 1993 DESK ITEMS 4 ADVANCE Staff recommends review CALL ARMY HQ REVIEW STAFF RECOMMENDATION WHAT FOLLOWED Last filed record: 31 May 1993 RECORDS BATTLES 1 DISPLACED 2593 EVENTS 0 DECISIONS 0 Srebrenica Demilitarization Agreement DECISION RECORDED Event decision / 19 Apr 1993 / Response recorded: Comply in appearance, hide weapons. OPEN CHRONICLE",
+    "state": {
+      "turn": 60,
+      "date": "1993-05-31",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        },
+        {
+          "id": "army_replacement_arbih_halilovic_t60",
+          "type": "replacement_suggested",
+          "officer": "arbih_delic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.75,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        },
+        {
+          "turn": 54,
+          "event": "srebrenica_demilitarization_1993",
+          "response": "hide_weapons"
+        }
+      ]
+    },
+    "sha256": "64480e60ef6598bc07ea43f52b5d7f41564d8d508c87ebf278c0b9d59160372b",
+    "bytes": 1515166,
+    "valid": true
+  },
+  {
+    "index": 52,
+    "label": "turn60-army-hq-final",
+    "file": "52-turn60-army-hq-final.png",
+    "time": "2026-07-30T14:47:03.931Z",
+    "text": "5 5 2 2 2 3 2 2 2 2 2 PREPARING OPERATIONAL MAP... DESK WAR MAP ARMY HQ 31 MAY 1993 (WAR) RECORDS CHRONICLE CODEX 4 REVIEWS Authority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability. AUTHORITY 100 ADVANCE TURN -> ARBIH COMMAND SITUATION ▼ TERRITORY ARBiH 23.5% SITUATION REPORT Widespread thinly held front sectors need staff review. Front posture: widespread contact; thinly held sectors: widespread Sustainment: 0 critical, 0 strained Operations: 0 active commands Priority fronts: Azapovici (kiseljak) - Bukovica (kiseljak); Bacci (gorazde) - Kolovarice (gorazde) Weakest brigades: 255th Slavna Mountain \"Hajrudin Mesić\"; 285th Light Brigade CAMPAIGN MILITARY CASUALTIES ARBiH 9,279 killed / 37,786 wounded / 5,304 missing or captured BOSNIAK-CROAT COORDINATION Alliance posture: open conflict INTERNATIONAL PRESSURE Current pressure: elevated (55) Sarajevo siege visibility strong Enclave humanitarian pressure dominant Displacement visibility minor Negotiation momentum dominant Diplomatic pressure rises as sieges, displacement, and negotiation strain become visible. Consequences: Drina blockade pressure HUMANITARIAN CONVOYS A humanitarian aid column on a contested route. NO CONVOY DECISIONS ARE PENDING. LOCAL SUPPORT NO LOCAL SUPPORT ORDER IS STAGED THIS TURN. OPERATIONAL SECURITY NO SECTORS ARE CURRENTLY UNDER AN OPERATIONAL-SECURITY SCREEN. DIPLOMACY NEGOTIATION CAPITAL Bargaining strength at the table (0-100), built from the six dimensions below. Republic of Bosnia and HerzegovinaWeak (47/100) Internal Cohesion 0 Int'l Standing 90 Military Credibility 40 Negotiating Leverage 49 International Backing 43 Territorial Legitimacy 28 ALERTS - Bosniak-Croat alliance under strain ARMY 90 ▼ ARBIH ARBiH / ARBiH CO: Gen. Sefer Halilović 78 fielded / 12 reserve ▼ UNGROUPED 36,000 12 fielded brigades TANKS 0/12 ARTY 22/33 STANCE UNREPORTED RBiH doboj Brigade 1 RBiH doboj Brigade 2 Rbih Donji Vakuf Brigade 1 RBiH kakanj Brigade 1 RBiH kakanj Brigade 2 RBiH kalesija Brigade 1 RBiH kladanj Brigade 1 RBiH lopare Brigade 1 RBiH lukavac Brigade 1 RBiH srebrenik Brigade 1 RBiH zavidovici Brigade 1 RBiH zivinice Brigade 1 1ST CORPS 56,492 34 fielded brigades Commander: Mustafa Hajrulahović \"Talijan\" TANKS 6/30 ARTY 50/54 STANCE BALANCED ORDER OF BATTLE 2ND CORPS 20,041 14 fielded brigades Commander: Željko Knez TANKS 3/16 ARTY 51/69 STANCE BALANCED ORDER OF BATTLE 3RD CORPS 20,668 12 fielded brigades Commander: Selmo Cikotić TANKS 1/7 ARTY 16/17 STANCE BALANCED ORDER OF BATTLE 4TH CORPS 15,067 10 fielded brigades Commander: Midhad Hujdur \"Hujka\" TANKS 1/4 ARTY 10/10 STANCE BALANCED ORDER OF BATTLE 5TH CORPS 14,003 8 fielded brigades Commander: Ramiz Dreković ARTY 4/4 STANCE BALANCED ORDER OF BATTLE MOBILIZATION 1 ▶ OPERATIONS ▶ SECTORS 40 ▶ ← FIELD WARROOM ARMIJA REPUBLIKE BOSNE I HERCEGOVINE ARBIH MAIN STAFF STRATEGIC SITUATION 31 May 1993 FIELDED PERSONNEL NOW162,271 × BRIEFING SUMMARY RECORDS PERSONNEL WAR SUMMARY 31 May 1993 (war) OVERVIEW PRESSURE CONVOYS CASUALTIES SUPPORT SECURITY CAPITAL STRATEGIC OBJECTIVES Protect state survival Status Critical Trend Steady Responsible command Unreported Current commitment 421 front contacts / 257 thinly held Last relevant consequence Turn 48: territorial control was gained. Next available lever Army HQ Review Army HQ briefing Build military credibility Status Contested Trend Improving Responsible command Unreported Current commitment Unreported Last relevant consequence Unreported Next available lever Army HQ Review Army HQ briefing Preserve international standing Status Secure Trend Improving Responsible command Unreported Current commitment Standing 90/100; recorded decision effect +90 Last relevant consequence Unreported Next available lever Decision Room Review political decisions Maintain internal cohesion Status Critical Trend Worsening Responsible command Unreported Current commitment RBiH-HRHB alliance at -100% Last relevant consequence Unreported Next available lever Decision Room Review political decisions TERRITORY ARBiH Friendly control 23.5% Enemy control is summarized through staff assessments and front reports, not exact faction-wide totals. MILITARY STRENGTH ARBiH Personnel at arms 162.3k Mobilized pool 269.6k Mobilized total 431.9k Killed 9k Wounded 38k DISPLACEMENT Theater-wide displaced 1164k Own-side displaced 706k Enemy displacement is not broken out here as exact faction totals in player-safe mode. CAMPAIGN COST Severity CRITICAL Friendly casualties Campaign cost so far: 9,279 killed / 37,786 wounded / 5,304 missing or captured 52.4k Displaced 1164k Net territory -80 CAMPAIGN DRAG War exhaustion 7570 Corps-level command strain is tracked per corps in Army HQ -> Command Relationship. SITUATION REPORT Widespread thinly held front sectors need staff review. Fronts 421 contacts / 257 thinly held Sustainment 0 critical / 0 strained, 0 collapsed Active operations 0 CIVILIAN IMPACT Killed",
+    "state": {
+      "turn": 60,
+      "date": "1993-05-31",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        },
+        {
+          "id": "army_replacement_arbih_halilovic_t60",
+          "type": "replacement_suggested",
+          "officer": "arbih_delic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.75,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        },
+        {
+          "turn": 54,
+          "event": "srebrenica_demilitarization_1993",
+          "response": "hide_weapons"
+        }
+      ]
+    },
+    "sha256": "c9ca04fea63e7852bd97cd54ddf52d60c5646a4eb25b76ddf247af363b94329d",
+    "bytes": 155829,
+    "valid": true
+  },
+  {
+    "index": 53,
+    "label": "turn60-army-hq-records",
+    "file": "53-turn60-army-hq-records.png",
+    "time": "2026-07-30T14:47:09.977Z",
+    "text": "5 5 2 2 2 3 2 2 2 2 2 DESK WAR MAP ARMY HQ 31 MAY 1993 (WAR) RECORDS CHRONICLE CODEX 4 REVIEWS Authority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability. AUTHORITY 100 ADVANCE TURN -> ARBIH COMMAND SITUATION ▼ TERRITORY ARBiH 23.5% SITUATION REPORT Widespread thinly held front sectors need staff review. Front posture: widespread contact; thinly held sectors: widespread Sustainment: 0 critical, 0 strained Operations: 0 active commands Priority fronts: Azapovici (kiseljak) - Bukovica (kiseljak); Bacci (gorazde) - Kolovarice (gorazde) Weakest brigades: 255th Slavna Mountain \"Hajrudin Mesić\"; 285th Light Brigade CAMPAIGN MILITARY CASUALTIES ARBiH 9,279 killed / 37,786 wounded / 5,304 missing or captured BOSNIAK-CROAT COORDINATION Alliance posture: open conflict INTERNATIONAL PRESSURE Current pressure: elevated (55) Sarajevo siege visibility strong Enclave humanitarian pressure dominant Displacement visibility minor Negotiation momentum dominant Diplomatic pressure rises as sieges, displacement, and negotiation strain become visible. Consequences: Drina blockade pressure HUMANITARIAN CONVOYS A humanitarian aid column on a contested route. NO CONVOY DECISIONS ARE PENDING. LOCAL SUPPORT NO LOCAL SUPPORT ORDER IS STAGED THIS TURN. OPERATIONAL SECURITY NO SECTORS ARE CURRENTLY UNDER AN OPERATIONAL-SECURITY SCREEN. DIPLOMACY NEGOTIATION CAPITAL Bargaining strength at the table (0-100), built from the six dimensions below. Republic of Bosnia and HerzegovinaWeak (47/100) Internal Cohesion 0 Int'l Standing 90 Military Credibility 40 Negotiating Leverage 49 International Backing 43 Territorial Legitimacy 28 ALERTS - Bosniak-Croat alliance under strain ARMY 90 ▼ ARBIH ARBiH / ARBiH CO: Gen. Sefer Halilović 78 fielded / 12 reserve ▼ UNGROUPED 36,000 12 fielded brigades TANKS 0/12 ARTY 22/33 STANCE UNREPORTED RBiH doboj Brigade 1 RBiH doboj Brigade 2 Rbih Donji Vakuf Brigade 1 RBiH kakanj Brigade 1 RBiH kakanj Brigade 2 RBiH kalesija Brigade 1 RBiH kladanj Brigade 1 RBiH lopare Brigade 1 RBiH lukavac Brigade 1 RBiH srebrenik Brigade 1 RBiH zavidovici Brigade 1 RBiH zivinice Brigade 1 1ST CORPS 56,492 34 fielded brigades Commander: Mustafa Hajrulahović \"Talijan\" TANKS 6/30 ARTY 50/54 STANCE BALANCED ORDER OF BATTLE 2ND CORPS 20,041 14 fielded brigades Commander: Željko Knez TANKS 3/16 ARTY 51/69 STANCE BALANCED ORDER OF BATTLE 3RD CORPS 20,668 12 fielded brigades Commander: Selmo Cikotić TANKS 1/7 ARTY 16/17 STANCE BALANCED ORDER OF BATTLE 4TH CORPS 15,067 10 fielded brigades Commander: Midhad Hujdur \"Hujka\" TANKS 1/4 ARTY 10/10 STANCE BALANCED ORDER OF BATTLE 5TH CORPS 14,003 8 fielded brigades Commander: Ramiz Dreković ARTY 4/4 STANCE BALANCED ORDER OF BATTLE MOBILIZATION 1 ▶ OPERATIONS ▶ SECTORS 40 ▶ ← FIELD WARROOM ARMIJA REPUBLIKE BOSNE I HERCEGOVINE ARBIH MAIN STAFF STRATEGIC SITUATION 31 May 1993 FIELDED PERSONNEL NOW162,271 × BRIEFING SUMMARY RECORDS PERSONNEL ARCHIVE ROUTES Weekly aftermath, player-faction completed operations, and Desk decisions are filed here; player event decisions are counted separately under Chronicle Decisions. LATEST FILED DECISION Srebrenica Demilitarization Agreement WEEKLY AFTERMATH 60 COMPLETED OPERATION AARS 0 DESK DECISIONS 0 CHRONICLE DECISIONS 1 OPPORTUNITIES 0 OPERATIONAL LEDGER Records owns operation status, completed dossiers, and archive exclusions. Chronicle carries one narrative entry for each visible completed operation. Proposed 0 Planning 0 Executing 0 Recovery 0 Completed 0 Archived 0 TERRITORY OVER TIME 0% 25% 50% 75% 100% Apr 1992 Jul 1992 Sep 1992 Dec 1992 Mar 1993 May 1993 TURN AFTERMATH · 60 LATEST WEEKLY REPORT · 1 OPERATION HISTORY · 0 DESK DECISIONS · 0 OPPORTUNITIES · 0 CODEX Historical essays and reference material live in the separate Codex shell. OPEN CODEX ALL 18 HARD TURNS 18 SIGNALS 18 ACTIONS 1 TERRITORY 1 CAMPAIGN PULSE 1 Feb 1993 - 31 May 1993 Archive window is contested: little net ground movement, but 1084 friendly casualties and 54 strategic signals. CONTESTED SIGNALS 54 20 events DECORATIONS 6 Archive window HARD TURNS 18 Severe / critical THEATER COST 4167 62699 displaced CAMPAIGN COST SO FAR Campaign cost is critical. 60 recorded turns: 16712 friendly casualties, 1163680 displaced, -80 net territorial change, 0.83 opposing casualties per friendly casualty. CRITICAL WINDOW 60 13 Apr 1992 - 31 May 1993 FRIENDLY COST 16712 278.5 per turn EXCHANGE 0.83 13795 opposing DISPLACED 1163680 Archived turns LOST FORMATIONS 2 60 hard turns NET TERRITORY -80 37007 theater casualties COST DRIVERS 1163680 displaced 16712 friendly casualties 60 hard turns 13795 opposing casualties COSTLIEST TURN 11 May 1992 CRITICAL 984 casualties / 467081 displaced / 0 formations ARCHIVE 18 NET TERRITORY +1 CAMPAIGN MILITARY CASUALTIES 1084 DISPLACED 62699 LOST FORMATIONS 0 HARD TURNS 18 31 May 1993 QUIET COST CRITICAL No territorial change this turn. A quiet week is still a week of depletion, wai",
+    "state": {
+      "turn": 60,
+      "date": "1993-05-31",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        },
+        {
+          "id": "army_replacement_arbih_halilovic_t60",
+          "type": "replacement_suggested",
+          "officer": "arbih_delic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.75,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        },
+        {
+          "turn": 54,
+          "event": "srebrenica_demilitarization_1993",
+          "response": "hide_weapons"
+        }
+      ]
+    },
+    "sha256": "ac0cd45b37e9b1a7ad608c429b3e14d5a022aaecaafff2f46057990d2197a464",
+    "bytes": 120444,
+    "valid": true
+  },
+  {
+    "index": 54,
+    "label": "turn60-chronicle-final",
+    "file": "54-turn60-chronicle-final.png",
+    "time": "2026-07-30T14:47:23.020Z",
+    "text": "5 5 2 2 2 3 2 2 2 2 2 DESK WAR MAP ARMY HQ 31 MAY 1993 (WAR) RECORDS CHRONICLE CODEX 4 REVIEWS Authority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability. AUTHORITY 100 ADVANCE TURN -> ARBIH COMMAND SITUATION ▼ TERRITORY ARBiH 23.5% SITUATION REPORT Widespread thinly held front sectors need staff review. Front posture: widespread contact; thinly held sectors: widespread Sustainment: 0 critical, 0 strained Operations: 0 active commands Priority fronts: Azapovici (kiseljak) - Bukovica (kiseljak); Bacci (gorazde) - Kolovarice (gorazde) Weakest brigades: 255th Slavna Mountain \"Hajrudin Mesić\"; 285th Light Brigade CAMPAIGN MILITARY CASUALTIES ARBiH 9,279 killed / 37,786 wounded / 5,304 missing or captured BOSNIAK-CROAT COORDINATION Alliance posture: open conflict INTERNATIONAL PRESSURE Current pressure: elevated (55) Sarajevo siege visibility strong Enclave humanitarian pressure dominant Displacement visibility minor Negotiation momentum dominant Diplomatic pressure rises as sieges, displacement, and negotiation strain become visible. Consequences: Drina blockade pressure HUMANITARIAN CONVOYS A humanitarian aid column on a contested route. NO CONVOY DECISIONS ARE PENDING. LOCAL SUPPORT NO LOCAL SUPPORT ORDER IS STAGED THIS TURN. OPERATIONAL SECURITY NO SECTORS ARE CURRENTLY UNDER AN OPERATIONAL-SECURITY SCREEN. DIPLOMACY NEGOTIATION CAPITAL Bargaining strength at the table (0-100), built from the six dimensions below. Republic of Bosnia and HerzegovinaWeak (47/100) Internal Cohesion 0 Int'l Standing 90 Military Credibility 40 Negotiating Leverage 49 International Backing 43 Territorial Legitimacy 28 ALERTS - Bosniak-Croat alliance under strain ARMY 90 ▼ ARBIH ARBiH / ARBiH CO: Gen. Sefer Halilović 78 fielded / 12 reserve ▼ UNGROUPED 36,000 12 fielded brigades TANKS 0/12 ARTY 22/33 STANCE UNREPORTED RBiH doboj Brigade 1 RBiH doboj Brigade 2 Rbih Donji Vakuf Brigade 1 RBiH kakanj Brigade 1 RBiH kakanj Brigade 2 RBiH kalesija Brigade 1 RBiH kladanj Brigade 1 RBiH lopare Brigade 1 RBiH lukavac Brigade 1 RBiH srebrenik Brigade 1 RBiH zavidovici Brigade 1 RBiH zivinice Brigade 1 1ST CORPS 56,492 34 fielded brigades Commander: Mustafa Hajrulahović \"Talijan\" TANKS 6/30 ARTY 50/54 STANCE BALANCED ORDER OF BATTLE 2ND CORPS 20,041 14 fielded brigades Commander: Željko Knez TANKS 3/16 ARTY 51/69 STANCE BALANCED ORDER OF BATTLE 3RD CORPS 20,668 12 fielded brigades Commander: Selmo Cikotić TANKS 1/7 ARTY 16/17 STANCE BALANCED ORDER OF BATTLE 4TH CORPS 15,067 10 fielded brigades Commander: Midhad Hujdur \"Hujka\" TANKS 1/4 ARTY 10/10 STANCE BALANCED ORDER OF BATTLE 5TH CORPS 14,003 8 fielded brigades Commander: Ramiz Dreković ARTY 4/4 STANCE BALANCED ORDER OF BATTLE MOBILIZATION 1 ▶ OPERATIONS ▶ SECTORS 40 ▶ WAR CHRONICLE 322/322 events - 13 Apr 1992 - 31 May 1993 ALL · 322 HEADLINES · 183 COST · 60 COMBAT · 119 POLITICAL · 54 HUMANITARIAN · 64 MILITARY · 14 DIPLOMATIC · 4 NARRATIVE · 1 CONSEQUENCE · 6 ENTRIES CHAPTERS Lens: All 14 chapters CLOSE [ESC] CAMPAIGN RECAP 14 chapters across Apr 1992-May 1993: 322 entries make Combat the dominant thread, with 183 headline anchors. FROM \"APR 1992\" TO \"MAY 1993\" | SENSITIVE-HISTORY SIGNAL CHAPTERS: 1 APR 1992 Apr 1992 Across Apr 1992, 40 sourced entries make combat the dominant thread; 34 headline records anchor the chapter. | 13 Apr 1992 - 27 Apr 1992 CALENDAR MONTH 13 APR 1992 | COMBAT HEADLINE Battle of Bratunac 2 SELECT OPEN TURN AFTERMATH 13 APR 1992 | COMBAT HEADLINE Battle of Glavaticevo 2 SELECT OPEN TURN AFTERMATH 13 APR 1992 | COMBAT HEADLINE Battle of Ljubija 2 SELECT OPEN TURN AFTERMATH 13 APR 1992 | COMBAT HEADLINE Battle of medojevici SELECT OPEN TURN AFTERMATH 13 APR 1992 | COMBAT HEADLINE Battle of Sarajevo Dio Ilidza 2 SELECT OPEN TURN AFTERMATH 13 APR 1992 | COMBAT HEADLINE Battle of svrake SELECT OPEN TURN AFTERMATH 13 APR 1992 | COMBAT HEADLINE Battle of Visegrad 2 SELECT OPEN TURN AFTERMATH 13 APR 1992 | COMBAT HEADLINE Battle of Vranjevici 2 SELECT OPEN TURN AFTERMATH 13 APR 1992 | COMBAT HEADLINE Battle of zvornik SELECT OPEN TURN AFTERMATH 13 APR 1992 | COST HEADLINE Critical campaign cost SELECT OPEN TURN AFTERMATH 20 APR 1992 | COMBAT Battle of Bihac 2 SELECT OPEN TURN AFTERMATH 20 APR 1992 | COMBAT HEADLINE Battle of dragoradi SELECT OPEN TURN AFTERMATH 20 APR 1992 | COMBAT HEADLINE Battle of Kozarac 2 SELECT OPEN TURN AFTERMATH 20 APR 1992 | COMBAT HEADLINE Battle of Kruzanj 2 SELECT OPEN TURN AFTERMATH 20 APR 1992 | COMBAT Battle of ljuta SELECT OPEN TURN AFTERMATH 20 APR 1992 | COMBAT HEADLINE Battle of Novo Selo SELECT OPEN TURN AFTERMATH 20 APR 1992 | COMBAT HEADLINE Battle of Prelovo 2 SELECT OPEN TURN AFTERMATH 20 APR 1992 | COMBAT HEADLINE Battle of Rakovica 2 SELECT OPEN TURN AFTERMATH 20 APR 1992 | COMBAT HEADLINE Battle of Sanski Most 2 SELECT OPEN TURN AFTERMATH 20 APR 1992 | COST HEADLINE Critical campaign cost SELECT OPEN TURN AFTERMATH 27 APR 1992 | COMBAT HEA",
+    "state": {
+      "turn": 60,
+      "date": "1993-05-31",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        },
+        {
+          "id": "army_replacement_arbih_halilovic_t60",
+          "type": "replacement_suggested",
+          "officer": "arbih_delic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.75,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        },
+        {
+          "turn": 54,
+          "event": "srebrenica_demilitarization_1993",
+          "response": "hide_weapons"
+        }
+      ]
+    },
+    "sha256": "d6fc1923255e33a5d7263817877442b0720074e0c587f793be62f04318e4fc98",
+    "bytes": 326486,
+    "valid": true
+  },
+  {
+    "index": 55,
+    "label": "turn60-war-map-final",
+    "file": "55-turn60-war-map-final.png",
+    "time": "2026-07-30T14:47:33.439Z",
+    "text": "5 5 2 2 2 2 2 2 2 DESK WAR MAP ARMY HQ 31 MAY 1993 (WAR) RECORDS CHRONICLE CODEX 4 REVIEWS Authority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability. AUTHORITY 100 ADVANCE TURN -> ARBIH COMMAND BRIEFING 10 10 items in this briefing. 9 critical items require attention. REVIEW × COMMAND SITUATION ▼ TERRITORY ARBiH 23.5% SITUATION REPORT Widespread thinly held front sectors need staff review. Front posture: widespread contact; thinly held sectors: widespread Sustainment: 0 critical, 0 strained Operations: 0 active commands Priority fronts: Azapovici (kiseljak) - Bukovica (kiseljak); Bacci (gorazde) - Kolovarice (gorazde) Weakest brigades: 255th Slavna Mountain \"Hajrudin Mesić\"; 285th Light Brigade CAMPAIGN MILITARY CASUALTIES ARBiH 9,279 killed / 37,786 wounded / 5,304 missing or captured BOSNIAK-CROAT COORDINATION Alliance posture: open conflict INTERNATIONAL PRESSURE Current pressure: elevated (55) Sarajevo siege visibility strong Enclave humanitarian pressure dominant Displacement visibility minor Negotiation momentum dominant Diplomatic pressure rises as sieges, displacement, and negotiation strain become visible. Consequences: Drina blockade pressure HUMANITARIAN CONVOYS A humanitarian aid column on a contested route. NO CONVOY DECISIONS ARE PENDING. LOCAL SUPPORT NO LOCAL SUPPORT ORDER IS STAGED THIS TURN. OPERATIONAL SECURITY NO SECTORS ARE CURRENTLY UNDER AN OPERATIONAL-SECURITY SCREEN. DIPLOMACY NEGOTIATION CAPITAL Bargaining strength at the table (0-100), built from the six dimensions below. Republic of Bosnia and HerzegovinaWeak (47/100) Internal Cohesion 0 Int'l Standing 90 Military Credibility 40 Negotiating Leverage 49 International Backing 43 Territorial Legitimacy 28 ALERTS - Bosniak-Croat alliance under strain ARMY 90 ▼ ARBIH ARBiH / ARBiH CO: Gen. Sefer Halilović 78 fielded / 12 reserve ▼ UNGROUPED 36,000 12 fielded brigades TANKS 0/12 ARTY 22/33 STANCE UNREPORTED RBiH doboj Brigade 1 RBiH doboj Brigade 2 Rbih Donji Vakuf Brigade 1 RBiH kakanj Brigade 1 RBiH kakanj Brigade 2 RBiH kalesija Brigade 1 RBiH kladanj Brigade 1 RBiH lopare Brigade 1 RBiH lukavac Brigade 1 RBiH srebrenik Brigade 1 RBiH zavidovici Brigade 1 RBiH zivinice Brigade 1 1ST CORPS 56,492 34 fielded brigades Commander: Mustafa Hajrulahović \"Talijan\" TANKS 6/30 ARTY 50/54 STANCE BALANCED ORDER OF BATTLE 2ND CORPS 20,041 14 fielded brigades Commander: Željko Knez TANKS 3/16 ARTY 51/69 STANCE BALANCED ORDER OF BATTLE 3RD CORPS 20,668 12 fielded brigades Commander: Selmo Cikotić TANKS 1/7 ARTY 16/17 STANCE BALANCED ORDER OF BATTLE 4TH CORPS 15,067 10 fielded brigades Commander: Midhad Hujdur \"Hujka\" TANKS 1/4 ARTY 10/10 STANCE BALANCED ORDER OF BATTLE 5TH CORPS 14,003 8 fielded brigades Commander: Ramiz Dreković ARTY 4/4 STANCE BALANCED ORDER OF BATTLE MOBILIZATION 1 ▶ OPERATIONS ▶ SECTORS 40 ▶ PRESIDENTIAL INBOX 4 PERSONNEL Personnel Matter Regarding Enver Hadžihasanović. PERSONNEL Personnel Matter Regarding Arif Pašalić. PERSONNEL Commander Replacement Regarding Hazim Šadić. PERSONNEL Commander Replacement Regarding Rasim Delić. SITUATION SITUATION 31 May 1993 Situation as of 31 May 1993. MAP COUNTERS ARBiH VRS HVO X × 3 Type / echelon Strength / morale Selected Stack size POLITICAL ETHNIC SUPPLY OPERATIONS +MORE 23% 77% Friendly 23.5% → | Hostile-held 76.5% WAR | INTERNATIONAL: ACTIVE | MINORITY RETENTION PARAMILITARY POLICY PARAMILITARY REFUSED CIVIC REPUBLIC LAYERS",
+    "state": {
+      "turn": 60,
+      "date": "1993-05-31",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        },
+        {
+          "id": "army_replacement_arbih_halilovic_t60",
+          "type": "replacement_suggested",
+          "officer": "arbih_delic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.75,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        },
+        {
+          "turn": 54,
+          "event": "srebrenica_demilitarization_1993",
+          "response": "hide_weapons"
+        }
+      ]
+    },
+    "sha256": "97270ba885b8412e15945e325c4b97cb22a683917470ea569740c1c18a9c5eff",
+    "bytes": 2135189,
+    "valid": true
+  },
+  {
+    "index": 56,
+    "label": "turn60-war-map-clean",
+    "file": "56-turn60-war-map-clean.png",
+    "time": "2026-07-30T14:47:50.696Z",
+    "text": "5 5 2 2 2 3 2 2 2 2 2 DESK WAR MAP ARMY HQ 31 MAY 1993 (WAR) RECORDS CHRONICLE CODEX 4 REVIEWS Authority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability. AUTHORITY 100 ADVANCE TURN -> ARBIH COMMAND SITUATION ▼ TERRITORY ARBiH 23.5% SITUATION REPORT Widespread thinly held front sectors need staff review. Front posture: widespread contact; thinly held sectors: widespread Sustainment: 0 critical, 0 strained Operations: 0 active commands Priority fronts: Azapovici (kiseljak) - Bukovica (kiseljak); Bacci (gorazde) - Kolovarice (gorazde) Weakest brigades: 255th Slavna Mountain \"Hajrudin Mesić\"; 285th Light Brigade CAMPAIGN MILITARY CASUALTIES ARBiH 9,279 killed / 37,786 wounded / 5,304 missing or captured BOSNIAK-CROAT COORDINATION Alliance posture: open conflict INTERNATIONAL PRESSURE Current pressure: elevated (55) Sarajevo siege visibility strong Enclave humanitarian pressure dominant Displacement visibility minor Negotiation momentum dominant Diplomatic pressure rises as sieges, displacement, and negotiation strain become visible. Consequences: Drina blockade pressure HUMANITARIAN CONVOYS A humanitarian aid column on a contested route. NO CONVOY DECISIONS ARE PENDING. LOCAL SUPPORT NO LOCAL SUPPORT ORDER IS STAGED THIS TURN. OPERATIONAL SECURITY NO SECTORS ARE CURRENTLY UNDER AN OPERATIONAL-SECURITY SCREEN. DIPLOMACY NEGOTIATION CAPITAL Bargaining strength at the table (0-100), built from the six dimensions below. Republic of Bosnia and HerzegovinaWeak (47/100) Internal Cohesion 0 Int'l Standing 90 Military Credibility 40 Negotiating Leverage 49 International Backing 43 Territorial Legitimacy 28 ALERTS - Bosniak-Croat alliance under strain ARMY 90 ▼ ARBIH ARBiH / ARBiH CO: Gen. Sefer Halilović 78 fielded / 12 reserve ▼ UNGROUPED 36,000 12 fielded brigades TANKS 0/12 ARTY 22/33 STANCE UNREPORTED RBiH doboj Brigade 1 RBiH doboj Brigade 2 Rbih Donji Vakuf Brigade 1 RBiH kakanj Brigade 1 RBiH kakanj Brigade 2 RBiH kalesija Brigade 1 RBiH kladanj Brigade 1 RBiH lopare Brigade 1 RBiH lukavac Brigade 1 RBiH srebrenik Brigade 1 RBiH zavidovici Brigade 1 RBiH zivinice Brigade 1 1ST CORPS 56,492 34 fielded brigades Commander: Mustafa Hajrulahović \"Talijan\" TANKS 6/30 ARTY 50/54 STANCE BALANCED ORDER OF BATTLE 2ND CORPS 20,041 14 fielded brigades Commander: Željko Knez TANKS 3/16 ARTY 51/69 STANCE BALANCED ORDER OF BATTLE 3RD CORPS 20,668 12 fielded brigades Commander: Selmo Cikotić TANKS 1/7 ARTY 16/17 STANCE BALANCED ORDER OF BATTLE 4TH CORPS 15,067 10 fielded brigades Commander: Midhad Hujdur \"Hujka\" TANKS 1/4 ARTY 10/10 STANCE BALANCED ORDER OF BATTLE 5TH CORPS 14,003 8 fielded brigades Commander: Ramiz Dreković ARTY 4/4 STANCE BALANCED ORDER OF BATTLE MOBILIZATION 1 ▶ OPERATIONS ▶ SECTORS 40 ▶ PRESIDENTIAL INBOX 4 PERSONNEL Personnel Matter Regarding Enver Hadžihasanović. PERSONNEL Personnel Matter Regarding Arif Pašalić. PERSONNEL Commander Replacement Regarding Hazim Šadić. PERSONNEL Commander Replacement Regarding Rasim Delić. SITUATION SITUATION 31 May 1993 Situation as of 31 May 1993. MAP COUNTERS ARBiH VRS HVO X × 3 Type / echelon Strength / morale Selected Stack size POLITICAL ETHNIC SUPPLY OPERATIONS +MORE 23% 77% Friendly 23.5% → | Hostile-held 76.5% WAR | INTERNATIONAL: ACTIVE | MINORITY RETENTION PARAMILITARY POLICY PARAMILITARY REFUSED CIVIC REPUBLIC LAYERS",
+    "state": {
+      "turn": 60,
+      "date": "1993-05-31",
+      "phase": "war",
+      "player": "RBiH",
+      "pendingEvents": [],
+      "pendingPlan": null,
+      "pendingOfficer": [
+        {
+          "id": "arrival_arbih_hadzihasanovic_t22",
+          "type": "officer_available",
+          "officer": "arbih_hadzihasanovic"
+        },
+        {
+          "id": "arrival_arbih_pasalic_t24",
+          "type": "officer_available",
+          "officer": "arbih_pasalic"
+        },
+        {
+          "id": "replacement:arbih_knez:arbih_2nd_corps:arbih_sadic",
+          "type": "replacement_suggested",
+          "officer": "arbih_sadic"
+        },
+        {
+          "id": "army_replacement_arbih_halilovic_t60",
+          "type": "replacement_suggested",
+          "officer": "arbih_delic"
+        }
+      ],
+      "authority": {
+        "current": 100,
+        "last_recovery": 5.75,
+        "last_recovery_source": "international_standing",
+        "lifetime_spent": 0,
+        "max": 100,
+        "reserve": 15,
+        "reserve_max": 15,
+        "spent_this_turn": 0
+      },
+      "decisionLog": [
+        {
+          "turn": 0,
+          "event": "rbih_state_identity",
+          "response": "civic"
+        },
+        {
+          "turn": 3,
+          "event": "rbih_paramilitary_policy_1992",
+          "response": "always_deny"
+        },
+        {
+          "turn": 12,
+          "event": "rbih_minority_retention_1992",
+          "response": "retain_minorities"
+        },
+        {
+          "turn": 20,
+          "event": "london_conference_1992",
+          "response": "accept_principles"
+        },
+        {
+          "turn": 38,
+          "event": "ic_pressure_vopp_engagement",
+          "response": "acknowledge_pressure"
+        },
+        {
+          "turn": 39,
+          "event": "vance_owen_plan_1993",
+          "response": "accept"
+        },
+        {
+          "turn": 54,
+          "event": "srebrenica_demilitarization_1993",
+          "response": "hide_weapons"
+        }
+      ]
+    },
+    "sha256": "460926b181ec5bf04d7531f99b2cb27d4f3465c3741582d3c219b58dba27ce28",
+    "bytes": 2238493,
+    "valid": true
+  }
+]

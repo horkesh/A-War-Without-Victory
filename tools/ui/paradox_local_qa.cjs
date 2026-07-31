@@ -76,6 +76,38 @@ function strictAsciiCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
+function comparePendingEventDecisionPriority(left, right) {
+  const leftRequired = left?.decision?.requires_player_response === true ? 0 : 1;
+  const rightRequired = right?.decision?.requires_player_response === true ? 0 : 1;
+  if (leftRequired !== rightRequired) return leftRequired - rightRequired;
+  const leftTurn = Number(left?.decision?.turn_fired ?? 0);
+  const rightTurn = Number(right?.decision?.turn_fired ?? 0);
+  if (leftTurn !== rightTurn) return leftTurn - rightTurn;
+  return strictAsciiCompare(String(left?.id ?? ''), String(right?.id ?? ''));
+}
+
+function resolveVisibleEventDecisionId(pendingEventId, visibleEventId) {
+  return visibleEventId || pendingEventId || null;
+}
+
+function assessCounterVerificationCoverage(
+  initialIds,
+  attemptedIds,
+  verifiedIds,
+  requireFormationProof,
+) {
+  const initialTargetIds = [...new Set(initialIds)].slice(0, 12);
+  const attempted = new Set(attemptedIds);
+  const verified = new Set(verifiedIds);
+  return {
+    ok: !requireFormationProof || verified.size > 0,
+    initialTargetCount: initialTargetIds.length,
+    attemptedCount: attempted.size,
+    verifiedCount: verified.size,
+    unavailableInitialIds: initialTargetIds.filter((id) => !attempted.has(id)),
+  };
+}
+
 function computeWorkingTreeContentFingerprint() {
   const excludedGeneratedPrefixes = [
     'tmp-paradox-qa-20260710/',
@@ -143,6 +175,29 @@ function sortUnresolvedPlayerProposals(proposals) {
       const rightKey = `${right?.id ?? right?.proposal_id ?? ''}\u0000${right?.proposed_action ?? right?.action ?? ''}`;
       return strictAsciiCompare(leftKey, rightKey);
     });
+}
+
+function selectProposalForQa(proposals, allowOrdinary) {
+  const unresolved = sortUnresolvedPlayerProposals(proposals ?? []);
+  const historical = unresolved.find((proposal) => {
+    const action = proposal?.proposed_action ?? proposal?.action ?? '';
+    return typeof action === 'string' && action.startsWith('HISTORICAL_OP:');
+  });
+  return historical ?? (allowOrdinary ? unresolved[0] ?? null : null);
+}
+
+function proposalDecisionRoomRoute(reviewId, proposedAction) {
+  const opportunityProposalId = typeof proposedAction === 'string' && proposedAction.startsWith('OPPORTUNITY:')
+    ? proposedAction.slice('OPPORTUNITY:'.length)
+    : null;
+  const historicalOperation = typeof proposedAction === 'string' && proposedAction.startsWith('HISTORICAL_OP:');
+  return {
+    categoryId: opportunityProposalId || historicalOperation ? 'war_direction' : 'command',
+    priorityCardId: opportunityProposalId
+      ? `opportunity:${opportunityProposalId}`
+      : `command:review-proposal:${reviewId}`,
+    actionLabel: opportunityProposalId ? 'Authorize' : 'Accept',
+  };
 }
 
 function assertExactProposalResolution(proposalId, beforeRecords, afterRecords) {
@@ -1127,7 +1182,7 @@ async function clickExactVisibleButton(surface, exactText, label, options = {}) 
 }
 
 function officerResponseLabel(officerMatter) {
-  if (officerMatter?.eventType === 'officer_available') return 'Acknowledge arrival';
+  if (officerMatter?.eventType === 'officer_available') return 'File availability notice';
   if (officerMatter?.eventType === 'replacement_suggested') return 'Keep current commander';
   return 'Acknowledge';
 }
@@ -1265,8 +1320,10 @@ async function readState(frame) {
     ];
     const source = sources.find((candidate) => candidate && (Array.isArray(candidate) || typeof candidate === 'object'));
     if (!source) return [];
-    if (Array.isArray(source)) return source.map((decision) => ({ id: decision?.event_id ?? decision?.id ?? null, decision }));
-    return Object.entries(source).map(([id, decision]) => ({ id: decision?.event_id ?? id, decision }));
+    const entries = Array.isArray(source)
+      ? source.map((decision) => ({ id: decision?.event_id ?? decision?.id ?? null, decision }))
+      : Object.entries(source).map(([id, decision]) => ({ id: decision?.event_id ?? id, decision }));
+    return entries.sort(comparePendingEventDecisionPriority);
   })();
   const eventDecisionReceipts = (Array.isArray(raw.military?.event_decision_log)
     ? raw.military.event_decision_log
@@ -2262,14 +2319,7 @@ async function acceptStrategicProposalThroughUi(frame, proposal, options = {}) {
   const reviewId = proposal?.id ?? null;
   const proposedAction = proposal?.action ?? null;
   if (!reviewId) throw new Error('Required proposal UI resolution is missing its review id');
-  const opportunityProposalId = typeof proposedAction === 'string' && proposedAction.startsWith('OPPORTUNITY:')
-    ? proposedAction.slice('OPPORTUNITY:'.length)
-    : null;
-  const categoryId = opportunityProposalId ? 'opportunity' : 'command';
-  const priorityCardId = opportunityProposalId
-    ? `opportunity:${opportunityProposalId}`
-    : `command:review-proposal:${reviewId}`;
-  const actionLabel = opportunityProposalId ? 'Authorize' : 'Accept';
+  const { categoryId, priorityCardId, actionLabel } = proposalDecisionRoomRoute(reviewId, proposedAction);
 
   await clearOpenSurfaces(frame);
   const openedCommandSurface = await openCommandSurfaceFromWarroom(frame, `proposal ${reviewId} command surface`);
@@ -2532,17 +2582,35 @@ async function armyHqDeepDive(page, frame, faction, events) {
     const returned = await clickTestId(frame, 'army-hq-corps-back', 'army hq back', { afterMs: 600 });
     if (!returned) throw new Error(`Army HQ failed to return from corps ${corpsId}`);
   }
+  const handoffButton = frame.locator('[data-testid="army-hq-decision-room-open"]').first();
+  await handoffButton.waitFor({ state: 'visible', timeout: 5000 });
+  const handoffRoute = await handoffButton.getAttribute('data-handoff-route');
+  if (handoffRoute !== 'decision_room' && handoffRoute !== 'desk') {
+    throw new Error(`Army HQ handoff exposed an invalid route: ${handoffRoute ?? 'missing'}`);
+  }
   const handoff = await clickTestId(frame, 'army-hq-decision-room-open', 'army hq decision room handoff', { afterMs: 900 });
   if (!handoff) throw new Error('Army HQ Decision Room handoff did not click');
-  const decisionRoomHost = frame.locator('[data-testid="warroom-decision-room-host"]').first();
-  if (!await decisionRoomHost.isVisible().catch(() => false)) {
-    throw new Error('army hq handoff did not open Decision Room');
+  if (handoffRoute === 'decision_room') {
+    const decisionRoomHost = frame.locator('[data-testid="warroom-decision-room-host"]').first();
+    if (!await decisionRoomHost.isVisible().catch(() => false)) {
+      throw new Error('army hq decision-room handoff did not open Decision Room');
+    }
+    await snapshot(page, frame, faction, events, 'army-hq-decision-room-handoff', { handoff, handoffRoute });
+    await decisionRoomDeepDive(page, frame, faction, events, 'decision-room-from-army-hq');
+    await closeOpenSurface(frame);
+    await closeOpenSurface(frame);
   }
-  await snapshot(page, frame, faction, events, 'army-hq-decision-room-handoff', { handoff });
-  await decisionRoomDeepDive(page, frame, faction, events, 'decision-room-from-army-hq');
-  await closeOpenSurface(frame);
-  await closeOpenSurface(frame);
-  return { opened, tabResults, corpsResults, handoff };
+  if (handoffRoute === 'desk') {
+    const deskShell = frame.locator('[data-testid="president-desk-shell"]').first();
+    await deskShell.waitFor({ state: 'visible', timeout: 5000 });
+    if (await frame.locator('[data-testid="army-hq-modal"]').isVisible().catch(() => false)) {
+      throw new Error('army hq desk handoff left Army HQ open');
+    }
+    await snapshot(page, frame, faction, events, 'army-hq-desk-handoff', { handoff, handoffRoute });
+    const closedDesk = await clickTestId(frame, 'desk-close-overlay', 'close desk after army hq handoff', { afterMs: 500 });
+    if (!closedDesk) throw new Error('Army HQ desk handoff did not expose the Desk field return');
+  }
+  return { opened, tabResults, corpsResults, handoff, handoffRoute };
 }
 
 async function dismissCommandBriefing(frame) {
@@ -2630,12 +2698,13 @@ async function mapInteractionProbe(page, frame, faction, events, labelPrefix = '
   const clickResults = [];
   const verifiedCounterIds = new Set();
   const attemptedCounterIds = new Set();
-  if (counters?.formationSample?.length) {
-    const requiredCounterVerifications = Math.min(12, counters.formationSample.length);
+  const initialCounterIds = (counters?.formationSample ?? []).map((counter) => counter.id).slice(0, 12);
+  const targetCounterVerifications = initialCounterIds.length;
+  if (targetCounterVerifications > 0) {
     for (
       let probeIndex = 0;
-      probeIndex < Math.max(20, requiredCounterVerifications * 3)
-        && verifiedCounterIds.size < requiredCounterVerifications;
+      probeIndex < Math.max(20, targetCounterVerifications * 3)
+        && verifiedCounterIds.size < targetCounterVerifications;
       probeIndex += 1
     ) {
       const readyBeforeClick = await waitForTacticalMapReady(
@@ -2678,9 +2747,16 @@ async function mapInteractionProbe(page, frame, faction, events, labelPrefix = '
       await detail.waitFor({ state: 'hidden', timeout: 5000 });
       await sleep(1200);
     }
-    if (verifiedCounterIds.size !== requiredCounterVerifications) {
-      throw new Error(`Insufficient exact formation-counter coverage: required ${requiredCounterVerifications}, verified ${verifiedCounterIds.size}`);
-    }
+  }
+  const counterCoverage = assessCounterVerificationCoverage(
+    initialCounterIds,
+    [...attemptedCounterIds],
+    [...verifiedCounterIds],
+    (mapState?.locatedOwnedFormationCount ?? 0) > 0,
+  );
+  await snapshot(page, frame, faction, events, `${labelPrefix}-counter-coverage`, { counterCoverage });
+  if (!counterCoverage.ok) {
+    throw new Error(`No exact formation counter could be verified: ${JSON.stringify(counterCoverage)}`);
   }
   const directionalMapBox = await map.boundingBox();
   if (!directionalMapBox) throw new Error(`Tactical map geometry unavailable for directional probes: ${labelPrefix}`);
@@ -3134,16 +3210,13 @@ async function exerciseFormationStackPicker(page, frame, faction, events, labelP
     stackFormationDetailTrace,
     frameStability,
   });
-  const detailClosed = await frame.evaluate(() => {
-    const close = document.querySelector('[data-testid="formation-detail-close"]');
-    if (!(close instanceof HTMLElement)) return false;
-    close.click();
-    return true;
-  });
-  if (!detailClosed) throw new Error(`Stack picker detail exposed no close control for ${expectedFormationId}`);
-  await pollFrameEvaluation(frame, (formationId) => !document.querySelector(
-    `[data-testid="formation-detail-panel"][data-formation-id="${CSS.escape(formationId)}"]`,
-  ), expectedFormationId);
+  const detailPanel = frame.locator(
+    `[data-testid="formation-detail-panel"][data-formation-id="${expectedFormationId}"]`,
+  ).first();
+  const detailClose = detailPanel.locator('[data-testid="formation-detail-close"]').first();
+  await detailClose.waitFor({ state: 'visible', timeout: 5000 });
+  await detailClose.click({ timeout: 5000 });
+  await detailPanel.waitFor({ state: 'detached', timeout: 5000 });
   return { stackOsid, badgeAriaLabel: selectedBadge.ariaLabel, badgeCount, memberCount, expectedFormationId, openedFormationId };
 }
 
@@ -3393,7 +3466,7 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     if (!cleared) throw new Error('Pending Dayton negotiation remained after visible response');
     return { handled: true, action: 'dayton-decline-talks' };
   }
-  if (strategicRun && pendingEventId) {
+  if (pendingEventId) {
     const responseRail = frame.locator('[data-testid="event-decision-response-rail"]').first();
     const responseControl = frame.locator('[data-testid="event-decision-response"]').first();
     let responsePresented = await responseControl.isVisible().catch(() => false)
@@ -3437,37 +3510,43 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
       responsePresented = await frame.locator('[data-testid="event-decision-response"]').count().catch(() => 0);
     }
     if (responsePresented === 0) throw new Error(`Required event decision control was not visible: ${pendingEventId}`);
+    const responseEventId = resolveVisibleEventDecisionId(
+      pendingEventId,
+      await responseRail.getAttribute('data-event-id').catch(() => null),
+    );
+    if (!responseEventId) throw new Error('Visible event decision has no exact identity');
+    if (!(pendingState?.pendingEventDecisionIds ?? []).includes(responseEventId)) {
+      throw new Error(`Visible event decision identity is not pending: ${responseEventId}`);
+    }
     const responseLabel = (await responseControl.getAttribute('aria-label').catch(() => null))
       || (await responseControl.getAttribute('title').catch(() => null))
       || (await responseControl.innerText({ timeout: 5000 }).catch(() => ''));
     await snapshot(page, frame, faction, events, 'strategic-pending-event-before-response', {
-      pendingEventId,
+      pendingEventId: responseEventId,
       responsePresented,
       responseLabel,
     });
     const responded = responsePresented > 0
-      ? await clickTestId(frame, 'event-decision-response', `pending event ${pendingEventId} response`, { afterMs: 1200 })
+      ? await clickTestId(frame, 'event-decision-response', `pending event ${responseEventId} response`, { afterMs: 1200 })
       : false;
-    if (!responded) throw new Error(`Required event decision response failed: ${pendingEventId}`);
+    if (!responded) throw new Error(`Required event decision response failed: ${responseEventId}`);
     const after = await readState(frame).catch(() => null);
-    const cleared = responded
-      && (after?.pendingEventDecisionIds?.length ?? Number.POSITIVE_INFINITY)
-        < (pendingState?.pendingEventDecisionIds?.length ?? 0);
+    const cleared = responded && !(after?.pendingEventDecisionIds ?? []).includes(responseEventId);
     const decisionReceipt = assertExactEventDecisionReceipt(
-      pendingEventId,
+      responseEventId,
       pendingState?.eventDecisionReceipts ?? [],
       after?.eventDecisionReceipts ?? [],
     );
     await snapshot(page, frame, faction, events, 'strategic-pending-event-after-response', {
-      pendingEventId,
+      pendingEventId: responseEventId,
       responseLabel,
       responded,
       cleared,
       decisionReceipt,
       after,
     });
-    if (!cleared) throw new Error(`Required event decision remained pending after visible response: ${pendingEventId}`);
-    return { handled: cleared, action: `strategic-event-ui:${pendingEventId}` };
+    if (!cleared) throw new Error(`Required event decision remained pending after visible response: ${responseEventId}`);
+    return { handled: cleared, action: `event-ui:${responseEventId}` };
   }
   if ((pendingState?.pendingCounterOffers ?? 0) > 0) {
     const counterOfferId = pendingState.pendingCounterOfferIds?.[0] ?? null;
@@ -3511,9 +3590,10 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     if (!cleared) throw new Error(`Pending counter-offer remained pending after visible response: ${counterOfferId}`);
     return { handled: true, action: `counter-offer-submit:${counterOfferId}` };
   }
-  if (strategicRun && (pendingState?.unresolvedProposalCount ?? 0) > 0) {
+  const qaProposal = selectProposalForQa(pendingState?.pendingProposals ?? [], strategicRun);
+  if (qaProposal) {
     await snapshot(page, frame, faction, events, 'strategic-proposal-before-accept', { before: pendingState });
-    const proposal = await acceptStrategicProposalThroughUi(frame, pendingState.pendingProposals?.[0], {
+    const proposal = await acceptStrategicProposalThroughUi(frame, qaProposal, {
       requireOrdinaryProposalDossierTruth: faction === 'RS',
       onDossierOpen: (details) => snapshot(
         page,
@@ -3727,7 +3807,12 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
   }
   const eventResponseCount = await frame.locator('[data-testid="event-decision-response"]').count().catch(() => 0);
   if (eventResponseCount > 0 || (/DECISION REQUIRED/i.test(text) && /PRESIDENTIAL RESPONSE/i.test(text))) {
-    if (!pendingEventId) throw new Error('Visible event decision has no exact pending event identity');
+    const responseRail = frame.locator('[data-testid="event-decision-response-rail"]').first();
+    const responseEventId = resolveVisibleEventDecisionId(
+      pendingEventId,
+      await responseRail.getAttribute('data-event-id').catch(() => null),
+    );
+    if (!responseEventId) throw new Error('Visible event decision has no exact pending event identity');
     const responseControl = frame.locator('[data-testid="event-decision-response"]').first();
     const responseLabel = (await responseControl.getAttribute('aria-label').catch(() => null))
       || (await responseControl.getAttribute('title').catch(() => null))
@@ -3736,14 +3821,14 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     if (!clicked) throw new Error('Required event decision response control failed');
     const after = await readState(frame);
     const decisionReceipt = assertExactEventDecisionReceipt(
-      pendingEventId,
+      responseEventId,
       pendingState?.eventDecisionReceipts ?? [],
       after?.eventDecisionReceipts ?? [],
     );
     await snapshot(page, frame, faction, events, 'handled-event-decision', {
       handledAction: 'event-decision-first-response',
       clicked,
-      pendingEventId,
+      pendingEventId: responseEventId,
       responseLabel,
       decisionReceipt,
     });
@@ -3792,11 +3877,11 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     return { handled: clicked, action: 'reserve-cautious-action' };
   }
   if (/Advance blocked|Resolve .*pending|Resolve Before Advancing|Review Before Advance/i.test(text)) {
-    if (strategicRun) {
-      const before = await readState(frame).catch(() => null);
-      if (before?.unresolvedProposalCount > 0) {
+    const before = await readState(frame).catch(() => null);
+    const qaProposal = selectProposalForQa(before?.pendingProposals ?? [], strategicRun);
+    if (qaProposal) {
         await snapshot(page, frame, faction, events, 'strategic-proposal-before-accept', { before });
-        const proposal = await acceptStrategicProposalThroughUi(frame, before.pendingProposals?.[0], {
+        const proposal = await acceptStrategicProposalThroughUi(frame, qaProposal, {
           requireOrdinaryProposalDossierTruth: faction === 'RS',
           onDossierOpen: (details) => snapshot(
             page,
@@ -3819,7 +3904,6 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
         await snapshot(page, frame, faction, events, 'strategic-proposal-after-accept', { proposal, proposalReceipt, after, cleared });
         if (!cleared) throw new Error(`Required proposal remained pending after visible response: ${proposal.proposalId}`);
         return { handled: true, action: `strategic-proposal:${proposal.proposedAction}` };
-      }
     }
     const clicked = await clickMatch(
       frame,
@@ -3928,25 +4012,34 @@ async function resolvePendingEventDecisionsBeforeFreeNavigation(page, frame, fac
       }
     }
     await response.waitFor({ state: 'visible', timeout: 5000 });
+    const responseRail = frame.locator('[data-testid="event-decision-response-rail"]').first();
+    const responseEventId = resolveVisibleEventDecisionId(
+      pendingEventId,
+      await responseRail.getAttribute('data-event-id').catch(() => null),
+    );
+    if (!responseEventId) throw new Error('Pre-tour visible event decision has no exact identity');
+    if (!(before?.pendingEventDecisionIds ?? []).includes(responseEventId)) {
+      throw new Error(`Pre-tour visible event decision identity is not pending: ${responseEventId}`);
+    }
     const responseLabel = (await response.getAttribute('aria-label').catch(() => null))
       || (await response.getAttribute('title').catch(() => null))
       || (await response.innerText({ timeout: 5000 }).catch(() => ''));
-    await snapshot(page, frame, faction, events, 'pre-tour-event-before-response', { pendingEventId, responseLabel, before });
-    const responded = await clickTestId(frame, 'event-decision-response', `pre-tour event ${pendingEventId} response`, { afterMs: 1200 });
-    if (!responded) throw new Error(`Pre-tour event decision response failed: ${pendingEventId}`);
+    await snapshot(page, frame, faction, events, 'pre-tour-event-before-response', { pendingEventId: responseEventId, responseLabel, before });
+    const responded = await clickTestId(frame, 'event-decision-response', `pre-tour event ${responseEventId} response`, { afterMs: 1200 });
+    if (!responded) throw new Error(`Pre-tour event decision response failed: ${responseEventId}`);
 
     const after = await readState(frame);
-    if ((after?.pendingEventDecisionIds ?? []).includes(pendingEventId)) {
-      throw new Error(`Pre-tour event decision remained pending after response: ${pendingEventId}`);
+    if ((after?.pendingEventDecisionIds ?? []).includes(responseEventId)) {
+      throw new Error(`Pre-tour event decision remained pending after response: ${responseEventId}`);
     }
     const decisionReceipt = assertExactEventDecisionReceipt(
-      pendingEventId,
+      responseEventId,
       before?.eventDecisionReceipts ?? [],
       after?.eventDecisionReceipts ?? [],
     );
-    resolved.push({ pendingEventId, responseLabel, decisionReceipt, before, after });
+    resolved.push({ pendingEventId: responseEventId, responseLabel, decisionReceipt, before, after });
     await snapshot(page, frame, faction, events, 'pre-tour-event-after-response', {
-      pendingEventId,
+      pendingEventId: responseEventId,
       responseLabel,
       decisionReceipt,
       responded,

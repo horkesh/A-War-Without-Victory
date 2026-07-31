@@ -208,7 +208,20 @@ export function TurnAftermathModal({
         <div className="grid max-h-[62vh] min-w-0 gap-4 overflow-y-auto overflow-x-hidden p-5 lg:grid-cols-[minmax(18rem,0.95fr)_minmax(0,1.35fr)]">
           <section className="min-w-0 space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <Metric label={t('turnAftermath.metric.territory')} value={formatSigned(view.territory.friendlyNet)} detail={t('turnAftermath.detail.gainedLost', { gained: view.territory.gains, lost: view.territory.losses })} />
+              <Metric
+                label={t('turnAftermath.metric.territory')}
+                value={formatSigned(view.territory.friendlyNet)}
+                detail={view.territory.breakdownComplete
+                  ? t('turnAftermath.detail.gainedLost', {
+                    gained: view.territory.gains,
+                    lost: view.territory.losses,
+                  })
+                  : t('turnAftermath.detail.notablePartial', {
+                    gained: view.territory.gains,
+                    lost: view.territory.losses,
+                    other: Math.abs(view.territory.friendlyNet - (view.territory.gains - view.territory.losses)),
+                  })}
+              />
               <Metric label={t('turnAftermath.metric.battles')} value={String(view.combat.friendlyBattleCount)} detail={t('turnAftermath.detail.total', { count: view.combat.battleCount })} />
               <Metric label={t('turnAftermath.metric.casualties')} value={String(view.combat.friendlyCasualties)} detail={t('turnAftermath.detail.opposing', { count: view.combat.opposingCasualties })} />
               <Metric label={t('turnAftermath.metric.displaced')} value={String(view.humanitarian.displacedThisTurn)} detail={view.humanitarian.hotspotLabel ?? t('turnAftermath.noHotspot')} />

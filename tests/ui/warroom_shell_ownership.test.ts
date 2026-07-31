@@ -26,15 +26,19 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(shouldShowWarroomReturn('', false)).toBe(false);
     });
 
-    it('keeps one explicit Army HQ close control while retaining Field and Warroom exits', () => {
+    it('keeps one explicit Army HQ close control while retaining Desk, Field, and Warroom exits', () => {
         const modal = read('src/ui/map/components/army_hq/ArmyHQModal.tsx');
         const closeLabels = modal.match(/aria-label=\{t\('armyHq\.close'\)\}/g) ?? [];
 
         expect(closeLabels).toHaveLength(1);
         expect(modal).toContain("aria-label={t('armyHq.dismissBackdrop')}");
+        expect(modal).toContain('onReturnToDesk');
+        expect(modal).toContain('data-testid="army-hq-desk-return"');
+        expect(modal).toContain("t('armyHq.returnDesk')");
         expect(modal).toContain('FIELD');
         expect(modal).toContain('WARROOM');
         expect(modal).toContain('shouldShowWarroomReturn');
+        expect(read('src/ui/map/App.tsx')).toContain('onReturnToDesk={openWarroomDeskFromField}');
     });
 
     it('keeps the Decision Room as one flat card archive instead of lane projections', () => {
@@ -121,6 +125,17 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(drillIn).toContain("openArmyHQTab(useGameStore.getState(), 'summary')");
         expect(drillIn).not.toContain("surface === 'diplomacy'");
         expect(drillIn).not.toContain("surface === 'chronicle'");
+    });
+
+    it('routes the turn-24 staff recommendation to the live Army HQ Briefing owner', () => {
+        const app = read('src/ui/map/App.tsx');
+        const handlerStart = app.indexOf('const handlePresidentialInboxAction =');
+        const handlerEnd = app.indexOf('\n\n  const openInboxHome =', handlerStart);
+        const handler = app.slice(handlerStart, handlerEnd);
+
+        expect(handler).toContain("if (action === 'army_hq_briefing')");
+        expect(handler).toContain("openArmyHQTab(gs, 'briefing')");
+        expect(handler).toContain('leaveWarroomForGame()');
     });
 
     it('keeps Warroom Diplomacy dismissible through the Warroom Escape stack', () => {

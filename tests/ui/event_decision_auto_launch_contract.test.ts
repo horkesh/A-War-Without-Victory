@@ -14,7 +14,18 @@ function readPresidentialAttentionPanel(): string {
   return readFileSync(join(__dirname, '../../src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx'), 'utf8');
 }
 
+function readEventDecisionModal(): string {
+  return readFileSync(join(__dirname, '../../src/ui/map/components/EventDecisionModal.tsx'), 'utf8');
+}
+
 describe('event decision modal auto-launch contract', () => {
+  it('exposes the exact visible event identity to QA on the response rail', () => {
+    const modal = readEventDecisionModal();
+
+    expect(modal).toContain('data-event-id={localizedDecision.event_id}');
+    expect(modal).not.toContain('data-event-id={decision.event_id}');
+  });
+
   it('auto-opens pending player event decisions directly from pendingEventDecisions', () => {
     const app = readApp();
     const autoLaunchEffect = app.slice(

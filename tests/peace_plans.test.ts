@@ -4,6 +4,8 @@ import { PEACE_PLANS, getPeacePlanById } from '../src/sim/negotiation/peace_plan
 import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
 import type { NegotiationState } from '../src/state/negotiation_types.js';
 import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
+import { resolveEventDecision } from '../src/sim/events/resolve_decision.js';
+import { advanceTurn, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import type { GameState, FactionId } from '../src/state/game_state.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
@@ -13,6 +15,7 @@ function makeState(overrides: {
     war_start_turn?: number;
     player_faction?: FactionId;
     no_player?: boolean;
+    decision_mode?: 'historical' | 'emergent';
     controllers?: Record<string, string>;
     negotiation?: any;
 } = {}): GameState {
@@ -26,6 +29,7 @@ function makeState(overrides: {
             seed: 1,
             date: '1992-06-15',
             war_start_turn: warStart,
+            ...(overrides.decision_mode ? { decision_mode: overrides.decision_mode } : {}),
             ...(overrides.no_player ? {} : { player_faction: overrides.player_faction ?? 'RBiH' }),
         },
         factions: [
@@ -120,6 +124,57 @@ function attachVanceOwenEventDecision(state: GameState): void {
                     HRHB: { headline: 'Sarajevo rejects', body: 'RBiH rejects Vance-Owen.' },
                 },
             },
+        },
+    ];
+}
+
+function attachOwenStoltenbergPresidencyDecision(state: GameState): void {
+    state.military.pending_event_decisions = [
+        {
+            event_id: 'owen_stoltenberg_plan_1993',
+            event_title: 'Owen-Stoltenberg Presidency Review',
+            turn_fired: 70,
+            faction: 'RBiH',
+            response_options: [
+                {
+                    id: 'accept',
+                    label: 'Conditionally accept',
+                    description: 'The Presidency conditionally accepts the framework.',
+                    effects: [],
+                    sets_flags: { owen_stoltenberg_accepted: true },
+                },
+                {
+                    id: 'reject',
+                    label: 'Reject',
+                    description: 'The Presidency rejects the framework.',
+                    effects: [],
+                },
+            ],
+        },
+    ];
+}
+
+function attachOwenStoltenbergAssemblyDecision(state: GameState): void {
+    state.military.pending_event_decisions = [
+        {
+            event_id: 'os_rbih_tactical_acceptance_1993',
+            event_title: 'Owen-Stoltenberg Assembly Vote',
+            turn_fired: 72,
+            faction: 'RBiH',
+            response_options: [
+                {
+                    id: 'reject_via_assembly',
+                    label: 'Assembly rejects',
+                    description: 'The Assembly rejects the partition framework.',
+                    effects: [],
+                },
+                {
+                    id: 'accept_for_optics',
+                    label: 'Assembly ratifies',
+                    description: 'The Assembly ratifies the Presidency acceptance.',
+                    effects: [],
+                },
+            ],
         },
     ];
 }
@@ -230,6 +285,87 @@ describe('evaluatePeacePlans', () => {
         evaluatePeacePlans(state);
 
         expect(state.military.negotiation?.pending_peace_plan).toBeUndefined();
+    });
+
+    it('uses the Presidency and Assembly events as the staged RBiH Owen-Stoltenberg owner', () => {
+        const neg = makeNegotiationState();
+        neg.pending_peace_plan = {
+            plan_id: 'owen_stoltenberg',
+            turn_offered: 70,
+            bot_responses: { RS: 'accepted', HRHB: 'accepted' },
+        };
+        const state = makeState({ turn: 70, war_start_turn: 0, negotiation: neg });
+        attachOwenStoltenbergPresidencyDecision(state);
+
+        resolveEventDecision(state, 'owen_stoltenberg_plan_1993', 'accept');
+
+        expect(neg.pending_peace_plan).toBeUndefined();
+        expect(neg.peace_plan_history).toEqual([]);
+        expect(state.meta.game_over).not.toBe(true);
+        expect(state.military.event_flags?.owen_stoltenberg_accepted).toBe(true);
+
+        state.meta.turn = 71;
+        evaluatePeacePlans(state);
+        expect(neg.pending_peace_plan).toBeUndefined();
+
+        state.meta.turn = 72;
+        attachOwenStoltenbergAssemblyDecision(state);
+        resolveEventDecision(state, 'os_rbih_tactical_acceptance_1993', 'reject_via_assembly');
+
+        expect(neg.pending_peace_plan).toBeUndefined();
+        expect(neg.peace_plan_history).toEqual([
+            expect.objectContaining({
+                plan_id: 'owen_stoltenberg',
+                turn_offered: 70,
+                responses: {
+                    RBiH: 'rejected',
+                    RS: 'accepted',
+                    HRHB: 'accepted',
+                },
+                resolved: true,
+            }),
+        ]);
+        expect(state.meta.game_over).not.toBe(true);
+        expect(state.military.event_decision_log?.map((entry) => [
+            entry.event_id,
+            entry.response_id,
+        ])).toEqual([
+            ['owen_stoltenberg_plan_1993', 'accept'],
+            ['os_rbih_tactical_acceptance_1993', 'reject_via_assembly'],
+        ]);
+    });
+
+    it('keeps an emergent RS campaign running when RS accepts Owen-Stoltenberg before the non-player RBiH Assembly disposition', () => {
+        const neg = makeNegotiationState({
+            override_authority: { RBiH: 60, RS: 10, HRHB: 60 },
+        });
+        const state = makeState({
+            turn: 70,
+            war_start_turn: 0,
+            player_faction: 'RS',
+            decision_mode: 'emergent',
+            controllers: makeControllers({ RBiH: 20, RS: 70, HRHB: 10 }),
+            negotiation: neg,
+        });
+
+        evaluatePeacePlans(state);
+
+        expect(neg.pending_peace_plan).toMatchObject({
+            plan_id: 'owen_stoltenberg',
+            bot_responses: {
+                RBiH: 'rejected',
+                HRHB: 'accepted',
+            },
+        });
+
+        const result = resolvePeacePlan(state, 'owen_stoltenberg', 'accepted');
+
+        expect(result).toEqual({
+            all_accepted: false,
+            rejection_factions: ['RBiH'],
+        });
+        expect(state.meta.game_over).not.toBe(true);
+        expect(state.military.event_flags?.war_ended_early).not.toBe(true);
     });
 
     it('skips player faction in bot responses', () => {
@@ -344,6 +480,76 @@ describe('evaluatePeacePlans', () => {
 });
 
 describe('Bot response logic', () => {
+    it('uses the documented Cutileiro rejection in a real emergent HRHB desktop campaign', async () => {
+        const { state } = await startNewCampaign(process.cwd(), 'HRHB', 'apr_1992');
+        resolveEventDecision(state, 'hrhb_political_goal', 'croat_republic');
+
+        const advanced = await advanceTurn(state, process.cwd());
+        expect(advanced.error).toBeUndefined();
+        expect(advanced.state.military.negotiation?.pending_peace_plan).toMatchObject({
+            plan_id: 'cutileiro',
+            bot_responses: {
+                RBiH: 'accepted',
+                RS: 'accepted',
+            },
+        });
+        const result = resolvePeacePlan(advanced.state, 'cutileiro', 'accepted');
+        expect(result).toEqual({
+            all_accepted: false,
+            rejection_factions: ['RBiH'],
+        });
+        expect(advanced.state.military.negotiation?.peace_plan_history.at(-1)?.responses).toEqual({
+            RBiH: 'rejected',
+            RS: 'accepted',
+            HRHB: 'accepted',
+        });
+        expect(advanced.state.meta.game_over).not.toBe(true);
+    }, 120_000);
+
+    it('keeps an HRHB historical campaign running when HRHB accepts Cutileiro', () => {
+        const state = makeState({
+            turn: 10,
+            war_start_turn: 10,
+            player_faction: 'HRHB',
+            decision_mode: 'emergent',
+            controllers: makeControllers({ RBiH: 45, RS: 45, HRHB: 10 }),
+        });
+
+        evaluatePeacePlans(state);
+
+        expect(state.military.negotiation?.pending_peace_plan?.bot_responses.RBiH).toBe('rejected');
+        const result = resolvePeacePlan(state, 'cutileiro', 'accepted');
+        expect(result).toEqual({
+            all_accepted: false,
+            rejection_factions: ['RBiH'],
+        });
+        expect(state.meta.game_over).not.toBe(true);
+    });
+
+    it('uses documented Cutileiro responses for non-player factions in an RS historical campaign', () => {
+        const state = makeState({
+            turn: 10,
+            war_start_turn: 10,
+            player_faction: 'RS',
+            controllers: makeControllers({ RBiH: 20, RS: 60, HRHB: 20 }),
+        });
+
+        evaluatePeacePlans(state);
+
+        const pending = state.military.negotiation?.pending_peace_plan;
+        expect(pending?.bot_responses).toEqual({
+            RBiH: 'rejected',
+            HRHB: 'accepted',
+        });
+
+        resolvePeacePlan(state, 'cutileiro', 'accepted');
+        expect(state.military.negotiation?.peace_plan_history.at(-1)?.responses).toEqual({
+            RBiH: 'rejected',
+            RS: 'accepted',
+            HRHB: 'accepted',
+        });
+    });
+
     it('bot accepts when override_authority > 50', () => {
         const neg = makeNegotiationState({
             override_authority: { RS: 60, HRHB: 60 },
@@ -354,6 +560,7 @@ describe('Bot response logic', () => {
         const state = makeState({
             turn: 10,
             war_start_turn: 10,
+            decision_mode: 'emergent',
             controllers,
             negotiation: neg,
         });
@@ -374,6 +581,7 @@ describe('Bot response logic', () => {
         const state = makeState({
             turn: 10,
             war_start_turn: 10,
+            decision_mode: 'emergent',
             controllers,
             negotiation: neg,
         });
@@ -393,6 +601,7 @@ describe('Bot response logic', () => {
         const state = makeState({
             turn: 10,
             war_start_turn: 10,
+            decision_mode: 'emergent',
             controllers,
             negotiation: neg,
         });
@@ -629,6 +838,68 @@ describe('resolvePeacePlan', () => {
             }
         },
     );
+
+    it.each([
+        ['accept', 'accepted'],
+        ['reject', 'rejected'],
+    ] as const)(
+        'Vance-Owen event decision %s also resolves the duplicate peace-plan surface',
+        (eventResponse, peaceResponse) => {
+            const neg = makeNegotiationState();
+            neg.pending_peace_plan = {
+                plan_id: 'vance_owen',
+                turn_offered: 40,
+                bot_responses: { RS: 'rejected', HRHB: 'accepted' },
+            };
+            const state = makeState({ turn: 40, war_start_turn: 0, negotiation: neg });
+            attachVanceOwenEventDecision(state);
+
+            resolveEventDecision(state, 'vance_owen_plan_1993', eventResponse);
+
+            expect(neg.pending_peace_plan).toBeUndefined();
+            expect(neg.peace_plan_history).toHaveLength(1);
+            expect(neg.peace_plan_history[0].responses.RBiH).toBe(peaceResponse);
+            expect(state.military.pending_event_decisions?.map(decision => decision.event_id)).toEqual([
+                'ic_pressure_vopp_engagement',
+            ]);
+            expect(state.military.event_decision_log?.filter(
+                decision => decision.event_id === 'vance_owen_plan_1993',
+            )).toHaveLength(1);
+        },
+    );
+
+    it('records Vance-Owen once when the turn-39 event is resolved before the turn-40 negotiation offer exists', () => {
+        const neg = makeNegotiationState();
+        const state = makeState({ turn: 39, war_start_turn: 0, negotiation: neg });
+        attachVanceOwenEventDecision(state);
+
+        resolveEventDecision(state, 'vance_owen_plan_1993', 'accept');
+
+        expect(neg.pending_peace_plan).toBeUndefined();
+        expect(neg.peace_plan_history).toEqual([
+            expect.objectContaining({
+                plan_id: 'vance_owen',
+                turn_offered: 39,
+                responses: {
+                    RBiH: 'accepted',
+                    RS: 'rejected',
+                    HRHB: 'accepted',
+                },
+                resolved: true,
+            }),
+        ]);
+        expect(state.military.pending_event_decisions?.map(decision => decision.event_id)).toEqual([
+            'ic_pressure_vopp_engagement',
+        ]);
+        expect(state.military.event_decision_log?.filter(
+            decision => decision.event_id === 'vance_owen_plan_1993',
+        )).toHaveLength(1);
+
+        state.meta.turn = 40;
+        evaluatePeacePlans(state);
+        expect(neg.pending_peace_plan).toBeUndefined();
+        expect(neg.peace_plan_history).toHaveLength(1);
+    });
 });
 
 describe('Determinism', () => {
