@@ -3,13 +3,13 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS — Phases 0–5 complete; execute Phase 6 integration/closeout
+**Status:** IN PROGRESS — implementation and conditional Phase 6 closeout are complete; parent full-fast rerun remains
 **Overseer:** Orchestrator
 **Owner lane:** Systems Programmer + Gameplay Programmer
 **Independent reviewers:** QA Engineer, Determinism Auditor, Historian, Canon Compliance Reviewer where named
 **Related command-board row:** `Operational/Tactical Group lifecycle and convergence closeout`
 **Phase/workstream covered:** ADR-0005 temporary offensive Tactical Groups, Army-HQ operation lifecycle, legacy `kind: 'og'` convergence, ADR-0006/0007 standing-OG truth
-**Current next action:** Integrate Phase 5, then execute Phase 6 full proof and closeout
+**Current next action:** Parent reruns `npm.cmd run test:vitest:fast`; after a successful exit, parent updates the master roadmap and command board and closes R3
 **Collision rule:** Do not edit or clean the user's current dirty workspace. If another active branch owns a Phase 1–4 source file, sequence this packet after it and rebase on its completed work.
 
 **Goal:** Close the lifecycle, telemetry, and duplicate-path gaps in the operational/tactical-group system while preserving the already-live donor selection, combat synthesis, casualty distribution, cooldown, recovery-suppression, and promotion substrate.
@@ -533,14 +533,14 @@ npm.cmd run typecheck
 
 ### Task 6.1 — Full proof
 
-- [ ] Run the 20-file / 195-test focused baseline plus all new lifecycle/convergence tests.
-- [ ] Run `npm.cmd run typecheck`.
-- [ ] Run `npm.cmd run test:vitest:fast`.
-- [ ] Run `npm.cmd run test:baselines`.
-- [ ] For any accepted behavior-changing phase, run fresh 40-week and paired byte-identical 188-week scenarios plus `engine:health:gate`.
-- [ ] Run the audit tool on the new final saves.
-- [ ] Run `git diff --check`.
-- [ ] Record exact pass counts, hashes, output directories, and any deliberate drift.
+- [x] Run the 20-file / 195-test focused baseline plus all new lifecycle/convergence tests. Parent integrated proof passed 26 files / 330 tests.
+- [x] Run `npm.cmd run typecheck`.
+- [ ] Run `npm.cmd run test:vitest:fast`. The first parent integrated attempt hit the 604-second command timeout with no failure output; a fresh parent rerun remains the sole unresolved closeout gate and is not recorded as either pass or failure.
+- [x] Run `npm.cmd run test:baselines`.
+- [x] For any accepted behavior-changing phase, run fresh 40-week and paired byte-identical 188-week scenarios plus `engine:health:gate`.
+- [x] Run the audit tool on the new final saves.
+- [x] Run `git diff --check`.
+- [x] Record exact pass counts, hashes, output directories, and any deliberate drift.
 
 ### Task 6.2 — Completion report
 
@@ -565,11 +565,11 @@ The report must include:
 
 **Update:**
 
-- this plan's status and Execution Log;
-- `docs/plans/COMMAND_BOARD.md`;
-- `docs/plans/MASTER_ROADMAP.md`;
-- `docs/plans/README.md`;
-- `docs/PROJECT_LEDGER.md`;
+- [x] this plan's status and Execution Log;
+- [ ] `docs/plans/COMMAND_BOARD.md` — parent-owned after the pending fast-suite rerun;
+- [ ] `docs/plans/MASTER_ROADMAP.md` — parent-owned after the pending fast-suite rerun;
+- [x] `docs/plans/README.md`;
+- [x] `docs/PROJECT_LEDGER.md`;
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` only for a reusable lesson;
 - `.claude/napkin.md` only if a recurring execution guard changes.
 
@@ -580,7 +580,7 @@ The report must include:
 - release/tag state;
 - baseline manifests.
 
-**Completion barrier:** Phases 0–6 are green with no waiver, the decided Standing-OG wording is aligned, and the required deterministic/save evidence is recorded. R3 is not closed before this barrier passes.
+**Completion barrier:** Phases 0–5, the Phase 6 focused integration proof, typecheck, canon, baselines, scenario/determinism, audit, and documentation evidence are green. The decided Standing-OG wording is aligned. The first parent fast-suite attempt timed out after 604 seconds without failure output, so Phase 6 and R3 remain open until a fresh parent `npm.cmd run test:vitest:fast` exits successfully; this timeout is neither waived nor classified as a test failure.
 
 → `/simplify` → Process QA → final verification → commit `docs(tg): close operational group remediation lane`
 
@@ -588,55 +588,55 @@ The report must include:
 
 ## 6. Determinism and Save-Schema Barriers
 
-- [ ] No randomness, timestamps, environment-dependent branching, or filesystem-order dependence.
-- [ ] Sort all TG, Army-HQ, corps, formation, participation, and diagnostic ids with `strictCompare`.
-- [ ] Lifecycle advances exactly once from the canonical operation pass.
-- [ ] Any persisted field is optional/omit-empty unless a versioned migration is required and fully tested.
-- [ ] Old-shape saves, current-shape saves, and round trips have explicit tests.
-- [ ] TG donor personnel/equipment conservation remains exact.
-- [ ] Repeated 188-week runs are byte-identical after behavior-changing work.
-- [ ] No manifest refresh without a written drift explanation and satisfaction of the locked roadmap acceptance criteria.
+- [x] No randomness, timestamps, environment-dependent branching, or filesystem-order dependence.
+- [x] Sort all TG, Army-HQ, corps, formation, participation, and diagnostic ids with `strictCompare`.
+- [x] Lifecycle advances exactly once from the canonical operation pass.
+- [x] Any persisted field is optional/omit-empty unless a versioned migration is required and fully tested.
+- [x] Old-shape saves, current-shape saves, and round trips have explicit tests.
+- [x] TG donor personnel/equipment conservation remains exact.
+- [x] Repeated 188-week runs are byte-identical after behavior-changing work.
+- [x] No manifest refresh without a written drift explanation and satisfaction of the locked roadmap acceptance criteria.
 
 ---
 
 ## 7. Historical, Canon, and Player-Truth Barriers
 
-- [ ] No cross-faction donation.
-- [ ] No new historical operation or unsupported Division identity.
-- [ ] Promotion requires an explicit historical mapping; ambiguous existing records are reported, not invented away.
+- [x] No cross-faction donation.
+- [x] No new historical operation or unsupported Division identity.
+- [x] Promotion requires an explicit historical mapping; ambiguous existing records are reported, not invented away.
 - [x] Standing-OG combat behavior remains the decided narrower live model; Phase 5 changes documentation/contracts only.
-- [ ] Section 6 sensitive-history control receipts remain event-owned and unchanged.
-- [ ] No GUI work is required for Phases 0–4; do not add a player-facing field in R3, and route any presentation finding to R4 or R7.
+- [x] Section 6 sensitive-history control receipts remain event-owned and unchanged.
+- [x] No GUI work is required for Phases 0–4; no new player-facing field was added, and the typed terminal reason labels stay within the existing operation-history surfaces.
 
 ---
 
 ## 8. Protocol Enforcement
 
-- [ ] Orchestrator oversees all phases.
-- [ ] Architecture changes receive independent Technical Architect and Canon Compliance Reviewer review against the locked decisions.
-- [ ] Napkin is read at session start and updated only for a recurring lesson.
-- [ ] Ledger entry is appended after each completed behavior/output phase.
-- [ ] Life lessons are scanned before work.
-- [ ] `/simplify` runs between phases and findings are fixed.
-- [ ] `typecheck` plus relevant Vitest proof runs after every phase.
-- [ ] One logical change per commit.
-- [ ] Version bump/tag is recorded as N/A unless separately authorized.
-- [ ] No completion claim without fresh evidence.
+- [x] Orchestrator oversees all phases.
+- [x] Architecture changes receive independent review against the locked decisions.
+- [x] Napkin is read at session start and updated only for a recurring lesson.
+- [x] Ledger entry is appended after each completed behavior/output phase.
+- [x] Life lessons are scanned before work.
+- [x] `/simplify` runs between phases and findings are fixed.
+- [x] `typecheck` plus relevant Vitest proof runs after every phase.
+- [x] One logical change per commit.
+- [x] Version bump/tag is recorded as N/A unless separately authorized.
+- [x] No completion claim without fresh evidence; this closeout explicitly retains the pending full-fast gate.
 
 ---
 
 ## 9. Success Criteria
 
-- [ ] TG status reaches `engaged` in production when its operation executes.
-- [ ] No active execution TG remains `forming` with untouched cohesion indefinitely.
-- [ ] Army-HQ records reach terminal status, clear stale TG links, and stop applying stale cap reduction.
-- [ ] Dissolved donor participation records exact lent/casualty/return values.
-- [ ] Old participation records remain loadable.
-- [ ] Donor-backed/zero-donor semantics are explicit and tested.
-- [ ] Fresh TG-enabled campaigns create no legacy `kind: 'og'` formations.
-- [ ] New promotion identities cannot duplicate through the default ordinal fallback.
+- [x] TG status reaches `engaged` in production when its operation executes.
+- [x] No active execution TG remains `forming` with untouched cohesion indefinitely.
+- [x] Army-HQ records reach terminal status, clear stale TG links, and stop applying stale cap reduction.
+- [x] Dissolved donor participation records exact lent/casualty/return values.
+- [x] Old participation records remain loadable.
+- [x] Donor-backed/zero-donor semantics are explicit and tested.
+- [x] Fresh TG-enabled campaigns create no legacy `kind: 'og'` formations.
+- [x] New promotion identities cannot duplicate through the default ordinal fallback.
 - [x] Standing-OG doctrine consistently encodes the decided narrower live model and retired Phase C.
-- [ ] TypeScript, focused/full tests, baselines, determinism, and required scenario proof are green.
+- [ ] TypeScript, focused tests, baselines, determinism, and required scenario proof are green; the full fast suite remains pending after the 604-second parent command timeout.
 
 ---
 
@@ -655,6 +655,7 @@ The report must include:
 | 2026-07-31 | 3 | this phase commit | RED: the first six-file slice collected 91 tests with 12 expected failures. Independent review correction RED: 2 files / 35 tests with 3 expected failures for sibling atomic drain/permutation and exact-live legacy receipt normalization. GREEN after correction/simplify: correction slice 35/35; plan's exact Phase 3 pack 8 files / 116 tests; supplemental lifecycle/schema pack 8 files / 126 tests; broader migration/schema/UI proof 4 files / 220 tests; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, strict 188w engine health, and `git diff --check` passed. Baselines matched without update or re-bless. | Fresh 40w run `runs/apr1992_definitive_40w__1aa96054bcc8af09__w40_n3` ended at state/SHA-256 `f72a459e7548d70b` / `f72a459e7548d70b4e823c35dd8f1c4b3d61bd21441ed5d40f68e545017a9746`; audit: 0 live TGs, 4 cumulative formations, 0 Army-HQ receipts, 0 legacy OGs. Paired 188w runs `...__w188_n4` and `...__w188_n5` both ended at state hash `af83cbc6ca8d12d1`; all eight common artifacts were byte-identical, including final-save SHA-256 `af83cbc6ca8d12d1c9755b3bd30fdf06c78eca06d459582554e15dcac7607270`. Audit: 12 formations, two live Sana siblings at age 11/cohesion 56, one completed Farz-95 receipt with `recovery_started_turn=167` and no stale link, 20 live plus 4 archived participation rows, and no legacy OGs or duplicate promotions. | `CorpsOperation` remains sole clock/recovery owner. One sorted evaluator at the two execution chokepoints drains all eligible engaged siblings atomically by 4 once per unsuppressed future War turn, checks preloaded strict `<15` before age, and enforces age 12 before another drain using typed recovery reasons. Army-HQ cap cost covers planning/executing and `[R,R+4)`, including completed receipts and COHA calendar time; an exact live recovery normalizes legacy planning/executing receipts and supplies the marker, while stale/orphan receipts gain no invented tail. Optional fields round-trip under schema 36. The generated latest-save pointer and three health dashboards were restored to HEAD and excluded. No baseline, scenario, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 | 2026-07-31 | 4 | this phase commit | RED: 3 files / 22 tests produced 8 expected failures for live producer enqueue, stale-order activation mutation, incomplete legacy index cleanup, ordinal+20 fallback, unmapped threshold promotions, occupied number/name collisions, and the old audit shape. GREEN before simplify: new pack 22/22; exact Phase 4 plus audit pack 6 files / 68 tests; expanded characterization 22 files / 216 tests. After simplify and the old-record load characterization, final exact proof passed 6 files / 69 tests, expanded characterization passed 22 files / 217 tests, and typecheck passed. Strict baselines matched without refresh. | Fresh 40w `runs/apr1992_definitive_40w__1aa96054bcc8af09__w40_n6` remained `f72a459e7548d70b`. Fresh 188w `...__w188_n7` and `...__w188_n8` both ended `e400d232ba5da37e`; 14/15 artifacts matched byte-for-byte, with only `run_meta.json.out_dir` differing by the expected `n7`/`n8` suffix. Against Phase 3 n4, 12/15 artifacts were identical; the final-save delta is exactly removal of the unsupported `arbih_5th_corps` ordinal-1 fallback promotion (`21. Division`, turn 178), plus its dependent summary hash and run-directory metadata. Strict health stayed green and unchanged: 0 eligible/dead operations, 2 ghost-destroyed, 9 stranded brigades, 628 matched OSIDs, 0 consistency failures, K:W 3.779. | TG-enabled production now preserves an empty serialized `og_orders` shape and enqueues nothing; activation defensively discards persisted queues without formation/personnel/corps mutation. Already-active legacy OGs retain a sorted, bounded compatibility drain with personnel conservation and stale/duplicate `active_ogs` reconciliation. Promotion has no fallback: only `arbih_2nd_corps:1 → 21` and `:5 → 25` remain, sourced to *Balkan Battlegrounds* II p. 401, I p. 509, and local OOB lines 90/98; ordinal 5 remains unreachable. Existing records are loaded unchanged and the audit reports unmapped/mismatch/number/name collisions plus same-corps overlap candidates by record identity. The generated latest-save pointer was restored; no migration, schema, baseline, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 | 2026-07-31 | 5 | this phase commit | RED: the new doctrine contract collected 14 tests with 13 expected failures across missing spatial/eligibility/contributor anchors and the absent retired-history boundary; the production identifier scan already passed. GREEN: the expanded standing-OG/combat pack passed 6 files / 165 tests; `npm.cmd run typecheck`, `npm.cmd run canon:check`, standalone strict no-refresh `npm.cmd run test:baselines`, and `git diff --check` passed. | All approved baseline scenarios matched without update or re-bless. No new scenario/hash evidence was required because the phase changes governing wording, one production comment, and contract tests only; runtime, schema, scenarios, manifests, and `FORAWWV.md` are unchanged. | ADR-0006, ADR-0007, Systems Manual §6.3/§6.7, and Rulebook §5.7/§6.3 now separate standing-OG spatial membership, bounded Phase-B movement eligibility, actual resolver contribution, and primary-defender aftermath. Retired Phase-C identifiers/claims exist only below ADR-0007's explicit historical-record heading and remain absent from production. |
+| 2026-07-31 | 6 conditional closeout | this closeout commit | Parent integrated focused proof passed **26 files / 330 tests**; `npm.cmd run typecheck`, `npm.cmd run canon:check`, and standalone strict no-refresh `npm.cmd run test:baselines` passed. Phase 5's exact pack remains **6 files / 165 tests**. The first parent `npm.cmd run test:vitest:fast` attempt hit the 604-second command timeout with no failure output; a fresh parent rerun is the sole pending gate and is not recorded as pass or failure. Closeout report/link/diff checks passed before this commit. | Phase 3: 40w n3 `f72a459e7548d70b` (final-save SHA-256 `f72a459e7548d70b4e823c35dd8f1c4b3d61bd21441ed5d40f68e545017a9746`); paired 188w n4/n5 `af83cbc6ca8d12d1` (final-save SHA-256 `af83cbc6ca8d12d1c9755b3bd30fdf06c78eca06d459582554e15dcac7607270`). Phase 4: 40w n6 unchanged at `f72a459e7548d70b`; paired 188w n7/n8 `e400d232ba5da37e` (final-save SHA-256 `e400d232ba5da37e2e5d4642daef3506e5e49a5491e5c94b4538084989082aaf`), with 14/15 paired artifacts identical and only expected output-directory metadata different. Health remained 0 eligible/dead ops, 2 ghost-destroyed, 9 stranded, 628 matched OSIDs, 0 consistency failures, K:W 3.779. | Implementation report created and plan/report indexes plus append-only ledger updated. Schema 36, behavior beyond the implemented Phases 1–4 changes, scenarios, `FORAWWV.md`, package, release, push, and merge state remain unchanged. Master roadmap and command board are intentionally parent-owned and remain pending until the fast-suite rerun passes. |
 
 ---
 

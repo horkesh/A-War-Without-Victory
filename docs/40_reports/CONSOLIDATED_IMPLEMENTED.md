@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Operational/Tactical Group implementation closeout:** [implemented/20260731_OPERATIONAL_TACTICAL_GROUP_CLOSEOUT_IMPLEMENTATION_REPORT.md](implemented/20260731_OPERATIONAL_TACTICAL_GROUP_CLOSEOUT_IMPLEMENTATION_REPORT.md) - R3 now synchronizes TG/Army-HQ lifecycle truth, enforces the deterministic `12/4/15/4` exhaustion/recovery contract, finalizes exact donor telemetry, retires new legacy-OG production, removes unsupported promotion fallback, and aligns Standing-OG doctrine. Phase 5 passed 6 files / 165 tests; parent integrated focused proof passed 26 files / 330 tests with typecheck, canon, and strict baselines green. A fresh parent `test:vitest:fast` rerun is the sole pending closeout gate after the first attempt hit the 604-second command timeout without failure output.
+
 **Latest campaign-QA canon integration:** [implemented/20260717_CAMPAIGN_QA_CANON_INTEGRATION.md](implemented/20260717_CAMPAIGN_QA_CANON_INTEGRATION.md) - operation ceasefire/causality truth, bounded uncontested occupation, live opportunity/roster eligibility, primary-sector commander targeting, Cincar/HV placement, organizational-penetration paramilitary policy, historical peace defaults, and centralized bilateral gating for rear-pocket consolidation. Two 188-week runs are byte-identical at `aa4302e694a6482e`; required engine health passes at `622/712`, with zero pre-war bilateral control events and 31/31 endpoint anchors.
 
 **Latest full-campaign player/canon acceptance:** [playtests/20260714_rs_52w_canon_player_experience.md](playtests/20260714_rs_52w_canon_player_experience.md) - fresh RS exact-52 Electron run, 468 screenshots/59 manually inspected sheets, bound controlled-player/headless comparator, durable exact-plan approvals, reserve deployment continuity, truthful paramilitary scope metadata, and sticky long-event completion action. Local agent-actionable PASS; D2/release/publication remain open.
@@ -985,6 +987,14 @@ Paramilitary sweeps now stop after week 20, clear readiness on dissolution, writ
 
 Report: `docs/40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md`
 
-Seven RBiH/RS/HRHB Electron owner diaries now preserve 10-, 60-, 80-, and 104-turn evidence. Their bug-first remediation closes duplicated diplomatic ownership, historical-default peace responses, early Foča/Zvornik chronology, 1992/1993 event separation, officer and reserve truth, Army HQ/Desk handoffs, priority semantics, presentation/accessibility defects, and diary-harness assumptions. The original diary scores remain evidence rather than being rewritten after fixes. Remaining RS 104-week friction and Operational/Tactical Group lifecycle work stays in the consolidated backlog.
+Seven RBiH/RS/HRHB Electron owner diaries now preserve 10-, 60-, 80-, and 104-turn evidence. Their bug-first remediation closes duplicated diplomatic ownership, historical-default peace responses, early Foča/Zvornik chronology, 1992/1993 event separation, officer and reserve truth, Army HQ/Desk handoffs, priority semantics, presentation/accessibility defects, and diary-harness assumptions. The original diary scores remain evidence rather than being rewritten after fixes. RS 104-week friction remains in the consolidated backlog; Operational/Tactical Group work is implemented and awaits its parent full-fast rerun.
+
+---
+
+# 2026-07-31 Operational/Tactical Group Closeout
+
+Report: `docs/40_reports/implemented/20260731_OPERATIONAL_TACTICAL_GROUP_CLOSEOUT_IMPLEMENTATION_REPORT.md`
+
+R3 now has one authoritative offensive-operation clock, deterministic TG exhaustion and Army-HQ recovery cost, exact terminal donor telemetry, compatibility-only legacy OG handling, explicit historical promotion mappings, and Standing-OG doctrine aligned to the shipped narrower combat model. Phase 5 passed 6 files / 165 tests; parent integrated focused proof passed 26 files / 330 tests, and typecheck, canon, strict baselines, scenario determinism, audit, and engine health are green. The sole unresolved gate is a fresh parent `test:vitest:fast` rerun after the first integrated command timed out at 604 seconds without failure output; no full-suite pass or failure is claimed.
 
 ---
