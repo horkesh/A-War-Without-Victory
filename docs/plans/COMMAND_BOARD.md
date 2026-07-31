@@ -20,8 +20,8 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 
 | Order | ID | Status | Next executable action | Plan |
 |---:|---|---|---|---|
-| 1 | R1 | IN PROGRESS — PHASE 1 GREEN, PHASE 2 IN PROFILE | Validate the stable single-document shell handoff, then continue the measured cache/resource and optional cold-path phases. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
-| 2 | R2 | WAITING ON R1 SHARED-FILE HANDOFF | Rebase FR-03 on R1; execute the five RS information-hierarchy, map-handoff, cadence, ultrawide, and presentation packets. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
+| 1 | R1 | IN PROGRESS — PHASES 1–2 GREEN, PHASE 3 ACTIVE | Eliminate warm static-resource requests, stage optional enrichment, and verify packaged HTTP cache/range semantics against a fresh profile. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
+| 2 | R2 | IN PROGRESS — NON-MAP PACKETS ACTIVE; FR-03 WAITS ON R1 | Execute priority, cadence, chronology, ultrawide, and presentation packets now; rebase the direct map handoff after R1 closes. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
 | 3 | R3 | **COMPLETE** | Verified lifecycle/state floor is available to R5; no further R3 action. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | WAITING ON R2 PRIORITY/CADENCE CONTRACT | Inventory command/event/Codex projections, converge them on deterministic receipts, and absorb Free War residuals. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | WAITING ON R1–R3 STATE FLOOR | Classify optional state and artifacts, profile measured hot paths, close save/replay and CI parity. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
