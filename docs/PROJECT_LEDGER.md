@@ -24824,3 +24824,37 @@ The administrative merge preserved patch-equivalent backups, superseded document
 The final documentation-only publication commit follows this ledger entry. Required remote checks are awaited before the owner task is declared clean and green.
 
 **Release boundary:** No package, installer, tag, version, GitHub release, or release-state change was performed.
+
+## 2026-07-31 - Seamless Command Room to Tactical Map transition opened as executable lane
+
+**Type:** Docs-only performance diagnosis propagation / implementation planning / roadmap and command-board activation.
+
+**Owner direction:** Convert the tactical-map loading diagnosis into an actionable executable plan and wire it into the roadmap and command board.
+
+**Verified diagnosis:** The canonical React shell conditionally mounts both `MapContainer` and `Minimap` only in game view. Returning to the Command Room therefore releases MapLibre and Deck WebGL owners; reopening awaits six main-map resources, constructs both maps again, and repeats approximately 14.5 MiB of static JSON reads. The packaged local server marks static and PMTiles range responses `no-store`; the direct iframe route adds a per-navigation timestamp; the built tactical entry preloads 25 JavaScript files / 6.36 MiB raw, including non-map event/Codex chunks; and packaged entrypoints still reference Google Fonts. A local parse-only probe measured roughly 80 ms for the involved JSON, so the multi-second residual must be separated across MapLibre workers/style, source geometry, PMTiles, WebGL/Deck, layer readiness, and full-document/module work rather than attributed to JSON parsing alone.
+
+**Execution packet:** Added `docs/plans/2026-07-31-seamless-command-room-map-transition-plan.md`. It defines Phase 0 cold/warm Electron instrumentation, Phase 1 campaign-scoped persistent map ownership, Phase 2 stable iframe/message navigation, Phase 3 static promise caches and critical-first initialization, a measurement-gated Phase 4 minimap/bundle/font cold-path pass, Phase 5 exact Electron acceptance, and Phase 6 documentation closeout. Locked targets are warm P95 <= 150 ms with zero warm context creation/release/static requests, cold current-state P50/P95 <= 1,000/1,500 ms on the recorded machine, and zero stale/blank/error samples.
+
+**Planning propagation:** Indexed the plan in `docs/plans/README.md`, added a P0 active row and dispatch note to `docs/plans/COMMAND_BOARD.md`, and added a no-renumber/no-move amendment to `docs/plans/MASTER_ROADMAP.md`. Source-changing phases must be sequenced against the RS 104-week FR-03 operation-map-focus packet because both can own `App.tsx` and `MapContainer.tsx`.
+
+**Verification:** Documentation links and execution commands are checked in the closing handoff. This planning pass changes no runtime source, game state, save schema, scenario, baseline, map-derived artifact, package output, version, tag, or release state.
+
+**Scope:** Plan, plans index, command board, master roadmap, ledger, and reusable knowledge only. No implementation, branch creation, commit, push, PR, package, installer, baseline refresh, or release mutation was performed.
+
+## 2026-07-31 - Planning control plane consolidated for autonomous execution
+
+**Type:** Documentation/control-plane cleanup, research-backed product disposition, and executable roadmap preparation.
+
+**Owner direction:** Replace the accumulated roadmap/command-board queues with one master roadmap and detailed executable plans for every remaining point; remove owner/design decision gates so the program can run autonomously after a future explicit instruction.
+
+**Control-plane decision:** `docs/plans/MASTER_ROADMAP.md` is now the sole authority for unfinished product work. The former 30 command-board lanes are individually mapped into nine finite workstreams, R1-R9. `docs/plans/COMMAND_BOARD.md` is a compact derived dispatch view, and `docs/plans/README.md` indexes exactly one task-level plan per workstream. Closed and duplicated rows are no longer carried as live program state; their lineage remains in Git, the ledger, and implementation reports.
+
+**Resolved choices:** Locked the five-lever presidential model and Decision Room action ownership; positive-hold handling for unsourced quiet intervals; Tactical Group lifecycle constants and exact-mapping promotion rule; continued retirement of ADR-0007 Phase C with documentation convergence to the narrower live Standing-OG model; serialized adopt-or-retire political/intel/fall-1995 experiments; Sarajevo as a continuous-condition consequence; exact-source/omit-unknown rules for sensitive history and OOB; `bs`/`bs-BA` with legacy `bcs` migration and preview fallback; first-party/CC0/approved CC BY audio; and Steam-primary, signed Windows, notarized macOS, Linux AppImage release preparation. Zvornik/Foca is anchored to April 1992 and Neretva/Grabovica/Uzdol to 1993.
+
+**Gate removal:** Owner-verdict, design-choice, historian-wait, native-reviewer, credentials, and operator queues were replaced by locked rules, evidence-based adopt-or-retire branches, or explicit inputs. Determinism, conservation, migration, historical substantiation, accessibility, security, licensing, clean-package/runtime, unexplained-drift, and external-publication boundaries remain mandatory safeguards. `Execute the master roadmap` is defined as the future local implementation authority; `Publish 1.0` remains the separate external signing/upload/tag/push/release authority.
+
+**Research basis:** Electron and MapLibre primary documentation for measured renderer/resource lifecycle; Electron security; W3C WCAG and BCP 47; Unicode CLDR Bosnian data; Microsoft pseudolocalization, Artifact Signing, and SignTool guidance; Apple notarization; SteamPipe; Creative Commons/Freesound licensing; local *Balkan Battlegrounds* extractions; and IRMCT/ICTY/UN official historical sources. Direct links are recorded in the master roadmap and the owning implementation plans.
+
+**Docs/test propagation:** Replaced the large historical roadmap accumulator and duplicate board; updated the plans index and documentation index; added six missing R4-R9 task-level plans; resolved inherited R2/R3 pauses; and replaced stale prose-snapshot roadmap assertions with current control-plane contract tests. No runtime, scenario, save, baseline, derived map artifact, or `docs/10_canon/FORAWWV.md` file was changed.
+
+**Authority boundary:** This entry records preparation only. No implementation workstream, branch/worktree creation, commit, push, package, signing, upload, tag, installer, or release-state change was performed or authorized.

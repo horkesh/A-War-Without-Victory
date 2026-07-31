@@ -1,11 +1,11 @@
 # RS 104-Week Friction Remediation Plan
 
-**Status:** Actionable implementation plan; friction work not yet implemented
+**Status:** READY — execute after the seamless map-transition packet owns and lands the shared map-shell files
 **Date:** 2026-07-31
 **Source diary:** `docs/40_reports/playtests/20260731_rs_104week_player_diary.md`
 **Scope:** The five confirmed friction findings from the RS 104-week owner-player Electron run
 **Order:** Correctness bugs first (completed locally in the originating repair pass), then information hierarchy, map handoff, cadence, and presentation
-**Release boundary:** No package, installer, version, baseline approval, commit, push, tag, or release-state change is authorized by this plan
+**Activation boundary:** `Execute the master roadmap` authorizes source implementation, tests, evidence, and local commits for this packet. It does not authorize push, tag, signing, upload, installer publication, or release-state change.
 
 ## 1. Outcome
 
@@ -65,7 +65,7 @@ Move all presidential work into a new single-screen owner.
 
 ### Approach C — one shared priority/read-model contract plus bounded surface changes
 
-Keep current shells, but give them one priority vocabulary and one set of derived groupings. Add a first-class operation-map focus route, source-gated optional cadence, responsive Army HQ composition, and bounded active-path overflow.
+Keep current shells, but give them one priority vocabulary and one set of derived groupings. Add a first-class operation-map focus route, source-bounded optional cadence, responsive Army HQ composition, and bounded active-path overflow.
 
 **Recommendation:** Approach C. It fixes the information model before changing presentation and reuses the existing Decision Room, field-inspection, and shell-navigation architecture.
 
@@ -120,7 +120,7 @@ Meanings:
 
 **Tests**
 
-- New `tests/ui/presidential_priority_contract.test.ts`.
+- Create `tests/ui/presidential_priority_contract.test.ts`.
 - Extend `presidential_decision_room.test.ts`, `presidential_categories.test.ts`, `pre_advance_command_review.test.ts`, `president_desk_shell.test.ts`, and `warroom_shell_ownership.test.ts`.
 - Feed the same turn-104 fixture to every surface and assert identical band totals.
 - Assert a critical no-lever briefing is `monitor`.
@@ -131,7 +131,7 @@ Meanings:
 
 - At the RS turn-104 fixture, all four surfaces report the same Required/Recommended/Monitor/Record totals.
 - No screen uses `urgent` as an unexplained aggregate.
-- `Advance` remains gated by exactly the pre-existing blocker set.
+- `Advance` remains blocked by exactly the pre-existing blocker set.
 
 ### Packet FR-02 — Consolidate repeated siege/enclave briefs
 
@@ -160,7 +160,7 @@ Meanings:
 
 **Tests**
 
-- New `tests/ui/command_briefing_consolidation.test.ts`.
+- Create `tests/ui/command_briefing_consolidation.test.ts`.
 - Assert nine siege/enclave inputs become one visible summary card with a count weight of nine.
 - Assert unrelated critical briefs do not merge.
 - Assert grouping is invariant under input-array permutation.
@@ -223,7 +223,7 @@ Meanings:
 
 **Tests**
 
-- New `tests/ui/historical_operation_map_focus.test.ts`.
+- Create `tests/ui/historical_operation_map_focus.test.ts`.
 - Extend `ui_shell_navigation.test.ts`, `ui_map_game_state_adapter.test.ts`, and Decision Room component tests.
 - Assert Cerska-Kamenica returns its exact authored objective/staging OSIDs in stable order.
 - Assert the field route clears conflicting selection, sets the focus, and retains a return receipt.
@@ -235,7 +235,7 @@ Meanings:
 - The player can answer “where is this operation and what is committed?” without manual name translation.
 - The dossier remains the decision owner; the map is supporting evidence and cannot authorize the operation.
 
-### Packet FR-04 — Source-gated cadence and near-cap Authority opportunities
+### Packet FR-04 — Source-bounded cadence and near-cap Authority opportunities
 
 **Problem:** The earlier 19-turn drought improved, but the RS run still had 13- and 12-week consequential gaps while Authority remained capped.
 
@@ -257,7 +257,7 @@ Use this order:
 
 1. retime an existing sourced event within its documented historical window;
 2. expose an already-existing operation, reserve, personnel, patron, or diplomatic lever as an optional presidential review;
-3. add a new authored initiative only with a Historian source packet and Game Designer approval;
+3. add a new authored initiative only when a Historian source packet and the locked design criteria below both pass;
 4. if none is justified, retain the quiet interval and make the hold posture explicit.
 
 Optional near-cap initiatives may appear when:
@@ -286,7 +286,7 @@ There must be no generic “spend Authority because it is full” event. Authori
 
 - New `src/sim/presidency/presidential_initiatives.ts`
 - New authored data file under `data/scenarios/presidential_initiatives/`
-- `src/sim/turn_phases/war_phases.ts` only after the read model and authored data pass their design gate
+- `src/sim/turn_phases/war_phases.ts` only after the read model and authored data pass the locked evidence/design criteria
 - `src/state/game_state.ts` only if an initiative receipt/cooldown cannot reuse existing proposal/event receipts
 - `src/ui/map/data/inboxItems.ts`
 - `src/ui/map/data/presidentialDecisionRoom.ts`
@@ -295,8 +295,8 @@ There must be no generic “spend Authority because it is full” event. Authori
 
 **Tests**
 
-- New `tests/presidential_initiatives.test.ts`.
-- New `tests/rs_104week_decision_cadence.test.ts`.
+- Create `tests/presidential_initiatives.test.ts`.
+- Create `tests/rs_104week_decision_cadence.test.ts`.
 - Extend the all-faction cadence diagnostics.
 - Assert initiative eligibility and ordering are deterministic under input permutation.
 - Assert no initiative appears without an authored source row.
@@ -305,9 +305,9 @@ There must be no generic “spend Authority because it is full” event. Authori
 - Assert historical defaults are absent unless the source row explicitly provides one.
 - Compare two identical 104-turn runs byte-for-byte for initiative receipts.
 
-**Historical stop gate**
+**Historical evidence disposition**
 
-Historian must approve each authored row and cite the relevant Balkan Battlegrounds volume/page or higher-tier primary/tribunal/UN source. If no source-backed lever exists for a gap, stop content authoring for that gap and document the positive-hold result.
+Every authored row requires Historian verification and a citation to the relevant *Balkan Battlegrounds* volume/page or a higher-tier primary, tribunal, or UN source. The Game Designer verifies only that the row uses an existing presidential lever, remains optional, and cannot become an Advance blocker. If no source-backed lever exists for a gap, the deterministic outcome is a documented positive-hold interval: close that gap as intentionally quiet, do not invent content, and continue with the remaining gaps.
 
 **Acceptance**
 
@@ -379,7 +379,7 @@ Historian must approve each authored row and cite the relevant Balkan Battlegrou
 
 **Tests**
 
-- New `tests/ui/bottom_status_active_paths.test.ts`.
+- Create `tests/ui/bottom_status_active_paths.test.ts`.
 - Extend `v47_readability_remediation.test.ts` and keyboard/focus tests.
 - Assert 0, 1, 2, and 8 active tags.
 - Assert stable visible-tag selection under input permutation.

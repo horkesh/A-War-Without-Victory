@@ -3950,3 +3950,25 @@ Applied in `[2026-07-17] Campaign QA canon integration` and `docs/40_reports/imp
 **Enabled flags and focused helper tests do not prove a feature's lifecycle is complete:** the Tactical Group core formed donors, affected combat, distributed casualties, and passed its focused suite while production records remained permanently `forming`, Army-HQ records remained `planning`, and terminal telemetry was absent. Durable rule: for every persisted lifecycle entity, enumerate every declared state, trace the production writer for each transition, verify the terminal cleanup/cap consequences, and inspect at least one long-horizon save.
 
 **A replacement path is not converged while the superseded producer still runs:** the canonical Tactical Group path coexists with the older formation-based OG producer even though current long runs create no legacy OGs. Durable rule: characterize both producers, stop new legacy production under the replacement feature, retain only bounded old-save cleanup, and prove force/personnel conservation before deleting compatibility code.
+
+## 2026-07-31 - Heavyweight player workspaces are session-owned
+
+**Primary navigation must not imply heavyweight renderer destruction:** a screen-state toggle is not a resource-lifecycle boundary. Durable rule: campaign-scoped workspaces such as the tactical map remain mounted across Command Room navigation; visibility, focus, and input ownership change, while MapLibre/Deck/WebGL cleanup occurs only on real campaign or application exit. A retained canvas is acceptable only behind the existing current-turn/current-fingerprint readiness cover.
+
+**Cache immutable substrate, not campaign truth:** operational geometry, census geometry, mappings, terrain scalars, and similar packaged resources may share one renderer-session promise/result. Control, formations, decisions, fog projection, and other campaign/player-derived data must remain live-state inputs and must never be made stale by the static cache.
+
+**Performance acceptance names truth as well as time:** a fast stale or blank canvas is a failure. Warm transition proof includes current-turn/current-fingerprint readiness, zero renderer reconstruction/release/static requests, bounded latency, and clean console/network/WebGL diagnostics. Debug timing is monotonic, default-off, and excluded from state, saves, replay, and deterministic artifacts.
+
+Applied in `[2026-07-31] Seamless Command Room to Tactical Map transition opened as executable lane` and `docs/plans/2026-07-31-seamless-command-room-map-transition-plan.md`.
+
+## 2026-07-31 - Autonomous roadmaps need outcomes, not verdict queues
+
+**One planning source prevents status drift:** a roadmap, command board, residual list, decision backlog, and release checklist cannot all be live authorities. Durable rule: keep one master workstream register; make dashboards derived views; link one executable plan per row; keep closed history in Git, ledgers, and reports rather than the active queue.
+
+**Remove decision gates by predeclaring evidence outcomes, not by removing safeguards:** a bounded experiment needs an adopt condition, a retire condition, evidence to preserve, and the next dependency in both cases. Historical gaps use source-backed content or an explicit positive hold. Unsupported identities and claims are omitted. Determinism, conservation, migration, accessibility, security, licensing, and historical evidence remain hard acceptance barriers.
+
+**External inputs are not product-design questions:** credentials, native-language review, store access, and code-signing services should have documented secure injection/fallback procedures. They may bound publication or labeling, but they should not leave implementation architecture undecided.
+
+**Activation phrases should carry exact authority:** separate reversible local implementation from externally visible publication. In this program, `Execute the master roadmap` permits local work and transient validation builds; `Publish 1.0` separately permits signing, upload, tag/push, and public release after readiness is proven.
+
+Applied in `[2026-07-31] Planning control plane consolidated for autonomous execution`, `docs/plans/MASTER_ROADMAP.md`, and the R1-R9 plans indexed by `docs/plans/README.md`.

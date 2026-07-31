@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -20,405 +20,103 @@ describe('desktop and roadmap truth docs', () => {
     expect(ipcContract).toContain('data/scenarios/apr1992_definitive_52w.json');
   });
 
-  it('keeps the roadmap honest about the closed startup residue and replay consumer status', () => {
+  it('defines one authoritative roadmap and one derived command board', () => {
     const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+    const board = readRepoFile('docs', 'plans', 'COMMAND_BOARD.md');
+    const plansIndex = readRepoFile('docs', 'plans', 'README.md');
 
-    expect(roadmap).toContain('The startup-snapshot interference residue is now closed');
-    expect(roadmap).toContain('desktop `startNewCampaign(...)` and the Warroom/browser fallback now use the baked `apr_1992` startup snapshot as the primary start-state source');
-    expect(roadmap).toContain('RESOLVED 2026-04-16 as a pre-0.9 truth lane');
-    expect(roadmap).toContain('loaded-game Warroom entry now stays on the React shell path');
-    expect(roadmap).toContain('replay scrubber + deterministic selected-frame summary cards');
-    expect(roadmap).toContain('replay scrubber + deterministic selected-frame summary cards + sparse manifest loading');
-    expect(roadmap).toContain('replay scrubber + deterministic selected-frame summary cards + sparse manifest loading + selected-frame map inspection');
-    expect(roadmap).toContain('ReplayScrubber now includes read-only Play/Pause and step controls');
-    expect(roadmap).toContain('| Map That Scars | Complete');
-    expect(roadmap).toContain('| Refugee Column | Complete');
-    expect(roadmap).toContain('| Corridor Heartbeat | Complete');
-    expect(roadmap).toContain('selected-frame map inspection is live');
-    expect(roadmap).toContain('Richer cinematic replay presentation remains future polish');
-    expect(roadmap).not.toContain('| Map That Scars | Not started');
-    expect(roadmap).not.toContain('| Refugee Column | Not started');
-    expect(roadmap).not.toContain('| Corridor Heartbeat | Not started');
-    expect(roadmap).not.toContain('richer map-state playback remains future polish');
-    expect(roadmap).not.toContain('richer replay-map inspection is still future work');
-    expect(roadmap).not.toContain('replay auto-play/animation polish remains future work');
-    expect(roadmap).not.toContain('Current next bounded lane: startup-snapshot proof-path interference');
-    expect(roadmap).not.toContain('Warroom React Shell Recovery / Feature Parity** Ã¢â‚¬â€ main desktop entry surface still needs parity/polish');
-    expect(roadmap).not.toContain('replay is still absent, tutorial/onboarding is still untouched');
-    expect(roadmap).not.toContain('desktop `New Game` birth state is now canonicalized onto the loaded-save contract, but it still boots from full scenario-source init instead of a baked campaign-start snapshot');
+    expect(roadmap).toContain('This file is the sole source of truth for unfinished product work.');
+    expect(roadmap).toContain('nine executable workstreams, R1–R9');
+    expect(board).toContain('Derived execution view');
+    expect(board).toContain('MASTER_ROADMAP.md');
+    expect(plansIndex).toContain('**Sole authority**');
+    expect(plansIndex).toContain('Each roadmap point has exactly one detailed plan');
+
+    expect(roadmap.length).toBeLessThan(60_000);
+    expect(board.length).toBeLessThan(20_000);
   });
 
-  it('keeps the master/canon docs aligned with the current directive and dispatch closures', () => {
+  it('binds every R1-R9 roadmap row to an existing executable plan', () => {
     const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+    const expectedPlans = [
+      '2026-07-31-seamless-command-room-map-transition-plan.md',
+      '2026-07-31-rs-104week-friction-remediation-plan.md',
+      '2026-07-31-operational-tactical-group-closeout-implementation-plan.md',
+      '2026-07-31-command-event-codex-convergence-plan.md',
+      '2026-07-31-engine-quality-performance-stability-plan.md',
+      '2026-07-31-historical-gameplay-depth-calibration-plan.md',
+      '2026-07-31-content-history-localization-audio-plan.md',
+      '2026-07-31-full-campaign-electron-validation-plan.md',
+      '2026-07-31-release-candidate-gold-publication-plan.md',
+    ];
+
+    expectedPlans.forEach((filename, index) => {
+      expect(roadmap).toContain(`| R${index + 1} |`);
+      expect(roadmap).toContain(`(${filename})`);
+      expect(existsSync(join(process.cwd(), 'docs', 'plans', filename))).toBe(true);
+    });
+  });
+
+  it('removes owner-verdict product gates while retaining verification and publication boundaries', () => {
+    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+    const activePlanNames = [
+      '2026-07-31-seamless-command-room-map-transition-plan.md',
+      '2026-07-31-rs-104week-friction-remediation-plan.md',
+      '2026-07-31-operational-tactical-group-closeout-implementation-plan.md',
+      '2026-07-31-command-event-codex-convergence-plan.md',
+      '2026-07-31-engine-quality-performance-stability-plan.md',
+      '2026-07-31-historical-gameplay-depth-calibration-plan.md',
+      '2026-07-31-content-history-localization-audio-plan.md',
+      '2026-07-31-full-campaign-electron-validation-plan.md',
+      '2026-07-31-release-candidate-gold-publication-plan.md',
+    ];
+    const activeTruth = [
+      roadmap,
+      ...activePlanNames.map((name) => readRepoFile('docs', 'plans', name)),
+    ].join('\n');
+
+    expect(roadmap).toContain('`Execute the master roadmap`');
+    expect(roadmap).toContain('`Publish 1.0`');
+    expect(roadmap).toContain('verification barriers and authority boundaries');
+    expect(activeTruth).not.toMatch(/STOP FOR VERDICT|GOVERNANCE-GATED|BEHAVIOR-GATED|Historical stop gate/i);
+  });
+
+  it('locks the researched product, history, locale, audio, and release dispositions', () => {
+    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+
+    expect(roadmap).toContain('The final player command model has five levers.');
+    expect(roadmap).toContain('maximum 12 turns, cohesion drain 4 per engaged turn, dissolve at cohesion 15');
+    expect(roadmap).toContain('ADR-0007 Phase C stays retired.');
+    expect(roadmap).toContain('Neretva/Grabovica/Uzdol belongs to 1993');
+    expect(roadmap).toContain('Canonical Bosnian locale is `bs`; formatting uses `bs-BA`.');
+    expect(roadmap).toContain('first-party/generated UI sound, then CC0');
+    expect(roadmap).toContain('Steam is the primary store.');
+  });
+
+  it('keeps canonical directive and closed v0.9.1 truth in their owning documents', () => {
     const fora = readRepoFile('docs', '10_canon', 'FORAWWV.md');
     const systems = readRepoFile('docs', '10_canon', 'Systems_Manual_v0_9_0.md');
     const knowledge = readRepoFile('docs', 'PROJECT_LEDGER_KNOWLEDGE.md');
-
-    expect(roadmap).toContain('**Last Updated:** 2026-05-18');
-    expect(roadmap).toContain('Current integrated-context 40w proof is n1894 `b14179d65639860c`');
-    expect(roadmap).toContain('Batch 18 Accessibility P0 verification/doc propagation');
-    expect(roadmap).toContain('Remaining autonomous lanes');
-    expect(roadmap).toContain('docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md');
-
-    expect(fora).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
-    expect(fora).toContain('magnitude');
-    expect(fora).toContain('permission_flags');
-    expect(systems).toContain('displacement_recent_by_turn');
-    expect(systems).toContain('bounded 4-turn recent displacement cue');
-    expect(knowledge).toContain('president_directive_bridge.ts');
-    expect(knowledge).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
-    expect(knowledge).not.toContain('Reference run_three_commanders.ts `PRESIDENT_TO_CANONICAL` table');
-
-    /*
-     * Retired 2026-05-18 Batch 36: the assertions below were a frozen 2026-05-10
-     * roadmap snapshot. Batches 1-35 reorganized this section heavily, so the
-     * active test above keeps the durable current contracts and avoids pinning
-     * hundreds of obsolete exact phrasing fragments.
-     *
-    expect(roadmap).toContain('detectZones component-count cut shipped');
-    expect(roadmap).toContain('`buildOperations` plan/probe profile split identified `probe.deriveObjectives` as the next measured target');
-    expect(roadmap).toContain('probe deriveObjectives internals split identified `predictAllAdjacentTargets(...)` as the hot sub-step');
-    expect(roadmap).toContain('direct-target prediction cut the probe objective bucket');
-    expect(roadmap).toContain('`predictCombatOutcome(...)` internals identified defender ranking/reactive defense as the next measured hotspot');
-    expect(roadmap).toContain('ranked defender powers are now reused by sector defense');
-    expect(roadmap).toContain('fallback defender formation scanning is now lazy');
-    expect(roadmap).toContain('defender ranking now has compute-vs-sort profile attribution');
-    expect(roadmap).toContain('defender power now has officer/front-density attribution');
-    expect(roadmap).toContain('sector-local front-density indexing shipped');
-    expect(roadmap).toContain('batch-level officer lookup indexing shipped');
-    expect(roadmap).toContain('direct-objective defender-power residual math split closed as no local optimization target');
-    expect(roadmap).toContain('Bot-order sectorMarch now has default-off overstack/retroactive-tooth attribution');
-    expect(roadmap).toContain('n1803 kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('overstack split');
-    expect(roadmap).toContain('n1804 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('overstack count-cache');
-    expect(roadmap).toContain('n1805 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.overstackRedistribution.countHere` dropped 189.557ms -> 3.615ms');
-    expect(roadmap).toContain('retroactive-tooth sector cache');
-    expect(roadmap).toContain('n1806 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.retroactiveTooth` dropped 82.802ms -> 17.620ms');
-    expect(roadmap).toContain('home-defense profile split');
-    expect(roadmap).toContain('n1807 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`homeDefense.uncontestedOccupation` accounted for 193.515ms');
-    expect(roadmap).toContain('uncontested-occupation profile split');
-    expect(roadmap).toContain('n1808 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.uncontestedOccupation.defenderScan` dominated at 287.853ms');
-    expect(roadmap).toContain('uncontested defender index');
-    expect(roadmap).toContain('n1809 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.uncontestedOccupation.defenderScan` dropped 287.853ms -> 3.673ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_DEFENDER_INDEX.md');
-    expect(roadmap).toContain('return-to-corps profile split');
-    expect(roadmap).toContain('n1810 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.returnToCorps.rosterScan` dominated at 144.998ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('return-to-corps roster cache');
-    expect(roadmap).toContain('n1811 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.returnToCorps.rosterScan` dropped 144.998ms -> 1.002ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_ROSTER_CACHE.md');
-    expect(roadmap).toContain('sectorMarch assignment cache');
-    expect(roadmap).toContain('n1812 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.sectorMarch.assignedSectorLookup` dropped 19.337ms -> 0ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_ASSIGNMENT_CACHE.md');
-    expect(roadmap).toContain('sector-attack profile split');
-    expect(roadmap).toContain('n1813 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.sectorAttack.executionPredictTargets` accounted for 94.286ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('sectorAttack direct prediction');
-    expect(roadmap).toContain('n1814 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`sectorAttack` dropped 126.089ms -> 61.800ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_PREDICTION.md');
-    expect(roadmap).toContain('pocketEvacuation cache');
-    expect(roadmap).toContain('n1815 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`pocketEvacuation` dropped 89.141ms -> 19.739ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_POCKET_EVACUATION_CACHE.md');
-    expect(roadmap).toContain('defensive profile split');
-    expect(roadmap).toContain('n1817 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.defensive.frontGapCountHere` measured 50.198ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('defensive front-gap count cache');
-    expect(roadmap).toContain('n1818 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.defensive.frontGapCountHere` dropped 50.198ms -> 0.753ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_COUNT_CACHE.md');
-    expect(roadmap).toContain('uncontested sector-defense cache');
-    expect(roadmap).toContain('n1819 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.uncontestedOccupation.sectorDefense` dropped 53.448ms -> 6.697ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_SECTOR_DEFENSE_CACHE.md');
-    expect(roadmap).toContain('adjacent-enemy cache');
-    expect(roadmap).toContain('n1820 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`adjacentEnemyScan` dropped 63.837ms -> 2.468ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_ADJACENT_ENEMY_CACHE.md');
-    expect(roadmap).toContain('return-to-corps territory cache');
-    expect(roadmap).toContain('n1821 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.returnToCorps.territoryCheck` dropped 20.496ms -> 1.072ms');
-    expect(roadmap).toContain('`returnToCorps` dropped 46.883ms -> 25.514ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_TERRITORY_CACHE.md');
-    expect(roadmap).toContain('interiorMovement profile split');
-    expect(roadmap).toContain('n1823 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.interiorMovement.fallback` measured 12.864ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('uncontested salient cache rejected');
-    expect(roadmap).toContain('n1824 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.uncontestedOccupation.salient` 20.629ms -> 23.320ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md');
-    expect(roadmap).toContain('sectorAttack direct-objective profile split');
-    expect(roadmap).toContain('n1825 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.sectorAttack.executionDirectObjective.predictCombatOutcome.rankDefendersByPower` measured 22.117ms');
-    expect(roadmap).toContain('`.rankDefendersByPower.computeDefenderPower` measured 20.229ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('sectorAttack direct-objective officer lookup');
-    expect(roadmap).toContain('n1826 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.computeDefenderPower.officer` dropped 6.107ms -> 0.696ms');
-    expect(roadmap).toContain('`sectorAttack` dropped 77.130ms -> 66.983ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_OFFICER_LOOKUP.md');
-    expect(roadmap).toContain('overstack dest-count profile split');
-    expect(roadmap).toContain('n1827 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.overstackRedistribution.destCount` measured only 0.503ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_DEST_COUNT_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('sectorMarch residual profile split');
-    expect(roadmap).toContain('n1828 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.sectorAssignmentContext` measured 2.775ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_RESIDUAL_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('sectorAttack direct-objective wrapper split');
-    expect(roadmap).toContain('n1829 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.sectorAttack.executionDirectObjective.predict` measured 39.897ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_WRAPPER_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('uncontested caller profile split');
-    expect(roadmap).toContain('n1830 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`homeDefense.uncontestedOccupation.salient` measured 12.603ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_CALLER_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('defensive sector lookup cache rejected');
-    expect(roadmap).toContain('n1831 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.defensive.sectorCounterAttackSectorLookup` worsened 13.205ms -> 14.669ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_SECTOR_LOOKUP_CACHE_REJECTED.md');
-    expect(roadmap).toContain('overstack residual profile split');
-    expect(roadmap).toContain('n1832 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.overstackRedistribution.gate` measured 17.214ms');
-    expect(roadmap).toContain('`.overstackRedistribution.candidateLoop` measured 4.956ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_RESIDUAL_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('lazy officer lookup');
-    expect(roadmap).toContain('n1833 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`bot_orders.executeFactionDirectives.officerIndex` dropped 42.553ms / 120 builds -> 4.279ms / 46 builds');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_LAZY_OFFICER_LOOKUP.md');
-    expect(roadmap).toContain('uncontested residual profile split');
-    expect(roadmap).toContain('n1834 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`homeDefense.uncontestedOccupation.candidateGates` at 11.581ms / 21,038 checks');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_RESIDUAL_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('defender-power residual profile split');
-    expect(roadmap).toContain('n1835 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.postureContext` 1.282ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENDER_POWER_RESIDUAL_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('uncontested candidate-gates profile split');
-    expect(roadmap).toContain('n1836 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.candidateGates.controller` 6.802ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_CANDIDATE_GATES_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('commander corps subordinates index');
-    expect(roadmap).toContain('n1837 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.buildBriefing.getCorpsSubordinates` dropped 63.641ms -> 0.597ms');
-    expect(roadmap).toContain('`commander.runCommanderForCorps.corpsSubordinatesIndex` cost 13.532ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_CORPS_SUBORDINATES_INDEX.md');
-    expect(roadmap).toContain('commander enemy-equipment summary context');
-    expect(roadmap).toContain('n1838 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`.buildBriefing.enemyEquipmentSummary` dropped 115.916ms -> 11.176ms');
-    expect(roadmap).toContain('`commander.runCommanderForCorps.enemyEquipmentSummaryContext` cost 54.218ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_ENEMY_EQUIPMENT_SUMMARY_CONTEXT.md');
-    expect(roadmap).toContain('commander detectZones must-hold queue');
-    expect(roadmap).toContain('n1840 profile kept hash `0cb626c032204372`');
-    expect(roadmap).toContain('`detectZones.mustHold` dropped 110.264ms -> 75.965ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_DETECT_ZONES_MUST_HOLD_QUEUE.md');
-    expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
-    expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
-    expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');
-    expect(roadmap).toContain('bridge metadata defaults shipped at `be66d1cc`');
-    expect(roadmap).toContain('Baseline Regression and Desktop Release Guard green at `750e1c14`');
-    expect(roadmap).toContain('Persona suppressor C3 structural fix shipped (`6cebf13e`)');
-    expect(roadmap).toContain('Cost Ledger prosecutorial findings shipped 2026-05-10');
-    expect(roadmap).toContain('Packet C2 patron-distance pressure completion');
-    expect(roadmap).toContain('Packet C3 accepted-peace bridging');
-    expect(roadmap).toContain('early_peace_implementation_record');
-    expect(roadmap).toContain('244 definitions / 827 effect instances');
-    expect(roadmap).toContain('v0.9.0 Consequence System CLOSED-FOR-AGENT-SCOPE');
-    expect(roadmap).toContain('csq_civic_identity_consolidation_1993');
-    expect(roadmap).toContain('csq_pragmatic_coalition_1993');
-    expect(roadmap).toContain('| Cost Ledger | Advanced');
-    expect(roadmap).not.toContain('war_dispatches.ts:149` 4-turn rolling window adapt to per-turn-buffer');
-    expect(roadmap).not.toContain('full prosecutorial authoring still open');
-    expect(roadmap).not.toContain('Persona suppressor C3 structural fix — prune routine op-lifecycle states');
-
-    expect(fora).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
-    expect(fora).toContain('magnitude');
-    expect(fora).toContain('permission_flags');
-    expect(systems).toContain('displacement_recent_by_turn');
-    expect(systems).toContain('bounded 4-turn recent displacement cue');
-    expect(knowledge).toContain('president_directive_bridge.ts');
-    expect(knowledge).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
-    expect(knowledge).not.toContain('Reference run_three_commanders.ts `PRESIDENT_TO_CANONICAL` table');
-    */
-  });
-
-  it('retires the stale scenario-board reds once direct proof has landed', () => {
-    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
-
-    expect(roadmap).toContain("This lane's older follow-up board is now retired");
-    expect(roadmap).toContain('`unresolved_sector_brigades = 0` and anomaly alignment holds');
-    expect(roadmap).toContain('`op:brcko:brka_2` is back under the current hard anchor suite');
-    expect(roadmap).toContain('front-edge ownership regressions were closed by dedicated real-save ownership/display proofs');
-    expect(roadmap).toContain('renderer-side white-line/Electron visual confirmation');
-    expect(roadmap).not.toContain('the remaining live reds are the separate southeast-Herzegovina unresolved-frontline seam, `op:brcko:brka_2` anchor drift, and Fo');
-  });
-
-  it('keeps the v0.9.1 plan baseline aligned with already-landed comparison and codex slices', () => {
-    const plan = readRepoFile('docs', 'plans', '2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md');
-    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+    const v091Plan = readRepoFile('docs', 'plans', '2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md');
     const bible = readRepoFile('docs', '10_canon', 'Game_Bible_v0_9_0.md');
 
-    expect(plan).toContain('Endgame Comparison` is partially implemented');
-    expect(plan).toContain('dynamic essay sections / ghost entries / divergence notes are partially implemented');
-    expect(plan).toContain('Cost Ledger findings through deterministic atoms/tokens');
-    expect(plan).toContain('`VerdictScreen` now renders deterministic milestone comparison rows');
-    expect(plan).toContain('historical_baseline.json` now authors the first milestone rows for Srebrenica and Dayton');
-    expect(plan).toContain('Codex resolver now supports deterministic `MILESTONE:<id>[:status]` atoms');
-    expect(plan).toContain('Cost Ledger annotation atoms/tokens');
-    expect(plan).toContain('`ANNOTATION:<tag>`, `{cost_annotations}`, `{cost_annotation_<tag>}`');
-    expect(plan).toContain('**Status:** CLOSED-FOR-AGENT-SCOPE');
-    expect(plan).toContain('sixty `v091_` authored dynamic sections');
-    expect(plan).toContain('optional `milestone_comparison` row contract');
-    expect(plan).toContain('`dynamic_sections`, `ghost_when`');
-    expect(roadmap).toContain('Cost Ledger finding atoms/tokens');
-    expect(roadmap).toContain('Consequence Wave 19 is a reader-only closure');
-    expect(roadmap).toContain('`ANNOTATION:<tag>`, `{cost_annotations}`, and `{cost_annotation_<tag>}` tokens');
-    expect(roadmap).toContain('milestone atoms/tokens');
-    expect(roadmap).toContain('**v0.9.1 Dynamic Essay + Endgame Comparison** — CLOSED-FOR-AGENT-SCOPE');
-    expect(roadmap).toContain('the authored `v091_` dynamic catalog now has sixty sections');
-    expect(roadmap).toContain('20260510_V091_DYNAMIC_ENDGAME_MILESTONE_CLOSURE.md');
-    expect(roadmap).toContain('| Endgame Comparison | Advanced');
-    expect(roadmap).toContain('index-based front-geometry BFS queue');
-    expect(roadmap).toContain('`buildBriefing` 1,077.718ms -> 1,041.042ms');
-    expect(roadmap).toContain('split `assessSituation` and `emitCommanderOutput` internals');
-    expect(roadmap).toContain('probe-target lookup map (316.271ms -> 316.829ms)');
-    expect(roadmap).toContain('`detectZones.mustHold` dropped 126.351ms -> 115.098ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_DETECT_ZONES_MUST_HOLD_PROFILE.md');
-    expect(roadmap).toContain('The diagnostic-gate pass proved `front_geometry` has no production consumer');
-    expect(roadmap).toContain('`AWWV_COMMANDER_FRONT_GEOMETRY=true` or `1`');
-    expect(roadmap).toContain('`frontGeometry` dropped 517.222ms -> 2.247ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_FRONT_GEOMETRY_DIAGNOSTIC_GATE.md');
-    expect(roadmap).toContain('enemy-equipment summary pass replaces repeated defender-sector scans');
-    expect(roadmap).toContain('`enemyEquipmentSummary` dropped 166.376ms -> 119.960ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_ENEMY_EQUIPMENT_INDEX_PROFILE.md');
-    expect(roadmap).toContain('probe emission pass gates `predictAllAdjacentTargets(...)`');
-    expect(roadmap).toContain('`emitCommanderOutput.buildOperations` dropped 306.524ms -> 258.813ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_PROBE_EMISSION_PREDICTOR_GATE_PROFILE.md');
-    expect(roadmap).toContain('`emitCommanderOutput.buildOperations`');
-    expect(roadmap).toContain('`assessSituation.detectZones`');
-    expect(roadmap).toContain('commander buildOperations profile split');
-    expect(roadmap).toContain('`buildOperations.probe.deriveObjectives` accounted for 257.393ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_BUILD_OPERATIONS_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('commander probe deriveObjectives profile split');
-    expect(roadmap).toContain('`predictAllAdjacentTargets(...)` accounted for 238.334ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_PROBE_DERIVE_OBJECTIVES_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('commander probe direct-target predictor cut');
-    expect(roadmap).toContain('`buildOperations.probe.deriveObjectives` dropped 263.514ms -> 244.752ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_PROBE_DIRECT_TARGET_PREDICTOR_PROFILE.md');
-    expect(roadmap).toContain('commander predictCombatOutcome profile split');
-    expect(roadmap).toContain('`rankDefendersByPower` at 61.218ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_PREDICT_COMBAT_OUTCOME_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('commander defender-power reuse');
-    expect(roadmap).toContain('`predictDirectTargets` dropped 255.571ms -> 193.777ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_DEFENDER_POWER_REUSE_PROFILE.md');
-    expect(roadmap).toContain('commander lazy defender formation scan');
-    expect(roadmap).toContain('`defenderFormationScan` dropped from 591 calls / 28.514ms to 20 calls / 1.802ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_LAZY_DEFENDER_FORMATION_SCAN_PROFILE.md');
-    expect(roadmap).toContain('commander defender ranking profile split');
-    expect(roadmap).toContain('`.rankDefendersByPower.computeDefenderPower` measured 56.651ms');
-    expect(roadmap).toContain('`.rankDefendersByPower.sortAndTotal` measured only 2.391ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_RANK_DEFENDER_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('commander defender power profile split');
-    expect(roadmap).toContain('defender-power internals measured `.officer` at 22.682ms');
-    expect(roadmap).toContain('`.frontDensity` at 15.177ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_DEFENDER_POWER_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('commander front-density index');
-    expect(roadmap).toContain('net front-density cost dropped 15.177ms -> 3.174ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_FRONT_DENSITY_INDEX.md');
-    expect(roadmap).toContain('commander officer lookup index');
-    expect(roadmap).toContain('rank+officer-index net dropped 83.109ms -> 76.369ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_OFFICER_LOOKUP_INDEX.md');
-    expect(roadmap).toContain('commander corps subordinates index');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_CORPS_SUBORDINATES_INDEX.md');
-    expect(roadmap).toContain('commander enemy-equipment summary context');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_ENEMY_EQUIPMENT_SUMMARY_CONTEXT.md');
-    expect(roadmap).toContain('commander detectZones must-hold queue');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_DETECT_ZONES_MUST_HOLD_QUEUE.md');
-    expect(roadmap).toContain('Bot-order sectorMarch now has default-off overstack/retroactive-tooth attribution');
-    expect(roadmap).toContain('`.overstackRedistribution` at 233.130ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('`.countHere` measured 189.557ms');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('home-defense profile split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_HOME_DEFENSE_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('uncontested-occupation profile split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_OCCUPATION_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('uncontested defender index');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_DEFENDER_INDEX.md');
-    expect(roadmap).toContain('return-to-corps profile split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('return-to-corps roster cache');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_ROSTER_CACHE.md');
-    expect(roadmap).toContain('sectorMarch assignment cache');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_ASSIGNMENT_CACHE.md');
-    expect(roadmap).toContain('sector-attack profile split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('sectorAttack direct prediction');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_PREDICTION.md');
-    expect(roadmap).toContain('pocketEvacuation cache');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_POCKET_EVACUATION_CACHE.md');
-    expect(roadmap).toContain('defensive profile split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('interiorMovement profile split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('uncontested salient cache rejected');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md');
-    expect(roadmap).toContain('sectorAttack direct-objective profile split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('sectorAttack direct-objective officer lookup');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_OFFICER_LOOKUP.md');
-    expect(roadmap).toContain('overstack dest-count profile split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_DEST_COUNT_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('sectorMarch residual profile split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_RESIDUAL_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('sectorAttack direct-objective wrapper split');
-    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_WRAPPER_PROFILE_SPLIT.md');
-    expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
-    expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
-    expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
-    expect(bible).toContain('Cost Ledger annotations from existing consequence events');
-    expect(bible).toContain('accelerated camps discovery, early ICTY mandate expansion, accelerated safe areas, early NATO threshold, Bihac pocket collapse, and Bihac refugee crisis');
-    expect(bible).toContain('milestone comparison rows inside historical essays');
+    expect(fora).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
+    expect(fora).toContain('permission_flags');
+    expect(systems).toContain('displacement_recent_by_turn');
+    expect(knowledge).toContain('president_directive_bridge.ts');
+
+    expect(v091Plan).toContain('**Status:** CLOSED-FOR-AGENT-SCOPE');
+    expect(v091Plan).toContain('sixty `v091_` authored dynamic sections');
     expect(bible).toContain('v0.9.1 is agent-closed with sixty authored `v091_` consumers');
-    expect(bible).toContain('Current authored consumers include Srebrenica, Dayton including the final human-cost docket, Ahmici, Operation Storm');
-    expect(bible).toContain('VerdictScreen` may render milestone comparison rows');
-    expect(bible).toContain('the first authored baseline rows are Srebrenica and Dayton');
-    expect(plan).not.toContain('Endgame Comparison` is not implemented');
-    expect(plan).not.toContain('dynamic essay sections / ghost entries / divergence notes are not implemented');
-    expect(roadmap).not.toContain('richer milestone-week comparison UX still open');
-    expect(roadmap).not.toContain('richer authored milestone data still open');
   });
 
-  it('keeps force-quality roadmap truth aligned with the current audit closure', () => {
-    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
-    const calibrationMaster = readRepoFile('docs', '40_reports', 'CALIBRATION_MASTER.md');
+  it('keeps force-quality reassessment truth in its audit and issue packet', () => {
+    const audit = readRepoFile('docs', '40_reports', 'audits', '20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md');
     const issue = readRepoFile('docs', 'plans', '2026-05-01-force-quality-trajectory-calibration-issue.md');
 
-    expect(roadmap).toContain('audit reassessed 2026-05-10');
-    expect(roadmap).toContain('The broad audit packet is now complete on current artifacts');
-    expect(roadmap).toContain('n1741` 188w hash `a4bf8b8095050881');
-    expect(roadmap).toContain('RS/HRHB average personnel still rises');
-    expect(roadmap).toContain('focused owner lanes (personnel/reconstitution, fatigue/exhaustion, HRHB trajectory, operation delivery)');
-    expect(roadmap).toContain('docs/40_reports/audits/20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md');
-
-    expect(calibrationMaster).toContain('Audit status:');
-    expect(calibrationMaster).toContain('Required broad audit packet complete as of 2026-05-10');
-    expect(calibrationMaster).toContain('next work should be focused owner lanes, not another broad audit');
+    expect(audit).toContain('a4bf8b8095050881');
+    expect(audit).toContain('RS and HRHB average brigade personnel still rise');
     expect(issue).toContain('**Status:** Audit packet complete; successor calibration/design lanes open');
     expect(issue).toContain('tools/diagnostics/force_quality_checkpoint_windows.cjs');
-    expect(issue).toContain('Report: `docs/40_reports/audits/20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md`');
   });
 });

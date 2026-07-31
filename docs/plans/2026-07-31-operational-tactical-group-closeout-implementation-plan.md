@@ -3,18 +3,18 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** READY — execute Phase 0, then Phases 1–2; later behavior/canon gates are explicit
+**Status:** READY — execute Phases 0–6 sequentially; all product and canon choices are resolved below
 **Overseer:** Orchestrator
 **Owner lane:** Systems Programmer + Gameplay Programmer
-**Independent reviewers:** QA Engineer, Determinism Auditor, Historian/Pyrrhic panel only where named
+**Independent reviewers:** QA Engineer, Determinism Auditor, Historian, Canon Compliance Reviewer where named
 **Related command-board row:** `Operational/Tactical Group lifecycle and convergence closeout`
 **Phase/workstream covered:** ADR-0005 temporary offensive Tactical Groups, Army-HQ operation lifecycle, legacy `kind: 'og'` convergence, ADR-0006/0007 standing-OG truth
 **Current next action:** Create an isolated `codex/op-tg-closeout` worktree and execute Phase 0
-**Collision rule:** Do not edit or clean the owner's current dirty workspace. Stop if another active branch owns any Phase 1–4 source file.
+**Collision rule:** Do not edit or clean the user's current dirty workspace. If another active branch owns a Phase 1–4 source file, sequence this packet after it and rebase on its completed work.
 
 **Goal:** Close the lifecycle, telemetry, and duplicate-path gaps in the operational/tactical-group system while preserving the already-live donor selection, combat synthesis, casualty distribution, cooldown, recovery-suppression, and promotion substrate.
 
-**Architecture:** `CorpsOperation` remains the sole offensive-operation clock. A live `TacticalGroup` mirrors that operation's active phase, Army-HQ operation records follow the same transition chokepoints, and dissolution finalizes per-brigade telemetry before removing the live TG. The older formation-based `kind: 'og'` path becomes compatibility-only once a clean-run proof shows the Tactical Group path owns new offensive task organization. Corps sectors remain the standing-OG spatial entity. Shared Standing-OG combat aftermath is not implemented until the accepted canon language and the retirement of ADR-0007 Phase C are reconciled.
+**Architecture:** `CorpsOperation` remains the sole offensive-operation clock. A live `TacticalGroup` mirrors that operation's active phase, Army-HQ operation records follow the same transition chokepoints, and dissolution finalizes per-brigade telemetry before removing the live TG. The older formation-based `kind: 'og'` path becomes compatibility-only once a clean-run proof shows the Tactical Group path owns new offensive task organization. Corps sectors remain the standing-OG spatial entity. ADR-0007 Phase C remains retired; Phase 5 aligns the ADR and canon wording to the narrower live contribution/primary-aftermath model without changing combat behavior.
 
 **Tech Stack:** TypeScript, Vitest, deterministic scenario runner, save migration/validation, Markdown governance docs.
 
@@ -67,9 +67,9 @@ Observed at turn 188:
 3. **One lifecycle authority.** `CorpsOperation.phase` owns the clock. TG and Army-HQ status synchronization must happen at the existing operation transition chokepoints, not in an independent second scheduler.
 4. **Live TG storage stays bounded.** A TG is present while forming/engaged. On execution-to-recovery it is finalized and removed, matching ADR-0005 trickle-back. `recovering`/`dissolved` may be used during finalization but are not retained as an unbounded second archive; per-brigade participation records own historical truth.
 5. **Army-HQ records are durable receipts.** They remain after completion, but completed records must not reduce TG concurrency and must not retain a live `tg_id`.
-6. **No automatic canon rewrite.** Do not edit `docs/10_canon/FORAWWV.md`. Standing-OG doctrine conflict goes to the explicit Phase 5 decision packet.
-7. **No baseline refresh by default.** Any scenario/hash drift must be explained and approved. Never run an update/re-bless command merely to make a gate green.
-8. **No release mutation.** This maintenance packet does not authorize packaging, a version bump, tag, push, PR, or release-state change. If project process requires a version/tag for closure, stop and obtain explicit owner authorization.
+6. **Standing-OG disposition is decided.** Do not edit `docs/10_canon/FORAWWV.md`. Phase 5 aligns ADR-0006/0007, the Systems Manual, and the Rulebook to the narrower live model: sectors are standing OGs; actual contributors share the immediate combat cost; downstream aftermath remains primarily owned by the primary defender; retired ADR-0007 Phase C is not resurrected.
+7. **No baseline refresh by default.** Any scenario/hash drift must be explained and accepted under the master roadmap's behavior criteria. Never run an update/re-bless command merely to make a verification barrier green.
+8. **No release mutation.** This maintenance packet does not authorize a version bump, tag, push, PR, signing, upload, installer publication, or release-state change. Those actions remain under the master-roadmap publication boundary.
 
 ---
 
@@ -81,10 +81,10 @@ Observed at turn 188:
 - Stale Army-HQ cap/tg-reference repair for live and loaded state.
 - Dissolution telemetry on live and archived brigade participation records.
 - A deterministic audit tool for current/future saves.
-- Canonical TG cohesion/max-lifecycle enforcement, but only after its behavior gate.
+- Canonical TG cohesion/max-lifecycle enforcement using the locked constants in Phase 3.
 - Retirement of new legacy-OG production while retaining bounded old-save cleanup.
 - Prevention of new unmapped/duplicate promotion identities.
-- A decision-ready Standing-OG doctrine reconciliation packet.
+- Standing-OG ADR/canon convergence to the decided narrower live model.
 - Focused, migration, full-suite, baseline, and 40/188-week proof.
 
 ### Non-goals
@@ -95,7 +95,7 @@ Observed at turn 188:
 - No resurrection of retired ADR-0007 Phase C code.
 - No automatic correction of historically ambiguous existing promotion records.
 - No calibration tuning to recover territory counts.
-- No baseline-manifest, startup-snapshot, package-version, installer, tag, or release edit without separate approval.
+- No baseline-manifest or startup-snapshot edit unless the locked behavior criteria justify the drift; no package-version, installer, tag, or release edit under this packet.
 
 ---
 
@@ -136,14 +136,14 @@ If they already exist, inspect and reuse them. Do not delete, reset, clean, stas
 - `docs/plans/PLAN_EXECUTION_STANDARD.md`
 - this plan, `docs/plans/COMMAND_BOARD.md`, and `docs/plans/MASTER_ROADMAP.md`
 
-### 4.3 Initial characterization gate
+### 4.3 Initial characterization barrier
 
 ```powershell
 npm.cmd run typecheck
 npm.cmd run test:vitest -- tests/tg_casualty_distribution.test.ts tests/tg_determinism.test.ts tests/tg_donation_readiness_fallback.test.ts tests/tg_effective_personnel.test.ts tests/tg_fidelity.test.ts tests/tg_identity_commander.test.ts tests/tg_inv6_zombie_hold.test.ts tests/tg_invariants.test.ts tests/tg_lifecycle.test.ts tests/tg_migration_recon.test.ts tests/tg_og_promotion.test.ts tests/tg_pre_planned_reservation.test.ts tests/tg_recovery_suppression.test.ts tests/tg_routing.test.ts tests/tg_schema_freeze.test.ts tests/tg_telemetry.test.ts tests/operation_aar_army_hq_telemetry.test.ts tests/standing_og_defense.test.ts tests/corps_command.test.ts tests/triggered_operations.test.ts --pool=forks --reporter=dot
 ```
 
-If this gate fails for a reason unrelated to the lane, stop and report the exact failure; do not repair unrelated owner work.
+If this barrier fails for a reason unrelated to the lane, record the exact prerequisite failure and continue only with focused commands that isolate this packet. Do not repair unrelated user work; the global barrier must be rechecked before R3 closes.
 
 ### 4.4 Commit and review discipline
 
@@ -252,7 +252,7 @@ npm.cmd exec -- tsx tools/diagnostics/audit_operational_tactical_groups.ts runs/
 - [ ] At CorpsOperation removal after recovery, set the durable Army-HQ record to `completed`.
 - [ ] Add a deterministic reconciliation helper for loaded state: if a planning/executing Army-HQ record has no matching live CorpsOperation and no live TG, mark it completed and clear `tg_id`.
 - [ ] Ensure the concurrency-cap helper counts only genuinely active planning/executing records.
-- [ ] Do not implement the ADR's four-turn post-recovery cap tail in this task unless the optional recovery-turn field and migration/default tests are approved under Phase 3's behavior gate.
+- [ ] Keep the ADR's locked four-turn post-recovery cap tail in Phase 3, where the optional recovery-turn field and migration/default tests are implemented together.
 
 **Red command:**
 
@@ -341,19 +341,19 @@ npm.cmd run typecheck
 
 **Assigned to:** Gameplay Programmer + Systems Programmer
 **Reviewer:** Game Designer, Determinism Auditor, QA Engineer
-**Status:** BEHAVIOR-GATED — do not begin without owner/Pyrrhic confirmation of the locked constants below
+**Status:** READY — execute with the locked constants below
 **Estimated scope:** 3–5 source files, focused tests, 40/188-week scenario proof
 
-### Decision gate 3.0
+### Locked constants
 
-Recommended constants, based on already-accepted ADR/legacy implementation:
+Implementation constants, based on the accepted ADR and legacy implementation:
 
 - `TG_MAX_LIFECYCLE_TURNS = 12` from ADR-0005.
 - `TG_COHESION_DRAIN_PER_ENGAGED_TURN = 4`, reusing the existing formation-based OG drain.
 - `TG_DISSOLVE_COHESION = 15`, already canonical.
 - `ARMY_HQ_TG_CAP_RECOVERY_TURNS = 4` from ADR-0005.
 
-If any constant is rejected or canon is interpreted differently, stop and amend this plan before code.
+These values are the implementation contract. A failing characterization may correct a transcription error, but it does not reopen the product choice; any genuine conflict is resolved by the governing ADR and the master roadmap.
 
 ### Task 3.1 — Write exhaustion tests first
 
@@ -410,7 +410,7 @@ npm.cmd run engine:health:gate
 
 Run the audit tool on both new final saves. Run a second 188-week scenario and prove byte identity before accepting deterministic output.
 
-**Stop gate:** Any unexplained control/hash drift, anchor regression, Section 6 sensitivity change, cross-faction donation, personnel conservation failure, or non-identical repeated 188-week output. Do not refresh a baseline.
+**Rejection barrier:** Revert or keep the phase open for any unexplained control/hash drift, anchor regression, Section 6 sensitivity change, cross-faction donation, personnel conservation failure, or non-identical repeated 188-week output. Do not refresh a baseline to hide it.
 
 → `/simplify` → independent game-design/QA/determinism review → verify → commit `feat(tg): enforce canonical exhaustion lifecycle`
 
@@ -473,7 +473,7 @@ npm.cmd run typecheck
 npm.cmd run test:baselines
 ```
 
-If Task 4.2 changes scenario output, rerun the Phase 3 40/188-week deterministic proof. No baseline refresh without approval.
+If Task 4.2 changes scenario output, rerun the Phase 3 40/188-week deterministic proof. Refresh a baseline only when the change is explained, passes the locked roadmap criteria, and is recorded in the ledger.
 
 **Gate:** A fresh TG-enabled campaign creates no legacy `kind: 'og'`; supported old state is cleaned without force inflation or personnel loss; new promotion names require explicit mappings and cannot duplicate.
 
@@ -481,45 +481,44 @@ If Task 4.2 changes scenario output, rerun the Phase 3 40/188-week deterministic
 
 ---
 
-## Phase 5 — Standing-OG doctrine reconciliation
+## Phase 5 — Standing-OG doctrine convergence
 
-**Assigned to:** Architect + Game Designer + Historian/Pyrrhic panel
-**Status:** GOVERNANCE-GATED / DOCS FIRST
-**Estimated scope:** one decision packet; no combat code
+**Assigned to:** Technical Architect + Documentation Specialist
+**Reviewers:** Game Designer, Historian, Canon Compliance Reviewer
+**Status:** READY — documentation and contract tests only; no combat-behavior change
+**Estimated scope:** three governing documents, two ADRs, one contract test
 
-### Task 5.1 — Produce the decision packet
+### Task 5.1 — Encode the decided ownership model
 
 **Files:**
 
-- Create `docs/40_reports/proposals/20260731_STANDING_OG_DOCTRINE_RECONCILIATION.md`
-- Do not edit canon in this task
+- Modify `docs/20_engineering/ADR/ADR-0006-sectors-as-standing-operational-groups.md`
+- Modify `docs/20_engineering/ADR/ADR-0007-standing-og-defensive-model.md`
+- Modify `docs/10_canon/Systems_Manual_v0_9_0.md`
+- Modify `docs/10_canon/Rulebook_v0_9_0.md`
+- Create `tests/standing_og_doctrine_contract.test.ts`
+- Do not edit `docs/10_canon/FORAWWV.md`
 
-- [ ] Quote/paraphrase the exact current ownership split:
-  - ADR-0006: sectors are standing OGs;
-  - live Phase B: one eligible reserve/rear brigade may commit to the hottest threatened subsegment;
-  - current combat: sector-assigned/physical defenders contribute and share casualties, while full downstream aftermath remains primarily on the primary defender;
-  - ADR-0007 Phase C: retired/deleted;
-  - canon: says the standing OG shares defensive fatigue and casualties.
-- [ ] Present three bounded options:
-  1. **Recommended:** design a new contribution-receipt-based shared aftermath slice for brigades that actually contributed; do not resurrect Phase C's widened roster/predictor split.
-  2. Amend canon to describe the narrower live Phase B/primary-aftermath model.
-  3. Reopen broader shared defense only as a new ADR with Guardrail-1 and calibration proof.
-- [ ] Include affected files, expected war-cost risks, focused tests, 40/188-week gates, and the exact owner decision required.
+- [ ] State that a corps sector is the standing operational-group spatial entity.
+- [ ] State that reserve/rear commitment is bounded by the live Phase B eligibility rules.
+- [ ] State that brigades that actually contribute share the immediate casualties/fatigue already assigned by the combat path.
+- [ ] State that downstream aftermath remains primarily owned by the primary defender unless a future roadmap revision explicitly changes the behavior contract.
+- [ ] Mark ADR-0007 Phase C as retired and prohibit its widened roster/predictor split from being inferred as live behavior.
+- [ ] Add a contract test that fails if the ADR, Systems Manual, and Rulebook again claim the retired broader model.
+- [ ] Make no runtime change in this phase.
 
-### Task 5.2 — Stop for verdict
+### Task 5.2 — Verify doctrine and runtime remain aligned
 
-No changes to:
+```powershell
+npm.cmd run test:vitest -- tests/standing_og_defense.test.ts tests/standing_og_doctrine_contract.test.ts --pool=forks --reporter=dot
+npm.cmd run canon:check
+npm.cmd run test:baselines
+npm.cmd run typecheck
+```
 
-- `src/sim/combat/standing_og_defense.ts`
-- `src/sim/combat/attack_resolution_osid.ts`
-- `src/sim/combat/brigade_front_distribution.ts`
-- `docs/10_canon/*`
+**Acceptance barrier:** The live narrower contribution/primary-aftermath model is described consistently; ADR-0007 Phase C remains retired; focused gameplay tests and baselines do not change.
 
-until the Pyrrhic panel/owner chooses an option. A later implementation must be a separate plan amendment because it changes combat outcomes.
-
-**Gate:** Signed option and explicit authorization to edit the named canon/runtime files.
-
-→ `/simplify` → docs verification → commit `docs(og): file standing doctrine decision packet`
+→ `/simplify` → independent canon/historian review → verify → commit `docs(og): align standing doctrine with live model`
 
 ---
 
@@ -555,7 +554,7 @@ The report must include:
 - before/after audit tables;
 - save/schema decision;
 - scenario/hash drift explanation;
-- Standing-OG verdict or explicit remaining gate;
+- Standing-OG doctrine convergence result;
 - promotion mappings added or still blocked;
 - no-force-inflation and personnel-conservation evidence.
 
@@ -578,40 +577,40 @@ The report must include:
 - release/tag state;
 - baseline manifests.
 
-**Completion gate:** Phases 0–4 are green or explicitly waived with written owner rationale; Phase 5 has either a signed verdict or remains clearly governance-gated. D3 may not treat Operational/Tactical Groups as fully closed before this gate.
+**Completion barrier:** Phases 0–6 are green with no waiver, the decided Standing-OG wording is aligned, and the required deterministic/save evidence is recorded. R3 is not closed before this barrier passes.
 
 → `/simplify` → Process QA → final verification → commit `docs(tg): close operational group remediation lane`
 
 ---
 
-## 6. Determinism and Save-Schema Gates
+## 6. Determinism and Save-Schema Barriers
 
 - [ ] No randomness, timestamps, environment-dependent branching, or filesystem-order dependence.
 - [ ] Sort all TG, Army-HQ, corps, formation, participation, and diagnostic ids with `strictCompare`.
 - [ ] Lifecycle advances exactly once from the canonical operation pass.
-- [ ] Any persisted field is optional/omit-empty unless a versioned migration is approved.
+- [ ] Any persisted field is optional/omit-empty unless a versioned migration is required and fully tested.
 - [ ] Old-shape saves, current-shape saves, and round trips have explicit tests.
 - [ ] TG donor personnel/equipment conservation remains exact.
 - [ ] Repeated 188-week runs are byte-identical after behavior-changing work.
-- [ ] No manifest refresh without explicit owner approval and a written drift explanation.
+- [ ] No manifest refresh without a written drift explanation and satisfaction of the locked roadmap acceptance criteria.
 
 ---
 
-## 7. Historical, Canon, and Player-Truth Gates
+## 7. Historical, Canon, and Player-Truth Barriers
 
 - [ ] No cross-faction donation.
 - [ ] No new historical operation or unsupported Division identity.
 - [ ] Promotion requires an explicit historical mapping; ambiguous existing records are reported, not invented away.
-- [ ] Standing-OG combat behavior does not change before a signed doctrine verdict.
+- [ ] Standing-OG combat behavior remains the decided narrower live model; Phase 5 changes documentation/contracts only.
 - [ ] Section 6 sensitive-history control receipts remain event-owned and unchanged.
-- [ ] No GUI work is required for Phases 0–4; if a new player-facing field is proposed, stop and create a UI/read-model amendment.
+- [ ] No GUI work is required for Phases 0–4; do not add a player-facing field in R3, and route any presentation finding to R4 or R7.
 
 ---
 
 ## 8. Protocol Enforcement
 
 - [ ] Orchestrator oversees all phases.
-- [ ] Architect decisions are flagged for owner review.
+- [ ] Architecture changes receive independent Technical Architect and Canon Compliance Reviewer review against the locked decisions.
 - [ ] Napkin is read at session start and updated only for a recurring lesson.
 - [ ] Ledger entry is appended after each completed behavior/output phase.
 - [ ] Life lessons are scanned before work.
@@ -633,7 +632,7 @@ The report must include:
 - [ ] Donor-backed/zero-donor semantics are explicit and tested.
 - [ ] Fresh TG-enabled campaigns create no legacy `kind: 'og'` formations.
 - [ ] New promotion identities cannot duplicate through the default ordinal fallback.
-- [ ] Standing-OG doctrine conflict has a signed decision or an explicit release gate.
+- [ ] Standing-OG doctrine consistently encodes the decided narrower live model and retired Phase C.
 - [ ] TypeScript, focused/full tests, baselines, determinism, and required scenario proof are green.
 
 ---
@@ -649,13 +648,13 @@ The report must include:
 ## 11. Copy-Ready Execution Prompt
 
 ```text
-Role and objective: You are the implementation agent for the Operational/Tactical Group lifecycle and convergence closeout. Execute docs/plans/2026-07-31-operational-tactical-group-closeout-implementation-plan.md one phase at a time, starting with Phase 0. Phases 0–2 are executable. Stop at Phase 3 until its constants are explicitly confirmed, and stop at Phase 5 until the Standing-OG doctrine verdict is signed.
+Role and objective: You are the implementation agent for the Operational/Tactical Group lifecycle and convergence closeout. Execute docs/plans/2026-07-31-operational-tactical-group-closeout-implementation-plan.md one phase at a time, starting with Phase 0 and continuing through Phase 6. Phase 3 uses the locked 12/4/15/4 constants; Phase 5 encodes the decided narrower Standing-OG model without changing combat behavior.
 
 Canon references: Read .claude/napkin.md, docs/00_start_here/docs_index.md, docs/10_canon/context.md, Engine_Invariants_v0_9_0.md §§6.3/11/14.7, Systems_Manual_v0_9_0.md operational/standing-OG sections, Rulebook_v0_9_0.md operational/standing-OG sections, ADR-0005, ADR-0006, ADR-0007, PYRRHIC_PLANNING_RULES.md, PLAN_EXECUTION_STANDARD.md, COMMAND_BOARD.md, MASTER_ROADMAP.md, and the full plan before editing.
 
 Determinism and ledger constraints: Use CorpsOperation as the only lifecycle clock. No timestamps, randomness, environment-dependent logic, or unordered iteration. Sort all persisted/diagnostic ids with strictCompare. Do not add save fields without old-shape/default/validator/round-trip tests. Preserve exact personnel/equipment conservation. Append PROJECT_LEDGER.md for behavior/output/roadmap changes and PROJECT_LEDGER_KNOWLEDGE.md only for reusable lessons. Do not edit FORAWWV.md.
 
-STOP AND ASK triggers: a Phase 3 constant is not explicitly approved; canon conflicts or is silent on a required choice; Standing-OG combat/canon work is reached without a signed verdict; an unmapped promotion needs historical identity; save schema needs a version bump; branch/file collision exists; unexplained scenario/hash drift appears; a baseline refresh seems necessary; scope expands into UI, scenario data, OOB, sensitive history, packaging, versioning, tagging, or release.
+Automatic dispositions: use the locked Phase 3 constants; align Standing-OG wording to the master-roadmap decision; omit an unmapped promotion identity; implement and test a required migration without inventing values; sequence/rebase a branch collision; investigate and revert unexplained scenario/hash drift; do not refresh a baseline merely to pass; and route UI, scenario, OOB, or sensitive-history findings to R4/R6/R7. Packaging, versioning, tagging, signing, upload, and release remain outside R3.
 
-Output and validation: Work in an isolated codex/op-tg-closeout worktree and one phase per commit. Run /simplify before each phase commit. In every handoff include changed files, phase completed, tests with exact pass/fail counts, scenario hashes/output paths when required, drift explanation, docs/ledger updates, stop-gate status, and the next unfinished phase. Never claim complete without fresh typecheck, tests, diff check, and required scenario evidence.
+Output and validation: Work in an isolated codex/op-tg-closeout worktree and one phase per local commit. Run /simplify before each phase commit. In every handoff include changed files, phase completed, tests with exact pass/fail counts, scenario hashes/output paths when required, drift explanation, docs/ledger updates, acceptance-barrier status, and the next unfinished phase. Never claim complete without fresh typecheck, tests, diff check, and required scenario evidence.
 ```
