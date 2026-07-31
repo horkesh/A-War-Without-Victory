@@ -6,7 +6,7 @@
 
 **Updated:** 2026-07-31
 
-**Program state:** PREPARED; autonomous implementation is not yet authorized
+**Program state:** EXECUTING; R1 and R3 are active on the integration branch
 
 ## Activation
 
@@ -14,15 +14,15 @@
 - `Execute Rn`: execute only the named workstream and required prerequisite checks.
 - `Publish 1.0`: after R9 is green, authorize signing, upload, public tag/push, and release-state change.
 
-This planning pass authorizes none of those implementation or publication actions.
+The owner activated full roadmap execution on 2026-07-31 and separately authorized commits, pushes, final merge, documentation propagation, and repository cleanup. Signing, store upload, public release creation, and a public `1.0` tag remain outside that authority.
 
 ## Dispatch Queue
 
 | Order | ID | Status | Next executable action | Plan |
 |---:|---|---|---|---|
-| 1 | R1 | READY | Establish cold/warm timing baseline, then retain the campaign-scoped tactical-map renderer and session static-data cache. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
+| 1 | R1 | IN PROGRESS — PHASE 0 GREEN | Implement and reprofile the campaign-scoped retained tactical viewport, then continue the measured shell/cache/cold-path phases. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
 | 2 | R2 | WAITING ON R1 SHARED-FILE HANDOFF | Rebase FR-03 on R1; execute the five RS information-hierarchy, map-handoff, cadence, ultrawide, and presentation packets. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
-| 3 | R3 | READY | Characterize lifecycle state, then execute Phases 0–6 with locked TG constants and the decided Standing-OG model. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
+| 3 | R3 | IN PROGRESS — PHASES 0–2 GREEN | Implement canonical TG exhaustion and the bounded Army-HQ recovery tail, then retire duplicate production and align doctrine. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | WAITING ON R2 PRIORITY/CADENCE CONTRACT | Inventory command/event/Codex projections, converge them on deterministic receipts, and absorb Free War residuals. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | WAITING ON R1–R3 STATE FLOOR | Classify optional state and artifacts, profile measured hot paths, close save/replay and CI parity. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
 | 6 | R6 | WAITING ON R3/R5 FLOOR | Run the serialized adopt-or-retire experiments, Sarajevo/E-B1 work, and final calibration proof. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
@@ -32,9 +32,9 @@ This planning pass authorizes none of those implementation or publication action
 
 ## Current Critical Path
 
-`R1 -> R2 -> R3 -> R4 -> R5 -> R6 -> R7 -> R8 -> R9`
+`R1 -> R2 -> R4`, alongside `R3 -> R5 -> R6`; both converge before `R7 -> R8 -> R9`.
 
-R3 is technically ready beside R1/R2, but serial execution is the default to minimize dirty-worktree and integration risk. Parallel execution requires a fresh shared-file inspection proving independence.
+R1 and R3 are executing in isolated worktrees after a shared-file inspection proved their implementation surfaces independent. Their reviewed commits converge only through `codex/master-roadmap-execution`.
 
 ## Fixed Decisions
 

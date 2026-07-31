@@ -25016,3 +25016,13 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Manifest refresh:** Updated exactly two `apr1992_52w` entries in `data/derived/scenario/baselines/manifest.json`: `final_save.json` is now `ef30222cd8b6eb99ad3d3e3b5688b414dc0d82e0a07a7a20465e43296351a141`, and `run_summary.json` is now `3f91bd76383ae9538e8556ccdb5e7116a3f29dfe42a0d20d95bb432a368bee14`. Every other artifact and scenario hash remains unchanged. A fresh strict no-update `npm.cmd run test:baselines` run exited 0 and reported all scenarios match.
 
 **Determinism and scope:** This is an approved deterministic expectation update for already-reviewed optional persisted telemetry. No source, test, runtime behavior, scenario input, startup snapshot, structural fingerprint, schema, migration, canon/FORAWWV, package, push, merge, tag, or release-state change. No new reusable knowledge rule is required because the existing artifact-scoped re-bless rule already requires unchanged control, formation, activity, watched-operation, end-report, and weekly-report outputs.
+
+## 2026-07-31 - Master-roadmap execution authority activated and synchronized
+
+**Type:** Governance truth / execution control-plane activation.
+
+**Authority and state:** The owner explicitly activated complete R1–R9 execution and separately authorized implementation, commits, remote pushes, final merge to `main`, documentation propagation, and repository/worktree/branch cleanup. `MASTER_ROADMAP.md`, `COMMAND_BOARD.md`, and the plans index now record that R1 and R3 are executing in isolated worktrees and converge through `codex/master-roadmap-execution`. The board mirrors the verified state: R1 Phase 0 is green and R3 Phases 0–2 are green.
+
+**Preserved publication boundary:** The expanded integration authority does not authorize signing, store upload, public release creation, or a public `1.0` tag. Those remain behind the separate `Publish 1.0` instruction. Transient local/directory Electron builds and release-candidate evidence remain permitted where R8/R9 require them.
+
+**Verification and scope:** Planning truth tests passed 2 files / 12 tests and `git diff --check` passed. This entry changes governance/status documentation only; no gameplay, scenario, history, canon/FORAWWV, save schema, deterministic baseline, package, version, tag, signing, upload, or public release state changed.

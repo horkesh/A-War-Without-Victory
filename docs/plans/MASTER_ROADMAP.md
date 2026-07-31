@@ -1,10 +1,10 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** READY FOR AUTONOMOUS EXECUTION; implementation is not yet authorized
+**Status:** IN AUTONOMOUS EXECUTION; R1 and R3 are active
 
 **Last updated:** 2026-07-31
 
-**Current integration base:** `main` at `f25b7aaa3` before this local planning pass
+**Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
 
 **Authority:** This file is the sole source of truth for unfinished product work.
 
@@ -33,7 +33,9 @@ Prior roadmap history remains in Git before this consolidation and in [PROJECT_L
 
 ## 2. Authority and Activation
 
-No implementation, commit, push, package, signing, upload, tag, or release action is authorized by this planning pass.
+The owner activated the complete roadmap on 2026-07-31 and subsequently authorized implementation, commits, remote pushes, final merge to `main`, documentation propagation, and repository/worktree/branch cleanup. That explicit instruction supersedes the planning-pass restriction on commits and pushes for this execution program.
+
+Signing, store upload, public release creation, and a public `1.0` tag remain unauthorized until the owner separately says `Publish 1.0` (or equally explicit wording). Transient local/directory Electron builds and immutable release-candidate evidence remain authorized where R8/R9 require them.
 
 | Owner instruction | Autonomous authority granted |
 |---|---|
