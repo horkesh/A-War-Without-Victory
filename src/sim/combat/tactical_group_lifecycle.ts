@@ -384,7 +384,7 @@ export function enterOperationRecovery(
         for (const tgId of tgIds) {
             const tg = state.military.tactical_groups?.[tgId];
             if (!tg) continue;
-            const telemetry = buildArmyHqTelemetryFromTg(tg);
+            const telemetry = buildArmyHqTelemetryFromTg(tg, op.army_hq_op_id);
             if (!telemetry) continue;
             op.army_hq_telemetry_snapshot = telemetry;
             break;

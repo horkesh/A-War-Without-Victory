@@ -576,9 +576,15 @@ function findTgForOp(
  * the TG-dissolution path (beginRecovery → dissolveTgsForOp) can snapshot the telemetry onto
  * the op record BEFORE the TG is deleted; finalizeOperationAAR runs only after the recovery
  * window elapses, by which point the live TG is gone (P2 timing bug #48).
+ * A resolver-validated ID-less legacy TG may inherit its owning CorpsOperation id;
+ * an explicit TG id always remains authoritative.
  */
-export function buildArmyHqTelemetryFromTg(tg: TacticalGroup): ArmyHqOpAarTelemetry | undefined {
-    if (tg.army_hq_op_id == null) return undefined;
+export function buildArmyHqTelemetryFromTg(
+    tg: TacticalGroup,
+    legacyArmyHqOpId?: string,
+): ArmyHqOpAarTelemetry | undefined {
+    const armyHqOpId = tg.army_hq_op_id ?? legacyArmyHqOpId;
+    if (armyHqOpId == null) return undefined;
     const donorCorpsSet = new Set<string>();
     let totalCohesionBled = 0;
     for (const d of tg.donor_contributions) {
@@ -588,7 +594,7 @@ export function buildArmyHqTelemetryFromTg(tg: TacticalGroup): ArmyHqOpAarTeleme
     const donorCorpsLineage = [...donorCorpsSet].sort(strictCompare);
     const crossCorpsDonorCount = donorCorpsLineage.filter(c => c !== tg.corps_id).length;
     return {
-        army_hq_op_id: tg.army_hq_op_id,
+        army_hq_op_id: armyHqOpId,
         anchor_corps_id: tg.corps_id,
         donor_corps_lineage: donorCorpsLineage,
         cross_corps_donor_count: crossCorpsDonorCount,
@@ -610,7 +616,7 @@ function buildArmyHqTelemetry(
 ): ArmyHqOpAarTelemetry | undefined {
     const tg = findTgForOp(state, hostCorpsId, op);
     if (tg) {
-        const live = buildArmyHqTelemetryFromTg(tg);
+        const live = buildArmyHqTelemetryFromTg(tg, op.army_hq_op_id);
         if (live) return live;
     }
     // Live TG absent (dissolved during beginRecovery) → use the snapshot captured then.
