@@ -24797,3 +24797,30 @@ Ran a fresh RBiH campaign from 6 April 1992 through exact turn 60 / 31 May 1993 
 **Repository state:** The detached generated-only worktree and ignored temporary Electron/profile residue were removed after exact-path validation. Twenty historical stashes remain intentionally preserved as recovery data. Remaining remote topic heads are to be joined to `main` by a history-only administrative merge and deleted only after the integrated `main` publication succeeds; that publication/ref proof is recorded in a subsequent ledger entry.
 
 **Release boundary:** No installer or distributable package was produced. No package version, tag, GitHub release, or release state changed.
+
+## 2026-07-31 - Repository housekeeping publication and branch reconciliation
+
+**Type:** Git history preservation / main publication / branch and worktree cleanup.
+
+**Published commits:**
+
+- `b5129c488cf1d7cd173bbf918937bce39ba3ac06` — the 572-file D2 owner-diary remediation, evidence, documentation, lifecycle-gate, and baseline packet;
+- `7751f0e8ddcc891feb70f1545401ac499c680c72` — an administrative `ours` merge joining every remaining local/remote topic head to `main` without changing the verified `b5129c488` tree.
+
+The administrative merge preserved patch-equivalent backups, superseded documentation, owner/native-review-gated work, rejected/parked calibration experiments, and the roadmap WIP head in reachable ancestry without activating their unapproved trees. `git diff HEAD^1 HEAD` was empty.
+
+**Publication and cleanup proof:**
+
+- pushed `main` from `b8ff530de` through `7751f0e8d`;
+- deleted 19 merged remote topic refs and the merged local `codex/fix-warroom-main-menu-hide` ref;
+- fetched/pruned origin after deletion;
+- local branches: `main` only;
+- remote branches: `origin/main` only (plus the symbolic `origin/HEAD`);
+- registered worktrees: the root `main` worktree only;
+- open pull requests: zero;
+- historical stashes: 20, intentionally preserved as recovery data;
+- main and origin/main synchronized at the time of this record.
+
+The final documentation-only publication commit follows this ledger entry. Required remote checks are awaited before the owner task is declared clean and green.
+
+**Release boundary:** No package, installer, tag, version, GitHub release, or release-state change was performed.

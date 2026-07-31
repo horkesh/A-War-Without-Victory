@@ -1,7 +1,7 @@
 # D2 Owner Diary Remediation and Repository Closeout
 
 **Date:** 2026-07-31
-**Status:** implemented and locally verified; Git publication/ref cleanup is recorded separately in `docs/PROJECT_LEDGER.md`
+**Status:** implemented, locally verified, published to `main`, and repository refs reconciled
 
 ## Scope
 
