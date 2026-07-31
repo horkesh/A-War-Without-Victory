@@ -19,6 +19,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { distributeCasualtiesAcrossTg } from '../src/sim/combat/tactical_group_casualties.js';
 import {
     dissolveTacticalGroup,
     formTacticalGroup,
@@ -164,8 +165,22 @@ describe('TG telemetry — tg_participations (Phase 3A)', () => {
         });
         const tgId = formed.tg_id!;
         const tg = state.military.tactical_groups![tgId]!;
-        tg.donor_contributions.find((d) => d.brigade_id === 'a_archived_donor')!.casualties_so_far = 75;
+        tg.donor_contributions.find((d) => d.brigade_id === 'a_archived_donor')!.casualties_so_far = 275;
         tg.donor_contributions.find((d) => d.brigade_id === 'm_live_donor')!.casualties_so_far = 20;
+
+        const finalBattle = distributeCasualtiesAcrossTg(400, tg.anchor_brigade_id, tg.donor_contributions);
+        expect(finalBattle.anchor_casualties).toBe(295);
+        expect(finalBattle.donor_casualties).toEqual({
+            a_archived_donor: 25,
+            m_live_donor: 80,
+        });
+        expect(
+            finalBattle.anchor_casualties
+            + Object.values(finalBattle.donor_casualties).reduce((sum, casualties) => sum + casualties, 0),
+        ).toBe(400);
+        for (const contribution of tg.donor_contributions) {
+            contribution.casualties_so_far += finalBattle.donor_casualties[contribution.brigade_id] ?? 0;
+        }
 
         const formations = state.military.formations!;
         const archivedDonorHistory = formations.a_archived_donor.brigade_history!;
@@ -203,18 +218,19 @@ describe('TG telemetry — tg_participations (Phase 3A)', () => {
         expect(archivedDonor).toMatchObject({
             dissolved_turn: 20,
             personnel_lent: 300,
-            casualties: 75,
-            personnel_returned: 225,
+            casualties: 300,
+            personnel_returned: 0,
         });
         const liveDonor = formations.m_live_donor.brigade_history!.tg_participations![0]!;
         expect(liveDonor).toMatchObject({
             dissolved_turn: 20,
             personnel_lent: 200,
-            casualties: 20,
-            personnel_returned: 180,
+            casualties: 100,
+            personnel_returned: 100,
         });
         for (const record of [archivedDonor, liveDonor]) {
             expect(record.casualties).toBeLessThanOrEqual(record.personnel_lent!);
+            expect(record.personnel_returned).toBe(Math.max(0, record.personnel_lent! - record.casualties!));
             expect(record.casualties! + record.personnel_returned!).toBe(record.personnel_lent);
         }
 

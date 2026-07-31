@@ -124,6 +124,41 @@ describe('distributeCasualtiesAcrossTg (ADR-0005 v2.1)', () => {
         expect(total).toBe(200);
     });
 
+    it('(h2) caps repeated-battle allocations at each donor remaining loan', () => {
+        const donors = [donor('d1', 30), donor('d2', 70)];
+
+        const firstBattle = distributeCasualtiesAcrossTg(100, 'anchor', donors);
+        expect(firstBattle).toEqual({
+            anchor_casualties: 50,
+            donor_casualties: { d1: 15, d2: 35 },
+        });
+        for (const contribution of donors) {
+            contribution.casualties_so_far += firstBattle.donor_casualties[contribution.brigade_id] ?? 0;
+        }
+
+        const secondBattle = distributeCasualtiesAcrossTg(200, 'anchor', donors);
+        expect(secondBattle).toEqual({
+            anchor_casualties: 150,
+            donor_casualties: { d1: 15, d2: 35 },
+        });
+        for (const contribution of donors) {
+            contribution.casualties_so_far += secondBattle.donor_casualties[contribution.brigade_id] ?? 0;
+        }
+
+        for (const contribution of donors) {
+            expect(contribution.casualties_so_far).toBeLessThanOrEqual(contribution.personnel_lent);
+        }
+        expect(donors.map((contribution) => contribution.casualties_so_far)).toEqual([30, 70]);
+        expect(
+            firstBattle.anchor_casualties
+            + Object.values(firstBattle.donor_casualties).reduce((sum, casualties) => sum + casualties, 0),
+        ).toBe(100);
+        expect(
+            secondBattle.anchor_casualties
+            + Object.values(secondBattle.donor_casualties).reduce((sum, casualties) => sum + casualties, 0),
+        ).toBe(200);
+    });
+
     it('(i) sum(personnel_lent) === 0 → anchor takes 100% (defensive)', () => {
         const r = distributeCasualtiesAcrossTg(100, 'anchor', [donor('d1', 0)]);
         expect(r.anchor_casualties).toBe(100);

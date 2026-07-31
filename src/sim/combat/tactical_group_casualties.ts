@@ -12,8 +12,9 @@
  * Integer pro-rata via **largest-remainder method**; ties broken by donor
  * `brigade_id` strictCompare (determinism).
  *
- * Hard Invariant #5 (casualties capped at donated amount): per-donor
- * casualties never exceed `personnel_lent`. Any excess from the pro-rata
+ * Hard Invariant #5 (casualties capped at donated amount): cumulative
+ * per-donor casualties never exceed `personnel_lent`. Each battle is capped
+ * at the donor's remaining loan. Any excess from the pro-rata
  * pool is reassigned to the anchor — see §Edge cases below.
  *
  * v2.1 scope: personnel only. v2.2 extends to heavy equipment using the
@@ -88,7 +89,7 @@ export function distributeCasualtiesAcrossTg(
             brigade_id: d.brigade_id,
             floor,
             remainder: exact - floor,
-            cap: d.personnel_lent, // Hard Invariant #5
+            cap: Math.max(0, d.personnel_lent - d.casualties_so_far), // Hard Invariant #5
         };
     });
 
@@ -110,7 +111,7 @@ export function distributeCasualtiesAcrossTg(
         }
     }
 
-    // Apply Hard Invariant #5: cap per donor at personnel_lent, reassign overflow to anchor.
+    // Apply Hard Invariant #5: cap at the remaining loan, reassign overflow to anchor.
     let anchorOverflow = 0;
     for (const alloc of allocations) {
         if (alloc.floor > alloc.cap) {
