@@ -16,6 +16,11 @@ import { fileURLToPath } from 'node:url';
 
 import { deserializeState } from '../../src/state/serialize.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
+import {
+    divisionDisplayName,
+    normalizeDivisionDisplayName,
+    resolveDivisionNumber,
+} from '../../src/sim/combat/tactical_group_promotion.js';
 
 type LooseRecord = Record<string, unknown>;
 
@@ -67,9 +72,39 @@ export interface OperationalTacticalGroupAudit {
             focus_settlement_ids: string[];
         }>;
     };
-    duplicate_promotion_display_names: Array<{
-        display_name: string;
-        corps_ids: string[];
+    promotion_identity: {
+        unmapped_records: Array<{
+            record_key: string;
+            corps_id: string;
+            og_ordinal: number | null;
+            division_number: number | null;
+            division_display_name: string;
+        }>;
+        mapped_mismatches: Array<{
+            record_key: string;
+            corps_id: string;
+            og_ordinal: number;
+            division_number: number | null;
+            division_display_name: string;
+            expected_division_number: number;
+            expected_division_display_name: string;
+        }>;
+        duplicate_division_numbers: Array<{
+            division_number: number;
+            record_keys: string[];
+            count: number;
+        }>;
+        duplicate_display_names: Array<{
+            normalized_display_name: string;
+            record_keys: string[];
+            count: number;
+        }>;
+    };
+    same_corps_legacy_tg_overlap_candidates: Array<{
+        corps_id: string;
+        active_legacy_og_ids: string[];
+        live_tg_ids: string[];
+        queued_legacy_order_count: number;
     }>;
 }
 
@@ -238,26 +273,133 @@ function auditLegacyOperationalGroups(military: LooseRecord): OperationalTactica
     };
 }
 
-function auditDuplicatePromotionDisplayNames(
+function auditPromotionIdentity(
     military: LooseRecord,
-): OperationalTacticalGroupAudit['duplicate_promotion_display_names'] {
-    const corpsIdsByDisplayName = new Map<string, Set<string>>();
-    for (const [, rawPromotion] of sortedRecordEntries(military.og_promotions)) {
+): OperationalTacticalGroupAudit['promotion_identity'] {
+    const unmappedRecords: OperationalTacticalGroupAudit['promotion_identity']['unmapped_records'] = [];
+    const mappedMismatches: OperationalTacticalGroupAudit['promotion_identity']['mapped_mismatches'] = [];
+    const recordKeysByNumber = new Map<number, string[]>();
+    const recordKeysByDisplayName = new Map<string, string[]>();
+
+    for (const [recordKey, rawPromotion] of sortedRecordEntries(military.og_promotions)) {
         const promotion = asRecord(rawPromotion);
-        const displayName = asString(promotion.division_display_name);
         const corpsId = asString(promotion.corps_id);
-        if (displayName.length === 0 || corpsId.length === 0) continue;
-        const corpsIds = corpsIdsByDisplayName.get(displayName) ?? new Set<string>();
-        corpsIds.add(corpsId);
-        corpsIdsByDisplayName.set(displayName, corpsIds);
+        const ogOrdinal = asFiniteNumber(promotion.og_ordinal);
+        const divisionNumber = asFiniteNumber(promotion.division_number);
+        const displayName = asString(promotion.division_display_name);
+        const normalizedDisplayName = normalizeDivisionDisplayName(displayName);
+        const expectedNumber = ogOrdinal === null ? undefined : resolveDivisionNumber(corpsId, ogOrdinal);
+
+        if (expectedNumber == null || ogOrdinal === null) {
+            unmappedRecords.push({
+                record_key: recordKey,
+                corps_id: corpsId,
+                og_ordinal: ogOrdinal,
+                division_number: divisionNumber,
+                division_display_name: displayName,
+            });
+        } else {
+            const expectedDisplayName = divisionDisplayName(expectedNumber);
+            if (
+                divisionNumber !== expectedNumber
+                || normalizedDisplayName !== normalizeDivisionDisplayName(expectedDisplayName)
+            ) {
+                mappedMismatches.push({
+                    record_key: recordKey,
+                    corps_id: corpsId,
+                    og_ordinal: ogOrdinal,
+                    division_number: divisionNumber,
+                    division_display_name: displayName,
+                    expected_division_number: expectedNumber,
+                    expected_division_display_name: expectedDisplayName,
+                });
+            }
+        }
+
+        if (divisionNumber !== null) {
+            const recordKeys = recordKeysByNumber.get(divisionNumber) ?? [];
+            recordKeys.push(recordKey);
+            recordKeysByNumber.set(divisionNumber, recordKeys);
+        }
+        if (normalizedDisplayName.length > 0) {
+            const recordKeys = recordKeysByDisplayName.get(normalizedDisplayName) ?? [];
+            recordKeys.push(recordKey);
+            recordKeysByDisplayName.set(normalizedDisplayName, recordKeys);
+        }
     }
 
-    return sortedStrings(corpsIdsByDisplayName.keys())
-        .map((displayName) => ({
-            display_name: displayName,
-            corps_ids: sortedStrings(corpsIdsByDisplayName.get(displayName) ?? []),
+    const duplicateDivisionNumbers = [...recordKeysByNumber.entries()]
+        .filter(([, recordKeys]) => recordKeys.length > 1)
+        .sort(([a], [b]) => a - b)
+        .map(([divisionNumber, recordKeys]) => ({
+            division_number: divisionNumber,
+            record_keys: recordKeys.sort(strictCompare),
+            count: recordKeys.length,
+        }));
+    const duplicateDisplayNames = [...recordKeysByDisplayName.entries()]
+        .filter(([, recordKeys]) => recordKeys.length > 1)
+        .sort(([a], [b]) => strictCompare(a, b))
+        .map(([normalizedDisplayName, recordKeys]) => ({
+            normalized_display_name: normalizedDisplayName,
+            record_keys: recordKeys.sort(strictCompare),
+            count: recordKeys.length,
+        }));
+
+    return {
+        unmapped_records: unmappedRecords,
+        mapped_mismatches: mappedMismatches,
+        duplicate_division_numbers: duplicateDivisionNumbers,
+        duplicate_display_names: duplicateDisplayNames,
+    };
+}
+
+function auditSameCorpsLegacyTgOverlapCandidates(
+    military: LooseRecord,
+): OperationalTacticalGroupAudit['same_corps_legacy_tg_overlap_candidates'] {
+    const activeLegacyOgIdsByCorps = new Map<string, string[]>();
+    for (const [key, rawFormation] of sortedRecordEntries(military.formations)) {
+        const formation = asRecord(rawFormation);
+        const corpsId = asString(formation.corps_id);
+        if (formation.kind !== 'og' || formation.status !== 'active' || corpsId.length === 0) continue;
+        const formationIds = activeLegacyOgIdsByCorps.get(corpsId) ?? [];
+        formationIds.push(asString(formation.id, key));
+        activeLegacyOgIdsByCorps.set(corpsId, formationIds);
+    }
+
+    const liveTgIdsByCorps = new Map<string, string[]>();
+    for (const [key, rawTacticalGroup] of sortedRecordEntries(military.tactical_groups)) {
+        const tacticalGroup = asRecord(rawTacticalGroup);
+        const corpsId = asString(tacticalGroup.corps_id);
+        if (corpsId.length === 0) continue;
+        const tacticalGroupIds = liveTgIdsByCorps.get(corpsId) ?? [];
+        tacticalGroupIds.push(asString(tacticalGroup.id, key));
+        liveTgIdsByCorps.set(corpsId, tacticalGroupIds);
+    }
+
+    const queuedLegacyOrderCountsByCorps = new Map<string, number>();
+    const rawOrders = Array.isArray(military.og_orders) ? military.og_orders : [];
+    for (const rawOrder of rawOrders) {
+        const corpsId = asString(asRecord(rawOrder).corps_id);
+        if (corpsId.length === 0) continue;
+        queuedLegacyOrderCountsByCorps.set(corpsId, (queuedLegacyOrderCountsByCorps.get(corpsId) ?? 0) + 1);
+    }
+
+    const corpsIds = new Set<string>([
+        ...activeLegacyOgIdsByCorps.keys(),
+        ...liveTgIdsByCorps.keys(),
+        ...queuedLegacyOrderCountsByCorps.keys(),
+    ]);
+    return sortedStrings(corpsIds)
+        .map((corpsId) => ({
+            corps_id: corpsId,
+            active_legacy_og_ids: sortedStrings(activeLegacyOgIdsByCorps.get(corpsId) ?? []),
+            live_tg_ids: sortedStrings(liveTgIdsByCorps.get(corpsId) ?? []),
+            queued_legacy_order_count: queuedLegacyOrderCountsByCorps.get(corpsId) ?? 0,
         }))
-        .filter((duplicate) => duplicate.corps_ids.length > 1);
+        .filter((candidate) => (
+            candidate.live_tg_ids.length > 0
+            && (candidate.active_legacy_og_ids.length > 0 || candidate.queued_legacy_order_count > 0)
+        ));
 }
 
 /** Build a deterministic, read-only lifecycle report from a deserialized save. */
@@ -274,7 +416,8 @@ export function auditOperationalTacticalGroups(rawState: unknown): OperationalTa
         army_hq_operations: auditArmyHqOperations(military, liveTacticalGroupIds),
         participations: auditParticipations(military),
         legacy_operational_groups: auditLegacyOperationalGroups(military),
-        duplicate_promotion_display_names: auditDuplicatePromotionDisplayNames(military),
+        promotion_identity: auditPromotionIdentity(military),
+        same_corps_legacy_tg_overlap_candidates: auditSameCorpsLegacyTgOverlapCandidates(military),
     };
 }
 

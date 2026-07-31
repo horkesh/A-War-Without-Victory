@@ -577,7 +577,7 @@ export interface OgPromotionRecord {
     faction: FactionId;
     /** OG ordinal that was promoted (1-based). */
     og_ordinal: number;
-    /** Promoted Division number (historical map where known, else og_ordinal + offset). */
+    /** Promoted Division number from an explicit, verified (corps, OG ordinal) mapping. */
     division_number: number;
     /** New display identity, e.g. "21. Division". */
     division_display_name: string;

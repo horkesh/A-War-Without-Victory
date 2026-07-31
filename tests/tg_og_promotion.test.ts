@@ -5,7 +5,7 @@
  * (2nd Corps Tuzla: 1st OG→21st Division, 5th OG→25th Division). Faction-specific to ARBiH.
  *
  * Covers:
- *   1. Pure helpers: resolveDivisionNumber (historical map + default offset), divisionDisplayName.
+ *   1. Pure helpers: resolveDivisionNumber (explicit historical map only), divisionDisplayName.
  *   2. evaluateOgPromotions: criterion (formation-count threshold), RBiH-only, one-way.
  *   3. applyOgPromotions: writes the one-way record; idempotent (no re-promote).
  *   4. projectPromotionDisplayNames: Division identity lands on the derived sector.
@@ -13,6 +13,8 @@
  *      brigade COUNT + personnel + equipment are UNCHANGED by promotion.
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import type {
     CorpsFrontSector,
@@ -21,6 +23,7 @@ import type {
     MilitaryState,
 } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import { deserializeState } from '../src/state/serialize.js';
 import {
     divisionDisplayName,
     resolveDivisionNumber,
@@ -87,9 +90,9 @@ describe('resolveDivisionNumber / divisionDisplayName', () => {
         expect(resolveDivisionNumber('arbih_2nd_corps', 5)).toBe(25);
     });
 
-    it('falls back to og_ordinal + 20 when unmapped', () => {
-        expect(resolveDivisionNumber('arbih_3rd_corps', 1)).toBe(21);
-        expect(resolveDivisionNumber('arbih_1st_corps', 2)).toBe(22);
+    it('returns no identity for an unmapped corps/ordinal pair', () => {
+        expect(resolveDivisionNumber('arbih_3rd_corps', 1)).toBeUndefined();
+        expect(resolveDivisionNumber('arbih_1st_corps', 2)).toBeUndefined();
     });
 
     it('formats the Division display identity', () => {
@@ -128,6 +131,52 @@ describe('evaluateOgPromotions', () => {
         expect(evaluateOgPromotions(state, 30)).toHaveLength(0);
     });
 
+    it('omits simultaneous threshold crossings for unmapped RBiH corps instead of inventing duplicate Divisions', () => {
+        const state = stateWith({
+            formations: {
+                arbih_3rd_corps: corps('arbih_3rd_corps', 'RBiH'),
+                arbih_5th_corps: corps('arbih_5th_corps', 'RBiH'),
+            },
+            counts: { arbih_3rd_corps: TH, arbih_5th_corps: TH },
+        });
+
+        expect(evaluateOgPromotions(state, 30)).toEqual([]);
+        expect(applyOgPromotions(state, 30)).toEqual([]);
+        expect(state.military.og_promotions).toBeUndefined();
+    });
+
+    it('rejects a new mapped identity when its Division number is already occupied by an old record', () => {
+        const state = stateWith({
+            formations: { arbih_2nd_corps: corps('arbih_2nd_corps', 'RBiH') },
+            counts: { arbih_2nd_corps: TH },
+            promotions: {
+                legacy: {
+                    corps_id: 'arbih_5th_corps', faction: 'RBiH', og_ordinal: 1,
+                    division_number: 21, division_display_name: 'Legacy identity', promoted_on_turn: 12,
+                },
+            },
+        });
+
+        expect(evaluateOgPromotions(state, 30)).toEqual([]);
+        expect(state.military.og_promotions).toHaveProperty('legacy');
+    });
+
+    it('rejects a new mapped identity when its normalized Division name is already occupied', () => {
+        const state = stateWith({
+            formations: { arbih_2nd_corps: corps('arbih_2nd_corps', 'RBiH') },
+            counts: { arbih_2nd_corps: TH },
+            promotions: {
+                legacy: {
+                    corps_id: 'arbih_5th_corps', faction: 'RBiH', og_ordinal: 1,
+                    division_number: 99, division_display_name: '  21.   DIVISION  ', promoted_on_turn: 12,
+                },
+            },
+        });
+
+        expect(evaluateOgPromotions(state, 30)).toEqual([]);
+        expect(state.military.og_promotions).toHaveProperty('legacy');
+    });
+
     it('is RBiH-only: a VRS or HVO corps at threshold is NOT promoted', () => {
         const state = stateWith({
             formations: {
@@ -151,6 +200,31 @@ describe('evaluateOgPromotions', () => {
             },
         });
         expect(evaluateOgPromotions(state, 30)).toHaveLength(0);
+    });
+
+    it('loads old unmapped and duplicate records unchanged without a migration', () => {
+        const raw = JSON.parse(readFileSync(join(
+            process.cwd(),
+            'data',
+            'derived',
+            'startup',
+            'apr_1992_initial_save.json',
+        ), 'utf8')) as GameState;
+        const legacyPromotions: NonNullable<MilitaryState['og_promotions']> = {
+            legacy_a: {
+                corps_id: 'arbih_3rd_corps', faction: 'RBiH', og_ordinal: 1,
+                division_number: 21, division_display_name: '21. Division', promoted_on_turn: 40,
+            },
+            legacy_b: {
+                corps_id: 'arbih_5th_corps', faction: 'RBiH', og_ordinal: 1,
+                division_number: 21, division_display_name: '21. Division', promoted_on_turn: 41,
+            },
+        };
+        raw.military.og_promotions = legacyPromotions;
+
+        const loaded = deserializeState(JSON.stringify(raw));
+
+        expect(loaded.military.og_promotions).toEqual(legacyPromotions);
     });
 });
 

@@ -2685,6 +2685,8 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // Compatibility boundary: consumes persisted legacy orders; TG-enabled activation
+        // discards them without creating formations or mutating donor/corps state.
         name: 'activate-operational-groups',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -3586,6 +3588,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // Compatibility-only bounded drain for already-active old-save kind:'og' formations.
         name: 'update-og-lifecycle',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
