@@ -3972,3 +3972,11 @@ Applied in `[2026-07-31] Seamless Command Room to Tactical Map transition opened
 **Activation phrases should carry exact authority:** separate reversible local implementation from externally visible publication. In this program, `Execute the master roadmap` permits local work and transient validation builds; `Publish 1.0` separately permits signing, upload, tag/push, and public release after readiness is proven.
 
 Applied in `[2026-07-31] Planning control plane consolidated for autonomous execution`, `docs/plans/MASTER_ROADMAP.md`, and the R1-R9 plans indexed by `docs/plans/README.md`.
+
+## 2026-07-31 - Performance evidence must prove schema completeness
+
+**Visible readiness and profiler completion are different boundaries:** a current-state canvas can become interactive before a later renderer lifecycle signal such as MapLibre style load arrives. Durable rule: publish a transition sample only after every required milestone exists, and make the external harness reject any sample with a missing duration. Always rebuild the tested UI bundle before an Electron baseline so source tests and runtime evidence exercise the same instrumentation.
+
+**Profiling isolation includes persistence and diagnostics:** an unpackaged Electron run can otherwise write repository autosaves or open DevTools that injects unrelated protocol errors. Durable rule: give profiling launches isolated absolute user-data and save roots, await cold-cache clearing before navigation, keep warm cycles inside that application lifetime, and hash repository saves before and after.
+
+Applied in `[2026-07-31] Seamless map transition Phase 0 baseline instrumentation` and `tools/ui/map_transition_profile.cjs`.

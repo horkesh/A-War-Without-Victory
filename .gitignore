@@ -73,6 +73,7 @@ tools/tmp_*.cjs
 tmp_gui_observation/
 tmp-paradox-qa-*/
 tmp-playtest-*/
+tmp-map-transition-perf/
 tmp-zepa-trace/
 
 # Electron browser profiles are disposable QA runtime state, not playtest evidence.

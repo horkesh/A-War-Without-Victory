@@ -17,6 +17,8 @@ describe('tactical map loading state', () => {
     expect(source).toMatch(/const currentMapStateReady = isTacticalMapStateReady\(/);
     expect(source).toMatch(/data-map-ready=\{currentMapStateReady \? 'true' : 'false'\}/);
     expect(source).toMatch(/data-map-state-turn=\{mapRenderedTurn \?\? ''\}/);
+    expect(source).toMatch(/completeMapTransition\(\{/);
+    expect(source).toMatch(/fingerprintMatches:\s*mapRenderedRevision === loadedStateFingerprint/);
     expect(source).toMatch(/!currentMapStateReady && \(/);
     expect(source).toMatch(/counterDomOverlay\.inert = true/);
     expect(source).toMatch(/formationCounterDomOverlayRef\.current\.inert = !currentMapStateReady/);

@@ -55,6 +55,19 @@ const {
   projectPlayerVisibleStateJson,
 } = require('./player_visible_state.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
+const MAP_TRANSITION_PROFILE_MODE = process.env.AWWV_MAP_TRANSITION_PROFILE === '1';
+
+function getMapTransitionSaveRoot() {
+  if (!MAP_TRANSITION_PROFILE_MODE) return null;
+  const configuredRoot = String(process.env.AWWV_MAP_TRANSITION_SAVE_ROOT || '').trim();
+  if (!configuredRoot) {
+    throw new Error('AWWV_MAP_TRANSITION_SAVE_ROOT is required in map-transition profile mode');
+  }
+  if (!path.isAbsolute(configuredRoot)) {
+    throw new Error('AWWV_MAP_TRANSITION_SAVE_ROOT must be an absolute path');
+  }
+  return path.resolve(configuredRoot);
+}
 
 function strictCompare(a, b) {
   return a < b ? -1 : a > b ? 1 : 0;
@@ -909,10 +922,20 @@ function createMainWindow(options = {}) {
   });
 
   attachRuntimeProbeFailureCapture(win, runtimeProbeLabel, runtimeFailureChecks);
-  win.loadURL(warroomUrl);
 
-  // Clear HTTP cache so the tactical map iframe always loads the latest bundle from the map server.
-  win.webContents.session.clearCache().catch(() => { });
+  // Cold profiling must start from an empty renderer cache, while warm cycles
+  // keep the cache accumulated in this one application lifetime. In ordinary
+  // development the historical clear-on-launch behavior remains, but it now
+  // finishes before navigation instead of racing the first resource requests.
+  const shouldClearColdCache = !MAP_TRANSITION_PROFILE_MODE
+    || process.env.AWWV_MAP_TRANSITION_COLD_CACHE === '1';
+  const navigation = (async () => {
+    if (shouldClearColdCache) await win.webContents.session.clearCache();
+    await win.loadURL(warroomUrl);
+  })();
+  navigation.catch((error) => {
+    console.error('[AWWV] Main window navigation failed:', error);
+  });
 
   if (openDevTools) {
     const devToolsPromise = win.webContents.openDevTools({ mode: 'detach' });
@@ -1596,6 +1619,8 @@ function showStateFileDialog(win) {
 }
 
 function getSavesDir() {
+  const profileSaveRoot = getMapTransitionSaveRoot();
+  if (profileSaveRoot) return profileSaveRoot;
   const root = app.isPackaged ? app.getPath('userData') : getBaseDir();
   return path.join(root, 'saves');
 }
@@ -1620,7 +1645,10 @@ function createWindow() {
   // builds, the detached DevTools window steals MainWindow focus and prevents
   // CloseMainWindow-driven clean exit (operator must force-kill). Dev tools
   // should not ship enabled-by-default in production anyway.
-  createMainWindow({ show: true, openDevTools: !app.isPackaged });
+  createMainWindow({
+    show: true,
+    openDevTools: !app.isPackaged && !MAP_TRANSITION_PROFILE_MODE,
+  });
 }
 
 function openTacticalMapWindow(mode = 'operational') {
