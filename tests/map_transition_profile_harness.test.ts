@@ -135,6 +135,47 @@ describe('map transition Electron profile harness contract', () => {
     expect(JSON.stringify(result)).not.toMatch(/ws:\/\/|49321|5a65bc3b|127\.0\.0\.1/);
   });
 
+  it('serializes complete process diagnostics without ephemeral stdout or stderr data', () => {
+    const { buildPersistedProcessDiagnostics } = require('../tools/ui/map_transition_profile.cjs');
+    expect(typeof buildPersistedProcessDiagnostics).toBe('function');
+    if (typeof buildPersistedProcessDiagnostics !== 'function') return;
+    const outputDirectory = String.raw`F:\AWWV-worktrees\r1-map-transition\tmp-map-transition-perf\diagnostics-test`;
+    const result = buildPersistedProcessDiagnostics({
+      stdout: [
+        'Tactical map server: http://127.0.0.1:58250',
+        '[AWWV] Map: using built server at http://127.0.0.1:58250/',
+        '[AWWV] Map: using built server at http://127.0.0.1:58250/',
+        `unexpected stdout at http://localhost:53728/private/5a65bc3b-f23d-4fab-a12b-0c2e8ae8a818 and https://example.test/details from ${outputDirectory} and D:\\private\\run.log and /home/test/run.log on port 53728`,
+      ],
+      stderr: [
+        'Debugger ending on ws://127.0.0.1:49321/5a65bc3b-f23d-4fab-a12b-0c2e8ae8a818',
+        'For help, see: https://nodejs.org/en/docs/inspector',
+        `unexpected stderr from ${outputDirectory}`,
+      ],
+      outputDirectory,
+    });
+
+    expect(result).toEqual({
+      expected_main_process_stdout: {
+        built_map_server_selected: 2,
+        tactical_map_server_started: 1,
+      },
+      main_process_stdout: [
+        'unexpected stdout at <loopback-http-endpoint> and <url> from <evidence> and <absolute-path> and <absolute-path> on port <ephemeral-port>',
+      ],
+      expected_main_process_stderr: {
+        inspector_help: 1,
+        inspector_shutdown: 1,
+      },
+      main_process_stderr: ['unexpected stderr from <evidence>'],
+    });
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toMatch(/(?:ws|https?):\/\/(?:127\.0\.0\.1|localhost|\[::1\])/i);
+    expect(serialized).not.toMatch(/https:\/\/example\.test|D:\\\\private|\/home\/test/);
+    expect(serialized).not.toMatch(/5a65bc3b-f23d-4fab-a12b-0c2e8ae8a818|49321|53728|58250/);
+    expect(serialized).not.toContain(outputDirectory);
+  });
+
   it('builds a bounded machine manifest without retaining the raw CPU model', () => {
     const { buildMachineManifest } = require('../tools/ui/map_transition_profile.cjs');
     expect(typeof buildMachineManifest).toBe('function');
