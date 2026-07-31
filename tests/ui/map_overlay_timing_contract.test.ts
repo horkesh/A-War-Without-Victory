@@ -57,4 +57,26 @@ describe('Map overlay dev timing', () => {
     expect(cleanupEnd).toBeGreaterThan(cleanupStart);
     expect(source.slice(cleanupStart, cleanupEnd)).toContain('appliedStateRef.current = null');
   });
+
+  it('marks the complete transition lifecycle without replacing the readiness gate', () => {
+    const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+    const mapSource = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const loaderSource = readFileSync('src/ui/map/data/DataLoader.ts', 'utf8');
+
+    expect(appSource).toMatch(/beginMapTransition\(\)/);
+    for (const mark of [
+      'viewport-visible',
+      'map-created',
+      'style-loaded',
+      'current-state-rendered',
+      'interactive',
+    ]) {
+      expect(mapSource).toContain(`'${mark}'`);
+    }
+    expect(loaderSource).toMatch(/countMapTransitionResource/);
+    expect(mapSource).toMatch(/countMapTransitionConstruction/);
+    expect(mapSource).toMatch(/countMapTransitionRelease/);
+    expect(mapSource).toMatch(/isTacticalMapStateReady/);
+    expect(mapSource).not.toMatch(/console\.time\(/);
+  });
 });

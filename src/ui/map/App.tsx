@@ -108,6 +108,7 @@ import {
   resolveBrowserEventDecision,
   startCampaignFromSidePicker,
 } from './desktop/campaignRecruitmentActions';
+import { beginMapTransition } from './perf/mapTransitionTiming';
 
 declare global {
   interface Window {
@@ -1319,6 +1320,7 @@ function App() {
     if (restoreFocus) restoreWarroomFocus();
   };
   const leaveWarroomForGame = () => {
+    beginMapTransition();
     setWarroomDeskOpen(false);
     setWarroomDecisionRoomOpen(false);
     setWarroomOverlaySurface(null);

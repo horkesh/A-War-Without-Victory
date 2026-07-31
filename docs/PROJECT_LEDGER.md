@@ -24858,3 +24858,15 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Docs/test propagation:** Replaced the large historical roadmap accumulator and duplicate board; updated the plans index and documentation index; added six missing R4-R9 task-level plans; resolved inherited R2/R3 pauses; and replaced stale prose-snapshot roadmap assertions with current control-plane contract tests. No runtime, scenario, save, baseline, derived map artifact, or `docs/10_canon/FORAWWV.md` file was changed.
 
 **Authority boundary:** This entry records preparation only. No implementation workstream, branch/worktree creation, commit, push, package, signing, upload, tag, installer, or release-state change was performed or authorized.
+
+## 2026-07-31 - Seamless map transition Phase 0 baseline instrumentation
+
+**Type:** Profiling-only runtime instrumentation / reproducible Electron performance baseline / roadmap execution record.
+
+**Change:** Added a default-off monotonic Command Room-to-map profiler with the plan's seven stable milestones, current-turn/current-fingerprint truth, MapLibre construction and WebGL release counters, and stable-key static-resource request counters. Added a non-overwriting Playwright Electron harness that creates isolated user data and save roots, clears cache before each cold launch, disables profiling DevTools noise, protects repository saves by hash, rejects incomplete samples, and captures screenshots plus console/page/network/HTTP/main-process diagnostics. Normal player behavior and the existing current-state readiness gate are unchanged.
+
+**Evidence:** `tmp-map-transition-perf/baseline-complete-marks/baseline.json` records app 0.9.9-beta.1, Electron 41.0.3, Chromium 146.0.7680.80, three cold launches, three warmups per launch, and 20 measured warm switches per launch. Cold current-state p50/p95 was 5526.5/5658.26 ms; warm p50/p95 was 4009.95/4265.585 ms. All 72 transitions contained every milestone and current-state proof, all diagnostics and stale samples were zero, and each launch balanced 24 constructions with 24 releases. Every measured warm cycle reconstructed/released a map and repeated static-resource requests, confirming the Phase 1 lifecycle target.
+
+**Verification:** TDD red/green evidence preceded implementation. The final focused suite passed 4 files / 19 tests; adjacent Electron persistence/runtime contracts passed 2 files / 20 tests; TypeScript, tactical-map build, War Room build, harness/main-process syntax checks, repository EOL, and `git diff --check` passed.
+
+**Determinism and scope:** Profiling uses renderer-monotonic time only, is disabled without the explicit query switch, and writes no timing, path, state, save, replay, scenario, or hidden-enemy data into canonical artifacts. Generated evidence remains ignored and retained outside Git. No simulation, scenario, historical content, save schema, baseline, package version, tag, installer, publication, or release state changed.

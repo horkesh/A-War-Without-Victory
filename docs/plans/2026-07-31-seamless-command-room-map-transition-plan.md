@@ -3,14 +3,14 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** READY — execute Phase 0 first; implementation has not started
+**Status:** IN PROGRESS — Phase 0 baseline complete; Phase 1 is next
 **Overseer:** Orchestrator
 **Owner lane:** Performance Engineer + UI/UX Developer
 **Independent reviewers:** Technical Architect, QA Engineer, Platform Specialist, Process QA
 **Roadmap workstream:** R1
 **Roadmap slot:** first autonomous execution packet / player-facing map performance
 **Phase/workstream covered:** Electron shell navigation, tactical-map React lifetime, MapLibre/Deck lifetime, static map-data loading, packaged local HTTP caching, cold-entry bundle/network cleanup
-**Current next action:** Create or claim an isolated implementation worktree and execute Phase 0 baseline instrumentation
+**Current next action:** Execute Phase 1 persistent campaign-scoped map viewport against the retained Phase 0 baseline
 **Collision rule:** Do not execute source-changing phases while the RS 104-week friction plan's FR-03 map-focus packet owns `App.tsx`, `MapContainer.tsx`, `shellNavigation.ts`, or `gameStore.ts`. Rebase or sequence this packet first; never merge two independent edits to those files by guesswork.
 **Activation boundary:** `Execute the master roadmap` authorizes source implementation, tests, evidence, local commits, and transient local directory builds for this packet. It does not authorize push, tag, signing, upload, installer publication, or release-state change.
 
@@ -241,12 +241,12 @@ If target hardware is not defined, Phase 0 records the machine/runtime manifest 
 - Create `src/ui/map/perf/mapTransitionTiming.ts`
 - Create `tests/ui/map_transition_timing.test.ts`
 
-- [ ] Define the stable mark vocabulary from §6.1.
-- [ ] Write a failing test proving profiling is disabled unless `profile_map_transition=1` is present.
-- [ ] Write a failing test proving collected samples contain durations/counters only and reject wall-clock/date/path/state fields.
-- [ ] Write a failing test proving percentile calculation is stable and numeric-input-order independent.
-- [ ] Implement the smallest monotonic timing helper that makes the tests pass.
-- [ ] Keep the helper browser-only and free of simulation imports.
+- [x] Define the stable mark vocabulary from §6.1.
+- [x] Write a failing test proving profiling is disabled unless `profile_map_transition=1` is present.
+- [x] Write a failing test proving collected samples contain durations/counters only and reject wall-clock/date/path/state fields.
+- [x] Write a failing test proving percentile calculation is stable and numeric-input-order independent.
+- [x] Implement the smallest monotonic timing helper that makes the tests pass.
+- [x] Keep the helper browser-only and free of simulation imports.
 
 **Red/green command:**
 
@@ -264,11 +264,11 @@ npm.cmd run test:vitest -- tests/ui/map_transition_timing.test.ts --pool=forks -
 - Modify `tests/ui/map_overlay_timing_contract.test.ts`
 - Modify `tests/ui/map_loading_state.test.ts`
 
-- [ ] Mark the canonical `leaveWarroomForGame()` command boundary.
-- [ ] Mark viewport visibility, core-data-ready, map construction, style load, current-state render, and interactivity.
-- [ ] Count MapLibre creation, cleanup/release, and stable resource-key loads only while profiling is enabled.
-- [ ] Preserve the existing current-turn/current-fingerprint readiness gate.
-- [ ] Keep raw duplicate-prone `console.time()` calls forbidden.
+- [x] Mark the canonical `leaveWarroomForGame()` command boundary.
+- [x] Mark viewport visibility, core-data-ready, map construction, style load, current-state render, and interactivity.
+- [x] Count MapLibre creation, cleanup/release, and stable resource-key loads only while profiling is enabled.
+- [x] Preserve the existing current-turn/current-fingerprint readiness gate.
+- [x] Keep raw duplicate-prone `console.time()` calls forbidden.
 
 ### Task 0.3 — Build the repeatable Electron harness
 
@@ -278,14 +278,14 @@ npm.cmd run test:vitest -- tests/ui/map_transition_timing.test.ts --pool=forks -
 - Create `tests/map_transition_profile_harness.test.ts`
 - Modify `package.json` to add `qa:map-transition`
 
-- [ ] Launch the unpackaged Electron application with isolated user data.
-- [ ] Start one clean campaign fixture without changing repository autosaves.
-- [ ] Measure three cold launches and 3 warmups + 20 warm Command Room <-> Map cycles per launch.
-- [ ] Wait for visible `data-map-ready="true"` and exact current turn before completing a sample.
-- [ ] Collect request failures, HTTP errors, console errors, page errors, main-process stderr, construction/release counters, and resource counts.
-- [ ] Write only under ignored `tmp-map-transition-perf/<label>/` using an explicit label.
-- [ ] Fail if the output directory already exists; never overwrite retained evidence.
-- [ ] Make `--cycles`, `--warmups`, and `--label` explicit CLI options with safe defaults.
+- [x] Launch the unpackaged Electron application with isolated user data.
+- [x] Start one clean campaign fixture without changing repository autosaves.
+- [x] Measure three cold launches and 3 warmups + 20 warm Command Room <-> Map cycles per launch.
+- [x] Wait for visible `data-map-ready="true"` and exact current turn before completing a sample.
+- [x] Collect request failures, HTTP errors, console errors, page errors, main-process stderr, construction/release counters, and resource counts.
+- [x] Write only under ignored `tmp-map-transition-perf/<label>/` using an explicit label.
+- [x] Fail if the output directory already exists; never overwrite retained evidence.
+- [x] Make `--cycles`, `--warmups`, and `--label` explicit CLI options with safe defaults.
 
 **Verification:**
 
@@ -700,13 +700,15 @@ This packet does not touch historical claims, event timing, scenarios, OOB, Code
 
 | Phase | Status | Commit | Verification | Evidence |
 |---|---|---|---|---|
-| 0 Baseline | Not started | — | — | — |
+| 0 Baseline | Complete | this phase commit | 19 focused + 20 Electron-contract Vitest tests; typecheck; tactical-map and warroom builds; 3 cold launches + 3 warmups + 20 measured warm cycles per launch | `tmp-map-transition-perf/baseline-complete-marks/baseline.json` |
 | 1 Persistent viewport | Not started | — | — | — |
 | 2 Stable shell | Not started | — | — | — |
 | 3 Resource/cache | Not started | — | — | — |
 | 4 Cold-entry residual | Not started | — | — | — |
 | 5 Acceptance | Not started | — | — | — |
 | 6 Closeout | Not started | — | — | — |
+
+Phase 0 recorded cold current-state p50/p95 of 5526.5/5658.26 ms and warm-switch p50/p95 of 4009.95/4265.585 ms on app 0.9.9-beta.1, Electron 41.0.3, and Chromium 146.0.7680.80. All 72 recorded transitions contained every required milestone and current-state proof; unexpected diagnostics, stale samples, and lifecycle imbalances were zero. Every one of the 60 measured warm cycles reconstructed and released one map and repeated static resource requests, establishing the Phase 1 lifecycle target without changing player behavior.
 
 ---
 

@@ -81,6 +81,12 @@ import {
   type FrontPressureRecord as CorridorFrontPressureRecord,
 } from '../layers/buildCorridorHeartbeatOverlay';
 import { createDevTimer } from './overlayTiming';
+import {
+  completeMapTransition,
+  countMapTransitionConstruction,
+  countMapTransitionRelease,
+  markMapTransition,
+} from '../perf/mapTransitionTiming';
 
 /**
  * Feature flag: Map That Scars per-OSID damage overlay.
@@ -768,6 +774,18 @@ export function MapContainer() {
   const currentMapStateReadyRef = useRef(currentMapStateReady);
   currentMapStateReadyRef.current = currentMapStateReady;
   useEffect(() => {
+    markMapTransition('viewport-visible');
+  }, []);
+  useEffect(() => {
+    if (!currentMapStateReady || loadedGameState == null) return;
+    markMapTransition('interactive');
+    completeMapTransition({
+      loadedTurn: loadedGameState.turn,
+      fingerprintMatches: mapRenderedRevision === loadedStateFingerprint,
+      currentStateReady: true,
+    });
+  }, [currentMapStateReady, loadedGameState, loadedStateFingerprint, mapRenderedRevision]);
+  useEffect(() => {
     if (!formationCounterDomOverlayRef.current) return;
     formationCounterDomOverlayRef.current.inert = !currentMapStateReady;
   }, [currentMapStateReady, mapReady]);
@@ -1139,6 +1157,7 @@ export function MapContainer() {
           loadTerrainScalars(),
           loadCensusSettlements().catch(() => null),
         ]);
+        markMapTransition('core-data-ready');
 
         // Pre-compute ghost map data from census (never changes)
         if (censusGeoJson) {
@@ -1250,6 +1269,9 @@ export function MapContainer() {
         touchPitch: false,
         attributionControl: false,
       });
+      countMapTransitionConstruction();
+      markMapTransition('map-created');
+      map.once('load', () => markMapTransition('style-loaded'));
       map.on('error', (e) => {
         // Suppress noisy PMTiles "Unimplemented type: 4" errors (MVT geometry type unsupported by MapLibre)
         if (e.error?.message?.includes('Unimplemented type')) return;
@@ -1420,7 +1442,10 @@ export function MapContainer() {
       visibleFormationCounterItemsRef.current = [];
       const mapToRelease = mapRef.current;
       mapRef.current = null;
-      if (mapToRelease) releaseMapWebGlContext(mapToRelease);
+      if (mapToRelease) {
+        releaseMapWebGlContext(mapToRelease);
+        countMapTransitionRelease();
+      }
       useGameStore.getState().setPanToCenter(null);
       useGameStore.getState().setPanToOsid(null);
       setMapReady(false);
@@ -1614,6 +1639,7 @@ export function MapContainer() {
           setMapRenderedRevision(stateFingerprint);
           setMapRenderReady(true);
           setMapLoadError(null);
+          markMapTransition('current-state-rendered');
         };
         targetMap.once('render', readinessRenderHandler);
         targetMap.triggerRepaint();

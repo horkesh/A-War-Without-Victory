@@ -1,12 +1,30 @@
 import type { FeatureCollection } from 'geojson';
 import type { EventDefinition } from '../../../sim/events/event_types.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
+import { countMapTransitionResource } from '../perf/mapTransitionTiming.js';
 
 interface PoliticalControlPayload {
   by_settlement_id?: Record<string, string | null>;
 }
 
+const STATIC_RESOURCE_KEYS: Readonly<Record<string, string>> = {
+  '/data/derived/operational/operational_settlements.geojson': 'operational-settlements',
+  '/data/derived/settlements_wgs84_1990.geojson': 'census-settlements',
+  '/data/derived/operational/operational_political_control.json': 'operational-political-control',
+  '/data/derived/operational/operational_contact_graph.json': 'osid-adjacency',
+  '/data/derived/operational/canonical_to_operational_map.json': 'sid-to-osid',
+  '/data/derived/terrain/settlements_terrain_scalars.json': 'terrain-scalars',
+  '/data/scenarios/events/war_1992.json': 'events-war-1992',
+  '/data/scenarios/events/war_1992_hrhb_summer.json': 'events-war-1992-hrhb-summer',
+  '/data/scenarios/events/war_1993.json': 'events-war-1993',
+  '/data/scenarios/events/war_1994.json': 'events-war-1994',
+  '/data/scenarios/events/war_1995.json': 'events-war-1995',
+  '/data/scenarios/events/consequences.json': 'events-consequences',
+};
+
 async function fetchJson<T>(url: string): Promise<T> {
+  const resourceKey = STATIC_RESOURCE_KEYS[url];
+  if (resourceKey) countMapTransitionResource(resourceKey);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: HTTP ${response.status}`);
