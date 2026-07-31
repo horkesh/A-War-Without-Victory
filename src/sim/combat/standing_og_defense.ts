@@ -1,8 +1,10 @@
 import type { CorpsFrontSector, FormationId, FormationState, GameState } from '../../state/game_state.js';
 
 /**
- * ADR-0007 Phase B flag. Enabled (PR-1): standing OGs commit sector reserves
- * to defense, so reserve brigades absorb attrition alongside assigned brigades.
+ * ADR-0007 live Phase B. Each threatened-sector distribution pass commits at
+ * most one eligible reserve/rear formation. Active-operation participants,
+ * disrupted or in-transit formations, and formations with an existing movement
+ * order are excluded. This flag does not widen reactive-defense membership.
  */
 export const ENABLE_STANDING_OG_RESERVE_COMMIT = true;
 
