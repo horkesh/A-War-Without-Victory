@@ -39,7 +39,11 @@ export function resolveArmyHqOperation(
     return null;
 }
 
-/** Resolve live TGs by exact Army-HQ id or the legacy host-corps/name composite. */
+/**
+ * Resolve live TGs by exact Army-HQ id or the legacy host-corps/name composite.
+ * An explicit TG id is authoritative: composite fallback applies only when the
+ * TG itself predates `army_hq_op_id` and therefore has no id to compare.
+ */
 export function resolveTacticalGroupIdsForOperation(
     state: GameState,
     hostCorpsId: FormationId,
@@ -49,7 +53,7 @@ export function resolveTacticalGroupIdsForOperation(
     const result: TgId[] = [];
     for (const id of Object.keys(groups).sort(strictCompare)) {
         const group = groups[id];
-        const matches = op.army_hq_op_id != null
+        const matches = group.army_hq_op_id != null
             ? group.army_hq_op_id === op.army_hq_op_id
             : group.corps_id === hostCorpsId && group.op_id === op.name;
         if (matches) result.push(id);

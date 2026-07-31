@@ -126,6 +126,115 @@ describe('Army-HQ operation lifecycle', () => {
         expect(state.military.army_hq_operations?.[AHQ_B]?.status).toBe('planning');
     });
 
+    it('carries a linked ID-less legacy TG through load, execution, recovery, and completion without crossing identity boundaries', () => {
+        const state = makeState();
+        const opA = state.military.corps_command!.corps_a!.active_operations[0]!;
+        const receiptA = state.military.army_hq_operations![AHQ_A]!;
+        const receiptB = state.military.army_hq_operations![AHQ_B]!;
+        const legacyTgId = receiptA.tg_id!;
+        const legacyTg = state.military.tactical_groups![legacyTgId]!;
+        delete legacyTg.army_hq_op_id;
+
+        const donor = makeFormation({
+            id: 'legacy_donor', faction: 'RBiH', corps_id: 'corps_d', hq_sid: 'S4',
+            location_osid: 'op:friendly:corps_a', personnel: 1400, cohesion: 65,
+        });
+        donor.personnel_lent_by_tg = { [legacyTgId]: 300 };
+        donor.equipment_lent_by_tg = {
+            [legacyTgId]: { tanks: 2, artillery: 3, aa_systems: 1 },
+        };
+        state.military.formations!.legacy_donor = donor;
+        legacyTg.donor_contributions = [{
+            brigade_id: donor.id,
+            source_corps_id: 'corps_d',
+            distance_hops: 2,
+            personnel_lent: 300,
+            heavy_equipment_lent: { tanks: 2, artillery: 3, aa_systems: 1 },
+            casualties_so_far: 20,
+            equipment_losses_so_far: { tanks: 1, artillery: 0, aa_systems: 0 },
+            cohesion_bleed_applied: 5,
+        }];
+
+        const conflictingAnchor = makeFormation({
+            id: 'conflicting_anchor', faction: 'RBiH', corps_id: 'corps_a', hq_sid: 'S1',
+            location_osid: 'op:friendly:corps_a', personnel: 1500, cohesion: 70,
+        });
+        state.military.formations!.conflicting_anchor = conflictingAnchor;
+        const conflictingTg = tgFor(opA, 'corps_a', conflictingAnchor.id, AHQ_B);
+        state.military.tactical_groups![conflictingTg.id] = conflictingTg;
+        const otherCorpsTgId = receiptB.tg_id!;
+        const otherCorpsTg = state.military.tactical_groups![otherCorpsTgId]!;
+        receiptB.status = 'completed';
+
+        reconcileLoadedArmyHqOperationLifecycle(state);
+        const reconciled = structuredClone(state);
+        reconcileLoadedArmyHqOperationLifecycle(state);
+
+        expect(state).toEqual(reconciled);
+        expect(receiptA.tg_id).toBe(legacyTgId);
+
+        markOperationExecuting(state, 'corps_a', opA);
+
+        expect(legacyTg.status).toBe('engaged');
+        expect(receiptA.status).toBe('executing');
+        expect(conflictingTg.status).toBe('forming');
+        expect(otherCorpsTg.status).toBe('forming');
+
+        enterOperationRecovery(state, 'corps_a', opA, 104, 'completed');
+
+        expect(opA.army_hq_telemetry_snapshot).toEqual({
+            army_hq_op_id: AHQ_A,
+            anchor_corps_id: 'corps_a',
+            donor_corps_lineage: ['corps_d'],
+            cross_corps_donor_count: 1,
+            total_cohesion_bled: 5,
+        });
+        expect(state.military.tactical_groups![legacyTgId]).toBeUndefined();
+        expect(state.military.tactical_groups![conflictingTg.id]).toBe(conflictingTg);
+        expect(state.military.tactical_groups![otherCorpsTgId]).toBe(otherCorpsTg);
+        expect(donor.personnel_lent_by_tg).toBeUndefined();
+        expect(donor.equipment_lent_by_tg).toBeUndefined();
+        expect(donor.tg_cooldown_until_turn).toBe(110);
+        expect(receiptA).toMatchObject({ status: 'recovering' });
+        expect(receiptA.tg_id).toBeUndefined();
+
+        state.military.formations!.candidate_anchor = makeFormation({
+            id: 'candidate_anchor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+            location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+        });
+        state.military.formations!.candidate_donor = makeFormation({
+            id: 'candidate_donor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+            location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+        });
+        const candidateDonor: TgDonorContribution = {
+            brigade_id: 'candidate_donor', source_corps_id: 'corps_c', distance_hops: 0,
+            personnel_lent: 300,
+            heavy_equipment_lent: { tanks: 0, artillery: 0, aa_systems: 0 },
+            casualties_so_far: 0,
+            equipment_losses_so_far: { tanks: 0, artillery: 0, aa_systems: 0 },
+            cohesion_bleed_applied: 0,
+        };
+        const candidate = {
+            op_id: 'Cap Release Candidate',
+            anchor_brigade_id: 'candidate_anchor',
+            donors: [candidateDonor],
+            current_turn: 104,
+        } as const;
+
+        expect(formTacticalGroup(state, candidate)).toEqual({
+            tg_id: null,
+            rejection_reason: 'faction_tg_cap_reached',
+        });
+
+        completeOperationLifecycle(state, 'corps_a', opA);
+
+        expect(receiptA).toMatchObject({ status: 'completed' });
+        expect(receiptA.tg_id).toBeUndefined();
+        expect(formTacticalGroup(state, candidate).tg_id).not.toBeNull();
+        expect(conflictingTg.status).toBe('forming');
+        expect(otherCorpsTg.status).toBe('forming');
+    });
+
     it('marks the durable record completed before evaluateOperationProgress removes the CorpsOperation', () => {
         const state = makeState();
         const opA = state.military.corps_command!.corps_a!.active_operations[0]!;
