@@ -19,6 +19,7 @@
 
 import type {
     ArmyHqOpId,
+    CorpsOperation,
     FormationId,
     FormationState,
     GameState,
@@ -30,6 +31,11 @@ import type {
 import type { TgParticipationRecord } from '../../state/brigade_history.js';
 import { createEmptyBrigadeHistory, TG_PARTICIPATION_WINDOW_TURNS } from '../../state/brigade_history.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import {
+    resolveArmyHqOperation,
+    resolveTacticalGroupIdsForOperation,
+} from '../../state/operation_lifecycle_reconciliation.js';
+import { buildArmyHqTelemetryFromTg } from './operation_aar.js';
 import {
     ENABLE_TG_COHESION_BLEED,
     ENABLE_TG_ARMY_HQ_OPS,
@@ -334,6 +340,80 @@ export function dissolveTacticalGroup(
     return { dissolved: true, tg_id: tgId };
 }
 
+/** Synchronize live TG and Army-HQ receipts after a CorpsOperation enters execution. */
+export function markOperationExecuting(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+): void {
+    const tgIds = resolveTacticalGroupIdsForOperation(state, hostCorpsId, op);
+    for (const tgId of tgIds) {
+        const tg = state.military.tactical_groups?.[tgId];
+        if (!tg) continue;
+        tg.status = 'engaged';
+        const anchorLocation = state.military.formations?.[tg.anchor_brigade_id]?.location_osid;
+        if (anchorLocation) tg.location_osid = anchorLocation;
+    }
+
+    const resolved = resolveArmyHqOperation(state, hostCorpsId, op);
+    if (!resolved) return;
+    resolved.operation.status = 'executing';
+    if (tgIds.length > 0) resolved.operation.tg_id = tgIds[0];
+    else delete resolved.operation.tg_id;
+}
+
+/**
+ * Canonical, idempotent execution-to-recovery transition. TGs are marked
+ * recovering only during finalization and then removed; Army-HQ receipts remain.
+ */
+export function enterOperationRecovery(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+    turn: number,
+    reason: CorpsOperation['recovery_reason'],
+): void {
+    if (op.phase !== 'recovery') {
+        op.phase = 'recovery';
+        op.phase_started_turn = turn;
+        op.recovery_reason = reason;
+    }
+
+    const tgIds = resolveTacticalGroupIdsForOperation(state, hostCorpsId, op);
+    if (ENABLE_TG_ARMY_HQ_OPS && op.army_hq_telemetry_snapshot == null) {
+        for (const tgId of tgIds) {
+            const tg = state.military.tactical_groups?.[tgId];
+            if (!tg) continue;
+            const telemetry = buildArmyHqTelemetryFromTg(tg);
+            if (!telemetry) continue;
+            op.army_hq_telemetry_snapshot = telemetry;
+            break;
+        }
+    }
+    for (const tgId of tgIds) {
+        const tg = state.military.tactical_groups?.[tgId];
+        if (tg) tg.status = 'recovering';
+        dissolveTacticalGroup(state, tgId, turn);
+    }
+
+    const resolved = resolveArmyHqOperation(state, hostCorpsId, op);
+    if (!resolved) return;
+    resolved.operation.status = 'recovering';
+    delete resolved.operation.tg_id;
+}
+
+/** Synchronize the durable Army-HQ receipt before its CorpsOperation is removed. */
+export function completeOperationLifecycle(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+): void {
+    const resolved = resolveArmyHqOperation(state, hostCorpsId, op);
+    if (!resolved) return;
+    resolved.operation.status = 'completed';
+    delete resolved.operation.tg_id;
+}
+
 /**
  * Concurrency-cap gate (ADR-0005 §Constants reference + §Army HQ Operations Pyrrhic cost #1).
  * Returns a rejection_reason string if forming a TG for `faction`/`corpsId` would exceed a cap,
@@ -373,7 +453,7 @@ function checkConcurrencyCaps(
     return null;
 }
 
-/** True if the faction has an Army HQ op in a planning or executing state (cap-reduction trigger). */
+/** True while the temporary Army-HQ cap reduction is active, including recovery. */
 function factionHasActiveArmyHqOp(
     mil: NonNullable<GameState['military']>,
     faction: string,
@@ -382,7 +462,7 @@ function factionHasActiveArmyHqOp(
     for (const id of Object.keys(ops).sort(strictCompare)) {
         const op = ops[id];
         if (op.faction_id !== faction) continue;
-        if (op.status === 'planning' || op.status === 'executing') return true;
+        if (op.status === 'planning' || op.status === 'executing' || op.status === 'recovering') return true;
     }
     return false;
 }

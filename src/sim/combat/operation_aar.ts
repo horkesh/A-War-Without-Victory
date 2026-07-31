@@ -11,6 +11,7 @@ import type { GameState, CorpsOperation, FormationId, CommanderAssessment, Tacti
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { resolveTacticalGroupIdsForOperation } from '../../state/operation_lifecycle_reconciliation.js';
 import { ENABLE_TG_ARMY_HQ_OPS } from './tactical_group_config.js';
 
 // ─── Sub-ledgers ────────────────────────────────────────────────────────────
@@ -557,18 +558,16 @@ export function recordOperationWeeklyEntries(
 // ─── Army HQ telemetry (ENABLE_TG_ARMY_HQ_OPS) ─────────────────────────────
 
 /**
- * Find the TG carrying out this CorpsOperation, if any. Matches on TG.op_id === op.name
- * (operation_preparation.ts sets TG.op_id = op.name at formation).
- * Deterministic: scans tactical_groups in sorted id order, returns first match.
+ * Find the TG carrying out this CorpsOperation, if any. Army-HQ linkage is exact;
+ * legacy linkage uses the host-corps/name composite.
  */
-function findTgForOp(state: GameState, opId: string): TacticalGroup | undefined {
-    const tgs = state.military?.tactical_groups;
-    if (!tgs) return undefined;
-    for (const tgId of Object.keys(tgs).sort(strictCompare)) {
-        const tg = tgs[tgId];
-        if (tg?.op_id === opId) return tg;
-    }
-    return undefined;
+function findTgForOp(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+): TacticalGroup | undefined {
+    const tgId = resolveTacticalGroupIdsForOperation(state, hostCorpsId, op)[0];
+    return tgId ? state.military.tactical_groups?.[tgId] : undefined;
 }
 
 /**
@@ -604,9 +603,12 @@ export function buildArmyHqTelemetryFromTg(tg: TacticalGroup): ArmyHqOpAarTeleme
  * time (the real lifecycle: beginRecovery dissolves the TG, finalize runs turns later).
  * Caller gates on ENABLE_TG_ARMY_HQ_OPS.
  */
-function buildArmyHqTelemetry(state: GameState, op: CorpsOperation): ArmyHqOpAarTelemetry | undefined {
-    // TG.op_id is set to op.name at formation (operation_preparation.ts), so match on name.
-    const tg = findTgForOp(state, op.name);
+function buildArmyHqTelemetry(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+): ArmyHqOpAarTelemetry | undefined {
+    const tg = findTgForOp(state, hostCorpsId, op);
     if (tg) {
         const live = buildArmyHqTelemetryFromTg(tg);
         if (live) return live;
@@ -894,7 +896,7 @@ export function finalizeOperationAAR(
     // the op was carried by a TG belonging to an Army HQ op. Flag-off: branch never runs →
     // field omitted → byte-identical.
     if (ENABLE_TG_ARMY_HQ_OPS) {
-        const armyHqTelemetry = buildArmyHqTelemetry(state, op);
+        const armyHqTelemetry = buildArmyHqTelemetry(state, corpsId, op);
         if (armyHqTelemetry) {
             aar.army_hq_telemetry = armyHqTelemetry;
         }
