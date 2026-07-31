@@ -700,7 +700,7 @@ This packet does not touch historical claims, event timing, scenarios, OOB, Code
 
 | Phase | Status | Commit | Verification | Evidence |
 |---|---|---|---|---|
-| 0 Baseline | Complete | Phase 0 commit + four review-fix follow-ups | 39 focused + 15 adjacent Electron-contract Vitest tests; typecheck; tactical-map and warroom builds; harness syntax; EOL and diff checks; 3 cold launches + 3 warmups + 20 measured warm cycles per launch; diagnostics-failure, cleanup, and whole-evidence volatility proof | `tmp-map-transition-perf/baseline-all-contexts-diagnostics-cleanup-v4b/baseline.json` |
+| 0 Baseline | Complete | Phase 0 commit + five review-fix follow-ups | Exact current commands and counts below; typecheck; tactical-map and warroom builds; harness syntax; EOL and diff checks; 3 cold launches + 3 warmups + 20 measured warm cycles per launch; diagnostics-failure, cleanup, and whole-evidence volatility proof | `tmp-map-transition-perf/baseline-all-contexts-diagnostics-cleanup-v4b/baseline.json` |
 | 1 Persistent viewport | Not started | — | — | — |
 | 2 Stable shell | Not started | — | — | — |
 | 3 Resource/cache | Not started | — | — | — |
@@ -717,6 +717,27 @@ The 109,679-byte JSON has SHA-256 `5e922cafa7749339819a437565033159ebf830fc9cf6b
 `tmp-map-transition-perf/baseline-all-contexts-diagnostics-cleanup-v4b/baseline.json` supersedes every retained earlier artifact, including `baseline-stable-process-diagnostics-v2`, whose lifecycle totals omitted the minimap and whose `ok` value did not fail on unexpected diagnostics. Its page/request/HTTP fields also lacked generic whole-payload sanitization, and its cleanup protection began after application evaluation/listener setup while swallowing close failures. The incomplete `baseline-all-contexts-clean-diagnostics-cleanup-v4` directory is not evidence: an operator-side terminal timeout interrupted it before JSON creation; all six exact profile-bound processes were stopped, zero remained, and the isolated profile passed an exclusive-open check before v4b began. Earlier schema-1 through schema-3 supersession reasons remain recorded in the ledger.
 
 The final bounded failure-path follow-up routes top-level failed-evidence `error` and fatal CLI stderr through the same generic sanitizer as diagnostic payloads. A functional regression serializes a malicious failure stack containing an external URL, Windows and POSIX absolute paths, UUID, and ephemeral port, then proves only stable placeholders remain; it also pins the unchanged successful outcome `{ "ok": true, "error": null }`. This changes neither schema 4 nor any successful evidence content. The authoritative v4b artifact was produced from the unchanged success path and therefore remains current; repeating the 72-sample performance capture would add timing noise without exercising the corrected failure-only sinks.
+
+The final delimiter correction covers POSIX stack paths following parentheses, single/double quotes, brackets, braces, and comparable diagnostic separators while preserving those delimiters around `<absolute-path>`. The functional failed-evidence and CLI-stderr regression now includes exact parenthesized and quoted Node-stack forms. Fresh validation accounting uses literal commands rather than changing aggregate labels:
+
+```text
+.\node_modules\.bin\vitest.cmd run tests/map_transition_profile_harness.test.ts tests/ui/map_transition_timing.test.ts tests/ui/map_context_lifecycle.test.ts --pool=forks --reporter=dot
+PASS — 3 files / 33 tests
+
+.\node_modules\.bin\vitest.cmd run tests/docs_desktop_v09_truth.test.ts --pool=forks --reporter=dot
+PASS — 1 file / 7 tests
+
+.\node_modules\.bin\vitest.cmd run tests/desktop_persistence_contract.test.ts tests/desktop_packaged_runtime_probe.test.ts --pool=forks --reporter=dot
+PASS — 2 files / 20 tests
+
+node --check tools/ui/map_transition_profile.cjs
+npm.cmd run typecheck
+npm.cmd run repo:eol:check
+git diff --check
+PASS — each command exited 0
+```
+
+The delimiter matcher and validation documentation affect only failure sanitization and process evidence. They do not change successful evidence schema/content, timing, lifecycle, diagnostics, cleanup, or sample collection; v4b remains the authoritative successful baseline and the 72-sample profile is not repeated.
 
 ---
 

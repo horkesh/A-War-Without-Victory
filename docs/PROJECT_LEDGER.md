@@ -24967,3 +24967,18 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Bounded evidence rationale:** The correction is reachable only when `failure != null` or the top-level CLI promise rejects. It does not change the schema, successful launch records, summary, timing samples, lifecycle counters, cleanup records, or successful serialization. Therefore `tmp-map-transition-perf/baseline-all-contexts-diagnostics-cleanup-v4b/baseline.json` remains authoritative and the 72-sample Electron profile was intentionally not repeated; a rerun would measure the unchanged success path and introduce only timing noise.
 
 **Verification and scope:** The focused four-file suite, harness syntax, TypeScript, documentation truth test, repository EOL, and `git diff --check` are the closing gates. No gameplay, scenario, history, canon, save, successful performance evidence, package, version, tag, push, publication, or release state changed.
+
+## 2026-07-31 - Seamless map transition delimiter sanitization and validation accounting reconciled
+
+**Type:** Final bounded failure-path matcher correction / process-evidence reconciliation.
+
+**Root cause and TDD:** The generic POSIX-path pattern required whitespace or string start immediately before `/`, so a normal Node stack frame such as `at wrapped (/home/user/file.js:9:2)` survived failed-evidence JSON and fatal CLI stderr sanitization. The focused regression failed with parenthesized, double-quoted, and single-quoted POSIX paths still present. The matcher now accepts parentheses, quotes, brackets, braces, and comparable diagnostic separators as safe prefixes, stops before their matching closing delimiters, and preserves the delimiter around `<absolute-path>`. The exact regression then passed for both serialized evidence and formatted CLI stderr.
+
+**Validation reconciliation:** Earlier entries used different informal aggregate scopes and therefore reported incompatible “focused” and “adjacent” totals. Those historical entries remain append-only; the active plan and this entry supersede only their aggregate labels with literal fresh commands and results:
+
+- `.\node_modules\.bin\vitest.cmd run tests/map_transition_profile_harness.test.ts tests/ui/map_transition_timing.test.ts tests/ui/map_context_lifecycle.test.ts --pool=forks --reporter=dot` — PASS, 3 files / 33 tests.
+- `.\node_modules\.bin\vitest.cmd run tests/docs_desktop_v09_truth.test.ts --pool=forks --reporter=dot` — PASS, 1 file / 7 tests.
+- `.\node_modules\.bin\vitest.cmd run tests/desktop_persistence_contract.test.ts tests/desktop_packaged_runtime_probe.test.ts --pool=forks --reporter=dot` — PASS, 2 files / 20 tests.
+- `node --check tools/ui/map_transition_profile.cjs`, `npm.cmd run typecheck`, `npm.cmd run repo:eol:check`, and `git diff --check` — each PASS with exit 0.
+
+**Evidence rationale and scope:** The matcher is exercised only when sanitizing diagnostic/failure strings, and the documentation change affects only process evidence. Successful schema-4 construction, samples, timings, counters, diagnostics, cleanup, and serialization are unchanged, so `tmp-map-transition-perf/baseline-all-contexts-diagnostics-cleanup-v4b/baseline.json` remains authoritative and the 72-sample profile was not repeated. No gameplay, scenario, history, canon, save, package, version, tag, push, publication, or release state changed.

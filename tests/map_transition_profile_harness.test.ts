@@ -253,12 +253,18 @@ describe('map transition Electron profile harness contract', () => {
       'Error: failed at https://example.test/private',
       String.raw`    at D:\private\failure.cjs:42:7`,
       '    at /home/test/private.mjs:9:2',
+      '    at wrapped (/home/user/file.js:9:2)',
+      '    at quoted "/srv/private/file.js:7:3"',
+      "    at single '/opt/private/file.js:5:1'",
       'token 5a65bc3b-f23d-4fab-a12b-0c2e8ae8a818 on port 53728',
     ].join('\n');
     const expectedError = [
       'Error: failed at <url>',
       '    at <absolute-path>:42:7',
       '    at <absolute-path>',
+      '    at wrapped (<absolute-path>)',
+      '    at quoted "<absolute-path>"',
+      "    at single '<absolute-path>'",
       'token <uuid> on port <ephemeral-port>',
     ].join('\n');
     const evidence = {
