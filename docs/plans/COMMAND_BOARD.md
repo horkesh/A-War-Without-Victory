@@ -4,9 +4,9 @@
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole planning authority and wins on any conflict.
 
-**Updated:** 2026-07-31
+**Updated:** 2026-08-01
 
-**Program state:** EXECUTING; R1 and R3 are active on the integration branch
+**Program state:** EXECUTING; R1 is active and R3 is complete on the integration branch
 
 ## Activation
 
@@ -20,9 +20,9 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 
 | Order | ID | Status | Next executable action | Plan |
 |---:|---|---|---|---|
-| 1 | R1 | IN PROGRESS — PHASE 0 GREEN | Implement and reprofile the campaign-scoped retained tactical viewport, then continue the measured shell/cache/cold-path phases. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
+| 1 | R1 | IN PROGRESS — PHASE 1 GREEN, PHASE 2 IN PROFILE | Validate the stable single-document shell handoff, then continue the measured cache/resource and optional cold-path phases. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
 | 2 | R2 | WAITING ON R1 SHARED-FILE HANDOFF | Rebase FR-03 on R1; execute the five RS information-hierarchy, map-handoff, cadence, ultrawide, and presentation packets. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
-| 3 | R3 | IN PROGRESS — PHASES 0–2 GREEN | Implement canonical TG exhaustion and the bounded Army-HQ recovery tail, then retire duplicate production and align doctrine. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
+| 3 | R3 | **COMPLETE** | Verified lifecycle/state floor is available to R5; no further R3 action. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | WAITING ON R2 PRIORITY/CADENCE CONTRACT | Inventory command/event/Codex projections, converge them on deterministic receipts, and absorb Free War residuals. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | WAITING ON R1–R3 STATE FLOOR | Classify optional state and artifacts, profile measured hot paths, close save/replay and CI parity. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
 | 6 | R6 | WAITING ON R3/R5 FLOOR | Run the serialized adopt-or-retire experiments, Sarajevo/E-B1 work, and final calibration proof. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
@@ -34,7 +34,7 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 
 `R1 -> R2 -> R4`, alongside `R3 -> R5 -> R6`; both converge before `R7 -> R8 -> R9`.
 
-R1 and R3 are executing in isolated worktrees after a shared-file inspection proved their implementation surfaces independent. Their reviewed commits converge only through `codex/master-roadmap-execution`.
+R1 continues in its isolated worktree. R3's reviewed commits and final full-suite proof are integrated on `codex/master-roadmap-execution`.
 
 ## Fixed Decisions
 

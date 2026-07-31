@@ -3,13 +3,13 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS — implementation and conditional Phase 6 closeout are complete; parent full-fast rerun remains
+**Status:** COMPLETE — implementation, integration proof, and Phase 6 closeout are green
 **Overseer:** Orchestrator
 **Owner lane:** Systems Programmer + Gameplay Programmer
 **Independent reviewers:** QA Engineer, Determinism Auditor, Historian, Canon Compliance Reviewer where named
 **Related command-board row:** `Operational/Tactical Group lifecycle and convergence closeout`
 **Phase/workstream covered:** ADR-0005 temporary offensive Tactical Groups, Army-HQ operation lifecycle, legacy `kind: 'og'` convergence, ADR-0006/0007 standing-OG truth
-**Current next action:** Parent reruns `npm.cmd run test:vitest:fast`; after a successful exit, parent updates the master roadmap and command board and closes R3
+**Current next action:** None in R3. Its verified state floor is available to R5 after the remaining R1 dependency closes.
 **Collision rule:** Do not edit or clean the user's current dirty workspace. If another active branch owns a Phase 1–4 source file, sequence this packet after it and rebase on its completed work.
 
 **Goal:** Close the lifecycle, telemetry, and duplicate-path gaps in the operational/tactical-group system while preserving the already-live donor selection, combat synthesis, casualty distribution, cooldown, recovery-suppression, and promotion substrate.
@@ -535,7 +535,7 @@ npm.cmd run typecheck
 
 - [x] Run the 20-file / 195-test focused baseline plus all new lifecycle/convergence tests. Parent integrated proof passed 26 files / 330 tests.
 - [x] Run `npm.cmd run typecheck`.
-- [ ] Run `npm.cmd run test:vitest:fast`. The first parent integrated attempt hit the 604-second command timeout with no failure output; a fresh parent rerun remains the sole unresolved closeout gate and is not recorded as either pass or failure.
+- [x] Run `npm.cmd run test:vitest:fast`. The first parent attempt hit the 604-second command timeout with no failure output. The next complete run exposed one stale R1 static map-test extraction boundary; the boundary was repaired and its file passed 31/31. The final full fast slice exited 0 in 1,502.2 seconds.
 - [x] Run `npm.cmd run test:baselines`.
 - [x] For any accepted behavior-changing phase, run fresh 40-week and paired byte-identical 188-week scenarios plus `engine:health:gate`.
 - [x] Run the audit tool on the new final saves.
@@ -566,8 +566,8 @@ The report must include:
 **Update:**
 
 - [x] this plan's status and Execution Log;
-- [ ] `docs/plans/COMMAND_BOARD.md` — parent-owned after the pending fast-suite rerun;
-- [ ] `docs/plans/MASTER_ROADMAP.md` — parent-owned after the pending fast-suite rerun;
+- [x] `docs/plans/COMMAND_BOARD.md`;
+- [x] `docs/plans/MASTER_ROADMAP.md`;
 - [x] `docs/plans/README.md`;
 - [x] `docs/PROJECT_LEDGER.md`;
 - `docs/PROJECT_LEDGER_KNOWLEDGE.md` only for a reusable lesson;
@@ -580,7 +580,7 @@ The report must include:
 - release/tag state;
 - baseline manifests.
 
-**Completion barrier:** Phases 0–5, the Phase 6 focused integration proof, typecheck, canon, baselines, scenario/determinism, audit, and documentation evidence are green. The decided Standing-OG wording is aligned. The first parent fast-suite attempt timed out after 604 seconds without failure output, so Phase 6 and R3 remain open until a fresh parent `npm.cmd run test:vitest:fast` exits successfully; this timeout is neither waived nor classified as a test failure.
+**Completion barrier:** Satisfied. Phases 0–5, the Phase 6 focused integration proof, typecheck, canon, baselines, scenario/determinism, audit, documentation evidence, and final full fast slice are green. The decided Standing-OG wording is aligned. The initial timeout and intermediate stale-test failure remain recorded rather than waived.
 
 → `/simplify` → Process QA → final verification → commit `docs(tg): close operational group remediation lane`
 
@@ -636,7 +636,7 @@ The report must include:
 - [x] Fresh TG-enabled campaigns create no legacy `kind: 'og'` formations.
 - [x] New promotion identities cannot duplicate through the default ordinal fallback.
 - [x] Standing-OG doctrine consistently encodes the decided narrower live model and retired Phase C.
-- [ ] TypeScript, focused tests, baselines, determinism, and required scenario proof are green; the full fast suite remains pending after the 604-second parent command timeout.
+- [x] TypeScript, focused tests, baselines, determinism, required scenario proof, and the final full fast slice are green.
 
 ---
 
@@ -656,6 +656,7 @@ The report must include:
 | 2026-07-31 | 4 | this phase commit | RED: 3 files / 22 tests produced 8 expected failures for live producer enqueue, stale-order activation mutation, incomplete legacy index cleanup, ordinal+20 fallback, unmapped threshold promotions, occupied number/name collisions, and the old audit shape. GREEN before simplify: new pack 22/22; exact Phase 4 plus audit pack 6 files / 68 tests; expanded characterization 22 files / 216 tests. After simplify and the old-record load characterization, final exact proof passed 6 files / 69 tests, expanded characterization passed 22 files / 217 tests, and typecheck passed. Strict baselines matched without refresh. | Fresh 40w `runs/apr1992_definitive_40w__1aa96054bcc8af09__w40_n6` remained `f72a459e7548d70b`. Fresh 188w `...__w188_n7` and `...__w188_n8` both ended `e400d232ba5da37e`; 14/15 artifacts matched byte-for-byte, with only `run_meta.json.out_dir` differing by the expected `n7`/`n8` suffix. Against Phase 3 n4, 12/15 artifacts were identical; the final-save delta is exactly removal of the unsupported `arbih_5th_corps` ordinal-1 fallback promotion (`21. Division`, turn 178), plus its dependent summary hash and run-directory metadata. Strict health stayed green and unchanged: 0 eligible/dead operations, 2 ghost-destroyed, 9 stranded brigades, 628 matched OSIDs, 0 consistency failures, K:W 3.779. | TG-enabled production now preserves an empty serialized `og_orders` shape and enqueues nothing; activation defensively discards persisted queues without formation/personnel/corps mutation. Already-active legacy OGs retain a sorted, bounded compatibility drain with personnel conservation and stale/duplicate `active_ogs` reconciliation. Promotion has no fallback: only `arbih_2nd_corps:1 → 21` and `:5 → 25` remain, sourced to *Balkan Battlegrounds* II p. 401, I p. 509, and local OOB lines 90/98; ordinal 5 remains unreachable. Existing records are loaded unchanged and the audit reports unmapped/mismatch/number/name collisions plus same-corps overlap candidates by record identity. The generated latest-save pointer was restored; no migration, schema, baseline, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 | 2026-07-31 | 5 | this phase commit | RED: the new doctrine contract collected 14 tests with 13 expected failures across missing spatial/eligibility/contributor anchors and the absent retired-history boundary; the production identifier scan already passed. GREEN: the expanded standing-OG/combat pack passed 6 files / 165 tests; `npm.cmd run typecheck`, `npm.cmd run canon:check`, standalone strict no-refresh `npm.cmd run test:baselines`, and `git diff --check` passed. | All approved baseline scenarios matched without update or re-bless. No new scenario/hash evidence was required because the phase changes governing wording, one production comment, and contract tests only; runtime, schema, scenarios, manifests, and `FORAWWV.md` are unchanged. | ADR-0006, ADR-0007, Systems Manual §6.3/§6.7, and Rulebook §5.7/§6.3 now separate standing-OG spatial membership, bounded Phase-B movement eligibility, actual resolver contribution, and primary-defender aftermath. Retired Phase-C identifiers/claims exist only below ADR-0007's explicit historical-record heading and remain absent from production. |
 | 2026-07-31 | 6 conditional closeout | this closeout commit | Parent integrated focused proof passed **26 files / 330 tests**; `npm.cmd run typecheck`, `npm.cmd run canon:check`, and standalone strict no-refresh `npm.cmd run test:baselines` passed. Phase 5's exact pack remains **6 files / 165 tests**. The first parent `npm.cmd run test:vitest:fast` attempt hit the 604-second command timeout with no failure output; a fresh parent rerun is the sole pending gate and is not recorded as pass or failure. Closeout report/link/diff checks passed before this commit. | Phase 3: 40w n3 `f72a459e7548d70b` (final-save SHA-256 `f72a459e7548d70b4e823c35dd8f1c4b3d61bd21441ed5d40f68e545017a9746`); paired 188w n4/n5 `af83cbc6ca8d12d1` (final-save SHA-256 `af83cbc6ca8d12d1c9755b3bd30fdf06c78eca06d459582554e15dcac7607270`). Phase 4: 40w n6 unchanged at `f72a459e7548d70b`; paired 188w n7/n8 `e400d232ba5da37e` (final-save SHA-256 `e400d232ba5da37e2e5d4642daef3506e5e49a5491e5c94b4538084989082aaf`), with 14/15 paired artifacts identical and only expected output-directory metadata different. Health remained 0 eligible/dead ops, 2 ghost-destroyed, 9 stranded, 628 matched OSIDs, 0 consistency failures, K:W 3.779. | Implementation report created and plan/report indexes plus append-only ledger updated. Schema 36, behavior beyond the implemented Phases 1–4 changes, scenarios, `FORAWWV.md`, package, release, push, and merge state remain unchanged. Master roadmap and command board are intentionally parent-owned and remain pending until the fast-suite rerun passes. |
+| 2026-08-01 | 6 final integration closeout | parent integration commits `abdf9ffeb`, `1c15387bd`, and this documentation commit | The first complete rerun after the 604-second timeout found the expected R3 optional-state increase plus one R1 static map-test boundary failure. The optional-state inventory was ratcheted from 527 to 529 and passed its focused 91/91 proof. The map contract was bounded to `const needsUpdate`, gained an explicit end-boundary assertion, and passed 31/31. The final full fast slice then exited 0 in **1,502.2 seconds**. | Scenario/hash evidence is unchanged from the conditional closeout row; the final repairs are test-contract updates only and do not affect simulation output. | R3 is complete. Master roadmap, command board, plan index, report, and append-only ledger now expose the verified state floor to R5. No publication or release state changed. |
 
 ---
 

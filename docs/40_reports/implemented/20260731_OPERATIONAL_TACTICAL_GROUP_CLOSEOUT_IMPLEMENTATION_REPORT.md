@@ -1,15 +1,16 @@
 # Operational/Tactical Group Closeout Implementation Report
 
 **Date:** 2026-07-31
+**Final integration date:** 2026-08-01
 **Roadmap lane:** R3 — Operational/Tactical Group convergence
-**Implementation commits:** `70557be1d` through `d44a3ac25`
-**Status:** Implementation complete; closeout is conditional on one pending parent-integration gate
+**Implementation commits:** `70557be1d` through `d44a3ac25`; parent integration repairs `abdf9ffeb` and `1c15387bd`
+**Status:** COMPLETE — implementation and parent integration gates are green
 
 ## Outcome
 
 R3 now has one offensive-operation clock, bounded Tactical Group exhaustion, durable Army-HQ recovery receipts, exact terminal participation telemetry, deterministic legacy-OG retirement, guarded historical promotion identities, and governing Standing-OG doctrine aligned to the narrower shipped combat model. The implementation preserves the existing donor-backed combat substrate and does not create a second operation scheduler.
 
-The phase-level proof and the parent integrated focused proof are green. The only unresolved closeout gate is a fresh parent rerun of `npm.cmd run test:vitest:fast`: the first integrated attempt reached the 604-second command timeout without failure output. That result is neither a pass nor a test failure. R3 must remain open in the master roadmap and command board until the rerun exits successfully.
+The phase-level proof, parent integrated focused proof, and final full fast slice are green. The first full attempt reached the 604-second command timeout without failure output. The next complete run found the deliberate R3 optional-state increase and one stale R1 map-test extraction boundary. The optional-state inventory was ratcheted from 527 to 529 and passed 91/91; the map test was bounded to the live `const needsUpdate` source-gate boundary and passed 31/31. The final full fast slice exited 0 in 1,502.2 seconds.
 
 No package, version, tag, installer, release, push, or merge state is changed by this report. `docs/10_canon/FORAWWV.md` remains unchanged.
 
@@ -79,7 +80,7 @@ ADR-0006, ADR-0007, Systems Manual §§6.3/6.7, and Rulebook §§5.7/6.3 now con
 | Canon | `npm.cmd run canon:check` passed in Phase 5 and parent integration |
 | Baselines | Standalone strict no-refresh `npm.cmd run test:baselines` passed; all approved scenarios match |
 | Diff hygiene | `git diff --check` passed at each completed phase; closeout diff is checked separately before commit |
-| Full fast suite | **Pending parent rerun.** First integrated attempt timed out at 604 seconds with no failure output; no pass/fail claim is made. |
+| Full fast suite | **Passed.** Initial attempt timed out at 604 seconds without a result; the next complete run exposed one optional-state inventory ratchet and one stale R1 source-gate extraction boundary, repaired with focused 91/91 and 31/31 proof; final slice exited 0 in 1,502.2 seconds. |
 
 ### Scenario and hash evidence
 
@@ -203,9 +204,4 @@ Completed and recorded:
 - fresh 40-week and paired 188-week hashes, audit results, drift explanation, and engine-health evidence;
 - documentation, plan-index, report-index, and ledger propagation on this branch.
 
-Still pending:
-
-- parent rerun of `npm.cmd run test:vitest:fast` to a successful exit after the first 604-second command timeout.
-- parent-owned update of `docs/plans/MASTER_ROADMAP.md` and `docs/plans/COMMAND_BOARD.md` after that gate passes.
-
-This report is therefore an accurate implementation closeout record, but not authority to claim the R3 roadmap lane fully closed before the pending fast-suite gate is green.
+All R3 closeout gates are satisfied. The master roadmap and command board mark the lane complete and expose the verified lifecycle/state floor to R5. No public release, package version, tag, signing, or publication state is changed by this closeout.
