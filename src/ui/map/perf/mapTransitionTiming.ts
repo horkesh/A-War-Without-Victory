@@ -133,13 +133,20 @@ export function createMapTransitionSample(
     throw new Error('Map transition sample requires the command mark');
   }
   const durations: Partial<Record<MapTransitionMark, number>> = {};
+  let previousMark: MapTransitionMark | null = null;
+  let previousMarkedAt = commandAt;
   for (const mark of MAP_TRANSITION_MARKS) {
     const markedAt = marks.get(mark);
     if (markedAt == null) continue;
-    if (!Number.isFinite(markedAt) || markedAt < commandAt) {
-      throw new Error(`Map transition mark ${mark} is not monotonic`);
+    if (!Number.isFinite(markedAt) || markedAt < previousMarkedAt) {
+      const predecessor = previousMark ?? 'command';
+      throw new Error(
+        `Map transition mark ${mark} violates locked vocabulary order after ${predecessor}`,
+      );
     }
     durations[mark] = roundMilliseconds(markedAt - commandAt);
+    previousMark = mark;
+    previousMarkedAt = markedAt;
   }
 
   return {

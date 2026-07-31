@@ -113,28 +113,55 @@ describe('map transition timing contract', () => {
     expect(() => percentile([1, Number.NaN], 50)).toThrow(/finite/i);
   });
 
-  it('waits for every lifecycle mark before publishing a sample', async () => {
+  it('publishes only after every ordered lifecycle mark and completion metadata exist', async () => {
     if (!existsSync(sourcePath)) return;
     const { MAP_TRANSITION_MARKS, createMapTransitionProfiler } = await import(modulePath);
     let now = 0;
     const profile = createMapTransitionProfiler(true, () => now);
     profile.begin();
-    for (const mark of MAP_TRANSITION_MARKS.filter((mark: string) => mark !== 'style-loaded')) {
+    for (const mark of MAP_TRANSITION_MARKS.filter((mark: string) => mark !== 'interactive')) {
       now += 1;
       profile.mark(mark);
     }
+    expect(profile.snapshot().samples).toHaveLength(0);
+    now += 1;
     profile.complete({
       loadedTurn: 0,
       fingerprintMatches: true,
       currentStateReady: true,
     });
-    expect(profile.snapshot().samples).toHaveLength(0);
-    now += 1;
-    profile.mark('style-loaded');
     expect(profile.snapshot().samples).toHaveLength(1);
     expect(profile.snapshot().samples[0]?.durations_ms).toEqual(expect.objectContaining({
       'style-loaded': expect.any(Number),
       interactive: expect.any(Number),
     }));
+  });
+
+  it('rejects a complete sample whose marks violate the locked vocabulary order', async () => {
+    if (!existsSync(sourcePath)) return;
+    const { MAP_TRANSITION_MARKS, createMapTransitionSample } = await import(modulePath);
+    const orderedMarks = new Map(
+      MAP_TRANSITION_MARKS.map((mark: string, index: number) => [mark, index * 10]),
+    );
+    const invalidMarks = new Map(orderedMarks);
+    invalidMarks.set('style-loaded', 45);
+    invalidMarks.set('current-state-rendered', 40);
+    const metadata = {
+      kind: 'cold' as const,
+      cycleIndex: 0,
+      loadedTurn: 0,
+      fingerprintMatches: true,
+      currentStateReady: true,
+    };
+    const counters = {
+      mapConstructions: 1,
+      webglReleases: 0,
+      staticResourceRequests: new Map<string, number>(),
+    };
+
+    expect(createMapTransitionSample(metadata, orderedMarks, counters).durations_ms)
+      .toEqual(expect.objectContaining({ interactive: 60 }));
+    expect(() => createMapTransitionSample(metadata, invalidMarks, counters))
+      .toThrow(/locked vocabulary order/i);
   });
 });

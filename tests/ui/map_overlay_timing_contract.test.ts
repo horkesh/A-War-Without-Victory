@@ -76,6 +76,8 @@ describe('Map overlay dev timing', () => {
     expect(loaderSource).toMatch(/countMapTransitionResource/);
     expect(mapSource).toMatch(/countMapTransitionConstruction/);
     expect(mapSource).toMatch(/countMapTransitionRelease/);
+    expect(mapSource).toMatch(/map\.once\('style\.load',\s*\(\) => markMapTransition\('style-loaded'\)\)/);
+    expect(mapSource).not.toMatch(/map\.once\('load',\s*\(\) => markMapTransition\('style-loaded'\)\)/);
     expect(mapSource).toMatch(/isTacticalMapStateReady/);
     expect(mapSource).not.toMatch(/console\.time\(/);
   });
