@@ -3,13 +3,13 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS — Phases 0–3 complete; execute Phases 4–6 sequentially
+**Status:** IN PROGRESS — Phases 0–4 complete; execute Phases 5–6 sequentially
 **Overseer:** Orchestrator
 **Owner lane:** Systems Programmer + Gameplay Programmer
 **Independent reviewers:** QA Engineer, Determinism Auditor, Historian, Canon Compliance Reviewer where named
 **Related command-board row:** `Operational/Tactical Group lifecycle and convergence closeout`
 **Phase/workstream covered:** ADR-0005 temporary offensive Tactical Groups, Army-HQ operation lifecycle, legacy `kind: 'og'` convergence, ADR-0006/0007 standing-OG truth
-**Current next action:** Execute Phase 4 in the isolated R3 worktree after integrating Phase 3
+**Current next action:** Integrate Phase 4, then execute Phase 5 doctrine convergence
 **Collision rule:** Do not edit or clean the user's current dirty workspace. If another active branch owns a Phase 1–4 source file, sequence this packet after it and rebase on its completed work.
 
 **Goal:** Close the lifecycle, telemetry, and duplicate-path gaps in the operational/tactical-group system while preserving the already-live donor selection, combat synthesis, casualty distribution, cooldown, recovery-suppression, and promotion substrate.
@@ -420,6 +420,7 @@ Run the audit tool on both new final saves. Run a second 188-week scenario and p
 
 ## Phase 4 — Retire duplicate legacy production and guard promotion identity
 
+**Status:** COMPLETE — compatibility convergence, explicit promotion identity, and deterministic proof landed locally
 **Assigned to:** Systems Programmer
 **Reviewers:** QA Engineer; Historian for Task 4.3 only
 **Estimated scope:** 4 source files, 3 focused tests
@@ -434,9 +435,9 @@ Run the audit tool on both new final saves. Run a second 188-week scenario and p
 - Inspect `src/sim/combat/operational_groups.ts`
 - Inspect `src/sim/turn_phases/war_phases.ts`
 
-- [ ] Test that a TG-enabled execution operation cannot enqueue a new legacy `OGActivationOrder`.
-- [ ] Test that old queued `og_orders` are handled deterministically and cannot create a second concurrent force overlay for the same operation.
-- [ ] Test that an already-active legacy `kind: 'og'` can finish its old compatibility lifecycle without disappearing personnel.
+- [x] Test that a TG-enabled execution operation cannot enqueue a new legacy `OGActivationOrder`.
+- [x] Test that old queued `og_orders` are handled deterministically and cannot create a second concurrent force overlay for the same operation.
+- [x] Test that an already-active legacy `kind: 'og'` can finish its old compatibility lifecycle without disappearing personnel.
 
 ### Task 4.2 — Make legacy OG compatibility-only
 
@@ -447,11 +448,11 @@ Run the audit tool on both new final saves. Run a second 188-week scenario and p
 - Modify `src/sim/turn_phases/war_phases.ts`
 - Modify `tests/operational_group_convergence.test.ts`
 
-- [ ] When Tactical Groups are enabled, stop producing new `og_orders`.
-- [ ] Prevent stale queued orders from activating a new legacy formation on the live path.
-- [ ] Retain `updateOGLifecycle` only as a bounded old-save drain for already-active `kind: 'og'` formations.
-- [ ] Mark the module and phase step compatibility-only in comments.
-- [ ] Do not delete old-save cleanup until a schema-retirement packet proves no supported save requires it.
+- [x] When Tactical Groups are enabled, stop producing new `og_orders`.
+- [x] Prevent stale queued orders from activating a new legacy formation on the live path.
+- [x] Retain `updateOGLifecycle` only as a bounded old-save drain for already-active `kind: 'og'` formations.
+- [x] Mark the module and phase step compatibility-only in comments.
+- [x] Do not delete old-save cleanup until a schema-retirement packet proves no supported save requires it.
 
 ### Task 4.3 — Prevent new duplicate/unmapped Division identities
 
@@ -461,11 +462,11 @@ Run the audit tool on both new final saves. Run a second 188-week scenario and p
 - Modify `tests/tg_og_promotion.test.ts`
 - Modify the audit tool/test from Phase 0
 
-- [ ] Write a failing test where two unmapped RBiH corps cross the threshold and would both become `21. Division`.
-- [ ] Require an explicit historical `(corps_id, og_ordinal) → division_number` mapping before creating a new promotion.
-- [ ] Do not auto-rewrite existing save records.
-- [ ] Make the audit flag duplicate/unmapped existing records for historian review.
-- [ ] If the Historian supplies verified mappings, add them in a separately reviewed data-only commit; otherwise leave those promotions uncreated.
+- [x] Write a failing test where two unmapped RBiH corps cross the threshold and would both become `21. Division`.
+- [x] Require an explicit historical `(corps_id, og_ordinal) → division_number` mapping before creating a new promotion.
+- [x] Do not auto-rewrite existing save records.
+- [x] Make the audit flag duplicate/unmapped existing records for historian review.
+- [x] Retain only the verified 2nd Corps mappings: 1st OG → 21st Division and 5th OG → 25th Division. Leave all other pairs uncreated.
 
 **Verification:**
 
@@ -652,6 +653,7 @@ The report must include:
 | 2026-07-31 | 2 conservation correction | this follow-up commit | RED: direct distribution plus terminalization collected 2 files / 16 tests with 2 expected failures: a second battle allocated against each donor's original loan, and the accrued terminal case failed to move unavailable donor casualties to the anchor. GREEN: direct proof passed 16/16; the Phase 2 pack passed 7 files / 110 tests; expanded TG/combat characterization passed 24 files / 262 tests; `npm.cmd run typecheck` and `git diff --check` passed. | Strict baselines retained exactly the pre-existing Phase 2 telemetry drift: both 4-week scenarios matched 8/8, while `apr1992_52w` matched 6/8 with `final_save.json` at `ef30222cd8b6eb99ad3d3e3b5688b414dc0d82e0a07a7a20465e43296351a141` and `run_summary.json` at `3f91bd76383ae9538e8556ccdb5e7116a3f29dfe42a0d20d95bb432a368bee14`. Removing the same four anchor-only `dissolved_turn` fields restored `591e1f41efd7f51f486b8bf303a0fefa959867d49d2db54dec1584507df909d0`; restoring only the dependent summary hash restored `f3a37865738df9fbe0903da778d62fb201c23bcebbb5d20a22f1e2dce6ce6545`. No new artifact drift and no manifest refresh. | The battle allocator now caps each donor at `max(0, personnel_lent - casualties_so_far)` before deterministic overflow reassignment to the anchor. Repeated battles preserve cumulative `casualties <= lent` and total-casualty conservation; terminalization records exact returns and remains idempotent. No ordering, schema, migration, scenario, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 | 2026-07-31 | 2 controlled baseline refresh | this data-only follow-up commit | Independent specification and code-quality reviews approved the Phase 2 implementation and its isolated telemetry movement. The strict no-update `npm.cmd run test:baselines` gate then exited 0 with all scenarios matching the refreshed manifest. | Only `apr1992_52w/final_save.json` was re-blessed to `ef30222cd8b6eb99ad3d3e3b5688b414dc0d82e0a07a7a20465e43296351a141` and its dependent `run_summary.json` to `3f91bd76383ae9538e8556ccdb5e7116a3f29dfe42a0d20d95bb432a368bee14`. Every other manifest entry is unchanged. | The approval rests on the recorded 6/8 artifact match and normalization proof: four optional anchor terminal-turn values fully explain the final-save movement, and the run-summary movement is only its reported final-state hash. No source, test, scenario, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 | 2026-07-31 | 3 | this phase commit | RED: the first six-file slice collected 91 tests with 12 expected failures. Independent review correction RED: 2 files / 35 tests with 3 expected failures for sibling atomic drain/permutation and exact-live legacy receipt normalization. GREEN after correction/simplify: correction slice 35/35; plan's exact Phase 3 pack 8 files / 116 tests; supplemental lifecycle/schema pack 8 files / 126 tests; broader migration/schema/UI proof 4 files / 220 tests; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, strict 188w engine health, and `git diff --check` passed. Baselines matched without update or re-bless. | Fresh 40w run `runs/apr1992_definitive_40w__1aa96054bcc8af09__w40_n3` ended at state/SHA-256 `f72a459e7548d70b` / `f72a459e7548d70b4e823c35dd8f1c4b3d61bd21441ed5d40f68e545017a9746`; audit: 0 live TGs, 4 cumulative formations, 0 Army-HQ receipts, 0 legacy OGs. Paired 188w runs `...__w188_n4` and `...__w188_n5` both ended at state hash `af83cbc6ca8d12d1`; all eight common artifacts were byte-identical, including final-save SHA-256 `af83cbc6ca8d12d1c9755b3bd30fdf06c78eca06d459582554e15dcac7607270`. Audit: 12 formations, two live Sana siblings at age 11/cohesion 56, one completed Farz-95 receipt with `recovery_started_turn=167` and no stale link, 20 live plus 4 archived participation rows, and no legacy OGs or duplicate promotions. | `CorpsOperation` remains sole clock/recovery owner. One sorted evaluator at the two execution chokepoints drains all eligible engaged siblings atomically by 4 once per unsuppressed future War turn, checks preloaded strict `<15` before age, and enforces age 12 before another drain using typed recovery reasons. Army-HQ cap cost covers planning/executing and `[R,R+4)`, including completed receipts and COHA calendar time; an exact live recovery normalizes legacy planning/executing receipts and supplies the marker, while stale/orphan receipts gain no invented tail. Optional fields round-trip under schema 36. The generated latest-save pointer and three health dashboards were restored to HEAD and excluded. No baseline, scenario, canon/FORAWWV, package, push, merge, tag, or release-state change. |
+| 2026-07-31 | 4 | this phase commit | RED: 3 files / 22 tests produced 8 expected failures for live producer enqueue, stale-order activation mutation, incomplete legacy index cleanup, ordinal+20 fallback, unmapped threshold promotions, occupied number/name collisions, and the old audit shape. GREEN before simplify: new pack 22/22; exact Phase 4 plus audit pack 6 files / 68 tests; expanded characterization 22 files / 216 tests. After simplify and the old-record load characterization, final exact proof passed 6 files / 69 tests, expanded characterization passed 22 files / 217 tests, and typecheck passed. Strict baselines matched without refresh. | Fresh 40w `runs/apr1992_definitive_40w__1aa96054bcc8af09__w40_n6` remained `f72a459e7548d70b`. Fresh 188w `...__w188_n7` and `...__w188_n8` both ended `e400d232ba5da37e`; 14/15 artifacts matched byte-for-byte, with only `run_meta.json.out_dir` differing by the expected `n7`/`n8` suffix. Against Phase 3 n4, 12/15 artifacts were identical; the final-save delta is exactly removal of the unsupported `arbih_5th_corps` ordinal-1 fallback promotion (`21. Division`, turn 178), plus its dependent summary hash and run-directory metadata. Strict health stayed green and unchanged: 0 eligible/dead operations, 2 ghost-destroyed, 9 stranded brigades, 628 matched OSIDs, 0 consistency failures, K:W 3.779. | TG-enabled production now preserves an empty serialized `og_orders` shape and enqueues nothing; activation defensively discards persisted queues without formation/personnel/corps mutation. Already-active legacy OGs retain a sorted, bounded compatibility drain with personnel conservation and stale/duplicate `active_ogs` reconciliation. Promotion has no fallback: only `arbih_2nd_corps:1 → 21` and `:5 → 25` remain, sourced to *Balkan Battlegrounds* II p. 401, I p. 509, and local OOB lines 90/98; ordinal 5 remains unreachable. Existing records are loaded unchanged and the audit reports unmapped/mismatch/number/name collisions plus same-corps overlap candidates by record identity. The generated latest-save pointer was restored; no migration, schema, baseline, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 
 ---
 

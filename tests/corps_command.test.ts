@@ -287,7 +287,7 @@ describe('operational groups - validateOGOrder', () => {
 });
 
 describe('operational groups - activateOGs', () => {
-    it('creates OG formation, deducts donor personnel, registers with corps', () => {
+    it('discards queued legacy activation without mutating formations when TGs are enabled', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
 
@@ -304,27 +304,12 @@ describe('operational groups - activateOGs', () => {
             }
         ];
 
-        const report = activateOGs(state);
+        const formationsBefore = structuredClone(state.military.formations);
+        const commandBefore = structuredClone(state.military.corps_command);
 
-        expect(report.activated.length).toBe(1);
-        expect(report.rejected.length).toBe(0);
-
-        const ogId = report.activated[0];
-
-        // OG formation should exist
-        expect(state.military.formations[ogId]).toBeDefined();
-        expect(state.military.formations[ogId].kind).toBe('og');
-        expect(state.military.formations[ogId].personnel).toBe(600);
-        expect(state.military.formations[ogId].faction).toBe('RS');
-
-        // Donor personnel deducted
-        expect(state.military.formations['rs-brig-1'].personnel).toBe(700);
-        expect(state.military.formations['rs-brig-2'].personnel).toBe(700);
-
-        // Registered with corps
-        expect(state.military.corps_command!['rs-corps-1'].active_ogs).toContain(ogId);
-
-        // Orders cleared
+        expect(activateOGs(state)).toEqual({ activated: [], rejected: [] });
+        expect(state.military.formations).toEqual(formationsBefore);
+        expect(state.military.corps_command).toEqual(commandBefore);
         expect(state.military.og_orders).toEqual([]);
     });
 });

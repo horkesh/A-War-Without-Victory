@@ -87,6 +87,7 @@ function syntheticState(): unknown {
                     faction: 'RS',
                     kind: 'og',
                     status: 'active',
+                    corps_id: 'corps:z',
                     brigade_history: {
                         tg_participations: [
                             { tg_id: 'tg:z', op_id: 'op:z', role: 'anchor', formed_turn: 18 },
@@ -149,7 +150,7 @@ function syntheticState(): unknown {
                     faction: 'RBiH',
                     og_ordinal: 1,
                     division_number: 21,
-                    division_display_name: '21. Division',
+                    division_display_name: '  21.   DIVISION  ',
                     promoted_on_turn: 16,
                 },
                 'promotion:b': {
@@ -159,6 +160,14 @@ function syntheticState(): unknown {
                     division_number: 22,
                     division_display_name: '22. Division',
                     promoted_on_turn: 15,
+                },
+                'promotion:mapped-mismatch': {
+                    corps_id: 'arbih_2nd_corps',
+                    faction: 'RBiH',
+                    og_ordinal: 1,
+                    division_number: 22,
+                    division_display_name: '22. Division',
+                    promoted_on_turn: 14,
                 },
             },
         },
@@ -231,8 +240,79 @@ describe('operational/tactical group audit', () => {
                     },
                 ],
             },
-            duplicate_promotion_display_names: [
-                { display_name: '21. Division', corps_ids: ['corps:a', 'corps:z'] },
+            promotion_identity: {
+                unmapped_records: [
+                    {
+                        record_key: 'promotion:a',
+                        corps_id: 'corps:a',
+                        og_ordinal: 1,
+                        division_number: 21,
+                        division_display_name: '  21.   DIVISION  ',
+                    },
+                    {
+                        record_key: 'promotion:b',
+                        corps_id: 'corps:b',
+                        og_ordinal: 1,
+                        division_number: 22,
+                        division_display_name: '22. Division',
+                    },
+                    {
+                        record_key: 'promotion:z',
+                        corps_id: 'corps:z',
+                        og_ordinal: 1,
+                        division_number: 21,
+                        division_display_name: '21. Division',
+                    },
+                ],
+                mapped_mismatches: [
+                    {
+                        record_key: 'promotion:mapped-mismatch',
+                        corps_id: 'arbih_2nd_corps',
+                        og_ordinal: 1,
+                        division_number: 22,
+                        division_display_name: '22. Division',
+                        expected_division_number: 21,
+                        expected_division_display_name: '21. Division',
+                    },
+                ],
+                duplicate_division_numbers: [
+                    {
+                        division_number: 21,
+                        record_keys: ['promotion:a', 'promotion:z'],
+                        count: 2,
+                    },
+                    {
+                        division_number: 22,
+                        record_keys: ['promotion:b', 'promotion:mapped-mismatch'],
+                        count: 2,
+                    },
+                ],
+                duplicate_display_names: [
+                    {
+                        normalized_display_name: '21. division',
+                        record_keys: ['promotion:a', 'promotion:z'],
+                        count: 2,
+                    },
+                    {
+                        normalized_display_name: '22. division',
+                        record_keys: ['promotion:b', 'promotion:mapped-mismatch'],
+                        count: 2,
+                    },
+                ],
+            },
+            same_corps_legacy_tg_overlap_candidates: [
+                {
+                    corps_id: 'corps:a',
+                    active_legacy_og_ids: [],
+                    live_tg_ids: ['tg:a'],
+                    queued_legacy_order_count: 1,
+                },
+                {
+                    corps_id: 'corps:z',
+                    active_legacy_og_ids: ['formation:z'],
+                    live_tg_ids: ['tg:z'],
+                    queued_legacy_order_count: 1,
+                },
             ],
         });
     });

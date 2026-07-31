@@ -9,7 +9,7 @@
  * CRITICAL INVARIANT (Engine Invariants — NO permanent force inflation): promotion is an
  * IDENTITY / COMMAND-ECHELON re-badge of brigades that ALREADY EXIST. It spawns NO brigades
  * and adds NO personnel/equipment/geometry. The standing OG's display identity is upgraded
- * ("N. OG (Place)" → "{N+20}. Division" or the historically-mapped number), and a one-way
+ * ("N. OG (Place)" → the explicitly verified Division identity), and a one-way
  * promotion record is written. No force totals change.
  *
  * DETERMINISM (sacred): pure functions; no Math.random / Date.now / timestamps. All iteration
@@ -27,7 +27,6 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 import {
     ARBIH_OG_TO_DIVISION_NUMBER,
-    OG_TO_DIVISION_DEFAULT_OFFSET,
     PROMOTION_TG_FORMATION_THRESHOLD,
 } from './tactical_group_config.js';
 
@@ -49,14 +48,17 @@ export function divisionDisplayName(divisionNumber: number): string {
     return `${divisionNumber}. Division`;
 }
 
+/** Normalize a Division display identity for deterministic collision checks and diagnostics. */
+export function normalizeDivisionDisplayName(displayName: string): string {
+    return displayName.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
 /**
- * Resolve the promoted Division number for a (corps, og_ordinal) pair: historical map first
- * (1st OG→21, 5th OG→25 for 2nd Corps), else the default rule (og_ordinal + offset). Pure.
+ * Resolve a verified promoted Division number for a (corps, og_ordinal) pair. An absent
+ * mapping has no historical identity and therefore cannot produce a promotion. Pure.
  */
-export function resolveDivisionNumber(corpsId: FormationId, ogOrdinal: number): number {
-    const mapped = ARBIH_OG_TO_DIVISION_NUMBER[`${corpsId}:${ogOrdinal}`];
-    if (mapped != null) return mapped;
-    return ogOrdinal + OG_TO_DIVISION_DEFAULT_OFFSET;
+export function resolveDivisionNumber(corpsId: FormationId, ogOrdinal: number): number | undefined {
+    return ARBIH_OG_TO_DIVISION_NUMBER[`${corpsId}:${ogOrdinal}`];
 }
 
 /**
@@ -74,6 +76,13 @@ export function evaluateOgPromotions(state: GameState, turn: number): OgPromotio
     if (!counts) return [];
     const formations = mil.formations ?? {};
     const existing = mil.og_promotions ?? {};
+    const occupiedDivisionNumbers = new Set<number>();
+    const occupiedDisplayNames = new Set<string>();
+    for (const recordKey of Object.keys(existing).sort(strictCompare)) {
+        const record = existing[recordKey];
+        occupiedDivisionNumbers.add(record.division_number);
+        occupiedDisplayNames.add(normalizeDivisionDisplayName(record.division_display_name));
+    }
 
     const out: OgPromotionRecord[] = [];
     for (const corpsId of Object.keys(counts).sort(strictCompare)) {
@@ -85,14 +94,22 @@ export function evaluateOgPromotions(state: GameState, turn: number): OgPromotio
 
         const ogOrdinal = standingOgOrdinalForCorps(corpsId);
         const divisionNumber = resolveDivisionNumber(corpsId, ogOrdinal);
+        if (divisionNumber == null) continue;
+        const displayName = divisionDisplayName(divisionNumber);
+        const normalizedDisplayName = normalizeDivisionDisplayName(displayName);
+        if (occupiedDivisionNumbers.has(divisionNumber) || occupiedDisplayNames.has(normalizedDisplayName)) {
+            continue;
+        }
         out.push({
             corps_id: corpsId,
             faction: ARBIH_FACTION,
             og_ordinal: ogOrdinal,
             division_number: divisionNumber,
-            division_display_name: divisionDisplayName(divisionNumber),
+            division_display_name: displayName,
             promoted_on_turn: turn,
         });
+        occupiedDivisionNumbers.add(divisionNumber);
+        occupiedDisplayNames.add(normalizedDisplayName);
     }
     return out;
 }
