@@ -20,10 +20,16 @@ import {
     type GameStateApplicationReservation,
 } from '../shared/gameStateUpdateMetadata.js';
 import { parsePlayerVisibleWarroomState } from './data/player_visible_state_adapter.js';
+import {
+    isTrustedTacticalFrameMessage as isTrustedTacticalFrameMessageEvent,
+    resolveTacticalFrameOrigin,
+} from './tacticalFrameTrust.js';
 
 type CampaignScenarioKey = 'apr_1992';
 const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
 const CAMPAIGN_REPLACEMENT_UPDATE: GameStateUpdateMetadata = Object.freeze({ campaignReplacement: true });
+const OPERATIONAL_SHELL_DOCUMENT = 'index.html?embedded=1&view=warroom';
+const SANDBOX_DOCUMENT = 'tactical_sandbox.html?embedded=1&desktop_window=sandbox';
 
 interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{
@@ -34,6 +40,7 @@ interface DesktopBridge {
     subscribeGameStateUpdated?: (cb: (stateJson: string, metadata?: GameStateUpdateMetadata) => void) => (() => void);
     subscribeTurnReportUpdated?: (cb: (report: unknown) => void) => (() => void);
     getCurrentGameState?: () => Promise<string | null>;
+    getMapServerUrl?: () => Promise<string | null>;
     loadStateDialog?: () => Promise<{ ok: boolean; error?: string }>;
     openTacticalMapWindow?: (payload?: { mode?: 'operational' | 'sandbox' }) => Promise<unknown>;
     [key: string]: unknown;
@@ -48,9 +55,11 @@ class WarroomApp {
     private desktopBridge: DesktopBridge | null = null;
     /** Tactical map iframe (lazily created on first open). */
     private tacticalMapIframe: HTMLIFrameElement | null = null;
+    private tacticalMapCreation: Promise<HTMLIFrameElement> | null = null;
     private tacticalMapReady = false;
-    /** True when the iframe was loaded with ?view=warroom (React shell owns room navigation). */
-    private tacticalMapInWarroomMode = false;
+    /** Sandbox is a separate document owner and never replaces the operational shell. */
+    private tacticalSandboxIframe: HTMLIFrameElement | null = null;
+    private tacticalSandboxCreation: Promise<HTMLIFrameElement> | null = null;
     /** HTTP base URL for the tactical map server (set at init from Electron IPC). */
     private mapServerUrl: string | null = null;
     /** Embedded iframe subscribers keyed by event name. */
@@ -97,23 +106,17 @@ class WarroomApp {
         // Listen for "back to HQ" messages from the embedded tactical map iframe
         window.addEventListener('message', (e) => {
             if (e.data?.type === 'awwv-back-to-hq') {
-                if (this.tacticalMapInWarroomMode && this.tacticalMapIframe?.contentWindow) {
-                    // React owns the warroom view — tell the iframe to switch back to warroom screen.
-                    // Keep the tactical scene visible (iframe stays loaded, React handles the swap).
-                    this.tacticalMapIframe.contentWindow.postMessage(
-                        { type: 'awwv-shell:show-warroom' },
-                        '*',
-                    );
-                } else {
-                    this.showWarroomScene();
-                }
+                if (!this.isTrustedTacticalFrameMessage(e)) return;
+                void this.returnToOperationalWarroomShell();
                 return;
             }
             if (e.data?.type === 'awwv-bridge:subscribe-event') {
+                if (!this.isTrustedTacticalFrameMessage(e)) return;
                 this.handleEmbeddedBridgeSubscription(e);
                 return;
             }
             if (e.data?.type === 'awwv-bridge:invoke') {
+                if (!this.isTrustedTacticalFrameMessage(e)) return;
                 void this.handleEmbeddedBridgeInvoke(e);
             }
         });
@@ -122,9 +125,9 @@ class WarroomApp {
 
         // Resolve tactical map HTTP server URL (set by Electron main process).
         // MapLibre requires http:// origin; its Web Workers don't work under awwv://.
-        if (this.desktopBridge && typeof (this.desktopBridge as Record<string, unknown>).getMapServerUrl === 'function') {
+        if (this.desktopBridge?.getMapServerUrl) {
             try {
-                const url = await (this.desktopBridge as { getMapServerUrl: () => Promise<string | null> }).getMapServerUrl();
+                const url = await this.desktopBridge.getMapServerUrl();
                 if (url) this.mapServerUrl = url.replace(/\/+$/, '');
             } catch (_) { /* not available — fallback to awwv:// */ }
         }
@@ -360,7 +363,7 @@ class WarroomApp {
     private showLoadedGameShellScene(): void {
         if (this.gameState) {
             // React shell owns room navigation; keep the iframe loaded for the session.
-            void this.showTacticalMapScene('warroom');
+            void this.returnToOperationalWarroomShell();
             return;
         }
         this.showWarroomScene();
@@ -563,7 +566,7 @@ class WarroomApp {
         }
         if (mapBtn) {
             mapBtn.onclick = () => {
-                this.showTacticalMapScene('operational');
+                void this.openTacticalShellHandoff({ kind: 'war-map' });
             };
         }
         if (sandboxBtn) {
@@ -656,22 +659,113 @@ class WarroomApp {
         }
     }
 
-    /**
-     * Show the tactical map as a full-screen iframe layer (same window, no separate BrowserWindow).
-     * In Electron: embeds the React tactical map via HTTP map server (MapLibre requires http://).
-     * In dev/browser: opens the tactical map in a new tab.
-     */
-    private async showTacticalMapScene(mode: 'operational' | 'sandbox' | 'warroom' = 'operational'): Promise<void> {
+    private async resolveMapBaseUrl(): Promise<string> {
+        if (this.mapServerUrl) return this.mapServerUrl;
+        if (this.desktopBridge && typeof (this.desktopBridge as Record<string, unknown>).getMapServerUrl === 'function') {
+            try {
+                const url = await (this.desktopBridge as { getMapServerUrl: () => Promise<string | null> }).getMapServerUrl();
+                if (url) {
+                    this.mapServerUrl = url.replace(/\/+$/, '');
+                    return this.mapServerUrl;
+                }
+            } catch (_) { /* use the protocol fallback */ }
+        }
+        return 'awwv://warroom/tactical-map';
+    }
+
+    private buildTacticalDocumentUrl(mapBaseUrl: string, documentPath: string): string {
+        const profiling = new URLSearchParams(window.location.search).get('profile_map_transition') === '1';
+        return `${mapBaseUrl}/${documentPath}${profiling ? '&profile_map_transition=1' : ''}`;
+    }
+
+    private isTrustedTacticalFrameMessage(event: MessageEvent): boolean {
+        return isTrustedTacticalFrameMessageEvent(
+            event,
+            [this.tacticalMapIframe, this.tacticalSandboxIframe],
+            window.location.href,
+        );
+    }
+
+    private postToOperationalShell(message: unknown): boolean {
+        const iframe = this.tacticalMapIframe;
+        if (!this.tacticalMapReady || !iframe?.contentWindow) return false;
+        try {
+            const targetOrigin = resolveTacticalFrameOrigin(iframe.src, window.location.href) ?? '*';
+            iframe.contentWindow.postMessage(message, targetOrigin);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    private async returnToOperationalWarroomShell(): Promise<void> {
+        await this.showTacticalMapScene('warroom');
+        this.postToOperationalShell({ type: 'awwv-shell:show-warroom' });
+    }
+
+    private async ensureOperationalShellIframe(tacticalScene: HTMLElement): Promise<HTMLIFrameElement> {
+        if (this.tacticalMapIframe) return this.tacticalMapIframe;
+        if (this.tacticalMapCreation) return this.tacticalMapCreation;
+
+        const creation = (async () => {
+            const mapBaseUrl = await this.resolveMapBaseUrl();
+            const shellUrl = this.buildTacticalDocumentUrl(mapBaseUrl, OPERATIONAL_SHELL_DOCUMENT);
+            const iframe = document.createElement('iframe');
+            iframe.id = 'tactical-map-iframe';
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.hidden = true;
+            iframe.onload = () => {
+                this.tacticalMapReady = true;
+                this.postFreshCampaignStartedToTacticalMap();
+                this.flushPendingShellHandoff();
+            };
+            iframe.src = shellUrl;
+            this.tacticalMapIframe = iframe;
+            tacticalScene.appendChild(iframe);
+            return iframe;
+        })();
+        this.tacticalMapCreation = creation;
+        try {
+            return await creation;
+        } finally {
+            if (this.tacticalMapCreation === creation) this.tacticalMapCreation = null;
+        }
+    }
+
+    private async ensureSandboxIframe(tacticalScene: HTMLElement): Promise<HTMLIFrameElement> {
+        if (this.tacticalSandboxIframe) return this.tacticalSandboxIframe;
+        if (this.tacticalSandboxCreation) return this.tacticalSandboxCreation;
+
+        const creation = (async () => {
+            const mapBaseUrl = await this.resolveMapBaseUrl();
+            const sandboxUrl = this.buildTacticalDocumentUrl(mapBaseUrl, SANDBOX_DOCUMENT);
+            const iframe = document.createElement('iframe');
+            iframe.id = 'tactical-sandbox-iframe';
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.hidden = true;
+            iframe.src = sandboxUrl;
+            this.tacticalSandboxIframe = iframe;
+            tacticalScene.appendChild(iframe);
+            return iframe;
+        })();
+        this.tacticalSandboxCreation = creation;
+        try {
+            return await creation;
+        } finally {
+            if (this.tacticalSandboxCreation === creation) this.tacticalSandboxCreation = null;
+        }
+    }
+
+    /** Show one retained tactical document without navigating either iframe. */
+    private async showTacticalMapScene(mode: 'sandbox' | 'warroom' = 'warroom'): Promise<void> {
         const isElectron = !!(window as Window & { awwv?: unknown }).awwv;
         if (!isElectron) {
-            // Dev/browser: cross-origin prevents meaningful iframe interaction.
-            // warroom mode not reachable in dev (warroom.ts runs in Electron only).
             const handoffQuery = this.pendingShellHandoff
-                ? `?shellHandoff=${encodeShellHandoffCommand(this.pendingShellHandoff)}`
+                ? `&shellHandoff=${encodeShellHandoffCommand(this.pendingShellHandoff)}`
                 : '';
             const devUrl = mode === 'sandbox'
-                ? `http://127.0.0.1:3002/tactical_sandbox.html${handoffQuery}`
-                : `http://127.0.0.1:3002/${handoffQuery}`;
+                ? 'http://127.0.0.1:3002/tactical_sandbox.html?desktop_window=sandbox'
+                : `http://127.0.0.1:3002/index.html?view=warroom${handoffQuery}`;
             window.open(devUrl, '_blank');
             this.pendingShellHandoff = null;
             return;
@@ -680,135 +774,31 @@ class WarroomApp {
         const tacticalScene = document.getElementById('tactical-map-scene');
         if (!tacticalScene) return;
 
-        // Prefer HTTP map server (re-query each time so we never use stale awwv if server is ready).
-        let mapBaseUrl = this.mapServerUrl;
-        if (this.desktopBridge && typeof (this.desktopBridge as Record<string, unknown>).getMapServerUrl === 'function') {
-            try {
-                const url = await (this.desktopBridge as { getMapServerUrl: () => Promise<string | null> }).getMapServerUrl();
-                if (url) {
-                    mapBaseUrl = url.replace(/\/+$/, '');
-                    this.mapServerUrl = mapBaseUrl;
-                }
-            } catch (_) { /* keep existing mapServerUrl or awwv fallback */ }
-        }
-        mapBaseUrl = mapBaseUrl || 'awwv://warroom/tactical-map';
-
-        const cacheBuster = `v=${Date.now()}`;
-        const freshCampaignStart = this.freshCampaignIntroPending;
-        const introQuery = freshCampaignStart ? '&intro=war_start' : '';
-        if (freshCampaignStart) {
-            this.freshCampaignResetPending = true;
-        }
-        let targetSrc: string;
         if (mode === 'sandbox') {
-            targetSrc = `${mapBaseUrl}/tactical_sandbox.html?embedded=1&${cacheBuster}${introQuery}`;
-        } else if (mode === 'warroom') {
-            // React shell owns room navigation — load with view=warroom so React renders WarroomShellLayer.
-            targetSrc = `${mapBaseUrl}/index.html?embedded=1&view=warroom&${cacheBuster}${introQuery}`;
+            const sandbox = await this.ensureSandboxIframe(tacticalScene);
+            sandbox.hidden = false;
+            if (this.tacticalMapIframe) this.tacticalMapIframe.hidden = true;
         } else {
-            targetSrc = `${mapBaseUrl}/index.html?embedded=1&${cacheBuster}${introQuery}`;
-        }
-        this.freshCampaignIntroPending = false;
-
-        // Track whether the iframe is currently in React warroom mode.
-        const nextWarroomMode = mode === 'warroom';
-
-        // Lazily create iframe on first open
-        if (!this.tacticalMapIframe) {
-            const iframe = document.createElement('iframe');
-            iframe.id = 'tactical-map-iframe';
-            iframe.setAttribute('allowfullscreen', '');
-            iframe.src = targetSrc;
-            this.tacticalMapInWarroomMode = nextWarroomMode;
-
-            iframe.onload = () => {
-                this.tacticalMapReady = true;
-                this.injectBridgeIntoTacticalMap(iframe);
-                this.postFreshCampaignStartedToTacticalMap();
-                this.flushPendingShellHandoff();
-            };
-
-            tacticalScene.appendChild(iframe);
-            this.tacticalMapIframe = iframe;
-        } else if (this.tacticalMapIframe.src !== targetSrc) {
-            this.tacticalMapReady = false;
-            this.tacticalMapInWarroomMode = nextWarroomMode;
-            this.tacticalMapIframe.src = targetSrc;
-        } else if (this.tacticalMapReady) {
-            // Push latest game state to existing iframe
-            this.injectBridgeIntoTacticalMap(this.tacticalMapIframe);
+            if (this.freshCampaignIntroPending) {
+                this.freshCampaignResetPending = true;
+                this.freshCampaignIntroPending = false;
+            }
+            const shell = await this.ensureOperationalShellIframe(tacticalScene);
+            shell.hidden = false;
+            if (this.tacticalSandboxIframe) this.tacticalSandboxIframe.hidden = true;
             this.postFreshCampaignStartedToTacticalMap();
-            this.flushPendingShellHandoff();
         }
 
-        // Scene swap: hide desk only so warroom-scene stays visible and tactical map can show
         const desk = document.getElementById('warroom-desk');
         if (desk) desk.classList.add('warroom-desk-hidden');
         tacticalScene.classList.remove('tactical-map-scene-hidden');
         tacticalScene.setAttribute('aria-hidden', 'false');
     }
 
-    /**
-     * Post-load setup for the tactical map iframe.
-     * For tactical_map.html / tactical_sandbox.html the bridge is inherited via inline script (?embedded=1).
-     * For map_hoi.html we inject a "Back to HQ" button since it doesn't have one natively.
-     */
-    private injectBridgeIntoTacticalMap(iframe: HTMLIFrameElement): void {
-        try {
-            const iframeWindow = iframe.contentWindow as (Window & { awwv?: Record<string, unknown> }) | null;
-            if (!iframeWindow) return;
-            const iframeOrigin = new URL(iframe.src, window.location.href).origin;
-            if (iframeOrigin !== window.location.origin) {
-                // The HTTP tactical map server is intentionally cross-origin from awwv://warroom.
-                // Runtime handoff uses postMessage; direct DOM setup is only valid for same-origin fallback.
-                return;
-            }
-
-            // Ensure the "Back to HQ" button is visible (inline script handles this too)
-            let hqBtn = iframeWindow.document.getElementById('btn-back-to-hq');
-
-            // map_hoi.html doesn't have a native "Back to HQ" button — inject one
-            if (!hqBtn) {
-                const topBar = iframeWindow.document.getElementById('hoi-top-bar-actions')
-                    ?? iframeWindow.document.getElementById('hoi-top-bar');
-                if (topBar) {
-                    hqBtn = iframeWindow.document.createElement('button');
-                    hqBtn.id = 'btn-back-to-hq';
-                    hqBtn.textContent = '\u25C0 HQ';
-                    hqBtn.title = 'Return to warroom HQ';
-                    hqBtn.style.cssText = 'padding:4px 10px;background:rgba(0,232,120,0.12);color:#00e878;border:1px solid rgba(0,232,120,0.3);border-radius:3px;cursor:pointer;font-family:inherit;font-size: 12px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-right:6px;';
-                    hqBtn.addEventListener('click', () => {
-                        window.postMessage({ type: 'awwv-back-to-hq' }, '*');
-                    });
-                    topBar.insertBefore(hqBtn, topBar.firstChild);
-                }
-            }
-
-            if (hqBtn) {
-                hqBtn.style.display = '';
-            }
-
-            // Ensure the tactical map's own main menu is hidden (we launched from warroom)
-            const mainMenuOverlay = iframeWindow.document.getElementById('main-menu-overlay');
-            if (mainMenuOverlay) {
-                mainMenuOverlay.classList.remove('open');
-                mainMenuOverlay.setAttribute('aria-hidden', 'true');
-            }
-        } catch (e) {
-            console.warn('[warroom] Could not configure tactical map iframe:', e);
-        }
-    }
-
     private postFreshCampaignStartedToTacticalMap(): void {
-        if (!this.freshCampaignResetPending || !this.tacticalMapIframe?.contentWindow) return;
-        try {
-            this.tacticalMapIframe.contentWindow.postMessage(
-                { type: 'awwv-shell:fresh-campaign-started' },
-                '*',
-            );
+        if (!this.freshCampaignResetPending) return;
+        if (this.postToOperationalShell({ type: 'awwv-shell:fresh-campaign-started' })) {
             this.freshCampaignResetPending = false;
-        } catch (e) {
-            console.warn('[warroom] Failed to notify tactical map of fresh campaign start:', e);
         }
     }
 
@@ -836,30 +826,20 @@ class WarroomApp {
     }
 
     private async openTacticalShellHandoff(command: ShellHandoffCommand): Promise<void> {
-        if (this.tacticalMapInWarroomMode && this.tacticalMapReady && this.tacticalMapIframe?.contentWindow) {
-            // React is showing the warroom view inside the already-loaded iframe.
-            // Send the handoff directly — React will switch to game view without an iframe reload.
-            this.tacticalMapIframe.contentWindow.postMessage(
-                { type: 'awwv-shell:handoff', command },
-                '*',
-            );
-            return;
-        }
         this.pendingShellHandoff = command;
-        await this.showTacticalMapScene('operational');
-        this.flushPendingShellHandoff();
+        await this.showTacticalMapScene('warroom');
+        if (this.postToOperationalShell({ type: 'awwv-shell:handoff', command })) {
+            this.pendingShellHandoff = null;
+        }
     }
 
     private flushPendingShellHandoff(): void {
-        if (!this.pendingShellHandoff || !this.tacticalMapReady || !this.tacticalMapIframe?.contentWindow) return;
-        try {
-            this.tacticalMapIframe.contentWindow.postMessage(
-                { type: 'awwv-shell:handoff', command: this.pendingShellHandoff },
-                '*',
-            );
+        if (!this.pendingShellHandoff) return;
+        if (this.postToOperationalShell({
+            type: 'awwv-shell:handoff',
+            command: this.pendingShellHandoff,
+        })) {
             this.pendingShellHandoff = null;
-        } catch (e) {
-            console.warn('[warroom] Failed to hand off shell command to tactical map:', e);
         }
     }
 

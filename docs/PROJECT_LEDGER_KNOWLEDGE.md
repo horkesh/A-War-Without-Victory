@@ -3975,7 +3975,13 @@ Applied in `[2026-07-17] Campaign QA canon integration` and `docs/40_reports/imp
 
 **Retained async renderers need revision cancellation as well as exact teardown:** removing a MapLibre owner does not cancel an already awaited geometry request or make a captured `load` callback harmless. Durable rule: every deferred apply path checks current owner plus current campaign revision after its final await, reacquires sources only after that check, explicitly detaches pending listeners, and is behaviorally tested by resolving stale work after campaign change and teardown.
 
-Applied in `[2026-07-31] Seamless Command Room to Tactical Map transition opened as executable lane`, `[2026-07-31] Seamless map transition Phase 1 persistent viewport`, `[2026-07-31] Seamless map transition Phase 1 final evidence and first-attachment repair`, and `docs/plans/2026-07-31-seamless-command-room-map-transition-plan.md`.
+**A retained workspace needs stable document identity as well as stable component identity:** keeping React/MapLibre mounted inside an iframe does not help if outer navigation reassigns `iframe.src`. Durable rule: create the campaign-capable iframe once at a deterministic URL; route room changes, map reveals, destination handoffs, and fresh-campaign reset through explicit messages. Keep genuinely separate tools in separate frames rather than navigating the operational owner.
+
+**Cross-origin frame trust requires exact source and origin:** a retained iframe keeps its `WindowProxy` if its document navigates, so source identity alone is not authorization. Durable rule: receive privileged bridge messages only when both the registered frame source and expected origin match; an opaque custom-protocol document must report literal `null`. Use `*` only as the unavoidable send target for an opaque destination, never as a receive-side trust decision.
+
+**Fallback documents must retain route semantics:** a server may intentionally serve `index.html` for a legacy or virtual path, but the path alone does not select the intended React screen. Durable rule: every fallback route carries the canonical deep-link marker and has a behavioral routing test; a successful HTTP load is not proof that the requested workspace opened.
+
+Applied in `[2026-07-31] Seamless Command Room to Tactical Map transition opened as executable lane`, `[2026-07-31] Seamless map transition Phase 1 persistent viewport`, `[2026-07-31] Seamless map transition Phase 1 final evidence and first-attachment repair`, `[2026-08-01] Seamless map transition Phase 2 stable shell document`, and `docs/plans/2026-07-31-seamless-command-room-map-transition-plan.md`.
 
 ## 2026-07-31 - Autonomous roadmaps need outcomes, not verdict queues
 

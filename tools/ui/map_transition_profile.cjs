@@ -596,9 +596,14 @@ async function clickTopmostVisibleButton(frame, name) {
 }
 
 async function startCleanCampaign(page) {
+  await page.evaluate(() => {
+    const next = new URL(window.location.href);
+    next.searchParams.set('profile_map_transition', '1');
+    window.history.replaceState(null, '', next.toString());
+  });
   await clickVisible(page.locator('#mm-new-campaign'));
   await clickVisible(page.locator('#sp-faction-RBiH'));
-  let frame = await waitForEmbeddedFrame(page, false);
+  const frame = await waitForEmbeddedFrame(page, true);
   await frame.waitForLoadState('networkidle', { timeout: 120000 }).catch(() => {});
   let startupControlsExhausted = true;
   for (let attempt = 0; attempt < 10; attempt += 1) {
@@ -618,17 +623,6 @@ async function startCleanCampaign(page) {
     throw new Error(`Startup control loop exhausted; startup=${JSON.stringify(diagnostic)}`);
   }
 
-  await page.evaluate(() => {
-    const iframe = document.querySelector('#tactical-map-iframe');
-    if (!(iframe instanceof HTMLIFrameElement)) throw new Error('tactical-map-iframe unavailable');
-    const next = new URL(iframe.src);
-    next.searchParams.set('embedded', '1');
-    next.searchParams.set('view', 'warroom');
-    next.searchParams.set('profile_map_transition', '1');
-    next.searchParams.delete('intro');
-    iframe.src = next.toString();
-  });
-  frame = await waitForEmbeddedFrame(page, true);
   await frame.locator('[data-testid="warroom-toolbar"]').waitFor({ state: 'visible', timeout: 90000 });
   return frame;
 }

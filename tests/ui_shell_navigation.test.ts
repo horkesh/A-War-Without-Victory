@@ -8,12 +8,26 @@ import {
   openArmyHQTab,
   openChronicle,
   openCodex,
+  resolveInitialShellScreen,
   type ShellNavigationState,
 } from '../src/ui/map/utils/shellNavigation.js';
 import { openPresidentialDecisionRoomNavigationTarget } from '../src/ui/map/utils/presidentialDecisionRoomNavigation.js';
 import { isWarroomLocalCommand } from '../src/ui/map/utils/warroomNavigation.js';
 import { decodeShellHandoffCommand, encodeShellHandoffCommand } from '../src/ui/shared/shellHandoff.js';
 import { isEmbeddedTacticalMap, shouldShowWarroomReturn } from '../src/ui/map/utils/warroomReturn.js';
+
+describe('initial shell route', () => {
+  it('deep-links both packaged tactical window modes into the game shell', () => {
+    expect(resolveInitialShellScreen('?embedded=1&desktop_window=sandbox')).toBe('game');
+    expect(resolveInitialShellScreen('?desktop_window=operational')).toBe('game');
+  });
+
+  it('keeps explicit view routes authoritative and leaves an unqualified boot alone', () => {
+    expect(resolveInitialShellScreen('?view=warroom&desktop_window=sandbox')).toBe('warroom');
+    expect(resolveInitialShellScreen('?view=game')).toBe('game');
+    expect(resolveInitialShellScreen('')).toBeNull();
+  });
+});
 
 function createState(playerFaction: string | null = 'RBiH'): ShellNavigationState & {
   calls: Array<[string, unknown]>;
@@ -230,6 +244,7 @@ describe('shellNavigation', () => {
     expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'briefing', corpsId: 'arbih_3rd_corps' })).toBe(true);
     expect(applyShellHandoffCommand(state, { kind: 'chronicle' })).toBe(true);
     expect(applyShellHandoffCommand(state, { kind: 'codex' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'war-map' })).toBe(true);
 
     expect(state.calls).toEqual([
       ['setCodexOpen', false],

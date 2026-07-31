@@ -97,7 +97,7 @@ import { isRequiredPendingEventDecision } from './data/eventDecisionRouting';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
 import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
-import { applyShellHandoffCommand, openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openChronicleDecisionRecord, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
+import { applyShellHandoffCommand, openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openChronicleDecisionRecord, openCodex, resolveInitialShellScreen, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
 import { requestDecisionRoomLens } from './utils/decisionRoomLensRequest';
 import { isKeyboardEventFromInteractiveControl } from './utils/interactiveFocus';
@@ -1580,6 +1580,7 @@ function App() {
 
   useEffect(() => {
     const handleShellHandoff = (event: MessageEvent) => {
+      if (window.parent !== window && event.source !== window.parent) return;
       // warroom.ts posts this when REACT_SHELL_ENABLED and the player clicks "back to HQ"
       // from the game view — React switches back to the warroom screen without an iframe reload.
       if (event.data?.type === 'awwv-shell:show-warroom') {
@@ -1639,20 +1640,10 @@ function App() {
   // dev/automation deep-link straight into the in-game shell, bypassing the
   // menu (mirrors the existing `?view=warroom` override).
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const view = params.get('view');
-    if (view === 'warroom') {
-      setAppScreen('warroom');
-    } else if (view === 'game') {
-      setAppScreen('game');
-    } else if (params.has('desktop_window')) {
-      // Task #80 — the packaged desktop app opens its tactical map windows with
-      // `?desktop_window=operational` / `?desktop_window=sandbox`
-      // (electron-main.cjs `getTacticalMapWindowUrl`). These windows attach to
-      // an already-running session, so deep-link straight to the in-game shell
-      // — but do NOT force the SidePicker (no new-game flow here).
-      setAppScreen('game');
-    }
+    // Packaged tactical windows attach to an existing session, so their
+    // desktop_window route enters the game without forcing the SidePicker.
+    const initialShellScreen = resolveInitialShellScreen(window.location.search);
+    if (initialShellScreen) setAppScreen(initialShellScreen);
   }, []);
 
   return (
@@ -2050,14 +2041,8 @@ function App() {
             )}
             onNavigate={(command) => {
               if (isWarroomLocalCommand(command)) {
-                if (command.kind === 'warroom-overlay') {
-                  setWarroomDecisionRoomOpen(false);
-                  openWarroomOverlay(command.surface);
-                  return;
-                }
-                if (command.kind === 'war-map') {
-                  leaveWarroomForGame();
-                }
+                setWarroomDecisionRoomOpen(false);
+                openWarroomOverlay(command.surface);
                 return;
               }
               if (!command) return;
@@ -2070,9 +2055,7 @@ function App() {
                 setWarroomDecisionRoomOpen(false);
                 closeCommandStrip(false);
               }
-              if (command) {
-                applyShellCommand(command);
-              }
+              applyShellCommand(command);
               if (!warroomCommandStaysInRoom(command)) {
                 leaveWarroomForGame();
               }
