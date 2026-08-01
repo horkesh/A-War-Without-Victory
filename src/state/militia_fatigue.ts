@@ -2,7 +2,7 @@ import type { SettlementRecord } from '../map/settlements.js';
 import type { FactionId, GameState, MilitiaPoolState, MunicipalityId } from './game_state.js';
 import { computeSupplyReachability } from './supply_reachability.js';
 
-import { buildAdjacencyMap } from '../map/adjacency_map.js';
+import { buildAdjacencyMapCached } from '../map/adjacency_map.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { strictCompare } from './validateGameState.js';
 
@@ -95,7 +95,7 @@ export function updateMilitiaFatigue(
     }
 
     // Compute supply reachability once
-    const adjacencyMap = buildAdjacencyMap(settlementEdges);
+    const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
     const supplyReport = computeSupplyReachability(state, adjacencyMap);
 
     // Build reachable sets by faction

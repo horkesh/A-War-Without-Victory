@@ -4026,3 +4026,9 @@ Applied in `[2026-07-31] Standing Operational Group doctrine converged with live
 **Post-action modal cascades need an allowlist of non-decisions, not a generic close loop:** an Advance can surface a neutral deferral and then read-only historical notices. Durable rule: permit only exact, bounded non-policy actions such as `Review Later` and `Acknowledged`; leave any unknown or decision-bearing surface open so the evidence run fails closed rather than inventing a choice.
 
 Applied in `[2026-08-01] Seamless map transition R1 Phase 3-6 closeout`, `src/ui/map/perf/mapTransitionTiming.ts`, and `tools/ui/map_transition_profile.cjs`.
+
+## 2026-08-01 - Simulation topology caches require runtime immutability proof
+
+**Identity reuse is safe only when immutability is enforceable:** a stable array reference is not proof that its edge records or membership cannot change. Durable rule: register and deeply freeze canonical topology at its ownership boundary, or require an independently deeply frozen array and every contained edge record before caching by identity. Mutable or only shallow-frozen inputs must take a fresh builder path, and cached composite outputs must also be deeply frozen so one consumer cannot corrupt another. Pair performance acceptance with a mutated-input regression and byte-identical scenario evidence.
+
+Applied in `[2026-08-01] Engine quality Phase 2 immutable topology reuse checkpoint`, `src/map/adjacency_map.ts`, and `tests/adjacency_map_cached.test.ts`.

@@ -2080,6 +2080,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             sidToMun,
             initOverrideChangeCount
         } = startup;
+        const operationalSettlementGraph = await timedAsync(
+            emitTimingJson,
+            timingTotals,
+            'setup',
+            () => loadSettlementGraph({
+                settlementsPath: join(baseDir, 'data/derived/operational/operational_settlements.geojson'),
+                edgesPath: join(baseDir, 'data/derived/operational/operational_contact_graph.json'),
+            }),
+        );
         let startWeekIndex = 0;
         if (resumeFromSavePath) {
             const resumedSerialized = await timedAsync(emitTimingJson, timingTotals, 'setup', () =>
@@ -2388,6 +2397,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 const runResult = await runTurn(state, {
                     seed: state.meta.seed,
                     settlementGraph: graph,
+                    operationalSettlementGraph,
                     settlementEdges: graph.edges,
                     municipalityPopulation1991,
                     settlementPopulationBySid,

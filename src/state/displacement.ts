@@ -9,7 +9,7 @@ import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementState, FactionId, GameState, MilitiaPoolState, MunicipalityId } from './game_state.js';
 import { CANONICAL_FACTIONS } from './game_state.js';
 
-import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
+import { buildAdjacencyMapCached, type AdjacencyMap } from '../map/adjacency_map.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
@@ -697,7 +697,7 @@ export function updateDisplacement(
     }
 
     // Compute derived state
-    const adjacencyMap = buildAdjacencyMap(settlementEdges);
+    const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
     const supplyReport = computeSupplyReachability(state, adjacencyMap);
     const frontEdges = computeFrontEdges(state, settlementEdges);
     const breaches = computeFrontBreaches(state, frontEdges);

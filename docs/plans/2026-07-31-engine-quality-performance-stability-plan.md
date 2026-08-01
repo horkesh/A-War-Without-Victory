@@ -171,20 +171,22 @@ npm.cmd run test:baselines
 
 For each candidate:
 
-- [ ] Write an equivalence test or existing-output assertion first.
-- [ ] Measure candidate-local cost before editing.
-- [ ] Implement one bounded reuse/index/algorithm change.
-- [ ] Prove no mutable `Map`/`Set` or insertion order leaks into state/output.
-- [ ] Run the local profile and full timed 40-turn run.
-- [ ] Keep the change only when both measurements improve and output remains byte-identical.
+- [x] Write an equivalence test or existing-output assertion first for operational-graph and immutable-adjacency reuse.
+- [x] Measure candidate-local cost before editing.
+- [x] Implement one bounded reuse/index/algorithm change at a time.
+- [x] Prove no mutable `Map`/`Set` or insertion order leaks into state/output; mutable edge arrays explicitly bypass the identity cache.
+- [x] Re-run the local profile, one excluded warmup, and three full timed 40-turn runs after adjacency runtime-eligibility hardening; operational-graph reuse is also replicated.
+- [x] Keep adjacency reuse only when the post-hardening local owner and replicated full-run envelope improve and all outputs remain byte-identical.
 - [ ] Revert performance-inconclusive or regressing candidates before the next candidate.
 
 ### Task 2.2 -- Repeat by current profile, not the old list
 
-- [ ] Reprofile after every accepted optimization.
+- [x] Reprofile the hardened adjacency candidate before final acceptance; the operational-graph candidate is complete.
 - [ ] Continue until the recorded-machine mean is below 100 ms/turn.
 - [ ] If the remaining owner requires an algorithmic redesign, write failing equivalence/property tests and implement the redesign inside this phase; do not create a new roadmap gate.
-- [ ] Record P50/P95, heap, hashes, and before/after owner shares for every accepted commit.
+- [x] Replace the provisional adjacency row in `docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md` with the real post-hardening P50/P95, heap, hashes, exact byte SHA, and owner shares before acceptance.
+
+Phase 2 checkpoint evidence (local reference machine, 2026-08-01): operational-graph reuse reduced the replicated mean from 1,562.923 to 1,292.665 ms/turn (P50 1,289.839; P95 1,302.636) and `loadSettlementGraph` inclusive time by 88.0%. Runtime-hardened adjacency reuse then reduced `buildAdjacencyMap` self time from 2,764.472 to 90.059 ms (96.7%) and reduced the replicated mean to 1,201.897 ms/turn (P50 1,206.850; P95 1,210.672), 7.0% below the preceding checkpoint and 23.1% below Phase 0. Hardened sampled peak heap was 193.845 MB. The excluded warmup, corrected app V8, and all three measured modes were exactly 5,071,275 bytes with SHA-256 `52ee1829aab62e5ede80ca461b0ec6cc1d5ecc8ac2e0700a36ea7229d6050bde` and final state hash `52ee1829aab62e5e`. The 100 ms/turn target remains open.
 
 ```powershell
 npm.cmd run test:vitest -- tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/final_sector_truth_reconciliation.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/brigade_front_distribution.test.ts tests/performance_wall_clock_report.test.ts --pool=forks --reporter=dot

@@ -1,4 +1,4 @@
-import { buildAdjacencyMap } from '../map/adjacency_map.js';
+import { buildAdjacencyMapCached } from '../map/adjacency_map.js';
 import { getSarajevoSiegeParams } from '../sim/combat/sarajevo_siege_params.js';
 import type { EdgeRecord, LoadedSettlementGraph } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
@@ -156,7 +156,7 @@ export function updateEnclaveIntegrity(
     edges: EdgeRecord[],
     supplyReport: SupplyStateDerivationReport | undefined
 ): EnclaveIntegrityReport {
-    const adjacency = buildAdjacencyMap(edges);
+    const adjacency = buildAdjacencyMapCached(edges);
     const controllers = state.political.political_controllers ?? {};
     const factions = state.factions.map((f) => f.id).sort(strictCompare);
     const enclaves: EnclaveState[] = [];
