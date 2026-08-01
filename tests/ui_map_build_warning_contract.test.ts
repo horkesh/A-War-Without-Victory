@@ -28,6 +28,9 @@ describe('tactical map build warning contracts', () => {
     expect(minimap).toContain("from '../map/builders/buildFrontLinesGeoJSON'");
     expect(minimap).not.toMatch(/import\(['"]\.\.\/data\/DataLoader['"]\)/);
     expect(minimap).not.toMatch(/import\(['"]\.\.\/map\/builders\/buildControlGeoJSON['"]\)/);
+    const viewport = readFileSync(resolve('src/ui/map/components/TacticalMapViewport.tsx'), 'utf8');
+    expect(viewport).toContain('minimapMounted && (');
+    expect(viewport).not.toMatch(/import\(['"]\.\/Minimap['"]\)/);
     expect(minimap).not.toMatch(/import\(['"]\.\.\/map\/builders\/buildFrontLinesGeoJSON['"]\)/);
   });
 });

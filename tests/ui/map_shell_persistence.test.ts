@@ -22,6 +22,7 @@ const graphics = vi.hoisted(() => ({
   reportRenderedRevision: null as null | ((revision: { turn: number; fingerprint: string } | null) => void),
   renderListener: null as null | (() => void),
   mainResize: vi.fn(),
+  mainOnceRender: vi.fn(),
   minimapResize: vi.fn(),
   mainRepaint: vi.fn(),
   minimapRepaint: vi.fn(),
@@ -48,6 +49,7 @@ vi.mock('../../src/ui/map/map/MapContainer.js', () => ({
         resize: graphics.mainResize,
         triggerRepaint: graphics.mainRepaint,
         onceRender: (listener: () => void) => {
+          graphics.mainOnceRender();
           graphics.renderListener = listener;
           return () => {
             if (graphics.renderListener === listener) graphics.renderListener = null;
@@ -147,13 +149,6 @@ function IntegratedTacticalOwnership({
 let nextRafId = 1;
 let pendingRafs = new Map<number, FrameRequestCallback>();
 
-function flushNextRaf(): void {
-  const next = [...pendingRafs.entries()].sort(([left], [right]) => left - right)[0];
-  if (!next) throw new Error('No pending animation frame');
-  pendingRafs.delete(next[0]);
-  act(() => next[1](0));
-}
-
 function read(path: string): string {
   return readFileSync(path, 'utf8');
 }
@@ -185,7 +180,7 @@ afterEach(() => {
 });
 
 describe('campaign-scoped tactical viewport ownership', () => {
-  it('keeps map, minimap, focus, and context input inert until revision plus reveal render are ready', () => {
+  it('keeps input inert, defers the minimap, and needs only the main activation render', () => {
     const interactionReady = vi.fn();
     const warroom = document.createElement('div');
     warroom.dataset.testid = 'warroom-shell';
@@ -202,21 +197,25 @@ describe('campaign-scoped tactical viewport ownership', () => {
     expect(viewport.style.pointerEvents).toBe('none');
     expect(map.getAttribute('data-input-active')).toBe('false');
     expect(map.tabIndex).toBe(-1);
-    expect(graphics.minimapInputActive).toHaveBeenLastCalledWith(false);
+    expect(graphics.minimapConstructions).not.toHaveBeenCalled();
+    expect(graphics.mainResize).toHaveBeenCalledOnce();
+    expect(graphics.mainOnceRender).toHaveBeenCalledOnce();
+    expect(graphics.mainRepaint).toHaveBeenCalledOnce();
+    expect(graphics.mainResize.mock.invocationCallOrder[0])
+      .toBeLessThan(graphics.mainOnceRender.mock.invocationCallOrder[0]);
+    expect(graphics.mainOnceRender.mock.invocationCallOrder[0])
+      .toBeLessThan(graphics.mainRepaint.mock.invocationCallOrder[0]);
+    expect(pendingRafs).toHaveLength(0);
     fireEvent.contextMenu(map);
     expect(graphics.contextMenu).not.toHaveBeenCalled();
 
     act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
     expect(viewport.inert).toBe(true);
     expect(map.getAttribute('data-input-active')).toBe('false');
-
-    flushNextRaf();
-    flushNextRaf();
-    expect(viewport.inert).toBe(true);
-    expect(graphics.mainResize).toHaveBeenCalledOnce();
-    expect(graphics.minimapResize).toHaveBeenCalledOnce();
-    expect(graphics.mainRepaint).toHaveBeenCalledOnce();
-    expect(graphics.minimapRepaint).toHaveBeenCalledOnce();
+    expect(graphics.minimapConstructions).toHaveBeenCalledOnce();
+    expect(graphics.minimapInputActive).toHaveBeenLastCalledWith(false);
+    expect(graphics.minimapResize).not.toHaveBeenCalled();
+    expect(graphics.minimapRepaint).not.toHaveBeenCalled();
 
     act(() => graphics.renderListener?.());
     expect(viewport.inert).toBe(false);
@@ -224,6 +223,8 @@ describe('campaign-scoped tactical viewport ownership', () => {
     expect(map.getAttribute('data-input-active')).toBe('true');
     expect(map.tabIndex).toBe(0);
     expect(graphics.minimapInputActive).toHaveBeenLastCalledWith(true);
+    expect(graphics.minimapResize).toHaveBeenCalledOnce();
+    expect(graphics.minimapRepaint).toHaveBeenCalledOnce();
     fireEvent.contextMenu(map);
     expect(graphics.contextMenu).toHaveBeenCalledOnce();
     expect(interactionReady).toHaveBeenLastCalledWith({
@@ -244,18 +245,20 @@ describe('campaign-scoped tactical viewport ownership', () => {
     warroom.remove();
   });
 
-  it('resumes the reveal sequence when hidden after its first frame and enables input only after the replacement render', () => {
+  it('cancels a hidden activation render and enables input only after the replacement render', () => {
     const view = render(createElement(TacticalMapViewport, { active: true }));
     act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
-    flushNextRaf();
+    const firstActivationListener = graphics.renderListener;
 
     view.rerender(createElement(TacticalMapViewport, { active: false }));
     expect(screen.getByTestId('tactical-map-viewport').inert).toBe(true);
     expect(screen.getByTestId('mock-tactical-map').getAttribute('data-input-active')).toBe('false');
 
     view.rerender(createElement(TacticalMapViewport, { active: true }));
-    flushNextRaf();
-    flushNextRaf();
+    expect(screen.getByTestId('mock-tactical-map').getAttribute('data-input-active')).toBe('false');
+    expect(graphics.renderListener).not.toBe(firstActivationListener);
+    act(() => firstActivationListener?.());
+    expect(screen.getByTestId('tactical-map-viewport').inert).toBe(true);
     expect(screen.getByTestId('mock-tactical-map').getAttribute('data-input-active')).toBe('false');
     act(() => graphics.renderListener?.());
 
@@ -263,6 +266,8 @@ describe('campaign-scoped tactical viewport ownership', () => {
     expect(screen.getByTestId('mock-tactical-map').getAttribute('data-input-active')).toBe('true');
     expect(graphics.mainMapConstructions).toHaveBeenCalledOnce();
     expect(graphics.minimapConstructions).toHaveBeenCalledOnce();
+    expect(graphics.mainResize).toHaveBeenCalledTimes(2);
+    expect(graphics.mainRepaint).toHaveBeenCalledTimes(2);
   });
 
   it('fails every viewport input owner closed immediately on fingerprint change and hide', () => {
@@ -272,8 +277,6 @@ describe('campaign-scoped tactical viewport ownership', () => {
       onInteractionReadyChange: interactionReadiness,
     }));
     act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
-    flushNextRaf();
-    flushNextRaf();
     act(() => graphics.renderListener?.());
 
     expect(screen.getByTestId('mock-tactical-map').getAttribute('data-input-active')).toBe('true');
@@ -314,8 +317,6 @@ describe('campaign-scoped tactical viewport ownership', () => {
     const onShellKeyDown = vi.fn();
     const view = render(createElement(IntegratedTacticalOwnership, { active: true, onShellKeyDown }));
     act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
-    flushNextRaf();
-    flushNextRaf();
     act(() => graphics.renderListener?.());
 
     fireEvent.keyDown(window, { key: '9' });
@@ -350,6 +351,7 @@ describe('campaign-scoped tactical viewport ownership', () => {
       loaded: true,
       active: true,
     }));
+    act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
     expect(graphics.mainMapConstructions).toHaveBeenCalledOnce();
 
     await act(async () => {
@@ -363,6 +365,7 @@ describe('campaign-scoped tactical viewport ownership', () => {
         active: true,
       }));
     });
+    act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
     expect(graphics.mainMapConstructions).toHaveBeenCalledTimes(2);
     expect(graphics.minimapConstructions).toHaveBeenCalledTimes(2);
     expect(graphics.mainMapRemove).toHaveBeenCalledOnce();
@@ -410,6 +413,7 @@ describe('campaign-scoped tactical viewport ownership', () => {
       loaded: campaignLoaded,
       active: true,
     }));
+    act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
     expect(graphics.mainMapConstructions).toHaveBeenCalledOnce();
     expect(graphics.minimapConstructions).toHaveBeenCalledOnce();
 
@@ -419,6 +423,7 @@ describe('campaign-scoped tactical viewport ownership', () => {
       loaded: campaignLoaded,
       active: true,
     }));
+    act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
 
     expect(onReplacementSucceeded).toHaveBeenCalledOnce();
     expect(graphics.mainMapConstructions).toHaveBeenCalledTimes(2);
@@ -468,6 +473,7 @@ describe('campaign-scoped tactical viewport ownership', () => {
 
   it('retains two MapLibre owners and one Deck owner across warm toggles, then releases each exactly once', () => {
     const view = render(createElement(TacticalMapViewport, { active: true }));
+    act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
 
     expect(graphics.mainMapConstructions).toHaveBeenCalledOnce();
     expect(graphics.minimapConstructions).toHaveBeenCalledOnce();
@@ -494,7 +500,9 @@ describe('campaign-scoped tactical viewport ownership', () => {
 
   it('releases the complete graphics owner set before a campaign epoch remounts it', () => {
     const view = render(createElement(TacticalMapViewport, { active: true, key: 0 }));
+    act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
     view.rerender(createElement(TacticalMapViewport, { active: true, key: 1 }));
+    act(() => graphics.reportRenderedRevision?.({ turn: 12, fingerprint: 'revision-a' }));
 
     expect(graphics.mainMapRemove).toHaveBeenCalledOnce();
     expect(graphics.minimapRemove).toHaveBeenCalledOnce();
@@ -522,25 +530,22 @@ describe('campaign-scoped tactical viewport ownership', () => {
     expect((app.match(/<main\s/g) ?? [])).toHaveLength(0);
   });
 
-  it('reveals in double-frame resize-listen-repaint order before enabling current-revision input', () => {
+  it('reveals in direct resize-listen-repaint order without waiting on minimap readiness', () => {
     const viewport = read('src/ui/map/components/TacticalMapViewport.tsx');
-    const firstFrame = viewport.indexOf('requestAnimationFrame(() => {');
-    const secondFrame = viewport.indexOf('requestAnimationFrame(() => {', firstFrame + 1);
-    const mainResize = viewport.indexOf('mainController.resize()', secondFrame);
-    const minimapResize = viewport.indexOf('minimapController?.resize()', mainResize);
-    const renderListener = viewport.indexOf('mainController.onceRender(', minimapResize);
+    const mainResize = viewport.indexOf('mainController.resize()');
+    const renderListener = viewport.indexOf('mainController.onceRender(', mainResize);
     const mainRepaint = viewport.indexOf('mainController.triggerRepaint()', renderListener);
-    const minimapRepaint = viewport.indexOf('minimapController?.triggerRepaint()', mainRepaint);
     const revealPaint = viewport.indexOf('setRevealPainted(true)', renderListener);
 
-    expect(firstFrame).toBeGreaterThanOrEqual(0);
-    expect(secondFrame).toBeGreaterThan(firstFrame);
-    expect(mainResize).toBeGreaterThan(secondFrame);
-    expect(minimapResize).toBeGreaterThan(mainResize);
-    expect(renderListener).toBeGreaterThan(minimapResize);
+    expect(viewport).not.toContain('requestAnimationFrame');
+    expect(viewport).not.toContain('cancelAnimationFrame');
+    expect(mainResize).toBeGreaterThanOrEqual(0);
+    expect(renderListener).toBeGreaterThan(mainResize);
     expect(mainRepaint).toBeGreaterThan(renderListener);
-    expect(minimapRepaint).toBeGreaterThan(mainRepaint);
     expect(revealPaint).toBeGreaterThan(renderListener);
+    expect(viewport).toMatch(/currentRevisionReady[\s\S]*setMinimapMounted\(true\)/);
+    expect(viewport).toMatch(/minimapMounted && \([\s\S]*<Minimap active=\{interactionReady\}/);
+    expect(viewport).toMatch(/if \(!interactionReady \|\| !minimapController\) return;[\s\S]*minimapController\.resize\(\);[\s\S]*minimapController\.triggerRepaint\(\);/);
     expect(viewport).toContain('inputActive={interactionReady}');
     expect(viewport).toContain('revealPainted={revealPainted}');
   });

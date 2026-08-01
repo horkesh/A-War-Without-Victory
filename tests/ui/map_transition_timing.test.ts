@@ -221,4 +221,37 @@ describe('map transition timing contract', () => {
       })],
     }));
   });
+
+  it('exposes camera state only through an explicitly enabled profiling probe', async () => {
+    if (!existsSync(sourcePath)) return;
+    const { createMapTransitionCameraProbe } = await import(modulePath);
+    let reads = 0;
+    const reader = () => {
+      reads += 1;
+      return { longitude: 17.82, latitude: 44.18, zoom: 8.2, pitch: 30 };
+    };
+    const disabled = createMapTransitionCameraProbe(false);
+    const releaseDisabled = disabled.setReader(reader);
+    expect(disabled.read()).toBeNull();
+    expect(reads).toBe(0);
+    releaseDisabled();
+
+    const enabled = createMapTransitionCameraProbe(true);
+    const releaseFirst = enabled.setReader(reader);
+    expect(enabled.read()).toEqual({ longitude: 17.82, latitude: 44.18, zoom: 8.2, pitch: 30 });
+    const replacement = () => ({ longitude: 18, latitude: 44, zoom: 9, pitch: 30 });
+    const releaseReplacement = enabled.setReader(replacement);
+    releaseFirst();
+    expect(enabled.read()).toEqual({ longitude: 18, latitude: 44, zoom: 9, pitch: 30 });
+    releaseReplacement();
+    expect(enabled.read()).toBeNull();
+  });
+
+  it('rejects unsafe camera telemetry from the profiling probe', async () => {
+    if (!existsSync(sourcePath)) return;
+    const { createMapTransitionCameraProbe } = await import(modulePath);
+    const enabled = createMapTransitionCameraProbe(true);
+    enabled.setReader(() => ({ longitude: Number.NaN, latitude: 44, zoom: 8, pitch: 30 }));
+    expect(() => enabled.read()).toThrow(/camera.*finite/i);
+  });
 });

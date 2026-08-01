@@ -816,7 +816,7 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   if (await clickSelectorIfVisible(page, '[data-testid="desk-close-overlay"]')) {
     await waitForSelectorHidden(page, '[data-testid="desk-close-overlay"]');
   }
-  await page.keyboard.press('h');
+  await clickSelector(page, '[data-testid="warroom-toolbar-staff"]', 'Army HQ Warroom route');
   await waitForVisibleText(page, 'BRIEFING');
   await clickByText(page, 'RECORDS');
   await waitForVisibleText(page, 'Archive Routes');
@@ -824,11 +824,11 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   await captureEvidence(page, summary, 'army_hq_records');
   await waitForVisibleText(page, 'Latest Filed Decision');
   await waitForVisibleText(page, flow.decisionTitle);
-  await waitForVisibleText(page, 'Chronicle Filed');
+  await waitForVisibleText(page, 'Chronicle Decisions');
   await waitForVisibleText(page, '1');
   const recordsSummaryText = await visibleSurfaceText(page, [
     'Archive Routes',
-    'Chronicle Filed',
+    'Chronicle Decisions',
     flow.decisionTitle,
   ]);
   assertNoFirstHourKnowledgeLeaks('Army HQ Records summary', recordsSummaryText);

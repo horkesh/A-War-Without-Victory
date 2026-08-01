@@ -400,6 +400,46 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
 });
 
+test('packaged tactical HTTP routes expose stable cache validators without weakening development freshness', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+
+    assert.match(
+        source,
+        /buildStaticFileResponseMetadata\([\s\S]*pathname,[\s\S]*stat,[\s\S]*app\.isPackaged,[\s\S]*contentType,[\s\S]*req\.headers\.range,[\s\S]*req\.headers\['if-none-match'\]/,
+        'the real tactical HTTP server should use the shared route, range, and cache response contract',
+    );
+    assert.match(
+        source,
+        /cacheHeaders\.ETag && ifNoneMatch === cacheHeaders\.ETag/,
+        'stable packaged resources should support validator-driven 304 revalidation',
+    );
+    assert.match(
+        source,
+        /'Access-Control-Expose-Headers':\s*STATIC_RESPONSE_EXPOSE_HEADERS/,
+        'range, validator, and cache headers should be readable by the tactical renderer',
+    );
+    assert.match(
+        source,
+        /headers:\s*res\.headers/,
+        'the packaged runtime probe should retain response headers for cache-contract checks',
+    );
+    assert.match(
+        source,
+        /expected_cache_control:/,
+        'the packaged runtime route inventory should pin expected cache policy',
+    );
+    assert.match(
+        source,
+        /response\.headers\['cache-control'\] !== response\.expected_cache_control/,
+        'the packaged runtime probe should fail when the real HTTP route returns the wrong policy',
+    );
+    assert.match(
+        source,
+        /typeof response\.headers\.etag !== 'string'/,
+        'the packaged runtime probe should fail when a stable packaged route lacks an ETag',
+    );
+});
+
 test('packaged electron aligns process cwd with resource base before runtime handlers', async () => {
     const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
 
