@@ -32,7 +32,16 @@ import { useGameStore } from '../store/gameStore';
 import { collectSectorFriendlyOsids, buildOsidToSectorMap, resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap, getOsidDisplayName } from '../utils/osidDisplayName';
-import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency, loadSidToOsidMapping, loadTerrainScalars, loadCensusSettlements } from '../data/DataLoader';
+import {
+  loadCensusSettlements,
+  loadOperationalPoliticalControl,
+  loadOperationalSettlements,
+  loadOsidAdjacency,
+  loadOsidDamageSeed,
+  loadSidToOsidMapping,
+  loadTerrainScalars,
+  type TerrainScalars,
+} from '../data/DataLoader';
 import { buildControlGeoJSON } from './builders/buildControlGeoJSON';
 import { buildMoraleGeoJSON } from './builders/buildMoraleGeoJSON';
 import { buildCasualtiesGeoJSON } from './builders/buildCasualtiesGeoJSON';
@@ -74,7 +83,7 @@ import {
   type FormationCounterDomOverlayItem,
 } from '../layers/formationCounterDomOverlay';
 import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLayer';
-import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '../layers/buildOsidDamageOverlay';
+import { buildOsidDamageData, type OsidDamageDatum } from '../layers/buildOsidDamageOverlay';
 import { buildForceQualityData, type ForceQualityDatum } from '../layers/buildForceQualityOverlay';
 import { buildRefugeeColumnData, type RefugeeColumnDatum } from '../layers/buildRefugeeColumnOverlay';
 import { getPlayerVisibleFormationStack } from '../utils/visibleFormationStack';
@@ -92,6 +101,7 @@ import {
   countMapTransitionDeckRelease,
   countMapTransitionRelease,
   markMapTransition,
+  setMapTransitionCameraReader,
 } from '../perf/mapTransitionTiming';
 
 /**
@@ -586,6 +596,35 @@ function shouldUseTilelessCiFallback(): boolean {
   if (typeof window === 'undefined') return false;
   return new URLSearchParams(window.location.search).get('disable_pmtiles') === '1';
 }
+
+function buildOsidProperties(
+  geojson: FeatureCollection,
+  terrainScalars?: ReadonlyMap<string, TerrainScalars>,
+): Record<string, Record<string, unknown>> {
+  const osidProperties: Record<string, Record<string, unknown>> = {};
+  for (const feature of geojson.features) {
+    const properties = (feature.properties ?? {}) as Record<string, unknown>;
+    const osid = typeof properties.osid === 'string' ? properties.osid : '';
+    if (!osid) continue;
+    const merged = { ...properties };
+    const sid = typeof properties.sid === 'string' ? properties.sid : '';
+    const terrain = sid ? terrainScalars?.get(sid) : undefined;
+    if (terrain) {
+      merged.elevation_mean_m = terrain.elevation_mean_m;
+      merged.slope_index = terrain.slope_index;
+      merged.terrain_friction_index = terrain.terrain_friction_index;
+      merged.road_access_index = terrain.road_access_index;
+      merged.river_crossing_penalty = terrain.river_crossing_penalty;
+      const friction = terrain.terrain_friction_index;
+      if (friction > 0.5) merged.terrain = 'Mountain';
+      else if (friction > 0.3) merged.terrain = 'Hilly';
+      else if (friction > 0.15) merged.terrain = 'Forest';
+      else merged.terrain = 'Flat';
+    }
+    osidProperties[osid] = merged;
+  }
+  return osidProperties;
+}
 const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
 const OSID_MORALE_FILL_LAYER_ID = 'osid-morale-fill';
 const OSID_MORALE_SOURCE_ID = 'osid-morale';
@@ -806,6 +845,8 @@ export function MapContainer({
   const [mapRenderedRevision, setMapRenderedRevision] = useState<string | null>(null);
   const [mapLoadError, setMapLoadError] = useState<string | null>(null);
   const [mapInitAttempt, setMapInitAttempt] = useState(0);
+  const [adjacencyRevision, setAdjacencyRevision] = useState(0);
+  const [optionalDeckDataRevision, setOptionalDeckDataRevision] = useState(0);
   const [interactionBindingRevision, setInteractionBindingRevision] = useState(0);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const setSelectedOsidInSector = useGameStore((s) => s.setSelectedOsidInSector);
@@ -857,6 +898,23 @@ export function MapContainer({
     if (!formationCounterDomOverlayRef.current) return;
     formationCounterDomOverlayRef.current.inert = !currentMapStateReady;
   }, [currentMapStateReady, mapReady]);
+  useEffect(() => {
+    if (!MAP_SCARS_FEATURE_FLAG || !currentRevisionReady || osidDamageDataRef.current || !osidBaseRef.current) return;
+    const baseGeoJson = osidBaseRef.current;
+    let cancelled = false;
+    void loadOsidDamageSeed()
+      .then((damageSeed) => {
+        if (cancelled || osidBaseRef.current !== baseGeoJson) return;
+        osidDamageDataRef.current = buildOsidDamageData(damageSeed, baseGeoJson);
+        setOptionalDeckDataRevision((revision) => revision + 1);
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) console.warn('[MapContainer] Optional scar enrichment failed:', error);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentRevisionReady]);
   const stagedOrders = useGameStore((s) => s.stagedOrders);
   const expandedStackOsid = useGameStore((s) => s.expandedStackOsid);
   const [overlayAnchor, setOverlayAnchor] = useState<{ x: number; y: number } | null>(null);
@@ -1223,65 +1281,29 @@ export function MapContainer({
       : rewrittenStyle;
 
     let initCancelled = false;
+    let releaseMapTransitionCameraReader = () => {};
     const init = async () => {
+      const operationalGeometryPromise = loadOperationalSettlements();
+      const politicalControlPromise = loadOperationalPoliticalControl();
+      const sidAliasesPromise = loadSidToOsidMapping()
+        .then((value) => ({ ok: true as const, value }))
+        .catch((error: unknown) => ({ ok: false as const, error }));
+      const terrainScalarsPromise = loadTerrainScalars()
+        .then((value) => ({ ok: true as const, value }))
+        .catch((error: unknown) => ({ ok: false as const, error }));
+
+      let geojson: FeatureCollection;
       try {
-        const [geojson, byOsid, adjacency, sidToOsid, terrainScalars, censusGeoJson] = await Promise.all([
-          loadOperationalSettlements(),
-          loadOperationalPoliticalControl(),
-          loadOsidAdjacency(),
-          loadSidToOsidMapping(),
-          loadTerrainScalars(),
-          loadCensusSettlements().catch(() => null),
-        ]);
+        const [loadedGeoJson, byOsid] = await Promise.all([operationalGeometryPromise, politicalControlPromise]);
+        if (initCancelled || !containerRef.current) return;
+        geojson = loadedGeoJson;
         if (activeRef.current) markMapTransition('core-data-ready');
 
-        // Pre-compute ghost map data from census (never changes)
-        if (censusGeoJson) {
-          ghostMapDataRef.current = buildGhostMapData(censusGeoJson);
-        }
-
-        // Map That Scars: load damage seed once when feature flag is enabled.
-        // Faction-agnostic, deterministic. When flag is false (default) this branch is dead → byte-stable.
-        if (MAP_SCARS_FEATURE_FLAG) {
-          try {
-            const dmgRes = await fetch('/data/derived/osid_damage_seed.json');
-            if (dmgRes.ok) {
-              const dmgSeed = (await dmgRes.json()) as OsidDamageSeed;
-              osidDamageDataRef.current = buildOsidDamageData(dmgSeed, geojson);
-            }
-          } catch (err) {
-            console.warn('[MapContainer] Failed to load osid_damage_seed.json:', err);
-          }
-        }
-
         osidBaseRef.current = geojson;
-        osidAdjacencyRef.current = adjacency;
-        // Enriched centroid lookup: OSID keys + SID aliases from mapping.
-        // Eliminates silent failures when legacy SID-keyed data hits the lookup.
-        osidCentroidsRef.current = buildOsidCentroidLookup(geojson, sidToOsid);
+        // Construct with OSID anchors; exact SID aliases remain a readiness gate.
+        osidCentroidsRef.current = buildOsidCentroidLookup(geojson);
         setOsidDisplayNames(buildOsidDisplayNameMap(geojson));
-        const osidProps: Record<string, Record<string, unknown>> = {};
-        for (const f of geojson.features) {
-          const props = (f.properties ?? {}) as Record<string, unknown>;
-          const osid = typeof props.osid === 'string' ? props.osid : '';
-          if (!osid) continue;
-          const merged = { ...props };
-          // Enrich with terrain scalars (keyed by SID)
-          const sid = typeof props.sid === 'string' ? props.sid : '';
-          const terrain = sid ? terrainScalars.get(sid) : undefined;
-          if (terrain) {
-            merged.elevation_mean_m = terrain.elevation_mean_m;
-            merged.slope_index = terrain.slope_index;
-            merged.terrain_friction_index = terrain.terrain_friction_index;
-            merged.road_access_index = terrain.road_access_index;
-            merged.river_crossing_penalty = terrain.river_crossing_penalty;
-            // Derive human-readable terrain type for settlement panel
-            const f = terrain.terrain_friction_index;
-            merged.terrain = f > 0.5 ? 'Mountain' : f > 0.3 ? 'Hilly' : f > 0.15 ? 'Forest' : 'Flat';
-          }
-          osidProps[osid] = merged;
-        }
-        setOsidPropertiesMap(osidProps);
+        setOsidPropertiesMap(buildOsidProperties(geojson));
 
         const controlledGeoJson = buildControlGeoJSON(geojson, byOsid);
         const majorCityLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
@@ -1361,6 +1383,23 @@ export function MapContainer({
         console.error('[MapLibre] map error:', e.error);
       });
       mapRef.current = map;
+      releaseMapTransitionCameraReader = setMapTransitionCameraReader(() => {
+        const center = map.getCenter();
+        return {
+          longitude: center.lng,
+          latitude: center.lat,
+          zoom: map.getZoom(),
+          pitch: map.getPitch(),
+        };
+      });
+      void terrainScalarsPromise.then((terrainResult) => {
+        if (initCancelled || osidBaseRef.current !== geojson) return;
+        if (!terrainResult.ok) {
+          console.warn('[MapContainer] Optional terrain enrichment failed:', terrainResult.error);
+          return;
+        }
+        setOsidPropertiesMap(buildOsidProperties(geojson, terrainResult.value));
+      });
       onGraphicsController?.({
         resize: () => map.resize(),
         triggerRepaint: () => map.triggerRepaint(),
@@ -1532,6 +1571,19 @@ export function MapContainer({
         map.easeTo({ center, offset: cameraOffsetForPadding(buildCounterAwareCameraPadding(map)), duration: 420, essential: true });
       });
 
+      const sidAliasesResult = await sidAliasesPromise;
+      if (!sidAliasesResult.ok) {
+        console.error('[MapContainer] Required SID alias data failed:', sidAliasesResult.error);
+        if (!initCancelled) {
+          const message = sidAliasesResult.error instanceof Error
+            ? sidAliasesResult.error.message
+            : String(sidAliasesResult.error);
+          setMapLoadError(message);
+        }
+        return;
+      }
+      if (initCancelled || mapRef.current !== map) return;
+      osidCentroidsRef.current = buildOsidCentroidLookup(geojson, sidAliasesResult.value);
       setMapReady(true);
     };
 
@@ -1539,6 +1591,7 @@ export function MapContainer({
 
     return () => {
       initCancelled = true;
+      releaseMapTransitionCameraReader();
       onGraphicsController?.(null);
       onRenderedRevisionChange?.(null);
       const deckOverlay = deckOverlayRef.current;
@@ -3341,6 +3394,23 @@ export function MapContainer({
 
   // Defense map mode — per-OSID defense strength via Layer A distance-weighted reactive defense.
   useEffect(() => {
+    if (mapMode !== 'defense' || osidAdjacencyRef.current) return;
+    let cancelled = false;
+    void loadOsidAdjacency()
+      .then((adjacency) => {
+        if (cancelled) return;
+        osidAdjacencyRef.current = adjacency;
+        setAdjacencyRevision((revision) => revision + 1);
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) console.warn('[MapContainer] Optional adjacency enrichment failed:', error);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mapMode]);
+
+  useEffect(() => {
     const map = mapRef.current;
     const baseGeoJson = osidBaseRef.current;
     const adjacency = osidAdjacencyRef.current;
@@ -3395,7 +3465,7 @@ export function MapContainer({
       cancelled = true;
       cancelAnimationFrame(rafId);
     };
-  }, [mapReady, mapMode, loadedGameState]);
+  }, [adjacencyRevision, mapReady, mapMode, loadedGameState]);
 
   // Operations map mode - show current weight of effort by sector frontage.
   useEffect(() => {
@@ -3758,6 +3828,22 @@ export function MapContainer({
   // panels/minimap so counter clipping uses current occluder rectangles.
   const ghostMapVisible = useGameStore((s) => s.ghostMapVisible);
   useEffect(() => {
+    if (!ghostMapVisible || ghostMapDataRef.current) return;
+    let cancelled = false;
+    void loadCensusSettlements()
+      .then((censusGeoJson) => {
+        if (cancelled) return;
+        ghostMapDataRef.current = buildGhostMapData(censusGeoJson);
+        setOptionalDeckDataRevision((revision) => revision + 1);
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) console.warn('[MapContainer] Optional census enrichment failed:', error);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ghostMapVisible]);
+  useEffect(() => {
     if (!active) return undefined;
     let cancelled = false;
     let firstFrame = 0;
@@ -3810,6 +3896,7 @@ export function MapContainer({
     selectedCorpsFrontSectorId,
     hoveredSectorId,
     hoveredCorpsId,
+    optionalDeckDataRevision,
   ]);
 
   useEffect(() => {
