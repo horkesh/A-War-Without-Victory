@@ -722,9 +722,13 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         const region = raw.slice(phaseIdx, phaseEnd);
         const distributeIdx = region.indexOf('distributeBrigadesToFront(');
+        const receiptIdx = region.indexOf('recordFinalSectorReconciliationMutation(');
         const sealIdx = region.indexOf('sealFinalSectorTruthFromCurrentSectors(');
         expect(distributeIdx).toBeGreaterThanOrEqual(0);
+        expect(receiptIdx).toBeGreaterThan(distributeIdx);
         expect(sealIdx).toBeGreaterThan(distributeIdx);
+        expect(sealIdx).toBeGreaterThan(receiptIdx);
+        expect(region).toContain("'distribution-roster'");
         expect(region).toContain('context.state.military.war_front_edges_osid ?? []');
     });
 
@@ -736,10 +740,18 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(serializeIdx).toBeGreaterThan(finalSaveIdx);
 
         const region = raw.slice(finalSaveIdx, serializeIdx);
+        const sessionIdx = region.indexOf('createFinalSectorReconciliationSession(');
         const reconcileIdx = region.indexOf('reconcileFinalSectorTruth(');
+        const receiptIdx = region.indexOf('recordFinalSectorReconciliationMutation(');
         const sealIdx = region.indexOf('sealFinalSectorTruthFromCurrentSectors(');
+        expect(sessionIdx).toBeGreaterThanOrEqual(0);
         expect(reconcileIdx).toBeGreaterThanOrEqual(0);
+        expect(reconcileIdx).toBeGreaterThan(sessionIdx);
+        expect(receiptIdx).toBeGreaterThan(reconcileIdx);
         expect(sealIdx).toBeGreaterThan(reconcileIdx);
+        expect(sealIdx).toBeGreaterThan(receiptIdx);
+        expect(region).toContain("'final-save-geometry'");
+        expect(region).toContain("'seal-roster'");
         expect(region).toContain('const finalOperationalEdges');
         expect(region).toContain('const finalSpatial');
         expect(region).toMatch(/sealFinalSectorTruthFromCurrentSectors\(\s*state,\s*finalOperationalEdges,/);

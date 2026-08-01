@@ -81,6 +81,7 @@ import type { StrategicReserveCollectionReport, StrategicReserveReinforcementRep
 import type { ResolveAttackOrdersReport } from './combat/resolve_attack_orders.js';
 import type { OsidColumnMovementReport } from './combat/osid_column_movement.js';
 import type { BrigadeMovementReport } from './combat/brigade_movement_orders.js';
+import type { FinalSectorReconciliationSession } from './combat/final_sector_truth_reconciliation.js';
 import type { OfficerQualityReport } from './combat/officer_quality_update.js';
 import type { OfficerSuccessionReport } from './combat/officer_system.js';
 import type { Phase3AAuditSummary } from './pressure/phase3a_pressure_eligibility.js';
@@ -327,6 +328,8 @@ export interface TurnContext {
     rng: Rng;
     input: TurnInput;
     report: TurnReport;
+    /** Explicit final-sector reconciliation state; owned by this turn only. */
+    finalSectorReconciliationSession?: FinalSectorReconciliationSession;
     /** Internal side-effect batch withheld until post-turn validation succeeds. */
     pendingDisplacementEventStream?: DisplacementEvent[];
 }

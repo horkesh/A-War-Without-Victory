@@ -3,7 +3,12 @@ import { assertFormationsInFriendlyTerritory } from '../combat/assert_formation_
 import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
 import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
-import { reconcileFinalSectorTruth, sealFinalSectorTruthFromCurrentSectors } from '../combat/final_sector_truth_reconciliation.js';
+import {
+    createFinalSectorReconciliationSession,
+    recordFinalSectorReconciliationMutation,
+    reconcileFinalSectorTruth,
+    sealFinalSectorTruthFromCurrentSectors,
+} from '../combat/final_sector_truth_reconciliation.js';
 import { computeCombatEffectiveBrigades } from '../negotiation/compute_combat_effective.js';
 import { computeSpatialContext } from '../spatial_context.js';
 import type { NamedPhase, TurnContext } from '../turn_pipeline_types.js';
@@ -89,21 +94,40 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
                 preCombat: spatial?.preCombat ?? finalSpatial,
                 postCombat: finalSpatial,
             });
-            reconcileFinalSectorTruth(
+            const reconciliationSession = context.finalSectorReconciliationSession ??=
+                createFinalSectorReconciliationSession(context.state.meta.turn, 'postcombat-geometry');
+            const report = reconcileFinalSectorTruth(
                 context.state,
                 od.edges,
                 od.opData?.operationalToCanonical ?? null,
                 od.centroids,
                 finalSpatial,
                 context.report?.supply_resolution?.supply_state_by_osid ?? null,
+                false,
+                { session: reconciliationSession },
             );
+            if (report.geometry_input_mutations > 0) {
+                recordFinalSectorReconciliationMutation(
+                    reconciliationSession,
+                    'geometry',
+                    'postcombat-formation-location-writeback',
+                );
+            }
         }
     },
     {
         name: 'reconcile-final-operation-truth',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            reconcileFinalOperationTruth(context.state);
+            const report = reconcileFinalOperationTruth(context.state);
+            const reconciliationSession = context.finalSectorReconciliationSession;
+            if (reconciliationSession && report.sector_reconciliation_required) {
+                recordFinalSectorReconciliationMutation(
+                    reconciliationSession,
+                    'operation-roster',
+                    'reconcile-final-operation-truth',
+                );
+            }
         }
     },
     {
@@ -113,6 +137,8 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.edges?.length) return;
             const cachedSpatial = getSpatialContextCache(context)?.postCombat;
+            const reconciliationSession = context.finalSectorReconciliationSession ??=
+                createFinalSectorReconciliationSession(context.state.meta.turn, 'postcombat-geometry');
             reconcileFinalSectorTruth(
                 context.state,
                 od.edges,
@@ -120,6 +146,8 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
                 od.centroids,
                 cachedSpatial,
                 context.report?.supply_resolution?.supply_state_by_osid ?? null,
+                false,
+                { session: reconciliationSession },
             );
         }
     },
@@ -135,6 +163,14 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>, {
                 population1991ByMun: context.input.municipalityPopulation1991,
             });
+            const reconciliationSession = context.finalSectorReconciliationSession;
+            if (reconciliationSession) {
+                recordFinalSectorReconciliationMutation(
+                    reconciliationSession,
+                    'distribution-roster',
+                    'final-distribute-brigades-to-front',
+                );
+            }
             const finalEdges = context.state.military.war_front_edges_osid ?? [];
             if (finalEdges.length === 0) return;
             sealFinalSectorTruthFromCurrentSectors(
@@ -142,6 +178,7 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
                 finalEdges,
                 context.report?.supply_resolution?.supply_state_by_osid ?? null,
                 spatial?.postCombat,
+                reconciliationSession ? { session: reconciliationSession } : undefined,
             );
         }
     },
@@ -152,11 +189,13 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             const finalEdges = context.state.military.war_front_edges_osid ?? [];
             if (finalEdges.length === 0) return;
             const spatial = getSpatialContextCache(context);
+            const reconciliationSession = context.finalSectorReconciliationSession;
             sealFinalSectorTruthFromCurrentSectors(
                 context.state,
                 finalEdges,
                 context.report?.supply_resolution?.supply_state_by_osid ?? null,
                 spatial?.postCombat,
+                reconciliationSession ? { session: reconciliationSession } : undefined,
             );
         }
     },
