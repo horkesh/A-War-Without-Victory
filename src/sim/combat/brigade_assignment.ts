@@ -25,6 +25,10 @@ import { ELITE_LOAN_MIN_DURATION } from '../../state/elite_loan_types.js';
 import { getSectorComponent, getSectorFrontOsids } from './sector_utils.js';
 import type { CorpsCommanderProfile } from './commander_override.js';
 import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
+import {
+    createFormationOccupancyIndex,
+    type FormationOccupancyIndex,
+} from './sector_build_derived_context.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
@@ -259,19 +263,6 @@ export function buildOperationParticipantSet(state: GameState | undefined): Set<
         }
     }
     return participants;
-}
-
-function countActiveBrigadesByOsid(
-    formations: Record<FormationId, FormationState>,
-): Map<string, number> {
-    const counts = new Map<string, number>();
-    for (const formation of Object.values(formations)) {
-        if (!isSectorRosterEligibleFormation(formation)) continue;
-        const locationOsid = formation.location_osid;
-        if (!locationOsid) continue;
-        counts.set(locationOsid, (counts.get(locationOsid) ?? 0) + 1);
-    }
-    return counts;
 }
 
 function countActiveEnemyPersonnelByOsid(
@@ -1521,6 +1512,21 @@ export function ensureMinimumSectorCoverage(
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
     const FRONT_DONOR_HOME_DISTANCE_MAX_HOPS = 4;
 
+    // Dense call-scoped occupancy replaces repeated full formation scans while
+    // retaining exactly the same eligibility rule and Map-like zero semantics.
+    // The universe contains every current counted location and every front target
+    // this function can select. Every location write below goes through move().
+    const occupancyOsids = new Set<string>();
+    for (const formation of Object.values(formations)) {
+        if (formation?.location_osid) occupancyOsids.add(formation.location_osid);
+    }
+    for (const sector of allSectors) {
+        for (const subSegment of sector.sub_segments ?? []) {
+            for (const osid of subSegment.friendly_osids ?? []) occupancyOsids.add(osid);
+        }
+    }
+    const activeCounts = createFormationOccupancyIndex(occupancyOsids, formations);
+
     // ── Single-call-frame front-OSID memoization (perf) ──
     // `getSectorFrontOsids(sector)` rebuilds a Set by iterating every sub_segment's
     // friendly_osids. Across this function's many passes (territory-claim-rescue,
@@ -1591,7 +1597,7 @@ export function ensureMinimumSectorCoverage(
     const pickVacantLocalFrontTargetFromFrontSet = (
         bid: FormationId,
         sectorFrontOsids: ReadonlySet<string>,
-        activeCounts: Map<string, number>,
+        activeCounts: FormationOccupancyIndex,
         maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS,
     ): { target: string; dist: number } | null => {
         const formation = formations[bid];
@@ -1638,7 +1644,7 @@ export function ensureMinimumSectorCoverage(
     const pickVacantLocalFrontTarget = (
         bid: FormationId,
         sector: CorpsFrontSector,
-        activeCounts: Map<string, number>,
+        activeCounts: FormationOccupancyIndex,
         maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS,
     ): { target: string; dist: number } | null => (
         pickVacantLocalFrontTargetFromFrontSet(
@@ -1652,16 +1658,15 @@ export function ensureMinimumSectorCoverage(
     const moveBrigadeToFrontTarget = (
         bid: FormationId,
         target: string,
-        activeCounts: Map<string, number>,
+        activeCounts: FormationOccupancyIndex,
     ): void => {
         const formation = formations[bid];
         if (!formation?.location_osid) return;
         const previous = formation.location_osid;
         if (!isEnclaveMovementDestinationAllowed(formation, previous, target)) return;
+        activeCounts.move(bid, previous, target);
         formation.location_osid = target;
         formation.entrenchment_turns = 0;
-        activeCounts.set(previous, Math.max(0, (activeCounts.get(previous) ?? 0) - 1));
-        activeCounts.set(target, (activeCounts.get(target) ?? 0) + 1);
     };
 
     const targetPreservesHomeDistance = (
@@ -1791,7 +1796,6 @@ export function ensureMinimumSectorCoverage(
             // Step 1: promote first connected reserve to assigned
             const promotedReserve = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-reserve', () => {
                 if (sector.reserve_brigade_ids.length === 0) return false;
-                const activeCounts = countActiveBrigadesByOsid(formations);
                 for (let ri = 0; ri < sector.reserve_brigade_ids.length; ri++) {
                     const bid = sector.reserve_brigade_ids[ri]!;
                     const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
@@ -1810,7 +1814,6 @@ export function ensureMinimumSectorCoverage(
             // Step 1b: promote the nearest reachable own-sector rear brigade.
             const promotedRear = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-rear', () => {
                 if ((sector.rear_brigade_ids?.length ?? 0) === 0) return false;
-                const activeCounts = countActiveBrigadesByOsid(formations);
                 const rearCandidates = [...(sector.rear_brigade_ids ?? [])]
                     .sort(strictCompare)
                     .map((bid) => {
@@ -1834,19 +1837,12 @@ export function ensureMinimumSectorCoverage(
                 const rearDonors = sameComponentDonors
                     .filter(s => (s.rear_brigade_ids?.length ?? 0) > 0);
                 if (rearDonors.length === 0) return false;
-                // Hoisted from inside the flatMap callback: formations is read-only
-                // across donor iterations within this step, so the per-donor rebuild
-                // produced identical activeCounts maps. Byte-identical because
-                // pickVacantLocalFrontTargetFromFrontSet(...) consumes activeCounts read-only;
-                // the post-pick moveBrigadeToFrontTarget below can reuse the same
-                // map because no formation location changes between pick and move.
-                const stepActiveCounts = countActiveBrigadesByOsid(formations);
                 const rearCandidates = rearDonors
                     .flatMap((donor) => {
                         return [...(donor.rear_brigade_ids ?? [])]
                             .sort(strictCompare)
                             .map((bid) => {
-                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts);
+                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                                 if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
@@ -1860,7 +1856,7 @@ export function ensureMinimumSectorCoverage(
                 if (rearCandidates.length > 0) {
                     const { donor, bid, target } = rearCandidates[0]!;
                     donor.rear_brigade_ids = (donor.rear_brigade_ids ?? []).filter((candidate) => candidate !== bid);
-                    moveBrigadeToFrontTarget(bid, target, stepActiveCounts);
+                    moveBrigadeToFrontTarget(bid, target, activeCounts);
                     sector.assigned_brigade_ids.push(bid);
                     return true;
                 }
@@ -1873,14 +1869,12 @@ export function ensureMinimumSectorCoverage(
                 const reserveDonors = sameComponentDonors
                     .filter(s => s.reserve_brigade_ids.length > 0);
                 if (reserveDonors.length === 0) return false;
-                // Hoisted from inside the flatMap callback (same justification as Step 1b).
-                const stepActiveCounts = countActiveBrigadesByOsid(formations);
                 const reserveCandidates = reserveDonors
                     .flatMap((donor) => {
                         return [...donor.reserve_brigade_ids]
                             .sort(strictCompare)
                             .map((bid) => {
-                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts);
+                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                                 if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
@@ -1894,7 +1888,7 @@ export function ensureMinimumSectorCoverage(
                 if (reserveCandidates.length > 0) {
                     const { donor, bid, target } = reserveCandidates[0]!;
                     donor.reserve_brigade_ids = donor.reserve_brigade_ids.filter((candidate) => candidate !== bid);
-                    moveBrigadeToFrontTarget(bid, target, stepActiveCounts);
+                    moveBrigadeToFrontTarget(bid, target, activeCounts);
                     sector.assigned_brigade_ids.push(bid);
                     return true;
                 }
@@ -1953,7 +1947,6 @@ export function ensureMinimumSectorCoverage(
                 }
                 if (!transferred) {
                     const ZERO_FRONT_DONOR_MAX_THREAT = 250;
-                    const activeCounts = countActiveBrigadesByOsid(formations);
                     const frontCandidates = sameCompSectors
                         .filter((donor) =>
                             donor.length_edges > 0
@@ -2227,7 +2220,6 @@ export function ensureMinimumSectorCoverage(
 
             let promoted = 0;
             while (promoted < deficit) {
-                const activeCounts = countActiveBrigadesByOsid(formations);
                 const candidates = [
                     ...(sector.rear_brigade_ids ?? []).map((bid) => ({ bid, role: 'rear' as const })),
                     ...sector.reserve_brigade_ids.map((bid) => ({ bid, role: 'reserve' as const })),
@@ -2286,20 +2278,12 @@ export function ensureMinimumSectorCoverage(
                 || (a.assigned_brigade_ids.length / a.length_edges) - (b.assigned_brigade_ids.length / b.length_edges)
                 || strictCompare(a.sector_id, b.sector_id));
 
-        // Per-recipient rebuild kept deliberately. Batch 27 attempted to hoist
-        // `countActiveBrigadesByOsid(formations)` to once-per-pass on the theory
-        // that moveBrigadeToFrontTarget below updates activeCounts in-place with
-        // an identical delta. Byte-identity held (40w hash unchanged) but the
-        // hoisted measurement consistently regressed `:floor-completion` from
-        // 696 ms to 907 ms across two confirmation runs (n1904 and n1905). The
-        // suspected cause is Map sparseness: the hoisted Map accumulates entries
-        // for transient OSIDs across the whole pass and V8's lookup cost grows
-        // with that footprint, while the per-recipient fresh build produces a
-        // tighter Map. Revert documented in BATCH27_FLOOR_COMPLETION_HOIST_REVERT.
+        // Batch 27's long-lived Map hoist regressed this pass as its sparse key
+        // footprint grew. The current candidate instead uses the fixed ordinal
+        // universe and dense counts owned by this one function invocation.
         for (const recipient of recipients) {
             const recipComp = componentForSector(recipient);
             const recipientDensity = recipient.assigned_brigade_ids.length / Math.max(1, recipient.length_edges);
-            const activeCounts = countActiveBrigadesByOsid(formations);
             const deficit = Math.max(0, needed(recipient) - recipient.assigned_brigade_ids.length);
             let transferred = 0;
 
@@ -2434,7 +2418,6 @@ export function ensureMinimumSectorCoverage(
         for (const recipient of recipients) {
             const recipComp = componentForSector(recipient);
             const deficit = Math.max(0, needed(recipient) - recipient.assigned_brigade_ids.length);
-            const activeCounts = countActiveBrigadesByOsid(formations);
             const recipientDensity = recipient.assigned_brigade_ids.length / Math.max(1, recipient.length_edges);
             const recipientThreat = recipient.threat_ratio ?? 0;
             let transferred = 0;

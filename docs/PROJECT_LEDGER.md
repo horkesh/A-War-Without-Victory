@@ -25419,3 +25419,15 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Decision and next action:** The accepted historical floor remains `1,189.962 ms/turn`. Proceed with Phase 2c Task 2: prove the call-scoped dense formation-occupancy contract red-first across every location/status mutation sequence before replacing any production hot-path helper. Candidate timing remains lease-serialized and follows full observable-surface parity.
 
 **Scope:** This checkpoint tracks documentation only. Raw profiles, transcripts, runs, and rejected-spike blobs remain ignored diagnostics. No scenario, baseline, state/save schema, gameplay rule, history/canon, `docs/10_canon/FORAWWV.md`, package, version, tag, installer, publication, push, release state, or napkin evidence changed.
+
+## 2026-08-01 - R5 Phase 2c dense occupancy source checkpoint
+
+**Type:** R5 deterministic performance candidate / red-first derived-state contract / pre-measurement checkpoint.
+
+**Implementation:** Added a call-scoped dense formation-occupancy index with strict-sorted OSID ordinals, `Uint32Array` counts, exact sector-roster eligibility, tracked formation locations, mutation synchronization, and fail-closed unknown/stale/underflow/overflow/id-mismatch behavior. Integrated one index into each `ensureMinimumSectorCoverage(...)` invocation, replacing eight repeated active-brigade scans. The function's sole formation-location writer updates the index before state. No index enters `GameState`, crosses an invocation/turn, or uses clock/random/locale/filesystem order.
+
+**TDD and equivalence:** RED failed on the intentionally absent module. GREEN passed the isolated 4-test mutation/parity contract, the focused coverage/rebalance slice (3 files / 26 tests), TypeScript, and the complete sector/full-state gate (6 files / 46 tests, `330.16s`). The long gate covers 100+ deterministic real-save variants and live-war, final-turn, and final-save-projection reconciliation behavior. No baseline was refreshed.
+
+**Acceptance boundary:** This is a committed source candidate, not a performance acceptance. The excluded 40-week byte gate and same-lease current-owner plus replicated candidate/control timing remain open. Reachability/component caching is deliberately deferred so this packet has one causal change. Any byte drift, missing owner reduction, or whole-run regression requires full source/test revert with negative evidence retained.
+
+**Scope:** No gameplay rule, threshold, persisted state/save/replay schema, scenario, historical/canon content, approved baseline, package, version, tag, installer, publication, push, release state, `docs/10_canon/FORAWWV.md`, or napkin evidence changed.
