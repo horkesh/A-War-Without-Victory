@@ -77,6 +77,26 @@ it('highlight overlay remains a styling layer, not a visibility backdoor', () =>
     ).toEqual(['b_hidden']);
 });
 
+it('keeps auto-packed formation icon atlas owners mounted across focus and visibility transitions', () => {
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [makeFeature('b_focus', true)],
+    } as any;
+    const iconLayerIds = (layers: any[]) => layers
+        .filter((layer: any) => layer.id.startsWith('deck-formations-') && layer.constructor.layerName === 'IconLayer')
+        .map((layer: any) => layer.id);
+
+    const focused = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, ['b_focus']);
+    const cleared = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, []);
+    const hidden = buildTacticalDeckLayers(formationsGeoJson, false, false, 10, []);
+
+    expect(iconLayerIds(focused)).toEqual(['deck-formations-icons', 'deck-formations-highlighted']);
+    expect(iconLayerIds(cleared)).toEqual(iconLayerIds(focused));
+    expect(iconLayerIds(hidden)).toEqual(iconLayerIds(focused));
+    expect(cleared.find((layer: any) => layer.id === 'deck-formations-highlighted')?.props.data).toEqual([]);
+    expect(hidden.find((layer: any) => layer.id === 'deck-formations-icons')?.props.data).toEqual([]);
+});
+
 it('base deck counters stay faction-colored while selected formations get a white overlay', () => {
     const feature = makeFeature('b_selected', false) as any;
 

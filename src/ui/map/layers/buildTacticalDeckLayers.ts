@@ -376,8 +376,6 @@ export function buildTacticalDeckLayers(
         );
     }
 
-    if (!formationsVisible) return layers;
-
     let iconHeight = 40;
     if (zoom <= 6) iconHeight = 16;
     else if (zoom >= 14) iconHeight = 40;
@@ -389,12 +387,14 @@ export function buildTacticalDeckLayers(
 
     const iconHalfSize = getCounterFootprintHalfSize(iconHeight);
     const getBaseFormationPixelOffset = (feature: Feature) => getFormationStackPixelOffset(feature, iconHeight);
-    const visibleFormationFeatures = selectViewportFormationCounterFeatures(
-        formationsGeoJson.features,
-        viewportClip,
-        iconHalfSize,
-        getBaseFormationPixelOffset,
-    );
+    const visibleFormationFeatures = formationsVisible
+        ? selectViewportFormationCounterFeatures(
+            formationsGeoJson.features,
+            viewportClip,
+            iconHalfSize,
+            getBaseFormationPixelOffset,
+        )
+        : [];
     const formationPixelOffsets = buildFormationCounterPixelOffsets(visibleFormationFeatures, iconHeight, viewportClip);
     const finalVisibleFormationFeatures = filterFinalFormationCounterFeatures(
         visibleFormationFeatures,
@@ -447,31 +447,33 @@ export function buildTacticalDeckLayers(
         }),
     );
 
-    if (highlightedFeatures.length > 0) {
-        layers.push(
-            new IconLayer({
-                id: 'deck-formations-highlighted',
-                data: highlightedFeatures,
-                getIcon: (d: any) => ({
-                    url: getIconDataUrl(getHighlightedFormationIconId(d)),
-                    width: 160,
-                    height: 80,
-                }),
-                getPosition: (d: any) => d.geometry.coordinates,
-                getPixelOffset: getFormationPixelOffset,
-                getSize: iconHeight + 2,
-                sizeUnits: 'pixels',
-                sizeScale: 1,
-                pickable: false,
-                parameters: { depthTest: false, depthMask: false, depthWriteEnabled: false, depthCompare: 'always' },
-                updateTriggers: {
-                    getSize: zoom,
-                    getIcon: highlightedFormationKey,
-                    getPixelOffset: viewportClip,
-                }
+    // Keep both auto-packed IconLayer owners mounted for the life of the retained
+    // Deck overlay. IconManager does not cancel pending image loads when a layer
+    // finalizes; removing the transient highlight layer can therefore let a late
+    // upload target its deleted atlas texture during dossier -> map -> dossier.
+    layers.push(
+        new IconLayer({
+            id: 'deck-formations-highlighted',
+            data: highlightedFeatures,
+            getIcon: (d: any) => ({
+                url: getIconDataUrl(getHighlightedFormationIconId(d)),
+                width: 160,
+                height: 80,
             }),
-        );
-    }
+            getPosition: (d: any) => d.geometry.coordinates,
+            getPixelOffset: getFormationPixelOffset,
+            getSize: iconHeight + 2,
+            sizeUnits: 'pixels',
+            sizeScale: 1,
+            pickable: false,
+            parameters: { depthTest: false, depthMask: false, depthWriteEnabled: false, depthCompare: 'always' },
+            updateTriggers: {
+                getSize: zoom,
+                getIcon: highlightedFormationKey,
+                getPixelOffset: viewportClip,
+            }
+        }),
+    );
 
     if (stackBadgeFeatures.length > 0) {
         layers.push(
