@@ -281,7 +281,7 @@ Total events authored across the five JSONs: **~246** (`22 + 53 + 17 + 23 + 131`
 | `maglaj_enclave_blockade_1993` | war_1993.json | 65-70 | Y | content. |
 | `battle_of_bugojno_1993` | war_1993.json | 66-72 | Y | content. |
 | `markale_area_shelling_1993` | war_1993.json | 68 | Y | turn-fixed. |
-| `nato_air_strike_threat_1993` | war_1993.json | 69-71 | Y | content. |
+| `nato_air_strike_threat_1993` | war_1993.json | 70 | Y | exact 9 August Council week; outcome-neutral content. |
 | `owen_stoltenberg_plan_1993` | war_1993.json | 70 | Y | turn-fixed. |
 | `grabovica_uzdol_massacres_1993` | war_1993.json | 73-76 | Y | content. |
 | `abdic_apwb_declared_1993` | war_1993.json | 77 | Y | turn-fixed. |
