@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-08-01] fix(events): bind Goražde consolidation to current control truth
+
+**Type:** R6 Phase 0 historical event-state correction / deterministic baseline reconciliation / tests / roadmap propagation.
+
+**Fix:** Replaced `gorazde_pocket_consolidation_1992`'s weak 30% municipality-share predicate with an exact conjunction requiring current RBiH political control of `op:gorazde:glamoc` and `op:gorazde:kamen`. Removed the authored `control_change`, so the historical notification, morale consequence, narrative, and flag can observe an already-consolidated state but never manufacture it. Four focused regressions prove the weak-share false positive, exact-state eligibility, both-target conjunction, unchanged political-control bytes, and absence of any authored territorial effect. The Wikipedia-only source and absolute future prose remain unchanged and are explicitly routed to R7.
+
+**Causal evidence:** A matched 40-week before/after pair changed only two false turn-18 `RBiH -> RBiH` control-event rows: pre-fix final SHA-256 `52ee1829aab62e5ede80ca461b0ec6cc1d5ecc8ac2e0700a36ea7229d6050bde`, post-fix `b28225e47b8e7ba563c4e836151fc8699f3cd191f4912c6c13ac7c099719fbd5`, with 31/31 anchors and control/formation/activity outcomes otherwise identical. In the golden 52-week seed the exact targets were not held during the event window, so the corrected event did not fire and no longer seeded a false campaign state. The reviewed cascade moved final RBiH/RS control from 264/367 to 260/371, reduced distinct flips 114 to 112, attack casualties 39,070/38,241 to 35,937/36,390, and displacement 1,086,299 to 1,086,185; core anchors improved 30/31 to 31/31, all six bot bands passed, critical anomalies stayed zero, and warnings stayed three. The updated golden final-save SHA-256 is `2cdb02b9a63b1a48146485675b137247a1bd7a86c7a2cdbc3ba07fe0a2ec4b84`.
+
+**Verification/review:** RED failed 3/3 against the old event; the final file has four passing truth tests. The final historical/event/canon matrix passed 7 files / 113 tests; TypeScript and diff checks passed. Detached pre-fix `test:baselines` passed, post-fix strict mode failed on the explained 52-week delta, `UPDATE_BASELINES=1` refreshed only `apr1992_52w`, and a second strict run passed all scenarios. Independent historian/canon review approved the mechanics and baseline acceptance; unsupported source/prose remains an R7 content finding. Full evidence: `docs/40_reports/implemented/20260801_R6_GORAZDE_CURRENT_STATE_TRUTH.md`.
+
+**Scope/determinism:** Event predicate/effect truth, one test, the causally reviewed baseline manifest, report, roadmap/board, and ledger only. No timing window, morale value, player decision, RNG, save schema, canon/FORAWWV, package, version, tag, signing, publication, or release state changed.
+
+---
+
 ## [2026-08-01] docs(roadmap): bind confirmed Goražde event bug to executable ownership
 
 **Type:** Master-roadmap / command-board / R6 execution-plan correction.

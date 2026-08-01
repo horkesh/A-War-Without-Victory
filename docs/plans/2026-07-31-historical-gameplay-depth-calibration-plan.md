@@ -97,17 +97,19 @@ For every behavior-moving slice:
 - Create `tests/gorazde_pocket_event_state_truth.test.ts`
 - Modify event baseline/fixture ownership only after causal review
 
-- [ ] RED: prove 30% Goražde municipal control cannot transfer `op:gorazde:glamoc` or `op:gorazde:kamen`, set the consolidation flag, or emit a completed-consolidation receipt.
-- [ ] RED: prove an informational receipt becomes eligible in the historical window only when current `political_controllers` already records both exact OSIDs as RBiH-held.
-- [ ] Remove the event's `control_change`; keep any morale/flag/narrative consequence downstream of the exact current-state predicate and prove the event does not alter political control bytes.
-- [ ] Route the Wikipedia-only citation and absolute future claim to R7; do not repair sourcing with unsupported copy in R6.
-- [ ] Run the 40-turn comparison and explain the expected baseline delta before Phase 0 freezes candidate truth.
+- [x] RED: prove 30% Goražde municipal control cannot transfer `op:gorazde:glamoc` or `op:gorazde:kamen`, set the consolidation flag, or emit a completed-consolidation receipt.
+- [x] RED: prove an informational receipt becomes eligible in the historical window only when current `political_controllers` already records both exact OSIDs as RBiH-held.
+- [x] Remove the event's `control_change`; keep any morale/flag/narrative consequence downstream of the exact current-state predicate and prove the event does not alter political control bytes.
+- [x] Route the Wikipedia-only citation and absolute future claim to R7; do not repair sourcing with unsupported copy in R6.
+- [x] Run the 40-turn comparison and explain the expected baseline delta before Phase 0 freezes candidate truth.
 
 ```powershell
 npm.cmd run test:vitest -- tests/gorazde_pocket_event_state_truth.test.ts tests/event_conditions.test.ts --pool=forks --reporter=dot
 npm.cmd run sim:scenario:run:40w
 npm.cmd run test:baselines
 ```
+
+**Execution evidence — 2026-08-01:** Task 0.1 is complete and independently approved. The matched 40-week seed changed only two false turn-18 `RBiH -> RBiH` control-event receipts; all 31 anchors and territorial/formation/activity outputs remained identical. The golden 52-week seed correctly stopped scripting Glamoč/Kamen, improved core anchors from 30/31 to 31/31, kept all six bot bands green and critical anomalies at zero, and produced the causally reviewed cascade recorded in [the implementation report](../40_reports/implemented/20260801_R6_GORAZDE_CURRENT_STATE_TRUTH.md). The baseline manifest was updated only after that review and strict mode passed. Wikipedia-only sourcing and absolute future prose remain routed to R7; the mechanical packet did not alter them.
 
 `/simplify` -> gameplay/historical review -> commit `fix(events): bind gorazde consolidation to current control truth`
 
