@@ -25254,3 +25254,13 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Verification and review:** Independent review initially blocked CSS-only overflow concealment, then approved the corrected measured geometry/readability contract. Geometry/harness focused tests pass 7 files / 97 tests; the R2 owner matrix passes 18 files / 231 tests; player journeys pass 44 files / 770 tests. TypeScript, harness syntax, and diff checks pass. The exact scope and rejected-run lineage are recorded in [the implementation report](40_reports/implemented/20260801_R2_RS_FRICTION_FR03_FR06_AND_RUNTIME_HARDENING.md).
 
 **Status/scope:** All R2 source packets are implemented and reviewed. R2 remains open for a rebuilt transient package, fresh no-resume 104-week RS owner run, clean final diagnostics, materialized geometry receipts, verified process cleanup, and a newly completed diary. Simulation, history/event content, scenario balance, save schema, deterministic baselines, package version, tag, installer, signing, publication, and `docs/10_canon/FORAWWV.md` are unchanged.
+
+## 2026-08-01 - R7 officer/OOB and audio provenance inventory accepted
+
+**Type:** Fail-closed content provenance inventory / deterministic diagnostic checkpoint.
+
+**Implementation and review:** Added structured sidecars and deterministic diagnostics for all named officer/OOB rows and registered audio cues. Independent review blocked two false-confidence paths: manifest-wide defaults could initially supply positive identity evidence to every row, and the audio census initially lacked the runtime bundle-resolution join and orphan-binary inventory. The accepted implementation requires every positive identity field on the exact row, joins cues to `audioAssets.ts`, recursively inventories owned audio binaries, and labels `OggS` honestly as a container-signature precheck.
+
+**Findings:** Officer/OOB coverage is 374/374 with 0 supported, 2,286 blocking findings, and 12 normalized-name collisions. Audio coverage is 36/36 with 17 provided, 19 placeholders, zero orphan binaries, 54 blocking findings, five warnings, and three absent required ambient beds. Missing identity, licensing, duration, loudness, or asset facts remain unresolved rather than inferred.
+
+**Verification and scope:** The accepted packet passed 5 files / 22 focused tests, TypeScript, canon/determinism/baseline checks, EOL policy, and diff checks; the parent integration smoke passed 2 files / 11 tests. This is a diagnostic/content-sidecar floor only. It changes no runtime, identity, OOB assignment, scenario, localization, audio binary, save schema, baseline, package/version, tag, signing, publication, release state, or `docs/10_canon/FORAWWV.md`.

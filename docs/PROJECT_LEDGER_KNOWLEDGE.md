@@ -4058,3 +4058,9 @@ Applied in `[2026-08-01] Engine quality Phase 2 immutable topology reuse checkpo
 **Share immutable inputs at the narrowest resource boundary:** combining independently optional mappings, edges, and centroids into one cached `Promise.all` can widen one missing resource into unrelated behavior loss. Durable rule: cache each resource with a turn-local promise, make each phase request only what it consumes, and compose a full bundle only at the explicit full-bundle owner. Keep caller-owned `Map` and object inputs read-only by contract, audit consumers for mutation, never persist the cache in `GameState`, and prove both failure isolation and exact scenario bytes before acceptance.
 
 Applied in `[2026-08-01] Engine quality Phase 2 operational-data ownership checkpoint`, `src/sim/turn_pipeline_types.ts`, and `tests/turn_pipeline_operational_data_reuse.test.ts`.
+
+## 2026-08-01 - Provenance defaults may describe absence, never support
+
+**Coverage is not evidence:** a sidecar row for every identity or cue proves inventory completeness, not historical or licensing support. Durable rule: every positive identity fact must be owned by the exact row, including applicable relation/court evidence; shared defaults may only encode an unresolved negative state. Audio proof must join the authored cue registry to the actual bundle-resolution owner and recursively census binaries, while container signatures remain prechecks rather than duration/LUFS decode evidence.
+
+Applied in `[2026-08-01] R7 officer/OOB and audio provenance inventory accepted`, `tools/diagnostics/officer_oob_provenance.ts`, and `tools/diagnostics/audio_asset_provenance.ts`.
