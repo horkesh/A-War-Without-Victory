@@ -83,6 +83,8 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
         } as GameState['military'],
         political: {
             political_controllers: {
@@ -406,6 +408,8 @@ describe('final sector truth reconciliation', () => {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
             } as GameState['military'],
             political: {
                 political_controllers: {

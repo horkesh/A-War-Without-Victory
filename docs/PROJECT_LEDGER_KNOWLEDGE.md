@@ -1,3 +1,7 @@
+## 2026-08-01 - Historical notifications observe state; they do not manufacture it
+
+An authored calendar window may make a historical notification eligible, but it must not create the territorial result the prose claims occurred. Territorial consolidation requires exact current-state evidence: for the confirmed Goražde case, both named OSIDs must already be held by RBiH before the informational receipt, morale consequence, or durable flag may be produced. Source quality and prose certainty are a separate content responsibility; projection wording is a separate receipt-consumer responsibility. Route the mechanic to gameplay correctness first, sourcing/prose to historical review second, and downstream projections to their shared receipt owner. See the [2026-08-01 ledger entry](PROJECT_LEDGER.md#2026-08-01-docsroadmap-bind-confirmed-gorade-event-bug-to-executable-ownership).
+
 ## 2026-07-12 - RBiH exact-turn remediation durable boundaries
 
 **Desktop mutation success is durable, shared state:** canonical mutating IPC completes as one transaction: serialize the new state, autosave it, then broadcast that exact serialization to every renderer, including the caller. Autosave failure restores the previous in-memory serialization and fails the invoke. A successful renderer response without persistence and broadcast is not a successful mutation.
@@ -4042,3 +4046,21 @@ Applied in `[2026-07-31] Standing Operational Group doctrine converged with live
 **Post-action modal cascades need an allowlist of non-decisions, not a generic close loop:** an Advance can surface a neutral deferral and then read-only historical notices. Durable rule: permit only exact, bounded non-policy actions such as `Review Later` and `Acknowledged`; leave any unknown or decision-bearing surface open so the evidence run fails closed rather than inventing a choice.
 
 Applied in `[2026-08-01] Seamless map transition R1 Phase 3-6 closeout`, `src/ui/map/perf/mapTransitionTiming.ts`, and `tools/ui/map_transition_profile.cjs`.
+
+## 2026-08-01 - Simulation topology caches require runtime immutability proof
+
+**Identity reuse is safe only when immutability is enforceable:** a stable array reference is not proof that its edge records or membership cannot change. Durable rule: register and deeply freeze canonical topology at its ownership boundary, or require an independently deeply frozen array and every contained edge record before caching by identity. Mutable or only shallow-frozen inputs must take a fresh builder path, and cached composite outputs must also be deeply frozen so one consumer cannot corrupt another. Pair performance acceptance with a mutated-input regression and byte-identical scenario evidence.
+
+Applied in `[2026-08-01] Engine quality Phase 2 immutable topology reuse checkpoint`, `src/map/adjacency_map.ts`, and `tests/adjacency_map_cached.test.ts`.
+
+## 2026-08-01 - Optional performance caches must preserve failure independence
+
+**Share immutable inputs at the narrowest resource boundary:** combining independently optional mappings, edges, and centroids into one cached `Promise.all` can widen one missing resource into unrelated behavior loss. Durable rule: cache each resource with a turn-local promise, make each phase request only what it consumes, and compose a full bundle only at the explicit full-bundle owner. Keep caller-owned `Map` and object inputs read-only by contract, audit consumers for mutation, never persist the cache in `GameState`, and prove both failure isolation and exact scenario bytes before acceptance.
+
+Applied in `[2026-08-01] Engine quality Phase 2 operational-data ownership checkpoint`, `src/sim/turn_pipeline_types.ts`, and `tests/turn_pipeline_operational_data_reuse.test.ts`.
+
+## 2026-08-01 - Provenance defaults may describe absence, never support
+
+**Coverage is not evidence:** a sidecar row for every identity or cue proves inventory completeness, not historical or licensing support. Durable rule: every positive identity fact must be owned by the exact row, including applicable relation/court evidence; shared defaults may only encode an unresolved negative state. Audio proof must join the authored cue registry to the actual bundle-resolution owner and recursively census binaries, while container signatures remain prechecks rather than duration/LUFS decode evidence.
+
+Applied in `[2026-08-01] R7 officer/OOB and audio provenance inventory accepted`, `tools/diagnostics/officer_oob_provenance.ts`, and `tools/diagnostics/audio_asset_provenance.ts`.

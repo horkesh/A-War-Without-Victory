@@ -2,6 +2,26 @@ import { describe, it, expect } from 'vitest';
 import { applyMigrations, getLatestSchemaVersion } from '../src/state/save_migration.js';
 
 describe('save_migration', () => {
+    it('materializes required sector state for v36 saves and preserves existing history', () => {
+        const absent = { schema_version: 36, military: {} } as any;
+        const existing = {
+            schema_version: 36,
+            military: {
+                sector_intel: { sector_a: [{ confidence: 0.75 }] },
+                corps_front_sectors: { sector_a: { sector_id: 'sector_a' } },
+            },
+        } as any;
+
+        applyMigrations(absent);
+        applyMigrations(existing);
+
+        expect(absent.schema_version).toBe(getLatestSchemaVersion());
+        expect(absent.military.sector_intel).toEqual({});
+        expect(absent.military.corps_front_sectors).toEqual({});
+        expect(existing.military.sector_intel).toEqual({ sector_a: [{ confidence: 0.75 }] });
+        expect(existing.military.corps_front_sectors).toEqual({ sector_a: { sector_id: 'sector_a' } });
+    });
+
     it('applies pending migrations to old saves', () => {
         const state = {
             schema_version: 0,

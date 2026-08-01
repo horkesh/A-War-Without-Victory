@@ -637,6 +637,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
       return;
     }
+    if (target.kind === 'field-operation-plan') {
+      set({
+        ...base,
+        isOperationsPanelOpen: false,
+      });
+      return;
+    }
     set({
       ...base,
       isOperationsPanelOpen: true,

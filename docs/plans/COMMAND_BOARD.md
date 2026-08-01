@@ -6,7 +6,7 @@
 
 **Updated:** 2026-08-01
 
-**Program state:** EXECUTING; R1 and R3 are complete on the integration branch, and R2 is active
+**Program state:** EXECUTING; R1 and R3 are complete, all R2 source packets are independently approved, and R2/R5 remain active
 
 ## Activation
 
@@ -21,12 +21,12 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 | Order | ID | Status | Next executable action | Plan |
 |---:|---|---|---|---|
 | 1 | R1 | **COMPLETE** | No further R1 action. Acceptance: warm p95 139.515 ms, cold p95 78.8 ms, zero warm graphics/static churn, three-launch player-visible proof, zero unexpected diagnostics. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
-| 2 | R2 | IN PROGRESS — NON-MAP PACKETS REVIEWED; FR-03 REBASE NEXT | Complete Electron viewport proof, rebase the direct map handoff on integrated R1, and run final RS acceptance. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
+| 2 | R2 | IN PROGRESS — SOURCE COMPLETE; FRESH PACKAGED RS ACCEPTANCE NEXT | Rebuild the transient package, run a fresh no-resume 104-week RS owner campaign, require clean final diagnostics plus measured map/OOB/path geometry, and file the completed diary. The prior failed final-tour run is negative evidence only. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
 | 3 | R3 | **COMPLETE** | Verified lifecycle/state floor is available to R5; no further R3 action. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | WAITING ON R2 PRIORITY/CADENCE CONTRACT | Inventory command/event/Codex projections, converge them on deterministic receipts, and absorb Free War residuals. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
-| 5 | R5 | WAITING ON R1–R3 STATE FLOOR | Classify optional state and artifacts, profile measured hot paths, close save/replay and CI parity. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | WAITING ON R3/R5 FLOOR | Run the serialized adopt-or-retire experiments, Sarajevo/E-B1 work, and final calibration proof. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
-| 7 | R7 | WAITING ON R4 INVENTORY AND R1/R2 UI | Build claim/identity/string/audio inventories; complete sourced content, `bs` localization, licensing, and audio proof. | [Content/localization/audio](2026-07-31-content-history-localization-audio-plan.md) |
+| 5 | R5 | IN PROGRESS — PHASES 0–1 COMPLETE; PHASE 2 CHECKPOINTS GREEN | Redesign the current `buildCorpsFrontSectors` owner under failing equivalence tests, then continue to the recorded sub-100 ms target before artifact/CI closeout. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
+| 6 | R6 | WAITING ON R5 FLOOR | First remove the confirmed Goražde weak-predicate territorial mutation, then run the serialized adopt-or-retire experiments, Sarajevo/E-B1 work, and final calibration proof. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
+| 7 | R7 | IN PROGRESS -- IDENTITY/AUDIO INVENTORIES ACCEPTED | Complete the historical-claim inventory now; complete localization inventory after integrated R2 UI, then remediate the explicit provenance, `bs`, licensing, and audio findings. | [Content/localization/audio](2026-07-31-content-history-localization-audio-plan.md) |
 | 8 | R8 | WAITING ON R1–R7 GREEN | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until two final diaries are 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | WAITING ON R8 | Freeze an immutable RC, produce reproducible clean-machine artifacts/evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
@@ -34,7 +34,7 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 
 `R2 -> R4`, alongside `R5 -> R6`; R1 and R3 are complete, and both active paths converge before `R7 -> R8 -> R9`.
 
-R1 and R3 are integrated on `codex/master-roadmap-execution`. R2 is completing its final rebase and Electron acceptance.
+R1 and R3 are integrated on `codex/master-roadmap-execution`. R2 source and harness changes are independently approved; the fresh packaged 104-week RS acceptance and completed diary are the remaining R2 gate. R5 has closed state classification and three byte-identical Phase 2 reuse checkpoints; its authoritative mean is 1,189.962 ms/turn, the target gap is 11.8996x, and sector reconstruction is next.
 
 ## Fixed Decisions
 

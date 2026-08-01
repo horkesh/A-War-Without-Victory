@@ -68,7 +68,7 @@ import { PresidentialDecisionRoomPanel } from './components/army_hq/Presidential
 import { Z } from '../shared/zIndex';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { PanelBreadcrumb } from './components/PanelBreadcrumb';
-import { derivePanelRailState, shouldRenderCommandBriefing, shouldRenderInboxPanel, shouldRenderTacticalDetailRails } from './components/panelRail';
+import { derivePanelRailState, shouldRenderCommandBriefing, shouldRenderInboxPanel, shouldRenderMapModeLegend, shouldRenderTacticalDetailRails } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
 import type { EventDefinition } from '../../sim/events/event_types';
@@ -113,6 +113,8 @@ import {
 } from './desktop/campaignRecruitmentActions';
 import { beginMapTransition } from './perf/mapTransitionTiming';
 import { createCampaignReplacementCoordinator } from './utils/campaignViewportLifecycle';
+import type { FieldOperationPlanTarget } from './utils/fieldInspectionTarget';
+import { normalizeFieldOperationPlanTarget } from './data/fieldOperationPlanFocus';
 
 declare global {
   interface Window {
@@ -524,6 +526,8 @@ function App() {
   // `?view=warroom` / `?view=game` URL-param overrides below (~:1022) still let
   // dev/automation deep-link past the menu.
   const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('mainMenu');
+  const [fieldOperationPlanFocus, setFieldOperationPlanFocus] = useState<FieldOperationPlanTarget | null>(null);
+  const [fieldOperationPlanReturnCardId, setFieldOperationPlanReturnCardId] = useState<string | null>(null);
   const [campaignViewportEpoch, setCampaignViewportEpoch] = useState(0);
   const [tacticalMapReadiness, setTacticalMapReadiness] = useState<TacticalMapInteractionReadiness>({
     ready: false,
@@ -538,8 +542,16 @@ function App() {
   });
   const markCampaignReplacementSucceeded = useCallback(() => {
     setTacticalMapReadiness({ ready: false, renderedTurn: null, renderedFingerprint: null });
+    setFieldOperationPlanFocus(null);
+    setFieldOperationPlanReturnCardId(null);
     setCampaignViewportEpoch((epoch) => epoch + 1);
   }, []);
+  useEffect(() => {
+    if (appScreen !== 'game') {
+      setFieldOperationPlanFocus(null);
+      setFieldOperationPlanReturnCardId(null);
+    }
+  }, [appScreen]);
   const campaignReplacementOwner = useMemo(
     () => createCampaignReplacementCoordinator(
       markCampaignReplacementSucceeded,
@@ -1362,6 +1374,23 @@ function App() {
     setSummaryOpen(false);
     setAppScreen('game');
   };
+  const inspectFieldOperationPlanFromDossier = (
+    target: FieldOperationPlanTarget,
+    dossierCardId: string,
+  ) => {
+    const normalizedTarget = normalizeFieldOperationPlanTarget(target);
+    clearTacticalInspectionOverlays();
+    useGameStore.getState().inspectOnFieldTarget(normalizedTarget);
+    setFieldOperationPlanFocus(normalizedTarget);
+    setFieldOperationPlanReturnCardId(dossierCardId);
+    leaveWarroomForGame();
+  };
+  const returnToFieldOperationDossier = () => {
+    const dossierCardId = fieldOperationPlanReturnCardId;
+    setFieldOperationPlanFocus(null);
+    setFieldOperationPlanReturnCardId(null);
+    if (dossierCardId) openWarroomDecisionRoomFromField('all', dossierCardId);
+  };
   const returnToWarroomShell = () => {
     const gs = useGameStore.getState();
     gs.setArmyHQOpen(false);
@@ -1665,6 +1694,8 @@ function App() {
         loaded={loadedGameState !== null && appScreen !== 'mainMenu'}
         active={appScreen === 'game'}
         onInteractionReadyChange={setTacticalMapReadiness}
+        operationPlanFocus={fieldOperationPlanFocus}
+        onReturnToOperationDossier={returnToFieldOperationDossier}
       />
       {/* LANE-NIGHTSHIFT-V093-A11Y-LANE-B: semantic landmarks.
           - <main>: MapContainer (the primary tactical-map view; landmark
@@ -1707,7 +1738,7 @@ function App() {
           />
         </RootErrorBoundary>
       </header>
-      {tacticalChromeVisible && (
+      {tacticalChromeVisible && fieldOperationPlanFocus === null && (
         <>
           {commandBriefingVisible && (
             <CommandBriefingLayer
@@ -1728,7 +1759,7 @@ function App() {
         </>
       )}
       {/* Tactical Detail Panel */}
-      {tacticalChromeVisible && (
+      {tacticalChromeVisible && fieldOperationPlanFocus === null && (
         <RootErrorBoundary zone="right panel">
         <OperationsPanel />
         <OrderQueue />
@@ -2010,7 +2041,7 @@ function App() {
         onReviewItem={reviewPreAdvanceItem}
         onResolveBlocker={handlePresidentialInboxAction}
       />
-      {appScreen === 'game' && <MapModeLegend />}
+      {appScreen === 'game' && shouldRenderMapModeLegend(railState.panel) && <MapModeLegend />}
       {appScreen === 'game' && (
         <nav
           aria-label="Map controls and status"
@@ -2132,7 +2163,10 @@ function App() {
                 </button>
               </div>
               <div data-decision-room-scroll-owner="true" className="min-h-0 overflow-y-auto px-4 pb-4 pt-3">
-                <PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />
+                <PresidentialDecisionRoomPanel
+                  onNavigateTarget={reviewPreAdvanceTarget}
+                  onInspectFieldPlan={inspectFieldOperationPlanFromDossier}
+                />
               </div>
             </div>
           )}

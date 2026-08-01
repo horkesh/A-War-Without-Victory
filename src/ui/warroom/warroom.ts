@@ -200,6 +200,8 @@ class WarroomApp {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
         };
         const political: GameState['political'] = {
             political_controllers: politicalControllers,

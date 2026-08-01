@@ -19,6 +19,7 @@ import {
 } from '../../data/warroomPriorityDocket';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import { derivePresidentialBlockers, type PresidentialBlocker } from '../../data/presidentialBlockers';
+import { isPresidentialCadenceHold } from '../../data/presidentialCadenceHold';
 import { Z } from '../../../shared/zIndex';
 import { t } from '../../i18n';
 
@@ -205,6 +206,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   const pendingReviewCount = docket.metrics.pendingReviews;
   const hasPendingReviews = pendingReviewCount > 0;
   const { advanceReviewCount } = docket.metrics;
+  const cadenceHold = isPresidentialCadenceHold(loadedGameState);
   const canReviewPriorities = docket.canOpenBoard && Boolean(onReviewPriorities);
   const singleBlocker = blockers.length === 1 ? blockers[0] : null;
   const canResolveSingleBlocker = singleBlocker != null && Boolean(onResolveBlocker);
@@ -265,6 +267,18 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
         {t('warroom.requiredCount', { count: blockers.length })}
       </span>
 
+      {cadenceHold && (
+        <span
+          role="note"
+          data-testid="warroom-cadence-hold"
+          aria-label={t('deskAuthority.cadenceHold')}
+          title={t('deskAuthority.cadenceHold')}
+          className="rounded border border-sky-700/60 bg-sky-950/45 px-2 py-0.5 text-[12px] font-bold uppercase tracking-[0.06em] text-sky-200"
+        >
+          {t('warroom.cadenceHoldShort')}
+        </span>
+      )}
+
       {/* A single required signature is the primary presidential action. */}
       {canResolveSingleBlocker ? (
         <button
@@ -288,8 +302,14 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
           aria-controls="warroom-priority-docket-panel"
           aria-expanded={priorityDocketOpen}
         >
-          <span>{t('warroom.staffReview')}</span>
-          <span className="tabular-nums">{advanceReviewCount}</span>
+          <span>{t('warroom.status.reviewBeforeAdvance')}</span>
+          <span data-review-count="before-advance" className="tabular-nums">{advanceReviewCount}</span>
+          {hasPendingReviews && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{t('warroom.pendingCount', { count: pendingReviewCount })}</span>
+            </>
+          )}
           {hasPendingReviews && <span className="h-1.5 w-1.5 rounded-full bg-amber-300 animate-pulse" aria-hidden="true" />}
         </button>
       )}

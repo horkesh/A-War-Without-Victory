@@ -12,6 +12,17 @@ import {
   type TacticalMapGraphicsController,
   type TacticalMapRenderedRevision,
 } from './mapContextLifecycle';
+import {
+  createFieldOperationFocusController,
+  expandFieldOperationSafePadding,
+  fieldOperationFocusKey,
+  isPointInsideFieldOperationSafeViewport,
+  ordinaryCameraOwnsNavigation,
+  syncFieldOperationOverlayWhenStyleReady,
+  type FieldOperationFocusController,
+  type FieldOperationFocusDiagnostics,
+  type FieldOperationFocusReceipt,
+} from './fieldOperationFocusController';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type {
   AddLayerObject,
@@ -23,6 +34,8 @@ import type {
 import type { FeatureCollection } from 'geojson';
 import type { PickingInfo } from '@deck.gl/core';
 import type { LoadedGameState } from '../data/types';
+import type { FieldOperationPlanTarget } from '../utils/fieldInspectionTarget';
+import { strictCompare } from '../../../state/validateGameState';
 import { t, useLocale } from '../i18n';
 import {
   useMapInteractions,
@@ -139,6 +152,7 @@ interface MapContainerProps {
   revealPainted: boolean;
   onRenderedRevisionChange?: (revision: TacticalMapRenderedRevision | null) => void;
   onGraphicsController?: (controller: TacticalMapGraphicsController | null) => void;
+  operationPlanFocus?: FieldOperationPlanTarget | null;
 }
 
 interface TacticalMapApplicationRevision {
@@ -450,7 +464,7 @@ function buildDeckCounterViewportPadding(canvas: HTMLCanvasElement): DeckViewpor
       }
     }
 
-    let bestGap: [number, number] = [padding.left, mapRect.width - padding.right];
+    let bestGap: [number, number] = [0, 0];
     let cursor = 0;
     for (const [left, right] of merged) {
       if (left > cursor && left - cursor > bestGap[1] - bestGap[0]) bestGap = [cursor, left];
@@ -476,6 +490,10 @@ function buildDeckCounterViewportPadding(canvas: HTMLCanvasElement): DeckViewpor
 }
 
 const CAMERA_MIN_VISIBLE_BAND = 220;
+// MapLibre's cameraForBounds solves unpitched geometry. The tactical map is
+// fixed at 30 degrees, so reserve deterministic projection slack for the
+// near (bottom) edge before validating exact centroids against visible chrome.
+const FIELD_OPERATION_PROJECTION_SAFE_MARGIN = 64;
 const MIN_CAMERA_BOUNDS_DELTA = 0.0005;
 type CameraBounds = [[number, number], [number, number]];
 
@@ -535,6 +553,20 @@ function buildCounterAwareCameraPadding(map: maplibregl.Map): DeckViewportClip['
     bottom: Math.max(TACTICAL_MAP_EDGE_PADDING.bottom, dynamic.bottom),
     left: Math.max(TACTICAL_MAP_EDGE_PADDING.left, dynamic.left),
   }, map.getCanvas());
+}
+
+function buildFieldOperationCameraPadding(map: maplibregl.Map): DeckViewportClip['padding'] {
+  // The dossier handoff hides the normal tactical rails, leaving only the
+  // field-plan card and any genuinely visible map chrome. Reusing the normal
+  // 380/420px rail reservation can leave too little vertical room at the
+  // enforced minimum zoom and prevent MapLibre from moving to the plan at all.
+  return clampCameraPaddingForFit(
+    expandFieldOperationSafePadding(
+      buildDeckCounterViewportPadding(map.getCanvas()),
+      FIELD_OPERATION_PROJECTION_SAFE_MARGIN,
+    ),
+    map.getCanvas(),
+  );
 }
 
 function fitBoundsOrEaseTo(
@@ -705,6 +737,9 @@ const ENCLAVE_OUTLINE_LAYER_ID = 'enclave-outline';
 const ENCLAVE_FILL_LAYER_ID = 'enclave-fill';
 const GHOST_PATH_SOURCE_ID = 'ghost-paths';
 const GHOST_PATH_LAYER_ID = 'ghost-paths-line';
+const FIELD_OPERATION_OBJECTIVE_FILL_LAYER_ID = 'field-operation-objective-fill';
+const FIELD_OPERATION_OBJECTIVE_OUTLINE_LAYER_ID = 'field-operation-objective-outline';
+const FIELD_OPERATION_STAGING_OUTLINE_LAYER_ID = 'field-operation-staging-outline';
 import { buildGhostPathsGeoJSON } from './builders/buildGhostPathsGeoJSON';
 const ENCLAVE_LABEL_LAYER_ID = 'enclave-label';
 
@@ -731,7 +766,16 @@ function composeDeckLayersForCurrentSelection(args: {
   hoveredSectorId: string | null;
   hoveredCorpsId: string | null;
   viewportClip?: DeckViewportClip;
+  operationPlanFormationIds?: readonly string[];
 }) {
+  const highlightedFormationIds = new Set(collectHighlightedFormationIds({
+    formationsGeoJson: args.formationsGeoJson,
+    loadedGameState: args.loadedGameState,
+    selectedFormationId: args.selectedFormationId,
+    selectedCorpsId: args.selectedCorpsId,
+    selectedCorpsFrontSectorId: args.selectedCorpsFrontSectorId,
+  }));
+  for (const id of args.operationPlanFormationIds ?? []) highlightedFormationIds.add(id);
   return composeTacticalDeckLayers({
     formationsGeoJson: args.formationsGeoJson,
     labelsVisible: args.labelsVisible,
@@ -752,13 +796,7 @@ function composeDeckLayersForCurrentSelection(args: {
     forceQualityData: args.forceQualityData,
     refugeeColumnData: args.refugeeColumnData,
     corridorHeartbeatData: args.corridorHeartbeatData,
-    highlightedFormationIds: collectHighlightedFormationIds({
-      formationsGeoJson: args.formationsGeoJson,
-      loadedGameState: args.loadedGameState,
-      selectedFormationId: args.selectedFormationId,
-      selectedCorpsId: args.selectedCorpsId,
-      selectedCorpsFrontSectorId: args.selectedCorpsFrontSectorId,
-    }),
+    highlightedFormationIds: [...highlightedFormationIds].sort(strictCompare),
     viewportClip: args.viewportClip,
   });
 }
@@ -804,6 +842,7 @@ export function MapContainer({
   revealPainted,
   onRenderedRevisionChange,
   onGraphicsController,
+  operationPlanFocus = null,
 }: MapContainerProps) {
   const [locale] = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -813,6 +852,8 @@ export function MapContainer({
   activeRef.current = active;
   const inputActiveRef = useRef(inputActive);
   inputActiveRef.current = inputActive;
+  const operationPlanFocusRef = useRef<FieldOperationPlanTarget | null>(operationPlanFocus);
+  operationPlanFocusRef.current = operationPlanFocus;
   const deckOverlayRef = useRef<MapboxOverlay | null>(null);
   const formationCounterDomOverlayRef = useRef<HTMLDivElement | null>(null);
   const visibleFormationCounterItemsRef = useRef<FormationCounterDomOverlayItem[]>([]);
@@ -825,6 +866,9 @@ export function MapContainer({
   // Map That Scars: pre-computed per-OSID damage data; only populated when MAP_SCARS_FEATURE_FLAG is true.
   const osidDamageDataRef = useRef<OsidDamageDatum[] | null>(null);
   const lastPanTargetRef = useRef<string | null>(null);
+  const fieldOperationFocusControllerRef = useRef<FieldOperationFocusController | null>(null);
+  const lastFieldOperationFocusReceiptRef = useRef<FieldOperationFocusReceipt | null>(null);
+  const lastFieldOperationCameraAttemptRef = useRef<Record<string, unknown> | null>(null);
   const prevSectorIdRef = useRef<string | null>(null);
   /** When true, sector selection came from a map click — skip zoom. Cleared after the pan/zoom effect reads it. */
   const sectorSelectedFromMapRef = useRef(false);
@@ -840,6 +884,8 @@ export function MapContainer({
   const interactionLayerSignatureRef = useRef('');
   const [mapReady, setMapReady] = useState(false);
   const [styleReady, setStyleReady] = useState(false);
+  const [fieldOperationOverlayEpoch, setFieldOperationOverlayEpoch] = useState(0);
+  const [fieldOperationReceiptEpoch, setFieldOperationReceiptEpoch] = useState(0);
   const [mapRenderReady, setMapRenderReady] = useState(false);
   const [mapRenderedTurn, setMapRenderedTurn] = useState<number | null>(null);
   const [mapRenderedRevision, setMapRenderedRevision] = useState<string | null>(null);
@@ -924,6 +970,23 @@ export function MapContainer({
     position: { x: number; y: number };
   } | null>(null);
   const [battleMarkerProbe, setBattleMarkerProbe] = useState({ count: 0, osids: '' });
+  const [fieldOperationViewportProof, setFieldOperationViewportProof] = useState<{
+    proposalId: string;
+    objectiveOsids: string;
+    objectiveCount: number;
+    missingObjectiveOsids: string;
+    offscreenObjectiveOsids: string;
+    objectiveViewportPositions: string;
+    focusOsids: string;
+    missingFocusOsids: string;
+    offscreenFocusOsids: string;
+    focusViewportPositions: string;
+    camera: string;
+    focusReceipt: FieldOperationFocusReceipt | null;
+    focusDiagnostics: FieldOperationFocusDiagnostics | null;
+    allObjectivesInViewport: boolean;
+    allFocusInViewport: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -1187,6 +1250,7 @@ export function MapContainer({
         selectedCorpsFrontSectorId: nextInputs.selectedCorpsFrontSectorId,
         hoveredSectorId: nextInputs.hoveredSectorId,
         hoveredCorpsId: nextInputs.hoveredCorpsId,
+        operationPlanFormationIds: operationPlanFocusRef.current?.formationIds ?? [],
         viewportClip,
       }),
     });
@@ -1268,6 +1332,238 @@ export function MapContainer({
   }, [contextMenu, osidToSector]);
 
   useEffect(() => {
+    const map = mapRef.current;
+    lastFieldOperationCameraAttemptRef.current = {
+      stage: 'effect-entered',
+      hasMap: map != null,
+      mapReady,
+      styleReady,
+      styleReadinessLoaded: styleReadinessRef.current.loaded,
+      mapStyleLoaded: map?.isStyleLoaded() ?? false,
+      active,
+      currentMapStateReady,
+      hasOperationPlanFocus: operationPlanFocus != null,
+    };
+    if (!map || !mapReady) return;
+    const none: maplibregl.FilterSpecification = ['==', ['get', 'osid'], '__none__'];
+    if (!operationPlanFocus) {
+      lastFieldOperationCameraAttemptRef.current = { stage: 'normal-padding-restored' };
+      lastFieldOperationFocusReceiptRef.current = fieldOperationFocusControllerRef.current?.clear('focus-cleared') ?? null;
+      for (const layerId of [
+        FIELD_OPERATION_OBJECTIVE_FILL_LAYER_ID,
+        FIELD_OPERATION_OBJECTIVE_OUTLINE_LAYER_ID,
+        FIELD_OPERATION_STAGING_OUTLINE_LAYER_ID,
+      ]) {
+        if (safeHasLayer(map, layerId)) map.setFilter(layerId, none);
+      }
+      if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
+        const store = useGameStore.getState();
+        lastDeckLayerInputsRef.current = null;
+        applyDeckLayerSelection({
+          formationsGeoJson: lastFormationsGeoJsonRef.current,
+          labelsVisible: store.labelsVisible,
+          formationsVisible: store.formationsVisible,
+          zoom: map.getZoom(),
+          loadedGameState: store.loadedGameState,
+          ghostMapVisible: store.ghostMapVisible,
+          ghostMapData: ghostMapDataRef.current ?? undefined,
+          selectedFormationId: store.selectedFormationId,
+          selectedCorpsId: store.selectedCorpsId,
+          selectedCorpsFrontSectorId: store.selectedCorpsFrontSectorId,
+          hoveredSectorId: store.hoveredSectorId,
+          hoveredCorpsId: store.hoveredCorpsId,
+        });
+      }
+      return;
+    }
+    // R1 retained-viewport contract: do not draw, move the camera, or rebuild Deck
+    // until the visible map has painted the current state revision.
+    if (!active || !currentMapStateReady) {
+      lastFieldOperationCameraAttemptRef.current = {
+        stage: 'waiting-for-active-current-map',
+        active,
+        currentMapStateReady,
+      };
+      return;
+    }
+    if (!styleReady || !styleReadinessRef.current.loaded || !map.isStyleLoaded()) {
+      lastFieldOperationCameraAttemptRef.current = {
+        stage: 'overlay-waiting-for-style',
+        mapStyleLoaded: map.isStyleLoaded(),
+      };
+      return syncFieldOperationOverlayWhenStyleReady(
+        {
+          isStyleLoaded: () => map.isStyleLoaded() === true,
+          on: (_event, listener) => { map.on('styledata', listener); },
+          off: (_event, listener) => { map.off('styledata', listener); },
+        },
+        () => setFieldOperationOverlayEpoch((epoch) => epoch + 1),
+      );
+    }
+    const fieldOperationCameraPadding = buildFieldOperationCameraPadding(map);
+
+    safeEnsureLayer(map, {
+      id: FIELD_OPERATION_OBJECTIVE_FILL_LAYER_ID,
+      type: 'fill',
+      source: 'osid-control',
+      filter: none,
+      paint: { 'fill-color': '#f6c453', 'fill-opacity': 0.22 },
+    });
+    safeEnsureLayer(map, {
+      id: FIELD_OPERATION_OBJECTIVE_OUTLINE_LAYER_ID,
+      type: 'line',
+      source: 'osid-control',
+      filter: none,
+      paint: { 'line-color': '#ffd978', 'line-width': 4, 'line-opacity': 0.95 },
+    });
+    safeEnsureLayer(map, {
+      id: FIELD_OPERATION_STAGING_OUTLINE_LAYER_ID,
+      type: 'line',
+      source: 'osid-control',
+      filter: none,
+      paint: {
+        'line-color': '#7dd3fc',
+        'line-width': 3,
+        'line-opacity': 0.95,
+        'line-dasharray': [1.5, 1.25],
+      },
+    });
+
+    const objectiveFilter: maplibregl.FilterSpecification = operationPlanFocus.objectiveOsids.length > 0
+      ? ['in', ['get', 'osid'], ['literal', operationPlanFocus.objectiveOsids]]
+      : none;
+    const stagingFilter: maplibregl.FilterSpecification = operationPlanFocus.stagingOsids.length > 0
+      ? ['in', ['get', 'osid'], ['literal', operationPlanFocus.stagingOsids]]
+      : none;
+    map.setFilter(FIELD_OPERATION_OBJECTIVE_FILL_LAYER_ID, objectiveFilter);
+    map.setFilter(FIELD_OPERATION_OBJECTIVE_OUTLINE_LAYER_ID, objectiveFilter);
+    map.setFilter(FIELD_OPERATION_STAGING_OUTLINE_LAYER_ID, stagingFilter);
+
+    const focusKey = fieldOperationFocusKey(operationPlanFocus);
+    lastFieldOperationCameraAttemptRef.current = {
+      stage: 'overlay-synced',
+      focusKey,
+      canvasUsable: hasUsableMapCanvas(map.getCanvas()),
+      canvas: { width: map.getCanvas().clientWidth, height: map.getCanvas().clientHeight },
+      fieldOperationCameraPadding,
+      currentPadding: map.getPadding(),
+    };
+    lastFieldOperationFocusReceiptRef.current = fieldOperationFocusControllerRef.current?.getReceipt() ?? null;
+
+    if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
+      const store = useGameStore.getState();
+      lastDeckLayerInputsRef.current = null;
+      applyDeckLayerSelection({
+        formationsGeoJson: lastFormationsGeoJsonRef.current,
+        labelsVisible: store.labelsVisible,
+        formationsVisible: store.formationsVisible,
+        zoom: map.getZoom(),
+        loadedGameState: store.loadedGameState,
+        ghostMapVisible: store.ghostMapVisible,
+        ghostMapData: ghostMapDataRef.current ?? undefined,
+        selectedFormationId: store.selectedFormationId,
+        selectedCorpsId: store.selectedCorpsId,
+        selectedCorpsFrontSectorId: store.selectedCorpsFrontSectorId,
+        hoveredSectorId: store.hoveredSectorId,
+        hoveredCorpsId: store.hoveredCorpsId,
+      });
+    }
+  }, [active, currentMapStateReady, fieldOperationOverlayEpoch, mapReady, operationPlanFocus, styleReady]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!operationPlanFocus) {
+      setFieldOperationViewportProof(null);
+      return;
+    }
+    if (!active || !currentMapStateReady || !map) return;
+    const updateProof = () => {
+      if (operationPlanFocusRef.current?.proposalId !== operationPlanFocus.proposalId) return;
+      const canvas = map.getCanvas();
+      const safePadding = buildFieldOperationCameraPadding(map);
+      const missingObjectiveOsids: string[] = [];
+      const offscreenObjectiveOsids: string[] = [];
+      const objectiveViewportPositions: Array<{ osid: string; x: number; y: number }> = [];
+      const focusOsids = [...operationPlanFocus.objectiveOsids, ...operationPlanFocus.stagingOsids];
+      const objectiveOsidSet = new Set(operationPlanFocus.objectiveOsids);
+      const missingFocusOsids: string[] = [];
+      const offscreenFocusOsids: string[] = [];
+      const focusViewportPositions: Array<{ osid: string; x: number; y: number }> = [];
+      for (const osid of focusOsids) {
+        const coordinate = osidCentroidsRef.current.get(osid);
+        if (!coordinate) {
+          missingFocusOsids.push(osid);
+          if (objectiveOsidSet.has(osid)) missingObjectiveOsids.push(osid);
+          continue;
+        }
+        const point = map.project(coordinate);
+        const position = {
+          osid,
+          x: Math.round(point.x),
+          y: Math.round(point.y),
+        };
+        focusViewportPositions.push(position);
+        if (objectiveOsidSet.has(osid)) objectiveViewportPositions.push(position);
+        const inside = isPointInsideFieldOperationSafeViewport({
+          point,
+          width: canvas.clientWidth,
+          height: canvas.clientHeight,
+          padding: safePadding,
+        });
+        if (!inside) {
+          offscreenFocusOsids.push(osid);
+          if (objectiveOsidSet.has(osid)) offscreenObjectiveOsids.push(osid);
+        }
+      }
+      const center = map.getCenter();
+      const focusReceipt = fieldOperationFocusControllerRef.current?.getReceipt() ?? null;
+      const focusDiagnostics = fieldOperationFocusControllerRef.current?.getDiagnostics() ?? null;
+      lastFieldOperationFocusReceiptRef.current = focusReceipt;
+      const allObjectivesInViewport = operationPlanFocus.objectiveOsids.length > 0
+        && missingObjectiveOsids.length === 0
+        && offscreenObjectiveOsids.length === 0;
+      const allFocusInViewport = focusOsids.length > 0
+        && missingFocusOsids.length === 0
+        && offscreenFocusOsids.length === 0;
+      setFieldOperationViewportProof({
+        proposalId: operationPlanFocus.proposalId,
+        objectiveOsids: operationPlanFocus.objectiveOsids.join('|'),
+        objectiveCount: operationPlanFocus.objectiveOsids.length,
+        missingObjectiveOsids: missingObjectiveOsids.join('|'),
+        offscreenObjectiveOsids: offscreenObjectiveOsids.join('|'),
+        objectiveViewportPositions: JSON.stringify(objectiveViewportPositions),
+        focusOsids: focusOsids.join('|'),
+        missingFocusOsids: missingFocusOsids.join('|'),
+        offscreenFocusOsids: offscreenFocusOsids.join('|'),
+        focusViewportPositions: JSON.stringify(focusViewportPositions),
+        camera: JSON.stringify({
+          width: canvas.clientWidth,
+          height: canvas.clientHeight,
+          center: [center.lng, center.lat],
+          zoom: map.getZoom(),
+          pitch: map.getPitch(),
+          padding: map.getPadding(),
+          target: focusReceipt?.target ?? null,
+          focusReceipt,
+          focusDiagnostics,
+          safePadding,
+          attempt: lastFieldOperationCameraAttemptRef.current,
+        }),
+        focusReceipt,
+        focusDiagnostics,
+        allObjectivesInViewport,
+        allFocusInViewport,
+      });
+    };
+    map.on('moveend', updateProof);
+    const timeoutId = window.setTimeout(updateProof, 600);
+    return () => {
+      map.off('moveend', updateProof);
+      window.clearTimeout(timeoutId);
+    };
+  }, [active, currentMapStateReady, fieldOperationReceiptEpoch, operationPlanFocus]);
+
+  useEffect(() => {
     if (!containerRef.current) return;
     setMapLoadError(null);
 
@@ -1282,6 +1578,7 @@ export function MapContainer({
 
     let initCancelled = false;
     let releaseMapTransitionCameraReader = () => {};
+    let releaseFieldOperationReceiptListener = () => {};
     const init = async () => {
       const operationalGeometryPromise = loadOperationalSettlements();
       const politicalControlPromise = loadOperationalPoliticalControl();
@@ -1371,11 +1668,15 @@ export function MapContainer({
       });
       countMapTransitionConstruction();
       if (activeRef.current) markMapTransition('map-created');
-      map.once('style.load', () => {
-        if (initCancelled) return;
-        styleReadinessRef.current.markLoaded();
-        setStyleReady(true);
-        if (activeRef.current) markMapTransition('style-loaded');
+      const styleLoadedPromise = new Promise<void>((resolve) => {
+        map.once('style.load', () => {
+          if (!initCancelled) {
+            styleReadinessRef.current.markLoaded();
+            setStyleReady(true);
+            if (activeRef.current) markMapTransition('style-loaded');
+          }
+          resolve();
+        });
       });
       map.on('error', (e) => {
         // Suppress noisy PMTiles "Unimplemented type: 4" errors (MVT geometry type unsupported by MapLibre)
@@ -1392,6 +1693,11 @@ export function MapContainer({
           pitch: map.getPitch(),
         };
       });
+      // `mapReady` is the dependency gate for every retained-map mutation
+      // effect. Do not publish it—or run setup that can touch Style—until
+      // MapLibre has completed the initial style load.
+      await styleLoadedPromise;
+      if (initCancelled || mapRef.current !== map) return;
       void terrainScalarsPromise.then((terrainResult) => {
         if (initCancelled || osidBaseRef.current !== geojson) return;
         if (!terrainResult.ok) {
@@ -1399,6 +1705,54 @@ export function MapContainer({
           return;
         }
         setOsidPropertiesMap(buildOsidProperties(geojson, terrainResult.value));
+      });
+      const fieldOperationFocusController = createFieldOperationFocusController({
+        camera: {
+          getCanvas: () => map.getCanvas(),
+          getPadding: () => {
+            const padding = map.getPadding();
+            return {
+              top: padding.top ?? 0,
+              right: padding.right ?? 0,
+              bottom: padding.bottom ?? 0,
+              left: padding.left ?? 0,
+            };
+          },
+          setPadding: (padding) => map.setPadding(padding),
+          getMaxBounds: () => {
+            const bounds = map.getMaxBounds();
+            return bounds
+              ? [[bounds.getWest(), bounds.getSouth()], [bounds.getEast(), bounds.getNorth()]]
+              : null;
+          },
+          setMaxBounds: (bounds) => { map.setMaxBounds(bounds); },
+          cameraForBounds: (bounds, options) => {
+            const target = map.cameraForBounds(bounds, options);
+            if (!target?.center || typeof target.zoom !== 'number') return null;
+            const center = maplibregl.LngLat.convert(target.center);
+            return { center: { lng: center.lng, lat: center.lat }, zoom: target.zoom };
+          },
+          getCenter: () => map.getCenter(),
+          getZoom: () => map.getZoom(),
+          project: (coordinate) => map.project(coordinate),
+          onceMoveEnd: (listener) => {
+            map.once('moveend', listener);
+            return () => map.off('moveend', listener);
+          },
+          easeTo: (options) => map.easeTo(options),
+          panBy: (offset, options) => map.panBy(offset, options),
+          stop: () => map.stop(),
+        },
+        canApply: () => activeRef.current
+          && currentMapStateReadyRef.current
+          && hasUsableMapCanvas(map.getCanvas()),
+        resolveCentroid: (osid) => osidCentroidsRef.current.get(osid) ?? null,
+        buildPadding: () => buildFieldOperationCameraPadding(map),
+        buildRestorePadding: () => buildCounterAwareCameraPadding(map),
+      });
+      fieldOperationFocusControllerRef.current = fieldOperationFocusController;
+      releaseFieldOperationReceiptListener = fieldOperationFocusController.subscribe(() => {
+        if (!initCancelled) setFieldOperationReceiptEpoch((epoch) => epoch + 1);
       });
       onGraphicsController?.({
         resize: () => map.resize(),
@@ -1408,6 +1762,7 @@ export function MapContainer({
           return () => map.off('render', listener);
         },
         stop: () => map.stop(),
+        fieldOperationFocus: fieldOperationFocusController,
       });
       map.setPadding(buildCounterAwareCameraPadding(map));
       ensureTacticalIcons(map);
@@ -1592,7 +1947,10 @@ export function MapContainer({
     return () => {
       initCancelled = true;
       releaseMapTransitionCameraReader();
+      releaseFieldOperationReceiptListener();
       onGraphicsController?.(null);
+      fieldOperationFocusControllerRef.current?.clear('campaign-replacement');
+      fieldOperationFocusControllerRef.current = null;
       onRenderedRevisionChange?.(null);
       const deckOverlay = deckOverlayRef.current;
       deckOverlayRef.current = null;
@@ -3903,6 +4261,9 @@ export function MapContainer({
     const map = mapRef.current;
     const lookup = osidCentroidsRef.current;
     if (!active || !mapReady || !map || lookup.size === 0) return;
+    // Explicit camera arbitration: field transactions supersede selected-OSID
+    // and formation navigation until their controller is cleared/cancelled.
+    if (!ordinaryCameraOwnsNavigation(fieldOperationFocusControllerRef.current)) return;
 
     // Prefer pan to a selected formation/navigation anchor or settlement before broad command bounds.
     let targetOsid: string | null = null;
@@ -3991,7 +4352,7 @@ export function MapContainer({
     }
 
     lastPanTargetRef.current = null;
-  }, [active, loadedGameState, mapReady, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId, selectedCorpsId]);
+  }, [active, loadedGameState, mapReady, operationPlanFocus, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId, selectedCorpsId]);
 
   // OSID selection: dark fill on picked settlement, faint fill on same-mun siblings, adm3 outline, bright rim
   useEffect(() => {
@@ -4271,6 +4632,28 @@ export function MapContainer({
       data-map-reveal-painted={revealPainted ? 'true' : 'false'}
       data-battle-marker-count={battleMarkerProbe.count}
       data-battle-marker-osids={battleMarkerProbe.osids}
+      data-field-operation-plan-id={fieldOperationViewportProof?.proposalId ?? ''}
+      data-field-operation-objective-count={fieldOperationViewportProof?.objectiveCount ?? 0}
+      data-field-operation-objective-osids={fieldOperationViewportProof?.objectiveOsids ?? ''}
+      data-field-operation-missing-objective-osids={fieldOperationViewportProof?.missingObjectiveOsids ?? ''}
+      data-field-operation-offscreen-objective-osids={fieldOperationViewportProof?.offscreenObjectiveOsids ?? ''}
+      data-field-operation-objective-viewport-positions={fieldOperationViewportProof?.objectiveViewportPositions ?? ''}
+      data-field-operation-focus-osids={fieldOperationViewportProof?.focusOsids ?? ''}
+      data-field-operation-missing-focus-osids={fieldOperationViewportProof?.missingFocusOsids ?? ''}
+      data-field-operation-offscreen-focus-osids={fieldOperationViewportProof?.offscreenFocusOsids ?? ''}
+      data-field-operation-focus-viewport-positions={fieldOperationViewportProof?.focusViewportPositions ?? ''}
+      data-field-operation-camera={fieldOperationViewportProof?.camera ?? ''}
+      data-field-operation-focus-key={fieldOperationViewportProof?.focusReceipt?.key ?? ''}
+      data-field-operation-focus-status={fieldOperationViewportProof?.focusReceipt?.status ?? ''}
+      data-field-operation-focus-target={fieldOperationViewportProof?.focusReceipt?.target ? JSON.stringify(fieldOperationViewportProof.focusReceipt.target) : ''}
+      data-field-operation-focus-request-count={fieldOperationViewportProof?.focusDiagnostics?.requestCount ?? 0}
+      data-field-operation-focus-apply-count={fieldOperationViewportProof?.focusDiagnostics?.appliedCount ?? 0}
+      data-field-operation-bounds-suspended={fieldOperationViewportProof?.focusDiagnostics?.boundsSuspended ? 'true' : 'false'}
+      data-retained-main-map-owner="true"
+      data-retained-deck-owner={mapReady && deckOverlayRef.current ? 'true' : 'false'}
+      data-field-operation-all-objectives-in-viewport={fieldOperationViewportProof?.allObjectivesInViewport ? 'true' : 'false'}
+      data-field-operation-all-focus-in-viewport={fieldOperationViewportProof?.allFocusInViewport ? 'true' : 'false'}
+      data-field-operation-selected-osid={operationPlanFocus?.objectiveOsids.includes(selectedOsid ?? '') ? selectedOsid ?? '' : ''}
       data-tutorial-step="map-container"
       aria-label={t('map.aria.tacticalMap')}
       aria-busy={!currentMapStateReady}

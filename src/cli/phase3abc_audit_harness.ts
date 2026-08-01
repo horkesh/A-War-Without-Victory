@@ -706,7 +706,9 @@ function createBaseState(seedName: string): GameState {
     event_last_fired_turn: {},
     event_flags: {},
     enabled_event_ids: [],
-    phantoms_spawned: []
+    phantoms_spawned: [],
+    corps_front_sectors: {},
+    sector_intel: {}
   },
   displacement: {
     displacement_state: {},

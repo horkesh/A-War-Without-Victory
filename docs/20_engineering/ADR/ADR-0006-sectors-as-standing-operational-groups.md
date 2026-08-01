@@ -26,6 +26,12 @@ A corps sector is the **standing-OG spatial assignment entity**. It groups a cor
 
 Live reserve commitment is the bounded ADR-0007 Phase B path. It commits **at most one eligible reserve or rear formation per threatened-sector distribution pass**. An **active-operation** participant, a **disrupted** formation, a formation **in transit**, or a formation with an **existing movement order** is ineligible.
 
+### Persistence contract (2026-08-01)
+
+`corps_front_sectors` is the materialized current-turn standing-OG/AoR snapshot, not a disposable cache. Schema v37 therefore requires and persists the sector record together with formation sector assignments and `assigned_sub_segment_id`. Load preserves those values exactly and does not rebuild sectors: the live builder may relocate formations while repairing coverage, so cold reconstruction is a gameplay mutation rather than an observationally pure projection. `sector_intel` is required-persisted because it contains cross-turn belief memory. The five genuinely disposable military caches remain excluded from canonical saves: `active_offensives_against_corps`, `home_distance_cache`, `militia_garrison`, `sector_combat_ratings`, and `unresolved_sector_brigades`.
+
+Electron keeps separate runtime IPC and canonical disk snapshots. Both contain the standing-OG snapshot; only the runtime snapshot may contain those five transient caches. Autosave rollback restores both snapshots together.
+
 Standing-OG **membership alone does not make a formation a reactive defender**. Only **actual combat-resolver contributors** receive the immediate combat effects already assigned by that path: **defender casualties are weighted across those contributors**, while any **contributor-specific immediate fatigue remains on its named recipient**. The separate **post-battle defender-fatigue write and downstream aftermath remain primarily on the primary defender**. A future change to that ownership would require a new behavior decision; it cannot be inferred from sector membership.
 
 Three concrete actions:
@@ -43,6 +49,10 @@ Scope boundaries:
 - **Future engine renames deferred.** A deeper code-level rename (`CorpsFrontSector` → `StandingOperationalGroup`, `sector_id` → `og_id` everywhere) is deferred to a v0.10 milestone ADR if-and-when calibration data demonstrates the naming inconsistency causes operational harm. Not now.
 
 ## Schema impact
+
+Schema v37 makes `corps_front_sectors` and `sector_intel` required persisted records. Migration preserves either record when present and materializes a deterministic empty record when a supported legacy save lacks it. Current-version validation rejects absence or malformed sector topology. Formation sector assignments and sub-segment identifiers remain inside the canonical formation record.
+
+The original ADR decision also added one optional display field:
 
 Single optional field added to `CorpsFrontSector`:
 

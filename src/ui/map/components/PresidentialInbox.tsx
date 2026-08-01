@@ -278,6 +278,7 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
             style={{ ...DETAIL_PANEL_STYLE, width: '22rem' }}
             className="bg-panel-bg/95 backdrop-blur-sm border-l border-panel-border flex flex-col"
             data-testid="presidential-inbox"
+            data-awwv-counter-occluder="true"
         >
             {/* Header */}
             <div className="px-3 py-2.5 border-b border-panel-border flex items-center justify-between shrink-0">

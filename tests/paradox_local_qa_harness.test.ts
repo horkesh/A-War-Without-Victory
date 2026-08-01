@@ -181,6 +181,13 @@ test('52-week Electron QA supports bounded major-surface checkpoint tours', () =
     assert.match(harness, /const currentCounters = await counterInfo\(frame\)/);
     assert.match(harness, /formation-detail-close/);
     assert.match(harness, /async function exerciseFormationStackPicker\(/);
+    assert.match(harness, /async function readMapChromeGeometry\(/);
+    assert.match(harness, /data-testid="oob-sidebar-scroll-region"/);
+    assert.match(harness, /data-testid="branch-tag-badge-row"/);
+    assert.match(harness, /visibleRatio/);
+    assert.match(harness, /overflowX !== 'hidden'/);
+    assert.match(harness, /Branch-path chip was visually clipped/);
+    assert.match(harness, /mapChromeGeometry: assertMapChromeGeometry/);
     assert.match(harness, /data-awwv-formation-stack-osid/);
     assert.match(harness, /data-stack-picker-panel/);
     assert.match(harness, /data-stack-selection-id/);
@@ -308,6 +315,14 @@ test('52-week Electron QA supports bounded major-surface checkpoint tours', () =
     assert.match(harness, /gitHead/);
     assert.match(harness, /workingTreeStatusSha256/);
     assert.match(harness, /resumeSaveSha256/);
+    assert.match(harness, /packagedExecutablePath/);
+    assert.match(harness, /executablePath: packagedExecutablePath/);
+    assert.match(harness, /packagedExecutableSha256/);
+    assert.match(
+        harness,
+        /canonicalAutosavePath = packagedExecutablePath[\s\S]{0,180}path\.join\(userDataDir, 'saves', 'autosave\.json'\)/,
+        'packaged Electron receipt and hash evidence must read its isolated userData autosave',
+    );
     assert.match(harness, /const screenshotBuffer = await page\.screenshot/);
     assert.match(harness, /update\(screenshotBuffer\)/);
     assert.doesNotMatch(harness, /page\.screenshot\(\{ path: screenshot, fullPage: false \}\)\.catch/);
@@ -326,6 +341,29 @@ test('52-week Electron QA supports bounded major-surface checkpoint tours', () =
     assert.match(harness, /proofLabelPrefix: `final-turn-\$\{turn\}`/);
     assert.match(harness, /finalTourProof/);
     assert.match(harness, /Decision Room exposed no lenses/);
+    assert.match(harness, /async function exerciseHistoricalOperationMapHandoff\(/);
+    assert.match(
+        harness,
+        /exerciseHistoricalOperationMapHandoff\([\s\S]*withinMapNavigationAbortWindow\([\s\S]*exerciseHistoricalOperationMapHandoffWithinNavigationWindow/s,
+        'the abort window must span the complete map-focus and same-dossier return transaction',
+    );
+    assert.match(harness, /decision-room-dossier-show-on-map/);
+    assert.match(harness, /data-field-operation-all-objectives-in-viewport/);
+    assert.match(harness, /data-field-operation-all-focus-in-viewport/);
+    assert.match(harness, /Historical operation viewport proof timed out/);
+    assert.match(harness, /data-field-operation-offscreen-objective-osids/);
+    assert.match(harness, /data-field-operation-offscreen-focus-osids/);
+    assert.match(harness, /Historical operation exact objective\/staging viewport proof failed/);
+    assert.match(harness, /data-field-operation-focus-status/);
+    assert.match(harness, /data-field-operation-focus-key/);
+    assert.match(harness, /data-field-operation-focus-target/);
+    assert.match(harness, /data-field-operation-bounds-suspended/);
+    assert.match(harness, /focusKey !== expectedFocusKey/);
+    assert.match(harness, /focusApplyCount !== focusRequestCount/);
+    assert.match(harness, /retainedMainMapOwners !== 1 \|\| ownerIdentity\.retainedDeckOwners !== 1/);
+    assert.match(harness, /field-operation-return-to-dossier/);
+    assert.match(harness, /same dossier after map return/);
+    assert.match(harness, /boundsRestored/);
     assert.doesNotMatch(harness, /commandSurfaceDeepDive\([^\n]+\.catch/);
     assert.doesNotMatch(harness, /armyHqDeepDive\([^\n]+\.catch/);
     assert.doesNotMatch(harness, /decisionRoomDeepDive\([^\n]+\.catch/);
@@ -429,6 +467,10 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
     assert.match(harness, /startup-embedded-warroom-document/);
     assert.match(harness, /teardown-game-document/);
     assert.match(harness, /map-hillshade-navigation/);
+    assert.match(harness, /map-osm-navigation/);
+    assert.match(harness, /MAP_NAVIGATION_ABORT_WINDOW_MS = 45_000/);
+    assert.match(harness, /withinMapNavigationAbortWindow/);
+    assert.match(harness, /mapNavigationWindow: diagnostics\.getMapNavigationAbortWindow\(observedAtMs\)/);
     assert.match(harness, /expectedNavigationAborts/);
     assert.doesNotMatch(harness, /expectedStartupAborts\.length < 2/);
 
@@ -437,6 +479,14 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
         'classifyExpectedRequestAbort',
         { URL },
     );
+    const activePackagedMapNavigation = {
+        active: true,
+        token: 'map-navigation:7:historical-operation',
+        runtime: 'packaged-local',
+        expectedOrigin: 'http://127.0.0.1:3002',
+        openedAtMs: 1_000,
+        expiresAtMs: 46_000,
+    };
     assert.equal(classifyExpectedRequestAbort({
         failure: { errorText: 'net::ERR_ABORTED' },
         method: 'GET',
@@ -463,7 +513,53 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
         isMainFrame: false,
         eventCount: 22,
         teardownStarted: false,
+        observedAtMs: 2_000,
+        mapNavigationWindow: activePackagedMapNavigation,
     }), 'map-hillshade-navigation');
+    assert.equal(classifyExpectedRequestAbort({
+        failure: { errorText: 'net::ERR_ABORTED' },
+        method: 'GET',
+        url: 'http://127.0.0.1:3002/data/derived/tiles/osm.pmtiles',
+        resourceType: 'fetch',
+        isMainFrame: false,
+        eventCount: 22,
+        teardownStarted: false,
+        observedAtMs: 2_000,
+        mapNavigationWindow: activePackagedMapNavigation,
+    }), 'map-osm-navigation');
+    assert.equal(classifyExpectedRequestAbort({
+        failure: { errorText: 'net::ERR_ABORTED' },
+        method: 'GET',
+        url: 'https://example.invalid/data/derived/tiles/osm.pmtiles',
+        resourceType: 'fetch',
+        isMainFrame: false,
+        eventCount: 22,
+        teardownStarted: false,
+        observedAtMs: 2_000,
+        mapNavigationWindow: activePackagedMapNavigation,
+    }), null, 'a remote origin must not inherit the packaged map abort allowance');
+    assert.equal(classifyExpectedRequestAbort({
+        failure: { errorText: 'net::ERR_ABORTED' },
+        method: 'GET',
+        url: 'http://127.0.0.1:3002/data/derived/tiles/osm.pmtiles',
+        resourceType: 'fetch',
+        isMainFrame: false,
+        eventCount: 22,
+        teardownStarted: false,
+        observedAtMs: 2_000,
+        mapNavigationWindow: null,
+    }), null, 'an exact local tile abort outside the bounded navigation window must fail');
+    assert.equal(classifyExpectedRequestAbort({
+        failure: { errorText: 'net::ERR_ABORTED' },
+        method: 'GET',
+        url: 'http://127.0.0.1:3002/data/derived/tiles/osm.pmtiles',
+        resourceType: 'fetch',
+        isMainFrame: false,
+        eventCount: 22,
+        teardownStarted: false,
+        observedAtMs: 46_001,
+        mapNavigationWindow: activePackagedMapNavigation,
+    }), null, 'an exact local tile abort after the bounded navigation deadline must fail');
     assert.equal(classifyExpectedRequestAbort({
         failure: { errorText: 'net::ERR_ABORTED' },
         method: 'GET',
@@ -472,6 +568,8 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
         isMainFrame: false,
         eventCount: 22,
         teardownStarted: false,
+        observedAtMs: 2_000,
+        mapNavigationWindow: activePackagedMapNavigation,
     }), null);
 });
 
@@ -536,6 +634,19 @@ test('stack-picker proof closes formation detail through a bounded exact UI cont
     assert.match(stackPickerSource, /detailClose\.click\(\{ timeout: 5000 \}\)/);
     assert.match(stackPickerSource, /detailPanel\.waitFor\(\{ state: 'detached', timeout: 5000 \}\)/);
     assert.doesNotMatch(stackPickerSource, /close\.click\(\)/);
+});
+
+test('stack-picker proof records an explicit not-applicable receipt when no visible stack exists', () => {
+    const harness = readHarness();
+    const stackPickerSource = extractFunctionSource(harness, 'exerciseFormationStackPicker');
+
+    assert.match(stackPickerSource, /if \(badgeCount < 1\) \{/);
+    assert.match(stackPickerSource, /status:\s*'not-applicable'/);
+    assert.match(stackPickerSource, /reason:\s*'no-visible-formation-stack-badge'/);
+    assert.match(stackPickerSource, /`\$\{labelPrefix\}-not-applicable`/);
+    assert.match(stackPickerSource, /return notApplicableReceipt/);
+    assert.doesNotMatch(stackPickerSource, /if \(badgeCount < 1\) throw/);
+    assert.match(stackPickerSource, /No player-hit-testable formation stack badge was available/);
 });
 
 test('fresh RS ordinary proposal acceptance requires every visible ready-plan dossier field', () => {
@@ -1105,6 +1216,32 @@ test('final blocker inventory covers every canonical player decision queue', () 
     assert.match(harness, /blockerInventory/);
     assert.match(extractFunctionSource(harness, 'fullFinalStateTour'), /assertNoPlayerBlockers/);
     assert.match(extractFunctionSource(harness, 'playTurns'), /assertNoPlayerBlockers/);
+});
+
+test('zero-count Review Before Advance telemetry cannot masquerade as a blocking surface', () => {
+    const harness = readHarness();
+    const shouldOpenAdvanceBlockerReview = loadFunction<(
+        text: string,
+        pendingState: { blockerInventory?: Record<string, number> } | null,
+    ) => boolean>(harness, 'shouldOpenAdvanceBlockerReview');
+
+    const emptyInventory = {
+        eventDecisions: 0,
+        proposals: 0,
+        paramilitary: 0,
+        reserves: 0,
+        convoys: 0,
+        officerEvents: 0,
+        peacePlan: 0,
+        counterOffers: 0,
+        dayton: 0,
+        operationOpportunities: 0,
+    };
+    assert.equal(shouldOpenAdvanceBlockerReview('REVIEW BEFORE ADVANCE 0', { blockerInventory: emptyInventory }), false);
+    assert.equal(shouldOpenAdvanceBlockerReview('Advance blocked — Review Before Advance', {
+        blockerInventory: { ...emptyInventory, proposals: 1 },
+    }), true);
+    assert.match(extractFunctionSource(harness, 'handleCurrentSurface'), /shouldOpenAdvanceBlockerReview\(text, pendingState\)/);
 });
 
 test('counter-offer handler targets an exact player-visible offer and requires source queue clearance', () => {

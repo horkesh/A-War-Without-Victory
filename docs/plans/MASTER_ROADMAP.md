@@ -1,6 +1,6 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** IN AUTONOMOUS EXECUTION; R1 is active and R3 is complete
+**Status:** IN AUTONOMOUS EXECUTION; R1/R3 are complete and R2 source packets are independently approved
 
 **Last updated:** 2026-08-01
 
@@ -97,20 +97,32 @@ Execute serially in the order R1, R2, R3, R4, R5, R6, R7, R8, R9 unless file-own
 | ID | Workstream | Status | Executable plan | Complete when |
 |---|---|---|---|---|
 | R1 | Seamless Command Room ↔ Tactical Map | **COMPLETE — CLOSED 2026-08-01** | [Map-transition plan](2026-07-31-seamless-command-room-map-transition-plan.md) | Warm switch shows current-turn/current-fingerprint truth without renderer reconstruction, static refetch, WebGL error, or visible wait; cold entry meets the measured plan budget. |
-| R2 | RS Desk → Decision → Advance friction | **IN PROGRESS — NON-MAP PACKETS REVIEWED; FR-03 REBASE NEXT** | [RS friction plan](2026-07-31-rs-104week-friction-remediation-plan.md) | Five diary findings close; no contradictory urgency; sourced opportunity/positive-hold cadence is intelligible; ultrawide and map handoff pass Electron proof. |
+| R2 | RS Desk → Decision → Advance friction | **IN PROGRESS — ALL SOURCE PACKETS REVIEWED; FRESH PACKAGED RS ACCEPTANCE NEXT** | [RS friction plan](2026-07-31-rs-104week-friction-remediation-plan.md) | Five diary findings close; no contradictory urgency; sourced opportunity/positive-hold cadence is intelligible; ultrawide and map handoff pass Electron proof. |
 | R3 | Operational/Tactical Group convergence | **COMPLETE** | [TG closeout plan](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | One offensive task-organization path, synchronized lifecycle/AHQ receipts, terminal telemetry, unique sourced promotions, locked exhaustion constants, and aligned Standing-OG doctrine. |
 | R4 | Command, event, and Dynamic Codex convergence | READY AFTER R2 | [Command/event/Codex plan](2026-07-31-command-event-codex-convergence-plan.md) | Five presidential levers remain; Decision Room owns action; Desk owns triage; events, Chronicle, Cost Ledger, and Codex share deterministic receipts and priority truth. |
-| R5 | Engine quality, performance, and stability | READY AFTER R1–R3 | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
-| R6 | Historical gameplay depth and final calibration | READY AFTER R3/R5 FLOOR | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) | Every behavior experiment is adopted or retired by predeclared criteria; Sarajevo and fall-1995 work is historically bounded; final 40/104/188-turn evidence is deterministic. |
-| R7 | Content, attribution, Bosnian localization, and audio | READY AFTER R4 INVENTORY; UI AFTER R1/R2 | [Content/localization/audio plan](2026-07-31-content-history-localization-audio-plan.md) | Claims, identities, strings, and audio are machine-auditable; unsupported content is absent; `bs`/legacy migration, pseudolocale, licensing, accessibility, and Electron proof pass. |
+| R5 | Engine quality, performance, and stability | **IN PROGRESS — PHASES 0–1 COMPLETE; PHASE 2 SECTOR REDESIGN NEXT** | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
+| R6 | Historical gameplay depth and final calibration | READY AFTER R3/R5 FLOOR | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) | Calendar/weak-predicate events cannot manufacture control; every behavior experiment is adopted or retired by predeclared criteria; Sarajevo and fall-1995 work is historically bounded; final 40/104/188-turn evidence is deterministic. |
+| R7 | Content, attribution, Bosnian localization, and audio | **IN PROGRESS -- IDENTITY/AUDIO INVENTORIES ACCEPTED** | [Content/localization/audio plan](2026-07-31-content-history-localization-audio-plan.md) | Claims, identities, strings, and audio are machine-auditable; unsupported content is absent; `bs`/legacy migration, pseudolocale, licensing, accessibility, and Electron proof pass. |
 | R8 | Full-campaign packaged-Electron validation and diaries | READY AFTER R1–R7 | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) | Fresh historical-policy RBiH, RS, and HRHB campaigns cover full duration and required surfaces; bugs and friction are separately routed; final two diaries score 5/5 with clean diagnostics. |
 | R9 | Release candidate, gold, and publication | READY AFTER R8 | [Release plan](2026-07-31-release-candidate-gold-publication-plan.md) | One immutable RC passes clean-machine/security/license/store proofs; artifacts are reproducible; signing/upload inputs are documented; publication awaits only the explicit instruction. |
 
 The linked plan is the task-level contract for each row. A workstream may not gain a second active plan; amend the linked plan and this register together.
 
+### 2026-08-01 R7 Phase 0 partial checkpoint amendment
+
+The independently reviewed identity/audio packet inventories 374/374 officer/OOB rows and 36/36 audio cues. It reports zero supported identities rather than inheriting positive evidence from defaults, joins provided cues to the actual bundle-resolution map, and finds zero orphan binaries. The live remediation floor remains explicit: 2,286 blocking identity findings, 54 blocking audio findings, five audio warnings, 12 normalized-name collisions, and three missing required ambient beds. R7 remains in progress for the historical-claim and localization inventories and all downstream remediation.
+
+### 2026-08-01 R5 Phase 2 checkpoint amendment
+
+R5 Phases 0 and 1 are complete. Three independently reviewed Phase 2 reuse checkpoints are accepted: operational graph, runtime-hardened immutable adjacency, and caller-owned operational data. The latest authoritative 40-turn packet records a 1,189.962 ms/turn mean (P50 1,187.475; P95 1,195.055), 0.993% below the preceding checkpoint, with five exact 5,071,275-byte saves at SHA-256 `52ee1829aab62e5ede80ca461b0ec6cc1d5ecc8ac2e0700a36ea7229d6050bde`. The 100 ms target remains open at 11.8996x. Current V8 evidence makes `buildCorpsFrontSectors` (15,599.493 ms inclusive) the next owner; R5 Phase 2 and the workstream remain in progress.
+
 ### 2026-08-01 R1 closure amendment
 
 R1 is closed locally after independent approval and three layers of evidence. The authoritative 72-sample performance artifact records cold current-state p50/p95 70.7/78.8 ms and warm interactive p50/p95 114.45/139.515 ms; all warm cycles create/release zero MapLibre/Deck owners and request zero static resources. The supplemental three-launch player packet proves actual camera movement, exact formation/settlement inspection, hidden-map input exclusion, catalog-backed historical-default choice, visible Advance, neutral/read-only post-advance handling, exact current-turn/fingerprint truth, unchanged repository saves, clean diagnostics, and verified process exit. Task 4.3 optional module splitting was not eligible because cold p95 had already passed at 125.2 ms after Phase 3. R2 may now rebase its shared map/shell files on R1. Evidence and full scope: [implementation report](../40_reports/implemented/20260801_SEAMLESS_COMMAND_ROOM_MAP_TRANSITION.md).
+
+### 2026-08-01 R2 source-closeout amendment
+
+All six R2 source packets are implemented and independently reviewed. FR-03 now routes the exact historical-operation dossier through the retained current-revision tactical map, exact objective/staging/participant evidence, and back to the same dossier without map-side authorization or renderer churn. FR-06 now uses full semantic labels, one chip plus deterministic `+N` below 1600 px and at most two plus `+N` above it, with complete accessible popover truth. The attempted packaged 104-week RS run reached turn 104 but failed because the old harness required a visible stack badge; it is retained only as negative evidence. The repaired harness emits an explicit not-applicable receipt and measures document/strip/OOB/Situation/branch geometry before map checkpoints. R2 remains open until a fresh no-resume packaged RS run completes with clean final diagnostics and materialized geometry receipts. Evidence and exact scope: [source closeout report](../40_reports/implemented/20260801_R2_RS_FRICTION_FR03_FR06_AND_RUNTIME_HARDENING.md).
 
 ## 6. Locked Product and Historical Decisions
 

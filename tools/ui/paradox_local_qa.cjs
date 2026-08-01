@@ -30,7 +30,60 @@ const requiredMapOriginArg = process.argv.find((arg) => arg.startsWith('--requir
 const requiredMapOrigin = requiredMapOriginArg ? new URL(requiredMapOriginArg).origin : null;
 const resumeSavePathArg = process.argv.find((arg) => arg.startsWith('--resume-save='))?.slice('--resume-save='.length);
 const resumeSavePath = resumeSavePathArg ? path.resolve(repo, resumeSavePathArg) : null;
-const canonicalAutosavePath = path.join(repo, 'saves', 'autosave.json');
+const packagedExecutableArg = process.argv.find((arg) => arg.startsWith('--packaged-executable='))?.slice('--packaged-executable='.length);
+const packagedExecutablePath = packagedExecutableArg ? path.resolve(repo, packagedExecutableArg) : null;
+if (packagedExecutablePath && !fs.existsSync(packagedExecutablePath)) {
+  throw new Error(`Packaged Electron executable not found: ${packagedExecutablePath}`);
+}
+const MAP_NAVIGATION_ABORT_WINDOW_MS = 45_000;
+let activeMapNavigationAbortWindow = null;
+let mapNavigationAbortWindowSequence = 0;
+
+function beginMapNavigationAbortWindow(frame, label) {
+  if (!packagedExecutablePath) return null;
+  let frameUrl;
+  try {
+    frameUrl = new URL(frame.url());
+  } catch {
+    return null;
+  }
+  if (frameUrl.protocol !== 'http:' || frameUrl.hostname !== '127.0.0.1') return null;
+  const token = `map-navigation:${++mapNavigationAbortWindowSequence}:${safeName(label)}`;
+  const openedAtMs = Date.now();
+  activeMapNavigationAbortWindow = {
+    active: true,
+    token,
+    runtime: 'packaged-local',
+    expectedOrigin: frameUrl.origin,
+    openedAtMs,
+    expiresAtMs: openedAtMs + MAP_NAVIGATION_ABORT_WINDOW_MS,
+  };
+  return token;
+}
+
+function getActiveMapNavigationAbortWindow(observedAtMs = Date.now()) {
+  if (!activeMapNavigationAbortWindow) return null;
+  if (observedAtMs > activeMapNavigationAbortWindow.expiresAtMs) {
+    activeMapNavigationAbortWindow = null;
+    return null;
+  }
+  return { ...activeMapNavigationAbortWindow };
+}
+
+function endMapNavigationAbortWindow(token) {
+  if (token && activeMapNavigationAbortWindow?.token === token) activeMapNavigationAbortWindow = null;
+}
+
+async function withinMapNavigationAbortWindow(frame, label, action) {
+  const token = beginMapNavigationAbortWindow(frame, label);
+  try {
+    return await action();
+  } finally {
+    endMapNavigationAbortWindow(token);
+  }
+}
+const developmentCanonicalAutosavePath = path.join(repo, 'saves', 'autosave.json');
+let canonicalAutosavePath = developmentCanonicalAutosavePath;
 let canonicalAutosavePersistenceAtResumeLoad = null;
 const factions = args.has('--all-factions')
   ? ['RS', 'RBiH', 'HRHB']
@@ -527,6 +580,8 @@ const provenance = {
   workingTreeContentFileCount: workingTreeContentFingerprint.fileCount,
   workingTreeContentExcludedGeneratedPrefixes: workingTreeContentFingerprint.excludedGeneratedPrefixes,
   resumeSaveSha256,
+  packagedExecutablePath,
+  packagedExecutableSha256: packagedExecutablePath ? fileSha256(packagedExecutablePath) : null,
   requiredMapOrigin,
   electronMainSha256: fileSha256(path.join(repo, 'src', 'desktop', 'electron-main.cjs')),
   warroomIndexSha256: fileSha256(path.join(repo, 'dist', 'warroom', 'index.html')),
@@ -1940,7 +1995,7 @@ async function formationAudit(frame) {
         .slice(0, 80),
     };
   });
-  const canonicalAutosave = canonicalFormationAuditFromAutosave(path.join(repo, 'saves', 'autosave.json'));
+  const canonicalAutosave = canonicalFormationAuditFromAutosave(canonicalAutosavePath);
   return {
     ...playerVisibleAudit,
     playerVisibleUnlocatedActiveCombatFormationsAllFactions:
@@ -2270,14 +2325,20 @@ async function openExactWarMapRoute(frame, label, options = {}) {
   const afterMs = options.afterMs ?? 1200;
   const warroomRoute = frame.locator('[data-testid="warroom-toolbar-war-map"]').first();
   if (await warroomRoute.isVisible().catch(() => false)) {
-    return clickTestId(frame, 'warroom-toolbar-war-map', `${label} warroom route`, { afterMs });
+    return withinMapNavigationAbortWindow(frame, `${label} warroom route`, () => (
+      clickTestId(frame, 'warroom-toolbar-war-map', `${label} warroom route`, { afterMs })
+    ));
   }
   const fieldRoute = frame.locator('[data-testid="toolbar-route-war-map"]').first();
   if (await fieldRoute.isVisible().catch(() => false)) {
-    return clickTestId(frame, 'toolbar-route-war-map', `${label} field route`, { afterMs });
+    return withinMapNavigationAbortWindow(frame, `${label} field route`, () => (
+      clickTestId(frame, 'toolbar-route-war-map', `${label} field route`, { afterMs })
+    ));
   }
   if (!await ensureWarroom(frame, `${label} ensure warroom`)) return false;
-  return clickTestId(frame, 'warroom-toolbar-war-map', `${label} warroom route`, { afterMs });
+  return withinMapNavigationAbortWindow(frame, `${label} warroom route`, () => (
+    clickTestId(frame, 'warroom-toolbar-war-map', `${label} warroom route`, { afterMs })
+  ));
 }
 
 async function openArmyHqFromCurrentSurface(frame, label, options = {}) {
@@ -2361,9 +2422,201 @@ async function acceptStrategicProposalThroughUi(frame, proposal, options = {}) {
     });
   }
   if (dossierTruthError) throw dossierTruthError;
+  const fieldPlanProof = await exerciseHistoricalOperationMapHandoff(frame, {
+    reviewId,
+    proposedAction,
+    priorityCardId,
+    onFieldPlanOpen: options.onFieldPlanOpen,
+    onFieldPlanReturn: options.onFieldPlanReturn,
+  });
   const clicked = await clickExactVisibleButton(host, actionLabel, `proposal ${reviewId} ${actionLabel}`, { afterMs: 1200 });
   if (!clicked) throw new Error(`Required proposal action failed: ${reviewId} ${actionLabel}`);
-  return { handled: true, proposalId: reviewId, proposedAction, priorityCardId, actionLabel, dossierTruth };
+  return { handled: true, proposalId: reviewId, proposedAction, priorityCardId, actionLabel, dossierTruth, fieldPlanProof };
+}
+
+const CERSKA_KAMENICA_OBJECTIVE_OSIDS = [
+  'op:srebrenica:osmace_2',
+  'op:srebrenica:radovcici',
+  'op:srebrenica:sulice_2',
+  'op:vlasenica:cerska_2',
+];
+
+async function exerciseHistoricalOperationMapHandoff(frame, options) {
+  if (typeof options.proposedAction !== 'string' || !options.proposedAction.startsWith('HISTORICAL_OP:')) {
+    return { exercised: false, reason: 'not-historical-operation' };
+  }
+  return withinMapNavigationAbortWindow(frame, `historical operation ${options.reviewId}`, () => (
+    exerciseHistoricalOperationMapHandoffWithinNavigationWindow(frame, options)
+  ));
+}
+
+async function exerciseHistoricalOperationMapHandoffWithinNavigationWindow(frame, options) {
+  const dossierPanel = frame.locator(
+    `[data-testid="decision-room-active-dossier"][data-card-id="${options.priorityCardId}"]`,
+  ).first();
+  const showOnMap = dossierPanel.locator('[data-testid="decision-room-dossier-show-on-map"]');
+  if (await showOnMap.count() !== 1 || !await showOnMap.isVisible()) {
+    throw new Error(`Historical operation dossier exposed no exact Show on map action: ${options.reviewId}`);
+  }
+  const map = frame.locator('[data-testid="tactical-map"]');
+  const context = frame.locator('[data-testid="field-operation-plan-context"]');
+  await showOnMap.click({ timeout: 5000 });
+  await map.waitFor({ state: 'visible', timeout: 30000 });
+  await frame.waitForFunction(() => document.querySelector('[data-testid="tactical-map"]')?.getAttribute('data-map-ready') === 'true');
+  await context.waitFor({ state: 'visible', timeout: 10000 });
+  const objectiveOsids = await context.locator('[data-testid="field-operation-objective"]').evaluateAll((nodes) => (
+    nodes.map((node) => node.getAttribute('data-osid')).filter(Boolean)
+  ));
+  const stagingOsids = await context.locator('[data-testid="field-operation-staging"]').evaluateAll((nodes) => (
+    nodes.map((node) => node.getAttribute('data-osid')).filter(Boolean)
+  ));
+  const focusOsids = [...objectiveOsids, ...stagingOsids];
+  try {
+    await frame.waitForFunction(() => {
+      const tacticalMap = document.querySelector('[data-testid="tactical-map"]');
+      return tacticalMap?.getAttribute('data-field-operation-all-objectives-in-viewport') === 'true'
+        && tacticalMap.getAttribute('data-field-operation-all-focus-in-viewport') === 'true'
+        && tacticalMap.getAttribute('data-field-operation-focus-status') === 'applied'
+        && tacticalMap.getAttribute('data-field-operation-bounds-suspended') === 'true'
+        && Boolean(tacticalMap.getAttribute('data-field-operation-focus-key'))
+        && Boolean(tacticalMap.getAttribute('data-field-operation-focus-target'));
+    });
+  } catch (error) {
+    const visibleOccluders = await frame.locator('[data-awwv-counter-occluder="true"]').evaluateAll((nodes) => (
+      nodes.flatMap((node) => {
+        const style = window.getComputedStyle(node);
+        if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) === 0) return [];
+        const rect = node.getBoundingClientRect();
+        return [{
+          testId: node.getAttribute('data-testid'),
+          rect: {
+            left: Math.round(rect.left),
+            top: Math.round(rect.top),
+            right: Math.round(rect.right),
+            bottom: Math.round(rect.bottom),
+            width: Math.round(rect.width),
+            height: Math.round(rect.height),
+          },
+        }];
+      })
+    ));
+    const viewportDiagnostics = {
+      objectiveOsids,
+      missingObjectiveOsids: String(await map.getAttribute('data-field-operation-missing-objective-osids') ?? '').split('|').filter(Boolean),
+      offscreenObjectiveOsids: String(await map.getAttribute('data-field-operation-offscreen-objective-osids') ?? '').split('|').filter(Boolean),
+      objectiveViewportPositions: String(await map.getAttribute('data-field-operation-objective-viewport-positions') ?? ''),
+      focusOsids,
+      missingFocusOsids: String(await map.getAttribute('data-field-operation-missing-focus-osids') ?? '').split('|').filter(Boolean),
+      offscreenFocusOsids: String(await map.getAttribute('data-field-operation-offscreen-focus-osids') ?? '').split('|').filter(Boolean),
+      focusViewportPositions: String(await map.getAttribute('data-field-operation-focus-viewport-positions') ?? ''),
+      camera: String(await map.getAttribute('data-field-operation-camera') ?? ''),
+      focusKey: String(await map.getAttribute('data-field-operation-focus-key') ?? ''),
+      focusStatus: String(await map.getAttribute('data-field-operation-focus-status') ?? ''),
+      focusTarget: String(await map.getAttribute('data-field-operation-focus-target') ?? ''),
+      focusRequestCount: Number(await map.getAttribute('data-field-operation-focus-request-count')),
+      focusApplyCount: Number(await map.getAttribute('data-field-operation-focus-apply-count')),
+      boundsSuspended: await map.getAttribute('data-field-operation-bounds-suspended') === 'true',
+      visibleOccluders,
+    };
+    const failureProof = {
+      exercised: true,
+      reviewId: options.reviewId,
+      priorityCardId: options.priorityCardId,
+      viewportTimedOut: true,
+      viewportDiagnostics,
+    };
+    if (typeof options.onFieldPlanOpen === 'function') await options.onFieldPlanOpen(failureProof);
+    throw new Error(`Historical operation viewport proof timed out: ${JSON.stringify(failureProof)}`, { cause: error });
+  }
+  const diagnosticObjectiveOsids = String(await map.getAttribute('data-field-operation-objective-osids') ?? '')
+    .split('|')
+    .filter(Boolean);
+  if (objectiveOsids.length === 0 || JSON.stringify(objectiveOsids) !== JSON.stringify(diagnosticObjectiveOsids)) {
+    throw new Error(`Historical operation field objective identity mismatch: ${JSON.stringify({ objectiveOsids, diagnosticObjectiveOsids })}`);
+  }
+  const diagnosticFocusOsids = String(await map.getAttribute('data-field-operation-focus-osids') ?? '')
+    .split('|')
+    .filter(Boolean);
+  if (focusOsids.length === 0 || JSON.stringify(focusOsids) !== JSON.stringify(diagnosticFocusOsids)) {
+    throw new Error(`Historical operation exact focus identity mismatch: ${JSON.stringify({ focusOsids, diagnosticFocusOsids })}`);
+  }
+  const missingFocusOsids = String(await map.getAttribute('data-field-operation-missing-focus-osids') ?? '').split('|').filter(Boolean);
+  const offscreenFocusOsids = String(await map.getAttribute('data-field-operation-offscreen-focus-osids') ?? '').split('|').filter(Boolean);
+  const focusViewportPositions = JSON.parse(String(await map.getAttribute('data-field-operation-focus-viewport-positions') ?? '[]'));
+  if (missingFocusOsids.length > 0 || offscreenFocusOsids.length > 0 || focusViewportPositions.length !== focusOsids.length) {
+    throw new Error(`Historical operation exact objective/staging viewport proof failed: ${JSON.stringify({ focusOsids, missingFocusOsids, offscreenFocusOsids, focusViewportPositions })}`);
+  }
+  if (options.proposedAction.endsWith(':Operation Cerska-Kamenica')
+    && JSON.stringify(objectiveOsids) !== JSON.stringify(CERSKA_KAMENICA_OBJECTIVE_OSIDS)) {
+    throw new Error(`Cerska-Kamenica exact objective mismatch: ${JSON.stringify(objectiveOsids)}`);
+  }
+  const focusKey = String(await map.getAttribute('data-field-operation-focus-key') ?? '');
+  const focusStatus = String(await map.getAttribute('data-field-operation-focus-status') ?? '');
+  const focusTarget = String(await map.getAttribute('data-field-operation-focus-target') ?? '');
+  const focusRequestCount = Number(await map.getAttribute('data-field-operation-focus-request-count'));
+  const focusApplyCount = Number(await map.getAttribute('data-field-operation-focus-apply-count'));
+  const boundsSuspended = await map.getAttribute('data-field-operation-bounds-suspended') === 'true';
+  const expectedFocusKey = [options.reviewId, ...focusOsids].join('|');
+  if (focusStatus !== 'applied' || focusKey !== expectedFocusKey || !focusTarget) {
+    throw new Error(`Historical operation focus receipt was not applied to the exact dossier: ${JSON.stringify({ focusKey, focusStatus, focusTarget })}`);
+  }
+  if (focusRequestCount < 1 || focusApplyCount !== focusRequestCount || !boundsSuspended) {
+    throw new Error(`Historical operation camera request/apply counts exposed hidden or failed focus calls: ${JSON.stringify({ focusRequestCount, focusApplyCount })}`);
+  }
+  const ownerIdentity = await frame.evaluate(() => ({
+    retainedMainMapOwners: document.querySelectorAll('[data-retained-main-map-owner="true"]').length,
+    retainedDeckOwners: document.querySelectorAll('[data-retained-deck-owner="true"]').length,
+  }));
+  if (ownerIdentity.retainedMainMapOwners !== 1 || ownerIdentity.retainedDeckOwners !== 1) {
+    throw new Error(`Historical operation handoff replaced or duplicated retained graphics owners: ${JSON.stringify(ownerIdentity)}`);
+  }
+  const openProof = {
+    exercised: true,
+    reviewId: options.reviewId,
+    priorityCardId: options.priorityCardId,
+    objectiveOsids,
+    stagingOsids,
+    focusOsids,
+    focusViewportPositions,
+    objectiveCount: Number(await map.getAttribute('data-field-operation-objective-count')),
+    allObjectivesInViewport: await map.getAttribute('data-field-operation-all-objectives-in-viewport') === 'true',
+    allFocusInViewport: await map.getAttribute('data-field-operation-all-focus-in-viewport') === 'true',
+    focusKey,
+    focusStatus,
+    focusTarget: JSON.parse(focusTarget),
+    focusRequestCount,
+    focusApplyCount,
+    boundsSuspended,
+    hiddenCameraCalls: focusRequestCount - focusApplyCount,
+    ownerIdentity,
+  };
+  if (typeof options.onFieldPlanOpen === 'function') await options.onFieldPlanOpen(openProof);
+
+  const selectedObjectiveOsid = objectiveOsids[0];
+  await context.locator(`[data-testid="field-operation-objective"][data-osid="${selectedObjectiveOsid}"]`).click({ timeout: 5000 });
+  await frame.waitForFunction((osid) => (
+    document.querySelector('[data-testid="tactical-map"]')?.getAttribute('data-field-operation-selected-osid') === osid
+  ), selectedObjectiveOsid);
+  const returned = await clickTestId(context, 'field-operation-return-to-dossier', `proposal ${options.reviewId} return to dossier`, { afterMs: 900 });
+  if (!returned) throw new Error(`Historical operation map could not return to dossier: ${options.reviewId}`);
+  const returnedDossier = frame.locator(
+    `[data-testid="decision-room-active-dossier"][data-card-id="${options.priorityCardId}"]`,
+  ).first();
+  await returnedDossier.waitFor({ state: 'visible', timeout: 10000 });
+  await frame.waitForFunction(() => (
+    document.querySelector('[data-testid="tactical-map"]')?.getAttribute('data-field-operation-bounds-suspended') === 'false'
+  ));
+  const returnProof = {
+    ...openProof,
+    selectedObjectiveOsid,
+    returnedToSameDossier: await returnedDossier.getAttribute('data-card-id') === options.priorityCardId,
+    boundsRestored: await map.getAttribute('data-field-operation-bounds-suspended') === 'false',
+  };
+  if (!returnProof.returnedToSameDossier || !returnProof.boundsRestored) {
+    throw new Error(`Historical operation did not return to the same dossier after map return: ${options.reviewId}`);
+  }
+  if (typeof options.onFieldPlanReturn === 'function') await options.onFieldPlanReturn(returnProof);
+  return returnProof;
 }
 
 async function decisionRoomDeepDive(page, frame, faction, events, labelPrefix = 'decision-room') {
@@ -2882,6 +3135,201 @@ async function pollFrameEvaluation(frame, evaluator, arg, timeoutMs = 5000, inte
   throw new Error(`Frame DOM condition timed out after ${timeoutMs}ms; last result: ${JSON.stringify(lastResult)}`);
 }
 
+async function readMapChromeGeometry(frame) {
+  return frame.evaluate(() => {
+    const rectOf = (node) => {
+      if (!(node instanceof HTMLElement)) return null;
+      const rect = node.getBoundingClientRect();
+      return {
+        left: Math.round(rect.left * 10) / 10,
+        top: Math.round(rect.top * 10) / 10,
+        right: Math.round(rect.right * 10) / 10,
+        bottom: Math.round(rect.bottom * 10) / 10,
+        width: Math.round(rect.width * 10) / 10,
+        height: Math.round(rect.height * 10) / 10,
+      };
+    };
+    const visibleWidth = (node) => {
+      if (!(node instanceof HTMLElement)) return 0;
+      const ownRect = node.getBoundingClientRect();
+      let left = Math.max(0, ownRect.left);
+      let right = Math.min(window.innerWidth, ownRect.right);
+      let parent = node.parentElement;
+      while (parent) {
+        const style = getComputedStyle(parent);
+        if (['hidden', 'clip', 'auto', 'scroll'].includes(style.overflowX)) {
+          const rect = parent.getBoundingClientRect();
+          left = Math.max(left, rect.left);
+          right = Math.min(right, rect.right);
+        }
+        parent = parent.parentElement;
+      }
+      return Math.max(0, Math.round((right - left) * 10) / 10);
+    };
+    const describeBranchNode = (node) => {
+      const rect = rectOf(node);
+      const visible = visibleWidth(node);
+      return {
+        text: node?.textContent?.trim() ?? '',
+        title: node instanceof HTMLElement ? node.title : '',
+        ariaLabel: node instanceof HTMLElement ? node.getAttribute('aria-label') ?? '' : '',
+        rect,
+        clientWidth: node instanceof HTMLElement ? node.clientWidth : 0,
+        scrollWidth: node instanceof HTMLElement ? node.scrollWidth : 0,
+        visibleWidth: visible,
+        visibleRatio: rect && rect.width > 0 ? Math.round((visible / rect.width) * 1000) / 1000 : 0,
+      };
+    };
+
+    const oob = document.querySelector('[data-testid="oob-sidebar-scroll-region"]');
+    const oobStyle = oob instanceof HTMLElement ? getComputedStyle(oob) : null;
+    const oobOverflowingDescendants = oob instanceof HTMLElement
+      ? Array.from(oob.querySelectorAll('*'))
+        .filter((node) => node instanceof HTMLElement)
+        .map((node) => {
+          const rect = node.getBoundingClientRect();
+          return {
+            tag: node.tagName.toLowerCase(),
+            testId: node.dataset.testid ?? null,
+            className: typeof node.className === 'string' ? node.className.slice(0, 320) : '',
+            text: node.textContent?.trim().slice(0, 180) ?? '',
+            rect: rectOf(node),
+            clientWidth: node.clientWidth,
+            scrollWidth: node.scrollWidth,
+          };
+        })
+        .filter((node) => node.scrollWidth > node.clientWidth + 2
+          || (node.rect?.right ?? 0) > oob.getBoundingClientRect().right + 2)
+        .slice(0, 24)
+      : [];
+    const situationContent = document.querySelector('[data-testid="situation-tab-content"]');
+    const oobCorpsCards = oob instanceof HTMLElement
+      ? Array.from(oob.querySelectorAll('[data-testid="oob-corps-card"]')).map(describeBranchNode)
+      : [];
+    const situationProse = Array.from(document.querySelectorAll('[data-oob-wrapping-prose="true"]')).map((node) => {
+      const style = node instanceof HTMLElement ? getComputedStyle(node) : null;
+      const geometry = describeBranchNode(node);
+      return {
+        ...geometry,
+        whiteSpace: style?.whiteSpace ?? null,
+        overflowWrap: style?.overflowWrap ?? null,
+      };
+    });
+    const bottomStatus = document.querySelector('[data-testid="bottom-status-strip"]');
+    const branchRow = document.querySelector('[data-testid="branch-tag-badge-row"]');
+    const chips = branchRow
+      ? Array.from(branchRow.querySelectorAll('[data-testid="branch-tag-chip"]')).map(describeBranchNode)
+      : [];
+    const remainder = branchRow?.querySelector('[data-testid="branch-tag-remainder"]') ?? null;
+    const compact = branchRow?.querySelector('[data-testid="branch-tag-compact"]') ?? null;
+    return {
+      viewport: { width: window.innerWidth, height: window.innerHeight },
+      document: {
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+      },
+      bottomStatus: bottomStatus instanceof HTMLElement ? {
+        present: true,
+        ...describeBranchNode(bottomStatus),
+      } : { present: false },
+      oob: oob instanceof HTMLElement ? {
+        present: true,
+        rect: rectOf(oob),
+        overflowX: oobStyle?.overflowX ?? null,
+        overflowY: oobStyle?.overflowY ?? null,
+        clientWidth: oob.clientWidth,
+        scrollWidth: oob.scrollWidth,
+        overflowingDescendants: oobOverflowingDescendants,
+        oobCorpsCards,
+        situationContent: situationContent instanceof HTMLElement ? {
+          ...describeBranchNode(situationContent),
+          clientWidth: situationContent.clientWidth,
+          scrollWidth: situationContent.scrollWidth,
+        } : null,
+        situationProse,
+      } : { present: false },
+      branchPaths: branchRow instanceof HTMLElement ? {
+        present: true,
+        row: describeBranchNode(branchRow),
+        chips,
+        remainder: remainder ? describeBranchNode(remainder) : null,
+        compact: compact ? describeBranchNode(compact) : null,
+      } : { present: false },
+    };
+  });
+}
+
+function assertMapChromeGeometry(label, geometry) {
+  if (geometry.document.scrollWidth > geometry.document.clientWidth + 2) {
+    throw new Error(`Map document has horizontal overflow at ${label}: ${JSON.stringify(geometry.document)}`);
+  }
+  if (geometry.bottomStatus.present && (
+    geometry.bottomStatus.scrollWidth > geometry.bottomStatus.clientWidth + 2
+    || geometry.bottomStatus.visibleRatio < 0.98
+  )) {
+    throw new Error(`Bottom status strip has local or ancestor horizontal overflow at ${label}: ${JSON.stringify(geometry.bottomStatus)}`);
+  }
+  if (geometry.oob.present) {
+    if (geometry.oob.overflowX !== 'hidden') {
+      throw new Error(`Command OOB horizontal overflow is not suppressed at ${label}: ${JSON.stringify(geometry.oob)}`);
+    }
+    if (!geometry.oob.rect || geometry.oob.rect.width <= 0 || geometry.oob.clientWidth <= 0) {
+      throw new Error(`Command OOB scroll region has no visible geometry at ${label}: ${JSON.stringify(geometry.oob)}`);
+    }
+    if (geometry.oob.scrollWidth > geometry.oob.clientWidth + 2) {
+      throw new Error(`Command OOB content exceeds its horizontal owner at ${label}: ${JSON.stringify(geometry.oob)}`);
+    }
+    if (!geometry.oob.situationContent || geometry.oob.situationContent.visibleRatio < 0.98
+      || geometry.oob.situationContent.scrollWidth > geometry.oob.situationContent.clientWidth + 2) {
+      throw new Error(`Situation content is clipped instead of wrapped at ${label}: ${JSON.stringify(geometry.oob.situationContent)}`);
+    }
+    if (geometry.oob.situationProse.length < 1) {
+      throw new Error(`Situation wrapping proof exposed no representative prose at ${label}`);
+    }
+    for (const prose of geometry.oob.situationProse) {
+      if (prose.visibleRatio < 0.98 || prose.scrollWidth > prose.clientWidth + 2 || prose.overflowWrap !== 'anywhere') {
+        throw new Error(`Situation prose was inaccessible or unwrapped at ${label}: ${JSON.stringify(prose)}`);
+      }
+    }
+    for (const corpsCard of geometry.oob.oobCorpsCards) {
+      if (!corpsCard.rect || corpsCard.rect.width <= 0 || corpsCard.visibleRatio < 0.98
+        || corpsCard.scrollWidth > corpsCard.clientWidth + 2) {
+        throw new Error(`OOB corps card content exceeds its rendered owner at ${label}: ${JSON.stringify(corpsCard)}`);
+      }
+    }
+  }
+  if (geometry.branchPaths.present) {
+    const compact = geometry.branchPaths.compact;
+    if (compact && geometry.branchPaths.chips.length !== 0) {
+      throw new Error(`Branch-path compact control retained full chips at ${label}: ${JSON.stringify(geometry.branchPaths)}`);
+    }
+    if (!compact && (geometry.branchPaths.chips.length < 1 || geometry.branchPaths.chips.length > 2)) {
+      throw new Error(`Branch-path bounded chip count failed at ${label}: ${JSON.stringify(geometry.branchPaths)}`);
+    }
+    for (const chip of geometry.branchPaths.chips) {
+      if (!chip.text || chip.title !== chip.text) {
+        throw new Error(`Branch-path semantic label/title mismatch at ${label}: ${JSON.stringify(chip)}`);
+      }
+      if (!chip.rect || chip.rect.width < 48 || chip.visibleRatio < 0.98 || chip.scrollWidth > chip.clientWidth + 1) {
+        throw new Error(`Branch-path chip was visually clipped at ${label}: ${JSON.stringify(chip)}`);
+      }
+    }
+    if (geometry.branchPaths.row.visibleRatio < 0.98
+      || geometry.branchPaths.row.scrollWidth > geometry.branchPaths.row.clientWidth + 1) {
+      throw new Error(`Branch-path row was clipped by an ancestor at ${label}: ${JSON.stringify(geometry.branchPaths.row)}`);
+    }
+    if (compact && (!compact.ariaLabel || !compact.title || !compact.rect || compact.rect.width < 24
+      || compact.visibleRatio < 0.98 || compact.scrollWidth > compact.clientWidth + 1)) {
+      throw new Error(`Branch-path compact control was visually clipped at ${label}: ${JSON.stringify(compact)}`);
+    }
+    const remainder = geometry.branchPaths.remainder;
+    if (remainder && (!remainder.rect || remainder.rect.width < 24 || remainder.visibleRatio < 0.98)) {
+      throw new Error(`Branch-path remainder control was visually clipped at ${label}: ${JSON.stringify(remainder)}`);
+    }
+  }
+  return geometry;
+}
+
 async function exerciseFormationStackPicker(page, frame, faction, events, labelPrefix = 'stack-picker') {
   await dismissCommandBriefing(frame);
   const tacticalMap = frame.locator('[data-testid="tactical-map"]').first();
@@ -2917,7 +3365,16 @@ async function exerciseFormationStackPicker(page, frame, faction, events, labelP
     };
   }).sort((left, right) => left.osid < right.osid ? -1 : left.osid > right.osid ? 1 : 0));
   const badgeCount = badgeRows.length;
-  if (badgeCount < 1) throw new Error(`No visible formation stack badge was available for ${labelPrefix}`);
+  if (badgeCount < 1) {
+    const notApplicableReceipt = {
+      exercised: false,
+      status: 'not-applicable',
+      reason: 'no-visible-formation-stack-badge',
+      badgeCount,
+    };
+    await snapshot(page, frame, faction, events, `${labelPrefix}-not-applicable`, { stackPickerProof: notApplicableReceipt });
+    return notApplicableReceipt;
+  }
   const selectedBadge = badgeRows.find((row) => row.hitTestable);
   if (!selectedBadge) {
     throw new Error(`No player-hit-testable formation stack badge was available for ${labelPrefix}: ${JSON.stringify(badgeRows)}`);
@@ -3310,7 +3767,10 @@ async function surfaceTour(page, frame, faction, events, options = {}) {
     (initialMapState?.locatedOwnedFormationCount ?? 0) > 0,
   );
   if (!initialMapReady) throw new Error('Initial tactical map did not render current-turn counters');
-  await snapshot(page, frame, faction, events, 'war-map', { counters: await counterInfo(frame) });
+  await snapshot(page, frame, faction, events, 'war-map', {
+    counters: await counterInfo(frame),
+    mapChromeGeometry: assertMapChromeGeometry('war-map', await readMapChromeGeometry(frame)),
+  });
 
   const stackPickerProof = options.requireStackPickerProof === true
     ? await exerciseFormationStackPicker(page, frame, faction, events, `${options.proofLabelPrefix ?? 'final'}-stack-picker`)
@@ -3393,6 +3853,13 @@ function selectHistoricalPeacePlanResponse(planId, faction) {
     contact_group: 'RS',
   }[planId];
   return historicalRejectingFaction === faction ? 'Reject Plan' : 'Accept Plan';
+}
+
+function shouldOpenAdvanceBlockerReview(text, pendingState) {
+  const blockerCount = Object.values(pendingState?.blockerInventory ?? {})
+    .reduce((sum, value) => sum + (Number.isFinite(value) ? Number(value) : 0), 0);
+  return blockerCount > 0
+    && /Advance blocked|Resolve .*pending|Resolve Before Advancing|Review Before Advance|Review Blockers/i.test(text);
 }
 
 async function handleCurrentSurface(page, frame, faction, events, options = {}) {
@@ -3603,6 +4070,8 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
         'strategic-proposal-dossier-open',
         { before: pendingState, ...details },
       ),
+      onFieldPlanOpen: (details) => snapshot(page, frame, faction, events, 'historical-operation-map-focus', details),
+      onFieldPlanReturn: (details) => snapshot(page, frame, faction, events, 'historical-operation-dossier-return', details),
     });
     await sleep(1200);
     const after = await readState(frame).catch(() => null);
@@ -3876,7 +4345,7 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     await snapshot(page, frame, faction, events, 'handled-reserve-request', { handledAction: 'reserve-cautious-action', clicked });
     return { handled: clicked, action: 'reserve-cautious-action' };
   }
-  if (/Advance blocked|Resolve .*pending|Resolve Before Advancing|Review Before Advance/i.test(text)) {
+  if (shouldOpenAdvanceBlockerReview(text, pendingState)) {
     const before = await readState(frame).catch(() => null);
     const qaProposal = selectProposalForQa(before?.pendingProposals ?? [], strategicRun);
     if (qaProposal) {
@@ -3891,6 +4360,8 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
             'strategic-proposal-dossier-open',
             { before, ...details },
           ),
+          onFieldPlanOpen: (details) => snapshot(page, frame, faction, events, 'historical-operation-map-focus', details),
+          onFieldPlanReturn: (details) => snapshot(page, frame, faction, events, 'historical-operation-dossier-return', details),
         });
         await sleep(1200);
         const after = await readState(frame);
@@ -3913,11 +4384,6 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     );
     await snapshot(page, frame, faction, events, 'handled-advance-blocker-review', { handledAction: 'advance-blocker-review', clicked });
     return { handled: clicked, action: 'advance-blocker-review' };
-  }
-  if (/Review Blockers/i.test(text)) {
-    const clicked = await clickMatch(frame, /Review Blockers/i, 'review blockers', { afterMs: 900 });
-    await snapshot(page, frame, faction, events, 'handled-review-blockers', { handledAction: 'review-blockers', clicked });
-    return { handled: clicked, action: 'review-blockers' };
   }
   if (/ADVANCE TURN/i.test(text)) {
     if (options.allowAdvanceModal === false) {
@@ -4091,7 +4557,10 @@ async function lightTurnCheckpointTour(page, frame, faction, events, turn) {
     await snapshot(page, frame, faction, events, `light-turn-${turn}-map-not-ready`, { readiness });
     throw new Error(`Light checkpoint map did not render current-turn counters at turn ${turn}: ${JSON.stringify(readiness)}`);
   }
-  await snapshot(page, frame, faction, events, `light-turn-${turn}-map`, { counters: await counterInfo(frame) });
+  await snapshot(page, frame, faction, events, `light-turn-${turn}-map`, {
+    counters: await counterInfo(frame),
+    mapChromeGeometry: assertMapChromeGeometry(`light-turn-${turn}-map`, await readMapChromeGeometry(frame)),
+  });
 
   const openedCommandSurface = await openCommandSurfaceFromWarroom(frame, `light turn ${turn} command surface`);
   if (!openedCommandSurface || !await frame.locator('[data-testid="command-card-strip"]').isVisible()) {
@@ -4120,7 +4589,7 @@ async function fullFinalStateTour(page, frame, faction, events, turn) {
   assertNoPlayerBlockers(`before final-state tour turn ${turn}`, beforeState);
   const beforeStateHash = await readRawStateHash(frame);
   const beforeCommandAuthority = JSON.stringify(beforeState?.commandAuthority ?? null);
-  const autosavePath = path.join(repo, 'saves', 'autosave.json');
+  const autosavePath = canonicalAutosavePath;
   const beforeAutosaveHash = fileSha256(autosavePath);
   const baselineHashProof = assertStableProjectionAndAutosaveHashes(
     `Final-state tour turn ${turn} baseline`,
@@ -4283,7 +4752,7 @@ async function playTurns(page, frame, faction, events, targetTurn) {
   });
   const finalState = await readState(frame);
   const finalFormationAudit = await formationAudit(frame);
-  const autosavePath = path.join(repo, 'saves', 'autosave.json');
+  const autosavePath = canonicalAutosavePath;
   const endStateHash = await readRawStateHash(frame);
   const endAutosaveHash = fileSha256(autosavePath);
   const endBaselineStateHash = finalTourProof?.postSnapshotHashProof?.stateHash ?? endStateHash;
@@ -4365,7 +4834,17 @@ async function playTurns(page, frame, faction, events, targetTurn) {
   };
 }
 
-function classifyExpectedRequestAbort({ failure, method, url, resourceType, isMainFrame, eventCount, teardownStarted }) {
+function classifyExpectedRequestAbort({
+  failure,
+  method,
+  url,
+  resourceType,
+  isMainFrame,
+  eventCount,
+  teardownStarted,
+  observedAtMs,
+  mapNavigationWindow,
+}) {
   if (failure?.errorText !== 'net::ERR_ABORTED' || method !== 'GET') return null;
   let parsed;
   try {
@@ -4373,12 +4852,31 @@ function classifyExpectedRequestAbort({ failure, method, url, resourceType, isMa
   } catch {
     return null;
   }
-  const canceledHillshadeOnNavigation = !teardownStarted
+  const navigationAbortAllowlist = new Map([
+    ['/data/derived/tiles/hillshade.pmtiles', 'map-hillshade-navigation'],
+    ['/data/derived/tiles/osm.pmtiles', 'map-osm-navigation'],
+  ]);
+  const exactPackagedLocalNavigationWindow = mapNavigationWindow?.active === true
+    && typeof mapNavigationWindow.token === 'string'
+    && mapNavigationWindow.token.startsWith('map-navigation:')
+    && mapNavigationWindow.runtime === 'packaged-local'
+    && Number.isFinite(mapNavigationWindow.openedAtMs)
+    && Number.isFinite(mapNavigationWindow.expiresAtMs)
+    && Number.isFinite(observedAtMs)
+    && observedAtMs >= mapNavigationWindow.openedAtMs
+    && observedAtMs <= mapNavigationWindow.expiresAtMs
+    && parsed.protocol === 'http:'
+    && parsed.hostname === '127.0.0.1'
+    && parsed.origin === mapNavigationWindow.expectedOrigin
+    && parsed.search === ''
+    && parsed.hash === '';
+  const canceledMapSourceOnNavigation = !teardownStarted
     && eventCount > 0
     && !isMainFrame
     && resourceType === 'fetch'
-    && parsed.pathname === '/data/derived/tiles/hillshade.pmtiles';
-  if (canceledHillshadeOnNavigation) return 'map-hillshade-navigation';
+    && exactPackagedLocalNavigationWindow
+    && navigationAbortAllowlist.has(parsed.pathname);
+  if (canceledMapSourceOnNavigation) return navigationAbortAllowlist.get(parsed.pathname);
   if (resourceType !== 'document') return null;
   const embeddedWarroomDocument = parsed.origin === 'http://127.0.0.1:3002'
     && parsed.pathname === '/index.html'
@@ -4426,6 +4924,7 @@ function attachPageDiagnostics(page, diagnostics) {
   });
   page.on('requestfailed', (request) => {
     const failure = request.failure();
+    const observedAtMs = Date.now();
     const record = {
       kind: 'requestfailed',
       method: request.method(),
@@ -4435,6 +4934,8 @@ function attachPageDiagnostics(page, diagnostics) {
       failure,
       eventCount: diagnostics.events.length,
       teardownStarted: diagnostics.isTeardownStarted(),
+      observedAtMs,
+      mapNavigationWindow: diagnostics.getMapNavigationAbortWindow(observedAtMs),
     };
     const expectedAbort = classifyExpectedRequestAbort(record);
     if (expectedAbort === 'startup-embedded-warroom-document') {
@@ -4445,7 +4946,7 @@ function attachPageDiagnostics(page, diagnostics) {
       diagnostics.expectedTeardownAborts.push({ ...record, allowlist: expectedAbort });
       return;
     }
-    if (expectedAbort === 'map-hillshade-navigation') {
+    if (expectedAbort === 'map-hillshade-navigation' || expectedAbort === 'map-osm-navigation') {
       diagnostics.expectedNavigationAborts.push({ ...record, allowlist: expectedAbort });
       return;
     }
@@ -4460,7 +4961,11 @@ function attachPageDiagnostics(page, diagnostics) {
 
 async function runFaction(faction, result) {
   canonicalAutosavePersistenceAtResumeLoad = null;
+  activeMapNavigationAbortWindow = null;
   const userDataDir = path.join(userDataRoot, safeName(`${runSlug}-${faction}`));
+  canonicalAutosavePath = packagedExecutablePath
+    ? path.join(userDataDir, 'saves', 'autosave.json')
+    : developmentCanonicalAutosavePath;
   if (!resumeSavePath) fs.rmSync(userDataDir, { recursive: true, force: true });
   fs.mkdirSync(userDataDir, { recursive: true });
   const events = [];
@@ -4476,7 +4981,10 @@ async function runFaction(faction, result) {
   let teardownStarted = false;
   const app = await electron.launch({
     cwd: repo,
-    args: ['.', `--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`],
+    ...(packagedExecutablePath ? { executablePath: packagedExecutablePath } : {}),
+    args: packagedExecutablePath
+      ? [`--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`]
+      : ['.', `--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`],
     env: { ...process.env, ELECTRON_DISABLE_SECURITY_WARNINGS: 'true' },
     timeout: 90000,
   });
@@ -4499,6 +5007,7 @@ async function runFaction(faction, result) {
     expectedNavigationAborts,
     attachedPages,
     isTeardownStarted: () => teardownStarted,
+    getMapNavigationAbortWindow: getActiveMapNavigationAbortWindow,
   };
   const attachDiagnostics = (page) => attachPageDiagnostics(page, diagnostics);
   app.on('window', attachDiagnostics);

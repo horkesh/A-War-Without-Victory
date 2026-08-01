@@ -252,6 +252,71 @@ export function buildFormationCounterPixelOffsets(
     return result;
 }
 
+export function filterFinalFormationCounterFeatures(
+    features: Feature[],
+    pixelOffsets: ReadonlyMap<string, [number, number]>,
+    iconHeight: number,
+    clip: DeckViewportClip | null | undefined,
+): Feature[] {
+    if (!clip) return features;
+    const groupSafety = new Map<string, boolean>();
+    const rectOverlaps = (
+        left: { left: number; right: number; top: number; bottom: number },
+        right: { left: number; right: number; top: number; bottom: number },
+    ) => left.right > right.left
+        && left.left < right.right
+        && left.bottom > right.top
+        && left.top < right.bottom;
+
+    for (const feature of features) {
+        const id = String(feature.properties?.id ?? '');
+        const groupId = typeof feature.properties?.location_osid === 'string'
+            ? feature.properties.location_osid
+            : `formation:${id}`;
+        if (groupSafety.get(groupId) === false) continue;
+        const coordinates = getPointCoordinates(feature);
+        const point = coordinates ? clip.project(coordinates) : null;
+        if (!id || !point) {
+            groupSafety.set(groupId, false);
+            continue;
+        }
+        const offset = pixelOffsets.get(id) ?? getFormationStackPixelOffset(feature, iconHeight);
+        const centerX = point.x + offset[0];
+        const centerY = point.y + offset[1];
+        const footprint = {
+            left: centerX - iconHeight,
+            right: centerX + iconHeight,
+            top: centerY - iconHeight / 2,
+            bottom: centerY + iconHeight / 2,
+        };
+        const stackIndex = Number(feature.properties?.stack_index ?? 0);
+        const stackCount = Number(feature.properties?.stack_count ?? 1);
+        if (stackIndex === 0 && stackCount > 1) {
+            const badgeCenterX = centerX + Math.round(iconHeight * 0.72);
+            const badgeCenterY = centerY - Math.round(iconHeight * 0.42);
+            footprint.left = Math.min(footprint.left, badgeCenterX - 12);
+            footprint.right = Math.max(footprint.right, badgeCenterX + 12);
+            footprint.top = Math.min(footprint.top, badgeCenterY - 12);
+            footprint.bottom = Math.max(footprint.bottom, badgeCenterY + 12);
+        }
+        const insideSafeViewport = footprint.left >= clip.padding.left
+            && footprint.right <= clip.width - clip.padding.right
+            && footprint.top >= clip.padding.top
+            && footprint.bottom <= clip.height - clip.padding.bottom;
+        const clearOfOccluders = !(clip.occluders ?? []).some((occluder) => rectOverlaps(footprint, occluder));
+        if (!insideSafeViewport || !clearOfOccluders) groupSafety.set(groupId, false);
+        else if (!groupSafety.has(groupId)) groupSafety.set(groupId, true);
+    }
+
+    return features.filter((feature) => {
+        const id = String(feature.properties?.id ?? '');
+        const groupId = typeof feature.properties?.location_osid === 'string'
+            ? feature.properties.location_osid
+            : `formation:${id}`;
+        return groupSafety.get(groupId) === true;
+    });
+}
+
 export function getBaseFormationIconId(feature: any): string {
     return feature.properties.icon_id;
 }
@@ -311,8 +376,6 @@ export function buildTacticalDeckLayers(
         );
     }
 
-    if (!formationsVisible) return layers;
-
     let iconHeight = 40;
     if (zoom <= 6) iconHeight = 16;
     else if (zoom >= 14) iconHeight = 40;
@@ -324,21 +387,29 @@ export function buildTacticalDeckLayers(
 
     const iconHalfSize = getCounterFootprintHalfSize(iconHeight);
     const getBaseFormationPixelOffset = (feature: Feature) => getFormationStackPixelOffset(feature, iconHeight);
-    const visibleFormationFeatures = selectViewportFormationCounterFeatures(
-        formationsGeoJson.features,
-        viewportClip,
-        iconHalfSize,
-        getBaseFormationPixelOffset,
-    );
+    const visibleFormationFeatures = formationsVisible
+        ? selectViewportFormationCounterFeatures(
+            formationsGeoJson.features,
+            viewportClip,
+            iconHalfSize,
+            getBaseFormationPixelOffset,
+        )
+        : [];
     const formationPixelOffsets = buildFormationCounterPixelOffsets(visibleFormationFeatures, iconHeight, viewportClip);
+    const finalVisibleFormationFeatures = filterFinalFormationCounterFeatures(
+        visibleFormationFeatures,
+        formationPixelOffsets,
+        iconHeight,
+        viewportClip,
+    );
     const getFormationPixelOffset = (feature: Feature): [number, number] => (
         formationPixelOffsets.get(String(feature.properties?.id ?? ''))
         ?? getBaseFormationPixelOffset(feature)
     );
     const highlightedFeatures = highlightedFormationIds.length > 0
-        ? getHighlightedFeatures(visibleFormationFeatures, highlightedFormationIdSet)
+        ? getHighlightedFeatures(finalVisibleFormationFeatures, highlightedFormationIdSet)
         : [];
-    const stackBadgeFeatures = visibleFormationFeatures.filter((feature) => (
+    const stackBadgeFeatures = finalVisibleFormationFeatures.filter((feature) => (
         feature.properties?.is_stack_top === true
         && typeof feature.properties?.stack_count === 'number'
         && feature.properties.stack_count > 1
@@ -354,7 +425,7 @@ export function buildTacticalDeckLayers(
     layers.push(
         new IconLayer({
             id: 'deck-formations-icons',
-            data: visibleFormationFeatures,
+            data: finalVisibleFormationFeatures,
             getIcon: (d: any) => ({
                 url: getIconDataUrl(getBaseFormationIconId(d)),
                 width: 160,
@@ -376,31 +447,33 @@ export function buildTacticalDeckLayers(
         }),
     );
 
-    if (highlightedFeatures.length > 0) {
-        layers.push(
-            new IconLayer({
-                id: 'deck-formations-highlighted',
-                data: highlightedFeatures,
-                getIcon: (d: any) => ({
-                    url: getIconDataUrl(getHighlightedFormationIconId(d)),
-                    width: 160,
-                    height: 80,
-                }),
-                getPosition: (d: any) => d.geometry.coordinates,
-                getPixelOffset: getFormationPixelOffset,
-                getSize: iconHeight + 2,
-                sizeUnits: 'pixels',
-                sizeScale: 1,
-                pickable: false,
-                parameters: { depthTest: false, depthMask: false, depthWriteEnabled: false, depthCompare: 'always' },
-                updateTriggers: {
-                    getSize: zoom,
-                    getIcon: highlightedFormationKey,
-                    getPixelOffset: viewportClip,
-                }
+    // Keep both auto-packed IconLayer owners mounted for the life of the retained
+    // Deck overlay. IconManager does not cancel pending image loads when a layer
+    // finalizes; removing the transient highlight layer can therefore let a late
+    // upload target its deleted atlas texture during dossier -> map -> dossier.
+    layers.push(
+        new IconLayer({
+            id: 'deck-formations-highlighted',
+            data: highlightedFeatures,
+            getIcon: (d: any) => ({
+                url: getIconDataUrl(getHighlightedFormationIconId(d)),
+                width: 160,
+                height: 80,
             }),
-        );
-    }
+            getPosition: (d: any) => d.geometry.coordinates,
+            getPixelOffset: getFormationPixelOffset,
+            getSize: iconHeight + 2,
+            sizeUnits: 'pixels',
+            sizeScale: 1,
+            pickable: false,
+            parameters: { depthTest: false, depthMask: false, depthWriteEnabled: false, depthCompare: 'always' },
+            updateTriggers: {
+                getSize: zoom,
+                getIcon: highlightedFormationKey,
+                getPixelOffset: viewportClip,
+            }
+        }),
+    );
 
     if (stackBadgeFeatures.length > 0) {
         layers.push(

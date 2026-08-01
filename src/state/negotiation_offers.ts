@@ -1,4 +1,4 @@
-import { buildAdjacencyMap } from '../map/adjacency_map.js';
+import { buildAdjacencyMapCached } from '../map/adjacency_map.js';
 import type { FrontEdge } from '../map/front_edges.js';
 import type { FrontRegionsFile } from '../map/front_regions.js';
 import { computeFrontRegions } from '../map/front_regions.js';
@@ -479,7 +479,7 @@ export function checkOfferAcceptance(
     }
 
     // 3) Supply sanity check
-    const adjacencyMap = buildAdjacencyMap(settlementEdges);
+    const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
     const supplyReport = computeSupplyReachability(state, adjacencyMap);
     const topPressuredFactions = [...state.factions]
         .map((f) => ({ id: f.id, pressure: f.negotiation?.pressure ?? 0 }))

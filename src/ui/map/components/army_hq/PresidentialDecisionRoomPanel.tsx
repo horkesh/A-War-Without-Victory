@@ -23,6 +23,7 @@ import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presid
 import { t } from '../../i18n';
 import { DirectiveCard, type DirectiveReceipt } from './DirectiveCard';
 import type { LoadedGameState } from '../../data/types';
+import type { FieldOperationPlanTarget } from '../../utils/fieldInspectionTarget';
 
 function severityClass(severity: PresidentialDecisionRoomSeverity): string {
   if (severity === 'blocking') return 'border-red-400/45 bg-red-500/10 text-red-300';
@@ -224,6 +225,7 @@ function OperationsAuthorizationPacket({
   onSelectCard,
   navigateTarget,
   onDirectiveReceipt,
+  onInspectFieldPlan,
 }: {
   cards: PresidentialDecisionRoomCard[];
   selectedDossierCardId: string | null;
@@ -231,6 +233,7 @@ function OperationsAuthorizationPacket({
   onSelectCard: (cardId: string) => void;
   navigateTarget: DecisionRoomNavigateTarget;
   onDirectiveReceipt: (receipt: DirectiveReceipt) => void;
+  onInspectFieldPlan?: (target: FieldOperationPlanTarget, dossierCardId: string) => void;
 }) {
   const ipc = useIPC();
   const [authorizing, setAuthorizing] = useState(false);
@@ -325,6 +328,7 @@ function PriorityDossier({
   gameState,
   navigateTarget,
   onDirectiveReceipt,
+  onInspectFieldPlan,
 }: {
   dossier: PresidentialDecisionRoomDossier | null;
   cardsById: Map<string, PresidentialDecisionRoomCard>;
@@ -332,6 +336,7 @@ function PriorityDossier({
   gameState: LoadedGameState | null;
   navigateTarget: DecisionRoomNavigateTarget;
   onDirectiveReceipt: (receipt: DirectiveReceipt) => void;
+  onInspectFieldPlan?: (target: FieldOperationPlanTarget, dossierCardId: string) => void;
 }) {
   if (!dossier) {
     return (
@@ -437,15 +442,25 @@ function PriorityDossier({
 
       <div
         data-decision-room-dossier-actions="true"
-        className="mt-2 border-t border-panel-border/60 pt-2"
+        className="mt-2 grid gap-1.5 border-t border-panel-border/60 pt-2 sm:grid-cols-2"
       >
+        {dossier.fieldInspectionTarget && onInspectFieldPlan && (
+          <button
+            type="button"
+            data-testid="decision-room-dossier-show-on-map"
+            onClick={() => onInspectFieldPlan(dossier.fieldInspectionTarget!, dossier.cardId)}
+            className="h-8 w-full truncate rounded border border-sky-400/35 bg-sky-400/10 px-2 text-xs font-bold uppercase tracking-[0.08em] text-sky-200 transition hover:bg-sky-400/20"
+          >
+            {t('decisionRoom.action.showOnMap')}
+          </button>
+        )}
         <button
           type="button"
           data-testid="decision-room-dossier-review"
           data-navigation-kind={reviewTarget.kind}
           disabled={reviewDisabled}
           onClick={() => navigateTarget(reviewTarget)}
-          className="h-8 w-full truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-xs font-bold uppercase tracking-[0.08em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+          className="min-h-8 w-full whitespace-normal rounded border border-amber-400/35 bg-amber-400/12 px-2 py-1 text-xs font-bold uppercase leading-tight tracking-[0.04em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
         >
           {effectiveReviewActionLabel}
         </button>
@@ -456,9 +471,10 @@ function PriorityDossier({
 
 export interface PresidentialDecisionRoomPanelProps {
   onNavigateTarget?: DecisionRoomNavigateTarget;
+  onInspectFieldPlan?: (target: FieldOperationPlanTarget, dossierCardId: string) => void;
 }
 
-export function PresidentialDecisionRoomPanel({ onNavigateTarget }: PresidentialDecisionRoomPanelProps = {}) {
+export function PresidentialDecisionRoomPanel({ onNavigateTarget, onInspectFieldPlan }: PresidentialDecisionRoomPanelProps = {}) {
   const state = useGameStore((s) => s.loadedGameState);
   const osidNameMap = useGameStore((s) => s.osidDisplayNames);
   const [activeLens, setActiveLens] = useState<ActiveDecisionRoomLens>('all');
@@ -683,6 +699,7 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
               gameState={state}
               navigateTarget={navigateTarget}
               onDirectiveReceipt={setActionReceipt}
+              onInspectFieldPlan={onInspectFieldPlan}
             />
           </div>
         </aside>

@@ -21,7 +21,7 @@
 
 1. Optional-state work ends when every field is classified as required-persisted, optional-persisted, derived/transient, compatibility-only, or dead. It is not an endless field-by-field lane.
 2. A field becomes required only with a materialized runtime default, migration, validator rejection tests, and round-trip proof.
-3. Derived sector/front/combat caches remain outside saves.
+3. The five disposable military caches remain outside saves; `corps_front_sectors` plus formation sector/sub-segment assignments are the explicit materialized standing-OG persistence exception.
 4. Performance selection is profile-driven. No speculative cache or mutable collection may cross a deterministic boundary.
 5. The historical target remains a mean below 100 ms per simulated turn on the recorded reference machine. Progress is also accepted only when full-run and local-owner timings move in the same direction.
 6. Every generated file is exactly one of: committed static input, committed golden output, retained research evidence, untracked diagnostic, or transient package output.
@@ -74,10 +74,10 @@ Before each phase, capture `git status --short`, current scenario hashes, and th
 - Create `tests/game_state_field_classification.test.ts`
 - Create `tests/generated_artifact_inventory.test.ts`
 
-- [ ] Emit every `GameState`/`MilitaryState` field with declared type, initializer, validator, migration, serializer, and known readers.
-- [ ] Emit every known scenario/replay/baseline/diagnostic/package artifact with owner and tracked/transient policy.
-- [ ] Fail on unclassified fields and unowned writes.
-- [ ] Sort output with stable ASCII comparison and omit absolute paths/timestamps.
+- [x] Emit every `GameState`/`MilitaryState` field with declared type, initializer, validator, migration, serializer, and known readers.
+- [x] Emit every known scenario/replay/baseline/diagnostic/package artifact with owner and tracked/transient policy.
+- [x] Fail on unclassified fields and unowned writes.
+- [x] Sort output with stable ASCII comparison and omit absolute paths/timestamps.
 
 ### Task 0.2 -- Capture fresh performance owners
 
@@ -86,9 +86,11 @@ Before each phase, capture `git status --short`, current scenario hashes, and th
 - Modify only instrumentation under `tools/perf/` if current output lacks owner attribution
 - Create `tests/performance_wall_clock_report.test.ts`
 
-- [ ] Run one warmup and three measured 40-turn runs on the recorded machine.
-- [ ] Capture total/turn mean, P50, P95, V8 inclusive owners, sector subowners, graph load, combat, bot orders, serialization, and peak heap.
-- [ ] Prove profiling flags do not change scenario bytes.
+- [x] Run one warmup and three measured 40-turn runs on the recorded machine.
+- [x] Capture total/turn mean, P50, P95, V8 inclusive owners, sector subowners, graph load, combat, bot orders, serialization, and peak heap.
+- [x] Prove profiling flags do not change scenario bytes.
+
+Phase 0 evidence (local reference machine, 2026-08-01): 1,562.923 ms/turn mean, 1,563.681 ms/turn P50, 1,567.255 ms/turn P95, 340.317 MB phase-boundary sampled heap, and identical 5,108,970-byte final saves with SHA-256 `f72a459e7548d70b4e823c35dd8f1c4b3d61bd21441ed5d40f68e545017a9746` across warmup, measured, sector/phase-profiled, and V8-profiled modes. The aggregate CLI calculates SHA-256 and size directly from six explicit final-save paths. The field gate covers 135 explicit classifications and exposes six derived/transient serializer-policy mismatches for Phase 1 closeout; the artifact gate covers 31 policies and 58 producer calls (45 repo-owned, 13 external/caller-selected, 0 unowned). Transient evidence lives under `runs_perf/r5_phase0_*` and `data/derived/_debug/r5_phase0_*`; it remains untracked by policy.
 
 ```powershell
 npm.cmd run perf:wall-clock:report
@@ -115,10 +117,10 @@ npm.cmd run typecheck
 - Modify `tests/game_state_field_classification.test.ts`
 - Modify `tests/validate_game_state_shape.test.ts`
 
-- [ ] Record one classification for every field still reported by Phase 0.
-- [ ] Keep caches and UI read models derived/transient.
-- [ ] Mark compatibility-only fields with the supported legacy-save boundary.
-- [ ] Delete a field only after proving zero supported reader/writer and no fixture dependency.
+- [x] Record one classification for every field still reported by Phase 0.
+- [x] Keep caches and UI read models derived/transient.
+- [x] Mark compatibility-only fields with the supported legacy-save boundary.
+- [x] Delete a field only after proving zero supported reader/writer and no fixture dependency.
 
 ### Task 1.2 -- Promote required-persisted families coherently
 
@@ -132,15 +134,19 @@ npm.cmd run typecheck
 - Modify `tests/save_migration_round_trip_contract.test.ts`
 - Modify `tests/save_migration_validator_rejection.test.ts`
 
-- [ ] Group fields by lifecycle/owner rather than one-field schema churn.
-- [ ] Materialize deterministic defaults for legacy saves.
-- [ ] Reject missing/malformed current-version payloads.
-- [ ] Preserve array order and map key ordering.
-- [ ] Rebuild startup snapshot only through its canonical command.
+- [x] Group fields by lifecycle/owner rather than one-field schema churn.
+- [x] Materialize deterministic defaults for legacy saves.
+- [x] Reject missing/malformed current-version payloads.
+- [x] Preserve array order and map key ordering.
+- [x] Rebuild startup snapshot only through its canonical command.
+
+Phase 1 evidence (local reference machine, 2026-08-01): schema v37 requires `sector_intel` and `corps_front_sectors`. `sector_intel` is persisted cross-turn belief memory; `corps_front_sectors` plus formation sector/sub-segment assignments are persisted as the materialized current-turn standing-OG/AoR snapshot because cold reconstruction can relocate brigades and is not observationally pure. Canonical saves exclude exactly five disposable military caches while Electron retains a separate runtime IPC snapshot; autosave rollback restores both. The field inventory reports zero serializer-policy mismatches, migration drift reports zero anonymous defaults, startup truth has zero release-gate findings including reserve-only gaps, and disk load preserves canonical bytes, CFS, assignments, command queries, and player-visible projection exactly. Two distinct seeds passed uninterrupted-versus-resumed 52-week final-save and replay-tail byte equivalence. All three baseline scenarios retained byte-identical activity, control, end-report, formation, watched-operation, and weekly-report artifacts; only the schema-shaped final save and its embedded run-summary hash were refreshed through the canonical baseline owner.
 
 ```powershell
 npm.cmd run test:vitest -- tests/game_state_field_classification.test.ts tests/validate_game_state_shape.test.ts tests/save_migration.test.ts tests/save_migration_round_trip_contract.test.ts tests/save_migration_validator_rejection.test.ts tests/save_migration_drift_audit.test.ts --pool=forks --reporter=dot
+npm.cmd run test:vitest -- tests/serialize_gamestate_no_derived_fields.test.ts tests/desktop_persistence_contract.test.ts tests/desktop_persisted_sector_continuity.test.ts tests/scenario_continue_from_save_equivalence.test.ts tests/startup_snapshot_contract.test.ts --pool=forks --reporter=dot
 npm.cmd run desktop:startup-snapshot:check
+npm.cmd run qa:electron-runtime-contracts
 npm.cmd run typecheck
 npm.cmd run test:baselines
 ```
@@ -165,20 +171,23 @@ npm.cmd run test:baselines
 
 For each candidate:
 
-- [ ] Write an equivalence test or existing-output assertion first.
-- [ ] Measure candidate-local cost before editing.
-- [ ] Implement one bounded reuse/index/algorithm change.
-- [ ] Prove no mutable `Map`/`Set` or insertion order leaks into state/output.
-- [ ] Run the local profile and full timed 40-turn run.
-- [ ] Keep the change only when both measurements improve and output remains byte-identical.
+- [x] Write an equivalence test or existing-output assertion first for operational-graph and immutable-adjacency reuse.
+- [x] Measure candidate-local cost before editing.
+- [x] Implement one bounded reuse/index/algorithm change at a time.
+- [x] Prove no mutable `Map`/`Set` or insertion order leaks into state/output; mutable edge arrays explicitly bypass the identity cache.
+- [x] Re-run the local profile, one excluded warmup, and three full timed 40-turn runs after adjacency runtime-eligibility hardening; operational-graph reuse is also replicated.
+- [x] Keep adjacency reuse only when the post-hardening local owner and replicated full-run envelope improve and all outputs remain byte-identical.
+- [x] Reuse caller-owned operational mappings/edges/centroids without rebuilding the reverse map, while retaining granular fallback promises so one optional resource failure cannot suppress an independent mapping-only phase.
 - [ ] Revert performance-inconclusive or regressing candidates before the next candidate.
 
 ### Task 2.2 -- Repeat by current profile, not the old list
 
-- [ ] Reprofile after every accepted optimization.
+- [x] Reprofile the hardened adjacency candidate before final acceptance; the operational-graph candidate is complete.
 - [ ] Continue until the recorded-machine mean is below 100 ms/turn.
 - [ ] If the remaining owner requires an algorithmic redesign, write failing equivalence/property tests and implement the redesign inside this phase; do not create a new roadmap gate.
-- [ ] Record P50/P95, heap, hashes, and before/after owner shares for every accepted commit.
+- [x] Replace the provisional adjacency row in `docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md` with the real post-hardening P50/P95, heap, hashes, exact byte SHA, and owner shares before acceptance.
+
+Phase 2 checkpoint evidence (local reference machine, 2026-08-01): operational-graph reuse reduced the replicated mean from 1,562.923 to 1,292.665 ms/turn (P50 1,289.839; P95 1,302.636) and `loadSettlementGraph` inclusive time by 88.0%. Runtime-hardened adjacency reuse then reduced `buildAdjacencyMap` self time from 2,764.472 to 90.059 ms (96.7%) and reduced the replicated mean to 1,201.897 ms/turn. Caller-owned operational-data reuse reduced the authoritative corrected-candidate mean a further 0.993% to 1,189.962 ms/turn (P50 1,187.475; P95 1,195.055); same-process V8 reduced `loadOperationalData` from 905.793 ms self / 1,390.831 ms inclusive to 7.755 / 15.554 ms and `buildReverseMap` from 466.977 / 472.217 ms to 7.799 / 7.799 ms. The corrected excluded warmup, application V8, and all three measured modes were exactly 5,071,275 bytes with SHA-256 `52ee1829aab62e5ede80ca461b0ec6cc1d5ecc8ac2e0700a36ea7229d6050bde` and final state hash `52ee1829aab62e5e`. The target remains open at 11.8996x; `buildCorpsFrontSectors` at 15,599.493 ms inclusive is the next measured owner.
 
 ```powershell
 npm.cmd run test:vitest -- tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/final_sector_truth_reconciliation.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/brigade_front_distribution.test.ts tests/performance_wall_clock_report.test.ts --pool=forks --reporter=dot

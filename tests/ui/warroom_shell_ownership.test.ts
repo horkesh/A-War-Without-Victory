@@ -13,7 +13,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
     it('does not mount tactical chrome while the Warroom shell owns the screen', () => {
         const app = read('src/ui/map/App.tsx');
 
-        expect(app).toContain("{appScreen === 'game' && <MapModeLegend />}");
+        expect(app).toContain("{appScreen === 'game' && shouldRenderMapModeLegend(railState.panel) && <MapModeLegend />}");
         expect(app).toMatch(/<CampaignTacticalViewportOwner[\s\S]*active=\{appScreen === 'game'\}[\s\S]*onInteractionReadyChange=\{setTacticalMapReadiness\}/);
         expect(app).toMatch(/loadedGameState !== null && appScreen !== 'mainMenu'/);
         expect(app).toContain("{appScreen === 'game' && (");
@@ -221,7 +221,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(hostEnd).toBeGreaterThan(hostStart);
 
         const host = app.slice(hostStart, hostEnd);
-        expect(host).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
+        expect(host).toMatch(/<PresidentialDecisionRoomPanel[\s\S]*onNavigateTarget=\{reviewPreAdvanceTarget\}[\s\S]*onInspectFieldPlan=\{inspectFieldOperationPlanFromDossier\}[\s\S]*\/>/);
         expect(host).not.toContain('<PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />');
     });
 

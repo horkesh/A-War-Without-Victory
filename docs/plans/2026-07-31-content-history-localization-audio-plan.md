@@ -9,7 +9,7 @@
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** READY -- content remediation may start after R4 event inventory; UI localization/audio starts after R1/R2 UI convergence
+**Status:** IN PROGRESS -- officer/OOB and audio inventories accepted; historical-claim and localization inventories remain
 **Roadmap workstream:** R7
 **Canonical owner:** authored JSON plus source/license manifests; `src/ui/map/i18n/` for locale; `src/ui/map/audio/` for playback
 **Collision rule:** Do not edit the same event/essay as R4. Do not edit map/Desk layout until R1/R2 finish.
@@ -120,10 +120,18 @@ Rules:
 - Create `tests/localization_coverage.test.ts`
 - Create `tests/audio_asset_provenance.test.ts`
 
-- [ ] Identity report: id, display name, faction, formation/corps ref, source, confidence, duplicate/conflict.
+- [x] Identity report: id, display name, faction, formation/corps ref, source, confidence, duplicate/conflict.
 - [ ] Locale report: every player-facing key, `en`/`bs` coverage, fallback use, concatenation, embedded English, and layout-risk length.
-- [ ] Audio report: cue id, file, SHA-256, duration, loudness, source URL, author, license, attribution, and sensitive-content class.
-- [ ] Stable ordering; no timestamps/absolute paths.
+- [x] Audio report: cue id, file, SHA-256, duration, loudness, source URL, author, license, attribution, and sensitive-content class.
+- [x] Stable ordering; no timestamps/absolute paths for the accepted identity/audio packet.
+
+### Phase 0 partial execution evidence -- 2026-08-01
+
+- [Officer/OOB and audio inventory report](../40_reports/audits/20260801_R7_OFFICER_AUDIO_PROVENANCE_INVENTORY.md).
+- Officer/OOB: 374/374 rows keyed, 0 supported, 2,286 blocking findings, 12 normalized-name collisions. Positive support must be owned per row and cannot be inherited from manifest defaults.
+- Audio: 36/36 cues keyed, 17 provided, 19 placeholders, 0 unregistered binaries, 54 blocking findings, 5 warnings, and three required ambient beds absent. Registry/bundle resolution and recursive binary ownership are fail-closed; `OggS` remains a container-signature precheck rather than decode/LUFS proof.
+- Verification: focused 5 files / 22 tests; parent integration 2 files / 11 tests; TypeScript, canon/determinism/baseline, EOL, and diff checks green.
+- Phase 0 is not complete until Task 0.1 and the localization portion of Task 0.2 are accepted.
 
 ```powershell
 npm.cmd run test:vitest -- tests/codex_sensitive_claim_inventory.test.ts tests/codex_sensitive_history_source_notes.test.ts tests/officer_oob_provenance.test.ts tests/localization_coverage.test.ts tests/audio_asset_provenance.test.ts --pool=forks --reporter=dot

@@ -1,3 +1,5 @@
+import type { FieldOperationFocusController } from './fieldOperationFocusController.js';
+
 interface CanvasSize {
   clientWidth: number;
   clientHeight: number;
@@ -39,6 +41,8 @@ export interface TacticalMapGraphicsController {
   triggerRepaint(): void;
   onceRender(listener: () => void): () => void;
   stop(): void;
+  /** Main-map-only transaction owner; the minimap intentionally omits it. */
+  fieldOperationFocus?: FieldOperationFocusController;
 }
 
 export interface TacticalMapRenderedRevision {

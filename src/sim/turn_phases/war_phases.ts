@@ -31,13 +31,12 @@ import { applyGuerrillaAttrition } from '../combat/guerrilla_attrition.js';
 import { cleanupExpiredEventModifiers } from '../events/active_modifiers.js';
 import { attributeOperationCasualties } from '../combat/operation_casualty_attribution.js';
 import { recordOperationWeeklyEntries } from '../combat/operation_aar.js';
-import { buildAdjacencyMap } from '../../map/adjacency_map.js';
+import { buildAdjacencyMapCached } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
 import { applyCommandAuthorityRecovery, computeCommandAuthorityRecovery } from '../../shared/commandAuthorityEconomy.js';
-import { loadSettlementGraph } from '../../map/settlements.js';
 import { loadTerrainScalars } from '../../map/terrain_scalars_node.js';
-import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
+import { backfillFormationLocationOsid, computeOsidPopulation } from '../../data/operational_data.js';
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { buildSidToMunFromSettlements } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
@@ -223,7 +222,9 @@ import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types
 import { setPoliticalControlSnapshot, setAllianceAtTurnStart, getAllianceAtTurnStart } from '../turn_pipeline_types.js';
 import {
     getOperationalData,
-    setOperationalData,
+    getOrLoadOperationalData,
+    getOrLoadOperationalMapping,
+    getOperationalSettlementGraph,
     getGraphAndEdges,
     getSiegeStateCache,
     setSiegeStateCache,
@@ -1014,9 +1015,8 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             try {
-                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-                const opData = await loadOperationalData(baseDir || undefined);
-                if (opData?.operationalToCanonical)
+                const opData = await getOrLoadOperationalMapping(context);
+                if (opData.operationalToCanonical)
                     migratePoliticalControllersToOsidIfNeeded(context.state, opData.operationalToCanonical);
             } catch {
                 // Operational data optional; skip migration when unavailable
@@ -1151,11 +1151,11 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             const edges = context.input.settlementEdges;
             if (!edges) return;
-            const adjacencyMap = buildAdjacencyMap(edges);
+            const adjacencyMap = buildAdjacencyMapCached(edges);
             const supplyReport = computeSupplyReachability(context.state, adjacencyMap);
             const corridorReport = deriveCorridors(context.state, adjacencyMap, supplyReport);
             const supplyStateReport = deriveSupplyState(context.state, adjacencyMap, supplyReport, corridorReport);
-            const graph = await loadSettlementGraph();
+            const graph = await getOperationalSettlementGraph(context);
             const localProductionReport = deriveLocalProductionCapacity(context.state, supplyReport, graph.settlements);
             ensureProductionFacilities(context.state);
             const productionBonusByFaction = calculateFactionProductionBonus(context.state, graph.settlements);
@@ -1221,7 +1221,7 @@ export const warPhases: NamedPhase[] = [
         name: 'formation-hq-relocation',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            const graph = context.input.settlementGraph ?? (await getOperationalSettlementGraph(context));
             const report = runFormationHqRelocation(context.state, graph.settlements, graph.edges);
             if (report.relocated > 0) {
                 context.report.formation_hq_relocation = report;
@@ -1233,9 +1233,8 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             try {
-                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-                const opData = await loadOperationalData(baseDir || undefined);
-                if (opData?.canonicalToOperational)
+                const opData = await getOrLoadOperationalMapping(context);
+                if (opData.canonicalToOperational)
                     backfillFormationLocationOsid(context.state, opData.canonicalToOperational);
             } catch {
                 // Operational data optional; skip backfill when unavailable
@@ -1278,14 +1277,8 @@ export const warPhases: NamedPhase[] = [
         name: 'load-operational-data',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
             try {
-                const [opData, edges, centroids] = await Promise.all([
-                    loadOperationalData(baseDir || undefined),
-                    loadOperationalEdges(baseDir || undefined),
-                    loadOperationalCentroids(baseDir || undefined)
-                ]);
-                setOperationalData(context, { opData, edges, centroids });
+                await getOrLoadOperationalData(context);
             } catch (err) {
                 if (typeof console !== 'undefined' && console.warn) {
                     console.warn('load-operational-data: operational data not available, skipping OSID steps:', err instanceof Error ? err.message : String(err));
@@ -2342,7 +2335,7 @@ export const warPhases: NamedPhase[] = [
             // Ensure corps_command is initialized (handles brigades created by per-turn recruitment)
             initializeCorpsCommand(context.state);
             if (!context.state.military.corps_command || Object.keys(context.state.military.corps_command).length === 0) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            const graph = context.input.settlementGraph ?? (await getOperationalSettlementGraph(context));
             const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
                 ? context.input.settlementEdges
                 : graph.edges;
@@ -2396,7 +2389,7 @@ export const warPhases: NamedPhase[] = [
             const playerFaction = context.state.meta.player_faction;
             if (!playerFaction) return;
             if (context.state.meta.autonomy_level !== 1) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            const graph = context.input.settlementGraph ?? (await getOperationalSettlementGraph(context));
             const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
                 ? context.input.settlementEdges
                 : graph.edges;
@@ -2879,7 +2872,7 @@ export const warPhases: NamedPhase[] = [
                 }
                 return;
             }
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            const graph = context.input.settlementGraph ?? (await getOperationalSettlementGraph(context));
             const edges = context.input.settlementEdges ?? graph.edges;
 
             const settlementToMun = new Map<string, string>();
@@ -3128,7 +3121,7 @@ export const warPhases: NamedPhase[] = [
         name: 'hostile-takeover-displacement',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            const graph = context.input.settlementGraph ?? (await getOperationalSettlementGraph(context));
 
             // Build combined battle report from both old settlement-based and OSID-based attack resolution.
             // The displacement system needs settlement-level records; we synthesize them from OSID flips
@@ -3164,7 +3157,7 @@ export const warPhases: NamedPhase[] = [
             // Load operational settlements (OSID-keyed) for per-OSID census data
             let osidSettlements: Map<string, import('../../map/settlements_parse.js').SettlementRecord> | undefined;
             try {
-                const opGraph = await loadSettlementGraph();
+                const opGraph = await getOperationalSettlementGraph(context);
                 // Check if it's OSID-keyed (keys start with 'op:') — if so, use it
                 const firstKey = opGraph.settlements.keys().next().value;
                 if (typeof firstKey === 'string' && firstKey.startsWith('op:')) {
@@ -3263,7 +3256,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             if (!context.state.military.recruitment_state) return;
 
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            const graph = context.input.settlementGraph ?? (await getOperationalSettlementGraph(context));
             const accrualReport = accrueRecruitmentResources(
                 context.state,
                 graph.settlements,
@@ -3332,7 +3325,7 @@ export const warPhases: NamedPhase[] = [
         name: 'ongoing-mobilization',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            const graph = context.input.settlementGraph ?? (await getOperationalSettlementGraph(context));
             context.report.ongoing_mobilization = runOngoingMobilization(
                 context.state,
                 graph.settlements,
@@ -3378,11 +3371,8 @@ export const warPhases: NamedPhase[] = [
                 : (directive.kind ?? 'brigade');
             let canonicalToOperational: import('../../data/operational_data.js').CanonicalToOperationalMap | undefined;
             try {
-                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-                if (baseDir) {
-                    const opData = await loadOperationalData(baseDir);
-                    canonicalToOperational = opData.canonicalToOperational;
-                }
+                const opData = await getOrLoadOperationalMapping(context);
+                canonicalToOperational = opData.canonicalToOperational;
             } catch {
                 // Keep formation spawn deterministic if optional operational data is unavailable.
             }
@@ -3630,7 +3620,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
-                const graph = await loadSettlementGraph();
+                const graph = await getOperationalSettlementGraph(context);
                 edges = graph.edges;
             }
             if (!edges || edges.length === 0) return;
@@ -3644,7 +3634,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
-                const graph = await loadSettlementGraph();
+                const graph = await getOperationalSettlementGraph(context);
                 edges = graph.edges;
             }
             if (!edges || edges.length === 0) return;
@@ -3664,11 +3654,11 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
-                const graph = await loadSettlementGraph();
+                const graph = await getOperationalSettlementGraph(context);
                 edges = graph.edges;
             }
             if (!edges || edges.length === 0) return;
-            const graph = await loadSettlementGraph();
+            const graph = await getOperationalSettlementGraph(context);
             const od = getOperationalData(context);
             const c2o = od?.opData?.canonicalToOperational;
             const { deltas, report: triggerReport } = evaluateDisplacementTriggers(context.state, edges, c2o);
@@ -3710,11 +3700,11 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             let edges = context.input.settlementEdges;
             if (!edges || edges.length === 0) {
-                const graph = await loadSettlementGraph();
+                const graph = await getOperationalSettlementGraph(context);
                 edges = graph.edges;
             }
             if (!edges || edges.length === 0) return;
-            const graph = await loadSettlementGraph();
+            const graph = await getOperationalSettlementGraph(context);
             const report = updateEnclaveIntegrity(
                 context.state,
                 graph,
@@ -3786,7 +3776,7 @@ export const warPhases: NamedPhase[] = [
         name: 'update-legitimacy',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const graph = await loadSettlementGraph();
+            const graph = await getOperationalSettlementGraph(context);
             await updateLegitimacyState(context.state, graph);
             context.report.legitimacy_update = { settlements: Object.keys(context.state.political.settlements ?? {}).length };
         }
@@ -3894,7 +3884,7 @@ export const warPhases: NamedPhase[] = [
             const edges = context.input.settlementEdges;
             if (!edges) return;
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
-            const adjacencyMap = buildAdjacencyMap(edges);
+            const adjacencyMap = buildAdjacencyMapCached(edges);
             const effectivePosture = (context as TurnContext & WarPhaseContextExtensions).effectivePosture;
             context.report.front_pressure = accumulateFrontPressure(context.state, derivedFrontEdges, adjacencyMap, effectivePosture);
         }
@@ -4044,7 +4034,7 @@ export const warPhases: NamedPhase[] = [
             }
 
             // Load settlement graph to get settlements map
-            const graph = await loadSettlementGraph();
+            const graph = await getOperationalSettlementGraph(context);
             context.report.militia_fatigue = updateMilitiaFatigue(context.state, graph.settlements, edges, exhaustionDeltas);
         }
     },
@@ -4055,7 +4045,7 @@ export const warPhases: NamedPhase[] = [
             if (!edges) return;
 
             // Load settlement graph to get settlements map
-            const graph = await loadSettlementGraph();
+            const graph = await getOperationalSettlementGraph(context);
             context.report.displacement = updateDisplacement(
                 context.state,
                 graph.settlements,
@@ -4071,7 +4061,7 @@ export const warPhases: NamedPhase[] = [
             if (!edges) return;
 
             // Load settlement graph to get settlements map
-            const graph = await loadSettlementGraph();
+            const graph = await getOperationalSettlementGraph(context);
             context.report.sustainability = updateSustainability(context.state, graph.settlements, edges);
         }
     },

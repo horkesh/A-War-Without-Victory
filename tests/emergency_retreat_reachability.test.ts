@@ -57,6 +57,8 @@ function buildLinearTopology(): {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
         },
         displacement: {
             displacement_state: {},

@@ -18,7 +18,9 @@ async function ensureRemoved(dir: string): Promise<void> {
 }
 
 describe('scenario continue-from-save equivalence', () => {
-  it('matches uninterrupted final state when resuming from a canonical weekly save', async () => {
+  it.each(['split-proof-alpha', 'split-proof-bravo'])(
+    'matches uninterrupted 52-week final state when resuming from a canonical weekly save with seed %s',
+    async (seedOverride) => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });
     if (!prereq.ok) {
       return;
@@ -35,6 +37,8 @@ describe('scenario continue-from-save equivalence', () => {
       const fullRun = await runScenario({
         scenarioPath: SCENARIO_PATH,
         outDirBase: FULL_OUT,
+        weeksOverride: 52,
+        seedOverride,
         consoleDiagnostics: false,
         replayPayloadMode: 'full',
       });
@@ -42,7 +46,9 @@ describe('scenario continue-from-save equivalence', () => {
       const segmentedRun = await runScenario({
         scenarioPath: SCENARIO_PATH,
         outDirBase: SPLIT_OUT,
-        emitEvery: 4,
+        emitEvery: 17,
+        weeksOverride: 52,
+        seedOverride,
         consoleDiagnostics: false,
         replayPayloadMode: 'full',
       });
@@ -54,6 +60,8 @@ describe('scenario continue-from-save equivalence', () => {
         scenarioPath: SCENARIO_PATH,
         outDirBase: RESUME_OUT,
         resumeFromSavePath: resumeSave!,
+        weeksOverride: 52,
+        seedOverride,
         consoleDiagnostics: false,
         replayPayloadMode: 'full',
       });
@@ -102,7 +110,9 @@ describe('scenario continue-from-save equivalence', () => {
       await ensureRemoved(SPLIT_OUT);
       await ensureRemoved(RESUME_OUT);
     }
-  }, 60_000);
+    },
+    900_000,
+  );
 
   it('rejects an explicit resume week that disagrees with the save turn', async () => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });

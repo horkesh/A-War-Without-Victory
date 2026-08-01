@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer } from '../map/MapContainer';
 import {
   isTacticalMapStateReady,
@@ -8,10 +8,19 @@ import {
 import { useGameStore } from '../store/gameStore';
 import { Minimap } from './Minimap';
 import { RootErrorBoundary } from './RootErrorBoundary';
+import type { FieldOperationPlanTarget } from '../utils/fieldInspectionTarget';
+import { buildFieldOperationPlanPresentation } from '../data/fieldOperationPlanFocus';
+import { FieldOperationPlanContextCard } from './FieldOperationPlanContextCard';
+import {
+  fieldOperationFocusKey,
+  type FieldOperationFocusReceipt,
+} from '../map/fieldOperationFocusController';
 
 interface TacticalMapViewportProps {
   active: boolean;
   onInteractionReadyChange?: (readiness: TacticalMapInteractionReadiness) => void;
+  operationPlanFocus?: FieldOperationPlanTarget | null;
+  onReturnToOperationDossier?: () => void;
 }
 
 export interface TacticalMapInteractionReadiness {
@@ -34,15 +43,29 @@ function clearTransientTacticalUi(): void {
  * Campaign-scoped owner for the main map, Deck overlay, and minimap.
  * Navigation only changes visibility; campaign replacement remounts this owner.
  */
-export function TacticalMapViewport({ active, onInteractionReadyChange }: TacticalMapViewportProps) {
+export function TacticalMapViewport({
+  active,
+  onInteractionReadyChange,
+  operationPlanFocus = null,
+  onReturnToOperationDossier,
+}: TacticalMapViewportProps) {
   const viewportRef = useRef<HTMLElement>(null);
   const [mainController, setMainController] = useState<TacticalMapGraphicsController | null>(null);
   const [minimapController, setMinimapController] = useState<TacticalMapGraphicsController | null>(null);
   const [minimapMounted, setMinimapMounted] = useState(false);
   const [revealPainted, setRevealPainted] = useState(false);
   const [renderedRevision, setRenderedRevision] = useState<TacticalMapRenderedRevision | null>(null);
+  const [fieldOperationFocusReceipt, setFieldOperationFocusReceipt] = useState<FieldOperationFocusReceipt | null>(null);
   const currentTurn = useGameStore((state) => state.loadedGameState?.turn);
   const currentFingerprint = useGameStore((state) => state.lastLoadedStateFingerprint);
+  const loadedGameState = useGameStore((state) => state.loadedGameState);
+  const osidNameMap = useGameStore((state) => state.osidDisplayNames);
+  const operationPlanPresentation = useMemo(
+    () => operationPlanFocus
+      ? buildFieldOperationPlanPresentation({ target: operationPlanFocus, state: loadedGameState, osidNameMap })
+      : null,
+    [operationPlanFocus, loadedGameState, osidNameMap],
+  );
   const currentRevisionReady = isTacticalMapStateReady(
     renderedRevision != null,
     renderedRevision?.turn ?? null,
@@ -117,6 +140,32 @@ export function TacticalMapViewport({ active, onInteractionReadyChange }: Tactic
     minimapController.triggerRepaint();
   }, [interactionReady, minimapController]);
 
+  useEffect(() => {
+    if (!operationPlanFocus) {
+      setFieldOperationFocusReceipt(null);
+      mainController?.fieldOperationFocus?.clear('focus-cleared');
+      return undefined;
+    }
+    const key = fieldOperationFocusKey(operationPlanFocus);
+    setFieldOperationFocusReceipt((current) => current?.key === key ? current : {
+      key,
+      proposalId: operationPlanFocus.proposalId,
+      status: 'pending',
+      target: null,
+      reason: null,
+    });
+    // Hidden maps never receive camera commands. The existing retained-map
+    // reveal handshake guarantees activation order: resize -> render -> focus.
+    if (!active || !interactionReady || !mainController?.fieldOperationFocus) return undefined;
+    const unsubscribe = mainController.fieldOperationFocus.subscribe(setFieldOperationFocusReceipt);
+    const receipt = mainController.fieldOperationFocus.request(operationPlanFocus);
+    setFieldOperationFocusReceipt(receipt);
+    return () => {
+      unsubscribe();
+      mainController.fieldOperationFocus?.cancel(key, active ? 'focus-replaced' : 'map-hidden');
+    };
+  }, [active, interactionReady, mainController, operationPlanFocus]);
+
   return (
     <section
       ref={viewportRef}
@@ -135,7 +184,21 @@ export function TacticalMapViewport({ active, onInteractionReadyChange }: Tactic
         revealPainted={revealPainted}
         onRenderedRevisionChange={setRenderedRevision}
         onGraphicsController={handleMainController}
+        operationPlanFocus={operationPlanFocus}
       />
+      {interactionReady && operationPlanPresentation && onReturnToOperationDossier && (
+        <FieldOperationPlanContextCard
+          presentation={operationPlanPresentation}
+          focusReceipt={fieldOperationFocusReceipt}
+          onSelectObjective={(osid) => useGameStore.getState().setSelectedOsid(osid)}
+          onReturn={() => {
+            if (operationPlanFocus) {
+              mainController?.fieldOperationFocus?.cancel(fieldOperationFocusKey(operationPlanFocus), 'return-to-dossier');
+            }
+            onReturnToOperationDossier();
+          }}
+        />
+      )}
       {minimapMounted && (
         <RootErrorBoundary zone="minimap">
           <Minimap active={interactionReady} onGraphicsController={handleMinimapController} />

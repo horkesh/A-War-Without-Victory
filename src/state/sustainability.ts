@@ -8,7 +8,7 @@
 import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementState, FactionId, GameState, MilitiaPoolState, MunicipalityId, SustainabilityState } from './game_state.js';
 
-import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
+import { buildAdjacencyMapCached, type AdjacencyMap } from '../map/adjacency_map.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getEffectiveSettlementSide } from './control_effective.js';
@@ -245,7 +245,7 @@ export function updateSustainability(
     }
 
     // Compute derived state
-    const adjacencyMap = buildAdjacencyMap(settlementEdges);
+    const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
     const supplyReport = computeSupplyReachability(state, adjacencyMap);
     const frontEdges = computeFrontEdges(state, settlementEdges);
     const breaches = computeFrontBreaches(state, frontEdges);

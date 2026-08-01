@@ -40,7 +40,9 @@ async function main(): Promise<void> {
     event_last_fired_turn: {},
     event_flags: {},
     enabled_event_ids: [],
-    phantoms_spawned: []
+    phantoms_spawned: [],
+    corps_front_sectors: {},
+    sector_intel: {}
   },
   political: {
     war_consolidation_until: {},

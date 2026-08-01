@@ -86,6 +86,8 @@ function currentVersionState(): any {
             pending_event_decisions: [],
             pending_event_notifications: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
         },
         political: {
             political_controllers: {},
@@ -121,6 +123,24 @@ function currentVersionState(): any {
 }
 
 describe('save migration validator hardening', () => {
+    it('rejects a current-version save missing required sector intelligence memory', () => {
+        const state = currentVersionState();
+        delete state.military.sector_intel;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v37[\s\S]*military\.sector_intel/
+        );
+    });
+
+    it('rejects a current-version save missing the materialized corps-front snapshot', () => {
+        const state = currentVersionState();
+        delete state.military.corps_front_sectors;
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /Save schema validation failed after migration[\s\S]*v37[\s\S]*military\.corps_front_sectors/
+        );
+    });
+
     it('rejects a current-version save missing a required-as-of-version field', () => {
         const state = currentVersionState();
         delete state.political.negotiation_status;

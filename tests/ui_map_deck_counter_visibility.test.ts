@@ -77,6 +77,26 @@ it('highlight overlay remains a styling layer, not a visibility backdoor', () =>
     ).toEqual(['b_hidden']);
 });
 
+it('keeps auto-packed formation icon atlas owners mounted across focus and visibility transitions', () => {
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [makeFeature('b_focus', true)],
+    } as any;
+    const iconLayerIds = (layers: any[]) => layers
+        .filter((layer: any) => layer.id.startsWith('deck-formations-') && layer.constructor.layerName === 'IconLayer')
+        .map((layer: any) => layer.id);
+
+    const focused = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, ['b_focus']);
+    const cleared = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, []);
+    const hidden = buildTacticalDeckLayers(formationsGeoJson, false, false, 10, []);
+
+    expect(iconLayerIds(focused)).toEqual(['deck-formations-icons', 'deck-formations-highlighted']);
+    expect(iconLayerIds(cleared)).toEqual(iconLayerIds(focused));
+    expect(iconLayerIds(hidden)).toEqual(iconLayerIds(focused));
+    expect(cleared.find((layer: any) => layer.id === 'deck-formations-highlighted')?.props.data).toEqual([]);
+    expect(hidden.find((layer: any) => layer.id === 'deck-formations-icons')?.props.data).toEqual([]);
+});
+
 it('base deck counters stay faction-colored while selected formations get a white overlay', () => {
     const feature = makeFeature('b_selected', false) as any;
 
@@ -155,6 +175,16 @@ it('clamps counter-aware camera padding before fitBounds so MapLibre can fit the
     expect(source).toContain('const CAMERA_MIN_VISIBLE_BAND');
     expect(helper).toContain('return clampCameraPaddingForFit(');
     expect(helper).toContain('map.getCanvas()');
+});
+
+it('selects a real unoccluded horizontal gap before deriving side padding', () => {
+    const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const helperStart = source.indexOf('function buildDeckCounterViewportPadding');
+    const helperEnd = source.indexOf('const CAMERA_MIN_VISIBLE_BAND', helperStart);
+    const helper = source.slice(helperStart, helperEnd);
+
+    expect(helper).toContain('let bestGap: [number, number] = [0, 0];');
+    expect(helper).not.toContain('let bestGap: [number, number] = [padding.left, mapRect.width - padding.right];');
 });
 
 it('falls back to centered camera motion when fitBounds would collapse to a point', () => {
@@ -248,6 +278,7 @@ it('deck counters derive clipping bounds from visible panel occluders', () => {
     const bottomStripSource = readFileSync('src/ui/map/components/BottomStatusStrip.tsx', 'utf8');
     const toolbarSource = readFileSync('src/ui/map/components/PresidentialToolbar.tsx', 'utf8');
     const briefingSource = readFileSync('src/ui/map/components/CommandBriefingLayer.tsx', 'utf8');
+    const inboxSource = readFileSync('src/ui/map/components/PresidentialInbox.tsx', 'utf8');
 
     expect(mapSource).toContain('function buildDeckCounterViewportPadding');
     expect(mapSource).toContain('function buildDeckCounterViewportOccluders');
@@ -279,6 +310,7 @@ it('deck counters derive clipping bounds from visible panel occluders', () => {
     expect(bottomStripSource).toContain('data-awwv-counter-occluder="true"');
     expect(toolbarSource).toContain('data-awwv-counter-occluder="true"');
     expect(briefingSource).toContain('data-awwv-counter-occluder="true"');
+    expect(inboxSource).toContain('data-awwv-counter-occluder="true"');
 });
 
 it('filters deck point features that would render clipped against the viewport edge', () => {
@@ -582,6 +614,49 @@ it('does not expose a clamped owned counter underneath a live UI occluder', () =
     });
 
     expect(items).toEqual([]);
+});
+
+it('drops an entire stack when collision separation would move its final hit targets under UI chrome', () => {
+    const stacked = (id: string, osid: string, stackIndex: number) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [17.8, 44.1] },
+        properties: {
+            id,
+            name: id,
+            icon_id: `counter-${id}`,
+            location_osid: osid,
+            stack_index: stackIndex,
+            stack_count: 2,
+            is_stack_top: stackIndex === 0,
+        },
+    });
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [
+            stacked('a1', 'op:test:a', 0),
+            stacked('a2', 'op:test:a', 1),
+            stacked('b1', 'op:test:b', 0),
+            stacked('b2', 'op:test:b', 1),
+        ],
+    } as any;
+    const viewportClip = {
+        width: 800,
+        height: 600,
+        padding: { top: 20, right: 20, bottom: 20, left: 20 },
+        occluders: [{ left: 350, top: 195, right: 450, bottom: 240 }],
+        project: () => ({ x: 400, y: 300 }),
+    };
+    const items = buildFormationCounterDomOverlayItems({
+        formationsGeoJson,
+        formationsVisible: true,
+        zoom: 10,
+        viewportClip,
+    });
+    const layers = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, [], viewportClip);
+    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+
+    expect(items.map((item) => item.id)).toEqual(['a1', 'a2']);
+    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['a1', 'a2']);
 });
 
 it('uses bounded pixel offsets for stacked counters instead of map-coordinate drift', () => {
