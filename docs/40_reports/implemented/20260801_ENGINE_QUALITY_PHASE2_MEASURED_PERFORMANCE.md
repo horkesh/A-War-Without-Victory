@@ -168,3 +168,58 @@ A larger pure-solve/serial-commit incremental topology architecture is condition
 Rejected shapes remain explicit: module/cross-turn `WeakMap` or fingerprint caching, unconditional truth-pass skips, recovery-only fixed-point guards, parallel faction mutation, threshold changes, hash-only comparison, and performance baseline re-flooring. The prior byte-identical floor-completion `Map` hoist is also not a retry candidate: it regressed the target label from roughly `696` to `907 ms` in confirmation runs as its mutation-updated map grew sparse. The Phase 2c plan instead requires a dense/delta structure to earn its place in a fresh profile.
 
 No production source, test, scenario, baseline, timing artifact, package, version, release state, canon, or `FORAWWV.md` changed in this design checkpoint. The next action remains a fresh corrected-source V8/phase/sector/control packet after the exclusive runtime lease is available.
+
+### Phase 2c fresh current-owner attribution
+
+The exclusive runtime lane subsequently produced a fresh corrected-source owner packet at commit `4462a485f1fd1ad511068bcaacd0926af962771e` on Windows x64, Node `24.13.0`, and an AMD Ryzen 7 5700X. Five unrelated long-lived Node processes remained present; no AWWV scenario, performance, Electron, package, or baseline process overlapped the serial runs. This packet selects the next owner but does not establish a new replicated floor because the three timed measured runs were not collected.
+
+The excluded control warmup completed in `45,236.582 ms`, including `43,475.791 ms` simulation. The phase/sector profile completed in `46,291.786 ms` (`1,157.295 ms/turn`) with `281.171 MB` phase-boundary sampled peak heap and `447.488 MB` RSS. Its dominant phases were:
+
+| Phase | Total over 40 turns | Per turn |
+|---|---:|---:|
+| `reconcile-final-sector-truth` | `6,368.145 ms` | `159.204 ms` |
+| `partition-corps-front-sectors` | `5,765.945 ms` | `144.149 ms` |
+| `reconcile-final-sector-truth-after-ops` | `2,958.513 ms` | `73.963 ms` |
+| **Three-sector total** | **`15,092.603 ms`** | **`377.315 ms`** |
+
+The three sector phases consumed `32.603%` of wall time. Their theoretical complete removal would still leave about `779.980 ms/turn`, so sector work remains the first structural owner rather than a complete route to the `100 ms/turn` target. The sector sidecar recorded 99 builder invocations (`2.475` calls/turn) and `14,646.453 ms` total instrumented builder time. Its largest nested labels include faction building, minimum coverage, sealing, rescue, territory claim, recovery, owner truth, geometry splitting, and surplus transfer; those timers overlap and are ranking evidence only.
+
+The same-process V8 profile sampled `47,713.892 ms`, `31,793` samples, and `1,781` application frames. `buildCorpsFrontSectors` ranked first by inclusive application time at `14,170.635 ms` (`29.699%`). The top current self-time owners were:
+
+1. `getSettlementControlStatus`: `2,086.262 ms` (`4.372%`);
+2. `countActiveBrigadesByOsid` in brigade assignment: `1,456.808 ms` self / `1,588.562 ms` inclusive;
+3. `strictCompare`: `1,408.912 ms`;
+4. `bfsReachable`: `1,346.664 ms`;
+5. `computeFrontEdges`: `1,260.255 ms` self / `3,301.004 ms` inclusive;
+6. `buildEdgeAdjacency`: `912.269 ms` self / `1,454.438 ms` inclusive;
+7. `friendlyPathToAny`: `641.584 ms` self / `701.375 ms` inclusive.
+
+The warmup, phase/sector profile, and V8 run each produced a `5,070,902`-byte final save with SHA-256 `b28225e47b8e7ba563c4e836151fc8699f3cd191f4912c6c13ac7c099719fbd5` and state hash `b28225e47b8e7ba5`. Exact transcripts and raw products remain ignored under:
+
+- `data/derived/_debug/r5_phase2c_current_warmup.transcript.txt`;
+- `data/derived/_debug/r5_phase2c_current_sector_profile.json`;
+- `data/derived/_debug/r5_phase2c_current_sector_partition.jsonl`;
+- `data/derived/_debug/r5_phase2c_current.cpuprofile`;
+- `data/derived/_debug/r5_phase2c_current_v8_{phase,summary}.json`;
+- `runs_perf/r5_phase2c_current_{warmup,sector_profile,v8}/...`.
+
+The retained raw-evidence hashes are:
+
+| Artifact | Bytes | SHA-256 |
+|---|---:|---|
+| `r5_phase2c_current_warmup.transcript.txt` | `4,926` | `b3fd44fd9d284885e3c1f542fbeb9b7cebfe02b8b4c3c4c8bea182030f60ccfb` |
+| `r5_phase2c_current_sector_profile.json` | `18,809` | `01cef0450a0857fee31c62e70382d6e7d89aebe3bb6eac2848a77326c93f8e84` |
+| `r5_phase2c_current_sector_partition.jsonl` | `9,334,756` | `c6289bdb68fde6633f27c72c4b1390c55464be56b9765ff30a86d4e67957fbda` |
+| `r5_phase2c_current.cpuprofile` | `2,647,735` | `77de5006691a75d9583ee57c61413bd24eff288a7ac867ce38235a47db4f1ee7` |
+| `r5_phase2c_current_v8_phase.json` | `18,818` | `10620070c0c3fd2e9911e9af302592bda393001acfbfda8ed42eb7938b9366ef` |
+| `r5_phase2c_current_v8_summary.json` | `162,104` | `df4725921343db31a93b25ee9f9d28a8b8b1b9e18f7cc9d551e957b30fe43f30` |
+
+### Rejected Phase 2c canonical status-result reuse
+
+A deliberately bounded red-first spike tested whether four frozen canonical result objects could remove allocation from `getSettlementControlStatus`. RED failed the intended object-identity expectation while semantic equality passed. GREEN passed 2/2 focused tests, an expanded eight-file 27-test matrix, and `npm run typecheck`. The candidate real-scenario saves remained exactly byte-identical to current source.
+
+The candidate was not retained. Its like-mode excluded warmup completed in `46,307.911 ms` versus `45,236.582 ms` for current source (`+2.368%`), including `44,518.156 ms` versus `43,475.791 ms` simulation (`+2.397%`). The candidate V8 envelope was globally slower (`57,484.452` versus `47,713.892` sampled milliseconds), so that profile cannot prove a causal regression. Nevertheless, the target function itself rose from `2,086.262` to `2,169.100 ms` self (`+3.971%`) and no absolute owner reduction appeared. The result is therefore rejected as inconclusive/no-benefit rather than mislabeled as either an optimization or a proven regression.
+
+The source and test spike were fully reverted; production source and tracked tests are unchanged. Ignored negative evidence remains under `data/derived/_debug/r5_phase2c_status_reuse_*` and `runs_perf/r5_phase2c_status_reuse_*`. The next safe executable step is the red-first, call-scoped dense formation-occupancy contract in Task 2 of the Phase 2c plan. It must prove mutation-sequence parity before any production hot-path replacement or candidate timing.
+
+The rejected packet's warmup transcript, CPU profile, phase report, and V8 summary are respectively SHA-256 `7c3f22b5979dc335dfbe76b7d2fe4ce7ae277f34753085a406909bbcd8f9f9fd`, `5886281c0f4a638932a8b2a77d11bb650ea90720d20a47a70bf115ab997de53f`, `6afb721b69f1e4f0348103570dbc502753665323a95068f271902b09901dd879`, and `bf91222a248c3f428859f45a1b7d165d7f6abaf8372d458a6be34ab51980cb89`. The transcripts preserve the exact command lines; the reverted source/test blobs are `19511d45ab085704fa9ea06c6407439c497cbc55` and `b299f65ab065f43edad6d5a0cfd830edb9c92e6f`.
