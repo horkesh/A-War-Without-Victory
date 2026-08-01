@@ -43,6 +43,9 @@ describe('sensitive-history choice semantics', () => {
         'Record reports of systematic cleansing and kill civilians',
         'Document evidence of maximum displacement, then murder the residents',
         'Authorize concentration camps and investigate the chain of command',
+        'Do not authorize detention camps, then kill civilians',
+        'Refuse to deploy paramilitary forces, then execute the displaced families',
+        'Authorize an investigation of concentration camps, then commit genocide',
     ])('does not let contextual language sanitize a later or prior directive: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(true);
     });

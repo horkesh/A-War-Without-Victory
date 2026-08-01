@@ -4,11 +4,11 @@
 
 **Roadmap:** R7 Phase 0 corrected candidate; committee re-review pending
 
-**Disposition:** Third blocked review corrected; direct Ring-3 choice defects remediated; broader content remediation remains open
+**Disposition:** Fourth blocked-review correction implemented; committee re-review required; broader content remediation remains open
 
 ## Result
 
-The first Phase 0 candidate understated historical and localization coverage and overloaded the canon audit with lexical checks. The first correction fixed that scope but still accepted invalid source tiers, left genuine Ring-3 choices outside the strict canon gate, made INFO fail the CLI, and counted non-player technical literals. The second correction centralized the tier vocabulary, shared the refused-choice classifier, repaired the two real event rows, and filtered deterministic localization false positives, but its verb grammar remained incomplete and its paramilitary exception bypassed whole events/families. This third correction closes those two fail-open paths and aligns the stale Six Goals foundational guard with the command-policy/non-player-consequence contract. It preserves production triggers, narratives, sources, essays, mechanics, save schema, the existing four-artifact baseline refresh, package/version/release state, and `FORAWWV`.
+The first Phase 0 candidate understated historical and localization coverage and overloaded the canon audit with lexical checks. The first correction fixed that scope but still accepted invalid source tiers, left genuine Ring-3 choices outside the strict canon gate, made INFO fail the CLI, and counted non-player technical literals. The second correction centralized the tier vocabulary, shared the refused-choice classifier, repaired the two real event rows, and filtered deterministic localization false positives, but its verb grammar remained incomplete and its paramilitary exception bypassed whole events/families. The third correction narrowed that exception and added missing victim-target/documentation forms, but the classifier still stopped after a first negated or accountability clause. This fourth correction evaluates every relevant action in a response field so a later direct atrocity instruction cannot inherit the earlier clause's safe disposition. It preserves production triggers, narratives, sources, essays, mechanics, save schema, the existing four-artifact baseline refresh, package/version/release state, and `FORAWWV`.
 
 | Inventory | Corrected census | Accepted/complete | Open remediation |
 |---|---:|---:|---:|
@@ -17,7 +17,7 @@ The first Phase 0 candidate understated historical and localization coverage and
 | Localization keys | 5,542 EN keys | 5,541 Bosnian translations present through legacy `bcs` | 1 explicit EN fallback; 599 length-risk candidates |
 | Localization source scan | 385 player-surface UI source files | deterministic candidate census | 575 embedded-English candidates; 8 concatenated-copy candidates; 388 dynamic-key candidates |
 
-The former 3 blocked choice rows belonged to `drina_cleansing_decision_1992` and `rs_strategic_goals`; all three are now remediated. The shared semantic classifier blocks direct verbs and constructions for expulsion, deportation, civilian/resident/family killing, camps, forced displacement, cleansing, genocide, and unauthorized paramilitary deployment while leaving contextual history and bounded documentation/accountability/refusal language outside the block. The Gate section-3 exception is no longer event- or family-wide: it requires the exact canonical event id, matching family, one of the three bounded option ids, and its exact shipped policy/deployment label. Tests prove `Commit genocide` and `Kill civilians` remain CRITICAL/player-choice violations even inside those event/family containers.
+The former 3 blocked choice rows belonged to `drina_cleansing_decision_1992` and `rs_strategic_goals`; all three production rows remain remediated. The shared semantic classifier evaluates every operative action and blocks direct verbs and constructions for expulsion, deportation, civilian/resident/family killing, camps, forced displacement, cleansing, genocide, and unauthorized paramilitary deployment while leaving bounded documentation/accountability/refusal clauses outside the block. A safe earlier clause cannot sanitize a later direct instruction. The Gate section-3 exception is no longer event- or family-wide: it requires the exact canonical event id, matching family, one of the three bounded option ids, and its exact shipped policy/deployment label. Tests prove forbidden wording remains CRITICAL/player-choice even inside those event/family containers.
 
 Localization source findings are review candidates, not automatic product defects. Dynamic keys can be safe when finite maps are typed and covered; length risk is a bounded visual-review queue, not proof that 599 layouts overflow.
 
@@ -77,9 +77,9 @@ No unsupported historical claim is promoted by this report. Phase 0 completion i
 - File-system walks, keys, findings, claims, citations, counters, and anchor rows use explicit stable ordering.
 - Reports contain no generated timestamp or absolute path.
 - Diagnostics use no randomness or wall clock.
-- Earlier RED reproduced all four second-review failures, including actual CLI exit 2 on the INFO-only report. Third-review RED independently reproduced the stale foundational assertion (1 of 9 failed) and then 14 semantic/consumer failures in the 4-file / 79-test focused matrix.
-- The third-review focused matrix passes 4 files / 79 tests.
-- The expanded inventory/provenance matrix passes 7 files / 60 tests; the canon matrix passes 2 files / 34 tests; the foundational/adjacent event matrix passes 5 files / 110 tests with 5 pre-existing skips.
+- Earlier RED reproduced all four second-review failures, including actual CLI exit 2 on the INFO-only report. Third-review RED independently reproduced the stale foundational assertion and the option-level semantic defects. Fourth-review RED reproduced all three clause-order cases at the helper and both consumers: 5 failures in the 3-file / 73-test matrix.
+- The fourth-review focused matrix passes 4 files / 82 tests.
+- The expanded inventory/provenance matrix passes 7 files / 63 tests; the canon matrix passes 2 files / 34 tests; the foundational/adjacent event matrix passes 5 files / 110 tests with 5 pre-existing skips.
 - The actual `--strict --violations-only --json` CLI exits 0 with 0 CRITICAL, 0 WARNING, and 1 INFO.
 - The intentional `apr1992_52w` baseline refresh changes only `end_report.md`, `final_save.json`, `run_summary.json`, and `weekly_report.jsonl` hashes; activity, control, formation, watched-operation, and every other scenario hash remain unchanged.
 - TypeScript, standalone no-refresh baseline regression, `canon:check`, and final diff hygiene pass.
