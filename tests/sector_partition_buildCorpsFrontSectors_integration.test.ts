@@ -59,7 +59,10 @@ import path from 'node:path';
 
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 
-import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
+import {
+    __buildCorpsFrontSectorsWithoutFixedPointShortcuts,
+    buildCorpsFrontSectors,
+} from '../src/sim/combat/corps_front_sectors.js';
 import { deserializeState } from '../src/state/serialize.js';
 import type {
     CorpsFrontSector,
@@ -136,6 +139,39 @@ function canonicalizeSectors(
         ];
     });
     return JSON.stringify(canonical);
+}
+
+function canonicalizeFormationSideEffects(state: GameState): string {
+    const formations = state.military.formations ?? {};
+    return JSON.stringify(
+        Object.keys(formations)
+            .sort(strictCompare)
+            .map((formationId) => [formationId, formations[formationId]]),
+    );
+}
+
+function runFixedPointModes(
+    state: GameState,
+    edges: ContactGraphEdge[],
+): { optimized: string; reference: string } {
+    const optimizedState = deserializeState(JSON.stringify(state)) as GameState;
+    const referenceState = deserializeState(JSON.stringify(state)) as GameState;
+    const optimizedSectors = buildCorpsFrontSectors(optimizedState, edges as never, null);
+    const referenceSectors = __buildCorpsFrontSectorsWithoutFixedPointShortcuts(
+        referenceState,
+        edges as never,
+        null,
+    );
+    return {
+        optimized: JSON.stringify([
+            canonicalizeSectors(optimizedSectors),
+            canonicalizeFormationSideEffects(optimizedState),
+        ]),
+        reference: JSON.stringify([
+            canonicalizeSectors(referenceSectors),
+            canonicalizeFormationSideEffects(referenceState),
+        ]),
+    };
 }
 
 /**
@@ -336,5 +372,27 @@ describe.skipIf(!hasFixture)(
                 }
             }
         });
+
+        it('fixed-point shortcuts preserve sectors and formation side effects across 100 real-save variants', () => {
+            for (let seed = 0; seed < 100; seed++) {
+                const variant = makeVariant(baseState, seed);
+                const { optimized, reference } = runFixedPointModes(variant, edges);
+                if (optimized !== reference) {
+                    let firstDiff = 0;
+                    while (
+                        firstDiff < optimized.length
+                        && firstDiff < reference.length
+                        && optimized.charCodeAt(firstDiff) === reference.charCodeAt(firstDiff)
+                    ) {
+                        firstDiff += 1;
+                    }
+                    throw new Error(
+                        `fixed-point divergence for seed ${seed} at byte ${firstDiff}; `
+                        + `optimized=${optimized.slice(firstDiff, firstDiff + 160)}; `
+                        + `reference=${reference.slice(firstDiff, firstDiff + 160)}`,
+                    );
+                }
+            }
+        }, 600_000);
     },
 );

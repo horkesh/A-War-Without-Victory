@@ -424,13 +424,16 @@ export function assignTerritoryVoronoi(
  *      ensureMinimumSectorCoverage or post-Voronoi sweep on subsequent turns).
  *
  * Deterministic: sorted iteration via strictCompare, no Math.random().
+ * Returns a conservative mutation receipt: true when a disconnected repair path
+ * was exercised, even if preserving multiple front-bearing components happened
+ * to leave the serialized territory packet byte-identical.
  */
 export function repairDisconnectedTerritory(
     sectors: CorpsFrontSector[],
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
-): void {
-    if (sectors.length === 0) return;
+): boolean {
+    if (sectors.length === 0) return false;
 
     // Build a reverse index: OSID → sector indices that claim it as territory.
     // (Needed to find adjacent sectors for orphan reassignment.)
@@ -559,8 +562,8 @@ export function repairDisconnectedTerritory(
         territoryIndex = rebuildTerritoryIndex();
     }
 
-    // No explicit logging — callers can compare territory counts before/after
-    // if diagnostics are needed.
+    // No explicit logging — callers can consume the conservative repair receipt.
+    return anyRepair;
 }
 
 /**

@@ -334,6 +334,10 @@ export const __sectorPartitionPerfTestHooks = {
  *   suppresses warnings because early/mid-pipeline invocations produce transient unresolved
  *   brigades that later repair passes resolve. Only the genuinely final invocation
  *   (reconcile-final-sector-truth-after-ops) should set this to true.
+ * @param finalSaveGeometryProjection - Enable final-save-only geometry projection.
+ * @param useFixedPointShortcuts - Consume deterministic mutation receipts to skip only
+ *   convergence work whose producer reported no change. False is reserved for the
+ *   test-only exact reference sequence.
  */
 export function buildCorpsFrontSectors(
     state: GameState,
@@ -343,6 +347,7 @@ export function buildCorpsFrontSectors(
     spatial?: SpatialContext,
     isFinalPass: boolean = false,
     finalSaveGeometryProjection: boolean = false,
+    useFixedPointShortcuts: boolean = true,
 ): Record<string, CorpsFrontSector> {
     const osidFrontEdges = state.military.war_front_edges_osid;
     if (!osidFrontEdges || osidFrontEdges.length === 0) return {};
@@ -486,10 +491,27 @@ export function buildCorpsFrontSectors(
     _perfTime('relocateMisassignedBrigadesToTruthfulOwners', () => relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency));
     _perfTime('sealMergedSectorTruth:2', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass }));
     _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));
-    _perfTime('recoverDroppedFrontEdges:1', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache));
-    _perfTime('sealMergedSectorTruth:3', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass }));
-    _perfTime('pruneGhostArtifactSectors:2', () => pruneGhostArtifactSectors(result));
-    _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache));
+    const recoveredDroppedFrontEdges = _perfTime('recoverDroppedFrontEdges:1', () => recoverDroppedFrontEdges(
+        result,
+        state,
+        osidFrontEdges,
+        adjacency,
+        sharedBoundaryAdj,
+        caseBSplitAdj,
+        globalEdgeMeta,
+        formations,
+        reverseMap,
+        centroids,
+        spatial,
+        recoveredFrontClaimSetupCache,
+    ));
+    // No edge recovery means no mutation occurred between seal pass 2 and this
+    // convergence segment. Preserve the full segment whenever recovery did write.
+    if (!useFixedPointShortcuts || recoveredDroppedFrontEdges) {
+        _perfTime('sealMergedSectorTruth:3', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass }));
+        _perfTime('pruneGhostArtifactSectors:2', () => pruneGhostArtifactSectors(result));
+        _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache));
+    }
 
     // Final geometry barrier: late recovery and seal passes can still leave
     // duplicate same-corps front ownership on sibling fragments. Resolve those
@@ -589,6 +611,7 @@ export function buildCorpsFrontSectors(
         });
         _perfTime('applyFinalSectorOwnerTruthPass:3', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass }));
     }
+    let finalTerritoryRepaired = false;
     _perfTime('repairDisconnectedTerritory:final', () => {
         for (const faction of getFactions(state)) {
             const factionSectors = Object.values(result).filter((sector) => sector.faction === faction);
@@ -596,10 +619,18 @@ export function buildCorpsFrontSectors(
             const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
                 ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
                 : buildFriendlyOsidsFromState(state, adjacency, faction);
-            repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
+            finalTerritoryRepaired = repairDisconnectedTerritory(
+                factionSectors,
+                sharedBoundaryAdj,
+                friendlyOsids,
+            ) || finalTerritoryRepaired;
         }
     });
-    _perfTime('applyFinalSectorOwnerTruthPass:4', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass }));
+    // Owner truth was already sealed by pass 2 (or pass 3 after absorption).
+    // Re-run it only when final territory repair exercised a mutation path.
+    if (!useFixedPointShortcuts || finalTerritoryRepaired) {
+        _perfTime('applyFinalSectorOwnerTruthPass:4', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass }));
+    }
     _perfTime('sealWarFrontFactionSideCoverage:final', () => sealWarFrontFactionSideCoverage(result, osidFrontEdges, adjacency, globalEdgeMeta));
     const _postCoverageAbsorbed = _perfTime('absorbUnstaffedSiblingFrontSectors:post-side-coverage', () => {
         let changed = false;
@@ -661,6 +692,28 @@ export function buildCorpsFrontSectors(
     }
 
     return result;
+}
+
+/** @internal Exact legacy fixed-point sequence retained for equivalence/property tests. */
+export function __buildCorpsFrontSectorsWithoutFixedPointShortcuts(
+    state: GameState,
+    edges: EdgeRecord[],
+    reverseMap: Map<string, string[]> | null,
+    centroids?: OsidCentroidMap,
+    spatial?: SpatialContext,
+    isFinalPass: boolean = false,
+    finalSaveGeometryProjection: boolean = false,
+): Record<string, CorpsFrontSector> {
+    return buildCorpsFrontSectors(
+        state,
+        edges,
+        reverseMap,
+        centroids,
+        spatial,
+        isFinalPass,
+        finalSaveGeometryProjection,
+        false,
+    );
 }
 
 export function sealWarFrontFactionSideCoverage(
@@ -2227,7 +2280,7 @@ function recoverDroppedFrontEdges(
     spatial?: SpatialContext,
     recoveredFrontClaimSetupCache?: Map<FactionId, RecoveredFrontClaimSetup>,
     options?: { allowUnstaffedFrontSectors?: boolean },
-): void {
+): boolean {
     let recoveredAny = false;
 
     for (const faction of getFactions(state)) {
@@ -2365,7 +2418,7 @@ function recoverDroppedFrontEdges(
         }
     }
 
-    if (!recoveredAny) return;
+    if (!recoveredAny) return false;
 
     _perfTime('recoverDroppedFrontEdges:post-recovery-truth-passes', () => {
         const emptiedSectorIds = canonicalizeSiblingFrontOwnership(
@@ -2448,6 +2501,7 @@ function recoverDroppedFrontEdges(
     });
 
     pruneGhostArtifactSectors(sectors);
+    return true;
 }
 
 function getRecoveredFrontClaimSetup(
