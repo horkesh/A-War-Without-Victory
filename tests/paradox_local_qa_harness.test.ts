@@ -1170,6 +1170,12 @@ test('resume receipt baselines use the loaded save until canonical autosave pers
     const readState = extractFunctionSource(harness, 'readState');
     assert.match(readState, /resolveDecisionReceiptAutosavePath/);
     assert.match(readState, /filePersistenceFingerprint/);
+    const runFaction = extractFunctionSource(harness, 'runFaction');
+    assert.match(
+        runFaction,
+        /const initialAutosavePath = resolveDecisionReceiptAutosavePath/,
+        'resume initial evidence must hash and archive the loaded save before canonical autosave persistence changes',
+    );
 });
 
 test('final blocker inventory covers every canonical player decision queue', () => {

@@ -5051,10 +5051,15 @@ async function runFaction(faction, result) {
     } else {
       frame = await startCampaign(page, faction, events);
     }
-    const autosavePath = canonicalAutosavePath;
+    const initialAutosavePath = resolveDecisionReceiptAutosavePath(
+      canonicalAutosavePath,
+      resumeSavePath,
+      canonicalAutosavePersistenceAtResumeLoad,
+      filePersistenceFingerprint(canonicalAutosavePath),
+    );
     const initialState = await readState(frame);
     const initialStateHash = await readRawStateHash(frame);
-    const initialAutosaveHash = fileSha256(autosavePath);
+    const initialAutosaveHash = fileSha256(initialAutosavePath);
     const initialHashProof = assertStableProjectionAndAutosaveHashes(
       `Initial ${faction} campaign evidence`,
       initialStateHash,
@@ -5063,7 +5068,7 @@ async function runFaction(faction, result) {
       initialAutosaveHash,
     );
     const initialAutosaveEvidence = archiveAutosaveEvidence(
-      autosavePath,
+      initialAutosavePath,
       path.join(evidenceDir, safeName(faction), 'initial-autosave.json'),
     );
     initialEvidence = {
