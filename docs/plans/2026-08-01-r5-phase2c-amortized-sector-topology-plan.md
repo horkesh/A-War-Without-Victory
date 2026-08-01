@@ -12,9 +12,9 @@
 
 ## Status and authority boundary
 
-This document is an implementation design plus a current-owner attribution checkpoint. The dense formation-occupancy contract and its bounded `ensureMinimumSectorCoverage(...)` integration are source/test complete but not yet performance-accepted. The accepted replicated floor remains `1,189.962 ms/turn` (`11.8996x` the `100 ms/turn` target). The `1,223.822 ms/turn` (`12.23822x`) fixed-point packet remains diagnostic because its measured source omitted the prune receipt. A fresh corrected-source warmup, phase/sector profile, and same-process V8 profile confirm sector reconstruction as the dominant owner, but no new three-run candidate/control packet has been collected.
+This document is an active implementation and measurement plan. The dense formation-occupancy contract and its bounded `ensureMinimumSectorCoverage(...)` integration are accepted at commit `25313d1c05b174188fad167ff38ed826b6aa737d`. The fully captured exact-parent replay improves mean throughput from `1,183.549` to `1,122.123 ms/turn` (`-5.190%`) with exact bytes, so `1,122.123 ms/turn` (`11.2212x` the `100 ms/turn` target) is the current accepted floor. The `1,223.822 ms/turn` fixed-point packet remains diagnostic because its measured source omitted the prune receipt. R5 remains open; Task 3's red-first reachability/sector-fact equivalence is next.
 
-Task 1's owner-selection subset is complete at source commit `4462a485f1fd1ad511068bcaacd0926af962771e`. Do not collect candidate timing, a replicated floor, or another heavy packet while any scenario, performance, Electron, package, baseline, or other heavy runtime owner holds the machine lane. No baseline re-floor, package, version, tag, push, publication, release-state, canon, or `docs/10_canon/FORAWWV.md` change belongs to Phase 2c.
+Task 1's owner-selection subset is complete at source commit `4462a485f1fd1ad511068bcaacd0926af962771e`; Task 5's occupancy disposition is complete at `25313d1c05b174188fad167ff38ed826b6aa737d`. Do not collect another heavy packet while any scenario, performance, Electron, package, baseline, or other heavy runtime owner holds the machine lane. No baseline re-floor, package, version, tag, publication, release-state, canon, or `docs/10_canon/FORAWWV.md` change belongs to Phase 2c.
 
 The determinism-auditor skill references `docs/PHASE_A_INVARIANTS.md`, but that file does not exist at this repository revision. Use the live contracts below and record the stale skill reference as documentation debt; do not invent a replacement contract.
 
@@ -29,6 +29,7 @@ The determinism-auditor skill references `docs/PHASE_A_INVARIANTS.md`, but that 
 | Corrected fixed-point source | 300 full-state comparisons across live-war, final-turn, and final-save-projection modes | Correctness prerequisite. |
 | Fresh corrected-source phase/sector profile | `46,291.786 ms` wall; three sector phases `15,092.603 ms` (`377.315 ms/turn`, `32.603%`) | Current owner selection only; not a replicated floor. |
 | Fresh corrected-source application V8 capture | `buildCorpsFrontSectors` `14,170.635 ms` inclusive (`29.699%`) | Confirms sector reconstruction is the next structural owner. |
+| Accepted dense occupancy replay | control `1,183.549`; candidate `1,122.123 ms/turn`; all three pairs faster; exact bytes | New current floor and permission to begin Task 3. |
 
 In the diagnostic 40-turn phase profile, the three large sector steps cost:
 
@@ -74,7 +75,9 @@ Task 2 is GREEN. The missing-module RED was preserved, then the stable-ordinal, 
 
 The first bounded Task 4 integration builds one dense index per `ensureMinimumSectorCoverage(...)` call from current formation locations and every selectable front OSID. It replaces eight repeated `countActiveBrigadesByOsid(...)` scans and routes the function's sole `location_osid` write through `index.move(...)` before state mutation. It does not yet introduce reachability/component caching; Task 3 is deliberately deferred until this isolated occupancy candidate is dispositioned so timing cannot conflate two optimizations.
 
-The focused coverage/rebalance slice passed 3 files / 26 tests, TypeScript passed, and the complete sector/full-state gate passed 6 files / 46 tests in `330.16s`. That gate includes 100+ deterministic real-save variants and the three production reconciliation modes. An excluded real-scenario byte gate and lease-backed candidate/control timing remain required before acceptance.
+The focused coverage/rebalance slice passed 3 files / 26 tests, TypeScript passed, and the complete sector/full-state gate passed 6 files / 46 tests in `330.16s`. That gate includes 100+ deterministic real-save variants and the three production reconciliation modes.
+
+The candidate warmup, phase/sector profile, V8 profile, and two alternating three-pair sequences preserved the exact `5,070,902`-byte save, SHA-256 `b28225e47b8e7ba563c4e836151fc8699f3cd191f4912c6c13ac7c099719fbd5`, and state hash `b28225e47b8e7ba5`. In the authoritative fully captured replay, controls measured `1,162.403`, `1,231.142`, and `1,157.103 ms/turn`; candidates measured `1,118.922`, `1,163.315`, and `1,084.132`. Means were `1,183.549` versus `1,122.123 ms/turn` (`-5.190%`), and mean simulation improved `-5.178%`. The named `ensureMinimumSectorCoverage` owner fell `48.055%` inclusive, `buildCorpsFrontSectors` fell `8.693%`, and the three sector phases fell `10.599%`. Approved baselines passed without refresh. The occupancy-only candidate is accepted.
 
 ## Invariants that every candidate must preserve
 
@@ -167,7 +170,7 @@ The solver must create a new result from stable inputs. The commit stage applies
 
 ## Task 1 — Acquire the runtime lease and establish current truth
 
-**Status:** Owner-selection subset complete. Warmup, phase/sector, and same-process V8 evidence are byte-identical and confirm sector reconstruction. The three-run measured packet remains intentionally open, so no current floor is accepted.
+**Status:** Complete. Owner selection, exact-byte evidence, and the exact-parent measured disposition are captured; the accepted candidate floor is `1,122.123 ms/turn`.
 
 **Files:**
 
@@ -181,7 +184,7 @@ The solver must create a new result from stable inputs. The commit stage applies
 1. Obtain an explicit named exclusive runtime lease from the orchestrator after R4 releases it. Record owner, start/end, branch, full commit, Node/platform/CPU class, and the absence of concurrent scenario/perf/Electron/package/baseline work.
 2. Verify a clean worktree and corrected fixed-point source. Do not time a dirty tree or an unrecorded commit.
 3. Clear or uniquely rename only the exact ignored Phase 2c output targets. Never delete a broad output directory.
-4. Run one excluded 40-week warmup, one phase+sector profile, one same-process V8 CPU profile, and three timed measured runs. Preserve exact commands and raw stdout/stderr in ignored files. The first three are complete; the three timed measured runs remain open.
+4. Run one excluded 40-week warmup, one phase+sector profile, one same-process V8 CPU profile, and three timed measured runs. Preserve exact commands and raw stdout/stderr in ignored files. Complete; the Task 5 exact-parent replay supplies the authoritative three-run current/candidate comparison.
 5. Hash every `final_save.json`; require identical byte size, SHA-256, and final state hash across warmup/profile/V8/measured modes before using timing.
 6. Rank V8 self and inclusive owners, phase owners, sector nested labels, and calls/turn. Do not sum overlapping nested timers.
 7. If sector reconstruction is not the largest amortized owner, stop this design before source edits and write a new bounded plan for the actual owner.
@@ -207,7 +210,7 @@ Expected result: a committee-usable current packet names one owner and preserves
 
 ## Task 2 — Red-first formation occupancy contract
 
-**Status:** Complete. Isolated contract and mutation-sequence parity are GREEN; the bounded coverage integration is awaiting Task 5 performance disposition.
+**Status:** Complete. Isolated contract, mutation-sequence parity, bounded coverage integration, and Task 5 performance disposition are GREEN/accepted.
 
 **Files:**
 
@@ -230,7 +233,7 @@ Expected RED: module/export missing. Expected GREEN: exact parity after every de
 
 ## Task 3 — Red-first reachability and sector-fact equivalence
 
-**Status:** Deferred until the occupancy-only candidate is accepted or rejected. Do not mix reachability caching into its timing packet.
+**Status:** NEXT. The occupancy-only candidate is accepted; implement and disposition this reachability-only packet without mixing in incremental topology.
 
 **Files:**
 
@@ -256,7 +259,7 @@ Expected result: all decisions and tie order are identical; no formation moves m
 
 ## Task 4 — Thread the context through one full build
 
-**Status:** Bounded occupancy-only subset source/test complete. One index owns one `ensureMinimumSectorCoverage(...)` invocation and all of that owner's location writes; broader whole-builder topology facts remain open.
+**Status:** Bounded occupancy-only subset accepted. One index owns one `ensureMinimumSectorCoverage(...)` invocation and all of that owner's location writes; broader reachability/whole-builder topology facts remain open under Tasks 3 and 6.
 
 **Files:**
 
@@ -283,6 +286,8 @@ Expected result: 300+ complete-state optimized/reference comparisons pass with e
 
 ## Task 5 — Lease-backed candidate measurement and disposition
 
+**Status:** Complete — accepted. Fully captured exact-parent replay improved the whole-run mean `5.190%`; all byte, owner, baseline, and non-regression gates passed.
+
 **Files:**
 
 - Update `docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md`
@@ -308,7 +313,7 @@ Expected result: one accepted measured optimization or a documented rejection wi
 
 ## Task 6 — Conditional incremental topology packet
 
-Start only if Task 5 is accepted and a fresh full profile still ranks repeated full sector builds first.
+Start only after Task 3's safer call-scoped reachability packet is dispositioned, and only if its fresh full profile still ranks repeated full sector builds first. Task 5 is accepted and the occupancy profile still ranks `buildCorpsFrontSectors` first, but that is permission to continue the bounded context work, not permission to skip directly to a larger solver.
 
 **Files:**
 
@@ -330,6 +335,8 @@ Start only if Task 5 is accepted and a fresh full profile still ranks repeated f
 Expected result: fewer full-faction/full-builder solves per turn with exact bytes. If dirty identity expands to most factions/components in the current scenario, reject the complexity and reprofile another owner.
 
 ## Task 7 — Mandatory full-profile handoff to the next owner
+
+**Status:** Current occupancy handoff complete. Mean remains above target, sector construction remains the largest inclusive owner, and Task 3's reachability/sector facts are next.
 
 After every accepted sector packet:
 
@@ -361,16 +368,17 @@ R5 Phase 2 is complete only when a committee-usable replicated packet records me
 
 ## Completion checklist
 
-- [ ] Fresh corrected-source current profile captured under the exclusive lease.
-- [ ] Exact commands/raw output/commit/machine/process envelope retained.
-- [ ] One excluded warmup, one phase+sector profile, one application V8 profile, and three measured runs captured.
-- [ ] All profile/mode final saves are byte-identical.
-- [ ] Current profile, not historical rank, selects each implementation owner.
-- [ ] Red-first helper and complete-state equivalence tests pass.
-- [ ] Context is invocation-local, mutation-aware, stable-order, and absent from `GameState`.
-- [ ] No skipped pass lacks a complete mutation receipt.
-- [ ] Same-parent replicated candidate improves its named owner and does not regress whole-run throughput.
-- [ ] Rejected candidates are fully reverted and recorded.
-- [ ] Fresh Amdahl calculation and next-owner handoff exist while mean remains above `100 ms/turn`.
-- [ ] Ledger, report, roadmap, and reusable knowledge state exactly match evidence.
-- [ ] No baseline refresh, package/version/tag/release mutation, canon/FORAWWV edit, push, or integration was performed by this design packet.
+- [x] Fresh corrected-source current profile captured under the exclusive lease.
+- [x] Exact commands/raw output/commit/machine/process envelope retained.
+- [x] One excluded warmup, one phase+sector profile, one application V8 profile, and three measured runs captured.
+- [x] All profile/mode final saves are byte-identical.
+- [x] Current profile, not historical rank, selects each implementation owner.
+- [x] Red-first helper and complete-state equivalence tests pass.
+- [x] Context is invocation-local, mutation-aware, stable-order, and absent from `GameState`.
+- [x] No skipped pass lacks a complete mutation receipt.
+- [x] Same-parent replicated candidate improves its named owner and does not regress whole-run throughput.
+- [x] Rejected candidates are fully reverted and recorded.
+- [x] Fresh Amdahl calculation and next-owner handoff exist while mean remains above `100 ms/turn`.
+- [x] Ledger, report, roadmap, and reusable knowledge state exactly match evidence.
+- [x] No baseline refresh, package/version/tag/release mutation, canon/FORAWWV edit, push, or integration was performed by this design packet.
+- [ ] R5 replicated mean is below `100 ms/turn`; continue with Task 3 and reprofile.

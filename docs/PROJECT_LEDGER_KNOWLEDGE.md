@@ -4108,6 +4108,16 @@ Applied in `[2026-08-01] R5 Phase 2c amortized sector topology design`, `docs/pl
 
 Applied in `[2026-08-01] R5 Phase 2c current-owner profile and rejected status-result reuse`, `src/state/settlement_control.ts` (reverted spike), and `docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md`.
 
+## 2026-08-01 - Dense mutable indexes must share scope and writer ownership
+
+**A dense index wins only when its universe is complete and its lifetime is narrow:** a sparse `Map` that grows through repeated relocation can regress even when it removes full scans, while a stable ordinal plus typed-array count can reduce the same owner materially. Durable rule: derive the complete selectable OSID universe in strict order at invocation start, allocate one `Uint32Array`, reject unknown targets, and discard the index with the owning invocation. Never persist it, reuse it across turns, or hide it in a module cache.
+
+**Mirrored state needs fail-closed mutation semantics:** updating `formation.location_osid` separately from its occupancy mirror creates plausible but false derived truth. Durable rule: the exact writer validates formation id and prior location, applies the count delta, and then mutates state; stale/double moves, underflow, overflow, and unknown OSIDs throw. Test move-away, move-back, same-location, creation/removal, lifecycle eligibility, and cross-faction sequences against the legacy full scan after every mutation.
+
+**Local owner reduction and alternating whole-run proof answer different questions:** the V8 profile proves the intended scan owner fell, while exact-parent control/candidate alternation proves that reduction survives full simulation noise. Durable rule: retain a performance-only index only when the named inclusive owner materially falls, all candidate/control saves have exact size and SHA-256 identity, every alternating pair is non-regressing, and the replicated mean improves. Keep raw timing/stdout/stderr hashes and child exit codes; an incomplete transcript may corroborate but must not be the authoritative packet.
+
+Applied in `[2026-08-01] R5 Phase 2c dense formation occupancy acceptance`, `src/sim/combat/sector_build_derived_context.ts`, `src/sim/combat/brigade_assignment.ts`, `tests/sector_build_derived_context.test.ts`, and `docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md`.
+
 ## 2026-08-01 - Adaptive UI evidence must keep its declared identities stable
 
 **Viewport reflow may change reachability, not the proof population:** opening and closing map panels changes occlusion and can reveal counters that were absent from the ready-map sample. Durable rule: freeze the declared identity set at the checkpoint, select only currently reachable unattempted members of that set, and report frozen members that became unavailable. Never substitute newly visible identities merely to reach a target count; that turns an adaptive reachability probe into an undeclared and non-reproducible blocker.
