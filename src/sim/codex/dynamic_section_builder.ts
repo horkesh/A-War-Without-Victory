@@ -7,8 +7,8 @@
  *   1. `BuiltDynamicSection[]` — dynamic essay sections that should be inserted
  *      into canonical historical essays at endgame, gated on observable
  *      campaign state.
- *   2. `BuiltGhostEntry[]` — ghost-entry records describing six paths-not-taken
- *      authored as Ring 2 narrative observations under
+ *   2. `BuiltGhostEntry[]` — twenty explicitly classified path-not-taken,
+ *      divergence-context, or audit-context Ring 2 records under
  *      `data/codex/ghost_entries/`.
  *
  * Sensitive-history boundary (`docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`):
@@ -42,6 +42,11 @@
 import { strictCompare } from '../../state/validateGameState.js';
 import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import type { GameState, FactionId } from '../../state/game_state.js';
+import {
+    buildRealizedConsequenceReceipts,
+    type ClaimPredicateOperand,
+    type NamedClaimPredicate,
+} from '../events/realized_consequence_receipts.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -77,12 +82,20 @@ export interface BuiltDynamicSection {
     ring_classification: RingClassification;
     /** Human-readable predicate name(s) that gated this section. Diagnostic. */
     conditional_on: string[];
+    /** Exact state/receipt owner that proves the rendered claim. */
+    claim_predicate: NamedClaimPredicate;
+    /** Calendar values may contextualize a claim but never prove it. */
+    calendar_context: string[];
+    /** Shared receipt identity when this section projects a realized receipt. */
+    receipt_record_id?: string;
 }
 
-/** A ghost-entry record. Ghost entries live as standalone Markdown bodies
- *  under `data/codex/ghost_entries/` and are surfaced only when the
- *  corresponding path-not-taken predicate fires. */
-export interface BuiltGhostEntry {
+/** A classified Campaign Codex record. Records live as standalone Markdown
+ *  bodies under `data/codex/ghost_entries/` and surface only when their exact
+ *  persisted-state predicate evaluates true. */
+export type GhostRecordClassification = 'path_not_taken' | 'divergence_context' | 'audit_context';
+
+interface BuiltGhostEntryBase {
     /** Stable ghost id matching the file basename under `data/codex/ghost_entries/`. */
     ghost_id: string;
     /** Repo-relative path to the authored markdown body. */
@@ -93,7 +106,22 @@ export interface BuiltGhostEntry {
     conditional_on: string[];
     /** Render variant. Must be `context` for AUDIT-ONLY (`enclave_defended`). */
     variant: SectionVariant;
+    /** Positive state predicate that proves this campaign record. */
+    claim_predicate: NamedClaimPredicate;
+    /** Calendar thresholds are context only, never the claim owner. */
+    calendar_context: string[];
 }
+
+/** Only a genuine path-not-taken record may carry distinct missed-condition proof. */
+export type BuiltGhostEntry =
+    | (BuiltGhostEntryBase & {
+        classification: 'path_not_taken';
+        missed_condition_predicate: NamedClaimPredicate;
+    })
+    | (BuiltGhostEntryBase & {
+        classification: 'divergence_context' | 'audit_context';
+        missed_condition_predicate?: never;
+    });
 
 /** Builder input. Wraps the frozen end-of-game state and the current turn. */
 export interface BuilderInput {
@@ -210,11 +238,6 @@ function isTruthyFlag(value: GhostEntryFlagValue): boolean {
     return false;
 }
 
-/** Read an event flag from MilitaryState.event_flags. */
-function flag(state: GhostEntryStateView, name: string): boolean {
-    return isTruthyFlag(state.military?.event_flags?.[name]);
-}
-
 function flagNumber(state: GhostEntryStateView, name: string): number {
     const value = state.military?.event_flags?.[name];
     if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -226,32 +249,182 @@ function flagNumber(state: GhostEntryStateView, name: string): number {
     return 0;
 }
 
-function eventFiredById(state: GhostEntryStateView, eventId: string): boolean {
-    const counts = state.military?.event_fire_counts;
-    if (!counts) return false;
-    const n = counts[eventId];
-    return typeof n === 'number' && n > 0;
+/** Player faction is the gating subject for every ghost predicate. Raw state
+ *  owns it at `meta.player_faction`; the flattened adapter mirror is accepted
+ *  only when the raw path is absent. Missing/noncanonical identity fails closed. */
+interface GhostPredicateMatch {
+    claim_operands: ClaimPredicateOperand[];
+    missed_operands: ClaimPredicateOperand[];
+    calendar_context: string[];
 }
 
-/** Player faction is the gating subject for paramilitary-policy and
- *  patron-pressure predicates. Lives on `state.meta.player_faction` per the
- *  StateMeta schema. Falls back to RBiH if unset; predicates that rely on
- *  player_faction-specific state are tolerant of absence. */
-function playerFaction(state: GhostEntryStateView): FactionId {
-    return state.meta?.player_faction ?? state.player_faction ?? 'RBiH';
+interface SelectedPlayerSubject {
+    faction: FactionId;
+    operand: ClaimPredicateOperand;
 }
 
-function loadedPlayerFaction(state: GhostEntryStateView): FactionId | null {
-    return state.meta?.player_faction ?? state.player_faction ?? null;
+function selectedPlayerSubject(state: GhostEntryStateView): SelectedPlayerSubject | null {
+    const metaFaction = state.meta?.player_faction;
+    if (metaFaction != null) {
+        if (!CANONICAL_FACTIONS.includes(metaFaction)) return null;
+        return {
+            faction: metaFaction,
+            operand: {
+                owner_path: 'state.meta.player_faction',
+                operator: 'equals',
+                expected_value: metaFaction,
+                observed_value: metaFaction,
+                expression: `state.meta.player_faction=${metaFaction}`,
+            },
+        };
+    }
+    const adaptedFaction = state.player_faction;
+    if (adaptedFaction != null && CANONICAL_FACTIONS.includes(adaptedFaction)) {
+        return {
+            faction: adaptedFaction,
+            operand: {
+                owner_path: 'state.player_faction',
+                operator: 'equals',
+                expected_value: adaptedFaction,
+                observed_value: adaptedFaction,
+                expression: `state.player_faction=${adaptedFaction}`,
+            },
+        };
+    }
+    return null;
+}
+
+function flagOperand(
+    state: GhostEntryStateView,
+    name: string,
+    expected: boolean,
+): ClaimPredicateOperand | null {
+    const observedRaw = state.military?.event_flags?.[name];
+    const observed = isTruthyFlag(observedRaw);
+    if (observed !== expected) return null;
+    return {
+        owner_path: `state.military.event_flags.${name}`,
+        operator: 'truthy_equals',
+        expected_value: expected,
+        observed_value: observedRaw ?? null,
+        expression: `truthy(event_flags[${name}])=${expected}`,
+    };
+}
+
+function flagAtLeastOperand(
+    state: GhostEntryStateView,
+    name: string,
+    minimum: number,
+): ClaimPredicateOperand | null {
+    const observed = flagNumber(state, name);
+    if (observed < minimum) return null;
+    return {
+        owner_path: `state.military.event_flags.${name}`,
+        operator: 'at_least',
+        expected_value: minimum,
+        observed_value: observed,
+        expression: `number(event_flags[${name}])=${observed}>=${minimum}`,
+    };
+}
+
+function eventFiredOperand(
+    state: GhostEntryStateView,
+    eventId: string,
+    expected: boolean,
+): ClaimPredicateOperand | null {
+    const raw = state.military?.event_fire_counts?.[eventId];
+    const observed = typeof raw === 'number' && Number.isFinite(raw) ? raw : 0;
+    if (expected ? observed < 1 : observed !== 0) return null;
+    return {
+        owner_path: `state.military.event_fire_counts.${eventId}`,
+        operator: expected ? 'at_least' : 'equals',
+        expected_value: expected ? 1 : 0,
+        observed_value: observed,
+        expression: expected
+            ? `event_fire_counts[${eventId}]=${observed}>=1`
+            : `event_fire_counts[${eventId}]=0`,
+    };
+}
+
+function policyOperand(
+    state: GhostEntryStateView,
+    expected: Exclude<GameState['paramilitary_policy'], undefined>,
+): ClaimPredicateOperand | null {
+    if (state.paramilitary_policy !== expected) return null;
+    return {
+        owner_path: 'state.paramilitary_policy',
+        operator: 'equals',
+        expected_value: expected,
+        observed_value: state.paramilitary_policy,
+        expression: `state.paramilitary_policy=${expected}`,
+    };
+}
+
+function warCrimesZeroOperand(
+    state: GhostEntryStateView,
+    faction: FactionId,
+): ClaimPredicateOperand | null {
+    const observed = state.military?.negotiation?.capital?.[faction]?.war_crimes_events;
+    if (typeof observed !== 'number' || observed !== 0) return null;
+    return {
+        owner_path: `state.military.negotiation.capital.${faction}.war_crimes_events`,
+        operator: 'equals',
+        expected_value: 0,
+        observed_value: observed,
+        expression: `negotiation.capital[${faction}].war_crimes_events=0`,
+    };
+}
+
+function matchGhost(
+    claimOperands: ClaimPredicateOperand[],
+    missedOperands: ClaimPredicateOperand[],
+    currentTurn: number,
+    minimumTurn?: number,
+): GhostPredicateMatch | null {
+    if (minimumTurn !== undefined && currentTurn < minimumTurn) return null;
+    return {
+        claim_operands: claimOperands,
+        missed_operands: missedOperands,
+        calendar_context: minimumTurn === undefined
+            ? []
+            : [`turn.current=${currentTurn}>=${minimumTurn}`],
+    };
+}
+
+function combineClaimPredicate(
+    kind: NamedClaimPredicate['kind'],
+    operands: readonly ClaimPredicateOperand[],
+): NamedClaimPredicate {
+    if (operands.length === 0) {
+        throw new Error('[dynamic_section_builder] claim predicate requires at least one owner operand.');
+    }
+    const ownerPaths = [...new Set(operands.map((operand) => operand.owner_path))];
+    return {
+        kind,
+        owner_path: ownerPaths.join('+'),
+        owner_paths: ownerPaths,
+        expression: operands.map((operand) => operand.expression).join(' AND '),
+        operands: operands.map((operand) => ({ ...operand })),
+    };
+}
+
+function requiredOperands(
+    ...operands: Array<ClaimPredicateOperand | null>
+): ClaimPredicateOperand[] | null {
+    return operands.every((operand): operand is ClaimPredicateOperand => operand !== null)
+        ? operands
+        : null;
 }
 
 // — Ghost 1: alliance_held —
 //   federation_never_fractured = true AND croat_bosniak_war_begins_1993 did
 //   NOT fire by t70.
-function predAllianceHeld(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (!flag(state, 'federation_never_fractured')) return false;
-    if (currentTurn < 70) return false;
-    return !eventFiredById(state, 'croat_bosniak_war_begins_1993');
+function predAllianceHeld(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'federation_never_fractured', true),
+        eventFiredOperand(state, 'croat_bosniak_war_begins_1993', false),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 70) : null;
 }
 
 // — Ghost 2: cleansing_refused —
@@ -260,14 +433,16 @@ function predAllianceHeld(state: GhostEntryStateView, currentTurn: number): bool
 //   negotiation breakdown (`state.political.negotiation.capital[faction]`),
 //   which is the canonical accumulator written by paramilitary_sweep and
 //   per-turn negotiation-capital recalculation.
-function predCleansingRefused(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 100) return false;
-    if (state.paramilitary_policy !== 'always_deny') return false;
-    const faction = playerFaction(state);
-    // NegotiationState (with `capital`) lives on MilitaryState — `state.military.negotiation`.
-    const breakdown = state.military?.negotiation?.capital?.[faction];
-    const warCrimes = breakdown?.war_crimes_events ?? 0;
-    return warCrimes === 0;
+function predCleansingRefused(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        policyOperand(state, 'always_deny'),
+        warCrimesZeroOperand(state, faction),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 100) : null;
 }
 
 // — Ghost 3: enclave_defended (AUDIT-ONLY) —
@@ -278,31 +453,35 @@ function predCleansingRefused(state: GhostEntryStateView, currentTurn: number): 
 //   forecast, and NOT a claim about Srebrenica 1995 outcomes. The
 //   surrounding ghost-entry body (data/codex/ghost_entries/enclave_defended.md)
 //   carries the strict audit register; this predicate only gates emission.
-function predEnclaveDefended(state: GhostEntryStateView): boolean {
-    return flag(state, 'enclave_held_through_turn');
+function predEnclaveDefended(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const operand = flagOperand(state, 'enclave_held_through_turn', true);
+    return operand ? matchGhost([operand], [operand], currentTurn) : null;
 }
 
 // — Ghost 4: patron_resisted —
 //   count of patron_pressure_refused increments ≥ 3.
-function predPatronResisted(state: GhostEntryStateView): boolean {
-    return flagNumber(state, 'patron_pressure_refused') >= 3;
+function predPatronResisted(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const operand = flagAtLeastOperand(state, 'patron_pressure_refused', 3);
+    return operand ? matchGhost([operand], [operand], currentTurn) : null;
 }
 
 // — Ghost 5: early_peace_accepted —
 //   vance_owen_accepted (turn 50-70) OR owen_stoltenberg_accepted (turn 70-90);
 //   mutually exclusive with dayton_signed_1995.
-function predEarlyPeaceAccepted(state: GhostEntryStateView): boolean {
-    if (eventFiredById(state, 'dayton_signed_1995')) return false;
-    if (flag(state, 'vance_owen_accepted')) return true;
-    if (flag(state, 'owen_stoltenberg_accepted')) return true;
-    return false;
+function predEarlyPeaceAccepted(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const accepted = flagOperand(state, 'vance_owen_accepted', true)
+        ?? flagOperand(state, 'owen_stoltenberg_accepted', true);
+    const noDayton = eventFiredOperand(state, 'dayton_signed_1995', false);
+    const operands = requiredOperands(accepted, noDayton);
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn) : null;
 }
 
 // — Ghost 6: force_quality_inversion —
 //   vrs_quality_inverted = true (RS per-brigade combat power < ARBiH for ≥ 8
 //   turns sustained). Set by an upstream auditor; we just observe the flag.
-function predForceQualityInversion(state: GhostEntryStateView): boolean {
-    return flag(state, 'vrs_quality_inverted');
+function predForceQualityInversion(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const operand = flagOperand(state, 'vrs_quality_inverted', true);
+    return operand ? matchGhost([operand], [operand], currentTurn) : null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -323,10 +502,12 @@ function predForceQualityInversion(state: GhostEntryStateView): boolean {
 //   come from csq_paramilitary_authorization_refused. Distinct from
 //   cleansing_refused, which is gated on policy + war_crimes counter
 //   rather than the upstream divergence-event flag.
-function predParamilitaryStreakRefused(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 80) return false;
-    if (!flag(state, 'paramilitary_authorization_refused')) return false;
-    return flag(state, 'clean_record');
+function predParamilitaryStreakRefused(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'paramilitary_authorization_refused', true),
+        flagOperand(state, 'clean_record', true),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 80) : null;
 }
 
 // — Ghost 8: winter_held —
@@ -336,25 +517,32 @@ function predParamilitaryStreakRefused(state: GhostEntryStateView, currentTurn: 
 //   (analogous to enclave_held_through_turn) AND the per-faction
 //   winter_supply_attrition_active_<faction> flag remains unset.
 //   Faction-agnostic via player_faction.
-function predWinterHeld(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 80) return false;
-    if (!flag(state, 'winter_held_through_turn')) return false;
-    const faction = playerFaction(state);
-    return !flag(state, `winter_supply_attrition_active_${faction}`);
+function predWinterHeld(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'winter_held_through_turn', true),
+        flagOperand(state, `winter_supply_attrition_active_${faction}`, false),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 80) : null;
 }
 
 // — Ghost 9: corridor_blocked —
 //   Counterfactual: the Posavina corridor breakthrough did not occur.
 //   Requires upstream observer to set `corridor_blocked_through_turn` as a
 //   positive audit signal AND NOT corridor_secured AND NOT
-//   eventFiredById('operation_corridor_1992'). Turn ≥ 30 is a margin past
+//   event_fire_counts['operation_corridor_1992'] = 0. Turn ≥ 30 is a margin past
 //   the historical operational window (w12-w22) so we are observing the
 //   post-window state, not racing it.
-function predCorridorBlocked(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 30) return false;
-    if (!flag(state, 'corridor_blocked_through_turn')) return false;
-    if (flag(state, 'corridor_secured')) return false;
-    return !eventFiredById(state, 'operation_corridor_1992');
+function predCorridorBlocked(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'corridor_blocked_through_turn', true),
+        flagOperand(state, 'corridor_secured', false),
+        eventFiredOperand(state, 'operation_corridor_1992', false),
+    );
+    return operands ? matchGhost(operands, [operands[1]!, operands[2]!], currentTurn, 30) : null;
 }
 
 // — Ghost 10: doctrine_reform_completed —
@@ -362,11 +550,17 @@ function predCorridorBlocked(state: GhostEntryStateView, currentTurn: number): b
 //   modernisation pulse fired AND drift did NOT fire on player faction's track.
 //   Faction-agnostic via player_faction. Modernisation chains on prior reform
 //   (csq_doctrine_modernization_<faction> requires doctrine_reform_initiated).
-function predDoctrineReformCompleted(state: GhostEntryStateView): boolean {
-    const faction = playerFaction(state);
-    if (!flag(state, `doctrine_reform_initiated_${faction}`)) return false;
-    if (!flag(state, `doctrine_modernization_active_${faction}`)) return false;
-    return !flag(state, `doctrine_drift_active_${faction}`);
+function predDoctrineReformCompleted(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, `doctrine_reform_initiated_${faction}`, true),
+        flagOperand(state, `doctrine_modernization_active_${faction}`, true),
+        flagOperand(state, `doctrine_drift_active_${faction}`, false),
+    );
+    return operands ? matchGhost(operands, [operands[2]!], currentTurn) : null;
 }
 
 // — Ghost 11: arms_embargo_full_compliance —
@@ -375,12 +569,17 @@ function predDoctrineReformCompleted(state: GhostEntryStateView): boolean {
 //   observer to set `arms_embargo_compliant_through_turn` as a positive
 //   audit signal AND no third-party-channel or attenuation flags are set
 //   for the player faction. Faction-agnostic via player_faction.
-function predArmsEmbargoFullCompliance(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 100) return false;
-    if (!flag(state, 'arms_embargo_compliant_through_turn')) return false;
-    const faction = playerFaction(state);
-    if (flag(state, `third_party_arms_channel_active_${faction}`)) return false;
-    return !flag(state, `iran_arms_channel_attenuation_active_${faction}`);
+function predArmsEmbargoFullCompliance(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'arms_embargo_compliant_through_turn', true),
+        flagOperand(state, `third_party_arms_channel_active_${faction}`, false),
+        flagOperand(state, `iran_arms_channel_attenuation_active_${faction}`, false),
+    );
+    return operands ? matchGhost(operands, [operands[1]!, operands[2]!], currentTurn, 100) : null;
 }
 
 // — Ghost 12: political_unity_held —
@@ -389,11 +588,16 @@ function predArmsEmbargoFullCompliance(state: GhostEntryStateView, currentTurn: 
 //   set `political_unity_held_through_turn` as a positive audit signal AND
 //   the per-faction political_split_temporary_active_<faction> flag remains
 //   unset. Faction-agnostic via player_faction.
-function predPoliticalUnityHeld(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 100) return false;
-    if (!flag(state, 'political_unity_held_through_turn')) return false;
-    const faction = playerFaction(state);
-    return !flag(state, `political_split_temporary_active_${faction}`);
+function predPoliticalUnityHeld(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'political_unity_held_through_turn', true),
+        flagOperand(state, `political_split_temporary_active_${faction}`, false),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 100) : null;
 }
 
 // — Ghost 13: equipment_quality_collapse —
@@ -401,20 +605,23 @@ function predPoliticalUnityHeld(state: GhostEntryStateView, currentTurn: number)
 //   on player faction's track. Reads equipment_quality_collapsed flag (set by
 //   an upstream auditor when per-brigade equipment-quality readings cross the
 //   collapse audit threshold).
-function predEquipmentQualityCollapse(state: GhostEntryStateView): boolean {
-    return flag(state, 'equipment_quality_collapsed');
+function predEquipmentQualityCollapse(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const operand = flagOperand(state, 'equipment_quality_collapsed', true);
+    return operand ? matchGhost([operand], [operand], currentTurn) : null;
 }
 
 // — Ghost 14: negotiation_capital_exhausted —
 //   Divergence note: diplomatic capital ran out without any canonical peace
 //   plan being signed. Reads negotiation_capital_exhausted flag AND
 //   no peace-plan acceptance flag is set.
-function predNegotiationCapitalExhausted(state: GhostEntryStateView): boolean {
-    if (!flag(state, 'negotiation_capital_exhausted')) return false;
-    if (flag(state, 'vance_owen_accepted')) return false;
-    if (flag(state, 'owen_stoltenberg_accepted')) return false;
-    if (eventFiredById(state, 'dayton_signed_1995')) return false;
-    return true;
+function predNegotiationCapitalExhausted(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'negotiation_capital_exhausted', true),
+        flagOperand(state, 'vance_owen_accepted', false),
+        flagOperand(state, 'owen_stoltenberg_accepted', false),
+        eventFiredOperand(state, 'dayton_signed_1995', false),
+    );
+    return operands ? matchGhost(operands, operands.slice(1), currentTurn) : null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -446,22 +653,32 @@ function predNegotiationCapitalExhausted(state: GhostEntryStateView): boolean {
 //   being attributed to the player faction. Requires the upstream observer to
 //   set `ceasefire_held_through_turn` AND no ceasefire-violation attribution
 //   flag for the player faction. turn >= 80 observes a post-window streak.
-function predCeasefireStreakHeld(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 80) return false;
-    if (!flag(state, 'ceasefire_held_through_turn')) return false;
-    const faction = playerFaction(state);
-    return !flag(state, `ceasefire_violation_attributed_${faction}`);
+function predCeasefireStreakHeld(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'ceasefire_held_through_turn', true),
+        flagOperand(state, `ceasefire_violation_attributed_${faction}`, false),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 80) : null;
 }
 
 // — Ghost 16: mediator_trust_sustained —
 //   The trust channel to the active mediation phase was not repudiated within
 //   the window. Requires `mediator_trust_held_through_turn` AND no
 //   mediator-denounced attribution for the player faction. turn >= 80.
-function predMediatorTrustSustained(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 80) return false;
-    if (!flag(state, 'mediator_trust_held_through_turn')) return false;
-    const faction = playerFaction(state);
-    return !flag(state, `mediator_denounced_${faction}`);
+function predMediatorTrustSustained(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'mediator_trust_held_through_turn', true),
+        flagOperand(state, `mediator_denounced_${faction}`, false),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 80) : null;
 }
 
 // — Ghost 17: rear_pocket_sustained —
@@ -470,24 +687,32 @@ function predMediatorTrustSustained(state: GhostEntryStateView, currentTurn: num
 //   remains at zero. Reuses the real war_crimes_events accumulator (the same
 //   counter cleansing_refused reads), so this is grounded on live substrate.
 //   turn >= 80.
-function predRearPocketSustained(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 80) return false;
-    if (!flag(state, 'rear_pocket_discipline_held_through_turn')) return false;
-    const faction = playerFaction(state);
-    const breakdown = state.military?.negotiation?.capital?.[faction];
-    const warCrimes = breakdown?.war_crimes_events ?? 0;
-    return warCrimes === 0;
+function predRearPocketSustained(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'rear_pocket_discipline_held_through_turn', true),
+        warCrimesZeroOperand(state, faction),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 80) : null;
 }
 
 // — Ghost 18: civilian_displacement_contained —
 //   The displacement-counter trajectory stayed below the canonical baseline by
 //   the audit turn. Requires `civilian_displacement_contained_through_turn` AND
 //   no mass-displacement attribution for the player faction. turn >= 80.
-function predCivilianDisplacementContained(state: GhostEntryStateView, currentTurn: number): boolean {
-    if (currentTurn < 80) return false;
-    if (!flag(state, 'civilian_displacement_contained_through_turn')) return false;
-    const faction = playerFaction(state);
-    return !flag(state, `mass_displacement_attributed_${faction}`);
+function predCivilianDisplacementContained(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'civilian_displacement_contained_through_turn', true),
+        flagOperand(state, `mass_displacement_attributed_${faction}`, false),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn, 80) : null;
 }
 
 // — Ghost 19: equipment_quality_recovered —
@@ -495,22 +720,19 @@ function predCivilianDisplacementContained(state: GhostEntryStateView, currentTu
 //   The recovery consequence substrate (csq_equipment_quality_recovery_streak_*
 //   in data/scenarios/events/consequences.json) sets PER-FACTION streak flags
 //   `equipment_quality_recovery_streak_active_<FACTION>` — it never sets a bare
-//   `equipment_quality_recovered`. Gating on the bare flag meant this ghost
-//   could never emit from a live run (#267). Re-gated on any-faction-active over
-//   the canonical faction set (faction-agnostic; the recovery is an observable
-//   campaign-wide audit reading, not a player-faction-only one). The legacy
-//   `equipment_quality_recovered` flag is still honoured for back-compat with
-//   any upstream that writes the aggregate name directly. Mutual exclusion with
-//   the equipment_quality_collapse reading is preserved.
-function predEquipmentQualityRecovered(state: GhostEntryStateView): boolean {
-    if (flag(state, 'equipment_quality_collapsed')) return false;
-    // Deterministic iteration over the canonical faction set.
-    const anyStreakActive = CANONICAL_FACTIONS.some((f) =>
-        flag(state, `equipment_quality_recovery_streak_active_${f}`),
-    );
-    if (anyStreakActive) return true;
-    // Back-compat: honour the aggregate flag if some upstream sets it directly.
-    return flag(state, 'equipment_quality_recovered');
+//   `equipment_quality_recovered`. The ghost is player-visible, so it reads only
+//   the selected player's per-faction streak and never a foreign/aggregate flag.
+//   Mutual exclusion with the equipment_quality_collapse reading is preserved.
+function predEquipmentQualityRecovered(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
+    const noCollapse = flagOperand(state, 'equipment_quality_collapsed', false);
+    if (!noCollapse) return null;
+    const recovery = flagOperand(state, `equipment_quality_recovery_streak_active_${faction}`, true);
+    const operands = requiredOperands(recovery, noCollapse);
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn) : null;
 }
 
 // — Ghost 20: negotiation_capital_recovered —
@@ -518,9 +740,12 @@ function predEquipmentQualityRecovered(state: GhostEntryStateView): boolean {
 //   one-way-drain baseline. Requires `negotiation_capital_recovered` AND NOT
 //   `negotiation_capital_exhausted` (mutually exclusive readings of the same
 //   ledger).
-function predNegotiationCapitalRecovered(state: GhostEntryStateView): boolean {
-    if (!flag(state, 'negotiation_capital_recovered')) return false;
-    return !flag(state, 'negotiation_capital_exhausted');
+function predNegotiationCapitalRecovered(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+    const operands = requiredOperands(
+        flagOperand(state, 'negotiation_capital_recovered', true),
+        flagOperand(state, 'negotiation_capital_exhausted', false),
+    );
+    return operands ? matchGhost(operands, [operands[1]!], currentTurn) : null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -532,10 +757,13 @@ interface GhostRegistryEntry {
     path: string;
     /** Variant for this entry. AUDIT-ONLY entries are pinned to 'context'. */
     variant: SectionVariant;
-    /** Diagnostic predicate names recorded on the emission. */
-    conditional_on: string[];
-    /** Pure predicate over (state, currentTurn). */
-    predicate: (state: GhostEntryStateView, currentTurn: number) => boolean;
+    classification: GhostRecordClassification;
+    /** Evaluates and returns the exact structured operands that proved emission. */
+    predicate: (
+        state: GhostEntryStateView,
+        currentTurn: number,
+        faction: FactionId,
+    ) => GhostPredicateMatch | null;
 }
 
 const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
@@ -543,14 +771,14 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
         ghost_id: 'alliance_held',
         path: 'data/codex/ghost_entries/alliance_held.md',
         variant: 'context',
-        conditional_on: ['federation_never_fractured', 'NOT croat_bosniak_war_begins_1993', 'turn>=70'],
+        classification: 'path_not_taken',
         predicate: predAllianceHeld,
     },
     {
         ghost_id: 'cleansing_refused',
         path: 'data/codex/ghost_entries/cleansing_refused.md',
         variant: 'context',
-        conditional_on: ['paramilitary_policy=always_deny', 'war_crimes_events=0', 'turn>=100'],
+        classification: 'divergence_context',
         predicate: predCleansingRefused,
     },
     {
@@ -558,28 +786,28 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
         ghost_id: 'enclave_defended',
         path: 'data/codex/ghost_entries/enclave_defended.md',
         variant: 'context',
-        conditional_on: ['enclave_held_through_turn:N (Srebrenica AND Žepa AND Goražde)'],
+        classification: 'audit_context',
         predicate: predEnclaveDefended,
     },
     {
         ghost_id: 'patron_resisted',
         path: 'data/codex/ghost_entries/patron_resisted.md',
         variant: 'context',
-        conditional_on: ['patron_pressure_refused>=3'],
+        classification: 'divergence_context',
         predicate: predPatronResisted,
     },
     {
         ghost_id: 'early_peace_accepted',
         path: 'data/codex/ghost_entries/early_peace_accepted.md',
         variant: 'context',
-        conditional_on: ['(vance_owen_accepted OR owen_stoltenberg_accepted)', 'NOT dayton_signed_1995'],
+        classification: 'path_not_taken',
         predicate: predEarlyPeaceAccepted,
     },
     {
         ghost_id: 'force_quality_inversion',
         path: 'data/codex/ghost_entries/force_quality_inversion.md',
         variant: 'context',
-        conditional_on: ['vrs_quality_inverted'],
+        classification: 'divergence_context',
         predicate: predForceQualityInversion,
     },
     // ─── Wave 2 entries (LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION) ────────
@@ -587,83 +815,56 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
         ghost_id: 'paramilitary_streak_refused',
         path: 'data/codex/ghost_entries/paramilitary_streak_refused.md',
         variant: 'context',
-        conditional_on: ['paramilitary_authorization_refused', 'clean_record', 'turn>=80'],
+        classification: 'divergence_context',
         predicate: predParamilitaryStreakRefused,
     },
     {
         ghost_id: 'winter_held',
         path: 'data/codex/ghost_entries/winter_held.md',
         variant: 'context',
-        conditional_on: [
-            'winter_held_through_turn',
-            'NOT winter_supply_attrition_active_<player>',
-            'turn>=80',
-        ],
+        classification: 'path_not_taken',
         predicate: predWinterHeld,
     },
     {
         ghost_id: 'corridor_blocked',
         path: 'data/codex/ghost_entries/corridor_blocked.md',
         variant: 'context',
-        conditional_on: [
-            'corridor_blocked_through_turn',
-            'NOT corridor_secured',
-            'NOT operation_corridor_1992',
-            'turn>=30',
-        ],
+        classification: 'path_not_taken',
         predicate: predCorridorBlocked,
     },
     {
         ghost_id: 'doctrine_reform_completed',
         path: 'data/codex/ghost_entries/doctrine_reform_completed.md',
         variant: 'context',
-        conditional_on: [
-            'doctrine_reform_initiated_<player>',
-            'doctrine_modernization_active_<player>',
-            'NOT doctrine_drift_active_<player>',
-        ],
+        classification: 'path_not_taken',
         predicate: predDoctrineReformCompleted,
     },
     {
         ghost_id: 'arms_embargo_full_compliance',
         path: 'data/codex/ghost_entries/arms_embargo_full_compliance.md',
         variant: 'context',
-        conditional_on: [
-            'arms_embargo_compliant_through_turn',
-            'NOT third_party_arms_channel_active_<player>',
-            'NOT iran_arms_channel_attenuation_active_<player>',
-            'turn>=100',
-        ],
+        classification: 'path_not_taken',
         predicate: predArmsEmbargoFullCompliance,
     },
     {
         ghost_id: 'political_unity_held',
         path: 'data/codex/ghost_entries/political_unity_held.md',
         variant: 'context',
-        conditional_on: [
-            'political_unity_held_through_turn',
-            'NOT political_split_temporary_active_<player>',
-            'turn>=100',
-        ],
+        classification: 'path_not_taken',
         predicate: predPoliticalUnityHeld,
     },
     {
         ghost_id: 'equipment_quality_collapse',
         path: 'data/codex/ghost_entries/equipment_quality_collapse.md',
         variant: 'context',
-        conditional_on: ['equipment_quality_collapsed'],
+        classification: 'divergence_context',
         predicate: predEquipmentQualityCollapse,
     },
     {
         ghost_id: 'negotiation_capital_exhausted',
         path: 'data/codex/ghost_entries/negotiation_capital_exhausted.md',
         variant: 'context',
-        conditional_on: [
-            'negotiation_capital_exhausted',
-            'NOT vance_owen_accepted',
-            'NOT owen_stoltenberg_accepted',
-            'NOT dayton_signed_1995',
-        ],
+        classification: 'path_not_taken',
         predicate: predNegotiationCapitalExhausted,
     },
     // ─── Wave 3 entries (LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION-WAVE-3) ──
@@ -671,61 +872,42 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
         ghost_id: 'ceasefire_streak_held',
         path: 'data/codex/ghost_entries/ceasefire_streak_held.md',
         variant: 'context',
-        conditional_on: [
-            'ceasefire_held_through_turn',
-            'NOT ceasefire_violation_attributed_<player>',
-            'turn>=80',
-        ],
+        classification: 'path_not_taken',
         predicate: predCeasefireStreakHeld,
     },
     {
         ghost_id: 'mediator_trust_sustained',
         path: 'data/codex/ghost_entries/mediator_trust_sustained.md',
         variant: 'context',
-        conditional_on: [
-            'mediator_trust_held_through_turn',
-            'NOT mediator_denounced_<player>',
-            'turn>=80',
-        ],
+        classification: 'path_not_taken',
         predicate: predMediatorTrustSustained,
     },
     {
         ghost_id: 'rear_pocket_sustained',
         path: 'data/codex/ghost_entries/rear_pocket_sustained.md',
         variant: 'context',
-        conditional_on: [
-            'rear_pocket_discipline_held_through_turn',
-            'war_crimes_events=0',
-            'turn>=80',
-        ],
+        classification: 'path_not_taken',
         predicate: predRearPocketSustained,
     },
     {
         ghost_id: 'civilian_displacement_contained',
         path: 'data/codex/ghost_entries/civilian_displacement_contained.md',
         variant: 'context',
-        conditional_on: [
-            'civilian_displacement_contained_through_turn',
-            'NOT mass_displacement_attributed_<player>',
-            'turn>=80',
-        ],
+        classification: 'path_not_taken',
         predicate: predCivilianDisplacementContained,
     },
     {
         ghost_id: 'equipment_quality_recovered',
         path: 'data/codex/ghost_entries/equipment_quality_recovered.md',
         variant: 'context',
-        conditional_on: [
-            'equipment_quality_recovery_streak_active_<any-faction> (or legacy equipment_quality_recovered)',
-            'NOT equipment_quality_collapsed',
-        ],
+        classification: 'path_not_taken',
         predicate: predEquipmentQualityRecovered,
     },
     {
         ghost_id: 'negotiation_capital_recovered',
         path: 'data/codex/ghost_entries/negotiation_capital_recovered.md',
         variant: 'context',
-        conditional_on: ['negotiation_capital_recovered', 'NOT negotiation_capital_exhausted'],
+        classification: 'path_not_taken',
         predicate: predNegotiationCapitalRecovered,
     },
 ];
@@ -859,23 +1041,23 @@ const LOAD_BEARING_BY_EVENT: ReadonlyMap<string, LoadBearingSectionSpec> = new M
  */
 function isPlayerOwnedDecision(entry: GhostEntryDecisionLogEntry, loadedFaction: FactionId | null): boolean {
     if (entry.decision_source !== 'player') return false;
-    if (loadedFaction == null) return true;
+    if (loadedFaction == null) return false;
     if (entry.player_faction != null && entry.player_faction !== loadedFaction) return false;
-    if (entry.faction != null && entry.faction !== loadedFaction) return false;
-    return true;
+    if (entry.faction !== loadedFaction) return false;
+    return Number.isInteger(entry.turn);
 }
 
-function firstResponseByEvent(
+function firstDecisionByEvent(
     log: readonly GhostEntryDecisionLogEntry[],
     loadedFaction: FactionId | null,
-): ReadonlyMap<string, string> {
-    const out = new Map<string, string>();
+): ReadonlyMap<string, GhostEntryDecisionLogEntry> {
+    const out = new Map<string, GhostEntryDecisionLogEntry>();
     for (const entry of log) {
         if (!entry || typeof entry.event_id !== 'string' || typeof entry.response_id !== 'string') continue;
         if (!isPlayerOwnedDecision(entry, loadedFaction)) continue;
         if (!LOAD_BEARING_BY_EVENT.has(entry.event_id)) continue;
         if (out.has(entry.event_id)) continue;
-        out.set(entry.event_id, entry.response_id);
+        out.set(entry.event_id, entry);
     }
     return out;
 }
@@ -967,6 +1149,14 @@ function buildRuptureReceiptSections(state: GhostEntryStateView): BuiltDynamicSe
             // (`FINDING:rupture_<id>`); the renderer pulls the ICTY-sourced prose
             // from there. Defence in depth: never emit an `outcome`-framed record.
             conditional_on: [`FINDING:rupture_${spec.rupture_id}`],
+            claim_predicate: combineClaimPredicate('receipt', [{
+                owner_path: 'state.military.negotiation.rupture_consequences',
+                operator: 'contains',
+                expected_value: spec.rupture_id,
+                observed_value: spec.rupture_id,
+                expression: `rupture_consequences contains id=${spec.rupture_id}`,
+            }]),
+            calendar_context: [],
         });
     }
     // Defence in depth — a rupture receipt must never be framed as a player
@@ -995,17 +1185,41 @@ function buildRuptureReceiptSections(state: GhostEntryStateView): BuiltDynamicSe
  */
 export function buildGhostEntries(state: GhostEntryStateView, currentTurn: number): BuiltGhostEntry[] {
     assertRingGuard(state);
+    const player = selectedPlayerSubject(state);
+    if (player === null) return [];
 
     const emitted: BuiltGhostEntry[] = [];
     for (const entry of GHOST_ENTRIES) {
-        if (!entry.predicate(state, currentTurn)) continue;
-        emitted.push({
+        const match = entry.predicate(state, currentTurn, player.faction);
+        if (match === null) continue;
+        const claimOperands = [player.operand, ...match.claim_operands];
+        const common: BuiltGhostEntryBase = {
             ghost_id: entry.ghost_id,
             path: entry.path,
             ring_classification: 2,
-            conditional_on: [...entry.conditional_on],
+            conditional_on: [
+                ...match.claim_operands.map((operand) => operand.expression),
+                ...match.calendar_context,
+            ],
             variant: entry.variant,
-        });
+            claim_predicate: combineClaimPredicate('state', claimOperands),
+            calendar_context: match.calendar_context,
+        };
+        if (entry.classification === 'path_not_taken') {
+            if (match.missed_operands.length === 0) continue;
+            const evaluatedClaim = combineClaimPredicate('state', match.claim_operands);
+            const missedCondition = combineClaimPredicate('state', match.missed_operands);
+            // Duplicate positive evidence cannot prove that another path was
+            // missed. Fail closed rather than inventing an inverse predicate.
+            if (missedCondition.expression === evaluatedClaim.expression) continue;
+            emitted.push({
+                ...common,
+                classification: 'path_not_taken',
+                missed_condition_predicate: missedCondition,
+            });
+        } else {
+            emitted.push({ ...common, classification: entry.classification });
+        }
     }
 
     // Defence in depth: enforce variant invariant at emission time even if
@@ -1035,8 +1249,9 @@ export function buildGhostEntries(state: GhostEntryStateView, currentTurn: numbe
  *
  * Pure & deterministic:
  *   - reads only frozen state; writes nothing (calibration-inert).
- *   - iterates the fixed `LOAD_BEARING_SECTIONS` declaration order, then sorts
- *     the emitted records by `strictCompare` on `id`.
+ *   - authored-choice and rupture records are sorted by `strictCompare` on
+ *     `id`; realized consequence receipts follow them in shared projector
+ *     order (`fired_turn`, then receipt id).
  *
  * In addition (#78), any rupture ALREADY recorded on
  * `state.military.negotiation.rupture_consequences` is surfaced as a Ring-2
@@ -1052,13 +1267,25 @@ export function buildDynamicSections(input: BuilderInput): BuiltDynamicSection[]
     assertRingGuard(input.state);
 
     const log = input.state.military?.event_decision_log ?? [];
-    const chosenByEvent = firstResponseByEvent(log, loadedPlayerFaction(input.state));
+    const player = selectedPlayerSubject(input.state);
+    const chosenByEvent = firstDecisionByEvent(log, player?.faction ?? null);
 
     const emitted: BuiltDynamicSection[] = [];
     for (const spec of LOAD_BEARING_SECTIONS) {
-        const branch = chosenByEvent.get(spec.event_id);
-        if (branch === undefined) continue;
+        const decision = chosenByEvent.get(spec.event_id);
+        if (decision === undefined || player === null || !Number.isInteger(decision.turn)) continue;
+        const branch = decision.response_id;
+        const decisionTurn = decision.turn as number;
         const responseCondition = `RESPONSE:${spec.event_id}:${branch}`;
+        const decisionOperand: ClaimPredicateOperand = {
+            owner_path: 'state.military.event_decision_log',
+            operator: 'contains',
+            expected_value: `${spec.event_id}::${branch}::${decisionTurn}::${player.faction}::player`,
+            observed_value: `${spec.event_id}::${branch}::${decisionTurn}::${player.faction}::player`,
+            expression:
+                `event_decision_log(event_id=${spec.event_id},response_id=${branch},turn=${decisionTurn},` +
+                `faction=${player.faction},decision_source=player)`,
+        };
         emitted.push({
             id: `dynsec_${spec.event_id}_${branch}`,
             target_essay_event_id: spec.target_essay_event_id,
@@ -1068,6 +1295,8 @@ export function buildDynamicSections(input: BuilderInput): BuiltDynamicSection[]
             // `conditional_on` carries the A1c join key so the renderer can pull
             // the authored per-branch prose from essay_index `dynamic_sections`.
             conditional_on: [responseCondition],
+            claim_predicate: combineClaimPredicate('receipt', [player.operand, decisionOperand]),
+            calendar_context: [],
         });
     }
 
@@ -1078,7 +1307,32 @@ export function buildDynamicSections(input: BuilderInput): BuiltDynamicSection[]
         emitted.push(receipt);
     }
 
-    return emitted.slice().sort((a, b) => strictCompare(a.id, b.id));
+    // Keep the projector's realized chronology intact. These receipt rows are
+    // appended after the independently sorted authored/rupture sections so a
+    // lexical receipt id cannot reorder fired history, while the pre-existing
+    // dynamic-section order remains unchanged.
+    const consequenceSections: BuiltDynamicSection[] = [];
+    for (const receipt of buildRealizedConsequenceReceipts(input.state)) {
+        consequenceSections.push({
+            id: `dynsec_consequence_${receipt.receipt_id}`,
+            target_essay_event_id: receipt.consequence_event_id,
+            content: 'The campaign record ties this realized consequence to a filed player decision.',
+            variant: 'note',
+            ring_classification: 2,
+            conditional_on: [`RECEIPT:${receipt.receipt_id}`],
+            claim_predicate: receipt.claim_predicate,
+            calendar_context: [
+                `turn decision=${receipt.decision_turn}`,
+                `turn fired=${receipt.fired_turn}`,
+            ],
+            receipt_record_id: receipt.receipt_record_id,
+        });
+    }
+
+    return [
+        ...emitted.slice().sort((a, b) => strictCompare(a.id, b.id)),
+        ...consequenceSections,
+    ];
 }
 
 /**

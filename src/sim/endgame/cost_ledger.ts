@@ -18,6 +18,10 @@ import type {
 import { computeFactionVerdict } from '../negotiation/scoring.js';
 import { getPeacePlanById } from '../negotiation/peace_plan_data.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import {
+    buildRealizedConsequenceReceipts,
+    type RealizedConsequenceReceipt,
+} from '../events/realized_consequence_receipts.js';
 
 const CANONICAL_FACTIONS: readonly string[] = ['HRHB', 'RBiH', 'RS'] as const;
 
@@ -262,6 +266,8 @@ export interface CostLedger {
     total_military_killed: number;
     total_civilian_killed: number;
     findings: CostLedgerFinding[];
+    /** Shared, receipt-id-stable projection consumed by Records, Chronicle, and Codex. */
+    consequence_receipts?: RealizedConsequenceReceipt[];
     /** Audit-only divergence-event annotations. Sorted (turn, tag) for determinism. */
     annotations?: CostLedgerAnnotation[];
 }
@@ -545,6 +551,8 @@ export function buildCostLedger(state: GameState): CostLedger {
             return strictCompare(a.event_id, b.event_id);
         });
 
+    const consequenceReceipts = buildRealizedConsequenceReceipts(state);
+
     return {
         war_duration_weeks: turn,
         entries,
@@ -553,6 +561,7 @@ export function buildCostLedger(state: GameState): CostLedger {
         total_military_killed: totalMilitaryKilled,
         total_civilian_killed: totalCivilianKilled,
         findings: buildProsecutorialFindings(entries, ruptureEntries, totalMilitaryKilled, totalCivilianKilled, state),
+        consequence_receipts: consequenceReceipts.length > 0 ? consequenceReceipts : undefined,
         annotations: annotations.length > 0 ? annotations : undefined,
     };
 }

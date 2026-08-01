@@ -21,7 +21,7 @@ import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
 import type { ChronicleChapter } from '../../data/chronicleChapters.js';
 import { EmptyState } from '../EmptyState.js';
 import { Z } from '../../../shared/zIndex.js';
-import { t } from '../../i18n';
+import { t, useLocale } from '../../i18n';
 
 /** Abbreviated date for column labels: "Dec 1992" */
 function turnToShortDate(turn: number): string {
@@ -280,6 +280,7 @@ function ChronicleChapterView({
 }
 
 export function ChronicleOverlay() {
+    const [locale] = useLocale();
     const open = useGameStore(s => s.chronicleOpen);
     const setOpen = useGameStore(s => s.setChronicleOpen);
     const focusedChronicleDecisionRecordId = useGameStore(s => s.focusedChronicleDecisionRecordId);
@@ -310,7 +311,7 @@ export function ChronicleOverlay() {
 
     const allEntries = useMemo(() =>
         state ? generateChronicleEntries(state, eventCatalogFull) : [],
-        [state, eventCatalogFull]
+        [state, eventCatalogFull, locale]
     );
 
     const narratedTurnSummaries = useMemo(

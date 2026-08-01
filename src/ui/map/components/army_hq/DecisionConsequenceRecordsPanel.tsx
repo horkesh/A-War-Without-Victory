@@ -18,7 +18,7 @@ import {
   type ConsequenceReceipt,
 } from '../../data/consequenceReceipts';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
-import { t, type MessageKey } from '../../i18n';
+import { t, useLocale, type MessageKey } from '../../i18n';
 import { useGameStore } from '../../store/gameStore';
 import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeDisplayLabel } from '../../utils/playerSafeText';
@@ -307,6 +307,7 @@ function DecisionHistoryRecordsSection({
 }: {
   eventCatalog?: ReadonlyMap<string, EventDefinition>;
 }) {
+  const [locale] = useLocale();
   const loadedState = useGameStore((s) => s.loadedGameState);
   const diagMode = useGameStore((s) => s.diagMode);
   const [expandedSourceRecordId, setExpandedSourceRecordId] = useState<string | null>(null);
@@ -318,13 +319,13 @@ function DecisionHistoryRecordsSection({
   const receiptsBySourceRecord = useMemo(() => {
     const map = new Map<string, ConsequenceReceipt[]>();
     if (!rawState || !eventCatalog) return map;
-    for (const receipt of buildConsequenceReceipts(rawState, eventCatalog)) {
+    for (const receipt of buildConsequenceReceipts(rawState, eventCatalog, locale)) {
       const arr = map.get(receipt.sourceRecordId) ?? [];
       arr.push(receipt);
       map.set(receipt.sourceRecordId, arr);
     }
     return map;
-  }, [rawState, eventCatalog]);
+  }, [rawState, eventCatalog, locale]);
 
   if (!rawState || !eventCatalog) return null;
 

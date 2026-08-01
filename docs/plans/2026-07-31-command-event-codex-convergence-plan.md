@@ -9,7 +9,7 @@
 **Tech stack:** TypeScript, React, Vitest, JSON-authored events/essays, Electron browser gates, deterministic scenario runner.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phase 3 complete; Phase 4 Dynamic Codex convergence next
+**Status:** IN PROGRESS -- Phase 4 source checkpoint complete; canonical baseline/canon acceptance lease-blocked
 **Roadmap workstream:** R4
 **Canonical owner:** Presidential Decision Room for action; Desk for triage; Records/Codex for receipts
 **Collision rule:** Do not overlap source edits with RS packets FR-01 or FR-04. Rebase on their shared priority and cadence contracts before Phase 0.
@@ -309,6 +309,7 @@ npm.cmd run typecheck
 
 **Assigned role:** Gameplay Programmer + Documentation Specialist
 **Independent review:** Historian + Canon Compliance Reviewer
+**Status:** SOURCE COMPLETE -- fast gates pass; canonical baseline/canon acceptance waits on the exclusive runtime lease
 
 ### Task 4.1 -- Pin state/receipt ownership
 
@@ -320,10 +321,10 @@ npm.cmd run typecheck
 - Modify `tests/dynamic_codex_slice_v1.test.ts`
 - Modify `tests/ui/codex_panel_dynamic_mount.test.ts`
 
-- [ ] Every dynamic claim names its state/receipt predicate.
-- [ ] Ghost entries require a documented missed-condition predicate.
-- [ ] Calendar-only context cannot claim territorial, casualty, atrocity, or negotiation outcomes.
-- [ ] One receipt renders consistently across Codex, Chronicle, Records, and Cost Ledger.
+- [x] Every dynamic claim names its state/receipt predicate.
+- [x] Ghost records use a discriminated contract: genuine paths require a distinct evaluated missed-condition predicate; divergence/audit context cannot carry one.
+- [x] Calendar-only context cannot claim territorial, casualty, atrocity, or negotiation outcomes.
+- [x] One receipt renders consistently across Codex, Chronicle, Records, and Cost Ledger.
 
 ### Task 4.2 -- Close content residuals found by the inventory
 
@@ -333,9 +334,9 @@ npm.cmd run typecheck
 - Modify `tests/codex_sensitive_claim_inventory.test.ts`
 - Modify `tests/consequence_substrate_inventory_diagnostic.test.ts`
 
-- [ ] Remove stale rupture tags from non-rupture essays.
-- [ ] Add missing source notes without copying source prose.
-- [ ] Preserve the Section 6 rule that atrocity is consequence, never lever.
+- [x] Remove stale rupture tags from non-rupture essays. The inventory found zero eligible stale tags and pins rupture ownership to the Srebrenica finding.
+- [x] Add missing source notes without copying source prose.
+- [x] Preserve the Section 6 rule that atrocity is consequence, never lever.
 
 **Verification:**
 
@@ -347,6 +348,13 @@ npm.cmd run typecheck
 ```
 
 `/simplify` -> historian/canon review -> commit `fix(codex): converge dynamic consequence truth`
+
+**Phase 4 source checkpoint (2026-08-01):**
+
+- Every dynamic section now exposes its exact state/receipt predicate and separates calendar context. The twenty ghost records are discriminated as `14` genuine paths, `5` divergence contexts, and `1` audit context: only a genuine path carries a distinct evaluated missed-condition predicate. A late-calendar UI regression proves that date alone cannot produce the Igman outcome.
+- One pure strict-sorted realized-consequence projector requires the selected canonical player, exact player decision, response-tagged causal edge, fired-event id, and at-or-after firing row. Its receipt id, record id, five-operand predicate, and chronology are shared by Codex, Chronicle, Records, and Cost Ledger. EN/BCS presentation uses authored localizations and suppresses unavailable English-only future-consequence prose outside EN.
+- Seven inventory-identified safe essays received source-note metadata only; bodies remain unchanged and explicitly original synthesis. The corrected live inventory is `405` claims / `227` files / `325` stop-gated rows and reports zero safe source-note residuals and zero dynamic sections without predicates. Only the Srebrenica finding carries a rupture condition. Sensitive player-choice and legacy Srebrenica presentation decisions remain routed to R7.
+- Committee RED probes fixed selected-player ownership leaks, partial/legacy predicates, cross-surface receipt reordering, untranslated prose, orphaned/closed projection cost, and false global path-not-taken semantics. GREEN passes the full changed/dependent-surface matrix at `14` files / `262` tests plus TypeScript. The canonical baseline/canon gates were not run because R5 owns the exclusive runtime lease. Phase 4 is source-complete but not canonically accepted. Evidence: [implementation report](../40_reports/implemented/20260801_R4_PHASE4_DYNAMIC_CODEX_CONVERGENCE_CHECKPOINT.md).
 
 ## Phase 5 -- Integrated proof and closeout
 
@@ -386,7 +394,7 @@ git diff --check
 - [ ] No duplicate Desk/Inbox/Decision Room priority disagreement.
 - [ ] No unsupported historical choice added to fill a drought.
 - [ ] Sourced review cadence meets the 8-10-week target where evidence exists; all other long intervals render positive-hold truth.
-- [ ] Every dynamic Codex claim is state/receipt backed.
+- [x] Every dynamic Codex claim is state/receipt backed at the source checkpoint; canonical baseline/canon acceptance remains lease-blocked.
 - [ ] RBiH, RS, and HRHB 104-turn proofs and repeated 188-turn proof are deterministic and green.
 
 ## 7. Copy-ready execution prompt

@@ -79,7 +79,7 @@ import {
   officerResentmentReceiptsRealizedOnTurn,
 } from './data/officerResentmentReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
-import { t } from './i18n';
+import { t, useLocale } from './i18n';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import {
   isCurrentTacticalInteractionReady,
@@ -467,6 +467,7 @@ function WarroomNativeOverlay({
 }
 
 function App() {
+  const [locale] = useLocale();
   const ipc = useIPC();
   const devMode = useGameStore((s) => s.devMode);
 
@@ -673,8 +674,8 @@ function App() {
   // the aftermath modal surfaces only those whose CONFIRMED firing landed on
   // the just-advanced turn. Read-only; collapses to [] pre-substrate.
   const consequenceReceipts = useMemo(
-    () => buildConsequenceReceipts(loadedGameState?.rawGameState, eventCatalogFull),
-    [loadedGameState?.rawGameState, eventCatalogFull],
+    () => buildConsequenceReceipts(loadedGameState?.rawGameState, eventCatalogFull, locale),
+    [loadedGameState?.rawGameState, eventCatalogFull, locale],
   );
   const aftermathConsequences = useMemo(
     () => (turnAftermath ? receiptsRealizedOnTurn(consequenceReceipts, turnAftermath.turn) : []),

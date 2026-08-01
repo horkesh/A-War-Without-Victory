@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -190,6 +190,7 @@ test('inventory covers essay_index dynamic_sections (A1c morphing prose) the run
         // `sourceStatusFor` only ran the floor check for surface === 'essay',
         // so this claim wrongly reported `cited` and bypassed the gate.)
         assert.strictEqual(hostage.source_status, 'source_floor_exception');
+        assert.strictEqual(hostage.state_predicate, 'RESPONSE:un_hostage_crisis_1995:maintain_hostages');
         // field_path is keyed by the parent essay id for human traceability.
         assert.strictEqual(
             hostage.field_path.startsWith('$.essay_un_hostage_crisis_1995.dynamic_sections'),
@@ -204,6 +205,51 @@ test('inventory covers essay_index dynamic_sections (A1c morphing prose) the run
     } finally {
         await rm(root, { recursive: true, force: true });
     }
+});
+
+test('real dynamic Codex claims name a non-calendar predicate and rupture tags stay on rupture essays', async () => {
+    const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const dynamicClaims = result.claims.filter(
+        (claim: { surface: string }) => claim.surface === 'essay_dynamic_section',
+    );
+
+    assert.ok(dynamicClaims.length > 0);
+    assert.strictEqual(dynamicClaims.every((claim: { state_predicate: string | null }) => (
+        typeof claim.state_predicate === 'string'
+        && claim.state_predicate.trim().length > 0
+        && !/^turn\s*[<=>]/i.test(claim.state_predicate)
+    )), true);
+
+    const essayIndex = JSON.parse(await readFile(
+        join(process.cwd(), 'data', 'scenarios', 'essays', 'essay_index.json'),
+        'utf8',
+    ));
+    const ruptureClaims = essayIndex.essays.flatMap((essay: { dynamic_sections?: Array<{ id: string; condition?: string }> }) => (
+        (essay.dynamic_sections ?? []).filter((section) => section.condition?.includes('FINDING:rupture_'))
+    ));
+    assert.deepStrictEqual(
+        [...new Set(ruptureClaims.map((claim: { id: string }) => claim.id))],
+        ['v091_cost_ledger_srebrenica_finding'],
+    );
+});
+
+test('inventory-identified safe essay residuals carry source notes without copied prose', async () => {
+    const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const safeFiles = new Set([
+        'data/scenarios/essays/battle_of_the_barracks_sarajevo.json',
+        'data/scenarios/essays/battle_of_the_barracks_visoko.json',
+        'data/scenarios/essays/belgrade_embargo_rs_1994.json',
+        'data/scenarios/essays/mostar_liberation_1992.json',
+        'data/scenarios/essays/nato_air_strike_threat_1993.json',
+        'data/scenarios/essays/operation_lukavac_93.json',
+        'data/scenarios/essays/un_hostage_crisis_1995.json',
+    ]);
+    const safeClaims = result.claims.filter((claim: { file: string; risk_class: string }) => (
+        safeFiles.has(claim.file) && claim.risk_class === 'safe_factual_correction'
+    ));
+
+    assert.strictEqual(safeClaims.length, safeFiles.size);
+    assert.strictEqual(safeClaims.every((claim: { status: string }) => claim.status === 'documented'), true);
 });
 
 test('dynamic_section claims clear the source floor when the parent has enough sources (#338)', async () => {

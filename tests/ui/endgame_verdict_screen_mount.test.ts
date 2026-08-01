@@ -192,6 +192,35 @@ describe('VerdictScreen mount — verdict content', () => {
         expect(h).toContain('least bad version'); expect(h).toContain('View Your War'); expect(h).toContain('New Game');
     });
 
+    it('renders mixed ghost classifications under a neutral Campaign Codex heading', () => {
+        storeState = {
+            loadedGameState: endgame({
+                rawGameState: {
+                    meta: { turn: 188, phase: 'war', player_faction: 'RBiH' },
+                    political: { political_controllers: {}, initial_political_controllers: {} },
+                    military: {
+                        formations: {},
+                        event_flags: {
+                            federation_never_fractured: true,
+                            vrs_quality_inverted: true,
+                        },
+                        event_fire_counts: {},
+                    },
+                } as any,
+            }),
+        };
+
+        const html = render();
+        expect(html).toContain('Campaign Codex');
+        expect(html).toContain('data-awwv-ghost-classification="path_not_taken"');
+        expect(html).toContain('data-awwv-ghost-classification="divergence_context"');
+        expect(html).toContain('Campaign divergence');
+        const divergenceRow = html.match(
+            /<li[^>]*data-awwv-ghost-classification="divergence_context"[\s\S]*?<\/li>/,
+        )?.[0] ?? '';
+        expect(divergenceRow).not.toMatch(/path[-\s]?not[-\s]?taken/i);
+    });
+
     it('renders replay from a sparse manifest when full frame sequence is absent', () => {
         storeState = {
             loadedGameState: endgame({

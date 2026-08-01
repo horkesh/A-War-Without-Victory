@@ -36,9 +36,13 @@ import type {
     EventDefinition,
     EventResponseOption,
 } from '../../../sim/events/event_types.js';
+import {
+    buildRealizedConsequenceReceipts,
+    type NamedClaimPredicate,
+} from '../../../sim/events/realized_consequence_receipts.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
-import { t } from '../i18n/index.js';
+import { getActiveLocale, t, type Locale } from '../i18n/index.js';
 import { isCanonicalPlayerFaction, playerFactionMatch } from './playerFactionMatch.js';
 
 /** Realization status of a single predicted downstream event. */
@@ -77,6 +81,8 @@ export interface ConsequenceReceipt {
     /** Turns between the decision and the consequence firing (CONFIRMED only;
      *  null otherwise). Non-negative. */
     turnsElapsed: number | null;
+    /** Exact persisted-state predicate that proves this receipt. */
+    claimPredicate: NamedClaimPredicate;
 }
 
 export function decisionSourceRecordId(eventId: string, responseId: string, turn: number): string {
@@ -87,18 +93,6 @@ export function consequenceReceiptRecordId(receiptId: string): string {
     return `receipt:${receiptId}`;
 }
 
-/** Index enables-edges by `turn::from_event::to_event::response_id` for O(1) CONFIRMED
- *  lookup. Only kind:'enables' edges with a non-null to_event participate. */
-function enablesEdgeKeySet(state: GameState): Set<string> {
-    const out = new Set<string>();
-    for (const entry of state.military?.event_causality_log ?? []) {
-        if (entry.kind !== 'enables') continue;
-        if (entry.to_event === null) continue;
-        out.add(`${entry.turn}::${entry.from_event}::${entry.to_event}::${entry.source_response_id ?? ''}`);
-    }
-    return out;
-}
-
 function findOption(
     def: EventDefinition | undefined,
     responseId: string,
@@ -107,7 +101,8 @@ function findOption(
     return (def.response_options ?? []).find((o) => o.id === responseId);
 }
 
-function resolveEventFallbackLabel(fallbackId: string): string {
+function resolveEventFallbackLabel(fallbackId: string, locale: Locale): string {
+    if (locale !== 'en') return t('decisionHistory.recordedEvent', undefined, locale);
     const displayId = fallbackId.trim().replace(/^(?:evt|event|csq)_/i, '');
     return getPlayerSafeDisplayLabel(displayId || fallbackId, 'Recorded event');
 }
@@ -118,26 +113,59 @@ function resolveEventFallbackLabel(fallbackId: string): string {
 function resolveEventTitle(
     def: EventDefinition | undefined,
     fallbackId: string,
+    locale: Locale,
 ): string {
+    if (locale !== 'en') {
+        const localizedTitle = def?.localizations?.[locale]?.title;
+        return typeof localizedTitle === 'string' && localizedTitle.trim().length > 0
+            ? localizedTitle
+            : resolveEventFallbackLabel(fallbackId, locale);
+    }
     const title = def?.title;
     return typeof title === 'string' && title.trim().length > 0
         ? title
-        : resolveEventFallbackLabel(fallbackId);
+        : resolveEventFallbackLabel(fallbackId, locale);
 }
 
-function resolveOptionLabel(option: EventResponseOption, fallbackId: string): string {
+function resolveOptionLabel(
+    option: EventResponseOption,
+    fallbackId: string,
+    def: EventDefinition | undefined,
+    locale: Locale,
+): string {
+    if (locale !== 'en') {
+        const localizedLabel = def?.localizations?.[locale]?.response_options?.[option.id]?.label;
+        return typeof localizedLabel === 'string' && localizedLabel.trim().length > 0
+            ? localizedLabel
+            : t('decisionHistory.recordedResponse', undefined, locale);
+    }
     const label = option.label;
     return typeof label === 'string' && label.trim().length > 0
         ? label
         : getPlayerSafeDisplayLabel(fallbackId, 'Recorded response');
 }
 
+function resolvePredictedLabel(
+    def: EventDefinition | undefined,
+    fallbackId: string,
+    authoredEnglishLabel: string | undefined,
+    locale: Locale,
+): string {
+    if (locale === 'en') {
+        return authoredEnglishLabel?.trim() || resolveEventTitle(def, fallbackId, locale);
+    }
+    const localizedTitle = def?.localizations?.[locale]?.title;
+    return typeof localizedTitle === 'string' && localizedTitle.trim().length > 0
+        ? localizedTitle
+        : t('chronicle.card.consequence', undefined, locale);
+}
+
 /** Player-facing label for a faction's coercive patron — sober, factual. */
-function patronLabelForFaction(factionId: string): string {
+function patronLabelForFaction(factionId: string, locale: Locale): string {
     switch (factionId) {
-        case 'RS': return t('chronicle.generated.patron.belgradePossessive');
-        case 'HRHB': return t('chronicle.generated.patron.zagrebPossessive');
-        default: return t('chronicle.generated.patron.genericPossessive');
+        case 'RS': return t('chronicle.generated.patron.belgradePossessive', undefined, locale);
+        case 'HRHB': return t('chronicle.generated.patron.zagrebPossessive', undefined, locale);
+        default: return t('chronicle.generated.patron.genericPossessive', undefined, locale);
     }
 }
 
@@ -153,31 +181,65 @@ function patronLabelForFaction(factionId: string): string {
  * so the existing Turn-Aftermath "Consequences Realized This Turn" section surfaces
  * it via `receiptsRealizedOnTurn`. Wording is factual and never framed as a reward.
  */
-function buildPatronDefianceReceipts(state: GameState, playerFaction: string | null): ConsequenceReceipt[] {
+function buildPatronDefianceReceipts(
+    state: GameState,
+    playerFaction: string | null,
+    locale: Locale,
+): ConsequenceReceipt[] {
     const cuts = state.military?.patron_defiance_supply_cuts ?? [];
     if (cuts.length === 0) return [];
     const out: ConsequenceReceipt[] = [];
     for (const cut of cuts) {
-        if (isCanonicalPlayerFaction(playerFaction) && !playerFactionMatch(cut.faction, playerFaction)) continue;
+        if (!playerFactionMatch(cut.faction, playerFaction)) continue;
         const pct = Math.round(cut.cut_fraction * 100);
         const supportPct = Math.round(cut.support_after * 100);
-        const patron = patronLabelForFaction(cut.faction);
+        const patron = patronLabelForFaction(cut.faction, locale);
         const id = `patron_defiance::${cut.faction}::${cut.turn}`;
         out.push({
             id,
             sourceRecordId: decisionSourceRecordId(`patron_defiance_${cut.faction}`, 'refused_demand', cut.turn),
             receiptRecordId: consequenceReceiptRecordId(id),
             decisionEventId: `patron_defiance_${cut.faction}`,
-            decisionTitle: t('chronicle.generated.patron.defianceTitle'),
-            decisionOptionLabel: t('chronicle.generated.patron.refusedDemand', { patron }),
+            decisionTitle: t('chronicle.generated.patron.defianceTitle', undefined, locale),
+            decisionOptionLabel: t('chronicle.generated.patron.refusedDemand', { patron }, locale),
             decisionTurn: cut.turn,
             predictedEventId: `patron_supply_cut_${cut.faction}`,
-            predictedLabel: t('chronicle.generated.patron.materielCut', { patron, pct }),
+            predictedLabel: t('chronicle.generated.patron.materielCut', { patron, pct }, locale),
             predictedExplanation:
-                t('chronicle.generated.patron.predictedExplanation', { patron, supportPct }),
+                t('chronicle.generated.patron.predictedExplanation', { patron, supportPct }, locale),
             status: 'confirmed',
             firedTurn: cut.turn,
             turnsElapsed: 0,
+            claimPredicate: {
+                kind: 'state',
+                owner_path: 'state.meta.player_faction+state.military.patron_defiance_supply_cuts',
+                owner_paths: [
+                    'state.meta.player_faction',
+                    'state.military.patron_defiance_supply_cuts',
+                ],
+                expression:
+                    `state.meta.player_faction=${playerFaction} AND ` +
+                    `patron_defiance_supply_cuts(faction=${cut.faction},turn=${cut.turn},` +
+                    `cut_fraction=${cut.cut_fraction},support_after=${cut.support_after})`,
+                operands: [
+                    {
+                        owner_path: 'state.meta.player_faction',
+                        operator: 'equals',
+                        expected_value: playerFaction,
+                        observed_value: playerFaction,
+                        expression: `state.meta.player_faction=${playerFaction}`,
+                    },
+                    {
+                        owner_path: 'state.military.patron_defiance_supply_cuts',
+                        operator: 'contains',
+                        expected_value: id,
+                        observed_value: id,
+                        expression:
+                            `patron_defiance_supply_cuts(faction=${cut.faction},turn=${cut.turn},` +
+                            `cut_fraction=${cut.cut_fraction},support_after=${cut.support_after})`,
+                    },
+                ],
+            },
         });
     }
     return out;
@@ -201,6 +263,7 @@ function buildPatronDefianceReceipts(state: GameState, playerFaction: string | n
 export function buildConsequenceReceipts(
     state: GameState | null | undefined,
     catalog: ReadonlyMap<string, EventDefinition> | null | undefined,
+    locale: Locale = getActiveLocale(),
 ): ConsequenceReceipt[] {
     if (!state) return [];
 
@@ -208,15 +271,16 @@ export function buildConsequenceReceipts(
     // project directly from the engine's realized-cut substrate. Gather them first
     // so they survive the event-causality early-returns below.
     const playerFaction = typeof state.meta?.player_faction === 'string' ? state.meta.player_faction : null;
-    const patronReceipts = buildPatronDefianceReceipts(state, playerFaction);
+    if (!isCanonicalPlayerFaction(playerFaction)) return [];
+    const patronReceipts = buildPatronDefianceReceipts(state, playerFaction, locale);
 
     const decisionLog = state.military?.event_decision_log ?? [];
     if (!catalog || catalog.size === 0 || decisionLog.length === 0) {
         return sortReceipts(patronReceipts);
     }
-    const firedIds = new Set(state.military?.fired_event_ids ?? []);
-    const lastFiredTurn = state.military?.event_last_fired_turn ?? {};
-    const edges = enablesEdgeKeySet(state);
+    const realizedById = new Map(
+        buildRealizedConsequenceReceipts(state).map((receipt) => [receipt.receipt_id, receipt]),
+    );
     const receipts: ConsequenceReceipt[] = [...patronReceipts];
 
     for (const dec of decisionLog) {
@@ -230,8 +294,8 @@ export function buildConsequenceReceipts(
         const futureConsequences = option.future_consequences ?? [];
         if (futureConsequences.length === 0) continue;
 
-        const decisionTitle = resolveEventTitle(def, dec.event_id);
-        const decisionOptionLabel = resolveOptionLabel(option, dec.response_id);
+        const decisionTitle = resolveEventTitle(def, dec.event_id, locale);
+        const decisionOptionLabel = resolveOptionLabel(option, dec.response_id, def, locale);
 
         // Dedupe predicted ids within this decision (a predicted id may appear
         // across multiple future_consequence entries).
@@ -245,37 +309,36 @@ export function buildConsequenceReceipts(
 
                 // CONFIRMED requires the predicted event to have fired, an
                 // enables edge tagged with this response AND decision turn, plus
-                // a fired turn AT OR AFTER the decision turn. The engine still records an enables edge when a
-                // response "enables" an already-fired event (audit), so the edge
-                // alone does not prove causation — confirming a P that fired
-                // BEFORE the decision would be a false causal claim. When P fired
-                // earlier (or has no recorded fired turn), it is not a receipt of
-                // THIS decision: fall through to closed → contradicted, else
-                // pending.
-                const edgeKey = `${dec.turn}::${dec.event_id}::${predictedId}::${dec.response_id}`;
-                const ft = lastFiredTurn[predictedId];
-                const firedAtOrAfterDecision = typeof ft === 'number' && ft >= dec.turn;
-                if (!(firedIds.has(predictedId) && edges.has(edgeKey) && firedAtOrAfterDecision)) continue;
+                // a fired turn AT OR AFTER the decision turn. The shared receipt
+                // projector rejects earlier or unrecorded firings, because the
+                // edge alone cannot prove that this decision caused them.
+                const id = `${dec.event_id}::${dec.response_id}::${dec.turn}::${predictedId}`;
+                const realized = realizedById.get(id);
+                if (!realized) continue;
 
                 const predictedDef = catalog.get(predictedId);
-                const predictedLabel = (fc.label?.trim())
-                    || resolveEventTitle(predictedDef, predictedId);
+                const predictedLabel = resolvePredictedLabel(
+                    predictedDef,
+                    predictedId,
+                    fc.label,
+                    locale,
+                );
 
-                const id = `${dec.event_id}::${dec.response_id}::${dec.turn}::${predictedId}`;
                 receipts.push({
                     id,
-                    sourceRecordId: decisionSourceRecordId(dec.event_id, dec.response_id, dec.turn),
-                    receiptRecordId: consequenceReceiptRecordId(id),
+                    sourceRecordId: realized.source_record_id,
+                    receiptRecordId: realized.receipt_record_id,
                     decisionEventId: dec.event_id,
                     decisionTitle,
                     decisionOptionLabel,
                     decisionTurn: dec.turn,
                     predictedEventId: predictedId,
                     predictedLabel,
-                    predictedExplanation: fc.explanation ?? '',
+                    predictedExplanation: locale === 'en' ? fc.explanation ?? '' : '',
                     status: 'confirmed',
-                    firedTurn: ft,
-                    turnsElapsed: ft - dec.turn,
+                    firedTurn: realized.fired_turn,
+                    turnsElapsed: realized.turns_elapsed,
+                    claimPredicate: realized.claim_predicate,
                 });
             }
         }

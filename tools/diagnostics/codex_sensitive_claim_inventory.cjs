@@ -541,6 +541,8 @@ function stableInline(value) {
 
 function statePredicateFor(ancestors, rootValue) {
   const subject = nearestSubjectObject(ancestors, rootValue);
+  const dynamicCondition = asNonEmptyString(subject?.condition);
+  if (dynamicCondition) return dynamicCondition;
   const trigger = subject?.trigger;
   if (!trigger || typeof trigger !== 'object' || Array.isArray(trigger)) return null;
   const parts = [];

@@ -371,6 +371,7 @@ describe('buildConsequenceReceipts', () => {
     it('keeps generated patron-defiance receipt copy localized in BCS mode', () => {
         setLocale('bcs');
         const state = {
+            meta: { player_faction: 'RS' },
             military: {
                 patron_defiance_supply_cuts: [{
                     faction: 'RS',
@@ -393,6 +394,55 @@ describe('buildConsequenceReceipts', () => {
         expect(text).toContain('Odbijen zahtjev Beograda');
         expect(text).toContain('Materijalna podrska Beograda smanjena za 25%');
         expect(text).not.toMatch(/Patron defiance|Refused|materiel cut|front fell|refusal stands/i);
+    });
+
+    it('uses authored BCS event and response localizations without leaking English future copy', () => {
+        setLocale('bcs');
+        const source = buildEventDef('E', ['p'], {
+            title: 'English decision dossier',
+            label: 'Accept the English option',
+            consequenceLabel: 'English future consequence label',
+            explanation: 'English future consequence explanation.',
+        });
+        source.localizations = {
+            bcs: {
+                title: 'Lokalizirani dosje odluke',
+                response_options: {
+                    opt_a: { label: 'Prihvati lokaliziranu opciju' },
+                },
+            },
+        };
+        const target = buildTargetDef('p', 'English target event title');
+        target.localizations = { bcs: { title: 'Lokalizirana ostvarena posljedica' } };
+        const catalog = new Map<string, EventDefinition>([
+            ['E', source],
+            ['p', target],
+        ]);
+        const state = buildState({
+            decisions: [{ event_id: 'E', response_id: 'opt_a', turn: 3 }],
+            firedEventIds: ['E', 'p'],
+            lastFiredTurn: { p: 9 },
+            causalityLog: [{
+                turn: 3,
+                from_event: 'E',
+                to_event: 'p',
+                to_flag: null,
+                kind: 'enables',
+                source_response_id: 'opt_a',
+            }],
+        });
+
+        const [receipt] = buildConsequenceReceipts(state, catalog);
+        expect(receipt.decisionTitle).toBe('Lokalizirani dosje odluke');
+        expect(receipt.decisionOptionLabel).toBe('Prihvati lokaliziranu opciju');
+        expect(receipt.predictedLabel).toBe('Lokalizirana ostvarena posljedica');
+        expect(receipt.predictedExplanation).toBe('');
+        expect([
+            receipt.decisionTitle,
+            receipt.decisionOptionLabel,
+            receipt.predictedLabel,
+            receipt.predictedExplanation,
+        ].join(' ')).not.toMatch(/English/);
     });
 
     it('filters patron-defiance receipts to the loaded player faction when ownership is known', () => {

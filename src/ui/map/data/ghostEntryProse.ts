@@ -3,7 +3,7 @@
  *
  * Orphaned-wiring audit finding T2-A / content C5
  * (docs/40_reports/proposals/20260609_ORPHANED_WIRING_AUDIT_content.md): the
- * VerdictScreen "Paths Not Taken" codex panel rendered the raw repo-relative
+ * VerdictScreen Campaign Codex panel rendered the raw repo-relative
  * markdown PATH (e.g. literally `data/codex/ghost_entries/winter_held.md`)
  * instead of the authored narrative. 20 EN + 20 BCS prose bodies exist on disk
  * (`data/codex/ghost_entries/`, `data/codex/ghost_entries_bcs/`) and were read
@@ -27,6 +27,42 @@
  */
 
 import type { Locale } from '../i18n';
+import type { GhostRecordClassification } from '../../../sim/codex/dynamic_section_builder.js';
+
+export interface GhostProseBlock {
+  kind: 'heading' | 'paragraph';
+  text: string;
+}
+
+/** Render the authored Markdown subset without exposing source markers. */
+export function parseGhostEntryProse(
+  markdown: string,
+  classification: GhostRecordClassification,
+): GhostProseBlock[] {
+  const stripInlineMarkers = (value: string): string => value
+    .replace(/\[([^\]]+)]\([^)]+\)/g, '$1')
+    .replace(/[\*_`]/g, '')
+    .trim();
+
+  return markdown
+    .split(/\r?\n\s*\r?\n/)
+    .map((rawBlock): GhostProseBlock | null => {
+      const block = rawBlock.trim();
+      if (block.length === 0) return null;
+      const heading = block.match(/^#{1,6}\s+([\s\S]+)$/);
+      const parsed: GhostProseBlock = heading
+        ? { kind: 'heading', text: stripInlineMarkers(heading[1]) }
+        : { kind: 'paragraph', text: stripInlineMarkers(block.replace(/\r?\n/g, ' ')) };
+      // Four reclassified EN context bodies carry a legacy classification strapline.
+      // It is metadata, not factual prose, and must not mislabel a context row
+      // as a path-not-taken record.
+      if (classification !== 'path_not_taken' && /path[-\s]?not[-\s]?taken/i.test(parsed.text)) {
+        return null;
+      }
+      return parsed.text.length > 0 ? parsed : null;
+    })
+    .filter((block): block is GhostProseBlock => block !== null);
+}
 
 /**
  * Ghost ids whose authored body is §6-adjacent and must NOT be surfaced without

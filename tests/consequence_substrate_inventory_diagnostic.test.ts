@@ -144,5 +144,9 @@ describe('consequence_substrate_inventory diagnostic', () => {
             status: 'live',
             consumer: 'ongoing_mobilization via getActiveRecruitmentMultiplier',
         });
+        expect(inventory.effect_kinds.find(row => row.kind === 'cost_ledger_annotation')).toMatchObject({
+            status: 'live-reader',
+            consumer: 'buildCostLedger narrative findings',
+        });
     });
 });

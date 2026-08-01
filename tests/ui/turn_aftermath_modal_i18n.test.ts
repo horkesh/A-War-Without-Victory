@@ -384,6 +384,19 @@ describe('TurnAftermathModal localization', () => {
             status: 'confirmed',
             firedTurn: 12,
             turnsElapsed: 7,
+            claimPredicate: {
+                kind: 'receipt',
+                owner_path: 'receipt:event_causality_log',
+                owner_paths: ['state.military.event_causality_log'],
+                expression: 'fixture realized receipt',
+                operands: [{
+                    owner_path: 'state.military.event_causality_log',
+                    operator: 'contains',
+                    expected_value: 'fixture',
+                    observed_value: 'fixture',
+                    expression: 'fixture realized receipt',
+                }],
+            },
         }];
         const officerResentment: OfficerResentmentReceipt[] = [{
             id: 'officer-one',
