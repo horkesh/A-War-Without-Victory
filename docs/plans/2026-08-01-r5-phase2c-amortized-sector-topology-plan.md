@@ -12,9 +12,9 @@
 
 ## Status and authority boundary
 
-This document is an implementation design, not a performance checkpoint. The accepted replicated floor remains `1,189.962 ms/turn` (`11.8996x` the `100 ms/turn` target). The `1,223.822 ms/turn` (`12.23822x`) fixed-point packet is diagnostic only because its measured source omitted the prune receipt; corrected source has equivalence proof but no fresh timing.
+This document is an implementation design plus a current-owner attribution checkpoint, not a new accepted throughput floor. The accepted replicated floor remains `1,189.962 ms/turn` (`11.8996x` the `100 ms/turn` target). The `1,223.822 ms/turn` (`12.23822x`) fixed-point packet remains diagnostic because its measured source omitted the prune receipt. A fresh corrected-source warmup, phase/sector profile, and same-process V8 profile now confirm sector reconstruction as the dominant owner, but no three-run measured packet was collected and the machine retained unrelated long-lived Node processes. The current profile is valid for owner selection only.
 
-Do not edit production source from this plan until Task 1 produces a current same-parent V8/phase/sector owner packet. Do not start Task 1 while any scenario, performance, Electron, package, baseline, or other heavy runtime owner holds the machine lane. No baseline re-floor, package, version, tag, push, publication, release-state, canon, or `docs/10_canon/FORAWWV.md` change belongs to Phase 2c.
+Task 1's owner-selection subset is complete at source commit `4462a485f1fd1ad511068bcaacd0926af962771e`. Do not collect candidate timing, a replicated floor, or another heavy packet while any scenario, performance, Electron, package, baseline, or other heavy runtime owner holds the machine lane. No baseline re-floor, package, version, tag, push, publication, release-state, canon, or `docs/10_canon/FORAWWV.md` change belongs to Phase 2c.
 
 The determinism-auditor skill references `docs/PHASE_A_INVARIANTS.md`, but that file does not exist at this repository revision. Use the live contracts below and record the stale skill reference as documentation debt; do not invent a replacement contract.
 
@@ -26,8 +26,9 @@ The determinism-auditor skill references `docs/PHASE_A_INVARIANTS.md`, but that 
 |---|---:|---|
 | Accepted operational-data packet | `1,189.962 ms/turn` mean | Historical accepted floor only. |
 | Committee-blocked fixed-point packet | `1,223.822 ms/turn` mean; P50 `1,219.931`; P95 `1,254.343`; `197.974 MB` sampled heap | Diagnostic owner ranking only. |
-| Corrected fixed-point source | 300 full-state comparisons across live-war, final-turn, and final-save-projection modes | Correctness prerequisite; still needs fresh timing. |
-| Last application V8 owner capture | `buildCorpsFrontSectors` `15,599.493 ms` inclusive (`30.61%`) | Supports sector topology as the first current-profile question, not as accepted current timing. |
+| Corrected fixed-point source | 300 full-state comparisons across live-war, final-turn, and final-save-projection modes | Correctness prerequisite. |
+| Fresh corrected-source phase/sector profile | `46,291.786 ms` wall; three sector phases `15,092.603 ms` (`377.315 ms/turn`, `32.603%`) | Current owner selection only; not a replicated floor. |
+| Fresh corrected-source application V8 capture | `buildCorpsFrontSectors` `14,170.635 ms` inclusive (`29.699%`) | Confirms sector reconstruction is the next structural owner. |
 
 In the diagnostic 40-turn phase profile, the three large sector steps cost:
 
@@ -49,7 +50,23 @@ The last application V8 self-time ranking gives the bounded primitives to test i
 6. `friendlyPathToAny`: `720.647 ms` self / `781.308 ms` inclusive;
 7. `buildOneHopReserveBand`: `537.673 ms` self.
 
-These numbers are historical/application-level evidence. Task 1 must confirm the current owner before production edits.
+### Fresh corrected-source owner packet
+
+The exclusive runtime-lane packet ran on Windows x64 with Node `24.13.0` and an AMD Ryzen 7 5700X at `4462a485f1fd1ad511068bcaacd0926af962771e`. Five unrelated long-lived Node processes remained present, but no AWWV scenario, performance, Electron, package, or baseline process overlapped the runs. Exact commands and transcripts are retained in ignored Phase 2c diagnostics.
+
+The excluded warmup completed in `45,236.582 ms` (`43,475.791 ms` simulation). The phase/sector profile completed in `46,291.786 ms`, or `1,157.295 ms/turn`, with `281.171 MB` phase-boundary sampled peak heap and `447.488 MB` RSS. Its three sector phases were `reconcile-final-sector-truth` `6,368.145 ms`, `partition-corps-front-sectors` `5,765.945 ms`, and `reconcile-final-sector-truth-after-ops` `2,958.513 ms`: `15,092.603 ms`, or `377.315 ms/turn` and `32.603%` of wall time. Even perfect removal would leave about `779.980 ms/turn` in that one run.
+
+The same-process application profile sampled `47,713.892 ms` across `31,793` samples and `1,781` frames. `buildCorpsFrontSectors` remained the dominant inclusive application owner at `14,170.635 ms` (`29.699%`). Its three largest self-time primitives were `getSettlementControlStatus` `2,086.262 ms`, `countActiveBrigadesByOsid` in brigade assignment `1,456.808 ms`, and `strictCompare` `1,408.912 ms`; `bfsReachable` cost `1,346.664 ms` and `computeFrontEdges` cost `1,260.255 ms` self / `3,301.004 ms` inclusive. The sector sidecar recorded `99` builder invocations over 40 turns (`2.475` calls/turn) and `14,646.453 ms` total instrumented builder time. Nested labels overlap and are not additive.
+
+Warmup, phase/sector, and V8 final saves were each exactly `5,070,902` bytes with SHA-256 `b28225e47b8e7ba563c4e836151fc8699f3cd191f4912c6c13ac7c099719fbd5` and state hash `b28225e47b8e7ba5`. This is sufficient to confirm the next owner, not to establish a current replicated floor: the three timed measured runs in Task 1 remain open.
+
+### Rejected bounded status-result reuse
+
+A red-first spike reused four frozen canonical objects returned by `getSettlementControlStatus`. RED failed only the intended identity contract while semantic equality passed; GREEN passed the focused 2/2 tests, an expanded eight-file 27-test matrix, and `npm run typecheck`. The real-scenario candidate preserved the exact `5,070,902` bytes, SHA-256, and state hash.
+
+The candidate did not earn a source checkpoint. Its like-mode excluded warmup was `46,307.911 ms` versus `45,236.582 ms` for current source (`+2.368%`), while the V8 machine envelope slowed globally from `47,713.892` to `57,484.452` sampled milliseconds. The target function itself moved from `2,086.262` to `2,169.100 ms` self (`+3.971%`) and showed no allocation/owner reduction. Because the globally slower V8 run cannot prove a causal regression but the like-mode warmup and absolute owner both show no win, the candidate is rejected as inconclusive/no-benefit and is fully reverted. Its source/test blobs and raw profiles remain ignored negative evidence; production source and tests are unchanged.
+
+The next safe executable packet is Task 2's red-first call-scoped dense occupancy contract. It creates no production hot-path replacement until exact mutation-sequence parity passes. Cross-turn caching, shared status-object allocation tricks, and direct topology mutation remain excluded.
 
 ## Invariants that every candidate must preserve
 
@@ -142,6 +159,8 @@ The solver must create a new result from stable inputs. The commit stage applies
 
 ## Task 1 — Acquire the runtime lease and establish current truth
 
+**Status:** Owner-selection subset complete. Warmup, phase/sector, and same-process V8 evidence are byte-identical and confirm sector reconstruction. The three-run measured packet remains intentionally open, so no current floor is accepted.
+
 **Files:**
 
 - Read `src/sim/combat/corps_front_sectors.ts`
@@ -154,7 +173,7 @@ The solver must create a new result from stable inputs. The commit stage applies
 1. Obtain an explicit named exclusive runtime lease from the orchestrator after R4 releases it. Record owner, start/end, branch, full commit, Node/platform/CPU class, and the absence of concurrent scenario/perf/Electron/package/baseline work.
 2. Verify a clean worktree and corrected fixed-point source. Do not time a dirty tree or an unrecorded commit.
 3. Clear or uniquely rename only the exact ignored Phase 2c output targets. Never delete a broad output directory.
-4. Run one excluded 40-week warmup, one phase+sector profile, one same-process V8 CPU profile, and three timed measured runs. Preserve exact commands and raw stdout/stderr in ignored files.
+4. Run one excluded 40-week warmup, one phase+sector profile, one same-process V8 CPU profile, and three timed measured runs. Preserve exact commands and raw stdout/stderr in ignored files. The first three are complete; the three timed measured runs remain open.
 5. Hash every `final_save.json`; require identical byte size, SHA-256, and final state hash across warmup/profile/V8/measured modes before using timing.
 6. Rank V8 self and inclusive owners, phase owners, sector nested labels, and calls/turn. Do not sum overlapping nested timers.
 7. If sector reconstruction is not the largest amortized owner, stop this design before source edits and write a new bounded plan for the actual owner.

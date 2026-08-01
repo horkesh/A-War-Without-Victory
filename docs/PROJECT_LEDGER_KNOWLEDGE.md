@@ -4100,6 +4100,14 @@ Applied in `[2026-08-01] Engine quality Phase 2 turn-local final-sector receipt 
 
 Applied in `[2026-08-01] R5 Phase 2c amortized sector topology design`, `docs/plans/2026-08-01-r5-phase2c-amortized-sector-topology-plan.md`, and `docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md`.
 
+## 2026-08-01 - Allocation shortcuts need absolute owner proof
+
+**A shared immutable return object does not automatically remove lookup cost:** replacing newly allocated tiny result objects with canonical frozen instances can preserve semantics and bytes while leaving the dominant branch/map-read work unchanged. Durable rule: require the named function's absolute self/inclusive time to fall in a comparable application profile and require a like-mode whole-run signal before retaining an allocation-only hot-path change. Passing identity, semantic, type, and scenario-byte gates proves safety, not value.
+
+**Global profile drift cannot be assigned to one candidate:** when sampled wall time and many unrelated owners rise together, relative percentages can mislead in either direction. Durable rule: classify the profile as an unstable envelope, inspect the target's absolute time, compare a non-profile same-mode control, and reject an optimization that shows no owner reduction without falsely claiming a causal regression.
+
+Applied in `[2026-08-01] R5 Phase 2c current-owner profile and rejected status-result reuse`, `src/state/settlement_control.ts` (reverted spike), and `docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md`.
+
 ## 2026-08-01 - Adaptive UI evidence must keep its declared identities stable
 
 **Viewport reflow may change reachability, not the proof population:** opening and closing map panels changes occlusion and can reveal counters that were absent from the ready-map sample. Durable rule: freeze the declared identity set at the checkpoint, select only currently reachable unattempted members of that set, and report frozen members that became unavailable. Never substitute newly visible identities merely to reach a target count; that turns an adaptive reachability probe into an undeclared and non-reproducible blocker.
