@@ -43,8 +43,9 @@ const DIRECT_REFUSED_PATTERNS = Object.freeze([
 
 const REFUSED_ACTION_PATTERN = /\b(?:allow|approve|authorize|begin|commit|conduct|continue|create|deploy\w*|deport\w*|displace\w*|establish|execute|expel\w*|implement|kill\w*|murder\w*|operate|order|proceed|pursue|target\w*)\b/i;
 const REFUSED_ACT_PATTERN = /\b(?:ethnic\s+cleansing|cleansing|forced\s+displacement|deport(?:ation|ing)s?|expulsions?|expelling|(?:civilian|mass)\s+killings?|massacres?|genocide|concentration\s+camps?|detention\s+camps?|paramilitar(?:y|ies)(?:\s+(?:deployment|standing\s+orders))?)\b/i;
-const INTERVENING_ACCOUNTABILITY_PATTERN = /\b(?:documentation|exposure|investigation|inspection|prosecution|report|review)\w*\b/i;
-const NEGATED_ACTION_PREFIX_PATTERN = /(?:\bnever|\bnot(?:\s+\w+){0,2}|\brefus(?:e|es|ed)\s+to)\s*$/i;
+const ACCOUNTABILITY_PATTERN = /\b(?:document\w*|expos\w*|investigat\w*|inspect\w*|prosecut\w*|report\w*|review\w*)\b/i;
+const REFUSAL_SCOPE_PATTERN = /\b(?:(?:do|does|did|must|shall|should|will|would|can|could|may|might)\s+not|never|refus(?:e|es|ed)\s+to)\b/i;
+const CLAUSE_BOUNDARY_PATTERN = /(?:[.;!?]+|[\r\n]+|(?:,\s*)?\b(?:and\s+then|then|but|however|yet|instead|afterwards?|subsequently|finally)\b(?:\s*,)?)/i;
 const CONTEXTUAL_STANDALONE_PREFIX_PATTERN = /\b(?:ban|document|expose|forbid|investigate|oppose|prevent|prosecute|record|reject|report|review|stop)\s+(?:(?:the\s+)?(?:allegations?|evidence|findings?|reports?)\s+(?:about|of)\s+)?$/i;
 
 function matchesFor(pattern, text) {
@@ -62,6 +63,24 @@ function directPatternCoversAction(text, actionIndex) {
   });
 }
 
+function clausesFor(text) {
+  const clauses = [];
+  let start = 0;
+  for (const boundary of matchesFor(CLAUSE_BOUNDARY_PATTERN, text)) {
+    if (boundary.index === undefined) continue;
+    const clauseText = text.slice(start, boundary.index);
+    if (clauseText.trim().length > 0) clauses.push({ start, text: clauseText });
+    start = boundary.index + boundary[0].length;
+  }
+  const finalClause = text.slice(start);
+  if (finalClause.trim().length > 0) clauses.push({ start, text: finalClause });
+  return clauses;
+}
+
+function refusalApplies(clauseText, offset) {
+  return REFUSAL_SCOPE_PATTERN.test(clauseText.slice(0, offset));
+}
+
 function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
   const contract = CANON_ALLOWED_PARAMILITARY_CHOICES.get(eventId ?? '');
   if (!contract || contract.family !== family || typeof text !== 'string') return false;
@@ -71,24 +90,26 @@ function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
 
 function isDirectRefusedSensitiveChoice(text) {
   if (typeof text !== 'string' || text.trim().length === 0) return false;
-  if (STANDALONE_REFUSED_PATTERNS.some((pattern) => {
-    for (const match of matchesFor(pattern, text)) {
-      if (match.index === undefined) continue;
-      const beforeMatch = text.slice(Math.max(0, match.index - 48), match.index);
-      if (!CONTEXTUAL_STANDALONE_PREFIX_PATTERN.test(beforeMatch)) return true;
+  for (const clause of clausesFor(text)) {
+    if (STANDALONE_REFUSED_PATTERNS.some((pattern) => {
+      for (const match of matchesFor(pattern, clause.text)) {
+        if (match.index === undefined || refusalApplies(clause.text, match.index)) continue;
+        const beforeMatch = clause.text.slice(0, match.index);
+        if (!CONTEXTUAL_STANDALONE_PREFIX_PATTERN.test(beforeMatch)) return true;
+      }
+      return false;
+    })) return true;
+    for (const action of matchesFor(REFUSED_ACTION_PATTERN, clause.text)) {
+      if (action.index === undefined || refusalApplies(clause.text, action.index)) continue;
+      const absoluteActionIndex = clause.start + action.index;
+      if (directPatternCoversAction(text, absoluteActionIndex)) return true;
+      const afterAction = clause.text.slice(action.index + action[0].length);
+      for (const act of matchesFor(REFUSED_ACT_PATTERN, afterAction)) {
+        if (act.index === undefined) continue;
+        const between = afterAction.slice(0, act.index);
+        if (!ACCOUNTABILITY_PATTERN.test(between)) return true;
+      }
     }
-    return false;
-  })) return true;
-  for (const action of matchesFor(REFUSED_ACTION_PATTERN, text)) {
-    if (action.index === undefined) continue;
-    const beforeAction = text.slice(Math.max(0, action.index - 32), action.index);
-    if (NEGATED_ACTION_PREFIX_PATTERN.test(beforeAction)) continue;
-    if (directPatternCoversAction(text, action.index)) return true;
-    const afterAction = text.slice(action.index + action[0].length);
-    const act = afterAction.match(REFUSED_ACT_PATTERN);
-    if (!act || act.index === undefined || act.index > 64) continue;
-    const between = afterAction.slice(0, act.index);
-    if (!INTERVENING_ACCOUNTABILITY_PATTERN.test(between)) return true;
   }
   return false;
 }

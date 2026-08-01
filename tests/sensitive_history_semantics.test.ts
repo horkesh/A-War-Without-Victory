@@ -35,6 +35,12 @@ describe('sensitive-history choice semantics', () => {
         'Prevent maximum displacement',
         'Authorize an investigation of concentration camps',
         'Do not authorize detention camps',
+        'Do not order the population killed',
+        'Refuse to order the population killed',
+        'Do not authorize, approve, or conduct genocide',
+        'Authorize prosecutors to investigate concentration camps',
+        'Never authorize or approve concentration camps',
+        'Order inspectors to inspect detention camps',
     ])('keeps documentation, accountability, and refusal prose contextual: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(false);
     });
@@ -46,6 +52,8 @@ describe('sensitive-history choice semantics', () => {
         'Do not authorize detention camps, then kill civilians',
         'Refuse to deploy paramilitary forces, then execute the displaced families',
         'Authorize an investigation of concentration camps, then commit genocide',
+        'Do not authorize or approve concentration camps, then kill civilians',
+        'Authorize prosecutors to investigate concentration camps, but commit genocide',
     ])('does not let contextual language sanitize a later or prior directive: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(true);
     });

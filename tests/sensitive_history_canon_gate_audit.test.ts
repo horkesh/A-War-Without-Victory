@@ -282,6 +282,14 @@ describe('buildSensitiveHistoryAudit', () => {
                         { id: 'negated_then_kill', description: 'Do not authorize detention camps, then kill civilians' },
                         { id: 'refuse_then_execute', description: 'Refuse to deploy paramilitary forces, then execute the displaced families' },
                         { id: 'investigate_then_genocide', description: 'Authorize an investigation of concentration camps, then commit genocide' },
+                        { id: 'safe_do_not_order', description: 'Do not order the population killed' },
+                        { id: 'safe_refuse_order', description: 'Refuse to order the population killed' },
+                        { id: 'safe_coordinated_genocide', description: 'Do not authorize, approve, or conduct genocide' },
+                        { id: 'safe_prosecutors', description: 'Authorize prosecutors to investigate concentration camps' },
+                        { id: 'safe_never_camps', description: 'Never authorize or approve concentration camps' },
+                        { id: 'safe_inspectors', description: 'Order inspectors to inspect detention camps' },
+                        { id: 'negated_scope_then_kill', description: 'Do not authorize or approve concentration camps, then kill civilians' },
+                        { id: 'accountability_scope_but_genocide', description: 'Authorize prosecutors to investigate concentration camps, but commit genocide' },
                     ],
                 },
                 {
@@ -299,13 +307,15 @@ describe('buildSensitiveHistoryAudit', () => {
         });
 
         const refused = report.violations.filter((row) => row.kind === 'sensitive_player_choice');
-        expect(refused).toHaveLength(16);
-        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(3);
+        expect(refused).toHaveLength(18);
+        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(5);
         expect(refused.filter((row) => row.event_id === 'direct_refused_choices_1993')).toHaveLength(11);
         expect(refused.filter((row) => row.event_id === 'rs_paramilitary_policy_1992')).toHaveLength(2);
         expect(refused.every((row) => row.severity === 'CRITICAL')).toBe(true);
         expect(refused.map((row) => row.locator)).toEqual([
+            'accountability_scope_but_genocide.description',
             'investigate_then_genocide.description',
+            'negated_scope_then_kill.description',
             'negated_then_kill.description',
             'refuse_then_execute.description',
             'begin_deporting.label',
