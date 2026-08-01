@@ -4094,3 +4094,11 @@ The original candidate named in `[2026-08-01] R7 historical-claim and localizati
 **Localization inventories count renderable player copy, not every English-looking token:** raw glyph entities, debug scripts, assertion labels, technical credentials, and IPC diagnostics inflate remediation queues. Durable rule: filter by deterministic source/context rules and pin known real literals so false-positive removal cannot create silent false negatives.
 
 Applied in `[2026-08-01] R7 second blocked-review correction and Ring-3 choice remediation`, `src/sim/events/source_tiers.json`, and the R7 historical/localization diagnostics and tests.
+
+## 2026-08-01 - Sensitive-history exceptions require option-level positive identity
+
+**A canon exception may never inherit from its container:** allowing an entire event id or family turns one bounded surface into a whitelist for arbitrary future prose. Durable rule: identify the exact event id, matching family, bounded option id, and exact allowed player label; run the direct-act classifier first/default-deny, and prove forbidden prose remains blocking inside the otherwise canonical container.
+
+**Context is grammatical, not lexical:** a sensitive phrase preceded by `record reports of` or `document evidence of` is documentation, while the same field can still contain a later direct instruction. Durable rule: scope contextual suppression to the phrase it governs, continue scanning the field for direct verbs and protected civilian/population/resident/family targets, and pin both safe and unsafe forms through direct helper tests plus both diagnostic consumers.
+
+Applied in `[2026-08-01] R7 third blocked-review correction: option-level Ring-3 semantics`, `tools/diagnostics/sensitive_history_semantics.cjs`, and its direct/audit/inventory/foundational tests.

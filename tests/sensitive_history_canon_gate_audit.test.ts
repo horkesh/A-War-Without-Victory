@@ -286,14 +286,19 @@ describe('buildSensitiveHistoryAudit', () => {
                     family: 'rs_paramilitary_policy',
                     response_options: [
                         { id: 'always_allow', label: 'Always allow paramilitary deployment' },
+                        { id: 'ask', label: 'Ask per deployment' },
+                        { id: 'always_deny', label: 'Always deny paramilitary deployment' },
+                        { id: 'commit_genocide', label: 'Commit genocide' },
+                        { id: 'kill_civilians', label: 'Kill civilians' },
                     ],
                 },
             ],
         });
 
         const refused = report.violations.filter((row) => row.kind === 'sensitive_player_choice');
-        expect(refused).toHaveLength(11);
-        expect(refused.every((row) => row.event_id === 'direct_refused_choices_1993')).toBe(true);
+        expect(refused).toHaveLength(13);
+        expect(refused.filter((row) => row.event_id === 'direct_refused_choices_1993')).toHaveLength(11);
+        expect(refused.filter((row) => row.event_id === 'rs_paramilitary_policy_1992')).toHaveLength(2);
         expect(refused.every((row) => row.severity === 'CRITICAL')).toBe(true);
         expect(refused.map((row) => row.locator)).toEqual([
             'begin_deporting.label',
@@ -307,6 +312,8 @@ describe('buildSensitiveHistoryAudit', () => {
             'expel.label',
             'forced.label',
             'kill.label',
+            'commit_genocide.label',
+            'kill_civilians.label',
         ]);
     });
 

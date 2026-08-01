@@ -437,11 +437,15 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
                 family: 'rs_paramilitary_policy',
                 historical_source: 'Fixture source.',
                 source_note: 'Fixture boundary note.',
-                response_options: [{
-                    id: 'always_allow',
-                    label: 'Always allow paramilitary deployment',
-                    description: 'Each approved sweep records civilian casualties.',
-                }],
+                response_options: [
+                    {
+                        id: 'always_allow',
+                        label: 'Always allow paramilitary deployment',
+                        description: 'Each approved sweep records civilian casualties.',
+                    },
+                    { id: 'commit_genocide', label: 'Commit genocide' },
+                    { id: 'kill_civilians', label: 'Kill civilians' },
+                ],
             },
             {
                 id: 'generic_symmetry_1992',
@@ -459,6 +463,7 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
             'direct_displacement_choice_1992',
             'direct_genocide_choice_1992',
             'direct_refused_verbs_1992',
+            'rs_paramilitary_policy_1992',
         ]);
         assert.strictEqual(blocked.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'direct_refused_verbs_1992'
@@ -475,13 +480,17 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
             claim.player_interaction_type === 'decision_context'
         )), true);
 
-        const allowed = report.claims.filter((claim: { subject_id: string }) => (
+        const allowed = report.claims.filter((claim: { subject_id: string; field_path: string }) => (
             claim.subject_id === 'rs_paramilitary_policy_1992'
+            && claim.field_path === '$[4].response_options[0].label'
         ));
         assert.ok(allowed.length > 0);
         assert.strictEqual(allowed.every((claim: { status: string }) => (
             claim.status !== 'blocked_sensitive_player_choice'
         )), true);
+        assert.strictEqual(blocked.filter((claim: { subject_id: string }) => (
+            claim.subject_id === 'rs_paramilitary_policy_1992'
+        )).length, 2);
 
         const symmetry = report.claims.find((claim: { subject_id: string }) => (
             claim.subject_id === 'generic_symmetry_1992'

@@ -697,17 +697,22 @@ function respondentFor(ancestors, rootValue) {
   return null;
 }
 
-function subjectAllowsParamilitaryChoice(ancestors, rootValue) {
+function choiceAllowsParamilitaryPolicy(fieldPath, text, ancestors, rootValue) {
   const subject = nearestSubjectObject(ancestors, rootValue);
   const id = asNonEmptyString(subject?.id) ?? '';
   const family = asNonEmptyString(subject?.family) ?? '';
-  return isCanonAllowedParamilitaryChoice(id, family);
+  const optionIndex = Number(fieldPath.match(/\.response_options\[(\d+)\]\./)?.[1]);
+  const option = Number.isInteger(optionIndex) && Array.isArray(subject?.response_options)
+    ? subject.response_options[optionIndex]
+    : null;
+  const optionId = asNonEmptyString(option?.id);
+  return isCanonAllowedParamilitaryChoice(id, family, optionId, text);
 }
 
 function playerInteractionTypeFor(fieldPath, text, ancestors, rootValue) {
   if (DIRECT_CHOICE_FIELDS_PATTERN.test(fieldPath)
     && isDirectRefusedSensitiveChoice(text)
-    && !subjectAllowsParamilitaryChoice(ancestors, rootValue)) {
+    && !choiceAllowsParamilitaryPolicy(fieldPath, text, ancestors, rootValue)) {
     return 'player_choice';
   }
   if (fieldPath.includes('.response_options[')) return 'decision_context';

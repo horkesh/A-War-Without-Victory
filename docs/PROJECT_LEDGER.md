@@ -25316,3 +25316,21 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Verification:** Focused correction proof passes 5 files / 51 tests. Expanded proof passes the inventory/provenance matrix (6 files / 33 tests), canon matrix (2 files / 34 tests), and adjacent event matrix (4 files / 101 tests with 5 pre-existing skips). The actual strict CLI reports 299 events, 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. `npm.cmd run typecheck`, the refreshed non-update baseline check, `npm.cmd run canon:check`, and `git diff --check` pass.
 
 **FORAWWV note:** `docs/10_canon/FORAWWV.md` was not edited; no canon contradiction was introduced.
+
+## 2026-08-01 - R7 third blocked-review correction: option-level Ring-3 semantics
+
+**Type:** Diagnostic fail-open repair / canon exception narrowing / stale foundational-contract correction.
+
+**Supersession:** This entry corrects the immediately preceding R7 candidate's claim that its semantic gate and paramilitary carve-out were fully bounded. The classifier missed direct resident/family/population targeting forms and misclassified multiword documentation phrases; both diagnostic consumers exempted every option field when only the event or family matched a paramilitary-policy container. The Six Strategic Goals foundational test also still required the player-authored humanitarian effect removed by the production remediation.
+
+**RED evidence:** Direct probes reproduced misses for `Murder the non-Serb residents`, `Execute the displaced families`, and `Order the population killed`, plus false positives for `Record reports of systematic cleansing` and `Document evidence of maximum displacement`. The combined 4-file / 79-test semantic-consumer matrix failed 14 tests before implementation. Independently, the stale foundational suite failed 1 of 9 tests by requiring an aggressive-branch humanitarian effect.
+
+**Implementation:** The shared classifier now covers direct protected population/resident/family targeting and unauthorized paramilitary deployment, recognizes bounded evidence/report documentation prefixes, and continues scanning for an actual directive elsewhere in the same field. The sole section-3 exception is an exact six-label contract keyed by canonical event id + matching family + bounded `always_allow|ask|always_deny` option id + shipped label; event/family identity alone confers nothing. Both the canon audit and claim inventory pass option identity and field text into that contract. The foundational guard now asserts centralized command-policy wording, no player-authored humanitarian effect, and the separate non-player Drina consequence.
+
+**Historian/canon review:** No historical fact, source, event trigger, response content, simulation mechanic, or consequence was changed. The test contract now matches Sensitive History Design Gate Ring 3 #1/#2 and section 3 lines 115-130: historical adoption/warning remain record, atrocities remain non-player consequence, and only the exact three-value paramilitary-policy surface is allowed. No new BB claim was introduced.
+
+**Findings:** Production remains 3,652 claims across 226 files with 1,431 documented, 1,598 source-note, 487 source-tier, 107 source-floor, and 29 actor-specificity rows open; direct refused-choice blocks remain zero. Localization remains 971 source findings across 385 player-surface files. Strict canon remains 299 events, 0 CRITICAL, 0 WARNING, 1 INFO, exit 0.
+
+**Verification:** Focused correction passes 4 files / 79 tests. Expanded proof passes inventory/provenance 7 files / 60 tests, canon 2 files / 34 tests, and foundational/adjacent events 5 files / 110 tests with 5 pre-existing skips. The actual strict CLI reports 299 events, 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass; pre-commit status contains only the intended R7 diagnostic, test, and documentation files.
+
+**Scope:** The prior `apr1992_52w` four-hash baseline refresh is preserved unchanged; this correction changes no production event JSON, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md`.

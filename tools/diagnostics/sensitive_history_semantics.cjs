@@ -9,14 +9,23 @@
  * exception under Sensitive History Design Gate section 3.
  */
 
-const CANON_ALLOWED_PARAMILITARY_IDS = new Set([
-  'rbih_paramilitary_policy_1992',
-  'rs_paramilitary_policy_1992',
-]);
-
-const CANON_ALLOWED_PARAMILITARY_FAMILIES = new Set([
-  'rbih_paramilitary_policy',
-  'rs_paramilitary_policy',
+const CANON_ALLOWED_PARAMILITARY_CHOICES = new Map([
+  ['rbih_paramilitary_policy_1992', Object.freeze({
+    family: 'rbih_paramilitary_policy',
+    labels: Object.freeze({
+      always_allow: 'Authorize paramilitary standing orders',
+      always_deny: 'Refuse paramilitary deployment',
+      ask: 'Review each deployment',
+    }),
+  })],
+  ['rs_paramilitary_policy_1992', Object.freeze({
+    family: 'rs_paramilitary_policy',
+    labels: Object.freeze({
+      always_allow: 'Always allow paramilitary deployment',
+      always_deny: 'Always deny paramilitary deployment',
+      ask: 'Ask per deployment',
+    }),
+  })],
 ]);
 
 const STANDALONE_REFUSED_PATTERNS = Object.freeze([
@@ -28,19 +37,21 @@ const DIRECT_REFUSED_PATTERNS = Object.freeze([
   /\bgenocide\b[\s\S]{0,96}\bproceed\b/i,
   /\bproceed\b[\s\S]{0,96}\bgenocide\b/i,
   /\b(?:expel|deport)\s+(?:the\s+)?(?:civilian\s+)?(?:population|civilians?|people|residents?)\b/i,
-  /\b(?:kill|murder|execute|target)\s+(?:the\s+)?civilians?\b/i,
-  /\border\s+(?:the\s+)?civilians?\s+(?:killed|murdered|executed|targeted)\b/i,
+  /\b(?:kill|murder|execute|target)\s+(?:the\s+)?(?:(?:civilian|displaced|non-[a-z]+)\s+){0,2}(?:population|civilians?|people|residents?|famil(?:y|ies))\b/i,
+  /\border\s+(?:the\s+)?(?:(?:civilian|displaced|non-[a-z]+)\s+){0,2}(?:population|civilians?|people|residents?|famil(?:y|ies))\s+(?:killed|murdered|executed|targeted)\b/i,
 ]);
 
-const REFUSED_ACTION_PATTERN = /\b(?:allow|approve|authorize|begin|commit|conduct|continue|create|deport\w*|displace\w*|establish|execute|expel\w*|implement|kill\w*|murder\w*|operate|order|proceed|pursue|target\w*)\b/i;
-const REFUSED_ACT_PATTERN = /\b(?:ethnic\s+cleansing|cleansing|forced\s+displacement|deport(?:ation|ing)s?|expulsions?|expelling|(?:civilian|mass)\s+killings?|massacres?|genocide|concentration\s+camps?|detention\s+camps?)\b/i;
+const REFUSED_ACTION_PATTERN = /\b(?:allow|approve|authorize|begin|commit|conduct|continue|create|deploy\w*|deport\w*|displace\w*|establish|execute|expel\w*|implement|kill\w*|murder\w*|operate|order|proceed|pursue|target\w*)\b/i;
+const REFUSED_ACT_PATTERN = /\b(?:ethnic\s+cleansing|cleansing|forced\s+displacement|deport(?:ation|ing)s?|expulsions?|expelling|(?:civilian|mass)\s+killings?|massacres?|genocide|concentration\s+camps?|detention\s+camps?|paramilitar(?:y|ies)(?:\s+(?:deployment|standing\s+orders))?)\b/i;
 const INTERVENING_ACCOUNTABILITY_PATTERN = /\b(?:documentation|exposure|investigation|inspection|prosecution|report|review)\w*\b/i;
 const NEGATED_ACTION_PREFIX_PATTERN = /(?:\bnever|\bnot(?:\s+\w+){0,2}|\brefus(?:e|es|ed)\s+to)\s*$/i;
-const CONTEXTUAL_STANDALONE_PREFIX_PATTERN = /\b(?:ban|document|expose|forbid|investigate|oppose|prevent|prosecute|reject|report|review|stop)\s*$/i;
+const CONTEXTUAL_STANDALONE_PREFIX_PATTERN = /\b(?:ban|document|expose|forbid|investigate|oppose|prevent|prosecute|record|reject|report|review|stop)\s+(?:(?:the\s+)?(?:allegations?|evidence|findings?|reports?)\s+(?:about|of)\s+)?$/i;
 
-function isCanonAllowedParamilitaryChoice(eventId, family) {
-  return CANON_ALLOWED_PARAMILITARY_IDS.has(eventId ?? '')
-    || CANON_ALLOWED_PARAMILITARY_FAMILIES.has(family ?? '');
+function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
+  const contract = CANON_ALLOWED_PARAMILITARY_CHOICES.get(eventId ?? '');
+  if (!contract || contract.family !== family || typeof text !== 'string') return false;
+  const expected = contract.labels[optionId ?? ''];
+  return expected !== undefined && text.replace(/\s+/g, ' ').trim() === expected;
 }
 
 function isDirectRefusedSensitiveChoice(text) {

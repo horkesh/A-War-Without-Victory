@@ -19,18 +19,18 @@
  *   - drop one of the six goals or the Mladić genocide-warning beat,
  *   - flip the historical-default path off `all_six` (the documented historical
  *     adoption — the calibration railroad, `bot_response_logic: 'historical'`),
- *   - turn the atrocity-warning option into a rewarded path (SENSITIVE_HISTORY
- *     gate §0/§8: atrocity is a consequence, never a lever).
+ *   - turn the atrocity warning into a player-authored consequence effect
+ *     (SENSITIVE_HISTORY gate Ring 3: atrocity is consequence, never a lever).
  *
  * §6 self-assessment (SENSITIVE_HISTORY_DESIGN_GATE.md):
- *   - Atrocity-is-never-rewarded: the test asserts NO response option carries a
- *     negative `humanitarian_impact.war_crimes_delta`, and that any option
- *     touching war crimes only ever INCREMENTS the war-crimes counter (a cost).
+ *   - Atrocity-is-never-a-lever: the test asserts NO response option carries a
+ *     `humanitarian_impact`; the documented consequence remains on a separate,
+ *     non-player-authored Ring-2 event.
  *   - Representation, not a lever: the genocide warning lives in narrative +
  *     Ring-2 essay (the historical record), not as a player-authored "commit
  *     genocide" branch. The six goals are adopted as historical fact on the
- *     default path; the player's only divergence is intensity, which only ever
- *     adds cost (war crimes) — never a discount.
+ *     default path; player divergence governs policy and command structure,
+ *     while historical harm remains consequence/record.
  *   - Calibration-inert: assertions read shipped JSON; they author nothing and
  *     mutate no GameState. The historical-default id is pinned to `all_six` so
  *     the byte-identical calibration railroad cannot drift.
@@ -59,6 +59,7 @@ function readJson<T>(rel: string): T {
 
 const WAR_1992 = readJson<EventDefinition[]>('data/scenarios/events/war_1992.json');
 const EVENT = WAR_1992.find((e) => e.id === 'rs_strategic_goals');
+const DRINA_CONSEQUENCE = WAR_1992.find((e) => e.id === 'drina_valley_ethnic_cleansing_1992');
 
 function makeOpeningState(playerFaction: 'RBiH' | 'RS' | 'HRHB'): GameState {
     return {
@@ -161,16 +162,12 @@ describe('RS Six Strategic Goals — foundational decision-event §6 guard', () 
         expect((lateState.military.pending_event_decisions ?? []).some((p) => p.event_id === 'rs_strategic_goals')).toBe(false);
     });
 
-    it('§6 bright line — NO response option rewards atrocity (war_crimes_delta is never negative; never a lever)', () => {
+    it('§6 bright line — no response option authors an atrocity consequence or grants territory', () => {
         const options: EventResponseOption[] = EVENT!.response_options ?? [];
         expect(options.length).toBeGreaterThanOrEqual(2);
         for (const opt of options) {
             for (const eff of opt.effects ?? []) {
-                if (eff.kind === 'humanitarian_impact') {
-                    // war_crimes_delta may only ADD cost. A negative delta would
-                    // "launder" war crimes — a Ring-3 refused surface.
-                    expect((eff.war_crimes_delta ?? 0) >= 0, `option ${opt.id} must not reduce war_crimes_events`).toBe(true);
-                }
+                expect(eff.kind, `option ${opt.id} must not author humanitarian harm`).not.toBe('humanitarian_impact');
                 // No option may carry a control_change (territory reward) — the goals
                 // are a political platform, not a free land grab. Territory is earned
                 // (or not) through ordinary combat downstream, never granted here.
@@ -179,16 +176,18 @@ describe('RS Six Strategic Goals — foundational decision-event §6 guard', () 
         }
     });
 
-    it('the maximum-intensity (atrocity-warned) path is strictly costlier, not rewarded', () => {
+    it('the remediated aggressive branch is command policy while historical harm remains a non-player consequence', () => {
         const options = EVENT!.response_options ?? [];
         const aggressive = options.find((o) => o.id === 'aggressive');
-        // If the maximum-force option exists, it must carry an atrocity COST
-        // (a positive war_crimes increment), never a discount.
-        if (aggressive) {
-            const warCrimes = (aggressive.effects ?? []).find((e) => e.kind === 'humanitarian_impact');
-            expect(warCrimes, 'the maximum-force path must register a war-crimes cost').toBeDefined();
-            expect((warCrimes as { war_crimes_delta?: number }).war_crimes_delta ?? 0).toBeGreaterThan(0);
-        }
+        expect(aggressive).toBeDefined();
+        expect(aggressive!.label).toBe('Centralize operational command');
+        expect(aggressive!.description).toContain('Assembly decision is part of the historical record');
+        expect(aggressive!.description).toContain('chain-of-command reporting');
+        expect((aggressive!.effects ?? []).some((effect) => effect.kind === 'humanitarian_impact')).toBe(false);
+
+        expect(DRINA_CONSEQUENCE).toBeDefined();
+        expect(DRINA_CONSEQUENCE!.requires_player_response).not.toBe(true);
+        expect(DRINA_CONSEQUENCE!.effect).toMatchObject({ kind: 'humanitarian_impact', war_crimes_delta: 3 });
     });
 
     it('the Free War dilemma-spine wires the keystone to its decision event and Ring-2 essay, flagged sensitive', () => {
