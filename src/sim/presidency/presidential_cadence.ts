@@ -70,6 +70,34 @@ export interface BuildPresidentialCadenceReportInput {
   positiveHoldEvidenceIds: readonly string[];
 }
 
+export interface PresidentialAuthorityObservation {
+  faction: string;
+  turn: number;
+  current: number;
+  cap: number;
+}
+
+export interface BuildPresidentialAuthorityCadenceSummaryInput {
+  faction: string;
+  startTurn: number;
+  endTurn: number;
+  nearCapThresholdFraction: number;
+  observations: readonly PresidentialAuthorityObservation[];
+}
+
+export interface PresidentialAuthorityCadenceSummary {
+  faction: string;
+  startTurn: number;
+  endTurn: number;
+  nearCapThresholdFraction: number;
+  coverage: 'complete' | 'partial' | 'unreported';
+  observationCount: number;
+  observedTurns: number[];
+  missingTurns: number[];
+  nearCapAuthorityWeekCount: number;
+  nearCapAuthorityTurns: number[];
+}
+
 export interface PresidentialCadenceEventCatalogRow {
   id: string;
   requiresPlayerResponse: boolean;
@@ -78,6 +106,7 @@ export interface PresidentialCadenceEventCatalogRow {
 }
 
 export interface PresidentialCadenceProjectionState {
+  playerFaction?: string | null;
   eventDecisionLog?: Array<{ eventId: string; faction: string | null; turn: number }>;
   peacePlanHistory?: Array<{
     planId: string;
@@ -101,6 +130,14 @@ export interface PresidentialCadenceProjectionState {
   reserveDecisionHistory?: Array<{ id: string; faction: string; turn: number }>;
   convoyDecisionHistory?: Array<{ id: string; routeFaction: string; turn: number }>;
   paramilitaryDecisionHistory?: Array<{ id: string; faction: string; turn: number }>;
+  daytonResult?: { turn: number };
+  operationOpportunities?: Array<{ proposalId: string; approverFaction: string }>;
+  operationOpportunityResolutions?: Array<{
+    proposalId: string;
+    opportunityId: string;
+    responseTurn: number;
+    response: 'approve' | 'delay' | 'redirect' | 'under_resource' | 'decline' | 'expire';
+  }>;
 }
 
 export interface ProjectPresidentialCadenceReceiptsInput {
@@ -204,6 +241,78 @@ function normalizePositiveHold(hold: PresidentialPositiveHold): PresidentialPosi
 }
 
 /**
+ * Summarize player-only Command Authority observations without filling missing
+ * weeks. Headless cadence evidence has no player ledger, so absent observations
+ * remain explicitly unreported instead of being inferred from the final save.
+ */
+export function buildPresidentialAuthorityCadenceSummary(
+  input: BuildPresidentialAuthorityCadenceSummaryInput,
+): PresidentialAuthorityCadenceSummary {
+  const { faction, startTurn, endTurn, nearCapThresholdFraction } = input;
+  if (!isValidTurn(startTurn) || !isValidTurn(endTurn) || endTurn < startTurn) {
+    throw new Error('Presidential Authority cadence summary requires an ordered, non-negative turn range.');
+  }
+  if (
+    !Number.isFinite(nearCapThresholdFraction)
+    || nearCapThresholdFraction <= 0
+    || nearCapThresholdFraction > 1
+  ) {
+    throw new Error('Presidential Authority near-cap threshold must be greater than zero and at most one.');
+  }
+
+  const observationsByTurn = new Map<number, PresidentialAuthorityObservation>();
+  for (const observation of input.observations) {
+    if (observation.faction !== faction) continue;
+    if (!isValidTurn(observation.turn)) {
+      throw new Error(`Invalid ${faction} Authority observation turn: ${observation.turn}.`);
+    }
+    if (observation.turn < startTurn || observation.turn > endTurn) continue;
+    if (
+      !Number.isFinite(observation.current)
+      || !Number.isFinite(observation.cap)
+      || observation.current < 0
+      || observation.cap <= 0
+      || observation.current > observation.cap
+    ) {
+      throw new Error(`Invalid ${faction} Authority observation at turn ${observation.turn}.`);
+    }
+
+    const prior = observationsByTurn.get(observation.turn);
+    if (prior && (prior.current !== observation.current || prior.cap !== observation.cap)) {
+      throw new Error(`Conflicting ${faction} Authority observations at turn ${observation.turn}.`);
+    }
+    observationsByTurn.set(observation.turn, { ...observation });
+  }
+
+  const observedTurns = [...observationsByTurn.keys()].sort((left, right) => left - right);
+  const missingTurns: number[] = [];
+  for (let turn = startTurn; turn <= endTurn; turn += 1) {
+    if (!observationsByTurn.has(turn)) missingTurns.push(turn);
+  }
+  const nearCapAuthorityTurns = observedTurns.filter((turn) => {
+    const observation = observationsByTurn.get(turn)!;
+    return observation.current >= observation.cap * nearCapThresholdFraction;
+  });
+
+  return {
+    faction,
+    startTurn,
+    endTurn,
+    nearCapThresholdFraction,
+    coverage: observedTurns.length === 0
+      ? 'unreported'
+      : missingTurns.length === 0
+        ? 'complete'
+        : 'partial',
+    observationCount: observedTurns.length,
+    observedTurns,
+    missingTurns,
+    nearCapAuthorityWeekCount: nearCapAuthorityTurns.length,
+    nearCapAuthorityTurns,
+  };
+}
+
+/**
  * Project the durable decision owners used by the cadence diagnostic.
  *
  * Unknown event rows are conservatively treated as notices. This prevents a
@@ -215,6 +324,27 @@ export function projectPresidentialCadenceReceipts(
   const { faction, state } = input;
   const eventCatalog = new Map(input.eventCatalog.map((row) => [row.id, row]));
   const projected: PresidentialCadenceReceipt[] = [];
+  const opportunityApprovers = new Map(
+    (state.operationOpportunities ?? []).map((row) => [row.proposalId, row.approverFaction]),
+  );
+  if (state.playerFaction === faction) {
+    for (const resolution of state.operationOpportunityResolutions ?? []) {
+      if (
+        resolution.response === 'expire'
+        || opportunityApprovers.get(resolution.proposalId) !== faction
+        || !isValidTurn(resolution.responseTurn)
+      ) {
+        continue;
+      }
+      projected.push({
+        id: `opportunity:${resolution.proposalId}`,
+        faction,
+        turn: resolution.responseTurn,
+        classification: 'optional_source_backed',
+        sourceIds: [`operation-opportunity:${resolution.opportunityId}`],
+      });
+    }
+  }
 
   for (const entry of state.eventDecisionLog ?? []) {
     if (entry.faction !== faction) continue;
@@ -248,6 +378,11 @@ export function projectPresidentialCadenceReceipts(
 
   for (const review of state.proposalReviews ?? []) {
     if (review.faction !== faction || !isValidTurn(review.resolvedTurn ?? Number.NaN)) continue;
+    if (review.proposedAction.startsWith('OPPORTUNITY:')) {
+      // The proposal row is a transient action carrier. Cadence ownership belongs
+      // to the durable operation_opportunity_resolutions row projected above.
+      continue;
+    }
     const historicalOperation = review.proposedAction.startsWith('HISTORICAL_OP:');
     projected.push({
       id: `proposal:${review.id}`,
@@ -300,6 +435,16 @@ export function projectPresidentialCadenceReceipts(
       turn: record.turn,
       classification: 'ordinary_emergent',
       sourceIds: [],
+    });
+  }
+
+  if (state.playerFaction === faction && state.daytonResult && isValidTurn(state.daytonResult.turn)) {
+    projected.push({
+      id: `dayton:${state.daytonResult.turn}:${faction}`,
+      faction,
+      turn: state.daytonResult.turn,
+      classification: 'required_authored',
+      sourceIds: ['negotiation:dayton_result'],
     });
   }
 

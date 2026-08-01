@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildPresidentialAuthorityCadenceSummary,
   buildPresidentialCadenceReport,
   projectPresidentialCadenceReceipts,
   type PresidentialCadenceReceipt,
@@ -156,6 +157,94 @@ describe('presidential cadence report', () => {
     });
 
     expect(first).toEqual(second);
+    expect(JSON.stringify(first)).toBe(JSON.stringify(second));
+  });
+});
+
+describe('presidential Authority cadence summary', () => {
+  it('records near-cap weeks with explicit complete coverage', () => {
+    const summary = buildPresidentialAuthorityCadenceSummary({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 2,
+      nearCapThresholdFraction: 0.9,
+      observations: [
+        { faction: 'RS', turn: 2, current: 100, cap: 100 },
+        { faction: 'RS', turn: 0, current: 90, cap: 100 },
+        { faction: 'RS', turn: 1, current: 89, cap: 100 },
+        { faction: 'RS', turn: 2, current: 100, cap: 100 },
+      ],
+    });
+
+    expect(summary).toEqual({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 2,
+      nearCapThresholdFraction: 0.9,
+      coverage: 'complete',
+      observationCount: 3,
+      observedTurns: [0, 1, 2],
+      missingTurns: [],
+      nearCapAuthorityWeekCount: 2,
+      nearCapAuthorityTurns: [0, 2],
+    });
+  });
+
+  it('is permutation-stable and reports absent player-only Authority evidence honestly', () => {
+    const observations = [
+      { faction: 'RBiH', turn: 1, current: 100, cap: 100 },
+      { faction: 'RBiH', turn: 0, current: 100, cap: 100 },
+      { faction: 'RS', turn: 0, current: 100, cap: 100 },
+    ];
+    const first = buildPresidentialAuthorityCadenceSummary({
+      faction: 'RBiH',
+      startTurn: 0,
+      endTurn: 2,
+      nearCapThresholdFraction: 0.9,
+      observations,
+    });
+    const second = buildPresidentialAuthorityCadenceSummary({
+      faction: 'RBiH',
+      startTurn: 0,
+      endTurn: 2,
+      nearCapThresholdFraction: 0.9,
+      observations: [...observations].reverse(),
+    });
+    const unreported = buildPresidentialAuthorityCadenceSummary({
+      faction: 'HRHB',
+      startTurn: 0,
+      endTurn: 2,
+      nearCapThresholdFraction: 0.9,
+      observations,
+    });
+
+    expect(second).toEqual(first);
+    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    expect(first).toMatchObject({
+      coverage: 'partial',
+      observationCount: 2,
+      missingTurns: [2],
+      nearCapAuthorityWeekCount: 2,
+    });
+    expect(unreported).toMatchObject({
+      coverage: 'unreported',
+      observationCount: 0,
+      missingTurns: [0, 1, 2],
+      nearCapAuthorityWeekCount: 0,
+    });
+  });
+
+  it('fails closed on conflicting observations for the same faction and turn', () => {
+    expect(() => buildPresidentialAuthorityCadenceSummary({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 0,
+      nearCapThresholdFraction: 0.9,
+      observations: [
+        { faction: 'RS', turn: 0, current: 90, cap: 100 },
+        { faction: 'RS', turn: 0, current: 91, cap: 100 },
+      ],
+    })).toThrow(/conflicting.*RS.*turn 0/i);
   });
 });
 
@@ -178,6 +267,7 @@ describe('presidential cadence receipt projection', () => {
         proposalReviews: [
           { id: 'hist-op', faction: 'RS', turn: 41, resolvedTurn: 41, proposedAction: 'HISTORICAL_OP:triggered:vrs_drina:Pracha' },
           { id: 'ordinary-op', faction: 'RS', turn: 42, resolvedTurn: 42, proposedAction: 'APPROVE_OP:vrs_drina:plan' },
+          { id: 'opportunity-review', faction: 'RS', turn: 43, resolvedTurn: 43, proposedAction: 'OPPORTUNITY:proposal-rs' },
         ],
         officerDecisionHistory: [
           { id: 'replacement', faction: 'RS', turn: 28, eventId: 'replacement:vrs', decision: 'replacement_accepted' },
@@ -186,6 +276,16 @@ describe('presidential cadence receipt projection', () => {
         reserveDecisionHistory: [{ id: 'reserve', faction: 'RS', turn: 20 }],
         convoyDecisionHistory: [{ id: 'convoy', routeFaction: 'RS', turn: 30 }],
         paramilitaryDecisionHistory: [{ id: 'paramilitary', faction: 'RS', turn: 3 }],
+        playerFaction: 'RS',
+        daytonResult: { turn: 70 },
+        operationOpportunities: [
+          { proposalId: 'proposal-rs', approverFaction: 'RS' },
+          { proposalId: 'proposal-rbih', approverFaction: 'RBiH' },
+        ],
+        operationOpportunityResolutions: [
+          { proposalId: 'proposal-rs', opportunityId: 'sana_95', responseTurn: 43, response: 'approve' },
+          { proposalId: 'proposal-rbih', opportunityId: 'sarajevo', responseTurn: 44, response: 'decline' },
+        ],
       },
     });
 
@@ -198,10 +298,35 @@ describe('presidential cadence receipt projection', () => {
       ['peace-plan:vance_owen:RS', 'required_authored'],
       ['proposal:hist-op', 'optional_source_backed'],
       ['proposal:ordinary-op', 'ordinary_emergent'],
+      ['opportunity:proposal-rs', 'optional_source_backed'],
       ['event:milosevic_notice', 'notice'],
       ['event:rs_assembly', 'required_authored'],
+      ['dayton:70:RS', 'required_authored'],
       ['event:address_to_nation_rs', 'ordinary_emergent'],
     ]);
+    expect(receipts.filter((receipt) => receipt.id === 'opportunity:proposal-rs')).toHaveLength(1);
+    expect(receipts.some((receipt) => receipt.id.includes('proposal-rbih'))).toBe(false);
+  });
+
+  it('does not credit bot, cross-faction, or expired operation opportunity outcomes', () => {
+    const receipts = projectPresidentialCadenceReceipts({
+      faction: 'RS',
+      eventCatalog: [],
+      state: {
+        playerFaction: 'RBiH',
+        daytonResult: { turn: 60 },
+        operationOpportunities: [
+          { proposalId: 'rs-expired', approverFaction: 'RS' },
+          { proposalId: 'rbih-declined', approverFaction: 'RBiH' },
+        ],
+        operationOpportunityResolutions: [
+          { proposalId: 'rs-expired', opportunityId: 'expired', responseTurn: 20, response: 'expire' },
+          { proposalId: 'rbih-declined', opportunityId: 'cross-faction', responseTurn: 21, response: 'decline' },
+        ],
+      },
+    });
+
+    expect(receipts).toEqual([]);
   });
 
   it('is conservative when an event receipt has no catalog row', () => {
