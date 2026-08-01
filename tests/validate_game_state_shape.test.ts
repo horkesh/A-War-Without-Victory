@@ -132,6 +132,45 @@ describe('validateGameStateShape — partition root validation', () => {
     });
 });
 
+describe('validateGameStateShape autonomy proposal receipt history', () => {
+    it('accepts a complete durable proposal disposition', () => {
+        const state = minimalValid();
+        (state.meta as any).proposal_decision_history = [{
+            id: 'proposal-1',
+            turn: 4,
+            resolved_turn: 5,
+            faction: 'RBiH',
+            domain: 'military',
+            description: 'Staff recommends a defensive stance.',
+            proposed_action: 'SET_STANCE:arbih_3rd_corps:defensive',
+            accepted: true,
+        }];
+
+        expect(validateGameStateShape(state)).toEqual({ ok: true });
+    });
+
+    it('rejects malformed or chronologically impossible proposal dispositions', () => {
+        const state = minimalValid();
+        (state.meta as any).proposal_decision_history = [{
+            id: 'proposal-1',
+            turn: 6,
+            resolved_turn: 5,
+            faction: 'RBiH',
+            domain: 'military',
+            description: 'Staff recommends a defensive stance.',
+            proposed_action: 'SET_STANCE:arbih_3rd_corps:defensive',
+            accepted: 'yes',
+        }];
+
+        const result = validateGameStateShape(state);
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toContain('meta.proposal_decision_history[0].accepted must be boolean');
+            expect(result.errors).toContain('meta.proposal_decision_history[0].resolved_turn must be greater than or equal to turn');
+        }
+    });
+});
+
 describe('validateGameStateShape optional military local state records', () => {
     it('requires sector_intel for the current schema', () => {
         const state = minimalValid();

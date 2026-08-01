@@ -190,6 +190,38 @@ function isNonEmptyString(value: unknown): value is string {
     return typeof value === 'string' && value.length > 0;
 }
 
+function validateProposalDecisionHistory(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('meta.proposal_decision_history must be an array when present');
+        return;
+    }
+    for (let index = 0; index < value.length; index += 1) {
+        const record = value[index];
+        const path = `meta.proposal_decision_history[${index}]`;
+        if (!isRecord(record)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        for (const key of ['id', 'domain', 'description', 'proposed_action'] as const) {
+            if (!isNonEmptyString(record[key])) errors.push(`${path}.${key} must be a non-empty string`);
+        }
+        if (!isCanonicalPlayerFaction(record.faction)) {
+            errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isNonNegativeInteger(record.turn)) {
+            errors.push(`${path}.turn must be a non-negative integer`);
+        }
+        if (!isNonNegativeInteger(record.resolved_turn)) {
+            errors.push(`${path}.resolved_turn must be a non-negative integer`);
+        } else if (isNonNegativeInteger(record.turn) && record.resolved_turn < record.turn) {
+            errors.push(`${path}.resolved_turn must be greater than or equal to turn`);
+        }
+        if (typeof record.accepted !== 'boolean') {
+            errors.push(`${path}.accepted must be boolean`);
+        }
+    }
+}
+
 function isCivilianCasualtiesRecord(value: unknown): boolean {
     if (!isRecord(value)) return false;
     for (const entry of Object.values(value)) {
@@ -3595,6 +3627,9 @@ export function validateGameStateShape(
             }
             if ('game_over' in m && m.game_over !== undefined && typeof m.game_over !== 'boolean') {
                 errors.push('meta.game_over must be boolean when present');
+            }
+            if ('proposal_decision_history' in m && m.proposal_decision_history !== undefined) {
+                validateProposalDecisionHistory(m.proposal_decision_history, errors);
             }
             if ('outcome' in m && m.outcome !== undefined && m.outcome !== null && typeof m.outcome !== 'string') {
                 errors.push('meta.outcome must be string or null when present');

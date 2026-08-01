@@ -11,7 +11,11 @@ import {
 import type { LoadedGameState } from './types';
 import { derivePresidentialBlockers } from './presidentialBlockers';
 import { t } from '../i18n';
-import { countPresidentialPriorityBands, type PresidentialPriorityBand } from './presidentialPriority';
+import {
+  countPresidentialPriorityBands,
+  type PresidentialPriorityBand,
+  type PresidentialPriorityReadModel,
+} from './presidentialPriority';
 
 export type PreAdvanceCommandReviewStatus = 'blocked' | 'review' | 'clear' | 'unavailable';
 
@@ -19,6 +23,7 @@ export interface PreAdvanceCommandReviewItem {
   id: string;
   severity: PresidentialDecisionRoomSeverity;
   priorityBand: PresidentialPriorityBand;
+  priorityModel: PresidentialPriorityReadModel;
   category: PresidentialDecisionRoomCategory;
   title: string;
   explanation: string;
@@ -56,6 +61,7 @@ function mapReadinessItem(card: PresidentialDecisionRoomCard): PreAdvanceCommand
     id: card.id,
     severity: card.severity,
     priorityBand: card.priorityBand,
+    priorityModel: card.priorityModel,
     category: card.category,
     title: card.title,
     explanation: card.explanation,

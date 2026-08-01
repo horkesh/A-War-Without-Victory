@@ -14,6 +14,7 @@ import {
 } from '../../data/decisionConsequenceLedger';
 import {
   buildConsequenceReceipts,
+  decisionSourceRecordId,
   type ConsequenceReceipt,
 } from '../../data/consequenceReceipts';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
@@ -25,6 +26,7 @@ import { openChronicleDecisionRecord } from '../../utils/shellNavigation';
 
 const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKey> = {
   'event-decision': 'decisionConsequences.family.eventDecision',
+  'autonomy-proposal': 'decisionConsequences.family.autonomyProposal',
   'operation-opportunity': 'decisionConsequences.family.operationOpportunity',
   'army-reserve': 'decisionConsequences.family.armyReserve',
   'peace-proposal': 'decisionConsequences.family.peaceProposal',
@@ -106,6 +108,12 @@ function tallyReceipts(receipts: readonly ConsequenceReceipt[]): {
   return counts;
 }
 
+function receiptStatusLabel(receipt: ConsequenceReceipt): string {
+  if (receipt.status === 'confirmed') return t('decisionHistory.receipts.confirmed', { count: 1 });
+  if (receipt.status === 'pending') return t('decisionHistory.receipts.pending', { count: 1 });
+  return t('decisionHistory.receipts.contradicted', { count: 1 });
+}
+
 function DecisionHistoryRecordRow({
   decision,
   eventCatalog,
@@ -132,6 +140,7 @@ function DecisionHistoryRecordRow({
   const optionLabel = resolveOptionLabel(decision, eventCatalog);
   const counts = tallyReceipts(receipts);
   const hasReceipts = receipts.length > 0;
+  const sourceRecordId = decisionSourceRecordId(decision.event_id, decision.response_id, decision.turn);
   const descendants = useMemo(
     () => (isExpanded ? getCausalDescendants(decision.event_id, rawState) : []),
     [isExpanded, decision.event_id, rawState],
@@ -140,6 +149,7 @@ function DecisionHistoryRecordRow({
   return (
     <li
       data-testid="decision-history-row"
+      data-source-record-id={sourceRecordId}
       {...(diagMode ? { 'data-event-id': decision.event_id, 'data-response-id': decision.response_id } : {})}
       data-turn={decision.turn}
       className="rounded border border-panel-border/70 bg-black/20"
@@ -235,6 +245,44 @@ function DecisionHistoryRecordRow({
               className="mb-2 text-xs italic text-text-muted"
             >
               {t('decisionHistory.descendants.empty')}
+            </div>
+          )}
+          {hasReceipts && (
+            <div className="mb-2">
+              <div className="mb-1 text-xs uppercase tracking-[0.12em] text-text-muted">
+                {t('decisionHistory.receipts.heading', { count: receipts.length })}
+              </div>
+              <ul data-testid="decision-history-receipts-list" className="space-y-1">
+                {receipts.map((receipt) => (
+                  <li
+                    key={receipt.receiptRecordId}
+                    data-testid="decision-history-receipt-row"
+                    data-receipt-record-id={receipt.receiptRecordId}
+                    data-source-record-id={receipt.sourceRecordId}
+                    className="rounded border border-panel-border/50 bg-black/20 px-2 py-1.5 text-xs text-text-secondary"
+                  >
+                    <div className="font-semibold text-text-primary">{receipt.predictedLabel}</div>
+                    <div className="mt-0.5 flex items-center justify-between gap-2">
+                      <span>
+                        {receiptStatusLabel(receipt)}
+                        {receipt.firedTurn !== null ? ` · ${turnToDateString(receipt.firedTurn)}` : ''}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.currentTarget
+                            .closest<HTMLElement>('[data-testid="decision-history-row"]')
+                            ?.querySelector<HTMLElement>('button')
+                            ?.focus();
+                        }}
+                        className="text-accent-gold hover:underline"
+                      >
+                        {t('decisionHistory.receipts.backToSource')}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
           {sourceNoteExcerpt && (

@@ -176,10 +176,17 @@ describe('buildPreAdvanceCommandReviewView', () => {
       advanceReviewCount: 2,
     });
     expect(view.items.map((item) => item.id)).toEqual([
-      'review:pending',
       'opportunity:opp_pre_advance',
+      'review:pending',
     ]);
     expect(view.items[0]).toMatchObject({
+      severity: 'critical',
+      category: 'opportunity',
+      actionLabel: 'Review Dossier',
+      sourceOwner: 'Operation opportunity dossiers',
+      navigationTarget: { kind: 'decision-room' },
+    });
+    expect(view.items.find((item) => item.id === 'review:pending')).toMatchObject({
       severity: 'blocking',
       category: 'decision',
       actionLabel: "Open President's Desk",
@@ -196,10 +203,15 @@ describe('buildPreAdvanceCommandReviewView', () => {
       sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     });
     expect(view.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
-      'presidential-inbox',
       'army-hq-briefing',
+      'presidential-inbox',
     ]);
     expect(view.sourceHandoffs[0]).toMatchObject({
+      label: 'Army HQ Briefing',
+      count: 1,
+      cardIds: ['opportunity:opp_pre_advance'],
+    });
+    expect(view.sourceHandoffs[1]).toMatchObject({
       label: "President's Desk",
       count: 1,
       cardIds: ['review:pending'],
@@ -530,12 +542,12 @@ describe('buildPreAdvanceCommandReviewView', () => {
       review.items.map((item) => [item.id, sourceTargetsById[item.id]]),
     );
     expect(review.items.map((item) => [item.id, item.navigationTarget.kind])).toEqual([
-      ['review:pending', 'inbox'],
       ['opportunity:opp_pre_advance', 'decision-room'],
+      ['review:pending', 'inbox'],
     ]);
     expect(review.sourceHandoffs.map((handoff) => [handoff.id, handoff.navigationTarget])).toEqual([
-      ['presidential-inbox', { kind: 'inbox' }],
       ['army-hq-briefing', { kind: 'army-hq-tab', tab: 'briefing' }],
+      ['presidential-inbox', { kind: 'inbox' }],
     ]);
   });
 

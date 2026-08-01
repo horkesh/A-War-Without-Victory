@@ -15,6 +15,7 @@ export interface ConsequenceStripProps {
 
 const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKey> = {
   'event-decision': 'decisionConsequences.family.eventDecision',
+  'autonomy-proposal': 'decisionConsequences.family.autonomyProposal',
   'operation-opportunity': 'decisionConsequences.family.operationOpportunity',
   'army-reserve': 'decisionConsequences.family.armyReserve',
   'peace-proposal': 'decisionConsequences.family.peaceProposal',

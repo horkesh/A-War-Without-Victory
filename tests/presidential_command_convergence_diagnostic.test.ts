@@ -29,9 +29,9 @@ describe('presidential command convergence diagnostic', () => {
     expect(report.summary).toEqual({
       familyCount: 9,
       reachableActionFamilyCount: 9,
-      durableReceiptFamilyCount: 8,
-      conditionalReceiptFamilyCount: 1,
-      unresolvedFindingCount: 1,
+      durableReceiptFamilyCount: 9,
+      conditionalReceiptFamilyCount: 0,
+      unresolvedFindingCount: 0,
       sourceVerifiedFamilyCount: 9,
     });
     expect(report.rows.map((row) => row.familyId)).toEqual([
@@ -45,11 +45,12 @@ describe('presidential command convergence diagnostic', () => {
       'peace_plan',
       'reserve_request',
     ]);
-    expect(report.findings).toEqual([{
-      code: 'missing_durable_receipt',
-      familyId: 'autonomy_proposal',
-      detail: 'Resolved ordinary proposal reviews are retained only for the current turn; durable retention is limited to authored-operation proposal classes.',
-    }]);
+    expect(report.findings).toEqual([]);
+    expect(report.rows.find((row) => row.familyId === 'autonomy_proposal')).toMatchObject({
+      receiptOwner: 'meta.proposal_decision_history',
+      receiptDurability: 'durable',
+      recordsConsumers: ['decision-consequence ledger'],
+    });
     expect(report.rows.find((row) => row.familyId === 'event_decision')).toMatchObject({
       producer: 'src/sim/events/evaluate_events.ts -> military.pending_event_decisions',
       blockerPredicate: 'requires_player_response === true',
@@ -79,16 +80,7 @@ describe('presidential command convergence diagnostic', () => {
   });
 
   it('fails closed on missing and duplicate action ownership and absent durable receipts', () => {
-    const durableOwnership = PRESIDENTIAL_DECISION_OWNERSHIP.map((row): PresidentialDecisionOwnership => (
-      row.familyId === 'autonomy_proposal'
-        ? {
-            ...row,
-            receiptOwner: 'meta.proposal_decision_history',
-            receiptDurability: 'durable',
-            receiptDisposition: 'A synthetic durable owner used only by this contract test.',
-          }
-        : row
-    ));
+    const durableOwnership = [...PRESIDENTIAL_DECISION_OWNERSHIP];
     const surfaces = Object.values(DECISION_SURFACE_REGISTRY);
     const missing = buildPresidentialCommandConvergenceReport({
       families: PLAYER_DECISION_FAMILIES,
@@ -108,7 +100,22 @@ describe('presidential command convergence diagnostic', () => {
     });
     expect(() => assertPresidentialCommandConvergence(duplicate)).toThrow(/event_decision.*two action surfaces/i);
 
-    const noReceipt = buildCurrentReport();
+    const noReceipt = buildPresidentialCommandConvergenceReport({
+      families: PLAYER_DECISION_FAMILIES,
+      surfaces,
+      ownership: PRESIDENTIAL_DECISION_OWNERSHIP.map((row): PresidentialDecisionOwnership => (
+        row.familyId === 'autonomy_proposal'
+          ? {
+              ...row,
+              receiptOwner: 'meta.pending_proposal_reviews (conditional retention)',
+              receiptDurability: 'conditional',
+              receiptDisposition: 'Synthetic missing durable receipt used only by this contract test.',
+            }
+          : row
+      )),
+      sourceProofs: PRESIDENTIAL_DECISION_SOURCE_PROOFS,
+      sourceTexts: loadPresidentialCommandSourceTexts(),
+    });
     expect(() => assertPresidentialCommandConvergence(noReceipt)).toThrow(/autonomy_proposal.*durable receipt/i);
   });
 

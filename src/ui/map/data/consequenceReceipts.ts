@@ -49,6 +49,10 @@ export type ConsequenceReceiptStatus = 'confirmed' | 'pending' | 'contradicted';
 export interface ConsequenceReceipt {
     /** Stable id for keying/dedupe: `<event>::<response>::<predicted>`. */
     id: string;
+    /** Stable source-side navigation id for the decision that made the promise. */
+    sourceRecordId: string;
+    /** Stable receipt-side navigation id for this realized consequence. */
+    receiptRecordId: string;
     /** Originating decision — the event the player responded to. */
     decisionEventId: string;
     /** Player-facing title of the originating event (resolved from catalog;
@@ -73,6 +77,14 @@ export interface ConsequenceReceipt {
     /** Turns between the decision and the consequence firing (CONFIRMED only;
      *  null otherwise). Non-negative. */
     turnsElapsed: number | null;
+}
+
+export function decisionSourceRecordId(eventId: string, responseId: string, turn: number): string {
+    return `decision:${eventId}::${responseId}::${turn}`;
+}
+
+export function consequenceReceiptRecordId(receiptId: string): string {
+    return `receipt:${receiptId}`;
 }
 
 /** Build a chosen-option lookup keyed by event_id. Last decision wins for
@@ -165,8 +177,11 @@ function buildPatronDefianceReceipts(state: GameState, playerFaction: string | n
         const pct = Math.round(cut.cut_fraction * 100);
         const supportPct = Math.round(cut.support_after * 100);
         const patron = patronLabelForFaction(cut.faction);
+        const id = `patron_defiance::${cut.faction}::${cut.turn}`;
         out.push({
-            id: `patron_defiance::${cut.faction}::${cut.turn}`,
+            id,
+            sourceRecordId: decisionSourceRecordId(`patron_defiance_${cut.faction}`, 'refused_demand', cut.turn),
+            receiptRecordId: consequenceReceiptRecordId(id),
             decisionEventId: `patron_defiance_${cut.faction}`,
             decisionTitle: t('chronicle.generated.patron.defianceTitle'),
             decisionOptionLabel: t('chronicle.generated.patron.refusedDemand', { patron }),
@@ -266,8 +281,11 @@ export function buildConsequenceReceipts(
                 const predictedLabel = (fc.label?.trim())
                     || resolveEventTitle(predictedDef, predictedId);
 
+                const id = `${dec.event_id}::${dec.response_id}::${predictedId}`;
                 receipts.push({
-                    id: `${dec.event_id}::${dec.response_id}::${predictedId}`,
+                    id,
+                    sourceRecordId: decisionSourceRecordId(dec.event_id, dec.response_id, dec.turn),
+                    receiptRecordId: consequenceReceiptRecordId(id),
                     decisionEventId: dec.event_id,
                     decisionTitle,
                     decisionOptionLabel,

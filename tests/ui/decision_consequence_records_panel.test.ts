@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { DecisionConsequenceRecordsPanel } from '../../src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.js';
@@ -40,6 +40,70 @@ afterEach(() => {
 });
 
 describe('DecisionConsequenceRecordsPanel', () => {
+  it('links an authored source decision forward to its filed receipt and back', () => {
+    const eventCatalog = new Map<string, any>([
+      ['source-event', {
+        id: 'source-event',
+        title: 'Source event',
+        family: 'test',
+        historical_default_response_id: 'accept',
+        response_options: [{
+          id: 'accept',
+          label: 'Accept the recommendation',
+          future_consequences: [{
+            label: 'Downstream consequence',
+            explanation: 'The dossier predicted this consequence.',
+            opens_events: ['downstream-event'],
+          }],
+        }],
+      }],
+      ['downstream-event', { id: 'downstream-event', title: 'Downstream event', response_options: [] }],
+    ]);
+    useGameStore.setState({
+      loadedGameState: makeState({
+        player_faction: 'RS',
+        rawGameState: {
+          meta: { player_faction: 'RS' },
+          military: {
+            event_decision_log: [{
+              event_id: 'source-event',
+              response_id: 'accept',
+              decision_source: 'player',
+              faction: 'RS',
+              turn: 4,
+            }],
+            event_causality_log: [{
+              turn: 7,
+              from_event: 'source-event',
+              to_event: 'downstream-event',
+              to_flag: null,
+              kind: 'enables',
+              source_response_id: 'accept',
+            }],
+            fired_event_ids: ['source-event', 'downstream-event'],
+            event_last_fired_turn: { 'source-event': 4, 'downstream-event': 7 },
+            closed_event_ids: [],
+          },
+        } as any,
+      }),
+    });
+
+    render(React.createElement(
+      DecisionConsequenceRecordsPanel as React.ComponentType<any>,
+      { eventCatalog },
+    ));
+
+    const sourceRow = screen.getByTestId('decision-history-row');
+    expect(sourceRow.getAttribute('data-source-record-id')).toBe('decision:source-event::accept::4');
+    fireEvent.click(screen.getByText('Source event'));
+    const receiptRow = screen.getByTestId('decision-history-receipt-row');
+    expect(receiptRow.getAttribute('data-receipt-record-id'))
+      .toBe('receipt:source-event::accept::downstream-event');
+    expect(receiptRow.getAttribute('data-source-record-id')).toBe('decision:source-event::accept::4');
+    fireEvent.click(screen.getByRole('button', { name: 'Back to source decision' }));
+    expect(document.activeElement).toBe(sourceRow.querySelector('button'));
+  });
+
   it('keeps Chronicle-filed presidential choices out of Army HQ Records rows', () => {
     useGameStore.setState({
       loadedGameState: makeState({

@@ -12,6 +12,37 @@ import { DeskPacket } from '../../src/ui/map/components/presidential_desk/DeskPa
 import { InboxCard } from '../../src/ui/map/components/PresidentialInbox.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
+function makeOpportunity(
+  proposalId: string,
+  reviewId: string,
+  expiresTurn: number,
+  faction: 'RBiH' | 'RS' | 'HRHB' = 'RS',
+) {
+  return {
+    proposal_id: proposalId,
+    opportunity_id: `window-${proposalId}`,
+    display_name: `Window ${proposalId}`,
+    faction,
+    status: 'eligible_pending_review' as const,
+    eligibility_turn: 40,
+    expires_turn: expiresTurn,
+    review_id: reviewId,
+    description: 'Staff reports an operational window.',
+    recommendation: 'Review the filed dossier.',
+    proposed_action: `OPPORTUNITY:${proposalId}`,
+    required_axes_green: 1,
+    required_axes_total: 1,
+    optional_axes_green: 0,
+    optional_axes_total: 0,
+    prerequisite_axes: [],
+    force_quality_traits: [],
+    objectives: [],
+    staging: [],
+    redirect_variants: [],
+    available_actions: [],
+  };
+}
+
 function makeTurn104State(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
   return {
     label: '4 Apr 1994 (war)',
@@ -43,16 +74,27 @@ function makeTurn104State(overrides: Partial<LoadedGameState> = {}): LoadedGameS
 }
 
 function makeInboxItem(overrides: Partial<InboxItem>): InboxItem {
+  const id = overrides.id ?? 'test-item';
+  const priorityBand = overrides.priorityBand ?? 'recommended';
   return {
-    id: 'test-item',
     type: 'reserve_request',
     severity: 'urgent',
-    priorityBand: 'recommended',
     title: 'Staff request',
     subtitle: 'A filed request awaits review.',
     action: 'army_reserve',
     priority: 20,
     ...overrides,
+    id,
+    priorityBand,
+    priorityModel: overrides.priorityModel ?? {
+      id,
+      priorityBand,
+      blocker: priorityBand === 'required',
+      urgency: priorityBand === 'required' ? 0 : 1_000_000,
+      source: { id },
+      deadlineTurn: null,
+      recommendedDestination: 'army-hq',
+    },
   };
 }
 
@@ -205,5 +247,72 @@ describe('shared presidential priority contract', () => {
     expect(view.cards.find((card) => card.id === 'review:pending:open-work')).toBeUndefined();
     expect(view.metrics.priorityCounts.required).toBe(2);
     expect(view.metrics.priorityCounts.recommended).toBeGreaterThanOrEqual(2);
+  });
+
+  it('orders the same active dossiers identically on Inbox, Desk, toolbar, and Decision Room from deadline truth', () => {
+    const state = makeTurn104State({
+      turn: 40,
+      pendingCounterOffers: [],
+      commandBriefing: undefined,
+      pendingProposalReviews: [
+        {
+          id: 'review-a-late', turn: 40, faction: 'RS', domain: 'ops',
+          description: 'Late window.', proposed_action: 'OPPORTUNITY:a-late',
+        },
+        {
+          id: 'review-z-soon', turn: 40, faction: 'RS', domain: 'ops',
+          description: 'Soon window.', proposed_action: 'OPPORTUNITY:z-soon',
+        },
+      ],
+      operationOpportunityProposals: [
+        makeOpportunity('a-late', 'review-a-late', 48),
+        makeOpportunity('z-soon', 'review-z-soon', 41),
+      ],
+    });
+    const expected = ['opportunity:z-soon', 'opportunity:a-late'];
+    const inbox = deriveInboxItems(state, null).filter((item) => item.id.startsWith('opportunity:'));
+    const decisionRoom = buildPresidentialDecisionRoomView({ state });
+    const desk = buildPreAdvanceCommandReviewView({ state });
+    const toolbar = buildWarroomPriorityDocketView({ state, limit: 8 });
+    const opportunityIds = (rows: readonly { id: string }[]) => rows
+      .filter((row) => row.id.startsWith('opportunity:'))
+      .map((row) => row.id);
+
+    expect(opportunityIds(inbox)).toEqual(expected);
+    expect(opportunityIds(decisionRoom.cards)).toEqual(expected);
+    expect(opportunityIds(desk.items)).toEqual(expected);
+    expect(opportunityIds(toolbar.items)).toEqual(expected);
+
+    for (const id of expected) {
+      const inboxModel = (inbox.find((row) => row.id === id) as any)?.priorityModel;
+      const decisionModel = (decisionRoom.cards.find((row) => row.id === id) as any)?.priorityModel;
+      expect(inboxModel).toEqual(decisionModel);
+      expect(inboxModel).toMatchObject({
+        blocker: false,
+        source: { id: id.slice('opportunity:'.length) },
+        recommendedDestination: 'decision-room',
+      });
+      expect(inboxModel.deadlineTurn).toBe(id.endsWith('z-soon') ? 41 : 48);
+    }
+  });
+
+  it('keeps foreign-faction opportunity dossiers outside every presidential surface', () => {
+    const state = makeTurn104State({
+      turn: 40,
+      pendingCounterOffers: [],
+      commandBriefing: undefined,
+      pendingProposalReviews: [{
+        id: 'review-own', turn: 40, faction: 'RS', domain: 'ops',
+        description: 'Own window.', proposed_action: 'OPPORTUNITY:own',
+      }],
+      operationOpportunityProposals: [
+        makeOpportunity('own', 'review-own', 41, 'RS'),
+        makeOpportunity('foreign', 'review-foreign', 40, 'RBiH'),
+      ],
+    });
+
+    const ids = buildPresidentialDecisionRoomView({ state }).cards.map((card) => card.id);
+    expect(ids).toContain('opportunity:own');
+    expect(ids).not.toContain('opportunity:foreign');
   });
 });

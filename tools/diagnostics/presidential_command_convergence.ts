@@ -182,9 +182,9 @@ export const PRESIDENTIAL_DECISION_OWNERSHIP: readonly PresidentialDecisionOwner
     familyId: 'autonomy_proposal',
     producer: 'src/sim/ai_commander/proposal_generation.ts -> meta.pending_proposal_reviews',
     blockerPredicate: 'advisory; unresolved proposal review for the player faction',
-    receiptOwner: 'meta.pending_proposal_reviews (conditional retention)',
-    receiptDurability: 'conditional',
-    receiptDisposition: 'Resolved ordinary proposal reviews are retained only for the current turn; durable retention is limited to authored-operation proposal classes.',
+    receiptOwner: 'meta.proposal_decision_history',
+    receiptDurability: 'durable',
+    receiptDisposition: 'Resolved ordinary staff proposals remain in the durable campaign Records history.',
   },
   {
     familyId: 'operation_opportunity',
@@ -356,11 +356,20 @@ export const PRESIDENTIAL_DECISION_SOURCE_PROOFS: readonly PresidentialDecisionS
     receipt: [{
       path: 'src/sim/turn_phases/war_phases.ts',
       anchors: [
+        'meta.proposal_decision_history ??= [];',
+        'meta.proposal_decision_history.push({',
         'meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter((proposal) =>',
-        '|| proposal.resolved_turn === meta.turn',
       ],
     }],
-    consumers: [],
+    consumers: [{
+      channel: 'records',
+      label: 'decision-consequence ledger',
+      path: 'src/ui/map/data/decisionConsequenceLedger.ts',
+      anchors: [
+        'const archivedProposals = state.rawGameState?.meta?.proposal_decision_history ?? [];',
+        "familyId: 'autonomy-proposal'",
+      ],
+    }],
   },
   {
     familyId: 'operation_opportunity',

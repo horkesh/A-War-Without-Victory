@@ -25255,6 +25255,18 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Verification and next owner:** RED reproduced two optional-resource regressions; GREEN passes six focused operational-data tests. The adjacent five-file matrix passes 24/24; TypeScript and diff checks pass. R5 Phase 2 remains open at 11.8996x the 100 ms/turn target. The corrected profile names `buildCorpsFrontSectors` at 15,599.493 ms inclusive as the next measured owner. No sector redesign ran in this checkpoint.
 
 **Scope:** Runtime ownership, fallback loading, tests, measured report, roadmap/board truth, ledger, and reusable knowledge only. No campaign decision, control result, formation result, turn order, RNG, scenario, history/canon, save schema, baseline, package, version, tag, push, publication, or release state changed.
+
+## 2026-08-01 - R4 Phase 1 priority and receipt convergence completed
+
+**Type:** Presidential agenda read-model convergence / durable decision receipts / player-safe Records navigation.
+
+**Implementation:** Added one deterministic blocker, agenda-band, urgency, source-id, deadline, and recommended-destination contract across Inbox, Decision Room, Desk pre-advance review, and the Warroom toolbar. The nine-family player-decision manifest now names each source path, recommended workspace, and durable receipt path. Player-faction filtering excludes foreign operation-opportunity dossiers, and source-owned urgency preserves established within-band order when no deadline exists. The executable ownership inventory found no duplicate action renderer, so none was deleted.
+
+**Receipt closure:** Ordinary resolved autonomy proposals now archive idempotently in optional `meta.proposal_decision_history`; authored-operation and opportunity carriers remain with their existing receipt owners. The history validates, round-trips, and projects to localized player-safe Records copy without raw action/corps/debug tokens. Authored event consequences carry stable source and receipt record ids; Records exposes forward receipt review and a source-decision backlink. Older saves without the optional field remain valid and read as empty history.
+
+**Evidence and verification:** `docs/40_reports/audits/20260801_R4_PHASE1_PRESIDENTIAL_COMMAND_CONVERGENCE.json` is 14,105 bytes, SHA-256 `76ea58590cf9d5ed7f1d67a6918e40557329e3fa14e32ac9b1744bcf8b63e0ac`, and reports 9/9 reachable actions, 9/9 durable receipts, 9/9 verified source rows, zero conditional receipts, and zero findings. The required Phase 1 UI suite passed 5 files / 120 tests; the focused persistence/priority/receipt matrix passed 10 files / 145 tests; player journeys passed 44 files / 770 tests. TypeScript, canon/determinism/static baselines, and diff checks passed.
+
+**Canon and scope:** Existing decision and consequence truth only; no new lever, initiative, event, historical claim, scenario, simulation formula, RNG, fog projection, baseline, package/version, tag, installer, signing, publication, or release state changed. `docs/10_canon/FORAWWV.md` is unchanged. Phase 2 source-backed cadence and positive holds is next.
 ## 2026-08-01 - R2 FR-03/FR-06 source closeout and rejected 104-week harness attempt
 
 **Type:** Retained-map evidence handoff / responsive-path and OOB bug repair / presidential-friction explanation / Electron harness hardening / roadmap propagation.

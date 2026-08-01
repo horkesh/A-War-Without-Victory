@@ -7,6 +7,18 @@ import { DecisionCard } from '../../src/ui/map/components/presidential_desk/Deci
 import type { InboxItem } from '../../src/ui/map/data/inboxItems';
 import { setLocale } from '../../src/ui/map/i18n';
 
+function priorityModel(id: string, priorityBand: InboxItem['priorityBand']) {
+  return {
+    id,
+    priorityBand,
+    blocker: priorityBand === 'required',
+    urgency: priorityBand === 'required' ? 0 : 1_000_000,
+    source: { id },
+    deadlineTurn: null,
+    recommendedDestination: 'inbox' as const,
+  };
+}
+
 afterEach(() => {
   cleanup();
   setLocale('en');
@@ -20,6 +32,7 @@ describe('President desk DecisionCard fallback copy', () => {
       type: 'paramilitary_request',
       severity: 'blocking',
       priorityBand: 'required',
+      priorityModel: priorityModel('paramilitary:readability', 'required'),
       title: 'Paramilitary authorization',
       subtitle,
       action: 'paramilitary_review',
@@ -61,6 +74,7 @@ describe('President desk DecisionCard fallback copy', () => {
       type: 'event_decision',
       severity: 'blocking',
       priorityBand: 'required',
+      priorityModel: priorityModel('event:evt_opening_foundation', 'required'),
       title: 'Predsjednička odluka potrebna',
       subtitle: 'Predsjednička odluka traži vaš odgovor do 6 apr 1992.',
       action: 'event_modal',
@@ -71,6 +85,7 @@ describe('President desk DecisionCard fallback copy', () => {
       type: 'peace_plan',
       severity: 'urgent',
       priorityBand: 'required',
+      priorityModel: priorityModel('peace:opening_peace', 'required'),
       title: 'Mirovni prijedlog',
       subtitle: 'Međunarodni posrednici su dostavili mirovni plan.',
       action: 'peace_plan_modal',
@@ -81,6 +96,7 @@ describe('President desk DecisionCard fallback copy', () => {
       type: 'operation_opportunity',
       severity: 'normal',
       priorityBand: 'recommended',
+      priorityModel: priorityModel('opportunity:opening_window', 'recommended'),
       title: 'Operativni prozor',
       subtitle: 'Štab armije ima dosije spreman za pregled.',
       action: 'decision_room',

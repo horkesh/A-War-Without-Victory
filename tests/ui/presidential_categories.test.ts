@@ -36,6 +36,14 @@ import {
 function makeCard(
   partial: Partial<PresidentialDecisionRoomCard> & Pick<PresidentialDecisionRoomCard, 'id' | 'category' | 'severity'>,
 ): PresidentialDecisionRoomCard {
+  const priorityBand = partial.priorityBand
+    ?? (partial.severity === 'blocking'
+      ? 'required'
+      : partial.category === 'turn' || partial.category === 'cost' || partial.category === 'memory'
+        ? 'record'
+        : partial.category === 'operational' || partial.category === 'briefing'
+          ? 'monitor'
+          : 'recommended');
   return {
     title: partial.title ?? partial.id,
     explanation: '',
@@ -45,15 +53,17 @@ function makeCard(
     evidence: [],
     navigationTarget: { kind: 'none' },
     sortKey: 0,
-    priorityBand: partial.priorityBand
-      ?? (partial.severity === 'blocking'
-        ? 'required'
-        : partial.category === 'turn' || partial.category === 'cost' || partial.category === 'memory'
-          ? 'record'
-          : partial.category === 'operational' || partial.category === 'briefing'
-            ? 'monitor'
-            : 'recommended'),
     ...partial,
+    priorityBand,
+    priorityModel: partial.priorityModel ?? {
+      id: partial.id,
+      priorityBand,
+      blocker: priorityBand === 'required',
+      urgency: 0,
+      source: { id: partial.id },
+      deadlineTurn: null,
+      recommendedDestination: 'none',
+    },
   };
 }
 
