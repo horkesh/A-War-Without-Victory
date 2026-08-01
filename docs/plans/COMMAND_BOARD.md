@@ -6,7 +6,7 @@
 
 **Updated:** 2026-08-02
 
-**Program state:** EXECUTING; R1 and R3 are complete, R7 Phase 0 seventh correction is implemented but still requires committee re-review, all R2 source packets are independently approved, and R2/R5 remain active
+**Program state:** EXECUTING; R1 and R3 are complete, R7 Phase 0 eighth correction is implemented but still requires committee re-review, all R2 source packets are independently approved, and R2/R5 remain active
 
 ## Activation
 
