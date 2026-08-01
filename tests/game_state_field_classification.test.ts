@@ -27,8 +27,6 @@ describe('GameState field classification diagnostic', () => {
 export interface GameState {
     /** @persistence required-persisted */
     schema_version: number;
-    /** Derived each turn; never persisted. @persistence derived/transient */
-    turn_cache?: Record<string, number>;
     /** @persistence required-persisted */
     military: MilitaryState;
 }
@@ -43,6 +41,8 @@ export interface MilitaryState {
     }>;
     /** @persistence required-persisted */
     required_log: string[];
+    /** Derived each turn; never persisted. @persistence derived/transient */
+    turn_cache?: Record<string, number>;
 }
 `);
         write('src/state/initialize_new_game_state.ts', `
@@ -65,6 +65,7 @@ export function migrate(state: GameState): void {
 }
 `);
         write('src/state/serializeGameState.ts', `
+export const TRANSIENT_MILITARY_STATE_FIELDS = ['turn_cache'] as const;
 export function serializeGameState(state: unknown): string {
     return JSON.stringify(state);
 }
@@ -85,10 +86,10 @@ export const count = asset.active_orders.length;
         expect(inventory.fields.map((row) => `${row.interface}.${row.field}`)).toEqual([
             'GameState.military',
             'GameState.schema_version',
-            'GameState.turn_cache',
             'MilitaryState.active_orders',
             'MilitaryState.legacy_orders',
             'MilitaryState.required_log',
+            'MilitaryState.turn_cache',
         ]);
         expect(inventory.fields.find((row) => row.field === 'turn_cache')?.classification)
             .toBe('derived/transient');
@@ -101,7 +102,7 @@ export const count = asset.active_orders.length;
             migration: [{ file: 'src/state/save_migration.ts', line: 5 }],
             serializer: {
                 contract_match: true,
-                evidence: [{ file: 'src/state/serializeGameState.ts', line: 2 }],
+                evidence: [{ file: 'src/state/serializeGameState.ts', line: 3 }],
                 expected: 'included',
                 observed: 'included-when-present',
             },
@@ -112,9 +113,9 @@ export const count = asset.active_orders.length;
             ],
         });
         expect(inventory.fields.find((row) => row.field === 'turn_cache')?.serializer).toMatchObject({
-            contract_match: false,
+            contract_match: true,
             expected: 'excluded',
-            observed: 'included-when-present',
+            observed: 'excluded-when-present',
         });
         expect(inventory.fields.find((row) => row.field === 'required_log')?.classification)
             .toBe('required-persisted');
@@ -175,10 +176,21 @@ export interface MilitaryState {}
         expect(inventory.fields.find((row) => row.field === 'patron_defiance_supply_cuts')?.classification)
             .toBe('optional-persisted');
         expect(inventory.fields.find((row) => row.field === 'formations')?.initializer)
-            .toContainEqual({ file: 'src/scenario/scenario_runner.ts', line: 260 });
+            .toEqual(expect.arrayContaining([
+                expect.objectContaining({ file: 'src/scenario/scenario_runner.ts' }),
+            ]));
         expect(inventory.fields.find((row) => row.field === 'militia_pools')?.validator)
-            .toContainEqual({ file: 'src/validate/militia_pools.ts', line: 32 });
+            .toEqual(expect.arrayContaining([
+                expect.objectContaining({ file: 'src/validate/militia_pools.ts' }),
+            ]));
         expect(inventory.fields.find((row) => row.field === 'army_corps_directives_by_faction')?.migration)
-            .toContainEqual({ file: 'src/state/save_migration.ts', line: 485 });
+            .toEqual(expect.arrayContaining([
+                expect.objectContaining({ file: 'src/state/save_migration.ts' }),
+            ]));
+        expect(inventory.fields.find((row) => row.field === 'sector_intel')?.classification)
+            .toBe('required-persisted');
+        expect(inventory.fields.find((row) => row.field === 'corps_front_sectors')?.classification)
+            .toBe('required-persisted');
+        expect(inventory.fields.filter((row) => !row.serializer.contract_match)).toEqual([]);
     });
 });

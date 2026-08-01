@@ -34,7 +34,7 @@ export type GameStateFieldInventoryRow = {
     migration: Evidence[];
     serializer: {
         expected: 'included' | 'excluded';
-        observed: 'included-when-present';
+        observed: 'excluded-when-present' | 'included-when-present';
         contract_match: boolean;
         evidence: Evidence[];
     };
@@ -110,6 +110,43 @@ function sourceFile(filePath: string): ts.SourceFile {
     );
 }
 
+function unwrapExpression(expression: ts.Expression): ts.Expression {
+    let current = expression;
+    while (
+        ts.isAsExpression(current)
+        || ts.isSatisfiesExpression(current)
+        || ts.isParenthesizedExpression(current)
+        || ts.isTypeAssertionExpression(current)
+    ) {
+        current = current.expression;
+    }
+    return current;
+}
+
+function transientMilitarySerializerFields(source: ts.SourceFile): ReadonlyMap<string, number> {
+    const fields = new Map<string, number>();
+    for (const statement of source.statements) {
+        if (!ts.isVariableStatement(statement)) continue;
+        for (const declaration of statement.declarationList.declarations) {
+            if (!ts.isIdentifier(declaration.name)
+                || declaration.name.text !== 'TRANSIENT_MILITARY_STATE_FIELDS'
+                || !declaration.initializer) {
+                continue;
+            }
+            const initializer = unwrapExpression(declaration.initializer);
+            if (!ts.isArrayLiteralExpression(initializer)) continue;
+            for (const element of initializer.elements) {
+                if (!ts.isStringLiteral(element)) continue;
+                fields.set(
+                    element.text,
+                    source.getLineAndCharacterOfPosition(element.getStart(source)).line + 1,
+                );
+            }
+        }
+    }
+    return fields;
+}
+
 function propertyName(node: ts.PropertyName): string | null {
     if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
         return node.text;
@@ -145,6 +182,8 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.front_segments',
         'MilitaryState.militia_pools',
         'MilitaryState.phantoms_spawned',
+        'MilitaryState.corps_front_sectors',
+        'MilitaryState.sector_intel',
     ],
     'optional-persisted': [
         'GameState.operation_history',
@@ -253,7 +292,6 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.home_distance_cache',
         'MilitaryState.militia_garrison',
         'MilitaryState.sector_combat_ratings',
-        'MilitaryState.sector_intel',
         'MilitaryState.unresolved_sector_brigades',
     ],
     'compatibility-only': [
@@ -262,7 +300,6 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.brigade_desired_aor_cap',
         'MilitaryState.brigade_front_assignment',
         'MilitaryState.brigade_reposition_orders',
-        'MilitaryState.corps_front_sectors',
         'MilitaryState.theatres',
     ],
     dead: [],
@@ -494,8 +531,21 @@ function collectLifecycleEvidence(rootDir: string, rows: GameStateFieldInventory
                     break;
                 }
             }
+            const transientFields = transientMilitarySerializerFields(source);
             for (const row of rows) {
-                row.serializer.evidence.push({ file: relativePath, line: serializerLine });
+                const excludedAt = row.interface === 'MilitaryState'
+                    ? transientFields.get(row.field)
+                    : undefined;
+                row.serializer.observed = excludedAt === undefined
+                    ? 'included-when-present'
+                    : 'excluded-when-present';
+                row.serializer.contract_match = row.serializer.expected === (
+                    excludedAt === undefined ? 'included' : 'excluded'
+                );
+                row.serializer.evidence.push({
+                    file: relativePath,
+                    line: excludedAt ?? serializerLine,
+                });
             }
         }
     }

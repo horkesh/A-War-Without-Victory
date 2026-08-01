@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { validateGameStateShape } from '../src/state/validateGameState.js';
 
 /** Minimal valid state object that passes all shape checks. */
@@ -132,6 +133,29 @@ describe('validateGameStateShape — partition root validation', () => {
 });
 
 describe('validateGameStateShape optional military local state records', () => {
+    it('requires sector_intel for the current schema', () => {
+        const state = minimalValid();
+        state.schema_version = CURRENT_SCHEMA_VERSION;
+        const result = validateGameStateShape(state, { requireVersion: CURRENT_SCHEMA_VERSION });
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toContain(`v${CURRENT_SCHEMA_VERSION} required field missing or invalid: military.sector_intel`);
+        }
+    });
+
+    it('requires corps_front_sectors for the current schema', () => {
+        const state = minimalValid();
+        state.schema_version = CURRENT_SCHEMA_VERSION;
+        (state.military as any).sector_intel = {};
+        const result = validateGameStateShape(state, { requireVersion: CURRENT_SCHEMA_VERSION });
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toContain(`v${CURRENT_SCHEMA_VERSION} required field missing or invalid: military.corps_front_sectors`);
+        }
+    });
+
     it('absent optional local state records still pass', () => {
         const state = minimalValid();
         const result = validateGameStateShape(state);
@@ -154,9 +178,124 @@ describe('validateGameStateShape optional military local state records', () => {
         (state.military as any).enclave_state = {
             gorazde: { fallen: false, status: 'holding', resilience: 0.8 }
         };
+        (state.military as any).sector_intel = {
+            friendly_sector: [{
+                enemy_sector_id: 'enemy_sector',
+                enemy_faction: 'RS',
+                enemy_corps_id: 'enemy_corps',
+                front_edge_count: 2,
+                strength_category: 'moderate',
+                posture_observed: 'defensive',
+                offensive_signs: false,
+                confidence: 0.6,
+                turns_in_contact: 3,
+                visible_brigade_ids: ['enemy_brigade'],
+                osid_confidence: [{ osid: 'enemy_osid', confidence: 0.8, sources: ['scout'] }],
+                last_updated_turn: 4,
+            }],
+        };
+        (state.military as any).corps_front_sectors = {
+            sector_a: {
+                sector_id: 'sector_a',
+                corps_id: 'corps_a',
+                faction: 'RBiH',
+                opposing_factions: ['RS'],
+                edge_ids: ['edge_a'],
+                sub_segments: [{
+                    sub_segment_id: 'sub_a',
+                    edge_ids: ['edge_a'],
+                    friendly_osids: ['friendly_a'],
+                    enemy_osids: ['enemy_a'],
+                    length_edges: 1,
+                    primary_brigade_ids: ['brigade_a'],
+                }],
+                length_edges: 1,
+                territory_osids: ['friendly_a'],
+                assigned_brigade_ids: ['brigade_a'],
+                reserve_brigade_ids: [],
+                density: 1,
+                threat_ratio: 0.5,
+                defensive_power: 10,
+                sector_stance: 'defend',
+                stance_source: 'bot',
+            },
+        };
 
         const result = validateGameStateShape(state);
         expect(result.ok).toBe(true);
+    });
+
+    it('malformed persisted sector_intel rejects every invalid leaf', () => {
+        const state = minimalValid();
+        (state.military as any).sector_intel = {
+            friendly_sector: [{
+                enemy_sector_id: '',
+                enemy_faction: 7,
+                enemy_corps_id: '',
+                front_edge_count: -1,
+                strength_category: 'omniscient',
+                posture_observed: 'routed',
+                offensive_signs: 'yes',
+                confidence: 1.5,
+                turns_in_contact: -2,
+                visible_brigade_ids: ['enemy_brigade', 3],
+                osid_confidence: [{ osid: '', confidence: Number.NaN, sources: ['satellite'] }],
+                last_updated_turn: -1,
+            }],
+        };
+
+        const result = validateGameStateShape(state);
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toContain('military.sector_intel.friendly_sector[0].enemy_sector_id must be a non-empty string');
+            expect(result.errors).toContain('military.sector_intel.friendly_sector[0].enemy_faction must be a non-empty string');
+            expect(result.errors).toContain('military.sector_intel.friendly_sector[0].front_edge_count must be a non-negative integer');
+            expect(result.errors).toContain('military.sector_intel.friendly_sector[0].confidence must be a finite number in [0,1]');
+            expect(result.errors).toContain('military.sector_intel.friendly_sector[0].visible_brigade_ids must be a string array');
+            expect(result.errors).toContain('military.sector_intel.friendly_sector[0].osid_confidence[0].sources must contain only: passive_contact, patrol, scout, combat');
+        }
+    });
+
+    it('malformed persisted corps_front_sectors rejects invalid topology leaves', () => {
+        const state = minimalValid();
+        (state.military as any).corps_front_sectors = {
+            sector_a: {
+                sector_id: 'wrong_key',
+                corps_id: '',
+                faction: 4,
+                opposing_factions: ['RS', 1],
+                edge_ids: 'edge_a',
+                sub_segments: [{
+                    sub_segment_id: '',
+                    edge_ids: ['edge_a'],
+                    friendly_osids: null,
+                    enemy_osids: [],
+                    length_edges: -1,
+                    primary_brigade_ids: [],
+                    gap: 'yes',
+                }],
+                length_edges: -1,
+                territory_osids: [],
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: [],
+                density: Number.NaN,
+                threat_ratio: -1,
+                defensive_power: -1,
+                sector_stance: 'charge',
+                stance_source: 'scenario',
+            },
+        };
+
+        const result = validateGameStateShape(state);
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toContain('military.corps_front_sectors.sector_a.sector_id must match its record key');
+            expect(result.errors).toContain('military.corps_front_sectors.sector_a.corps_id must be a non-empty string');
+            expect(result.errors).toContain('military.corps_front_sectors.sector_a.edge_ids must be a string array');
+            expect(result.errors).toContain('military.corps_front_sectors.sector_a.density must be a finite non-negative number');
+            expect(result.errors).toContain('military.corps_front_sectors.sector_a.sub_segments[0].friendly_osids must be a string array');
+            expect(result.errors).toContain('military.corps_front_sectors.sector_a.sub_segments[0].gap must be a boolean when present');
+        }
     });
 
     it('malformed casualty_ledger rejects when present', () => {

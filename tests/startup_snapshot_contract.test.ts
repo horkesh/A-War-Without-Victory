@@ -296,7 +296,6 @@ test('baked April 1992 startup sector truth audits clean without rebuilt-state m
         unresolved_sector_brigades: 0,
         active_formations_in_enemy_territory: 0,
     };
-
     assert.deepStrictEqual(savedAudit.counts, releaseGateCounts);
     assert.strictEqual(savedAudit.ok, true);
     assert.strictEqual(
