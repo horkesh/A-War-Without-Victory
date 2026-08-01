@@ -1,5 +1,17 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] R5 fresh accepted-source causal-owner handoff
+
+**Type:** R5 measured owner-selection packet / exact integrated-parent lineage / roadmap and command-board handoff / no production candidate.
+
+**Source and lease:** Created isolated branch `codex/r5-fresh-owner-profile` from exact integrated parent `e017d3ec14a8fff1697a9bbed69b39335c1bed2a`, tree `fb4ec6ebb1fda860b93fb5d5c0da98c23ede4b55`. Under the exclusive R5 runtime lease, and only after clean cwd/`HEAD`/tree/absolute-script/process preflight, ran one excluded 40-week warmup, one phase+sector profile, and one same-process V8 application profile serially. No AWWV scenario, performance, Electron, package, baseline, or other heavy runtime overlapped the valid starts.
+
+**Determinism:** Warmup, phase, and V8 final saves were each exactly `5,085,842` bytes, SHA-256 `95be2c9e8975a12face36e9777e54882c757ee8adb23b1cd91a06b2f546319b7`, and state hash `95be2c9e8975a12f`. No baseline was refreshed. One initial PowerShell capture wrapper promoted expected native stderr to a terminating `NativeCommandError`; its partial run/log are preserved only under `INVALID_CAPTURE_WRAPPER` names and excluded from conclusions.
+
+**Owner result:** V8 sampled `47,404.946 ms` and ranks `buildCorpsFrontSectors` as the largest named causal application owner at `13,211.998 ms` inclusive, or `330.300 ms/turn` (`27.871%`). Independent sector instrumentation records `99` calls (`2.475` per turn), `13,631.569 ms`, and `340.789 ms/turn`. The phase leaders are `reconcile-final-sector-truth` `147.806 ms/turn`, `partition-corps-front-sectors` `141.684`, `generate-bot-corps-orders` `108.948`, and after-ops reconciliation `63.900`; overlapping nested labels were not summed. Top self owners are `getSettlementControlStatus` `55.698 ms/turn`, `strictCompare` `37.152`, `bfsReachable` `34.101`, and `computeFrontEdges` `28.344`.
+
+**Disposition and scope:** R5's next packet is a new bounded red-first sector-reconstruction design. The rejected reachability context remains retired and this owner profile does not automatically authorize Task 6 incremental topology. Updated the R5 performance report, Phase 2c plan, master roadmap, command board, and this ledger entry only. No production source, test, scenario, approved baseline, canon, `docs/10_canon/FORAWWV.md`, package, version, tag, installer, signing, publication, or release state changed. Ignored evidence is indexed by `data/derived/_debug/r5_phase2c_fresh_owner_e017d3ec1/manifest.json` with SHA-256 sidecar.
+
 ## [2026-08-01] R5 Phase 2c reachability and sector-fact no-go
 
 **Type:** R5 measured performance candidate / exact-output equivalence / negative retention result / full source revert / roadmap handoff.
