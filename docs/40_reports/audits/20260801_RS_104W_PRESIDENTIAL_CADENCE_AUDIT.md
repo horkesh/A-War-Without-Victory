@@ -33,6 +33,8 @@ The fresh save contains no resolved player proposal reviews, so its optional-sou
 
 These intervals are the explicit positive-hold inventory from the clean replay: the historian/source review found no supported additional presidential lever within them. They are not permission to fabricate an event, treat a notice as a decision, or spend Authority automatically. The small endpoint differences from the player fixture (for example, RS `40-56` instead of `41-56`) reflect the absence of resolved player historical-operation proposals in the headless save.
 
+The RBiH `82-97` hold ends at turn 97 on `event:rbih_nato_ultimatum_compliance_1994`. It does not end on the separate Washington Agreement response at turn 102. The retained bundle now declares both endpoint turns and the exact receipt IDs, and the reporter rejects a hold when either declared receipt set differs from the computed source-backed gap even if its turns still match.
+
 ## Positive-hold source inventory
 
 Each frozen RS hold resolves to this stable report anchor and to the owner-play diary. The review checked the event catalogs in `data/scenarios/events/war_1992.json`, `war_1993.json`, and `war_1994.json`; the historical-operation catalog in `data/scenarios/historical_operations.json`; and the durable player receipts preserved in `docs/40_reports/playtests/20260731_rs_104week_player_diary.md`. An interval is a hold only when its exact source-backed endpoints match the cadence report and the intervening inventory contains no supported executable presidential lever.
@@ -54,8 +56,14 @@ The owner fixture's admitted evidence inventory contains repository-relative pat
 - aggregates event decisions, peace-plan dispositions, resolved proposals, officer decisions, reserve requests, convoy decisions, and paramilitary authorizations;
 - normalizes and sorts receipts deterministically;
 - computes source-backed turn gaps without treating routine work or notification traffic as authored judgment;
-- validates positive holds against exact long-gap endpoints, a non-empty rationale, and one or more IDs from the caller's admitted evidence inventory;
+- validates positive holds against exact long-gap turns and exact endpoint receipt-ID sets, a non-empty rationale, and one or more IDs from the caller's admitted evidence inventory;
 - reports invalid holds and unresolved gaps instead of silently accepting them.
+
+## Retained-evidence caveats
+
+The later R4 Task 2.2 replay manifest records `processCountAfterExit: 0` and summarizes deterministic stdout warnings, but those rows are manifest attestations: raw process-list snapshots and raw stdout/stderr logs were not retained. They support historical execution bookkeeping, not independent reconstruction of teardown or console bytes.
+
+The three retained accepted `end_report.md` files are byte-identical and independently inspectable. Each contains `0` critical, `3` warning, and `11` info anomalies. The warning classes are `frontline_density_imbalance`, `undefended_painted_mismatch`, and `adjacent_uncontested_territory`; these are simulation-anomaly findings and remain distinct from presidential-cadence bugs or source-hold validity.
 
 `tools/diagnostics/presidential_cadence_report.ts` reads a durable save and emits the same report for RBiH, RS, and HRHB. Generic command-presence rows are explicitly source-ineligible. The tool writes only when `--out` is supplied; it does not mutate the save or simulation.
 

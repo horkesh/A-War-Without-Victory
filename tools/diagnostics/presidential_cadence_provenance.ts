@@ -27,7 +27,7 @@ export interface CadenceEvidenceAttestation {
 }
 
 export interface PositiveHoldEvidenceBundle {
-  schemaVersion: 1;
+  schemaVersion: 2;
   provenance: CadenceProvenanceContext;
   evidence: CadenceEvidenceAttestation[];
   positiveHoldEvidenceIds: string[];
@@ -213,8 +213,8 @@ export function assertPositiveHoldBundle(
   expected: CadenceProvenanceContext,
   contents: CadenceEvidenceContents,
 ): void {
-  if (!bundle || typeof bundle !== 'object' || bundle.schemaVersion !== 1) {
-    throw new Error('Positive-hold bundle schemaVersion must be 1.');
+  if (!bundle || typeof bundle !== 'object' || bundle.schemaVersion !== 2) {
+    throw new Error('Positive-hold bundle schemaVersion must be 2.');
   }
   assertExactProvenance(bundle.provenance, expected);
   const admitted = assertAttestedEvidence(bundle.evidence, contents);
@@ -234,6 +234,15 @@ export function assertPositiveHoldBundle(
     }
     if (expected.playerFaction !== null && hold.faction !== expected.playerFaction) {
       throw new Error(`Positive hold ${hold.id} faction does not match playerFaction.`);
+    }
+    if (!Array.isArray(hold.fromReceiptIds) || !Array.isArray(hold.toReceiptIds)) {
+      throw new Error(`Positive hold ${hold.id} must declare endpoint receipt ids.`);
+    }
+    if (
+      hold.fromReceiptIds.some((id) => typeof id !== 'string' || id.trim().length === 0)
+      || hold.toReceiptIds.some((id) => typeof id !== 'string' || id.trim().length === 0)
+    ) {
+      throw new Error(`Positive hold ${hold.id} endpoint receipt ids must be non-empty strings.`);
     }
     assertEvidenceIds(hold.evidenceIds, admitted, `Positive hold ${hold.id}`);
   }

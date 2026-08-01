@@ -163,6 +163,13 @@ describe('all-faction 104-week headless positive holds', () => {
       ['HRHB', 52, 65],
       ['HRHB', 87, 102],
     ]);
+    expect(headlessHoldFixture.positiveHolds.find((hold) => hold.id === 'hold:rbih:82-97')).toMatchObject({
+      toTurn: 97,
+      toReceiptIds: ['event:rbih_nato_ultimatum_compliance_1994'],
+      rationale: expect.stringMatching(/NATO ultimatum/i),
+    });
+    expect(headlessHoldFixture.positiveHolds.find((hold) => hold.id === 'hold:rbih:82-97')?.rationale)
+      .not.toMatch(/Washington/i);
     expect(headlessHoldFixture.positiveHolds.every((hold) => (
       hold.rationale.length > 0
       && hold.evidenceIds.every((id) => headlessHoldFixture.positiveHoldEvidenceIds.includes(id))

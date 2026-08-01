@@ -29,6 +29,8 @@ export interface PresidentialPositiveHold {
   faction: string;
   fromTurn: number;
   toTurn: number;
+  fromReceiptIds: string[];
+  toReceiptIds: string[];
   rationale: string;
   evidenceIds: string[];
 }
@@ -236,8 +238,14 @@ function sourceBackedTurns(
 function normalizePositiveHold(hold: PresidentialPositiveHold): PresidentialPositiveHold {
   return {
     ...hold,
+    fromReceiptIds: normalizedIds(hold.fromReceiptIds),
+    toReceiptIds: normalizedIds(hold.toReceiptIds),
     evidenceIds: normalizedIds(hold.evidenceIds),
   };
+}
+
+function sameIds(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((id, index) => id === right[index]);
 }
 
 /**
@@ -504,6 +512,12 @@ export function buildPresidentialCadenceReport(
       && hold.evidenceIds.length > 0
       && hold.evidenceIds.every((evidenceId) => admittedEvidenceIds.has(evidenceId))
       && exactLongGap
+      && longGapCandidates.some((gap) => (
+        gap.fromTurn === hold.fromTurn
+        && gap.toTurn === hold.toTurn
+        && sameIds(hold.fromReceiptIds, gap.fromReceiptIds)
+        && sameIds(hold.toReceiptIds, gap.toReceiptIds)
+      ))
       && !claimedGapKeys.has(key);
 
     if (!valid) {

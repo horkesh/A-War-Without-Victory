@@ -9,7 +9,7 @@
 **Tech stack:** TypeScript, React, Vitest, JSON-authored events/essays, Electron browser gates, deterministic scenario runner.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phases 0-1 complete; Phase 2 Task 2.1 source packet complete; Task 2.2 lease-backed proof pending
+**Status:** IN PROGRESS -- Phases 0-2 complete; Phase 3 event reachability and two-level surfacing next
 **Roadmap workstream:** R4
 **Canonical owner:** Presidential Decision Room for action; Desk for triage; Records/Codex for receipts
 **Collision rule:** Do not overlap source edits with RS packets FR-01 or FR-04. Rebase on their shared priority and cadence contracts before Phase 0.
@@ -244,11 +244,11 @@ npm.cmd run typecheck
 
 **Task 2.2 runtime closeout (2026-08-01):**
 
-- Three independent headless campaigns designated RBiH, RS, and HRHB completed serially under one exclusive runtime lease at exact turn 104. All `14` substantive artifacts are byte-identical; final-save SHA-256 is `afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b` and cadence-report SHA-256 is `6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80`.
-- Actual sourced decisions remain separate from ordinary activity/notices and from explanatory holds. Maximum actual-decision gaps are RBiH `18`, RS `23`, and HRHB `15` turns. Eleven exact positive holds close every unsupported long interval with zero unresolved or invalid holds; they do not become decision receipts.
+- Three independent headless campaigns designated RBiH, RS, and HRHB completed serially under one exclusive runtime lease at exact turn 104. All `14` substantive artifacts are byte-identical; final-save SHA-256 is `afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b` and corrected cadence-report SHA-256 is `1e4a61efcdae342f5e7e9f6400af8a57e838dd5e909ba833a1fb0e577cb9e1c2`.
+- Actual sourced decisions remain separate from ordinary activity/notices and from explanatory holds. Maximum actual-decision gaps are RBiH `18`, RS `23`, and HRHB `15` turns. Eleven positive holds close every unsupported long interval with zero unresolved or invalid holds; schema v2 binds exact endpoint turns and receipt-ID sets, including the RBiH `82-97` endpoint on the turn-97 NATO ultimatum response rather than Washington at turn 102. Holds do not become decision receipts.
 - The accepted registry still contains `0` optional initiatives, so the 8-10-week target admits no unsupported row. Generic Authority-spend scans return zero; Authority coverage remains explicitly unreported because no weekly owner-observation bundle exists.
 - Historical-mode evidence records `55/55` deterministic bot-default event responses. All `40` events with an authored historical default match it; `15` rows without one use the documented first-option fallback and are not promoted into source proof. Pending decisions and notifications are both zero.
-- The focused matrix passes `4` files / `51` tests, TypeScript passes, and baseline regression reports all scenarios match without a refresh. No source bug appeared; no source, scenario, baseline, Electron, package, release, or `FORAWWV.md` change occurred. Evidence: [runtime report](../40_reports/implemented/20260801_R4_PHASE2_RUNTIME_CADENCE_PROOF.md), [replay manifest](../40_reports/audits/20260801_R4_PHASE2_RUNTIME_REPLAY_MANIFEST.json), and [canonical cadence report](../40_reports/audits/20260801_R4_PHASE2_RUNTIME_CADENCE.json).
+- The initial focused matrix passed `4` files / `51` tests; the endpoint correction matrix passes `7` files / `82` tests, TypeScript passes, and the original baseline regression reported all scenarios match without a refresh. The correction regenerated cadence diagnostics from retained saves only and explicitly distinguishes manifest-only process/stdout attestations from three retained simulation-anomaly warning classes. No scenario campaign, baseline refresh, Electron/package/release action, or `FORAWWV.md` change occurred. Evidence: [runtime report](../40_reports/implemented/20260801_R4_PHASE2_RUNTIME_CADENCE_PROOF.md), [replay manifest](../40_reports/audits/20260801_R4_PHASE2_RUNTIME_REPLAY_MANIFEST.json), and [canonical cadence report](../40_reports/audits/20260801_R4_PHASE2_RUNTIME_CADENCE.json).
 
 `/simplify` -> historian/canon review -> commit `feat(command): add sourced presidential cadence`
 

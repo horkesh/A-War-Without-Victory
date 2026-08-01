@@ -37,8 +37,8 @@
       "finalSaveBytes": 6630269,
       "finalSaveSha256": "afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b",
       "rawCadenceReport": "runs/r4_phase2_runtime_20260801/rbih-accepted/cadence_report.json",
-      "cadenceReportBytes": 39790,
-      "cadenceReportSha256": "6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80",
+      "cadenceReportBytes": 39803,
+      "cadenceReportSha256": "1e4a61efcdae342f5e7e9f6400af8a57e838dd5e909ba833a1fb0e577cb9e1c2",
       "processCountAfterExit": 0
     },
     {
@@ -51,8 +51,8 @@
       "finalSaveBytes": 6630269,
       "finalSaveSha256": "afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b",
       "rawCadenceReport": "runs/r4_phase2_runtime_20260801/rs-accepted/cadence_report.json",
-      "cadenceReportBytes": 39790,
-      "cadenceReportSha256": "6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80",
+      "cadenceReportBytes": 39803,
+      "cadenceReportSha256": "1e4a61efcdae342f5e7e9f6400af8a57e838dd5e909ba833a1fb0e577cb9e1c2",
       "processCountAfterExit": 0
     },
     {
@@ -65,8 +65,8 @@
       "finalSaveBytes": 6630269,
       "finalSaveSha256": "afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b",
       "rawCadenceReport": "runs/r4_phase2_runtime_20260801/hrhb-accepted/cadence_report.json",
-      "cadenceReportBytes": 39790,
-      "cadenceReportSha256": "6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80",
+      "cadenceReportBytes": 39803,
+      "cadenceReportSha256": "1e4a61efcdae342f5e7e9f6400af8a57e838dd5e909ba833a1fb0e577cb9e1c2",
       "processCountAfterExit": 0
     }
   ],
@@ -89,11 +89,11 @@
   "pathBearingArtifactsExcludedFromByteIdentity": ["run_meta.json"],
   "cadenceEvidence": {
     "positiveHoldBundle": "docs/40_reports/audits/20260801_R4_PHASE2_RUNTIME_POSITIVE_HOLDS.json",
-    "positiveHoldBundleBytes": 5489,
-    "positiveHoldBundleSha256": "4f0092368c0758b11c6235c589cdedc0278e989117743927772854b2ff225f1e",
+    "positiveHoldBundleBytes": 6920,
+    "positiveHoldBundleSha256": "2a75eb6dcfd0f5c7d9f6ff3069f96025394812b4ea7ecd97c26b6f7f317097e8",
     "canonicalReport": "docs/40_reports/audits/20260801_R4_PHASE2_RUNTIME_CADENCE.json",
-    "canonicalReportBytes": 39790,
-    "canonicalReportSha256": "6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80",
+    "canonicalReportBytes": 39803,
+    "canonicalReportSha256": "1e4a61efcdae342f5e7e9f6400af8a57e838dd5e909ba833a1fb0e577cb9e1c2",
     "authorityCoverage": "unreported",
     "factions": {
       "RBiH": {
@@ -144,15 +144,33 @@
     "unsupportedInitiatives": 0
   },
   "verification": {
-    "focusedTests": "4 files / 51 tests passed",
+    "initialFocusedTests": "4 files / 51 tests passed",
+    "correctionMatrix": "7 files / 82 tests passed",
     "baselineRegression": "all scenarios match; no baseline refreshed",
-    "typecheck": "passed"
+    "typecheck": "passed",
+    "manifestHashAndSizeCheck": "passed"
   },
   "knownDiagnostics": [
     "Each accepted replay emitted the existing unresolved assignment warning for rs_65th_protection_motorized_regiment.",
     "Each accepted replay emitted already-owned objective warnings for Operation Jajce and Operation Bosanski Novi.",
     "These repeated diagnostics did not change bytes across runs and are not reclassified as cadence source bugs."
   ],
+  "evidenceCaveats": {
+    "processTeardown": "processCountAfterExit values are manifest attestations; raw process-list snapshots were not retained.",
+    "stdoutDiagnostics": "knownDiagnostics rows are manifest attestations; raw stdout/stderr logs were not retained.",
+    "retainedEndReports": {
+      "byteIdentical": true,
+      "criticalCount": 0,
+      "warningCount": 3,
+      "infoCount": 11,
+      "warningClasses": [
+        "adjacent_uncontested_territory",
+        "frontline_density_imbalance",
+        "undefended_painted_mismatch"
+      ],
+      "classification": "simulation anomalies distinct from presidential-cadence bugs"
+    }
+  },
   "rejectedAttempts": [
     {
       "label": "rbih",

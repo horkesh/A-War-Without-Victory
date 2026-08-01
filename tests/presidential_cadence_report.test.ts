@@ -61,6 +61,8 @@ describe('presidential cadence report', () => {
         faction: 'RS',
         fromTurn: 40,
         toTurn: 56,
+        fromReceiptIds: ['operation:cerska'],
+        toReceiptIds: ['event:assembly'],
         rationale: 'No additional executable RS presidential lever is supported in this interval.',
         evidenceIds: ['audit:all-faction-event-catalog'],
       }],
@@ -83,10 +85,10 @@ describe('presidential cadence report', () => {
       receipts: BASE_RECEIPTS,
       positiveHoldEvidenceIds: ['audit'],
       positiveHolds: [
-        { id: 'hold:empty', faction: 'RS', fromTurn: 40, toTurn: 56, rationale: '', evidenceIds: [] },
-        { id: 'hold:mismatch', faction: 'RS', fromTurn: 41, toTurn: 56, rationale: 'Mismatch.', evidenceIds: ['audit'] },
-        { id: 'hold:short', faction: 'RS', fromTurn: 56, toTurn: 60, rationale: 'Short.', evidenceIds: ['audit'] },
-        { id: 'hold:other', faction: 'RBiH', fromTurn: 40, toTurn: 56, rationale: 'Other.', evidenceIds: ['audit'] },
+        { id: 'hold:empty', faction: 'RS', fromTurn: 40, toTurn: 56, fromReceiptIds: ['operation:cerska'], toReceiptIds: ['event:assembly'], rationale: '', evidenceIds: [] },
+        { id: 'hold:mismatch', faction: 'RS', fromTurn: 41, toTurn: 56, fromReceiptIds: [], toReceiptIds: ['event:assembly'], rationale: 'Mismatch.', evidenceIds: ['audit'] },
+        { id: 'hold:short', faction: 'RS', fromTurn: 56, toTurn: 60, fromReceiptIds: ['event:assembly'], toReceiptIds: [], rationale: 'Short.', evidenceIds: ['audit'] },
+        { id: 'hold:other', faction: 'RBiH', fromTurn: 40, toTurn: 56, fromReceiptIds: ['operation:cerska'], toReceiptIds: ['event:assembly'], rationale: 'Other.', evidenceIds: ['audit'] },
       ],
     });
 
@@ -112,12 +114,39 @@ describe('presidential cadence report', () => {
         faction: 'RS',
         fromTurn: 40,
         toTurn: 56,
+        fromReceiptIds: ['operation:cerska'],
+        toReceiptIds: ['event:assembly'],
         rationale: 'No supported lever.',
         evidenceIds: ['audit:invented-label'],
       }],
     });
 
     expect(report.invalidPositiveHoldIds).toEqual(['hold:unregistered-evidence']);
+    expect(report.gaps.find((gap) => gap.fromTurn === 40 && gap.toTurn === 56)?.status)
+      .toBe('unresolved');
+  });
+
+  it('rejects a hold whose declared receipt endpoint does not match the actual endpoint at the same turn', () => {
+    const report = buildPresidentialCadenceReport({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 70,
+      targetMaxGapTurns: 10,
+      receipts: BASE_RECEIPTS,
+      positiveHoldEvidenceIds: ['audit'],
+      positiveHolds: [{
+        id: 'hold:wrong-endpoint',
+        faction: 'RS',
+        fromTurn: 40,
+        toTurn: 56,
+        fromReceiptIds: ['operation:cerska'],
+        toReceiptIds: ['event:washington'],
+        rationale: 'No supported lever before the Washington response.',
+        evidenceIds: ['audit'],
+      }],
+    });
+
+    expect(report.invalidPositiveHoldIds).toEqual(['hold:wrong-endpoint']);
     expect(report.gaps.find((gap) => gap.fromTurn === 40 && gap.toTurn === 56)?.status)
       .toBe('unresolved');
   });
@@ -135,6 +164,8 @@ describe('presidential cadence report', () => {
         faction: 'RS',
         fromTurn: 40,
         toTurn: 56,
+        fromReceiptIds: ['operation:cerska'],
+        toReceiptIds: ['event:assembly'],
         rationale: 'No supported lever.',
         evidenceIds: ['audit:b', 'audit:a'],
       }],
@@ -151,6 +182,8 @@ describe('presidential cadence report', () => {
         faction: 'RS',
         fromTurn: 40,
         toTurn: 56,
+        fromReceiptIds: ['operation:cerska'],
+        toReceiptIds: ['event:assembly'],
         rationale: 'No supported lever.',
         evidenceIds: ['audit:a', 'audit:b'],
       }],

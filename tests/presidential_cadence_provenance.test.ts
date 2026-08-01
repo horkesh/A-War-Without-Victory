@@ -31,7 +31,7 @@ const CONTEXT: CadenceProvenanceContext = {
 };
 
 const HOLDS: PositiveHoldEvidenceBundle = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   provenance: CONTEXT,
   evidence: [{
     id: `${EVIDENCE_PATH}#positive-hold-source-inventory`,
@@ -45,6 +45,8 @@ const HOLDS: PositiveHoldEvidenceBundle = {
     faction: 'RS',
     fromTurn: 20,
     toTurn: 40,
+    fromReceiptIds: ['event:opening'],
+    toReceiptIds: ['event:next'],
     rationale: 'The attested source inventory contains no executable lever.',
     evidenceIds: [`${EVIDENCE_PATH}#positive-hold-source-inventory`],
   }],
@@ -96,7 +98,7 @@ describe('presidential cadence provenance', () => {
 
   it('rejects a schema mismatch and an end turn that does not equal the actual save turn', () => {
     expect(() => assertPositiveHoldBundle(
-      { ...HOLDS, schemaVersion: 2 } as unknown as PositiveHoldEvidenceBundle,
+      { ...HOLDS, schemaVersion: 1 } as unknown as PositiveHoldEvidenceBundle,
       CONTEXT,
       CONTENTS,
     )).toThrow(/schemaVersion/i);
@@ -105,6 +107,15 @@ describe('presidential cadence provenance', () => {
       { ...CONTEXT, endTurn: 105 },
       CONTENTS,
     )).toThrow(/saveTurn.*endTurn/i);
+  });
+
+  it('rejects a positive hold without explicit endpoint receipt ids', () => {
+    const hold = HOLDS.positiveHolds[0];
+    const { toReceiptIds: _toReceiptIds, ...withoutEndpoint } = hold;
+    expect(() => assertPositiveHoldBundle({
+      ...HOLDS,
+      positiveHolds: [withoutEndpoint],
+    } as unknown as PositiveHoldEvidenceBundle, CONTEXT, CONTENTS)).toThrow(/endpoint receipt ids/i);
   });
 
   it('rejects unattested, hash-tampered, and missing-anchor positive-hold evidence', () => {

@@ -337,7 +337,7 @@
           ],
           "status": "positive_hold",
           "positiveHoldId": "hold:rbih:82-97",
-          "positiveHoldRationale": "The all-faction catalog and source audit found no additional executable RBiH presidential lever before the Washington negotiations response.",
+          "positiveHoldRationale": "The all-faction catalog and source audit found no additional executable RBiH presidential lever before the NATO ultimatum compliance response at turn 97.",
           "positiveHoldEvidenceIds": [
             "docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"
           ]
@@ -1086,7 +1086,7 @@
     }
   },
   "positiveHoldBundleSource": "20260801_R4_PHASE2_RUNTIME_POSITIVE_HOLDS.json",
-  "positiveHoldBundleSha256": "4f0092368c0758b11c6235c589cdedc0278e989117743927772854b2ff225f1e",
+  "positiveHoldBundleSha256": "2a75eb6dcfd0f5c7d9f6ff3069f96025394812b4ea7ecd97c26b6f7f317097e8",
   "authorityObservationSource": null,
   "authorityObservationSha256": null,
   "authorityReports": {

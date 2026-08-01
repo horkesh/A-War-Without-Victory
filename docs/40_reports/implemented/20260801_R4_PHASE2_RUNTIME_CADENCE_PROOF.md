@@ -34,7 +34,7 @@ The large raw products were moved without rewriting their bytes to the ignored l
 | `end_report.md` | 41,199 | `e407431fa5bb074275c0b0416c5bb6907c33f9f92d8ccb0ffcfb960aec4aa3a3` | identical |
 | `control_delta.json` | 21,648 | `2b4cd2bb78db3570b6b9afe39bcd2a39d88ea29f6d5cdf0b9755478e50768f96` | identical |
 | `formation_delta.json` | 3,317 | `9559ec29d499b60638a779e09085e79c5f361a9752c49ab95b303026878dd155` | identical |
-| cadence report | 39,790 | `6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80` | identical |
+| cadence report | 39,803 | `1e4a61efcdae342f5e7e9f6400af8a57e838dd5e909ba833a1fb0e577cb9e1c2` | identical |
 
 Eight additional substantive raw artifacts also match and are enumerated in the replay manifest. `run_meta.json` is excluded from byte identity because it embeds the deliberately different output path.
 
@@ -58,12 +58,12 @@ The save ends with zero pending event decisions and zero pending notifications. 
 
 ## Source, Authority, and unsupported-content checks
 
-The [positive-hold bundle](../audits/20260801_R4_PHASE2_RUNTIME_POSITIVE_HOLDS.json) is `5,489` bytes, SHA-256 `4f0092368c0758b11c6235c589cdedc0278e989117743927772854b2ff225f1e`, and binds:
+The [positive-hold bundle](../audits/20260801_R4_PHASE2_RUNTIME_POSITIVE_HOLDS.json) is `6,920` bytes, SHA-256 `2a75eb6dcfd0f5c7d9f6ff3069f96025394812b4ea7ecd97c26b6f7f317097e8`, and binds:
 
 - scenario and deterministic run id;
 - turn range `0-104` and exact source-save bytes;
 - the accepted source-audit file hash and `positive-hold-source-inventory` anchor; and
-- all eleven exact faction/gap endpoints.
+- all eleven exact faction/gap endpoint turns and receipt-ID sets.
 
 The APR1992 initiative registry contains `0` rows. Case-insensitive scans of the accepted raw save/report products, all three raw cadence reports, and the hold bundle found `0` matches for generic `spend Authority`/`Authority spend` content. No unsupported initiative exists.
 
@@ -71,11 +71,13 @@ Command Authority cadence remains explicitly `unreported` for all three factions
 
 ## Diagnostics and rejected evidence
 
-Each accepted campaign repeated the existing unresolved-assignment warning for `rs_65th_protection_motorized_regiment` and already-owned-objective warnings for Operation Jajce and Operation Bosanski Novi. They are deterministic and byte-identical across runs. This task does not reclassify them as presidential-cadence bugs.
+Each accepted campaign repeated the existing unresolved-assignment warning for `rs_65th_protection_motorized_regiment` and already-owned-objective warnings for Operation Jajce and Operation Bosanski Novi. The replay manifest summarizes those stdout warnings and records `processCountAfterExit: 0`, but these are historical manifest attestations: raw stdout/stderr logs and raw process-list snapshots were not retained. They are nonblocking execution bookkeeping and cannot be independently reconstructed byte-for-byte from the tracked packet.
+
+The retained accepted `end_report.md` files are byte-identical and each reports `0` critical, `3` warning, and `11` info anomalies. The warning classes are `frontline_density_imbalance`, `undefended_painted_mismatch`, and `adjacent_uncontested_territory`. They are explicit simulation-anomaly findings, not presidential-cadence bugs, and this correction does not close or reclassify them.
 
 The first RBiH attempt used a 120-second command wrapper. It reached artifact emission, then the wrapper closed stdout and Node reported `EPIPE`; the command exited `124`. Its final-save hash independently matches the three accepted runs, but the attempt is retained only as rejected infrastructure evidence. RBiH was rerun from scratch with a 20-minute foreground timeout and exited `0`.
 
-No source bug appeared. Per the lane contract, no TDD or source modification was initiated.
+The original cadence run exposed no simulation-source bug. Review later found an evidence-classification bug: a turn-97 RBiH hold rationale named the turn-102 Washington response because the hold contract bound turns but not receipt IDs. The corrected schema binds both endpoint turns and exact receipt-ID sets; regression tests reject a same-turn hold whose declared endpoint ID differs from the computed gap.
 
 ## Verification
 
@@ -93,6 +95,8 @@ npm.cmd run typecheck
 
 The three scenario commands and three provenance-bound cadence commands each exited `0`. Final teardown found no Node process attached to the worktree's scenario runner.
 
+The later endpoint correction passed the expanded cadence/provenance/source/timing matrix at `7` files / `82` tests, a fresh TypeScript check, JSON parsing, and tracked replay-manifest hash/size verification. It regenerated diagnostics from retained accepted saves only; it did not rerun a campaign or refresh a baseline.
+
 ## Scope
 
-Tracked changes are evidence and governance documentation only. No runtime source, test source, event, initiative, historical choice, save schema, deterministic baseline, package, version, tag, push, merge, installer, Electron run, publication, release state, or `docs/10_canon/FORAWWV.md` changed. R4 now advances to Phase 3 event reachability and two-level surfacing.
+The correction changes only the read-only cadence diagnostic contract, its tests/fixtures, regenerated cadence evidence, and governance documentation. It does not alter simulation runtime behavior, event/initiative content, historical choices, accepted campaign saves, scenario data, save schema, deterministic baselines, package/version/tag, Electron output, publication/release state, or `docs/10_canon/FORAWWV.md`. R4 remains closed through Phase 2 and advances to Phase 3 event reachability and two-level surfacing.
