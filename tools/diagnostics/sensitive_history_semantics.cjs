@@ -50,8 +50,6 @@ const CONTEXTUAL_STANDALONE_PREFIX_PATTERN = /\b(?:ban|document|expose|forbid|in
 const SENSITIVE_WARNING_PATTERN = /\b(?:caution(?:s|ed|ing)?|object(?:s|ed|ing)?|objection\w*|oppos(?:e|es|ed|ing)|reject(?:s|ed|ing)?|warn(?:s|ed|ing)?)\b/i;
 const CONTINUATION_ACTION_PATTERN = /\b(?:continue|proceed)\b/i;
 const ANAPHORIC_MARKER_PATTERN = /\b(?:anyway|regardless)\b/i;
-const CONTINUATION_PURPOSE_ACTION_PATTERN = /\b(?:continue|document\w*|execute|expos\w*|investigat\w*|inspect\w*|launch\w*|proceed|prosecut\w*|report\w*|review\w*)\b/i;
-const OPERATIVE_PURPOSE_ACTION_PATTERN = /^(?:continue|execute|launch\w*|proceed)$/i;
 const OPERATIVE_PURPOSE_PATTERN = /\b(?:attacks?|assaults?|campaigns?|combat|direct\s+action|offensives?|operations?|strikes?)\b/i;
 
 function matchesFor(pattern, text) {
@@ -87,23 +85,9 @@ function refusalApplies(clauseText, offset) {
   return REFUSAL_SCOPE_PATTERN.test(clauseText.slice(0, offset));
 }
 
-function continuationHasOnlyAccountabilityPurpose(clauseText, continuation) {
-  const actions = [...matchesFor(CONTINUATION_PURPOSE_ACTION_PATTERN, clauseText)]
-    .filter((action) => action.index !== undefined && action.index >= continuation.index);
-  let hasAccountabilityPurpose = false;
-  for (let index = 0; index < actions.length; index += 1) {
-    const action = actions[index];
-    if (action.index === undefined || refusalApplies(clauseText, action.index)) continue;
-    if (ACCOUNTABILITY_PATTERN.test(action[0])) {
-      hasAccountabilityPurpose = true;
-      continue;
-    }
-    if (!OPERATIVE_PURPOSE_ACTION_PATTERN.test(action[0])) continue;
-    const purposeEnd = actions[index + 1]?.index ?? clauseText.length;
-    const purpose = clauseText.slice(action.index + action[0].length, purposeEnd);
-    if (OPERATIVE_PURPOSE_PATTERN.test(purpose)) return false;
-  }
-  return hasAccountabilityPurpose;
+function continuationHasOnlyAccountabilityPurpose(clauseText) {
+  return !OPERATIVE_PURPOSE_PATTERN.test(clauseText)
+    && ACCOUNTABILITY_PATTERN.test(clauseText);
 }
 
 function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
@@ -126,7 +110,7 @@ function isDirectRefusedSensitiveChoice(text) {
       && !refusalApplies(clause.text, continuation.index)
       && SENSITIVE_WARNING_PATTERN.test(previousClause)
       && REFUSED_ACT_PATTERN.test(previousClause)
-      && !continuationHasOnlyAccountabilityPurpose(clause.text, continuation)
+      && !continuationHasOnlyAccountabilityPurpose(clause.text)
     ) return true;
     if (STANDALONE_REFUSED_PATTERNS.some((pattern) => {
       for (const match of matchesFor(pattern, clause.text)) {
