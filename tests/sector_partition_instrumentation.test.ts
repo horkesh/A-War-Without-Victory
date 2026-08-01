@@ -919,4 +919,16 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         delete process.env[FLAG];
         expect(isSectorPartitionPerfEnabled()).toBe(v1);
     });
+
+    it('fixed-point shortcut consumes both prune and recovery mutation receipts', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const compact = raw.replace(/\s+/g, ' ');
+
+        expect(compact).toContain(
+            "const prunedGhostArtifacts = _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));",
+        );
+        expect(compact).toContain(
+            'if (!useFixedPointShortcuts || prunedGhostArtifacts || recoveredDroppedFrontEdges)',
+        );
+    });
 });

@@ -5,7 +5,7 @@
 **Scenario:** `data/scenarios/apr1992_definitive_40w.json`
 **Reference machine:** AMD Ryzen 7 5700X, 8 physical / 16 logical cores, Windows x64, Node v24.13.0
 **Target:** mean below 100 ms per simulated turn
-**Status:** Operational-graph, runtime-hardened immutable-adjacency, operational-data ownership reuse, and fixed-point mutation receipts are accepted by exact-output tests and measured evidence. Same-parent control disproves the apparent committee-repair regression; the earlier `+18.155%` packet is preserved below as historical evidence but superseded as a causal timing result. The performance target is not met.
+**Status:** Operational-graph, runtime-hardened immutable-adjacency, and operational-data ownership reuse remain accepted. Same-parent control disproves the apparent committee-repair regression; the earlier `+18.155%` packet is preserved below as historical evidence but superseded as a causal timing result. The Phase 2b fixed-point candidate is committee-blocked: its first shortcut omitted the mutation receipt from ghost pruning, its original property test covered only a partial sector surface/default mode, and its 20-pair microbenchmark retained neither the exact command nor raw output. Its timing packet is diagnostic history, not accepted performance evidence. The performance target is not met.
 
 ## Determinism boundary
 
@@ -38,7 +38,7 @@ No baseline was refreshed. The different bytes between the historical and curren
 | Committee-corrected final-sector receipts (historical packet) | 3 measured | 1,588.219 | 1,616.182 | 1,654.908 | 202.072 MB | Exact-output correctness checkpoint. The apparent +18.155% regression is preserved but superseded as timing evidence by the same-parent control below. |
 | Exact pre-committee control at reviewed-parent lineage (`5c272e0b4`) | 1 control | 1,377.877 | n/a | n/a | n/a | Same-condition causal control for the receipt correction. |
 | Corrected receipts at reviewed parent (`6649ae8ca`) | 1 control | 1,332.681 | n/a | n/a | 203.571 MB | 3.280% faster than the exact pre-committee control; the old regression attribution is disproved. |
-| Fixed-point mutation receipts | 3 measured | 1,223.822 | 1,219.931 | 1,254.343 | 197.974 MB | Current-parent mean improved 8.168% versus the corrected control; paired builder and call-count evidence below supplies the causal result. |
+| Fixed-point mutation receipts (committee-blocked packet) | 3 measured | 1,223.822 | 1,219.931 | 1,254.343 | 197.974 MB | Diagnostic only. Source dependency proof and benchmark provenance were insufficient; no performance acceptance is claimed. |
 
 The three replicated operational-graph samples were `1,285.520`, `1,289.839`, and `1,302.636` ms/turn.
 
@@ -63,7 +63,9 @@ Phase 2b recovered the exact pre-committee implementation at `5c272e0b4` and mea
 
 The historical corrected profile recorded `62,649.585` ms total wall and 202.072 MB phase-boundary sampled peak heap. Relevant phase owners were: `reconcile-final-sector-truth` 8,878.592 ms / 40 calls, `partition-corps-front-sectors` 7,997.175 ms / 40, `reconcile-final-sector-truth-after-ops` 4,120.042 ms / 40, `final-distribute-brigades-to-front` 1,908.359 ms / 40, and `seal-final-sector-truth-after-distribution` 0.935 ms / 40. Those owner observations remain useful, while that packet's whole-run regression attribution is superseded.
 
-The fixed-point-receipt candidate measured `47,887.717`, `48,797.227`, and `50,173.716` ms total wall: mean `48,952.887` ms or `1,223.822` ms/turn, P50 `1,219.931`, P95 `1,254.343`, and mean phase-boundary sampled peak heap 197.974 MB. Against the one-run same-parent corrected control this is an apparent 8.168% whole-run improvement. Because that control was not replicated, acceptance rests primarily on the paired same-process builder benchmark and deterministic call elimination: 20 alternating candidate/reference pairs reduced mean build time from `209.666` to `196.560` ms (`-6.251%`), while the detailed 99-build profile reduced measured sector work from `18,904.264` to `15,356.308` ms (`-18.77%`).
+The committee-blocked fixed-point candidate measured `47,887.717`, `48,797.227`, and `50,173.716` ms total wall: mean `48,952.887` ms or `1,223.822` ms/turn, P50 `1,219.931`, P95 `1,254.343`, and mean phase-boundary sampled peak heap 197.974 MB. Against the one-run same-parent corrected control this appeared 8.168% faster. The detailed profile also appeared to reduce measured sector work from `18,904.264` to `15,356.308` ms (`-18.77%`). Neither result is accepted: the measured source omitted the prune receipt from its fixed-point dependency set.
+
+A one-off 20-pair alternating builder run reported `209.666` to `196.560` ms (`-6.251%`), but its exact command and raw stdout were not retained. That is the complete available provenance; the result is non-reproducible and removed from the acceptance case. A fresh benchmark must use a committed runner or capture exact command, parent commit/candidate commit, fixture hashes, Node version, every pair, aggregation method, and raw output before any speed claim is restored.
 
 ## Candidate-local owner movement
 
@@ -73,7 +75,7 @@ The fixed-point-receipt candidate measured `47,887.717`, `48,797.227`, and `50,1
 | Reuse adjacency for an immutable edge-array identity | `buildAdjacencyMap` 2,764.472 ms self | 90.059 ms self | 4.84% | 0.17% | −2,674.413 ms, or −96.7%. |
 | Reuse caller-owned operational mappings | `loadOperationalData` 905.793 ms self / 1,390.831 ms inclusive; `buildReverseMap` 466.977 / 472.217 ms | `loadOperationalData` 7.755 / 15.554 ms; `buildReverseMap` 7.799 / 7.799 ms | 2.44% and 0.83% | 0.03% and 0.02% | Named work removed in comparable same-process application V8 profiles; whole-turn mean improved 0.993%. |
 | Replace implicit final-sector fingerprint cache with turn-local receipts | Module-level `WeakMap<GameState, ...>` inferred invalidation from a pre-build fingerprint and hid self-mutating formation-location inputs | `TurnContext` owns ordered geometry/territory/roster/rating epochs; dispatch follows the earliest dirty stage; postcombat and operation-roster location writers emit explicit geometry receipts | n/a | n/a | Exact legacy bytes restored and committee ordering/writeback blockers closed. Correctness accepted; same-parent control later disproved the apparent timing regression. |
-| Consume fixed-point mutation receipts | Every build repeated seal pass 3, prune pass 2, recovery pass 2, and owner-truth pass 4 | Seal/prune/recovery convergence runs only after recovery reports a mutation; owner-truth pass 4 runs only after final territory repair exercises a mutation path | 99/99 calls for each pass | seal 3: 5/99; prune 2: 5/99; recovery 2: 5/99; owner truth 4: 1/99 | Paired builder mean improved 6.251%; exact reference equivalence held across 100 deterministic real-save variants and complete scenario bytes. |
+| Consume fixed-point mutation receipts (committee-blocked) | Every build repeated seal pass 3, prune pass 2, recovery pass 2, and owner-truth pass 4 | The blocked source gated convergence on recovery alone even though ghost pruning ran after seal pass 2 and could delete a sector independently | 99/99 calls for each pass | Historical diagnostic counts: seal 3: 5/99; prune 2: 5/99; recovery 2: 5/99; owner truth 4: 1/99 | Not accepted. Corrected source must consume both prune and recovery receipts and pass the complete observable-surface/mode matrix before remeasurement. |
 
 The adjacency cache is eligible only for a runtime-registered, deeply frozen graph edge identity, or an independently deeply frozen array whose every edge record is frozen. Arbitrary mutable arrays take the uncached builder path. Cached adjacency objects and their neighbor arrays are themselves frozen, so a later phase cannot corrupt another consumer's value.
 
@@ -97,21 +99,49 @@ The raw performance products are intentionally untracked diagnostics under the r
 - committee-corrected receipt warmup/profile/measured runs: `runs_perf/r5_phase2_receipts_correction_{warmup,profile,measured_1,measured_2,measured_3}/...`;
 - same-condition pre-receipt control: `F:/AWWV-worktrees/r5-receipts-baseline/runs_perf/r5_phase2_pre_receipts_current_control/.../timing.json` (detached `eab6812fd`; transient local evidence).
 - current-parent corrected control: `data/derived/_debug/r5_phase2b_current_profile.json` and `runs_perf/r5_phase2b_current_profile/...`;
-- fixed-point candidate measurements: `data/derived/_debug/r5_phase2b_fixed_point_receipts_candidate{,_m2,_m3}.json` and matching `runs_perf` directories;
-- fixed-point detailed sector profile: `data/derived/_debug/r5_phase2b_fixed_point_receipts_sector_detail.json` and `runs_perf/r5_phase2b_fixed_point_receipts_sector_detail/...`;
+- committee-blocked fixed-point measurements: `data/derived/_debug/r5_phase2b_fixed_point_receipts_candidate{,_m2,_m3}.json` and matching `runs_perf` directories;
+- committee-blocked detailed sector profile: `data/derived/_debug/r5_phase2b_fixed_point_receipts_sector_detail.json` and `runs_perf/r5_phase2b_fixed_point_receipts_sector_detail/...`;
 - exact pre-committee control: detached `5c272e0b4`, measured at `55,115.070` ms before its transient worktree was removed.
 
 Evidence lineage is fail-closed. The first operational-data packet is invalid because other lanes executed read-only commands during timing. The first `_clean2` V8 attempt is invalid because it profiled only the parent CLI and contained zero application frames. The otherwise clean `_clean2` packet was then superseded after independent review found an optional-resource coupling regression. The reviewer approved the granular correction, actual-phase failure tests, read-only consumer audit, and corrected five-mode packet. Only the corrected packet named above is authoritative for this candidate.
 
 The initial receipt checkpoint is likewise superseded for correctness by the committee-corrected packet. Its historical RED regressions reproduce both blockers; the focused matrix passed 5 files / 69 tests and the expanded sector/performance matrix passed 8 files / 105 tests, including 100+ deterministic real-save variants. The corrected historical warmup, profile, and all three measured saves were each exactly 5,071,275 bytes with SHA-256 `52ee1829aab62e5ede80ca461b0ec6cc1d5ecc8ac2e0700a36ea7229d6050bde` and state hash `52ee1829aab62e5e`.
 
-Phase 2b added an exact full-reference fixed-point mode for tests and compared canonical sectors plus all formation side effects across 100 deterministic real-save variants. The focused matrix passes 6 files / 78 tests; TypeScript, diff hygiene, and the unchanged baseline-regression runner also pass. A rejected unconditional skip of final seal pass 5 failed that gate at variant seed 27 (ARBiH 3rd Corps topology diverged, 20 sectors versus 8) and was fully reverted. The accepted candidate gates work only behind explicit mutation receipts and preserve the current-parent final save exactly at 5,070,902 bytes and SHA-256 `b28225e47b8e7ba563c4e836151fc8699f3cd191f4912c6c13ac7c099719fbd5` in the detailed profile and all three measurements.
+The blocked Phase 2b checkpoint added a full-reference fixed-point mode but compared a hand-maintained subset of sector fields plus formation state only, in the default `isFinalPass=false` / `finalSaveGeometryProjection=false` mode. Its exact focused command was:
+
+```powershell
+npm.cmd exec -- vitest run tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/final_sector_truth_reconciliation.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/final_sector_reconciliation_session.test.ts tests/sector_territory_contiguity_repair.test.ts --pool=forks --reporter=dot
+```
+
+The command reported Vitest 2.1.9, 6 files / 78 tests passed, started `2026-08-01 17:49:49`, duration `177.19s`. Raw stdout existed only in the Codex task transcript and was not retained as a durable artifact; the count is historical provenance, not sufficient evidence for acceptance. The committee correction replaces the selective serializer with recursive stable-key canonicalization of the complete `CorpsFrontSector`/sub-segment packet and entire cloned `GameState`, and exercises the three production modes: live war (`false/false`), final turn (`true/false`), and final-save projection (`false/true`).
+
+A rejected unconditional skip of final seal pass 5 failed the earlier gate at variant seed 27 (ARBiH 3rd Corps topology diverged, 20 sectors versus 8) and was fully reverted. The blocked candidate's detailed profile and all three measurements did preserve the then-current parent final save at 5,070,902 bytes and SHA-256 `b28225e47b8e7ba563c4e836151fc8699f3cd191f4912c6c13ac7c099719fbd5`, but exact scenario bytes cannot accept a shortcut whose dependency proof and test surface are incomplete.
+
+### Committee correction verification
+
+The prune-receipt regression was run RED before the source repair:
+
+```powershell
+npm.cmd exec -- vitest run tests/postmerge_ghost_sector_prune.test.ts tests/sector_partition_instrumentation.test.ts --pool=forks --reporter=dot
+```
+
+It failed for the intended reason: `pruneGhostArtifactSectors` returned `undefined` for both mutation/no-mutation cases and the convergence guard did not consume a prune receipt (3 failed, 34 passed). The corrected source returns a deterministic boolean receipt and runs the convergence segment unless both prune and recovery report unchanged.
+
+The fresh combined GREEN command was:
+
+```powershell
+npm.cmd exec -- vitest run tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/final_sector_truth_reconciliation.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/final_sector_reconciliation_session.test.ts tests/sector_territory_contiguity_repair.test.ts tests/postmerge_ghost_sector_prune.test.ts --pool=forks --reporter=dot
+```
+
+Vitest 2.1.9 reported 7 files / 81 tests passed, started `2026-08-01 18:22:50`, duration `385.56s`. The complete recursive optimized/reference property covered every returned sector/sub-segment field and the entire directly mutated `GameState` across 100 variants in each of the three production modes (300 candidate/reference comparisons); that property took `291.245s`. Raw stdout is preserved in the ignored diagnostic `data/derived/_debug/r5_phase2b_committee_correction_focused.log` (192,074 bytes; SHA-256 `c02a7ed2b9159e4996e54ccefa6678ca17c3cfa1d40f8e6877fd53ba33e39e8a`).
+
+`npm.cmd run typecheck` passed. `npm.cmd run test:baselines` reported `Baseline regression: all scenarios match.` Its raw stdout/stderr is preserved in the ignored diagnostic `data/derived/_debug/r5_phase2b_committee_correction_baselines.log` (63,168 bytes; SHA-256 `a908d8a8993de784c2415f2cfa8dd3d20bf35bab8cbbfe2476b7c1e9cc0d2506`). Diff hygiene and the determinism-sensitive added-line scan passed. Per `DETERMINISM_TEST_MATRIX.md`, `Engine_Invariants_v0_9_0.md`, `DETERMINISM_AUDIT.md`, `INVARIANTS_IN_CODE.md`, and `CODE_CANON.md`, the correction adds no random, time-derived, locale-dependent, filesystem-order, or persisted diagnostic input. No performance profile or new timed scenario measurement was run for the correction; the timing packet remains blocked pending an authorized fresh lane.
 
 The tracked acceptance contract is this report plus the focused equivalence tests. Raw profiler products remain untracked because they are machine-local diagnostic evidence, not canonical game data.
 
 ## Remaining target gap and next measured owner
 
-The accepted historical best replicated mean remains `1,189.962` ms/turn, or 11.8996x the 100 ms/turn target. The current-parent fixed-point candidate mean is `1,223.822` ms/turn, or 12.2382x target. Because the historical floor and current parent were measured in different machine envelopes, Phase 2b is accepted as a causal owner improvement, not a new all-time throughput floor. No Phase 2 completion claim is made.
+The accepted historical best replicated mean remains `1,189.962` ms/turn, or 11.8996x the 100 ms/turn target. The blocked fixed-point packet's `1,223.822` ms/turn mean is not an accepted checkpoint or floor. No Phase 2 completion or Phase 2b performance-acceptance claim is made.
 
 The current application profile ranks the next bounded owners as:
 

@@ -22,15 +22,10 @@
  *      DISABLED via env flag `SECTOR_COLDSTART_CACHE_DISABLED=true`. This
  *      forces every internal `mapOsidsToCorps` call site to bypass the cache
  *      and always recompute (the legacy behavior).
- *   4. Asserts the two returned sector dictionaries are byte-identical:
- *      - Same set of sector_ids (no spurious ordering / count differences)
- *      - Same `corps_id`, `faction`, `length_edges`, `density`, `power`,
- *        `threat`, every list field (`edge_ids`, `territory_osids`,
- *        `assigned_brigade_ids`, `reserve_brigade_ids`, `rear_brigade_ids`)
- *        in matching order
- *      - Same `sub_segments[*].sub_segment_id`, `friendly_osids`,
- *        `enemy_osids`, `edge_ids`, `length_edges`, `primary_brigade_ids`
- *      - JSON.stringify of the canonicalized sectors must be byte-equal
+ *   4. Asserts the two returned sector dictionaries are byte-identical across
+ *      every recursively observable field. Object keys are sorted while array
+ *      order remains part of the contract, so new optional sector/sub-segment
+ *      fields are covered automatically rather than by a hand-maintained list.
  *
  * Fixture variants (≥100 invocations total):
  *   - The base state from `data/derived/latest_run_final_save.json`
@@ -113,64 +108,68 @@ function loadEdges(): ContactGraphEdge[] {
 function canonicalizeSectors(
     sectors: Record<string, CorpsFrontSector>,
 ): string {
-    const sectorIds = Object.keys(sectors).sort(strictCompare);
-    const canonical = sectorIds.map((sectorId) => {
-        const s = sectors[sectorId]!;
-        // Snapshot every observable field in a stable key order.
-        return [
-            'sector_id', s.sector_id,
-            'corps_id', s.corps_id,
-            'faction', s.faction,
-            'length_edges', s.length_edges,
-            'edge_ids', s.edge_ids,
-            'territory_osids', s.territory_osids,
-            'assigned_brigade_ids', s.assigned_brigade_ids,
-            'reserve_brigade_ids', s.reserve_brigade_ids,
-            'rear_brigade_ids', s.rear_brigade_ids ?? [],
-            'sub_segments', (s.sub_segments ?? []).map((ss) => [
-                ss.sub_segment_id,
-                ss.friendly_osids,
-                ss.enemy_osids,
-                ss.edge_ids,
-                ss.length_edges,
-                ss.primary_brigade_ids,
-            ]),
-            'opposing_factions', s.opposing_factions ?? [],
-        ];
-    });
-    return JSON.stringify(canonical);
+    return JSON.stringify(canonicalizeObservable(sectors));
 }
 
-function canonicalizeFormationSideEffects(state: GameState): string {
-    const formations = state.military.formations ?? {};
-    return JSON.stringify(
-        Object.keys(formations)
+function canonicalizeObservable(value: unknown): unknown {
+    if (Array.isArray(value)) {
+        return value.map((entry) => canonicalizeObservable(entry));
+    }
+    if (value !== null && typeof value === 'object') {
+        const record = value as Record<string, unknown>;
+        return Object.keys(record)
             .sort(strictCompare)
-            .map((formationId) => [formationId, formations[formationId]]),
-    );
+            .map((key) => [key, canonicalizeObservable(record[key])]);
+    }
+    return value;
 }
+
+type FixedPointProductionMode = {
+    label: string;
+    isFinalPass: boolean;
+    finalSaveGeometryProjection: boolean;
+};
+
+const FIXED_POINT_PRODUCTION_MODES: FixedPointProductionMode[] = [
+    { label: 'war', isFinalPass: false, finalSaveGeometryProjection: false },
+    { label: 'final-turn', isFinalPass: true, finalSaveGeometryProjection: false },
+    { label: 'final-save', isFinalPass: false, finalSaveGeometryProjection: true },
+];
 
 function runFixedPointModes(
     state: GameState,
     edges: ContactGraphEdge[],
+    mode: FixedPointProductionMode,
 ): { optimized: string; reference: string } {
     const optimizedState = deserializeState(JSON.stringify(state)) as GameState;
     const referenceState = deserializeState(JSON.stringify(state)) as GameState;
-    const optimizedSectors = buildCorpsFrontSectors(optimizedState, edges as never, null);
+    const optimizedSectors = buildCorpsFrontSectors(
+        optimizedState,
+        edges as never,
+        null,
+        undefined,
+        undefined,
+        mode.isFinalPass,
+        mode.finalSaveGeometryProjection,
+    );
     const referenceSectors = __buildCorpsFrontSectorsWithoutFixedPointShortcuts(
         referenceState,
         edges as never,
         null,
+        undefined,
+        undefined,
+        mode.isFinalPass,
+        mode.finalSaveGeometryProjection,
     );
     return {
-        optimized: JSON.stringify([
-            canonicalizeSectors(optimizedSectors),
-            canonicalizeFormationSideEffects(optimizedState),
-        ]),
-        reference: JSON.stringify([
-            canonicalizeSectors(referenceSectors),
-            canonicalizeFormationSideEffects(referenceState),
-        ]),
+        optimized: JSON.stringify(canonicalizeObservable({
+            sectors: optimizedSectors,
+            state: optimizedState,
+        })),
+        reference: JSON.stringify(canonicalizeObservable({
+            sectors: referenceSectors,
+            state: referenceState,
+        })),
     };
 }
 
@@ -373,26 +372,28 @@ describe.skipIf(!hasFixture)(
             }
         });
 
-        it('fixed-point shortcuts preserve sectors and formation side effects across 100 real-save variants', () => {
-            for (let seed = 0; seed < 100; seed++) {
-                const variant = makeVariant(baseState, seed);
-                const { optimized, reference } = runFixedPointModes(variant, edges);
-                if (optimized !== reference) {
-                    let firstDiff = 0;
-                    while (
-                        firstDiff < optimized.length
-                        && firstDiff < reference.length
-                        && optimized.charCodeAt(firstDiff) === reference.charCodeAt(firstDiff)
-                    ) {
-                        firstDiff += 1;
+        it('fixed-point shortcuts preserve every sector field and direct state side effect across production modes and 100 real-save variants', () => {
+            for (const mode of FIXED_POINT_PRODUCTION_MODES) {
+                for (let seed = 0; seed < 100; seed++) {
+                    const variant = makeVariant(baseState, seed);
+                    const { optimized, reference } = runFixedPointModes(variant, edges, mode);
+                    if (optimized !== reference) {
+                        let firstDiff = 0;
+                        while (
+                            firstDiff < optimized.length
+                            && firstDiff < reference.length
+                            && optimized.charCodeAt(firstDiff) === reference.charCodeAt(firstDiff)
+                        ) {
+                            firstDiff += 1;
+                        }
+                        throw new Error(
+                            `fixed-point divergence for mode ${mode.label}, seed ${seed} at byte ${firstDiff}; `
+                            + `optimized=${optimized.slice(firstDiff, firstDiff + 160)}; `
+                            + `reference=${reference.slice(firstDiff, firstDiff + 160)}`,
+                        );
                     }
-                    throw new Error(
-                        `fixed-point divergence for seed ${seed} at byte ${firstDiff}; `
-                        + `optimized=${optimized.slice(firstDiff, firstDiff + 160)}; `
-                        + `reference=${reference.slice(firstDiff, firstDiff + 160)}`,
-                    );
                 }
             }
-        }, 600_000);
+        }, 900_000);
     },
 );
