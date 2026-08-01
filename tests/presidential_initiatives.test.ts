@@ -8,7 +8,8 @@ import {
   parsePresidentialInitiativeRegistry,
   type PresidentialInitiativeRegistry,
 } from '../src/sim/presidency/presidential_initiatives.js';
-import type { GameState } from '../src/state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
+import { runTurn } from '../src/sim/turn_pipeline.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import {
   countActionableItems,
@@ -83,7 +84,7 @@ function sourcedRow(id: string) {
   } as const;
 }
 
-function registry(rows: readonly ReturnType<typeof sourcedRow>[]): PresidentialInitiativeRegistry {
+function registry(rows: readonly unknown[]): PresidentialInitiativeRegistry {
   return parsePresidentialInitiativeRegistry({
     schema_version: 1,
     scenario_id: 'test',
@@ -95,6 +96,71 @@ function registry(rows: readonly ReturnType<typeof sourcedRow>[]): PresidentialI
     },
     initiatives: rows,
   });
+}
+
+function pipelineState(): GameState {
+  return {
+    schema_version: CURRENT_SCHEMA_VERSION,
+    meta: {
+      turn: 10,
+      seed: 'presidential-initiative-inert-fixture',
+      phase: 'war',
+      player_faction: 'RS',
+      referendum_held: true,
+      referendum_turn: 6,
+      war_start_turn: 10,
+    },
+    factions: [
+      {
+        id: 'RBiH',
+        profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
+        areasOfResponsibility: [],
+        supply_sources: [],
+        declared: false,
+        declaration_turn: null,
+      },
+      {
+        id: 'RS',
+        profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
+        areasOfResponsibility: [],
+        supply_sources: [],
+        declared: true,
+        declaration_turn: 5,
+      },
+      {
+        id: 'HRHB',
+        profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
+        areasOfResponsibility: [],
+        supply_sources: [],
+        declared: false,
+        declaration_turn: null,
+      },
+    ],
+    military: {
+      formations: {},
+      front_segments: {},
+      front_posture: {},
+      front_posture_regions: {},
+      front_pressure: {},
+      militia_pools: {},
+      command_authority: {
+        current: 95,
+        max: 100,
+        spent_this_turn: 0,
+        lifetime_spent: 0,
+      },
+      war_militia_strength: {
+        MUN_A: { RBiH: 30, RS: 60, HRHB: 10 },
+        MUN_B: { RBiH: 25, RS: 70, HRHB: 5 },
+      },
+    } as unknown as GameState['military'],
+    political: {
+      political_controllers: { s1: 'RBiH', s2: 'RS' },
+      municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
+      war_consolidation_until: {},
+    } as unknown as GameState['political'],
+    displacement: {} as GameState['displacement'],
+  };
 }
 
 function cadenceInput(candidateRegistry: PresidentialInitiativeRegistry) {
@@ -152,7 +218,7 @@ describe('APR1992 presidential initiative source registry', () => {
     const wrongCost = {
       ...sourcedRow('wrong_existing_lever_cost'),
       lever: { kind: 'request_operation', authority_cost: 24 },
-    };
+    } as const;
     expect(() => registry([wrongCost]))
       .toThrow(/authority_cost/i);
   });
@@ -279,13 +345,14 @@ describe('positive-hold Desk projection', () => {
     expect(countActionableItems(items)).toBe(0);
   });
 
-  it('wires the source gate into war turns without mutating the empty-registry state', async () => {
-    const step = warPhases.find((candidate) => candidate.name === 'evaluate-presidential-initiative-registry');
-    const state = gameState();
-    const before = JSON.stringify(state);
+  it('keeps the real turn pipeline report and state free of zero-row registry output', async () => {
+    const result = await runTurn(pipelineState(), { seed: 'presidential-initiative-inert-fixture' });
+    const phaseNames = result.report.phases.map((phase) => phase.name);
 
-    expect(step).toBeDefined();
-    await step!.run({ state } as unknown as Parameters<(typeof warPhases)[number]['run']>[0]);
-    expect(JSON.stringify(state)).toBe(before);
+    expect(result.status).toBe('success');
+    expect(phaseNames).toEqual(warPhases.map((phase) => phase.name));
+    expect(phaseNames).not.toContain('evaluate-presidential-initiative-registry');
+    expect(Object.keys(result.report).filter((key) => key.includes('presidential_initiative'))).toEqual([]);
+    expect(JSON.stringify(result.nextState)).not.toContain('presidential_initiative');
   });
 });

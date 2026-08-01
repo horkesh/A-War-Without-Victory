@@ -4095,3 +4095,7 @@ Applied in `[2026-08-01] Engine quality Phase 2 turn-local final-sector receipt 
 **Viewport reflow may change reachability, not the proof population:** opening and closing map panels changes occlusion and can reveal counters that were absent from the ready-map sample. Durable rule: freeze the declared identity set at the checkpoint, select only currently reachable unattempted members of that set, and report frozen members that became unavailable. Never substitute newly visible identities merely to reach a target count; that turns an adaptive reachability probe into an undeclared and non-reproducible blocker.
 
 Applied in `[2026-08-01] R2 final-tour route and frozen counter-target harness correction`, `tools/ui/paradox_local_qa.cjs`, and `tests/paradox_local_qa_harness.test.ts`.
+
+## 2026-08-01 - Empty registries must be report-inert, not merely state-inert
+
+**A no-op named phase still changes deterministic output:** `runNamedPhase` records the phase name before invoking the phase body, so an empty `run` function is not output-inert even when it never mutates `GameState`. Durable rule: do not register a named phase for a shipped zero-row catalog. Validate fail-closed authoring at module initialization, and prove the absence of phase, report, and state output through the real `runTurn` orchestrator. Unit-calling `step.run` alone cannot establish scenario-output identity. Applied in the R4 Phase 2 Task 2.1 committee correction.

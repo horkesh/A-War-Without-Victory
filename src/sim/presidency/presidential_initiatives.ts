@@ -300,6 +300,11 @@ export function assertPresidentialInitiativeRuntimeCatalog(
   return 'positive_hold';
 }
 
+// Validate the shipped authoring disposition at module initialization. This
+// fails closed before a future supported row can reach any runtime owner while
+// keeping the accepted zero-row catalog entirely out of TurnReport ordering.
+assertPresidentialInitiativeRuntimeCatalog();
+
 function predicateMatches(predicate: PresidentialInitiativePredicate, state: GameState): boolean {
   if (predicate.kind === 'event_fired') {
     return (state.military?.fired_event_ids ?? []).includes(predicate.event_id);

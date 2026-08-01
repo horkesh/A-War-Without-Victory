@@ -25372,3 +25372,15 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Determinism and scope:** Stable sorting and current state only; no clock, random source, locale ordering, persisted field, migration, scenario output, or baseline changed. No scenario/headless cadence rerun, performance measurement, Electron run, package, version, tag, installer, push, publication, release state, or `docs/10_canon/FORAWWV.md` edit occurred.
 
 **Next gate:** R4 Task 2.2 remains open. After R5 releases the exclusive runtime lease, rerun fresh 104-week RBiH/RS/HRHB cadence evidence, separate actual-decision gaps from briefing gaps, verify every unsupported interval receives its explicit positive hold, reject generic Authority-spend content, and run the deferred runtime/baseline gates before Phase 2 closeout.
+
+## 2026-08-01 - R4 Phase 2 Task 2.1 committee correction
+
+**Type:** TurnReport output-inertia correction / TypeScript evidence correction / orchestration-level regression.
+
+**Superseded claim:** The preceding R4 entry said the live war phase accepted the empty catalog and that TypeScript passed. Committee review proved both statements incomplete: `runNamedPhase` appended `evaluate-presidential-initiative-registry` to every `TurnReport.phases` even though the body changed no state, and the final malformed-cost test edit widened `lever.kind`, causing `npm.cmd run typecheck` to fail at `tests/presidential_initiatives.test.ts:156`.
+
+**Correction:** The zero-row registry is no longer registered in `warPhases`; `src/sim/turn_phases/war_phases.ts` returns exactly to its parent content. The registry module validates its shipped authoring disposition at module initialization, so a future supported row still fails closed before reaching an unwired action owner. The malformed-row helper now accepts unknown parser input and the wrong-cost fixture retains literal types.
+
+**TDD and output proof:** A new regression runs the real `runTurn` orchestrator on a player-war fixture. RED observed the unwanted phase marker. GREEN completes a successful turn and proves the emitted phase list equals the canonical `warPhases` list, excludes the registry marker, and contains no presidential-initiative report or state key. This replaces the insufficient direct `step.run` mutation check.
+
+**Verification and scope:** The corrected focused UI/Advance matrix passes 3 files / 86 tests; the source/cadence/timing matrix passes 8 files / 85 tests; actual TypeScript, EOL, and diff checks pass. The full static/canon slice remains 34/35: determinism, non-strict sensitive-history, and paramilitary contracts pass, while the strict test reports the same 57 inherited R7 event-catalog findings. The correction touches none of those event/audit files, and `war_phases.ts` is byte-identical to parent `60e963e0d`. No scenario/headless cadence run, performance run, Electron launch, package, baseline update, save/schema change, release action, push, or `docs/10_canon/FORAWWV.md` edit is authorized or performed. Task 2.2 remains lease-blocked.

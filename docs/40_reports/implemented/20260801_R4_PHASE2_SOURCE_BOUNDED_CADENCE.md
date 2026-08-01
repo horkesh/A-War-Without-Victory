@@ -3,7 +3,7 @@
 **Date:** 2026-08-01
 **Roadmap:** R4, Phase 2, Task 2.1
 **Baseline parent:** `60e963e0dd2754e96cfe39050f5919cb589d3b0c`
-**Result:** source implementation complete; lease-backed Task 2.2 proof pending
+**Result:** committee-corrected source implementation complete; lease-backed Task 2.2 proof pending
 
 ## Outcome
 
@@ -41,19 +41,24 @@ The pure cadence evaluator rejects invalid or below-threshold Authority, too-sho
 
 ### Runtime and Desk projection
 
-The war pipeline validates the shipped registry after ordinary Level 1 operation proposals. The empty positive-hold registry is state-inert. If a future supported row is authored before its named existing lever owns the action, runtime fails closed instead of exposing an incomplete or fictional decision.
+The registry module validates the shipped authoring disposition at module initialization. The accepted empty registry is not registered as a named war phase. If a future supported row is authored before its named existing lever owns the action, module initialization fails closed instead of exposing an incomplete or fictional decision.
+
+A real `runTurn` regression executes the complete war phase orchestrator and proves that the zero-row catalog adds no phase name, report key, or state key. This corrects the first packet, whose no-op named phase left state bytes untouched but still changed every `TurnReport.phases` array.
 
 `src/ui/map/data/presidentialCadenceHold.ts` remains the single quiet-week selector. When its existing live rule is true—Authority at least 90% and no required/recommended Desk item—the Desk packet adds one informational monitor row with the localized player-faction label and live Authority value. The row has action `none`, is not actionable, is not an Advance blocker, creates no receipt, and changes no simulation state. Desk Header and Warroom Status continue to consume the same selector and existing explanation.
 
 ## RED/GREEN evidence
 
-RED first failed because the registry module did not exist. After the schema/evaluator was added, RED narrowed to the absent Desk positive-hold row. Final contract review added exact cost-parity proof and confirmed the canon distinction: approving a commander's surfaced operation is the free `authorize_operation` lever, while authoring a brand-new operation is a separate 25-Authority action outside this five-lever registry. GREEN proves:
+RED first failed because the registry module did not exist. After the schema/evaluator was added, RED narrowed to the absent Desk positive-hold row. Final contract review added exact cost-parity proof and confirmed the canon distinction: approving a commander's surfaced operation is the free `authorize_operation` lever, while authoring a brand-new operation is a separate 25-Authority action outside this five-lever registry.
+
+Committee review then reproduced two blockers. The malformed wrong-cost fixture widened `lever.kind`, so the first committed TypeScript claim was false. Separately, the no-op named phase was appended to every `TurnReport.phases` before its empty `run` body. The corrected fixture is literal-safe, an actual `npm.cmd run typecheck` passes, and a new real-pipeline RED failed specifically on the emitted registry phase before the phase registration was removed. GREEN proves:
 
 - the shipped audit is explicitly empty;
 - missing citations, a sixth lever, noncanonical costs, unsupported historical defaults, and premature runtime rows fail closed;
 - candidate order is deterministic under input permutation and at most one row is selected;
 - an existing optional row prevents a second; and
-- the Desk hold is monitor-only, actionless, nonblocking, localized as `Republika Srpska`, and backed by live `95/100` Authority in the fixture.
+- the Desk hold is monitor-only, actionless, nonblocking, localized as `Republika Srpska`, and backed by live `95/100` Authority in the fixture; and
+- the complete `runTurn` path emits no presidential-initiative phase/report/state output for the accepted zero-row registry.
 
 ## Verification
 
@@ -75,7 +80,7 @@ The combined canon-static check passed the determinism scan, non-strict sensitiv
 ## Determinism, canon, and scope
 
 - Registry parsing and selection use stable sorting and current state only; no clock, randomness, locale comparison, or filesystem path enters output.
-- The shipped catalog is state-inert and adds no save field, migration, cooldown state, scenario output, or baseline change.
+- The shipped catalog is state- and report-inert: it adds no named phase, report field, save field, migration, cooldown state, scenario output, or baseline change.
 - No historical decision, default, event, effect, response, operation, cost, or recurrence was authored.
 - No scenario/headless rerun, performance measurement, Electron run, package, version, tag, installer, push, publication, or release-state action occurred.
 - `docs/10_canon/FORAWWV.md` is unchanged.
@@ -84,9 +89,9 @@ The combined canon-static check passed the determinism scan, non-strict sensitiv
 
 | Area | Files |
 |---|---|
-| Registry/runtime | `data/scenarios/presidential_initiatives/apr1992.json`; `src/sim/presidency/presidential_initiatives.ts`; `src/sim/turn_phases/war_phases.ts` |
+| Registry/runtime | `data/scenarios/presidential_initiatives/apr1992.json`; `src/sim/presidency/presidential_initiatives.ts` |
 | Shared projection | `src/ui/map/data/presidentialCadenceHold.ts`; `src/ui/map/data/inboxItems.ts`; Desk Header; Warroom Status; EN/BCS messages |
-| Proof | `tests/presidential_initiatives.test.ts` |
+| Proof | `tests/presidential_initiatives.test.ts`, including the real `runTurn` output-inertia regression |
 | Governance | R4 plan; master roadmap; command board; reports indices; project ledger |
 
 ## Remaining Task 2.2 gate
