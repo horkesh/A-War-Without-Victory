@@ -14,8 +14,8 @@ import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, 
 import { triggerMatches } from './event_types.js';
 import { isEventReady } from './pressure_system.js';
 import { pickBotResponseV1 } from './bot_response.js';
-import { applyAIDefaultResponse } from './ai_default_response.js';
-import { emitEventNotifications, isTwoLevelNotificationsEnabled } from './emit_notifications.js';
+import { applyAIDefaultResponse, hasAuthoredAIDefaultResponse } from './ai_default_response.js';
+import { emitEventNotifications } from './emit_notifications.js';
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { pickPoliticalResponse } from '../political/political_event_decision.js';
@@ -614,7 +614,7 @@ export function evaluateEvents(
                     ...(def.staff_recommended_response_id
                         ? { staff_recommended_response_id: def.staff_recommended_response_id }
                         : {}),
-                    ...(isTwoLevelNotificationsEnabled()
+                    ...(def.notifications_to_other_factions
                         ? { notifications_to_other_factions: def.notifications_to_other_factions }
                         : {}),
                 });
@@ -625,16 +625,11 @@ export function evaluateEvents(
                 let decisionSource: 'bot_political' | 'bot_v1' | 'bot_ai_default';
                 // Free War Phase 0 de-railroad: in 'emergent' mode, bypass the
                 // historical-default railroad and fall through to the live
-                // political/v1 scorers. Unset preserves today's flag-dependent
-                // behavior byte-identical (the calibration health check).
-                // Codex P2 (#88): EXPLICIT 'historical' is the source of truth for
-                // the calibration contract — it must replay historical defaults
-                // regardless of the AWWV_TWO_LEVEL_NOTIFICATIONS flag, so a future
-                // calibration scenario that sets historical mode without exporting
-                // the flag does not silently take emergent choices.
+                // political/v1 scorers. Unset follows the save-migration default
+                // ('historical') independently of notification delivery.
                 const emergent = state.meta.decision_mode === 'emergent';
-                const forceHistorical = state.meta.decision_mode === 'historical';
-                if (forceHistorical || (isTwoLevelNotificationsEnabled() && !emergent)) {
+                const historical = !emergent;
+                if (historical && hasAuthoredAIDefaultResponse(def)) {
                     chosen = applyAIDefaultResponse(state, def);
                     decisionSource = 'bot_ai_default';
                 // Free War Phase 0.5: in EMERGENT mode, route EVERY faction-attributed
@@ -642,7 +637,8 @@ export function evaluateEvents(
                 // POLITICAL_LOGICS subset. Most events carry bot_response_logic
                 // 'historical' (→ pickBotResponseV1, which hard-returns the historical
                 // default with no scoring); without this, emergent freedom is nominal.
-                // Historical/unset keeps the POLITICAL_LOGICS gate, byte-identical.
+                // Historical/unset uses the political scorer only when no authored
+                // AI default exists and the event explicitly selects political logic.
                 } else if (
                     respondingFaction !== null &&
                     (emergent || POLITICAL_LOGICS.has(def.bot_response_logic ?? ''))
@@ -673,7 +669,7 @@ export function evaluateEvents(
                 // (packet §3.3, §3.5). Mirror of player path in resolve_decision.ts
                 // — both paths produce identical deltas for the same choice.
                 applyResponseRuntimeCausality(state, def.id, chosen.id, chosen, currentTurn);
-                if (isTwoLevelNotificationsEnabled() && respondingFaction !== null) {
+                if (respondingFaction !== null) {
                     emitEventNotifications(
                         state,
                         { event_id: def.id, notifications_to_other_factions: def.notifications_to_other_factions },

@@ -9,7 +9,7 @@
 **Tech stack:** TypeScript, React, Vitest, JSON-authored events/essays, Electron browser gates, deterministic scenario runner.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phases 0-2 complete; Phase 3 event reachability and two-level surfacing next
+**Status:** IN PROGRESS -- Phase 3 source checkpoint complete; baseline/canon verification waits on the R5 runtime lease
 **Roadmap workstream:** R4
 **Canonical owner:** Presidential Decision Room for action; Desk for triage; Records/Codex for receipts
 **Collision rule:** Do not overlap source edits with RS packets FR-01 or FR-04. Rebase on their shared priority and cadence contracts before Phase 0.
@@ -267,10 +267,10 @@ npm.cmd run typecheck
 - Modify `tests/sim/events/event_presidential_acceptance.test.ts`
 - Modify `tests/sim/events/event_notification_residuals_diagnostic.test.ts`
 
-- [ ] Repair only inventory-proven unreachable writers/readers.
-- [ ] Keep informational notifications nonblocking.
-- [ ] Give AI respondents deterministic authored defaults only where data supplies them.
-- [ ] Preserve stable event ordering and idempotent once/cooldown semantics.
+- [x] Repair only inventory-proven unreachable writers/readers.
+- [x] Keep informational notifications nonblocking.
+- [x] Give AI respondents deterministic authored defaults only where data supplies them.
+- [x] Preserve stable event ordering and idempotent once/cooldown semantics.
 
 ### Task 3.2 -- Close authored coverage gaps
 
@@ -279,9 +279,18 @@ npm.cmd run typecheck
 - Modify the specific files under `data/scenarios/events/` identified by the report
 - Modify `tests/sim/events/event_notification_content_backfill.test.ts`
 
-- [ ] Add recipient-specific notification text where the event already exists.
-- [ ] Do not invent a new event solely to improve a percentage.
-- [ ] Keep every `requires_player_response` event owned by exactly one respondent.
+- [x] Add recipient-specific notification text where the event already exists.
+- [x] Do not invent a new event solely to improve a percentage.
+- [x] Keep every `requires_player_response` event owned by exactly one respondent.
+
+**Phase 3 source checkpoint (2026-08-01):**
+
+- Phase 0 already proved all `9/9` decision families reachable, with zero missing producers, unreachable surfaces, or duplicate surfaces. The only production reachability gap was the process-only `AWWV_TWO_LEVEL_NOTIFICATIONS` gate: no packaged startup path set it, and it also changed AI response policy. The gate is removed from ordinary evaluation, player resolution, and the packaged foundational-decision writer.
+- Notifications remain informational monitor rows and do not enter the blocking-decision manifest. Historical/unset AI policy now uses `bot_ai_default` only for an explicit authored `accept_first` or a valid authored `historical_default_response_id`; events without authored defaults use the existing deterministic political/v1 policy and are no longer mislabeled.
+- No event was invented. The existing HRHB Washington Agreement event now notifies its two nonresponding recipients, RS and RBiH, with HRHB/Mostar source copy. Required-response ownership remains exactly one canonical respondent for all `76` rows. Residual notification coverage falls from `3` rows / `6` blocks with `2` unclassified blocks to `2` rows / `4` blocks, all classified `blocked-sensitive` and left untouched for R7.
+- RED isolated six expected failures. GREEN passes the focused event/UI matrix at `11` files / `137` tests, packaged startup/surfacing at `2` files / `12` tests, TypeScript, JSON parse, diff hygiene, and four static boundary files / `56` tests. The presidential probe is READY at `46` surfaced, `46` player-resolved, `46` headless-auto-resolved, zero failures, and zero stuck decisions.
+- `tests/event_state_shape_validation.test.ts` is independently base-red at exact parent `408d39ec09fd7425b1ee45b418b546040893d06c`: its fixture omits schema-v37 `military.corps_front_sectors` and `military.sector_intel` already required by the parent validator. This unrelated state-contract fixture bug is routed to R5 and is not repaired in R4.
+- `npm.cmd run test:baselines` and canon/runtime scenarios are deliberately not run while R5 owns the exclusive lane. Phase 3 source is checkpointed; baseline/canon acceptance remains lease-blocked. Evidence: [implementation report](../40_reports/implemented/20260801_R4_PHASE3_EVENT_REACHABILITY_CHECKPOINT.md).
 
 **Verification:**
 

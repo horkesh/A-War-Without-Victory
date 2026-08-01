@@ -29,7 +29,6 @@ import {
     applyDefinitionDimensionShifts,
     applyDefinitionFlags,
 } from '../sim/events/evaluate_events.js';
-import { isTwoLevelNotificationsEnabled } from '../sim/events/emit_notifications.js';
 import type { EventDefinition, EventEffect, PendingEventDecision } from '../sim/events/event_types.js';
 import {
     queryMovementPath as computeMovementPathQuery,
@@ -197,7 +196,7 @@ function buildOpeningPendingDecision(
         ...(def.staff_recommended_response_id
             ? { staff_recommended_response_id: def.staff_recommended_response_id }
             : {}),
-        ...(isTwoLevelNotificationsEnabled()
+        ...(def.notifications_to_other_factions
             ? { notifications_to_other_factions: def.notifications_to_other_factions }
             : {}),
     };

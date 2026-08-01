@@ -166,6 +166,11 @@ test('startNewCampaign queues the selected faction foundational decision at camp
             `${eventId} should carry authored response options for the player`,
         );
         assert.ok(
+            pending[0]?.notifications_to_other_factions
+                && Object.keys(pending[0].notifications_to_other_factions ?? {}).length > 0,
+            `${eventId} should carry authored notification text in the packaged startup path`,
+        );
+        assert.ok(
             state.military.fired_event_ids.includes(eventId),
             `${eventId} should be marked fired when queued so once-only gating holds`,
         );

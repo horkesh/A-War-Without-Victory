@@ -1,10 +1,38 @@
 import { describe, expect, it } from 'vitest';
 
 import { stableStringify } from '../../../src/utils/stable_json';
+import { selectAIDefaultResponse } from '../../../src/sim/events/ai_default_response';
+import type { EventDefinition } from '../../../src/sim/events/event_types';
 import { buildEventAcceptanceReport } from '../../../tools/diagnostics/event_acceptance_report';
 import { buildEventPresidentialAcceptanceReport } from '../../../tools/diagnostics/event_presidential_acceptance';
 
 describe('event presidential acceptance diagnostic', () => {
+    it('refuses to label a first-option fallback as an authored AI default', () => {
+        const definition = {
+            id: 'missing_authored_default',
+            trigger: { phase: 'war' },
+            effect: { kind: 'narrative', text: 'Test.' },
+            bot_response_logic: 'historical',
+            response_options: [
+                { id: 'first', label: 'First', effects: [] },
+                { id: 'second', label: 'Second', effects: [] },
+            ],
+        } as EventDefinition;
+
+        expect(() => selectAIDefaultResponse(definition)).toThrow(
+            'Event "missing_authored_default" has no authored AI default response',
+        );
+    });
+
+    it('keeps every required-response event owned by one canonical respondent', () => {
+        const catalog = buildEventAcceptanceReport();
+
+        expect(catalog.required_response_rows).toHaveLength(catalog.summary.required_response_events);
+        for (const row of catalog.required_response_rows) {
+            expect(['RBiH', 'RS', 'HRHB'], row.id).toContain(row.responding_faction);
+        }
+    });
+
     it('emits stable JSON layered on current catalog acceptance truth', () => {
         const first = buildEventPresidentialAcceptanceReport();
         const second = buildEventPresidentialAcceptanceReport();

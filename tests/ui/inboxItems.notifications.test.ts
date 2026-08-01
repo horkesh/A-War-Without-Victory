@@ -89,6 +89,16 @@ describe('deriveInboxItems event notifications', () => {
                 subtitle: 'Sarajevo intelligence reads the platform as a hardening of territorial war aims.',
                 action: 'dismiss_intelligence_notification',
                 priority: 55,
+                priorityBand: 'monitor',
+                priorityModel: {
+                    id: 'intel:rs_strategic_goals:RS:RBiH',
+                    blocker: false,
+                    priorityBand: 'monitor',
+                    recommendedDestination: 'none',
+                    deadlineTurn: null,
+                    source: { id: 'intel:rs_strategic_goals:RS:RBiH' },
+                    urgency: 2000055,
+                },
             },
         ]);
     });
