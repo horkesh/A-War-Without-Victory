@@ -182,6 +182,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
 
   return (
     <div
+      data-testid="bottom-status-strip"
       data-awwv-counter-occluder="true"
       className="absolute bottom-0 left-0 right-0 flex items-center justify-start gap-2 overflow-hidden px-3 py-1.5 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]"
       style={{ zIndex: Z.SHELL_FLOATING }}
@@ -295,7 +296,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
       <div className="w-[1px] h-4 bg-white/10 shrink-0" />
 
       {/* 3. Faction-contextual indicator — R6: more prominent */}
-      <div className="hidden lg:flex min-w-0 flex-1 items-center gap-2 overflow-x-auto overflow-y-hidden px-2 text-xs font-mono">
+      <div className="hidden lg:flex min-w-0 flex-1 items-center gap-2 overflow-hidden px-2 text-xs font-mono">
         {showAlliance && alliance != null && (() => {
           const a = alliance;
           const status = a <= 0.10 ? 'WAR' : a <= 0.20 ? 'MOBILIZING' : a <= 0.45 ? 'STRAINED' : 'ALLIED';

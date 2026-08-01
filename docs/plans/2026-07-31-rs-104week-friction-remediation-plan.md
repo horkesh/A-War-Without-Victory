@@ -1,6 +1,6 @@
 # RS 104-Week Friction Remediation Plan
 
-**Status:** READY — execute after the seamless map-transition packet owns and lands the shared map-shell files
+**Status:** IN PROGRESS — all source packets independently approved; fresh packaged 104-week RS acceptance and completed diary pending
 **Date:** 2026-07-31
 **Source diary:** `docs/40_reports/playtests/20260731_rs_104week_player_diary.md`
 **Scope:** The five confirmed friction findings from the RS 104-week owner-player Electron run
@@ -405,6 +405,20 @@ The mandatory Product/UX/Historian preflight passed this packet for execution af
 - Invert the stale `bottom_status_strip_overflow.test.ts` contract that currently requires horizontal scrolling; the accepted strip has at most two visible paths plus an accessible deterministic overflow popover and no horizontal scroll.
 
 R1's post-integration lifetime remains two MapLibre owners (main plus minimap) and one Deck owner per campaign epoch, with zero additional warm construction/release. R2 verification must rerun that ownership, hidden-input/focus, and current-revision gate after its shared-file changes.
+
+## 4.8 2026-08-01 Source Closeout and Rejected Runtime Attempt
+
+FR-01/02/04/05 remain reviewed and green. FR-03 and FR-06 are now implemented and independently approved:
+
+- FR-03 uses exact authored references, the retained current-revision map/Deck owners, objective/staging/participant evidence, bounded focus, and same-dossier return. It performs no map-side authorization, hidden camera work, guessed targeting, or persistence.
+- FR-06 uses full semantic labels without truncation, one chip plus `+N` below 1600 px, at most two plus `+N` at wider geometry, stable ordering, and a complete keyboard-accessible popover.
+- Command/OOB Situation prose owns wrapping width. Packaged checkpoints now fail if document, strip, OOB, Situation prose, branch chips, or `+N` are locally or ancestor clipped.
+- The Warroom docket names `Review Before Advance` and `PENDING` counts separately. Near-cap quiet weeks reuse the shared sourced-policy-hold explanation; no decision or event was invented.
+- A missing visible final-tour stack badge produces an explicit not-applicable evidence receipt. Existing but unclickable/unstable stack surfaces still fail closed.
+
+The packaged attempt `20260801-r2-rs-104w-owner-postfix-v1` reached exact turn 104 and then failed the retired unconditional stack-badge assumption. Its 456 screenshots and progress/error artifacts are negative lineage only: no accepted final diagnostics packet was emitted, so it is not a completed diary or Electron acceptance. See the [R2 source closeout report](../40_reports/implemented/20260801_R2_RS_FRICTION_FR03_FR06_AND_RUNTIME_HARDENING.md).
+
+Remaining gate: after the next Electron lease, rebuild the transient unpacked package and run a fresh no-resume 104-week RS owner campaign. Acceptance requires exact turn 104, clean final diagnostics, all operation handoff receipts, materialized geometry receipts, verified process cleanup, and a newly completed diary. Do not reuse or resume the rejected run.
 
 ## 5. Execution Order
 

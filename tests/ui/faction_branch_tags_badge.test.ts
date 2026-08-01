@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { BranchTagBadgeRow } from '../../src/ui/map/components/BranchTagBadgeRow.js';
 import type { EventDefinition, EventResponseOption } from '../../src/sim/events/event_types.js';
@@ -176,8 +176,13 @@ describe('BranchTagBadgeRow (Phase H Packet 4)', () => {
         const tagsRendered = chips.map((c) => c.getAttribute('data-tag'));
         expect(tagsRendered).toEqual([
             'rbih_civic',
-            'rbih_dayton_accept',
-            'rbih_paramilitary_allow',
+        ]);
+        const remainder = screen.getByRole('button', { name: /2 active paths/i });
+        fireEvent.click(remainder);
+        expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+            'Civic republic',
+            'Dayton acceptance',
+            'Paramilitary authorization',
         ]);
     });
 

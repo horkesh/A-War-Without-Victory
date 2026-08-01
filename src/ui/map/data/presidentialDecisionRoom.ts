@@ -35,6 +35,7 @@ import {
   isResolvedProposalReview,
   parseHistoricalOperationAuthorizationAction,
 } from './historicalOperationAuthorization';
+import type { FieldOperationPlanTarget } from '../utils/fieldInspectionTarget';
 import { deriveInboxItems } from './inboxItems';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { playerFactionMatch } from './playerFactionMatch';
@@ -210,6 +211,8 @@ export interface PresidentialDecisionRoomCard {
   evidence: string[];
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
   sourceHandoffTarget?: PresidentialDecisionRoomNavigationTarget;
+  /** Exact authored map footprint for a historical-operation review. UI-only; never serialized. */
+  fieldInspectionTarget?: FieldOperationPlanTarget;
   /**
    * Optional pending-item weight for compact grouped cards. A single visible
    * card can represent several modal-required player decisions.
@@ -272,6 +275,8 @@ export interface PresidentialDecisionRoomDossier {
   evidence: string[];
   sourceIds?: string[];
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  /** Exact authored map footprint for the active dossier, when available. */
+  fieldInspectionTarget?: FieldOperationPlanTarget;
   /** Optional War-Direction directive the dossier can ISSUE inline (additive). */
   directive?: PresidentialDecisionRoomDirective;
   sourceHandoff: PresidentialDecisionRoomSourceHandoff | null;
@@ -1215,6 +1220,9 @@ function addProposalReviewDirectiveCards(
 
   for (const review of reviews) {
     const historicalOp = parseHistoricalOperationAuthorizationAction(review.proposed_action);
+    const historicalDetails = historicalOp
+      ? buildHistoricalOperationAuthorizationDetails(state, historicalOp, osidNameMap)
+      : null;
     const ordinaryOperation = !historicalOp && review.domain === 'ops'
       ? state.opProposalCards?.find((proposal) => proposal.proposal_id === review.id)
       : undefined;
@@ -1256,6 +1264,18 @@ function addProposalReviewDirectiveCards(
           : { kind: 'army-hq-tab', tab: 'personnel' },
       ...(historicalOp
         ? { sourceHandoffTarget: { kind: 'army-hq-corps-briefing' as const, corpsId: historicalOp.corpsId } }
+        : {}),
+      ...(historicalDetails && (historicalDetails.objectiveOsids.length > 0 || historicalDetails.stagingOsids.length > 0)
+        ? {
+          fieldInspectionTarget: {
+            kind: 'field-operation-plan' as const,
+            proposalId: review.id,
+            corpsId: historicalDetails.corpsId,
+            objectiveOsids: historicalDetails.objectiveOsids,
+            stagingOsids: historicalDetails.stagingOsids,
+            formationIds: historicalDetails.formationIds,
+          },
+        }
         : {}),
       directive: {
         lever: 'review_proposal',
@@ -1861,6 +1881,7 @@ function finalizeCards(state: LoadedGameState, cards: CandidateCard[]): Presiden
         ...(card.sourceIds ? { sourceIds: [...card.sourceIds].sort(strictCompare) } : {}),
         navigationTarget,
         ...(sourceHandoffTarget ? { sourceHandoffTarget } : {}),
+        ...(card.fieldInspectionTarget ? { fieldInspectionTarget: card.fieldInspectionTarget } : {}),
         ...(card.countWeight != null ? { countWeight: card.countWeight } : {}),
         ...(card.directive ? { directive: card.directive } : {}),
         sortKey: index,
@@ -2148,6 +2169,7 @@ function buildActiveDossier(
     evidence: card.evidence,
     ...(card.sourceIds ? { sourceIds: card.sourceIds } : {}),
     navigationTarget: card.navigationTarget,
+    ...(card.fieldInspectionTarget ? { fieldInspectionTarget: card.fieldInspectionTarget } : {}),
     ...(card.directive ? { directive: card.directive } : {}),
     sourceHandoff,
     relatedCardIds,

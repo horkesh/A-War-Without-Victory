@@ -32,6 +32,7 @@ import { getBranchTagsActive } from '../../../sim/events/causality_query';
 import type { EventDefinition } from '../../../sim/events/event_types';
 import type { FactionId, GameState } from '../../../state/game_state';
 import { toTitleCase } from '../utils/formatters';
+import { ActiveBranchPathRow } from './ActiveBranchPathRow';
 
 const PLAYER_SAFE_BRANCH_TAG_LABELS: Record<string, string> = {
     rbih_state_identity: 'Civic republic',
@@ -88,24 +89,9 @@ export function BranchTagBadgeRow({
     const tags = getBranchTagsActive(state, faction, eventCatalog);
     if (tags.length === 0) return null;
     const labels = tags.map((tag) => ({ tag, label: getPlayerSafeBranchTagLabel(tag) }));
-    const tooltip = `Active strategic branches (${labels.length}): ${labels.map((entry) => entry.label).join(', ')}`;
     return (
-        <div
-            className="branch-tag-badge-row flex shrink-0 flex-nowrap items-center gap-1.5"
-            data-testid="branch-tag-badge-row"
-            data-faction={faction}
-            title={tooltip}
-        >
-            {labels.map(({ tag, label }) => (
-                <span
-                    key={tag}
-                    className="rounded-sm border border-panel-border bg-panel-card px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-text-secondary"
-                    data-testid="branch-tag-chip"
-                    data-tag={tag}
-                >
-                    {label}
-                </span>
-            ))}
+        <div className="ml-auto min-w-0 shrink-0">
+            <ActiveBranchPathRow faction={faction ?? undefined} paths={labels.map(({ tag, label }) => ({ id: tag, label }))} />
         </div>
     );
 }

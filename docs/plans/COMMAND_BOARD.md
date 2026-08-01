@@ -6,7 +6,7 @@
 
 **Updated:** 2026-08-01
 
-**Program state:** EXECUTING; R1 and R3 are complete on the integration branch, and R2 is active
+**Program state:** EXECUTING; R1 and R3 are complete, and all R2 source packets are independently approved
 
 ## Activation
 
@@ -21,7 +21,7 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 | Order | ID | Status | Next executable action | Plan |
 |---:|---|---|---|---|
 | 1 | R1 | **COMPLETE** | No further R1 action. Acceptance: warm p95 139.515 ms, cold p95 78.8 ms, zero warm graphics/static churn, three-launch player-visible proof, zero unexpected diagnostics. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
-| 2 | R2 | IN PROGRESS — NON-MAP PACKETS REVIEWED; FR-03 REBASE NEXT | Complete Electron viewport proof, rebase the direct map handoff on integrated R1, and run final RS acceptance. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
+| 2 | R2 | IN PROGRESS — SOURCE COMPLETE; FRESH PACKAGED RS ACCEPTANCE NEXT | Rebuild the transient package, run a fresh no-resume 104-week RS owner campaign, require clean final diagnostics plus measured map/OOB/path geometry, and file the completed diary. The prior failed final-tour run is negative evidence only. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
 | 3 | R3 | **COMPLETE** | Verified lifecycle/state floor is available to R5; no further R3 action. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | WAITING ON R2 PRIORITY/CADENCE CONTRACT | Inventory command/event/Codex projections, converge them on deterministic receipts, and absorb Free War residuals. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | WAITING ON R1–R3 STATE FLOOR | Classify optional state and artifacts, profile measured hot paths, close save/replay and CI parity. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
@@ -34,7 +34,7 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 
 `R2 -> R4`, alongside `R5 -> R6`; R1 and R3 are complete, and both active paths converge before `R7 -> R8 -> R9`.
 
-R1 and R3 are integrated on `codex/master-roadmap-execution`. R2 is completing its final rebase and Electron acceptance.
+R1 and R3 are integrated on `codex/master-roadmap-execution`. R2 source and harness changes are independently approved; the fresh packaged 104-week RS acceptance and completed diary are the remaining R2 gate.
 
 ## Fixed Decisions
 
