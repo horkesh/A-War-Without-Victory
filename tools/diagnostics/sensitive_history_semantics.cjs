@@ -53,8 +53,10 @@ const ANAPHORIC_MARKER_PATTERN = /\b(?:anyway|regardless)\b/i;
 const OPERATIVE_PURPOSE_PATTERN = /\b(?:attacks?|assaults?|campaigns?|combat|direct\s+action|offensives?|operations?|strikes?)\b/i;
 const SUBCLAUSE_BOUNDARY_PATTERN = /,\s*/i;
 const LOCAL_NEGATION_PATTERN = /\b(?:(?:(?:am|are|is|was|were|be|been|being|do|does|did|must|shall|should|will|would|can|could|may|might)\s+(?:[a-z]+ly\s+)*not)|[a-z]+n['\u2019]t|cannot|never|refus(?:e|es|ed)\s+to|declin(?:e|es|ed)\s+to|no(?:\s+|\s*[-\u2010-\u2015]\s*)one|nobody)\s+(?:[a-z]+ly\s+)*$/i;
-const CATEGORICAL_WARNING_NEGATION_PATTERN = /\b(?:(?:(?:am|are|is|was|were|be|been|being|do|does|did|must|shall|should|will|would|can|could|may|might)\s+(?:[a-z]+ly\s+)*not)|[a-z]+n['\u2019]t|cannot|never|refus(?:e|es|ed)\s+to|declin(?:e|es|ed)\s+to|no(?:\s+|\s*[-\u2010-\u2015]\s*)one|nobody)\s+$/i;
-const UNCERTAIN_WARNING_NEGATION_PATTERN = /\b(?:(?:apparently|probably)\s+(?:(?:(?:am|are|is|was|were|be|been|being|do|does|did|must|shall|should|will|would|can|could|may|might)\s+(?:[a-z]+ly\s+)*not)|[a-z]+n['\u2019]t)|(?:am|are|is|was|were|be|been|being|do|does|did|must|shall|should|will|would|can|could|may|might)\s+(?:[a-z]+ly\s+)*(?:apparently|probably)\s+not)\s+$/i;
+const CATEGORICAL_WARNING_NEGATION_PATTERN = /\b(?:(?:(?:am|are|is|was|were|be|been|being|do|does|did|must|shall|should|will|would|can|could|may|might)\s+(?:emphatically\s+)?not)|[a-z]+n['\u2019]t|cannot|never|refus(?:e|es|ed)\s+to|declin(?:e|es|ed)\s+to|no(?:\s+|\s*[-\u2010-\u2015]\s*)one|nobody)\s+$/i;
+const SAFE_CATEGORICAL_PRE_MODIFIER_PATTERN = /^(?:emphatically|merely|simply)$/i;
+const POTENTIAL_WARNING_MODIFIER_PATTERN = /^(?:[a-z]+ly|maybe|perhaps|almost)$/i;
+const SAFE_WARNING_COMPLEMENT_TOKEN_PATTERN = /^(?:about|of|the|to)$/i;
 const COORDINATED_CONTINUATION_BRIDGE_PATTERN = /\b(?:and|or|nor)\s+(?:[a-z]+ly\s+)*$/i;
 const LEADING_MARKER_SUBCLAUSE_PATTERN = /^\s*(?:anyway|regardless)\s*$/i;
 
@@ -115,11 +117,37 @@ function localNegationApplies(subclause, clauseOffset) {
   return LOCAL_NEGATION_PATTERN.test(subclause.text.slice(0, localOffset));
 }
 
-function warningNegationApplies(subclause, clauseOffset) {
-  const localOffset = clauseOffset - subclause.start;
-  const predicatePrefix = subclause.text.slice(0, localOffset);
-  if (UNCERTAIN_WARNING_NEGATION_PATTERN.test(predicatePrefix)) return false;
-  return CATEGORICAL_WARNING_NEGATION_PATTERN.test(predicatePrefix);
+function hasUnsafeModifierBeforeCategoricalNegation(predicatePrefix, categoricalIndex) {
+  let precedingText = predicatePrefix.slice(0, categoricalIndex);
+  while (true) {
+    const tokenMatch = /([a-z]+)\s*$/i.exec(precedingText);
+    if (!tokenMatch) return false;
+    const token = tokenMatch[1];
+    if (SAFE_CATEGORICAL_PRE_MODIFIER_PATTERN.test(token)) {
+      precedingText = precedingText.slice(0, tokenMatch.index);
+      continue;
+    }
+    return POTENTIAL_WARNING_MODIFIER_PATTERN.test(token);
+  }
+}
+
+function hasCategoricalWarningComplementBridge(subclause, warning) {
+  const warningEnd = warning.index + warning[0].length;
+  const afterWarning = subclause.text.slice(warningEnd);
+  const sensitiveObject = REFUSED_ACT_PATTERN.exec(afterWarning);
+  if (!sensitiveObject || sensitiveObject.index === undefined) return true;
+  const bridge = afterWarning.slice(0, sensitiveObject.index);
+  const bridgeTokens = bridge.match(/[a-z]+/gi) ?? [];
+  if (bridgeTokens.some((token) => !SAFE_WARNING_COMPLEMENT_TOKEN_PATTERN.test(token))) return false;
+  return bridge.replace(/[a-z]+/gi, '').trim().length === 0;
+}
+
+function warningNegationApplies(subclause, warning) {
+  const predicatePrefix = subclause.text.slice(0, warning.index);
+  const categoricalMatch = CATEGORICAL_WARNING_NEGATION_PATTERN.exec(predicatePrefix);
+  if (!categoricalMatch) return false;
+  if (hasUnsafeModifierBeforeCategoricalNegation(predicatePrefix, categoricalMatch.index)) return false;
+  return hasCategoricalWarningComplementBridge(subclause, warning);
 }
 
 function continuationRecords(clauseText, subclauses) {
@@ -155,7 +183,7 @@ function nonNegatedSensitiveWarningOffsets(clauseText, subclauses) {
   const offsets = [];
   for (const subclause of subclauses) {
     for (const warning of matchesFor(SENSITIVE_WARNING_PATTERN, subclause.text)) {
-      if (warning.index === undefined || warningNegationApplies(subclause, subclause.start + warning.index)) continue;
+      if (warning.index === undefined || warningNegationApplies(subclause, warning)) continue;
       offsets.push(subclause.start + warning.index);
     }
   }

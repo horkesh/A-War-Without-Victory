@@ -25494,3 +25494,21 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Fast verification:** RED failed 43/248 as described above. The corrected focused matrix passes 3 files / 248 tests; the accumulated fast R7 surface passes 10 files / 295 tests. TypeScript, both shared JavaScript diagnostics' syntax checks, the 1-test static nondeterminism scan, protected-path scope, and diff hygiene pass. No baseline, canon, scenario, Electron, packaging, release, publication, push, or integration lane ran for this correction.
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
+
+## 2026-08-02 - R7 fourteenth blocked-review correction: both-boundary categorical warning grammar
+
+**Type:** Candidate-truth correction / structural warning-negation repair / shared-consumer regression hardening.
+
+**Supersession:** This entry corrects only the thirteenth correction's claim that direct predicate adjacency completed fail-closed warning suppression. The categorical regex still accepted arbitrary internal `-ly` modifiers and could restart after unseen qualification, while the classifier lacked the warning predicate's end boundary.
+
+**RED evidence:** The deterministic matrix shared by the direct helper, canon-audit consumer, and claim-inventory consumer first gained generic pre-negation `-ly|maybe|perhaps|almost` forms before auxiliaries, contractions, `cannot`, `never`, refusal/decline, and negative subjects; defended categorical controls; all five warning-predicate families; seven post-predicate modifiers; capitalization, punctuation, three marker layouts, and multiple continuations. The focused 3-file / 316-test run failed 55 assertions: 53 direct-helper classifications and both real-consumer aggregate contracts; 261 controls passed. Independent challenge then added bare complements for every warning family plus `just|alone|at length|enough` bridge controls; the 3-file / 340-test run failed 14 assertions: 12 direct-helper classifications and both consumers; 326 controls passed.
+
+**Implementation:** The categorical regex no longer accepts arbitrary internal adverbs; only the defended internal `emphatically` form remains. The classifier uses the categorical match index and walks immediately preceding modifier tokens, allowing only the positive safe set `simply|merely|emphatically` and failing closed for the generic structural class `-ly|maybe|perhaps|almost`. The complete warning match now owns the bridge to the first sensitive object in the same comma subclause. Categorical suppression requires that bridge to contain only whitespace and the fixture-defended complement tokens `about|of|the|to`; any other word or punctuation preserves the warning antecedent. No epistemic or post-predicate modifier denylist was added. An absent in-subclause object does not attach a later comma segment. Bare/modal/be/contraction/`cannot`/`never`/refusal/decline/negative-subject categorical forms remain safe, and the broader continuation-action negation grammar is unchanged.
+
+**Historian/canon review:** This is enforcement-only. It changes no historical fact, source, event trigger, player response, consequence, simulation state, source tier, Six Strategic Goals contract, or exact paramilitary-policy exception.
+
+**Determinism:** The change is a pure bounded traversal over existing string spans. It adds no clock, randomness, environment, filesystem traversal, collection-order dependency, save data, or report ordering.
+
+**Fast verification:** RED failed 55/316 and challenge RED failed 14/340 as described above. The corrected focused matrix passes 3 files / 340 tests; the accumulated fast R7 surface passes 10 files / 387 tests. TypeScript, both shared JavaScript diagnostics' syntax checks, the 1-test static nondeterminism scan, protected-path scope, and diff hygiene pass. No baseline, canon, scenario, Electron, packaging, release, publication, push, or integration lane ran for this correction.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
