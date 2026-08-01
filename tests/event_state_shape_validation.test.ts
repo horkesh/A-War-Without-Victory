@@ -28,6 +28,8 @@ function baseState(overrides: Record<string, unknown> = {}): Record<string, unkn
             front_posture: {},
             front_posture_regions: {},
             front_pressure: {},
+            corps_front_sectors: {},
+            sector_intel: {},
             militia_pools: {},
             theatres: {},
             army_theatre_assignment: {},

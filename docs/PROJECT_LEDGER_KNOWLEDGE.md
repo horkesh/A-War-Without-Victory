@@ -4118,6 +4118,16 @@ Applied in `[2026-08-01] R5 Phase 2c current-owner profile and rejected status-r
 
 Applied in `[2026-08-01] R5 Phase 2c dense formation occupancy acceptance`, `src/sim/combat/sector_build_derived_context.ts`, `src/sim/combat/brigade_assignment.ts`, `tests/sector_build_derived_context.test.ts`, and `docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md`.
 
+## 2026-08-01 - Optimization equivalence must cross the changed boundary
+
+**A reference path is independent only when it bypasses the optimized primitive:** comparing two outer control-flow strategies proves nothing about an inner replacement when both strategies still call that replacement. Durable rule: put the test-only strategy at the exact changed boundary, keep the production default explicit, and make the reference reconstruct the removed behavior rather than wrap the candidate. Compare the complete returned value and every directly mutated state field over the required real-state variants and production modes; keep unrelated fixed-point/cache properties separate so each failure identifies one contract.
+
+**Fail-closed strategy contracts prevent vacuous equivalence tests:** JavaScript ignores surplus arguments, so a test can appear to request a reference mode while production silently runs the default candidate twice. Durable rule: type the allowed strategies, reject unknown values before doing work, and pin that rejection with a RED-first test. Propagate the strategy explicitly through owners instead of using environment variables or module state.
+
+**Schema-valid fixtures must evolve with required state shape:** when a validation test's supposedly valid base fixture predates required fields, fix the fixture rather than weakening the validator or reclassifying the fields as optional. Record fixture debt separately from the product optimization it happened to block.
+
+Applied in `[2026-08-01] R5 Phase 2c independent occupancy equivalence correction`, `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/corps_front_sectors.ts`, `tests/sector_partition_buildCorpsFrontSectors_integration.test.ts`, and `tests/event_state_shape_validation.test.ts`.
+
 ## 2026-08-01 - Adaptive UI evidence must keep its declared identities stable
 
 **Viewport reflow may change reachability, not the proof population:** opening and closing map panels changes occlusion and can reveal counters that were absent from the ready-map sample. Durable rule: freeze the declared identity set at the checkpoint, select only currently reachable unattempted members of that set, and report frozen members that became unavailable. Never substitute newly visible identities merely to reach a target count; that turns an adaptive reachability probe into an undeclared and non-reproducible blocker.
