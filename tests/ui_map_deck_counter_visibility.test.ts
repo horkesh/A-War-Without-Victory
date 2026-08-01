@@ -258,6 +258,7 @@ it('deck counters derive clipping bounds from visible panel occluders', () => {
     const bottomStripSource = readFileSync('src/ui/map/components/BottomStatusStrip.tsx', 'utf8');
     const toolbarSource = readFileSync('src/ui/map/components/PresidentialToolbar.tsx', 'utf8');
     const briefingSource = readFileSync('src/ui/map/components/CommandBriefingLayer.tsx', 'utf8');
+    const inboxSource = readFileSync('src/ui/map/components/PresidentialInbox.tsx', 'utf8');
 
     expect(mapSource).toContain('function buildDeckCounterViewportPadding');
     expect(mapSource).toContain('function buildDeckCounterViewportOccluders');
@@ -289,6 +290,7 @@ it('deck counters derive clipping bounds from visible panel occluders', () => {
     expect(bottomStripSource).toContain('data-awwv-counter-occluder="true"');
     expect(toolbarSource).toContain('data-awwv-counter-occluder="true"');
     expect(briefingSource).toContain('data-awwv-counter-occluder="true"');
+    expect(inboxSource).toContain('data-awwv-counter-occluder="true"');
 });
 
 it('filters deck point features that would render clipped against the viewport edge', () => {
