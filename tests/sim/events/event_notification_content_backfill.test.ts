@@ -128,8 +128,8 @@ describe('event notification content backfill', () => {
                 eventId: 'hrhb_washington_agreement_1994',
                 source: 'HRHB',
                 responses: {
-                    accept: ['HRHB', 'RS'],
-                    reluctant: ['HRHB', 'RS'],
+                    accept: ['RBiH', 'RS'],
+                    reluctant: ['RBiH', 'RS'],
                 },
             },
             {

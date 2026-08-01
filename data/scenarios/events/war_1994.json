@@ -891,22 +891,22 @@
     "notifications_to_other_factions": {
       "accept": {
         "RS": {
-          "headline": "Sarajevo embraces the Federation",
-          "body": "RBiH leadership commits fully to the formal Washington Agreement. Pale sees a consolidated Federation front, stronger international standing for Sarajevo, and reopened Croatian supply channels against the VRS."
+          "headline": "Mostar embraces the Federation",
+          "body": "HZ HB leadership commits fully to the formal Washington Agreement. Pale sees a consolidated Federation front, tighter Croat-Bosniak coordination, and reopened Croatian supply channels against the VRS."
         },
-        "HRHB": {
-          "headline": "Sarajevo commits to the Federation",
-          "body": "RBiH accepts the formal Washington framework without reservation. Mostar reads the move as a clear Federation commitment, with joint anti-VRS coordination and Croatian supply access now politically easier to sustain."
+        "RBiH": {
+          "headline": "Mostar commits to the Federation",
+          "body": "HZ HB accepts the formal Washington framework without reservation. Sarajevo reads the move as a clear Federation commitment, with joint anti-VRS coordination and Croatian supply access now politically easier to sustain."
         }
       },
       "reluctant": {
         "RS": {
-          "headline": "Sarajevo accepts with reservations",
-          "body": "RBiH signs onto the formal Washington Agreement while keeping distance from its former Croat adversaries. Pale still faces a Federation framework, but integration looks slower and more politically brittle."
+          "headline": "Mostar accepts with reservations",
+          "body": "HZ HB signs onto the formal Washington Agreement while keeping distance from its former Bosniak adversaries. Pale still faces a Federation framework, but integration looks slower and more politically brittle."
         },
-        "HRHB": {
-          "headline": "RBiH enters Federation warily",
-          "body": "Sarajevo accepts the formal Washington settlement but signals continued caution toward former enemies. Mostar gains the Federation framework, though trust and operational integration will need time."
+        "RBiH": {
+          "headline": "HZ HB enters Federation warily",
+          "body": "Mostar accepts the formal Washington settlement but signals continued caution toward former enemies. Sarajevo gains the Federation framework, though trust and operational integration will need time."
         }
       }
     }

@@ -7,10 +7,6 @@ export interface EventNotificationSource {
     notifications_to_other_factions?: EventNotificationTextByResponse;
 }
 
-export function isTwoLevelNotificationsEnabled(): boolean {
-    return process.env.AWWV_TWO_LEVEL_NOTIFICATIONS === 'true';
-}
-
 export function emitEventNotifications(
     state: GameState,
     source: EventNotificationSource,

@@ -6,20 +6,13 @@
  * Tests pass event definitions via the registry parameter (no global mutation).
  */
 
-import { afterEach, describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { GameState } from '../src/state/game_state';
 import type { EventDefinition } from '../src/sim/events/event_types';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision';
 import { evaluateEvents } from '../src/sim/events/evaluate_events';
 import { updateEventReadiness } from '../src/sim/events/pressure_system';
-
-const ORIGINAL_TWO_LEVEL_FLAG = process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
-
-afterEach(() => {
-    if (ORIGINAL_TWO_LEVEL_FLAG === undefined) delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
-    else process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = ORIGINAL_TWO_LEVEL_FLAG;
-});
 
 function makeMinimalState(playerFaction?: string): GameState {
     return {
@@ -360,6 +353,29 @@ describe('Event Decisions', () => {
             {
                 event_id: 'test_explicit_historical_event',
                 response_id: 'historical_path',
+                decision_source: 'bot_ai_default',
+                faction: 'RBiH',
+                turn: 5,
+            },
+        ]);
+    });
+
+    it('historical mode does not claim an authored AI default when the event supplies none', () => {
+        const state = makeMinimalState(undefined);
+        state.meta.decision_mode = 'historical';
+        const event = {
+            ...EXPLICIT_HISTORICAL_EVENT,
+            id: 'test_missing_authored_default_event',
+            historical_default_response_id: undefined,
+            bot_response_logic: 'historical',
+        } as EventDefinition;
+
+        evaluateEvents(state, () => 0.5, 5, [event]);
+
+        expect(state.military.event_decision_log).toEqual([
+            {
+                event_id: 'test_missing_authored_default_event',
+                response_id: 'counterfactual_path',
                 decision_source: 'bot_v1',
                 faction: 'RBiH',
                 turn: 5,
@@ -384,8 +400,7 @@ describe('Event Decisions', () => {
         expect(state.military.event_decision_log?.[0]?.response_id).toBe('counterfactual_path');
     });
 
-    it('two-level bot default keeps accept_first on option 0 when explicit historical default points to option 2', () => {
-        process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = 'true';
+    it('authored accept_first keeps option 0 when explicit historical default points to option 2', () => {
         const state = makeMinimalState(undefined);
         const initialSupply = state.military.general_supply_reserve!['RBiH'];
         const rng = () => 0.5;

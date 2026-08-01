@@ -1,20 +1,13 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { evaluateEvents } from '../../../src/sim/events/evaluate_events.js';
 import { resolveEventDecision } from '../../../src/sim/events/resolve_decision.js';
 import type { EventDefinition } from '../../../src/sim/events/event_types.js';
 import type { GameState } from '../../../src/state/game_state.js';
-
-const ORIGINAL_FLAG = process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
-
-afterEach(() => {
-    if (ORIGINAL_FLAG === undefined) delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
-    else process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = ORIGINAL_FLAG;
-});
-
-function enableNotifications(): void {
-    process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = 'true';
-}
+import {
+    countBlockingPlayerDecisions,
+    type GameStateLike,
+} from '../../../src/state/player_decision_manifest.js';
 
 function state(playerFaction: 'RBiH' | 'RS' | 'HRHB', turn = 1): GameState {
     return {
@@ -74,19 +67,22 @@ const RS_STRATEGIC_GOALS: EventDefinition = {
 };
 
 describe('two-level event surfacing', () => {
-    it('does not carry authored notification text or emit notifications when the flag is off', () => {
-        delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
+    it('keeps packaged notifications reachable without a process-only feature flag', () => {
         const s = state('RS', 1);
 
         evaluateEvents(s, () => 0, 1, [RS_STRATEGIC_GOALS]);
+        expect(s.military.pending_event_decisions?.[0]?.notifications_to_other_factions)
+            .toEqual(RS_STRATEGIC_GOALS.notifications_to_other_factions);
         resolveEventDecision(s, 'rs_strategic_goals', 'all_six');
 
-        expect(s.military.pending_event_notifications).toBeUndefined();
+        expect(s.military.pending_event_notifications?.map((notification) => notification.notification_id)).toEqual([
+            'rs_strategic_goals:RS:HRHB',
+            'rs_strategic_goals:RS:RBiH',
+        ]);
         expect(s.military.pending_event_decisions ?? []).toHaveLength(0);
     });
 
     it('emits one deterministic notification per authored non-source faction after a player response', () => {
-        enableNotifications();
         const s = state('RS', 1);
 
         evaluateEvents(s, () => 0, 1, [RS_STRATEGIC_GOALS]);
@@ -119,7 +115,6 @@ describe('two-level event surfacing', () => {
     });
 
     it('emits an authored notification when an AI respondent takes the default response', () => {
-        enableNotifications();
         const s = state('RBiH', 1);
 
         evaluateEvents(s, () => 0, 1, [RS_STRATEGIC_GOALS]);
@@ -131,10 +126,10 @@ describe('two-level event surfacing', () => {
         ]);
         expect(s.military.pending_event_notifications?.find((n) => n.target_faction === 'RBiH')?.headline)
             .toBe('RS Assembly endorses Six Strategic Goals');
+        expect(countBlockingPlayerDecisions(s as unknown as GameStateLike, 'RBiH')).toBe(0);
     });
 
     it('keeps notification emission byte-stable across identical runs', () => {
-        enableNotifications();
         const a = state('RBiH', 1);
         const b = state('RBiH', 1);
 
