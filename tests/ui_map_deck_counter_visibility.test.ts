@@ -157,6 +157,16 @@ it('clamps counter-aware camera padding before fitBounds so MapLibre can fit the
     expect(helper).toContain('map.getCanvas()');
 });
 
+it('selects a real unoccluded horizontal gap before deriving side padding', () => {
+    const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const helperStart = source.indexOf('function buildDeckCounterViewportPadding');
+    const helperEnd = source.indexOf('const CAMERA_MIN_VISIBLE_BAND', helperStart);
+    const helper = source.slice(helperStart, helperEnd);
+
+    expect(helper).toContain('let bestGap: [number, number] = [0, 0];');
+    expect(helper).not.toContain('let bestGap: [number, number] = [padding.left, mapRect.width - padding.right];');
+});
+
 it('falls back to centered camera motion when fitBounds would collapse to a point', () => {
     const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
     const panEffectStart = source.indexOf('// Prefer pan to a selected formation/navigation anchor');
