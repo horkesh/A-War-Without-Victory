@@ -82,6 +82,9 @@ describe('BranchTagBadgeRow (Phase H Packet 4)', () => {
         }));
 
         const row = screen.getByTestId('branch-tag-badge-row');
+        expect(row.parentElement?.className).toContain('flex-1');
+        expect(row.parentElement?.className).toContain('min-w-0');
+        expect(row.parentElement?.className).not.toContain('shrink-0');
         expect(row.getAttribute('data-faction')).toBe('RBiH');
         const chips = screen.getAllByTestId('branch-tag-chip');
         expect(chips).toHaveLength(1);

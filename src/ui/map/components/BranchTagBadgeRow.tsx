@@ -90,7 +90,7 @@ export function BranchTagBadgeRow({
     if (tags.length === 0) return null;
     const labels = tags.map((tag) => ({ tag, label: getPlayerSafeBranchTagLabel(tag) }));
     return (
-        <div className="ml-auto min-w-0 shrink-0">
+        <div className="ml-auto flex min-w-0 flex-1">
             <ActiveBranchPathRow faction={faction ?? undefined} paths={labels.map(({ tag, label }) => ({ id: tag, label }))} />
         </div>
     );
