@@ -138,7 +138,7 @@ describe('buildConsequenceReceipts', () => {
             closedEventIds: ['p_closed'],
             lastFiredTurn: { E: 3, p_confirmed: 9 },
             causalityLog: [
-                { turn: 9, from_event: 'E', to_event: 'p_confirmed', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 3, from_event: 'E', to_event: 'p_confirmed', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
 
@@ -206,7 +206,7 @@ describe('buildConsequenceReceipts', () => {
             lastFiredTurn: { csq_patron_recovery_offer: 10 },
             causalityLog: [
                 {
-                    turn: 10,
+                    turn: 6,
                     from_event: 'evt_internal_crisis_1994',
                     to_event: 'csq_patron_recovery_offer',
                     to_flag: null,
@@ -245,7 +245,7 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p'],
             lastFiredTurn: { p: 5 },
             causalityLog: [
-                { turn: 5, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_other' },
+                { turn: 2, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_other' },
             ],
         });
         expect(buildConsequenceReceipts(state, catalog)).toEqual([]);
@@ -283,7 +283,7 @@ describe('buildConsequenceReceipts', () => {
             lastFiredTurn: { p_same: 6, p_after: 11 }, // at-turn and after-turn
             causalityLog: [
                 { turn: 6, from_event: 'E', to_event: 'p_same', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
-                { turn: 11, from_event: 'E', to_event: 'p_after', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 6, from_event: 'E', to_event: 'p_after', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
         const receipts = buildConsequenceReceipts(state, catalog);
@@ -304,7 +304,7 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p'],
             lastFiredTurn: { p: 4 },
             causalityLog: [
-                { turn: 4, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
         expect(buildConsequenceReceipts(state, catalog)).toEqual([]);
@@ -321,7 +321,7 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p'],
             lastFiredTurn: { p: 4 },
             causalityLog: [
-                { turn: 4, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
 
@@ -340,8 +340,8 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p_late', 'p_early'],
             lastFiredTurn: { p_late: 12, p_early: 4 },
             causalityLog: [
-                { turn: 12, from_event: 'E', to_event: 'p_late', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
-                { turn: 4, from_event: 'E', to_event: 'p_early', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p_late', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p_early', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
         const receipts = buildConsequenceReceipts(state, catalog);
@@ -359,8 +359,8 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p1', 'p2'],
             lastFiredTurn: { p1: 5, p2: 8 },
             causalityLog: [
-                { turn: 5, from_event: 'E', to_event: 'p1', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
-                { turn: 8, from_event: 'E', to_event: 'p2', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p1', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p2', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
         const receipts = buildConsequenceReceipts(state, catalog);
