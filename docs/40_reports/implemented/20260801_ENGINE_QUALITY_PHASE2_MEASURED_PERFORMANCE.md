@@ -139,6 +139,10 @@ Vitest 2.1.9 reported 7 files / 81 tests passed, started `2026-08-01 18:22:50`, 
 
 The tracked acceptance contract is this report plus the focused equivalence tests. Raw profiler products remain untracked because they are machine-local diagnostic evidence, not canonical game data.
 
+### Ledger and handoff correction
+
+Commit `a7b417c0f` remains the blocked initial fixed-point candidate; commit `65b7b072e` is its correctness correction with prune and recovery receipts plus the 300 full-state, three-mode comparison matrix. Neither prior commit body contained the required ledger reference. They were not amended or rewritten; this separate docs-only correction closes that process gap without changing source, tests, baselines, or timing evidence. The canonical record is [2026-08-01 - Engine quality Phase 2b fixed-point mutation-receipt correction](../../PROJECT_LEDGER.md#2026-08-01---engine-quality-phase-2b-fixed-point-mutation-receipt-correction). The non-authoritative 20-pair result and Phase 2b performance acceptance remain blocked exactly as stated above; no unavailable napkin evidence is claimed.
+
 ## Remaining target gap and next measured owner
 
 The accepted historical best replicated mean remains `1,189.962` ms/turn, or 11.8996x the 100 ms/turn target. The blocked fixed-point packet's `1,223.822` ms/turn mean is not an accepted checkpoint or floor. No Phase 2 completion or Phase 2b performance-acceptance claim is made.
