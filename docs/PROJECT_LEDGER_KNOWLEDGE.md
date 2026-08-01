@@ -1,3 +1,7 @@
+## 2026-08-01 - Historical notifications observe state; they do not manufacture it
+
+An authored calendar window may make a historical notification eligible, but it must not create the territorial result the prose claims occurred. Territorial consolidation requires exact current-state evidence: for the confirmed Goražde case, both named OSIDs must already be held by RBiH before the informational receipt, morale consequence, or durable flag may be produced. Source quality and prose certainty are a separate content responsibility; projection wording is a separate receipt-consumer responsibility. Route the mechanic to gameplay correctness first, sourcing/prose to historical review second, and downstream projections to their shared receipt owner. See the [2026-08-01 ledger entry](PROJECT_LEDGER.md#2026-08-01-docsroadmap-bind-confirmed-gorade-event-bug-to-executable-ownership).
+
 ## 2026-07-12 - RBiH exact-turn remediation durable boundaries
 
 **Desktop mutation success is durable, shared state:** canonical mutating IPC completes as one transaction: serialize the new state, autosave it, then broadcast that exact serialization to every renderer, including the caller. Autosave failure restores the previous in-memory serialization and fails the invoke. A successful renderer response without persistence and broadcast is not a successful mutation.

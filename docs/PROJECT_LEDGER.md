@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-08-01] docs(roadmap): bind confirmed Goražde event bug to executable ownership
+
+**Type:** Master-roadmap / command-board / R6 execution-plan correction.
+
+**Fix:** Recorded the packaged RS 104-turn diagnostic finding that `gorazde_pocket_consolidation_1992` fires from a weak 30% municipality-control predicate and directly transfers `op:gorazde:glamoc` and `op:gorazde:kamen`. R6 now owns a pre-floor TDD correction: the event may not mutate control and its informational receipt may fire only after current political-control truth already records both OSIDs as RBiH-held. R7 separately owns replacement of the Wikipedia-only citation and removal of the unsupported absolute future-outcome prose; R4 owns downstream receipt wording only. Updated the master roadmap and command board so the defect is a mandatory R6 closeout item rather than an informal diary note.
+
+**Verification:** Docs-only `git diff --check`; the event row and current condition/effect vocabulary were inspected directly. No runtime code, scenario/event data, baselines, generated artifacts, canon, `FORAWWV.md`, package, version, tag, or release state changed.
+
+**Scope/determinism:** Planning and execution ownership only. The later R6 implementation is required to explain its 40-turn baseline delta before freezing the post-correction comparison floor.
+
+---
+
 ## [2026-08-01] refactor(state): close persistence classification
 
 **Type:** R5 Phase 1 persistence contract / schema migration / deterministic serialization / Electron runtime boundary / canonical docs / tests.

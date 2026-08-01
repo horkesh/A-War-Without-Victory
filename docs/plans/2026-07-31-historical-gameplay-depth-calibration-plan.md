@@ -2,7 +2,7 @@
 
 > **For implementation:** REQUIRED SUB-SKILL: use `executing-plans` and execute one phase at a time.
 
-**Goal:** Resolve and finish the Standing-OG, political-dimension, intel/ambush, supply-comprehension, Sarajevo continuous-condition, and fall-1995 combat-math lanes without another owner decision queue.
+**Goal:** Resolve and finish historical event-state correctness, Standing-OG, political-dimension, intel/ambush, supply-comprehension, Sarajevo continuous-condition, and fall-1995 combat-math lanes without another owner decision queue.
 
 **Architecture:** Preserve the current deterministic combat model, retire the failed broad Standing-OG path, and serialize every remaining behavior-moving experiment against one recorded floor. Each experiment has predeclared adopt-or-retire criteria; failure produces a documented no-go and the plan proceeds. Historical claims use the local Balkan Battlegrounds corpus plus official tribunal/UN sources, while sensitive outcomes remain consequences rather than player levers.
 
@@ -26,6 +26,7 @@
 5. **Intel ambush:** the default-off implementation is an experiment after the combat spine is frozen. Enable only if it improves low-confidence attack differentiation without hidden-truth leakage, clamp failure, anchor loss, or ahistorical casualty growth; otherwise retire the flag.
 6. **Supply:** improve comprehension over existing truth. Do not add new supply authority or reveal enemy data.
 7. **Final calibration:** one accepted change per evidence run, followed by one deliberate final 1.0 re-floor after all adopted slices are known.
+8. **Historical event-state truth:** calendar windows may surface history but may not manufacture territorial outcomes. `gorazde_pocket_consolidation_1992` is a confirmed gameplay bug: its 30% municipal-control predicate currently flips `op:gorazde:glamoc` and `op:gorazde:kamen`. Remove that control mutation and allow the informational receipt only after current political control already records both OSIDs as RBiH-held. R7 separately owns source replacement and removal of the absolute future-outcome prose.
 
 ## 2. Historical evidence and terminology
 
@@ -41,6 +42,7 @@ No plan task may convert those sources into an atrocity optimization or an unsup
 ### In scope
 
 - align Standing-OG doctrine and live code truth;
+- remove calendar/weak-predicate territorial mutation from authored historical events, beginning with the confirmed Goražde consolidation defect;
 - activate or retire political-dimension modes by evidence;
 - complete Sarajevo lifeline/continuous siege behavior and explanation;
 - finish E-B1 and conditionally E-A6;
@@ -86,6 +88,30 @@ For every behavior-moving slice:
 
 **Assigned role:** Scenario Author
 **Independent review:** Determinism Auditor + Historian
+
+### Task 0.1 -- Correct the confirmed Goražde event-state defect before freezing the floor
+
+**Files:**
+
+- Modify `data/scenarios/events/war_1992.json`
+- Create `tests/gorazde_pocket_event_state_truth.test.ts`
+- Modify event baseline/fixture ownership only after causal review
+
+- [ ] RED: prove 30% Goražde municipal control cannot transfer `op:gorazde:glamoc` or `op:gorazde:kamen`, set the consolidation flag, or emit a completed-consolidation receipt.
+- [ ] RED: prove an informational receipt becomes eligible in the historical window only when current `political_controllers` already records both exact OSIDs as RBiH-held.
+- [ ] Remove the event's `control_change`; keep any morale/flag/narrative consequence downstream of the exact current-state predicate and prove the event does not alter political control bytes.
+- [ ] Route the Wikipedia-only citation and absolute future claim to R7; do not repair sourcing with unsupported copy in R6.
+- [ ] Run the 40-turn comparison and explain the expected baseline delta before Phase 0 freezes candidate truth.
+
+```powershell
+npm.cmd run test:vitest -- tests/gorazde_pocket_event_state_truth.test.ts tests/event_conditions.test.ts --pool=forks --reporter=dot
+npm.cmd run sim:scenario:run:40w
+npm.cmd run test:baselines
+```
+
+`/simplify` -> gameplay/historical review -> commit `fix(events): bind gorazde consolidation to current control truth`
+
+### Task 0.2 -- Freeze the post-correction comparison truth
 
 **Files:**
 
