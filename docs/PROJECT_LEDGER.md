@@ -25446,3 +25446,19 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Verification:** Focused correction passes 3 files / 126 tests; the accumulated R7 matrix passes 10 files / 191 tests. TypeScript passes. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim census remains 3,652 claims / 226 files with chronology passing, provenance blocked, and zero date mismatches; localization remains 5,542 keys and 971 open findings across 385 files. JavaScript syntax and static nondeterminism checks pass. With the runtime lane explicitly granted, standalone no-refresh `npm.cmd run test:baselines` reports every approved scenario matches, and `npm.cmd run canon:check` passes its determinism static scan plus embedded baseline regression.
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
+
+## 2026-08-01 - R7 eleventh blocked-review correction: structural warning grammar
+
+**Type:** Leading-marker ownership repair / coordinated-negation grammar / warning-negation completion.
+
+**Supersession:** This entry corrects the tenth correction's claim that comma-subclause ownership and local negation were complete. A marker-only `Regardless,` subclause was cut away from the immediately following continuation, `Do not proceed or continue ...` negated only the first continuation, and valid negative warning forms outside `did not warn` established a false antecedent.
+
+**RED evidence:** One deterministic 41-case matrix is imported by the direct helper, canon-audit consumer, and claim-inventory consumer. It spans marker-before, marker-after, and marker-before-comma positions; auxiliary/adverb/`not`, ASCII and curly contractions, `never`, and `no one|nobody` warning negation; `and|or|nor` coordinated continuation lists; multiple commas, semicolons, two continuations, and neutral/refusal interveners. Before implementation the focused 3-file / 169-test run failed 21 assertions: 19 helper classifications and both consumer aggregate contracts.
+
+**Implementation:** Marker-only comma segments attach forward to exactly one immediately following continuation. Continuation records carry local negation through a coordinated `and|or|nor` action bridge only while both actions remain in the same comma subclause; comma and hard-clause boundaries reset scope. Predicate negation recognizes auxiliary verbs with adverbs before or after `not`, contractions with straight or curly apostrophes, `never`, refusal/decline forms, and negative subjects. Warning antecedent persistence, every-continuation enumeration, exact operative nouns, accountability-only contextual handling, purpose-free fail-closed handling, and the exact paramilitary exception are unchanged. Determinism impact is none: the helper remains a pure forward traversal over stable input order with no clock, randomness, environment, or filesystem dependency.
+
+**Historian/canon review:** This is enforcement-only. It changes no historical fact, source, event trigger, player response, consequence, simulation state, source tier, Six Strategic Goals contract, or exact paramilitary-policy exception.
+
+**Fast verification:** The corrected focused matrix passes 3 files / 169 tests. TypeScript, JavaScript syntax, the 1-test static nondeterminism scan, and diff hygiene pass. Accumulated tests and runtime audits are intentionally deferred until the exclusive runtime lane is granted.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.

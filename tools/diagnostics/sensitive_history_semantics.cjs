@@ -52,7 +52,9 @@ const CONTINUATION_ACTION_PATTERN = /\b(?:continue|proceed)\b/i;
 const ANAPHORIC_MARKER_PATTERN = /\b(?:anyway|regardless)\b/i;
 const OPERATIVE_PURPOSE_PATTERN = /\b(?:attacks?|assaults?|campaigns?|combat|direct\s+action|offensives?|operations?|strikes?)\b/i;
 const SUBCLAUSE_BOUNDARY_PATTERN = /,\s*/i;
-const LOCAL_NEGATION_PATTERN = /\b(?:(?:do|does|did|must|shall|should|will|would|can|could|may|might)\s+not|cannot|never|refus(?:e|es|ed)\s+to|declin(?:e|es|ed)\s+to)\s+(?:[a-z]+ly\s+)*$/i;
+const LOCAL_NEGATION_PATTERN = /\b(?:(?:(?:am|are|is|was|were|be|been|being|do|does|did|must|shall|should|will|would|can|could|may|might)\s+(?:[a-z]+ly\s+)*not)|[a-z]+n['\u2019]t|cannot|never|refus(?:e|es|ed)\s+to|declin(?:e|es|ed)\s+to|no\s+one|nobody)\s+(?:[a-z]+ly\s+)*$/i;
+const COORDINATED_CONTINUATION_BRIDGE_PATTERN = /\b(?:and|or|nor)\s+(?:[a-z]+ly\s+)*$/i;
+const LEADING_MARKER_SUBCLAUSE_PATTERN = /^\s*(?:anyway|regardless)\s*$/i;
 
 function matchesFor(pattern, text) {
   const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
@@ -99,16 +101,44 @@ function subclausesFor(clauseText) {
   return subclauses;
 }
 
-function subclauseForOffset(subclauses, offset) {
+function subclauseIndexForOffset(subclauses, offset) {
   for (let index = subclauses.length - 1; index >= 0; index -= 1) {
-    if (subclauses[index].start <= offset) return subclauses[index];
+    if (subclauses[index].start <= offset) return index;
   }
-  return subclauses[0];
+  return 0;
 }
 
 function localNegationApplies(subclause, clauseOffset) {
   const localOffset = clauseOffset - subclause.start;
   return LOCAL_NEGATION_PATTERN.test(subclause.text.slice(0, localOffset));
+}
+
+function continuationRecords(clauseText, subclauses) {
+  const records = [];
+  for (const match of matchesFor(CONTINUATION_ACTION_PATTERN, clauseText)) {
+    if (match.index === undefined) continue;
+    const subclauseIndex = subclauseIndexForOffset(subclauses, match.index);
+    const subclause = subclauses[subclauseIndex];
+    let negated = localNegationApplies(subclause, match.index);
+    const previous = records[records.length - 1];
+    if (!negated && previous?.subclauseIndex === subclauseIndex && previous.negated) {
+      const bridge = clauseText.slice(previous.index + previous.text.length, match.index);
+      negated = COORDINATED_CONTINUATION_BRIDGE_PATTERN.test(bridge);
+    }
+    records.push({
+      index: match.index,
+      text: match[0],
+      subclauseIndex,
+      negated,
+    });
+  }
+  return records;
+}
+
+function ownedSegmentStart(subclauses, subclauseIndex) {
+  const previous = subclauses[subclauseIndex - 1];
+  if (previous && LEADING_MARKER_SUBCLAUSE_PATTERN.test(previous.text)) return previous.start;
+  return subclauses[subclauseIndex].start;
 }
 
 function nonNegatedSensitiveWarningOffsets(clauseText, subclauses) {
@@ -128,8 +158,7 @@ function hasDirectWarningContinuation(clauses) {
   for (const clause of clauses) {
     const subclauses = subclausesFor(clause.text);
     const warningOffsets = nonNegatedSensitiveWarningOffsets(clause.text, subclauses);
-    const continuations = [...matchesFor(CONTINUATION_ACTION_PATTERN, clause.text)]
-      .filter((match) => match.index !== undefined);
+    const continuations = continuationRecords(clause.text, subclauses);
     let warningIndex = 0;
     for (let continuationIndex = 0; continuationIndex < continuations.length; continuationIndex += 1) {
       const continuation = continuations[continuationIndex];
@@ -141,10 +170,9 @@ function hasDirectWarningContinuation(clauses) {
         warningIndex += 1;
       }
       if (!hasSensitiveWarningAntecedent) continue;
-      const subclause = subclauseForOffset(subclauses, continuation.index);
-      if (localNegationApplies(subclause, continuation.index)) continue;
+      if (continuation.negated) continue;
       const nextContinuation = continuations[continuationIndex + 1];
-      const ownedStart = subclause.start;
+      const ownedStart = ownedSegmentStart(subclauses, continuation.subclauseIndex);
       const ownedEnd = nextContinuation?.index ?? clause.text.length;
       const ownedSegment = clause.text.slice(ownedStart, ownedEnd);
       if (!ANAPHORIC_MARKER_PATTERN.test(ownedSegment)) continue;

@@ -1,6 +1,8 @@
 import { createRequire } from 'node:module';
 import { describe, expect, it } from 'vitest';
 
+import { warningContinuationMatrix } from './fixtures/sensitive_history_warning_continuation_matrix.js';
+
 const require = createRequire(import.meta.url);
 const {
     isCanonAllowedParamilitaryChoice,
@@ -16,6 +18,13 @@ const {
 };
 
 describe('sensitive-history choice semantics', () => {
+    it.each(warningContinuationMatrix.map((row) => [row.id, row.text, row.blocked] as const))(
+        'classifies deterministic warning-continuation grammar: %s',
+        (_id, text, blocked) => {
+            expect(isDirectRefusedSensitiveChoice(text)).toBe(blocked);
+        },
+    );
+
     it.each([
         'Murder the non-Serb residents',
         'Execute the displaced families',
