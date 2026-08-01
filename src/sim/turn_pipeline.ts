@@ -8,6 +8,7 @@
  */
 
 import { computeFrontEdges } from '../map/front_edges.js';
+import { registerImmutableSettlementEdges } from '../map/adjacency_map.js';
 import { EdgeRecord, loadSettlementGraph } from '../map/settlements.js';
 import { cloneGameState } from '../state/clone.js';
 import { GameState } from '../state/game_state.js';
@@ -69,6 +70,12 @@ export function assertTurnSuccess(result: TurnResult): asserts result is TurnSuc
 // ═══════════════════════════════════════════════════════════════════════════
 
 export async function runTurn(state: GameState, input: TurnInput): Promise<TurnResult> {
+    if (input.settlementGraph) {
+        registerImmutableSettlementEdges(input.settlementGraph.edges);
+    }
+    if (input.operationalSettlementGraph) {
+        registerImmutableSettlementEdges(input.operationalSettlementGraph.edges);
+    }
     const working = cloneGameState(state);
 
     // War-only pipeline: all games start in April 1992 (war phase).

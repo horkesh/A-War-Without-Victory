@@ -96,6 +96,13 @@ function settlementGraphOptions(baseDir: string): { settlementsPath: string; edg
     };
 }
 
+function operationalSettlementGraphOptions(baseDir: string): { settlementsPath: string; edgesPath: string } {
+    return {
+        settlementsPath: join(baseDir, 'data/derived/operational/operational_settlements.geojson'),
+        edgesPath: join(baseDir, 'data/derived/operational/operational_contact_graph.json'),
+    };
+}
+
 function terrainScalarsPath(baseDir: string): string {
     return join(baseDir, 'data/derived/terrain/settlements_terrain_scalars.json');
 }
@@ -305,7 +312,10 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
     const phase = state.meta?.phase ?? 'war';
     const seed = state.meta?.seed ?? 'desktop-seed';
 
-    const graph = await loadSettlementGraph(settlementGraphOptions(baseDir));
+    const [graph, operationalSettlementGraph] = await Promise.all([
+        loadSettlementGraph(settlementGraphOptions(baseDir)),
+        loadSettlementGraph(operationalSettlementGraphOptions(baseDir)),
+    ]);
 
     const graphForBrowser = graph as LoadedSettlementGraph;
 
@@ -314,6 +324,7 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
             const result = await runTurn(state, {
                 seed,
                 settlementGraph: graphForBrowser,
+                operationalSettlementGraph,
                 settlementEdges: graph.edges,
                 eventDefinitions: loadDesktopEventDefinitions(baseDir),
             });

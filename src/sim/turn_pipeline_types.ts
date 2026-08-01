@@ -5,6 +5,7 @@
  */
 
 import { EdgeRecord, loadSettlementGraph, type LoadedSettlementGraph } from '../map/settlements.js';
+import { registerImmutableSettlementEdges } from '../map/adjacency_map.js';
 import {
     loadMunicipalityHqSettlement,
     loadOobBrigades,
@@ -105,8 +106,10 @@ export type MunicipalityPopulation1991 = Record<
 export interface TurnInput {
     seed: string;
     settlementEdges?: EdgeRecord[];
-    /** When provided, Peace phase uses this graph instead of loadSettlementGraph() (e.g. browser or tests). */
+    /** Canonical SID graph used by campaign/peace mechanics. Its edge identity is deep-frozen at the turn boundary. */
     settlementGraph?: LoadedSettlementGraph;
+    /** OSID graph used by war mechanics that otherwise load the default graph. Its edge identity is deep-frozen on injection/load. */
+    operationalSettlementGraph?: LoadedSettlementGraph;
     applyNegotiation?: boolean; // Phase 11B: apply accepted negotiation offers
     /** When provided, pool population is weighted by eligible population (RBiH=bosniak, RS=serb, HRHB=croat) so brigade counts reflect demographics. */
     municipalityPopulation1991?: MunicipalityPopulation1991;
@@ -378,6 +381,34 @@ export function setOperationalData(context: TurnContext, data: OperationalDataCa
     (context as TurnContext & { operationalData?: OperationalDataCache }).operationalData = data;
 }
 
+type OperationalSettlementGraphContext = TurnContext & {
+    operationalSettlementGraphPromise?: Promise<LoadedSettlementGraph>;
+};
+
+/**
+ * Return the immutable OSID graph for this turn.
+ *
+ * Production callers may inject one graph for the whole run. Compatibility
+ * callers still load the default graph lazily, but share that single promise
+ * across all phases in the same TurnContext. The cache never enters GameState
+ * and never crosses a turn boundary unless the caller explicitly owns the
+ * immutable input object.
+ */
+export function getOperationalSettlementGraph(context: TurnContext): Promise<LoadedSettlementGraph> {
+    if (context.input.operationalSettlementGraph) {
+        registerImmutableSettlementEdges(context.input.operationalSettlementGraph.edges);
+        return Promise.resolve(context.input.operationalSettlementGraph);
+    }
+    const cachedContext = context as OperationalSettlementGraphContext;
+    if (!cachedContext.operationalSettlementGraphPromise) {
+        cachedContext.operationalSettlementGraphPromise = loadSettlementGraph().then((graph) => {
+            registerImmutableSettlementEdges(graph.edges);
+            return graph;
+        });
+    }
+    return cachedContext.operationalSettlementGraphPromise;
+}
+
 /** Siege state cached on TurnContext by compute-siege-state step (Phase F). Turn-local only. */
 export interface SiegeStateCache { siegeRatios: SiegeRatioByMunFaction; }
 
@@ -515,7 +546,7 @@ export function setAllianceAtTurnStart(context: TurnContext, value: number | und
 
 /** Load settlement graph and edges from context (or default). */
 export async function getGraphAndEdges(context: TurnContext): Promise<{ graph: LoadedSettlementGraph; edges: EdgeRecord[] }> {
-    const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+    const graph = context.input.settlementGraph ?? (await getOperationalSettlementGraph(context));
     const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
         ? context.input.settlementEdges
         : graph.edges;

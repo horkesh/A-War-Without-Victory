@@ -1,4 +1,4 @@
-import { buildAdjacencyMap } from '../map/adjacency_map.js';
+import { buildAdjacencyMapCached } from '../map/adjacency_map.js';
 import type { FrontEdge } from '../map/front_edges.js';
 import type { FrontRegionsFile } from '../map/front_regions.js';
 import type { FormationFatigueStepReport } from './formation_fatigue.js';
@@ -179,7 +179,7 @@ export function applyFormationCommitment(
                 } else {
                     // Fallback: recompute supply deterministically (same logic as fatigue step)
                     if (settlementEdges) {
-                        const adjacencyMap = buildAdjacencyMap(settlementEdges);
+                        const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
                         const localSupplyByEdge = computeLocalSupplyForEdges(state, derivedFrontEdges, adjacencyMap);
                         supplied_this_turn = isFormationSupplied(state, formationData, localSupplyByEdge, frontRegions, derivedFrontEdges);
                     } else {
@@ -192,7 +192,7 @@ export function applyFormationCommitment(
             } else {
                 // No report available: recompute deterministically
                 if (settlementEdges) {
-                    const adjacencyMap = buildAdjacencyMap(settlementEdges);
+                    const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
                     const localSupplyByEdge = computeLocalSupplyForEdges(state, derivedFrontEdges, adjacencyMap);
                     supplied_this_turn = isFormationSupplied(state, formationData, localSupplyByEdge, frontRegions, derivedFrontEdges);
                 } else {
