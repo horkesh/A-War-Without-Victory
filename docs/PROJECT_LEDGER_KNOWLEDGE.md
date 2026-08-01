@@ -4011,6 +4011,22 @@ Applied in `[2026-07-31] Seamless map transition Phase 0 baseline instrumentatio
 
 Applied in `[2026-07-31] Seamless map transition Phase 0 evidence made fail-closed and context-complete`, `src/ui/map/components/Minimap.tsx`, and `tools/ui/map_transition_profile.cjs`.
 
+## 2026-08-01 - Presidential priority and sourced-cadence truth
+
+**Priority vocabulary needs one owner:** Required, Recommended, Monitor, and Record are routing/advance semantics, not synonyms for visual severity. Durable rule: Required must originate in the canonical advance-blocker contract; every other presidential surface consumes the shared band projection. A critical advisory can remain Recommended or Monitor, and a record remains a record even when its subject is grave.
+
+**Repeated evidence is not repeated executive work:** multiple siege/enclave rows about the same category and exact target should consolidate into one stable command brief with all source/evidence IDs preserved. Do not merge different targets or infer equivalence from similar prose.
+
+**Notices cannot cure a decision drought:** cadence diagnostics must separate required authored and optional source-backed reviews from ordinary emergent proposals and notices. Only sourced review receipts close the sourced-cadence gap. When the inventory contains no legitimate lever, preserve the interval as an exact evidenced positive hold; Authority near its cap is not historical evidence and must not generate a fictional decision.
+
+**Historical corrections do not authorize adjacent mechanics:** correcting Operation Lukavac 93 to the sourced July-August chronology and approximately 10,000 troops permits truthful presentation of that existing event. It does not itself justify a new initiative, war-crimes effect, or broader presidential lever.
+
+**Natural recurrence and voluntary action cadence require separate fields:** `once:true` plus engine `recurrence` is contradictory because the once gate wins before cooldown/cap evaluation. Durable rule: a naturally occurring row stays once-only; any repeat initiated explicitly by the player uses `action_cadence`, consumed by the desktop action contract and ignored by `evaluateEvents`. Fail closed when that metadata is absent, and prove the natural row cannot create another pending/Advance-blocking decision.
+
+**An exogenous historical notice must not pre-resolve a neighboring choice:** the August 9 NATO Council authorization fires at its exact source week whether or not the Lukavac operation predicate is present. When both are eligible, canonical priority presents the sourced RS Lukavac decision first; when only the notice is eligible, its event and base Codex prose/effects record authorization/pressure without asserting withdrawal, compliance, defiance, control, or causal closure. Historical outcome analysis belongs behind the exact response receipt.
+
+Applied in `[2026-08-01] RS 104-week friction packets FR-01/02/04/05 implemented locally`; audit `docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md`.
+
 ## 2026-07-31 - Formation membership and battle-effect ownership
 
 **Assignment membership, movement eligibility, combat participation, and aftermath ownership are separate contracts:** sharing a sector, Operational Group, or other roster does not automatically make a formation a contributor to a specific battle. Durable rule: first identify the spatial-assignment owner, then the bounded movement/commitment gate, then the exact resolver contributor set, and finally the recipient named by each immediate or downstream effect. Documentation must not widen a runtime recipient set by using collective language such as “the formation shares the cost.” Pin this boundary with semantic doctrine anchors and a production scan for identifiers from retired experiments.

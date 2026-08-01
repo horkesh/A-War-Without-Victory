@@ -1028,6 +1028,15 @@ While the loaded turn/save fingerprint is changing, the previous rendered canvas
 - Army HQ presidential handoffs expose their derived destination through `data-handoff-route`. Electron QA must assert the actual route: filed executive work opens Decision Room; critical reporting without a filed executable matter opens the President's Desk.
 - Operation-conclusion copy receives the authored operation name verbatim. Message templates must not prepend another `operation`, because authored names may already begin with `Operation`.
 
+### 14.9 Presidential priority and responsive Army HQ contracts
+
+- `presidentialPriority.ts` owns the four player-facing priority bands: Required, Recommended, Monitor, and Record. Inbox, Decision Room, pre-advance review, presidential category metrics, and Warroom priority docket consume those bands rather than rebuilding urgency from severity labels.
+- Required is reserved for a live advance blocker. A critical report, alarming monitor, or legacy `blocking` presentation field cannot create a Required item without blocker ownership.
+- Decision Room consolidation may merge repeated siege/enclave monitor evidence only when category and target are exactly equal. The merged card preserves stable sorted source/evidence IDs; permutation must not change its identity or order.
+- Army HQ Summary card/table regions expand responsively: two columns at ordinary desktop widths and three at ultrawide widths, while prose retains a readable maximum measure and the document does not gain horizontal scrolling.
+- A no-action executive posture is rendered once as a non-interactive note before objectives. Objective cards report only local filing truth (`No staff request filed` or `No presidential signature due`) and do not repeat a generic hold instruction or add tab stops.
+- The cadence reporter is diagnostic/read-only and cannot create a UI decision. Only required authored and optional source-backed receipts close sourced cadence gaps; ordinary emergent work and notices remain visible but excluded. A positive hold is valid only for exact long-gap endpoints with a rationale and evidence IDs.
+
 ---
 
 ## 15. Paradox Team & Protocol Roles
