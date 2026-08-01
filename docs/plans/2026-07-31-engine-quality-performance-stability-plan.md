@@ -74,10 +74,10 @@ Before each phase, capture `git status --short`, current scenario hashes, and th
 - Create `tests/game_state_field_classification.test.ts`
 - Create `tests/generated_artifact_inventory.test.ts`
 
-- [ ] Emit every `GameState`/`MilitaryState` field with declared type, initializer, validator, migration, serializer, and known readers.
-- [ ] Emit every known scenario/replay/baseline/diagnostic/package artifact with owner and tracked/transient policy.
-- [ ] Fail on unclassified fields and unowned writes.
-- [ ] Sort output with stable ASCII comparison and omit absolute paths/timestamps.
+- [x] Emit every `GameState`/`MilitaryState` field with declared type, initializer, validator, migration, serializer, and known readers.
+- [x] Emit every known scenario/replay/baseline/diagnostic/package artifact with owner and tracked/transient policy.
+- [x] Fail on unclassified fields and unowned writes.
+- [x] Sort output with stable ASCII comparison and omit absolute paths/timestamps.
 
 ### Task 0.2 -- Capture fresh performance owners
 
@@ -86,9 +86,11 @@ Before each phase, capture `git status --short`, current scenario hashes, and th
 - Modify only instrumentation under `tools/perf/` if current output lacks owner attribution
 - Create `tests/performance_wall_clock_report.test.ts`
 
-- [ ] Run one warmup and three measured 40-turn runs on the recorded machine.
-- [ ] Capture total/turn mean, P50, P95, V8 inclusive owners, sector subowners, graph load, combat, bot orders, serialization, and peak heap.
-- [ ] Prove profiling flags do not change scenario bytes.
+- [x] Run one warmup and three measured 40-turn runs on the recorded machine.
+- [x] Capture total/turn mean, P50, P95, V8 inclusive owners, sector subowners, graph load, combat, bot orders, serialization, and peak heap.
+- [x] Prove profiling flags do not change scenario bytes.
+
+Phase 0 evidence (local reference machine, 2026-08-01): 1,562.923 ms/turn mean, 1,563.681 ms/turn P50, 1,567.255 ms/turn P95, 340.317 MB phase-boundary sampled heap, and identical 5,108,970-byte final saves with SHA-256 `f72a459e7548d70b4e823c35dd8f1c4b3d61bd21441ed5d40f68e545017a9746` across warmup, measured, sector/phase-profiled, and V8-profiled modes. The aggregate CLI calculates SHA-256 and size directly from six explicit final-save paths. The field gate covers 135 explicit classifications and exposes six derived/transient serializer-policy mismatches for Phase 1 closeout; the artifact gate covers 31 policies and 58 producer calls (45 repo-owned, 13 external/caller-selected, 0 unowned). Transient evidence lives under `runs_perf/r5_phase0_*` and `data/derived/_debug/r5_phase0_*`; it remains untracked by policy.
 
 ```powershell
 npm.cmd run perf:wall-clock:report
