@@ -170,6 +170,8 @@
     "responding_faction": "RS",
     "priority": 50,
     "bot_response_logic": "strategic_weighted",
+    "historical_source": "NATO North Atlantic Council decision of 9 February 1994 (Sarajevo Heavy Weapons Exclusion Zone ultimatum; UN S/1994/154); UN Security Council Resolution 836 (4 June 1993); ICTY Galic Trial Judgement IT-98-29-T (5 December 2003); ICTY Karadzic Trial Judgement IT-95-5/18-T (24 March 2016); Balkan Battlegrounds Vol. II, Sarajevo HWEZ chronology.",
+    "source_note": "The North Atlantic Council demanded removal or UNPROFOR control of heavy weapons within 20 kilometres of Sarajevo by the February 1994 deadline and threatened air strikes for non-compliance. The documented VRS/RS posture was substantial compliance under coercion; the defy option is the explicit counterfactual branch.",
     "effect": {
       "kind": "patron_pressure",
       "faction": "RS",

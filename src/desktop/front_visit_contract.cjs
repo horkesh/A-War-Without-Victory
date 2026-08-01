@@ -7,7 +7,7 @@
  * (data/scenarios/events/war_1993.json) into
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
  * ZERO new sim/event code — the event's authored effects (morale +5 / cohesion
- * +3 / patron_pressure -3 / standing shifts), recurrence (max_fires 5 /
+ * +3 / patron_pressure -3 / standing shifts), voluntary action cadence (max_fires 5 /
  * cooldown 10t), and branches are reused verbatim.
  *
  * ⚠ ENCLAVE REACHABILITY GATE (owner constraint, 2026-06-01):
@@ -135,10 +135,11 @@ function computeFrontVisitAvailability(state, playerFaction, eventDef) {
   if (!playerFaction) return { ...base, reason: 'no_player_faction' };
   if (!eventId || !eventDef) return { ...base, reason: 'no_event' };
 
-  // ── Cooldown / cap (reuse the event's OWN recurrence, canonical state) ──────
-  const recurrence = eventDef.recurrence || {};
-  const maxFires = typeof recurrence.max_fires === 'number' ? recurrence.max_fires : Infinity;
-  const cooldownTurns = typeof recurrence.cooldown_turns === 'number' ? recurrence.cooldown_turns : 0;
+  // ── Cooldown / cap (voluntary desktop action only; engine ignores it) ───────
+  const actionCadence = eventDef.action_cadence;
+  if (!actionCadence) return { ...base, reason: 'no_action_cadence' };
+  const maxFires = actionCadence.max_fires;
+  const cooldownTurns = actionCadence.cooldown_turns;
   const fireCount = state?.military?.event_fire_counts?.[eventId] ?? 0;
   const lastFired = state?.military?.event_last_fired_turn?.[eventId];
   const firesLeft = Number.isFinite(maxFires) ? Math.max(0, maxFires - fireCount) : Infinity;

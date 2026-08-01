@@ -8,13 +8,13 @@
  * `address_to_nation_<faction>` event (data/scenarios/events/war_1993.json) into
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
  * ZERO new sim/event code — the event's authored effects (morale / cohesion /
- * patron_pressure / standing shifts, all double-edged), recurrence (max_fires 5 /
+ * patron_pressure / standing shifts, all double-edged), voluntary action cadence (max_fires 5 /
  * cooldown 10t), and branches are reused verbatim.
  *
  * Unlike the front visit, an address is FACTION-WIDE: there is NO reachability /
  * enclave gate (the president broadcasts from the capital; no front is travelled
  * to). The only gates are the player-faction resolution and the event's OWN
- * recurrence (cap / cooldown). The CA debit lives in the IPC handler.
+ * action cadence (cap / cooldown). The CA debit lives in the IPC handler.
  *
  * Determinism: pure over (state). No Math.random / no Date.now. Iteration over
  * the authored response_options order (deterministic by construction;
@@ -66,10 +66,11 @@ function computeAddressNationAvailability(state, playerFaction, eventDef) {
   if (!playerFaction) return { ...base, reason: 'no_player_faction' };
   if (!eventId || !eventDef) return { ...base, reason: 'no_event' };
 
-  // ── Cooldown / cap (reuse the event's OWN recurrence, canonical state) ──────
-  const recurrence = eventDef.recurrence || {};
-  const maxFires = typeof recurrence.max_fires === 'number' ? recurrence.max_fires : Infinity;
-  const cooldownTurns = typeof recurrence.cooldown_turns === 'number' ? recurrence.cooldown_turns : 0;
+  // ── Cooldown / cap (voluntary desktop action only; engine ignores it) ───────
+  const actionCadence = eventDef.action_cadence;
+  if (!actionCadence) return { ...base, reason: 'no_action_cadence' };
+  const maxFires = actionCadence.max_fires;
+  const cooldownTurns = actionCadence.cooldown_turns;
   const fireCount = state?.military?.event_fire_counts?.[eventId] ?? 0;
   const lastFired = state?.military?.event_last_fired_turn?.[eventId];
   const firesLeft = Number.isFinite(maxFires) ? Math.max(0, maxFires - fireCount) : Infinity;

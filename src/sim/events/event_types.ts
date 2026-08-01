@@ -495,6 +495,8 @@ export interface EventDefinition {
     // v0.6.0 metagame fields (all optional for backward compat)
     /** Pressure system config: readiness counter with increment/decay. */
     pressure?: PressureConfig;
+    /** Voluntary desktop-action cap/cooldown. The natural event evaluator ignores this field. */
+    action_cadence?: ActionCadenceConfig;
     /** Recurrence model: how many times this event can fire. */
     recurrence?: RecurrenceConfig;
     /** Flags set on fire (before player choice). */
@@ -663,6 +665,15 @@ export interface RecurrenceConfig {
     /** How stakes change on each recurrence. */
     escalation: 'static' | 'escalating' | 'deteriorating';
 }
+
+/**
+ * Cap/cooldown metadata for a player-initiated desktop action.
+ *
+ * Kept distinct from `recurrence`: action handlers consume this contract,
+ * while `evaluateEvents` continues to apply `once` to the row's natural
+ * occurrence and never uses this field to manufacture another decision.
+ */
+export type ActionCadenceConfig = RecurrenceConfig;
 
 /** Check if trigger matches current state (deterministic). */
 export function triggerMatches(def: EventDefinition, state: GameState, currentTurn: number, edges?: EdgeRecord[]): boolean {

@@ -2577,9 +2577,9 @@ app.whenReady().then(() => {
   // Force-queues the authored visit_to_front_<faction> event into
   // state.military.pending_event_decisions (mirror evaluate_events.ts:577) so
   // EventDecisionModal surfaces it. ZERO new sim/event code — the event's authored
-  // effects/recurrence/branches are reused. Guards (in order):
+  // effects/action cadence/branches are reused. Guards (in order):
   //   1. player faction must resolve to a visit_to_front_<faction> event
-  //   2. cooldown/cap reuse the event's OWN recurrence (max_fires 5 / cooldown 10t)
+  //   2. cooldown/cap use the event's action_cadence (max_fires 5 / cooldown 10t)
   //   3. ENCLAVE REACHABILITY GATE: front branches filtered to corridored targets;
   //      all-cut-off → 'all_cut_off' refusal
   //   4. CA guard + debit FRONT_VISIT_COST (10)
@@ -2626,7 +2626,7 @@ app.whenReady().then(() => {
       }
       state.military.pending_event_decisions.push(decision);
 
-      // Record the fire so the event's OWN recurrence (max_fires 5 / cooldown 10t)
+      // Record the fire so the event's action_cadence (max_fires 5 / cooldown 10t)
       // gates subsequent visits. resolveEventDecision (the modal-resolve path)
       // does NOT increment these — so we record at queue time here, mirroring the
       // calendar-fire bookkeeping in evaluate_events.ts:194-202. The act of
@@ -2653,7 +2653,7 @@ app.whenReady().then(() => {
   // ── Presidential ADDRESS THE NATION (read-only availability) ────────────────
   // Mirrors get-front-visit-availability. An address is FACTION-WIDE — no
   // reachability gate (the president broadcasts from the capital); the only gates
-  // are player-faction resolution and the event's OWN recurrence (cap/cooldown).
+  // are player-faction resolution and the event's action_cadence (cap/cooldown).
   ipcMain.handle('get-address-nation-availability', async () => {
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded' };
@@ -2675,7 +2675,7 @@ app.whenReady().then(() => {
   // Force-queues the authored address_to_nation_<faction> event into
   // state.military.pending_event_decisions (mirror evaluate_events.ts:577 /
   // initiate-front-visit) so EventDecisionModal surfaces it. ZERO new sim/event
-  // code. Guards: 1. faction→event 2. cooldown/cap (event's OWN recurrence)
+  // code. Guards: 1. faction→event 2. cooldown/cap (event action_cadence)
   // 3. CA guard + debit ADDRESS_NATION_COST. Player-IPC-only → never headless →
   // byte-identical by construction.
   ipcMain.handle('initiate-address-nation', async (_event) => {
@@ -2717,7 +2717,7 @@ app.whenReady().then(() => {
       }
       state.military.pending_event_decisions.push(decision);
 
-      // Record the fire so the event's OWN recurrence gates subsequent addresses
+      // Record the fire so the event's action_cadence gates subsequent addresses
       // (mirror initiate-front-visit: resolveEventDecision does NOT increment these).
       if (!state.military.event_fire_counts) state.military.event_fire_counts = {};
       state.military.event_fire_counts[eventId] = (state.military.event_fire_counts[eventId] ?? 0) + 1;
@@ -2738,7 +2738,7 @@ app.whenReady().then(() => {
 
   // ── Presidential DECORATE A UNIT (read-only availability) ───────────────────
   // Mirrors get-front-visit-availability. No reachability gate (issued from the
-  // capital); gated by player-faction + the event's OWN recurrence. Returns the
+  // capital); gated by player-faction + the event's action_cadence. Returns the
   // BRIGHT-LINE-filtered eligible REGULAR formations (never paramilitary/militia/
   // phantom) so the renderer can show what the president may honour.
   ipcMain.handle('get-decorate-unit-availability', async () => {
