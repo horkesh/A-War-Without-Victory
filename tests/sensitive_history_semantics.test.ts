@@ -24,6 +24,7 @@ describe('sensitive-history choice semantics', () => {
         'Kill civilians',
         'Always allow paramilitary deployment',
         'Authorize paramilitary standing orders',
+        'General Staff warned of genocide. Proceed anyway and make it swift.',
     ])('classifies a direct refused instruction: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(true);
     });
@@ -41,6 +42,12 @@ describe('sensitive-history choice semantics', () => {
         'Authorize prosecutors to investigate concentration camps',
         'Never authorize or approve concentration camps',
         'Order inspectors to inspect detention camps',
+        'Proceed with the command review. Document genocide allegations.',
+        'Document genocide allegations. Proceed with the command review.',
+        'Forbid commanders to murder civilians',
+        'Decline to authorize concentration camps',
+        'Cannot authorize concentration camps',
+        'The objective is to document genocide allegations. Proceed anyway with the command review.',
     ])('keeps documentation, accountability, and refusal prose contextual: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(false);
     });
@@ -54,6 +61,12 @@ describe('sensitive-history choice semantics', () => {
         'Authorize an investigation of concentration camps, then commit genocide',
         'Do not authorize or approve concentration camps, then kill civilians',
         'Authorize prosecutors to investigate concentration camps, but commit genocide',
+        'Do not authorize detention camps: kill civilians',
+        'Refuse to deploy paramilitary forces — execute the displaced families',
+        'Refuse to deploy paramilitary forces – execute the displaced families',
+        'Forbid commanders to murder civilians: kill civilians',
+        'Decline to authorize concentration camps — commit genocide',
+        'Cannot authorize concentration camps: execute the displaced families',
     ])('does not let contextual language sanitize a later or prior directive: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(true);
     });

@@ -44,9 +44,11 @@ const DIRECT_REFUSED_PATTERNS = Object.freeze([
 const REFUSED_ACTION_PATTERN = /\b(?:allow|approve|authorize|begin|commit|conduct|continue|create|deploy\w*|deport\w*|displace\w*|establish|execute|expel\w*|implement|kill\w*|murder\w*|operate|order|proceed|pursue|target\w*)\b/i;
 const REFUSED_ACT_PATTERN = /\b(?:ethnic\s+cleansing|cleansing|forced\s+displacement|deport(?:ation|ing)s?|expulsions?|expelling|(?:civilian|mass)\s+killings?|massacres?|genocide|concentration\s+camps?|detention\s+camps?|paramilitar(?:y|ies)(?:\s+(?:deployment|standing\s+orders))?)\b/i;
 const ACCOUNTABILITY_PATTERN = /\b(?:document\w*|expos\w*|investigat\w*|inspect\w*|prosecut\w*|report\w*|review\w*)\b/i;
-const REFUSAL_SCOPE_PATTERN = /\b(?:(?:do|does|did|must|shall|should|will|would|can|could|may|might)\s+not|never|refus(?:e|es|ed)\s+to)\b/i;
-const CLAUSE_BOUNDARY_PATTERN = /(?:[.;!?]+|[\r\n]+|(?:,\s*)?\b(?:and\s+then|then|but|however|yet|instead|afterwards?|subsequently|finally)\b(?:\s*,)?)/i;
+const REFUSAL_SCOPE_PATTERN = /\b(?:(?:do|does|did|must|shall|should|will|would|can|could|may|might)\s+not|cannot|never|refus(?:e|es|ed)\s+to|declin(?:e|es|ed)\s+to|forbid(?:s|ding)?|forbade)\b/i;
+const CLAUSE_BOUNDARY_PATTERN = /(?:[.;!?]+|:(?=\s|$)|\s+[–—]\s+|[\r\n]+|(?:,\s*)?\b(?:and\s+then|then|but|however|yet|instead|afterwards?|subsequently|finally)\b(?:\s*,)?)/i;
 const CONTEXTUAL_STANDALONE_PREFIX_PATTERN = /\b(?:ban|document|expose|forbid|investigate|oppose|prevent|prosecute|record|reject|report|review|stop)\s+(?:(?:the\s+)?(?:allegations?|evidence|findings?|reports?)\s+(?:about|of)\s+)?$/i;
+const SENSITIVE_WARNING_PATTERN = /\b(?:caution(?:s|ed|ing)?|object(?:s|ed|ing)?|objection\w*|oppos(?:e|es|ed|ing)|reject(?:s|ed|ing)?|warn(?:s|ed|ing)?)\b/i;
+const ANAPHORIC_CONTINUATION_PATTERN = /\b(?:continue|proceed)\s+(?:anyway|regardless)\b/i;
 
 function matchesFor(pattern, text) {
   const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
@@ -90,7 +92,17 @@ function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
 
 function isDirectRefusedSensitiveChoice(text) {
   if (typeof text !== 'string' || text.trim().length === 0) return false;
-  for (const clause of clausesFor(text)) {
+  const clauses = clausesFor(text);
+  for (let clauseIndex = 0; clauseIndex < clauses.length; clauseIndex += 1) {
+    const clause = clauses[clauseIndex];
+    const continuation = clause.text.match(ANAPHORIC_CONTINUATION_PATTERN);
+    const previousClause = clauses[clauseIndex - 1]?.text ?? '';
+    if (
+      continuation?.index !== undefined
+      && !refusalApplies(clause.text, continuation.index)
+      && SENSITIVE_WARNING_PATTERN.test(previousClause)
+      && REFUSED_ACT_PATTERN.test(previousClause)
+    ) return true;
     if (STANDALONE_REFUSED_PATTERNS.some((pattern) => {
       for (const match of matchesFor(pattern, clause.text)) {
         if (match.index === undefined || refusalApplies(clause.text, match.index)) continue;
@@ -101,8 +113,7 @@ function isDirectRefusedSensitiveChoice(text) {
     })) return true;
     for (const action of matchesFor(REFUSED_ACTION_PATTERN, clause.text)) {
       if (action.index === undefined || refusalApplies(clause.text, action.index)) continue;
-      const absoluteActionIndex = clause.start + action.index;
-      if (directPatternCoversAction(text, absoluteActionIndex)) return true;
+      if (directPatternCoversAction(clause.text, action.index)) return true;
       const afterAction = clause.text.slice(action.index + action[0].length);
       for (const act of matchesFor(REFUSED_ACT_PATTERN, afterAction)) {
         if (act.index === undefined) continue;
