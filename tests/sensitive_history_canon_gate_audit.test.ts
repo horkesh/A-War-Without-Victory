@@ -305,12 +305,21 @@ describe('buildSensitiveHistoryAudit', () => {
                         { id: 'safe_warning_continue_regardless_review', description: 'General Staff warned of genocide. Continue regardless with the documentation review.' },
                         { id: 'safe_warning_continue_review_regardless', description: 'General Staff warned of genocide. Continue with the documentation review regardless.' },
                         { id: 'safe_warning_review_offensive', description: 'General Staff warned of genocide. Proceed to review the offensive regardless.' },
+                        { id: 'safe_warning_operational_review', description: 'General Staff warned of genocide. Proceed with the operational review anyway.' },
+                        { id: 'safe_warning_multi_accountability', description: 'General Staff warned of genocide. Proceed to review and document the offensive regardless.' },
+                        { id: 'safe_warning_inspect_operation', description: 'General Staff warned of genocide. Proceed to inspect the operation and review the report anyway.' },
                         { id: 'warning_offensive_anyway', description: 'General Staff warned of genocide. Proceed with the offensive anyway.' },
                         { id: 'warning_continue_operation_regardless', description: 'General Staff warned of genocide. Continue the operation regardless.' },
                         { id: 'warning_continue_regardless_offensive', description: 'General Staff warned of genocide. Continue regardless with the offensive.' },
                         { id: 'warning_review_then_kill', description: 'General Staff warned of genocide. Proceed anyway with the command review. Then kill civilians.' },
                         { id: 'warning_offensive_then_review', description: 'General Staff warned of genocide. Proceed with the offensive anyway and review the result.' },
                         { id: 'warning_direct_action_then_review', description: 'General Staff warned of genocide. Proceed with direct action regardless and review the result.' },
+                        { id: 'warning_review_execute_offensive', description: 'General Staff warned of genocide. Proceed to review and execute the offensive regardless.' },
+                        { id: 'warning_review_continue_offensive', description: 'General Staff warned of genocide. Proceed to review and continue the offensive regardless.' },
+                        { id: 'warning_review_launch_offensive', description: 'General Staff warned of genocide. Proceed to review and launch the offensive regardless.' },
+                        { id: 'warning_multi_launch_operation', description: 'General Staff warned of genocide. Proceed regardless to document, review, and launch the operation.' },
+                        { id: 'warning_launch_then_document', description: 'General Staff warned of genocide. Proceed to review, launch the offensive, and document the result anyway.' },
+                        { id: 'warning_review_continue_direct_action', description: 'General Staff warned of genocide. Proceed to review and continue with direct action regardless.' },
                     ],
                 },
                 {
@@ -328,8 +337,8 @@ describe('buildSensitiveHistoryAudit', () => {
         });
 
         const refused = report.violations.filter((row) => row.kind === 'sensitive_player_choice');
-        expect(refused).toHaveLength(30);
-        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(16);
+        expect(refused).toHaveLength(36);
+        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(22);
         expect(refused.filter((row) => row.event_id === 'direct_refused_choices_1993')).toHaveLength(12);
         expect(refused.filter((row) => row.event_id === 'rs_paramilitary_policy_1992')).toHaveLength(2);
         expect(refused.every((row) => row.severity === 'CRITICAL')).toBe(true);
@@ -347,8 +356,14 @@ describe('buildSensitiveHistoryAudit', () => {
             'warning_continue_operation_regardless.description',
             'warning_continue_regardless_offensive.description',
             'warning_direct_action_then_review.description',
+            'warning_launch_then_document.description',
+            'warning_multi_launch_operation.description',
             'warning_offensive_anyway.description',
             'warning_offensive_then_review.description',
+            'warning_review_continue_direct_action.description',
+            'warning_review_continue_offensive.description',
+            'warning_review_execute_offensive.description',
+            'warning_review_launch_offensive.description',
             'warning_review_then_kill.description',
             'anaphoric_genocide.description',
             'begin_deporting.label',

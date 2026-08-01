@@ -25398,3 +25398,19 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Verification:** Focused correction passes 4 files / 113 tests; expanded inventory/provenance passes 7 files / 94 tests; canon passes 2 files / 34 tests; foundational/adjacent passes 5 files / 110 tests with 105 passing and 5 pre-existing skips. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim and localization censuses remain 3,652 / 226 files and 971 / 385 files. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass.
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
+
+## 2026-08-01 - R7 eighth blocked-review correction: action-owned warning purpose
+
+**Type:** Multi-action continuation false-negative repair / noun-adjective false-positive repair / deterministic purpose ownership.
+
+**Supersession:** This entry corrects the immediately preceding claim that comparing the first accountability and operative purpose classified a whole continuation clause. An early review suppressed every later action, while `operation\w*` classified adjectival `operational review` as an operation.
+
+**RED evidence:** Helper and both-consumer fixtures pin exact safe `Proceed with the operational review anyway`, exact blocking review-then-`execute|continue|launch` offensive forms, marker/action permutations, multiple accountability actions, operative actions between accountability actions, and a later continuation governing direct action. Before implementation, the 3-file / 113-test matrix failed nine assertions: one helper false positive, six helper false negatives, and both consumer contracts.
+
+**Implementation:** The warning guard enumerates recognized continuation, accountability, `execute`, and `launch` actions from the initial non-negated continuation onward. Each action owns only the text before the next action. Any operative action governing an exact attack, assault, campaign, combat, direct-action, offensive, operation, or strike noun blocks the clause even after earlier accountability; a clause with accountability actions and no operative-owned purpose remains contextual. Exact `operation|operations` noun matching excludes adjectival `operational` without a phrase exception. Later clauses remain independently scanned by the ordinary direct-act path.
+
+**Historian/canon review:** This enforcement-only correction implements Sensitive History Design Gate Ring 3 #1/#2 and section 3. It changes no historical fact, source, event trigger, player response, consequence, simulation state, or source tier; the exact six-label paramilitary-policy exception and Six Strategic Goals historical-record/non-player-consequence contract remain unchanged.
+
+**Verification:** Focused correction passes 4 files / 122 tests; expanded inventory/provenance passes 7 files / 103 tests; canon passes 2 files / 34 tests; foundational/adjacent passes 5 files / 110 tests with 105 passing and 5 pre-existing skips. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim and localization censuses remain 3,652 / 226 files and 971 / 385 files. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
