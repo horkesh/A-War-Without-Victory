@@ -1,4 +1,28 @@
 {
+  "schemaVersion": 1,
+  "provenance": {
+    "sourceId": "final-autosave.json",
+    "scenarioId": "apr1992_definitive_104w",
+    "runId": "20260731-session16c-rs-104w-player-final",
+    "playerFaction": "RS",
+    "startTurn": 0,
+    "endTurn": 104,
+    "saveTurn": 104,
+    "sourceSaveSha256": "aaebe5bd01d9ac78ffb264b74f3827ba34307c4f5ad312b4e735aa65fdca7062"
+  },
+  "evidence": [
+    {
+      "id": "docs/40_reports/playtests/20260731_rs_104week_player_diary.md",
+      "path": "docs/40_reports/playtests/20260731_rs_104week_player_diary.md",
+      "sha256": "5c13bc6484fd7242793280a873c2c1e2c641bc4e68d69a9f65e57d0e8b4a1c1b"
+    },
+    {
+      "id": "docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory",
+      "path": "docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md",
+      "sha256": "fdbe8e8da085af8bf482f34b9f12c8265b4557e5ea9e2be69824aefe55ebfdca",
+      "anchor": "positive-hold-source-inventory"
+    }
+  ],
   "source": "docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/run-data/paradox-local-qa-progress-20260731-session16c-rs-104w-player-final.json",
   "sourceTurn": 104,
   "positiveHoldEvidenceIds": [

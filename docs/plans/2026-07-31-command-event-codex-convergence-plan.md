@@ -9,7 +9,7 @@
 **Tech stack:** TypeScript, React, Vitest, JSON-authored events/essays, Electron browser gates, deterministic scenario runner.
 
 **Date:** 2026-07-31
-**Status:** READY -- starts after the RS 104-week friction plan
+**Status:** IN PROGRESS -- Phase 0 characterized on integrated R2; Phase 1 remains gated on shared ownership clearance
 **Roadmap workstream:** R4
 **Canonical owner:** Presidential Decision Room for action; Desk for triage; Records/Codex for receipts
 **Collision rule:** Do not overlap source edits with RS packets FR-01 or FR-04. Rebase on their shared priority and cadence contracts before Phase 0.
@@ -98,11 +98,11 @@ Inspect before editing:
 - Create `tools/diagnostics/presidential_command_convergence.ts`
 - Create `tests/presidential_command_convergence_diagnostic.test.ts`
 
-- [ ] Emit stable rows containing family id, producer, blocker predicate, action surface, receipt/history owner, and Codex/Chronicle consumers.
-- [ ] Fail on a producer with no reachable action surface.
-- [ ] Fail on two action surfaces for one family.
-- [ ] Fail on a player-visible decision with no durable receipt.
-- [ ] Sort by stable family id with `strictCompare`; exclude timestamps and absolute paths.
+- [x] Emit stable rows containing family id, producer, blocker predicate, action surface, receipt/history owner, and Codex/Chronicle consumers.
+- [x] Fail on a producer with no reachable action surface.
+- [x] Fail on two action surfaces for one family.
+- [x] Fail on a player-visible decision with no durable receipt.
+- [x] Sort by stable family id with `strictCompare`; exclude timestamps and absolute paths.
 
 ### Task 0.2 -- Measure all-faction decision cadence
 
@@ -112,10 +112,21 @@ Inspect before editing:
 - Create `tests/presidential_cadence_report.test.ts`
 - Reuse/extend `tests/rs_104week_decision_cadence.test.ts` when FR-04 creates it
 
-- [ ] Classify required decisions, optional sourced initiatives, ordinary emergent proposals, notices, and positive-hold weeks.
-- [ ] Run RBiH, RS, and HRHB through 104 turns with identical documented scenario inputs.
-- [ ] Record consequential-gap lengths and near-cap Authority weeks.
-- [ ] Prove the report is byte-identical under input permutation and repeated execution.
+- [x] Classify required decisions, optional sourced initiatives, ordinary emergent proposals, notices, and positive-hold weeks.
+- [x] Run RBiH, RS, and HRHB through 104 turns with identical documented scenario inputs. (Consumed the integrated R2 paired `apr1992_definitive_104w` replay; no redundant rerun.)
+- [x] Record consequential-gap lengths and near-cap Authority weeks. (Headless Authority coverage is explicitly `unreported`; separate owner-diary exact-cap counts are retained without cross-run inference.)
+- [x] Prove the report is byte-identical under input permutation and repeated execution.
+
+### Phase 0 execution evidence -- 2026-08-01
+
+- Machine-readable inventory: `docs/40_reports/audits/20260801_R4_PHASE0_PRESIDENTIAL_COMMAND_CONVERGENCE.json`, SHA-256 `2daf74e82bb483202f48980610385ab65a54ee1ca13d635d238ec6eb170e6859` on two consecutive runs. All `9` family proofs resolve producer/action/receipt and discovered Chronicle/Records/receipt/Codex/Cost-Ledger source anchors; operation Records and Cost Ledger anchor the exact durable resolution read and have an injected-resolution behavior proof.
+- Characterization report: `docs/40_reports/audits/20260801_R4_PHASE0_COMMAND_EVENT_CODEX_CHARACTERIZATION.md`.
+- Exact ownership result: `9` families, `9` reachable, `8` durable receipts, `1` conditional receipt, `0` duplicate surfaces, `1` fail-closed finding (`autonomy_proposal` durable-history gap).
+- Integrated paired cadence result: final-save SHA-256 `d83d10c983da384dd7f0e5f957da69e346f9d50df788e4fac8a90923b8260ccc`; byte-identical cadence SHA-256 `647ee513bca77f800de5db469801419258e5ec5acabe09c1013ae57ac6d4018f`; all `11` long gaps are exact positive holds with `0` unresolved and `0` invalid holds.
+- Provenance-hardening evidence: schema-versioned hold/Authority bundles bind source id, scenario, run, player, range, end-turn save, save SHA-256, evidence byte hashes, and optional anchors. Authority observations additionally require exact parsed faction/turn/current/cap rows in their attested JSON bytes. The tracked RS owner-save schema-3 report at `docs/40_reports/audits/20260801_R4_PHASE0_RS_CADENCE_SCHEMA3.json` repeated at SHA-256 `f9726f571a48d011deb55635834235022ec9d0d79b608b6a2e3fb07f6864fcb6`; an executable CLI regression proves a forged turn-0 save advertised as end turn 1 exits nonzero and writes no output.
+- Cadence projection now includes player-owned `negotiation.dayton_result` and durable, non-expired `military.operation_opportunity_resolutions`; transient `OPPORTUNITY:` proposal carriers do not double-count them.
+- Verification: corrected focused suite passed `6` files / `42` tests; full TypeScript passed.
+- Scope: deterministic diagnostics, tests, and documentation only. No Phase 1 behavior, historical content, canon, scenario, save schema, package, version, tag, push, publication, or release state changed.
 
 **Verification:**
 
