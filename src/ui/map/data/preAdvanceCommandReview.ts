@@ -11,12 +11,14 @@ import {
 import type { LoadedGameState } from './types';
 import { derivePresidentialBlockers } from './presidentialBlockers';
 import { t } from '../i18n';
+import { countPresidentialPriorityBands, type PresidentialPriorityBand } from './presidentialPriority';
 
 export type PreAdvanceCommandReviewStatus = 'blocked' | 'review' | 'clear' | 'unavailable';
 
 export interface PreAdvanceCommandReviewItem {
   id: string;
   severity: PresidentialDecisionRoomSeverity;
+  priorityBand: PresidentialPriorityBand;
   category: PresidentialDecisionRoomCategory;
   title: string;
   explanation: string;
@@ -24,6 +26,7 @@ export interface PreAdvanceCommandReviewItem {
   sourceLabel: string;
   actionLabel: string;
   evidence: string[];
+  sourceIds?: string[];
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
   sourceHandoffTarget?: PresidentialDecisionRoomNavigationTarget;
 }
@@ -52,6 +55,7 @@ function mapReadinessItem(card: PresidentialDecisionRoomCard): PreAdvanceCommand
   return {
     id: card.id,
     severity: card.severity,
+    priorityBand: card.priorityBand,
     category: card.category,
     title: card.title,
     explanation: card.explanation,
@@ -59,6 +63,7 @@ function mapReadinessItem(card: PresidentialDecisionRoomCard): PreAdvanceCommand
     sourceLabel: card.sourceLabel,
     actionLabel: card.actionLabel,
     evidence: card.evidence,
+    ...(card.sourceIds ? { sourceIds: card.sourceIds } : {}),
     navigationTarget: card.navigationTarget,
     ...(card.sourceHandoffTarget ? { sourceHandoffTarget: card.sourceHandoffTarget } : {}),
   };
@@ -130,17 +135,15 @@ export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewI
     sourceHandoffs,
     metrics: {
       ...decisionRoom.metrics,
-      urgentCount: Math.max(
-        0,
-        decisionRoom.metrics.urgentCount - reviewedAftermathCards.reduce(
-          (sum, card) => sum + (
-            card.severity === 'blocking' || card.severity === 'critical'
-              ? (card.countWeight ?? 1)
-              : 0
-          ),
-          0,
-        ),
-      ),
+      priorityCounts: (() => {
+        const reviewedCounts = countPresidentialPriorityBands(reviewedAftermathCards);
+        return {
+          required: Math.max(0, decisionRoom.metrics.priorityCounts.required - reviewedCounts.required),
+          recommended: Math.max(0, decisionRoom.metrics.priorityCounts.recommended - reviewedCounts.recommended),
+          monitor: Math.max(0, decisionRoom.metrics.priorityCounts.monitor - reviewedCounts.monitor),
+          record: Math.max(0, decisionRoom.metrics.priorityCounts.record - reviewedCounts.record),
+        };
+      })(),
       hardTurns: Math.max(0, decisionRoom.metrics.hardTurns - reviewedAftermathCards.length),
       advanceReviewCount: readinessCards.reduce(
         (sum, card) => sum + (card.countWeight ?? 1),

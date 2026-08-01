@@ -1237,6 +1237,8 @@ describe('deriveInboxItems — opening brief conditions', () => {
         expect(gains).toHaveLength(1);
         expect(losses[0].action).toBe('decision_room');
         expect(gains[0].action).toBe('decision_room');
+        expect(losses[0].priorityBand).toBe('record');
+        expect(gains[0].priorityBand).toBe('record');
     });
 
     it('does not report startup control painting as turn-zero territory gained or lost', () => {

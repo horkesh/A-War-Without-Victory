@@ -1,5 +1,4 @@
 import type { InboxItem } from '../../data/inboxItems';
-import { effectiveInboxSeverity } from '../../data/inboxItems';
 import { t } from '../../i18n';
 import { DecisionCard } from './DecisionCard';
 
@@ -10,7 +9,7 @@ export interface DeskPacketProps {
 }
 
 export function DeskPacket({ items, onAction, requiredItemIds }: DeskPacketProps) {
-  const blockers = items.filter((item) => effectiveInboxSeverity(item) === 'blocking' || requiredItemIds?.has(item.id));
+  const blockers = items.filter((item) => item.priorityBand === 'required' || requiredItemIds?.has(item.id));
   const otherDecisions = items.filter((item) =>
     !blockers.includes(item)
     && (item.type !== 'situation' || item.includeInDeskPacket === true)

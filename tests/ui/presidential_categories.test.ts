@@ -5,7 +5,7 @@
  *
  * Covers (design §9, UI-only):
  *   - the six categories map onto the right PresidentialDecisionRoomCategory sources
- *   - count/urgent derivation from a mock decision-room view (incl. the
+ *   - count/priority-band derivation from a mock decision-room view (incl. the
  *     paramilitary → Conscience bright-line split)
  *   - warroom hotspots are not remapped into command-surface categories
  *   - CommandCard renders its faction-tinted fallback placeholder with NO art
@@ -45,6 +45,14 @@ function makeCard(
     evidence: [],
     navigationTarget: { kind: 'none' },
     sortKey: 0,
+    priorityBand: partial.priorityBand
+      ?? (partial.severity === 'blocking'
+        ? 'required'
+        : partial.category === 'turn' || partial.category === 'cost' || partial.category === 'memory'
+          ? 'record'
+          : partial.category === 'operational' || partial.category === 'briefing'
+            ? 'monitor'
+            : 'recommended'),
     ...partial,
   };
 }
@@ -57,7 +65,13 @@ function makeView(cards: PresidentialDecisionRoomCard[]): PresidentialDecisionRo
     lenses: [],
     activeDossier: null,
     advanceReadiness: { headline: '', blockedByExistingSystems: false, items: [] },
-    metrics: { urgentCount: 0, pendingReviews: 0, opportunities: 0, hardTurns: 0, advanceReviewCount: 0 },
+    metrics: {
+      priorityCounts: { required: 0, recommended: 0, monitor: 0, record: 0 },
+      pendingReviews: 0,
+      opportunities: 0,
+      hardTurns: 0,
+      advanceReviewCount: 0,
+    },
   };
 }
 
@@ -108,7 +122,7 @@ describe('presidential command categories — taxonomy', () => {
 });
 
 describe('presidential command categories — count derivation', () => {
-  it('derives pending/urgent counts per category from a mock view', () => {
+  it('derives shared priority-band counts per category from a mock view', () => {
     const view = makeView([
       makeCard({ id: 'opportunity:a', category: 'opportunity', severity: 'critical' }),
       makeCard({ id: 'sitrep:b', category: 'operational', severity: 'warning' }),
@@ -124,20 +138,20 @@ describe('presidential command categories — count derivation', () => {
     expect(war.count).toBe(3); // opportunity + operational + briefing
     expect(war.role).toBe('act');
     expect(war.roleLabel).toBe('Act');
-    expect(war.urgentCount).toBe(1); // the critical opportunity
-    expect(war.isUrgent).toBe(true);
+    expect(war.priorityCounts).toEqual({ required: 0, recommended: 1, monitor: 2, record: 0 });
+    expect(war.hasPresidentialAction).toBe(true);
 
     const diplomacy = byId.get('cat_diplomacy')!;
     expect(diplomacy.count).toBe(2); // counter_offer + decision
-    expect(diplomacy.urgentCount).toBe(1); // the blocking counter-offer
+    expect(diplomacy.priorityCounts).toEqual({ required: 1, recommended: 1, monitor: 0, record: 0 });
 
     const record = byId.get('cat_record')!;
     expect(record.count).toBe(1);
-    expect(record.urgentCount).toBe(1);
+    expect(record.priorityCounts).toEqual({ required: 0, recommended: 0, monitor: 0, record: 1 });
 
     expect(byId.get('cat_home_front')!.count).toBe(0);
     expect(byId.get('cat_command')!.count).toBe(0);
-    expect(byId.get('cat_command')!.isUrgent).toBe(false);
+    expect(byId.get('cat_command')!.hasPresidentialAction).toBe(false);
   });
 
   it('routes the paramilitary card to Conscience, not Diplomacy (bright-line split)', () => {
@@ -149,8 +163,8 @@ describe('presidential command categories — count derivation', () => {
 
     const conscience = byId.get('cat_conscience')!;
     expect(conscience.count).toBe(1);
-    expect(conscience.urgentCount).toBe(1);
-    expect(conscience.isUrgent).toBe(true);
+    expect(conscience.priorityCounts.required).toBe(1);
+    expect(conscience.hasPresidentialAction).toBe(true);
 
     // The paramilitary decision card must NOT be double-counted under Diplomacy.
     const diplomacy = byId.get('cat_diplomacy')!;
@@ -169,7 +183,7 @@ describe('presidential command categories — count derivation', () => {
     expect(cardBelongsToPresidentialCommandCategory(historicalOperation, 'cat_war_direction')).toBe(true);
     expect(cardBelongsToPresidentialCommandCategory(historicalOperation, 'cat_diplomacy')).toBe(false);
     expect(byId.get('cat_war_direction')?.count).toBe(1);
-    expect(byId.get('cat_war_direction')?.urgentCount).toBe(1);
+    expect(byId.get('cat_war_direction')?.priorityCounts.required).toBe(1);
     expect(byId.get('cat_diplomacy')?.count).toBe(0);
   });
 
@@ -182,13 +196,13 @@ describe('presidential command categories — count derivation', () => {
 
     const homeFront = byId.get('cat_home_front')!;
     expect(homeFront.count).toBe(1);
-    expect(homeFront.urgentCount).toBe(1);
-    expect(homeFront.isUrgent).toBe(true);
+    expect(homeFront.priorityCounts.monitor).toBe(1);
+    expect(homeFront.hasPresidentialAction).toBe(false);
 
     // Supply/economy pressure should not inflate the War Direction count.
     const war = byId.get('cat_war_direction')!;
     expect(war.count).toBe(1);
-    expect(war.urgentCount).toBe(0);
+    expect(war.priorityCounts.monitor).toBe(1);
   });
 
   it('counts grouped modal-required decision families by represented pending items', () => {
@@ -205,8 +219,8 @@ describe('presidential command categories — count derivation', () => {
 
     const diplomacy = byId.get('cat_diplomacy')!;
     expect(diplomacy.count).toBe(4);
-    expect(diplomacy.urgentCount).toBe(3);
-    expect(diplomacy.isUrgent).toBe(true);
+    expect(diplomacy.priorityCounts).toEqual({ required: 3, recommended: 1, monitor: 0, record: 0 });
+    expect(diplomacy.hasPresidentialAction).toBe(true);
   });
 
   it('uses the same exact predicate for command-card filtering and counts', () => {
@@ -238,7 +252,11 @@ describe('presidential command categories — count derivation', () => {
   it('returns zero counts for an empty view', () => {
     const counts = derivePresidentialCommandCategoryCounts(makeView([]));
     expect(counts).toHaveLength(6);
-    expect(counts.every((c) => c.count === 0 && c.urgentCount === 0 && !c.isUrgent)).toBe(true);
+    expect(counts.every((c) => (
+      c.count === 0
+      && Object.values(c.priorityCounts).every((count) => count === 0)
+      && !c.hasPresidentialAction
+    ))).toBe(true);
   });
 });
 
@@ -317,8 +335,8 @@ describe('CommandCard fallback placeholder', () => {
           role: 'inspect',
           roleLabel: 'Inspect',
           count: 3,
-          urgentCount: 1,
-          isUrgent: true,
+          priorityCounts: { required: 1, recommended: 0, monitor: 2, record: 0 },
+          hasPresidentialAction: true,
           lens: 'all',
         },
         playerFaction: 'RS',
@@ -331,7 +349,7 @@ describe('CommandCard fallback placeholder', () => {
     expect(html).toContain('Inspect');
     expect(html).toContain('command-card-cat_unmapped_does_not_exist');
     expect(html).toContain('Unmapped');
-    expect(html).toContain('command-card-urgent-cat_unmapped_does_not_exist'); // urgent pip
+    expect(html).toContain('command-card-action-cat_unmapped_does_not_exist'); // presidential-action pip
     expect(html).toContain('>3<'); // the count badge value
     // RS faction tint (red) present in the placeholder gradient.
     expect(html).toContain('165, 45, 45');
@@ -347,8 +365,8 @@ describe('CommandCard fallback placeholder', () => {
           role: 'inspect',
           roleLabel: 'Inspect',
           count: 0,
-          urgentCount: 0,
-          isUrgent: false,
+          priorityCounts: { required: 0, recommended: 0, monitor: 0, record: 0 },
+          hasPresidentialAction: false,
           lens: 'all',
         },
         playerFaction: null,
@@ -357,7 +375,7 @@ describe('CommandCard fallback placeholder', () => {
     );
     // cat_home_front is mapped → the <img> renders, not the CSS placeholder.
     expect(html).not.toContain('command-card-fallback-cat_home_front');
-    expect(html).not.toContain('command-card-urgent-cat_home_front');
+    expect(html).not.toContain('command-card-action-cat_home_front');
     expect(html).toContain('packet_thumb_event_decision');
   });
 });

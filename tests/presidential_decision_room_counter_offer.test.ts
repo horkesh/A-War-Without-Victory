@@ -96,7 +96,7 @@ describe('Presidential Decision Room counter-offer surface', () => {
 
         expect(view.cards.find((entry) => entry.id === 'counter-offer:HRHB_FOREIGN')).toBeUndefined();
         expect(view.advanceReadiness.items.map((item) => item.id)).not.toContain('counter-offer:HRHB_FOREIGN');
-        expect(view.metrics.urgentCount).toBe(0);
+        expect(view.metrics.priorityCounts.required).toBe(0);
     });
 
     it('keeps every hard blocker in advance review when more than four are pending', () => {

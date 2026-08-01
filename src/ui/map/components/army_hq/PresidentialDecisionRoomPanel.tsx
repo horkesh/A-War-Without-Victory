@@ -98,11 +98,18 @@ function LensButton({
           {t(lens.count === 1 ? 'decisionRoom.itemCount.one' : 'decisionRoom.itemCount.many', { count: lens.count })}
         </span>
       </span>
-      <span className={`shrink-0 rounded border px-1.5 py-0.5 text-xs font-bold tabular-nums ${lens.urgentCount > 0
+      <span className={`shrink-0 rounded border px-1.5 py-0.5 text-xs font-bold tabular-nums ${lens.priorityCounts.required > 0
         ? 'border-red-400/35 bg-red-500/10 text-red-300'
-        : 'border-panel-border/55 bg-panel-bg/70 text-text-muted'}`}
+        : lens.priorityCounts.recommended > 0
+          ? 'border-amber-400/35 bg-amber-400/10 text-amber-200'
+          : 'border-panel-border/55 bg-panel-bg/70 text-text-muted'}`}
       >
-        {t(lens.urgentCount === 1 ? 'decisionRoom.urgentCount.one' : 'decisionRoom.urgentCount.many', { count: lens.urgentCount })}
+        {t('decisionRoom.priorityCountSummary', {
+          required: lens.priorityCounts.required,
+          recommended: lens.priorityCounts.recommended,
+          monitor: lens.priorityCounts.monitor,
+          record: lens.priorityCounts.record,
+        })}
       </span>
     </button>
   );

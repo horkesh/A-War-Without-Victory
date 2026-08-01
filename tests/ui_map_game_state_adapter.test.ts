@@ -108,7 +108,7 @@ test('B4 exposes four RBiH strategic objectives with command ownership and spars
         currentCommitment: null,
         nextLever: {
             owner: 'decision_room',
-            label: 'No signature due — hold present policy',
+            label: 'No presidential signature due',
             available: false,
             navigationTarget: { kind: 'decision-room', lens: 'decision' },
         },

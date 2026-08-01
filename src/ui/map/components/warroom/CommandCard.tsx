@@ -3,7 +3,7 @@
  *
  * Renders one of the six command-surface categories (presidentialCategories.ts)
  * as a period photo-illustration card with a bottom-gradient title safe-area, a
- * pending-count badge, and an urgent pip. Mirrors the DecisionCard.tsx markup
+ * pending-count badge, and a presidential-action pip. Mirrors the DecisionCard.tsx markup
  * idiom (object-cover img + gradient + badge).
  *
  * Art resolution precedence (first hit wins):
@@ -125,16 +125,22 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
   const roleLabel = commandCategoryRole(category.role);
   const title = commandCategoryTitle(category.id, category.title);
   const blurb = commandCategoryBlurb(category.id, category.blurb);
-  const footer = category.urgentCount > 0
-    ? t('commandSurface.footer.urgentPending', { urgentCount: category.urgentCount, count: category.count })
-    : t('commandSurface.footer.pending', { count: category.count });
+  const footer = t('commandSurface.footer.priorityBands', {
+    required: category.priorityCounts.required,
+    recommended: category.priorityCounts.recommended,
+    monitor: category.priorityCounts.monitor,
+    record: category.priorityCounts.record,
+  });
 
   return (
     <button
       type="button"
       data-testid={`command-card-${category.id}`}
       data-awwv-count={category.count}
-      data-awwv-urgent-count={category.urgentCount}
+      data-awwv-required-count={category.priorityCounts.required}
+      data-awwv-recommended-count={category.priorityCounts.recommended}
+      data-awwv-monitor-count={category.priorityCounts.monitor}
+      data-awwv-record-count={category.priorityCounts.record}
       onClick={() => onSelect(category)}
       className="group relative block aspect-[4/3] w-full overflow-hidden rounded-sm border border-accent-gold/40 bg-black/40 text-left shadow-[0_12px_28px_rgba(0,0,0,0.32)] transition-colors hover:border-accent-gold/70"
     >
@@ -175,19 +181,21 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
         </span>
       </div>
 
-      {/* Count badge + urgent pip (top-right) */}
+      {/* Count badge + presidential-action pip (top-right) */}
       <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
-        {category.isUrgent && (
+        {category.hasPresidentialAction && (
           <span
-            data-testid={`command-card-urgent-${category.id}`}
+            data-testid={`command-card-action-${category.id}`}
             aria-hidden="true"
             className="h-2.5 w-2.5 rounded-full border border-red-200/70 bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.85)]"
           />
         )}
         <span
           className={`min-w-[1.4rem] rounded border px-1.5 py-0.5 text-center text-xs font-bold tabular-nums ${
-            category.urgentCount > 0
+            category.priorityCounts.required > 0
               ? 'border-red-300/55 bg-red-950/70 text-red-100'
+              : category.priorityCounts.recommended > 0
+                ? 'border-amber-300/55 bg-amber-950/70 text-amber-100'
               : category.count > 0
                 ? 'border-accent-gold/45 bg-black/65 text-accent-gold'
                 : 'border-stone-400/35 bg-black/55 text-stone-300'

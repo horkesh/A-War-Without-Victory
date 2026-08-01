@@ -24,6 +24,10 @@ import { buildReserveRequestPresentation, buildReserveRequestSummary } from './r
 import { looksLikeRawPlayerFacingToken } from '../utils/playerSafeText';
 import { isPeacePlanOwnedByPendingEvent } from '../utils/peacePlanDismissal';
 import { PARAMILITARY_TARGET_AVG_POPULATION } from '../../../state/formation_constants';
+import {
+    classifyPresidentialPriority,
+    type PresidentialPriorityBand,
+} from './presidentialPriority';
 
 export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
@@ -32,6 +36,8 @@ export interface InboxItem {
     id: string;
     type: InboxItemType;
     severity: InboxSeverity;
+    /** Presidential agenda role; distinct from threat/cost severity. */
+    priorityBand: PresidentialPriorityBand;
     title: string;
     subtitle: string;
     /** Number of source records represented by this card. Undefined means 1. */
@@ -47,6 +53,8 @@ export interface InboxItem {
     /** Priority for sorting (lower = higher priority) */
     priority: number;
 }
+
+type InboxItemDraft = Omit<InboxItem, 'priorityBand'>;
 
 function opportunityProposalIdFromAction(action: string | null | undefined, fallbackId: string): string {
     const prefix = 'OPPORTUNITY:';
@@ -198,7 +206,7 @@ export function deriveInboxItems(
 ): InboxItem[] {
     if (!state) return [];
 
-    const items: InboxItem[] = [];
+    const items: InboxItemDraft[] = [];
     const playerFaction = state.player_faction;
     const eventSurface = getDecisionSurface('event_decision');
     const peaceSurface = getDecisionSurface('peace_plan');
@@ -565,7 +573,18 @@ export function deriveInboxItems(
         priority: 99,
     });
 
-    return items.sort((a, b) => a.priority - b.priority);
+    return items
+        .sort((a, b) => a.priority - b.priority)
+        .map((item) => ({
+            ...item,
+            priorityBand: classifyPresidentialPriority({
+                required: isAdvanceBlockingInboxItem(item),
+                recordOnly: item.id.startsWith('sit:date:')
+                    || item.id.startsWith('sit:territory_gain:')
+                    || item.id.startsWith('sit:territory_loss:'),
+                hasPresidentialLever: item.type !== 'situation' && item.type !== 'intelligence_notification',
+            }),
+        }));
 }
 
 function isFinalParamilitaryDecision(decision: unknown): boolean {

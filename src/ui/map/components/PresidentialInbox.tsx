@@ -11,8 +11,8 @@
  */
 
 import { useGameStore } from '../store/gameStore';
-import { deriveInboxItems, countActionableItems, effectiveInboxSeverity, hasBlockingItems } from '../data/inboxItems';
-import type { InboxItem, InboxSeverity } from '../data/inboxItems';
+import { deriveInboxItems, countActionableItems } from '../data/inboxItems';
+import type { InboxItem } from '../data/inboxItems';
 import type { EventDefinition } from '../../../sim/events/event_types';
 import { DETAIL_PANEL_STYLE } from './panelRail';
 import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
@@ -47,11 +47,11 @@ const OPENING_BRIEFS: Record<string, { titleKey: MessageKey; bulletKeys: Message
     },
 };
 
-const SEVERITY_STYLES: Record<InboxSeverity, { badge: string; border: string; labelKey: MessageKey | null }> = {
-    blocking: { badge: 'bg-red-500 text-neutral-950', border: 'border-red-500/40', labelKey: 'inbox.severity.blocking' },
-    urgent: { badge: 'bg-amber-500 text-neutral-950', border: 'border-amber-500/30', labelKey: 'inbox.severity.urgent' },
-    normal: { badge: 'bg-sky-600 text-neutral-950', border: 'border-sky-600/20', labelKey: null },
-    info: { badge: 'bg-stone-600 text-stone-300', border: 'border-stone-600/20', labelKey: null },
+const PRIORITY_STYLES: Record<InboxItem['priorityBand'], { badge: string; border: string; labelKey: MessageKey }> = {
+    required: { badge: 'bg-red-500 text-neutral-950', border: 'border-red-500/40', labelKey: 'decisionRoom.metric.required' },
+    recommended: { badge: 'bg-amber-500 text-neutral-950', border: 'border-amber-500/30', labelKey: 'decisionRoom.metric.recommended' },
+    monitor: { badge: 'bg-sky-600 text-neutral-950', border: 'border-sky-600/20', labelKey: 'decisionRoom.metric.monitor' },
+    record: { badge: 'bg-stone-600 text-stone-200', border: 'border-stone-600/20', labelKey: 'decisionRoom.metric.record' },
 };
 
 export function typeLabel(type: string): string {
@@ -69,11 +69,10 @@ export function typeLabel(type: string): string {
     return t('inbox.type.reviewItem');
 }
 
-function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) {
-    const severity = effectiveInboxSeverity(item);
-    const style = SEVERITY_STYLES[severity];
+export function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) {
+    const style = PRIORITY_STYLES[item.priorityBand];
     const cardTypeLabel = typeLabel(item.type);
-    const severityLabel = style.labelKey ? t(style.labelKey) : '';
+    const priorityLabel = t(style.labelKey);
     const isActionable = item.action !== 'none';
 
     if (item.type === 'intelligence_notification') {
@@ -85,9 +84,14 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
                 data-inbox-item-type={item.type}
                 data-inbox-action={item.action}
                 data-actionable={isActionable ? 'true' : 'false'}
+                data-priority-band={item.priorityBand}
+                data-threat-severity={item.severity}
             >
                 <div className="flex items-center gap-1.5 mb-1">
                     <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
+                        {priorityLabel}
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
                         {cardTypeLabel}
                     </span>
                     <button
@@ -115,6 +119,8 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
             data-inbox-item-type={item.type}
             data-inbox-action={item.action}
             data-actionable={isActionable ? 'true' : 'false'}
+            data-priority-band={item.priorityBand}
+            data-threat-severity={item.severity}
             className={`w-full text-left p-2.5 rounded border ${style.border} ${
                 isActionable
                     ? 'bg-panel-card hover:bg-panel-card-hover cursor-pointer transition-colors'
@@ -123,13 +129,11 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
         >
             <div className="flex items-center gap-1.5 mb-1">
                 <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
-                    {severityLabel || cardTypeLabel}
+                    {priorityLabel}
                 </span>
-                {severityLabel && (
-                    <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
-                        {cardTypeLabel}
-                    </span>
-                )}
+                <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
+                    {cardTypeLabel}
+                </span>
                 {(item.updateCount ?? 1) > 1 && (
                     <span className="ml-auto text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/8 text-text-secondary border border-white/10">
                         {t('inbox.updates', { count: (item.updateCount ?? 1) - 1 })}
@@ -262,7 +266,7 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
 
     const items = deriveInboxItems(state, osidNameMap, eventCatalog);
     const actionableCount = countActionableItems(items);
-    const blocking = hasBlockingItems(items);
+    const blocking = items.some((item) => item.priorityBand === 'required');
 
     const actionableItems = items.filter(i => i.type !== 'situation');
     const situationItems = items.filter(i => i.type === 'situation');
@@ -357,7 +361,7 @@ export function InboxBadge({ onClick }: { onClick: () => void }) {
 
     const items = deriveInboxItems(state, osidNameMap);
     const count = countActionableItems(items);
-    const blocking = hasBlockingItems(items);
+    const blocking = items.some((item) => item.priorityBand === 'required');
 
     if (count === 0) {
         return (

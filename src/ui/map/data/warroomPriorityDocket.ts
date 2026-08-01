@@ -32,13 +32,10 @@ export interface WarroomPriorityDocketInput extends PreAdvanceCommandReviewInput
   limit?: number;
 }
 
-function docketTone(
-  status: PreAdvanceCommandReviewStatus,
-  urgentCount: number,
-): WarroomPriorityDocketTone {
+function docketTone(status: PreAdvanceCommandReviewStatus): WarroomPriorityDocketTone {
   if (status === 'unavailable') return 'quiet';
   if (status === 'clear') return 'clear';
-  if (status === 'blocked' || urgentCount > 0) return 'danger';
+  if (status === 'blocked') return 'danger';
   return 'attention';
 }
 
@@ -46,19 +43,25 @@ function formatSummary(metrics: PreAdvanceCommandReviewMetrics): string {
   return t('warroom.docket.summary', {
     advanceReviewCount: metrics.advanceReviewCount,
     advanceItemLabel: t(metrics.advanceReviewCount === 1 ? 'warroom.docket.advanceItem.one' : 'warroom.docket.advanceItem.many'),
-    urgentCount: metrics.urgentCount,
+    required: metrics.priorityCounts.required,
+    recommended: metrics.priorityCounts.recommended,
+    monitor: metrics.priorityCounts.monitor,
+    record: metrics.priorityCounts.record,
     pendingReviews: metrics.pendingReviews,
   });
 }
 
 function formatSourceHandoffSummary(
   sourceHandoffs: WarroomPriorityDocketSourceHandoff[],
-  urgentCount: number,
+  metrics: PreAdvanceCommandReviewMetrics,
 ): string {
   return t('warroom.docket.sourceHandoffSummary', {
     sourceHandoffCount: sourceHandoffs.length,
     sourceHandoffLabel: t(sourceHandoffs.length === 1 ? 'warroom.docket.sourceHandoff.one' : 'warroom.docket.sourceHandoff.many'),
-    urgentCount,
+    required: metrics.priorityCounts.required,
+    recommended: metrics.priorityCounts.recommended,
+    monitor: metrics.priorityCounts.monitor,
+    record: metrics.priorityCounts.record,
   });
 }
 
@@ -78,10 +81,10 @@ export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput
   return {
     status: review.status,
     statusLabel: statusLabel(review.status, input.state != null),
-    tone: docketTone(review.status, review.metrics.urgentCount),
+    tone: docketTone(review.status),
     headline: review.headline,
     summary: formatSummary(review.metrics),
-    sourceHandoffSummary: formatSourceHandoffSummary(review.sourceHandoffs, review.metrics.urgentCount),
+    sourceHandoffSummary: formatSourceHandoffSummary(review.sourceHandoffs, review.metrics),
     canOpenBoard: review.canReviewPriorities,
     openBoardLabel: t('warroom.docket.openDecisionRoom'),
     items: review.items.slice(0, safeLimit),

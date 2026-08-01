@@ -83,11 +83,11 @@ function severityLabel(severity: PreAdvanceCommandReviewItem['severity']): strin
   return t('warroom.severity.info');
 }
 
-function MetricCell({ label, value, urgent = false }: { label: string; value: number; urgent?: boolean }) {
+function MetricCell({ label, value, highlighted = false }: { label: string; value: number; highlighted?: boolean }) {
   return (
     <div className="min-w-0 border border-panel-border/60 bg-panel-card/65 px-2 py-1.5">
       <div className="truncate text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{label}</div>
-      <div className={`text-base font-bold tabular-nums ${urgent ? 'text-amber-300' : 'text-text-primary'}`}>
+      <div className={`text-base font-bold tabular-nums ${highlighted ? 'text-amber-300' : 'text-text-primary'}`}>
         {value}
       </div>
     </div>
@@ -411,10 +411,10 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
               {t('decisionRoom.reviewBeforeAdvance')}
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <MetricCell label={t('decisionRoom.metric.urgent')} value={review.metrics.urgentCount} urgent={review.metrics.urgentCount > 0} />
-              <MetricCell label={t('decisionRoom.metric.pending')} value={review.metrics.pendingReviews} urgent={review.metrics.pendingReviews > 0} />
-              <MetricCell label={t('decisionRoom.metric.ops')} value={review.metrics.opportunities} />
-              <MetricCell label={t('decisionRoom.metric.hardTurns')} value={review.metrics.hardTurns} />
+              <MetricCell label={t('decisionRoom.metric.required')} value={review.metrics.priorityCounts.required} highlighted={review.metrics.priorityCounts.required > 0} />
+              <MetricCell label={t('decisionRoom.metric.recommended')} value={review.metrics.priorityCounts.recommended} />
+              <MetricCell label={t('decisionRoom.metric.monitor')} value={review.metrics.priorityCounts.monitor} />
+              <MetricCell label={t('decisionRoom.metric.record')} value={review.metrics.priorityCounts.record} />
             </div>
           </section>
 
