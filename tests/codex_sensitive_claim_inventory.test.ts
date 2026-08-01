@@ -6,6 +6,8 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { test } from 'vitest';
 
+import { warningContinuationMatrix } from './fixtures/sensitive_history_warning_continuation_matrix.js';
+
 const require = createRequire(import.meta.url);
 const inventory = require('../tools/diagnostics/codex_sensitive_claim_inventory.cjs');
 
@@ -17,6 +19,36 @@ function expectedClaimId(file: string, line: number, fieldPath: string, matchedT
     const basis = [file, String(line), fieldPath, matchedTerms.join('|')].join('\n');
     return `sci_${createHash('sha256').update(basis).digest('hex').slice(0, 16)}`;
 }
+
+test('inventory applies the deterministic warning-continuation matrix', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-warning-matrix-'));
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1993.json'), [{
+            id: 'warning_continuation_matrix_1993',
+            historical_source: 'Fixture source.',
+            source_note: 'Fixture boundary note.',
+            source_tier: 'scholarship',
+            response_options: warningContinuationMatrix.map((row) => ({
+                id: row.id,
+                description: row.text,
+            })),
+        }]);
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        for (const row of warningContinuationMatrix) {
+            const claim = report.claims.find((candidate: { claim: string }) => candidate.claim === row.text);
+            assert.ok(claim, `missing inventory claim for ${row.id}`);
+            assert.strictEqual(
+                claim.status === 'blocked_sensitive_player_choice',
+                row.blocked,
+                `wrong inventory disposition for ${row.id}`,
+            );
+        }
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
 
 test('inventory scans bounded surfaces with stable ordering, ids, and source status', async () => {
     const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));

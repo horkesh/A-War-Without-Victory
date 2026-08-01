@@ -23,6 +23,7 @@ import {
     scanOptionCostFloor,
     type AuditReport,
 } from '../tools/diagnostics/sensitive_history_canon_gate_audit.js';
+import { warningContinuationMatrix } from './fixtures/sensitive_history_warning_continuation_matrix.js';
 
 // ─── Test row factories ────────────────────────────────────────────────────
 
@@ -44,6 +45,27 @@ function ring3RowClean(overrides: Record<string, unknown> = {}): Record<string, 
         ...overrides,
     };
 }
+
+it('applies the deterministic warning-continuation matrix through the canon audit', () => {
+    const report = buildSensitiveHistoryAudit({
+        rows: [{
+            id: 'warning_continuation_matrix_1993',
+            response_options: warningContinuationMatrix.map((row) => ({
+                id: row.id,
+                description: row.text,
+            })),
+        }],
+    });
+    const blockedLocators = report.violations
+        .filter((row) => row.kind === 'sensitive_player_choice')
+        .map((row) => row.locator);
+    const expectedLocators = warningContinuationMatrix
+        .filter((row) => row.blocked)
+        .map((row) => `${row.id}.description`)
+        .sort();
+
+    expect(blockedLocators).toEqual(expectedLocators);
+});
 
 function ring3RowMissingGuard(): Record<string, unknown> {
     return {
