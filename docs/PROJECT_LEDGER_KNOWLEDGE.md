@@ -4126,7 +4126,11 @@ Applied in `[2026-08-01] R5 Phase 2c dense formation occupancy acceptance`, `src
 
 **Schema-valid fixtures must evolve with required state shape:** when a validation test's supposedly valid base fixture predates required fields, fix the fixture rather than weakening the validator or reclassifying the fields as optional. Record fixture debt separately from the product optimization it happened to block.
 
-Applied in `[2026-08-01] R5 Phase 2c independent occupancy equivalence correction`, `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/corps_front_sectors.ts`, `tests/sector_partition_buildCorpsFrontSectors_integration.test.ts`, and `tests/event_state_shape_validation.test.ts`.
+**Task-stream output is not a durable raw transcript:** an agent session may preserve only a truncated rendering even when the underlying command completed successfully. Durable rule: for a committee-critical long gate, redirect complete stdout/stderr to a stable ignored evidence path at execution time, then record exact command, exit code, file bytes, SHA-256, and the test runner footer. A later captured replication supplements the historical result; it does not silently replace it.
+
+**Functional-test duration is not performance evidence under overlap:** a correctness matrix can prove every case passed while its wall time is contaminated by unrelated broad test activity. Durable rule: report completion counts and hashes, label elapsed/property durations functional-only, and keep them out of optimization comparisons and accepted throughput floors.
+
+Applied in `[2026-08-01] R5 Phase 2c independent occupancy equivalence correction`, `[2026-08-01] R5 Phase 2c reviewer replication provenance`, `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/corps_front_sectors.ts`, `tests/sector_partition_buildCorpsFrontSectors_integration.test.ts`, and `tests/event_state_shape_validation.test.ts`.
 
 ## 2026-08-01 - Adaptive UI evidence must keep its declared identities stable
 
