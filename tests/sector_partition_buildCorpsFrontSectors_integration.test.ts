@@ -214,6 +214,49 @@ function runOccupancyModes(
     };
 }
 
+function runReachabilityModes(
+    state: GameState,
+    edges: ContactGraphEdge[],
+    mode: FixedPointProductionMode,
+): { candidate: string; legacy: string } {
+    const candidateState = deserializeState(JSON.stringify(state)) as GameState;
+    const legacyState = deserializeState(JSON.stringify(state)) as GameState;
+    const candidateSectors = buildCorpsFrontSectors(
+        candidateState,
+        edges as never,
+        null,
+        undefined,
+        undefined,
+        mode.isFinalPass,
+        mode.finalSaveGeometryProjection,
+        true,
+        'dense-index',
+        'derived-context',
+    );
+    const legacySectors = buildCorpsFrontSectors(
+        legacyState,
+        edges as never,
+        null,
+        undefined,
+        undefined,
+        mode.isFinalPass,
+        mode.finalSaveGeometryProjection,
+        true,
+        'dense-index',
+        'test-only-legacy',
+    );
+    return {
+        candidate: JSON.stringify(canonicalizeObservable({
+            sectors: candidateSectors,
+            state: candidateState,
+        })),
+        legacy: JSON.stringify(canonicalizeObservable({
+            sectors: legacySectors,
+            state: legacyState,
+        })),
+    };
+}
+
 /**
  * Run buildCorpsFrontSectors with cache ON (env flag absent) and cache OFF
  * (env flag set), returning both canonicalized snapshots.
@@ -453,6 +496,30 @@ describe.skipIf(!hasFixture)(
                         }
                         throw new Error(
                             `occupancy divergence for mode ${mode.label}, seed ${seed} at byte ${firstDiff}; `
+                            + `candidate=${candidate.slice(firstDiff, firstDiff + 160)}; `
+                            + `legacy=${legacy.slice(firstDiff, firstDiff + 160)}`,
+                        );
+                    }
+                }
+            }
+        }, 900_000);
+
+        it('call-scoped reachability and sector facts preserve complete state against independent legacy decisions across production modes and 100 real-save variants', () => {
+            for (const mode of FIXED_POINT_PRODUCTION_MODES) {
+                for (let seed = 0; seed < 100; seed++) {
+                    const variant = makeVariant(baseState, seed);
+                    const { candidate, legacy } = runReachabilityModes(variant, edges, mode);
+                    if (candidate !== legacy) {
+                        let firstDiff = 0;
+                        while (
+                            firstDiff < candidate.length
+                            && firstDiff < legacy.length
+                            && candidate.charCodeAt(firstDiff) === legacy.charCodeAt(firstDiff)
+                        ) {
+                            firstDiff += 1;
+                        }
+                        throw new Error(
+                            `reachability divergence for mode ${mode.label}, seed ${seed} at byte ${firstDiff}; `
                             + `candidate=${candidate.slice(firstDiff, firstDiff + 160)}; `
                             + `legacy=${legacy.slice(firstDiff, firstDiff + 160)}`,
                         );

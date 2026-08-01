@@ -27,7 +27,9 @@ import type { CorpsCommanderProfile } from './commander_override.js';
 import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
 import {
     createFormationOccupancyIndex,
+    createSectorBuildReachabilityContext,
     type FormationOccupancyIndex,
+    type SectorBuildReachabilityContext,
 } from './sector_build_derived_context.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 
@@ -232,9 +234,9 @@ function nearestSameCorpsRearSectorInComponent(
 }
 
 export function buildOneHopReserveBand(
-    frontSet: Set<string>,
-    adjacency: Map<Osid, Osid[]>,
-    friendlyOsids: Set<string>,
+    frontSet: ReadonlySet<string>,
+    adjacency: ReadonlyMap<Osid, readonly Osid[]>,
+    friendlyOsids: ReadonlySet<string>,
 ): Set<string> {
     const oneHopBehind = new Set<string>();
     for (const frontOsid of frontSet) {
@@ -1533,6 +1535,10 @@ export type EnsureMinimumSectorCoverageOccupancyStrategy =
     | 'dense-index'
     | 'test-only-legacy-scan';
 
+export type EnsureMinimumSectorCoverageReachabilityStrategy =
+    | 'derived-context'
+    | 'test-only-legacy';
+
 export function ensureMinimumSectorCoverage(
     allSectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
@@ -1542,9 +1548,13 @@ export function ensureMinimumSectorCoverage(
     state?: GameState,
     perfTime: EnsureMinimumSectorCoveragePerfTimer = (_label, fn) => fn(),
     occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
+    reachabilityStrategy: EnsureMinimumSectorCoverageReachabilityStrategy = 'derived-context',
 ): void {
     if (occupancyStrategy !== 'dense-index' && occupancyStrategy !== 'test-only-legacy-scan') {
         throw new Error(`Unknown occupancy strategy: ${String(occupancyStrategy)}`);
+    }
+    if (reachabilityStrategy !== 'derived-context' && reachabilityStrategy !== 'test-only-legacy') {
+        throw new Error(`Unknown reachability strategy: ${String(reachabilityStrategy)}`);
     }
     const opParticipants = buildOperationParticipantSet(state);
     const brigadeMovementState = state?.military.brigade_movement_state;
@@ -1573,35 +1583,30 @@ export function ensureMinimumSectorCoverage(
         denseActiveCounts ?? createLegacyCoverageOccupancyCounts(formations)
     );
 
-    // ── Single-call-frame front-OSID memoization (perf) ──
-    // `getSectorFrontOsids(sector)` rebuilds a Set by iterating every sub_segment's
-    // friendly_osids. Across this function's many passes (territory-claim-rescue,
-    // density-floor, idle-equalization, moderate-reinforcement, severe-rescue) and
-    // the tight donor×brigade loops inside canReachSectorFront / claimTypeForSector /
-    // pickVacantLocalFrontTarget, the same sector objects are re-scanned thousands of
-    // times per invocation. This function never mutates sub_segments or friendly_osids
-    // (it only moves brigade ids between assigned/reserve/rear lists and updates
-    // formation.location_osid/entrenchment_turns), so the front-OSID set is invariant
-    // for the whole call — the cached set is byte-identical to a fresh rebuild.
-    //
-    // Determinism: scoped to this single invocation (local const Map, never module-
-    // level / cross-turn), keyed by sector object identity, no env/time/random input.
-    // The returned Set is treated read-only by every consumer in this function
-    // (.has / .size / iteration / spread-copy only); buildOneHopReserveBand likewise
-    // only reads it. Mirrors the existing sectorComponentCache / componentForSector
-    // pattern below.
-    const frontOsidCache = new Map<CorpsFrontSector, Set<string>>();
-    const frontOsidsFor = (sector: CorpsFrontSector): Set<string> => {
-        const cached = frontOsidCache.get(sector);
-        if (cached !== undefined) return cached;
-        const computed = getSectorFrontOsids(sector);
-        frontOsidCache.set(sector, computed);
-        return computed;
-    };
+    // Production derives front/reserve/territory membership and unbounded friendly
+    // reachability once for this invocation. The test-only strategy deliberately
+    // rebuilds the historical sets and BFS decisions at these same boundaries.
+    // Geometry is immutable during this function; no fact crosses the call frame.
+    const reachabilityContext: SectorBuildReachabilityContext | undefined =
+        reachabilityStrategy === 'derived-context'
+            ? createSectorBuildReachabilityContext(
+                allSectors,
+                adjacency,
+                friendlyOsids,
+                componentOf,
+            )
+            : undefined;
+    const frontOsidsFor = (sector: CorpsFrontSector): ReadonlySet<string> => (
+        reachabilityContext?.sectorFacts(sector).frontOsids
+        ?? getSectorFrontOsids(sector)
+    );
 
     const canReachSectorFront = (bid: string, sector: CorpsFrontSector): boolean => {
         const f = formations[bid];
         const startOsid = f?.location_osid;
+        if (reachabilityContext) {
+            return reachabilityContext.sectorFacts(sector).canReachFrom(startOsid);
+        }
         if (!startOsid) return false;
         const sectorFriendly = frontOsidsFor(sector);
         if (sectorFriendly.size === 0) return false;
@@ -1631,6 +1636,9 @@ export function ensureMinimumSectorCoverage(
     ): 'front' | 'territory' | 'reserve' | null => {
         const formation = formations[brigadeId];
         const locationOsid = formation?.location_osid;
+        if (reachabilityContext) {
+            return reachabilityContext.sectorFacts(sector).claimType(locationOsid);
+        }
         if (!locationOsid) return null;
         const frontSet = frontOsidsFor(sector);
         if (frontSet.has(locationOsid)) return 'front';

@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import {
     createFormationOccupancyIndex,
+    createSectorBuildReachabilityContext,
     type FormationOccupancyIndex,
 } from '../src/sim/combat/sector_build_derived_context.js';
-import type { FormationState } from '../src/state/game_state.js';
+import type { CorpsFrontSector, FormationState } from '../src/state/game_state.js';
+import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
 function formation(
     id: string,
@@ -142,5 +144,100 @@ describe('FormationOccupancyIndex', () => {
         const index = createFormationOccupancyIndex(['op:test:a'], formations);
         formations.alpha.location_osid = 'op:test:unknown';
         expect(() => index.assertEquivalent(formations)).toThrow(/unknown OSID/i);
+    });
+});
+
+function sector(
+    sectorId: string,
+    frontOsids: string[],
+    territoryOsids: string[],
+): CorpsFrontSector {
+    return {
+        sector_id: sectorId,
+        corps_id: 'corps:test',
+        faction: 'RBiH',
+        opposing_factions: ['RS'],
+        edge_ids: frontOsids.map((osid, index) => `${osid}__enemy:${index}`),
+        sub_segments: [{
+            sub_segment_id: `subsegment:${sectorId}`,
+            edge_ids: frontOsids.map((osid, index) => `${osid}__enemy:${index}`),
+            friendly_osids: frontOsids,
+            enemy_osids: frontOsids.map((_, index) => `enemy:${index}`),
+            length_edges: frontOsids.length,
+            primary_brigade_ids: [],
+        }],
+        length_edges: frontOsids.length,
+        territory_osids: territoryOsids,
+        assigned_brigade_ids: [],
+        reserve_brigade_ids: [],
+        density: 0,
+        threat_ratio: 0,
+        defensive_power: 0,
+        sector_stance: 'defend',
+        stance_source: 'bot',
+    };
+}
+
+describe('SectorBuildReachabilityContext', () => {
+    it('builds exact sector facts and preserves legacy start-node reachability semantics', () => {
+        const adjacency = new Map<Osid, Osid[]>([
+            ['op:test:a' as Osid, ['op:test:b' as Osid]],
+            ['op:test:b' as Osid, ['op:test:a' as Osid, 'op:test:c' as Osid]],
+            ['op:test:c' as Osid, ['op:test:b' as Osid]],
+            ['op:test:d' as Osid, ['op:test:e' as Osid, 'outside:start' as Osid]],
+            ['op:test:e' as Osid, ['op:test:d' as Osid]],
+            ['outside:start' as Osid, ['op:test:d' as Osid]],
+        ]);
+        const friendlyOsids = new Set([
+            'op:test:a',
+            'op:test:b',
+            'op:test:c',
+            'op:test:d',
+            'op:test:e',
+        ]);
+        const componentOf = new Map<string, number>([
+            ['op:test:a', 0],
+            ['op:test:b', 0],
+            ['op:test:c', 0],
+            ['op:test:d', 1],
+            ['op:test:e', 1],
+        ]);
+        const west = sector(
+            'sector:test:west',
+            ['op:test:b'],
+            ['op:test:a', 'op:test:b', 'op:test:c'],
+        );
+        const east = sector(
+            'sector:test:east',
+            ['op:test:e'],
+            ['op:test:d', 'op:test:e'],
+        );
+        const empty = sector('sector:test:empty', [], ['op:test:a']);
+        const outside = sector('sector:test:outside', ['outside:start'], []);
+
+        const context = createSectorBuildReachabilityContext(
+            [west, east, empty, outside],
+            adjacency,
+            friendlyOsids,
+            componentOf,
+        );
+
+        const westFacts = context.sectorFacts(west);
+        expect([...westFacts.frontOsids]).toEqual(['op:test:b']);
+        expect([...westFacts.reserveOsids]).toEqual(['op:test:a', 'op:test:c']);
+        expect([...westFacts.territoryOsids]).toEqual(['op:test:a', 'op:test:b', 'op:test:c']);
+        expect(westFacts.claimType('op:test:b')).toBe('front');
+        expect(westFacts.claimType('op:test:a')).toBe('reserve');
+        expect(westFacts.claimType('op:test:c')).toBe('reserve');
+        expect(westFacts.claimType('op:test:d')).toBeNull();
+        expect(westFacts.canReachFrom('op:test:a')).toBe(true);
+        expect(westFacts.canReachFrom('op:test:c')).toBe(true);
+        expect(westFacts.canReachFrom('op:test:d')).toBe(false);
+        expect(westFacts.canReachFrom(undefined)).toBe(false);
+
+        expect(context.sectorFacts(east).canReachFrom('outside:start')).toBe(true);
+        expect(context.sectorFacts(empty).canReachFrom('op:test:a')).toBe(false);
+        expect(context.sectorFacts(outside).canReachFrom('outside:start')).toBe(true);
+        expect(context.sectorFacts(west)).toBe(westFacts);
     });
 });

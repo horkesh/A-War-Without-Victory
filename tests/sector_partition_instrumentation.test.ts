@@ -654,13 +654,14 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         const region = raw.slice(startIdx, endIdx);
         expect(raw).toContain('const pickVacantLocalFrontTargetFromFrontSet = (');
         // Front-OSID lookup routes through the per-invocation `frontOsidsFor(...)`
-        // memoization cache (byte-identical to getSectorFrontOsids; sub_segments
-        // are immutable across this function's passes).
+        // boundary. Production serves the call-scoped derived facts; the explicit
+        // test-only legacy strategy rebuilds the historical set at the same site.
         expect(region).toContain('const sectorFrontOsids = frontOsidsFor(sector);');
         expect(region).toContain('const sameComponentDonors = corpsSectors');
+        expect(region).toContain('const activeCounts = freshActiveCounts();');
         expect(region).toContain('pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts)');
-        expect(region).toContain('pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts)');
-        expect(region).toContain('moveBrigadeToFrontTarget(bid, target, stepActiveCounts);');
+        expect(region).toContain('moveBrigadeToFrontTarget(bid, target, activeCounts);');
+        expect(region).not.toContain('stepActiveCounts');
         expect(region).not.toContain('moveBrigadeToFrontTarget(bid, target, countActiveBrigadesByOsid');
         expect(region).not.toMatch(/\bDate\.now\s*\(/);
         expect(region).not.toMatch(/\bnew\s+Date\s*\(/);

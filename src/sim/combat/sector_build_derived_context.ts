@@ -1,5 +1,10 @@
-import type { FormationId, FormationState } from '../../state/game_state.js';
+import type {
+    CorpsFrontSector,
+    FormationId,
+    FormationState,
+} from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import type { Osid } from './osid_adjacency.js';
 import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
 
 const MAX_UINT32 = 0xffff_ffff;
@@ -16,6 +21,137 @@ export interface FormationOccupancyIndex {
         next: FormationState | undefined,
     ): void;
     assertEquivalent(formations: Readonly<Record<FormationId, FormationState>>): void;
+}
+
+export type SectorClaimType = 'front' | 'territory' | 'reserve' | null;
+
+export interface SectorReachabilityFacts {
+    readonly frontOsids: ReadonlySet<string>;
+    readonly reserveOsids: ReadonlySet<string>;
+    readonly territoryOsids: ReadonlySet<string>;
+    canReachFrom(startOsid: string | undefined): boolean;
+    claimType(locationOsid: string | undefined): SectorClaimType;
+}
+
+export interface SectorBuildReachabilityContext {
+    sectorFacts(sector: CorpsFrontSector): SectorReachabilityFacts;
+}
+
+class CallScopedSectorReachabilityFacts implements SectorReachabilityFacts {
+    readonly frontOsids: ReadonlySet<string>;
+    readonly reserveOsids: ReadonlySet<string>;
+    readonly territoryOsids: ReadonlySet<string>;
+
+    private readonly frontComponentIds: ReadonlySet<number>;
+    private readonly adjacency: ReadonlyMap<Osid, readonly Osid[]>;
+    private readonly friendlyOsids: ReadonlySet<string>;
+    private readonly componentOf: ReadonlyMap<string, number>;
+
+    constructor(
+        sector: CorpsFrontSector,
+        adjacency: ReadonlyMap<Osid, readonly Osid[]>,
+        friendlyOsids: ReadonlySet<string>,
+        componentOf: ReadonlyMap<string, number>,
+    ) {
+        const frontOsids = new Set<string>();
+        for (const subSegment of sector.sub_segments) {
+            for (const osid of subSegment.friendly_osids) frontOsids.add(osid);
+        }
+
+        const reserveOsids = new Set<string>();
+        for (const frontOsid of frontOsids) {
+            const neighbors = adjacency.get(frontOsid as Osid);
+            if (!neighbors) continue;
+            for (const neighbor of neighbors) {
+                if (frontOsids.has(neighbor)) continue;
+                if (!friendlyOsids.has(neighbor)) continue;
+                reserveOsids.add(neighbor);
+            }
+        }
+
+        const frontComponentIds = new Set<number>();
+        for (const frontOsid of frontOsids) {
+            const componentId = componentOf.get(frontOsid);
+            if (componentId !== undefined) frontComponentIds.add(componentId);
+        }
+
+        this.frontOsids = frontOsids;
+        this.reserveOsids = reserveOsids;
+        this.territoryOsids = new Set(sector.territory_osids);
+        this.frontComponentIds = frontComponentIds;
+        this.adjacency = adjacency;
+        this.friendlyOsids = friendlyOsids;
+        this.componentOf = componentOf;
+    }
+
+    canReachFrom(startOsid: string | undefined): boolean {
+        if (!startOsid || this.frontOsids.size === 0) return false;
+        if (this.frontOsids.has(startOsid)) return true;
+
+        const startComponentId = this.componentOf.get(startOsid);
+        if (
+            startComponentId !== undefined
+            && this.frontComponentIds.has(startComponentId)
+        ) {
+            return true;
+        }
+
+        // The legacy BFS permits a start outside friendly territory, then enters
+        // only through an adjacent friendly OSID. Preserve that exact start-node
+        // exception while replacing the unbounded traversal with component facts.
+        const neighbors = this.adjacency.get(startOsid as Osid);
+        if (!neighbors) return false;
+        for (const neighbor of neighbors) {
+            if (!this.friendlyOsids.has(neighbor)) continue;
+            const componentId = this.componentOf.get(neighbor);
+            if (
+                componentId !== undefined
+                && this.frontComponentIds.has(componentId)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    claimType(locationOsid: string | undefined): SectorClaimType {
+        if (!locationOsid) return null;
+        if (this.frontOsids.has(locationOsid)) return 'front';
+        if (this.reserveOsids.has(locationOsid)) return 'reserve';
+        if (this.territoryOsids.has(locationOsid)) return 'territory';
+        return null;
+    }
+}
+
+class CallScopedSectorBuildReachabilityContext implements SectorBuildReachabilityContext {
+    private readonly factsBySector = new Map<CorpsFrontSector, SectorReachabilityFacts>();
+
+    constructor(
+        sectors: readonly CorpsFrontSector[],
+        adjacency: ReadonlyMap<Osid, readonly Osid[]>,
+        friendlyOsids: ReadonlySet<string>,
+        componentOf: ReadonlyMap<string, number>,
+    ) {
+        for (const sector of sectors) {
+            this.factsBySector.set(
+                sector,
+                new CallScopedSectorReachabilityFacts(
+                    sector,
+                    adjacency,
+                    friendlyOsids,
+                    componentOf,
+                ),
+            );
+        }
+    }
+
+    sectorFacts(sector: CorpsFrontSector): SectorReachabilityFacts {
+        const facts = this.factsBySector.get(sector);
+        if (!facts) {
+            throw new Error(`SectorBuildReachabilityContext unknown sector: ${sector.sector_id}`);
+        }
+        return facts;
+    }
 }
 
 function countedLocation(formation: FormationState | null | undefined): string | undefined {
@@ -196,4 +332,18 @@ export function createFormationOccupancyIndex(
     formations: Readonly<Record<FormationId, FormationState>>,
 ): FormationOccupancyIndex {
     return new DenseFormationOccupancyIndex(osids, formations);
+}
+
+export function createSectorBuildReachabilityContext(
+    sectors: readonly CorpsFrontSector[],
+    adjacency: ReadonlyMap<Osid, readonly Osid[]>,
+    friendlyOsids: ReadonlySet<string>,
+    componentOf: ReadonlyMap<string, number>,
+): SectorBuildReachabilityContext {
+    return new CallScopedSectorBuildReachabilityContext(
+        sectors,
+        adjacency,
+        friendlyOsids,
+        componentOf,
+    );
 }

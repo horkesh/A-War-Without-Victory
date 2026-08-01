@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { ensureMinimumSectorCoverage } from '../src/sim/combat/brigade_assignment.js';
+import {
+    ensureMinimumSectorCoverage,
+    type EnsureMinimumSectorCoverageReachabilityStrategy,
+} from '../src/sim/combat/brigade_assignment.js';
+import { buildFriendlyComponents } from '../src/sim/combat/sector_utils.js';
 import type {
     CorpsFrontSector,
     CorpsFrontSubSegment,
@@ -8,6 +12,7 @@ import type {
     FormationState,
 } from '../src/state/game_state.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
+import { strictCompare } from '../src/state/validateGameState.js';
 
 function makeSector(
     sectorId: string,
@@ -68,7 +73,146 @@ function makeAdjacency(): Map<Osid, Osid[]> {
     ]);
 }
 
+function runReachabilityVariant(
+    seed: number,
+    strategy: EnsureMinimumSectorCoverageReachabilityStrategy,
+): string {
+    const recipientFront = [
+        'op:recipient:r1',
+        'op:recipient:r2',
+        'op:recipient:r3',
+        'op:recipient:r4',
+        'op:recipient:r5',
+        'op:recipient:r6',
+        'op:recipient:r7',
+        'op:recipient:r8',
+        'op:recipient:r9',
+    ];
+    if ((seed & 1) === 1) recipientFront.reverse();
+    const donorFront = [
+        'op:donor:d1',
+        'op:donor:d2',
+        'op:donor:d3',
+        'op:donor:d4',
+    ];
+    const recipient = makeSector(
+        'sector:corps_a:recipient',
+        recipientFront,
+        [...recipientFront],
+        ['brig_recipient'],
+    );
+    recipient.threat_ratio = 900;
+    const donor = makeSector(
+        'sector:corps_a:donor',
+        donorFront,
+        [...donorFront],
+        ['brig_donor_a', 'brig_donor_b', 'brig_donor_c'],
+    );
+    donor.threat_ratio = 20;
+    const empty = makeSector('sector:corps_a:empty', [], [], []);
+
+    const homeDistance = seed % 2 === 0 ? 4 : 5;
+    const formations: Record<FormationId, FormationState> = {
+        brig_recipient: makeFormation('brig_recipient', 'op:recipient:r1'),
+        brig_donor_a: makeFormation('brig_donor_a', 'op:donor:d1'),
+        brig_donor_b: makeFormation('brig_donor_b', 'op:donor:d2'),
+        brig_donor_c: makeFormation('brig_donor_c', 'op:donor:d3'),
+    };
+    for (const donorId of ['brig_donor_a', 'brig_donor_b', 'brig_donor_c']) {
+        formations[donorId]!.home_osid = 'op:home:h0';
+    }
+
+    const adjacencySets = new Map<string, Set<string>>();
+    const addEdge = (left: string, right: string): void => {
+        const leftNeighbors = adjacencySets.get(left) ?? new Set<string>();
+        leftNeighbors.add(right);
+        adjacencySets.set(left, leftNeighbors);
+        const rightNeighbors = adjacencySets.get(right) ?? new Set<string>();
+        rightNeighbors.add(left);
+        adjacencySets.set(right, rightNeighbors);
+    };
+    for (let index = 1; index < recipientFront.length; index++) {
+        addEdge(`op:recipient:r${index}`, `op:recipient:r${index + 1}`);
+    }
+    for (let index = 1; index < donorFront.length; index++) {
+        addEdge(`op:donor:d${index}`, `op:donor:d${index + 1}`);
+    }
+    if (seed % 3 !== 0) {
+        addEdge('op:donor:d1', 'op:recipient:r2');
+        addEdge('op:donor:d1', 'op:recipient:r3');
+    }
+
+    let previousHome = 'op:home:h0';
+    for (let hop = 1; hop < homeDistance; hop++) {
+        const nextHome = `op:home:h${hop}`;
+        addEdge(previousHome, nextHome);
+        previousHome = nextHome;
+    }
+    addEdge(previousHome, 'op:recipient:r2');
+
+    const friendlyOsids = new Set<string>([
+        ...recipientFront,
+        ...donorFront,
+        ...adjacencySets.keys(),
+    ]);
+    const adjacency = new Map<Osid, Osid[]>(
+        [...adjacencySets.entries()]
+            .sort((a, b) => strictCompare(a[0], b[0]))
+            .map(([osid, neighbors]) => [
+                osid as Osid,
+                [...neighbors].sort(strictCompare).map((neighbor) => neighbor as Osid),
+            ]),
+    );
+    const componentOf = buildFriendlyComponents(adjacency, friendlyOsids);
+
+    ensureMinimumSectorCoverage(
+        [recipient, donor, empty],
+        formations,
+        adjacency,
+        friendlyOsids,
+        componentOf,
+        undefined,
+        undefined,
+        'dense-index',
+        strategy,
+    );
+
+    return JSON.stringify({
+        sectors: [recipient, donor, empty],
+        formations,
+    });
+}
+
 describe('ensureMinimumSectorCoverage truth preservation', () => {
+    it('fails closed when the reachability decision strategy is unknown', () => {
+        const sector = makeSector(
+            'sector:corps_a:0',
+            ['op:recipient:front'],
+            ['op:recipient:front'],
+            [],
+        );
+
+        expect(() => ensureMinimumSectorCoverage(
+            [sector],
+            {},
+            new Map(),
+            new Set(['op:recipient:front']),
+            new Map([['op:recipient:front', 0]]),
+            undefined,
+            undefined,
+            'dense-index',
+            'unsupported' as never,
+        )).toThrow(/unknown reachability strategy/i);
+    });
+
+    it('matches independent legacy decisions across disconnected graphs, ties, empty fronts, and home-distance boundaries', () => {
+        for (let seed = 0; seed < 48; seed++) {
+            expect(runReachabilityVariant(seed, 'derived-context')).toBe(
+                runReachabilityVariant(seed, 'test-only-legacy'),
+            );
+        }
+    });
+
     it('does not move a fixed-home Zepa defender to a Srebrenica sector', () => {
         const zepa = 'op:rogatica:zepa_2';
         const srebrenica = 'op:srebrenica:srebrenica_2';
