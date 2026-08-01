@@ -22,7 +22,7 @@ export interface FinalSectorTruthReconciliationReport {
     sectors_rebuilt: number;
     sectors_rated: number;
     unresolved_brigades: number;
-    /** Active formation locations changed while geometry was being rebuilt. */
+    /** Active formation locations changed during the reconciliation stage. */
     geometry_input_mutations: number;
 }
 
@@ -136,6 +136,14 @@ function assertSessionTurn(session: FinalSectorReconciliationSession, state: Gam
 
 function pendingReceipts(session: FinalSectorReconciliationSession): FinalSectorReconciliationReceipt[] {
     return session.receipts.slice(session.processed_receipts);
+}
+
+function firstDirtyStage(session: FinalSectorReconciliationSession): FinalSectorReconciliationStage {
+    const stage = session.dirty_worklist[0];
+    if (!stage) {
+        throw new Error('Pending final-sector receipts have no dirty reconciliation stage');
+    }
+    return stage;
 }
 
 function completePendingStages(session: FinalSectorReconciliationSession): void {
@@ -299,12 +307,26 @@ function runOperationRosterReconciliation(
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     spatial?: SpatialContext,
 ): FinalSectorTruthReconciliationReport {
+    const activeFormationLocations = captureActiveFormationLocations(state);
     const sectors = state.military.corps_front_sectors ?? {};
     const adjacency = (spatial?.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     reconcileOperationSensitiveSectorRoster(state, sectors, adjacency, spatial);
     const sectorList = Object.values(sectors);
     assignBrigadesToSubSegments(state, sectorList, adjacency);
     clearStaleSubSegmentAssignments(state);
+    const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
+    return {
+        sectors_rebuilt: 0,
+        sectors_rated: ratings.sectors_rated,
+        unresolved_brigades: state.military.unresolved_sector_brigades?.length ?? 0,
+        geometry_input_mutations: countActiveFormationLocationMutations(activeFormationLocations, state),
+    };
+}
+
+function runRatingsReconciliation(
+    state: GameState,
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+): FinalSectorTruthReconciliationReport {
     const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
     return {
         sectors_rebuilt: 0,
@@ -344,50 +366,56 @@ export function reconcileFinalSectorTruth(
     }
 
     assertSessionTurn(session, state);
-    const receipts = pendingReceipts(session);
-    if (receipts.length === 0) {
+    if (pendingReceipts(session).length === 0) {
         return session.last_report ?? reportFromCurrentState(state);
     }
 
-    const hasGeometryMutation = receipts.some((receipt) => receipt.mutation === 'geometry');
-    const hasRosterSealMutation = receipts.some(
-        (receipt) => receipt.mutation === 'distribution-roster' || receipt.mutation === 'seal-roster',
-    );
-    let report: FinalSectorTruthReconciliationReport;
+    let report = session.last_report ?? reportFromCurrentState(state);
+    while (pendingReceipts(session).length > 0) {
+        const receipts = pendingReceipts(session);
+        const dirtyStage = firstDirtyStage(session);
+        let operationRosterLocationMutations = 0;
 
-    if (hasGeometryMutation) {
-        session.geometry_builds += 1;
-        report = runFullGeometryReconciliation(
-            state,
-            edges,
-            reverseMap,
-            centroids,
-            spatial,
-            supplyStateByOsid,
-            isFinalPass,
-            options?.finalSaveGeometryProjection === true,
-        );
-    } else if (hasRosterSealMutation) {
-        report = runCurrentSectorSeal(state, edges, supplyStateByOsid, spatial);
-    } else if (receipts.some((receipt) => receipt.mutation === 'ratings')) {
-        const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
-        report = {
-            sectors_rebuilt: 0,
-            sectors_rated: ratings.sectors_rated,
-            unresolved_brigades: state.military.unresolved_sector_brigades?.length ?? 0,
-            geometry_input_mutations: 0,
-        };
-    } else {
-        // Operation truth removes duplicate, inactive, or foreign-claimed
-        // participants. Geometry and territory stay authoritative, but the new
-        // participant set can change coverage donors, commander moves, unstaffed
-        // annotations, unresolved brigades, and ratings. Rebuild that complete
-        // roster projection without repartitioning topology.
-        report = runOperationRosterReconciliation(state, edges, supplyStateByOsid, spatial);
+        if (dirtyStage === 'geometry' || dirtyStage === 'territory') {
+            session.geometry_builds += 1;
+            report = runFullGeometryReconciliation(
+                state,
+                edges,
+                reverseMap,
+                centroids,
+                spatial,
+                supplyStateByOsid,
+                isFinalPass,
+                options?.finalSaveGeometryProjection === true,
+            );
+        } else if (dirtyStage === 'roster') {
+            const hasRosterSealMutation = receipts.some(
+                (receipt) => receipt.mutation === 'distribution-roster' || receipt.mutation === 'seal-roster',
+            );
+            if (hasRosterSealMutation) {
+                report = runCurrentSectorSeal(state, edges, supplyStateByOsid, spatial);
+            } else {
+                // Operation truth removes duplicate, inactive, or foreign-claimed
+                // participants. Geometry and territory stay authoritative unless
+                // coverage moves a formation; that writeback gets its own receipt
+                // and bounded full-geometry fixed point below.
+                report = runOperationRosterReconciliation(state, edges, supplyStateByOsid, spatial);
+                operationRosterLocationMutations = report.geometry_input_mutations;
+            }
+        } else {
+            report = runRatingsReconciliation(state, supplyStateByOsid);
+        }
+
+        completePendingStages(session);
+        session.last_report = report;
+        if (operationRosterLocationMutations > 0) {
+            recordFinalSectorReconciliationMutation(
+                session,
+                'geometry',
+                'operation-roster-formation-location-writeback',
+            );
+        }
     }
-
-    completePendingStages(session);
-    session.last_report = report;
     return report;
 }
 
@@ -410,28 +438,30 @@ export function sealFinalSectorTruthFromCurrentSectors(
     if (receipts.length === 0) {
         return session.last_report ?? reportFromCurrentState(state);
     }
-    if (receipts.some((receipt) => receipt.mutation === 'geometry')) {
+    const dirtyStage = firstDirtyStage(session);
+    if (dirtyStage === 'geometry' || dirtyStage === 'territory') {
         throw new Error('A full geometry receipt must be processed by reconcileFinalSectorTruth');
     }
 
     let report: FinalSectorTruthReconciliationReport;
-    if (receipts.some(
+    if (dirtyStage === 'roster' && receipts.some(
         (receipt) => receipt.mutation === 'distribution-roster' || receipt.mutation === 'seal-roster',
     )) {
         report = runCurrentSectorSeal(state, edges, supplyStateByOsid, spatial);
-    } else if (receipts.some((receipt) => receipt.mutation === 'ratings')) {
-        const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
-        report = {
-            sectors_rebuilt: 0,
-            sectors_rated: ratings.sectors_rated,
-            unresolved_brigades: state.military.unresolved_sector_brigades?.length ?? 0,
-            geometry_input_mutations: 0,
-        };
-    } else {
+    } else if (dirtyStage === 'roster') {
         report = runOperationRosterReconciliation(state, edges, supplyStateByOsid, spatial);
+    } else {
+        report = runRatingsReconciliation(state, supplyStateByOsid);
     }
 
     completePendingStages(session);
+    if (report.geometry_input_mutations > 0) {
+        recordFinalSectorReconciliationMutation(
+            session,
+            'geometry',
+            'operation-roster-formation-location-writeback',
+        );
+    }
     session.last_report = report;
     return report;
 }
