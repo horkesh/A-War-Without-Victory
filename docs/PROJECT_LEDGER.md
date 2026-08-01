@@ -1,5 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-01] R5 Phase 2c independent occupancy equivalence correction
+
+**Type:** R5 committee correctness correction / independent legacy reference / schema-v37 fixture repair / no-refresh deterministic verification.
+
+**Superseded evidence claim:** The accepted dense occupancy timing and exact-byte packet remain valid, but its original 6-file / 46-test long gate did not independently prove the occupancy replacement. Its complete-state property compared fixed-point shortcut control flow while both sides still used the same dense occupancy index. The claim that this gate alone supplied legacy occupancy equivalence is superseded.
+
+**Correction:** Added an explicit `dense-index | test-only-legacy-scan` strategy at the exact `ensureMinimumSectorCoverage(...)` boundary. Unknown strategies fail closed before work. Production still constructs one call-scoped dense index. The test-only reference independently rebuilds the removed eligible-formation scan at all eight historical scan sites and applies local count deltas only after a selected move. Strategy ownership is threaded explicitly through faction build, dropped-edge recovery, seal, final-owner truth, and operation-sensitive roster reconciliation; no environment variable, module cache, persisted state, gameplay rule, threshold, or ordering contract changed.
+
+**TDD and evidence:** RED observed that an unsupported strategy did not throw. The inherited event-state-shape fixture also failed its valid schema-v37 case only because `corps_front_sectors` and `sector_intel` were absent; both empty required fields were added without relaxing the validator. GREEN passes brigade reconciliation 37/37, state-shape validation 9/9, dense-index unit tests 4/4, and TypeScript. The complete long gate passes 6 files / 47 tests in `617.81s`. Its existing fixed-point property remains separate and passes 300 full-state comparisons in `265.045s`; the new dense-index/independent-legacy-scan property passes another 300 comparisons in `264.249s`, covering 100 deterministic real-save variants in each of live-war, final-turn, and final-save-projection modes and comparing complete sectors plus the entire cloned `GameState`. No divergence occurred. `npm.cmd run test:baselines` exited `0` in `67.6s` with all scenarios matching; no baseline was refreshed.
+
+**Disposition and scope:** This closes the occupancy-specific committee correctness blocker while leaving the previously accepted performance measurements and `1,122.123 ms/turn` floor unchanged; no timing rerun was required or performed. Task 3 reachability/sector-fact work remains next after independent review. Source, deterministic tests, plan/report/roadmap/board, ledger, and reusable process knowledge only. No save/schema version, scenario, approved baseline, historical/canon content, `docs/10_canon/FORAWWV.md`, package, version, tag, installer, signing, publication, release state, push, or integration changed.
+
+---
+
 ## [2026-08-01] R5 Phase 2c dense formation occupancy acceptance
 
 **Type:** R5 Phase 2c measured simulation-performance optimization / invocation-local derived index / deterministic equivalence / roadmap propagation.
