@@ -799,6 +799,13 @@ test('final evidence exercises every exposed corps and the direct Records route'
     assert.match(armyHqDeepDive, /let corpsClickError = null/);
     assert.match(armyHqDeepDive, /data-expanded-corps-id="\$\{corpsId\}"/);
     assert.match(armyHqDeepDive, /if \(corpsClickError && !corpsExpanded\) throw corpsClickError/);
+    assert.match(surfaceTour, /restore exact War Map after Army HQ handoff/);
+    assert.match(surfaceTour, /waitForTacticalMapReady/);
+    assert.ok(
+        surfaceTour.indexOf('restore exact War Map after Army HQ handoff')
+        < surfaceTour.indexOf("toolbar-route-records"),
+        'surface tour must restore the field route before waiting for its Records control',
+    );
     assert.match(surfaceTour, /clickTestId\(frame, 'toolbar-route-records'/);
     assert.match(surfaceTour, /Direct Records route/);
 });

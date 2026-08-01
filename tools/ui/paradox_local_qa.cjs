@@ -3806,6 +3806,23 @@ async function surfaceTour(page, frame, faction, events, options = {}) {
   await snapshot(page, frame, faction, events, 'army-hq-after-deep-dive', { armyHqResults });
 
   await clearOpenSurfaces(frame);
+  const restoredMapAfterArmyHq = await openExactWarMapRoute(
+    frame,
+    'restore exact War Map after Army HQ handoff',
+    { afterMs: 1200 },
+  );
+  if (!restoredMapAfterArmyHq) {
+    throw new Error(`Could not restore the field route after Army HQ ${armyHqResults.handoffRoute} handoff`);
+  }
+  const restoredMapState = await readState(frame).catch(() => null);
+  const restoredMapReady = await waitForTacticalMapReady(
+    frame,
+    restoredMapState?.turn,
+    (restoredMapState?.locatedOwnedFormationCount ?? 0) > 0,
+  );
+  if (!restoredMapReady) {
+    throw new Error(`War Map was not ready after Army HQ ${armyHqResults.handoffRoute} handoff`);
+  }
   await frame.locator('[data-testid="toolbar-route-records"]').waitFor({ state: 'visible', timeout: 5000 });
   const recordsArmyHq = await clickTestId(frame, 'toolbar-route-records', 'direct Records route', { afterMs: 1100 });
   if (!recordsArmyHq) throw new Error('Direct Records route could not open Army HQ Records');
