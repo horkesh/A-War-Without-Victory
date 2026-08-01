@@ -92,8 +92,20 @@ describe('sensitive-history choice semantics', () => {
         'General Staff warned of genocide. Proceed to review and start the offensive regardless.',
         'General Staff warned of genocide. Proceed to review and order the offensive regardless.',
         'General Staff warned of genocide. Proceed anyway.',
+        'General Staff warned of genocide. Do not hesitate, proceed with the offensive anyway.',
+        'General Staff warned of genocide. Do not proceed with the documentation review; continue with the offensive regardless.',
+        'General Staff warned of genocide. Do not delay. Continue with the offensive regardless.',
+        'General Staff warned of genocide. The cabinet reviewed the report. Continue with the offensive regardless.',
+        'General Staff warned of genocide. Do not proceed with the documentation review, continue with the offensive regardless.',
     ])('does not let contextual language sanitize a later or prior directive: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(true);
+    });
+
+    it.each([
+        'General Staff did not warn of genocide. Proceed with the offensive anyway.',
+        'General Staff warned of genocide. Do not proceed with the offensive anyway.',
+    ])('keeps a negated warning or continuation contextual: %s', (text) => {
+        expect(isDirectRefusedSensitiveChoice(text)).toBe(false);
     });
 
     it.each([
