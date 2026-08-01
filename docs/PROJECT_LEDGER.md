@@ -25264,3 +25264,21 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Findings:** Officer/OOB coverage is 374/374 with 0 supported, 2,286 blocking findings, and 12 normalized-name collisions. Audio coverage is 36/36 with 17 provided, 19 placeholders, zero orphan binaries, 54 blocking findings, five warnings, and three absent required ambient beds. Missing identity, licensing, duration, loudness, or asset facts remain unresolved rather than inferred.
 
 **Verification and scope:** The accepted packet passed 5 files / 22 focused tests, TypeScript, canon/determinism/baseline checks, EOL policy, and diff checks; the parent integration smoke passed 2 files / 11 tests. This is a diagnostic/content-sidecar floor only. It changes no runtime, identity, OOB assignment, scenario, localization, audio binary, save schema, baseline, package/version, tag, signing, publication, release state, or `docs/10_canon/FORAWWV.md`.
+
+## 2026-08-01 - R7 historical-claim and localization inventories completed
+
+**Type:** Deterministic historical/content inventory / localization census / roadmap propagation.
+
+**Summary:** Completed the two remaining R7 Phase 0 inventories without changing event, essay, translation, simulation, package, or release content.
+
+**Change:** Historical claim rows now expose stable subject/ring/claim/date/predicate/source/citation/respondent/interaction/status/owner fields; strict mode detects unresolved claims, sensitive player-choice copy, calendar-only rupture claims, missing source notes, generic symmetry, event/essay year mismatches, and failed Neretva/Grabovica/Uzdol anchors. The localization diagnostic inventories every EN key against canonical `bs` through the legacy `bcs` dictionary, fallback use, message lengths, embedded English, concatenated copy, and dynamic message keys with stable file/line ownership.
+
+**Failure mode prevented:** Historical claims can no longer disappear into a vocabulary-only count without provenance or owner, September 1993 content cannot drift into another file/window silently, and localization completeness cannot be inferred from dictionary size while fallback, source literals, concatenation, dynamic keys, or layout-length risk remain invisible.
+
+**Files modified:** `tools/diagnostics/codex_sensitive_claim_inventory.cjs`; `tools/diagnostics/sensitive_history_canon_gate_audit.ts`; `tools/diagnostics/localization_coverage.ts`; their focused tests; R7 plan, master roadmap, command board, reports index/backlog, and `docs/40_reports/audits/20260801_R7_HISTORICAL_CLAIM_LOCALIZATION_INVENTORIES.md`.
+
+**Mistake guard:** Inventory completion is not remediation completion. Open historical/localization rows remain explicitly counted and owner-routed; dynamic-key and length rows are review candidates rather than automatic bugs. Diagnostics have stable lexical ordering and contain no timestamp or absolute path.
+
+**Verification:** The required combined provenance matrix passed 5 files / 25 tests; the sensitive-history gate suite passed 1 file / 30 tests; the post-simplification localization rerun passed 1 file / 2 tests. `npm.cmd run typecheck`, `npm.cmd run canon:check` (determinism scan plus baseline regression), and `git diff --check` all passed.
+
+**FORAWWV note:** `docs/10_canon/FORAWWV.md` was not edited; no canon contradiction was introduced.

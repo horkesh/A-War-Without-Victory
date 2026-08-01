@@ -1,6 +1,10 @@
 import assert from 'node:assert';
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { test } from 'vitest';
+
+const require = createRequire(import.meta.url);
+const inventory = require('../tools/diagnostics/codex_sensitive_claim_inventory.cjs');
 
 type EventRow = {
     id: string;
@@ -110,5 +114,29 @@ test('Srebrenica/Zepa source notes do not introduce forbidden gameplay framing',
             !sourceNotes.toLowerCase().includes(forbidden),
             `source notes must not introduce forbidden sensitive-history framing: ${forbidden}`,
         );
+    }
+});
+
+test('every inventoried sensitive claim has an explicit status and owner', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    assert.ok(report.claims.length > 0);
+    for (const claim of report.claims) {
+        assert.ok(claim.status, `missing status for ${claim.claim_id}`);
+        assert.ok(claim.owner, `missing owner for ${claim.claim_id}`);
+        assert.ok(claim.subject_id, `missing subject_id for ${claim.claim_id}`);
+        assert.ok(claim.ring, `missing ring for ${claim.claim_id}`);
+        assert.ok(claim.player_interaction_type, `missing interaction type for ${claim.claim_id}`);
+    }
+});
+
+test('Neretva, Grabovica, and Uzdol anchors are source-owned September 1993 content', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    assert.strictEqual(report.historical_anchors.length, 2);
+    for (const anchor of report.historical_anchors) {
+        assert.strictEqual(anchor.status, 'pass', `${anchor.anchor_id} historical placement mismatch`);
+        assert.strictEqual(anchor.event_window, 'turns 74-76');
+        assert.ok(anchor.source.includes('Balkan Battlegrounds Vol. II, pp. 434-435'));
+        assert.ok(anchor.source.includes('ICTY Halilovic Trial Judgment'));
+        assert.strictEqual(anchor.owner, 'historian');
     }
 });

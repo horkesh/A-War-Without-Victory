@@ -4064,3 +4064,13 @@ Applied in `[2026-08-01] Engine quality Phase 2 operational-data ownership check
 **Coverage is not evidence:** a sidecar row for every identity or cue proves inventory completeness, not historical or licensing support. Durable rule: every positive identity fact must be owned by the exact row, including applicable relation/court evidence; shared defaults may only encode an unresolved negative state. Audio proof must join the authored cue registry to the actual bundle-resolution owner and recursively census binaries, while container signatures remain prechecks rather than duration/LUFS decode evidence.
 
 Applied in `[2026-08-01] R7 officer/OOB and audio provenance inventory accepted`, `tools/diagnostics/officer_oob_provenance.ts`, and `tools/diagnostics/audio_asset_provenance.ts`.
+
+## 2026-08-01 - Inventories need dispositions, not just detections
+
+**A claim census is actionable only when every row names its evidence and next owner:** vocabulary hits without subject identity, ring, time/predicate, citation, interaction type, status, and owner create an unbounded review pile. Durable rule: emit those fields together, keep unresolved rows explicit, and fail strict validation on unsupported or refused dispositions rather than counting them as coverage.
+
+**Localization coverage has three distinct layers:** dictionary parity, source-boundary discipline, and rendered layout risk. Durable rule: report all three separately. A dynamic key may be a safe finite typed map, and a long string may fit; classify them as review candidates until code or viewport evidence proves the disposition. Do not label every static candidate a product bug.
+
+**Chronology anchors require both placement and semantics:** a year suffix alone does not prove the right event window, while a correct turn window in the wrong catalog still hides drift. Durable rule: pin event file, essay relation, exact turn window, source, and owner together for historically sensitive anchors.
+
+Applied in `[2026-08-01] R7 historical-claim and localization inventories completed`, `tools/diagnostics/codex_sensitive_claim_inventory.cjs`, and `tools/diagnostics/localization_coverage.ts`.
