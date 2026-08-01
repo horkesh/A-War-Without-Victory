@@ -63,7 +63,7 @@ export const REPLACE_CO_COST = 25;
  * LOWER than the override levers (10, matching the stabilize-command-relationship
  * action) because it is a leadership gesture, not an officer override. MUST match
  * autonomy_ipc_contract.cjs (FRONT_VISIT_COST = 10) and the initiate-front-visit
- * IPC handler (electron-main.cjs). Cooldown/cap reuse the event's OWN recurrence
+ * IPC handler (electron-main.cjs). Cooldown/cap use the event's voluntary action cadence
  * (max_fires 5 / cooldown 10t), not a CA-side timer.
  */
 export const FRONT_VISIT_COST = 10;

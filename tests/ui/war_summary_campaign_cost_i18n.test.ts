@@ -129,6 +129,26 @@ function stateWithStrategicObjectives(): LoadedGameState {
     } as LoadedGameState;
 }
 
+function stateWithNoFiledObjectiveAction(): LoadedGameState {
+    const base = stateWithStrategicObjectives();
+    return {
+        ...base,
+        formations: [
+            ...base.formations.filter((formation) => formation.kind !== 'corps'),
+            {
+                id: 'arbih_general_staff', faction: 'RBiH', name: 'General Staff ARBiH', kind: 'army_hq',
+                readiness: 'ready', status: 'active', createdTurn: 0, tags: [],
+            },
+        ],
+        operations: undefined,
+        pendingReserveRequests: undefined,
+        pendingEventDecisions: undefined,
+        pendingPeacePlan: undefined,
+        pendingDayton: undefined,
+        pendingCounterOffers: undefined,
+    } as LoadedGameState;
+}
+
 describe('War Summary campaign cost localization', () => {
     afterEach(() => {
         cleanup();
@@ -259,6 +279,7 @@ describe('War Summary campaign cost localization', () => {
         expect(objectives[2]?.textContent).toContain('Responsible ownerPresidency');
         expect(within(section).getAllByRole('button', { name: /Decision Room: Review/i }).length).toBeGreaterThan(0);
         expect(within(section).getAllByRole('button', { name: /Army HQ: Review/i }).length).toBeGreaterThan(0);
+        expect(screen.queryByTestId('war-summary-posture')).toBeNull();
     });
 
     it('does not duplicate the Operation prefix in the latest military consequence', () => {
@@ -282,34 +303,39 @@ describe('War Summary campaign cost localization', () => {
         expect(section.textContent).not.toContain('operation Operation Cerska-Kamenica');
     });
 
-    it('names fallback owners and shows honest hold statuses when no command request or signature is filed', () => {
-        const base = stateWithStrategicObjectives();
-        storeState.loadedGameState = {
-            ...base,
-            formations: [
-                ...base.formations.filter((formation) => formation.kind !== 'corps'),
-                {
-                    id: 'arbih_general_staff', faction: 'RBiH', name: 'General Staff ARBiH', kind: 'army_hq',
-                    readiness: 'ready', status: 'active', createdTurn: 0, tags: [],
-                },
-            ],
-            operations: undefined,
-            pendingReserveRequests: undefined,
-            pendingEventDecisions: undefined,
-            pendingPeacePlan: undefined,
-            pendingDayton: undefined,
-            pendingCounterOffers: undefined,
-        } as LoadedGameState;
+    it('presents one executive hold posture and keeps objective fallbacks local', () => {
+        storeState.loadedGameState = stateWithNoFiledObjectiveAction();
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
         const section = screen.getByRole('region', { name: 'Strategic Objectives' });
         const objectives = within(section).getAllByRole('article');
+        const summaryTab = screen.getByRole('button', { name: 'Overview' });
+        const posture = screen.getByTestId('war-summary-posture');
         expect(objectives[0]?.textContent).toContain('Responsible ownerGeneral Staff ARBiH');
         expect(objectives[2]?.textContent).toContain('Responsible ownerPresidency');
-        expect(section.textContent).toContain('No filed command request — hold present policy');
-        expect(section.textContent).toContain('No signature due — hold present policy');
+        expect(posture.textContent).toBe('No presidential signature is due; current policy remains in force.');
+        expect(screen.getAllByText('No presidential signature is due; current policy remains in force.')).toHaveLength(1);
+        expect(section.textContent).toContain('No staff request filed');
+        expect(section.textContent).toContain('No presidential signature due');
+        expect(section.textContent).not.toContain('hold present policy');
         expect(within(section).queryAllByRole('button')).toHaveLength(0);
+        expect(summaryTab.compareDocumentPosition(posture) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(posture.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('localizes the executive hold posture and local fallbacks in BCS', () => {
+        setLocale('bcs');
+        storeState.loadedGameState = stateWithNoFiledObjectiveAction();
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const section = screen.getByRole('region', { name: 'Strateski ciljevi' });
+        expect(screen.getByTestId('war-summary-posture').textContent)
+            .toBe('Nije potreban potpis predsjednika; sadašnja politika ostaje na snazi.');
+        expect(section.textContent).toContain('Nije podnesen zahtjev štaba');
+        expect(section.textContent).toContain('Nije potreban potpis predsjednika');
+        expect(section.textContent).not.toContain('hold present policy');
     });
 
     it('renders strategic objective labels and unavailable truth in BCS', () => {

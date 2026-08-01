@@ -5,7 +5,7 @@
  * `PresidentialDecisionRoomCategory` union (presidentialDecisionRoom.ts). NO new
  * card sources, NO engine/state touch — this maps the eight underlying decision
  * categories onto the six owner-locked presidential category cards and derives
- * each card's pending-count + urgent pip from a `PresidentialDecisionRoomView`.
+ * each card's pending-count + presidential-action pip from a `PresidentialDecisionRoomView`.
  *
  * Authoritative design: docs/plans/2026-06-01-presidential-command-surface-design.md §9.
  *
@@ -21,6 +21,7 @@ import type {
   PresidentialDecisionRoomLensId,
   PresidentialDecisionRoomView,
 } from './presidentialDecisionRoom';
+import { countPresidentialPriorityBands, type PresidentialPriorityCounts } from './presidentialPriority';
 
 /** Stable identifier for each of the six presidential command-surface cards. */
 export type PresidentialCommandCategoryId =
@@ -60,24 +61,16 @@ export interface PresidentialCommandCategoryCount {
   roleLabel: string;
   /** Total pending items across this card's source categories. */
   count: number;
-  /** Blocking + critical items across this card's source categories. */
-  urgentCount: number;
-  /** True when at least one source item is blocking/critical (drives the pip). */
-  isUrgent: boolean;
+  /** Shared presidential agenda totals across this card's source categories. */
+  priorityCounts: PresidentialPriorityCounts;
+  /** True when at least one required or recommended item drives an action pip. */
+  hasPresidentialAction: boolean;
   /** The decision-room lens to open when this card is clicked. */
   lens: PresidentialDecisionRoomLensId;
 }
 
 function categoryItemCount(cards: readonly PresidentialDecisionRoomCard[]): number {
   return cards.reduce((sum, card) => sum + (card.countWeight ?? 1), 0);
-}
-
-function categoryUrgentCount(cards: readonly PresidentialDecisionRoomCard[]): number {
-  return cards.reduce((sum, card) => (
-    card.severity === 'blocking' || card.severity === 'critical'
-      ? sum + (card.countWeight ?? 1)
-      : sum
-  ), 0);
 }
 
 /**
@@ -208,7 +201,7 @@ export function lensForCategory(category: PresidentialCommandCategory): Presiden
 }
 
 /**
- * Derive per-category pending/urgent counts from a decision-room view.
+ * Derive per-category priority-band counts from a decision-room view.
  *
  * Pure, deterministic: iterates `view.cards` once per category in the fixed
  * literal order. The Conscience card pulls the paramilitary card out of the
@@ -221,7 +214,7 @@ export function derivePresidentialCommandCategoryCounts(
   return PRESIDENTIAL_COMMAND_CATEGORIES.map((category) => {
     const matched = cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, category.id));
     const count = categoryItemCount(matched);
-    const urgentCount = categoryUrgentCount(matched);
+    const priorityCounts = countPresidentialPriorityBands(matched);
     return {
       id: category.id,
       title: category.title,
@@ -229,8 +222,8 @@ export function derivePresidentialCommandCategoryCounts(
       role: category.role,
       roleLabel: category.roleLabel,
       count,
-      urgentCount,
-      isUrgent: urgentCount > 0,
+      priorityCounts,
+      hasPresidentialAction: priorityCounts.required > 0 || priorityCounts.recommended > 0,
       lens: lensForCategory(category),
     };
   });

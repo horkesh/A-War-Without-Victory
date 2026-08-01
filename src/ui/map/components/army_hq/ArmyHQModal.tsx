@@ -427,7 +427,7 @@ export function ArmyHQModal({
                         </div>
                     </div>
                     <div
-                        className="relative flex-1 overflow-y-auto px-3 pt-2 pb-3"
+                        className="relative min-w-0 flex-1 overflow-y-auto overflow-x-clip px-3 pt-2 pb-3"
                         role="tabpanel"
                         id="army-hq-tabpanel-records"
                         aria-label={t('armyHq.tab.records')}
@@ -598,7 +598,7 @@ export function ArmyHQModal({
                 </div>
 
                 <div
-                    className="relative flex-1 overflow-y-auto px-3 pt-2 pb-3"
+                    className="relative min-w-0 flex-1 overflow-y-auto overflow-x-clip px-3 pt-2 pb-3"
                     role="tabpanel"
                     id={`army-hq-tabpanel-${activeTab}`}
                     aria-labelledby={`army-hq-tab-${activeTab}`}

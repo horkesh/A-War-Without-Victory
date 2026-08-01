@@ -27,7 +27,7 @@ import {
 } from '../utils/commandAuthority';
 import { buildForceableReadyPlans } from './backTheOfficer';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
-import { getPlayerSafeCorpsName, getPlayerSafeRecordDetail } from '../utils/playerSafeText';
+import { getPlayerSafeCorpsName, getPlayerSafeEnclaveName, getPlayerSafeRecordDetail } from '../utils/playerSafeText';
 import { countFiledChronicleDecisionRecords } from './filedRecordTruth';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
 import {
@@ -40,6 +40,14 @@ import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { playerFactionMatch } from './playerFactionMatch';
 import { buildReserveRequestPresentation } from './reserveRequestPresentation';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { derivePresidentialBlockers } from './presidentialBlockers';
+import {
+  classifyPresidentialPriority,
+  countPresidentialPriorityBands,
+  emptyPresidentialPriorityCounts,
+  type PresidentialPriorityBand,
+  type PresidentialPriorityCounts,
+} from './presidentialPriority';
 
 export {
   buildReserveRequestPresentation,
@@ -193,6 +201,7 @@ export interface PresidentialDecisionRoomCard {
   id: string;
   category: PresidentialDecisionRoomCategory;
   severity: PresidentialDecisionRoomSeverity;
+  priorityBand: PresidentialPriorityBand;
   title: string;
   explanation: string;
   sourceOwner: string;
@@ -206,6 +215,8 @@ export interface PresidentialDecisionRoomCard {
    * card can represent several modal-required player decisions.
    */
   countWeight?: number;
+  /** Stable source records retained when presentation consolidates cards. */
+  sourceIds?: string[];
   /** Optional War-Direction directive this card can ISSUE inline (additive). */
   directive?: PresidentialDecisionRoomDirective;
   sortKey: number;
@@ -218,7 +229,7 @@ export interface PresidentialDecisionRoomAdvanceReadiness {
 }
 
 export interface PresidentialDecisionRoomMetrics {
-  urgentCount: number;
+  priorityCounts: PresidentialPriorityCounts;
   pendingReviews: number;
   opportunities: number;
   hardTurns: number;
@@ -231,7 +242,7 @@ export interface PresidentialDecisionRoomLens {
   id: PresidentialDecisionRoomLensId;
   label: string;
   count: number;
-  urgentCount: number;
+  priorityCounts: PresidentialPriorityCounts;
   topCardId: string | null;
   actionLabel: string;
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
@@ -242,7 +253,7 @@ export interface PresidentialDecisionRoomSourceHandoff {
   label: string;
   summary: string;
   count: number;
-  urgentCount: number;
+  priorityCounts: PresidentialPriorityCounts;
   cardIds: string[];
   actionLabel: string;
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
@@ -259,6 +270,7 @@ export interface PresidentialDecisionRoomDossier {
   sourceLabel: string;
   actionLabel: string;
   evidence: string[];
+  sourceIds?: string[];
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
   /** Optional War-Direction directive the dossier can ISSUE inline (additive). */
   directive?: PresidentialDecisionRoomDirective;
@@ -284,7 +296,7 @@ export interface PresidentialDecisionRoomInput {
   selectedCardId?: string | null;
 }
 
-type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey' | 'directive'> & {
+type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey' | 'directive' | 'priorityBand'> & {
   urgencySort: number;
   sourceSort: string;
   directive?: PresidentialDecisionRoomDirective;
@@ -346,20 +358,42 @@ function pluralize(value: number, singular: string, plural = `${singular}s`): st
 }
 
 function countReviewRequiredEventDecisions(state: LoadedGameState): number {
-  const liveRequiredCount = (state.pendingEventDecisions ?? []).filter((decision) =>
-    playerFactionMatch(decision.faction, state.player_faction ?? null)
-    && isRequiredPendingEventDecision(decision)
-  ).length;
+  const liveRequiredCount = requiredReviewEventDecisions(state).length;
   if (Array.isArray(state.pendingEventDecisions)) return liveRequiredCount;
   return Math.max(state.presidentialReviewQueue?.eventDecisionCount ?? 0, liveRequiredCount);
 }
 
-function toDecisionSeverity(state: LoadedGameState, requiredEventDecisionCount = countReviewRequiredEventDecisions(state)): PresidentialDecisionRoomSeverity {
-  const queue = state.presidentialReviewQueue;
-  if (!queue) return 'info';
-  if (requiredEventDecisionCount > 0) return 'blocking';
-  if (queue.criticalCount > 0) return 'critical';
-  return 'warning';
+function requiredReviewEventDecisions(state: LoadedGameState) {
+  return (state.pendingEventDecisions ?? []).filter((decision) =>
+    playerFactionMatch(decision.faction, state.player_faction ?? null)
+    && isRequiredPendingEventDecision(decision)
+  ).sort((a, b) => strictCompare(a.event_id, b.event_id));
+}
+
+type ReviewOfficerEvent = NonNullable<LoadedGameState['pendingOfficerEvents']>[number];
+
+function isCommandReviewOfficerEvent(event: ReviewOfficerEvent): boolean {
+  return event.type === 'order_modified'
+    || event.type === 'order_pushback'
+    || event.type === 'order_refused'
+    || event.type === 'order_exceeded'
+    || event.type === 'army_directive_pushback'
+    || event.type === 'army_co_proposes_op';
+}
+
+function isPersonnelReviewOfficerEvent(event: ReviewOfficerEvent): boolean {
+  return event.type === 'officer_available'
+    || event.type === 'replacement_suggested'
+    || event.type === 'officer_relieved';
+}
+
+function reviewOfficerEvents(
+  state: LoadedGameState,
+  predicate: (event: ReviewOfficerEvent) => boolean,
+): ReviewOfficerEvent[] {
+  return (state.pendingOfficerEvents ?? [])
+    .filter((event) => playerFactionMatch(event.faction, state.player_faction ?? null) && predicate(event))
+    .sort((a, b) => strictCompare(a.event_id, b.event_id));
 }
 
 function costToCardSeverity(severity: TurnAftermathCostSeverity): PresidentialDecisionRoomSeverity {
@@ -456,67 +490,61 @@ function actionForBriefingItem(item: CommandBriefingItemView, localizedActionLab
 function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
   const queue = state.presidentialReviewQueue;
   if (!queue || queue.pendingCount <= 0) return;
+  const requiredEventDecisions = requiredReviewEventDecisions(state);
   const eventDecisionCount = countReviewRequiredEventDecisions(state);
-  const pendingCount = eventDecisionCount
-    + queue.commandInterpretationCount
-    + queue.personnelDirectiveCount
-    + queue.operationOpportunityCount;
-  if (pendingCount <= 0) return;
-  const evidencePendingCount = Array.isArray(state.pendingEventDecisions)
-    ? pendingCount
-    : queue.pendingCount;
+  const personnelEvents = reviewOfficerEvents(state, isPersonnelReviewOfficerEvent);
+  const personnelCount = Array.isArray(state.pendingOfficerEvents)
+    ? personnelEvents.length
+    : queue.personnelDirectiveCount;
+  if (eventDecisionCount <= 0 && personnelCount <= 0) return;
 
-  const evidence: string[] = [t('decisionRoom.card.review.evidence.pending', { count: evidencePendingCount })];
-  if (eventDecisionCount > 0) evidence.push(t('decisionRoom.card.review.evidence.eventDecision', { count: eventDecisionCount }));
-  if (queue.commandInterpretationCount > 0) evidence.push(t('decisionRoom.card.review.evidence.commandReaction', { count: queue.commandInterpretationCount }));
-  if (queue.personnelDirectiveCount > 0) evidence.push(t('decisionRoom.card.review.evidence.personnel', { count: queue.personnelDirectiveCount }));
-  if (queue.operationOpportunityCount > 0) evidence.push(t('decisionRoom.card.review.evidence.opDossier', { count: queue.operationOpportunityCount }));
-
-  const route = eventDecisionCount > 0
-    ? {
+  if (eventDecisionCount > 0) {
+    cards.push({
+      id: 'review:pending',
+      category: 'decision',
+      severity: 'blocking',
+      title: t('decisionRoom.card.review.title'),
+      explanation: t('decisionRoom.card.review.explanation.blocking'),
+      sourceOwner: t('decisionRoom.card.review.sourceOwner'),
       sourceLabel: t('inbox.decisionRoom'),
       actionLabel: t('decisionRoom.action.openInbox'),
-      navigationTarget: { kind: 'inbox' } as PresidentialDecisionRoomNavigationTarget,
-      sourceHandoffTarget: undefined as PresidentialDecisionRoomNavigationTarget | undefined,
-    }
-    : queue.commandInterpretationCount > 0
-      ? {
-        sourceLabel: t('decisionRoom.card.pushback.sourceOwner'),
-        actionLabel: t('decisionRoom.action.reviewPushback'),
-        navigationTarget: { kind: 'decision-room', lens: 'command', cardId: 'pushback:player-army-co' } as PresidentialDecisionRoomNavigationTarget,
-        sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' } as PresidentialDecisionRoomNavigationTarget,
-      }
-      : queue.personnelDirectiveCount > 0
-        ? {
-          sourceLabel: t('decisionRoom.action.personnel'),
-          actionLabel: t('decisionRoom.action.personnel'),
-          navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' } as PresidentialDecisionRoomNavigationTarget,
-          sourceHandoffTarget: undefined as PresidentialDecisionRoomNavigationTarget | undefined,
-        }
-        : {
-          sourceLabel: t('inbox.decisionRoom'),
-          actionLabel: t('decisionRoom.action.openInbox'),
-          navigationTarget: { kind: 'inbox' } as PresidentialDecisionRoomNavigationTarget,
-          sourceHandoffTarget: undefined as PresidentialDecisionRoomNavigationTarget | undefined,
-        };
+      evidence: [
+        t('decisionRoom.card.review.evidence.pending', { count: eventDecisionCount }),
+        t('decisionRoom.card.review.evidence.eventDecision', { count: eventDecisionCount }),
+      ],
+      navigationTarget: { kind: 'inbox' },
+      countWeight: eventDecisionCount,
+      sourceIds: requiredEventDecisions.length > 0
+        ? requiredEventDecisions.map((decision) => decision.event_id)
+        : ['review-queue:required-events'],
+      urgencySort: 0,
+      sourceSort: 'review-required-events',
+    });
+  }
 
-  cards.push({
-    id: 'review:pending',
-    category: 'decision',
-    severity: toDecisionSeverity(state, eventDecisionCount),
-    title: t('decisionRoom.card.review.title'),
-    explanation: eventDecisionCount > 0
-      ? t('decisionRoom.card.review.explanation.blocking')
-      : t('decisionRoom.card.review.explanation.openWork'),
-    sourceOwner: t('decisionRoom.card.review.sourceOwner'),
-    sourceLabel: route.sourceLabel,
-    actionLabel: route.actionLabel,
-    evidence,
-    navigationTarget: route.navigationTarget,
-    ...(route.sourceHandoffTarget ? { sourceHandoffTarget: route.sourceHandoffTarget } : {}),
-    urgencySort: eventDecisionCount > 0 ? 0 : 10,
-    sourceSort: 'review',
-  });
+  if (personnelCount > 0) {
+    cards.push({
+      id: 'review:pending:personnel',
+      category: 'decision',
+      severity: 'warning',
+      title: t('decisionRoom.card.review.title'),
+      explanation: t('decisionRoom.card.review.explanation.openWork'),
+      sourceOwner: t('decisionRoom.card.review.sourceOwner'),
+      sourceLabel: t('decisionRoom.action.personnel'),
+      actionLabel: t('decisionRoom.action.personnel'),
+      evidence: [
+        t('decisionRoom.card.review.evidence.pending', { count: personnelCount }),
+        t('decisionRoom.card.review.evidence.personnel', { count: personnelCount }),
+      ],
+      navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+      countWeight: personnelCount,
+      sourceIds: personnelEvents.length > 0
+        ? personnelEvents.map((event) => event.event_id)
+        : ['review-queue:personnel-directive'],
+      urgencySort: 10,
+      sourceSort: 'review-personnel',
+    });
+  }
 }
 
 function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
@@ -745,6 +773,7 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
         cardId: `opportunity:${opportunity.proposal_id}`,
       },
       sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      sourceIds: [opportunity.proposal_id],
       ...(directive ? { directive } : {}),
       urgencySort: expires,
       sourceSort: opportunity.proposal_id,
@@ -780,6 +809,7 @@ function addSupplyVisibilityCard(state: LoadedGameState, cards: CandidateCard[])
 function addArmyCoPushbackCard(state: LoadedGameState, cards: CandidateCard[]): void {
   const view = buildPlayerArmyCoPushbackVisibility(state);
   if (!view || !view.hasSignal) return;
+  const commandEvents = reviewOfficerEvents(state, isCommandReviewOfficerEvent);
 
   const cardSeverity: PresidentialDecisionRoomSeverity = view.severity === 'blocking'
     ? 'blocking'
@@ -803,6 +833,10 @@ function addArmyCoPushbackCard(state: LoadedGameState, cards: CandidateCard[]): 
       cardId: 'pushback:player-army-co',
     },
     sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    ...(commandEvents.length > 0 ? {
+      countWeight: commandEvents.length,
+      sourceIds: commandEvents.map((event) => event.event_id),
+    } : {}),
     urgencySort: cardSeverity === 'blocking' ? 0 : 5,
     sourceSort: 'pushback:player-army-co',
   });
@@ -905,7 +939,20 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
     return strictCompare(a.id, b.id);
     });
 
+  const groupedEnclaves = new Map<string, CommandBriefingItemView[]>();
+  const ungrouped: CommandBriefingItemView[] = [];
   for (const item of items) {
+    if (item.briefingCategory === 'enclave' && item.target.type === 'enclaves') {
+      const key = `enclave:enclave-dashboard:${state.player_faction ?? ''}`;
+      const group = groupedEnclaves.get(key);
+      if (group) group.push(item);
+      else groupedEnclaves.set(key, [item]);
+    } else {
+      ungrouped.push(item);
+    }
+  }
+
+  for (const item of ungrouped) {
     const copy = resolveCommandBriefingItemCopy(item);
     const action = actionForBriefingItem(item, copy.actionLabel);
     // NOTE: briefing items do NOT carry a stop-op directive. The sim briefing target
@@ -927,6 +974,76 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
       navigationTarget: action.navigationTarget,
       urgencySort: 0,
       sourceSort: `${item.title}:${item.id}`,
+    });
+  }
+
+  for (const [groupKey, rawGroup] of [...groupedEnclaves.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+    const group = [...rawGroup].sort((a, b) => strictCompare(a.id, b.id));
+    if (group.length === 1) {
+      const item = group[0]!;
+      const copy = resolveCommandBriefingItemCopy(item);
+      const action = actionForBriefingItem(item, copy.actionLabel);
+      cards.push({
+        id: `briefing:${item.id}`,
+        category: 'briefing',
+        severity: item.severity === 'critical' ? 'critical' : item.severity === 'warning' ? 'warning' : 'info',
+        title: copy.title,
+        explanation: copy.detail,
+        sourceOwner: t('decisionRoom.card.briefing.sourceOwner'),
+        sourceLabel: briefingKindLabel(item.kind),
+        actionLabel: action.actionLabel,
+        evidence: [briefingCategoryLabel(item.category, item.kind)],
+        sourceIds: [item.id],
+        navigationTarget: action.navigationTarget,
+        urgencySort: 0,
+        sourceSort: `${item.title}:${item.id}`,
+      });
+      continue;
+    }
+
+    const copies = group.map((item) => ({ item, copy: resolveCommandBriefingItemCopy(item) }));
+    const criticalCount = group.filter((item) => item.severity === 'critical').length;
+    const warningCount = group.filter((item) => item.severity === 'warning').length;
+    const names = copies.map(({ item }) => getPlayerSafeEnclaveName(
+      item.target.label ?? item.subject?.label ?? item.target.enclaveId,
+    ));
+    const visibleNames = names.slice(0, 4);
+    const remainingCount = Math.max(0, names.length - visibleNames.length);
+    const nameList = remainingCount > 0
+      ? `${visibleNames.join(', ')} +${remainingCount}`
+      : visibleNames.join(', ');
+    const lead = copies[0]!;
+    const action = actionForBriefingItem(lead.item, lead.copy.actionLabel);
+    cards.push({
+      id: `briefing-group:${groupKey}`,
+      category: 'briefing',
+      severity: criticalCount > 0 ? 'critical' : warningCount > 0 ? 'warning' : 'info',
+      title: t('decisionRoom.card.enclaveSummary.title', { count: group.length }),
+      explanation: t('decisionRoom.card.enclaveSummary.explanation', {
+        count: group.length,
+        critical: t(
+          criticalCount === 1
+            ? 'decisionRoom.card.enclaveSummary.critical.one'
+            : 'decisionRoom.card.enclaveSummary.critical.many',
+          { count: criticalCount },
+        ),
+        warning: t(
+          warningCount === 1
+            ? 'decisionRoom.card.enclaveSummary.warning.one'
+            : 'decisionRoom.card.enclaveSummary.warning.many',
+          { count: warningCount },
+        ),
+        names: nameList,
+      }),
+      sourceOwner: t('decisionRoom.card.briefing.sourceOwner'),
+      sourceLabel: briefingKindLabel(lead.item.kind),
+      actionLabel: action.actionLabel,
+      evidence: copies.map(({ copy }) => `${copy.title}: ${copy.detail}`),
+      sourceIds: group.map((item) => item.id),
+      navigationTarget: action.navigationTarget,
+      countWeight: group.length,
+      urgencySort: 0,
+      sourceSort: groupKey,
     });
   }
 }
@@ -1687,7 +1804,35 @@ function decisionRoomOwnedTarget(card: CandidateCard): PresidentialDecisionRoomN
   };
 }
 
-function finalizeCards(cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
+function requiredCardIds(state: LoadedGameState): Set<string> {
+  const ids = new Set<string>();
+  const blockers = derivePresidentialBlockers(state, null);
+  for (const blocker of blockers) {
+    ids.add(blocker.id);
+    if (blocker.type === 'event_decision') ids.add('review:pending');
+    if (blocker.type === 'peace_plan') ids.add('manifest:peace_plan');
+    if (blocker.type === 'dayton_negotiation') ids.add('manifest:dayton_negotiation');
+    if (blocker.type === 'convoy_decision') ids.add('manifest:convoy_decision');
+    if (blocker.type === 'paramilitary_request') ids.add('paramilitary:pending');
+    if (blocker.type === 'autonomy_proposal' && blocker.id === 'command:review-proposal:historical-ops') {
+      for (const review of state.pendingProposalReviews ?? []) {
+        if (parseHistoricalOperationAuthorizationAction(review.proposed_action)) {
+          ids.add(`command:review-proposal:${review.id}`);
+        }
+      }
+    }
+  }
+  const playerFaction = state.player_faction ?? null;
+  for (const offer of state.pendingCounterOffers ?? []) {
+    if (!playerFaction || !offer.targetFaction || offer.targetFaction === playerFaction) {
+      ids.add(`counter-offer:${offer.id}`);
+    }
+  }
+  return ids;
+}
+
+function finalizeCards(state: LoadedGameState, cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
+  const requiredIds = requiredCardIds(state);
   return cards
     .sort(compareCandidates)
     .map((card, index) => {
@@ -1698,12 +1843,22 @@ function finalizeCards(cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
         id: card.id,
         category: card.category,
         severity: card.severity,
+        priorityBand: classifyPresidentialPriority({
+          required: requiredIds.has(card.id),
+          recordOnly: card.category === 'turn' || card.category === 'cost' || card.category === 'memory',
+          hasPresidentialLever: Boolean(card.directive)
+            || card.category === 'decision'
+            || card.category === 'counter_offer'
+            || card.category === 'opportunity'
+            || card.category === 'command',
+        }),
         title: card.title,
         explanation: card.explanation,
         sourceOwner: card.sourceOwner,
         sourceLabel: card.sourceLabel,
         actionLabel: decisionRoomOwned && !card.preserveActionLabel ? t('decisionRoom.action.review') : card.actionLabel,
         evidence: card.evidence,
+        ...(card.sourceIds ? { sourceIds: [...card.sourceIds].sort(strictCompare) } : {}),
         navigationTarget,
         ...(sourceHandoffTarget ? { sourceHandoffTarget } : {}),
         ...(card.countWeight != null ? { countWeight: card.countWeight } : {}),
@@ -1713,9 +1868,8 @@ function finalizeCards(cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
     });
 }
 
-function isHardAdvanceBlockingCard(card: Pick<PresidentialDecisionRoomCard, 'category' | 'severity'>): boolean {
-  return card.severity === 'blocking'
-    && (card.category === 'decision' || card.category === 'counter_offer');
+function isHardAdvanceBlockingCard(card: Pick<PresidentialDecisionRoomCard, 'priorityBand'>): boolean {
+  return card.priorityBand === 'required';
 }
 
 function buildAdvanceReadiness(
@@ -1723,7 +1877,8 @@ function buildAdvanceReadiness(
   cards: PresidentialDecisionRoomCard[],
 ): PresidentialDecisionRoomAdvanceReadiness {
   const eligible = cards.filter((card) =>
-    (card.category === 'decision'
+    (card.priorityBand === 'required' || card.priorityBand === 'recommended')
+    && (card.category === 'decision'
       || card.category === 'counter_offer'
       || card.category === 'opportunity'
       || card.category === 'command'
@@ -1766,10 +1921,6 @@ function buildAdvanceReadiness(
     blockedByExistingSystems,
     items,
   };
-}
-
-function isUrgentCard(card: PresidentialDecisionRoomCard): boolean {
-  return card.severity === 'blocking' || card.severity === 'critical';
 }
 
 interface SourceHandoffDescriptor {
@@ -1868,11 +2019,16 @@ function describeSourceHandoffTarget(
   return null;
 }
 
-function sourceHandoffSummary(count: number, urgentCount: number): string {
+function sourceHandoffSummary(count: number, priorityCounts: PresidentialPriorityCounts): string {
   const itemLabel = t(count === 1 ? 'decisionRoom.noun.item.one' : 'decisionRoom.noun.item.many');
-  return urgentCount > 0
-    ? t('decisionRoom.summary.withUrgent', { count, noun: itemLabel, urgentCount })
-    : t('decisionRoom.summary.countOnly', { count, noun: itemLabel });
+  return t('decisionRoom.summary.withPriorityBands', {
+    count,
+    noun: itemLabel,
+    required: priorityCounts.required,
+    recommended: priorityCounts.recommended,
+    monitor: priorityCounts.monitor,
+    record: priorityCounts.record,
+  });
 }
 
 function cardWeight(card: Pick<PresidentialDecisionRoomCard, 'countWeight'>): number {
@@ -1883,10 +2039,6 @@ function cardWeight(card: Pick<PresidentialDecisionRoomCard, 'countWeight'>): nu
 
 function weightedCardCount(cards: readonly PresidentialDecisionRoomCard[]): number {
   return cards.reduce((sum, card) => sum + cardWeight(card), 0);
-}
-
-function weightedUrgentCount(cards: readonly PresidentialDecisionRoomCard[]): number {
-  return cards.reduce((sum, card) => sum + (isUrgentCard(card) ? cardWeight(card) : 0), 0);
 }
 
 export function buildPresidentialDecisionRoomSourceHandoffs(
@@ -1920,13 +2072,13 @@ export function buildPresidentialDecisionRoomSourceHandoffs(
     })
     .map((group) => {
       const count = weightedCardCount(group.cards);
-      const urgentCount = weightedUrgentCount(group.cards);
+      const priorityCounts = countPresidentialPriorityBands(group.cards);
       return {
         id: group.id,
         label: group.label,
-        summary: sourceHandoffSummary(count, urgentCount),
+        summary: sourceHandoffSummary(count, priorityCounts),
         count,
-        urgentCount,
+        priorityCounts,
         cardIds: group.cards.map((card) => card.id),
         actionLabel: group.actionLabel,
         navigationTarget: group.navigationTarget,
@@ -1945,7 +2097,7 @@ function buildLens(
     id,
     label,
     count,
-    urgentCount: weightedUrgentCount(cards),
+    priorityCounts: countPresidentialPriorityBands(cards),
     topCardId: topCard?.id ?? null,
     actionLabel: topCard?.actionLabel ?? t('decisionRoom.action.review'),
     navigationTarget: topCard?.navigationTarget ?? { kind: 'none' },
@@ -1994,6 +2146,7 @@ function buildActiveDossier(
     sourceLabel: card.sourceLabel,
     actionLabel: card.actionLabel,
     evidence: card.evidence,
+    ...(card.sourceIds ? { sourceIds: card.sourceIds } : {}),
     navigationTarget: card.navigationTarget,
     ...(card.directive ? { directive: card.directive } : {}),
     sourceHandoff,
@@ -2025,7 +2178,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
         items: [],
       },
       metrics: {
-        urgentCount: 0,
+        priorityCounts: emptyPresidentialPriorityCounts(),
         pendingReviews: 0,
         opportunities: 0,
         hardTurns: 0,
@@ -2046,7 +2199,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
         items: [],
       },
       metrics: {
-        urgentCount: 0,
+        priorityCounts: emptyPresidentialPriorityCounts(),
         pendingReviews: 0,
         opportunities: 0,
         hardTurns: 0,
@@ -2076,7 +2229,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addCampaignCostCard(state, osidNameMap, candidates);
   addChronicleCard(state, candidates);
 
-  const cards = finalizeCards(candidates);
+  const cards = finalizeCards(state, candidates);
   const advanceReadiness = buildAdvanceReadiness(state, cards);
   const lenses = buildLenses(cards);
   const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(cards);
@@ -2087,13 +2240,13 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
 
   return {
     hasPlayerFaction: true,
-    emptyState: cards.length === 0 ? 'No urgent command priorities.' : null,
+    emptyState: cards.length === 0 ? 'No command priorities.' : null,
     cards,
     lenses,
     activeDossier,
     advanceReadiness,
     metrics: {
-      urgentCount: weightedUrgentCount(cards),
+      priorityCounts: countPresidentialPriorityBands(cards),
       pendingReviews: weightedCardCount(livePendingReviewCards),
       opportunities: (state.operationOpportunityProposals ?? []).filter(isReviewableOperationOpportunity).length,
       hardTurns: cards.filter((card) => card.category === 'turn').length,

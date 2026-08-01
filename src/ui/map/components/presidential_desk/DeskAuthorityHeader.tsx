@@ -21,6 +21,7 @@
  * one-for-one with every directive issued.
  */
 import type { LoadedGameState } from '../../data/types';
+import { deriveInboxItems } from '../../data/inboxItems';
 import { t } from '../../i18n';
 import {
   AUTHOR_OP_COST,
@@ -91,6 +92,11 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
   const pct = max > 0 ? Math.max(0, Math.min(100, Math.round((current / max) * 100))) : 0;
   const lowAuthority = current < MIN_LEVER_COST;
   const atCapacity = max > 0 && current >= max;
+  const nearCapacity = max > 0 && current / max >= 0.9;
+  const filedPresidentialAction = deriveInboxItems(state, null).some((item) =>
+    item.priorityBand === 'required' || item.priorityBand === 'recommended'
+  );
+  const nearCapacityQuiet = nearCapacity && !filedPresidentialAction;
 
   const gaugeColor = pct >= 60 ? 'bg-emerald-400/70' : pct >= 30 ? 'bg-amber-400/70' : 'bg-red-400/70';
   const valueColor = pct >= 60 ? 'text-emerald-300' : pct >= 30 ? 'text-amber-300' : 'text-red-300';
@@ -146,6 +152,15 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
             className="mt-2 border border-red-400/40 bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-200"
           >
             {t('deskAuthority.lowHint')}
+          </div>
+        )}
+        {nearCapacityQuiet && (
+          <div
+            role="note"
+            data-testid="desk-authority-cadence-hold"
+            className="mt-2 border border-sky-300/30 bg-sky-500/10 px-2 py-1.5 text-xs leading-relaxed text-sky-100"
+          >
+            {t('deskAuthority.cadenceHold')}
           </div>
         )}
         {atCapacity && (
