@@ -834,3 +834,13 @@ registerMigration({
         ensureRecord(disp, 'displacement_flows_by_osid');
     },
 });
+
+registerMigration({
+    version: 37,
+    description: 'Persist sector intelligence and the materialized current-turn corps-front standing OG snapshot. Sensitive: no; missing legacy fields begin as deterministic empty records.',
+    migrate: (state) => {
+        const military = asRecord(state.military);
+        ensureRecord(military, 'sector_intel');
+        ensureRecord(military, 'corps_front_sectors');
+    },
+});

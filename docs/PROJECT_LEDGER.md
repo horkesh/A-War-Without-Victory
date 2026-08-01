@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-08-01] refactor(state): close persistence classification
+
+**Type:** R5 Phase 1 persistence contract / schema migration / deterministic serialization / Electron runtime boundary / canonical docs / tests.
+
+**Fix:** Closed the Phase 0 field inventory with zero unclassified or serializer-policy mismatches. Schema v37 now requires and deeply validates `sector_intel` as cross-turn belief memory and `corps_front_sectors` as the materialized current-turn standing-OG/AoR snapshot; supported legacy saves preserve either record when present and receive deterministic empty records when absent. Formation sector assignments and sub-segment identifiers remain canonical. This follows an independent architecture block on cold CFS reconstruction: the live sector builder can relocate brigades and therefore cannot be treated as an observationally pure load projection. Canonical serialization now excludes exactly five disposable military caches (`active_offensives_against_corps`, `home_distance_cache`, `militia_garrison`, `sector_combat_ratings`, `unresolved_sector_brigades`). Electron maintains separate runtime IPC and canonical disk snapshots, writes only canonical bytes, and rolls both snapshots back on autosave failure. Fixed the sector logistics-priority IPC path to read `state.military.corps_front_sectors`. Updated the Systems Manual, War Specification, and ADR-0006 persistence boundary; `FORAWWV.md` was not changed.
+
+**Verification:** The final Option A matrix passed 15 files / 347 tests, including migration rejection/round-trip/drift, field classification, canonical/runtime serialization, exact startup truth, player-visible fog/map projection, command continuity, Electron persistence rollback, and two distinct 52-week seeds with byte-identical uninterrupted-versus-resumed final saves and replay tails. `npm.cmd run qa:electron-runtime-contracts` passed 8 files / 87 tests after building and requiring the actual CommonJS desktop bundle. `npm.cmd run typecheck`, `npm.cmd run desktop:startup-snapshot:check`, and `git diff --check` passed. Migration drift reports zero anonymous defaults. Exact pre-refresh comparison across `apr1992_52w`, `baseline_ops_4w`, and `noop_4w` proved six behavior/report artifacts byte-identical in every scenario; only `final_save.json` and `run_summary.json` changed, after which the canonical baseline update and a fresh `npm.cmd run test:baselines` passed.
+
+**Scope/determinism:** Save schema, persisted standing-OG/intelligence ownership, deterministic serializer split, Electron in-memory/disk boundary, diagnostics, fixtures, generated startup/baseline hashes, and narrow canonical documentation only. No combat formula, bot policy, scenario/event content, territorial outcome, report content, randomness, timestamps, locale ordering, package/version/tag/release state, or `FORAWWV.md` changed.
+
+---
+
 ## [2026-08-01] test(engine): inventory quality and performance owners
 
 **Type:** R5 Phase 0 engine-quality baseline / deterministic diagnostics / performance instrumentation / tests / roadmap status.

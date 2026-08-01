@@ -1,8 +1,8 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 36,
-  "registered_migration_count": 36,
-  "strict_required_field_count": 77,
+  "latest_schema_version": 37,
+  "registered_migration_count": 37,
+  "strict_required_field_count": 79,
   "anonymous_default_count": 0,
   "fields": [],
   "migrations": [
@@ -149,6 +149,10 @@
     {
       "version": 36,
       "description": "Persist displacement.displacement_flows_by_osid (per-OSID flow tally) read-model "
+    },
+    {
+      "version": 37,
+      "description": "Persist sector intelligence and the materialized current-turn corps-front standing OG snapshot. Sensitive: no; missing legacy fields begin as deterministic empty records."
     }
   ],
   "required_fields": [
@@ -459,6 +463,14 @@
     {
       "version": 36,
       "path": "displacement.displacement_flows_by_osid"
+    },
+    {
+      "version": 37,
+      "path": "military.corps_front_sectors"
+    },
+    {
+      "version": 37,
+      "path": "military.sector_intel"
     }
   ]
 }

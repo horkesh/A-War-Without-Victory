@@ -41,11 +41,13 @@ describe('desktop persistence contract', () => {
     const helperEnd = source.indexOf('function ensureCorpsCommandEntry', helperStart);
     const helper = source.slice(helperStart, helperEnd);
 
-    expect(helper).toContain('currentGameStateJson = sim.serializeState(state);');
+    expect(helper).toContain('setCurrentStateSnapshots(sim, state);');
     expect(helper).toContain('autoSave();');
-    expect(helper.indexOf('autoSave();')).toBeGreaterThan(helper.indexOf('currentGameStateJson = sim.serializeState(state);'));
+    expect(helper.indexOf('autoSave();')).toBeGreaterThan(helper.indexOf('setCurrentStateSnapshots(sim, state);'));
     expect(helper).toContain('sendGameStateToRenderer(currentGameStateJson);');
     expect(helper).not.toContain('sendGameStateToRenderer(currentGameStateJson, excludeSender);');
+    expect(helper).toContain('currentGameStateJson = previousGameStateJson;');
+    expect(helper).toContain('currentCanonicalSaveJson = previousCanonicalSaveJson;');
   });
 
   it('does not report a canonical mutation as successful when autosave fails', () => {
@@ -101,6 +103,36 @@ describe('desktop persistence contract', () => {
     expect(helper).toContain('app.isPackaged');
     expect(helper).toContain("app.getPath('userData')");
     expect(helper).toContain("path.join(root, 'saves')");
+  });
+
+  it('separates runtime renderer bytes from canonical disk-save bytes', () => {
+    const source = readFileSync(
+      resolve(process.cwd(), 'src/desktop/electron-main.cjs'),
+      'utf8',
+    );
+    const snapshotsStart = source.indexOf('function setCurrentStateSnapshots');
+    const snapshotsEnd = source.indexOf('function writeCanonicalCurrentState', snapshotsStart);
+    const snapshots = source.slice(snapshotsStart, snapshotsEnd);
+    const saveStart = source.indexOf('function writeSaveFile');
+    const saveEnd = source.indexOf('function autoSave', saveStart);
+    const save = source.slice(saveStart, saveEnd);
+
+    expect(snapshots).toContain('sim.serializeRuntimeState(state)');
+    expect(snapshots).toContain('sim.serializeState(state)');
+    expect(snapshots).toContain('currentGameStateJson = runtimeStateJson;');
+    expect(snapshots).toContain('currentCanonicalSaveJson = canonicalSaveJson;');
+    expect(save).toContain("fs.writeFileSync(filePath, currentCanonicalSaveJson, 'utf-8');");
+    expect(save).not.toContain('currentGameStateJson');
+  });
+
+  it('exports the runtime serializer through the Electron simulation bundle entry', () => {
+    const source = readFileSync(
+      resolve(process.cwd(), 'src/desktop/desktop_sim.ts'),
+      'utf8',
+    );
+
+    expect(source).toContain("import { deserializeState, serializeRuntimeState, serializeState } from '../state/serialize.js';");
+    expect(source).toMatch(/export \{[\s\S]*serializeRuntimeState,[\s\S]*serializeState,[\s\S]*\};/);
   });
 
   it('autonomy and proposal IPC writes keep currentGameStateJson on the canonical serializer path', () => {

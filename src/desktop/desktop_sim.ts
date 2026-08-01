@@ -5,6 +5,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { loadTerrainScalars } from '../map/terrain_scalars_node.js';
@@ -46,7 +47,7 @@ import {
 import type { FactionId, GameState } from '../state/game_state.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass } from '../state/recruitment_types.js';
-import { deserializeState, serializeState } from '../state/serialize.js';
+import { deserializeState, serializeRuntimeState, serializeState } from '../state/serialize.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { asArray, asRecord } from '../state/schema_validators.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
@@ -636,7 +637,13 @@ export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: str
 }
 
 /** Re-export for main process (serialize/deserialize state for IPC). */
-export { deserializeState, resolveEventDecision, resolvePlayerParamilitaryDecisions, serializeState };
+export {
+    deserializeState,
+    resolveEventDecision,
+    resolvePlayerParamilitaryDecisions,
+    serializeRuntimeState,
+    serializeState,
+};
 export {
     PLAYER_DECISION_FAMILIES,
     summarizePlayerDecisions,
@@ -661,7 +668,6 @@ function getReserveRequestId(request: {
 
 // ── Operation Prediction Query ─────────────────────────────────────────
 
-import { loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
 import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
 import { buildTerrainCache } from '../sim/combat/combat_predictor.js';
 import {

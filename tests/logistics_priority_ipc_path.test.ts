@@ -33,24 +33,25 @@ function makeState(): GameState {
             front_pressure: {},
             militia_pools: {},
             logistics_priority: {},
-        } as GameState['military'],
+            sector_intel: {},
+            corps_front_sectors: {
+                [SECTOR_ID]: {
+                    sector_id: SECTOR_ID,
+                    faction: 'RBiH',
+                    edge_ids: EDGE_IDS,
+                },
+            },
+        } as unknown as GameState['military'],
         political: { political_controllers: {} } as GameState['political'],
         displacement: {} as GameState['displacement'],
-        corps_front_sectors: {
-            [SECTOR_ID]: {
-                sector_id: SECTOR_ID,
-                faction: 'RBiH',
-                edge_ids: EDGE_IDS,
-            },
-        },
-    } as unknown as GameState;
+    };
 }
 
 function stageLogisticsPriorityOnCanonicalPath(
     state: GameState,
     payload: { faction: string; sectorId: string; priority: number },
 ): void {
-    const sectors = (state as GameState & { corps_front_sectors?: Record<string, { edge_ids?: string[] }> }).corps_front_sectors;
+    const sectors = state.military.corps_front_sectors;
     const sector = sectors?.[payload.sectorId];
     if (!sector) throw new Error(`Unknown sector: ${payload.sectorId}`);
     if (!state.military.logistics_priority) state.military.logistics_priority = {};
@@ -81,6 +82,8 @@ describe('stage-logistics-priority IPC path', () => {
         const handler = source.slice(handlerStart, handlerEnd);
 
         expect(handler).toContain('state.military.logistics_priority');
+        expect(handler).toContain('state.military.corps_front_sectors');
         expect(handler).not.toContain('state.logistics_priority');
+        expect(handler).not.toContain('state.corps_front_sectors');
     });
 });

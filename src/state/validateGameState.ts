@@ -87,6 +87,9 @@ const BRIGADE_MOVEMENT_STATUSES = ['deployed', 'packing', 'in_transit', 'unpacki
 const BRIGADE_MOVEMENT_STANCES = ['combat', 'column'] as const;
 const BRIGADE_DEPLOY_ACTIONS = ['deploy', 'undeploy'] as const;
 const BRIGADE_POSTURES = ['hold', 'defend', 'defend_at_all_costs', 'elastic_defense', 'counterattack', 'dig_in', 'attack', 'assault'] as const;
+const SECTOR_INTEL_STRENGTH_CATEGORIES = ['unknown', 'thin', 'moderate', 'dense', 'fortress'] as const;
+const SECTOR_INTEL_POSTURES = ['unknown', 'defensive', 'entrenched', 'offensive_prep'] as const;
+const SECTOR_INTEL_SOURCES = ['passive_contact', 'patrol', 'scout', 'combat'] as const;
 const OP_INJECTION_CHECKS = [
     'staging_adjacency',
     'chain_gap',
@@ -1003,6 +1006,170 @@ function validateFiniteNonNegativeNumberRecord(value: unknown, path: string, err
         if (!isFiniteNonNegativeNumber(entry)) {
             errors.push(`${path}.${key} must be a finite non-negative number`);
         }
+    }
+}
+
+function validateCorpsFrontSectors(value: unknown, errors: string[]): void {
+    const rootPath = 'military.corps_front_sectors';
+    if (!isRecord(value)) {
+        errors.push(`${rootPath} must be an object`);
+        return;
+    }
+    for (const sectorKey of Object.keys(value).sort(strictCompare)) {
+        const sector = value[sectorKey];
+        const path = `${rootPath}.${sectorKey}`;
+        if (!isRecord(sector)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        for (const field of ['sector_id', 'corps_id', 'faction'] as const) {
+            if (!isNonEmptyString(sector[field])) {
+                errors.push(`${path}.${field} must be a non-empty string`);
+            }
+        }
+        if (sector.sector_id !== sectorKey) {
+            errors.push(`${path}.sector_id must match its record key`);
+        }
+        for (const field of [
+            'opposing_factions',
+            'edge_ids',
+            'territory_osids',
+            'assigned_brigade_ids',
+            'reserve_brigade_ids',
+        ] as const) {
+            if (!isStringArray(sector[field])) {
+                errors.push(`${path}.${field} must be a string array`);
+            }
+        }
+        if (sector.rear_brigade_ids !== undefined && !isStringArray(sector.rear_brigade_ids)) {
+            errors.push(`${path}.rear_brigade_ids must be a string array when present`);
+        }
+        if (!isNonNegativeInteger(sector.length_edges)) {
+            errors.push(`${path}.length_edges must be a non-negative integer`);
+        }
+        for (const field of ['density', 'threat_ratio', 'defensive_power'] as const) {
+            if (!isFiniteNonNegativeNumber(sector[field])) {
+                errors.push(`${path}.${field} must be a finite non-negative number`);
+            }
+        }
+        if (!isSectorStanceValue(sector.sector_stance)) {
+            errors.push(`${path}.sector_stance must be one of: ${SECTOR_STANCES.join(', ')}`);
+        }
+        if (sector.stance_source !== 'bot' && sector.stance_source !== 'player') {
+            errors.push(`${path}.stance_source must be bot or player`);
+        }
+        if (sector.unstaffed_front !== undefined && typeof sector.unstaffed_front !== 'boolean') {
+            errors.push(`${path}.unstaffed_front must be a boolean when present`);
+        }
+        if (sector.must_hold !== undefined && typeof sector.must_hold !== 'boolean') {
+            errors.push(`${path}.must_hold must be a boolean when present`);
+        }
+        if (sector.must_hold_source !== undefined
+            && !['scenario', 'bot', 'player'].includes(sector.must_hold_source as string)) {
+            errors.push(`${path}.must_hold_source must be scenario, bot, or player when present`);
+        }
+        for (const field of ['must_hold_reason', 'display_name'] as const) {
+            if (sector[field] !== undefined && !isNonEmptyString(sector[field])) {
+                errors.push(`${path}.${field} must be a non-empty string when present`);
+            }
+        }
+        if (!Array.isArray(sector.sub_segments)) {
+            errors.push(`${path}.sub_segments must be an array`);
+            continue;
+        }
+        sector.sub_segments.forEach((subSegment, index) => {
+            const subPath = `${path}.sub_segments[${index}]`;
+            if (!isRecord(subSegment)) {
+                errors.push(`${subPath} must be an object`);
+                return;
+            }
+            if (!isNonEmptyString(subSegment.sub_segment_id)) {
+                errors.push(`${subPath}.sub_segment_id must be a non-empty string`);
+            }
+            for (const field of ['edge_ids', 'friendly_osids', 'enemy_osids', 'primary_brigade_ids'] as const) {
+                if (!isStringArray(subSegment[field])) {
+                    errors.push(`${subPath}.${field} must be a string array`);
+                }
+            }
+            if (!isNonNegativeInteger(subSegment.length_edges)) {
+                errors.push(`${subPath}.length_edges must be a non-negative integer`);
+            }
+            if (subSegment.gap !== undefined && typeof subSegment.gap !== 'boolean') {
+                errors.push(`${subPath}.gap must be a boolean when present`);
+            }
+        });
+    }
+}
+
+function validateSectorIntel(value: unknown, errors: string[]): void {
+    const rootPath = 'military.sector_intel';
+    if (!isRecord(value)) {
+        errors.push(`${rootPath} must be an object when present`);
+        return;
+    }
+    for (const sectorId of Object.keys(value).sort(strictCompare)) {
+        const records = value[sectorId];
+        const sectorPath = `${rootPath}.${sectorId}`;
+        if (!Array.isArray(records)) {
+            errors.push(`${sectorPath} must be an array`);
+            continue;
+        }
+        records.forEach((record, index) => {
+            const path = `${sectorPath}[${index}]`;
+            if (!isRecord(record)) {
+                errors.push(`${path} must be an object`);
+                return;
+            }
+            for (const field of ['enemy_sector_id', 'enemy_faction', 'enemy_corps_id'] as const) {
+                if (!isNonEmptyString(record[field])) {
+                    errors.push(`${path}.${field} must be a non-empty string`);
+                }
+            }
+            for (const field of ['front_edge_count', 'turns_in_contact', 'last_updated_turn'] as const) {
+                if (!isNonNegativeInteger(record[field])) {
+                    errors.push(`${path}.${field} must be a non-negative integer`);
+                }
+            }
+            if (!SECTOR_INTEL_STRENGTH_CATEGORIES.includes(record.strength_category as typeof SECTOR_INTEL_STRENGTH_CATEGORIES[number])) {
+                errors.push(`${path}.strength_category must be one of: ${SECTOR_INTEL_STRENGTH_CATEGORIES.join(', ')}`);
+            }
+            if (!SECTOR_INTEL_POSTURES.includes(record.posture_observed as typeof SECTOR_INTEL_POSTURES[number])) {
+                errors.push(`${path}.posture_observed must be one of: ${SECTOR_INTEL_POSTURES.join(', ')}`);
+            }
+            if (typeof record.offensive_signs !== 'boolean') {
+                errors.push(`${path}.offensive_signs must be a boolean`);
+            }
+            if (!isFiniteNumber(record.confidence) || record.confidence < 0 || record.confidence > 1) {
+                errors.push(`${path}.confidence must be a finite number in [0,1]`);
+            }
+            if (!isStringArray(record.visible_brigade_ids)) {
+                errors.push(`${path}.visible_brigade_ids must be a string array`);
+            }
+            if (record.osid_confidence !== undefined) {
+                const osidEntries = record.osid_confidence;
+                if (!Array.isArray(osidEntries)) {
+                    errors.push(`${path}.osid_confidence must be an array when present`);
+                } else {
+                    osidEntries.forEach((entry, osidIndex) => {
+                        const osidPath = `${path}.osid_confidence[${osidIndex}]`;
+                        if (!isRecord(entry)) {
+                            errors.push(`${osidPath} must be an object`);
+                            return;
+                        }
+                        if (!isNonEmptyString(entry.osid)) {
+                            errors.push(`${osidPath}.osid must be a non-empty string`);
+                        }
+                        if (!isFiniteNumber(entry.confidence) || entry.confidence < 0 || entry.confidence > 1) {
+                            errors.push(`${osidPath}.confidence must be a finite number in [0,1]`);
+                        }
+                        if (!Array.isArray(entry.sources)
+                            || entry.sources.some((source) => !SECTOR_INTEL_SOURCES.includes(source as typeof SECTOR_INTEL_SOURCES[number]))) {
+                            errors.push(`${osidPath}.sources must contain only: ${SECTOR_INTEL_SOURCES.join(', ')}`);
+                        }
+                    });
+                }
+            }
+        });
     }
 }
 
@@ -3313,6 +3480,8 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     // every load. Absence must NOT hard-reject a same-version v36 state (the Codex
     // P1 load-break); a present value is still type-checked.
     { version: 36, path: 'displacement.displacement_flows_by_osid', check: isRecord, optionalWhenAbsent: true },
+    { version: 37, path: 'military.corps_front_sectors', check: isRecord },
+    { version: 37, path: 'military.sector_intel', check: isRecord },
 ];
 
 /**
@@ -3647,6 +3816,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'active_offensives_against_corps' in military && military.active_offensives_against_corps !== undefined) {
         validateNonNegativeIntegerRecord(military.active_offensives_against_corps, 'military.active_offensives_against_corps', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'corps_front_sectors' in military && military.corps_front_sectors !== undefined) {
+        validateCorpsFrontSectors(military.corps_front_sectors, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'sector_intel' in military && military.sector_intel !== undefined) {
+        validateSectorIntel(military.sector_intel, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'casualty_ledger' in military && military.casualty_ledger !== undefined) {
         validateCasualtyLedger(military.casualty_ledger, errors);

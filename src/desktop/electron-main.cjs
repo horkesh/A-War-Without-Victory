@@ -217,8 +217,10 @@ function getAppIconPath() {
   return path.join(getBaseDir(), 'build', 'icon.png');
 }
 
-/** In-memory game state for "play myself". Set by load-scenario or load-state; updated by advance-turn. */
+/** Full runtime snapshot for IPC/readback/renderer projection. Never written to disk. */
 let currentGameStateJson = null;
+/** Canonical persistence snapshot with runtime-only projections removed. */
+let currentCanonicalSaveJson = null;
 let mainWindow = null;
 let tacticalMapWindow = null;
 const CAMPAIGN_REPLACEMENT_UPDATE = Object.freeze({ campaignReplacement: true });
@@ -392,13 +394,22 @@ function readCanonicalCurrentState(sim) {
   return sim.deserializeState(currentGameStateJson);
 }
 
+function setCurrentStateSnapshots(sim, state) {
+  const runtimeStateJson = sim.serializeRuntimeState(state);
+  const canonicalSaveJson = sim.serializeState(state);
+  currentGameStateJson = runtimeStateJson;
+  currentCanonicalSaveJson = canonicalSaveJson;
+}
+
 function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options = {}) {
   const previousGameStateJson = currentGameStateJson;
-  currentGameStateJson = sim.serializeState(state);
+  const previousCanonicalSaveJson = currentCanonicalSaveJson;
+  setCurrentStateSnapshots(sim, state);
   try {
     autoSave();
   } catch (error) {
     currentGameStateJson = previousGameStateJson;
+    currentCanonicalSaveJson = previousCanonicalSaveJson;
     throw error;
   }
   if (metadata) {
@@ -1073,7 +1084,7 @@ function createMainWindow(options = {}) {
               if (result.canceled || !result.filePaths.length) return;
               const sim = getDesktopSim();
               const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
-              currentGameStateJson = sim.serializeState(state);
+              setCurrentStateSnapshots(sim, state);
               liveReplayManifestFrames = [];
               sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
             } catch (e) { console.error('Load scenario failed:', e); }
@@ -1086,7 +1097,7 @@ function createMainWindow(options = {}) {
               if (result.canceled || !result.filePaths.length) return;
               const sim = getDesktopSim();
               const { state } = await sim.loadStateFromPath(result.filePaths[0]);
-              currentGameStateJson = sim.serializeState(state);
+              setCurrentStateSnapshots(sim, state);
               liveReplayManifestFrames = [];
               // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
               const manifestJson = readReplaySaveManifestSidecar(result.filePaths[0]);
@@ -1171,7 +1182,7 @@ async function runPackagedRuntimeProbe() {
 
   const sim = getDesktopSim();
   const { state } = await sim.startNewCampaign(getBaseDir(), 'RBiH');
-  currentGameStateJson = sim.serializeState(state);
+  setCurrentStateSnapshots(sim, state);
   const probeTurnReport = {
     probe: 'awwv_turn_report_probe',
     player_faction: state?.meta?.player_faction ?? null,
@@ -1350,8 +1361,8 @@ async function runPackagedRuntimeProbe() {
   // the packaged renderer.
   state.meta.game_over = true;
   state.meta.outcome = 'timeout_stalemate';
-  const endgameStateJson = sim.serializeState(state);
-  currentGameStateJson = endgameStateJson;
+  setCurrentStateSnapshots(sim, state);
+  const endgameStateJson = currentGameStateJson;
 
   const { win: endgameProbeWindow, targetUrl: endgameMapUrl } = createTacticalMapWindow({
     mode: 'operational',
@@ -1744,13 +1755,13 @@ function getSavesDir() {
   return path.join(root, 'saves');
 }
 
-/** Write currentGameStateJson to the writable saves directory. Returns the file path. */
+/** Write canonical save bytes to the writable saves directory. Returns the file path. */
 function writeSaveFile(filename) {
-  if (!currentGameStateJson) throw new Error('No game loaded');
+  if (!currentCanonicalSaveJson) throw new Error('No game loaded');
   const savesDir = getSavesDir();
   fs.mkdirSync(savesDir, { recursive: true });
   const filePath = path.join(savesDir, filename);
-  fs.writeFileSync(filePath, currentGameStateJson, 'utf-8');
+  fs.writeFileSync(filePath, currentCanonicalSaveJson, 'utf-8');
   return filePath;
 }
 
@@ -2029,7 +2040,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
-      currentGameStateJson = sim.serializeState(state);
+      setCurrentStateSnapshots(sim, state);
       liveReplayManifestFrames = [];
       sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
       return { ok: true };
@@ -2070,7 +2081,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const { state } = await sim.loadStateFromPath(result.filePaths[0]);
-      currentGameStateJson = sim.serializeState(state);
+      setCurrentStateSnapshots(sim, state);
       liveReplayManifestFrames = [];
       // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
       // Carried alongside the state so the VerdictScreen Replay tab works
@@ -2482,7 +2493,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const sector = state.corps_front_sectors?.[sectorId];
+      const sector = state.military.corps_front_sectors?.[sectorId];
       if (!sector) {
         return { ok: false, error: `Unknown sector: ${sectorId}` };
       }

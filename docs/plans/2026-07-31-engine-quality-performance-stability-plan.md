@@ -21,7 +21,7 @@
 
 1. Optional-state work ends when every field is classified as required-persisted, optional-persisted, derived/transient, compatibility-only, or dead. It is not an endless field-by-field lane.
 2. A field becomes required only with a materialized runtime default, migration, validator rejection tests, and round-trip proof.
-3. Derived sector/front/combat caches remain outside saves.
+3. The five disposable military caches remain outside saves; `corps_front_sectors` plus formation sector/sub-segment assignments are the explicit materialized standing-OG persistence exception.
 4. Performance selection is profile-driven. No speculative cache or mutable collection may cross a deterministic boundary.
 5. The historical target remains a mean below 100 ms per simulated turn on the recorded reference machine. Progress is also accepted only when full-run and local-owner timings move in the same direction.
 6. Every generated file is exactly one of: committed static input, committed golden output, retained research evidence, untracked diagnostic, or transient package output.
@@ -117,10 +117,10 @@ npm.cmd run typecheck
 - Modify `tests/game_state_field_classification.test.ts`
 - Modify `tests/validate_game_state_shape.test.ts`
 
-- [ ] Record one classification for every field still reported by Phase 0.
-- [ ] Keep caches and UI read models derived/transient.
-- [ ] Mark compatibility-only fields with the supported legacy-save boundary.
-- [ ] Delete a field only after proving zero supported reader/writer and no fixture dependency.
+- [x] Record one classification for every field still reported by Phase 0.
+- [x] Keep caches and UI read models derived/transient.
+- [x] Mark compatibility-only fields with the supported legacy-save boundary.
+- [x] Delete a field only after proving zero supported reader/writer and no fixture dependency.
 
 ### Task 1.2 -- Promote required-persisted families coherently
 
@@ -134,15 +134,19 @@ npm.cmd run typecheck
 - Modify `tests/save_migration_round_trip_contract.test.ts`
 - Modify `tests/save_migration_validator_rejection.test.ts`
 
-- [ ] Group fields by lifecycle/owner rather than one-field schema churn.
-- [ ] Materialize deterministic defaults for legacy saves.
-- [ ] Reject missing/malformed current-version payloads.
-- [ ] Preserve array order and map key ordering.
-- [ ] Rebuild startup snapshot only through its canonical command.
+- [x] Group fields by lifecycle/owner rather than one-field schema churn.
+- [x] Materialize deterministic defaults for legacy saves.
+- [x] Reject missing/malformed current-version payloads.
+- [x] Preserve array order and map key ordering.
+- [x] Rebuild startup snapshot only through its canonical command.
+
+Phase 1 evidence (local reference machine, 2026-08-01): schema v37 requires `sector_intel` and `corps_front_sectors`. `sector_intel` is persisted cross-turn belief memory; `corps_front_sectors` plus formation sector/sub-segment assignments are persisted as the materialized current-turn standing-OG/AoR snapshot because cold reconstruction can relocate brigades and is not observationally pure. Canonical saves exclude exactly five disposable military caches while Electron retains a separate runtime IPC snapshot; autosave rollback restores both. The field inventory reports zero serializer-policy mismatches, migration drift reports zero anonymous defaults, startup truth has zero release-gate findings including reserve-only gaps, and disk load preserves canonical bytes, CFS, assignments, command queries, and player-visible projection exactly. Two distinct seeds passed uninterrupted-versus-resumed 52-week final-save and replay-tail byte equivalence. All three baseline scenarios retained byte-identical activity, control, end-report, formation, watched-operation, and weekly-report artifacts; only the schema-shaped final save and its embedded run-summary hash were refreshed through the canonical baseline owner.
 
 ```powershell
 npm.cmd run test:vitest -- tests/game_state_field_classification.test.ts tests/validate_game_state_shape.test.ts tests/save_migration.test.ts tests/save_migration_round_trip_contract.test.ts tests/save_migration_validator_rejection.test.ts tests/save_migration_drift_audit.test.ts --pool=forks --reporter=dot
+npm.cmd run test:vitest -- tests/serialize_gamestate_no_derived_fields.test.ts tests/desktop_persistence_contract.test.ts tests/desktop_persisted_sector_continuity.test.ts tests/scenario_continue_from_save_equivalence.test.ts tests/startup_snapshot_contract.test.ts --pool=forks --reporter=dot
 npm.cmd run desktop:startup-snapshot:check
+npm.cmd run qa:electron-runtime-contracts
 npm.cmd run typecheck
 npm.cmd run test:baselines
 ```
