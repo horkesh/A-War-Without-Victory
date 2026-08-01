@@ -4,9 +4,9 @@
 
 **Last corrected:** 2026-08-02
 
-**Roadmap:** R7 Phase 0 fourteenth corrected candidate; committee re-review pending
+**Roadmap:** R7 Phase 0 diagnostic contract accepted; Phase 1 remediation active
 
-**Disposition:** Fourteenth blocked-review correction implemented; committee re-review required; broader content remediation remains open
+**Disposition:** Independent committee re-review accepted the fourteenth correction. Integrated R4/R7 source reconciliation is green; broader content remediation and the serialized integrated baseline check remain open.
 
 ## Result
 
@@ -20,7 +20,7 @@ Final structural review found that the thirteenth correction still overclaimed c
 
 | Inventory | Corrected census | Accepted/complete | Open remediation |
 |---|---:|---:|---:|
-| Historical claims | 3,652 claims / 226 files | 1,431 documented; 0 direct sensitive-choice blocks | 1,598 need source notes; 487 need a source tier; 107 need source-floor completion; 29 need actor specificity |
+| Historical claims | 3,651 claims / 227 files | 1,466 documented; 0 direct sensitive-choice blocks | 1,574 need source notes; 489 need a source tier; 108 need source-floor completion; 14 need actor specificity |
 | Sensitive-history canon gate | 299 events | 298 clean; 0 CRITICAL and 0 WARNING | 1 observational INFO reward-risk row |
 | Localization keys | 5,542 EN keys | 5,541 Bosnian translations present through legacy `bcs` | 1 explicit EN fallback; 599 length-risk candidates |
 | Localization source scan | 385 player-surface UI source files | deterministic candidate census | 575 embedded-English candidates; 8 concatenated-copy candidates; 388 dynamic-key candidates |
@@ -74,11 +74,11 @@ Regression coverage pins previously missed examples including `LOADING SCENARIO`
 
 ## Action order
 
-1. Historian: close or explicitly omit the 1,598 source-note, 487 source-tier, 107 source-floor, and 29 actor-specificity rows.
+1. Historian: close or explicitly omit the 1,574 source-note, 489 source-tier, 108 source-floor, and 14 actor-specificity rows.
 2. Localization: supply the one missing `bs` translation and classify every dynamic-key candidate as finite/typed or replace it.
 3. UI/UX + Localization: replace confirmed embedded/concatenated copy and verify the 599 length-risk rows with pseudo-locale plus 1280x720 and 3440x1440 evidence.
 
-No unsupported historical claim is promoted by this report. Phase 0 completion is not claimed until committee re-review accepts the corrected diagnostic contract.
+No unsupported historical claim is promoted by this report. Independent committee re-review accepts the Phase 0 diagnostic contract. Phase 1 owns the remaining historical/source rows; later phases own identity, localization, licensing/audio, accessibility, and packaged proof.
 
 ## Determinism and verification
 
@@ -99,6 +99,7 @@ No unsupported historical claim is promoted by this report. Phase 0 completion i
 - The corrected fourteenth-review focused matrix passes 3 files / 340 tests, and the accumulated fast R7 surface passes 10 files / 387 tests. TypeScript, JavaScript syntax, the 1-test static nondeterminism scan, protected-path scope, and diff hygiene pass. No baseline, canon, scenario, Electron, packaging, release, publication, push, or integration lane was run for this correction.
 - The actual `--strict --violations-only --json` CLI exits 0 with 0 CRITICAL, 0 WARNING, and 1 INFO.
 - The intentional `apr1992_52w` baseline refresh changes only `end_report.md`, `final_save.json`, `run_summary.json`, and `weekly_report.jsonl` hashes; activity, control, formation, watched-operation, and every other scenario hash remain unchanged.
-- TypeScript, the two deterministic inventory censuses, JavaScript syntax checking, and static nondeterminism scanning pass. The claim census remains 3,652 claims / 226 files with chronology passing, provenance blocked, and zero date mismatches; localization remains 5,542 keys and 971 open findings across 385 files.
-- With the runtime lane explicitly granted, standalone no-refresh `npm.cmd run test:baselines` reports all approved scenarios match. `npm.cmd run canon:check` passes its determinism static scan and embedded baseline regression. Final diff hygiene remains a pre-commit gate.
+- On the integrated R4/R7 parent, one RED integration failure showed that seven safe R4 essays lacked the now-required authored tier and that neutral Visoko corridor prose was falsely classified by a generic-symmetry rule. Historian/canon review assigned six `icty_icj_un` tiers and one `agreement_text` tier. Source files and the runtime essay index now agree, and generic symmetry is actor-blocking only for sensitive-history risk. The focused inventory passes 15/15; the combined R7/R4 dependent matrix passes 23 files / 659 tests. TypeScript and the actual strict CLI pass with 0 CRITICAL, 0 WARNING, and 1 INFO.
+- The integrated claim census is 3,651 claims / 227 files: 1,466 documented; 1,574 source-note, 489 tier, 108 floor, and 14 actor-specificity rows remain. Chronology passes, provenance remains blocked, and date mismatches remain zero. Localization remains 5,542 keys and 971 open findings across 385 files.
+- The corrected branch's standalone no-refresh baseline and canon evidence remains retained. A fresh integrated baseline/canon run is serialized behind R5's exclusive real-save lane and must pass before R7 final closeout. Final diff hygiene remains a pre-commit gate.
 - `docs/10_canon/FORAWWV.md` was not edited.

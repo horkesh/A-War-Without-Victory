@@ -277,14 +277,14 @@ test('real dynamic Codex claims name a non-calendar predicate and rupture tags s
 
 test('inventory-identified safe essay residuals carry source notes without copied prose', async () => {
     const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
-    const safeFiles = new Set([
-        'data/scenarios/essays/battle_of_the_barracks_sarajevo.json',
-        'data/scenarios/essays/battle_of_the_barracks_visoko.json',
-        'data/scenarios/essays/belgrade_embargo_rs_1994.json',
-        'data/scenarios/essays/mostar_liberation_1992.json',
-        'data/scenarios/essays/nato_air_strike_threat_1993.json',
-        'data/scenarios/essays/operation_lukavac_93.json',
-        'data/scenarios/essays/un_hostage_crisis_1995.json',
+    const safeFiles = new Map([
+        ['data/scenarios/essays/battle_of_the_barracks_sarajevo.json', 'icty_icj_un'],
+        ['data/scenarios/essays/battle_of_the_barracks_visoko.json', 'icty_icj_un'],
+        ['data/scenarios/essays/belgrade_embargo_rs_1994.json', 'icty_icj_un'],
+        ['data/scenarios/essays/mostar_liberation_1992.json', 'icty_icj_un'],
+        ['data/scenarios/essays/nato_air_strike_threat_1993.json', 'agreement_text'],
+        ['data/scenarios/essays/operation_lukavac_93.json', 'icty_icj_un'],
+        ['data/scenarios/essays/un_hostage_crisis_1995.json', 'icty_icj_un'],
     ]);
     const safeClaims = result.claims.filter((claim: { file: string; risk_class: string }) => (
         safeFiles.has(claim.file) && claim.risk_class === 'safe_factual_correction'
@@ -292,6 +292,10 @@ test('inventory-identified safe essay residuals carry source notes without copie
 
     assert.strictEqual(safeClaims.length, safeFiles.size);
     assert.strictEqual(safeClaims.every((claim: { status: string }) => claim.status === 'documented'), true);
+    assert.deepStrictEqual(
+        Object.fromEntries(safeClaims.map((claim: { file: string; source_tier: string }) => [claim.file, claim.source_tier])),
+        Object.fromEntries(safeFiles),
+    );
 });
 
 test('dynamic_section claims clear the source floor when the parent has enough sources (#338)', async () => {

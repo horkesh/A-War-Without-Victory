@@ -742,7 +742,7 @@ function statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePr
   if (ring === 'ring_3_refused_candidate') {
     return { status: 'blocked_sensitive_player_choice', owner: 'historian+game-designer' };
   }
-  if (GENERIC_SYMMETRY_PATTERN.test(text)) {
+  if (riskClass === 'sensitive_history_gated' && GENERIC_SYMMETRY_PATTERN.test(text)) {
     return { status: 'needs_actor_specificity', owner: 'historian' };
   }
   if (sourceInfo.status === 'source_floor_exception') {

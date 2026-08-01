@@ -25652,6 +25652,18 @@ The final documentation-only publication commit follows this ledger entry. Requi
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
 
+## 2026-08-02 - R7 Phase 0 integrated acceptance and R4 provenance reconciliation
+
+**Type:** Diagnostic acceptance / cross-workstream integration bug fix / authored provenance metadata.
+
+**Finding:** The independently corrected R7 inventory contract passed its focused committee review, but the first integrated R7/R4 dependent matrix failed 1 of 659 tests. Seven R4 safe essays carried source notes but no tier under R7's fail-closed tier vocabulary, and Visoko's neutral statement that corridor control mattered to “both sides” was misclassified as unsupported moral symmetry even though the claim and paragraph name the actors.
+
+**Fix:** Historian/canon review assigned `icty_icj_un` to six essays grounded in ICTY/UN material and `agreement_text` to the NATO Council/Operation Deny Flight essay. The metadata is mirrored in the individual essay files and runtime `essay_index.json`. Generic-symmetry actor blocking now applies only to sensitive-history risk, preserving the fail-closed treatment of moral/atrocity generalization without rewriting clear operational prose to satisfy a scanner.
+
+**Acceptance:** The focused inventory passes 15/15. The combined R7/R4 dependent matrix passes 23 files / 659 tests. TypeScript passes. The actual strict canon-gate CLI exits 0 after scanning 299 events with 0 CRITICAL, 0 WARNING, and 1 observational INFO. JSON parsing and diff hygiene pass. The integrated census is 3,651 claims / 227 files: 1,466 documented, 1,574 source-note, 489 tier, 108 floor, and 14 actor-specificity rows open; both September-1993 chronology anchors pass and remain provenance-blocked for Phase 1.
+
+**Scope:** This accepts the Phase 0 diagnostic contract and fixes one integration defect; it does not claim R7 remediation complete. The fresh integrated baseline/canon run is serialized behind R5's exclusive real-save lane. No simulation mechanic, save schema, baseline manifest, package/version/tag/signing/publication/release state, `docs/10_canon/FORAWWV.md`, or public release changed.
+
 ## 2026-08-01 - R7 fifth blocked-review correction: deterministic clause scope
 
 **Type:** Semantic false-positive repair / deterministic clause parser / candidate-truth correction.
