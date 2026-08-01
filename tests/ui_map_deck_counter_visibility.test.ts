@@ -594,6 +594,49 @@ it('does not expose a clamped owned counter underneath a live UI occluder', () =
     expect(items).toEqual([]);
 });
 
+it('drops an entire stack when collision separation would move its final hit targets under UI chrome', () => {
+    const stacked = (id: string, osid: string, stackIndex: number) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [17.8, 44.1] },
+        properties: {
+            id,
+            name: id,
+            icon_id: `counter-${id}`,
+            location_osid: osid,
+            stack_index: stackIndex,
+            stack_count: 2,
+            is_stack_top: stackIndex === 0,
+        },
+    });
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [
+            stacked('a1', 'op:test:a', 0),
+            stacked('a2', 'op:test:a', 1),
+            stacked('b1', 'op:test:b', 0),
+            stacked('b2', 'op:test:b', 1),
+        ],
+    } as any;
+    const viewportClip = {
+        width: 800,
+        height: 600,
+        padding: { top: 20, right: 20, bottom: 20, left: 20 },
+        occluders: [{ left: 350, top: 195, right: 450, bottom: 240 }],
+        project: () => ({ x: 400, y: 300 }),
+    };
+    const items = buildFormationCounterDomOverlayItems({
+        formationsGeoJson,
+        formationsVisible: true,
+        zoom: 10,
+        viewportClip,
+    });
+    const layers = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, [], viewportClip);
+    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+
+    expect(items.map((item) => item.id)).toEqual(['a1', 'a2']);
+    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['a1', 'a2']);
+});
+
 it('uses bounded pixel offsets for stacked counters instead of map-coordinate drift', () => {
     const stacked = {
         type: 'Feature',
