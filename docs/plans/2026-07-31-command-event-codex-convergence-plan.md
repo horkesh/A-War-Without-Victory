@@ -9,7 +9,7 @@
 **Tech stack:** TypeScript, React, Vitest, JSON-authored events/essays, Electron browser gates, deterministic scenario runner.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phase 3 source checkpoint complete; baseline/canon verification waits on the R5 runtime lease
+**Status:** IN PROGRESS -- Phase 3 complete; Phase 4 Dynamic Codex convergence next
 **Roadmap workstream:** R4
 **Canonical owner:** Presidential Decision Room for action; Desk for triage; Records/Codex for receipts
 **Collision rule:** Do not overlap source edits with RS packets FR-01 or FR-04. Rebase on their shared priority and cadence contracts before Phase 0.
@@ -256,6 +256,7 @@ npm.cmd run typecheck
 
 **Assigned role:** Gameplay Programmer
 **Independent review:** QA Engineer + Determinism Auditor
+**Status:** COMPLETE -- canonical baseline and canon gates accepted 2026-08-01
 
 ### Task 3.1 -- Turn the Phase 0 inventory into invariants
 
@@ -283,20 +284,22 @@ npm.cmd run typecheck
 - [x] Do not invent a new event solely to improve a percentage.
 - [x] Keep every `requires_player_response` event owned by exactly one respondent.
 
-**Phase 3 source checkpoint (2026-08-01):**
+**Phase 3 acceptance (2026-08-01):**
 
 - Phase 0 already proved all `9/9` decision families reachable, with zero missing producers, unreachable surfaces, or duplicate surfaces. The only production reachability gap was the process-only `AWWV_TWO_LEVEL_NOTIFICATIONS` gate: no packaged startup path set it, and it also changed AI response policy. The gate is removed from ordinary evaluation, player resolution, and the packaged foundational-decision writer.
 - Notifications remain informational monitor rows and do not enter the blocking-decision manifest. Historical/unset AI policy now uses `bot_ai_default` only for an explicit authored `accept_first` or a valid authored `historical_default_response_id`; events without authored defaults use the existing deterministic political/v1 policy and are no longer mislabeled.
 - No event was invented. The existing HRHB Washington Agreement event now notifies its two nonresponding recipients, RS and RBiH, with HRHB/Mostar source copy. Required-response ownership remains exactly one canonical respondent for all `76` rows. Residual notification coverage falls from `3` rows / `6` blocks with `2` unclassified blocks to `2` rows / `4` blocks, all classified `blocked-sensitive` and left untouched for R7.
 - RED isolated six expected failures. GREEN passes the focused event/UI matrix at `11` files / `137` tests, packaged startup/surfacing at `2` files / `12` tests, TypeScript, JSON parse, diff hygiene, and four static boundary files / `56` tests. The presidential probe is READY at `46` surfaced, `46` player-resolved, `46` headless-auto-resolved, zero failures, and zero stuck decisions.
-- `tests/event_state_shape_validation.test.ts` is independently base-red at exact parent `408d39ec09fd7425b1ee45b418b546040893d06c`: its fixture omits schema-v37 `military.corps_front_sectors` and `military.sector_intel` already required by the parent validator. This unrelated state-contract fixture bug is routed to R5 and is not repaired in R4.
-- `npm.cmd run test:baselines` and canon/runtime scenarios are deliberately not run while R5 owns the exclusive lane. Phase 3 source is checkpointed; baseline/canon acceptance remains lease-blocked. Evidence: [implementation report](../40_reports/implemented/20260801_R4_PHASE3_EVENT_REACHABILITY_CHECKPOINT.md).
+- The exclusive runtime lane later opened. The orchestrator-owned `UPDATE_BASELINES=1 npm.cmd run test:baselines` refresh changed exactly six hashes: `final_save.json` and `run_summary.json` for `apr1992_52w`, `baseline_ops_4w`, and `noop_4w`. A byte-exhaustive audit classified `272 + 1` changed leaves in the 52-week save and `18 + 1` in each four-week save: notification delivery plus one truthful bot decision-source label only. No effects, event choices, control, combat, formations, casualties, displacement, operations, or other simulation truth changed; every other artifact hash remained exact.
+- Fresh no-refresh `npm.cmd run test:baselines` and `npm.cmd run canon:check` both exited `0`. Phase 3 is complete and Phase 4 is next. Evidence: [implementation report](../40_reports/implemented/20260801_R4_PHASE3_EVENT_REACHABILITY_CHECKPOINT.md).
+- The inherited schema-v37 fixture omission remains routed to R5. R5 has repaired it with only the two already-required empty military records and no validator relaxation; that independently approved correction is pending integration rather than being absorbed into R4.
 
 **Verification:**
 
 ```powershell
 npm.cmd run test:vitest -- tests/event_decisions.test.ts tests/events_evaluate.test.ts tests/sim/events/event_presidential_acceptance.test.ts tests/sim/events/event_notification_residuals_diagnostic.test.ts tests/sim/events/event_notification_content_backfill.test.ts --pool=forks --reporter=dot
 npm.cmd run test:baselines
+npm.cmd run canon:check
 npm.cmd run typecheck
 ```
 
