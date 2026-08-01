@@ -1,5 +1,17 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-01] R5 Phase 2c reviewer replication provenance
+
+**Type:** Docs-only correctness-evidence provenance / complete transcript capture / reviewer replication.
+
+**Replication:** A provenance audit found no standalone raw stdout/stderr file for the historical 6-file / 47-test `617.81s` correction run; its surviving Codex session output was explicitly truncated from `1,391` lines. No standalone focused-suite or baseline log was retained either; those successful outputs remain available only in the session record. One authorized exact rerun therefore captured complete merged stdout/stderr at ignored path `data/derived/_debug/r5_phase2c_occupancy_equivalence_correction/20260801_corrected_6file_47test.log`. The file is `164,344` bytes with SHA-256 `c3ddb1d025176a322e6ca2ab308d43c7e1bf2e5c57574394c58dc1b2e10ccfa3`.
+
+**Result:** The exact documented six-file command exited `0`: 6/6 files, 47/47 tests, start `21:54:28`, total duration `600.06s`, and test time `594.38s`. The separate fixed-point property completed in `265,354ms`; the independent dense-index/legacy-scan property completed in `248,753ms`. The capture overlapped a broad functional test elsewhere in the committee workspace, so all elapsed/property durations are functional completion evidence only and are not performance samples.
+
+**Disposition and scope:** This reviewer replication appends durable provenance; it does not replace the historical correction run, weaken or reopen acceptance, or alter the accepted performance packet and `1,122.123 ms/turn` floor. Report, executable plan, ledger, and reusable evidence-retention knowledge only. No source, test, baseline, scenario, performance profile, canon/FORAWWV, package, version, tag, signing, publication, release state, or push changed.
+
+---
+
 ## [2026-08-01] R5 Phase 2c independent occupancy equivalence correction
 
 **Type:** R5 committee correctness correction / independent legacy reference / schema-v37 fixture repair / no-refresh deterministic verification.
