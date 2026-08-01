@@ -5,7 +5,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
+import { loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { loadTerrainScalars } from '../map/terrain_scalars_node.js';
@@ -312,9 +312,11 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
     const phase = state.meta?.phase ?? 'war';
     const seed = state.meta?.seed ?? 'desktop-seed';
 
-    const [graph, operationalSettlementGraph] = await Promise.all([
+    const [graph, operationalSettlementGraph, operationalData, operationalCentroids] = await Promise.all([
         loadSettlementGraph(settlementGraphOptions(baseDir)),
         loadSettlementGraph(operationalSettlementGraphOptions(baseDir)),
+        loadOperationalData(baseDir),
+        loadOperationalCentroids(baseDir),
     ]);
 
     const graphForBrowser = graph as LoadedSettlementGraph;
@@ -325,6 +327,11 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
                 seed,
                 settlementGraph: graphForBrowser,
                 operationalSettlementGraph,
+                operationalData: {
+                    opData: operationalData,
+                    edges: operationalSettlementGraph.edges,
+                    centroids: operationalCentroids,
+                },
                 settlementEdges: graph.edges,
                 eventDefinitions: loadDesktopEventDefinitions(baseDir),
             });

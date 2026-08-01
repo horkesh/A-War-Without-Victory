@@ -4032,3 +4032,9 @@ Applied in `[2026-08-01] Seamless map transition R1 Phase 3-6 closeout`, `src/ui
 **Identity reuse is safe only when immutability is enforceable:** a stable array reference is not proof that its edge records or membership cannot change. Durable rule: register and deeply freeze canonical topology at its ownership boundary, or require an independently deeply frozen array and every contained edge record before caching by identity. Mutable or only shallow-frozen inputs must take a fresh builder path, and cached composite outputs must also be deeply frozen so one consumer cannot corrupt another. Pair performance acceptance with a mutated-input regression and byte-identical scenario evidence.
 
 Applied in `[2026-08-01] Engine quality Phase 2 immutable topology reuse checkpoint`, `src/map/adjacency_map.ts`, and `tests/adjacency_map_cached.test.ts`.
+
+## 2026-08-01 - Optional performance caches must preserve failure independence
+
+**Share immutable inputs at the narrowest resource boundary:** combining independently optional mappings, edges, and centroids into one cached `Promise.all` can widen one missing resource into unrelated behavior loss. Durable rule: cache each resource with a turn-local promise, make each phase request only what it consumes, and compose a full bundle only at the explicit full-bundle owner. Keep caller-owned `Map` and object inputs read-only by contract, audit consumers for mutation, never persist the cache in `GameState`, and prove both failure isolation and exact scenario bytes before acceptance.
+
+Applied in `[2026-08-01] Engine quality Phase 2 operational-data ownership checkpoint`, `src/sim/turn_pipeline_types.ts`, and `tests/turn_pipeline_operational_data_reuse.test.ts`.
