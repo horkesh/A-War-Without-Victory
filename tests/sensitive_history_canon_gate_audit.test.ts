@@ -266,6 +266,7 @@ describe('buildSensitiveHistoryAudit', () => {
                         { id: 'begin_deporting', label: 'Begin deporting civilians' },
                         { id: 'establish_camps', label: 'Establish detention camps' },
                         { id: 'civilian_killings', label: 'Approve civilian killings' },
+                        { id: 'anaphoric_genocide', description: 'General Staff warned of genocide. Proceed anyway and make it swift.' },
                     ],
                 },
                 {
@@ -290,6 +291,16 @@ describe('buildSensitiveHistoryAudit', () => {
                         { id: 'safe_inspectors', description: 'Order inspectors to inspect detention camps' },
                         { id: 'negated_scope_then_kill', description: 'Do not authorize or approve concentration camps, then kill civilians' },
                         { id: 'accountability_scope_but_genocide', description: 'Authorize prosecutors to investigate concentration camps, but commit genocide' },
+                        { id: 'safe_proceed_then_document', description: 'Proceed with the command review. Document genocide allegations.' },
+                        { id: 'safe_document_then_proceed', description: 'Document genocide allegations. Proceed with the command review.' },
+                        { id: 'safe_forbid_commanders', description: 'Forbid commanders to murder civilians' },
+                        { id: 'safe_decline_authorize', description: 'Decline to authorize concentration camps' },
+                        { id: 'safe_cannot_authorize', description: 'Cannot authorize concentration camps' },
+                        { id: 'colon_then_kill', description: 'Do not authorize detention camps: kill civilians' },
+                        { id: 'em_dash_then_execute', description: 'Refuse to deploy paramilitary forces — execute the displaced families' },
+                        { id: 'forbid_then_kill', description: 'Forbid commanders to murder civilians: kill civilians' },
+                        { id: 'decline_then_genocide', description: 'Decline to authorize concentration camps — commit genocide' },
+                        { id: 'cannot_then_execute', description: 'Cannot authorize concentration camps: execute the displaced families' },
                     ],
                 },
                 {
@@ -307,17 +318,23 @@ describe('buildSensitiveHistoryAudit', () => {
         });
 
         const refused = report.violations.filter((row) => row.kind === 'sensitive_player_choice');
-        expect(refused).toHaveLength(18);
-        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(5);
-        expect(refused.filter((row) => row.event_id === 'direct_refused_choices_1993')).toHaveLength(11);
+        expect(refused).toHaveLength(24);
+        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(10);
+        expect(refused.filter((row) => row.event_id === 'direct_refused_choices_1993')).toHaveLength(12);
         expect(refused.filter((row) => row.event_id === 'rs_paramilitary_policy_1992')).toHaveLength(2);
         expect(refused.every((row) => row.severity === 'CRITICAL')).toBe(true);
         expect(refused.map((row) => row.locator)).toEqual([
             'accountability_scope_but_genocide.description',
+            'cannot_then_execute.description',
+            'colon_then_kill.description',
+            'decline_then_genocide.description',
+            'em_dash_then_execute.description',
+            'forbid_then_kill.description',
             'investigate_then_genocide.description',
             'negated_scope_then_kill.description',
             'negated_then_kill.description',
             'refuse_then_execute.description',
+            'anaphoric_genocide.description',
             'begin_deporting.label',
             'camps.label',
             'camps_review.label',

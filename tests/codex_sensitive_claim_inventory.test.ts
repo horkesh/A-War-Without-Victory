@@ -417,6 +417,11 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
                     { id: 'investigate_then_genocide', description: 'Authorize an investigation of concentration camps, then commit genocide' },
                     { id: 'negated_scope_then_kill', description: 'Do not authorize or approve concentration camps, then kill civilians' },
                     { id: 'accountability_scope_but_genocide', description: 'Authorize prosecutors to investigate concentration camps, but commit genocide' },
+                    { id: 'colon_then_kill', description: 'Do not authorize detention camps: kill civilians' },
+                    { id: 'em_dash_then_execute', description: 'Refuse to deploy paramilitary forces — execute the displaced families' },
+                    { id: 'forbid_then_kill', description: 'Forbid commanders to murder civilians: kill civilians' },
+                    { id: 'decline_then_genocide', description: 'Decline to authorize concentration camps — commit genocide' },
+                    { id: 'cannot_then_execute', description: 'Cannot authorize concentration camps: execute the displaced families' },
                 ],
             },
             {
@@ -434,6 +439,11 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
                     { id: 'safe_prosecutors', description: 'Authorize prosecutors to investigate concentration camps' },
                     { id: 'safe_never_camps', description: 'Never authorize or approve concentration camps' },
                     { id: 'safe_inspectors', description: 'Order inspectors to inspect detention camps' },
+                    { id: 'safe_proceed_then_document', description: 'Proceed with the command review. Document genocide allegations.' },
+                    { id: 'safe_document_then_proceed', description: 'Document genocide allegations. Proceed with the command review.' },
+                    { id: 'safe_forbid_commanders', description: 'Forbid commanders to murder civilians' },
+                    { id: 'safe_decline_authorize', description: 'Decline to authorize concentration camps' },
+                    { id: 'safe_cannot_authorize', description: 'Cannot authorize concentration camps' },
                     {
                         id: 'guarded',
                         label: 'Adopt the platform',
@@ -478,7 +488,7 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
         ]);
         assert.strictEqual(blocked.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'direct_refused_verbs_1992'
-        )).length, 12);
+        )).length, 17);
 
         const contextual = report.claims.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'lexical_context_1992'

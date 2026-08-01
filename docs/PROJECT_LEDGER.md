@@ -25366,3 +25366,19 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Verification:** Focused correction passes 4 files / 90 tests; expanded inventory/provenance passes 7 files / 71 tests; canon passes 2 files / 34 tests; foundational/adjacent passes 5 files / 110 tests with 105 passing and 5 pre-existing skips. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim and localization censuses remain 3,652 / 226 files and 971 / 385 files. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass.
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
+
+## 2026-08-01 - R7 sixth blocked-review correction: clause-owned direct semantics
+
+**Type:** Semantic cross-clause false-positive repair / boundary and refusal grammar completion / candidate-truth correction.
+
+**Supersession:** This entry corrects the preceding claim that deterministic clause spans made later clauses independent. `directPatternCoversAction` still received the whole response field and an absolute index, so its 96-character patterns could cross sentence punctuation. The boundary grammar omitted bounded colons and Unicode dashes, while refusal scope omitted `forbid`, `decline to`, and `cannot`.
+
+**RED evidence:** Two safe command-review/documentation sentence orders, three safe refusal forms, three colon/en-em-dash resets, and both consumer aggregates produced 10 failures in the 3-file / 92-test matrix. Making direct ranges clause-local then exposed the existing `General Staff warned of genocide. Proceed anyway and make it swift.` contract; explicit helper and canon-consumer coverage produced the expected 3 failures in the 3-file / 93-test matrix before its structural preservation rule. Simplification review separately reproduced the `objective`/`objected` warning-stem collision as one expected helper failure.
+
+**Implementation:** Direct-pattern ranges now receive only `clause.text` with a clause-relative action index. Bounded colons and spaced en/em dashes join sentence, sequential, and adversative separators. Refusal grammar explicitly recognizes forbid forms, decline-to forms, and `cannot`. The existing warning/directive fixture remains blocked through a separate sensitive-warning plus non-negated anaphoric-continuation relation rather than a pattern spanning punctuation; explicit warning inflections prevent `objective` from impersonating `objected`. Exact safe and unsafe forms are pinned at the helper, canon audit, and claim inventory.
+
+**Historian/canon review:** This is enforcement-only and maps to Sensitive History Design Gate Ring 3 #1/#2 and section 3. It changes no historical fact, event, player response, consequence, simulation state, source, or source tier; the exact canonical paramilitary-policy exception remains unchanged.
+
+**Verification:** Focused correction passes 4 files / 103 tests; expanded inventory/provenance passes 7 files / 84 tests; canon passes 2 files / 34 tests; foundational/adjacent passes 5 files / 110 tests with 105 passing and 5 pre-existing skips. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim and localization censuses remain 3,652 / 226 files and 971 / 385 files. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
