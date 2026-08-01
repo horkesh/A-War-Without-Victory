@@ -3,8 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { startNewCampaign } from '../src/desktop/desktop_sim.js';
-import { warPhases } from '../src/sim/turn_phases/war_phases.js';
+import { advanceTurn, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import { parsePlayerVisibleWarroomState } from '../src/ui/warroom/data/player_visible_state_adapter.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { buildDecisionConsequenceLedger } from '../src/ui/map/data/decisionConsequenceLedger.js';
@@ -458,11 +457,11 @@ describe('desktop player-visible state projection', () => {
         accepted: false,
       },
     ];
-    const autonomyStep = warPhases.find((candidate) => candidate.name === 'apply-autonomy-transition');
-    if (!autonomyStep) throw new Error('apply-autonomy-transition step missing');
-    await autonomyStep.run({ state } as Parameters<typeof autonomyStep.run>[0]);
+    const advanced = await advanceTurn(state, process.cwd());
+    expect(advanced.error).toBeUndefined();
+    expect(advanced.state.meta.turn).toBe(3);
 
-    const canonicalJson = serializeState(state);
+    const canonicalJson = serializeState(advanced.state);
     const hydrated = deserializeState(canonicalJson);
     expect(hydrated.meta.proposal_decision_history?.map((record) => record.id))
       .toEqual(['rbih_receipt', 'rs_receipt']);

@@ -87,14 +87,14 @@ export function consequenceReceiptRecordId(receiptId: string): string {
     return `receipt:${receiptId}`;
 }
 
-/** Index enables-edges by `from_event::to_event::response_id` for O(1) CONFIRMED
+/** Index enables-edges by `turn::from_event::to_event::response_id` for O(1) CONFIRMED
  *  lookup. Only kind:'enables' edges with a non-null to_event participate. */
 function enablesEdgeKeySet(state: GameState): Set<string> {
     const out = new Set<string>();
     for (const entry of state.military?.event_causality_log ?? []) {
         if (entry.kind !== 'enables') continue;
         if (entry.to_event === null) continue;
-        out.add(`${entry.from_event}::${entry.to_event}::${entry.source_response_id ?? ''}`);
+        out.add(`${entry.turn}::${entry.from_event}::${entry.to_event}::${entry.source_response_id ?? ''}`);
     }
     return out;
 }
@@ -243,16 +243,16 @@ export function buildConsequenceReceipts(
                 if (seenPredicted.has(predictedId)) continue;
                 seenPredicted.add(predictedId);
 
-                // CONFIRMED requires the predicted event to have fired, a
-                // response-tagged enables edge, AND a fired turn AT OR AFTER the
-                // decision turn. The engine still records an enables edge when a
+                // CONFIRMED requires the predicted event to have fired, an
+                // enables edge tagged with this response AND decision turn, plus
+                // a fired turn AT OR AFTER the decision turn. The engine still records an enables edge when a
                 // response "enables" an already-fired event (audit), so the edge
                 // alone does not prove causation — confirming a P that fired
                 // BEFORE the decision would be a false causal claim. When P fired
                 // earlier (or has no recorded fired turn), it is not a receipt of
                 // THIS decision: fall through to closed → contradicted, else
                 // pending.
-                const edgeKey = `${dec.event_id}::${predictedId}::${dec.response_id}`;
+                const edgeKey = `${dec.turn}::${dec.event_id}::${predictedId}::${dec.response_id}`;
                 const ft = lastFiredTurn[predictedId];
                 const firedAtOrAfterDecision = typeof ft === 'number' && ft >= dec.turn;
                 if (!(firedIds.has(predictedId) && edges.has(edgeKey) && firedAtOrAfterDecision)) continue;

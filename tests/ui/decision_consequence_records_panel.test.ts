@@ -73,7 +73,7 @@ describe('DecisionConsequenceRecordsPanel', () => {
               turn: 4,
             }],
             event_causality_log: [{
-              turn: 7,
+              turn: 4,
               from_event: 'source-event',
               to_event: 'downstream-event',
               to_flag: null,
@@ -104,36 +104,24 @@ describe('DecisionConsequenceRecordsPanel', () => {
     expect(document.activeElement).toBe(sourceRow.querySelector('button'));
   });
 
-  it('keeps recurring decisions, receipts, expansion, and source focus on exact decision identity', () => {
+  it('matches same-response recurring receipts, expansion, and source focus by exact decision turn', () => {
     const eventCatalog = new Map<string, any>([
       ['recurring-event', {
         id: 'recurring-event',
         title: 'Recurring staff question',
         family: 'test',
-        historical_default_response_id: 'first',
-        response_options: [
-          {
-            id: 'first',
-            label: 'Choose the first course',
-            future_consequences: [{
-              label: 'First downstream consequence',
-              explanation: 'First recurring decision promise.',
-              opens_events: ['first-downstream'],
-            }],
-          },
-          {
-            id: 'second',
-            label: 'Choose the second course',
-            future_consequences: [{
-              label: 'Second downstream consequence',
-              explanation: 'Second recurring decision promise.',
-              opens_events: ['second-downstream'],
-            }],
-          },
-        ],
+        historical_default_response_id: 'accept',
+        response_options: [{
+          id: 'accept',
+          label: 'Accept the recurring recommendation',
+          future_consequences: [{
+            label: 'Matching downstream consequence',
+            explanation: 'Only the later recurrence made this promise.',
+            opens_events: ['matching-downstream'],
+          }],
+        }],
       }],
-      ['first-downstream', { id: 'first-downstream', title: 'First downstream', response_options: [] }],
-      ['second-downstream', { id: 'second-downstream', title: 'Second downstream', response_options: [] }],
+      ['matching-downstream', { id: 'matching-downstream', title: 'Matching downstream', response_options: [] }],
     ]);
     useGameStore.setState({
       loadedGameState: makeState({
@@ -142,15 +130,14 @@ describe('DecisionConsequenceRecordsPanel', () => {
           meta: { player_faction: 'RS' },
           military: {
             event_decision_log: [
-              { event_id: 'recurring-event', response_id: 'first', decision_source: 'player', faction: 'RS', turn: 4 },
-              { event_id: 'recurring-event', response_id: 'second', decision_source: 'player', faction: 'RS', turn: 8 },
+              { event_id: 'recurring-event', response_id: 'accept', decision_source: 'player', faction: 'RS', turn: 4 },
+              { event_id: 'recurring-event', response_id: 'accept', decision_source: 'player', faction: 'RS', turn: 8 },
             ],
             event_causality_log: [
-              { turn: 6, from_event: 'recurring-event', to_event: 'first-downstream', to_flag: null, kind: 'enables', source_response_id: 'first' },
-              { turn: 10, from_event: 'recurring-event', to_event: 'second-downstream', to_flag: null, kind: 'enables', source_response_id: 'second' },
+              { turn: 8, from_event: 'recurring-event', to_event: 'matching-downstream', to_flag: null, kind: 'enables', source_response_id: 'accept' },
             ],
-            fired_event_ids: ['recurring-event', 'first-downstream', 'second-downstream'],
-            event_last_fired_turn: { 'recurring-event': 8, 'first-downstream': 6, 'second-downstream': 10 },
+            fired_event_ids: ['recurring-event', 'matching-downstream'],
+            event_last_fired_turn: { 'recurring-event': 8, 'matching-downstream': 10 },
             closed_event_ids: [],
           },
         } as any,
@@ -164,21 +151,23 @@ describe('DecisionConsequenceRecordsPanel', () => {
 
     const sourceRows = screen.getAllByTestId('decision-history-row');
     expect(sourceRows.map((row) => row.getAttribute('data-source-record-id'))).toEqual([
-      'decision:recurring-event::first::4',
-      'decision:recurring-event::second::8',
+      'decision:recurring-event::accept::4',
+      'decision:recurring-event::accept::8',
     ]);
 
     fireEvent.click(sourceRows[0]!.querySelector('button')!);
-    expect(screen.getByText('First downstream consequence')).toBeTruthy();
-    expect(screen.queryByText('Second downstream consequence')).toBeNull();
-    expect(screen.getByTestId('decision-history-receipt-row').getAttribute('data-receipt-record-id'))
-      .toBe('receipt:recurring-event::first::4::first-downstream');
+    expect(sourceRows[0]!.querySelector('[data-testid="decision-history-row-expanded"]')).toBeTruthy();
+    expect(sourceRows[0]!.querySelector('[data-testid="decision-history-receipt-row"]')).toBeNull();
 
     fireEvent.click(sourceRows[1]!.querySelector('button')!);
-    expect(screen.queryByText('First downstream consequence')).toBeNull();
-    expect(screen.getByText('Second downstream consequence')).toBeTruthy();
-    expect(screen.getByTestId('decision-history-receipt-row').getAttribute('data-source-record-id'))
-      .toBe('decision:recurring-event::second::8');
+    expect(sourceRows[0]!.querySelector('[data-testid="decision-history-row-expanded"]')).toBeNull();
+    expect(sourceRows[1]!.querySelector('[data-testid="decision-history-row-expanded"]')).toBeTruthy();
+    expect(screen.getByText('Matching downstream consequence')).toBeTruthy();
+    const receiptRow = screen.getByTestId('decision-history-receipt-row');
+    expect(receiptRow.getAttribute('data-receipt-record-id'))
+      .toBe('receipt:recurring-event::accept::8::matching-downstream');
+    expect(receiptRow.getAttribute('data-source-record-id'))
+      .toBe('decision:recurring-event::accept::8');
     fireEvent.click(screen.getByRole('button', { name: 'Back to source decision' }));
     expect(document.activeElement).toBe(sourceRows[1]!.querySelector('button'));
   });
