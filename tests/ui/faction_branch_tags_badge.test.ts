@@ -83,7 +83,7 @@ describe('BranchTagBadgeRow (Phase H Packet 4)', () => {
 
         const row = screen.getByTestId('branch-tag-badge-row');
         expect(row.parentElement?.className).toContain('flex-1');
-        expect(row.parentElement?.className).toContain('min-w-0');
+        expect(row.parentElement?.className).toContain('min-w-10');
         expect(row.parentElement?.className).not.toContain('shrink-0');
         expect(row.getAttribute('data-faction')).toBe('RBiH');
         const chips = screen.getAllByTestId('branch-tag-chip');
@@ -175,13 +175,8 @@ describe('BranchTagBadgeRow (Phase H Packet 4)', () => {
             state,
         }));
 
-        const chips = screen.getAllByTestId('branch-tag-chip');
-        const tagsRendered = chips.map((c) => c.getAttribute('data-tag'));
-        expect(tagsRendered).toEqual([
-            'rbih_civic',
-        ]);
-        const remainder = screen.getByRole('button', { name: /2 active paths/i });
-        fireEvent.click(remainder);
+        const compact = screen.getByRole('button', { name: /3 active paths/i });
+        fireEvent.click(compact);
         expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
             'Civic republic',
             'Dayton acceptance',

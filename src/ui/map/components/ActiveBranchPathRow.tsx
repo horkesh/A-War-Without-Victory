@@ -85,7 +85,7 @@ export function ActiveBranchPathRow({
   const recalculateLayout = useCallback(() => {
     const row = rowRef.current;
     const measurements = measurementRef.current;
-    if (!row || !measurements || row.clientWidth <= 0) return;
+    if (!row || !measurements) return;
     const chipWidths = Array.from(measurements.querySelectorAll<HTMLElement>('[data-branch-measure-chip]'))
       .map((node) => node.getBoundingClientRect().width);
     const remainderWidths: Record<number, number> = {};
@@ -222,7 +222,7 @@ export function ActiveBranchPathRow({
           aria-haspopup="dialog"
           title={tooltip}
           onClick={() => setOpen((value) => !value)}
-          className="min-w-6 shrink-0 rounded-sm border border-accent-gold/35 bg-accent-gold/10 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] text-accent-gold"
+          className="min-w-10 shrink-0 rounded-sm border border-accent-gold/35 bg-accent-gold/10 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] text-accent-gold"
         >
           {t('statusStrip.activePaths.compact', { count: normalized.length })}
         </button>
