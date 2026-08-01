@@ -25478,3 +25478,19 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Fast verification:** The corrected focused matrix passes 3 files / 202 tests; the accumulated fast R7 surface passes 10 files / 249 tests. TypeScript passes. Both shared JavaScript diagnostics pass syntax checks. The 1-test static nondeterminism scan, protected-path scope check, and diff hygiene pass. No baseline, canon, scenario, Electron, packaging, release, publication, push, or integration lane ran for this correction.
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
+
+## 2026-08-02 - R7 thirteenth blocked-review correction: fail-closed warning negation
+
+**Type:** Candidate-truth correction / categorical warning-negation grammar / shared-consumer regression hardening.
+
+**Supersession:** This entry corrects only the twelfth correction's finite focus-limiter formulation. That denylist still let unlisted post-negation modifiers suppress an operative warning and therefore fail open.
+
+**RED evidence:** The deterministic matrix shared by the direct helper, canon-audit consumer, and claim-inventory consumer gained recognized and unrecognized post-negation modifiers, straight/curly contractions, uncertainty before contractions and between do-support and `not`, all three marker positions, punctuation ownership, and multiple continuations. Before implementation the focused 3-file / 248-test run failed 43 assertions: 41 direct-helper classifications and both real-consumer aggregate contracts; 205 controls passed. Existing categorical/no-one controls and conservative `ever|once` treatment already behaved correctly.
+
+**Implementation:** Warning suppression now uses a positive categorical suffix grammar rather than a focus-word denylist. Bare auxiliary `not`, contractions, `cannot`, `never`, bounded refusal/decline forms, and bounded `no one|no-one|nobody` subjects suppress only when they directly adjoin the warning predicate. Any post-negation token leaves the warning operative. `probably|apparently` around do-support or a contraction explicitly fail closed, and `ever|once` receive no safe special case. The broader adverb-tolerant negation grammar remains isolated to continuation actions; antecedent state, continuation enumeration, marker ownership, purpose/accountability classification, and the exact option-level paramilitary exception are unchanged.
+
+**Historian/canon review:** This is enforcement-only. It changes no historical fact, source, event trigger, player response, consequence, simulation state, source tier, Six Strategic Goals contract, or exact paramilitary-policy exception.
+
+**Fast verification:** RED failed 43/248 as described above. The corrected focused matrix passes 3 files / 248 tests; the accumulated fast R7 surface passes 10 files / 295 tests. TypeScript, both shared JavaScript diagnostics' syntax checks, the 1-test static nondeterminism scan, protected-path scope, and diff hygiene pass. No baseline, canon, scenario, Electron, packaging, release, publication, push, or integration lane ran for this correction.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
