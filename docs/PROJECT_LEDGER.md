@@ -25462,3 +25462,19 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Fast verification:** The corrected focused matrix passes 3 files / 169 tests. TypeScript, JavaScript syntax, the 1-test static nondeterminism scan, and diff hygiene pass. Accumulated tests and runtime audits are intentionally deferred until the exclusive runtime lane is granted.
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
+
+## 2026-08-02 - R7 twelfth blocked-review correction: warning focus scope
+
+**Type:** Negative-subject boundary repair / predicate-focus scope grammar / candidate-truth correction.
+
+**Supersession:** This entry corrects only the eleventh correction's claim that warning-negation coverage was complete. Hyphenated `no-one` still established a false warning antecedent, while `did not only warn`, `didn't merely warn`, and `did not simply warn` incorrectly suppressed a warning that the focus construction asserts occurred.
+
+**RED evidence:** The deterministic matrix shared by the direct helper, canon-audit consumer, and claim-inventory consumer gained ASCII and Unicode hyphenated negative subjects, straight/curly-apostrophe focus forms, `only|merely|simply|just` focus controls, limiter-before-negation controls, comma/semicolon ownership, and multiple-continuation cases. Before implementation the focused 3-file / 199-test run failed 20 assertions: 18 direct helper classifications and both consumer aggregate contracts. The exact `did not just warn` control already blocked, while the other required focus forms and hyphenated negative subjects reproduced the defect.
+
+**Implementation:** Warning negation now parses do-support negation and its contraction separately from the modifiers between the negator and warning predicate. A post-negation `only|merely|simply|just` is predicate focus and leaves the warning antecedent operative; the same limiter before the negated auxiliary remains genuinely negative. Negative `no one|no-one` subjects accept whitespace or a bounded ASCII/Unicode hyphen class under case-insensitive matching. Warning scope remains confined to its comma subclause, so focus cannot leak across comma or hard-clause boundaries. Antecedent state, continuation enumeration, coordinated continuation negation, marker ownership, operative-purpose fail-closed behavior, accountability-only contextual behavior, and the exact option-level paramilitary exception are unchanged.
+
+**Historian/canon review:** This is enforcement-only. It changes no historical fact, source, event trigger, player response, consequence, simulation state, source tier, Six Strategic Goals contract, or exact paramilitary-policy exception.
+
+**Fast verification:** The corrected focused matrix passes 3 files / 202 tests; the accumulated fast R7 surface passes 10 files / 249 tests. TypeScript passes. Both shared JavaScript diagnostics pass syntax checks. The 1-test static nondeterminism scan, protected-path scope check, and diff hygiene pass. No baseline, canon, scenario, Electron, packaging, release, publication, push, or integration lane ran for this correction.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
