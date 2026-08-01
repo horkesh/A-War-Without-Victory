@@ -4,7 +4,7 @@
 
 **Goal:** Recover the dominant sector-reconstruction cost without changing any campaign byte, then repeatedly hand the 100 ms/turn target to the largest owner in a fresh full profile until the target is met.
 
-**Architecture:** First establish a current, committee-usable profile from the corrected fixed-point source under the exclusive runtime lease. Replace repeated scans and graph searches inside one sector-build call with a call-scoped, deterministic derived context whose formation-location counts are updated by the same mutation owner. Only after that bounded packet passes full legacy equivalence and shows a measured win may the lane split sector construction into a pure topology solve and deterministic mutation commit, with explicit faction/component dirty receipts. No cache crosses a turn or enters `GameState`.
+**Architecture:** The accepted dense formation-occupancy index remains invocation-local and mutation-aware. The fresh owner packet now selects a second, disjoint Phase 2d slice: build immutable standard/strict front-edge pair relations once per faction per sector-build invocation and reuse them through exact stable-order subset queries, with the current subset builders preserved as the independent legacy oracle. Pure faction extraction and incremental dirty topology remain deferred until a separate pure-solve/serial-commit proof exists. No context crosses a builder call or enters `GameState`.
 
 **Tech Stack:** TypeScript, Vitest, Node/V8 CPU profiling, the 40-week scenario runner, deterministic JSON serialization, PowerShell evidence capture.
 
@@ -12,7 +12,7 @@
 
 ## Status and authority boundary
 
-This document is an active implementation and measurement plan. The dense formation-occupancy contract and its bounded `ensureMinimumSectorCoverage(...)` integration are accepted at commit `25313d1c05b174188fad167ff38ed826b6aa737d`. The fully captured exact-parent replay improves mean throughput from `1,183.549` to `1,122.123 ms/turn` (`-5.190%`) with exact bytes, so `1,122.123 ms/turn` (`11.2212x` the `100 ms/turn` target) remains the current accepted floor. A later committee review correctly found that the original long property proved fixed-point shortcut equivalence, not independent occupancy equivalence. That evidence gap is closed by a test-only legacy scan strategy at the exact coverage boundary and a separate 300-case dense-versus-legacy full-state property. The `1,223.822 ms/turn` fixed-point packet remains diagnostic because its measured source omitted the prune receipt. Task 3's red-first reachability/sector-fact candidate passed exact-output equivalence but failed performance retention: two of three alternating pairs regressed and both the intended owner and enclosing builder worsened. It is fully reverted. The mandatory fresh accepted-source handoff now reconfirms `buildCorpsFrontSectors` as the largest named causal application owner at `330.300 ms/turn` inclusive, supported by `340.789 ms/turn` of independent sector instrumentation. R5 remains open at the accepted occupancy floor; the next packet is a new bounded red-first sector-reconstruction design, while incremental topology remains unauthorized without that separate design proof.
+This document is an active implementation and measurement plan. The dense formation-occupancy contract and its bounded `ensureMinimumSectorCoverage(...)` integration are accepted at commit `25313d1c05b174188fad167ff38ed826b6aa737d`. The fully captured exact-parent replay improves mean throughput from `1,183.549` to `1,122.123 ms/turn` (`-5.190%`) with exact bytes, so `1,122.123 ms/turn` (`11.2212x` the `100 ms/turn` target) remains the current accepted floor. A later committee review correctly found that the original long property proved fixed-point shortcut equivalence, not independent occupancy equivalence. That evidence gap is closed by a test-only legacy scan strategy at the exact coverage boundary and a separate 300-case dense-versus-legacy full-state property. The `1,223.822 ms/turn` fixed-point packet remains diagnostic because its measured source omitted the prune receipt. Task 3's red-first reachability/sector-fact candidate passed exact-output equivalence but failed performance retention: two of three alternating pairs regressed and both the intended owner and enclosing builder worsened. It is fully reverted. The mandatory fresh accepted-source handoff reconfirms `buildCorpsFrontSectors` as the largest named causal application owner at `330.300 ms/turn` inclusive, supported by `340.789 ms/turn` of independent sector instrumentation. The bounded reconstruction research is now complete: Phase 2d Task 8A owns invocation-local front-edge relation reuse, with the existing subset builders retained as an independent legacy reference. Pure full-solve/faction extraction is deferred because current faction construction writes formation locations that later faction and recovery stages read. Task 6 incremental topology remains unauthorized. R5 remains open at the accepted occupancy floor.
 
 Task 1's owner-selection subset is complete at source commit `4462a485f1fd1ad511068bcaacd0926af962771e`; Task 5's occupancy disposition is complete at `25313d1c05b174188fad167ff38ed826b6aa737d`. Do not collect another heavy packet while any scenario, performance, Electron, package, baseline, or other heavy runtime owner holds the machine lane. No baseline re-floor, package, version, tag, publication, release-state, canon, or `docs/10_canon/FORAWWV.md` change belongs to Phase 2c.
 
@@ -122,73 +122,67 @@ The observable equivalence surface is larger than the returned sector record. Co
 
 No optimization may teleport a formation, convert assignment into movement authority, weaken the canonical destruction/dissolution path, change strict tie order, change a threshold, omit a truth pass without a complete mutation receipt, or persist a performance context.
 
-## Design alternatives
+## Design alternatives after the fresh owner profile
 
-### Approach A — call-scoped derived context (recommended first)
+### Approach A — pure full solve plus serial commit, deferred
 
-Build immutable topology facts and a mutation-aware formation-location index once inside `buildCorpsFrontSectors(...)`; thread only the required read-only views into hot helpers. Use stable OSID ordinals and dense `Uint32Array` counts instead of a long-lived sparse `Map`. Every location write must go through the context's delta owner, with test-only consistency assertions against the formations record.
+Extract the whole faction topology calculation into a pure function, then commit all sector and formation mutations in the legacy order. This is the desired long-term seam, but current code does not yet provide a safe faction boundary. `getFactions(state)` is strict-sorted, `buildFactionSectors(...)` reads every active formation to build `enemyPersonnelByLocation`, and `ensureMinimumSectorCoverage(...)` can write `formation.location_osid` and `entrenchment_turns` before the next faction is constructed. Recovery setup also deliberately observes a pre-recovery location snapshot because rebuilding it after relocation changes edge ownership. A nominally pure or parallel faction solve would therefore change later inputs unless it first captured and reproduced the complete global write schedule. Do not make this the first candidate.
 
-Advantages: bounded lifetime, no save/schema effect, attacks measured repeated scans/BFS construction, and can be introduced helper by helper behind exact legacy comparisons. Risk: missing one location write creates stale counts; the mutation owner and invariant assertion are mandatory.
+### Approach B — invocation-local front-edge relation, selected for Phase 2d Task 8A
 
-### Approach B — receipt-scoped incremental topology solve (conditional second stage)
+Build the two immutable pairwise front-edge relations once per faction per `buildCorpsFrontSectors(...)` invocation: standard Case A/B and strict Case B. Query those full relations through subset membership rather than rebuilding adjacency maps for each corps, split, recovery, or merge check. The relation depends only on the invocation's already-derived `war_front_edges_osid`, edge-side metadata, shared-boundary adjacency, Case-B adjacency, centroids, and faction. Formation-location and sector-array mutations do not change whether two original front edges are adjacent.
 
-After Approach A is accepted, factor the builder into a pure topology solve and a deterministic mutation commit. Extend transient reconciliation receipts with exact dirty faction/component/front-edge/formation identities. Recompute only affected topology packets; copy untouched prior materialized sectors in canonical order; commit all formation and sector mutations in the same legacy order.
+This is the smallest evidence-supported first candidate. The fresh V8 packet assigns `907.638 ms` self / `1,441.354 ms` inclusive to `buildEdgeAdjacency` and `241.153 ms` self / `414.393 ms` inclusive to `buildEdgeAdjacencyStrictCaseB`, or a combined ceiling of about `28.720 ms/turn` self and `46.394 ms/turn` inclusive. It cannot close R5 alone, but it isolates a measured reconstruction primitive without reintroducing the rejected reachability context or touching self-mutating formation ownership.
 
-Advantages: can amortize the current `2.475` builds/turn and is capable of a larger algorithmic reduction. Risk: `buildCorpsFrontSectors(...)` writes inputs that a later call reads. A receipt kind without complete dirty identity is insufficient, and a partial solver can silently preserve stale topology.
+### Approach C — receipt-scoped incremental topology, still unauthorized
 
-### Approach C — whole-builder memoization, skipped passes, or parallel faction mutation (rejected)
+The `2.475` builds/turn make incremental reconstruction attractive, but the present receipts identify broad stages, not exact dirty factions, components, edge pieces, formation identities, or write order. Task 6 stays closed until a separately accepted pure full-solve/serial-commit extraction proves that all inputs and outputs are explicit. A profile selecting the builder is necessary but not sufficient authorization.
 
-Do not use a whole-state fingerprint/`WeakMap`, cross-turn/module cache, unconditional truth-pass skip, parallel faction builder, or approximate output check. These shapes either hide self-invalidation, share mutable formation state, alter deterministic write order, or already failed equivalence.
+### Approach D — control-status object reuse, whole-builder memoization, skipped passes, or parallel faction mutation, rejected
 
-## Recommended architecture
+`computeFrontEdges` and `getSettlementControlStatus` are broad pipeline owners, not children of `buildCorpsFrontSectors`; the builder consumes the already-materialized `war_front_edges_osid`. The earlier bounded status-object reuse showed no allocation/owner reduction and was fully reverted. Do not conflate it with the reconstruction packet. Also reject a whole-state fingerprint/`WeakMap`, cross-turn/module cache, unconditional truth-pass skip, parallel faction builder, or approximate output check: these hide self-invalidation, share mutable formation state, alter deterministic write order, or already failed evidence gates.
 
-### `SectorBuildDerivedContext`
+## Selected architecture — `SectorFrontEdgeRelation`
 
-Create a call-owned context in a new module only after Task 1 confirms the owner:
+Create one call-owned relation context in `src/sim/combat/sector_front_edge_relation.ts` during Phase 2d Task 8A:
 
 ```ts
-interface SectorBuildDerivedContext {
-    readonly osidOrdinal: ReadonlyMap<Osid, number>;
-    readonly occupancy: FormationOccupancyIndex;
-    readonly factionTopology: ReadonlyMap<FactionId, FactionTopologyFacts>;
-    sectorFacts(sector: CorpsFrontSector): SectorReachabilityFacts;
-}
+type FrontEdgeRelationMode = 'standard' | 'strict-case-b';
 
-interface FormationOccupancyIndex {
-    count(osid: Osid): number;
-    move(formationId: string, from: Osid | undefined, to: Osid | undefined): void;
-    assertEquivalent(formations: Readonly<Record<string, Formation>>): void;
+interface SectorFrontEdgeRelation {
+    readonly faction: FactionId;
+    hasEdge(edgeId: string): boolean;
+    neighborsIn(
+        edgeId: string,
+        subset: ReadonlySet<string>,
+        mode: FrontEdgeRelationMode,
+    ): readonly string[];
 }
 ```
 
+The implementation may use a zero-allocation iterator instead of returning an array, but it must preserve the exact `strictCompare` neighbor order. The standard and strict relations are built from the full faction edge universe. Their validity follows from the current pairwise algorithms: for any subset `S` of the same metadata universe, `buildEdgeAdjacency(S)` equals the full relation restricted to endpoints in `S`; the strict relation has the same subset property. RED property tests must prove this rather than relying on the argument alone.
+
 Requirements:
 
-- derive ordinals from the complete OSID universe sorted with `strictCompare`;
-- use `Uint32Array`, not a narrow counter with an unstated maximum;
-- treat unknown OSIDs explicitly and deterministically;
-- build faction component IDs from the exact current friendly graph;
-- precompute per-sector front membership, one-hop reserve membership, territory membership, and component facts;
-- preserve the legacy traversal and tie order when a helper returns a candidate, not merely the same set;
-- invalidate/rebuild sector facts after any sector geometry mutation;
-- update occupancy at the same statement that changes a formation location;
-- keep test assertions and profiling optional/off by default;
-- never store the context or typed arrays in `GameState`, a module global, a static cache, or a cross-turn session.
+- construct the relation inside `buildCorpsFrontSectors(...)`; never put it in `GameState`, `SpatialContext`, a reconciliation session, a module global, or a cross-turn cache;
+- derive the faction edge universe from the current invocation's `osidFrontEdges` in stable order and retain the current edge metadata as read-only;
+- keep `buildEdgeAdjacency(...)` and `buildEdgeAdjacencyStrictCaseB(...)` unchanged as the independent test-only legacy path;
+- preserve factionless/synthetic `tempMeta` fallback calls on the legacy path;
+- preserve seed, neighbor, stack/queue, component, sector-id, and tie order exactly; filtering a full sorted neighbor list must not reorder it;
+- fail closed to the legacy subset builder when a queried edge is outside the relation universe or a caller uses incompatible metadata/adjacency semantics;
+- do not cache sector objects, edge arrays, connected components, reachability, occupancy, or formation facts in this candidate;
+- expose test-only construction/query/fallback counters without environment-variable or persisted-state control;
+- remove no truth pass and change no receipt, threshold, gameplay rule, output field, or warning behavior.
 
-### Reachability replacement rule
+### Mutation and receipt boundary
 
-An unbounded friendly-territory BFS may be replaced by component equality only after a property test proves equivalence for every candidate formation/sector pair across the generated corpus. Bounded path/distance routines are not component checks; preserve hop bounds and exact target/tie order with reverse-distance tables or keep the legacy routine.
+The selected relation is valid only within one builder invocation. Its inputs are immutable for that lifetime even though the builder mutates local sector arrays and may move formations. Existing reconciliation receipts remain the sole owners of repeated full builds: no new receipt kind or dirty identity is needed for Task 8A because the relation is rebuilt on every call. If a future packet tries to retain it across calls, dirty identity must include every front-edge addition/removal, both side labels, political-controller change affecting derived front truth, adjacency/threshold/centroid identity, faction/alliance mode, and final-save mode; absent that proof, rebuild.
 
-### Incremental solver rule
+Task 6 additionally requires exact dirty formation creation/destruction/status/corps/faction/location identities and any sector mutation that changes a later pass's input. If complete identity cannot be proven, recompute the full affected faction; if faction isolation cannot be proven, run the current full builder.
 
-Approach B is eligible only after the call-scoped packet is accepted and a fresh profile still ranks repeated full builds first. Dirty identity must cover every input consumed by the topology solve:
+### Why reachability is explicitly excluded
 
-- changed political controller OSIDs and affected faction components;
-- front-edge additions/removals and both faction sides;
-- formation creation/destruction/status/corps/faction/location changes;
-- final-turn/final-save mode;
-- any prior sector mutation that changes the next pass's input.
-
-The solver must create a new result from stable inputs. The commit stage applies sector replacement, formation location changes, assignments, unresolved diagnostics, and ratings in legacy order. If complete dirty identity cannot be proven, recompute the full affected faction; if faction isolation cannot be proven, fall back to the full builder.
+The rejected Task 3 context already passed 300 complete-sector/complete-state comparisons yet added `265.402 ms` self, worsened `ensureMinimumSectorCoverage` `20.772%` inclusive, and worsened `buildCorpsFrontSectors` `9.724%` inclusive; two of three paired wall-clock samples regressed. Task 8A therefore contains no component cache, sector front/reserve/territory fact cache, BFS replacement, or bounded-path rewrite. Reusing that code would conflate a measured no-go with a different causal hypothesis and invalidate retention attribution.
 
 ## Task 1 — Acquire the runtime lease and establish current truth
 
@@ -335,7 +329,7 @@ Expected result: one accepted measured optimization or a documented rejection wi
 
 ## Task 6 — Conditional incremental topology packet
 
-Task 3 is dispositioned as a no-go, so this task is not authorized by the rejected packet. Select a fresh owner from the accepted occupancy floor before considering a receipt-scoped solver; do not infer permission from the candidate's outlier-sensitive mean.
+**Status:** NOT AUTHORIZED. Task 3 is a measured no-go, and the fresh owner plus Task 8 design review found that current faction construction is not pure: formation-location writes change later faction/recovery inputs. Complete Task 8A, reprofile, and—only if the builder remains dominant—write and accept a separate pure full-solve/serial-commit extraction packet before considering the receipt-scoped work below. Do not infer permission from the rejected candidate's outlier-sensitive mean or the current `2.475` calls/turn.
 
 **Files:**
 
@@ -373,6 +367,104 @@ After every accepted sector packet:
 
 R5 Phase 2 is complete only when a committee-usable replicated packet records mean `<100 ms/turn` with exact deterministic output. A large local percentage or one fast run is not completion.
 
+## Task 8 — Phase 2d bounded sector-reconstruction packet
+
+**Status:** DESIGN COMPLETE / IMPLEMENTATION NOT STARTED. Execute Task 8A next. Do not start Task 6 or combine this work with reachability, control-status allocation, bot orders, or incremental topology.
+
+### Current production call graph and call count
+
+The design review was performed from exact integrated parent `ed06eddc3c5448c7cb960f65aa99403a8de2b289`. The fresh sidecar's `99` builder calls decompose exactly as follows:
+
+| Owner | Calls | Why it exists |
+|---|---:|---|
+| Scenario startup projection | 1 | `scenario_runner.ts` derives initial OSID fronts and calls the builder before turn 1. |
+| `partition-corps-front-sectors` | 40 | One direct pre-combat build per turn. |
+| First post-combat geometry reconciliation | 40 | `reconcile-final-sector-truth` consumes the session's geometry receipt and calls `runFullGeometryReconciliation(...)`. |
+| Geometry writeback fixed points | 17 | On turns where sector coverage relocates active formations, the first reconciliation reports a location delta, records a geometry receipt, and `reconcile-final-sector-truth-after-ops` performs one additional full build. |
+| Final-save geometry projection | 1 | The scenario finalizer creates a new reconciliation session and runs the builder in `finalSaveGeometryProjection` mode. |
+| **Total** | **99** | **`2.475` calls/turn over the 40-turn measured run.** |
+
+The phase profile records `reconcile-final-sector-truth` at `147.806 ms/turn`, pre-combat partition at `141.684`, and after-ops reconciliation at `63.900`. These phase buckets overlap the builder and must not be added to its V8 `330.300 ms/turn` inclusive or the sector sidecar's `340.789 ms/turn`. The V8 and sidecar values are independent attribution views, not additive costs.
+
+### Full semantic input and output boundary
+
+`buildCorpsFrontSectors(...)` receives the entire mutable `GameState`, operational `edges`, reverse map, centroids, optional `SpatialContext`, `isFinalPass`, `finalSaveGeometryProjection`, fixed-point strategy, and occupancy strategy. The full state is therefore the semantic input. In particular, the current call graph reads `war_front_edges_osid`, formations and their status/kind/faction/corps/home/current location, corps operations and participants, brigade movement/override state, political controllers, factions, turn/alliance/mode state, and commander priorities.
+
+The returned `Record<string, CorpsFrontSector>` is only part of the observable output. During the call, coverage may write a formation's `location_osid` and reset `entrenchment_turns`; final ownership can clear `assigned_sub_segment_id`; assignment synchronization clears and repopulates `formation.assignment`; the builder writes `state.military.unresolved_sector_brigades`; final-pass warnings and optional perf records are observable diagnostics. The reconciliation caller then installs `state.military.corps_front_sectors`, assigns sub-segments, clears stale sub-segment ownership, computes `sector_combat_ratings`, and records geometry receipts from active-location deltas. Tests must compare all of this, not only the returned sectors.
+
+### Current mutation/write order
+
+1. Build invocation-local adjacency variants, front-edge metadata, sorted formation scan IDs, and a pre-recovery claim cache.
+2. Iterate factions in `strictCompare` order. For each faction: map OSIDs to corps; partition/consolidate front edges; build sectors; assign/repair territory; classify brigades; run minimum coverage; review/deduplicate/rehome; normalize rear roles and power; demote unreachable owners; run final coverage. Coverage is the sole in-scope `location_osid` writer and writes through the dense occupancy owner before changing the formation.
+3. Run the global merge/repair/canonicalize sequence, five numbered seal passes plus conditional convergence, two dropped-edge recovery passes when dirty, repeated owner-truth passes, absorption/side-coverage normalization, optional final-save projection, and final metric recomputation. These stages mutate local sector records and may invoke coverage again.
+4. Synchronize formation assignments in stable formation/sector order, collect unresolved brigades, optionally emit final warnings, and return the sector record.
+5. `runFullGeometryReconciliation(...)` installs the returned record, assigns sub-segments, clears stale ownership, computes ratings, and reports active-location mutations. The turn pipeline emits a geometry receipt after the first post-combat build when this count is nonzero; the after-ops step consumes it through the existing bounded fixed point.
+
+The order is part of behavior. Task 8A changes only how immutable edge-neighbor facts are supplied; it may not reorder any stage above.
+
+### Task 8A — RED-first invocation-local front-edge relation
+
+**Production file ownership:**
+
+- Create `src/sim/combat/sector_front_edge_relation.ts`.
+- Modify `src/sim/combat/corps_front_sectors.ts`.
+- Modify `src/sim/combat/sector_building.ts`.
+- Modify `src/sim/combat/sector_splitting.ts`.
+- Modify `src/sim/combat/sector_territory.ts`.
+- Do not modify `src/sim/combat/final_sector_truth_reconciliation.ts` or `src/sim/turn_phases/war_phase_reconciliation_steps.ts`; existing receipts and build ownership remain unchanged.
+
+**Test file ownership:**
+
+- Create `tests/sector_front_edge_relation.test.ts`.
+- Modify `tests/sector_partition_buildCorpsFrontSectors_integration.test.ts`.
+- Modify `tests/sector_partition_instrumentation.test.ts` only for explicit construction/query/fallback count contracts.
+- Modify `tests/final_sector_reconciliation_session.test.ts` for geometry-build/report parity.
+- Reuse unchanged `tests/final_sector_truth_reconciliation.test.ts`, `tests/real_save_sector_truth_contracts.test.ts`, and `tests/sector_territory_contiguity_repair.test.ts` as dependent gates.
+
+**RED surfaces, in order:**
+
+1. Import the missing relation module and assert that, for deterministic generated front metadata, every standard and strict subset relation exactly equals the independent legacy subset builder. Cover empty/singleton/full subsets, duplicates, shuffled input, both side orientations, Case A, ordinary Case B, Case-B bridge rejection, missing metadata, and edges outside the declared universe. Expected RED: module/export missing.
+2. Assert exact neighbor sequence, not set equality. Filtering a full relation must preserve the same sorted order returned by `buildEdgeAdjacency(subset, ...)` and `buildEdgeAdjacencyStrictCaseB(subset, ...)`. Expected RED after a naive implementation: order or fallback mismatch.
+3. Add an explicit final builder strategy: `invocation-front-edge-relation | test-only-legacy-edge-adjacency`. Unknown values must throw before work. The legacy strategy must execute the existing subset builders directly and must not call the candidate relation.
+4. Add test-only counters proving at most one standard and one strict relation construction per active faction per builder invocation, that no context survives the call, and that factionless/synthetic metadata uses the legacy fallback. Counters are explicit arguments/hooks, never environment variables or `GameState` fields.
+5. For 100 deterministic real-save variants in each of live-war (`false/false`), final-turn (`true/false`), and final-save projection (`false/true`) modes, clone the same initial state and compare candidate versus independent legacy strategy. Compare complete returned sectors, complete cloned `GameState`, reconciliation report/session fields and receipt sequence, warning capture, canonical `serializeState(...)` bytes, size, SHA-256, and deterministic rerun hash.
+6. Assert the active-location mutation count and `geometry_builds` sequence are identical on variants that cause no relocation and variants that exercise the extra after-ops fixed point.
+
+**Implementation sequence:**
+
+1. Implement the relation module only after RED is captured. Build the full standard and strict maps with the current trusted algorithms; provide subset-filtered, stable-order neighbor iteration.
+2. Thread an optional read-only relation through `findSubSegments(...)`, `splitNonContiguousSectors(...)`, the two front-edge consolidation functions, and the same-semantics adjacency checks. Keep incompatible/factionless calls on the old builders.
+3. Construct relations lazily per faction after `globalEdgeMeta` exists in `buildCorpsFrontSectors(...)`; pass no formation, state, sector, or receipt object into the relation.
+4. Thread the test-only legacy strategy from `buildCorpsFrontSectors(...)` without changing production callers or persisted state.
+5. Run the focused matrix, TypeScript, determinism static checks, and approved baselines without refresh before any timing command.
+
+```powershell
+npm.cmd exec -- vitest run tests/sector_front_edge_relation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/sector_partition_instrumentation.test.ts tests/final_sector_reconciliation_session.test.ts tests/final_sector_truth_reconciliation.test.ts tests/real_save_sector_truth_contracts.test.ts tests/sector_territory_contiguity_repair.test.ts --pool=forks --reporter=dot
+npm.cmd run typecheck
+npm.cmd run determinism:static
+npm.cmd run test:baselines
+git diff --check
+```
+
+### Fallback and stop gates
+
+- Missing/out-of-universe edge, synthetic metadata, incompatible adjacency semantics, or absent relation: run the exact legacy subset builder for that call and increment a test-visible fallback receipt.
+- Any sector/state/receipt/warning/byte divergence: stop before profiling, locate the first differing write, and either correct the relation boundary or revert the candidate.
+- Any hidden global, `WeakMap`, environment switch, cross-call persistence, new `GameState` field, receipt change, pass skip, threshold change, or order change: stop and reject the implementation shape.
+- If functional instrumentation shows relation construction at more than one standard/strict instance per active faction per invocation, or fallback occurs on canonical front edges, stop and fix ownership before timing.
+- If the complete independent-legacy property is not practical at 300 cases, do not reduce the comparison surface; optimize the test harness while preserving the case count and full state/byte comparison.
+
+### Measurement, retention, and evidence protocol
+
+1. Use an exact-parent control worktree and candidate worktree under the exclusive runtime lease. Record absolute cwd/script paths, branch, commit, parent, tree, Node/OS/CPU, process preflight, and every command in an ignored manifest with SHA-256 sidecar.
+2. Run one excluded warmup per lineage. Require the current `5,085,842`-byte / `95be2c9e...319b7` fingerprint before proceeding unless an already-integrated parent has a separately explained new fingerprint.
+3. Run one phase+sector profile and one same-process V8 profile for control and candidate. Report standard/strict relation constructions, legacy fallbacks, queries, `buildEdgeAdjacency` and strict self/inclusive time, `buildCorpsFrontSectors` inclusive time, the three overlapping sector phase buckets, calls/turn, and sampled heap.
+4. Run three alternating control/candidate wall-clock pairs under the same lease. Preserve raw stdout/stderr, timings, saves, hashes, and pair order. Do not use a single run or an arithmetic mean dominated by one outlier.
+5. Retain only if all modes/variants/runs are exact, approved baselines pass without refresh, canonical fallbacks are zero, combined standard+strict adjacency inclusive time falls at least `20%`, enclosing builder inclusive time falls at least `3%`, at least two of three wall-clock pairs improve, median paired improvement is at least `1%`, and no pair regresses more than `2%`. Otherwise fully revert production and candidate-specific tests and record the no-go.
+6. After an accepted packet, run a fresh full owner profile. If `buildCorpsFrontSectors` remains dominant, write a new pure full-solve/serial-commit extraction design; do not roll directly into Task 6. If another owner wins, hand R5 to that owner.
+
+Expected Task 8A result: a bounded, exact-output-equivalent reduction in repeated front-edge relation construction. Its combined inclusive Amdahl ceiling is about `46.394 ms/turn`, so it is explicitly a low-risk first slice, not a claim that sector reconstruction or R5 is complete.
+
 ## Rejected shortcuts and retry conditions
 
 | Shortcut | Disposition | Retry only if |
@@ -401,6 +493,8 @@ R5 Phase 2 is complete only when a committee-usable replicated packet records me
 - [x] Same-parent replicated candidate improves its named owner and does not regress whole-run throughput.
 - [x] Rejected candidates are fully reverted and recorded.
 - [x] Fresh Amdahl calculation and next-owner handoff exist while mean remains above `100 ms/turn`.
+- [x] Phase 2d Task 8A has a bounded owner, independent legacy oracle, full mutation/receipt boundary, exact files, RED surfaces, stop gates, and retention protocol.
+- [ ] Phase 2d Task 8A is implemented, independently reviewed, and either retained by measurement or fully reverted as a no-go.
 - [x] Ledger, report, roadmap, and reusable knowledge state exactly match evidence.
 - [x] No baseline refresh, package/version/tag/release mutation, canon/FORAWWV edit, push, or integration was performed by this design packet.
 - [ ] R5 replicated mean is below `100 ms/turn`; continue from a fresh accepted-floor profile and reprofile after every retained candidate.

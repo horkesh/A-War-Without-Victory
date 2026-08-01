@@ -2,7 +2,7 @@
 
 **Status:** IN AUTONOMOUS EXECUTION; R1/R3 are complete and R2 source packets are independently approved
 
-**Last updated:** 2026-08-01
+**Last updated:** 2026-08-02
 
 **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
 
@@ -100,7 +100,7 @@ Execute serially in the order R1, R2, R3, R4, R5, R6, R7, R8, R9 unless file-own
 | R2 | RS Desk → Decision → Advance friction | **IN PROGRESS — ALL SOURCE PACKETS REVIEWED; FRESH PACKAGED RS ACCEPTANCE NEXT** | [RS friction plan](2026-07-31-rs-104week-friction-remediation-plan.md) | Five diary findings close; no contradictory urgency; sourced opportunity/positive-hold cadence is intelligible; ultrawide and map handoff pass Electron proof. |
 | R3 | Operational/Tactical Group convergence | **COMPLETE** | [TG closeout plan](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | One offensive task-organization path, synchronized lifecycle/AHQ receipts, terminal telemetry, unique sourced promotions, locked exhaustion constants, and aligned Standing-OG doctrine. |
 | R4 | Command, event, and Dynamic Codex convergence | **IN PROGRESS — PHASE 4 CANONICALLY ACCEPTED; PHASE 5 INTEGRATED PROOF NEXT** | [Command/event/Codex plan](2026-07-31-command-event-codex-convergence-plan.md) | Five presidential levers remain; Decision Room owns action; Desk owns triage; events, Chronicle, Cost Ledger, and Codex share deterministic receipts and priority truth. |
-| R5 | Engine quality, performance, and stability | **IN PROGRESS — FRESH PROFILE SELECTS SECTOR RECONSTRUCTION; BOUNDED RED-FIRST DESIGN NEXT** | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
+| R5 | Engine quality, performance, and stability | **IN PROGRESS — PHASE 2D FRONT-EDGE RELATION PACKET READY** | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
 | R6 | Historical gameplay depth and final calibration | **IN PROGRESS — GORAŽDE EVENT-STATE BUG CLOSED; PHASE 0.2 WAITS ON R5 FLOOR** | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) | Calendar/weak-predicate events cannot manufacture control; every behavior experiment is adopted or retired by predeclared criteria; Sarajevo and fall-1995 work is historically bounded; final 40/104/188-turn evidence is deterministic. |
 | R7 | Content, attribution, Bosnian localization, and audio | **IN PROGRESS — PHASE 0 CORRECTION/REVIEW; REMEDIATION OPEN** | [Content/localization/audio plan](2026-07-31-content-history-localization-audio-plan.md) | Claims, identities, strings, and audio are machine-auditable; unsupported content is absent; `bs`/legacy migration, pseudolocale, licensing, accessibility, and Electron proof pass. |
 | R8 | Full-campaign packaged-Electron validation and diaries | READY AFTER R1–R7 | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) | Fresh historical-policy RBiH, RS, and HRHB campaigns cover full duration and required surfaces; bugs and friction are separately routed; final two diaries score 5/5 with clean diagnostics. |
@@ -155,6 +155,14 @@ Retention failed. Alternating pair deltas were `-10.950%`, `+1.917%`, and `+4.71
 ### 2026-08-02 R5 fresh accepted-source owner amendment
 
 The mandatory owner handoff is complete from exact integrated source `e017d3ec14a8fff1697a9bbed69b39335c1bed2a`. Warmup, phase+sector, and same-process V8 modes all reproduced the exact `5,085,842`-byte save and SHA-256 `95be2c9e8975a12face36e9777e54882c757ee8adb23b1cd91a06b2f546319b7`. V8 ranks `buildCorpsFrontSectors` as the largest named causal application owner at `330.300 ms/turn` inclusive (`27.871%` sampled); independent sector instrumentation records `340.789 ms/turn` across `99` calls (`2.475` per turn). The next R5 packet is a new bounded red-first sector-reconstruction design. The rejected reachability context remains retired, and Task 6 incremental topology is not inferred from this profile alone.
+
+### 2026-08-02 R5 Phase 2d executable reconstruction design amendment
+
+The bounded design review is complete at exact integrated parent `ed06eddc3c5448c7cb960f65aa99403a8de2b289`. The `99` builds are one startup projection, 40 pre-combat partitions, 40 first post-combat geometry reconciliations, 17 location-writeback fixed points, and one final-save projection. Phase, V8, and sector-sidecar figures overlap and remain separate attribution views.
+
+Phase 2d Task 8A is the next executable R5 packet: build one invocation-local standard and strict Case-B front-edge relation per active faction, then serve exact stable-order subset queries to the existing construction, splitting, and consolidation paths. The unchanged subset builders remain the independent test-only legacy oracle; factionless/synthetic or out-of-universe inputs fail closed to that path. The candidate owns no state, sector, formation, receipt, control-status, reachability, or cross-turn cache and changes no truth pass, threshold, or write order.
+
+Pure full-solve/faction extraction is deferred because faction construction reads all formation locations/personnel and coverage can relocate a formation before later faction/recovery readers. Task 6 remains unauthorized until a separate pure full-solve/serial-commit proof exists. The rejected reachability context stays retired, and `computeFrontEdges`/control-status work remains outside this builder packet. Task 8A has exact file ownership, RED relation/order/fallback surfaces, 300 complete-sector/complete-state/byte comparisons across all production modes, explicit receipt/build-count parity, fail-closed gates, and a three-pair lease-backed retention protocol in the Phase 2c/2d plan. Its measured combined adjacency ceiling is about `46.394 ms/turn` inclusive, so acceptance must be followed by a fresh owner profile.
 
 ### 2026-08-01 R1 closure amendment
 

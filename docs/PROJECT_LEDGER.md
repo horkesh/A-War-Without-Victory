@@ -1,5 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] R5 Phase 2d bounded sector-reconstruction design
+
+**Type:** R5 docs-only architecture/performance design / exact call-graph and mutation audit / red-first implementation handoff / no production candidate.
+
+**Lineage and evidence:** Created `codex/r5-sector-reconstruction-design` from exact integrated parent `ed06eddc3c5448c7cb960f65aa99403a8de2b289`. The fresh accepted-source evidence remains the owner input: `buildCorpsFrontSectors` `330.300 ms/turn` inclusive and independent sector instrumentation `340.789 ms/turn` across `99` calls. Source and sidecar review accounts for every call: startup projection 1, direct pre-combat partition 40, first post-combat geometry reconciliation 40, active-location-writeback fixed points 17, and final-save projection 1. The `147.806`, `141.684`, and `63.900 ms/turn` phase figures overlap these builder calls and were not summed with V8 or sidecar attribution.
+
+**Architecture decision:** Pure full-solve/faction extraction is deferred. `buildFactionSectors(...)` reads all live formation locations/personnel and `ensureMinimumSectorCoverage(...)` can write `location_osid`/`entrenchment_turns` before later strict-sorted faction and recovery readers. The broader builder then mutates sector geometry through merge/seal/recovery/owner-truth passes, synchronizes formation assignment/sub-segment state and unresolved truth, and hands location deltas to reconciliation receipts. A pure or parallel faction boundary is not currently proven.
+
+**Next executable packet:** Phase 2d Task 8A creates one invocation-local standard and strict Case-B `SectorFrontEdgeRelation` per active faction and serves stable-order subset queries to existing construction/splitting/consolidation paths. Existing `buildEdgeAdjacency(...)` and `buildEdgeAdjacencyStrictCaseB(...)` subset paths remain the explicit independent test-only legacy oracle; factionless/synthetic or out-of-universe inputs fail closed to legacy. No context crosses a builder call or enters `GameState`, `SpatialContext`, reconciliation sessions, globals, or caches. The measured upper bound is about `28.720 ms/turn` self and `46.394 ms/turn` inclusive across the two adjacency builders.
+
+**TDD and disposition gates:** The executable plan defines relation/subset algebra, exact neighbor order, bridge/fallback/unknown-strategy REDs; explicit construction/query/fallback receipts; and 100 deterministic real-save variants in each of live-war, final-turn, and final-save-projection modes. Candidate and independent legacy paths compare complete returned sectors, the entire cloned `GameState`, reconciliation sessions/reports/receipts, warnings, canonical bytes, and active-location/build-count fixed points. Timing is lease-serialized with one excluded warmup, paired phase/sector and V8 profiles, and three alternating control/candidate pairs. Retention requires exact output, zero canonical fallback, at least 20% combined adjacency-owner and 3% builder reduction, two of three faster pairs, median paired improvement at least 1%, and no pair worse than 2%; otherwise fully revert and record a no-go.
+
+**Exclusions and scope:** The measured no-go reachability/sector-fact context remains retired; no component/sector-fact cache, BFS change, or bounded-path rewrite is included. `computeFrontEdges`/control-status work is outside the builder call graph and the prior status-object reuse remains rejected. Task 6 incremental topology is still unauthorized; an accepted Task 8A must be followed by a fresh owner profile and, if needed, a separate pure full-solve/serial-commit design. Updated the Phase 2c/2d plan, performance report, master roadmap, command board, and this ledger only. No production source, test, scenario, approved baseline, knowledge/canon/FORAWWV, package, version, tag, installer, signing, publication, release state, push, or integration changed.
+
+---
+
 ## [2026-08-02] R5 fresh accepted-source causal-owner handoff
 
 **Type:** R5 measured owner-selection packet / exact integrated-parent lineage / roadmap and command-board handoff / no production candidate.
