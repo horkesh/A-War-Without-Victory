@@ -127,6 +127,18 @@ function looksLikePlayerCopy(value: string): boolean {
     return /[A-Za-z]{2}/.test(normalized) && !/^[-_:.#/]+$/.test(normalized);
 }
 
+function looksLikeEmbeddedCopy(value: string): boolean {
+    const normalized = value.trim();
+    const looksLikeCss = /(?:^|\s)(?:bg|border|cursor|duration|flex|focus|font|gap|grid|h|hover|items|justify|m[trblxy]?|opacity|p[trblxy]?|rounded|shadow|text|tracking|transition|w)-[^\s]+/.test(normalized)
+        || /^(?:Georgia|Arial|Helvetica|monospace|sans-serif|serif)(?:,|$)/i.test(normalized);
+    return looksLikePlayerCopy(normalized) && (
+        /\s/.test(normalized)
+        || /^[A-Z][a-z]+$/.test(normalized)
+        || /^[A-Z][A-Z ]+$/.test(normalized)
+        || /[.!?;,]$/.test(normalized)
+    ) && !looksLikeCss;
+}
+
 function nodeLocation(sourceFile: ts.SourceFile, node: ts.Node): { line: number; column: number } {
     const location = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
     return { line: location.line + 1, column: location.character + 1 };
@@ -145,6 +157,38 @@ function containsLiteralCopy(node: ts.Node): boolean {
     return found;
 }
 
+function hasPlusExpressionAncestor(node: ts.Node): boolean {
+    for (let current = node.parent; current; current = current.parent) {
+        if (ts.isBinaryExpression(current) && current.operatorToken.kind === ts.SyntaxKind.PlusToken) return true;
+        if (ts.isStatement(current) || ts.isJsxElement(current) || ts.isJsxSelfClosingElement(current)) break;
+    }
+    return false;
+}
+
+function isFirstCallArgument(node: ts.StringLiteralLike): boolean {
+    return ts.isCallExpression(node.parent) && node.parent.arguments[0] === node;
+}
+
+function isEmbeddedLiteralContext(node: ts.StringLiteralLike, sourceFile: ts.SourceFile): boolean {
+    if (ts.isJsxAttribute(node.parent) || hasPlusExpressionAncestor(node) || isFirstCallArgument(node)) return false;
+    for (let current: ts.Node | undefined = node.parent; current; current = current.parent) {
+        if (ts.isJsxAttribute(current)
+            && !PLAYER_COPY_ATTRIBUTES.has(current.name.getText(sourceFile))) return false;
+        if (ts.isSourceFile(current)) break;
+    }
+    for (let current: ts.Node | undefined = node.parent; current; current = current.parent) {
+        if ((ts.isParameter(current) || ts.isBindingElement(current)) && current.initializer === node) return true;
+        if (ts.isBinaryExpression(current)
+            && (current.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken
+                || current.operatorToken.kind === ts.SyntaxKind.BarBarToken)) return true;
+        if (ts.isConditionalExpression(current)) return true;
+        if (ts.isCallExpression(current) && current.arguments.indexOf(node as ts.Expression) > 0) return true;
+        if (ts.isJsxExpression(current)) return true;
+        if (ts.isStatement(current) || ts.isSourceFile(current)) break;
+    }
+    return false;
+}
+
 function scanSourceFile(rootDir: string, relativeFile: string): LocalizationSourceFinding[] {
     const absoluteFile = resolve(rootDir, ...relativeFile.split('/'));
     const raw = readFileSync(absoluteFile, 'utf8');
@@ -153,6 +197,7 @@ function scanSourceFile(rootDir: string, relativeFile: string): LocalizationSour
         : ts.ScriptKind.TS;
     const sourceFile = ts.createSourceFile(relativeFile, raw, ts.ScriptTarget.Latest, true, scriptKind);
     const findings: LocalizationSourceFinding[] = [];
+    const findingKeys = new Set<string>();
     const add = (
         node: ts.Node,
         kind: LocalizationFindingKind,
@@ -160,14 +205,19 @@ function scanSourceFile(rootDir: string, relativeFile: string): LocalizationSour
         owner: LocalizationSourceFinding['owner'],
     ): void => {
         const location = nodeLocation(sourceFile, node);
-        findings.push({
+        const finding = {
             file: relativeFile,
             ...location,
             kind,
             excerpt: normalizeExcerpt(excerpt),
             status: 'open',
             owner,
-        });
+        } satisfies LocalizationSourceFinding;
+        const key = `${finding.file}:${finding.line}:${finding.column}:${finding.kind}:${finding.excerpt}`;
+        if (!findingKeys.has(key)) {
+            findingKeys.add(key);
+            findings.push(finding);
+        }
     };
 
     const visit = (node: ts.Node): void => {
@@ -179,6 +229,11 @@ function scanSourceFile(rootDir: string, relativeFile: string): LocalizationSour
                 && looksLikePlayerCopy(node.initializer.text)) {
                 add(node.initializer, 'embedded_english', node.initializer.text, 'ui-ux+localization');
             }
+        }
+
+        if (ts.isStringLiteralLike(node) && looksLikeEmbeddedCopy(node.text)
+            && isEmbeddedLiteralContext(node, sourceFile)) {
+            add(node, 'embedded_english', node.text, 'ui-ux+localization');
         }
 
         if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken

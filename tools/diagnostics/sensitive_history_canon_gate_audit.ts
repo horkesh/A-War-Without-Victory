@@ -167,10 +167,7 @@ export type Severity = 'CRITICAL' | 'WARNING' | 'INFO';
 
 export type ViolationKind =
     | 'missing_section_3_6_guard'
-    | 'missing_sensitive_source_note'
-    | 'sensitive_player_choice'
     | 'calendar_only_rupture_claim'
-    | 'generic_symmetry_language'
     | 'weak_punitive_floor'
     | 'forbidden_positive_territorial_legitimacy'
     | 'forbidden_recruitment_modifier_above_one'
@@ -252,21 +249,6 @@ function stringOrNull(value: unknown): string | null {
 
 function numberOrNull(value: unknown): number | null {
     return typeof value === 'number' && Number.isFinite(value) ? value : null;
-}
-
-function collectText(value: unknown): string {
-    if (typeof value === 'string') return value;
-    if (Array.isArray(value)) return value.map(collectText).filter(Boolean).join(' ');
-    if (!isRecord(value)) return '';
-    return Object.keys(value).sort(strictCompare).map((key) => collectText(value[key])).filter(Boolean).join(' ');
-}
-
-const SENSITIVE_HISTORY_PATTERN = /\b(?:atrocit(?:y|ies)|camp|civilian(?:s)?|cleansing|deportation|detention|displacement|expulsion|forced displacement|genocide|massacre|refugee(?:s)?|war crime(?:s)?)\b/i;
-const GENERIC_SYMMETRY_PATTERN = /\b(?:both|all) sides\b|\bno faction\b.{0,48}\bclean hands\b/i;
-
-function isSensitiveHistoryRow(row: Record<string, unknown>): boolean {
-    const relevant = [row.title, row.narrative, row.effect, row.effects];
-    return SENSITIVE_HISTORY_PATTERN.test(relevant.map(collectText).join(' '));
 }
 
 function hasLiveStatePredicate(row: Record<string, unknown>): boolean {
@@ -543,8 +525,6 @@ function evaluateEvent(row: Record<string, unknown>, allRows: unknown[]): EventC
     const ring3 = isRing3SensitiveFamily(family ?? undefined);
 
     const violations: Violation[] = [];
-    const sensitiveHistory = isSensitiveHistoryRow(row);
-
     // Detected sensitive options (canonically counterfactual option ids).
     const options = Array.isArray(row.response_options) ? row.response_options : [];
     const detectedSensitive: string[] = [];
@@ -557,44 +537,12 @@ function evaluateEvent(row: Record<string, unknown>, allRows: unknown[]): EventC
 
     const sensitiveAdjacent = !ring3 && detectedSensitive.length > 0;
 
-    // R7 Phase 0 inventory hard gates. Sensitive-history facts remain
-    // informational and source-owned; they cannot be authored as player
-    // choices, hidden behind generic symmetry, or turned into calendar-only
-    // rupture receipts.
-    if (sensitiveHistory && stringOrNull(row.source_note) === null) {
-        violations.push({
-            event_id: eventId,
-            family,
-            kind: 'missing_sensitive_source_note',
-            severity: 'CRITICAL',
-            detail: 'Sensitive-history row has no provenance-only source_note defining the supported claim and its boundaries.',
-            locator: 'source_note',
-        });
-    }
-    const rowCopy = [row.title, row.narrative, row.effect, row.effects].map(collectText).join(' ');
-    if (sensitiveHistory && GENERIC_SYMMETRY_PATTERN.test(rowCopy)) {
-        violations.push({
-            event_id: eventId,
-            family,
-            kind: 'generic_symmetry_language',
-            severity: 'CRITICAL',
-            detail: 'Sensitive-history copy uses generic symmetry language; claims must name the specific actor, act, and source.',
-            locator: 'narrative/effects',
-        });
-    }
-    for (const option of options) {
-        if (!isRecord(option)) continue;
-        const optionText = collectText(option);
-        if (!SENSITIVE_HISTORY_PATTERN.test(optionText)) continue;
-        violations.push({
-            event_id: eventId,
-            family,
-            kind: 'sensitive_player_choice',
-            severity: 'CRITICAL',
-            detail: 'Sensitive-history act appears inside a player response option; Ring 3 makes this an informational-only surface.',
-            locator: stringOrNull(option.id),
-        });
-    }
+    // Calendar-only rupture assertions are a canon-owned state invariant.
+    // Historical provenance, actor specificity, and semantic classification of
+    // player-facing prose belong to the claim inventory. Keeping those checks
+    // separate prevents lexical references (for example "hardline camp" or
+    // Dayton refugee-return text) from becoming false canon violations while
+    // preserving the fail-closed rupture gate below.
     if (/genocide.*rupture|rupture.*genocide|srebrenica_genocide/i.test(eventId) && !hasLiveStatePredicate(row)) {
         violations.push({
             event_id: eventId,
@@ -789,10 +737,7 @@ function computeSummary(
     const byFamily: Record<string, number> = {};
     const byKind: Record<ViolationKind, number> = {
         missing_section_3_6_guard: 0,
-        missing_sensitive_source_note: 0,
-        sensitive_player_choice: 0,
         calendar_only_rupture_claim: 0,
-        generic_symmetry_language: 0,
         weak_punitive_floor: 0,
         forbidden_positive_territorial_legitimacy: 0,
         forbidden_recruitment_modifier_above_one: 0,

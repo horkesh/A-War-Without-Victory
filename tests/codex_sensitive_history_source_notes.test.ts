@@ -129,14 +129,37 @@ test('every inventoried sensitive claim has an explicit status and owner', async
     }
 });
 
+test('production choice classification blocks direct acts and excludes lexical references', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const blockedSubjects = [...new Set(report.claims
+        .filter((claim: { status: string }) => claim.status === 'blocked_sensitive_player_choice')
+        .map((claim: { subject_id: string }) => claim.subject_id))]
+        .sort();
+
+    assert.deepStrictEqual(blockedSubjects, [
+        'drina_cleansing_decision_1992',
+        'rs_strategic_goals',
+    ]);
+    for (const falsePositive of [
+        'dayton_talks_begin_1995',
+        'karadzic_mladic_split_1995',
+        'rs_paramilitary_policy_1992',
+        'strategic_posture_review_hrhb',
+        'visit_to_front_hrhb',
+    ]) {
+        assert.strictEqual(blockedSubjects.includes(falsePositive), false, falsePositive);
+    }
+});
+
 test('Neretva, Grabovica, and Uzdol anchors are source-owned September 1993 content', async () => {
     const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
     assert.strictEqual(report.historical_anchors.length, 2);
     for (const anchor of report.historical_anchors) {
-        assert.strictEqual(anchor.status, 'pass', `${anchor.anchor_id} historical placement mismatch`);
+        assert.strictEqual(anchor.chronology_status, 'pass', `${anchor.anchor_id} historical placement mismatch`);
         assert.strictEqual(anchor.event_window, 'turns 74-76');
-        assert.ok(anchor.source.includes('Balkan Battlegrounds Vol. II, pp. 434-435'));
-        assert.ok(anchor.source.includes('ICTY Halilovic Trial Judgment'));
+        assert.strictEqual(anchor.provenance_status, 'blocked');
+        assert.ok(Array.isArray(anchor.authored_provenance.essay_citations));
+        assert.strictEqual(anchor.source, undefined);
         assert.strictEqual(anchor.owner, 'historian');
     }
 });
