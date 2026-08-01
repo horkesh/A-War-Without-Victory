@@ -37,6 +37,7 @@ This is not final R2 acceptance. A fresh packaged, no-resume 104-week RS run mus
 ## Harness Hardening and Runtime Receipts
 
 - A final-tour stack-picker proof is now explicitly `not-applicable` when no visible formation stack badge exists. The harness captures a receipt and screenshot with reason `no-visible-formation-stack-badge`. If a badge exists but is not hit-testable, unstable, exposes no exact member, or fails to open the exact formation detail, the tour still fails closed.
+- Exact-counter verification now keeps the target identities frozen to the initial ready-map sample. Panel reflow may make an original target unavailable, which is reported explicitly; it may not silently substitute a newly visible counter and turn that accidental extra probe into an acceptance blocker.
 - Packaged local OSM/hillshade `ERR_ABORTED` requests are classified only inside the explicit historical-operation navigation window, for exact loopback origin/path, GET/fetch, non-main-frame, pre-teardown requests. Remote, expired, and out-of-window failures remain fatal.
 - `war-map` and every light checkpoint map now record and assert `mapChromeGeometry` before the screenshot:
   - document `scrollWidth <= clientWidth + 2`;
@@ -65,6 +66,12 @@ Negative evidence is retained locally under `tmp-paradox-qa-20260710/`, includin
 
 Useful non-acceptance observations remain diagnostic only: Owen–Stoltenberg did not end the war after only HRHB and RS accepted; field-plan presentations for Donji Vakuf, Cerska–Kamenica, and Trnovo exposed exact objectives/assembly/participants; and the run observed two 13-week source-backed decision gaps rather than the previously suspected 19-turn gap. The new capped-Authority explanation addresses comprehension; no unsupported decision was inserted.
 
+### Later negative lineage
+
+The rebuilt package used executable SHA-256 `72B49C7EF477371015BADB28E6CD833F5FDF9225F19F47FE365D7CCEE346F771` and ASAR SHA-256 `D53B1848ACB0F51AFB2DCF2115463E54F3513D0008057D83DE0D64D932FB61AD`. Fresh no-resume run `20260801_r2_rs104_fresh_v4` reached exact turn 104 and wrote autosave SHA-256 `65C7AFA2DB0D71411E9EF86D5023248BB0FAF6545C3D9B7C80D496C108E08A06`, but the final surface tour remained on the Desk/Warroom route after an Army HQ handoff and timed out waiting for the field Records toolbar. The harness now restores the exact War Map route and current-revision readiness before that toolbar check.
+
+Resume diagnostic `20260801_r2_rs104_v4_routefix_resume2` then exposed a separate harness defect after five exact counter/detail successes. The probe had frozen an initial counter sample but selected later candidates from the changing post-panel viewport; it therefore substituted newly visible `rs_1st_krnjin_light_infantry` and failed on an undeclared extra target. RED/GREEN coverage now selects only an unattempted member of the frozen target set and preserves the existing fail-closed rule when no exact formation can be verified. Both runs remain negative evidence: neither is a fresh accepted diary, and the route repair still requires live proof in the next no-resume campaign.
+
 ## Verification and Review
 
 - Geometry/harness focused: 7 files / 97 tests.
@@ -72,6 +79,7 @@ Useful non-acceptance observations remain diagnostic only: Owen–Stoltenberg di
 - Full player journeys: 44 files / 770 tests.
 - `tsc --noEmit -p tsconfig.json`: pass.
 - `node --check tools/ui/paradox_local_qa.cjs`: pass.
+- Counter target-set RED/GREEN: 1 file / 46 tests.
 - `git diff --check`: pass.
 - Independent UI/UX review first blocked hidden-overflow evidence gaps, then approved the corrected measured-width, wrapping, ancestor-visibility, and semantic-label contracts.
 - Earlier independent FR-03 review approved exact authored identity, retained renderer ownership, current-revision focus, same-dossier return, and bounded navigation-abort classification.

@@ -161,6 +161,14 @@ function assessCounterVerificationCoverage(
   };
 }
 
+function selectNextCounterVerificationCandidate(initialIds, currentFormationSample, attemptedIds) {
+  const initialTargets = new Set(initialIds);
+  const attempted = new Set(attemptedIds);
+  return currentFormationSample.find((candidate) => (
+    initialTargets.has(candidate.id) && !attempted.has(candidate.id)
+  )) ?? null;
+}
+
 function computeWorkingTreeContentFingerprint() {
   const excludedGeneratedPrefixes = [
     'tmp-paradox-qa-20260710/',
@@ -2975,7 +2983,11 @@ async function mapInteractionProbe(page, frame, faction, events, labelPrefix = '
       }
       const currentCounters = await counterInfo(frame);
       const currentFormationSample = currentCounters?.formationSample ?? [];
-      const counter = currentFormationSample.find((candidate) => !attemptedCounterIds.has(candidate.id));
+      const counter = selectNextCounterVerificationCandidate(
+        initialCounterIds,
+        currentFormationSample,
+        [...attemptedCounterIds],
+      );
       if (!counter) break;
       attemptedCounterIds.add(counter.id);
       const counterLocator = frame.locator(`[data-awwv-formation-counter-id="${counter.id}"]`);

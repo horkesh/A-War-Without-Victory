@@ -1459,6 +1459,32 @@ test('counter proof reports adaptive reachability without weakening exact identi
     assert.equal(assess([], [], [], false).ok, true);
 });
 
+test('counter proof never substitutes newly visible counters for its declared initial targets', () => {
+    const harness = readHarness();
+    const selectNext = loadFunction<(
+        initialIds: string[],
+        currentFormationSample: Array<{ id: string }>,
+        attemptedIds: string[],
+    ) => { id: string } | null>(harness, 'selectNextCounterVerificationCandidate');
+
+    assert.deepEqual(
+        selectNext(
+            ['formation-1', 'formation-2', 'formation-3'],
+            [{ id: 'newly-visible' }, { id: 'formation-2' }, { id: 'formation-1' }],
+            ['formation-1'],
+        ),
+        { id: 'formation-2' },
+    );
+    assert.equal(
+        selectNext(
+            ['formation-1', 'formation-2'],
+            [{ id: 'newly-visible' }],
+            ['formation-1'],
+        ),
+        null,
+    );
+});
+
 test('pending event order and visible modal identity match the app selector', () => {
     const harness = readHarness();
     const compare = loadFunction<(left: any, right: any) => number>(

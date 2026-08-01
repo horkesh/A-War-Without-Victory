@@ -415,8 +415,11 @@ FR-01/02/04/05 remain reviewed and green. FR-03 and FR-06 are now implemented an
 - Command/OOB Situation prose owns wrapping width. Packaged checkpoints now fail if document, strip, OOB, Situation prose, branch chips, or `+N` are locally or ancestor clipped.
 - The Warroom docket names `Review Before Advance` and `PENDING` counts separately. Near-cap quiet weeks reuse the shared sourced-policy-hold explanation; no decision or event was invented.
 - A missing visible final-tour stack badge produces an explicit not-applicable evidence receipt. Existing but unclickable/unstable stack surfaces still fail closed.
+- Exact-counter proof freezes the initial ready-map identity set. Later panel reflow may report an initial identity unavailable but cannot replace it with a newly visible, undeclared counter.
 
 The packaged attempt `20260801-r2-rs-104w-owner-postfix-v1` reached exact turn 104 and then failed the retired unconditional stack-badge assumption. Its 456 screenshots and progress/error artifacts are negative lineage only: no accepted final diagnostics packet was emitted, so it is not a completed diary or Electron acceptance. See the [R2 source closeout report](../40_reports/implemented/20260801_R2_RS_FRICTION_FR03_FR06_AND_RUNTIME_HARDENING.md).
+
+Later no-resume run `20260801_r2_rs104_fresh_v4` also reached exact turn 104 but exposed a field-route restoration defect after the Army HQ deep dive. The source repair restores the exact War Map and current-revision readiness before using the field Records toolbar. A bounded resume diagnostic proved the new route far enough to expose and repair a second harness bug: the adaptive counter probe substituted newly visible post-reflow counters for its frozen initial sample. RED/GREEN coverage now limits attempts to the declared initial identities. These are still negative diagnostics; the remaining gate must use a newly built package and a brand-new no-resume campaign.
 
 Remaining gate: after the next Electron lease, rebuild the transient unpacked package and run a fresh no-resume 104-week RS owner campaign. Acceptance requires exact turn 104, clean final diagnostics, all operation handoff receipts, materialized geometry receipts, verified process cleanup, and a newly completed diary. Do not reuse or resume the rejected run.
 

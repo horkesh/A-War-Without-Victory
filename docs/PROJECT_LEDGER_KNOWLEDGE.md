@@ -4089,3 +4089,9 @@ Applied in `[2026-08-01] R7 historical-claim and localization inventories comple
 **A real scenario byte gate is part of equivalence TDD for derived military truth:** small fixtures can prove stage ordering while missing location-driven sector repartition. Durable rule: after focused tests, run an excluded real-scenario warmup and compare exact size, SHA-256, and first divergent weekly record before collecting any measured packet. On drift, stop measurement and diagnose the earliest state difference; never refresh a performance baseline to absorb unexplained gameplay movement.
 
 Applied in `[2026-08-01] Engine quality Phase 2 turn-local final-sector receipt checkpoint`, `[2026-08-01] Engine quality Phase 2 final-sector receipt committee correction`, `src/sim/combat/final_sector_truth_reconciliation.ts`, `src/sim/turn_phases/war_phase_reconciliation_steps.ts`, and `tests/final_sector_reconciliation_session.test.ts`.
+
+## 2026-08-01 - Adaptive UI evidence must keep its declared identities stable
+
+**Viewport reflow may change reachability, not the proof population:** opening and closing map panels changes occlusion and can reveal counters that were absent from the ready-map sample. Durable rule: freeze the declared identity set at the checkpoint, select only currently reachable unattempted members of that set, and report frozen members that became unavailable. Never substitute newly visible identities merely to reach a target count; that turns an adaptive reachability probe into an undeclared and non-reproducible blocker.
+
+Applied in `[2026-08-01] R2 final-tour route and frozen counter-target harness correction`, `tools/ui/paradox_local_qa.cjs`, and `tests/paradox_local_qa_harness.test.ts`.
