@@ -296,7 +296,11 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
       <div className="w-[1px] h-4 bg-white/10 shrink-0" />
 
       {/* 3. Faction-contextual indicator — R6: more prominent */}
-      <div className="hidden lg:flex min-w-0 flex-1 items-center gap-2 overflow-hidden px-2 text-xs font-mono">
+      <div className="hidden lg:flex min-w-16 flex-1 items-center gap-2 overflow-hidden px-2 text-xs font-mono">
+        <div
+          data-testid="status-strip-secondary-telemetry"
+          className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden"
+        >
         {showAlliance && alliance != null && (() => {
           const a = alliance;
           const status = a <= 0.10 ? 'WAR' : a <= 0.20 ? 'MOBILIZING' : a <= 0.45 ? 'STRAINED' : 'ALLIED';
@@ -337,6 +341,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
             </span>
           </>
         )}
+        </div>
 
         {/* Phase H Packet 7 — H4 Branch-tag faction badge row mount.
             The component self-degrades when state / catalog absent or no
@@ -344,19 +349,13 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
             child rendering. Mount lives inside the faction-contextual
             indicator zone per H1 §4.2D guidance. */}
         {playerFaction && eventCatalog && loadedGameState?.rawGameState && (
-          <>
-            <span className="text-white/10">|</span>
-            <BranchTagBadgeRow
-              faction={playerFaction}
-              eventCatalog={eventCatalog}
-              state={loadedGameState.rawGameState}
-            />
-          </>
+          <BranchTagBadgeRow
+            faction={playerFaction}
+            eventCatalog={eventCatalog}
+            state={loadedGameState.rawGameState}
+          />
         )}
       </div>
-
-      {/* Spacer */}
-      <div className="hidden flex-1 md:block" />
 
       {/* 4. Layer toggles — gear dropdown */}
       {turnAftermathDigest && (
@@ -381,7 +380,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
         </div>
       )}
 
-      <div className="relative shrink-0">
+      <div className="relative ml-auto shrink-0">
         <button
           type="button"
           onClick={() => setLayersOpen(!layersOpen)}

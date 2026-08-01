@@ -9,9 +9,13 @@ test('bottom status strip contains wide faction telemetry without shifting contr
   );
 
   expect(source).toMatch(/data-awwv-counter-occluder="true"[\s\S]{0,220}justify-start[\s\S]{0,120}overflow-hidden/);
-  expect(source).toMatch(/hidden lg:flex min-w-0 flex-1[\s\S]{0,100}overflow-hidden/);
-  expect(source).not.toMatch(/hidden lg:flex min-w-0 flex-1[\s\S]{0,100}overflow-x-auto/);
+  expect(source).toMatch(/hidden lg:flex min-w-16 flex-1[\s\S]{0,100}overflow-hidden/);
+  expect(source).not.toMatch(/hidden lg:flex min-w-16 flex-1[\s\S]{0,100}overflow-x-auto/);
+  expect(source).toMatch(/data-testid="status-strip-secondary-telemetry"[\s\S]{0,160}flex min-w-0 flex-1[\s\S]{0,100}overflow-hidden/);
+  expect(source).toMatch(/data-testid="status-strip-secondary-telemetry"[\s\S]*<BranchTagBadgeRow/);
   expect(source).toMatch(/Active operations count[\s\S]{0,260}shrink-0 whitespace-nowrap[\s\S]{0,180}text-xs/);
+  expect(source).not.toContain('className="hidden flex-1 md:block"');
+  expect(source).toContain('className="relative ml-auto shrink-0"');
 });
 
 test('branch-tag badges remain a bounded non-scrolling telemetry row', () => {
