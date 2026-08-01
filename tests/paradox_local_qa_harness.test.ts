@@ -1218,6 +1218,32 @@ test('final blocker inventory covers every canonical player decision queue', () 
     assert.match(extractFunctionSource(harness, 'playTurns'), /assertNoPlayerBlockers/);
 });
 
+test('zero-count Review Before Advance telemetry cannot masquerade as a blocking surface', () => {
+    const harness = readHarness();
+    const shouldOpenAdvanceBlockerReview = loadFunction<(
+        text: string,
+        pendingState: { blockerInventory?: Record<string, number> } | null,
+    ) => boolean>(harness, 'shouldOpenAdvanceBlockerReview');
+
+    const emptyInventory = {
+        eventDecisions: 0,
+        proposals: 0,
+        paramilitary: 0,
+        reserves: 0,
+        convoys: 0,
+        officerEvents: 0,
+        peacePlan: 0,
+        counterOffers: 0,
+        dayton: 0,
+        operationOpportunities: 0,
+    };
+    assert.equal(shouldOpenAdvanceBlockerReview('REVIEW BEFORE ADVANCE 0', { blockerInventory: emptyInventory }), false);
+    assert.equal(shouldOpenAdvanceBlockerReview('Advance blocked — Review Before Advance', {
+        blockerInventory: { ...emptyInventory, proposals: 1 },
+    }), true);
+    assert.match(extractFunctionSource(harness, 'handleCurrentSurface'), /shouldOpenAdvanceBlockerReview\(text, pendingState\)/);
+});
+
 test('counter-offer handler targets an exact player-visible offer and requires source queue clearance', () => {
     const harness = readHarness();
     const handler = extractFunctionSource(harness, 'handleCurrentSurface');

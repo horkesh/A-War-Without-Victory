@@ -3855,6 +3855,13 @@ function selectHistoricalPeacePlanResponse(planId, faction) {
   return historicalRejectingFaction === faction ? 'Reject Plan' : 'Accept Plan';
 }
 
+function shouldOpenAdvanceBlockerReview(text, pendingState) {
+  const blockerCount = Object.values(pendingState?.blockerInventory ?? {})
+    .reduce((sum, value) => sum + (Number.isFinite(value) ? Number(value) : 0), 0);
+  return blockerCount > 0
+    && /Advance blocked|Resolve .*pending|Resolve Before Advancing|Review Before Advance|Review Blockers/i.test(text);
+}
+
 async function handleCurrentSurface(page, frame, faction, events, options = {}) {
   const text = await bodyText(frame);
   const pendingState = await readState(frame).catch(() => null);
@@ -4338,7 +4345,7 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     await snapshot(page, frame, faction, events, 'handled-reserve-request', { handledAction: 'reserve-cautious-action', clicked });
     return { handled: clicked, action: 'reserve-cautious-action' };
   }
-  if (/Advance blocked|Resolve .*pending|Resolve Before Advancing|Review Before Advance/i.test(text)) {
+  if (shouldOpenAdvanceBlockerReview(text, pendingState)) {
     const before = await readState(frame).catch(() => null);
     const qaProposal = selectProposalForQa(before?.pendingProposals ?? [], strategicRun);
     if (qaProposal) {
@@ -4377,11 +4384,6 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     );
     await snapshot(page, frame, faction, events, 'handled-advance-blocker-review', { handledAction: 'advance-blocker-review', clicked });
     return { handled: clicked, action: 'advance-blocker-review' };
-  }
-  if (/Review Blockers/i.test(text)) {
-    const clicked = await clickMatch(frame, /Review Blockers/i, 'review blockers', { afterMs: 900 });
-    await snapshot(page, frame, faction, events, 'handled-review-blockers', { handledAction: 'review-blockers', clicked });
-    return { handled: clicked, action: 'review-blockers' };
   }
   if (/ADVANCE TURN/i.test(text)) {
     if (options.allowAdvanceModal === false) {
