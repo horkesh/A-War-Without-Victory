@@ -2398,6 +2398,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     seed: state.meta.seed,
                     settlementGraph: graph,
                     operationalSettlementGraph,
+                    operationalData: operationalData && operationalCentroids
+                        ? {
+                            opData: operationalData,
+                            edges: operationalSettlementGraph.edges,
+                            centroids: operationalCentroids,
+                        }
+                        : undefined,
                     settlementEdges: graph.edges,
                     municipalityPopulation1991,
                     settlementPopulationBySid,

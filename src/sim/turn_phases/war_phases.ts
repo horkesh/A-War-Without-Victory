@@ -36,7 +36,7 @@ import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.
 import { computeFrontRegions } from '../../map/front_regions.js';
 import { applyCommandAuthorityRecovery, computeCommandAuthorityRecovery } from '../../shared/commandAuthorityEconomy.js';
 import { loadTerrainScalars } from '../../map/terrain_scalars_node.js';
-import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
+import { backfillFormationLocationOsid, computeOsidPopulation } from '../../data/operational_data.js';
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { buildSidToMunFromSettlements } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
@@ -222,7 +222,8 @@ import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types
 import { setPoliticalControlSnapshot, setAllianceAtTurnStart, getAllianceAtTurnStart } from '../turn_pipeline_types.js';
 import {
     getOperationalData,
-    setOperationalData,
+    getOrLoadOperationalData,
+    getOrLoadOperationalMapping,
     getOperationalSettlementGraph,
     getGraphAndEdges,
     getSiegeStateCache,
@@ -1014,9 +1015,8 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             try {
-                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-                const opData = await loadOperationalData(baseDir || undefined);
-                if (opData?.operationalToCanonical)
+                const opData = await getOrLoadOperationalMapping(context);
+                if (opData.operationalToCanonical)
                     migratePoliticalControllersToOsidIfNeeded(context.state, opData.operationalToCanonical);
             } catch {
                 // Operational data optional; skip migration when unavailable
@@ -1233,9 +1233,8 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             try {
-                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-                const opData = await loadOperationalData(baseDir || undefined);
-                if (opData?.canonicalToOperational)
+                const opData = await getOrLoadOperationalMapping(context);
+                if (opData.canonicalToOperational)
                     backfillFormationLocationOsid(context.state, opData.canonicalToOperational);
             } catch {
                 // Operational data optional; skip backfill when unavailable
@@ -1278,14 +1277,8 @@ export const warPhases: NamedPhase[] = [
         name: 'load-operational-data',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
             try {
-                const [opData, edges, centroids] = await Promise.all([
-                    loadOperationalData(baseDir || undefined),
-                    loadOperationalEdges(baseDir || undefined),
-                    loadOperationalCentroids(baseDir || undefined)
-                ]);
-                setOperationalData(context, { opData, edges, centroids });
+                await getOrLoadOperationalData(context);
             } catch (err) {
                 if (typeof console !== 'undefined' && console.warn) {
                     console.warn('load-operational-data: operational data not available, skipping OSID steps:', err instanceof Error ? err.message : String(err));
@@ -3378,11 +3371,8 @@ export const warPhases: NamedPhase[] = [
                 : (directive.kind ?? 'brigade');
             let canonicalToOperational: import('../../data/operational_data.js').CanonicalToOperationalMap | undefined;
             try {
-                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-                if (baseDir) {
-                    const opData = await loadOperationalData(baseDir);
-                    canonicalToOperational = opData.canonicalToOperational;
-                }
+                const opData = await getOrLoadOperationalMapping(context);
+                canonicalToOperational = opData.canonicalToOperational;
             } catch {
                 // Keep formation spawn deterministic if optional operational data is unavailable.
             }

@@ -110,6 +110,8 @@ export interface TurnInput {
     settlementGraph?: LoadedSettlementGraph;
     /** OSID graph used by war mechanics that otherwise load the default graph. Its edge identity is deep-frozen on injection/load. */
     operationalSettlementGraph?: LoadedSettlementGraph;
+    /** Immutable OSID mappings/topology owned by the campaign or scenario runner. */
+    operationalData?: OperationalDataCache;
     applyNegotiation?: boolean; // Phase 11B: apply accepted negotiation offers
     /** When provided, pool population is weighted by eligible population (RBiH=bosniak, RS=serb, HRHB=croat) so brigade counts reflect demographics. */
     municipalityPopulation1991?: MunicipalityPopulation1991;
@@ -371,14 +373,87 @@ export interface OperationalDataCache {
     centroids: Awaited<ReturnType<typeof loadOperationalCentroids>>;
 }
 
-/** Type-safe accessor for operational data attached to context by load-operational-data step. */
+type OperationalDataContext = TurnContext & {
+    operationalData?: OperationalDataCache;
+    operationalDataPromise?: Promise<OperationalDataCache>;
+    operationalMappingPromise?: Promise<OperationalDataCache['opData']>;
+    operationalEdgesPromise?: Promise<OperationalDataCache['edges']>;
+    operationalCentroidsPromise?: Promise<OperationalDataCache['centroids']>;
+};
+
+/** Type-safe accessor for caller-owned or turn-local operational data. */
 export function getOperationalData(context: TurnContext): OperationalDataCache | undefined {
-    return (context as TurnContext & { operationalData?: OperationalDataCache }).operationalData;
+    return context.input.operationalData ?? (context as OperationalDataContext).operationalData;
 }
 
 /** Type-safe setter for operational data on context. */
 export function setOperationalData(context: TurnContext, data: OperationalDataCache): void {
-    (context as TurnContext & { operationalData?: OperationalDataCache }).operationalData = data;
+    (context as OperationalDataContext).operationalData = data;
+}
+
+function operationalDataBaseDir(): string | undefined {
+    const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function'
+        ? process.cwd()
+        : '';
+    return baseDir || undefined;
+}
+
+/** Return the caller-owned mapping or one turn-local fallback mapping Promise. */
+export function getOrLoadOperationalMapping(context: TurnContext): Promise<OperationalDataCache['opData']> {
+    const existing = getOperationalData(context);
+    if (existing) return Promise.resolve(existing.opData);
+
+    const cachedContext = context as OperationalDataContext;
+    cachedContext.operationalMappingPromise ??= loadOperationalData(operationalDataBaseDir());
+    return cachedContext.operationalMappingPromise;
+}
+
+/** Return the caller-owned edges or one turn-local fallback edge Promise. */
+export function getOrLoadOperationalEdges(context: TurnContext): Promise<OperationalDataCache['edges']> {
+    const existing = getOperationalData(context);
+    if (existing) return Promise.resolve(existing.edges);
+
+    const cachedContext = context as OperationalDataContext;
+    cachedContext.operationalEdgesPromise ??= loadOperationalEdges(operationalDataBaseDir());
+    return cachedContext.operationalEdgesPromise;
+}
+
+/** Return the caller-owned centroids or one turn-local fallback centroid Promise. */
+export function getOrLoadOperationalCentroids(context: TurnContext): Promise<OperationalDataCache['centroids']> {
+    const existing = getOperationalData(context);
+    if (existing) return Promise.resolve(existing.centroids);
+
+    const cachedContext = context as OperationalDataContext;
+    cachedContext.operationalCentroidsPromise ??= loadOperationalCentroids(operationalDataBaseDir());
+    return cachedContext.operationalCentroidsPromise;
+}
+
+/**
+ * Return one operational-data bundle for the whole turn.
+ *
+ * Scenario and desktop owners inject their already-loaded immutable bundle.
+ * Compatibility callers share granular lazy Promises across every phase in
+ * this TurnContext. The full bundle is composed only for consumers that need
+ * all three resources, so optional edge/centroid failures cannot suppress
+ * mapping-only migration, backfill, or formation placement.
+ */
+export function getOrLoadOperationalData(context: TurnContext): Promise<OperationalDataCache> {
+    const existing = getOperationalData(context);
+    if (existing) return Promise.resolve(existing);
+
+    const cachedContext = context as OperationalDataContext;
+    if (!cachedContext.operationalDataPromise) {
+        cachedContext.operationalDataPromise = Promise.all([
+            getOrLoadOperationalMapping(context),
+            getOrLoadOperationalEdges(context),
+            getOrLoadOperationalCentroids(context),
+        ]).then(([opData, edges, centroids]) => {
+            const loaded = { opData, edges, centroids };
+            setOperationalData(context, loaded);
+            return loaded;
+        });
+    }
+    return cachedContext.operationalDataPromise;
 }
 
 type OperationalSettlementGraphContext = TurnContext & {

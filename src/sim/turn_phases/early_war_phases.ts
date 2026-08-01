@@ -9,7 +9,6 @@ import { applyDisplacementFromFlips } from '../../state/displacement.js';
 import { GameState, type FactionId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { selectBotBrigadeOrderFactions } from './war_phases.js';
-import { loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
 import { evaluateEvents } from '../events/evaluate_events.js';
 import {
     getActiveFormationSpawnDirective,
@@ -39,7 +38,13 @@ import { computeSiegeState } from '../early_war/compute_siege_state.js';
 import { promoteFormations } from '../early_war/promote_formations.js';
 import { runEarlyWarBotPosture } from '../early_war/bot_early_war.js';
 import type { NamedPhase, TurnContext } from '../turn_pipeline_types.js';
-import { getSiegeStateCache, setSiegeStateCache, loadRecruitmentCatalog } from '../turn_pipeline_types.js';
+import {
+    getOrLoadOperationalEdges,
+    getOrLoadOperationalMapping,
+    getSiegeStateCache,
+    setSiegeStateCache,
+    loadRecruitmentCatalog,
+} from '../turn_pipeline_types.js';
 
 /**
  * Phase C: Peace phase entry gating (Phase_I_Specification_v0_4_0.md; ROADMAP Phase C).
@@ -86,11 +91,9 @@ export const earlyWarPhases: NamedPhase[] = [
             if (_phase !== 'war') return;
             if (context.state.meta.recruitment_mode !== 'bottom_up') return;
             try {
-                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-                if (!baseDir) return;
                 const [opData, edges] = await Promise.all([
-                    loadOperationalData(baseDir),
-                    loadOperationalEdges(baseDir)
+                    getOrLoadOperationalMapping(context),
+                    getOrLoadOperationalEdges(context),
                 ]);
                 if (!opData?.operationalToCanonical || !edges?.length) return;
                 // Build adjacency map from operational edges
@@ -145,11 +148,8 @@ export const earlyWarPhases: NamedPhase[] = [
             const kind = directive.kind === 'both' || directive.kind === 'militia' ? 'brigade' : (directive.kind ?? 'brigade');
             let canonicalToOperational: import('../../data/operational_data.js').CanonicalToOperationalMap | undefined;
             try {
-                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
-                if (baseDir) {
-                    const opData = await loadOperationalData(baseDir);
-                    canonicalToOperational = opData.canonicalToOperational;
-                }
+                const opData = await getOrLoadOperationalMapping(context);
+                canonicalToOperational = opData.canonicalToOperational;
             } catch {
                 // Operational data missing; spawn without location_osid (legacy)
             }
