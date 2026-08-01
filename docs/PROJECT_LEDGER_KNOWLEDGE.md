@@ -4006,3 +4006,13 @@ Applied in `[2026-07-31] Seamless map transition Phase 0 baseline instrumentatio
 **Application close is an attempt, not cleanup proof:** a `finally` block entered after setup has already succeeded cannot protect setup failures, and swallowing `close()` rejection can leave an orphan and locked profile. Durable rule: enter cleanup protection immediately after launch; bound graceful close; force-kill if necessary; wait for and verify process exit under a second bound; fail if exit cannot be proved; and persist stable cleanup outcomes for successful launches.
 
 Applied in `[2026-07-31] Seamless map transition Phase 0 evidence made fail-closed and context-complete`, `src/ui/map/components/Minimap.tsx`, and `tools/ui/map_transition_profile.cjs`.
+
+## 2026-08-01 - Player-visible evidence must observe owned state
+
+**Screenshot differences are supporting evidence, not interaction proof:** animation, clocks, cursors, and compositing can change a full-page hash without proving a map command reached its owner. Durable rule: expose a default-off, bounded read-only probe at the owning renderer and assert direction, magnitude, and restoration against that state; keep screenshots for visual review.
+
+**Automation must mutate through the same visible control as the player:** invoking an IPC bridge directly can bypass shell routing, blockers, confirmation, and aftermath surfaces. Durable rule: trigger the visible control, use read-only state polling to verify its exact result, and bind historical responses to the catalog's explicit default id plus historical marker instead of duplicating a label in the harness.
+
+**Post-action modal cascades need an allowlist of non-decisions, not a generic close loop:** an Advance can surface a neutral deferral and then read-only historical notices. Durable rule: permit only exact, bounded non-policy actions such as `Review Later` and `Acknowledged`; leave any unknown or decision-bearing surface open so the evidence run fails closed rather than inventing a choice.
+
+Applied in `[2026-08-01] Seamless map transition R1 Phase 3-6 closeout`, `src/ui/map/perf/mapTransitionTiming.ts`, and `tools/ui/map_transition_profile.cjs`.

@@ -17,8 +17,8 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 
 | ID | Plan | Start condition |
 |---|---|---|
-| R1 | [Seamless Command Room ↔ Tactical Map](2026-07-31-seamless-command-room-map-transition-plan.md) | Ready after explicit execution instruction |
-| R2 | [RS Desk → Decision → Advance friction](2026-07-31-rs-104week-friction-remediation-plan.md) | R1 shared-file handoff |
+| R1 | [Seamless Command Room ↔ Tactical Map](2026-07-31-seamless-command-room-map-transition-plan.md) | Complete locally; closed 2026-08-01 |
+| R2 | [RS Desk → Decision → Advance friction](2026-07-31-rs-104week-friction-remediation-plan.md) | Ready; R1 shared-file handoff complete |
 | R3 | [Operational/Tactical Group convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | Ready after explicit execution instruction |
 | R4 | [Command, event, and Dynamic Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) | R2 priority/cadence contract |
 | R5 | [Engine quality, performance, and stability](2026-07-31-engine-quality-performance-stability-plan.md) | R1–R3 source/state floor |

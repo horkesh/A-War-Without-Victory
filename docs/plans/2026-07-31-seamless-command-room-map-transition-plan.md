@@ -3,14 +3,14 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS — Phases 0–2 complete; Phase 3 is next
+**Status:** COMPLETE LOCALLY — Phases 0–6 accepted; R2 shared-file handoff is unlocked
 **Overseer:** Orchestrator
 **Owner lane:** Performance Engineer + UI/UX Developer
 **Independent reviewers:** Technical Architect, QA Engineer, Platform Specialist, Process QA
 **Roadmap workstream:** R1
 **Roadmap slot:** first autonomous execution packet / player-facing map performance
 **Phase/workstream covered:** Electron shell navigation, tactical-map React lifetime, MapLibre/Deck lifetime, static map-data loading, packaged local HTTP caching, cold-entry bundle/network cleanup
-**Current next action:** Execute Phase 3 static-resource promise caches and critical-first initialization against the retained Phase 2 shell
+**Current next action:** Integrate the reviewed R1 commits, then let R2 rebase its FR-03 shared files on the completed shell/map contract
 **Collision rule:** Do not execute source-changing phases while the RS 104-week friction plan's FR-03 map-focus packet owns `App.tsx`, `MapContainer.tsx`, `shellNavigation.ts`, or `gameStore.ts`. Rebase or sequence this packet first; never merge two independent edits to those files by guesswork.
 **Activation boundary:** `Execute the master roadmap` authorizes source implementation, tests, evidence, local commits, and transient local directory builds for this packet. It does not authorize push, tag, signing, upload, installer publication, or release-state change.
 
@@ -424,12 +424,12 @@ npm.cmd run qa:map-transition -- --label=stable-shell --cycles=20 --warmups=3
 - Modify `src/ui/map/data/DataLoader.ts`
 - Create `tests/ui/map_data_loader_cache.test.ts`
 
-- [ ] Write failing tests for concurrent and sequential calls to every static map resource loader.
-- [ ] Assert main map and minimap share one operational-geometry fetch/parse result.
-- [ ] Cache the in-flight promise immediately, not only the fulfilled value.
-- [ ] Evict rejected promises so an explicit Retry can reload.
-- [ ] Treat returned static resources as immutable. Do not cache game-state-derived control GeoJSON.
-- [ ] Provide a test-only cache reset with no production UI control.
+- [x] Write failing tests for concurrent and sequential calls to every static map resource loader.
+- [x] Assert main map and minimap share one operational-geometry fetch/parse result.
+- [x] Cache the in-flight promise immediately, not only the fulfilled value.
+- [x] Evict rejected promises so an explicit Retry can reload.
+- [x] Treat returned static resources as immutable. Do not cache game-state-derived control GeoJSON.
+- [x] Provide a test-only cache reset with no production UI control.
 
 ### Task 3.2 — Separate core and optional initialization
 
@@ -439,14 +439,14 @@ npm.cmd run qa:map-transition -- --label=stable-shell --cycles=20 --warmups=3
 - Modify `tests/ui/map_loading_state.test.ts`
 - Create `tests/ui/map_critical_first_init.test.ts`
 
-- [ ] Start all safe fetches early, but await only operational geometry and political control before constructing the base map.
-- [ ] Preserve SID aliases needed for exact current-state placement before declaring current-state readiness.
-- [ ] Load census/ghost data only on first ghost-layer request.
-- [ ] Load adjacency only on first map mode/read model that requires it.
-- [ ] Apply terrain/property enrichment without blocking base geography and current control.
-- [ ] Apply damage/scar enrichment after the first current-state render.
-- [ ] Do not use `requestIdleCallback` as the sole scheduler for player-critical counters or readiness.
-- [ ] Keep optional-load failure diagnostic and nonfatal; keep required-source failure retryable and visible.
+- [x] Start all safe fetches early, but await only operational geometry and political control before constructing the base map.
+- [x] Preserve SID aliases needed for exact current-state placement before declaring current-state readiness.
+- [x] Load census/ghost data only on first ghost-layer request.
+- [x] Load adjacency only on first map mode/read model that requires it.
+- [x] Apply terrain/property enrichment without blocking base geography and current control.
+- [x] Apply damage/scar enrichment after the first current-state render.
+- [x] Do not use `requestIdleCallback` as the sole scheduler for player-critical counters or readiness.
+- [x] Keep optional-load failure diagnostic and nonfatal; keep required-source failure retryable and visible.
 
 ### Task 3.3 — Use cacheable packaged HTTP semantics
 
@@ -456,12 +456,12 @@ npm.cmd run qa:map-transition -- --label=stable-shell --cycles=20 --warmups=3
 - Modify `tests/desktop_pmtiles_protocol_route.test.ts`
 - Modify `tests/desktop_packaged_runtime_probe.test.ts`
 
-- [ ] Keep `index.html` revalidated rather than immutable.
-- [ ] Serve content-hashed `/assets/*` as long-lived immutable resources.
-- [ ] Give packaged derived data, fonts, and PMTiles range responses a stable ETag/revalidation or process-lifetime immutable policy.
-- [ ] Preserve byte-range correctness and exposed range headers.
-- [ ] Keep Vite development behavior separate so source edits remain visible during development.
-- [ ] Assert 206 and 200 responses use consistent validators/cache policy.
+- [x] Keep `index.html` revalidated rather than immutable.
+- [x] Serve content-hashed `/assets/*` as long-lived immutable resources.
+- [x] Give packaged derived data, fonts, and PMTiles range responses a stable ETag/revalidation or process-lifetime immutable policy.
+- [x] Preserve byte-range correctness and exposed range headers.
+- [x] Keep Vite development behavior separate so source edits remain visible during development.
+- [x] Assert 206 and 200 responses use consistent validators/cache policy.
 
 **Verification:**
 
@@ -494,11 +494,11 @@ npm.cmd run qa:map-transition -- --label=resource-cache --cycles=20 --warmups=3
 - Modify `tests/ui/map_shell_persistence.test.ts`
 - Modify `tests/ui_map_build_warning_contract.test.ts`
 
-- [ ] Mount the minimap only after the primary map reports the first current-state frame.
-- [ ] Keep the minimap mounted thereafter across room switches.
-- [ ] Reuse the cached operational geometry.
-- [ ] Keep minimap visibility preference and click-to-pan behavior unchanged.
-- [ ] Do not replace the minimap renderer unless profiling still identifies it as a dominant cost.
+- [x] Mount the minimap only after the primary map reports the first current-state frame.
+- [x] Keep the minimap mounted thereafter across room switches.
+- [x] Reuse the cached operational geometry.
+- [x] Keep minimap visibility preference and click-to-pan behavior unchanged.
+- [x] Do not replace the minimap renderer unless profiling still identifies it as a dominant cost.
 
 ### Task 4.2 — Remove packaged external-font dependency
 
@@ -509,14 +509,16 @@ npm.cmd run qa:map-transition -- --label=resource-cache --cycles=20 --warmups=3
 - Modify relevant CSS/font assets only if reviewed local WOFF2 files and licenses are present
 - Create `tests/ui/packaged_font_network_contract.test.ts`
 
-- [ ] Remove Google Fonts preconnect, stylesheet link, and CSS `@import` from packaged entrypoints.
-- [ ] Use reviewed local webfonts if already supplied with license provenance; otherwise retain the current CSS family names with system fallbacks.
-- [ ] Do not fetch or add unreviewed font binaries during implementation.
-- [ ] Assert packaged HTML contains no `http://` or `https://` font dependency.
+- [x] Remove Google Fonts preconnect, stylesheet link, and CSS `@import` from packaged entrypoints.
+- [x] Use reviewed local webfonts if already supplied with license provenance; otherwise retain the current CSS family names with system fallbacks.
+- [x] Do not fetch or add unreviewed font binaries during implementation.
+- [x] Assert packaged HTML contains no `http://` or `https://` font dependency.
 
 ### Task 4.3 — Split only measured optional modules
 
 **Entry gate:** Cold P95 still exceeds 1,500 ms and the Phase 0 module timeline shows optional JS evaluation/preload as material.
+
+**Disposition:** NOT APPLICABLE. Phase 3 cold current-state p95 was 125.2 ms, so the 1,500 ms entry gate did not open. The packet deliberately stopped before speculative module splitting.
 
 **Files:**
 
@@ -573,27 +575,27 @@ No package/distributable command is authorized.
 
 ### Task 5.2 — Cold/warm acceptance matrix
 
-- [ ] Run three clean launches on the recorded target/development machine.
-- [ ] Run 3 warmups + 20 measured switches per launch.
-- [ ] Capture one Command Room screenshot, one first cold correct-state map screenshot, and one warm correct-state map screenshot per launch.
-- [ ] Verify map interaction: pan, zoom, select a visible formation/stack, open a settlement, return to the Command Room, reopen map.
-- [ ] Verify the displayed turn/fingerprint after a turn advanced from the Command Room.
-- [ ] Verify no hidden map input or shortcut fires while the Command Room owns focus.
-- [ ] Record p50/p95, construction/release/resource counts, diagnostic counts, runtime versions, viewport, and machine class in a bounded summary.
+- [x] Run three clean launches on the recorded target/development machine.
+- [x] Run 3 warmups + 20 measured switches per launch.
+- [x] Capture one Command Room screenshot, one first cold correct-state map screenshot, and one warm correct-state map screenshot per launch.
+- [x] Verify map interaction: pan, zoom, select a visible formation/stack, open a settlement, return to the Command Room, reopen map.
+- [x] Verify the displayed turn/fingerprint after a turn advanced from the Command Room.
+- [x] Verify no hidden map input or shortcut fires while the Command Room owns focus.
+- [x] Record p50/p95, construction/release/resource counts, diagnostic counts, runtime versions, viewport, and machine class in a bounded summary.
 
 **Acceptance table:**
 
 | Metric | Baseline | Final | Target | Result |
 |---|---:|---:|---:|---|
-| Warm switch P50 | record Phase 0 | record | informational | |
-| Warm switch P95 | record Phase 0 | record | <= 150 ms | |
-| Warm MapLibre constructions | record | record | 0 | |
-| Warm WebGL releases | record | record | 0 | |
-| Warm static resource requests | record | record | 0 | |
-| Cold current-state P50 | record | record | <= 1,000 ms | |
-| Cold current-state P95 | record | record | <= 1,500 ms | |
-| Stale/blank samples | record | record | 0 | |
-| Unexpected diagnostics | record | record | 0 | |
+| Warm switch P50 | 4,251.05 ms | 114.45 ms | informational | Improved 97.3% |
+| Warm switch P95 | 4,628.045 ms | 139.515 ms | <= 150 ms | PASS |
+| Warm MapLibre constructions | 2/cycle | 0/cycle | 0 | PASS |
+| Warm WebGL releases | 2/cycle | 0/cycle | 0 | PASS |
+| Warm static resource requests | 6/cycle | 0/cycle | 0 | PASS |
+| Cold current-state P50 | 5,368 ms | 70.7 ms | <= 1,000 ms | PASS |
+| Cold current-state P95 | 5,380.87 ms | 78.8 ms | <= 1,500 ms | PASS |
+| Stale/blank samples | 0 | 0 of 72 | 0 | PASS |
+| Unexpected diagnostics | 0 | 0 | 0 | PASS |
 
 **Stop gate:** A visually fast but stale, noninteractive, fog-unsafe, or erroring map is a failure. Return to the owning phase; do not relax the metric definition.
 
@@ -620,11 +622,11 @@ No package/distributable command is authorized.
 - Update `docs/PROJECT_LEDGER_KNOWLEDGE.md` only if implementation changes the reusable rule below
 - Create `docs/40_reports/implemented/20260731_SEAMLESS_COMMAND_ROOM_MAP_TRANSITION.md`
 
-- [ ] Document campaign-scoped map ownership, reveal/resize behavior, static-resource cache ownership, and cold/warm metric definitions.
-- [ ] Include the before/after acceptance table and exact evidence path.
-- [ ] Move the command-board row to `CLOSED` only when every Phase 5 target passes.
-- [ ] Add a short roadmap closure amendment; do not rewrite historical amendments.
-- [ ] Do not update package version, tag, release state, or `FORAWWV.md`.
+- [x] Document campaign-scoped map ownership, reveal/resize behavior, static-resource cache ownership, and cold/warm metric definitions.
+- [x] Include the before/after acceptance table and exact evidence path.
+- [x] Move the command-board row to `CLOSED` only when every Phase 5 target passes.
+- [x] Add a short roadmap closure amendment; do not rewrite historical amendments.
+- [x] Do not update package version, tag, release state, or `FORAWWV.md`.
 
 **Verification:**
 
@@ -669,30 +671,30 @@ This packet does not touch historical claims, event timing, scenarios, OOB, Code
 
 ## 11. Protocol Enforcement
 
-- [ ] Orchestrator oversees all phases.
-- [ ] Technical Architect reviews the campaign-scoped ownership boundary.
-- [ ] Napkin and life-lessons indexes are read at session start.
-- [ ] TDD red/green proof precedes behavior changes.
-- [ ] `/simplify` runs between every phase and its findings are fixed before the next phase.
-- [ ] Typecheck and focused Vitest run after every phase.
-- [ ] One logical phase per commit after implementation is authorized.
-- [ ] Process QA validates the closeout.
-- [ ] Ledger and implementation report are updated on completion.
-- [ ] No version, tag, push, PR, signing, upload, installer publication, or release mutation occurs without the separate publication instruction.
+- [x] Orchestrator oversees all phases.
+- [x] Technical Architect reviews the campaign-scoped ownership boundary.
+- [x] Napkin and life-lessons indexes are read at session start.
+- [x] TDD red/green proof precedes behavior changes.
+- [x] `/simplify` runs between every phase and its findings are fixed before the next phase.
+- [x] Typecheck and focused Vitest run after every phase.
+- [x] One logical phase per commit after implementation is authorized.
+- [x] Process QA validates the closeout.
+- [x] Ledger and implementation report are updated on completion.
+- [x] No version, tag, push, PR, signing, upload, installer publication, or release mutation occurs without the separate publication instruction.
 
 ---
 
 ## 12. Success Criteria
 
-- [ ] The current-turn tactical map stays mounted across Command Room transitions.
-- [ ] Warm P95 is <= 150 ms over the defined sample.
-- [ ] Warm transitions create/release zero graphics contexts and request zero static map resources.
-- [ ] Cold current-state P50/P95 meet 1,000/1,500 ms targets on the recorded machine.
-- [ ] All accepted frames are current-turn/current-fingerprint, interactive, and fog-safe.
-- [ ] Sandbox remains functional without weakening the stable interactive-shell contract.
-- [ ] Map cleanup remains exact on real campaign/app exit.
-- [ ] Focused, player-journey, browser, Electron runtime, build, EOL, and diff gates pass.
-- [ ] Roadmap, command board, masters, report, ledger, and knowledge are synchronized.
+- [x] The current-turn tactical map stays mounted across Command Room transitions.
+- [x] Warm P95 is <= 150 ms over the defined sample.
+- [x] Warm transitions create/release zero graphics contexts and request zero static map resources.
+- [x] Cold current-state P50/P95 meet 1,000/1,500 ms targets on the recorded machine.
+- [x] All accepted frames are current-turn/current-fingerprint, interactive, and fog-safe.
+- [x] Sandbox remains functional without weakening the stable interactive-shell contract.
+- [x] Map cleanup remains exact on real campaign/app exit.
+- [x] Focused, player-journey, browser, Electron runtime, build, EOL, and diff gates pass.
+- [x] Roadmap, command board, masters, report, ledger, and knowledge are synchronized.
 
 ---
 
@@ -703,10 +705,18 @@ This packet does not touch historical claims, event timing, scenarios, OOB, Code
 | 0 Baseline | Complete | Phase 0 commit + five review-fix follow-ups | Exact current commands and counts below; typecheck; tactical-map and warroom builds; harness syntax; EOL and diff checks; 3 cold launches + 3 warmups + 20 measured warm cycles per launch; diagnostics-failure, cleanup, and whole-evidence volatility proof | `tmp-map-transition-perf/baseline-all-contexts-diagnostics-cleanup-v4b/baseline.json` |
 | 1 Persistent viewport | Complete; independently approved | Phase 1 integration commit | 24 focused/adjacent files / 226 tests; typecheck; tactical-map and Warroom builds; harness syntax; EOL and diff checks; independent repair review: 4 files / 38 tests | `tmp-map-transition-perf/phase1-retained-viewport-authoritative-v7-final/baseline.json` |
 | 2 Stable shell | Complete; independently approved | Phase 2 integration commit | 11 focused/adjacent files / 162 tests; typecheck; desktop release build; harness syntax; EOL and diff checks; independent initial and repair review | `tmp-map-transition-perf/phase2-stable-shell-authoritative-v1/baseline.json` |
-| 3 Resource/cache | Not started | — | — | — |
-| 4 Cold-entry residual | Not started | — | — | — |
-| 5 Acceptance | Not started | — | — | — |
-| 6 Closeout | Not started | — | — | — |
+| 3 Resource/cache | Complete; independently approved | Phase 3 local commit | Focused cache/critical-init/protocol tests; typecheck; release/runtime checks; 72-sample Electron profile | `tmp-map-transition-perf/phase3-resource-cache-authoritative-v1/baseline.json` |
+| 4 Cold-entry residual | Complete; independently approved; Task 4.3 not applicable | Phase 4/5 local commit | Focused reveal/minimap/font tests; typecheck; production builds; 72-sample Electron profile | `tmp-map-transition-perf/phase4-minimap-reveal-font-authoritative-v1/baseline.json` |
+| 5 Acceptance | Complete; independently approved | Phase 4/5 local commit | 42/42 evidence hardening tests; three player-visible launches; 21 screenshots; exact interaction, decision, advance, cleanup, diagnostic, save, and privacy proof | `tmp-map-transition-perf/phase5-player-visible-interaction-authoritative-v8/baseline.json` |
+| 6 Closeout | Complete | Documentation local commit | 18 files / 187 focused/docs tests; 8 files / 85 Electron runtime tests; 44 files / 769 player journeys; 36-step first-hour and 42-step live-surface browser proofs; desktop release, typecheck, EOL, and diff gates | [Implementation report](../40_reports/implemented/20260801_SEAMLESS_COMMAND_ROOM_MAP_TRANSITION.md) |
+
+### Phase 3–6 closeout amendment (2026-08-01)
+
+Phase 3 introduced immutable promise/result caches with rejection eviction and mutation-safe map results, kept campaign truth uncached, moved optional enrichment off the truthful first frame, and aligned packaged HTTP/PMTiles caching, validators, containment, conditionals, and ranges. Its authoritative profile (`a3e7c73ad82b040fb0c7d5b33f4ee45a838a6e3821bfc391578b578c8e6857c2`) recorded cold p50/p95 69.4/125.2 ms, zero warm static-resource requests, 72/72 ordered samples, and zero unexpected diagnostics. Warm p95 remained 229.605 ms, selecting the reveal path for Phase 4.
+
+Phase 4 removed the two-frame reveal delay, tied interactivity to resize/one-render/repaint plus exact revision truth, deferred minimap readiness, and removed external font requests. The authoritative 72-sample profile (`33a32edb7dda961533bf8f846326cf41603da2a465f7d76abbb26669dba06b5b`) records cold p50/p95 70.7/78.8 ms and warm p50/p95 114.45/139.515 ms with zero warm renderer churn, releases, static requests, stale samples, or unexpected diagnostics. Task 4.3 did not execute because the cold-p95 entry gate had already passed by more than an order of magnitude.
+
+Phase 5 added profile-only camera state and a bounded player-visible schema. The accepted v8 packet (`2855c269ad72a6a4e8d21b664e61cc92c5c6e045980211b215148a73f50ab34e`) proves three clean RBiH launches through actual pan/zoom/Home, exact formation and settlement inspection, Command Room ownership, catalog-marked historical-default choice, visible Advance, neutral Cutileiro deferral, read-only Foča acknowledgement, and exact post-advance turn/fingerprint readiness. Failed v5-v7 packets are rejected diagnostic lineage, never acceptance evidence. Independent re-review approved the final implementation with no actionable findings.
 
 Phase 1 replaces screen-scoped map mounting with one App-owned campaign epoch above `CampaignTacticalViewportOwner`, so an initial load can succeed before any tactical viewport exists. Successful browser auto/manual/continue/main-menu and Toolbar development loads use the same success-aware replacement runner. Packaged new-campaign, scenario-load, and state-load broadcasts carry replacement metadata through Electron main, preload, Warroom, and the embedded iframe bridge; initial packaged state is classified as a replacement at session attachment. Failed replacements and ordinary turn/mutation updates do not advance the epoch. Normal `game <-> warroom` navigation changes only visibility, focus, and input ownership. The full-size retained layer stays opaque-covered, `aria-hidden`, inert, pointer-disabled, and keyboard-disabled while inactive or while its committed turn/fingerprint is stale. Reveal uses two animation frames, resizes the main map and minimap, listens for one rendered frame, repaints, and only then admits current-revision input. Hidden application updates use no application animation frame, and warm navigation does not create or release a graphics owner.
 

@@ -4,9 +4,9 @@
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole planning authority and wins on any conflict.
 
-**Updated:** 2026-07-31
+**Updated:** 2026-08-01
 
-**Program state:** PREPARED; autonomous implementation is not yet authorized
+**Program state:** ACTIVE; R1 is closed locally and R2 is unlocked for integration/execution
 
 ## Activation
 
@@ -20,8 +20,8 @@ This planning pass authorizes none of those implementation or publication action
 
 | Order | ID | Status | Next executable action | Plan |
 |---:|---|---|---|---|
-| 1 | R1 | READY | Establish cold/warm timing baseline, then retain the campaign-scoped tactical-map renderer and session static-data cache. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
-| 2 | R2 | WAITING ON R1 SHARED-FILE HANDOFF | Rebase FR-03 on R1; execute the five RS information-hierarchy, map-handoff, cadence, ultrawide, and presentation packets. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
+| 1 | R1 | CLOSED | Integrate the reviewed local commits. Acceptance: warm p95 139.515 ms, cold p95 78.8 ms, zero warm graphics/static churn, three-launch player-visible proof, zero unexpected diagnostics. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
+| 2 | R2 | READY — R1 HANDOFF COMPLETE | Rebase FR-03 on R1; execute the five RS information-hierarchy, map-handoff, cadence, ultrawide, and presentation packets. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
 | 3 | R3 | READY | Characterize lifecycle state, then execute Phases 0–6 with locked TG constants and the decided Standing-OG model. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | WAITING ON R2 PRIORITY/CADENCE CONTRACT | Inventory command/event/Codex projections, converge them on deterministic receipts, and absorb Free War residuals. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | WAITING ON R1–R3 STATE FLOOR | Classify optional state and artifacts, profile measured hot paths, close save/replay and CI parity. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
@@ -32,7 +32,7 @@ This planning pass authorizes none of those implementation or publication action
 
 ## Current Critical Path
 
-`R1 -> R2 -> R3 -> R4 -> R5 -> R6 -> R7 -> R8 -> R9`
+`R2 -> R3 -> R4 -> R5 -> R6 -> R7 -> R8 -> R9` (`R1` closed 2026-08-01)
 
 R3 is technically ready beside R1/R2, but serial execution is the default to minimize dirty-worktree and integration risk. Parallel execution requires a fresh shared-file inspection proving independence.
 
