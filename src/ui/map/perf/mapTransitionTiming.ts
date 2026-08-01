@@ -61,6 +61,18 @@ export interface MapTransitionDebugState {
   pending_metadata: boolean;
 }
 
+export interface MapTransitionCameraState {
+  longitude: number;
+  latitude: number;
+  zoom: number;
+  pitch: number;
+}
+
+export interface MapTransitionCameraProbe {
+  setReader: (reader: (() => MapTransitionCameraState) | null) => () => void;
+  read: () => MapTransitionCameraState | null;
+}
+
 const SAFE_METADATA_KEYS = new Set([
   'kind',
   'cycleIndex',
@@ -81,6 +93,48 @@ function assertFiniteNonNegative(value: number, label: string): void {
   if (!Number.isFinite(value) || value < 0) {
     throw new Error(`${label} must be a finite non-negative number`);
   }
+}
+
+function normalizeCameraState(state: MapTransitionCameraState): MapTransitionCameraState {
+  const entries = Object.entries(state) as [keyof MapTransitionCameraState, number][];
+  for (const [key, value] of entries) {
+    if (!Number.isFinite(value)) throw new Error(`Map transition camera ${key} must be finite`);
+  }
+  if (state.longitude < -180 || state.longitude > 180) {
+    throw new Error('Map transition camera longitude must be from -180 through 180');
+  }
+  if (state.latitude < -90 || state.latitude > 90) {
+    throw new Error('Map transition camera latitude must be from -90 through 90');
+  }
+  if (state.zoom < 0 || state.zoom > 30) {
+    throw new Error('Map transition camera zoom must be from 0 through 30');
+  }
+  if (state.pitch < 0 || state.pitch > 85) {
+    throw new Error('Map transition camera pitch must be from 0 through 85');
+  }
+  return {
+    longitude: Math.round(state.longitude * 1_000_000) / 1_000_000,
+    latitude: Math.round(state.latitude * 1_000_000) / 1_000_000,
+    zoom: Math.round(state.zoom * 1_000_000) / 1_000_000,
+    pitch: Math.round(state.pitch * 1_000_000) / 1_000_000,
+  };
+}
+
+export function createMapTransitionCameraProbe(enabled: boolean): MapTransitionCameraProbe {
+  let reader: (() => MapTransitionCameraState) | null = null;
+  return {
+    setReader(nextReader) {
+      if (!enabled) return () => {};
+      reader = nextReader;
+      return () => {
+        if (reader === nextReader) reader = null;
+      };
+    },
+    read() {
+      if (!enabled || !reader) return null;
+      return normalizeCameraState(reader());
+    },
+  };
 }
 
 function sortedResourceCounts(counts: ReadonlyMap<string, number>): Record<string, number> {
@@ -331,6 +385,7 @@ const profiler = createMapTransitionProfiler(
   isMapTransitionProfilingEnabled(),
   () => (typeof performance === 'undefined' ? 0 : performance.now()),
 );
+const cameraProbe = createMapTransitionCameraProbe(profiler.enabled);
 
 export function setMapTransitionKind(kind: MapTransitionKind): void {
   profiler.setKind(kind);
@@ -378,12 +433,23 @@ export function getMapTransitionDebugState(): MapTransitionDebugState {
   return profiler.debugState();
 }
 
+export function setMapTransitionCameraReader(
+  reader: (() => MapTransitionCameraState) | null,
+): () => void {
+  return cameraProbe.setReader(reader);
+}
+
+export function getMapTransitionCameraState(): MapTransitionCameraState | null {
+  return cameraProbe.read();
+}
+
 declare global {
   interface Window {
     __AWWV_MAP_TRANSITION_PROFILE__?: {
       setKind: typeof setMapTransitionKind;
       snapshot: typeof getMapTransitionProfileSnapshot;
       debugState: typeof getMapTransitionDebugState;
+      camera: typeof getMapTransitionCameraState;
     };
   }
 }
@@ -393,5 +459,6 @@ if (typeof window !== 'undefined' && profiler.enabled) {
     setKind: setMapTransitionKind,
     snapshot: getMapTransitionProfileSnapshot,
     debugState: getMapTransitionDebugState,
+    camera: getMapTransitionCameraState,
   };
 }

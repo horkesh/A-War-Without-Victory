@@ -2,6 +2,7 @@ import type { FeatureCollection } from 'geojson';
 import type { EventDefinition } from '../../../sim/events/event_types.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 import { countMapTransitionResource } from '../perf/mapTransitionTiming.js';
+import type { OsidDamageSeed } from '../layers/buildOsidDamageOverlay.js';
 
 interface PoliticalControlPayload {
   by_settlement_id?: Record<string, string | null>;
@@ -14,6 +15,7 @@ const STATIC_RESOURCE_KEYS: Readonly<Record<string, string>> = {
   '/data/derived/operational/operational_contact_graph.json': 'osid-adjacency',
   '/data/derived/operational/canonical_to_operational_map.json': 'sid-to-osid',
   '/data/derived/terrain/settlements_terrain_scalars.json': 'terrain-scalars',
+  '/data/derived/osid_damage_seed.json': 'osid-damage-seed',
   '/data/scenarios/events/war_1992.json': 'events-war-1992',
   '/data/scenarios/events/war_1992_hrhb_summer.json': 'events-war-1992-hrhb-summer',
   '/data/scenarios/events/war_1993.json': 'events-war-1993',
@@ -22,27 +24,88 @@ const STATIC_RESOURCE_KEYS: Readonly<Record<string, string>> = {
   '/data/scenarios/events/consequences.json': 'events-consequences',
 };
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const resourceKey = STATIC_RESOURCE_KEYS[url];
-  if (resourceKey) countMapTransitionResource(resourceKey);
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: HTTP ${response.status}`);
+const staticResourcePromises = new Map<string, Promise<unknown>>();
+const immutableMapMutators = new Set<PropertyKey>(['set', 'delete', 'clear']);
+
+function freezeStaticResource<T>(value: T, seen = new WeakSet<object>()): T {
+  if (value === null || typeof value !== 'object') return value;
+  if (seen.has(value)) return value;
+  seen.add(value);
+
+  if (value instanceof Map) {
+    for (const [key, entry] of value) {
+      freezeStaticResource(key, seen);
+      freezeStaticResource(entry, seen);
+    }
+    let readonlyMap: Map<unknown, unknown>;
+    readonlyMap = new Proxy(value as Map<unknown, unknown>, {
+      get(target, property) {
+        if (immutableMapMutators.has(property)) {
+          return () => { throw new TypeError('Static map resources are immutable'); };
+        }
+        if (property === 'size') return target.size;
+        if (property === 'get') return target.get.bind(target);
+        if (property === 'has') return target.has.bind(target);
+        if (property === 'entries') return target.entries.bind(target);
+        if (property === 'keys') return target.keys.bind(target);
+        if (property === 'values') return target.values.bind(target);
+        if (property === Symbol.iterator) return target[Symbol.iterator].bind(target);
+        if (property === 'forEach') {
+          return (callback: (entry: unknown, key: unknown, map: Map<unknown, unknown>) => void, thisArg?: unknown) => {
+            target.forEach((entry, key) => callback.call(thisArg, entry, key, readonlyMap));
+          };
+        }
+        if (property === 'valueOf') return () => readonlyMap;
+        return Reflect.get(target, property, readonlyMap) as unknown;
+      },
+    });
+    return Object.freeze(readonlyMap) as T;
   }
-  return (await response.json()) as T;
+
+  for (const property of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, property);
+    if (descriptor && 'value' in descriptor) freezeStaticResource(descriptor.value, seen);
+  }
+  return Object.freeze(value);
 }
 
-export async function loadOperationalSettlements(): Promise<FeatureCollection> {
+function loadStaticResource<T>(key: string, load: () => Promise<T>): Promise<T> {
+  const cached = staticResourcePromises.get(key) as Promise<T> | undefined;
+  if (cached) return cached;
+
+  const promise = Promise.resolve().then(load).then((value) => freezeStaticResource(value));
+  staticResourcePromises.set(key, promise);
+  void promise.catch(() => {
+    if (staticResourcePromises.get(key) === promise) staticResourcePromises.delete(key);
+  });
+  return promise;
+}
+
+function fetchJson<T>(url: string): Promise<T> {
+  return loadStaticResource(`json:${url}`, async () => {
+    const resourceKey = STATIC_RESOURCE_KEYS[url];
+    if (resourceKey) countMapTransitionResource(resourceKey);
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${url}: HTTP ${response.status}`);
+    }
+    return (await response.json()) as T;
+  });
+}
+
+export function loadOperationalSettlements(): Promise<FeatureCollection> {
   return fetchJson<FeatureCollection>('/data/derived/operational/operational_settlements.geojson');
 }
 
-export async function loadCensusSettlements(): Promise<FeatureCollection> {
+export function loadCensusSettlements(): Promise<FeatureCollection> {
   return fetchJson<FeatureCollection>('/data/derived/settlements_wgs84_1990.geojson');
 }
 
-export async function loadOperationalPoliticalControl(): Promise<Record<string, string | null>> {
-  const payload = await fetchJson<PoliticalControlPayload>('/data/derived/operational/operational_political_control.json');
-  return payload.by_settlement_id ?? {};
+export function loadOperationalPoliticalControl(): Promise<Record<string, string | null>> {
+  return loadStaticResource('operational-political-control', async () => {
+    const payload = await fetchJson<PoliticalControlPayload>('/data/derived/operational/operational_political_control.json');
+    return payload.by_settlement_id ?? {};
+  });
 }
 
 interface ContactGraphPayload {
@@ -54,19 +117,21 @@ interface ContactGraphPayload {
  * Load the OSID contact graph and build an adjacency Map.
  * Used by the defense strength heat map for BFS distance computation.
  */
-export async function loadOsidAdjacency(): Promise<Map<string, string[]>> {
-  const payload = await fetchJson<ContactGraphPayload>('/data/derived/operational/operational_contact_graph.json');
-  const adj = new Map<string, string[]>();
-  for (const edge of payload.edges) {
-    if (!edge.a || !edge.b) continue;
-    let listA = adj.get(edge.a);
-    if (!listA) { listA = []; adj.set(edge.a, listA); }
-    if (!listA.includes(edge.b)) listA.push(edge.b);
-    let listB = adj.get(edge.b);
-    if (!listB) { listB = []; adj.set(edge.b, listB); }
-    if (!listB.includes(edge.a)) listB.push(edge.a);
-  }
-  return adj;
+export function loadOsidAdjacency(): Promise<Map<string, string[]>> {
+  return loadStaticResource('osid-adjacency', async () => {
+    const payload = await fetchJson<ContactGraphPayload>('/data/derived/operational/operational_contact_graph.json');
+    const adj = new Map<string, string[]>();
+    for (const edge of payload.edges) {
+      if (!edge.a || !edge.b) continue;
+      let listA = adj.get(edge.a);
+      if (!listA) { listA = []; adj.set(edge.a, listA); }
+      if (!listA.includes(edge.b)) listA.push(edge.b);
+      let listB = adj.get(edge.b);
+      if (!listB) { listB = []; adj.set(edge.b, listB); }
+      if (!listB.includes(edge.a)) listB.push(edge.a);
+    }
+    return adj;
+  });
 }
 
 /** Event definition from scenario JSON files. */
@@ -81,48 +146,44 @@ export interface EventDefinitionView {
   image?: string;
 }
 
-let _eventDefCache: Map<string, EventDefinitionView> | null = null;
-
 /**
  * Load all event definitions from scenario event JSON files.
  * Returns a Map<eventId, definition>. Cached after first call.
  */
-export async function loadEventDefinitions(): Promise<Map<string, EventDefinitionView>> {
-  if (_eventDefCache) return _eventDefCache;
+export function loadEventDefinitions(): Promise<Map<string, EventDefinitionView>> {
+  return loadStaticResource('event-definitions-view', async () => {
+    const files = [
+      '/data/scenarios/events/war_1992.json',
+      '/data/scenarios/events/war_1992_hrhb_summer.json',
+      '/data/scenarios/events/war_1993.json',
+      '/data/scenarios/events/war_1994.json',
+      '/data/scenarios/events/war_1995.json',
+      // Consequence events (csq_*) fire as non-decision notifications and flash
+      // an acknowledge EventModal (deriveFiredEvents → isDecision:false). Include
+      // them here so their documentary `image` (e.g. mobilization/supply stills)
+      // resolves in the modal — matches loadEventDefinitionsFull's file set.
+      '/data/scenarios/events/consequences.json',
+    ];
 
-  const files = [
-    '/data/scenarios/events/war_1992.json',
-    '/data/scenarios/events/war_1992_hrhb_summer.json',
-    '/data/scenarios/events/war_1993.json',
-    '/data/scenarios/events/war_1994.json',
-    '/data/scenarios/events/war_1995.json',
-    // Consequence events (csq_*) fire as non-decision notifications and flash
-    // an acknowledge EventModal (deriveFiredEvents → isDecision:false). Include
-    // them here so their documentary `image` (e.g. mobilization/supply stills)
-    // resolves in the modal — matches loadEventDefinitionsFull's file set.
-    '/data/scenarios/events/consequences.json',
-  ];
-
-  const map = new Map<string, EventDefinitionView>();
-  const results = await Promise.allSettled(files.map(f => fetchJson<any[]>(f)));
-  for (const result of results) {
-    if (result.status !== 'fulfilled') continue;
-    for (const ev of result.value) {
-      if (!ev.id) continue;
-      map.set(ev.id, {
-        id: ev.id,
-        title: getPlayerSafeDisplayLabel(ev.title ?? ev.id, 'Untitled event'),
-        narrative: ev.narrative ?? '',
-        category: ev.category ?? 'military',
-        effects: Array.isArray(ev.effects) ? ev.effects : ev.effect ? [ev.effect] : [],
-        decision: ev.decision,
-        image: typeof ev.image === 'string' ? ev.image : undefined,
-      });
+    const map = new Map<string, EventDefinitionView>();
+    const results = await Promise.all(files.map(f => fetchJson<any[]>(f)));
+    for (const events of results) {
+      for (const ev of events) {
+        if (!ev.id) continue;
+        map.set(ev.id, {
+          id: ev.id,
+          title: getPlayerSafeDisplayLabel(ev.title ?? ev.id, 'Untitled event'),
+          narrative: ev.narrative ?? '',
+          category: ev.category ?? 'military',
+          effects: Array.isArray(ev.effects) ? ev.effects : ev.effect ? [ev.effect] : [],
+          decision: ev.decision,
+          image: typeof ev.image === 'string' ? ev.image : undefined,
+        });
+      }
     }
-  }
 
-  _eventDefCache = map;
-  return map;
+    return map;
+  });
 }
 
 /**
@@ -144,38 +205,34 @@ export async function loadEventDefinitions(): Promise<Map<string, EventDefinitio
  *
  * Cached separately from the view cache.
  */
-let _eventDefFullCache: Map<string, EventDefinition> | null = null;
+export function loadEventDefinitionsFull(): Promise<Map<string, EventDefinition>> {
+  return loadStaticResource('event-definitions-full', async () => {
+    const files = [
+      '/data/scenarios/events/war_1992.json',
+      '/data/scenarios/events/war_1992_hrhb_summer.json',
+      '/data/scenarios/events/war_1993.json',
+      '/data/scenarios/events/war_1994.json',
+      '/data/scenarios/events/war_1995.json',
+      '/data/scenarios/events/consequences.json',
+    ];
 
-export async function loadEventDefinitionsFull(): Promise<Map<string, EventDefinition>> {
-  if (_eventDefFullCache) return _eventDefFullCache;
-
-  const files = [
-    '/data/scenarios/events/war_1992.json',
-    '/data/scenarios/events/war_1992_hrhb_summer.json',
-    '/data/scenarios/events/war_1993.json',
-    '/data/scenarios/events/war_1994.json',
-    '/data/scenarios/events/war_1995.json',
-    '/data/scenarios/events/consequences.json',
-  ];
-
-  const map = new Map<string, EventDefinition>();
-  const results = await Promise.allSettled(files.map(f => fetchJson<unknown[]>(f)));
-  for (const result of results) {
-    if (result.status !== 'fulfilled') continue;
-    if (!Array.isArray(result.value)) continue;
-    for (const raw of result.value) {
-      if (!raw || typeof raw !== 'object') continue;
-      const ev = raw as EventDefinition;
-      if (typeof ev.id !== 'string' || ev.id.length === 0) continue;
-      // Last write wins on duplicate id — matches the engine-side loader's
-      // duplicate-detection error behavior at runtime catalog assembly; we
-      // tolerate here because browser-side bridges only do read-only lookups.
-      map.set(ev.id, ev);
+    const map = new Map<string, EventDefinition>();
+    const results = await Promise.all(files.map(f => fetchJson<unknown[]>(f)));
+    for (const events of results) {
+      if (!Array.isArray(events)) continue;
+      for (const raw of events) {
+        if (!raw || typeof raw !== 'object') continue;
+        const ev = raw as EventDefinition;
+        if (typeof ev.id !== 'string' || ev.id.length === 0) continue;
+        // Last write wins on duplicate id — matches the engine-side loader's
+        // duplicate-detection error behavior at runtime catalog assembly; we
+        // tolerate here because browser-side bridges only do read-only lookups.
+        map.set(ev.id, ev);
+      }
     }
-  }
 
-  _eventDefFullCache = map;
-  return map;
+    return map;
+  });
 }
 
 /**
@@ -183,12 +240,11 @@ export async function loadEventDefinitionsFull(): Promise<Map<string, EventDefin
  * Returns Map<SID, OSID> (e.g. "S100013" → "op:banovici:banovici_2").
  * Used to resolve legacy SID keys against the OSID centroid lookup.
  */
-let _sidToOsidCache: Map<string, string> | null = null;
-export async function loadSidToOsidMapping(): Promise<Map<string, string>> {
-  if (_sidToOsidCache) return _sidToOsidCache;
-  const raw = await fetchJson<Record<string, string>>('/data/derived/operational/canonical_to_operational_map.json');
-  _sidToOsidCache = new Map(Object.entries(raw));
-  return _sidToOsidCache;
+export function loadSidToOsidMapping(): Promise<Map<string, string>> {
+  return loadStaticResource('sid-to-osid', async () => {
+    const raw = await fetchJson<Record<string, string>>('/data/derived/operational/canonical_to_operational_map.json');
+    return new Map(Object.entries(raw));
+  });
 }
 
 /** Terrain scalars per settlement (SID-keyed). */
@@ -201,12 +257,20 @@ export interface TerrainScalars {
   terrain_friction_index: number;
 }
 
-let _terrainScalarsCache: Map<string, TerrainScalars> | null = null;
-export async function loadTerrainScalars(): Promise<Map<string, TerrainScalars>> {
-  if (_terrainScalarsCache) return _terrainScalarsCache;
-  const raw = await fetchJson<{ by_sid: Record<string, TerrainScalars> }>('/data/derived/terrain/settlements_terrain_scalars.json');
-  _terrainScalarsCache = new Map(Object.entries(raw.by_sid));
-  return _terrainScalarsCache;
+export function loadTerrainScalars(): Promise<Map<string, TerrainScalars>> {
+  return loadStaticResource('terrain-scalars', async () => {
+    const raw = await fetchJson<{ by_sid: Record<string, TerrainScalars> }>('/data/derived/terrain/settlements_terrain_scalars.json');
+    return new Map(Object.entries(raw.by_sid));
+  });
+}
+
+export function loadOsidDamageSeed(): Promise<OsidDamageSeed> {
+  return fetchJson<OsidDamageSeed>('/data/derived/osid_damage_seed.json');
+}
+
+/** Test isolation only. Static renderer resources otherwise live for the renderer session. */
+export function resetStaticMapResourceCachesForTests(): void {
+  staticResourcePromises.clear();
 }
 
 /** Fetch latest run save as raw text. Use with loadSave(text) to parse after yielding so UI can show loading state. */

@@ -38,6 +38,7 @@ export function TacticalMapViewport({ active, onInteractionReadyChange }: Tactic
   const viewportRef = useRef<HTMLElement>(null);
   const [mainController, setMainController] = useState<TacticalMapGraphicsController | null>(null);
   const [minimapController, setMinimapController] = useState<TacticalMapGraphicsController | null>(null);
+  const [minimapMounted, setMinimapMounted] = useState(false);
   const [revealPainted, setRevealPainted] = useState(false);
   const [renderedRevision, setRenderedRevision] = useState<TacticalMapRenderedRevision | null>(null);
   const currentTurn = useGameStore((state) => state.loadedGameState?.turn);
@@ -50,6 +51,10 @@ export function TacticalMapViewport({ active, onInteractionReadyChange }: Tactic
     currentFingerprint,
   );
   const interactionReady = active && revealPainted && currentRevisionReady;
+
+  useEffect(() => {
+    if (currentRevisionReady) setMinimapMounted(true);
+  }, [currentRevisionReady]);
 
   const handleMainController = useCallback((controller: TacticalMapGraphicsController | null) => {
     setMainController(controller);
@@ -92,31 +97,25 @@ export function TacticalMapViewport({ active, onInteractionReadyChange }: Tactic
     if (!active || !mainController) return undefined;
 
     let cancelled = false;
-    let firstFrame = 0;
-    let secondFrame = 0;
-    let removeRenderListener: (() => void) | null = null;
     setRevealPainted(false);
 
-    firstFrame = requestAnimationFrame(() => {
-      secondFrame = requestAnimationFrame(() => {
-        if (cancelled) return;
-        mainController.resize();
-        minimapController?.resize();
-        removeRenderListener = mainController.onceRender(() => {
-          if (!cancelled) setRevealPainted(true);
-        });
-        mainController.triggerRepaint();
-        minimapController?.triggerRepaint();
-      });
+    mainController.resize();
+    const removeRenderListener = mainController.onceRender(() => {
+      if (!cancelled) setRevealPainted(true);
     });
+    mainController.triggerRepaint();
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(firstFrame);
-      cancelAnimationFrame(secondFrame);
-      removeRenderListener?.();
+      removeRenderListener();
     };
-  }, [active, mainController, minimapController]);
+  }, [active, mainController]);
+
+  useEffect(() => {
+    if (!interactionReady || !minimapController) return;
+    minimapController.resize();
+    minimapController.triggerRepaint();
+  }, [interactionReady, minimapController]);
 
   return (
     <section
@@ -137,9 +136,11 @@ export function TacticalMapViewport({ active, onInteractionReadyChange }: Tactic
         onRenderedRevisionChange={setRenderedRevision}
         onGraphicsController={handleMainController}
       />
-      <RootErrorBoundary zone="minimap">
-        <Minimap active={interactionReady} onGraphicsController={handleMinimapController} />
-      </RootErrorBoundary>
+      {minimapMounted && (
+        <RootErrorBoundary zone="minimap">
+          <Minimap active={interactionReady} onGraphicsController={handleMinimapController} />
+        </RootErrorBoundary>
+      )}
     </section>
   );
 }

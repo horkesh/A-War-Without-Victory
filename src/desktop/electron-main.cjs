@@ -56,6 +56,120 @@ const {
 } = require('./player_visible_state.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
 const MAP_TRANSITION_PROFILE_MODE = process.env.AWWV_MAP_TRANSITION_PROFILE === '1';
+const STATIC_RESPONSE_EXPOSE_HEADERS = 'Content-Range, Content-Length, Accept-Ranges, ETag, Cache-Control';
+
+function isPathInside(baseDir, filePath) {
+  const base = path.resolve(baseDir);
+  const target = path.resolve(filePath);
+  const relative = path.relative(base, target);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+function parseByteRange(rangeHeader, totalSize) {
+  if (typeof rangeHeader !== 'string' || !rangeHeader.startsWith('bytes=')) return null;
+  const match = /^(\d*)-(\d*)$/.exec(rangeHeader.slice('bytes='.length).trim());
+  if (!match || (match[1] === '' && match[2] === '')) return 'invalid';
+
+  let start;
+  let end;
+  if (match[1] === '') {
+    const suffixLength = Number(match[2]);
+    if (!Number.isInteger(suffixLength) || suffixLength <= 0) return 'invalid';
+    start = Math.max(totalSize - suffixLength, 0);
+    end = totalSize - 1;
+  } else {
+    start = Number(match[1]);
+    end = match[2] === '' ? totalSize - 1 : Number(match[2]);
+  }
+  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || start >= totalSize) {
+    return 'invalid';
+  }
+  return { start, end: Math.min(end, totalSize - 1) };
+}
+
+function buildPackagedFileCacheHeaders(pathname, stat, packaged) {
+  const normalized = String(pathname || '/').replace(/\\/g, '/');
+  let cacheControl = 'no-store';
+  if (packaged) {
+    const basename = path.posix.basename(normalized);
+    const contentHashedAsset = normalized.startsWith('/assets/')
+      && !normalized.slice('/assets/'.length).includes('/')
+      && /[.-][A-Za-z0-9_-]{8}\.[A-Za-z0-9]+$/.test(basename);
+    if (normalized === '/' || normalized === '/index.html' || normalized.endsWith('/index.html')) {
+      cacheControl = 'no-cache';
+    } else if (contentHashedAsset) {
+      cacheControl = 'public, max-age=31536000, immutable';
+    } else if (normalized.startsWith('/data/runs/') || normalized === '/data/derived/latest_run_final_save.json') {
+      cacheControl = 'no-store';
+    } else if (normalized.startsWith('/data/') || normalized.startsWith('/font/') || normalized.endsWith('.pmtiles')) {
+      cacheControl = 'public, max-age=0, must-revalidate';
+    } else {
+      cacheControl = 'no-cache';
+    }
+  }
+  const headers = {
+    'Cache-Control': cacheControl,
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Expose-Headers': STATIC_RESPONSE_EXPOSE_HEADERS,
+  };
+  if (packaged) {
+    const size = Number(stat?.size) || 0;
+    const mtime = Math.trunc(Number(stat?.mtimeMs) || 0);
+    headers.ETag = `"${size.toString(16)}-${mtime.toString(16)}"`;
+  }
+  return headers;
+}
+
+function buildStaticFileResponseMetadata(
+  pathname,
+  stat,
+  packaged,
+  contentType,
+  rangeHeader = null,
+  ifNoneMatch = null,
+) {
+  const cacheHeaders = buildPackagedFileCacheHeaders(pathname, stat, packaged);
+  if (cacheHeaders.ETag && ifNoneMatch === cacheHeaders.ETag) {
+    return { status: 304, headers: cacheHeaders, range: null };
+  }
+
+  const parsedRange = parseByteRange(rangeHeader, stat.size);
+  if (parsedRange === 'invalid') {
+    return {
+      status: 416,
+      headers: {
+        ...cacheHeaders,
+        'Content-Range': `bytes */${stat.size}`,
+        'Accept-Ranges': 'bytes',
+      },
+      range: null,
+    };
+  }
+  if (parsedRange) {
+    const length = parsedRange.end - parsedRange.start + 1;
+    return {
+      status: 206,
+      headers: {
+        ...cacheHeaders,
+        'Content-Type': contentType,
+        'Content-Range': `bytes ${parsedRange.start}-${parsedRange.end}/${stat.size}`,
+        'Content-Length': String(length),
+        'Accept-Ranges': 'bytes',
+      },
+      range: parsedRange,
+    };
+  }
+  return {
+    status: 200,
+    headers: {
+      ...cacheHeaders,
+      'Content-Type': contentType,
+      'Content-Length': String(stat.size),
+      'Accept-Ranges': 'bytes',
+    },
+    range: null,
+  };
+}
 
 function getMapTransitionSaveRoot() {
   if (!MAP_TRANSITION_PROFILE_MODE) return null;
@@ -389,6 +503,7 @@ function fetchLocalText(url, options = {}) {
         resolve({
           statusCode: res.statusCode ?? 0,
           body,
+          headers: res.headers,
         });
       });
     });
@@ -1076,18 +1191,19 @@ async function runPackagedRuntimeProbe() {
     '/data/scenarios/events/war_1995.json',
     '/data/scenarios/events/consequences.json',
   ];
+  const revalidatedStaticPolicy = 'public, max-age=0, must-revalidate';
   const packagedRouteInventory = [
-    { route: '/data/derived/operational/operational_settlements.geojson', expected_status: 200 },
-    { route: '/data/derived/settlements_wgs84_1990.geojson', expected_status: 200 },
-    { route: '/data/derived/terrain/settlements_terrain_scalars.json', expected_status: 200 },
-    { route: '/data/derived/tiles/osm.pmtiles', expected_status: 206, range: 'bytes=0-15' },
-    { route: '/font/Open%20Sans%20Bold/0-255.pbf', expected_status: 200 },
-    { route: '/font/Open%20Sans%20Bold/256-511.pbf', expected_status: 200 },
-    { route: '/data/ui/hq_rbih_clickable_regions.json', expected_status: 200 },
-    { route: '/data/ui/hq_rs_clickable_regions.json', expected_status: 200 },
-    { route: '/data/ui/hq_hrhb_clickable_regions.json', expected_status: 200 },
-    { route: '/data/source/settlements_initial_master.json', expected_status: 200 },
-    { route: '/assets/ui/icons/icon_warning.svg', expected_status: 200 },
+    { route: '/data/derived/operational/operational_settlements.geojson', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/derived/settlements_wgs84_1990.geojson', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/derived/terrain/settlements_terrain_scalars.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/derived/tiles/osm.pmtiles', expected_status: 206, expected_cache_control: revalidatedStaticPolicy, range: 'bytes=0-15' },
+    { route: '/font/Open%20Sans%20Bold/0-255.pbf', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/font/Open%20Sans%20Bold/256-511.pbf', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/ui/hq_rbih_clickable_regions.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/ui/hq_rs_clickable_regions.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/ui/hq_hrhb_clickable_regions.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/source/settlements_initial_master.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/assets/ui/icons/icon_warning.svg', expected_status: 200, expected_cache_control: 'no-cache' },
   ];
   const [mapIndexResponse, snapshotResponse, ...rawRouteResponses] = await Promise.all([
     fetchLocalText(getMapServerUrl('/')),
@@ -1106,6 +1222,7 @@ async function runPackagedRuntimeProbe() {
   }));
   const routeInventoryResponses = rawPackagedRouteResponses.map((response, index) => ({
     ...response,
+    expected_cache_control: packagedRouteInventory[index].expected_cache_control,
     expected_status: packagedRouteInventory[index].expected_status,
     range: packagedRouteInventory[index].range ?? null,
     route: packagedRouteInventory[index].route,
@@ -1126,6 +1243,17 @@ async function runPackagedRuntimeProbe() {
     throw new Error(
       `packaged tactical map server returned ${failedRouteInventoryResponse.statusCode} for route inventory ${failedRouteInventoryResponse.route}; expected ${failedRouteInventoryResponse.expected_status}`,
     );
+  }
+  const invalidCacheResponse = routeInventoryResponses.find(
+    (response) => response.headers['cache-control'] !== response.expected_cache_control
+      || typeof response.headers.etag !== 'string'
+      || response.headers.etag.length === 0,
+  );
+  if (invalidCacheResponse) {
+    throw new Error(`packaged tactical map cache contract failed for ${invalidCacheResponse.route}`);
+  }
+  if (mapIndexResponse.headers['cache-control'] !== 'no-cache' || typeof mapIndexResponse.headers.etag !== 'string') {
+    throw new Error('packaged tactical map index must be validator-revalidated');
   }
 
   const probeWindow = createMainWindow({
@@ -1316,6 +1444,8 @@ async function runPackagedRuntimeProbe() {
     ],
     route_inventory_checks: routeInventoryResponses.map((response) => ({
       expected_status: response.expected_status,
+      cache_control: response.headers['cache-control'] ?? null,
+      etag_present: typeof response.headers.etag === 'string' && response.headers.etag.length > 0,
       range: response.range,
       route: response.route,
       status: response.statusCode,
@@ -1463,32 +1593,32 @@ function startMapServer() {
     let filePath;
     if (segments[0] === 'data' && segments[1] === 'derived') {
       filePath = path.join(derivedDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(derivedDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(derivedDir, filePath)) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'source') {
       filePath = path.join(sourceDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(sourceDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(sourceDir, filePath)) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'ui') {
       filePath = path.join(uiDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(uiDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(uiDir, filePath)) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'scenarios') {
       filePath = path.join(scenariosDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(scenariosDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(scenariosDir, filePath)) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'runs') {
       filePath = path.join(runsDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(runsDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(runsDir, filePath)) { res.writeHead(403); res.end(); return; }
       if (!filePath.toLowerCase().endsWith('.json')) { res.writeHead(403); res.end(); return; }
     } else {
       // Tactical map static files
       const rel = segments.join(path.sep) || 'index.html';
       filePath = path.join(mapDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(mapDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(mapDir, filePath)) { res.writeHead(403); res.end(); return; }
       if (!fs.existsSync(filePath) && segments[0] === 'tactical_sandbox.html') {
         filePath = path.join(mapDir, 'index.html');
       }
       if (!fs.existsSync(filePath) && segments[0] === 'assets') {
         const assetRel = segments.slice(1).join(path.sep);
         filePath = path.join(assetsDir, assetRel);
-        if (!path.resolve(filePath).startsWith(path.resolve(assetsDir))) { res.writeHead(403); res.end(); return; }
+        if (!isPathInside(assetsDir, filePath)) { res.writeHead(403); res.end(); return; }
       }
     }
 
@@ -1502,37 +1632,23 @@ function startMapServer() {
 
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME[ext] || 'application/octet-stream';
-
-    // Range request support (essential for PMTiles byte-range access)
-    const rangeHeader = req.headers.range;
-    if (rangeHeader) {
-      const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
-      if (match) {
-        const start = parseInt(match[1], 10);
-        const end = match[2] ? parseInt(match[2], 10) : stat.size - 1;
-        const chunkSize = end - start + 1;
-        res.writeHead(206, {
-          'Content-Type': contentType,
-          'Content-Range': `bytes ${start}-${end}/${stat.size}`,
-          'Content-Length': chunkSize,
-          'Accept-Ranges': 'bytes',
-          'Cache-Control': 'no-store',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
-        });
-        fs.createReadStream(filePath, { start, end }).pipe(res);
-        return;
-      }
+    const responseMetadata = buildStaticFileResponseMetadata(
+      pathname,
+      stat,
+      app.isPackaged,
+      contentType,
+      req.headers.range,
+      req.headers['if-none-match'],
+    );
+    res.writeHead(responseMetadata.status, responseMetadata.headers);
+    if (responseMetadata.status === 304 || responseMetadata.status === 416) {
+      res.end();
+      return;
     }
-
-    res.writeHead(200, {
-      'Content-Type': contentType,
-      'Content-Length': stat.size,
-      'Accept-Ranges': 'bytes',
-      'Cache-Control': 'no-store',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
-    });
+    if (responseMetadata.range) {
+      fs.createReadStream(filePath, responseMetadata.range).pipe(res);
+      return;
+    }
     fs.createReadStream(filePath).pipe(res);
   });
 
@@ -1675,38 +1791,33 @@ function openTacticalMapWindow(mode = 'operational') {
  */
 function serveFileResponse(request, filePath, contentType) {
   const stat = fs.statSync(filePath);
-  const rangeHeader = request.headers.get('range');
-
-  if (rangeHeader) {
-    const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
-    if (match) {
-      const start = parseInt(match[1], 10);
-      const end = match[2] ? parseInt(match[2], 10) : stat.size - 1;
-      const length = end - start + 1;
-      const fd = fs.openSync(filePath, 'r');
-      const buf = Buffer.alloc(length);
-      fs.readSync(fd, buf, 0, length, start);
-      fs.closeSync(fd);
-      return new Response(buf, {
-        status: 206,
-        headers: {
-          'Content-Type': contentType,
-          'Content-Range': `bytes ${start}-${end}/${stat.size}`,
-          'Content-Length': String(length),
-          'Accept-Ranges': 'bytes',
-        },
-      });
-    }
+  const pathname = new URL(request.url).pathname.replace(/^\/app(?=\/)/, '');
+  const responseMetadata = buildStaticFileResponseMetadata(
+    pathname,
+    stat,
+    app.isPackaged,
+    contentType,
+    request.headers.get('range'),
+    request.headers.get('if-none-match'),
+  );
+  if (responseMetadata.status === 304 || responseMetadata.status === 416) {
+    return new Response(null, responseMetadata);
   }
-
+  if (responseMetadata.range) {
+    const { start, end } = responseMetadata.range;
+    const length = end - start + 1;
+    const buf = Buffer.alloc(length);
+    let fd = null;
+    try {
+      fd = fs.openSync(filePath, 'r');
+      fs.readSync(fd, buf, 0, length, start);
+    } finally {
+      if (fd !== null) fs.closeSync(fd);
+    }
+    return new Response(buf, responseMetadata);
+  }
   const buf = fs.readFileSync(filePath);
-  return new Response(buf, {
-    headers: {
-      'Content-Type': contentType,
-      'Content-Length': String(stat.size),
-      'Accept-Ranges': 'bytes',
-    },
-  });
+  return new Response(buf, responseMetadata);
 }
 
 /** MIME type map for data files (PMTiles, GeoJSON, etc.) */
@@ -1734,7 +1845,7 @@ function registerProtocol() {
     if (segs[0] === 'app' && segs[1] === 'data' && segs[2] === 'derived') {
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataDerivedDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataDerivedDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(dataDerivedDir, filePath)) return new Response(null, { status: 403 });
       try {
         const ext = path.extname(rel).toLowerCase();
         const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
@@ -1749,7 +1860,7 @@ function registerProtocol() {
     if (segs[0] === 'app' && segs[1] === 'data' && segs[2] === 'source') {
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataSourceDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataSourceDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(dataSourceDir, filePath)) return new Response(null, { status: 403 });
       try {
         const ext = path.extname(rel).toLowerCase();
         const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
@@ -1768,7 +1879,7 @@ function registerProtocol() {
     if (segs[0] === 'app' && segs[1] === 'data' && segs[2] === 'scenarios') {
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataScenariosDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataScenariosDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(dataScenariosDir, filePath)) return new Response(null, { status: 403 });
       try {
         const ext = path.extname(rel).toLowerCase();
         const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
@@ -1782,7 +1893,7 @@ function registerProtocol() {
     if (segs[0] === 'app') {
       const rel = segs.slice(1).join(path.sep) || 'index.html';
       const filePath = path.join(mapAppDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(mapAppDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(mapAppDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
@@ -1799,7 +1910,7 @@ function registerProtocol() {
       const dataDir = resourcePath('data', segs[2]);
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(dataDir, filePath)) return new Response(null, { status: 403 });
       try {
         const ext = path.extname(rel).toLowerCase();
         const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
@@ -1821,7 +1932,7 @@ function registerProtocol() {
 
       // 1. Try Vite-built warroom assets first (JS, CSS, hashed images)
       const warroomAssetPath = path.join(warroomAppDir, 'assets', rel);
-      if (path.resolve(warroomAssetPath).startsWith(path.resolve(warroomAppDir))) {
+      if (isPathInside(warroomAppDir, warroomAssetPath)) {
         try {
           const buf = fs.readFileSync(warroomAssetPath);
           return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
@@ -1831,7 +1942,7 @@ function registerProtocol() {
       // 2. Fall back to project root assets/ (crests, flags for embedded tactical map)
       const assetsDir = resourcePath('assets');
       const filePath = path.join(assetsDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(assetsDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(assetsDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
@@ -1846,7 +1957,7 @@ function registerProtocol() {
     if (segs[0] === 'warroom' && segs[1] === 'tactical-map') {
       const rel = segs.slice(2).join(path.sep) || 'index.html';
       const filePath = path.join(mapAppDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(mapAppDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(mapAppDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
@@ -1861,7 +1972,7 @@ function registerProtocol() {
     if (segs[0] === 'warroom') {
       const rel = segs.slice(1).join(path.sep) || 'index.html';
       const filePath = path.join(warroomAppDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(warroomAppDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(warroomAppDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
