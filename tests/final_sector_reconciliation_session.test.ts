@@ -395,7 +395,7 @@ describe('turn-local final-sector reconciliation session', () => {
         expect(session.geometry_builds).toBe(1);
     });
 
-    it('reconciles the complete roster when operation cleanup removes an active foreign-corps claim', () => {
+    it('processes operation-roster before a later ratings receipt and restores an active foreign-corps claim', () => {
         const fixture = makeState();
         fixture.state.military.formations!.corps_b = makeFormation('corps_b', {
             kind: 'corps',
@@ -448,6 +448,8 @@ describe('turn-local final-sector reconciliation session', () => {
         expect(operationTruth.sector_reconciliation_required).toBe(true);
         expect(state.military.corps_command!.corps_a!.active_operations[0]!.participating_brigades).toEqual([]);
         recordFinalSectorReconciliationMutation(session, 'operation-roster', 'reconcile-final-operation-truth');
+        recordFinalSectorReconciliationMutation(session, 'ratings', 'supply-ratings-refresh');
+        expect(session.dirty_worklist).toEqual(['roster', 'ratings']);
         const geometrySpy = vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors');
         reconcileFinalSectorTruth(state, fixture.edges, null, undefined, undefined, null, false, { session });
         expect(geometrySpy).not.toHaveBeenCalled();
@@ -459,6 +461,46 @@ describe('turn-local final-sector reconciliation session', () => {
         expect(state.military.unresolved_sector_brigades).toEqual(legacy.military.unresolved_sector_brigades);
         expect(serializeState(state)).toBe(serializeState(legacy));
         expect(session.geometry_builds).toBe(1);
+    });
+
+    it('records and consumes a geometry receipt when operation roster coverage relocates a brigade', () => {
+        const fixture = makeState();
+        const state = structuredClone(fixture.state);
+        const legacy = structuredClone(fixture.state);
+        const session = createFinalSectorReconciliationSession(state.meta.turn, 'postcombat-geometry');
+
+        reconcileFinalSectorTruth(state, fixture.edges, null, undefined, undefined, null, false, { session });
+        reconcileFinalSectorTruth(legacy, fixture.edges, null);
+
+        state.military.formations!.brig_seed!.location_osid = 'op:test:front_a';
+        state.military.formations!.brig_stack!.location_osid = 'op:test:front_a';
+        legacy.military.formations!.brig_seed!.location_osid = 'op:test:front_a';
+        legacy.military.formations!.brig_stack!.location_osid = 'op:test:front_a';
+        recordFinalSectorReconciliationMutation(session, 'operation-roster', 'reconcile-final-operation-truth');
+
+        const geometrySpy = vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors');
+        const report = reconcileFinalSectorTruth(
+            state,
+            fixture.edges,
+            null,
+            undefined,
+            undefined,
+            null,
+            false,
+            { session },
+        );
+        expect(report.geometry_input_mutations).toBe(0);
+        expect(geometrySpy).toHaveBeenCalledTimes(1);
+        expect(session.geometry_builds).toBe(2);
+        expect(session.receipts).toContainEqual(expect.objectContaining({
+            mutation: 'geometry',
+            source: 'operation-roster-formation-location-writeback',
+        }));
+        expect(session.dirty_worklist).toEqual([]);
+
+        reconcileFinalSectorTruth(legacy, fixture.edges, null);
+        expect(canonicalTruthProjection(state)).toEqual(canonicalTruthProjection(legacy));
+        expect(serializeState(state)).toBe(serializeState(legacy));
     });
 
     it('runs roster/seal only after distribution and makes the already-sealed pass a no-op', () => {
