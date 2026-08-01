@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "roadmapTask": "R4 Phase 2 Task 2.2",
+  "baselineHead": "2e8fcb0937e2f2a8f939bbe7a3ffa3f80b957a0b",
+  "branch": "codex/r4-phase2-runtime",
+  "lease": {
+    "owner": "R4 Task 2.2",
+    "mode": "exclusive scenario/performance lane",
+    "execution": "serial",
+    "releasedAfterFinalProcessCheck": true
+  },
+  "scenario": {
+    "path": "data/scenarios/apr1992_definitive_104w.json",
+    "id": "apr1992_definitive_104w",
+    "runId": "apr1992_definitive_104w__68d77163456892d1__w104",
+    "weeks": 104,
+    "decisionMode": "historical"
+  },
+  "commands": {
+    "preflight": "npm.cmd run test:vitest -- tests/presidential_initiatives.test.ts tests/rs_104week_decision_cadence.test.ts tests/event_timing.test.ts tests/event_timeline_integrity.test.ts --pool=forks --reporter=dot",
+    "RBiH": "npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_104w.json --weeks 104 --out tmp-r4-phase2-runtime/rbih-accepted",
+    "RS": "npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_104w.json --weeks 104 --out tmp-r4-phase2-runtime/rs-accepted",
+    "HRHB": "npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_104w.json --weeks 104 --out tmp-r4-phase2-runtime/hrhb-accepted",
+    "cadenceTemplate": "npx.cmd tsx tools/diagnostics/presidential_cadence_report.ts --save <accepted-run>/apr1992_definitive_104w__68d77163456892d1__w104/final_save.json --scenario data/scenarios/apr1992_definitive_104w.json --run-id apr1992_definitive_104w__68d77163456892d1__w104 --holds docs/40_reports/audits/20260801_R4_PHASE2_RUNTIME_POSITIVE_HOLDS.json --end-turn 104 --out <accepted-run>/cadence_report.json",
+    "baselineCheck": "npm.cmd run test:baselines",
+    "typecheck": "npm.cmd run typecheck"
+  },
+  "rawArtifactArchive": "runs/r4_phase2_runtime_20260801",
+  "acceptedRuns": [
+    {
+      "designatedFaction": "RBiH",
+      "originalOutArgument": "tmp-r4-phase2-runtime/rbih-accepted",
+      "archivedArtifactRoot": "runs/r4_phase2_runtime_20260801/rbih-accepted/apr1992_definitive_104w__68d77163456892d1__w104",
+      "exitCode": 0,
+      "sourceTurn": 104,
+      "finalStateHash": "afbe45d807e19e8b",
+      "finalSaveBytes": 6630269,
+      "finalSaveSha256": "afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b",
+      "rawCadenceReport": "runs/r4_phase2_runtime_20260801/rbih-accepted/cadence_report.json",
+      "cadenceReportBytes": 39790,
+      "cadenceReportSha256": "6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80",
+      "processCountAfterExit": 0
+    },
+    {
+      "designatedFaction": "RS",
+      "originalOutArgument": "tmp-r4-phase2-runtime/rs-accepted",
+      "archivedArtifactRoot": "runs/r4_phase2_runtime_20260801/rs-accepted/apr1992_definitive_104w__68d77163456892d1__w104",
+      "exitCode": 0,
+      "sourceTurn": 104,
+      "finalStateHash": "afbe45d807e19e8b",
+      "finalSaveBytes": 6630269,
+      "finalSaveSha256": "afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b",
+      "rawCadenceReport": "runs/r4_phase2_runtime_20260801/rs-accepted/cadence_report.json",
+      "cadenceReportBytes": 39790,
+      "cadenceReportSha256": "6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80",
+      "processCountAfterExit": 0
+    },
+    {
+      "designatedFaction": "HRHB",
+      "originalOutArgument": "tmp-r4-phase2-runtime/hrhb-accepted",
+      "archivedArtifactRoot": "runs/r4_phase2_runtime_20260801/hrhb-accepted/apr1992_definitive_104w__68d77163456892d1__w104",
+      "exitCode": 0,
+      "sourceTurn": 104,
+      "finalStateHash": "afbe45d807e19e8b",
+      "finalSaveBytes": 6630269,
+      "finalSaveSha256": "afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b",
+      "rawCadenceReport": "runs/r4_phase2_runtime_20260801/hrhb-accepted/cadence_report.json",
+      "cadenceReportBytes": 39790,
+      "cadenceReportSha256": "6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80",
+      "processCountAfterExit": 0
+    }
+  ],
+  "byteIdenticalSubstantiveArtifacts": {
+    "activity_summary.json": { "bytes": 456, "sha256": "0fb1f560ec7385896162f3adb0493df63a12376a145eb43a30488e32701cf658" },
+    "brigade_temporal_log.jsonl": { "bytes": 12792293, "sha256": "0c1a301a2f0d9f8627bac674a8dc6c15b73bc9b153f73a4291357f656768a38a" },
+    "control_delta.json": { "bytes": 21648, "sha256": "2b4cd2bb78db3570b6b9afe39bcd2a39d88ea29f6d5cdf0b9755478e50768f96" },
+    "destroyed_brigades.json": { "bytes": 6184, "sha256": "871ae79d0fa8f86fd82da074393438548585fa23d3c5ebeae0a3c23c0922cede" },
+    "displacement_event_log.jsonl": { "bytes": 12958998, "sha256": "2c943feb0d1c56d0ce4a51a3bc148d0fd821bca196248d4fa8e01751357fceec" },
+    "end_report.md": { "bytes": 41199, "sha256": "e407431fa5bb074275c0b0416c5bb6907c33f9f92d8ccb0ffcfb960aec4aa3a3" },
+    "final_save.json": { "bytes": 6630269, "sha256": "afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b" },
+    "formation_delta.json": { "bytes": 3317, "sha256": "9559ec29d499b60638a779e09085e79c5f361a9752c49ab95b303026878dd155" },
+    "initial_save.json": { "bytes": 1348805, "sha256": "7a0d08d897d44826ae51299fcaf146c4a7b35710fa08b5a65730c2b7fa32a2b4" },
+    "operation_aars.json": { "bytes": 220392, "sha256": "e1a5e751b2144acb710396cdfd194c5cf72df4619ac5130db1a816b4320b6627" },
+    "replay_save_manifest.json": { "bytes": 20536, "sha256": "3f80c3d562bbb13f0c16dbc301629f21102e406bdc5d874d5aec27afeae23b91" },
+    "run_summary.json": { "bytes": 366553, "sha256": "c60a1a3954f7cfea3a5c0534025188651a6cf2438b1118c4728541c34cb9b545" },
+    "watched_operations.json": { "bytes": 1774, "sha256": "62bbe628e9a8f199a0f267fa6c3624ed02eeeb8e3a3990b46d52a0d4de65d950" },
+    "weekly_report.jsonl": { "bytes": 951139, "sha256": "d2c5b176c0001f1d3a22775a8d8e90b7c246231bcc408f64950331398e66e1d6" }
+  },
+  "pathBearingArtifactsExcludedFromByteIdentity": ["run_meta.json"],
+  "cadenceEvidence": {
+    "positiveHoldBundle": "docs/40_reports/audits/20260801_R4_PHASE2_RUNTIME_POSITIVE_HOLDS.json",
+    "positiveHoldBundleBytes": 5489,
+    "positiveHoldBundleSha256": "4f0092368c0758b11c6235c589cdedc0278e989117743927772854b2ff225f1e",
+    "canonicalReport": "docs/40_reports/audits/20260801_R4_PHASE2_RUNTIME_CADENCE.json",
+    "canonicalReportBytes": 39790,
+    "canonicalReportSha256": "6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80",
+    "authorityCoverage": "unreported",
+    "factions": {
+      "RBiH": {
+        "requiredAuthoredReceipts": 17,
+        "optionalSourceBackedReceipts": 0,
+        "ordinaryEmergentReceipts": 6,
+        "noticeReceipts": 0,
+        "maxActualDecisionGapTurns": 18,
+        "positiveHoldIntervals": [[20, 38], [40, 54], [54, 70], [82, 97]],
+        "unresolvedLongGapCount": 0,
+        "invalidPositiveHoldCount": 0
+      },
+      "RS": {
+        "requiredAuthoredReceipts": 12,
+        "optionalSourceBackedReceipts": 0,
+        "ordinaryEmergentReceipts": 8,
+        "noticeReceipts": 3,
+        "maxActualDecisionGapTurns": 23,
+        "positiveHoldIntervals": [[17, 40], [40, 56], [56, 70], [76, 89]],
+        "unresolvedLongGapCount": 0,
+        "invalidPositiveHoldCount": 0
+      },
+      "HRHB": {
+        "requiredAuthoredReceipts": 18,
+        "optionalSourceBackedReceipts": 0,
+        "ordinaryEmergentReceipts": 24,
+        "noticeReceipts": 2,
+        "maxActualDecisionGapTurns": 15,
+        "positiveHoldIntervals": [[40, 51], [52, 65], [87, 102]],
+        "unresolvedLongGapCount": 0,
+        "invalidPositiveHoldCount": 0
+      }
+    }
+  },
+  "decisionPolicyEvidence": {
+    "eventDecisionCount": 55,
+    "botAiDefaultCount": 55,
+    "nonDefaultSourceCount": 0,
+    "authoredHistoricalDefaultCount": 40,
+    "authoredHistoricalDefaultDivergenceCount": 0,
+    "deterministicFirstOptionFallbackCount": 15,
+    "pendingEventDecisionCount": 0,
+    "pendingNotificationCount": 0
+  },
+  "unsupportedContentChecks": {
+    "presidentialInitiativeRegistryRows": 0,
+    "genericAuthoritySpendMatches": 0,
+    "unsupportedInitiatives": 0
+  },
+  "verification": {
+    "focusedTests": "4 files / 51 tests passed",
+    "baselineRegression": "all scenarios match; no baseline refreshed",
+    "typecheck": "passed"
+  },
+  "knownDiagnostics": [
+    "Each accepted replay emitted the existing unresolved assignment warning for rs_65th_protection_motorized_regiment.",
+    "Each accepted replay emitted already-owned objective warnings for Operation Jajce and Operation Bosanski Novi.",
+    "These repeated diagnostics did not change bytes across runs and are not reclassified as cadence source bugs."
+  ],
+  "rejectedAttempts": [
+    {
+      "label": "rbih",
+      "command": "npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_104w.json --weeks 104 --out tmp-r4-phase2-runtime/rbih",
+      "reason": "The 120-second command wrapper closed stdout after artifact emission, causing EPIPE and exit 124.",
+      "acceptedEvidence": false,
+      "finalSaveSha256": "afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b"
+    }
+  ]
+}

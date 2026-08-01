@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "provenance": {
+    "sourceId": "final_save.json",
+    "scenarioId": "apr1992_definitive_104w",
+    "runId": "apr1992_definitive_104w__68d77163456892d1__w104",
+    "playerFaction": null,
+    "startTurn": 0,
+    "endTurn": 104,
+    "saveTurn": 104,
+    "sourceSaveSha256": "afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b"
+  },
+  "evidence": [
+    {
+      "id": "docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory",
+      "path": "docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md",
+      "sha256": "fdbe8e8da085af8bf482f34b9f12c8265b4557e5ea9e2be69824aefe55ebfdca",
+      "anchor": "positive-hold-source-inventory"
+    }
+  ],
+  "positiveHoldEvidenceIds": [
+    "docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"
+  ],
+  "positiveHolds": [
+    {
+      "id": "hold:rbih:20-38",
+      "faction": "RBiH",
+      "fromTurn": 20,
+      "toTurn": 38,
+      "rationale": "The all-faction catalog and source audit found no additional executable RBiH presidential lever between the London Conference decision and Vance-Owen engagement.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:rbih:40-54",
+      "faction": "RBiH",
+      "fromTurn": 40,
+      "toTurn": 54,
+      "rationale": "The all-faction catalog and source audit found no additional executable RBiH presidential lever between the Vance-Owen disposition and the safe-area decision.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:rbih:54-70",
+      "faction": "RBiH",
+      "fromTurn": 54,
+      "toTurn": 70,
+      "rationale": "The all-faction catalog and source audit found no additional executable RBiH presidential lever before the Owen-Stoltenberg disposition.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:rbih:82-97",
+      "faction": "RBiH",
+      "fromTurn": 82,
+      "toTurn": 97,
+      "rationale": "The all-faction catalog and source audit found no additional executable RBiH presidential lever before the Washington negotiations response.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:rs:17-40:headless",
+      "faction": "RS",
+      "fromTurn": 17,
+      "toTurn": 40,
+      "rationale": "The all-faction catalog and source audit found no additional executable RS presidential lever in this interval; headless reserve and personnel acknowledgements remain separate.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:rs:40-56:headless",
+      "faction": "RS",
+      "fromTurn": 40,
+      "toTurn": 56,
+      "rationale": "The turn-54 Milosevic row is an acknowledgement notice, not an executable presidential lever; the headless save contains no resolved operation proposal at turn 41.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:rs:56-70:headless",
+      "faction": "RS",
+      "fromTurn": 56,
+      "toTurn": 70,
+      "rationale": "The turn-68 Milosevic row is an acknowledgement notice; the headless save contains no resolved operation proposal at turn 69, so the next sourced receipt is the turn-70 peace-plan disposition.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:rs:76-89:headless",
+      "faction": "RS",
+      "fromTurn": 76,
+      "toTurn": 89,
+      "rationale": "The all-faction catalog and source audit found no additional executable RS presidential lever before the autonomy-path decision.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:hrhb:40-51",
+      "faction": "HRHB",
+      "fromTurn": 40,
+      "toTurn": 51,
+      "rationale": "The all-faction catalog and source audit found no additional executable HRHB presidential lever between the Vance-Owen disposition and the next authored response.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:hrhb:52-65",
+      "faction": "HRHB",
+      "fromTurn": 52,
+      "toTurn": 65,
+      "rationale": "The all-faction catalog and source audit found no additional executable HRHB presidential lever before the Owen-Stoltenberg political sequence.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    },
+    {
+      "id": "hold:hrhb:87-102",
+      "faction": "HRHB",
+      "fromTurn": 87,
+      "toTurn": 102,
+      "rationale": "The all-faction catalog and source audit found no additional executable HRHB presidential lever before the Washington negotiations response.",
+      "evidenceIds": ["docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"]
+    }
+  ]
+}

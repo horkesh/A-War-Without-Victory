@@ -226,11 +226,11 @@ Final committee verification: `18` focused files / `341` tests and `44` player-j
 
 ### Task 2.2 -- Prove cadence without forced decisions
 
-- [ ] Rerun the three 104-turn cadence reports.
-- [ ] Require a meaningful sourced review every 8-10 weeks where the catalog supports one.
-- [ ] Require every unsupported interval to contain an explicit positive-hold row.
-- [ ] Record actual decision gaps separately from briefing gaps.
-- [ ] Reject generic `spend Authority` content.
+- [x] Rerun the three 104-turn cadence reports.
+- [x] Require a meaningful sourced review every 8-10 weeks where the catalog supports one.
+- [x] Require every unsupported interval to contain an explicit positive-hold row.
+- [x] Record actual decision gaps separately from briefing gaps.
+- [x] Reject generic `spend Authority` content.
 
 **Historical evidence protocol:** Use the local Balkan Battlegrounds KB first (`BB1`/`BB2` volume and page), then official UN/IRMCT primary sources. If evidence is absent or contradictory, the deterministic outcome is `positive_hold`, not an implementation pause.
 
@@ -241,6 +241,14 @@ npm.cmd run test:vitest -- tests/presidential_initiatives.test.ts tests/rs_104we
 npm.cmd run test:baselines
 npm.cmd run typecheck
 ```
+
+**Task 2.2 runtime closeout (2026-08-01):**
+
+- Three independent headless campaigns designated RBiH, RS, and HRHB completed serially under one exclusive runtime lease at exact turn 104. All `14` substantive artifacts are byte-identical; final-save SHA-256 is `afbe45d807e19e8bd098af0b7dcd9be92b3f51caedffd85ca6b30af3149ede0b` and cadence-report SHA-256 is `6de52d7b465510c4c7777b30a14921088453d121ad3acad36315005ccf23ed80`.
+- Actual sourced decisions remain separate from ordinary activity/notices and from explanatory holds. Maximum actual-decision gaps are RBiH `18`, RS `23`, and HRHB `15` turns. Eleven exact positive holds close every unsupported long interval with zero unresolved or invalid holds; they do not become decision receipts.
+- The accepted registry still contains `0` optional initiatives, so the 8-10-week target admits no unsupported row. Generic Authority-spend scans return zero; Authority coverage remains explicitly unreported because no weekly owner-observation bundle exists.
+- Historical-mode evidence records `55/55` deterministic bot-default event responses. All `40` events with an authored historical default match it; `15` rows without one use the documented first-option fallback and are not promoted into source proof. Pending decisions and notifications are both zero.
+- The focused matrix passes `4` files / `51` tests, TypeScript passes, and baseline regression reports all scenarios match without a refresh. No source bug appeared; no source, scenario, baseline, Electron, package, release, or `FORAWWV.md` change occurred. Evidence: [runtime report](../40_reports/implemented/20260801_R4_PHASE2_RUNTIME_CADENCE_PROOF.md), [replay manifest](../40_reports/audits/20260801_R4_PHASE2_RUNTIME_REPLAY_MANIFEST.json), and [canonical cadence report](../40_reports/audits/20260801_R4_PHASE2_RUNTIME_CADENCE.json).
 
 `/simplify` -> historian/canon review -> commit `feat(command): add sourced presidential cadence`
 
