@@ -12,7 +12,7 @@
 
 ## Status and authority boundary
 
-This document is an implementation design plus a current-owner attribution checkpoint, not a new accepted throughput floor. The accepted replicated floor remains `1,189.962 ms/turn` (`11.8996x` the `100 ms/turn` target). The `1,223.822 ms/turn` (`12.23822x`) fixed-point packet remains diagnostic because its measured source omitted the prune receipt. A fresh corrected-source warmup, phase/sector profile, and same-process V8 profile now confirm sector reconstruction as the dominant owner, but no three-run measured packet was collected and the machine retained unrelated long-lived Node processes. The current profile is valid for owner selection only.
+This document is an implementation design plus a current-owner attribution checkpoint. The dense formation-occupancy contract and its bounded `ensureMinimumSectorCoverage(...)` integration are source/test complete but not yet performance-accepted. The accepted replicated floor remains `1,189.962 ms/turn` (`11.8996x` the `100 ms/turn` target). The `1,223.822 ms/turn` (`12.23822x`) fixed-point packet remains diagnostic because its measured source omitted the prune receipt. A fresh corrected-source warmup, phase/sector profile, and same-process V8 profile confirm sector reconstruction as the dominant owner, but no new three-run candidate/control packet has been collected.
 
 Task 1's owner-selection subset is complete at source commit `4462a485f1fd1ad511068bcaacd0926af962771e`. Do not collect candidate timing, a replicated floor, or another heavy packet while any scenario, performance, Electron, package, baseline, or other heavy runtime owner holds the machine lane. No baseline re-floor, package, version, tag, push, publication, release-state, canon, or `docs/10_canon/FORAWWV.md` change belongs to Phase 2c.
 
@@ -67,6 +67,14 @@ A red-first spike reused four frozen canonical objects returned by `getSettlemen
 The candidate did not earn a source checkpoint. Its like-mode excluded warmup was `46,307.911 ms` versus `45,236.582 ms` for current source (`+2.368%`), while the V8 machine envelope slowed globally from `47,713.892` to `57,484.452` sampled milliseconds. The target function itself moved from `2,086.262` to `2,169.100 ms` self (`+3.971%`) and showed no allocation/owner reduction. Because the globally slower V8 run cannot prove a causal regression but the like-mode warmup and absolute owner both show no win, the candidate is rejected as inconclusive/no-benefit and is fully reverted. Its source/test blobs and raw profiles remain ignored negative evidence; production source and tests are unchanged.
 
 The next safe executable packet is Task 2's red-first call-scoped dense occupancy contract. It creates no production hot-path replacement until exact mutation-sequence parity passes. Cross-turn caching, shared status-object allocation tricks, and direct topology mutation remain excluded.
+
+### Dense occupancy source checkpoint
+
+Task 2 is GREEN. The missing-module RED was preserved, then the stable-ordinal, eligibility, unknown-OSID, move-away/move-back/same-location, creation/removal, status/readiness/lifecycle, cross-faction, stale-write, and parity cases passed 4/4 focused tests. The index uses a `Uint32Array`, a stable strict-sorted ordinal map, and tracked formation locations. Unknown mutation targets, stale/double moves, underflow, overflow, and formation-id mismatches fail closed.
+
+The first bounded Task 4 integration builds one dense index per `ensureMinimumSectorCoverage(...)` call from current formation locations and every selectable front OSID. It replaces eight repeated `countActiveBrigadesByOsid(...)` scans and routes the function's sole `location_osid` write through `index.move(...)` before state mutation. It does not yet introduce reachability/component caching; Task 3 is deliberately deferred until this isolated occupancy candidate is dispositioned so timing cannot conflate two optimizations.
+
+The focused coverage/rebalance slice passed 3 files / 26 tests, TypeScript passed, and the complete sector/full-state gate passed 6 files / 46 tests in `330.16s`. That gate includes 100+ deterministic real-save variants and the three production reconciliation modes. An excluded real-scenario byte gate and lease-backed candidate/control timing remain required before acceptance.
 
 ## Invariants that every candidate must preserve
 
@@ -199,6 +207,8 @@ Expected result: a committee-usable current packet names one owner and preserves
 
 ## Task 2 — Red-first formation occupancy contract
 
+**Status:** Complete. Isolated contract and mutation-sequence parity are GREEN; the bounded coverage integration is awaiting Task 5 performance disposition.
+
 **Files:**
 
 - Create `src/sim/combat/sector_build_derived_context.ts`
@@ -219,6 +229,8 @@ npm.cmd run typecheck
 Expected RED: module/export missing. Expected GREEN: exact parity after every deterministic mutation sequence.
 
 ## Task 3 — Red-first reachability and sector-fact equivalence
+
+**Status:** Deferred until the occupancy-only candidate is accepted or rejected. Do not mix reachability caching into its timing packet.
 
 **Files:**
 
@@ -243,6 +255,8 @@ npm.cmd run typecheck
 Expected result: all decisions and tie order are identical; no formation moves merely because it is assigned.
 
 ## Task 4 — Thread the context through one full build
+
+**Status:** Bounded occupancy-only subset source/test complete. One index owns one `ensureMinimumSectorCoverage(...)` invocation and all of that owner's location writes; broader whole-builder topology facts remain open.
 
 **Files:**
 
