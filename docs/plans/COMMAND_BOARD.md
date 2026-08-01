@@ -6,7 +6,7 @@
 
 **Updated:** 2026-08-02
 
-**Program state:** EXECUTING; R1 and R3 are complete, R7 Phase 0 second-review defects and genuine Ring-3 choices are corrected pending committee re-review, all R2 source packets are independently approved, and R2/R5 remain active
+**Program state:** EXECUTING; R1 and R3 are complete, R7 Phase 0 third-review defects and genuine Ring-3 choices are corrected pending committee re-review, all R2 source packets are independently approved, and R2/R5 remain active
 
 ## Activation
 

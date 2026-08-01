@@ -53,7 +53,12 @@ const {
     isCanonAllowedParamilitaryChoice,
     isDirectRefusedSensitiveChoice,
 } = require('./sensitive_history_semantics.cjs') as {
-    isCanonAllowedParamilitaryChoice: (eventId: string | null, family: string | null) => boolean;
+    isCanonAllowedParamilitaryChoice: (
+        eventId: string | null,
+        family: string | null,
+        optionId: string | null,
+        text: string,
+    ) => boolean;
     isDirectRefusedSensitiveChoice: (text: string) => boolean;
 };
 
@@ -551,23 +556,22 @@ function evaluateEvent(row: Record<string, unknown>, allRows: unknown[]): EventC
     // Direct Ring-3 acts are checked only in player-facing option prose. This
     // semantic boundary avoids the former broad lexical false positives in
     // historical narration, source notes, and future guard text.
-    if (!isCanonAllowedParamilitaryChoice(eventId, family)) {
-        const choiceFields = ['description', 'label', 'narrative', 'text'] as const;
-        for (const option of options) {
-            if (!isRecord(option)) continue;
-            const optionId = stringOrNull(option.id) ?? '<unknown-option>';
-            for (const field of choiceFields) {
-                const text = stringOrNull(option[field]);
-                if (text === null || !isDirectRefusedSensitiveChoice(text)) continue;
-                violations.push({
-                    event_id: eventId,
-                    family,
-                    kind: 'sensitive_player_choice',
-                    severity: 'CRITICAL',
-                    detail: 'A direct Ring-3 refused act appears in player response prose; sensitive history must remain consequence/record rather than player authorization.',
-                    locator: `${optionId}.${field}`,
-                });
-            }
+    const choiceFields = ['description', 'label', 'narrative', 'text'] as const;
+    for (const option of options) {
+        if (!isRecord(option)) continue;
+        const optionId = stringOrNull(option.id);
+        for (const field of choiceFields) {
+            const text = stringOrNull(option[field]);
+            if (text === null || !isDirectRefusedSensitiveChoice(text)) continue;
+            if (isCanonAllowedParamilitaryChoice(eventId, family, optionId, text)) continue;
+            violations.push({
+                event_id: eventId,
+                family,
+                kind: 'sensitive_player_choice',
+                severity: 'CRITICAL',
+                detail: 'A direct Ring-3 refused act appears in player response prose; sensitive history must remain consequence/record rather than player authorization.',
+                locator: `${optionId ?? '<unknown-option>'}.${field}`,
+            });
         }
     }
 
