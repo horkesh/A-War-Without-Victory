@@ -6,7 +6,7 @@
 
 **Updated:** 2026-08-01
 
-**Program state:** EXECUTING; R1 and R3 are complete, R7 Phase 0 third-review defects and genuine Ring-3 choices are corrected pending committee re-review, all R2 source packets are independently approved, and R2/R5 remain active
+**Program state:** EXECUTING; R1 and R3 are complete, R7 Phase 0 fourth correction is implemented but still requires committee re-review, all R2 source packets are independently approved, and R2/R5 remain active
 
 ## Activation
 
@@ -26,7 +26,7 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 | 4 | R4 | WAITING ON R2 PRIORITY/CADENCE CONTRACT | Inventory command/event/Codex projections, converge them on deterministic receipts, and absorb Free War residuals. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | IN PROGRESS — PHASES 0–1 COMPLETE; PHASE 2 CHECKPOINTS GREEN | Redesign the current `buildCorpsFrontSectors` owner under failing equivalence tests, then continue to the recorded sub-100 ms target before artifact/CI closeout. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
 | 6 | R6 | WAITING ON R5 FLOOR | First remove the confirmed Goražde weak-predicate territorial mutation, then run the serialized adopt-or-retire experiments, Sarajevo/E-B1 work, and final calibration proof. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
-| 7 | R7 | IN PROGRESS -- PHASE 0 THIRD CORRECTION; COMMITTEE RE-REVIEW PENDING | Re-review the centralized source-tier contract, direct semantic probes, exact option-level paramilitary exception, remediated production choices/foundational guard, strict CLI behavior, and filtered localization census; after acceptance, continue the explicit historical/source, identity, `bs` migration, pseudo-locale, licensing/audio, accessibility, and packaged-Electron queues in linked phase order. | [Content/localization/audio](2026-07-31-content-history-localization-audio-plan.md) |
+| 7 | R7 | IN PROGRESS -- PHASE 0 FOURTH CORRECTION; COMMITTEE RE-REVIEW PENDING | Re-review the centralized source-tier contract, all-action semantic probes, exact option-level paramilitary exception, remediated production choices/foundational guard, strict CLI behavior, and filtered localization census; after acceptance, continue the explicit historical/source, identity, `bs` migration, pseudo-locale, licensing/audio, accessibility, and packaged-Electron queues in linked phase order. | [Content/localization/audio](2026-07-31-content-history-localization-audio-plan.md) |
 | 8 | R8 | WAITING ON R1–R7 GREEN | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until two final diaries are 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | WAITING ON R8 | Freeze an immutable RC, produce reproducible clean-machine artifacts/evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 

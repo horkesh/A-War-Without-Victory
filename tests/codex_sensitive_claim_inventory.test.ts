@@ -412,6 +412,9 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
                     { id: 'continue', label: 'Continue expulsions' },
                     { id: 'forced', label: 'Authorize forced displacement' },
                     { id: 'cleansing', label: 'Proceed with ethnic cleansing' },
+                    { id: 'negated_then_kill', description: 'Do not authorize detention camps, then kill civilians' },
+                    { id: 'refuse_then_execute', description: 'Refuse to deploy paramilitary forces, then execute the displaced families' },
+                    { id: 'investigate_then_genocide', description: 'Authorize an investigation of concentration camps, then commit genocide' },
                 ],
             },
             {
@@ -467,7 +470,7 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
         ]);
         assert.strictEqual(blocked.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'direct_refused_verbs_1992'
-        )).length, 7);
+        )).length, 10);
 
         const contextual = report.claims.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'lexical_context_1992'

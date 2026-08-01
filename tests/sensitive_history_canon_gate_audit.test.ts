@@ -279,6 +279,9 @@ describe('buildSensitiveHistoryAudit', () => {
                         { id: 'investigate_cleansing', description: 'Investigate systematic cleansing.' },
                         { id: 'prevent_displacement', description: 'Prevent maximum displacement.' },
                         { id: 'return', description: 'Continue refugee returns under civilian protection.' },
+                        { id: 'negated_then_kill', description: 'Do not authorize detention camps, then kill civilians' },
+                        { id: 'refuse_then_execute', description: 'Refuse to deploy paramilitary forces, then execute the displaced families' },
+                        { id: 'investigate_then_genocide', description: 'Authorize an investigation of concentration camps, then commit genocide' },
                     ],
                 },
                 {
@@ -296,11 +299,15 @@ describe('buildSensitiveHistoryAudit', () => {
         });
 
         const refused = report.violations.filter((row) => row.kind === 'sensitive_player_choice');
-        expect(refused).toHaveLength(13);
+        expect(refused).toHaveLength(16);
+        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(3);
         expect(refused.filter((row) => row.event_id === 'direct_refused_choices_1993')).toHaveLength(11);
         expect(refused.filter((row) => row.event_id === 'rs_paramilitary_policy_1992')).toHaveLength(2);
         expect(refused.every((row) => row.severity === 'CRITICAL')).toBe(true);
         expect(refused.map((row) => row.locator)).toEqual([
+            'investigate_then_genocide.description',
+            'negated_then_kill.description',
+            'refuse_then_execute.description',
             'begin_deporting.label',
             'camps.label',
             'camps_review.label',

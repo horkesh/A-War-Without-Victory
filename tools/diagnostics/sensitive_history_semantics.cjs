@@ -47,6 +47,21 @@ const INTERVENING_ACCOUNTABILITY_PATTERN = /\b(?:documentation|exposure|investig
 const NEGATED_ACTION_PREFIX_PATTERN = /(?:\bnever|\bnot(?:\s+\w+){0,2}|\brefus(?:e|es|ed)\s+to)\s*$/i;
 const CONTEXTUAL_STANDALONE_PREFIX_PATTERN = /\b(?:ban|document|expose|forbid|investigate|oppose|prevent|prosecute|record|reject|report|review|stop)\s+(?:(?:the\s+)?(?:allegations?|evidence|findings?|reports?)\s+(?:about|of)\s+)?$/i;
 
+function matchesFor(pattern, text) {
+  const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
+  return text.matchAll(new RegExp(pattern.source, flags));
+}
+
+function directPatternCoversAction(text, actionIndex) {
+  return DIRECT_REFUSED_PATTERNS.some((pattern) => {
+    for (const match of matchesFor(pattern, text)) {
+      const start = match.index ?? -1;
+      if (start <= actionIndex && actionIndex < start + match[0].length) return true;
+    }
+    return false;
+  });
+}
+
 function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
   const contract = CANON_ALLOWED_PARAMILITARY_CHOICES.get(eventId ?? '');
   if (!contract || contract.family !== family || typeof text !== 'string') return false;
@@ -57,21 +72,25 @@ function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
 function isDirectRefusedSensitiveChoice(text) {
   if (typeof text !== 'string' || text.trim().length === 0) return false;
   if (STANDALONE_REFUSED_PATTERNS.some((pattern) => {
-    const match = text.match(pattern);
-    if (!match || match.index === undefined) return false;
-    const beforeMatch = text.slice(Math.max(0, match.index - 48), match.index);
-    return !CONTEXTUAL_STANDALONE_PREFIX_PATTERN.test(beforeMatch);
+    for (const match of matchesFor(pattern, text)) {
+      if (match.index === undefined) continue;
+      const beforeMatch = text.slice(Math.max(0, match.index - 48), match.index);
+      if (!CONTEXTUAL_STANDALONE_PREFIX_PATTERN.test(beforeMatch)) return true;
+    }
+    return false;
   })) return true;
-  const action = text.match(REFUSED_ACTION_PATTERN);
-  if (!action || action.index === undefined) return false;
-  const beforeAction = text.slice(Math.max(0, action.index - 32), action.index);
-  if (NEGATED_ACTION_PREFIX_PATTERN.test(beforeAction)) return false;
-  if (DIRECT_REFUSED_PATTERNS.some((pattern) => pattern.test(text))) return true;
-  const afterAction = text.slice(action.index + action[0].length);
-  const act = afterAction.match(REFUSED_ACT_PATTERN);
-  if (!act || act.index === undefined || act.index > 64) return false;
-  const between = afterAction.slice(0, act.index);
-  return !INTERVENING_ACCOUNTABILITY_PATTERN.test(between);
+  for (const action of matchesFor(REFUSED_ACTION_PATTERN, text)) {
+    if (action.index === undefined) continue;
+    const beforeAction = text.slice(Math.max(0, action.index - 32), action.index);
+    if (NEGATED_ACTION_PREFIX_PATTERN.test(beforeAction)) continue;
+    if (directPatternCoversAction(text, action.index)) return true;
+    const afterAction = text.slice(action.index + action[0].length);
+    const act = afterAction.match(REFUSED_ACT_PATTERN);
+    if (!act || act.index === undefined || act.index > 64) continue;
+    const between = afterAction.slice(0, act.index);
+    if (!INTERVENING_ACCOUNTABILITY_PATTERN.test(between)) return true;
+  }
+  return false;
 }
 
 module.exports = {

@@ -25334,3 +25334,19 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Verification:** Focused correction passes 4 files / 79 tests. Expanded proof passes inventory/provenance 7 files / 60 tests, canon 2 files / 34 tests, and foundational/adjacent events 5 files / 110 tests with 5 pre-existing skips. The actual strict CLI reports 299 events, 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass; pre-commit status contains only the intended R7 diagnostic, test, and documentation files.
 
 **Scope:** The prior `apr1992_52w` four-hash baseline refresh is preserved unchanged; this correction changes no production event JSON, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md`.
+
+## 2026-08-01 - R7 fourth blocked-review correction: clause-complete sensitive-action scan
+
+**Type:** Diagnostic fail-open repair / semantic clause-order correction / candidate-truth update.
+
+**Supersession:** This entry corrects the preceding R7 candidate's claim that contextual suppression could not sanitize a later directive. The shared helper inspected only the first action and returned safe when that action was negated or separated from a refused act by accountability language.
+
+**RED evidence:** Exact helper and both-consumer fixtures reproduced `Do not authorize detention camps, then kill civilians`, `Refuse to deploy paramilitary forces, then execute the displaced families`, and `Authorize an investigation of concentration camps, then commit genocide`. Before implementation, the 3-file / 73-test matrix failed five assertions: all three direct helper cases plus the canon-audit and claim-inventory aggregate guards.
+
+**Implementation:** The shared classifier now iterates every action occurrence. Negation and accountability suppress only the action they govern; direct-pattern spans are associated with the covered action; later actions remain independently enforceable. Standalone sensitive phrases are likewise checked occurrence by occurrence. Both diagnostic consumers retain the same shared helper and the exact event/family/option/label paramilitary contract.
+
+**Historian/canon review:** This changes enforcement only. No historical fact, source, event trigger, player response, simulation effect, source tier, localization content, or consequence changed. The result matches Sensitive History Design Gate Ring 3 #1/#2 and section 3: a direct atrocity instruction remains refused regardless of an earlier safe clause, while the exact canonical paramilitary-policy surface remains the sole bounded exception.
+
+**Verification:** Focused correction passes 4 files / 82 tests; expanded inventory/provenance passes 7 files / 63 tests; canon passes 2 files / 34 tests; foundational/adjacent passes 5 files / 110 tests with 105 passing and 5 pre-existing skips. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim and localization censuses remain 3,652 / 226 files and 971 / 385 files. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.

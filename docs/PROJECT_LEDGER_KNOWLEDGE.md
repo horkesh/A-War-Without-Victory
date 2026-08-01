@@ -4102,3 +4102,9 @@ Applied in `[2026-08-01] R7 second blocked-review correction and Ring-3 choice r
 **Context is grammatical, not lexical:** a sensitive phrase preceded by `record reports of` or `document evidence of` is documentation, while the same field can still contain a later direct instruction. Durable rule: scope contextual suppression to the phrase it governs, continue scanning the field for direct verbs and protected civilian/population/resident/family targets, and pin both safe and unsafe forms through direct helper tests plus both diagnostic consumers.
 
 Applied in `[2026-08-01] R7 third blocked-review correction: option-level Ring-3 semantics`, `tools/diagnostics/sensitive_history_semantics.cjs`, and its direct/audit/inventory/foundational tests.
+
+## 2026-08-01 - Safe clauses cannot terminate whole-field sensitive-history review
+
+**A contextual disposition belongs only to the action it governs:** first-match parsing turns a negated or accountability clause into a sanitizer for later prose. Durable rule: enumerate every operative action, associate direct-pattern spans with the action they contain, and apply negation/accountability locally before continuing. Pin exact mixed safe/unsafe fields at the shared helper and every blocking consumer.
+
+Applied in `[2026-08-01] R7 fourth blocked-review correction: clause-complete sensitive-action scan`, `tools/diagnostics/sensitive_history_semantics.cjs`, and the helper/audit/inventory regressions.
