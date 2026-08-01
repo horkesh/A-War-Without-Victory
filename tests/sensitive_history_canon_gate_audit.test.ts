@@ -301,6 +301,16 @@ describe('buildSensitiveHistoryAudit', () => {
                         { id: 'forbid_then_kill', description: 'Forbid commanders to murder civilians: kill civilians' },
                         { id: 'decline_then_genocide', description: 'Decline to authorize concentration camps — commit genocide' },
                         { id: 'cannot_then_execute', description: 'Cannot authorize concentration camps: execute the displaced families' },
+                        { id: 'safe_warning_review_anyway', description: 'General Staff warned of genocide. Proceed anyway with the command review.' },
+                        { id: 'safe_warning_continue_regardless_review', description: 'General Staff warned of genocide. Continue regardless with the documentation review.' },
+                        { id: 'safe_warning_continue_review_regardless', description: 'General Staff warned of genocide. Continue with the documentation review regardless.' },
+                        { id: 'safe_warning_review_offensive', description: 'General Staff warned of genocide. Proceed to review the offensive regardless.' },
+                        { id: 'warning_offensive_anyway', description: 'General Staff warned of genocide. Proceed with the offensive anyway.' },
+                        { id: 'warning_continue_operation_regardless', description: 'General Staff warned of genocide. Continue the operation regardless.' },
+                        { id: 'warning_continue_regardless_offensive', description: 'General Staff warned of genocide. Continue regardless with the offensive.' },
+                        { id: 'warning_review_then_kill', description: 'General Staff warned of genocide. Proceed anyway with the command review. Then kill civilians.' },
+                        { id: 'warning_offensive_then_review', description: 'General Staff warned of genocide. Proceed with the offensive anyway and review the result.' },
+                        { id: 'warning_direct_action_then_review', description: 'General Staff warned of genocide. Proceed with direct action regardless and review the result.' },
                     ],
                 },
                 {
@@ -318,8 +328,8 @@ describe('buildSensitiveHistoryAudit', () => {
         });
 
         const refused = report.violations.filter((row) => row.kind === 'sensitive_player_choice');
-        expect(refused).toHaveLength(24);
-        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(10);
+        expect(refused).toHaveLength(30);
+        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(16);
         expect(refused.filter((row) => row.event_id === 'direct_refused_choices_1993')).toHaveLength(12);
         expect(refused.filter((row) => row.event_id === 'rs_paramilitary_policy_1992')).toHaveLength(2);
         expect(refused.every((row) => row.severity === 'CRITICAL')).toBe(true);
@@ -334,6 +344,12 @@ describe('buildSensitiveHistoryAudit', () => {
             'negated_scope_then_kill.description',
             'negated_then_kill.description',
             'refuse_then_execute.description',
+            'warning_continue_operation_regardless.description',
+            'warning_continue_regardless_offensive.description',
+            'warning_direct_action_then_review.description',
+            'warning_offensive_anyway.description',
+            'warning_offensive_then_review.description',
+            'warning_review_then_kill.description',
             'anaphoric_genocide.description',
             'begin_deporting.label',
             'camps.label',
