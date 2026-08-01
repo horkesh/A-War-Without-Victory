@@ -4103,8 +4103,8 @@ Applied in `[2026-08-01] R7 second blocked-review correction and Ring-3 choice r
 
 Applied in `[2026-08-01] R7 third blocked-review correction: option-level Ring-3 semantics`, `tools/diagnostics/sensitive_history_semantics.cjs`, and its direct/audit/inventory/foundational tests.
 
-## 2026-08-01 - Safe clauses cannot terminate whole-field sensitive-history review
+## 2026-08-01 - Sensitive-history context follows clause scope, not token distance
 
-**A contextual disposition belongs only to the action it governs:** first-match parsing turns a negated or accountability clause into a sanitizer for later prose. Durable rule: enumerate every operative action, associate direct-pattern spans with the action they contain, and apply negation/accountability locally before continuing. Pin exact mixed safe/unsafe fields at the shared helper and every blocking consumer.
+**Negation/refusal is a clause scope, while accountability is a governed-object context:** fixed character windows misclassify coordinated verbs and passive targets, and noun-only accountability lists miss active phrasing. Durable rule: partition on deterministic sequential/adversative boundaries, carry refusal across coordinated actions inside the clause, recognize accountability noun and verb stems before the sensitive object, and evaluate each later clause independently. Pin safe coordinated/passive forms and mixed safe-then-directive forms at the helper and every blocking consumer.
 
-Applied in `[2026-08-01] R7 fourth blocked-review correction: clause-complete sensitive-action scan`, `tools/diagnostics/sensitive_history_semantics.cjs`, and the helper/audit/inventory regressions.
+Applied in `[2026-08-01] R7 fifth blocked-review correction: deterministic clause scope`, `tools/diagnostics/sensitive_history_semantics.cjs`, and the helper/audit/inventory regressions.

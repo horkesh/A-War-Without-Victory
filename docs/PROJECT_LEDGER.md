@@ -25350,3 +25350,19 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Verification:** Focused correction passes 4 files / 82 tests; expanded inventory/provenance passes 7 files / 63 tests; canon passes 2 files / 34 tests; foundational/adjacent passes 5 files / 110 tests with 105 passing and 5 pre-existing skips. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim and localization censuses remain 3,652 / 226 files and 971 / 385 files. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass.
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
+
+## 2026-08-01 - R7 fifth blocked-review correction: deterministic clause scope
+
+**Type:** Semantic false-positive repair / deterministic clause parser / candidate-truth correction.
+
+**Supersession:** This entry corrects the preceding claim that per-action scanning made negation and accountability local. The helper still used 32/48/64-character windows: a passive or coordinated verb could escape refusal scope, and accountability verbs or actor nouns were not recognized.
+
+**RED evidence:** Six exact safe forms failed at the helper and produced aggregate canon-audit/claim-inventory failures: `Do not order the population killed`, `Refuse to order the population killed`, `Do not authorize, approve, or conduct genocide`, `Authorize prosecutors to investigate concentration camps`, `Never authorize or approve concentration camps`, and `Order inspectors to inspect detention camps`. The 3-file / 81-test RED matrix failed eight assertions. Mixed safe-then-directive cases were pinned separately as blocking.
+
+**Implementation:** The classifier now builds stable clause spans from punctuation and explicit sequential/adversative connectors. Refusal or negation remains active across coordinated verbs in its clause and resets at a genuine boundary. Accountability uses deterministic document/expose/investigate/inspect/prosecute/report/review stems before each sensitive object. Direct-pattern spans remain associated with their action, and later clauses are evaluated independently. No phrase-specific allowlist was added.
+
+**Historian/canon review:** Enforcement remains confined to player-facing option prose. The correction changes no historical fact, source, event trigger, response, consequence, simulation mechanic, or source tier. It implements Sensitive History Design Gate Ring 3 #1/#2 while preserving the exact section-3 paramilitary-policy exception and the Six Strategic Goals command-policy/non-player-consequence contract.
+
+**Verification:** Focused correction passes 4 files / 90 tests; expanded inventory/provenance passes 7 files / 71 tests; canon passes 2 files / 34 tests; foundational/adjacent passes 5 files / 110 tests with 105 passing and 5 pre-existing skips. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim and localization censuses remain 3,652 / 226 files and 971 / 385 files. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.

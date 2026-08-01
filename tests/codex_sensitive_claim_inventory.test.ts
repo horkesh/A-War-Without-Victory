@@ -415,6 +415,8 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
                     { id: 'negated_then_kill', description: 'Do not authorize detention camps, then kill civilians' },
                     { id: 'refuse_then_execute', description: 'Refuse to deploy paramilitary forces, then execute the displaced families' },
                     { id: 'investigate_then_genocide', description: 'Authorize an investigation of concentration camps, then commit genocide' },
+                    { id: 'negated_scope_then_kill', description: 'Do not authorize or approve concentration camps, then kill civilians' },
+                    { id: 'accountability_scope_but_genocide', description: 'Authorize prosecutors to investigate concentration camps, but commit genocide' },
                 ],
             },
             {
@@ -426,6 +428,12 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
                     { id: 'command', description: 'Civilian authority over the military must be established.' },
                     { id: 'press', description: 'Invite scrutiny of front-line conditions and treatment of civilians.' },
                     { id: 'dayton', description: 'Accept Annex 7 refugee-return commitments.' },
+                    { id: 'safe_do_not_order', description: 'Do not order the population killed' },
+                    { id: 'safe_refuse_order', description: 'Refuse to order the population killed' },
+                    { id: 'safe_coordinated_genocide', description: 'Do not authorize, approve, or conduct genocide' },
+                    { id: 'safe_prosecutors', description: 'Authorize prosecutors to investigate concentration camps' },
+                    { id: 'safe_never_camps', description: 'Never authorize or approve concentration camps' },
+                    { id: 'safe_inspectors', description: 'Order inspectors to inspect detention camps' },
                     {
                         id: 'guarded',
                         label: 'Adopt the platform',
@@ -470,7 +478,7 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
         ]);
         assert.strictEqual(blocked.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'direct_refused_verbs_1992'
-        )).length, 10);
+        )).length, 12);
 
         const contextual = report.claims.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'lexical_context_1992'
