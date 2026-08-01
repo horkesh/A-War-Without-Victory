@@ -490,7 +490,7 @@ export function buildCorpsFrontSectors(
     _perfTime('sealMergedSectorTruth:1', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass }));
     _perfTime('relocateMisassignedBrigadesToTruthfulOwners', () => relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency));
     _perfTime('sealMergedSectorTruth:2', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass }));
-    _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));
+    const prunedGhostArtifacts = _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));
     const recoveredDroppedFrontEdges = _perfTime('recoverDroppedFrontEdges:1', () => recoverDroppedFrontEdges(
         result,
         state,
@@ -505,9 +505,10 @@ export function buildCorpsFrontSectors(
         spatial,
         recoveredFrontClaimSetupCache,
     ));
-    // No edge recovery means no mutation occurred between seal pass 2 and this
-    // convergence segment. Preserve the full segment whenever recovery did write.
-    if (!useFixedPointShortcuts || recoveredDroppedFrontEdges) {
+    // Skip the convergence segment only when every producer since seal pass 2
+    // reports no mutation. A prune deletion is independently dirty even when
+    // edge recovery has nothing eligible to rebuild.
+    if (!useFixedPointShortcuts || prunedGhostArtifacts || recoveredDroppedFrontEdges) {
         _perfTime('sealMergedSectorTruth:3', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass }));
         _perfTime('pruneGhostArtifactSectors:2', () => pruneGhostArtifactSectors(result));
         _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache));
@@ -2250,7 +2251,8 @@ function canonicalizeDuplicateFrontOwnershipByPiece(
     }
 }
 
-export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSector>): void {
+export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSector>): boolean {
+    let prunedAny = false;
     for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sectorId];
         if (!sector) continue;
@@ -2262,8 +2264,10 @@ export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSect
             && (sector.rear_brigade_ids?.length ?? 0) === 0
         ) {
             delete sectors[sectorId];
+            prunedAny = true;
         }
     }
+    return prunedAny;
 }
 
 function recoverDroppedFrontEdges(
