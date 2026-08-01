@@ -4643,6 +4643,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'decisionConsequences.fallback.staffOfficer': 'Štabni oficir',
     'decisionConsequences.detail.decisionFiled': 'Odluka arhivirana.',
     'decisionConsequences.detail.autonomyProposal': '{detail}',
+    'decisionConsequences.detail.autonomyProposal.stanceChange': '{corps}: {current} → {proposed}.',
     'decisionConsequences.detail.autonomyProposal.fallback': 'Odluka o prijedlogu štaba arhivirana je u zapisu kampanje.',
     'decisionConsequences.detail.reserveDecisionFiled': 'Odluka o rezervi arhivirana.',
     'decisionConsequences.detail.finalSettlementFiled': 'Konačni sporazum arhiviran je u zapisu kampanje.',

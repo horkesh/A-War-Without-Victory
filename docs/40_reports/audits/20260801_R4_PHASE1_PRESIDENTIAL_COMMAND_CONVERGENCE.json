@@ -29,13 +29,17 @@
           "src/ui/map/data/presidentialDecisionRoom.ts#function addProposalReviewDirectiveCards("
         ],
         "receipt": [
+          "src/desktop/player_visible_state.cjs#projected.proposal_decision_history = playerFaction",
           "src/sim/turn_phases/war_phases.ts#meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter((proposal) =>",
           "src/sim/turn_phases/war_phases.ts#meta.proposal_decision_history ??= [];",
-          "src/sim/turn_phases/war_phases.ts#meta.proposal_decision_history.push({"
+          "src/sim/turn_phases/war_phases.ts#meta.proposal_decision_history.push({",
+          "src/state/proposal_decision_history.ts#export function proposalDecisionIdentity(",
+          "src/state/validateGameState.ts#duplicates durable identity ${identity}"
         ],
         "consumers": [
           "src/ui/map/data/decisionConsequenceLedger.ts#const archivedProposals = state.rawGameState?.meta?.proposal_decision_history ?? [];",
-          "src/ui/map/data/decisionConsequenceLedger.ts#familyId: 'autonomy-proposal'"
+          "src/ui/map/data/decisionConsequenceLedger.ts#familyId: 'autonomy-proposal'",
+          "src/ui/map/data/decisionConsequenceLedger.ts#id: proposalDecisionLedgerId(identitySource)"
         ]
       }
     },

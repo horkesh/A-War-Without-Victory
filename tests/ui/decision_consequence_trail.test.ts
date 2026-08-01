@@ -56,7 +56,7 @@ describe('decision consequence trail', () => {
     }));
 
     expect(ledger).toContainEqual(expect.objectContaining({
-      id: 'proposal:PROP_12_military_0',
+      id: 'proposal:PROP_12_military_0::12',
       turn: 12,
       title: 'Staff proposal declined',
       outcome: 'Declined',
@@ -88,7 +88,7 @@ describe('decision consequence trail', () => {
     }));
 
     expect(ledger).toContainEqual(expect.objectContaining({
-      id: 'proposal:PROP_12_military_0',
+      id: 'proposal:PROP_12_military_0::13',
       familyId: 'autonomy-proposal',
       family: 'Staff proposal',
       turn: 13,

@@ -5060,6 +5060,7 @@ export const enMessages = {
     'decisionConsequences.fallback.staffOfficer': 'Staff officer',
     'decisionConsequences.detail.decisionFiled': 'Decision filed.',
     'decisionConsequences.detail.autonomyProposal': '{detail}',
+    'decisionConsequences.detail.autonomyProposal.stanceChange': '{corps}: {current} → {proposed}.',
     'decisionConsequences.detail.autonomyProposal.fallback': 'Staff proposal disposition filed in the campaign record.',
     'decisionConsequences.detail.reserveDecisionFiled': 'Reserve decision filed.',
     'decisionConsequences.detail.finalSettlementFiled': 'Final settlement filed in the campaign record.',

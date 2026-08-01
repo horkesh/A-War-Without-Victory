@@ -8,7 +8,7 @@
  *   - CONTRADICTED: predicted id is in the closed-event set.
  *
  * Also covers determinism (sort order), defensive empties, bot-decision
- * exclusion, and last-wins recurring-decision semantics.
+ * exclusion, and exact recurring-decision identity semantics.
  */
 
 import { afterEach, describe, it, expect } from 'vitest';
@@ -152,7 +152,7 @@ describe('buildConsequenceReceipts', () => {
         expect(confirmed.firedTurn).toBe(9);
         expect(confirmed.turnsElapsed).toBe(6);
         expect(confirmed.sourceRecordId).toBe('decision:E::opt_a::3');
-        expect(confirmed.receiptRecordId).toBe('receipt:E::opt_a::p_confirmed');
+        expect(confirmed.receiptRecordId).toBe('receipt:E::opt_a::3::p_confirmed');
         // Originating decision resolved to TITLES + option prose, not raw ids.
         expect(confirmed.decisionTitle).toBe('Authorize the Goražde relief column');
         expect(confirmed.decisionOptionLabel).toBe('Send the column through');
@@ -217,7 +217,7 @@ describe('buildConsequenceReceipts', () => {
         });
 
         const [receipt] = buildConsequenceReceipts(state, catalog);
-        expect(receipt.id).toBe('evt_internal_crisis_1994::approve_emergency_measure::csq_patron_recovery_offer');
+        expect(receipt.id).toBe('evt_internal_crisis_1994::approve_emergency_measure::6::csq_patron_recovery_offer');
         expect(receipt.decisionEventId).toBe('evt_internal_crisis_1994');
         expect(receipt.predictedEventId).toBe('csq_patron_recovery_offer');
 

@@ -58,6 +58,7 @@ import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
 import { GameState, type FactionId, type FormationId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState, type AuthoredOpDef, type OperationAxis, type CorpsOperation, type CorpsCommandState } from '../../state/game_state.js';
+import { proposalDecisionIdentity } from '../../state/proposal_decision_history.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../../state/maintenance.js';
@@ -2089,7 +2090,7 @@ export const warPhases: NamedPhase[] = [
                     }
                 }
                 const existingReceiptKeys = new Set(
-                    (meta.proposal_decision_history ?? []).map((record) => `${record.id}::${record.resolved_turn}`),
+                    (meta.proposal_decision_history ?? []).map(proposalDecisionIdentity),
                 );
                 const ordinaryResolved = meta.pending_proposal_reviews
                     .filter((proposal) => (
@@ -2104,7 +2105,10 @@ export const warPhases: NamedPhase[] = [
                         || strictCompare(left.id, right.id)
                     ));
                 for (const proposal of ordinaryResolved) {
-                    const receiptKey = `${proposal.id}::${proposal.resolved_turn}`;
+                    const receiptKey = proposalDecisionIdentity({
+                        id: proposal.id,
+                        resolved_turn: proposal.resolved_turn!,
+                    });
                     if (existingReceiptKeys.has(receiptKey)) continue;
                     meta.proposal_decision_history ??= [];
                     meta.proposal_decision_history.push({

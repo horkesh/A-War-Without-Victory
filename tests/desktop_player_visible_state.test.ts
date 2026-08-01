@@ -4,8 +4,10 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { startNewCampaign } from '../src/desktop/desktop_sim.js';
+import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { parsePlayerVisibleWarroomState } from '../src/ui/warroom/data/player_visible_state_adapter.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
+import { buildDecisionConsequenceLedger } from '../src/ui/map/data/decisionConsequenceLedger.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 
 const require = createRequire(import.meta.url);
@@ -426,11 +428,50 @@ describe('desktop player-visible state projection', () => {
     expect(loaded.namedOfficerData?.map((officer) => officer.id)).toEqual(['rs_officer']);
   });
 
-  it('loads a freshly generated current RS campaign through the Warroom player-visible adapter', async () => {
+  it('keeps only the player faction durable proposal receipt through Advance, save/load, and Electron projection', async () => {
     const projector = loadProjector();
     const { state } = await startNewCampaign(process.cwd(), 'RS', 'apr_1992');
+    state.meta.turn = 2;
+    state.meta.pending_proposal_reviews = [
+      {
+        id: 'rs_receipt',
+        turn: 1,
+        resolved_turn: 1,
+        faction: 'RS',
+        domain: 'military',
+        description: 'Own durable proposal receipt.',
+        proposed_action: 'SET_STANCE:vrs_main_staff:balanced',
+        current_value: 'defensive',
+        proposed_value: 'balanced',
+        accepted: true,
+      },
+      {
+        id: 'rbih_receipt',
+        turn: 1,
+        resolved_turn: 1,
+        faction: 'RBiH',
+        domain: 'military',
+        description: 'Foreign durable proposal receipt.',
+        proposed_action: 'SET_STANCE:arbih_general_staff:offensive',
+        current_value: 'balanced',
+        proposed_value: 'offensive',
+        accepted: false,
+      },
+    ];
+    const autonomyStep = warPhases.find((candidate) => candidate.name === 'apply-autonomy-transition');
+    if (!autonomyStep) throw new Error('apply-autonomy-transition step missing');
+    await autonomyStep.run({ state } as Parameters<typeof autonomyStep.run>[0]);
+
     const canonicalJson = serializeState(state);
-    const projectedJson = projector.projectPlayerVisibleStateJson(canonicalJson);
+    const hydrated = deserializeState(canonicalJson);
+    expect(hydrated.meta.proposal_decision_history?.map((record) => record.id))
+      .toEqual(['rbih_receipt', 'rs_receipt']);
+    const projectedJson = projector.projectPlayerVisibleStateJson(serializeState(hydrated));
+    const projected = JSON.parse(projectedJson);
+
+    expect(projected.meta.proposal_decision_history.map((record: any) => record.id))
+      .toEqual(['rs_receipt']);
+    expect(projectedJson).not.toContain('Foreign durable proposal receipt.');
 
     expect(() => deserializeState(projectedJson)).toThrow();
 
@@ -440,7 +481,9 @@ describe('desktop player-visible state projection', () => {
     expect(Object.values(warroomState.military.formations).filter((formation) => formation.faction === 'RS').length)
       .toBeGreaterThan(0);
     expect(Object.values(warroomState.military.corps_command ?? {}).length).toBeGreaterThan(0);
-    expect(() => parseGameState(JSON.parse(projectedJson))).not.toThrow();
+    const loaded = parseGameState(projected);
+    expect(buildDecisionConsequenceLedger(loaded, 10).map((record) => record.id))
+      .toContain('proposal:rs_receipt::1');
   }, 120_000);
 
   it('projects every replay frame instead of sending canonical saves to the renderer', () => {

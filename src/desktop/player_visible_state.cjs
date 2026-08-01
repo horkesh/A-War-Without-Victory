@@ -107,6 +107,9 @@ function projectMeta(meta, playerFaction) {
   projected.pending_proposal_reviews = playerFaction
     ? rowsForFaction(meta?.pending_proposal_reviews, playerFaction)
     : [];
+  projected.proposal_decision_history = playerFaction
+    ? rowsForFaction(meta?.proposal_decision_history, playerFaction)
+    : [];
   if (isRecord(meta?.autonomy_overrides) && playerFaction) {
     projected.autonomy_overrides = sortedRecordFromEntries(
       Object.entries(meta.autonomy_overrides)
