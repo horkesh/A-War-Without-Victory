@@ -1,3 +1,9 @@
+## 2026-08-01 - Performance retention requires local-owner and paired-direction corroboration
+
+**A favorable arithmetic mean does not retain an optimization when its cause regresses.** Alternating exact-parent pairs must be read both as an aggregate and by paired direction. A single slow control can make the mean look favorable while most pairs worsen. Retain a candidate only when whole-run evidence and the intended causal owner corroborate the same improvement; if two of three pairs regress and the owner worsens materially, record a no-go and fully revert even when bytes and correctness are exact.
+
+**Performance lineage must be executable evidence, not a label.** Before each warmup, profile, or timing capture, verify the process working directory, exact `HEAD`, tree, and absolute script path. If a command accidentally runs the same source under both labels, preserve it under an explicit invalid-lineage name and exclude it from every conclusion. Applied in `[2026-08-01] R5 Phase 2c reachability and sector-fact no-go`.
+
 ## 2026-08-01 - Historical notifications observe state; they do not manufacture it
 
 An authored calendar window may make a historical notification eligible, but it must not create the territorial result the prose claims occurred. Territorial consolidation requires exact current-state evidence: for the confirmed Goražde case, both named OSIDs must already be held by RBiH before the informational receipt, morale consequence, or durable flag may be produced. Source quality and prose certainty are a separate content responsibility; projection wording is a separate receipt-consumer responsibility. Route the mechanic to gameplay correctness first, sourcing/prose to historical review second, and downstream projections to their shared receipt owner. See the [2026-08-01 ledger entry](PROJECT_LEDGER.md#2026-08-01-docsroadmap-bind-confirmed-gorade-event-bug-to-executable-ownership).

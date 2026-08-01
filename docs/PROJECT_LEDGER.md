@@ -1,5 +1,17 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-01] R5 Phase 2c reachability and sector-fact no-go
+
+**Type:** R5 measured performance candidate / exact-output equivalence / negative retention result / full source revert / roadmap handoff.
+
+**Candidate and correctness:** Built an invocation-local derived context containing faction component facts and per-sector front, reserve, and territory sets. Production used it only for the proven unbounded reachability decision; bounded distance/path logic remained legacy, and a test-only strategy preserved an independent former path. The focused four-file matrix passed 64 tests, TypeScript and determinism static checks passed, approved baselines passed without refresh, and a three-mode × 100-variant property passed all 300 complete-sector and complete-`GameState` comparisons. Candidate snapshot `214c79e5d16353d7a3cae6bf613a74e9578518c2` has exact parent `6c02edcaf950d7d52ebb05fb63b10b89f50d7442`; every valid run produced `5,085,842` bytes, SHA-256 `95be2c9e8975a12face36e9777e54882c757ee8adb23b1cd91a06b2f546319b7`, and state hash `95be2c9e8975a12f`.
+
+**Measured disposition:** Alternating pair deltas were `-10.950%`, `+1.917%`, and `+4.718%`. The arithmetic mean moved from `1,152.680` to `1,130.277 ms/turn` (`-1.944%`), but two pairs regressed and the first control was the slow outlier. The causal owner independently worsened: `ensureMinimumSectorCoverage` increased `27.625%` self and `20.772%` inclusive, `buildCorpsFrontSectors` increased `9.724%` inclusive, and the new context added `265.402 ms` self. The candidate is rejected and its production/test-specific changes are fully reverted. The accepted occupancy floor remains `1,122.123 ms/turn`; incremental topology is not authorized. A fresh accepted-source full profile must choose the next owner.
+
+**Evidence integrity and scope:** Ignored evidence remains under `data/derived/_debug/r5_phase2c_reachability/`, indexed by `measurement_manifest.json` and `summary.md`. An initial warmup command failed to change into the candidate worktree; affected files are retained only with `INVALID_CONTROL_LINEAGE` in their names and excluded from conclusions. Corrected commands verified working directory, `HEAD`, tree, and absolute script path. One stale static instrumentation assertion was corrected to match the already-accepted call-scoped `activeCounts` source and is not part of the candidate. No gameplay result, rule, traversal/tie order, scenario, historical/canon content, save schema, approved baseline, package, version, tag, installer, signing, publication, release state, push, integration, or `docs/10_canon/FORAWWV.md` changed.
+
+---
+
 ## [2026-08-01] R4 Phase 4 canonical acceptance
 
 **Type:** Canonical acceptance / deterministic consequence truth / integrated verification.
