@@ -269,11 +269,11 @@ function DecisionHistoryRecordRow({
                       </span>
                       <button
                         type="button"
-                        onClick={(event) => {
-                          event.currentTarget
-                            .closest<HTMLElement>('[data-testid="decision-history-row"]')
-                            ?.querySelector<HTMLElement>('button')
-                            ?.focus();
+                        onClick={() => {
+                          const sourceRow = [...document.querySelectorAll<HTMLElement>(
+                            '[data-testid="decision-history-row"]',
+                          )].find((row) => row.dataset.sourceRecordId === receipt.sourceRecordId);
+                          sourceRow?.querySelector<HTMLElement>('button')?.focus();
                         }}
                         className="text-accent-gold hover:underline"
                       >
@@ -309,19 +309,19 @@ function DecisionHistoryRecordsSection({
 }) {
   const loadedState = useGameStore((s) => s.loadedGameState);
   const diagMode = useGameStore((s) => s.diagMode);
-  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [expandedSourceRecordId, setExpandedSourceRecordId] = useState<string | null>(null);
   const rawState = loadedState?.rawGameState;
   const decisions = useMemo(
     () => (rawState && eventCatalog ? getPlayerDecisionHistory(rawState) : []),
     [rawState, eventCatalog],
   );
-  const receiptsByEvent = useMemo(() => {
+  const receiptsBySourceRecord = useMemo(() => {
     const map = new Map<string, ConsequenceReceipt[]>();
     if (!rawState || !eventCatalog) return map;
     for (const receipt of buildConsequenceReceipts(rawState, eventCatalog)) {
-      const arr = map.get(receipt.decisionEventId) ?? [];
+      const arr = map.get(receipt.sourceRecordId) ?? [];
       arr.push(receipt);
-      map.set(receipt.decisionEventId, arr);
+      map.set(receipt.sourceRecordId, arr);
     }
     return map;
   }, [rawState, eventCatalog]);
@@ -359,20 +359,27 @@ function DecisionHistoryRecordsSection({
         </div>
       ) : (
         <ul data-testid="decision-history-list" className="mt-3 space-y-2">
-          {decisions.map((decision) => (
-            <DecisionHistoryRecordRow
-              key={`${decision.event_id}::${decision.turn}::${decision.response_id}`}
-              decision={decision}
-              eventCatalog={eventCatalog}
-              rawState={rawState}
-              receipts={receiptsByEvent.get(decision.event_id) ?? []}
-              diagMode={diagMode}
-              isExpanded={expandedEventId === decision.event_id}
-              onToggle={() => setExpandedEventId(
-                expandedEventId === decision.event_id ? null : decision.event_id,
-              )}
-            />
-          ))}
+          {decisions.map((decision) => {
+            const sourceRecordId = decisionSourceRecordId(
+              decision.event_id,
+              decision.response_id,
+              decision.turn,
+            );
+            return (
+              <DecisionHistoryRecordRow
+                key={sourceRecordId}
+                decision={decision}
+                eventCatalog={eventCatalog}
+                rawState={rawState}
+                receipts={receiptsBySourceRecord.get(sourceRecordId) ?? []}
+                diagMode={diagMode}
+                isExpanded={expandedSourceRecordId === sourceRecordId}
+                onToggle={() => setExpandedSourceRecordId(
+                  expandedSourceRecordId === sourceRecordId ? null : sourceRecordId,
+                )}
+              />
+            );
+          })}
         </ul>
       )}
     </section>

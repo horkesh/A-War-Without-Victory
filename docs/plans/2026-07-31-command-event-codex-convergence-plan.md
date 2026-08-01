@@ -177,8 +177,9 @@ npm.cmd run typecheck
 - `PresidentialPriorityReadModel` is the shared blocker/band, urgency, source id, deadline, and recommended-destination contract. Inbox, Decision Room, Desk pre-advance review, and the Warroom toolbar consume its deterministic ordering; exact-expiry regressions prove the same opportunity order across all four surfaces.
 - The nine-family manifest now owns the recommended workspace and durable receipt path beside the existing source state path. No duplicate renderer was found by the executable ownership inventory, so no renderer or durable receipt was deleted.
 - Player-faction regressions exclude foreign opportunity dossiers. Existing player-safe projections and evidence-map return-card ownership remain intact; the selected dossier id is restored on return.
-- Ordinary resolved autonomy proposals now archive idempotently in optional `meta.proposal_decision_history`, round-trip through saves, validate fail-closed when malformed, and project into Records without raw action/corps tokens. Authored event consequences carry stable source/receipt record ids and expose forward receipt review plus a source backlink.
-- Machine report: `docs/40_reports/audits/20260801_R4_PHASE1_PRESIDENTIAL_COMMAND_CONVERGENCE.json`, 14,105 bytes, SHA-256 `76ea58590cf9d5ed7f1d67a6918e40557329e3fa14e32ac9b1744bcf8b63e0ac`. Exact result: `9` families, `9` reachable actions, `9` durable receipts, `0` conditional receipts, `0` unresolved findings, and `9` verified source-proof rows.
+- Ordinary resolved autonomy proposals now archive idempotently in optional `meta.proposal_decision_history`. Shared `proposal id :: resolved turn` identity owns writer deduplication, validation, and Records ledger ids; invalid domains, malformed optional fields, and duplicates fail closed. An Advance -> save/load -> Electron projection regression proves that only the player faction's durable receipt reaches the renderer.
+- Authored event consequence source/receipt ids include event, response, and decision turn. Recurring decisions retain distinct receipts, expansion state, and exact backlinks. Structured localized proposal fields prevent English description, raw stance, action, formation-id, or debug-token leakage in BCS.
+- Machine report: `docs/40_reports/audits/20260801_R4_PHASE1_PRESIDENTIAL_COMMAND_CONVERGENCE.json`, 14,488 bytes, SHA-256 `43c0df567cbfb4592450cdfe6864967c239e8b6f63080efe463351ae29c31506`. Exact result: `9` families, `9` reachable actions, `9` durable receipts, `0` conditional receipts, `0` unresolved findings, and `9` verified source-proof rows.
 - This is additive save state only: older saves omit the optional receipt history and continue with an empty history. No scenario, historical event, canon, deterministic baseline, package/version, tag, installer, publication, or release state changed; `docs/10_canon/FORAWWV.md` is unchanged.
 
 **Verification:**
@@ -188,6 +189,8 @@ npm.cmd run test:vitest -- tests/ui/presidential_decision_room.test.ts tests/ui/
 npm.cmd run typecheck
 npm.cmd run qa:player-journeys
 ```
+
+Committee-corrected verification: `18` focused files / `297` tests and `44` player-journey files / `770` tests passed, followed by TypeScript, canon/determinism/baseline, and diff gates.
 
 `/simplify` -> review -> commit `refactor(command): converge priority and receipt ownership`
 

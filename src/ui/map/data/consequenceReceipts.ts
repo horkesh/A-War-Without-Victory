@@ -47,7 +47,7 @@ export type ConsequenceReceiptStatus = 'confirmed' | 'pending' | 'contradicted';
 /** One receipt: a single predicted downstream event from one player decision,
  *  resolved against the engine's realized causality substrate. */
 export interface ConsequenceReceipt {
-    /** Stable id for keying/dedupe: `<event>::<response>::<predicted>`. */
+    /** Stable id for keying/dedupe: `<event>::<response>::<decision-turn>::<predicted>`. */
     id: string;
     /** Stable source-side navigation id for the decision that made the promise. */
     sourceRecordId: string;
@@ -85,21 +85,6 @@ export function decisionSourceRecordId(eventId: string, responseId: string, turn
 
 export function consequenceReceiptRecordId(receiptId: string): string {
     return `receipt:${receiptId}`;
-}
-
-/** Build a chosen-option lookup keyed by event_id. Last decision wins for
- *  recurring events (matches causality_query's decisionByEvent semantics). */
-function chosenResponseByEvent(
-    state: GameState,
-    playerFaction: string | null,
-): Map<string, string> {
-    const out = new Map<string, string>();
-    for (const dec of state.military?.event_decision_log ?? []) {
-        if (dec.decision_source !== 'player') continue;
-        if (!playerFactionMatch(dec.faction, playerFaction)) continue;
-        out.set(dec.event_id, dec.response_id);
-    }
-    return out;
 }
 
 /** Index enables-edges by `from_event::to_event::response_id` for O(1) CONFIRMED
@@ -232,8 +217,6 @@ export function buildConsequenceReceipts(
     const firedIds = new Set(state.military?.fired_event_ids ?? []);
     const lastFiredTurn = state.military?.event_last_fired_turn ?? {};
     const edges = enablesEdgeKeySet(state);
-    const chosenByEvent = chosenResponseByEvent(state, playerFaction);
-
     const receipts: ConsequenceReceipt[] = [...patronReceipts];
 
     for (const dec of decisionLog) {
@@ -241,9 +224,6 @@ export function buildConsequenceReceipts(
         // player's promise→receipt loop.
         if (dec.decision_source !== 'player') continue;
         if (!playerFactionMatch(dec.faction, playerFaction)) continue;
-        // Last-wins: only score the decision that currently owns this event.
-        if (chosenByEvent.get(dec.event_id) !== dec.response_id) continue;
-
         const def = catalog.get(dec.event_id);
         const option = findOption(def, dec.response_id);
         if (!option) continue;
@@ -281,7 +261,7 @@ export function buildConsequenceReceipts(
                 const predictedLabel = (fc.label?.trim())
                     || resolveEventTitle(predictedDef, predictedId);
 
-                const id = `${dec.event_id}::${dec.response_id}::${predictedId}`;
+                const id = `${dec.event_id}::${dec.response_id}::${dec.turn}::${predictedId}`;
                 receipts.push({
                     id,
                     sourceRecordId: decisionSourceRecordId(dec.event_id, dec.response_id, dec.turn),

@@ -46,11 +46,17 @@ describe('presidential command convergence diagnostic', () => {
       'reserve_request',
     ]);
     expect(report.findings).toEqual([]);
-    expect(report.rows.find((row) => row.familyId === 'autonomy_proposal')).toMatchObject({
+    const autonomyRow = report.rows.find((row) => row.familyId === 'autonomy_proposal');
+    expect(autonomyRow).toMatchObject({
       receiptOwner: 'meta.proposal_decision_history',
       receiptDurability: 'durable',
       recordsConsumers: ['decision-consequence ledger'],
     });
+    expect(autonomyRow?.sourceEvidence.receipt).toEqual(expect.arrayContaining([
+      'src/desktop/player_visible_state.cjs#projected.proposal_decision_history = playerFaction',
+      'src/state/validateGameState.ts#duplicates durable identity ${identity}',
+      'src/state/proposal_decision_history.ts#export function proposalDecisionIdentity(',
+    ]));
     expect(report.rows.find((row) => row.familyId === 'event_decision')).toMatchObject({
       producer: 'src/sim/events/evaluate_events.ts -> military.pending_event_decisions',
       blockerPredicate: 'requires_player_response === true',

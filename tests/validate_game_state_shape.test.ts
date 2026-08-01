@@ -169,6 +169,69 @@ describe('validateGameStateShape autonomy proposal receipt history', () => {
             expect(result.errors).toContain('meta.proposal_decision_history[0].resolved_turn must be greater than or equal to turn');
         }
     });
+
+    it('rejects unknown proposal domains and malformed optional receipt fields', () => {
+        const state = minimalValid();
+        (state.meta as any).proposal_decision_history = [{
+            id: 'proposal-1',
+            turn: 4,
+            resolved_turn: 5,
+            faction: 'RBiH',
+            domain: 'logistics',
+            description: 'Staff recommends a defensive stance.',
+            proposed_action: 'SET_STANCE:arbih_3rd_corps:defensive',
+            accepted: true,
+            current_value: 1,
+            proposed_value: false,
+            opportunity_decision: 'launch',
+            opportunity_decision_options: 'reinforced',
+        }];
+
+        const result = validateGameStateShape(state);
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toContain(
+                'meta.proposal_decision_history[0].domain must be one of: military, political, events, ops',
+            );
+            expect(result.errors).toContain(
+                'meta.proposal_decision_history[0].current_value must be a string when present',
+            );
+            expect(result.errors).toContain(
+                'meta.proposal_decision_history[0].proposed_value must be a string when present',
+            );
+            expect(result.errors).toContain(
+                'meta.proposal_decision_history[0].opportunity_decision must be one of: approve, delay, redirect, under_resource, decline',
+            );
+            expect(result.errors).toContain(
+                'meta.proposal_decision_history[0].opportunity_decision_options must be an object when present',
+            );
+        }
+    });
+
+    it('rejects duplicate durable proposal identities', () => {
+        const state = minimalValid();
+        const receipt = {
+            id: 'proposal-1',
+            turn: 4,
+            resolved_turn: 5,
+            faction: 'RBiH',
+            domain: 'military',
+            description: 'Staff recommends a defensive stance.',
+            proposed_action: 'SET_STANCE:arbih_3rd_corps:defensive',
+            accepted: true,
+            current_value: 'balanced',
+            proposed_value: 'defensive',
+        };
+        (state.meta as any).proposal_decision_history = [receipt, { ...receipt, description: 'Duplicate copy.' }];
+
+        const result = validateGameStateShape(state);
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            expect(result.errors).toContain(
+                'meta.proposal_decision_history[1] duplicates durable identity proposal-1::5',
+            );
+        }
+    });
 });
 
 describe('validateGameStateShape optional military local state records', () => {

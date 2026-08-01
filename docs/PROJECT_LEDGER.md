@@ -25252,6 +25252,16 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Evidence and verification:** `docs/40_reports/audits/20260801_R4_PHASE1_PRESIDENTIAL_COMMAND_CONVERGENCE.json` is 14,105 bytes, SHA-256 `76ea58590cf9d5ed7f1d67a6918e40557329e3fa14e32ac9b1744bcf8b63e0ac`, and reports 9/9 reachable actions, 9/9 durable receipts, 9/9 verified source rows, zero conditional receipts, and zero findings. The required Phase 1 UI suite passed 5 files / 120 tests; the focused persistence/priority/receipt matrix passed 10 files / 145 tests; player journeys passed 44 files / 770 tests. TypeScript, canon/determinism/static baselines, and diff checks passed.
 
 **Canon and scope:** Existing decision and consequence truth only; no new lever, initiative, event, historical claim, scenario, simulation formula, RNG, fog projection, baseline, package/version, tag, installer, signing, publication, or release state changed. `docs/10_canon/FORAWWV.md` is unchanged. Phase 2 source-backed cadence and positive holds is next.
+
+## 2026-08-01 - R4 Phase 1 committee correction accepted
+
+**Type:** Independent-review correction / Electron projection / recurring receipt identity / BCS player-safe copy / validator hardening.
+
+**Findings and correction:** Independent review blocked four gaps in the initial Phase 1 packet. The player-visible desktop projector now emits only the player's durable proposal history, with an actual Advance -> save/load -> Electron projection proof. Event consequences now use exact event/response/decision-turn source identity end to end, so recurring authored decisions retain distinct receipts, expansion state, and exact source backlinks. Proposal Records copy is built from localized structured stance fields and safe formation display names rather than English proposal descriptions or raw enums. Proposal-history validation now rejects invalid domains, malformed optional fields, and duplicate `proposal id :: resolved turn` identities; the writer, validator, and ledger share that identity helper.
+
+**Evidence and verification:** Each committee finding first had a failing regression. The corrected machine report is 14,488 bytes, SHA-256 `43c0df567cbfb4592450cdfe6864967c239e8b6f63080efe463351ae29c31506`, with 9/9 reachable actions, 9/9 durable receipts, 9/9 source-verified rows, and zero findings. The corrected focused matrix passes 18 files / 297 tests; player journeys pass 44 files / 770 tests. TypeScript, canon/determinism/baseline, and diff gates complete the acceptance packet.
+
+**Scope:** Existing decision receipt ownership and player-visible projection only. No decision/event/history content, scenario, simulation formula, RNG, deterministic baseline, package/version, tag, installer, signing, publication, release state, or `docs/10_canon/FORAWWV.md` changed.
 ## 2026-08-01 - R2 FR-03/FR-06 source closeout and rejected 104-week harness attempt
 
 **Type:** Retained-map evidence handoff / responsive-path and OOB bug repair / presidential-friction explanation / Electron harness hardening / roadmap propagation.

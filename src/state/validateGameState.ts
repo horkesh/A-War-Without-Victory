@@ -6,12 +6,16 @@
 
 
 import type { PhaseName } from './game_state.js';
+import { proposalDecisionIdentity } from './proposal_decision_history.js';
 import { COMMAND_AUTHORITY_ALLOWED_INCOME_SOURCES } from '../shared/commandAuthorityEconomy.js';
 
 
 /** Known phase names (must match PhaseName in game_state.ts). */
 const KNOWN_PHASES: readonly PhaseName[] = ['peace', 'war'];
 const CANONICAL_PLAYER_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
+const PROPOSAL_DECISION_DOMAINS = ['military', 'political', 'events', 'ops'] as const;
+const PROPOSAL_OPPORTUNITY_DECISIONS = ['approve', 'delay', 'redirect', 'under_resource', 'decline'] as const;
+const PROPOSAL_COMMITMENT_PROFILES = ['minimum', 'standard', 'reinforced'] as const;
 const DOCTRINE_OVERRIDE_FORCED_STANCES = ['defensive', 'balanced', 'offensive', 'reorganize'] as const;
 const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
 const MUNICIPALITY_SUPPORT_TYPES = ['weapons_shipment', 'staff_priority', 'croatian_support_package'] as const;
@@ -195,6 +199,7 @@ function validateProposalDecisionHistory(value: unknown, errors: string[]): void
         errors.push('meta.proposal_decision_history must be an array when present');
         return;
     }
+    const seenIdentities = new Set<string>();
     for (let index = 0; index < value.length; index += 1) {
         const record = value[index];
         const path = `meta.proposal_decision_history[${index}]`;
@@ -202,8 +207,12 @@ function validateProposalDecisionHistory(value: unknown, errors: string[]): void
             errors.push(`${path} must be an object`);
             continue;
         }
-        for (const key of ['id', 'domain', 'description', 'proposed_action'] as const) {
+        for (const key of ['id', 'description', 'proposed_action'] as const) {
             if (!isNonEmptyString(record[key])) errors.push(`${path}.${key} must be a non-empty string`);
+        }
+        if (typeof record.domain !== 'string'
+            || !PROPOSAL_DECISION_DOMAINS.includes(record.domain as typeof PROPOSAL_DECISION_DOMAINS[number])) {
+            errors.push(`${path}.domain must be one of: ${PROPOSAL_DECISION_DOMAINS.join(', ')}`);
         }
         if (!isCanonicalPlayerFaction(record.faction)) {
             errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
@@ -216,8 +225,55 @@ function validateProposalDecisionHistory(value: unknown, errors: string[]): void
         } else if (isNonNegativeInteger(record.turn) && record.resolved_turn < record.turn) {
             errors.push(`${path}.resolved_turn must be greater than or equal to turn`);
         }
+        if (isNonEmptyString(record.id) && isNonNegativeInteger(record.resolved_turn)) {
+            const identity = proposalDecisionIdentity({ id: record.id, resolved_turn: record.resolved_turn });
+            if (seenIdentities.has(identity)) {
+                errors.push(`${path} duplicates durable identity ${identity}`);
+            } else {
+                seenIdentities.add(identity);
+            }
+        }
         if (typeof record.accepted !== 'boolean') {
             errors.push(`${path}.accepted must be boolean`);
+        }
+        for (const key of ['current_value', 'proposed_value'] as const) {
+            if (record[key] !== undefined && typeof record[key] !== 'string') {
+                errors.push(`${path}.${key} must be a string when present`);
+            }
+        }
+        if (record.opportunity_decision !== undefined && (
+            typeof record.opportunity_decision !== 'string'
+            || !PROPOSAL_OPPORTUNITY_DECISIONS.includes(
+                record.opportunity_decision as typeof PROPOSAL_OPPORTUNITY_DECISIONS[number],
+            )
+        )) {
+            errors.push(
+                `${path}.opportunity_decision must be one of: ${PROPOSAL_OPPORTUNITY_DECISIONS.join(', ')}`,
+            );
+        }
+        if (record.opportunity_decision_options !== undefined) {
+            const optionsPath = `${path}.opportunity_decision_options`;
+            if (!isRecord(record.opportunity_decision_options)) {
+                errors.push(`${optionsPath} must be an object when present`);
+            } else {
+                const options = record.opportunity_decision_options;
+                if (options.redirect_variant_id !== undefined && typeof options.redirect_variant_id !== 'string') {
+                    errors.push(`${optionsPath}.redirect_variant_id must be a string when present`);
+                }
+                if (options.delay_turns !== undefined && !isNonNegativeInteger(options.delay_turns)) {
+                    errors.push(`${optionsPath}.delay_turns must be a non-negative integer when present`);
+                }
+                if (options.commitment_profile !== undefined && (
+                    typeof options.commitment_profile !== 'string'
+                    || !PROPOSAL_COMMITMENT_PROFILES.includes(
+                        options.commitment_profile as typeof PROPOSAL_COMMITMENT_PROFILES[number],
+                    )
+                )) {
+                    errors.push(
+                        `${optionsPath}.commitment_profile must be one of: ${PROPOSAL_COMMITMENT_PROFILES.join(', ')}`,
+                    );
+                }
+            }
         }
     }
 }

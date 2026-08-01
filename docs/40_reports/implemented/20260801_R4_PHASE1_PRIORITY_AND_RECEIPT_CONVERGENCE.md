@@ -22,16 +22,20 @@ No duplicate action renderer was found: the executable ownership diagnostic stil
 
 ## Receipt closure
 
-Resolved ordinary autonomy proposals previously survived only through their resolution turn. The turn phase now archives them idempotently in optional `meta.proposal_decision_history`, excluding historical-operation and operation-opportunity carriers that already own durable receipts elsewhere. The history is deterministically ordered, survives save/load, and is validated when present. Older saves omit the optional field and read as an empty history.
+Resolved ordinary autonomy proposals previously survived only through their resolution turn. The turn phase now archives them idempotently in optional `meta.proposal_decision_history`, excluding historical-operation and operation-opportunity carriers that already own durable receipts elsewhere. One shared identity, `proposal id :: resolved turn`, owns writer deduplication, validation, and Records ledger ids. The history is deterministically ordered, survives save/load, and is projected by the Electron player-visible boundary for the player faction only. Older saves omit the optional field and read as an empty history.
 
-Records projects those dispositions as localized, player-safe `Staff proposal accepted/declined` rows. Raw proposed-action strings, internal corps ids, and debug tokens are not rendered. Authored event consequence receipts now carry stable source and receipt record ids. Expanding the source decision reveals filed receipts, and each receipt provides a focus backlink to the source decision.
+Records projects those dispositions as localized, player-safe `Staff proposal accepted/declined` rows. Structured stance-change receipts localize the safe formation name and both stance values; raw proposal descriptions, action strings, internal corps ids, stance enums, and debug tokens are not rendered. Authored event consequence receipts now carry stable source and receipt record ids including decision turn. Recurrences of the same event therefore retain separate receipts, expansion state, and exact focus backlinks.
+
+## Committee correction
+
+Independent review blocked the first implementation on four concrete gaps. The correction adds an Advance-boundary save/load/Electron projection regression; replaces event-id indexing with exact event/response/turn source identity; renders BCS proposal receipts from structured localized fields; and rejects invalid domains, malformed optional fields, and duplicate durable proposal identities. Each finding was reproduced by a failing test before the runtime correction.
 
 ## Executable evidence
 
 The machine report is `docs/40_reports/audits/20260801_R4_PHASE1_PRESIDENTIAL_COMMAND_CONVERGENCE.json`:
 
-- bytes: `14,105`
-- SHA-256: `76ea58590cf9d5ed7f1d67a6918e40557329e3fa14e32ac9b1744bcf8b63e0ac`
+- bytes: `14,488`
+- SHA-256: `43c0df567cbfb4592450cdfe6864967c239e8b6f63080efe463351ae29c31506`
 - player-decision families: `9`
 - reachable action families: `9`
 - durable receipt families: `9`
@@ -41,8 +45,7 @@ The machine report is `docs/40_reports/audits/20260801_R4_PHASE1_PRESIDENTIAL_CO
 
 ## Verification
 
-- Phase 1 required UI suite: `5` files / `120` tests passed.
-- Priority, receipt, persistence, validator, manifest, diagnostic, and pre-advance matrix: `10` files / `145` tests passed.
+- Committee-corrected Phase 1 matrix: `18` files / `297` tests passed.
 - Player journeys: `44` files / `770` tests passed.
 - `npm.cmd run typecheck`: passed.
 - `npm.cmd run canon:check`: determinism scan and baseline regression passed; all scenarios match.
@@ -52,7 +55,7 @@ The machine report is `docs/40_reports/audits/20260801_R4_PHASE1_PRESIDENTIAL_CO
 
 This phase changes presentation ordering and durable recording of decisions the game already produced. It adds no decision family, lever, historical event, source claim, scenario content, simulation formula, RNG input, or hidden-information projection. The optional history records actual resolved proposal state and is not used to influence simulation. No deterministic baseline changed.
 
-The Technical Architect review found no new entrypoint, phase reorder, or ownership boundary: Decision Room remains the action owner, Army HQ Records remains the receipt owner, and the Warroom toolbar remains a summary projection, matching `PRODUCT_SHELL_HIERARCHY.md`. The proposal history is a lazy nested receipt bus: absence is legitimate until a decision is resolved, so `SAVE_SCHEMA_EVOLUTION.md` requires validate-when-present and load/round-trip proof rather than a schema-version migration. The Modern Wargame review found no UI-truthfulness breach: agenda priority is kept separate from threat/cost severity, deadlines come from existing source state, foreign-faction opportunities are filtered, and deterministic source/id tie-breaks prevent unstable cross-surface ordering.
+The Technical Architect review found no new entrypoint, phase reorder, or ownership boundary: Decision Room remains the action owner, Army HQ Records remains the receipt owner, and the Warroom toolbar remains a summary projection, matching `PRODUCT_SHELL_HIERARCHY.md`. The proposal history is a lazy nested receipt bus: absence is legitimate until a decision is resolved, so `SAVE_SCHEMA_EVOLUTION.md` requires validate-when-present plus Advance, save/load, and Electron projection proof rather than a schema-version migration. The Modern Wargame review found no UI-truthfulness breach: agenda priority is kept separate from threat/cost severity, deadlines come from existing source state, foreign-faction opportunities and receipt history are filtered, and deterministic source/id tie-breaks prevent unstable cross-surface ordering.
 
 No package, version, tag, installer, signing, publication, or release state changed. `docs/10_canon/FORAWWV.md` is unchanged.
 

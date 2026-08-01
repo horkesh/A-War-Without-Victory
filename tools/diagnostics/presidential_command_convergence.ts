@@ -353,20 +353,35 @@ export const PRESIDENTIAL_DECISION_SOURCE_PROOFS: readonly PresidentialDecisionS
         anchors: ['function addProposalReviewDirectiveCards('],
       },
     ],
-    receipt: [{
-      path: 'src/sim/turn_phases/war_phases.ts',
-      anchors: [
-        'meta.proposal_decision_history ??= [];',
-        'meta.proposal_decision_history.push({',
-        'meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter((proposal) =>',
-      ],
-    }],
+    receipt: [
+      {
+        path: 'src/sim/turn_phases/war_phases.ts',
+        anchors: [
+          'meta.proposal_decision_history ??= [];',
+          'meta.proposal_decision_history.push({',
+          'meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter((proposal) =>',
+        ],
+      },
+      {
+        path: 'src/desktop/player_visible_state.cjs',
+        anchors: ['projected.proposal_decision_history = playerFaction'],
+      },
+      {
+        path: 'src/state/validateGameState.ts',
+        anchors: ['duplicates durable identity ${identity}'],
+      },
+      {
+        path: 'src/state/proposal_decision_history.ts',
+        anchors: ['export function proposalDecisionIdentity('],
+      },
+    ],
     consumers: [{
       channel: 'records',
       label: 'decision-consequence ledger',
       path: 'src/ui/map/data/decisionConsequenceLedger.ts',
       anchors: [
         'const archivedProposals = state.rawGameState?.meta?.proposal_decision_history ?? [];',
+        'id: proposalDecisionLedgerId(identitySource)',
         "familyId: 'autonomy-proposal'",
       ],
     }],
