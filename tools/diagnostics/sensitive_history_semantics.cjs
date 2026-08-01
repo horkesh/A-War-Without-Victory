@@ -52,7 +52,9 @@ const CONTINUATION_ACTION_PATTERN = /\b(?:continue|proceed)\b/i;
 const ANAPHORIC_MARKER_PATTERN = /\b(?:anyway|regardless)\b/i;
 const OPERATIVE_PURPOSE_PATTERN = /\b(?:attacks?|assaults?|campaigns?|combat|direct\s+action|offensives?|operations?|strikes?)\b/i;
 const SUBCLAUSE_BOUNDARY_PATTERN = /,\s*/i;
-const LOCAL_NEGATION_PATTERN = /\b(?:(?:(?:am|are|is|was|were|be|been|being|do|does|did|must|shall|should|will|would|can|could|may|might)\s+(?:[a-z]+ly\s+)*not)|[a-z]+n['\u2019]t|cannot|never|refus(?:e|es|ed)\s+to|declin(?:e|es|ed)\s+to|no\s+one|nobody)\s+(?:[a-z]+ly\s+)*$/i;
+const LOCAL_NEGATION_PATTERN = /\b(?:(?:(?:am|are|is|was|were|be|been|being|do|does|did|must|shall|should|will|would|can|could|may|might)\s+(?:[a-z]+ly\s+)*not)|[a-z]+n['\u2019]t|cannot|never|refus(?:e|es|ed)\s+to|declin(?:e|es|ed)\s+to|no(?:\s+|\s*[-\u2010-\u2015]\s*)one|nobody)\s+(?:[a-z]+ly\s+)*$/i;
+const DO_SUPPORT_NEGATION_SCOPE_PATTERN = /\b(?:(?:do(?:es)?|did)\s+(?:[a-z]+ly\s+)*not|(?:don|doesn|didn)['\u2019]t)\s+((?:(?:[a-z]+ly|just)\s+)*)$/i;
+const WARNING_FOCUS_LIMITERS = Object.freeze(['just', 'merely', 'only', 'simply']);
 const COORDINATED_CONTINUATION_BRIDGE_PATTERN = /\b(?:and|or|nor)\s+(?:[a-z]+ly\s+)*$/i;
 const LEADING_MARKER_SUBCLAUSE_PATTERN = /^\s*(?:anyway|regardless)\s*$/i;
 
@@ -113,6 +115,19 @@ function localNegationApplies(subclause, clauseOffset) {
   return LOCAL_NEGATION_PATTERN.test(subclause.text.slice(0, localOffset));
 }
 
+function warningNegationApplies(subclause, clauseOffset) {
+  const localOffset = clauseOffset - subclause.start;
+  const predicatePrefix = subclause.text.slice(0, localOffset);
+  const doSupportScope = DO_SUPPORT_NEGATION_SCOPE_PATTERN.exec(predicatePrefix);
+  if (doSupportScope) {
+    const postNegationModifiers = doSupportScope[1].trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (postNegationModifiers.some((modifier) => WARNING_FOCUS_LIMITERS.includes(modifier))) {
+      return false;
+    }
+  }
+  return LOCAL_NEGATION_PATTERN.test(predicatePrefix);
+}
+
 function continuationRecords(clauseText, subclauses) {
   const records = [];
   for (const match of matchesFor(CONTINUATION_ACTION_PATTERN, clauseText)) {
@@ -146,7 +161,7 @@ function nonNegatedSensitiveWarningOffsets(clauseText, subclauses) {
   const offsets = [];
   for (const subclause of subclauses) {
     for (const warning of matchesFor(SENSITIVE_WARNING_PATTERN, subclause.text)) {
-      if (warning.index === undefined || localNegationApplies(subclause, subclause.start + warning.index)) continue;
+      if (warning.index === undefined || warningNegationApplies(subclause, subclause.start + warning.index)) continue;
       offsets.push(subclause.start + warning.index);
     }
   }
