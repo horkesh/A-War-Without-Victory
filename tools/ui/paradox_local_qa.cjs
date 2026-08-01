@@ -3182,7 +3182,29 @@ async function readMapChromeGeometry(frame) {
 
     const oob = document.querySelector('[data-testid="oob-sidebar-scroll-region"]');
     const oobStyle = oob instanceof HTMLElement ? getComputedStyle(oob) : null;
+    const oobOverflowingDescendants = oob instanceof HTMLElement
+      ? Array.from(oob.querySelectorAll('*'))
+        .filter((node) => node instanceof HTMLElement)
+        .map((node) => {
+          const rect = node.getBoundingClientRect();
+          return {
+            tag: node.tagName.toLowerCase(),
+            testId: node.dataset.testid ?? null,
+            className: typeof node.className === 'string' ? node.className.slice(0, 320) : '',
+            text: node.textContent?.trim().slice(0, 180) ?? '',
+            rect: rectOf(node),
+            clientWidth: node.clientWidth,
+            scrollWidth: node.scrollWidth,
+          };
+        })
+        .filter((node) => node.scrollWidth > node.clientWidth + 2
+          || (node.rect?.right ?? 0) > oob.getBoundingClientRect().right + 2)
+        .slice(0, 24)
+      : [];
     const situationContent = document.querySelector('[data-testid="situation-tab-content"]');
+    const oobCorpsCards = oob instanceof HTMLElement
+      ? Array.from(oob.querySelectorAll('[data-testid="oob-corps-card"]')).map(describeBranchNode)
+      : [];
     const situationProse = Array.from(document.querySelectorAll('[data-oob-wrapping-prose="true"]')).map((node) => {
       const style = node instanceof HTMLElement ? getComputedStyle(node) : null;
       const geometry = describeBranchNode(node);
@@ -3215,6 +3237,8 @@ async function readMapChromeGeometry(frame) {
         overflowY: oobStyle?.overflowY ?? null,
         clientWidth: oob.clientWidth,
         scrollWidth: oob.scrollWidth,
+        overflowingDescendants: oobOverflowingDescendants,
+        oobCorpsCards,
         situationContent: situationContent instanceof HTMLElement ? {
           ...describeBranchNode(situationContent),
           clientWidth: situationContent.clientWidth,
@@ -3262,6 +3286,12 @@ function assertMapChromeGeometry(label, geometry) {
     for (const prose of geometry.oob.situationProse) {
       if (prose.visibleRatio < 0.98 || prose.scrollWidth > prose.clientWidth + 2 || prose.overflowWrap !== 'anywhere') {
         throw new Error(`Situation prose was inaccessible or unwrapped at ${label}: ${JSON.stringify(prose)}`);
+      }
+    }
+    for (const corpsCard of geometry.oob.oobCorpsCards) {
+      if (!corpsCard.rect || corpsCard.rect.width <= 0 || corpsCard.visibleRatio < 0.98
+        || corpsCard.scrollWidth > corpsCard.clientWidth + 2) {
+        throw new Error(`OOB corps card content exceeds its rendered owner at ${label}: ${JSON.stringify(corpsCard)}`);
       }
     }
   }
