@@ -64,7 +64,8 @@ describe('repairDisconnectedTerritory', () => {
             ['op:a:a', 'op:b:b', 'op:c:c'],  // contiguous A-B-C
         );
         const sectors = [sector];
-        repairDisconnectedTerritory(sectors, adj, friendly);
+        const repaired = repairDisconnectedTerritory(sectors, adj, friendly);
+        expect(repaired).toBe(false);
         expect(sectors[0]!.territory_osids).toEqual(['op:a:a', 'op:b:b', 'op:c:c']);
     });
 
@@ -77,7 +78,8 @@ describe('repairDisconnectedTerritory', () => {
             ['op:a:a', 'op:b:b', 'op:c:c', 'op:x:x'],
         );
         const sectors = [sector];
-        repairDisconnectedTerritory(sectors, adj, friendly);
+        const repaired = repairDisconnectedTerritory(sectors, adj, friendly);
+        expect(repaired).toBe(true);
         // Largest component {A,B,C} kept; X is dropped (no adjacent sector to reassign to)
         expect(sectors[0]!.territory_osids).toEqual(['op:a:a', 'op:b:b', 'op:c:c']);
     });
