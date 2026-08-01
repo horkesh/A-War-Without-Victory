@@ -629,6 +629,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'decisionRoom.commandCategoryFilter.active': 'Filtrirano po kategoriji {category}',
     'statusStrip.activePaths.tooltip': 'Aktivni strateški pravci ({count}): {paths}',
     'statusStrip.activePaths.more': '+{count} aktivnih pravaca',
+    'statusStrip.activePaths.compact': '+{count}',
     'statusStrip.activePaths.dialogAria': 'Aktivni strateški pravci',
     'statusStrip.activePaths.dialogTitle': 'Aktivni strateški pravci',
     'decisionRoom.action.showOnMap': 'Prikaži na karti',

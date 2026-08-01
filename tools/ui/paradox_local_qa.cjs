@@ -3172,6 +3172,7 @@ async function readMapChromeGeometry(frame) {
       return {
         text: node?.textContent?.trim() ?? '',
         title: node instanceof HTMLElement ? node.title : '',
+        ariaLabel: node instanceof HTMLElement ? node.getAttribute('aria-label') ?? '' : '',
         rect,
         clientWidth: node instanceof HTMLElement ? node.clientWidth : 0,
         scrollWidth: node instanceof HTMLElement ? node.scrollWidth : 0,
@@ -3219,7 +3220,8 @@ async function readMapChromeGeometry(frame) {
     const chips = branchRow
       ? Array.from(branchRow.querySelectorAll('[data-testid="branch-tag-chip"]')).map(describeBranchNode)
       : [];
-    const remainder = branchRow?.querySelector('button[aria-haspopup="dialog"]') ?? null;
+    const remainder = branchRow?.querySelector('[data-testid="branch-tag-remainder"]') ?? null;
+    const compact = branchRow?.querySelector('[data-testid="branch-tag-compact"]') ?? null;
     return {
       viewport: { width: window.innerWidth, height: window.innerHeight },
       document: {
@@ -3251,6 +3253,7 @@ async function readMapChromeGeometry(frame) {
         row: describeBranchNode(branchRow),
         chips,
         remainder: remainder ? describeBranchNode(remainder) : null,
+        compact: compact ? describeBranchNode(compact) : null,
       } : { present: false },
     };
   });
@@ -3296,7 +3299,11 @@ function assertMapChromeGeometry(label, geometry) {
     }
   }
   if (geometry.branchPaths.present) {
-    if (geometry.branchPaths.chips.length < 1 || geometry.branchPaths.chips.length > 2) {
+    const compact = geometry.branchPaths.compact;
+    if (compact && geometry.branchPaths.chips.length !== 0) {
+      throw new Error(`Branch-path compact control retained full chips at ${label}: ${JSON.stringify(geometry.branchPaths)}`);
+    }
+    if (!compact && (geometry.branchPaths.chips.length < 1 || geometry.branchPaths.chips.length > 2)) {
       throw new Error(`Branch-path bounded chip count failed at ${label}: ${JSON.stringify(geometry.branchPaths)}`);
     }
     for (const chip of geometry.branchPaths.chips) {
@@ -3307,8 +3314,13 @@ function assertMapChromeGeometry(label, geometry) {
         throw new Error(`Branch-path chip was visually clipped at ${label}: ${JSON.stringify(chip)}`);
       }
     }
-    if (geometry.branchPaths.row.visibleRatio < 0.98) {
+    if (geometry.branchPaths.row.visibleRatio < 0.98
+      || geometry.branchPaths.row.scrollWidth > geometry.branchPaths.row.clientWidth + 1) {
       throw new Error(`Branch-path row was clipped by an ancestor at ${label}: ${JSON.stringify(geometry.branchPaths.row)}`);
+    }
+    if (compact && (!compact.ariaLabel || !compact.title || !compact.rect || compact.rect.width < 24
+      || compact.visibleRatio < 0.98 || compact.scrollWidth > compact.clientWidth + 1)) {
+      throw new Error(`Branch-path compact control was visually clipped at ${label}: ${JSON.stringify(compact)}`);
     }
     const remainder = geometry.branchPaths.remainder;
     if (remainder && (!remainder.rect || remainder.rect.width < 24 || remainder.visibleRatio < 0.98)) {

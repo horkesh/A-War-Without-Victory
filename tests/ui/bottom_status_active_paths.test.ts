@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   ActiveBranchPathRow,
+  activeBranchLayoutForWidth,
   activeBranchVisibleLimit,
   summarizeActiveBranchPaths,
 } from '../../src/ui/map/components/ActiveBranchPathRow.js';
@@ -20,6 +21,17 @@ describe('bottom status active-path summary', () => {
     expect(activeBranchVisibleLimit(1599)).toBe(1);
     expect(activeBranchVisibleLimit(1600)).toBe(2);
     expect(activeBranchVisibleLimit(2048)).toBe(2);
+  });
+
+  it('falls back to an accessible compact trigger when the actual owner cannot fit a full chip', () => {
+    const widths = {
+      chipWidths: [152, 140],
+      remainderWidths: { 1: 92 },
+      gapPx: 6,
+    };
+    expect(activeBranchLayoutForWidth(1280, 55, widths)).toEqual({ visibleLimit: 0, compact: true });
+    expect(activeBranchLayoutForWidth(1280, 250, widths)).toEqual({ visibleLimit: 1, compact: false });
+    expect(activeBranchLayoutForWidth(2048, 298, widths)).toEqual({ visibleLimit: 2, compact: false });
   });
 
   it.each([
@@ -47,14 +59,14 @@ describe('bottom status active-path summary', () => {
     expect(document.activeElement).toBe(trigger);
   });
 
-  it('keeps both semantic path chips and the remainder control from collapsing', () => {
+  it('lets the row accept its actual flex owner while full chips remain non-collapsing', () => {
     render(React.createElement(ActiveBranchPathRow, {
       paths: ['Herzeg-Bosna posture', 'Alliance sustained', 'Dayton acceptance'],
     }));
 
     const row = screen.getByTestId('branch-tag-badge-row');
-    expect(row.className).toContain('shrink-0');
-    expect(row.className).not.toMatch(/(?:^|\s)shrink(?:\s|$)/);
+    expect(row.className).toContain('flex-1');
+    expect(row.className).toContain('min-w-0');
     for (const chip of screen.getAllByTestId('branch-tag-chip')) {
       expect(chip.className).toContain('shrink-0');
       expect(chip.className).toContain('whitespace-nowrap');

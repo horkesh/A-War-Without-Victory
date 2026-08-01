@@ -628,6 +628,7 @@ export const enMessages = {
     'decisionRoom.commandCategoryFilter.active': 'Filtered by {category}',
     'statusStrip.activePaths.tooltip': 'Active strategic paths ({count}): {paths}',
     'statusStrip.activePaths.more': '+{count} active paths',
+    'statusStrip.activePaths.compact': '+{count}',
     'statusStrip.activePaths.dialogAria': 'Active strategic paths',
     'statusStrip.activePaths.dialogTitle': 'Active strategic paths',
     'decisionRoom.action.showOnMap': 'Show on map',

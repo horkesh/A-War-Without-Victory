@@ -20,10 +20,11 @@ test('branch-tag badges remain a bounded non-scrolling telemetry row', () => {
     'utf8',
   );
 
-  expect(source).toMatch(/active-branch-path-row flex min-w-0 shrink-0/);
+  expect(source).toMatch(/active-branch-path-row flex min-w-0 flex-1/);
   expect(source).toMatch(/shrink-0 whitespace-nowrap rounded-sm/);
   expect(source).not.toMatch(/data-testid="branch-tag-chip"[\s\S]{0,180}(?:truncate|max-w-40)/);
   expect(source).toMatch(/TWO_CHIP_MIN_VIEWPORT_PX = 1600/);
+  expect(source).toMatch(/data-testid="branch-tag-compact"/);
   expect(source).not.toMatch(/branch-tag-badge-row flex shrink-0 flex-nowrap/);
 });
 

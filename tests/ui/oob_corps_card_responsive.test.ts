@@ -25,4 +25,6 @@ test('packaged map geometry rejects a locally overflowing OOB corps card', () =>
   expect(harness).toContain("[data-testid=\"oob-corps-card\"]");
   expect(harness).toContain('oobCorpsCards');
   expect(harness).toContain('OOB corps card content exceeds its rendered owner');
+  expect(harness).toContain('branchPaths.compact');
+  expect(harness).toContain('Branch-path compact control was visually clipped');
 });
