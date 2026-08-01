@@ -35,6 +35,13 @@ describe('RBiH v47 evidence-backed readability floor', () => {
     expect(briefing).not.toContain('text-[9.5px]');
   });
 
+  it('keeps the disabled front-visit action readable', () => {
+    const source = readComponent('army_hq', 'FrontVisitSection.tsx');
+
+    expect(source).toContain("'border-panel-border text-text-secondary bg-panel-bg/40 cursor-not-allowed'");
+    expect(source).not.toContain('text-text-secondary/40');
+  });
+
   it('keeps Records SVG axes and dates readable and high contrast', () => {
     const source = readComponent('TerritoryOverTimeChart.tsx');
 
@@ -101,8 +108,8 @@ describe('RBiH v47 evidence-backed readability floor', () => {
   it('uses dark text on saturated Presidential Inbox badges', () => {
     const inbox = readComponent('PresidentialInbox.tsx');
 
-    expect(inbox).toContain("blocking: { badge: 'bg-red-500 text-neutral-950'");
-    expect(inbox).toContain("normal: { badge: 'bg-sky-600 text-neutral-950'");
+    expect(inbox).toContain("required: { badge: 'bg-red-500 text-neutral-950'");
+    expect(inbox).toContain("monitor: { badge: 'bg-sky-600 text-neutral-950'");
     expect(inbox).not.toContain('bg-red-500 text-white');
     expect(inbox).not.toContain('bg-sky-600 text-white');
   });
