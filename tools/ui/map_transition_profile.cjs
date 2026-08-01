@@ -55,6 +55,7 @@ function parseOptions(argv) {
     label,
     cycles: parseInteger(readOption(argv, '--cycles', '20'), '--cycles', 1, 100),
     warmups: parseInteger(readOption(argv, '--warmups', '3'), '--warmups', 0, 20),
+    playerEvidence: argv.includes('--player-evidence'),
   };
 }
 
@@ -266,6 +267,7 @@ function formatFatalError(failure) {
 function classifyMainProcessStdout(lines) {
   const counts = {
     built_map_server_selected: 0,
+    routine_brigade_rehome: 0,
     tactical_map_server_started: 0,
   };
   const unexpectedLines = [];
@@ -275,12 +277,14 @@ function classifyMainProcessStdout(lines) {
       counts.built_map_server_selected += 1;
     } else if (line === 'Tactical map server: <loopback-http-endpoint>') {
       counts.tactical_map_server_started += 1;
+    } else if (/^\[brigade_assignment\] Rehomed [a-z0-9_.:-]+ into truthful sector owner sector:[a-z0-9_.:-]+ \((?:front|reserve)\)$/i.test(line)) {
+      counts.routine_brigade_rehome += 1;
     } else {
       unexpectedLines.push(sanitizeUnexpectedProcessLine(line));
     }
   }
   const expectedCategories = {};
-  for (const key of ['built_map_server_selected', 'tactical_map_server_started']) {
+  for (const key of ['built_map_server_selected', 'routine_brigade_rehome', 'tactical_map_server_started']) {
     if (counts[key] > 0) expectedCategories[key] = counts[key];
   }
   return {
@@ -721,7 +725,7 @@ function hasOrderedTransitionDurations(durations) {
   return true;
 }
 
-async function profileOneCycle(frame, kind, expectedTurn) {
+async function profileOneCycle(frame, kind, expectedTurn, captureCurrentMap = null) {
   const before = await profileSnapshot(frame);
   await frame.evaluate((selectedKind) => {
     window.__AWWV_MAP_TRANSITION_PROFILE__?.setKind(selectedKind);
@@ -745,6 +749,7 @@ async function profileOneCycle(frame, kind, expectedTurn) {
   const mapTurn = await frame.locator('[data-testid="tactical-map"]')
     .getAttribute('data-map-state-turn');
   await waitForProfileSample(frame, before.samples.length);
+  if (captureCurrentMap) await captureCurrentMap();
   await clickVisible(frame.locator('[data-testid="toolbar-route-desk"]'));
   await frame.locator('[data-testid="warroom-toolbar"]').waitFor({ state: 'visible', timeout: 30000 });
   await sleep(100);
@@ -778,6 +783,504 @@ async function profileOneCycle(frame, kind, expectedTurn) {
   };
 }
 
+function roundEvidenceNumber(value) {
+  return Math.round(value * 1_000_000) / 1_000_000;
+}
+
+function normalizeCameraState(value, label) {
+  const camera = {
+    longitude: Number(value?.longitude),
+    latitude: Number(value?.latitude),
+    zoom: Number(value?.zoom),
+    pitch: Number(value?.pitch),
+  };
+  if (Object.values(camera).some((entry) => !Number.isFinite(entry))) {
+    throw new Error(`${label} camera state must contain finite coordinates`);
+  }
+  if (camera.longitude < -180 || camera.longitude > 180
+    || camera.latitude < -90 || camera.latitude > 90
+    || camera.zoom < 0 || camera.zoom > 30
+    || camera.pitch < 0 || camera.pitch > 85) {
+    throw new Error(`${label} camera state is outside bounded map coordinates`);
+  }
+  return Object.fromEntries(Object.entries(camera).map(([key, entry]) => [key, roundEvidenceNumber(entry)]));
+}
+
+function buildCameraInteractionProof({ baseline, panned, zoomed, restored }) {
+  const start = normalizeCameraState(baseline, 'Baseline');
+  const afterPan = normalizeCameraState(panned, 'Panned');
+  const afterZoom = normalizeCameraState(zoomed, 'Zoomed');
+  const afterHome = normalizeCameraState(restored, 'Restored');
+  const longitudeDelta = roundEvidenceNumber(afterPan.longitude - start.longitude);
+  if (longitudeDelta <= 0.000001) {
+    throw new Error('ArrowRight must move the tactical camera east by a measurable amount');
+  }
+  const zoomDelta = roundEvidenceNumber(afterZoom.zoom - afterPan.zoom);
+  if (zoomDelta <= 0.000001) {
+    throw new Error('Tactical map zoom input must increase camera zoom by a measurable amount');
+  }
+  const restoreDelta = {
+    longitude_delta: roundEvidenceNumber(afterHome.longitude - start.longitude),
+    latitude_delta: roundEvidenceNumber(afterHome.latitude - start.latitude),
+    zoom_delta: roundEvidenceNumber(afterHome.zoom - start.zoom),
+    pitch_delta: roundEvidenceNumber(afterHome.pitch - start.pitch),
+  };
+  if (Object.values(restoreDelta).some((entry) => Math.abs(entry) > 0.000001)) {
+    throw new Error('Home must restore the canonical tactical camera');
+  }
+  return {
+    pan: { direction: 'east', longitude_delta: longitudeDelta },
+    zoom: { zoom_delta: zoomDelta },
+    home_restore: restoreDelta,
+  };
+}
+
+function buildHiddenShortcutProof(before, after) {
+  const beforeHidden = before?.warroom_visible === true
+    && before?.army_hq_visible === false
+    && before?.map_visible === false
+    && before?.viewport_aria_hidden === 'true'
+    && before?.viewport_inert === true;
+  const afterHidden = after?.warroom_visible === true
+    && after?.army_hq_visible === false
+    && after?.map_visible === false
+    && after?.viewport_aria_hidden === 'true'
+    && after?.viewport_inert === true;
+  if (!beforeHidden || !afterHidden) {
+    throw new Error('Desk-scoped H shortcut violated hidden tactical-map input ownership');
+  }
+  return {
+    before: {
+      viewport_aria_hidden: before.viewport_aria_hidden,
+      viewport_inert: before.viewport_inert,
+    },
+    after: {
+      viewport_aria_hidden: after.viewport_aria_hidden,
+      viewport_inert: after.viewport_inert,
+    },
+    escaped: false,
+  };
+}
+
+function resolveHistoricalDecisionFromCatalog(catalog, eventId) {
+  if (!Array.isArray(catalog)) throw new Error('Historical decision catalog must be an array');
+  const matches = catalog.filter((event) => event?.id === eventId);
+  if (matches.length !== 1) throw new Error(`Historical catalog event ${eventId} must resolve exactly once`);
+  const event = matches[0];
+  const responseId = event.historical_default_response_id;
+  if (typeof responseId !== 'string' || !responseId) {
+    throw new Error(`Historical catalog event ${eventId} has no historical default response`);
+  }
+  const responses = Array.isArray(event.response_options) ? event.response_options : [];
+  const responseMatches = responses.filter((response) => response?.id === responseId);
+  if (responseMatches.length !== 1) {
+    throw new Error(`Historical catalog event ${eventId} default response ${responseId} must resolve exactly once`);
+  }
+  const response = responseMatches[0];
+  if (response.historical_marker !== 'historical_default') {
+    throw new Error(`Historical catalog event ${eventId} response ${responseId} must carry the historical_default marker`);
+  }
+  if (typeof response.label !== 'string' || response.label.length < 1 || response.label.length > 160) {
+    throw new Error(`Historical catalog event ${eventId} response ${responseId} has no bounded label`);
+  }
+  return {
+    event_id: eventId,
+    response_id: responseId,
+    response_label: response.label,
+  };
+}
+
+function copyCanonicalId(value, label) {
+  if (typeof value !== 'string' || !/^[A-Za-z0-9_.:-]{1,160}$/.test(value)) {
+    throw new Error(`${label} must be a bounded canonical identifier`);
+  }
+  return value;
+}
+
+function buildPlayerInteractionRecord({
+  hiddenShortcutProof,
+  cameraInteraction,
+  formationSelection,
+  settlementSelection,
+  commandRoomReturn,
+  historicalDecision,
+  deferredModal,
+  informationalAcknowledgements,
+  postAdvanceCurrentState,
+}) {
+  return {
+    hidden_shortcut_ownership: {
+      before: {
+        viewport_aria_hidden: hiddenShortcutProof?.before?.viewport_aria_hidden,
+        viewport_inert: hiddenShortcutProof?.before?.viewport_inert === true,
+      },
+      after: {
+        viewport_aria_hidden: hiddenShortcutProof?.after?.viewport_aria_hidden,
+        viewport_inert: hiddenShortcutProof?.after?.viewport_inert === true,
+      },
+      escaped: hiddenShortcutProof?.escaped === true,
+    },
+    camera_interaction: {
+      pan: {
+        direction: cameraInteraction?.pan?.direction,
+        longitude_delta: Number(cameraInteraction?.pan?.longitude_delta),
+      },
+      zoom: { zoom_delta: Number(cameraInteraction?.zoom?.zoom_delta) },
+      home_restore: {
+        longitude_delta: Number(cameraInteraction?.home_restore?.longitude_delta),
+        latitude_delta: Number(cameraInteraction?.home_restore?.latitude_delta),
+        zoom_delta: Number(cameraInteraction?.home_restore?.zoom_delta),
+        pitch_delta: Number(cameraInteraction?.home_restore?.pitch_delta),
+      },
+    },
+    formation_selection: {
+      counter_id: copyCanonicalId(formationSelection?.counter_id, 'Formation counter id'),
+      opened_formation_id: copyCanonicalId(formationSelection?.opened_formation_id, 'Opened formation id'),
+    },
+    settlement_selection: {
+      osid: copyCanonicalId(settlementSelection?.osid, 'Settlement OSID'),
+      position: {
+        x_ratio: Number(settlementSelection?.position?.x_ratio),
+        y_ratio: Number(settlementSelection?.position?.y_ratio),
+      },
+    },
+    command_room_return: {
+      visible: commandRoomReturn?.visible === true,
+      hidden_map_inert: commandRoomReturn?.hidden_map_inert === true,
+    },
+    historical_decision: {
+      event_id: copyCanonicalId(historicalDecision?.event_id, 'Historical event id'),
+      response_id: copyCanonicalId(historicalDecision?.response_id, 'Historical response id'),
+      response_label: String(historicalDecision?.response_label ?? '').slice(0, 160),
+    },
+    deferred_modal: deferredModal == null ? null : {
+      action: deferredModal.action === 'review-later' ? 'review-later' : 'unexpected',
+      resolved: deferredModal.resolved === true,
+    },
+    informational_acknowledgements: {
+      count: Number.isInteger(informationalAcknowledgements)
+        ? Math.min(Math.max(informationalAcknowledgements, 0), 8)
+        : 0,
+    },
+    post_advance_current_state: {
+      expected_turn: Number(postAdvanceCurrentState?.expected_turn),
+      loaded_turn: Number(postAdvanceCurrentState?.loaded_turn),
+      fingerprint_matches: postAdvanceCurrentState?.fingerprint_matches === true,
+      current_state_ready: postAdvanceCurrentState?.current_state_ready === true,
+    },
+  };
+}
+
+async function readPlayerSurfaceState(frame) {
+  return frame.evaluate(() => {
+    const visible = (node) => {
+      if (!(node instanceof HTMLElement)) return false;
+      const rect = node.getBoundingClientRect();
+      const style = window.getComputedStyle(node);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0.01;
+    };
+    const map = document.querySelector('[data-testid="tactical-map"]');
+    const viewport = document.querySelector('[data-testid="tactical-map-viewport"]');
+    return {
+      warroom_visible: visible(document.querySelector('[data-testid="warroom-toolbar"]')),
+      army_hq_visible: visible(document.querySelector('[data-testid="army-hq-modal"]')),
+      map_visible: visible(map),
+      viewport_aria_hidden: viewport?.getAttribute('aria-hidden') ?? 'missing',
+      viewport_inert: viewport instanceof HTMLElement ? viewport.inert : null,
+      map_turn: map?.getAttribute('data-map-state-turn') ?? 'missing',
+      map_ready: map?.getAttribute('data-map-ready') ?? 'missing',
+    };
+  });
+}
+
+async function readCameraState(frame) {
+  return frame.evaluate(() => {
+    const profile = window.__AWWV_MAP_TRANSITION_PROFILE__;
+    if (!profile?.camera) throw new Error('map transition camera probe unavailable');
+    const camera = profile.camera();
+    if (!camera) throw new Error('map transition camera reader unavailable');
+    return camera;
+  });
+}
+
+async function findHitTestableFormationCounter(frame) {
+  const counters = frame.locator('[data-awwv-formation-counter-id]');
+  const rows = await counters.evaluateAll((nodes) => nodes.map((node, index) => {
+    const rect = node.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const topmost = document.elementFromPoint(x, y);
+    return {
+      index,
+      id: node.getAttribute('data-awwv-formation-counter-id'),
+      hit_testable: rect.width > 0
+        && rect.height > 0
+        && topmost != null
+        && (topmost === node || node.contains(topmost)),
+    };
+  }));
+  return rows.find((row) => row.hit_testable && row.id) ?? null;
+}
+
+async function openSettlementFromMap(frame) {
+  const map = frame.locator('[data-testid="tactical-map"]');
+  const box = await map.boundingBox();
+  if (!box) throw new Error('Tactical map geometry unavailable for settlement selection');
+  const closeMapPanels = async () => {
+    for (const selector of [
+      '[data-testid="formation-detail-panel"]',
+      '[data-testid="corps-front-panel"]',
+      '[data-testid="corps-detail-panel"]',
+      '[data-testid="army-reserve-panel"]',
+      '[data-testid="selection-panel"]',
+    ]) {
+      const panel = frame.locator(selector).first();
+      if (!await panel.isVisible().catch(() => false)) continue;
+      const close = panel.locator('button[aria-label]').first();
+      if (!await close.isVisible().catch(() => false)) {
+        throw new Error(`Visible map panel has no close control: ${selector}`);
+      }
+      await close.click();
+      await panel.waitFor({ state: 'hidden', timeout: 10000 });
+    }
+  };
+  const positions = [
+    [0.50, 0.50],
+    [0.28, 0.28],
+    [0.72, 0.28],
+    [0.28, 0.72],
+    [0.72, 0.72],
+  ];
+  for (const [xRatio, yRatio] of positions) {
+    await closeMapPanels();
+    await map.click({
+      position: { x: box.width * xRatio, y: box.height * yRatio },
+      timeout: 10000,
+    });
+    await sleep(400);
+    const settlement = frame.locator('[data-testid="settlement-detail-panel"]');
+    if (await settlement.isVisible().catch(() => false)) {
+      return {
+        osid: await settlement.getAttribute('data-osid'),
+        position: { x_ratio: xRatio, y_ratio: yRatio },
+      };
+    }
+  }
+  throw new Error('Directional tactical-map probe did not open a settlement');
+}
+
+async function resolveHistoricalRbihFoundationalDecision(frame, historicalDecision) {
+  await clickVisible(frame.locator('[data-testid="warroom-toolbar-president-desk"]'));
+  await frame.locator('[data-testid="president-desk-shell"]').waitFor({ state: 'visible', timeout: 30000 });
+  const response = frame.getByRole('button', { name: historicalDecision.response_label, exact: true });
+  if (pickTopmostStartupControlIndex(await inspectStartupButtons(response)) < 0) {
+    const opened = await clickTopmostVisibleButton(frame, /Decide now/i);
+    if (!opened) throw new Error('Historical RBiH decision could not be opened from the Command Room');
+    await sleep(300);
+  }
+  const selected = await clickTopmostVisibleButton(frame, historicalDecision.response_label);
+  if (!selected) throw new Error('Historical RBiH civic response was not available');
+  await sleep(700);
+  const closeDesk = frame.locator('[data-testid="desk-close-overlay"]');
+  if (await closeDesk.isVisible().catch(() => false)) {
+    await closeDesk.click();
+    await frame.locator('[data-testid="president-desk-shell"]').waitFor({ state: 'hidden', timeout: 10000 });
+  }
+  return historicalDecision;
+}
+
+function classifyVisibleAdvanceOutcome(currentTurn, expectedTurn, confirmationVisible) {
+  if (!Number.isInteger(currentTurn) || !Number.isInteger(expectedTurn)) {
+    throw new Error('Visible Advance turn values must be integers');
+  }
+  if (currentTurn === expectedTurn + 1) return 'advanced';
+  if (currentTurn !== expectedTurn) {
+    throw new Error('Visible Advance must advance exactly one turn');
+  }
+  return confirmationVisible ? 'confirmation' : 'pending';
+}
+
+function classifyApprovedPostAdvanceAction({
+  modalVisible,
+  reviewLaterHitTestable,
+  acknowledgedHitTestable,
+}) {
+  if (reviewLaterHitTestable && acknowledgedHitTestable) {
+    throw new Error('Post-advance modal action state is ambiguous');
+  }
+  if (reviewLaterHitTestable) return 'review-later';
+  if (acknowledgedHitTestable) return 'acknowledged';
+  return modalVisible ? 'pending' : 'none';
+}
+
+async function settleApprovedPostAdvanceSurfaces(frame) {
+  const reviewLater = frame.getByRole('button', { name: 'Review Later', exact: true });
+  const acknowledged = frame.getByRole('button', { name: /^Acknowledged$/i });
+  const visibleModal = frame.locator('[data-testid="modal-backdrop"]:visible, [data-testid="event-modal-backdrop"]:visible');
+  let deferredModal = null;
+  let informationalAcknowledgements = 0;
+  await sleep(750);
+  for (let step = 0; step < 8; step += 1) {
+    const action = await waitUntil('settled approved post-advance surface', async () => {
+      const outcome = classifyApprovedPostAdvanceAction({
+        modalVisible: await visibleModal.count() > 0,
+        reviewLaterHitTestable:
+          pickTopmostStartupControlIndex(await inspectStartupButtons(reviewLater)) >= 0,
+        acknowledgedHitTestable:
+          pickTopmostStartupControlIndex(await inspectStartupButtons(acknowledged)) >= 0,
+      });
+      return outcome === 'pending' ? null : outcome;
+    }, 10000);
+    if (action === 'none') {
+      return { deferredModal, informationalAcknowledgements };
+    }
+    if (action === 'review-later') {
+      if (deferredModal) throw new Error('Post-advance flow exposed more than one peace-plan deferral');
+      const clicked = await clickTopmostVisibleButton(frame, 'Review Later');
+      if (!clicked) throw new Error('Approved Review Later control lost hit-test ownership');
+      deferredModal = { action: 'review-later', resolved: false };
+    } else if (action === 'acknowledged') {
+      const clicked = await clickTopmostVisibleButton(frame, /^Acknowledged$/i);
+      if (!clicked) throw new Error('Informational acknowledgement lost hit-test ownership');
+      informationalAcknowledgements += 1;
+    }
+    await sleep(500);
+  }
+  throw new Error('Post-advance informational surface limit exceeded');
+}
+
+async function advanceTurnThroughPlayerUi(frame, expectedTurn) {
+  await clickVisible(frame.locator('[data-testid="warroom-toolbar-advance"]'));
+  const advanceDialog = frame.getByRole('dialog').filter({
+    has: frame.getByText('End of Turn', { exact: true }),
+  });
+  const advancedTurn = expectedTurn + 1;
+  const initialOutcome = await waitUntil('visible Advance route outcome', async () => {
+    const currentTurn = await readCurrentTurn(frame);
+    const outcome = classifyVisibleAdvanceOutcome(
+      currentTurn,
+      expectedTurn,
+      await advanceDialog.isVisible().catch(() => false),
+    );
+    return outcome === 'pending' ? null : outcome;
+  }, 30000);
+  if (initialOutcome === 'confirmation') {
+    const confirmAdvance = advanceDialog.getByRole('button', {
+      name: /^Advance(?: Turn| with recorded decisions| while holding present policy)?$/i,
+    });
+    await clickVisible(confirmAdvance);
+    await waitUntil('exact next turn after Advance confirmation', async () => (
+      classifyVisibleAdvanceOutcome(await readCurrentTurn(frame), expectedTurn, false) === 'advanced'
+    ), 120000);
+  }
+  const postAdvanceSurfaces = await settleApprovedPostAdvanceSurfaces(frame);
+  return { advancedTurn, ...postAdvanceSurfaces };
+}
+
+async function runPlayerInteractionEvidence(
+  page,
+  frame,
+  launchIndex,
+  outputDirectory,
+  expectedTurn,
+  catalogHistoricalDecision,
+) {
+  const deskBeforeShortcut = await readPlayerSurfaceState(frame);
+  await frame.locator('body').press('h');
+  await sleep(250);
+  const deskAfterShortcut = await readPlayerSurfaceState(frame);
+  const hiddenShortcutProof = buildHiddenShortcutProof(deskBeforeShortcut, deskAfterShortcut);
+
+  await clickVisible(frame.locator('[data-testid="warroom-toolbar-war-map"]'));
+  await frame.waitForFunction((turn) => {
+    const map = document.querySelector('[data-testid="tactical-map"]');
+    const viewport = document.querySelector('[data-testid="tactical-map-viewport"]');
+    return map?.getAttribute('data-map-ready') === 'true'
+      && map?.getAttribute('data-map-state-turn') === String(turn)
+      && viewport?.getAttribute('aria-hidden') === 'false'
+      && (!(viewport instanceof HTMLElement) || viewport.inert === false);
+  }, expectedTurn, { timeout: 120000 });
+  const map = frame.locator('[data-testid="tactical-map"]');
+  await map.press('Home');
+  await sleep(250);
+  const baselineCamera = await readCameraState(frame);
+  await map.press('ArrowRight');
+  await sleep(700);
+  const pannedCamera = await readCameraState(frame);
+  await map.press('+');
+  await sleep(700);
+  const zoomedCamera = await readCameraState(frame);
+  await map.press('Home');
+  await sleep(250);
+  const restoredCamera = await readCameraState(frame);
+  const cameraInteraction = buildCameraInteractionProof({
+    baseline: baselineCamera,
+    panned: pannedCamera,
+    zoomed: zoomedCamera,
+    restored: restoredCamera,
+  });
+
+  const counter = await findHitTestableFormationCounter(frame);
+  if (!counter) throw new Error('No hit-testable visible formation counter was available');
+  await frame.locator('[data-awwv-formation-counter-id]').nth(counter.index).click();
+  const formationDetail = frame.locator('[data-testid="formation-detail-panel"]');
+  await formationDetail.waitFor({ state: 'visible', timeout: 10000 });
+  const openedFormationId = await formationDetail.getAttribute('data-formation-id');
+  if (openedFormationId !== counter.id) {
+    throw new Error(`Formation counter opened wrong detail: expected ${counter.id}, observed ${openedFormationId ?? 'none'}`);
+  }
+  await page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-formation.png`) });
+  await frame.locator('[data-testid="formation-detail-close"]').click();
+  await formationDetail.waitFor({ state: 'hidden', timeout: 10000 });
+  const settlementSelection = await openSettlementFromMap(frame);
+  if (!settlementSelection.osid) throw new Error('Settlement detail opened without an OSID');
+  await page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-settlement.png`) });
+
+  await clickVisible(frame.locator('[data-testid="toolbar-route-desk"]'));
+  const deskReturn = await readPlayerSurfaceState(frame);
+  if (!deskReturn.warroom_visible || deskReturn.map_visible || deskReturn.viewport_inert !== true) {
+    throw new Error(`Command Room return did not restore input ownership: ${JSON.stringify(deskReturn)}`);
+  }
+  const historicalDecision = await resolveHistoricalRbihFoundationalDecision(
+    frame,
+    catalogHistoricalDecision,
+  );
+  const {
+    advancedTurn,
+    deferredModal,
+    informationalAcknowledgements,
+  } = await advanceTurnThroughPlayerUi(frame, expectedTurn);
+  const postAdvanceSample = await profileOneCycle(
+    frame,
+    'warm',
+    advancedTurn,
+    () => page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-post-advance-map.png`) }),
+  );
+  return buildPlayerInteractionRecord({
+    hiddenShortcutProof,
+    cameraInteraction,
+    formationSelection: { counter_id: counter.id, opened_formation_id: openedFormationId },
+    settlementSelection,
+    commandRoomReturn: {
+      visible: deskReturn.warroom_visible,
+      hidden_map_inert: deskReturn.viewport_inert === true,
+    },
+    historicalDecision,
+    deferredModal,
+    informationalAcknowledgements,
+    postAdvanceCurrentState: {
+      expected_turn: advancedTurn,
+      loaded_turn: postAdvanceSample.loaded_turn,
+      fingerprint_matches: postAdvanceSample.fingerprint_matches,
+      current_state_ready: postAdvanceSample.current_state_ready,
+    },
+  });
+}
+
 async function settlePostLaunchEvidence(run, captureFailure, cleanupApplication) {
   let failure = null;
   let failedEvidence = null;
@@ -808,7 +1311,7 @@ async function settlePostLaunchEvidence(run, captureFailure, cleanupApplication)
   return { failure, failedEvidence, cleanup };
 }
 
-async function runLaunch(launchIndex, options, outputDirectory) {
+async function runLaunch(launchIndex, options, outputDirectory, catalogHistoricalDecision) {
   const launchRoot = path.join(outputDirectory, 'runtime', `launch-${launchIndex}`);
   const userDataDirectory = path.join(launchRoot, 'user-data');
   const isolatedSaveRoot = path.join(launchRoot, 'saves');
@@ -843,6 +1346,7 @@ async function runLaunch(launchIndex, options, outputDirectory) {
   let cleanup = null;
   let page = null;
   let frame = null;
+  let playerInteraction = null;
   let stage = 'application-launched';
   const warmups = [];
   const measured = [];
@@ -877,15 +1381,40 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     stage = 'campaign-ready';
     const expectedTurn = await readCurrentTurn(frame);
     stage = 'cold-transition';
-    cold = await profileOneCycle(frame, 'cold', expectedTurn);
-    await page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-cold.png`) });
+    cold = await profileOneCycle(
+      frame,
+      'cold',
+      expectedTurn,
+      options.playerEvidence
+        ? () => page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-cold-map.png`) })
+        : null,
+    );
+    await page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-command-room.png`) });
     for (let index = 0; index < options.warmups; index += 1) {
       stage = `warmup-${index + 1}`;
       warmups.push(await profileOneCycle(frame, 'warm', expectedTurn));
     }
     for (let index = 0; index < options.cycles; index += 1) {
       stage = `measured-${index + 1}`;
-      measured.push(await profileOneCycle(frame, 'warm', expectedTurn));
+      measured.push(await profileOneCycle(
+        frame,
+        'warm',
+        expectedTurn,
+        options.playerEvidence && index === options.cycles - 1
+          ? () => page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-warm-map.png`) })
+          : null,
+      ));
+    }
+    if (options.playerEvidence) {
+      stage = 'player-interaction-evidence';
+      playerInteraction = await runPlayerInteractionEvidence(
+        page,
+        frame,
+        launchIndex,
+        outputDirectory,
+        expectedTurn,
+        catalogHistoricalDecision,
+      );
     }
     stage = 'final-snapshot';
     lifetimeCounters = (await profileSnapshot(frame)).lifetime_counters;
@@ -947,6 +1476,7 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     cold,
     warmups,
     measured,
+    player_interaction: playerInteraction,
     lifetime_counters: lifetimeCounters,
     cleanup,
     failure_evidence: settled.failedEvidence,
@@ -1023,6 +1553,12 @@ function unexpectedDiagnosticsFailure(summary) {
 
 async function main() {
   const options = parseOptions(process.argv.slice(2));
+  const catalogHistoricalDecision = options.playerEvidence
+    ? resolveHistoricalDecisionFromCatalog(
+      JSON.parse(fs.readFileSync(path.join(repo, 'data', 'scenarios', 'events', 'war_1992.json'), 'utf8')),
+      'rbih_state_identity',
+    )
+    : null;
   fs.mkdirSync(evidenceRoot, { recursive: true });
   const outputDirectory = path.join(evidenceRoot, options.label);
   fs.mkdirSync(outputDirectory, { recursive: false });
@@ -1031,7 +1567,7 @@ async function main() {
   let failure = null;
   try {
     for (let launchIndex = 1; launchIndex <= 3; launchIndex += 1) {
-      const outcome = await runLaunch(launchIndex, options, outputDirectory);
+      const outcome = await runLaunch(launchIndex, options, outputDirectory, catalogHistoricalDecision);
       launches.push(outcome.launch);
       if (outcome.failure) {
         failure = outcome.failure;
@@ -1046,9 +1582,14 @@ async function main() {
   const summary = buildSummary(launches);
   failure ??= unexpectedDiagnosticsFailure(summary);
   const evidence = {
-    schema_version: 4,
+    schema_version: 5,
     label: options.label,
-    options: { cycles: options.cycles, warmups: options.warmups, cold_launches: 3 },
+    options: {
+      cycles: options.cycles,
+      warmups: options.warmups,
+      cold_launches: 3,
+      player_evidence: options.playerEvidence,
+    },
     runtime: {
       platform: process.platform,
       architecture: process.arch,
@@ -1086,12 +1627,17 @@ if (require.main === module) {
 module.exports = {
   assertRepositorySavesUnchanged,
   buildEvidenceOutcome,
+  buildCameraInteractionProof,
+  buildHiddenShortcutProof,
   buildMachineManifest,
+  buildPlayerInteractionRecord,
   buildPersistedProcessDiagnostics,
   buildStartupSurfaceDiagnostic,
   buildSummary,
   classifyMainProcessStdout,
   classifyMainProcessStderr,
+  classifyApprovedPostAdvanceAction,
+  classifyVisibleAdvanceOutcome,
   counterDelta,
   closeElectronApplication,
   formatFatalError,
@@ -1099,6 +1645,7 @@ module.exports = {
   parseOptions,
   pickTopmostStartupControlIndex,
   percentile,
+  resolveHistoricalDecisionFromCatalog,
   sanitizeDiagnosticPayload,
   settlePostLaunchEvidence,
   snapshotRepositorySaves,

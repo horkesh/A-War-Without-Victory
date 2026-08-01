@@ -38,6 +38,9 @@ describe('tactical map loading state', () => {
     expect(source).not.toMatch(/map\.on\('error',[\s\S]{0,300}setMapLoadError/);
     expect(source).toMatch(/data-testid="tactical-map-load-error"/);
     expect(source).toMatch(/setMapInitAttempt\(\(attempt\) => attempt \+ 1\)/);
+    expect(source).toMatch(/Required SID alias data failed:[\s\S]*setMapLoadError\(message\)/);
+    expect(source).toMatch(/Failed to pre-load OSID data:[\s\S]*setMapLoadError/);
+    expect(source).not.toMatch(/Optional (?:census|adjacency|terrain|scar) enrichment failed:[\s\S]{0,180}setMapLoadError/);
     expect(source).toMatch(/aria-busy=\{!currentMapStateReady\}/);
     expect(source).toMatch(/tabIndex=\{inputActive && currentMapStateReady \? 0 : -1\}/);
     expect(source).toMatch(/data-testid="tactical-map-loading"/);

@@ -239,6 +239,26 @@ describe('production tactical graphics cleanup', () => {
     expect(transitionCounters.deckRelease).toHaveBeenCalledOnce();
   });
 
+  it('does not publish required map data after an unmounted initialization resolves', async () => {
+    settlementLoads.deferred = true;
+    useGameStore.setState({ osidDisplayNames: null, osidPropertiesMap: null });
+    const view = render(createElement(MapContainer, {
+      active: true,
+      inputActive: true,
+      revealPainted: true,
+    }));
+
+    await waitFor(() => expect(settlementLoads.resolvers).toHaveLength(1));
+    act(() => view.unmount());
+    act(() => settlementLoads.resolvers[0]!({ type: 'FeatureCollection', features: [] }));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(useGameStore.getState().osidDisplayNames).toBeNull();
+    expect(useGameStore.getState().osidPropertiesMap).toBeNull();
+    expect(graphics.maps).toHaveLength(0);
+  });
+
   it('discards a stale settlement load after the campaign revision changes', async () => {
     settlementLoads.deferred = true;
     const stateA = {

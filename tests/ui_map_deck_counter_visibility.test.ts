@@ -201,10 +201,11 @@ it('deck counter ownership hides native MapLibre formation symbol layers', () =>
 it('does not block formation counter rendering on optional ghost-path source readiness', () => {
     const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
     const gateStart = source.indexOf("const osidSource = m.getSource('osid-control')");
-    const gateEnd = source.indexOf('// Only run heavy build once per state', gateStart);
+    const gateEnd = source.indexOf('// Only a fully rendered revision is committed', gateStart);
     const gate = source.slice(gateStart, gateEnd);
 
     expect(gateStart).toBeGreaterThanOrEqual(0);
+    expect(gateEnd).toBeGreaterThan(gateStart);
     expect(gate).toContain("m.getSource('osid-control')");
     expect(gate).toContain("m.getSource('front-lines')");
     expect(gate).toContain("m.getSource('formations')");

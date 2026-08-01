@@ -40,6 +40,201 @@ describe('map transition Electron profile harness contract', () => {
     expect(gitignore).toMatch(/^tmp-map-transition-perf\/$/m);
   });
 
+  it('keeps player-visible evidence opt-in and records the complete interaction matrix', () => {
+    const { parseOptions } = require('../tools/ui/map_transition_profile.cjs');
+    const source = readFileSync(harnessPath, 'utf8');
+
+    expect(parseOptions(['--label=plain', '--cycles=1', '--warmups=0']).playerEvidence).toBe(false);
+    expect(parseOptions(['--label=proof', '--cycles=1', '--warmups=0', '--player-evidence']).playerEvidence).toBe(true);
+    expect(source).toContain('runPlayerInteractionEvidence');
+    expect(source).toContain('hidden_shortcut_ownership');
+    expect(source).toContain('camera_interaction');
+    expect(source).toContain('formation_selection');
+    expect(source).toContain('settlement_selection');
+    expect(source).toContain('post_advance_current_state');
+    expect(source).toContain('resolveHistoricalDecisionFromCatalog');
+    expect(source).toContain('historical_default_response_id');
+    expect(source).toContain("historical_marker !== 'historical_default'");
+    expect(source).toContain('warroom-toolbar-advance');
+    expect(source).not.toContain('window.awwv.advanceTurn()');
+    expect(source).toContain('Review Later');
+    expect(source).toContain('command-room.png');
+    expect(source).toContain('cold-map.png');
+    expect(source).toContain('warm-map.png');
+  });
+
+  it('proves map camera input from bounded telemetry and rejects unchanged or wrong-direction motion', () => {
+    const { buildCameraInteractionProof } = require('../tools/ui/map_transition_profile.cjs');
+    const baseline = { longitude: 17.85, latitude: 44.15, zoom: 8.2, pitch: 30 };
+    const panned = { longitude: 18.05, latitude: 44.15, zoom: 8.2, pitch: 30 };
+    const zoomed = { longitude: 18.05, latitude: 44.15, zoom: 9.2, pitch: 30 };
+    const restored = { ...baseline };
+
+    expect(buildCameraInteractionProof({ baseline, panned, zoomed, restored })).toEqual({
+      pan: {
+        direction: 'east',
+        longitude_delta: 0.2,
+      },
+      zoom: {
+        zoom_delta: 1,
+      },
+      home_restore: {
+        longitude_delta: 0,
+        latitude_delta: 0,
+        zoom_delta: 0,
+        pitch_delta: 0,
+      },
+    });
+    expect(() => buildCameraInteractionProof({
+      baseline,
+      panned: baseline,
+      zoomed,
+      restored,
+    })).toThrow(/ArrowRight.*east/i);
+    expect(() => buildCameraInteractionProof({
+      baseline,
+      panned: { ...panned, longitude: 17.65 },
+      zoomed,
+      restored,
+    })).toThrow(/ArrowRight.*east/i);
+    expect(() => buildCameraInteractionProof({
+      baseline,
+      panned,
+      zoomed: panned,
+      restored,
+    })).toThrow(/zoom.*increase/i);
+    expect(() => buildCameraInteractionProof({
+      baseline,
+      panned,
+      zoomed,
+      restored: { ...baseline, longitude: 18.2 },
+    })).toThrow(/Home.*restore/i);
+  });
+
+  it('proves hidden map ownership before and after the desk-scoped H shortcut', () => {
+    const { buildHiddenShortcutProof } = require('../tools/ui/map_transition_profile.cjs');
+    const hidden = {
+      warroom_visible: true,
+      army_hq_visible: false,
+      map_visible: false,
+      viewport_aria_hidden: 'true',
+      viewport_inert: true,
+    };
+    expect(buildHiddenShortcutProof(hidden, hidden)).toEqual({
+      before: { viewport_aria_hidden: 'true', viewport_inert: true },
+      after: { viewport_aria_hidden: 'true', viewport_inert: true },
+      escaped: false,
+    });
+    expect(() => buildHiddenShortcutProof(hidden, { ...hidden, viewport_inert: false }))
+      .toThrow(/input ownership/i);
+    expect(() => buildHiddenShortcutProof(hidden, { ...hidden, viewport_aria_hidden: 'false' }))
+      .toThrow(/input ownership/i);
+  });
+
+  it('binds the clean RBiH choice to the event catalog historical default marker', () => {
+    const { resolveHistoricalDecisionFromCatalog } = require('../tools/ui/map_transition_profile.cjs');
+    const catalog = JSON.parse(readFileSync('data/scenarios/events/war_1992.json', 'utf8'));
+    expect(resolveHistoricalDecisionFromCatalog(catalog, 'rbih_state_identity')).toEqual({
+      event_id: 'rbih_state_identity',
+      response_id: 'civic',
+      response_label: 'Civic multi-ethnic republic',
+    });
+    expect(() => resolveHistoricalDecisionFromCatalog([
+      {
+        id: 'rbih_state_identity',
+        historical_default_response_id: 'civic',
+        response_options: [{ id: 'civic', label: 'Civic', historical_marker: 'counterfactual' }],
+      },
+    ], 'rbih_state_identity')).toThrow(/historical_default marker/i);
+    expect(() => resolveHistoricalDecisionFromCatalog([], 'rbih_state_identity'))
+      .toThrow(/catalog event/i);
+  });
+
+  it('builds a bounded player-evidence schema without raw state, paths, or screenshot hashes', () => {
+    const { buildPlayerInteractionRecord } = require('../tools/ui/map_transition_profile.cjs');
+    const result = buildPlayerInteractionRecord({
+      hiddenShortcutProof: {
+        before: { viewport_aria_hidden: 'true', viewport_inert: true },
+        after: { viewport_aria_hidden: 'true', viewport_inert: true },
+        escaped: false,
+      },
+      cameraInteraction: {
+        pan: { direction: 'east', longitude_delta: 0.2 },
+        zoom: { zoom_delta: 1 },
+        home_restore: { longitude_delta: 0, latitude_delta: 0, zoom_delta: 0, pitch_delta: 0 },
+      },
+      formationSelection: { counter_id: 'arbih_1', opened_formation_id: 'arbih_1' },
+      settlementSelection: { osid: 'sarajevo', position: { x_ratio: 0.5, y_ratio: 0.5 } },
+      commandRoomReturn: { visible: true, hidden_map_inert: true },
+      historicalDecision: {
+        event_id: 'rbih_state_identity',
+        response_id: 'civic',
+        response_label: 'Civic multi-ethnic republic',
+      },
+      deferredModal: { action: 'review-later', resolved: false },
+      informationalAcknowledgements: 1,
+      postAdvanceCurrentState: {
+        expected_turn: 1,
+        loaded_turn: 1,
+        fingerprint_matches: true,
+        current_state_ready: true,
+      },
+      raw_state: { player_name: 'Ana' },
+      screenshot_hash: 'private-hash',
+      output_path: String.raw`F:\private\evidence`,
+    });
+
+    expect(Object.keys(result)).toEqual([
+      'hidden_shortcut_ownership',
+      'camera_interaction',
+      'formation_selection',
+      'settlement_selection',
+      'command_room_return',
+      'historical_decision',
+      'deferred_modal',
+      'informational_acknowledgements',
+      'post_advance_current_state',
+    ]);
+    expect(JSON.stringify(result)).not.toMatch(/raw_state|player_name|screenshot_hash|private-hash|output_path|F:\\private/i);
+  });
+
+  it('accepts only the visible Advance route confirmation or exact next turn', () => {
+    const { classifyVisibleAdvanceOutcome } = require('../tools/ui/map_transition_profile.cjs');
+    expect(classifyVisibleAdvanceOutcome(0, 0, false)).toBe('pending');
+    expect(classifyVisibleAdvanceOutcome(0, 0, true)).toBe('confirmation');
+    expect(classifyVisibleAdvanceOutcome(1, 0, false)).toBe('advanced');
+    expect(() => classifyVisibleAdvanceOutcome(2, 0, false)).toThrow(/exactly one turn/i);
+  });
+
+  it('allows only neutral deferral and informational acknowledgement after Advance', () => {
+    const { classifyApprovedPostAdvanceAction } = require('../tools/ui/map_transition_profile.cjs');
+    expect(classifyApprovedPostAdvanceAction({
+      modalVisible: false,
+      reviewLaterHitTestable: false,
+      acknowledgedHitTestable: false,
+    })).toBe('none');
+    expect(classifyApprovedPostAdvanceAction({
+      modalVisible: true,
+      reviewLaterHitTestable: true,
+      acknowledgedHitTestable: false,
+    })).toBe('review-later');
+    expect(classifyApprovedPostAdvanceAction({
+      modalVisible: true,
+      reviewLaterHitTestable: false,
+      acknowledgedHitTestable: true,
+    })).toBe('acknowledged');
+    expect(classifyApprovedPostAdvanceAction({
+      modalVisible: true,
+      reviewLaterHitTestable: false,
+      acknowledgedHitTestable: false,
+    })).toBe('pending');
+    expect(() => classifyApprovedPostAdvanceAction({
+      modalVisible: true,
+      reviewLaterHitTestable: true,
+      acknowledgedHitTestable: true,
+    })).toThrow(/ambiguous/i);
+  });
+
   it('launches unpackaged Electron with isolated state and protects repository saves', () => {
     if (!existsSync(harnessPath)) return;
     const harness = readFileSync(harnessPath, 'utf8');
@@ -259,6 +454,19 @@ describe('map transition Electron profile harness contract', () => {
       unexpected_lines: ['unexpected failure'],
     });
     expect(JSON.stringify(result)).not.toMatch(/ws:\/\/|49321|5a65bc3b|127\.0\.0\.1/);
+  });
+
+  it('categorizes deterministic turn-pipeline rehome diagnostics without persisting formation identity', () => {
+    const { classifyMainProcessStdout } = require('../tools/ui/map_transition_profile.cjs');
+    const result = classifyMainProcessStdout([
+      '[brigade_assignment] Rehomed rs_1st_vlasenica into truthful sector owner sector:vrs_drina:3 (front)',
+    ]);
+
+    expect(result).toEqual({
+      expected_categories: { routine_brigade_rehome: 1 },
+      unexpected_lines: [],
+    });
+    expect(JSON.stringify(result)).not.toContain('rs_1st_vlasenica');
   });
 
   it('serializes complete process diagnostics without ephemeral stdout or stderr data', () => {
