@@ -38,6 +38,7 @@ export interface DecisionConsequenceRecord {
 
 export type DecisionConsequenceFamilyId =
   | 'event-decision'
+  | 'autonomy-proposal'
   | 'operation-opportunity'
   | 'army-reserve'
   | 'peace-proposal'
@@ -579,6 +580,58 @@ export function buildDecisionConsequenceLedger(
   const records: DecisionConsequenceRecord[] = [];
   const formationDisplayMaps = buildFormationDisplayMaps(state.formations);
   const playerFaction = playerFactionFromState(state);
+
+  const archivedProposals = state.rawGameState?.meta?.proposal_decision_history ?? [];
+  const archivedProposalKeys = new Set(
+    archivedProposals.map((proposal) => `${proposal.id}::${proposal.resolved_turn}`),
+  );
+  const currentResolvedProposals = (state.rawGameState?.meta?.pending_proposal_reviews ?? [])
+    .filter((proposal) => (
+      proposal.proposed_action.startsWith('SET_STANCE:')
+      && typeof proposal.accepted === 'boolean'
+      && Number.isInteger(proposal.resolved_turn)
+      && !archivedProposalKeys.has(`${proposal.id}::${proposal.resolved_turn}`)
+    ));
+  for (const proposal of [...archivedProposals, ...currentResolvedProposals]) {
+    if (playerFaction && !playerFactionMatch(proposal.faction, playerFaction)) continue;
+    if (typeof proposal.accepted !== 'boolean'
+      || typeof proposal.resolved_turn !== 'number'
+      || !Number.isInteger(proposal.resolved_turn)) continue;
+    const accepted = proposal.accepted;
+    const resolvedTurn = proposal.resolved_turn;
+    records.push({
+      id: `proposal:${proposal.id}`,
+      turn: resolvedTurn,
+      familyId: 'autonomy-proposal',
+      family: 'Staff proposal',
+      title: accepted ? 'Staff proposal accepted' : 'Staff proposal declined',
+      titleToken: {
+        key: accepted
+          ? 'decisionConsequences.title.autonomyProposal.accepted'
+          : 'decisionConsequences.title.autonomyProposal.declined',
+      },
+      outcome: accepted ? 'Accepted' : 'Declined',
+      outcomeToken: {
+        key: accepted
+          ? 'decisionConsequences.outcome.accepted'
+          : 'decisionConsequences.outcome.declined',
+      },
+      detail: safeConsequenceDetail(
+        proposal.description,
+        'Staff proposal disposition filed in the campaign record.',
+      ),
+      detailToken: {
+        key: 'decisionConsequences.detail.autonomyProposal',
+        params: {
+          detail: safeConsequenceDetail(
+            proposal.description,
+            t('decisionConsequences.detail.autonomyProposal.fallback'),
+          ),
+        },
+      },
+      recordTarget: 'records',
+    });
+  }
 
   for (const event of state.firedEvents ?? []) {
     if (!event.isDecision) continue;

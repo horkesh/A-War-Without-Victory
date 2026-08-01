@@ -151,6 +151,8 @@ describe('buildConsequenceReceipts', () => {
         expect(confirmed.status).toBe('confirmed');
         expect(confirmed.firedTurn).toBe(9);
         expect(confirmed.turnsElapsed).toBe(6);
+        expect(confirmed.sourceRecordId).toBe('decision:E::opt_a::3');
+        expect(confirmed.receiptRecordId).toBe('receipt:E::opt_a::p_confirmed');
         // Originating decision resolved to TITLES + option prose, not raw ids.
         expect(confirmed.decisionTitle).toBe('Authorize the Goražde relief column');
         expect(confirmed.decisionOptionLabel).toBe('Send the column through');

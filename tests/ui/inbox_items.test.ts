@@ -1266,7 +1266,7 @@ describe('deriveInboxItems — priority ordering', () => {
     it('sorts items by priority (blocking event first, then peace plan, then reserve, then situation)', () => {
         const state = makeStub({
             pendingEventDecisions: [
-                { event_id: 'evt_1', event_title: 'Crisis', turn_fired: 5, faction: 'RBiH', response_options: [{ id: 'a', label: 'A', effects: [] }] },
+                { event_id: 'evt_1', event_title: 'Crisis', turn_fired: 5, faction: 'RBiH', requires_player_response: true, response_options: [{ id: 'a', label: 'A', effects: [] }] },
             ],
             pendingPeacePlan: {
                 planId: 'vance', planName: 'Vance Plan', narrative: '', turnOffered: 5,

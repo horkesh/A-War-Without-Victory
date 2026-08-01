@@ -43,11 +43,14 @@ import { buildReserveRequestPresentation } from './reserveRequestPresentation';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { derivePresidentialBlockers } from './presidentialBlockers';
 import {
-  classifyPresidentialPriority,
+  buildPresidentialPriorityReadModel,
+  comparePresidentialPriorityReadModels,
   countPresidentialPriorityBands,
   emptyPresidentialPriorityCounts,
   type PresidentialPriorityBand,
   type PresidentialPriorityCounts,
+  type PresidentialPriorityDestination,
+  type PresidentialPriorityReadModel,
 } from './presidentialPriority';
 
 export {
@@ -203,6 +206,8 @@ export interface PresidentialDecisionRoomCard {
   category: PresidentialDecisionRoomCategory;
   severity: PresidentialDecisionRoomSeverity;
   priorityBand: PresidentialPriorityBand;
+  /** Canonical blocker/urgency/source/deadline/destination truth. */
+  priorityModel: PresidentialPriorityReadModel;
   title: string;
   explanation: string;
   sourceOwner: string;
@@ -301,9 +306,10 @@ export interface PresidentialDecisionRoomInput {
   selectedCardId?: string | null;
 }
 
-type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey' | 'directive' | 'priorityBand'> & {
+type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey' | 'directive' | 'priorityBand' | 'priorityModel'> & {
   urgencySort: number;
   sourceSort: string;
+  deadlineTurn?: number | null;
   directive?: PresidentialDecisionRoomDirective;
   preserveActionLabel?: boolean;
 };
@@ -715,8 +721,10 @@ function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): v
 }
 
 function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const playerFaction = state.player_faction ?? null;
   const opportunities = [...(state.operationOpportunityProposals ?? [])]
     .filter(isReviewableOperationOpportunity)
+    .filter((opportunity) => playerFactionMatch(opportunity.faction, playerFaction))
     .sort((a, b) => {
       const aExpiry = a.expires_turn ?? LARGE_SORT;
       const bExpiry = b.expires_turn ?? LARGE_SORT;
@@ -780,6 +788,7 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
       sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
       sourceIds: [opportunity.proposal_id],
       ...(directive ? { directive } : {}),
+      deadlineTurn: opportunity.expires_turn ?? null,
       urgencySort: expires,
       sourceSort: opportunity.proposal_id,
     });
@@ -1824,6 +1833,23 @@ function decisionRoomOwnedTarget(card: CandidateCard): PresidentialDecisionRoomN
   };
 }
 
+function priorityDestinationForNavigation(
+  target: PresidentialDecisionRoomNavigationTarget,
+): PresidentialPriorityDestination {
+  if (target.kind === 'decision-room') return 'decision-room';
+  if (target.kind === 'inbox') return 'inbox';
+  if (target.kind === 'army-hq-tab'
+    || target.kind === 'army-hq-records'
+    || target.kind === 'army-hq-aftermath-record'
+    || target.kind === 'army-hq-operation-record'
+    || target.kind === 'army-hq-decision-record'
+    || target.kind === 'army-hq-corps-briefing') return 'army-hq';
+  if (target.kind === 'field') return 'field';
+  if (target.kind === 'enclave-dashboard') return 'enclave-dashboard';
+  if (target.kind === 'chronicle') return 'chronicle';
+  return 'none';
+}
+
 function requiredCardIds(state: LoadedGameState): Set<string> {
   const ids = new Set<string>();
   const blockers = derivePresidentialBlockers(state, null);
@@ -1853,25 +1879,42 @@ function requiredCardIds(state: LoadedGameState): Set<string> {
 
 function finalizeCards(state: LoadedGameState, cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
   const requiredIds = requiredCardIds(state);
-  return cards
-    .sort(compareCandidates)
-    .map((card, index) => {
-      const decisionRoomOwned = isDecisionRoomOwnedPrimaryCard(card);
-      const navigationTarget = decisionRoomOwned ? decisionRoomOwnedTarget(card) : card.navigationTarget;
+  const prioritized = cards.map((card) => {
+    const decisionRoomOwned = isDecisionRoomOwnedPrimaryCard(card);
+    const navigationTarget = decisionRoomOwned ? decisionRoomOwnedTarget(card) : card.navigationTarget;
+    const sourceId = card.sourceIds && card.sourceIds.length > 0
+      ? [...card.sourceIds].sort(strictCompare)[0]!
+      : card.sourceSort;
+    const priorityModel = buildPresidentialPriorityReadModel({
+      id: card.id,
+      required: requiredIds.has(card.id),
+      recordOnly: card.category === 'turn' || card.category === 'cost' || card.category === 'memory',
+      hasPresidentialLever: Boolean(card.directive)
+        || card.category === 'decision'
+        || card.category === 'counter_offer'
+        || card.category === 'opportunity'
+        || card.category === 'command',
+      sourceId,
+      currentTurn: state.turn ?? 0,
+      urgency: card.urgencySort,
+      deadlineTurn: card.deadlineTurn ?? null,
+      recommendedDestination: priorityDestinationForNavigation(navigationTarget),
+    });
+    return { card, decisionRoomOwned, navigationTarget, priorityModel };
+  }).sort((left, right) => (
+    comparePresidentialPriorityReadModels(left.priorityModel, right.priorityModel)
+      || compareCandidates(left.card, right.card)
+  ));
+
+  return prioritized
+    .map(({ card, decisionRoomOwned, navigationTarget, priorityModel }, index) => {
       const sourceHandoffTarget = card.sourceHandoffTarget ?? (decisionRoomOwned ? card.navigationTarget : undefined);
       return {
         id: card.id,
         category: card.category,
         severity: card.severity,
-        priorityBand: classifyPresidentialPriority({
-          required: requiredIds.has(card.id),
-          recordOnly: card.category === 'turn' || card.category === 'cost' || card.category === 'memory',
-          hasPresidentialLever: Boolean(card.directive)
-            || card.category === 'decision'
-            || card.category === 'counter_offer'
-            || card.category === 'opportunity'
-            || card.category === 'command',
-        }),
+        priorityBand: priorityModel.priorityBand,
+        priorityModel,
         title: card.title,
         explanation: card.explanation,
         sourceOwner: card.sourceOwner,

@@ -372,6 +372,8 @@ describe('TurnAftermathModal localization', () => {
     it('renders consequence and officer resentment timing as calendar dates', () => {
         const consequences: ConsequenceReceipt[] = [{
             id: 'receipt-one',
+            sourceRecordId: 'decision:decision-one::open::5',
+            receiptRecordId: 'receipt:receipt-one',
             decisionEventId: 'decision-one',
             decisionTitle: 'Aid corridor',
             decisionOptionLabel: 'Open the corridor',

@@ -2088,6 +2088,36 @@ export const warPhases: NamedPhase[] = [
                         proposal.resolved_turn = meta.turn;
                     }
                 }
+                const existingReceiptKeys = new Set(
+                    (meta.proposal_decision_history ?? []).map((record) => `${record.id}::${record.resolved_turn}`),
+                );
+                const ordinaryResolved = meta.pending_proposal_reviews
+                    .filter((proposal) => (
+                        typeof proposal.accepted === 'boolean'
+                        && Number.isInteger(proposal.resolved_turn)
+                        && !isHistoricalOperationAuthorizationReview(proposal)
+                        && !proposal.proposed_action.startsWith('APPROVE_OP:')
+                        && !proposal.proposed_action.startsWith('OPPORTUNITY:')
+                    ))
+                    .sort((left, right) => (
+                        (left.resolved_turn! - right.resolved_turn!)
+                        || strictCompare(left.id, right.id)
+                    ));
+                for (const proposal of ordinaryResolved) {
+                    const receiptKey = `${proposal.id}::${proposal.resolved_turn}`;
+                    if (existingReceiptKeys.has(receiptKey)) continue;
+                    meta.proposal_decision_history ??= [];
+                    meta.proposal_decision_history.push({
+                        ...proposal,
+                        accepted: proposal.accepted!,
+                        resolved_turn: proposal.resolved_turn!,
+                    });
+                    existingReceiptKeys.add(receiptKey);
+                }
+                meta.proposal_decision_history?.sort((left, right) => (
+                    (left.resolved_turn - right.resolved_turn)
+                    || strictCompare(left.id, right.id)
+                ));
                 meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter((proposal) =>
                     proposal.turn >= meta.turn
                         || proposal.resolved_turn === meta.turn

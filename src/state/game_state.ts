@@ -1652,6 +1652,12 @@ export interface PendingProposalReview {
     proposed_value?: string;
 }
 
+/** Durable receipt for an ordinary player-facing autonomy proposal disposition. */
+export interface ProposalDecisionRecord extends PendingProposalReview {
+    accepted: boolean;
+    resolved_turn: number;
+}
+
 /**
  * World-level deterministic bookkeeping (Engine Invariants §11).
  * Conceptually "WorldState": current_turn (weeks), phase, seed.
@@ -1758,6 +1764,8 @@ export interface StateMeta {
     autonomy_overrides?: AutonomyOverride[];
     /** v0.8.4 Phase B: Pending AI proposal reviews at Level 1 (Assisted). Player must accept or reject before they take effect. */
     pending_proposal_reviews?: PendingProposalReview[];
+    /** Durable Records receipt for resolved ordinary autonomy proposals. */
+    proposal_decision_history?: ProposalDecisionRecord[];
     /**
      * LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): frozen endgame snapshot.
      *

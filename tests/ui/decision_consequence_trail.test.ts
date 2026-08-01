@@ -34,6 +34,72 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 }
 
 describe('decision consequence trail', () => {
+  it('shows a just-resolved ordinary proposal receipt before the next Advance archives it', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RS',
+      rawGameState: {
+        meta: {
+          player_faction: 'RS',
+          pending_proposal_reviews: [{
+            id: 'PROP_12_military_0',
+            turn: 12,
+            resolved_turn: 12,
+            faction: 'RS',
+            domain: 'military',
+            description: 'Drina Corps recommends a defensive stance.',
+            proposed_action: 'SET_STANCE:vrs_drina:defensive',
+            accepted: false,
+          }],
+        },
+        military: {},
+      } as any,
+    }));
+
+    expect(ledger).toContainEqual(expect.objectContaining({
+      id: 'proposal:PROP_12_military_0',
+      turn: 12,
+      title: 'Staff proposal declined',
+      outcome: 'Declined',
+      recordTarget: 'records',
+    }));
+  });
+
+  it('files durable ordinary autonomy-proposal dispositions in Records', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RS',
+      rawGameState: {
+        meta: {
+          player_faction: 'RS',
+          proposal_decision_history: [{
+            id: 'PROP_12_military_0',
+            turn: 12,
+            resolved_turn: 13,
+            faction: 'RS',
+            domain: 'military',
+            description: 'Drina Corps recommends a defensive stance.',
+            proposed_action: 'SET_STANCE:vrs_drina:defensive',
+            current_value: 'balanced',
+            proposed_value: 'defensive',
+            accepted: true,
+          }],
+        },
+        military: {},
+      } as any,
+    }));
+
+    expect(ledger).toContainEqual(expect.objectContaining({
+      id: 'proposal:PROP_12_military_0',
+      familyId: 'autonomy-proposal',
+      family: 'Staff proposal',
+      turn: 13,
+      title: 'Staff proposal accepted',
+      outcome: 'Accepted',
+      recordTarget: 'records',
+    }));
+    const visibleCopy = ledger.map(({ family, title, outcome, detail }) => ({ family, title, outcome, detail }));
+    expect(JSON.stringify(visibleCopy)).not.toMatch(/SET_STANCE|vrs_drina|PROP_12/);
+  });
+
   it('turns resolved decision events into player-facing record entries', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       firedEvents: [

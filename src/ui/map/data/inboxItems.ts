@@ -25,8 +25,11 @@ import { looksLikeRawPlayerFacingToken } from '../utils/playerSafeText';
 import { isPeacePlanOwnedByPendingEvent } from '../utils/peacePlanDismissal';
 import { PARAMILITARY_TARGET_AVG_POPULATION } from '../../../state/formation_constants';
 import {
-    classifyPresidentialPriority,
+    buildPresidentialPriorityReadModel,
+    comparePresidentialPriorityReadModels,
     type PresidentialPriorityBand,
+    type PresidentialPriorityDestination,
+    type PresidentialPriorityReadModel,
 } from './presidentialPriority';
 
 export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
@@ -38,6 +41,8 @@ export interface InboxItem {
     severity: InboxSeverity;
     /** Presidential agenda role; distinct from threat/cost severity. */
     priorityBand: PresidentialPriorityBand;
+    /** Canonical cross-surface priority truth. */
+    priorityModel: PresidentialPriorityReadModel;
     title: string;
     subtitle: string;
     /** Number of source records represented by this card. Undefined means 1. */
@@ -54,7 +59,18 @@ export interface InboxItem {
     priority: number;
 }
 
-type InboxItemDraft = Omit<InboxItem, 'priorityBand'>;
+type InboxItemDraft = Omit<InboxItem, 'priorityBand' | 'priorityModel'>;
+
+function priorityDestinationForInboxAction(action: InboxItem['action']): PresidentialPriorityDestination {
+    if (action === 'decision_room') return 'decision-room';
+    if (action === 'event_modal'
+        || action === 'peace_plan_modal'
+        || action === 'dayton_modal'
+        || action === 'paramilitary_review'
+        || action === 'convoy_decision_modal') return 'inbox';
+    if (action === 'army_reserve' || action === 'army_hq_personnel' || action === 'army_hq_briefing') return 'army-hq';
+    return 'none';
+}
 
 function opportunityProposalIdFromAction(action: string | null | undefined, fallbackId: string): string {
     const prefix = 'OPPORTUNITY:';
@@ -291,6 +307,7 @@ export function deriveInboxItems(
                     severity: 'normal',
                     title,
                     subtitle: formatOpportunityRecommendationDetail(prop.proposed_value, detail),
+                    sourceIds: [proposalId],
                     action: operationSurface.inboxAction,
                     priority: 32,
                 });
@@ -573,18 +590,36 @@ export function deriveInboxItems(
         priority: 99,
     });
 
+    const opportunityDeadlineById = new Map(
+        (state.operationOpportunityProposals ?? []).map((proposal) => [proposal.proposal_id, proposal.expires_turn ?? null]),
+    );
     return items
-        .sort((a, b) => a.priority - b.priority)
-        .map((item) => ({
-            ...item,
-            priorityBand: classifyPresidentialPriority({
+        .map((item): InboxItem => {
+            const sourceId = item.sourceIds?.[0]
+                ?? (item.id.startsWith('opportunity:') ? item.id.slice('opportunity:'.length) : item.id);
+            const deadlineTurn = item.id.startsWith('opportunity:')
+                ? opportunityDeadlineById.get(sourceId) ?? null
+                : null;
+            const priorityModel = buildPresidentialPriorityReadModel({
+                id: item.id,
                 required: isAdvanceBlockingInboxItem(item),
                 recordOnly: item.id.startsWith('sit:date:')
                     || item.id.startsWith('sit:territory_gain:')
                     || item.id.startsWith('sit:territory_loss:'),
                 hasPresidentialLever: item.type !== 'situation' && item.type !== 'intelligence_notification',
-            }),
-        }));
+                sourceId,
+                currentTurn: state.turn ?? 0,
+                urgency: item.priority,
+                deadlineTurn,
+                recommendedDestination: priorityDestinationForInboxAction(item.action),
+            });
+            return {
+                ...item,
+                priorityBand: priorityModel.priorityBand,
+                priorityModel,
+            };
+        })
+        .sort((left, right) => comparePresidentialPriorityReadModels(left.priorityModel, right.priorityModel));
 }
 
 function isFinalParamilitaryDecision(decision: unknown): boolean {

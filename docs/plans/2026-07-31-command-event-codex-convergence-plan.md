@@ -9,7 +9,7 @@
 **Tech stack:** TypeScript, React, Vitest, JSON-authored events/essays, Electron browser gates, deterministic scenario runner.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phase 0 characterized on integrated R2; Phase 1 remains gated on shared ownership clearance
+**Status:** IN PROGRESS -- Phases 0-1 complete on integrated R2; Phase 2 is next
 **Roadmap workstream:** R4
 **Canonical owner:** Presidential Decision Room for action; Desk for triage; Records/Codex for receipts
 **Collision rule:** Do not overlap source edits with RS packets FR-01 or FR-04. Rebase on their shared priority and cadence contracts before Phase 0.
@@ -153,10 +153,10 @@ npm.cmd run typecheck
 - Test `tests/ui/presidential_decision_room.test.ts`
 - Test `tests/ui/presidential_blockers.test.ts`
 
-- [ ] Make blocker, urgency, source, deadline, and recommended destination a single read-model contract.
-- [ ] Prove Desk, Inbox, toolbar, and Decision Room order the same active rows.
-- [ ] Preserve player-faction visibility and fog restrictions.
-- [ ] Remove only duplicate renderer ownership; do not delete durable receipts.
+- [x] Make blocker, urgency, source, deadline, and recommended destination a single read-model contract.
+- [x] Prove Desk, Inbox, toolbar, and Decision Room order the same active rows.
+- [x] Preserve player-faction visibility and fog restrictions.
+- [x] Remove only duplicate renderer ownership; do not delete durable receipts.
 
 ### Task 1.2 -- Close action/receipt loops
 
@@ -168,9 +168,18 @@ npm.cmd run typecheck
 - Test `tests/ui/decision_consequence_trail.test.ts`
 - Test `tests/ui/decision_consequence_records_panel.test.ts`
 
-- [ ] Every action deep-links back to its source and forward to its receipt.
-- [ ] Current dossiers remain selected after evidence-map round trips.
-- [ ] No raw enum/debug copy reaches the player.
+- [x] Every action deep-links back to its source and forward to its receipt.
+- [x] Current dossiers remain selected after evidence-map round trips.
+- [x] No raw enum/debug copy reaches the player.
+
+**Phase 1 evidence (2026-08-01):**
+
+- `PresidentialPriorityReadModel` is the shared blocker/band, urgency, source id, deadline, and recommended-destination contract. Inbox, Decision Room, Desk pre-advance review, and the Warroom toolbar consume its deterministic ordering; exact-expiry regressions prove the same opportunity order across all four surfaces.
+- The nine-family manifest now owns the recommended workspace and durable receipt path beside the existing source state path. No duplicate renderer was found by the executable ownership inventory, so no renderer or durable receipt was deleted.
+- Player-faction regressions exclude foreign opportunity dossiers. Existing player-safe projections and evidence-map return-card ownership remain intact; the selected dossier id is restored on return.
+- Ordinary resolved autonomy proposals now archive idempotently in optional `meta.proposal_decision_history`, round-trip through saves, validate fail-closed when malformed, and project into Records without raw action/corps tokens. Authored event consequences carry stable source/receipt record ids and expose forward receipt review plus a source backlink.
+- Machine report: `docs/40_reports/audits/20260801_R4_PHASE1_PRESIDENTIAL_COMMAND_CONVERGENCE.json`, 14,105 bytes, SHA-256 `76ea58590cf9d5ed7f1d67a6918e40557329e3fa14e32ac9b1744bcf8b63e0ac`. Exact result: `9` families, `9` reachable actions, `9` durable receipts, `0` conditional receipts, `0` unresolved findings, and `9` verified source-proof rows.
+- This is additive save state only: older saves omit the optional receipt history and continue with an empty history. No scenario, historical event, canon, deterministic baseline, package/version, tag, installer, publication, or release state changed; `docs/10_canon/FORAWWV.md` is unchanged.
 
 **Verification:**
 
