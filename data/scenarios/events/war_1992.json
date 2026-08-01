@@ -19,8 +19,8 @@
             "description": "Osigurati koridor i zastititi srpske zajednice. Dolina Drine - ograniciti operacije. Sarajevo - drzati u obrucu, ali ne razoriti. Upozorenje generala Mladica oblikuje strategiju."
           },
           "aggressive": {
-            "label": "Provoditi ih maksimalnom silom",
-            "description": "Svih sest ciljeva najvecom zestinom. General Mladic je upozorio na genocid. Culi ste ga. Nastavite ipak, i neka bude brzo. Svijet ce osuditi, ali svijet nije ovdje."
+            "label": "Centralizovati operativnu komandu",
+            "description": "Skupstinska odluka je dio historijskog zapisa; ovdje odredjujete centralizovane operativne naredbe i izvjestavanje komandnog lanca. Upozorenje generala Mladica ostaje u zapisniku i obavezuje komandu."
           }
         }
       }
@@ -577,8 +577,8 @@
       {
         "id": "aggressive",
         "branch_tag": "rs_aggressive",
-        "label": "Pursue with maximum force",
-        "description": "All six goals at maximum intensity. General Mladic warned of genocide. You heard him. Proceed anyway — and make it swift. The world will condemn you. But the world is not here.",
+        "label": "Centralize operational command",
+        "description": "The Assembly decision is part of the historical record; here you determine centralized operational orders and chain-of-command reporting. General Mladic's warning remains in that record and constrains the command.",
         "effects": [
           {
             "kind": "morale_change",
@@ -590,11 +590,6 @@
             "faction": "RS",
             "delta": 0.25,
             "duration_turns": 26
-          },
-          {
-            "kind": "humanitarian_impact",
-            "faction": "RS",
-            "war_crimes_delta": 2
           }
         ],
         "sets_flags": {
@@ -640,8 +635,7 @@
               "rs_strategic_goals"
             ],
             "material_effect_refs": [
-              "aggression_modifier.RS",
-              "humanitarian_impact.RS"
+              "aggression_modifier.RS"
             ],
             "explanation": "Maximum-tempo platform compresses the implementation timeline; the paramilitary-policy decision opens with the most aggressive posture context. The May 1993 VOPP-rejection decision is also reachable: a maximum-force platform is by definition incompatible with the Vance-Owen ten-province demilitarized scheme (UN S/25221). The August 1994 Belgrade embargo decision is likewise reachable: maximum-force is incompatible with the Contact Group 51/49 framework, and the Assembly's rejection triggers Belgrade's embargo (Karadžić IT-95-5/18-T §§4263-4310; UNSCR 943). The September 1995 Deliberate Force compliance decision is also reachable a fortiori: maximum-intensity Sarajevo siege fires accelerate the path to the Markale II shelling pattern that draws NATO air response (Mladić IT-09-92-T §§4631-4685; Karadžić IT-95-5/18-T §§4940-4982). The October 1995 Holbrooke-Belgrade channel decision is reachable from the same maximum-intensity pressure path that drives Milošević to demand the Patriarch Paper delegation (Karadžić IT-95-5/18-T §§4985-5020; Holbrooke ch. 8). The May 1995 UN hostage-crisis response decision is reachable a fortiori: maximum-intensity Sarajevo-axis fires accelerate NATO air strikes near Pale on 25-26 May 1995, and the VRS retaliation seizes 377 UN peacekeepers (Karadžić IT-95-5/18-T Count 11 §§5810-5876; Mladić IT-09-92-T Count 6 §§5169-5215; UNSCR 998)."
           },
@@ -868,7 +862,8 @@
         }
       }
     },
-    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 2710-2715, 3447-3526 — Six Strategic Goals and JCE findings. ICTY Mladic Trial Judgment (IT-09-92-T, 22 November 2017) paras. 3232-3243 — commander's Assembly warning. ICJ Bosnia and Herzegovina v. Serbia and Montenegro (26 February 2007)."
+    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 2710-2715, 3447-3526 — Six Strategic Goals and JCE findings. ICTY Mladic Trial Judgment (IT-09-92-T, 22 November 2017) paras. 3232-3243 — commander's Assembly warning. ICJ Bosnia and Herzegovina v. Serbia and Montenegro (26 February 2007).",
+    "source_note": "The cited ICTY and ICJ record supports the Six Strategic Goals and General Mladic's Assembly warning preserved in the narrative. Response options govern strategic-platform scope and command structure only; under the Sensitive History Design Gate Ring 3, none authorizes genocide, cleansing, forced displacement, civilian targeting, or detention camps. Historical atrocities remain represented as non-player-authored Ring-2 consequences."
   },
   {
     "id": "foca_1992",
@@ -4079,22 +4074,10 @@
     "response_options": [
       {
         "id": "systematic",
-        "label": "Systematic cleansing",
-        "description": "Full territorial consolidation. Maximum displacement. The international community will condemn this. Your officers know what this means. Mladić knows.",
-        "effects": [
-          {
-            "kind": "humanitarian_impact",
-            "faction": "RS",
-            "war_crimes_delta": 5
-          },
-          {
-            "kind": "morale_change",
-            "faction": "RS",
-            "delta": 3
-          }
-        ],
+        "label": "Open command-accountability proceedings",
+        "description": "Enter the field reports into the official record, investigate the chain of command, and require written civilian-protection orders while current operations remain under review.",
         "sets_flags": {
-          "drina_cleansing_intensity": "systematic"
+          "drina_command_accountability": "formal_review"
         },
         "dimension_shifts": [
           {
@@ -4104,31 +4087,19 @@
           },
           {
             "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": 5
-          },
-          {
-            "faction": "RS",
             "dimension": "territorial_legitimacy",
             "delta": -10
           }
         ],
-        "aggression_affinity": 0.8,
-        "risk_level": 0.8
+        "aggression_affinity": 0,
+        "risk_level": 0.4
       },
       {
         "id": "restrained",
-        "label": "Military objectives only",
-        "description": "Secure strategic positions. Protect Serb communities. Restrain the paramilitaries. Your hardliners will be furious. Your commander may ignore the order.",
-        "effects": [
-          {
-            "kind": "humanitarian_impact",
-            "faction": "RS",
-            "war_crimes_delta": 1
-          }
-        ],
+        "label": "Impose immediate civilian-protection restraints",
+        "description": "Issue binding civilian-protection orders, restrict field operations to stated military objectives, and place paramilitary formations under regular-command control pending investigation.",
         "sets_flags": {
-          "drina_cleansing_intensity": "restrained"
+          "drina_command_accountability": "immediate_restraint"
         },
         "dimension_shifts": [
           {
@@ -4154,26 +4125,28 @@
     "notifications_to_other_factions": {
       "systematic": {
         "RBiH": {
-          "headline": "RS hardens Drina Valley campaign",
-          "body": "RS command signals full territorial consolidation in the Drina Valley. Sarajevo sees the campaign around Zvornik, Višegrad, and Foča moving onto a course that will deepen displacement and international condemnation."
+          "headline": "RS opens a Drina command review",
+          "body": "RS command enters field reports from the Drina Valley into an official accountability process and requires written civilian-protection orders. Sarajevo will judge the order by conduct around Zvornik, Višegrad, and Foča."
         },
         "HRHB": {
-          "headline": "RS hardens Drina Valley campaign",
-          "body": "RS command signals full territorial consolidation in the Drina Valley. Mostar sees the eastern campaign moving toward harsher control measures and heavier international fallout."
+          "headline": "RS opens a Drina command review",
+          "body": "RS command records the Drina field reports and opens a chain-of-command review. Mostar sees an accountability order whose practical force remains to be demonstrated."
         }
       },
       "restrained": {
         "RBiH": {
-          "headline": "RS narrows Drina Valley orders",
-          "body": "RS command frames the Drina Valley campaign around military positions and orders paramilitary restraint. Sarajevo sees a less sweeping public line, with hardliners and field commanders still able to strain implementation."
+          "headline": "RS issues immediate Drina restraints",
+          "body": "RS command issues binding civilian-protection orders and places paramilitary formations under regular-command control in the Drina Valley. Sarajevo watches implementation around the affected towns."
         },
         "HRHB": {
-          "headline": "RS narrows Drina Valley orders",
-          "body": "RS command frames the Drina Valley campaign around military positions and orders paramilitary restraint. Mostar sees a lower-intensity signal that may still fray under hardliner and field-command pressure."
+          "headline": "RS issues immediate Drina restraints",
+          "body": "RS command restricts field operations to stated military objectives and places paramilitary formations under regular-command control. Mostar watches whether field commands comply."
         }
       }
     },
-    "historical_source": "ICTY Karadzic Judgment, Strategic Goal 3. BB Vol. I Ch. 8-9. Drina Valley campaign April-July 1992."
+    "source_tier": "icty_icj_un",
+    "historical_source": "ICTY Karadzic Judgment, Strategic Goal 3. BB Vol. I Ch. 8-9. Drina Valley campaign April-July 1992.",
+    "source_note": "The cited ICTY and Balkan Battlegrounds record grounds the field reports and Drina Valley historical context preserved in the narrative. Response options govern command accountability and civilian-protection constraints only. Under the Sensitive History Design Gate Ring 3, the player cannot authorize cleansing, forced displacement, civilian targeting, or detention camps; the historical record remains in non-player-authored Ring-2 consequence events."
   },
   {
     "id": "drina_valley_ethnic_cleansing_1992",

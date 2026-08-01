@@ -129,17 +129,13 @@ test('every inventoried sensitive claim has an explicit status and owner', async
     }
 });
 
-test('production choice classification blocks direct acts and excludes lexical references', async () => {
+test('production choice classification has no direct refused acts and excludes lexical references', async () => {
     const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
     const blockedSubjects = [...new Set(report.claims
         .filter((claim: { status: string }) => claim.status === 'blocked_sensitive_player_choice')
         .map((claim: { subject_id: string }) => claim.subject_id))]
         .sort();
 
-    assert.deepStrictEqual(blockedSubjects, [
-        'drina_cleansing_decision_1992',
-        'rs_strategic_goals',
-    ]);
     for (const falsePositive of [
         'dayton_talks_begin_1995',
         'karadzic_mladic_split_1995',
@@ -149,6 +145,7 @@ test('production choice classification blocks direct acts and excludes lexical r
     ]) {
         assert.strictEqual(blockedSubjects.includes(falsePositive), false, falsePositive);
     }
+    assert.deepStrictEqual(blockedSubjects, [] as string[]);
 });
 
 test('Neretva, Grabovica, and Uzdol anchors are source-owned September 1993 content', async () => {

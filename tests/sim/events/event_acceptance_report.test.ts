@@ -124,14 +124,16 @@ describe('event acceptance diagnostic report', () => {
         // decorate_a_unit ×{RBiH,RS,HRHB}): each is requires_player_response with
         // no historical default/marker (required-response debt), so they add to
         // missing_approved_default / historical_default / historical_marker debt.
-        // They DO carry a source_note, so missing_source_note is unchanged.
+        // They DO carry a source_note. The R7 Ring-3 remediation adds source
+        // notes to rs_strategic_goals and drina_cleansing_decision_1992, so
+        // missing_source_note falls from 9 to 7.
         // 16 → 15: Owen-Stoltenberg's Presidency stage now carries the
         // historically sourced conditional-acceptance default and historical bot policy.
         expect(first.summary.missing_approved_default_events).toBe(15);
         expect(first.summary.missing_historical_default_response_id_events).toBe(18);
         expect(first.summary.missing_historical_marker_events).toBe(18);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(9);
+        expect(first.summary.missing_source_note_events).toBe(7);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {

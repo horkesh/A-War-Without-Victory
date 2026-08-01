@@ -131,19 +131,21 @@ Rules:
 - Officer/OOB: 374/374 rows keyed, 0 supported, 2,286 blocking findings, 12 normalized-name collisions. Positive support must be owned per row and cannot be inherited from manifest defaults.
 - Audio: 36/36 cues keyed, 17 provided, 19 placeholders, 0 unregistered binaries, 54 blocking findings, 5 warnings, and three required ambient beds absent. Registry/bundle resolution and recursive binary ownership are fail-closed; `OggS` remains a container-signature precheck rather than decode/LUFS proof.
 - Verification: focused 5 files / 22 tests; parent integration 2 files / 11 tests; TypeScript, canon/determinism/baseline, EOL, and diff checks green.
-- Officer/OOB and audio inventories are accepted. Historical-claim and localization diagnostics were corrected after blocked review; Phase 0 completion awaits committee re-review. Historical, identity, localization, licensing, and audio remediation remains open in Phases 1-4.
+- Officer/OOB and audio inventories are accepted. Historical-claim and localization diagnostics were corrected after two blocked reviews; the genuine Ring-3 choice defects found by the second review are remediated, while Phase 0 completion still awaits committee re-review. Historical, identity, localization, licensing, and audio remediation remains open in Phases 1-4.
 
 ### Phase 0 corrected candidate evidence -- historical claims and localization
 
 - [Historical-claim and localization inventory report](../40_reports/audits/20260801_R7_HISTORICAL_CLAIM_LOCALIZATION_INVENTORIES.md).
-- Historical claims: 3,652 prose rows across 226 files; 1,315 documented, 1,711 need source notes, 487 need source tiers, 107 need source-floor completion, 29 need actor specificity, and 3 direct sensitive-choice rows across 2 subjects are blocked. Zero event/essay year mismatches; zero calendar-only rupture claims.
+- Historical claims: schema 4 records 3,652 prose rows across 226 files; 1,431 documented, 1,598 need source notes, 487 need source tiers, 107 need source-floor completion, 29 need actor specificity, and zero direct sensitive-choice rows remain blocked. Unknown tiers are invalid and recognized `pending` tiers remain unresolved. Zero event/essay year mismatches; zero calendar-only rupture claims.
 - Required chronology: Operation Neretva 93 and Grabovica/Uzdol event/essay anchors are in 1993 files at turns 74-76. Authored provenance is independently BLOCKED for both; the diagnostic supplies no hard-coded source.
-- Sensitive-history canon gate: 299 events, 0 CRITICAL, 0 WARNING, and 1 observational INFO after lexical provenance/choice checks moved to the semantic claim inventory.
-- Localization: 5,542 EN keys, 5,541 legacy-`bcs` translations mapped to canonical `bs`, one explicit fallback probe, 599 length-risk candidates, and 1,003 source-review findings across 386 UI files.
+- Sensitive-history canon gate: 299 events, 0 CRITICAL, 0 WARNING, and 1 observational INFO. Both audits share the bounded direct-choice semantic classifier, and the actual strict CLI treats INFO as nonblocking.
+- Sensitive-choice content: `rs_strategic_goals` retains the historical Assembly record but replaces the direct refused-act instruction with strategic/command framing; `drina_cleansing_decision_1992` now offers accountability/restraint policy, has no response-level humanitarian effect, and no longer writes a cleansing-intensity control flag. Historical consequence rows remain intact.
+- Localization: 5,542 EN keys, 5,541 legacy-`bcs` translations mapped to canonical `bs`, one explicit fallback probe, 599 length-risk candidates, and 971 source-review findings across 385 player-surface UI files after 32 deterministic technical/glyph false positives were removed.
 - Status: corrected implementation candidate; committee re-review pending. This section does not claim Phase 0 acceptance.
 
 ```powershell
-npm.cmd run test:vitest -- tests/codex_sensitive_claim_inventory.test.ts tests/codex_sensitive_history_source_notes.test.ts tests/officer_oob_provenance.test.ts tests/localization_coverage.test.ts tests/audio_asset_provenance.test.ts --pool=forks --reporter=dot
+npm.cmd run test:vitest -- tests/codex_sensitive_claim_inventory.test.ts tests/codex_sensitive_history_source_notes.test.ts tests/officer_oob_provenance.test.ts tests/localization_coverage.test.ts tests/audio_asset_provenance.test.ts tests/sensitive_history_player_choice_content.test.ts --pool=forks --reporter=dot
+npm.cmd run test:vitest -- tests/sensitive_history_canon_gate_audit.test.ts tests/sensitive_history_canon_gate_audit_strict_gate.test.ts --pool=forks --reporter=dot
 npm.cmd run canon:check
 npm.cmd run typecheck
 ```

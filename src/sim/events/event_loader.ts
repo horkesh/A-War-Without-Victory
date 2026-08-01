@@ -20,6 +20,7 @@ import {
     isRing3SensitiveFamily,
 } from './event_families.js';
 import { DIMENSION_IDS } from './strategic_dimensions.js';
+import sourceTierContract from './source_tiers.json';
 
 /**
  * Phase D Packet 44 — typed DimensionId vocabulary as a runtime Set. Mirrors
@@ -67,14 +68,7 @@ const VALID_FUTURE_CONSEQUENCE_TIMING = new Set(['immediate', 'next_turn', 'futu
 const VALID_FUTURE_CONSEQUENCE_CERTAINTY = new Set(['guaranteed', 'conditional', 'risk']);
 
 /** Phase B Sub-slice B1 — `EventDefinition.source_tier` enum. */
-const VALID_SOURCE_TIERS = new Set([
-    'icty_icj_un',
-    'agreement_text',
-    'balkan_battlegrounds',
-    'corroborated_participant',
-    'design_counterfactual',
-    'pending',
-]);
+const VALID_SOURCE_TIERS: ReadonlySet<string> = new Set(sourceTierContract.recognized);
 
 /** Phase B Sub-slice B1 — `EventDefinition.emergence_class` enum. */
 const VALID_EMERGENCE_CLASSES = new Set([

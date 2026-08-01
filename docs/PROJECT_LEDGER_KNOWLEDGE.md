@@ -4163,3 +4163,19 @@ Applied in `[2026-08-01] R2 final-tour route and frozen counter-target harness c
 
 Applied in `[2026-08-01] R4 Phase 4 Dynamic Codex source checkpoint`, `src/sim/events/realized_consequence_receipts.ts`, `src/sim/codex/dynamic_section_builder.ts`, `src/ui/map/data/consequenceReceipts.ts`, `src/ui/map/components/chronicle/generateChronicleEntries.ts`, and `src/sim/endgame/cost_ledger.ts`.
 The original candidate named in `[2026-08-01] R7 historical-claim and localization inventories completed` was blocked and is superseded by `[2026-08-01] R7 historical/localization inventory correction after blocked review`.
+
+## 2026-08-01 - Diagnostic gates must share executable semantics
+
+**A non-empty enum field is not a resolved claim:** loader-valid workflow sentinels such as `pending` and invalid near-synonyms such as `tribunal` must not satisfy provenance. Durable rule: centralize the runtime vocabulary, retain the raw value and a resolution status in inventory rows, and allow only resolved tiers to produce `documented`.
+
+**Ring-3 enforcement must be semantic, shared, and bounded to player choice prose:** broad keyword scans turn history, source notes, and guard clauses into false positives; inventory-only flags leave genuine violations outside CI. Durable rule: one classifier handles direct refused verbs/constructions in response label/description/text/narrative fields, the canon audit makes matches blocking, and only the exact canonical paramilitary-policy surface receives the section-3 carve-out.
+
+**Historical record and player authorization are separate content owners:** preserving a sourced narrative does not require presenting the documented atrocity as a selectable order. Durable rule: retain the event trigger, record, citation, and non-player consequence while rewriting the player surface around policy, constraint, accountability, or response to an already-existing state; remove response effects/flags that let the player control the refused act directly.
+
+**Canon remediation can require a narrow baseline refresh:** removing a prohibited response effect changes deterministic reports and saves even when historical consequence events remain intact. Durable rule: run the non-update baseline first, refresh only after the mismatch is explained, inspect every changed artifact hash, require unrelated scenario/control/operation hashes to remain stable, then rerun the ordinary baseline and canon gates.
+
+**Severity vocabulary must control process exit:** observational INFO cannot be documented as nonblocking while `--strict` exits nonzero on total findings. Durable rule: compute blocking from CRITICAL+WARNING in one exported helper and regression-test the actual CLI subprocess, not only a pure report builder.
+
+**Localization inventories count renderable player copy, not every English-looking token:** raw glyph entities, debug scripts, assertion labels, technical credentials, and IPC diagnostics inflate remediation queues. Durable rule: filter by deterministic source/context rules and pin known real literals so false-positive removal cannot create silent false negatives.
+
+Applied in `[2026-08-01] R7 second blocked-review correction and Ring-3 choice remediation`, `src/sim/events/source_tiers.json`, and the R7 historical/localization diagnostics and tests.

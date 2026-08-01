@@ -32,13 +32,14 @@
  *   --json              Emit structured JSON; otherwise plain-text report.
  *   --family <id>       Restrict to events whose `family` equals this id.
  *   --violations-only   Print only events with at least one violation.
- *   --strict            Exit non-zero when the audit surfaces any violation.
+ *   --strict            Exit 2 for CRITICAL/WARNING; INFO remains nonblocking.
  *
  * Determinism: sorted iteration via `strictCompare` everywhere; pure function
  * given the catalog files; no Math.random, no Date.now, no timestamps.
  */
 
 import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -46,6 +47,15 @@ import {
     isRing3SensitiveFamily,
     RING3_SENSITIVE_FAMILIES,
 } from '../../src/sim/events/event_families.js';
+
+const require = createRequire(import.meta.url);
+const {
+    isCanonAllowedParamilitaryChoice,
+    isDirectRefusedSensitiveChoice,
+} = require('./sensitive_history_semantics.cjs') as {
+    isCanonAllowedParamilitaryChoice: (eventId: string | null, family: string | null) => boolean;
+    isDirectRefusedSensitiveChoice: (text: string) => boolean;
+};
 
 const CATALOG_FILES = [
     'data/scenarios/events/war_1992.json',
@@ -167,6 +177,7 @@ export type Severity = 'CRITICAL' | 'WARNING' | 'INFO';
 
 export type ViolationKind =
     | 'missing_section_3_6_guard'
+    | 'sensitive_player_choice'
     | 'calendar_only_rupture_claim'
     | 'weak_punitive_floor'
     | 'forbidden_positive_territorial_legitimacy'
@@ -537,12 +548,30 @@ function evaluateEvent(row: Record<string, unknown>, allRows: unknown[]): EventC
 
     const sensitiveAdjacent = !ring3 && detectedSensitive.length > 0;
 
+    // Direct Ring-3 acts are checked only in player-facing option prose. This
+    // semantic boundary avoids the former broad lexical false positives in
+    // historical narration, source notes, and future guard text.
+    if (!isCanonAllowedParamilitaryChoice(eventId, family)) {
+        const choiceFields = ['description', 'label', 'narrative', 'text'] as const;
+        for (const option of options) {
+            if (!isRecord(option)) continue;
+            const optionId = stringOrNull(option.id) ?? '<unknown-option>';
+            for (const field of choiceFields) {
+                const text = stringOrNull(option[field]);
+                if (text === null || !isDirectRefusedSensitiveChoice(text)) continue;
+                violations.push({
+                    event_id: eventId,
+                    family,
+                    kind: 'sensitive_player_choice',
+                    severity: 'CRITICAL',
+                    detail: 'A direct Ring-3 refused act appears in player response prose; sensitive history must remain consequence/record rather than player authorization.',
+                    locator: `${optionId}.${field}`,
+                });
+            }
+        }
+    }
+
     // Calendar-only rupture assertions are a canon-owned state invariant.
-    // Historical provenance, actor specificity, and semantic classification of
-    // player-facing prose belong to the claim inventory. Keeping those checks
-    // separate prevents lexical references (for example "hardline camp" or
-    // Dayton refugee-return text) from becoming false canon violations while
-    // preserving the fail-closed rupture gate below.
     if (/genocide.*rupture|rupture.*genocide|srebrenica_genocide/i.test(eventId) && !hasLiveStatePredicate(row)) {
         violations.push({
             event_id: eventId,
@@ -737,6 +766,7 @@ function computeSummary(
     const byFamily: Record<string, number> = {};
     const byKind: Record<ViolationKind, number> = {
         missing_section_3_6_guard: 0,
+        sensitive_player_choice: 0,
         calendar_only_rupture_claim: 0,
         weak_punitive_floor: 0,
         forbidden_positive_territorial_legitimacy: 0,
@@ -773,6 +803,11 @@ function computeSummary(
         violations_by_family: byFamily,
         violations_by_kind: byKind,
     };
+}
+
+export function hasBlockingViolations(report: AuditReport): boolean {
+    return report.summary.violations_by_severity.CRITICAL > 0
+        || report.summary.violations_by_severity.WARNING > 0;
 }
 
 // ─── Text rendering ───────────────────────────────────────────────────────
@@ -893,7 +928,7 @@ function main(): void {
         printTextReport(report);
     }
 
-    if (args.strict && report.summary.total_violations > 0) {
+    if (args.strict && hasBlockingViolations(report)) {
         process.exit(2);
     }
 }
