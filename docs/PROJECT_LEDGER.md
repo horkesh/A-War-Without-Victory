@@ -1,4 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+
+## [2026-08-01] R5 Phase 2c dense formation occupancy acceptance
+
+**Type:** R5 Phase 2c measured simulation-performance optimization / invocation-local derived index / deterministic equivalence / roadmap propagation.
+
+**Fix:** Added `sector_build_derived_context.ts` with a stable strict-sorted OSID ordinal map and `Uint32Array` formation occupancy counts. One index is constructed per `ensureMinimumSectorCoverage(...)` invocation, replaces eight repeated active-brigade location scans, and is updated at the exact owner of the function's sole `location_osid` write. Eligibility matches the legacy active brigade/operational-group boundary. Unknown mutation targets, stale or double moves, underflow, overflow, and formation-id mismatches fail closed. The index is absent from `GameState`, saves, globals, and cross-turn state. Reachability and incremental topology are deliberately excluded so the measured cause remains isolated.
+
+**Measured evidence:** Candidate commit `25313d1c05b174188fad167ff38ed826b6aa737d` was compared to its exact parent `e0481393f32d77001369a78e462f494200bed831` in the order control/candidate repeated three times under one exclusive runtime lease. Fully captured controls measured `1,162.403`, `1,231.142`, and `1,157.103 ms/turn`; candidates measured `1,118.922`, `1,163.315`, and `1,084.132`. Means were `1,183.549` versus `1,122.123 ms/turn` (`-5.190%`), all three pairs improved, and mean simulation improved `5.178%`. The current V8 owner packet reduces `ensureMinimumSectorCoverage` from `3,124.746` to `1,623.138 ms` inclusive (`-48.055%`), `buildCorpsFrontSectors` from `14,170.635` to `12,938.800 ms` (`-8.693%`), and the three sector phases from `15,092.603` to `13,493.006 ms` (`-10.599%`). Warmup, phase/sector, V8, and every measured control/candidate save are exactly `5,070,902` bytes with SHA-256 `b28225e47b8e7ba563c4e836151fc8699f3cd191f4912c6c13ac7c099719fbd5` and state hash `b28225e47b8e7ba5`.
+
+**Verification:** Missing-module RED failed as intended. The isolated occupancy contract passed 4/4 tests; the focused occupancy/coverage slice passed 3 files / 26 tests; the complete sector/full-state gate passed 6 files / 46 tests in `330.16s`, including 100+ deterministic real-save variants and all production reconciliation modes. TypeScript passed. A fresh baseline child process exited `0` with all scenarios matching; no approved baseline was refreshed. The repository hotspot and aggregate wall-clock report CLIs passed against the retained packet. Raw commands, commits, child exit codes, timing/save/stdout/stderr paths and SHA-256 values are retained in the ignored 32,067-byte manifest `data/derived/_debug/r5_phase2c_dense_occupancy_replication/manifest.json` (SHA-256 `6c65d7abffedbf95a4fdfeff9427b35b3e4c47fdd310eeae6a480499d4764c13`).
+
+**Scope/determinism:** Formation occupancy lookup cost, one mirrored mutation adapter, focused tests, measured report, roadmap/board, plan, ledger, and reusable knowledge only. No scenario/event data, combat or assignment rule, threshold, traversal/tie order, RNG, save schema, baseline content, package, version, tag, signing, publication, release state, canon, or `FORAWWV.md` changed. The accepted floor is `1,122.123 ms/turn` (`11.2212x` target), so R5 remains open; red-first reachability/sector-fact equivalence is next.
+
+---
+
 ## [2026-08-01] fix(events): bind Goražde consolidation to current control truth
 
 **Type:** R6 Phase 0 historical event-state correction / deterministic baseline reconciliation / tests / roadmap propagation.

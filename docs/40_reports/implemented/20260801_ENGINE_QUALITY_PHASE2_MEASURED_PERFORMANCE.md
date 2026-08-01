@@ -5,7 +5,7 @@
 **Scenario:** `data/scenarios/apr1992_definitive_40w.json`
 **Reference machine:** AMD Ryzen 7 5700X, 8 physical / 16 logical cores, Windows x64, Node v24.13.0
 **Target:** mean below 100 ms per simulated turn
-**Status:** Operational-graph, runtime-hardened immutable-adjacency, and operational-data ownership reuse remain accepted. Same-parent control disproves the apparent committee-repair regression; the earlier `+18.155%` packet is preserved below as historical evidence but superseded as a causal timing result. The Phase 2b fixed-point candidate is committee-blocked: its first shortcut omitted the mutation receipt from ghost pruning, its original property test covered only a partial sector surface/default mode, and its 20-pair microbenchmark retained neither the exact command nor raw output. Its timing packet is diagnostic history, not accepted performance evidence. The performance target is not met.
+**Status:** Operational-graph, runtime-hardened immutable-adjacency, operational-data ownership reuse, and the Phase 2c call-scoped dense formation-occupancy index are accepted. Same-parent control disproves the apparent committee-repair regression; the earlier `+18.155%` packet is preserved below as historical evidence but superseded as a causal timing result. The Phase 2b fixed-point candidate remains committee-blocked. The accepted Phase 2c replay mean is `1,122.123 ms/turn`, or `11.2212x` the target, so the performance target is not met.
 
 ## Determinism boundary
 
@@ -39,6 +39,7 @@ No baseline was refreshed. The different bytes between the historical and curren
 | Exact pre-committee control at reviewed-parent lineage (`5c272e0b4`) | 1 control | 1,377.877 | n/a | n/a | n/a | Same-condition causal control for the receipt correction. |
 | Corrected receipts at reviewed parent (`6649ae8ca`) | 1 control | 1,332.681 | n/a | n/a | 203.571 MB | 3.280% faster than the exact pre-committee control; the old regression attribution is disproved. |
 | Fixed-point mutation receipts (committee-blocked packet) | 3 measured | 1,223.822 | 1,219.931 | 1,254.343 | 197.974 MB | Diagnostic only. Source dependency proof and benchmark provenance were insufficient; no performance acceptance is claimed. |
+| Dense formation occupancy (Phase 2c accepted replay) | 3 measured | 1,122.123 | 1,118.922 | 1,163.315 | 254.082 MB | Exact-parent control mean was 1,183.549 ms/turn; candidate mean improved 5.190%, all three pairs improved, and all saves were byte-identical. |
 
 The three replicated operational-graph samples were `1,285.520`, `1,289.839`, and `1,302.636` ms/turn.
 
@@ -145,7 +146,7 @@ Commit `a7b417c0f` remains the blocked initial fixed-point candidate; commit `65
 
 ## Remaining target gap and next measured owner
 
-The accepted historical best replicated mean remains `1,189.962` ms/turn, or 11.8996x the 100 ms/turn target. The blocked fixed-point packet's `1,223.822` ms/turn mean is not an accepted checkpoint or floor. No Phase 2 completion or Phase 2b performance-acceptance claim is made.
+The accepted current-parent best replicated mean is now `1,122.123` ms/turn, or `11.2212x` the 100 ms/turn target. The earlier operational-data floor remains valid historical evidence at `1,189.962 ms/turn`, while the blocked fixed-point packet's `1,223.822 ms/turn` mean is not an accepted checkpoint. No Phase 2 completion or Phase 2b performance-acceptance claim is made.
 
 The current application profile ranks the next bounded owners as:
 
@@ -223,3 +224,35 @@ The candidate was not retained. Its like-mode excluded warmup completed in `46,3
 The source and test spike were fully reverted; production source and tracked tests are unchanged. Ignored negative evidence remains under `data/derived/_debug/r5_phase2c_status_reuse_*` and `runs_perf/r5_phase2c_status_reuse_*`. The next safe executable step is the red-first, call-scoped dense formation-occupancy contract in Task 2 of the Phase 2c plan. It must prove mutation-sequence parity before any production hot-path replacement or candidate timing.
 
 The rejected packet's warmup transcript, CPU profile, phase report, and V8 summary are respectively SHA-256 `7c3f22b5979dc335dfbe76b7d2fe4ce7ae277f34753085a406909bbcd8f9f9fd`, `5886281c0f4a638932a8b2a77d11bb650ea90720d20a47a70bf115ab997de53f`, `6afb721b69f1e4f0348103570dbc502753665323a95068f271902b09901dd879`, and `bf91222a248c3f428859f45a1b7d165d7f6abaf8372d458a6be34ab51980cb89`. The transcripts preserve the exact command lines; the reverted source/test blobs are `19511d45ab085704fa9ea06c6407439c497cbc55` and `b299f65ab065f43edad6d5a0cfd830edb9c92e6f`.
+
+### Accepted Phase 2c dense formation occupancy
+
+The retained candidate is commit `25313d1c05b174188fad167ff38ed826b6aa737d`, whose exact parent/control is `e0481393f32d77001369a78e462f494200bed831`. It constructs one stable-ordinal `Uint32Array` occupancy index per `ensureMinimumSectorCoverage(...)` invocation, replaces eight repeated full formation-location scans, and updates the index at the same statement that owns the function's sole `location_osid` mutation. Unknown OSIDs, stale/double moves, underflow, overflow, and formation-id mismatches fail closed. No index crosses an invocation or enters `GameState`, and no reachability, pass-skipping, rule, or threshold change is included.
+
+The excluded warmup completed in `44,743.659 ms` and preserved exact bytes. The like-mode phase/sector profile completed in `44,174.035 ms`, compared with `46,291.786 ms` for the exact-parent current profile. The three named sector phases fell from `15,092.603` to `13,493.006 ms` (`-10.599%`):
+
+| Phase owner | Exact-parent ms | Candidate ms | Delta |
+|---|---:|---:|---:|
+| `reconcile-final-sector-truth` | 6,368.145 | 5,668.880 | -10.981% |
+| `partition-corps-front-sectors` | 5,765.945 | 5,303.939 | -8.013% |
+| `reconcile-final-sector-truth-after-ops` | 2,958.513 | 2,520.187 | -14.816% |
+| **Three-sector total** | **15,092.603** | **13,493.006** | **-10.599%** |
+
+The candidate V8 profile sampled `47,354.022 ms`, `31,592` samples, and `1,791` frames. The named `ensureMinimumSectorCoverage` owner fell from `3,124.746` to `1,623.138 ms` inclusive (`-48.055%`); its removed brigade-assignment `countActiveBrigadesByOsid` frame no longer appears, while the replacement `DenseFormationOccupancyIndex` costs `597.951 ms` inclusive. `buildCorpsFrontSectors` fell from `14,170.635` to `12,938.800 ms` inclusive (`-8.693%`). The separate `countActiveBrigadesByOsid` in `brigade_front_distribution.ts` remains `428.529 ms` and is not claimed by this packet.
+
+The authoritative fully captured alternating sequence was `control_1, candidate_1, control_2, candidate_2, control_3, candidate_3`. It used one dependency installation and exact-parent detached control under the same exclusive runtime lease:
+
+| Run | Control ms/turn | Candidate ms/turn | Pair delta |
+|---:|---:|---:|---:|
+| 1 | 1,162.403 | 1,118.922 | -3.741% |
+| 2 | 1,231.142 | 1,163.315 | -5.509% |
+| 3 | 1,157.103 | 1,084.132 | -6.306% |
+| **Mean** | **1,183.549** | **1,122.123** | **-5.190%** |
+
+Candidate P50/P95 were `1,118.922` / `1,163.315 ms/turn`, versus control `1,162.403` / `1,231.142`. Mean simulation time fell from `1,138.446` to `1,079.494 ms/turn` (`-5.178%`). A preceding alternating sequence with complete timing/save artifacts but incomplete stdout capture also favored the candidate (`1,101.322` versus `1,140.842 ms/turn`, `-3.464%`); it is corroborating evidence only and does not replace the fully captured replay.
+
+Warmup, phase/sector, V8, and all twelve control/candidate measured saves were each exactly `5,070,902` bytes with SHA-256 `b28225e47b8e7ba563c4e836151fc8699f3cd191f4912c6c13ac7c099719fbd5` and state hash `b28225e47b8e7ba5`. The full-state gate passed 6 files / 46 tests over 100+ deterministic real-save variants and all production reconciliation modes; the focused occupancy/coverage slice passed 3 files / 26 tests; TypeScript passed. A fresh baseline process exited `0` with `Baseline regression: all scenarios match.` No baseline was refreshed.
+
+Raw evidence is ignored by artifact policy but retained under `data/derived/_debug/r5_phase2c_dense_occupancy_*`, `data/derived/_debug/r5_phase2c_dense_occupancy_replication/`, and `runs_perf/r5_phase2c_dense_occupancy_*`. The authoritative manifest is 32,067 bytes, SHA-256 `6c65d7abffedbf95a4fdfeff9427b35b3e4c47fdd310eeae6a480499d4764c13`; it records every command, commit, timing path/hash, stdout/stderr path/hash, final-save path/hash, pair delta, and exit code. The repository's hotspot and aggregate wall-clock report CLIs both passed against the retained packet; their JSON SHA-256 values are `cbf1d4930d4cd1304ff76a1014273a4685fe1d044ebad0433080d62d3ea9b30f` and `af1fa0df09bdc4b0f12c819b7f515f9246fb9a657278710494ba4610b6eb78c3`. The candidate CPU profile, phase report, sector sidecar, V8 phase report, and V8 summary are respectively SHA-256 `e09fcc6823c6e060c3067e89a3794febea01449a33e291312446bfba953ad134`, `543fda5fde4ce2eed01c52c83eea6b6ed9c418dc96856a60bbe6001dd1d7b299`, `d14893f5287f55c9bf846edcd0aa0cc39b5177e9b1a69c4cac2f19c43eeccb45`, `a412aa7ee902dc1e62ab169d0593bacc1560c342cb6f025c1903eeb97b0a23c9`, and `53ec4e5de4603c70be38fc59e6a5741de125d6905a04ea6a13d8fad7a217928a`.
+
+The fresh candidate profile still ranks `buildCorpsFrontSectors` as the dominant inclusive application owner. Its three sector phases consume `337.325 ms/turn`; perfect removal would still leave about `767.026 ms/turn` in that profile. R5 therefore remains open. The next bounded owner is Task 3's red-first reachability/sector-fact equivalence packet; any later incremental topology solver remains conditional on that safer call-scoped work and another fresh full profile.
