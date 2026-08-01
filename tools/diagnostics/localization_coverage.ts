@@ -19,6 +19,9 @@ const PLAYER_COPY_ATTRIBUTES = new Set([
     'title',
 ]);
 const SOURCE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx']);
+const NON_PLAYER_SOURCE_DIRECTORIES = new Set(['src/ui/map/scripts']);
+const RAW_GLYPH_ENTITY_PATTERN = /^(?:\s*&(?:#[0-9]+|#x[0-9a-f]+|[a-z]+);\s*)+$/i;
+const TECHNICAL_LITERAL_PATTERN = /^(?:sk|pk)-[a-z0-9_.-]*\.{3}$/i;
 
 export type LocalizationFindingKind =
     | 'embedded_english'
@@ -106,7 +109,8 @@ function listSourceFiles(rootDir: string, relativeDir = UI_SOURCE_ROOT): string[
     for (const entry of entries.sort((a, b) => strictCompare(a.name, b.name))) {
         const child = `${relativeDir}/${entry.name}`;
         if (entry.isDirectory()) {
-            if (['__mocks__', '.storybook', 'node_modules', 'saved', 'stories'].includes(entry.name)) continue;
+            if (['__mocks__', '.storybook', 'node_modules', 'saved', 'stories'].includes(entry.name)
+                || NON_PLAYER_SOURCE_DIRECTORIES.has(child)) continue;
             files.push(...listSourceFiles(rootDir, child));
             continue;
         }
@@ -124,7 +128,11 @@ function normalizeExcerpt(value: string): string {
 
 function looksLikePlayerCopy(value: string): boolean {
     const normalized = value.trim();
-    return /[A-Za-z]{2}/.test(normalized) && !/^[-_:.#/]+$/.test(normalized);
+    return /[A-Za-z]{2}/.test(normalized)
+        && !/^[-_:.#/]+$/.test(normalized)
+        && !RAW_GLYPH_ENTITY_PATTERN.test(normalized)
+        && !TECHNICAL_LITERAL_PATTERN.test(normalized)
+        && !/\bIPC\b/.test(normalized);
 }
 
 function looksLikeEmbeddedCopy(value: string): boolean {
@@ -169,8 +177,23 @@ function isFirstCallArgument(node: ts.StringLiteralLike): boolean {
     return ts.isCallExpression(node.parent) && node.parent.arguments[0] === node;
 }
 
+function isNonPlayerDiagnosticCall(node: ts.StringLiteralLike): boolean {
+    for (let current: ts.Node | undefined = node.parent; current; current = current.parent) {
+        if (ts.isCallExpression(current)) {
+            const callee = current.expression;
+            if (ts.isIdentifier(callee) && /^(?:assert|debug|trace)/i.test(callee.text)) return true;
+            if (ts.isPropertyAccessExpression(callee)
+                && ts.isIdentifier(callee.expression)
+                && /^(?:console|performance)$/i.test(callee.expression.text)) return true;
+        }
+        if (ts.isStatement(current) || ts.isSourceFile(current)) break;
+    }
+    return false;
+}
+
 function isEmbeddedLiteralContext(node: ts.StringLiteralLike, sourceFile: ts.SourceFile): boolean {
-    if (ts.isJsxAttribute(node.parent) || hasPlusExpressionAncestor(node) || isFirstCallArgument(node)) return false;
+    if (ts.isJsxAttribute(node.parent) || hasPlusExpressionAncestor(node) || isFirstCallArgument(node)
+        || isNonPlayerDiagnosticCall(node)) return false;
     for (let current: ts.Node | undefined = node.parent; current; current = current.parent) {
         if (ts.isJsxAttribute(current)
             && !PLAYER_COPY_ATTRIBUTES.has(current.name.getText(sourceFile))) return false;

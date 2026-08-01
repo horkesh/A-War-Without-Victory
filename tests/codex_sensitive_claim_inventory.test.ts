@@ -300,7 +300,7 @@ test('inventory detects forbidden scaffold tokens and reports deterministic poli
         const second = await inventory.scanSensitiveClaimInventory({ rootDir: root });
 
         assert.deepStrictEqual(first, second);
-        assert.strictEqual(first.schema_version, 3);
+        assert.strictEqual(first.schema_version, 4);
         assert.strictEqual(first.summary.claim_count, 1);
         assert.deepStrictEqual(first.summary.risk_class_counts, { unsupported_remove: 1 });
         assert.deepStrictEqual(first.policy.term_sets.forbidden_scaffold, ['FIXME', 'TODO', 'atrocity lever', 'cleansing lever', 'placeholder']);
@@ -323,7 +323,7 @@ test('inventory emits actionable historical provenance and interaction ownership
                 id: 'grabovica_uzdol_massacres_1993',
                 category: 'humanitarian',
                 narrative: 'ARBiH soldiers killed Croat civilians at Grabovica and Uzdol in September 1993.',
-                source_tier: 'tribunal',
+                source_tier: 'icty_icj_un',
                 historical_source: 'ICTY Halilovic Trial Judgment (IT-01-48-T).',
                 source_note: 'Provenance only; distinguishes charged acts from the acquittal on command responsibility.',
                 responding_faction: 'RBiH',
@@ -339,7 +339,7 @@ test('inventory emits actionable historical provenance and interaction ownership
                 id: 'forbidden_choice_1993',
                 category: 'humanitarian',
                 narrative: 'A sensitive-history fixture.',
-                source_tier: 'fixture',
+                source_tier: 'design_counterfactual',
                 historical_source: 'Fixture citation.',
                 source_note: 'Fixture source note.',
                 responding_faction: 'RBiH',
@@ -353,12 +353,13 @@ test('inventory emits actionable historical provenance and interaction ownership
             claim.subject_id === 'grabovica_uzdol_massacres_1993' && claim.field_path === '$[0].narrative'
         ));
         assert.ok(grabovica);
-        assert.strictEqual(result.schema_version, 3);
+        assert.strictEqual(result.schema_version, 4);
         assert.strictEqual(grabovica.ring, 'ring_2_informational');
         assert.strictEqual(grabovica.claim, grabovica.excerpt);
         assert.strictEqual(grabovica.date_window, 'turns 74-76');
         assert.strictEqual(grabovica.state_predicate, 'phase=war; requires_events=operation_neretva_93_1993');
-        assert.strictEqual(grabovica.source_tier, 'tribunal');
+        assert.strictEqual(grabovica.source_tier, 'icty_icj_un');
+        assert.strictEqual(grabovica.source_tier_status, 'resolved');
         assert.strictEqual(grabovica.citation, 'ICTY Halilovic Trial Judgment (IT-01-48-T).');
         assert.strictEqual(grabovica.respondent, 'RBiH');
         assert.strictEqual(grabovica.player_interaction_type, 'informational');
@@ -398,6 +399,20 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
                     id: 'aggressive',
                     description: 'General Staff warned of genocide. Proceed anyway and make it swift.',
                 }],
+            },
+            {
+                id: 'direct_refused_verbs_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [
+                    { id: 'expel', label: 'Expel the population' },
+                    { id: 'camps', label: 'Authorize concentration camps' },
+                    { id: 'kill', label: 'Order civilians killed' },
+                    { id: 'deport', label: 'Deport the civilian population' },
+                    { id: 'continue', label: 'Continue expulsions' },
+                    { id: 'forced', label: 'Authorize forced displacement' },
+                    { id: 'cleansing', label: 'Proceed with ethnic cleansing' },
+                ],
             },
             {
                 id: 'lexical_context_1992',
@@ -440,10 +455,14 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
         const blocked = report.claims.filter((claim: { status: string }) => (
             claim.status === 'blocked_sensitive_player_choice'
         ));
-        assert.deepStrictEqual(blocked.map((claim: { subject_id: string }) => claim.subject_id), [
+        assert.deepStrictEqual([...new Set(blocked.map((claim: { subject_id: string }) => claim.subject_id))], [
             'direct_displacement_choice_1992',
             'direct_genocide_choice_1992',
+            'direct_refused_verbs_1992',
         ]);
+        assert.strictEqual(blocked.filter((claim: { subject_id: string }) => (
+            claim.subject_id === 'direct_refused_verbs_1992'
+        )).length, 7);
 
         const contextual = report.claims.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'lexical_context_1992'
@@ -518,7 +537,7 @@ test('inventory covers claim prose without relying on a narrow keyword list', as
     assert.ok(report.policy.claim_prose_keys.includes('trigger_evidence'));
 });
 
-test('documented status requires an authored source tier', async () => {
+test('documented status requires a recognized and resolved authored source tier', async () => {
     const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
     try {
         await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
@@ -531,10 +550,18 @@ test('documented status requires an authored source tier', async () => {
                 source_note: 'Fixture provenance boundary.',
             },
             {
-                id: 'note_only_1993',
-                narrative: 'A second event enters the record.',
-                source_note: 'A boundary note is not a citation.',
+                id: 'invalid_tier_1993',
+                narrative: 'A second documented event enters the record.',
+                historical_source: 'Fixture citation.',
+                source_note: 'Fixture provenance boundary.',
                 source_tier: 'tribunal',
+            },
+            {
+                id: 'pending_tier_1993',
+                narrative: 'A third documented event enters the record.',
+                historical_source: 'Fixture citation.',
+                source_note: 'Fixture provenance boundary.',
+                source_tier: 'pending',
             },
         ]);
 
@@ -542,14 +569,40 @@ test('documented status requires an authored source tier', async () => {
         const narrative = report.claims.find((claim: { field_path: string }) => claim.field_path.endsWith('.narrative'));
         assert.ok(narrative);
         assert.strictEqual(narrative.source_tier, null);
+        assert.strictEqual(narrative.source_tier_status, 'missing');
         assert.strictEqual(narrative.status, 'needs_source_tier');
         assert.deepStrictEqual(narrative.provenance_gaps, ['source_tier']);
 
-        const noteOnly = report.claims.find((claim: { subject_id: string }) => claim.subject_id === 'note_only_1993');
-        assert.ok(noteOnly);
-        assert.strictEqual(noteOnly.citation, null);
-        assert.strictEqual(noteOnly.source_status, 'uncited');
-        assert.deepStrictEqual(noteOnly.provenance_gaps, ['citation']);
+        const invalid = report.claims.find((claim: { subject_id: string }) => claim.subject_id === 'invalid_tier_1993');
+        assert.ok(invalid);
+        assert.strictEqual(invalid.source_tier, 'tribunal');
+        assert.strictEqual(invalid.source_tier_status, 'invalid');
+        assert.strictEqual(invalid.status, 'needs_source_tier');
+        assert.deepStrictEqual(invalid.provenance_gaps, ['source_tier']);
+
+        const pending = report.claims.find((claim: { subject_id: string }) => claim.subject_id === 'pending_tier_1993');
+        assert.ok(pending);
+        assert.strictEqual(pending.source_tier, 'pending');
+        assert.strictEqual(pending.source_tier_status, 'pending');
+        assert.strictEqual(pending.status, 'needs_source_tier');
+        assert.deepStrictEqual(pending.provenance_gaps, ['source_tier']);
+        assert.deepStrictEqual(report.policy.source_tiers, {
+            recognized: [
+                'agreement_text',
+                'balkan_battlegrounds',
+                'corroborated_participant',
+                'design_counterfactual',
+                'icty_icj_un',
+                'pending',
+            ],
+            resolved: [
+                'agreement_text',
+                'balkan_battlegrounds',
+                'corroborated_participant',
+                'design_counterfactual',
+                'icty_icj_un',
+            ],
+        });
     } finally {
         await rm(root, { recursive: true, force: true });
     }

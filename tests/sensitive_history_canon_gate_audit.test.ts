@@ -249,19 +249,65 @@ describe('scanOptionCostFloor', () => {
 // ─── End-to-end audit semantics ────────────────────────────────────────────
 
 describe('buildSensitiveHistoryAudit', () => {
-    it('does not promote historical-inventory review rows into the canon CI gate', () => {
+    it('blocks direct Ring-3 acts semantically without restoring broad lexical false positives', () => {
         const report = buildSensitiveHistoryAudit({
-            rows: [{
-                id: 'generic_sensitive_fixture_1993',
-                category: 'humanitarian',
-                narrative: 'Atrocities on both sides left civilians dead.',
-                historical_source: 'Fixture citation.',
-                trigger: { turn_min: 74, turn_max: 76, phase: 'war' },
-                response_options: [{ id: 'authorize', label: 'Authorize forced displacement' }],
-            }],
+            rows: [
+                {
+                    id: 'direct_refused_choices_1993',
+                    response_options: [
+                        { id: 'expel', label: 'Expel the population' },
+                        { id: 'camps', label: 'Authorize concentration camps' },
+                        { id: 'camps_review', label: 'Authorize concentration camps and investigate the chain of command' },
+                        { id: 'kill', label: 'Order civilians killed' },
+                        { id: 'deport', label: 'Deport the civilian population' },
+                        { id: 'continue', label: 'Continue expulsions' },
+                        { id: 'forced', label: 'Authorize forced displacement' },
+                        { id: 'cleansing', label: 'Proceed with ethnic cleansing' },
+                        { id: 'begin_deporting', label: 'Begin deporting civilians' },
+                        { id: 'establish_camps', label: 'Establish detention camps' },
+                        { id: 'civilian_killings', label: 'Approve civilian killings' },
+                    ],
+                },
+                {
+                    id: 'contextual_sensitive_history_1993',
+                    narrative: 'Atrocities on both sides left civilians dead.',
+                    response_options: [
+                        { id: 'review', label: 'Continue the command accountability review' },
+                        { id: 'record', description: 'Document reports of concentration camps for prosecution.' },
+                        { id: 'investigate', description: 'Authorize an investigation of concentration camps.' },
+                        { id: 'refuse', description: 'Do not authorize detention camps.' },
+                        { id: 'investigate_cleansing', description: 'Investigate systematic cleansing.' },
+                        { id: 'prevent_displacement', description: 'Prevent maximum displacement.' },
+                        { id: 'return', description: 'Continue refugee returns under civilian protection.' },
+                    ],
+                },
+                {
+                    id: 'rs_paramilitary_policy_1992',
+                    family: 'rs_paramilitary_policy',
+                    response_options: [
+                        { id: 'always_allow', label: 'Always allow paramilitary deployment' },
+                    ],
+                },
+            ],
         });
 
-        expect(report.violations).toEqual([]);
+        const refused = report.violations.filter((row) => row.kind === 'sensitive_player_choice');
+        expect(refused).toHaveLength(11);
+        expect(refused.every((row) => row.event_id === 'direct_refused_choices_1993')).toBe(true);
+        expect(refused.every((row) => row.severity === 'CRITICAL')).toBe(true);
+        expect(refused.map((row) => row.locator)).toEqual([
+            'begin_deporting.label',
+            'camps.label',
+            'camps_review.label',
+            'civilian_killings.label',
+            'cleansing.label',
+            'continue.label',
+            'deport.label',
+            'establish_camps.label',
+            'expel.label',
+            'forced.label',
+            'kill.label',
+        ]);
     });
 
     it('flags rupture claims whose trigger has no live state predicate', () => {
@@ -270,7 +316,7 @@ describe('buildSensitiveHistoryAudit', () => {
                 id: 'fixture_genocide_rupture_1995',
                 category: 'humanitarian',
                 narrative: 'A genocide rupture is recorded.',
-                source_tier: 'tribunal',
+                source_tier: 'icty_icj_un',
                 historical_source: 'Fixture tribunal citation.',
                 source_note: 'Fixture provenance-only note.',
                 trigger: { turn_min: 160, turn_max: 161, phase: 'war' },

@@ -4,8 +4,13 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const sourceTierContract = require('../../src/sim/events/source_tiers.json');
+const {
+  isCanonAllowedParamilitaryChoice,
+  isDirectRefusedSensitiveChoice,
+} = require('./sensitive_history_semantics.cjs');
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 const EXCERPT_CHARS = 160;
 
 // The runtime Codex panel (src/ui/map/components/CodexPanel.tsx) imports
@@ -119,16 +124,8 @@ const CLAIM_PROSE_KEYS = new Set([
 
 const GENERIC_SYMMETRY_PATTERN = /\b(?:both|all) sides\b|\bno faction\b.{0,48}\bclean hands\b/i;
 const DIRECT_CHOICE_FIELDS_PATTERN = /\.response_options\[\d+\]\.(?:description|label|narrative|text)$/;
-const PROHIBITED_ACT_PATTERN = /\b(?:ethnic cleansing|cleansing|forced displacement|deportation|expulsion|massacre|genocide)\b/i;
-const PROHIBITED_ACTION_PATTERN = /\b(?:allow|approve|authorize|begin|commit|conduct|continue|execute|implement|order|proceed|pursue)\b/i;
-const CANON_ALLOWED_PARAMILITARY_IDS = new Set([
-  'rbih_paramilitary_policy_1992',
-  'rs_paramilitary_policy_1992',
-]);
-const CANON_ALLOWED_PARAMILITARY_FAMILIES = new Set([
-  'rbih_paramilitary_policy',
-  'rs_paramilitary_policy',
-]);
+const RECOGNIZED_SOURCE_TIERS = new Set(sourceTierContract.recognized);
+const RESOLVED_SOURCE_TIERS = new Set(sourceTierContract.resolved);
 
 const SRC_PATH_KEYWORDS = Object.freeze([
   'codex',
@@ -544,15 +541,24 @@ function nearestSubjectObject(ancestors, rootValue) {
     : null;
 }
 
+function sourceTierStatusFor(sourceTier) {
+  if (!sourceTier) return 'missing';
+  if (sourceTier === 'pending') return 'pending';
+  if (RESOLVED_SOURCE_TIERS.has(sourceTier)) return 'resolved';
+  return RECOGNIZED_SOURCE_TIERS.has(sourceTier) ? 'pending' : 'invalid';
+}
+
 function sourceDetailsFor(ancestors, rootValue) {
   const sourceObject = nearestSourceObject(ancestors) ?? nearestSubjectObject(ancestors, rootValue);
   if (!sourceObject) {
-    return { citation: null, sourceTier: null, sourceNote: null };
+    return { citation: null, sourceTier: null, sourceTierStatus: 'missing', sourceNote: null };
   }
   const citations = CITATION_KEYS.flatMap((key) => flattenSourceValues(sourceObject[key]));
+  const sourceTier = asNonEmptyString(sourceObject.source_tier);
   return {
     citation: citations.length > 0 ? [...new Set(citations)].sort(compareText).join(' | ') : null,
-    sourceTier: asNonEmptyString(sourceObject.source_tier),
+    sourceTier,
+    sourceTierStatus: sourceTierStatusFor(sourceTier),
     sourceNote: asNonEmptyString(sourceObject.source_note),
   };
 }
@@ -691,24 +697,17 @@ function respondentFor(ancestors, rootValue) {
   return null;
 }
 
-function isCanonAllowedParamilitaryChoice(ancestors, rootValue) {
+function subjectAllowsParamilitaryChoice(ancestors, rootValue) {
   const subject = nearestSubjectObject(ancestors, rootValue);
   const id = asNonEmptyString(subject?.id) ?? '';
   const family = asNonEmptyString(subject?.family) ?? '';
-  return CANON_ALLOWED_PARAMILITARY_IDS.has(id) || CANON_ALLOWED_PARAMILITARY_FAMILIES.has(family);
-}
-
-function isDirectProhibitedChoice(text) {
-  if (/\bsystematic\s+(?:ethnic\s+)?cleansing\b/i.test(text)) return true;
-  if (/\bmaximum\s+displacement\b/i.test(text)) return true;
-  if (/\bgenocide\b[\s\S]{0,96}\bproceed\b/i.test(text)) return true;
-  return (PROHIBITED_ACTION_PATTERN.test(text) && PROHIBITED_ACT_PATTERN.test(text));
+  return isCanonAllowedParamilitaryChoice(id, family);
 }
 
 function playerInteractionTypeFor(fieldPath, text, ancestors, rootValue) {
   if (DIRECT_CHOICE_FIELDS_PATTERN.test(fieldPath)
-    && isDirectProhibitedChoice(text)
-    && !isCanonAllowedParamilitaryChoice(ancestors, rootValue)) {
+    && isDirectRefusedSensitiveChoice(text)
+    && !subjectAllowsParamilitaryChoice(ancestors, rootValue)) {
     return 'player_choice';
   }
   if (fieldPath.includes('.response_options[')) return 'decision_context';
@@ -728,12 +727,12 @@ function provenanceGapsFor(sourceInfo, sourceDetails) {
   if (sourceInfo.status === 'source_floor_exception') gaps.push('source_floor');
   if (!sourceDetails.citation) gaps.push('citation');
   if (!sourceDetails.sourceNote) gaps.push('source_note');
-  if (!sourceDetails.sourceTier) gaps.push('source_tier');
+  if (sourceDetails.sourceTierStatus !== 'resolved') gaps.push('source_tier');
   return gaps;
 }
 
 function statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate, text }) {
-  if (ring === 'ring_3_refused_candidate' && riskClass === 'sensitive_history_gated') {
+  if (ring === 'ring_3_refused_candidate') {
     return { status: 'blocked_sensitive_player_choice', owner: 'historian+game-designer' };
   }
   if (GENERIC_SYMMETRY_PATTERN.test(text)) {
@@ -745,7 +744,7 @@ function statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePr
   if (sourceInfo.status !== 'cited' || !sourceDetails.citation || !sourceDetails.sourceNote) {
     return { status: 'needs_source_note', owner: 'historian' };
   }
-  if (!sourceDetails.sourceTier) {
+  if (sourceDetails.sourceTierStatus !== 'resolved') {
     return { status: 'needs_source_tier', owner: 'historian' };
   }
   if (riskClass === 'dynamic_state_candidate' && !statePredicate) {
@@ -839,6 +838,7 @@ function makeClaim({ surface, file, line, fieldPath, text, matchedTerms, sourceI
     state_predicate: statePredicate,
     source_status: sourceInfo.status,
     source_tier: sourceDetails.sourceTier,
+    source_tier_status: sourceDetails.sourceTierStatus,
     citation: sourceDetails.citation,
     source_note: sourceDetails.sourceNote,
     provenance_gaps: provenanceGapsFor(sourceInfo, sourceDetails),
@@ -1062,18 +1062,20 @@ async function buildHistoricalAnchors(rootDir) {
     const authoredProvenance = {
       event_citations: [...new Set(eventCitation)].sort(compareText),
       event_source_tier: asNonEmptyString(event?.source_tier),
+      event_source_tier_status: sourceTierStatusFor(asNonEmptyString(event?.source_tier)),
       event_source_note: asNonEmptyString(event?.source_note),
       essay_citations: [...new Set(essayCitations)].sort(compareText),
       essay_source_tier: asNonEmptyString(essay?.source_tier),
+      essay_source_tier_status: sourceTierStatusFor(asNonEmptyString(essay?.source_tier)),
       essay_category: essayCategory,
       required_essay_source_floor: essaySourceFloor,
     };
     const provenanceGaps = [];
     if (authoredProvenance.event_citations.length === 0) provenanceGaps.push('event_citation');
     if (!authoredProvenance.event_source_note) provenanceGaps.push('event_source_note');
-    if (!authoredProvenance.event_source_tier) provenanceGaps.push('event_source_tier');
+    if (authoredProvenance.event_source_tier_status !== 'resolved') provenanceGaps.push('event_source_tier');
     if (authoredProvenance.essay_citations.length === 0) provenanceGaps.push('essay_citation');
-    if (!authoredProvenance.essay_source_tier) provenanceGaps.push('essay_source_tier');
+    if (authoredProvenance.essay_source_tier_status !== 'resolved') provenanceGaps.push('essay_source_tier');
     if (typeof essaySourceFloor === 'number' && authoredProvenance.essay_citations.length < essaySourceFloor) {
       provenanceGaps.push('essay_source_floor');
     }
@@ -1197,6 +1199,10 @@ async function scanSensitiveClaimInventory(options = {}) {
       citation_keys: Array.from(CITATION_KEYS),
       source_keys: Array.from(SOURCE_KEYS),
       claim_prose_keys: Array.from(CLAIM_PROSE_KEYS).sort(compareText),
+      source_tiers: {
+        recognized: [...RECOGNIZED_SOURCE_TIERS].sort(compareText),
+        resolved: [...RESOLVED_SOURCE_TIERS].sort(compareText),
+      },
       term_sets: {
         forbidden_scaffold: Array.from(TERM_SETS.forbidden_scaffold),
         operational_overclaim: Array.from(TERM_SETS.operational_overclaim),

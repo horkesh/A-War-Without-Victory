@@ -86,6 +86,21 @@ describe('localization coverage inventory', () => {
                 && row.excerpt === expected[1]
             )), `${expected[0]}: ${expected[1]}`).toBe(true);
         }
+        expect(report.source_findings.some((row) => row.file === 'src/ui/map/scripts/debugLoadSave.ts')).toBe(false);
+        expect(report.source_findings.some((row) => row.excerpt === 'sk-ant-...')).toBe(false);
+        expect(report.source_findings.some((row) => row.excerpt === 'Desktop IPC not available')).toBe(false);
+        expect(report.source_findings.some((row) => /^&(?:#[0-9]+|#x[0-9a-f]+|[a-z]+);$/i.test(row.excerpt))).toBe(false);
+        for (const assertionLabel of [
+            'Map construction count',
+            'WebGL release count',
+            'Deck construction count',
+            'Deck release count',
+        ]) {
+            expect(report.source_findings.some((row) => (
+                row.file === 'src/ui/map/perf/mapTransitionTiming.ts'
+                && row.excerpt === assertionLabel
+            ))).toBe(false);
+        }
     });
 
     it('finds player-facing literals in defaults, JSX expressions, fallbacks, and function arguments', async () => {
@@ -95,11 +110,22 @@ describe('localization coverage inventory', () => {
             await mkdir(sourceDir, { recursive: true });
             await writeFile(join(sourceDir, 'Fallbacks.tsx'), [
                 "function label(_value: string, fallback: string) { return fallback; }",
+                "function assertFiniteNonNegative(_value: number, _label: string) {}",
                 "export function Fallbacks({ caption = 'LOADING SCENARIO', own = false }) {",
                 "  const error = undefined ?? 'Failed to resolve peace plan.';",
+                "  const ipc = undefined ?? 'Desktop IPC not available';",
+                "  assertFiniteNonNegative(0, 'Map construction count');",
                 "  const className = own ? 'bg-red-500 text-white' : 'bg-blue-500 text-black';",
-                "  return <span className={className} title={caption}>{own ? 'Own' : label('event-id', 'Recorded event')}{error}</span>;",
+                "  void ipc;",
+                "  return <span className={className} title={caption}>{own ? 'Own' : label('event-id', 'Recorded event')}{error}<i>&rarr;</i><input placeholder=\"sk-ant-...\" /></span>;",
                 "}",
+                '',
+            ].join('\n'));
+            const scriptsDir = join(root, 'src', 'ui', 'map', 'scripts');
+            await mkdir(scriptsDir, { recursive: true });
+            await writeFile(join(scriptsDir, 'debugLoadSave.ts'), [
+                "const suffix = undefined ?? 'ms, features:';",
+                'void suffix;',
                 '',
             ].join('\n'));
 
