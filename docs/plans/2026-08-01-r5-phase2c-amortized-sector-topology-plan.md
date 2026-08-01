@@ -12,7 +12,7 @@
 
 ## Status and authority boundary
 
-This document is an active implementation and measurement plan. The dense formation-occupancy contract and its bounded `ensureMinimumSectorCoverage(...)` integration are accepted at commit `25313d1c05b174188fad167ff38ed826b6aa737d`. The fully captured exact-parent replay improves mean throughput from `1,183.549` to `1,122.123 ms/turn` (`-5.190%`) with exact bytes, so `1,122.123 ms/turn` (`11.2212x` the `100 ms/turn` target) is the current accepted floor. A later committee review correctly found that the original long property proved fixed-point shortcut equivalence, not independent occupancy equivalence. That evidence gap is now closed by a test-only legacy scan strategy at the exact coverage boundary and a separate 300-case dense-versus-legacy full-state property. The `1,223.822 ms/turn` fixed-point packet remains diagnostic because its measured source omitted the prune receipt. R5 remains open; Task 3's red-first reachability/sector-fact equivalence is next after independent review of this correction.
+This document is an active implementation and measurement plan. The dense formation-occupancy contract and its bounded `ensureMinimumSectorCoverage(...)` integration are accepted at commit `25313d1c05b174188fad167ff38ed826b6aa737d`. The fully captured exact-parent replay improves mean throughput from `1,183.549` to `1,122.123 ms/turn` (`-5.190%`) with exact bytes, so `1,122.123 ms/turn` (`11.2212x` the `100 ms/turn` target) remains the current accepted floor. A later committee review correctly found that the original long property proved fixed-point shortcut equivalence, not independent occupancy equivalence. That evidence gap is closed by a test-only legacy scan strategy at the exact coverage boundary and a separate 300-case dense-versus-legacy full-state property. The `1,223.822 ms/turn` fixed-point packet remains diagnostic because its measured source omitted the prune receipt. Task 3's red-first reachability/sector-fact candidate passed exact-output equivalence but failed performance retention: two of three alternating pairs regressed and both the intended owner and enclosing builder worsened. It is fully reverted. R5 remains open at the accepted occupancy floor; no incremental topology solver is authorized from this rejected result.
 
 Task 1's owner-selection subset is complete at source commit `4462a485f1fd1ad511068bcaacd0926af962771e`; Task 5's occupancy disposition is complete at `25313d1c05b174188fad167ff38ed826b6aa737d`. Do not collect another heavy packet while any scenario, performance, Electron, package, baseline, or other heavy runtime owner holds the machine lane. No baseline re-floor, package, version, tag, publication, release-state, canon, or `docs/10_canon/FORAWWV.md` change belongs to Phase 2c.
 
@@ -31,6 +31,7 @@ The determinism-auditor skill references `docs/PHASE_A_INVARIANTS.md`, but that 
 | Fresh corrected-source phase/sector profile | `46,291.786 ms` wall; three sector phases `15,092.603 ms` (`377.315 ms/turn`, `32.603%`) | Current owner selection only; not a replicated floor. |
 | Fresh corrected-source application V8 capture | `buildCorpsFrontSectors` `14,170.635 ms` inclusive (`29.699%`) | Confirms sector reconstruction is the next structural owner. |
 | Accepted dense occupancy replay | control `1,183.549`; candidate `1,122.123 ms/turn`; all three pairs faster; exact bytes | New current floor and permission to begin Task 3. |
+| Rejected reachability/sector-fact replay | arithmetic mean `-1.944%`, but pair deltas `-10.950%`, `+1.917%`, `+4.718%`; exact bytes | No-go: two of three pairs and the causal owners regress; candidate fully reverted. |
 
 In the diagnostic 40-turn phase profile, the three large sector steps cost:
 
@@ -81,6 +82,16 @@ The focused coverage/rebalance slice passed 3 files / 26 tests, TypeScript passe
 A reviewer-requested exact replication now adds a complete standalone transcript without replacing those historical results. `data/derived/_debug/r5_phase2c_occupancy_equivalence_correction/20260801_corrected_6file_47test.log` is ignored, `164,344` bytes, and SHA-256 `c3ddb1d025176a322e6ca2ab308d43c7e1bf2e5c57574394c58dc1b2e10ccfa3`. Exit `0` records 6/6 files and 47/47 tests, start `21:54:28`, total `600.06s` / tests `594.38s`, fixed-point `265,354ms`, and occupancy `248,753ms`. Because the capture overlapped a broad functional test elsewhere in the committee workspace, all replication durations are functional evidence only, never performance samples. No standalone transcript exists for the focused or baseline commands; their successful session outputs remain disclosed as session-only evidence. The exact replication command is retained in the implementation report.
 
 The candidate warmup, phase/sector profile, V8 profile, and two alternating three-pair sequences preserved the exact `5,070,902`-byte save, SHA-256 `b28225e47b8e7ba563c4e836151fc8699f3cd191f4912c6c13ac7c099719fbd5`, and state hash `b28225e47b8e7ba5`. In the authoritative fully captured replay, controls measured `1,162.403`, `1,231.142`, and `1,157.103 ms/turn`; candidates measured `1,118.922`, `1,163.315`, and `1,084.132`. Means were `1,183.549` versus `1,122.123 ms/turn` (`-5.190%`), and mean simulation improved `-5.178%`. The named `ensureMinimumSectorCoverage` owner fell `48.055%` inclusive, `buildCorpsFrontSectors` fell `8.693%`, and the three sector phases fell `10.599%`. Approved baselines passed without refresh. The occupancy-only candidate is accepted.
+
+### Rejected reachability and sector-fact context
+
+Task 3 built invocation-local faction components and per-sector front, reserve, and territory facts. Only the unbounded component-reachability decision used the derived context in production; bounded path and distance logic retained the legacy implementation. A test-only strategy kept the former behavior independently callable through `ensureMinimumSectorCoverage(...)` and `buildCorpsFrontSectors(...)`.
+
+Correctness was green: the focused four-file matrix passed 64 tests, TypeScript and determinism static checks passed, and an isolated three-mode × 100-variant property passed 300 complete-sector and complete-`GameState` comparisons. Candidate snapshot `214c79e5d16353d7a3cae6bf613a74e9578518c2` has exact parent `6c02edcaf950d7d52ebb05fb63b10b89f50d7442`; the control and candidate trees are `2c9632e819fb5ff02828020c76e1378d54fb9898` and `c206d5fb5b627e5ab6d4852c89b10cb84d901ad1`. Every valid run produced the exact current-parent fingerprint: `5,085,842` bytes, SHA-256 `95be2c9e8975a12face36e9777e54882c757ee8adb23b1cd91a06b2f546319b7`, state hash `95be2c9e8975a12f`.
+
+Performance was a no-go. Alternating-pair deltas were `-10.950%`, `+1.917%`, and `+4.718%`: two of three pairs regressed even though the arithmetic means moved from `1,152.680` to `1,130.277 ms/turn` (`-1.944%`). The intended `ensureMinimumSectorCoverage` owner worsened `+27.625%` self and `+20.772%` inclusive, while `buildCorpsFrontSectors` worsened `+9.724%` inclusive; the new context itself added `265.402 ms` self time. The positive arithmetic mean is therefore an outlier-sensitive aggregate, not retention evidence. Candidate production and candidate-specific tests are fully reverted.
+
+Ignored raw evidence is retained under `data/derived/_debug/r5_phase2c_reachability/`, including `measurement_manifest.json`, `summary.md`, timing rows, exact-output logs, wall reports, V8 captures, and hotspot reports. The first attempted warmup pair accidentally executed control source for both labels; those artifacts are preserved only under names containing `INVALID_CONTROL_LINEAGE` and are excluded from every conclusion. One independent stale instrumentation assertion was corrected to match the already-accepted call-scoped `activeCounts` source; it is not part of the rejected candidate.
 
 ## Invariants that every candidate must preserve
 
@@ -236,7 +247,7 @@ Expected RED: module/export missing. Expected GREEN: exact parity after every de
 
 ## Task 3 — Red-first reachability and sector-fact equivalence
 
-**Status:** NEXT. The occupancy-only candidate is accepted; implement and disposition this reachability-only packet without mixing in incremental topology.
+**Status:** COMPLETE — REJECTED / FULLY REVERTED. Exact-output equivalence passed, but two of three timing pairs and the causal owner regressed. Do not reintroduce this context without a materially different design and a fresh red-first packet.
 
 **Files:**
 
@@ -316,7 +327,7 @@ Expected result: one accepted measured optimization or a documented rejection wi
 
 ## Task 6 — Conditional incremental topology packet
 
-Start only after Task 3's safer call-scoped reachability packet is dispositioned, and only if its fresh full profile still ranks repeated full sector builds first. Task 5 is accepted and the occupancy profile still ranks `buildCorpsFrontSectors` first, but that is permission to continue the bounded context work, not permission to skip directly to a larger solver.
+Task 3 is dispositioned as a no-go, so this task is not authorized by the rejected packet. Select a fresh owner from the accepted occupancy floor before considering a receipt-scoped solver; do not infer permission from the candidate's outlier-sensitive mean.
 
 **Files:**
 
@@ -339,7 +350,7 @@ Expected result: fewer full-faction/full-builder solves per turn with exact byte
 
 ## Task 7 — Mandatory full-profile handoff to the next owner
 
-**Status:** Current occupancy handoff complete. Mean remains above target, sector construction remains the largest inclusive owner, and Task 3's reachability/sector facts are next.
+**Status:** Reachability/sector-fact handoff complete as a no-go. The accepted floor remains `1,122.123 ms/turn`; a fresh owner-selection handoff is required before another optimization candidate.
 
 After every accepted sector packet:
 
@@ -384,4 +395,4 @@ R5 Phase 2 is complete only when a committee-usable replicated packet records me
 - [x] Fresh Amdahl calculation and next-owner handoff exist while mean remains above `100 ms/turn`.
 - [x] Ledger, report, roadmap, and reusable knowledge state exactly match evidence.
 - [x] No baseline refresh, package/version/tag/release mutation, canon/FORAWWV edit, push, or integration was performed by this design packet.
-- [ ] R5 replicated mean is below `100 ms/turn`; continue with Task 3 and reprofile.
+- [ ] R5 replicated mean is below `100 ms/turn`; continue from a fresh accepted-floor profile and reprofile after every retained candidate.
