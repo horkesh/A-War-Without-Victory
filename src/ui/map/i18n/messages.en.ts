@@ -4894,6 +4894,7 @@ export const enMessages = {
     'deskAuthority.lowHint': 'Authority is low — some levers are out of reach.',
     'deskAuthority.capacityHint': 'At capacity. Authority is reserve power, not a weekly quota. Overflow recovery banks only to the displayed reserve limit; spend only when a deliberate directive is warranted.',
     'deskAuthority.cadenceHold': 'No sourced presidential initiative is filed this week. Holding Authority preserves the current policy; notices do not require a signature.',
+    'inbox.item.presidentialCadenceHold.subtitle': '{faction} posture · Authority {current}/{max}. {message}',
     'deskAuthority.bank': 'Banked: {reserve} / {max}',
     'deskAuthority.incomeSource': 'Authority is flowing from: {source}',
     'deskAuthority.cadence': 'At this pace: one directive every {turns} turns',

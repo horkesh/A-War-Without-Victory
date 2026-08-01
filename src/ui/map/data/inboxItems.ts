@@ -31,6 +31,9 @@ import {
     type PresidentialPriorityDestination,
     type PresidentialPriorityReadModel,
 } from './presidentialPriority';
+import { isPresidentialCadenceHold } from './presidentialCadenceHold';
+import { APR1992_PRESIDENTIAL_INITIATIVE_REGISTRY } from '../../../sim/presidency/presidential_initiatives.js';
+import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 
 export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
@@ -593,32 +596,61 @@ export function deriveInboxItems(
     const opportunityDeadlineById = new Map(
         (state.operationOpportunityProposals ?? []).map((proposal) => [proposal.proposal_id, proposal.expires_turn ?? null]),
     );
-    return items
-        .map((item): InboxItem => {
-            const sourceId = item.sourceIds?.[0]
-                ?? (item.id.startsWith('opportunity:') ? item.id.slice('opportunity:'.length) : item.id);
-            const deadlineTurn = item.id.startsWith('opportunity:')
-                ? opportunityDeadlineById.get(sourceId) ?? null
-                : null;
-            const priorityModel = buildPresidentialPriorityReadModel({
-                id: item.id,
-                required: isAdvanceBlockingInboxItem(item),
-                recordOnly: item.id.startsWith('sit:date:')
-                    || item.id.startsWith('sit:territory_gain:')
-                    || item.id.startsWith('sit:territory_loss:'),
-                hasPresidentialLever: item.type !== 'situation' && item.type !== 'intelligence_notification',
-                sourceId,
-                currentTurn: state.turn ?? 0,
-                urgency: item.priority,
-                deadlineTurn,
-                recommendedDestination: priorityDestinationForInboxAction(item.action),
-            });
-            return {
-                ...item,
-                priorityBand: priorityModel.priorityBand,
-                priorityModel,
-            };
-        })
+    const finalizeItem = (item: InboxItemDraft): InboxItem => {
+        const sourceId = item.sourceIds?.[0]
+            ?? (item.id.startsWith('opportunity:') ? item.id.slice('opportunity:'.length) : item.id);
+        const deadlineTurn = item.id.startsWith('opportunity:')
+            ? opportunityDeadlineById.get(sourceId) ?? null
+            : null;
+        const priorityModel = buildPresidentialPriorityReadModel({
+            id: item.id,
+            required: isAdvanceBlockingInboxItem(item),
+            recordOnly: item.id.startsWith('sit:date:')
+                || item.id.startsWith('sit:territory_gain:')
+                || item.id.startsWith('sit:territory_loss:'),
+            hasPresidentialLever: item.type !== 'situation' && item.type !== 'intelligence_notification',
+            sourceId,
+            currentTurn: state.turn ?? 0,
+            urgency: item.priority,
+            deadlineTurn,
+            recommendedDestination: priorityDestinationForInboxAction(item.action),
+        });
+        return {
+            ...item,
+            priorityBand: priorityModel.priorityBand,
+            priorityModel,
+        };
+    };
+    const finalized = items.map(finalizeItem);
+
+    // FR-04: project the already-established cadence-hold truth into the Desk
+    // packet as an informational posture row. This is never an action, never a
+    // source-backed receipt, and never an Advance blocker. The Header and
+    // Warroom continue to consume the same selector and existing copy.
+    if (
+        APR1992_PRESIDENTIAL_INITIATIVE_REGISTRY.source_audit.disposition === 'positive_hold'
+        && (playerFaction === 'RBiH' || playerFaction === 'RS' || playerFaction === 'HRHB')
+        && isPresidentialCadenceHold(state, finalized)
+    ) {
+        const authority = state.commandAuthority!;
+        finalized.push(finalizeItem({
+            id: `sit:presidential-cadence-hold:${turn}`,
+            type: 'situation',
+            severity: 'info',
+            title: t('warroom.cadenceHoldShort'),
+            subtitle: t('inbox.item.presidentialCadenceHold.subtitle', {
+                faction: sidePickerFactionLabel(playerFaction),
+                current: authority.current,
+                max: authority.max,
+                message: t('deskAuthority.cadenceHold'),
+            }),
+            action: 'none',
+            includeInDeskPacket: true,
+            priority: 57,
+        }));
+    }
+
+    return finalized
         .sort((left, right) => comparePresidentialPriorityReadModels(left.priorityModel, right.priorityModel));
 }
 

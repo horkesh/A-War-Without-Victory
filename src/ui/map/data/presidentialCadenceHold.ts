@@ -1,16 +1,19 @@
 import type { LoadedGameState } from './types';
-import { deriveInboxItems } from './inboxItems';
+import type { InboxItem } from './inboxItems';
 
 /**
- * True only when the engine-backed Authority balance is near capacity and the
- * current sourced inbox contains no required or recommended presidential act.
- * This is explanatory UI state: it never creates, resolves, or schedules work.
+ * Agenda-aware form used by projections that already hold the canonical inbox.
+ * Keeping the near-cap/source-action predicate here prevents a second cadence
+ * truth from drifting away from the Header and Warroom status.
  */
-export function isPresidentialCadenceHold(state: LoadedGameState | null): boolean {
+export function isPresidentialCadenceHold(
+  state: LoadedGameState | null,
+  agenda: readonly Pick<InboxItem, 'priorityBand'>[],
+): boolean {
   const authority = state?.commandAuthority;
   if (!state || !authority || authority.max <= 0 || authority.current / authority.max < 0.9) return false;
 
-  return !deriveInboxItems(state, null).some((item) =>
+  return !agenda.some((item) =>
     item.priorityBand === 'required' || item.priorityBand === 'recommended'
   );
 }

@@ -9,7 +9,7 @@
 **Tech stack:** TypeScript, React, Vitest, JSON-authored events/essays, Electron browser gates, deterministic scenario runner.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phases 0-1 complete on integrated R2; Phase 2 is next
+**Status:** IN PROGRESS -- Phases 0-1 complete; Phase 2 Task 2.1 source packet complete; Task 2.2 lease-backed proof pending
 **Roadmap workstream:** R4
 **Canonical owner:** Presidential Decision Room for action; Desk for triage; Records/Codex for receipts
 **Collision rule:** Do not overlap source edits with RS packets FR-01 or FR-04. Rebase on their shared priority and cadence contracts before Phase 0.
@@ -209,11 +209,20 @@ Final committee verification: `18` focused files / `341` tests and `44` player-j
 - Modify `src/ui/map/data/inboxItems.ts`
 - Create `tests/presidential_initiatives.test.ts`
 
-- [ ] Require stable id, faction, turn window, state predicate, source citation, existing lever, Authority cost, cooldown, and once rule.
-- [ ] Cap pending optional initiatives at one.
-- [ ] Never make an initiative an Advance blocker.
-- [ ] Never create a historical default without an explicit source row.
-- [ ] If a measured gap lacks a source-backed action, emit a nonblocking positive-hold briefing referencing the live posture and continue.
+- [x] Require stable id, faction, turn window, state predicate, source citation, existing lever, Authority cost, cooldown, and once rule.
+- [x] Cap pending optional initiatives at one.
+- [x] Never make an initiative an Advance blocker.
+- [x] Never create a historical default without an explicit source row.
+- [x] If a measured gap lacks a source-backed action, emit a nonblocking positive-hold briefing referencing the live posture and continue.
+
+**Task 2.1 source checkpoint (2026-08-01):**
+
+- The accepted BB1/BB2 source audit admits `0` new initiative rows. `apr1992.json` records that result as an explicit `positive_hold`; Authority capacity alone cannot create a choice.
+- Registry parsing fails closed on missing citations, unsupported lever kinds or costs, malformed deterministic predicates, duplicate ids, unsupported historical defaults, or initiative rows inside a positive-hold audit. The pure evaluator selects at most one stable row and refuses a second optional initiative while one is pending.
+- The live war phase validates the shipped empty catalog without mutating state. A future supported row fails closed until its named existing lever owns the action.
+- The existing `presidentialCadenceHold.ts` selector remains the one quiet-week truth owner. The Desk packet projects its live faction/Authority posture as one informational, actionless, nonblocking monitor row; Header and Warroom retain the same selector and copy.
+- RED/GREEN evidence passes the focused UI/Advance matrix at `3` files / `86` tests, the source/cadence/event-timing matrix at `8` files / `85` tests, TypeScript, and the determinism static scan. The strict sensitive-history audit still reports `57` inherited event-catalog findings; this packet adds no event row and no finding.
+- No scenario/headless cadence rerun, performance measurement, Electron launch, package, baseline update, save-schema change, release-state change, or `FORAWWV.md` edit occurred. Task 2.2 waits for the R5 exclusive scenario/performance/Electron lease.
 
 ### Task 2.2 -- Prove cadence without forced decisions
 

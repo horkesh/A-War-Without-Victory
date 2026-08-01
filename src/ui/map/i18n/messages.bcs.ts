@@ -5112,6 +5112,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'deskAuthority.lowHint': 'Vlast je niska — neke poluge su van domašaja.',
     'deskAuthority.capacityHint': 'Na maksimumu. Ovlast je rezervna moc, a ne sedmicna kvota. Visak oporavka se cuva samo do prikazanog limita rezerve; trosite ga samo kada je opravdana promislena direktiva.',
     'deskAuthority.cadenceHold': 'Ove sedmice nije podnesena nijedna izvorima potkrijepljena predsjednička inicijativa. Zadržavanje ovlasti čuva sadašnju politiku; obavijesti ne zahtijevaju potpis.',
+    'inbox.item.presidentialCadenceHold.subtitle': 'Položaj: {faction} · Ovlast {current}/{max}. {message}',
     'deskAuthority.bank': 'Sačuvano: {reserve} / {max}',
     'deskAuthority.incomeSource': 'Ovlast dolazi iz: {source}',
     'deskAuthority.cadence': 'Ovim tempom: jedna direktiva svaka {turns} poteza',

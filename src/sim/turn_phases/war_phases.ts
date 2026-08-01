@@ -97,6 +97,7 @@ import {
     deriveSupplyStateByOsid
 } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { assertPresidentialInitiativeRuntimeCatalog } from '../presidency/presidential_initiatives.js';
 
 import { applyPhase3DCollapseResolution } from '../collapse/phase3d_collapse_resolution.js';
 import { evaluateEvents } from '../events/evaluate_events.js';
@@ -2523,6 +2524,19 @@ export const warPhases: NamedPhase[] = [
                 context.state.meta.pending_proposal_reviews = [];
             }
             context.state.meta.pending_proposal_reviews.push(...proposals);
+        },
+    },
+    {
+        // FR-04 Phase 2: the accepted APR1992 BB1/BB2 audit admits no new
+        // presidential initiative. Keep that disposition explicit in the live
+        // war pipeline and fail closed if a future row is authored before its
+        // named existing lever owns the action. The shipped empty registry is
+        // state-inert; positive-hold presentation remains UI-derived.
+        name: 'evaluate-presidential-initiative-registry',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!context.state.meta.player_faction) return;
+            assertPresidentialInitiativeRuntimeCatalog();
         },
     },
     {

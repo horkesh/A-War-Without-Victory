@@ -20,6 +20,7 @@ import {
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import { derivePresidentialBlockers, type PresidentialBlocker } from '../../data/presidentialBlockers';
 import { isPresidentialCadenceHold } from '../../data/presidentialCadenceHold';
+import { deriveInboxItems } from '../../data/inboxItems';
 import { Z } from '../../../shared/zIndex';
 import { t } from '../../i18n';
 
@@ -206,7 +207,10 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   const pendingReviewCount = docket.metrics.pendingReviews;
   const hasPendingReviews = pendingReviewCount > 0;
   const { advanceReviewCount } = docket.metrics;
-  const cadenceHold = isPresidentialCadenceHold(loadedGameState);
+  const cadenceHold = isPresidentialCadenceHold(
+    loadedGameState,
+    deriveInboxItems(loadedGameState, osidDisplayNames),
+  );
   const canReviewPriorities = docket.canOpenBoard && Boolean(onReviewPriorities);
   const singleBlocker = blockers.length === 1 ? blockers[0] : null;
   const canResolveSingleBlocker = singleBlocker != null && Boolean(onResolveBlocker);

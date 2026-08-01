@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "scenario_id": "apr1992",
+  "source_audit": {
+    "disposition": "positive_hold",
+    "report": "docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md",
+    "evidence_ids": [
+      "docs/40_reports/audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md#positive-hold-source-inventory"
+    ],
+    "rationale": "The accepted BB1/BB2 inventory supports no additional presidential initiative for the measured RBiH, RS, or HRHB quiet intervals. Authority capacity is not historical evidence; retain the policy hold."
+  },
+  "initiatives": []
+}
