@@ -105,9 +105,9 @@ Rules:
 - Modify `tests/codex_sensitive_claim_inventory.test.ts`
 - Modify `tests/codex_sensitive_history_source_notes.test.ts`
 
-- [ ] Emit event/essay id, ring, claim, event date/window, state predicate, source tier, citation, respondent, and player interaction type.
-- [ ] Fail on sensitive player choices, calendar-only rupture claims, missing source notes, generic symmetry language, and event/essay date mismatch.
-- [ ] Add explicit check that Grabovica/Uzdol/Neretva content is in 1993 files/windows.
+- [x] Emit event/essay id, ring, claim, event date/window, state predicate, source tier, citation, respondent, and player interaction type.
+- [x] Fail on sensitive player choices, calendar-only rupture claims, missing source notes, generic symmetry language, and event/essay date mismatch.
+- [x] Add explicit check that Grabovica/Uzdol/Neretva content is in 1993 files/windows.
 
 ### Task 0.2 -- Identity, locale, and audio inventories
 
@@ -121,9 +121,9 @@ Rules:
 - Create `tests/audio_asset_provenance.test.ts`
 
 - [x] Identity report: id, display name, faction, formation/corps ref, source, confidence, duplicate/conflict.
-- [ ] Locale report: every player-facing key, `en`/`bs` coverage, fallback use, concatenation, embedded English, and layout-risk length.
+- [x] Locale report: every player-facing key, `en`/`bs` coverage, fallback use, concatenation, embedded English, and layout-risk length.
 - [x] Audio report: cue id, file, SHA-256, duration, loudness, source URL, author, license, attribution, and sensitive-content class.
-- [x] Stable ordering; no timestamps/absolute paths for the accepted identity/audio packet.
+- [x] Stable ordering; no timestamps/absolute paths for all four accepted inventory families.
 
 ### Phase 0 partial execution evidence -- 2026-08-01
 
@@ -131,7 +131,14 @@ Rules:
 - Officer/OOB: 374/374 rows keyed, 0 supported, 2,286 blocking findings, 12 normalized-name collisions. Positive support must be owned per row and cannot be inherited from manifest defaults.
 - Audio: 36/36 cues keyed, 17 provided, 19 placeholders, 0 unregistered binaries, 54 blocking findings, 5 warnings, and three required ambient beds absent. Registry/bundle resolution and recursive binary ownership are fail-closed; `OggS` remains a container-signature precheck rather than decode/LUFS proof.
 - Verification: focused 5 files / 22 tests; parent integration 2 files / 11 tests; TypeScript, canon/determinism/baseline, EOL, and diff checks green.
-- Phase 0 is not complete until Task 0.1 and the localization portion of Task 0.2 are accepted.
+- Phase 0 inventory coverage is complete. Historical, identity, localization, licensing, and audio remediation remains open in Phases 1-4.
+
+### Phase 0 completion evidence -- historical claims and localization
+
+- [Historical-claim and localization inventory report](../40_reports/audits/20260801_R7_HISTORICAL_CLAIM_LOCALIZATION_INVENTORIES.md).
+- Historical claims: 406 claim rows across 226 files; 75 documented, 251 need source notes, 28 need source-floor completion, and 52 sensitive player-choice claim rows are blocked with explicit owners. Zero event/essay year mismatches; zero calendar-only rupture claims.
+- Required chronology: Operation Neretva 93 and Grabovica/Uzdol event/essay anchors are in 1993 files at turns 74-76, grounded in BB Vol. II pp. 434-435 and the existing ICTY Halilovic citation.
+- Localization: 5,542 EN keys, 5,541 legacy-`bcs` translations mapped to canonical `bs`, one explicit fallback probe, 599 length-risk candidates, and 507 source-review findings across 386 UI files.
 
 ```powershell
 npm.cmd run test:vitest -- tests/codex_sensitive_claim_inventory.test.ts tests/codex_sensitive_history_source_notes.test.ts tests/officer_oob_provenance.test.ts tests/localization_coverage.test.ts tests/audio_asset_provenance.test.ts --pool=forks --reporter=dot

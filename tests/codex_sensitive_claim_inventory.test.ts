@@ -290,7 +290,7 @@ test('inventory detects forbidden scaffold tokens and reports deterministic poli
         const second = await inventory.scanSensitiveClaimInventory({ rootDir: root });
 
         assert.deepStrictEqual(first, second);
-        assert.strictEqual(first.schema_version, 1);
+        assert.strictEqual(first.schema_version, 2);
         assert.strictEqual(first.summary.claim_count, 1);
         assert.deepStrictEqual(first.summary.risk_class_counts, { unsupported_remove: 1 });
         assert.deepStrictEqual(first.policy.term_sets.forbidden_scaffold, ['FIXME', 'TODO', 'atrocity lever', 'cleansing lever', 'placeholder']);
@@ -298,6 +298,118 @@ test('inventory detects forbidden scaffold tokens and reports deterministic poli
         assert.strictEqual(first.claims[0].risk_class, 'unsupported_remove');
         assert.strictEqual(first.claims[0].stop_gate, 'canon');
         assert.strictEqual(inventory.stableStringify(first), inventory.stableStringify(second));
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('inventory emits actionable historical provenance and interaction ownership', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1993.json'), [
+            {
+                id: 'grabovica_uzdol_massacres_1993',
+                category: 'humanitarian',
+                narrative: 'ARBiH soldiers killed Croat civilians at Grabovica and Uzdol in September 1993.',
+                source_tier: 'tribunal',
+                historical_source: 'ICTY Halilovic Trial Judgment (IT-01-48-T).',
+                source_note: 'Provenance only; distinguishes charged acts from the acquittal on command responsibility.',
+                responding_faction: 'RBiH',
+                trigger: {
+                    turn_min: 74,
+                    turn_max: 76,
+                    phase: 'war',
+                    requires_events: ['operation_neretva_93_1993'],
+                },
+                once: true,
+            },
+            {
+                id: 'forbidden_choice_1993',
+                category: 'humanitarian',
+                narrative: 'A sensitive-history fixture.',
+                source_tier: 'fixture',
+                historical_source: 'Fixture citation.',
+                source_note: 'Fixture source note.',
+                responding_faction: 'RBiH',
+                trigger: { turn_min: 74, turn_max: 76, phase: 'war' },
+                response_options: [{ id: 'authorize', label: 'Authorize forced displacement of civilians' }],
+            },
+        ]);
+
+        const result = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        const grabovica = result.claims.find((claim: { subject_id: string; field_path: string }) => (
+            claim.subject_id === 'grabovica_uzdol_massacres_1993' && claim.field_path === '$[0].narrative'
+        ));
+        assert.ok(grabovica);
+        assert.strictEqual(result.schema_version, 2);
+        assert.strictEqual(grabovica.ring, 'ring_2_informational');
+        assert.strictEqual(grabovica.claim, grabovica.excerpt);
+        assert.strictEqual(grabovica.date_window, 'turns 74-76');
+        assert.strictEqual(grabovica.state_predicate, 'phase=war; requires_events=operation_neretva_93_1993');
+        assert.strictEqual(grabovica.source_tier, 'tribunal');
+        assert.strictEqual(grabovica.citation, 'ICTY Halilovic Trial Judgment (IT-01-48-T).');
+        assert.strictEqual(grabovica.respondent, 'RBiH');
+        assert.strictEqual(grabovica.player_interaction_type, 'informational');
+        assert.strictEqual(grabovica.status, 'documented');
+        assert.strictEqual(grabovica.owner, 'historian');
+
+        const forbiddenChoice = result.claims.find((claim: { subject_id: string; field_path: string }) => (
+            claim.subject_id === 'forbidden_choice_1993' && claim.field_path.includes('response_options')
+        ));
+        assert.ok(forbiddenChoice);
+        assert.strictEqual(forbiddenChoice.ring, 'ring_3_refused_candidate');
+        assert.strictEqual(forbiddenChoice.player_interaction_type, 'player_choice');
+        assert.strictEqual(forbiddenChoice.status, 'blocked_sensitive_player_choice');
+        assert.strictEqual(forbiddenChoice.owner, 'historian+game-designer');
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('inventory reports the 1993 placement/window contract for Neretva, Grabovica, and Uzdol', async () => {
+    const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const anchors = result.historical_anchors;
+
+    assert.deepStrictEqual(anchors.map((row: { anchor_id: string }) => row.anchor_id), [
+        'grabovica_uzdol_massacres_1993',
+        'operation_neretva_93_1993',
+    ]);
+    assert.deepStrictEqual(anchors.map((row: { status: string }) => row.status), ['pass', 'pass']);
+    for (const row of anchors) {
+        assert.strictEqual(row.event_file, 'data/scenarios/events/war_1993.json');
+        assert.strictEqual(row.event_window, 'turns 74-76');
+        assert.strictEqual(row.essay_file.endsWith('_1993.json'), true);
+    }
+});
+
+test('inventory fails closed on event and essay year mismatches', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await mkdir(join(root, 'data', 'scenarios', 'essays'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1992.json'), [{
+            id: 'misfiled_claim_1993',
+            title: 'Misfiled claim',
+            narrative: 'Civilian displacement is recorded.',
+        }]);
+        await writeJson(join(root, 'data', 'scenarios', 'essays', 'misfiled_claim_1994.json'), {
+            id: 'essay_misfiled_claim_1994',
+            event_id: 'misfiled_claim_1993',
+            year: 1994,
+            title: 'Misfiled essay',
+            content: 'Civilian displacement is recorded.',
+            sources: ['Fixture A', 'Fixture B'],
+        });
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        assert.deepStrictEqual(report.date_mismatches.map((row: { code: string }) => row.code), [
+            'event_essay_date_mismatch',
+            'event_essay_date_mismatch',
+        ]);
+        assert.strictEqual(report.date_mismatches.every((row: { status: string }) => row.status === 'blocked'), true);
+        assert.strictEqual(report.date_mismatches.every((row: { owner: string }) => row.owner === 'historian'), true);
     } finally {
         await rm(root, { recursive: true, force: true });
     }

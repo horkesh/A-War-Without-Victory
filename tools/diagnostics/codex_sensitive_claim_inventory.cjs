@@ -5,7 +5,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 const EXCERPT_CHARS = 160;
 
 // The runtime Codex panel (src/ui/map/components/CodexPanel.tsx) imports
@@ -368,6 +368,21 @@ function hasSourceValue(value) {
   return typeof value === 'string' ? value.trim().length > 0 : Boolean(value);
 }
 
+function asNonEmptyString(value) {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
+}
+
+function flattenSourceValues(value) {
+  if (Array.isArray(value)) {
+    return value.flatMap(flattenSourceValues);
+  }
+  if (value && typeof value === 'object') {
+    return Object.keys(value).sort(compareText).flatMap((key) => flattenSourceValues(value[key]));
+  }
+  const text = asNonEmptyString(value);
+  return text ? [text] : [];
+}
+
 function nearestSourceObject(ancestors) {
   for (let index = ancestors.length - 1; index >= 0; index -= 1) {
     const value = ancestors[index];
@@ -381,6 +396,46 @@ function nearestSourceObject(ancestors) {
     }
   }
   return null;
+}
+
+function nearestSubjectObject(ancestors, rootValue) {
+  for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+    const value = ancestors[index];
+    if (value && typeof value === 'object' && !Array.isArray(value) && asNonEmptyString(value.id)
+      && (value.trigger || value.category || value.event_id || value.content || value.narrative)) {
+      return value;
+    }
+  }
+  for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+    const value = ancestors[index];
+    if (value && typeof value === 'object' && !Array.isArray(value) && asNonEmptyString(value.id)) return value;
+  }
+  return rootValue && typeof rootValue === 'object' && !Array.isArray(rootValue)
+    ? rootValue
+    : null;
+}
+
+function sourceDetailsFor(ancestors, rootValue) {
+  const sourceObject = nearestSourceObject(ancestors) ?? nearestSubjectObject(ancestors, rootValue);
+  if (!sourceObject) {
+    return { citation: null, sourceTier: null, sourceNote: null };
+  }
+  const citationKeys = [
+    'citation',
+    'citations',
+    'historical_source',
+    'historical_sources',
+    'reference',
+    'references',
+    'source',
+    'sources',
+  ];
+  const citations = citationKeys.flatMap((key) => flattenSourceValues(sourceObject[key]));
+  return {
+    citation: citations.length > 0 ? [...new Set(citations)].sort(compareText).join(' | ') : null,
+    sourceTier: asNonEmptyString(sourceObject.source_tier),
+    sourceNote: asNonEmptyString(sourceObject.source_note),
+  };
 }
 
 function essayFloorStatus(rootValue) {
@@ -459,9 +514,91 @@ function dateWindowFor(relativeFile, ancestors) {
         return value[key].trim();
       }
     }
+    const trigger = value.trigger;
+    if (trigger && typeof trigger === 'object' && !Array.isArray(trigger)) {
+      const turnMin = Number.isInteger(trigger.turn_min) ? trigger.turn_min : null;
+      const turnMax = Number.isInteger(trigger.turn_max) ? trigger.turn_max : turnMin;
+      if (turnMin !== null) {
+        return turnMax === turnMin ? `turn ${turnMin}` : `turns ${turnMin}-${turnMax}`;
+      }
+    }
   }
   const fileYear = relativeFile.match(/\b(199[2-5])\b/);
   return fileYear ? fileYear[1] : null;
+}
+
+function stableInline(value) {
+  if (Array.isArray(value)) {
+    return value.map(stableInline);
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  const sorted = {};
+  for (const key of Object.keys(value).sort(compareText)) sorted[key] = stableInline(value[key]);
+  return sorted;
+}
+
+function statePredicateFor(ancestors, rootValue) {
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  const trigger = subject?.trigger;
+  if (!trigger || typeof trigger !== 'object' || Array.isArray(trigger)) return null;
+  const parts = [];
+  if (asNonEmptyString(trigger.phase)) parts.push(`phase=${trigger.phase.trim()}`);
+  if (Array.isArray(trigger.requires_events) && trigger.requires_events.length > 0) {
+    parts.push(`requires_events=${trigger.requires_events.filter((value) => typeof value === 'string').sort(compareText).join(',')}`);
+  }
+  if (trigger.condition && typeof trigger.condition === 'object') {
+    parts.push(`condition=${JSON.stringify(stableInline(trigger.condition))}`);
+  }
+  if (Array.isArray(trigger.conditions) && trigger.conditions.length > 0) {
+    parts.push(`conditions=${JSON.stringify(stableInline(trigger.conditions))}`);
+  }
+  return parts.length > 0 ? parts.join('; ') : null;
+}
+
+function subjectIdFor(ancestors, rootValue, relativeFile) {
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  return asNonEmptyString(subject?.id) ?? path.basename(relativeFile, path.extname(relativeFile));
+}
+
+function respondentFor(ancestors, rootValue) {
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  if (!subject) return null;
+  for (const key of ['responding_faction', 'respondent', 'player_faction', 'faction']) {
+    const value = asNonEmptyString(subject[key]);
+    if (value) return value;
+  }
+  return null;
+}
+
+function playerInteractionTypeFor(fieldPath, ancestors, rootValue) {
+  if (fieldPath.includes('.response_options[')) return 'player_choice';
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  if (Array.isArray(subject?.response_options) && subject.response_options.length > 0) return 'decision_context';
+  return 'informational';
+}
+
+function ringFor(playerInteractionType) {
+  return playerInteractionType === 'player_choice'
+    ? 'ring_3_refused_candidate'
+    : 'ring_2_informational';
+}
+
+function statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate }) {
+  if (ring === 'ring_3_refused_candidate' && riskClass === 'sensitive_history_gated') {
+    return { status: 'blocked_sensitive_player_choice', owner: 'historian+game-designer' };
+  }
+  if (sourceInfo.status === 'source_floor_exception') {
+    return { status: 'needs_source_floor', owner: 'historian' };
+  }
+  if (sourceInfo.status !== 'cited' || !sourceDetails.citation || !sourceDetails.sourceNote) {
+    return { status: 'needs_source_note', owner: 'historian' };
+  }
+  if (riskClass === 'dynamic_state_candidate' && !statePredicate) {
+    return { status: 'needs_state_predicate', owner: 'gameplay-programmer+historian' };
+  }
+  return { status: 'documented', owner: 'historian' };
 }
 
 function isDynamicConsequenceClaim(surface, text) {
@@ -526,8 +663,13 @@ function makeClaimId(file, line, fieldPath, matchedTerms) {
   return `sci_${crypto.createHash('sha256').update(basis).digest('hex').slice(0, 16)}`;
 }
 
-function makeClaim({ surface, file, line, fieldPath, text, matchedTerms, sourceInfo, dateWindow }) {
+function makeClaim({ surface, file, line, fieldPath, text, matchedTerms, sourceInfo, dateWindow, ancestors, rootValue }) {
   const riskClass = riskFor(surface, text, matchedTerms);
+  const sourceDetails = sourceDetailsFor(ancestors, rootValue);
+  const statePredicate = statePredicateFor(ancestors, rootValue);
+  const playerInteractionType = playerInteractionTypeFor(fieldPath, ancestors, rootValue);
+  const ring = ringFor(playerInteractionType);
+  const disposition = statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate });
   return {
     claim_id: makeClaimId(file, line, fieldPath, matchedTerms),
     surface,
@@ -535,12 +677,23 @@ function makeClaim({ surface, file, line, fieldPath, text, matchedTerms, sourceI
     line,
     field_path: fieldPath,
     excerpt: makeExcerpt(text, matchedTerms),
+    claim: makeExcerpt(text, matchedTerms),
     matched_terms: matchedTerms,
+    subject_id: subjectIdFor(ancestors, rootValue, file),
+    ring,
     actor_faction: actorFactionFor(text),
     date_window: dateWindow,
+    state_predicate: statePredicate,
     source_status: sourceInfo.status,
+    source_tier: sourceDetails.sourceTier,
+    citation: sourceDetails.citation,
+    source_note: sourceDetails.sourceNote,
+    respondent: respondentFor(ancestors, rootValue),
+    player_interaction_type: playerInteractionType,
     risk_class: riskClass,
     stop_gate: stopGateFor(riskClass),
+    status: disposition.status,
+    owner: disposition.owner,
     notes: notesFor(riskClass, sourceInfo),
   };
 }
@@ -581,6 +734,9 @@ async function scanJsonFile(rootDir, relativeFile, surface) {
   const claims = [];
 
   const collect = (text, fieldPath, ancestors, rootValue) => {
+    if (/\.(?:citation|citations|historical_source|historical_sources|reference|references|source|source_note|source_notes|sources)(?:\[|$)/.test(fieldPath)) {
+      return;
+    }
     const matchedTerms = findMatchedTerms(text);
     if (matchedTerms.length === 0) {
       return;
@@ -595,6 +751,8 @@ async function scanJsonFile(rootDir, relativeFile, surface) {
       matchedTerms,
       sourceInfo,
       dateWindow: dateWindowFor(relativeFile, ancestors),
+      ancestors,
+      rootValue,
     }));
   };
 
@@ -652,6 +810,8 @@ async function scanTextFile(rootDir, relativeFile, surface) {
       matchedTerms,
       sourceInfo,
       dateWindow: dateWindowFor(relativeFile, []),
+      ancestors: [],
+      rootValue: null,
     }));
   });
   return claims;
@@ -661,10 +821,14 @@ function summarize(files, claims) {
   const riskClassCounts = {};
   const sourceStatusCounts = {};
   const surfaceCounts = {};
+  const statusCounts = {};
+  const ownerCounts = {};
   for (const claim of claims) {
     riskClassCounts[claim.risk_class] = (riskClassCounts[claim.risk_class] ?? 0) + 1;
     sourceStatusCounts[claim.source_status] = (sourceStatusCounts[claim.source_status] ?? 0) + 1;
     surfaceCounts[claim.surface] = (surfaceCounts[claim.surface] ?? 0) + 1;
+    statusCounts[claim.status] = (statusCounts[claim.status] ?? 0) + 1;
+    ownerCounts[claim.owner] = (ownerCounts[claim.owner] ?? 0) + 1;
   }
   return {
     file_count: files.length,
@@ -673,7 +837,130 @@ function summarize(files, claims) {
     risk_class_counts: sortedCounts(riskClassCounts),
     source_status_counts: sortedCounts(sourceStatusCounts),
     surface_counts: sortedCounts(surfaceCounts),
+    status_counts: sortedCounts(statusCounts),
+    owner_counts: sortedCounts(ownerCounts),
   };
+}
+
+const HISTORICAL_ANCHORS = Object.freeze([
+  Object.freeze({
+    anchor_id: 'grabovica_uzdol_massacres_1993',
+    event_file: 'data/scenarios/events/war_1993.json',
+    essay_file: 'data/scenarios/essays/grabovica_uzdol_massacres_1993.json',
+    expected_turn_min: 74,
+    expected_turn_max: 76,
+  }),
+  Object.freeze({
+    anchor_id: 'operation_neretva_93_1993',
+    event_file: 'data/scenarios/events/war_1993.json',
+    essay_file: 'data/scenarios/essays/operation_neretva_93_1993.json',
+    expected_turn_min: 74,
+    expected_turn_max: 76,
+  }),
+]);
+
+async function buildHistoricalAnchors(rootDir) {
+  const anchors = [];
+  for (const contract of HISTORICAL_ANCHORS) {
+    const eventAbsolute = path.join(rootDir, contract.event_file);
+    const essayAbsolute = path.join(rootDir, contract.essay_file);
+    const eventExists = await pathExists(eventAbsolute);
+    const essayExists = await pathExists(essayAbsolute);
+    let event = null;
+    let essay = null;
+    if (eventExists) {
+      const rows = JSON.parse(await fs.readFile(eventAbsolute, 'utf8'));
+      event = Array.isArray(rows) ? rows.find((row) => row?.id === contract.anchor_id) ?? null : null;
+    }
+    if (essayExists) essay = JSON.parse(await fs.readFile(essayAbsolute, 'utf8'));
+    const actualMin = Number.isInteger(event?.trigger?.turn_min) ? event.trigger.turn_min : null;
+    const actualMax = Number.isInteger(event?.trigger?.turn_max) ? event.trigger.turn_max : actualMin;
+    const eventWindow = actualMin === null
+      ? null
+      : actualMin === actualMax ? `turn ${actualMin}` : `turns ${actualMin}-${actualMax}`;
+    const checks = {
+      event_in_1993_file: eventExists && event !== null && contract.event_file.endsWith('war_1993.json'),
+      essay_in_1993_file: essayExists && essay?.event_id === contract.anchor_id && contract.essay_file.endsWith('_1993.json'),
+      september_window: actualMin === contract.expected_turn_min && actualMax === contract.expected_turn_max,
+    };
+    anchors.push({
+      anchor_id: contract.anchor_id,
+      event_file: contract.event_file,
+      essay_file: contract.essay_file,
+      event_window: eventWindow,
+      expected_window: `turns ${contract.expected_turn_min}-${contract.expected_turn_max}`,
+      checks,
+      status: Object.values(checks).every(Boolean) ? 'pass' : 'fail',
+      owner: 'historian',
+      source: 'Balkan Battlegrounds Vol. II, pp. 434-435; ICTY Halilovic Trial Judgment (IT-01-48-T)',
+    });
+  }
+  return anchors.sort((a, b) => compareText(a.anchor_id, b.anchor_id));
+}
+
+function yearFromText(value) {
+  const match = asNonEmptyString(value)?.match(/(?:^|[^0-9])(199[2-5])(?:$|[^0-9])/);
+  return match ? Number(match[1]) : null;
+}
+
+async function buildContentDateMismatches(rootDir, files) {
+  const mismatches = [];
+  const eventYears = new Map();
+  for (const relativeFile of files.filter((file) => (
+    file.startsWith('data/scenarios/events/') || file.startsWith('data/scenarios/essays/')
+  ))) {
+    const fileYear = yearFromText(relativeFile);
+    if (fileYear === null || relativeFile === ESSAY_INDEX_RELATIVE) continue;
+    const parsed = JSON.parse(await fs.readFile(path.join(rootDir, relativeFile), 'utf8'));
+    const rows = Array.isArray(parsed) ? parsed : [parsed];
+    for (const row of rows) {
+      if (!row || typeof row !== 'object') continue;
+      const subjectId = asNonEmptyString(row.id) ?? path.basename(relativeFile, '.json');
+      const statedYear = Number.isInteger(row.year) ? row.year : yearFromText(subjectId);
+      if (relativeFile.startsWith('data/scenarios/events/') && asNonEmptyString(row.id)) {
+        eventYears.set(row.id, { year: statedYear ?? fileYear, file: relativeFile });
+      }
+      if (statedYear !== null && statedYear !== fileYear) {
+        mismatches.push({
+          code: 'event_essay_date_mismatch',
+          file: relativeFile,
+          subject_id: subjectId,
+          file_year: fileYear,
+          claim_year: statedYear,
+          related_file: null,
+          status: 'blocked',
+          owner: 'historian',
+        });
+      }
+    }
+  }
+  for (const relativeFile of files.filter((file) => (
+    file.startsWith('data/scenarios/essays/') && file !== ESSAY_INDEX_RELATIVE
+  ))) {
+    const parsed = JSON.parse(await fs.readFile(path.join(rootDir, relativeFile), 'utf8'));
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) continue;
+    const eventId = asNonEmptyString(parsed.event_id);
+    if (!eventId) continue;
+    const event = eventYears.get(eventId);
+    const essayYear = Number.isInteger(parsed.year) ? parsed.year : yearFromText(parsed.id) ?? yearFromText(relativeFile);
+    if (event && essayYear !== null && event.year !== essayYear) {
+      mismatches.push({
+        code: 'event_essay_date_mismatch',
+        file: relativeFile,
+        subject_id: asNonEmptyString(parsed.id) ?? path.basename(relativeFile, '.json'),
+        file_year: essayYear,
+        claim_year: event.year,
+        related_file: event.file,
+        status: 'blocked',
+        owner: 'historian',
+      });
+    }
+  }
+  return mismatches.sort((a, b) => (
+    compareText(a.file, b.file)
+    || compareText(a.subject_id, b.subject_id)
+    || compareText(a.related_file ?? '', b.related_file ?? '')
+  ));
 }
 
 async function scanSensitiveClaimInventory(options = {}) {
@@ -691,6 +978,8 @@ async function scanSensitiveClaimInventory(options = {}) {
   }
 
   sortClaims(claims);
+  const historicalAnchors = await buildHistoricalAnchors(rootDir);
+  const dateMismatches = await buildContentDateMismatches(rootDir, files);
 
   return {
     schema_version: SCHEMA_VERSION,
@@ -701,6 +990,8 @@ async function scanSensitiveClaimInventory(options = {}) {
     },
     summary: summarize(files, claims),
     claims,
+    historical_anchors: historicalAnchors,
+    date_mismatches: dateMismatches,
     policy: {
       excerpt_chars: EXCERPT_CHARS,
       source_floors: SOURCE_FLOORS,
@@ -710,6 +1001,7 @@ async function scanSensitiveClaimInventory(options = {}) {
         operational_overclaim: Array.from(TERM_SETS.operational_overclaim),
         sensitive_history: Array.from(TERM_SETS.sensitive_history),
       },
+      historical_anchor_contracts: HISTORICAL_ANCHORS,
     },
   };
 }
@@ -741,14 +1033,14 @@ function formatMarkdown(result) {
     '',
     '## Claims',
     '',
-    '| Claim ID | Surface | File | Line | Source | Risk | Terms | Excerpt |',
-    '|---|---|---|---:|---|---|---|---|',
+    '| Claim ID | Subject | Ring | File | Line | Source | Status | Owner | Interaction | Claim |',
+    '|---|---|---|---|---:|---|---|---|---|---|',
   );
   if (result.claims.length === 0) {
-    lines.push('| - | - | - | - | - | - | - | No claims found. |');
+    lines.push('| - | - | - | - | - | - | - | - | - | No claims found. |');
   } else {
     for (const claim of result.claims) {
-      lines.push(`| ${claim.claim_id} | ${claim.surface} | ${claim.file} | ${claim.line} | ${claim.source_status} | ${claim.risk_class} | ${claim.matched_terms.join(', ')} | ${claim.excerpt.replace(/\|/g, '\\|')} |`);
+      lines.push(`| ${claim.claim_id} | ${claim.subject_id} | ${claim.ring} | ${claim.file} | ${claim.line} | ${claim.source_status} | ${claim.status} | ${claim.owner} | ${claim.player_interaction_type} | ${claim.claim.replace(/\|/g, '\\|')} |`);
     }
   }
 
@@ -776,6 +1068,11 @@ async function main() {
   } else {
     process.stdout.write(content);
   }
+  if (args.includes('--strict')) {
+    const blockedClaims = result.claims.filter((claim) => claim.status !== 'documented').length;
+    const failedAnchors = result.historical_anchors.filter((anchor) => anchor.status !== 'pass').length;
+    if (blockedClaims > 0 || failedAnchors > 0 || result.date_mismatches.length > 0) process.exitCode = 2;
+  }
 }
 
 module.exports = {
@@ -786,6 +1083,8 @@ module.exports = {
   makeClaimId,
   scanSensitiveClaimInventory,
   stableStringify,
+  buildHistoricalAnchors,
+  buildContentDateMismatches,
 };
 
 if (require.main === module) {

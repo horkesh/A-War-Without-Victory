@@ -249,6 +249,42 @@ describe('scanOptionCostFloor', () => {
 // ─── End-to-end audit semantics ────────────────────────────────────────────
 
 describe('buildSensitiveHistoryAudit', () => {
+    it('flags sensitive player choices, missing provenance notes, and generic symmetry language', () => {
+        const report = buildSensitiveHistoryAudit({
+            rows: [{
+                id: 'generic_sensitive_fixture_1993',
+                category: 'humanitarian',
+                narrative: 'Atrocities on both sides left civilians dead.',
+                historical_source: 'Fixture citation.',
+                trigger: { turn_min: 74, turn_max: 76, phase: 'war' },
+                response_options: [{ id: 'authorize', label: 'Authorize forced displacement' }],
+            }],
+        });
+
+        expect(report.violations.map((row) => row.kind).sort()).toEqual([
+            'generic_symmetry_language',
+            'missing_sensitive_source_note',
+            'sensitive_player_choice',
+        ]);
+        expect(report.violations.every((row) => row.severity === 'CRITICAL')).toBe(true);
+    });
+
+    it('flags rupture claims whose trigger has no live state predicate', () => {
+        const report = buildSensitiveHistoryAudit({
+            rows: [{
+                id: 'fixture_genocide_rupture_1995',
+                category: 'humanitarian',
+                narrative: 'A genocide rupture is recorded.',
+                source_tier: 'tribunal',
+                historical_source: 'Fixture tribunal citation.',
+                source_note: 'Fixture provenance-only note.',
+                trigger: { turn_min: 160, turn_max: 161, phase: 'war' },
+            }],
+        });
+
+        expect(report.violations.some((row) => row.kind === 'calendar_only_rupture_claim')).toBe(true);
+    });
+
     it('runs on real catalog without throwing and surfaces summary structure', () => {
         const report = buildSensitiveHistoryAudit();
         expect(report.summary.total_events_scanned).toBeGreaterThan(0);
