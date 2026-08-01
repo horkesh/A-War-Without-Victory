@@ -51,10 +51,7 @@ describe('sensitive-history choice semantics', () => {
         'General Staff warned of genocide. Proceed anyway with the command review.',
         'General Staff warned of genocide. Continue regardless with the documentation review.',
         'General Staff warned of genocide. Continue with the documentation review regardless.',
-        'General Staff warned of genocide. Proceed to review the offensive regardless.',
         'General Staff warned of genocide. Proceed with the operational review anyway.',
-        'General Staff warned of genocide. Proceed to review and document the offensive regardless.',
-        'General Staff warned of genocide. Proceed to inspect the operation and review the report anyway.',
     ])('keeps documentation, accountability, and refusal prose contextual: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(false);
     });
@@ -86,6 +83,15 @@ describe('sensitive-history choice semantics', () => {
         'General Staff warned of genocide. Proceed regardless to document, review, and launch the operation.',
         'General Staff warned of genocide. Proceed to review, launch the offensive, and document the result anyway.',
         'General Staff warned of genocide. Proceed to review and continue with direct action regardless.',
+        'General Staff warned of genocide. Proceed to review the offensive regardless.',
+        'General Staff warned of genocide. Proceed to review and document the offensive regardless.',
+        'General Staff warned of genocide. Proceed to inspect the operation and review the report anyway.',
+        'General Staff warned of genocide. Proceed to review and begin the offensive regardless.',
+        'General Staff warned of genocide. Proceed to review and conduct the offensive regardless.',
+        'General Staff warned of genocide. Proceed to review and resume the offensive regardless.',
+        'General Staff warned of genocide. Proceed to review and start the offensive regardless.',
+        'General Staff warned of genocide. Proceed to review and order the offensive regardless.',
+        'General Staff warned of genocide. Proceed anyway.',
     ])('does not let contextual language sanitize a later or prior directive: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(true);
     });
