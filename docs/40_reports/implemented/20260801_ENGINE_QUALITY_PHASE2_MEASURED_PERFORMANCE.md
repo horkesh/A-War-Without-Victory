@@ -154,3 +154,17 @@ The current application profile ranks the next bounded owners as:
 3. primitive political-control lookup/object allocation (`getSettlementControlStatus` 2,187.781 ms self/inclusive).
 
 Each subsequent candidate remains subject to the same rule: focused equivalence test first, current-owner profile, full timed run, exact byte equality, independent determinism review, and rejection on regression or unexplained drift.
+
+### Phase 2c static owner design
+
+The executable design is [R5 Phase 2c amortized sector topology plan](../../plans/2026-08-01-r5-phase2c-amortized-sector-topology-plan.md). This is a static-analysis handoff, not new timing or performance acceptance.
+
+The diagnostic 40-turn profile attributes `6,751.949 ms` to `reconcile-final-sector-truth`, `6,006.792 ms` to `partition-corps-front-sectors`, and `3,077.626 ms` to `reconcile-final-sector-truth-after-ops`: `15,836.367 ms`, or about `395.9 ms/turn`. The same run totals about `1,223.822 ms/turn`, so eliminating all three sector owners would still leave roughly `828 ms/turn`. Sector topology is the first structural candidate, not an order-of-magnitude solution by itself.
+
+The diagnostic sector sidecar records 99 builder invocations over 40 turns (`2.475` calls/turn). Static source inspection shows each full build repeats faction construction followed by geometry, sealing, recovery, coverage, ownership, territory, assignment, and diagnostic passes. The safe first candidate is therefore an invocation-local derived context with stable OSID ordinals, dense mutation-aware formation occupancy, and precomputed faction/sector reachability facts. The context must be updated at the exact formation-location mutation owner and must not cross a turn or enter `GameState`.
+
+A larger pure-solve/serial-commit incremental topology architecture is conditional. It requires explicit dirty faction/component/front-edge/formation identity on the transient receipt, complete full-builder fallback, and full observable-surface equivalence. A broad receipt kind alone cannot prove untouched topology current.
+
+Rejected shapes remain explicit: module/cross-turn `WeakMap` or fingerprint caching, unconditional truth-pass skips, recovery-only fixed-point guards, parallel faction mutation, threshold changes, hash-only comparison, and performance baseline re-flooring. The prior byte-identical floor-completion `Map` hoist is also not a retry candidate: it regressed the target label from roughly `696` to `907 ms` in confirmation runs as its mutation-updated map grew sparse. The Phase 2c plan instead requires a dense/delta structure to earn its place in a fresh profile.
+
+No production source, test, scenario, baseline, timing artifact, package, version, release state, canon, or `FORAWWV.md` changed in this design checkpoint. The next action remains a fresh corrected-source V8/phase/sector/control packet after the exclusive runtime lease is available.

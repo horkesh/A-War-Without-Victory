@@ -4090,6 +4090,16 @@ Applied in `[2026-08-01] R7 historical-claim and localization inventories comple
 
 Applied in `[2026-08-01] Engine quality Phase 2 turn-local final-sector receipt checkpoint`, `[2026-08-01] Engine quality Phase 2 final-sector receipt committee correction`, `src/sim/combat/final_sector_truth_reconciliation.ts`, `src/sim/turn_phases/war_phase_reconciliation_steps.ts`, and `tests/final_sector_reconciliation_session.test.ts`.
 
+## 2026-08-01 - Amortized performance plans need an Amdahl handoff
+
+**A dominant owner can still be too small to close the target:** the three diagnostic sector phases consume about `395.9 ms/turn`, but the diagnostic run is about `1,223.8 ms/turn`. Even perfect sector removal would leave roughly `828 ms/turn`. Durable rule: compute the maximum whole-run saving before an algorithmic rewrite, state whether one owner can close the target, and require a fresh full-profile handoff after every accepted packet while the global target remains open.
+
+**A mutable hot-path index needs the same writer as the state it mirrors:** repeated formation-location scans are a candidate for dense call-scoped counts, but a cache that observes some location writes and misses others is false derived truth. Durable rule: use stable ordinals, keep the index inside one owning invocation, route each state write and count delta through the same adapter, assert parity in tests after every mutation, and invalidate geometry-derived facts when the geometry changes. Do not persist the index or use a module/cross-turn cache.
+
+**Inclusive nested timers rank work inside an owner; they are not additive self-time:** sector sidecar labels deliberately nest seals, coverage, recovery, and ownership passes. Durable rule: use them to select the next split, then confirm self/inclusive ownership with a current application profile; never sum overlapping labels into a claimed wall-clock saving.
+
+Applied in `[2026-08-01] R5 Phase 2c amortized sector topology design`, `docs/plans/2026-08-01-r5-phase2c-amortized-sector-topology-plan.md`, and `docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md`.
+
 ## 2026-08-01 - Adaptive UI evidence must keep its declared identities stable
 
 **Viewport reflow may change reachability, not the proof population:** opening and closing map panels changes occlusion and can reveal counters that were absent from the ready-map sample. Durable rule: freeze the declared identity set at the checkpoint, select only currently reachable unattempted members of that set, and report frozen members that became unavailable. Never substitute newly visible identities merely to reach a target count; that turns an adaptive reachability probe into an undeclared and non-reproducible blocker.
