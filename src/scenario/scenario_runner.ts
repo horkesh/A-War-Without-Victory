@@ -78,7 +78,12 @@ import { loadUrbanOsidSet, loadForestOsidSet } from '../sim/combat/combat_terrai
 import { displaceFormationsInEnemyTerritory } from '../sim/combat/attack_resolution_osid.js';
 import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.js';
 import { computeSrkStrangleOsids } from '../sim/combat/srk_strangle.js';
-import { reconcileFinalSectorTruth, sealFinalSectorTruthFromCurrentSectors } from '../sim/combat/final_sector_truth_reconciliation.js';
+import {
+    createFinalSectorReconciliationSession,
+    recordFinalSectorReconciliationMutation,
+    reconcileFinalSectorTruth,
+    sealFinalSectorTruthFromCurrentSectors,
+} from '../sim/combat/final_sector_truth_reconciliation.js';
 import {
     applyBotOpportunityDecisions,
     autoResolveOpportunityProposalReviews,
@@ -2923,6 +2928,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 'post-combat',
                 state.military.war_front_edges_osid,
             );
+            const finalSectorSession = createFinalSectorReconciliationSession(
+                state.meta.turn,
+                'final-save-geometry',
+            );
             reconcileFinalSectorTruth(
                 state,
                 finalOperationalEdges,
@@ -2931,13 +2940,19 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 finalSpatial,
                 null,
                 false,
-                { finalSaveGeometryProjection: true },
+                { finalSaveGeometryProjection: true, session: finalSectorSession },
+            );
+            recordFinalSectorReconciliationMutation(
+                finalSectorSession,
+                'seal-roster',
+                'final-save-seal',
             );
             sealFinalSectorTruthFromCurrentSectors(
                 state,
                 finalOperationalEdges,
                 null,
                 finalSpatial,
+                { session: finalSectorSession },
             );
         }
         const finalSerialized = _serTimeSync(emitTimingJson, timingTotals, 'final-save-serialize', () =>

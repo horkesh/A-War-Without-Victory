@@ -1596,6 +1596,151 @@ export function applyFinalSectorOwnerTruthPass(
         ));
 }
 
+/**
+ * Rebuild participant-sensitive roster truth against already-canonical geometry.
+ *
+ * Operation reconciliation can remove a brigade from the participant set after
+ * the turn's full sector build. That changes legal coverage donors, commander
+ * overrides, unresolved status, and unstaffed-front annotation, but it does not
+ * change front topology or territory. Re-run the canonical faction roster stages
+ * from empty buckets, then apply the same owner/seal derivations used by the full
+ * builder. All work is invocation-local and iterates in strict deterministic order.
+ */
+export function reconcileOperationSensitiveSectorRoster(
+    state: GameState,
+    sectors: Record<string, CorpsFrontSector>,
+    adjacency: Map<Osid, Osid[]>,
+    spatial?: SpatialContext,
+): FormationId[] {
+    const formations = state.military.formations ?? {};
+    const byFaction = new Map<FactionId, CorpsFrontSector[]>();
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector) continue;
+        const factionSectors = byFaction.get(sector.faction) ?? [];
+        factionSectors.push(sector);
+        byFaction.set(sector.faction, factionSectors);
+    }
+
+    for (const faction of [...byFaction.keys()].sort(strictCompare)) {
+        const factionSectors = byFaction.get(faction)!;
+        factionSectors.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+        // A full geometry build creates empty rear buckets before classification.
+        // Reset them here as well so the roster projection has the same input.
+        for (const sector of factionSectors) sector.rear_brigade_ids = [];
+
+        const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
+            ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+            : buildFriendlyOsidsFromState(state, adjacency, faction);
+        const componentOf = spatial?.componentsByFaction.get(faction)
+            ? new Map(spatial.componentsByFaction.get(faction)!)
+            : buildFriendlyComponents(adjacency, friendlyOsids);
+        const commanderProfiles = buildCorpsCommanderProfiles(state, factionSectors);
+
+        classifyBrigadesByTerritory(
+            factionSectors,
+            faction,
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+            commanderProfiles,
+            state.military.brigade_sector_override,
+            state,
+        );
+        assignCrossCorpsEnclaveDefenders(factionSectors, formations, faction, componentOf);
+        ensureMinimumSectorCoverage(
+            factionSectors,
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+            state,
+        );
+        reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
+
+        const corpsIds = [...new Set(factionSectors.map((sector) => sector.corps_id))]
+            .sort(strictCompare);
+        for (const corpsId of corpsIds) {
+            const profile = commanderProfiles.get(corpsId);
+            if (!profile) continue;
+            const operationParticipants = new Set<FormationId>();
+            for (const operation of state.military.corps_command?.[corpsId]?.active_operations ?? []) {
+                for (const brigadeId of operation.participating_brigades ?? []) {
+                    operationParticipants.add(brigadeId);
+                }
+            }
+            commanderReviewAssignment(
+                corpsId,
+                factionSectors,
+                formations,
+                getCorpsArmyPriorities(faction, corpsId, state.meta.turn, state),
+                profile,
+                componentOf,
+                adjacency,
+                friendlyOsids,
+                operationParticipants,
+            );
+        }
+
+        deduplicateBrigadesAcrossSectors(factionSectors);
+        enforcePhysicalSectorOwnership(factionSectors, formations, adjacency, friendlyOsids);
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(
+            factionSectors,
+            formations,
+            faction,
+            adjacency,
+            friendlyOsids,
+            { allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0 },
+        );
+        reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
+        recomputeSectorPowerAndThreat(factionSectors, formations, faction, state);
+
+        const unreachableIds = assertBrigadeReachability(factionSectors, formations, componentOf);
+        if (unreachableIds.length > 0) {
+            const unreachable = new Set(unreachableIds);
+            for (const sector of factionSectors) {
+                const demoted = sector.assigned_brigade_ids
+                    .filter((brigadeId) => unreachable.has(brigadeId));
+                sector.assigned_brigade_ids = sector.assigned_brigade_ids
+                    .filter((brigadeId) => !unreachable.has(brigadeId));
+                for (const brigadeId of demoted.sort(strictCompare)) {
+                    if (!sector.reserve_brigade_ids.includes(brigadeId)) {
+                        sector.reserve_brigade_ids.push(brigadeId);
+                    }
+                    const formation = formations[brigadeId];
+                    if (formation) formation.assigned_sub_segment_id = undefined;
+                }
+            }
+        }
+        ensureMinimumSectorCoverage(
+            factionSectors,
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+            state,
+        );
+        reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
+        recomputeSectorPowerAndThreat(factionSectors, formations, faction, state);
+        assertSectorBrigadesActive(factionSectors, formations);
+    }
+
+    applyFinalSectorOwnerTruthPass(sectors, state, formations, adjacency, {
+        allowCollapsedRearGuardAbsorption: false,
+    });
+    rescueUnassignedLoanedElitesInTerritory(sectors, formations);
+    applyFinalSectorOwnerTruthPass(sectors, state, formations, adjacency, {
+        allowCollapsedRearGuardAbsorption: false,
+    });
+    annotateUnstaffedFrontSectors(sectors, state, formations, adjacency, spatial);
+    recomputeMetricsByFaction(Object.values(sectors), formations, state);
+    syncSectorAssignmentsToFormations(sectors, formations, adjacency);
+    const unresolved = collectUnresolvedSectorBrigades(state, sectors, formations, adjacency);
+    state.military.unresolved_sector_brigades = unresolved;
+    return unresolved;
+}
+
 function rescueAdjacentLiveOwnersForEmptyFrontSectors(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,

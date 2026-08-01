@@ -90,12 +90,17 @@ describe('reconcileFinalOperationTruth', () => {
             } as any,
         };
 
-        reconcileFinalOperationTruth(state);
+        const report = reconcileFinalOperationTruth(state);
 
         const op = state.military.corps_command!.test_corps.active_operations[0];
         expect(op.participating_brigades).toEqual(['b_active']);
         expect(op.axes?.[0]?.assigned_brigades).toEqual(['b_active']);
         expect(op.sector_id).toBe('sector:test:truth');
+        expect(report).toEqual({
+            operations_checked: 1,
+            sector_reconciliation_changes: 1,
+            sector_reconciliation_required: true,
+        });
     });
 
     it('forces empty execution operations into recovery with brigade attrition reason', () => {
@@ -135,13 +140,14 @@ describe('reconcileFinalOperationTruth', () => {
             } as any,
         };
 
-        reconcileFinalOperationTruth(state);
+        const report = reconcileFinalOperationTruth(state);
 
         const op = state.military.corps_command!.test_corps.active_operations[0];
         expect(op.participating_brigades).toEqual([]);
         expect(op.phase).toBe('recovery');
         expect(op.recovery_reason).toBe('brigade_attrition');
         expect(op.phase_started_turn).toBe(12);
+        expect(report.sector_reconciliation_required).toBe(true);
     });
 
     it('drops participants whose only live sector claim belongs to a different corps', () => {
@@ -214,11 +220,56 @@ describe('reconcileFinalOperationTruth', () => {
             } as any,
         };
 
-        reconcileFinalOperationTruth(state);
+        const report = reconcileFinalOperationTruth(state);
 
         const op = state.military.corps_command!.test_corps.active_operations[0];
         expect(op.participating_brigades).toEqual(['b_same']);
         expect(op.axes?.[0]?.assigned_brigades).toEqual(['b_same']);
         expect(op.sector_id).toBe('sector:test:truth');
+        expect(report.sector_reconciliation_required).toBe(true);
+    });
+
+    it('does not request sector reconciliation when the canonical participant roster is unchanged', () => {
+        const state = makeState();
+        state.military.formations = {
+            b_active: makeFormation({
+                id: 'b_active',
+                faction: 'RS',
+                corps_id: 'test_corps',
+                location_osid: 'front_truth',
+                home_osid: 'front_truth',
+                status: 'active',
+            }),
+        };
+        state.military.corps_front_sectors = {
+            truth: makeSector({
+                sector_id: 'sector:test:truth',
+                corps_id: 'test_corps',
+                assigned_brigade_ids: ['b_active'],
+                territory_osids: ['front_truth'],
+                friendly_osids: ['front_truth'],
+                edge_ids: ['front_truth__enemy'],
+            }),
+        };
+        state.military.corps_command = {
+            test_corps: {
+                active_operations: [{
+                    name: 'Operation Stable',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 10,
+                    phase_started_turn: 10,
+                    participating_brigades: ['b_active'],
+                    sector_id: 'sector:test:truth',
+                    objectives: ['enemy'],
+                }],
+            } as any,
+        };
+
+        expect(reconcileFinalOperationTruth(state)).toEqual({
+            operations_checked: 1,
+            sector_reconciliation_changes: 0,
+            sector_reconciliation_required: false,
+        });
     });
 });
