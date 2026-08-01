@@ -5,7 +5,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 const EXCERPT_CHARS = 160;
 
 // The runtime Codex panel (src/ui/map/components/CodexPanel.tsx) imports
@@ -71,7 +71,7 @@ const TERM_SETS = Object.freeze({
   ]),
 });
 
-const SOURCE_KEYS = Object.freeze([
+const CITATION_KEYS = Object.freeze([
   'citation',
   'citations',
   'historical_source',
@@ -79,9 +79,55 @@ const SOURCE_KEYS = Object.freeze([
   'reference',
   'references',
   'source',
+  'sources',
+]);
+const SOURCE_KEYS = Object.freeze([
+  ...CITATION_KEYS,
   'source_note',
   'source_notes',
-  'sources',
+]);
+
+// These are authored player-facing prose fields. JSON identifiers, trigger
+// predicates, source metadata, and mechanical effect values are deliberately
+// excluded. The inventory must not depend on a sensitive-word dictionary:
+// ordinary historical prose can still contain an unsupported factual claim.
+const CLAIM_PROSE_KEYS = new Set([
+  'after_action',
+  'body',
+  'content',
+  'copy',
+  'description',
+  'detail',
+  'effect',
+  'effects',
+  'explanation',
+  'headline',
+  'historical_context',
+  'label',
+  'message',
+  'narrative',
+  'note',
+  'outcome',
+  'rationale',
+  'staff_assessment',
+  'summary',
+  'text',
+  'title',
+  'tooltip',
+  'trigger_evidence',
+]);
+
+const GENERIC_SYMMETRY_PATTERN = /\b(?:both|all) sides\b|\bno faction\b.{0,48}\bclean hands\b/i;
+const DIRECT_CHOICE_FIELDS_PATTERN = /\.response_options\[\d+\]\.(?:description|label|narrative|text)$/;
+const PROHIBITED_ACT_PATTERN = /\b(?:ethnic cleansing|cleansing|forced displacement|deportation|expulsion|massacre|genocide)\b/i;
+const PROHIBITED_ACTION_PATTERN = /\b(?:allow|approve|authorize|begin|commit|conduct|continue|execute|implement|order|proceed|pursue)\b/i;
+const CANON_ALLOWED_PARAMILITARY_IDS = new Set([
+  'rbih_paramilitary_policy_1992',
+  'rs_paramilitary_policy_1992',
+]);
+const CANON_ALLOWED_PARAMILITARY_FAMILIES = new Set([
+  'rbih_paramilitary_policy',
+  'rs_paramilitary_policy',
 ]);
 
 const SRC_PATH_KEYWORDS = Object.freeze([
@@ -319,23 +365,105 @@ function termSetMatches(matchedTerms, setName) {
   return matchedTerms.some((term) => set.has(term));
 }
 
-function lineForOffset(text, offset) {
-  if (offset < 0) {
-    return 1;
-  }
+function buildJsonStringLineMap(raw) {
+  const linesByPath = new Map();
+  let index = 0;
   let line = 1;
-  for (let index = 0; index < offset; index += 1) {
-    if (text[index] === '\n') {
-      line += 1;
-    }
-  }
-  return line;
-}
 
-function lineForJsonString(raw, value) {
-  const encoded = JSON.stringify(value);
-  const offset = raw.indexOf(encoded);
-  return lineForOffset(raw, offset);
+  const skipWhitespace = () => {
+    while (index < raw.length && /\s/.test(raw[index])) {
+      if (raw[index] === '\n') line += 1;
+      index += 1;
+    }
+  };
+
+  const parseString = () => {
+    if (raw[index] !== '"') throw new Error(`Expected JSON string at line ${line}`);
+    const start = index;
+    const tokenLine = line;
+    index += 1;
+    let escaped = false;
+    while (index < raw.length) {
+      const char = raw[index];
+      if (char === '\n') line += 1;
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === '"') {
+        index += 1;
+        break;
+      }
+      index += 1;
+    }
+    return { value: JSON.parse(raw.slice(start, index)), line: tokenLine };
+  };
+
+  const parseValue = (pathParts) => {
+    skipWhitespace();
+    if (raw[index] === '"') {
+      const token = parseString();
+      linesByPath.set(pathParts.join(''), token.line);
+      return;
+    }
+    if (raw[index] === '{') {
+      index += 1;
+      skipWhitespace();
+      if (raw[index] === '}') {
+        index += 1;
+        return;
+      }
+      while (index < raw.length) {
+        const key = parseString().value;
+        skipWhitespace();
+        if (raw[index] !== ':') throw new Error(`Expected ':' after JSON key at line ${line}`);
+        index += 1;
+        parseValue([...pathParts, `.${key}`]);
+        skipWhitespace();
+        if (raw[index] === '}') {
+          index += 1;
+          return;
+        }
+        if (raw[index] !== ',') throw new Error(`Expected ',' in JSON object at line ${line}`);
+        index += 1;
+        skipWhitespace();
+      }
+      throw new Error('Unterminated JSON object');
+    }
+    if (raw[index] === '[') {
+      index += 1;
+      skipWhitespace();
+      if (raw[index] === ']') {
+        index += 1;
+        return;
+      }
+      let arrayIndex = 0;
+      while (index < raw.length) {
+        parseValue([...pathParts, `[${arrayIndex}]`]);
+        arrayIndex += 1;
+        skipWhitespace();
+        if (raw[index] === ']') {
+          index += 1;
+          return;
+        }
+        if (raw[index] !== ',') throw new Error(`Expected ',' in JSON array at line ${line}`);
+        index += 1;
+      }
+      throw new Error('Unterminated JSON array');
+    }
+    const primitiveStart = index;
+    while (index < raw.length && !/[\s,}\]]/.test(raw[index])) index += 1;
+    if (index === primitiveStart) {
+      throw new Error(`Expected JSON value at line ${line}`);
+    }
+  };
+
+  parseValue(['$']);
+  skipWhitespace();
+  if (index !== raw.length) {
+    throw new Error(`Unexpected JSON input at line ${line}`);
+  }
+  return linesByPath;
 }
 
 function normalizeExcerpt(text) {
@@ -402,7 +530,8 @@ function nearestSubjectObject(ancestors, rootValue) {
   for (let index = ancestors.length - 1; index >= 0; index -= 1) {
     const value = ancestors[index];
     if (value && typeof value === 'object' && !Array.isArray(value) && asNonEmptyString(value.id)
-      && (value.trigger || value.category || value.event_id || value.content || value.narrative)) {
+      && (value.trigger || value.category || value.event_id || value.content || value.narrative
+        || value.title || Array.isArray(value.response_options))) {
       return value;
     }
   }
@@ -420,17 +549,7 @@ function sourceDetailsFor(ancestors, rootValue) {
   if (!sourceObject) {
     return { citation: null, sourceTier: null, sourceNote: null };
   }
-  const citationKeys = [
-    'citation',
-    'citations',
-    'historical_source',
-    'historical_sources',
-    'reference',
-    'references',
-    'source',
-    'sources',
-  ];
-  const citations = citationKeys.flatMap((key) => flattenSourceValues(sourceObject[key]));
+  const citations = CITATION_KEYS.flatMap((key) => flattenSourceValues(sourceObject[key]));
   return {
     citation: citations.length > 0 ? [...new Set(citations)].sort(compareText).join(' | ') : null,
     sourceTier: asNonEmptyString(sourceObject.source_tier),
@@ -481,7 +600,7 @@ function sourceStatusFor(surface, rootValue, ancestors) {
   if (!sourceObject) {
     return { status: 'uncited', floorStatus: null };
   }
-  const cited = SOURCE_KEYS.some((key) => (
+  const cited = CITATION_KEYS.some((key) => (
     Object.prototype.hasOwnProperty.call(sourceObject, key) && hasSourceValue(sourceObject[key])
   ));
   return { status: cited ? 'cited' : 'uncited', floorStatus: null };
@@ -572,8 +691,27 @@ function respondentFor(ancestors, rootValue) {
   return null;
 }
 
-function playerInteractionTypeFor(fieldPath, ancestors, rootValue) {
-  if (fieldPath.includes('.response_options[')) return 'player_choice';
+function isCanonAllowedParamilitaryChoice(ancestors, rootValue) {
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  const id = asNonEmptyString(subject?.id) ?? '';
+  const family = asNonEmptyString(subject?.family) ?? '';
+  return CANON_ALLOWED_PARAMILITARY_IDS.has(id) || CANON_ALLOWED_PARAMILITARY_FAMILIES.has(family);
+}
+
+function isDirectProhibitedChoice(text) {
+  if (/\bsystematic\s+(?:ethnic\s+)?cleansing\b/i.test(text)) return true;
+  if (/\bmaximum\s+displacement\b/i.test(text)) return true;
+  if (/\bgenocide\b[\s\S]{0,96}\bproceed\b/i.test(text)) return true;
+  return (PROHIBITED_ACTION_PATTERN.test(text) && PROHIBITED_ACT_PATTERN.test(text));
+}
+
+function playerInteractionTypeFor(fieldPath, text, ancestors, rootValue) {
+  if (DIRECT_CHOICE_FIELDS_PATTERN.test(fieldPath)
+    && isDirectProhibitedChoice(text)
+    && !isCanonAllowedParamilitaryChoice(ancestors, rootValue)) {
+    return 'player_choice';
+  }
+  if (fieldPath.includes('.response_options[')) return 'decision_context';
   const subject = nearestSubjectObject(ancestors, rootValue);
   if (Array.isArray(subject?.response_options) && subject.response_options.length > 0) return 'decision_context';
   return 'informational';
@@ -585,15 +723,30 @@ function ringFor(playerInteractionType) {
     : 'ring_2_informational';
 }
 
-function statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate }) {
+function provenanceGapsFor(sourceInfo, sourceDetails) {
+  const gaps = [];
+  if (sourceInfo.status === 'source_floor_exception') gaps.push('source_floor');
+  if (!sourceDetails.citation) gaps.push('citation');
+  if (!sourceDetails.sourceNote) gaps.push('source_note');
+  if (!sourceDetails.sourceTier) gaps.push('source_tier');
+  return gaps;
+}
+
+function statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate, text }) {
   if (ring === 'ring_3_refused_candidate' && riskClass === 'sensitive_history_gated') {
     return { status: 'blocked_sensitive_player_choice', owner: 'historian+game-designer' };
+  }
+  if (GENERIC_SYMMETRY_PATTERN.test(text)) {
+    return { status: 'needs_actor_specificity', owner: 'historian' };
   }
   if (sourceInfo.status === 'source_floor_exception') {
     return { status: 'needs_source_floor', owner: 'historian' };
   }
   if (sourceInfo.status !== 'cited' || !sourceDetails.citation || !sourceDetails.sourceNote) {
     return { status: 'needs_source_note', owner: 'historian' };
+  }
+  if (!sourceDetails.sourceTier) {
+    return { status: 'needs_source_tier', owner: 'historian' };
   }
   if (riskClass === 'dynamic_state_candidate' && !statePredicate) {
     return { status: 'needs_state_predicate', owner: 'gameplay-programmer+historian' };
@@ -667,9 +820,9 @@ function makeClaim({ surface, file, line, fieldPath, text, matchedTerms, sourceI
   const riskClass = riskFor(surface, text, matchedTerms);
   const sourceDetails = sourceDetailsFor(ancestors, rootValue);
   const statePredicate = statePredicateFor(ancestors, rootValue);
-  const playerInteractionType = playerInteractionTypeFor(fieldPath, ancestors, rootValue);
+  const playerInteractionType = playerInteractionTypeFor(fieldPath, text, ancestors, rootValue);
   const ring = ringFor(playerInteractionType);
-  const disposition = statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate });
+  const disposition = statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate, text });
   return {
     claim_id: makeClaimId(file, line, fieldPath, matchedTerms),
     surface,
@@ -688,6 +841,7 @@ function makeClaim({ surface, file, line, fieldPath, text, matchedTerms, sourceI
     source_tier: sourceDetails.sourceTier,
     citation: sourceDetails.citation,
     source_note: sourceDetails.sourceNote,
+    provenance_gaps: provenanceGapsFor(sourceInfo, sourceDetails),
     respondent: respondentFor(ancestors, rootValue),
     player_interaction_type: playerInteractionType,
     risk_class: riskClass,
@@ -717,6 +871,11 @@ function walkJsonStrings(value, visitor, ancestors = [], pathParts = ['$']) {
   }
 }
 
+function isClaimProseField(fieldPath) {
+  const match = fieldPath.match(/\.([A-Za-z0-9_]+)(?:\[\d+\])?$/);
+  return match ? CLAIM_PROSE_KEYS.has(match[1]) : false;
+}
+
 function sortClaims(claims) {
   return claims.sort((a, b) => (
     compareText(a.file, b.file)
@@ -731,21 +890,24 @@ async function scanJsonFile(rootDir, relativeFile, surface) {
   const absoluteFile = path.join(rootDir, relativeFile);
   const raw = await fs.readFile(absoluteFile, 'utf8');
   const parsed = JSON.parse(raw);
+  const linesByPath = buildJsonStringLineMap(raw);
   const claims = [];
 
-  const collect = (text, fieldPath, ancestors, rootValue) => {
+  const collect = (text, fieldPath, ancestors, rootValue, sourceFieldPath = fieldPath) => {
     if (/\.(?:citation|citations|historical_source|historical_sources|reference|references|source|source_note|source_notes|sources)(?:\[|$)/.test(fieldPath)) {
       return;
     }
     const matchedTerms = findMatchedTerms(text);
-    if (matchedTerms.length === 0) {
+    if (matchedTerms.length === 0 && !isClaimProseField(fieldPath)) {
       return;
     }
     const sourceInfo = sourceStatusFor(surface, rootValue, ancestors);
+    const line = linesByPath.get(sourceFieldPath);
+    if (!Number.isInteger(line)) throw new Error(`Missing JSON line for ${relativeFile}:${sourceFieldPath}`);
     claims.push(makeClaim({
       surface,
       file: relativeFile,
-      line: lineForJsonString(raw, text),
+      line,
       fieldPath,
       text,
       matchedTerms,
@@ -775,9 +937,15 @@ async function scanJsonFile(rootDir, relativeFile, surface) {
         : `[${essayIndex}]`;
       walkJsonStrings(
         sections,
-        (text, fieldPath, ancestors) => collect(text, fieldPath, ancestors, essay),
+        (text, sourceFieldPath, ancestors) => {
+          const fieldPath = sourceFieldPath.replace(
+            `$.essays[${essayIndex}]`,
+            `$.${essayKey}`,
+          );
+          collect(text, fieldPath, ancestors, essay, sourceFieldPath);
+        },
         [parsed, essay],
-        ['$', `.${essayKey}`, '.dynamic_sections'],
+        ['$', '.essays', `[${essayIndex}]`, '.dynamic_sections'],
       );
     });
     return claims;
@@ -883,6 +1051,34 @@ async function buildHistoricalAnchors(rootDir) {
       essay_in_1993_file: essayExists && essay?.event_id === contract.anchor_id && contract.essay_file.endsWith('_1993.json'),
       september_window: actualMin === contract.expected_turn_min && actualMax === contract.expected_turn_max,
     };
+    const eventCitation = event
+      ? CITATION_KEYS.flatMap((key) => flattenSourceValues(event[key])).filter(Boolean)
+      : [];
+    const essayCitations = Array.isArray(essay?.sources)
+      ? essay.sources.flatMap(flattenSourceValues)
+      : [];
+    const essayCategory = asNonEmptyString(essay?.category);
+    const essaySourceFloor = essayCategory ? SOURCE_FLOORS[essayCategory] ?? null : null;
+    const authoredProvenance = {
+      event_citations: [...new Set(eventCitation)].sort(compareText),
+      event_source_tier: asNonEmptyString(event?.source_tier),
+      event_source_note: asNonEmptyString(event?.source_note),
+      essay_citations: [...new Set(essayCitations)].sort(compareText),
+      essay_source_tier: asNonEmptyString(essay?.source_tier),
+      essay_category: essayCategory,
+      required_essay_source_floor: essaySourceFloor,
+    };
+    const provenanceGaps = [];
+    if (authoredProvenance.event_citations.length === 0) provenanceGaps.push('event_citation');
+    if (!authoredProvenance.event_source_note) provenanceGaps.push('event_source_note');
+    if (!authoredProvenance.event_source_tier) provenanceGaps.push('event_source_tier');
+    if (authoredProvenance.essay_citations.length === 0) provenanceGaps.push('essay_citation');
+    if (!authoredProvenance.essay_source_tier) provenanceGaps.push('essay_source_tier');
+    if (typeof essaySourceFloor === 'number' && authoredProvenance.essay_citations.length < essaySourceFloor) {
+      provenanceGaps.push('essay_source_floor');
+    }
+    const chronologyStatus = Object.values(checks).every(Boolean) ? 'pass' : 'blocked';
+    const provenanceStatus = provenanceGaps.length === 0 ? 'pass' : 'blocked';
     anchors.push({
       anchor_id: contract.anchor_id,
       event_file: contract.event_file,
@@ -890,9 +1086,12 @@ async function buildHistoricalAnchors(rootDir) {
       event_window: eventWindow,
       expected_window: `turns ${contract.expected_turn_min}-${contract.expected_turn_max}`,
       checks,
-      status: Object.values(checks).every(Boolean) ? 'pass' : 'fail',
+      chronology_status: chronologyStatus,
+      provenance_status: provenanceStatus,
+      status: chronologyStatus === 'pass' && provenanceStatus === 'pass' ? 'pass' : 'blocked',
       owner: 'historian',
-      source: 'Balkan Battlegrounds Vol. II, pp. 434-435; ICTY Halilovic Trial Judgment (IT-01-48-T)',
+      authored_provenance: authoredProvenance,
+      provenance_gaps: provenanceGaps.sort(compareText),
     });
   }
   return anchors.sort((a, b) => compareText(a.anchor_id, b.anchor_id));
@@ -995,7 +1194,9 @@ async function scanSensitiveClaimInventory(options = {}) {
     policy: {
       excerpt_chars: EXCERPT_CHARS,
       source_floors: SOURCE_FLOORS,
+      citation_keys: Array.from(CITATION_KEYS),
       source_keys: Array.from(SOURCE_KEYS),
+      claim_prose_keys: Array.from(CLAIM_PROSE_KEYS).sort(compareText),
       term_sets: {
         forbidden_scaffold: Array.from(TERM_SETS.forbidden_scaffold),
         operational_overclaim: Array.from(TERM_SETS.operational_overclaim),

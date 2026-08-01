@@ -106,8 +106,8 @@ Rules:
 - Modify `tests/codex_sensitive_history_source_notes.test.ts`
 
 - [x] Emit event/essay id, ring, claim, event date/window, state predicate, source tier, citation, respondent, and player interaction type.
-- [x] Fail on sensitive player choices, calendar-only rupture claims, missing source notes, generic symmetry language, and event/essay date mismatch.
-- [x] Add explicit check that Grabovica/Uzdol/Neretva content is in 1993 files/windows.
+- [x] Fail semantically on direct sensitive player choices; route missing provenance and generic symmetry through the claim inventory; keep calendar-only rupture claims in the canon audit; fail event/essay date mismatches.
+- [x] Check Grabovica/Uzdol/Neretva chronology and authored provenance separately, without hard-coded source substitution.
 
 ### Task 0.2 -- Identity, locale, and audio inventories
 
@@ -123,7 +123,7 @@ Rules:
 - [x] Identity report: id, display name, faction, formation/corps ref, source, confidence, duplicate/conflict.
 - [x] Locale report: every player-facing key, `en`/`bs` coverage, fallback use, concatenation, embedded English, and layout-risk length.
 - [x] Audio report: cue id, file, SHA-256, duration, loudness, source URL, author, license, attribution, and sensitive-content class.
-- [x] Stable ordering; no timestamps/absolute paths for all four accepted inventory families.
+- [x] Stable ordering; no timestamps/absolute paths for all four implemented inventory families.
 
 ### Phase 0 partial execution evidence -- 2026-08-01
 
@@ -131,14 +131,16 @@ Rules:
 - Officer/OOB: 374/374 rows keyed, 0 supported, 2,286 blocking findings, 12 normalized-name collisions. Positive support must be owned per row and cannot be inherited from manifest defaults.
 - Audio: 36/36 cues keyed, 17 provided, 19 placeholders, 0 unregistered binaries, 54 blocking findings, 5 warnings, and three required ambient beds absent. Registry/bundle resolution and recursive binary ownership are fail-closed; `OggS` remains a container-signature precheck rather than decode/LUFS proof.
 - Verification: focused 5 files / 22 tests; parent integration 2 files / 11 tests; TypeScript, canon/determinism/baseline, EOL, and diff checks green.
-- Phase 0 inventory coverage is complete. Historical, identity, localization, licensing, and audio remediation remains open in Phases 1-4.
+- Officer/OOB and audio inventories are accepted. Historical-claim and localization diagnostics were corrected after blocked review; Phase 0 completion awaits committee re-review. Historical, identity, localization, licensing, and audio remediation remains open in Phases 1-4.
 
-### Phase 0 completion evidence -- historical claims and localization
+### Phase 0 corrected candidate evidence -- historical claims and localization
 
 - [Historical-claim and localization inventory report](../40_reports/audits/20260801_R7_HISTORICAL_CLAIM_LOCALIZATION_INVENTORIES.md).
-- Historical claims: 406 claim rows across 226 files; 75 documented, 251 need source notes, 28 need source-floor completion, and 52 sensitive player-choice claim rows are blocked with explicit owners. Zero event/essay year mismatches; zero calendar-only rupture claims.
-- Required chronology: Operation Neretva 93 and Grabovica/Uzdol event/essay anchors are in 1993 files at turns 74-76, grounded in BB Vol. II pp. 434-435 and the existing ICTY Halilovic citation.
-- Localization: 5,542 EN keys, 5,541 legacy-`bcs` translations mapped to canonical `bs`, one explicit fallback probe, 599 length-risk candidates, and 507 source-review findings across 386 UI files.
+- Historical claims: 3,652 prose rows across 226 files; 1,315 documented, 1,711 need source notes, 487 need source tiers, 107 need source-floor completion, 29 need actor specificity, and 3 direct sensitive-choice rows across 2 subjects are blocked. Zero event/essay year mismatches; zero calendar-only rupture claims.
+- Required chronology: Operation Neretva 93 and Grabovica/Uzdol event/essay anchors are in 1993 files at turns 74-76. Authored provenance is independently BLOCKED for both; the diagnostic supplies no hard-coded source.
+- Sensitive-history canon gate: 299 events, 0 CRITICAL, 0 WARNING, and 1 observational INFO after lexical provenance/choice checks moved to the semantic claim inventory.
+- Localization: 5,542 EN keys, 5,541 legacy-`bcs` translations mapped to canonical `bs`, one explicit fallback probe, 599 length-risk candidates, and 1,003 source-review findings across 386 UI files.
+- Status: corrected implementation candidate; committee re-review pending. This section does not claim Phase 0 acceptance.
 
 ```powershell
 npm.cmd run test:vitest -- tests/codex_sensitive_claim_inventory.test.ts tests/codex_sensitive_history_source_notes.test.ts tests/officer_oob_provenance.test.ts tests/localization_coverage.test.ts tests/audio_asset_provenance.test.ts --pool=forks --reporter=dot

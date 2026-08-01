@@ -1,3 +1,7 @@
+## 2026-08-01 - Historical/localization inventories must prove semantic coverage
+
+Historical claim censuses must walk bounded authored prose fields even when no sensitive keyword matches; keyword lists classify risk but do not define the claim universe. Duplicate prose needs a JSON-path-owned line, and provenance anchors may expose only citations, tiers, notes, and floors actually authored in repository content. Direct sensitive-player-choice classification is semantic and must preserve canon's explicit paramilitary-policy allowance; broad lexical canon checks create false blockers. Localization AST scans must include defaults, rendered expressions, and fallback literals while excluding CSS-class lists and technical call identifiers. A corrected diagnostic candidate is not Phase 0 completion until independent re-review accepts it.
+
 ## 2026-08-01 - Historical notifications observe state; they do not manufacture it
 
 An authored calendar window may make a historical notification eligible, but it must not create the territorial result the prose claims occurred. Territorial consolidation requires exact current-state evidence: for the confirmed Goražde case, both named OSIDs must already be held by RBiH before the informational receipt, morale consequence, or durable flag may be produced. Source quality and prose certainty are a separate content responsibility; projection wording is a separate receipt-consumer responsibility. Route the mechanic to gameplay correctness first, sourcing/prose to historical review second, and downstream projections to their shared receipt owner. See the [2026-08-01 ledger entry](PROJECT_LEDGER.md#2026-08-01-docsroadmap-bind-confirmed-gorade-event-bug-to-executable-ownership).
@@ -4065,12 +4069,12 @@ Applied in `[2026-08-01] Engine quality Phase 2 operational-data ownership check
 
 Applied in `[2026-08-01] R7 officer/OOB and audio provenance inventory accepted`, `tools/diagnostics/officer_oob_provenance.ts`, and `tools/diagnostics/audio_asset_provenance.ts`.
 
-## 2026-08-01 - Inventories need dispositions, not just detections
+## 2026-08-01 - Initial inventory lessons (superseded by corrected contract above)
 
 **A claim census is actionable only when every row names its evidence and next owner:** vocabulary hits without subject identity, ring, time/predicate, citation, interaction type, status, and owner create an unbounded review pile. Durable rule: emit those fields together, keep unresolved rows explicit, and fail strict validation on unsupported or refused dispositions rather than counting them as coverage.
 
 **Localization coverage has three distinct layers:** dictionary parity, source-boundary discipline, and rendered layout risk. Durable rule: report all three separately. A dynamic key may be a safe finite typed map, and a long string may fit; classify them as review candidates until code or viewport evidence proves the disposition. Do not label every static candidate a product bug.
 
-**Chronology anchors require both placement and semantics:** a year suffix alone does not prove the right event window, while a correct turn window in the wrong catalog still hides drift. Durable rule: pin event file, essay relation, exact turn window, source, and owner together for historically sensitive anchors.
+**Chronology and provenance are separate gates:** a year suffix alone does not prove the right event window, while a correct turn window does not prove authored sourcing. Durable rule: report event file, essay relation, and exact turn window as chronology; separately expose only repository-authored citations, tiers, notes, and source floors. Never fill an anchor with a hard-coded research citation.
 
-Applied in `[2026-08-01] R7 historical-claim and localization inventories completed`, `tools/diagnostics/codex_sensitive_claim_inventory.cjs`, and `tools/diagnostics/localization_coverage.ts`.
+The original candidate named in `[2026-08-01] R7 historical-claim and localization inventories completed` was blocked and is superseded by `[2026-08-01] R7 historical/localization inventory correction after blocked review`.

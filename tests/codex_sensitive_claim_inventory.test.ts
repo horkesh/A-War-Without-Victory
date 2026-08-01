@@ -81,12 +81,16 @@ test('inventory scans bounded surfaces with stable ordering, ids, and source sta
             'data/codex/ghost_entries/ghost.md',
             'data/codex/ghost_entries_bcs/ghost_bcs.md',
             'data/scenarios/essays/a_cited.json',
+            'data/scenarios/essays/a_cited.json',
+            'data/scenarios/essays/z_uncited.json',
             'data/scenarios/essays/z_uncited.json',
             'data/scenarios/events/consequences.json',
             'src/ui/map/data/decisionConsequenceLedger.ts',
         ]);
 
-        const cited = result.claims.find((claim: { file: string }) => claim.file === 'data/scenarios/essays/a_cited.json');
+        const cited = result.claims.find((claim: { file: string; field_path: string }) => (
+            claim.file === 'data/scenarios/essays/a_cited.json' && claim.field_path === '$.body'
+        ));
         assert.strictEqual(cited.surface, 'essay');
         assert.strictEqual(cited.field_path, '$.body');
         assert.strictEqual(cited.source_status, 'cited');
@@ -95,7 +99,9 @@ test('inventory scans bounded surfaces with stable ordering, ids, and source sta
         assert.strictEqual(cited.stop_gate, 'sensitive_history');
         assert.strictEqual(cited.claim_id, expectedClaimId(cited.file, cited.line, cited.field_path, cited.matched_terms));
 
-        const floorException = result.claims.find((claim: { file: string }) => claim.file === 'data/scenarios/essays/z_uncited.json');
+        const floorException = result.claims.find((claim: { file: string; field_path: string }) => (
+            claim.file === 'data/scenarios/essays/z_uncited.json' && claim.field_path === '$.body'
+        ));
         assert.strictEqual(floorException.source_status, 'source_floor_exception');
         assert.strictEqual(floorException.actor_faction, 'RBiH');
         assert.deepStrictEqual(floorException.matched_terms, ['5th Corps sweeps west', 'cleanses']);
@@ -173,12 +179,15 @@ test('inventory covers essay_index dynamic_sections (A1c morphing prose) the run
         const indexClaims = result.claims.filter(
             (claim: { surface: string }) => claim.surface === 'essay_dynamic_section',
         );
-        // Exactly one claim: the sensitive `detention` branch. The body-clone
-        // dynamic section has no sensitive vocabulary → no claim (no double-count
-        // of the canonical body).
-        assert.strictEqual(indexClaims.length, 1);
+        // Both dynamic-section prose fields are claims, including prose without
+        // a sensitive dictionary hit. The duplicated top-level canonical body
+        // remains excluded, so the body is not double-counted.
+        assert.strictEqual(indexClaims.length, 2);
 
-        const hostage = indexClaims[0];
+        const hostage = indexClaims.find((claim: { matched_terms: string[] }) => (
+            claim.matched_terms.includes('detention')
+        ));
+        assert.ok(hostage);
         assert.strictEqual(hostage.file, 'data/scenarios/essays/essay_index.json');
         assert.deepStrictEqual(hostage.matched_terms, ['detention']);
         assert.strictEqual(hostage.risk_class, 'sensitive_history_gated');
@@ -190,6 +199,7 @@ test('inventory covers essay_index dynamic_sections (A1c morphing prose) the run
         // `sourceStatusFor` only ran the floor check for surface === 'essay',
         // so this claim wrongly reported `cited` and bypassed the gate.)
         assert.strictEqual(hostage.source_status, 'source_floor_exception');
+        assert.deepStrictEqual(hostage.provenance_gaps, ['source_floor', 'source_note', 'source_tier']);
         // field_path is keyed by the parent essay id for human traceability.
         assert.strictEqual(
             hostage.field_path.startsWith('$.essay_un_hostage_crisis_1995.dynamic_sections'),
@@ -290,7 +300,7 @@ test('inventory detects forbidden scaffold tokens and reports deterministic poli
         const second = await inventory.scanSensitiveClaimInventory({ rootDir: root });
 
         assert.deepStrictEqual(first, second);
-        assert.strictEqual(first.schema_version, 2);
+        assert.strictEqual(first.schema_version, 3);
         assert.strictEqual(first.summary.claim_count, 1);
         assert.deepStrictEqual(first.summary.risk_class_counts, { unsupported_remove: 1 });
         assert.deepStrictEqual(first.policy.term_sets.forbidden_scaffold, ['FIXME', 'TODO', 'atrocity lever', 'cleansing lever', 'placeholder']);
@@ -343,7 +353,7 @@ test('inventory emits actionable historical provenance and interaction ownership
             claim.subject_id === 'grabovica_uzdol_massacres_1993' && claim.field_path === '$[0].narrative'
         ));
         assert.ok(grabovica);
-        assert.strictEqual(result.schema_version, 2);
+        assert.strictEqual(result.schema_version, 3);
         assert.strictEqual(grabovica.ring, 'ring_2_informational');
         assert.strictEqual(grabovica.claim, grabovica.excerpt);
         assert.strictEqual(grabovica.date_window, 'turns 74-76');
@@ -368,6 +378,103 @@ test('inventory emits actionable historical provenance and interaction ownership
     }
 });
 
+test('inventory blocks direct sensitive acts without treating contextual or canon-allowed wording as choices', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1992.json'), [
+            {
+                id: 'direct_displacement_choice_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [{ id: 'systematic', label: 'Systematic cleansing' }],
+            },
+            {
+                id: 'direct_genocide_choice_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [{
+                    id: 'aggressive',
+                    description: 'General Staff warned of genocide. Proceed anyway and make it swift.',
+                }],
+            },
+            {
+                id: 'lexical_context_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [
+                    { id: 'political', label: 'Keep the hardline camp together' },
+                    { id: 'command', description: 'Civilian authority over the military must be established.' },
+                    { id: 'press', description: 'Invite scrutiny of front-line conditions and treatment of civilians.' },
+                    { id: 'dayton', description: 'Accept Annex 7 refugee-return commitments.' },
+                    {
+                        id: 'guarded',
+                        label: 'Adopt the platform',
+                        future_consequences: [{
+                            explanation: 'This branch may not re-author cleansing or forced displacement.',
+                        }],
+                    },
+                ],
+            },
+            {
+                id: 'rs_paramilitary_policy_1992',
+                family: 'rs_paramilitary_policy',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [{
+                    id: 'always_allow',
+                    label: 'Always allow paramilitary deployment',
+                    description: 'Each approved sweep records civilian casualties.',
+                }],
+            },
+            {
+                id: 'generic_symmetry_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                narrative: 'No faction in the war holds clean hands after atrocities against civilians.',
+            },
+        ]);
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        const blocked = report.claims.filter((claim: { status: string }) => (
+            claim.status === 'blocked_sensitive_player_choice'
+        ));
+        assert.deepStrictEqual(blocked.map((claim: { subject_id: string }) => claim.subject_id), [
+            'direct_displacement_choice_1992',
+            'direct_genocide_choice_1992',
+        ]);
+
+        const contextual = report.claims.filter((claim: { subject_id: string }) => (
+            claim.subject_id === 'lexical_context_1992'
+        ));
+        assert.ok(contextual.length > 0);
+        assert.strictEqual(contextual.every((claim: { status: string }) => (
+            claim.status !== 'blocked_sensitive_player_choice'
+        )), true);
+        assert.strictEqual(contextual.some((claim: { player_interaction_type: string }) => (
+            claim.player_interaction_type === 'decision_context'
+        )), true);
+
+        const allowed = report.claims.filter((claim: { subject_id: string }) => (
+            claim.subject_id === 'rs_paramilitary_policy_1992'
+        ));
+        assert.ok(allowed.length > 0);
+        assert.strictEqual(allowed.every((claim: { status: string }) => (
+            claim.status !== 'blocked_sensitive_player_choice'
+        )), true);
+
+        const symmetry = report.claims.find((claim: { subject_id: string }) => (
+            claim.subject_id === 'generic_symmetry_1992'
+        ));
+        assert.ok(symmetry);
+        assert.strictEqual(symmetry.status, 'needs_actor_specificity');
+        assert.strictEqual(symmetry.owner, 'historian');
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
 test('inventory reports the 1993 placement/window contract for Neretva, Grabovica, and Uzdol', async () => {
     const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
     const anchors = result.historical_anchors;
@@ -376,11 +483,102 @@ test('inventory reports the 1993 placement/window contract for Neretva, Grabovic
         'grabovica_uzdol_massacres_1993',
         'operation_neretva_93_1993',
     ]);
-    assert.deepStrictEqual(anchors.map((row: { status: string }) => row.status), ['pass', 'pass']);
+    assert.deepStrictEqual(anchors.map((row: { chronology_status: string }) => row.chronology_status), ['pass', 'pass']);
+    assert.deepStrictEqual(anchors.map((row: { provenance_status: string }) => row.provenance_status), ['blocked', 'blocked']);
     for (const row of anchors) {
         assert.strictEqual(row.event_file, 'data/scenarios/events/war_1993.json');
         assert.strictEqual(row.event_window, 'turns 74-76');
         assert.strictEqual(row.essay_file.endsWith('_1993.json'), true);
+        assert.strictEqual(row.status, 'blocked');
+        assert.ok(row.authored_provenance);
+        assert.strictEqual(row.source, undefined);
+    }
+});
+
+test('inventory covers claim prose without relying on a narrow keyword list', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const subjects = new Set(report.claims.map((claim: { subject_id: string }) => claim.subject_id));
+    for (const id of [
+        'operation_neretva_93_1993',
+        'turajlic_assassination_1993',
+        'essay_east_mostar_siege_1993',
+        'un_hostage_crisis_1995',
+    ]) {
+        assert.ok(subjects.has(id), `missing claim subject ${id}`);
+    }
+    const neretvaNarrative = report.claims.find((claim: { subject_id: string; field_path: string }) => (
+        claim.subject_id === 'operation_neretva_93_1993' && claim.field_path.endsWith('.narrative')
+    ));
+    assert.ok(neretvaNarrative);
+    assert.deepStrictEqual(neretvaNarrative.matched_terms, []);
+    const triggerEvidence = report.claims.find((claim: { field_path: string; matched_terms: string[] }) => (
+        claim.field_path.includes('.trigger_evidence[') && claim.matched_terms.length === 0
+    ));
+    assert.ok(triggerEvidence, 'missing unmatched trigger-evidence prose');
+    assert.ok(report.policy.claim_prose_keys.includes('trigger_evidence'));
+});
+
+test('documented status requires an authored source tier', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1993.json'), [
+            {
+                id: 'missing_tier_1993',
+                title: 'A sourced historical record',
+                narrative: 'A documented event enters the record.',
+                historical_source: 'Fixture tribunal judgment.',
+                source_note: 'Fixture provenance boundary.',
+            },
+            {
+                id: 'note_only_1993',
+                narrative: 'A second event enters the record.',
+                source_note: 'A boundary note is not a citation.',
+                source_tier: 'tribunal',
+            },
+        ]);
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        const narrative = report.claims.find((claim: { field_path: string }) => claim.field_path.endsWith('.narrative'));
+        assert.ok(narrative);
+        assert.strictEqual(narrative.source_tier, null);
+        assert.strictEqual(narrative.status, 'needs_source_tier');
+        assert.deepStrictEqual(narrative.provenance_gaps, ['source_tier']);
+
+        const noteOnly = report.claims.find((claim: { subject_id: string }) => claim.subject_id === 'note_only_1993');
+        assert.ok(noteOnly);
+        assert.strictEqual(noteOnly.citation, null);
+        assert.strictEqual(noteOnly.source_status, 'uncited');
+        assert.deepStrictEqual(noteOnly.provenance_gaps, ['citation']);
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('duplicate prose receives the exact line for each JSON field', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1993.json'), [{
+            id: 'duplicate_lines_1993',
+            narrative: 'Civilian displacement is recorded.',
+            effects: [
+                { kind: 'narrative', text: 'Civilian displacement is recorded.' },
+                { kind: 'narrative', text: 'Civilian displacement is recorded.' },
+            ],
+        }]);
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        const duplicates = report.claims.filter((claim: { claim: string }) => (
+            claim.claim === 'Civilian displacement is recorded.'
+        ));
+        assert.strictEqual(duplicates.length, 3);
+        assert.deepStrictEqual(duplicates.map((claim: { line: number }) => claim.line), [
+            ...new Set(duplicates.map((claim: { line: number }) => claim.line)),
+        ]);
+        assert.ok(duplicates[0].line < duplicates[1].line && duplicates[1].line < duplicates[2].line);
+    } finally {
+        await rm(root, { recursive: true, force: true });
     }
 });
 

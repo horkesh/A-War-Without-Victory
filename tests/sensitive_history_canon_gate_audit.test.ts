@@ -249,7 +249,7 @@ describe('scanOptionCostFloor', () => {
 // ─── End-to-end audit semantics ────────────────────────────────────────────
 
 describe('buildSensitiveHistoryAudit', () => {
-    it('flags sensitive player choices, missing provenance notes, and generic symmetry language', () => {
+    it('does not promote historical-inventory review rows into the canon CI gate', () => {
         const report = buildSensitiveHistoryAudit({
             rows: [{
                 id: 'generic_sensitive_fixture_1993',
@@ -261,12 +261,7 @@ describe('buildSensitiveHistoryAudit', () => {
             }],
         });
 
-        expect(report.violations.map((row) => row.kind).sort()).toEqual([
-            'generic_symmetry_language',
-            'missing_sensitive_source_note',
-            'sensitive_player_choice',
-        ]);
-        expect(report.violations.every((row) => row.severity === 'CRITICAL')).toBe(true);
+        expect(report.violations).toEqual([]);
     });
 
     it('flags rupture claims whose trigger has no live state predicate', () => {
@@ -283,6 +278,24 @@ describe('buildSensitiveHistoryAudit', () => {
         });
 
         expect(report.violations.some((row) => row.kind === 'calendar_only_rupture_claim')).toBe(true);
+    });
+
+    it('accepts rupture claims backed by a discrete live-state predicate', () => {
+        const report = buildSensitiveHistoryAudit({
+            rows: [{
+                id: 'fixture_genocide_rupture_1995',
+                category: 'humanitarian',
+                narrative: 'A genocide rupture is recorded.',
+                trigger: {
+                    turn_min: 160,
+                    turn_max: 161,
+                    phase: 'war',
+                    condition: { type: 'territory_control', faction: 'RS', osid: 'fixture:enclave' },
+                },
+            }],
+        });
+
+        expect(report.violations.some((row) => row.kind === 'calendar_only_rupture_claim')).toBe(false);
     });
 
     it('runs on real catalog without throwing and surfaces summary structure', () => {

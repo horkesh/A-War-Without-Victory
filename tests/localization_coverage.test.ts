@@ -73,5 +73,52 @@ describe('localization coverage inventory', () => {
             status: 'missing_bs',
         });
         expect([...report.keys].sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0)).toEqual(report.keys);
+
+        for (const expected of [
+            ['src/ui/map/components/LoadingSkeleton.tsx', 'LOADING SCENARIO'],
+            ['src/ui/map/components/Tooltip.tsx', 'Own'],
+            ['src/ui/map/components/PeacePlanModal.tsx', 'Failed to resolve peace plan.'],
+            ['src/ui/map/components/chronicle/generateWrappedSlides.ts', 'Recorded event'],
+        ] as const) {
+            expect(report.source_findings.some((row) => (
+                row.kind === 'embedded_english'
+                && row.file === expected[0]
+                && row.excerpt === expected[1]
+            )), `${expected[0]}: ${expected[1]}`).toBe(true);
+        }
+    });
+
+    it('finds player-facing literals in defaults, JSX expressions, fallbacks, and function arguments', async () => {
+        const root = await mkdtemp(join(tmpdir(), 'awwv-localization-'));
+        try {
+            const sourceDir = join(root, 'src', 'ui', 'map', 'components');
+            await mkdir(sourceDir, { recursive: true });
+            await writeFile(join(sourceDir, 'Fallbacks.tsx'), [
+                "function label(_value: string, fallback: string) { return fallback; }",
+                "export function Fallbacks({ caption = 'LOADING SCENARIO', own = false }) {",
+                "  const error = undefined ?? 'Failed to resolve peace plan.';",
+                "  const className = own ? 'bg-red-500 text-white' : 'bg-blue-500 text-black';",
+                "  return <span className={className} title={caption}>{own ? 'Own' : label('event-id', 'Recorded event')}{error}</span>;",
+                "}",
+                '',
+            ].join('\n'));
+
+            const report = await buildLocalizationCoverageReport({
+                rootDir: root,
+                enMessages: {},
+                bsMessages: {},
+            });
+            const excerpts = report.source_findings
+                .filter((row) => row.kind === 'embedded_english')
+                .map((row) => row.excerpt);
+            expect(excerpts).toEqual([
+                'LOADING SCENARIO',
+                'Failed to resolve peace plan.',
+                'Own',
+                'Recorded event',
+            ]);
+        } finally {
+            await rm(root, { recursive: true, force: true });
+        }
     });
 });
