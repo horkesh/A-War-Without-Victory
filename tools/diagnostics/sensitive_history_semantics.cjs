@@ -51,6 +51,8 @@ const SENSITIVE_WARNING_PATTERN = /\b(?:caution(?:s|ed|ing)?|object(?:s|ed|ing)?
 const CONTINUATION_ACTION_PATTERN = /\b(?:continue|proceed)\b/i;
 const ANAPHORIC_MARKER_PATTERN = /\b(?:anyway|regardless)\b/i;
 const OPERATIVE_PURPOSE_PATTERN = /\b(?:attacks?|assaults?|campaigns?|combat|direct\s+action|offensives?|operations?|strikes?)\b/i;
+const SUBCLAUSE_BOUNDARY_PATTERN = /,\s*/i;
+const LOCAL_NEGATION_PATTERN = /\b(?:(?:do|does|did|must|shall|should|will|would|can|could|may|might)\s+not|cannot|never|refus(?:e|es|ed)\s+to|declin(?:e|es|ed)\s+to)\s+(?:[a-z]+ly\s+)*$/i;
 
 function matchesFor(pattern, text) {
   const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
@@ -85,9 +87,73 @@ function refusalApplies(clauseText, offset) {
   return REFUSAL_SCOPE_PATTERN.test(clauseText.slice(0, offset));
 }
 
-function continuationHasOnlyAccountabilityPurpose(clauseText) {
-  return !OPERATIVE_PURPOSE_PATTERN.test(clauseText)
-    && ACCOUNTABILITY_PATTERN.test(clauseText);
+function subclausesFor(clauseText) {
+  const subclauses = [];
+  let start = 0;
+  for (const boundary of matchesFor(SUBCLAUSE_BOUNDARY_PATTERN, clauseText)) {
+    if (boundary.index === undefined) continue;
+    subclauses.push({ start, text: clauseText.slice(start, boundary.index) });
+    start = boundary.index + boundary[0].length;
+  }
+  subclauses.push({ start, text: clauseText.slice(start) });
+  return subclauses;
+}
+
+function subclauseForOffset(subclauses, offset) {
+  for (let index = subclauses.length - 1; index >= 0; index -= 1) {
+    if (subclauses[index].start <= offset) return subclauses[index];
+  }
+  return subclauses[0];
+}
+
+function localNegationApplies(subclause, clauseOffset) {
+  const localOffset = clauseOffset - subclause.start;
+  return LOCAL_NEGATION_PATTERN.test(subclause.text.slice(0, localOffset));
+}
+
+function nonNegatedSensitiveWarningOffsets(clauseText, subclauses) {
+  if (!REFUSED_ACT_PATTERN.test(clauseText)) return [];
+  const offsets = [];
+  for (const subclause of subclauses) {
+    for (const warning of matchesFor(SENSITIVE_WARNING_PATTERN, subclause.text)) {
+      if (warning.index === undefined || localNegationApplies(subclause, subclause.start + warning.index)) continue;
+      offsets.push(subclause.start + warning.index);
+    }
+  }
+  return offsets;
+}
+
+function hasDirectWarningContinuation(clauses) {
+  let hasSensitiveWarningAntecedent = false;
+  for (const clause of clauses) {
+    const subclauses = subclausesFor(clause.text);
+    const warningOffsets = nonNegatedSensitiveWarningOffsets(clause.text, subclauses);
+    const continuations = [...matchesFor(CONTINUATION_ACTION_PATTERN, clause.text)]
+      .filter((match) => match.index !== undefined);
+    let warningIndex = 0;
+    for (let continuationIndex = 0; continuationIndex < continuations.length; continuationIndex += 1) {
+      const continuation = continuations[continuationIndex];
+      while (
+        warningIndex < warningOffsets.length
+        && warningOffsets[warningIndex] < continuation.index
+      ) {
+        hasSensitiveWarningAntecedent = true;
+        warningIndex += 1;
+      }
+      if (!hasSensitiveWarningAntecedent) continue;
+      const subclause = subclauseForOffset(subclauses, continuation.index);
+      if (localNegationApplies(subclause, continuation.index)) continue;
+      const nextContinuation = continuations[continuationIndex + 1];
+      const ownedStart = subclause.start;
+      const ownedEnd = nextContinuation?.index ?? clause.text.length;
+      const ownedSegment = clause.text.slice(ownedStart, ownedEnd);
+      if (!ANAPHORIC_MARKER_PATTERN.test(ownedSegment)) continue;
+      if (OPERATIVE_PURPOSE_PATTERN.test(ownedSegment)) return true;
+      if (!ACCOUNTABILITY_PATTERN.test(ownedSegment)) return true;
+    }
+    if (warningIndex < warningOffsets.length) hasSensitiveWarningAntecedent = true;
+  }
+  return false;
 }
 
 function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
@@ -100,18 +166,9 @@ function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
 function isDirectRefusedSensitiveChoice(text) {
   if (typeof text !== 'string' || text.trim().length === 0) return false;
   const clauses = clausesFor(text);
+  if (hasDirectWarningContinuation(clauses)) return true;
   for (let clauseIndex = 0; clauseIndex < clauses.length; clauseIndex += 1) {
     const clause = clauses[clauseIndex];
-    const continuation = clause.text.match(CONTINUATION_ACTION_PATTERN);
-    const previousClause = clauses[clauseIndex - 1]?.text ?? '';
-    if (
-      continuation?.index !== undefined
-      && ANAPHORIC_MARKER_PATTERN.test(clause.text)
-      && !refusalApplies(clause.text, continuation.index)
-      && SENSITIVE_WARNING_PATTERN.test(previousClause)
-      && REFUSED_ACT_PATTERN.test(previousClause)
-      && !continuationHasOnlyAccountabilityPurpose(clause.text)
-    ) return true;
     if (STANDALONE_REFUSED_PATTERNS.some((pattern) => {
       for (const match of matchesFor(pattern, clause.text)) {
         if (match.index === undefined || refusalApplies(clause.text, match.index)) continue;

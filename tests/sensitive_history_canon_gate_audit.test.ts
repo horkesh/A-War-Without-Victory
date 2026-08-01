@@ -305,6 +305,8 @@ describe('buildSensitiveHistoryAudit', () => {
                         { id: 'safe_warning_continue_regardless_review', description: 'General Staff warned of genocide. Continue regardless with the documentation review.' },
                         { id: 'safe_warning_continue_review_regardless', description: 'General Staff warned of genocide. Continue with the documentation review regardless.' },
                         { id: 'safe_warning_operational_review', description: 'General Staff warned of genocide. Proceed with the operational review anyway.' },
+                        { id: 'safe_negated_warning_offensive', description: 'General Staff did not warn of genocide. Proceed with the offensive anyway.' },
+                        { id: 'safe_negated_continuation_offensive', description: 'General Staff warned of genocide. Do not proceed with the offensive anyway.' },
                         { id: 'warning_offensive_anyway', description: 'General Staff warned of genocide. Proceed with the offensive anyway.' },
                         { id: 'warning_continue_operation_regardless', description: 'General Staff warned of genocide. Continue the operation regardless.' },
                         { id: 'warning_continue_regardless_offensive', description: 'General Staff warned of genocide. Continue regardless with the offensive.' },
@@ -326,6 +328,11 @@ describe('buildSensitiveHistoryAudit', () => {
                         { id: 'warning_review_start_offensive', description: 'General Staff warned of genocide. Proceed to review and start the offensive regardless.' },
                         { id: 'warning_review_order_offensive', description: 'General Staff warned of genocide. Proceed to review and order the offensive regardless.' },
                         { id: 'warning_bare_proceed_anyway', description: 'General Staff warned of genocide. Proceed anyway.' },
+                        { id: 'warning_do_not_hesitate_offensive', description: 'General Staff warned of genocide. Do not hesitate, proceed with the offensive anyway.' },
+                        { id: 'warning_negated_review_then_offensive', description: 'General Staff warned of genocide. Do not proceed with the documentation review; continue with the offensive regardless.' },
+                        { id: 'warning_do_not_delay_then_offensive', description: 'General Staff warned of genocide. Do not delay. Continue with the offensive regardless.' },
+                        { id: 'warning_neutral_then_offensive', description: 'General Staff warned of genocide. The cabinet reviewed the report. Continue with the offensive regardless.' },
+                        { id: 'warning_first_negated_then_second_offensive', description: 'General Staff warned of genocide. Do not proceed with the documentation review, continue with the offensive regardless.' },
                     ],
                 },
                 {
@@ -343,8 +350,8 @@ describe('buildSensitiveHistoryAudit', () => {
         });
 
         const refused = report.violations.filter((row) => row.kind === 'sensitive_player_choice');
-        expect(refused).toHaveLength(45);
-        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(31);
+        expect(refused).toHaveLength(50);
+        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(36);
         expect(refused.filter((row) => row.event_id === 'direct_refused_choices_1993')).toHaveLength(12);
         expect(refused.filter((row) => row.event_id === 'rs_paramilitary_policy_1992')).toHaveLength(2);
         expect(refused.every((row) => row.severity === 'CRITICAL')).toBe(true);
@@ -363,9 +370,14 @@ describe('buildSensitiveHistoryAudit', () => {
             'warning_continue_operation_regardless.description',
             'warning_continue_regardless_offensive.description',
             'warning_direct_action_then_review.description',
+            'warning_do_not_delay_then_offensive.description',
+            'warning_do_not_hesitate_offensive.description',
+            'warning_first_negated_then_second_offensive.description',
             'warning_inspect_operation.description',
             'warning_launch_then_document.description',
             'warning_multi_launch_operation.description',
+            'warning_negated_review_then_offensive.description',
+            'warning_neutral_then_offensive.description',
             'warning_offensive_anyway.description',
             'warning_offensive_then_review.description',
             'warning_review_begin_offensive.description',

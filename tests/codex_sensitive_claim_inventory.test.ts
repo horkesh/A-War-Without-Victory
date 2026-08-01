@@ -443,6 +443,11 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
                     { id: 'warning_review_start_offensive', description: 'General Staff warned of genocide. Proceed to review and start the offensive regardless.' },
                     { id: 'warning_review_order_offensive', description: 'General Staff warned of genocide. Proceed to review and order the offensive regardless.' },
                     { id: 'warning_bare_proceed_anyway', description: 'General Staff warned of genocide. Proceed anyway.' },
+                    { id: 'warning_do_not_hesitate_offensive', description: 'General Staff warned of genocide. Do not hesitate, proceed with the offensive anyway.' },
+                    { id: 'warning_negated_review_then_offensive', description: 'General Staff warned of genocide. Do not proceed with the documentation review; continue with the offensive regardless.' },
+                    { id: 'warning_do_not_delay_then_offensive', description: 'General Staff warned of genocide. Do not delay. Continue with the offensive regardless.' },
+                    { id: 'warning_neutral_then_offensive', description: 'General Staff warned of genocide. The cabinet reviewed the report. Continue with the offensive regardless.' },
+                    { id: 'warning_first_negated_then_second_offensive', description: 'General Staff warned of genocide. Do not proceed with the documentation review, continue with the offensive regardless.' },
                 ],
             },
             {
@@ -469,6 +474,8 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
                     { id: 'safe_warning_continue_regardless_review', description: 'General Staff warned of genocide. Continue regardless with the documentation review.' },
                     { id: 'safe_warning_continue_review_regardless', description: 'General Staff warned of genocide. Continue with the documentation review regardless.' },
                     { id: 'safe_warning_operational_review', description: 'General Staff warned of genocide. Proceed with the operational review anyway.' },
+                    { id: 'safe_negated_warning_offensive', description: 'General Staff did not warn of genocide. Proceed with the offensive anyway.' },
+                    { id: 'safe_negated_continuation_offensive', description: 'General Staff warned of genocide. Do not proceed with the offensive anyway.' },
                     {
                         id: 'guarded',
                         label: 'Adopt the platform',
@@ -513,7 +520,7 @@ test('inventory blocks direct sensitive acts without treating contextual or cano
         ]);
         assert.strictEqual(blocked.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'direct_refused_verbs_1992'
-        )).length, 38);
+        )).length, 43);
 
         const contextual = report.claims.filter((claim: { subject_id: string }) => (
             claim.subject_id === 'lexical_context_1992'
