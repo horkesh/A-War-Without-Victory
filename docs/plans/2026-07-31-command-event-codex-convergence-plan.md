@@ -190,7 +190,7 @@ npm.cmd run typecheck
 npm.cmd run qa:player-journeys
 ```
 
-Committee-corrected verification: `18` focused files / `297` tests and `44` player-journey files / `770` tests passed, followed by TypeScript, canon/determinism/baseline, and diff gates.
+Final committee verification: `18` focused files / `341` tests and `44` player-journey files / `770` tests passed, followed by TypeScript, canon/determinism/baseline, and diff gates.
 
 `/simplify` -> review -> commit `refactor(command): converge priority and receipt ownership`
 

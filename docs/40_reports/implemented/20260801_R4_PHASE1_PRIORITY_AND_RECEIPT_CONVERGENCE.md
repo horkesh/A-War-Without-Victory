@@ -45,7 +45,7 @@ The machine report is `docs/40_reports/audits/20260801_R4_PHASE1_PRESIDENTIAL_CO
 
 ## Verification
 
-- Committee-corrected Phase 1 matrix: `18` files / `297` tests passed.
+- Final committee Phase 1 matrix: `18` files / `341` tests passed.
 - Player journeys: `44` files / `770` tests passed.
 - `npm.cmd run typecheck`: passed.
 - `npm.cmd run canon:check`: determinism scan and baseline regression passed; all scenarios match.
