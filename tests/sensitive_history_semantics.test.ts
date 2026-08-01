@@ -48,6 +48,10 @@ describe('sensitive-history choice semantics', () => {
         'Decline to authorize concentration camps',
         'Cannot authorize concentration camps',
         'The objective is to document genocide allegations. Proceed anyway with the command review.',
+        'General Staff warned of genocide. Proceed anyway with the command review.',
+        'General Staff warned of genocide. Continue regardless with the documentation review.',
+        'General Staff warned of genocide. Continue with the documentation review regardless.',
+        'General Staff warned of genocide. Proceed to review the offensive regardless.',
     ])('keeps documentation, accountability, and refusal prose contextual: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(false);
     });
@@ -67,6 +71,12 @@ describe('sensitive-history choice semantics', () => {
         'Forbid commanders to murder civilians: kill civilians',
         'Decline to authorize concentration camps — commit genocide',
         'Cannot authorize concentration camps: execute the displaced families',
+        'General Staff warned of genocide. Proceed with the offensive anyway.',
+        'General Staff warned of genocide. Continue the operation regardless.',
+        'General Staff warned of genocide. Continue regardless with the offensive.',
+        'General Staff warned of genocide. Proceed anyway with the command review. Then kill civilians.',
+        'General Staff warned of genocide. Proceed with the offensive anyway and review the result.',
+        'General Staff warned of genocide. Proceed with direct action regardless and review the result.',
     ])('does not let contextual language sanitize a later or prior directive: %s', (text) => {
         expect(isDirectRefusedSensitiveChoice(text)).toBe(true);
     });

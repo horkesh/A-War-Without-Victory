@@ -48,7 +48,9 @@ const REFUSAL_SCOPE_PATTERN = /\b(?:(?:do|does|did|must|shall|should|will|would|
 const CLAUSE_BOUNDARY_PATTERN = /(?:[.;!?]+|:(?=\s|$)|\s+[–—]\s+|[\r\n]+|(?:,\s*)?\b(?:and\s+then|then|but|however|yet|instead|afterwards?|subsequently|finally)\b(?:\s*,)?)/i;
 const CONTEXTUAL_STANDALONE_PREFIX_PATTERN = /\b(?:ban|document|expose|forbid|investigate|oppose|prevent|prosecute|record|reject|report|review|stop)\s+(?:(?:the\s+)?(?:allegations?|evidence|findings?|reports?)\s+(?:about|of)\s+)?$/i;
 const SENSITIVE_WARNING_PATTERN = /\b(?:caution(?:s|ed|ing)?|object(?:s|ed|ing)?|objection\w*|oppos(?:e|es|ed|ing)|reject(?:s|ed|ing)?|warn(?:s|ed|ing)?)\b/i;
-const ANAPHORIC_CONTINUATION_PATTERN = /\b(?:continue|proceed)\s+(?:anyway|regardless)\b/i;
+const CONTINUATION_ACTION_PATTERN = /\b(?:continue|proceed)\b/i;
+const ANAPHORIC_MARKER_PATTERN = /\b(?:anyway|regardless)\b/i;
+const OPERATIVE_CONTINUATION_PATTERN = /\b(?:attack\w*|assault\w*|campaign\w*|combat\w*|direct\s+action|offensive\w*|operation\w*|strike\w*)\b/i;
 
 function matchesFor(pattern, text) {
   const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
@@ -83,6 +85,14 @@ function refusalApplies(clauseText, offset) {
   return REFUSAL_SCOPE_PATTERN.test(clauseText.slice(0, offset));
 }
 
+function continuationIsAccountability(clauseText, continuation) {
+  const purpose = clauseText.slice(continuation.index + continuation[0].length);
+  const accountabilityIndex = purpose.search(ACCOUNTABILITY_PATTERN);
+  if (accountabilityIndex < 0) return false;
+  const operativeIndex = purpose.search(OPERATIVE_CONTINUATION_PATTERN);
+  return operativeIndex < 0 || accountabilityIndex < operativeIndex;
+}
+
 function isCanonAllowedParamilitaryChoice(eventId, family, optionId, text) {
   const contract = CANON_ALLOWED_PARAMILITARY_CHOICES.get(eventId ?? '');
   if (!contract || contract.family !== family || typeof text !== 'string') return false;
@@ -95,13 +105,15 @@ function isDirectRefusedSensitiveChoice(text) {
   const clauses = clausesFor(text);
   for (let clauseIndex = 0; clauseIndex < clauses.length; clauseIndex += 1) {
     const clause = clauses[clauseIndex];
-    const continuation = clause.text.match(ANAPHORIC_CONTINUATION_PATTERN);
+    const continuation = clause.text.match(CONTINUATION_ACTION_PATTERN);
     const previousClause = clauses[clauseIndex - 1]?.text ?? '';
     if (
       continuation?.index !== undefined
+      && ANAPHORIC_MARKER_PATTERN.test(clause.text)
       && !refusalApplies(clause.text, continuation.index)
       && SENSITIVE_WARNING_PATTERN.test(previousClause)
       && REFUSED_ACT_PATTERN.test(previousClause)
+      && !continuationIsAccountability(clause.text, continuation)
     ) return true;
     if (STANDALONE_REFUSED_PATTERNS.some((pattern) => {
       for (const match of matchesFor(pattern, clause.text)) {

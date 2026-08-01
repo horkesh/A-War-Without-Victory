@@ -25382,3 +25382,19 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Verification:** Focused correction passes 4 files / 103 tests; expanded inventory/provenance passes 7 files / 84 tests; canon passes 2 files / 34 tests; foundational/adjacent passes 5 files / 110 tests with 105 passing and 5 pre-existing skips. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim and localization censuses remain 3,652 / 226 files and 971 / 385 files. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass.
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
+
+## 2026-08-01 - R7 seventh blocked-review correction: purpose-aware warning continuation
+
+**Type:** Anaphoric continuation false-positive/false-negative repair / deterministic clause-purpose classification / candidate-truth correction.
+
+**Supersession:** This entry corrects the preceding claim that the separate warning-plus-anaphoric rule preserved cross-clause intent accurately. It only recognized contiguous `proceed|continue anyway|regardless`, so it blocked marked command review but missed a reordered offensive continuation; it never inspected accountability language in the continuation clause.
+
+**RED evidence:** Exact helper and both-consumer fixtures pinned an accountability-safe `Proceed anyway with the command review`, a reordered blocking `Proceed with the offensive anyway`, both `continue/regardless` orders and dispositions, and a safe review continuation followed by a later direct instruction. Before implementation, the 3-file / 101-test matrix failed six assertions: two helper false positives, two helper false negatives, and both consumer guards; the other reordered controls and later-direct case already behaved correctly. Purpose-precedence review separately pinned operative-before-review versus review-before-operative ordering with three expected helper/consumer failures in the 3-file / 103-test matrix. Final vocabulary review pinned direct-action-before-review ordering with three expected helper/consumer failures in the 3-file / 104-test matrix.
+
+**Implementation:** The warning relation now finds `proceed|continue` and `anyway|regardless` independently inside the same continuation clause. It requires a preceding sensitive warning, honors refusal/negation at the continuation action, and compares the first accountability versus operative purpose after that action. Accountability/review/documentation governing the continuation is contextual; an earlier offensive, operation, or direct-action purpose—or no accountability purpose—remains blocking. Every later clause continues through the ordinary direct-act scan.
+
+**Historian/canon review:** This enforcement-only change maps to Sensitive History Design Gate Ring 3 #1/#2 and section 3. It changes no historical fact, event, player response, consequence, simulation state, source, or source tier; the exact canonical paramilitary-policy exception remains unchanged.
+
+**Verification:** Focused correction passes 4 files / 113 tests; expanded inventory/provenance passes 7 files / 94 tests; canon passes 2 files / 34 tests; foundational/adjacent passes 5 files / 110 tests with 105 passing and 5 pre-existing skips. The strict production CLI scans 299 events with 0 CRITICAL, 0 WARNING, 1 INFO, and exit 0. Claim and localization censuses remain 3,652 / 226 files and 971 / 385 files. `npm.cmd run typecheck`, standalone no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` pass.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
