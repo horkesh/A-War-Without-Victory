@@ -378,6 +378,21 @@ function validatePressure(value: unknown, filename: string, rowIndex: number): v
     });
 }
 
+function validateActionCadence(value: unknown, filename: string, rowIndex: number): void {
+    if (!isObject(value)) {
+        failRow(filename, rowIndex, 'action_cadence must be a non-null object when present');
+    }
+    if (!Number.isInteger(value.max_fires) || (value.max_fires as number) <= 0) {
+        failRow(filename, rowIndex, 'action_cadence.max_fires must be a positive integer');
+    }
+    if (!Number.isInteger(value.cooldown_turns) || (value.cooldown_turns as number) < 0) {
+        failRow(filename, rowIndex, 'action_cadence.cooldown_turns must be a non-negative integer');
+    }
+    if (!['static', 'escalating', 'deteriorating'].includes(String(value.escalation))) {
+        failRow(filename, rowIndex, 'action_cadence.escalation must be one of static, escalating, deteriorating');
+    }
+}
+
 function validateOptionalFiniteNumber(value: unknown, path: string, filename: string, rowIndex: number): void {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
         failRow(filename, rowIndex, `${path} must be a finite number when present`);
@@ -411,6 +426,12 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
     }
     if (hasOwn(row, 'once')) {
         validateOptionalBoolean(row.once, 'once', filename, rowIndex);
+    }
+    if (row.once === true && hasOwn(row, 'recurrence')) {
+        failRow(filename, rowIndex, 'once and recurrence cannot both be set');
+    }
+    if (hasOwn(row, 'action_cadence')) {
+        validateActionCadence(row.action_cadence, filename, rowIndex);
     }
     if (hasOwn(row, 'requires_player_response')) {
         validateOptionalBoolean(row.requires_player_response, 'requires_player_response', filename, rowIndex);

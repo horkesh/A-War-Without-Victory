@@ -131,7 +131,7 @@ describe('event acceptance diagnostic report', () => {
         expect(first.summary.missing_historical_default_response_id_events).toBe(18);
         expect(first.summary.missing_historical_marker_events).toBe(18);
         expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(10);
+        expect(first.summary.missing_source_note_events).toBe(9);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {
@@ -252,7 +252,7 @@ describe('event acceptance diagnostic report', () => {
         } | undefined;
 
         expect(event).toBeDefined();
-        expect(trigger).toMatchObject({ turn_min: 65, turn_max: 72, phase: 'war' });
+        expect(trigger).toMatchObject({ turn_min: 69, turn_max: 71, phase: 'war' });
         expect(trigger?.condition).toEqual({
             type: 'and',
             conditions: [

@@ -102,7 +102,7 @@ describe('pressure system', () => {
         const events = JSON.parse(readFileSync('data/scenarios/events/war_1993.json', 'utf8')) as EventDefinition[];
         const lukavac = events.find((event) => event.id === 'operation_lukavac_93');
         const state = minState();
-        state.meta.turn = 65;
+        state.meta.turn = 69;
         state.military.event_flags = { sarajevo_siege_active: true };
         state.political.political_controllers = {
             'op:trnovo:trnovo_2': 'RS',

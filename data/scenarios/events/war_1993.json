@@ -2642,189 +2642,6 @@
     }
   },
   {
-    "id": "operation_lukavac_93",
-    "title": "Operation Lukavac 93 — VRS Offensive on Igman",
-    "narrative": "The VRS launches Operation Lukavac 93 with 15,000 troops against ARBiH positions on Mount Igman and Bjelasnica, aiming to sever Sarajevo's last supply route. VRS forces capture the Igman road on August 4, bringing the city to the brink of total isolation. The offensive provokes the first credible NATO threat of air strikes and a UN-brokered withdrawal demand.",
-    "category": "military",
-    "trigger": {
-      "turn_min": 65,
-      "turn_max": 72,
-      "phase": "war",
-      "condition": {
-        "type": "and",
-        "conditions": [
-          {
-            "type": "flag_equals",
-            "flag": "sarajevo_siege_active",
-            "value": true
-          },
-          {
-            "type": "faction_controls_municipality",
-            "faction": "RS",
-            "municipality": "trnovo",
-            "threshold": 0.5
-          }
-        ]
-      }
-    },
-    "pressure": {
-      "base_rate": 1,
-      "threshold": 2,
-      "decay_rate": 1,
-      "modifiers": [
-        {
-          "condition": {
-            "type": "territory_control",
-            "osid": "op:hadzici:lokve",
-            "faction": "RS"
-          },
-          "rate_bonus": 1
-        },
-        {
-          "condition": {
-            "type": "territory_control",
-            "osid": "op:hadzici:pazaric",
-            "faction": "RS"
-          },
-          "rate_bonus": 1
-        },
-        {
-          "condition": {
-            "type": "territory_control",
-            "osid": "op:hadzici:tarcin_2",
-            "faction": "RS"
-          },
-          "rate_bonus": 1
-        }
-      ]
-    },
-    "once": true,
-    "requires_player_response": true,
-    "responding_faction": "RS",
-    "bot_response_logic": "historical",
-    "historical_default_response_id": "comply",
-    "source_note": "Pascal, Balkan Battlegrounds II pp.410-411 frames Lukavac 93 as VRS pressure from Rogoj/Trnovo toward Igman and Bjelasnica after ARBiH Gorazde corridor pressure, threatening Sarajevo's supply link and creating the UN-NATO pressure path for withdrawal.",
-    "staff_assessment": "The advance has created a local military gain, but holding Igman now risks converting a battlefield success into a direct confrontation with NATO and further patron pressure.",
-    "trigger_evidence": [
-      "ARBiH pressure toward the Gorazde corridor has drawn VRS attention to the Rogoj-Trnovo axis.",
-      "RS control around Trnovo and pressure on Hadzici route proxies indicate a credible threat to the Igman-Bjelasnica supply link.",
-      "UN and NATO warnings are visible enough that withdrawal is a live political-military option, not a guaranteed outcome."
-    ],
-    "effect": {
-      "kind": "narrative",
-      "text": "VRS forces have seized the Igman road. Sarajevo faces total isolation — and NATO is issuing its first genuine ultimatum."
-    },
-    "response_options": [
-      {
-        "id": "comply",
-        "historical_marker": "historical_default",
-        "label": "Comply with withdrawal demand",
-        "description": "Pull back from Igman under the UN-brokered agreement. Avoids NATO strikes but concedes the strategic gain.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RS",
-            "delta": -3
-          },
-          {
-            "kind": "aggression_modifier",
-            "faction": "RS",
-            "delta": -0.1,
-            "duration_turns": 8
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 10
-          }
-        ],
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "military_credibility",
-            "delta": -5
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -10
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": 5
-          }
-        ],
-        "aggression_affinity": -0.3,
-        "risk_level": 0.4
-      },
-      {
-        "id": "defy_nato",
-        "label": "Defy NATO — hold Igman",
-        "description": "Call NATO's bluff and hold the captured positions. Risks triggering the first NATO combat strikes in history.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RS",
-            "delta": 3
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -15
-          },
-          {
-            "kind": "humanitarian_impact",
-            "faction": "RS",
-            "war_crimes_delta": 2
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 20
-          }
-        ],
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "military_credibility",
-            "delta": -15
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -20
-          }
-        ],
-        "aggression_affinity": 0.6,
-        "risk_level": 0.9
-      }
-    ],
-    "notifications_to_other_factions": {
-      "comply": {
-        "RBiH": {
-          "headline": "VRS withdraws from Igman under pressure",
-          "body": "RS accepts the UN-brokered withdrawal demand after the Lukavac 93 advance. Sarajevo sees the immediate threat to the Igman route ease, while VRS gives up a strategic gain."
-        },
-        "HRHB": {
-          "headline": "VRS complies on Igman withdrawal",
-          "body": "RS pulls back from the Igman positions rather than trigger NATO strikes. Mostar sees Western pressure contain the offensive, with VRS credibility taking a cost."
-        }
-      },
-      "defy_nato": {
-        "RBiH": {
-          "headline": "VRS defies NATO over Igman",
-          "body": "RS holds the captured Igman positions despite the threat of air strikes. Sarajevo faces renewed isolation pressure, while the risk of NATO combat action rises sharply."
-        },
-        "HRHB": {
-          "headline": "VRS holds Igman against NATO warning",
-          "body": "RS calls the air-strike threat and keeps the Igman gains. Mostar sees stronger VRS battlefield posture, but also a more dangerous confrontation with NATO."
-        }
-      }
-    },
-    "historical_source": "ICTY Mladic Trial Judgment (IT-09-92-T). Washington Post, Aug 14 1993."
-  },
-  {
     "id": "maglaj_enclave_blockade_1993",
     "title": "Maglaj Enclave Under Joint HVO-VRS Blockade",
     "narrative": "Following the collapse of the ARBiH-HVO alliance, the HVO joins the VRS in imposing a complete blockade on the Bosniak-held pocket around Maglaj, trapping approximately 100,000 people. The town endures relentless bombardment and near-total isolation for nine months, surviving partly on US airdrop supplies. The joint siege exemplifies the impossible tactical situation the ARBiH now faces — encircled from two directions simultaneously.",
@@ -3314,15 +3131,195 @@
     ]
   },
   {
-    "id": "nato_air_strike_threat_1993",
-    "title": "NATO Threatens Air Strikes — Sarajevo Ultimatum",
-    "narrative": "NATO formally agrees to launch air strikes against Bosnian Serb positions if the strangulation of Sarajevo or attacks on other safe areas continue. The decision marks the first time the Alliance has authorized potential force in its 44-year history. The dual-key arrangement between UN and NATO commands means execution remains politically constrained, but the threat forces the VRS withdrawal from Mount Igman.",
-    "category": "diplomatic",
+    "id": "operation_lukavac_93",
+    "title": "Operation Lukavac 93 — VRS Offensive on Igman",
+    "narrative": "The VRS opened Operation Lukavac 93 on 2-3 July with about 10,000 troops, captured Trnovo, and severed the ARBiH supply route to Gorazde. A renewed assault from 31 July has carried VRS forces onto Bjelasnica and Igman, putting Sarajevo's last supply link under immediate threat. NATO and the UN are now demanding a withdrawal while the captured positions remain in VRS hands.",
+    "category": "military",
     "trigger": {
       "turn_min": 69,
       "turn_max": 71,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "sarajevo_siege_active",
+            "value": true
+          },
+          {
+            "type": "faction_controls_municipality",
+            "faction": "RS",
+            "municipality": "trnovo",
+            "threshold": 0.5
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 2,
+      "decay_rate": 1,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "territory_control",
+            "osid": "op:hadzici:lokve",
+            "faction": "RS"
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "territory_control",
+            "osid": "op:hadzici:pazaric",
+            "faction": "RS"
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "territory_control",
+            "osid": "op:hadzici:tarcin_2",
+            "faction": "RS"
+          },
+          "rate_bonus": 1
+        }
+      ]
+    },
+    "priority": 40,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "comply",
+    "source_note": "Balkan Battlegrounds II pp. 410-411: Operation Lukavac 93 opened on 2-3 July; the VRS Main Staff assembled about 10,000 troops, took Trnovo, and severed the Gorazde supply corridor. The final Igman-Bjelasnica assault began on 31 July and produced the UN/NATO confrontation represented by this decision.",
+    "staff_assessment": "The advance has created a local military gain, but holding Igman now risks converting a battlefield success into a direct confrontation with NATO and further patron pressure.",
+    "trigger_evidence": [
+      "ARBiH pressure toward the Gorazde corridor has drawn VRS attention to the Rogoj-Trnovo axis.",
+      "RS control around Trnovo and pressure on Hadzici route proxies indicate a credible threat to the Igman-Bjelasnica supply link.",
+      "UN and NATO warnings are visible enough that withdrawal is a live political-military option, not a guaranteed outcome."
+    ],
+    "effect": {
+      "kind": "narrative",
+      "text": "VRS forces have reached Igman and Bjelasnica. Sarajevo's last overland supply link is under immediate threat, and NATO is issuing its first genuine ultimatum."
+    },
+    "response_options": [
+      {
+        "id": "comply",
+        "historical_marker": "historical_default",
+        "label": "Comply with withdrawal demand",
+        "description": "Pull back from Igman under the UN-brokered agreement. Avoids NATO strikes but concedes the strategic gain.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -3
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RS",
+            "delta": -0.1,
+            "duration_turns": 8
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 10
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.4
+      },
+      {
+        "id": "defy_nato",
+        "label": "Defy NATO — hold Igman",
+        "description": "Call NATO's bluff and hold the captured positions. Risks triggering the first NATO combat strikes in history.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -15
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 20
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -20
+          }
+        ],
+        "aggression_affinity": 0.6,
+        "risk_level": 0.9
+      }
+    ],
+    "notifications_to_other_factions": {
+      "comply": {
+        "RBiH": {
+          "headline": "VRS withdraws from Igman under pressure",
+          "body": "RS accepts the UN-brokered withdrawal demand after the Lukavac 93 advance. Sarajevo sees the immediate threat to the Igman route ease, while VRS gives up a strategic gain."
+        },
+        "HRHB": {
+          "headline": "VRS complies on Igman withdrawal",
+          "body": "RS pulls back from the Igman positions rather than trigger NATO strikes. Mostar sees Western pressure contain the offensive, with VRS credibility taking a cost."
+        }
+      },
+      "defy_nato": {
+        "RBiH": {
+          "headline": "VRS defies NATO over Igman",
+          "body": "RS holds the captured Igman positions despite the threat of air strikes. Sarajevo faces renewed isolation pressure, while the risk of NATO combat action rises sharply."
+        },
+        "HRHB": {
+          "headline": "VRS holds Igman against NATO warning",
+          "body": "RS calls the air-strike threat and keeps the Igman gains. Mostar sees stronger VRS battlefield posture, but also a more dangerous confrontation with NATO."
+        }
+      }
+    },
+    "historical_source": "Balkan Battlegrounds Vol. II, pp. 410-411. ICTY Mladic Trial Judgment (IT-09-92-T)."
+  },
+  {
+    "id": "nato_air_strike_threat_1993",
+    "title": "NATO Threatens Air Strikes — Sarajevo Ultimatum",
+    "narrative": "NATO formally agrees to launch air strikes against Bosnian Serb positions if the strangulation of Sarajevo or attacks on other safe areas continue. The decision marks the first time the Alliance has authorized potential force in its 44-year history. The dual-key arrangement between UN and NATO commands means execution remains politically constrained; the VRS disposition on Mount Igman remains a separate political-military choice.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 70,
+      "turn_max": 70,
       "phase": "war"
     },
+    "priority": 50,
     "once": true,
     "effects": [
       {
@@ -3359,6 +3356,7 @@
       }
     ],
     "historical_source": "NATO Council decision, August 9 1993. Operation Deny Flight history.",
+    "source_note": "This exogenous NATO Council notice records authorization and pressure only. It neither depends on nor resolves the separate RS decision over the Igman positions.",
     "effect": {
       "kind": "patron_pressure",
       "faction": "RS",
@@ -5624,7 +5622,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 8,
       "cooldown_turns": 8,
       "escalation": "escalating"
@@ -5635,7 +5633,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "strategic_posture"
     ],
     "response_options": [
@@ -5882,7 +5879,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 8,
       "cooldown_turns": 8,
       "escalation": "escalating"
@@ -5893,7 +5890,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "strategic_posture"
     ],
     "response_options": [
@@ -6151,7 +6147,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 8,
       "cooldown_turns": 8,
       "escalation": "escalating"
@@ -6162,7 +6158,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "strategic_posture"
     ],
     "response_options": [
@@ -6412,7 +6407,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -6423,7 +6418,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "visit_to_front"
     ],
     "response_options": [
@@ -6703,7 +6697,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -6714,7 +6708,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "visit_to_front"
     ],
     "response_options": [
@@ -6979,7 +6972,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -6990,7 +6983,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "visit_to_front"
     ],
     "response_options": [
@@ -7255,7 +7247,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -7266,7 +7258,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "address_to_nation"
     ],
     "response_options": [
@@ -7479,7 +7470,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -7490,7 +7481,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "address_to_nation"
     ],
     "response_options": [
@@ -7702,7 +7692,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -7713,7 +7703,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "address_to_nation"
     ],
     "response_options": [
@@ -7911,7 +7900,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -7922,7 +7911,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "decorate_a_unit"
     ],
     "response_options": [
@@ -8074,7 +8062,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -8085,7 +8073,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "decorate_a_unit"
     ],
     "response_options": [
@@ -8237,7 +8224,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -8248,7 +8235,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "decorate_a_unit"
     ],
     "response_options": [

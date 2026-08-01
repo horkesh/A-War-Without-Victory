@@ -1,0 +1,224 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  buildPresidentialCadenceReport,
+  projectPresidentialCadenceReceipts,
+  type PresidentialCadenceReceipt,
+} from '../src/sim/presidency/presidential_cadence.js';
+
+const BASE_RECEIPTS: PresidentialCadenceReceipt[] = [
+  { id: 'event:opening', faction: 'RS', turn: 0, classification: 'required_authored', sourceIds: ['BB1:p177'] },
+  { id: 'operation:cerska', faction: 'RS', turn: 40, classification: 'optional_source_backed', sourceIds: ['BB2:p404'] },
+  { id: 'notice:milosevic', faction: 'RS', turn: 54, classification: 'notice', sourceIds: ['ICTY:Krajisnik'] },
+  { id: 'event:assembly', faction: 'RS', turn: 56, classification: 'required_authored', sourceIds: ['ICTY:Krajisnik'] },
+  { id: 'reserve:gap', faction: 'RS', turn: 62, classification: 'ordinary_emergent', sourceIds: [] },
+  { id: 'peace:owen-stoltenberg', faction: 'RS', turn: 70, classification: 'required_authored', sourceIds: ['Owen:ch7'] },
+];
+
+describe('presidential cadence report', () => {
+  it('separates source-backed presidential receipts from emergent work and notices', () => {
+    const report = buildPresidentialCadenceReport({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 70,
+      targetMaxGapTurns: 10,
+      receipts: BASE_RECEIPTS,
+      positiveHolds: [],
+      positiveHoldEvidenceIds: [],
+    });
+
+    expect(report.receiptCounts).toEqual({
+      required_authored: 3,
+      optional_source_backed: 1,
+      ordinary_emergent: 1,
+      notice: 1,
+    });
+    expect(report.sourceBackedReceiptIds).toEqual([
+      'event:opening',
+      'operation:cerska',
+      'event:assembly',
+      'peace:owen-stoltenberg',
+    ]);
+    expect(report.maxSourceBackedGapTurns).toBe(40);
+    expect(report.gaps.map((gap) => [gap.fromTurn, gap.toTurn, gap.status])).toEqual([
+      [0, 40, 'unresolved'],
+      [40, 56, 'unresolved'],
+      [56, 70, 'unresolved'],
+    ]);
+  });
+
+  it('closes only an exact long gap with an evidenced positive-hold disposition', () => {
+    const report = buildPresidentialCadenceReport({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 70,
+      targetMaxGapTurns: 10,
+      receipts: BASE_RECEIPTS,
+      positiveHoldEvidenceIds: ['audit:all-faction-event-catalog'],
+      positiveHolds: [{
+        id: 'hold:rs:40-56',
+        faction: 'RS',
+        fromTurn: 40,
+        toTurn: 56,
+        rationale: 'No additional executable RS presidential lever is supported in this interval.',
+        evidenceIds: ['audit:all-faction-event-catalog'],
+      }],
+    });
+
+    expect(report.gaps.find((gap) => gap.fromTurn === 40 && gap.toTurn === 56)).toMatchObject({
+      status: 'positive_hold',
+      positiveHoldId: 'hold:rs:40-56',
+    });
+    expect(report.unresolvedLongGapCount).toBe(2);
+    expect(report.invalidPositiveHoldIds).toEqual([]);
+  });
+
+  it('rejects empty, mismatched, short-gap, and cross-faction hold dispositions', () => {
+    const report = buildPresidentialCadenceReport({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 70,
+      targetMaxGapTurns: 10,
+      receipts: BASE_RECEIPTS,
+      positiveHoldEvidenceIds: ['audit'],
+      positiveHolds: [
+        { id: 'hold:empty', faction: 'RS', fromTurn: 40, toTurn: 56, rationale: '', evidenceIds: [] },
+        { id: 'hold:mismatch', faction: 'RS', fromTurn: 41, toTurn: 56, rationale: 'Mismatch.', evidenceIds: ['audit'] },
+        { id: 'hold:short', faction: 'RS', fromTurn: 56, toTurn: 60, rationale: 'Short.', evidenceIds: ['audit'] },
+        { id: 'hold:other', faction: 'RBiH', fromTurn: 40, toTurn: 56, rationale: 'Other.', evidenceIds: ['audit'] },
+      ],
+    });
+
+    expect(report.invalidPositiveHoldIds).toEqual([
+      'hold:empty',
+      'hold:mismatch',
+      'hold:other',
+      'hold:short',
+    ]);
+    expect(report.gaps.every((gap) => gap.status === 'unresolved')).toBe(true);
+  });
+
+  it('rejects a hold whose evidence label is not in the supplied evidence inventory', () => {
+    const report = buildPresidentialCadenceReport({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 70,
+      targetMaxGapTurns: 10,
+      receipts: BASE_RECEIPTS,
+      positiveHoldEvidenceIds: ['audit:registered'],
+      positiveHolds: [{
+        id: 'hold:unregistered-evidence',
+        faction: 'RS',
+        fromTurn: 40,
+        toTurn: 56,
+        rationale: 'No supported lever.',
+        evidenceIds: ['audit:invented-label'],
+      }],
+    });
+
+    expect(report.invalidPositiveHoldIds).toEqual(['hold:unregistered-evidence']);
+    expect(report.gaps.find((gap) => gap.fromTurn === 40 && gap.toTurn === 56)?.status)
+      .toBe('unresolved');
+  });
+
+  it('is invariant under receipt and disposition permutation and deduplicates exact receipts', () => {
+    const first = buildPresidentialCadenceReport({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 70,
+      targetMaxGapTurns: 10,
+      receipts: [...BASE_RECEIPTS, BASE_RECEIPTS[1]],
+      positiveHoldEvidenceIds: ['audit:a', 'audit:b'],
+      positiveHolds: [{
+        id: 'hold:rs:40-56',
+        faction: 'RS',
+        fromTurn: 40,
+        toTurn: 56,
+        rationale: 'No supported lever.',
+        evidenceIds: ['audit:b', 'audit:a'],
+      }],
+    });
+    const second = buildPresidentialCadenceReport({
+      faction: 'RS',
+      startTurn: 0,
+      endTurn: 70,
+      targetMaxGapTurns: 10,
+      receipts: [...BASE_RECEIPTS].reverse(),
+      positiveHoldEvidenceIds: ['audit:b', 'audit:a'],
+      positiveHolds: [{
+        id: 'hold:rs:40-56',
+        faction: 'RS',
+        fromTurn: 40,
+        toTurn: 56,
+        rationale: 'No supported lever.',
+        evidenceIds: ['audit:a', 'audit:b'],
+      }],
+    });
+
+    expect(first).toEqual(second);
+  });
+});
+
+describe('presidential cadence receipt projection', () => {
+  it('aggregates every decision owner without letting notices or abstract actions close sourced gaps', () => {
+    const receipts = projectPresidentialCadenceReceipts({
+      faction: 'RS',
+      eventCatalog: [
+        { id: 'rs_assembly', requiresPlayerResponse: true, sourceBacked: true, sourceIds: ['BB2:p400'] },
+        { id: 'milosevic_notice', requiresPlayerResponse: false, sourceBacked: true, sourceIds: ['ICTY:notice'] },
+        { id: 'address_to_nation_rs', requiresPlayerResponse: true, sourceBacked: false, sourceIds: ['design:abstract'] },
+      ],
+      state: {
+        eventDecisionLog: [
+          { eventId: 'rs_assembly', faction: 'RS', turn: 56 },
+          { eventId: 'milosevic_notice', faction: 'RS', turn: 54 },
+          { eventId: 'address_to_nation_rs', faction: 'RS', turn: 84 },
+        ],
+        peacePlanHistory: [{ planId: 'vance_owen', turn: 40, responses: { RS: 'rejected' } }],
+        proposalReviews: [
+          { id: 'hist-op', faction: 'RS', turn: 41, resolvedTurn: 41, proposedAction: 'HISTORICAL_OP:triggered:vrs_drina:Pracha' },
+          { id: 'ordinary-op', faction: 'RS', turn: 42, resolvedTurn: 42, proposedAction: 'APPROVE_OP:vrs_drina:plan' },
+        ],
+        officerDecisionHistory: [
+          { id: 'replacement', faction: 'RS', turn: 28, eventId: 'replacement:vrs', decision: 'replacement_accepted' },
+          { id: 'arrival', faction: 'RS', turn: 18, eventId: 'arrival:vrs', decision: 'acknowledged' },
+        ],
+        reserveDecisionHistory: [{ id: 'reserve', faction: 'RS', turn: 20 }],
+        convoyDecisionHistory: [{ id: 'convoy', routeFaction: 'RS', turn: 30 }],
+        paramilitaryDecisionHistory: [{ id: 'paramilitary', faction: 'RS', turn: 3 }],
+      },
+    });
+
+    expect(receipts.map((receipt) => [receipt.id, receipt.classification])).toEqual([
+      ['paramilitary:paramilitary', 'ordinary_emergent'],
+      ['officer:arrival', 'notice'],
+      ['reserve:reserve', 'ordinary_emergent'],
+      ['officer:replacement', 'optional_source_backed'],
+      ['convoy:convoy', 'ordinary_emergent'],
+      ['peace-plan:vance_owen:RS', 'required_authored'],
+      ['proposal:hist-op', 'optional_source_backed'],
+      ['proposal:ordinary-op', 'ordinary_emergent'],
+      ['event:milosevic_notice', 'notice'],
+      ['event:rs_assembly', 'required_authored'],
+      ['event:address_to_nation_rs', 'ordinary_emergent'],
+    ]);
+  });
+
+  it('is conservative when an event receipt has no catalog row', () => {
+    const receipts = projectPresidentialCadenceReceipts({
+      faction: 'RBiH',
+      eventCatalog: [],
+      state: {
+        eventDecisionLog: [{ eventId: 'unknown_event', faction: 'RBiH', turn: 12 }],
+      },
+    });
+
+    expect(receipts).toEqual([{
+      id: 'event:unknown_event',
+      faction: 'RBiH',
+      turn: 12,
+      classification: 'notice',
+      sourceIds: [],
+    }]);
+  });
+});

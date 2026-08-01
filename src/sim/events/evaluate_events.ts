@@ -112,13 +112,17 @@ function collectEffects(def: EventDefinition) {
  */
 export function canEventFire(def: EventDefinition, state: GameState, currentTurn: number): boolean {
     const firedIds = state.military.fired_event_ids ?? [];
+    const fireCount = state.military.event_fire_counts?.[def.id] ?? 0;
 
-    // 1. once:true events that already fired
-    if (def.once && firedIds.includes(def.id)) return false;
+    // 1. once:true events that already fired through either canonical path.
+    // Natural evaluation records both the id and count; desktop-initiated
+    // actions record the count at queue time. Either receipt must seal the
+    // row against a later natural queue without coupling the evaluator to the
+    // desktop-only action_cadence contract.
+    if (def.once && (firedIds.includes(def.id) || fireCount > 0)) return false;
 
     // 2. Recurrence max_fires check
     if (def.recurrence) {
-        const fireCount = state.military.event_fire_counts?.[def.id] ?? 0;
         if (def.recurrence.max_fires != null && fireCount >= def.recurrence.max_fires) return false;
 
         // 3. Cooldown check
