@@ -3,7 +3,7 @@
 **Date:** 2026-08-01
 **Roadmap:** R4, Phase 4, Tasks 4.1-4.2
 **Baseline parent:** `6c02edcaf950d7d52ebb05fb63b10b89f50d7442`
-**Result:** source and fast gates complete; canonical baseline/canon acceptance blocked on the exclusive runtime lease
+**Result:** COMPLETE — source, focused, TypeScript, no-refresh baseline, and canon gates accepted on the integrated roadmap parent
 
 ## Outcome
 
@@ -64,6 +64,6 @@ The inherited player-facing Srebrenica ghost presentation still derives sensitiv
 
 ## Acceptance boundary and scope
 
-R5 holds the exclusive runtime lane. Therefore `npm.cmd run canon:check`, `npm.cmd run test:baselines`, scenarios, Electron, packaging, and release checks were not run, and no baseline was refreshed. This is a reviewable source checkpoint, not Phase 4 canonical acceptance. Phase 5 and any Phase 4 acceptance claim remain blocked until the lease owner runs and independently reviews the canonical gates.
+After integration on the roadmap parent at `638805ea4`, the exclusive runtime lane was released and the acceptance owner reran the exact `14`-file matrix (`262/262`), TypeScript, a no-refresh baseline regression, and `canon:check`. All exited `0`; every scenario matched and no baseline was refreshed. Phase 4 is canonically accepted. Phase 5 remains the separate integrated campaign, browser, Electron, and presentation closeout.
 
 No save schema, simulation output, scenario source, package, Electron artifact, version, tag, installer, publication, release state, push, merge, or `docs/10_canon/FORAWWV.md` change occurred.

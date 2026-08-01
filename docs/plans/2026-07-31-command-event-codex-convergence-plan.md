@@ -9,7 +9,7 @@
 **Tech stack:** TypeScript, React, Vitest, JSON-authored events/essays, Electron browser gates, deterministic scenario runner.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phase 4 source checkpoint complete; canonical baseline/canon acceptance lease-blocked
+**Status:** IN PROGRESS -- Phase 4 canonically accepted; Phase 5 integrated proof next
 **Roadmap workstream:** R4
 **Canonical owner:** Presidential Decision Room for action; Desk for triage; Records/Codex for receipts
 **Collision rule:** Do not overlap source edits with RS packets FR-01 or FR-04. Rebase on their shared priority and cadence contracts before Phase 0.
@@ -309,7 +309,7 @@ npm.cmd run typecheck
 
 **Assigned role:** Gameplay Programmer + Documentation Specialist
 **Independent review:** Historian + Canon Compliance Reviewer
-**Status:** SOURCE COMPLETE -- fast gates pass; canonical baseline/canon acceptance waits on the exclusive runtime lease
+**Status:** COMPLETE -- source, focused, TypeScript, no-refresh baseline, and canon gates accepted
 
 ### Task 4.1 -- Pin state/receipt ownership
 
@@ -349,12 +349,12 @@ npm.cmd run typecheck
 
 `/simplify` -> historian/canon review -> commit `fix(codex): converge dynamic consequence truth`
 
-**Phase 4 source checkpoint (2026-08-01):**
+**Phase 4 canonical acceptance (2026-08-01):**
 
 - Every dynamic section now exposes its exact state/receipt predicate and separates calendar context. The twenty ghost records are discriminated as `14` genuine paths, `5` divergence contexts, and `1` audit context: only a genuine path carries a distinct evaluated missed-condition predicate. A late-calendar UI regression proves that date alone cannot produce the Igman outcome.
 - One pure strict-sorted realized-consequence projector requires the selected canonical player, exact player decision, response-tagged causal edge, fired-event id, and at-or-after firing row. Its receipt id, record id, five-operand predicate, and chronology are shared by Codex, Chronicle, Records, and Cost Ledger. EN/BCS presentation uses authored localizations and suppresses unavailable English-only future-consequence prose outside EN.
 - Seven inventory-identified safe essays received source-note metadata only; bodies remain unchanged and explicitly original synthesis. The corrected live inventory is `405` claims / `227` files / `325` stop-gated rows and reports zero safe source-note residuals and zero dynamic sections without predicates. Only the Srebrenica finding carries a rupture condition. Sensitive player-choice and legacy Srebrenica presentation decisions remain routed to R7.
-- Committee RED probes fixed selected-player ownership leaks, partial/legacy predicates, cross-surface receipt reordering, untranslated prose, orphaned/closed projection cost, and false global path-not-taken semantics. GREEN passes the full changed/dependent-surface matrix at `14` files / `262` tests plus TypeScript. The canonical baseline/canon gates were not run because R5 owns the exclusive runtime lease. Phase 4 is source-complete but not canonically accepted. Evidence: [implementation report](../40_reports/implemented/20260801_R4_PHASE4_DYNAMIC_CODEX_CONVERGENCE_CHECKPOINT.md).
+- Committee RED probes fixed selected-player ownership leaks, partial/legacy predicates, cross-surface receipt reordering, untranslated prose, orphaned/closed projection cost, and false global path-not-taken semantics. On integrated parent `638805ea4`, GREEN passes the full changed/dependent-surface matrix at `14` files / `262` tests plus TypeScript, a fresh no-refresh baseline regression, and `canon:check`. Phase 4 is canonically accepted; Phase 5 is next. Evidence: [implementation report](../40_reports/implemented/20260801_R4_PHASE4_DYNAMIC_CODEX_CONVERGENCE_CHECKPOINT.md).
 
 ## Phase 5 -- Integrated proof and closeout
 
@@ -394,7 +394,7 @@ git diff --check
 - [ ] No duplicate Desk/Inbox/Decision Room priority disagreement.
 - [ ] No unsupported historical choice added to fill a drought.
 - [ ] Sourced review cadence meets the 8-10-week target where evidence exists; all other long intervals render positive-hold truth.
-- [x] Every dynamic Codex claim is state/receipt backed at the source checkpoint; canonical baseline/canon acceptance remains lease-blocked.
+- [x] Every dynamic Codex claim is state/receipt backed; focused, TypeScript, no-refresh baseline, and canon acceptance are green.
 - [ ] RBiH, RS, and HRHB 104-turn proofs and repeated 188-turn proof are deterministic and green.
 
 ## 7. Copy-ready execution prompt

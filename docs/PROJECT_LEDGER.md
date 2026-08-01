@@ -1,5 +1,15 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-01] R4 Phase 4 canonical acceptance
+
+**Type:** Canonical acceptance / deterministic consequence truth / integrated verification.
+
+**Result:** The reviewed Phase 4 source commit was integrated as `638805ea4`. Its exact changed/dependent-surface matrix passed `14/14` files and `262/262` tests; `npm.cmd run typecheck`, a fresh no-refresh `npm.cmd run test:baselines`, `npm.cmd run canon:check`, and `git diff --check` all exited `0`. Every baseline scenario matched and no expected artifact was refreshed.
+
+**Disposition and scope:** Phase 4 is canonically accepted and R4 proceeds to Phase 5. This acceptance records integrated verification only: no new behavior, scenario or essay prose, save schema, baseline, package, version, tag, installer, signing, publication, release state, push, or `docs/10_canon/FORAWWV.md` change occurred.
+
+---
+
 ## [2026-08-01] R5 Phase 2c reviewer replication provenance
 
 **Type:** Docs-only correctness-evidence provenance / complete transcript capture / reviewer replication.
