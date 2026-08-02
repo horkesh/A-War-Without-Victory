@@ -1,5 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] CI-break repair: v37 schema fixture and drift-audit assertion drift
+
+**Type:** CI-red repair / test-fixture synchronization / process-gap finding.
+
+**Cause:** `refactor(state): close persistence classification` (`715532403`, 2026-08-01) bumped `CURRENT_SCHEMA_VERSION` 36 -> 37 and added two new required-field checks to `validateGameStateShape` (`military.corps_front_sectors`, `military.sector_intel`) but never updated `tests/event_state_shape_b2.test.ts`'s hand-built `currentVersionState()` fixture or its hardcoded `expect(report.latest_schema_version).toBe(36)` drift-audit assertion. `Event System CI` failed on every one of the next 20 consecutive pushes across roughly 24 hours (2026-08-01T08:58 through 2026-08-02T06:51) while unrelated R2/R4/R5/R7 work kept landing on top of red.
+
+**Fix:** Added `corps_front_sectors: {}` and `sector_intel: {}` (both `isRecord`-validated, empty-record-safe) to the fixture; replaced the hardcoded `36` with `CURRENT_SCHEMA_VERSION` so the assertion self-updates on the next schema bump instead of drifting again.
+
+**Verification:** `tests/event_state_shape_b2.test.ts` passes 29/29 locally; `tsc --noEmit` clean; `desktop:map:build` succeeds. `Event System CI` run `30744707438` (commit `45c99a07b`) passed all steps including TypeScript, the Event-system + Phase E/F/H suite, the Phase F2 strict gate, and baseline regression, in 5m25s — first green run on this branch since 2026-08-01T08:58.
+
+**Process finding (not yet resolved):** `full-suite-and-fingerprint.yml` — the only workflow that runs the complete `npm run test:vitest` (all ~1,264 files / ~12,561 tests, vs. `Event System CI`'s narrower Event-system/Phase-E-F-H/baseline-regression slice) — triggers only on `push`/`pull_request` to `main`, never on feature branches. It has therefore never gated any of this branch's 108 commits. A local full run (`vitest run`, ~71 minutes) found 11 failed test files / 17 failed tests unrelated to this fix (confirmed: the fixed file passes in isolation). Re-running with full, untruncated output capture to get the complete failure list before triage. This is a real gap sitting under the branch's "integration target: main after all workstreams are green" claim in `docs/plans/MASTER_ROADMAP.md` and should be closed (either by fixing the failures or by wiring a scoped full-suite check to this branch) before merge to `main`.
+
+**Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema change, canon, `docs/10_canon/FORAWWV.md`, package/version/tag/signing/publication/release-state change.
+
+---
+
 ## [2026-08-02] R2 v8 hard-clipped Desk viewport and Army HQ contrast repair
 
 **Type:** Packaged-Electron defect repair / diagnostic attribution hardening / accessibility readability correction / acceptance pending.
