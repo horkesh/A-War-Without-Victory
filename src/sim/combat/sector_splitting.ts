@@ -17,6 +17,11 @@ import {
     MIN_SECTOR_EDGES,
 } from './corps_front_sectors_constants.js';
 import { buildEdgeAdjacency, buildEdgeAdjacencyStrictCaseB, isCaseBBridge, isOsidAdjacent, isSegmentAdjacent } from './sector_edge_adjacency.js';
+import {
+    areSectorFrontEdgeSubsetsAdjacent,
+    buildSectorFrontEdgeAdjacency,
+    type SectorFrontEdgeRelation,
+} from './sector_front_edge_relation.js';
 
 export interface SplitNonContiguousSectorsOptions {
     /**
@@ -53,6 +58,7 @@ export function splitNonContiguousSectors(
     strictAdj?: Map<Osid, Osid[]>,
     centroids?: OsidCentroidMap,
     options: SplitNonContiguousSectorsOptions = {},
+    frontEdgeRelation?: SectorFrontEdgeRelation,
 ): CorpsFrontSector[] {
     const result: CorpsFrontSector[] = [];
 
@@ -181,7 +187,18 @@ export function splitNonContiguousSectors(
         // which correctly splits at branching points. Otherwise shared-OSID.
         let edgeAdj: Map<string, string[]>;
         if (faction && edgeMeta) {
-            edgeAdj = buildEdgeAdjacency(sector.edge_ids, edgeMeta, faction, osidAdjacency, sharedBoundaryAdj, centroids);
+            edgeAdj = frontEdgeRelation
+                ? buildSectorFrontEdgeAdjacency({
+                    relation: frontEdgeRelation,
+                    mode: 'standard',
+                    edgeIds: sector.edge_ids,
+                    edgeMeta,
+                    faction,
+                    osidAdjacency,
+                    sharedBoundaryAdj,
+                    centroids,
+                })
+                : buildEdgeAdjacency(sector.edge_ids, edgeMeta, faction, osidAdjacency, sharedBoundaryAdj, centroids);
         } else {
             const tempMeta = new Map<string, { a: string; b: string; side_a?: string | null; side_b?: string | null }>();
             for (const eid of sector.edge_ids) {
@@ -189,7 +206,16 @@ export function splitNonContiguousSectors(
                 if (sep < 0) continue;
                 tempMeta.set(eid, { a: eid.slice(0, sep), b: eid.slice(sep + 2) });
             }
-            edgeAdj = buildEdgeAdjacency(sector.edge_ids, tempMeta);
+            edgeAdj = frontEdgeRelation
+                ? buildSectorFrontEdgeAdjacency({
+                    relation: frontEdgeRelation,
+                    mode: 'standard',
+                    edgeIds: sector.edge_ids,
+                    edgeMeta: tempMeta,
+                    faction: undefined,
+                    osidAdjacency,
+                })
+                : buildEdgeAdjacency(sector.edge_ids, tempMeta);
         }
 
         // Find connected components of edges
@@ -205,9 +231,21 @@ export function splitNonContiguousSectors(
         // legitimate triple junctions pass while pocket bridges (≥24.6m) are cut.
         // Fragments are re-merged in Step 4c using Case A only adjacency.
         if (edgeComponents.length <= 1 && faction && edgeMeta) {
-            const strictCaseBAdjMap = buildEdgeAdjacencyStrictCaseB(
-                sector.edge_ids, edgeMeta, faction, sharedBoundaryAdj ?? osidAdjacency, strictAdj ?? osidAdjacency, centroids
-            );
+            const strictCaseBAdjMap = frontEdgeRelation
+                ? buildSectorFrontEdgeAdjacency({
+                    relation: frontEdgeRelation,
+                    mode: 'strict-case-b',
+                    edgeIds: sector.edge_ids,
+                    edgeMeta,
+                    faction,
+                    osidAdjacency,
+                    sharedBoundaryAdj,
+                    strictAdjForCaseB: strictAdj,
+                    centroids,
+                })
+                : buildEdgeAdjacencyStrictCaseB(
+                    sector.edge_ids, edgeMeta, faction, sharedBoundaryAdj ?? osidAdjacency, strictAdj ?? osidAdjacency, centroids
+                );
             const strictComponents = findConnectedComponents(
                 new Set(sector.edge_ids),
                 (eid) => strictCaseBAdjMap.get(eid) ?? [],
@@ -371,6 +409,7 @@ export function mergeUndersizedSubSegments(
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
     strictAdjForCaseB?: Map<Osid, Osid[]>,
     centroids?: OsidCentroidMap,
+    frontEdgeRelation?: SectorFrontEdgeRelation,
 ): CorpsFrontSubSegment[] {
     if (subSegments.length <= 1) return subSegments;
 
@@ -404,7 +443,28 @@ export function mergeUndersizedSubSegments(
         for (let i = 0; i < segs.length; i++) {
             if (i === targetIdx) continue;
             const candidate = segs[i]!;
-            if (isSegmentAdjacent(target, candidate, osidAdjacency, sharedBoundaryAdj, strictAdjForCaseB, centroids)) {
+            const relationAdjacent = frontEdgeRelation
+                ? areSectorFrontEdgeSubsetsAdjacent(
+                    frontEdgeRelation,
+                    target.edge_ids,
+                    candidate.edge_ids,
+                    'strict-case-b',
+                    {
+                        osidAdjacency,
+                        sharedBoundaryAdj,
+                        strictAdjForCaseB,
+                        centroids,
+                    },
+                )
+                : undefined;
+            if (relationAdjacent ?? isSegmentAdjacent(
+                target,
+                candidate,
+                osidAdjacency,
+                sharedBoundaryAdj,
+                strictAdjForCaseB,
+                centroids,
+            )) {
                 if (candidate.length_edges < bestSize ||
                     (candidate.length_edges === bestSize && bestIdx >= 0 &&
                         strictCompare(candidate.sub_segment_id, segs[bestIdx]!.sub_segment_id) < 0)) {
