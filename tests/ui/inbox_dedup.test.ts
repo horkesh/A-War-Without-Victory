@@ -130,8 +130,8 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(onAction).toHaveBeenCalledWith('decision_room', 'empty:desk');
     });
 
-    it('localizes quiet inbox shell copy in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes quiet inbox shell copy in Bosnian mode', () => {
+        setLocale('bs');
         const onAction = vi.fn();
         useGameStore.setState({
             loadedGameState: makeLoadedState({ turn: 12 }),
@@ -148,9 +148,9 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(screen.queryByText('Presidential Inbox')).toBeNull();
     });
 
-    it('localizes quiet-inbox capsule chrome in BCS mode', () => {
+    it('localizes quiet-inbox capsule chrome in Bosnian mode', () => {
         const onAction = vi.fn();
-        setLocale('bcs');
+        setLocale('bs');
         useGameStore.setState({
             loadedGameState: makeLoadedState({ turn: 12 }),
             openingBriefDismissed: true,
@@ -170,9 +170,9 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(onAction).toHaveBeenCalledWith('decision_room', 'empty:desk');
     });
 
-    it('localizes opening brief chrome and RBiH scan bullets in BCS mode', () => {
+    it('localizes opening brief chrome and RBiH scan bullets in Bosnian mode', () => {
         const onAction = vi.fn();
-        setLocale('bcs');
+        setLocale('bs');
         useGameStore.setState({
             loadedGameState: makeLoadedState({ player_faction: 'RBiH', turn: 0 }),
             openingBriefDismissed: false,

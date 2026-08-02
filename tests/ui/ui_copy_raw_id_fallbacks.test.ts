@@ -61,7 +61,7 @@ describe('UI copy raw-id fallbacks', () => {
   });
 
   it('CommandTopBar localizes commander and action chrome without debug placeholders', () => {
-    setLocale('bcs');
+    setLocale('bs');
 
     const { container } = render(createElement(CommandTopBar, {
       opName: 'Test direktiva',
@@ -168,8 +168,8 @@ describe('UI copy raw-id fallbacks', () => {
     expect(hotspot.getAttribute('title')).not.toBe('desk_radio_channel_internal');
   });
 
-  it('CommandBriefingLayer localizes saved collector fallback copy in BCS mode', () => {
-    setLocale('bcs');
+  it('CommandBriefingLayer localizes saved collector fallback copy in Bosnian mode', () => {
+    setLocale('bs');
     storeState = {
       devMode: false,
       loadedGameState: {

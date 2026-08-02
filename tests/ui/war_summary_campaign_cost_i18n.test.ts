@@ -156,8 +156,8 @@ describe('War Summary campaign cost localization', () => {
         storeState.loadedGameState = null;
     });
 
-    it('renders BCS campaign cost chrome in the overview', () => {
-        setLocale('bcs');
+    it('renders Bosnian campaign cost chrome in the overview', () => {
+        setLocale('bs');
         storeState.loadedGameState = stateWithCampaignCost();
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
@@ -184,8 +184,8 @@ describe('War Summary campaign cost localization', () => {
         expect(screen.queryByText('Enemy control is summarized through staff assessments and front reports, not exact faction-wide totals.')).toBeNull();
     });
 
-    it('renders BCS operational SITREP token copy in the overview', () => {
-        setLocale('bcs');
+    it('renders Bosnian operational SITREP token copy in the overview', () => {
+        setLocale('bs');
         storeState.loadedGameState = stateWithOperationalSitrep();
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
@@ -324,8 +324,8 @@ describe('War Summary campaign cost localization', () => {
         expect(posture.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
-    it('localizes the executive hold posture and local fallbacks in BCS', () => {
-        setLocale('bcs');
+    it('localizes the executive hold posture and local fallbacks in Bosnian', () => {
+        setLocale('bs');
         storeState.loadedGameState = stateWithNoFiledObjectiveAction();
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
@@ -338,8 +338,8 @@ describe('War Summary campaign cost localization', () => {
         expect(section.textContent).not.toContain('hold present policy');
     });
 
-    it('renders strategic objective labels and unavailable truth in BCS', () => {
-        setLocale('bcs');
+    it('renders strategic objective labels and unavailable truth in Bosnian', () => {
+        setLocale('bs');
         storeState.loadedGameState = stateWithStrategicObjectives();
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));

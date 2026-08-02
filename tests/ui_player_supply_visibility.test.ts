@@ -306,8 +306,8 @@ describe('buildPlayerSupplyVisibility', () => {
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
   });
 
-  it('localizes BCS critical supply headlines and evidence', () => {
-    setLocale('bcs');
+  it('localizes Bosnian critical supply headlines and evidence', () => {
+    setLocale('bs');
     const state = emptyState({
       player_faction: 'RBiH',
       formations: [
@@ -339,8 +339,8 @@ describe('buildPlayerSupplyVisibility', () => {
     expect(text).not.toMatch(/\bSupply\b|adequate|strained|critical|open|brittle|cut corridor|brigades cut off/i);
   });
 
-  it('localizes BCS corridor warning copy', () => {
-    setLocale('bcs');
+  it('localizes Bosnian corridor warning copy', () => {
+    setLocale('bs');
     const state = emptyState({
       player_faction: 'RBiH',
       supplyStateByOsid: {

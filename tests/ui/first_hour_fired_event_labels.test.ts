@@ -129,7 +129,7 @@ describe('first-hour fired event labels', () => {
   it('localizes generated fired-decision wrapper copy', async () => {
     const { setLocale } = await import('../../src/ui/map/i18n/index.js');
     try {
-      setLocale('bcs', undefined);
+      setLocale('bs', undefined);
       const loaded = parseGameState({
         meta: {
           turn: 0,

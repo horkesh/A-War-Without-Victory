@@ -28,8 +28,8 @@ describe('SettlementTimeline localization', () => {
     expect(screen.getByText('No recorded events at this settlement.')).toBeTruthy();
   });
 
-  it('localizes date and empty-state labels in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes date and empty-state labels in Bosnian mode', () => {
+    setLocale('bs');
 
     expect(formatSettlementTimelineTurnDate(0)).toBe('6 apr 1992');
 
@@ -39,8 +39,8 @@ describe('SettlementTimeline localization', () => {
     expect(screen.queryByText('No recorded events at this settlement.')).toBeNull();
   });
 
-  it('localizes the component-owned casualty row label in BCS mode without role shorthand', () => {
-    setLocale('bcs');
+  it('localizes the component-owned casualty row label in Bosnian mode without role shorthand', () => {
+    setLocale('bs');
 
     render(createElement(SettlementTimeline, {
       events: [{
@@ -56,8 +56,8 @@ describe('SettlementTimeline localization', () => {
     expect(screen.queryByText('Casualties: 3 att / 5 def')).toBeNull();
   });
 
-  it('localizes supply transition titles without raw supply state ids in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes supply transition titles without raw supply state ids in Bosnian mode', () => {
+    setLocale('bs');
 
     const events = buildSettlementTimeline(
       'op:test:test_1',
@@ -80,7 +80,7 @@ describe('SettlementTimeline localization', () => {
   });
 
   it('uses localized neutral copy for adapter historical events with missing text', () => {
-    setLocale('bcs');
+    setLocale('bs');
 
     const parsed = parseGameState({
       meta: { turn: 10, phase: 'war' },
@@ -159,8 +159,8 @@ describe('SettlementTimeline localization', () => {
     ).map((event) => event.id)).toEqual(['srebrenica_falls_1995', 'srebrenica_municipality_signal']);
   });
 
-  it('localizes control battle and movement rows in BCS mode without English timeline fragments', () => {
-    setLocale('bcs');
+  it('localizes control battle and movement rows in Bosnian mode without English timeline fragments', () => {
+    setLocale('bs');
 
     const events = buildSettlementTimeline(
       'op:test:test_1',
@@ -323,8 +323,8 @@ describe('SettlementTimeline localization', () => {
     expect(container.textContent).not.toContain('Casualties: 0 attacker / 0 defender');
   });
 
-  it('localizes displacement operation and ethnic-shift rows in BCS mode without English fragments', () => {
-    setLocale('bcs');
+  it('localizes displacement operation and ethnic-shift rows in Bosnian mode without English fragments', () => {
+    setLocale('bs');
 
     const events = buildSettlementTimeline(
       'op:test:test_1',

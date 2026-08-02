@@ -46,10 +46,10 @@ afterEach(() => {
 });
 
 describe('OrderInterpretationPanel i18n', () => {
-    it('renders BCS chrome without translating authored reason prose', () => {
+    it('renders Bosnian chrome without translating authored reason prose', () => {
         const authoredReason = 'Commander says the bridge approach is mined.';
 
-        setLocale('bcs', undefined);
+        setLocale('bs', undefined);
         render(createElement(OrderInterpretationPanel, {
             playerFaction: 'RBiH',
             gameState: makeState({

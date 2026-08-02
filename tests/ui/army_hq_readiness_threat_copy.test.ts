@@ -10,7 +10,7 @@ import { t } from '../../src/ui/map/i18n/index.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 function bcsMarkup(element: React.ReactElement): string {
-    setLocale('bcs', undefined);
+    setLocale('bs', undefined);
     try {
         return renderToStaticMarkup(element);
     } finally {
@@ -109,7 +109,7 @@ describe('Army HQ readiness and threat copy', () => {
         expect(html).not.toContain('Weighted Composite');
     });
 
-    it('renders ForceReadiness labels through BCS copy instead of English staff labels', () => {
+    it('renders ForceReadiness labels through Bosnian copy instead of English staff labels', () => {
         const item: CorpsReadiness = {
             corpsId: 'corps_1',
             corpsName: '1st Corps',
@@ -141,7 +141,7 @@ describe('Army HQ readiness and threat copy', () => {
         expect(html).not.toContain('Corps</button>');
     });
 
-    it('renders ThreatAssessment chrome through BCS copy instead of English section labels', () => {
+    it('renders ThreatAssessment chrome through Bosnian copy instead of English section labels', () => {
         const html = bcsMarkup(createElement(ThreatAssessment, {
             items: [
                 {
@@ -160,8 +160,8 @@ describe('Army HQ readiness and threat copy', () => {
         expect(html).not.toContain('Front</button>');
     });
 
-    it('renders shared corps-card readiness labels through BCS copy', () => {
-        setLocale('bcs', undefined);
+    it('renders shared corps-card readiness labels through Bosnian copy', () => {
+        setLocale('bs', undefined);
         try {
             expect(readinessGradeLabel('COMBAT READY')).not.toBe('COMBAT READY');
             expect(t('armyHqCorps.readinessVitals', { fatigue: 7, cohesion: 82 })).not.toContain('fatigue');
@@ -295,8 +295,8 @@ describe('Army HQ readiness and threat copy', () => {
         expect(source).not.toContain("f.kind === 'brigade' && f.status === 'active'");
     });
 
-    it('generates BCS threat copy without English intel prose or raw sector ids', () => {
-        setLocale('bcs', undefined);
+    it('generates Bosnian threat copy without English intel prose or raw sector ids', () => {
+        setLocale('bs', undefined);
         const items = generateThreatAssessment(makeThreatState(), 'RBiH');
         const copy = items.flatMap(item => [item.title, item.detail]).join(' ');
 

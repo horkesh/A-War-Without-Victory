@@ -87,8 +87,8 @@ describe('WarroomShellLayer accessibility proof', () => {
         }
     });
 
-    it('renders localized BCS toolbar labels', () => {
-        setLocale('bcs');
+    it('renders localized Bosnian toolbar labels', () => {
+        setLocale('bs');
         storeState = {
             loadedGameState: {
                 player_faction: 'RBiH',
@@ -282,7 +282,9 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(openCommandCategoryBody).not.toContain("openArmyHQTab(useGameStore.getState(), 'briefing')");
         expect(openCommandCategoryBody).not.toContain("setAppScreen('game')");
         expect(appSource).toContain('data-testid="warroom-decision-room-host"');
-        expect(appSource).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
+        expect(appSource).toContain('<PresidentialDecisionRoomPanel');
+        expect(appSource).toContain('onNavigateTarget={reviewPreAdvanceTarget}');
+        expect(appSource).toContain('onInspectFieldPlan={inspectFieldOperationPlanFromDossier}');
     });
 
     it('keeps Warroom-hosted Decision Room review text readable over the staff-room background', () => {

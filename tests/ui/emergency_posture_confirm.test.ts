@@ -69,8 +69,8 @@ describe('Army HQ shell chrome', () => {
         expect(screen.queryByRole('combobox')).toBeNull();
     });
 
-    it('localizes Army HQ shell chrome in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes Army HQ shell chrome in Bosnian mode', () => {
+        setLocale('bs');
         render(createElement(ArmyHQModal));
 
         expect(screen.getByRole('dialog', { name: 'Štab armije' })).toBeTruthy();

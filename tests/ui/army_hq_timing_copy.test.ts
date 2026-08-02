@@ -589,8 +589,8 @@ describe('Army HQ timing copy', () => {
     expect(authorize.getAttribute('title')).toBe('Authorize unavailable: staff has not cleared this action.');
   });
 
-  it('localizes opportunity dossier labels in BCS without raw proposal enums', () => {
-    setLocale('bcs');
+  it('localizes opportunity dossier labels in Bosnian without raw proposal enums', () => {
+    setLocale('bs');
 
     render(React.createElement(OperationOpportunityDossierPanel, {
       gameState: makeGameState({
@@ -617,8 +617,8 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toMatch(/\bnot_applicable\b/i);
   });
 
-  it('localizes Back-the-Officer rank, framing, and donor title copy in BCS', () => {
-    setLocale('bcs');
+  it('localizes Back-the-Officer rank, framing, and donor title copy in Bosnian', () => {
+    setLocale('bs');
 
     render(React.createElement(OperationOpportunityDossierPanel, {
       gameState: makeGameState({
@@ -750,8 +750,8 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toContain('Decision Required');
   });
 
-  it('renders presidential attention counts through BCS one/many keys', () => {
-    setLocale('bcs', undefined);
+  it('renders presidential attention counts through Bosnian one/many keys', () => {
+    setLocale('bs', undefined);
     render(React.createElement(PresidentialAttentionPanel, {
       gameState: makeGameState({
         presidentialReviewQueue: {

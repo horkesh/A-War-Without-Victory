@@ -181,8 +181,8 @@ describe('DiplomacyPanel', () => {
         expect(panelText).not.toContain('T40');
     });
 
-    it('renders BCS defiance receipt timing as a calendar date without raw P tokens', () => {
-        setLocale('bcs');
+    it('renders Bosnian defiance receipt timing as a calendar date without raw P tokens', () => {
+        setLocale('bs');
         render(createElement(DiplomacyPanel, {
             view: makeView({
                 patronConfidence: { value: 38, band: 'low' },
@@ -206,8 +206,8 @@ describe('DiplomacyPanel', () => {
         expect(panelText).not.toMatch(/\bpotez\s+31\b/i);
     });
 
-    it('localizes related-track headings and qualitative labels in BCS', () => {
-        setLocale('bcs');
+    it('localizes related-track headings and qualitative labels in Bosnian', () => {
+        setLocale('bs');
         render(createElement(DiplomacyPanel, { view: makeView(), onClose: vi.fn() }));
 
         const panelText = screen.getByTestId('diplomacy-panel').textContent ?? '';
@@ -223,8 +223,8 @@ describe('DiplomacyPanel', () => {
         expect(panelText).not.toContain('Elevated');
     });
 
-    it('renders generated diplomacy read-model tokens in BCS without English pressure labels', () => {
-        setLocale('bcs');
+    it('renders generated diplomacy read-model tokens in Bosnian without English pressure labels', () => {
+        setLocale('bs');
         const view = buildDiplomacyView({
             meta: { turn: 44, phase: 'war', player_faction: 'RS' },
             factions: [

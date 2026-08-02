@@ -124,8 +124,8 @@ describe('buildVerdictShareSummary', () => {
         ].join('\n'));
     });
 
-    it('generates localized BCS wrapper text while preserving source-authored prose', () => {
-        setLocale('bcs');
+    it('generates localized Bosnian wrapper text while preserving source-authored prose', () => {
+        setLocale('bs');
 
         const text = buildVerdictShareSummary({
             verdict: makeVerdict(),

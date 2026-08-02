@@ -118,8 +118,8 @@ describe('formatHistoricalDivergenceNote', () => {
             .toBe('A source-authored divergence note');
     });
 
-    it('localizes generated territory and casualty notes in BCS', () => {
-        setLocale('bcs');
+    it('localizes generated territory and casualty notes in Bosnian', () => {
+        setLocale('bs');
 
         expect(formatHistoricalDivergenceNote('Federation controlled 54.0% territory vs historical 51%'))
             .toBe('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.');

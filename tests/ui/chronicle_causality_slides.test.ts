@@ -563,8 +563,8 @@ describe('generateWrappedSlides — slide ordering + rendering contract', () => 
         }
     });
 
-    it('localizes generated BCS causality slide chrome while preserving authored event data', () => {
-        setLocale('bcs');
+    it('localizes generated Bosnian causality slide chrome while preserving authored event data', () => {
+        setLocale('bs');
         const catalog = buildCatalog([
             eventDef('rbih_state_identity_1992', {
                 title: 'Drzavni identitet',

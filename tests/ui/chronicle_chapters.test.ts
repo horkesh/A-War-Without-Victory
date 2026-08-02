@@ -195,8 +195,8 @@ describe('buildChronicleChapters', () => {
         });
     });
 
-    it('localizes generated BCS chapter summaries, type labels, and boundary labels', () => {
-        setLocale('bcs');
+    it('localizes generated Bosnian chapter summaries, type labels, and boundary labels', () => {
+        setLocale('bs');
         const chapters = buildChronicleChapters(
             [
                 entry(1, 'Cijena sedmice', { type: 'cost', headline: true } as Partial<ChronicleEntry>),
@@ -215,8 +215,8 @@ describe('buildChronicleChapters', () => {
         expect(chronicleTypeLabel('military')).not.toBe('military affairs');
     });
 
-    it('localizes generated BCS doctrine fallback chapter titles', () => {
-        setLocale('bcs');
+    it('localizes generated Bosnian doctrine fallback chapter titles', () => {
+        setLocale('bs');
         const chapters = buildChronicleChapters(
             [entry(2, 'Pocetna direktiva')],
             {

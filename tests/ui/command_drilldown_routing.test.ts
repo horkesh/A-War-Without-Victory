@@ -123,7 +123,7 @@ describe('command drilldown routing', () => {
       selectedArmyId: 'RBiH',
       selectedCorpsId: 'rbih_1_corps',
     });
-    setLocale('bcs');
+    setLocale('bs');
 
     const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
     const copy = container.textContent ?? '';

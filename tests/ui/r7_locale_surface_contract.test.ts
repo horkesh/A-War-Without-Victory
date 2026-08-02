@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -8,6 +9,14 @@ import {
 } from '../../tools/ui/localization_viewport_contract.js';
 
 describe('R7 locale surface evidence contract', () => {
+    function collectSources(directory: string, filePattern: RegExp): string[] {
+        return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+            const path = join(directory, entry.name);
+            if (entry.isDirectory()) return collectSources(path, filePattern);
+            return filePattern.test(entry.name) ? [path.replace(/\\/g, '/')] : [];
+        });
+    }
+
     it('owns all required surfaces at all three deterministic viewport sizes', () => {
         expect(LOCALIZATION_EVIDENCE_SURFACES).toEqual([
             'Desk',
@@ -83,5 +92,29 @@ describe('R7 locale surface evidence contract', () => {
             expect(source, file).toContain('formatLocalizedNumber');
             expect(source, file).not.toMatch(/\.toLocaleString\(\)/);
         }
+    });
+
+    it('keeps the legacy bcs setter out of ordinary tests', () => {
+        const legacySetter = /setLocale\s*\(\s*['"]bcs['"](?:\s*,|\s*\))/;
+        const legacySetterOwners = collectSources('tests', /\.test\.tsx?$/)
+            .filter((file) => legacySetter.test(readFileSync(file, 'utf8')));
+
+        expect(legacySetterOwners).toEqual(['tests/ui_i18n.test.ts']);
+        const compatibilitySource = readFileSync('tests/ui_i18n.test.ts', 'utf8');
+        expect(compatibilitySource.match(/setLocale\s*\(\s*['"]bcs['"]/g)).toHaveLength(1);
+    });
+
+    it('pins the exact locale-formatting source census', () => {
+        const files = collectSources('src/ui/map', /\.tsx?$/);
+        expect(files.length).toBeGreaterThan(0);
+        const sources = files.map((file) => readFileSync(file, 'utf8'));
+        const count = (pattern: RegExp) => sources.reduce(
+            (total, source) => total + (source.match(pattern)?.length ?? 0),
+            0,
+        );
+
+        expect(count(/\.toLocaleString\(\)/g)).toBe(47);
+        expect(count(/\.toLocaleString\((?!\))/g) + count(/Intl\.NumberFormat\(/g)).toBe(20);
+        expect(count(/formatLocalizedNumber\(/g)).toBe(51);
     });
 });

@@ -343,8 +343,8 @@ describe('warroom player visibility', () => {
     expect(text).not.toContain('No command briefing packet is available yet.');
   });
 
-  it('warroom command briefing localizes known collector rows in BCS mode', () => {
-    setLocale('bcs');
+  it('warroom command briefing localizes known collector rows in Bosnian mode', () => {
+    setLocale('bs');
     const state = {
       meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
       factions: [

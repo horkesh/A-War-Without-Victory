@@ -54,7 +54,7 @@ describe('GUI audit Batch H supply legend overlap contract', () => {
     });
 
     it('renders the supply legend through the active locale', () => {
-        setLocale('bcs', undefined);
+        setLocale('bs', undefined);
         useGameStore.setState({
             mapMode: 'supply',
         });

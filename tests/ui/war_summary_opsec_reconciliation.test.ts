@@ -63,8 +63,8 @@ describe('War Summary OPSEC reconciliation', () => {
         expect(screen.queryByText('Supply 0% · Failures 0')).toBeNull();
     });
 
-    it('localizes OPSEC labels and health counts in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes OPSEC labels and health counts in Bosnian mode', () => {
+        setLocale('bs');
         render(createElement(SituationTab, { state: stateWithFilteredOpsecOperations(), focusSection: 'opsec' }));
 
         expect(screen.getByText('Operativni položaj')).toBeTruthy();

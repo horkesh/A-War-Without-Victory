@@ -103,8 +103,8 @@ describe('ops modal BrigadeCard i18n', () => {
     expect(card.textContent).not.toMatch(/\bFRESH\b/i);
   });
 
-  it('renders BrigadeCard and BrigadeTray copy through localized BCS labels', () => {
-    setLocale('bcs');
+  it('renders BrigadeCard and BrigadeTray copy through localized Bosnian labels', () => {
+    setLocale('bs');
 
     const { container, rerender } = render(React.createElement(BrigadeTray, {
       plan: makePlan(),

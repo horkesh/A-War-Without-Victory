@@ -301,8 +301,8 @@ describe('ArmyReservePanel elite commander identity', () => {
     });
   });
 
-  it('keeps reserve request detail labels and unavailable truth in BCS', () => {
-    setLocale('bcs', undefined);
+  it('keeps reserve request detail labels and unavailable truth in Bosnian', () => {
+    setLocale('bs', undefined);
     const state = makeReserveState(false);
     state.pendingReserveRequests = [{
       request_id: 'req-arbih-sparse',

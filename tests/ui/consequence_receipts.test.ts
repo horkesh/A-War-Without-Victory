@@ -368,8 +368,8 @@ describe('buildConsequenceReceipts', () => {
         expect(onTurn5.map((r) => r.predictedEventId)).toEqual(['p1']);
     });
 
-    it('keeps generated patron-defiance receipt copy localized in BCS mode', () => {
-        setLocale('bcs');
+    it('keeps generated patron-defiance receipt copy localized in Bosnian mode', () => {
+        setLocale('bs');
         const state = {
             meta: { player_faction: 'RS' },
             military: {
@@ -396,8 +396,8 @@ describe('buildConsequenceReceipts', () => {
         expect(text).not.toMatch(/Patron defiance|Refused|materiel cut|front fell|refusal stands/i);
     });
 
-    it('uses authored BCS event and response localizations without leaking English future copy', () => {
-        setLocale('bcs');
+    it('uses authored Bosnian event and response localizations without leaking English future copy', () => {
+        setLocale('bs');
         const source = buildEventDef('E', ['p'], {
             title: 'English decision dossier',
             label: 'Accept the English option',

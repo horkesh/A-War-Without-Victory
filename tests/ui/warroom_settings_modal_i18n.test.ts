@@ -11,8 +11,8 @@ describe('Warroom Settings modal i18n', () => {
     document.body.innerHTML = '';
   });
 
-  it('renders settings chrome through BCS labels', () => {
-    setLocale('bcs', undefined);
+  it('renders settings chrome through Bosnian labels', () => {
+    setLocale('bs', undefined);
 
     const modal = new SettingsModal({ meta: { player_faction: 'RBiH' } }).render();
     document.body.appendChild(modal);

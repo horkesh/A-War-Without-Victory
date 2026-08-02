@@ -68,8 +68,8 @@ describe('Presidential Decision Room counter-offer surface', () => {
         expect(view.advanceReadiness.items.map((item) => item.id)).toContain('counter-offer:HRHB_001');
     });
 
-    it('localizes counter-offer faction evidence in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes counter-offer faction evidence in Bosnian mode', () => {
+        setLocale('bs');
         try {
             const view = buildPresidentialDecisionRoomView({ state: makeState() });
             const card = view.cards.find((entry) => entry.id === 'counter-offer:HRHB_001');

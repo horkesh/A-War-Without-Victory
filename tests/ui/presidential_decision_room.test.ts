@@ -458,8 +458,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
-  it('localizes peace-plan briefing action labels in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes peace-plan briefing action labels in Bosnian mode', () => {
+    setLocale('bs');
     const state = makeState({
       pendingPeacePlan: {
         planId: 'vance_owen',
@@ -521,8 +521,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.cards.find((card) => card.id === 'briefing:dip-peace-plan')).toBeUndefined();
   });
 
-  it('localizes command briefing collector fallback titles and details in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes command briefing collector fallback titles and details in Bosnian mode', () => {
+    setLocale('bs');
     const state = makeState({
       commandBriefing: {
         headline: '2 items of note.',
@@ -764,8 +764,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
-  it('localizes Decision Room lane, loop, lens, and source-handoff chrome in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes Decision Room lane, loop, lens, and source-handoff chrome in Bosnian mode', () => {
+    setLocale('bs');
     const state = makeState({
       presidentialReviewQueue: {
         pendingCount: 2,
@@ -815,8 +815,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.lenses.map((lens) => lens.label)).not.toContain('Opportunity');
   });
 
-  it('localizes Decision Room generated decision card prose in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes Decision Room generated decision card prose in Bosnian mode', () => {
+    setLocale('bs');
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
         presidentialReviewQueue: {
@@ -1952,8 +1952,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.evidence.join(' ')).not.toContain('sector_threat');
   });
 
-  it('localizes every reserve-request evidence label in BCS', () => {
-    setLocale('bcs');
+  it('localizes every reserve-request evidence label in Bosnian', () => {
+    setLocale('bs');
     const state = makeState({
       formations: [
         { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps' },

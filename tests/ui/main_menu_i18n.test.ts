@@ -45,8 +45,8 @@ describe('MainMenu localization', () => {
         expect(screen.getByRole('button', { name: 'Credits' })).toBeTruthy();
     });
 
-    it('renders BCS main menu copy when BCS is selected', () => {
-        setLocale('bcs');
+    it('renders Bosnian main menu copy when Bosnian is selected', () => {
+        setLocale('bs');
 
         renderMainMenu();
 
@@ -61,7 +61,7 @@ describe('MainMenu localization', () => {
     });
 
     it('hides localized continue action when no save exists', () => {
-        setLocale('bcs');
+        setLocale('bs');
 
         renderMainMenu(false);
 

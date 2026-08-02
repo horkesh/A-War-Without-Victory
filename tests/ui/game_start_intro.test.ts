@@ -111,8 +111,8 @@ describe('PeaceWarTransition identity block (game-start intro — step 2)', () =
         expect(screen.getByText('What you cannot escape')).toBeTruthy();
     });
 
-    it('renders localized faction force briefings in BCS', () => {
-        setLocale('bcs');
+    it('renders localized faction force briefings in Bosnian', () => {
+        setLocale('bs');
         render(createElement(PeaceWarTransition, { onDismiss: vi.fn(), state: playerState('RBiH') }));
 
         expect(screen.getByText(/Vojska Republike Bosne i Hercegovine/)).toBeTruthy();

@@ -161,8 +161,8 @@ describe('SituationBriefing progressive disclosure (UI-4 / Batch 43)', () => {
         expect(container.textContent).toContain('No route is available for this briefing item.');
     });
 
-    it('localizes collector fallback copy in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes collector fallback copy in Bosnian mode', () => {
+        setLocale('bs');
         const items: BriefingItem[] = [
             makeItem({
                 id: 'mil-active-ops',

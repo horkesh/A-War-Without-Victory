@@ -130,7 +130,7 @@ describe('decision surface registry', () => {
   it('resolves registry labels and fallback copy through the active locale', async () => {
     const { setLocale } = await import('../../src/ui/map/i18n/index.js');
     try {
-      setLocale('bcs', undefined);
+      setLocale('bs', undefined);
       expect(getDecisionSurface('operation_opportunity')).toMatchObject({
         playerLabel: 'Operativna prilika',
         actionLabel: 'Otvori sobu odluka',

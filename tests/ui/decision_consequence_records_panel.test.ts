@@ -332,7 +332,7 @@ describe('DecisionConsequenceRecordsPanel', () => {
 
   it('keeps decision consequence panel copy localized', async () => {
     const { setLocale } = await import('../../src/ui/map/i18n/index.js');
-    setLocale('bcs', undefined);
+    setLocale('bs', undefined);
     useGameStore.setState({
       loadedGameState: makeState({
         firedEvents: [
@@ -366,9 +366,9 @@ describe('DecisionConsequenceRecordsPanel', () => {
     }
   });
 
-  it('renders a BCS autonomy receipt from structured stance fields without English or raw tokens', async () => {
+  it('renders a Bosnian autonomy receipt from structured stance fields without English or raw tokens', async () => {
     const { setLocale } = await import('../../src/ui/map/i18n/index.js');
-    setLocale('bcs', undefined);
+    setLocale('bs', undefined);
     useGameStore.setState({
       loadedGameState: makeState({
         player_faction: 'RS',

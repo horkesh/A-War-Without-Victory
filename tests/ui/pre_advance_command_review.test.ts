@@ -588,8 +588,8 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.canReviewPriorities).toBe(false);
   });
 
-  it('localizes advance readiness headlines in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes advance readiness headlines in Bosnian mode', () => {
+    setLocale('bs');
 
     const clearView = buildPreAdvanceCommandReviewView({
       state: makeState({

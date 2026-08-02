@@ -66,8 +66,8 @@ describe('President desk DecisionCard fallback copy', () => {
     expect(container.textContent).not.toMatch(/internal debug marker|internal_debug_marker/i);
   });
 
-  it('localizes BCS packet chrome for foundational event and peace cards', () => {
-    setLocale('bcs');
+  it('localizes Bosnian packet chrome for foundational event and peace cards', () => {
+    setLocale('bs');
     const onAction = vi.fn();
     const eventItem: InboxItem = {
       id: 'event:evt_opening_foundation',

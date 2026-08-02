@@ -24,8 +24,8 @@ describe('warroom date localization', () => {
     expect(turnToShortLabel(0)).toBe('Sep 1991');
   });
 
-  it('localizes warroom date labels in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes warroom date labels in Bosnian mode', () => {
+    setLocale('bs');
     setScenarioStartDate({ year: 1991, month: 8, day: 1 });
 
     expect(turnToDateString(0)).toBe('1 septembar 1991');

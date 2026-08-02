@@ -32,8 +32,8 @@ describe('political map counter legend', () => {
     expect(screen.getByTestId('map-counter-stack-badge').textContent).toBe('3');
   });
 
-  it('localizes the compact counter key in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes the compact counter key in Bosnian mode', () => {
+    setLocale('bs');
     useGameStore.setState({ mapMode: 'political' });
 
     render(createElement(MapModeLegend));

@@ -86,7 +86,7 @@ describe('command briefing consolidation', () => {
     expect(view.cards.find((card) => card.id === 'briefing:mil-front-collapse')).toBeDefined();
   });
 
-  it('uses count-aware enclave severity copy in EN and BCS', () => {
+  it('uses count-aware enclave severity copy in EN and Bosnian', () => {
     const items = (fixture.commandBriefing.items as CommandBriefingItemView[]).slice(0, 2).map((item, index) => ({
       ...item,
       severity: index === 0 ? 'critical' as const : 'warning' as const,
@@ -95,7 +95,7 @@ describe('command briefing consolidation', () => {
     setLocale('en');
     const en = buildPresidentialDecisionRoomView({ state: makeState(items) }).cards
       .find((card) => card.id.startsWith('briefing-group:'))?.explanation;
-    setLocale('bcs');
+    setLocale('bs');
     const bcs = buildPresidentialDecisionRoomView({ state: makeState(items) }).cards
       .find((card) => card.id.startsWith('briefing-group:'))?.explanation;
     setLocale('en');

@@ -209,7 +209,7 @@ test('B4 reserve presentation keeps genuinely absent request details unreported'
     });
 });
 
-test('reserve transfer sentences respect the active BCS locale', () => {
+test('reserve transfer sentences respect the active Bosnian locale', () => {
     const request = {
         request_id: 'reserve_bcs', corps_id: 'arbih_1st_corps', faction: 'RBiH',
         reason: 'defensive_gap', priority: 82, severityBand: 'critical', travel_hops: 2,
@@ -235,7 +235,7 @@ test('reserve transfer sentences respect the active BCS locale', () => {
         }],
     } as unknown as LoadedGameState;
 
-    setLocale('bcs', undefined);
+    setLocale('bs', undefined);
     try {
         const presentation = buildReserveRequestPresentation(
             state,

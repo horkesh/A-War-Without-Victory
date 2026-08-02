@@ -65,8 +65,8 @@ describe('EventDecisionModal presidential dossier', () => {
     };
   }
 
-  it('renders BCS authored copy for first-hour decision title, situation, options, source note, and staff assessment', () => {
-    setLocale('bcs');
+  it('renders Bosnian authored copy for first-hour decision title, situation, options, source note, and staff assessment', () => {
+    setLocale('bs');
 
     for (const eventId of firstHourEventIds) {
       const { container, unmount } = render(React.createElement(EventDecisionModal, {
@@ -144,7 +144,7 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(englishText).not.toMatch(/Your army commander|Your commander's warning|Your commander warned/i);
     unmount();
 
-    setLocale('bcs');
+    setLocale('bs');
     const bcsRender = render(React.createElement(EventDecisionModal, {
       decision: buildCatalogBackedDecision('rs_strategic_goals'),
       eventCatalog: firstHourCatalog,
@@ -153,13 +153,13 @@ describe('EventDecisionModal presidential dossier', () => {
     const bcsText = bcsRender.container.textContent ?? '';
     expect(bcsText).toContain('General Ratko Mladic');
     expect(bcsText).toContain('upozorenje generala Ratka Mladica');
-    expect(bcsText).toContain('General Mladic je upozorio na genocid');
+    expect(bcsText).toContain('radnje koje cine genocid');
     expect(bcsText).not.toMatch(/Komandant vojske|Upozorenje komandanta|Komandant je upozorio/i);
     bcsRender.unmount();
   });
 
-  it('renders foundational decision modal chrome through BCS i18n', () => {
-    setLocale('bcs');
+  it('renders foundational decision modal chrome through Bosnian i18n', () => {
+    setLocale('bs');
 
     const { container } = render(React.createElement(EventDecisionModal, {
       decision: {

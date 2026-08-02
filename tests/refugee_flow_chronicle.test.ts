@@ -190,8 +190,8 @@ describe('refugee-flow Chronicle cadence beats (D2 mid-1995 void)', () => {
         expect(REFUGEE_SURGE_ABSOLUTE_FLOOR).toBeGreaterThan(0);
     });
 
-    it('keeps generated refugee-flow copy localized in BCS mode', () => {
-        setLocale('bcs');
+    it('keeps generated refugee-flow copy localized in Bosnian mode', () => {
+        setLocale('bs');
         const entries = buildRefugeeFlowChronicleEntries(rawStateWith({ 5: 700_000, 6: 3_460 }), 188);
         const text = entries.map((e) => `${e.title} ${e.detail}`).join('\n');
 

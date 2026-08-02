@@ -21,8 +21,8 @@ afterEach(() => {
 });
 
 describe('Convoy decision modal localization', () => {
-    it('localizes convoy decision modal chrome and action prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes convoy decision modal chrome and action prose in Bosnian mode', () => {
+        setLocale('bs');
 
         render(createElement(ConvoyDecisionModal, {
             convoy,

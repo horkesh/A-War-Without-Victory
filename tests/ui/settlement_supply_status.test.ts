@@ -172,7 +172,7 @@ describe('SettlementDetailContent supply status surface', () => {
   });
 
   it('renders localized ethnicity and terrain labels instead of raw data labels', () => {
-    setLocale('bcs');
+    setLocale('bs');
 
     render(createElement(SettlementDetailContent, {
       ...BASE_PROPS,

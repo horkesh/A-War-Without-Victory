@@ -330,6 +330,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                         <>
                             <button
                                 type="button"
+                                data-testid="ops-planning-authorize-probe"
                                 onClick={handleProbe}
                                 disabled={isSubmitting}
                                 className="px-6 py-3 rounded-lg bg-amber-500/20 text-amber-400 font-bold text-sm

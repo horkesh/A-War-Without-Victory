@@ -205,7 +205,7 @@ describe('derivePresidentialBlockers', () => {
   it('localizes convoy blocker and registry action copy', async () => {
     const { setLocale } = await import('../../src/ui/map/i18n/index.js');
     try {
-      setLocale('bcs', undefined);
+      setLocale('bs', undefined);
       const blockers = derivePresidentialBlockers(makeState({
         pendingConvoyDecisions: [
           {

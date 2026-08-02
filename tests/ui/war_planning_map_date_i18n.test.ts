@@ -13,8 +13,8 @@ describe('war planning map date localization', () => {
     expect(formatWarPlanningTurnDate(0)).toBe('1 Sep 1991');
   });
 
-  it('localizes abbreviated month labels in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes abbreviated month labels in Bosnian mode', () => {
+    setLocale('bs');
 
     expect(formatWarPlanningTurnDate(0)).toBe('1 sep 1991');
   });

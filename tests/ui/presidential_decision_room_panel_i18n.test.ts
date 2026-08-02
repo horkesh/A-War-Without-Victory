@@ -74,8 +74,8 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     __resetDecisionRoomLensRequestForTest();
   });
 
-  it('localizes static flat Decision Room panel chrome in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes static flat Decision Room panel chrome in Bosnian mode', () => {
+    setLocale('bs');
     useGameStore.setState({
       loadedGameState: makeState(),
       osidDisplayNames: null,
@@ -195,7 +195,8 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('presidential-decision-room').getAttribute('data-command-category-id')).toBe('');
-      expect(screen.queryByRole('status')).toBeNull();
+      expect(screen.queryByTestId('decision-room-clear-command-category')).toBeNull();
+      expect(screen.queryByText('Filtered by Conscience & Atrocity')).toBeNull();
       expect(screen.getByTestId('decision-room-lens-all').getAttribute('aria-pressed')).toBe('true');
       expect(screen.getByTestId('decision-room-priority-card-turn:24:hard-turn')).toBeTruthy();
       expect(screen.getByText('Priority Dossier')).toBeTruthy();
@@ -222,8 +223,8 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     expect(screen.queryByRole('button', { name: 'View Advanced' })).toBeNull();
   });
 
-  it('localizes priority-card severity badges in BCS mode', async () => {
-    setLocale('bcs');
+  it('localizes priority-card severity badges in Bosnian mode', async () => {
+    setLocale('bs');
     useGameStore.setState({
       loadedGameState: makeState({
         pendingParamilitaryRequests: [

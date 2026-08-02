@@ -154,8 +154,8 @@ describe('war-weariness Chronicle beats (Collapse Repurpose Design A)', () => {
         expect(collapsingTurns.every(t => t === 58)).toBe(true);
     });
 
-    it('keeps generated war-weariness copy localized in BCS mode', () => {
-        setLocale('bcs');
+    it('keeps generated war-weariness copy localized in Bosnian mode', () => {
+        setLocale('bs');
         const entries = buildWarWearinessChronicleEntries(rawStateWith({ RS: 9000 }), 80);
         const text = entries.map((e) => `${e.title} ${e.detail}`).join('\n');
 

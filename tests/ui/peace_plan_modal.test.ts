@@ -225,8 +225,8 @@ describe('PeacePlanModal', () => {
         expect(onDismiss).not.toHaveBeenCalled();
     });
 
-    it('localizes BCS modal chrome and hides unknown ids behind neutral copy', () => {
-        setLocale('bcs');
+    it('localizes Bosnian modal chrome and hides unknown ids behind neutral copy', () => {
+        setLocale('bs');
         installIpc();
 
         render(createElement(PeacePlanModal, {

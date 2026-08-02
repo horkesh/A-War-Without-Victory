@@ -223,7 +223,7 @@ describe('PresidentialDecisionRoom pushback explanations card', () => {
     it('localizes generated Army CO pushback copy without localizing authored reasons', async () => {
         const { setLocale } = await import('../src/ui/map/i18n/index.js');
         try {
-            setLocale('bcs', undefined);
+            setLocale('bs', undefined);
             const view = buildPlayerArmyCoPushbackVisibility(makeState({
                 pendingOfficerEvents: [
                     {

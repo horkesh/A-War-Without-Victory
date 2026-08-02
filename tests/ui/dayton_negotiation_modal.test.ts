@@ -57,8 +57,8 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         expect(screen.getByText(/Left unresolved/)).toBeTruthy();
     });
 
-    it('localizes chrome and readouts in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes chrome and readouts in Bosnian mode', () => {
+        setLocale('bs');
         render(createElement(DaytonNegotiationModal, { dayton: PENDING }));
         expect(screen.getByText('Dejtonski mirovni sporazum')).toBeTruthy();
         expect(screen.getByText('Autonomija entiteta')).toBeTruthy();

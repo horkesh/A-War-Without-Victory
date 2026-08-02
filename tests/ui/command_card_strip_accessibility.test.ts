@@ -50,8 +50,8 @@ describe('CommandCardStrip accessibility', () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it('localizes BCS command-surface strip chrome and card labels', () => {
-    setLocale('bcs');
+  it('localizes Bosnian command-surface strip chrome and card labels', () => {
+    setLocale('bs');
 
     render(React.createElement(CommandCardStrip, {
       initialCategoryId: null,
@@ -66,14 +66,14 @@ describe('CommandCardStrip accessibility', () => {
     expect(screen.getByText('Ratno usmjerenje')).toBeTruthy();
     expect(screen.getByText('Diplomatija i pokrovitelji')).toBeTruthy();
     expect(screen.getAllByText('Djeluj').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('0 na čekanju').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('0 obavezno · 0 preporučeno · 0 praćenje · 0 zapis').length).toBeGreaterThan(0);
 
     expect(dialog.textContent).not.toContain('Command Surface');
     expect(dialog.textContent).not.toContain('Where will you direct the war?');
     expect(dialog.textContent).not.toContain('War Direction');
     expect(dialog.textContent).not.toContain('Diplomacy & Patrons');
     expect(dialog.textContent).not.toContain('Act');
-    expect(dialog.textContent).not.toContain('0 pending');
+    expect(dialog.textContent).not.toContain('0 required · 0 recommended · 0 monitor · 0 record');
   });
 
   it('routes every command category through the warroom host callback', () => {

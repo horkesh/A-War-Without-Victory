@@ -783,7 +783,7 @@ describe('decision consequence trail', () => {
     } as Partial<LoadedGameState>), 10);
 
     try {
-      setLocale('bcs', undefined);
+      setLocale('bs', undefined);
       expect(resolveDecisionConsequenceCopy(ledger[0]!, 'title')).toBe('Patronsko smanjenje snabdijevanja');
       expect(resolveDecisionConsequenceCopy(ledger[0]!, 'outcome')).toBe('Materijalna podrška smanjena');
       expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).toBe('Serbia je smanjio materijalnu podršku za VRS za 35%; podrška nakon smanjenja 45%.');

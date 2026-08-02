@@ -131,8 +131,8 @@ describe('paramilitary Presidential Inbox items', () => {
         expect(deriveInboxItems(state, null).some((item) => item.type === 'paramilitary_request')).toBe(false);
     });
 
-    it('localizes generated paramilitary request subtitles in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes generated paramilitary request subtitles in Bosnian mode', () => {
+        setLocale('bs');
         const state = makeLoadedState({
             pendingParamilitaryRequests: [
                 { faction: 'RS', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', estimated_civilian_risk: 100 },

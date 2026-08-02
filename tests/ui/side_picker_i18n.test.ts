@@ -40,8 +40,8 @@ describe('SidePickerOverlay localization', () => {
         expect(screen.getByRole('button', { name: 'Close' })).toBeTruthy();
     });
 
-    it('renders BCS side-picker copy when BCS is selected', () => {
-        setLocale('bcs');
+    it('renders Bosnian side-picker copy when Bosnian is selected', () => {
+        setLocale('bs');
 
         renderSidePicker();
 

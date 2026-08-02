@@ -59,8 +59,8 @@ describe('chronicle endgame narrative mounts', () => {
         expect(html).toContain('Federation controlled 54.0% territory vs historical 51%');
     });
 
-    it('localizes generated BCS comparison notes in Chronicle cards and wrapped bullets', () => {
-        setLocale('bcs');
+    it('localizes generated Bosnian comparison notes in Chronicle cards and wrapped bullets', () => {
+        setLocale('bs');
 
         const cardHtml = renderToStaticMarkup(
             React.createElement(ChronicleCard, {
@@ -133,8 +133,8 @@ describe('chronicle endgame narrative mounts', () => {
         }
     });
 
-    it('renders your-war wrapped faction hero with BCS faction labels', () => {
-        setLocale('bcs');
+    it('renders your-war wrapped faction hero with Bosnian faction labels', () => {
+        setLocale('bs');
         for (const [faction, label] of [
             ['RBiH', 'Republika Bosna i Hercegovina'],
             ['RS', 'Republika Srpska'],
@@ -164,8 +164,8 @@ describe('chronicle endgame narrative mounts', () => {
         }
     });
 
-    it('localizes wrapped component chrome and strategic chart labels in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes wrapped component chrome and strategic chart labels in Bosnian mode', () => {
+        setLocale('bs');
         const html = renderToStaticMarkup(
             React.createElement(WrappedSlideComponent, {
                 slide: {

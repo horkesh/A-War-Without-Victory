@@ -83,8 +83,8 @@ describe('TurnAftermathModal localization', () => {
         setLocale('en');
     });
 
-    it('renders BCS chrome for the turn aftermath modal', () => {
-        setLocale('bcs');
+    it('renders Bosnian chrome for the turn aftermath modal', () => {
+        setLocale('bs');
         const onClose = vi.fn();
 
         render(createElement(TurnAftermathModal, {

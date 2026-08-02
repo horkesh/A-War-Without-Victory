@@ -230,8 +230,8 @@ describe('deriveInboxItems — event decisions', () => {
         expect(eventItems[0].subtitle).not.toMatch(/\bturn\s+0\b/i);
     });
 
-    it('localizes turn-zero pending foundational decision fallback copy in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes turn-zero pending foundational decision fallback copy in Bosnian mode', () => {
+        setLocale('bs');
         const state = makeStub({
             turn: 0,
             pendingEventDecisions: [
@@ -265,8 +265,8 @@ describe('deriveInboxItems — event decisions', () => {
         expect(copy).not.toMatch(/Decision Required|A presidential decision requires|Peace Proposal|Peace proposal/);
     });
 
-    it('uses catalog-localized BCS title for first-hour event decision packets', () => {
-        setLocale('bcs');
+    it('uses catalog-localized Bosnian title for first-hour event decision packets', () => {
+        setLocale('bs');
         const firstHourCatalog = new Map<string, EventDefinition>(
             (war1992Events as EventDefinition[])
                 .filter((eventDef) => eventDef.id === 'rbih_state_identity')
@@ -532,8 +532,8 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
         expect(hasBlockingItems(items)).toBe(false);
     });
 
-    it('localizes generated decision and situation inbox items in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes generated decision and situation inbox items in Bosnian mode', () => {
+        setLocale('bs');
         const state = makeStub({
             pendingDayton: {
                 territorialPackages: [],
@@ -777,8 +777,8 @@ describe('deriveInboxItems — officer events', () => {
         });
     });
 
-    it('localizes officer event titles and subtitles in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes officer event titles and subtitles in Bosnian mode', () => {
+        setLocale('bs');
         const state = makeStub({
             player_faction: 'RBiH',
             pendingOfficerEvents: [
@@ -1076,8 +1076,8 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(items.filter(i => i.type === 'autonomy_proposal')).toHaveLength(0);
     });
 
-    it('localizes operation-opportunity recommendation and autonomy fallback copy in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes operation-opportunity recommendation and autonomy fallback copy in Bosnian mode', () => {
+        setLocale('bs');
         const state = makeStub({
             player_faction: 'RBiH',
             pendingProposalReviews: [
@@ -1109,8 +1109,8 @@ describe('deriveInboxItems — autonomy proposals', () => {
             .not.toMatch(/Operation Opportunity|Staff recommends|authorization|Command Proposal|proposal requires your review/i);
     });
 
-    it('does not echo non-localized generated proposal descriptions in BCS mode', () => {
-        setLocale('bcs');
+    it('does not echo non-localized generated proposal descriptions in Bosnian mode', () => {
+        setLocale('bs');
         const state = makeStub({
             player_faction: 'RBiH',
             pendingProposalReviews: [

@@ -171,8 +171,8 @@ describe('Sarajevo-siege legibility (SRK strangle-not-capture, D2 task #41)', ()
     expect(entries[0].detail).toEqual(sarajevoSiegeGloss('RBiH'));
   });
 
-  it('keeps generated Sarajevo siege copy localized in BCS mode', () => {
-    setLocale('bcs');
+  it('keeps generated Sarajevo siege copy localized in Bosnian mode', () => {
+    setLocale('bs');
     const entries = buildSarajevoSiegeChronicleEntries(rawStateWithStrangle(CORE_OSIDS), 188, 'RBiH');
     const text = `${entries[0].title} ${entries[0].detail}`;
 

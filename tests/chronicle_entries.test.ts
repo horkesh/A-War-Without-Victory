@@ -834,8 +834,8 @@ describe('generateChronicleEntries', () => {
         expect(entries.filter(e => e.metadata?.operationAarId === 'op-final-held')).toHaveLength(1);
     });
 
-    it('keeps generated Chronicle scaffolding localized in BCS mode while preserving names', () => {
-        setLocale('bcs');
+    it('keeps generated Chronicle scaffolding localized in Bosnian mode while preserving names', () => {
+        setLocale('bs');
         const state = {
             player_faction: 'RBiH',
             turn: 188,

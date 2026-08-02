@@ -69,8 +69,8 @@ describe('GameOverModal localization', () => {
         expect(document.body.textContent ?? '').not.toMatch(/\bOSID\b/i);
     });
 
-    it('renders BCS game-over copy when BCS is selected', () => {
-        setLocale('bcs');
+    it('renders Bosnian game-over copy when Bosnian is selected', () => {
+        setLocale('bs');
 
         renderGameOver();
 

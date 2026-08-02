@@ -28,8 +28,8 @@ describe('CreditsScreen localization', () => {
         expect(screen.getByRole('button', { name: 'Close' })).toBeTruthy();
     });
 
-    it('renders BCS credits copy when BCS is selected', () => {
-        setLocale('bcs');
+    it('renders Bosnian credits copy when Bosnian is selected', () => {
+        setLocale('bs');
 
         render(createElement(CreditsScreen, { onClose: noop }));
 

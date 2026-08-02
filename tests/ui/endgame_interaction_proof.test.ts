@@ -242,8 +242,8 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText(/War Cost/)).toBeDefined();
     });
 
-    it('renders localized rich verdict chrome when BCS is selected', () => {
-        setLocale('bcs');
+    it('renders localized rich verdict chrome when Bosnian is selected', () => {
+        setLocale('bs');
 
         const { container } = renderVS();
         const warCostSection = container.querySelector('[data-tutorial-step="cost-ledger"]');
@@ -338,8 +338,8 @@ describe('VerdictScreen route — endgame reachability', () => {
         expect(screen.getByText('Final Standings')).toBeDefined();
     });
 
-    it('renders localized FallbackGameOver copy when BCS is selected', () => {
-        setLocale('bcs');
+    it('renders localized FallbackGameOver copy when Bosnian is selected', () => {
+        setLocale('bs');
         storeState = { loadedGameState: endgame({ gameVerdict: undefined }) };
 
         renderVS();

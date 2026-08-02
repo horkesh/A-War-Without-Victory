@@ -332,8 +332,8 @@ describe('decision family modals', () => {
     expect(container.textContent).not.toMatch(/sector[_ ]threat[_ ]urgent|flank[_ ]anchor|raw description payload/i);
   });
 
-  it('uses BCS neutral reserve-copy fallbacks without exposing unknown ids', () => {
-    setLocale('bcs');
+  it('uses Bosnian neutral reserve-copy fallbacks without exposing unknown ids', () => {
+    setLocale('bs');
 
     const { container } = render(React.createElement(ReserveRequestModal, {
       requestId: 'reserve:req-bcs',

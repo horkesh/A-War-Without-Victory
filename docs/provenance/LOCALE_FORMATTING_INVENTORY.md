@@ -17,20 +17,22 @@ The following six player-facing surfaces have no zero-argument `toLocaleString()
 - operation history (`OperationHistoryPanel.tsx`);
 - Army HQ operations (`army_hq/OperationsSection.tsx`).
 
-This repair adds 53 production calls to `formatLocalizedNumber()` including the helper definition. The selected core surfaces account for 52 call sites.
+The selected core surfaces contain 50 calls to `formatLocalizedNumber()`. The helper definition in `src/ui/map/i18n/index.ts` makes 51 matching source expressions in the production map UI.
 
 ## Honest residual
 
 A deterministic source census after the repair finds:
 
-- 46 zero-argument `toLocaleString()` call sites across 26 other map UI files;
-- 21 explicit-locale `toLocaleString(...)` / `Intl.NumberFormat(...)` call sites, including legacy `en-US` authored narrative helpers and older direct Bosnian switches;
+- 47 zero-argument `toLocaleString()` call sites across 26 other map UI files;
+- 20 explicit-locale sites: 16 `toLocaleString(...)` calls with arguments and 4 `Intl.NumberFormat(...)` calls, including legacy `en-US` authored narrative helpers and older direct Bosnian switches;
 - no `toLocaleDateString()`, `toLocaleTimeString()`, or `Intl.DateTimeFormat` use in the map UI.
 
-Calendar presentation currently uses UTC arithmetic plus the explicit `en | bs | qps` month table in `utils/formatters.ts`, so it is locale-aware without host date formatting. The 46 residual number sites are not claimed complete and remain follow-up localization debt; this Phase 3 repair covers the six named high-traffic surfaces only.
+Calendar presentation currently uses UTC arithmetic plus the explicit `en | bs | qps` month table in `utils/formatters.ts`, so it is locale-aware without host date formatting. The 47 residual number sites are not claimed complete and remain follow-up localization debt; this Phase 3 repair covers the six named high-traffic surfaces only.
 
 Reproduce the residual census:
 
 ```powershell
-rg -n "\.toLocale(String|DateString|TimeString)\(\)" src/ui/map -g "*.ts" -g "*.tsx"
+npm.cmd exec vitest run tests/ui/r7_locale_surface_contract.test.ts -- --maxWorkers=1 --minWorkers=1
 ```
+
+The executable guard scans every `src/ui/map/**/*.{ts,tsx}` file and pins all three counts: 47 host-default calls, 20 explicit-locale/`Intl.NumberFormat` calls, and 51 helper expressions.

@@ -76,8 +76,8 @@ describe('War Summary empty states', () => {
         ['convoys', 'Nema konvojskih odluka na čekanju.'],
         ['support', 'Nema lokalne naredbe podrške za ovaj potez.'],
         ['capital', 'Diplomatski kapital nije dostupan u ovom prikazu.'],
-    ] as const)('localizes the empty %s section in BCS mode', (section, message) => {
-        setLocale('bcs');
+    ] as const)('localizes the empty %s section in Bosnian mode', (section, message) => {
+        setLocale('bs');
         storeState.loadedGameState = stateForEmptySummary();
 
         render(createElement(WarSummaryContent, { focusSection: section }));
@@ -86,8 +86,8 @@ describe('War Summary empty states', () => {
         expect(screen.queryByText('No convoy decisions are pending.')).toBeNull();
     });
 
-    it('localizes convoy action buttons in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes convoy action buttons in Bosnian mode', () => {
+        setLocale('bs');
         storeState.loadedGameState = stateForPendingConvoySummary();
 
         render(createElement(WarSummaryContent, { focusSection: 'convoys' }));

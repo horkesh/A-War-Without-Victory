@@ -355,8 +355,8 @@ describe('generals-digest Chronicle beats (D2 task #42)', () => {
         expect(ops[0].opName).toBe('Operation Krivaja-95');
     });
 
-    it('keeps generated generals-digest copy localized in BCS mode while preserving corps/op labels', () => {
-        setLocale('bcs');
+    it('keeps generated generals-digest copy localized in Bosnian mode while preserving corps/op labels', () => {
+        setLocale('bs');
         const cmd = corpsCommandWith({
             arbih_2nd_corps: [{ name: 'Operation Olovo', phase: 'execution' }],
         });

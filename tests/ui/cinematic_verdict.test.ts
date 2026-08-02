@@ -110,8 +110,8 @@ describe('CinematicVerdict', () => {
         expect(html).not.toContain('undefined');
     });
 
-    it('localizes the cinematic verdict shell labels in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes the cinematic verdict shell labels in Bosnian mode', () => {
+        setLocale('bs');
 
         const html = renderToStaticMarkup(createElement(CinematicVerdict, {
             verdict: makeVerdict(),

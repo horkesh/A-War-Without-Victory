@@ -61,7 +61,7 @@ describe('BottomStatusStrip labels', () => {
   });
 
   it('renders map mode and layer chrome through the active locale', () => {
-    setLocale('bcs', undefined);
+    setLocale('bs', undefined);
     useGameStore.setState({
       loadedGameState: makeState(),
       mapMode: 'defense',
@@ -103,8 +103,8 @@ describe('BottomStatusStrip labels', () => {
     expect(screen.getByText('WAVERING')).toBeTruthy();
   });
 
-  it('localizes HRHB alliance and Zagreb patron pressure in BCS mode', () => {
-    setLocale('bcs', undefined);
+  it('localizes HRHB alliance and Zagreb patron pressure in Bosnian mode', () => {
+    setLocale('bs', undefined);
     useGameStore.setState({
       loadedGameState: makeState({
         player_faction: 'HRHB',
@@ -154,8 +154,8 @@ describe('BottomStatusStrip labels', () => {
     expect(screen.getByText('HIGH')).toBeTruthy();
   });
 
-  it('localizes RBiH alliance and international pressure in BCS mode', () => {
-    setLocale('bcs', undefined);
+  it('localizes RBiH alliance and international pressure in Bosnian mode', () => {
+    setLocale('bs', undefined);
     useGameStore.setState({
       loadedGameState: makeState({
         player_faction: 'RBiH',

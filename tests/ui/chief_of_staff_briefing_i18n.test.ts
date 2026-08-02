@@ -21,8 +21,8 @@ describe('Chief of Staff briefing localization', () => {
         cleanup();
     });
 
-    it('localizes stable no-alert briefing prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes stable no-alert briefing prose in Bosnian mode', () => {
+        setLocale('bs');
         const state = {
             ...makeMockLoadedGameState(),
             turn: 2,
@@ -37,8 +37,8 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).not.toContain('The situation is stable for now');
     });
 
-    it('localizes cautious combat and territory summary prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes cautious combat and territory summary prose in Bosnian mode', () => {
+        setLocale('bs');
         const latestTurnSummary: TurnSummary = {
             turn: 3,
             battles: [{
@@ -116,8 +116,8 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).not.toContain('Took 2');
     });
 
-    it('localizes precise and aggressive combat and territory prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes precise and aggressive combat and territory prose in Bosnian mode', () => {
+        setLocale('bs');
         const makeSummary = (battles: TurnSummary['battles'], territoryNet: TurnSummary['territory_net']): TurnSummary => ({
             turn: 5,
             battles,
@@ -203,8 +203,8 @@ describe('Chief of Staff briefing localization', () => {
         expect(combined).not.toContain('Gained');
     });
 
-    it('localizes cautious exhaustion warning prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes cautious exhaustion warning prose in Bosnian mode', () => {
+        setLocale('bs');
         const state = {
             ...makeMockLoadedGameState(),
             turn: 1,
@@ -227,8 +227,8 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).not.toContain('War exhaustion is narrowing');
     });
 
-    it('localizes cautious alert prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes cautious alert prose in Bosnian mode', () => {
+        setLocale('bs');
         const state = {
             ...makeMockLoadedGameState(),
             turn: 1,
@@ -281,8 +281,8 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).not.toContain('Our line at');
     });
 
-    it('localizes precise and aggressive alert prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes precise and aggressive alert prose in Bosnian mode', () => {
+        setLocale('bs');
         const state = {
             ...makeMockLoadedGameState(),
             turn: 1,
@@ -340,7 +340,7 @@ describe('Chief of Staff briefing localization', () => {
     });
 
     it('uses structured briefing metadata instead of parsing rendered English titles', () => {
-        setLocale('bcs');
+        setLocale('bs');
         const state = {
             ...makeMockLoadedGameState(),
             turn: 1,
@@ -409,8 +409,8 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).not.toContain('Tanka linija');
     });
 
-    it('localizes command-strain prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes command-strain prose in Bosnian mode', () => {
+        setLocale('bs');
         const base = makeMockLoadedGameState();
         const state = {
             ...base,
@@ -475,8 +475,8 @@ describe('Chief of Staff briefing localization', () => {
         expect(cautiousText + preciseText + aggressiveText).not.toContain('overrides have left a mark');
     });
 
-    it('localizes Chief of Staff header chrome in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes Chief of Staff header chrome in Bosnian mode', () => {
+        setLocale('bs');
         const state = {
             ...makeMockLoadedGameState(),
             turn: 1,

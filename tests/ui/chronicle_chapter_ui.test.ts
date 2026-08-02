@@ -47,8 +47,8 @@ describe('Chronicle chapter UI controls', () => {
         expect(screen.getByRole('button', { name: /Chapters/i }).getAttribute('aria-pressed')).toBe('true');
     });
 
-    it('localizes Chronicle review controls in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes Chronicle review controls in Bosnian mode', () => {
+        setLocale('bs');
 
         render(createElement(ChronicleViewModeToggle, {
             mode: 'entries',

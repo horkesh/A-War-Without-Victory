@@ -301,8 +301,8 @@ describe('generateWrappedSlides', () => {
             expect(slide.detail).not.toMatch(/\b(?:RBiH|RS|HRHB)\b/);
         });
 
-        it('localizes negotiating capital faction labels in BCS mode', () => {
-            setLocale('bcs');
+        it('localizes negotiating capital faction labels in Bosnian mode', () => {
+            setLocale('bs');
             const state = makeMinimalState({
                 player_faction: 'HRHB',
                 negotiatingCapital: { RS: 72.5, RBiH: 55.3, HRHB: 40.1 },
@@ -436,8 +436,8 @@ describe('generateWrappedSlides', () => {
         expect(summaryText).not.toContain(' OSID');
     });
 
-    it('uses localized player faction labels in BCS wrapped copy', () => {
-        setLocale('bcs');
+    it('uses localized player faction labels in Bosnian wrapped copy', () => {
+        setLocale('bs');
         const slides = generateWrappedSlides(makeMinimalState({
             player_faction: 'RBiH',
             negotiatingCapital: { RBiH: 14, RS: 9, HRHB: 7 },
@@ -461,8 +461,8 @@ describe('generateWrappedSlides', () => {
         expect(summaryText).not.toMatch(/\b(?:RBiH|RS|HRHB)\b/);
     });
 
-    it('localizes generated BCS wrapped slide prose, labels, and fallbacks', () => {
-        setLocale('bcs');
+    it('localizes generated Bosnian wrapped slide prose, labels, and fallbacks', () => {
+        setLocale('bs');
         const slides = generateWrappedSlides(makeMinimalState({
             turn: 12,
             phase: 'war',

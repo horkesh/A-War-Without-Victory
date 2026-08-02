@@ -76,8 +76,8 @@ describe('War Summary personnel labels', () => {
         expect(screen.getByText('118.0k')).toBeTruthy();
     });
 
-    it('localizes overview labels in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes overview labels in Bosnian mode', () => {
+        setLocale('bs');
         storeState.loadedGameState = stateWithMobilizedPool();
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));

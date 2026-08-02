@@ -4237,3 +4237,15 @@ Applied in `[2026-08-02] R7 Phase 0 integrated acceptance and R4 provenance reco
 **Source concatenation diagnostics must distinguish rendered prose from syntax:** a broad `+` scan conflates player-facing assembly with arithmetic, reducers, and selector expressions. Durable rule: require high-confidence copy literals or localized-expression-plus-literal evidence, preserve a positive fixture for real concatenation, and report dynamic-message-key review separately.
 
 Applied in `[2026-08-02] R7 Phase 3 Bosnian locale source checkpoint`, `src/ui/map/i18n/index.ts`, the canonical/pseudo dictionaries, the localization diagnostic, and `docs/provenance/LOCALIZATION_REVIEW_LEDGER.json`.
+
+## 2026-08-02 - Locale proof must cross player and persistence boundaries
+
+**A sequence of separately rendered components is not a journey:** route evidence must preserve one stateful interaction chain through the actual player surfaces and select the decision declared by catalog data, not a copied response constant or an English label.
+
+**A payload serialization is not save determinism:** locale-independent identity is proven only after the renderer action crosses its real bridge, production staging mutates a canonical state, and canonical serialization/deserialization preserves byte-identical complete saves across locales.
+
+**Compatibility aliases belong at compatibility tests:** ordinary tests must select the canonical locale so stale fallback assertions and accidental alias dependence cannot hide. Keep the legacy setter in one explicit migration-boundary test and enforce that ownership recursively.
+
+**Source censuses count expressions, not matching lines:** pin the exact recursive counts in an executable guard and distinguish helper definitions, helper call sites, host-default calls, explicit-locale calls, and `Intl` constructors.
+
+Applied in `[2026-08-02] R7 Phase 3 proof-boundary and canonical-test correction`, the continuous Desk journey, the AuthorizePhase/save identity proof, and the exact locale-formatting source guard.

@@ -71,8 +71,8 @@ describe('TurnAftermathRecordsPanel localization', () => {
         useGameStore.setState(useGameStore.getInitialState());
     });
 
-    it('renders BCS archive chrome and campaign summaries', () => {
-        setLocale('bcs');
+    it('renders Bosnian archive chrome and campaign summaries', () => {
+        setLocale('bs');
         useGameStore.setState({
             ...useGameStore.getInitialState(),
             loadedGameState: makeState(),
@@ -114,8 +114,8 @@ describe('TurnAftermathRecordsPanel localization', () => {
         expect(container.textContent).not.toContain('event_decision');
     });
 
-    it('localizes non-event latest desk item types in BCS', () => {
-        setLocale('bcs');
+    it('localizes non-event latest desk item types in Bosnian', () => {
+        setLocale('bs');
         useGameStore.setState({
             ...useGameStore.getInitialState(),
             loadedGameState: {

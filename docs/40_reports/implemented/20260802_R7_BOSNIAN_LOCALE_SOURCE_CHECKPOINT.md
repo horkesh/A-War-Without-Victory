@@ -18,10 +18,12 @@ Settings display `Bosanski (Preview)` and English remains the default. This is a
 
 - `SUPPORTED_LOCALES` is exactly `en | bs`; runtime QA may additionally select `qps` without persisting it.
 - `getLocale()` resolves stored `bcs` as `bs` even if its best-effort rewrite cannot write to storage; `setLocale('bcs')` remains a bounded compatibility input and persists `bs` when storage is writable.
-- `formatLocalizedNumber()` resolves Bosnian through `bs-BA` and `en|qps` through `en-US`. Six named high-traffic surfaces use it; [the formatting inventory](../../provenance/LOCALE_FORMATTING_INVENTORY.md) records 46 host-default residual calls in 26 other files rather than claiming global completion. Calendar labels use the explicit locale month table and UTC arithmetic.
+- `formatLocalizedNumber()` resolves Bosnian through `bs-BA` and `en|qps` through `en-US`. Six named high-traffic surfaces use it; [the formatting inventory](../../provenance/LOCALE_FORMATTING_INVENTORY.md) records 47 host-default residual calls in 26 other files rather than claiming global completion. Calendar labels use the explicit locale month table and UTC arithmetic.
 - Main menu, settings, map consumers, warroom helpers, formation names, Codex, ghost entries, consequence receipts, letter-home prose, and localized number/date helpers consume canonical `bs`.
 - The single known Bosnian fallback probe is translated. Probe operation payload identity is canonical (`<operation> (Probe)`) in every locale; localized `probeName` copy is presentation-only and never enters staged state or commander assignment identity.
-- Browser entrypoints accept `?locale=bs`; QA entrypoints accept `?locale=qps`. The live-surface harness now uses semantic test IDs for all shell navigation, pause/tutorial recovery, Army HQ drilldown, and turn-zero provenance rather than English labels. An executable component journey covers the menu, war splash, faction briefing, opening Desk route, and historical-default decision under EN, BS, and QPS. The legacy `?locale=bcs` boundary remains compatibility-only.
+- Browser entrypoints accept `?locale=bs`; QA entrypoints accept `?locale=qps`. The live-surface harness now uses semantic test IDs for all shell navigation, pause/tutorial recovery, Army HQ drilldown, and turn-zero provenance rather than English labels. One continuous executable component journey drives the real menu, war splash, faction briefing, opening inbox, Desk, and decision modal under EN, BS, and QPS, loads the catalog-backed `rbih_state_identity` event, and selects its declared `historical_default_response_id`. The legacy `?locale=bcs` boundary remains compatibility-only.
+- A separate executable identity proof drives the real `AuthorizePhase`, crosses the `useIPC` / `window.awwv` bridge into production `stageAuthoredOperation`, then serializes and deserializes the canonical April 1992 startup save. EN, BS, and QPS produce byte-identical complete saves with canonical `Operation Sana (Probe)` pending identity. Presentation locale never enters authored operation state.
+- Ordinary tests use the canonical `bs` setter. The only test call to `setLocale('bcs', ...)` is the explicit persisted-preference compatibility case in `tests/ui_i18n.test.ts`; 136 ordinary calls in 78 test files were migrated.
 
 ## Deterministic pseudo-locale
 
@@ -55,15 +57,16 @@ The review record is [LOCALIZATION_REVIEW_LEDGER.json](../../provenance/LOCALIZA
 
 ## Verification
 
-- Independent-review RED: **9 failures / 64 tests** across the 7-file repair matrix, matching the missing contracts and stale assertions. A follow-up display-only challenge then failed **1/1 targeted assertion** because canonical `(Probe)` still rendered verbatim in Bosnian; the shared player-safe projector now localizes that suffix without changing staged bytes. A final harness-wide challenge caught the remaining English-text navigation outside the foundational route; the repaired contract now rejects every awaited text-navigation helper and requires semantic turn-zero filed-record state.
-- Corrected Phase 3 changed/dependent localization and determinism matrix: **27 files / 274 tests passed**.
+- Earlier independent-review RED: **9 failures / 64 tests** across the original 7-file repair matrix. Follow-up challenges exposed localized probe identity and remaining English-text harness navigation before those defects were closed.
+- Proof-correction RED: the former component route stopped after independently rendered intro surfaces, the persistence assertion serialized a helper payload rather than a save, and the new real `AuthorizePhase` proof failed until it had a semantic authorization selector. The canonical-locale guard also rejected ordinary `setLocale('bcs', ...)` use until 136 calls in 78 test files moved to `bs`.
+- Full affected regression surface, including the new untracked-at-first-count persistence test: **81 files / 929 tests passed**.
+- Focused locale, pseudolocale, diagnostic, operation-staging, desktop-persistence, real route, and real save-boundary matrix: **9 files / 91 tests passed**.
+- Continuous real Desk/historical-default plus AuthorizePhase/save proofs: **3 files / 10 tests passed**.
 - Lightweight player-journey matrix: **44 files / 771 tests passed**.
 - `npm.cmd run typecheck`: passed.
-- Localization diagnostic CLI: exited 0 and reproduced the exact census above.
-- Pseudo-locale builder CLI: exited 0; the full-corpus test covers all 5,556 keys and the exact 2,234-message eligible distribution.
-- `node --check tools/ui/live_surface_browser_sweep.cjs`: passed.
-- Semantic route/component proof: **4 files / 50 tests passed**, including all three EN/BS/QPS journeys and the Desk consequence state attribute.
-- JSON review-ledger parsing and final diff hygiene are part of the commit gate.
+- Localization diagnostic CLI: exited 0 and reproduced 5,556 English keys, 5,556 Bosnian strings, zero fallback, and the exact 970-finding review remainder.
+- Pseudo-locale builder CLI: exited 0 and emitted a deterministic module; the full-corpus test covers all 5,556 keys and the exact 2,234-message eligible distribution.
+- `node --check tools/ui/live_surface_browser_sweep.cjs`, protected-path scope, the one-owner legacy setter assertion, and final diff hygiene: passed.
 
 The expected stderr in malformed-save browser fixtures is negative-path test evidence and did not fail the player-journey matrix.
 

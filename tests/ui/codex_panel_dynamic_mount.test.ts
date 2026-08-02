@@ -318,8 +318,8 @@ describe('CodexPanel dynamic essay proof', () => {
         }
     });
 
-    it('localizes mounted realized receipts in BCS without duplicating the Codex title', () => {
-        setLocale('bcs');
+    it('localizes mounted realized receipts in Bosnian without duplicating the Codex title', () => {
+        setLocale('bs');
         const loaded = parseGameState(rawCodexState());
         storeState = { loadedGameState: loaded };
 
@@ -358,8 +358,8 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.getByText('Campaign Codex')).toBeTruthy();
     });
 
-    it('localizes BCS divergence context without either path-not-taken label', () => {
-        setLocale('bcs');
+    it('localizes Bosnian divergence context without either path-not-taken label', () => {
+        setLocale('bs');
         const raw = rawCodexState();
         raw.military.event_flags = { vrs_quality_inverted: true };
         raw.military.event_decision_log = [];
@@ -433,8 +433,8 @@ describe('CodexPanel dynamic essay proof', () => {
         ).toBeTruthy();
     });
 
-    it('localizes BCS empty-selection Codex chrome', () => {
-        setLocale('bcs');
+    it('localizes Bosnian empty-selection Codex chrome', () => {
+        setLocale('bs');
 
         renderPanel();
 
@@ -550,8 +550,8 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(body).not.toContain('the RS leadership holds the Igman positions');
     });
 
-    it('localizes BCS Codex dilemma and history-comparison chrome without translating authored labels', () => {
-        setLocale('bcs');
+    it('localizes Bosnian Codex dilemma and history-comparison chrome without translating authored labels', () => {
+        setLocale('bs');
         storeState = {
             loadedGameState: {
                 firedEvents: [firedEvent('arms_embargo_impact_1992')],
@@ -649,8 +649,8 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.getByText('Federation controlled 54.0% territory vs historical 51%')).toBeTruthy();
     });
 
-    it('localizes generated BCS divergence notes inside dynamic Codex essays', () => {
-        setLocale('bcs');
+    it('localizes generated Bosnian divergence notes inside dynamic Codex essays', () => {
+        setLocale('bs');
         storeState = {
             loadedGameState: {
                 firedEvents: [firedEvent('dayton_signed_1995')],

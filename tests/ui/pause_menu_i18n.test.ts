@@ -39,8 +39,8 @@ describe('PauseMenu localization', () => {
         expect(screen.getByText('Command paused. Planning state is preserved.')).toBeTruthy();
     });
 
-    it('renders BCS pause menu copy when BCS is selected', () => {
-        setLocale('bcs');
+    it('renders Bosnian pause menu copy when Bosnian is selected', () => {
+        setLocale('bs');
 
         renderPauseMenu();
 

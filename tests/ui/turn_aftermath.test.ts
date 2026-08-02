@@ -631,8 +631,8 @@ describe('buildTurnAftermathView', () => {
     expect(view?.cost.severity).toBe('low');
   });
 
-  it('localizes generated aftermath prose when BCS is selected', () => {
-    setLocale('bcs');
+  it('localizes generated aftermath prose when Bosnian is selected', () => {
+    setLocale('bs');
 
     const view = buildTurnAftermathView({
       nextState: makeState({
@@ -890,8 +890,8 @@ describe('buildTurnAftermathView', () => {
     expect(cost.friendlyMilitaryCasualtyScope).toBe('campaign_ledger');
   });
 
-  it('localizes campaign pulse and campaign cost archive prose when BCS is selected', () => {
-    setLocale('bcs');
+  it('localizes campaign pulse and campaign cost archive prose when Bosnian is selected', () => {
+    setLocale('bs');
 
     const turn18 = makeSummary({
       turn: 18,

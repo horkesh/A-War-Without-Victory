@@ -41,7 +41,7 @@ describe('command strain i18n boundary', () => {
         setLocale('en', undefined);
     });
 
-    it('renders order interpretation badges, factors, and warnings through BCS keys', () => {
+    it('renders order interpretation badges, factors, and warnings through Bosnian keys', () => {
         const interpretation = deriveOrderInterpretation(6, 'postpone');
 
         expect(interpretation.categoryLabel).toBe('STRAIN-SHAPED');
@@ -52,7 +52,7 @@ describe('command strain i18n boundary', () => {
         expectBcsCopy(t('commandStrain.order.directInterventionWarning', undefined, 'bcs'));
     });
 
-    it('renders stance, recovery, and delegation copy through BCS keys', () => {
+    it('renders stance, recovery, and delegation copy through Bosnian keys', () => {
         const stance = deriveStanceInterpretation(7, 'compromised', 'offensive');
         const recovery = deriveRecoveryForecastToken([
             { turn: 0, projectedStrain: 2 },
@@ -109,7 +109,7 @@ describe('command strain i18n boundary', () => {
         expect(bcsCopy).not.toMatch(/odgodes|potezs|brigadas|predmets|postponement|delay|turns|matters/i);
     });
 
-    it('emits BCS tokens for threat context, dominant reason, and relief path', () => {
+    it('emits Bosnian tokens for threat context, dominant reason, and relief path', () => {
         const assessment = deriveCorpsSituationAssessment(
             {
                 threat_assessment: { overall_pressure: 'critical', enemy_concentration_zones: ['north'] },
@@ -129,8 +129,8 @@ describe('command strain i18n boundary', () => {
         expectBcsCopy(t(assessment.reliefPathToken!.key, assessment.reliefPathToken!.params, 'bcs'));
     });
 
-    it('renders Army HQ and Operation Briefing constraint copy through BCS tokens', () => {
-        setLocale('bcs', undefined);
+    it('renders Army HQ and Operation Briefing constraint copy through Bosnian tokens', () => {
+        setLocale('bs', undefined);
         const assessment = deriveCorpsSituationAssessment(
             {
                 threat_assessment: { overall_pressure: 'critical', enemy_concentration_zones: ['north'] },

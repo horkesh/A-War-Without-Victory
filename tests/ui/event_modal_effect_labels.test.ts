@@ -23,7 +23,7 @@ describe('event acknowledgement modal effect labels', () => {
   it('localizes generated acknowledgement effect copy', async () => {
     const { setLocale } = await import('../../src/ui/map/i18n/index.js');
     try {
-      setLocale('bcs', undefined);
+      setLocale('bs', undefined);
       const renderedCopy = formatAcknowledgementEventEffect({
         kind: 'aggression_modifier',
         faction: 'RBiH',

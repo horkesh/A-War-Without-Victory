@@ -264,7 +264,7 @@ describe('AAR and tooltip friction labels', () => {
 
   it('localizes the battle tooltip fallback when no battle row is available', () => {
     vi.useFakeTimers();
-    setLocale('bcs');
+    setLocale('bs');
     useGameStore.setState({
       loadedGameState: {
         ...makeState(),
@@ -389,8 +389,8 @@ describe('AAR and tooltip friction labels', () => {
     expect(document.body.textContent).not.toMatch(/Cohesion:\s*0\b/);
   });
 
-  it('uses localized friction and confidence labels in BCS', () => {
-    setLocale('bcs');
+  it('uses localized friction and confidence labels in Bosnian', () => {
+    setLocale('bs');
     useGameStore.setState({
       loadedGameState: makeState(),
       osidDisplayNames: { 'op:tuzla:center': 'Tuzla' },

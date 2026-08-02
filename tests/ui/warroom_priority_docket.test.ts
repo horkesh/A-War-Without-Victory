@@ -232,8 +232,8 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.canOpenBoard).toBe(false);
   });
 
-  it('localizes Warroom docket summary chrome in BCS mode', () => {
-    setLocale('bcs');
+  it('localizes Warroom docket summary chrome in Bosnian mode', () => {
+    setLocale('bs');
     const state = makeState({
       presidentialReviewQueue: {
         pendingCount: 2,

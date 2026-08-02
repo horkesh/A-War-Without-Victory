@@ -109,8 +109,8 @@ describe('CodexPanel tier + dependency-graph (A1a/A1b)', () => {
         expect(screen.queryByText('Unfired Tier Three Title')).toBeNull();
     });
 
-    it('localizes tier headers in BCS', () => {
-        setLocale('bcs');
+    it('localizes tier headers in Bosnian', () => {
+        setLocale('bs');
         storeState = {
             loadedGameState: {
                 turn: 100,
@@ -125,8 +125,8 @@ describe('CodexPanel tier + dependency-graph (A1a/A1b)', () => {
         expect(screen.queryByText('Fixed History')).toBeNull();
     });
 
-    it('localizes locked Tier 3 chrome as a campaign entry in BCS', () => {
-        setLocale('bcs');
+    it('localizes locked Tier 3 chrome as a campaign entry in Bosnian', () => {
+        setLocale('bs');
         storeState = {
             loadedGameState: {
                 turn: 100,
