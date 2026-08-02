@@ -3,14 +3,15 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type {
     FormationAssignment,
     FormationId,
-    FormationState,
 } from '../../state/game_state.js';
 import type { SpatialContext } from '../spatial_context.js';
 import { buildCorpsFrontSectorsFromReadModel } from './corps_front_sectors.js';
+import type { SectorFrontEdgeRelationTestCounters } from './sector_front_edge_relation.js';
+import { createDeterministicSectorTopologyStageRunner } from './sector_topology_execution.js';
 import { createSectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 import type {
     SectorTopologyFormation,
-    SectorTopologyMutation,
+    SectorTopologyMutableFormation,
     SectorTopologySolveInput,
     SectorTopologySolveOutput,
     SectorTopologyWorkingState,
@@ -24,12 +25,11 @@ function copyAssignment(
 
 function createWorkingFormation(
     formation: SectorTopologyFormation,
-): FormationState {
+): SectorTopologyMutableFormation {
     return {
         id: formation.id,
+        name: formation.name,
         faction: formation.faction,
-        name: formation.id,
-        created_turn: 0,
         status: formation.status,
         assignment: copyAssignment(formation.assignment),
         tags: formation.tags == null ? undefined : [...formation.tags],
@@ -60,18 +60,14 @@ function createWorkingFormation(
                 on_loan: formation.elite_loan_state.on_loan,
                 loaned_to_corps: formation.elite_loan_state.loaned_to_corps,
                 loan_start_turn: formation.elite_loan_state.loan_start_turn,
-                last_recall_turn: null,
-                loan_start_personnel: null,
-                permanently_degraded: false,
-                current_episode_id: null,
             },
     };
 }
 
 function createWorkingFormations(
     input: SectorTopologySolveInput,
-): Record<FormationId, FormationState> {
-    const formations: Record<FormationId, FormationState> = {};
+): Record<FormationId, SectorTopologyMutableFormation> {
+    const formations: Record<FormationId, SectorTopologyMutableFormation> = {};
     for (const formationId of Object.keys(input.formations)) {
         const formation = input.formations[formationId];
         if (formation) formations[formationId] = createWorkingFormation(formation);
@@ -205,19 +201,14 @@ function createSpatialContext(input: SectorTopologySolveInput): SpatialContext |
     };
 }
 
-function traceFromMutations(mutations: readonly SectorTopologyMutation[]) {
-    const stages: Array<{ stage: string; mutationCount: number }> = [];
-    for (const mutation of mutations) {
-        const last = stages.at(-1);
-        if (last?.stage === mutation.stage) last.mutationCount += 1;
-        else stages.push({ stage: mutation.stage, mutationCount: 1 });
-    }
-    return { stages };
+export interface SectorTopologySolveObservers {
+    readonly frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters;
 }
 
 /** Run the complete current topology solve over one detached mutable projection. */
 export function solveCorpsFrontSectorsPure(
     input: SectorTopologySolveInput,
+    observers: SectorTopologySolveObservers = {},
 ): SectorTopologySolveOutput {
     const working = createWorkingState(input);
     const edges: EdgeRecord[] = input.edges.map((edge) => ({ ...edge }));
@@ -229,6 +220,7 @@ export function solveCorpsFrontSectorsPure(
         : new Map(input.centroidEntries.map(([key, centroid]) => [key, { ...centroid }]));
     const spatial = createSpatialContext(input);
     const recorder = createSectorTopologyMutationRecorder();
+    const stageRunner = createDeterministicSectorTopologyStageRunner(recorder.mutations);
     const sectors = buildCorpsFrontSectorsFromReadModel(
         working,
         edges,
@@ -240,15 +232,16 @@ export function solveCorpsFrontSectorsPure(
         input.options.useFixedPointShortcuts,
         input.options.occupancyStrategy,
         input.options.frontEdgeAdjacencyStrategy,
-        undefined,
+        observers.frontEdgeRelationTestCounters,
         'test-only-imperative-live-state',
         recorder,
+        stageRunner,
     );
 
     return {
         sectors,
         mutations: recorder.mutations,
         diagnostics: recorder.diagnostics,
-        trace: traceFromMutations(recorder.mutations),
+        trace: stageRunner.snapshot(),
     };
 }

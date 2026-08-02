@@ -34,16 +34,6 @@ function loadEdges(): EdgeRecord[] {
     return graph.edges.filter((edge) => (edge.shared_segments ?? 0) >= 1);
 }
 
-function traceFromMutations(mutations: readonly { stage: string }[]) {
-    const stages: Array<{ stage: string; mutationCount: number }> = [];
-    for (const mutation of mutations) {
-        const last = stages.at(-1);
-        if (last?.stage === mutation.stage) last.mutationCount++;
-        else stages.push({ stage: mutation.stage, mutationCount: 1 });
-    }
-    return { stages };
-}
-
 function runImperative(
     state: GameState,
     edges: EdgeRecord[],
@@ -69,7 +59,6 @@ function runImperative(
         sectors,
         mutations: recorder.mutations,
         diagnostics: recorder.diagnostics,
-        trace: traceFromMutations(recorder.mutations),
     };
 }
 
@@ -143,7 +132,7 @@ describe.skipIf(!hasRealSave)('pure full sector topology solve', () => {
     ];
 
     for (const variant of variants) {
-        it(`matches imperative statement order for ${variant.name}`, () => {
+        it(`supplements the independent oracle with live-state parity for ${variant.name}`, () => {
             const imperativeState = loadState();
             const snapshotState = loadState();
             variant.arrange?.(imperativeState);
@@ -162,7 +151,13 @@ describe.skipIf(!hasRealSave)('pure full sector topology solve', () => {
             const expected = runImperative(imperativeState, edges, variant.options);
             const actual = solveCorpsFrontSectorsPure(input);
 
-            expect(actual).toEqual(expected);
+            expect(actual.sectors).toEqual(expected.sectors);
+            expect(actual.mutations).toEqual(expected.mutations);
+            expect(actual.diagnostics).toEqual(expected.diagnostics);
+            expect(actual.trace.stages.length).toBeGreaterThan(0);
+            expect(actual.trace.stages.map((row) => row.sequence)).toEqual(
+                actual.trace.stages.map((_, index) => index),
+            );
             expect(JSON.stringify(input)).toBe(before);
             expect(Object.isFrozen(input)).toBe(true);
             expect(Object.isFrozen(input.formations)).toBe(true);

@@ -43,7 +43,7 @@ export function isEnclaveBrigade(f: { tags?: string[] }): boolean {
 }
 
 export function getFormationEnclaveForMovement(
-    formation: FormationState,
+    formation: Pick<FormationState, 'tags' | 'home_osid' | 'faction'>,
     originOsid: string,
 ): EnclaveDefinition | null {
     const isFixedHome = formation.tags?.includes(FIXED_HOME_OSID_TAG) === true;
@@ -61,7 +61,7 @@ export function getFormationEnclaveForMovement(
 }
 
 export function isEnclaveMovementDestinationAllowed(
-    formation: FormationState,
+    formation: Pick<FormationState, 'tags' | 'home_osid' | 'faction'>,
     originOsid: string,
     destinationOsid: string,
 ): boolean {

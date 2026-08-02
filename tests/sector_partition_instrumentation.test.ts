@@ -227,7 +227,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         ];
 
         for (const label of labels) {
-            expect(region).toContain(`_perfTime('${label}'`);
+            expect(region).toContain(`runStage('${label}'`);
         }
         expect([...labels].sort()).toEqual(labels);
         expect(region).not.toMatch(/\btimestamp\b/i);
@@ -318,7 +318,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         ];
 
         for (const label of labels) {
-            expect(region).toContain(`_perfTime(\`${label}\``);
+            expect(region).toContain(`runStage(\`${label}\``);
         }
         expect([...labels].sort()).toEqual(labels);
         expect(region).not.toMatch(/\btimestamp\b/i);
@@ -373,8 +373,8 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         expect(callMatch?.groups?.args).toBeTruthy();
         const args = callMatch!.groups!.args;
-        expect(args).toContain('_perfTime, edgeMeta');
-        expect(args).not.toMatch(/friendlyOsids,\s*_perfTime\s*$/);
+        expect(args).toContain('runStage, edgeMeta');
+        expect(args).not.toMatch(/friendlyOsids,\s*runStage\s*$/);
     });
 
     it('static contract: buildMultiSectorsForCorps reuses shared metadata and keeps fallback lookup lazy', () => {
@@ -413,8 +413,8 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         const region = raw.slice(startIdx, endIdx);
         const compact = region.replace(/\s+/g, ' ');
 
-        expect(region).toContain("_perfTime('active-combat-formation-scan-ids'");
-        expect(compact).toContain('const activeCombatFormationScanIds = _perfTime');
+        expect(region).toContain("runStage('active-combat-formation-scan-ids'");
+        expect(compact).toContain('const activeCombatFormationScanIds = runStage');
         expect(compact).toContain('buildActiveCombatFormationScanIds(formations)');
         expect(compact).toContain('globalEdgeMeta, formations, activeCombatFormationScanIds, reverseMap');
         expect(region).not.toMatch(/Object\.keys\(formations\)\.sort\(strictCompare\)/);
@@ -424,7 +424,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(factionStartIdx).toBeGreaterThanOrEqual(0);
         expect(factionEndIdx).toBeGreaterThan(factionStartIdx);
         const factionRegion = raw.slice(factionStartIdx, factionEndIdx).replace(/\s+/g, ' ');
-        expect(factionRegion).toContain('_perfTime, edgeMeta, activeCombatFormationScanIds');
+        expect(factionRegion).toContain('runStage, edgeMeta, activeCombatFormationScanIds');
     });
 
     it('static contract: buildFactionSectors reuses invocation-local sector formation scan indexes', () => {
@@ -442,7 +442,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(compact).toContain('const sectorFormationScanIndex: SectorFormationScanIndex =');
         expect(compact).toContain('assignedCandidateIds: activeCombatIdsByCorps.get(corpsId) ?? []');
         expect(compact).toContain('enemyPersonnelByLocation');
-        expect(compact).toContain('_perfTime, edgeMeta, activeCombatFormationScanIds, sectorFormationScanIndex');
+        expect(compact).toContain('runStage, edgeMeta, activeCombatFormationScanIds, sectorFormationScanIndex');
         expect(region).not.toMatch(/buildSectorFormationScanIndex\(formations,\s*faction,\s*corpsId/);
         expect(region).not.toMatch(/\bDate\.now\s*\(/);
         expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
@@ -488,7 +488,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         const region = raw.slice(startIdx, endIdx);
         const compact = region.replace(/\s+/g, ' ');
 
-        expect(compact).toContain('const preComponentOf = _perfTime(`buildFactionSectors:${faction}:pre-component-setup`');
+        expect(compact).toContain('const preComponentOf = runStage(`buildFactionSectors:${faction}:pre-component-setup`');
         expect(compact).toContain('const componentOf = preComponentOf;');
         expect(region.match(/buildFriendlyComponents\(adjacency,\s*friendlyOsids\)/g) ?? []).toHaveLength(1);
         expect(region).not.toMatch(/\bDate\.now\s*\(/);
@@ -723,7 +723,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         ];
 
         for (const label of labels) {
-            expect(region).toContain(`_perfTime('${label}'`);
+            expect(region).toContain(`runStage('${label}'`);
         }
         expect([...labels].sort()).toEqual(labels);
         expect(region).not.toMatch(/\bDate\.now\s*\(/);
@@ -796,7 +796,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         ];
 
         for (const label of labels) {
-            expect(region).toContain(`_perfTime('${label}'`);
+            expect(region).toContain(`runStage('${label}'`);
         }
         expect([...labels].sort()).toEqual(labels);
         expect(region).not.toMatch(/\bDate\.now\s*\(/);
@@ -821,7 +821,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         ];
 
         for (const label of labels) {
-            expect(region).toContain(`_perfTime('${label}'`);
+            expect(region).toContain(`runStage('${label}'`);
         }
         expect([...labels].sort()).toEqual(labels);
         expect(region).not.toMatch(/\btimestamp\b/i);
@@ -847,7 +847,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         ];
 
         for (const label of labels) {
-            expect(region).toContain(`_perfTime('${label}'`);
+            expect(region).toContain(`runStage('${label}'`);
         }
         expect([...labels].sort()).toEqual(labels);
         expect(region).not.toMatch(/\btimestamp\b/i);
@@ -922,20 +922,13 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(rbih.perCorps.find((c) => c.corpsId === 'arbih:5th_corps')!.totalNs).toBe(100n);
     });
 
-    it('flag exposure: isSectorPartitionPerfEnabled returns the boolean state captured at module load', () => {
-        // The exported flag is captured at module load time. We can only
-        // verify it's a boolean and that it's stable within the process.
-        const v1 = isSectorPartitionPerfEnabled();
-        const v2 = isSectorPartitionPerfEnabled();
-        expect(typeof v1).toBe('boolean');
-        expect(v1).toBe(v2);
-        // Mutating env after module load does NOT change the captured value
-        // (intentional — the flag is read once at import time so production
-        // code paths pay zero env-read cost per call).
-        process.env[FLAG] = 'true';
-        expect(isSectorPartitionPerfEnabled()).toBe(v1);
+    it('flag exposure is read only when the imperative instrumentation boundary asks for it', () => {
         delete process.env[FLAG];
-        expect(isSectorPartitionPerfEnabled()).toBe(v1);
+        expect(isSectorPartitionPerfEnabled()).toBe(false);
+        process.env[FLAG] = 'true';
+        expect(isSectorPartitionPerfEnabled()).toBe(true);
+        delete process.env[FLAG];
+        expect(isSectorPartitionPerfEnabled()).toBe(false);
     });
 
     it('fixed-point shortcut consumes both prune and recovery mutation receipts', () => {
@@ -943,10 +936,13 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         const compact = raw.replace(/\s+/g, ' ');
 
         expect(compact).toContain(
-            "const prunedGhostArtifacts = _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));",
+            "const prunedGhostArtifacts = runStage('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));",
         );
         expect(compact).toContain(
-            'if (!useFixedPointShortcuts || prunedGhostArtifacts || recoveredDroppedFrontEdges)',
+            'const runFixedPointConvergence = !useFixedPointShortcuts || prunedGhostArtifacts || recoveredDroppedFrontEdges;',
+        );
+        expect(compact).toContain(
+            "stageRunner.recordBranch('fixed-point-convergence', runFixedPointConvergence);",
         );
     });
 });

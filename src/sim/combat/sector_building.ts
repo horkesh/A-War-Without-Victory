@@ -8,7 +8,6 @@ import type {
     CorpsFrontSubSegment,
     FactionId,
     FormationId,
-    FormationState,
 } from '../../state/game_state.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import { computeLocalFrontDefensivePower } from './local_front_defense.js';
@@ -27,7 +26,10 @@ import {
     buildSectorFrontEdgeAdjacency,
     type SectorFrontEdgeRelation,
 } from './sector_front_edge_relation.js';
-import type { SectorTopologyWorkingState } from './sector_topology_solver_types.js';
+import type {
+    SectorTopologyMutableFormation,
+    SectorTopologyWorkingState,
+} from './sector_topology_solver_types.js';
 
 type SectorPartitionPerfTimer = <T>(label: string, fn: () => T) => T;
 
@@ -59,14 +61,14 @@ export interface SectorFormationScanIndex {
     enemyPersonnelByLocation: ReadonlyMap<string, number>;
 }
 
-function isActiveCombatFormation(formation: FormationState | undefined): formation is FormationState {
+function isActiveCombatFormation(formation: SectorTopologyMutableFormation | undefined): formation is SectorTopologyMutableFormation {
     return !!formation
         && formation.status === 'active'
         && (formation.kind === 'brigade' || formation.kind === 'og' || formation.kind === 'operational_group');
 }
 
 export function buildActiveCombatFormationScanIds(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyMutableFormation>,
 ): FormationId[] {
     return Object.keys(formations)
         .sort(strictCompare)
@@ -74,7 +76,7 @@ export function buildActiveCombatFormationScanIds(
 }
 
 function buildSectorFormationScanIndex(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyMutableFormation>,
     faction: FactionId,
     corpsId: FormationId,
     formationScanIds: readonly FormationId[],
@@ -205,7 +207,7 @@ export function buildMultiSectorsForCorps(
     sharedBoundaryAdj: Map<Osid, Osid[]>,
     strictAdj: Map<Osid, Osid[]>,
     caseBSplitAdj: Map<Osid, Osid[]>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyMutableFormation>,
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
     friendlyOsids?: Set<string>,
@@ -612,7 +614,7 @@ export function buildSectorFromSubSegments(
     sectorIndex: number,
     subSegments: CorpsFrontSubSegment[],
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyMutableFormation>,
     perfTime: SectorPartitionPerfTimer = (_label, fn) => fn(),
     activeCombatFormationScanIds?: readonly FormationId[],
     sectorFormationScanIndex?: SectorFormationScanIndex,

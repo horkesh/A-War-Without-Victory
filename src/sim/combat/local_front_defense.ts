@@ -26,12 +26,16 @@ const MAX_DENSITY_BONUS = 1.25;
 const MIN_COVERAGE_PENALTY = 0.6;
 
 export type LocalFrontDensityModifierLookup = ReadonlyMap<FormationId, number>;
+type LocalFrontDefenseFormation = Pick<
+    FormationState,
+    'status' | 'personnel' | 'personnel_lent_by_tg' | 'cohesion' | 'experience' | 'honor'
+>;
 
 /**
  * Compute brigade power contribution to a frontage.
  * Uses simplified basePower (personnel × equipment × experience × cohesion × honor).
  */
-function brigadePower(formation: FormationState): number {
+function brigadePower(formation: LocalFrontDefenseFormation): number {
     // Phase 0 (ADR-0005): local front defensive power is a pure home-availability read.
     // A donor's lent slice fights inside its TG and must not also defend the home front.
     // This helper is defense-only (used solely by computeLocalFrontDefensivePower), so
@@ -78,7 +82,7 @@ export function frontDensityModifier(assignedBrigades: number, coverageLength: n
  * defensive_power = sum(brigade_power) × density_modifier / coverage_length
  */
 export function computeLocalFrontDefensivePower(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, LocalFrontDefenseFormation>,
     assignedBrigadeIds: string[],
     coverageLength: number
 ): number {

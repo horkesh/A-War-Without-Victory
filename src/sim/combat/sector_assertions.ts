@@ -8,8 +8,9 @@
 import type {
     CorpsFrontSector,
     FormationId,
-    FormationState,
 } from '../../state/game_state.js';
+import type { SectorTopologyMutableFormation } from './sector_topology_solver_types.js';
+import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getSectorComponent } from './sector_utils.js';
 import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
@@ -30,8 +31,10 @@ import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js'
  */
 export function assertBrigadeReachability(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyMutableFormation>,
     componentOf: Map<string, number>,
+    mutationRecorder?: SectorTopologyMutationRecorder,
+    diagnosticStage: string = 'assert-brigade-reachability',
 ): string[] {
     const unreachableBrigadeIds: string[] = [];
     for (const sec of sectors) {
@@ -59,9 +62,10 @@ export function assertBrigadeReachability(
             const secComp = sec ? getSectorComponent(sec, componentOf) : -1;
             return `${bid} (at ${loc}, comp ${brigComp}) -> ${sec?.sector_id ?? '?'} (comp ${secComp})`;
         });
-        console.error(
-            `SECTOR REACHABILITY INVARIANT VIOLATION: ${unreachableBrigadeIds.length} brigade(s) assigned to unreachable sectors:\n  ${details.join('\n  ')}`
-        );
+        const message =
+            `SECTOR REACHABILITY INVARIANT VIOLATION: ${unreachableBrigadeIds.length} brigade(s) assigned to unreachable sectors:\n  ${details.join('\n  ')}`;
+        if (mutationRecorder) mutationRecorder.recordError(diagnosticStage, message);
+        else console.error(message);
     }
     return unreachableBrigadeIds;
 }
@@ -81,7 +85,9 @@ export function assertBrigadeReachability(
  */
 export function assertSectorBrigadesActive(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyMutableFormation>,
+    mutationRecorder?: SectorTopologyMutationRecorder,
+    diagnosticStage: string = 'assert-sector-brigades-active',
 ): void {
     const violations: string[] = [];
     for (const sec of sectors) {
@@ -106,9 +112,10 @@ export function assertSectorBrigadesActive(
         }
     }
     if (violations.length > 0) {
-        console.error(
-            `SECTOR BRIGADE STATUS INVARIANT VIOLATION: ${violations.length} inactive/dissolved brigade(s) found in sectors:\n  ${violations.join('\n  ')}`
-        );
+        const message =
+            `SECTOR BRIGADE STATUS INVARIANT VIOLATION: ${violations.length} inactive/dissolved brigade(s) found in sectors:\n  ${violations.join('\n  ')}`;
+        if (mutationRecorder) mutationRecorder.recordError(diagnosticStage, message);
+        else console.error(message);
     }
 }
 
@@ -123,7 +130,7 @@ export function assertSectorBrigadesActive(
 export function filterReachableReassignmentOrders(
     orders: Array<{ brigade_id: string; to_sector_id: string }>,
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyMutableFormation>,
     componentOf: Map<string, number>,
 ): Array<{ brigade_id: string; to_sector_id: string }> {
     const sectorMap = new Map<string, CorpsFrontSector>();

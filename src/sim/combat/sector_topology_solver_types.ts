@@ -34,6 +34,7 @@ export interface SectorTopologyFrontEdge {
 
 type SectorTopologyFormationScalarKeys =
     | 'id'
+    | 'name'
     | 'faction'
     | 'status'
     | 'kind'
@@ -66,6 +67,20 @@ export type SectorTopologyFormation = Readonly<
         loaned_to_corps: FormationId | null;
         loan_start_turn: number | null;
     }>;
+};
+
+export type SectorTopologyMutableFormation = Pick<
+    FormationState,
+    SectorTopologyFormationScalarKeys
+> & {
+    tags?: string[];
+    assignment: FormationAssignment | null;
+    personnel_lent_by_tg?: Record<string, number>;
+    elite_loan_state?: {
+        on_loan: boolean;
+        loaned_to_corps: FormationId | null;
+        loan_start_turn: number | null;
+    };
 };
 
 export interface SectorTopologyOperationAxis {
@@ -178,7 +193,7 @@ export interface SectorTopologyWorkingState {
             side_a: FactionId | null;
             side_b: FactionId | null;
         }>;
-        formations: Record<FormationId, FormationState>;
+        formations: Record<FormationId, SectorTopologyMutableFormation>;
         brigade_movement_orders?: Record<FormationId, BrigadeMovementOrder>;
         brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
         brigade_posture_orders?: BrigadePostureOrder[];
@@ -249,15 +264,18 @@ export type SectorTopologyMutation =
 export interface SectorTopologyDiagnostic {
     readonly sequence: number;
     readonly stage: string;
-    readonly kind: 'warning';
+    readonly kind: 'debug' | 'warning' | 'error';
     readonly message: string;
     readonly mutationBoundary: number;
 }
 
 export interface SectorTopologyDeterministicTrace {
     readonly stages: readonly Readonly<{
+        sequence: number;
+        kind: 'stage' | 'branch';
         stage: string;
         mutationCount: number;
+        branchTaken?: boolean;
     }>[];
 }
 

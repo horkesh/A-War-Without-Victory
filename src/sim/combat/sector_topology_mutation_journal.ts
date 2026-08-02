@@ -1,10 +1,10 @@
 import type {
     FormationAssignment,
     FormationId,
-    FormationState,
 } from '../../state/game_state.js';
 import type {
     SectorTopologyDiagnostic,
+    SectorTopologyMutableFormation,
     SectorTopologyMutableMilitary,
     SectorTopologyMutation,
 } from './sector_topology_solver_types.js';
@@ -20,24 +20,24 @@ export interface SectorTopologyMutationRecorder {
     recordFormationLocation(
         stage: string,
         formationId: FormationId,
-        formation: FormationState,
+        formation: SectorTopologyMutableFormation,
         after: string,
     ): void;
     recordFormationEntrenchmentReset(
         stage: string,
         formationId: FormationId,
-        formation: FormationState,
+        formation: SectorTopologyMutableFormation,
     ): void;
     recordFormationAssignedSubSegment(
         stage: string,
         formationId: FormationId,
-        formation: FormationState,
+        formation: SectorTopologyMutableFormation,
         after: string | undefined,
     ): void;
     recordFormationAssignment(
         stage: string,
         formationId: FormationId,
-        formation: FormationState,
+        formation: SectorTopologyMutableFormation,
         after: FormationAssignment | null,
     ): void;
     recordUnresolvedSectorBrigades(
@@ -46,6 +46,8 @@ export interface SectorTopologyMutationRecorder {
         after: readonly FormationId[],
     ): void;
     recordWarning(stage: string, message: string): void;
+    recordDebug(stage: string, message: string): void;
+    recordError(stage: string, message: string): void;
 }
 
 function copyAssignment(
@@ -126,6 +128,24 @@ export function createSectorTopologyMutationRecorder(): SectorTopologyMutationRe
                 sequence: diagnostics.length,
                 stage,
                 kind: 'warning',
+                message,
+                mutationBoundary: mutations.length,
+            });
+        },
+        recordDebug(stage, message): void {
+            diagnostics.push({
+                sequence: diagnostics.length,
+                stage,
+                kind: 'debug',
+                message,
+                mutationBoundary: mutations.length,
+            });
+        },
+        recordError(stage, message): void {
+            diagnostics.push({
+                sequence: diagnostics.length,
+                stage,
+                kind: 'error',
                 message,
                 mutationBoundary: mutations.length,
             });

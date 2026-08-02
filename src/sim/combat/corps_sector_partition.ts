@@ -41,7 +41,9 @@ export interface DisconnectedTerritories {
  * Get a formation's corps ID from corps_id field or tags.
  * Exported so corps_directed_aor can use it.
  */
-export function getFormationCorpsId(formation: FormationState): FormationId | null {
+export function getFormationCorpsId(
+    formation: Pick<FormationState, 'corps_id' | 'tags'>,
+): FormationId | null {
     if (formation.corps_id) return formation.corps_id;
     const tags = formation.tags ?? [];
     for (const tag of tags) {

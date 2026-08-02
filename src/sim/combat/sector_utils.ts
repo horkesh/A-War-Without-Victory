@@ -32,7 +32,7 @@ export type SectorDefenseByFactionAndOsid = Map<string, Map<string, CorpsFrontSe
 
 function activeAssignedDefenseCount(
     sector: Pick<CorpsFrontSector, 'assigned_brigade_ids'>,
-    formations?: Record<FormationId, FormationState>,
+    formations?: Record<FormationId, Pick<FormationState, 'status'>>,
 ): number {
     if (!formations) return sector.assigned_brigade_ids.length;
     let count = 0;
@@ -46,7 +46,7 @@ function activeAssignedDefenseCount(
 function preferLiveDefendedSector(
     current: CorpsFrontSector | undefined,
     candidate: CorpsFrontSector,
-    formations?: Record<FormationId, FormationState>,
+    formations?: Record<FormationId, Pick<FormationState, 'status'>>,
 ): CorpsFrontSector {
     if (!current) return candidate;
     const currentCount = activeAssignedDefenseCount(current, formations);
@@ -354,7 +354,7 @@ export function bfsDistance(
  * Get sorted list of active corps formation IDs for a faction.
  */
 export function getCorpsForFaction(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, Pick<FormationState, 'faction' | 'status' | 'kind'>>,
     faction: FactionId
 ): FormationId[] {
     return Object.keys(formations)

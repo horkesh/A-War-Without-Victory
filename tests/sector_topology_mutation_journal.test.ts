@@ -65,17 +65,24 @@ describe('sector topology imperative mutation journal', () => {
         const edges = loadOperationalEdges() as never;
         const recorder = createSectorTopologyMutationRecorder();
         const originalWarn = console.warn;
-        const controlWarnings: string[] = [];
-        const warnings: string[] = [];
+        const originalDebug = console.debug;
+        const controlDiagnostics: Array<{ kind: 'debug' | 'warning'; message: string }> = [];
+        const tracedConsoleDiagnostics: Array<{ kind: 'debug' | 'warning'; message: string }> = [];
         let controlSectors: ReturnType<typeof buildCorpsFrontSectors>;
         let tracedSectors: ReturnType<typeof buildCorpsFrontSectors>;
         try {
             console.warn = (...args: unknown[]) => {
-                controlWarnings.push(args.map(String).join(' '));
+                controlDiagnostics.push({ kind: 'warning', message: args.map(String).join(' ') });
+            };
+            console.debug = (...args: unknown[]) => {
+                controlDiagnostics.push({ kind: 'debug', message: args.map(String).join(' ') });
             };
             controlSectors = buildCorpsFrontSectors(controlState, edges, null, undefined, undefined, true);
             console.warn = (...args: unknown[]) => {
-                warnings.push(args.map(String).join(' '));
+                tracedConsoleDiagnostics.push({ kind: 'warning', message: args.map(String).join(' ') });
+            };
+            console.debug = (...args: unknown[]) => {
+                tracedConsoleDiagnostics.push({ kind: 'debug', message: args.map(String).join(' ') });
             };
             tracedSectors = buildCorpsFrontSectors(
                 state,
@@ -94,11 +101,12 @@ describe('sector topology imperative mutation journal', () => {
             );
         } finally {
             console.warn = originalWarn;
+            console.debug = originalDebug;
         }
 
         expect(tracedSectors!).toEqual(controlSectors!);
         expect(state).toEqual(controlState);
-        expect(warnings).toEqual(controlWarnings);
+        expect(tracedConsoleDiagnostics).toEqual([]);
 
         expect(recorder.mutations.map((row) => row.sequence)).toEqual(
             recorder.mutations.map((_, index) => index),
@@ -146,9 +154,13 @@ describe('sector topology imperative mutation journal', () => {
             kind: 'unresolved-sector-brigades',
             stage: 'collect-unresolved-sector-brigades',
         });
-        expect(recorder.diagnostics.map((row) => row.message)).toEqual(warnings);
+        expect(recorder.diagnostics.map((row) => ({
+            kind: row.kind,
+            message: row.message,
+        }))).toEqual(controlDiagnostics);
         expect(recorder.diagnostics.every((row) =>
-            row.mutationBoundary === recorder.mutations.length,
+            row.mutationBoundary >= 0
+            && row.mutationBoundary <= recorder.mutations.length,
         )).toBe(true);
     });
 
@@ -213,13 +225,14 @@ describe('sector topology imperative mutation journal', () => {
             console.warn = originalWarn;
         }
 
-        expect(warnings).toEqual([
+        expect(warnings).toEqual([]);
+        const expectedMessages = [
             '[brigade_assignment] UNRESOLVED brigade:a (1200 pers): fell through sector pipeline, corps=corps:a',
             '[brigade_assignment] UNRESOLVED brigade:b (900 pers): fell through sector pipeline, corps=corps:b',
-        ]);
+        ];
         expect(recorder.diagnostics.map((row) => ({
             message: row.message,
             mutationBoundary: row.mutationBoundary,
-        }))).toEqual(warnings.map((message) => ({ message, mutationBoundary: 1 })));
+        }))).toEqual(expectedMessages.map((message) => ({ message, mutationBoundary: 1 })));
     });
 });

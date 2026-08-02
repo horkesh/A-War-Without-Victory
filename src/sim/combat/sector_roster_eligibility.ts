@@ -1,6 +1,13 @@
 import type { FormationState } from '../../state/game_state.js';
 
-export function isSectorRosterEligibleFormation(formation: FormationState | null | undefined): boolean {
+type SectorRosterEligibilityFormation = Pick<
+    FormationState,
+    'kind' | 'status' | 'lifecycle_status' | 'readiness'
+>;
+
+export function isSectorRosterEligibleFormation(
+    formation: SectorRosterEligibilityFormation | null | undefined,
+): boolean {
     if (!formation) return false;
     if (
         formation.kind !== undefined

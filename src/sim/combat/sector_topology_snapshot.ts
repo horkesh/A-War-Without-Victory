@@ -61,6 +61,7 @@ function copyOptionalStringRecord(
 function copyFormation(formation: FormationState): SectorTopologyFormation {
     return {
         id: formation.id,
+        name: formation.name,
         faction: formation.faction,
         status: formation.status,
         kind: formation.kind,
@@ -237,6 +238,7 @@ export function captureSectorTopologySolveInput(
     spatial: SpatialContext | undefined,
     options: SectorTopologySolveOptions,
 ): SectorTopologySolveInput {
+    validateSectorTopologySolveOptions(options);
     const turn = state.meta.turn;
     const decisionMode = state.meta.decision_mode;
     const factionIds = state.factions.map((faction) => faction.id).sort(strictCompare);
@@ -333,6 +335,34 @@ export function captureSectorTopologySolveInput(
     };
 
     return deepFreeze(input);
+}
+
+export function validateSectorTopologySolveOptions(
+    options: SectorTopologySolveOptions,
+): void {
+    if (typeof options.isFinalPass !== 'boolean') {
+        throw new Error(`Invalid isFinalPass: ${String(options.isFinalPass)}`);
+    }
+    if (typeof options.finalSaveGeometryProjection !== 'boolean') {
+        throw new Error(
+            `Invalid finalSaveGeometryProjection: ${String(options.finalSaveGeometryProjection)}`,
+        );
+    }
+    if (typeof options.useFixedPointShortcuts !== 'boolean') {
+        throw new Error(
+            `Invalid useFixedPointShortcuts: ${String(options.useFixedPointShortcuts)}`,
+        );
+    }
+    if (options.occupancyStrategy !== 'dense-index'
+        && options.occupancyStrategy !== 'test-only-legacy-scan') {
+        throw new Error(`Unknown occupancy strategy: ${String(options.occupancyStrategy)}`);
+    }
+    if (options.frontEdgeAdjacencyStrategy !== 'invocation-front-edge-relation'
+        && options.frontEdgeAdjacencyStrategy !== 'test-only-legacy-edge-adjacency') {
+        throw new Error(
+            `Unknown front-edge adjacency strategy: ${String(options.frontEdgeAdjacencyStrategy)}`,
+        );
+    }
 }
 
 export function sectorTopologyPoliticalController(
