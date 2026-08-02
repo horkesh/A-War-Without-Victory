@@ -74,7 +74,24 @@ export function getPoliticalControllerOSID(
     osid: string,
     operationalToCanonical?: Map<string, string[]>
 ): ControlSide | null {
-    const pc = state.political.political_controllers ?? {};
+    return getPoliticalControllerOSIDFromReadModel(
+        { politicalControllers: state.political.political_controllers ?? {} },
+        osid,
+        operationalToCanonical,
+    );
+}
+
+export interface PoliticalControllerReadModel {
+    readonly politicalControllers: Readonly<Record<string, string | null | undefined>>;
+}
+
+/** Resolve OSID control from the explicit political-controller read model. */
+export function getPoliticalControllerOSIDFromReadModel(
+    readModel: PoliticalControllerReadModel,
+    osid: string,
+    operationalToCanonical?: ReadonlyMap<string, readonly string[]>,
+): ControlSide | null {
+    const pc = readModel.politicalControllers;
     const direct = pc[osid];
     if (direct !== undefined && direct !== null) return direct as ControlSide;
 

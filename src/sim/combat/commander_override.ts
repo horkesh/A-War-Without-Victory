@@ -9,7 +9,10 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { getCorpsCommander } from './officer_system.js';
+import {
+    getCorpsCommanderFromReadModel,
+    type CorpsCommanderOfficerReadModel,
+} from './officer_system.js';
 import type { ArmyOperationPriority } from './bot_strategy.js';
 import { munFromOsid } from './osid_adjacency.js';
 import { getSectorComponent, getSectorFrontOsids } from './sector_utils.js';
@@ -78,12 +81,34 @@ export function buildCorpsCommanderProfiles(
     state: GameState,
     sectors: CorpsFrontSector[],
 ): Map<string, CorpsCommanderProfile> {
+    return buildCorpsCommanderProfilesFromReadModel({
+        namedOfficers: state.military.named_officers,
+        namedOfficerData: state.military.named_officer_data,
+        corpsCommand: state.military.corps_command ?? {},
+    }, sectors);
+}
+
+export interface CorpsCommanderProfileReadModel extends CorpsCommanderOfficerReadModel {
+    readonly corpsCommand: Readonly<Record<string, {
+        readonly directive?: Readonly<{ priority_sector_id?: string }> | null;
+        readonly active_operations: readonly Readonly<{
+            preparation_sub_phase?: string;
+            sector_id?: string;
+        }>[];
+    }>>;
+}
+
+/** Build topology commander profiles from a detached, explicit read model. */
+export function buildCorpsCommanderProfilesFromReadModel(
+    readModel: CorpsCommanderProfileReadModel,
+    sectors: readonly CorpsFrontSector[],
+): Map<string, CorpsCommanderProfile> {
     const profiles = new Map<string, CorpsCommanderProfile>();
 
     const corpsIds = [...new Set(sectors.map(s => s.corps_id))].sort(strictCompare);
 
     for (const corpsId of corpsIds) {
-        const commander = getCorpsCommander(corpsId, state);
+        const commander = getCorpsCommanderFromReadModel(corpsId, readModel);
         let competence = 0.3; // generic placeholder when no named commander
         let aggressiveness = 0.5;
 
@@ -94,7 +119,7 @@ export function buildCorpsCommanderProfiles(
             aggressiveness = commander.data.aggressiveness / 5;
         }
 
-        const corpsCmd = state.military.corps_command?.[corpsId];
+        const corpsCmd = readModel.corpsCommand[corpsId];
         // priority_sector_id is on the CorpsDirective (generated prior turn)
         const prioritySectorId = corpsCmd?.directive?.priority_sector_id;
 

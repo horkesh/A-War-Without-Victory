@@ -678,6 +678,21 @@ function clamp(x: number, lo: number, hi: number): number {
     return x < lo ? lo : x > hi ? hi : x;
 }
 
+export interface CorpsArmyPriorityReadModel {
+    readonly turn: number;
+    readonly decisionMode: GameState['meta']['decision_mode'];
+    readonly controlEvents: readonly NonNullable<GameState['political']['control_events']>[number][];
+    readonly lastSupplyStateByOsid: Readonly<Record<string, string>>;
+    readonly politicalControllers: Readonly<Record<string, string | null | undefined>>;
+    readonly campaignPlans: Readonly<Record<string, {
+        readonly valid_until_turn: number;
+        readonly front_priorities: readonly {
+            readonly corps_id: string;
+            readonly role: FrontPriority['role'];
+        }[];
+    } | null>>;
+}
+
 /**
  * Net recent territory change scoped to a single priority's target AREA
  * (target_municipalities + target_osids), from political.control_events.
@@ -685,17 +700,17 @@ function clamp(x: number, lo: number, hi: number): number {
  * as army_hq_gathering.computeRecentTerritoryChange. Deterministic: persisted state only.
  */
 function priorityAreaTrend(
-    state: GameState,
+    readModel: CorpsArmyPriorityReadModel,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
-    const currentTurn = state.meta?.turn ?? 0;
+    const currentTurn = readModel.turn;
     const recentCutoff = currentTurn - TERRITORY_TREND_MODULATOR.WINDOW;
     const muns = new Set(priority.target_municipalities ?? []);
     const osids = new Set(priority.target_osids ?? []);
     if (muns.size === 0 && osids.size === 0) return 0;
 
-    const controlEvents = state.political?.control_events ?? [];
+    const controlEvents = readModel.controlEvents;
     let delta = 0;
     for (const event of controlEvents) {
         if (event.turn <= recentCutoff) continue;
@@ -717,11 +732,11 @@ function priorityAreaTrend(
  * Quantized to 2 decimals so near-ties cannot flip the argmax order.
  */
 function priorityTrendMultiplier(
-    state: GameState,
+    readModel: CorpsArmyPriorityReadModel,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
-    const trend = priorityAreaTrend(state, faction, priority);
+    const trend = priorityAreaTrend(readModel, faction, priority);
     // Losing ground in the area → positive boost; gaining or quiet → no boost.
     const lossTerm = TERRITORY_TREND_MODULATOR.K_LOSS * Math.max(0, -trend);
     // Quietness: 1 when no recent change in the priority's area, 0 otherwise.
@@ -756,17 +771,17 @@ function priorityTrendMultiplier(
  * Quantized to 2 decimals. Deterministic: persisted state only.
  */
 function prioritySupplyMultiplier(
-    state: GameState,
+    readModel: CorpsArmyPriorityReadModel,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
-    const supplyByOsid = state.political?.last_supply_state_by_osid;
-    if (!supplyByOsid) return 1.0;
+    const supplyByOsid = readModel.lastSupplyStateByOsid;
+    if (Object.keys(supplyByOsid).length === 0) return 1.0;
     const muns = new Set(priority.target_municipalities ?? []);
     const osids = new Set(priority.target_osids ?? []);
     if (muns.size === 0 && osids.size === 0) return 1.0;
 
-    const controllers = state.political?.political_controllers;
+    const controllers = readModel.politicalControllers;
 
     let rated = 0;
     let strained = 0;
@@ -807,13 +822,13 @@ function prioritySupplyMultiplier(
  * Deterministic: persisted state only.
  */
 function priorityCampaignPlanMultiplier(
-    state: GameState,
+    readModel: CorpsArmyPriorityReadModel,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
-    const plan = state.military?.campaign_plans?.[faction];
+    const plan = readModel.campaignPlans[faction];
     if (!plan) return 1.0;
-    const turn = state.meta?.turn ?? 0;
+    const turn = readModel.turn;
     if (plan.valid_until_turn < turn) return 1.0;
     const fp = plan.front_priorities.find(p => p.corps_id === priority.corps_id);
     if (!fp) return 1.0;
@@ -827,13 +842,13 @@ function priorityCampaignPlanMultiplier(
  * never reaches here (the caller gates on decision_mode === 'emergent').
  */
 function priorityEmergentMultiplier(
-    state: GameState,
+    readModel: CorpsArmyPriorityReadModel,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
-    const trend = priorityTrendMultiplier(state, faction, priority);
-    const supply = prioritySupplyMultiplier(state, faction, priority);
-    const plan = priorityCampaignPlanMultiplier(state, faction, priority);
+    const trend = priorityTrendMultiplier(readModel, faction, priority);
+    const supply = prioritySupplyMultiplier(readModel, faction, priority);
+    const plan = priorityCampaignPlanMultiplier(readModel, faction, priority);
     return round2(trend * supply * plan);
 }
 
@@ -854,11 +869,52 @@ export function getCorpsArmyPriorities(
     turn: number,
     state?: GameState,
 ): ArmyOperationPriority[] {
+    const readModel: CorpsArmyPriorityReadModel | undefined = state == null
+        ? undefined
+        : {
+            turn: state.meta.turn,
+            decisionMode: state.meta.decision_mode,
+            controlEvents: state.political.control_events ?? [],
+            lastSupplyStateByOsid: state.political.last_supply_state_by_osid ?? {},
+            politicalControllers: state.political.political_controllers ?? {},
+            campaignPlans: state.military.campaign_plans ?? {},
+        };
+    return getCorpsArmyPrioritiesFromReadModelAtTurn(
+        readModel,
+        faction,
+        corpsId,
+        turn,
+    );
+}
+
+/**
+ * Snapshot-native priority reader for the topology solve. The caller supplies only the
+ * immutable state families used by the emergent priority modulators.
+ */
+export function getCorpsArmyPrioritiesFromReadModel(
+    readModel: CorpsArmyPriorityReadModel,
+    faction: FactionId,
+    corpsId: string,
+): ArmyOperationPriority[] {
+    return getCorpsArmyPrioritiesFromReadModelAtTurn(
+        readModel,
+        faction,
+        corpsId,
+        readModel.turn,
+    );
+}
+
+function getCorpsArmyPrioritiesFromReadModelAtTurn(
+    readModel: CorpsArmyPriorityReadModel | undefined,
+    faction: FactionId,
+    corpsId: string,
+    turn: number,
+): ArmyOperationPriority[] {
     const all = FACTION_ARMY_PRIORITIES[faction] ?? [];
     const active = all.filter(p => p.corps_id === corpsId && turn >= p.start_week && turn < p.end_week);
 
     // Historical / unset / no-state → static weights verbatim (byte-identical contract).
-    if (state?.meta?.decision_mode !== 'emergent') {
+    if (readModel?.decisionMode !== 'emergent') {
         return active.sort((a, b) => {
             if (b.weight !== a.weight) return b.weight - a.weight;
             return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
@@ -870,7 +926,7 @@ export function getCorpsArmyPriorities(
     // effective weight with the existing NAME tie-break. A losing/under-supplied/plan-primary
     // area can out-rank a quiet higher-static objective.
     const scored = active.map(p => {
-        const boost = priorityEmergentMultiplier(state, faction, p);
+        const boost = priorityEmergentMultiplier(readModel, faction, p);
         return {
             p,
             boost,

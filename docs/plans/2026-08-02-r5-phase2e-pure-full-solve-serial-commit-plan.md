@@ -153,7 +153,7 @@ The following table is the Phase 2e read allow-list. A static test must fail if 
 | Formation identity/lifecycle | record key, `id`, `faction`, `status`, `kind`, `readiness`, `lifecycle_status`, `tags`, `corps_id` | One strict-ID ordered `SectorTopologyFormation` record. Preserve `undefined` defaults exactly. |
 | Formation geography | `location_osid`, `home_osid`, `hq_osid`, `hq_sid` | Same formation projection; these fields must be locally mutable only where listed in section 7. |
 | Formation strength | `personnel`, `personnel_lent_by_tg`, `cohesion`, `experience`, `honor` | Same projection; required by enemy totals and `computeLocalFrontDefensivePower(...)`. |
-| Formation assignment/eligibility | `assignment`, `assigned_sub_segment_id`, `posture`, `disrupted`, `disrupted_turns`, `stranded_status` | Same projection; deep-copy assignment objects. |
+| Formation assignment/eligibility | `assignment`, `assigned_sub_segment_id`, `posture`, `disrupted`, `disrupted_turns`, `stranded_status`, `entrenchment_turns` | Same projection; deep-copy assignment objects. Preserve `entrenchment_turns` as `undefined` or its exact numeric value because the ordered location/entrenchment journal records the live before-value. |
 | Elite/enclave movement | `elite_loan_state.on_loan`, `loaned_to_corps`, `loan_start_turn`; faction/home/origin inference used by enclave guard | Minimal deep copy of the named loan fields plus the formation geography above. |
 | Movement ownership | `military.brigade_movement_orders`, `military.brigade_movement_state`, `military.brigade_posture_orders` | Strict-key/deep copies; posture order array order preserved. |
 | Player sector direction | `military.brigade_sector_override` | Strict-key deep copy. |

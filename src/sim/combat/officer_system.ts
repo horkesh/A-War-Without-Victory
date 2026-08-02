@@ -155,6 +155,46 @@ export function getCorpsCommander(
     return null;
 }
 
+export interface CorpsCommanderOfficerReadModel {
+    readonly namedOfficers: Readonly<Record<string, {
+        readonly status: string;
+        readonly assigned_corps_id: string | null;
+        readonly effective_competence_penalty?: number;
+    }>> | undefined;
+    readonly namedOfficerData: readonly Readonly<{
+        readonly id: string;
+        readonly competence: number;
+        readonly aggressiveness: number;
+    }>[] | undefined;
+}
+
+/** Resolve a corps commander from the explicit officer read model. */
+export function getCorpsCommanderFromReadModel(
+    corpsId: string,
+    readModel: CorpsCommanderOfficerReadModel,
+): {
+    data: { id: string; competence: number; aggressiveness: number };
+    state: {
+        status: string;
+        assigned_corps_id: string | null;
+        effective_competence_penalty?: number;
+    };
+} | null {
+    const officers = readModel.namedOfficers;
+    const officerData = readModel.namedOfficerData;
+    if (!officers || !officerData) return null;
+
+    const officerIds = Object.keys(officers).sort(strictCompare);
+    for (const id of officerIds) {
+        const os = officers[id]!;
+        if (os.status === 'active' && os.assigned_corps_id === corpsId) {
+            const data = officerData.find(o => o.id === id);
+            if (data) return { data, state: os };
+        }
+    }
+    return null;
+}
+
 /**
  * Get the army-level commander for a faction.
  */

@@ -4,55 +4,15 @@ import type {
     FormationState,
     GameState,
 } from '../../state/game_state.js';
+import type {
+    SectorTopologyDiagnostic,
+    SectorTopologyMutation,
+} from './sector_topology_solver_types.js';
 
-export type SectorTopologyMutation =
-    | {
-        readonly sequence: number;
-        readonly stage: string;
-        readonly kind: 'formation-location';
-        readonly formationId: FormationId;
-        readonly before: string | undefined;
-        readonly after: string;
-    }
-    | {
-        readonly sequence: number;
-        readonly stage: string;
-        readonly kind: 'formation-entrenchment';
-        readonly formationId: FormationId;
-        readonly before: number | undefined;
-        readonly after: 0;
-    }
-    | {
-        readonly sequence: number;
-        readonly stage: string;
-        readonly kind: 'formation-assigned-sub-segment';
-        readonly formationId: FormationId;
-        readonly before: string | undefined;
-        readonly after: string | undefined;
-    }
-    | {
-        readonly sequence: number;
-        readonly stage: string;
-        readonly kind: 'formation-assignment';
-        readonly formationId: FormationId;
-        readonly before: FormationAssignment | null;
-        readonly after: FormationAssignment | null;
-    }
-    | {
-        readonly sequence: number;
-        readonly stage: string;
-        readonly kind: 'unresolved-sector-brigades';
-        readonly before: readonly FormationId[] | undefined;
-        readonly after: readonly FormationId[];
-    };
-
-export interface SectorTopologyDiagnostic {
-    readonly sequence: number;
-    readonly stage: string;
-    readonly kind: 'warning';
-    readonly message: string;
-    readonly mutationBoundary: number;
-}
+export type {
+    SectorTopologyDiagnostic,
+    SectorTopologyMutation,
+} from './sector_topology_solver_types.js';
 
 export interface SectorTopologyMutationRecorder {
     readonly mutations: readonly SectorTopologyMutation[];
