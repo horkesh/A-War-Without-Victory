@@ -7,19 +7,14 @@ const OFFICER_DATA_PATH = path.resolve('data/scenarios/officers/apr1992_officers
 const FIRST_PASS_OPENING_COMMANDERS = [
     'arbih_drekovic',
     'arbih_halilovic',
-    'arbih_knez',
-    'arbih_talijan',
     'hvo_blaskic',
     'hvo_lasic',
-    'hvo_matuzovic',
     'hvo_petkovic',
-    'hvo_tole',
     'vrs_grubac',
     'vrs_mladic',
     'vrs_simic',
     'vrs_sipcic',
     'vrs_talic',
-    'vrs_tomanic',
 ] as const;
 
 type OfficerRecord = {
@@ -28,9 +23,6 @@ type OfficerRecord = {
     available_from_turn?: number;
     is_historical_start?: boolean;
     bio_short?: unknown;
-    command_style?: unknown;
-    known_for?: unknown;
-    political_alignment_note?: unknown;
     sensitive_history_note?: unknown;
 };
 
@@ -61,16 +53,13 @@ describe('officer mini-bio schema', () => {
         expect(discovered).toEqual([...FIRST_PASS_OPENING_COMMANDERS].sort());
     });
 
-    it('authors compact, read-only mini-bio fields for every first-pass opening commander', () => {
+    it('authors a compact, source-bounded mini-bio for every supported opening commander', () => {
         const byId = new Map(loadOfficerRecords().map((officer) => [officer.id, officer]));
 
         for (const officerId of FIRST_PASS_OPENING_COMMANDERS) {
             const officer = byId.get(officerId);
             expect(officer, `${officerId} exists`).toBeDefined();
             expectShortString(officer?.bio_short, 'bio_short', officerId, 150);
-            expectShortString(officer?.command_style, 'command_style', officerId, 80);
-            expectShortString(officer?.known_for, 'known_for', officerId, 90);
-            expectShortString(officer?.political_alignment_note, 'political_alignment_note', officerId, 110);
             if (officer?.sensitive_history_note !== undefined) {
                 expectShortString(officer.sensitive_history_note, 'sensitive_history_note', officerId, 120);
                 expect(String(officer.sensitive_history_note).toLowerCase()).not.toMatch(/\b(guilty|culpable|ordered|responsible)\b/);

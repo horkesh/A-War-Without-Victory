@@ -24,7 +24,8 @@ const fixture = JSON.parse(readFileSync(join(
 ), 'utf8')) as FixtureCases;
 
 function violationCodes(report: ReturnType<typeof buildOfficerOobProvenanceReport>): string[] {
-    return report.records.flatMap((record) => record.violations.map((violation) => violation.code));
+    return [...report.records, ...report.omissions]
+        .flatMap((record) => record.violations.map((violation) => violation.code));
 }
 
 describe('officer/OOB provenance inventory', () => {
@@ -126,23 +127,163 @@ describe('officer/OOB provenance inventory', () => {
         expect(first).not.toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:/);
     });
 
-    it('inventories every repository officer, corps, brigade, and named elite commander from the sidecar', () => {
+    it('retains unsupported candidates as deterministic, non-playable omission rows', () => {
+        const omitted = {
+            record_kind: 'officer' as const,
+            record_id: 'officer_unsupported',
+            display_name: 'Unsupported Candidate',
+            faction: 'RBiH',
+            reason: 'missing_exact_source' as const,
+            notes: 'No row-local identity and assignment evidence was found.',
+        };
+        const input: OfficerOobProvenanceInput = {
+            ...fixture.valid,
+            manifest: {
+                ...fixture.valid.manifest,
+                omissions: {
+                    'officer:officer_unsupported': omitted,
+                },
+            },
+        };
+
+        const report = buildOfficerOobProvenanceReport(input);
+
+        expect(report.summary).toMatchObject({
+            total_records: 3,
+            supported_records: 3,
+            omitted_records: 1,
+            blocking_violations: 0,
+        });
+        expect(report.omissions).toEqual([{
+            record_key: 'officer:officer_unsupported',
+            ...omitted,
+            violations: [],
+        }]);
+        expect(report.records.some((record) => record.record_key.includes('officer_unsupported'))).toBe(false);
+    });
+
+    it('fails closed when an omission overlaps playable data or its key does not own the candidate', () => {
+        const input: OfficerOobProvenanceInput = {
+            ...fixture.valid,
+            manifest: {
+                ...fixture.valid.manifest,
+                omissions: {
+                    'officer:officer_exact': {
+                        record_kind: 'officer',
+                        record_id: 'officer_exact',
+                        display_name: 'Exact Officer',
+                        faction: 'RBiH',
+                        reason: 'conflicting_identity',
+                        notes: 'This must not coexist with a playable row.',
+                    },
+                    'officer:wrong_key': {
+                        record_kind: 'officer',
+                        record_id: 'omitted_candidate',
+                        display_name: 'Omitted Candidate',
+                        faction: 'RS',
+                        reason: 'missing_exact_source',
+                        notes: 'The manifest key must match the immutable candidate identity.',
+                    },
+                },
+            },
+        };
+
+        const report = buildOfficerOobProvenanceReport(input);
+
+        expect(violationCodes(report)).toEqual(expect.arrayContaining([
+            'omission_key_mismatch',
+            'omission_overlaps_playable',
+        ]));
+        expect(report.summary.blocking_violations).toBe(2);
+    });
+
+    it('inventories every authoritative OOB source row and retains unsupported named candidates only as omissions', () => {
         const report = loadOfficerOobProvenanceReport(process.cwd());
 
-        expect(report.summary.total_records).toBe(374);
-        expect(report.records.filter((record) => record.record_kind === 'officer')).toHaveLength(98);
+        expect(report.summary.total_records).toBe(222);
+        expect(report.records.filter((record) => record.record_kind === 'officer')).toHaveLength(31);
         expect(report.records.filter((record) => record.record_kind === 'corps')).toHaveLength(19);
-        expect(report.records.filter((record) => record.record_kind === 'brigade')).toHaveLength(249);
-        expect(report.records.filter((record) => record.record_kind === 'elite_commander')).toHaveLength(8);
-        expect(report.summary.manifest_records).toBe(374);
+        expect(report.records.filter((record) => record.record_kind === 'brigade')).toHaveLength(169);
+        expect(report.records.filter((record) => record.record_kind === 'elite_commander')).toHaveLength(3);
+        expect(report.summary).toMatchObject({
+            manifest_records: 222,
+            supported_records: 222,
+            unsupported_records: 0,
+            omitted_records: 152,
+            blocking_violations: 0,
+        });
+        expect(report.records.every((record) => record.disposition === 'supported')).toBe(true);
+        expect(report.omissions.filter((record) => record.record_kind === 'brigade')).toHaveLength(80);
         expect(violationCodes(report)).not.toContain('missing_provenance');
+        expect(violationCodes(report)).not.toContain('missing_court_record_citation');
+        expect(violationCodes(report)).not.toContain('unresolved_normalized_identity_collision');
 
+        const blaskic = report.records.find((record) => record.record_key === 'officer:hvo_blaskic');
+        expect(blaskic?.identity_relation).toEqual({
+            kind: 'tenure_of',
+            target_record_key: 'officer:hvo_blaskic_2',
+        });
         const petkovic = report.records.find((record) => record.record_key === 'officer:hvo_petkovic');
-        const petkovicSecond = report.records.find((record) => record.record_key === 'officer:hvo_petkovic_2');
-        expect(petkovic?.duplicate_record_keys).toContain('officer:hvo_petkovic_2');
-        expect(petkovicSecond?.duplicate_record_keys).toContain('officer:hvo_petkovic');
-        expect(petkovicSecond?.violations.map((violation) => violation.code)).toContain(
-            'unresolved_normalized_identity_collision',
-        );
+        expect(petkovic?.identity_relation).toEqual({
+            kind: 'tenure_of',
+            target_record_key: 'officer:hvo_petkovic_2',
+        });
+    });
+
+    it('keeps the canonical army-command succession roster closed over exact playable officer ids', () => {
+        const officerData = JSON.parse(readFileSync(join(
+            process.cwd(),
+            'data',
+            'scenarios',
+            'officers',
+            'apr1992_officers.json',
+        ), 'utf8')) as {
+            officers: Array<{
+                id: string;
+                available_from_turn: number;
+                available_until_turn?: number;
+            }>;
+        };
+        const armyRoster = JSON.parse(readFileSync(join(
+            process.cwd(),
+            'data',
+            'scenarios',
+            'army_co_roster.json',
+        ), 'utf8')) as {
+            rosters: Record<string, {
+                schedule: Array<{ officer_id: string; replaces_with: string | null }>;
+            }>;
+        };
+        const playableOfficerIds = new Set(officerData.officers.map((officer) => officer.id));
+        const officerById = new Map(officerData.officers.map((officer) => [officer.id, officer]));
+        const authoredReferences = Object.values(armyRoster.rosters)
+            .flatMap((roster) => roster.schedule)
+            .flatMap((entry) => [
+                entry.officer_id,
+                ...(entry.replaces_with ?? '')
+                    .split('|')
+                    .filter((candidate) => candidate.length > 0 && candidate !== 'political_bot_pick'),
+            ])
+            .sort();
+
+        expect(authoredReferences.filter((officerId) => !playableOfficerIds.has(officerId))).toEqual([]);
+        expect(armyRoster.rosters.HRHB.schedule.map((entry) => entry.officer_id)).toEqual([
+            'hvo_petkovic',
+            'hvo_praljak',
+            'hvo_roso',
+            'hvo_petkovic_2',
+            'hvo_blaskic_2',
+        ]);
+        expect(armyRoster.rosters.HRHB.schedule[2]?.replaces_with).toBe('hvo_petkovic_2');
+        expect([
+            officerById.get('hvo_petkovic')?.available_until_turn,
+            officerById.get('hvo_praljak')?.available_from_turn,
+            officerById.get('hvo_praljak')?.available_until_turn,
+            officerById.get('hvo_roso')?.available_from_turn,
+            officerById.get('hvo_roso')?.available_until_turn,
+            officerById.get('hvo_petkovic_2')?.available_from_turn,
+            officerById.get('hvo_petkovic_2')?.available_until_turn,
+            officerById.get('hvo_blaskic_2')?.available_from_turn,
+        ]).toEqual([68, 68, 84, 84, 108, 108, 122, 122]);
     });
 });

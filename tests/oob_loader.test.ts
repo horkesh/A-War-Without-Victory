@@ -30,19 +30,20 @@ test('loadOobBrigades preserves elite commander metadata from source rows', asyn
     const brigades = await loadOobBrigades(process.cwd());
     const byId = new Map(brigades.map((brigade) => [brigade.id, brigade]));
 
-    assert.deepStrictEqual(byId.get('arbih_guards_brigade')?.elite_commander, {
-        name: 'Dževad Rađo',
+    assert.deepStrictEqual(byId.get('rs_65th_protection_motorized_regiment')?.elite_commander, {
+        name: 'Milomir Savčić',
         competence: 4,
         aggressiveness: 3,
-        defensive_skill: 3,
-        origin: 'military',
+        defensive_skill: 4,
+        origin: 'jna',
     });
-    assert.strictEqual(byId.get('rs_65th_protection_motorized_regiment')?.elite_commander?.name, 'Milomir Savčić');
-    assert.strictEqual(
-        byId.get('rs_65th_protection_motorized_regiment')?.elite_commander?.war_crimes_record?.verdict,
-        'indicted',
-    );
     assert.strictEqual(byId.get('hvo_1st_guard_abb')?.elite_commander?.name, 'Željko Glasnović');
+    assert.strictEqual(byId.get('hvo_2nd_guard_mechanized')?.elite_commander?.name, 'Stanko Sopta');
+    assert.strictEqual(
+        byId.get('arbih_guards_brigade')?.elite_commander,
+        undefined,
+        'Unsupported named elite-command metadata remains absent from playable source rows',
+    );
 
     assert.strictEqual(
         byId.get('hrhb_vitezovi_brigade_vitez')?.elite_commander,

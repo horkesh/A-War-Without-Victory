@@ -9,7 +9,7 @@
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- officer/OOB and audio inventories accepted; historical-claim and localization inventories remain
+**Status:** IN PROGRESS -- Phase 2 exact-evidence checkpoint implemented; integrated startup/baseline proof remains
 **Roadmap workstream:** R7
 **Canonical owner:** authored JSON plus source/license manifests; `src/ui/map/i18n/` for locale; `src/ui/map/audio/` for playback
 **Collision rule:** Do not edit the same event/essay as R4. Do not edit map/Desk layout until R1/R2 finish.
@@ -129,6 +129,7 @@ Rules:
 
 - [Officer/OOB and audio inventory report](../40_reports/audits/20260801_R7_OFFICER_AUDIO_PROVENANCE_INVENTORY.md).
 - Officer/OOB: 374/374 rows keyed, 0 supported, 2,286 blocking findings, 12 normalized-name collisions. Positive support must be owned per row and cannot be inherited from manifest defaults.
+- [Phase 2 exact-evidence source checkpoint](../40_reports/implemented/20260802_R7_PHASE2_OFFICER_OOB_ATTRIBUTION.md): all 222 authoritative officer/OOB source rows are exact-source-backed; 67 officer, five elite-commander, and 80 named-formation candidates are omitted from those sources. Generated startup/runtime closure remains open.
 - Audio: 36/36 cues keyed, 17 provided, 19 placeholders, 0 unregistered binaries, 54 blocking findings, 5 warnings, and three required ambient beds absent. Registry/bundle resolution and recursive binary ownership are fail-closed; `OggS` remains a container-signature precheck rather than decode/LUFS proof.
 - Verification: focused 5 files / 22 tests; parent integration 2 files / 11 tests; TypeScript, canon/determinism/baseline, EOL, and diff checks green.
 - All four Phase 0 inventories are accepted. The historical/localization contract survived fourteen bounded review corrections and an integrated R4/R7 repair: sensitive-warning continuations are structural and fail closed; exact paramilitary exceptions remain option-bounded; seven safe R4 essays now carry reviewed source tiers; and neutral operational `both sides` prose no longer triggers a moral-symmetry false positive. The production Ring-3 choices remain remediated; historical, identity, localization, licensing, and audio remediation remains open in Phases 1-4.
@@ -210,15 +211,18 @@ npm.cmd run test:baselines
 - Create `tests/officer_state_persistence.test.ts`
 - Create `tests/officer_bio_read_model.test.ts`
 
-- [ ] Resolve exact duplicate IDs and dead corps refs.
-- [ ] Require explicit source/citation for new named rows.
-- [ ] Preserve uncertain/conflicting candidates only in the audit output, not playable data.
-- [ ] Ensure officer bios and faction/corps assignments survive startup/save/round-trip.
-- [ ] Do not derive historical identity from name similarity alone.
+- [x] Resolve exact duplicate IDs and dead corps refs in the retained roster; unsupported duplicate tenures are omitted.
+- [x] Require explicit row-owned source/citation for every retained named row.
+- [x] Preserve uncertain/conflicting named candidates only in the deterministic omission output, not playable data.
+- [ ] Ensure officer bios and faction/corps assignments survive startup/save/round-trip. Focused save/read-model coverage passes in the 11-file / 95-test matrix; generated startup-snapshot and integrated baseline proof remain serialized behind the R5 runtime lane.
+- [x] Do not derive historical identity from name similarity alone; only exact `same_person`/`tenure_of` relations survive.
+
+**Checkpoint census:** 31/31 authored officer-tenure rows supported; 19/19 corps/command rows supported; 169/169 authored brigade/regiment rows supported; 3/3 retained elite commanders supported. Sixty-seven officer, five elite-commander, and 80 named-formation candidates are omitted from authoritative source data. Appendix I (HVO, BB1 pp.518–521) is now included alongside Appendices G/H. Official ICTY judgments close the exact HVO Main Staff succession through Petković's second tenure and Blaškić's August 1994 appointment. Generated startup inspection still finds 55 omitted exact IDs, so runtime closure is not claimed.
 
 ```powershell
-npm.cmd run test:vitest -- tests/canon_officer_corps_refs.test.ts tests/officer_oob_provenance.test.ts tests/officer_state_persistence.test.ts tests/officer_bio_read_model.test.ts --pool=forks --reporter=dot
+npm.cmd run test:vitest -- tests/canon_officer_corps_refs.test.ts tests/officer_oob_provenance.test.ts tests/officer_state_persistence.test.ts tests/officer_bio_read_model.test.ts tests/officer_mini_bio_schema.test.ts tests/officer_system.test.ts tests/oob_loader.test.ts tests/oob_lookup_determinism.test.ts tests/compare_oob_vs_markdown.test.ts tests/a4_army_co_roster_personalities.test.ts tests/army_co_emergent_lifecycle.test.ts --pool=forks --reporter=dot
 npm.cmd run typecheck
+npm.cmd run desktop:startup-snapshot:check
 npm.cmd run test:baselines
 ```
 
@@ -346,7 +350,7 @@ git diff --check
 
 - [ ] Sensitive-history inventory has no unsupported live claim or prohibited interaction.
 - [ ] Grabovica/Uzdol/Neretva content is correctly placed in 1993 and legally/factually precise.
-- [ ] No playable officer/OOB identity lacks exact provenance.
+- [ ] No playable officer/OOB identity lacks exact provenance. The authored source diagnostic is strict-green with 152 omission-only candidates, but 55 omitted exact IDs remain in the tracked generated startup artifact pending owner regeneration and baseline proof.
 - [ ] `bs`/`bs-BA` is canonical, `bcs` migrates, pseudo coverage is complete, and Bosnian is honestly labeled for its review state.
 - [ ] Every audible asset has source/license/checksum lineage and passes sensitivity rules.
 - [ ] Offline packaged runtime, accessibility, browser, baseline, and content suites are green.

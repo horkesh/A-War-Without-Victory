@@ -32,6 +32,24 @@ export interface OfficerOobProvenanceManifest {
     schema_version: 1;
     defaults?: OfficerOobProvenanceEntry;
     records: Record<string, Partial<OfficerOobProvenanceEntry>>;
+    omissions?: Record<string, OfficerOobOmission>;
+}
+
+export type OmissionReason = 'missing_exact_source' | 'conflicting_identity' | 'source_scope_mismatch';
+export type OmissibleRecordKind = 'officer' | 'brigade' | 'elite_commander';
+
+export interface OfficerOobOmission {
+    record_kind: OmissibleRecordKind;
+    record_id: string;
+    display_name: string;
+    faction: string;
+    reason: OmissionReason;
+    notes: string;
+}
+
+export interface OfficerOobOmissionRecord extends OfficerOobOmission {
+    record_key: string;
+    violations: ProvenanceViolation[];
 }
 
 export interface OfficerLike {
@@ -110,11 +128,13 @@ export interface OfficerOobProvenanceReport {
         manifest_records: number;
         supported_records: number;
         unsupported_records: number;
+        omitted_records: number;
         blocking_violations: number;
         warning_violations: number;
         violations_by_code: Record<string, number>;
     };
     records: OfficerOobProvenanceRecord[];
+    omissions: OfficerOobOmissionRecord[];
 }
 
 interface DerivedIdentity {
@@ -138,6 +158,12 @@ const ACCEPTED_SOURCE_TIERS = new Set<SourceTier>([
     'dataset',
 ]);
 const EXPLICIT_RELATION_KINDS = new Set<IdentityRelation['kind']>(['same_person', 'tenure_of']);
+const OMISSIBLE_RECORD_KINDS = new Set<OmissibleRecordKind>(['officer', 'brigade', 'elite_commander']);
+const OMISSION_REASONS = new Set<OmissionReason>([
+    'missing_exact_source',
+    'conflicting_identity',
+    'source_scope_mismatch',
+]);
 const REQUIRED_EXPLICIT_SUPPORTED_FIELDS = [
     'source',
     'source_url',
@@ -449,7 +475,54 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
     }
     records.sort((a, b) => compareText(a.record_key, b.record_key));
 
-    const allViolations = records.flatMap((record) => record.violations);
+    const omissions = Object.entries(input.manifest.omissions ?? {})
+        .sort(([a], [b]) => compareText(a, b))
+        .map(([recordKey, omission]): OfficerOobOmissionRecord => {
+            const violations: ProvenanceViolation[] = [];
+            const expectedRecordKey = `${omission.record_kind}:${omission.record_id}`;
+            if (recordKey !== expectedRecordKey) {
+                violations.push(violation(
+                    'omission_key_mismatch',
+                    `Omission key ${recordKey} does not match candidate identity ${expectedRecordKey}.`,
+                ));
+            }
+            if (identityByKey.has(recordKey)) {
+                violations.push(violation(
+                    'omission_overlaps_playable',
+                    `Omission ${recordKey} still exists in playable source data.`,
+                ));
+            }
+            if (!OMISSIBLE_RECORD_KINDS.has(omission.record_kind)) {
+                violations.push(violation(
+                    'invalid_omission_record_kind',
+                    `Omission ${recordKey} uses non-person record kind ${omission.record_kind}.`,
+                ));
+            }
+            if (!OMISSION_REASONS.has(omission.reason)) {
+                violations.push(violation(
+                    'invalid_omission_reason',
+                    `Omission ${recordKey} uses unknown reason ${omission.reason}.`,
+                ));
+            }
+            if (!asNonEmpty(omission.display_name)) {
+                violations.push(violation('missing_omission_name', `Omission ${recordKey} has no display name.`));
+            }
+            if (!asNonEmpty(omission.faction)) {
+                violations.push(violation('missing_omission_faction', `Omission ${recordKey} has no faction.`));
+            }
+            if (!asNonEmpty(omission.notes)) {
+                violations.push(violation('missing_omission_notes', `Omission ${recordKey} has no evidence note.`));
+            }
+            return {
+                record_key: recordKey,
+                ...omission,
+                violations: sortViolations(violations),
+            };
+        });
+    const allViolations = [
+        ...records.flatMap((record) => record.violations),
+        ...omissions.flatMap((omission) => omission.violations),
+    ];
     const violationCounts = new Map<string, number>();
     for (const item of allViolations) violationCounts.set(item.code, (violationCounts.get(item.code) ?? 0) + 1);
     const supportedRecords = records.filter((record) =>
@@ -457,7 +530,6 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
         && record.disposition === 'supported'
         && record.violations.every((item) => item.severity !== 'blocking')).length;
     const sourceRecordCount = records.filter((record) => record.record_kind !== 'manifest_orphan').length;
-
     return {
         schema_version: 1,
         inputs: {
@@ -471,11 +543,13 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
             manifest_records: Object.keys(input.manifest.records).length,
             supported_records: supportedRecords,
             unsupported_records: sourceRecordCount - supportedRecords,
+            omitted_records: omissions.length,
             blocking_violations: allViolations.filter((item) => item.severity === 'blocking').length,
             warning_violations: allViolations.filter((item) => item.severity === 'warning').length,
             violations_by_code: Object.fromEntries([...violationCounts.entries()].sort(([a], [b]) => compareText(a, b))),
         },
         records,
+        omissions,
     };
 }
 

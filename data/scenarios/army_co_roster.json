@@ -55,7 +55,7 @@
         },
         {
           "officer_id": "hvo_praljak",
-          "tenure_start": 64,
+          "tenure_start": 68,
           "tenure_end_default": null,
           "stubbornness": 3,
           "replacement_trigger": "scheduled-1994-washington|political-relief",
@@ -63,7 +63,7 @@
         },
         {
           "officer_id": "hvo_roso",
-          "tenure_start": 80,
+          "tenure_start": 84,
           "tenure_end_default": null,
           "stubbornness": 2,
           "replacement_trigger": "scheduled-rotation|political-relief",
@@ -71,7 +71,7 @@
         },
         {
           "officer_id": "hvo_petkovic_2",
-          "tenure_start": 100,
+          "tenure_start": 108,
           "tenure_end_default": null,
           "stubbornness": 2,
           "replacement_trigger": "scheduled-rotation|political-relief",
@@ -79,7 +79,7 @@
         },
         {
           "officer_id": "hvo_blaskic_2",
-          "tenure_start": 120,
+          "tenure_start": 122,
           "tenure_end_default": null,
           "stubbornness": 3,
           "replacement_trigger": "combat-death",

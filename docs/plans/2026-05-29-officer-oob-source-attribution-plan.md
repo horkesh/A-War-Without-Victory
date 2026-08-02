@@ -1,5 +1,7 @@
 # Officer / OOB / Source Attribution + Essay Rosters — Inventory + Citation Plan
 
+**Superseded execution note (2026-08-02):** This planning-only inventory is retained as historical context. Execution authority now comes from [the R7 content/history/localization/audio plan](2026-07-31-content-history-localization-audio-plan.md), whose Phase 2 source checkpoint has 222 authored rows, all 222 exact-source-supported, and 152 unsupported officer, elite-commander, or named-formation candidates omitted from authoritative source data. Generated startup/runtime closure remains open. See the [implementation report](../40_reports/implemented/20260802_R7_PHASE2_OFFICER_OOB_ATTRIBUTION.md). The old stop-gate language below does not override the active master roadmap.
+
 **Date:** 2026-05-29
 **Status:** PLANNING-ONLY (no content/citations authored, no commit)
 **Owner lane:** Research/operator lane plus content bank

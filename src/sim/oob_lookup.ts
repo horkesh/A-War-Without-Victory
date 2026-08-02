@@ -58,7 +58,7 @@ export function createOOBLookup(
 
     // 2. Build map: mun_id -> Set<mun_code> (for settlement validation)
     const munIdToCodes = new Map<string, Set<string>>();
-    for (const [code, entry] of Object.entries(munPop)) {
+    for (const [code, entry] of Object.entries(munPop).sort(([a], [b]) => strictCompare(a, b))) {
         if (entry.mun1990_id) {
             if (!munIdToCodes.has(entry.mun1990_id)) munIdToCodes.set(entry.mun1990_id, new Set());
             munIdToCodes.get(entry.mun1990_id)?.add(code);
@@ -68,11 +68,12 @@ export function createOOBLookup(
     // 3. Build lookup: settlement name -> Map<mun_code, sid>
     // Because names are not unique, we need to know which mun_code they belong to.
     const settlementNameMap = new Map<string, Map<string, string>>();
-    for (const [sid, entry] of Object.entries(settlements)) {
+    for (const [sid, entry] of Object.entries(settlements).sort(([a], [b]) => strictCompare(a, b))) {
         if (!settlementNameMap.has(entry.name)) {
             settlementNameMap.set(entry.name, new Map());
         }
-        settlementNameMap.get(entry.name)?.set(entry.mun_code, sid);
+        const byMunicipality = settlementNameMap.get(entry.name);
+        if (!byMunicipality?.has(entry.mun_code)) byMunicipality?.set(entry.mun_code, sid);
     }
 
     const nameLookup = (faction: string, mun_id: string, ordinal: number): string | null => {
@@ -106,7 +107,8 @@ export function createOOBLookup(
         }
 
         // Checking if any candidate mun_code is in allowedCodes
-        for (const [code, sid] of candidateMap.entries()) {
+        for (const [code, sid] of [...candidateMap.entries()].sort(([aCode, aSid], [bCode, bSid]) =>
+            strictCompare(`${aCode}\u0000${aSid}`, `${bCode}\u0000${bSid}`))) {
             if (allowedCodes.has(code)) {
                 return sid;
             }
