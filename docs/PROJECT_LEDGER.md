@@ -1,5 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] R7 Ring-3 baseline causal acceptance
+
+**Type:** Intentional behavior-baseline disposition / sensitive-history correction / deterministic causal review.
+
+**Cause and ownership:** Exact-commit baseline bisect identified `3c2e8a47facf334839d4914f2e48aa2e3c91d301` (`fix(content): enforce R7 provenance and Ring-3 gates`) as the first artifact-changing commit after accepted baseline `6c02edcaf950d7d52ebb05fb63b10b89f50d7442`. Exact parent `61ecd3d44` passes; `3c2e8a47f` fails with the same activity hash reproduced at R7 Phase 1.1 parent `5987daea5` and Task 8A candidate `0fd36157b`, exonerating the performance change and current toolchain. The source correction removes the former `war_crimes_delta: 5`, morale `+3`, and internal-cohesion reward from `drina_cleansing_decision_1992/systematic` and reframes that same response id as command-accountability proceedings. The historical campaign remains Ring-2 informational content.
+
+**Artifact review:** The bot selects the same response ids at turns 1 and 11. The first weekly divergence is turn 11, where removal of the unlawful morale/cohesion reward makes small battle power-ratio and casualty changes that deterministically cascade through control, displacement, later operation timing, final state, reports, and diagnostics. Seven of eight `apr1992_52w` baseline artifacts change; `formation_delta.json` remains exact. Activity changes only the front-active/displacement means `1237.596154 -> 1236.192308` and pressure mean `1334.000000 -> 1332.461538`. This behavior is accepted by the locked Ring-3 design gate; it is not unexplained drift.
+
+**Refresh and verification:** The authorized manifest refresh changed exactly the seven reviewed `apr1992_52w` hashes: activity `18ca4624...f07`, control `5d058c0b...d97`, end report `cb626598...b1b`, final save `1e6fe9a9...c7c4`, run summary `ad049096...70d`, watched operations `b67b41c3...a84`, and weekly report `c62f3318...48c7`. `formation_delta.json` and all four-week hashes remain unchanged. The refresh completed in `90.7s`; an immediate no-refresh `npm.cmd run test:baselines` passed in `63.6s`; `npm.cmd run canon:check` passed the determinism static scan and embedded no-refresh baseline in `68.2s`.
+
+**Scope:** Officer/OOB or generated-startup changes are excluded and require a separate later causal disposition. Evidence: `docs/40_reports/implemented/20260802_R7_RING3_BASELINE_CAUSAL_REFRESH.md`. No canon/FORAWWV, schema, package, version, tag, signing, publication, or release-state change is authorized.
+
+---
+
 ## [2026-08-02] R5 Phase 2d Task 8A retained measurement and Phase 2e pure-solve design
 
 **Type:** Measured performance disposition / deterministic architecture handoff / docs-only executable design.
