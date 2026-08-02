@@ -83,7 +83,15 @@ export function PresidentDeskShell({
           onClose();
         }
       }}
-      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-16 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden md:right-6 xl:right-10"
+      // Static, generous clearance (not measured) — a prior ResizeObserver-
+      // based dynamic-measurement approach (fc04f2902, reverted a39b29673)
+      // was unit-test-clean but regressed RS's early-game historical-event
+      // determinism in the interactive packaged harness, most likely via the
+      // extra render cycle its mount-time state update introduced. bottom-16
+      // (64px) proved insufficient once WarroomStatusBar's priority docket
+      // wraps to more than one row; bottom-28 (112px) comfortably covers a
+      // multi-row wrap with no additional state, effect, or render.
+      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-28 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden md:right-6 xl:right-10"
     >
       {onClose && (
         <button
