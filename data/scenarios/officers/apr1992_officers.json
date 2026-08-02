@@ -1123,7 +1123,7 @@
       "defensive_skill": 4,
       "political_reliability": 4,
       "home_corps_id": "hvo_northwest_bosnia",
-      "available_from_turn": 166,
+      "available_from_turn": 69,
       "origin": "military",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
@@ -1132,11 +1132,11 @@
       "enclave_lock": {
         "enclave_id": "orasje"
       },
-      "bio_short": "Military-origin commander documented leading the 106th HVO Brigade by mid-1995.",
+      "bio_short": "Court of BiH records identify him as 106th HVO Brigade commander and later Orašje Operational Group and Operational Zone commander in 1992–93.",
       "command_style": "Cautious, defensive regional command",
-      "known_for": "106th HVO Brigade command",
-      "political_alignment_note": "Regular HRHB corps command appointment.",
-      "historical_role": "brigade_commander"
+      "known_for": "106th HVO Brigade and later Orašje operational commands",
+      "political_alignment_note": "HVO Orašje command-pool entry; appointment class is gameplay-only.",
+      "historical_role": "operational_zone_commander"
     },
     {
       "id": "hvo_nakic",

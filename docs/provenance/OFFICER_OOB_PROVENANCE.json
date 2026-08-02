@@ -3915,24 +3915,24 @@
       ]
     },
     "officer:hvo_matuzovic": {
-      "source": "Balkan Battlegrounds, Vol. I",
-      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0438.json",
-      "citation": "BB1 p.438, Orašje command evidence",
-      "source_tier": "scholarly",
+      "source": "Court of Bosnia and Herzegovina",
+      "source_url": "https://sudbih.gov.ba/Post/Read/20504-potvrdjena-optuznica-u-predmetu-djuro-matuzovic-i-dr",
+      "citation": "Confirmed-indictment summary identifies Đuro Matuzović as commander of the 106th HVO Brigade and later commander of the Orašje Operational Group and Operational Zone during the charged period from the second half of April 1992 through July 1993.",
+      "source_tier": "official",
       "confidence": "exact",
       "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
+      "court_record_citation": "Court of BiH confirmed-indictment summary, Đuro Matuzović et al.; indictment confirmed 24 January 2017, public notice 31 January 2017.",
+      "conflict_note": "Used only for office and conservative chronology identification; the indictment summary is not treated as a finding of criminal liability.",
       "disposition": "supported",
-      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "notes": "Exact official command-authority evidence replaces the BB1 p.438 interview citation, which identified him only as a staff brigadier and did not prove a 106th Brigade command.",
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "source_date": "1995-06-06",
+          "source_date": "1993-07-31",
           "precision": "on_or_before",
-          "modeled_turn": 166,
+          "modeled_turn": 69,
           "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
-          "citation": "BB1 p.438, Orašje command evidence"
+          "citation": "Court of BiH summary bounds the charged command-period evidence on or before July 1993; no exact appointment day is asserted."
         }
       ]
     },

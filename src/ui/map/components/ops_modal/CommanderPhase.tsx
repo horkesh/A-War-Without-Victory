@@ -8,7 +8,7 @@ import { useGameStore } from '../../store/gameStore';
 import type { NamedOfficerView } from '../../data/types';
 import {
     getArchetype,
-    formatRank,
+    formatHistoricalRole,
     formatPips,
     getRatingColor,
     getCompetenceLabel,
@@ -183,7 +183,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                 {corpsCommander && (
                     <div className="text-xs text-text-secondary">
                         <span className="uppercase tracking-wider">{t('opsPlanning.commander.commanding')}</span>{' '}
-                        <span className="text-white">{formatRank(corpsCommander.rank)} {corpsCommander.name}</span>
+                        <span className="text-white">{formatHistoricalRole(corpsCommander.historical_role)} {corpsCommander.name}</span>
                     </div>
                 )}
                 <div className="flex gap-4 text-xs text-text-secondary">
@@ -213,10 +213,10 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                     <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
                         {availableOfficers.map(({ officer, fit }) => {
                             const prepTurns = getPreparationMaxTurns(preparationAggressiveness(officer.aggressiveness));
-                            const rankLabel = formatRank(officer.rank);
+                            const roleLabel = formatHistoricalRole(officer.historical_role);
                             const fitLabel = localizeRegionalFit(fit.label);
                             const commanderOptionLabel = t('opsPlanning.commander.optionAria', {
-                                rank: rankLabel,
+                                rank: roleLabel,
                                 name: officer.name,
                                 fit: fitLabel,
                                 turns: prepTurns,
@@ -238,7 +238,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="min-w-0">
                                             <div className="text-xs text-text-secondary uppercase tracking-wider">
-                                                {rankLabel}
+                                                {roleLabel}
                                             </div>
                                             <div className="text-sm font-bold text-white truncate group-hover:text-accent-gold transition-colors">
                                                 {officer.name}
@@ -287,7 +287,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                         <div className="mt-3 pt-3 border-t border-[rgba(180,160,130,0.15)] flex items-center gap-3">
                             <span className="text-xs text-text-secondary flex-1 truncate">
                                 {t('opsPlanning.commander.selected')} <span className="text-white font-bold">
-                                    {formatRank(pendingOfficer.officer.rank)} {pendingOfficer.officer.name}
+                                    {formatHistoricalRole(pendingOfficer.officer.historical_role)} {pendingOfficer.officer.name}
                                 </span>
                                 <span className={`ml-1.5 text-xs uppercase ${pendingOfficer.fit.colorClass}`}>
                                     ({localizeRegionalFit(pendingOfficer.fit.label)})

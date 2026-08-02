@@ -1,14 +1,14 @@
-# R7 Phase 2 Officer/OOB Attribution — Third Committee Repair
+# R7 Phase 2 Officer/OOB Attribution — Fourth Committee Repair
 
 **Date:** 2026-08-02
 **Workstream:** R7 Phase 2
-**Status:** Third repair implementation-green; final independent committee re-review pending
+**Status:** Fourth repair implementation-green; final independent committee re-review pending
 
 ## Outcome
 
-The second review correctly blocked the prior repair. It still accepted missing `repo://` targets, promoted eleven Wikipedia-only formation identities, left turn-zero and `bounded_model` chronology unsupported, compared OOB sources by count rather than identity, inspected only a selected dependency list, retained 35/28 stale officer rows in the tracked startup, and left the UI presenting gameplay appointment classes as invented general ranks. A later independent review then found six residual defects: the tracked startup was not canonical builder truth; seven live surfaces still rendered appointment classes as rank; two biographies misstated later appointments as opening facts; four formation aliases crossed factions without a cited relation; the 107th Gradačac source supported ARBiH rather than HVO identity; and the identity audit used locale-sensitive sorting.
+The second review correctly blocked the prior repair. It still accepted missing `repo://` targets, promoted eleven Wikipedia-only formation identities, left turn-zero and `bounded_model` chronology unsupported, compared OOB sources by count rather than identity, inspected only a selected dependency list, retained 35/28 stale officer rows in the tracked startup, and left the UI presenting gameplay appointment classes as invented general ranks. A later independent review then found six residual defects: the tracked startup was not canonical builder truth; seven live surfaces still rendered appointment classes as rank; two biographies misstated later appointments as opening facts; four formation aliases crossed factions without a cited relation; the 107th Gradačac source supported ARBiH rather than HVO identity; and the identity audit used locale-sensitive sorting. Review of commit `7779fca39` then blocked a third incomplete repair: persisted operation records still rendered appointment tokens, four full-officer surfaces preferred appointment labels over available sourced roles, Matuzović's BB1 citation did not support the claimed 106th Brigade command, and the master-roadmap register remained stale.
 
-This repair closes those findings without running scenario, baseline, performance, Electron, packaging, release, or publication commands. The owner authorized exactly one canonical deterministic `desktop:startup-snapshot:build` regeneration after the source/data repair; it completed successfully. `docs/10_canon/FORAWWV.md` was not edited.
+This repair closes those findings without running scenario, baseline, performance, Electron, packaging, release, or publication commands. The owner separately authorized one canonical deterministic `desktop:startup-snapshot:build` for the third repair and one additional regeneration after the fourth-review source correction; both completed successfully and no other startup build ran. `docs/10_canon/FORAWWV.md` was not edited.
 
 ## Final census
 
@@ -28,10 +28,11 @@ Seven formerly challenged formation rows remain because exact Balkan Battlegroun
 - Avdo Palić now cites the ICTY Popović transcript: appointment as Žepa-region armed-forces commander on 18 October 1992, turn 28.
 - Mustafa Hajrulahović Talijan now cites the ICTY Halilović judgment: 1st Corps established under his command on 1 September 1992, turn 22.
 - Tihomir Blaškić now cites the ICTY trial judgment: Central Bosnia appointment on 27 June 1992, turn 12.
+- Đuro Matuzović now cites the Court of Bosnia and Herzegovina's confirmed-indictment summary, which identifies him as 106th HVO Brigade commander and later Orašje Operational Group and Operational Zone commander during the charged period. Availability is conservatively bounded `on_or_before` 31 July 1993, turn 69; the record is used only for office/chronology, not as a finding of criminal liability.
 - Mehdin Hodžić, Nesib Malkić, Hajrudin Mešić, and Safet Hadžić use official Bosnia and Herzegovina government/ministry sources for their exact roles and dated boundaries.
 - All 63 playable rows own `available_from_turn` evidence. Every authored exit boundary owns matching evidence. No `bounded_model` rows remain and no row is left at turn zero without a pre-campaign source.
 - Imprecise year/month evidence is represented as `on_or_before` with a conservative source-date bound; it is not described as an exact appointment.
-- Talijan's and Matuzović's biographies now describe their evidenced later commands instead of falsely describing those appointments as the campaign opening.
+- Talijan's and Matuzović's biographies now describe their evidenced later commands instead of falsely describing those appointments as the campaign opening; Matuzović's earlier unsupported BB1 unit inference is replaced by the exact official court-record wording.
 
 ## Accepted officer semantics
 
@@ -40,8 +41,8 @@ Seven formerly challenged formation rows remain because exact Balkan Battlegroun
 - `rank` is retained as the deterministic gameplay appointment class for save compatibility.
 - `historical_role` is a typed sourced office/command. The roster covers army/corps, division, operational-zone/group, enclave, brigade/battalion, staff, regional-defence, and political-military roles.
 - The validator rejects unknown role tokens and legacy rows project deterministically as `unspecified_command_role`.
-- The map read model carries `historical_role`; Personnel and Operations render it separately.
-- Appointment classes no longer become `Gen.`, general titles, stars, or title text. Voice and decision surfaces that do not own a sourced role render the officer's name only; localization retains only neutral appointment wording for compatibility.
+- The map read model carries `historical_role`; Personnel, Operations, commander selection, OOB, operation briefing, and planning surfaces render it separately.
+- Appointment classes no longer become `Gen.`, general titles, stars, or title text. Voice, decision, persisted operation-history, Chronicle, and scenario-end surfaces that do not own a sourced role render the officer's name only; localization retains only neutral appointment wording for compatibility.
 - Opening-command fallback is positive-only: a row must explicitly be a historical start, become available on turn zero, and name the exact historical corps. Generic pool or home-corps metadata cannot manufacture an opening commander.
 - Systems Manual and Rulebook wording now match the accepted contract.
 
@@ -83,6 +84,7 @@ RED evidence preceded production changes:
 - the recursive dependency module did not exist.
 - the residual-review matrix failed 14 of 82 tests across eight files before the third repair, reproducing UI title leakage, false opening biographies, permissive cross-faction aliases, unsupported opening fallbacks, and locale-sensitive ordering.
 - a wider defensive audit then failed 2 of 12 focused assertions, exposing an eighth raw appointment-token renderer in Decision Room operation evidence and a source gate that accepted directories; both were repaired before commit.
+- review of `7779fca39` remained BLOCKED; the fourth-repair RED matrix failed 5 of 63 tests across five files, reproducing persisted AAR/end-report leakage, missed sourced-role surfaces, Chronicle rank propagation, and Matuzović's unsupported source/turn contract.
 
 Green evidence for the repaired packet:
 
@@ -92,8 +94,10 @@ Green evidence for the repaired packet:
 - canonical startup plus operations-planning matrix: 2 files / 49 tests green;
 - final startup/read-model/browser-adjacent matrix: 6 files / 82 tests green;
 - full Decision Room dossier matrix: 1 file / 63 tests green;
+- fourth-repair source/startup/record matrix: 6 files / 81 tests green;
+- fourth-repair full-officer UI/report adjacency: 8 files / 189 tests green;
 - recursive real-repository audit: zero stale brigade/officer identities;
-- canonical deterministic startup regeneration: success, followed by byte-truth/current-state and sector-audit tests green;
+- both separately authorized canonical deterministic startup regenerations: success, each followed by byte-truth/current-state and sector-audit tests green;
 - TypeScript `tsc --noEmit`: exit 0;
 - `git diff --check` and static forbidden-renderer/`localeCompare` scan: green;
 - independent committee result is recorded after the final review below.

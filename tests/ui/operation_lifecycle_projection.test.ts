@@ -300,8 +300,8 @@ describe('shared operation lifecycle consumers', () => {
         expect(operationEntries[0].metadata).toMatchObject({
             operationAarId: 'raw-history-1',
             officerName: 'Archive Commander',
-            officerRank: 'Colonel',
         });
+        expect(operationEntries[0].metadata).not.toHaveProperty('officerRank');
         expect(entries.some((entry) => entry.id === 'officer-week-raw-history-1')).toBe(false);
     });
 

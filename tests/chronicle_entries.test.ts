@@ -793,8 +793,8 @@ describe('generateChronicleEntries', () => {
         expect(operationEntries[0].metadata).toMatchObject({
             operationAarId: 'op-vitez-relief',
             officerName: 'Enver Hadzihasanovic',
-            officerRank: 'General',
         });
+        expect(operationEntries[0].metadata).not.toHaveProperty('officerRank');
         expect(entries.some(e => (e.type as string) === 'personnel')).toBe(false);
     });
 

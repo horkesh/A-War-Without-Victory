@@ -34,6 +34,7 @@ The schema/read-model addition is static and deterministic. It adds no random so
 - Historically important non-corps command personalities are not deleted merely to make an imprecise label true.
 - Provenance stays exact about historical assignments and cannot infer a corps command from the gameplay enum.
 - The UI no longer converts appointment classes into invented historical general ranks or stars.
+- Persisted AAR, Chronicle, and scenario-end records may retain appointment tokens for save compatibility, but player-facing projections render a sourced role or the officer name only.
 - Generic pool metadata cannot manufacture an opening historical commander.
 - The numeric 63-person contract is reconciled without pretending every roster member historically held corps or army command.
 

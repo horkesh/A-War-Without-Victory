@@ -22,7 +22,6 @@ export interface ChronicleEntry {
         operationAarId?: string;
         operationOutcome?: string;
         officerName?: string;
-        officerRank?: string;
         costLedgerRef?: string;
         decisionRecordId?: string;
         decisionRecordSurface?: 'chronicle' | 'records';
@@ -365,7 +364,6 @@ function buildOperationHistoryEntries(state: any, playerFaction: string | null):
                 operationName,
                 operationOutcome: outcome,
                 officerName: typeof op.commander_name === 'string' ? op.commander_name : undefined,
-                officerRank: typeof op.commander_rank === 'string' ? op.commander_rank : undefined,
             },
         });
     }

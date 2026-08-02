@@ -8,7 +8,7 @@ import type { NamedOfficerView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import {
     getArchetype,
-    formatRank,
+    formatHistoricalRole,
     formatPips,
     getRatingColor,
     getCompetenceLabel,
@@ -154,7 +154,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <div className="font-bold text-[12px]">
-                                            {formatRank(officer.rank)} {officer.name}
+                                            {formatHistoricalRole(officer.historical_role)} {officer.name}
                                         </div>
                                         <div className="text-xs text-text-muted italic">{getArchetype(officer)}</div>
                                     </div>
@@ -192,7 +192,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                             <div className="text-xs uppercase text-neutral-400 font-bold mb-1">{t('commanderSelect.unavailable')}</div>
                             {unavailableOfficers.map(({ officer, reason }) => (
                                 <div key={officer.id} className="px-3 py-1.5 text-neutral-400 text-xs">
-                                    <span className="font-semibold">{formatRank(officer.rank)} {officer.name}</span>
+                                    <span className="font-semibold">{formatHistoricalRole(officer.historical_role)} {officer.name}</span>
                                     <span className="ml-2 text-xs uppercase">[{reason}]</span>
                                 </div>
                             ))}

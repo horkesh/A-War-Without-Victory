@@ -18,7 +18,7 @@ import {
 import { getOperationPhaseLabel } from '../utils/operations';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
-import { formatRank } from '../utils/officerCharacter';
+import { formatHistoricalRole } from '../utils/officerCharacter';
 import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingFaction, getPlayerFacingSectorName, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
@@ -427,7 +427,7 @@ export function OOBSidebar() {
                                 <span className="block truncate pl-6 text-xs text-text-secondary">
                                   {t('oob.co')}{' '}
                                   <span className="text-accent-gold font-semibold">
-                                    {formatRank(commander.rank)} {commander.name}
+                                    {formatHistoricalRole(commander.historical_role)} {commander.name}
                                   </span>
                                 </span>
                               );

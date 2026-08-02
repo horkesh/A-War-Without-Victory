@@ -408,7 +408,7 @@ function CompletedOpCard({
                         </div>
                         {op.commander_name && (
                             <div className="text-xs text-text-muted">
-                                {t('operationHistory.oic', { commander: `${op.commander_rank ? `${op.commander_rank} ` : ''}${op.commander_name}` })}
+                                {t('operationHistory.oic', { commander: op.commander_name })}
                             </div>
                         )}
                         <div className="text-xs text-text-muted">

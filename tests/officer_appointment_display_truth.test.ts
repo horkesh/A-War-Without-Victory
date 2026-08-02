@@ -22,7 +22,7 @@ describe('officer appointment and historical-role display truth', () => {
     });
 
     it('keeps gameplay appointment classes out of every live officer identity surface', () => {
-        const surfaces = [
+        const nameOnlySurfaces = [
             'src/ui/map/components/army_hq/PersonnelContent.tsx',
             'src/ui/map/components/army_hq/OperationsSection.tsx',
             'src/ui/map/components/army_hq/OperationOpportunityDossierPanel.tsx',
@@ -32,9 +32,31 @@ describe('officer appointment and historical-role display truth', () => {
             'src/ui/map/data/presidentialDecisionRoom.ts',
             'src/ui/map/components/EventDecisionModal.tsx',
         ];
-        for (const surface of surfaces) {
+        for (const surface of nameOnlySurfaces) {
             const source = fs.readFileSync(surface, 'utf8');
             expect(source, surface).not.toMatch(/humanizeRank|formatOfficerRank|proposal\.commander\.rank/);
+        }
+
+        const sourcedRoleSurfaces = [
+            'src/ui/map/components/CommanderSelectionModal.tsx',
+            'src/ui/map/components/OOBSidebar.tsx',
+            'src/ui/map/components/OperationBriefingModal.tsx',
+            'src/ui/map/components/ops_modal/CommanderPhase.tsx',
+        ];
+        for (const surface of sourcedRoleSurfaces) {
+            const source = fs.readFileSync(surface, 'utf8');
+            expect(source, surface).toContain('formatHistoricalRole');
+            expect(source, surface).not.toContain('formatRank(');
+        }
+
+        const persistedRecordSurfaces = [
+            'src/ui/map/components/OperationHistoryPanel.tsx',
+            'src/ui/map/components/chronicle/generateChronicleEntries.ts',
+            'src/scenario/scenario_end_report.ts',
+        ];
+        for (const surface of persistedRecordSurfaces) {
+            const source = fs.readFileSync(surface, 'utf8');
+            expect(source, surface).not.toMatch(/commander_rank|officerRank/);
         }
     });
 

@@ -5,7 +5,7 @@
 import { useMemo } from 'react';
 import type { NamedOfficerView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
-import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/officerCharacter';
+import { formatHistoricalRole, getArchetype, formatPips, getRatingColor } from '../utils/officerCharacter';
 import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
@@ -458,7 +458,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         {commanderDisplay.kind === 'assigned' ? (
                             <div className="flex items-center gap-3">
                                 <div>
-                                    <div className="text-xs font-bold">{formatRank(commanderDisplay.officer.rank)} {commanderDisplay.officer.name}</div>
+                                    <div className="text-xs font-bold">{formatHistoricalRole(commanderDisplay.officer.historical_role)} {commanderDisplay.officer.name}</div>
                                     <div className="text-xs text-text-muted italic">{getArchetype(commanderDisplay.officer)}</div>
                                 </div>
                                 <div className="flex gap-2 text-xs">

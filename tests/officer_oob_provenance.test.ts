@@ -455,6 +455,7 @@ describe('officer/OOB provenance inventory', () => {
         expect(byId.get('arbih_drekovic')?.available_from_turn).toBe(29);
         expect(byId.get('hvo_petkovic')?.available_from_turn).toBe(2);
         expect(byId.get('vrs_boric')?.available_from_turn).toBe(39);
+        expect(byId.get('hvo_matuzovic')?.available_from_turn).toBe(69);
 
         expect(manifest.records['officer:arbih_drekovic']?.temporal_evidence).toContainEqual(
             expect.objectContaining({
@@ -478,6 +479,19 @@ describe('officer/OOB provenance inventory', () => {
                 source_date: '1992-12-31',
                 precision: 'on_or_before',
                 modeled_turn: 39,
+            }),
+        );
+        expect(manifest.records['officer:hvo_matuzovic']).toMatchObject({
+            source: 'Court of Bosnia and Herzegovina',
+            source_url: 'https://sudbih.gov.ba/Post/Read/20504-potvrdjena-optuznica-u-predmetu-djuro-matuzovic-i-dr',
+            source_tier: 'official',
+        });
+        expect(manifest.records['officer:hvo_matuzovic']?.temporal_evidence).toContainEqual(
+            expect.objectContaining({
+                field: 'available_from_turn',
+                source_date: '1993-07-31',
+                precision: 'on_or_before',
+                modeled_turn: 69,
             }),
         );
     });

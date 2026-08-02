@@ -24,6 +24,8 @@ type OfficerRecord = {
     is_historical_start?: boolean;
     bio_short?: unknown;
     known_for?: unknown;
+    historical_role?: unknown;
+    political_alignment_note?: unknown;
     sensitive_history_note?: unknown;
 };
 
@@ -80,5 +82,13 @@ describe('officer mini-bio schema', () => {
                 .join(' ');
             expect(chronologyCopy, officer.id).not.toMatch(/\b(?:scenario start|opening (?:army |corps |regional |northwest |command))\b/i);
         }
+    });
+
+    it('keeps Matuzović bounded to the exact Court of BiH command record', () => {
+        const officer = loadOfficerRecords().find((candidate) => candidate.id === 'hvo_matuzovic');
+        expect(officer?.available_from_turn).toBe(69);
+        expect(officer?.historical_role).toBe('operational_zone_commander');
+        expect(officer?.bio_short).toMatch(/Court of BiH.*106th HVO Brigade.*Operational Group.*Operational Zone/i);
+        expect(officer?.political_alignment_note).not.toMatch(/corps command/i);
     });
 });
