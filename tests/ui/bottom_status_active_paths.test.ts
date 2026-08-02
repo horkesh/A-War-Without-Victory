@@ -9,11 +9,27 @@ import {
   summarizeActiveBranchPaths,
 } from '../../src/ui/map/components/ActiveBranchPathRow.js';
 
+// jsdom has no layout engine: `clientWidth` and `getBoundingClientRect()` are
+// always 0, which starves ActiveBranchPathRow's width-measurement collapse
+// logic (recalculateLayout) into always choosing `compact`. Stub both to a
+// generous, fixed size so the viewport-threshold behavior under test (not
+// pixel-perfect measurement) is what actually gets exercised.
+const originalClientWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientWidth');
+const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+
 beforeEach(() => {
   Object.defineProperty(window, 'innerWidth', { configurable: true, writable: true, value: 2048 });
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 2000 });
+  HTMLElement.prototype.getBoundingClientRect = function stubbedGetBoundingClientRect(this: HTMLElement) {
+    return { width: 100, height: 20, top: 0, left: 0, right: 100, bottom: 20, x: 0, y: 0, toJSON() { return this; } } as DOMRect;
+  };
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  if (originalClientWidth) Object.defineProperty(HTMLElement.prototype, 'clientWidth', originalClientWidth);
+  HTMLElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+});
 
 describe('bottom status active-path summary', () => {
   it('uses two full labels only at wide packaged geometry', () => {

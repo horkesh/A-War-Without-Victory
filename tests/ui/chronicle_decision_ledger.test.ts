@@ -189,7 +189,7 @@ describe('Chronicle decision ledger integration', () => {
             turn: decisionTurn,
           }],
           event_causality_log: [{
-            turn: firedTurn,
+            turn: decisionTurn,
             from_event: 'cabinet_crisis',
             to_event: 'cabinet_aftershock',
             to_flag: null,
@@ -207,7 +207,7 @@ describe('Chronicle decision ledger integration', () => {
       ['cabinet_aftershock', { id: 'cabinet_aftershock', title: 'Cabinet aftershock' } as EventDefinition],
     ]));
 
-    const receipt = entries.find((entry) => entry.id === 'consequence-receipt-cabinet_crisis::hold_line::cabinet_aftershock');
+    const receipt = entries.find((entry) => entry.id === `consequence-receipt-cabinet_crisis::hold_line::${decisionTurn}::cabinet_aftershock`);
     expect(receipt?.detail).toContain(`on ${turnToDateString(decisionTurn)}`);
     expect(receipt?.detail).not.toContain(`at week ${decisionTurn}`);
     expect(receipt?.metadata).toMatchObject({

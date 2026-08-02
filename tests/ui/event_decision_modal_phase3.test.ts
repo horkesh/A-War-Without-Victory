@@ -153,7 +153,7 @@ describe('EventDecisionModal presidential dossier', () => {
     const bcsText = bcsRender.container.textContent ?? '';
     expect(bcsText).toContain('General Ratko Mladic');
     expect(bcsText).toContain('upozorenje generala Ratka Mladica');
-    expect(bcsText).toContain('General Mladic je upozorio na genocid');
+    expect(bcsText).toContain('traziti radnje koje cine genocid');
     expect(bcsText).not.toMatch(/Komandant vojske|Upozorenje komandanta|Komandant je upozorio/i);
     bcsRender.unmount();
   });
