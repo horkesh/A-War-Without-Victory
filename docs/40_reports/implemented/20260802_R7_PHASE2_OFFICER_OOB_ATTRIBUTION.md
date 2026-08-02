@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-02
 **Workstream:** R7 Phase 2
-**Status:** Fourth repair implementation-green; final independent committee re-review pending
+**Status:** ACCEPTED — independent committee code/data review passed; canonical-plan blocker corrected in final publication tip
 
 ## Outcome
 
@@ -98,10 +98,15 @@ Green evidence for the repaired packet:
 - fourth-repair source/startup/record matrix: 6 files / 81 tests green;
 - fourth-repair full-officer UI/report adjacency: 8 files / 189 tests green;
 - reconciled Phase-E elite-commander omission contract: 1 file / 2 tests green;
+- independent review of `5aef484d7`: code/data green, corrected omission contract verified, 12 files / 103 tests green, startup/typecheck/identity gates green;
 - recursive real-repository audit: zero stale brigade/officer identities;
 - both separately authorized canonical deterministic startup regenerations: success, each followed by byte-truth/current-state and sector-audit tests green;
 - TypeScript `tsc --noEmit`: exit 0;
 - `git diff --check` and static forbidden-renderer/`localeCompare` scan: green;
-- independent committee result is recorded after the final review below.
+- final committee publication review covers this accepted report, canonical R7 plan, roadmap, board, and ledger together.
 
 The final verification command census is recorded in the ledger and commit handoff. No baseline was refreshed and no release state changed.
+
+## Independent committee disposition
+
+Independent review of immutable implementation tip `5aef484d7` passed every code, data, source, startup, identity, chronology, UI/report, TypeScript, and forbidden-scope gate. The reviewer correctly withheld final acceptance because the detailed canonical R7 execution plan and the current supersession note on its historical predecessor still carried the superseded 334/249 census, described startup closure as open, and left the active Phase 2 startup task unchecked. This publication tip corrects those active instructions to the verified 323 supported / 51 omitted census, 238 supported formations, 213 matches / 29 dispositions / zero unresolved identities, and byte/current/sector-clean startup. R7 Phase 2 is therefore closed and Phase 3 is the next executable R7 work.

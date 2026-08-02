@@ -4237,3 +4237,5 @@ Applied in `[2026-08-02] R7 Phase 2 second provenance committee correction`, ADR
 **Court summaries can establish an office without establishing liability:** when a confirmed-indictment summary is the exact official command-authority source, quote its office and charged-period boundary conservatively, state that it is not a finding of criminal liability, and do not import a more specific unit/date from adjacent narrative text.
 
 **An omission is incomplete while a regression test still requires the unsupported identity:** when provenance deliberately removes an officer or elite-commander sidecar, reconcile adapter/UI tests to assert absence and retain a supported neighboring control. A clean production audit does not make a contradictory committed test harmless.
+
+**An active execution plan is part of the acceptance surface:** roadmap and board summaries cannot close a phase while their linked canonical plan still carries a superseded census, unchecked completed task, or stale generated-state blocker. Independent review must reconcile executable instructions as well as code, data, reports, and ledgers.

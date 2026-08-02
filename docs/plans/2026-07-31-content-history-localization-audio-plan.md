@@ -9,7 +9,7 @@
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phase 2 committee repair source-green; generated officer-state/startup proof remains
+**Status:** IN PROGRESS -- Phase 2 independently accepted; Phase 3 Bosnian locale contract next
 **Roadmap workstream:** R7
 **Canonical owner:** authored JSON plus source/license manifests; `src/ui/map/i18n/` for locale; `src/ui/map/audio/` for playback
 **Collision rule:** Do not edit the same event/essay as R4. Do not edit map/Desk layout until R1/R2 finish.
@@ -129,7 +129,7 @@ Rules:
 
 - [Officer/OOB and audio inventory report](../40_reports/audits/20260801_R7_OFFICER_AUDIO_PROVENANCE_INVENTORY.md).
 - Officer/OOB: 374/374 rows keyed, 0 supported, 2,286 blocking findings, 12 normalized-name collisions. Positive support must be owned per row and cannot be inherited from manifest defaults.
-- [Phase 2 committee repair](../40_reports/implemented/20260802_R7_PHASE2_OFFICER_OOB_ATTRIBUTION.md): 334/334 authoritative officer/OOB source rows are supported (63 officers, 19 corps/commands, 249 brigades/regiments, three elite commanders). Formation omissions and generated formation overlaps are zero. The deterministic omission ledger retains 35 unsupported officer and five elite candidates. Generated startup still has 35 stale `named_officer_data` and 28 stale `named_officers` rows.
+- [Phase 2 accepted closeout](../40_reports/implemented/20260802_R7_PHASE2_OFFICER_OOB_ATTRIBUTION.md): 323 authoritative officer/OOB source rows are supported (63 officers, 19 corps/commands, 238 brigades/regiments, and three elite commanders). The deterministic omission ledger retains 35 unsupported officer, 11 formation, and five elite candidates. Strict provenance has zero findings; identity comparison closes 213 matches plus 29 dispositions with zero unresolved; recursive dependency closure has zero stale identities. The tracked startup is canonical-builder byte truth, its officer state matches the 63 supported rows, and current-state plus sector audits pass.
 - Audio: 36/36 cues keyed, 17 provided, 19 placeholders, 0 unregistered binaries, 54 blocking findings, 5 warnings, and three required ambient beds absent. Registry/bundle resolution and recursive binary ownership are fail-closed; `OggS` remains a container-signature precheck rather than decode/LUFS proof.
 - Verification: focused 5 files / 22 tests; parent integration 2 files / 11 tests; TypeScript, canon/determinism/baseline, EOL, and diff checks green.
 - All four Phase 0 inventories are accepted. The historical/localization contract survived fourteen bounded review corrections and an integrated R4/R7 repair: sensitive-warning continuations are structural and fail closed; exact paramilitary exceptions remain option-bounded; seven safe R4 essays now carry reviewed source tiers; and neutral operational `both sides` prose no longer triggers a moral-symmetry false positive. The production Ring-3 choices remain remediated; historical, identity, localization, licensing, and audio remediation remains open in Phases 1-4.
@@ -214,10 +214,10 @@ npm.cmd run test:baselines
 - [x] Resolve exact duplicate IDs and dead corps refs while honoring the Systems Manual's 63-officer census.
 - [x] Require explicit row-owned source/citation for every retained named row.
 - [x] Preserve uncertain/conflicting named candidates only in the deterministic omission output, not playable data.
-- [ ] Align the tracked generated startup with the repaired source roster. Static inventory is exact: 35 stale `named_officer_data`, 28 stale `named_officers`, and zero stale historical formation dependencies. Regeneration and integrated baseline proof remain serialized behind the runtime owner.
+- [x] Align the tracked generated startup with the repaired source roster. The two separately owner-authorized canonical regenerations closed the source changes; byte truth, current-state validation, sector audit, and recursive zero-stale identity closure pass. No baseline was refreshed.
 - [x] Do not derive historical identity from name similarity alone; only exact `same_person`/`tenure_of` relations survive.
 
-**Repaired checkpoint census:** 63/63 authored officer rows supported; 19/19 corps/command rows supported; 249/249 authored brigade/regiment rows supported; 3/3 elite commanders supported. The committee-blocked 80-formation deletion is fully reversed because the rows were generated or hardcoded dependencies, not safe omissions. The omission ledger now contains 35 officer and five elite research candidates. Temporal evidence covers every non-zero/terminal modeled officer boundary; Dreković is turn 29, Petković is turn 2, and Borić is an honest conservative turn-39 bound. Generated officer-state closure remains open at 35/28 stale rows; formation dependency closure is zero-stale.
+**Accepted checkpoint census:** 63 authored officer rows, 19 corps/command rows, 238 authored brigade/regiment rows, and three elite commanders are supported: 323 playable rows total. The deterministic omission ledger contains 35 officer, 11 formation, and five elite research candidates: 51 omissions total. Seven challenged formation rows remain on exact Balkan Battlegrounds evidence, including the corrected ARBiH 107th Gradačac; three cited cross-faction operational-alignment dispositions remain explicit. Temporal evidence covers every modeled officer boundary, including Matuzović's conservative turn-69 Court of BiH office bound. The tracked startup is byte-identical to canonical builder output, carries exactly the 63 supported officer-data rows, and has zero stale officer or formation dependencies.
 
 ```powershell
 npm.cmd run test:vitest -- tests/canon_officer_corps_refs.test.ts tests/officer_oob_provenance.test.ts tests/officer_state_persistence.test.ts tests/officer_bio_read_model.test.ts tests/officer_mini_bio_schema.test.ts tests/officer_system.test.ts tests/oob_loader.test.ts tests/oob_lookup_determinism.test.ts tests/compare_oob_vs_markdown.test.ts tests/a4_army_co_roster_personalities.test.ts tests/army_co_emergent_lifecycle.test.ts --pool=forks --reporter=dot
@@ -350,7 +350,7 @@ git diff --check
 
 - [ ] Sensitive-history inventory has no unsupported live claim or prohibited interaction.
 - [ ] Grabovica/Uzdol/Neretva content is correctly placed in 1993 and legally/factually precise.
-- [ ] No playable officer/OOB identity lacks exact provenance. Authored source and formation-dependency diagnostics are strict-green at 334/334 and zero omitted live formations; generated officer-state closure remains open at 35 stale data rows and 28 stale mutable-state rows pending owner regeneration and baseline proof.
+- [x] No playable officer/OOB identity lacks exact or conservatively bounded row-owned provenance. Strict provenance is green at 323 supported / 51 explicit omissions / zero findings; identity comparison is 213 matches / 29 dispositions / zero unresolved; generated startup and recursive dependency closure have zero stale identities.
 - [ ] `bs`/`bs-BA` is canonical, `bcs` migrates, pseudo coverage is complete, and Bosnian is honestly labeled for its review state.
 - [ ] Every audible asset has source/license/checksum lineage and passes sensitivity rules.
 - [ ] Offline packaged runtime, accessibility, browser, baseline, and content suites are green.
