@@ -51,7 +51,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(36);
+        expect(getLatestSchemaVersion()).toBe(37);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -1002,7 +1002,7 @@ describe('versioned save migration steps', () => {
         // same-version save serialized without it.
         const built = minimalLegacyState(1);
         applyMigrations(built);
-        expect(built.schema_version).toBe(36);
+        expect(built.schema_version).toBe(CURRENT_SCHEMA_VERSION);
         delete built.displacement.displacement_flows_by_osid;
         built.schema_version = 36;
 

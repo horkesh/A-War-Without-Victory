@@ -612,9 +612,22 @@ describe('strict null inventory progress', () => {
         // `'RS'` string literal, NOT an `as FactionId` cast, so as_factionid (still 1) /
         // as_unknown / as_any / non_null_assertions are ALL UNCHANGED — this bump is purely
         // the optional-field ratchet recording the contract-mandated new persisted field.
+        // R5 persistence classification (#448): `sector_intel` moved optional -> required
+        // on MilitaryState, so 529 -> 528 optional GameState fields (checked separately
+        // below via optional_fields_game_state). Two unrelated lanes landed +2
+        // as_factionid_casts in the same window, both guarded narrowing helpers, not
+        // unguarded widenings: `canonicalPlayerFaction()` in
+        // src/sim/events/realized_consequence_receipts.ts checks
+        // `CANONICAL_FACTIONS.includes(value as FactionId)` before returning the cast value
+        // or `null`; generateWrappedSlides.ts:400 casts only inside
+        // `if (VALID_FACTION_IDS.has(playerFaction))`. So as_factionid 1 -> 3. R1's seamless
+        // map-transition build (19b2f80ca7) added +1 as_unknown_casts: DataLoader.ts:59's
+        // `Reflect.get(target, property, readonlyMap) as unknown` inside a read-only Map
+        // Proxy `get` trap — the standard cast-through-unknown Proxy-typing idiom, not a
+        // widened escape. So as_unknown 4 -> 5. as_any / non_null_assertions UNCHANGED.
         expect(current.counts).toMatchObject({
-            as_factionid_casts: 1,
-            as_unknown_casts: 4,
+            as_factionid_casts: 3,
+            as_unknown_casts: 5,
             as_any_casts: 0,
             non_null_assertions_dot: 7,
             non_null_assertions_index: 0,
@@ -672,15 +685,20 @@ describe('strict null inventory progress', () => {
             // Schema 36 keeps legacy saves absent-safe; both fields are deterministic and
             // add no type escape. The inventory classifies TacticalGroup as sim and
             // ArmyHqOperation as state: 527->529 / sim 336->337 / state 181->182.
-            optional_fields_game_state: 529,
+            // R5 persistence classification (#448) + R4 Phase 1 Records receipt land in the
+            // same window: MilitaryState's `corps_front_sectors` and `sector_intel` move
+            // optional -> required (sim domain, -2), while StateMeta gains +1 optional field
+            // `proposal_decision_history` (the durable Records receipt for resolved ordinary
+            // autonomy proposals, state domain). Net 529->528 / sim 337->335 / state 182->183.
+            optional_fields_game_state: 528,
         });
-        expect(current.optional_field_domains.total).toBe(529);
+        expect(current.optional_field_domains.total).toBe(528);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 337,
-            state: 182,
+            sim: 335,
+            state: 183,
             ui_adapter: 0,
             unknown: 0,
         });

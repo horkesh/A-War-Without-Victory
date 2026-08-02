@@ -22,20 +22,20 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { TgParticipationRecord } from '../src/state/brigade_history.js';
 
-describe('C3 schema freeze guard (v36)', () => {
-    it('CURRENT_SCHEMA_VERSION is pinned at 36', () => {
+describe('C3 schema freeze guard (v37)', () => {
+    it('CURRENT_SCHEMA_VERSION is pinned at 37', () => {
         // If this fails, a renumber happened. Confirm the bump is intentional
         // (new migration step appended), then update this guard + the
         // save_migration v34 one-way contract comment together.
-        expect(CURRENT_SCHEMA_VERSION).toBe(36);
+        expect(CURRENT_SCHEMA_VERSION).toBe(37);
     });
 
-    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (36)', () => {
+    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (37)', () => {
         // Guards against a migration being appended at a number > 35 without
         // bumping CURRENT_SCHEMA_VERSION (or vice-versa) — the classic
         // collide-renumber footgun ADR-0005 §Determinism Impact warns about.
         expect(getLatestSchemaVersion()).toBe(CURRENT_SCHEMA_VERSION);
-        expect(getLatestSchemaVersion()).toBe(36);
+        expect(getLatestSchemaVersion()).toBe(37);
     });
 
     it('v34 ships the four TG/Army-HQ Records as the only non-undefined scaffold (omitEmpty shape)', () => {
@@ -137,10 +137,10 @@ describe('C3 schema freeze guard (v36)', () => {
             displacement: {} as any,
         } as GameState;
         const hydrated = deserializeState(serializeState(state));
-        expect(hydrated.schema_version).toBe(36);
+        expect(hydrated.schema_version).toBe(37);
     });
 
-    it('C3 freeze: canonical startup save (schema 36) keeps the frozen persisted key-sets', () => {
+    it('C3 freeze: canonical startup save (schema 37) keeps the frozen persisted key-sets', () => {
         // C3 schema-freeze sentinel. A new PERSISTED field added to the initial
         // GameState (military/political/displacement) without a deliberate schema
         // bump + migration changes these key-sets and trips a RED test — the
@@ -151,10 +151,10 @@ describe('C3 schema freeze guard (v36)', () => {
         const save = JSON.parse(
             readFileSync(join(process.cwd(), 'data', 'derived', 'startup', 'apr_1992_initial_save.json'), 'utf8'),
         ) as { schema_version: number; military: Record<string, unknown>; political: Record<string, unknown>; displacement: Record<string, unknown> };
-        expect(save.schema_version).toBe(36);
+        expect(save.schema_version).toBe(37);
         const keys = (o: Record<string, unknown>): string => Object.keys(o).sort().join(',');
         expect(keys(save.military)).toBe(
-            'alliance_locks,army_co_decision_traces,army_corps_directives_by_faction,army_hq_last_op_turn,army_hq_op_count_by_year,army_hq_operations,army_theatre_assignment,assignable_front_segments,bot_priority_shifts,brigade_front_assignment,cascade_penalties,closed_event_ids,command_authority,convoy_decision_history,corps_command,corps_front_sectors,cost_ledger_annotations,declined_operations,enabled_event_ids,equipment_quality_modifiers,event_aggression_modifiers,event_causality_log,event_decision_log,event_fire_counts,event_flags,event_last_fired_turn,event_overflow_queue,event_readiness,fired_event_ids,formation_spawn_directive,formations,front_posture,front_posture_regions,front_pressure,front_segments,militia_pools,named_officer_data,named_officers,negotiation,offensive_ops_suppressions,officer_decision_history,pending_convoy_decisions,pending_event_decisions,pending_event_notifications,pending_officer_events,pending_reserve_requests,phantoms_spawned,political_leader_data,political_leaders,recruitment_modifiers,recruitment_state,reserve_request_history,tactical_groups,theatres,triggered_operations_accepted,unresolved_sector_brigades,used_operation_names,war_front_edges_osid,war_jna,war_militia_strength,war_timeline',
+            'alliance_locks,army_co_decision_traces,army_corps_directives_by_faction,army_hq_last_op_turn,army_hq_op_count_by_year,army_hq_operations,army_theatre_assignment,assignable_front_segments,bot_priority_shifts,brigade_front_assignment,cascade_penalties,closed_event_ids,command_authority,convoy_decision_history,corps_command,corps_front_sectors,cost_ledger_annotations,declined_operations,enabled_event_ids,equipment_quality_modifiers,event_aggression_modifiers,event_causality_log,event_decision_log,event_fire_counts,event_flags,event_last_fired_turn,event_overflow_queue,event_readiness,fired_event_ids,formation_spawn_directive,formations,front_posture,front_posture_regions,front_pressure,front_segments,militia_pools,named_officer_data,named_officers,negotiation,offensive_ops_suppressions,officer_decision_history,pending_convoy_decisions,pending_event_decisions,pending_event_notifications,pending_officer_events,pending_reserve_requests,phantoms_spawned,political_leader_data,political_leaders,recruitment_modifiers,recruitment_state,reserve_request_history,sector_intel,tactical_groups,theatres,triggered_operations_accepted,used_operation_names,war_front_edges_osid,war_jna,war_militia_strength,war_timeline',
         );
         expect(keys(save.political)).toBe(
             'ceasefire,coercion_pressure_by_municipality,contested_control,control_events,initial_political_controllers,last_contained_osids_by_faction,municipalities,negotiation_ledger,negotiation_status,political_controllers,rbih_hrhb_state,supply_rights,war_alliance_rbih_hrhb,war_consolidation_until,war_control_strain,war_exhaustion,war_exhaustion_local,war_supply_condition,war_supply_pressure',
