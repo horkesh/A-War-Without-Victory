@@ -527,6 +527,7 @@ function App() {
   // `?view=warroom` / `?view=game` URL-param overrides below (~:1022) still let
   // dev/automation deep-link past the menu.
   const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('mainMenu');
+  const [warroomStatusBarHeightPx, setWarroomStatusBarHeightPx] = useState(0);
   const [fieldOperationPlanFocus, setFieldOperationPlanFocus] = useState<FieldOperationPlanTarget | null>(null);
   const [fieldOperationPlanReturnCardId, setFieldOperationPlanReturnCardId] = useState<string | null>(null);
   const [campaignViewportEpoch, setCampaignViewportEpoch] = useState(0);
@@ -2068,6 +2069,7 @@ function App() {
                   onReviewItem={reviewPreAdvanceItem}
                   onReviewTarget={reviewPreAdvanceTarget}
                   onResolveBlocker={handlePresidentialInboxAction}
+                  onHeightChange={setWarroomStatusBarHeightPx}
                 />
               ) : null
             )}
@@ -2098,6 +2100,7 @@ function App() {
               state={loadedGameState}
               osidNameMap={osidDisplayNames}
               eventCatalog={eventCatalogFull}
+              statusBarClearancePx={warroomStatusBarHeightPx}
               onAction={handlePresidentialInboxAction}
               onAdvance={() => useGameStore.getState().setAdvanceTurnPending(true)}
               onOpenArmyHQ={() => {
