@@ -85,6 +85,7 @@ RED evidence preceded production changes:
 - the residual-review matrix failed 14 of 82 tests across eight files before the third repair, reproducing UI title leakage, false opening biographies, permissive cross-faction aliases, unsupported opening fallbacks, and locale-sensitive ordering.
 - a wider defensive audit then failed 2 of 12 focused assertions, exposing an eighth raw appointment-token renderer in Decision Room operation evidence and a source gate that accepted directories; both were repaired before commit.
 - review of `7779fca39` remained BLOCKED; the fourth-repair RED matrix failed 5 of 63 tests across five files, reproducing persisted AAR/end-report leakage, missed sourced-role surfaces, Chronicle rank propagation, and Matuzović's unsupported source/turn contract.
+- review of `383797818` found the production/source/docs gates green but correctly remained BLOCKED because a legacy Phase-E UI test still expected the explicitly omitted Dževad Rađo elite-commander attribution; the follow-up changes that regression contract to require `undefined` while retaining the supported Savčić sidecar control.
 
 Green evidence for the repaired packet:
 
@@ -96,6 +97,7 @@ Green evidence for the repaired packet:
 - full Decision Room dossier matrix: 1 file / 63 tests green;
 - fourth-repair source/startup/record matrix: 6 files / 81 tests green;
 - fourth-repair full-officer UI/report adjacency: 8 files / 189 tests green;
+- reconciled Phase-E elite-commander omission contract: 1 file / 2 tests green;
 - recursive real-repository audit: zero stale brigade/officer identities;
 - both separately authorized canonical deterministic startup regenerations: success, each followed by byte-truth/current-state and sector-audit tests green;
 - TypeScript `tsc --noEmit`: exit 0;
