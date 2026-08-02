@@ -10,7 +10,7 @@
  * Canonical owner: src/ui/map/components/warroom/WarroomStatusBar.tsx
  */
 
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import {
   buildWarroomPriorityDocketView,
@@ -29,11 +29,6 @@ export interface WarroomStatusBarProps {
   onReviewItem?: (item: WarroomPriorityDocketItem) => void;
   onReviewTarget?: (target: PresidentialDecisionRoomNavigationTarget) => void;
   onResolveBlocker?: (action: PresidentialBlocker['action'], itemId: string) => void;
-  /** Reports the bar's own rendered height (it wraps to more rows as the
-   *  priority docket grows), so bottom-right-anchored siblings like
-   *  PresidentDeskShell can keep their own content clear of it instead of
-   *  assuming a fixed clearance. */
-  onHeightChange?: (px: number) => void;
 }
 
 function priorityClass(tone: WarroomPriorityDocketTone): string {
@@ -186,9 +181,8 @@ function PriorityDocketPanel({
   );
 }
 
-export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTarget, onResolveBlocker, onHeightChange }: WarroomStatusBarProps) {
+export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTarget, onResolveBlocker }: WarroomStatusBarProps) {
   const [priorityDocketOpen, setPriorityDocketOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement | null>(null);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const turnAftermath = useGameStore((s) => s.turnAftermath);
@@ -205,25 +199,6 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
     () => derivePresidentialBlockers(loadedGameState, osidDisplayNames),
     [loadedGameState, osidDisplayNames],
   );
-
-  // Mount/unmount only (deps on the loadedGameState presence that gates the
-  // early return below, not on every render) — the ResizeObserver itself
-  // picks up ongoing content-driven size changes, so re-running this per
-  // render would tear down and rebuild the observer on every keystroke and
-  // spuriously zero the reported height in between.
-  useLayoutEffect(() => {
-    if (!onHeightChange) return undefined;
-    const node = rootRef.current;
-    if (!node) return undefined;
-    const report = () => onHeightChange(node.getBoundingClientRect().height);
-    report();
-    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(report);
-    observer?.observe(node);
-    return () => {
-      observer?.disconnect();
-      onHeightChange(0);
-    };
-  }, [onHeightChange, Boolean(loadedGameState)]);
 
   if (!loadedGameState) return null;
 
@@ -263,7 +238,6 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
 
   return (
     <div
-      ref={rootRef}
       data-tutorial-step="warroom-status-bar"
       className="absolute bottom-[2%] right-[2%] flex max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded bg-black/90 px-3 py-1.5 font-mono text-xs text-amber-400 pointer-events-auto select-none"
       style={{ backdropFilter: 'blur(4px)', zIndex: Z.PRIORITY_DOCKET }}

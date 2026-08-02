@@ -26,15 +26,7 @@ export interface PresidentDeskShellProps {
   onReviewAdvance?: () => void;
   /** Current-session aftermath already presented to the player. */
   reviewedAftermathTurn?: number | null;
-  /** WarroomStatusBar's measured rendered height in px (it wraps to more
-   *  rows as the priority docket grows). The shell keeps its own bottom
-   *  clearance at least this tall plus a margin so the status bar's badges
-   *  are never occluded, instead of assuming a fixed clearance. */
-  statusBarClearancePx?: number;
 }
-
-const DESK_MIN_BOTTOM_CLEARANCE_PX = 64; // matches the prior fixed `bottom-16`
-const DESK_STATUS_BAR_MARGIN_PX = 16;
 
 function factionTitle(state: LoadedGameState | null): string {
   if (state?.player_faction === 'RS') return t('desk.faction.rs');
@@ -56,13 +48,8 @@ export function PresidentDeskShell({
   onClose,
   onReviewAdvance,
   reviewedAftermathTurn,
-  statusBarClearancePx,
 }: PresidentDeskShellProps) {
   const shellRef = useRef<HTMLElement | null>(null);
-  const bottomClearancePx = Math.max(
-    DESK_MIN_BOTTOM_CLEARANCE_PX,
-    (statusBarClearancePx ?? 0) + DESK_STATUS_BAR_MARGIN_PX,
-  );
   const items = deriveInboxItems(state, osidNameMap, eventCatalog);
   const actionableCount = countActionableItems(items);
   const advanceReview = buildPreAdvanceCommandReviewView({
@@ -96,8 +83,7 @@ export function PresidentDeskShell({
           onClose();
         }
       }}
-      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden md:right-6 xl:right-10"
-      style={{ bottom: `${bottomClearancePx}px` }}
+      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-16 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden md:right-6 xl:right-10"
     >
       {onClose && (
         <button
