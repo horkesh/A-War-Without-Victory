@@ -4253,3 +4253,11 @@ Applied in `[2026-08-02] R2 decorative ARIA-hidden readability classification re
 **Nonshrinking children do not cure nested scroll composition:** a card can retain intrinsic height and still paint beneath a fixed dock when an inner panel and its bounded outer shell both own vertical scrolling. Durable rule: the shell that owns viewport clearance also owns vertical overflow and overscroll containment. Descendant packets contribute intrinsic height; they do not add a second `max-height` scroller. Keep bottom clearance inside the owning shell, make major panels full-width/nonshrinking, and prove the absence of descendant vertical scroll owners in the component regression.
 
 Applied in `[2026-08-02] R2 Decision Packet single-scroll-owner repair`, `PresidentDeskShell.tsx`, `DeskPacket.tsx`, and `tests/ui/president_desk_shell.test.ts`.
+
+## 2026-08-02 - Scroll containment needs a non-scrolling hard boundary
+
+**One logical scroll owner is not proof of paint containment:** a descendant of an absolutely positioned scrolling shell can still enter a sibling dock's hit-test band when transformed/stacked ancestors establish competing contexts. Durable rule: make the viewport-clearance shell a non-scrolling `overflow-hidden` boundary, then place exactly one `min-height: 0`, flex-bounded vertical scroller inside it. Direct scroll children remain intrinsic-height/nonshrinking. Verify the product with hit testing as well as screenshots.
+
+**Occlusion reports need causal identity:** a screenshot can show both labels while a transient or post-capture layout still places another surface on top for input. Durable rule: when fully sampled text is occluded, retain the sampled top element's tag, id, test id, and class. Use that evidence to identify the escaping surface; do not whitelist copy or relax the occlusion gate.
+
+Applied in `[2026-08-02] R2 v8 hard-clipped Desk viewport and Army HQ contrast repair`, `PresidentDeskShell.tsx`, `tools/ui/paradox_local_qa.cjs`, and their focused regressions.

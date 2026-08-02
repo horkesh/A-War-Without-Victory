@@ -187,9 +187,12 @@ describe('PresidentDeskShell', () => {
     const { container } = renderDesk();
 
     const shell = screen.getByTestId('president-desk-shell');
-    expect(shell.className).toContain('overflow-y-auto');
-    expect(shell.className).toContain('overscroll-contain');
-    const cards = Array.from(shell.children);
+    expect(shell.className).toContain('overflow-hidden');
+    expect(shell.className).not.toContain('overflow-y-auto');
+    const scrollRegion = screen.getByTestId('president-desk-scroll-region');
+    expect(scrollRegion.className).toContain('overflow-y-auto');
+    expect(scrollRegion.className).toContain('overscroll-contain');
+    const cards = Array.from(scrollRegion.children);
     expect(cards.length).toBeGreaterThanOrEqual(3);
     for (const card of cards) {
       expect(card.className).toContain('shrink-0');
@@ -198,6 +201,7 @@ describe('PresidentDeskShell', () => {
     const packet = container.querySelector('section[aria-label="Desk packet"]');
     expect(packet).toBeTruthy();
     expect(packet?.querySelector('.overflow-y-auto')).toBeNull();
+    expect(scrollRegion.querySelectorAll('.overflow-y-auto')).toHaveLength(0);
   });
 
   it('can close when rendered as a warroom overlay', () => {

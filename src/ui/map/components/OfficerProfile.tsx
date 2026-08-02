@@ -94,7 +94,7 @@ export function OfficerProfile({
                         <span className={`font-mono tracking-tight ${getComplianceModifierColor(officer.effective_compliance_modifier)}`}>
                             {getComplianceModifierTextFromValue(officer.effective_compliance_modifier)}
                         </span>
-                        <span className="text-text-secondary/60">{t('officerProfile.compliance')}</span>
+                        <span className="text-text-secondary">{t('officerProfile.compliance')}</span>
                     </div>
                 )}
             </div>

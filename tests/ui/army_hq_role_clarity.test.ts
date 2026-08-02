@@ -9,6 +9,8 @@ const situationBriefingSource = readFileSync('src/ui/map/components/army_hq/Situ
 const strategicPositionSource = readFileSync('src/ui/map/components/army_hq/StrategicPosition.tsx', 'utf8');
 const aftermathSource = readFileSync('src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx', 'utf8');
 const frontVisitSource = readFileSync('src/ui/map/components/army_hq/FrontVisitSection.tsx', 'utf8');
+const operationsSource = readFileSync('src/ui/map/components/army_hq/OperationsSection.tsx', 'utf8');
+const officerProfileSource = readFileSync('src/ui/map/components/OfficerProfile.tsx', 'utf8');
 const themeSource = readFileSync('src/ui/map/utils/theme.ts', 'utf8');
 const en = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
 const bcs = readFileSync('src/ui/map/i18n/messages.bcs.ts', 'utf8');
@@ -48,6 +50,9 @@ describe('Army HQ role clarity and contrast', () => {
     expect(corpsSituationSource).not.toContain('text-neutral-500');
     expect(sectorsSource).not.toMatch(/text-(?:text-secondary|red-\d+)\/(?:40|50|60|70|80)/);
     expect(sectorsSource).not.toContain('text-red-500');
+    expect(operationsSource).toContain("execution: { bg: 'bg-red-500/10', text: 'text-red-300'");
+    expect(operationsSource).not.toContain('text-text-secondary/60 border-l border-panel-border/50 pl-4 ml-auto');
+    expect(officerProfileSource).not.toContain('<span className="text-text-secondary/60">{t(\'officerProfile.compliance\')}</span>');
   });
 
   it('wraps aftermath signal evidence instead of clipping it', () => {

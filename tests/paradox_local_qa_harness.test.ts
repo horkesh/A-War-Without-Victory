@@ -1656,6 +1656,8 @@ test('readability diagnostics ignore recoverable scroll overflow and inactive co
     assert.match(source, /topHasVisibleFill/);
     assert.match(source, /nearestInteractiveOwner/);
     assert.match(source, /topOwner === nodeOwner/);
+    assert.match(source, /occlusionHits/);
+    assert.match(source, /data-testid/);
     assert.match(source, /compositeForeground/);
     assert.match(source, /hasBitmapBackdrop/);
     assert.match(source, /document\.elementsFromPoint/);

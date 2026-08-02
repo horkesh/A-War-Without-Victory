@@ -1,6 +1,6 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** IN AUTONOMOUS EXECUTION; R1/R3 are complete and the R2 v7 single-scroll-owner Desk repair is awaiting a fresh packaged acceptance rerun
+**Status:** IN AUTONOMOUS EXECUTION; R1/R3 are complete and the R2 v8 hard-clipped Desk/Army-HQ contrast repair is awaiting a fresh packaged acceptance rerun
 
 **Last updated:** 2026-08-02
 

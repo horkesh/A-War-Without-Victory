@@ -839,29 +839,41 @@ async function textDiagnostics(surface) {
     const nearestInteractiveOwner = (node) => node?.closest(
       'button, a, label, [role="button"], [role="link"], [role="tab"], [role="menuitem"], [role="checkbox"], [role="radio"], [role="switch"]',
     ) ?? null;
-    const textIsOccluded = (node, rect) => {
-      if (outsideScrollableAncestor(node, rect)) return false;
+    const textOcclusion = (node, rect) => {
+      if (outsideScrollableAncestor(node, rect)) return { occluded: false, occlusionHits: [] };
       const points = [
         [rect.left + rect.width / 2, rect.top + rect.height / 2],
         [rect.left + Math.min(3, rect.width / 2), rect.top + rect.height / 2],
         [rect.right - Math.min(3, rect.width / 2), rect.top + rect.height / 2],
       ].filter(([x, y]) => x >= 0 && y >= 0 && x < window.innerWidth && y < window.innerHeight);
-      if (points.length === 0) return false;
+      if (points.length === 0) return { occluded: false, occlusionHits: [] };
       const priorInlinePointerEvents = node.style.pointerEvents;
       const needsPointerHitTestOverride = window.getComputedStyle(node).pointerEvents === 'none';
       if (needsPointerHitTestOverride) node.style.pointerEvents = 'auto';
       try {
-        return points.every(([x, y]) => {
+        const occlusionHits = points.map(([x, y]) => {
           const top = document.elementFromPoint(x, y);
           const nodeOwner = nearestInteractiveOwner(node);
           const topOwner = nearestInteractiveOwner(top);
-          if (nodeOwner && topOwner === nodeOwner) return false;
-          return top
+          const sharesInteractiveOwner = Boolean(nodeOwner && topOwner === nodeOwner);
+          const occluding = Boolean(top
             && top !== node
             && !node.contains(top)
             && !top.contains(node)
-            && topHasVisibleFill(top);
+            && topHasVisibleFill(top)
+            && !sharesInteractiveOwner);
+          return {
+            x: Math.round(x),
+            y: Math.round(y),
+            occluding,
+            tag: top?.tagName?.toLowerCase?.() ?? '',
+            id: top?.id ?? '',
+            testid: top?.getAttribute?.('data-testid') ?? '',
+            className: String(top?.className ?? '').slice(0, 120),
+          };
         });
+        const occluded = occlusionHits.every((hit) => hit.occluding);
+        return { occluded, occlusionHits: occluded ? occlusionHits : [] };
       } finally {
         if (needsPointerHitTestOverride) node.style.pointerEvents = priorInlinePointerEvents;
       }
@@ -931,6 +943,7 @@ async function textDiagnostics(surface) {
           const ratio = foreground && background
             ? Math.round(contrastRatio(compositeForeground(foreground, background), background) * 100) / 100
             : null;
+          const occlusion = textOcclusion(parent, rangeRect);
           rows.push({
             text: text.slice(0, 140),
             fontSize: Math.round(Number.parseFloat(style.fontSize || '0') * 10) / 10,
@@ -941,7 +954,8 @@ async function textDiagnostics(surface) {
             clippedY: selfClippedY,
             ancestorClipped,
             accessibleFullText,
-            occluded: textIsOccluded(parent, rangeRect),
+            occluded: occlusion.occluded,
+            occlusionHits: occlusion.occlusionHits,
             rect: {
               x: Math.round(rangeRect.x),
               y: Math.round(rangeRect.y),

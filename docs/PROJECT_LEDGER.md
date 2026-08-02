@@ -1,5 +1,17 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] R2 v8 hard-clipped Desk viewport and Army HQ contrast repair
+
+**Type:** Packaged-Electron defect repair / diagnostic attribution hardening / accessibility readability correction / acceptance pending.
+
+**Negative evidence and cause:** Fresh no-resume RS run `20260802-r2-rs104-fresh-v8` reached exact turn 104, completed the full route, frozen-counter, Army-HQ, final-surface, and state-integrity tours, captured 512 screenshots, and recorded zero console messages, page errors, unexpected network failures, or main-process stderr. It failed closed on six duplicate-checkpoint observations of the live bottom-dock labels `WAR`, `REQUIRED 1`, and `SIGNATURE REQUIRED`. A bounded fresh turn-1 diagnostic added sampled `elementsFromPoint` identities to fully occluded rows; every sample returned the Strategic Situation `aside`, proving the Desk descendant escaped the nominal shell boundary and painted/received input over the dock. The same probe found `In execution` at 4.20:1 and the commander/name and officer-compliance labels at 3.07:1.
+
+**TDD repair:** RED component contracts require the absolute Desk shell itself to be `overflow-hidden`, forbid it from owning vertical scrolling, require one `min-h-0 flex-1` inner `overflow-y-auto overscroll-contain` region, and keep its direct cards nonshrinking. Production now matches that structure, so the shell is the hard clipping/stacking boundary while the inner region alone owns scroll. Army HQ uses `text-red-300` for the execution badge and full `text-text-secondary` for commander and compliance text. The harness retains exact top-hit tag/id/test-id/class evidence for future occlusion attribution without weakening any readability rule.
+
+**Verification and scope:** The focused six-file matrix passes 118/118 tests; TypeScript, harness syntax, and diff hygiene pass. Runs v8 and the turn-1 diagnostic remain negative evidence and cannot satisfy R2. Simulation rules, historical content, save schema, deterministic baselines, package/release version, canon, `docs/10_canon/FORAWWV.md`, signing, publication, and release state are unchanged. A newly built package and brand-new no-resume 104-week RS acceptance remain required.
+
+---
+
 ## [2026-08-02] R7 Ring-3 baseline causal acceptance
 
 **Type:** Intentional behavior-baseline disposition / sensitive-history correction / deterministic causal review.

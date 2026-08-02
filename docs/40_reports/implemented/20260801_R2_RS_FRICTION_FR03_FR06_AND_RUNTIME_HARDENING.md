@@ -91,6 +91,12 @@ Fresh no-resume run `20260802-r2-rs104-fresh-v7` again reached exact turn 104, c
 
 The remaining cause was nested vertical scroll ownership: `PresidentDeskShell` owned the viewport above the status dock while `DeskPacket` created a second composited `max-h-[48vh]` scroller. The prior nonshrinking-card repair was necessary but not sufficient. A RED regression now requires the outer Desk to be the only vertical scroll owner. The repair removes the packet scroller, adds outer overscroll containment and bottom padding, hides horizontal overflow, and makes the packet and situation panels full-width intrinsic-height children. The focused Desk/harness/Warroom matrix passes 3 files / 82 tests; TypeScript, harness syntax, and diff hygiene pass. Run v7 remains rejected negative evidence.
 
+Fresh no-resume run `20260802-r2-rs104-fresh-v8` reached exact turn 104, completed the full route, frozen-counter, Army-HQ, and final surface tours, captured all 512 screenshots through `511-playthrough-final.png`, and again recorded zero console, page, unexpected-network, and main-process-stderr diagnostics. Every v5-v7 content and classifier finding was absent. It failed closed on six duplicate-checkpoint observations of the live bottom-dock labels `WAR`, `REQUIRED 1`, and `SIGNATURE REQUIRED` at y=766-781.
+
+The screenshot alone did not establish which surface owned the hit-test conflict, so a bounded fresh turn-1 probe added exact sampled `elementsFromPoint` identities to fully occluded text rows without weakening the gate. All nine samples returned the Strategic Situation `aside`, proving a real product defect: the scrolling Desk descendant could still paint and receive input outside the shell's intended bottom boundary. The same probe found three independent Army HQ contrast defects: `In execution` at 4.20:1, the commander label/name at 3.07:1, and the officer `compliance` label at 3.07:1.
+
+RED-first coverage now requires a hard-clipped non-scrolling Desk shell plus one bounded inner vertical scroll region whose direct cards remain intrinsic-height. The repair applies that structure and raises the three Army HQ tones to readable palette tokens. Occlusion diagnostics retain the exact top-hit tag/id/test-id/class evidence so future stacking failures remain attributable. The focused six-file matrix passes 118 tests; TypeScript, harness syntax, and diff hygiene pass. Run v8 and the turn-1 probe remain rejected negative evidence. A rebuilt package and brand-new no-resume acceptance run are still required.
+
 ## Verification and Review
 
 - Geometry/harness focused: 7 files / 97 tests.
@@ -107,4 +113,4 @@ The remaining cause was nested vertical scroll ownership: `PresidentDeskShell` o
 
 Changed scope is UI read models, retained map handoff/presentation, diagnostics/harness, tests, and documentation. Simulation, historical event content, scenario balance, save schema, deterministic baselines, package version, tag, installer, signing, store upload, publication, and public release state are unchanged. `docs/10_canon/FORAWWV.md` is unchanged.
 
-Next: rebuild the transient unpacked package with the single-scroll-owner Desk repair, run a brand-new no-resume 104-week RS campaign, require clean final diagnostics plus materialized geometry receipts, then write the actual completed owner diary. Every rejected run above remains negative lineage and cannot satisfy that gate.
+Next: rebuild the transient unpacked package with the hard-clipped Desk viewport and Army HQ contrast repair, run a brand-new no-resume 104-week RS campaign, require clean final diagnostics plus materialized geometry receipts, then write the actual completed owner diary. Every rejected run above remains negative lineage and cannot satisfy that gate.
