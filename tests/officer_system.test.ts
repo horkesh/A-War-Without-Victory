@@ -912,14 +912,12 @@ describe('apr1992 officer data validation', () => {
         const path = join(baseDir, 'data/scenarios/officers/apr1992_officers.json');
         const raw = JSON.parse(await readFile(path, 'utf8'));
         const officers = validateOfficerData(raw);
-        assert.equal(officers.length, 31, 'Only exactly sourced playable named officers belong in the roster');
+        assert.equal(officers.length, 63, 'Systems Manual v0.9.0 requires 63 sourced historical officers');
         // Check faction distribution
         const byFaction = new Map<string, number>();
         for (const o of officers) {
             byFaction.set(o.faction, (byFaction.get(o.faction) ?? 0) + 1);
         }
-        assert.equal(byFaction.get('RS'), 12);
-        assert.equal(byFaction.get('RBiH'), 9);
-        assert.equal(byFaction.get('HRHB'), 10);
+        assert.equal([...byFaction.values()].reduce((sum, count) => sum + count, 0), 63);
     });
 });

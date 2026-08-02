@@ -1,115 +1,128 @@
-# R7 Phase 2 Officer/OOB Attribution — Exact-Evidence Checkpoint
+# R7 Phase 2 Officer/OOB Attribution — Committee Repair
 
 **Date:** 2026-08-02
 **Workstream:** R7 Phase 2
-**Status:** Focused implementation verified; generated startup/baseline verification remains serialized behind the R5 runtime lane
+**Status:** Authored source gate repaired and focused proof green; generated officer-state alignment remains pending
 
 ## Outcome
 
-This packet replaces inferred authored officer/commander identity with an exact-source rule. Each retained identity in the authoritative officer/OOB source owns a row-local citation. Candidates without exact identity-and-command evidence were removed from those authored sources and retained in the deterministic omission section of `docs/provenance/OFFICER_OOB_PROVENANCE.json`.
+The first Phase 2 checkpoint (c4aab9a3b) was not acceptable. It made the provenance report green by deleting 80 canonical formations even though 55 were still present in the generated April 1992 startup and many were hardcoded participants in operation catalogs. It also reduced the playable officer roster from 98 to 31 despite the binding Systems Manual census of 63, and the OOB comparison tool silently treated two missing evidence files as zero rows.
 
-The source review also corrected a repository misconception: BB Volume I contains Appendix I, a Croatian Defense Council order of battle for October 1995, on pages 518–521. Those pages now support the five HVO command rows and four guard-formation rows alongside Appendices G and H.
+This repair restores every formation candidate to the playable OOB, restores a sourced 63-officer roster, adds temporal-evidence validation, and makes missing comparison evidence fatal. No startup, scenario, baseline, Electron, package, performance, version, release, or publication command ran.
 
-## Exact census
+## Corrected census
 
-| Family | Authored source rows | Exactly supported | Unsupported source rows | Omitted candidates |
+| Family | Before repair | After repair | Supported | Omitted |
 |---|---:|---:|---:|---:|
-| Officers | 31 | 31 | 0 | 67 |
-| Corps/command formations | 19 | 19 | 0 | 0 |
-| Brigades/regiments | 169 | 169 | 0 | 80 |
-| Elite commanders | 3 | 3 | 0 | 5 |
-| **Total** | **222** | **222** | **0** | **152** |
+| Officers | 31 | 63 | 63 | 35 |
+| Corps/command formations | 19 | 19 | 19 | 0 |
+| Brigades/regiments | 169 | 249 | 249 | 0 |
+| Elite commanders | 3 | 3 | 3 | 5 |
+| **Total playable/authored** | **222** | **334** | **334** | **40** |
 
-The 169 supported formation rows comprise 105 ARBiH Appendix H rows, 60 VRS Appendix G rows, and four HVO Appendix I guard rows. All 19 corps/command rows have exact provenance. `jna_herzegovina_command` is explicitly classified as a synthetic engine command and cites the repository design ledger rather than being presented as a historical corps.
+Faction source counts after repair:
 
-The source review also found 80 named formation candidates without exact row-local evidence:
+- Officers: RS 21, RBiH 27, HRHB 15.
+- Brigades/regiments: RBiH 126, RS 83, HRHB 40.
+- The Systems Manual's 63-officer contract is now true in source data and enforced by test.
+- All 80 formation omissions were removed. The omission ledger now contains only 35 officer and five elite-commander research candidates.
 
-| Faction | Count | Corps distribution |
-|---|---:|---|
-| HRHB | 36 | Central Bosnia 12; Posavina 7; Southeast Herzegovina 14; Tomislavgrad 3 |
-| RBiH | 21 | 1st Corps 4; 2nd Corps 14; 3rd Corps 1; 5th Corps 2 |
-| RS | 23 | 1st Krajina 1; Drina 9; Herzegovina 8; Sarajevo-Romanija 5 |
+## Formation dependency repair
 
-They are historical OOB identity claims, not anonymous engine slots. They were therefore removed from authoritative OOB source data and preserved as typed `brigade` omission rows; no blanket source, name similarity, HQ mention, or appendix-adjacent inference promotes them. They may return only through a future exact-evidence packet.
+The committee finding was correct: the removed formation set was not safe.
 
-## Generated/reference closure still required
+- 55 of the 80 omitted IDs were instantiated in the tracked April 1992 startup.
+- Additional IDs were authored in triggered operations, pre-planned operations, opportunity catalogs, enclave rules, sector helpers, Jan-1993 scenario data, localization, and regression fixtures.
+- The Krivaja/Stupčanica participants are restored, including rs_1st_zvornik, rs_1st_bratunac, rs_1st_milii, rs_5th_podrinje, and rs_skelani_battalion.
+- The Drina rows cite the official ICTY Popović et al. Trial Judgment, IT-05-88-T, paragraphs 244–249. Paragraph 244 names the Zvornik, Birač, Romanija, Vlasenica, Podrinje, Bratunac, Milići, and Skelani formations addressed by the preparatory order.
+- A regression now joins the canonical designation catalog against generated startup and every live formation-authored combat catalog. Any referenced historical formation absent from the playable OOB fails the suite.
 
-A post-omission reference scan prevents this source checkpoint from being misreported as full runtime closure. Of the 80 omitted brigade IDs, 55 still occur as formation instances in the tracked generated April 1992 startup artifact, one occurs in `initial_formations_jan1993.json`, and 10 occur in `jan1993_start.json`. Additional references in designation/localization maps and conditional operation catalogs do not instantiate formations, but their behavior after source removal still belongs to integrated proof.
+Post-repair, the previous 55-row generated formation mismatch is zero. The 41 startup formation IDs not present in oob_brigades.json are expected corps/staff, JNA/HV tactical-group, garrison, and phantom identities; they are not stale brigade rows.
 
-The current runtime/startup success criterion therefore remains open. The generated-artifact owner must rebuild or explicitly remove the stale instances under the serialized runtime lane, review the resulting scenario/baseline drift, and prove that conditional catalogs fail safely. This packet does not weaken the exact-evidence gate or call those stale instances supported.
+## Officer canon and chronology
 
-## Sources promoted
+Thirty-two source-backed officers were restored, bringing the roster to exactly 63. Restored command identities own row-local BB or official ICTY citations. Unsupported residual candidates remain deterministic omissions and are not playable.
 
-- BB1 pp.496–501: Appendix G, VRS skeleton OOB, July 1995.
-- BB1 pp.506–515: Appendix H, ARBiH skeleton OOB, October 1995.
-- BB1 pp.518–521: Appendix I, HVO OOB, October 1995.
-- BB1 pp.524–525 and 527–528: exact commander charts.
-- BB1 pp.170, 186, 189, 442, 456 and BB2 pp.406, 446, 452: exact formation, command, and named-commander rows used where the charts do not carry the opening or subordinate role.
-- ICTY `Prlić et al.` Trial Judgment, Vol. I, paras. 715–728, and Appeal Judgment, Vol. I, para. 7: exact Petković → Praljak → Roso → Petković succession dates.
-- ICTY `Blaškić` Amended Indictment, para. 2: exact 5 August 1994 army-command appointment and November 1995 exit.
+The audit also exposed an inherited canon/schema ambiguity rather than hiding it: several members of the original 63-person command pool are historically operational-zone, enclave, independent-brigade, or political command personalities, while the three-value engine enum calls every non-army/non-deputy candidate `corps_commander` and the UI renders that token as a general-officer rank. [ADR-0008](../../20_engineering/ADR/ADR-0008-named-officer-tier-scope-and-rank-semantics.md) is proposed to define the token as gameplay assignment class and require the source layer to retain exact historical offices. It is not marked accepted and no canon wording or UI behavior was changed in this lane.
 
-Promoted BB rows use repository-relative `repo://data/derived/knowledge_base/balkan_battlegrounds/pages/<page>.json` paths. Tribunal rows use permanent official ICTY document URLs. The sidecar requires explicit row ownership of source, URL, citation, tier, confidence, and disposition; positive evidence cannot be inherited from defaults.
+The temporal sidecar now distinguishes evidence precision:
 
-## Identity and chronology corrections
+- exact_date: a sourced calendar date mapped to the first campaign-week boundary on or after it.
+- on_or_before: a sourced no-later-than bound mapped conservatively and explicitly, not presented as an exact appointment.
+- bounded_model: an authored gameplay boundary whose citation does not establish an exact calendar date.
 
-- Radivoje Tomanić is no longer the opening 2nd Krajina Corps commander. BB1 p.524 places his tenure in 1994–95; the deterministic year boundary is modeled from turn 91.
-- Grujo Borić is available from the late-1992 2nd Krajina command evidenced at BB1 p.186, with the late-1994 exit bounded by the BB2 Bihac command narrative.
-- Milivoj Petković's second tenure is retained after official ICTY research proved the exact 26 April–5 August 1994 interval. It is an explicit `tenure_of` relation rather than an inferred duplicate.
-- The HVO army-command sequence now uses the first campaign-week boundary on or after each exact appointment: Petković → Praljak at turn 68, Praljak → Roso at turn 84, Roso → Petković at turn 108, and Petković → Blaškić at turn 122. The canonical succession roster has no omitted/dead officer reference.
-- Tihomir Blaškić's Central Bosnia and 1995 army roles are retained as an explicit `tenure_of` relation.
-- Željko Glasnović's officer and 1st Guards commander rows are retained as an explicit `same_person` relation.
-- All other normalized-name collisions disappeared because unsupported duplicate officer/elite rows were omitted rather than inferred.
+Every non-zero available_from_turn and every authored available_until_turn must now have a matching temporal-evidence row. Strict mode fails on a missing row, a data/evidence turn mismatch, an incomplete rule/citation, an invalid date, or an incorrect weekly mapping.
 
-## Sensitive legal metadata
+Specific corrections:
 
-Court-record prose was removed from the retained officer/elite rows in this packet. The local BB commander/OOB pages prove identity and assignment but are not exact official judgment citations for every verdict, charge, sentence, and summary field. Sensitive legal metadata may return only through a separate official/tribunal row-level citation packet; it is not inherited from repository prose or case-number mentions.
+- Ramiz Dreković: 5th Corps formation on 20 October 1992 maps to turn 29.
+- Milivoj Petković: 14 April 1992 maps to turn 2; the HVO army-command roster begins his tenure at turn 2.
+- Grujo Borić: the evidence only establishes command by the end of 1992. The old invented turn-28 claim is removed; turn 39 is labeled on_or_before with a conservative boundary rule.
+- Exact HVO succession dates continue to map at turns 68, 84, 108, and 122.
+- Other retained modeled bounds are honestly marked bounded_model; strict green does not misrepresent them as exact dates.
 
-## Determinism and persistence
+No edit was made to docs/10_canon/FORAWWV.md.
 
-- The provenance report now emits deterministic `omissions`, an `omitted_records` count, stable record ordering, repository-relative paths, and no clock fields.
-- `src/sim/oob_lookup.ts` now sorts municipality and settlement inputs and keeps the lexicographically lowest settlement ID for duplicate `(name, municipality-code)` rows instead of depending on JSON insertion order.
-- Save/load persistence and the UI read model have focused tests proving static identity, faction, corps attribution, and biography fields remain in `named_officer_data`, while mutable command state remains separate.
-- The stale `compare_oob_vs_markdown` tool now accepts the canonical top-level brigade array, retains legacy wrapped-shape compatibility, rejects malformed input, and no longer executes on test import.
+## OOB comparison fail-closed repair
 
-## Verification record
+tools/audit/compare_oob_vs_markdown.ts now uses the real sources:
 
-Red-first evidence:
+| Faction | Evidence file | Parsed brigade rows |
+|---|---|---:|
+| RBiH | ARBIH_APPENDIX_H_FULL_BRIGADE_LIST.md | 106 |
+| RS | VRS_APPENDIX_G_FULL_BRIGADE_LIST.md | 76 |
+| HRHB | HVO_FULL_BRIGADE_LIST.md | 35 |
 
-- The first focused run failed because the provenance report had no omission channel and the OOB comparison tool exported no canonical-array reader and executed on import.
-- The first data-aware run exposed the obsolete 98/80-officer census assertions and the inference-backed 15-officer biography cohort.
-- The OOB lookup determinism and HVO succession-closure fixtures were added during the exclusive runtime lease and passed in the final focused matrix.
+A missing evidence file now throws, the CLI reports failure and exits non-zero, malformed OOB JSON remains fatal, and tests exercise the real repository files and exact counts. The parser no longer mistakes rows containing both “brigade” and “corps” for table headers.
 
-Pre-lease evidence:
+## Generated artifact inventory
 
-- `tests/compare_oob_vs_markdown.test.ts`, `tests/officer_oob_provenance.test.ts`, `tests/officer_state_persistence.test.ts`, and `tests/officer_bio_read_model.test.ts`: 4 files / 11 tests passed before the roster rewrite.
-- Save/load and read-model persistence continued to pass in the data-aware focused run.
+Startup regeneration was explicitly outside this repair lane, so the residual is reported rather than hidden:
 
-Final focused verification after the R5 lease released:
+| Generated class | Total in tracked startup | Stale against repaired source |
+|---|---:|---:|
+| named_officer_data | 98 | 35 |
+| named_officers | 71 | 28 |
+| Historical formation dependencies omitted from playable OOB | 55 before repair | 0 after repair |
 
-```powershell
-npm.cmd run test:vitest -- tests/canon_officer_corps_refs.test.ts tests/officer_oob_provenance.test.ts tests/officer_state_persistence.test.ts tests/officer_bio_read_model.test.ts tests/officer_mini_bio_schema.test.ts tests/officer_system.test.ts tests/oob_loader.test.ts tests/oob_lookup_determinism.test.ts tests/compare_oob_vs_markdown.test.ts tests/a4_army_co_roster_personalities.test.ts tests/army_co_emergent_lifecycle.test.ts --pool=forks --reporter=dot
-npm.cmd run typecheck
-npx.cmd tsx tools/diagnostics/officer_oob_provenance.ts --strict
-git diff --check
-```
+The 35/28 officer residue is exactly the unsupported remainder still embedded in the previously generated save. It remains the owner of generated startup/baseline work when that serialized lane is authorized. Source-data and formation-dependency closure are green; generated officer-state closure is not yet claimed.
 
-- Focused Vitest: 11 files / 95 tests passed. The first released-lane run exposed one stale loader assertion that still required the omitted Dževad Rađo row; the corrected test now proves retained exact-source elites and absence of unsupported elite metadata.
-- TypeScript: `tsc --noEmit -p tsconfig.json` exited 0.
-- Provenance diagnostic: two strict invocations exit 0 with the same serialized output. The summary is 222 records, 222 supported, zero unsupported, 152 omitted, zero blocking findings, and zero warnings.
-- Static JSON closure: 222 manifest/playable records and 152 omissions, with zero duplicate record or omission keys, zero playable/omission overlap, zero missing or extra playable records, and zero malformed omission rows.
-- `git diff --check` exited 0.
+## Determinism
 
-The startup snapshot check is intentionally not refreshed or bypassed in this packet. Removing the 80 unsupported named formations changes clean-campaign OOB construction, while 55 stale exact-ID instances remain in the tracked generated startup artifact. The generated snapshot and baseline owners must account for that intentional source correction under the serialized runtime lane before global identity closure can be claimed. No scenario, baseline, startup-snapshot, performance, Electron, package, version, release, or publication command ran here.
+- Provenance records, omissions, violations, and serialized JSON use stable ordering and contain no clock fields.
+- Temporal mapping is UTC and pure: campaign start 6 April 1992, seven-day boundaries, mathematical ceiling to the first boundary on or after a sourced date.
+- Dependency tests sort all missing IDs before comparison.
+- The prior deterministic OOB lookup fix remains intact.
+- Mojibake introduced during the first checkpoint's data rewrite was repaired in the touched officer, brigade, and provenance JSON.
+
+## Verification
+
+Red-first evidence was captured:
+
+- 31 officers failed the new 63-officer canon assertion.
+- 169 brigades failed the 249-row source assertion.
+- Live/generated dependency closure returned the omitted formation IDs.
+- The comparison module had no real evidence-path export and missing files did not throw.
+- Dreković, Petković, and Borić failed the new chronology assertions.
+
+Final verification:
+
+- Focused Vitest: 11 files / 101 tests passed, including exact 35/28 generated officer-residue inventory.
+- Hardcoded-operation/OOB dependent matrix: 9 files / 153 tests passed after replacing the stale one-row elite-gap allowlist with the five explicit provenance omissions plus the independently unresolved Vitezovi row.
+- TypeScript: tsc --noEmit exited 0.
+- Strict provenance diagnostic: two invocations were byte-identical; 334 total, 334 supported, zero unsupported, 40 omitted, zero blockers, zero warnings.
+- OOB evidence comparison: RBiH 106 evidence / 126 source; RS 76 / 83; HRHB 35 / 40; command exited 0.
+- Static generated/runtime dependency inventory: zero referenced historical formation IDs absent from playable OOB.
+- Honest startup officer residue: 35 stale named_officer_data rows and 28 stale named_officers rows.
+- JSON parsing and git diff --check exited 0.
 
 ## Files
 
-- `data/scenarios/officers/apr1992_officers.json`
-- `data/scenarios/army_co_roster.json`
-- `data/source/oob_brigades.json`
-- `docs/provenance/OFFICER_OOB_PROVENANCE.json`
-- `src/sim/oob_lookup.ts`
-- `tools/diagnostics/officer_oob_provenance.ts`
-- `tools/audit/compare_oob_vs_markdown.ts`
-- focused provenance, persistence, read-model, lookup-determinism, and comparison tests
-
-No edit was made to `docs/10_canon/FORAWWV.md`.
+- data/scenarios/officers/apr1992_officers.json
+- data/scenarios/army_co_roster.json
+- data/source/oob_brigades.json
+- docs/provenance/OFFICER_OOB_PROVENANCE.json
+- docs/20_engineering/ADR/ADR-0008-named-officer-tier-scope-and-rank-semantics.md
+- tools/diagnostics/officer_oob_provenance.ts
+- tools/audit/compare_oob_vs_markdown.ts
+- focused provenance, chronology, source-count, formation-dependency, and officer-system tests

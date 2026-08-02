@@ -5,11 +5,11 @@ import { describe, expect, it } from 'vitest';
 const OFFICER_DATA_PATH = path.resolve('data/scenarios/officers/apr1992_officers.json');
 
 const FIRST_PASS_OPENING_COMMANDERS = [
-    'arbih_drekovic',
     'arbih_halilovic',
+    'arbih_talijan',
     'hvo_blaskic',
     'hvo_lasic',
-    'hvo_petkovic',
+    'hvo_matuzovic',
     'vrs_grubac',
     'vrs_mladic',
     'vrs_simic',

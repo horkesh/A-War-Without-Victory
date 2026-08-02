@@ -15,6 +15,17 @@ export interface IdentityRelation {
     target_record_key: string;
 }
 
+export type TemporalPrecision = 'exact_date' | 'on_or_before' | 'bounded_model';
+
+export interface TemporalEvidence {
+    field: 'available_from_turn' | 'available_until_turn';
+    source_date?: string;
+    precision: TemporalPrecision;
+    modeled_turn: number;
+    boundary_rule: string;
+    citation: string;
+}
+
 export interface OfficerOobProvenanceEntry {
     source: string | null;
     source_url: string | null;
@@ -26,6 +37,7 @@ export interface OfficerOobProvenanceEntry {
     conflict_note: string | null;
     disposition: IdentityDisposition;
     notes: string | null;
+    temporal_evidence?: TemporalEvidence[];
 }
 
 export interface OfficerOobProvenanceManifest {
@@ -60,6 +72,8 @@ export interface OfficerLike {
     historical_corps_id?: string | null;
     compatible_corps_ids?: string[];
     war_crimes_record?: unknown;
+    available_from_turn?: number;
+    available_until_turn?: number;
 }
 
 export interface CorpsLike {
@@ -112,6 +126,7 @@ export interface OfficerOobProvenanceRecord {
     conflict: string | null;
     disposition: IdentityDisposition | null;
     notes: string | null;
+    temporal_evidence: TemporalEvidence[];
     violations: ProvenanceViolation[];
 }
 
@@ -147,6 +162,25 @@ interface DerivedIdentity {
     corps_refs: string[];
     has_court_record: boolean;
     duplicate_source_id: boolean;
+    temporal_boundaries: Array<{
+        field: TemporalEvidence['field'];
+        modeled_turn: number;
+    }>;
+}
+
+const CAMPAIGN_START_UTC = Date.UTC(1992, 3, 6);
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+function firstWeeklyBoundaryOnOrAfter(sourceDate: string): number | null {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(sourceDate)) return null;
+    const [year, month, day] = sourceDate.split('-').map(Number);
+    const timestamp = Date.UTC(year!, month! - 1, day!);
+    const parsed = new Date(timestamp);
+    if (parsed.getUTCFullYear() !== year
+        || parsed.getUTCMonth() !== month! - 1
+        || parsed.getUTCDate() !== day
+        || timestamp < CAMPAIGN_START_UTC) return null;
+    return Math.ceil((timestamp - CAMPAIGN_START_UTC) / WEEK_MS);
 }
 
 const ACCEPTED_SOURCE_TIERS = new Set<SourceTier>([
@@ -234,6 +268,14 @@ function deriveIdentities(input: OfficerOobProvenanceInput): DerivedIdentity[] {
                 ...(officer.compatible_corps_ids ?? []),
             ]),
             has_court_record: officer.war_crimes_record != null,
+            temporal_boundaries: [
+                ...(typeof officer.available_from_turn === 'number' && officer.available_from_turn > 0
+                    ? [{ field: 'available_from_turn' as const, modeled_turn: officer.available_from_turn }]
+                    : []),
+                ...(typeof officer.available_until_turn === 'number'
+                    ? [{ field: 'available_until_turn' as const, modeled_turn: officer.available_until_turn }]
+                    : []),
+            ],
         });
     }
 
@@ -247,6 +289,7 @@ function deriveIdentities(input: OfficerOobProvenanceInput): DerivedIdentity[] {
             formation_ref: null,
             corps_refs: [],
             has_court_record: false,
+            temporal_boundaries: [],
         });
     }
 
@@ -261,6 +304,7 @@ function deriveIdentities(input: OfficerOobProvenanceInput): DerivedIdentity[] {
             formation_ref: brigade.id,
             corps_refs: uniqueSorted([corpsId]),
             has_court_record: false,
+            temporal_boundaries: [],
         });
 
         const commanderName = asNonEmpty(brigade.elite_commander?.name);
@@ -274,6 +318,7 @@ function deriveIdentities(input: OfficerOobProvenanceInput): DerivedIdentity[] {
                 formation_ref: brigade.id,
                 corps_refs: uniqueSorted([corpsId]),
                 has_court_record: brigade.elite_commander?.war_crimes_record != null,
+                temporal_boundaries: [],
             });
         }
     }
@@ -401,6 +446,43 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
                     `${identity.record_key} carries a court record without an exact court citation.`,
                 ));
             }
+            const temporalEvidence = entry.temporal_evidence ?? [];
+            for (const boundary of identity.temporal_boundaries) {
+                const evidence = temporalEvidence.find((candidate) => candidate.field === boundary.field);
+                if (!evidence) {
+                    violations.push(violation(
+                        'missing_temporal_evidence',
+                        `${identity.record_key} ${boundary.field}=${boundary.modeled_turn} has no temporal evidence.`,
+                    ));
+                    continue;
+                }
+                if (evidence.modeled_turn !== boundary.modeled_turn) {
+                    violations.push(violation(
+                        'temporal_turn_mismatch',
+                        `${identity.record_key} ${boundary.field} is ${boundary.modeled_turn}, evidence says ${evidence.modeled_turn}.`,
+                    ));
+                }
+                if (!asNonEmpty(evidence.boundary_rule) || !asNonEmpty(evidence.citation)) {
+                    violations.push(violation(
+                        'incomplete_temporal_evidence',
+                        `${identity.record_key} ${boundary.field} lacks a boundary rule or citation.`,
+                    ));
+                }
+                if (evidence.precision === 'exact_date' || evidence.precision === 'on_or_before') {
+                    const expectedTurn = firstWeeklyBoundaryOnOrAfter(evidence.source_date ?? '');
+                    if (expectedTurn == null) {
+                        violations.push(violation(
+                            'invalid_temporal_source_date',
+                            `${identity.record_key} ${boundary.field} has invalid source date ${evidence.source_date ?? '(missing)'}.`,
+                        ));
+                    } else if (expectedTurn !== evidence.modeled_turn) {
+                        violations.push(violation(
+                            'temporal_boundary_mismatch',
+                            `${identity.record_key} ${boundary.field} should map to turn ${expectedTurn}, not ${evidence.modeled_turn}.`,
+                        ));
+                    }
+                }
+            }
         }
 
         if (duplicateRecordKeys.length > 0) {
@@ -441,6 +523,7 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
             conflict: entry?.conflict_note ?? (duplicateRecordKeys.length > 0 ? 'normalized_name_collision' : null),
             disposition: entry?.disposition ?? null,
             notes: entry?.notes ?? null,
+            temporal_evidence: entry?.temporal_evidence ?? [],
             violations: sortViolations(violations),
         };
     });
@@ -470,6 +553,7 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
             conflict: 'manifest_record_orphaned',
             disposition: entry.disposition ?? null,
             notes: entry.notes ?? null,
+            temporal_evidence: entry.temporal_evidence ?? [],
             violations: [violation('manifest_record_orphaned', `Manifest key ${recordKey} has no source-data row.`)],
         });
     }

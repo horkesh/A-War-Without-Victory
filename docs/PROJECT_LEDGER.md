@@ -1,5 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] R7 Phase 2 committee repair — officer canon, formation dependencies, and chronology
+
+**Type:** Committee-block repair / historical source restoration / fail-closed diagnostic correction / deterministic chronology.
+
+**Supersession:** This entry supersedes the Phase 2 checkpoint immediately below. Independent review proved that its 222/222 green was false: it reduced the binding 63-officer roster to 31, removed 80 formations despite 55 generated startup instances and many live operation references, assigned exact turns to bounded chronology, and let missing OOB evidence files count as zero.
+
+**Implementation:** Restored a sourced 63-officer roster and all 249 brigade/regiment rows. The strict authored census is now 334/334 supported: 63 officers, 19 corps/commands, 249 brigades/regiments, and three elite commanders. Formation omissions fell from 80 to zero; the deterministic research ledger retains only 35 unsupported officer and five elite candidates. The Popović et al. IT-05-88-T paragraphs 244–249 support the restored Drina/Krivaja participants. A designation-to-generated/runtime dependency regression now prevents any authored historical formation from disappearing behind a green omission.
+
+**Exposed canon ambiguity:** The source re-audit confirmed that the inherited 63-person pool contains operational-zone, enclave, independent-brigade, and political command personalities even though the engine enum and Systems Manual use the shorthand `corps_commander` / "corps and above." [ADR-0008](20_engineering/ADR/ADR-0008-named-officer-tier-scope-and-rank-semantics.md) is proposed, not accepted: it would define the enum as gameplay assignment class, keep exact historical offices in provenance, and require a future UI/schema lane to stop presenting every token as a literal general-officer rank. This repair does not silently amend canon or invent historical ranks.
+
+**Chronology:** Every non-zero officer availability or authored exit owns temporal evidence. `exact_date` uses the first UTC campaign-week boundary on or after the source date; `on_or_before` is explicitly conservative; `bounded_model` never claims exact source precision. Dreković's 20 October 1992 5th Corps appointment maps to turn 29. Petković's 14 April 1992 appointment and army-command roster start map to turn 2. Borić is no longer invented at turn 28; the evidence says only “by the end of 1992,” so the source gate labels a conservative turn-39 `on_or_before` boundary.
+
+**Tooling and determinism:** The Markdown comparison now owns the real RBiH/RS/HRHB brigade-list paths, parses exact table counts 106/76/35, throws on missing evidence, exits non-zero on any input failure, and no longer drops real rows merely because their text contains both “brigade” and “corps.” The provenance diagnostic fails on missing/incomplete temporal evidence, source/data turn disagreement, invalid exact dates, and incorrect weekly mapping. Stable sort and clock-free serialization remain intact. Mojibake in the touched JSON was repaired.
+
+**Honest remainder:** Startup regeneration was outside this lane. The tracked startup contains 98 `named_officer_data` rows with 35 stale against source and 71 `named_officers` rows with 28 stale. The previous 55 stale historical formation dependencies are now zero. Forty-one startup formation IDs absent from `oob_brigades.json` are expected corps/staff, JNA/HV tactical-group, garrison, or phantom rows, not omitted brigades. Generated officer-state/baseline closure remains open.
+
+**Scope:** Focused tests, TypeScript, strict source diagnostic repeatability, JSON/dependency inventory, and diff hygiene are the authorized proof surface. No startup, scenario, baseline refresh, Electron, package, performance, version, tag, signing, publication, release-state, remote push, or `docs/10_canon/FORAWWV.md` change. Evidence: [repaired implementation report](40_reports/implemented/20260802_R7_PHASE2_OFFICER_OOB_ATTRIBUTION.md).
+
 ## [2026-08-02] R7 Phase 2 officer/OOB exact-evidence checkpoint
 
 **Type:** Historical identity correction / row-local provenance enforcement / deterministic omission and lookup repair.

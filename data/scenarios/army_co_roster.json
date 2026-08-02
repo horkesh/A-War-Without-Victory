@@ -47,7 +47,7 @@
       "schedule": [
         {
           "officer_id": "hvo_petkovic",
-          "tenure_start": 0,
+          "tenure_start": 2,
           "tenure_end_default": null,
           "stubbornness": 2,
           "replacement_trigger": "scheduled-1993-reorg|political-relief",

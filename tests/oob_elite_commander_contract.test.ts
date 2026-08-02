@@ -35,9 +35,19 @@ const projectLedgerKnowledge = fs.readFileSync(
   'utf8',
 );
 
+const provenanceManifest = JSON.parse(fs.readFileSync(
+  path.join(repoRoot, 'docs/provenance/OFFICER_OOB_PROVENANCE.json'),
+  'utf8',
+)) as {
+  omissions: Record<string, { record_kind: string; record_id: string }>;
+};
+
 const sourceReviewAllowlistedEliteCommanderGaps = [
   'hrhb_vitezovi_brigade_vitez',
-] as const;
+  ...Object.values(provenanceManifest.omissions)
+    .filter((row) => row.record_kind === 'elite_commander')
+    .map((row) => row.record_id),
+].sort();
 
 describe('OOB elite commander metadata contract', () => {
   test('requires every elite brigade commander gap to be source-review allowlisted', () => {

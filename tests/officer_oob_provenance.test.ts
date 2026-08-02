@@ -107,6 +107,67 @@ describe('officer/OOB provenance inventory', () => {
         expect(report.summary.blocking_violations).toBeGreaterThan(0);
     });
 
+    it('fails closed on missing or calendar-inconsistent officer chronology evidence', () => {
+        const officer = fixture.valid.officers.officers[0]!;
+        const input: OfficerOobProvenanceInput = {
+            ...fixture.valid,
+            officers: {
+                officers: fixture.valid.officers.officers.map((row) => row.id === officer.id
+                    ? { ...row, available_from_turn: 2 }
+                    : row),
+            },
+        };
+
+        const missing = buildOfficerOobProvenanceReport(input);
+        expect(violationCodes(missing)).toContain('missing_temporal_evidence');
+
+        const inconsistent = buildOfficerOobProvenanceReport({
+            ...input,
+            manifest: {
+                ...input.manifest,
+                records: {
+                    ...input.manifest.records,
+                    [`officer:${officer.id}`]: {
+                        ...input.manifest.records[`officer:${officer.id}`],
+                        temporal_evidence: [{
+                            field: 'available_from_turn',
+                            source_date: '1992-04-21',
+                            precision: 'exact_date',
+                            modeled_turn: 2,
+                            boundary_rule: 'first campaign-week boundary on or after the exact source date',
+                            citation: 'Official appointment record, item 2',
+                        }],
+                    },
+                },
+            },
+        });
+
+        expect(violationCodes(inconsistent)).toContain('temporal_boundary_mismatch');
+
+        const invalidDate = buildOfficerOobProvenanceReport({
+            ...input,
+            manifest: {
+                ...input.manifest,
+                records: {
+                    ...input.manifest.records,
+                    [`officer:${officer.id}`]: {
+                        ...input.manifest.records[`officer:${officer.id}`],
+                        temporal_evidence: [{
+                            field: 'available_from_turn',
+                            source_date: '1992-04-31',
+                            precision: 'exact_date',
+                            modeled_turn: 2,
+                            boundary_rule: 'first campaign-week boundary on or after the exact source date',
+                            citation: 'Official appointment record, item 2',
+                        }],
+                    },
+                },
+            },
+        });
+
+        expect(violationCodes(invalidDate)).toContain('invalid_temporal_source_date');
+    });
+
     it('is independent of source and manifest insertion order and serializes repository-relative truth only', () => {
         const reversed: OfficerOobProvenanceInput = {
             officers: { officers: [...fixture.valid.officers.officers].reverse() },
@@ -200,20 +261,20 @@ describe('officer/OOB provenance inventory', () => {
     it('inventories every authoritative OOB source row and retains unsupported named candidates only as omissions', () => {
         const report = loadOfficerOobProvenanceReport(process.cwd());
 
-        expect(report.summary.total_records).toBe(222);
-        expect(report.records.filter((record) => record.record_kind === 'officer')).toHaveLength(31);
+        expect(report.records.filter((record) => record.record_kind === 'officer')).toHaveLength(63);
         expect(report.records.filter((record) => record.record_kind === 'corps')).toHaveLength(19);
-        expect(report.records.filter((record) => record.record_kind === 'brigade')).toHaveLength(169);
+        expect(report.records.filter((record) => record.record_kind === 'brigade')).toHaveLength(249);
         expect(report.records.filter((record) => record.record_kind === 'elite_commander')).toHaveLength(3);
         expect(report.summary).toMatchObject({
-            manifest_records: 222,
-            supported_records: 222,
+            total_records: 334,
+            manifest_records: 334,
+            supported_records: 334,
             unsupported_records: 0,
-            omitted_records: 152,
+            omitted_records: 40,
             blocking_violations: 0,
         });
         expect(report.records.every((record) => record.disposition === 'supported')).toBe(true);
-        expect(report.omissions.filter((record) => record.record_kind === 'brigade')).toHaveLength(80);
+        expect(report.omissions.filter((record) => record.record_kind === 'brigade')).toHaveLength(0);
         expect(violationCodes(report)).not.toContain('missing_provenance');
         expect(violationCodes(report)).not.toContain('missing_court_record_citation');
         expect(violationCodes(report)).not.toContain('unresolved_normalized_identity_collision');
@@ -228,6 +289,144 @@ describe('officer/OOB provenance inventory', () => {
             kind: 'tenure_of',
             target_record_key: 'officer:hvo_petkovic_2',
         });
+    });
+
+    it('keeps every generated or runtime-authored historical formation dependency in the playable OOB', () => {
+        const root = process.cwd();
+        const oob = JSON.parse(readFileSync(join(root, 'data', 'source', 'oob_brigades.json'), 'utf8')) as Array<{ id: string }>;
+        const designations = JSON.parse(readFileSync(
+            join(root, 'data', 'source', 'oob_brigade_designations.json'),
+            'utf8',
+        )) as { rows: Array<{ id: string }> };
+        const startup = readFileSync(
+            join(root, 'data', 'derived', 'startup', 'apr_1992_initial_save.json'),
+            'utf8',
+        );
+        const authoredRuntime = [
+            'src/sim/combat/triggered_operations.ts',
+            'src/sim/combat/pre_planned_operations.ts',
+            'src/sim/combat/operation_opportunity_catalog_5th_corps.ts',
+            'src/sim/combat/operation_opportunity_catalog_central_bosnia.ts',
+            'src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.ts',
+            'src/sim/combat/enclave_resilience.ts',
+            'src/sim/combat/sector_offensive_launch_helpers.ts',
+            'src/sim/combat/sector_territory.ts',
+            'src/sim/combat/tactical_group_anchor.ts',
+        ].map((relativePath) => readFileSync(join(root, ...relativePath.split('/')), 'utf8')).join('\n');
+        const referencedText = `${startup}\n${authoredRuntime}`;
+        const playableIds = new Set(oob.map((row) => row.id));
+        const missing = designations.rows
+            .map((row) => row.id)
+            .filter((id) => referencedText.includes(`\"${id}\"`) || referencedText.includes(`'${id}'`))
+            .filter((id) => !playableIds.has(id))
+            .sort();
+
+        expect(missing).toEqual([]);
+    });
+
+    it('reports the exact generated officer residue without conflating corps and phantom formations with brigades', () => {
+        const root = process.cwd();
+        const officerData = JSON.parse(readFileSync(join(
+            root,
+            'data',
+            'scenarios',
+            'officers',
+            'apr1992_officers.json',
+        ), 'utf8')) as { officers: Array<{ id: string }> };
+        const startup = JSON.parse(readFileSync(join(
+            root,
+            'data',
+            'derived',
+            'startup',
+            'apr_1992_initial_save.json',
+        ), 'utf8')) as {
+            military: {
+                named_officer_data: Array<{ id: string }>;
+                named_officers: Record<string, unknown>;
+            };
+        };
+        const manifest = JSON.parse(readFileSync(join(
+            root,
+            'docs',
+            'provenance',
+            'OFFICER_OOB_PROVENANCE.json',
+        ), 'utf8')) as {
+            omissions: Record<string, { record_kind: string; record_id: string }>;
+        };
+        const sourceIds = new Set(officerData.officers.map((officer) => officer.id));
+        const omittedOfficerIds = Object.values(manifest.omissions)
+            .filter((row) => row.record_kind === 'officer')
+            .map((row) => row.record_id)
+            .sort();
+        const staleDataIds = startup.military.named_officer_data
+            .map((officer) => officer.id)
+            .filter((id) => !sourceIds.has(id))
+            .sort();
+        const staleStateIds = Object.keys(startup.military.named_officers)
+            .filter((id) => !sourceIds.has(id))
+            .sort();
+
+        expect(staleDataIds).toEqual(omittedOfficerIds);
+        expect(staleDataIds).toHaveLength(35);
+        expect(staleStateIds).toHaveLength(28);
+        expect(staleStateIds.every((id) => omittedOfficerIds.includes(id))).toBe(true);
+    });
+
+    it('models sourced chronology at weekly boundaries without inventing exact dates', () => {
+        const root = process.cwd();
+        const officerData = JSON.parse(readFileSync(join(
+            root,
+            'data',
+            'scenarios',
+            'officers',
+            'apr1992_officers.json',
+        ), 'utf8')) as { officers: Array<{ id: string; available_from_turn: number }> };
+        const manifest = JSON.parse(readFileSync(join(
+            root,
+            'docs',
+            'provenance',
+            'OFFICER_OOB_PROVENANCE.json',
+        ), 'utf8')) as {
+            records: Record<string, {
+                temporal_evidence?: Array<{
+                    field: string;
+                    source_date: string;
+                    precision: string;
+                    modeled_turn: number;
+                }>;
+            }>;
+        };
+        const byId = new Map(officerData.officers.map((officer) => [officer.id, officer]));
+
+        expect(byId).toHaveLength(63);
+        expect(byId.get('arbih_drekovic')?.available_from_turn).toBe(29);
+        expect(byId.get('hvo_petkovic')?.available_from_turn).toBe(2);
+        expect(byId.get('vrs_boric')?.available_from_turn).toBe(39);
+
+        expect(manifest.records['officer:arbih_drekovic']?.temporal_evidence).toContainEqual(
+            expect.objectContaining({
+                field: 'available_from_turn',
+                source_date: '1992-10-20',
+                precision: 'exact_date',
+                modeled_turn: 29,
+            }),
+        );
+        expect(manifest.records['officer:hvo_petkovic']?.temporal_evidence).toContainEqual(
+            expect.objectContaining({
+                field: 'available_from_turn',
+                source_date: '1992-04-14',
+                precision: 'exact_date',
+                modeled_turn: 2,
+            }),
+        );
+        expect(manifest.records['officer:vrs_boric']?.temporal_evidence).toContainEqual(
+            expect.objectContaining({
+                field: 'available_from_turn',
+                source_date: '1992-12-31',
+                precision: 'on_or_before',
+                modeled_turn: 39,
+            }),
+        );
     });
 
     it('keeps the canonical army-command succession roster closed over exact playable officer ids', () => {
@@ -251,7 +450,7 @@ describe('officer/OOB provenance inventory', () => {
             'army_co_roster.json',
         ), 'utf8')) as {
             rosters: Record<string, {
-                schedule: Array<{ officer_id: string; replaces_with: string | null }>;
+                schedule: Array<{ officer_id: string; tenure_start: number; replaces_with: string | null }>;
             }>;
         };
         const playableOfficerIds = new Set(officerData.officers.map((officer) => officer.id));
@@ -274,6 +473,7 @@ describe('officer/OOB provenance inventory', () => {
             'hvo_petkovic_2',
             'hvo_blaskic_2',
         ]);
+        expect(armyRoster.rosters.HRHB.schedule[0]?.tenure_start).toBe(2);
         expect(armyRoster.rosters.HRHB.schedule[2]?.replaces_with).toBe('hvo_petkovic_2');
         expect([
             officerById.get('hvo_petkovic')?.available_until_turn,

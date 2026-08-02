@@ -4,13 +4,11 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-const FILES: Record<string, string> = {
+export const MARKDOWN_SOURCES = {
     'RBiH': 'docs/knowledge/ARBIH_APPENDIX_H_FULL_BRIGADE_LIST.md',
-    'RS': 'docs/knowledge/VRS_APPENDIX_G_FULL_UNIT_LIST.md',
-    'HRHB': 'docs/knowledge/HVO_FULL_UNIT_LIST.md'
-};
-
-const OOB_PATH = path.join(ROOT, 'data/source/oob_brigades.json');
+    'RS': 'docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md',
+    'HRHB': 'docs/knowledge/HVO_FULL_BRIGADE_LIST.md',
+} as const;
 
 interface BrigadeRow {
     id?: string;
@@ -20,11 +18,10 @@ interface BrigadeRow {
 
 // --- Helpers ---
 
-function countBrigadesInMarkdown(filePath: string): number {
-    const fullPath = path.join(ROOT, filePath);
+export function countBrigadesInMarkdown(filePath: string, rootDir = ROOT): number {
+    const fullPath = path.join(rootDir, filePath);
     if (!fs.existsSync(fullPath)) {
-        console.error(`File not found: ${fullPath}`);
-        return 0;
+        throw new Error(`OOB evidence file not found: ${fullPath}`);
     }
 
     const content = fs.readFileSync(fullPath, 'utf-8');
@@ -40,18 +37,10 @@ function countBrigadesInMarkdown(filePath: string): number {
         // Header detection (H1, H2, H3...)
         if (line.startsWith('#')) {
             const upper = line.toUpperCase();
-            // Start capturing if header contains BRIGADE or "FULL LIST" (generic)
-            // But verify it's not a TOC or "Special Units"
-            if (upper.includes('BRIGADE') || upper.includes('FULL LIST')) {
-                if (!upper.includes('SPECIAL') && !upper.includes('BATTALION') && !upper.includes('REGIMENT') && !upper.includes('NOTES')) {
-                    inBrigadeTable = true;
-                    // console.log(`  Entered table section at: ${line}`);
-                } else {
-                    inBrigadeTable = false;
-                }
-            } else if (upper.includes('BATTALION') || upper.includes('SPECIAL') || upper.includes('CORPS') || upper.includes('OPERATIONAL ZONES')) {
+            if (upper.includes('BRIGADES') && upper.includes('FULL LIST')) {
+                inBrigadeTable = true;
+            } else if (upper.includes('BATTALION') || upper.includes('SPECIAL')) {
                 inBrigadeTable = false;
-                // console.log(`  Exited table section at: ${line}`);
             }
         }
 
@@ -59,9 +48,7 @@ function countBrigadesInMarkdown(filePath: string): number {
             // Ignore separators
             if (line.includes('---')) continue;
             // Ignore headers (case insensitive check for common header terms)
-            const lower = line.toLowerCase();
-            if (lower.includes('brigade') && lower.includes('corps')) continue; // Standard header
-            if (lower.includes('unit') && lower.includes('municipality')) continue; // Standard header
+            if (/^\|\s*(brigade(?:\s*\/\s*unit)?|unit)\s*\|/i.test(line)) continue;
 
             // Count valid row
             const cols = line.split('|').filter(s => s.trim() !== '');
@@ -71,6 +58,35 @@ function countBrigadesInMarkdown(filePath: string): number {
         }
     }
     return count;
+}
+
+export interface OobComparison {
+    markdown_counts: Record<keyof typeof MARKDOWN_SOURCES, number>;
+    oob_counts: Record<keyof typeof MARKDOWN_SOURCES, number>;
+    deltas: Record<keyof typeof MARKDOWN_SOURCES, number>;
+}
+
+export function buildOobComparison(rootDir = ROOT): OobComparison {
+    const oobPath = path.join(rootDir, 'data/source/oob_brigades.json');
+    const brigades = normalizeOobBrigades(JSON.parse(fs.readFileSync(oobPath, 'utf-8')));
+    const factions = Object.keys(MARKDOWN_SOURCES) as Array<keyof typeof MARKDOWN_SOURCES>;
+    const markdownCounts = { RBiH: 0, RS: 0, HRHB: 0 };
+    const oobCounts = { RBiH: 0, RS: 0, HRHB: 0 };
+    for (const brigade of brigades) {
+        const faction = brigade.faction as keyof typeof MARKDOWN_SOURCES | undefined;
+        if (faction && Object.prototype.hasOwnProperty.call(oobCounts, faction)) oobCounts[faction]++;
+    }
+    for (const faction of factions) {
+        markdownCounts[faction] = countBrigadesInMarkdown(MARKDOWN_SOURCES[faction], rootDir);
+    }
+    return {
+        markdown_counts: markdownCounts,
+        oob_counts: oobCounts,
+        deltas: Object.fromEntries(factions.map((faction) => [
+            faction,
+            oobCounts[faction] - markdownCounts[faction],
+        ])) as Record<keyof typeof MARKDOWN_SOURCES, number>,
+    };
 }
 
 export function normalizeOobBrigades(raw: unknown): BrigadeRow[] {
@@ -85,50 +101,21 @@ export function normalizeOobBrigades(raw: unknown): BrigadeRow[] {
 
 function main(): void {
     console.log('--- Order of Battle Verification ---\n');
-
-    // 1. JSON Counts
-    let brigades: BrigadeRow[] = [];
     try {
-        brigades = normalizeOobBrigades(JSON.parse(fs.readFileSync(OOB_PATH, 'utf-8')));
+        const comparison = buildOobComparison(ROOT);
+        console.log('| Faction | Markdown Source (Appendix) | OOB JSON (oob_brigades.json) | Delta (JSON - MD) |');
+        console.log('|:--------|:---------------------------|:-----------------------------|:------------------|');
+        for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
+            const mdStr = comparison.markdown_counts[faction].toString().padEnd(26);
+            const jsStr = comparison.oob_counts[faction].toString().padEnd(28);
+            console.log(`| ${faction.padEnd(7)} | ${mdStr} | ${jsStr} | ${comparison.deltas[faction]} |`);
+        }
+        console.log('\nNote: Positive Delta means JSON has duplicates or extra units not in Appendix MD.');
+        console.log('      Negative Delta means JSON is missing units found in Appendix MD.');
     } catch (error) {
-        console.error('Error reading OOB JSON:', error);
+        console.error('OOB comparison failed:', error);
         process.exitCode = 1;
     }
-
-    const jsonCounts: Record<string, number> = { 'RBiH': 0, 'RS': 0, 'HRHB': 0 };
-
-    for (const brigade of brigades) {
-        if (brigade.faction && jsonCounts[brigade.faction] !== undefined) {
-            jsonCounts[brigade.faction]++;
-        }
-    }
-
-    // 2. Markdown Counts
-    const mdCounts: Record<string, number> = { 'RBiH': 0, 'RS': 0, 'HRHB': 0 };
-
-    for (const faction of Object.keys(FILES)) {
-        mdCounts[faction] = countBrigadesInMarkdown(FILES[faction]);
-    }
-
-    // 3. Output Table
-    console.log('| Faction | Markdown Source (Appendix) | OOB JSON (oob_brigades.json) | Delta (JSON - MD) |');
-    console.log('|:--------|:---------------------------|:-----------------------------|:------------------|');
-
-    for (const faction of ['RBiH', 'RS', 'HRHB']) {
-        const md = mdCounts[faction];
-        const js = jsonCounts[faction];
-        const delta = js - md;
-
-        // Formatting
-        const fStr = faction.padEnd(7);
-        const mdStr = md.toString().padEnd(26);
-        const jsStr = js.toString().padEnd(28);
-
-        console.log(`| ${fStr} | ${mdStr} | ${jsStr} | ${delta} |`);
-    }
-
-    console.log('\nNote: Positive Delta means JSON has duplicates or extra units not in Appendix MD.');
-    console.log('      Negative Delta means JSON is missing units found in Appendix MD.');
 }
 
 function isMainModule(): boolean {

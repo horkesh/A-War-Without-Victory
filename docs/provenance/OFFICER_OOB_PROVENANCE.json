@@ -79,6 +79,18 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
     },
+    "brigade:arbih_10th_mountain": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 10th Mountain Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
     "brigade:arbih_111th_vitezka_motorized": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0507.json",
@@ -114,6 +126,18 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
+    },
+    "brigade:arbih_116th_mountain": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 116th Mountain Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "brigade:arbih_120th_liberation_black_swans": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -342,6 +366,54 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
+    },
+    "brigade:arbih_1st_cerska": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 1st Cerska Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:arbih_1st_kamenica": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 1st Kamenica Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:arbih_1st_mountain": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 1st Mountain Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:arbih_1st_olovo": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 1st Olovo Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "brigade:arbih_210th_vitezka_liberation_nesib_maliki": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -619,6 +691,78 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
     },
+    "brigade:arbih_280th_east_bosnian_light": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 280th East Bosnian Light",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:arbih_281st_east_bosnian_light": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 281st East Bosnian Light",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:arbih_282nd_east_bosnian_light": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 282nd East Bosnian Light",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:arbih_283rd_east_bosnian_light": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 283rd East Bosnian Light",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:arbih_284th_east_bosnian_light": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 284th East Bosnian Light",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:arbih_285th_light": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 285th Light Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
     "brigade:arbih_286th_mountain": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0514.json",
@@ -642,6 +786,30 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
+    },
+    "brigade:arbih_2nd_mountain": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 2nd Mountain Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:arbih_2nd_tuzla": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0490.json",
+      "citation": "BB2 p.490, Majevica OOB narrative: 2nd Tuzla Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "brigade:arbih_303rd_vitezka_mountain": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -967,6 +1135,18 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
     },
+    "brigade:arbih_504th_cazin_light": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0537.json",
+      "citation": "BB2 p.537, Bihać 1994 OOB chart: 504th Cazin Light Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
     "brigade:arbih_505th_vitezka_mountain": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0513.json",
@@ -1279,6 +1459,450 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
     },
+    "brigade:arbih_hvo_kralj_tvrtko": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: HVO Brigade \"Kralj Tvrtko\"",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_101st_oraje_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 101st Orašje Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_102nd_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 102nd Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_103rd_derventa_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 103rd Derventa Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_104th_bosanski_brod_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 104th Bosanski Brod Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_105th_modrica_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 105th Modriča Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_106th_bosanska_posavina_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 106th \"Bosanska Posavina\" Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_107th_gradaac_brigade": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 107th \"Gradačac\" Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_108th_brko_brigade": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 108th \"Brčko\" Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_110th_usora_brigade": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 110th Usora Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_111th_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 111th Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_115th_zrinski_brigade": {
+      "source": "ARBiH historical formation evidence ledger",
+      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
+      "citation": "Exact formation identity cross-reference row: 115th \"Zrinski\" Brigade",
+      "source_tier": "dataset",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_1st_brigade_mostar": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 1st Brigade (Mostar)",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_1st_herzegovina_brigade_knez_domagoj": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 1st Herzegovina Brigade \"Knez Domagoj\"",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_2nd_brigade_mostar": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 2nd Brigade (Mostar)",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_6th_brigade_ranko_boban": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 6th Brigade \"Ranko Boban\"",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_94th_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 94th Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_95th_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 95th Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_apljina_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Čapljina Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_ban_jelai_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Ban Jelačić Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_grude_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Grude Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_herceg_stjepan_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Herceg Stjepan Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_iroki_brijeg_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Široki Brijeg Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_itluk_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Čitluk Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_jure_franceti_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: \"Jure Francetić\" Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_kiseljak_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Kiseljak Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_kralj_petar_kreimir_iv_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Kralj Petar Krešimir IV Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_kralj_tomislav_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Kralj Tomislav Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_kreevo_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Kreševo Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_ljubuki_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Ljubuški Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_mario_hrka_ikota_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Mario Hrkač Čikota Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_mostar_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Mostar Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_stjepan_tomaevi_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: \"Stjepan Tomašević\" Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_stolac_units": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Stolac Units",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_travnik_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Travnik Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hrhb_vitezovi_brigade_vitez": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: \"Vitezovi\" Brigade (Vitez)",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hvo_101st_bihac": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0537.json",
+      "citation": "BB2 p.537, Bihać 1994 OOB chart: 101st Bihać HVO Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
     "brigade:hvo_1st_guard_abb": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0518.json",
@@ -1326,6 +1950,66 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix I."
+    },
+    "brigade:hvo_ante_starcevic_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Ante Starčević Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hvo_hrvoje_vukcic_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Hrvoje Vukčić Hrvatinić Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hvo_nikola_subic_zrinski_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Nikola Šubić Zrinski Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hvo_posusje_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Posušje Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:hvo_rama_brigade": {
+      "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
+      "source_url": "repo://docs/knowledge/HVO_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Rama Brigade",
+      "source_tier": "archival",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "brigade:rs_11th_dubica_infantry": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -1459,6 +2143,30 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix G."
     },
+    "brigade:rs_1st_birac": {
+      "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+      "citation": "IT-05-88-T, paras. 244-249; exact Drina Corps formation: 1st Birač",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored: this exact operational participant is named by the Popović judgment and hardcoded campaign catalogs."
+    },
+    "brigade:rs_1st_bratunac": {
+      "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+      "citation": "IT-05-88-T, paras. 244-249; exact Drina Corps formation: 1st Bratunac",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored: this exact operational participant is named by the Popović judgment and hardcoded campaign catalogs."
+    },
     "brigade:rs_1st_celinac_light_infantry": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0498.json",
@@ -1555,6 +2263,18 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix G."
     },
+    "brigade:rs_1st_milii": {
+      "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+      "citation": "IT-05-88-T, paras. 244-249; exact Drina Corps formation: 1st Milići",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored: this exact operational participant is named by the Popović judgment and hardcoded campaign catalogs."
+    },
     "brigade:rs_1st_novigrad_infantry": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0498.json",
@@ -1578,6 +2298,18 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix G."
+    },
+    "brigade:rs_1st_podrinje": {
+      "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+      "citation": "IT-05-88-T, paras. 244-249; exact Drina Corps formation: 1st Podrinje Light Infantry Brigade",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored: this exact operational participant is named by the Popović judgment and hardcoded campaign catalogs."
     },
     "brigade:rs_1st_posavina_infantry": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -1687,6 +2419,18 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix G."
     },
+    "brigade:rs_1st_vlasenica": {
+      "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+      "citation": "IT-05-88-T, paras. 244-249; exact Drina Corps formation: 1st Vlasenica",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored: this exact operational participant is named by the Popović judgment and hardcoded campaign catalogs."
+    },
     "brigade:rs_1st_vujak_light_infantry": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0499.json",
@@ -1698,6 +2442,18 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix G."
+    },
+    "brigade:rs_1st_zvornik": {
+      "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+      "citation": "IT-05-88-T, paras. 244-249; exact Drina Corps formation: 1st Zvornik",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored: this exact operational participant is named by the Popović judgment and hardcoded campaign catalogs."
     },
     "brigade:rs_22nd_krajina_infantry": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -1747,6 +2503,18 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix G."
     },
+    "brigade:rs_2nd_herzegovina_light_infantry": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 2nd Herzegovina Light Infantry Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
     "brigade:rs_2nd_krajina_infantry": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0497.json",
@@ -1794,6 +2562,18 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix G."
+    },
+    "brigade:rs_2nd_romanija_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 2nd Romanija Motorized Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "brigade:rs_2nd_sarajevo_light_infantry": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -1999,6 +2779,18 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix G."
     },
+    "brigade:rs_5th_podrinje": {
+      "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+      "citation": "IT-05-88-T, paras. 244-249; exact Drina Corps formation: 5th Podrinje",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored: this exact operational participant is named by the Popović judgment and hardcoded campaign catalogs."
+    },
     "brigade:rs_65th_protection_motorized_regiment": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0496.json",
@@ -2046,6 +2838,174 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix G."
+    },
+    "brigade:rs_ajnie_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Čajniče Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_bilea_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Bileća Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_foa_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Foča Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_gacko_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Gacko Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_igman_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Igman Infantry Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_ilidza_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 2nd Sarajevo Light Infantry Brigade (Ilidža)",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_ilijas_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 3rd Sarajevo Infantry Brigade (Ilijaš)",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_kalinovik_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Kalinovik Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_nevesinje_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Nevesinje Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_skelani_battalion": {
+      "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+      "citation": "IT-05-88-T, paras. 244-249; exact Drina Corps formation: Independent Infantry Battalion Skelani",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored: this exact operational participant is named by the Popović judgment and hardcoded campaign catalogs."
+    },
+    "brigade:rs_trebinje_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Trebinje Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_trnovo_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Trnovo Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:rs_visegrad_brigade": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: Višegrad Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+    },
+    "brigade:vrs_1st_laktasi": {
+      "source": "VRS brigade evidence ledger (BB Appendix G, narrative, and ICTY sources)",
+      "source_url": "repo://docs/knowledge/VRS_APPENDIX_G_FULL_BRIGADE_LIST.md",
+      "citation": "Full historical OOB, exact formation row: 1st Laktaši Light Brigade",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "corps:arbih_1st_corps": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2314,6 +3274,19 @@
       "disposition": "supported",
       "notes": "Exact Milomir Savcic command of the 65th Protection Regiment."
     },
+    "officer:arbih_ajnadzic": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0418.json",
+      "citation": "BB2 p.418, 37th Division and 1st Corps command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
     "officer:arbih_alagic": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0528.json",
@@ -2324,7 +3297,49 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact 3rd and 7th Corps commander identity and tenures."
+      "notes": "Exact 3rd and 7th Corps commander identity and tenures.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 80,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.528, Key Wartime Commanders chart"
+        },
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 120,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.528, Key Wartime Commanders chart"
+        }
+      ]
+    },
+    "officer:arbih_cikotic": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0448.json",
+      "citation": "BB2 p.448, Operational Group West command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_cuskic": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0529.json",
+      "citation": "BB2 p.529, Bosanska Krajina Operational Group command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:arbih_delic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2336,7 +3351,29 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact ARBiH General Staff commander identity and 1993-97 tenure."
+      "notes": "Exact ARBiH General Staff commander identity and 1993-97 tenure.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 60,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.528, Key Wartime Commanders chart"
+        }
+      ]
+    },
+    "officer:arbih_divjak": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0418.json",
+      "citation": "BB2 p.418, ARBiH deputy chief of staff",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:arbih_drekovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2348,7 +3385,24 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact 5th Corps founding commander identity on 20 October 1992."
+      "notes": "Exact 5th Corps founding commander identity on 20 October 1992.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-10-20",
+          "precision": "exact_date",
+          "modeled_turn": 29,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "BB1 p.186, 5th Corps formation narrative"
+        },
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 80,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.186, 5th Corps formation narrative"
+        }
+      ]
     },
     "officer:arbih_dudakovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2360,7 +3414,8 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact 5th Corps commander identity and 1993-97 tenure."
+      "notes": "Exact 5th Corps commander identity and 1993-97 tenure.",
+      "temporal_evidence": []
     },
     "officer:arbih_hadzihasanovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2372,7 +3427,23 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact 3rd Corps and General Staff command identity and tenures."
+      "notes": "Exact 3rd Corps and General Staff command identity and tenures.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 22,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.528, Key Wartime Commanders chart"
+        },
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 80,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.528, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:arbih_halilovic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -2384,7 +3455,84 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact Bosnian Army commander identity in March 1993."
+      "notes": "Exact Bosnian Army commander identity in March 1993.",
+      "temporal_evidence": [
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 60,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB2 p.406, Drina operations narrative"
+        }
+      ]
+    },
+    "officer:arbih_hodzic": {
+      "source": "Balkan Battlegrounds, Vols. I-II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0405.json",
+      "citation": "BB2 p.405, northeast Bosnia command narrative",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_imamovic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0443.json",
+      "citation": "BB1 p.443, 14th Division command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_karavelic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0404.json",
+      "citation": "BB1 p.404 and index p.533, 1st Corps command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 68,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.404 and index p.533, 1st Corps command"
+        }
+      ]
+    },
+    "officer:arbih_lendo": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0439.json",
+      "citation": "BB1 p.439, 25th Division command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 120,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.439, 25th Division command"
+        }
+      ]
     },
     "officer:arbih_mahmuljin": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2396,7 +3544,81 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact 3rd Corps commander identity and 1994-97 tenure."
+      "notes": "Exact 3rd Corps commander identity and 1994-97 tenure.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 110,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.528, Key Wartime Commanders chart"
+        }
+      ]
+    },
+    "officer:arbih_malkic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0439.json",
+      "citation": "BB1 p.439, 210th Liberation Brigade identity",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_mesic": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0490.json",
+      "citation": "BB2 p.490, Teočak brigade identity",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_nanic": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0537.json",
+      "citation": "BB2 p.537, 505th Brigade command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_oric": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0186.json",
+      "citation": "BB1 pp.186-187, Srebrenica force command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": "ICTY IT-03-68-A, Orić Appeal Judgment",
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_palic": {
+      "source": "Balkan Battlegrounds, Vols. I-II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0356.json",
+      "citation": "BB1 p.356 and BB2 p.408, Žepa command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:arbih_pasalic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -2408,7 +3630,23 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact ARBiH 4th Corps commander identity in the 1993 Konjic context."
+      "notes": "Exact ARBiH 4th Corps commander identity in the 1993 Konjic context.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 24,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB2 p.452, northern Herzegovina narrative"
+        },
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 80,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB2 p.452, northern Herzegovina narrative"
+        }
+      ]
     },
     "officer:arbih_s_delic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2420,7 +3658,104 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact 2nd Corps commander identity and 1993-2000 tenure."
+      "notes": "Exact 2nd Corps commander identity and 1993-2000 tenure.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 132,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.528, Key Wartime Commanders chart"
+        }
+      ]
+    },
+    "officer:arbih_s_hadzic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0441.json",
+      "citation": "BB1 p.441, Sarajevo command narrative",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_sadic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0202.json",
+      "citation": "BB1 p.202, 2nd Corps commander statement",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 44,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.202, 2nd Corps commander statement"
+        },
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 132,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.202, 2nd Corps commander statement"
+        }
+      ]
+    },
+    "officer:arbih_sehovic": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0428.json",
+      "citation": "BB2 p.428, 1st Motorized Brigade command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_selmanovic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0449.json",
+      "citation": "BB1 p.449, 5th Corps chief of staff",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:arbih_talijan": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0234.json",
+      "citation": "BB1 p.234, 1st Corps command narrative",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 68,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.234, 1st Corps command narrative"
+        }
+      ]
     },
     "officer:hvo_blaskic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -2435,7 +3770,16 @@
       "court_record_citation": null,
       "conflict_note": "Exact cross-row identity relation.",
       "disposition": "supported",
-      "notes": "Exact Central Bosnia Operational Zone commander identity."
+      "notes": "Exact Central Bosnia Operational Zone commander identity.",
+      "temporal_evidence": [
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 122,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB2 p.446, Chart 1 HVO OOB Kiseljak Enclave, 1993"
+        }
+      ]
     },
     "officer:hvo_blaskic_2": {
       "source": "ICTY, Prosecutor v. Blaškić, Amended Indictment",
@@ -2447,7 +3791,30 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact 5 August 1994 appointment as commander of the HVO and November 1995 exit. The modeled turn boundary is the first weekly campaign boundary on or after the cited date."
+      "notes": "Exact 5 August 1994 appointment as commander of the HVO and November 1995 exit. The modeled turn boundary is the first weekly campaign boundary on or after the cited date.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1994-08-05",
+          "precision": "exact_date",
+          "modeled_turn": 122,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY Prlić et al. command chronology"
+        }
+      ]
+    },
+    "officer:hvo_cerkez": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0437.json",
+      "citation": "BB2 p.437, Vitez Brigade command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": "ICTY IT-95-14/2-A, Kordić and Čerkez Appeal Judgment",
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:hvo_glasnovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2462,7 +3829,29 @@
       "court_record_citation": null,
       "conflict_note": "Exact cross-row identity relation.",
       "disposition": "supported",
-      "notes": "Exact 1st Guards and Tomislavgrad command identity."
+      "notes": "Exact 1st Guards and Tomislavgrad command identity.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 120,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.527, Key Wartime Commanders chart"
+        }
+      ]
+    },
+    "officer:hvo_kordic": {
+      "source": "ICTY, Prosecutor v. Kordić and Čerkez, Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/kordic_cerkez/tjug/en/kor-tj010226e.pdf",
+      "citation": "IT-95-14/2-T, Central Bosnia authority findings",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": "ICTY IT-95-14/2-A, Kordić and Čerkez Appeal Judgment",
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:hvo_lasic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -2474,7 +3863,21 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact Southeastern Herzegovina Operational Zone commander identity."
+      "notes": "Exact Southeastern Herzegovina Operational Zone commander identity.",
+      "temporal_evidence": []
+    },
+    "officer:hvo_matuzovic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0438.json",
+      "citation": "BB1 p.438, Orašje command evidence",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:hvo_nakic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -2486,7 +3889,21 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact Central Bosnia Operational Zone deputy commander identity."
+      "notes": "Exact Central Bosnia Operational Zone deputy commander identity.",
+      "temporal_evidence": []
+    },
+    "officer:hvo_naletlic": {
+      "source": "ICTY, Prosecutor v. Naletilić and Martinović, Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/naletilic_martinovic/tjug/en/nal-tj030331-e.pdf",
+      "citation": "IT-98-34-T, Convicts Battalion command findings",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": "ICTY IT-98-34-A, Naletilić and Martinović Appeal Judgment",
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:hvo_petkovic": {
       "source": "ICTY, Prosecutor v. Prlić et al., Trial Judgment, Vol. I",
@@ -2501,7 +3918,25 @@
       "court_record_citation": null,
       "conflict_note": "Exact non-contiguous tenure relation.",
       "disposition": "supported",
-      "notes": "Exact first tenure as Chief of the HVO Main Staff, 14 April 1992 to 24 July 1993. The modeled exit is the first weekly campaign boundary on or after the cited date."
+      "notes": "Exact first tenure as Chief of the HVO Main Staff, 14 April 1992 to 24 July 1993. The modeled exit is the first weekly campaign boundary on or after the cited date.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-04-14",
+          "precision": "exact_date",
+          "modeled_turn": 2,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY IT-04-74-A, Appeal Judgment, Vol. I, para. 332 fn. 1026"
+        },
+        {
+          "field": "available_until_turn",
+          "source_date": "1993-07-24",
+          "precision": "exact_date",
+          "modeled_turn": 68,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY IT-04-74-A, Appeal Judgment, Vol. I, para. 332 fn. 1026"
+        }
+      ]
     },
     "officer:hvo_petkovic_2": {
       "source": "ICTY, Prosecutor v. Prlić et al., Appeal Judgment, Vol. I",
@@ -2513,7 +3948,25 @@
       "court_record_citation": null,
       "conflict_note": "Resolved by exact tenure_of relation on officer:hvo_petkovic.",
       "disposition": "supported",
-      "notes": "Exact second tenure as Chief of the HVO Main Staff, 26 April to 5 August 1994. The modeled boundaries are the first weekly campaign boundaries on or after the cited dates."
+      "notes": "Exact second tenure as Chief of the HVO Main Staff, 26 April to 5 August 1994. The modeled boundaries are the first weekly campaign boundaries on or after the cited dates.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1994-04-26",
+          "precision": "exact_date",
+          "modeled_turn": 108,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY IT-04-74-A, Appeal Judgment, Vol. I, para. 7"
+        },
+        {
+          "field": "available_until_turn",
+          "source_date": "1994-08-05",
+          "precision": "exact_date",
+          "modeled_turn": 122,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY IT-04-74-A, Appeal Judgment, Vol. I, para. 7"
+        }
+      ]
     },
     "officer:hvo_praljak": {
       "source": "ICTY, Prosecutor v. Prlić et al., Trial Judgment, Vol. I",
@@ -2525,7 +3978,25 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact HVO Main Staff command from 24 July to 9 November 1993. The modeled boundaries are the first weekly campaign boundaries on or after the cited dates."
+      "notes": "Exact HVO Main Staff command from 24 July to 9 November 1993. The modeled boundaries are the first weekly campaign boundaries on or after the cited dates.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-07-24",
+          "precision": "exact_date",
+          "modeled_turn": 68,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY IT-04-74-A, Appeal Judgment, Vol. I, para. 6"
+        },
+        {
+          "field": "available_until_turn",
+          "source_date": "1993-11-09",
+          "precision": "exact_date",
+          "modeled_turn": 84,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY IT-04-74-A, Appeal Judgment, Vol. I, para. 6"
+        }
+      ]
     },
     "officer:hvo_rajic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -2537,7 +4008,8 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact Central Bosnia Second Operational Group command identity."
+      "notes": "Exact Central Bosnia Second Operational Group command identity.",
+      "temporal_evidence": []
     },
     "officer:hvo_roso": {
       "source": "ICTY, Prosecutor v. Prlić et al., Trial Judgment, Vol. I",
@@ -2549,7 +4021,88 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact HVO Main Staff command from 9 November 1993 to 26 April 1994. The modeled boundaries are the first weekly campaign boundaries on or after the cited dates."
+      "notes": "Exact HVO Main Staff command from 9 November 1993 to 26 April 1994. The modeled boundaries are the first weekly campaign boundaries on or after the cited dates.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-11-09",
+          "precision": "exact_date",
+          "modeled_turn": 84,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY Prlić et al. command chronology"
+        },
+        {
+          "field": "available_until_turn",
+          "source_date": "1994-04-26",
+          "precision": "exact_date",
+          "modeled_turn": 108,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY Prlić et al. command chronology"
+        }
+      ]
+    },
+    "officer:hvo_sopta": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0456.json",
+      "citation": "BB1 p.456, 2nd HVO Guard Brigade command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": {
+        "kind": "same_person",
+        "target_record_key": "elite_commander:hvo_2nd_guard_mechanized"
+      },
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 88,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.456, 2nd HVO Guard Brigade command"
+        }
+      ]
+    },
+    "officer:vrs_andric": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0413.json",
+      "citation": "BB2 p.413, Drina Corps brigade command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:vrs_arsic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0458.json",
+      "citation": "BB1 p.458, Doboj Operational Group command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:vrs_blagojevic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0443.json",
+      "citation": "BB1 p.443, 1st Bratunac Brigade command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": "ICTY IT-02-60-T, Blagojević and Jokić Trial Judgment",
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:vrs_boric": {
       "source": "Balkan Battlegrounds, Vols. I-II",
@@ -2561,7 +4114,37 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "BB1 p.186 proves Borić commanded 2nd Krajina Corps at the end of 1992. BB2 p.555 (repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0555.json) proves that he lost command after the October 1994 breakout; the modeled turn boundary is the deterministic weekly boundary for that dated account."
+      "notes": "BB1 p.186 proves Borić commanded 2nd Krajina Corps at the end of 1992. BB2 p.555 (repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0555.json) proves that he lost command after the October 1994 breakout; the modeled turn boundary is the deterministic weekly boundary for that dated account.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative first campaign-week boundary on or after the sourced no-later-than date",
+          "citation": "BB1 p.186 proves command only by the end of 1992"
+        },
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 134,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.186, Bihac operations narrative; BB2 p.555, October 1994 Bihac offensive narrative"
+        }
+      ]
+    },
+    "officer:vrs_colic": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0401.json",
+      "citation": "BB2 p.401, 5th Kozara Brigade command interview",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:vrs_d_milosevic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2573,7 +4156,16 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact Sarajevo-Romanija Corps commander identity and 1994-95 tenure."
+      "notes": "Exact Sarajevo-Romanija Corps commander identity and 1994-95 tenure.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 118,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.525, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:vrs_galic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2585,7 +4177,23 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact Sarajevo-Romanija Corps commander identity and 1992-94 tenure."
+      "notes": "Exact Sarajevo-Romanija Corps commander identity and 1992-94 tenure.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 18,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.524, Key Wartime Commanders chart"
+        },
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 118,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.524, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:vrs_grubac": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2597,7 +4205,8 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact Herzegovina Corps commander identity and 1992-96 tenure."
+      "notes": "Exact Herzegovina Corps commander identity and 1992-96 tenure.",
+      "temporal_evidence": []
     },
     "officer:vrs_krstic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2609,7 +4218,16 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact Drina Corps commander identity and 1995-96 tenure."
+      "notes": "Exact Drina Corps commander identity and 1995-96 tenure.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 170,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.525, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:vrs_milovanovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2621,7 +4239,8 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact VRS Main Staff chief identity and 1992-96 tenure."
+      "notes": "Exact VRS Main Staff chief identity and 1992-96 tenure.",
+      "temporal_evidence": []
     },
     "officer:vrs_mladic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2633,7 +4252,47 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact VRS Main Staff command identity and 1992-96 tenure."
+      "notes": "Exact VRS Main Staff command identity and 1992-96 tenure.",
+      "temporal_evidence": []
+    },
+    "officer:vrs_obrenovic": {
+      "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf",
+      "citation": "IT-05-88-T, command findings for the Zvornik Brigade",
+      "source_tier": "tribunal",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": "ICTY IT-02-60/2-S, Obrenović Sentencing Judgment",
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:vrs_pandurevic": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0443.json",
+      "citation": "BB1 p.443, 1st Zvornik Brigade command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": "ICTY IT-05-88-T, Popović et al. Trial Judgment, command findings",
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:vrs_samardzija": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0530.json",
+      "citation": "BB2 p.530, 7th Kupres-Šipovo Brigade command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
     },
     "officer:vrs_simic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2645,7 +4304,8 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact East Bosnian Corps commander identity and 1992-97 tenure."
+      "notes": "Exact East Bosnian Corps commander identity and 1992-97 tenure.",
+      "temporal_evidence": []
     },
     "officer:vrs_sipcic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2657,7 +4317,16 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact initial Sarajevo-Romanija Corps commander and replacement timing."
+      "notes": "Exact initial Sarajevo-Romanija Corps commander and replacement timing.",
+      "temporal_evidence": [
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 18,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.189, Sarajevo corps narrative"
+        }
+      ]
     },
     "officer:vrs_talic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2669,7 +4338,8 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact 1st Krajina Corps commander identity and 1992-97 tenure."
+      "notes": "Exact 1st Krajina Corps commander identity and 1992-97 tenure.",
+      "temporal_evidence": []
     },
     "officer:vrs_tolimir": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2681,7 +4351,8 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact Main Staff intelligence and security assistant identity and 1992-96 tenure."
+      "notes": "Exact Main Staff intelligence and security assistant identity and 1992-96 tenure.",
+      "temporal_evidence": []
     },
     "officer:vrs_tomanic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -2693,650 +4364,60 @@
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Exact 2nd Krajina Corps commander identity and 1994-95 tenure."
+      "notes": "Exact 2nd Krajina Corps commander identity and 1994-95 tenure.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 91,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB1 p.524, Key Wartime Commanders chart"
+        }
+      ]
+    },
+    "officer:vrs_zeljaja": {
+      "source": "Balkan Battlegrounds, Vol. I",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0420.json",
+      "citation": "BB1 p.420, Prijedor Operational Group command",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": []
+    },
+    "officer:vrs_zivanovic": {
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0478.json",
+      "citation": "BB2 p.478, Drina Corps command narrative",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": "ICTY IT-05-88-T, Popović et al. Trial Judgment, Drina Corps command findings",
+      "conflict_note": null,
+      "disposition": "supported",
+      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 28,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB2 p.478, Drina Corps command narrative"
+        },
+        {
+          "field": "available_until_turn",
+          "precision": "bounded_model",
+          "modeled_turn": 170,
+          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "citation": "BB2 p.478, Drina Corps command narrative"
+        }
+      ]
     }
   },
   "omissions": {
-    "brigade:arbih_10th_mountain": {
-      "record_kind": "brigade",
-      "record_id": "arbih_10th_mountain",
-      "display_name": "10th Mountain Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_116th_mountain": {
-      "record_kind": "brigade",
-      "record_id": "arbih_116th_mountain",
-      "display_name": "116th Mountain Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_1st_cerska": {
-      "record_kind": "brigade",
-      "record_id": "arbih_1st_cerska",
-      "display_name": "1st Cerska Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_1st_kamenica": {
-      "record_kind": "brigade",
-      "record_id": "arbih_1st_kamenica",
-      "display_name": "1st Kamenica Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_1st_mountain": {
-      "record_kind": "brigade",
-      "record_id": "arbih_1st_mountain",
-      "display_name": "1st Mountain Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_1st_olovo": {
-      "record_kind": "brigade",
-      "record_id": "arbih_1st_olovo",
-      "display_name": "1st Olovo Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_280th_east_bosnian_light": {
-      "record_kind": "brigade",
-      "record_id": "arbih_280th_east_bosnian_light",
-      "display_name": "280th East Bosnian Light",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_281st_east_bosnian_light": {
-      "record_kind": "brigade",
-      "record_id": "arbih_281st_east_bosnian_light",
-      "display_name": "281st East Bosnian Light",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_282nd_east_bosnian_light": {
-      "record_kind": "brigade",
-      "record_id": "arbih_282nd_east_bosnian_light",
-      "display_name": "282nd East Bosnian Light",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_283rd_east_bosnian_light": {
-      "record_kind": "brigade",
-      "record_id": "arbih_283rd_east_bosnian_light",
-      "display_name": "283rd East Bosnian Light",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_284th_east_bosnian_light": {
-      "record_kind": "brigade",
-      "record_id": "arbih_284th_east_bosnian_light",
-      "display_name": "284th East Bosnian Light",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_285th_light": {
-      "record_kind": "brigade",
-      "record_id": "arbih_285th_light",
-      "display_name": "285th Light Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_2nd_mountain": {
-      "record_kind": "brigade",
-      "record_id": "arbih_2nd_mountain",
-      "display_name": "2nd Mountain Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_2nd_tuzla": {
-      "record_kind": "brigade",
-      "record_id": "arbih_2nd_tuzla",
-      "display_name": "2nd Tuzla Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_504th_cazin_light": {
-      "record_kind": "brigade",
-      "record_id": "arbih_504th_cazin_light",
-      "display_name": "504th Cazin Light Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:arbih_hvo_kralj_tvrtko": {
-      "record_kind": "brigade",
-      "record_id": "arbih_hvo_kralj_tvrtko",
-      "display_name": "HVO Brigade \"Kralj Tvrtko\"",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_101st_oraje_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_101st_oraje_brigade",
-      "display_name": "101st Orašje Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_102nd_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_102nd_brigade",
-      "display_name": "102nd Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_103rd_derventa_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_103rd_derventa_brigade",
-      "display_name": "103rd Derventa Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_104th_bosanski_brod_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_104th_bosanski_brod_brigade",
-      "display_name": "104th Bosanski Brod Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_105th_modrica_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_105th_modrica_brigade",
-      "display_name": "105th Modriča Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_106th_bosanska_posavina_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_106th_bosanska_posavina_brigade",
-      "display_name": "106th \"Bosanska Posavina\" Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_107th_gradaac_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_107th_gradaac_brigade",
-      "display_name": "107th \"Gradačac\" Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_108th_brko_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_108th_brko_brigade",
-      "display_name": "108th \"Brčko\" Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_110th_usora_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_110th_usora_brigade",
-      "display_name": "110th Usora Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_111th_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_111th_brigade",
-      "display_name": "111th Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_115th_zrinski_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_115th_zrinski_brigade",
-      "display_name": "115th \"Zrinski\" Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_1st_brigade_mostar": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_1st_brigade_mostar",
-      "display_name": "1st Brigade (Mostar)",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_1st_herzegovina_brigade_knez_domagoj": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
-      "display_name": "1st Herzegovina Brigade \"Knez Domagoj\"",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_2nd_brigade_mostar": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_2nd_brigade_mostar",
-      "display_name": "2nd Brigade (Mostar)",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_6th_brigade_ranko_boban": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_6th_brigade_ranko_boban",
-      "display_name": "6th Brigade \"Ranko Boban\"",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_94th_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_94th_brigade",
-      "display_name": "94th Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_95th_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_95th_brigade",
-      "display_name": "95th Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_apljina_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_apljina_brigade",
-      "display_name": "Čapljina Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_ban_jelai_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_ban_jelai_brigade",
-      "display_name": "Ban Jelačić Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_grude_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_grude_brigade",
-      "display_name": "Grude Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_herceg_stjepan_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_herceg_stjepan_brigade",
-      "display_name": "Herceg Stjepan Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_iroki_brijeg_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_iroki_brijeg_brigade",
-      "display_name": "Široki Brijeg Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_itluk_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_itluk_brigade",
-      "display_name": "Čitluk Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_jure_franceti_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_jure_franceti_brigade",
-      "display_name": "\"Jure Francetić\" Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_kiseljak_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_kiseljak_brigade",
-      "display_name": "Kiseljak Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_kralj_petar_kreimir_iv_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_kralj_petar_kreimir_iv_brigade",
-      "display_name": "Kralj Petar Krešimir IV Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_kralj_tomislav_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_kralj_tomislav_brigade",
-      "display_name": "Kralj Tomislav Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_kreevo_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_kreevo_brigade",
-      "display_name": "Kreševo Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_ljubuki_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_ljubuki_brigade",
-      "display_name": "Ljubuški Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_mario_hrka_ikota_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_mario_hrka_ikota_brigade",
-      "display_name": "Mario Hrkač Čikota Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_mostar_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_mostar_brigade",
-      "display_name": "Mostar Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_stjepan_tomaevi_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_stjepan_tomaevi_brigade",
-      "display_name": "\"Stjepan Tomašević\" Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_stolac_units": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_stolac_units",
-      "display_name": "Stolac Units",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_travnik_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_travnik_brigade",
-      "display_name": "Travnik Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hrhb_vitezovi_brigade_vitez": {
-      "record_kind": "brigade",
-      "record_id": "hrhb_vitezovi_brigade_vitez",
-      "display_name": "\"Vitezovi\" Brigade (Vitez)",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hvo_101st_bihac": {
-      "record_kind": "brigade",
-      "record_id": "hvo_101st_bihac",
-      "display_name": "101st Bihać HVO Brigade",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hvo_ante_starcevic_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hvo_ante_starcevic_brigade",
-      "display_name": "Ante Starčević Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hvo_hrvoje_vukcic_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hvo_hrvoje_vukcic_brigade",
-      "display_name": "Hrvoje Vukčić Hrvatinić Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hvo_nikola_subic_zrinski_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hvo_nikola_subic_zrinski_brigade",
-      "display_name": "Nikola Šubić Zrinski Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hvo_posusje_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hvo_posusje_brigade",
-      "display_name": "Posušje Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:hvo_rama_brigade": {
-      "record_kind": "brigade",
-      "record_id": "hvo_rama_brigade",
-      "display_name": "Rama Brigade",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_1st_birac": {
-      "record_kind": "brigade",
-      "record_id": "rs_1st_birac",
-      "display_name": "1st Birač",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_1st_bratunac": {
-      "record_kind": "brigade",
-      "record_id": "rs_1st_bratunac",
-      "display_name": "1st Bratunac",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_1st_milii": {
-      "record_kind": "brigade",
-      "record_id": "rs_1st_milii",
-      "display_name": "1st Milići",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_1st_podrinje": {
-      "record_kind": "brigade",
-      "record_id": "rs_1st_podrinje",
-      "display_name": "1st Podrinje Light Infantry Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_1st_vlasenica": {
-      "record_kind": "brigade",
-      "record_id": "rs_1st_vlasenica",
-      "display_name": "1st Vlasenica",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_1st_zvornik": {
-      "record_kind": "brigade",
-      "record_id": "rs_1st_zvornik",
-      "display_name": "1st Zvornik",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_2nd_herzegovina_light_infantry": {
-      "record_kind": "brigade",
-      "record_id": "rs_2nd_herzegovina_light_infantry",
-      "display_name": "2nd Herzegovina Light Infantry Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_2nd_romanija_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_2nd_romanija_brigade",
-      "display_name": "2nd Romanija Motorized Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_5th_podrinje": {
-      "record_kind": "brigade",
-      "record_id": "rs_5th_podrinje",
-      "display_name": "5th Podrinje",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_ajnie_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_ajnie_brigade",
-      "display_name": "Čajniče Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_bilea_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_bilea_brigade",
-      "display_name": "Bileća Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_foa_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_foa_brigade",
-      "display_name": "Foča Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_gacko_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_gacko_brigade",
-      "display_name": "Gacko Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_igman_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_igman_brigade",
-      "display_name": "Igman Infantry Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_ilidza_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_ilidza_brigade",
-      "display_name": "2nd Sarajevo Light Infantry Brigade (Ilidža)",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_ilijas_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_ilijas_brigade",
-      "display_name": "3rd Sarajevo Infantry Brigade (Ilijaš)",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_kalinovik_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_kalinovik_brigade",
-      "display_name": "Kalinovik Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_nevesinje_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_nevesinje_brigade",
-      "display_name": "Nevesinje Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_skelani_battalion": {
-      "record_kind": "brigade",
-      "record_id": "rs_skelani_battalion",
-      "display_name": "Independent Infantry Battalion Skelani",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_trebinje_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_trebinje_brigade",
-      "display_name": "Trebinje Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_trnovo_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_trnovo_brigade",
-      "display_name": "Trnovo Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:rs_visegrad_brigade": {
-      "record_kind": "brigade",
-      "record_id": "rs_visegrad_brigade",
-      "display_name": "Višegrad Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
-    "brigade:vrs_1st_laktasi": {
-      "record_kind": "brigade",
-      "record_id": "vrs_1st_laktasi",
-      "display_name": "1st Laktaši Light Brigade",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable OOB because no exact row-local formation identity evidence was found."
-    },
     "elite_commander:arbih_120th_liberation_black_swans": {
       "record_kind": "elite_commander",
       "record_id": "arbih_120th_liberation_black_swans",
@@ -3377,14 +4458,6 @@
       "reason": "missing_exact_source",
       "notes": "Removed from playable elite-commander metadata because no row-local source proved the named formation command."
     },
-    "officer:arbih_ajnadzic": {
-      "record_kind": "officer",
-      "record_id": "arbih_ajnadzic",
-      "display_name": "Nedžad Ajnadžić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
     "officer:arbih_bahto": {
       "record_kind": "officer",
       "record_id": "arbih_bahto",
@@ -3417,42 +4490,10 @@
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
     },
-    "officer:arbih_cikotic": {
-      "record_kind": "officer",
-      "record_id": "arbih_cikotic",
-      "display_name": "Selmo Cikotić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_cuskic": {
-      "record_kind": "officer",
-      "record_id": "arbih_cuskic",
-      "display_name": "Fikret Čuskić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_divjak": {
-      "record_kind": "officer",
-      "record_id": "arbih_divjak",
-      "display_name": "Jovan Divjak",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
     "officer:arbih_hadzic": {
       "record_kind": "officer",
       "record_id": "arbih_hadzic",
       "display_name": "Ismet Hadžić \"Mutevelija\"",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_hodzic": {
-      "record_kind": "officer",
-      "record_id": "arbih_hodzic",
-      "display_name": "Mehdin Hodžić",
       "faction": "RBiH",
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
@@ -3465,42 +4506,10 @@
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
     },
-    "officer:arbih_imamovic": {
-      "record_kind": "officer",
-      "record_id": "arbih_imamovic",
-      "display_name": "Zaim Imamović",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_karavelic": {
-      "record_kind": "officer",
-      "record_id": "arbih_karavelic",
-      "display_name": "Vahid Karavelić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
     "officer:arbih_knez": {
       "record_kind": "officer",
       "record_id": "arbih_knez",
       "display_name": "Željko Knez",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_lendo": {
-      "record_kind": "officer",
-      "record_id": "arbih_lendo",
-      "display_name": "Refik Lendo",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_malkic": {
-      "record_kind": "officer",
-      "record_id": "arbih_malkic",
-      "display_name": "Nesib Malkić",
       "faction": "RBiH",
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
@@ -3513,38 +4522,6 @@
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
     },
-    "officer:arbih_mesic": {
-      "record_kind": "officer",
-      "record_id": "arbih_mesic",
-      "display_name": "Hajrudin Mešić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_nanic": {
-      "record_kind": "officer",
-      "record_id": "arbih_nanic",
-      "display_name": "Izet Nanić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_oric": {
-      "record_kind": "officer",
-      "record_id": "arbih_oric",
-      "display_name": "Naser Orić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_palic": {
-      "record_kind": "officer",
-      "record_id": "arbih_palic",
-      "display_name": "Avdo Palić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
     "officer:arbih_polutak": {
       "record_kind": "officer",
       "record_id": "arbih_polutak",
@@ -3553,50 +4530,10 @@
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
     },
-    "officer:arbih_s_hadzic": {
-      "record_kind": "officer",
-      "record_id": "arbih_s_hadzic",
-      "display_name": "Safet Hadžić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_sadic": {
-      "record_kind": "officer",
-      "record_id": "arbih_sadic",
-      "display_name": "Hazim Šadić",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_sehovic": {
-      "record_kind": "officer",
-      "record_id": "arbih_sehovic",
-      "display_name": "Enver Šehović",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_selmanovic": {
-      "record_kind": "officer",
-      "record_id": "arbih_selmanovic",
-      "display_name": "Mirsad Šelmanović",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
     "officer:arbih_siber": {
       "record_kind": "officer",
       "record_id": "arbih_siber",
       "display_name": "Stjepan Šiber",
-      "faction": "RBiH",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:arbih_talijan": {
-      "record_kind": "officer",
-      "record_id": "arbih_talijan",
-      "display_name": "Mustafa Hajrulahović \"Talijan\"",
       "faction": "RBiH",
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
@@ -3625,14 +4562,6 @@
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
     },
-    "officer:hvo_cerkez": {
-      "record_kind": "officer",
-      "record_id": "hvo_cerkez",
-      "display_name": "Mario Čerkez",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
     "officer:hvo_cerni": {
       "record_kind": "officer",
       "record_id": "hvo_cerni",
@@ -3657,34 +4586,10 @@
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
     },
-    "officer:hvo_kordic": {
-      "record_kind": "officer",
-      "record_id": "hvo_kordic",
-      "display_name": "Dario Kordić",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
     "officer:hvo_lozancic": {
       "record_kind": "officer",
       "record_id": "hvo_lozancic",
       "display_name": "Ivo Lozančić",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:hvo_matuzovic": {
-      "record_kind": "officer",
-      "record_id": "hvo_matuzovic",
-      "display_name": "Đuro Matuzović",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:hvo_naletlic": {
-      "record_kind": "officer",
-      "record_id": "hvo_naletlic",
-      "display_name": "Mladen Naletilić \"Tuta\"",
       "faction": "HRHB",
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
@@ -3721,14 +4626,6 @@
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
     },
-    "officer:hvo_sopta": {
-      "record_kind": "officer",
-      "record_id": "hvo_sopta",
-      "display_name": "Stanko Sopta",
-      "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
     "officer:hvo_stefanek": {
       "record_kind": "officer",
       "record_id": "hvo_stefanek",
@@ -3750,38 +4647,6 @@
       "record_id": "hvo_totic",
       "display_name": "Živko Totić",
       "faction": "HRHB",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:vrs_andric": {
-      "record_kind": "officer",
-      "record_id": "vrs_andric",
-      "display_name": "Svetozar Andrić",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:vrs_arsic": {
-      "record_kind": "officer",
-      "record_id": "vrs_arsic",
-      "display_name": "Vladimir Arsić",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:vrs_blagojevic": {
-      "record_kind": "officer",
-      "record_id": "vrs_blagojevic",
-      "display_name": "Vidoje Blagojević",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:vrs_colic": {
-      "record_kind": "officer",
-      "record_id": "vrs_colic",
-      "display_name": "Pero Čolić",
-      "faction": "RS",
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
     },
@@ -3865,50 +4730,10 @@
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
     },
-    "officer:vrs_obrenovic": {
-      "record_kind": "officer",
-      "record_id": "vrs_obrenovic",
-      "display_name": "Dragan Obrenović",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:vrs_pandurevic": {
-      "record_kind": "officer",
-      "record_id": "vrs_pandurevic",
-      "display_name": "Vinko Pandurević",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:vrs_samardzija": {
-      "record_kind": "officer",
-      "record_id": "vrs_samardzija",
-      "display_name": "Drago Samardžija",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
     "officer:vrs_sladoje": {
       "record_kind": "officer",
       "record_id": "vrs_sladoje",
       "display_name": "Čedomir Sladoje",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:vrs_zeljaja": {
-      "record_kind": "officer",
-      "record_id": "vrs_zeljaja",
-      "display_name": "Radmilo Željaja",
-      "faction": "RS",
-      "reason": "missing_exact_source",
-      "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
-    },
-    "officer:vrs_zivanovic": {
-      "record_kind": "officer",
-      "record_id": "vrs_zivanovic",
-      "display_name": "Milenko Živanović",
       "faction": "RS",
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
