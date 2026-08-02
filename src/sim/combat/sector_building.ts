@@ -9,12 +9,11 @@ import type {
     FactionId,
     FormationId,
     FormationState,
-    GameState,
 } from '../../state/game_state.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import { computeLocalFrontDefensivePower } from './local_front_defense.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
-import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { getPoliticalControllerOSIDFromReadModel } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { Osid } from './osid_adjacency.js';
 import {
@@ -28,6 +27,7 @@ import {
     buildSectorFrontEdgeAdjacency,
     type SectorFrontEdgeRelation,
 } from './sector_front_edge_relation.js';
+import type { SectorTopologyWorkingState } from './sector_topology_solver_types.js';
 
 type SectorPartitionPerfTimer = <T>(label: string, fn: () => T) => T;
 
@@ -196,7 +196,7 @@ export function findSubSegments(
  * Sector IDs: `sector:{corps_id}:0`, `sector:{corps_id}:1`, etc.
  */
 export function buildMultiSectorsForCorps(
-    state: GameState,
+    state: SectorTopologyWorkingState,
     corpsId: FormationId,
     faction: FactionId,
     edgeIds: string[],
@@ -245,8 +245,16 @@ export function buildMultiSectorsForCorps(
             nextEdgeMeta.set(eid, {
                 a: osidA,
                 b: osidB,
-                side_a: getPoliticalControllerOSID(state, osidA, reverseMap ?? undefined),
-                side_b: getPoliticalControllerOSID(state, osidB, reverseMap ?? undefined),
+                side_a: getPoliticalControllerOSIDFromReadModel(
+                    { politicalControllers: state.political.political_controllers ?? {} },
+                    osidA,
+                    reverseMap ?? undefined,
+                ),
+                side_b: getPoliticalControllerOSIDFromReadModel(
+                    { politicalControllers: state.political.political_controllers ?? {} },
+                    osidB,
+                    reverseMap ?? undefined,
+                ),
             });
         }
         return nextEdgeMeta;
@@ -598,7 +606,7 @@ export function buildSubSegmentFromEdges(
  * Build a single CorpsFrontSector from one or more sub-segments.
  */
 export function buildSectorFromSubSegments(
-    state: GameState,
+    state: SectorTopologyWorkingState,
     corpsId: FormationId,
     faction: FactionId,
     sectorIndex: number,

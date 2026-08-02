@@ -45,12 +45,16 @@ import {
     MAX_RESERVES_PER_SECTOR,
     MIN_SECTOR_BRIGADES,
 } from './corps_front_sectors_constants.js';
-import { getCorpsArmyPriorities } from './bot_strategy.js';
+import {
+    getCorpsArmyPrioritiesFromReadModel,
+    type CorpsArmyPriorityReadModel,
+} from './bot_strategy.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
+import type { SectorTopologyWorkingState } from './sector_topology_solver_types.js';
 
 // ── Imported from extracted modules ──────────────────────────────────────
-import { buildFriendlyComponents, getSectorComponent, getSectorFrontOsids, getSectorUniqueFrontOsids, canAnyBrigadeReachAny, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
+import { buildFriendlyComponents, getSectorComponent, getSectorFrontOsids, getSectorUniqueFrontOsids, canAnyBrigadeReachAny, getCorpsForFaction, isSectorColdFront } from './sector_utils.js';
 import { buildEdgeAdjacency as _buildEdgeAdjacency } from './sector_edge_adjacency.js';
 import {
     areSectorFrontEdgeSubsetsAdjacent,
@@ -91,7 +95,8 @@ import {
     type EnsureMinimumSectorCoverageOccupancyStrategy,
 } from './brigade_assignment.js';
 import {
-    buildCorpsCommanderProfiles,
+    buildCorpsCommanderProfilesFromReadModel,
+    type CorpsCommanderProfileReadModel,
     commanderReviewAssignment,
 } from './commander_override.js';
 
@@ -192,6 +197,33 @@ export type SectorTopologyExecutionStrategy =
 
 type SectorFrontEdgeRelationProvider = (faction: FactionId) => SectorFrontEdgeRelation | undefined;
 
+function getTopologyFactions(state: SectorTopologyWorkingState): FactionId[] {
+    return state.factions.map((faction) => faction.id).sort(strictCompare);
+}
+
+function topologyArmyPriorityReadModel(
+    state: SectorTopologyWorkingState,
+): CorpsArmyPriorityReadModel {
+    return {
+        turn: state.meta.turn,
+        decisionMode: state.meta.decision_mode,
+        controlEvents: state.political.control_events ?? [],
+        lastSupplyStateByOsid: state.political.last_supply_state_by_osid ?? {},
+        politicalControllers: state.political.political_controllers ?? {},
+        campaignPlans: state.military.campaign_plans ?? {},
+    };
+}
+
+function topologyCommanderProfileReadModel(
+    state: SectorTopologyWorkingState,
+): CorpsCommanderProfileReadModel {
+    return {
+        namedOfficers: state.military.named_officers,
+        namedOfficerData: state.military.named_officer_data,
+        corpsCommand: state.military.corps_command ?? {},
+    };
+}
+
 /**
  * Per-invocation-scoped timing record. The outer call to `buildCorpsFrontSectors`
  * creates one of these and threads it through the body via this module-local
@@ -247,7 +279,7 @@ function _perfTime<T>(label: string, fn: () => T): T {
  * Lazy-loaded `node:fs` and `node:path` so this module remains tree-shakeable
  * for browser builds.
  */
-function _flushInvocation(state: GameState, totalNs: bigint, isFinalPass: boolean): string | null {
+function _flushInvocation(state: SectorTopologyWorkingState, totalNs: bigint, isFinalPass: boolean): string | null {
     if (!SECTOR_PARTITION_PERF_FLAG) return null;
     if (!_activeInvocation) return null;
     const fs = getNodeBuiltinModule<NodeFsSync>('node:fs');
@@ -376,6 +408,39 @@ export function buildCorpsFrontSectors(
     executionStrategy: SectorTopologyExecutionStrategy = 'production',
     mutationRecorder?: SectorTopologyMutationRecorder,
 ): Record<string, CorpsFrontSector> {
+    return buildCorpsFrontSectorsFromReadModel(
+        state,
+        edges,
+        reverseMap,
+        centroids,
+        spatial,
+        isFinalPass,
+        finalSaveGeometryProjection,
+        useFixedPointShortcuts,
+        occupancyStrategy,
+        frontEdgeAdjacencyStrategy,
+        frontEdgeRelationTestCounters,
+        executionStrategy,
+        mutationRecorder,
+    );
+}
+
+/** @internal Detached-state topology orchestrator used by the pure solver. */
+export function buildCorpsFrontSectorsFromReadModel(
+    state: SectorTopologyWorkingState,
+    edges: EdgeRecord[],
+    reverseMap: Map<string, string[]> | null,
+    centroids?: OsidCentroidMap,
+    spatial?: SpatialContext,
+    isFinalPass: boolean = false,
+    finalSaveGeometryProjection: boolean = false,
+    useFixedPointShortcuts: boolean = true,
+    occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
+    frontEdgeAdjacencyStrategy: SectorFrontEdgeAdjacencyStrategy = 'invocation-front-edge-relation',
+    frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters,
+    executionStrategy: SectorTopologyExecutionStrategy = 'production',
+    mutationRecorder?: SectorTopologyMutationRecorder,
+): Record<string, CorpsFrontSector> {
     if (executionStrategy !== 'production'
         && executionStrategy !== 'test-only-imperative-live-state') {
         throw new Error(`Unknown sector topology execution strategy: ${String(executionStrategy)}`);
@@ -455,7 +520,7 @@ export function buildCorpsFrontSectors(
     };
 
     const formations = state.military.formations ?? {};
-    const factions = getFactions(state);
+    const factions = getTopologyFactions(state);
     const activeCombatFormationScanIds = _perfTime('active-combat-formation-scan-ids', () =>
         buildActiveCombatFormationScanIds(formations));
     const result: Record<string, CorpsFrontSector> = {};
@@ -691,7 +756,7 @@ export function buildCorpsFrontSectors(
         _perfTime('enforceFinalSectorGeometryInvariants:3', () => enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations, frontEdgeRelationForFaction));
         _perfTime('pruneGhostArtifactSectors:6', () => pruneGhostArtifactSectors(result));
         _perfTime('assignTerritoryVoronoi:2-post-absorb', () => {
-            for (const faction of getFactions(state)) {
+            for (const faction of getTopologyFactions(state)) {
                 const factionSectors = Object.values(result).filter((sector) => sector.faction === faction);
                 if (factionSectors.length === 0) continue;
                 const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
@@ -706,7 +771,7 @@ export function buildCorpsFrontSectors(
     }
     let finalTerritoryRepaired = false;
     _perfTime('repairDisconnectedTerritory:final', () => {
-        for (const faction of getFactions(state)) {
+        for (const faction of getTopologyFactions(state)) {
             const factionSectors = Object.values(result).filter((sector) => sector.faction === faction);
             if (factionSectors.length === 0) continue;
             const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
@@ -1144,7 +1209,7 @@ function rescueUnassignedLoanedElitesInTerritory(
 }
 
 function collectUnresolvedSectorBrigades(
-    state: GameState,
+    state: SectorTopologyWorkingState,
     sectors: Record<string, CorpsFrontSector>,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
@@ -1196,7 +1261,7 @@ export function emitFinalUnresolvedSectorWarnings(
 function recomputeMetricsByFaction(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
-    state: GameState,
+    state: SectorTopologyWorkingState,
 ): void {
     const byFaction = new Map<FactionId, CorpsFrontSector[]>();
     for (const sector of sectors) {
@@ -1310,7 +1375,7 @@ function isSectorUnstaffableByFaction(
     sector: CorpsFrontSector,
     siblingSectors: CorpsFrontSector[],
     factionBrigades: FormationState[],
-    state: GameState,
+    state: SectorTopologyWorkingState,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
@@ -1397,7 +1462,7 @@ function isSectorUnstaffableByFaction(
 
 export function annotateUnstaffedFrontSectors(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyWorkingState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     _spatial?: SpatialContext,
@@ -1410,7 +1475,7 @@ export function annotateUnstaffedFrontSectors(
         byFaction.set(sector.faction, list);
     }
 
-    for (const faction of getFactions(state)) {
+    for (const faction of getTopologyFactions(state)) {
         const factionSectors = byFaction.get(faction) ?? [];
         if (factionSectors.length === 0) continue;
         const friendlyOsids = buildFriendlyOsidsFromState(state, adjacency, faction);
@@ -1443,7 +1508,7 @@ export function annotateUnstaffedFrontSectors(
 
 function absorbEmptyStaffableSiblingSectors(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyWorkingState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     sharedBoundaryAdj: Map<Osid, Osid[]>,
@@ -1696,7 +1761,7 @@ function enforceFinalSectorGeometryInvariants(
 
 export function applyFinalSectorOwnerTruthPass(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyWorkingState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     options?: {
@@ -1798,7 +1863,7 @@ export function applyFinalSectorOwnerTruthPass(
  * builder. All work is invocation-local and iterates in strict deterministic order.
  */
 export function reconcileOperationSensitiveSectorRoster(
-    state: GameState,
+    state: SectorTopologyWorkingState,
     sectors: Record<string, CorpsFrontSector>,
     adjacency: Map<Osid, Osid[]>,
     spatial?: SpatialContext,
@@ -1827,7 +1892,10 @@ export function reconcileOperationSensitiveSectorRoster(
         const componentOf = spatial?.componentsByFaction.get(faction)
             ? new Map(spatial.componentsByFaction.get(faction)!)
             : buildFriendlyComponents(adjacency, friendlyOsids);
-        const commanderProfiles = buildCorpsCommanderProfiles(state, factionSectors);
+        const commanderProfiles = buildCorpsCommanderProfilesFromReadModel(
+            topologyCommanderProfileReadModel(state),
+            factionSectors,
+        );
 
         classifyBrigadesByTerritory(
             factionSectors,
@@ -1868,7 +1936,11 @@ export function reconcileOperationSensitiveSectorRoster(
                 corpsId,
                 factionSectors,
                 formations,
-                getCorpsArmyPriorities(faction, corpsId, state.meta.turn, state),
+                getCorpsArmyPrioritiesFromReadModel(
+                    topologyArmyPriorityReadModel(state),
+                    faction,
+                    corpsId,
+                ),
                 profile,
                 componentOf,
                 adjacency,
@@ -2421,7 +2493,7 @@ export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSect
 
 function recoverDroppedFrontEdges(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyWorkingState,
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     adjacency: Map<Osid, Osid[]>,
     sharedBoundaryAdj: Map<Osid, Osid[]>,
@@ -2442,7 +2514,7 @@ function recoverDroppedFrontEdges(
 ): boolean {
     let recoveredAny = false;
 
-    for (const faction of getFactions(state)) {
+    for (const faction of getTopologyFactions(state)) {
         const corpsIds = getCorpsForFaction(formations, faction);
         if (corpsIds.length === 0) continue;
         const frontEdgeRelation = frontEdgeRelationProvider?.(faction);
@@ -2662,7 +2734,20 @@ function recoverDroppedFrontEdges(
 
             assignTerritoryVoronoi(factionSectors, adjacency, friendlyOsids, osidToCorps);
             repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
-            classifyBrigadesByTerritory(factionSectors, faction, formations, adjacency, friendlyOsids, componentOf, buildCorpsCommanderProfiles(state, factionSectors), state.military.brigade_sector_override, state);
+            classifyBrigadesByTerritory(
+                factionSectors,
+                faction,
+                formations,
+                adjacency,
+                friendlyOsids,
+                componentOf,
+                buildCorpsCommanderProfilesFromReadModel(
+                    topologyCommanderProfileReadModel(state),
+                    factionSectors,
+                ),
+                state.military.brigade_sector_override,
+                state,
+            );
             assignCrossCorpsEnclaveDefenders(factionSectors, formations, faction, componentOf);
             ensureMinimumSectorCoverage(
                 factionSectors,
@@ -2697,7 +2782,7 @@ function recoverDroppedFrontEdges(
 }
 
 function getRecoveredFrontClaimSetup(
-    state: GameState,
+    state: SectorTopologyWorkingState,
     faction: FactionId,
     corpsIds: FormationId[],
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
@@ -2866,7 +2951,7 @@ function pickRecoveredFrontEdgeRecipient(
 
 function sealMergedSectorTruth(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyWorkingState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
@@ -3062,7 +3147,7 @@ function shareFrontEdgeEndpoint(a: CorpsFrontSector, b: CorpsFrontSector): boole
 }
 
 function buildFriendlyOsidsFromState(
-    state: GameState,
+    state: SectorTopologyWorkingState,
     _adjacency: Map<Osid, Osid[]>,
     faction: FactionId,
 ): Set<string> {
@@ -3087,7 +3172,7 @@ function buildFriendlyOsidsFromState(
 
 export function relocateMisassignedBrigadesToTruthfulOwners(
     sectors: CorpsFrontSector[],
-    state: GameState,
+    state: SectorTopologyWorkingState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
 ): void {
@@ -3554,7 +3639,7 @@ function areSectorsFrontEdgeAdjacent(
 // ═══════════════════════════════════════════════════════════════════════════
 
 function buildFactionSectors(
-    state: GameState,
+    state: SectorTopologyWorkingState,
     faction: FactionId,
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     adjacency: Map<Osid, Osid[]>,
@@ -3897,7 +3982,10 @@ function buildFactionSectors(
     // Step 6: Classify brigades — corps-driven assignment.
     const commanderProfiles = _perfTime(`buildFactionSectors:${faction}:brigade-classification`, () => {
         const profiles = _perfTime(`buildFactionSectors:${faction}:brigade-classification:commander-profile-build`,
-            () => buildCorpsCommanderProfiles(state, sectors),
+            () => buildCorpsCommanderProfilesFromReadModel(
+                topologyCommanderProfileReadModel(state),
+                sectors,
+            ),
         );
         const playerOverrides = state.military.brigade_sector_override;
         _perfTime(`buildFactionSectors:${faction}:brigade-classification:territory-assignment`,
@@ -3938,7 +4026,11 @@ function buildFactionSectors(
         for (const cid of uniqueCorps) {
             const profile = commanderProfiles.get(cid);
             if (!profile) continue;
-            const priorities = getCorpsArmyPriorities(faction, cid, state.meta.turn, state);
+            const priorities = getCorpsArmyPrioritiesFromReadModel(
+                topologyArmyPriorityReadModel(state),
+                faction,
+                cid,
+            );
             // Build op participants set — never reassign brigades mid-operation
             const opParticipants = new Set<string>();
             const cmd = state.military.corps_command?.[cid];

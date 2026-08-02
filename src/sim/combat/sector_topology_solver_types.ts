@@ -28,8 +28,8 @@ export interface SectorTopologyFrontEdge {
     readonly edge_id: string;
     readonly a: string;
     readonly b: string;
-    readonly side_a: string | null;
-    readonly side_b: string | null;
+    readonly side_a: FactionId | null;
+    readonly side_b: FactionId | null;
 }
 
 type SectorTopologyFormationScalarKeys =
@@ -147,10 +147,63 @@ export interface SectorTopologySolveInput {
     readonly brigadeMovementState: Readonly<Record<FormationId, Readonly<BrigadeMovementState>>>;
     readonly brigadePostureOrders: readonly Readonly<BrigadePostureOrder>[];
     readonly brigadeSectorOverride: Readonly<Record<string, string>>;
+    readonly unresolvedSectorBrigades: readonly FormationId[] | undefined;
     readonly corpsCommand: Readonly<Record<FormationId, SectorTopologyCorpsCommand>>;
     readonly namedOfficers: Readonly<Record<string, SectorTopologyNamedOfficerState>>;
     readonly namedOfficerData: readonly SectorTopologyNamedOfficerData[];
 }
+
+/**
+ * Detached mutable state used by the extracted topology orchestrator. It deliberately
+ * exposes only the snapshot families above; `GameState` is structurally compatible for
+ * the legacy wrapper, while the pure solver can build this shape without a state cast.
+ */
+export interface SectorTopologyWorkingState {
+    readonly meta: {
+        turn: number;
+        decision_mode?: GameState['meta']['decision_mode'];
+    };
+    readonly factions: readonly Readonly<{ id: FactionId }>[];
+    readonly political: {
+        political_controllers?: Record<string, string | null | undefined>;
+        graz_east_herzegovina_active_turn?: number | null;
+        control_events?: ControlEvent[];
+        last_supply_state_by_osid?: Record<string, string>;
+    };
+    readonly military: {
+        war_front_edges_osid?: Array<{
+            edge_id: string;
+            a: string;
+            b: string;
+            side_a: FactionId | null;
+            side_b: FactionId | null;
+        }>;
+        formations: Record<FormationId, FormationState>;
+        brigade_movement_orders?: Record<FormationId, BrigadeMovementOrder>;
+        brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
+        brigade_posture_orders?: BrigadePostureOrder[];
+        brigade_sector_override?: Record<string, string>;
+        corps_command?: Record<FormationId, {
+            directive?: { priority_sector_id?: string } | null;
+            active_operations: Array<{
+                name: string;
+                type: CorpsOperation['type'];
+                phase: CorpsOperation['phase'];
+                sector_id?: string;
+                preparation_sub_phase?: CorpsOperation['preparation_sub_phase'];
+                participating_brigades: FormationId[];
+                axes?: Array<{ objectives?: string[] }>;
+                objectives?: string[];
+            }>;
+        }>;
+        campaign_plans?: Record<string, SectorTopologyCampaignPlan | null>;
+        named_officers?: Record<string, SectorTopologyNamedOfficerState>;
+        named_officer_data?: SectorTopologyNamedOfficerData[];
+        unresolved_sector_brigades?: FormationId[];
+    };
+}
+
+export type SectorTopologyMutableMilitary = SectorTopologyWorkingState['military'];
 
 export type SectorTopologyMutation =
     | {

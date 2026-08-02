@@ -157,6 +157,7 @@ The following table is the Phase 2e read allow-list. A static test must fail if 
 | Elite/enclave movement | `elite_loan_state.on_loan`, `loaned_to_corps`, `loan_start_turn`; faction/home/origin inference used by enclave guard | Minimal deep copy of the named loan fields plus the formation geography above. |
 | Movement ownership | `military.brigade_movement_orders`, `military.brigade_movement_state`, `military.brigade_posture_orders` | Strict-key/deep copies; posture order array order preserved. |
 | Player sector direction | `military.brigade_sector_override` | Strict-key deep copy. |
+| Prior unresolved truth | `military.unresolved_sector_brigades` | Preserve `undefined` versus the existing authored-order array exactly; this is the before-value for the final ordered journal write. |
 | Corps/operation truth | `military.corps_command`: directive priority, active-operation id/type/phase/sector/preparation subphase, participants, axes/objectives | Strict-key command record with active operation array order and participant/objective array order preserved. |
 | Officer profile | `military.named_officers`, `military.named_officer_data` fields used by `getCorpsCommander(...)` | Strict-key officer state and authored officer-data array copy; no lookup may fall through to live state. |
 | Static doctrine | faction priority tables, constants, enclave definitions, corps exclusions | Module-owned immutable data; list in solver imports and pin by existing focused tests. Not copied into `GameState` or output. |

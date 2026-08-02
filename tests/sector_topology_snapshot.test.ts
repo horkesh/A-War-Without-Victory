@@ -101,6 +101,7 @@ describe.skipIf(!hasRealSave)('sector topology immutable solve snapshot', () => 
             'brigadeMovementState',
             'brigadePostureOrders',
             'brigadeSectorOverride',
+            'unresolvedSectorBrigades',
             'corpsCommand',
             'namedOfficers',
             'namedOfficerData',
@@ -138,6 +139,9 @@ describe.skipIf(!hasRealSave)('sector topology immutable solve snapshot', () => 
         expect(input.spatial.adjacencyEntries).not.toBe(spatial.adjacency);
         expect(input.namedOfficers).not.toBe(state.military.named_officers);
         expect(input.namedOfficerData).not.toBe(state.military.named_officer_data);
+        expect(input.unresolvedSectorBrigades).not.toBe(
+            state.military.unresolved_sector_brigades,
+        );
         const firstCorpsId = Object.keys(input.corpsCommand)[0];
         const firstCapturedOperation = firstCorpsId
             ? input.corpsCommand[firstCorpsId]?.active_operations[0]
@@ -198,6 +202,7 @@ describe.skipIf(!hasRealSave)('sector topology immutable solve snapshot', () => 
             brigade_id: formationId,
             posture: 'hold',
         });
+        state.military.unresolved_sector_brigades?.push('mutated:unresolved');
 
         expect(input.formations[formationId]?.entrenchment_turns).toBe(originalEntrenchment);
         expect(input.formations[formationId]?.location_osid).not.toBe('op:mutated:source');
@@ -211,6 +216,7 @@ describe.skipIf(!hasRealSave)('sector topology immutable solve snapshot', () => 
             brigade_id: formationId,
             posture: 'hold',
         });
+        expect(input.unresolvedSectorBrigades).not.toContain('mutated:unresolved');
     });
 
     it('declares every full-state read family and forbids a partial GameState cast', () => {
@@ -235,6 +241,7 @@ describe.skipIf(!hasRealSave)('sector topology immutable solve snapshot', () => 
             'military.formations',
             'military.named_officer_data',
             'military.named_officers',
+            'military.unresolved_sector_brigades',
             'military.war_front_edges_osid',
             'political.control_events',
             'political.graz_east_herzegovina_active_turn',

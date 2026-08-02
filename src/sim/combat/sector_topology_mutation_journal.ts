@@ -2,10 +2,10 @@ import type {
     FormationAssignment,
     FormationId,
     FormationState,
-    GameState,
 } from '../../state/game_state.js';
 import type {
     SectorTopologyDiagnostic,
+    SectorTopologyMutableMilitary,
     SectorTopologyMutation,
 } from './sector_topology_solver_types.js';
 
@@ -42,7 +42,7 @@ export interface SectorTopologyMutationRecorder {
     ): void;
     recordUnresolvedSectorBrigades(
         stage: string,
-        military: GameState['military'],
+        military: SectorTopologyMutableMilitary,
         after: readonly FormationId[],
     ): void;
     recordWarning(stage: string, message: string): void;

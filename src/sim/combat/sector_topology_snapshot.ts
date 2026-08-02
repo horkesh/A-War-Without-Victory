@@ -317,6 +317,9 @@ export function captureSectorTopologySolveInput(
         brigadeSectorOverride: copyStringRecord(
             state.military.brigade_sector_override,
         ),
+        unresolvedSectorBrigades: state.military.unresolved_sector_brigades == null
+            ? undefined
+            : [...state.military.unresolved_sector_brigades],
         corpsCommand: copySortedRecord(
             state.military.corps_command,
             (command) => copyCorpsCommand(command),

@@ -8,7 +8,6 @@ import type {
     FactionId,
     FormationId,
     FormationState,
-    GameState,
 } from '../../state/game_state.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -20,6 +19,7 @@ import {
     buildSectorFrontEdgeAdjacency,
     type SectorFrontEdgeRelation,
 } from './sector_front_edge_relation.js';
+import type { SectorTopologyWorkingState } from './sector_topology_solver_types.js';
 
 /**
  * Corps territory exclusions: municipalities that should NEVER be claimed by a specific corps,
@@ -46,7 +46,7 @@ const CORPS_EXCLUDED_MUNICIPALITIES: ReadonlyMap<string, ReadonlySet<string>> = 
  * Deterministic: corps sorted by ID, neighbors sorted by strictCompare.
  */
 export function mapOsidsToCorps(
-    state: GameState,
+    state: SectorTopologyWorkingState,
     faction: FactionId,
     corpsIds: FormationId[],
     adjacency: Map<Osid, Osid[]>,
@@ -581,7 +581,7 @@ export function partitionFrontEdges(
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     faction: FactionId,
     osidToCorps: Map<Osid, FormationId>,
-    state: GameState,
+    state: SectorTopologyWorkingState,
     reverseMap: Map<string, string[]> | null,
     corpsIds: FormationId[],
     adjacency: Map<Osid, Osid[]>
