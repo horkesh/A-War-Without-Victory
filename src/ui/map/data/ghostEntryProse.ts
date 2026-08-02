@@ -5,7 +5,7 @@
  * (docs/40_reports/proposals/20260609_ORPHANED_WIRING_AUDIT_content.md): the
  * VerdictScreen Campaign Codex panel rendered the raw repo-relative
  * markdown PATH (e.g. literally `data/codex/ghost_entries/winter_held.md`)
- * instead of the authored narrative. 20 EN + 20 BCS prose bodies exist on disk
+ * instead of the authored narrative. 20 English + 20 Bosnian prose bodies exist on disk
  * (`data/codex/ghost_entries/`, `data/codex/ghost_entries_bcs/`) and were read
  * by zero runtime code. This module bundles those bodies (raw markdown) at
  * build time and resolves them by ghost id + locale.
@@ -75,7 +75,7 @@ const SECTION6_GATED_GHOST_IDS: ReadonlySet<string> = new Set([
 ]);
 
 // Eager raw glob so the bundler inlines every authored body as a string keyed
-// by glob path. The directories are content-complete (20 EN + 20 BCS); a
+// by glob path. The directories are content-complete (20 English + 20 Bosnian); a
 // missing body resolves to `null` and the caller renders the label only.
 const GHOST_PROSE_EN = import.meta.glob('../../../../data/codex/ghost_entries/*.md', {
   eager: true,

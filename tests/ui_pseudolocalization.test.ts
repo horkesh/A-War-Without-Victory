@@ -4,6 +4,7 @@ import { enMessages } from '../src/ui/map/i18n/messages.en.js';
 import { qpsMessages } from '../src/ui/map/i18n/messages.qps.js';
 import {
     buildPseudolocale,
+    getPseudolocaleExpansionProfile,
     pseudolocalizeMessage,
     serializePseudolocaleModule,
 } from '../tools/i18n/build_pseudolocale.js';
@@ -49,5 +50,28 @@ describe('deterministic qps pseudolocalization', () => {
         expect(firstModule).toBe(secondModule);
         expect(firstModule).toContain(JSON.stringify(first[Object.keys(first)[0]!]));
         expect(firstModule).not.toMatch(/generated_at|timestamp|[A-Z]:\\|\/tmp\//i);
+    });
+
+    it('holds approximately forty percent body expansion across the full eligible corpus', () => {
+        const built = buildPseudolocale(enMessages);
+        const keys = Object.keys(enMessages);
+        let eligibleCount = 0;
+
+        expect(keys).toHaveLength(5_556);
+        for (const key of keys) {
+            const source = enMessages[key as keyof typeof enMessages];
+            const rendered = built[key]!;
+            const profile = getPseudolocaleExpansionProfile(source);
+            const sourceTokens = source.match(/(\{[a-zA-Z0-9_]+\}|<[^>]+>|&(?:#[0-9]+|#x[0-9a-fA-F]+|[a-zA-Z]+);|%(?:\d+\$)?[a-zA-Z%])/g) ?? [];
+            const renderedTokens = rendered.match(/(\{[a-zA-Z0-9_]+\}|<[^>]+>|&(?:#[0-9]+|#x[0-9a-fA-F]+|[a-zA-Z]+);|%(?:\d+\$)?[a-zA-Z%])/g) ?? [];
+
+            expect(renderedTokens, key).toEqual(sourceTokens);
+            if (!profile.eligible) continue;
+            eligibleCount += 1;
+            const bodyRatio = (rendered.length - 4) / source.length;
+            expect(bodyRatio, key).toBeGreaterThanOrEqual(1.38);
+            expect(bodyRatio, key).toBeLessThanOrEqual(1.42);
+        }
+        expect(eligibleCount).toBe(2_234);
     });
 });

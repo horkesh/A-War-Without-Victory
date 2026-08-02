@@ -4,7 +4,7 @@ import { FACTION_BG_SUBTLE, FACTION_COLORS } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { Icon } from './icons/Icon';
-import { t, useLocale, type MessageKey } from '../i18n';
+import { formatLocalizedNumber, t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 const STATUS_BADGE: Record<string, { class: string; labelKey: MessageKey }> = {
@@ -98,7 +98,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
   const badge = STATUS_BADGE[displayStatus] ?? STATUS_BADGE.recorded;
   const statusLabel = t(badge.labelKey);
   const personnelLabel = formation.personnel != null
-    ? t('brigadeRow.personnelAria', { personnel: formation.personnel.toLocaleString() })
+    ? t('brigadeRow.personnelAria', { personnel: formatLocalizedNumber(formation.personnel) })
     : t('brigadeRow.personnelAria', { personnel: t('corpsFront.unreported') });
   const rowAriaLabel = t('brigadeRow.ariaLabel', {
     name: formationName,
@@ -148,7 +148,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
 
       {/* Personnel count */}
       {formation.personnel != null && (
-        <span className="shrink-0 text-xs tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formation.personnel.toLocaleString() })}>
+        <span className="shrink-0 text-xs tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formatLocalizedNumber(formation.personnel) })}>
           <Icon name="personnel" size={9} />
           {formation.personnel >= 1000 ? `${(formation.personnel / 1000).toFixed(1)}k` : formation.personnel}
         </span>

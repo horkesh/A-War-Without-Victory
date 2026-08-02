@@ -9,7 +9,7 @@
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phase 1.1 and Phase 3 source checkpoint complete; Phase 1.2, Phase 2, Phase 4, native Bosnian review, and integrated visual proof remain
+**Status:** IN PROGRESS -- Phase 1.1 and Phase 3 source repair complete; Phase 1.2, Phase 2, Phase 4, native Bosnian review, and integrated visual proof remain
 **Roadmap workstream:** R7
 **Canonical owner:** authored JSON plus source/license manifests; `src/ui/map/i18n/` for locale; `src/ui/map/audio/` for playback
 **Collision rule:** Do not edit the same event/essay as R4. Do not edit map/Desk layout until R1/R2 finish.
@@ -268,7 +268,7 @@ npm.cmd run test:baselines
 - Create `tests/ui_pseudolocalization.test.ts`
 - Extend browser/player journey harness locale selection
 
-- [x] Expand text by approximately 40%, add delimiters, preserve tokens/markup, and remain deterministic.
+- [x] Target 40% body expansion with explicit eligibility/tolerance across all 5,556 keys, add delimiters, preserve tokens/markup, and remain deterministic.
 - [x] Fail on concatenated player sentences, missing keys, and font glyph gaps; retain clipped-essential-text review in the integrated viewport capture.
 - [ ] Capture 1920x1080, 1366x768, and 3440x1440 sheets for the Desk, Decision Room, Army HQ, map, Records, Codex, Chronicle, and endgame.
 
@@ -281,13 +281,13 @@ npm.cmd run test:baselines
 
 ### Phase 3 source checkpoint evidence -- 2026-08-02
 
-- Canonical persisted locale identity is `bs`; formatting is `bs-BA`. Legacy `bcs` remains input/read compatibility only and is immediately rewritten as `bs`. The old `messages.bcs.ts` is a read-only import shim over canonical `messages.bs.ts` / `bsMessages`.
-- The deterministic, nonpersisted `qps` locale covers every English key, expands representative prose by approximately 40%, preserves interpolation tokens/markup/entities/printf tokens byte-for-byte, uses only supported source/Bosnian glyphs, and serializes in strict key order without timestamps or host paths.
-- The settings and browser harnesses accept canonical `bs`; the QA harnesses also accept nonpersisted `qps`. A static contract pins the exact eight required surfaces and three viewport sizes, producing 24 cases. Real capture and clipping disposition remain Phase 5 integrated browser/Electron evidence and are not claimed here.
+- Canonical persisted locale identity is `bs`; formatting is `bs-BA`. Legacy `bcs` remains input/read compatibility only, resolves as `bs`, and is rewritten when storage is writable. The old `messages.bcs.ts` is a read-only import shim over canonical `messages.bs.ts` / `bsMessages`.
+- The deterministic, nonpersisted `qps` locale covers all 5,556 English keys. Its full-corpus test defines ratio eligibility (at least 20 code units and enough unprotected ASCII letters), holds all 2,234 eligible message bodies to 1.38–1.42 expansion, preserves interpolation tokens/markup/entities/printf tokens byte-for-byte for every key, and serializes in strict key order without timestamps or host paths.
+- The settings and browser harnesses accept canonical `bs`; the QA harnesses also accept nonpersisted `qps`. The live-surface harness uses semantic selectors throughout shell navigation and recovery, while an executable component journey proves the foundational route under EN/BS/QPS. A separate contract pins the exact eight required surfaces and three viewport sizes, producing 24 cases. Real capture and clipping disposition remain Phase 5 integrated browser/Electron evidence and are not claimed here.
 - Exact inventory: 5,556 English keys, 5,556 Bosnian draft strings, zero fallback uses, 599 length-risk keys, and 385 scanned player-surface files. One confirmed rendered source concatenation and the one fallback were closed. The machine-readable remainder is 579 embedded-English candidates plus 391 dynamic-key candidates, 970 open findings total, with zero confirmed concatenated-copy findings.
 - [Localization review ledger](../provenance/LOCALIZATION_REVIEW_LEDGER.json) records the bounded source review and assigns all remaining linguistic review to `preview-language-review`. No native review or production LQA is claimed.
 - [Source checkpoint implementation report](../40_reports/implemented/20260802_R7_BOSNIAN_LOCALE_SOURCE_CHECKPOINT.md) records implementation, diagnostics, tests, limitations, and deferred evidence.
-- This checkpoint changes no simulation rules/state, save schema, baseline, historical content, package, release state, or `FORAWWV.md`.
+- Probe operation staging now keeps canonical operation identity byte-stable across EN/BS/QPS; localized labels are display-only. This corrects locale-dependent staged state without changing simulation rules or save schema. Six named core player surfaces route number formatting through `getIntlLocale`; [the exact inventory](../provenance/LOCALE_FORMATTING_INVENTORY.md) records the remaining 46 host-default calls across 26 files.
 
 ```powershell
 npm.cmd run test:vitest -- tests/ui_i18n.test.ts tests/localization_coverage.test.ts tests/ui_pseudolocalization.test.ts tests/ui/settings_screen_i18n.test.ts tests/ui/settlement_timeline_i18n.test.ts tests/ui/warroom_date_i18n.test.ts --pool=forks --reporter=dot

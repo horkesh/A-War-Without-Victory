@@ -57,5 +57,31 @@ describe('R7 locale surface evidence contract', () => {
         expect(main).toMatch(/setLocale\(requestedLocale/);
         expect(liveHarness).toMatch(/\['en', 'bs', 'bcs', 'qps'\]\.includes\(LOCALE\)/);
         expect(liveHarness).toMatch(/searchParams\.set\('locale', LOCALE\)/);
+        expect(liveHarness).toMatch(/\[data-testid="main-menu-faction-RBiH"\]/);
+        expect(liveHarness).toMatch(/\[data-testid="war-start-splash-acknowledge"\]/);
+        expect(liveHarness).toMatch(/\[data-testid="peace-war-briefing-begin"\]/);
+        expect(liveHarness).toMatch(/\[data-testid="presidential-inbox-opening-brief-open-desk"\]/);
+        expect(liveHarness).toMatch(/\[data-testid="event-decision-response"\]\[data-response-id="civic"\]/);
+        expect(liveHarness).not.toMatch(/waitForVisibleText\(page, 'A WAR WITHOUT VICTORY'\)/);
+        expect(liveHarness).not.toMatch(/clickByText\(page, 'Republic of Bosnia and Herzegovina'\)/);
+        expect(liveHarness).not.toMatch(/waitForVisibleText\(page, 'WAR HAS STARTED'\)/);
+        expect(liveHarness).not.toMatch(/await (?:waitForVisibleText|clickByText|clickFirstMatchingText)\(page/);
+        expect(liveHarness).toContain('[data-testid="desk-consequence-strip"][data-has-filed-record="false"]');
+    });
+
+    it('routes the named player-facing core number surfaces through the locale helper', () => {
+        const files = [
+            'src/ui/map/components/AARPanel.tsx',
+            'src/ui/map/components/BrigadeRow.tsx',
+            'src/ui/map/components/SettlementDetailContent.tsx',
+            'src/ui/map/components/VerdictScreen.tsx',
+            'src/ui/map/components/OperationHistoryPanel.tsx',
+            'src/ui/map/components/army_hq/OperationsSection.tsx',
+        ];
+        for (const file of files) {
+            const source = readFileSync(file, 'utf8');
+            expect(source, file).toContain('formatLocalizedNumber');
+            expect(source, file).not.toMatch(/\.toLocaleString\(\)/);
+        }
     });
 });

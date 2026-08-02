@@ -42,6 +42,21 @@ function playerSafeEligibilityMessage(warning: AuthorableOpWarningView): string 
     return t(ELIGIBILITY_MESSAGE_KEYS[warning.code] ?? 'opsPlanning.authorize.eligibility.finding.generic');
 }
 
+/** Canonical payload identity; presentation locale must never enter staged state. */
+export function buildProbeOperationOverrides(plan: OpsPlanState): Partial<CorpsOperationOrderPayload> {
+    const allObjs = plan.axes.flatMap((axis) => axis.objectives);
+    const allBrigades = plan.axes.flatMap((axis) => axis.brigadeIds);
+    return {
+        name: `${plan.opName} (Probe)`,
+        type: 'probe',
+        participatingBrigades: allBrigades.slice(0, 3),
+        objectives: allObjs.slice(0, 1),
+        minAttackOutcome: 'repulsed',
+        tempo: 'standard',
+        axes: undefined,
+    };
+}
+
 export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSectorId }: AuthorizePhaseProps) {
     const ipc = useIPC();
     const clearContext = useGameStore((s) => s.clearOpsPlanningContext);
@@ -192,17 +207,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
     const handleAuthorize = () => submitOperation();
 
     const handleProbe = () => {
-        const allObjs = plan.axes.flatMap((a) => a.objectives);
-        const allBrigades = plan.axes.flatMap((a) => a.brigadeIds);
-        return submitOperation({
-            name: t('opsPlanning.authorize.probeName', { name: plan.opName }),
-            type: 'probe',
-            participatingBrigades: allBrigades.slice(0, 3),
-            objectives: allObjs.slice(0, 1),
-            minAttackOutcome: 'repulsed',
-            tempo: 'standard',
-            axes: undefined,
-        });
+        return submitOperation(buildProbeOperationOverrides(plan));
     };
 
     return (

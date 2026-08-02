@@ -51,7 +51,7 @@ const RAW_TECHNICAL_TOKENS = [
   { label: '.json', pattern: /\.json\b/i },
 ];
 
-const BCS_ENGLISH_LEAK_TOKENS = [
+const BS_ENGLISH_LEAK_TOKENS = [
   { label: 'order interpretation EN header', pattern: /\bORDER INTERPRETATIONS\s*-\s*\d+\s+PENDING\b/ },
   { label: 'Officer morale EN relief', pattern: /\bOfficer morale\s+-?\d+\s+if relieved\b/i },
   { label: 'Enemy offensive fallback', pattern: /\bEnemy offensive threatens corps integrity\b/i },
@@ -81,16 +81,15 @@ const LIVE_SURFACES = [
   {
     name: 'Desk',
     open: async (page) => {
-      await clickByText(page, 'Desk');
-      await waitForVisibleText(page, "President's Desk");
-      await waitForVisibleText(page, 'Strategic Situation');
+      await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
+      await waitForVisibleSelector(page, '[data-testid="president-desk-shell"]');
     },
     expectedSurface: 'Desk',
   },
   {
     name: 'War Map',
     open: async (page) => {
-      await clickFirstMatchingText(page, ['War Map', 'FIELD']);
+      await activateVisibleControl(page, '[data-testid="toolbar-route-war-map"]');
       await waitForTacticalMap(page);
     },
     expectedSurface: 'War Map',
@@ -98,35 +97,33 @@ const LIVE_SURFACES = [
   {
     name: 'Army HQ',
     open: async (page) => {
-      await clickByText(page, 'Army HQ');
-      await waitForVisibleText(page, 'Army HQ');
-      await waitForVisibleText(page, 'BRIEFING');
+      await activateVisibleControl(page, '[data-testid="toolbar-route-army-hq"]');
+      await waitForVisibleSelector(page, '[data-testid="army-hq-modal"]');
     },
     expectedSurface: 'Army HQ',
   },
   {
     name: 'Records',
     open: async (page) => {
-      await clickByText(page, 'Records');
-      await waitForVisibleText(page, 'Archive Routes');
-      await waitForVisibleText(page, 'Latest Filed Decision');
+      await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');
+      await waitForVisibleSelector(page, '[data-testid="records-content"]');
+      await waitForVisibleSelector(page, '[data-testid="records-archive-summary"]');
     },
     expectedSurface: 'Records',
   },
   {
     name: 'Chronicle',
     open: async (page) => {
-      await clickByText(page, 'Chronicle');
-      await waitForVisibleText(page, 'War Chronicle');
+      await activateVisibleControl(page, '[data-testid="toolbar-route-chronicle"]');
+      await waitForVisibleSelector(page, '[data-testid="chronicle-overlay"]');
     },
     expectedSurface: 'Chronicle',
   },
   {
     name: 'Codex',
     open: async (page) => {
-      await clickByText(page, 'Codex');
-      await waitForVisibleText(page, 'Essays');
-      await waitForVisibleText(page, 'Codex');
+      await activateVisibleControl(page, '[data-testid="toolbar-route-codex"]');
+      await waitForVisibleSelector(page, '[data-testid="codex-panel"]');
     },
     expectedSurface: 'Codex',
   },
@@ -494,27 +491,6 @@ async function visibleText(page) {
   return page.evaluate(() => document.body?.innerText ?? '');
 }
 
-async function waitForVisibleText(page, text, timeout = 30000) {
-  await page.waitForFunction(
-    (needle) => (document.body?.innerText ?? '').toLowerCase().includes(needle.toLowerCase()),
-    { timeout },
-    text,
-  );
-}
-
-async function waitUntilDialogTextAbsent(page, text, timeout = 15000) {
-  await page.waitForFunction(
-    (needle) => !Array.from(document.querySelectorAll('[role="dialog"], [aria-modal="true"]'))
-      .some((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) return false;
-        return (el.textContent ?? '').toLowerCase().includes(needle.toLowerCase());
-      }),
-    { timeout },
-    text,
-  );
-}
-
 async function waitForTacticalMap(page, timeout = 30000) {
   await page.waitForFunction(() => {
     const map = document.querySelector('[data-testid="tactical-map"]');
@@ -522,51 +498,6 @@ async function waitForTacticalMap(page, timeout = 30000) {
     const rect = map.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0;
   }, { timeout });
-}
-
-async function clickByText(page, text) {
-  const clicked = await page.evaluate((needle) => {
-    const normalizedNeedle = needle.toLowerCase();
-    const candidates = Array.from(document.querySelectorAll('button, [role="button"], a'))
-      .map((el) => {
-        const label = [
-          el.textContent,
-          el.getAttribute('aria-label'),
-          el.getAttribute('title'),
-        ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim().toLowerCase();
-        return { el, label };
-      })
-      .filter(({ el, label }) => {
-        const rect = el.getBoundingClientRect();
-        const style = window.getComputedStyle(el);
-        if (rect.width <= 0 || rect.height <= 0) return false;
-        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') <= 0) return false;
-        return label.includes(normalizedNeedle);
-      })
-      .sort((a, b) => {
-        const aExact = a.label === normalizedNeedle ? 0 : 1;
-        const bExact = b.label === normalizedNeedle ? 0 : 1;
-        return aExact - bExact || a.label.length - b.label.length;
-      });
-    const target = candidates[0]?.el;
-    if (!target) return false;
-    target.click();
-    return true;
-  }, text);
-  if (!clicked) throw new Error(`No visible clickable control matched "${text}"`);
-}
-
-async function clickFirstMatchingText(page, labels) {
-  let lastError = null;
-  for (const label of labels) {
-    try {
-      await clickByText(page, label);
-      return label;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError ?? new Error(`No visible clickable control matched any label: ${labels.join(' | ')}`);
 }
 
 async function clickSelectorIfVisible(page, selector) {
@@ -978,45 +909,15 @@ async function clickFirstSectorWithVisibleFormation(page, summary) {
 }
 
 async function closePauseMenuIfPresent(page) {
-  const text = await visibleText(page);
-  if (!/\bPAUSED\b/i.test(text)) return;
-  await clickFirstMatchingText(page, ['RESUME']).catch(() => {});
+  if (await visibleSelectorCount(page, '[data-testid="pause-menu-backdrop"]') === 0) return;
+  await clickVisibleSelector(page, '[data-testid="pause-menu-backdrop"]');
   await delay(250);
-}
-
-async function dialogText(page) {
-  return page.evaluate(() => {
-    const dialog = document.querySelector('[role="dialog"], [aria-modal="true"]');
-    return dialog?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
-  });
 }
 
 async function dismissTutorialIfPresent(page) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    const before = await visibleText(page);
-    if (!/tutorial|thesis lesson|skip/i.test(before)) return;
-    const clicked = await page.evaluate(() => {
-      const candidates = Array.from(document.querySelectorAll('button, [role="button"]'))
-        .filter((el) => {
-          const rect = el.getBoundingClientRect();
-          const label = [
-            el.textContent,
-            el.getAttribute('aria-label'),
-            el.getAttribute('title'),
-          ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim().toLowerCase();
-          return rect.width > 0 && rect.height > 0 && (
-            label.includes('skip tutorial')
-            || label === 'skip'
-            || label.includes('read later')
-            || label.includes('review later')
-          );
-        });
-      const target = candidates[0];
-      if (!target) return false;
-      target.click();
-      return true;
-    });
-    if (!clicked) return;
+    if (await visibleSelectorCount(page, '[data-testid="onboarding-skip"]') === 0) return;
+    await activateVisibleControl(page, '[data-testid="onboarding-skip"]');
     await delay(300);
   }
 }
@@ -1032,9 +933,7 @@ async function resetToWarMap(page) {
   await clickSelectorIfVisible(page, '[data-testid="command-card-strip-close"]');
   await clickSelectorIfVisible(page, '[data-testid="codex-close"]');
   await clickSelectorIfVisible(page, '[data-testid="desk-close-overlay"]');
-  await activateVisibleControl(page, '[data-testid="toolbar-route-war-map"]').catch(() => {
-    return clickFirstMatchingText(page, ['FIELD', 'War Map']).catch(() => {});
-  });
+  await activateVisibleControl(page, '[data-testid="toolbar-route-war-map"]').catch(() => {});
   await closePauseMenuIfPresent(page);
   await waitForTacticalMap(page);
   await page.waitForFunction(() => {
@@ -1048,28 +947,13 @@ async function resetToWarMap(page) {
         && style.visibility !== 'hidden'
         && Number(style.opacity || '1') > 0;
     };
-    const textOf = (el) => (el?.textContent ?? '').replace(/\s+/g, ' ').trim();
-    const hasVisibleText = (selector, pattern) => Array.from(document.querySelectorAll(selector))
-      .some((el) => isVisible(el) && pattern.test(textOf(el)));
-    const visibleDialogs = Array.from(document.querySelectorAll('[role="dialog"], [aria-modal="true"]'))
-      .filter(isVisible)
-      .map((el) => ({
-        label: [
-          el.getAttribute('aria-label'),
-          el.getAttribute('aria-labelledby')
-            ? document.getElementById(el.getAttribute('aria-labelledby'))?.textContent
-            : '',
-        ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim(),
-        text: textOf(el),
-      }));
-    const desk = isVisible(document.querySelector('[data-testid="desk-close-overlay"]'))
-      || hasVisibleText('section[aria-label], aside, h2', /President's Desk|Strategic Situation/);
-    const armyHqDialog = visibleDialogs.find((dialog) => /Army HQ|Army Headquarters/i.test(dialog.label));
-    const chronicle = hasVisibleText('h1', /^War Chronicle$/i);
+    const desk = isVisible(document.querySelector('[data-testid="president-desk-shell"]'));
+    const armyHq = isVisible(document.querySelector('[data-testid="army-hq-modal"]'));
+    const chronicle = isVisible(document.querySelector('[data-testid="chronicle-overlay"]'));
     const codex = isVisible(document.querySelector('[data-testid="codex-panel"]'));
     const commandStrip = isVisible(document.querySelector('[data-testid="command-card-strip"]'));
     const decisionRoom = isVisible(document.querySelector('[data-testid="warroom-decision-room-host"]'));
-    return !desk && !armyHqDialog && !chronicle && !codex && !commandStrip && !decisionRoom;
+    return !desk && !armyHq && !chronicle && !codex && !commandStrip && !decisionRoom;
   }, { timeout: 15000 });
 }
 
@@ -1138,7 +1022,7 @@ function assertNoRawTechnicalTokens(surfaceName, text) {
     throw new Error(`${surfaceName} exposed raw technical tokens: ${JSON.stringify(found, null, 2)}`);
   }
   if (LOCALE === 'bcs' || LOCALE === 'bs') {
-    assertNoBcsEnglishLeakTokens(surfaceName, text);
+    assertNoBsEnglishLeakTokens(surfaceName, text);
   }
 }
 
@@ -1158,9 +1042,9 @@ function assertNoFutureKnowledgeLeaks(surfaceName, text) {
   }
 }
 
-function assertNoBcsEnglishLeakTokens(surfaceName, text) {
+function assertNoBsEnglishLeakTokens(surfaceName, text) {
   const found = [];
-  for (const { label, pattern } of BCS_ENGLISH_LEAK_TOKENS) {
+  for (const { label, pattern } of BS_ENGLISH_LEAK_TOKENS) {
     const match = pattern.exec(text);
     if (match?.index !== undefined) {
       found.push({
@@ -1170,7 +1054,7 @@ function assertNoBcsEnglishLeakTokens(surfaceName, text) {
     }
   }
   if (found.length > 0) {
-    throw new Error(`${surfaceName} exposed English fallback copy in BCS mode: ${JSON.stringify(found, null, 2)}`);
+    throw new Error(`${surfaceName} exposed English fallback copy in Bosnian mode: ${JSON.stringify(found, null, 2)}`);
   }
 }
 
@@ -1186,28 +1070,10 @@ async function getVisibleShellSurfaces(page) {
         && style.visibility !== 'hidden'
         && Number(style.opacity || '1') > 0;
     };
-    const textOf = (el) => (el?.textContent ?? '').replace(/\s+/g, ' ').trim();
-    const hasVisibleText = (selector, pattern) => Array.from(document.querySelectorAll(selector))
-      .some((el) => isVisible(el) && pattern.test(textOf(el)));
-    const visibleDialogs = Array.from(document.querySelectorAll('[role="dialog"], [aria-modal="true"]'))
-      .filter(isVisible)
-      .map((el) => ({
-        label: [
-          el.getAttribute('aria-label'),
-          el.getAttribute('aria-labelledby')
-            ? document.getElementById(el.getAttribute('aria-labelledby'))?.textContent
-            : '',
-        ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim(),
-        text: textOf(el),
-      }));
-
-    const desk = isVisible(document.querySelector('[data-testid="desk-close-overlay"]'))
-      || hasVisibleText('section[aria-label], aside, h2', /President's Desk|Strategic Situation/);
-    const armyHqDialog = visibleDialogs.find((dialog) => /Army HQ|Army Headquarters/i.test(dialog.label));
-    const armyHqText = armyHqDialog?.text ?? '';
-    const records = Boolean(armyHqDialog && /Archive Routes|Records archive summary|Decision Consequences|Turn Records/.test(armyHqText));
-    const armyHq = Boolean(armyHqDialog && !records);
-    const chronicle = hasVisibleText('h1', /^War Chronicle$/i);
+    const desk = isVisible(document.querySelector('[data-testid="president-desk-shell"]'));
+    const records = isVisible(document.querySelector('[data-testid="records-content"]'));
+    const armyHq = isVisible(document.querySelector('[data-testid="army-hq-modal"]')) && !records;
+    const chronicle = isVisible(document.querySelector('[data-testid="chronicle-overlay"]'));
     const codex = isVisible(document.querySelector('[data-testid="codex-panel"]'));
     return [
       ...(desk ? ['Desk'] : []),
@@ -1240,30 +1106,27 @@ async function runFoundationalFlow(page, summary) {
     window.sessionStorage?.clear();
   });
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
-  await waitForVisibleText(page, 'A WAR WITHOUT VICTORY');
+  await waitForVisibleSelector(page, '[data-testid="main-menu-title"]');
   await captureEvidence(page, summary, 'main_menu');
 
-  await clickByText(page, 'Republic of Bosnia and Herzegovina');
-  await waitForVisibleText(page, 'WAR HAS STARTED');
+  await clickVisibleSelector(page, '[data-testid="main-menu-faction-RBiH"]');
+  await waitForVisibleSelector(page, '[data-testid="war-start-splash-acknowledge"]');
   await captureEvidence(page, summary, 'war_start_splash');
 
-  await clickByText(page, 'Acknowledge');
-  await waitForVisibleText(page, 'WAR BEGINS');
-  const identityDialog = await dialogText(page);
-  if (!identityDialog.includes('President of the Presidency of the Republic of Bosnia and Herzegovina')) {
-    throw new Error(`WAR BEGINS identity dialog did not show RBiH identity copy: ${identityDialog}`);
-  }
+  await clickVisibleSelector(page, '[data-testid="war-start-splash-acknowledge"]');
+  await waitForVisibleSelector(page, '[data-testid="peace-war-identity"][data-faction="RBiH"]');
+  await waitForVisibleSelector(page, '[data-testid="peace-war-briefing-begin"]');
   await captureEvidence(page, summary, 'war_begins_identity');
 
-  await clickByText(page, 'Begin');
-  await waitForVisibleText(page, 'President');
-  await clickFirstMatchingText(page, ['Open Desk', 'President', 'Desk', 'Begin at Desk', 'Open President']);
-  await waitForVisibleText(page, 'What Is Bosnia?');
-  await waitForVisibleText(page, 'Civic multi-ethnic republic');
+  await clickVisibleSelector(page, '[data-testid="peace-war-briefing-begin"]');
+  await waitForVisibleSelector(page, '[data-testid="presidential-inbox-opening-brief-open-desk"]');
+  await clickVisibleSelector(page, '[data-testid="presidential-inbox-opening-brief-open-desk"]');
+  await waitForVisibleSelector(page, '[data-testid="event-decision-response-rail"][data-event-id="rbih_state_identity"]');
+  await waitForVisibleSelector(page, '[data-testid="event-decision-response"][data-response-id="civic"]');
   await captureEvidence(page, summary, 'foundational_decision');
 
-  await clickByText(page, 'Civic multi-ethnic republic');
-  await waitUntilDialogTextAbsent(page, 'Presidential Response');
+  await clickVisibleSelector(page, '[data-testid="event-decision-response"][data-response-id="civic"]');
+  await page.waitForFunction(() => !document.querySelector('[data-testid="event-decision-response-rail"]'), { timeout: 30000 });
   await dismissTutorialIfPresent(page);
   summary.evidence.warStartFoundationalFlow = true;
   await captureEvidence(page, summary, 'after_foundational_decision');
@@ -1299,12 +1162,10 @@ async function runArmyHqInternalDrilldown(page, summary) {
   await activateVisibleControl(page, '#army-hq-tab-summary');
   await waitForVisibleSelector(page, '#army-hq-tab-summary[aria-selected="true"]');
   await waitForVisibleSelector(page, '#army-hq-tabpanel-summary');
-  await waitForVisibleText(page, 'WAR SUMMARY');
   await captureEvidence(page, summary, 'army_hq_internal_summary');
 
   await activateVisibleControl(page, '#army-hq-tab-personnel');
   await waitForVisibleSelector(page, '#army-hq-tabpanel-personnel');
-  await waitForVisibleText(page, 'PERSONNEL COMMAND DOSSIER');
   await captureEvidence(page, summary, 'army_hq_internal_personnel');
 
   await activateVisibleControl(page, '#army-hq-tab-briefing');
@@ -1313,8 +1174,6 @@ async function runArmyHqInternalDrilldown(page, summary) {
   await waitForVisibleSelector(page, '[data-testid="army-hq-opening-command-provenance"]');
   await activateVisibleControl(page, '[data-testid="army-hq-corps-card"][data-commander-source="opening_read_model"]');
   await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
-  await waitForVisibleText(page, 'Back');
-  await waitForVisibleText(page, 'Combat Record');
   await captureEvidence(page, summary, 'army_hq_internal_corps_card');
 
   const active = await assertSingleShellSurface(page, 'Army HQ');
@@ -1727,12 +1586,7 @@ async function runTurnZeroSetupProvenanceLiveProof(page, summary) {
 
   await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
   await waitForVisibleSelector(page, '[data-testid="president-desk-shell"]');
-  await waitForVisibleText(page, 'No campaign record loaded.');
-  const deskText = await visibleText(page);
-  if (/Last filed record/i.test(deskText)) {
-    await captureEvidence(page, summary, 'turn_zero_setup_provenance_desk_failed');
-    throw new Error('Desk consequence strip treated turn-zero setup as a filed record');
-  }
+  await waitForVisibleSelector(page, '[data-testid="desk-consequence-strip"][data-has-filed-record="false"]');
 
   await waitForVisibleSelector(page, '[data-testid="warroom-toolbar-command-surface"]');
   await activateVisibleControl(page, '[data-testid="warroom-toolbar-command-surface"]');

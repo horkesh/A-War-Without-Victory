@@ -1,4 +1,5 @@
 import { normalizeFactionId } from '../../../state/identity.js';
+import { t } from '../i18n';
 import { formatCorpsDisplayName, toTitleCase } from './formatters';
 
 const MILITARY_FACTION_LABELS: Record<string, string> = {
@@ -285,6 +286,12 @@ export function getPlayerSafeOperationName(
 ): string {
     const safeName = (name ?? '').trim();
     if (!safeName) return fallback;
+
+    // Canonical state keeps the stable English marker; presentation localizes it.
+    const probeDisplayMatch = safeName.match(/^(.+?)\s+\(Probe\)$/);
+    if (probeDisplayMatch) {
+        return t('opsPlanning.authorize.probeName', { name: probeDisplayMatch[1].trim() });
+    }
 
     if (
         opOrCorpsId === 'jna_herzegovina_command'

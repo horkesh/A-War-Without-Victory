@@ -10,12 +10,13 @@ import { PlanPhase } from '../../src/ui/map/components/ops_modal/PlanPhase.js';
 import { PlanParameters } from '../../src/ui/map/components/ops_modal/PlanParameters.js';
 import { ObjectiveList } from '../../src/ui/map/components/ops_modal/ObjectiveList.js';
 import { G2Phase } from '../../src/ui/map/components/ops_modal/G2Phase.js';
-import { AuthorizePhase } from '../../src/ui/map/components/ops_modal/AuthorizePhase.js';
+import { AuthorizePhase, buildProbeOperationOverrides } from '../../src/ui/map/components/ops_modal/AuthorizePhase.js';
 import { OpordDocument } from '../../src/ui/map/components/ops_modal/OpordDocument.js';
 import type { PredictionResult } from '../../src/ui/map/components/ops_modal/usePrediction.js';
 import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage } from '../../src/ui/map/components/ops_modal/phaseGate.js';
 import { chooseOpsPlanningSector } from '../../src/ui/map/components/ops_modal/stagingChoice.js';
-import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { setLocale, setQaLocale } from '../../src/ui/map/i18n/index.js';
+import { getPlayerSafeOperationName } from '../../src/ui/map/utils/playerSafeText.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -181,6 +182,26 @@ function makeCorps(overrides: Partial<FormationView> = {}): FormationView {
 }
 
 describe('ops planning target discovery', () => {
+    it('keeps staged probe operation identity byte-stable across display locales', () => {
+        setLocale('en');
+        const englishBytes = JSON.stringify(buildProbeOperationOverrides(makePlan()));
+        setLocale('bs');
+        const bosnianBytes = JSON.stringify(buildProbeOperationOverrides(makePlan()));
+        setQaLocale('qps');
+        const pseudoBytes = JSON.stringify(buildProbeOperationOverrides(makePlan()));
+
+        expect(bosnianBytes).toBe(englishBytes);
+        expect(pseudoBytes).toBe(englishBytes);
+        expect(JSON.parse(englishBytes).name).toBe('Operacija Test (Probe)');
+
+        setLocale('en');
+        expect(getPlayerSafeOperationName('Operacija Test (Probe)')).toBe('Operacija Test (Probe)');
+        setLocale('bs');
+        expect(getPlayerSafeOperationName('Operacija Test (Probe)')).toBe('Operacija Test (Izviđanje)');
+        setQaLocale('qps');
+        expect(getPlayerSafeOperationName('Operacija Test (Probe)')).toContain('Operacija Test');
+        expect(getPlayerSafeOperationName('Operacija Test (Probe)')).not.toBe('Operacija Test (Probe)');
+    });
     afterEach(() => {
         cleanup();
         setLocale('en');
@@ -310,8 +331,8 @@ describe('ops planning target discovery', () => {
         expect(container.textContent).not.toContain('op:test:staging_1');
     });
 
-    it('localizes PlanPhase status chrome in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes PlanPhase status chrome in Bosnian mode', () => {
+        setLocale('bs');
         useGameStore.setState({ loadedGameState: makeState(), osidDisplayNames: null });
 
         render(createElement(PlanPhase, {
@@ -335,8 +356,8 @@ describe('ops planning target discovery', () => {
         expect(screen.queryByText('Plan Status')).toBeNull();
     });
 
-    it('localizes ObjectiveList empty-state chrome in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes ObjectiveList empty-state chrome in Bosnian mode', () => {
+        setLocale('bs');
 
         render(createElement(ObjectiveList, {
             plan: makePlan(),
@@ -353,8 +374,8 @@ describe('ops planning target discovery', () => {
         expect(screen.queryByText('Available')).toBeNull();
     });
 
-    it('localizes OpsMap compact legend chrome in BCS mode', async () => {
-        setLocale('bcs');
+    it('localizes OpsMap compact legend chrome in Bosnian mode', async () => {
+        setLocale('bs');
         Object.defineProperty(window.URL, 'createObjectURL', {
             configurable: true,
             value: vi.fn(() => 'blob:maplibre-worker'),
@@ -415,8 +436,8 @@ describe('ops planning target discovery', () => {
         expect(modalSource).toContain('aria-current={i === currentIdx ? \'step\' : undefined}');
     });
 
-    it('localizes G2Phase clipboard chrome in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes G2Phase clipboard chrome in Bosnian mode', () => {
+        setLocale('bs');
         useGameStore.setState({ loadedGameState: makeState() });
 
         render(createElement(G2Phase, {
@@ -540,8 +561,8 @@ describe('ops planning target discovery', () => {
         expect(copy).not.toMatch(/axis_raw_1|bde_raw_missing|formations|0 valid|would be dropped|axis_empty|op_empty|brigade_missing/i);
     });
 
-    it('localizes AuthorizePhase action chrome in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes AuthorizePhase action chrome in Bosnian mode', () => {
+        setLocale('bs');
         useGameStore.setState({ loadedGameState: makeState(), osidDisplayNames: null });
 
         const lowIntelPlan = makePlan({
@@ -588,8 +609,8 @@ describe('ops planning target discovery', () => {
         }), false)).toBe('Add at least 1 objective and 1 brigade to your axis.');
     });
 
-    it('localizes phase gate messages in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes phase gate messages in Bosnian mode', () => {
+        setLocale('bs');
         expect(getOpsPhaseGateMessage('plan', false, makePlan(), false)).toBe('Prvo izaberite komandanta.');
         expect(getOpsPhaseGateMessage('g2_assessment', true, makePlan(), false))
             .toBe('Dodajte najmanje 1 cilj i 1 brigadu na svoju osu.');
@@ -598,8 +619,8 @@ describe('ops planning target discovery', () => {
         }), false)).toBe('Prvo pregledajte procjenu G-2.');
     });
 
-    it('localizes PlanParameters chrome in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes PlanParameters chrome in Bosnian mode', () => {
+        setLocale('bs');
         render(createElement(PlanParameters, {
             plan: makePlan(),
             onUpdate: vi.fn(),
@@ -619,8 +640,8 @@ describe('ops planning target discovery', () => {
         expect(screen.queryByText('What kind of operation?')).toBeNull();
     });
 
-    it('localizes CommanderPhase chrome and officer metadata in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes CommanderPhase chrome and officer metadata in Bosnian mode', () => {
+        setLocale('bs');
         useGameStore.setState({
             loadedGameState: makeState(),
             opsPlanningCorpsId: 'rs_1st_krajina',
@@ -745,8 +766,8 @@ describe('ops planning target discovery', () => {
         expect(allCopy).not.toMatch(/\bKIA\b|\bARMY HQ\b|\bASSIGNED TO OP\b|\bCORPS CMDR\b|\bACTING CMDR\b|raw_operation_id/);
     });
 
-    it('localizes CommanderPhase unavailable reasons in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes CommanderPhase unavailable reasons in Bosnian mode', () => {
+        setLocale('bs');
         const state = makeState();
         useGameStore.setState({
             loadedGameState: {
@@ -776,8 +797,8 @@ describe('ops planning target discovery', () => {
         expect(allCopy).not.toMatch(/\bKIA\b|\bASSIGNED TO OP\b|raw_operation_id/);
     });
 
-    it('localizes OPORD body prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes OPORD body prose in Bosnian mode', () => {
+        setLocale('bs');
         render(createElement(OpordDocument, {
             plan: makePlan({
                 axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
@@ -800,8 +821,8 @@ describe('ops planning target discovery', () => {
         expect(screen.queryByText(/Minimum outcome:/)).toBeNull();
     });
 
-    it('localizes G2 narrative and map legend prose in BCS mode', () => {
-        setLocale('bcs');
+    it('localizes G2 narrative and map legend prose in Bosnian mode', () => {
+        setLocale('bs');
         useGameStore.setState({ loadedGameState: makeState() });
 
         render(createElement(G2Phase, {
@@ -849,8 +870,8 @@ describe('ops planning target discovery', () => {
         expect(copy).not.toContain('postpone');
     });
 
-    it('renders G2 prediction values as player-facing BCS labels', () => {
-        setLocale('bcs');
+    it('renders G2 prediction values as player-facing Bosnian labels', () => {
+        setLocale('bs');
         useGameStore.setState({ loadedGameState: makeState() });
 
         const { container } = render(createElement(G2Phase, {

@@ -79,6 +79,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
 
     return (
         <div
+            data-testid="war-start-splash"
             role="dialog"
             aria-modal="true"
             aria-label={t('intro.warHasStarted')}
@@ -136,6 +137,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                 />
                 <button
                     type="button"
+                    data-testid="war-start-splash-acknowledge"
                     onClick={skip}
                     style={{
                         padding: '12px 40px',

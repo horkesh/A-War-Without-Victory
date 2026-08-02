@@ -55,6 +55,15 @@ export function getIntlLocale(locale: LocaleInput = getActiveLocale()): typeof B
     return locale === 'bs' || locale === 'bcs' ? BOSNIAN_FORMATTING_LOCALE : ENGLISH_FORMATTING_LOCALE;
 }
 
+/** Player-facing number formatting must not inherit the host operating-system locale. */
+export function formatLocalizedNumber(
+    value: number,
+    locale: LocaleInput = getActiveLocale(),
+    options?: Intl.NumberFormatOptions,
+): string {
+    return new Intl.NumberFormat(getIntlLocale(locale), options).format(value);
+}
+
 /** Legacy authored JSON still uses a `bcs` localization field. */
 export function getLegacyContentLocale(locale: RuntimeLocale): 'bcs' | undefined {
     return locale === 'bs' ? 'bcs' : undefined;
@@ -62,14 +71,21 @@ export function getLegacyContentLocale(locale: RuntimeLocale): 'bcs' | undefined
 
 export function getLocale(storage: LocaleStorage | undefined = getBrowserStorage()): PersistedLocale {
     if (!storage) return DEFAULT_LOCALE;
+    let stored: string | null;
     try {
-        const stored = storage.getItem(LOCALE_STORAGE_KEY);
-        const resolved = resolveLocale(stored);
-        if (stored === 'bcs') storage.setItem(LOCALE_STORAGE_KEY, resolved);
-        return resolved;
+        stored = storage.getItem(LOCALE_STORAGE_KEY);
     } catch {
         return DEFAULT_LOCALE;
     }
+    const resolved = resolveLocale(stored);
+    if (stored === 'bcs') {
+        try {
+            storage.setItem(LOCALE_STORAGE_KEY, resolved);
+        } catch {
+            // Migration writes are best-effort; the successfully read preference still resolves.
+        }
+    }
+    return resolved;
 }
 
 let activeLocale: RuntimeLocale = getLocale();

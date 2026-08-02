@@ -47,7 +47,7 @@ describe('local playtest evidence packet', () => {
         const storage = createMemoryStorage();
         const queue = createCrashDiagnosticsQueue({ storage, sessionId: 'playtest-session' });
         queue.setConsentEnabled(true);
-        storage.setItem(LOCALE_STORAGE_KEY, 'bcs');
+        storage.setItem(LOCALE_STORAGE_KEY, 'bs');
         storage.setItem(REDUCE_MOTION_STORAGE_KEY, '1');
         storage.setItem(COLORBLIND_PRESET_STORAGE_KEY, 'deuteranopia');
         storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY, JSON.stringify({ muted: false, masterVolume: 0.75 }));
@@ -82,7 +82,7 @@ describe('local playtest evidence packet', () => {
             osFamily: 'windows',
             currentSurface: 'settings',
             preferences: {
-                locale: 'bcs',
+                locale: 'bs',
                 reduceMotion: true,
                 colorblindPreset: 'deuteranopia',
                 audio: { muted: false, masterVolume: 0.75 },

@@ -16,7 +16,7 @@ import { CollapsibleSection } from '../../src/ui/map/components/army_hq/Collapsi
 import { OrbatSection } from '../../src/ui/map/components/army_hq/OrbatSection.js';
 import { OpportunityLedgerPanel } from '../../src/ui/map/components/army_hq/OpportunityLedgerPanel.js';
 import { SectorsSection } from '../../src/ui/map/components/army_hq/SectorsSection.js';
-import { bsMessages as bcsMessages } from '../../src/ui/map/i18n/messages.bs.js';
+import { bsMessages } from '../../src/ui/map/i18n/messages.bs.js';
 import { enMessages } from '../../src/ui/map/i18n/messages.en.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { CorpsFrontSectorView, FormationView, LoadedGameState } from '../../src/ui/map/data/types.js';
@@ -128,8 +128,8 @@ describe('GUI audit label discipline', () => {
     expect(screen.queryByText('50.0%')).toBeNull();
   });
 
-  it('renders operational SITREP token copy in BCS mode without English generated fallbacks', () => {
-    setLocale('bcs');
+    it('renders operational SITREP token copy in Bosnian mode without English generated fallbacks', () => {
+        setLocale('bs');
     const state = makeSitrepState();
     state.operationalSitrep = {
       ...state.operationalSitrep!,
@@ -153,8 +153,8 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toContain('collapse-eligible');
   });
 
-  it('localizes local-support labels without English order names in BCS mode', () => {
-    setLocale('bcs');
+    it('localizes local-support labels without English order names in Bosnian mode', () => {
+        setLocale('bs');
     const state = makeState({
       controlBySettlement: { 'op:tuzla:center': 'RBiH' },
       municipalitySupportOrders: {
@@ -1712,52 +1712,52 @@ describe('GUI audit label discipline', () => {
     expect(enMessages['corpsFront.tab.forces']).toBe('Order of battle');
     expect(enMessages['formationDetail.overridePermanentHelp']).not.toMatch(/frontline position/i);
     expect(enMessages['formationDetail.overridePermanentHelp']).toMatch(/sector command responsibility/i);
-    expect(bcsMessages['situation.operationalSitrep']).not.toMatch(/\bSITREP\b/);
-    expect(bcsMessages['decisionRoom.category.operational']).not.toMatch(/\bSITREP\b/);
-    expect(bcsMessages['warroom.status.category.operational']).not.toMatch(/\bSITREP\b/);
-    expect(bcsMessages['armyHqCorps.orbat']).not.toMatch(/\bORBAT\b/);
-    expect(bcsMessages['orbat.loc']).not.toMatch(/\bLOK\b/);
-    expect(bcsMessages['orbat.homeDef']).not.toMatch(/\bDOM ODB\b/);
-    expect(bcsMessages['orbat.title']).not.toMatch(/\bORBAT\b/);
-    expect(bcsMessages['orbat.turnsShort']).not.toMatch(/\bT\b/);
-    expect(bcsMessages['orbat.operationalCount']).not.toMatch(/\bOP\b/);
-    expect(bcsMessages['operationsSection.operationalOrbat']).not.toMatch(/\bORBAT\b/);
-    expect(bcsMessages['corpsCard.orbat']).not.toMatch(/\bORBAT\b/i);
-    expect(bcsMessages['sectorsSection.stance.activeDefense']).not.toMatch(/\bAKT ODB\b/);
-    expect(bcsMessages['corpsFront.tab.forces']).not.toMatch(/\bORBAT\b/);
-    expect(bcsMessages['corpsFront.opsec']).not.toMatch(/\bOPSEC\b/);
-    expect(bcsMessages['situation.opsecActive']).not.toMatch(/\bOPSEC\b/);
-    expect(bcsMessages['presidentialToolbar.auth']).not.toMatch(/\bAUTH\b/);
-    expect(bcsMessages['operationsSection.directInterventionButton']).not.toMatch(/\bAUT\b/);
-    expect(bcsMessages['operationsPanel.bdeCount']).not.toMatch(/brig\./i);
-    expect(bcsMessages['personnel.brigadeSummary']).not.toMatch(/brig\./i);
-    expect(bcsMessages['operationsSection.prep.intelGathering']).not.toMatch(/OBAVJ\./i);
-    expect(bcsMessages['formationDetail.kia']).not.toMatch(/\bKIA\b/);
-    expect(bcsMessages['formationDetail.wia']).not.toMatch(/\bWIA\b/);
-    expect(bcsMessages['formationDetail.miaPow']).not.toMatch(/\bMIA\b|\bPOW\b/);
-    expect(bcsMessages['corpsDetail.opSlotsSentence.none']).not.toMatch(/\bops\b/i);
-    expect(bcsMessages['armyHq.activeOps']).not.toMatch(/\bops\b/i);
-    expect(bcsMessages['presidentialToolbar.ops']).not.toMatch(/\bOPS\b/);
-    expect(bcsMessages['toolbar.ops']).not.toMatch(/\bOPS\b/);
-    expect(bcsMessages['presidentialToolbar.commandAuthorityTitle']).not.toMatch(/Level 3|override/i);
-    expect(bcsMessages['presidentialToolbar.commandAuthorityDescription']).not.toMatch(/Level 3|override/i);
-    expect(bcsMessages['toolbar.commandAuthority.title']).not.toMatch(/Level 3|override/i);
-    expect(bcsMessages['toolbar.commandAuthority.description']).not.toMatch(/Level 3|override/i);
-    expect(bcsMessages['warSummary.campaignDrag.commandStrainDetail']).not.toMatch(/Command Relationship/);
-    expect(bcsMessages['chiefOfStaff.exhaustion.precise']).not.toMatch(/Command Relationship/);
-    expect(bcsMessages['brigadeRow.title']).not.toMatch(/Snabd\./);
-    expect(bcsMessages['operationsSection.prep.supplyCheck']).not.toMatch(/Snabd\./i);
-    expect(bcsMessages['operationsSection.readinessTitle']).not.toMatch(/obavj\./i);
-    expect(bcsMessages['operationHistory.oic']).not.toMatch(/Kom\./);
-    expect(bcsMessages['operationHistory.equipmentLost']).not.toMatch(/\{tanks\}T|\{artillery\}A/);
-    expect(bcsMessages['operationHistory.equipmentDestroyed']).not.toMatch(/\{tanks\}T|\{artillery\}A/);
-    expect(bcsMessages['operationHistory.equipmentCaptured']).not.toMatch(/\{tanks\}T|\{artillery\}A/);
+    expect(bsMessages['situation.operationalSitrep']).not.toMatch(/\bSITREP\b/);
+    expect(bsMessages['decisionRoom.category.operational']).not.toMatch(/\bSITREP\b/);
+    expect(bsMessages['warroom.status.category.operational']).not.toMatch(/\bSITREP\b/);
+    expect(bsMessages['armyHqCorps.orbat']).not.toMatch(/\bORBAT\b/);
+    expect(bsMessages['orbat.loc']).not.toMatch(/\bLOK\b/);
+    expect(bsMessages['orbat.homeDef']).not.toMatch(/\bDOM ODB\b/);
+    expect(bsMessages['orbat.title']).not.toMatch(/\bORBAT\b/);
+    expect(bsMessages['orbat.turnsShort']).not.toMatch(/\bT\b/);
+    expect(bsMessages['orbat.operationalCount']).not.toMatch(/\bOP\b/);
+    expect(bsMessages['operationsSection.operationalOrbat']).not.toMatch(/\bORBAT\b/);
+    expect(bsMessages['corpsCard.orbat']).not.toMatch(/\bORBAT\b/i);
+    expect(bsMessages['sectorsSection.stance.activeDefense']).not.toMatch(/\bAKT ODB\b/);
+    expect(bsMessages['corpsFront.tab.forces']).not.toMatch(/\bORBAT\b/);
+    expect(bsMessages['corpsFront.opsec']).not.toMatch(/\bOPSEC\b/);
+    expect(bsMessages['situation.opsecActive']).not.toMatch(/\bOPSEC\b/);
+    expect(bsMessages['presidentialToolbar.auth']).not.toMatch(/\bAUTH\b/);
+    expect(bsMessages['operationsSection.directInterventionButton']).not.toMatch(/\bAUT\b/);
+    expect(bsMessages['operationsPanel.bdeCount']).not.toMatch(/brig\./i);
+    expect(bsMessages['personnel.brigadeSummary']).not.toMatch(/brig\./i);
+    expect(bsMessages['operationsSection.prep.intelGathering']).not.toMatch(/OBAVJ\./i);
+    expect(bsMessages['formationDetail.kia']).not.toMatch(/\bKIA\b/);
+    expect(bsMessages['formationDetail.wia']).not.toMatch(/\bWIA\b/);
+    expect(bsMessages['formationDetail.miaPow']).not.toMatch(/\bMIA\b|\bPOW\b/);
+    expect(bsMessages['corpsDetail.opSlotsSentence.none']).not.toMatch(/\bops\b/i);
+    expect(bsMessages['armyHq.activeOps']).not.toMatch(/\bops\b/i);
+    expect(bsMessages['presidentialToolbar.ops']).not.toMatch(/\bOPS\b/);
+    expect(bsMessages['toolbar.ops']).not.toMatch(/\bOPS\b/);
+    expect(bsMessages['presidentialToolbar.commandAuthorityTitle']).not.toMatch(/Level 3|override/i);
+    expect(bsMessages['presidentialToolbar.commandAuthorityDescription']).not.toMatch(/Level 3|override/i);
+    expect(bsMessages['toolbar.commandAuthority.title']).not.toMatch(/Level 3|override/i);
+    expect(bsMessages['toolbar.commandAuthority.description']).not.toMatch(/Level 3|override/i);
+    expect(bsMessages['warSummary.campaignDrag.commandStrainDetail']).not.toMatch(/Command Relationship/);
+    expect(bsMessages['chiefOfStaff.exhaustion.precise']).not.toMatch(/Command Relationship/);
+    expect(bsMessages['brigadeRow.title']).not.toMatch(/Snabd\./);
+    expect(bsMessages['operationsSection.prep.supplyCheck']).not.toMatch(/Snabd\./i);
+    expect(bsMessages['operationsSection.readinessTitle']).not.toMatch(/obavj\./i);
+    expect(bsMessages['operationHistory.oic']).not.toMatch(/Kom\./);
+    expect(bsMessages['operationHistory.equipmentLost']).not.toMatch(/\{tanks\}T|\{artillery\}A/);
+    expect(bsMessages['operationHistory.equipmentDestroyed']).not.toMatch(/\{tanks\}T|\{artillery\}A/);
+    expect(bsMessages['operationHistory.equipmentCaptured']).not.toMatch(/\{tanks\}T|\{artillery\}A/);
     expect(presidentialCategoriesSource).not.toMatch(/front sitrep/i);
     expect(liveSurfaceBrowserSweepSource).toMatch(/label:\s*'PAX'/);
     expect(enMessages['recordsContent.tab.aar']).toMatch(/LATEST WEEKLY REPORT/i);
     expect(enMessages['recordsContent.archiveSummary.operationAars']).toMatch(/Completed Operation AARs/i);
-    expect(bcsMessages['recordsContent.tab.aar']).toMatch(/NAJNOVIJI SEDMIČNI IZVJEŠTAJ/i);
-    expect(bcsMessages['recordsContent.archiveSummary.operationAars']).not.toMatch(/\bAAR\b/);
+    expect(bsMessages['recordsContent.tab.aar']).toMatch(/NAJNOVIJI SEDMIČNI IZVJEŠTAJ/i);
+    expect(bsMessages['recordsContent.archiveSummary.operationAars']).not.toMatch(/\bAAR\b/);
     expect(oobSource).not.toMatch(/\} assigned|Density:/);
     expect(corpsDetailSource).not.toMatch(/\} front|Density:|toTitleCase\(s\.sector_stance\)|\} men|~'\}\{s\.length_edges\} km|~.*km/);
     expect(corpsFrontSource).not.toMatch(/`~\$\{sector\.length_edges\} km`/);
@@ -1770,7 +1770,7 @@ describe('GUI audit label discipline', () => {
     expect(armyReserveSource).toContain("aria-label={t('armyReserve.closePanelAria')}");
     expect(enMessages['armyReserve.closePanelAria']).toBe('Close Army Reserve panel');
     expect(enMessages['armyReserve.closePanelAria']).not.toBe('Close');
-    expect(bcsMessages['armyReserve.closePanelAria']).toBeTruthy();
+    expect(bsMessages['armyReserve.closePanelAria']).toBeTruthy();
   });
 
   it('keeps settlement support panel copy on i18n keys', () => {

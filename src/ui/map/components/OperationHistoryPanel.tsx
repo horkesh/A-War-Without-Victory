@@ -17,7 +17,7 @@ import {
 } from '../utils/playerSafeText';
 import { turnToDateString } from '../utils/formatters';
 import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
-import { t, type MessageKey } from '../i18n';
+import { formatLocalizedNumber, t, type MessageKey } from '../i18n';
 import { projectOperationLifecycle } from '../data/operationLifecycleProjection';
 
 // --- Faction styling ---
@@ -133,11 +133,11 @@ function formatWeeklyPhaseLabel(phase: string | null | undefined): string {
 }
 
 function formatWeeklyAttackCount(count: number): string {
-    return t(count === 1 ? 'operationHistory.weekly.attack.one' : 'operationHistory.weekly.attack.many', { count: count.toLocaleString() });
+    return t(count === 1 ? 'operationHistory.weekly.attack.one' : 'operationHistory.weekly.attack.many', { count: formatLocalizedNumber(count) });
 }
 
 function formatWeeklyCasualties(count: number): string {
-    return t(count === 1 ? 'operationHistory.weekly.casualty.one' : 'operationHistory.weekly.casualty.many', { count: count.toLocaleString() });
+    return t(count === 1 ? 'operationHistory.weekly.casualty.one' : 'operationHistory.weekly.casualty.many', { count: formatLocalizedNumber(count) });
 }
 
 function formatWeeklyHeldObjectives(objectives: string[]): string {
@@ -251,7 +251,7 @@ function CasualtyLine({ label, cas }: { label: string; cas: { killed: number; wo
     if (total === 0) return null;
     return (
         <div className="text-xs text-text-muted tabular-nums">
-            {t('operationHistory.casualtyLine', { label, total: total.toLocaleString(), killed: cas.killed.toLocaleString(), wounded: cas.wounded.toLocaleString() })}
+            {t('operationHistory.casualtyLine', { label, total: formatLocalizedNumber(total), killed: formatLocalizedNumber(cas.killed), wounded: formatLocalizedNumber(cas.wounded) })}
         </div>
     );
 }
@@ -321,8 +321,8 @@ function OperationDeepReview({
             </div>
             <div className="grid gap-1 text-xs text-text-secondary sm:grid-cols-2">
                 <span>{t('operationHistory.result', { outcome: formatOutcome(op.outcome) })}</span>
-                <span>{t('operationHistory.attacks', { count: op.total_attacks.toLocaleString() })}</span>
-                <span>{t('operationHistory.casualties', { suffered: suffered.toLocaleString(), inflicted: inflicted.toLocaleString() })}</span>
+                <span>{t('operationHistory.attacks', { count: formatLocalizedNumber(op.total_attacks) })}</span>
+                <span>{t('operationHistory.casualties', { suffered: formatLocalizedNumber(suffered), inflicted: formatLocalizedNumber(inflicted) })}</span>
                 <span>{grade ? t('operationHistory.grade', { stars: grade.stars, verdict: grade.verdict }) : t('operationHistory.gradeUnreported')}</span>
                 <span className="sm:col-span-2">{t('operationHistory.provenance', { provenance })}</span>
             </div>

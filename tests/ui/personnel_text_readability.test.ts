@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from 'vitest';
 import { enMessages } from '../../src/ui/map/i18n/messages.en.js';
-import { bsMessages as bcsMessages } from '../../src/ui/map/i18n/messages.bs.js';
+import { bsMessages } from '../../src/ui/map/i18n/messages.bs.js';
 
 test('Personnel reserve-officer details scroll instead of clipping the available names', () => {
   const source = readFileSync(
@@ -20,8 +20,8 @@ test('force, mobilization, and casualty labels state their non-comparable scopes
   expect(enMessages['personnel.mobilization.committed']).toBe('Committed over campaign');
   expect(enMessages['situation.casualties']).toBe('Campaign military casualties');
 
-  expect(bcsMessages['personnel.totalPersonnel']).toBe('Trenutno ljudstvo na terenu');
-  expect(bcsMessages['personnel.mobilization']).toBe('KUMULATIVNI TOK MOBILIZACIJE');
-  expect(bcsMessages['personnel.mobilization.committed']).toBe('Angažovano tokom kampanje');
-  expect(bcsMessages['situation.casualties']).toBe('Vojni gubici tokom kampanje');
+        expect(bsMessages['personnel.totalPersonnel']).toBe('Trenutno ljudstvo na terenu');
+        expect(bsMessages['personnel.mobilization']).toBe('KUMULATIVNI TOK MOBILIZACIJE');
+        expect(bsMessages['personnel.mobilization.committed']).toBe('Angažovano tokom kampanje');
+        expect(bsMessages['situation.casualties']).toBe('Vojni gubici tokom kampanje');
 });

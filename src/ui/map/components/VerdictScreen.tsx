@@ -31,7 +31,7 @@ import {
     type GhostRecordClassification,
 } from '../../../sim/codex/dynamic_section_builder.js';
 // T2-A / content C5 (orphaned-wiring audit): resolve the authored ghost-entry
-// markdown body (EN/BCS) instead of rendering the raw repo path. §6-adjacent
+// markdown body (English/Bosnian) instead of rendering the raw repo path. §6-adjacent
 // bodies are gated out inside the resolver.
 import { parseGhostEntryProse, resolveGhostEntryProse } from '../data/ghostEntryProse.js';
 // LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER: read-only turn scrubber for the
@@ -41,7 +41,7 @@ import { parseGhostEntryProse, resolveGhostEntryProse } from '../data/ghostEntry
 import { ReplayScrubber } from './replay/index.js';
 import { Z } from '../../shared/zIndex.js';
 import { CinematicVerdict } from './verdict/CinematicVerdict.js';
-import { t, useLocale, type MessageKey } from '../i18n';
+import { formatLocalizedNumber, t, useLocale, type MessageKey } from '../i18n';
 import {
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
@@ -593,7 +593,7 @@ export function VerdictScreen() {
                         </div>
                         <ul className="space-y-3">
                             {codexGhosts.map((g) => {
-                                // T2-A / content C5: render the authored EN/BCS
+// T2-A / content C5: render the authored English/Bosnian
                                 // narrative body. §6-adjacent bodies resolve to
                                 // null and fall back to the label only — never
                                 // the raw repo path that was shown before.
@@ -849,14 +849,14 @@ export function FactionReport({
                     <StatRow label={t('verdict.report.stat.territory')} value={`${((factionOsids / totalOsids) * 100).toFixed(1)}% (${factionOsids} settlements)`} />
                     {cap && (
                         <>
-                            <StatRow label={t('verdict.report.stat.territoryKm2')} value={`${Math.round(cap.territory_controlled_km2).toLocaleString()} km\u00b2`} />
+                            <StatRow label={t('verdict.report.stat.territoryKm2')} value={`${formatLocalizedNumber(Math.round(cap.territory_controlled_km2))} km\u00b2`} />
                             <StatRow label={t('verdict.report.stat.activeBrigades')} value={String(brigadeCount)} />
-                            <StatRow label={t('verdict.report.stat.personnel')} value={personnel.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.casualtiesInflicted')} value={cap.military_casualties_inflicted.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.casualtiesTaken')} value={cap.military_casualties_taken.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.civiliansProtected')} value={cap.civilians_under_protection.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.refugeesCreated')} value={cap.refugees_created.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.refugeesReceived')} value={cap.refugees_received.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.personnel')} value={formatLocalizedNumber(personnel)} />
+                            <StatRow label={t('verdict.report.stat.casualtiesInflicted')} value={formatLocalizedNumber(cap.military_casualties_inflicted)} />
+                            <StatRow label={t('verdict.report.stat.casualtiesTaken')} value={formatLocalizedNumber(cap.military_casualties_taken)} />
+                            <StatRow label={t('verdict.report.stat.civiliansProtected')} value={formatLocalizedNumber(cap.civilians_under_protection)} />
+                            <StatRow label={t('verdict.report.stat.refugeesCreated')} value={formatLocalizedNumber(cap.refugees_created)} />
+                            <StatRow label={t('verdict.report.stat.refugeesReceived')} value={formatLocalizedNumber(cap.refugees_received)} />
                             <StatRow label={t('verdict.report.stat.operationsLaunched')} value={String(cap.operations_launched)} />
                             <StatRow label={t('verdict.report.stat.operationsSuccessful')} value={String(cap.operations_successful)} />
                             {cap.enclaves_held.length > 0 && (

@@ -47,6 +47,7 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
       className="border-t border-panel-border/70 pt-3"
       aria-label={t('desk.consequences.ariaLabel')}
       data-testid="desk-consequence-strip"
+      data-has-filed-record={latestFiledTurn != null ? 'true' : 'false'}
     >
       <div className="flex items-center justify-between gap-3">
         <div>

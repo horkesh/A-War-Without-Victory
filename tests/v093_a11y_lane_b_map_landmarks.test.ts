@@ -39,7 +39,7 @@ const APP_PATH = 'src/ui/map/App.tsx';
 const TACTICAL_VIEWPORT_PATH = 'src/ui/map/components/TacticalMapViewport.tsx';
 const MAP_CONTAINER_PATH = 'src/ui/map/map/MapContainer.tsx';
 const EN_MESSAGES_PATH = 'src/ui/map/i18n/messages.en.ts';
-const BCS_MESSAGES_PATH = 'src/ui/map/i18n/messages.bs.ts';
+const BS_MESSAGES_PATH = 'src/ui/map/i18n/messages.bs.ts';
 const OOB_SIDEBAR_PATH = 'src/ui/map/components/OOBSidebar.tsx';
 const BOTTOM_STATUS_PATH = 'src/ui/map/components/BottomStatusStrip.tsx';
 const PRESIDENTIAL_TOOLBAR_PATH = 'src/ui/map/components/PresidentialToolbar.tsx';
@@ -156,9 +156,9 @@ describe('LANE-NIGHTSHIFT-V093-A11Y-LANE-B — Map / tactical landmarks + keyboa
         expect(mapSrc).not.toMatch(/aria-label=["'][^"']*[Tt]actical map/);
 
         const enMessages = read(EN_MESSAGES_PATH);
-        const bcsMessages = read(BCS_MESSAGES_PATH);
+        const bosnianMessages = read(BS_MESSAGES_PATH);
         expect(enMessages).toContain("'map.aria.tacticalMap'");
-        expect(bcsMessages).toContain("'map.aria.tacticalMap'");
+        expect(bosnianMessages).toContain("'map.aria.tacticalMap'");
         expect(enMessages).toContain('arrow keys');
 
         // The rendered aria-label should mention arrow keys (keyboard discoverability).
@@ -245,12 +245,12 @@ describe('LANE-NIGHTSHIFT-V093-A11Y-LANE-B — Map / tactical landmarks + keyboa
         // a faction (RBiH / ARBiH / RS / VRS / HRHB / HVO).
         const appSrc = read(APP_PATH);
         const enMessages = read(EN_MESSAGES_PATH);
-        const bcsMessages = read(BCS_MESSAGES_PATH);
+        const bosnianMessages = read(BS_MESSAGES_PATH);
         const allLabels = [
             ...collectLandmarkAriaLabels(appSrc),
             ...collectLandmarkAriaLabels(mapSrc),
             ...collectMessageValues(enMessages, ['map.aria.tacticalMap']),
-            ...collectMessageValues(bcsMessages, ['map.aria.tacticalMap']),
+            ...collectMessageValues(bosnianMessages, ['map.aria.tacticalMap']),
         ];
         expect(
             allLabels.length,

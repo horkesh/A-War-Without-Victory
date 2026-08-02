@@ -17,25 +17,51 @@ function strictCompare(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
 }
 
-function transformTextSegment(value: string): string {
-    const letterCount = [...value].filter((character) => LETTER_PATTERN.test(character)).length;
-    let expansionRemaining = Math.round(letterCount * 0.4);
+function transformTextSegment(value: string, budget: { remaining: number }): string {
     let result = '';
     for (const character of value) {
         result += ACCENT_MAP[character] ?? character;
-        if (expansionRemaining > 0 && LETTER_PATTERN.test(character)) {
+        if (budget.remaining > 0 && LETTER_PATTERN.test(character)) {
             result += '~';
-            expansionRemaining -= 1;
+            budget.remaining -= 1;
         }
     }
     return result;
 }
 
+export interface PseudolocaleExpansionProfile {
+    sourceLength: number;
+    expandableLetters: number;
+    targetExpansion: number;
+    eligible: boolean;
+}
+
+/**
+ * Ratio QA excludes the fixed `[[`/`]]` wrapper. Strings shorter than 20 code
+ * units and messages without enough unprotected ASCII letters are ineligible;
+ * they still transform deterministically but cannot honestly reach +40%.
+ */
+export function getPseudolocaleExpansionProfile(source: string): PseudolocaleExpansionProfile {
+    const segments = source.split(PROTECTED_SEGMENT_PATTERN);
+    const expandableLetters = segments
+        .filter((_segment, index) => index % 2 === 0)
+        .reduce((count, segment) => count + [...segment].filter((character) => LETTER_PATTERN.test(character)).length, 0);
+    const targetExpansion = Math.round(source.length * 0.4);
+    return {
+        sourceLength: source.length,
+        expandableLetters,
+        targetExpansion,
+        eligible: source.length >= 20 && expandableLetters >= targetExpansion,
+    };
+}
+
 /** Deterministic QA-only transform. It preserves runtime tokens and markup. */
 export function pseudolocalizeMessage(source: string): string {
     const segments = source.split(PROTECTED_SEGMENT_PATTERN);
+    const profile = getPseudolocaleExpansionProfile(source);
+    const budget = { remaining: Math.min(profile.targetExpansion, profile.expandableLetters) };
     const transformed = segments.map((segment, index) => (
-        index % 2 === 1 ? segment : transformTextSegment(segment)
+        index % 2 === 1 ? segment : transformTextSegment(segment, budget)
     )).join('');
     return `[[${transformed}]]`;
 }

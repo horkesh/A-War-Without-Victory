@@ -15,7 +15,7 @@ import {
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText';
 import { EmptyState } from './EmptyState';
-import { t, useLocale, type MessageKey } from '../i18n';
+import { formatLocalizedNumber, t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { shouldNarrateTerritorySummary } from '../data/territorySummaryGuard';
 import { getDecorationName } from '../utils/decorationUtils';
@@ -251,7 +251,7 @@ function BattleRow({
             </div>
             {hasReportedLosses && (
                 <div className="text-xs text-text-muted tabular-nums mt-0.5 ml-6">
-                    {t('aar.attackerShort')} −{attackerCasualties.toLocaleString()}  ·  {t('aar.defenderShort')} −{defenderCasualties.toLocaleString()}
+                    {t('aar.attackerShort')} −{formatLocalizedNumber(attackerCasualties)}  ·  {t('aar.defenderShort')} −{formatLocalizedNumber(defenderCasualties)}
                 </div>
             )}
             {!casualtiesReported && (
@@ -537,7 +537,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                     <div className="space-y-0.5 text-xs">
                                         <div className="flex justify-between">
                                             <span className="text-text-secondary">{t('aar.totalDisplaced')}</span>
-                                            <span className="tabular-nums text-text-primary">{summary.displacement_total.toLocaleString()}</span>
+                                            <span className="tabular-nums text-text-primary">{formatLocalizedNumber(summary.displacement_total)}</span>
                                         </div>
                                         {summary.displacement_hotspot && (
                                             <div className="flex justify-between">
@@ -550,7 +550,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                             .map(([eth, count]) => (
                                                 <div key={eth} className="flex justify-between">
                                                     <DisplacementGroupTag group={eth} />
-                                                    <span className="tabular-nums text-text-secondary">{count?.toLocaleString()}</span>
+                                                    <span className="tabular-nums text-text-secondary">{count == null ? '' : formatLocalizedNumber(count)}</span>
                                                 </div>
                                             ))
                                         }

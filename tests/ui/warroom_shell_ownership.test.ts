@@ -95,14 +95,14 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         const navigation = read('src/ui/map/utils/warroomNavigation.ts');
         const app = read('src/ui/map/App.tsx');
         const englishMessages = read('src/ui/map/i18n/messages.en.ts');
-        const bcsMessages = read('src/ui/map/i18n/messages.bs.ts');
+        const bosnianMessages = read('src/ui/map/i18n/messages.bs.ts');
 
         expect(navigation).not.toContain("kind: 'strategic-overview'");
         expect(navigation).not.toContain("kind: 'event-log'");
         expect(app).not.toContain("command.kind === 'strategic-overview'");
         expect(app).not.toContain("command.kind === 'event-log'");
         expect(englishMessages).not.toContain('openStrategicDashboard');
-        expect(bcsMessages).not.toContain('openStrategicDashboard');
+        expect(bosnianMessages).not.toContain('openStrategicDashboard');
     });
 
     it('keeps native Warroom overlay drill-ins on existing owner surfaces', () => {

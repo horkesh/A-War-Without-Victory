@@ -5,10 +5,11 @@ import { resolve } from 'node:path';
 import { enMessages, type MessageKey } from '../../src/ui/map/i18n/messages.en.js';
 import {
     buildPseudolocaleDictionary,
+    getPseudolocaleExpansionProfile,
     pseudolocalizeMessage,
 } from '../../src/ui/map/i18n/pseudolocalize.js';
 
-export { pseudolocalizeMessage };
+export { getPseudolocaleExpansionProfile, pseudolocalizeMessage };
 
 export function buildPseudolocale(
     messages: Readonly<Record<string, string>>,

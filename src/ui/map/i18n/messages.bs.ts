@@ -4809,8 +4809,6 @@ export const bsMessages: Partial<Record<MessageKey, string>> = {
     'warroom.overlay.faction.drillIn': 'Otvori sažetak strane',
     'inbox.type.reviewItem': 'STAVKA ZA PREGLED',
     // --- Draft parity pass: Bosnian translations for previously English-only keys ---
-    // 'settings.experimentalFallbackProbe' is intentionally omitted to exercise
-    // the English-fallback path (see tests/ui_i18n.test.ts).
     'decisionRoom.category.command': 'Komanda',
     'turnAftermath.forcedOpRealized': 'Prisilne operacije razriješene ove sedmice',
     'turnAftermath.forcedOpForced': 'Prisilili ste {op} uprkos protivljenju komandanta {commander} (preporučio je obustavu).',

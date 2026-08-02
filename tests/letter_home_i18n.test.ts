@@ -3,7 +3,7 @@ import { generateLetterHome, type LetterHomeInput } from '../src/sim/letter_home
 import type { TurnBattle } from '../src/state/turn_summary.js';
 
 describe('Letter Home localization', () => {
-    it('uses localized template prose when BCS locale is requested', () => {
+    it('uses localized template prose when Bosnian locale is requested', () => {
         const input: LetterHomeInput = {
             turn: 1,
             faction: 'RBiH',

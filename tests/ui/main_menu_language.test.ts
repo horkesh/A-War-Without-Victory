@@ -28,7 +28,7 @@ describe('MainMenu language control', () => {
         expect(screen.getByRole('combobox', { name: 'Language' })).toBeTruthy();
     });
 
-    it('persists BCS from the initial screen before opening settings', () => {
+    it('persists canonical Bosnian from the initial screen before opening settings', () => {
         render(createElement(MainMenu, {
             hasSave: false,
             onNewGame: noop,
@@ -40,10 +40,10 @@ describe('MainMenu language control', () => {
         }));
 
         fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), {
-            target: { value: 'bcs' },
+            target: { value: 'bs' },
         });
 
-        expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bcs');
+        expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bs');
         expect(screen.getByRole('button', { name: /Republika Srpska/i })).toBeTruthy();
     });
 });

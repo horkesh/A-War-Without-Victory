@@ -53,7 +53,7 @@ describe('tactical map loading state', () => {
       join(process.cwd(), 'src', 'ui', 'map', 'i18n', 'messages.en.ts'),
       'utf8',
     );
-    const bcs = readFileSync(
+        const bosnian = readFileSync(
       join(process.cwd(), 'src', 'ui', 'map', 'i18n', 'messages.bs.ts'),
       'utf8',
     );
@@ -61,8 +61,8 @@ describe('tactical map loading state', () => {
     expect(english).toContain("'map.status.preparing': 'Preparing operational map...'");
     expect(english).toContain("'map.status.loadFailed': 'Operational map data could not be loaded.'");
     expect(english).toContain("'map.status.retry': 'Retry'");
-    expect(bcs).toContain("'map.status.preparing': 'Priprema operativne karte...'");
-    expect(bcs).toContain("'map.status.loadFailed': 'Podaci operativne karte nisu učitani.'");
-    expect(bcs).toContain("'map.status.retry': 'Pokušaj ponovo'");
+        expect(bosnian).toContain("'map.status.preparing': 'Priprema operativne karte...'");
+        expect(bosnian).toContain("'map.status.loadFailed': 'Podaci operativne karte nisu učitani.'");
+        expect(bosnian).toContain("'map.status.retry': 'Pokušaj ponovo'");
   });
 });

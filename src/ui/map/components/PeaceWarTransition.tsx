@@ -133,6 +133,8 @@ function IdentityBlock({ faction }: { faction: IdentityFaction }) {
     ];
     return (
         <div
+            data-testid="peace-war-identity"
+            data-faction={faction}
             className="mb-4 rounded border border-[#c4a04a]/40 bg-[#c4a04a]/5 p-3.5"
             style={{ borderLeft: `3px solid ${color}` }}
         >
@@ -226,6 +228,7 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
             <div className="sticky bottom-0 -mx-2.5 flex justify-center border-t border-[rgba(180,160,130,0.15)] bg-panel-bg/95 px-2.5 pt-2 pb-1 backdrop-blur-md">
                 <button
                     type="button"
+                    data-testid="peace-war-briefing-begin"
                     onClick={onDismiss}
                     aria-label={t('peace.begin')}
                     className="px-8 py-2.5 bg-[#c4a04a]/20 hover:bg-[#c4a04a]/30 text-[#c4a04a] border border-[#c4a04a]/40 rounded font-bold uppercase tracking-[0.2em] text-sm transition-all duration-200 hover:shadow-[0_0_12px_rgba(196,160,74,0.2)]"

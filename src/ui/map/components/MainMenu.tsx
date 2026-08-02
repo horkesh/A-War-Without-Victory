@@ -30,7 +30,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
     const [locale, setLocale] = useLocale();
 
     return (
-        <div className="fixed inset-0 flex flex-col items-center justify-center px-6"
+        <div data-testid="main-menu" className="fixed inset-0 flex flex-col items-center justify-center px-6"
              style={{
                  zIndex: Z.HARD_MODAL,
                  background: 'radial-gradient(ellipse at center, #1a1816 0%, #0d0c0a 100%)',
@@ -60,7 +60,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
                 <div className="text-xs uppercase tracking-[0.5em] text-[#8a7a60]/60 mb-2">
                     {t('mainMenu.presents')}
                 </div>
-                <h1 className="text-[36px] font-bold text-[#c4a35a] tracking-wider leading-tight"
+                <h1 data-testid="main-menu-title" className="text-[36px] font-bold text-[#c4a35a] tracking-wider leading-tight"
                     style={{ textShadow: '0 2px 20px rgba(196, 163, 90, 0.3)' }}>
                     {t('mainMenu.title')}
                 </h1>

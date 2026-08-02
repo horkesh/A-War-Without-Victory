@@ -148,11 +148,11 @@ describe('Army HQ Records operation AAR review', () => {
 
     it('labels compact AAR final-held objectives as held at close, not taken', () => {
         const en = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
-        const bcs = readFileSync('src/ui/map/i18n/messages.bs.ts', 'utf8');
+        const bosnian = readFileSync('src/ui/map/i18n/messages.bs.ts', 'utf8');
 
         expect(en).toContain("'operationsSection.aarObjectivesTaken': '{captured} / {targeted} held at close'");
         expect(en).not.toContain('OBJ TAKEN');
-        expect(bcs).not.toContain('CILJEVA UZETO');
+        expect(bosnian).not.toContain('CILJEVA UZETO');
     });
 
     it('renders operation display names in Records instead of raw history identifiers', () => {
@@ -330,8 +330,8 @@ describe('Army HQ Records operation AAR review', () => {
         expect(copy).not.toMatch(/supply_crisis/i);
     });
 
-    it('localizes Operation History weekly row labels in BCS', () => {
-        setLocale('bcs');
+    it('localizes Operation History weekly row labels in Bosnian', () => {
+        setLocale('bs');
         useGameStore.setState({
             loadedGameState: {
                 ...makeLoadedState(),
@@ -656,7 +656,7 @@ describe('Army HQ Records operation AAR review', () => {
     });
 
     it('localizes the Records archive summary chrome', () => {
-        setLocale('bcs');
+        setLocale('bs');
         useGameStore.setState({
             loadedGameState: {
                 ...makeLoadedState(),
@@ -683,8 +683,8 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.queryByText('Archive Routes')).toBeNull();
     });
 
-    it('localizes Records subtab count tooltips in BCS without polluting tab accessible names', () => {
-        setLocale('bcs');
+    it('localizes Records subtab count tooltips in Bosnian without polluting tab accessible names', () => {
+        setLocale('bs');
         render(createElement(RecordsContent));
 
         expect(document.querySelectorAll('[title$=" zapisa"]').length).toBeGreaterThan(0);

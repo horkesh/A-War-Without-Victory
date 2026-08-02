@@ -400,6 +400,7 @@ function ResponseButton({
             <button
                 type="button"
                 data-testid="event-decision-response"
+                data-response-id={option.id}
                 aria-label={chooseLabel}
                 title={chooseLabel}
                 onClick={onChoose}

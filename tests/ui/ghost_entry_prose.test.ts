@@ -26,16 +26,16 @@ describe('resolveGhostEntryProse', () => {
     expect((prose ?? '').length).toBeGreaterThan(200);
   });
 
-  it('returns the BCS body when locale is bcs', () => {
+    it('returns the Bosnian body when locale is bs', () => {
     const en = resolveGhostEntryProse('winter_held', 'en');
-    const bcs = resolveGhostEntryProse('winter_held', 'bs');
-    expect(bcs).not.toBeNull();
-    expect((bcs ?? '').length).toBeGreaterThan(200);
-    // EN and BCS bodies are distinct localizations of the same entry.
-    expect(bcs).not.toEqual(en);
+        const bosnian = resolveGhostEntryProse('winter_held', 'bs');
+        expect(bosnian).not.toBeNull();
+        expect((bosnian ?? '').length).toBeGreaterThan(200);
+        // English and Bosnian bodies are distinct localizations of the same entry.
+        expect(bosnian).not.toEqual(en);
   });
 
-  it('falls back to the EN body for an unknown locale gap (locale not bcs)', () => {
+    it('falls back to the English body for an unknown locale gap', () => {
     // Sanity: a valid id always resolves at least the EN body.
     expect(resolveGhostEntryProse('alliance_held', 'en')).not.toBeNull();
     expect(resolveGhostEntryProse('alliance_held', 'bs')).not.toBeNull();

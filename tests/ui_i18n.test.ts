@@ -7,6 +7,7 @@ import {
     getActiveLocale,
     getIntlLocale,
     getLocale,
+    formatLocalizedNumber,
     isSupportedLocale,
     resolveLocale,
     setLocale,
@@ -75,11 +76,23 @@ describe('UI localization substrate', () => {
         expect(memoryStorage.get(LOCALE_STORAGE_KEY)).toBe('bs');
     });
 
+    it('resolves legacy bcs to bs even when the best-effort rewrite is read-only', () => {
+        const storage = {
+            getItem: () => 'bcs',
+            setItem: () => { throw new Error('read-only storage'); },
+            removeItem: () => undefined,
+        };
+
+        expect(getLocale(storage)).toBe<Locale>('bs');
+    });
+
     it('maps canonical Bosnian to bs-BA formatting and qps to stable English formatting', () => {
         expect(getIntlLocale('bs')).toBe('bs-BA');
         expect(getIntlLocale('bcs')).toBe('bs-BA');
         expect(getIntlLocale('en')).toBe('en-US');
         expect(getIntlLocale('qps')).toBe('en-US');
+        expect(formatLocalizedNumber(1_234_567, 'bs')).toBe('1.234.567');
+        expect(formatLocalizedNumber(1_234_567, 'en')).toBe('1,234,567');
     });
 
     it('activates qps without overwriting the persisted player locale', () => {

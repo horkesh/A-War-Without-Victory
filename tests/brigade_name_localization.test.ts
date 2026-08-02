@@ -45,7 +45,7 @@ const forbiddenBosnianLeaks = [
   /\bpesad\w*\b/i,
 ];
 
-describe('BCS brigade name localizations', () => {
+describe('Bosnian brigade name localizations', () => {
   test('provide one structured designation row per source OOB brigade id', () => {
     const ids = new Set(oobRows.map((row) => row.id));
     const catalogIds = new Set(BRIGADE_DESIGNATION_CATALOG.map((row) => row.id));

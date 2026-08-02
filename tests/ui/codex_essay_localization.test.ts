@@ -9,7 +9,7 @@ import {
 
 const essays = (essayIndex as { essays: EssayEntry[] }).essays;
 const ghostDir = resolve(__dirname, '..', '..', 'data/codex/ghost_entries');
-const ghostBcsDir = resolve(__dirname, '..', '..', 'data/codex/ghost_entries_bcs');
+const ghostBosnianDir = resolve(__dirname, '..', '..', 'data/codex/ghost_entries_bcs');
 const war1994Events = JSON.parse(readFileSync(
     resolve(__dirname, '..', '..', 'data/scenarios/events/war_1994.json'),
     'utf8',
@@ -19,7 +19,7 @@ const war1995Events = JSON.parse(readFileSync(
     'utf8',
 )) as Array<{ id: string; narrative?: string; historical_source?: string }>;
 
-const forbiddenBcsPatterns = [
+const forbiddenBosnianPatterns = [
     /\btjed/i,
     /\bpovij/i,
     /\bstozer/i,
@@ -38,9 +38,9 @@ describe('Codex essay localization coverage', () => {
     it('has Bosnian localization for every indexed Codex essay', () => {
         expect(essays.length).toBeGreaterThan(0);
         for (const essay of essays) {
-            expect(essay.localizations?.bcs?.title, `${essay.id} missing BCS title`).toBeTruthy();
-            expect(essay.localizations?.bcs?.category, `${essay.id} missing BCS category`).toBeTruthy();
-            expect(essay.localizations?.bcs?.content, `${essay.id} missing BCS content`).toBeTruthy();
+            expect(essay.localizations?.bcs?.title, `${essay.id} missing Bosnian title in legacy bcs field`).toBeTruthy();
+            expect(essay.localizations?.bcs?.category, `${essay.id} missing Bosnian category in legacy bcs field`).toBeTruthy();
+            expect(essay.localizations?.bcs?.content, `${essay.id} missing Bosnian content in legacy bcs field`).toBeTruthy();
         }
     });
 
@@ -49,7 +49,7 @@ describe('Codex essay localization coverage', () => {
             for (const section of essay.dynamic_sections ?? []) {
                 expect(
                     section.localizations?.bcs?.content,
-                    `${essay.id}/${section.id ?? 'section'} missing BCS dynamic content`,
+                    `${essay.id}/${section.id ?? 'section'} missing Bosnian dynamic content in legacy bcs field`,
                 ).toBeTruthy();
             }
         }
@@ -57,7 +57,7 @@ describe('Codex essay localization coverage', () => {
 
     it('resolves localized Bosnian title, category, and paragraphs from scenario start', () => {
         const essay = essays[0];
-        const bcs = resolveCodexEssay(essay, {
+        const bosnian = resolveCodexEssay(essay, {
             firedEventIds: new Set(),
             gameOver: false,
         }, 'bs');
@@ -66,24 +66,24 @@ describe('Codex essay localization coverage', () => {
             gameOver: false,
         }, 'en');
 
-        expect(bcs.title).toBe(essay.localizations?.bcs?.title);
-        expect(bcs.category).toBe(essay.localizations?.bcs?.category);
-        expect(bcs.paragraphs.length).toBeGreaterThan(0);
-        expect(bcs.paragraphs[0]?.text).not.toBe(en.paragraphs[0]?.text);
+        expect(bosnian.title).toBe(essay.localizations?.bcs?.title);
+        expect(bosnian.category).toBe(essay.localizations?.bcs?.category);
+        expect(bosnian.paragraphs.length).toBeGreaterThan(0);
+        expect(bosnian.paragraphs[0]?.text).not.toBe(en.paragraphs[0]?.text);
     });
 
     it('keeps Bosnian Codex localization free of common Croatian and Serbian-ekavian forms', () => {
-        const ghostCorpus = existsSync(ghostBcsDir)
-            ? readdirSync(ghostBcsDir)
+        const ghostCorpus = existsSync(ghostBosnianDir)
+            ? readdirSync(ghostBosnianDir)
                 .filter((name) => name.endsWith('.md'))
-                .map((name) => readFileSync(resolve(ghostBcsDir, name), 'utf8'))
+                .map((name) => readFileSync(resolve(ghostBosnianDir, name), 'utf8'))
                 .join('\n')
             : '';
         const corpus = [
             JSON.stringify(essays.map((essay) => essay.localizations?.bcs ?? {})),
             ghostCorpus,
         ].join('\n').toLowerCase();
-        for (const pattern of forbiddenBcsPatterns) {
+        for (const pattern of forbiddenBosnianPatterns) {
             expect(corpus).not.toMatch(pattern);
         }
     });
@@ -174,12 +174,12 @@ describe('Codex essay localization coverage', () => {
             .sort();
         expect(ghostFiles.length).toBeGreaterThan(0);
         for (const name of ghostFiles) {
-            const bcsPath = resolve(ghostBcsDir, name);
-            expect(existsSync(bcsPath), `${name} missing BCS sidecar`).toBe(true);
-            const body = readFileSync(bcsPath, 'utf8');
-            expect(body.startsWith('# '), `${name} missing BCS heading`).toBe(true);
+            const bosnianPath = resolve(ghostBosnianDir, name);
+            expect(existsSync(bosnianPath), `${name} missing Bosnian sidecar`).toBe(true);
+            const body = readFileSync(bosnianPath, 'utf8');
+            expect(body.startsWith('# '), `${name} missing Bosnian heading`).toBe(true);
             expect(body).toContain('Ring 2');
-            expect(body.length, `${name} BCS body too short`).toBeGreaterThan(450);
+            expect(body.length, `${name} Bosnian body too short`).toBeGreaterThan(450);
         }
     });
 });

@@ -76,14 +76,14 @@ describe('RBiH v47 evidence-backed readability floor', () => {
   it('keeps Chronicle chrome and chapter counts readable and grammatical', () => {
     const source = readComponent('chronicle', 'ChronicleOverlay.tsx');
     const english = readRepo('src', 'ui', 'map', 'i18n', 'messages.en.ts');
-    const bcs = readRepo('src', 'ui', 'map', 'i18n', 'messages.bs.ts');
+        const bosnian = readRepo('src', 'ui', 'map', 'i18n', 'messages.bs.ts');
 
     expect(source).not.toContain('text-stone-500');
     expect(source).not.toContain('text-stone-600');
     expect(source).toContain("chapterCount === 1 ? 'chronicle.chapterCount.one' : 'chronicle.chapterCount.many'");
     expect(source).toContain("recap.chapterCount === 1 ? 'chronicle.recapBody.one' : 'chronicle.recapBody.many'");
     expect(english).toContain("'chronicle.chapterCount.one': '{count} chapter'");
-    expect(bcs).toContain("'chronicle.chapterCount.one': '{count} poglavlje'");
+        expect(bosnian).toContain("'chronicle.chapterCount.one': '{count} poglavlje'");
   });
 
   it('uses contrast-safe faction labels, paper notices, and primary actions', () => {

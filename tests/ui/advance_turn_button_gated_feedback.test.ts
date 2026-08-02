@@ -416,8 +416,8 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(container.textContent).not.toMatch(/event_decision|paramilitary request|paramilitary_request/i);
   });
 
-  it('Warroom status dock localizes priority chrome in BCS mode without duplicating Advance', () => {
-    setLocale('bcs');
+    it('Warroom status dock localizes priority chrome in Bosnian mode without duplicating Advance', () => {
+        setLocale('bs');
     setLoadedState(makeState());
 
     render(createElement(WarroomStatusBar, { onReviewPriorities: vi.fn() }));
@@ -439,18 +439,18 @@ describe('ADVANCE_TURN gated feedback', () => {
 
   it('Warroom priority severity badges are localized instead of hardcoded English', () => {
     const source = readFileSync('src/ui/map/components/warroom/WarroomStatusBar.tsx', 'utf8');
-    const bcsMessages = readFileSync('src/ui/map/i18n/messages.bs.ts', 'utf8');
+    const bosnianMessages = readFileSync('src/ui/map/i18n/messages.bs.ts', 'utf8');
 
     expect(source).toContain("t('warroom.severity.blocking')");
     expect(source).toContain("t('warroom.severity.critical')");
     expect(source).toContain("t('warroom.severity.warning')");
     expect(source).toContain("t('warroom.severity.info')");
-    expect(bcsMessages).toContain("'warroom.severity.blocking': 'Blokira'");
-    expect(bcsMessages).toContain("'warroom.severity.warning': 'Upozorenje'");
+    expect(bosnianMessages).toContain("'warroom.severity.blocking': 'Blokira'");
+    expect(bosnianMessages).toContain("'warroom.severity.warning': 'Upozorenje'");
   });
 
-  it('Advance Clearance modal localizes review severity and blocker chrome in BCS mode', () => {
-    setLocale('bcs');
+    it('Advance Clearance modal localizes review severity and blocker chrome in Bosnian mode', () => {
+        setLocale('bs');
     setLoadedState(makeState({
       presidentialReviewQueue: {
         pendingCount: 1,
@@ -487,8 +487,8 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(copy).not.toContain('blocking');
   });
 
-  it('toolbar localizes the pending-decision advance gate title in BCS mode', () => {
-    setLocale('bcs');
+    it('toolbar localizes the pending-decision advance gate title in Bosnian mode', () => {
+        setLocale('bs');
     setLoadedState(makeState({
       pendingEventDecisions: makeRequiredEventDecisions(2),
       presidentialReviewQueue: {
@@ -512,8 +512,8 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.queryByText(/Resolve 2 pending decisions to continue/i)).toBeNull();
   });
 
-  it('toolbar localizes primary shell chrome in BCS mode', () => {
-    setLocale('bcs');
+    it('toolbar localizes primary shell chrome in Bosnian mode', () => {
+        setLocale('bs');
     setLoadedState(makeState({
       commandAuthority: { current: 4, max: 8, spentThisTurn: 0, lifetimeSpent: 0 },
     }));

@@ -18,7 +18,7 @@ import {
   getPlayerSafeMunicipalityName,
   getPlayerSafeOperationPhaseLabel,
 } from '../utils/playerSafeText';
-import { t, useLocale } from '../i18n';
+import { formatLocalizedNumber, t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { buildOsidSupplyExplanation, type OsidSupplyTone } from '../data/osidSupplyExplanation';
 
@@ -661,20 +661,20 @@ export function SettlementDetailContent({
                 <div className="flex items-baseline justify-between gap-3 mb-2">
                   <div className="flex items-baseline gap-2">
                     <span className="text-text-secondary text-xs">{t('settlement.preWar')}</span>
-                    <span className="text-sm font-mono text-text-primary">{popOriginal.toLocaleString()}</span>
+                    <span className="text-sm font-mono text-text-primary">{formatLocalizedNumber(popOriginal)}</span>
                   </div>
                   <span className="text-text-secondary">→</span>
                   <div className="flex items-baseline gap-2 text-right">
                     <span className="text-text-secondary text-xs">{t('settlement.now')}</span>
                     <span className="text-sm font-mono font-semibold text-text-primary">
-                      {(currentPop ?? popOriginal).toLocaleString()}
+                      {formatLocalizedNumber(currentPop ?? popOriginal)}
                     </span>
                     {(() => {
                       const delta = popDelta;
                       if (delta == null || delta === 0) return null;
                       return (
                         <span className={`text-xs font-mono font-bold ${delta < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                          {delta > 0 ? '+' : ''}{delta.toLocaleString()}
+                          {delta > 0 ? '+' : ''}{formatLocalizedNumber(delta)}
                         </span>
                       );
                     })()}
@@ -706,19 +706,19 @@ export function SettlementDetailContent({
                   {outSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
                       <span className="text-amber-400/90">{t('settlement.displaced')}</span>
-                      <div className="font-mono font-semibold text-amber-300">−{outSettlement.toLocaleString()}</div>
+                      <div className="font-mono font-semibold text-amber-300">−{formatLocalizedNumber(outSettlement)}</div>
                     </div>
                   )}
                   {inSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
                       <span className="text-emerald-500/90">{t('settlement.arrived')}</span>
-                      <div className="font-mono font-semibold text-emerald-400">+{inSettlement.toLocaleString()}</div>
+                      <div className="font-mono font-semibold text-emerald-400">+{formatLocalizedNumber(inSettlement)}</div>
                     </div>
                   )}
                   {lostSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
                       <span className="text-red-400/90">{t('settlement.killed')}</span>
-                      <div className="font-mono font-semibold text-red-300">−{lostSettlement.toLocaleString()}</div>
+                      <div className="font-mono font-semibold text-red-300">−{formatLocalizedNumber(lostSettlement)}</div>
                     </div>
                   )}
                 </div>
@@ -733,7 +733,7 @@ export function SettlementDetailContent({
                       <span className="text-text-secondary">{t('settlement.arrivedHere')}: </span>
                       {entries.map(([faction, n]) => (
                         <span key={faction} className={FACTION_COLORS_SUBTLE[faction] ?? 'text-text-primary'}>
-                          {ethnicityOrFactionToNationLabel(faction)} +{Math.round((n ?? 0) * scale).toLocaleString()}{' '}
+                          {ethnicityOrFactionToNationLabel(faction)} +{formatLocalizedNumber(Math.round((n ?? 0) * scale))}{' '}
                         </span>
                       ))}
                     </div>
@@ -752,7 +752,7 @@ export function SettlementDetailContent({
                           .sort(([a], [b]) => a.localeCompare(b))
                           .map(([eth, n]) => (
                             <span key={eth} className="text-amber-300/90">
-                              {ethnicityOrFactionToNationLabel(eth)} {(n ?? 0).toLocaleString()}{' '}
+                              {ethnicityOrFactionToNationLabel(eth)} {formatLocalizedNumber(n ?? 0)}{' '}
                             </span>
                           ));
                       }
@@ -770,7 +770,7 @@ export function SettlementDetailContent({
                       }
                       return scaled.map(({ eth, v }) => (
                         <span key={eth} className="text-amber-300/90">
-                          {ethnicityOrFactionToNationLabel(eth)} {v.toLocaleString()}{' '}
+                          {ethnicityOrFactionToNationLabel(eth)} {formatLocalizedNumber(v)}{' '}
                         </span>
                       ));
                     })()}
@@ -779,7 +779,7 @@ export function SettlementDetailContent({
                 {!(departedByEthnicity && Object.keys(departedByEthnicity).length > 0) && (outSettlement + lostSettlement) > 0 && (
                   <div className="text-xs pt-1 border-t border-panel-border/20">
                     <span className="text-text-secondary">{t('settlement.leftHere')}: </span>
-                    <span className="text-amber-300/90">{(outSettlement + lostSettlement).toLocaleString()}</span>
+                    <span className="text-amber-300/90">{formatLocalizedNumber(outSettlement + lostSettlement)}</span>
                     <span className="text-text-secondary/80"> {t('settlement.breakdownNotRecorded')}</span>
                   </div>
                 )}
@@ -789,10 +789,10 @@ export function SettlementDetailContent({
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-xs text-text-secondary uppercase font-semibold">{t('settlement.population')}</span>
                   <div className="text-right">
-                    <span className="text-xs font-mono text-text-primary">{(currentPop ?? popOriginal).toLocaleString()}</span>
+                    <span className="text-xs font-mono text-text-primary">{formatLocalizedNumber(currentPop ?? popOriginal)}</span>
                     {popDelta != null && popDelta !== 0 && (
                       <span className={`ml-1.5 text-xs font-mono ${popDelta < 0 ? 'text-alert' : 'text-success'}`}>
-                        {popDelta > 0 ? '+' : ''}{popDelta.toLocaleString()}
+                        {popDelta > 0 ? '+' : ''}{formatLocalizedNumber(popDelta)}
                       </span>
                     )}
                   </div>
@@ -830,7 +830,7 @@ export function SettlementDetailContent({
                       style={{ width: `${e.pct}%` }}
                     />
                   </div>
-                  <span className="text-text-primary font-mono text-right tabular-nums">{count.toLocaleString()}</span>
+                  <span className="text-text-primary font-mono text-right tabular-nums">{formatLocalizedNumber(count)}</span>
                   <span className="text-text-secondary font-mono text-right">{e.pct.toFixed(0)}%</span>
                 </div>
               );
@@ -861,7 +861,7 @@ export function SettlementDetailContent({
                       style={{ width: `${e.pct}%` }}
                     />
                   </div>
-                  <span className="text-text-primary font-mono text-right tabular-nums">{Math.round(e.count).toLocaleString()}</span>
+                  <span className="text-text-primary font-mono text-right tabular-nums">{formatLocalizedNumber(Math.round(e.count))}</span>
                   <span className="text-text-secondary font-mono text-right">{e.pct.toFixed(0)}%</span>
                 </div>
               ))}
@@ -976,31 +976,31 @@ export function SettlementDetailContent({
             </div>
             <div className="flex items-center gap-2 text-xs">
               <span className="text-text-secondary">{t('settlement.preWar')}</span>
-              <span className="font-mono font-bold text-text-primary">{disp.originalPopulation.toLocaleString()}</span>
+              <span className="font-mono font-bold text-text-primary">{formatLocalizedNumber(disp.originalPopulation)}</span>
               <span className="text-text-secondary">→</span>
               <span className="text-text-secondary">{t('settlement.now')}</span>
-              <span className="font-mono font-bold text-text-primary">{disp.currentPopulation.toLocaleString()}</span>
+              <span className="font-mono font-bold text-text-primary">{formatLocalizedNumber(disp.currentPopulation)}</span>
               <span className={`font-mono text-xs ${disp.currentPopulation < disp.originalPopulation ? 'text-red-400' : 'text-emerald-400'}`}>
-                {disp.currentPopulation >= disp.originalPopulation ? '+' : ''}{(disp.currentPopulation - disp.originalPopulation).toLocaleString()}
+                {disp.currentPopulation >= disp.originalPopulation ? '+' : ''}{formatLocalizedNumber(disp.currentPopulation - disp.originalPopulation)}
               </span>
             </div>
             <div className="flex gap-2">
               {disp.displacedOut > 0 && (
                 <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
                   <span className="text-xs text-red-400/80">{t('settlement.displaced')}</span>
-                  <div className="font-mono font-semibold text-red-400 text-xs">-{disp.displacedOut.toLocaleString()}</div>
+                  <div className="font-mono font-semibold text-red-400 text-xs">-{formatLocalizedNumber(disp.displacedOut)}</div>
                 </div>
               )}
               {disp.lostPopulation > 0 && (
                 <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
                   <span className="text-xs text-red-300/80">{t('settlement.killedFled')}</span>
-                  <div className="font-mono font-semibold text-red-300 text-xs">-{disp.lostPopulation.toLocaleString()}</div>
+                  <div className="font-mono font-semibold text-red-300 text-xs">-{formatLocalizedNumber(disp.lostPopulation)}</div>
                 </div>
               )}
               {disp.displacedIn > 0 && (
                 <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
                   <span className="text-xs text-emerald-500/80">{t('settlement.arrived')}</span>
-                  <div className="font-mono font-semibold text-emerald-400 text-xs">+{disp.displacedIn.toLocaleString()}</div>
+                  <div className="font-mono font-semibold text-emerald-400 text-xs">+{formatLocalizedNumber(disp.displacedIn)}</div>
                 </div>
               )}
             </div>
@@ -1012,7 +1012,7 @@ export function SettlementDetailContent({
                   .sort(([a], [b]) => a.localeCompare(b))
                   .map(([faction, n]) => (
                     <span key={faction} className={FACTION_COLORS_SUBTLE[faction] ?? 'text-text-primary'}>
-                      {ethnicityOrFactionToNationLabel(faction)} +{(n ?? 0).toLocaleString()}{' '}
+                      {ethnicityOrFactionToNationLabel(faction)} +{formatLocalizedNumber(n ?? 0)}{' '}
                     </span>
                   ))}
               </div>
@@ -1034,7 +1034,7 @@ export function SettlementDetailContent({
                   <div className="h-1 bg-black/30 rounded overflow-hidden">
                     <div className={`h-full ${ethnicBarColor(e.label)}`} style={{ width: `${e.pct}%` }} />
                   </div>
-                  <span className="text-text-primary font-mono text-right tabular-nums">{e.count.toLocaleString()}</span>
+                  <span className="text-text-primary font-mono text-right tabular-nums">{formatLocalizedNumber(e.count)}</span>
                   <span className="text-text-secondary font-mono text-right">{e.pct.toFixed(0)}%</span>
                 </div>
               ))}
@@ -1048,7 +1048,7 @@ export function SettlementDetailContent({
                     <div className="h-1 bg-black/30 rounded overflow-hidden">
                       <div className={`h-full ${ethnicBarColor(e.label)}`} style={{ width: `${e.pct}%` }} />
                     </div>
-                    <span className="text-text-primary font-mono text-right tabular-nums">{Math.round(e.count).toLocaleString()}</span>
+                    <span className="text-text-primary font-mono text-right tabular-nums">{formatLocalizedNumber(Math.round(e.count))}</span>
                     <span className="text-text-secondary font-mono text-right">{e.pct.toFixed(0)}%</span>
                   </div>
                 ))}

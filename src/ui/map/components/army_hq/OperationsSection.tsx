@@ -13,7 +13,7 @@ import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/pl
 import { CollapsibleSection } from './CollapsibleSection';
 import { deriveOperationOutcomeCategory, normalizeCommandStrainLabel } from '../../data/command_strain';
 import { EmptyState } from '../EmptyState';
-import { t, type MessageKey } from '../../i18n';
+import { formatLocalizedNumber, t, type MessageKey } from '../../i18n';
 import { inspectOnField } from '../../utils/shellNavigation';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
@@ -169,15 +169,15 @@ function formatWeeklyPhaseLabel(phase: string | null | undefined): string {
 }
 
 function formatWeeklyAttackCount(count: number): string {
-    return t(count === 1 ? 'operationHistory.weekly.attack.one' : 'operationHistory.weekly.attack.many', { count: count.toLocaleString() });
+    return t(count === 1 ? 'operationHistory.weekly.attack.one' : 'operationHistory.weekly.attack.many', { count: formatLocalizedNumber(count) });
 }
 
 function formatWeeklyCasualties(count: number): string {
-    return t(count === 1 ? 'operationHistory.weekly.casualty.one' : 'operationHistory.weekly.casualty.many', { count: count.toLocaleString() });
+    return t(count === 1 ? 'operationHistory.weekly.casualty.one' : 'operationHistory.weekly.casualty.many', { count: formatLocalizedNumber(count) });
 }
 
 function formatWeeklyInflicted(count: number): string {
-    return t(count === 1 ? 'operationHistory.weekly.inflicted.one' : 'operationHistory.weekly.inflicted.many', { count: count.toLocaleString() });
+    return t(count === 1 ? 'operationHistory.weekly.inflicted.one' : 'operationHistory.weekly.inflicted.many', { count: formatLocalizedNumber(count) });
 }
 
 function formatWeeklyHeldObjectives(objectives: string[]): string {
@@ -281,7 +281,7 @@ function isReportedNumber(value: number | null | undefined): value is number {
 
 function formatReportedInteger(value: number | null | undefined, options?: { locale?: boolean }): string {
     if (!isReportedNumber(value)) return t('operationsSection.metricUnreported');
-    return options?.locale ? Math.round(value).toLocaleString() : String(Math.round(value));
+    return options?.locale ? formatLocalizedNumber(Math.round(value)) : String(Math.round(value));
 }
 
 function metricTone(value: number | null | undefined, good: number, caution: number): string {
@@ -364,12 +364,12 @@ function CasualtyBlock({ suffered, inflicted, label }: {
             <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs font-mono tabular-nums">
                 <div>
                     <span className="text-text-secondary/60 uppercase">{t('operationsSection.suffered')} </span>
-                    <span className="text-red-500 font-bold">{totalSuffered.toLocaleString()}</span>
+                    <span className="text-red-500 font-bold">{formatLocalizedNumber(totalSuffered)}</span>
                     <span className="text-text-secondary/40 ml-1">({t('operationsSection.casualtyBreakdown', { killed: suffered.killed, wounded: suffered.wounded })})</span>
                 </div>
                 <div>
                     <span className="text-text-secondary/60 uppercase">{t('operationsSection.inflicted')} </span>
-                    <span className="text-emerald-400 font-bold">{totalInflicted.toLocaleString()}</span>
+                    <span className="text-emerald-400 font-bold">{formatLocalizedNumber(totalInflicted)}</span>
                     <span className="text-text-secondary/40 ml-1">({t('operationsSection.casualtyBreakdown', { killed: inflicted.killed, wounded: inflicted.wounded })})</span>
                 </div>
             </div>
