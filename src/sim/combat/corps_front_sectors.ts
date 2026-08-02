@@ -49,16 +49,24 @@ import {
     type CorpsArmyPriorityReadModel,
 } from './bot_strategy.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
-import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
+import {
+    commitSectorTopologySolve,
+    type SectorTopologyMutationRecorder,
+} from './sector_topology_mutation_journal.js';
 import type {
     SectorTopologyStageRun,
     SectorTopologyStageRunner,
 } from './sector_topology_execution.js';
+import { createDeterministicSectorTopologyStageRunner } from './sector_topology_execution.js';
 import type {
     SectorTopologyMutableFormation,
     SectorTopologyWorkingState,
 } from './sector_topology_solver_types.js';
-import { validateSectorTopologySolveOptions } from './sector_topology_snapshot.js';
+import {
+    captureSectorTopologySolveInput,
+    validateSectorTopologySolveOptions,
+} from './sector_topology_snapshot.js';
+import { solveCorpsFrontSectorsPure } from './sector_topology_solver.js';
 
 const DIRECT_STAGE_RUN: SectorTopologyStageRun = (_stage, fn) => fn();
 
@@ -409,16 +417,15 @@ export function buildCorpsFrontSectors(
     occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
     frontEdgeAdjacencyStrategy: SectorFrontEdgeAdjacencyStrategy = 'invocation-front-edge-relation',
     frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters,
-    executionStrategy: SectorTopologyExecutionStrategy = 'production',
-    mutationRecorder?: SectorTopologyMutationRecorder,
 ): Record<string, CorpsFrontSector> {
-    validateSectorTopologySolveOptions({
+    const options = {
         isFinalPass,
         finalSaveGeometryProjection,
         useFixedPointShortcuts,
         occupancyStrategy,
         frontEdgeAdjacencyStrategy,
-    });
+    } as const;
+    validateSectorTopologySolveOptions(options);
     const perfEnabled = isSectorPartitionPerfEnabled();
     const perfNodeProcess = perfEnabled ? requirePerfNodeProcess() : undefined;
     const invocationStart = perfEnabled
@@ -444,7 +451,56 @@ export function buildCorpsFrontSectors(
             }
         },
     };
-    const result = buildCorpsFrontSectorsFromReadModel(
+    const input = captureSectorTopologySolveInput(
+        state,
+        edges,
+        reverseMap,
+        centroids,
+        spatial,
+        options,
+    );
+    const output = solveCorpsFrontSectorsPure(input, {
+        frontEdgeRelationTestCounters,
+        observationalStageRunner: stageRunner,
+    });
+    commitSectorTopologySolve(state, input, output);
+    if (perfEnabled) {
+        _flushInvocation(
+            state,
+            perfNodeProcess!.hrtime.bigint() - invocationStart,
+            isFinalPass,
+        );
+    }
+    return output.sectors as Record<string, CorpsFrontSector>;
+}
+
+/** Explicit mutable oracle for tests; production callers cannot select it through the public wrapper. */
+export function __buildCorpsFrontSectorsImperativeForTest(
+    state: GameState,
+    edges: EdgeRecord[],
+    reverseMap: Map<string, string[]> | null,
+    mutationRecorder: SectorTopologyMutationRecorder,
+    centroids?: OsidCentroidMap,
+    spatial?: SpatialContext,
+    isFinalPass: boolean = false,
+    finalSaveGeometryProjection: boolean = false,
+    useFixedPointShortcuts: boolean = true,
+    occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
+    frontEdgeAdjacencyStrategy: SectorFrontEdgeAdjacencyStrategy = 'invocation-front-edge-relation',
+    frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters,
+): Record<string, CorpsFrontSector> {
+    const options = {
+        isFinalPass,
+        finalSaveGeometryProjection,
+        useFixedPointShortcuts,
+        occupancyStrategy,
+        frontEdgeAdjacencyStrategy,
+    } as const;
+    validateSectorTopologySolveOptions(options);
+    const stageRunner = createDeterministicSectorTopologyStageRunner(
+        mutationRecorder.mutations,
+    );
+    return buildCorpsFrontSectorsFromReadModel(
         state,
         edges,
         reverseMap,
@@ -456,18 +512,10 @@ export function buildCorpsFrontSectors(
         occupancyStrategy,
         frontEdgeAdjacencyStrategy,
         frontEdgeRelationTestCounters,
-        executionStrategy,
+        'test-only-imperative-live-state',
         mutationRecorder,
         stageRunner,
     );
-    if (perfEnabled) {
-        _flushInvocation(
-            state,
-            perfNodeProcess!.hrtime.bigint() - invocationStart,
-            isFinalPass,
-        );
-    }
-    return result;
 }
 
 /** @internal Detached-state topology orchestrator used by the pure solver. */

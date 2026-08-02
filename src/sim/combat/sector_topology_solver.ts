@@ -8,6 +8,7 @@ import type { SpatialContext } from '../spatial_context.js';
 import { buildCorpsFrontSectorsFromReadModel } from './corps_front_sectors.js';
 import type { SectorFrontEdgeRelationTestCounters } from './sector_front_edge_relation.js';
 import { createDeterministicSectorTopologyStageRunner } from './sector_topology_execution.js';
+import type { SectorTopologyStageRunner } from './sector_topology_execution.js';
 import { createSectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 import type {
     SectorTopologyFormation,
@@ -203,6 +204,27 @@ function createSpatialContext(input: SectorTopologySolveInput): SpatialContext |
 
 export interface SectorTopologySolveObservers {
     readonly frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters;
+    readonly observationalStageRunner?: SectorTopologyStageRunner;
+}
+
+function combineStageRunners(
+    deterministic: SectorTopologyStageRunner,
+    observational: SectorTopologyStageRunner | undefined,
+): SectorTopologyStageRunner {
+    if (!observational) return deterministic;
+    return {
+        run<T>(stage: string, fn: () => T): T {
+            return deterministic.run(stage, () => observational.run(stage, fn));
+        },
+        recordBranch(stage, branchTaken): void {
+            deterministic.recordBranch(stage, branchTaken);
+            observational.recordBranch(stage, branchTaken);
+        },
+        snapshot: deterministic.snapshot,
+        attributeFactionCost(faction, corpsIds): void {
+            observational.attributeFactionCost?.(faction, corpsIds);
+        },
+    };
 }
 
 /** Run the complete current topology solve over one detached mutable projection. */
@@ -220,7 +242,13 @@ export function solveCorpsFrontSectorsPure(
         : new Map(input.centroidEntries.map(([key, centroid]) => [key, { ...centroid }]));
     const spatial = createSpatialContext(input);
     const recorder = createSectorTopologyMutationRecorder();
-    const stageRunner = createDeterministicSectorTopologyStageRunner(recorder.mutations);
+    const deterministicStageRunner = createDeterministicSectorTopologyStageRunner(
+        recorder.mutations,
+    );
+    const stageRunner = combineStageRunners(
+        deterministicStageRunner,
+        observers.observationalStageRunner,
+    );
     const sectors = buildCorpsFrontSectorsFromReadModel(
         working,
         edges,

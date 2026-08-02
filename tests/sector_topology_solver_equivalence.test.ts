@@ -4,7 +4,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import type { EdgeRecord } from '../src/map/settlements.js';
-import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
+import { __buildCorpsFrontSectorsImperativeForTest } from '../src/sim/combat/corps_front_sectors.js';
 import { createSectorTopologyMutationRecorder } from '../src/sim/combat/sector_topology_mutation_journal.js';
 import { captureSectorTopologySolveInput } from '../src/sim/combat/sector_topology_snapshot.js';
 import { solveCorpsFrontSectorsPure } from '../src/sim/combat/sector_topology_solver.js';
@@ -40,10 +40,11 @@ function runImperative(
     options: SectorTopologySolveOptions,
 ) {
     const recorder = createSectorTopologyMutationRecorder();
-    const sectors = buildCorpsFrontSectors(
+    const sectors = __buildCorpsFrontSectorsImperativeForTest(
         state,
         edges,
         null,
+        recorder,
         undefined,
         undefined,
         options.isFinalPass,
@@ -51,9 +52,6 @@ function runImperative(
         options.useFixedPointShortcuts,
         options.occupancyStrategy,
         options.frontEdgeAdjacencyStrategy,
-        undefined,
-        'test-only-imperative-live-state',
-        recorder,
     );
     return {
         sectors,
