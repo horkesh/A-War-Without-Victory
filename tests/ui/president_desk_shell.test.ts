@@ -183,6 +183,18 @@ describe('PresidentDeskShell', () => {
     }
   });
 
+  it('keeps direct desk cards at intrinsic height so the shell owns scrolling above the status dock', () => {
+    renderDesk();
+
+    const shell = screen.getByTestId('president-desk-shell');
+    expect(shell.className).toContain('overflow-y-auto');
+    const cards = Array.from(shell.children);
+    expect(cards.length).toBeGreaterThanOrEqual(3);
+    for (const card of cards) {
+      expect(card.className).toContain('shrink-0');
+    }
+  });
+
   it('can close when rendered as a warroom overlay', () => {
     const onClose = vi.fn();
     renderDesk({ onClose });

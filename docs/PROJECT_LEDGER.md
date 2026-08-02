@@ -25714,6 +25714,20 @@ The final documentation-only publication commit follows this ledger entry. Requi
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
 
+## 2026-08-02 - R2 packaged-readability fail-closed repair
+
+**Type:** Player-surface readability bugfix / scroll-ownership correction / diagnostic false-positive repair.
+
+**Negative evidence:** Fresh packaged no-resume RS run `20260802-r2-rs104-fresh-v5` reached exact turn 104, completed route, counter, Army HQ, and final surface tours, preserved state/autosave hashes across inspection, captured 512 screenshots, and reported zero console, page, unexpected-network, and main-process-stderr diagnostics. It exited nonzero solely because ten readability rows reduced to four underlying defects. The run is rejected evidence and is not a diary or acceptance packet.
+
+**RED evidence:** Four focused regressions failed before production changes: the historical-operation participant name retained `truncate`; the event category remained outside a wrapping metadata flow; Desk cards lacked a nonshrinking direct-child contract under the shell scroll owner; and the active-modal selector still admitted `[role="dialog"][aria-modal="false"]`.
+
+**Implementation:** Historical-operation participant identities wrap with `whitespace-normal break-words`; faction badges and the category stamp share a normal-flow `flex-wrap` metadata row; direct Desk cards use `shrink-0` so the existing `overflow-y-auto` shell remains the single scroll owner above the status dock; and the packaged QA diagnostic excludes explicitly non-modal dialogs while continuing to fail closed on real active dialogs.
+
+**Verification:** The focused 4-file matrix passes 74 tests; the adjacent 8-file matrix passes 94 tests; `tsc --noEmit -p tsconfig.json`, `node --check tools/ui/paradox_local_qa.cjs`, and `git diff --check` pass. A newly built package and brand-new no-resume 104-week RS run remain required before R2 acceptance.
+
+**Scope:** UI layout, packaged QA diagnostic classification, tests, and documentation only. Simulation state, historical content, scenarios, save/replay schema, baselines, package version, tag, signing, publication, release state, and `docs/10_canon/FORAWWV.md` are unchanged.
+
 ## 2026-08-02 - R7 Phase 0 integrated acceptance and R4 provenance reconciliation
 
 **Type:** Diagnostic acceptance / cross-workstream integration bug fix / authored provenance metadata.

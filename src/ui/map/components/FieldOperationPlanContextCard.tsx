@@ -76,8 +76,8 @@ export function FieldOperationPlanContextCard({
       </div>
       <div className="mt-1 max-h-28 space-y-1 overflow-y-auto">
         {presentation.participants.length > 0 ? presentation.participants.map((participant) => (
-          <div key={participant.id} className="flex items-center justify-between gap-2 text-xs text-text-secondary">
-            <span className="truncate font-semibold text-text-primary">{participant.label}</span>
+          <div key={participant.id} className="flex items-start justify-between gap-2 text-xs text-text-secondary">
+            <span className="min-w-0 flex-1 whitespace-normal break-words font-semibold text-text-primary">{participant.label}</span>
             <span className="shrink-0 text-text-muted">{participant.locationLabel}</span>
           </div>
         )) : (

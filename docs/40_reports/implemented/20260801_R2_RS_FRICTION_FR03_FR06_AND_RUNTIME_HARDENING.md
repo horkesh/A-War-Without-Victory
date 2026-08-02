@@ -72,6 +72,15 @@ The rebuilt package used executable SHA-256 `72B49C7EF477371015BADB28E6CD833F5FD
 
 Resume diagnostic `20260801_r2_rs104_v4_routefix_resume2` then exposed a separate harness defect after five exact counter/detail successes. The probe had frozen an initial counter sample but selected later candidates from the changing post-panel viewport; it therefore substituted newly visible `rs_1st_krnjin_light_infantry` and failed on an undeclared extra target. RED/GREEN coverage now selects only an unattempted member of the frozen target set and preserves the existing fail-closed rule when no exact formation can be verified. Both runs remain negative evidence: neither is a fresh accepted diary, and the route repair still requires live proof in the next no-resume campaign.
 
+Fresh no-resume run `20260802-r2-rs104-fresh-v5` used executable SHA-256 `0E80B7112051F109A8055C13B7F6453BC9A7E3666DEF718E3B5CB9EADA8607F0` and ASAR SHA-256 `87093DEAAC7A5292BE7DFBD1A83AAF099C8359B5D08E09DE9798B79634AB0890`. It reached exact turn 104, completed the route, counter, Army HQ, and full final tours, wrote 512 screenshots through `511-playthrough-final.png`, and preserved state/autosave hashes across inspection. It had zero console messages, page errors, unexpected network failures, and main-process stderr. It then failed closed on ten readability observations, reducing to four defects:
+
+- the historical-operation participant row deliberately truncated `1st Podrinje Light Infantry Brigade` instead of wrapping it;
+- the absolutely positioned `DIPLOMATIC` category stamp occluded long faction badges;
+- direct Desk flex children were allowed to shrink, letting content bleed beneath the status dock rather than remaining inside the shell scroll owner;
+- the QA diagnostic treated `[role="dialog"][aria-modal="false"]` as an active modal root, displacing the real event modal and duplicating underlying Desk observations.
+
+RED-first tests now require wrapped operation identities, a normal-flow wrapping event-metadata row, nonshrinking Desk cards under the existing vertical scroll owner, and exclusion of explicitly non-modal dialogs from active-modal diagnostics. The focused four-file matrix passes 74 tests; the adjacent eight-file matrix passes 94 tests; TypeScript, harness syntax, and diff hygiene pass. Run v5 remains rejected negative evidence. A newly built package and brand-new no-resume campaign are still required.
+
 ## Verification and Review
 
 - Geometry/harness focused: 7 files / 97 tests.
@@ -88,4 +97,4 @@ Resume diagnostic `20260801_r2_rs104_v4_routefix_resume2` then exposed a separat
 
 Changed scope is UI read models, retained map handoff/presentation, diagnostics/harness, tests, and documentation. Simulation, historical event content, scenario balance, save schema, deterministic baselines, package version, tag, installer, signing, store upload, publication, and public release state are unchanged. `docs/10_canon/FORAWWV.md` is unchanged.
 
-Next: rebuild the transient unpacked package only after the Electron lease, run a fresh no-resume 104-week RS campaign, require clean final diagnostics plus materialized geometry receipts, then write the actual completed owner diary. The rejected run above remains negative lineage and cannot satisfy that gate.
+Next: rebuild the transient unpacked package with the v5 readability repairs, run a brand-new no-resume 104-week RS campaign, require clean final diagnostics plus materialized geometry receipts, then write the actual completed owner diary. Every rejected run above remains negative lineage and cannot satisfy that gate.

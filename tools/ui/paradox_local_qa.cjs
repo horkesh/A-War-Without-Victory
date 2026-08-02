@@ -879,7 +879,7 @@ async function textDiagnostics(surface) {
       return true;
     };
     const activeModalSurface = [...document.querySelectorAll(
-      '[aria-modal="true"], [role="dialog"], [data-testid="codex-panel"], [data-testid="chronicle-overlay"], [data-testid="formation-detail-panel"]',
+      '[aria-modal="true"], [role="dialog"]:not([aria-modal="false"]), [data-testid="codex-panel"], [data-testid="chronicle-overlay"], [data-testid="formation-detail-panel"]',
     )]
       .filter((node) => {
         const rect = node.getBoundingClientRect();

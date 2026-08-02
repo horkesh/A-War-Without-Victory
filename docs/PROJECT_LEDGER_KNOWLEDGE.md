@@ -4233,3 +4233,11 @@ Applied in `[2026-08-02] R7 fourteenth blocked-review correction: both-boundary 
 **Generic symmetry is a sensitive-history risk, not a ban on neutral plural actors:** a sentence that names both belligerents' operational interest is not moral equivalence. Apply generic-symmetry blocking only where the claim's risk class concerns atrocity, blame, civilian harm, or responsibility. Do not rewrite clear history merely to evade a broad regex.
 
 Applied in `[2026-08-02] R7 Phase 0 integrated acceptance and R4 provenance reconciliation`, `tools/diagnostics/codex_sensitive_claim_inventory.cjs`, the seven reviewed essay metadata rows, and the combined R7/R4 dependent matrix.
+
+## 2026-08-02 - Modal diagnostics and flex scroll owners need explicit boundaries
+
+**ARIA role alone does not establish modal ownership:** an application shell may use `role="dialog"` while explicitly declaring `aria-modal="false"`. A visual diagnostic that treats every dialog as the active modal can hide the true event modal and duplicate observations from underlying content. Durable rule: prefer `aria-modal="true"`; when admitting role-based fallbacks, explicitly exclude `aria-modal="false"` and regression-test the executable selector.
+
+**A scroll owner cannot protect children that are allowed to shrink:** `overflow-y-auto` on a flex column is insufficient when direct children keep the default shrink behavior; their descendants can paint through the intended viewport and beneath a fixed status dock. Durable rule: make intrinsic-height cards nonshrinking, retain one explicit scroll owner, and test both contracts together. For unpredictable authored identities and metadata, use wrapping flow layout rather than truncation or absolute positioning.
+
+Applied in `[2026-08-02] R2 packaged-readability fail-closed repair`, `PresidentDeskShell.tsx`, `EventModal.tsx`, `FieldOperationPlanContextCard.tsx`, and `tools/ui/paradox_local_qa.cjs`.

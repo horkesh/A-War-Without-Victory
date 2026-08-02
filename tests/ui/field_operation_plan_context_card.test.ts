@@ -67,4 +67,25 @@ describe('field operation plan context card', () => {
     expect(screen.getByTestId('field-operation-plan-context').dataset.fieldOperationFocusStatus).toBe('failed');
     expect(screen.getByTestId('field-operation-focus-status').textContent).toMatch(/could not frame/i);
   });
+
+  it('wraps long participant names instead of clipping the evidence handoff', () => {
+    render(React.createElement(FieldOperationPlanContextCard, {
+      presentation: {
+        objectives: [],
+        staging: [],
+        participants: [{
+          id: 'rs_1st_podrinje_light_infantry',
+          label: '1st Podrinje Light Infantry Brigade',
+          locationLabel: 'Goražde',
+        }],
+      },
+      onSelectObjective: vi.fn(),
+      onReturn: vi.fn(),
+    }));
+
+    const participantName = screen.getByText('1st Podrinje Light Infantry Brigade');
+    expect(participantName.className).toContain('whitespace-normal');
+    expect(participantName.className).toContain('break-words');
+    expect(participantName.className).not.toContain('truncate');
+  });
 });

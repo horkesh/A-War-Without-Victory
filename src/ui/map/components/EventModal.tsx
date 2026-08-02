@@ -195,27 +195,16 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                     }}
                 />
 
-                {/* Category stamp — top-right corner, rotated */}
-                <div
-                    className="absolute top-3 right-3 px-3 py-1.5 border-2 rounded-sm font-bold uppercase tracking-[0.2em] text-xs select-none"
-                    style={{
-                        transform: 'rotate(-4deg)',
-                        borderColor: cat.color,
-                        color: cat.color,
-                        opacity: 0.7,
-                        backgroundColor: `${cat.bg}15`,
-                    }}
-                >
-                    <div className="flex items-center gap-1.5">
-                        <Icon name={cat.icon} size={12} color={cat.color} />
-                        {t(cat.labelKey)}
-                    </div>
-                </div>
-
                 <div className="p-5 relative">
-                    {/* Faction impact badges */}
-                    {factions.length > 0 && (
-                        <div className="flex items-center gap-1.5 mb-3">
+                    <div
+                        data-testid="event-modal-metadata-row"
+                        className="mb-3 flex flex-wrap items-start justify-between gap-2"
+                    >
+                        {/* Faction impact badges */}
+                        <div
+                            data-testid="event-modal-faction-badges"
+                            className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5"
+                        >
                             {factions.map(fid => (
                                 <span
                                     key={fid}
@@ -230,12 +219,30 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                                 </span>
                             ))}
                         </div>
-                    )}
+
+                        {/* Keep the stamp in normal flow so long faction names wrap beside it. */}
+                        <div
+                            data-testid="event-modal-category-stamp"
+                            className="shrink-0 px-3 py-1.5 border-2 rounded-sm font-bold uppercase tracking-[0.2em] text-xs select-none"
+                            style={{
+                                transform: 'rotate(-4deg)',
+                                borderColor: cat.color,
+                                color: cat.color,
+                                opacity: 0.7,
+                                backgroundColor: `${cat.bg}15`,
+                            }}
+                        >
+                            <div className="flex items-center gap-1.5">
+                                <Icon name={cat.icon} size={12} color={cat.color} />
+                                {t(cat.labelKey)}
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Title — typewriter style on paper */}
                     <h3
                         id="event-modal-title"
-                        className="text-lg font-bold mb-3 pr-24"
+                        className="text-lg font-bold mb-3"
                         style={{ color: '#3a3228', fontFamily: 'Georgia, serif' }}
                     >
                         {event.title}
