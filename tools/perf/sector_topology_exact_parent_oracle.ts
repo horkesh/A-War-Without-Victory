@@ -38,6 +38,12 @@ export interface SectorTopologyExactParentComparison {
     }>[];
 }
 
+const REQUIRED_MODES: readonly SectorTopologyOracleMode[] = [
+    'live-war',
+    'final-turn',
+    'final-save-projection',
+];
+
 function strictCompare(left: string, right: string): number {
     return left < right ? -1 : left > right ? 1 : 0;
 }
@@ -86,6 +92,7 @@ function validateArtifact(
         throw new Error(`${label} artifact must contain exactly 300 cases.`);
     }
     const seen = new Set<string>();
+    const seenModeSeeds = new Set<string>();
     for (const entry of artifact.cases) {
         if (!entry || typeof entry.caseId !== 'string' || seen.has(entry.caseId)) {
             throw new Error(`${label} artifact has a missing or duplicate caseId.`);
@@ -98,7 +105,23 @@ function validateArtifact(
         if (!Number.isInteger(entry.seed) || entry.seed < 0 || entry.seed >= 100) {
             throw new Error(`${label} artifact case ${entry.caseId} has an invalid seed.`);
         }
+        const modeSeed = `${entry.mode}:${entry.seed}`;
+        if (seenModeSeeds.has(modeSeed)) {
+            throw new Error(
+                `${label} artifact must contain the complete 3-mode x 100 Cartesian set exactly once.`,
+            );
+        }
         seen.add(entry.caseId);
+        seenModeSeeds.add(modeSeed);
+    }
+    for (const mode of REQUIRED_MODES) {
+        for (let seed = 0; seed < 100; seed += 1) {
+            if (!seenModeSeeds.has(`${mode}:${seed}`)) {
+                throw new Error(
+                    `${label} artifact must contain the complete 3-mode x 100 Cartesian set exactly once.`,
+                );
+            }
+        }
     }
 }
 

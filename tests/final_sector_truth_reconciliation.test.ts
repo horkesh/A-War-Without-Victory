@@ -553,6 +553,26 @@ describe('final sector truth reconciliation', () => {
             caseId: control.cases[137]!.caseId,
             firstDifferenceByte: expect.any(Number),
         });
+
+        const malformedCases = structuredClone(cases);
+        malformedCases[0] = {
+            ...malformedCases[0]!,
+            caseId: 'malformed-extra-final-turn-zero',
+            mode: 'final-turn',
+            seed: 0,
+        };
+        const malformedControl: SectorTopologyExactParentArtifact = {
+            ...control,
+            cases: malformedCases,
+        };
+        const malformedCandidate: SectorTopologyExactParentArtifact = {
+            ...candidate,
+            cases: structuredClone(malformedCases),
+        };
+        expect(() => compareSectorTopologyExactParentArtifacts(
+            malformedControl,
+            malformedCandidate,
+        )).toThrow(/complete 3-mode x 100 cartesian set/i);
     });
 
     it('static contract: assignment emits warnings only from the final unresolved pass', () => {

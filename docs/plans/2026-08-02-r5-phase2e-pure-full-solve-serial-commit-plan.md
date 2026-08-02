@@ -12,7 +12,7 @@
 
 **Date:** 2026-08-02
 
-**Status:** DESIGN COMPLETE / IMPLEMENTATION NOT STARTED
+**Status:** TASKS 1-6 SOURCE PROOF COMPLETE / TASK 7 RUNTIME LEASE REQUIRED
 
 **Owner lane:** R5 Phase 2e, engine quality/performance/stability
 
@@ -20,10 +20,12 @@
 
 **Design base:** `0fd36157bd7b92241ac48b8a9e4d94d69f8d2141`
 
-**Current next action:** Task 1, capture the current imperative writer sequence with RED characterization before extracting any production body.
+**Current next action:** Task 7, acquire the named exclusive runtime lease and run approved baselines without refresh. Source checkpoint: `docs/40_reports/implemented/20260802_R5_PHASE2E_PURE_SOLVE_SERIAL_COMMIT_SOURCE_CHECKPOINT.md`.
 
 **Collision rule:** This packet owns the sector-builder and final-sector test surfaces listed below. It must not overlap another branch changing `corps_front_sectors.ts`, `brigade_assignment.ts`, `final_sector_truth_reconciliation.ts`, the real-save sector oracle, or the Phase 2 performance report.
 **Runtime rule:** Scenario, baseline, V8, wall-clock, Electron, and package commands require the orchestrator's named exclusive runtime lease. Fast focused tests, TypeScript, static determinism checks, and documentation checks do not.
+
+**2026-08-02 source checkpoint:** Tasks 1-6 are complete through `1c064829d` plus the Task 6 documentation commit. The final three-mode x 100 in-process oracle passed on the post-repair source in `743.472 s`; the prescribed fast gate passed 10 files / 107 tests, TypeScript, the determinism static scan, and diff check. Independent Technical Architecture, Systems/Determinism, and Performance Design verdicts are recorded in the source checkpoint report. This is not runtime acceptance: Tasks 7-10, no-refresh baselines, exact-parent external comparison, measurement, retention/revert, and final roadmap/ledger disposition remain pending. The downstream incremental-reuse Task 6 remains closed.
 
 ## 1. Status, authority, and prerequisite result
 
@@ -84,7 +86,7 @@ The production wrapper remains `buildCorpsFrontSectors(...)`. Its default become
 ```ts
 const input = captureSectorTopologySolveInput(state, edges, reverseMap, centroids, spatial, options);
 const output = solveCorpsFrontSectorsPure(input);
-commitSectorTopologySolve(state, output);
+commitSectorTopologySolve(state, input, output);
 return output.sectors;
 ```
 
@@ -150,7 +152,7 @@ The following table is the Phase 2e read allow-list. A static test must fail if 
 | Political control | `political.political_controllers` directly and through `getPoliticalControllerOSID(...)` | Strict-key record copy `politicalControllers`; preserve `null`/`undefined` distinction where the current lookup does. |
 | Cold-front exception | `political.graz_east_herzegovina_active_turn` | Scalar/null snapshot. |
 | Emergent commander priority | `political.control_events`, `political.last_supply_state_by_osid`, and `military.campaign_plans` when `decision_mode === 'emergent'` | Deep-copied arrays/records with existing event order preserved; strict-key records; only fields read by `getCorpsArmyPriorities(...)`. |
-| Formation identity/lifecycle | record key, `id`, `faction`, `status`, `kind`, `readiness`, `lifecycle_status`, `tags`, `corps_id` | One strict-ID ordered `SectorTopologyFormation` record. Preserve `undefined` defaults exactly. |
+| Formation identity/lifecycle | record key, `id`, `name`, `faction`, `status`, `kind`, `readiness`, `lifecycle_status`, `tags`, `corps_id` | One strict-ID ordered `SectorTopologyFormation` record. Preserve `undefined` defaults exactly; `name` participates in the existing corps regional-edge-affinity tie-break. |
 | Formation geography | `location_osid`, `home_osid`, `hq_osid`, `hq_sid` | Same formation projection; these fields must be locally mutable only where listed in section 7. |
 | Formation strength | `personnel`, `personnel_lent_by_tg`, `cohesion`, `experience`, `honor` | Same projection; required by enemy totals and `computeLocalFrontDefensivePower(...)`. |
 | Formation assignment/eligibility | `assignment`, `assigned_sub_segment_id`, `posture`, `disrupted`, `disrupted_turns`, `stranded_status`, `entrenchment_turns` | Same projection; deep-copy assignment objects. Preserve `entrenchment_turns` as `undefined` or its exact numeric value because the ordered location/entrenchment journal records the live before-value. |
@@ -540,14 +542,14 @@ Do not squash away RED/repair provenance before independent review. The orchestr
 
 ## 14. Completion checklist
 
-- [ ] Current imperative journal is characterized before extraction.
-- [ ] Every section 6 input is captured with no retained mutable caller identity.
-- [ ] Pure solve mutates neither input nor live state.
-- [ ] Every live builder write is journaled in exact order.
-- [ ] Detached local writes are visible to later faction/recovery stages.
-- [ ] Serial commit preflights the entire journal before any live write.
-- [ ] Task 8A relation and dense occupancy contracts are unchanged.
-- [ ] Three modes x 100 compare sectors/state/reports/session/receipts/journal/geometry/diagnostics/bytes/SHA/rerun.
+- [x] Current imperative journal is characterized before extraction.
+- [x] Every section 6 input is captured with no retained mutable caller identity.
+- [x] Pure solve mutates neither input nor live state.
+- [x] Every live builder write is journaled in exact order.
+- [x] Detached local writes are visible to later faction/recovery stages.
+- [x] Serial commit preflights the entire journal before any live write.
+- [x] Task 8A relation and dense occupancy contracts are unchanged.
+- [x] Three modes x 100 compare sectors/state/reports/session/receipts/journal/geometry/diagnostics/bytes/SHA/rerun.
 - [ ] Exact-parent external oracle passes.
 - [ ] Fast/type/static/baseline gates pass without refresh.
 - [ ] Exclusive measurement packet passes timing and memory gates or the candidate is reverted.
