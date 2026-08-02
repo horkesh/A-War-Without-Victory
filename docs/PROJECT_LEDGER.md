@@ -1,5 +1,17 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-03] Correction: the "sarajevo_siege non-determinism" was a reproduction error, not an engine bug
+
+**Type:** Retraction of the "open determinism question" raised in the immediately-following 2026-08-03 entry below.
+
+**What happened:** All four of my `sarajevo_siege_begins_1992` reproduction attempts (`v10`, `v11`, `v12`, `v13-control`) used the command `node tools/ui/paradox_local_qa.cjs --turns=104 --faction=RS --label=... --final-checkpoint-tour --packaged-executable=...`. `v9`'s actual recorded command (in `paradox-local-qa-progress-20260802-r2-rs104-fresh-v9.json`, which I had not checked before launching `v10`) additionally included `--strategic --auto-recruit`. Those flags gate real early-game decisions — `strategicRun`/`autoRecruit` are read at the turn-1 handling path and control proposal resolution and recruitment — not cosmetic reporting flags. Every run I attempted was therefore playing a materially different early game than `v9`, not reproducing it.
+
+**Correction:** There is no evidence of sim-code non-determinism, no Sacred Rules violation, and no wall-clock-date dependence. The "open question" and "Sacred Rules violation" framing in the entry below is retracted. The lesson worth keeping: **always read a prior run's own recorded command (the harness writes one to its progress JSON) before attempting to reproduce it — do not reconstruct flags from memory or the general pattern of prior invocations.** A proper re-verification with the matching full flag set is in progress; see the next entry for its result once complete.
+
+**Scope:** Documentation-only correction. No code change.
+
+---
+
 ## [2026-08-03] R2 v9-fix revert was a false positive; original fix re-landed; a separate, unexplained non-determinism surfaced
 
 **Type:** Root-cause correction / controlled-experiment finding / open determinism question (unresolved, escalated).
