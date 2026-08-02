@@ -1,6 +1,6 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** IN AUTONOMOUS EXECUTION; R1/R3 are complete and the R2 v5 readability repair is awaiting a fresh packaged acceptance rerun
+**Status:** IN AUTONOMOUS EXECUTION; R1/R3 are complete and the R2 v6 ARIA-hidden diagnostic repair is awaiting a fresh packaged acceptance rerun
 
 **Last updated:** 2026-08-02
 
@@ -97,7 +97,7 @@ Execute serially in the order R1, R2, R3, R4, R5, R6, R7, R8, R9 unless file-own
 | ID | Workstream | Status | Executable plan | Complete when |
 |---|---|---|---|---|
 | R1 | Seamless Command Room ↔ Tactical Map | **COMPLETE — CLOSED 2026-08-01** | [Map-transition plan](2026-07-31-seamless-command-room-map-transition-plan.md) | Warm switch shows current-turn/current-fingerprint truth without renderer reconstruction, static refetch, WebGL error, or visible wait; cold entry meets the measured plan budget. |
-| R2 | RS Desk → Decision → Advance friction | **IN PROGRESS — V5 READABILITY DEFECTS REPAIRED; FRESH PACKAGED ACCEPTANCE NEXT** | [RS friction plan](2026-07-31-rs-104week-friction-remediation-plan.md) | Five diary findings close; no contradictory urgency; sourced opportunity/positive-hold cadence is intelligible; ultrawide and map handoff pass Electron proof. |
+| R2 | RS Desk → Decision → Advance friction | **IN PROGRESS — V6 DECORATIVE-ARIA DIAGNOSTIC REPAIRED; FRESH PACKAGED ACCEPTANCE NEXT** | [RS friction plan](2026-07-31-rs-104week-friction-remediation-plan.md) | Five diary findings close; no contradictory urgency; sourced opportunity/positive-hold cadence is intelligible; ultrawide and map handoff pass Electron proof. |
 | R3 | Operational/Tactical Group convergence | **COMPLETE** | [TG closeout plan](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | One offensive task-organization path, synchronized lifecycle/AHQ receipts, terminal telemetry, unique sourced promotions, locked exhaustion constants, and aligned Standing-OG doctrine. |
 | R4 | Command, event, and Dynamic Codex convergence | **IN PROGRESS — PHASE 4 CANONICALLY ACCEPTED; PHASE 5 INTEGRATED PROOF NEXT** | [Command/event/Codex plan](2026-07-31-command-event-codex-convergence-plan.md) | Five presidential levers remain; Decision Room owns action; Desk owns triage; events, Chronicle, Cost Ledger, and Codex share deterministic receipts and priority truth. |
 | R5 | Engine quality, performance, and stability | **IN PROGRESS — PHASE 2D TASK 8A RETAINED; PHASE 2E DESIGN READY** | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |

@@ -282,7 +282,9 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(openCommandCategoryBody).not.toContain("openArmyHQTab(useGameStore.getState(), 'briefing')");
         expect(openCommandCategoryBody).not.toContain("setAppScreen('game')");
         expect(appSource).toContain('data-testid="warroom-decision-room-host"');
-        expect(appSource).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
+        expect(appSource).toMatch(
+            /<PresidentialDecisionRoomPanel[\s\S]*onNavigateTarget=\{reviewPreAdvanceTarget\}[\s\S]*onInspectFieldPlan=\{inspectFieldOperationPlanFromDossier\}/,
+        );
     });
 
     it('keeps Warroom-hosted Decision Room review text readable over the staff-room background', () => {

@@ -4241,3 +4241,9 @@ Applied in `[2026-08-02] R7 Phase 0 integrated acceptance and R4 provenance reco
 **A scroll owner cannot protect children that are allowed to shrink:** `overflow-y-auto` on a flex column is insufficient when direct children keep the default shrink behavior; their descendants can paint through the intended viewport and beneath a fixed status dock. Durable rule: make intrinsic-height cards nonshrinking, retain one explicit scroll owner, and test both contracts together. For unpredictable authored identities and metadata, use wrapping flow layout rather than truncation or absolute positioning.
 
 Applied in `[2026-08-02] R2 packaged-readability fail-closed repair`, `PresidentDeskShell.tsx`, `EventModal.tsx`, `FieldOperationPlanContextCard.tsx`, and `tools/ui/paradox_local_qa.cjs`.
+
+## 2026-08-02 - Visual diagnostics must honor accessibility-hidden ancestry
+
+**Rendered pixels are not automatically player-facing evidence:** scene dressing may contain DOM text that is deliberately absent from the accessibility tree and may be correctly covered by an active overlay. A whole-document text walker that ignores `aria-hidden` can turn decorative background into false contrast and occlusion blockers, especially when its visual substrate is a bitmap and the text node itself is transparent. Durable rule: one effective-visibility predicate must reject `aria-hidden="true"` at any ancestor and must govern text, active-modal discovery, alerts, controls, and overflow candidates consistently. Keep screenshot inspection as causal evidence; do not whitelist the literal copy or suppress a real active surface.
+
+Applied in `[2026-08-02] R2 decorative ARIA-hidden readability classification repair`, `tools/ui/paradox_local_qa.cjs`, and `tests/paradox_local_qa_harness.test.ts`.

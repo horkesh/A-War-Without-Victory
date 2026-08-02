@@ -110,6 +110,11 @@ test('52-week Electron QA supports bounded major-surface checkpoint tours', () =
         /\[role="dialog"\]:not\(\[aria-modal="false"\]\)/,
         'non-modal desk regions must not displace the real active modal diagnostic root',
     );
+    assert.match(
+        extractFunctionSource(harness, 'textDiagnostics'),
+        /current\.getAttribute\('aria-hidden'\) === 'true'/,
+        'decorative aria-hidden scene labels must not become readability or occlusion failures behind overlays',
+    );
     assert.match(harness, /activeLocatedFormationCount/);
     assert.match(harness, /locatedOwnedFormationCount/);
     assert.match(

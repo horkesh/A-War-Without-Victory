@@ -870,7 +870,8 @@ async function textDiagnostics(surface) {
       let current = node;
       while (current && current !== document.documentElement) {
         const style = window.getComputedStyle(current);
-        if (style.display === 'none'
+        if (current.getAttribute('aria-hidden') === 'true'
+          || style.display === 'none'
           || style.visibility === 'hidden'
           || style.visibility === 'collapse'
           || Number(style.opacity || '1') <= 0.01) return false;
@@ -966,6 +967,7 @@ async function textDiagnostics(surface) {
         const rect = node.getBoundingClientRect();
         const style = window.getComputedStyle(node);
         const visible = rect.width > 1 && rect.height > 1
+          && isEffectivelyVisible(node)
           && style.display !== 'none'
           && style.visibility !== 'hidden'
           && Number(style.opacity || '1') > 0.01;
@@ -977,6 +979,7 @@ async function textDiagnostics(surface) {
         const rect = control.getBoundingClientRect();
         const controlStyle = window.getComputedStyle(control);
         const visible = rect.width > 1 && rect.height > 1
+          && isEffectivelyVisible(control)
           && controlStyle.display !== 'none'
           && controlStyle.visibility !== 'hidden'
           && Number(controlStyle.opacity || '1') > 0.01;
@@ -1017,6 +1020,7 @@ async function textDiagnostics(surface) {
         const rect = node.getBoundingClientRect();
         const style = window.getComputedStyle(node);
         const visible = rect.width > 1 && rect.height > 1
+          && isEffectivelyVisible(node)
           && style.display !== 'none'
           && style.visibility !== 'hidden'
           && Number(style.opacity || '1') > 0.01;

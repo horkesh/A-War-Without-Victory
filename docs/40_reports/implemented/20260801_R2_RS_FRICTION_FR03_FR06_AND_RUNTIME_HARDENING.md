@@ -81,6 +81,12 @@ Fresh no-resume run `20260802-r2-rs104-fresh-v5` used executable SHA-256 `0E80B7
 
 RED-first tests now require wrapped operation identities, a normal-flow wrapping event-metadata row, nonshrinking Desk cards under the existing vertical scroll owner, and exclusion of explicitly non-modal dialogs from active-modal diagnostics. The focused four-file matrix passes 74 tests; the adjacent eight-file matrix passes 94 tests; TypeScript, harness syntax, and diff hygiene pass. Run v5 remains rejected negative evidence. A newly built package and brand-new no-resume campaign are still required.
 
+Fresh no-resume run `20260802-r2-rs104-fresh-v6` used the rebuilt external tactical-map bundle `feature-command-ui-BhDCO6zV.js` (SHA-256 `AC7CD9F235DE583FC67FBD9D5A027D8D95992197C48A294942BB8006E7A98299`) and packaged index SHA-256 `51E895DA67142BEB433331DB830EEC88DE4212F4C9131988FD14ADADE6DEEAF2`. The EXE/ASAR hashes remained equal to v5 because `signAndEditExecutable` is disabled and the tactical map is shipped as unpacked `extraResources`, not inside `app.asar`; direct bundle inspection confirmed every repaired selector/class in the package.
+
+Run v6 reached exact turn 104, completed its full route/counter/Army-HQ tour, captured 512 screenshots through `511-playthrough-final.png`, preserved final-tour state/autosave integrity, and exited with zero console messages, page errors, unexpected network failures, or main-process stderr. All v5 readability defects were absent. It failed closed only because the diagnostic counted the Warroom whiteboard date under an `aria-hidden="true"` scene board: bitmap-backed transparency was misread as 1.27:1 against black, while overlays correctly covering the decorative background were reported as occlusion. Visual inspection shows dark navy date text on the light whiteboard; the scene board is intentionally absent from the accessibility tree.
+
+A RED harness contract now requires effective visibility to reject any `aria-hidden="true"` ancestor. The implementation applies that rule to text, active-modal discovery, alerts, controls, and overflow candidates. The focused harness/Warroom matrix passes 3 files / 101 tests; harness syntax and diff hygiene pass. Run v6 remains negative diagnostic lineage, not acceptance or a diary.
+
 ## Verification and Review
 
 - Geometry/harness focused: 7 files / 97 tests.
@@ -97,4 +103,4 @@ RED-first tests now require wrapped operation identities, a normal-flow wrapping
 
 Changed scope is UI read models, retained map handoff/presentation, diagnostics/harness, tests, and documentation. Simulation, historical event content, scenario balance, save schema, deterministic baselines, package version, tag, installer, signing, store upload, publication, and public release state are unchanged. `docs/10_canon/FORAWWV.md` is unchanged.
 
-Next: rebuild the transient unpacked package with the v5 readability repairs, run a brand-new no-resume 104-week RS campaign, require clean final diagnostics plus materialized geometry receipts, then write the actual completed owner diary. Every rejected run above remains negative lineage and cannot satisfy that gate.
+Next: rebuild the transient unpacked package with the v6 ARIA-hidden diagnostic repair, run a brand-new no-resume 104-week RS campaign, require clean final diagnostics plus materialized geometry receipts, then write the actual completed owner diary. Every rejected run above remains negative lineage and cannot satisfy that gate.

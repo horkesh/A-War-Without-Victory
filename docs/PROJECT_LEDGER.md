@@ -25728,6 +25728,18 @@ The final documentation-only publication commit follows this ledger entry. Requi
 
 **Scope:** UI layout, packaged QA diagnostic classification, tests, and documentation only. Simulation state, historical content, scenarios, save/replay schema, baselines, package version, tag, signing, publication, release state, and `docs/10_canon/FORAWWV.md` are unchanged.
 
+## 2026-08-02 - R2 decorative ARIA-hidden readability classification repair
+
+**Type:** Packaged-QA false-positive repair / accessibility-tree alignment / rejected-run evidence.
+
+**Negative evidence:** Fresh packaged no-resume RS run `20260802-r2-rs104-fresh-v6` reached exact turn 104, completed the full route/counter/Army-HQ tour, captured 512 screenshots through `511-playthrough-final.png`, preserved state/autosave integrity, and recorded zero console, page, unexpected-network, and main-process-stderr diagnostics. All v5 product/readability defects were absent. The run exited nonzero only on repeated copies of the same Warroom whiteboard date observation and remains rejected evidence, not an accepted diary.
+
+**Diagnosis:** `WarroomDateBoard` owns dark navy date ink on a light bitmap whiteboard under an ancestor explicitly marked `aria-hidden="true"`. Screenshots confirm the copy is visually legible when the board is exposed. The diagnostic traversed the decorative accessibility-hidden subtree, could not resolve the bitmap-backed transparent child background, composited it as 1.27:1 against black, and reported expected coverage by Desk/Decision overlays as occlusion.
+
+**RED/GREEN:** A new harness contract failed until effective visibility rejected `aria-hidden="true"` at any ancestor. The repaired predicate is shared by text rows, active-modal candidates, visible alerts, interactive controls, and overflow candidates. The focused harness/Warroom matrix passes 3 files / 101 tests; JavaScript syntax and diff hygiene pass.
+
+**Scope:** QA diagnostic semantics, one stale source-contract assertion, tests, and documentation only. Player UI, simulation, history, scenarios, save/replay schema, baselines, package version, tag, signing, publication, release state, and `docs/10_canon/FORAWWV.md` are unchanged.
+
 ## 2026-08-02 - R7 Phase 0 integrated acceptance and R4 provenance reconciliation
 
 **Type:** Diagnostic acceptance / cross-workstream integration bug fix / authored provenance metadata.
