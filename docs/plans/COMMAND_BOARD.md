@@ -6,7 +6,7 @@
 
 **Updated:** 2026-08-02
 
-**Program state:** EXECUTING; R1 and R3 are complete, R7 Phase 2 committee repair is source-green with generated officer alignment pending, all R2 source packets are independently approved, and R2/R5 remain active
+**Program state:** EXECUTING; R1 and R3 are complete, R7 Phase 2 second repair is implementation-green pending independent re-review, all R2 source packets are independently approved, and R2/R5 remain active
 
 ## Activation
 
@@ -26,7 +26,7 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 | 4 | R4 | IN PROGRESS — PHASE 4 CANONICALLY ACCEPTED; PHASE 5 NEXT | Run Phase 5 all-faction deterministic, baseline/engine-health, browser, Electron, and dual-resolution presentation closeout. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | IN PROGRESS — PHASE 2D TASK 8A READY | Implement the red-first invocation-local standard/strict front-edge relation, preserve the independent legacy subset oracle, prove 300 complete-state/byte comparisons and receipt/build-count parity, then run the serialized three-pair retention packet. Task 6 remains closed. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) |
 | 6 | R6 | IN PROGRESS — TASK 0.1 CLOSED; WAITING ON R5 FLOOR | Keep the corrected Goražde current-state baseline frozen; after the R5 floor closes, execute Phase 0.2 and the serialized adopt-or-retire experiments, Sarajevo/E-B1 work, and final calibration proof. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
-| 7 | R7 | IN PROGRESS — PHASE 2 COMMITTEE REPAIR SOURCE-GREEN; GENERATED OFFICER ALIGNMENT PENDING | Preserve the 63-officer/249-formation source gate; under the next authorized serialized runtime lane remove the 35/28 stale generated officer rows and run startup/baseline proof, then continue localization, audio, accessibility, and packaged-Electron phases. | [Content/localization/audio](2026-07-31-content-history-localization-audio-plan.md) |
+| 7 | R7 | IN PROGRESS — PHASE 2 SECOND REPAIR GREEN; RE-REVIEW PENDING | Independently re-review the strict 63-officer/238-formation gate, 11 formation omissions, typed-role/UI semantics, identity dispositions, chronology, and recursive zero-stale audit; then continue localization, audio, accessibility, and packaged-Electron phases. | [Content/localization/audio](2026-07-31-content-history-localization-audio-plan.md) |
 | 8 | R8 | WAITING ON R1–R7 GREEN | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until two final diaries are 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | WAITING ON R8 | Freeze an immutable RC, produce reproducible clean-machine artifacts/evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
@@ -34,7 +34,7 @@ The owner activated full roadmap execution on 2026-07-31 and separately authoriz
 
 `R2 -> R4`, alongside `R5 -> R6`; R1 and R3 are complete, and both active paths converge before `R7 -> R8 -> R9`.
 
-R1 and R3 are integrated on `codex/master-roadmap-execution`. R2 source, harness, and WebGL repairs are independently approved; a rebuilt fresh packaged 104-week RS acceptance and completed diary remain. R4 Phase 4 is canonically accepted and R4 Phase 5 integrated proof is next. R5 owns the active performance floor and R6 waits on it. R7 Phase 2's first checkpoint was committee-blocked; its repair now has 334/334 supported authored rows: 63 officers, 19 corps/commands, 249 brigades/regiments, and three elite commanders. The 80 unsafe formation omissions and all 55 generated formation overlaps are gone. Chronology is precision-labeled, with Dreković turn 29, Petković turn 2, and Borić conservatively bounded at turn 39 rather than invented at turn 28. The OOB comparison uses real evidence paths and fails on missing files. The remaining generated residue is 35 stale `named_officer_data` and 28 stale `named_officers` rows; startup/baseline closure is not claimed and remains serialized behind the runtime owner.
+R1 and R3 are integrated on `codex/master-roadmap-execution`. R2 source, harness, and WebGL repairs are independently approved; a rebuilt fresh packaged 104-week RS acceptance and completed diary remain. R4 Phase 4 is canonically accepted and R4 Phase 5 integrated proof is next. R5 owns the active performance floor and R6 waits on it. R7 Phase 2's second repair has 323 supported authored rows and 51 explicit omissions. Eleven challenged Wikipedia-only/new formations are absent from OOB, scenarios, startup, designation, sim, and UI surfaces; seven challenged rows retain exact BB evidence. All officer chronology is exact or conservatively bounded with no unsupported turn zero. Accepted ADR-0008 and the UI distinguish sourced historical role from gameplay appointment class. The identity-level comparison has zero unresolved mismatches, and the recursive dependency/startup audit has zero stale brigade or officer IDs. Independent re-review remains before Phase 2 acceptance.
 
 ## Fixed Decisions
 

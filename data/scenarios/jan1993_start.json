@@ -2937,21 +2937,6 @@
         "mun:stari_grad_sarajevo"
       ]
     },
-    "arbih_2nd_mountain": {
-      "id": "arbih_2nd_mountain",
-      "faction": "RBiH",
-      "name": "2nd Mountain Brigade",
-      "kind": "brigade",
-      "readiness": "active",
-      "cohesion": 100,
-      "status": "active",
-      "created_turn": 0,
-      "hq_sid": null,
-      "municipalityId": "stari_grad_sarajevo",
-      "tags": [
-        "mun:stari_grad_sarajevo"
-      ]
-    },
     "arbih_hvo_kralj_tvrtko": {
       "id": "arbih_hvo_kralj_tvrtko",
       "faction": "RBiH",
@@ -2980,81 +2965,6 @@
       "municipalityId": "tuzla",
       "tags": [
         "mun:tuzla"
-      ]
-    },
-    "arbih_1st_olovo": {
-      "id": "arbih_1st_olovo",
-      "faction": "RBiH",
-      "name": "1st Olovo Brigade",
-      "kind": "brigade",
-      "readiness": "active",
-      "cohesion": 100,
-      "status": "active",
-      "created_turn": 0,
-      "hq_sid": "S135712",
-      "municipalityId": "olovo",
-      "tags": [
-        "mun:olovo"
-      ]
-    },
-    "arbih_116th_mountain": {
-      "id": "arbih_116th_mountain",
-      "faction": "RBiH",
-      "name": "116th Mountain Brigade",
-      "kind": "brigade",
-      "readiness": "active",
-      "cohesion": 100,
-      "status": "active",
-      "created_turn": 0,
-      "hq_sid": "S210650",
-      "municipalityId": "zivinice",
-      "tags": [
-        "mun:zivinice"
-      ]
-    },
-    "arbih_285th_light": {
-      "id": "arbih_285th_light",
-      "faction": "RBiH",
-      "name": "285th Light Brigade",
-      "kind": "brigade",
-      "readiness": "active",
-      "cohesion": 100,
-      "status": "active",
-      "created_turn": 0,
-      "hq_sid": "S220817",
-      "municipalityId": "rogatica",
-      "tags": [
-        "mun:rogatica"
-      ]
-    },
-    "arbih_1st_cerska": {
-      "id": "arbih_1st_cerska",
-      "faction": "RBiH",
-      "name": "1st Cerska Brigade",
-      "kind": "brigade",
-      "readiness": "active",
-      "cohesion": 100,
-      "status": "active",
-      "created_turn": 0,
-      "hq_sid": "S205010",
-      "municipalityId": "vlasenica",
-      "tags": [
-        "mun:vlasenica"
-      ]
-    },
-    "arbih_1st_kamenica": {
-      "id": "arbih_1st_kamenica",
-      "faction": "RBiH",
-      "name": "1st Kamenica Brigade",
-      "kind": "brigade",
-      "readiness": "active",
-      "cohesion": 100,
-      "status": "active",
-      "created_turn": 0,
-      "hq_sid": "S228877",
-      "municipalityId": "zvornik",
-      "tags": [
-        "mun:zvornik"
       ]
     }
   },

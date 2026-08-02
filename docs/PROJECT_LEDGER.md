@@ -25684,6 +25684,22 @@ The final documentation-only publication commit follows this ledger entry. Requi
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
 
+## 2026-08-02 - R7 Phase 2 second committee repair: exact identities, chronology, and role truth
+
+**Type:** Blocked-review repair / historical provenance / generated identity closure / canon-schema reconciliation.
+
+**RED evidence:** Focused tests proved five independent failures before production edits: repository URLs could target missing/escaping/malformed paths; turn-zero availability required no temporal evidence; the 63-row roster had no typed historical role; the OOB comparison exposed counts only; and no recursive identity-dependency diagnostic existed. The first RED run failed three files with four assertions plus the missing module.
+
+**Implementation:** `repo://` validation now resolves strictly within the repository and fails missing/non-file targets. Seven challenged formations received exact Balkan Battlegrounds row citations; eleven Wikipedia-only/new identities were removed from OOB, designations, Jan-1993 data, tracked startup, and all recursively scanned authored surfaces, with explicit `missing_exact_source` omissions. Palić, Talijan, and Blaškić now use official ICTY evidence and exact weekly mappings, including Blaškić 27 June 1992 → turn 12. All 63 officers own exact or conservative `on_or_before` availability evidence; no `bounded_model` or unsupported turn-zero row remains. Official BiH government sources repair Hodžić, Malkić, Mešić, and Hadžić role/date evidence. ADR-0008 is accepted: `rank` is gameplay appointment class, `historical_role` is the sourced office, legacy rows use a deterministic unspecified fallback, and UI surfaces no longer render appointment classes as generals or star insignia. Systems Manual and Rulebook were aligned; FORAWWV was untouched.
+
+**Identity closure:** The Markdown comparison parses identities, normalizes deterministically, applies authored aliases/dispositions, and exits nonzero for unresolved mismatches. Current result: 214 matches, 27 dispositions, zero unresolved. The recursive sorted audit scans scenario, generated-startup, source, sim, and UI roots against playable plus omitted identity universes; both missing lists are zero. Tracked startup contains exactly 63 playable officer-data rows, zero omitted officer states, and no unsupported operation commander references.
+
+**Census:** 323 supported records (63 officers, 19 corps/commands, 238 brigades/regiments, three elite commanders) plus 51 explicit omissions (35 officers, 11 brigades, five elite commanders), zero provenance blockers/warnings.
+
+**Verification:** Focused provenance/identity/display tests pass; adjacent officer-system tests pass; the real recursive audit passes; identity-comparison CLI exits zero; TypeScript exits zero; strict diagnostic reports zero blockers/warnings; diff hygiene passes. No scenario, baseline, performance, Electron, packaging, version, release, publication, or push command ran in this repair. Independent committee re-review requested after commit.
+
+**Scope:** No `docs/10_canon/FORAWWV.md`, package/version/tag/signing/publication/release-state, baseline, or external-state change.
+
 ## 2026-08-02 - R7 Phase 0 integrated acceptance and R4 provenance reconciliation
 
 **Type:** Diagnostic acceptance / cross-workstream integration bug fix / authored provenance metadata.

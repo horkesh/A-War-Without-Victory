@@ -13,12 +13,13 @@
       "compatible_corps_ids": [
         "vrs_east_bosnian"
       ],
-      "available_from_turn": 0,
+      "available_from_turn": 91,
       "origin": "jna",
       "casualty_vulnerability": 0.15,
       "can_improve": false,
       "improvement_rate": 0,
-      "pool_tier": "tier_b"
+      "pool_tier": "tier_b",
+      "historical_role": "brigade_commander"
     },
     {
       "id": "vrs_arsic",
@@ -33,12 +34,13 @@
       "compatible_corps_ids": [
         "vrs_east_bosnian"
       ],
-      "available_from_turn": 0,
+      "available_from_turn": 195,
       "origin": "jna",
       "casualty_vulnerability": 0.15,
       "can_improve": false,
       "improvement_rate": 0,
-      "pool_tier": "tier_b"
+      "pool_tier": "tier_b",
+      "historical_role": "operational_group_commander"
     },
     {
       "id": "vrs_blagojevic",
@@ -50,7 +52,7 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "vrs_drina",
-      "available_from_turn": 0,
+      "available_from_turn": 195,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
@@ -62,7 +64,8 @@
         "sentence": "15 years",
         "charges": "Crimes against humanity (persecution, inhumane acts), aiding forcible transfer",
         "summary": "Bratunac Brigade commander convicted for aiding forcible transfer of Srebrenica civilians"
-      }
+      },
+      "historical_role": "brigade_commander"
     },
     {
       "id": "vrs_boric",
@@ -81,7 +84,7 @@
       "improvement_rate": 0,
       "pool_tier": "starter",
       "bio_short": "Commander of the VRS 2nd Krajina Corps by the end of 1992.",
-      "available_until_turn": 134
+      "historical_role": "corps_commander"
     },
     {
       "id": "vrs_colic",
@@ -96,12 +99,13 @@
       "compatible_corps_ids": [
         "vrs_2nd_krajina"
       ],
-      "available_from_turn": 0,
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
       "improvement_rate": 0,
-      "pool_tier": "tier_b"
+      "pool_tier": "tier_b",
+      "historical_role": "brigade_commander"
     },
     {
       "id": "vrs_d_milosevic",
@@ -113,7 +117,7 @@
       "defensive_skill": 4,
       "political_reliability": 5,
       "home_corps_id": "vrs_sarajevo_romanija",
-      "available_from_turn": 118,
+      "available_from_turn": 143,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
@@ -122,7 +126,8 @@
       "enclave_lock": {
         "enclave_id": "sarajevo_ring"
       },
-      "bio_short": "Commander of the Sarajevo-Romanija Corps from 1994 to 1995."
+      "bio_short": "Commander of the Sarajevo-Romanija Corps from 1994 to 1995.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "vrs_galic",
@@ -134,8 +139,7 @@
       "defensive_skill": 4,
       "political_reliability": 5,
       "home_corps_id": "vrs_sarajevo_romanija",
-      "available_from_turn": 18,
-      "available_until_turn": 118,
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
@@ -144,7 +148,8 @@
       "enclave_lock": {
         "enclave_id": "sarajevo_ring"
       },
-      "bio_short": "Commander of the Sarajevo-Romanija Corps from 1992 to 1994."
+      "bio_short": "Commander of the Sarajevo-Romanija Corps from 1992 to 1994.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "vrs_grubac",
@@ -156,15 +161,14 @@
       "defensive_skill": 4,
       "political_reliability": 4,
       "home_corps_id": "vrs_herzegovina",
-      "available_from_turn": 0,
-      "is_historical_start": true,
-      "historical_corps_id": "vrs_herzegovina",
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Commander of the VRS Herzegovina Corps from 1992 to 1996."
+      "bio_short": "Commander of the VRS Herzegovina Corps from 1992 to 1996.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "vrs_krstic",
@@ -176,13 +180,14 @@
       "defensive_skill": 3,
       "political_reliability": 5,
       "home_corps_id": "vrs_drina",
-      "available_from_turn": 170,
+      "available_from_turn": 195,
       "origin": "jna",
       "casualty_vulnerability": 0.15,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "tier_a",
-      "bio_short": "Commander of the VRS Drina Corps from 1995 to 1996."
+      "bio_short": "Commander of the VRS Drina Corps from 1995 to 1996.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "vrs_milovanovic",
@@ -193,14 +198,14 @@
       "aggressiveness": 3,
       "defensive_skill": 4,
       "political_reliability": 4,
-      "available_from_turn": 0,
-      "is_historical_start": true,
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.05,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Chief of the VRS Main Staff from 1992 to 1996."
+      "bio_short": "Chief of the VRS Main Staff from 1992 to 1996.",
+      "historical_role": "army_deputy"
     },
     {
       "id": "vrs_mladic",
@@ -213,14 +218,14 @@
       "political_reliability": 2,
       "home_corps_id": null,
       "compatible_corps_ids": [],
-      "available_from_turn": 0,
-      "is_historical_start": true,
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.05,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Commander of the VRS Main Staff from 1992 to 1996."
+      "bio_short": "Commander of the VRS Main Staff from 1992 to 1996.",
+      "historical_role": "army_commander"
     },
     {
       "id": "vrs_obrenovic",
@@ -232,7 +237,7 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "vrs_drina",
-      "available_from_turn": 0,
+      "available_from_turn": 173,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
@@ -244,7 +249,8 @@
         "sentence": "17 years",
         "charges": "Persecution as crime against humanity",
         "summary": "Zvornik Brigade deputy pleaded guilty for role in Srebrenica killings; cooperated with prosecution"
-      }
+      },
+      "historical_role": "brigade_commander"
     },
     {
       "id": "vrs_pandurevic",
@@ -256,7 +262,7 @@
       "defensive_skill": 3,
       "political_reliability": 3,
       "home_corps_id": "vrs_drina",
-      "available_from_turn": 0,
+      "available_from_turn": 195,
       "origin": "jna",
       "casualty_vulnerability": 0.15,
       "can_improve": false,
@@ -268,7 +274,8 @@
         "sentence": "13 years",
         "charges": "Aiding and abetting murder and persecution",
         "summary": "Zvornik Brigade commander convicted re Srebrenica; lighter sentence for opening corridor allowing survivors to escape"
-      }
+      },
+      "historical_role": "brigade_commander"
     },
     {
       "id": "vrs_samardzija",
@@ -283,12 +290,13 @@
       "compatible_corps_ids": [
         "vrs_1st_krajina"
       ],
-      "available_from_turn": 0,
+      "available_from_turn": 143,
       "origin": "jna",
       "casualty_vulnerability": 0.15,
       "can_improve": false,
       "improvement_rate": 0,
-      "pool_tier": "tier_b"
+      "pool_tier": "tier_b",
+      "historical_role": "brigade_commander"
     },
     {
       "id": "vrs_simic",
@@ -300,15 +308,14 @@
       "defensive_skill": 4,
       "political_reliability": 4,
       "home_corps_id": "vrs_east_bosnian",
-      "available_from_turn": 0,
-      "is_historical_start": true,
-      "historical_corps_id": "vrs_east_bosnian",
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Commander of the VRS East Bosnian Corps from 1992 to 1997."
+      "bio_short": "Commander of the VRS East Bosnian Corps from 1992 to 1997.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "vrs_sipcic",
@@ -320,10 +327,7 @@
       "defensive_skill": 3,
       "political_reliability": 3,
       "home_corps_id": "vrs_sarajevo_romanija",
-      "available_from_turn": 0,
-      "available_until_turn": 18,
-      "is_historical_start": true,
-      "historical_corps_id": "vrs_sarajevo_romanija",
+      "available_from_turn": 8,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
@@ -332,7 +336,8 @@
       "enclave_lock": {
         "enclave_id": "sarajevo_ring"
       },
-      "bio_short": "Initial commander of the Sarajevo-Romanija Corps in 1992."
+      "bio_short": "Initial commander of the Sarajevo-Romanija Corps in 1992.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "vrs_talic",
@@ -347,15 +352,14 @@
       "compatible_corps_ids": [
         "vrs_east_bosnian"
       ],
-      "available_from_turn": 0,
-      "is_historical_start": true,
-      "historical_corps_id": "vrs_1st_krajina",
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Commander of the VRS 1st Krajina Corps from 1992 to 1997."
+      "bio_short": "Commander of the VRS 1st Krajina Corps from 1992 to 1997.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "vrs_tolimir",
@@ -366,13 +370,14 @@
       "aggressiveness": 3,
       "defensive_skill": 3,
       "political_reliability": 5,
-      "available_from_turn": 0,
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.05,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "tier_a",
-      "bio_short": "VRS Main Staff assistant for intelligence and security from 1992 to 1996."
+      "bio_short": "VRS Main Staff assistant for intelligence and security from 1992 to 1996.",
+      "historical_role": "staff_officer"
     },
     {
       "id": "vrs_tomanic",
@@ -390,7 +395,8 @@
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Commander of the VRS 2nd Krajina Corps from 1994 to 1995."
+      "bio_short": "Commander of the VRS 2nd Krajina Corps from 1994 to 1995.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "vrs_zeljaja",
@@ -402,12 +408,13 @@
       "defensive_skill": 3,
       "political_reliability": 3,
       "home_corps_id": "vrs_1st_krajina",
-      "available_from_turn": 0,
+      "available_from_turn": 180,
       "origin": "jna",
       "casualty_vulnerability": 0.2,
       "can_improve": false,
       "improvement_rate": 0,
-      "pool_tier": "tier_b"
+      "pool_tier": "tier_b",
+      "historical_role": "operational_group_commander"
     },
     {
       "id": "vrs_zivanovic",
@@ -419,10 +426,7 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "vrs_drina",
-      "available_from_turn": 28,
-      "available_until_turn": 170,
-      "is_historical_start": true,
-      "historical_corps_id": "vrs_drina",
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
@@ -433,7 +437,8 @@
         "verdict": "indicted",
         "charges": "Genocide, crimes against humanity",
         "summary": "Drina Corps commander indicted for Srebrenica; case referred to BiH State Court"
-      }
+      },
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_ajnadzic",
@@ -445,7 +450,7 @@
       "defensive_skill": 4,
       "political_reliability": 4,
       "home_corps_id": "arbih_1st_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 91,
       "origin": "military",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
@@ -453,7 +458,8 @@
       "pool_tier": "tier_a",
       "enclave_lock": {
         "enclave_id": "sarajevo"
-      }
+      },
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_alagic",
@@ -466,14 +472,14 @@
       "political_reliability": 3,
       "home_corps_id": "arbih_3rd_corps",
       "compatible_corps_ids": [],
-      "available_from_turn": 80,
-      "available_until_turn": 120,
+      "available_from_turn": 91,
       "origin": "jna",
       "casualty_vulnerability": 0.15,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "tier_a",
-      "bio_short": "Commander of the ARBiH 3rd Corps in 1993 and 7th Corps from 1994."
+      "bio_short": "Commander of the ARBiH 3rd Corps in 1993 and 7th Corps from 1994.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_cikotic",
@@ -485,12 +491,13 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "arbih_3rd_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 69,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
       "improvement_rate": 0.05,
-      "pool_tier": "tier_a"
+      "pool_tier": "tier_a",
+      "historical_role": "operational_group_commander"
     },
     {
       "id": "arbih_cuskic",
@@ -503,12 +510,13 @@
       "political_reliability": 4,
       "home_corps_id": "arbih_3rd_corps",
       "compatible_corps_ids": [],
-      "available_from_turn": 0,
+      "available_from_turn": 91,
       "origin": "military",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
       "improvement_rate": 0.05,
-      "pool_tier": "tier_a"
+      "pool_tier": "tier_a",
+      "historical_role": "operational_group_commander"
     },
     {
       "id": "arbih_delic",
@@ -519,13 +527,14 @@
       "aggressiveness": 3,
       "defensive_skill": 4,
       "political_reliability": 5,
-      "available_from_turn": 60,
+      "available_from_turn": 91,
       "origin": "jna",
       "casualty_vulnerability": 0.05,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Commander of the ARBiH General Staff from 1993 to 1997."
+      "bio_short": "Commander of the ARBiH General Staff from 1993 to 1997.",
+      "historical_role": "army_commander"
     },
     {
       "id": "arbih_divjak",
@@ -537,12 +546,13 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "arbih_1st_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 70,
       "origin": "jna",
       "casualty_vulnerability": 0.05,
       "can_improve": false,
       "improvement_rate": 0,
-      "pool_tier": "tier_a"
+      "pool_tier": "tier_a",
+      "historical_role": "army_deputy"
     },
     {
       "id": "arbih_drekovic",
@@ -555,8 +565,6 @@
       "political_reliability": 4,
       "home_corps_id": "arbih_5th_corps",
       "available_from_turn": 29,
-      "available_until_turn": 80,
-      "is_historical_start": false,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
@@ -565,7 +573,8 @@
       "enclave_lock": {
         "enclave_id": "bihac"
       },
-      "bio_short": "Founding commander of the ARBiH 5th Corps on 20 October 1992."
+      "bio_short": "Founding commander of the ARBiH 5th Corps on 20 October 1992.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_dudakovic",
@@ -577,7 +586,7 @@
       "defensive_skill": 5,
       "political_reliability": 4,
       "home_corps_id": "arbih_5th_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 91,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
@@ -587,7 +596,8 @@
         "enclave_id": "bihac",
         "locked_until_turn": 170
       },
-      "bio_short": "Commander of the ARBiH 5th Corps from 1993 to 1997."
+      "bio_short": "Commander of the ARBiH 5th Corps from 1993 to 1997.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_hadzihasanovic",
@@ -600,16 +610,14 @@
       "political_reliability": 4,
       "home_corps_id": "arbih_3rd_corps",
       "compatible_corps_ids": [],
-      "available_from_turn": 22,
-      "available_until_turn": 80,
-      "is_historical_start": true,
-      "historical_corps_id": "arbih_3rd_corps",
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
       "improvement_rate": 0.04,
       "pool_tier": "starter",
-      "bio_short": "Commander of the ARBiH 3rd Corps in 1992-93, then General Staff chief."
+      "bio_short": "Commander of the ARBiH 3rd Corps in 1992-93, then General Staff chief.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_halilovic",
@@ -620,15 +628,14 @@
       "aggressiveness": 4,
       "defensive_skill": 2,
       "political_reliability": 2,
-      "available_from_turn": 0,
-      "available_until_turn": 60,
-      "is_historical_start": true,
+      "available_from_turn": 48,
       "origin": "jna",
       "casualty_vulnerability": 0.05,
       "can_improve": true,
       "improvement_rate": 0.05,
       "pool_tier": "starter",
-      "bio_short": "Commander of the Bosnian Army in March 1993."
+      "bio_short": "Commander of the Bosnian Army in March 1993.",
+      "historical_role": "army_commander"
     },
     {
       "id": "arbih_hodzic",
@@ -640,12 +647,14 @@
       "defensive_skill": 2,
       "political_reliability": 3,
       "home_corps_id": "arbih_2nd_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 5,
       "origin": "military",
       "casualty_vulnerability": 0.3,
       "can_improve": true,
       "improvement_rate": 0.06,
-      "pool_tier": "tier_c"
+      "pool_tier": "tier_c",
+      "historical_role": "regional_defense_organizer",
+      "available_until_turn": 5
     },
     {
       "id": "arbih_imamovic",
@@ -657,7 +666,7 @@
       "defensive_skill": 5,
       "political_reliability": 4,
       "home_corps_id": "arbih_1st_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 173,
       "origin": "jna",
       "casualty_vulnerability": 0.2,
       "can_improve": false,
@@ -665,7 +674,8 @@
       "pool_tier": "tier_a",
       "enclave_lock": {
         "enclave_id": "gorazde"
-      }
+      },
+      "historical_role": "division_commander"
     },
     {
       "id": "arbih_karavelic",
@@ -677,7 +687,7 @@
       "defensive_skill": 5,
       "political_reliability": 4,
       "home_corps_id": "arbih_1st_corps",
-      "available_from_turn": 68,
+      "available_from_turn": 91,
       "origin": "military",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
@@ -685,7 +695,8 @@
       "pool_tier": "tier_a",
       "enclave_lock": {
         "enclave_id": "sarajevo"
-      }
+      },
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_lendo",
@@ -697,12 +708,13 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "arbih_2nd_corps",
-      "available_from_turn": 120,
+      "available_from_turn": 195,
       "origin": "military",
       "casualty_vulnerability": 0.15,
       "can_improve": true,
       "improvement_rate": 0.04,
-      "pool_tier": "tier_b"
+      "pool_tier": "tier_b",
+      "historical_role": "division_commander"
     },
     {
       "id": "arbih_mahmuljin",
@@ -714,13 +726,14 @@
       "defensive_skill": 2,
       "political_reliability": 4,
       "home_corps_id": "arbih_3rd_corps",
-      "available_from_turn": 110,
+      "available_from_turn": 143,
       "origin": "military",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
       "improvement_rate": 0.05,
       "pool_tier": "tier_a",
-      "bio_short": "Commander of the ARBiH 3rd Corps from 1994 to 1997."
+      "bio_short": "Commander of the ARBiH 3rd Corps from 1994 to 1997.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_malkic",
@@ -732,12 +745,14 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "arbih_2nd_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 45,
       "origin": "jna",
       "casualty_vulnerability": 0.2,
       "can_improve": true,
       "improvement_rate": 0.05,
-      "pool_tier": "tier_b"
+      "pool_tier": "tier_b",
+      "historical_role": "brigade_commander",
+      "available_until_turn": 81
     },
     {
       "id": "arbih_mesic",
@@ -749,12 +764,14 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "arbih_2nd_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 24,
       "origin": "jna",
       "casualty_vulnerability": 0.25,
       "can_improve": true,
       "improvement_rate": 0.06,
-      "pool_tier": "tier_b"
+      "pool_tier": "tier_b",
+      "historical_role": "brigade_commander",
+      "available_until_turn": 30
     },
     {
       "id": "arbih_nanic",
@@ -766,7 +783,7 @@
       "defensive_skill": 3,
       "political_reliability": 3,
       "home_corps_id": "arbih_5th_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 195,
       "origin": "military",
       "casualty_vulnerability": 0.25,
       "can_improve": true,
@@ -774,7 +791,8 @@
       "pool_tier": "tier_c",
       "enclave_lock": {
         "enclave_id": "bihac"
-      }
+      },
+      "historical_role": "brigade_commander"
     },
     {
       "id": "arbih_oric",
@@ -786,7 +804,7 @@
       "defensive_skill": 4,
       "political_reliability": 3,
       "home_corps_id": "arbih_2nd_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 5,
       "origin": "jna",
       "casualty_vulnerability": 0.2,
       "can_improve": true,
@@ -801,7 +819,8 @@
       "enclave_lock": {
         "enclave_id": "srebrenica",
         "locked_until_turn": 168
-      }
+      },
+      "historical_role": "enclave_commander"
     },
     {
       "id": "arbih_palic",
@@ -813,7 +832,7 @@
       "defensive_skill": 5,
       "political_reliability": 4,
       "home_corps_id": "arbih_2nd_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 28,
       "origin": "military",
       "casualty_vulnerability": 0.15,
       "can_improve": true,
@@ -821,7 +840,8 @@
       "pool_tier": "tier_a",
       "enclave_lock": {
         "enclave_id": "zepa"
-      }
+      },
+      "historical_role": "enclave_commander"
     },
     {
       "id": "arbih_pasalic",
@@ -833,13 +853,13 @@
       "defensive_skill": 4,
       "political_reliability": 5,
       "home_corps_id": "arbih_4th_corps",
-      "available_from_turn": 24,
-      "available_until_turn": 80,
+      "available_from_turn": 39,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": false,
       "improvement_rate": 0,
-      "pool_tier": "tier_a"
+      "pool_tier": "tier_a",
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_s_delic",
@@ -851,13 +871,14 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "arbih_2nd_corps",
-      "available_from_turn": 132,
+      "available_from_turn": 195,
       "origin": "military",
       "casualty_vulnerability": 0.15,
       "can_improve": true,
       "improvement_rate": 0.04,
       "pool_tier": "tier_b",
-      "bio_short": "Commander of the ARBiH 2nd Corps from 1993 to 2000."
+      "bio_short": "Commander of the ARBiH 2nd Corps from 1993 to 2000.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_s_hadzic",
@@ -869,7 +890,7 @@
       "defensive_skill": 1,
       "political_reliability": 4,
       "home_corps_id": "arbih_1st_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 2,
       "origin": "military",
       "casualty_vulnerability": 0.3,
       "can_improve": true,
@@ -877,7 +898,9 @@
       "pool_tier": "tier_c",
       "enclave_lock": {
         "enclave_id": "sarajevo"
-      }
+      },
+      "historical_role": "regional_defense_organizer",
+      "available_until_turn": 2
     },
     {
       "id": "arbih_sadic",
@@ -889,13 +912,13 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "arbih_2nd_corps",
-      "available_from_turn": 44,
-      "available_until_turn": 132,
+      "available_from_turn": 91,
       "origin": "military",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
       "improvement_rate": 0.05,
-      "pool_tier": "tier_a"
+      "pool_tier": "tier_a",
+      "historical_role": "corps_commander"
     },
     {
       "id": "arbih_sehovic",
@@ -907,7 +930,7 @@
       "defensive_skill": 3,
       "political_reliability": 3,
       "home_corps_id": "arbih_1st_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 69,
       "origin": "military",
       "casualty_vulnerability": 0.3,
       "can_improve": true,
@@ -915,7 +938,9 @@
       "pool_tier": "tier_c",
       "enclave_lock": {
         "enclave_id": "sarajevo"
-      }
+      },
+      "historical_role": "brigade_commander",
+      "available_until_turn": 69
     },
     {
       "id": "arbih_selmanovic",
@@ -927,7 +952,7 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "arbih_5th_corps",
-      "available_from_turn": 0,
+      "available_from_turn": 195,
       "origin": "military",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
@@ -935,7 +960,8 @@
       "pool_tier": "tier_a",
       "enclave_lock": {
         "enclave_id": "bihac"
-      }
+      },
+      "historical_role": "staff_officer"
     },
     {
       "id": "arbih_talijan",
@@ -947,10 +973,7 @@
       "defensive_skill": 4,
       "political_reliability": 4,
       "home_corps_id": "arbih_1st_corps",
-      "available_from_turn": 0,
-      "available_until_turn": 68,
-      "is_historical_start": true,
-      "historical_corps_id": "arbih_1st_corps",
+      "available_from_turn": 22,
       "origin": "jna",
       "casualty_vulnerability": 0.15,
       "can_improve": true,
@@ -962,7 +985,8 @@
       "bio_short": "JNA-trained officer assigned to 1st Corps around Sarajevo at scenario start.",
       "command_style": "Bold, resilient enclave command",
       "known_for": "1st Corps opening command",
-      "political_alignment_note": "Regular RBiH corps command appointment."
+      "political_alignment_note": "Regular RBiH corps command appointment.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "hvo_blaskic",
@@ -974,16 +998,14 @@
       "defensive_skill": 4,
       "political_reliability": 3,
       "home_corps_id": "hvo_central_bosnia",
-      "available_from_turn": 0,
-      "available_until_turn": 122,
-      "is_historical_start": true,
-      "historical_corps_id": "hvo_central_bosnia",
+      "available_from_turn": 12,
       "origin": "jna",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
       "improvement_rate": 0.03,
       "pool_tier": "starter",
-      "bio_short": "Commander of the HVO Central Bosnia Operational Zone in 1993."
+      "bio_short": "Commander of the HVO Central Bosnia Operational Zone in 1993.",
+      "historical_role": "operational_zone_commander"
     },
     {
       "id": "hvo_blaskic_2",
@@ -1000,7 +1022,8 @@
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Appointed commander of the HVO on 5 August 1994 and served until November 1995."
+      "bio_short": "Appointed commander of the HVO on 5 August 1994 and served until November 1995.",
+      "historical_role": "army_commander"
     },
     {
       "id": "hvo_cerkez",
@@ -1012,7 +1035,7 @@
       "defensive_skill": 4,
       "political_reliability": 3,
       "home_corps_id": "hvo_central_bosnia",
-      "available_from_turn": 0,
+      "available_from_turn": 91,
       "origin": "militia",
       "casualty_vulnerability": 0.15,
       "can_improve": true,
@@ -1024,7 +1047,8 @@
         "sentence": "6 years",
         "charges": "Crimes against humanity (persecution), violations of laws of war",
         "summary": "Viteska Brigade commander convicted for attacks on Bosniak civilians in Vitez; many convictions overturned on appeal"
-      }
+      },
+      "historical_role": "brigade_commander"
     },
     {
       "id": "hvo_glasnovic",
@@ -1036,13 +1060,14 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "hvo_tomislavgrad",
-      "available_from_turn": 120,
+      "available_from_turn": 143,
       "origin": "foreign",
       "casualty_vulnerability": 0.15,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "tier_a",
-      "bio_short": "Commander of the HVO 1st Guards Brigade in 1994 and Tomislavgrad Corps District in 1995."
+      "bio_short": "Commander of the HVO 1st Guards Brigade in 1994 and Tomislavgrad Corps District in 1995.",
+      "historical_role": "corps_commander"
     },
     {
       "id": "hvo_kordic",
@@ -1054,7 +1079,7 @@
       "defensive_skill": 2,
       "political_reliability": 5,
       "home_corps_id": "hvo_central_bosnia",
-      "available_from_turn": 0,
+      "available_from_turn": 39,
       "origin": "political",
       "casualty_vulnerability": 0.05,
       "can_improve": false,
@@ -1066,7 +1091,8 @@
         "sentence": "25 years",
         "charges": "Crimes against humanity (persecution, murder, deportation), unlawful attacks on civilians, wanton destruction",
         "summary": "Vice-president of Herceg-Bosna who exercised de facto military command in Lašva Valley; ordered Bušovača and Ahmići attacks"
-      }
+      },
+      "historical_role": "political_military_authority"
     },
     {
       "id": "hvo_lasic",
@@ -1078,15 +1104,14 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "hvo_southeast_herzegovina",
-      "available_from_turn": 0,
-      "is_historical_start": true,
-      "historical_corps_id": "hvo_southeast_herzegovina",
+      "available_from_turn": 91,
       "origin": "militia",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
       "improvement_rate": 0.03,
       "pool_tier": "starter",
-      "bio_short": "Commander of the HVO Southeastern Herzegovina Operational Zone in 1993."
+      "bio_short": "Commander of the HVO Southeastern Herzegovina Operational Zone in 1993.",
+      "historical_role": "operational_zone_commander"
     },
     {
       "id": "hvo_matuzovic",
@@ -1098,9 +1123,7 @@
       "defensive_skill": 4,
       "political_reliability": 4,
       "home_corps_id": "hvo_northwest_bosnia",
-      "available_from_turn": 0,
-      "is_historical_start": true,
-      "historical_corps_id": "hvo_northwest_bosnia",
+      "available_from_turn": 166,
       "origin": "military",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
@@ -1112,7 +1135,8 @@
       "bio_short": "Military-origin commander assigned to Northwest Bosnia in the opening OOB.",
       "command_style": "Cautious, defensive regional command",
       "known_for": "Northwest Bosnia opening command",
-      "political_alignment_note": "Regular HRHB corps command appointment."
+      "political_alignment_note": "Regular HRHB corps command appointment.",
+      "historical_role": "brigade_commander"
     },
     {
       "id": "hvo_nakic",
@@ -1124,12 +1148,13 @@
       "defensive_skill": 3,
       "political_reliability": 4,
       "home_corps_id": "hvo_central_bosnia",
-      "available_from_turn": 0,
+      "available_from_turn": 91,
       "origin": "military",
       "casualty_vulnerability": 0.1,
       "can_improve": true,
       "improvement_rate": 0.03,
-      "pool_tier": "tier_a"
+      "pool_tier": "tier_a",
+      "historical_role": "operational_zone_commander"
     },
     {
       "id": "hvo_naletlic",
@@ -1141,7 +1166,7 @@
       "defensive_skill": 1,
       "political_reliability": 3,
       "home_corps_id": "hvo_southeast_herzegovina",
-      "available_from_turn": 0,
+      "available_from_turn": 91,
       "origin": "militia",
       "casualty_vulnerability": 0.2,
       "can_improve": false,
@@ -1153,7 +1178,8 @@
         "sentence": "20 years",
         "charges": "Crimes against humanity (persecution, murder, rape), grave breaches of Geneva Conventions",
         "summary": "Convicts Battalion commander convicted for campaign of persecution against Bosniaks including forced labor and human shields"
-      }
+      },
+      "historical_role": "battalion_commander"
     },
     {
       "id": "hvo_petkovic",
@@ -1166,13 +1192,13 @@
       "political_reliability": 4,
       "available_from_turn": 2,
       "available_until_turn": 68,
-      "is_historical_start": false,
       "origin": "jna",
       "casualty_vulnerability": 0.05,
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Chief of the HVO Main Staff from 14 April 1992 until 24 July 1993."
+      "bio_short": "Chief of the HVO Main Staff from 14 April 1992 until 24 July 1993.",
+      "historical_role": "army_commander"
     },
     {
       "id": "hvo_petkovic_2",
@@ -1190,7 +1216,8 @@
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Returned as Chief of the HVO Main Staff from 26 April until 5 August 1994."
+      "bio_short": "Returned as Chief of the HVO Main Staff from 26 April until 5 August 1994.",
+      "historical_role": "army_commander"
     },
     {
       "id": "hvo_praljak",
@@ -1208,7 +1235,8 @@
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Commander of the HVO Main Staff from 24 July until 9 November 1993."
+      "bio_short": "Commander of the HVO Main Staff from 24 July until 9 November 1993.",
+      "historical_role": "army_commander"
     },
     {
       "id": "hvo_rajic",
@@ -1220,12 +1248,13 @@
       "defensive_skill": 2,
       "political_reliability": 4,
       "home_corps_id": "hvo_central_bosnia",
-      "available_from_turn": 0,
+      "available_from_turn": 91,
       "origin": "jna",
       "casualty_vulnerability": 0.15,
       "can_improve": false,
       "improvement_rate": 0,
-      "pool_tier": "tier_a"
+      "pool_tier": "tier_a",
+      "historical_role": "operational_group_commander"
     },
     {
       "id": "hvo_roso",
@@ -1243,7 +1272,8 @@
       "can_improve": false,
       "improvement_rate": 0,
       "pool_tier": "starter",
-      "bio_short": "Commander, then Chief, of the HVO Main Staff from 9 November 1993 until 26 April 1994."
+      "bio_short": "Commander, then Chief, of the HVO Main Staff from 9 November 1993 until 26 April 1994.",
+      "historical_role": "army_commander"
     },
     {
       "id": "hvo_sopta",
@@ -1258,12 +1288,13 @@
       "compatible_corps_ids": [
         "hvo_tomislavgrad"
       ],
-      "available_from_turn": 88,
+      "available_from_turn": 143,
       "origin": "military",
       "casualty_vulnerability": 0.15,
       "can_improve": false,
       "improvement_rate": 0,
-      "pool_tier": "tier_a"
+      "pool_tier": "tier_a",
+      "historical_role": "brigade_commander"
     }
   ]
 }

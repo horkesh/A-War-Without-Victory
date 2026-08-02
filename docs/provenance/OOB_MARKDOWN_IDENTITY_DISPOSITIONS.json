@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "aliases": {
+    "HRHB:103rd": "hrhb_103rd_derventa_brigade",
+    "HRHB:104th": "hrhb_104th_bosanski_brod_brigade",
+    "HRHB:105th": "hrhb_105th_modrica_brigade",
+    "HRHB:106th": "hrhb_106th_bosanska_posavina_brigade",
+    "HRHB:107th gradacac": "hrhb_107th_gradaac_brigade",
+    "HRHB:108th brcko": "hrhb_108th_brko_brigade",
+    "HRHB:110th usora": "hrhb_110th_usora_brigade",
+    "HRHB:115th zrinski": "hrhb_115th_zrinski_brigade",
+    "RS:1st podrinje": "rs_1st_podrinje"
+  },
+  "modeled_extras": {
+    "arbih_10th_mountain": {
+      "disposition": "modeled_extra",
+      "reason": "Early-war Sarajevo formation outside the October 1995 Appendix H snapshot."
+    },
+    "arbih_1st_mountain": {
+      "disposition": "modeled_extra",
+      "reason": "Earlier designation later represented by a successor in the October 1995 Appendix H snapshot."
+    },
+    "arbih_2nd_tuzla": {
+      "disposition": "modeled_extra",
+      "reason": "Earlier Tuzla formation outside the October 1995 Appendix H snapshot."
+    },
+    "arbih_504th_cazin_light": {
+      "disposition": "modeled_extra",
+      "reason": "Earlier 5th Corps designation outside the October 1995 Appendix H snapshot."
+    },
+    "arbih_hvo_kralj_tvrtko": {
+      "disposition": "modeled_extra",
+      "reason": "Sarajevo HVO/ARBiH formation represented separately from Appendix H's later 124th Light identity."
+    },
+    "hvo_101st_bihac": {
+      "disposition": "modeled_extra",
+      "reason": "Bihać HVO formation documented outside the sparse HVO comparison list."
+    },
+    "hvo_1st_guard_abb": {
+      "disposition": "modeled_extra",
+      "reason": "Guard formation documented outside the sparse HVO comparison list."
+    },
+    "hvo_2nd_guard_mechanized": {
+      "disposition": "modeled_extra",
+      "reason": "Guard formation documented outside the sparse HVO comparison list."
+    },
+    "hvo_3rd_guard_jastrebovi": {
+      "disposition": "modeled_extra",
+      "reason": "Guard formation documented outside the sparse HVO comparison list."
+    },
+    "hvo_4th_guard_sinovi_posavine": {
+      "disposition": "modeled_extra",
+      "reason": "Guard formation documented outside the sparse HVO comparison list."
+    },
+    "hvo_ante_starcevic_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Named HVO formation documented in the master OOB rather than the sparse comparison list."
+    },
+    "hvo_hrvoje_vukcic_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Named HVO formation documented in the master OOB rather than the sparse comparison list."
+    },
+    "hvo_nikola_subic_zrinski_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Named HVO formation documented in the master OOB rather than the sparse comparison list."
+    },
+    "hvo_posusje_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Posušje formation documented in the master OOB rather than the sparse comparison list."
+    },
+    "hvo_rama_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Rama formation documented in the master OOB rather than the sparse comparison list."
+    },
+    "rs_2nd_herzegovina_light_infantry": {
+      "disposition": "modeled_extra",
+      "reason": "Narrative Herzegovina Corps formation outside Appendix G's explicit skeleton tables."
+    },
+    "rs_2nd_romanija_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Narrative Sarajevo-Romanija formation outside Appendix G's explicit skeleton tables."
+    },
+    "rs_65th_protection_motorized_regiment": {
+      "disposition": "modeled_extra",
+      "reason": "Main Staff regiment deliberately modeled although the comparison source is brigade-focused."
+    },
+    "rs_igman_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Narrative Sarajevo-Romanija formation outside Appendix G's explicit skeleton tables."
+    },
+    "rs_ilidza_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Detailed Sarajevo-Romanija identity represented more specifically than the appendix label."
+    },
+    "rs_ilijas_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Detailed Sarajevo-Romanija identity represented more specifically than the appendix label."
+    },
+    "rs_skelani_battalion": {
+      "disposition": "modeled_extra",
+      "reason": "Independent battalion deliberately modeled although the comparison source is brigade-focused."
+    },
+    "rs_trnovo_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "Narrative Sarajevo-Romanija formation outside Appendix G's explicit skeleton tables."
+    },
+    "vrs_1st_laktasi": {
+      "disposition": "modeled_extra",
+      "reason": "Formation documented outside the July 1995 Appendix G snapshot."
+    }
+  },
+  "evidence_only": {
+    "RBiH:145th light": {
+      "disposition": "evidence_only",
+      "reason": "Appendix row is marked insufficient-detail and remains omitted pending an exact playable identity."
+    },
+    "RS:rogatica": {
+      "disposition": "evidence_only",
+      "reason": "The generic appendix label is not conflated with the modeled 1st Podrinje identity without exact alias evidence."
+    },
+    "RS:sekovici": {
+      "disposition": "evidence_only",
+      "reason": "The appendix row remains omitted pending exact authoritative identity and startup placement evidence."
+    }
+  }
+}

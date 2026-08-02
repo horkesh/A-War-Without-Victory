@@ -40,6 +40,8 @@ export interface NamedOfficerView {
     name: string;
     faction: string;
     rank: string;
+    /** Sourced historical office; rank remains a gameplay appointment class. */
+    historical_role?: string;
     competence: number;
     aggressiveness: number;
     defensive_skill: number;

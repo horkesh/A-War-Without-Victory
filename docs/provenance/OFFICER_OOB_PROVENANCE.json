@@ -80,16 +80,16 @@
       "notes": "Exact named formation row in Appendix H."
     },
     "brigade:arbih_10th_mountain": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 10th Mountain Brigade",
-      "source_tier": "dataset",
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0428.json",
+      "citation": "BB2 p.428 identifies the ARBiH 10th Mountain Brigade in Sarajevo combat.",
+      "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+      "notes": "Retained after exact row-level formation identity re-audit."
     },
     "brigade:arbih_111th_vitezka_motorized": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -126,18 +126,6 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
-    },
-    "brigade:arbih_116th_mountain": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 116th Mountain Brigade",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "brigade:arbih_120th_liberation_black_swans": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -367,53 +355,17 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
     },
-    "brigade:arbih_1st_cerska": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 1st Cerska Brigade",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
-    },
-    "brigade:arbih_1st_kamenica": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 1st Kamenica Brigade",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
-    },
     "brigade:arbih_1st_mountain": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 1st Mountain Brigade",
-      "source_tier": "dataset",
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0519.json",
+      "citation": "BB2 p.519 identifies the ARBiH 1st Corps 1st Mountain Brigade in the October 1994 Bjelašnica operation.",
+      "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
-    },
-    "brigade:arbih_1st_olovo": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 1st Olovo Brigade",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+      "notes": "Retained after exact row-level formation identity re-audit."
     },
     "brigade:arbih_210th_vitezka_liberation_nesib_maliki": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -691,78 +643,6 @@
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
     },
-    "brigade:arbih_280th_east_bosnian_light": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 280th East Bosnian Light",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
-    },
-    "brigade:arbih_281st_east_bosnian_light": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 281st East Bosnian Light",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
-    },
-    "brigade:arbih_282nd_east_bosnian_light": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 282nd East Bosnian Light",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
-    },
-    "brigade:arbih_283rd_east_bosnian_light": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 283rd East Bosnian Light",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
-    },
-    "brigade:arbih_284th_east_bosnian_light": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 284th East Bosnian Light",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
-    },
-    "brigade:arbih_285th_light": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 285th Light Brigade",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
-    },
     "brigade:arbih_286th_mountain": {
       "source": "Balkan Battlegrounds, Vol. I",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0514.json",
@@ -786,18 +666,6 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact named formation row in Appendix H."
-    },
-    "brigade:arbih_2nd_mountain": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 2nd Mountain Brigade",
-      "source_tier": "dataset",
-      "confidence": "exact",
-      "identity_relation": null,
-      "court_record_citation": null,
-      "conflict_note": null,
-      "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "brigade:arbih_2nd_tuzla": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -1460,16 +1328,16 @@
       "notes": "Exact named formation row in Appendix H."
     },
     "brigade:arbih_hvo_kralj_tvrtko": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: HVO Brigade \"Kralj Tvrtko\"",
-      "source_tier": "dataset",
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0460.json",
+      "citation": "BB2 p.460 identifies the HVO Kralj Tvrtko Brigade in Sarajevo and its later subordination to ARBiH 1st Corps.",
+      "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+      "notes": "Retained after exact row-level formation identity re-audit."
     },
     "brigade:hrhb_101st_oraje_brigade": {
       "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
@@ -1544,40 +1412,40 @@
       "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "brigade:hrhb_107th_gradaac_brigade": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 107th \"Gradačac\" Brigade",
-      "source_tier": "dataset",
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0401.json",
+      "citation": "BB2 p.401 identifies the 107th Gradačac Motorized Brigade.",
+      "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+      "notes": "Retained after exact row-level formation identity re-audit."
     },
     "brigade:hrhb_108th_brko_brigade": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 108th \"Brčko\" Brigade",
-      "source_tier": "dataset",
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0401.json",
+      "citation": "BB2 p.401 identifies the HVO 108th Brčko Brigade.",
+      "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+      "notes": "Retained after exact row-level formation identity re-audit."
     },
     "brigade:hrhb_110th_usora_brigade": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 110th Usora Brigade",
-      "source_tier": "dataset",
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0498.json",
+      "citation": "BB2 p.498 identifies the HVO 110th Usora Brigade and its operational alliance with ARBiH.",
+      "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+      "notes": "Retained after exact row-level formation identity re-audit."
     },
     "brigade:hrhb_111th_brigade": {
       "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
@@ -1592,16 +1460,16 @@
       "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
     "brigade:hrhb_115th_zrinski_brigade": {
-      "source": "ARBiH historical formation evidence ledger",
-      "source_url": "repo://docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md",
-      "citation": "Exact formation identity cross-reference row: 115th \"Zrinski\" Brigade",
-      "source_tier": "dataset",
+      "source": "Balkan Battlegrounds, Vol. II",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0401.json",
+      "citation": "BB2 p.401 identifies the HVO 115th Brigade in Tuzla.",
+      "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
+      "notes": "Retained after exact row-level formation identity re-audit."
     },
     "brigade:hrhb_1st_brigade_mostar": {
       "source": "HVO brigade evidence ledger (BB narrative and archival unit sources)",
@@ -3285,7 +3153,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.418, 37th Division and 1st Corps command"
+        }
+      ]
     },
     "officer:arbih_alagic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3301,16 +3178,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 80,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB1 p.528, Key Wartime Commanders chart"
-        },
-        {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 120,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.528, Key Wartime Commanders chart"
         }
       ]
@@ -3326,7 +3197,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-07-31",
+          "precision": "on_or_before",
+          "modeled_turn": 69,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.448, Operational Group West command"
+        }
+      ]
     },
     "officer:arbih_cuskic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -3339,7 +3219,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.529, Bosanska Krajina Operational Group command"
+        }
+      ]
     },
     "officer:arbih_delic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3355,9 +3244,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 60,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.528, Key Wartime Commanders chart"
         }
       ]
@@ -3373,7 +3263,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-08-05",
+          "precision": "on_or_before",
+          "modeled_turn": 70,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.418, ARBiH deputy chief of staff"
+        }
+      ]
     },
     "officer:arbih_drekovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3394,13 +3293,6 @@
           "modeled_turn": 29,
           "boundary_rule": "first campaign-week boundary on or after the exact source date",
           "citation": "BB1 p.186, 5th Corps formation narrative"
-        },
-        {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 80,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB1 p.186, 5th Corps formation narrative"
         }
       ]
     },
@@ -3415,7 +3307,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact 5th Corps commander identity and 1993-97 tenure.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.528, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:arbih_hadzihasanovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3431,16 +3332,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 22,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB1 p.528, Key Wartime Commanders chart"
-        },
-        {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 80,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.528, Key Wartime Commanders chart"
         }
       ]
@@ -3458,26 +3353,44 @@
       "notes": "Exact Bosnian Army commander identity in March 1993.",
       "temporal_evidence": [
         {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 60,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "field": "available_from_turn",
+          "source_date": "1993-03-08",
+          "precision": "on_or_before",
+          "modeled_turn": 48,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB2 p.406, Drina operations narrative"
         }
       ]
     },
     "officer:arbih_hodzic": {
-      "source": "Balkan Battlegrounds, Vols. I-II",
-      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0405.json",
-      "citation": "BB2 p.405, northeast Bosnia command narrative",
-      "source_tier": "scholarly",
+      "source": "Federal Ministry for Veterans and Disabled Veterans of the Defence-Liberation War",
+      "source_url": "https://fmbi.gov.ba/obiljezen-dan-pogibije-heroja-mehdina-senada-hodzica/",
+      "citation": "Official commemoration identifies Mehdin Hodžić as a direct commander and records his death on 10 May 1992.",
+      "source_tier": "official",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "notes": "Retained after exact identity, role, and chronology re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-05-10",
+          "precision": "on_or_before",
+          "modeled_turn": 5,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "Official commemoration identifies Mehdin Hodžić as a direct commander and records his death on 10 May 1992."
+        },
+        {
+          "field": "available_until_turn",
+          "source_date": "1992-05-10",
+          "precision": "exact_date",
+          "modeled_turn": 5,
+          "boundary_rule": "first campaign-week boundary on or after the exact death date",
+          "citation": "Official commemoration identifies Mehdin Hodžić as a direct commander and records his death on 10 May 1992."
+        }
+      ]
     },
     "officer:arbih_imamovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3490,7 +3403,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1995-07-31",
+          "precision": "on_or_before",
+          "modeled_turn": 173,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.443, 14th Division command"
+        }
+      ]
     },
     "officer:arbih_karavelic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3506,9 +3428,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 68,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.404 and index p.533, 1st Corps command"
         }
       ]
@@ -3527,9 +3450,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 120,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1995-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 195,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.439, 25th Division command"
         }
       ]
@@ -3548,38 +3472,73 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 110,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1994-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 143,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.528, Key Wartime Commanders chart"
         }
       ]
     },
     "officer:arbih_malkic": {
-      "source": "Balkan Battlegrounds, Vol. I",
-      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0439.json",
-      "citation": "BB1 p.439, 210th Liberation Brigade identity",
-      "source_tier": "scholarly",
+      "source": "Federal Ministry for Veterans and Disabled Veterans of the Defence-Liberation War",
+      "source_url": "https://fmbi.gov.ba/obiljezavanje-31-godisnjice-formiranja-210-viteske-oslobodilacke-brigade-nesib-malkic/",
+      "citation": "Official history records the 210th Brigade formation on 12 February 1993, Nesib Malkić as its first commander, and his death on 25 October 1993.",
+      "source_tier": "official",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "notes": "Retained after exact identity, role, and chronology re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-02-12",
+          "precision": "exact_date",
+          "modeled_turn": 45,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "Official history records the 210th Brigade formation on 12 February 1993, Nesib Malkić as its first commander, and his death on 25 October 1993."
+        },
+        {
+          "field": "available_until_turn",
+          "source_date": "1993-10-25",
+          "precision": "exact_date",
+          "modeled_turn": 81,
+          "boundary_rule": "first campaign-week boundary on or after the exact death date",
+          "citation": "Official history records the 210th Brigade formation on 12 February 1993, Nesib Malkić as its first commander, and his death on 25 October 1993."
+        }
+      ]
     },
     "officer:arbih_mesic": {
-      "source": "Balkan Battlegrounds, Vol. II",
-      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0490.json",
-      "citation": "BB2 p.490, Teočak brigade identity",
-      "source_tier": "scholarly",
+      "source": "Federal Ministry for Veterans and Disabled Veterans of the Defence-Liberation War",
+      "source_url": "https://fmbi.gov.ba/teocanski-dani-otpora-obiljezena-godisnjica-255-slavne-brdske-brigade-hajrudin-mesic/",
+      "citation": "Official history records the 1st Teočak Brigade formation on 16 September 1992 and Hajrudin Mešić as its first commander.",
+      "source_tier": "official",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "notes": "Retained after exact identity, role, and chronology re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-09-16",
+          "precision": "exact_date",
+          "modeled_turn": 24,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "Official history records the 1st Teočak Brigade formation on 16 September 1992 and Hajrudin Mešić as its first commander."
+        },
+        {
+          "field": "available_until_turn",
+          "source_date": "1992-10-30",
+          "precision": "exact_date",
+          "modeled_turn": 30,
+          "boundary_rule": "first campaign-week boundary on or after the exact death date",
+          "citation": "Official history records the 1st Teočak Brigade formation on 16 September 1992 and Hajrudin Mešić as its first commander."
+        }
+      ]
     },
     "officer:arbih_nanic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -3592,7 +3551,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1995-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 195,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.537, 505th Brigade command"
+        }
+      ]
     },
     "officer:arbih_oric": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3605,20 +3573,38 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-05-08",
+          "precision": "on_or_before",
+          "modeled_turn": 5,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 pp.186-187, Srebrenica force command"
+        }
+      ]
     },
     "officer:arbih_palic": {
-      "source": "Balkan Battlegrounds, Vols. I-II",
-      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0356.json",
-      "citation": "BB1 p.356 and BB2 p.408, Žepa command",
-      "source_tier": "scholarly",
+      "source": "ICTY Popović et al. trial transcript",
+      "source_url": "https://www.icty.org/x/cases/popovic/trans/en/070330ED.htm",
+      "citation": "ICTY transcript records Avdo Palić appointed commander of armed forces in the Žepa region on 18 October 1992.",
+      "source_tier": "official",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "notes": "Retained after exact identity, role, and chronology re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-10-18",
+          "precision": "exact_date",
+          "modeled_turn": 28,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY transcript records Avdo Palić appointed commander of armed forces in the Žepa region on 18 October 1992."
+        }
+      ]
     },
     "officer:arbih_pasalic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -3634,16 +3620,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 24,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB2 p.452, northern Herzegovina narrative"
-        },
-        {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 80,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB2 p.452, northern Herzegovina narrative"
         }
       ]
@@ -3662,25 +3642,43 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 132,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1995-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 195,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.528, Key Wartime Commanders chart"
         }
       ]
     },
     "officer:arbih_s_hadzic": {
-      "source": "Balkan Battlegrounds, Vol. I",
-      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0441.json",
-      "citation": "BB1 p.441, Sarajevo command narrative",
-      "source_tier": "scholarly",
+      "source": "Government of Sarajevo Canton",
+      "source_url": "https://www.vlada.ks.gov.ba/aktuelnosti/novosti/obiljezena-25-godisnjica-pogibije-heroja-oslobodilackog-rata-safeta-hadzica-i",
+      "citation": "Official commemoration records Safet Hadžić as Sarajevo regional crisis-staff president and his death on 18 April 1992.",
+      "source_tier": "official",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "notes": "Retained after exact identity, role, and chronology re-audit.",
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-04-18",
+          "precision": "on_or_before",
+          "modeled_turn": 2,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "Official commemoration records Safet Hadžić as Sarajevo regional crisis-staff president and his death on 18 April 1992."
+        },
+        {
+          "field": "available_until_turn",
+          "source_date": "1992-04-18",
+          "precision": "exact_date",
+          "modeled_turn": 2,
+          "boundary_rule": "first campaign-week boundary on or after the exact death date",
+          "citation": "Official commemoration records Safet Hadžić as Sarajevo regional crisis-staff president and his death on 18 April 1992."
+        }
+      ]
     },
     "officer:arbih_sadic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3696,16 +3694,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 44,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB1 p.202, 2nd Corps commander statement"
-        },
-        {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 132,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.202, 2nd Corps commander statement"
         }
       ]
@@ -3721,7 +3713,24 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-07-27",
+          "precision": "on_or_before",
+          "modeled_turn": 69,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.428, 1st Motorized Brigade command"
+        },
+        {
+          "field": "available_until_turn",
+          "source_date": "1993-07-27",
+          "precision": "exact_date",
+          "modeled_turn": 69,
+          "boundary_rule": "first campaign-week boundary on or after the exact death date",
+          "citation": "BB2 p.428, 1st Motorized Brigade command"
+        }
+      ]
     },
     "officer:arbih_selmanovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3734,34 +3743,44 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1995-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 195,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.449, 5th Corps chief of staff"
+        }
+      ]
     },
     "officer:arbih_talijan": {
-      "source": "Balkan Battlegrounds, Vol. I",
-      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0234.json",
-      "citation": "BB1 p.234, 1st Corps command narrative",
-      "source_tier": "scholarly",
+      "source": "ICTY Halilović Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/halilovic/tjug/en/tcj051116e.pdf",
+      "citation": "ICTY Trial Judgment paragraph 118 records the 1st Corps established on 1 September 1992 under Mustafa Hajrulahović Talijan.",
+      "source_tier": "official",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Restored after exact row-local identity and command-assignment re-audit.",
+      "notes": "Retained after exact identity, role, and chronology re-audit.",
       "temporal_evidence": [
         {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 68,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB1 p.234, 1st Corps command narrative"
+          "field": "available_from_turn",
+          "source_date": "1992-09-01",
+          "precision": "exact_date",
+          "modeled_turn": 22,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY Trial Judgment paragraph 118 records the 1st Corps established on 1 September 1992 under Mustafa Hajrulahović Talijan."
         }
       ]
     },
     "officer:hvo_blaskic": {
-      "source": "Balkan Battlegrounds, Vol. II",
-      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0446.json",
-      "citation": "BB2 p.446, Chart 1 HVO OOB Kiseljak Enclave, 1993",
-      "source_tier": "scholarly",
+      "source": "ICTY Blaškić Trial Judgment",
+      "source_url": "https://www.icty.org/x/cases/blaskic/tjug/en/bla-tj000303e-1.htm",
+      "citation": "ICTY Trial Judgment records Tihomir Blaškić appointed commander of the Central Bosnia Armed Forces on 27 June 1992.",
+      "source_tier": "official",
       "confidence": "exact",
       "identity_relation": {
         "kind": "tenure_of",
@@ -3770,14 +3789,15 @@
       "court_record_citation": null,
       "conflict_note": "Exact cross-row identity relation.",
       "disposition": "supported",
-      "notes": "Exact Central Bosnia Operational Zone commander identity.",
+      "notes": "Retained after exact identity, role, and chronology re-audit.",
       "temporal_evidence": [
         {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 122,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB2 p.446, Chart 1 HVO OOB Kiseljak Enclave, 1993"
+          "field": "available_from_turn",
+          "source_date": "1992-06-27",
+          "precision": "exact_date",
+          "modeled_turn": 12,
+          "boundary_rule": "first campaign-week boundary on or after the exact source date",
+          "citation": "ICTY Trial Judgment records Tihomir Blaškić appointed commander of the Central Bosnia Armed Forces on 27 June 1992."
         }
       ]
     },
@@ -3814,7 +3834,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.437, Vitez Brigade command"
+        }
+      ]
     },
     "officer:hvo_glasnovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3833,9 +3862,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 120,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1994-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 143,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.527, Key Wartime Commanders chart"
         }
       ]
@@ -3851,7 +3881,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "IT-95-14/2-T, Central Bosnia authority findings"
+        }
+      ]
     },
     "officer:hvo_lasic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -3864,7 +3903,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact Southeastern Herzegovina Operational Zone commander identity.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.452, northern Herzegovina narrative"
+        }
+      ]
     },
     "officer:hvo_matuzovic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -3877,7 +3925,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1995-06-06",
+          "precision": "on_or_before",
+          "modeled_turn": 166,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.438, Orašje command evidence"
+        }
+      ]
     },
     "officer:hvo_nakic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -3890,7 +3947,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact Central Bosnia Operational Zone deputy commander identity.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.446, Chart 1 HVO OOB Kiseljak Enclave, 1993"
+        }
+      ]
     },
     "officer:hvo_naletlic": {
       "source": "ICTY, Prosecutor v. Naletilić and Martinović, Trial Judgment",
@@ -3903,7 +3969,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "IT-98-34-T, Convicts Battalion command findings"
+        }
+      ]
     },
     "officer:hvo_petkovic": {
       "source": "ICTY, Prosecutor v. Prlić et al., Trial Judgment, Vol. I",
@@ -4009,7 +4084,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact Central Bosnia Second Operational Group command identity.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.446, Chart 1 HVO OOB Kiseljak Enclave, 1993"
+        }
+      ]
     },
     "officer:hvo_roso": {
       "source": "ICTY, Prosecutor v. Prlić et al., Trial Judgment, Vol. I",
@@ -4058,9 +4142,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 88,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1994-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 143,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.456, 2nd HVO Guard Brigade command"
         }
       ]
@@ -4076,7 +4161,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 91,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.413, Drina Corps brigade command"
+        }
+      ]
     },
     "officer:vrs_arsic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4089,7 +4183,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1995-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 195,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.458, Doboj Operational Group command"
+        }
+      ]
     },
     "officer:vrs_blagojevic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4102,7 +4205,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1995-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 195,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.443, 1st Bratunac Brigade command"
+        }
+      ]
     },
     "officer:vrs_boric": {
       "source": "Balkan Battlegrounds, Vols. I-II",
@@ -4123,13 +4235,6 @@
           "modeled_turn": 39,
           "boundary_rule": "conservative first campaign-week boundary on or after the sourced no-later-than date",
           "citation": "BB1 p.186 proves command only by the end of 1992"
-        },
-        {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 134,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB1 p.186, Bihac operations narrative; BB2 p.555, October 1994 Bihac offensive narrative"
         }
       ]
     },
@@ -4144,7 +4249,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.401, 5th Kozara Brigade command interview"
+        }
+      ]
     },
     "officer:vrs_d_milosevic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4160,9 +4274,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 118,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1994-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 143,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.525, Key Wartime Commanders chart"
         }
       ]
@@ -4181,16 +4296,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 18,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB1 p.524, Key Wartime Commanders chart"
-        },
-        {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 118,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.524, Key Wartime Commanders chart"
         }
       ]
@@ -4206,7 +4315,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact Herzegovina Corps commander identity and 1992-96 tenure.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.525, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:vrs_krstic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4222,9 +4340,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 170,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1995-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 195,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.525, Key Wartime Commanders chart"
         }
       ]
@@ -4240,7 +4359,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact VRS Main Staff chief identity and 1992-96 tenure.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.524, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:vrs_mladic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4253,7 +4381,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact VRS Main Staff command identity and 1992-96 tenure.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.524, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:vrs_obrenovic": {
       "source": "ICTY, Prosecutor v. Popović et al., Trial Judgment",
@@ -4266,7 +4403,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1995-07-31",
+          "precision": "on_or_before",
+          "modeled_turn": 173,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "IT-05-88-T, command findings for the Zvornik Brigade"
+        }
+      ]
     },
     "officer:vrs_pandurevic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4279,7 +4425,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1995-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 195,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.443, 1st Zvornik Brigade command"
+        }
+      ]
     },
     "officer:vrs_samardzija": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -4292,7 +4447,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1994-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 143,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB2 p.530, 7th Kupres-Šipovo Brigade command"
+        }
+      ]
     },
     "officer:vrs_simic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4305,7 +4469,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact East Bosnian Corps commander identity and 1992-97 tenure.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.524, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:vrs_sipcic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4320,10 +4493,11 @@
       "notes": "Exact initial Sarajevo-Romanija Corps commander and replacement timing.",
       "temporal_evidence": [
         {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 18,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "field": "available_from_turn",
+          "source_date": "1992-05-31",
+          "precision": "on_or_before",
+          "modeled_turn": 8,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.189, Sarajevo corps narrative"
         }
       ]
@@ -4339,7 +4513,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact 1st Krajina Corps commander identity and 1992-97 tenure.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.524, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:vrs_tolimir": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4352,7 +4535,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Exact Main Staff intelligence and security assistant identity and 1992-96 tenure.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.524, Key Wartime Commanders chart"
+        }
+      ]
     },
     "officer:vrs_tomanic": {
       "source": "Balkan Battlegrounds, Vol. I",
@@ -4368,9 +4560,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
+          "source_date": "1993-12-31",
+          "precision": "on_or_before",
           "modeled_turn": 91,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB1 p.524, Key Wartime Commanders chart"
         }
       ]
@@ -4386,7 +4579,16 @@
       "conflict_note": null,
       "disposition": "supported",
       "notes": "Restored after exact row-local identity and command-assignment re-audit.",
-      "temporal_evidence": []
+      "temporal_evidence": [
+        {
+          "field": "available_from_turn",
+          "source_date": "1995-09-15",
+          "precision": "on_or_before",
+          "modeled_turn": 180,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
+          "citation": "BB1 p.420, Prijedor Operational Group command"
+        }
+      ]
     },
     "officer:vrs_zivanovic": {
       "source": "Balkan Battlegrounds, Vol. II",
@@ -4402,16 +4604,10 @@
       "temporal_evidence": [
         {
           "field": "available_from_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 28,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
-          "citation": "BB2 p.478, Drina Corps command narrative"
-        },
-        {
-          "field": "available_until_turn",
-          "precision": "bounded_model",
-          "modeled_turn": 170,
-          "boundary_rule": "authored gameplay boundary; the cited source does not establish an exact calendar date",
+          "source_date": "1992-12-31",
+          "precision": "on_or_before",
+          "modeled_turn": 39,
+          "boundary_rule": "conservative source-date bound; no earlier appointment date is asserted",
           "citation": "BB2 p.478, Drina Corps command narrative"
         }
       ]
@@ -4737,6 +4933,94 @@
       "faction": "RS",
       "reason": "missing_exact_source",
       "notes": "Removed from playable named-officer data because no row-local source proved the modeled identity and command attribution."
+    },
+    "brigade:arbih_116th_mountain": {
+      "record_kind": "brigade",
+      "record_id": "arbih_116th_mountain",
+      "display_name": "116th Mountain Brigade",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_1st_cerska": {
+      "record_kind": "brigade",
+      "record_id": "arbih_1st_cerska",
+      "display_name": "1st Cerska Brigade",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_1st_kamenica": {
+      "record_kind": "brigade",
+      "record_id": "arbih_1st_kamenica",
+      "display_name": "1st Kamenica Brigade",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_1st_olovo": {
+      "record_kind": "brigade",
+      "record_id": "arbih_1st_olovo",
+      "display_name": "1st Olovo Brigade",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_280th_east_bosnian_light": {
+      "record_kind": "brigade",
+      "record_id": "arbih_280th_east_bosnian_light",
+      "display_name": "280th East Bosnian Light",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_281st_east_bosnian_light": {
+      "record_kind": "brigade",
+      "record_id": "arbih_281st_east_bosnian_light",
+      "display_name": "281st East Bosnian Light",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_282nd_east_bosnian_light": {
+      "record_kind": "brigade",
+      "record_id": "arbih_282nd_east_bosnian_light",
+      "display_name": "282nd East Bosnian Light",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_283rd_east_bosnian_light": {
+      "record_kind": "brigade",
+      "record_id": "arbih_283rd_east_bosnian_light",
+      "display_name": "283rd East Bosnian Light",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_284th_east_bosnian_light": {
+      "record_kind": "brigade",
+      "record_id": "arbih_284th_east_bosnian_light",
+      "display_name": "284th East Bosnian Light",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_285th_light": {
+      "record_kind": "brigade",
+      "record_id": "arbih_285th_light",
+      "display_name": "285th Light Brigade",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
+    },
+    "brigade:arbih_2nd_mountain": {
+      "record_kind": "brigade",
+      "record_id": "arbih_2nd_mountain",
+      "display_name": "2nd Mountain Brigade",
+      "faction": "RBiH",
+      "reason": "missing_exact_source",
+      "notes": "Removed from the playable OOB after re-audit: the prior cross-reference labels this identity as Wikipedia-only/new and no exact authoritative or local primary row evidence was found."
     }
   }
 }

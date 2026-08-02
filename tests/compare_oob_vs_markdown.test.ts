@@ -42,6 +42,8 @@ describe('compare_oob_vs_markdown evidence inputs', () => {
         expect(report.oob_counts.RBiH).toBeGreaterThan(0);
         expect(report.oob_counts.RS).toBeGreaterThan(0);
         expect(report.oob_counts.HRHB).toBeGreaterThan(0);
+        expect((report as unknown as { unresolved_mismatches: unknown[] }).unresolved_mismatches).toEqual([]);
+        expect((report as unknown as { identity_match_ok: boolean }).identity_match_ok).toBe(true);
     });
 
     it('throws instead of turning a missing evidence file into a zero count', () => {

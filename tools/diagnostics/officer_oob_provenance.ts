@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const OFFICER_OOB_PROVENANCE_MANIFEST_PATH = 'docs/provenance/OFFICER_OOB_PROVENANCE.json';
@@ -269,7 +269,7 @@ function deriveIdentities(input: OfficerOobProvenanceInput): DerivedIdentity[] {
             ]),
             has_court_record: officer.war_crimes_record != null,
             temporal_boundaries: [
-                ...(typeof officer.available_from_turn === 'number' && officer.available_from_turn > 0
+                ...(typeof officer.available_from_turn === 'number' && officer.available_from_turn >= 0
                     ? [{ field: 'available_from_turn' as const, modeled_turn: officer.available_from_turn }]
                     : []),
                 ...(typeof officer.available_until_turn === 'number'
@@ -341,7 +341,27 @@ function hasOwnField(
     return Object.prototype.hasOwnProperty.call(row, field);
 }
 
-export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput): OfficerOobProvenanceReport {
+function validateRepoSourceUrl(sourceUrl: string, rootDir: string): ProvenanceViolation[] {
+    if (!sourceUrl.startsWith('repo://')) return [];
+    const repoPath = sourceUrl.slice('repo://'.length);
+    if (!repoPath || repoPath.startsWith('/') || repoPath.includes('\\') || repoPath.includes('\0')) {
+        return [violation('repo_source_malformed', `Malformed repository source URL: ${sourceUrl}.`)];
+    }
+    const target = resolve(rootDir, ...repoPath.split('/'));
+    const relativeTarget = relative(resolve(rootDir), target);
+    if (!relativeTarget || relativeTarget.startsWith('..') || isAbsolute(relativeTarget)) {
+        return [violation('repo_source_escapes_root', `Repository source URL escapes the repository root: ${sourceUrl}.`)];
+    }
+    if (!existsSync(target) || !statSync(target).isFile()) {
+        return [violation('repo_source_missing', `Repository source target does not exist: ${sourceUrl}.`)];
+    }
+    return [];
+}
+
+export function buildOfficerOobProvenanceReport(
+    input: OfficerOobProvenanceInput,
+    rootDir = process.cwd(),
+): OfficerOobProvenanceReport {
     const identities = deriveIdentities(input);
     const identityByKey = new Map(identities.map((identity) => [identity.record_key, identity]));
     const corpsById = new Map(input.corps.corps.map((corps) => [corps.id, corps]));
@@ -404,6 +424,8 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
             }
             if (!asNonEmpty(entry.source_url)) {
                 violations.push(violation('missing_source_url', `${identity.record_key} has no source URL.`));
+            } else {
+                violations.push(...validateRepoSourceUrl(entry.source_url!, rootDir));
             }
             if (!asNonEmpty(entry.citation)) {
                 violations.push(violation('missing_citation', `${identity.record_key} has no exact citation.`));
@@ -647,7 +669,7 @@ export function loadOfficerOobProvenanceReport(rootDir = process.cwd()): Officer
         corps: readJson(rootDir, 'data/source/oob_corps.json'),
         brigades: readJson(rootDir, 'data/source/oob_brigades.json'),
         manifest: readJson(rootDir, OFFICER_OOB_PROVENANCE_MANIFEST_PATH),
-    });
+    }, rootDir);
 }
 
 export function serializeOfficerOobProvenanceReport(report: OfficerOobProvenanceReport): string {

@@ -93,16 +93,6 @@
       "source_basis": "catalogued_designation"
     },
     {
-      "id": "arbih_116th_mountain",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-116TH-MOUNTAIN",
-      "english_gloss": "116th Mountain Brigade",
-      "official_bcs": "116. brdska brigada",
-      "unit_type": "mountain",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
       "id": "arbih_120th_liberation_black_swans",
       "faction": "RBiH",
       "designation_code": "AWWV-BDE-ARBIH-120TH-LIBERATION-BLACK-SWANS",
@@ -293,42 +283,12 @@
       "source_basis": "catalogued_designation"
     },
     {
-      "id": "arbih_1st_cerska",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-1ST-CERSKA",
-      "english_gloss": "1st Cerska Brigade",
-      "official_bcs": "1. cerska brigada",
-      "unit_type": "brigade",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "arbih_1st_kamenica",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-1ST-KAMENICA",
-      "english_gloss": "1st Kamenica Brigade",
-      "official_bcs": "1. kamenička brigada",
-      "unit_type": "brigade",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
       "id": "arbih_1st_mountain",
       "faction": "RBiH",
       "designation_code": "AWWV-BDE-ARBIH-1ST-MOUNTAIN",
       "english_gloss": "1st Mountain Brigade",
       "official_bcs": "1. brdska brigada",
       "unit_type": "mountain",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "arbih_1st_olovo",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-1ST-OLOVO",
-      "english_gloss": "1st Olovo Brigade",
-      "official_bcs": "1. olovska brigada",
-      "unit_type": "brigade",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
     },
@@ -563,66 +523,6 @@
       "source_basis": "catalogued_designation"
     },
     {
-      "id": "arbih_280th_east_bosnian_light",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-280TH-EAST-BOSNIAN-LIGHT",
-      "english_gloss": "280th East Bosnian Light",
-      "official_bcs": "280. istočnobosanska lahka brigada",
-      "unit_type": "light",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "arbih_281st_east_bosnian_light",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-281ST-EAST-BOSNIAN-LIGHT",
-      "english_gloss": "281st East Bosnian Light",
-      "official_bcs": "281. istočnobosanska lahka brigada",
-      "unit_type": "light",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "arbih_282nd_east_bosnian_light",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-282ND-EAST-BOSNIAN-LIGHT",
-      "english_gloss": "282nd East Bosnian Light",
-      "official_bcs": "282. istočnobosanska lahka brigada",
-      "unit_type": "light",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "arbih_283rd_east_bosnian_light",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-283RD-EAST-BOSNIAN-LIGHT",
-      "english_gloss": "283rd East Bosnian Light",
-      "official_bcs": "283. istočnobosanska lahka brigada",
-      "unit_type": "light",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "arbih_284th_east_bosnian_light",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-284TH-EAST-BOSNIAN-LIGHT",
-      "english_gloss": "284th East Bosnian Light",
-      "official_bcs": "284. istočnobosanska lahka brigada",
-      "unit_type": "light",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "arbih_285th_light",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-285TH-LIGHT",
-      "english_gloss": "285th Light Brigade",
-      "official_bcs": "285. lahka brigada",
-      "unit_type": "light",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
       "id": "arbih_286th_mountain",
       "faction": "RBiH",
       "designation_code": "AWWV-BDE-ARBIH-286TH-MOUNTAIN",
@@ -638,16 +538,6 @@
       "designation_code": "AWWV-BDE-ARBIH-287TH-MOUNTAIN",
       "english_gloss": "287th Mountain",
       "official_bcs": "287. brdska brigada",
-      "unit_type": "mountain",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "arbih_2nd_mountain",
-      "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-2ND-MOUNTAIN",
-      "english_gloss": "2nd Mountain Brigade",
-      "official_bcs": "2. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"

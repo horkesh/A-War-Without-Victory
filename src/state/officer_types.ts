@@ -1,8 +1,8 @@
 /**
  * Type definitions for the Named Officers system (Tier 1).
  *
- * Named officers are historical corps and army-level commanders with individual
- * ratings that affect combat modifiers, corps directives, and succession.
+ * Named officers are a historical strategic/operational command pool with
+ * individual ratings that affect combat modifiers, directives, and succession.
  *
  * Deterministic: all data is static JSON. Mutable state is on GameState.
  */
@@ -14,7 +14,24 @@ import type { StepCurveEntry } from './war_timeline.js';
 // Static officer data (loaded from JSON, immutable during simulation)
 // ═══════════════════════════════════════════════════════════════════════════
 
-export type OfficerRank = 'army_commander' | 'corps_commander' | 'deputy' | 'tactical_commander';
+/** Gameplay assignment eligibility. This is not a literal historical rank. */
+export type OfficerAppointmentClass = 'army_commander' | 'corps_commander' | 'deputy' | 'tactical_commander';
+/** @deprecated Use OfficerAppointmentClass; retained for save and API compatibility. */
+export type OfficerRank = OfficerAppointmentClass;
+export type HistoricalOfficerRole =
+    | 'army_commander'
+    | 'army_deputy'
+    | 'corps_commander'
+    | 'division_commander'
+    | 'operational_zone_commander'
+    | 'operational_group_commander'
+    | 'enclave_commander'
+    | 'brigade_commander'
+    | 'battalion_commander'
+    | 'staff_officer'
+    | 'political_military_authority'
+    | 'regional_defense_organizer'
+    | 'unspecified_command_role';
 export type OfficerOrigin = 'jna' | 'hv' | 'to' | 'militia' | 'foreign' | 'political' | 'military';
 export type OfficerPoolTier = 'starter' | 'tier_a' | 'tier_b' | 'tier_c';
 
@@ -22,7 +39,10 @@ export interface NamedOfficer {
     id: string;
     name: string;
     faction: FactionId;
-    rank: OfficerRank;
+    /** Gameplay appointment class; never render this as a historical military rank. */
+    rank: OfficerAppointmentClass;
+    /** Sourced historical office/command represented by this roster row. */
+    historical_role?: HistoricalOfficerRole;
 
     /** Overall military skill (1-5). Primary combat modifier. */
     competence: number;

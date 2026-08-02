@@ -1,5 +1,9 @@
 # context.md - Agent Context for A War Without Victory
 
+## Officer attribution correction (2026-08-02)
+
+The 63-row named-officer catalog is a typed historical-role roster, not a roster of 63 corps/army commanders. `historical_role` records the sourced office; `rank` is only the gameplay appointment class (`army`, `corps`, or `brigade`) and must not be rendered as a claimed military rank. An officer becomes active only at an evidence-supported temporal boundary. Unsupported identities and unsupported opening appointments are omitted, and OOB closure is proved by identity-level matches or explicit dispositions across scenario, startup, source, simulation, and UI surfaces. This section supersedes the scope and rank wording in the 2026-03-03 Officers System summary below. See ADR-0008 and `20260802_R7_PHASE2_OFFICER_OOB_ATTRIBUTION.md`.
+
 ## Project Identity
 
 **A War Without Victory (AWWV)** is a strategic-level historical simulation of the 1992-1995 Bosnian War. This is a deterministic, negative-sum war game focused on exhaustion, political collapse, and constrained agency rather than conquest.

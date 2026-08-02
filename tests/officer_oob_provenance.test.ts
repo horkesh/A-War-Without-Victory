@@ -86,6 +86,35 @@ describe('officer/OOB provenance inventory', () => {
         expect(violationCodes(report)).toContain('inherited_positive_provenance');
     });
 
+    it('fails closed when a repo source target is missing, escaping, or malformed', () => {
+        const buildWithRoot = buildOfficerOobProvenanceReport as unknown as (
+            input: OfficerOobProvenanceInput,
+            rootDir: string,
+        ) => ReturnType<typeof buildOfficerOobProvenanceReport>;
+        const cases = [
+            ['repo_source_missing', 'repo://docs/knowledge/does-not-exist.md'],
+            ['repo_source_escapes_root', 'repo://../outside.md'],
+            ['repo_source_malformed', 'repo://'],
+        ] as const;
+
+        for (const [expectedCode, sourceUrl] of cases) {
+            const input = structuredClone(fixture.valid);
+            input.manifest.records['officer:officer_exact']!.source_url = sourceUrl;
+            const report = buildWithRoot(input, process.cwd());
+            expect(violationCodes(report), sourceUrl).toContain(expectedCode);
+        }
+    });
+
+    it('requires temporal evidence for turn-zero availability', () => {
+        const input = structuredClone(fixture.valid);
+        input.officers.officers[0]!.available_from_turn = 0;
+        input.manifest.records['officer:officer_exact']!.temporal_evidence = [];
+
+        const report = buildOfficerOobProvenanceReport(input);
+
+        expect(violationCodes(report)).toContain('missing_temporal_evidence');
+    });
+
     it('fails duplicate ids, dead/cross-faction refs, inferred matches, missing citations, and orphan manifest rows', () => {
         const report = buildOfficerOobProvenanceReport(fixture.invalid);
         const codes = violationCodes(report);
@@ -263,21 +292,36 @@ describe('officer/OOB provenance inventory', () => {
 
         expect(report.records.filter((record) => record.record_kind === 'officer')).toHaveLength(63);
         expect(report.records.filter((record) => record.record_kind === 'corps')).toHaveLength(19);
-        expect(report.records.filter((record) => record.record_kind === 'brigade')).toHaveLength(249);
+        expect(report.records.filter((record) => record.record_kind === 'brigade')).toHaveLength(238);
         expect(report.records.filter((record) => record.record_kind === 'elite_commander')).toHaveLength(3);
         expect(report.summary).toMatchObject({
-            total_records: 334,
-            manifest_records: 334,
-            supported_records: 334,
+            total_records: 323,
+            manifest_records: 323,
+            supported_records: 323,
             unsupported_records: 0,
-            omitted_records: 40,
+            omitted_records: 51,
             blocking_violations: 0,
         });
         expect(report.records.every((record) => record.disposition === 'supported')).toBe(true);
-        expect(report.omissions.filter((record) => record.record_kind === 'brigade')).toHaveLength(0);
+        expect(report.omissions.filter((record) => record.record_kind === 'brigade')).toHaveLength(11);
         expect(violationCodes(report)).not.toContain('missing_provenance');
         expect(violationCodes(report)).not.toContain('missing_court_record_citation');
         expect(violationCodes(report)).not.toContain('unresolved_normalized_identity_collision');
+
+        const playableOfficers = JSON.parse(readFileSync(join(
+            process.cwd(),
+            'data',
+            'scenarios',
+            'officers',
+            'apr1992_officers.json',
+        ), 'utf8')) as { officers: Array<{ id: string; historical_role?: string }> };
+        expect(playableOfficers.officers.every((officer) => officer.historical_role != null)).toBe(true);
+        expect(playableOfficers.officers.find((officer) => officer.id === 'arbih_nanic')?.historical_role)
+            .toBe('brigade_commander');
+        expect(playableOfficers.officers.find((officer) => officer.id === 'arbih_oric')?.historical_role)
+            .toBe('enclave_commander');
+        expect(playableOfficers.officers.find((officer) => officer.id === 'hvo_kordic')?.historical_role)
+            .toBe('political_military_authority');
 
         const blaskic = report.records.find((record) => record.record_key === 'officer:hvo_blaskic');
         expect(blaskic?.identity_relation).toEqual({
@@ -324,7 +368,7 @@ describe('officer/OOB provenance inventory', () => {
         expect(missing).toEqual([]);
     });
 
-    it('reports the exact generated officer residue without conflating corps and phantom formations with brigades', () => {
+    it('contains no generated officer residue from omitted identities', () => {
         const root = process.cwd();
         const officerData = JSON.parse(readFileSync(join(
             root,
@@ -366,10 +410,9 @@ describe('officer/OOB provenance inventory', () => {
             .filter((id) => !sourceIds.has(id))
             .sort();
 
-        expect(staleDataIds).toEqual(omittedOfficerIds);
-        expect(staleDataIds).toHaveLength(35);
-        expect(staleStateIds).toHaveLength(28);
-        expect(staleStateIds.every((id) => omittedOfficerIds.includes(id))).toBe(true);
+        expect(omittedOfficerIds).toHaveLength(35);
+        expect(staleDataIds).toEqual([]);
+        expect(staleStateIds).toEqual([]);
     });
 
     it('models sourced chronology at weekly boundaries without inventing exact dates', () => {

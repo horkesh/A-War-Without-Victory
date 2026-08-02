@@ -4219,3 +4219,11 @@ Applied in `[2026-08-02] R7 fourteenth blocked-review correction: both-boundary 
 **Generic symmetry is a sensitive-history risk, not a ban on neutral plural actors:** a sentence that names both belligerents' operational interest is not moral equivalence. Apply generic-symmetry blocking only where the claim's risk class concerns atrocity, blame, civilian harm, or responsibility. Do not rewrite clear history merely to evade a broad regex.
 
 Applied in `[2026-08-02] R7 Phase 0 integrated acceptance and R4 provenance reconciliation`, `tools/diagnostics/codex_sensitive_claim_inventory.cjs`, the seven reviewed essay metadata rows, and the combined R7/R4 dependent matrix.
+
+## 2026-08-02 - Officer identity truth requires typed roles and recursive closure
+
+**Historical office and gameplay appointment class are different claims:** a named-officer row may document a brigade, enclave, operational-zone, staff, regional, or political role without proving a general-officer rank or a corps/army appointment. Durable rule: store the sourced office in `historical_role`; use `rank` only as a neutral gameplay appointment class; never render that class as a historical military rank. Activate an appointment only at an evidence-supported exact or conservative boundary, including the opening turn. If the boundary is not proved, omit the appointment rather than guess it.
+
+**Count equality cannot prove OOB identity closure:** two rosters can have the same faction totals while naming different formations. Durable rule: compare canonical identities one-to-one, normalize names deterministically, and require every non-match to have an explicit reviewed disposition. Omission is complete only when a recursive audit finds no stale identity across scenario, generated startup, source, simulation, or UI surfaces; designation-catalog deletion alone is not proof.
+
+Applied in `[2026-08-02] R7 Phase 2 second provenance committee correction`, ADR-0008, `tools/audit/compare_oob_vs_markdown.ts`, `tools/diagnostics/officer_oob_provenance.ts`, and `tools/diagnostics/oob_identity_dependencies.ts`.

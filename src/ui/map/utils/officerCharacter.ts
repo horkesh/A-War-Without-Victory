@@ -74,60 +74,57 @@ export function getOriginDisplay(origin: string): { label: string; color: string
 // ═══════════════════════════════════════════════════════════════════════════
 
 const RANK_DISPLAY: Record<string, string> = {
-    army_commander: 'Gen.',
-    corps_commander: 'Gen.',
-    deputy: 'Dep.',
+    army_commander: 'Army appointment',
+    corps_commander: 'Corps appointment',
+    deputy: 'Deputy appointment',
+    tactical_commander: 'Tactical appointment',
 };
 
 export function formatRank(rank: string): string {
     return RANK_DISPLAY[rank] ?? rank;
 }
 
+const HISTORICAL_ROLE_DISPLAY: Record<string, string> = {
+    army_commander: 'Army commander',
+    army_deputy: 'Army deputy',
+    corps_commander: 'Corps commander',
+    division_commander: 'Division commander',
+    operational_zone_commander: 'Operational-zone commander',
+    operational_group_commander: 'Operational-group commander',
+    enclave_commander: 'Enclave commander',
+    brigade_commander: 'Brigade commander',
+    battalion_commander: 'Battalion commander',
+    staff_officer: 'Staff officer',
+    political_military_authority: 'Political-military authority',
+    regional_defense_organizer: 'Regional defence organizer',
+    unspecified_command_role: 'Command-pool member',
+};
+
+export function formatHistoricalRole(role: string | null | undefined): string {
+    return role ? HISTORICAL_ROLE_DISPLAY[role] ?? role : 'Command-pool member';
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
-// Rank insignia — historically accurate for 1992-1995 Bosnian War
-//
-// All three factions inherited the JNA (Yugoslav People's Army) rank system.
-// VRS kept JNA ranks nearly unchanged, ARBiH introduced "Brigadir",
-// HVO adopted Croatian Army (HV) terminology.
-//
-// Functional OfficerRank → historical rank mapping:
-//   army_commander → General-pukovnik (3-star equivalent, highest wartime rank)
-//   corps_commander → General-major (2-star equivalent, standard corps command)
-//   deputy → Pukovnik/Colonel (1-star equivalent, senior field officer)
+// Appointment-class badge helpers. These intentionally render no historical
+// rank insignia because `rank` is gameplay eligibility, not a sourced rank.
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Number of stars for the insignia display. */
-export function getRankStarCount(rank: string): number {
-    switch (rank) {
-        case 'army_commander': return 3;   // General-pukovnik / General-bojnik
-        case 'corps_commander': return 2;  // General-major
-        case 'deputy': return 1;           // Pukovnik (Colonel)
-        default: return 1;
-    }
+export function getRankStarCount(_rank: string): number {
+    return 0;
 }
 
 /** Whether to show a bar beneath stars (colonels and below). */
-export function getRankHasBar(rank: string): boolean {
-    return rank === 'deputy';
+export function getRankHasBar(_rank: string): boolean {
+    return false;
 }
 
 /**
- * Historically accurate rank title by faction.
- * VRS: Serbian/JNA terminology.  ARBiH: mixed JNA + own.  HVO: Croatian (HV) terminology.
+ * Gameplay appointment class. Never claims a historical rank.
  */
 export function getRankDisplayName(rank: string, faction: string): string {
-    const fid = faction.toUpperCase();
-    switch (rank) {
-        case 'army_commander':
-            if (fid === 'HRHB' || fid === 'HVO') return 'General-bojnik';
-            return 'General-pukovnik'; // RS and RBiH
-        case 'corps_commander':
-            return 'General-major'; // same across all three
-        case 'deputy':
-            return 'Pukovnik'; // Colonel — same across all three
-        default:
-            return rank;
-    }
+    void faction;
+    return formatRank(rank);
 }
 
 /** Faction-specific insignia accent color (hex). */

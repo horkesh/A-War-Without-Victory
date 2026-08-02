@@ -16,9 +16,57 @@ interface BrigadeRow {
     [key: string]: unknown;
 }
 
+type Faction = keyof typeof MARKDOWN_SOURCES;
+
+interface EvidenceIdentity {
+    faction: Faction;
+    name: string;
+    normalized_name: string;
+    source: string;
+    line: number;
+}
+
+interface IdentityDisposition {
+    disposition: 'modeled_extra' | 'evidence_only';
+    reason: string;
+}
+
+interface DispositionLedger {
+    schema_version: 1;
+    aliases: Record<string, string>;
+    modeled_extras: Record<string, IdentityDisposition>;
+    evidence_only: Record<string, IdentityDisposition>;
+}
+
 // --- Helpers ---
 
 export function countBrigadesInMarkdown(filePath: string, rootDir = ROOT): number {
+    const fullPath = path.join(rootDir, filePath);
+    if (!fs.existsSync(fullPath)) throw new Error(`OOB evidence file not found: ${fullPath}`);
+    return readBrigadesInMarkdown(filePath, inferFaction(filePath), rootDir).length;
+}
+
+function inferFaction(filePath: string): Faction {
+    const entry = (Object.entries(MARKDOWN_SOURCES) as Array<[Faction, string]>).find(([, value]) => value === filePath);
+    if (!entry) throw new Error(`Unknown OOB evidence source: ${filePath}`);
+    return entry[0];
+}
+
+export function normalizeIdentityName(value: string): string {
+    return value
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\*/g, '')
+        .replace(/[“”„'`]/g, '')
+        .replace(/\bbrigade\b|\bbrigada\b/g, '')
+        .replace(/\bunits?\b/g, '')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+}
+
+export function readBrigadesInMarkdown(filePath: string, faction: Faction, rootDir = ROOT): EvidenceIdentity[] {
     const fullPath = path.join(rootDir, filePath);
     if (!fs.existsSync(fullPath)) {
         throw new Error(`OOB evidence file not found: ${fullPath}`);
@@ -26,7 +74,7 @@ export function countBrigadesInMarkdown(filePath: string, rootDir = ROOT): numbe
 
     const content = fs.readFileSync(fullPath, 'utf-8');
     const lines = content.split('\n');
-    let count = 0;
+    const rows: EvidenceIdentity[] = [];
     let inBrigadeTable = false;
 
     // console.log(`Scanning ${filePath}...`);
@@ -53,17 +101,22 @@ export function countBrigadesInMarkdown(filePath: string, rootDir = ROOT): numbe
             // Count valid row
             const cols = line.split('|').filter(s => s.trim() !== '');
             if (cols.length >= 2) {
-                count++;
+                const name = cols[0].trim();
+                rows.push({ faction, name, normalized_name: normalizeIdentityName(name), source: filePath, line: i + 1 });
             }
         }
     }
-    return count;
+    return rows;
 }
 
 export interface OobComparison {
     markdown_counts: Record<keyof typeof MARKDOWN_SOURCES, number>;
     oob_counts: Record<keyof typeof MARKDOWN_SOURCES, number>;
     deltas: Record<keyof typeof MARKDOWN_SOURCES, number>;
+    matched_identities: Array<{ faction: Faction; oob_id: string; oob_name: string; evidence_name: string }>;
+    dispositions: Array<{ kind: 'modeled_extra' | 'evidence_only'; key: string; name: string; reason: string }>;
+    unresolved_mismatches: Array<{ kind: 'modeled_extra' | 'evidence_only'; key: string; name: string }>;
+    identity_match_ok: boolean;
 }
 
 export function buildOobComparison(rootDir = ROOT): OobComparison {
@@ -72,12 +125,64 @@ export function buildOobComparison(rootDir = ROOT): OobComparison {
     const factions = Object.keys(MARKDOWN_SOURCES) as Array<keyof typeof MARKDOWN_SOURCES>;
     const markdownCounts = { RBiH: 0, RS: 0, HRHB: 0 };
     const oobCounts = { RBiH: 0, RS: 0, HRHB: 0 };
+    const evidenceRows: EvidenceIdentity[] = [];
     for (const brigade of brigades) {
         const faction = brigade.faction as keyof typeof MARKDOWN_SOURCES | undefined;
         if (faction && Object.prototype.hasOwnProperty.call(oobCounts, faction)) oobCounts[faction]++;
     }
     for (const faction of factions) {
-        markdownCounts[faction] = countBrigadesInMarkdown(MARKDOWN_SOURCES[faction], rootDir);
+        const rows = readBrigadesInMarkdown(MARKDOWN_SOURCES[faction], faction, rootDir);
+        evidenceRows.push(...rows);
+        markdownCounts[faction] = rows.length;
+    }
+    const ledgerPath = path.join(rootDir, 'docs/provenance/OOB_MARKDOWN_IDENTITY_DISPOSITIONS.json');
+    if (!fs.existsSync(ledgerPath)) throw new Error(`OOB identity disposition ledger not found: ${ledgerPath}`);
+    const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8')) as DispositionLedger;
+    if (ledger.schema_version !== 1) throw new Error('Unsupported OOB identity disposition ledger schema.');
+    const evidenceByKey = new Map<string, EvidenceIdentity[]>();
+    for (const row of evidenceRows) {
+        const key = `${row.faction}:${row.normalized_name}`;
+        const bucket = evidenceByKey.get(key) ?? [];
+        bucket.push(row);
+        evidenceByKey.set(key, bucket);
+    }
+    const matched: OobComparison['matched_identities'] = [];
+    let unmatchedOob: Array<{ faction: Faction; id: string; name: string }> = [];
+    for (const brigade of brigades) {
+        const faction = brigade.faction as Faction;
+        if (!Object.prototype.hasOwnProperty.call(MARKDOWN_SOURCES, faction)) continue;
+        const id = String(brigade.id ?? '');
+        const name = String(brigade.name ?? id);
+        const key = `${faction}:${normalizeIdentityName(name)}`;
+        const bucket = evidenceByKey.get(key);
+        const evidence = bucket?.shift();
+        if (evidence) matched.push({ faction, oob_id: id, oob_name: name, evidence_name: evidence.name });
+        else unmatchedOob.push({ faction, id, name });
+    }
+    let unmatchedEvidence = [...evidenceByKey.entries()].flatMap(([key, rows]) => rows.map((row) => ({ key, ...row })));
+    for (const [evidenceKey, oobId] of Object.entries(ledger.aliases ?? {}).sort(([a], [b]) => a.localeCompare(b))) {
+        const evidenceIndex = unmatchedEvidence.findIndex((row) => row.key === evidenceKey);
+        const oobIndex = unmatchedOob.findIndex((row) => row.id === oobId);
+        if (evidenceIndex < 0 || oobIndex < 0) continue;
+        const evidence = unmatchedEvidence[evidenceIndex];
+        const oob = unmatchedOob[oobIndex];
+        matched.push({ faction: oob.faction, oob_id: oob.id, oob_name: oob.name, evidence_name: evidence.name });
+        unmatchedEvidence.splice(evidenceIndex, 1);
+        unmatchedOob.splice(oobIndex, 1);
+    }
+    const dispositions: OobComparison['dispositions'] = [];
+    const unresolved: OobComparison['unresolved_mismatches'] = [];
+    for (const row of unmatchedOob) {
+        const disposition = ledger.modeled_extras[row.id];
+        if (disposition?.disposition === 'modeled_extra' && disposition.reason.trim()) {
+            dispositions.push({ kind: 'modeled_extra', key: row.id, name: row.name, reason: disposition.reason });
+        } else unresolved.push({ kind: 'modeled_extra', key: row.id, name: row.name });
+    }
+    for (const row of unmatchedEvidence) {
+        const disposition = ledger.evidence_only[row.key];
+        if (disposition?.disposition === 'evidence_only' && disposition.reason.trim()) {
+            dispositions.push({ kind: 'evidence_only', key: row.key, name: row.name, reason: disposition.reason });
+        } else unresolved.push({ kind: 'evidence_only', key: row.key, name: row.name });
     }
     return {
         markdown_counts: markdownCounts,
@@ -86,6 +191,10 @@ export function buildOobComparison(rootDir = ROOT): OobComparison {
             faction,
             oobCounts[faction] - markdownCounts[faction],
         ])) as Record<keyof typeof MARKDOWN_SOURCES, number>,
+        matched_identities: matched.sort((a, b) => a.oob_id.localeCompare(b.oob_id)),
+        dispositions: dispositions.sort((a, b) => a.key.localeCompare(b.key)),
+        unresolved_mismatches: unresolved.sort((a, b) => a.key.localeCompare(b.key)),
+        identity_match_ok: unresolved.length === 0,
     };
 }
 
@@ -112,6 +221,12 @@ function main(): void {
         }
         console.log('\nNote: Positive Delta means JSON has duplicates or extra units not in Appendix MD.');
         console.log('      Negative Delta means JSON is missing units found in Appendix MD.');
+        console.log(`\nIdentity matches: ${comparison.matched_identities.length}`);
+        console.log(`Dispositions: ${comparison.dispositions.length}`);
+        if (!comparison.identity_match_ok) {
+            console.error(`Unresolved identity mismatches: ${JSON.stringify(comparison.unresolved_mismatches, null, 2)}`);
+            process.exitCode = 1;
+        }
     } catch (error) {
         console.error('OOB comparison failed:', error);
         process.exitCode = 1;

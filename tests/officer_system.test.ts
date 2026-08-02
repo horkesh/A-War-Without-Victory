@@ -701,6 +701,7 @@ describe('validateOfficerData', () => {
                     name: 'Test Officer',
                     faction: 'RS',
                     rank: 'corps_commander',
+                    historical_role: 'brigade_commander',
                     competence: 4,
                     aggressiveness: 3,
                     defensive_skill: 3,
@@ -718,6 +719,12 @@ describe('validateOfficerData', () => {
         assert.equal(result.length, 1);
         assert.equal(result[0]!.id, 'o1');
         assert.equal(result[0]!.competence, 4);
+        assert.equal(result[0]!.historical_role, 'brigade_commander');
+    });
+
+    it('rejects an unknown historical role token', () => {
+        const raw = { officers: [{ id: 'o1', faction: 'RS', historical_role: 'invented_general_rank' }] };
+        assert.throws(() => validateOfficerData(raw), /invalid historical_role/);
     });
 
     it('throws on duplicate IDs', () => {

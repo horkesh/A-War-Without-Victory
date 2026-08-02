@@ -182,7 +182,7 @@ With Corps authorization, a temporary TG may pull battalion-equivalent manpower 
 
 ### 5.8 Named officers and command
 
-Historical corps and army-level commanders are represented as **named officers** with individual ratings that shape military operations. Officers are not abstract bonuses — they are specific individuals with documented careers, personalities, and limitations.
+Historically documented people in the strategic/operational command pool are represented as **named officers** with individual ratings that shape military operations. The pool includes army and corps commanders, deputies, operational-zone/group and enclave commanders, significant formation commanders, staff officers, regional defence organizers, and sourced political-military authorities. Officers are not abstract bonuses — they are specific individuals with documented careers, offices, personalities, and limitations. Their displayed historical role is distinct from the gameplay appointment class used by assignment and succession.
 
 **Officer ratings:**
 - **Competence** (1-5): Overall military skill. Primary combat modifier for the corps.

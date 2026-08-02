@@ -2,7 +2,7 @@
 
 ## Status
 
-**Proposed 2026-08-02.** This record exposes an inherited canon/schema ambiguity found during the R7 Phase 2 provenance repair. It does not amend binding canon until owner acceptance.
+**Accepted 2026-08-02.** Owner/orchestrator acceptance was given for the R7 Phase 2 repair after the 63-row source roster demonstrated typed brigade, enclave, operational-zone, staff, and political-military roles.
 
 ## Context
 
@@ -14,25 +14,26 @@ R7 Phase 2 restores the 63-row contract and cites each historical identity and c
 
 ## Decision
 
-If accepted, Tier 1 will mean the **63-person named strategic/operational command pool**, not a literal list restricted to people who historically commanded a corps or army.
+Tier 1 means the **63-person named strategic/operational command pool**, not a literal list restricted to people who historically commanded a corps or army.
 
-- `rank` remains a deterministic gameplay assignment-class token until a separately tested schema migration replaces it.
+- `rank` remains a deterministic gameplay appointment-class token for save compatibility; it is not a historical rank.
+- `historical_role` is the typed, sourced office/command used for player-facing labels and provenance review.
 - Provenance must name and source the person's actual historical office or command; `corps_commander` must never be used as evidence that the person historically held corps rank or command.
 - The pool may include army/corps commanders and deputies, operational-zone commanders, enclave commanders, commanders of strategically significant independent formations, and political actors for whom a reliable source establishes military command authority.
 - Inclusion still requires exact row-local identity and command-authority evidence. Fame, name similarity, proximity in an appendix, or a generic formation citation is insufficient.
-- A future UI/schema lane must separate gameplay assignment class from displayed historical rank/title. Until then, the existing general-officer display is recorded technical debt; this ADR does not authorize invented historical rank labels.
+- UI surfaces must render the sourced `historical_role` or a neutral command-pool fallback. Appointment classes may be shown only as gameplay eligibility and must not generate general-officer abbreviations or star insignia.
 
 ## Determinism Impact
 
-None. This record describes the already deterministic 63-row source contract. It adds no random source, iteration-order change, clock field, serialization field, or new entry point. Any future schema migration must preserve stable officer IDs and deterministic succession ordering and will require its own save-migration and baseline proof.
+The schema/read-model addition is static and deterministic. It adds no random source, iteration-order change, clock field, serialization clock, or new entry point. Stable officer IDs and succession ordering are unchanged; legacy save rows without `historical_role` project as `unspecified_command_role`.
 
 ## Consequences
 
 - The Systems Manual's numeric 63-officer contract remains enforced.
 - Historically important non-corps command personalities are not deleted merely to make an imprecise label true.
 - Provenance stays exact about historical assignments and cannot infer a corps command from the gameplay enum.
-- The UI's general-officer rendering of every `corps_commander` token remains an explicit presentation defect to fix in a separate authorized lane.
-- If the owner rejects this proposal, the alternative is a sourced replacement roster of 63 literal corps/army commanders plus corresponding generated-state, UI, succession, scenario, and baseline work; silently reducing the roster is not acceptable.
+- The UI no longer converts appointment classes into invented historical general ranks or stars.
+- The numeric 63-person contract is reconciled without pretending every roster member historically held corps or army command.
 
 ## Canon References
 

@@ -6,13 +6,11 @@ import {
     getDefenseLabel,
     getReliabilityLabel,
     getOriginDisplay,
-    formatRank,
+    formatHistoricalRole,
     getRatingColor,
     formatPips,
     formatCombatRecord,
     formatTenure,
-    getRankStarCount,
-    getRankHasBar,
     getRankDisplayName,
     getRankInsigniaColor,
     getComplianceModifierTextFromValue,
@@ -47,7 +45,7 @@ export function OfficerProfile({
 }: OfficerProfileProps) {
     const origin = getOriginDisplay(officer.origin);
     const archetype = getArchetype(officer);
-    const rank = formatRank(officer.rank);
+    const historicalRole = formatHistoricalRole(officer.historical_role);
 
     return (
         <div className={`p-2 bg-black/20 rounded border border-panel-border/30 space-y-1.5${className ? ` ${className}` : ''}`}>
@@ -66,12 +64,13 @@ export function OfficerProfile({
 
             {/* Insignia + Name + archetype */}
             <div className="flex items-start gap-2">
-                <RankInsignia rank={officer.rank} faction={officer.faction} />
+                <AppointmentBadge appointmentClass={officer.rank} faction={officer.faction} />
                 <div className="min-w-0 flex-1">
                     <div className="text-xs font-bold text-accent-gold truncate">
-                        {rank} {officer.name}
+                        {officer.name}
                         {officer.acting_commander && <span className="text-xs text-text-secondary ml-1 font-normal">{t('officerProfile.acting')}</span>}
                     </div>
+                    <div className="text-xs text-text-secondary">{historicalRole}</div>
                     <div className="text-xs text-text-secondary italic">{archetype}</div>
                 </div>
             </div>
@@ -209,20 +208,10 @@ function StatRow({ label, value, descriptor }: { label: string; value: number; d
     );
 }
 
-/**
- * Visual rank insignia — CSS-only stars on a faction-colored shoulder board.
- *
- * Historically accurate for the 1992-1995 Bosnian War. All three factions
- * inherited the JNA five-pointed star insignia system:
- *   3 stars = General-pukovnik / General-bojnik (army commander)
- *   2 stars = General-major (corps commander)
- *   1 star + bar = Pukovnik / Colonel (deputy / senior field officer)
- */
-function RankInsignia({ rank, faction }: { rank: string; faction: string }) {
-    const starCount = getRankStarCount(rank);
-    const hasBar = getRankHasBar(rank);
+/** Neutral gameplay appointment badge; it makes no claim about historical rank. */
+function AppointmentBadge({ appointmentClass, faction }: { appointmentClass: string; faction: string }) {
     const color = getRankInsigniaColor(faction);
-    const title = getRankDisplayName(rank, faction);
+    const title = getRankDisplayName(appointmentClass, faction);
 
     return (
         <div
@@ -235,25 +224,7 @@ function RankInsignia({ rank, faction }: { rank: string; faction: string }) {
             }}
             title={title}
         >
-            {/* Stars row */}
-            <div className="flex items-center gap-px">
-                {Array.from({ length: starCount }).map((_, i) => (
-                    <span
-                        key={i}
-                        className="leading-none"
-                        style={{ color, fontSize: starCount >= 3 ? 9 : 10 }}
-                    >
-                        {'\u2605'}
-                    </span>
-                ))}
-            </div>
-            {/* Bar beneath stars for colonel rank */}
-            {hasBar && (
-                <div
-                    className="rounded-sm mt-px"
-                    style={{ width: 14, height: 2, backgroundColor: color, opacity: 0.7 }}
-                />
-            )}
+            <span className="text-[9px] font-bold tracking-wider" style={{ color }}>CMD</span>
         </div>
     );
 }

@@ -21,15 +21,15 @@ import { projectOperationLifecycle } from '../../data/operationLifecycleProjecti
 
 interface CoSProfile {
     name: string;
-    rank: string;
+    office: string;
     titleKey: MessageKey;
     tone: 'cautious' | 'precise' | 'aggressive';
 }
 
 const COS_PROFILES: Record<string, CoSProfile> = {
-    RS: { name: 'Manojlo Milovanović', rank: 'Gen.', titleKey: 'chiefOfStaff.title.mainStaff', tone: 'precise' },
-    RBiH: { name: 'Jovan Divjak', rank: 'Gen.', titleKey: 'chiefOfStaff.title.deputyCommander', tone: 'cautious' },
-    HRHB: { name: 'Milivoj Petković', rank: 'Gen.', titleKey: 'chiefOfStaff.title.mainStaff', tone: 'aggressive' },
+    RS: { name: 'Manojlo Milovanović', office: 'Army deputy', titleKey: 'chiefOfStaff.title.mainStaff', tone: 'precise' },
+    RBiH: { name: 'Jovan Divjak', office: 'Army deputy', titleKey: 'chiefOfStaff.title.deputyCommander', tone: 'cautious' },
+    HRHB: { name: 'Milivoj Petković', office: 'Army command', titleKey: 'chiefOfStaff.title.mainStaff', tone: 'aggressive' },
 };
 
 // ── Segment types ───────────────────────────────────────────────────
@@ -456,7 +456,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
             <div className="px-3 py-1.5 border-b border-neutral-300/60 bg-[#ebe5d8]">
                 <div className="text-xs uppercase font-bold text-neutral-600 tracking-[0.2em]">{t('chiefOfStaff.header.dailyBriefing')} — {turnToDateString(turn)}</div>
                 <div className="text-xs font-bold text-neutral-800 mt-0.5">
-                    {profile.rank} {profile.name}
+                    {profile.name} · {profile.office}
                 </div>
                 <div className="text-xs text-neutral-600 italic">{profileTitle}</div>
             </div>
@@ -501,7 +501,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
             {/* Footer — signature line */}
             <div className="px-3 py-1 border-t border-neutral-300/60 bg-[#ebe5d8]">
                 <div className="text-xs text-neutral-600 italic text-right">
-                    — {profile.rank} {profile.name.split(' ').pop()}, {profileTitle}
+                    — {profile.name.split(' ').pop()}, {profileTitle}
                 </div>
             </div>
         </div>

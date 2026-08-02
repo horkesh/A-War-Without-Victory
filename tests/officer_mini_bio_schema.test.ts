@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const OFFICER_DATA_PATH = path.resolve('data/scenarios/officers/apr1992_officers.json');
 
-const FIRST_PASS_OPENING_COMMANDERS = [
+const FIRST_PASS_PROFILED_COMMANDERS = [
     'arbih_halilovic',
     'arbih_talijan',
     'hvo_blaskic',
@@ -39,7 +39,7 @@ function expectShortString(value: unknown, field: string, officerId: string, max
 }
 
 describe('officer mini-bio schema', () => {
-    it('keeps the first pass limited to opening commanders already displayed by HQ/OOB surfaces', () => {
+    it('does not preserve the legacy false turn-zero opening classification', () => {
         const officers = loadOfficerRecords();
         const discovered = officers
             .filter((officer) =>
@@ -50,13 +50,17 @@ describe('officer mini-bio schema', () => {
             .map((officer) => String(officer.id))
             .sort();
 
-        expect(discovered).toEqual([...FIRST_PASS_OPENING_COMMANDERS].sort());
+        expect(discovered).toEqual([]);
+        const byId = new Map(officers.map((officer) => [officer.id, officer]));
+        for (const officerId of FIRST_PASS_PROFILED_COMMANDERS) {
+            expect(byId.get(officerId)?.available_from_turn, officerId).toBeGreaterThan(0);
+        }
     });
 
-    it('authors a compact, source-bounded mini-bio for every supported opening commander', () => {
+    it('retains a compact, source-bounded mini-bio for every first-pass profile', () => {
         const byId = new Map(loadOfficerRecords().map((officer) => [officer.id, officer]));
 
-        for (const officerId of FIRST_PASS_OPENING_COMMANDERS) {
+        for (const officerId of FIRST_PASS_PROFILED_COMMANDERS) {
             const officer = byId.get(officerId);
             expect(officer, `${officerId} exists`).toBeDefined();
             expectShortString(officer?.bio_short, 'bio_short', officerId, 150);

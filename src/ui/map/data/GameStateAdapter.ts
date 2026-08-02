@@ -2097,6 +2097,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 name: getPlayerSafeOfficerName(typeof data.name === 'string' ? data.name : null),
                 faction: typeof data.faction === 'string' ? data.faction : '',
                 rank: typeof data.rank === 'string' ? data.rank : 'corps_commander',
+                historical_role: typeof data.historical_role === 'string' ? data.historical_role : 'unspecified_command_role',
                 competence,
                 aggressiveness,
                 defensive_skill: defensiveSkill,

@@ -969,6 +969,12 @@ export function validateOfficerData(raw: unknown): NamedOfficer[] {
 
     const result: NamedOfficer[] = [];
     const seenIds = new Set<string>();
+    const historicalRoles = new Set<NonNullable<NamedOfficer['historical_role']>>([
+        'army_commander', 'army_deputy', 'corps_commander', 'division_commander',
+        'operational_zone_commander', 'operational_group_commander', 'enclave_commander',
+        'brigade_commander', 'battalion_commander', 'staff_officer',
+        'political_military_authority', 'regional_defense_organizer', 'unspecified_command_role',
+    ]);
 
     for (let i = 0; i < officers.length; i++) {
         const o = officers[i] as Record<string, unknown>;
@@ -984,6 +990,10 @@ export function validateOfficerData(raw: unknown): NamedOfficer[] {
             throw new Error(`Officer ${id}: invalid faction ${String(rawFaction)}`);
         }
         const faction: FactionId = rawFaction;
+        const historicalRole = o.historical_role ?? 'unspecified_command_role';
+        if (typeof historicalRole !== 'string' || !historicalRoles.has(historicalRole as NonNullable<NamedOfficer['historical_role']>)) {
+            throw new Error(`Officer ${id}: invalid historical_role ${String(historicalRole)}`);
+        }
 
         const clampRating = (val: unknown, field: string): number => {
             const n = typeof val === 'number' ? val : 3;
@@ -996,6 +1006,7 @@ export function validateOfficerData(raw: unknown): NamedOfficer[] {
             name: String(o.name ?? id),
             faction,
             rank: (o.rank as NamedOfficer['rank']) ?? 'corps_commander',
+            historical_role: historicalRole as NamedOfficer['historical_role'],
             competence: clampRating(o.competence, 'competence'),
             aggressiveness: clampRating(o.aggressiveness, 'aggressiveness'),
             defensive_skill: clampRating(o.defensive_skill, 'defensive_skill'),
