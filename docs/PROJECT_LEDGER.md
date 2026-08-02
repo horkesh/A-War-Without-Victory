@@ -25740,6 +25740,18 @@ The final documentation-only publication commit follows this ledger entry. Requi
 
 **Scope:** QA diagnostic semantics, one stale source-contract assertion, tests, and documentation only. Player UI, simulation, history, scenarios, save/replay schema, baselines, package version, tag, signing, publication, release state, and `docs/10_canon/FORAWWV.md` are unchanged.
 
+## 2026-08-02 - R2 Decision Packet single-scroll-owner repair
+
+**Type:** Player-surface layout bugfix / fixed-dock clearance / rejected-run evidence.
+
+**Negative evidence:** Fresh packaged no-resume RS run `20260802-r2-rs104-fresh-v7` reached exact turn 104, completed the full route/counter/Army-HQ tour, captured 512 screenshots through `511-playthrough-final.png`, and recorded zero console, page, unexpected-network, and main-process-stderr diagnostics. Every v5/v6 finding was absent. It exited nonzero on five repeated observations of the live `Intelligence brief` Decision Packet label painting beneath the fixed status dock. Screenshot inspection confirmed a real product defect. The run remains rejected evidence, not an accepted diary.
+
+**Diagnosis/fix:** `PresidentDeskShell` and the inner `DeskPacket` both owned vertical scrolling. The inner composited `max-h-[48vh]` layer could paint card content through the outer Desk's fixed-dock clearance. A RED regression now requires the outer Desk to be the sole vertical scroll owner. The packet-local scroller was removed; the shell now owns horizontal clipping, vertical scrolling, overscroll containment, and bottom padding, while its packet and situation panels are full-width nonshrinking children.
+
+**Verification:** The focused Desk/harness/Warroom matrix passes 3 files / 82 tests. `npm.cmd run typecheck`, `node --check tools/ui/paradox_local_qa.cjs`, and `git diff --check` pass. A newly built package and brand-new no-resume 104-week RS campaign remain mandatory before R2 acceptance.
+
+**Scope:** Desk layout, tests, and documentation only. Simulation state, historical content, scenarios, save/replay schema, baselines, package version, tag, signing, publication, release state, and `docs/10_canon/FORAWWV.md` are unchanged.
+
 ## 2026-08-02 - R7 Phase 0 integrated acceptance and R4 provenance reconciliation
 
 **Type:** Diagnostic acceptance / cross-workstream integration bug fix / authored provenance metadata.

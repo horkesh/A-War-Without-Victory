@@ -87,6 +87,10 @@ Run v6 reached exact turn 104, completed its full route/counter/Army-HQ tour, ca
 
 A RED harness contract now requires effective visibility to reject any `aria-hidden="true"` ancestor. The implementation applies that rule to text, active-modal discovery, alerts, controls, and overflow candidates. The focused harness/Warroom matrix passes 3 files / 101 tests; harness syntax and diff hygiene pass. Run v6 remains negative diagnostic lineage, not acceptance or a diary.
 
+Fresh no-resume run `20260802-r2-rs104-fresh-v7` again reached exact turn 104, completed the full route/counter/Army-HQ tour, captured 512 screenshots through `511-playthrough-final.png`, and recorded zero console, page, unexpected-network, and main-process-stderr diagnostics. Every v5 and v6 finding was absent. It failed closed on five repeated observations of the live `Intelligence brief` family label in a Decision Packet card painting beneath the fixed bottom status dock. Screenshot `225-officer-event-after-acknowledge.png` confirms this was a product defect, not a diagnostic false positive.
+
+The remaining cause was nested vertical scroll ownership: `PresidentDeskShell` owned the viewport above the status dock while `DeskPacket` created a second composited `max-h-[48vh]` scroller. The prior nonshrinking-card repair was necessary but not sufficient. A RED regression now requires the outer Desk to be the only vertical scroll owner. The repair removes the packet scroller, adds outer overscroll containment and bottom padding, hides horizontal overflow, and makes the packet and situation panels full-width intrinsic-height children. The focused Desk/harness/Warroom matrix passes 3 files / 82 tests; TypeScript, harness syntax, and diff hygiene pass. Run v7 remains rejected negative evidence.
+
 ## Verification and Review
 
 - Geometry/harness focused: 7 files / 97 tests.
@@ -103,4 +107,4 @@ A RED harness contract now requires effective visibility to reject any `aria-hid
 
 Changed scope is UI read models, retained map handoff/presentation, diagnostics/harness, tests, and documentation. Simulation, historical event content, scenario balance, save schema, deterministic baselines, package version, tag, installer, signing, store upload, publication, and public release state are unchanged. `docs/10_canon/FORAWWV.md` is unchanged.
 
-Next: rebuild the transient unpacked package with the v6 ARIA-hidden diagnostic repair, run a brand-new no-resume 104-week RS campaign, require clean final diagnostics plus materialized geometry receipts, then write the actual completed owner diary. Every rejected run above remains negative lineage and cannot satisfy that gate.
+Next: rebuild the transient unpacked package with the single-scroll-owner Desk repair, run a brand-new no-resume 104-week RS campaign, require clean final diagnostics plus materialized geometry receipts, then write the actual completed owner diary. Every rejected run above remains negative lineage and cannot satisfy that gate.

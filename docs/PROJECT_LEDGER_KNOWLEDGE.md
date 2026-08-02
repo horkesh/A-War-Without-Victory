@@ -4247,3 +4247,9 @@ Applied in `[2026-08-02] R2 packaged-readability fail-closed repair`, `President
 **Rendered pixels are not automatically player-facing evidence:** scene dressing may contain DOM text that is deliberately absent from the accessibility tree and may be correctly covered by an active overlay. A whole-document text walker that ignores `aria-hidden` can turn decorative background into false contrast and occlusion blockers, especially when its visual substrate is a bitmap and the text node itself is transparent. Durable rule: one effective-visibility predicate must reject `aria-hidden="true"` at any ancestor and must govern text, active-modal discovery, alerts, controls, and overflow candidates consistently. Keep screenshot inspection as causal evidence; do not whitelist the literal copy or suppress a real active surface.
 
 Applied in `[2026-08-02] R2 decorative ARIA-hidden readability classification repair`, `tools/ui/paradox_local_qa.cjs`, and `tests/paradox_local_qa_harness.test.ts`.
+
+## 2026-08-02 - Fixed-dock layouts require one vertical scroll owner
+
+**Nonshrinking children do not cure nested scroll composition:** a card can retain intrinsic height and still paint beneath a fixed dock when an inner panel and its bounded outer shell both own vertical scrolling. Durable rule: the shell that owns viewport clearance also owns vertical overflow and overscroll containment. Descendant packets contribute intrinsic height; they do not add a second `max-height` scroller. Keep bottom clearance inside the owning shell, make major panels full-width/nonshrinking, and prove the absence of descendant vertical scroll owners in the component regression.
+
+Applied in `[2026-08-02] R2 Decision Packet single-scroll-owner repair`, `PresidentDeskShell.tsx`, `DeskPacket.tsx`, and `tests/ui/president_desk_shell.test.ts`.

@@ -83,7 +83,7 @@ export function PresidentDeskShell({
           onClose();
         }
       }}
-      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-16 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-y-auto md:right-6 xl:right-10"
+      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-16 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3 md:right-6 xl:right-10"
     >
       {onClose && (
         <button
@@ -100,11 +100,11 @@ export function PresidentDeskShell({
         <DeskAuthorityHeader state={state} />
       </div>
 
-      <div className="pointer-events-auto shrink-0 self-start border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)]">
+      <div className="pointer-events-auto w-full shrink-0 border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)]">
         <DeskPacket items={items} onAction={onAction} requiredItemIds={requiredItemIds} />
       </div>
 
-      <aside className="pointer-events-auto shrink-0 self-start border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]">
+      <aside className="pointer-events-auto w-full shrink-0 border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]">
         <div className="border-b border-panel-border/70 pb-3">
           <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">{t('desk.strategicSituation')}</div>
           <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{factionTitle(state)}</h2>

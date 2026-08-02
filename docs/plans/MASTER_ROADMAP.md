@@ -1,6 +1,6 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** IN AUTONOMOUS EXECUTION; R1/R3 are complete and the R2 v6 ARIA-hidden diagnostic repair is awaiting a fresh packaged acceptance rerun
+**Status:** IN AUTONOMOUS EXECUTION; R1/R3 are complete and the R2 v7 single-scroll-owner Desk repair is awaiting a fresh packaged acceptance rerun
 
 **Last updated:** 2026-08-02
 
@@ -97,7 +97,7 @@ Execute serially in the order R1, R2, R3, R4, R5, R6, R7, R8, R9 unless file-own
 | ID | Workstream | Status | Executable plan | Complete when |
 |---|---|---|---|---|
 | R1 | Seamless Command Room ↔ Tactical Map | **COMPLETE — CLOSED 2026-08-01** | [Map-transition plan](2026-07-31-seamless-command-room-map-transition-plan.md) | Warm switch shows current-turn/current-fingerprint truth without renderer reconstruction, static refetch, WebGL error, or visible wait; cold entry meets the measured plan budget. |
-| R2 | RS Desk → Decision → Advance friction | **IN PROGRESS — V6 DECORATIVE-ARIA DIAGNOSTIC REPAIRED; FRESH PACKAGED ACCEPTANCE NEXT** | [RS friction plan](2026-07-31-rs-104week-friction-remediation-plan.md) | Five diary findings close; no contradictory urgency; sourced opportunity/positive-hold cadence is intelligible; ultrawide and map handoff pass Electron proof. |
+| R2 | RS Desk → Decision → Advance friction | **IN PROGRESS — V7 SINGLE-SCROLL DESK REPAIRED; FRESH PACKAGED ACCEPTANCE NEXT** | [RS friction plan](2026-07-31-rs-104week-friction-remediation-plan.md) | Five diary findings close; no contradictory urgency; sourced opportunity/positive-hold cadence is intelligible; ultrawide and map handoff pass Electron proof. |
 | R3 | Operational/Tactical Group convergence | **COMPLETE** | [TG closeout plan](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | One offensive task-organization path, synchronized lifecycle/AHQ receipts, terminal telemetry, unique sourced promotions, locked exhaustion constants, and aligned Standing-OG doctrine. |
 | R4 | Command, event, and Dynamic Codex convergence | **IN PROGRESS — PHASE 4 CANONICALLY ACCEPTED; PHASE 5 INTEGRATED PROOF NEXT** | [Command/event/Codex plan](2026-07-31-command-event-codex-convergence-plan.md) | Five presidential levers remain; Decision Room owns action; Desk owns triage; events, Chronicle, Cost Ledger, and Codex share deterministic receipts and priority truth. |
 | R5 | Engine quality, performance, and stability | **IN PROGRESS — PHASE 2D TASK 8A RETAINED; PHASE 2E DESIGN READY** | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
@@ -181,6 +181,8 @@ R1 is closed locally after independent approval and three layers of evidence. Th
 ### 2026-08-01 R2 source-closeout amendment
 
 All six R2 source packets are implemented and independently reviewed. FR-03 now routes the exact historical-operation dossier through the retained current-revision tactical map, exact objective/staging/participant evidence, and back to the same dossier without map-side authorization or renderer churn. FR-06 now uses full semantic labels, one chip plus deterministic `+N` below 1600 px and at most two plus `+N` above it, with complete accessible popover truth. Rejected packaged runs reached turn 104 but exposed retired stack-badge, post-Army-HQ route-restoration, and adaptive counter-target harness defects; all remain negative evidence. The repaired harness emits an explicit stack not-applicable receipt, restores the exact current-revision War Map before field toolbar use, freezes counter proof to its declared initial identities, and measures document/strip/OOB/Situation/branch geometry. R2 remains open until a new package and fresh no-resume RS run complete with clean final diagnostics and materialized geometry receipts. Evidence and exact scope: [source closeout report](../40_reports/implemented/20260801_R2_RS_FRICTION_FR03_FR06_AND_RUNTIME_HARDENING.md).
+
+Fresh packaged runs v5-v7 extended that negative lineage without lowering the gate. V5 found four real readability/classifier defects, v6 isolated one ARIA-hidden decorative false positive, and v7 proved one residual live Desk occlusion caused by nested vertical scroll ownership. The current repair makes the outer Desk the sole vertical scroller above the fixed status dock. A new package and a brand-new no-resume run are still required; no rejected campaign can be resumed into acceptance.
 
 ## 6. Locked Product and Historical Decisions
 

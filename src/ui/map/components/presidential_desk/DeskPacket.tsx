@@ -28,7 +28,7 @@ export function DeskPacket({ items, onAction, requiredItemIds }: DeskPacketProps
         </div>
       </div>
 
-      <div className="mt-4 max-h-[48vh] space-y-2 overflow-y-auto pr-1">
+      <div className="mt-4 space-y-2 pr-1">
         {blockers.length > 0 ? blockers.map((item) => (
           <DecisionCard key={item.id} item={item} onAction={onAction} />
         )) : (

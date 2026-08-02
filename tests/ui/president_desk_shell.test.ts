@@ -160,7 +160,7 @@ describe('PresidentDeskShell', () => {
     expect(onAdvance).not.toHaveBeenCalled();
   });
 
-  it('renders every advisory decision in the scrollable desk packet', () => {
+  it('renders every advisory decision in the desk packet', () => {
     const pendingReserveRequests = Array.from({ length: 5 }, (_, index) => ({
       request_id: `reserve-${index + 1}`,
       corps_id: `vrs_corps_${index + 1}`,
@@ -184,15 +184,20 @@ describe('PresidentDeskShell', () => {
   });
 
   it('keeps direct desk cards at intrinsic height so the shell owns scrolling above the status dock', () => {
-    renderDesk();
+    const { container } = renderDesk();
 
     const shell = screen.getByTestId('president-desk-shell');
     expect(shell.className).toContain('overflow-y-auto');
+    expect(shell.className).toContain('overscroll-contain');
     const cards = Array.from(shell.children);
     expect(cards.length).toBeGreaterThanOrEqual(3);
     for (const card of cards) {
       expect(card.className).toContain('shrink-0');
     }
+
+    const packet = container.querySelector('section[aria-label="Desk packet"]');
+    expect(packet).toBeTruthy();
+    expect(packet?.querySelector('.overflow-y-auto')).toBeNull();
   });
 
   it('can close when rendered as a warroom overlay', () => {
