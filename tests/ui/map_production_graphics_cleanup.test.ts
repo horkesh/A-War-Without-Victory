@@ -34,7 +34,7 @@ vi.mock('../../src/ui/map/perf/mapTransitionTiming.js', async (importOriginal) =
   };
 });
 
-vi.mock('../../src/ui/map/node_modules/maplibre-gl/dist/maplibre-gl.js', () => {
+vi.mock('maplibre-gl', () => {
   class MockMap {
     constructor() {
       const loseContext = vi.fn();
@@ -63,6 +63,12 @@ vi.mock('../../src/ui/map/node_modules/maplibre-gl/dist/maplibre-gl.js', () => {
       });
       const once = vi.fn((eventName: string, listener: (...args: unknown[]) => void) => {
         if (eventName === 'load') loadListeners.add(listener);
+        // Production init awaits a `once('style.load', ...)` promise before
+        // proceeding to deck construction. No test here manages that timing
+        // manually (unlike 'load', which the removed-while-loading race test
+        // fires explicitly) — resolve it on the next microtask so init can
+        // reach the deck.gl overlay construction it's gating.
+        if (eventName === 'style.load') queueMicrotask(() => listener());
       });
       const off = vi.fn((eventName: string, listener: (...args: unknown[]) => void) => {
         if (eventName === 'load') loadListeners.delete(listener);
@@ -106,7 +112,7 @@ vi.mock('../../src/ui/map/node_modules/maplibre-gl/dist/maplibre-gl.js', () => {
   };
 });
 
-vi.mock('../../src/ui/map/node_modules/@deck.gl/mapbox/dist/index.js', () => ({
+vi.mock('@deck.gl/mapbox', () => ({
   MapboxOverlay: class MockMapboxOverlay {
     private readonly canvas = document.createElement('canvas');
     readonly finalize = vi.fn();
