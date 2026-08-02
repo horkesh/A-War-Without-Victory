@@ -1,5 +1,25 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-03] R2 v9-fix revert was a false positive; original fix re-landed; a separate, unexplained non-determinism surfaced
+
+**Type:** Root-cause correction / controlled-experiment finding / open determinism question (unresolved, escalated).
+
+**Correction to 2026-08-02's "R2 v9 fix reverted" entry:** That entry attributed a `sarajevo_siege_begins_1992` non-firing (an RS historical-event anchor requiring territory >45% within turns 4-10) to `fc04f2902`'s `ResizeObserver`-based Desk-clearance coupling, based on a timing correlation (v9 passed pre-fix, v10/v11 failed post-fix). That attribution was wrong.
+
+**Disproof, in two steps:**
+1. A differently-shaped fix (`fc04f2902`'s revert, then a new static `bottom-28` change — zero new state, effects, or renders, purely a CSS class value swap) was verified via a fresh isolated packaged run (`v12`) and hit the **identical** `sarajevo_siege_begins_1992` non-firing. A change with no runtime behavior difference from the pre-fix baseline reproducing the same failure is strong evidence against the original causal claim.
+2. A control run (`v13-control`): stashed the static change, rebuilt the package from the exact pre-`fc04f2902` code (functionally identical to what `v9` tested — confirmed via `git log 5a5c47f93..HEAD`, every intervening commit is test/CI/docs-only, none touch `src/ui/map/components/presidential_desk/`, `src/ui/map/components/warroom/WarroomStatusBar.tsx`, or any sim/event code), ran it fresh and isolated. **It also failed identically.** Unmodified original code, run on a different day, produces a different result than it did when `v9` ran it.
+
+**Conclusion:** The regression is not caused by any R2 UI change. The original fix (`fc04f2902`) was valid and its revert (`a39b29673`) was an overcorrection based on false-positive attribution — a real lesson: two packaged runs agreeing is not proof of causation when neither isolates the variable under test from everything else that can differ run-to-run (including, apparently, the calendar date).
+
+**Action:** Re-landed the occlusion fix as `524bb7937`, using the static (not `ResizeObserver`) shape — no behavioral difference from the reverted version was ever found responsible for anything, but static is simpler and strictly lower-risk going forward. `tsc` clean, 36 tests across both touched files pass.
+
+**Open question — NOT resolved, needs engine/determinism-specialist attention:** `sarajevo_siege_begins_1992` fired correctly when `v9` ran on 2026-08-02 morning and has failed to fire in every subsequent packaged run (`v10`, `v11`, `v12`, `v13-control`), including a run of byte-identical-to-`v9` source code, run late on 2026-08-02 into 2026-08-03. A static search of `src/sim/`, `src/state/`, `src/scenario/`, and the new-campaign seed-generation path (`src/desktop/desktop_sim.ts`, `src/ui/map/components/{SidePickerOverlay,MainMenu}.tsx`) found no wall-clock `Date.now()`/`new Date()` usage outside comments and legitimate QA-harness timeout/metadata bookkeeping (`tools/ui/paradox_local_qa.cjs`, not sim code) — so the mechanism is not yet identified. Candidates not yet checked: whether the harness's own campaign-start payload derives anything (a save-file name, a default label, a scenario variant) from the current date that could indirectly perturb early-game RS behavior; whether this specific historical-event trigger has always been marginal/borderline (close to the 45% threshold) and is sensitive to sub-turn ordering noise unrelated to dates; whether the two runs used different Electron/system clock states in some other way. **If this turns out to be genuine sim-code non-determinism, it is a Sacred Rules violation (CLAUDE.md: "no Date.now() in sim code") and takes priority over all other roadmap work); if it's confined to the QA harness or is expected trigger-marginality, it's a lower-priority R6/calibration item.** This needs a dedicated investigation session, not further packaged-run iteration — each attempt costs 45-90 minutes and, per this investigation, does not by itself distinguish hypotheses.
+
+**Scope:** No event JSON, save schema, canon, or `docs/10_canon/FORAWWV.md` change. R2's PresidentDeskShell change is UI-only; the open Sarajevo-siege question is unresolved and explicitly out of scope for this entry's fix.
+
+---
+
 ## [2026-08-02] R2 v9 fix reverted: ResizeObserver coupling regressed RS early-game determinism
 
 **Type:** Regression discovery + revert / R2 packaged-acceptance evidence / process finding.
