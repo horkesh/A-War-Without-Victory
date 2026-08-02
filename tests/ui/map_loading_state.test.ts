@@ -54,7 +54,7 @@ describe('tactical map loading state', () => {
       'utf8',
     );
     const bcs = readFileSync(
-      join(process.cwd(), 'src', 'ui', 'map', 'i18n', 'messages.bcs.ts'),
+      join(process.cwd(), 'src', 'ui', 'map', 'i18n', 'messages.bs.ts'),
       'utf8',
     );
 

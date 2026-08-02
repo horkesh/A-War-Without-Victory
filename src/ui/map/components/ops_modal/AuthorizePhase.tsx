@@ -195,7 +195,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
         const allObjs = plan.axes.flatMap((a) => a.objectives);
         const allBrigades = plan.axes.flatMap((a) => a.brigadeIds);
         return submitOperation({
-            name: plan.opName + ' (Probe)',
+            name: t('opsPlanning.authorize.probeName', { name: plan.opName }),
             type: 'probe',
             participatingBrigades: allBrigades.slice(0, 3),
             objectives: allObjs.slice(0, 1),

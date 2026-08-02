@@ -26,7 +26,7 @@ import {
     compareStepsById,
 } from '../src/ui/map/components/onboarding/onboardingSteps.js';
 import { enMessages } from '../src/ui/map/i18n/messages.en.js';
-import { bcsMessages } from '../src/ui/map/i18n/messages.bcs.js';
+import { bsMessages } from '../src/ui/map/i18n/messages.bs.js';
 import {
     applyDismissPure,
     applyRestart,
@@ -194,9 +194,9 @@ describe('first-hour tutorial knowledge boundary', () => {
             enMessages['onboarding.08.body'],
             enMessages['inbox.openingBrief.thesis'],
             enMessages['commandBriefing.item.patronOverride.detail'],
-            bcsMessages['onboarding.08.body'],
-            bcsMessages['inbox.openingBrief.thesis'],
-            bcsMessages['commandBriefing.item.patronOverride.detail'],
+            bsMessages['onboarding.08.body'],
+            bsMessages['inbox.openingBrief.thesis'],
+            bsMessages['commandBriefing.item.patronOverride.detail'],
         ].join('\n');
 
         expect(text).not.toMatch(/\bDayton\b|Daytonu|Srebrenica|Žepa|Zepa|Vance-Owen|Owen-Stoltenberg|Contact Group|Karadzic|Mladic|massacre|genocide|falls?/i);

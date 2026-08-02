@@ -60,7 +60,7 @@ describe('Codex essay localization coverage', () => {
         const bcs = resolveCodexEssay(essay, {
             firedEventIds: new Set(),
             gameOver: false,
-        }, 'bcs');
+        }, 'bs');
         const en = resolveCodexEssay(essay, {
             firedEventIds: new Set(),
             gameOver: false,

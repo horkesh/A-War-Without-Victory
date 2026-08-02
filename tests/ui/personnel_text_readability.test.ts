@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from 'vitest';
 import { enMessages } from '../../src/ui/map/i18n/messages.en.js';
-import { bcsMessages } from '../../src/ui/map/i18n/messages.bcs.js';
+import { bsMessages as bcsMessages } from '../../src/ui/map/i18n/messages.bs.js';
 
 test('Personnel reserve-officer details scroll instead of clipping the available names', () => {
   const source = readFileSync(

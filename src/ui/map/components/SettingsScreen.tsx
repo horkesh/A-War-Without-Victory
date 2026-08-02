@@ -43,7 +43,7 @@ import {
     REDUCE_MOTION_STORAGE_KEY,
     type ColorblindPreset,
 } from '../../shared/factionPalette';
-import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, t, useLocale, type PersistedLocale } from '../i18n';
 
 interface SettingsSection {
     id: string;
@@ -341,13 +341,13 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                             <select
                                 className="bg-[#2a2720] text-[#d5c9bc] text-xs border border-[#8a7a60]/20 rounded px-2 py-1"
                                 aria-label={t('settings.language.ariaLabel')}
-                                value={locale}
-                                onChange={(e) => setLocale(e.target.value as Locale)}>
+                                value={locale === 'qps' ? DEFAULT_LOCALE : locale}
+                                onChange={(e) => setLocale(e.target.value as PersistedLocale)}>
                                 {SUPPORTED_LOCALES.map((option) => (
                                     <option key={option} value={option}>
                                         {option === 'en'
                                             ? t('settings.language.option.en')
-                                            : t('settings.language.option.bcs')}
+                                            : t('settings.language.option.bs')}
                                     </option>
                                 ))}
                             </select>

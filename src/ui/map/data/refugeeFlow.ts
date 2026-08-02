@@ -60,7 +60,7 @@ export const REFUGEE_SURGE_RATIO = 3;
 /** Format a people-count as a compact, somber figure (e.g. 1,500,000). */
 export function formatRefugeeCount(n: number): string {
     const safe = Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0;
-    return safe.toLocaleString(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US');
+    return safe.toLocaleString(getActiveLocale() === 'bs' ? 'bs-BA' : 'en-US');
 }
 
 /** Prose for a cumulative-milestone note. Faction-agnostic, non-gamified — the

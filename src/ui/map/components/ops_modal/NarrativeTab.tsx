@@ -17,7 +17,7 @@ interface NarrativeTabProps {
 }
 
 // WP3e: B/C/S to English translations
-const BCS_TRANSLATIONS: Record<string, string> = {
+const BS_TRANSLATIONS: Record<string, string> = {
     'NEPRIJATELJ': 'Enemy Forces',
     'VLASTITE SNAGE': 'Own Forces',
     'PROCJENA': 'Assessment',
@@ -26,8 +26,8 @@ const BCS_TRANSLATIONS: Record<string, string> = {
 
 /** Add inline English translation if the title contains a known B/C/S term. */
 function translateTitle(title: string): string {
-    for (const [bcs, eng] of Object.entries(BCS_TRANSLATIONS)) {
-        if (title.toUpperCase().includes(bcs)) {
+    for (const [bs, eng] of Object.entries(BS_TRANSLATIONS)) {
+        if (title.toUpperCase().includes(bs)) {
             // Only add translation if not already present
             if (!title.includes(eng)) {
                 return `${title} \u2014 ${eng}`;

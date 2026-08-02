@@ -51,7 +51,7 @@ const UNIT_TYPE_LABEL_KEYS: Record<string, MessageKey> = {
 };
 
 function formatInteger(value: number, locale: Locale): string {
-    return value.toLocaleString(locale === 'bcs' ? 'bs-BA' : 'en-US');
+    return value.toLocaleString(locale === 'bs' ? 'bs-BA' : 'en-US');
 }
 
 function formatOptionalInteger(value: number | null | undefined, locale: Locale): string {

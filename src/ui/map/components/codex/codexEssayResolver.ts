@@ -164,15 +164,15 @@ export interface ResolvedEssay {
     lockReason: CodexLockReason | null;
 }
 
-type EssayBcsLocalization = NonNullable<EssayEntry['localizations']>['bcs'];
-type DynamicSectionBcsLocalization = NonNullable<DynamicSection['localizations']>['bcs'];
+type LegacyEssayBsLocalization = NonNullable<EssayEntry['localizations']>['bcs'];
+type LegacyDynamicSectionBsLocalization = NonNullable<DynamicSection['localizations']>['bcs'];
 
-function localizedEssay(essay: EssayEntry, locale: Locale): EssayBcsLocalization | undefined {
-    return locale === 'bcs' ? essay.localizations?.bcs : undefined;
+function localizedEssay(essay: EssayEntry, locale: Locale): LegacyEssayBsLocalization | undefined {
+    return locale === 'bs' ? essay.localizations?.bcs : undefined;
 }
 
-function localizedSection(section: DynamicSection, locale: Locale): DynamicSectionBcsLocalization | undefined {
-    return locale === 'bcs' ? section.localizations?.bcs : undefined;
+function localizedSection(section: DynamicSection, locale: Locale): LegacyDynamicSectionBsLocalization | undefined {
+    return locale === 'bs' ? section.localizations?.bcs : undefined;
 }
 
 function tokenizeCondition(condition: string): string[] {
@@ -710,7 +710,7 @@ function ghostSummary(essay: EssayEntry, locale: Locale): string {
     if (essay.ghost_summary && essay.ghost_summary.trim().length > 0) {
         return essay.ghost_summary.trim();
     }
-    return locale === 'bcs'
+    return locale === 'bs'
         ? 'Ovaj historijski zapis ostao je neostvaren u vasem ratu.'
         : 'This historical entry remained unrealized in your war.';
 }

@@ -101,7 +101,8 @@ function resolveGlobBySuffix(glob: Record<string, string>, suffix: string): stri
  * Resolve the authored markdown body for a ghost entry, respecting locale.
  *
  * @param ghostId  Stable ghost id (file basename, no extension), e.g. `winter_held`.
- * @param locale   `'en'` or `'bcs'`. Falls back to the EN body when the BCS body
+ * @param locale   Canonical `'en'` or `'bs'` (plus QA-only `'qps'`). Falls back to
+ *                 the EN body when the legacy-authored Bosnian body
  *                 is absent (none are today, but the fallback keeps the panel
  *                 populated rather than blank if a locale gap appears).
  * @returns the raw markdown body, or `null` when no body should be surfaced
@@ -114,9 +115,9 @@ export function resolveGhostEntryProse(ghostId: string, locale: Locale): string 
   if (SECTION6_GATED_GHOST_IDS.has(id)) return null;
 
   const suffix = `/${id}.md`;
-  if (locale === 'bcs') {
-    const bcs = resolveGlobBySuffix(GHOST_PROSE_BCS, suffix);
-    if (bcs !== null) return bcs;
+  if (locale === 'bs') {
+    const bs = resolveGlobBySuffix(GHOST_PROSE_BCS, suffix);
+    if (bs !== null) return bs;
   }
   return resolveGlobBySuffix(GHOST_PROSE_EN, suffix);
 }

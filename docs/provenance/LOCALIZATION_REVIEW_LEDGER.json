@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "locale": "bs",
+  "formatting_locale": "bs-BA",
+  "display_label": "Bosanski (Preview)",
+  "default_locale": "en",
+  "production_lqa_claim": false,
+  "remaining_linguistic_review": "preview-language-review",
+  "reviews": [
+    {
+      "reviewer": "Codex/Pyrrhic UI-UX Developer + Documentation Specialist",
+      "date": "2026-08-02",
+      "keys": [
+        "opsPlanning.authorize.probeName",
+        "settings.experimentalFallbackProbe",
+        "settings.language.option.bs"
+      ],
+      "issue_class": "locale-contract-and-localizability",
+      "resolution": "Canonicalized bs identity, closed the known fallback, removed one rendered English concatenation, and labeled the unreviewed locale Preview."
+    },
+    {
+      "reviewer": null,
+      "date": null,
+      "keys": "*",
+      "issue_class": "native-language-review",
+      "resolution": "preview-language-review"
+    }
+  ],
+  "exact_remainder": {
+    "owner": "tools/diagnostics/localization_coverage.ts",
+    "command": "node_modules/.bin/tsx tools/diagnostics/localization_coverage.ts",
+    "machine_readable": true,
+    "stable_order": "file, line, column, finding kind, excerpt",
+    "census": {
+      "english_keys": 5556,
+      "bosnian_translations": 5556,
+      "bosnian_fallbacks": 0,
+      "layout_review_keys": 599,
+      "source_files_scanned": 385,
+      "embedded_english_literals": 579,
+      "concatenated_copy_findings": 0,
+      "source_literal_remainder": 579,
+      "dynamic_message_key_findings": 391,
+      "open_findings": 970
+    }
+  },
+  "visual_evidence": {
+    "contract": "tools/ui/localization_viewport_contract.ts",
+    "surfaces": 8,
+    "viewports": [
+      "1366x768",
+      "1920x1080",
+      "3440x1440"
+    ],
+    "capture_status": "deferred-to-r7-phase5-integrated-browser-electron-proof"
+  }
+}

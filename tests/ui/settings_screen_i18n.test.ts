@@ -20,21 +20,22 @@ describe('SettingsScreen localization control', () => {
         expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBeNull();
     });
 
-    it('persists and renders BCS settings copy when selected', () => {
+    it('persists and renders preview Bosnian settings copy when selected', () => {
         render(createElement(SettingsScreen, { onClose: () => {} }));
 
         fireEvent.click(screen.getByRole('button', { name: 'Language' }));
         fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), {
-            target: { value: 'bcs' },
+            target: { value: 'bs' },
         });
 
         expect(screen.getByRole('heading', { name: 'Postavke' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zatvori' })).toBeTruthy();
-        expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bcs');
+        expect(screen.getByRole('option', { name: 'Bosanski (Preview)' })).toBeTruthy();
+        expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bs');
     });
 
-    it('renders BCS audio settings copy when BCS is selected', () => {
-        setLocale('bcs');
+    it('renders Bosnian audio settings copy when Bosnian is selected', () => {
+        setLocale('bs');
 
         render(createElement(SettingsScreen, { onClose: () => {} }));
 

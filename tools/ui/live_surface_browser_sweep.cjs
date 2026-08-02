@@ -3,6 +3,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { URL: NodeURL } = require('node:url');
 const { spawn, spawnSync } = require('node:child_process');
 const { resolveBrowserGateEnv } = require('./browser_gate_pmtiles_env.cjs');
 
@@ -10,6 +11,13 @@ const ROOT = process.cwd();
 const PORT = Number(process.env.AWWV_LIVE_SURFACE_BROWSER_PORT || 3239);
 const URL = process.env.AWWV_LIVE_SURFACE_BROWSER_URL || `http://127.0.0.1:${PORT}/?dev=1`;
 const LOCALE = String(process.env.AWWV_LIVE_SURFACE_BROWSER_LOCALE || process.env.AWWV_UI_LOCALE || 'en').toLowerCase();
+const NAVIGATION_URL = (() => {
+  const target = new NodeURL(URL);
+  if (['en', 'bs', 'bcs', 'qps'].includes(LOCALE)) {
+    target.searchParams.set('locale', LOCALE);
+  }
+  return target.toString();
+})();
 const OUT_DIR = process.env.AWWV_LIVE_SURFACE_BROWSER_OUT_DIR
   || path.join(ROOT, '.tmp_live_surface_browser_sweep');
 const SCREENSHOT_DIR = path.join(OUT_DIR, 'screenshots');
@@ -1226,7 +1234,7 @@ async function assertSingleShellSurface(page, expectedSurface) {
 }
 
 async function runFoundationalFlow(page, summary) {
-  await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.goto(NAVIGATION_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.evaluate(() => {
     window.localStorage?.clear();
     window.sessionStorage?.clear();

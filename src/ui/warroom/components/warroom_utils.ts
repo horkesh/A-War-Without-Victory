@@ -18,16 +18,21 @@ const MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December',
     ],
-    bcs: [
+    bs: [
         'januar', 'februar', 'mart', 'april', 'maj', 'jun',
         'jul', 'august', 'septembar', 'oktobar', 'novembar', 'decembar',
+    ],
+    qps: [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
     ],
 };
 
 /** Months in uppercase (JANUARY, FEBRUARY, …). */
 const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
     en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    bcs: ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+    bs: ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+    qps: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 };
 
 function monthName(monthIndex: number): string {
@@ -98,7 +103,7 @@ export function turnToWeekString(turn: number): string {
     const d = new Date(_activeStart.year, _activeStart.month, _activeStart.day);
     d.setDate(d.getDate() + turn * 7);
     const week = Math.floor((d.getDate() - 1) / 7) + 1;
-    const weekPrefix = getActiveLocale() === 'bcs' ? 'Sedmica' : 'Week';
+    const weekPrefix = getActiveLocale() === 'bs' ? 'Sedmica' : 'Week';
     return `${weekPrefix} ${week}, ${monthName(d.getMonth())} ${d.getFullYear()}`;
 }
 

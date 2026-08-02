@@ -42,7 +42,7 @@ import {
 } from '../../../sim/events/realized_consequence_receipts.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
-import { getActiveLocale, t, type Locale } from '../i18n/index.js';
+import { getActiveLocale, getLegacyContentLocale, t, type Locale } from '../i18n/index.js';
 import { isCanonicalPlayerFaction, playerFactionMatch } from './playerFactionMatch.js';
 
 /** Realization status of a single predicted downstream event. */
@@ -116,7 +116,8 @@ function resolveEventTitle(
     locale: Locale,
 ): string {
     if (locale !== 'en') {
-        const localizedTitle = def?.localizations?.[locale]?.title;
+        const contentLocale = getLegacyContentLocale(locale);
+        const localizedTitle = contentLocale ? def?.localizations?.[contentLocale]?.title : undefined;
         return typeof localizedTitle === 'string' && localizedTitle.trim().length > 0
             ? localizedTitle
             : resolveEventFallbackLabel(fallbackId, locale);
@@ -134,7 +135,10 @@ function resolveOptionLabel(
     locale: Locale,
 ): string {
     if (locale !== 'en') {
-        const localizedLabel = def?.localizations?.[locale]?.response_options?.[option.id]?.label;
+        const contentLocale = getLegacyContentLocale(locale);
+        const localizedLabel = contentLocale
+            ? def?.localizations?.[contentLocale]?.response_options?.[option.id]?.label
+            : undefined;
         return typeof localizedLabel === 'string' && localizedLabel.trim().length > 0
             ? localizedLabel
             : t('decisionHistory.recordedResponse', undefined, locale);
@@ -154,7 +158,8 @@ function resolvePredictedLabel(
     if (locale === 'en') {
         return authoredEnglishLabel?.trim() || resolveEventTitle(def, fallbackId, locale);
     }
-    const localizedTitle = def?.localizations?.[locale]?.title;
+    const contentLocale = getLegacyContentLocale(locale);
+    const localizedTitle = contentLocale ? def?.localizations?.[contentLocale]?.title : undefined;
     return typeof localizedTitle === 'string' && localizedTitle.trim().length > 0
         ? localizedTitle
         : t('chronicle.card.consequence', undefined, locale);

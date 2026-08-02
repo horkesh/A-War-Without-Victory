@@ -551,7 +551,7 @@ describe('player-safe tooltip models', () => {
       attackOrders: [],
       osidDisplayNames: null,
       playerFaction: 'RBiH',
-      locale: 'bcs',
+      locale: 'bs',
     });
 
     expect(model.posture).toBe('Odbrana');

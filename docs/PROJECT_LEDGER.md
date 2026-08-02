@@ -25857,3 +25857,23 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Fast verification:** RED failed 55/316 and challenge RED failed 14/340 as described above. The corrected focused matrix passes 3 files / 340 tests; the accumulated fast R7 surface passes 10 files / 387 tests. TypeScript, both shared JavaScript diagnostics' syntax checks, the 1-test static nondeterminism scan, protected-path scope, and diff hygiene pass. No baseline, canon, scenario, Electron, packaging, release, publication, push, or integration lane ran for this correction.
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
+
+## 2026-08-02 - R7 Phase 3 Bosnian locale source checkpoint
+
+**Type:** UI locale identity migration / deterministic QA-localization substrate / review-queue convergence.
+
+**RED evidence:** Canonical-locale tests first required `SUPPORTED_LOCALES` to contain `bs` rather than `bcs`, legacy storage to rewrite immediately, formatting to resolve through `bs-BA`, and the settings label to be `Bosanski (Preview)`. Pseudo-locale tests first required bounded expansion, byte-preserved tokens/markup, exact key coverage, supported glyphs, and stable timestamp-free serialization. Diagnostic fixtures first required the known Bosnian fallback and a confirmed rendered `t(...) + literal` construction to remain visible while arithmetic/selector expressions did not count as player-copy concatenation. The new expectations failed against the legacy contract before implementation.
+
+**Implementation:** `src/ui/map/i18n/index.ts` now separates canonical persisted locales (`en|bs`), the nonpersisted QA locale (`qps`), legacy input (`bcs`), and legacy authored-content lookup. `messages.bs.ts` / `bsMessages` owns the complete canonical draft; `messages.bcs.ts` is a read-only import shim. Stored `bcs` migrates to `bs`, Bosnian formats through `bs-BA`, English remains default, and the visible label is `Bosanski (Preview)`. Map, settings/menu, formation, Codex, ghost-entry, consequence, inbox, letter-home, number, and date consumers use canonical `bs`; legacy JSON fields remain behind explicit adapters. One fallback and one confirmed rendered source concatenation were closed.
+
+**Pseudolocalization and evidence contract:** Deterministic, nonpersisted `qps` derives from English in strict code-point key order, adds delimiters and approximately 40% expansion, preserves interpolation/markup/entity/printf spans byte-for-byte, and uses only source plus Bosnian glyphs. The browser URL contract accepts `bs|qps`, and a static owner pins 8 required surfaces across 1366x768, 1920x1080, and 3440x1440 for 24 future cases. Real screenshots and clipping disposition are not claimed; they remain R7 Phase 5 integrated proof.
+
+**Exact census and review disposition:** 5,556 English keys, 5,556 Bosnian draft strings, zero fallback, 599 length-risk keys, 385 source files, 579 embedded-English candidates, zero confirmed concatenated-copy findings, 391 dynamic-key candidates, and 970 exact open findings. `docs/provenance/LOCALIZATION_REVIEW_LEDGER.json` records the completed bounded source review and assigns all remaining native linguistic work to `preview-language-review`; no production LQA claim is made.
+
+**Determinism and state:** Locale normalization, pseudo transformation, diagnostic traversal, review serialization, and viewport-case construction are pure or storage-bounded and strictly ordered. No clock, randomness, host path, filesystem-order dependence, simulation rule/state, save field, scenario, baseline, performance artifact, or runtime review metadata was added.
+
+**Verification:** Focused changed/dependent localization proof passes 21 files / 223 tests. `qa:player-journeys` passes 44 files / 771 tests. TypeScript passes. The localization and pseudo-locale CLIs exit 0; the live browser harness passes `node --check`. Final JSON parsing, protected-scope checks, and diff hygiene are commit gates. Expected malformed-save stderr belongs to negative-path fixtures and does not represent a test failure.
+
+**Artifacts:** `docs/40_reports/implemented/20260802_R7_BOSNIAN_LOCALE_SOURCE_CHECKPOINT.md`, `docs/provenance/LOCALIZATION_REVIEW_LEDGER.json`, and the R7 plan/roadmap/command-board/index updates.
+
+**Scope:** No native-language approval, real browser/Electron capture, Electron run, scenario/baseline/canon/performance execution, package/version/tag/signing/publication/release state, push/integration, parent worktree, or `docs/10_canon/FORAWWV.md` change.

@@ -4225,3 +4225,15 @@ Applied in `[2026-08-02] R7 fourteenth blocked-review correction: both-boundary 
 **Generic symmetry is a sensitive-history risk, not a ban on neutral plural actors:** a sentence that names both belligerents' operational interest is not moral equivalence. Apply generic-symmetry blocking only where the claim's risk class concerns atrocity, blame, civilian harm, or responsibility. Do not rewrite clear history merely to evade a broad regex.
 
 Applied in `[2026-08-02] R7 Phase 0 integrated acceptance and R4 provenance reconciliation`, `tools/diagnostics/codex_sensitive_claim_inventory.cjs`, the seven reviewed essay metadata rows, and the combined R7/R4 dependent matrix.
+
+## 2026-08-02 - Locale identity, content compatibility, and language quality are separate contracts
+
+**A compatibility code must not remain a canonical product identity:** persisted language selection, `Intl` formatting, authored legacy-content fields, and import compatibility have different lifetimes. Durable rule: expose one canonical BCP 47 product locale, migrate old preferences immediately, map regional formatting explicitly, and isolate old data-field/import names behind narrow read adapters. Do not make every consumer understand both the old and new identifiers.
+
+**A pseudo-locale is deterministic QA state, not a user preference:** pseudolocalization should expose expansion, token, markup, key-coverage, and font defects without changing saves or normal preference storage. Durable rule: derive it from the canonical source dictionary in strict order, protect nontranslatable spans byte-for-byte, prohibit clocks/paths/randomness, and select it only through an explicit QA boundary.
+
+**Complete key parity is not linguistic approval:** a dictionary can have zero missing keys and still lack native contextual review. Durable rule: label that locale `Preview`, keep the reviewed language as default, record reviewer/date/key/issue/resolution outside runtime state, and retain an exact machine-readable remainder. Never infer production LQA from key coverage or automated translation.
+
+**Source concatenation diagnostics must distinguish rendered prose from syntax:** a broad `+` scan conflates player-facing assembly with arithmetic, reducers, and selector expressions. Durable rule: require high-confidence copy literals or localized-expression-plus-literal evidence, preserve a positive fixture for real concatenation, and report dynamic-message-key review separately.
+
+Applied in `[2026-08-02] R7 Phase 3 Bosnian locale source checkpoint`, `src/ui/map/i18n/index.ts`, the canonical/pseudo dictionaries, the localization diagnostic, and `docs/provenance/LOCALIZATION_REVIEW_LEDGER.json`.

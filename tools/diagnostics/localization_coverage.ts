@@ -5,10 +5,11 @@ import { extname, resolve, sep } from 'node:path';
 import ts from 'typescript';
 
 import { enMessages as productionEnMessages } from '../../src/ui/map/i18n/messages.en.js';
-import { bcsMessages as productionBcsMessages } from '../../src/ui/map/i18n/messages.bcs.js';
+import { bsMessages as productionBsMessages } from '../../src/ui/map/i18n/messages.bs.js';
 
 const EN_DICTIONARY_FILE = 'src/ui/map/i18n/messages.en.ts';
 const LEGACY_BCS_DICTIONARY_FILE = 'src/ui/map/i18n/messages.bcs.ts';
+const BS_DICTIONARY_FILE = 'src/ui/map/i18n/messages.bs.ts';
 const UI_SOURCE_ROOT = 'src/ui/map';
 const PLAYER_COPY_ATTRIBUTES = new Set([
     'alt',
@@ -61,6 +62,13 @@ export interface LocalizationCoverageReport {
         formatting_locale: 'bs-BA';
         legacy_alias: 'bcs';
         legacy_dictionary_file: string;
+    };
+    review_disposition: {
+        display_label: 'Bosanski (Preview)';
+        english_remains_default: true;
+        external_native_review: 'not_completed';
+        remaining_linguistic_review: 'preview-language-review';
+        production_lqa_claim: false;
     };
     inputs: {
         english_dictionary: string;
@@ -152,10 +160,12 @@ function nodeLocation(sourceFile: ts.SourceFile, node: ts.Node): { line: number;
     return { line: location.line + 1, column: location.character + 1 };
 }
 
-function containsLiteralCopy(node: ts.Node): boolean {
+function containsTranslationCall(node: ts.Node): boolean {
     let found = false;
     const visit = (candidate: ts.Node): void => {
-        if (ts.isStringLiteralLike(candidate) && looksLikePlayerCopy(candidate.text)) {
+        if (ts.isCallExpression(candidate)
+            && ts.isIdentifier(candidate.expression)
+            && candidate.expression.text === 't') {
             found = true;
             return;
         }
@@ -163,6 +173,21 @@ function containsLiteralCopy(node: ts.Node): boolean {
     };
     visit(node);
     return found;
+}
+
+function isPlayerCopyConcatenation(node: ts.Node): boolean {
+    let hasLiteral = false;
+    let hasHighConfidenceLiteral = false;
+    const visit = (candidate: ts.Node): void => {
+        if (ts.isStringLiteralLike(candidate) && looksLikePlayerCopy(candidate.text)) {
+            hasLiteral = true;
+            hasHighConfidenceLiteral ||= looksLikeEmbeddedCopy(candidate.text)
+                || /\b[A-Z][a-z]{2,}\b/.test(candidate.text);
+        }
+        ts.forEachChild(candidate, visit);
+    };
+    visit(node);
+    return hasHighConfidenceLiteral || (hasLiteral && containsTranslationCall(node));
 }
 
 function hasPlusExpressionAncestor(node: ts.Node): boolean {
@@ -260,7 +285,7 @@ function scanSourceFile(rootDir: string, relativeFile: string): LocalizationSour
         }
 
         if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken
-            && containsLiteralCopy(node)
+            && isPlayerCopyConcatenation(node)
             && !(ts.isBinaryExpression(node.parent) && node.parent.operatorToken.kind === ts.SyntaxKind.PlusToken)) {
             add(node, 'concatenated_copy', node.getText(sourceFile), 'ui-ux+localization');
         }
@@ -314,7 +339,7 @@ export async function buildLocalizationCoverageReport(
 ): Promise<LocalizationCoverageReport> {
     const rootDir = input.rootDir ?? process.cwd();
     const enMessages = input.enMessages ?? productionEnMessages as Record<string, string>;
-    const bsMessages = input.bsMessages ?? productionBcsMessages as Partial<Record<string, string>>;
+    const bsMessages = input.bsMessages ?? productionBsMessages as Partial<Record<string, string>>;
     const sourceFiles = listSourceFiles(rootDir);
     const sourceFindings = sortFindings(sourceFiles.flatMap((file) => scanSourceFile(rootDir, file)));
     const keys = Object.keys(enMessages).sort(strictCompare).map((key): LocalizationCoverageKey => {
@@ -327,7 +352,7 @@ export async function buildLocalizationCoverageReport(
         return {
             key,
             source_file_en: EN_DICTIONARY_FILE,
-            source_file_bs: LEGACY_BCS_DICTIONARY_FILE,
+            source_file_bs: BS_DICTIONARY_FILE,
             en_text: enText,
             bs_text: bsText,
             en_status: 'authored',
@@ -351,9 +376,16 @@ export async function buildLocalizationCoverageReport(
             legacy_alias: 'bcs',
             legacy_dictionary_file: LEGACY_BCS_DICTIONARY_FILE,
         },
+        review_disposition: {
+            display_label: 'Bosanski (Preview)',
+            english_remains_default: true,
+            external_native_review: 'not_completed',
+            remaining_linguistic_review: 'preview-language-review',
+            production_lqa_claim: false,
+        },
         inputs: {
             english_dictionary: EN_DICTIONARY_FILE,
-            bosnian_dictionary: LEGACY_BCS_DICTIONARY_FILE,
+            bosnian_dictionary: BS_DICTIONARY_FILE,
             player_surface_root: UI_SOURCE_ROOT,
         },
         summary: {

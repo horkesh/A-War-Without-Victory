@@ -26,7 +26,7 @@ import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 import { turnToDateString } from '../utils/formatters';
-import { t, useLocale, type Locale, type MessageKey } from '../i18n';
+import { getLegacyContentLocale, t, useLocale, type Locale, type MessageKey } from '../i18n';
 
 type EventDecisionDossier = PendingEventDecision & {
     narrative?: string;
@@ -40,8 +40,8 @@ type EventDecisionDossier = PendingEventDecision & {
 };
 
 function eventLocalization(def: EventDefinition | undefined, locale: Locale) {
-    if (locale === 'en') return undefined;
-    return def?.localizations?.[locale];
+    const contentLocale = getLegacyContentLocale(locale);
+    return contentLocale ? def?.localizations?.[contentLocale] : undefined;
 }
 
 function localizedField(

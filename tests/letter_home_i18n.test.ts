@@ -26,7 +26,7 @@ describe('Letter Home localization', () => {
             formationLookup: new Map([
                 ['arbih_brigade', { id: 'arbih_brigade', name: '1st Brigade', home_osid: 'op:tuzla' }],
             ]),
-            locale: 'bcs',
+            locale: 'bs',
             templateData: {
                 version: 1,
                 templates: [{

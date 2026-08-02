@@ -239,7 +239,7 @@ export function getLocalizedFormationName(
   formation: FormationNameInput,
   locale: Locale,
 ): string {
-  if (locale !== 'bcs') return formation.name;
+  if (locale !== 'bs') return formation.name;
   if (formation.kind && !['brigade', 'operational_group'].includes(formation.kind)) return formation.name;
   return DESIGNATION_BY_ID.get(formation.id)?.official_bcs
     ?? EXACT_BCS_NAMES[formation.id]
@@ -251,7 +251,7 @@ export function compareLocalizedFormationNames(
   b: FormationNameInput,
   locale: Locale,
 ): number {
-  const localeTag = locale === 'bcs' ? 'bs-BA' : 'en-US';
+  const localeTag = locale === 'bs' ? 'bs-BA' : 'en-US';
   const nameCompare = getLocalizedFormationName(a, locale).localeCompare(
     getLocalizedFormationName(b, locale),
     localeTag,

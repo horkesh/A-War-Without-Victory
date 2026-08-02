@@ -11,7 +11,7 @@ const aftermathSource = readFileSync('src/ui/map/components/army_hq/TurnAftermat
 const frontVisitSource = readFileSync('src/ui/map/components/army_hq/FrontVisitSection.tsx', 'utf8');
 const themeSource = readFileSync('src/ui/map/utils/theme.ts', 'utf8');
 const en = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
-const bcs = readFileSync('src/ui/map/i18n/messages.bcs.ts', 'utf8');
+const bcs = readFileSync('src/ui/map/i18n/messages.bs.ts', 'utf8');
 
 describe('Army HQ role clarity and contrast', () => {
   it('distinguishes the Army commander, Chief of Staff briefing, and presidential intent', () => {

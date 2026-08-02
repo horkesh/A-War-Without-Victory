@@ -67,7 +67,7 @@ describe('BCS brigade name localizations', () => {
         id: row.id,
         kind: 'brigade',
         name: row.name,
-      }, 'bcs') === row.name)
+      }, 'bs') === row.name)
       .map((row) => `${row.id}: ${row.name}`);
 
     expect(missing).toEqual([]);
@@ -80,7 +80,7 @@ describe('BCS brigade name localizations', () => {
           id: row.id,
           kind: 'brigade',
           name: row.name,
-        }, 'bcs');
+        }, 'bs');
         return forbiddenBosnianLeaks
         .filter((pattern) => pattern.test(name))
           .map((pattern) => `${row.id}: ${name} matched ${pattern}`);
@@ -94,17 +94,17 @@ describe('BCS brigade name localizations', () => {
       id: 'arbih_503rd_slavna_mountain',
       kind: 'brigade',
       name: '503rd Slavna Mountain',
-    }, 'bcs')).toBe('503. slavna brdska brigada');
+    }, 'bs')).toBe('503. slavna brdska brigada');
     expect(getLocalizedFormationName({
       id: 'rs_5th_kozara_light_infantry',
       kind: 'brigade',
       name: '5th Kozara Light Infantry',
-    }, 'bcs')).toBe('5. kozarska laka pješadijska brigada');
+    }, 'bs')).toBe('5. kozarska laka pješadijska brigada');
     expect(getLocalizedFormationName({
       id: 'hrhb_106th_bosanska_posavina_brigade',
       kind: 'brigade',
       name: '106th "Bosanska Posavina" Brigade',
-    }, 'bcs')).toBe('106. brigada "Bosanska Posavina"');
+    }, 'bs')).toBe('106. brigada "Bosanska Posavina"');
     expect(getLocalizedFormationName({
       id: 'unknown_brigade',
       kind: 'brigade',
@@ -136,7 +136,7 @@ describe('BCS brigade name localizations', () => {
       'z_same',
       'rs_1st_sarajevo_mechanized',
     ]);
-    expect([...rows].sort((a, b) => compareLocalizedFormationNames(a, b, 'bcs')).map((row) => row.id)).toEqual([
+    expect([...rows].sort((a, b) => compareLocalizedFormationNames(a, b, 'bs')).map((row) => row.id)).toEqual([
       'rs_1st_sarajevo_mechanized',
       'arbih_503rd_slavna_mountain',
       'a_same',

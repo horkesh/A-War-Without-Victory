@@ -28,7 +28,7 @@ describe('resolveGhostEntryProse', () => {
 
   it('returns the BCS body when locale is bcs', () => {
     const en = resolveGhostEntryProse('winter_held', 'en');
-    const bcs = resolveGhostEntryProse('winter_held', 'bcs');
+    const bcs = resolveGhostEntryProse('winter_held', 'bs');
     expect(bcs).not.toBeNull();
     expect((bcs ?? '').length).toBeGreaterThan(200);
     // EN and BCS bodies are distinct localizations of the same entry.
@@ -38,15 +38,15 @@ describe('resolveGhostEntryProse', () => {
   it('falls back to the EN body for an unknown locale gap (locale not bcs)', () => {
     // Sanity: a valid id always resolves at least the EN body.
     expect(resolveGhostEntryProse('alliance_held', 'en')).not.toBeNull();
-    expect(resolveGhostEntryProse('alliance_held', 'bcs')).not.toBeNull();
+    expect(resolveGhostEntryProse('alliance_held', 'bs')).not.toBeNull();
   });
 
   it('gates out §6-adjacent bodies (label only, never the prose)', () => {
     // Both bodies exist on disk but must NOT surface without owner + §6 sign-off.
     expect(resolveGhostEntryProse('cleansing_refused', 'en')).toBeNull();
-    expect(resolveGhostEntryProse('cleansing_refused', 'bcs')).toBeNull();
+    expect(resolveGhostEntryProse('cleansing_refused', 'bs')).toBeNull();
     expect(resolveGhostEntryProse('enclave_defended', 'en')).toBeNull();
-    expect(resolveGhostEntryProse('enclave_defended', 'bcs')).toBeNull();
+    expect(resolveGhostEntryProse('enclave_defended', 'bs')).toBeNull();
   });
 
   it('returns null for unknown / empty ids (graceful fallback to label only)', () => {

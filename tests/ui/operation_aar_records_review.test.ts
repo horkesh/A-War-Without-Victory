@@ -148,7 +148,7 @@ describe('Army HQ Records operation AAR review', () => {
 
     it('labels compact AAR final-held objectives as held at close, not taken', () => {
         const en = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
-        const bcs = readFileSync('src/ui/map/i18n/messages.bcs.ts', 'utf8');
+        const bcs = readFileSync('src/ui/map/i18n/messages.bs.ts', 'utf8');
 
         expect(en).toContain("'operationsSection.aarObjectivesTaken': '{captured} / {targeted} held at close'");
         expect(en).not.toContain('OBJ TAKEN');

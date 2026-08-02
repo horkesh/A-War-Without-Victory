@@ -19,7 +19,7 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getDecisionSurface, getDecisionSurfaceForInboxType } from './decisionSurfaceRegistry';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
-import { getActiveLocale, t, type MessageKey } from '../i18n';
+import { getActiveLocale, getLegacyContentLocale, t, type MessageKey } from '../i18n';
 import { buildReserveRequestPresentation, buildReserveRequestSummary } from './reserveRequestPresentation';
 import { looksLikeRawPlayerFacingToken } from '../utils/playerSafeText';
 import { isPeacePlanOwnedByPendingEvent } from '../utils/peacePlanDismissal';
@@ -161,11 +161,11 @@ function currentParamilitaryDeploymentCount(state: LoadedGameState, faction: str
 
 function formatParamilitaryStandingImpact(value: number): string {
     const exact = value.toFixed(4).replace(/\.?0+$/, '');
-    return getActiveLocale() === 'bcs' ? exact.replace('.', ',') : exact;
+    return getActiveLocale() === 'bs' ? exact.replace('.', ',') : exact;
 }
 
 function formatParamilitaryModelPopulation(): string {
-    return new Intl.NumberFormat(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US').format(
+    return new Intl.NumberFormat(getActiveLocale() === 'bs' ? 'bs-BA' : 'en-US').format(
         PARAMILITARY_TARGET_AVG_POPULATION,
     );
 }
@@ -198,7 +198,8 @@ function localizedEventTitle(
     eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
 ): string {
     const locale = getActiveLocale();
-    const localized = locale === 'en' ? undefined : eventCatalog?.get(eventId)?.localizations?.[locale]?.title;
+    const contentLocale = getLegacyContentLocale(locale);
+    const localized = contentLocale ? eventCatalog?.get(eventId)?.localizations?.[contentLocale]?.title : undefined;
     const trimmed = localized?.trim();
     if (trimmed) return trimmed;
     return fallback ?? t('inbox.item.eventDecision.titleFallback');

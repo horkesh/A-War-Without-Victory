@@ -439,7 +439,7 @@ describe('ADVANCE_TURN gated feedback', () => {
 
   it('Warroom priority severity badges are localized instead of hardcoded English', () => {
     const source = readFileSync('src/ui/map/components/warroom/WarroomStatusBar.tsx', 'utf8');
-    const bcsMessages = readFileSync('src/ui/map/i18n/messages.bcs.ts', 'utf8');
+    const bcsMessages = readFileSync('src/ui/map/i18n/messages.bs.ts', 'utf8');
 
     expect(source).toContain("t('warroom.severity.blocking')");
     expect(source).toContain("t('warroom.severity.critical')");

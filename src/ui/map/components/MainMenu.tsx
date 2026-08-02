@@ -5,7 +5,7 @@
  */
 import { type ReactNode } from 'react';
 import { Z } from '../../shared/zIndex';
-import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, t, useLocale, type PersistedLocale } from '../i18n';
 import type { StartNewCampaignPayload } from '../desktop/types';
 import { getArmyName, getFactionFlag } from '../utils/factionAssets';
 import { AWWV_APP_VERSION } from '../utils/appVersion';
@@ -42,14 +42,14 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
                 <select
                     className="rounded border border-[#8a7a60]/25 bg-[#1a1816] px-2 py-1 text-xs text-[#d5c9bc] outline-none hover:border-[#c4a35a]/40 focus:border-[#c4a35a]/60"
                     aria-label={t('settings.language.ariaLabel')}
-                    value={locale}
-                    onChange={(event) => setLocale(event.target.value as Locale)}
+                    value={locale === 'qps' ? DEFAULT_LOCALE : locale}
+                    onChange={(event) => setLocale(event.target.value as PersistedLocale)}
                 >
                     {SUPPORTED_LOCALES.map((option) => (
                         <option key={option} value={option}>
                             {option === 'en'
                                 ? t('settings.language.option.en')
-                                : t('settings.language.option.bcs')}
+                                : t('settings.language.option.bs')}
                         </option>
                     ))}
                 </select>

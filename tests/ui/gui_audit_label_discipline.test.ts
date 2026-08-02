@@ -16,7 +16,7 @@ import { CollapsibleSection } from '../../src/ui/map/components/army_hq/Collapsi
 import { OrbatSection } from '../../src/ui/map/components/army_hq/OrbatSection.js';
 import { OpportunityLedgerPanel } from '../../src/ui/map/components/army_hq/OpportunityLedgerPanel.js';
 import { SectorsSection } from '../../src/ui/map/components/army_hq/SectorsSection.js';
-import { bcsMessages } from '../../src/ui/map/i18n/messages.bcs.js';
+import { bsMessages as bcsMessages } from '../../src/ui/map/i18n/messages.bs.js';
 import { enMessages } from '../../src/ui/map/i18n/messages.en.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { CorpsFrontSectorView, FormationView, LoadedGameState } from '../../src/ui/map/data/types.js';

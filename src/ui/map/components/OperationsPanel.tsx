@@ -124,7 +124,7 @@ function taskForceStrengthLabel(taskForce: OperationTaskForceInspectionView, num
 
 export function OperationsPanel() {
   const [locale] = useLocale();
-  const numberLocale = locale === 'bcs' ? 'bs-BA' : 'en-US';
+  const numberLocale = locale === 'bs' ? 'bs-BA' : 'en-US';
   const isOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const setIsOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);

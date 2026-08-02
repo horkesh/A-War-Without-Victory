@@ -9,14 +9,16 @@
  *   ?mock=1   — install a window.awwv.previewDayton stub so "Probe Positions"
  *               returns a deterministic bot counter-offer (RS counters, HRHB accepts).
  *               Must be set BEFORE React mounts (useIPC reads window.awwv once).
- *   ?locale=bcs — render in BCS locale (optional).
+ *   ?locale=bs  — render in canonical Bosnian locale (optional).
+ *   ?locale=en  — force English regardless of a stored preference (optional).
+ *   ?locale=qps — render in deterministic pseudolocale (optional).
  */
 import ReactDOM from 'react-dom/client';
 import { createElement } from 'react';
 import './styles/globals.css';
 import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
 import { useGameStore } from './store/gameStore';
-import { setLocale } from './i18n';
+import { setLocale, setQaLocale } from './i18n';
 import { makeMockLoadedGameState } from './__mocks__/loadedGameState';
 import type { LoadedGameState } from './data/types';
 
@@ -55,8 +57,11 @@ if (params.get('mock') === '1') {
     };
 }
 
-if (params.get('locale') === 'bcs') {
-    setLocale('bcs');
+const requestedLocale = params.get('locale');
+if (requestedLocale === 'qps') {
+    setQaLocale('qps');
+} else if (requestedLocale === 'en' || requestedLocale === 'bs' || requestedLocale === 'bcs') {
+    setLocale(requestedLocale);
 }
 
 // Same realistic packet the unit test exercises (Brčko tri-state present).

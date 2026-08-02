@@ -78,6 +78,6 @@ describe('OOB elite commander metadata contract', () => {
       id: 'hrhb_vitezovi_brigade_vitez',
       kind: 'brigade',
       name: row?.name ?? '',
-    }, 'bcs')).toBe(designation?.official_bcs);
+    }, 'bs')).toBe(designation?.official_bcs);
   });
 });

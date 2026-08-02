@@ -62,7 +62,7 @@ function reportedK(value: number | undefined, reported: boolean): string {
 }
 
 function localizedInteger(value: number): string {
-    return value.toLocaleString(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US');
+    return value.toLocaleString(getActiveLocale() === 'bs' ? 'bs-BA' : 'en-US');
 }
 
 interface WarSummaryContentProps {

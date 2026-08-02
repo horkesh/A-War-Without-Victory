@@ -34,7 +34,7 @@ function getOutcomeDisplay(outcome?: string): { title: string; subtitle: string 
 }
 
 function formatSettlementsControlled(count: number, locale: Locale): string {
-    if (locale === 'bcs') {
+    if (locale === 'bs') {
         return t('gameOver.osidsControlled', { count });
     }
     return t(count === 1 ? 'gameOver.osidControlled.one' : 'gameOver.osidControlled.many', { count });

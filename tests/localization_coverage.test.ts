@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -17,6 +18,10 @@ describe('localization coverage inventory', () => {
             await writeFile(join(sourceDir, 'Desk.tsx'), [
                 "import { t } from '../i18n';",
                 "export function Desk({ dynamicKey }: { dynamicKey: string }) {",
+                "  const numbers = [1, 2].reduce((a, n) => a + (typeof n === 'number' ? n : 0), 0);",
+                "  const targetToken = 'desk';",
+                "  const selector = '[data-tutorial-step=' + JSON.stringify(targetToken) + ']';",
+                "  void numbers; void selector;",
                 "  return <button aria-label=\"Open desk\">{t('desk.open') + ' now'}{t(dynamicKey as never)}</button>;",
                 "}",
                 '',
@@ -45,6 +50,13 @@ describe('localization coverage inventory', () => {
                 legacy_alias: 'bcs',
                 legacy_dictionary_file: 'src/ui/map/i18n/messages.bcs.ts',
             });
+            expect(first.review_disposition).toEqual({
+                display_label: 'Bosanski (Preview)',
+                english_remains_default: true,
+                external_native_review: 'not_completed',
+                remaining_linguistic_review: 'preview-language-review',
+                production_lqa_claim: false,
+            });
             expect(first.keys.map((row) => row.key)).toEqual(['desk.long', 'desk.missing', 'desk.open']);
             expect(first.keys.find((row) => row.key === 'desk.missing')).toMatchObject({
                 bs_status: 'fallback_to_en',
@@ -64,15 +76,53 @@ describe('localization coverage inventory', () => {
         }
     });
 
-    it('inventories every production English key and exposes the intentional fallback probe', async () => {
+    it('records a deterministic preview-language-review ledger and exact remainder owner', () => {
+        const ledger = JSON.parse(readFileSync(
+            'docs/provenance/LOCALIZATION_REVIEW_LEDGER.json',
+            'utf8',
+        ));
+        expect(ledger).toMatchObject({
+            schema_version: 1,
+            locale: 'bs',
+            display_label: 'Bosanski (Preview)',
+            default_locale: 'en',
+            production_lqa_claim: false,
+            remaining_linguistic_review: 'preview-language-review',
+            exact_remainder: {
+                owner: 'tools/diagnostics/localization_coverage.ts',
+                machine_readable: true,
+            },
+        });
+        expect(ledger.reviews).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                date: '2026-08-02',
+                issue_class: 'locale-contract-and-localizability',
+            }),
+            expect.objectContaining({
+                reviewer: null,
+                date: null,
+                issue_class: 'native-language-review',
+                resolution: 'preview-language-review',
+            }),
+        ]));
+        expect(JSON.stringify(ledger)).not.toMatch(/generated_at|timestamp|[A-Z]:\\|\/tmp\//i);
+    });
+
+    it('inventories every production English key and proves the former fallback probe is translated', async () => {
         const report = await buildLocalizationCoverageReport({ rootDir: process.cwd() });
         expect(report.summary.total_keys).toBeGreaterThan(5_000);
         expect(report.keys.length).toBe(report.summary.total_keys);
+        expect(report.inputs.bosnian_dictionary).toBe('src/ui/map/i18n/messages.bs.ts');
+        expect(report.summary.bs_fallbacks).toBe(0);
         expect(report.keys.find((row) => row.key === 'settings.experimentalFallbackProbe')).toMatchObject({
-            bs_status: 'fallback_to_en',
-            status: 'missing_bs',
+            bs_status: 'translated',
+            status: 'complete',
         });
         expect([...report.keys].sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0)).toEqual(report.keys);
+        expect(report.source_findings.some((row) => (
+            row.kind === 'concatenated_copy'
+            && row.file === 'src/ui/map/components/ops_modal/AuthorizePhase.tsx'
+        ))).toBe(false);
 
         for (const expected of [
             ['src/ui/map/components/LoadingSkeleton.tsx', 'LOADING SCENARIO'],

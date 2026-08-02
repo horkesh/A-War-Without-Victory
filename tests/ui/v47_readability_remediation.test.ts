@@ -76,7 +76,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
   it('keeps Chronicle chrome and chapter counts readable and grammatical', () => {
     const source = readComponent('chronicle', 'ChronicleOverlay.tsx');
     const english = readRepo('src', 'ui', 'map', 'i18n', 'messages.en.ts');
-    const bcs = readRepo('src', 'ui', 'map', 'i18n', 'messages.bcs.ts');
+    const bcs = readRepo('src', 'ui', 'map', 'i18n', 'messages.bs.ts');
 
     expect(source).not.toContain('text-stone-500');
     expect(source).not.toContain('text-stone-600');

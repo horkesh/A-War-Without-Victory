@@ -24,14 +24,14 @@ function modeLabel(mode: string | undefined): string {
 }
 
 function formatNumber(value: number, locale: Locale): string {
-    return new Intl.NumberFormat(locale === 'bcs' ? 'bs-BA' : 'en-US', {
+    return new Intl.NumberFormat(locale === 'bs' ? 'bs-BA' : 'en-US', {
         maximumFractionDigits: Number.isInteger(value) ? 0 : 20,
     }).format(value);
 }
 
 function formatStandingPoints(value: number, locale: Locale): string {
     const exact = value.toFixed(4).replace(/\.?0+$/, '');
-    return locale === 'bcs' ? exact.replace('.', ',') : exact;
+    return locale === 'bs' ? exact.replace('.', ',') : exact;
 }
 
 function paramilitaryStandingPenalty(deploymentCount: number): number {

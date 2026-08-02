@@ -89,11 +89,12 @@ const FACTION_ETHNICITY: Record<string, string> = {
     HRHB: 'croatian',
 };
 
-type LetterHomeLocale = 'en' | 'bcs';
+type LetterHomeLocale = 'en' | 'bs' | 'qps';
 
 const RANKS: Record<LetterHomeLocale, string[]> = {
     en: ['Private', 'Corporal', 'Sergeant'],
-    bcs: ['Redov', 'Kaplar', 'Vodnik'],
+    bs: ['Redov', 'Kaplar', 'Vodnik'],
+    qps: ['Private', 'Corporal', 'Sergeant'],
 };
 
 /** Faction-appropriate rear municipalities for displacement_municipality placeholder. */
@@ -271,13 +272,13 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
     }
 
     // Brigade display name
-    let brigadeName = locale === 'bcs' ? 'njegova jedinica' : 'his unit';
+    let brigadeName = locale === 'bs' ? 'njegova jedinica' : 'his unit';
     if (primaryFormation?.name) {
         brigadeName = primaryFormation.name;
     }
 
     // Circumstance from battle OSID
-    let circumstance = locale === 'bcs' ? 'linija fronta' : 'the front line';
+    let circumstance = locale === 'bs' ? 'linija fronta' : 'the front line';
     circumstance = municipalityFromOsid(battleOsid);
 
     // Displacement municipality (rear area)
@@ -289,7 +290,7 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
     const hospital = selectContextLocation(hospitals, municipality);
 
     // Substitute placeholders
-    let text = locale === 'bcs' && template.text_template_bcs ? template.text_template_bcs : template.text_template;
+    let text = locale === 'bs' && template.text_template_bcs ? template.text_template_bcs : template.text_template;
     text = text.replace(/\{name\}/g, fullName);
     text = text.replace(/\{age\}/g, String(age));
     text = text.replace(/\{municipality\}/g, municipality);

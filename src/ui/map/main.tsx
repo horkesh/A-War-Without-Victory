@@ -2,6 +2,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/globals.css';
 import { CRASH_DIAGNOSTICS_APP_VERSION, installCrashDiagnosticsCapture } from './services/telemetry/crashCapture';
+import { setLocale, setQaLocale } from './i18n';
+
+const requestedLocale = new URLSearchParams(window.location.search).get('locale');
+if (requestedLocale === 'qps') {
+    setQaLocale('qps');
+} else if (requestedLocale === 'en' || requestedLocale === 'bs' || requestedLocale === 'bcs') {
+    setLocale(requestedLocale);
+}
 
 installCrashDiagnosticsCapture({
     appVersion: CRASH_DIAGNOSTICS_APP_VERSION,
