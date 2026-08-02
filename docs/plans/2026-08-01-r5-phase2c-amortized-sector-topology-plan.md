@@ -18,6 +18,8 @@ Task 1's owner-selection subset is complete at source commit `4462a485f1fd1ad511
 
 The determinism-auditor skill references `docs/PHASE_A_INVARIANTS.md`, but that file does not exist at this repository revision. Use the live contracts below and record the stale skill reference as documentation debt; do not invent a replacement contract.
 
+**2026-08-02 source checkpoint:** Phase 2d Task 8A is source-complete and independently reviewed. Its repaired three-mode x 100 property crosses the full reconciliation boundary and preserves reports, sessions, receipt/build order, complete state, warnings/diagnostics, and serialized bytes. Expected synthetic fallbacks are explicit while unexpected canonical fallbacks remain zero. Performance measurement and retain/revert disposition are still pending; R5 remains open at the accepted occupancy floor.
+
 ## Evidence that selects the design
 
 ### Accepted and diagnostic boundaries
@@ -32,6 +34,7 @@ The determinism-auditor skill references `docs/PHASE_A_INVARIANTS.md`, but that 
 | Fresh corrected-source application V8 capture | `buildCorpsFrontSectors` `14,170.635 ms` inclusive (`29.699%`) | Confirms sector reconstruction is the next structural owner. |
 | Accepted dense occupancy replay | control `1,183.549`; candidate `1,122.123 ms/turn`; all three pairs faster; exact bytes | New current floor and permission to begin Task 3. |
 | Rejected reachability/sector-fact replay | arithmetic mean `-1.944%`, but pair deltas `-10.950%`, `+1.917%`, `+4.718%`; exact bytes | No-go: two of three pairs and the causal owners regress; candidate fully reverted. |
+| Phase 2d Task 8A source checkpoint | 300 candidate/legacy/rerun comparisons across full reconciliation; `635172 ms` property; independent PASS | Source correctness only. Timing/retention remains pending under the exclusive lease. |
 
 In the diagnostic 40-turn phase profile, the three large sector steps cost:
 
@@ -100,6 +103,16 @@ The mandatory Task 7 handoff ran from exact integrated source `e017d3ec14a8fff16
 V8 ranks `buildCorpsFrontSectors` first among named causal application owners at `13,211.998 ms` inclusive, or `330.300 ms/turn`. The sector sidecar independently records `99` calls (`2.475` per turn), `13,631.569 ms`, and `340.789 ms/turn`. Phase costs remain concentrated in `reconcile-final-sector-truth` `147.806 ms/turn`, `partition-corps-front-sectors` `141.684`, and the after-ops reconciliation `63.900`; these and the nested builder labels overlap and must not be added. `generate-bot-corps-orders` is the next distinct phase owner at `108.948 ms/turn`. The top self primitives are `getSettlementControlStatus` `55.698 ms/turn`, `strictCompare` `37.152`, `bfsReachable` `34.101`, and `computeFrontEdges` `28.344`.
 
 This result selects sector reconstruction for a materially different bounded red-first design/research packet. It does not reauthorize the rejected call-scoped reachability context and does not automatically open Task 6. Exact commands, hashes, reports, and the excluded `INVALID_CAPTURE_WRAPPER` diagnostic are indexed under `data/derived/_debug/r5_phase2c_fresh_owner_e017d3ec1/`.
+
+### Phase 2d Task 8A source checkpoint
+
+Task 8A is GREEN at the source-correctness boundary from exact parent `2d72d75e3e8250c0fe09739648a61522cd7efd14`, tree `c7004af13f186e585393b44f71651edb42e57a7f`. The production default lazily creates one invocation-owned standard/strict relation per used faction. The explicit `test-only-legacy-edge-adjacency` strategy executes the prior subset builders directly, and unknown strategy values throw before state inspection. The relation carries no state, formation, sector, receipt, global, module, `WeakMap`, environment, persisted, or cross-turn ownership.
+
+Independent review first blocked a builder-only 300-case property. The repaired property now runs through `reconcileFinalSectorTruth(...)` and the existing `vi.spyOn` builder seam, comparing candidate, forced legacy, and candidate rerun across live-war, final-turn, and final-save modes for 100 deterministic real-save variants each. It includes reports, the entire reconciliation session, explicit receipt sequence, geometry-build fixed-point order, installed sectors, complete `GameState`, warnings, debug/log/error diagnostics, serialized bytes, size, and SHA-256. It passed 1/1 (`10` skipped), with `635172 ms` in the property and `637.46 s` total.
+
+A second review block found that real factionless/synthetic helper calls took exact legacy behavior without making the fallback observable. The final source threads the candidate relation through those midpoint, decomposition, recursive oversized-split, and temp-metadata paths. The pristine fixture records 46 expected `synthetic-factionless` fallbacks per builder invocation; duplicate, outside-universe, metadata, faction, adjacency, and centroid fallback reasons remain zero. Test-only legacy execution leaves candidate counters unchanged. Final independent source re-review returned PASS with no findings. The detailed checkpoint is [20260802_R5_PHASE2D_TASK8A_FRONT_EDGE_RELATION_SOURCE_CHECKPOINT.md](../40_reports/implemented/20260802_R5_PHASE2D_TASK8A_FRONT_EDGE_RELATION_SOURCE_CHECKPOINT.md).
+
+This is not performance retention. Approved baselines, scenario/profile work, and alternating measurements remain pending and must run only under the exclusive lease. No baseline refresh, canon/FORAWWV, roadmap/command-board, package, or release mutation belongs to this checkpoint.
 
 ## Invariants that every candidate must preserve
 
@@ -404,6 +417,8 @@ The order is part of behavior. Task 8A changes only how immutable edge-neighbor 
 
 ### Task 8A — RED-first invocation-local front-edge relation
 
+**Source status (2026-08-02):** Implemented and independently reviewed PASS. Full reconciliation/state/byte equivalence is GREEN; measurement and retain/revert disposition remain open.
+
 **Production file ownership:**
 
 - Create `src/sim/combat/sector_front_edge_relation.ts`.
@@ -494,7 +509,8 @@ Expected Task 8A result: a bounded, exact-output-equivalent reduction in repeate
 - [x] Rejected candidates are fully reverted and recorded.
 - [x] Fresh Amdahl calculation and next-owner handoff exist while mean remains above `100 ms/turn`.
 - [x] Phase 2d Task 8A has a bounded owner, independent legacy oracle, full mutation/receipt boundary, exact files, RED surfaces, stop gates, and retention protocol.
-- [ ] Phase 2d Task 8A is implemented, independently reviewed, and either retained by measurement or fully reverted as a no-go.
+- [x] Phase 2d Task 8A is implemented, independently reviewed, and exact across the full three-mode x 100 reconciliation oracle.
+- [ ] Phase 2d Task 8A is retained by measurement or fully reverted as a no-go.
 - [x] Ledger, report, roadmap, and reusable knowledge state exactly match evidence.
 - [x] No baseline refresh, package/version/tag/release mutation, canon/FORAWWV edit, push, or integration was performed by this design packet.
 - [ ] R5 replicated mean is below `100 ms/turn`; continue from a fresh accepted-floor profile and reprofile after every retained candidate.

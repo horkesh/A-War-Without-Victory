@@ -1,0 +1,84 @@
+# R5 Phase 2d Task 8A Front-Edge Relation Source Checkpoint
+
+**Date:** 2026-08-02
+**Baseline:** `2d72d75e3e8250c0fe09739648a61522cd7efd14` (`c7004af13f186e585393b44f71651edb42e57a7f`)
+**Branch:** `codex/r5-phase2d-front-edge-relation`
+**Result:** Source correctness accepted; performance measurement and retain/revert disposition pending.
+
+## Summary
+
+- `buildCorpsFrontSectors(...)` now creates at most one standard and one strict `SectorFrontEdgeRelation` per used faction for one invocation, then discards them at return.
+- Existing subset builders remain independently callable through `test-only-legacy-edge-adjacency`; production reconciliation ownership and receipts are unchanged.
+- Complete three-mode x 100 real-save equivalence crossed the reconciliation boundary and compared reports, sessions, receipt order, geometry-build order, installed sectors, the entire `GameState`, warnings/diagnostics, serialized bytes, and a deterministic candidate rerun.
+- This checkpoint makes no timing or retention claim. Baselines, scenario runs, Electron, packaging, release state, and performance measurement were deliberately not run.
+
+## Implementation
+
+### Invocation-local relation
+
+`src/sim/combat/sector_front_edge_relation.ts` builds the standard Case A/B and strict Case-B maps from the complete faction edge universe with the existing trusted algorithms. Subset queries filter those maps without changing `strictCompare` neighbor order. The context owns no `GameState`, formation, sector, receipt, global, module cache, `WeakMap`, environment switch, or cross-turn state.
+
+`buildCorpsFrontSectors(...)` validates the explicit strategy before inspecting state, constructs relations lazily after canonical edge metadata exists, and threads the read-only relation through owned construction, split, consolidation, recovery, sealing, sibling-ownership, and final-geometry paths. Factionless or synthetic shared-OSID work remains on exact legacy semantics.
+
+### Fail-closed compatibility
+
+The relation wrapper detects duplicate edge IDs before `Set` conversion. Duplicate IDs, outside-universe edges, metadata mismatch, faction mismatch, adjacency-identity mismatch, or centroid-identity mismatch execute the unchanged legacy subset builder. Pair-query incompatibility returns control to the unchanged pairwise check.
+
+Expected factionless production calls use the explicit `synthetic-factionless` receipt. The pristine real-save counter proof observes 46 such fallbacks per builder invocation while every unexpected canonical fallback reason remains zero. A second invocation doubles constructions and receipts, proving call-local ownership; the test-only legacy strategy leaves candidate counters unchanged.
+
+## TDD and Review
+
+The first tool attempt lacked worktree dependencies and is infrastructure evidence only. After the dependency junction was present, the behavioral RED was the missing `sector_front_edge_relation` module. A second RED proved an unknown strategy did not fail before state inspection. Both became GREEN after the relation and explicit strategy boundary were implemented.
+
+Independent review then blocked two evidence defects:
+
+1. The first 300-case property stopped at the builder boundary. It was replaced with a reconciliation-boundary oracle using the existing `vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors')` seam to force the independent legacy strategy without touching production reconciliation.
+2. Synthetic production helpers executed legacy behavior directly but did not increment candidate fallback receipts. Those exact midpoint, decomposition, recursive oversized-split, and factionless temp-metadata paths now enter the exact wrapper fallback; functional coverage proves output equality and receipt visibility.
+
+The repaired long property passed with the following exact command:
+
+```powershell
+npm.cmd exec -- vitest run tests/sector_partition_buildCorpsFrontSectors_integration.test.ts -t "invocation-local front-edge relations preserve reconciliation reports, sessions, receipts, geometry order, sectors, full state, warnings, bytes, and rerun hashes across production modes and 100 real-save variants" --pool=forks --reporter=dot
+```
+
+Result: 1 passed / 10 skipped; property `635172 ms`; total `637.46 s`. The reviewer retained that full-boundary evidence after reviewing the focused receipt-observability hardening and returned final PASS with no findings. Per parent direction, the 300-case property was not rerun a second time for this source checkpoint.
+
+## Fast Verification
+
+- Final relation/reconciliation/dependent matrix: 6 files / 76 tests passed.
+- Pristine real-save reconciliation oracle plus construction/fallback ownership: 2 passed / 9 skipped.
+- TypeScript: `npm.cmd run typecheck` passed.
+- Determinism static scan: 1 file / 1 test passed; the plan's older `determinism:static` package script is absent at this parent.
+- `git diff --check` and report-index link checks passed.
+
+The exact final commands were:
+
+```powershell
+node_modules\.bin\vitest.cmd run tests/sector_front_edge_relation.test.ts tests/sector_partition_instrumentation.test.ts tests/final_sector_reconciliation_session.test.ts tests/final_sector_truth_reconciliation.test.ts tests/real_save_sector_truth_contracts.test.ts tests/sector_territory_contiguity_repair.test.ts --pool=forks --reporter=dot
+node_modules\.bin\vitest.cmd run tests/sector_partition_buildCorpsFrontSectors_integration.test.ts -t "relation matches the independent legacy strategy on the pristine real-save fixture|constructs at most one standard/strict relation" --pool=forks --reporter=dot
+npm.cmd run typecheck
+node_modules\.bin\vitest.cmd run tests/determinism_static_scan_r1_5.test.ts --pool=forks --reporter=dot
+git diff --check
+```
+
+No approved baseline, scenario, profile, performance, Electron, package, or release command belongs to this checkpoint.
+
+## Files Changed
+
+| Area | Files | Change |
+|---|---|---|
+| Relation | `src/sim/combat/sector_front_edge_relation.ts` | New invocation-local standard/strict relation, exact fallbacks, and explicit counters. |
+| Builder integration | `src/sim/combat/corps_front_sectors.ts` | Lazy per-faction ownership, strategy seam, and all owned live call chains. |
+| Sector helpers | `src/sim/combat/sector_building.ts`, `sector_splitting.ts`, `sector_territory.ts` | Stable subset queries and observable exact synthetic fallbacks. |
+| Tests | `tests/sector_front_edge_relation.test.ts`, `sector_partition_buildCorpsFrontSectors_integration.test.ts`, `sector_partition_instrumentation.test.ts`, `final_sector_reconciliation_session.test.ts` | Function, ownership, full reconciliation, receipt, byte, and static contracts. |
+| Documentation | Phase 2c/2d plan, this report, reports indices, and `PROJECT_LEDGER.md` | Source-checkpoint truth and pending measurement boundary. |
+
+## Determinism and Canon Propagation
+
+Neighbor ordering remains `strictCompare`-sorted, the relation is invocation-owned, and no new random, clock, locale, filesystem-order, persisted, or cross-turn input exists. The independent oracle proves state and serialized-byte equivalence across all production modes.
+
+The propagation scan found no rule, threshold, save schema, receipt ownership, historical content, scenario data, player-visible behavior, or canon contract change. `docs/10_canon/FORAWWV.md` and the canon set therefore remain untouched. `MASTER_ROADMAP.md` and `COMMAND_BOARD.md` are intentionally left for root after integration to avoid concurrent R7 documentation collisions.
+
+## Pending Measurement
+
+Under an exclusive runtime lease, the exact-parent control and this candidate still require approved baselines without refresh, one excluded warmup per lineage, phase/sector and application V8 profiles, and three alternating wall-clock pairs. Retention still requires exact outputs, zero unexpected canonical fallbacks, at least 20% combined adjacency-owner reduction, at least 3% enclosing-builder reduction, two of three faster pairs, median paired improvement of at least 1%, and no pair worse than 2%. Failure of any gate requires full candidate reversion and a recorded no-go.

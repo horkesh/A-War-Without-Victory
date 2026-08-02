@@ -173,6 +173,123 @@ describe('turn-local final-sector reconciliation session', () => {
         vi.restoreAllMocks();
     });
 
+    it('keeps reports, sessions, receipts, warnings, bytes, and geometry fixed-point order equal through the legacy spy oracle', () => {
+        const originalBuild = corpsFrontSectorsModule.buildCorpsFrontSectors;
+        const scenarios = [
+            { label: 'live-no-relocation', isFinalPass: false, finalSaveGeometryProjection: false, noRelocation: true },
+            { label: 'final-turn-relocation', isFinalPass: true, finalSaveGeometryProjection: false, noRelocation: false },
+            { label: 'final-save-relocation', isFinalPass: false, finalSaveGeometryProjection: true, noRelocation: false },
+        ];
+
+        const run = (
+            fixture: ReturnType<typeof makeState>,
+            scenario: (typeof scenarios)[number],
+            legacy: boolean,
+        ): unknown => {
+            const state = structuredClone(fixture.state);
+            const session = createFinalSectorReconciliationSession(state.meta.turn, 'postcombat-geometry');
+            const reports: unknown[] = [];
+            const geometryBuildSequence: number[] = [];
+            const warnings: unknown[][] = [];
+            const logs: unknown[][] = [];
+            const errors: unknown[][] = [];
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
+                warnings.push(args);
+            });
+            const logSpy = vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+                logs.push(args);
+            });
+            const errorSpy = vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+                errors.push(args);
+            });
+            const geometrySpy = legacy
+                ? vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors').mockImplementation((...args) =>
+                    originalBuild(
+                        args[0],
+                        args[1],
+                        args[2],
+                        args[3],
+                        args[4],
+                        args[5],
+                        args[6],
+                        args[7],
+                        args[8],
+                        'test-only-legacy-edge-adjacency',
+                    ))
+                : null;
+            try {
+                const firstReport = reconcileFinalSectorTruth(
+                    state,
+                    fixture.edges,
+                    null,
+                    undefined,
+                    undefined,
+                    null,
+                    scenario.isFinalPass,
+                    {
+                        session,
+                        finalSaveGeometryProjection: scenario.finalSaveGeometryProjection,
+                    },
+                );
+                reports.push(firstReport);
+                geometryBuildSequence.push(session.geometry_builds);
+                if (firstReport.geometry_input_mutations > 0) {
+                    recordFinalSectorReconciliationMutation(
+                        session,
+                        'geometry',
+                        'postcombat-formation-location-writeback',
+                    );
+                    reports.push(reconcileFinalSectorTruth(
+                        state,
+                        fixture.edges,
+                        null,
+                        undefined,
+                        undefined,
+                        null,
+                        scenario.isFinalPass,
+                        {
+                            session,
+                            finalSaveGeometryProjection: scenario.finalSaveGeometryProjection,
+                        },
+                    ));
+                    geometryBuildSequence.push(session.geometry_builds);
+                }
+                return {
+                    reports,
+                    session: structuredClone(session),
+                    geometryBuildSequence,
+                    warnings,
+                    diagnostics: { logs, errors },
+                    state: structuredClone(state),
+                    serialized: serializeState(state),
+                };
+            } finally {
+                geometrySpy?.mockRestore();
+                errorSpy.mockRestore();
+                logSpy.mockRestore();
+                warnSpy.mockRestore();
+            }
+        };
+
+        for (const scenario of scenarios) {
+            const fixture = makeState();
+            if (scenario.noRelocation) {
+                fixture.state.military.formations!.brig_stack!.location_osid = 'op:test:front_b';
+                fixture.state.military.formations!.brig_stack!.home_osid = 'op:test:front_b';
+            }
+            const candidate = run(fixture, scenario, false) as {
+                reports: Array<{ geometry_input_mutations: number }>;
+                geometryBuildSequence: number[];
+            };
+            const legacy = run(fixture, scenario, true);
+            expect(candidate, scenario.label).toEqual(legacy);
+            expect(candidate.reports[0]!.geometry_input_mutations, scenario.label)
+                .toBe(scenario.noRelocation ? 0 : 1);
+            expect(candidate.geometryBuildSequence, scenario.label)
+                .toEqual(scenario.noRelocation ? [1] : [1, 2]);
+        }
+    });
+
     it('keeps active-operation postcombat cleanup roster-only, adds zero geometry builds, and equals legacy full reconciliation', () => {
         const fixture = makeState();
         const state = structuredClone(fixture.state);

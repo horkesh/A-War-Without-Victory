@@ -24,11 +24,35 @@ import {
 import { buildEdgeAdjacency } from './sector_edge_adjacency.js';
 import { mergeUndersizedSubSegments, splitNonContiguousSectors, mergeUndersizedSectors } from './sector_splitting.js';
 import { deduplicateBrigadesAcrossSectors } from './brigade_assignment.js';
+import {
+    buildSectorFrontEdgeAdjacency,
+    type SectorFrontEdgeRelation,
+} from './sector_front_edge_relation.js';
 
 type SectorPartitionPerfTimer = <T>(label: string, fn: () => T) => T;
 
 type FrontEdgeMeta = { a: string; b: string; side_a: string | null; side_b: string | null };
 type FrontEdgeMetaLookup = ReadonlyMap<string, FrontEdgeMeta>;
+
+function buildSyntheticFrontEdgeAdjacency(
+    edgeIds: string[],
+    edgeMeta: Map<string, FrontEdgeMeta>,
+    frontEdgeRelation?: SectorFrontEdgeRelation,
+    osidAdjacency?: Map<Osid, Osid[]>,
+): Map<string, string[]> {
+    if (!frontEdgeRelation) return buildEdgeAdjacency(edgeIds, edgeMeta);
+    return buildSectorFrontEdgeAdjacency({
+        relation: frontEdgeRelation,
+        mode: 'standard',
+        edgeIds,
+        edgeMeta,
+        faction: undefined,
+        // Factionless legacy semantics ignore OSID adjacency. Production
+        // callers still pass the invocation-owned map to avoid placeholder
+        // allocation in this repeated fallback path.
+        osidAdjacency: osidAdjacency ?? new Map<Osid, Osid[]>(),
+    });
+}
 
 export interface SectorFormationScanIndex {
     assignedCandidateIds: readonly FormationId[];
@@ -88,10 +112,22 @@ export function findSubSegments(
     osidAdjacency: Map<Osid, Osid[]>,
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
     centroids?: OsidCentroidMap,
+    frontEdgeRelation?: SectorFrontEdgeRelation,
 ): CorpsFrontSubSegment[] {
     const edgeSet = new Set(edgeIds);
     // Build edge adjacency for these edges only (friendly-side)
-    const edgeAdj = buildEdgeAdjacency(edgeIds, edgeMeta, faction, osidAdjacency, sharedBoundaryAdj, centroids);
+    const edgeAdj = frontEdgeRelation
+        ? buildSectorFrontEdgeAdjacency({
+            relation: frontEdgeRelation,
+            mode: 'standard',
+            edgeIds,
+            edgeMeta,
+            faction,
+            osidAdjacency,
+            sharedBoundaryAdj,
+            centroids,
+        })
+        : buildEdgeAdjacency(edgeIds, edgeMeta, faction, osidAdjacency, sharedBoundaryAdj, centroids);
     const visited = new Set<string>();
     const subSegments: CorpsFrontSubSegment[] = [];
     let segIndex = 0;
@@ -177,6 +213,7 @@ export function buildMultiSectorsForCorps(
     sharedFrontEdgeMeta?: FrontEdgeMetaLookup,
     sharedActiveCombatFormationScanIds?: readonly FormationId[],
     sharedSectorFormationScanIndex?: SectorFormationScanIndex,
+    frontEdgeRelation?: SectorFrontEdgeRelation,
 ): CorpsFrontSector[] {
     if (edgeIds.length === 0) return [];
 
@@ -221,19 +258,19 @@ export function buildMultiSectorsForCorps(
     // disconnected fronts — e.g. hajderovici_2↔kamensko_2 (38m) bridges Zavidovici
     // to Olovo via Case B at gornja_borovica_2.
     let subSegments = perfTime(`buildMultiSectorsForCorps:${corpsId}:subsegment-discovery`, () => findSubSegments(
-        corpsId, faction, edgeIds, edgeMeta, adjacency, sharedBoundaryAdj, centroids
+        corpsId, faction, edgeIds, edgeMeta, adjacency, sharedBoundaryAdj, centroids, frontEdgeRelation
     ));
     // Proposal B: merge undersized sub-segments up to MIN_SECTOR_EDGES.
     // Do NOT pass friendlyOsids — merging should use direct OSID adjacency only,
     // not unbounded BFS through rear territory (which merges distant segments).
     subSegments = perfTime(`buildMultiSectorsForCorps:${corpsId}:subsegment-merge-undersized`, () => mergeUndersizedSubSegments(
-        corpsId, subSegments, adjacency, sharedBoundaryAdj, caseBSplitAdj, centroids
+        corpsId, subSegments, adjacency, sharedBoundaryAdj, caseBSplitAdj, centroids, frontEdgeRelation
     ));
     if (subSegments.length === 0) return [];
 
     // Step 2 (Phase 1D): Split oversized sub-segments
     subSegments = perfTime(`buildMultiSectorsForCorps:${corpsId}:subsegment-edge-cap-split`, () => splitOversizedSubSegments(
-        corpsId, subSegments, edgeMeta
+        corpsId, subSegments, edgeMeta, frontEdgeRelation, adjacency
     ));
 
     // Renumber sub-segments deterministically
@@ -274,7 +311,13 @@ export function buildMultiSectorsForCorps(
             for (const sector of sectorPool) {
                 const total = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
                 if (total > MAX_SECTOR_BRIGADES && sector.length_edges >= 4) {
-                    const halves = splitSubSegmentAtMidpoint(sector.sub_segments[0]!, corpsId, edgeMeta);
+                    const halves = splitSubSegmentAtMidpoint(
+                        sector.sub_segments[0]!,
+                        corpsId,
+                        edgeMeta,
+                        frontEdgeRelation,
+                        adjacency,
+                    );
                     if (halves) {
                         for (const half of halves) {
                             const s = buildSectorFromSubSegments(
@@ -308,7 +351,7 @@ export function buildMultiSectorsForCorps(
     // Strict Case B re-check uses caseBSplitAdj (16.6m) — wider than 5.5m strict
     // to preserve legitimate triple junctions, but catches pocket bridges (>16.6m).
     const contiguousSectors = perfTime(`buildMultiSectorsForCorps:${corpsId}:split-non-contiguous-sectors`, () => splitNonContiguousSectors(
-        finalSectors, adjacency, faction, edgeMeta, sharedBoundaryAdj, friendlyOsids, caseBSplitAdj, centroids
+        finalSectors, adjacency, faction, edgeMeta, sharedBoundaryAdj, friendlyOsids, caseBSplitAdj, centroids, {}, frontEdgeRelation
     ));
 
     // Step 4c: Post-split merge — re-merge undersized sectors created by contiguity
@@ -337,7 +380,9 @@ export function buildMultiSectorsForCorps(
 export function splitOversizedSubSegments(
     corpsId: FormationId,
     subSegments: CorpsFrontSubSegment[],
-    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    frontEdgeRelation?: SectorFrontEdgeRelation,
+    osidAdjacency?: Map<Osid, Osid[]>,
 ): CorpsFrontSubSegment[] {
     const result: CorpsFrontSubSegment[] = [];
 
@@ -347,7 +392,13 @@ export function splitOversizedSubSegments(
             continue;
         }
         // Try to split at midpoint
-        const halves = splitSubSegmentAtMidpoint(seg, corpsId, edgeMeta);
+        const halves = splitSubSegmentAtMidpoint(
+            seg,
+            corpsId,
+            edgeMeta,
+            frontEdgeRelation,
+            osidAdjacency,
+        );
         if (!halves) {
             result.push(seg); // Can't split — keep as-is
             continue;
@@ -355,10 +406,22 @@ export function splitOversizedSubSegments(
         // Ensure contiguity: decompose each half into connected components,
         // then recurse on oversized components
         for (const half of halves) {
-            const components = decomposeIntoConnectedComponents(half, corpsId, edgeMeta);
+            const components = decomposeIntoConnectedComponents(
+                half,
+                corpsId,
+                edgeMeta,
+                frontEdgeRelation,
+                osidAdjacency,
+            );
             for (const comp of components) {
                 if (comp.length_edges > MAX_SECTOR_EDGES) {
-                    result.push(...splitOversizedSubSegments(corpsId, [comp], edgeMeta));
+                    result.push(...splitOversizedSubSegments(
+                        corpsId,
+                        [comp],
+                        edgeMeta,
+                        frontEdgeRelation,
+                        osidAdjacency,
+                    ));
                 } else {
                     result.push(comp);
                 }
@@ -376,9 +439,16 @@ export function splitOversizedSubSegments(
 export function decomposeIntoConnectedComponents(
     seg: CorpsFrontSubSegment,
     corpsId: FormationId,
-    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    frontEdgeRelation?: SectorFrontEdgeRelation,
+    osidAdjacency?: Map<Osid, Osid[]>,
 ): CorpsFrontSubSegment[] {
-    const adj = buildEdgeAdjacency(seg.edge_ids, edgeMeta);
+    const adj = buildSyntheticFrontEdgeAdjacency(
+        seg.edge_ids,
+        edgeMeta,
+        frontEdgeRelation,
+        osidAdjacency,
+    );
     const edgeSet = new Set(seg.edge_ids);
     const visited = new Set<string>();
     const components: CorpsFrontSubSegment[] = [];
@@ -414,12 +484,19 @@ export function decomposeIntoConnectedComponents(
 export function splitSubSegmentAtMidpoint(
     seg: CorpsFrontSubSegment,
     corpsId: FormationId,
-    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    frontEdgeRelation?: SectorFrontEdgeRelation,
+    osidAdjacency?: Map<Osid, Osid[]>,
 ): [CorpsFrontSubSegment, CorpsFrontSubSegment] | null {
     if (seg.length_edges < 4) return null;
 
     // Build local adjacency and walk the edge chain to find ordering
-    const adj = buildEdgeAdjacency(seg.edge_ids, edgeMeta);
+    const adj = buildSyntheticFrontEdgeAdjacency(
+        seg.edge_ids,
+        edgeMeta,
+        frontEdgeRelation,
+        osidAdjacency,
+    );
     const chain = walkEdgeChain(seg.edge_ids, adj);
     const mid = Math.floor(chain.length / 2);
     const firstHalf = chain.slice(0, mid);
