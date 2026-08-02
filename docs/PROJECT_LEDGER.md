@@ -1,5 +1,25 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] Full-suite gate gap closed: 10 pre-existing failures across schema/UI/content
+
+**Type:** Process-gap discovery + repair / test-fixture desync repair / accessibility fix / real bug fixes.
+
+**Discovery:** `full-suite-and-fingerprint.yml` — the only CI workflow that runs the complete `npm run test:vitest` (~1,264 files / ~12,561 tests) — triggers only on `push`/`pull_request` to `main`, never on feature branches. It has therefore never gated any of `codex/master-roadmap-execution`'s commits. A local full run (`vitest run`, ~71 min) surfaced 11 failed test files / 17 failed tests beyond the v37 schema-fixture break already fixed in `45c99a07b`/`87b7c626a`. This process gap remains open (CI-wiring decision, not made in this pass) and should be closed before merge to `main`.
+
+**Fixed in `0d48f2467`, `0cd58c645`, `9107f5f07`, `85458fb2d`:**
+- Four more files broken by the same `CURRENT_SCHEMA_VERSION` 36->37 bump (`715532403`): `tg_schema_freeze.test.ts` (the v36 freeze guard itself, re-blessed against the actual committed startup save), `save_migration_versioned_steps.test.ts`, `migration_nested_ownership.test.ts`, and `strict_null_inventory_progress.test.ts` (a type-escape ratchet whose counts genuinely moved — every new cast traced to source and confirmed guarded/narrow before updating the pin, not blindly bumped).
+- `map_production_graphics_cleanup.test.ts`: two real bugs, both masked by a hard collection-time crash — a `vi.mock()` targeting a nonexistent nested `node_modules` path (the real, unmocked maplibre-gl loaded and crashed on jsdom's missing `URL.createObjectURL`), and a mock `once()` that silently dropped `'style.load'` listeners, hanging `MapContainer`'s init promise forever and preventing deck.gl construction. Both fixed; 0/7 -> 7/7.
+- Accessibility: `CodexPanel.tsx`/`VerdictScreen.tsx` shipped a 10px ghost-classification label (from `638805ea4`), below the enforced 12px interactive-text floor. Bumped to 12px.
+- Four stale UI/content assertions synced to already-correct current behavior: `command_card_strip_accessibility.test.ts` (CommandCard's footer moved from a single pending-count to a four-metric priority-band breakdown), `chronicle_decision_ledger.test.ts` (test fixture had `event_causality_log[].turn` backwards — confirmed against `evaluate_events.ts`'s `recordCausality()` call site that the edge turn is decision-time, not fire-time), `bottom_status_active_paths.test.ts` (jsdom has no layout engine, so `ActiveBranchPathRow`'s width-measurement collapse logic always read 0 and forced `compact`; stubbed `clientWidth`/`getBoundingClientRect`), and `event_decision_modal_phase3.test.ts` (16/17 assertions already passed; the one failure was a stale short paraphrase not matching the current, more precise, historian-reviewed BCS prose from `3c2e8a47f` — owner-confirmed before touching this file given its sensitive-history subject).
+
+**Not fixed — flagged for R4 owner review:** `presidential_decision_room_panel_i18n.test.ts`'s "retains an explicitly selected command category when that category becomes quiet" test. Root cause traced to `PresidentialDecisionRoomPanel`'s active-dossier selection appearing to retain a stale card (with an embedded `DirectiveCard`) after the underlying data that backed it (`pendingParamilitaryRequests`) is removed from state, rather than re-deriving against the new top-priority card. This is live R4 Decision Room behavior, not a fixture desync — left untouched pending product-owner judgment.
+
+**Verification:** All 11 touched files pass together (214/214 tests). `tsc --noEmit` clean throughout. `desktop:map:build` succeeds. `Event System CI` green on every push in this sequence.
+
+**Scope:** No event JSON, save schema, canon, `docs/10_canon/FORAWWV.md`, package/version/tag/signing/publication/release-state change. `interactive_text_floor` and the sensitive-history assertion are the only production/content-adjacent touches, both narrowly scoped and verified as described above.
+
+---
+
 ## [2026-08-02] CI-break repair: v37 schema fixture and drift-audit assertion drift
 
 **Type:** CI-red repair / test-fixture synchronization / process-gap finding.
