@@ -1,3 +1,9 @@
+## 2026-08-02 - Sensitive-history acquittals do not erase crime findings
+
+**Crime findings and individual command liability are separate authored facts.** When a tribunal finds that crimes occurred but acquits a charged commander because superior authority or effective control was not proved, preserve both holdings without implication: name the perpetrators only to the level the judgment supports, state the acquittal and appeal outcome precisely, and never use the acquittal to cast doubt on the crime finding. Operational chronology belongs to the repository-local military source; criminal findings and liability outcomes belong to the exact tribunal record.
+
+**A high-quality source tier does not license unsupported synthesis.** Omit strategic objectives, campaign rankings, force advantages, diplomatic causation, collective-guilt framing, and generic symmetry unless the exact cited pages or judgment support them. Source notes must explain which source owns which claim, and runtime mirrors must remain identical to leaf authoring. Applied in `[2026-08-02] R7 Phase 1.1 September sensitive-history closeout`.
+
 ## 2026-08-01 - Performance retention requires local-owner and paired-direction corroboration
 
 **A favorable arithmetic mean does not retain an optimization when its cause regresses.** Alternating exact-parent pairs must be read both as an aggregate and by paired direction. A single slow control can make the mean look favorable while most pairs worsen. Retain a candidate only when whole-run evidence and the intended causal owner corroborate the same improvement; if two of three pairs regress and the owner worsens materially, record a no-go and fully revert even when bytes and correctness are exact.

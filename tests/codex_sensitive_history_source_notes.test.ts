@@ -154,8 +154,19 @@ test('Neretva, Grabovica, and Uzdol anchors are source-owned September 1993 cont
     for (const anchor of report.historical_anchors) {
         assert.strictEqual(anchor.chronology_status, 'pass', `${anchor.anchor_id} historical placement mismatch`);
         assert.strictEqual(anchor.event_window, 'turns 74-76');
-        assert.strictEqual(anchor.provenance_status, 'blocked');
+        assert.strictEqual(anchor.provenance_status, 'pass');
+        assert.strictEqual(anchor.status, 'pass');
+        assert.deepStrictEqual(anchor.provenance_gaps, []);
+        assert.strictEqual(anchor.authored_provenance.event_source_tier, 'icty_icj_un');
+        assert.strictEqual(anchor.authored_provenance.event_source_tier_status, 'resolved');
+        assert.strictEqual(anchor.authored_provenance.essay_source_tier, 'icty_icj_un');
+        assert.strictEqual(anchor.authored_provenance.essay_source_tier_status, 'resolved');
+        assert.ok(anchor.authored_provenance.event_source_note);
         assert.ok(Array.isArray(anchor.authored_provenance.essay_citations));
+        assert.ok(
+            anchor.authored_provenance.essay_citations.length
+                >= anchor.authored_provenance.required_essay_source_floor,
+        );
         assert.strictEqual(anchor.source, undefined);
         assert.strictEqual(anchor.owner, 'historian');
     }

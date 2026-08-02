@@ -647,13 +647,23 @@ test('inventory reports the 1993 placement/window contract for Neretva, Grabovic
         'operation_neretva_93_1993',
     ]);
     assert.deepStrictEqual(anchors.map((row: { chronology_status: string }) => row.chronology_status), ['pass', 'pass']);
-    assert.deepStrictEqual(anchors.map((row: { provenance_status: string }) => row.provenance_status), ['blocked', 'blocked']);
+    assert.deepStrictEqual(anchors.map((row: { provenance_status: string }) => row.provenance_status), ['pass', 'pass']);
     for (const row of anchors) {
         assert.strictEqual(row.event_file, 'data/scenarios/events/war_1993.json');
         assert.strictEqual(row.event_window, 'turns 74-76');
         assert.strictEqual(row.essay_file.endsWith('_1993.json'), true);
-        assert.strictEqual(row.status, 'blocked');
+        assert.strictEqual(row.status, 'pass');
         assert.ok(row.authored_provenance);
+        assert.deepStrictEqual(row.provenance_gaps, []);
+        assert.strictEqual(row.authored_provenance.event_source_tier, 'icty_icj_un');
+        assert.strictEqual(row.authored_provenance.event_source_tier_status, 'resolved');
+        assert.strictEqual(row.authored_provenance.essay_source_tier, 'icty_icj_un');
+        assert.strictEqual(row.authored_provenance.essay_source_tier_status, 'resolved');
+        assert.ok(row.authored_provenance.event_source_note);
+        assert.ok(
+            row.authored_provenance.essay_citations.length
+                >= row.authored_provenance.required_essay_source_floor,
+        );
         assert.strictEqual(row.source, undefined);
     }
 });

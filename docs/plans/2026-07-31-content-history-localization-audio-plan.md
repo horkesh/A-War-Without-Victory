@@ -9,7 +9,7 @@
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- officer/OOB and audio inventories accepted; historical-claim and localization inventories remain
+**Status:** IN PROGRESS -- Phase 1.1 sensitive-history closeout complete; Phase 1.2 historical backlog and localization remain
 **Roadmap workstream:** R7
 **Canonical owner:** authored JSON plus source/license manifests; `src/ui/map/i18n/` for locale; `src/ui/map/audio/` for playback
 **Collision rule:** Do not edit the same event/essay as R4. Do not edit map/Desk layout until R1/R2 finish.
@@ -165,13 +165,27 @@ npm.cmd run typecheck
 
 - Modify `data/scenarios/essays/croat_bosniak_war_begins_1993.json`
 - Modify `data/scenarios/essays/grabovica_uzdol_massacres_1993.json`
+- Modify `data/scenarios/essays/operation_neretva_93_1993.json`
+- Modify `data/scenarios/essays/essay_index.json`
 - Modify any paired event in `data/scenarios/events/war_1993.json`
-- Modify focused essay/event tests
+- Modify `tests/codex_sensitive_claim_inventory.test.ts`
+- Modify `tests/codex_sensitive_history_source_notes.test.ts`
+- Create `tests/r7_sensitive_history_phase1_content.test.ts`
 
-- [ ] Remove unsupported generic symmetry.
-- [ ] State side-specific findings with exact sources and neutral prosecutorial language.
-- [ ] Keep Grabovica/Uzdol in September 1993 and distinguish crime findings from command-liability outcome.
-- [ ] Keep atrocity informational; no decision response or reward.
+- [x] Remove unsupported generic symmetry.
+- [x] State side-specific findings with exact sources and neutral prosecutorial language.
+- [x] Keep Grabovica/Uzdol in September 1993 and distinguish crime findings from command-liability outcome.
+- [x] Keep atrocity informational; no decision response or reward.
+
+**Phase 1.1 execution evidence -- 2026-08-02:**
+
+- Both September anchors retain turns 74-76 and now pass chronology and authored-provenance checks. The event and essay rows cite repository-local *Balkan Battlegrounds* Vol. II, pp. 434-435 and the ICTY Halilovic Trial/Appeal record; all three essay pairs carry a resolved `icty_icj_un` tier and provenance-only source note.
+- The Grabovica/Uzdol record names ARBiH personnel for the crimes, states the exact dates and bounded victim findings, and distinguishes those findings from the failure to prove Sefer Halilovic's superior authority/effective control. The Appeal Chamber's affirmed acquittal is an individual-liability outcome, not a reversal of the crime findings.
+- Unsupported Neretva claims were omitted: coastal-corridor objective, campaign superlative, decisive escalation, broad force/composition advantage, diplomatic causation, collective-guilt framing, and generic symmetry. The retained account is limited to sourced dates, places, movements, and bounded outcomes.
+- Authored content improved the inventory from 1,466 to 1,483 documented claims. Remaining Phase 1.2 queues are 1,563 source notes, 489 tiers, 104 source-floor rows, and 12 actor-specificity rows.
+- Runtime `essay_index.json` mirrors the leaf sources, tiers, source notes, and English content. Existing turn windows, runtime effects, and save schema are unchanged; the atrocity event has no response or beneficial reward.
+- Verification passes the 16-file fast matrix with 247 tests passed and 5 intentional skips, the separate 2-test source-quality suite, TypeScript, targeted JSON parsing, and diff hygiene. The actual strict canon CLI exits 0 with 0 CRITICAL, 0 WARNING, and 1 observational INFO.
+- This checkpoint intentionally excludes scenario/baseline/performance/Electron/package/FORAWWV/release work; integrated baseline/canon execution remains serialized outside this phase.
 
 ### Task 1.2 -- Finish retained Ring-2 informational backlog
 

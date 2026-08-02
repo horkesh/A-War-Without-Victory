@@ -486,9 +486,11 @@
   {
     "id": "croat_bosniak_war_begins_1993",
     "title": "Croat-Bosniak War Erupts",
-    "narrative": "Full-scale fighting erupts between the HVO and the ARBiH across central Bosnia and Herzegovina. Emboldened by the Vance-Owen provincial map and Croatian political pressure, HVO forces launch coordinated offensives to secure territories claimed for Herceg-Bosna. What began as sporadic clashes at Prozor and Gornji Vakuf hardens into open warfare from mid-January 1993, opening a devastating second front for the Bosnian government.",
-    "source_note": "BB Vol. I, ch. 39 ('Neighbor Fighting Neighbor: The Croat-Muslim Descent Into War', pp. 219, 225) grounds this row's provenance for the onset of full-scale Croat-Muslim fighting from mid-January 1993. The legal characterisation of the campaigns that followed is asymmetric and is recorded in the case law rather than restated here: ICTY Prlic et al. (IT-04-74) found a joint criminal enterprise of the Herceg-Bosna/HVO leadership to forcibly displace the Bosnian Muslim population from claimed municipalities (crimes against humanity and grave breaches), with Kordic & Cerkez (IT-95-14/2) and Blaskic (IT-95-14) convicting for the central-Bosnia / Lasva-valley operations; ICTY Hadzihasanovic & Kubura (IT-01-47) convicted two ARBiH 3rd Corps commanders under superior responsibility for failing to prevent or punish discrete crimes against Croat and Serb victims, a narrower finding that is not a systematic-cleansing determination. This note carries no symmetry claim of equivalent culpability. It adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "narrative": "After clashes at Prozor and Gornji Vakuf, fighting between HVO and ARBiH formations hardens into open war across central Bosnia and Herzegovina from mid-January 1993. HVO forces attack in municipalities claimed for Herceg-Bosna, opening a second front for the Bosnian government. Later ICTY judgments attribute the Herceg-Bosna/HVO campaign and discrete ARBiH crimes to specific actors under different legal findings.",
     "category": "military",
+    "source_tier": "icty_icj_un",
+    "historical_source": "Balkan Battlegrounds Vol. I, ch. 39, pp. 219 and 225 (Croat-Bosniak fighting chronology); ICTY Prlic et al. Trial Judgment (IT-04-74-T), Herceg-Bosna/HVO joint-criminal-enterprise findings; ICTY Kordic and Cerkez Trial Judgment (IT-95-14/2-T), Lasva Valley attack findings; ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T), superior-responsibility findings for discrete ARBiH crimes.",
+    "source_note": "Balkan Battlegrounds grounds the transition from local clashes to open fighting. The ICTY judgments support separate actor-specific findings: Prlic and Kordic/Cerkez address the Herceg-Bosna/HVO campaign, while Hadzihasanovic/Kubura addresses narrower superior responsibility findings for discrete crimes by ARBiH subordinates. The row does not collapse those findings into equivalent culpability and adds no casualty figure, prohibited player choice, reward, or copied source prose.",
     "trigger": {
       "turn_min": 40,
       "turn_max": 80,
@@ -3886,8 +3888,11 @@
   {
     "id": "operation_neretva_93_1993",
     "title": "Operation Neretva '93",
-    "narrative": "The ARBiH launches Operation Neretva '93 against HVO positions in Herzegovina and the Neretva Valley. The offensive aims to break the HVO siege of East Mostar and secure a corridor to the coast. Fierce fighting erupts around Jablanica and along the Neretva River as the ARBiH attempts to exploit its growing numerical advantage.",
+    "narrative": "On 14 September 1993, ARBiH forces mount a sizable offensive east of Prozor during the Neretva fighting. The advance continues south from Jablanica and Dreznica, with combat around Vrdi and a separate 17 September attack from East Mostar. The recorded gains remain limited and do not establish a decisive breakthrough.",
     "category": "military",
+    "source_tier": "icty_icj_un",
+    "historical_source": "Balkan Battlegrounds Vol. II, pp. 434-435, September 1993 fighting east of Prozor and along the Neretva; ICTY Halilovic Trial Judgment (IT-01-48-T, 16 November 2005), Operation Neretva command record and Grabovica/Uzdol findings.",
+    "source_note": "Balkan Battlegrounds anchors the bounded September chronology: the 14 September offensive east of Prozor, movement south from Jablanica and Dreznica, fighting at Vrdi, and the 17 September East Mostar attack. The Halilovic Trial Judgment supplies command and crime-case context but does not support attributing superior responsibility after the acquittal. The row omits unsupported strategic objectives, campaign ranking, and diplomatic causation.",
     "trigger": {
       "turn_min": 74,
       "turn_max": 76,
@@ -3904,7 +3909,7 @@
     "once": true,
     "effect": {
       "kind": "narrative",
-      "text": "The ARBiH launches Operation Neretva '93, striking at HVO positions in the Neretva Valley and around Mostar."
+      "text": "ARBiH forces open the September offensive east of Prozor and continue attacks along the Neretva toward Mostar."
     },
     "effects": [
       {
@@ -3917,8 +3922,11 @@
   {
     "id": "grabovica_uzdol_massacres_1993",
     "title": "Grabovica and Uzdol Massacres",
-    "narrative": "During Operation Neretva 93, ARBiH units from Sarajevo commit war crimes against Croat civilians: at least 13 villagers killed at Grabovica on September 8-9, and at least 29 civilians and one HVO POW killed at Uzdol on September 14. ICTY Chief of Staff Sefer Halilovic is indicted but acquitted due to insufficient evidence of effective command control over the perpetrators.",
+    "narrative": "During September 1993 operations in Herzegovina, ARBiH soldiers kill at least 13 Croat civilians at Grabovica on 8-9 September 1993. At Uzdol on 14 September 1993, ARBiH personnel kill 29 civilians and one captured HVO soldier. The ICTY Trial Chamber finds that the crimes occurred but acquits Sefer Halilovic because his superior authority and effective control over the perpetrators were not proved beyond reasonable doubt; the Appeal Chamber affirms the acquittal.",
     "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "historical_source": "ICTY Halilovic Trial Judgment (IT-01-48-T, 16 November 2005), Grabovica/Uzdol crime findings and superior-responsibility acquittal; ICTY Halilovic Appeal Judgment (IT-01-48-A, 16 October 2007), prosecution appeal dismissed and acquittal affirmed; Balkan Battlegrounds Vol. II, pp. 434-435, September 1993 fighting east of Prozor and along the Neretva.",
+    "source_note": "The Trial Judgment establishes the Grabovica and Uzdol crime findings while separately acquitting Sefer Halilovic because the required superior authority and effective control were not proved; the Appeal Judgment affirmed that outcome. Balkan Battlegrounds anchors the September 1993 operational chronology and Uzdol date. This is an informational consequence with no response option or reward, and it makes no claim of collective or equivalent guilt.",
     "trigger": {
       "turn_min": 74,
       "turn_max": 76,
@@ -3947,7 +3955,7 @@
       },
       {
         "kind": "narrative",
-        "text": "ARBiH atrocities in Herzegovina are documented. No faction in this war holds clean hands."
+        "text": "ARBiH crimes against Croat civilians at Grabovica and Uzdol enter the tribunal record; Halilovic's acquittal resolves his individual superior responsibility, not whether the crimes occurred."
       }
     ],
     "dimension_shifts": [
@@ -3957,7 +3965,6 @@
         "delta": -10
       }
     ],
-    "historical_source": "ICTY Halilovic Trial Judgment (IT-01-48-T).",
     "effect": {
       "kind": "humanitarian_impact",
       "faction": "RBiH",

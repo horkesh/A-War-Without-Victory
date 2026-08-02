@@ -4,9 +4,9 @@
 
 **Last corrected:** 2026-08-02
 
-**Roadmap:** R7 Phase 0 diagnostic contract accepted; Phase 1 remediation active
+**Roadmap:** R7 Phase 0 diagnostic contract accepted; Phase 1.1 complete; Phase 1.2 remediation active
 
-**Disposition:** Independent committee re-review accepted the fourteenth correction. Integrated R4/R7 source reconciliation is green; broader content remediation and the serialized integrated baseline check remain open.
+**Disposition:** Independent committee re-review accepted the fourteenth correction. Integrated R4/R7 source reconciliation is green, and Phase 1.1 closes the two September-1993 provenance anchors plus their highest-risk paired content. The broader Ring-2 backlog and serialized integrated baseline check remain open.
 
 ## Result
 
@@ -20,7 +20,7 @@ Final structural review found that the thirteenth correction still overclaimed c
 
 | Inventory | Corrected census | Accepted/complete | Open remediation |
 |---|---:|---:|---:|
-| Historical claims | 3,651 claims / 227 files | 1,466 documented; 0 direct sensitive-choice blocks | 1,574 need source notes; 489 need a source tier; 108 need source-floor completion; 14 need actor specificity |
+| Historical claims | 3,651 claims / 227 files | 1,483 documented; 0 direct sensitive-choice blocks; 2/2 September anchors provenance-complete | 1,563 need source notes; 489 need a source tier; 104 need source-floor completion; 12 need actor specificity |
 | Sensitive-history canon gate | 299 events | 298 clean; 0 CRITICAL and 0 WARNING | 1 observational INFO reward-risk row |
 | Localization keys | 5,542 EN keys | 5,541 Bosnian translations present through legacy `bcs` | 1 explicit EN fallback; 599 length-risk candidates |
 | Localization source scan | 385 player-surface UI source files | deterministic candidate census | 575 embedded-English candidates; 8 concatenated-copy candidates; 388 dynamic-key candidates |
@@ -52,14 +52,18 @@ The loader and inventory now consume `src/sim/events/source_tiers.json` as the s
 
 ## Neretva / Grabovica / Uzdol chronology and provenance
 
-The September 1993 chronology passes, but both provenance anchors are blocked:
+Phase 1.1 closes both September 1993 chronology and authored-provenance anchors:
 
 | Anchor | Event file | Window | Chronology | Authored provenance |
 |---|---|---|---|---|
-| `operation_neretva_93_1993` | `data/scenarios/events/war_1993.json` | turns 74-76 | PASS | BLOCKED |
-| `grabovica_uzdol_massacres_1993` | `data/scenarios/events/war_1993.json` | turns 74-76 | PASS | BLOCKED |
+| `operation_neretva_93_1993` | `data/scenarios/events/war_1993.json` | turns 74-76 | PASS | PASS |
+| `grabovica_uzdol_massacres_1993` | `data/scenarios/events/war_1993.json` | turns 74-76 | PASS | PASS |
 
-The diagnostic now reports only authored repository provenance. The Neretva event has no authored citation, source tier, or source note. The Grabovica/Uzdol event has an ICTY Halilovic citation but no tier or note. Each linked essay has one authored citation, below its category's two-source floor, and no source tier. The earlier hard-coded *Balkan Battlegrounds* provenance string was removed from the diagnostic; no source is inferred from local research or memory.
+The paired event and essay rows now carry resolved `icty_icj_un` tiers, provenance-only source notes, and exact authored citations. Balkan Battlegrounds Vol. II, pp. 434-435 supplies the bounded September operational chronology; the ICTY Halilovic Trial Judgment (IT-01-48-T) supplies the operation, crime, and superior-responsibility record; and the Appeal Judgment (IT-01-48-A) supplies the affirmed acquittal. The military and humanitarian essays meet their two-source floors without diagnostic substitution.
+
+The content now states actor-specific findings in neutral prosecutorial language. ARBiH personnel are named for the Grabovica and Uzdol crimes, while the Trial Chamber's crime findings remain distinct from its failure to find the superior authority and effective control required to convict Sefer Halilovic. The Appeal Chamber's affirmed acquittal resolves his individual liability, not whether the crimes occurred. The event remains informational and has no response option or beneficial reward.
+
+Unsupported claims were omitted rather than backfilled: the Neretva essay no longer asserts a coastal-corridor strategic objective, campaign superlative, decisive escalation, broad force/composition advantage, or causal path to the Washington Agreement. Generic clean-hands, equivalent-culpability, and retaliation-cycle sentences were removed. The retained operational account is limited to BB2's dates, places, movements, and bounded outcome; runtime `essay_index.json` mirrors the authored sources, tiers, notes, and English content.
 
 ## Localization contract
 
@@ -74,14 +78,15 @@ Regression coverage pins previously missed examples including `LOADING SCENARIO`
 
 ## Action order
 
-1. Historian: close or explicitly omit the 1,574 source-note, 489 source-tier, 108 source-floor, and 14 actor-specificity rows.
+1. Historian, Phase 1.2: close or explicitly omit the remaining 1,563 source-note, 489 source-tier, 104 source-floor, and 12 actor-specificity rows.
 2. Localization: supply the one missing `bs` translation and classify every dynamic-key candidate as finite/typed or replace it.
 3. UI/UX + Localization: replace confirmed embedded/concatenated copy and verify the 599 length-risk rows with pseudo-locale plus 1280x720 and 3440x1440 evidence.
 
-No unsupported historical claim is promoted by this report. Independent committee re-review accepts the Phase 0 diagnostic contract. Phase 1 owns the remaining historical/source rows; later phases own identity, localization, licensing/audio, accessibility, and packaged proof.
+No unsupported historical claim is promoted by this report. Independent committee re-review accepts the Phase 0 diagnostic contract, and Phase 1.1 closes the bounded September packet. Phase 1.2 owns the remaining historical/source rows; later phases own identity, localization, licensing/audio, accessibility, and packaged proof.
 
 ## Determinism and verification
 
+- Phase 1.1 RED reproduced blocked provenance anchors, missing tier/citation metadata, the missing crime/acquittal distinction, incorrect detail boundaries, generic symmetry, unsupported Neretva synthesis, and runtime-index drift. GREEN passes the 16-file fast matrix with 247 tests passed and 5 intentional skips, plus the separate 2-test source-quality suite. TypeScript, targeted JSON parsing, the actual strict CLI, and diff hygiene pass; the CLI reports 0 CRITICAL, 0 WARNING, and 1 observational INFO.
 - File-system walks, keys, findings, claims, citations, counters, and anchor rows use explicit stable ordering.
 - Reports contain no generated timestamp or absolute path.
 - Diagnostics use no randomness or wall clock.
@@ -100,6 +105,6 @@ No unsupported historical claim is promoted by this report. Independent committe
 - The actual `--strict --violations-only --json` CLI exits 0 with 0 CRITICAL, 0 WARNING, and 1 INFO.
 - The intentional `apr1992_52w` baseline refresh changes only `end_report.md`, `final_save.json`, `run_summary.json`, and `weekly_report.jsonl` hashes; activity, control, formation, watched-operation, and every other scenario hash remain unchanged.
 - On the integrated R4/R7 parent, one RED integration failure showed that seven safe R4 essays lacked the now-required authored tier and that neutral Visoko corridor prose was falsely classified by a generic-symmetry rule. Historian/canon review assigned six `icty_icj_un` tiers and one `agreement_text` tier. Source files and the runtime essay index now agree, and generic symmetry is actor-blocking only for sensitive-history risk. The focused inventory passes 15/15; the combined R7/R4 dependent matrix passes 23 files / 659 tests. TypeScript and the actual strict CLI pass with 0 CRITICAL, 0 WARNING, and 1 INFO.
-- The integrated claim census is 3,651 claims / 227 files: 1,466 documented; 1,574 source-note, 489 tier, 108 floor, and 14 actor-specificity rows remain. Chronology passes, provenance remains blocked, and date mismatches remain zero. Localization remains 5,542 keys and 971 open findings across 385 files.
+- The accepted integrated Phase 0 census was 3,651 claims / 227 files with 1,466 documented and both September provenance anchors blocked. Phase 1.1 now reports the same 3,651 claims / 227 files with 1,483 documented; 1,563 source-note, 489 tier, 104 floor, and 12 actor-specificity rows remain. Both September chronology and provenance anchors pass, and date mismatches remain zero. Localization remains 5,542 keys and 971 open findings across 385 files.
 - The corrected branch's standalone no-refresh baseline and canon evidence remains retained. A fresh integrated baseline/canon run is serialized behind R5's exclusive real-save lane and must pass before R7 final closeout. Final diff hygiene remains a pre-commit gate.
 - `docs/10_canon/FORAWWV.md` was not edited.

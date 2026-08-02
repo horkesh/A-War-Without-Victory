@@ -1,5 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] R7 Phase 1.1 September sensitive-history closeout
+
+**Type:** R7 historical-content remediation / source-provenance closure / side-specific tribunal language / TDD checkpoint.
+
+**Content and evidence:** Reauthored the Croat-Bosniak war, Operation Neretva '93, and Grabovica/Uzdol event/essay pairs against exact repository-local evidence. *Balkan Battlegrounds* Vol. I, ch. 39, pp. 219 and 225 anchors the transition to open Croat-Bosniak fighting. Vol. II, pp. 434-435 anchors the September 1993 Neretva chronology. ICTY Prlic, Kordic/Cerkez, and Hadzihasanovic/Kubura judgments support distinct actor-specific findings; the ICTY Halilovic Trial and Appeal judgments support the operation, crime findings, superior-responsibility acquittal, and affirmed appeal outcome. All three pairs now carry resolved `icty_icj_un` tiers and provenance-only source notes, and the runtime essay index mirrors the leaf authoring data.
+
+**Historical disposition:** The Neretva and Grabovica/Uzdol anchors remain at turns 74-76 and move from authored-provenance BLOCKED to PASS. The Grabovica/Uzdol text attributes the crimes to ARBiH personnel while keeping those findings separate from the prosecution's failure to prove Sefer Halilovic's superior authority and effective control beyond reasonable doubt. His acquittal and its affirmance resolve individual liability; they do not negate the crime findings. The atrocity record remains informational, with no player response or beneficial reward.
+
+**Canon/design review:** The packet remains Ring 2 narrative history under `Game_Bible_v0_9_0.md` section 22.1 and the Rulebook sensitive-history gate: atrocity is represented as a consequence, never offered as a lever. It adds no rupture, player command, score input, mechanic, or alternative canon interpretation. The specific, prosecutorial historical voice follows the Sensitive History Design Gate; no canon ambiguity or design blocker remains.
+
+**Omissions and inventory:** Unsupported claims were removed rather than laundered through generic attribution: the coastal-corridor objective, campaign ranking, decisive-escalation language, broad force/composition advantage, diplomatic causation, collective clean-hands framing, equivalent culpability, and retaliation-cycle prose are absent. Documented claims increase from `1,466` to `1,483`; the remaining Phase 1.2 queues are `1,563` source notes, `489` tiers, `104` source-floor rows, and `12` actor-specificity rows.
+
+**TDD, verification, and scope:** RED tests first reproduced the missing tier/citation, blocked-anchor, legal-distinction, exact-date, generic-symmetry, unsupported-overclaim, and runtime-mirror failures. GREEN passes the 16-file fast matrix with `247` tests passed and `5` intentional skips, the separate 2-test source-quality suite, TypeScript, targeted JSON parsing, and diff hygiene. The actual strict canon CLI exits `0` with `0 CRITICAL`, `0 WARNING`, and `1` observational `INFO`. The bounded implementation changes prose and provenance metadata only; existing September turn windows, runtime effects, and save schema remain unchanged. No scenario run, approved-baseline refresh, performance profile, Electron run, package, `docs/10_canon/FORAWWV.md`, version, tag, installer, signing, publication, release state, push, or integration occurred.
+
+---
+
 ## [2026-08-02] R5 Phase 2d bounded sector-reconstruction design
 
 **Type:** R5 docs-only architecture/performance design / exact call-graph and mutation audit / red-first implementation handoff / no production candidate.
