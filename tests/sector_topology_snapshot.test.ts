@@ -44,6 +44,31 @@ function deepFreeze(value: unknown): void {
 }
 
 describe.skipIf(!hasRealSave)('sector topology immutable solve snapshot', () => {
+    it('normalizes the legacy record-shaped centroid lookup accepted by reconciliation callers', () => {
+        const input = captureSectorTopologySolveInput(
+            loadState(),
+            loadEdges(),
+            null,
+            {
+                'op:z': { lat: 44.2, lon: 18.1 },
+                'op:a': { lat: 43.9, lon: 17.8 },
+            } as never,
+            undefined,
+            {
+                isFinalPass: false,
+                finalSaveGeometryProjection: false,
+                useFixedPointShortcuts: true,
+                occupancyStrategy: 'dense-index',
+                frontEdgeAdjacencyStrategy: 'invocation-front-edge-relation',
+            },
+        );
+
+        expect(input.centroidEntries).toEqual([
+            ['op:a', { lat: 43.9, lon: 17.8 }],
+            ['op:z', { lat: 44.2, lon: 18.1 }],
+        ]);
+    });
+
     it('captures the complete allow-list in strict key order without retaining mutable caller identity', () => {
         const state = loadState();
         const edges = loadEdges();

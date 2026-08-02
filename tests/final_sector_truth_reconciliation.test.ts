@@ -17,6 +17,10 @@ import {
     type GameState,
 } from '../src/state/game_state.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
+import {
+    compareSectorTopologyExactParentArtifacts,
+    type SectorTopologyExactParentArtifact,
+} from '../tools/perf/sector_topology_exact_parent_oracle.js';
 
 function makeFormation(id: string, overrides: Partial<FormationState>): FormationState {
     return {
@@ -511,6 +515,44 @@ describe('final sector truth reconciliation', () => {
         expect(raw).toContain("'operation-roster'");
         expect(raw).toContain('dirty_worklist');
         expect(raw).not.toContain('new WeakMap<GameState');
+    });
+
+    it('compares all 300 exact-parent oracle payloads and reports deterministic drift', () => {
+        const modes = ['live-war', 'final-turn', 'final-save-projection'] as const;
+        const cases = modes.flatMap((mode) => Array.from({ length: 100 }, (_, seed) => ({
+            caseId: `${mode}:${seed}`,
+            mode,
+            seed,
+            observable: { mode, seed, journal: [{ sequence: 0, after: seed }] },
+        })));
+        const control: SectorTopologyExactParentArtifact = {
+            schema: 'awwv-sector-topology-exact-parent-v1',
+            lineage: { commit: 'control', parent: 'base', tree: 'control-tree' },
+            cases,
+        };
+        const candidate = structuredClone(control) as SectorTopologyExactParentArtifact;
+        (candidate as { lineage: { commit: string; parent: string; tree: string } }).lineage = {
+            commit: 'candidate',
+            parent: 'control',
+            tree: 'candidate-tree',
+        };
+
+        expect(compareSectorTopologyExactParentArtifacts(control, candidate)).toMatchObject({
+            disposition: 'PASS_EXACT',
+            comparedCases: 300,
+            failures: [],
+        });
+
+        const drifted = structuredClone(candidate) as SectorTopologyExactParentArtifact;
+        (drifted.cases[137]!.observable as { journal: Array<{ after: number }> })
+            .journal[0]!.after += 1;
+        const comparison = compareSectorTopologyExactParentArtifacts(control, drifted);
+        expect(comparison.disposition).toBe('FAIL_DIVERGENCE');
+        expect(comparison.failures).toHaveLength(1);
+        expect(comparison.failures[0]).toMatchObject({
+            caseId: control.cases[137]!.caseId,
+            firstDifferenceByte: expect.any(Number),
+        });
     });
 
     it('static contract: assignment emits warnings only from the final unresolved pass', () => {

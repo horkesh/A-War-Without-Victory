@@ -173,7 +173,31 @@ describe('turn-local final-sector reconciliation session', () => {
         vi.restoreAllMocks();
     });
 
-    it('keeps reports, sessions, receipts, warnings, bytes, and geometry fixed-point order equal through the legacy spy oracle', () => {
+    it('honors the explicit test-only topology builder seam', () => {
+        const fixture = makeState();
+        let calls = 0;
+        const injectedBuilder: typeof corpsFrontSectorsModule.buildCorpsFrontSectors = (...args) => {
+            calls += 1;
+            return corpsFrontSectorsModule.buildCorpsFrontSectors(...args);
+        };
+
+        reconcileFinalSectorTruth(
+            fixture.state,
+            fixture.edges,
+            null,
+            undefined,
+            undefined,
+            null,
+            false,
+            {
+                __testOnlyBuildCorpsFrontSectors: injectedBuilder,
+            },
+        );
+
+        expect(calls).toBe(1);
+    });
+
+    it('keeps reports, sessions, receipts, warnings, bytes, and geometry fixed-point order equal through the explicit legacy builder oracle', () => {
         const originalBuild = corpsFrontSectorsModule.buildCorpsFrontSectors;
         const scenarios = [
             { label: 'live-no-relocation', isFinalPass: false, finalSaveGeometryProjection: false, noRelocation: true },
@@ -202,21 +226,20 @@ describe('turn-local final-sector reconciliation session', () => {
             const errorSpy = vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
                 errors.push(args);
             });
-            const geometrySpy = legacy
-                ? vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors').mockImplementation((...args) =>
-                    originalBuild(
-                        args[0],
-                        args[1],
-                        args[2],
-                        args[3],
-                        args[4],
-                        args[5],
-                        args[6],
-                        args[7],
-                        args[8],
-                        'test-only-legacy-edge-adjacency',
-                    ))
-                : null;
+            const geometryBuilder: typeof originalBuild | undefined = legacy
+                ? (...args) => originalBuild(
+                    args[0],
+                    args[1],
+                    args[2],
+                    args[3],
+                    args[4],
+                    args[5],
+                    args[6],
+                    args[7],
+                    args[8],
+                    'test-only-legacy-edge-adjacency',
+                )
+                : undefined;
             try {
                 const firstReport = reconcileFinalSectorTruth(
                     state,
@@ -229,6 +252,7 @@ describe('turn-local final-sector reconciliation session', () => {
                     {
                         session,
                         finalSaveGeometryProjection: scenario.finalSaveGeometryProjection,
+                        __testOnlyBuildCorpsFrontSectors: geometryBuilder,
                     },
                 );
                 reports.push(firstReport);
@@ -250,6 +274,7 @@ describe('turn-local final-sector reconciliation session', () => {
                         {
                             session,
                             finalSaveGeometryProjection: scenario.finalSaveGeometryProjection,
+                            __testOnlyBuildCorpsFrontSectors: geometryBuilder,
                         },
                     ));
                     geometryBuildSequence.push(session.geometry_builds);
@@ -264,7 +289,6 @@ describe('turn-local final-sector reconciliation session', () => {
                     serialized: serializeState(state),
                 };
             } finally {
-                geometrySpy?.mockRestore();
                 errorSpy.mockRestore();
                 logSpy.mockRestore();
                 warnSpy.mockRestore();

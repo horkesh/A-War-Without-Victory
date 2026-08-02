@@ -61,6 +61,8 @@ export interface FinalSectorReconciliationSession {
 export interface FinalSectorTruthReconciliationOptions {
     finalSaveGeometryProjection?: boolean;
     session?: FinalSectorReconciliationSession;
+    /** Test-only seam for exact pure/serial versus imperative topology oracles. */
+    __testOnlyBuildCorpsFrontSectors?: typeof buildCorpsFrontSectors;
 }
 
 export interface FinalSectorTruthSealOptions {
@@ -216,9 +218,10 @@ function runFullGeometryReconciliation(
     supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
     isFinalPass: boolean,
     finalSaveGeometryProjection: boolean,
+    topologyBuilder: typeof buildCorpsFrontSectors = buildCorpsFrontSectors,
 ): FinalSectorTruthReconciliationReport {
     const activeFormationLocations = captureActiveFormationLocations(state);
-    const sectors = buildCorpsFrontSectors(
+    const sectors = topologyBuilder(
         state,
         edges,
         reverseMap,
@@ -362,6 +365,7 @@ export function reconcileFinalSectorTruth(
             supplyStateByOsid,
             isFinalPass,
             options?.finalSaveGeometryProjection === true,
+            options?.__testOnlyBuildCorpsFrontSectors,
         );
     }
 
@@ -387,6 +391,7 @@ export function reconcileFinalSectorTruth(
                 supplyStateByOsid,
                 isFinalPass,
                 options?.finalSaveGeometryProjection === true,
+                options?.__testOnlyBuildCorpsFrontSectors,
             );
         } else if (dirtyStage === 'roster') {
             const hasRosterSealMutation = receipts.some(

@@ -153,13 +153,23 @@ function copyNamedOfficerData(
 }
 
 function copyMapEntries<T>(
-    source: ReadonlyMap<string, T> | undefined,
+    source: ReadonlyMap<string, T> | Readonly<Record<string, T>> | undefined,
     copyValue: (value: T) => T,
 ): Array<readonly [string, T]> {
     if (!source) return [];
-    return [...source.keys()]
+    const mapSource = typeof (source as ReadonlyMap<string, T>).keys === 'function'
+        && typeof (source as ReadonlyMap<string, T>).get === 'function'
+        ? source as ReadonlyMap<string, T>
+        : undefined;
+    const keys = mapSource == null ? Object.keys(source) : [...mapSource.keys()];
+    return keys
         .sort(strictCompare)
-        .map((key) => [key, copyValue(source.get(key)!)] as const);
+        .map((key) => [
+            key,
+            copyValue(mapSource == null
+                ? (source as Readonly<Record<string, T>>)[key]!
+                : mapSource.get(key)!),
+        ] as const);
 }
 
 function copyStringListEntries(

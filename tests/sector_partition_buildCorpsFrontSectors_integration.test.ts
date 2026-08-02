@@ -53,13 +53,24 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 
-import { describe, expect, it, beforeAll, afterAll, vi } from 'vitest';
+import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 
-import * as corpsFrontSectorsModule from '../src/sim/combat/corps_front_sectors.js';
 import {
+    __buildCorpsFrontSectorsImperativeForTest,
     __buildCorpsFrontSectorsWithoutFixedPointShortcuts,
     buildCorpsFrontSectors,
 } from '../src/sim/combat/corps_front_sectors.js';
+import {
+    commitSectorTopologySolve,
+    createSectorTopologyMutationRecorder,
+} from '../src/sim/combat/sector_topology_mutation_journal.js';
+import { captureSectorTopologySolveInput } from '../src/sim/combat/sector_topology_snapshot.js';
+import { solveCorpsFrontSectorsPure } from '../src/sim/combat/sector_topology_solver.js';
+import type {
+    SectorTopologyDiagnostic,
+    SectorTopologyMutation,
+    SectorTopologySolveOutput,
+} from '../src/sim/combat/sector_topology_solver_types.js';
 import {
     createFinalSectorReconciliationSession,
     recordFinalSectorReconciliationMutation,
@@ -228,7 +239,6 @@ function runFrontEdgeRelationModes(
     edges: ContactGraphEdge[],
     mode: FixedPointProductionMode,
 ): { candidate: string; legacy: string; rerun: string } {
-    const originalBuild = corpsFrontSectorsModule.buildCorpsFrontSectors;
     const run = (strategy: 'invocation-front-edge-relation' | 'test-only-legacy-edge-adjacency'): string => {
         const runState = deserializeState(JSON.stringify(state)) as GameState;
         const session = createFinalSectorReconciliationSession(
@@ -249,9 +259,9 @@ function runFrontEdgeRelationModes(
         console.debug = (...args: unknown[]) => { debug.push(args); };
         console.log = (...args: unknown[]) => { logs.push(args); };
         console.error = (...args: unknown[]) => { errors.push(args); };
-        const geometrySpy = strategy === 'test-only-legacy-edge-adjacency'
-            ? vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors').mockImplementation((...args) =>
-                originalBuild(
+        const topologyBuilder: typeof buildCorpsFrontSectors | undefined =
+            strategy === 'test-only-legacy-edge-adjacency'
+                ? (...args) => buildCorpsFrontSectors(
                     args[0],
                     args[1],
                     args[2],
@@ -263,8 +273,8 @@ function runFrontEdgeRelationModes(
                     args[8],
                     'test-only-legacy-edge-adjacency',
                     args[10],
-                ))
-            : null;
+                )
+                : undefined;
         try {
             const firstReport = reconcileFinalSectorTruth(
                 runState,
@@ -277,6 +287,7 @@ function runFrontEdgeRelationModes(
                 {
                     session,
                     finalSaveGeometryProjection: mode.finalSaveGeometryProjection,
+                    __testOnlyBuildCorpsFrontSectors: topologyBuilder,
                 },
             );
             reports.push(firstReport);
@@ -298,6 +309,7 @@ function runFrontEdgeRelationModes(
                     {
                         session,
                         finalSaveGeometryProjection: mode.finalSaveGeometryProjection,
+                        __testOnlyBuildCorpsFrontSectors: topologyBuilder,
                     },
                 ));
                 geometryBuildSequence.push(session.geometry_builds);
@@ -317,7 +329,6 @@ function runFrontEdgeRelationModes(
                 serializedSha256: createHash('sha256').update(serialized).digest('hex'),
             }));
         } finally {
-            geometrySpy?.mockRestore();
             console.warn = originalWarn;
             console.debug = originalDebug;
             console.log = originalLog;
@@ -330,6 +341,244 @@ function runFrontEdgeRelationModes(
         legacy: run('test-only-legacy-edge-adjacency'),
         rerun: run('invocation-front-edge-relation'),
     };
+}
+
+type PureSerialOracleStrategy = 'pure-serial' | 'imperative';
+
+interface PureSerialTopologyReceipt {
+    mutations: readonly SectorTopologyMutation[];
+    diagnostics: readonly SectorTopologyDiagnostic[];
+    inputSha256Before: string;
+    inputSha256After: string;
+    inputSizeBefore: number;
+    inputSizeAfter: number;
+    inputUnchanged: boolean;
+    relationCounters: ReturnType<typeof createSectorFrontEdgeRelationTestCounters>;
+    occupancyStrategy: 'dense-index';
+    relationStrategy: 'invocation-front-edge-relation';
+}
+
+function emitOracleDiagnostic(diagnostic: SectorTopologyDiagnostic): void {
+    if (diagnostic.kind === 'debug') console.debug(diagnostic.message);
+    else if (diagnostic.kind === 'warning') console.warn(diagnostic.message);
+    else console.error(diagnostic.message);
+}
+
+function omitLastAssignmentSet(
+    output: SectorTopologySolveOutput,
+): SectorTopologySolveOutput {
+    let omittedIndex = -1;
+    for (let index = output.mutations.length - 1; index >= 0; index -= 1) {
+        const mutation = output.mutations[index];
+        if (mutation?.kind === 'formation-assignment' && mutation.after !== null) {
+            omittedIndex = index;
+            break;
+        }
+    }
+    if (omittedIndex < 0) throw new Error('Negative-control fixture has no assignment-set row to omit.');
+    return {
+        ...output,
+        mutations: output.mutations
+            .filter((_, index) => index !== omittedIndex)
+            .map((mutation, sequence) => ({ ...mutation, sequence })),
+        diagnostics: output.diagnostics.map((diagnostic) => ({
+            ...diagnostic,
+            mutationBoundary: diagnostic.mutationBoundary > omittedIndex
+                ? diagnostic.mutationBoundary - 1
+                : diagnostic.mutationBoundary,
+        })),
+    };
+}
+
+function createPureSerialOracleBuilder(
+    strategy: PureSerialOracleStrategy,
+    receipts: PureSerialTopologyReceipt[],
+    omitCommitRow: boolean,
+): typeof buildCorpsFrontSectors {
+    return (
+        state,
+        edges,
+        reverseMap,
+        centroids,
+        spatial,
+        isFinalPass = false,
+        finalSaveGeometryProjection = false,
+    ) => {
+        const options = {
+            isFinalPass,
+            finalSaveGeometryProjection,
+            useFixedPointShortcuts: true,
+            occupancyStrategy: 'dense-index' as const,
+            frontEdgeAdjacencyStrategy: 'invocation-front-edge-relation' as const,
+        };
+        const input = captureSectorTopologySolveInput(
+            state,
+            edges,
+            reverseMap,
+            centroids,
+            spatial,
+            options,
+        );
+        const inputBefore = JSON.stringify(input);
+        const counters = createSectorFrontEdgeRelationTestCounters();
+        let sectors: Record<string, CorpsFrontSector>;
+        let mutations: readonly SectorTopologyMutation[];
+        let diagnostics: readonly SectorTopologyDiagnostic[];
+
+        if (strategy === 'pure-serial') {
+            const solved = solveCorpsFrontSectorsPure(input, {
+                frontEdgeRelationTestCounters: counters,
+            });
+            const committed = omitCommitRow ? omitLastAssignmentSet(solved) : solved;
+            commitSectorTopologySolve(state, input, committed, emitOracleDiagnostic);
+            sectors = committed.sectors as Record<string, CorpsFrontSector>;
+            mutations = committed.mutations;
+            diagnostics = committed.diagnostics;
+        } else {
+            const recorder = createSectorTopologyMutationRecorder();
+            sectors = __buildCorpsFrontSectorsImperativeForTest(
+                state,
+                edges,
+                reverseMap,
+                recorder,
+                centroids,
+                spatial,
+                isFinalPass,
+                finalSaveGeometryProjection,
+                true,
+                'dense-index',
+                'invocation-front-edge-relation',
+                counters,
+            );
+            mutations = recorder.mutations;
+            diagnostics = recorder.diagnostics;
+            for (const diagnostic of diagnostics) emitOracleDiagnostic(diagnostic);
+        }
+
+        const inputAfter = JSON.stringify(input);
+        receipts.push({
+            mutations: structuredClone(mutations),
+            diagnostics: structuredClone(diagnostics),
+            inputSha256Before: createHash('sha256').update(inputBefore).digest('hex'),
+            inputSha256After: createHash('sha256').update(inputAfter).digest('hex'),
+            inputSizeBefore: Buffer.byteLength(inputBefore),
+            inputSizeAfter: Buffer.byteLength(inputAfter),
+            inputUnchanged: inputBefore === inputAfter,
+            relationCounters: structuredClone(counters),
+            occupancyStrategy: 'dense-index',
+            relationStrategy: 'invocation-front-edge-relation',
+        });
+        return sectors;
+    };
+}
+
+function runPureSerialReconciliationOracle(
+    sourceState: GameState,
+    edges: ContactGraphEdge[],
+    mode: FixedPointProductionMode,
+    strategy: PureSerialOracleStrategy,
+    omitCommitRow: boolean = false,
+): string {
+    const state = deserializeState(JSON.stringify(sourceState)) as GameState;
+    const session = createFinalSectorReconciliationSession(
+        state.meta.turn,
+        mode.finalSaveGeometryProjection ? 'final-save-geometry' : 'postcombat-geometry',
+    );
+    const reports: unknown[] = [];
+    const geometryBuildSequence: number[] = [];
+    const topologyReceipts: PureSerialTopologyReceipt[] = [];
+    const warnings: unknown[][] = [];
+    const debug: unknown[][] = [];
+    const logs: unknown[][] = [];
+    const errors: unknown[][] = [];
+    const originalWarn = console.warn;
+    const originalDebug = console.debug;
+    const originalLog = console.log;
+    const originalError = console.error;
+    console.warn = (...args: unknown[]) => { warnings.push(args); };
+    console.debug = (...args: unknown[]) => { debug.push(args); };
+    console.log = (...args: unknown[]) => { logs.push(args); };
+    console.error = (...args: unknown[]) => { errors.push(args); };
+    const topologyBuilder = createPureSerialOracleBuilder(
+        strategy,
+        topologyReceipts,
+        omitCommitRow,
+    );
+    try {
+        const reconcile = (): ReturnType<typeof reconcileFinalSectorTruth> =>
+            reconcileFinalSectorTruth(
+                state,
+                edges as never,
+                null,
+                undefined,
+                undefined,
+                null,
+                mode.isFinalPass,
+                {
+                    session,
+                    finalSaveGeometryProjection: mode.finalSaveGeometryProjection,
+                    __testOnlyBuildCorpsFrontSectors: topologyBuilder,
+                },
+            );
+        const firstReport = reconcile();
+        reports.push(firstReport);
+        geometryBuildSequence.push(session.geometry_builds);
+        if (firstReport.geometry_input_mutations > 0) {
+            recordFinalSectorReconciliationMutation(
+                session,
+                'geometry',
+                'postcombat-formation-location-writeback',
+            );
+            reports.push(reconcile());
+            geometryBuildSequence.push(session.geometry_builds);
+        }
+        const serialized = serializeState(state);
+        for (const [index, receipt] of topologyReceipts.entries()) {
+            if (!receipt.inputUnchanged
+                || receipt.inputSha256Before !== receipt.inputSha256After
+                || receipt.inputSizeBefore !== receipt.inputSizeAfter) {
+                throw new Error(`topology solve input mutated during build ${index}`);
+            }
+            if (receipt.relationCounters.standardConstructions
+                    !== receipt.relationCounters.strictConstructions
+                || receipt.relationCounters.standardConstructions > state.factions.length
+                || receipt.relationCounters.fallbackReasons['duplicate-edge-id'] !== 0
+                || receipt.relationCounters.fallbackReasons['edge-outside-universe'] !== 0
+                || receipt.relationCounters.fallbackReasons['metadata-mismatch'] !== 0
+                || receipt.relationCounters.fallbackReasons['faction-mismatch'] !== 0
+                || receipt.relationCounters.fallbackReasons['adjacency-mismatch'] !== 0
+                || receipt.relationCounters.fallbackReasons['centroid-mismatch'] !== 0) {
+                throw new Error(`topology relation contract drifted during build ${index}`);
+            }
+        }
+        return JSON.stringify(canonicalizeObservable({
+            sectors: state.military.corps_front_sectors,
+            state,
+            reports,
+            session: structuredClone(session),
+            pendingReceipts: session.receipts.slice(session.processed_receipts),
+            consumedReceipts: session.receipts.slice(0, session.processed_receipts),
+            lastReport: session.last_report,
+            topologyReceipts,
+            geometryBuildSequence,
+            activeLocationMutationCount: reports.reduce<number>(
+                (sum, report) => sum + Number(
+                    (report as { geometry_input_mutations?: number }).geometry_input_mutations ?? 0,
+                ),
+                0,
+            ),
+            warnings,
+            diagnostics: { debug, logs, errors },
+            serialized,
+            serializedSize: Buffer.byteLength(serialized),
+            serializedSha256: createHash('sha256').update(serialized).digest('hex'),
+        }));
+    } finally {
+        console.warn = originalWarn;
+        console.debug = originalDebug;
+        console.log = originalLog;
+        console.error = originalError;
+    }
 }
 
 describe('buildCorpsFrontSectors front-edge strategy contract', () => {
@@ -463,6 +712,49 @@ describe.skipIf(!hasFixture)(
             );
             expect(candidate).toBe(legacy);
             expect(candidate).toBe(rerun);
+        });
+
+        it('detects an intentionally omitted serial-commit row in the reconciliation oracle', () => {
+            const mode = FIXED_POINT_PRODUCTION_MODES[0]!;
+            const corrupted = runPureSerialReconciliationOracle(
+                baseState,
+                edges,
+                mode,
+                'pure-serial',
+                true,
+            );
+            const imperative = runPureSerialReconciliationOracle(
+                baseState,
+                edges,
+                mode,
+                'imperative',
+            );
+            expect(corrupted).not.toBe(imperative);
+        });
+
+        it('pure serial reconciliation matches the explicit imperative oracle on the pristine save', () => {
+            for (const mode of FIXED_POINT_PRODUCTION_MODES) {
+                const candidate = runPureSerialReconciliationOracle(
+                    baseState,
+                    edges,
+                    mode,
+                    'pure-serial',
+                );
+                const imperative = runPureSerialReconciliationOracle(
+                    baseState,
+                    edges,
+                    mode,
+                    'imperative',
+                );
+                const rerun = runPureSerialReconciliationOracle(
+                    baseState,
+                    edges,
+                    mode,
+                    'pure-serial',
+                );
+                expect(candidate, mode.label).toBe(imperative);
+                expect(candidate, `${mode.label} rerun`).toBe(rerun);
+            }
         });
 
         it('constructs at most one standard/strict relation per used faction, discards them between calls, observes synthetic fallbacks, and keeps unexpected canonical fallback at zero', () => {
@@ -678,5 +970,47 @@ describe.skipIf(!hasFixture)(
                 }
             }
         }, 1_200_000);
+
+        it('pure full solve and serial commit preserve reports, sessions, receipts, mutation order, geometry order, sectors, full state, diagnostics, bytes, and rerun hashes across production modes and 100 real-save variants', () => {
+            for (const mode of FIXED_POINT_PRODUCTION_MODES) {
+                for (let seed = 0; seed < 100; seed += 1) {
+                    const variant = makeVariant(baseState, seed);
+                    const candidate = runPureSerialReconciliationOracle(
+                        variant,
+                        edges,
+                        mode,
+                        'pure-serial',
+                    );
+                    const imperative = runPureSerialReconciliationOracle(
+                        variant,
+                        edges,
+                        mode,
+                        'imperative',
+                    );
+                    const rerun = runPureSerialReconciliationOracle(
+                        variant,
+                        edges,
+                        mode,
+                        'pure-serial',
+                    );
+                    if (candidate !== imperative || candidate !== rerun) {
+                        const reference = candidate !== imperative ? imperative : rerun;
+                        let firstDiff = 0;
+                        while (
+                            firstDiff < candidate.length
+                            && firstDiff < reference.length
+                            && candidate.charCodeAt(firstDiff) === reference.charCodeAt(firstDiff)
+                        ) {
+                            firstDiff += 1;
+                        }
+                        throw new Error(
+                            `pure-serial divergence for mode ${mode.label}, seed ${seed} at byte ${firstDiff}; `
+                            + `candidate=${candidate.slice(firstDiff, firstDiff + 240)}; `
+                            + `reference=${reference.slice(firstDiff, firstDiff + 240)}`,
+                        );
+                    }
+                }
+            }
+        }, 1_800_000);
     },
 );
