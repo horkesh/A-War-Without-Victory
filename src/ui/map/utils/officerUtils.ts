@@ -65,8 +65,9 @@ function compareOpeningOfficer(a: NamedOfficerView, b: NamedOfficerView): number
 }
 
 function isOpeningCorpsMatch(officer: NamedOfficerView, corpsId: string): boolean {
-    return officer.home_corps_id === corpsId
-        || (officer.is_historical_start === true && officer.historical_corps_id === corpsId);
+    return officer.is_historical_start === true
+        && officer.available_from_turn === 0
+        && officer.historical_corps_id === corpsId;
 }
 
 export function resolveOpeningCorpsCommanderOfficer(

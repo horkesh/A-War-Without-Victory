@@ -1302,8 +1302,7 @@ async function runArmyHqInternalDrilldown(page, summary) {
   await activateVisibleControl(page, '#army-hq-tab-briefing');
   await waitForVisibleSelector(page, '#army-hq-tabpanel-briefing');
   await waitForVisibleSelector(page, '[data-testid="army-hq-corps-index"]');
-  await waitForVisibleSelector(page, '[data-testid="army-hq-opening-command-provenance"]');
-  await activateVisibleControl(page, '[data-testid="army-hq-corps-card"][data-commander-source="opening_read_model"]');
+  await activateVisibleControl(page, '[data-testid="army-hq-corps-card"]');
   await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
   await waitForVisibleText(page, 'Back');
   await waitForVisibleText(page, 'Combat Record');

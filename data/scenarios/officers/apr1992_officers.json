@@ -982,9 +982,9 @@
       "enclave_lock": {
         "enclave_id": "sarajevo"
       },
-      "bio_short": "JNA-trained officer assigned to 1st Corps around Sarajevo at scenario start.",
+      "bio_short": "JNA-trained officer appointed to command 1st Corps around Sarajevo in September 1992.",
       "command_style": "Bold, resilient enclave command",
-      "known_for": "1st Corps opening command",
+      "known_for": "1st Corps command from September 1992",
       "political_alignment_note": "Regular RBiH corps command appointment.",
       "historical_role": "corps_commander"
     },
@@ -1132,9 +1132,9 @@
       "enclave_lock": {
         "enclave_id": "orasje"
       },
-      "bio_short": "Military-origin commander assigned to Northwest Bosnia in the opening OOB.",
+      "bio_short": "Military-origin commander documented leading the 106th HVO Brigade by mid-1995.",
       "command_style": "Cautious, defensive regional command",
-      "known_for": "Northwest Bosnia opening command",
+      "known_for": "106th HVO Brigade command",
       "political_alignment_note": "Regular HRHB corps command appointment.",
       "historical_role": "brigade_commander"
     },

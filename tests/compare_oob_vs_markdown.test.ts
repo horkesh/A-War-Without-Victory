@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -51,5 +52,39 @@ describe('compare_oob_vs_markdown evidence inputs', () => {
             'docs/knowledge/DOES_NOT_EXIST.md',
             process.cwd(),
         )).toThrow(/evidence file not found/i);
+    });
+
+    it('makes every cross-faction alias an explicit cited operational relation', () => {
+        const report = buildOobComparison(process.cwd());
+        const matches = report.matched_identities as Array<{
+            faction: string;
+            evidence_faction?: string;
+            oob_id: string;
+            alias_reason?: string;
+            alias_source_url?: string;
+            faction_relation?: string;
+        }>;
+        const crossFaction = matches.filter((match) => match.evidence_faction !== match.faction);
+
+        expect(crossFaction.map((match) => match.oob_id)).toEqual([
+            'hrhb_108th_brko_brigade',
+            'hrhb_110th_usora_brigade',
+            'hrhb_115th_zrinski_brigade',
+        ]);
+        for (const match of crossFaction) {
+            expect(match.faction_relation).toBe('cross_faction_operational_alignment');
+            expect(match.alias_reason?.trim()).toBeTruthy();
+            expect(match.alias_source_url).toMatch(/^repo:\/\//);
+        }
+    });
+
+    it('uses explicit lexical ordering rather than host-locale ordering', () => {
+        const source = fs.readFileSync('tools/audit/compare_oob_vs_markdown.ts', 'utf8');
+        expect(source).not.toContain('localeCompare');
+    });
+
+    it('requires cross-faction repo citations to resolve to a file', () => {
+        const source = fs.readFileSync('tools/audit/compare_oob_vs_markdown.ts', 'utf8');
+        expect(source).toContain('statSync(resolvedSource).isFile()');
     });
 });

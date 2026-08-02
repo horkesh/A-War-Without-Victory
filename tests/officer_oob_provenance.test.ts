@@ -323,6 +323,16 @@ describe('officer/OOB provenance inventory', () => {
         expect(playableOfficers.officers.find((officer) => officer.id === 'hvo_kordic')?.historical_role)
             .toBe('political_military_authority');
 
+        const playableBrigades = JSON.parse(readFileSync(join(
+            process.cwd(),
+            'data',
+            'source',
+            'oob_brigades.json',
+        ), 'utf8')) as Array<{ id: string; faction: string; recruit_pool_faction?: string }>;
+        expect(playableBrigades.find((brigade) => brigade.id === 'arbih_107th_gradacac_brigade'))
+            .toMatchObject({ faction: 'RBiH', recruit_pool_faction: 'RBiH' });
+        expect(playableBrigades.some((brigade) => brigade.id === 'hrhb_107th_gradaac_brigade')).toBe(false);
+
         const blaskic = report.records.find((record) => record.record_key === 'officer:hvo_blaskic');
         expect(blaskic?.identity_relation).toEqual({
             kind: 'tenure_of',

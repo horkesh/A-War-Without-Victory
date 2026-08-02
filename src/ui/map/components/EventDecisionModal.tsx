@@ -138,7 +138,7 @@ export interface EventDecisionModalProps {
     /**
      * Phase 2 slice 1 "Back the Officer": named advisor whose voice frames the
      * assessment block for operation/corps-scoped events ('command' / 'military'
-     * category). When a commander resolves, the block is labelled "{rank} {name}"
+     * category). When a commander resolves, the block is labelled with the sourced name
      * instead of the generic "Staff assessment". Backward compatible — omit to
      * keep the generic label. Names are already player-safe via the roster, but
      * sanitised defensively here too.
@@ -218,19 +218,11 @@ function signedDelta(delta: number): string {
     return `${delta > 0 ? '+' : ''}${delta}`;
 }
 
-function humanizeRank(rank: string): string {
-    return rank
-        .split(/[_\s]+/)
-        .filter(Boolean)
-        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-        .join(' ');
-}
-
 /**
  * Phase 2 slice 1 "Back the Officer": label for the assessment block.
  *
  * Operation/corps-scoped events ('command' / 'military') speak in a named
- * officer's voice ("{rank} {name}") when a commander resolves; everything else
+ * officer's voice (the sourced name only) when a commander resolves; everything else
  * (and the no-officer fallback) keeps the generic "Staff assessment". Pure +
  * exported for unit testing without a DOM render.
  */
@@ -242,8 +234,7 @@ export function deriveAssessmentLabel(
     if (!isOfficerScoped || !advisor) return 'Staff assessment';
     // `advisor` is now narrowed; access its fields without non-null assertions.
     if ((advisor.name ?? '').trim().length === 0) return 'Staff assessment';
-    const rankPrefix = advisor.rank ? `${humanizeRank(advisor.rank)} ` : '';
-    return `${rankPrefix}${getPlayerSafeOfficerName(advisor.name)}`;
+    return getPlayerSafeOfficerName(advisor.name);
 }
 
 /** Render a human-readable summary of an effect. */

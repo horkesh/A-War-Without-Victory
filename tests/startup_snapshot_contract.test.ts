@@ -189,26 +189,14 @@ test('baked April 1992 opening corps command display does not mutate sim officer
     }
 }, 120_000);
 
-test('baked April 1992 UI read model shows opening commanders without backdating official arrivals', async () => {
+test('baked April 1992 UI read model leaves commands vacant rather than inventing opening appointments', async () => {
     const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
     const view = parseGameState(state);
     const officers = state.military.named_officers ?? {};
 
-    assert.deepStrictEqual(resolveCorpsCommanderDisplay('vrs_drina', 'RS', view), {
-        name: 'Svetozar Andrić',
-        acting: true,
-        source: 'opening_read_model',
-    });
-    assert.deepStrictEqual(resolveCorpsCommanderDisplay('arbih_3rd_corps', 'RBiH', view), {
-        name: 'Selmo Cikotić',
-        acting: true,
-        source: 'opening_read_model',
-    });
-    assert.deepStrictEqual(resolveCorpsCommanderDisplay('arbih_4th_corps', 'RBiH', view), {
-        name: 'Midhad Hujdur "Hujka"',
-        acting: true,
-        source: 'opening_read_model',
-    });
+    assert.strictEqual(resolveCorpsCommanderDisplay('vrs_drina', 'RS', view), null);
+    assert.strictEqual(resolveCorpsCommanderDisplay('arbih_3rd_corps', 'RBiH', view), null);
+    assert.strictEqual(resolveCorpsCommanderDisplay('arbih_4th_corps', 'RBiH', view), null);
     assert.deepStrictEqual(resolveCorpsCommanderDisplay('jna_herzegovina_command', 'RS', view), {
         name: 'JNA forward command staff',
         acting: false,

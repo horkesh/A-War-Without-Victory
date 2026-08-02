@@ -114,7 +114,7 @@ const EXACT_BCS_NAMES: Record<string, string> = {
   hvo_3rd_guard_jastrebovi: '3. gardijska brigada "Jastrebovi"',
   hvo_4th_guard_sinovi_posavine: '4. gardijska brigada "Sinovi Posavine"',
   hrhb_106th_bosanska_posavina_brigade: '106. brigada "Bosanska Posavina"',
-  hrhb_107th_gradaac_brigade: '107. brigada "Gradačac"',
+  arbih_107th_gradacac_brigade: '107. brigada "Gradačac"',
   hrhb_108th_brko_brigade: '108. brigada "Brčko"',
   hvo_rama_brigade: 'Ramska brigada',
   hvo_ante_starcevic_brigade: 'Brigada "Ante Starčević"',

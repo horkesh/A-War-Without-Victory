@@ -6,14 +6,14 @@ import { deriveAssessmentLabel } from '../../src/ui/map/components/EventDecision
 // officer's voice for operation/corps-scoped events ('command' / 'military'),
 // and otherwise keeps the generic "Staff assessment". Pure derivation — no DOM.
 describe('EventDecisionModal advisor label (Phase 2 slice 1)', () => {
-  it('renders {rank} {name} for a command-scoped event when a commander resolves', () => {
+  it('renders the sourced identity without turning appointment class into a title', () => {
     expect(deriveAssessmentLabel('command', { name: 'Atif Dudaković', rank: 'corps_commander' }))
-      .toBe('Corps Commander Atif Dudaković');
+      .toBe('Atif Dudaković');
   });
 
-  it('renders {rank} {name} for a military-scoped event', () => {
+  it('does not turn a legacy rank token into a title for a military-scoped event', () => {
     expect(deriveAssessmentLabel('military', { name: 'Sefer Halilović', rank: 'general' }))
-      .toBe('General Sefer Halilović');
+      .toBe('Sefer Halilović');
   });
 
   it('renders just the name when the officer has no rank', () => {

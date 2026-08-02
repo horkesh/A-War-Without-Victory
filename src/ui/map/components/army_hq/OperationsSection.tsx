@@ -15,6 +15,7 @@ import { deriveOperationOutcomeCategory, normalizeCommandStrainLabel } from '../
 import { EmptyState } from '../EmptyState';
 import { t, type MessageKey } from '../../i18n';
 import { inspectOnField } from '../../utils/shellNavigation';
+import { formatHistoricalRole } from '../../utils/officerCharacter';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -132,22 +133,6 @@ const GRADE_FACTOR_LABELS: Record<string, string> = {
     duration_efficiency: 'Duration efficiency',
     momentum: 'Momentum',
 };
-
-const OFFICER_RANK_LABEL_KEYS: Record<string, MessageKey> = {
-    army_commander: 'personnel.rank.armyCommander',
-    corps_commander: 'personnel.rank.corpsCommander',
-    brigadier_general: 'personnel.rank.brigadierGeneral',
-    tactical_commander: 'personnel.rank.tacticalCommander',
-    general: 'personnel.rank.general',
-    colonel: 'personnel.rank.colonel',
-    major: 'personnel.rank.major',
-    deputy: 'personnel.rank.deputy',
-};
-
-function formatOfficerRank(rank: string | undefined): string {
-    if (!rank) return t('personnel.rank.unspecified');
-    return t(OFFICER_RANK_LABEL_KEYS[rank] ?? 'personnel.rank.unspecified');
-}
 
 function isUnsafeRawLabel(value: string | null | undefined): boolean {
     if (!value) return false;
@@ -461,7 +446,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         <div className="flex items-center gap-2">
                             <span className="text-xs text-text-secondary/60 uppercase">{t('operationsSection.operationCommander')}</span>
                             <span className="text-[12px] font-bold text-text-primary uppercase tracking-wider">{commanderDisplay.officer.name}</span>
-                            <span className="text-xs text-text-secondary/40 uppercase">{formatOfficerRank(commanderDisplay.officer.rank)}</span>
+                            <span className="text-xs text-text-secondary/40 uppercase">{formatHistoricalRole(commanderDisplay.officer.historical_role)}</span>
                         </div>
                         <div className="text-xs text-accent-gold/80 uppercase tracking-wider font-bold">
                             {getCommanderPersonality(commanderDisplay.officer)}

@@ -79,6 +79,7 @@ describe('back-the-officer read-model', () => {
     expect(v.total_personnel_lent).toBe(1400);
     // Framing frames the decision as backing the named CO + names donor corps + cost.
     expect(v.framing).toContain('Atif Dudaković');
+    expect(v.framing).not.toMatch(/Corps Commander|corps_commander/);
     expect(v.framing).toContain('5th Corps');
     expect(v.framing).toContain('1,400');
   });
@@ -158,6 +159,7 @@ describe('back-the-officer read-model', () => {
     );
     expect(story).toContain('dissolved');
     expect(story).toContain('killed');
+    expect(story).not.toMatch(/Corps Commander|corps_commander/);
     expect(story).toContain('Enver Hadžihasanović');
   });
 

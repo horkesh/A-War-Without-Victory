@@ -345,7 +345,7 @@ export function buildFraming(
 ): string {
   const identity = tgName ?? opName;
   const who = commander
-    ? `${commander.rank ? `${humanizeRank(commander.rank)} ` : ''}${commander.name}`
+    ? commander.name
     : 'the field commander';
   const lead = `Back ${who} and his ${identity}.`;
 
@@ -359,14 +359,6 @@ export function buildFraming(
     ? ` — ${totalPersonnelLent.toLocaleString('en-US')} men lent, cohesion bled from those corps.`
     : ' — cohesion bled from those corps.';
   return `${lead} ${pulling}${cost}`;
-}
-
-function humanizeRank(rank: string): string {
-  return rank
-    .split(/[_\s]+/)
-    .filter(Boolean)
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-    .join(' ');
 }
 
 function joinList(items: string[]): string {
@@ -540,7 +532,7 @@ export function buildAftermathStory(
 ): string {
   const identity = tgName ?? 'the tactical group';
   const who = commander
-    ? `${commander.rank ? `${humanizeRank(commander.rank)} ` : ''}${commander.name}`
+    ? commander.name
     : 'its commander';
 
   if (anchorLost) {
@@ -865,7 +857,7 @@ export function buildOpProposalFraming(
   totalPersonnelLent: number,
 ): string {
   const who = commander
-    ? `${commander.rank ? `${humanizeRank(commander.rank)} ` : ''}${commander.name}`
+    ? commander.name
     : 'Your field commander';
   const ratioClause = forceRatio != null ? ` at an estimated ${forceRatio.toFixed(1)}:1` : '';
   const recommendation =

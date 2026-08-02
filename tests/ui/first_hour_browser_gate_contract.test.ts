@@ -143,8 +143,8 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('army_hq_internal_summary');
     expect(tool).toContain('army_hq_internal_personnel');
     expect(tool).toContain('army_hq_internal_corps_card');
-    expect(tool).toContain('army-hq-opening-command-provenance');
-    expect(tool).toContain('data-commander-source="opening_read_model"');
+    expect(tool).not.toContain("waitForVisibleSelector(page, '[data-testid=\"army-hq-opening-command-provenance\"]')");
+    expect(tool).not.toContain('data-commander-source="opening_read_model"');
     expect(tool).toContain('runArmyHqPersonnelBrigadeLiveProof');
     expect(tool).toContain('armyHqPersonnelBrigadeLiveProof');
     expect(tool).toContain('personnel-orbat-brigade-link');

@@ -179,7 +179,7 @@ describe('opening corps commander display', () => {
         });
     });
 
-    it('shows a turn-safe opening officer without activating him in sim state', () => {
+    it('does not backfill a future arrival with an unsourced pool officer', () => {
         const gameState = state({
             namedOfficerData: [
                 officer({
@@ -206,15 +206,11 @@ describe('opening corps commander display', () => {
             },
         });
 
-        expect(resolveCorpsCommanderDisplay('vrs_drina', 'RS', gameState)).toEqual({
-            name: 'Svetozar Andric',
-            acting: true,
-            source: 'opening_read_model',
-        });
+        expect(resolveCorpsCommanderDisplay('vrs_drina', 'RS', gameState)).toBeNull();
         expect(gameState.namedOfficerStateById?.vrs_andric?.assigned_corps_id).toBeNull();
     });
 
-    it('does not use broad compatibility or non-corps ranks for opening command labels', () => {
+    it('requires an exact authored turn-zero corps assignment for opening command labels', () => {
         const gameState = state({
             namedOfficerData: [
                 officer({
@@ -234,8 +230,11 @@ describe('opening corps commander display', () => {
                 }),
                 officer({
                     id: 'home_corps',
-                    name: 'Home Corps Commander',
+                    name: 'Evidence-Supported Officer',
                     home_corps_id: 'vrs_drina',
+                    available_from_turn: 0,
+                    is_historical_start: true,
+                    historical_corps_id: 'vrs_drina',
                     pool_tier: 'tier_b',
                     competence: 3,
                 }),
@@ -243,7 +242,7 @@ describe('opening corps commander display', () => {
         });
 
         expect(resolveCorpsCommanderDisplay('vrs_drina', 'RS', gameState)).toEqual({
-            name: 'Home Corps Commander',
+            name: 'Evidence-Supported Officer',
             acting: true,
             source: 'opening_read_model',
         });
@@ -266,7 +265,7 @@ describe('opening corps commander display', () => {
         expect(resolveCorpsCommanderDisplay('vrs_drina', 'RS', state({ namedOfficerData: [] }))).toBeNull();
     });
 
-    it('shows opening ARBiH corps command without assigning the officers', () => {
+    it('does not synthesize opening ARBiH command from home-corps pool metadata', () => {
         const gameState = state({
             namedOfficerData: [
                 officer({
@@ -320,16 +319,8 @@ describe('opening corps commander display', () => {
             },
         });
 
-        expect(resolveCorpsCommanderDisplay('arbih_3rd_corps', 'RBiH', gameState)).toEqual({
-            name: 'Selmo Cikotic',
-            acting: true,
-            source: 'opening_read_model',
-        });
-        expect(resolveCorpsCommanderDisplay('arbih_4th_corps', 'RBiH', gameState)).toEqual({
-            name: 'Midhad Hujdur',
-            acting: true,
-            source: 'opening_read_model',
-        });
+        expect(resolveCorpsCommanderDisplay('arbih_3rd_corps', 'RBiH', gameState)).toBeNull();
+        expect(resolveCorpsCommanderDisplay('arbih_4th_corps', 'RBiH', gameState)).toBeNull();
         expect(gameState.namedOfficerStateById?.arbih_cikotic?.assigned_corps_id).toBeNull();
         expect(gameState.namedOfficerStateById?.arbih_hujdur?.assigned_corps_id).toBeNull();
     });

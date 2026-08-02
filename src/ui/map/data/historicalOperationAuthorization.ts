@@ -106,12 +106,6 @@ function findOperationDefinition(
   return armyHq ? { def: armyHq, source: 'scenario Army HQ operation definition' } : null;
 }
 
-function humanizeRank(rank: string | null | undefined): string {
-  const clean = (rank ?? '').trim().replace(/[_-]+/g, ' ');
-  if (!clean) return '';
-  return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
-}
-
 function commanderLabel(
   state: LoadedGameState,
   corpsId: string,
@@ -123,8 +117,7 @@ function commanderLabel(
     )
     .sort((a, b) => strictCompare(a.id, b.id))[0];
   if (!commander) return 'not assigned in current save';
-  const rank = humanizeRank(commander.rank);
-  return rank ? `${rank} ${commander.name}` : commander.name;
+  return commander.name;
 }
 
 function commandLabel(state: LoadedGameState, corpsId: string): string {

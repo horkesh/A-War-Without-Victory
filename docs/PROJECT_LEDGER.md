@@ -25684,6 +25684,22 @@ The final documentation-only publication commit follows this ledger entry. Requi
 
 **Scope:** No production event JSON, source-tier vocabulary, baseline manifest, save schema, package/version/tag/signing/publication/release state, parent worktree, or `docs/10_canon/FORAWWV.md` change.
 
+## 2026-08-02 - R7 Phase 2 third provenance committee correction
+
+**Type:** Historical-source correction / generated-startup closure / player-facing identity repair / deterministic identity-audit hardening.
+
+**Supersession:** This entry corrects the residual defects found by independent review of commit `756d5077e`. The tracked startup was stale relative to the canonical builder, seven live UI paths still presented the gameplay appointment class as rank, Talijan and Matuzović biographies misstated later commands as opening facts, four formation aliases crossed factions without a cited relation, the 107th Gradačac source supported ARBiH rather than HVO identity, and the OOB identity audit used locale-sensitive comparison.
+
+**RED evidence:** An eight-file / 82-test residual-review matrix failed 14 assertions before implementation. It reproduced appointment-class leakage in Personnel, Operations, opportunity dossiers, officer-backing copy, historical-operation authorization, directive objections, and event decisions; permissive generic opening-command fallback; false opening chronology in later-available biographies; uncited cross-faction aliases; and `localeCompare` use in the identity comparator. The independent review also reported four failures in the 140-test startup-adjacent contract because the tracked derived save was not canonical builder truth. A wider defensive audit then failed 2 of 12 focused assertions, exposing an eighth raw appointment-token renderer in Decision Room operation evidence and a repository source gate that accepted directories.
+
+**Implementation:** Live identity surfaces now render a sourced `historical_role` when present and otherwise render the officer name only; appointment tokens are never rank titles, abbreviations, or stars. This includes ordinary and historical operation evidence in the Decision Room. Opening fallback requires `is_historical_start`, turn-zero availability, and exact `historical_corps_id`. Talijan and Matuzović biographies now state their evidenced later commands. The 107th Gradačac row is ARBiH/RBiH; the former HVO identity is evidence-only. Identity-disposition schema 2 requires `designation_alias` for same-faction aliases and a row-local repository file citation plus evidence-faction/recruitment-pool equality for cross-faction operational alignment. The 108th, 110th Usora, and 115th retain cited relations. Sorting uses explicit code-unit comparators. After source/data repair, the owner authorized exactly one canonical deterministic `desktop:startup-snapshot:build`; it completed and rewrote the tracked startup.
+
+**Determinism and canon:** The change adds no clock, randomness, environment ordering, or cross-turn cache. The generated startup is canonical-builder byte truth. Historical roles and chronology remain source-local; gameplay appointment classes do not assert rank. `docs/10_canon/FORAWWV.md` was not edited.
+
+**Fast verification:** RED failed 14/82 and the defensive extension failed 2/12 as described above. The repaired officer/source/UI matrix passes 12 files / 116 tests. Canonical startup plus operations-planning tests pass 2 files / 49 tests; the final startup/read-model/browser-adjacent matrix passes 6 files / 82 tests; the full Decision Room dossier matrix passes 1 file / 63 tests. The identity comparator reports 213 matches and 29 explicit dispositions with zero unresolved; strict provenance remains 323 supported and 51 omissions with zero findings; the recursive repository audit scans 1,200 files with zero stale brigade/officer identities. TypeScript, diff hygiene, and the static forbidden-renderer/`localeCompare` scan pass. Independent-review evidence follows in the commit handoff.
+
+**Scope:** No scenario, baseline, performance, Electron, packaging, release, publication, push, integration, or parent-worktree lane ran. The only generated-state command was the single owner-authorized canonical startup regeneration.
+
 ## 2026-08-02 - R7 Phase 2 second committee repair: exact identities, chronology, and role truth
 
 **Type:** Blocked-review repair / historical provenance / generated identity closure / canon-schema reconciliation.

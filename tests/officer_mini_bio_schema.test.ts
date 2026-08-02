@@ -23,6 +23,7 @@ type OfficerRecord = {
     available_from_turn?: number;
     is_historical_start?: boolean;
     bio_short?: unknown;
+    known_for?: unknown;
     sensitive_history_note?: unknown;
 };
 
@@ -68,6 +69,16 @@ describe('officer mini-bio schema', () => {
                 expectShortString(officer.sensitive_history_note, 'sensitive_history_note', officerId, 120);
                 expect(String(officer.sensitive_history_note).toLowerCase()).not.toMatch(/\b(guilty|culpable|ordered|responsible)\b/);
             }
+        }
+    });
+
+    it('does not describe post-opening appointments as scenario-start commands', () => {
+        for (const officer of loadOfficerRecords()) {
+            if ((officer.available_from_turn ?? 0) <= 0) continue;
+            const chronologyCopy = [officer.bio_short, officer.known_for]
+                .filter((value): value is string => typeof value === 'string')
+                .join(' ');
+            expect(chronologyCopy, officer.id).not.toMatch(/\b(?:scenario start|opening (?:army |corps |regional |northwest |command))\b/i);
         }
     });
 });

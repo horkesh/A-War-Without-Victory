@@ -24,6 +24,15 @@ const DELAY = { forceRatio: 0.9, estimatedCasualties: 250, recommendedAction: 'd
 const LAUNCH = { forceRatio: 1.8, estimatedCasualties: 80, recommendedAction: 'launch' as const };
 
 describe('buildDirectiveObjection — disposition tinting', () => {
+  it('does not turn the gameplay appointment class into a player-facing title', () => {
+    const view = buildDirectiveObjection(
+      { name: 'Talic', rank: 'corps_commander', competence: 4, political_reliability: 3 },
+      NO_GO,
+    );
+    expect(view.prose).toContain('Talic');
+    expect(view.prose).not.toMatch(/Corps Commander|corps_commander/);
+  });
+
   it('COWED CO complies fully — shows compliance, NEVER an objection (even on a no-go)', () => {
     const view = buildDirectiveObjection(
       { name: 'Talić', rank: 'corps_commander', competence: 4, political_reliability: 3, is_cowed: true },

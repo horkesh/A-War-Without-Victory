@@ -57,22 +57,9 @@ const TRAIT_BAND_KEYS: Record<OperationOpportunityProposalView['force_quality_tr
     poor: 'opportunity.trait.poor',
 };
 
-const OFFICER_RANK_KEYS: Partial<Record<string, MessageKey>> = {
-    army_commander: 'officer.rank.armyCommander',
-    corps_commander: 'officer.rank.corpsCommander',
-    deputy: 'officer.rank.deputy',
-    major_general: 'officer.rank.majorGeneral',
-};
-
 function knownLabel<T extends string>(value: T, map: Partial<Record<T, MessageKey>>, fallbackKey: MessageKey): string {
     const key = map[value];
     return key ? t(key) : t(fallbackKey);
-}
-
-function formatOfficerRank(rank: string | undefined): string {
-    if (!rank) return '';
-    const key = OFFICER_RANK_KEYS[rank];
-    return key ? t(key) : rank.replace(/[_\s]+/g, ' ').trim();
 }
 
 function joinNames(items: string[]): string {
@@ -246,10 +233,6 @@ function DossierCard({
                     </div>
                     {backTheOfficer.commander && (
                         <div className="text-xs font-bold text-text-primary">
-                            {(() => {
-                                const rank = formatOfficerRank(backTheOfficer.commander?.rank);
-                                return rank ? `${rank} ` : '';
-                            })()}
                             {backTheOfficer.commander.name}
                             {backTheOfficer.tg_name ? ` - ${backTheOfficer.tg_name}` : ''}
                         </div>

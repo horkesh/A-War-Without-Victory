@@ -1,20 +1,61 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "aliases": {
-    "HRHB:103rd": "hrhb_103rd_derventa_brigade",
-    "HRHB:104th": "hrhb_104th_bosanski_brod_brigade",
-    "HRHB:105th": "hrhb_105th_modrica_brigade",
-    "HRHB:106th": "hrhb_106th_bosanska_posavina_brigade",
-    "HRHB:107th gradacac": "hrhb_107th_gradaac_brigade",
-    "HRHB:108th brcko": "hrhb_108th_brko_brigade",
-    "HRHB:110th usora": "hrhb_110th_usora_brigade",
-    "HRHB:115th zrinski": "hrhb_115th_zrinski_brigade",
-    "RS:1st podrinje": "rs_1st_podrinje"
+    "HRHB:103rd": {
+      "oob_id": "hrhb_103rd_derventa_brigade",
+      "relation": "designation_alias",
+      "reason": "The sparse appendix uses the ordinal alone; the playable row adds the Derventa locality qualifier within the same HRHB roster."
+    },
+    "HRHB:104th": {
+      "oob_id": "hrhb_104th_bosanski_brod_brigade",
+      "relation": "designation_alias",
+      "reason": "The sparse appendix uses the ordinal alone; the playable row adds the Bosanski Brod locality qualifier within the same HRHB roster."
+    },
+    "HRHB:105th": {
+      "oob_id": "hrhb_105th_modrica_brigade",
+      "relation": "designation_alias",
+      "reason": "The sparse appendix uses the ordinal alone; the playable row adds the Modriča locality qualifier within the same HRHB roster."
+    },
+    "HRHB:106th": {
+      "oob_id": "hrhb_106th_bosanska_posavina_brigade",
+      "relation": "designation_alias",
+      "reason": "The sparse appendix uses the ordinal alone; the playable row adds the Bosanska Posavina qualifier within the same HRHB roster."
+    },
+    "HRHB:108th brcko": {
+      "oob_id": "hrhb_108th_brko_brigade",
+      "relation": "cross_faction_operational_alignment",
+      "reason": "The playable row remains under RBiH control for command integration while retaining HRHB recruitment origin; BB2 identifies the HVO 108th Brčko Brigade coordinating with ARBiH 2nd Corps/1st Operational Group.",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0401.json",
+      "citation": "BB2 p.401: 1st OG coordinated with the HVO 108th Brčko Brigade; the HVO and ARBiH 108th formations are explicitly distinguished."
+    },
+    "HRHB:110th usora": {
+      "oob_id": "hrhb_110th_usora_brigade",
+      "relation": "cross_faction_operational_alignment",
+      "reason": "The playable row remains under RBiH control for command integration while retaining HRHB recruitment origin; BB2 documents the HVO 110th Usora Brigade as operationally allied to ARBiH.",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0498.json",
+      "citation": "BB2 p.498: the HVO 110th Usora Brigade remained operationally allied to ARBiH throughout the Croat-Muslim war."
+    },
+    "HRHB:115th zrinski": {
+      "oob_id": "hrhb_115th_zrinski_brigade",
+      "relation": "cross_faction_operational_alignment",
+      "reason": "The playable row remains under RBiH control for command integration while retaining HRHB recruitment origin; BB2 identifies the HVO 115th Zrinski Brigade reinforcing ARBiH 2nd Corps/1st Operational Group.",
+      "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0401.json",
+      "citation": "BB2 p.401: the HVO 115th Zrinski Brigade regularly reinforced ARBiH 1st Operational Group/2nd Corps."
+    },
+    "RS:1st podrinje": {
+      "oob_id": "rs_1st_podrinje",
+      "relation": "designation_alias",
+      "reason": "The playable row and appendix row differ only by the canonical brigade suffix within the same RS roster."
+    }
   },
   "modeled_extras": {
     "arbih_10th_mountain": {
       "disposition": "modeled_extra",
       "reason": "Early-war Sarajevo formation outside the October 1995 Appendix H snapshot."
+    },
+    "arbih_107th_gradacac_brigade": {
+      "disposition": "modeled_extra",
+      "reason": "BB2 p.401 documents this early ARBiH 2nd Corps/1st Operational Group identity; the October 1995 Appendix H lists later successor designations instead."
     },
     "arbih_1st_mountain": {
       "disposition": "modeled_extra",
@@ -110,6 +151,10 @@
     }
   },
   "evidence_only": {
+    "HRHB:107th gradacac": {
+      "disposition": "evidence_only",
+      "reason": "The sparse HVO appendix row is not conflated with the separately sourced ARBiH 107th Gradačac Motorized Brigade; no exact source currently proves a playable HVO 107th identity."
+    },
     "RBiH:145th light": {
       "disposition": "evidence_only",
       "reason": "Appendix row is marked insufficient-detail and remains omitted pending an exact playable identity."

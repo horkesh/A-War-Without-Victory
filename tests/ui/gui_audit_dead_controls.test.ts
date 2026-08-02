@@ -236,6 +236,8 @@ describe('GUI audit Batch G dead/no-op controls', () => {
                         political_reliability: 4,
                         home_corps_id: 'vrs_drina',
                         available_from_turn: 0,
+                        is_historical_start: true,
+                        historical_corps_id: 'vrs_drina',
                         origin: 'jna',
                         pool_tier: 'tier_b',
                         status: 'reserve',

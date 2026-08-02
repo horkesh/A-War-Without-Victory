@@ -5,8 +5,8 @@
 import { useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { formatPersonnel } from '../../utils/formatters';
-import { getRatingColor } from '../../utils/officerCharacter';
-import { t, useLocale, type MessageKey } from '../../i18n';
+import { formatHistoricalRole, getRatingColor } from '../../utils/officerCharacter';
+import { t, useLocale } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 import { resolveCorpsCommanderDisplay, resolveOpeningCorpsCommanderOfficer } from '../../utils/officerUtils';
 import { getPlayerSafeMunicipalityName } from '../../utils/playerSafeText';
@@ -302,7 +302,7 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                             <div className="min-w-0">
                                 <div className="font-bold text-text-primary truncate">{o.name}</div>
                                 <div className="text-text-secondary text-xs uppercase">
-                                    {formatOfficerRank(o.rank)}
+                                    {formatHistoricalRole(o.historical_role)}
                                     {o.assigned_corps_id ? ` - ${data.commandNameById.get(o.assigned_corps_id) ?? t('personnel.attachedCommand')}` : ''}
                                 </div>
                                 {(o.command_style || o.known_for) && (
@@ -345,22 +345,6 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
 
 function formatWholeNumber(value: number): string {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
-}
-
-const OFFICER_RANK_LABEL_KEYS: Record<string, MessageKey> = {
-    army_commander: 'personnel.rank.armyCommander',
-    corps_commander: 'personnel.rank.corpsCommander',
-    brigadier_general: 'personnel.rank.brigadierGeneral',
-    tactical_commander: 'personnel.rank.tacticalCommander',
-    general: 'personnel.rank.general',
-    colonel: 'personnel.rank.colonel',
-    major: 'personnel.rank.major',
-    deputy: 'personnel.rank.deputy',
-};
-
-function formatOfficerRank(rank: string | undefined): string {
-    if (!rank) return t('personnel.rank.unspecified');
-    return t(OFFICER_RANK_LABEL_KEYS[rank] ?? 'personnel.rank.unspecified');
 }
 
 function strictCompare(a: string, b: string): number {

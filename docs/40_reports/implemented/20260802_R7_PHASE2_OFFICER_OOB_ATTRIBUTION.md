@@ -1,14 +1,14 @@
-# R7 Phase 2 Officer/OOB Attribution — Second Committee Repair
+# R7 Phase 2 Officer/OOB Attribution — Third Committee Repair
 
 **Date:** 2026-08-02
 **Workstream:** R7 Phase 2
-**Status:** Implementation and focused verification green; independent committee re-review requested
+**Status:** Third repair implementation-green; final independent committee re-review pending
 
 ## Outcome
 
-The second review correctly blocked the prior repair. It still accepted missing `repo://` targets, promoted eleven Wikipedia-only formation identities, left turn-zero and `bounded_model` chronology unsupported, compared OOB sources by count rather than identity, inspected only a selected dependency list, retained 35/28 stale officer rows in the tracked startup, and left the UI presenting gameplay appointment classes as invented general ranks.
+The second review correctly blocked the prior repair. It still accepted missing `repo://` targets, promoted eleven Wikipedia-only formation identities, left turn-zero and `bounded_model` chronology unsupported, compared OOB sources by count rather than identity, inspected only a selected dependency list, retained 35/28 stale officer rows in the tracked startup, and left the UI presenting gameplay appointment classes as invented general ranks. A later independent review then found six residual defects: the tracked startup was not canonical builder truth; seven live surfaces still rendered appointment classes as rank; two biographies misstated later appointments as opening facts; four formation aliases crossed factions without a cited relation; the 107th Gradačac source supported ARBiH rather than HVO identity; and the identity audit used locale-sensitive sorting.
 
-This repair closes those findings without running scenario, baseline, performance, Electron, packaging, release, or publication commands. `docs/10_canon/FORAWWV.md` was not edited.
+This repair closes those findings without running scenario, baseline, performance, Electron, packaging, release, or publication commands. The owner authorized exactly one canonical deterministic `desktop:startup-snapshot:build` regeneration after the source/data repair; it completed successfully. `docs/10_canon/FORAWWV.md` was not edited.
 
 ## Final census
 
@@ -20,7 +20,7 @@ This repair closes those findings without running scenario, baseline, performanc
 | Elite commanders | 3 | 5 |
 | **Total** | **323** | **51** |
 
-Seven formerly Wikipedia-only formation rows remain because exact Balkan Battlegrounds pages name them: 10th Mountain, 1st Mountain, HVO Kralj Tvrtko, and HVO 107th, 108th, 110th Usora, and 115th. Eleven rows without exact authoritative/local identity evidence were removed from OOB, designation, scenario, startup, and UI/sim surfaces and recorded as `missing_exact_source` omissions.
+Seven formerly challenged formation rows remain because exact Balkan Battlegrounds pages name them: 10th Mountain, 1st Mountain, HVO Kralj Tvrtko, ARBiH 107th Gradačac, and HVO 108th, 110th Usora, and 115th. The cited appendix identifies the 107th as an ARBiH 2nd Corps formation, so the playable row is now RBiH and the old HVO 107th identity is an explicit evidence-only disposition. Eleven rows without exact authoritative/local identity evidence were removed from OOB, designation, scenario, startup, and UI/sim surfaces and recorded as `missing_exact_source` omissions.
 
 ## Source and chronology repair
 
@@ -31,6 +31,7 @@ Seven formerly Wikipedia-only formation rows remain because exact Balkan Battleg
 - Mehdin Hodžić, Nesib Malkić, Hajrudin Mešić, and Safet Hadžić use official Bosnia and Herzegovina government/ministry sources for their exact roles and dated boundaries.
 - All 63 playable rows own `available_from_turn` evidence. Every authored exit boundary owns matching evidence. No `bounded_model` rows remain and no row is left at turn zero without a pre-campaign source.
 - Imprecise year/month evidence is represented as `on_or_before` with a conservative source-date bound; it is not described as an exact appointment.
+- Talijan's and Matuzović's biographies now describe their evidenced later commands instead of falsely describing those appointments as the campaign opening.
 
 ## Accepted officer semantics
 
@@ -39,13 +40,14 @@ Seven formerly Wikipedia-only formation rows remain because exact Balkan Battleg
 - `rank` is retained as the deterministic gameplay appointment class for save compatibility.
 - `historical_role` is a typed sourced office/command. The roster covers army/corps, division, operational-zone/group, enclave, brigade/battalion, staff, regional-defence, and political-military roles.
 - The validator rejects unknown role tokens and legacy rows project deterministically as `unspecified_command_role`.
-- The map read model carries `historical_role`; command profiles render it separately.
-- Appointment classes no longer become `Gen.`, general titles, or star insignia. A neutral `CMD` badge and appointment wording preserve gameplay information without inventing rank.
+- The map read model carries `historical_role`; Personnel and Operations render it separately.
+- Appointment classes no longer become `Gen.`, general titles, stars, or title text. Voice and decision surfaces that do not own a sourced role render the officer's name only; localization retains only neutral appointment wording for compatibility.
+- Opening-command fallback is positive-only: a row must explicitly be a historical start, become available on turn zero, and name the exact historical corps. Generic pool or home-corps metadata cannot manufacture an opening commander.
 - Systems Manual and Rulebook wording now match the accepted contract.
 
 ## Identity-level OOB comparison
 
-`tools/audit/compare_oob_vs_markdown.ts` now parses the three actual brigade tables into identities, normalizes names deterministically, performs one-to-one matches, applies authored cross-name/faction aliases, and requires a non-empty disposition for every unmatched row.
+`tools/audit/compare_oob_vs_markdown.ts` now parses the three actual brigade tables into identities, normalizes names deterministically, performs one-to-one matches, applies authored cross-name aliases, and requires a non-empty disposition for every unmatched row. Same-faction aliases require the explicit `designation_alias` relation. Cross-faction mappings fail closed unless a row-local repository citation proves the operational relation and the evidence faction equals the playable row's `recruit_pool_faction`; this preserves the cited 108th, 110th Usora, and 115th operational-alignment cases without relabelling their playable faction.
 
 | Evidence | Parsed rows | Playable rows |
 |---|---:|---:|
@@ -53,7 +55,7 @@ Seven formerly Wikipedia-only formation rows remain because exact Balkan Battleg
 | VRS Appendix G | 76 | 83 |
 | HVO full list | 35 | 40 |
 
-Result: 214 identity matches, 27 explicit snapshot/narrative dispositions, zero unresolved mismatches. Missing evidence files, malformed JSON, missing disposition ledgers, or unresolved identities exit nonzero.
+Result: 213 identity matches, 29 explicit snapshot/narrative dispositions, zero unresolved mismatches. Missing evidence files, malformed JSON, missing disposition ledgers, uncited faction crossing, or unresolved identities exit nonzero.
 
 ## Recursive dependency and generated-state closure
 
@@ -61,13 +63,14 @@ The new recursive diagnostic scans sorted text files under all scenario, generat
 
 - Unsupported formation references: zero.
 - Unsupported officer references: zero.
+- Tracked startup is byte-identical to the canonical deterministic builder output and the sector audit is clean.
 - Tracked startup `named_officer_data`: exactly the 63 playable source rows; stale rows zero.
-- Tracked startup `named_officers`: no unsupported states; stale rows zero.
+- Tracked startup `named_officers`: no unsupported states; stale rows zero; unsupported opening-command projections are absent.
 - Four preplanned-operation commander fields that referenced omitted officers were removed rather than silently substituted.
 
 ## Determinism
 
-All diagnostics use stable path, ID, violation, match, and disposition ordering. Temporal mapping is UTC and pure from the 6 April 1992 campaign start. No clock, random source, environment-dependent ordering, or cross-turn cache was introduced. Stable officer and formation IDs are preserved for retained records.
+All diagnostics use stable path, ID, violation, match, and disposition ordering with explicit code-unit comparators; locale-sensitive comparison is forbidden in the identity audit. Temporal mapping is UTC and pure from the 6 April 1992 campaign start. No clock, random source, environment-dependent ordering, or cross-turn cache was introduced. Stable officer and formation IDs are preserved for retained records except for the corrected HVO-to-ARBiH 107th identity.
 
 ## Verification
 
@@ -78,14 +81,21 @@ RED evidence preceded production changes:
 - the roster lacked `historical_role`;
 - the comparison exposed no identities;
 - the recursive dependency module did not exist.
+- the residual-review matrix failed 14 of 82 tests across eight files before the third repair, reproducing UI title leakage, false opening biographies, permissive cross-faction aliases, unsupported opening fallbacks, and locale-sensitive ordering.
+- a wider defensive audit then failed 2 of 12 focused assertions, exposing an eighth raw appointment-token renderer in Decision Room operation evidence and a source gate that accepted directories; both were repaired before commit.
 
 Green evidence for the repaired packet:
 
 - strict provenance diagnostic: 323 supported, 51 omissions, zero blockers/warnings;
-- identity comparison: 214 matches, 27 dispositions, zero unresolved, CLI exit 0;
-- focused and adjacent officer/UI/save projection matrix: 9 files / 102 tests green;
+- identity comparison: 213 matches, 29 dispositions, zero unresolved, CLI exit 0;
+- focused officer/source/UI matrix: 12 files / 116 tests green;
+- canonical startup plus operations-planning matrix: 2 files / 49 tests green;
+- final startup/read-model/browser-adjacent matrix: 6 files / 82 tests green;
+- full Decision Room dossier matrix: 1 file / 63 tests green;
 - recursive real-repository audit: zero stale brigade/officer identities;
+- canonical deterministic startup regeneration: success, followed by byte-truth/current-state and sector-audit tests green;
 - TypeScript `tsc --noEmit`: exit 0;
-- `git diff --check`: exit 0.
+- `git diff --check` and static forbidden-renderer/`localeCompare` scan: green;
+- independent committee result is recorded after the final review below.
 
 The final verification command census is recorded in the ledger and commit handoff. No baseline was refreshed and no release state changed.

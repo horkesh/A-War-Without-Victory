@@ -27,7 +27,7 @@
 export interface ObjectionOfficerInput {
   /** Player-facing officer name. */
   name: string;
-  /** Player-facing rank (optional; humanized for the lead-in). */
+  /** Legacy gameplay appointment class. Retained for caller compatibility; never rendered as a rank. */
   rank?: string;
   /** Overall military skill (1-5). Low → hedged uncertainty. */
   competence: number;
@@ -79,16 +79,8 @@ export interface DirectiveObjectionView {
   severity: 'delay' | 'abort' | null;
 }
 
-function humanizeRank(rank: string): string {
-  return rank
-    .split(/[_\s]+/)
-    .filter(Boolean)
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-    .join(' ');
-}
-
 function who(officer: ObjectionOfficerInput): string {
-  return officer.rank ? `${humanizeRank(officer.rank)} ${officer.name}` : officer.name;
+  return officer.name;
 }
 
 /**

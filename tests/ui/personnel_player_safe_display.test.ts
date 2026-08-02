@@ -45,6 +45,7 @@ function makeState(): LoadedGameState {
         faction: 'RS',
         status: 'active',
         rank: 'corps_commander',
+        historical_role: 'staff_officer',
         assigned_corps_id: 'vrs_drina',
         competence: 4,
         aggressiveness: 3,
@@ -57,6 +58,7 @@ function makeState(): LoadedGameState {
         faction: 'RS',
         status: 'active',
         rank: 'corps_commander',
+        historical_role: 'staff_officer',
         assigned_corps_id: 'vrs_main_staff',
         competence: 4,
         aggressiveness: 3,
@@ -122,6 +124,9 @@ function makeOpeningCommanderState(): LoadedGameState {
         status: 'reserve',
         rank: 'corps_commander',
         home_corps_id: 'vrs_drina',
+        available_from_turn: 0,
+        is_historical_start: true,
+        historical_corps_id: 'vrs_drina',
         competence: 4,
         aggressiveness: 3,
         defensive_skill: 4,
@@ -207,17 +212,18 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).not.toMatch(/\bA:\d/);
   });
 
-  it('renders officer rank labels without raw rank ids', () => {
+  it('renders sourced historical roles without raw appointment-class ids', () => {
     useGameStore.setState({ loadedGameState: makeState(), selectedArmyId: 'RS' });
 
     const { container } = render(React.createElement(PersonnelContent));
 
-    expect(container.textContent).toContain('Corps commander');
+    expect(container.textContent).toContain('Staff officer');
+    expect(container.textContent).not.toContain('Corps commander');
     expect(container.textContent).not.toContain('corps_commander');
     expect(container.textContent).not.toContain('corps commander');
   });
 
-  it('renders tactical commander rank labels without raw ids or generic fallbacks', () => {
+  it('renders a sourced brigade role instead of the tactical appointment class', () => {
     const state = makeState() as LoadedGameState & { namedOfficerData: NonNullable<LoadedGameState['namedOfficerData']> };
     state.namedOfficerData.push({
       id: 'officer_3',
@@ -225,6 +231,7 @@ describe('PersonnelContent player-facing display', () => {
       faction: 'RS',
       status: 'active',
       rank: 'tactical_commander',
+      historical_role: 'brigade_commander',
       competence: 3,
       aggressiveness: 4,
       defensive_skill: 3,
@@ -240,7 +247,8 @@ describe('PersonnelContent player-facing display', () => {
 
     const { container } = render(React.createElement(PersonnelContent));
 
-    expect(container.textContent).toContain('Tactical commander');
+    expect(container.textContent).toContain('Brigade commander');
+    expect(container.textContent).not.toContain('Tactical commander');
     expect(container.textContent).not.toContain('tactical_commander');
     expect(container.textContent).not.toContain('Tactical OfficerStaff officer');
   });
@@ -472,7 +480,7 @@ describe('PersonnelContent player-facing display', () => {
 
     expect(container.textContent).toContain('Main Staff VRS');
     expect(container.textContent).toContain('HQ Officer');
-    expect(container.textContent).toContain('Corps commander - Main Staff VRS');
+    expect(container.textContent).toContain('Staff officer - Main Staff VRS');
 
     const hqBrigadeLink = screen.getByRole('button', { name: /Guard Brigade/i });
     expect(hqBrigadeLink.getAttribute('data-testid')).toBe('personnel-orbat-brigade-link');

@@ -1421,7 +1421,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.explanation).toContain('1st Corps requests authorization');
     expect(card?.evidence).toEqual([
       'Command: 1st Corps',
-      'Commander: Corps Commander Atif DudakoviÄ‡',
+      'Commander: Atif DudakoviÄ‡',
       'Objective: Relieve Jajce',
       'Targets: Jajce',
       'Forces: Alpha Brigade, Beta Brigade',
@@ -2399,7 +2399,7 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
 
     expect(dossierText).toContain('Prijedor Clean: Ljubija -> Kozarac -> Kamicani -> Raljas');
     expect(dossierText).toContain('Command: 1st Krajina Corps');
-    expect(dossierText).toContain('Commander: Corps commander Momir Talic');
+    expect(dossierText).toContain('Commander: Momir Talic');
     expect(dossierText).toContain('Force: 8 assigned formations; 4,800 reported personnel');
     expect(dossierText).toContain('Execution assist: after authorization, field staff can move and attack only with assigned formations for this operation; other formations remain under your orders.');
     expect(dossierText).toContain('Staging: Prijedor');
@@ -2514,7 +2514,7 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
     expect(reviewCard?.title).toBe('Operation Kotor Varos');
     expect(dossierText).toContain('Kotor Varos Siege: Kotor Varos -> Vrbanjci -> Prisocka');
     expect(dossierText).toContain('Command: 1st Krajina Corps');
-    expect(dossierText).toContain('Commander: General Ratko Mladic');
+    expect(dossierText).toContain('Commander: Ratko Mladic');
     expect(dossierText).toContain('Force: 3 assigned formations; 3,700 reported personnel');
     expect(dossierText).toContain('Axes: Kotor Varos Siege');
     expect(dossierText).toContain('Staging: Kotor Varos');

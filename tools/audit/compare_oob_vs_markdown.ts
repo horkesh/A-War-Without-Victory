@@ -13,6 +13,7 @@ export const MARKDOWN_SOURCES = {
 interface BrigadeRow {
     id?: string;
     faction?: string;
+    recruit_pool_faction?: string;
     [key: string]: unknown;
 }
 
@@ -31,11 +32,45 @@ interface IdentityDisposition {
     reason: string;
 }
 
+interface AliasDisposition {
+    oob_id: string;
+    relation: 'designation_alias' | 'cross_faction_operational_alignment';
+    reason: string;
+    source_url?: string;
+    citation?: string;
+}
+
 interface DispositionLedger {
-    schema_version: 1;
-    aliases: Record<string, string>;
+    schema_version: 2;
+    aliases: Record<string, AliasDisposition>;
     modeled_extras: Record<string, IdentityDisposition>;
     evidence_only: Record<string, IdentityDisposition>;
+}
+
+function strictCompare(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function assertRepoSource(rootDir: string, sourceUrl: string, evidenceKey: string): void {
+    if (!sourceUrl.startsWith('repo://')) {
+        throw new Error(`Alias ${evidenceKey} must cite a repo:// source.`);
+    }
+    const relativePath = sourceUrl.slice('repo://'.length);
+    if (!relativePath || path.isAbsolute(relativePath)) {
+        throw new Error(`Alias ${evidenceKey} has a malformed repo:// source.`);
+    }
+    const resolvedRoot = path.resolve(rootDir);
+    const resolvedSource = path.resolve(resolvedRoot, relativePath);
+    const relativeToRoot = path.relative(resolvedRoot, resolvedSource);
+    if (relativeToRoot.startsWith('..') || path.isAbsolute(relativeToRoot)) {
+        throw new Error(`Alias ${evidenceKey} repo:// source escapes the repository.`);
+    }
+    if (!fs.existsSync(resolvedSource)) {
+        throw new Error(`Alias ${evidenceKey} repo:// source is missing: ${sourceUrl}`);
+    }
+    if (!fs.statSync(resolvedSource).isFile()) {
+        throw new Error(`Alias ${evidenceKey} repo:// source is not a file: ${sourceUrl}`);
+    }
 }
 
 // --- Helpers ---
@@ -113,7 +148,17 @@ export interface OobComparison {
     markdown_counts: Record<keyof typeof MARKDOWN_SOURCES, number>;
     oob_counts: Record<keyof typeof MARKDOWN_SOURCES, number>;
     deltas: Record<keyof typeof MARKDOWN_SOURCES, number>;
-    matched_identities: Array<{ faction: Faction; oob_id: string; oob_name: string; evidence_name: string }>;
+    matched_identities: Array<{
+        faction: Faction;
+        evidence_faction: Faction;
+        oob_id: string;
+        oob_name: string;
+        evidence_name: string;
+        faction_relation: 'direct_same_faction' | AliasDisposition['relation'];
+        alias_reason?: string;
+        alias_source_url?: string;
+        alias_citation?: string;
+    }>;
     dispositions: Array<{ kind: 'modeled_extra' | 'evidence_only'; key: string; name: string; reason: string }>;
     unresolved_mismatches: Array<{ kind: 'modeled_extra' | 'evidence_only'; key: string; name: string }>;
     identity_match_ok: boolean;
@@ -138,7 +183,7 @@ export function buildOobComparison(rootDir = ROOT): OobComparison {
     const ledgerPath = path.join(rootDir, 'docs/provenance/OOB_MARKDOWN_IDENTITY_DISPOSITIONS.json');
     if (!fs.existsSync(ledgerPath)) throw new Error(`OOB identity disposition ledger not found: ${ledgerPath}`);
     const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8')) as DispositionLedger;
-    if (ledger.schema_version !== 1) throw new Error('Unsupported OOB identity disposition ledger schema.');
+    if (ledger.schema_version !== 2) throw new Error('Unsupported OOB identity disposition ledger schema.');
     const evidenceByKey = new Map<string, EvidenceIdentity[]>();
     for (const row of evidenceRows) {
         const key = `${row.faction}:${row.normalized_name}`;
@@ -147,7 +192,7 @@ export function buildOobComparison(rootDir = ROOT): OobComparison {
         evidenceByKey.set(key, bucket);
     }
     const matched: OobComparison['matched_identities'] = [];
-    let unmatchedOob: Array<{ faction: Faction; id: string; name: string }> = [];
+    let unmatchedOob: Array<{ faction: Faction; id: string; name: string; recruit_pool_faction?: string }> = [];
     for (const brigade of brigades) {
         const faction = brigade.faction as Faction;
         if (!Object.prototype.hasOwnProperty.call(MARKDOWN_SOURCES, faction)) continue;
@@ -156,17 +201,58 @@ export function buildOobComparison(rootDir = ROOT): OobComparison {
         const key = `${faction}:${normalizeIdentityName(name)}`;
         const bucket = evidenceByKey.get(key);
         const evidence = bucket?.shift();
-        if (evidence) matched.push({ faction, oob_id: id, oob_name: name, evidence_name: evidence.name });
-        else unmatchedOob.push({ faction, id, name });
+        if (evidence) matched.push({
+            faction,
+            evidence_faction: evidence.faction,
+            oob_id: id,
+            oob_name: name,
+            evidence_name: evidence.name,
+            faction_relation: 'direct_same_faction',
+        });
+        else unmatchedOob.push({
+            faction,
+            id,
+            name,
+            recruit_pool_faction: typeof brigade.recruit_pool_faction === 'string'
+                ? brigade.recruit_pool_faction
+                : undefined,
+        });
     }
     let unmatchedEvidence = [...evidenceByKey.entries()].flatMap(([key, rows]) => rows.map((row) => ({ key, ...row })));
-    for (const [evidenceKey, oobId] of Object.entries(ledger.aliases ?? {}).sort(([a], [b]) => a.localeCompare(b))) {
+    for (const [evidenceKey, alias] of Object.entries(ledger.aliases ?? {}).sort(([a], [b]) => strictCompare(a, b))) {
         const evidenceIndex = unmatchedEvidence.findIndex((row) => row.key === evidenceKey);
-        const oobIndex = unmatchedOob.findIndex((row) => row.id === oobId);
-        if (evidenceIndex < 0 || oobIndex < 0) continue;
+        const oobIndex = unmatchedOob.findIndex((row) => row.id === alias.oob_id);
+        if (evidenceIndex < 0) throw new Error(`Alias evidence identity is not unresolved: ${evidenceKey}`);
+        if (oobIndex < 0) throw new Error(`Alias playable identity is not unresolved: ${alias.oob_id}`);
+        if (!alias.reason?.trim()) throw new Error(`Alias ${evidenceKey} requires a reviewed reason.`);
         const evidence = unmatchedEvidence[evidenceIndex];
         const oob = unmatchedOob[oobIndex];
-        matched.push({ faction: oob.faction, oob_id: oob.id, oob_name: oob.name, evidence_name: evidence.name });
+        const isCrossFaction = evidence.faction !== oob.faction;
+        if (isCrossFaction) {
+            if (alias.relation !== 'cross_faction_operational_alignment') {
+                throw new Error(`Cross-faction alias ${evidenceKey} requires an explicit operational-alignment relation.`);
+            }
+            if (oob.recruit_pool_faction !== evidence.faction) {
+                throw new Error(`Cross-faction alias ${evidenceKey} must preserve ${evidence.faction} recruitment origin.`);
+            }
+            if (!alias.source_url || !alias.citation?.trim()) {
+                throw new Error(`Cross-faction alias ${evidenceKey} requires an exact source and citation.`);
+            }
+            assertRepoSource(rootDir, alias.source_url, evidenceKey);
+        } else if (alias.relation !== 'designation_alias') {
+            throw new Error(`Same-faction alias ${evidenceKey} must use designation_alias.`);
+        }
+        matched.push({
+            faction: oob.faction,
+            evidence_faction: evidence.faction,
+            oob_id: oob.id,
+            oob_name: oob.name,
+            evidence_name: evidence.name,
+            faction_relation: alias.relation,
+            alias_reason: alias.reason,
+            alias_source_url: alias.source_url,
+            alias_citation: alias.citation,
+        });
         unmatchedEvidence.splice(evidenceIndex, 1);
         unmatchedOob.splice(oobIndex, 1);
     }
@@ -191,9 +277,9 @@ export function buildOobComparison(rootDir = ROOT): OobComparison {
             faction,
             oobCounts[faction] - markdownCounts[faction],
         ])) as Record<keyof typeof MARKDOWN_SOURCES, number>,
-        matched_identities: matched.sort((a, b) => a.oob_id.localeCompare(b.oob_id)),
-        dispositions: dispositions.sort((a, b) => a.key.localeCompare(b.key)),
-        unresolved_mismatches: unresolved.sort((a, b) => a.key.localeCompare(b.key)),
+        matched_identities: matched.sort((a, b) => strictCompare(a.oob_id, b.oob_id)),
+        dispositions: dispositions.sort((a, b) => strictCompare(a.key, b.key)),
+        unresolved_mismatches: unresolved.sort((a, b) => strictCompare(a.key, b.key)),
         identity_match_ok: unresolved.length === 0,
     };
 }

@@ -8,7 +8,7 @@
 
 `docs/10_canon/Systems_Manual_v0_9_0.md` section 4 describes Tier 1 as 63 historical named officers "corps and above." The original 63-row implementation and the restored 63-row source roster also contain historically important operational-zone, enclave, independent-brigade, and political command personalities. Examples include Izet Nanić (505th Brigade), Naser Orić (Srebrenica forces), Avdo Palić (Žepa), Mario Čerkez (Vitez Brigade), Dario Kordić (political authority with de facto military authority), and Mladen Naletilić (Convicts Battalion).
 
-The runtime schema has only three `rank` tokens: `army_commander`, `deputy`, and `corps_commander`. It uses those tokens for assignment eligibility and succession. The UI currently converts `corps_commander` into a general-officer abbreviation and star count. Consequently, treating every token as a literal historical rank would contradict the row-local command evidence, while deleting every non-corps personality would contradict the binding 63-row census and the established command-pool design.
+The runtime schema has only three `rank` tokens: `army_commander`, `deputy`, and `corps_commander`. It uses those tokens for assignment eligibility and succession. The prior UI converted `corps_commander` into a general-officer abbreviation, star count, and title text. Consequently, treating every token as a literal historical rank would contradict the row-local command evidence, while deleting every non-corps personality would contradict the binding 63-row census and the established command-pool design.
 
 R7 Phase 2 restores the 63-row contract and cites each historical identity and command assignment exactly. It does not silently claim that the source assignment was a corps command.
 
@@ -21,7 +21,8 @@ Tier 1 means the **63-person named strategic/operational command pool**, not a l
 - Provenance must name and source the person's actual historical office or command; `corps_commander` must never be used as evidence that the person historically held corps rank or command.
 - The pool may include army/corps commanders and deputies, operational-zone commanders, enclave commanders, commanders of strategically significant independent formations, and political actors for whom a reliable source establishes military command authority.
 - Inclusion still requires exact row-local identity and command-authority evidence. Fame, name similarity, proximity in an appendix, or a generic formation citation is insufficient.
-- UI surfaces must render the sourced `historical_role` or a neutral command-pool fallback. Appointment classes may be shown only as gameplay eligibility and must not generate general-officer abbreviations or star insignia.
+- UI identity surfaces must render the sourced `historical_role` where that role is in the read model. Voice and decision surfaces without a sourced role render the person's name only. Appointment classes may be shown only as neutral gameplay eligibility and must not generate rank titles, general-officer abbreviations, or star insignia.
+- A historical opening-command fallback requires positive evidence on the row itself: `is_historical_start`, turn-zero availability, and the exact `historical_corps_id`. Pool or home-corps metadata alone is insufficient.
 
 ## Determinism Impact
 
@@ -33,6 +34,7 @@ The schema/read-model addition is static and deterministic. It adds no random so
 - Historically important non-corps command personalities are not deleted merely to make an imprecise label true.
 - Provenance stays exact about historical assignments and cannot infer a corps command from the gameplay enum.
 - The UI no longer converts appointment classes into invented historical general ranks or stars.
+- Generic pool metadata cannot manufacture an opening historical commander.
 - The numeric 63-person contract is reconciled without pretending every roster member historically held corps or army command.
 
 ## Canon References

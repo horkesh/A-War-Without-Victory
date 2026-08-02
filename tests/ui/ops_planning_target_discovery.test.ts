@@ -120,6 +120,7 @@ function makeOpeningCommanderState(): LoadedGameState {
                 home_corps_id: 'rs_1st_krajina',
                 historical_corps_id: 'rs_1st_krajina',
                 is_historical_start: true,
+                available_from_turn: 0,
                 pool_tier: 'starter',
                 competence: 0.7,
                 defensive_skill: 0.66,

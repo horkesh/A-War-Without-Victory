@@ -1411,17 +1411,17 @@
       "disposition": "supported",
       "notes": "Restored after formation-dependency and exact identity re-audit; omission was not runtime-safe."
     },
-    "brigade:hrhb_107th_gradaac_brigade": {
+    "brigade:arbih_107th_gradacac_brigade": {
       "source": "Balkan Battlegrounds, Vol. II",
       "source_url": "repo://data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0401.json",
-      "citation": "BB2 p.401 identifies the 107th Gradačac Motorized Brigade.",
+      "citation": "BB2 p.401 places the 107th Gradačac Motorized Brigade inside ARBiH 2nd Corps/1st Operational Group and separately identifies the HVO formations operating with it.",
       "source_tier": "scholarly",
       "confidence": "exact",
       "identity_relation": null,
       "court_record_citation": null,
       "conflict_note": null,
       "disposition": "supported",
-      "notes": "Retained after exact row-level formation identity re-audit."
+      "notes": "Retagged as an ARBiH formation; the source does not support an HVO-origin or HRHB recruit-pool claim for this 107th identity."
     },
     "brigade:hrhb_108th_brko_brigade": {
       "source": "Balkan Battlegrounds, Vol. II",

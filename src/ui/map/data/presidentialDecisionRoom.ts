@@ -1181,9 +1181,7 @@ function ordinaryOperationProposalEvidence(
 ): string[] {
   const unreported = t('corpsFront.unreported');
   const commander = proposal.commander
-    ? `${proposal.commander.rank
-      ? proposal.commander.rank.split(/[_\s]+/).filter(Boolean).map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`).join(' ')
-      : ''} ${proposal.commander.name}`.trim()
+    ? proposal.commander.name
     : 'Unreported';
   const objective = proposal.objective_origin_osid
     ? `Advance from ${getOsidDisplayName(proposal.objective_origin_osid, osidNameMap)}`
