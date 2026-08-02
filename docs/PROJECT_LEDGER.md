@@ -1,5 +1,23 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] R2 v9 fix reverted: ResizeObserver coupling regressed RS early-game determinism
+
+**Type:** Regression discovery + revert / R2 packaged-acceptance evidence / process finding.
+
+**Context:** `fc04f2902` fixed the R2 v9 packaged-acceptance readability failure (PresidentDeskShell's `aside` occluding WarroomStatusBar's WAR/REQUIRED/SIGNATURE-REQUIRED badges) by having WarroomStatusBar measure its own rendered height via a mount-scoped `ResizeObserver` and report it through a new `onHeightChange` prop, which App.tsx threaded into PresidentDeskShell's new `statusBarClearancePx` prop to compute a dynamic bottom offset instead of a fixed `bottom-16`.
+
+**Regression found:** A fresh no-resume 104-week RS packaged campaign (`20260802-r2-rs104-fresh-v10`) failed a different, more serious check than v9's: `assertHistoricalEventAnchors` reported `sarajevo_siege_begins_1992` never fired (the event requires RS territory >45% within turns 4-10, `once: true`). Re-run in a fully isolated environment (`v11`, no concurrent CI/build load) to rule out timing contention — identical failure, byte-for-byte the same error. Direct comparison of the saved final states settled attribution definitively: v9's `final-autosave.json` (pre-`fc04f2902` package) shows `event_fire_counts.sarajevo_siege_begins_1992: 1`; both v10 and v11's saves (post-`fc04f2902` package, otherwise identical harness config) show the event never fired. `fc04f2902` was the only functional-code difference between the passing and failing runs.
+
+**Root-cause hypothesis (not fully traced):** This harness plays an *interactive* campaign via Playwright UI automation, not a headless replay. The `ResizeObserver` + parent `setState` on mount causes an extra render cycle in `App.tsx`/`WarroomStatusBar`/`PresidentDeskShell` that didn't exist before. The mechanism by which that extra render affects RS's early (turn 4-10) territorial trajectory closely enough to cross the 45% threshold in one build and not the other was not traced to a specific line — the fix was reverted on reproduced empirical evidence rather than a confirmed mechanism.
+
+**Action:** Reverted cleanly in `a39b29673` (`git revert fc04f2902`, no conflicts — no later commit touched the same three files). `tsc --noEmit` clean, `tests/ui/president_desk_shell.test.ts` + `tests/ui/warroom_shell_accessibility.test.ts` (36 tests) pass post-revert.
+
+**State after this revert:** R2's v8 hard-clip fix stands; the v9 WarroomStatusBar-occlusion finding is **open again**, unresolved. Any future fix for it must be verified against a fresh interactive packaged run (not just unit tests) before being considered safe — a layout fix that is unit-test-clean and locally-plausible was not sufficient evidence here. Do not re-attempt the ResizeObserver-coupling approach without first understanding why it perturbs early-game determinism, or prove a differently-shaped fix (e.g., a static, sufficiently generous fixed clearance instead of dynamic measurement) doesn't have the same effect.
+
+**Scope:** No event JSON, save schema, canon, or `docs/10_canon/FORAWWV.md` change. Revert-only; no new production behavior introduced.
+
+---
+
 ## [2026-08-02] Full-suite gate gap closed: 10 pre-existing failures across schema/UI/content
 
 **Type:** Process-gap discovery + repair / test-fixture desync repair / accessibility fix / real bug fixes.
