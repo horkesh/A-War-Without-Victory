@@ -207,7 +207,7 @@ function sanitizeDiagnosticLine(value, outputDirectory) {
   for (const [needle, replacement] of [
     [outputDirectory, '<evidence>'],
     [repo, '<repo>'],
-    [process.env.USERPROFILE, '<user>'],
+    [os.homedir(), '<user>'],
   ]) {
     if (needle) line = line.split(String(needle)).join(replacement);
   }

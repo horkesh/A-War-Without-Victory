@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
 import { existsSync, readFileSync } from 'node:fs';
 import { EventEmitter } from 'node:events';
+import { homedir } from 'node:os';
 import { describe, expect, it } from 'vitest';
 
 const harnessPath = 'tools/ui/map_transition_profile.cjs';
@@ -515,7 +516,7 @@ describe('map transition Electron profile harness contract', () => {
     expect(typeof sanitizeDiagnosticPayload).toBe('function');
     if (typeof sanitizeDiagnosticPayload !== 'function') return;
     const outputDirectory = String.raw`F:\AWWV-worktrees\r1-map-transition\tmp-map-transition-perf\diagnostics-test`;
-    const userRoot = process.env.USERPROFILE;
+    const userRoot = homedir();
     const result = sanitizeDiagnosticPayload({
       type: 'warning from https://example.test/type',
       message: `http://localhost:53728/private/5a65bc3b-f23d-4fab-a12b-0c2e8ae8a818 ${outputDirectory} ${userRoot} D:\\private\\run.log /home/test/run.log`,
