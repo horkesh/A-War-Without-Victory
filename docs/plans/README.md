@@ -21,7 +21,7 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | R2 | [RS Desk → Decision → Advance friction](2026-07-31-rs-104week-friction-remediation-plan.md) | Source complete/reviewed; fresh packaged 104-week RS acceptance next |
 | R3 | [Operational/Tactical Group convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | Complete; final full fast slice green |
 | R4 | [Command, event, and Dynamic Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) | R2 priority/cadence contract |
-| R5 | [Engine quality, performance, and stability](2026-07-31-engine-quality-performance-stability-plan.md) | R1–R3 source/state floor |
+| R5 | [Engine quality, performance, and stability](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | R1–R3 source/state floor; Task 8A retained; Phase 2e ready |
 | R6 | [Historical gameplay depth and final calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) | R3/R5 deterministic floor |
 | R7 | [Content, history, Bosnian localization, and audio](2026-07-31-content-history-localization-audio-plan.md) | R4 inventory; R1/R2 UI convergence |
 | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | R1–R7 green |

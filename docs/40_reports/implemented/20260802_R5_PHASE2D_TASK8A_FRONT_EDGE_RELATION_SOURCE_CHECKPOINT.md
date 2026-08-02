@@ -3,14 +3,14 @@
 **Date:** 2026-08-02
 **Baseline:** `2d72d75e3e8250c0fe09739648a61522cd7efd14` (`c7004af13f186e585393b44f71651edb42e57a7f`)
 **Branch:** `codex/r5-phase2d-front-edge-relation`
-**Result:** Source correctness accepted; performance measurement and retain/revert disposition pending.
+**Result:** Source correctness accepted; post-integration exact-parent measurement is `PASS_RETAIN` at `0fd36157b`.
 
 ## Summary
 
 - `buildCorpsFrontSectors(...)` now creates at most one standard and one strict `SectorFrontEdgeRelation` per used faction for one invocation, then discards them at return.
 - Existing subset builders remain independently callable through `test-only-legacy-edge-adjacency`; production reconciliation ownership and receipts are unchanged.
 - Complete three-mode x 100 real-save equivalence crossed the reconciliation boundary and compared reports, sessions, receipt order, geometry-build order, installed sectors, the entire `GameState`, warnings/diagnostics, serialized bytes, and a deterministic candidate rerun.
-- This checkpoint makes no timing or retention claim. Baselines, scenario runs, Electron, packaging, release state, and performance measurement were deliberately not run.
+- The source checkpoint itself made no timing claim. A later exclusive exact-parent packet retained the integrated candidate; its evidence is recorded below without rewriting the source-review history.
 
 ## Implementation
 
@@ -79,6 +79,10 @@ Neighbor ordering remains `strictCompare`-sorted, the relation is invocation-own
 
 The propagation scan found no rule, threshold, save schema, receipt ownership, historical content, scenario data, player-visible behavior, or canon contract change. `docs/10_canon/FORAWWV.md` and the canon set therefore remain untouched. `MASTER_ROADMAP.md` and `COMMAND_BOARD.md` are intentionally left for root after integration to avoid concurrent R7 documentation collisions.
 
-## Pending Measurement
+## Post-Integration Measurement Disposition
 
-Under an exclusive runtime lease, the exact-parent control and this candidate still require approved baselines without refresh, one excluded warmup per lineage, phase/sector and application V8 profiles, and three alternating wall-clock pairs. Retention still requires exact outputs, zero unexpected canonical fallbacks, at least 20% combined adjacency-owner reduction, at least 3% enclosing-builder reduction, two of three faster pairs, median paired improvement of at least 1%, and no pair worse than 2%. Failure of any gate requires full candidate reversion and a recorded no-go.
+The exclusive runtime packet completed after integration. Candidate `0fd36157bd7b92241ac48b8a9e4d94d69f8d2141` has exact parent `5987daea518501745bc94be3939589ea5e767c23`; candidate/control trees are `c92a6a05956bf42a24afd762f5c6815ad65c7d1f` / `bf71a0240b010a080824958277e9ce933c3c402e`. The authoritative manifest is `data/derived/_debug/r5_phase2d_task8a_integrated/measurement_manifest.json`, SHA-256 `50b78332ebae96f4dd767da61c89e398c1bead91a246e1a945d657b36cea138d`, and records `PASS_RETAIN`.
+
+All 14 inspected saves are exactly `5,085,892` bytes with SHA-256 `9d2a59dc1097ff3b69d3cec2d19962af32b7199de9f0b311d1dea4c562a596b4`. Unexpected canonical fallbacks remain zero. Combined adjacency inclusive time falls `81.610253%`; `buildCorpsFrontSectors` inclusive time falls `7.075305%`. Two of three alternating pairs improve; median pair improvement is `2.599063%`, maximum regression is `1.766058%`, and mean moves from `1,106.024517` to `1,086.310925 ms/turn` (`1.782383%`). Every predeclared retention gate passes.
+
+Memory remains a watch rather than a benefit: phase-boundary sampled peak heap moves `215.045822 -> 291.751656 MB`, and the fresh retained-source profile samples `281.241852 MB`. That fresh profile still ranks `buildCorpsFrontSectors` first at `295.866225 ms/turn` and `26.224914%` of sampled application time. The next authorized work is the separate [Phase 2e pure full-solve/serial-commit extraction plan](../../plans/2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md). Task 6 remains closed until that enabling extraction is accepted and a new profile passes its exact authorization gate.

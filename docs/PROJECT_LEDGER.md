@@ -1,5 +1,21 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-02] R5 Phase 2d Task 8A retained measurement and Phase 2e pure-solve design
+
+**Type:** Measured performance disposition / deterministic architecture handoff / docs-only executable design.
+
+**Retained evidence:** Phase 2d Task 8A is `PASS_RETAIN` at integrated candidate `0fd36157bd7b92241ac48b8a9e4d94d69f8d2141`, exact parent `5987daea518501745bc94be3939589ea5e767c23`, candidate/control trees `c92a6a05956bf42a24afd762f5c6815ad65c7d1f` / `bf71a0240b010a080824958277e9ce933c3c402e`. The authoritative serial/no-overlap Windows 11 x64, Node `24.13.0`, AMD Ryzen 7 5700X manifest is `data/derived/_debug/r5_phase2d_task8a_integrated/measurement_manifest.json`, SHA-256 `50b78332ebae96f4dd767da61c89e398c1bead91a246e1a945d657b36cea138d`. All 14 final saves are exactly `5,085,892` bytes with SHA-256 `9d2a59dc1097ff3b69d3cec2d19962af32b7199de9f0b311d1dea4c562a596b4` and state hash `9d2a59dc1097ff3b`; the 50-byte prior-fingerprint movement is already-integrated R7 content common to control and candidate.
+
+**Performance disposition:** Combined standard/strict adjacency inclusive time falls `1,815.479 -> 333.862 ms` (`81.610253%`) and `buildCorpsFrontSectors` inclusive time falls `13,428.255 -> 12,478.165 ms` (`7.075305%`). Alternating pair deltas are `-1.766058%`, `+4.424003%`, and `+2.599063%`: two of three improve, median improves `2.599063%`, maximum regression is `1.766058%`, and mean moves `1,106.024517 -> 1,086.310925 ms/turn` (`1.782383%`). Unexpected canonical relation fallbacks remain zero. Every predeclared Task 8A gate passes.
+
+**Memory watch and next owner:** Phase-boundary sampled peak heap moves `215.045822 -> 291.751656 MB`; fresh retained-source heap is `281.241852 MB`. RSS moves `409.394500 -> 474.296875 MB`; fresh RSS is `448.187500 MB`. These are retained watch values, not a memory-win claim. The fresh retained profile still ranks `buildCorpsFrontSectors` first at `11,834.649 ms`, `295.866225 ms/turn`, and `26.224914%` sampled; the next distinct owner is `generateAllCorpsOrders` at `100.929250 ms/turn`.
+
+**Phase 2e architecture:** Added `docs/plans/2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md`. It inventories the complete builder read/write boundary and exact 99-call ownership; rejects whole-state cloning and parallel faction solve; captures a typed immutable solve input; reproduces the current strict-sorted faction/global/recovery/fixed-point sequence against a detached mutation-aware formation projection; emits a deterministic ordered mutation/diagnostic output; prevalidates the entire journal before live mutation; and replays it serially in legacy write order. Task 8A's relation and Phase 2c dense occupancy remain retained. The plan requires RED characterization, independent legacy and exact-parent oracles, three production modes x 100 real-save variants across sectors/state/reports/session/receipts/journal/geometry/diagnostics/bytes/SHA/rerun, journal equivalence, fast gates, approved baselines without refresh, exclusive measurement, heap/RSS ceilings, timing non-regression, and stop/revert rules.
+
+**Authorization and scope:** Phase 2e is enabling architecture only. Task 6 remains unauthorized unless Phase 2e is accepted and a fresh profile passes the plan's exact builder-dominance, Amdahl, memory, timing, equivalence, call-coverage, and documentation gate. This checkpoint changes documentation/design only. It runs no production code, scenario, baseline, V8, Electron, package, or release command; refreshes no baseline; and changes no gameplay, state, save schema, scenario, canon, `docs/10_canon/FORAWWV.md`, package, version, tag, signing, publication, release state, push, or merge.
+
+---
+
 ## [2026-08-02] R7 Phase 1.1 September sensitive-history closeout
 
 **Type:** R7 historical-content remediation / source-provenance closure / side-specific tribunal language / TDD checkpoint.

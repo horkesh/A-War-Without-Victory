@@ -1,3 +1,11 @@
+## 2026-08-02 - A retained speed win can require a memory-bounded enabling boundary
+
+**Retention is multidimensional.** Exact outputs plus corroborating owner and paired-wall-clock improvements can justify retaining an optimization even when sampled heap moves upward, but the memory movement must remain explicit and become a hard ceiling for the next packet. Do not relabel the heap increase as a win or erase it from handoff docs.
+
+**Delayed commit requires an ordered semantic journal, not a state diff.** When an imperative solver writes formation locations that later strict-sorted factions, recovery, and fixed-point stages read, a safe pure boundary must update a detached working projection at the same logical write point and record the exact ordered live mutation. Prevalidate the complete journal before applying any entry, then replay serially. Whole-state clone/diff hides the read contract and write order; parallel faction solve changes behavior.
+
+**Enabling architecture is not optimization authorization.** A pure solve/serial-commit extraction may create the boundary needed for future incremental research, but it does not authorize reuse, caching, dirty-component solve, pass skipping, or parallelism. Require exact acceptance plus a fresh profile that still satisfies explicit dominance, Amdahl, memory, timing, coverage, and documentation gates before opening that later task. Applied in `[2026-08-02] R5 Phase 2d Task 8A retained measurement and Phase 2e pure-solve design`.
+
 ## 2026-08-02 - Sensitive-history acquittals do not erase crime findings
 
 **Crime findings and individual command liability are separate authored facts.** When a tribunal finds that crimes occurred but acquits a charged commander because superior authority or effective control was not proved, preserve both holdings without implication: name the perpetrators only to the level the judgment supports, state the acquittal and appeal outcome precisely, and never use the acquittal to cast doubt on the crime finding. Operational chronology belongs to the repository-local military source; criminal findings and liability outcomes belong to the exact tribunal record.

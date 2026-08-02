@@ -4,7 +4,7 @@
 
 **Goal:** Recover the dominant sector-reconstruction cost without changing any campaign byte, then repeatedly hand the 100 ms/turn target to the largest owner in a fresh full profile until the target is met.
 
-**Architecture:** The accepted dense formation-occupancy index remains invocation-local and mutation-aware. The fresh owner packet now selects a second, disjoint Phase 2d slice: build immutable standard/strict front-edge pair relations once per faction per sector-build invocation and reuse them through exact stable-order subset queries, with the current subset builders preserved as the independent legacy oracle. Pure faction extraction and incremental dirty topology remain deferred until a separate pure-solve/serial-commit proof exists. No context crosses a builder call or enters `GameState`.
+**Architecture:** The accepted dense formation-occupancy index remains invocation-local and mutation-aware. The retained Phase 2d Task 8A relation builds immutable standard/strict front-edge pair relations once per faction per sector-build invocation and reuses them through exact stable-order subset queries, with the current subset builders preserved as the independent legacy oracle. Phase 2e now owns the separate pure full-solve/serial-commit proof: an explicit immutable input snapshot, detached mutation-aware working projection, ordered output journal, and prevalidated serial live-state replay. Incremental dirty topology remains deferred. No context crosses a builder call or enters `GameState`.
 
 **Tech Stack:** TypeScript, Vitest, Node/V8 CPU profiling, the 40-week scenario runner, deterministic JSON serialization, PowerShell evidence capture.
 
@@ -12,13 +12,13 @@
 
 ## Status and authority boundary
 
-This document is an active implementation and measurement plan. The dense formation-occupancy contract and its bounded `ensureMinimumSectorCoverage(...)` integration are accepted at commit `25313d1c05b174188fad167ff38ed826b6aa737d`. The fully captured exact-parent replay improves mean throughput from `1,183.549` to `1,122.123 ms/turn` (`-5.190%`) with exact bytes, so `1,122.123 ms/turn` (`11.2212x` the `100 ms/turn` target) remains the current accepted floor. A later committee review correctly found that the original long property proved fixed-point shortcut equivalence, not independent occupancy equivalence. That evidence gap is closed by a test-only legacy scan strategy at the exact coverage boundary and a separate 300-case dense-versus-legacy full-state property. The `1,223.822 ms/turn` fixed-point packet remains diagnostic because its measured source omitted the prune receipt. Task 3's red-first reachability/sector-fact candidate passed exact-output equivalence but failed performance retention: two of three alternating pairs regressed and both the intended owner and enclosing builder worsened. It is fully reverted. The mandatory fresh accepted-source handoff reconfirms `buildCorpsFrontSectors` as the largest named causal application owner at `330.300 ms/turn` inclusive, supported by `340.789 ms/turn` of independent sector instrumentation. The bounded reconstruction research is now complete: Phase 2d Task 8A owns invocation-local front-edge relation reuse, with the existing subset builders retained as an independent legacy reference. Pure full-solve/faction extraction is deferred because current faction construction writes formation locations that later faction and recovery stages read. Task 6 incremental topology remains unauthorized. R5 remains open at the accepted occupancy floor.
+This document is an active implementation and measurement plan. The dense formation-occupancy contract and its bounded `ensureMinimumSectorCoverage(...)` integration are accepted at commit `25313d1c05b174188fad167ff38ed826b6aa737d`. Its fully captured exact-parent replay improved mean throughput from `1,183.549` to `1,122.123 ms/turn` (`-5.190%`) with exact bytes and established the Phase 2c occupancy floor. A later committee review correctly found that the original long property proved fixed-point shortcut equivalence, not independent occupancy equivalence. That evidence gap is closed by a test-only legacy scan strategy at the exact coverage boundary and a separate 300-case dense-versus-legacy full-state property. The `1,223.822 ms/turn` fixed-point packet remains diagnostic because its measured source omitted the prune receipt. Task 3's red-first reachability/sector-fact candidate passed exact-output equivalence but failed performance retention: two of three alternating pairs regressed and both the intended owner and enclosing builder worsened. It is fully reverted. The mandatory fresh accepted-source handoff reconfirmed `buildCorpsFrontSectors` as the largest named causal application owner. Phase 2d Task 8A then retained invocation-local front-edge relation reuse at `0fd36157b`, with exact-parent paired mean `1,086.311 ms/turn` (`10.8631x` the target), builder inclusive time down `7.075305%`, and the existing subset builders preserved as an independent legacy reference. Its heap movement remains a watch. Phase 2e pure full-solve/serial-commit extraction is the next packet because current faction construction writes formation locations that later faction and recovery stages read. Task 6 incremental topology remains unauthorized. R5 remains open at the latest retained Task 8A result.
 
 Task 1's owner-selection subset is complete at source commit `4462a485f1fd1ad511068bcaacd0926af962771e`; Task 5's occupancy disposition is complete at `25313d1c05b174188fad167ff38ed826b6aa737d`. Do not collect another heavy packet while any scenario, performance, Electron, package, baseline, or other heavy runtime owner holds the machine lane. No baseline re-floor, package, version, tag, publication, release-state, canon, or `docs/10_canon/FORAWWV.md` change belongs to Phase 2c.
 
 The determinism-auditor skill references `docs/PHASE_A_INVARIANTS.md`, but that file does not exist at this repository revision. Use the live contracts below and record the stale skill reference as documentation debt; do not invent a replacement contract.
 
-**2026-08-02 source checkpoint:** Phase 2d Task 8A is source-complete and independently reviewed. Its repaired three-mode x 100 property crosses the full reconciliation boundary and preserves reports, sessions, receipt/build order, complete state, warnings/diagnostics, and serialized bytes. Expected synthetic fallbacks are explicit while unexpected canonical fallbacks remain zero. Performance measurement and retain/revert disposition are still pending; R5 remains open at the accepted occupancy floor.
+**2026-08-02 retained measurement:** Phase 2d Task 8A is `PASS_RETAIN` at integrated commit `0fd36157b`. Its repaired three-mode x 100 property crosses the full reconciliation boundary and preserves reports, sessions, receipt/build order, complete state, warnings/diagnostics, and serialized bytes. Exact-parent measurement reduces combined adjacency inclusive time `81.610253%` and enclosing-builder inclusive time `7.075305%`; two of three wall pairs improve, median pair improves `2.599063%`, maximum regression is `1.766058%`, and mean improves `1.782383%` to `1,086.311 ms/turn`. All 14 saves are exactly `5,085,892` bytes with SHA-256 `9d2a59dc1097ff3b69d3cec2d19962af32b7199de9f0b311d1dea4c562a596b4`; unexpected canonical fallbacks remain zero. Heap movement from `215.046` to `291.752 MB`, with a fresh retained-source sample of `281.242 MB`, is an explicit Phase 2e watch. R5 remains open.
 
 ## Evidence that selects the design
 
@@ -33,8 +33,10 @@ The determinism-auditor skill references `docs/PHASE_A_INVARIANTS.md`, but that 
 | Fresh corrected-source phase/sector profile | `46,291.786 ms` wall; three sector phases `15,092.603 ms` (`377.315 ms/turn`, `32.603%`) | Current owner selection only; not a replicated floor. |
 | Fresh corrected-source application V8 capture | `buildCorpsFrontSectors` `14,170.635 ms` inclusive (`29.699%`) | Confirms sector reconstruction is the next structural owner. |
 | Accepted dense occupancy replay | control `1,183.549`; candidate `1,122.123 ms/turn`; all three pairs faster; exact bytes | New current floor and permission to begin Task 3. |
+| Retained Phase 2d Task 8A replay | control `1,106.025`; candidate `1,086.311 ms/turn`; adjacency `-81.610253%`; builder `-7.075305%`; exact bytes | `PASS_RETAIN`; selects Phase 2e pure full-solve/serial-commit extraction while keeping Task 6 closed. |
+| Task 8A memory watch | heap `215.046 -> 291.752 MB`; fresh retained-source heap `281.242 MB` | Phase 2e must satisfy explicit heap and RSS ceilings; no memory-win claim. |
 | Rejected reachability/sector-fact replay | arithmetic mean `-1.944%`, but pair deltas `-10.950%`, `+1.917%`, `+4.718%`; exact bytes | No-go: two of three pairs and the causal owners regress; candidate fully reverted. |
-| Phase 2d Task 8A source checkpoint | 300 candidate/legacy/rerun comparisons across full reconciliation; `635172 ms` property; independent PASS | Source correctness only. Timing/retention remains pending under the exclusive lease. |
+| Phase 2d Task 8A source checkpoint | 300 candidate/legacy/rerun comparisons across full reconciliation; `635172 ms` property; independent PASS | Source-correctness prerequisite to the retained measurement below. |
 
 In the diagnostic 40-turn phase profile, the three large sector steps cost:
 
@@ -382,7 +384,7 @@ R5 Phase 2 is complete only when a committee-usable replicated packet records me
 
 ## Task 8 — Phase 2d bounded sector-reconstruction packet
 
-**Status:** DESIGN COMPLETE / IMPLEMENTATION NOT STARTED. Execute Task 8A next. Do not start Task 6 or combine this work with reachability, control-status allocation, bot orders, or incremental topology.
+**Status:** TASK 8A RETAINED / PHASE 2D COMPLETE. Execute the separate Phase 2e plan next. Do not start Task 6 or combine this work with reachability, control-status allocation, bot orders, or incremental topology.
 
 ### Current production call graph and call count
 
@@ -417,7 +419,7 @@ The order is part of behavior. Task 8A changes only how immutable edge-neighbor 
 
 ### Task 8A — RED-first invocation-local front-edge relation
 
-**Source status (2026-08-02):** Implemented and independently reviewed PASS. Full reconciliation/state/byte equivalence is GREEN; measurement and retain/revert disposition remain open.
+**Disposition (2026-08-02):** Implemented, independently reviewed, measured, and retained at `0fd36157b`. Full reconciliation/state/byte equivalence is GREEN; every predeclared retention gate passes. Manifest: `data/derived/_debug/r5_phase2d_task8a_integrated/measurement_manifest.json`, SHA-256 `50b78332ebae96f4dd767da61c89e398c1bead91a246e1a945d657b36cea138d`.
 
 **Production file ownership:**
 
@@ -480,6 +482,18 @@ git diff --check
 
 Expected Task 8A result: a bounded, exact-output-equivalent reduction in repeated front-edge relation construction. Its combined inclusive Amdahl ceiling is about `46.394 ms/turn`, so it is explicitly a low-risk first slice, not a claim that sector reconstruction or R5 is complete.
 
+### Retained Task 8A measurement result
+
+Exact-parent control `5987daea518501745bc94be3939589ea5e767c23` and integrated candidate `0fd36157bd7b92241ac48b8a9e4d94d69f8d2141` produce identical `5,085,892`-byte final saves at SHA-256 `9d2a59dc1097ff3b69d3cec2d19962af32b7199de9f0b311d1dea4c562a596b4`. Combined adjacency inclusive time falls from `1,815.479` to `333.862 ms`; builder inclusive time falls from `13,428.255` to `12,478.165 ms`. Alternating pair deltas are `-1.766058%`, `+4.424003%`, and `+2.599063%`; the candidate passes the direction, median, maximum-regression, and mean gates. The retained fresh profile ranks the builder first at `295.866225 ms/turn` and `26.224914%` sampled. Peak heap movement is retained only with a watch: `215.045822 -> 291.751656 MB`, fresh `281.241852 MB`.
+
+## Task 9 — Phase 2e pure full-solve/serial-commit extraction
+
+**Status:** DESIGN COMPLETE / IMPLEMENTATION NOT STARTED.
+
+Execute [the dedicated Phase 2e implementation plan](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md). It inventories every builder read and write, captures a typed immutable input snapshot, performs the complete legacy faction/global/recovery/fixed-point sequence against a detached working projection, emits a stable ordered mutation journal, validates the complete journal before any live write, and commits it serially in legacy order. Task 8A's invocation-local relation and Phase 2c dense occupancy remain in place.
+
+Acceptance requires RED characterization, an exact-parent legacy oracle, three production modes x 100 real-save variants across sectors/full state/reports/session/receipts/journal/geometry/diagnostics/bytes/SHA/rerun, journal equivalence, approved baselines without refresh, fast dependent gates, exclusive measurement, memory ceilings, and the plan's stop/revert rules. This extraction is enabling architecture only. Task 6 remains unauthorized unless Phase 2e is accepted and a fresh retained-source profile satisfies every explicit authorization condition in that plan.
+
 ## Rejected shortcuts and retry conditions
 
 | Shortcut | Disposition | Retry only if |
@@ -510,7 +524,8 @@ Expected Task 8A result: a bounded, exact-output-equivalent reduction in repeate
 - [x] Fresh Amdahl calculation and next-owner handoff exist while mean remains above `100 ms/turn`.
 - [x] Phase 2d Task 8A has a bounded owner, independent legacy oracle, full mutation/receipt boundary, exact files, RED surfaces, stop gates, and retention protocol.
 - [x] Phase 2d Task 8A is implemented, independently reviewed, and exact across the full three-mode x 100 reconciliation oracle.
-- [ ] Phase 2d Task 8A is retained by measurement or fully reverted as a no-go.
+- [x] Phase 2d Task 8A is retained by measurement or fully reverted as a no-go.
+- [x] Phase 2e pure full-solve/serial-commit extraction has a separate complete executable plan with exact reads/writes, ordered commit semantics, oracle, memory, timing, and stop gates.
 - [x] Ledger, report, roadmap, and reusable knowledge state exactly match evidence.
 - [x] No baseline refresh, package/version/tag/release mutation, canon/FORAWWV edit, push, or integration was performed by this design packet.
 - [ ] R5 replicated mean is below `100 ms/turn`; continue from a fresh accepted-floor profile and reprofile after every retained candidate.
