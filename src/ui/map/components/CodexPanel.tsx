@@ -412,7 +412,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                         <div className="font-semibold text-neutral-200">
                                             {rowTitle}
                                         </div>
-                                        <div className="text-[10px] uppercase tracking-[0.1em] text-neutral-500">
+                                        <div className="text-[12px] uppercase tracking-[0.1em] text-neutral-500">
                                             {ghostClassificationLabel(ghost.classification)}
                                         </div>
                                         {bodyBlocks.length > 0 && (

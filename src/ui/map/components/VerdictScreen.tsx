@@ -614,7 +614,7 @@ export function VerdictScreen() {
                                     data-awwv-ghost-classification={g.classification}
                                     data-awwv-ghost-has-prose={prose !== null ? 'true' : 'false'}>
                                     <div className="text-text-primary font-semibold">{rowTitle}</div>
-                                    <div className="text-[10px] uppercase tracking-[0.1em] text-text-secondary/70">
+                                    <div className="text-[12px] uppercase tracking-[0.1em] text-text-secondary/70">
                                         {verdictGhostClassificationLabel(g.classification)}
                                     </div>
                                     {bodyBlocks.length > 0 && (
