@@ -48,6 +48,7 @@ import { getCorpsArmyPriorities } from './bot_strategy.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 import type { SectorTopologyDiagnosticCollector } from './sector_topology_diagnostic.js';
+import type { SectorTopologyTraceCollector } from './sector_topology_trace.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 import type { SectorTopologySpatialSnapshot } from './sector_topology_solver_types.js';
@@ -202,6 +203,15 @@ type SectorFrontEdgeRelationProvider = (faction: FactionId) => SectorFrontEdgeRe
  */
 let _activeInvocation: SectorPartitionInvocationRecord | null = null;
 
+/**
+ * Deterministic-trace counterpart to `_activeInvocation`, set/cleared the
+ * same way at `buildCorpsFrontSectors`'s own entry/exit (see
+ * `sector_topology_trace.ts`'s module docstring). Unlike `_activeInvocation`,
+ * recording here is unconditional — NOT gated by `SECTOR_PARTITION_PERF_FLAG` —
+ * because the trace is deterministic solve output, not optional profiling.
+ */
+let _activeTraceCollector: SectorTopologyTraceCollector | null = null;
+
 function _newInvocation(): SectorPartitionInvocationRecord {
     return {
         perFactionPerCorpsNs: new Map(),
@@ -212,12 +222,15 @@ function _newInvocation(): SectorPartitionInvocationRecord {
 /**
  * Wrap a synchronous function call with hrtime instrumentation. When the env
  * flag is OFF or no invocation is active, `_perfTime` is a tail-call to `fn()`
- * (only added cost: the boolean check + the function-call frame).
+ * (only added cost: the boolean check + the function-call frame). Always
+ * records `label` into `_activeTraceCollector` first, when one is active,
+ * regardless of the perf flag.
  *
  * If `fn()` throws, the elapsed time IS still recorded (in a `finally` block)
  * and the error is re-thrown — instrumentation never swallows.
  */
 function _perfTime<T>(label: string, fn: () => T): T {
+    _activeTraceCollector?.record(label);
     if (!SECTOR_PARTITION_PERF_FLAG) return fn();
     if (!_activeInvocation) return fn();
     const start = perfNodeProcess.hrtime.bigint();
@@ -374,6 +387,7 @@ export function buildCorpsFrontSectors(
     frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters,
     mutationRecorder?: SectorTopologyMutationRecorder,
     diagnosticCollector?: SectorTopologyDiagnosticCollector,
+    traceCollector?: SectorTopologyTraceCollector,
 ): Record<string, CorpsFrontSector> {
     if (frontEdgeAdjacencyStrategy !== 'invocation-front-edge-relation'
         && frontEdgeAdjacencyStrategy !== 'test-only-legacy-edge-adjacency') {
@@ -388,6 +402,9 @@ export function buildCorpsFrontSectors(
     if (SECTOR_PARTITION_PERF_FLAG) {
         _activeInvocation = _newInvocation();
     }
+    // Not reentrant (buildCorpsFrontSectors is never called recursively — see
+    // _activeInvocation's docstring), so a plain set-at-entry/clear-at-exit is safe.
+    _activeTraceCollector = traceCollector ?? null;
 
     // Use SpatialContext adjacency if available, otherwise build from edges (backward compat)
     const adjacency = (spatial?.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
@@ -786,6 +803,7 @@ export function buildCorpsFrontSectors(
         const totalNs = perfNodeProcess.hrtime.bigint() - _invStart;
         _flushInvocation(state, totalNs, isFinalPass);
     }
+    _activeTraceCollector = null;
 
     return result;
 }
