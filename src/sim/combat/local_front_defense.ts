@@ -12,6 +12,7 @@
 import type { CorpsFrontSector, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { effectivePersonnel } from './tactical_group_personnel.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
 /** Coverage density: below this ratio, defense power is penalized. */
 const THIN_FRONT_THRESHOLD = 0.5;
@@ -31,7 +32,7 @@ export type LocalFrontDensityModifierLookup = ReadonlyMap<FormationId, number>;
  * Compute brigade power contribution to a frontage.
  * Uses simplified basePower (personnel × equipment × experience × cohesion × honor).
  */
-function brigadePower(formation: FormationState): number {
+function brigadePower(formation: SectorTopologyWorkingFormation): number {
     // Phase 0 (ADR-0005): local front defensive power is a pure home-availability read.
     // A donor's lent slice fights inside its TG and must not also defend the home front.
     // This helper is defense-only (used solely by computeLocalFrontDefensivePower), so
@@ -78,7 +79,7 @@ export function frontDensityModifier(assignedBrigades: number, coverageLength: n
  * defensive_power = sum(brigade_power) × density_modifier / coverage_length
  */
 export function computeLocalFrontDefensivePower(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     assignedBrigadeIds: string[],
     coverageLength: number
 ): number {

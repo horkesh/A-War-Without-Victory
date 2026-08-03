@@ -14,7 +14,8 @@
  * See docs/plans/2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md section 7.2.
  */
 
-import type { FormationAssignment, FormationId, FormationState } from '../../state/game_state.js';
+import type { FormationAssignment, FormationId } from '../../state/game_state.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
 export type SectorTopologyMutationExecutionStrategy = 'test-only-imperative-live-state';
 
@@ -28,10 +29,10 @@ export type SectorTopologyMutation =
 export interface SectorTopologyMutationRecorder {
     readonly strategy: SectorTopologyMutationExecutionStrategy;
     readonly journal: readonly SectorTopologyMutation[];
-    recordFormationLocation(formation: FormationState, formationId: FormationId, after: string, stage: string): void;
-    recordFormationEntrenchment(formation: FormationState, formationId: FormationId, stage: string): void;
-    recordFormationAssignedSubSegment(formation: FormationState, formationId: FormationId, after: string | undefined, stage: string): void;
-    recordFormationAssignment(formation: FormationState, formationId: FormationId, after: FormationAssignment | null, stage: string): void;
+    recordFormationLocation(formation: SectorTopologyWorkingFormation, formationId: FormationId, after: string, stage: string): void;
+    recordFormationEntrenchment(formation: SectorTopologyWorkingFormation, formationId: FormationId, stage: string): void;
+    recordFormationAssignedSubSegment(formation: SectorTopologyWorkingFormation, formationId: FormationId, after: string | undefined, stage: string): void;
+    recordFormationAssignment(formation: SectorTopologyWorkingFormation, formationId: FormationId, after: FormationAssignment | null, stage: string): void;
     recordUnresolvedSectorBrigades(before: readonly FormationId[] | undefined, after: readonly FormationId[], apply: () => void, stage: string): void;
 }
 

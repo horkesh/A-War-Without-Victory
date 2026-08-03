@@ -1,6 +1,6 @@
-import type { FormationState } from '../../state/game_state.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
-export function isSectorRosterEligibleFormation(formation: FormationState | null | undefined): boolean {
+export function isSectorRosterEligibleFormation(formation: SectorTopologyWorkingFormation | null | undefined): boolean {
     if (!formation) return false;
     if (
         formation.kind !== undefined

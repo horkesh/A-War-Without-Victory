@@ -7,10 +7,10 @@ import type {
     CorpsFrontSector,
     FactionId,
     FormationId,
-    FormationState,
 } from '../../state/game_state.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findConnectedComponents } from '../../utils/graph.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
@@ -50,7 +50,7 @@ export function mapOsidsToCorps(
     faction: FactionId,
     corpsIds: FormationId[],
     adjacency: Map<Osid, Osid[]>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     reverseMap: Map<string, string[]> | null
 ): Map<Osid, FormationId> {
     const result = new Map<Osid, FormationId>();
@@ -84,7 +84,7 @@ export function mapOsidsToCorps(
     // 1st Corps brigades are FROM there.
     const osidCorpsVotes = new Map<Osid, Map<FormationId, number>>();
     const sortedBrigadeIds = Object.keys(formations).sort(strictCompare);
-    const activeCorpsBrigades: Array<{ formation: FormationState; corpsId: FormationId }> = [];
+    const activeCorpsBrigades: Array<{ formation: SectorTopologyWorkingFormation; corpsId: FormationId }> = [];
     for (const fid of sortedBrigadeIds) {
         const f = formations[fid];
         if (!f || f.faction !== faction || f.status !== 'active') continue;
@@ -240,7 +240,7 @@ export function mapOsidsToCorps(
  * Find the first subordinate brigade OSID for a corps (fallback when corps HQ has no OSID).
  */
 export function findSubordinateOsid(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     corpsId: FormationId,
     friendlyOsids: Set<Osid>
 ): Osid | null {
@@ -675,7 +675,7 @@ export function consolidateCrossCorpsFronts(
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     osidToCorps: Map<Osid, FormationId>,
     centroids?: OsidCentroidMap,
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
@@ -907,7 +907,7 @@ export function consolidateIsolatedCorpsPockets(
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     centroids?: OsidCentroidMap,
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
     frontEdgeRelation?: SectorFrontEdgeRelation,

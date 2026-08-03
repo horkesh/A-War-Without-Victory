@@ -5,12 +5,12 @@
 
 import type {
     CorpsFrontSector,
-    FormationState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getCorpsCommander } from './officer_system.js';
 import type { ArmyOperationPriority } from './bot_strategy.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 import { munFromOsid } from './osid_adjacency.js';
 import { getSectorComponent, getSectorFrontOsids } from './sector_utils.js';
 import {
@@ -128,7 +128,7 @@ export function buildCorpsCommanderProfiles(
 function transferBrigadesBetweenSectors(
     deficits: Array<{ sector: CorpsFrontSector; need: number }>,
     donors: CorpsFrontSector[],
-    formations: Record<string, FormationState>,
+    formations: Record<string, SectorTopologyWorkingFormation>,
     overrides: CommanderOverride[],
     overriddenBrigadeIds: Set<string>,
     reason: CommanderOverride['reason'],
@@ -220,7 +220,7 @@ function transferBrigadesBetweenSectors(
 export function commanderReviewAssignment(
     corpsId: string,
     sectors: CorpsFrontSector[],
-    formations: Record<string, FormationState>,
+    formations: Record<string, SectorTopologyWorkingFormation>,
     armyPriorities: ArmyOperationPriority[],
     commanderProfile: CorpsCommanderProfile,
     componentOf: Map<string, number>,
@@ -275,7 +275,7 @@ export function commanderReviewAssignment(
  */
 function applyMissionCompliance(
     corpsSectors: CorpsFrontSector[],
-    formations: Record<string, FormationState>,
+    formations: Record<string, SectorTopologyWorkingFormation>,
     armyPriorities: ArmyOperationPriority[],
     commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],
@@ -342,7 +342,7 @@ function applyMissionCompliance(
  */
 function applyNonPriorityExcess(
     corpsSectors: CorpsFrontSector[],
-    formations: Record<string, FormationState>,
+    formations: Record<string, SectorTopologyWorkingFormation>,
     armyPriorities: ArmyOperationPriority[],
     commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],
@@ -406,7 +406,7 @@ function applyNonPriorityExcess(
  */
 function applyOffensiveStaging(
     corpsSectors: CorpsFrontSector[],
-    formations: Record<string, FormationState>,
+    formations: Record<string, SectorTopologyWorkingFormation>,
     commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],
     overriddenBrigadeIds: Set<string>,
@@ -464,7 +464,7 @@ function applyOffensiveStaging(
 /** Reinforce critically threatened defensive sectors by pulling from safe surplus sectors. */
 function applyDefensiveCoherence(
     corpsSectors: CorpsFrontSector[],
-    formations: Record<string, FormationState>,
+    formations: Record<string, SectorTopologyWorkingFormation>,
     _commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],
     overriddenBrigadeIds: Set<string>,
@@ -503,7 +503,7 @@ function applyDefensiveCoherence(
  */
 function applyPositionViability(
     corpsSectors: CorpsFrontSector[],
-    formations: Record<string, FormationState>,
+    formations: Record<string, SectorTopologyWorkingFormation>,
     armyPriorities: ArmyOperationPriority[],
     commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],

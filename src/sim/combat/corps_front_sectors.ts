@@ -29,7 +29,6 @@ import type {
     CorpsFrontSubSegment,
     FactionId,
     FormationId,
-    FormationState,
     GameState,
 } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
@@ -49,6 +48,7 @@ import { getCorpsArmyPriorities } from './bot_strategy.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
 // ── Imported from extracted modules ──────────────────────────────────────
 import { buildFriendlyComponents, getSectorComponent, getSectorFrontOsids, getSectorUniqueFrontOsids, canAnyBrigadeReachAny, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
@@ -849,7 +849,7 @@ export function sealWarFrontFactionSideCoverage(
 
 export function canonicalizeSameFactionEdgeOwnership(
     sectors: Record<string, CorpsFrontSector>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
     spatial?: SpatialContext,
 ): string[] {
@@ -900,7 +900,7 @@ export function canonicalizeSameFactionEdgeOwnership(
 function pruneRemovedDuplicateEdgeTruth(
     sector: CorpsFrontSector,
     removedEdgeId: string,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
 ): void {
     const removedMeta = edgeMeta.get(removedEdgeId) ?? parseEdgeId(removedEdgeId);
@@ -943,7 +943,7 @@ function compareSameFactionEdgeOwners(
     a: CorpsFrontSector,
     b: CorpsFrontSector,
     edgeId: string,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
     spatial?: SpatialContext,
 ): number {
@@ -986,7 +986,7 @@ const POSAVINA_EDGE_MUNICIPALITIES = new Set([
 function sectorCorpsRegionalEdgeAffinity(
     sector: CorpsFrontSector,
     edgeId: string,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
 ): number {
     const corps = formations[sector.corps_id];
     const corpsText = `${sector.corps_id} ${corps?.name ?? ''}`.toLowerCase();
@@ -1001,7 +1001,7 @@ function sectorCorpsRegionalEdgeAffinity(
 function sectorCorpsHqDistanceToEdge(
     sector: CorpsFrontSector,
     edgeId: string,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
     spatial?: SpatialContext,
 ): number {
@@ -1084,7 +1084,7 @@ function pickWarFrontFactionSideCoverageRecipient(
  */
 function rescueUnassignedLoanedElitesInTerritory(
     sectors: Record<string, CorpsFrontSector>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
 ): void {
     const assigned = new Set<FormationId>();
     for (const sec of Object.values(sectors)) {
@@ -1124,7 +1124,7 @@ function rescueUnassignedLoanedElitesInTerritory(
 function collectUnresolvedSectorBrigades(
     state: SectorTopologyNarrowReadState,
     sectors: Record<string, CorpsFrontSector>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
 ): FormationId[] {
     const sectorList = Object.values(sectors);
@@ -1157,7 +1157,7 @@ function collectUnresolvedSectorBrigades(
 
 export function emitFinalUnresolvedSectorWarnings(
     unresolved: FormationId[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
 ): void {
     for (const formationId of unresolved) {
         const formation = formations[formationId];
@@ -1171,7 +1171,7 @@ export function emitFinalUnresolvedSectorWarnings(
 
 function recomputeMetricsByFaction(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     state: SectorTopologyNarrowReadState,
 ): void {
     const byFaction = new Map<FactionId, CorpsFrontSector[]>();
@@ -1285,7 +1285,7 @@ function canCorpsStaffSectorFront(
 function isSectorUnstaffableByFaction(
     sector: CorpsFrontSector,
     siblingSectors: CorpsFrontSector[],
-    factionBrigades: FormationState[],
+    factionBrigades: SectorTopologyWorkingFormation[],
     state: SectorTopologyNarrowReadState,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
@@ -1374,7 +1374,7 @@ function isSectorUnstaffableByFaction(
 export function annotateUnstaffedFrontSectors(
     sectors: Record<string, CorpsFrontSector>,
     state: SectorTopologyNarrowReadState,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     _spatial?: SpatialContext,
 ): void {
@@ -1420,7 +1420,7 @@ export function annotateUnstaffedFrontSectors(
 function absorbEmptyStaffableSiblingSectors(
     sectors: Record<string, CorpsFrontSector>,
     state: SectorTopologyNarrowReadState,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     sharedBoundaryAdj: Map<Osid, Osid[]>,
     caseBSplitAdj: Map<Osid, Osid[]>,
@@ -1444,7 +1444,7 @@ function absorbEmptyStaffableSiblingSectors(
         const componentOf = spatial?.componentsByFaction.get(faction)
             ? new Map(spatial.componentsByFaction.get(faction)!)
             : buildFriendlyComponents(adjacency, friendlyOsids);
-        const factionBrigades: FormationState[] = [];
+        const factionBrigades: SectorTopologyWorkingFormation[] = [];
         for (const fid of Object.keys(formations).sort(strictCompare)) {
             const formation = formations[fid];
             if (!formation || formation.faction !== faction || !isSectorRosterEligibleFormation(formation)) continue;
@@ -1536,7 +1536,7 @@ function enforceFinalSectorGeometryInvariants(
     sharedBoundaryAdj: Map<Osid, Osid[]>,
     caseBSplitAdj: Map<Osid, Osid[]>,
     centroids?: OsidCentroidMap,
-    formations?: Record<FormationId, FormationState>,
+    formations?: Record<FormationId, SectorTopologyWorkingFormation>,
     frontEdgeRelationProvider?: SectorFrontEdgeRelationProvider,
 ): void {
     const nextSectors: Record<string, CorpsFrontSector> = {};
@@ -1673,7 +1673,7 @@ function enforceFinalSectorGeometryInvariants(
 export function applyFinalSectorOwnerTruthPass(
     sectors: Record<string, CorpsFrontSector>,
     state: SectorTopologyNarrowReadState,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     options?: {
         allowCollapsedRearGuardAbsorption?: boolean;
@@ -1913,7 +1913,7 @@ export function reconcileOperationSensitiveSectorRoster(
 
 function rescueAdjacentLiveOwnersForEmptyFrontSectors(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
 ): void {
@@ -1988,7 +1988,7 @@ function rescueAdjacentLiveOwnersForEmptyFrontSectors(
 
 function normalizeFinalSectorBuckets(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     politicalControllers?: Record<string, FactionId | null | undefined>,
 ): void {
@@ -2131,7 +2131,7 @@ function buildSectorSliceFromSubSegment(
 function seedSplitPieceBrigadeBuckets(
     original: CorpsFrontSector,
     pieces: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
 ): void {
     const brigadeIds = [...new Set([
@@ -2201,7 +2201,7 @@ function seedSplitPieceBrigadeBuckets(
 
 function canonicalizeDuplicateFrontOwnershipByPiece(
     sectors: Record<string, CorpsFrontSector>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
     sharedBoundaryAdj: Map<Osid, Osid[]>,
@@ -2399,7 +2399,7 @@ function recoverDroppedFrontEdges(
     sharedBoundaryAdj: Map<Osid, Osid[]>,
     caseBSplitAdj: Map<Osid, Osid[]>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
     spatial?: SpatialContext,
@@ -2673,7 +2673,7 @@ function getRecoveredFrontClaimSetup(
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     adjacency: Map<Osid, Osid[]>,
     sharedBoundaryAdj: Map<Osid, Osid[]>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
     spatial?: SpatialContext,
@@ -2837,7 +2837,7 @@ function pickRecoveredFrontEdgeRecipient(
 function sealMergedSectorTruth(
     sectors: Record<string, CorpsFrontSector>,
     state: SectorTopologyNarrowReadState,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
     sharedBoundaryAdj: Map<Osid, Osid[]>,
@@ -3054,7 +3054,7 @@ function buildFriendlyOsidsFromState(
 export function relocateMisassignedBrigadesToTruthfulOwners(
     sectors: CorpsFrontSector[],
     state: SectorTopologyNarrowReadState,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
 ): void {
     const byFaction = new Map<FactionId, CorpsFrontSector[]>();
@@ -3161,7 +3161,7 @@ export function relocateMisassignedBrigadesToTruthfulOwners(
 
 export function canonicalizeSiblingFrontOwnership(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     edgeMeta?: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
     adjacency?: Map<Osid, Osid[]>,
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
@@ -3298,7 +3298,7 @@ function countIncidentEdgesForFrontOsid(
 
 function countBrigadesAtOsid(
     sector: CorpsFrontSector,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     osid: string,
 ): number {
     let count = 0;
@@ -3528,7 +3528,7 @@ function buildFactionSectors(
     strictAdj: Map<Osid, Osid[]>,
     caseBSplitAdj: Map<Osid, Osid[]>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     activeCombatFormationScanIds: readonly FormationId[],
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,

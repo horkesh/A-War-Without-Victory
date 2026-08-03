@@ -1,6 +1,7 @@
-import type { FormationId, FormationState } from '../../state/game_state.js';
+import type { FormationId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
 const MAX_UINT32 = 0xffff_ffff;
 
@@ -12,13 +13,13 @@ export interface FormationOccupancyIndex {
     move(formationId: FormationId, from: string | undefined, to: string | undefined): void;
     syncFormation(
         formationId: FormationId,
-        previous: FormationState | undefined,
-        next: FormationState | undefined,
+        previous: SectorTopologyWorkingFormation | undefined,
+        next: SectorTopologyWorkingFormation | undefined,
     ): void;
-    assertEquivalent(formations: Readonly<Record<FormationId, FormationState>>): void;
+    assertEquivalent(formations: Readonly<Record<FormationId, SectorTopologyWorkingFormation>>): void;
 }
 
-function countedLocation(formation: FormationState | null | undefined): string | undefined {
+function countedLocation(formation: SectorTopologyWorkingFormation | null | undefined): string | undefined {
     if (!isSectorRosterEligibleFormation(formation)) return undefined;
     return formation?.location_osid || undefined;
 }
@@ -31,7 +32,7 @@ class DenseFormationOccupancyIndex implements FormationOccupancyIndex {
 
     constructor(
         osids: Iterable<string>,
-        formations: Readonly<Record<FormationId, FormationState>>,
+        formations: Readonly<Record<FormationId, SectorTopologyWorkingFormation>>,
     ) {
         this.osids = Object.freeze([...new Set(osids)].sort(strictCompare));
         this.ordinalByOsid = new Map(this.osids.map((osid, ordinal) => [osid, ordinal]));
@@ -109,15 +110,15 @@ class DenseFormationOccupancyIndex implements FormationOccupancyIndex {
 
     syncFormation(
         formationId: FormationId,
-        previous: FormationState | undefined,
-        next: FormationState | undefined,
+        previous: SectorTopologyWorkingFormation | undefined,
+        next: SectorTopologyWorkingFormation | undefined,
     ): void {
         this.assertMatchingId(formationId, previous);
         this.assertMatchingId(formationId, next);
         this.move(formationId, countedLocation(previous), countedLocation(next));
     }
 
-    assertEquivalent(formations: Readonly<Record<FormationId, FormationState>>): void {
+    assertEquivalent(formations: Readonly<Record<FormationId, SectorTopologyWorkingFormation>>): void {
         const expectedCounts = new Uint32Array(this.osids.length);
         const expectedLocations = new Map<FormationId, string>();
 
@@ -181,7 +182,7 @@ class DenseFormationOccupancyIndex implements FormationOccupancyIndex {
 
     private assertMatchingId(
         formationId: FormationId,
-        formation: FormationState | undefined,
+        formation: SectorTopologyWorkingFormation | undefined,
     ): void {
         if (formation && formation.id !== formationId) {
             throw new Error(
@@ -193,7 +194,7 @@ class DenseFormationOccupancyIndex implements FormationOccupancyIndex {
 
 export function createFormationOccupancyIndex(
     osids: Iterable<string>,
-    formations: Readonly<Record<FormationId, FormationState>>,
+    formations: Readonly<Record<FormationId, SectorTopologyWorkingFormation>>,
 ): FormationOccupancyIndex {
     return new DenseFormationOccupancyIndex(osids, formations);
 }

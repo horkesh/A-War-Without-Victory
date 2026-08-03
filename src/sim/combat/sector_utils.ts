@@ -26,6 +26,7 @@ import {
     GRAZ_EXEMPT_HRHB_CORPS,
 } from '../local_truces.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
 /** Fraction of entrenchment_turns retained when a brigade is reassigned to a different sub-segment. */
 export const REASSIGNMENT_ENTRENCHMENT_RETAIN = 0.3;
@@ -355,7 +356,7 @@ export function bfsDistance(
  * Get sorted list of active corps formation IDs for a faction.
  */
 export function getCorpsForFaction(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId
 ): FormationId[] {
     return Object.keys(formations)

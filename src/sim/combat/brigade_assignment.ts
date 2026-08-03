@@ -8,7 +8,6 @@ import type {
     FactionId,
     FormationAssignment,
     FormationId,
-    FormationState,
 } from '../../state/game_state.js';
 import { computeLocalFrontDefensivePower } from './local_front_defense.js';
 import { effectivePersonnel } from './tactical_group_personnel.js';
@@ -32,6 +31,7 @@ import {
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
 const COLLAPSED_REAR_GUARD_ABSORPTION_CORPS = new Set<string>(['vrs_2nd_krajina']);
@@ -268,7 +268,7 @@ export function buildOperationParticipantSet(state: SectorTopologyNarrowReadStat
 }
 
 function countActiveBrigadesByOsid(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
 ): Map<string, number> {
     const counts = new Map<string, number>();
     for (const formation of Object.values(formations)) {
@@ -283,7 +283,7 @@ function countActiveBrigadesByOsid(
 type CoverageOccupancyCounts = Pick<FormationOccupancyIndex, 'get' | 'move'>;
 
 function createLegacyCoverageOccupancyCounts(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
 ): CoverageOccupancyCounts {
     const counts = countActiveBrigadesByOsid(formations);
     return {
@@ -300,7 +300,7 @@ function createLegacyCoverageOccupancyCounts(
 }
 
 function countActiveEnemyPersonnelByOsid(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
 ): Map<string, number> {
     const personnelByOsid = new Map<string, number>();
@@ -334,7 +334,7 @@ function classifySectorPosition(
 export function isMovementOwnedHomeReturn(
     state: SectorTopologyNarrowReadState | undefined,
     formationId: FormationId,
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
 ): boolean {
     if (!state || !formation.home_osid || formation.assignment?.kind != null) return false;
     const moveOrder = state.military.brigade_movement_orders?.[formationId];
@@ -350,7 +350,7 @@ export function isMovementOwnedHomeReturn(
 export function isMovementOwnedReturnToCorps(
     state: SectorTopologyNarrowReadState | undefined,
     formationId: FormationId,
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
     sectors: CorpsFrontSector[],
 ): boolean {
     if (!state || formation.assignment?.kind != null || !formation.location_osid) return false;
@@ -399,7 +399,7 @@ function columnDeploymentDestination(
 export function isMovementOwnedActiveLoanDeployment(
     state: SectorTopologyNarrowReadState | undefined,
     formationId: FormationId,
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
 ): boolean {
     if (!state || formation.assignment?.kind != null) return false;
     const loanedToCorps = formation.elite_loan_state?.on_loan
@@ -436,7 +436,7 @@ export function isMovementOwnedActiveLoanDeployment(
 export function classifyBrigadesByTerritory(
     sectors: CorpsFrontSector[],
     faction: FactionId,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
@@ -1107,7 +1107,7 @@ export function classifyBrigadesByTerritory(
  */
 export function assignCrossCorpsEnclaveDefenders(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
     componentOf: Map<string, number>,
 ): void {
@@ -1130,7 +1130,7 @@ export function assignCrossCorpsEnclaveDefenders(
  */
 export function reclassifyRearBrigades(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>
 ): void {
@@ -1186,7 +1186,7 @@ export function reclassifyRearBrigades(
  */
 export function enforcePhysicalSectorOwnership(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
 ): void {
@@ -1261,7 +1261,7 @@ export function enforcePhysicalSectorOwnership(
  */
 export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
@@ -1461,7 +1461,7 @@ function frontOsidsForFaction(
 }
 
 export function brigadeRequiresSectorAssignment(
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
     sectors: CorpsFrontSector[],
     adjacency: Map<Osid, Osid[]>,
     frontEdges: FrontEdgeSnapshot[],
@@ -1501,7 +1501,7 @@ export function brigadeRequiresSectorAssignment(
  */
 export function warnUnresolvedSectorAssignments(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
     adjacency?: Map<Osid, Osid[]>,
     frontEdges: FrontEdgeSnapshot[] = [],
@@ -1537,7 +1537,7 @@ export type EnsureMinimumSectorCoverageOccupancyStrategy =
 
 export function ensureMinimumSectorCoverage(
     allSectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
@@ -2628,7 +2628,7 @@ export function deduplicateBrigadesAcrossSectors(sectors: CorpsFrontSector[]): v
  */
 export function recomputeSectorPowerAndThreat(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
     state: SectorTopologyNarrowReadState,
 ): void {
@@ -2665,7 +2665,7 @@ export function recomputeSectorPowerAndThreat(
  */
 export function syncSectorAssignmentsToFormations(
     sectors: Record<string, CorpsFrontSector>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency?: Map<Osid, Osid[]>,
     mutationRecorder?: SectorTopologyMutationRecorder,
 ): void {
