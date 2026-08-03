@@ -1,5 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-03] R4 Phase 5 fresh-188w finding: two anchors regressed, one older than tracked
+
+**Type:** Calibration observation (not a re-floor) / R4 Phase 5 integrated-proof byproduct / process-gap discovery.
+
+**Summary:** Running R4 Phase 5's checklist item "fresh 40w and paired 188w baseline/engine-health proof" surfaced that the documented 2026-07-17 floor (622/712, 31/31 anchors) has never been re-verified against current `HEAD` — no CI gate runs a live 188w scenario with anchor checks on this branch even now (`full-suite-and-fingerprint.yml`, wired in this session, covers the vitest suite only). Fresh `HEAD` run: `matched_osids` 638/712 (up from 622) but 28/31 anchors (`op:zvornik:zvornik`, `op:doboj:boljanic_2`, `op:gracanica:petrovo_2` fail, all same Drina/Posavina corridor, all RBiH holding RS-expected ground). `engine_health_gate.cjs --horizon 188w` passes cleanly against this run — it only checks the aggregate count, not named anchors, so it structurally cannot catch this class of regression.
+
+**Bisected** (3 worktree runs): `op:doboj:boljanic_2` and `op:gracanica:petrovo_2` are cleanly isolated to somewhere within R4 Phases 1-4 / R5 Phase 2c-2d / R7 (~100 commits) — both pass at R3's closure (`7068a0c6c`), both fail at `HEAD`. `op:zvornik:zvornik` already fails at the earliest point it's checked; the anchor itself was added during R3's Tactical Group work (the check-set grew 27→31), so its true break point predates this investigation's window and is unresolved. `matched_osids` rose monotonically across all three bisection points (615→628→638) — the aggregate trend is positive even as these named anchors broke.
+
+**Action:** Documented in `docs/40_reports/CALIBRATION_MASTER.md` (2026-08-03 entry) for a dedicated combat/calibration lane to pick up. Not blocking R4 Phase 5 closure per this project's calibration-last posture. No code, canon, or baseline change from this finding.
+
+**Scope:** Docs-only. No session commit touches combat/sector/event code — verified before treating this as pre-existing rather than self-inflicted.
+
+---
+
 ## [2026-08-03] R2 packaged acceptance PASSED — v14, clean
 
 **Type:** R2 packaged-acceptance closure / evidence.

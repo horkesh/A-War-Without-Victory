@@ -1,5 +1,28 @@
 # AWWV Calibration Master Reference
 
+## 2026-08-03 R4 Phase 5 fresh-188w check: floor is stale, two anchors regressed, one is older than tracked
+
+**This entry does not re-bless a new floor.** It records a fresh, un-gated 188w observation made while running R4 Phase 5's integrated proof, per this project's own "calibration-last" posture (the floor is a regression guard, not a target — do not chase %). The finding below should route to a dedicated combat/calibration lane, not be treated as blocking R4.
+
+**What changed since the 2026-07-17 floor:** the documented floor (622/712 matched_osids, 31/31 anchors, hash `aa4302e694a6482e`) has never been re-verified by CI on this branch — `full-suite-and-fingerprint.yml` only started gating `codex/master-roadmap-execution` on 2026-08-02, and even that gate runs the vitest suite, not a live 188w scenario with anchor checks (that remains a manual/local-only process: `sim:scenario:run:188w` + `engine_health_gate.cjs`). A large volume of work (R1, R3 Tactical Groups, R4 Phases 1-4, R5 Phase 2c/2d, R7) landed on this branch in that window with no 188w check gating any of it.
+
+**Fresh run at current `HEAD`** (`apr1992_definitive_188w__63a3a0858050b865__w188_n93`, hash `bfc7e2cbebfbb9bc`): `matched_osids` **638/712** (up from 622 — aggregate fit improved), but **28/31 named anchors** (down from 31/31). The three failures are `op:zvornik:zvornik`, `op:doboj:boljanic_2`, `op:gracanica:petrovo_2` — all RBiH holding ground expected RS, all in the same Drina/Posavina corridor. `engine_health_gate.cjs --horizon 188w` passes all hard checks against this run (it only checks the aggregate `matched_osids` count and engine-health counters, not named anchors — a real blind spot for exactly this class of regression).
+
+**Bisection (three points, git worktrees, ~20-30 min per 188w run):**
+- `7068a0c6c` (R3's last `tg:`-prefixed commit, near its closure): 30/31 anchors — only `op:zvornik:zvornik` fails. `matched_osids` 628/712.
+- `15bf78d3a` (immediately before R3's Tactical Group activation, commit `2d1ab9117`): only **27** anchors existed in the check-set at this point (not 31) — R3's work added 4 new anchors, apparently including Zvornik itself. All 27 pass. `matched_osids` 615/712. **This does not prove Zvornik passed pre-R3** — it wasn't being checked yet, so its true break point is unknown and could predate this window entirely.
+- Current `HEAD`: 28/31, as above.
+
+**Conclusions:**
+1. `matched_osids` rose monotonically across all three points (615 → 628 → 638) — the aggregate historical-fit trend is genuinely positive across this whole span of work.
+2. `op:doboj:boljanic_2` and `op:gracanica:petrovo_2` are cleanly isolated: both pass at `7068a0c6c` and both fail at current `HEAD`. The regression is somewhere in the ~100 commits spanning R4 Phases 1-4, R5 Phase 2c/2d, and R7 — a combat/calibration specialist should bisect further within that narrower window, since the shared geography (both in the same corridor as Zvornik) suggests one shared cause, not two independent ones.
+3. `op:zvornik:zvornik`'s break point is **not resolved** by this investigation — it already fails at the earliest point where it's checked (`7068a0c6c`) and the anchor didn't exist as a check before that. It may be substantially older than the 2026-07-17 floor date suggests, or the floor's "31/31" claim may have been accurate only briefly before drifting immediately after. Given this project's own documented history of Zvornik-anchor fragility (a prior combat-predictor change broke it despite passing 40w and two independent reviews — caught only because 188w validation is mandatory before merge for combat-affecting changes), this is worth a dedicated look, but a proper bisection needs to go back further than this session tested.
+4. None of this session's own commits are implicated — all are docs/test/CI-config/UI-only changes verified not to touch combat, sector, or event-firing code.
+
+**Scope:** No canon, `docs/10_canon/FORAWWV.md`, or code change from this entry. No baseline re-blessed. `data/calibration/engine_health_thresholds.json` untouched — 638 already clears the existing 622 floor with margin.
+
+---
+
 ## 2026-07-17 Campaign-QA Organizational-Policy Re-Floor
 
 The post-RS acceptance integration contract has exact 188-week runs at `runs/eh_local_canon40_a_20260717/apr1992_definitive_188w__63a3a0858050b865__w188_n0` and `runs/eh_local_canon40_b_20260717/...`. Both produce final state hash `aa4302e694a6482e`, `matched_osids=622/712`, `zero_eligible_ops=0`, `dead_ops=3`, `ghost_destroyed=0`, `stranded_brigades=3`, `consistency_failures=0`, and K:W `3.813` (`105,931` killed / `403,878` wounded). Initial save, final save, run summary, control delta, and formation delta are byte-identical across the pair. The endpoint passes 31/31 anchors, including `op:brcko:brcko` and `brcko_corridor_jan1993`, and contains zero pre-turn-40 RBiH-HRHB control events. The first 622 pair is lineage only because pre-publication review found three turn-21 allied seizures through rear-pocket consolidation.
