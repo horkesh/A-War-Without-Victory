@@ -36,6 +36,7 @@
 import type {
     BrigadeMovementStatus,
     BrigadePosture,
+    CorpsFrontSector,
     FactionId,
     FormationAssignment,
     FormationId,
@@ -47,6 +48,9 @@ import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import type { EnsureMinimumSectorCoverageOccupancyStrategy } from './brigade_assignment.js';
 import type { SectorFrontEdgeAdjacencyStrategy } from './corps_front_sectors.js';
 import type { SectorFrontEdgeRelationTestCounters } from './sector_front_edge_relation.js';
+import type { SectorTopologyMutation } from './sector_topology_mutation_journal.js';
+import type { SectorTopologyDiagnostic } from './sector_topology_diagnostic.js';
+import type { SectorTopologyDeterministicTrace } from './sector_topology_trace.js';
 
 // ── 1. Invocation modes ──────────────────────────────────────────────────
 
@@ -241,7 +245,13 @@ export interface SectorTopologySolveInput {
     readonly namedOfficerData: readonly SectorTopologyNamedOfficerRow[];
 }
 
-// ── 7.1 Pure solve output (Task 3 will populate; declared here so Task 2's
-//        capture-side types and Task 3's solve-side types share one module) ──
+// ── 7.1 Pure solve output ────────────────────────────────────────────────
 
-export type { CorpsFrontSector } from '../../state/game_state.js';
+export type { CorpsFrontSector };
+
+export interface SectorTopologySolveOutput {
+    readonly sectors: Readonly<Record<string, CorpsFrontSector>>;
+    readonly mutations: readonly SectorTopologyMutation[];
+    readonly diagnostics: readonly SectorTopologyDiagnostic[];
+    readonly trace: SectorTopologyDeterministicTrace;
+}
