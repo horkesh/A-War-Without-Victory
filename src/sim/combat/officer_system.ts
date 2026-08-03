@@ -133,14 +133,28 @@ function replacementMatterMatches(
 // Officer lookups
 // ═══════════════════════════════════════════════════════════════════════════
 
+type CorpsCommanderResult<S extends SectorTopologyNarrowReadState> = {
+    data: S['military']['named_officer_data'] extends readonly (infer D)[] | undefined ? D : never;
+    state: S['military']['named_officers'] extends Record<string, infer T> | undefined ? T : never;
+};
+
 /**
  * Get the named officer currently commanding a corps.
  * Returns null if no named officer is assigned.
+ *
+ * Generic over the caller's exact `state` shape so the return type resolves
+ * to the FULL `NamedOfficer`/`NamedOfficerState` for real-`GameState`
+ * callers (`getOfficerCombatMod`, `processOfficerSuccession`, which read
+ * fields — `defensive_skill`, `acting_commander`, etc. — beyond the narrow
+ * type) while still resolving to the narrow row types for callers passing a
+ * `SectorTopologyNarrowReadState`-shaped detached read state. A single
+ * non-generic narrow return type would break the wide callers; a single
+ * non-generic wide return type would defeat the whole point of narrowing.
  */
-export function getCorpsCommander(
+export function getCorpsCommander<S extends SectorTopologyNarrowReadState>(
     corpsId: string,
-    state: SectorTopologyNarrowReadState
-): { data: NamedOfficer; state: NamedOfficerState } | null {
+    state: S
+): CorpsCommanderResult<S> | null {
     const officers = state.military.named_officers;
     const officerData = state.military.named_officer_data;
     if (!officers || !officerData) return null;
@@ -150,7 +164,7 @@ export function getCorpsCommander(
         const os = officers[id]!;
         if (os.status === 'active' && os.assigned_corps_id === corpsId) {
             const data = officerData.find(o => o.id === id);
-            if (data) return { data, state: os };
+            if (data) return { data, state: os } as CorpsCommanderResult<S>;
         }
     }
     return null;

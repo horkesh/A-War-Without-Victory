@@ -63,13 +63,20 @@ export function getSettlementSideLegacy(
 }
 
 /**
- * Narrow read contract for `getPoliticalControllerOSID`: only `political`.
- * `GameState` structurally satisfies this, so every existing caller keeps
- * compiling unchanged (see R5 Phase 2e plan section 6's narrow-read-interface
- * note). Declared locally rather than imported from a `sim/combat` module to
- * avoid a state-layer -> sim-layer dependency.
+ * Narrow read contract for `getPoliticalControllerOSID`: only
+ * `political.political_controllers`. `GameState` structurally satisfies
+ * this, so every existing caller keeps compiling unchanged (see R5 Phase 2e
+ * plan section 6's narrow-read-interface note). Declared locally rather
+ * than imported from a `sim/combat` module to avoid a state-layer ->
+ * sim-layer dependency.
+ *
+ * Deliberately NOT `Pick<GameState, 'political'>` (which keeps `.political`
+ * at the full, wide `PoliticalState` shape) -- narrowed one level further to
+ * just the one field actually read, so a detached read state built only
+ * from `political_controllers` (no other `PoliticalState` fields) can
+ * satisfy this without a partial-object cast.
  */
-export type PoliticalControllerReadState = Pick<GameState, 'political'>;
+export type PoliticalControllerReadState = { political: { political_controllers?: Record<string, string | null | undefined> } };
 
 /**
  * Get political controller at OSID granularity (HoI ZoC / spawn-by-OSID).

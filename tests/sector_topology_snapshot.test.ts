@@ -254,7 +254,7 @@ describe('captureSectorTopologySolveInput — static read-inventory (no fixture 
         const raw = fs.readFileSync(path.resolve('src/sim/combat/officer_system.ts'), 'utf8');
         const region = extractRegion(
             raw,
-            'export function getCorpsCommander(',
+            'export function getCorpsCommander<',
             '\n/**\n * Get the army-level commander for a faction.',
         );
         assertOnlyAllowedFields(region, 'political', ALLOWED_POLITICAL_FIELDS);
