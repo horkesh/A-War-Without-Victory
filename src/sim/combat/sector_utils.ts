@@ -25,6 +25,7 @@ import {
     GRAZ_EXEMPT_RS_CORPS,
     GRAZ_EXEMPT_HRHB_CORPS,
 } from '../local_truces.js';
+import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 
 /** Fraction of entrenchment_turns retained when a brigade is reassigned to a different sub-segment. */
 export const REASSIGNMENT_ENTRENCHMENT_RETAIN = 0.3;
@@ -369,7 +370,7 @@ export function getCorpsForFaction(
 /**
  * Get sorted list of faction IDs in the game.
  */
-export function getFactions(state: GameState): FactionId[] {
+export function getFactions(state: SectorTopologyNarrowReadState): FactionId[] {
     return (state.factions ?? []).map(f => f.id).sort(strictCompare);
 }
 

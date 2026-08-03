@@ -48,6 +48,7 @@ import {
 import { getCorpsArmyPriorities } from './bot_strategy.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
+import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 
 // ── Imported from extracted modules ──────────────────────────────────────
 import { buildFriendlyComponents, getSectorComponent, getSectorFrontOsids, getSectorUniqueFrontOsids, canAnyBrigadeReachAny, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
@@ -243,7 +244,7 @@ function _perfTime<T>(label: string, fn: () => T): T {
  * Lazy-loaded `node:fs` and `node:path` so this module remains tree-shakeable
  * for browser builds.
  */
-function _flushInvocation(state: GameState, totalNs: bigint, isFinalPass: boolean): string | null {
+function _flushInvocation(state: SectorTopologyNarrowReadState, totalNs: bigint, isFinalPass: boolean): string | null {
     if (!SECTOR_PARTITION_PERF_FLAG) return null;
     if (!_activeInvocation) return null;
     const fs = getNodeBuiltinModule<NodeFsSync>('node:fs');
@@ -358,7 +359,7 @@ export const __sectorPartitionPerfTestHooks = {
  *   active faction. The legacy subset builders remain independently callable in tests.
  */
 export function buildCorpsFrontSectors(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     edges: EdgeRecord[],
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
@@ -786,7 +787,7 @@ export function buildCorpsFrontSectors(
 
 /** @internal Exact legacy fixed-point sequence retained for equivalence/property tests. */
 export function __buildCorpsFrontSectorsWithoutFixedPointShortcuts(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     edges: EdgeRecord[],
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
@@ -1121,7 +1122,7 @@ function rescueUnassignedLoanedElitesInTerritory(
 }
 
 function collectUnresolvedSectorBrigades(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     sectors: Record<string, CorpsFrontSector>,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
@@ -1171,7 +1172,7 @@ export function emitFinalUnresolvedSectorWarnings(
 function recomputeMetricsByFaction(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
 ): void {
     const byFaction = new Map<FactionId, CorpsFrontSector[]>();
     for (const sector of sectors) {
@@ -1285,7 +1286,7 @@ function isSectorUnstaffableByFaction(
     sector: CorpsFrontSector,
     siblingSectors: CorpsFrontSector[],
     factionBrigades: FormationState[],
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
@@ -1372,7 +1373,7 @@ function isSectorUnstaffableByFaction(
 
 export function annotateUnstaffedFrontSectors(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     _spatial?: SpatialContext,
@@ -1418,7 +1419,7 @@ export function annotateUnstaffedFrontSectors(
 
 function absorbEmptyStaffableSiblingSectors(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     sharedBoundaryAdj: Map<Osid, Osid[]>,
@@ -1671,7 +1672,7 @@ function enforceFinalSectorGeometryInvariants(
 
 export function applyFinalSectorOwnerTruthPass(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     options?: {
@@ -2392,7 +2393,7 @@ export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSect
 
 function recoverDroppedFrontEdges(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     adjacency: Map<Osid, Osid[]>,
     sharedBoundaryAdj: Map<Osid, Osid[]>,
@@ -2666,7 +2667,7 @@ function recoverDroppedFrontEdges(
 }
 
 function getRecoveredFrontClaimSetup(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     faction: FactionId,
     corpsIds: FormationId[],
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
@@ -2835,7 +2836,7 @@ function pickRecoveredFrontEdgeRecipient(
 
 function sealMergedSectorTruth(
     sectors: Record<string, CorpsFrontSector>,
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
@@ -3027,7 +3028,7 @@ function shareFrontEdgeEndpoint(a: CorpsFrontSector, b: CorpsFrontSector): boole
 }
 
 function buildFriendlyOsidsFromState(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     _adjacency: Map<Osid, Osid[]>,
     faction: FactionId,
 ): Set<string> {
@@ -3052,7 +3053,7 @@ function buildFriendlyOsidsFromState(
 
 export function relocateMisassignedBrigadesToTruthfulOwners(
     sectors: CorpsFrontSector[],
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
 ): void {
@@ -3519,7 +3520,7 @@ function areSectorsFrontEdgeAdjacent(
 // ═══════════════════════════════════════════════════════════════════════════
 
 function buildFactionSectors(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     faction: FactionId,
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     adjacency: Map<Osid, Osid[]>,

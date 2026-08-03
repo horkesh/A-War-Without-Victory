@@ -19,12 +19,20 @@
  *
  * This type narrows which TOP-LEVEL GameState keys a function may declare it
  * needs; it does not itself restrict which SUB-fields of `meta`/`political`/
- * `military` are read — that discipline is enforced by direct code review
- * and the static read-inventory tests in `sector_topology_snapshot.test.ts`,
+ * `military`/`factions` are read — that discipline is enforced by direct code
+ * review and the static read-inventory tests in `sector_topology_snapshot.test.ts`,
  * consistent with how this codebase already gates other read boundaries
  * (e.g. the `WarDataSnapshot` warroom boundary).
+ *
+ * Includes `factions` because plan section 6's own read allow-list names it
+ * explicitly ("Factions | state.factions[].id | factionIds..."), and
+ * `getFactions(state)` (which reads exactly that field) is called from
+ * several functions in this call graph (e.g. `annotateUnstaffedFrontSectors`,
+ * `buildCorpsFrontSectors`, `buildFactionSectors`) — confirmed by reading
+ * their bodies during the Task 3 narrowing sweep, not assumed from the
+ * plan's table alone.
  */
 
 import type { GameState } from '../../state/game_state.js';
 
-export type SectorTopologyNarrowReadState = Pick<GameState, 'meta' | 'political' | 'military'>;
+export type SectorTopologyNarrowReadState = Pick<GameState, 'meta' | 'political' | 'military' | 'factions'>;
