@@ -47,6 +47,7 @@ import {
 import { getCorpsArmyPriorities } from './bot_strategy.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
+import type { SectorTopologyDiagnosticCollector } from './sector_topology_diagnostic.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 import type { SectorTopologySpatialSnapshot } from './sector_topology_solver_types.js';
@@ -372,6 +373,7 @@ export function buildCorpsFrontSectors(
     frontEdgeAdjacencyStrategy: SectorFrontEdgeAdjacencyStrategy = 'invocation-front-edge-relation',
     frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters,
     mutationRecorder?: SectorTopologyMutationRecorder,
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): Record<string, CorpsFrontSector> {
     if (frontEdgeAdjacencyStrategy !== 'invocation-front-edge-relation'
         && frontEdgeAdjacencyStrategy !== 'test-only-legacy-edge-adjacency') {
@@ -462,7 +464,7 @@ export function buildCorpsFrontSectors(
 
     for (const faction of factions) {
         const factionSectors = _perfTime(`buildFactionSectors:${faction}`, () => buildFactionSectors(
-            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, globalEdgeMeta, formations, activeCombatFormationScanIds, reverseMap, centroids, spatial, occupancyStrategy, frontEdgeRelationForFaction, mutationRecorder
+            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, globalEdgeMeta, formations, activeCombatFormationScanIds, reverseMap, centroids, spatial, occupancyStrategy, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector
         ));
         for (const sector of factionSectors) {
             result[sector.sector_id] = sector;
@@ -562,9 +564,9 @@ export function buildCorpsFrontSectors(
     for (const sectorId of postInvariantEmptiedSectorIds) {
         delete result[sectorId];
     }
-    _perfTime('sealMergedSectorTruth:1', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder));
+    _perfTime('sealMergedSectorTruth:1', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
     _perfTime('relocateMisassignedBrigadesToTruthfulOwners', () => relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency));
-    _perfTime('sealMergedSectorTruth:2', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder));
+    _perfTime('sealMergedSectorTruth:2', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
     const prunedGhostArtifacts = _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));
     const recoveredDroppedFrontEdges = _perfTime('recoverDroppedFrontEdges:1', () => recoverDroppedFrontEdges(
         result,
@@ -582,14 +584,15 @@ export function buildCorpsFrontSectors(
         { occupancyStrategy },
         frontEdgeRelationForFaction,
         mutationRecorder,
+        diagnosticCollector,
     ));
     // Skip the convergence segment only when every producer since seal pass 2
     // reports no mutation. A prune deletion is independently dirty even when
     // edge recovery has nothing eligible to rebuild.
     if (!useFixedPointShortcuts || prunedGhostArtifacts || recoveredDroppedFrontEdges) {
-        _perfTime('sealMergedSectorTruth:3', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder));
+        _perfTime('sealMergedSectorTruth:3', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
         _perfTime('pruneGhostArtifactSectors:2', () => pruneGhostArtifactSectors(result));
-        _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache, { occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder));
+        _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache, { occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
     }
 
     // Final geometry barrier: late recovery and seal passes can still leave
@@ -648,7 +651,7 @@ export function buildCorpsFrontSectors(
     // after the final geometry rebuild. Run one last live-owner sealing pass so
     // overlapping same-corps fragments are absorbed before final packet truth is
     // synchronized into formation assignments and UI-facing sector geometry.
-    _perfTime('sealMergedSectorTruth:4', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder));
+    _perfTime('sealMergedSectorTruth:4', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
     _perfTime('pruneGhostArtifactSectors:4', () => pruneGhostArtifactSectors(result));
 
     // Merge passes can zero density/power/threat when they union sectors. Refresh
@@ -658,11 +661,11 @@ export function buildCorpsFrontSectors(
     // Final packet truth must be reconciled before the last late seal. Any sector
     // bucket that does not physically own its brigade is false final state and must
     // be moved or dropped before the closing absorb/seal pass serializes assignments.
-    _perfTime('applyFinalSectorOwnerTruthPass:1', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder));
-    _perfTime('sealMergedSectorTruth:5', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder));
+    _perfTime('applyFinalSectorOwnerTruthPass:1', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder, diagnosticCollector));
+    _perfTime('sealMergedSectorTruth:5', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
     _perfTime('pruneGhostArtifactSectors:5', () => pruneGhostArtifactSectors(result));
     _perfTime('rescueUnassignedLoanedElitesInTerritory', () => rescueUnassignedLoanedElitesInTerritory(result, formations));
-    _perfTime('applyFinalSectorOwnerTruthPass:2', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder));
+    _perfTime('applyFinalSectorOwnerTruthPass:2', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder, diagnosticCollector));
     const _absorbed = _perfTime('absorbEmptyStaffableSiblingSectors', () => absorbEmptyStaffableSiblingSectors(
         result,
         state,
@@ -690,7 +693,7 @@ export function buildCorpsFrontSectors(
                 repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
             }
         });
-        _perfTime('applyFinalSectorOwnerTruthPass:3', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder));
+        _perfTime('applyFinalSectorOwnerTruthPass:3', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder, diagnosticCollector));
     }
     let finalTerritoryRepaired = false;
     _perfTime('repairDisconnectedTerritory:final', () => {
@@ -710,7 +713,7 @@ export function buildCorpsFrontSectors(
     // Owner truth was already sealed by pass 2 (or pass 3 after absorption).
     // Re-run it only when final territory repair exercised a mutation path.
     if (!useFixedPointShortcuts || finalTerritoryRepaired) {
-        _perfTime('applyFinalSectorOwnerTruthPass:4', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder));
+        _perfTime('applyFinalSectorOwnerTruthPass:4', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder, diagnosticCollector));
     }
     _perfTime('sealWarFrontFactionSideCoverage:final', () => sealWarFrontFactionSideCoverage(result, osidFrontEdges, adjacency, globalEdgeMeta));
     const _postCoverageAbsorbed = _perfTime('absorbUnstaffedSiblingFrontSectors:post-side-coverage', () => {
@@ -726,7 +729,7 @@ export function buildCorpsFrontSectors(
     });
     if (_postCoverageAbsorbed) {
         _perfTime('pruneGhostArtifactSectors:post-side-coverage', () => pruneGhostArtifactSectors(result));
-        _perfTime('applyFinalSectorOwnerTruthPass:post-side-coverage', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder));
+        _perfTime('applyFinalSectorOwnerTruthPass:post-side-coverage', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder, diagnosticCollector));
     }
     _perfTime('canonicalizeSameFactionEdgeOwnership', () => {
         const emptied = canonicalizeSameFactionEdgeOwnership(result, formations, globalEdgeMeta, spatial);
@@ -754,6 +757,7 @@ export function buildCorpsFrontSectors(
             { allowUnstaffedFrontSectors: true, occupancyStrategy },
             frontEdgeRelationForFaction,
             mutationRecorder,
+            diagnosticCollector,
         ));
     }
     _perfTime('annotateUnstaffedFrontSectors', () => annotateUnstaffedFrontSectors(result, state, formations, adjacency, spatial));
@@ -774,7 +778,7 @@ export function buildCorpsFrontSectors(
         state.military.unresolved_sector_brigades = _unresolvedBrigades;
     }
     if (isFinalPass) {
-        emitFinalUnresolvedSectorWarnings(_unresolvedBrigades, formations);
+        emitFinalUnresolvedSectorWarnings(_unresolvedBrigades, formations, diagnosticCollector);
     }
 
     // Flush jsonl line for this invocation (no-op when flag is OFF).
@@ -1159,14 +1163,15 @@ function collectUnresolvedSectorBrigades(
 export function emitFinalUnresolvedSectorWarnings(
     unresolved: FormationId[],
     formations: Record<FormationId, SectorTopologyWorkingFormation>,
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): void {
     for (const formationId of unresolved) {
         const formation = formations[formationId];
         if (!formation) continue;
-        emitRoutineConsoleWarn(
-            `[brigade_assignment] UNRESOLVED ${formationId} (${formation.personnel ?? 0} pers): ` +
-            `fell through sector pipeline, corps=${getFormationCorpsId(formation)}`
-        );
+        const message = `[brigade_assignment] UNRESOLVED ${formationId} (${formation.personnel ?? 0} pers): ` +
+            `fell through sector pipeline, corps=${getFormationCorpsId(formation)}`;
+        emitRoutineConsoleWarn(message);
+        diagnosticCollector?.record('warn', 'emitFinalUnresolvedSectorWarnings', message);
     }
 }
 
@@ -1681,6 +1686,7 @@ export function applyFinalSectorOwnerTruthPass(
         occupancyStrategy?: EnsureMinimumSectorCoverageOccupancyStrategy;
     },
     mutationRecorder?: SectorTopologyMutationRecorder,
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): void {
     const sectorList = Object.values(sectors);
     _perfTime('applyFinalSectorOwnerTruthPass:relocate-misassigned', () =>
@@ -1707,6 +1713,7 @@ export function applyFinalSectorOwnerTruthPass(
                     allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0,
                     allowCollapsedRearGuardAbsorption: options?.allowCollapsedRearGuardAbsorption === true,
                 },
+                diagnosticCollector,
             ));
         _perfTime('applyFinalSectorOwnerTruthPass:rescue-adjacent', () =>
             rescueAdjacentLiveOwnersForEmptyFrontSectors(
@@ -2411,6 +2418,7 @@ function recoverDroppedFrontEdges(
     },
     frontEdgeRelationProvider?: SectorFrontEdgeRelationProvider,
     mutationRecorder?: SectorTopologyMutationRecorder,
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): boolean {
     let recoveredAny = false;
 
@@ -2634,7 +2642,7 @@ function recoverDroppedFrontEdges(
 
             assignTerritoryVoronoi(factionSectors, adjacency, friendlyOsids, osidToCorps);
             repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
-            classifyBrigadesByTerritory(factionSectors, faction, formations, adjacency, friendlyOsids, componentOf, buildCorpsCommanderProfiles(state, factionSectors), state.military.brigade_sector_override, state);
+            classifyBrigadesByTerritory(factionSectors, faction, formations, adjacency, friendlyOsids, componentOf, buildCorpsCommanderProfiles(state, factionSectors), state.military.brigade_sector_override, state, diagnosticCollector);
             assignCrossCorpsEnclaveDefenders(factionSectors, formations, faction, componentOf);
             ensureMinimumSectorCoverage(
                 factionSectors,
@@ -2657,6 +2665,7 @@ function recoverDroppedFrontEdges(
                 adjacency,
                 friendlyOsids,
                 { allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0 },
+                diagnosticCollector,
             );
             reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
             recomputeSectorPowerAndThreat(factionSectors, formations, faction, state);
@@ -2851,6 +2860,7 @@ function sealMergedSectorTruth(
     },
     frontEdgeRelationProvider?: SectorFrontEdgeRelationProvider,
     mutationRecorder?: SectorTopologyMutationRecorder,
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): void {
     const sectorList = Object.values(sectors);
     const byFaction = new Map<FactionId, CorpsFrontSector[]>();
@@ -2883,6 +2893,7 @@ function sealMergedSectorTruth(
                 allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0,
                 allowCollapsedRearGuardAbsorption: options?.allowCollapsedRearGuardAbsorption === true,
             },
+            diagnosticCollector,
         ));
         _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(factionSectors));
         _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(
@@ -2922,6 +2933,7 @@ function sealMergedSectorTruth(
                     allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0,
                     allowCollapsedRearGuardAbsorption: options?.allowCollapsedRearGuardAbsorption === true,
                 },
+                diagnosticCollector,
             ));
             _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(refreshedFactionSectors));
             _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(
@@ -3537,6 +3549,7 @@ function buildFactionSectors(
     occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
     frontEdgeRelationProvider?: SectorFrontEdgeRelationProvider,
     mutationRecorder?: SectorTopologyMutationRecorder,
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): CorpsFrontSector[] {
     // Step 1: Find corps for this faction
     const corpsIds = getCorpsForFaction(formations, faction);
@@ -3868,7 +3881,7 @@ function buildFactionSectors(
         );
         const playerOverrides = state.military.brigade_sector_override;
         _perfTime(`buildFactionSectors:${faction}:brigade-classification:territory-assignment`,
-            () => classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, profiles, playerOverrides, state),
+            () => classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, profiles, playerOverrides, state, diagnosticCollector),
         );
 
         // Step 6b: Cross-corps enclave defense
@@ -3943,6 +3956,7 @@ function buildFactionSectors(
                 adjacency,
                 friendlyOsids,
                 { allowDeepRearOwnership: (state.meta?.turn ?? 0) === 0 },
+                diagnosticCollector,
             );
         });
 

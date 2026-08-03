@@ -30,6 +30,7 @@ import {
 } from './sector_build_derived_context.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
+import type { SectorTopologyDiagnosticCollector } from './sector_topology_diagnostic.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
@@ -443,6 +444,7 @@ export function classifyBrigadesByTerritory(
     commanderProfiles: Map<string, CorpsCommanderProfile>,
     playerOverrides?: Record<string, string>, // brigadeId → sector_id
     state?: SectorTopologyNarrowReadState,
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): void {
     if (sectors.length === 0) return;
 
@@ -469,7 +471,9 @@ export function classifyBrigadesByTerritory(
             const brigComp = componentOf.get(f.location_osid) ?? -2;
             const sectorComp = getSectorComponent(sector, componentOf);
             if (sectorComp !== brigComp) {
-                emitRoutineConsoleWarn(`[brigade_assignment] Ignored stale player override ${bid} -> ${sector.sector_id}: component ${brigComp} cannot reach component ${sectorComp}`);
+                const message = `[brigade_assignment] Ignored stale player override ${bid} -> ${sector.sector_id}: component ${brigComp} cannot reach component ${sectorComp}`;
+                emitRoutineConsoleWarn(message);
+                diagnosticCollector?.record('warn', 'classifyBrigadesByTerritory', message);
                 continue;
             }
             sector.assigned_brigade_ids.push(bid);
@@ -855,7 +859,9 @@ export function classifyBrigadesByTerritory(
         for (const bid of [...pool]) {
             const f = formations[bid];
             if (!f?.location_osid) {
-                emitRoutineConsoleWarn(`[brigade_assignment] UNASSIGNED ${bid}: no location_osid`);
+                const message = `[brigade_assignment] UNASSIGNED ${bid}: no location_osid`;
+                emitRoutineConsoleWarn(message);
+                diagnosticCollector?.record('warn', 'classifyBrigadesByTerritory', message);
                 continue;
             }
             const brigComp = componentOf.get(f.location_osid) ?? -2;
@@ -1002,7 +1008,11 @@ export function classifyBrigadesByTerritory(
                     const idx = sector.assigned_brigade_ids.indexOf(bid);
                     if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                     territoryMatches[0]!.assigned_brigade_ids.push(bid);
-                    emitRoutineConsoleDebug(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`);
+                    {
+                        const message = `[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`;
+                        emitRoutineConsoleDebug(message);
+                        diagnosticCollector?.record('debug', 'classifyBrigadesByTerritory', message);
+                    }
                     continue;
                 }
                 const sameCorps = sectors
@@ -1027,7 +1037,11 @@ export function classifyBrigadesByTerritory(
                     const idx = sector.assigned_brigade_ids.indexOf(bid);
                     if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                     sameCorps[0]!.sector.assigned_brigade_ids.push(bid);
-                    emitRoutineConsoleDebug(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to ${sameCorps[0]!.sector.sector_id}`);
+                    {
+                        const message = `[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to ${sameCorps[0]!.sector.sector_id}`;
+                        emitRoutineConsoleDebug(message);
+                        diagnosticCollector?.record('debug', 'classifyBrigadesByTerritory', message);
+                    }
                     continue;
                 }
                 const idx = sector.assigned_brigade_ids.indexOf(bid);
@@ -1083,9 +1097,11 @@ export function classifyBrigadesByTerritory(
                 const idx = sector.assigned_brigade_ids.indexOf(bid);
                 if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                 best.sector.assigned_brigade_ids.push(bid);
-                emitRoutineConsoleDebug(
-                    `[brigade_assignment] rear-guard rebalance ${bid}: ${sector.sector_id} (dist ${ownDist}) -> ${best.sector.sector_id} (dist ${best.dist})`
-                );
+                {
+                    const message = `[brigade_assignment] rear-guard rebalance ${bid}: ${sector.sector_id} (dist ${ownDist}) -> ${best.sector.sector_id} (dist ${best.dist})`;
+                    emitRoutineConsoleDebug(message);
+                    diagnosticCollector?.record('debug', 'classifyBrigadesByTerritory', message);
+                }
             }
         }
     }
@@ -1266,6 +1282,7 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     options?: { allowDeepRearOwnership?: boolean; allowCollapsedRearGuardAbsorption?: boolean },
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): void {
     const sectorClaims = sectors.map((sector) => {
         const frontSet = getSectorFrontOsids(sector);
@@ -1377,7 +1394,9 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
             const ownCorpsSectors = sectorClaims.filter(c => c.sector.corps_id === corpsId);
             const homeStillOwnCorps = ownCorpsSectors.some(c => c.territorySet.has(formation.home_osid!));
             if (homeStillOwnCorps) {
-                emitRoutineConsoleDebug(`[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`);
+                const message = `[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`;
+                emitRoutineConsoleDebug(message);
+                diagnosticCollector?.record('debug', 'rehomeUnassignedBrigadesToPhysicalSectorOwners', message);
                 continue;
             }
         }
@@ -1416,7 +1435,11 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
                     collapsedBest.sector.reserve_brigade_ids.push(fid);
                 }
                 assigned.add(fid);
-                emitRoutineConsoleDebug(`[brigade_assignment] Rehomed collapsed rear-guard ${fid} into truthful sector owner ${collapsedBest.sector.sector_id} (${collapsedBest.claim})`);
+                {
+                    const message = `[brigade_assignment] Rehomed collapsed rear-guard ${fid} into truthful sector owner ${collapsedBest.sector.sector_id} (${collapsedBest.claim})`;
+                    emitRoutineConsoleDebug(message);
+                    diagnosticCollector?.record('debug', 'rehomeUnassignedBrigadesToPhysicalSectorOwners', message);
+                }
                 continue;
             }
         }
@@ -1431,7 +1454,11 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
             best.sector.reserve_brigade_ids.push(fid);
         }
         assigned.add(fid);
-        emitRoutineConsoleDebug(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${best.sector.sector_id} (${best.claim})`);
+        {
+            const message = `[brigade_assignment] Rehomed ${fid} into truthful sector owner ${best.sector.sector_id} (${best.claim})`;
+            emitRoutineConsoleDebug(message);
+            diagnosticCollector?.record('debug', 'rehomeUnassignedBrigadesToPhysicalSectorOwners', message);
+        }
     }
 }
 
