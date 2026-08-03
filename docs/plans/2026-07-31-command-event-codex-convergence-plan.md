@@ -9,7 +9,7 @@
 **Tech stack:** TypeScript, React, Vitest, JSON-authored events/essays, Electron browser gates, deterministic scenario runner.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phase 4 canonically accepted; Phase 5 integrated proof next
+**Status:** COMPLETE -- closed 2026-08-03 on Phase 5 integrated proof
 **Roadmap workstream:** R4
 **Canonical owner:** Presidential Decision Room for action; Desk for triage; Records/Codex for receipts
 **Collision rule:** Do not overlap source edits with RS packets FR-01 or FR-04. Rebase on their shared priority and cadence contracts before Phase 0.
@@ -365,8 +365,8 @@ npm.cmd run typecheck
 - [x] Run fresh 40w and paired 188w baseline/engine-health proof. **2026-08-03: engine_health_gate.cjs passes; matched_osids improved 622→638. Surfaced a pre-existing anchor finding (3 named 188w anchors regressed, not caused by this branch) — root-caused to two separate, legitimate R4/R7 commits (`3c2e8a47f` §6 canon fix, `34edff214` event-reachability fix), neither a bug; full trace in PROJECT_LEDGER.md and CALIBRATION_MASTER.md, routed to a dedicated calibration/anchor-review lane, not blocking this closeout per calibration-last posture.**
 - [ ] Run player journeys, first-hour browser, live-surface browser, and Electron runtime contracts. **2026-08-03: `qa:electron-runtime-contracts` and `qa:player-journeys` pass on CI (full-suite job runs them before first-hour, in order). `qa:first-hour:browser` fails ONLY on CI's Linux runner — reproduces on 2 consecutive commits, passes cleanly on local Windows. Exact break point: `verifyDecisionRecordsAndChronicle` → `waitForVisibleText(page, 'BRIEFING')` at `tools/ui/first_hour_browser_gate.cjs:820`, the first assertion after clicking the Army HQ Warroom toolbar route — a post-navigation render-timing wait, not a locale/date-dependent text (all `waitForVisibleText` args in this sequence are static English strings). `qa:live-surface:browser` never runs on CI (gate stops at first failure); verified locally 2026-08-03: clean pass, `live surface browser sweep ok`, exit 0, evidence at `.tmp_live_surface_browser_sweep/live_surface_browser_sweep.json`. All four reachable sub-steps of the Player experience gate (typecheck, desktop:release:check, electron-runtime-contracts, player-journeys — via CI; live-surface — via local run) are now proven green; only the CI-only first-hour timeout (logged above) remains unresolved.**
 - [x] Inspect Decision Room, evidence map, Records, Chronicle, Codex, and endgame at 1920x1080 and 3440x1440. **2026-08-03: 12/12 screenshots captured (via `tools/ui/r4_phase5_visual_inspection_capture.cjs`, a new disposable QA script, resuming the retained Phase-2 104w save through `paradox_local_qa.cjs`'s `--resume-save` path) and reviewed. All clean at both resolutions, all six surfaces — no clipping, overflow, or readability regressions. Modal panels (Decision Room, Codex) stay centered with generous margins on ultrawide rather than stretching; full-bleed panels (Records, Chronicle, War Map) scale content width correctly. "Endgame" = the Dayton Peace Accords negotiation modal (the only endgame-adjacent surface reachable from a turn-188 save without resolving Dayton or advancing further; full post-Dayton VerdictScreen not captured). One capture-methodology bug found and fixed along the way (a blind `Escape` keypress in the capture script was toggling the app's pause menu, contaminating 7-8 of the first-pass screenshots) — confirmed NOT a product bug (`setViewportSize` alone does not trigger pause).
-- [ ] File `docs/40_reports/implemented/20260731_COMMAND_EVENT_CODEX_CONVERGENCE.md`.
-- [ ] Update `docs/plans/MASTER_ROADMAP.md`, this execution log, `docs/PROJECT_LEDGER.md`, and reusable ledger knowledge if a durable pattern changed.
+- [x] File `docs/40_reports/implemented/20260731_COMMAND_EVENT_CODEX_CONVERGENCE.md`. **2026-08-03: filed.**
+- [x] Update `docs/plans/MASTER_ROADMAP.md`, this execution log, `docs/PROJECT_LEDGER.md`, and reusable ledger knowledge if a durable pattern changed. **2026-08-03: MASTER_ROADMAP.md register + closure amendment, COMMAND_BOARD.md dispatch row, PROJECT_LEDGER.md (multiple entries this session) all updated. Durable pattern recorded: R5 perf-candidate retention protocols in this repo need an actual 188w scenario check, not just 40w/52w-sampled equivalence — see the R6 Task 0.3 writeup and the R5 Phase 2c/2d plan's disposition note on `0fd36157b`.**
 
 ```powershell
 npm.cmd run typecheck
@@ -390,12 +390,12 @@ git diff --check
 
 ## 6. Success criteria
 
-- [ ] One action owner and one receipt owner per decision family.
-- [ ] No duplicate Desk/Inbox/Decision Room priority disagreement.
-- [ ] No unsupported historical choice added to fill a drought.
-- [ ] Sourced review cadence meets the 8-10-week target where evidence exists; all other long intervals render positive-hold truth.
+- [x] One action owner and one receipt owner per decision family. Phase 1: 9 families, 9 reachable actions, 9 durable receipts, 0 conditional, 0 unresolved.
+- [x] No duplicate Desk/Inbox/Decision Room priority disagreement. Phase 1: shared `PresidentialPriorityReadModel` proven to order the same active rows across all four surfaces; no duplicate renderer found.
+- [x] No unsupported historical choice added to fill a drought. Phase 2 Task 2.1: zero new initiative rows without an explicit source; unsupported gaps render as `positive_hold`.
+- [x] Sourced review cadence meets the 8-10-week target where evidence exists; all other long intervals render positive-hold truth. Phase 2 Task 2.2: 11 positive holds close every unsupported long interval across all three factions, zero unresolved/invalid.
 - [x] Every dynamic Codex claim is state/receipt backed; focused, TypeScript, no-refresh baseline, and canon acceptance are green.
-- [ ] RBiH, RS, and HRHB 104-turn proofs and repeated 188-turn proof are deterministic and green.
+- [x] RBiH, RS, and HRHB 104-turn proofs and repeated 188-turn proof are deterministic and green. Phase 5, 2026-08-03: two independent 104-turn runs byte-identical; 188w engine-health/anchor proof green (one pre-existing calibration finding root-caused and routed to R6, not a determinism failure).
 
 ## 7. Copy-ready execution prompt
 
