@@ -97,6 +97,7 @@ describe.skipIf(!hasFixture)('captureSectorTopologySolveInput — fidelity again
         const sourceFormation = state.military.formations![sampleId]!;
         const capturedFormation = input.formations.get(sampleId)!;
         expect(capturedFormation.faction).toBe(sourceFormation.faction);
+        expect(capturedFormation.name).toBe(sourceFormation.name);
         expect(capturedFormation.status).toBe(sourceFormation.status);
         expect(capturedFormation.location_osid).toBe(sourceFormation.location_osid);
         expect(capturedFormation.personnel).toBe(sourceFormation.personnel);

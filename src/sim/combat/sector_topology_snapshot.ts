@@ -118,6 +118,7 @@ function captureSpatialSnapshot(
 
 function captureFormation(id: FormationId, f: {
     faction: FactionId;
+    name: string;
     status: 'active' | 'inactive';
     kind?: SectorTopologyFormation['kind'];
     readiness?: SectorTopologyFormation['readiness'];
@@ -152,6 +153,7 @@ function captureFormation(id: FormationId, f: {
     return Object.freeze({
         id,
         faction: f.faction,
+        name: f.name,
         status: f.status,
         kind: f.kind,
         readiness: f.readiness,

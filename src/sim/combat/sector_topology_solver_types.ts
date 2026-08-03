@@ -122,6 +122,8 @@ export interface SectorTopologyFormation {
     readonly id: FormationId;
     readonly faction: FactionId;
     readonly status: 'active' | 'inactive';
+    /** Read by `sectorCorpsRegionalEdgeAffinity`'s Posavina/northwest text-match special case. */
+    readonly name: string;
     readonly kind?: FormationKind;
     readonly readiness?: FormationReadinessState;
     readonly lifecycle_status?: 'active' | 'forming' | 'disbanded' | 'merged' | 'destroyed' | 'withdrawn' | 'displaced';
