@@ -260,23 +260,6 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(recoverRegion).not.toMatch(/\bMath\.random\s*\(/);
     });
 
-    it('static contract: front-edge relation construction is invocation-local with explicit strategy and counters', () => {
-        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
-        const buildStart = raw.indexOf('export function buildCorpsFrontSectors(');
-        const buildEnd = raw.indexOf('/** @internal Exact legacy fixed-point sequence', buildStart);
-        expect(buildStart).toBeGreaterThanOrEqual(0);
-        expect(buildEnd).toBeGreaterThan(buildStart);
-
-        const buildRegion = raw.slice(buildStart, buildEnd);
-        expect(buildRegion).toContain("frontEdgeAdjacencyStrategy: SectorFrontEdgeAdjacencyStrategy = 'invocation-front-edge-relation'");
-        expect(buildRegion).toContain("frontEdgeAdjacencyStrategy === 'test-only-legacy-edge-adjacency'");
-        expect(buildRegion).toContain('const frontEdgeRelations = new Map<FactionId, SectorFrontEdgeRelation>();');
-        expect(buildRegion).toContain('const frontEdgeRelationForFaction: SectorFrontEdgeRelationProvider');
-        expect(buildRegion).toContain('frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters');
-        expect(buildRegion.match(/createSectorFrontEdgeRelation\(/g)).toHaveLength(1);
-        expect(buildRegion).not.toMatch(/process\.env|WeakMap|state\.military\.frontEdgeRelation/);
-    });
-
     it('static contract: buildFactionSectors has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
         const startIdx = raw.indexOf('function buildFactionSectors(');

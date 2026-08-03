@@ -51,20 +51,13 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { createHash } from 'node:crypto';
 
-import { describe, expect, it, beforeAll, afterAll, vi } from 'vitest';
+import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 
-import * as corpsFrontSectorsModule from '../src/sim/combat/corps_front_sectors.js';
 import {
     __buildCorpsFrontSectorsWithoutFixedPointShortcuts,
     buildCorpsFrontSectors,
 } from '../src/sim/combat/corps_front_sectors.js';
-import {
-    createFinalSectorReconciliationSession,
-    recordFinalSectorReconciliationMutation,
-    reconcileFinalSectorTruth,
-} from '../src/sim/combat/final_sector_truth_reconciliation.js';
 import { deserializeState } from '../src/state/serialize.js';
 import type {
     CorpsFrontSector,
@@ -72,8 +65,6 @@ import type {
     GameState,
 } from '../src/state/game_state.js';
 import { strictCompare } from '../src/state/validateGameState.js';
-import { serializeState } from '../src/state/serialize.js';
-import { createSectorFrontEdgeRelationTestCounters } from '../src/sim/combat/sector_front_edge_relation.js';
 
 const ROOT = process.cwd();
 const SAVE_PATH = path.join(ROOT, 'data', 'derived', 'latest_run_final_save.json');
@@ -223,132 +214,6 @@ function runOccupancyModes(
     };
 }
 
-function runFrontEdgeRelationModes(
-    state: GameState,
-    edges: ContactGraphEdge[],
-    mode: FixedPointProductionMode,
-): { candidate: string; legacy: string; rerun: string } {
-    const originalBuild = corpsFrontSectorsModule.buildCorpsFrontSectors;
-    const run = (strategy: 'invocation-front-edge-relation' | 'test-only-legacy-edge-adjacency'): string => {
-        const runState = deserializeState(JSON.stringify(state)) as GameState;
-        const session = createFinalSectorReconciliationSession(
-            runState.meta.turn,
-            mode.finalSaveGeometryProjection ? 'final-save-geometry' : 'postcombat-geometry',
-        );
-        const reports: unknown[] = [];
-        const geometryBuildSequence: number[] = [];
-        const warnings: unknown[][] = [];
-        const debug: unknown[][] = [];
-        const logs: unknown[][] = [];
-        const errors: unknown[][] = [];
-        const originalWarn = console.warn;
-        const originalDebug = console.debug;
-        const originalLog = console.log;
-        const originalError = console.error;
-        console.warn = (...args: unknown[]) => { warnings.push(args); };
-        console.debug = (...args: unknown[]) => { debug.push(args); };
-        console.log = (...args: unknown[]) => { logs.push(args); };
-        console.error = (...args: unknown[]) => { errors.push(args); };
-        const geometrySpy = strategy === 'test-only-legacy-edge-adjacency'
-            ? vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors').mockImplementation((...args) =>
-                originalBuild(
-                    args[0],
-                    args[1],
-                    args[2],
-                    args[3],
-                    args[4],
-                    args[5],
-                    args[6],
-                    args[7],
-                    args[8],
-                    'test-only-legacy-edge-adjacency',
-                    args[10],
-                ))
-            : null;
-        try {
-            const firstReport = reconcileFinalSectorTruth(
-                runState,
-                edges as never,
-                null,
-                undefined,
-                undefined,
-                null,
-                mode.isFinalPass,
-                {
-                    session,
-                    finalSaveGeometryProjection: mode.finalSaveGeometryProjection,
-                },
-            );
-            reports.push(firstReport);
-            geometryBuildSequence.push(session.geometry_builds);
-            if (firstReport.geometry_input_mutations > 0) {
-                recordFinalSectorReconciliationMutation(
-                    session,
-                    'geometry',
-                    'postcombat-formation-location-writeback',
-                );
-                reports.push(reconcileFinalSectorTruth(
-                    runState,
-                    edges as never,
-                    null,
-                    undefined,
-                    undefined,
-                    null,
-                    mode.isFinalPass,
-                    {
-                        session,
-                        finalSaveGeometryProjection: mode.finalSaveGeometryProjection,
-                    },
-                ));
-                geometryBuildSequence.push(session.geometry_builds);
-            }
-            const serialized = serializeState(runState);
-            return JSON.stringify(canonicalizeObservable({
-                sectors: runState.military.corps_front_sectors,
-                state: runState,
-                reports,
-                session: structuredClone(session),
-                receipts: structuredClone(session.receipts),
-                geometryBuildSequence,
-                warnings,
-                diagnostics: { debug, logs, errors },
-                serialized,
-                serializedSize: Buffer.byteLength(serialized),
-                serializedSha256: createHash('sha256').update(serialized).digest('hex'),
-            }));
-        } finally {
-            geometrySpy?.mockRestore();
-            console.warn = originalWarn;
-            console.debug = originalDebug;
-            console.log = originalLog;
-            console.error = originalError;
-        }
-    };
-
-    return {
-        candidate: run('invocation-front-edge-relation'),
-        legacy: run('test-only-legacy-edge-adjacency'),
-        rerun: run('invocation-front-edge-relation'),
-    };
-}
-
-describe('buildCorpsFrontSectors front-edge strategy contract', () => {
-    it('rejects an unknown strategy before inspecting an otherwise empty build', () => {
-        expect(() => buildCorpsFrontSectors(
-            {} as GameState,
-            [],
-            null,
-            undefined,
-            undefined,
-            false,
-            false,
-            true,
-            'dense-index',
-            'unknown-front-edge-strategy' as never,
-        )).toThrow(/unknown front-edge adjacency strategy/i);
-    });
-});
-
 /**
  * Run buildCorpsFrontSectors with cache ON (env flag absent) and cache OFF
  * (env flag set), returning both canonicalized snapshots.
@@ -453,64 +318,6 @@ describe.skipIf(!hasFixture)(
             // Byte-equality assertion: if this fails, memoization introduced
             // a cross-call divergence that pure-G1 would not catch.
             expect(cached).toBe(uncached);
-        });
-
-        it('invocation-local front-edge relation matches the independent legacy strategy on the pristine real-save fixture', () => {
-            const { candidate, legacy, rerun } = runFrontEdgeRelationModes(
-                baseState,
-                edges,
-                FIXED_POINT_PRODUCTION_MODES[0]!,
-            );
-            expect(candidate).toBe(legacy);
-            expect(candidate).toBe(rerun);
-        });
-
-        it('constructs at most one standard/strict relation per used faction, discards them between calls, observes synthetic fallbacks, and keeps unexpected canonical fallback at zero', () => {
-            const counters = createSectorFrontEdgeRelationTestCounters();
-            const run = (strategy: 'invocation-front-edge-relation' | 'test-only-legacy-edge-adjacency'): void => {
-                const state = deserializeState(JSON.stringify(baseState)) as GameState;
-                buildCorpsFrontSectors(
-                    state,
-                    edges as never,
-                    null,
-                    undefined,
-                    undefined,
-                    false,
-                    false,
-                    true,
-                    'dense-index',
-                    strategy,
-                    counters,
-                );
-            };
-
-            run('invocation-front-edge-relation');
-            const firstStandard = counters.standardConstructions;
-            const firstStrict = counters.strictConstructions;
-            expect(firstStandard).toBeGreaterThan(0);
-            expect(firstStandard).toBe(firstStrict);
-            expect(firstStandard).toBeLessThanOrEqual(baseState.factions.length);
-            expect(counters.standardQueries).toBeGreaterThanOrEqual(firstStandard);
-            expect(counters.strictQueries).toBeGreaterThanOrEqual(firstStrict);
-            const firstSyntheticFallbacks = counters.fallbackReasons['synthetic-factionless'];
-            expect(firstSyntheticFallbacks).toBeGreaterThan(0);
-            expect(counters.legacyFallbacks).toBe(firstSyntheticFallbacks);
-            expect(counters.fallbackReasons['duplicate-edge-id']).toBe(0);
-            expect(counters.fallbackReasons['edge-outside-universe']).toBe(0);
-            expect(counters.fallbackReasons['metadata-mismatch']).toBe(0);
-            expect(counters.fallbackReasons['faction-mismatch']).toBe(0);
-            expect(counters.fallbackReasons['adjacency-mismatch']).toBe(0);
-            expect(counters.fallbackReasons['centroid-mismatch']).toBe(0);
-
-            run('invocation-front-edge-relation');
-            expect(counters.standardConstructions).toBe(firstStandard * 2);
-            expect(counters.strictConstructions).toBe(firstStrict * 2);
-            expect(counters.legacyFallbacks).toBe(firstSyntheticFallbacks * 2);
-            expect(counters.fallbackReasons['synthetic-factionless']).toBe(firstSyntheticFallbacks * 2);
-
-            const beforeLegacy = structuredClone(counters);
-            run('test-only-legacy-edge-adjacency');
-            expect(counters).toEqual(beforeLegacy);
         });
 
         it('cached path matches uncached path on the final-pass real-save fixture', () => {
@@ -653,30 +460,5 @@ describe.skipIf(!hasFixture)(
                 }
             }
         }, 900_000);
-
-        it('invocation-local front-edge relations preserve reconciliation reports, sessions, receipts, geometry order, sectors, full state, warnings, bytes, and rerun hashes across production modes and 100 real-save variants', () => {
-            for (const mode of FIXED_POINT_PRODUCTION_MODES) {
-                for (let seed = 0; seed < 100; seed++) {
-                    const variant = makeVariant(baseState, seed);
-                    const { candidate, legacy, rerun } = runFrontEdgeRelationModes(variant, edges, mode);
-                    if (candidate !== legacy || candidate !== rerun) {
-                        const reference = candidate !== legacy ? legacy : rerun;
-                        let firstDiff = 0;
-                        while (
-                            firstDiff < candidate.length
-                            && firstDiff < reference.length
-                            && candidate.charCodeAt(firstDiff) === reference.charCodeAt(firstDiff)
-                        ) {
-                            firstDiff += 1;
-                        }
-                        throw new Error(
-                            `front-edge relation divergence for mode ${mode.label}, seed ${seed} at byte ${firstDiff}; `
-                            + `candidate=${candidate.slice(firstDiff, firstDiff + 160)}; `
-                            + `reference=${reference.slice(firstDiff, firstDiff + 160)}`,
-                        );
-                    }
-                }
-            }
-        }, 1_200_000);
     },
 );

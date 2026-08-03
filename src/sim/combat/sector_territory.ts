@@ -16,10 +16,6 @@ import { findConnectedComponents } from '../../utils/graph.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { buildEdgeAdjacency } from './sector_edge_adjacency.js';
-import {
-    buildSectorFrontEdgeAdjacency,
-    type SectorFrontEdgeRelation,
-} from './sector_front_edge_relation.js';
 
 /**
  * Corps territory exclusions: municipalities that should NEVER be claimed by a specific corps,
@@ -679,7 +675,6 @@ export function consolidateCrossCorpsFronts(
     osidToCorps: Map<Osid, FormationId>,
     centroids?: OsidCentroidMap,
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
-    frontEdgeRelation?: SectorFrontEdgeRelation,
 ): void {
     // Collect all edge_ids across all corps for this faction
     const allEdgeIds: string[] = [];
@@ -706,18 +701,7 @@ export function consolidateCrossCorpsFronts(
     // Includes friendly-OSID, OSID-neighbor, same-hostile-OSID, and hostile-
     // OSID-neighbor adjacency — so connected components faithfully represent
     // contiguous front segments.
-    const edgeAdj = frontEdgeRelation
-        ? buildSectorFrontEdgeAdjacency({
-            relation: frontEdgeRelation,
-            mode: 'standard',
-            edgeIds: allEdgeIds,
-            edgeMeta,
-            faction,
-            osidAdjacency: adjacency,
-            sharedBoundaryAdj,
-            centroids,
-        })
-        : buildEdgeAdjacency(allEdgeIds, edgeMeta, faction, adjacency, sharedBoundaryAdj, centroids);
+    const edgeAdj = buildEdgeAdjacency(allEdgeIds, edgeMeta, faction, adjacency, sharedBoundaryAdj, centroids);
 
     // Build brigade-presence lookup once: OSID → set of corps with brigades
     // stationed there. Edges where a brigade of the current corps is stationed
@@ -910,7 +894,6 @@ export function consolidateIsolatedCorpsPockets(
     formations: Record<FormationId, FormationState>,
     centroids?: OsidCentroidMap,
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
-    frontEdgeRelation?: SectorFrontEdgeRelation,
 ): void {
     const edgeMeta = new Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>();
     // Reverse index: friendly OSID → front edge IDs touching it
@@ -947,18 +930,7 @@ export function consolidateIsolatedCorpsPockets(
         if (!edges || edges.length <= 1) continue;
 
         // Build edge adjacency for this corps's edges only (friendly-side)
-        const edgeAdj = frontEdgeRelation
-            ? buildSectorFrontEdgeAdjacency({
-                relation: frontEdgeRelation,
-                mode: 'standard',
-                edgeIds: edges,
-                edgeMeta,
-                faction,
-                osidAdjacency: adjacency,
-                sharedBoundaryAdj,
-                centroids,
-            })
-            : buildEdgeAdjacency(edges, edgeMeta, faction, adjacency, sharedBoundaryAdj, centroids);
+        const edgeAdj = buildEdgeAdjacency(edges, edgeMeta, faction, adjacency, sharedBoundaryAdj, centroids);
 
         // Find connected components
         const components = findConnectedComponents(

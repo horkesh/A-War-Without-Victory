@@ -186,22 +186,6 @@
 
 ---
 
-## [2026-08-02] R5 Phase 2d Task 8A invocation-local front-edge relation source checkpoint
-
-**Type:** Behavior-affecting performance implementation / exact-output source checkpoint / measurement pending.
-
-**Implementation:** `buildCorpsFrontSectors(...)` now lazily creates one standard and one strict `SectorFrontEdgeRelation` per used faction per invocation, reuses their stable-order subset queries through every owned construction, split, consolidation, recovery, sealing, sibling-ownership, and final-geometry call chain, and discards them at return. The relation takes only the invocation's front-edge universe, edge metadata, adjacency identities, centroids, and faction. It owns no `GameState`, formation, sector, receipt, global/module cache, `WeakMap`, environment switch, persisted field, or cross-turn state. The production reconciliation writers and receipt ownership are unchanged.
-
-**Fail-closed and oracle boundary:** The explicit `test-only-legacy-edge-adjacency` strategy runs the former subset builders directly and does not touch candidate counters; unknown strategies throw before state inspection. Duplicate strict edge IDs are detected before `Set` conversion. Duplicate, outside-universe, metadata, faction, adjacency, or centroid incompatibility executes the exact legacy builder, and incompatible pair queries return to the unchanged pairwise check. Candidate-mode factionless midpoint, decomposition, recursive oversized-split, and temp-metadata calls retain exact shared-OSID legacy semantics while recording `synthetic-factionless`. The pristine fixture records 46 expected synthetic fallbacks per invocation and zero unexpected canonical fallback reasons; a second invocation doubles the call-local counts.
-
-**TDD, independent review, and equivalence:** The behavioral RED was the missing relation module, followed by the unknown-strategy failure occurring after state access. Independent review then blocked the first long property because it stopped at the builder boundary. The repaired existing-`vi.spyOn` oracle crossed `reconcileFinalSectorTruth(...)` for live-war, final-turn, and final-save modes across 100 deterministic real-save variants each, comparing candidate, forced legacy, and candidate rerun over reports, complete session and receipt order, geometry-build fixed-point order, installed sectors, entire `GameState`, warnings, debug/log/error diagnostics, serialized bytes, size, and SHA-256. It passed 1/1 (`10` skipped), property `635172 ms`, total `637.46 s`. Review blocked a second time on unobservable production synthetic fallbacks; focused functional coverage repaired that boundary, and final independent source re-review returned PASS with no findings. Per parent direction, the accepted 300-case property was not rerun a second time for this source checkpoint.
-
-**Verification:** Final fast verification covers the six-file relation/reconciliation/dependent matrix, the two targeted pristine-real-save ownership/oracle cases, TypeScript, the live determinism static scan, and diff hygiene. Exact final counts and commands are recorded in `docs/40_reports/implemented/20260802_R5_PHASE2D_TASK8A_FRONT_EDGE_RELATION_SOURCE_CHECKPOINT.md`. No approved baseline, scenario, profile, performance, Electron, package, or release command ran, and no baseline was refreshed.
-
-**Disposition and propagation:** Source correctness is accepted, but timing and retain/revert disposition remain pending under the exclusive runtime lease and the plan's unchanged causal-owner and paired-wall-clock thresholds. Output/state/receipt equivalence means no rule, threshold, save schema, historical content, scenario data, player-visible behavior, or canon contract changed; the canon set and `docs/10_canon/FORAWWV.md` remain untouched. `MASTER_ROADMAP.md` and `COMMAND_BOARD.md` are intentionally deferred to root after integration to avoid active R7 documentation collisions. No push, merge, package, version, tag, installer, publication, or release-state mutation occurred.
-
----
-
 ## [2026-08-02] R5 Phase 2d bounded sector-reconstruction design
 
 **Type:** R5 docs-only architecture/performance design / exact call-graph and mutation audit / red-first implementation handoff / no production candidate.
