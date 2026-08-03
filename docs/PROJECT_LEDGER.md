@@ -1,5 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-03] R2 packaged acceptance PASSED — v14, clean
+
+**Type:** R2 packaged-acceptance closure / evidence.
+
+**Result:** Fresh no-resume 104-week RS campaign (`20260803-r2-rs104-fresh-v14`), run against a package built from `524bb7937` (the re-landed static Desk-clearance fix), using the exact flag set `v9` itself recorded (`--turns=104 --faction=RS --strategic --auto-recruit --light-checkpoint-tour --final-checkpoint-tour`), completed with **zero errors**: `consoleMessages: []`, `pageErrors: []`, `networkFailures: []`, no readability diagnostic thrown. Final save confirms exact turn 104 and all five historical event anchors fired exactly once each (`jna_withdrawal_1992`, `sarajevo_siege_begins_1992`, `operation_corridor_1992`, `srebrenica_enclave_forms_1992`, `jajce_falls_1992`).
+
+**Closes:** R2's `v8`/`v9` UI-defect lineage (hard-clipped Desk viewport, Army-HQ contrast, WarroomStatusBar occlusion) and the acceptance-gate requirement of "a newly completed diary" with clean final diagnostics per the RS 104-week friction remediation plan §4.8. R2 is complete.
+
+**Full lineage for the record:** v5 (4 readability defects) → v6 (1 false-positive ARIA fix) → v7 (nested-scroll Desk occlusion) → v8 (hard-clip + Army HQ contrast) → v9 (WarroomStatusBar occlusion, new finding) → [false-positive revert/re-land/reproduction-error detour, fully documented in the three entries below] → v14 (clean pass with the corrected flag set and the re-landed fix).
+
+**Scope:** No event JSON, save schema, canon, or `docs/10_canon/FORAWWV.md` change beyond what's already recorded in `524bb7937`.
+
+---
+
 ## [2026-08-03] Correction: the "sarajevo_siege non-determinism" was a reproduction error, not an engine bug
 
 **Type:** Retraction of the "open determinism question" raised in the immediately-following 2026-08-03 entry below.

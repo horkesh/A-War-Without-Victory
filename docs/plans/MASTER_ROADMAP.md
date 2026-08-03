@@ -1,6 +1,6 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** IN AUTONOMOUS EXECUTION; R1/R3 are complete; R2's v8+v9 UI fixes are landed. The `sarajevo_siege_begins_1992` "non-determinism" reported earlier 2026-08-03 was a reproduction error (missing `--strategic --auto-recruit` flags in the retry commands, not present in v9's own recorded invocation) — retracted; a corrected re-verification run is in progress
+**Status:** IN AUTONOMOUS EXECUTION; R1/R2/R3 are complete (R2 closed 2026-08-03 on a clean v14 packaged-acceptance pass). R4 is next per the dependency sequence.
 
 **Last updated:** 2026-08-03
 
@@ -97,7 +97,7 @@ Execute serially in the order R1, R2, R3, R4, R5, R6, R7, R8, R9 unless file-own
 | ID | Workstream | Status | Executable plan | Complete when |
 |---|---|---|---|---|
 | R1 | Seamless Command Room ↔ Tactical Map | **COMPLETE — CLOSED 2026-08-01** | [Map-transition plan](2026-07-31-seamless-command-room-map-transition-plan.md) | Warm switch shows current-turn/current-fingerprint truth without renderer reconstruction, static refetch, WebGL error, or visible wait; cold entry meets the measured plan budget. |
-| R2 | RS Desk → Decision → Advance friction | **IN PROGRESS — V8+V9 UI FIXES LANDED (static Desk clearance); corrected re-verification run in progress with the exact v9 flag set** | [RS friction plan](2026-07-31-rs-104week-friction-remediation-plan.md) | Five diary findings close; no contradictory urgency; sourced opportunity/positive-hold cadence is intelligible; ultrawide and map handoff pass Electron proof. |
+| R2 | RS Desk → Decision → Advance friction | **COMPLETE — CLOSED 2026-08-03 (v14 clean pass)** | [RS friction plan](2026-07-31-rs-104week-friction-remediation-plan.md) | Five diary findings close; no contradictory urgency; sourced opportunity/positive-hold cadence is intelligible; ultrawide and map handoff pass Electron proof. |
 | R3 | Operational/Tactical Group convergence | **COMPLETE** | [TG closeout plan](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | One offensive task-organization path, synchronized lifecycle/AHQ receipts, terminal telemetry, unique sourced promotions, locked exhaustion constants, and aligned Standing-OG doctrine. |
 | R4 | Command, event, and Dynamic Codex convergence | **IN PROGRESS — PHASE 4 CANONICALLY ACCEPTED; PHASE 5 INTEGRATED PROOF NEXT** | [Command/event/Codex plan](2026-07-31-command-event-codex-convergence-plan.md) | Five presidential levers remain; Decision Room owns action; Desk owns triage; events, Chronicle, Cost Ledger, and Codex share deterministic receipts and priority truth. |
 | R5 | Engine quality, performance, and stability | **IN PROGRESS — PHASE 2D TASK 8A RETAINED; PHASE 2E DESIGN READY** | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
@@ -188,7 +188,9 @@ V8 (hard-clipped Desk viewport + Army HQ contrast) reached exact turn 104 and cl
 
 **2026-08-03 correction:** that attribution was a false positive. A differently-shaped fix (static `bottom-28`, zero new state/effects/renders) reproduced the identical failure (v12); a control run rebuilding the exact pre-fix, `v9`-equivalent code unmodified and re-running it fresh (v13-control, isolated) *also* failed identically — proving the regression is unrelated to any R2 UI change. The static occlusion fix was re-landed (`524bb7937`).
 
-**Second correction, same day:** the apparent `sarajevo_siege_begins_1992` "non-determinism" was itself a reproduction error, not an engine bug. `v9`'s own recorded command included `--strategic --auto-recruit`; `v10`/`v11`/`v12`/`v13-control` all omitted both, so none of them actually reproduced `v9`'s run — they played a materially different early game (those flags gate real turn-1 recruitment/proposal decisions). No non-determinism, no Sacred Rules concern. A corrected re-verification run using `v9`'s exact flag set is in progress against the re-landed fix; see the PROJECT_LEDGER for the result.
+**Second correction, same day:** the apparent `sarajevo_siege_begins_1992` "non-determinism" was itself a reproduction error, not an engine bug. `v9`'s own recorded command included `--strategic --auto-recruit`; `v10`/`v11`/`v12`/`v13-control` all omitted both, so none of them actually reproduced `v9`'s run — they played a materially different early game (those flags gate real turn-1 recruitment/proposal decisions). No non-determinism, no Sacred Rules concern.
+
+**R2 CLOSED 2026-08-03:** `v14`, run against the re-landed fix using `v9`'s exact flag set, passed clean — exact turn 104, zero console messages/page errors/network failures, no readability diagnostic, all five historical anchors (`jna_withdrawal_1992`, `sarajevo_siege_begins_1992`, `operation_corridor_1992`, `srebrenica_enclave_forms_1992`, `jajce_falls_1992`) fired exactly once. Full v5-v14 lineage and evidence in the PROJECT_LEDGER. R4 may now proceed (its dependency is R1 + stable R2 UI, both satisfied).
 
 ## 6. Locked Product and Historical Decisions
 
