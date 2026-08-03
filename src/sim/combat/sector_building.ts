@@ -9,7 +9,6 @@ import type {
     FactionId,
     FormationId,
     FormationState,
-    GameState,
 } from '../../state/game_state.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import { computeLocalFrontDefensivePower } from './local_front_defense.js';
@@ -24,6 +23,7 @@ import {
 import { buildEdgeAdjacency } from './sector_edge_adjacency.js';
 import { mergeUndersizedSubSegments, splitNonContiguousSectors, mergeUndersizedSectors } from './sector_splitting.js';
 import { deduplicateBrigadesAcrossSectors } from './brigade_assignment.js';
+import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import {
     buildSectorFrontEdgeAdjacency,
     type SectorFrontEdgeRelation,
@@ -196,7 +196,7 @@ export function findSubSegments(
  * Sector IDs: `sector:{corps_id}:0`, `sector:{corps_id}:1`, etc.
  */
 export function buildMultiSectorsForCorps(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     corpsId: FormationId,
     faction: FactionId,
     edgeIds: string[],
@@ -598,7 +598,7 @@ export function buildSubSegmentFromEdges(
  * Build a single CorpsFrontSector from one or more sub-segments.
  */
 export function buildSectorFromSubSegments(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     corpsId: FormationId,
     faction: FactionId,
     sectorIndex: number,

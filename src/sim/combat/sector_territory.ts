@@ -8,7 +8,6 @@ import type {
     FactionId,
     FormationId,
     FormationState,
-    GameState,
 } from '../../state/game_state.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
@@ -582,7 +581,7 @@ export function partitionFrontEdges(
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
     faction: FactionId,
     osidToCorps: Map<Osid, FormationId>,
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     reverseMap: Map<string, string[]> | null,
     corpsIds: FormationId[],
     adjacency: Map<Osid, Osid[]>
