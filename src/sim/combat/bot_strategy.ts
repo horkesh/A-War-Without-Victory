@@ -37,6 +37,7 @@
  */
 
 import type { BrigadePosture, FactionId, GameState } from '../../state/game_state.js';
+import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import type { DoctrinePhase, StandingOrder, WarTimeline } from '../../state/war_timeline.js';
 import { getActiveBotObjectiveShifts } from '../events/active_modifiers.js';
 import { computeRecentTerritoryChange } from './army_hq_gathering.js';
@@ -685,7 +686,7 @@ function clamp(x: number, lo: number, hi: number): number {
  * as army_hq_gathering.computeRecentTerritoryChange. Deterministic: persisted state only.
  */
 function priorityAreaTrend(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
@@ -717,7 +718,7 @@ function priorityAreaTrend(
  * Quantized to 2 decimals so near-ties cannot flip the argmax order.
  */
 function priorityTrendMultiplier(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
@@ -756,7 +757,7 @@ function priorityTrendMultiplier(
  * Quantized to 2 decimals. Deterministic: persisted state only.
  */
 function prioritySupplyMultiplier(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
@@ -807,7 +808,7 @@ function prioritySupplyMultiplier(
  * Deterministic: persisted state only.
  */
 function priorityCampaignPlanMultiplier(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
@@ -827,7 +828,7 @@ function priorityCampaignPlanMultiplier(
  * never reaches here (the caller gates on decision_mode === 'emergent').
  */
 function priorityEmergentMultiplier(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     faction: FactionId,
     priority: ArmyOperationPriority,
 ): number {
@@ -852,7 +853,7 @@ export function getCorpsArmyPriorities(
     faction: FactionId,
     corpsId: string,
     turn: number,
-    state?: GameState,
+    state?: SectorTopologyNarrowReadState,
 ): ArmyOperationPriority[] {
     const all = FACTION_ARMY_PRIORITIES[faction] ?? [];
     const active = all.filter(p => p.corps_id === corpsId && turn >= p.start_week && turn < p.end_week);

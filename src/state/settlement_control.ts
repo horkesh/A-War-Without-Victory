@@ -63,6 +63,15 @@ export function getSettlementSideLegacy(
 }
 
 /**
+ * Narrow read contract for `getPoliticalControllerOSID`: only `political`.
+ * `GameState` structurally satisfies this, so every existing caller keeps
+ * compiling unchanged (see R5 Phase 2e plan section 6's narrow-read-interface
+ * note). Declared locally rather than imported from a `sim/combat` module to
+ * avoid a state-layer -> sim-layer dependency.
+ */
+export type PoliticalControllerReadState = Pick<GameState, 'political'>;
+
+/**
  * Get political controller at OSID granularity (HoI ZoC / spawn-by-OSID).
  * State may be OSID-keyed (operational) or canonical-SID-keyed; when OSID is not
  * present in state, derives controller by majority vote over canonical SIDs from
@@ -70,7 +79,7 @@ export function getSettlementSideLegacy(
  * counting so tie-break is stable.
  */
 export function getPoliticalControllerOSID(
-    state: GameState,
+    state: PoliticalControllerReadState,
     osid: string,
     operationalToCanonical?: Map<string, string[]>
 ): ControlSide | null {

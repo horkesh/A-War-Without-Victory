@@ -11,6 +11,7 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
+import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findConnectedComponents } from '../../utils/graph.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
@@ -46,7 +47,7 @@ const CORPS_EXCLUDED_MUNICIPALITIES: ReadonlyMap<string, ReadonlySet<string>> = 
  * Deterministic: corps sorted by ID, neighbors sorted by strictCompare.
  */
 export function mapOsidsToCorps(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     faction: FactionId,
     corpsIds: FormationId[],
     adjacency: Map<Osid, Osid[]>,

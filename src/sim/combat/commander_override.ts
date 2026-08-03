@@ -6,11 +6,11 @@
 import type {
     CorpsFrontSector,
     FormationState,
-    GameState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getCorpsCommander } from './officer_system.js';
 import type { ArmyOperationPriority } from './bot_strategy.js';
+import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import { munFromOsid } from './osid_adjacency.js';
 import { getSectorComponent, getSectorFrontOsids } from './sector_utils.js';
 import {
@@ -75,7 +75,7 @@ function friendlyDistanceToAny(
  * Reads named_officers + corps_command from state. Pure — no side effects.
  */
 export function buildCorpsCommanderProfiles(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     sectors: CorpsFrontSector[],
 ): Map<string, CorpsCommanderProfile> {
     const profiles = new Map<string, CorpsCommanderProfile>();

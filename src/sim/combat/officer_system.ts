@@ -8,6 +8,7 @@
  */
 
 import type { FactionId, FormationState, GameState } from '../../state/game_state.js';
+import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import type {
     NamedOfficer,
     NamedOfficerState,
@@ -138,7 +139,7 @@ function replacementMatterMatches(
  */
 export function getCorpsCommander(
     corpsId: string,
-    state: GameState
+    state: SectorTopologyNarrowReadState
 ): { data: NamedOfficer; state: NamedOfficerState } | null {
     const officers = state.military.named_officers;
     const officerData = state.military.named_officer_data;
