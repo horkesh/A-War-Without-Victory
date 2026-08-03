@@ -159,11 +159,21 @@ export function computeSpatialContext(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * Narrow read contract for `spatialFriendlyDistance`: only `adjacency` and
+ * `friendlyOsidsByFaction`. `SpatialContext` structurally satisfies this, so
+ * every existing caller keeps compiling unchanged (see R5 Phase 2e plan
+ * section 6's narrow-read-interface note). Declared locally rather than
+ * imported from a `sim/combat` module to avoid a foundational-layer ->
+ * higher-layer dependency.
+ */
+export type SpatialFriendlyDistanceReadContext = Pick<SpatialContext, 'adjacency' | 'friendlyOsidsByFaction'>;
+
+/**
  * BFS distance through friendly territory for a specific faction.
  * Returns -1 if unreachable within maxHops (or at all).
  */
 export function spatialFriendlyDistance(
-    ctx: SpatialContext,
+    ctx: SpatialFriendlyDistanceReadContext,
     faction: FactionId,
     from: string,
     to: string,

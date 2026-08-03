@@ -49,6 +49,7 @@ import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
+import type { SectorTopologySpatialSnapshot } from './sector_topology_solver_types.js';
 
 // ── Imported from extracted modules ──────────────────────────────────────
 import { buildFriendlyComponents, getSectorComponent, getSectorFrontOsids, getSectorUniqueFrontOsids, canAnyBrigadeReachAny, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
@@ -363,7 +364,7 @@ export function buildCorpsFrontSectors(
     edges: EdgeRecord[],
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
     isFinalPass: boolean = false,
     finalSaveGeometryProjection: boolean = false,
     useFixedPointShortcuts: boolean = true,
@@ -791,7 +792,7 @@ export function __buildCorpsFrontSectorsWithoutFixedPointShortcuts(
     edges: EdgeRecord[],
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
     isFinalPass: boolean = false,
     finalSaveGeometryProjection: boolean = false,
 ): Record<string, CorpsFrontSector> {
@@ -851,7 +852,7 @@ export function canonicalizeSameFactionEdgeOwnership(
     sectors: Record<string, CorpsFrontSector>,
     formations: Record<FormationId, SectorTopologyWorkingFormation>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
 ): string[] {
     const claims = new Map<string, CorpsFrontSector[]>();
     for (const sector of Object.values(sectors).sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
@@ -945,7 +946,7 @@ function compareSameFactionEdgeOwners(
     edgeId: string,
     formations: Record<FormationId, SectorTopologyWorkingFormation>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
 ): number {
     const aBrigades = countSectorCommandedBrigades(a);
     const bBrigades = countSectorCommandedBrigades(b);
@@ -1003,7 +1004,7 @@ function sectorCorpsHqDistanceToEdge(
     edgeId: string,
     formations: Record<FormationId, SectorTopologyWorkingFormation>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
 ): number {
     const corps = formations[sector.corps_id];
     const hqOsid = corps?.location_osid ?? corps?.home_osid ?? corps?.hq_sid;
@@ -1019,7 +1020,7 @@ function sectorCorpsHqDistanceToEdge(
 }
 
 function unboundedGraphDistance(
-    spatial: SpatialContext,
+    spatial: SectorTopologySpatialSnapshot,
     from: string,
     to: string,
     maxHops: number,
@@ -1376,7 +1377,7 @@ export function annotateUnstaffedFrontSectors(
     state: SectorTopologyNarrowReadState,
     formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
-    _spatial?: SpatialContext,
+    _spatial?: SectorTopologySpatialSnapshot,
 ): void {
     const byFaction = new Map<FactionId, CorpsFrontSector[]>();
     for (const sector of Object.values(sectors)) {
@@ -1426,7 +1427,7 @@ function absorbEmptyStaffableSiblingSectors(
     caseBSplitAdj: Map<Osid, Osid[]>,
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
     centroids?: OsidCentroidMap,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
     frontEdgeRelationProvider?: SectorFrontEdgeRelationProvider,
 ): boolean {
     let changed = false;
@@ -2402,7 +2403,7 @@ function recoverDroppedFrontEdges(
     formations: Record<FormationId, SectorTopologyWorkingFormation>,
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
     recoveredFrontClaimSetupCache?: Map<FactionId, RecoveredFrontClaimSetup>,
     options?: {
         allowUnstaffedFrontSectors?: boolean;
@@ -2676,7 +2677,7 @@ function getRecoveredFrontClaimSetup(
     formations: Record<FormationId, SectorTopologyWorkingFormation>,
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
     recoveredFrontClaimSetupCache?: Map<FactionId, RecoveredFrontClaimSetup>,
     frontEdgeRelation?: SectorFrontEdgeRelation,
 ): RecoveredFrontClaimSetup {
@@ -2843,7 +2844,7 @@ function sealMergedSectorTruth(
     sharedBoundaryAdj: Map<Osid, Osid[]>,
     caseBSplitAdj: Map<Osid, Osid[]>,
     centroids?: OsidCentroidMap,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
     options?: {
         allowCollapsedRearGuardAbsorption?: boolean;
         occupancyStrategy?: EnsureMinimumSectorCoverageOccupancyStrategy;
@@ -3532,7 +3533,7 @@ function buildFactionSectors(
     activeCombatFormationScanIds: readonly FormationId[],
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
-    spatial?: SpatialContext,
+    spatial?: SectorTopologySpatialSnapshot,
     occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
     frontEdgeRelationProvider?: SectorFrontEdgeRelationProvider,
     mutationRecorder?: SectorTopologyMutationRecorder,
