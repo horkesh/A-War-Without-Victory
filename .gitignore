@@ -75,6 +75,7 @@ tmp-paradox-qa-*/
 tmp-playtest-*/
 tmp-map-transition-perf/
 tmp-zepa-trace/
+tmp-r4-phase5-determinism/
 
 # Electron browser profiles are disposable QA runtime state, not playtest evidence.
 docs/40_reports/playtests/evidence/**/electron-user-data/
