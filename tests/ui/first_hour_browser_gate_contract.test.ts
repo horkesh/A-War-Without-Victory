@@ -265,7 +265,7 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain("const evidenceId = (id) => (journeyKey === 'rbih' ? id : `${journeyKey}_${id}`);");
     expect(tool).toContain('runTurnZeroSetupProvenanceLiveProof');
     expect(tool).toContain('turnZeroSetupProvenanceLiveProof');
-    expect(tool).toContain('command-card-cat_record"][data-awwv-count="0"][data-awwv-urgent-count="0"]');
+    expect(tool).toContain('command-card-cat_record"][data-awwv-count="0"][data-awwv-required-count="0"]');
     expect(tool).toContain('warroom-toolbar-command-surface');
     expect(tool).toContain('toolbar-route-desk');
     expect(tool).toContain('toolbar-route-war-map');
