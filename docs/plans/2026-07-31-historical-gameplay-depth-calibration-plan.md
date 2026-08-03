@@ -135,6 +135,24 @@ npm.cmd run engine:health:gate
 
 `/simplify` -> review -> commit `test(calibration): freeze remaining candidate truth`
 
+### Task 0.3 -- Fix the Zvornik/Doboj/Gračanica ahistorical 188w losses
+
+**Status:** BLOCKED on R5 closing (owner directive 2026-08-03: finish the engine workstream first). Do not start until R5's Workstream Register row reads complete.
+
+**Owner ruling (2026-08-03):** RS losing Zvornik, `op:doboj:boljanic_2`, and `op:gracanica:petrovo_2` by week 188 is unacceptable and ahistorical (historically RS held all three for the duration of the war). This is not the same as a stale-anchor question — the current in-game outcome itself is wrong and needs an engine/data fix, not an anchor-definition change.
+
+**Root causes already diagnosed (2026-08-03 R4 Phase 5 bisection; do not re-investigate from scratch, verify against current HEAD first since more work may have landed since):**
+
+1. **Zvornik** (`op:zvornik:zvornik`): RS's `rs_1st_zvornik` brigade correctly captures the town turn 1 (Operation Drina, decisive victory, matches the historical April 1992 seizure). The same brigade is then committed to a string of losing fights away from home at Kalesija and Šekovići (weeks 39, 47, 48, 49, 69 — roughly 800 cumulative casualties, all losses against ARBiH's 1st Olovo and 250th Liberation brigades) and is never reinforced or replaced. By week 76, ARBiH's 287th Mountain Brigade retakes the town against **no defending brigade at all** (`defender_brigade: null`). Traced to commit `3c2e8a47f` ("enforce R7 provenance and Ring-3 gates") — an intentional, correctly-implemented Section 6 fix that removes a prohibited atrocity-reward (`war_crimes_delta: +5`, `+3` morale, internal-cohesion bonus) from the `drina_cleansing_decision_1992` event response. Removing that reward is not itself wrong (the reward was a canon violation), but its downstream effect — this specific brigade's survivability in the Kalesija/Šekovići fighting, and the absence of any reinforcement plan for a captured Drina-corridor town — is the actual bug. **Do not restore the removed reward as a fix; that would reintroduce a Section 6 violation.** Fix the garrison/reinforcement/combat-power gap by other means.
+2. **`op:doboj:boljanic_2`** and **`op:gracanica:petrovo_2`**: chronic, long-documented weak points, not a single loss. Multiple different RS brigades rotate through as defenders and lose in turn across the whole campaign (weeks 61-63, 98-100, 136-137 for boljanic_2; weeks 156-158 for petrovo_2), each thrown in piecemeal against sustained ARBiH 2nd/3rd Corps probing. This matches a root cause this project already diagnosed on 2026-04-02 (see `docs/40_reports/CALIBRATION_MASTER.md` session history): `vrs_1st_krajina` has no standing `hold_osids` directive for the Doboj OSIDs, so garrison priority keeps being pulled toward the higher-priority Posavina corridor, leaving whatever brigade is stationed there permanently under-strength. Commit `34edff214` (R4 Phase 3 event-reachability fix, changed `bot_ai_default` AI-response-selection attribution) is where the *final* week-188 outcome tips from "barely holds" to "falls for good," but the underlying fragility is much older and structural.
+
+**Full evidence trail:** `docs/PROJECT_LEDGER.md` (2026-08-03 entries, "Doboj/Gračanica/Zvornik 188w regression" and its corrected-attribution follow-up) and `docs/40_reports/CALIBRATION_MASTER.md` (2026-08-03 corrected entry). A prior, incorrect attribution to `0fd36157b` (R5 Phase 2d Task 8A) was investigated, reverted, found ineffective, and un-reverted — `0fd36157b` is confirmed innocent and must not be touched by this task.
+
+- [ ] Re-verify both root causes still reproduce against current HEAD (a fresh `npm run sim:scenario:run:188w` + `anchor_checks` check) before designing a fix — upstream commits may have shifted things further since 2026-08-03.
+- [ ] Design a garrison/reinforcement mechanism (likely: a `hold_osids` directive for `vrs_1st_krajina` covering the Doboj OSIDs, and/or a reinforcement-priority rule for captured Drina-corridor towns) that restores historical RS control at all three OSIDs without reintroducing an atrocity-reward mechanic or any other Section 6 violation.
+- [ ] Prove the fix is isolated: 188w anchors recover to historical RS control at all three OSIDs, with no unrelated OSID regressions and no change to `matched_osids`'s broader positive trend.
+- [ ] Run the full R6 Phase 7 verification barriers against the fix before considering it closed.
+
 ## Phase 1 -- Standing-OG retired-path verification
 
 **Assigned role:** Systems Programmer + QA Engineer
