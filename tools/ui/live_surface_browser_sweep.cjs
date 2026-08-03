@@ -1729,7 +1729,7 @@ async function runTurnZeroSetupProvenanceLiveProof(page, summary) {
   await waitForVisibleSelector(page, '[data-testid="warroom-toolbar-command-surface"]');
   await activateVisibleControl(page, '[data-testid="warroom-toolbar-command-surface"]');
   await waitForVisibleSelector(page, '[data-testid="command-card-strip"]');
-  await waitForVisibleSelector(page, '[data-testid="command-card-cat_record"][data-awwv-count="0"][data-awwv-urgent-count="0"]');
+  await waitForVisibleSelector(page, '[data-testid="command-card-cat_record"][data-awwv-count="0"][data-awwv-required-count="0"]');
   await captureEvidence(page, summary, 'turn_zero_setup_provenance_live_proof');
   const text = await visibleText(page);
   assertNoRawTechnicalTokens('Turn-Zero Setup Provenance Live Proof', text);

@@ -768,7 +768,7 @@ async function verifyFirstHourDecisionRoomKnowledgeBoundary(page, summary, flow)
     const cards = Array.from(document.querySelectorAll('[data-testid^="command-card-"]'))
       .filter((el) => el instanceof HTMLElement && isVisible(el) && !String(el.getAttribute('data-testid')).includes('fallback'))
       .sort((a, b) => {
-        const urgentDelta = Number(b.getAttribute('data-awwv-urgent-count') ?? 0) - Number(a.getAttribute('data-awwv-urgent-count') ?? 0);
+        const urgentDelta = Number(b.getAttribute('data-awwv-required-count') ?? 0) - Number(a.getAttribute('data-awwv-required-count') ?? 0);
         if (urgentDelta !== 0) return urgentDelta;
         return Number(b.getAttribute('data-awwv-count') ?? 0) - Number(a.getAttribute('data-awwv-count') ?? 0);
       });
