@@ -1,5 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-03] R4 Phase 5: CI-only `qa:first-hour:browser` timeout, root-caused to a CI/Linux-specific render-timing gap, not a session regression
+
+**Type:** CI infrastructure finding / R4 Phase 5 gate-verification byproduct. Not fixed this session — logged and routed per owner decision (further diagnosis needs either Linux-local reproduction or repeated ~50-min CI iteration cycles; core vitest suite of 12,584+ tests is unaffected).
+
+**Summary:** `full-suite-and-fingerprint.yml`'s `Player experience gate` step (`npm run qa:player-experience` → `tools/ui/player_experience_gate.cjs`) runs six sub-steps in order: typecheck, desktop:release:check, `qa:electron-runtime-contracts`, `qa:player-journeys`, `qa:first-hour:browser`, `qa:live-surface:browser`. The first four pass cleanly on CI. `qa:first-hour:browser` has now failed identically on two consecutive commits that reached this step (`25c51eeec`, `31ceccfe9`) at the exact same line: `verifyDecisionRecordsAndChronicle` → `waitForVisibleText(page, 'BRIEFING')`, `tools/ui/first_hour_browser_gate.cjs:820` — the first UI assertion after clicking the Army HQ Warroom toolbar route (`[data-testid="warroom-toolbar-staff"]`), `TimeoutError: Waiting failed: 30000ms exceeded`. This is a post-navigation render-timing wait, not a locale/date-dependent string — ruled out timezone/locale drift as a cause. The gate stops at first failure, so `qa:live-surface:browser` has not yet run on CI at all.
+
+**Confirmed NOT caused by this session's work:** the two selector-rename fixes landed this session (`data-awwv-urgent-count` → `data-awwv-required-count`, in `live_surface_browser_sweep.cjs` and `first_hour_browser_gate.cjs`'s sort comparator) are in unrelated code paths, not `verifyDecisionRecordsAndChronicle`. Local Windows runs of the identical script pass cleanly and consistently (verified via direct-to-file redirection, not pipe-masked).
+
+**Action:** Owner decision (2026-08-03): log as known, continue R4 Phase 5 rather than spend further ~50-min CI iteration cycles chasing it now. Whoever picks this up next should add temporary diagnostic logging around each `waitForVisibleText` call in `verifyDecisionRecordsAndChronicle` (lines 820-830) and push to CI to isolate which specific wait times out, or reproduce on a Linux box locally.
+
+**Scope:** Docs-only. No code change from this finding.
+
+---
+
 ## [2026-08-03] R4 Phase 5 fresh-188w finding: two anchors regressed, one older than tracked
 
 **Type:** Calibration observation (not a re-floor) / R4 Phase 5 integrated-proof byproduct / process-gap discovery.
