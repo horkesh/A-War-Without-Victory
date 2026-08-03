@@ -1,6 +1,23 @@
 # AWWV Calibration Master Reference
 
-## 2026-08-03 R4 Phase 5 fresh-188w check: floor is stale, two anchors regressed, one is older than tracked
+## 2026-08-03 CORRECTED: Doboj/Gračanica/Zvornik 188w regression traced to two separate, legitimate R4/R7 commits — NOT an engine bug, NOT `0fd36157b`
+
+**Supersedes the entry immediately below ("R4 Phase 5 fresh-188w check"), which correctly identified the symptom but whose bisection was too coarse to find the true cause.** A follow-up full bisection (11 fresh worktree+188w probes) during R4 Phase 5 traced the three failing anchors to their exact source commits. Full narrative, including a documented false start (a wrongly-attributed and then correctly-reverted-and-restored revert of `0fd36157b`), is in `PROJECT_LEDGER.md`.
+
+**Root causes, confirmed by isolated bisection:**
+
+1. **`op:zvornik:zvornik`** flips RS→RBiH at exactly `3c2e8a47f` (`fix(content): enforce R7 provenance and Ring-3 gates`, 2026-08-01). This is an **intentional §6 canon-compliance fix**, already independently discovered and documented by this project's own prior investigation in `docs/40_reports/implemented/20260802_R7_RING3_BASELINE_CAUSAL_REFRESH.md`: it removes a prohibited atrocity-reward (`war_crimes_delta: 5`, morale `+3`, internal-cohesion bonus) from the `drina_cleansing_decision_1992` event per the locked sensitive-history contract and the atrocity-is-never-rewarded bright line. That report's own causal bisect already concluded "Task 8A is exonerated" (i.e., `0fd36157b` was never the cause) — this session's bisection independently reached the same conclusion from a different starting point before finding that report. **Not a bug. Do not revert.** The 188w anchor for Zvornik may need re-evaluation given this canon-mandated change legitimately weakens RS combat power at this location — that's a calibration/anchor-definition question, not an engine defect.
+2. **`op:doboj:boljanic_2`** and **`op:gracanica:petrovo_2`** flip RS→RBiH at exactly `34edff214` (`fix(events): close presidential reachability residuals`, R4 Phase 3, 2026-08-01). This closes a real event-reachability gap: removes an unreachable process-only notification gate and corrects `bot_ai_default` AI-response attribution to require an authored default rather than a mislabeled fallback. Its own acceptance checkpoint (`docs/40_reports/implemented/20260801_R4_PHASE3_EVENT_REACHABILITY_CHECKPOINT.md`) explicitly claims "no effects/control/combat drift" — but that claim was validated only via a 52-week baseline refresh, never checked against 188w. The changed AI-default-response selection evidently changes which event choices bots make over a full 188-turn campaign, compounding into a real territorial difference at Doboj/Gračanica by week 188 that a 52-week check cannot see. **Also not an engine bug per se** — the reachability fix itself is correct and needed — but its downstream 188-week combat effect was never validated, matching this project's own previously-institutionalized "40w GO is a false-green for combat-behavior changes" lesson, recurring here at the 52w→188w boundary instead of 40w→188w.
+
+**`0fd36157b` (R5 Phase 2d Task 8A, front-edge relation reuse) is confirmed innocent.** Its own parent commit (`5987daea5`) already exhibits the identical 638/712, 28/31-anchor failure before `0fd36157b` ever lands — proven by a full 188w scenario run directly at that parent commit, and independently corroborated by the pre-existing R7 Ring-3 report's own causal bisect. A revert of `0fd36157b` was committed and then found ineffective in a clean fresh-worktree test, and has been reverted-of-reverted (restored) — see `PROJECT_LEDGER.md` for the full sequence. Task 8A's `PASS_RETAIN` disposition stands.
+
+**Recommended next step (not performed by this investigation — routed to calibration/canon-review lane):** decide whether to (a) accept the new territory outcome and update the affected anchors' expected values to reflect the canon-mandated and reachability-mandated changes, or (b) find a compensating tune elsewhere that restores historical fit within these new constraints, per this project's calibration-last, "floor is a guard not a target" posture. Do not attempt to revert either `3c2e8a47f` or `34edff214` — both are correct, reviewed, needed changes.
+
+**Scope:** No canon, code, or baseline change from this corrected entry beyond the now-restored `0fd36157b`. `docs/10_canon/FORAWWV.md` untouched.
+
+---
+
+## 2026-08-03 R4 Phase 5 fresh-188w check: floor is stale, two anchors regressed, one is older than tracked (SUPERSEDED — see entry above)
 
 **This entry does not re-bless a new floor.** It records a fresh, un-gated 188w observation made while running R4 Phase 5's integrated proof, per this project's own "calibration-last" posture (the floor is a regression guard, not a target — do not chase %). The finding below should route to a dedicated combat/calibration lane, not be treated as blocking R4.
 

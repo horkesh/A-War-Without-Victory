@@ -1,5 +1,31 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-03] Doboj/Gračanica/Zvornik 188w regression: true root causes found (two legitimate R4/R7 commits), including a documented false start
+
+**Type:** Calibration root-cause investigation, correction of an earlier wrong attribution, and a reverted-then-restored engine commit. Full sequence recorded honestly because it includes a real mistake.
+
+**Summary of the full investigation:** Following up on the 2026-08-03 "R4 Phase 5 fresh-188w check" entry (three named 188w anchors failing: `op:zvornik:zvornik`, `op:doboj:boljanic_2`, `op:gracanica:petrovo_2`), a deeper bisection was run at user request.
+
+**First attempt (WRONG):** An initial 5-point bisection across the ~100-commit window between R3 closure and HEAD found `0fd36157b` (R5 Phase 2d Task 8A, "front-edge relation reuse") as the apparent single cause — all 3 anchors flipped RS→RBiH at exactly that commit in the tested sequence, with `matched_osids` moving 610→638. `0fd36157b`'s own checkpoint doc showed its `PASS_RETAIN` disposition was validated only against the 40-week scenario, never 188w — a plausible mechanism. Acting on this, `0fd36157b` was reverted (commit `2d11792e5`), with full documentation updates across `CONSOLIDATED_IMPLEMENTED.md`, `README.md`, the Phase 2c/2d plan doc, and the checkpoint report itself.
+
+**The revert was then found ineffective.** A confirming 188w run — first in the main repo, then in a completely fresh, independently-`npm install`'d worktree at the new revert commit — showed the identical failure (same hash, same 3 anchors) as before the revert. Extensive diagnosis (tsx cache, Node's built-in module compile cache, worker threads, stray compiled artifacts, a literal `process.stderr.write` marker injected into the reverted function) all confirmed the reverted code was genuinely executing — ruling out any caching or environment explanation. The only remaining possibility was that the original bisection's attribution was wrong.
+
+**Second bisection (CORRECT):** Testing `0fd36157b`'s own direct git parent (`5987daea5`) with a full 188w run showed it **already fails identically** — proving `0fd36157b` inherited an already-broken state and was never the cause. This matches this project's own prior, independent finding in `docs/40_reports/implemented/20260802_R7_RING3_BASELINE_CAUSAL_REFRESH.md` ("Task 8A is exonerated"), which this investigation had not yet read at that point. `0fd36157b` was un-reverted (commit `e081c6e8b`, restoring `2d11792e5`'s changes), returning all documentation to its accurate pre-revert state.
+
+A further 4-point bisection within the true window (`67a779dd4` confirmed clean → `5987daea5` confirmed broken) isolated two independent, non-adjacent true causes:
+- **`3c2e8a47f`** (`fix(content): enforce R7 provenance and Ring-3 gates`) — the Zvornik flip. Intentional §6 canon-compliance fix removing a prohibited atrocity-reward from `drina_cleansing_decision_1992`. Already causally proven and accepted by the project's own Ring-3 report.
+- **`34edff214`** (`fix(events): close presidential reachability residuals`, R4 Phase 3) — the Doboj/Gračanica flip. A real event-reachability fix whose acceptance checkpoint claimed "no control/combat drift" based on a 52-week-only validation; the corrected AI-default-response selection evidently changes bot event choices in ways that compound into real territorial differences by week 188, invisible at 52w.
+
+**Neither true cause should be reverted** — both are correct, reviewed, needed changes (one canon-mandated, one closing a real bug). Full technical detail, the exact bisection trace, and a recommended next step (re-evaluate the affected anchors' expected values, or find a compensating tune, per calibration-last posture) are in `docs/40_reports/CALIBRATION_MASTER.md`'s 2026-08-03 corrected entry.
+
+**Process lesson (the second instance of this exact lesson in the same investigation):** this project's institutionalized "40w GO is a false-green for combat-behavior changes — validate at 188w" lesson recurred twice in immediately adjacent commits — once at the 40w→188w boundary (`0fd36157b`'s Task 8A measurement, though ultimately not the cause) and once at the 52w→188w boundary (`34edff214`'s R4 Phase 3 acceptance, which was the cause). Any future change touching `src/sim/events/` or combat/sector code should be checked at 188w before its acceptance checkpoint claims "no control/combat drift."
+
+**Bisection method used throughout:** isolated git worktrees, each given a fresh `npm install`, each running a full `npm run sim:scenario:run:188w` against `apr1992_definitive_188w.json` and comparing named `anchor_checks` results — 11 such probes across both bisection attempts. Five disposable worktrees (`bisect-r4p5-*`, `bisect-3c2e8a47f`, `bisect-638805ea4`, `bisect-34edff214`, `bisect-67a779dd4`, `verify-revert-2d11792e5`) remain on disk under `F:/AWWV-worktrees/` pending cleanup.
+
+**Scope:** No canon, `docs/10_canon/FORAWWV.md`, scenario, or baseline change. Net code effect after the revert-then-restore: zero (identical to pre-investigation `HEAD` plus the R4 Phase 5 documentation commits already recorded below).
+
+---
+
 ## [2026-08-03] R4 Phase 5: CI-only `qa:first-hour:browser` timeout, root-caused to a CI/Linux-specific render-timing gap, not a session regression
 
 **Type:** CI infrastructure finding / R4 Phase 5 gate-verification byproduct. Not fixed this session — logged and routed per owner decision (further diagnosis needs either Linux-local reproduction or repeated ~50-min CI iteration cycles; core vitest suite of 12,584+ tests is unaffected).
