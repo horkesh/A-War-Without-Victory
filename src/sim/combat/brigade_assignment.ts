@@ -9,7 +9,6 @@ import type {
     FormationAssignment,
     FormationId,
     FormationState,
-    GameState,
 } from '../../state/game_state.js';
 import { computeLocalFrontDefensivePower } from './local_front_defense.js';
 import { effectivePersonnel } from './tactical_group_personnel.js';
@@ -32,6 +31,7 @@ import {
 } from './sector_build_derived_context.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
+import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
 
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
 const COLLAPSED_REAR_GUARD_ABSORPTION_CORPS = new Set<string>(['vrs_2nd_krajina']);
@@ -69,7 +69,7 @@ function operationObjectives(op: { axes?: Array<{ objectives?: string[] }>; obje
 }
 
 function hasActiveEnemyFeintAgainstSector(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     sector: CorpsFrontSector,
     faction: FactionId,
 ): boolean {
@@ -253,7 +253,7 @@ export function buildOneHopReserveBand(
     return oneHopBehind;
 }
 
-export function buildOperationParticipantSet(state: GameState | undefined): Set<FormationId> {
+export function buildOperationParticipantSet(state: SectorTopologyNarrowReadState | undefined): Set<FormationId> {
     const participants = new Set<FormationId>();
     if (!state) return participants;
     const corpsCommand = state.military.corps_command ?? {};
@@ -332,7 +332,7 @@ function classifySectorPosition(
 }
 
 export function isMovementOwnedHomeReturn(
-    state: GameState | undefined,
+    state: SectorTopologyNarrowReadState | undefined,
     formationId: FormationId,
     formation: FormationState,
 ): boolean {
@@ -348,7 +348,7 @@ export function isMovementOwnedHomeReturn(
 }
 
 export function isMovementOwnedReturnToCorps(
-    state: GameState | undefined,
+    state: SectorTopologyNarrowReadState | undefined,
     formationId: FormationId,
     formation: FormationState,
     sectors: CorpsFrontSector[],
@@ -380,7 +380,7 @@ export function isMovementOwnedReturnToCorps(
 }
 
 function columnDeploymentDestination(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     formationId: FormationId,
 ): string | null {
     const moveOrder = state.military.brigade_movement_orders?.[formationId] as { destination_sids?: string[]; stance?: string } | undefined;
@@ -397,7 +397,7 @@ function columnDeploymentDestination(
 }
 
 export function isMovementOwnedActiveLoanDeployment(
-    state: GameState | undefined,
+    state: SectorTopologyNarrowReadState | undefined,
     formationId: FormationId,
     formation: FormationState,
 ): boolean {
@@ -442,7 +442,7 @@ export function classifyBrigadesByTerritory(
     componentOf: Map<string, number>,
     commanderProfiles: Map<string, CorpsCommanderProfile>,
     playerOverrides?: Record<string, string>, // brigadeId → sector_id
-    state?: GameState,
+    state?: SectorTopologyNarrowReadState,
 ): void {
     if (sectors.length === 0) return;
 
@@ -1541,7 +1541,7 @@ export function ensureMinimumSectorCoverage(
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
-    state?: GameState,
+    state?: SectorTopologyNarrowReadState,
     perfTime: EnsureMinimumSectorCoveragePerfTimer = (_label, fn) => fn(),
     occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
     mutationRecorder?: SectorTopologyMutationRecorder,
@@ -2630,7 +2630,7 @@ export function recomputeSectorPowerAndThreat(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     faction: FactionId,
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
 ): void {
     const enemyPersonnelByOsid = countActiveEnemyPersonnelByOsid(formations, faction);
     for (const s of sectors) {
