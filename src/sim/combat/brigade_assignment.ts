@@ -6,6 +6,7 @@
 import type {
     CorpsFrontSector,
     FactionId,
+    FormationAssignment,
     FormationId,
     FormationState,
     GameState,
@@ -30,6 +31,7 @@ import {
     type FormationOccupancyIndex,
 } from './sector_build_derived_context.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
+import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
 const COLLAPSED_REAR_GUARD_ABSORPTION_CORPS = new Set<string>(['vrs_2nd_krajina']);
@@ -1542,6 +1544,7 @@ export function ensureMinimumSectorCoverage(
     state?: GameState,
     perfTime: EnsureMinimumSectorCoveragePerfTimer = (_label, fn) => fn(),
     occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
+    mutationRecorder?: SectorTopologyMutationRecorder,
 ): void {
     if (occupancyStrategy !== 'dense-index' && occupancyStrategy !== 'test-only-legacy-scan') {
         throw new Error(`Unknown occupancy strategy: ${String(occupancyStrategy)}`);
@@ -1711,8 +1714,13 @@ export function ensureMinimumSectorCoverage(
         const previous = formation.location_osid;
         if (!isEnclaveMovementDestinationAllowed(formation, previous, target)) return;
         activeCounts.move(bid, previous, target);
-        formation.location_osid = target;
-        formation.entrenchment_turns = 0;
+        if (mutationRecorder) {
+            mutationRecorder.recordFormationLocation(formation, bid, target, 'ensureMinimumSectorCoverage');
+            mutationRecorder.recordFormationEntrenchment(formation, bid, 'ensureMinimumSectorCoverage');
+        } else {
+            formation.location_osid = target;
+            formation.entrenchment_turns = 0;
+        }
     };
 
     const targetPreservesHomeDistance = (
@@ -2659,6 +2667,7 @@ export function syncSectorAssignmentsToFormations(
     sectors: Record<string, CorpsFrontSector>,
     formations: Record<FormationId, FormationState>,
     adjacency?: Map<Osid, Osid[]>,
+    mutationRecorder?: SectorTopologyMutationRecorder,
 ): void {
     // Step 1: Clear assignment for all brigade-kind formations
     const formIds = Object.keys(formations).sort(strictCompare);
@@ -2669,11 +2678,19 @@ export function syncSectorAssignmentsToFormations(
             && f.kind !== undefined) continue;
         // Only clear sector assignments — preserve edge/region assignments from other systems
         if (f.assignment && f.assignment.kind === 'sector') {
-            f.assignment = null;
+            if (mutationRecorder) {
+                mutationRecorder.recordFormationAssignment(f, fid, null, 'syncSectorAssignmentsToFormations:clear');
+            } else {
+                f.assignment = null;
+            }
         }
         // Sub-segment ownership is derived from current frontline sector truth.
         // If a brigade is no longer sector-owned, stale residue must not survive.
-        f.assigned_sub_segment_id = undefined;
+        if (mutationRecorder) {
+            mutationRecorder.recordFormationAssignedSubSegment(f, fid, undefined, 'syncSectorAssignmentsToFormations:clear');
+        } else {
+            f.assigned_sub_segment_id = undefined;
+        }
     }
 
     // Step 2: Set assignment from sector data
@@ -2701,7 +2718,12 @@ export function syncSectorAssignmentsToFormations(
                         ? 'territory'
                         : null;
             if (!physicalClaim) continue;
-            f.assignment = { kind: 'sector', sector_id: sid, role: physicalClaim === 'territory' ? 'rear' : physicalClaim };
+            const nextAssignment: FormationAssignment = { kind: 'sector', sector_id: sid, role: physicalClaim === 'territory' ? 'rear' : physicalClaim };
+            if (mutationRecorder) {
+                mutationRecorder.recordFormationAssignment(f, bid, nextAssignment, 'syncSectorAssignmentsToFormations:assigned');
+            } else {
+                f.assignment = nextAssignment;
+            }
         }
         for (const bid of sector.reserve_brigade_ids) {
             const f = formations[bid];
@@ -2715,7 +2737,12 @@ export function syncSectorAssignmentsToFormations(
                         ? 'territory'
                         : null;
             if (!reserveClaim) continue;
-            f.assignment = { kind: 'sector', sector_id: sid, role: reserveClaim === 'territory' ? 'rear' : 'reserve' };
+            const nextAssignment: FormationAssignment = { kind: 'sector', sector_id: sid, role: reserveClaim === 'territory' ? 'rear' : 'reserve' };
+            if (mutationRecorder) {
+                mutationRecorder.recordFormationAssignment(f, bid, nextAssignment, 'syncSectorAssignmentsToFormations:reserve');
+            } else {
+                f.assignment = nextAssignment;
+            }
         }
         for (const bid of sector.rear_brigade_ids ?? []) {
             const f = formations[bid];
@@ -2729,7 +2756,12 @@ export function syncSectorAssignmentsToFormations(
                         ? 'territory'
                         : null;
             if (!rearClaim) continue;
-            f.assignment = { kind: 'sector', sector_id: sid, role: 'rear' };
+            const nextAssignment: FormationAssignment = { kind: 'sector', sector_id: sid, role: 'rear' };
+            if (mutationRecorder) {
+                mutationRecorder.recordFormationAssignment(f, bid, nextAssignment, 'syncSectorAssignmentsToFormations:rear');
+            } else {
+                f.assignment = nextAssignment;
+            }
         }
     }
 }

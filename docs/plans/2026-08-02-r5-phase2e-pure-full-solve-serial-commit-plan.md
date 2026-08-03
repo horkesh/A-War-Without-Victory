@@ -12,7 +12,28 @@
 
 **Date:** 2026-08-02
 
-**Status:** DESIGN COMPLETE / IMPLEMENTATION NOT STARTED
+**Status:** IMPLEMENTATION IN PROGRESS — Task 1 partial (WIP), not yet committed as a complete task
+
+**2026-08-03 Task 1 scope discovery (WIP checkpoint, read this before resuming):** The plan's section 6/7 writer-mapping table understates the true call frequency of `ensureMinimumSectorCoverage`. It has **8 call sites** in `corps_front_sectors.ts`, not the 1 implied by the narrative:
+
+- `applyFinalSectorOwnerTruthPass` — 1 site, called up to **4 times** per builder invocation (some conditional on `useFixedPointShortcuts`/mutation flags).
+- `reconcileOperationSensitiveSectorRoster` — 2 sites. **Confirmed out of scope** per plan section 7.2 ("the separate operation-sensitive roster reconciliation stays outside this extraction and retains its current owner") — do not thread the recorder here.
+- `recoverDroppedFrontEdges` — 1 site, called 2-3 times per invocation (the third conditional on `!useFixedPointShortcuts || prunedGhostArtifacts || recoveredDroppedFrontEdges`).
+- `sealMergedSectorTruth` — 2 sites, called up to **5 times** per invocation (`sealMergedSectorTruth:1` through `:5`, one conditional).
+- `buildFactionSectors` — 2 sites (not 1), once per faction.
+
+Net: one `buildCorpsFrontSectors` invocation can call `ensureMinimumSectorCoverage` **15-20+ times** in a single call, in a data-dependent order gated by several fixed-point-shortcut conditionals. The main function body (`buildCorpsFrontSectors`, `corps_front_sectors.ts` lines ~359-772) is itself a nearly 300-line sequence of ~25 named passes (`mergeSmallAdjacentSectors`, `repairDisconnectedTerritory`, `canonicalizeSiblingFrontOwnership` ×2, `mergeLateSiblingFrontFragments`, `enforceFinalSectorGeometryInvariants` ×2-3, the 5 seal passes, 2-3 recovery passes, `canonicalizeDuplicateFrontOwnershipByPiece`, 2 territory-Voronoi passes, the 4 owner-truth passes, `absorbEmptyStaffableSiblingSectors`, `rescueUnassignedLoanedElitesInTerritory`, `sealWarFrontFactionSideCoverage`, `absorbUnstaffedSiblingFrontSectors`, `canonicalizeSameFactionEdgeOwnership`, plus a `finalSaveGeometryProjection`-only branch not yet read). Characterizing the true write order requires tracing all of this, not just the tail — comparable in scope to Task 8A's own multi-day effort.
+
+**WIP state (uncommitted-then-committed as an honest checkpoint, not a completed Task 1):**
+
+- Created: `src/sim/combat/sector_topology_mutation_journal.ts` — `SectorTopologyMutationRecorder`, the `SectorTopologyMutation` union, `createSectorTopologyMutationRecorder('test-only-imperative-live-state')`. Rejects unknown strategy before any state access. Complete and self-consistent as written; not yet exercised by a test.
+- Modified (all backward-compatible — every new parameter is optional, defaults to `undefined`, and behavior is byte-identical to before when no recorder is supplied): `brigade_assignment.ts` (`ensureMinimumSectorCoverage`'s `moveBrigadeToFrontTarget` helper now routes its `location_osid`/`entrenchment_turns` writes through the recorder when present; `syncSectorAssignmentsToFormations`'s clear-and-set sequence likewise); `corps_front_sectors.ts` (`buildCorpsFrontSectors` and `buildFactionSectors` signatures gained an optional `mutationRecorder` parameter and thread it to the one `ensureMinimumSectorCoverage` call and `syncSectorAssignmentsToFormations` call already wired).
+- Typecheck is clean at this checkpoint.
+- **Not done:** threading the recorder through the other 6 `ensureMinimumSectorCoverage` call sites (`applyFinalSectorOwnerTruthPass`, `recoverDroppedFrontEdges`, `sealMergedSectorTruth` ×2, `buildFactionSectors`'s second call), the `assigned_sub_segment_id = undefined` write in the reachability-demotion loop (`buildFactionSectors`, ~line 3970), the `unresolved_sector_brigades` write at the true tail, and the RED characterization test itself. None of this can be written accurately without first reading the ~300-line main body plus the 3 additional pass functions in full.
+
+**Next action for whoever resumes this:** read `corps_front_sectors.ts` lines 359-772 in full (the actual main-body pass sequence, not just its head and tail) plus `sealMergedSectorTruth`, `recoverDroppedFrontEdges`, and `applyFinalSectorOwnerTruthPass` in full, before writing anything further. Budget this as most of a session on its own.
+
+**Original status line (superseded above):** DESIGN COMPLETE / IMPLEMENTATION NOT STARTED
 
 **Owner lane:** R5 Phase 2e, engine quality/performance/stability
 

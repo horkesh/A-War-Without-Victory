@@ -47,6 +47,7 @@ import {
 } from './corps_front_sectors_constants.js';
 import { getCorpsArmyPriorities } from './bot_strategy.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
+import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 
 // ── Imported from extracted modules ──────────────────────────────────────
 import { buildFriendlyComponents, getSectorComponent, getSectorFrontOsids, getSectorUniqueFrontOsids, canAnyBrigadeReachAny, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
@@ -368,6 +369,7 @@ export function buildCorpsFrontSectors(
     occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
     frontEdgeAdjacencyStrategy: SectorFrontEdgeAdjacencyStrategy = 'invocation-front-edge-relation',
     frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters,
+    mutationRecorder?: SectorTopologyMutationRecorder,
 ): Record<string, CorpsFrontSector> {
     if (frontEdgeAdjacencyStrategy !== 'invocation-front-edge-relation'
         && frontEdgeAdjacencyStrategy !== 'test-only-legacy-edge-adjacency') {
@@ -458,7 +460,7 @@ export function buildCorpsFrontSectors(
 
     for (const faction of factions) {
         const factionSectors = _perfTime(`buildFactionSectors:${faction}`, () => buildFactionSectors(
-            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, globalEdgeMeta, formations, activeCombatFormationScanIds, reverseMap, centroids, spatial, occupancyStrategy, frontEdgeRelationForFaction
+            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, globalEdgeMeta, formations, activeCombatFormationScanIds, reverseMap, centroids, spatial, occupancyStrategy, frontEdgeRelationForFaction, mutationRecorder
         ));
         for (const sector of factionSectors) {
             result[sector.sector_id] = sector;
@@ -3513,6 +3515,7 @@ function buildFactionSectors(
     spatial?: SpatialContext,
     occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
     frontEdgeRelationProvider?: SectorFrontEdgeRelationProvider,
+    mutationRecorder?: SectorTopologyMutationRecorder,
 ): CorpsFrontSector[] {
     // Step 1: Find corps for this faction
     const corpsIds = getCorpsForFaction(formations, faction);
