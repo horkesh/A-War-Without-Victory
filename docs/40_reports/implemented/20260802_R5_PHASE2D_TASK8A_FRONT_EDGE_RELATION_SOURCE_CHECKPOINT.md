@@ -3,7 +3,7 @@
 **Date:** 2026-08-02
 **Baseline:** `2d72d75e3e8250c0fe09739648a61522cd7efd14` (`c7004af13f186e585393b44f71651edb42e57a7f`)
 **Branch:** `codex/r5-phase2d-front-edge-relation`
-**Result:** Source correctness accepted; post-integration exact-parent measurement recorded `PASS_RETAIN` at `0fd36157b` — **superseded 2026-08-03, see "Final Disposition: Reverted" at the end of this document.** The retained state below is preserved as-written for the audit trail; it is no longer current.
+**Result:** Source correctness accepted; post-integration exact-parent measurement is `PASS_RETAIN` at `0fd36157b`.
 
 ## Summary
 
@@ -86,20 +86,3 @@ The exclusive runtime packet completed after integration. Candidate `0fd36157bd7
 All 14 inspected saves are exactly `5,085,892` bytes with SHA-256 `9d2a59dc1097ff3b69d3cec2d19962af32b7199de9f0b311d1dea4c562a596b4`. Unexpected canonical fallbacks remain zero. Combined adjacency inclusive time falls `81.610253%`; `buildCorpsFrontSectors` inclusive time falls `7.075305%`. Two of three alternating pairs improve; median pair improvement is `2.599063%`, maximum regression is `1.766058%`, and mean moves from `1,106.024517` to `1,086.310925 ms/turn` (`1.782383%`). Every predeclared retention gate passes.
 
 Memory remains a watch rather than a benefit: phase-boundary sampled peak heap moves `215.045822 -> 291.751656 MB`, and the fresh retained-source profile samples `281.241852 MB`. That fresh profile still ranks `buildCorpsFrontSectors` first at `295.866225 ms/turn` and `26.224914%` of sampled application time. The next authorized work is the separate [Phase 2e pure full-solve/serial-commit extraction plan](../../plans/2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md). Task 6 remains closed until that enabling extraction is accepted and a new profile passes its exact authorization gate.
-
-## Final Disposition: Reverted (2026-08-03)
-
-**The `PASS_RETAIN` disposition above is superseded.** All exact-output equivalence evidence in this document — the 100-real-save property, the 14-inspected-save byte comparison, and every retention-gate number — was measured exclusively against `apr1992_definitive_40w.json` (the 40-week scenario). No approved 188-week scenario run was part of the retention protocol at any stage.
-
-During R4 Phase 5 integrated-proof work, a fresh 188-week scenario run at exactly this commit (`0fd36157b`) found the candidate is **not** output-equivalent to the legacy path at that horizon:
-
-- `op:doboj:boljanic_2`, `op:gracanica:petrovo_2`, and `op:zvornik:zvornik` — three named historical anchors, all in the same Drina/Posavina corridor — flip RS→RBiH at exactly this commit and no other commit in a ~100-commit bisection window (R3 closure `7068a0c6c` through this branch's HEAD).
-- `matched_osids` (aggregate historical fit) moves 610→638/712 at the same commit — the aggregate score improves even as the three named anchors regress, which is why an aggregate-only check would not have caught this either.
-- Two anchors unrelated to this corridor (`op:brcko:brcko`, `brcko_corridor_jan1993`) that failed at every earlier bisection point flip back to passing at this same commit — a clean single-cause trade-off signature, not independent noise.
-- Bisection method: five isolated git worktrees at successive commits between `7068a0c6c` and HEAD, each given a fresh `npm install` and a full `npm run sim:scenario:run:188w` against `apr1992_definitive_188w.json`, comparing named `anchor_checks` results. Full trace retained in `PROJECT_LEDGER.md` (2026-08-03 entries) and the R4 Phase 5 execution log.
-
-This is a direct recurrence of this project's own previously-documented lesson: **"40w GO + green CI is a false-green for combat-behavior changes — validate at 188w before declaring GO"** (see `docs/life_lessons.md` / calibration memory; the same failure pattern previously broke the Zvornik sacred anchor via a different change that also passed 40w and two independent reviews).
-
-**Disposition:** Reverted. `src/sim/combat/sector_front_edge_relation.ts` (deleted), `corps_front_sectors.ts`, `sector_building.ts`, `sector_splitting.ts`, `sector_territory.ts`, and the associated test files are restored to their pre-`0fd36157b` state. No commit after `0fd36157b` touched any of these files or imported the new module, so the revert is isolated — nothing else on this branch depends on the reverted change.
-
-**Process lesson for the next front-edge/sector-topology candidate:** a single-invocation, sampled real-save equivalence property (however large — 100 variants, 14 inspected saves) proves the function is correct for the specific inputs it was fed. It does not prove a full multi-turn campaign is unaffected, because a rare divergent branch triggered even once early in a 188-turn campaign compounds forward through every subsequent turn's state. The retention protocol for this lane should require an actual full-length (188-week) scenario comparison — not just sampled snapshots — before a `PASS_RETAIN` disposition is recorded. Task 6 and any future Phase 2d/2e candidate touching this call graph should treat this as a mandatory gate, not an optional strengthening.
