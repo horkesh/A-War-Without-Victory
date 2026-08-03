@@ -42,14 +42,33 @@
  * upfront census missed because it never showed up in the earlier 4-file
  * grep census (that census only matched `formation.`/`f.` variable-name
  * prefixes; this call site uses `corps.name`).
+ *
+ * `elite_loan_state` is NOT included in the `Pick` below, and is instead
+ * overridden with a hand-written narrow shape: `Pick<FormationState,
+ * 'elite_loan_state'>` would have kept the field's VALUE at the full, wide
+ * `EliteLoanState` type (`Pick` only restricts which top-level keys are
+ * required, not the shape behind them — the exact mistake corrected in
+ * `sector_topology_narrow_reads.ts`'s file docstring, caught here only once
+ * the detached-state adapter tried to construct a real value for it).
+ * `EliteLoanState` has several required fields (`last_recall_turn`,
+ * `loan_start_personnel`, `permanently_degraded`, `current_episode_id`)
+ * nothing in this call graph reads.
  */
 
 import type { FormationState } from '../../state/game_state.js';
 
-export type SectorTopologyWorkingFormation = Pick<FormationState,
+export interface SectorTopologyWorkingEliteLoanState {
+    on_loan: boolean;
+    loaned_to_corps: string | null;
+    loan_start_turn: number | null;
+}
+
+export type SectorTopologyWorkingFormation = Omit<Pick<FormationState,
     | 'id' | 'faction' | 'status' | 'kind' | 'readiness' | 'lifecycle_status' | 'tags'
     | 'corps_id' | 'location_osid' | 'home_osid' | 'hq_osid' | 'hq_sid' | 'name'
     | 'personnel' | 'personnel_lent_by_tg' | 'cohesion' | 'experience' | 'honor'
     | 'assignment' | 'assigned_sub_segment_id' | 'posture' | 'disrupted' | 'disrupted_turns'
     | 'stranded_status' | 'elite_loan_state' | 'entrenchment_turns'
->;
+>, 'elite_loan_state'> & {
+    elite_loan_state?: SectorTopologyWorkingEliteLoanState;
+};

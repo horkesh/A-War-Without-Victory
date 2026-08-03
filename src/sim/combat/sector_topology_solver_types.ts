@@ -172,6 +172,8 @@ export interface SectorTopologyBrigadePostureOrder {
 export interface SectorTopologyOperationAxisRow {
     readonly axis_id: string;
     readonly assigned_brigades: readonly FormationId[];
+    /** Read by `operationObjectives` (brigade_assignment.ts) via `hasActiveEnemyFeintAgainstSector`. */
+    readonly objectives?: readonly string[];
 }
 
 export interface SectorTopologyOperationRow {

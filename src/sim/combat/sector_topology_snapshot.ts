@@ -186,7 +186,7 @@ function captureOperation(op: {
     sector_id?: string;
     preparation_sub_phase?: string;
     participating_brigades: FormationId[];
-    axes?: Array<{ axis_id: string; assigned_brigades: FormationId[] }>;
+    axes?: Array<{ axis_id: string; assigned_brigades: FormationId[]; objectives?: string[] }>;
     objectives?: string[];
 }): SectorTopologyOperationRow {
     return Object.freeze({
@@ -200,6 +200,7 @@ function captureOperation(op: {
             ? Object.freeze(op.axes.map((axis) => Object.freeze({
                 axis_id: axis.axis_id,
                 assigned_brigades: Object.freeze([...(axis.assigned_brigades ?? [])]),
+                objectives: axis.objectives ? Object.freeze([...axis.objectives]) : undefined,
             })))
             : undefined,
         objectives: op.objectives ? Object.freeze([...op.objectives]) : undefined,
