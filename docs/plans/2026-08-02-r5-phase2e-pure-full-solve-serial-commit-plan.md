@@ -834,3 +834,9 @@ Note on Task 5's item 5 (explicit mutation journal diff) and items 7/9/10 (Task 
 **Task 6 verdict: all three required reviewers returned PASS. Task 6 is CLOSED.** Two of three reviews were conducted by genuinely independent, freshly-dispatched subagents with no context from the implementation work; the third (Architect) was self-conducted because the `technical-architect` skill loaded inline into this session rather than spawning a subagent — flagged transparently rather than claimed as equally independent. The Performance reviewer's formation-double-copy finding is carried forward as a required measurement scope item for Task 8, not treated as resolved or dismissed.
 
 **Commit:** `docs(r5): checkpoint pure solve source proof` (per the plan's own Task 6 commit message).
+
+## 2026-08-04 session 5 continued — Task 7: approved baselines pass without refresh
+
+Preflight: clean branch (`codex/master-roadmap-execution` at `883ff66c2`, only the 5 expected pre-existing session-start files modified), Node v24.13.0, no other AWWV heavy process running (checked via process list before starting). Ran `npm run test:baselines` (`tsx tools/scenario_runner/run_baseline_regression.ts`). Result: **"Baseline regression: all scenarios match."** No manifest refresh needed or performed. Task 7 requires no dedicated commit per the plan's own spec (verification-only, no code change); this checkpoint plus the roadmap sync below is the record.
+
+Next: Task 8 (exact-parent functional and measurement packet against `0fd36157b` in two clean worktrees) — this is a substantially heavier, more procedurally strict undertaking (V8 profiling, alternating wall-clock pairs, heap/RSS ceilings, exclusive runtime lease) than anything else completed this session, and is the direct input to Task 9's retain/revert decision. Starting it fresh rather than folding it into this already-long session's tail.
