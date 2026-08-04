@@ -757,21 +757,21 @@ Do not squash away RED/repair provenance before independent review. The orchestr
 
 ## 14. Completion checklist
 
-- [ ] Current imperative journal is characterized before extraction.
-- [ ] Every section 6 input is captured with no retained mutable caller identity.
-- [ ] Pure solve mutates neither input nor live state.
-- [ ] Every live builder write is journaled in exact order.
-- [ ] Detached local writes are visible to later faction/recovery stages.
-- [ ] Serial commit preflights the entire journal before any live write.
-- [ ] Task 8A relation and dense occupancy contracts are unchanged.
-- [ ] Three modes x 100 compare sectors/state/reports/session/receipts/journal/geometry/diagnostics/bytes/SHA/rerun.
-- [ ] Exact-parent external oracle passes.
-- [ ] Fast/type/static/baseline gates pass without refresh.
-- [ ] Exclusive measurement packet passes timing and memory gates or the candidate is reverted.
-- [ ] Fresh profile selects the next owner.
-- [ ] Task 6 is authorized only if every section 11 item passes; otherwise it remains closed.
-- [ ] Report, roadmap, command board, ledger, knowledge, and indices match evidence.
-- [ ] No canon/FORAWWV/schema/scenario/baseline/package/version/release change.
+- [x] Current imperative journal is characterized before extraction. (Task 1, shipped)
+- [x] Every section 6 input is captured with no retained mutable caller identity. (Task 2, shipped)
+- [x] Pure solve mutates neither input nor live state. (proven by `sector_topology_solver.test.ts`'s "never mutates its input" test)
+- [x] Every live builder write is journaled in exact order. (Tasks 1/3, shipped)
+- [x] Detached local writes are visible to later faction/recovery stages. (Task 3, proven via the imperative-oracle equivalence test)
+- [x] Serial commit preflights the entire journal before any live write. (Task 4, shipped)
+- [x] Task 8A relation and dense occupancy contracts are unchanged. (`runFrontEdgeRelationModes`/`runOccupancyModes` both clean in this session's full-suite runs)
+- [x] Three modes x 100 compare sectors/state/reports/session/receipts/journal/geometry/diagnostics/bytes/SHA/rerun. (Task 5, 2026-08-04, 300/300 clean — see this doc's session 5 checkpoints for the documented, deliberate scope judgment on the journal/Task-8A-diagnostics/solve-input-unchanged/relation-occupancy sub-items)
+- [ ] Exact-parent external oracle passes. (Task 8, not started — explicitly deferred by Task 5's own spec, needs a separate `0fd36157b` control worktree)
+- [ ] Fast/type/static/baseline gates pass without refresh. (fast/type gates pass on every commit so far; the full baseline-gate sweep has not been run as a single closeout pass)
+- [ ] Exclusive measurement packet passes timing and memory gates or the candidate is reverted. (Task 6 prerequisite, not started)
+- [ ] Fresh profile selects the next owner. (Task 6 prerequisite, not started)
+- [ ] Task 6 is authorized only if every section 11 item passes; otherwise it remains closed. (currently: NOT authorized)
+- [ ] Report, roadmap, command board, ledger, knowledge, and indices match evidence. (kept in sync incrementally after every commit; final closeout pass not yet done)
+- [ ] No canon/FORAWWV/schema/scenario/baseline/package/version/release change. (true of every commit so far; final closeout pass not yet done)
 
 ## 15. Copy-ready implementation prompt
 
