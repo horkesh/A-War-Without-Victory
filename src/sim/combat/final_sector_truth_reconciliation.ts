@@ -1,6 +1,6 @@
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import type { EdgeRecord } from '../../map/settlements.js';
-import type { GameState } from '../../state/game_state.js';
+import type { CorpsFrontSector, GameState } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { SpatialContext } from '../spatial_context.js';
@@ -8,6 +8,7 @@ import { syncSectorAssignmentsToFormations } from './brigade_assignment.js';
 import {
     applyFinalSectorOwnerTruthPass,
     assignBrigadesToSubSegments,
+    buildCorpsFrontSectors,
     collectUnresolvedSectorBrigades,
     emitFinalUnresolvedSectorWarnings,
     reconcileOperationSensitiveSectorRoster,
@@ -63,6 +64,15 @@ export interface FinalSectorReconciliationSession {
 export interface FinalSectorTruthReconciliationOptions {
     finalSaveGeometryProjection?: boolean;
     session?: FinalSectorReconciliationSession;
+    /**
+     * @internal Test-only. Defaults to `'pipeline'` (capture -> pure solve ->
+     * serial commit, the production path since R5 Phase 2e Task 4 step 5).
+     * `'test-only-imperative-legacy'` restores the pre-Task-4 direct
+     * `buildCorpsFrontSectors` call, preserved verbatim as a reference
+     * oracle for the Task 5 candidate/legacy/rerun equivalence suite. Never
+     * set this outside a test.
+     */
+    geometrySolveStrategy?: 'pipeline' | 'test-only-imperative-legacy';
 }
 
 export interface FinalSectorTruthSealOptions {
@@ -218,21 +228,40 @@ function runFullGeometryReconciliation(
     supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
     isFinalPass: boolean,
     finalSaveGeometryProjection: boolean,
+    geometrySolveStrategy: 'pipeline' | 'test-only-imperative-legacy' = 'pipeline',
 ): FinalSectorTruthReconciliationReport {
     const activeFormationLocations = captureActiveFormationLocations(state);
-    // R5 Phase 2e Task 4 step 5: pure-solve/serial-commit is now this call
-    // site's production path. capture -> solve -> commit run back-to-back
-    // synchronously against the same `state` with no intervening code, so
-    // commitSectorTopologySolve's turn/front-edge provenance checks always
-    // pass here; a thrown SectorTopologyStaleCommitError would indicate a
-    // genuine broken invariant and must propagate, not be caught.
-    const input = captureSectorTopologySolveInput(state, edges, reverseMap, centroids, spatial, {
-        isFinalPass,
-        finalSaveGeometryProjection,
-    });
-    const output = solveCorpsFrontSectorsPure(input);
-    commitSectorTopologySolve(state, input, output);
-    const sectors = output.sectors;
+    let sectors: Record<string, CorpsFrontSector>;
+    if (geometrySolveStrategy === 'test-only-imperative-legacy') {
+        // @internal Test-only reference oracle for the R5 Phase 2e Task 5
+        // candidate/legacy/rerun equivalence suite. Preserved verbatim from
+        // the pre-Task-4 direct-call body (see commit dc9648920^). Never
+        // reached outside a test.
+        sectors = buildCorpsFrontSectors(
+            state,
+            edges,
+            reverseMap,
+            centroids,
+            spatial,
+            isFinalPass,
+            finalSaveGeometryProjection,
+        );
+        state.military.corps_front_sectors = sectors;
+    } else {
+        // R5 Phase 2e Task 4 step 5: pure-solve/serial-commit is now this call
+        // site's production path. capture -> solve -> commit run back-to-back
+        // synchronously against the same `state` with no intervening code, so
+        // commitSectorTopologySolve's turn/front-edge provenance checks always
+        // pass here; a thrown SectorTopologyStaleCommitError would indicate a
+        // genuine broken invariant and must propagate, not be caught.
+        const input = captureSectorTopologySolveInput(state, edges, reverseMap, centroids, spatial, {
+            isFinalPass,
+            finalSaveGeometryProjection,
+        });
+        const output = solveCorpsFrontSectorsPure(input);
+        commitSectorTopologySolve(state, input, output);
+        sectors = output.sectors;
+    }
 
     const sectorList = Object.values(sectors);
     if (sectorList.length === 0) {
@@ -357,6 +386,7 @@ export function reconcileFinalSectorTruth(
     options?: FinalSectorTruthReconciliationOptions,
 ): FinalSectorTruthReconciliationReport {
     const session = options?.session;
+    const geometrySolveStrategy = options?.geometrySolveStrategy ?? 'pipeline';
     if (!session) {
         return runFullGeometryReconciliation(
             state,
@@ -367,6 +397,7 @@ export function reconcileFinalSectorTruth(
             supplyStateByOsid,
             isFinalPass,
             options?.finalSaveGeometryProjection === true,
+            geometrySolveStrategy,
         );
     }
 
@@ -392,6 +423,7 @@ export function reconcileFinalSectorTruth(
                 supplyStateByOsid,
                 isFinalPass,
                 options?.finalSaveGeometryProjection === true,
+                geometrySolveStrategy,
             );
         } else if (dirtyStage === 'roster') {
             const hasRosterSealMutation = receipts.some(
