@@ -141,6 +141,7 @@ function captureFormation(id: FormationId, f: {
     disrupted_turns?: number;
     stranded_status?: SectorTopologyFormation['stranded_status'];
     elite_loan_state?: { on_loan: boolean; loaned_to_corps: string | null; loan_start_turn: number | null };
+    entrenchment_turns?: number;
 }): SectorTopologyFormation {
     let eliteLoanState: SectorTopologyEliteLoanSnapshot | undefined;
     if (f.elite_loan_state) {
@@ -176,6 +177,7 @@ function captureFormation(id: FormationId, f: {
         disrupted_turns: f.disrupted_turns,
         stranded_status: f.stranded_status,
         elite_loan_state: eliteLoanState,
+        entrenchment_turns: f.entrenchment_turns,
     });
 }
 
@@ -355,6 +357,10 @@ export function captureSectorTopologySolveInput(
         ? Object.freeze({ ...state.military.brigade_sector_override })
         : undefined;
 
+    const unresolvedSectorBrigades = state.military.unresolved_sector_brigades
+        ? Object.freeze([...state.military.unresolved_sector_brigades])
+        : undefined;
+
     // ── Corps/operation truth ──
     const rawCorpsCommand = state.military.corps_command ?? {};
     const corpsCommandByCorpsId = new Map<string, SectorTopologyCorpsCommandRow>();
@@ -421,6 +427,7 @@ export function captureSectorTopologySolveInput(
         brigadeMovementOrders,
         brigadePostureOrders,
         brigadeSectorOverride,
+        unresolvedSectorBrigades,
         corpsCommandByCorpsId,
         namedOfficers,
         namedOfficerData,

@@ -8,7 +8,6 @@ import { syncSectorAssignmentsToFormations } from './brigade_assignment.js';
 import {
     applyFinalSectorOwnerTruthPass,
     assignBrigadesToSubSegments,
-    buildCorpsFrontSectors,
     collectUnresolvedSectorBrigades,
     emitFinalUnresolvedSectorWarnings,
     reconcileOperationSensitiveSectorRoster,
@@ -17,6 +16,9 @@ import {
 import type { Osid } from './osid_adjacency.js';
 import { buildOsidAdjacency } from './osid_adjacency.js';
 import { computeSectorCombatRatings } from './sector_combat_rating.js';
+import { captureSectorTopologySolveInput } from './sector_topology_snapshot.js';
+import { solveCorpsFrontSectorsPure } from './sector_topology_solver.js';
+import { commitSectorTopologySolve } from './sector_topology_commit.js';
 
 export interface FinalSectorTruthReconciliationReport {
     sectors_rebuilt: number;
@@ -218,16 +220,19 @@ function runFullGeometryReconciliation(
     finalSaveGeometryProjection: boolean,
 ): FinalSectorTruthReconciliationReport {
     const activeFormationLocations = captureActiveFormationLocations(state);
-    const sectors = buildCorpsFrontSectors(
-        state,
-        edges,
-        reverseMap,
-        centroids,
-        spatial,
+    // R5 Phase 2e Task 4 step 5: pure-solve/serial-commit is now this call
+    // site's production path. capture -> solve -> commit run back-to-back
+    // synchronously against the same `state` with no intervening code, so
+    // commitSectorTopologySolve's turn/front-edge provenance checks always
+    // pass here; a thrown SectorTopologyStaleCommitError would indicate a
+    // genuine broken invariant and must propagate, not be caught.
+    const input = captureSectorTopologySolveInput(state, edges, reverseMap, centroids, spatial, {
         isFinalPass,
         finalSaveGeometryProjection,
-    );
-    state.military.corps_front_sectors = sectors;
+    });
+    const output = solveCorpsFrontSectorsPure(input);
+    commitSectorTopologySolve(state, input, output);
+    const sectors = output.sectors;
 
     const sectorList = Object.values(sectors);
     if (sectorList.length === 0) {

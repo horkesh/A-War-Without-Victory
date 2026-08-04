@@ -156,6 +156,26 @@ describe.skipIf(!hasFixture)('buildDetachedNarrowReadState — fidelity against 
         const sourcePostureOrders = state.military.brigade_posture_orders ?? [];
         expect(detached.military.brigade_posture_orders?.length).toBe(sourcePostureOrders.length);
     });
+
+    it('unresolved_sector_brigades round-trips from live state through capture into the detached state (regression: a prior version silently hardcoded undefined here)', () => {
+        const state = loadStateRaw();
+        const edges = loadEdges();
+
+        // Force a non-empty, non-vacuous synthetic value so this test does
+        // not depend on the fixture save happening to have one already —
+        // this is exactly the field a prior bug silently dropped, so the
+        // guard must not be satisfiable by coincidence.
+        const sampleFormationId = Object.keys(state.military.formations ?? {}).sort()[0];
+        expect(sampleFormationId, 'fixture must have at least one formation').toBeDefined();
+        state.military.unresolved_sector_brigades = [sampleFormationId!, 'op:test:synthetic_unresolved' as never];
+
+        const input = captureSectorTopologySolveInput(state, edges as never, null, undefined, undefined, { isFinalPass: true });
+        // Capture preserves authored order, not resorted.
+        expect(input.unresolvedSectorBrigades).toEqual([sampleFormationId, 'op:test:synthetic_unresolved']);
+
+        const detached = buildDetachedNarrowReadState(input);
+        expect(detached.military.unresolved_sector_brigades).toEqual([sampleFormationId, 'op:test:synthetic_unresolved']);
+    });
 });
 
 describe.skipIf(!hasFixture)('buildDetachedWorkingFormations — fidelity and mutability', () => {
@@ -175,7 +195,30 @@ describe.skipIf(!hasFixture)('buildDetachedWorkingFormations — fidelity and mu
         expect(workingFormation.location_osid).toBe(sourceFormation.location_osid);
         expect(workingFormation.personnel).toBe(sourceFormation.personnel);
         expect(workingFormation.corps_id).toBe(sourceFormation.corps_id);
-        expect(workingFormation.entrenchment_turns).toBe(0);
+        // Regression: a prior version hardcoded this to 0 regardless of the
+        // source formation's true value (see the dedicated round-trip test
+        // below for why that's wrong — it broke the mutation journal's
+        // `before` fidelity, caught on a real 188-week run).
+        expect(workingFormation.entrenchment_turns).toBe(sourceFormation.entrenchment_turns);
+    });
+
+    it('entrenchment_turns round-trips the TRUE source value, not a hardcoded 0 (regression: a prior version assumed a hardcoded 0 starting point was behavior-inert since the field is write-only within this call graph — true for the sectors output, false for the mutation journal\'s before fidelity, which commitSectorTopologySolve validates against live state)', () => {
+        const state = loadStateRaw();
+        const edges = loadEdges();
+
+        const sampleFormationId = Object.keys(state.military.formations ?? {}).sort()[0];
+        expect(sampleFormationId, 'fixture must have at least one formation').toBeDefined();
+        const formation = state.military.formations![sampleFormationId!]!;
+        // Force a nonzero, non-vacuous value so this guard is not
+        // satisfiable by coincidence if the fixture's sample happens to
+        // already be 0.
+        formation.entrenchment_turns = 3;
+
+        const input = captureSectorTopologySolveInput(state, edges as never, null, undefined, undefined, { isFinalPass: true });
+        expect(input.formations.get(sampleFormationId as never)!.entrenchment_turns).toBe(3);
+
+        const working = buildDetachedWorkingFormations(input);
+        expect(working[sampleFormationId!]!.entrenchment_turns).toBe(3);
     });
 
     it('is a genuinely mutable projection independent of the source formations map', () => {

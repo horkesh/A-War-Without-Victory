@@ -51,10 +51,18 @@ import type {
 /**
  * Build the detached mutable working-formation projection: a fresh
  * `Record<FormationId, SectorTopologyWorkingFormation>` deep-copied from the
- * snapshot's read-only `formations` map, with `entrenchment_turns`
- * defaulted to `0` (write-only in this call graph — never read, always set
- * to `0` — so any initial value is behavior-inert; `0` matches the field's
- * post-first-write steady state).
+ * snapshot's read-only `formations` map. `entrenchment_turns` is seeded
+ * from the CAPTURED value (`input.formations[id].entrenchment_turns`), not
+ * hardcoded to `0` — an earlier version of this function assumed a
+ * hardcoded `0` was "behavior-inert" because this field is write-only
+ * within the sector-topology call graph (never read for a computation
+ * here), which is true for the SECTORS output but not for the mutation
+ * journal: `recordFormationEntrenchment`'s `before` value must be the
+ * field's true prior value, or `commitSectorTopologySolve`'s validation
+ * (which checks that `before` against live state) spuriously rejects any
+ * formation whose real entrenchment_turns isn't already `0` — caught on a
+ * real 188-week run when this field accumulates elsewhere in the engine,
+ * outside this call graph.
  */
 export function buildDetachedWorkingFormations(
     input: SectorTopologySolveInput,
@@ -89,7 +97,7 @@ export function buildDetachedWorkingFormations(
             disrupted_turns: f.disrupted_turns,
             stranded_status: f.stranded_status,
             elite_loan_state: f.elite_loan_state ? { ...f.elite_loan_state } : undefined,
-            entrenchment_turns: 0,
+            entrenchment_turns: f.entrenchment_turns,
         };
     }
     return working;
@@ -218,7 +226,7 @@ export function buildDetachedNarrowReadState(
             brigade_movement_orders: reshapeBrigadeMovementOrders(input),
             brigade_posture_orders: reshapeBrigadePostureOrders(input),
             brigade_sector_override: input.brigadeSectorOverride ? { ...input.brigadeSectorOverride } : undefined,
-            unresolved_sector_brigades: undefined,
+            unresolved_sector_brigades: input.unresolvedSectorBrigades ? [...input.unresolvedSectorBrigades] : undefined,
         },
         factions: input.factionIds.map((id) => ({ id })),
     };

@@ -272,4 +272,36 @@ describe.skipIf(!hasFixture)('commitSectorTopologySolve — real-save round-trip
         expect(canonicalize(first.journal)).toBe(canonicalize(second.journal));
         expect(canonicalize(first.state)).toBe(canonicalize(second.state));
     });
+
+    it('supports two capture+solve+commit passes against the SAME live state in sequence (regression: a prior version hardcoded the detached unresolved_sector_brigades to undefined AND entrenchment_turns to 0 instead of threading them from the capture, which produced a spurious stale-value error on any second pass within one turn, or on a first pass against any formation with nonzero entrenchment — exactly what final_sector_truth_reconciliation.ts\'s multi-pass reconciliation session does in production, and exactly what a real 188-week run hit)', () => {
+        const rawState = loadStateRaw();
+        const edges = loadEdges();
+        const state = deserializeState(JSON.stringify(rawState)) as GameState;
+
+        // Force at least one formation to a nonzero entrenchment_turns so
+        // this test cannot pass by coincidence of the fixture save's
+        // formations all already being at 0.
+        const someFormationId = Object.keys(state.military.formations ?? {}).sort()[0];
+        expect(someFormationId, 'fixture must have at least one formation').toBeDefined();
+        state.military.formations![someFormationId!]!.entrenchment_turns = 4;
+
+        function runPass(): void {
+            const input = captureSectorTopologySolveInput(state, edges as never, null, undefined, undefined, {
+                isFinalPass: true,
+            });
+            const output = solveCorpsFrontSectorsPure(input);
+            commitSectorTopologySolve(state, input, output);
+        }
+
+        expect(() => runPass()).not.toThrow();
+        const afterFirstPass = state.military.unresolved_sector_brigades;
+        // Second pass must succeed: the first pass's committed
+        // unresolved_sector_brigades value must be what the second pass's
+        // capture reads as its own detached solve's starting value, so its
+        // journal's `before` matches live state exactly.
+        expect(() => runPass()).not.toThrow();
+        // A no-op second pass over unchanged state reproduces the identical
+        // unresolved list.
+        expect(state.military.unresolved_sector_brigades).toEqual(afterFirstPass);
+    });
 });

@@ -149,6 +149,19 @@ export interface SectorTopologyFormation {
     readonly disrupted_turns?: number;
     readonly stranded_status?: 'none' | 'holding' | 'reconnected' | 'collapsed';
     readonly elite_loan_state?: SectorTopologyEliteLoanSnapshot;
+    /**
+     * Write-only within the sector-topology call graph itself (always
+     * unconditionally set to `0` when a moved formation's entrenchment is
+     * reset — never read for a computation there), but its TRUE prior value
+     * must still be captured: the mutation journal's `formation-entrenchment`
+     * row records an exact `before`/`after` pair, and a hardcoded `0`
+     * starting point in the detached working-formation projection produces
+     * a fabricated `before` whenever the real live value is already nonzero
+     * (this field accumulates elsewhere in the engine, outside this call
+     * graph). Caught by `commitSectorTopologySolve`'s validation on a real
+     * 188-week run — see the R5 Phase 2e Task 4 step 5 session checkpoint.
+     */
+    readonly entrenchment_turns?: number;
 }
 
 // ── 15. Movement ownership / 16. player sector direction ────────────────
@@ -240,6 +253,17 @@ export interface SectorTopologySolveInput {
     readonly brigadeMovementOrders: ReadonlyMap<FormationId, SectorTopologyBrigadeMovementOrder>;
     readonly brigadePostureOrders: readonly SectorTopologyBrigadePostureOrder[];
     readonly brigadeSectorOverride: Readonly<Record<string, string>> | undefined;
+    /**
+     * Captured from `state.military.unresolved_sector_brigades` at capture
+     * time. Load-bearing: `buildCorpsFrontSectors` reads this as the
+     * `before` value for its single `unresolved-sector-brigades` mutation
+     * journal row. `runFullGeometryReconciliation` (final_sector_truth_
+     * reconciliation.ts) can call the solve multiple times within one turn
+     * (multi-pass reconciliation session) — after the first pass this is no
+     * longer `undefined` on live state, so the detached solve must start
+     * from the SAME captured value, not assume `undefined`.
+     */
+    readonly unresolvedSectorBrigades: readonly FormationId[] | undefined;
     readonly corpsCommandByCorpsId: ReadonlyMap<string, SectorTopologyCorpsCommandRow>;
     readonly namedOfficers: ReadonlyMap<string, SectorTopologyNamedOfficerStateRow>;
     readonly namedOfficerData: readonly SectorTopologyNamedOfficerRow[];
