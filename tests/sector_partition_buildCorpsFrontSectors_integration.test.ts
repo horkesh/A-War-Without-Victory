@@ -341,6 +341,129 @@ function runFrontEdgeRelationModes(
     };
 }
 
+/**
+ * R5 Phase 2e Task 5 oracle: proves `reconcileFinalSectorTruth`'s production
+ * pipeline (capture -> pure solve -> serial commit) is equivalent, at the
+ * full reconciliation-report/session/receipt/geometry-builds/diagnostics/
+ * bytes level (not just the builder-level equivalence already proven by
+ * `tests/sector_topology_solver.test.ts`'s imperative-oracle test), to the
+ * pre-Task-4 direct `buildCorpsFrontSectors` imperative call preserved via
+ * `geometrySolveStrategy: 'test-only-imperative-legacy'`
+ * (`final_sector_truth_reconciliation.ts`). No `vi.spyOn` involved — the
+ * strategy is a real, explicit parameter, sidestepping the whole class of
+ * stale-mock-argument-forwarding bug found and fixed earlier this session.
+ *
+ * Comparison surface against plan section 9 Task 5's ten items:
+ *   1-4, 6, 8: sectors/sub-segments, full state, report, session/receipts,
+ *      geometry_builds sequence, canonical bytes/size/SHA-256/rerun-SHA —
+ *      all captured directly below.
+ *   5 (explicit mutation journal): not diffed here by design — the legacy
+ *      reference path has no journal concept to diff against (it never
+ *      goes through the pure-solve/commit pipeline). The journal's own
+ *      correctness against the pipeline's live writes is already proven at
+ *      builder granularity by `sector_topology_solver.test.ts`'s
+ *      imperative-oracle test and `sector_topology_commit.test.ts`.
+ *   7 (Task 8A relation/occupancy diagnostics): orthogonal to this axis
+ *      (geometrySolveStrategy never touches front-edge-relation or
+ *      occupancy strategy) — already proven by `runFrontEdgeRelationModes`
+ *      and `runOccupancyModes`'s own tests above.
+ *   9 (solve input unchanged): proven generically, not per-case, by
+ *      `sector_topology_solver.test.ts`'s "never mutates its input" test.
+ *   10 (relation/dense-occupancy strategy contracts): same as item 7.
+ */
+function runGeometrySolveStrategyModes(
+    state: GameState,
+    edges: ContactGraphEdge[],
+    mode: FixedPointProductionMode,
+): { candidate: string; legacy: string; rerun: string } {
+    const run = (strategy: 'pipeline' | 'test-only-imperative-legacy'): string => {
+        const runState = deserializeState(JSON.stringify(state)) as GameState;
+        const session = createFinalSectorReconciliationSession(
+            runState.meta.turn,
+            mode.finalSaveGeometryProjection ? 'final-save-geometry' : 'postcombat-geometry',
+        );
+        const reports: unknown[] = [];
+        const geometryBuildSequence: number[] = [];
+        const warnings: unknown[][] = [];
+        const debug: unknown[][] = [];
+        const logs: unknown[][] = [];
+        const errors: unknown[][] = [];
+        const originalWarn = console.warn;
+        const originalDebug = console.debug;
+        const originalLog = console.log;
+        const originalError = console.error;
+        console.warn = (...args: unknown[]) => { warnings.push(args); };
+        console.debug = (...args: unknown[]) => { debug.push(args); };
+        console.log = (...args: unknown[]) => { logs.push(args); };
+        console.error = (...args: unknown[]) => { errors.push(args); };
+        try {
+            const firstReport = reconcileFinalSectorTruth(
+                runState,
+                edges as never,
+                null,
+                undefined,
+                undefined,
+                null,
+                mode.isFinalPass,
+                {
+                    session,
+                    finalSaveGeometryProjection: mode.finalSaveGeometryProjection,
+                    geometrySolveStrategy: strategy,
+                },
+            );
+            reports.push(firstReport);
+            geometryBuildSequence.push(session.geometry_builds);
+            if (firstReport.geometry_input_mutations > 0) {
+                recordFinalSectorReconciliationMutation(
+                    session,
+                    'geometry',
+                    'postcombat-formation-location-writeback',
+                );
+                reports.push(reconcileFinalSectorTruth(
+                    runState,
+                    edges as never,
+                    null,
+                    undefined,
+                    undefined,
+                    null,
+                    mode.isFinalPass,
+                    {
+                        session,
+                        finalSaveGeometryProjection: mode.finalSaveGeometryProjection,
+                        geometrySolveStrategy: strategy,
+                    },
+                ));
+                geometryBuildSequence.push(session.geometry_builds);
+            }
+            const serialized = serializeState(runState);
+            return JSON.stringify(canonicalizeObservable({
+                sectors: runState.military.corps_front_sectors,
+                state: runState,
+                reports,
+                session: structuredClone(session),
+                receipts: structuredClone(session.receipts),
+                geometryBuildSequence,
+                warnings,
+                diagnostics: { debug, logs, errors },
+                serialized,
+                serializedSize: Buffer.byteLength(serialized),
+                serializedSha256: createHash('sha256').update(serialized).digest('hex'),
+            }));
+        } finally {
+            console.warn = originalWarn;
+            console.debug = originalDebug;
+            console.log = originalLog;
+            console.error = originalError;
+        }
+    };
+
+    return {
+        candidate: run('pipeline'),
+        legacy: run('test-only-imperative-legacy'),
+        rerun: run('pipeline'),
+    };
+}
+
 describe('buildCorpsFrontSectors front-edge strategy contract', () => {
     it('rejects an unknown strategy before inspecting an otherwise empty build', () => {
         expect(() => buildCorpsFrontSectors(
@@ -680,6 +803,31 @@ describe.skipIf(!hasFixture)(
                         }
                         throw new Error(
                             `front-edge relation divergence for mode ${mode.label}, seed ${seed} at byte ${firstDiff}; `
+                            + `candidate=${candidate.slice(firstDiff, firstDiff + 160)}; `
+                            + `reference=${reference.slice(firstDiff, firstDiff + 160)}`,
+                        );
+                    }
+                }
+            }
+        }, 1_200_000);
+
+        it('pure full solve and serial commit preserve reports, sessions, receipts, mutation order, geometry order, sectors, full state, diagnostics, bytes, and rerun hashes across production modes and 100 real-save variants', () => {
+            for (const mode of FIXED_POINT_PRODUCTION_MODES) {
+                for (let seed = 0; seed < 100; seed++) {
+                    const variant = makeVariant(baseState, seed);
+                    const { candidate, legacy, rerun } = runGeometrySolveStrategyModes(variant, edges, mode);
+                    if (candidate !== legacy || candidate !== rerun) {
+                        const reference = candidate !== legacy ? legacy : rerun;
+                        let firstDiff = 0;
+                        while (
+                            firstDiff < candidate.length
+                            && firstDiff < reference.length
+                            && candidate.charCodeAt(firstDiff) === reference.charCodeAt(firstDiff)
+                        ) {
+                            firstDiff += 1;
+                        }
+                        throw new Error(
+                            `geometry-solve-strategy divergence for mode ${mode.label}, seed ${seed} at byte ${firstDiff}; `
                             + `candidate=${candidate.slice(firstDiff, firstDiff + 160)}; `
                             + `reference=${reference.slice(firstDiff, firstDiff + 160)}`,
                         );
