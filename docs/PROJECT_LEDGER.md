@@ -26193,3 +26193,21 @@ This narrowing enabled the key finding: `buildCorpsFrontSectors`/`buildFactionSe
 **Artifacts:** Plan doc `docs/plans/2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md`'s 2026-08-04 session 4 checkpoints carry full detail, including the explicit correction of the earlier wrong "pre-existing, unrelated" conclusion. Commit: `aa4ec5b62`.
 
 **Scope:** No canon, event, source-tier, baseline manifest, save schema, or `docs/10_canon/FORAWWV.md` change. Test-file-only change; zero production code touched.
+
+## 2026-08-04 - R5 Phase 2e Task 8 measured, Task 9 disposition FAIL_REVERT: production reverted to direct buildCorpsFrontSectors call
+
+**Type:** Measurement-gated production revert. The pure-solve/serial-commit extraction (Tasks 1-7, all independently reviewed PASS, 300-case equivalence oracle GREEN) failed its own pre-declared performance retention gates and was reverted per the plan's explicit rule, not a judgment call made after the fact.
+
+**Exact-parent correction:** the plan's literal control commit (`0fd36157b`) had gone stale (76 commits behind HEAD, containing substantial unrelated R2/R4/R6/R7 work). Corrected to Phase 2e's true immediate parent (`0fcd80bee`) before measuring, matching this project's own established precedent (Task 8A used its true immediate parent, not a fixed anchor).
+
+**Result:** Functional exactness perfect (byte-identical final saves across all 14 timed runs). Timing FAILED consistently: 6/6 alternating wall-clock pairs across two independent packets (the second mandated by the plan's own noise-check rule after the first failed) showed the candidate 3-7% slower than control, confirmed and worsened by the repeat, not resolved by it. Builder inclusive time +12.94% (single V8 profile). Peak heap +45.5% over control (threshold 105%). RSS +26% over control (threshold 110%). All four material gates point to the same root cause the independent Task 6 Performance reviewer flagged in advance: `buildDetachedWorkingFormations` copies every formation a second time on top of capture's own copy, multiplied by `reconcileFinalSectorTruth`'s multi-pass receipt loop.
+
+**Disposition: FAIL_REVERT**, executed per the plan's pre-declared Task 9 rule. `war_phases.ts` and `scenario_runner.ts` restored verbatim to their pre-switch bodies (commit `5a1624e10`). `final_sector_truth_reconciliation.ts` keeps the `geometrySolveStrategy` option (Task 5's oracle still depends on it) but its default flipped to the direct-call path, restoring production behavior exactly.
+
+**Verification:** `npx tsc --noEmit` clean; fresh re-grep confirms zero remaining pipeline references outside the one file that intentionally keeps the option; 9 files / 78 tests pass, including 2 previously-failing pre-existing `centroids: {}` tests that pass now as an honest side-effect (that crash only occurred in the now-unreachable pipeline path, not a deliberate fix); a fresh 188w run produced `final_state_hash bfc7e2cbebfbb9bc`, matching `CALIBRATION_MASTER.md` exactly (638/712 matched_osids, 28/31 anchors, the same 3 already-known R6 Task 0.3 failures) — territory-flat, zero calibration drift from the revert.
+
+**Determinism:** No `Math.random()`, timestamp, or `Date.now()` introduced. The revert is a pure routing change back to already-proven-correct imperative code; verified byte-identical at both 40 and 188 weeks against the documented pre-Phase-2e baseline.
+
+**Artifacts:** `data/derived/_debug/r5_phase2e_task8/measurement_manifest.json` (SHA-256 `c601730102fad7e3126bf59dea2e4e1b116f88728ae1ae438194530034ba9480`), full profile/timing/raw evidence in the same directory, reusable orchestration scripts for a future re-attempt. Implementation report: `docs/40_reports/implemented/20260804_R5_PHASE2E_TASK8_MEASUREMENT_AND_TASK9_NOGO.md`. Plan doc's 2026-08-04 session 5 checkpoints carry full narrative detail.
+
+**Scope:** No canon, event, source-tier, baseline manifest, save schema, or `docs/10_canon/FORAWWV.md` change. Production behavior reverted to its pre-Phase-2e state exactly; the extraction's infrastructure and test suite are preserved, unreachable in production, for a future re-attempt.
