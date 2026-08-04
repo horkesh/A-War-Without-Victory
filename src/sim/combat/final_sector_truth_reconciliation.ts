@@ -65,12 +65,22 @@ export interface FinalSectorTruthReconciliationOptions {
     finalSaveGeometryProjection?: boolean;
     session?: FinalSectorReconciliationSession;
     /**
-     * @internal Test-only. Defaults to `'pipeline'` (capture -> pure solve ->
-     * serial commit, the production path since R5 Phase 2e Task 4 step 5).
-     * `'test-only-imperative-legacy'` restores the pre-Task-4 direct
-     * `buildCorpsFrontSectors` call, preserved verbatim as a reference
-     * oracle for the Task 5 candidate/legacy/rerun equivalence suite. Never
-     * set this outside a test.
+     * @internal Test-only. R5 Phase 2e Task 8's exact-parent measurement
+     * packet (2026-08-04, data/derived/_debug/r5_phase2e_task8/) found the
+     * `'pipeline'` path (capture -> pure solve -> serial commit) regresses
+     * wall-clock time 3-7% (6/6 alternating pairs across two independent
+     * packets, both under and over the plan's own repeat-once noise-check
+     * threshold), peak heap +45.5% over control, and RSS +26% over control
+     * -- all against Task 9's pre-declared retention gates. Disposition:
+     * FAIL_REVERT. Root cause: `buildDetachedWorkingFormations` copies every
+     * formation a second time on top of capture's own copy, multiplied by
+     * this function's own multi-pass receipt loop. Defaults to
+     * `'test-only-imperative-legacy'` (the restored production path) as a
+     * result. `'pipeline'` remains fully implemented, correctness-proven
+     * (Task 5's 300-case oracle), and reachable only by explicitly passing
+     * this option -- preserved as characterization/reference infrastructure
+     * for any future re-attempt that fixes the double-copy cost, not as a
+     * live production seam. Never set this outside a test.
      */
     geometrySolveStrategy?: 'pipeline' | 'test-only-imperative-legacy';
 }
@@ -228,15 +238,19 @@ function runFullGeometryReconciliation(
     supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
     isFinalPass: boolean,
     finalSaveGeometryProjection: boolean,
-    geometrySolveStrategy: 'pipeline' | 'test-only-imperative-legacy' = 'pipeline',
+    geometrySolveStrategy: 'pipeline' | 'test-only-imperative-legacy' = 'test-only-imperative-legacy',
 ): FinalSectorTruthReconciliationReport {
     const activeFormationLocations = captureActiveFormationLocations(state);
     let sectors: Record<string, CorpsFrontSector>;
     if (geometrySolveStrategy === 'test-only-imperative-legacy') {
-        // @internal Test-only reference oracle for the R5 Phase 2e Task 5
-        // candidate/legacy/rerun equivalence suite. Preserved verbatim from
-        // the pre-Task-4 direct-call body (see commit dc9648920^). Never
-        // reached outside a test.
+        // R5 Phase 2e Task 9 (2026-08-04): restored production path. The
+        // capture -> pure solve -> serial commit pipeline (the 'pipeline'
+        // branch below) was measured in Task 8's exact-parent packet and
+        // found to regress wall-clock time 3-7%, peak heap +45.5%, and RSS
+        // +26% against the true pre-Phase-2e control -- FAIL_REVERT per the
+        // plan's own pre-declared gates. See
+        // data/derived/_debug/r5_phase2e_task8/measurement_manifest.json.
+        // This is the direct-call body, unchanged since before Task 4.
         sectors = buildCorpsFrontSectors(
             state,
             edges,
@@ -248,12 +262,13 @@ function runFullGeometryReconciliation(
         );
         state.military.corps_front_sectors = sectors;
     } else {
-        // R5 Phase 2e Task 4 step 5: pure-solve/serial-commit is now this call
-        // site's production path. capture -> solve -> commit run back-to-back
-        // synchronously against the same `state` with no intervening code, so
-        // commitSectorTopologySolve's turn/front-edge provenance checks always
-        // pass here; a thrown SectorTopologyStaleCommitError would indicate a
-        // genuine broken invariant and must propagate, not be caught.
+        // @internal Rejected production path (R5 Phase 2e Task 9 FAIL_REVERT,
+        // 2026-08-04) -- reachable only when a caller explicitly requests
+        // `geometrySolveStrategy: 'pipeline'`. Preserved as correctness-proven
+        // (Task 5's 300-case equivalence oracle) characterization
+        // infrastructure for any future re-attempt that fixes the
+        // double-formation-copy cost identified in Task 6/8, not as a live
+        // production seam. Never set this outside a test.
         const input = captureSectorTopologySolveInput(state, edges, reverseMap, centroids, spatial, {
             isFinalPass,
             finalSaveGeometryProjection,
@@ -386,7 +401,7 @@ export function reconcileFinalSectorTruth(
     options?: FinalSectorTruthReconciliationOptions,
 ): FinalSectorTruthReconciliationReport {
     const session = options?.session;
-    const geometrySolveStrategy = options?.geometrySolveStrategy ?? 'pipeline';
+    const geometrySolveStrategy = options?.geometrySolveStrategy ?? 'test-only-imperative-legacy';
     if (!session) {
         return runFullGeometryReconciliation(
             state,

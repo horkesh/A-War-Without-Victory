@@ -1935,25 +1935,13 @@ export async function buildScenarioStartupState(
             const preEdges = await loadOperationalEdges(baseDir);
             if (preEdges?.length) {
                 const { computeFrontEdgesOsid } = await import('../map/front_edges.js');
+                const { buildCorpsFrontSectors } = await import('../sim/combat/corps_front_sectors.js');
                 state.military.war_front_edges_osid = computeFrontEdgesOsid(
                     state, preEdges, operationalData.operationalToCanonical
                 );
-                // R5 Phase 2e Task 4 step 5: pure-solve/serial-commit, matching
-                // final_sector_truth_reconciliation.ts's production switch.
-                // capture -> solve -> commit run back-to-back synchronously
-                // against the same `state` with no intervening code, so
-                // commitSectorTopologySolve's turn/front-edge provenance
-                // checks always pass here; any thrown error still falls
-                // through to this block's own catch exactly as a
-                // buildCorpsFrontSectors throw would have.
-                const { captureSectorTopologySolveInput } = await import('../sim/combat/sector_topology_snapshot.js');
-                const { solveCorpsFrontSectorsPure } = await import('../sim/combat/sector_topology_solver.js');
-                const { commitSectorTopologySolve } = await import('../sim/combat/sector_topology_commit.js');
-                const input = captureSectorTopologySolveInput(
-                    state, preEdges, operationalData.operationalToCanonical, undefined, undefined,
+                state.military.corps_front_sectors = buildCorpsFrontSectors(
+                    state, preEdges, operationalData.operationalToCanonical
                 );
-                const output = solveCorpsFrontSectorsPure(input);
-                commitSectorTopologySolve(state, input, output);
             }
         } catch {
             // Edges may be missing; sectors will compute on first turn
