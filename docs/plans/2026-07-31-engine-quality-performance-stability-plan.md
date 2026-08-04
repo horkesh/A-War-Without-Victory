@@ -225,11 +225,13 @@ npm.cmd run perf:profile-hotspot:report
 - Modify `tests/generated_artifact_ownership_matrix_contract.test.ts`
 - Add one focused ownership test per new matrix row
 
-- [ ] Ensure replay manifests and sidecars have one finalizer.
-- [ ] Ensure latest-run copies are byte-equivalent to their canonical source.
-- [ ] Ensure baselines/startup snapshots/migration drift have explicit static ownership.
-- [ ] Ensure diagnostics and `data/derived/_debug/**` remain untracked unless a narrow matrix row says otherwise.
-- [ ] Ensure package directories are transient and release evidence stores path/size/SHA-256, not binaries.
+- [x] Ensure replay manifests and sidecars have one finalizer.
+- [x] Ensure latest-run copies are byte-equivalent to their canonical source.
+- [x] Ensure baselines/startup snapshots/migration drift have explicit static ownership.
+- [x] Ensure diagnostics and `data/derived/_debug/**` remain untracked unless a narrow matrix row says otherwise.
+- [x] Ensure package directories are transient and release evidence stores path/size/SHA-256, not binaries.
+
+**2026-08-04 verification note:** These checkboxes were stale — the underlying implementation and tests were already complete from an earlier session, just never marked done in this plan doc. Verified by running the full referenced test list (`generated_artifact_ownership_matrix_contract`, `replay_artifact_ownership`, `replay_save_finalizer_artifact_ownership`, `replay_surface_truth`, `scenario_latest_run_final_save_map_copy`, `startup_snapshot_artifact_ownership`, `save_migration_drift_artifact_ownership`) — 7 files, 10 tests, all pass — and spot-reading `replay_surface_truth.test.ts` in full to confirm the tests are real, substantive content-assertion checks (not vacuous stubs). No new code was written for this checkbox update.
 
 ### Task 3.2 -- Replay/save equivalence
 
@@ -241,8 +243,10 @@ npm.cmd run perf:profile-hotspot:report
 - Modify `tests/replay_save_finalizer_artifact_ownership.test.ts`
 - Modify `tests/replay_surface_truth.test.ts`
 
-- [ ] Prove the final save, replay manifest, replay sequence, and selected-frame summary agree on scenario, faction, turn, and state fingerprint.
-- [ ] Prove an old save migrates, round-trips, and produces the same current-state replay contract.
+- [x] Prove the final save, replay manifest, replay sequence, and selected-frame summary agree on scenario, faction, turn, and state fingerprint.
+- [x] Prove an old save migrates, round-trips, and produces the same current-state replay contract.
+
+**2026-08-04 verification note:** Same as Task 3.1 — stale checkboxes, already-complete implementation, verified via the same test run.
 
 ```powershell
 npm.cmd run test:vitest -- tests/generated_artifact_ownership_matrix_contract.test.ts tests/replay_artifact_ownership.test.ts tests/replay_save_finalizer_artifact_ownership.test.ts tests/replay_surface_truth.test.ts tests/scenario_latest_run_final_save_map_copy.test.ts tests/startup_snapshot_artifact_ownership.test.ts tests/save_migration_drift_artifact_ownership.test.ts --pool=forks --reporter=dot
@@ -267,17 +271,21 @@ npm.cmd run test:baselines
 - Modify `tests/desktop_release_ci_guardrails.test.ts`
 - Modify `tests/baseline_regression_ci_guardrails.test.ts`
 
-- [ ] Include every runtime/package input path in release guards.
-- [ ] Restore trusted detector scripts from `HEAD` after base comparison.
-- [ ] Treat cancelled/skipped required jobs as non-green.
-- [ ] Keep local commands and CI commands byte-for-byte aligned where practical.
-- [ ] Add no secret, token, certificate, or machine path to tracked files.
+- [x] Include every runtime/package input path in release guards.
+- [x] Restore trusted detector scripts from `HEAD` after base comparison.
+- [x] Treat cancelled/skipped required jobs as non-green.
+- [x] Keep local commands and CI commands byte-for-byte aligned where practical.
+- [x] Add no secret, token, certificate, or machine path to tracked files.
+
+**2026-08-04 verification note:** Same as Phase 3 — stale checkboxes, already-complete implementation, verified by running `tests/desktop_release_ci_guardrails.test.ts` (7 tests) and `tests/baseline_regression_ci_guardrails.test.ts` (1 test), all pass, and spot-reading the former in full to confirm the tests are real assertions against the actual `.github/workflows/*.yml` and `.github/scripts/detect-changed-paths.sh` content (trusted-detector-restore counting, path-filter coverage, job ordering), not vacuous stubs. No new code was written for this checkbox update.
 
 ### Task 4.2 -- Branch/reference hygiene
 
 - [ ] Report merged, superseded, stale, and protected branches without deleting them during implementation.
 - [ ] Close only repo-local stale references after proof; remote deletion/push is outside this plan unless separately authorized.
 - [ ] Run link and generated-artifact checks from a clean checkout/worktree before closeout.
+
+**2026-08-04 status:** Left unchecked deliberately. Reporting-only observation from this session: `git worktree list` shows a large number of pre-existing local worktrees under `F:/AWWV-worktrees/` (`r2-fr03-final`, `r2-webgl-cleanup`, `r3-tg-convergence`, `r4-command-event-codex`, `r4-phase2-command-codex`, `r5-engine-quality`, `r5-fresh-owner-profile`, `r5-phase2c-task3-candidate`/`-control`, `r5-phase2d-front-edge-relation`/`-integrated-control`, `r5-phase2e-pure-solve`/`-design`, `r5-receipts-baseline`, `r5-sector-reconstruction-design`, `r6-gorazde-baseline`, four `r7-*` worktrees), most named after already-closed roadmap workstreams (R1-R4 are closed; several R5/R7 sub-lanes referenced are also closed per this doc and `MASTER_ROADMAP.md`). This is a REPORT only — closing/deleting any of these is a destructive, hard-to-reverse action requiring explicit owner authorization, not something to do unilaterally as part of a documentation-verification pass. Not closed this session.
 
 ```powershell
 npm.cmd run ci:structural-fingerprint:check
