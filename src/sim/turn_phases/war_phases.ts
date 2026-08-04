@@ -152,6 +152,9 @@ import { updateExhaustion } from '../combat/exhaustion.js';
 import { recordWarWearinessBandCrossings } from '../../state/exhaustion.js';
 import { detectFronts } from '../combat/front_emergence.js';
 import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
+import { captureSectorTopologySolveInput } from '../combat/sector_topology_snapshot.js';
+import { solveCorpsFrontSectorsPure } from '../combat/sector_topology_solver.js';
+import { commitSectorTopologySolve } from '../combat/sector_topology_commit.js';
 import { ENABLE_TG_OG_PROMOTION } from '../combat/tactical_group_config.js';
 import { applyOgPromotions, projectPromotionDisplayNames } from '../combat/tactical_group_promotion.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
@@ -1568,9 +1571,20 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
             const spatial = getSpatialContextCache(context);
-            context.state.military.corps_front_sectors = buildCorpsFrontSectors(
-                context.state, od.edges, od.opData.operationalToCanonical, od.centroids, spatial?.preCombat
+            // R5 Phase 2e Task 4 step 5: pure-solve/serial-commit, matching
+            // the already-landed final_sector_truth_reconciliation.ts and
+            // scenario_runner.ts switches. capture -> solve -> commit run
+            // back-to-back synchronously against the same `context.state`
+            // with no intervening code, so commitSectorTopologySolve's
+            // turn/front-edge provenance checks always pass here. This call
+            // site has no surrounding try/catch, same as the imperative
+            // buildCorpsFrontSectors call it replaces -- any thrown error
+            // propagates exactly as before, no new failure mode introduced.
+            const input = captureSectorTopologySolveInput(
+                context.state, od.edges, od.opData.operationalToCanonical, od.centroids, spatial?.preCombat,
             );
+            const output = solveCorpsFrontSectorsPure(input);
+            commitSectorTopologySolve(context.state, input, output);
         }
     },
     // Note: brigade_front_assignment survives only as a compatibility fallback.
