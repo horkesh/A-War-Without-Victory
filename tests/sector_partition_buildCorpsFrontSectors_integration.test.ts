@@ -249,21 +249,30 @@ function runFrontEdgeRelationModes(
         console.debug = (...args: unknown[]) => { debug.push(args); };
         console.log = (...args: unknown[]) => { logs.push(args); };
         console.error = (...args: unknown[]) => { errors.push(args); };
+        // Force the frontEdgeAdjacencyStrategy argument (position 9) to the
+        // legacy strategy while forwarding every OTHER argument unchanged,
+        // including any trailing optional parameters (mutationRecorder,
+        // diagnosticCollector, traceCollector) added to buildCorpsFrontSectors
+        // after this mock was first written. A prior version of this mock
+        // hardcoded a fixed positional forward list (args[0..8], override
+        // args[9], forward args[10], STOP) that silently dropped every
+        // parameter added past index 10 -- harmless when nothing depended on
+        // those trailing params reaching the real implementation, but a real
+        // bug once solveCorpsFrontSectorsPure/commitSectorTopologySolve
+        // started depending on mutationRecorder being correctly threaded
+        // through for the mutation journal to reflect what the detached
+        // solve actually computed (silently empty journal -> commit applies
+        // zero rows -> formation-level fields never reach live state, even
+        // though the detached solve computed them correctly). Caught via a
+        // real 100-real-save-variant integration run once the production
+        // switch (final_sector_truth_reconciliation.ts) started routing
+        // through that pipeline and this mock's spied call started mattering.
         const geometrySpy = strategy === 'test-only-legacy-edge-adjacency'
-            ? vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors').mockImplementation((...args) =>
-                originalBuild(
-                    args[0],
-                    args[1],
-                    args[2],
-                    args[3],
-                    args[4],
-                    args[5],
-                    args[6],
-                    args[7],
-                    args[8],
-                    'test-only-legacy-edge-adjacency',
-                    args[10],
-                ))
+            ? vi.spyOn(corpsFrontSectorsModule, 'buildCorpsFrontSectors').mockImplementation((...args) => {
+                const forwarded = [...args];
+                forwarded[9] = 'test-only-legacy-edge-adjacency';
+                return (originalBuild as (...fnArgs: unknown[]) => Record<string, CorpsFrontSector>)(...forwarded);
+            })
             : null;
         try {
             const firstReport = reconcileFinalSectorTruth(
