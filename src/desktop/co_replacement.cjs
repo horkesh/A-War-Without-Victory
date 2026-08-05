@@ -24,6 +24,7 @@
 // NO mutation (no CA debit, nothing staged).
 
 const { REPLACE_CO_COST } = require('./autonomy_ipc_contract.cjs');
+const { isNonFieldCommandCorps } = require('./field_command.cjs');
 
 function strictCompare(a, b) {
   return a < b ? -1 : a > b ? 1 : 0;
@@ -135,6 +136,14 @@ function stageCoReplacement(state, payload) {
     ? state.military.corps_command[corpsId]
     : undefined;
   if (!cc) return { ok: false, error: 'corps_not_found' };
+
+  // Non-field-command guard (R4 Phase 6 Task 6.4): the main-staff / general-staff
+  // entities (kind: "army_hq") are supreme-command reserve pools, not field corps —
+  // they have no CO to sack in the field-command sense and must never be a REPLACE-CO
+  // target. Reject BEFORE ownership/CA so nothing is staged or debited.
+  if (isNonFieldCommandCorps(state, corpsId)) {
+    return { ok: false, error: 'not_a_field_command' };
+  }
 
   // Player-ownership: only the player faction may sack its own corps' CO.
   const playerFaction = (state.meta && state.meta.player_faction) ? state.meta.player_faction : null;

@@ -23,6 +23,7 @@
 // function performs NO mutation (no CA debit, nothing staged).
 
 const { REQUEST_OP_COST } = require('./autonomy_ipc_contract.cjs');
+const { isNonFieldCommandCorps } = require('./field_command.cjs');
 
 /**
  * Validate the op-directive payload shape. Returns an error string or null.
@@ -43,9 +44,16 @@ function validateOpDirectivePayload(payload) {
  *
  * @param {any} state Deserialized canonical GameState.
  * @param {any} payload IPC payload { corpsId, targetOsid }.
+ * @param {{unbuildableReason?: string}} [options] Issuability pre-check result from
+ *   the caller (electron-main runs `queryDirectiveObjection`, which shares the pure
+ *   `planDirectiveOperation` the consume step uses). When `unbuildableReason` is set,
+ *   the directive would no-op in `inject-op-directive` (producing only an
+ *   `op_directive_rejection`), so we refuse to stage it — the president is not charged
+ *   Command Authority for an order the engine already knows it will discard. An
+ *   unbuildable target is not forceable, so this holds even for a forced request.
  * @returns {{ok:true}|{ok:false,error:string}}
  */
-function stageOpDirective(state, payload) {
+function stageOpDirective(state, payload, options) {
   const payloadError = validateOpDirectivePayload(payload);
   if (payloadError) return { ok: false, error: payloadError };
 
@@ -59,6 +67,13 @@ function stageOpDirective(state, payload) {
     ? state.military.corps_command[corpsId]
     : undefined;
   if (!cc) return { ok: false, error: 'corps_not_found' };
+
+  // Non-field-command guard (R4 Phase 6 Task 6.4): main-staff / general-staff
+  // (kind: "army_hq") entities command no front to direct toward an objective.
+  // Reject BEFORE ownership/CA so nothing is staged or debited.
+  if (isNonFieldCommandCorps(state, corpsId)) {
+    return { ok: false, error: 'not_a_field_command' };
+  }
 
   // Player-ownership: only the player faction may direct its own corps.
   const playerFaction = (state.meta && state.meta.player_faction) ? state.meta.player_faction : null;
@@ -75,6 +90,19 @@ function stageOpDirective(state, payload) {
   // the CA guard so no double-charge.
   if (cc.pending_op_directive) {
     return { ok: false, error: 'pending_op_directive_exists' };
+  }
+
+  // Issuability guard (R4 Phase 6 Task 6.3): the caller's pre-check (queryDirectiveObjection,
+  // which shares planDirectiveOperation with the consume step) reports the directive is
+  // unbuildable — no free force, unreachable objective, already-owned/uncontrolled target,
+  // or no free operation slot. inject-op-directive would no-op it into an
+  // op_directive_rejection, so charging REQUEST_OP_COST is charging for an order already
+  // known to be discarded. Refuse to stage BEFORE the CA guard so nothing is debited.
+  const unbuildableReason = options && typeof options.unbuildableReason === 'string'
+    ? options.unbuildableReason
+    : null;
+  if (unbuildableReason) {
+    return { ok: false, error: unbuildableReason };
   }
 
   // Command-authority guard + debit — stage nothing if unaffordable.

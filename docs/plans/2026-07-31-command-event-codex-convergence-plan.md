@@ -388,6 +388,8 @@ git diff --check
 **Assigned role:** Gameplay Programmer
 **Independent review:** Code Review (canon/specs) + QA Engineer
 
+**STATUS (2026-08-06):** Tasks **6.1, 6.3, 6.4 DONE** — logic-tested (65/65 across the touched suite) and **calibration byte-identical** (`test:baselines`: all scenarios match; changes are desktop/manifest/Dayton-resolver only, none in the 188w sim pipeline). Task **6.5 substrate landed** (`src/desktop/ipc_mutex.cjs` + test, 4/4); its handler wiring is the remaining step — needs the full mutating-channel audit (79 IPC channels) + Electron runtime verification that nothing deadlocks/over-serializes, so it is not swept blind. Task **6.2 (surface `op_directive_rejection`) NOT STARTED** — it adds a UI Desk card + `player_visible_state.cjs` projection + an `OperationAAR` schema field, and benefits from visual verification. 6.2 + 6.5-wiring are the next increment before the phase's full verification suite + single closing commit.
+
 **Files:**
 
 - Modify `src/state/player_decision_manifest.ts`

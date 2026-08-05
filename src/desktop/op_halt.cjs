@@ -21,6 +21,7 @@
 // performs NO mutation (no CA debit, nothing staged).
 
 const { STOP_OP_COST } = require('./autonomy_ipc_contract.cjs');
+const { isNonFieldCommandCorps } = require('./field_command.cjs');
 
 /**
  * Validate the op-halt payload shape. Returns an error string or null.
@@ -83,6 +84,13 @@ function stageOpHalt(state, payload) {
     ? state.military.corps_command[corpsId]
     : undefined;
   if (!cc) return { ok: false, error: 'corps_not_found' };
+
+  // Non-field-command guard (R4 Phase 6 Task 6.4): main-staff / general-staff
+  // (kind: "army_hq") entities run no field operations to halt. Reject BEFORE
+  // ownership/CA so nothing is staged or debited.
+  if (isNonFieldCommandCorps(state, corpsId)) {
+    return { ok: false, error: 'not_a_field_command' };
+  }
 
   // Player-ownership: only the player faction may halt its own corps' ops.
   const playerFaction = (state.meta && state.meta.player_faction) ? state.meta.player_faction : null;

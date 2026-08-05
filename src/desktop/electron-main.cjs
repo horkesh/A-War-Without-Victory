@@ -2402,7 +2402,25 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = readCanonicalCurrentState(sim);
-      const result = stageOpDirective(state, payload);
+      // Issuability pre-check (R4 Phase 6 Task 6.3): run the SAME mutation-free planner
+      // the consume step uses (queryDirectiveObjection → planDirectiveOperation). An
+      // unbuildable directive (no free force / unreachable / already-owned / no slot)
+      // would no-op in inject-op-directive into an op_directive_rejection, so charging
+      // REQUEST_OP_COST for it is charging for an order already known to be discarded.
+      // Enforced here at the IPC boundary — not the renderer — so every caller gets the
+      // guard. stageOpDirective refuses to stage (no CA debit) when a reason is passed.
+      let unbuildableReason;
+      if (payload && typeof payload.corpsId === 'string' && typeof payload.targetOsid === 'string') {
+        const objection = await sim.queryDirectiveObjection(
+          state,
+          { corpsId: payload.corpsId, targetOsid: payload.targetOsid },
+          getBaseDir(),
+        );
+        if (objection && typeof objection.rejectionReason === 'string') {
+          unbuildableReason = objection.rejectionReason;
+        }
+      }
+      const result = stageOpDirective(state, payload, { unbuildableReason });
       if (!result.ok) return result;
       // Refresh ALL windows incl. the clicking renderer (see Codex P2 above) so the
       // sender re-renders the debited CA and the now-staged directive immediately.

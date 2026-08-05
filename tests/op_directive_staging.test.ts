@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
 const { stageOpDirective, REQUEST_OP_COST } = require('../src/desktop/op_directive_staging.cjs') as {
-  stageOpDirective: (state: any, payload: any) => { ok: boolean; error?: string };
+  stageOpDirective: (state: any, payload: any, options?: { unbuildableReason?: string }) => { ok: boolean; error?: string };
   REQUEST_OP_COST: number;
 };
 
@@ -128,5 +128,50 @@ describe('REQUEST-OP staging contract', () => {
     const res = stageOpDirective(state, makePayload());
     expect(res.ok).toBe(true);
     expect(state.military.corps_command.rbih_1st_corps.pending_op_directive).toBeDefined();
+  });
+});
+
+// R4 Phase 6 Task 6.3 — do not charge Command Authority for an unbuildable directive.
+// The caller (electron-main) runs queryDirectiveObjection (the mutation-free planner the
+// consume step shares) and passes any rejectionReason as options.unbuildableReason. An
+// unbuildable directive would only produce an op_directive_rejection in inject-op-directive,
+// so it must not be staged or debited.
+describe('REQUEST-OP issuability guard (Task 6.3)', () => {
+  it('refuses to stage (no CA debit) when the pre-check reports the order is unbuildable', () => {
+    const state = makeState({ ca: 100 });
+    const res = stageOpDirective(state, makePayload(), { unbuildableReason: 'objective_unreachable' });
+    expect(res.ok).toBe(false);
+    expect(res.error).toBe('objective_unreachable');
+    expect(state.military.command_authority.current).toBe(100);
+    expect(state.military.command_authority.spent_this_turn).toBe(0);
+    expect(state.military.corps_command.rbih_1st_corps.pending_op_directive).toBeUndefined();
+  });
+
+  it('stages normally when the pre-check reports no rejection (buildable directive)', () => {
+    const state = makeState({ ca: 100 });
+    const res = stageOpDirective(state, makePayload(), { unbuildableReason: undefined });
+    expect(res.ok).toBe(true);
+    expect(state.military.command_authority.current).toBe(100 - REQUEST_OP_COST);
+    expect(state.military.corps_command.rbih_1st_corps.pending_op_directive).toBeDefined();
+  });
+
+  it('an unbuildable target is not forceable — a forced request is also refused, no debit', () => {
+    const state = makeState({ ca: 100 });
+    const res = stageOpDirective(
+      state,
+      makePayload({ forced_over_objection: true }),
+      { unbuildableReason: 'no_available_slot' },
+    );
+    expect(res.ok).toBe(false);
+    expect(res.error).toBe('no_available_slot');
+    expect(state.military.command_authority.current).toBe(100);
+    expect(state.military.corps_command.rbih_1st_corps.pending_op_directive).toBeUndefined();
+  });
+
+  it('the unbuildable check runs after ownership — a non-owned corps still returns corps_not_owned_by_player', () => {
+    const state = makeState({ playerFaction: 'RBiH', corpsFaction: 'RS' });
+    const res = stageOpDirective(state, makePayload(), { unbuildableReason: 'objective_unreachable' });
+    expect(res.ok).toBe(false);
+    expect(res.error).toBe('corps_not_owned_by_player');
   });
 });

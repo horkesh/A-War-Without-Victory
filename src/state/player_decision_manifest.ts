@@ -388,8 +388,21 @@ export function summarizePlayerDecisions(
 ): PlayerDecisionSummary {
     const effectiveFaction = playerFactionFor(state, playerFaction);
     const groupedInstances = collectInstances(state, effectiveFaction);
+    // R4 Phase 6 Task 6.1 — terminal-state decision gate. Once the campaign is over,
+    // NO decision family may report a blocking instance: a concluded game must never
+    // hold shut `advance-turn` (or any gate keyed on blocking decisions) on a dangling
+    // request/receipt pair — the self-sealing `pending_dayton` deadlock the RS-
+    // ahistorical-playthrough Pyrrhic panel root-caused (four independent specialists).
+    // This is the general fix (covers every family, not just Dayton) and the only one
+    // that also rescues already-saved concluded games, since the manifest is recomputed
+    // from state on load. Instances stay VISIBLE for records surfaces but are neutralized
+    // to non-blocking.
+    const gameOver = getMeta(state).game_over === true;
     const families = PLAYER_DECISION_FAMILIES.map((family, index): PlayerDecisionFamilySummary => {
-        const instances = groupedInstances[index] ?? [];
+        const rawInstances = groupedInstances[index] ?? [];
+        const instances = gameOver
+            ? rawInstances.map((item) => (item.blocking ? { ...item, blocking: false } : item))
+            : rawInstances;
         const blockingCount = instances.filter((item) => item.blocking).length;
         return {
             id: family.id,
