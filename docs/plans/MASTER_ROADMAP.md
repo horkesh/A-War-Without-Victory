@@ -396,6 +396,14 @@ During R8 and R9:
 
 Bugs are fixed before friction. A repaired packaged-Electron session restarts from a clean campaign; it is never continued across a source-changing fix.
 
+### Post-1.0 / non-blocking backlog
+
+Optional improvements identified outside the 1.0 outcome, per the routing rule above: recorded here, not folded into an active R-lane.
+
+| Date | Item | Design doc | Status |
+|---|---|---|---|
+| 2026-08-05 | Faction-wide current equipment totals visibility (Warroom Faction Overview MILITARY quadrant + Army HQ corps-list rollup) | [Design note](2026-08-05-faction-equipment-totals-visibility-design.md) | Proposed — not implemented; does not gate any R1–R9 lane |
+
 ## 11. Global Verification Barriers
 
 Each plan contains focused commands. Before a workstream closes, run its focused suite plus every applicable global command:

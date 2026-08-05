@@ -60,6 +60,12 @@ R1 and R3 are integrated on `codex/master-roadmap-execution`. R2 source, harness
 
 See [Master Roadmap §6](MASTER_ROADMAP.md#6-locked-product-and-historical-decisions) for the complete decision record and sources.
 
+## Backlog (non-blocking)
+
+Optional improvements outside the 1.0 outcome live in [Master Roadmap §10](MASTER_ROADMAP.md#10-finding-routing) rather than as a dispatch-queue row. Current entries:
+
+- **Faction-wide current equipment totals visibility** — [design note](2026-08-05-faction-equipment-totals-visibility-design.md), proposed 2026-08-05. Not implemented; does not gate R1–R9.
+
 ## Workstream Update Protocol
 
 When a workstream changes state:
