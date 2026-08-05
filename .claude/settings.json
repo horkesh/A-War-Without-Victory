@@ -61,7 +61,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_response // \"\"' | grep -qiE '(area-weighted match|compare_painted_vs_sim|final_state_hash|run_summary\\.json|anchor_checks)' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"ORCHESTRATOR ENFORCEMENT: This Bash output contains scenario run results. You MUST dispatch /scenario-creator-runner-tester to analyze these results BEFORE presenting any interpretation to the user. Present raw numbers only. All analysis must be attributed to experts.\"}}' || true",
+            "command": "jq -r '.tool_input.command // \"\"' | grep -qiE '(npm(\\.cmd)?[[:space:]]+run[[:space:]]+sim:scenario:run|run_scenario_with_preflight\\.ts|tools/scenario_runner/|runs/[^[:space:]]*(final_save\\.json|run_summary\\.json|control_delta\\.json|end_report\\.md|formation_delta\\.json|destroyed_brigades\\.json|watched_operations\\.json|weekly_report\\.jsonl|operation_aars\\.json))' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"ORCHESTRATOR ENFORCEMENT: This command invokes a scenario run or references its result artifacts. You MUST dispatch /scenario-creator-runner-tester to analyze these results BEFORE presenting any interpretation to the user. Present raw numbers only. All analysis must be attributed to experts.\"}}' || true",
             "timeout": 5,
             "statusMessage": "Checking orchestrator enforcement..."
           },
@@ -70,6 +70,28 @@
             "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"LOOP DISCIPLINE REMINDER: If the last command changed state, verified progress, or produced a milestone result, update the active report/plan/working note with a short checkpoint before moving on.\"}}'",
             "timeout": 5,
             "statusMessage": "Checking checkpoint discipline..."
+          }
+        ]
+      },
+      {
+        "matcher": "PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // \"\"' | grep -qiE '(npm(\\.cmd)?[[:space:]]+run[[:space:]]+sim:scenario:run|run_scenario_with_preflight\\.ts|tools/scenario_runner/|runs/[^[:space:]]*(final_save\\.json|run_summary\\.json|control_delta\\.json|end_report\\.md|formation_delta\\.json|destroyed_brigades\\.json|watched_operations\\.json|weekly_report\\.jsonl|operation_aars\\.json))' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"ORCHESTRATOR ENFORCEMENT: This command invokes a scenario run or references its result artifacts. You MUST dispatch /scenario-creator-runner-tester to analyze these results BEFORE presenting any interpretation to the user. Present raw numbers only. All analysis must be attributed to experts.\"}}' || true",
+            "timeout": 5,
+            "statusMessage": "Checking orchestrator enforcement..."
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // \"\"' | grep -qiE 'runs/[^[:space:]]*(final_save\\.json|run_summary\\.json|control_delta\\.json|end_report\\.md|formation_delta\\.json|destroyed_brigades\\.json|watched_operations\\.json|weekly_report\\.jsonl|operation_aars\\.json)$' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"ORCHESTRATOR ENFORCEMENT: This file is a scenario run result artifact. You MUST dispatch /scenario-creator-runner-tester to analyze these results BEFORE presenting any interpretation to the user. Present raw numbers only. All analysis must be attributed to experts.\"}}' || true",
+            "timeout": 5,
+            "statusMessage": "Checking orchestrator enforcement..."
           }
         ]
       }
