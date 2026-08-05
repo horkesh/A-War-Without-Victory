@@ -26233,3 +26233,31 @@ Two leading hypotheses were tested directly and ruled out: (1) the dissolution-t
 **Status / next action:** the Zvornik-only fix is a fully-validated candidate, not yet committed — awaiting owner commit/push decision. Doboj/Gračanica remain open, explicitly routed to the new engine-health workstream rather than further same-session anchor tuning.
 
 **Scope:** No canon or `docs/10_canon/FORAWWV.md` change. `docs/40_reports/CALIBRATION_MASTER.md` and this ledger updated; `docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md` Task 0.3 carries full step-by-step technical detail for all six designs (five disproven, one shipped) and both engine-health experiments (dissolution threshold, reinforcement multiplier).
+
+## 2026-08-05 - Bug found: the Wrapped campaign-recap deck is unreachable through normal play (documented, not fixed)
+
+**Type:** Finding, no engine/UI code changed. Surfaced incidentally while capturing showcase-site screenshots of the endgame flow (a non-engine side task), then investigated properly at the user's request.
+
+**Symptom:** Clicking "View Your War" on the Verdict screen correctly sets `wrappedOpen: true` and `WrappedOverlay` does mount, but it renders permanently invisible underneath the still-open `VerdictScreen`. No error, no console warning, nothing visibly wrong — the deck is simply unreachable. `generateWrappedSlides.ts` itself has no bug: forcing a real 188-week save into `game_over: true` and hiding `VerdictScreen`'s backdrop via a test-only DOM override confirmed all 10 slides render correctly with genuine per-campaign content (casualty spikes, named formations, a live six-dimension negotiating-capital spider chart on the closing slide).
+
+**Root cause:** `VerdictScreen.tsx` renders at `Z.GAME_OVER` (99999, documented in `src/ui/shared/zIndex.ts` as "top of stack") and has no dismiss state anywhere in the file — it never reads `wrappedOpen` and never hides once `game_over` is true (by design: you can't dismiss that your war is over). `WrappedOverlay` renders at `Z.MODAL_RAISED` (1100), correctly positioned "above MODAL siblings" per its own doc comment — but nobody designed for `VerdictScreen` itself spawning a lower-tier overlay of itself. The token table is internally consistent and `tests/z_index_canonical.test.ts` correctly proves the static values/ordering; the gap is that no test mounts the composed `App`-level stacking and checks *effective* runtime reachability, so the defect was invisible to every existing gate.
+
+**Blast-radius survey (this session):** checked every component at the four highest tiers (`GAME_OVER`, `TURN_AFTERMATH`, `CRITICAL_MODAL`, `HARD_MODAL`/`MODAL_HARD`, `PAUSE_MENU`) for the same shape — opens another overlay's store flag without yielding itself first. `VerdictScreen → WrappedOverlay` is the only instance found; every other high-tier component either opens nothing or opens something already at an equal-or-higher tier (`PauseMenu` → Settings/Credits at `MODAL_HARD`, safe by construction). The correct pattern already exists twice elsewhere in the same file tree — `WrappedOverlay`'s own "View Chronicle" button calls `setOpen(false)` before opening Chronicle, and `ReplayInspectionBanner` deliberately renders at `Z.GAME_OVER - 1` — so this is a one-off omission, not a systemic pattern.
+
+**Fix recommendation (not applied):** have `VerdictScreen` cede visually (not dismiss) while `wrappedOpen` is true, e.g. `display: 'none'` at both `Z.GAME_OVER` render sites, gated on `useGameStore((s) => s.wrappedOpen)`. Small, Ring 1, no `§6` surface, no sim/calibration touch — a direct small-spec fix candidate per the napkin's dispatch-overhead guidance, not a worktree dispatch. A regression test should mount `VerdictScreen` + `WrappedOverlay` together and assert the Wrapped slide is topmost/interactive after the transition — closing the reachability gap `tests/z_index_canonical.test.ts` cannot cover.
+
+**Full writeup:** `docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md`.
+
+**Scope:** No canon, `docs/10_canon/FORAWWV.md`, engine, or UI source change. Documentation only.
+
+## 2026-08-05 - Wrapped campaign-recap deck fix SHIPPED: VerdictScreen now yields to WrappedOverlay
+
+**Type:** UI-reachability fix, exactly as recommended in the same-day finding above. User-authorized ("go ahead and fix it"). Ring 1, no `§6` surface, no sim/calibration touch.
+
+**Fix:** `src/ui/map/components/VerdictScreen.tsx` — both `Z.GAME_OVER` render sites (the main verdict branch and the separate `FallbackGameOver` component, which has its own independent root and its own "View Your War" button) now read `wrappedOpen` from `useGameStore` and swap to `style={{ display: 'none' }}` while it's true, falling back to `{ zIndex: Z.GAME_OVER }` otherwise. `VerdictScreen` still has no general dismiss capability — this only cedes visually to `WrappedOverlay`, it doesn't let the player dismiss the fact the war is over.
+
+**Verification:** 3 new regression tests added to `tests/ui/endgame_verdict_screen_mount.test.ts` (main-branch yields when `wrappedOpen: true`, main-branch still paints at `Z.GAME_OVER` when `wrappedOpen: false`, `FallbackGameOver` yields identically) — 52/52 in that file. Full relevant-surface sweep per the "run the full suite, not just your own tests" life-lesson: 13 more files touching `VerdictScreen`/`FallbackGameOver` (`z_index_canonical`, `verdict_visibility`, all `endgame_*` proof suites, `dynamic_codex_slice_v1`, `strict_null_inventory_progress`, `desktop_packaged_runtime_probe`, `faction_report_mobile_subdivision`, `ghost_entry_prose`, `render_proof_real_fixtures`) — 264/264 pass. Smoke-test triad complete: `tsc --noEmit` clean, 316/316 relevant tests green, `desktop:map:build` succeeded.
+
+**Determinism:** No `Math.random()`, `Date.now()`, or timestamp introduced — pure conditional inline-style change gated on existing store state.
+
+**Scope:** No canon, `docs/10_canon/FORAWWV.md`, or sim/calibration change. `VerdictScreen.tsx` + its test file only. Not yet committed — pending owner commit/push decision.

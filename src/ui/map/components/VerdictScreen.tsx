@@ -312,6 +312,11 @@ const LOWER_SECTION_LABEL_KEYS: Record<VerdictLowerSection, MessageKey> = {
 export function VerdictScreen() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const startReplayInspection = useGameStore((s) => s.startReplayInspection);
+    // The Wrapped overlay (Z.MODAL_RAISED) is opened FROM this screen's own
+    // "View Your War" button but renders below GAME_OVER — without this,
+    // it mounts permanently invisible underneath the still-open Verdict
+    // screen (see docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md).
+    const wrappedOpen = useGameStore((s) => s.wrappedOpen);
     const ipc = useIPC();
     const [locale] = useLocale();
     const [verdictSelection, setVerdictSelection] = useState<{ verdict: GameVerdict; faction: string } | null>(null);
@@ -432,7 +437,7 @@ export function VerdictScreen() {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm"
-             style={{ zIndex: Z.GAME_OVER }}
+             style={wrappedOpen ? { display: 'none' } : { zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="verdict"
              data-awwv-endgame-outcome={verdict.outcome_label}
              data-awwv-verdict-focus={selectedFaction}>
@@ -1083,10 +1088,13 @@ function FallbackGameOver({
 }) {
     useLocale();
     const display = fallbackOutcomeDisplay(outcome);
+    // Same yield-to-Wrapped fix as the main verdict branch above — see
+    // docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md.
+    const wrappedOpen = useGameStore((s) => s.wrappedOpen);
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-             style={{ zIndex: Z.GAME_OVER }}
+             style={wrappedOpen ? { display: 'none' } : { zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="fallback"
              data-awwv-endgame-outcome={display.title}>
             <div className="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">

@@ -155,6 +155,26 @@ describe('VerdictScreen mount — gating', () => {
         expect(html.length).toBeGreaterThan(500);
         expect(html).toContain('A War Without Victory');
     });
+
+    // Regression: docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md —
+    // the Wrapped overlay (Z.MODAL_RAISED, 1100) is opened from this screen's
+    // own "View Your War" button but renders below GAME_OVER (99999). Without
+    // yielding, WrappedOverlay mounts permanently invisible underneath the
+    // still-open Verdict screen. This screen must cede (display:none) rather
+    // than keep painting at GAME_OVER once wrappedOpen is true.
+    it('yields to the Wrapped overlay instead of covering it once wrappedOpen is true', () => {
+        storeState = { loadedGameState: endgame(), wrappedOpen: true };
+        const html = render();
+        expect(html).toContain('display:none');
+        expect(html).not.toContain('z-index:99999');
+    });
+
+    it('still paints at GAME_OVER when wrappedOpen is false', () => {
+        storeState = { loadedGameState: endgame(), wrappedOpen: false };
+        const html = render();
+        expect(html).toContain('z-index:99999');
+        expect(html).not.toContain('display:none');
+    });
 });
 
 describe('VerdictScreen mount — verdict content', () => {
@@ -319,6 +339,17 @@ describe('VerdictScreen mount — fallback', () => {
         expect(h).toContain('1 active brigade');
         expect(h).not.toContain('2 active brigades');
         expect(h).not.toContain('2000 personnel');
+    });
+
+    // Regression: docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md —
+    // FallbackGameOver has its own independent "View Your War" button and its
+    // own GAME_OVER-tier root; it needs the same yield-to-Wrapped fix as the
+    // main verdict branch above (they are separate render trees).
+    it('FallbackGameOver yields to the Wrapped overlay once wrappedOpen is true', () => {
+        storeState = { loadedGameState: endgame({ gameVerdict: undefined }), wrappedOpen: true };
+        const h = render();
+        expect(h).toContain('display:none');
+        expect(h).not.toContain('z-index:99999');
     });
 });
 
