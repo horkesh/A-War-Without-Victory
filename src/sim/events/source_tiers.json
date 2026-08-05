@@ -1,0 +1,17 @@
+{
+  "recognized": [
+    "agreement_text",
+    "balkan_battlegrounds",
+    "corroborated_participant",
+    "design_counterfactual",
+    "icty_icj_un",
+    "pending"
+  ],
+  "resolved": [
+    "agreement_text",
+    "balkan_battlegrounds",
+    "corroborated_participant",
+    "design_counterfactual",
+    "icty_icj_un"
+  ]
+}

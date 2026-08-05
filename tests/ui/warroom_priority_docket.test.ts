@@ -160,28 +160,23 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(first.status).toBe('review');
     expect(first.statusLabel).toBe('Review before advance');
     expect(first.statusLabel).not.toBe(first.status);
-    expect(first.tone).toBe('danger');
+    expect(first.tone).toBe('attention');
     expect(first.headline).toBe('Recommended before advance');
     expect(first.blockingDecisionCount).toBe(0);
-    expect(first.summary).toBe('4 advance items / 4 urgent / 2 pending');
+    expect(first.summary).toBe('1 advance item / 0 required / 4 recommended / 1 monitor / 3 record / 1 pending');
     expect(first.items.map((item) => item.id)).toEqual([
-      'review:pending',
       'opportunity:opp_docket',
-      'sitrep:front-critical',
     ]);
     expect(first.items[0]).toMatchObject({
-      category: 'decision',
+      category: 'opportunity',
       severity: 'critical',
-      actionLabel: "Open President's Desk",
-      navigationTarget: { kind: 'inbox' },
+      actionLabel: 'Review Dossier',
+      navigationTarget: { kind: 'decision-room', lens: 'opportunity', cardId: 'opportunity:opp_docket' },
     });
     expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
-      'presidential-inbox',
       'army-hq-briefing',
-      'army-hq-summary',
-      'turn-aftermath-records',
     ]);
-    expect(first.sourceHandoffSummary).toBe('4 source handoffs / 4 urgent');
+    expect(first.sourceHandoffSummary).toBe('1 source handoff / 0 required / 4 recommended / 1 monitor / 3 record');
     expect(first.openBoardLabel).toBe('Open Decision Room');
   });
 
@@ -198,10 +193,10 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.statusLabel).not.toBe(view.status);
     expect(view.tone).toBe('clear');
     expect(view.headline).toBe('Clear to advance');
-    expect(view.summary).toBe('0 advance items / 0 urgent / 0 pending');
+    expect(view.summary).toBe('0 advance items / 0 required / 3 recommended / 0 monitor / 0 record / 0 pending');
     expect(view.items).toEqual([]);
     expect(view.sourceHandoffs).toEqual([]);
-    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 urgent');
+    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 required / 3 recommended / 0 monitor / 0 record');
     expect(view.canOpenBoard).toBe(true);
   });
 
@@ -218,9 +213,9 @@ describe('buildWarroomPriorityDocketView', () => {
     });
 
     expect(view.metrics.pendingReviews).toBe(2);
-    expect(view.metrics.urgentCount).toBe(2);
+    expect(view.metrics.priorityCounts.required).toBe(2);
     expect(view.metrics.advanceReviewCount).toBe(2);
-    expect(view.summary).toBe('2 advance items / 2 urgent / 2 pending');
+    expect(view.summary).toBe('2 advance items / 2 required / 3 recommended / 0 monitor / 0 record / 2 pending');
   });
 
   it('returns a safe unavailable state when no campaign is loaded', () => {
@@ -233,7 +228,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.headline).toBe('No state loaded');
     expect(view.items).toEqual([]);
     expect(view.sourceHandoffs).toEqual([]);
-    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 urgent');
+    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 required / 0 recommended / 0 monitor / 0 record');
     expect(view.canOpenBoard).toBe(false);
   });
 
@@ -260,8 +255,8 @@ describe('buildWarroomPriorityDocketView', () => {
     const view = buildWarroomPriorityDocketView({ state, limit: 3 });
     setLocale('en');
 
-    expect(view.summary).toBe('4 stavke za napredovanje / 4 hitno / 2 na čekanju');
-    expect(view.sourceHandoffSummary).toBe('4 izvorna prijenosa / 4 hitno');
+    expect(view.summary).toBe('1 stavka za napredovanje / 0 obavezno / 4 preporučeno / 1 praćenje / 3 zapis / 1 na čekanju');
+    expect(view.sourceHandoffSummary).toBe('1 izvorni prijenos / 0 obavezno / 4 preporučeno / 1 praćenje / 3 zapis');
     expect(view.openBoardLabel).toBe('Otvori sobu odluka');
     expect(view.statusLabel).toBe('Pregled prije napredovanja');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('advance items');

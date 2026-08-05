@@ -42,6 +42,10 @@ function renderHeader(ca: LoadedGameState['commandAuthority'] | undefined) {
   return render(React.createElement(DeskAuthorityHeader, { state: makeState(ca) }));
 }
 
+function renderHeaderState(state: LoadedGameState) {
+  return render(React.createElement(DeskAuthorityHeader, { state }));
+}
+
 afterEach(() => cleanup());
 
 describe('DeskAuthorityHeader', () => {
@@ -73,6 +77,34 @@ describe('DeskAuthorityHeader', () => {
     renderHeader({ current: 99, max: 100, reserve: 15, reserveMax: 15, spentThisTurn: 0, lifetimeSpent: 0 });
 
     expect(screen.queryByTestId('desk-authority-capacity-cue')).toBeNull();
+  });
+
+  it('explains a near-capacity quiet posture when no presidential action is filed', () => {
+    renderHeader({ current: 90, max: 100, reserve: 12, reserveMax: 15, spentThisTurn: 0, lifetimeSpent: 0 });
+
+    const note = screen.getByRole('note');
+    expect(note.getAttribute('data-testid')).toBe('desk-authority-cadence-hold');
+    expect(note.textContent).toMatch(/no sourced presidential initiative is filed this week/i);
+    expect(note.textContent).toMatch(/holding authority preserves the current policy/i);
+    expect(within(note).queryByRole('button')).toBeNull();
+    expect(screen.queryByTestId('desk-authority-capacity-cue')).toBeNull();
+  });
+
+  it('does not call the posture quiet when a required presidential response is filed', () => {
+    renderHeaderState({
+      ...makeState({ current: 100, max: 100, reserve: 15, reserveMax: 15, spentThisTurn: 0, lifetimeSpent: 0 }),
+      pendingEventDecisions: [{
+        event_id: 'required-response',
+        event_title: 'Required response',
+        turn_fired: 1,
+        faction: 'RS',
+        requires_player_response: true,
+        response_options: [{ id: 'ack', label: 'Acknowledge', effects: [] }],
+      }],
+    } as LoadedGameState);
+
+    expect(screen.queryByTestId('desk-authority-cadence-hold')).toBeNull();
+    expect(screen.queryByTestId('desk-authority-capacity-cue')).not.toBeNull();
   });
 
   it('renders each lever cost from the canonical constants', () => {

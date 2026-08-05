@@ -251,3 +251,32 @@ Foča and Zvornik were delayed because their event definitions explicitly requir
 - The original five friction findings remain open by design; they were not converted into incidental code patches.
 - The actionable implementation sequence, exact files, tests, historical stop gates, responsive-layout checks, determinism gates, and fresh Electron acceptance run are defined in [the RS 104-week friction remediation plan](../../plans/2026-07-31-rs-104week-friction-remediation-plan.md).
 - No commit, push, package, installer, approved-baseline update, or release-state action was performed.
+
+## 2026-08-01 Friction Remediation Checkpoint
+
+This checkpoint records local implementation evidence without rewriting the original owner session or its `3/5` President-feel score.
+
+### Implemented in this packet
+
+- **FR-01 priority truth:** President's Desk, Decision Room, Advance review, and the Warroom docket now consume one Required / Recommended / Monitor / Record contract. Severity alone cannot fabricate a Required item; only a real advance blocker can do that.
+- **FR-02 brief consolidation:** duplicate enclave/siege monitor rows with the same category and target become one stable brief with sorted source and evidence IDs. Distinct targets remain distinct.
+- **FR-04 cadence truth:** a pure all-faction reporter distinguishes authored/source-backed work from ordinary emergent work and notices. The frozen RS turn-104 evidence contains 44 receipts and four exact positive holds, with no invented initiative. See [the cadence audit](../audits/20260801_RS_104W_PRESIDENTIAL_CADENCE_AUDIT.md).
+- **FR-05 Army HQ composition:** Summary card regions use two columns on normal desktop and three on ultrawide while prose stays bounded. One non-interactive posture note owns the executive hold message; individual objective cards state only their local truth. The [authoritative Electron viewport packet](evidence/20260801_r2_fr05_viewport_1920_3440_v6/README.md) passed at physical 1920x1080 and 3440x1440 sizes with complete right-edge paint, no horizontal overflow, zero unexpected runtime diagnostics, and unchanged source/repository saves.
+- **Historical correction:** Operation Lukavac 93 now uses the July-August 1993 chronology and approximately 10,000 VRS troops supported by *Balkan Battlegrounds* II, pages 410-411. It cannot fire after turn 71, and the unsupported `defy_nato` war-crimes delta is removed.
+- **Committee repair:** all twelve generic command-presence rows remain natural `once:true` events, while voluntary cap/cooldown metadata lives under `action_cadence` and is ignored by the event evaluator. Existing desktop visit/address/decoration initiators enforce the 5-fire / 10-turn contract and fail closed without it; a manual action's canonical fire count also seals the row against a later natural queue. Operation Lukavac 93 remains eligible from turn 69, while the source-dated August 9 NATO Council notice fires at exact turn 70. The notice still fires alone, orders after Lukavac when both are eligible, and neither related base Codex essay asserts a withdrawal before the RS choice.
+
+### Still open at this checkpoint
+
+- FR-03 dossier-to-map objective focus and FR-06 active-path overflow are separate integration packets and are not claimed here.
+- The paired all-faction 104-week headless replay is complete and byte-identical for every substantive artifact. The final save SHA-256 is `d83d10c983da384dd7f0e5f957da69e346f9d50df788e4fac8a90923b8260ccc`; the two generated cadence reports are byte-identical at `647ee513bca77f800de5db469801419258e5ec5acabe09c1013ae57ac6d4018f`. The headless report uses exact all-faction hold endpoints rather than approximating them with the distinct owner-play RS fixture; all eleven headless long gaps resolve with zero invalid holds.
+- FR-05's focused Electron viewport acceptance and screenshots are complete. FR-03, FR-06, their final integrated Electron acceptance, and a fresh RS owner diary remain parent-coordinated work.
+- Therefore the original five friction observations remain the pre-fix owner evidence, and no new President-feel score is awarded from automated tests.
+
+### Focused verification
+
+- Combined priority, consolidation, cadence, Army HQ, Lukavac, event, and essay integration: 23 files / 424 tests green.
+- Committee-blocker repair: 5 files / 102 tests green; Codex response-gating regression: 7 files / 120 tests green; adjacent event/cadence/packaging regression: 7 files / 82 tests green.
+- Player journeys: 44 files / 769 tests green.
+- TypeScript, canon/static-baseline gates, and tactical-map, desktop-simulation, and Warroom production builds: green.
+- Paired 104-week scenario replay: identical final save, summary, weekly report, operation AAR, manifest, deltas, and temporal logs; only output-directory metadata differs.
+- TypeScript: green.

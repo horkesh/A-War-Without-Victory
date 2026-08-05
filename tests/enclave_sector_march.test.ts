@@ -159,7 +159,7 @@ describe('enclave sector march destination invariant', () => {
         context.brigade.location_osid = ZEPA_HOME;
         context.loc = ZEPA_HOME;
         context.state.political.political_controllers![ZEPA_HOME] = 'RBiH';
-        context.state.military.corps_front_sectors = undefined;
+        context.state.military.corps_front_sectors = {};
         context.sectorAssignment = null;
         context.assignedSectorFrontOsids = null;
 

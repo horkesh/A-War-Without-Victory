@@ -24,10 +24,23 @@ import {
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 import type { AttackResolutionOsidSnapEvent } from './attack_resolution_types.js';
+import { getFactionCohesionFloor } from './faction_progression.js';
+import type { WarTimeline } from '../../state/war_timeline.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Experiment 2 cap on the flag-gated floor-aware per-battle cohesion decrement
+ * (RS brigade-attrition workstream, 2026-08-05). Combat may not drive a defender
+ * BELOW this value via the faction-floor clamp. Set to RS's maximum resting
+ * cohesion floor (35, faction_progression.getRSCohesionFloor peak): every RS
+ * floor passes through unchanged (RS's declining 35→20 schedule is preserved),
+ * while RBiH's 62 resting-recovery floor is prevented from acting as a
+ * combat-damage wall. Only consulted when AWWV_COHESION_FLOOR_AT_DECREMENT is on.
+ */
+export const COMBAT_COHESION_FLOOR_CAP = 35;
 
 // Part 7a: Experience gain from combat (Mobilization & Force Growth)
 export const BASE_EXPERIENCE_GAIN = 0.03;
@@ -112,9 +125,41 @@ export function applyDefenderBattleAftermath(params: {
     outcome: CombatOutcome;
     primaryDefenderId?: FormationId;
     corpsFrontSectors?: Record<string, CorpsFrontSector>;
+    /** Current turn — required for the faction cohesion-floor clamp (flag-gated). */
+    turn?: number;
+    /** War timeline for the faction cohesion-floor step-curve lookup (flag-gated). */
+    warTimeline?: WarTimeline;
 }): void {
     const defenderOutcome = getDefenderOutcomePerspective(params.outcome);
     const defenderCohesionDelta = COHESION_DEFENDER[params.outcome] ?? 0;
+    // Engine-health experiment (RS brigade-attrition workstream, 2026-08-05):
+    // the faction cohesion FLOOR (faction_progression.ts — "no formation drifts
+    // below this floor") is enforced in runCohesionDrift but BYPASSED here: the
+    // per-battle decrement clamps to 0, not to the floor. Because runCohesionDrift
+    // skips brigades that fought this turn, a continuously-engaged brigade (RS
+    // defends ~3x more than RBiH) never receives the floor at all — and cohesion
+    // is the binding dissolution criterion in ~95% of RS destructions. Clamping
+    // the decrement to each defender's OWN faction floor is a faction-SYMMETRIC
+    // mechanism enforcing the already-documented invariant. RS's late-war floor
+    // (20) equals the dissolution gate (20), so the historical late-war collapse
+    // is preserved rather than erased.
+    //
+    // Experiment 2 (panel ITERATE, 2026-08-05): getFactionCohesionFloor returns
+    // the RESTING-drift recovery floor, which is 62 for late-war RBiH — absurd as
+    // a combat-damage wall (it made RBiH brigades combat-immune, over-advancing
+    // into historically-RS ground: -20 matched_osids). Cap the clamp at
+    // COMBAT_COHESION_FLOOR_CAP so combat can still erode cohesion below a
+    // faction's RESTING baseline. The cap equals RS's maximum resting floor (35),
+    // so every RS floor (which only ever DECLINES from 35) passes through
+    // unchanged — RS's mid-war protection is preserved — while RBiH's 62
+    // recovery-floor stops acting as a combat wall.
+    //
+    // DEFAULT-ON (owner-signed re-bless 2026-08-05, panel-unanimous SHIP: +2
+    // anchors recovered, RS dissolution 61→32, 188w match 633→630). The
+    // AWWV_COHESION_FLOOR_AT_DECREMENT flag is retained as an escape hatch:
+    // explicit 'false'/'0' restores the pre-fix behavior for regression/comparison.
+    const rawFloorFlag = process.env.AWWV_COHESION_FLOOR_AT_DECREMENT;
+    const floorAtDecrement = rawFloorFlag !== 'false' && rawFloorFlag !== '0';
     for (const defender of params.defenderFormations) {
         (defender as { recent_battle_outcome?: string }).recent_battle_outcome = defenderOutcome;
         const isNonPrimaryFixedHomeDefender = isSameCorpsStandingOgHomeHolder(
@@ -124,7 +169,13 @@ export function applyDefenderBattleAftermath(params: {
         );
         const appliesLineAftermath = !isNonPrimaryFixedHomeDefender;
         if (appliesLineAftermath) {
-            defender.cohesion = Math.max(0, Math.min(100, (defender.cohesion ?? 60) + defenderCohesionDelta));
+            let nextCohesion = Math.max(0, Math.min(100, (defender.cohesion ?? 60) + defenderCohesionDelta));
+            if (floorAtDecrement && defender.faction && params.turn != null) {
+                const floor = getFactionCohesionFloor(defender.faction, params.turn, params.warTimeline);
+                const clampFloor = Math.min(floor, COMBAT_COHESION_FLOOR_CAP);
+                if (nextCohesion < clampFloor) nextCohesion = clampFloor;
+            }
+            defender.cohesion = nextCohesion;
             (defender as { defense_streak?: number }).defense_streak =
                 (params.outcome === 'stalemate' || params.outcome === 'repulsed' || params.outcome === 'catastrophic')
                     ? Math.min(MAX_RESILIENCE_STREAK, ((defender as { defense_streak?: number }).defense_streak ?? 0) + 1)

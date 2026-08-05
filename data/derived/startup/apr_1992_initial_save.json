@@ -33975,10 +33975,10 @@
       }
     },
     "reserve_request_history": [],
+    "sector_intel": {},
     "tactical_groups": {},
     "theatres": {},
     "triggered_operations_accepted": {},
-    "unresolved_sector_brigades": [],
     "used_operation_names": {},
     "war_front_edges_osid": [
       {
@@ -43086,6 +43086,6 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 36,
+  "schema_version": 37,
   "turn_summaries": []
 }

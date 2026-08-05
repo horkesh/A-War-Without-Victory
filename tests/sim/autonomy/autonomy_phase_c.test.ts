@@ -534,6 +534,13 @@ describe('apply-autonomy-transition: proposal expiry', () => {
                 resolved_turn: 6,
             }),
         ]);
+        expect(state.meta.proposal_decision_history).toEqual([
+            expect.objectContaining({
+                id: 'PROP_5_military_0',
+                accepted: false,
+                resolved_turn: 6,
+            }),
+        ]);
     });
 
     it('garbage-collects a previously resolved ordinary proposal from a prior turn', async () => {
@@ -561,6 +568,16 @@ describe('apply-autonomy-transition: proposal expiry', () => {
         await step.run(makePhaseContext(state));
 
         expect(state.meta.pending_proposal_reviews).toHaveLength(0);
+        expect(state.meta.proposal_decision_history).toEqual([
+            expect.objectContaining({
+                id: 'PROP_5_military_0',
+                accepted: true,
+                resolved_turn: 5,
+            }),
+        ]);
+
+        await step.run(makePhaseContext(state));
+        expect(state.meta.proposal_decision_history).toHaveLength(1);
     });
 
     it('keeps a resolved operation-plan decision as a durable no-reprompt record', async () => {

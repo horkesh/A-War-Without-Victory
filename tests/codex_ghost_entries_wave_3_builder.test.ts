@@ -76,13 +76,13 @@ const WAVE_3_IDS = [
 ] as const;
 
 // Symmetric, fully-active Wave-3 flag set (no per-faction exclusion flags set).
-function activeWave3Flags(): Record<string, string | number | boolean> {
+function activeWave3Flags(faction: FactionId = 'RBiH' as FactionId): Record<string, string | number | boolean> {
     return {
         ceasefire_held_through_turn: true,
         mediator_trust_held_through_turn: true,
         rear_pocket_discipline_held_through_turn: true,
         civilian_displacement_contained_through_turn: true,
-        equipment_quality_recovered: true,
+        [`equipment_quality_recovery_streak_active_${faction}`]: true,
         negotiation_capital_recovered: true,
     };
 }
@@ -223,27 +223,33 @@ describe('WAVE-3 builder — W5: equipment_quality_recovered gating', () => {
         });
         expect(findGhost(buildGhostEntries(s, 100), 'equipment_quality_recovered')).toBeUndefined();
     });
-    it('fires on the legacy aggregate flag (back-compat)', () => {
+    it('does not use the legacy aggregate flag as player-track proof', () => {
         const s = makeState({ event_flags: { equipment_quality_recovered: true } });
+        expect(findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered')).toBeUndefined();
+    });
+    it('fires when the selected RBiH recovery streak flag is set (#267)', () => {
+        const s = makeState({
+            player_faction: 'RBiH' as FactionId,
+            event_flags: { equipment_quality_recovery_streak_active_RBiH: true },
+        });
         const got = findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered');
         expect(got).toBeDefined();
         expect(got?.path).toBe('data/codex/ghost_entries/equipment_quality_recovered.md');
     });
-    // #267: the recovery consequence sets PER-FACTION streak flags, not the
-    // aggregate. The ghost must emit when any per-faction streak flag is set.
-    it('fires when the RBiH per-faction recovery streak flag is set (#267)', () => {
-        const s = makeState({ event_flags: { equipment_quality_recovery_streak_active_RBiH: true } });
-        const got = findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered');
-        expect(got).toBeDefined();
-        expect(got?.path).toBe('data/codex/ghost_entries/equipment_quality_recovered.md');
+    it('does not expose an RS recovery streak to the selected RBiH player', () => {
+        const s = makeState({
+            player_faction: 'RBiH' as FactionId,
+            event_flags: { equipment_quality_recovery_streak_active_RS: true },
+        });
+        expect(findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered')).toBeUndefined();
     });
-    it('fires when the RS per-faction recovery streak flag is set (#267)', () => {
-        const s = makeState({ event_flags: { equipment_quality_recovery_streak_active_RS: true } });
-        expect(findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered')).toBeDefined();
-    });
-    it('fires when the HRHB per-faction recovery streak flag is set (#267)', () => {
-        const s = makeState({ event_flags: { equipment_quality_recovery_streak_active_HRHB: true } });
-        expect(findGhost(buildGhostEntries(s, 50), 'equipment_quality_recovered')).toBeDefined();
+    it('preserves selected-player recovery truth through a JSON round trip', () => {
+        const original = makeState({
+            player_faction: 'RBiH' as FactionId,
+            event_flags: { equipment_quality_recovery_streak_active_RBiH: true },
+        });
+        const restored = JSON.parse(JSON.stringify(original)) as GameState;
+        expect(buildGhostEntries(restored, 50)).toEqual(buildGhostEntries(original, 50));
     });
     it('does not fire when a per-faction streak flag is set but collapse is also set (mutual exclusion)', () => {
         const s = makeState({
@@ -283,7 +289,7 @@ describe('WAVE-3 builder — W7: predicates remain faction-agnostic on symmetric
     it('emits identical Wave-3 id sets across RBiH/RS/HRHB', () => {
         function idsFor(faction: FactionId): string[] {
             const s = makeState({
-                event_flags: activeWave3Flags(),
+                event_flags: activeWave3Flags(faction),
                 war_crimes_events: 0,
                 player_faction: faction,
             });

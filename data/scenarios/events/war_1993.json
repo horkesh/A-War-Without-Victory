@@ -486,9 +486,11 @@
   {
     "id": "croat_bosniak_war_begins_1993",
     "title": "Croat-Bosniak War Erupts",
-    "narrative": "Full-scale fighting erupts between the HVO and the ARBiH across central Bosnia and Herzegovina. Emboldened by the Vance-Owen provincial map and Croatian political pressure, HVO forces launch coordinated offensives to secure territories claimed for Herceg-Bosna. What began as sporadic clashes at Prozor and Gornji Vakuf hardens into open warfare from mid-January 1993, opening a devastating second front for the Bosnian government.",
-    "source_note": "BB Vol. I, ch. 39 ('Neighbor Fighting Neighbor: The Croat-Muslim Descent Into War', pp. 219, 225) grounds this row's provenance for the onset of full-scale Croat-Muslim fighting from mid-January 1993. The legal characterisation of the campaigns that followed is asymmetric and is recorded in the case law rather than restated here: ICTY Prlic et al. (IT-04-74) found a joint criminal enterprise of the Herceg-Bosna/HVO leadership to forcibly displace the Bosnian Muslim population from claimed municipalities (crimes against humanity and grave breaches), with Kordic & Cerkez (IT-95-14/2) and Blaskic (IT-95-14) convicting for the central-Bosnia / Lasva-valley operations; ICTY Hadzihasanovic & Kubura (IT-01-47) convicted two ARBiH 3rd Corps commanders under superior responsibility for failing to prevent or punish discrete crimes against Croat and Serb victims, a narrower finding that is not a systematic-cleansing determination. This note carries no symmetry claim of equivalent culpability. It adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "narrative": "After clashes at Prozor and Gornji Vakuf, fighting between HVO and ARBiH formations hardens into open war across central Bosnia and Herzegovina from mid-January 1993. HVO forces attack in municipalities claimed for Herceg-Bosna, opening a second front for the Bosnian government. Later ICTY judgments attribute the Herceg-Bosna/HVO campaign and discrete ARBiH crimes to specific actors under different legal findings.",
     "category": "military",
+    "source_tier": "icty_icj_un",
+    "historical_source": "Balkan Battlegrounds Vol. I, ch. 39, pp. 219 and 225 (Croat-Bosniak fighting chronology); ICTY Prlic et al. Trial Judgment (IT-04-74-T), Herceg-Bosna/HVO joint-criminal-enterprise findings; ICTY Kordic and Cerkez Trial Judgment (IT-95-14/2-T), Lasva Valley attack findings; ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T), superior-responsibility findings for discrete ARBiH crimes.",
+    "source_note": "Balkan Battlegrounds grounds the transition from local clashes to open fighting. The ICTY judgments support separate actor-specific findings: Prlic and Kordic/Cerkez address the Herceg-Bosna/HVO campaign, while Hadzihasanovic/Kubura addresses narrower superior responsibility findings for discrete crimes by ARBiH subordinates. The row does not collapse those findings into equivalent culpability and adds no casualty figure, prohibited player choice, reward, or copied source prose.",
     "trigger": {
       "turn_min": 40,
       "turn_max": 80,
@@ -2642,189 +2644,6 @@
     }
   },
   {
-    "id": "operation_lukavac_93",
-    "title": "Operation Lukavac 93 — VRS Offensive on Igman",
-    "narrative": "The VRS launches Operation Lukavac 93 with 15,000 troops against ARBiH positions on Mount Igman and Bjelasnica, aiming to sever Sarajevo's last supply route. VRS forces capture the Igman road on August 4, bringing the city to the brink of total isolation. The offensive provokes the first credible NATO threat of air strikes and a UN-brokered withdrawal demand.",
-    "category": "military",
-    "trigger": {
-      "turn_min": 65,
-      "turn_max": 72,
-      "phase": "war",
-      "condition": {
-        "type": "and",
-        "conditions": [
-          {
-            "type": "flag_equals",
-            "flag": "sarajevo_siege_active",
-            "value": true
-          },
-          {
-            "type": "faction_controls_municipality",
-            "faction": "RS",
-            "municipality": "trnovo",
-            "threshold": 0.5
-          }
-        ]
-      }
-    },
-    "pressure": {
-      "base_rate": 1,
-      "threshold": 2,
-      "decay_rate": 1,
-      "modifiers": [
-        {
-          "condition": {
-            "type": "territory_control",
-            "osid": "op:hadzici:lokve",
-            "faction": "RS"
-          },
-          "rate_bonus": 1
-        },
-        {
-          "condition": {
-            "type": "territory_control",
-            "osid": "op:hadzici:pazaric",
-            "faction": "RS"
-          },
-          "rate_bonus": 1
-        },
-        {
-          "condition": {
-            "type": "territory_control",
-            "osid": "op:hadzici:tarcin_2",
-            "faction": "RS"
-          },
-          "rate_bonus": 1
-        }
-      ]
-    },
-    "once": true,
-    "requires_player_response": true,
-    "responding_faction": "RS",
-    "bot_response_logic": "historical",
-    "historical_default_response_id": "comply",
-    "source_note": "Pascal, Balkan Battlegrounds II pp.410-411 frames Lukavac 93 as VRS pressure from Rogoj/Trnovo toward Igman and Bjelasnica after ARBiH Gorazde corridor pressure, threatening Sarajevo's supply link and creating the UN-NATO pressure path for withdrawal.",
-    "staff_assessment": "The advance has created a local military gain, but holding Igman now risks converting a battlefield success into a direct confrontation with NATO and further patron pressure.",
-    "trigger_evidence": [
-      "ARBiH pressure toward the Gorazde corridor has drawn VRS attention to the Rogoj-Trnovo axis.",
-      "RS control around Trnovo and pressure on Hadzici route proxies indicate a credible threat to the Igman-Bjelasnica supply link.",
-      "UN and NATO warnings are visible enough that withdrawal is a live political-military option, not a guaranteed outcome."
-    ],
-    "effect": {
-      "kind": "narrative",
-      "text": "VRS forces have seized the Igman road. Sarajevo faces total isolation — and NATO is issuing its first genuine ultimatum."
-    },
-    "response_options": [
-      {
-        "id": "comply",
-        "historical_marker": "historical_default",
-        "label": "Comply with withdrawal demand",
-        "description": "Pull back from Igman under the UN-brokered agreement. Avoids NATO strikes but concedes the strategic gain.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RS",
-            "delta": -3
-          },
-          {
-            "kind": "aggression_modifier",
-            "faction": "RS",
-            "delta": -0.1,
-            "duration_turns": 8
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 10
-          }
-        ],
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "military_credibility",
-            "delta": -5
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -10
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": 5
-          }
-        ],
-        "aggression_affinity": -0.3,
-        "risk_level": 0.4
-      },
-      {
-        "id": "defy_nato",
-        "label": "Defy NATO — hold Igman",
-        "description": "Call NATO's bluff and hold the captured positions. Risks triggering the first NATO combat strikes in history.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RS",
-            "delta": 3
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -15
-          },
-          {
-            "kind": "humanitarian_impact",
-            "faction": "RS",
-            "war_crimes_delta": 2
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 20
-          }
-        ],
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "military_credibility",
-            "delta": -15
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -20
-          }
-        ],
-        "aggression_affinity": 0.6,
-        "risk_level": 0.9
-      }
-    ],
-    "notifications_to_other_factions": {
-      "comply": {
-        "RBiH": {
-          "headline": "VRS withdraws from Igman under pressure",
-          "body": "RS accepts the UN-brokered withdrawal demand after the Lukavac 93 advance. Sarajevo sees the immediate threat to the Igman route ease, while VRS gives up a strategic gain."
-        },
-        "HRHB": {
-          "headline": "VRS complies on Igman withdrawal",
-          "body": "RS pulls back from the Igman positions rather than trigger NATO strikes. Mostar sees Western pressure contain the offensive, with VRS credibility taking a cost."
-        }
-      },
-      "defy_nato": {
-        "RBiH": {
-          "headline": "VRS defies NATO over Igman",
-          "body": "RS holds the captured Igman positions despite the threat of air strikes. Sarajevo faces renewed isolation pressure, while the risk of NATO combat action rises sharply."
-        },
-        "HRHB": {
-          "headline": "VRS holds Igman against NATO warning",
-          "body": "RS calls the air-strike threat and keeps the Igman gains. Mostar sees stronger VRS battlefield posture, but also a more dangerous confrontation with NATO."
-        }
-      }
-    },
-    "historical_source": "ICTY Mladic Trial Judgment (IT-09-92-T). Washington Post, Aug 14 1993."
-  },
-  {
     "id": "maglaj_enclave_blockade_1993",
     "title": "Maglaj Enclave Under Joint HVO-VRS Blockade",
     "narrative": "Following the collapse of the ARBiH-HVO alliance, the HVO joins the VRS in imposing a complete blockade on the Bosniak-held pocket around Maglaj, trapping approximately 100,000 people. The town endures relentless bombardment and near-total isolation for nine months, surviving partly on US airdrop supplies. The joint siege exemplifies the impossible tactical situation the ARBiH now faces — encircled from two directions simultaneously.",
@@ -3314,15 +3133,195 @@
     ]
   },
   {
-    "id": "nato_air_strike_threat_1993",
-    "title": "NATO Threatens Air Strikes — Sarajevo Ultimatum",
-    "narrative": "NATO formally agrees to launch air strikes against Bosnian Serb positions if the strangulation of Sarajevo or attacks on other safe areas continue. The decision marks the first time the Alliance has authorized potential force in its 44-year history. The dual-key arrangement between UN and NATO commands means execution remains politically constrained, but the threat forces the VRS withdrawal from Mount Igman.",
-    "category": "diplomatic",
+    "id": "operation_lukavac_93",
+    "title": "Operation Lukavac 93 — VRS Offensive on Igman",
+    "narrative": "The VRS opened Operation Lukavac 93 on 2-3 July with about 10,000 troops, captured Trnovo, and severed the ARBiH supply route to Gorazde. A renewed assault from 31 July has carried VRS forces onto Bjelasnica and Igman, putting Sarajevo's last supply link under immediate threat. NATO and the UN are now demanding a withdrawal while the captured positions remain in VRS hands.",
+    "category": "military",
     "trigger": {
       "turn_min": 69,
       "turn_max": 71,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "sarajevo_siege_active",
+            "value": true
+          },
+          {
+            "type": "faction_controls_municipality",
+            "faction": "RS",
+            "municipality": "trnovo",
+            "threshold": 0.5
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 2,
+      "decay_rate": 1,
+      "modifiers": [
+        {
+          "condition": {
+            "type": "territory_control",
+            "osid": "op:hadzici:lokve",
+            "faction": "RS"
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "territory_control",
+            "osid": "op:hadzici:pazaric",
+            "faction": "RS"
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "territory_control",
+            "osid": "op:hadzici:tarcin_2",
+            "faction": "RS"
+          },
+          "rate_bonus": 1
+        }
+      ]
+    },
+    "priority": 40,
+    "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "historical",
+    "historical_default_response_id": "comply",
+    "source_note": "Balkan Battlegrounds II pp. 410-411: Operation Lukavac 93 opened on 2-3 July; the VRS Main Staff assembled about 10,000 troops, took Trnovo, and severed the Gorazde supply corridor. The final Igman-Bjelasnica assault began on 31 July and produced the UN/NATO confrontation represented by this decision.",
+    "staff_assessment": "The advance has created a local military gain, but holding Igman now risks converting a battlefield success into a direct confrontation with NATO and further patron pressure.",
+    "trigger_evidence": [
+      "ARBiH pressure toward the Gorazde corridor has drawn VRS attention to the Rogoj-Trnovo axis.",
+      "RS control around Trnovo and pressure on Hadzici route proxies indicate a credible threat to the Igman-Bjelasnica supply link.",
+      "UN and NATO warnings are visible enough that withdrawal is a live political-military option, not a guaranteed outcome."
+    ],
+    "effect": {
+      "kind": "narrative",
+      "text": "VRS forces have reached Igman and Bjelasnica. Sarajevo's last overland supply link is under immediate threat, and NATO is issuing its first genuine ultimatum."
+    },
+    "response_options": [
+      {
+        "id": "comply",
+        "historical_marker": "historical_default",
+        "label": "Comply with withdrawal demand",
+        "description": "Pull back from Igman under the UN-brokered agreement. Avoids NATO strikes but concedes the strategic gain.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -3
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RS",
+            "delta": -0.1,
+            "duration_turns": 8
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 10
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.4
+      },
+      {
+        "id": "defy_nato",
+        "label": "Defy NATO — hold Igman",
+        "description": "Call NATO's bluff and hold the captured positions. Risks triggering the first NATO combat strikes in history.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -15
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 20
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -20
+          }
+        ],
+        "aggression_affinity": 0.6,
+        "risk_level": 0.9
+      }
+    ],
+    "notifications_to_other_factions": {
+      "comply": {
+        "RBiH": {
+          "headline": "VRS withdraws from Igman under pressure",
+          "body": "RS accepts the UN-brokered withdrawal demand after the Lukavac 93 advance. Sarajevo sees the immediate threat to the Igman route ease, while VRS gives up a strategic gain."
+        },
+        "HRHB": {
+          "headline": "VRS complies on Igman withdrawal",
+          "body": "RS pulls back from the Igman positions rather than trigger NATO strikes. Mostar sees Western pressure contain the offensive, with VRS credibility taking a cost."
+        }
+      },
+      "defy_nato": {
+        "RBiH": {
+          "headline": "VRS defies NATO over Igman",
+          "body": "RS holds the captured Igman positions despite the threat of air strikes. Sarajevo faces renewed isolation pressure, while the risk of NATO combat action rises sharply."
+        },
+        "HRHB": {
+          "headline": "VRS holds Igman against NATO warning",
+          "body": "RS calls the air-strike threat and keeps the Igman gains. Mostar sees stronger VRS battlefield posture, but also a more dangerous confrontation with NATO."
+        }
+      }
+    },
+    "historical_source": "Balkan Battlegrounds Vol. II, pp. 410-411. ICTY Mladic Trial Judgment (IT-09-92-T)."
+  },
+  {
+    "id": "nato_air_strike_threat_1993",
+    "title": "NATO Threatens Air Strikes — Sarajevo Ultimatum",
+    "narrative": "NATO formally agrees to launch air strikes against Bosnian Serb positions if the strangulation of Sarajevo or attacks on other safe areas continue. The decision marks the first time the Alliance has authorized potential force in its 44-year history. The dual-key arrangement between UN and NATO commands means execution remains politically constrained; the VRS disposition on Mount Igman remains a separate political-military choice.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 70,
+      "turn_max": 70,
       "phase": "war"
     },
+    "priority": 50,
     "once": true,
     "effects": [
       {
@@ -3359,6 +3358,7 @@
       }
     ],
     "historical_source": "NATO Council decision, August 9 1993. Operation Deny Flight history.",
+    "source_note": "This exogenous NATO Council notice records authorization and pressure only. It neither depends on nor resolves the separate RS decision over the Igman positions.",
     "effect": {
       "kind": "patron_pressure",
       "faction": "RS",
@@ -3888,8 +3888,11 @@
   {
     "id": "operation_neretva_93_1993",
     "title": "Operation Neretva '93",
-    "narrative": "The ARBiH launches Operation Neretva '93 against HVO positions in Herzegovina and the Neretva Valley. The offensive aims to break the HVO siege of East Mostar and secure a corridor to the coast. Fierce fighting erupts around Jablanica and along the Neretva River as the ARBiH attempts to exploit its growing numerical advantage.",
+    "narrative": "On 14 September 1993, ARBiH forces mount a sizable offensive east of Prozor during the Neretva fighting. The advance continues south from Jablanica and Dreznica, with combat around Vrdi and a separate 17 September attack from East Mostar. The recorded gains remain limited and do not establish a decisive breakthrough.",
     "category": "military",
+    "source_tier": "icty_icj_un",
+    "historical_source": "Balkan Battlegrounds Vol. II, pp. 434-435, September 1993 fighting east of Prozor and along the Neretva; ICTY Halilovic Trial Judgment (IT-01-48-T, 16 November 2005), Operation Neretva command record and Grabovica/Uzdol findings.",
+    "source_note": "Balkan Battlegrounds anchors the bounded September chronology: the 14 September offensive east of Prozor, movement south from Jablanica and Dreznica, fighting at Vrdi, and the 17 September East Mostar attack. The Halilovic Trial Judgment supplies command and crime-case context but does not support attributing superior responsibility after the acquittal. The row omits unsupported strategic objectives, campaign ranking, and diplomatic causation.",
     "trigger": {
       "turn_min": 74,
       "turn_max": 76,
@@ -3906,7 +3909,7 @@
     "once": true,
     "effect": {
       "kind": "narrative",
-      "text": "The ARBiH launches Operation Neretva '93, striking at HVO positions in the Neretva Valley and around Mostar."
+      "text": "ARBiH forces open the September offensive east of Prozor and continue attacks along the Neretva toward Mostar."
     },
     "effects": [
       {
@@ -3919,8 +3922,11 @@
   {
     "id": "grabovica_uzdol_massacres_1993",
     "title": "Grabovica and Uzdol Massacres",
-    "narrative": "During Operation Neretva 93, ARBiH units from Sarajevo commit war crimes against Croat civilians: at least 13 villagers killed at Grabovica on September 8-9, and at least 29 civilians and one HVO POW killed at Uzdol on September 14. ICTY Chief of Staff Sefer Halilovic is indicted but acquitted due to insufficient evidence of effective command control over the perpetrators.",
+    "narrative": "During September 1993 operations in Herzegovina, ARBiH soldiers kill at least 13 Croat civilians at Grabovica on 8-9 September 1993. At Uzdol on 14 September 1993, ARBiH personnel kill 29 civilians and one captured HVO soldier. The ICTY Trial Chamber finds that the crimes occurred but acquits Sefer Halilovic because his superior authority and effective control over the perpetrators were not proved beyond reasonable doubt; the Appeal Chamber affirms the acquittal.",
     "category": "humanitarian",
+    "source_tier": "icty_icj_un",
+    "historical_source": "ICTY Halilovic Trial Judgment (IT-01-48-T, 16 November 2005), Grabovica/Uzdol crime findings and superior-responsibility acquittal; ICTY Halilovic Appeal Judgment (IT-01-48-A, 16 October 2007), prosecution appeal dismissed and acquittal affirmed; Balkan Battlegrounds Vol. II, pp. 434-435, September 1993 fighting east of Prozor and along the Neretva.",
+    "source_note": "The Trial Judgment establishes the Grabovica and Uzdol crime findings while separately acquitting Sefer Halilovic because the required superior authority and effective control were not proved; the Appeal Judgment affirmed that outcome. Balkan Battlegrounds anchors the September 1993 operational chronology and Uzdol date. This is an informational consequence with no response option or reward, and it makes no claim of collective or equivalent guilt.",
     "trigger": {
       "turn_min": 74,
       "turn_max": 76,
@@ -3949,7 +3955,7 @@
       },
       {
         "kind": "narrative",
-        "text": "ARBiH atrocities in Herzegovina are documented. No faction in this war holds clean hands."
+        "text": "ARBiH crimes against Croat civilians at Grabovica and Uzdol enter the tribunal record; Halilovic's acquittal resolves his individual superior responsibility, not whether the crimes occurred."
       }
     ],
     "dimension_shifts": [
@@ -3959,7 +3965,6 @@
         "delta": -10
       }
     ],
-    "historical_source": "ICTY Halilovic Trial Judgment (IT-01-48-T).",
     "effect": {
       "kind": "humanitarian_impact",
       "faction": "RBiH",
@@ -5624,7 +5629,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 8,
       "cooldown_turns": 8,
       "escalation": "escalating"
@@ -5635,7 +5640,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "strategic_posture"
     ],
     "response_options": [
@@ -5882,7 +5886,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 8,
       "cooldown_turns": 8,
       "escalation": "escalating"
@@ -5893,7 +5897,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "strategic_posture"
     ],
     "response_options": [
@@ -6151,7 +6154,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 8,
       "cooldown_turns": 8,
       "escalation": "escalating"
@@ -6162,7 +6165,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "strategic_posture"
     ],
     "response_options": [
@@ -6412,7 +6414,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -6423,7 +6425,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "visit_to_front"
     ],
     "response_options": [
@@ -6703,7 +6704,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -6714,7 +6715,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "visit_to_front"
     ],
     "response_options": [
@@ -6979,7 +6979,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -6990,7 +6990,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "visit_to_front"
     ],
     "response_options": [
@@ -7255,7 +7254,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -7266,7 +7265,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "address_to_nation"
     ],
     "response_options": [
@@ -7479,7 +7477,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -7490,7 +7488,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "address_to_nation"
     ],
     "response_options": [
@@ -7702,7 +7699,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -7713,7 +7710,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "address_to_nation"
     ],
     "response_options": [
@@ -7911,7 +7907,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -7922,7 +7918,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "decorate_a_unit"
     ],
     "response_options": [
@@ -8074,7 +8069,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -8085,7 +8080,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "decorate_a_unit"
     ],
     "response_options": [
@@ -8237,7 +8231,7 @@
         }
       ]
     },
-    "recurrence": {
+    "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
       "escalation": "static"
@@ -8248,7 +8242,6 @@
     },
     "tags": [
       "presidential",
-      "recurring",
       "decorate_a_unit"
     ],
     "response_options": [

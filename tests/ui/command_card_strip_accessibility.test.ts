@@ -66,7 +66,7 @@ describe('CommandCardStrip accessibility', () => {
     expect(screen.getByText('Ratno usmjerenje')).toBeTruthy();
     expect(screen.getByText('Diplomatija i pokrovitelji')).toBeTruthy();
     expect(screen.getAllByText('Djeluj').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('0 na čekanju').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('0 obavezno · 0 preporučeno · 0 praćenje · 0 zapis').length).toBeGreaterThan(0);
 
     expect(dialog.textContent).not.toContain('Command Surface');
     expect(dialog.textContent).not.toContain('Where will you direct the war?');

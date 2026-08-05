@@ -6,8 +6,8 @@
  *    routes the bot auto-response through the live political scorer
  *    (pickPoliticalResponse), so the bot can pick a NON-historical option when
  *    battlefield/political signals favor it.
- *  - decision_mode unset / 'historical' (with two-level notifications ON, the
- *    active baseline) keeps the railroad: applyAIDefaultResponse selects the
+ *  - decision_mode unset / 'historical' keeps the railroad independently of
+ *    notification delivery: applyAIDefaultResponse selects the
  *    historical_default_response_id, byte-identical to today.
  *  - Emergent decisions are deterministic: same state → same choice twice.
  *
@@ -20,7 +20,7 @@
  */
 
 import assert from 'node:assert';
-import { afterEach, beforeEach, test } from 'vitest';
+import { test } from 'vitest';
 import { evaluateEvents } from '../src/sim/events/evaluate_events.js';
 import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -113,18 +113,6 @@ function decisionSource(state: GameState): string | undefined {
     return log.find((e) => e.event_id === 'free_war_test_event')?.decision_source;
 }
 
-// The active baseline runs with two-level notifications ON; replicate it so the
-// railroad branch is live for the historical assertion.
-let prevTwoLevel: string | undefined;
-beforeEach(() => {
-    prevTwoLevel = process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
-    process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = 'true';
-});
-afterEach(() => {
-    if (prevTwoLevel === undefined) delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
-    else process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = prevTwoLevel;
-});
-
 test('emergent mode bypasses the railroad → bot picks the signal-driven (non-historical) option', () => {
     const state = rsBotState('emergent');
     evaluateEvents(state, rng, 10, [rsDecisionEvent()]);
@@ -136,7 +124,7 @@ test('emergent mode bypasses the railroad → bot picks the signal-driven (non-h
     assert.strictEqual(decisionSource(state), 'bot_political', 'emergent strategic_weighted → political scorer');
 });
 
-test('historical mode (two-level notifications on) keeps the railroad → bot picks the historical default', () => {
+test('historical mode keeps the railroad → bot picks the historical default', () => {
     const state = rsBotState('historical');
     evaluateEvents(state, rng, 10, [rsDecisionEvent()]);
     assert.strictEqual(
@@ -154,26 +142,22 @@ test('unset decision_mode behaves as historical (byte-identical-to-today default
     assert.strictEqual(decisionSource(state), 'bot_ai_default', 'unset → AI default railroad');
 });
 
-test('Codex P2 #88: EXPLICIT historical honors the default even WITHOUT the two-level flag', () => {
-    delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS; // flag off — decision_mode must still decide
+test('explicit historical honors the authored default independently of notification delivery', () => {
     const state = rsBotState('historical');
     evaluateEvents(state, rng, 10, [rsDecisionEvent()]);
     assert.strictEqual(
         chosenResponseId(state),
         HISTORICAL_DEFAULT_ID,
-        'explicit historical must replay the historical default regardless of the notification flag',
+        'explicit historical must replay the authored historical default',
     );
     assert.strictEqual(decisionSource(state), 'bot_ai_default');
 });
 
-test('the fix is surgical: UNSET mode without the flag still takes the legacy political/v1 path (unchanged)', () => {
-    delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS; // flag off
-    const state = rsBotState(undefined); // unset — NOT explicit historical
+test('unset mode remains the migrated historical default', () => {
+    const state = rsBotState(undefined);
     evaluateEvents(state, rng, 10, [rsDecisionEvent()]);
-    // Legacy behavior (no flag + unset) routes to the political scorer, NOT applyAIDefaultResponse.
-    // The Codex fix only forces the default for EXPLICIT historical, leaving this untouched.
-    assert.strictEqual(decisionSource(state), 'bot_political', 'unset + no flag = legacy political path, unchanged');
-    assert.strictEqual(chosenResponseId(state), SIGNAL_DRIVEN_ID);
+    assert.strictEqual(decisionSource(state), 'bot_ai_default', 'unset migrates to historical policy');
+    assert.strictEqual(chosenResponseId(state), HISTORICAL_DEFAULT_ID);
 });
 
 test('emergent decisions are deterministic: same state → same choice twice', () => {

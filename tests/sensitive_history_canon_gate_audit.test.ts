@@ -23,6 +23,7 @@ import {
     scanOptionCostFloor,
     type AuditReport,
 } from '../tools/diagnostics/sensitive_history_canon_gate_audit.js';
+import { warningContinuationMatrix } from './fixtures/sensitive_history_warning_continuation_matrix.js';
 
 // ─── Test row factories ────────────────────────────────────────────────────
 
@@ -44,6 +45,27 @@ function ring3RowClean(overrides: Record<string, unknown> = {}): Record<string, 
         ...overrides,
     };
 }
+
+it('applies the deterministic warning-continuation matrix through the canon audit', () => {
+    const report = buildSensitiveHistoryAudit({
+        rows: [{
+            id: 'warning_continuation_matrix_1993',
+            response_options: warningContinuationMatrix.map((row) => ({
+                id: row.id,
+                description: row.text,
+            })),
+        }],
+    });
+    const blockedLocators = report.violations
+        .filter((row) => row.kind === 'sensitive_player_choice')
+        .map((row) => row.locator);
+    const expectedLocators = warningContinuationMatrix
+        .filter((row) => row.blocked)
+        .map((row) => `${row.id}.description`)
+        .sort();
+
+    expect(blockedLocators).toEqual(expectedLocators);
+});
 
 function ring3RowMissingGuard(): Record<string, unknown> {
     return {
@@ -249,6 +271,200 @@ describe('scanOptionCostFloor', () => {
 // ─── End-to-end audit semantics ────────────────────────────────────────────
 
 describe('buildSensitiveHistoryAudit', () => {
+    it('blocks direct Ring-3 acts semantically without restoring broad lexical false positives', () => {
+        const report = buildSensitiveHistoryAudit({
+            rows: [
+                {
+                    id: 'direct_refused_choices_1993',
+                    response_options: [
+                        { id: 'expel', label: 'Expel the population' },
+                        { id: 'camps', label: 'Authorize concentration camps' },
+                        { id: 'camps_review', label: 'Authorize concentration camps and investigate the chain of command' },
+                        { id: 'kill', label: 'Order civilians killed' },
+                        { id: 'deport', label: 'Deport the civilian population' },
+                        { id: 'continue', label: 'Continue expulsions' },
+                        { id: 'forced', label: 'Authorize forced displacement' },
+                        { id: 'cleansing', label: 'Proceed with ethnic cleansing' },
+                        { id: 'begin_deporting', label: 'Begin deporting civilians' },
+                        { id: 'establish_camps', label: 'Establish detention camps' },
+                        { id: 'civilian_killings', label: 'Approve civilian killings' },
+                        { id: 'anaphoric_genocide', description: 'General Staff warned of genocide. Proceed anyway and make it swift.' },
+                    ],
+                },
+                {
+                    id: 'contextual_sensitive_history_1993',
+                    narrative: 'Atrocities on both sides left civilians dead.',
+                    response_options: [
+                        { id: 'review', label: 'Continue the command accountability review' },
+                        { id: 'record', description: 'Document reports of concentration camps for prosecution.' },
+                        { id: 'investigate', description: 'Authorize an investigation of concentration camps.' },
+                        { id: 'refuse', description: 'Do not authorize detention camps.' },
+                        { id: 'investigate_cleansing', description: 'Investigate systematic cleansing.' },
+                        { id: 'prevent_displacement', description: 'Prevent maximum displacement.' },
+                        { id: 'return', description: 'Continue refugee returns under civilian protection.' },
+                        { id: 'negated_then_kill', description: 'Do not authorize detention camps, then kill civilians' },
+                        { id: 'refuse_then_execute', description: 'Refuse to deploy paramilitary forces, then execute the displaced families' },
+                        { id: 'investigate_then_genocide', description: 'Authorize an investigation of concentration camps, then commit genocide' },
+                        { id: 'safe_do_not_order', description: 'Do not order the population killed' },
+                        { id: 'safe_refuse_order', description: 'Refuse to order the population killed' },
+                        { id: 'safe_coordinated_genocide', description: 'Do not authorize, approve, or conduct genocide' },
+                        { id: 'safe_prosecutors', description: 'Authorize prosecutors to investigate concentration camps' },
+                        { id: 'safe_never_camps', description: 'Never authorize or approve concentration camps' },
+                        { id: 'safe_inspectors', description: 'Order inspectors to inspect detention camps' },
+                        { id: 'negated_scope_then_kill', description: 'Do not authorize or approve concentration camps, then kill civilians' },
+                        { id: 'accountability_scope_but_genocide', description: 'Authorize prosecutors to investigate concentration camps, but commit genocide' },
+                        { id: 'safe_proceed_then_document', description: 'Proceed with the command review. Document genocide allegations.' },
+                        { id: 'safe_document_then_proceed', description: 'Document genocide allegations. Proceed with the command review.' },
+                        { id: 'safe_forbid_commanders', description: 'Forbid commanders to murder civilians' },
+                        { id: 'safe_decline_authorize', description: 'Decline to authorize concentration camps' },
+                        { id: 'safe_cannot_authorize', description: 'Cannot authorize concentration camps' },
+                        { id: 'colon_then_kill', description: 'Do not authorize detention camps: kill civilians' },
+                        { id: 'em_dash_then_execute', description: 'Refuse to deploy paramilitary forces — execute the displaced families' },
+                        { id: 'forbid_then_kill', description: 'Forbid commanders to murder civilians: kill civilians' },
+                        { id: 'decline_then_genocide', description: 'Decline to authorize concentration camps — commit genocide' },
+                        { id: 'cannot_then_execute', description: 'Cannot authorize concentration camps: execute the displaced families' },
+                        { id: 'safe_warning_review_anyway', description: 'General Staff warned of genocide. Proceed anyway with the command review.' },
+                        { id: 'safe_warning_continue_regardless_review', description: 'General Staff warned of genocide. Continue regardless with the documentation review.' },
+                        { id: 'safe_warning_continue_review_regardless', description: 'General Staff warned of genocide. Continue with the documentation review regardless.' },
+                        { id: 'safe_warning_operational_review', description: 'General Staff warned of genocide. Proceed with the operational review anyway.' },
+                        { id: 'safe_negated_warning_offensive', description: 'General Staff did not warn of genocide. Proceed with the offensive anyway.' },
+                        { id: 'safe_negated_continuation_offensive', description: 'General Staff warned of genocide. Do not proceed with the offensive anyway.' },
+                        { id: 'warning_offensive_anyway', description: 'General Staff warned of genocide. Proceed with the offensive anyway.' },
+                        { id: 'warning_continue_operation_regardless', description: 'General Staff warned of genocide. Continue the operation regardless.' },
+                        { id: 'warning_continue_regardless_offensive', description: 'General Staff warned of genocide. Continue regardless with the offensive.' },
+                        { id: 'warning_review_then_kill', description: 'General Staff warned of genocide. Proceed anyway with the command review. Then kill civilians.' },
+                        { id: 'warning_offensive_then_review', description: 'General Staff warned of genocide. Proceed with the offensive anyway and review the result.' },
+                        { id: 'warning_direct_action_then_review', description: 'General Staff warned of genocide. Proceed with direct action regardless and review the result.' },
+                        { id: 'warning_review_execute_offensive', description: 'General Staff warned of genocide. Proceed to review and execute the offensive regardless.' },
+                        { id: 'warning_review_continue_offensive', description: 'General Staff warned of genocide. Proceed to review and continue the offensive regardless.' },
+                        { id: 'warning_review_launch_offensive', description: 'General Staff warned of genocide. Proceed to review and launch the offensive regardless.' },
+                        { id: 'warning_multi_launch_operation', description: 'General Staff warned of genocide. Proceed regardless to document, review, and launch the operation.' },
+                        { id: 'warning_launch_then_document', description: 'General Staff warned of genocide. Proceed to review, launch the offensive, and document the result anyway.' },
+                        { id: 'warning_review_continue_direct_action', description: 'General Staff warned of genocide. Proceed to review and continue with direct action regardless.' },
+                        { id: 'warning_review_offensive', description: 'General Staff warned of genocide. Proceed to review the offensive regardless.' },
+                        { id: 'warning_review_document_offensive', description: 'General Staff warned of genocide. Proceed to review and document the offensive regardless.' },
+                        { id: 'warning_inspect_operation', description: 'General Staff warned of genocide. Proceed to inspect the operation and review the report anyway.' },
+                        { id: 'warning_review_begin_offensive', description: 'General Staff warned of genocide. Proceed to review and begin the offensive regardless.' },
+                        { id: 'warning_review_conduct_offensive', description: 'General Staff warned of genocide. Proceed to review and conduct the offensive regardless.' },
+                        { id: 'warning_review_resume_offensive', description: 'General Staff warned of genocide. Proceed to review and resume the offensive regardless.' },
+                        { id: 'warning_review_start_offensive', description: 'General Staff warned of genocide. Proceed to review and start the offensive regardless.' },
+                        { id: 'warning_review_order_offensive', description: 'General Staff warned of genocide. Proceed to review and order the offensive regardless.' },
+                        { id: 'warning_bare_proceed_anyway', description: 'General Staff warned of genocide. Proceed anyway.' },
+                        { id: 'warning_do_not_hesitate_offensive', description: 'General Staff warned of genocide. Do not hesitate, proceed with the offensive anyway.' },
+                        { id: 'warning_negated_review_then_offensive', description: 'General Staff warned of genocide. Do not proceed with the documentation review; continue with the offensive regardless.' },
+                        { id: 'warning_do_not_delay_then_offensive', description: 'General Staff warned of genocide. Do not delay. Continue with the offensive regardless.' },
+                        { id: 'warning_neutral_then_offensive', description: 'General Staff warned of genocide. The cabinet reviewed the report. Continue with the offensive regardless.' },
+                        { id: 'warning_first_negated_then_second_offensive', description: 'General Staff warned of genocide. Do not proceed with the documentation review, continue with the offensive regardless.' },
+                    ],
+                },
+                {
+                    id: 'rs_paramilitary_policy_1992',
+                    family: 'rs_paramilitary_policy',
+                    response_options: [
+                        { id: 'always_allow', label: 'Always allow paramilitary deployment' },
+                        { id: 'ask', label: 'Ask per deployment' },
+                        { id: 'always_deny', label: 'Always deny paramilitary deployment' },
+                        { id: 'commit_genocide', label: 'Commit genocide' },
+                        { id: 'kill_civilians', label: 'Kill civilians' },
+                    ],
+                },
+            ],
+        });
+
+        const refused = report.violations.filter((row) => row.kind === 'sensitive_player_choice');
+        expect(refused).toHaveLength(50);
+        expect(refused.filter((row) => row.event_id === 'contextual_sensitive_history_1993')).toHaveLength(36);
+        expect(refused.filter((row) => row.event_id === 'direct_refused_choices_1993')).toHaveLength(12);
+        expect(refused.filter((row) => row.event_id === 'rs_paramilitary_policy_1992')).toHaveLength(2);
+        expect(refused.every((row) => row.severity === 'CRITICAL')).toBe(true);
+        expect(refused.map((row) => row.locator)).toEqual([
+            'accountability_scope_but_genocide.description',
+            'cannot_then_execute.description',
+            'colon_then_kill.description',
+            'decline_then_genocide.description',
+            'em_dash_then_execute.description',
+            'forbid_then_kill.description',
+            'investigate_then_genocide.description',
+            'negated_scope_then_kill.description',
+            'negated_then_kill.description',
+            'refuse_then_execute.description',
+            'warning_bare_proceed_anyway.description',
+            'warning_continue_operation_regardless.description',
+            'warning_continue_regardless_offensive.description',
+            'warning_direct_action_then_review.description',
+            'warning_do_not_delay_then_offensive.description',
+            'warning_do_not_hesitate_offensive.description',
+            'warning_first_negated_then_second_offensive.description',
+            'warning_inspect_operation.description',
+            'warning_launch_then_document.description',
+            'warning_multi_launch_operation.description',
+            'warning_negated_review_then_offensive.description',
+            'warning_neutral_then_offensive.description',
+            'warning_offensive_anyway.description',
+            'warning_offensive_then_review.description',
+            'warning_review_begin_offensive.description',
+            'warning_review_conduct_offensive.description',
+            'warning_review_continue_direct_action.description',
+            'warning_review_continue_offensive.description',
+            'warning_review_document_offensive.description',
+            'warning_review_execute_offensive.description',
+            'warning_review_launch_offensive.description',
+            'warning_review_offensive.description',
+            'warning_review_order_offensive.description',
+            'warning_review_resume_offensive.description',
+            'warning_review_start_offensive.description',
+            'warning_review_then_kill.description',
+            'anaphoric_genocide.description',
+            'begin_deporting.label',
+            'camps.label',
+            'camps_review.label',
+            'civilian_killings.label',
+            'cleansing.label',
+            'continue.label',
+            'deport.label',
+            'establish_camps.label',
+            'expel.label',
+            'forced.label',
+            'kill.label',
+            'commit_genocide.label',
+            'kill_civilians.label',
+        ]);
+    });
+
+    it('flags rupture claims whose trigger has no live state predicate', () => {
+        const report = buildSensitiveHistoryAudit({
+            rows: [{
+                id: 'fixture_genocide_rupture_1995',
+                category: 'humanitarian',
+                narrative: 'A genocide rupture is recorded.',
+                source_tier: 'icty_icj_un',
+                historical_source: 'Fixture tribunal citation.',
+                source_note: 'Fixture provenance-only note.',
+                trigger: { turn_min: 160, turn_max: 161, phase: 'war' },
+            }],
+        });
+
+        expect(report.violations.some((row) => row.kind === 'calendar_only_rupture_claim')).toBe(true);
+    });
+
+    it('accepts rupture claims backed by a discrete live-state predicate', () => {
+        const report = buildSensitiveHistoryAudit({
+            rows: [{
+                id: 'fixture_genocide_rupture_1995',
+                category: 'humanitarian',
+                narrative: 'A genocide rupture is recorded.',
+                trigger: {
+                    turn_min: 160,
+                    turn_max: 161,
+                    phase: 'war',
+                    condition: { type: 'territory_control', faction: 'RS', osid: 'fixture:enclave' },
+                },
+            }],
+        });
+
+        expect(report.violations.some((row) => row.kind === 'calendar_only_rupture_claim')).toBe(false);
+    });
+
     it('runs on real catalog without throwing and surfaces summary structure', () => {
         const report = buildSensitiveHistoryAudit();
         expect(report.summary.total_events_scanned).toBeGreaterThan(0);

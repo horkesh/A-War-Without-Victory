@@ -262,12 +262,11 @@ export async function startCampaignFromSidePicker(
             return false;
         }
         try {
-            const stateJson = await ipc.getCurrentGameState();
-            if (!stateJson) {
+            if (!result.stateJson) {
                 setLoadError('Campaign started, but the player-visible state was unavailable.');
                 return false;
             }
-            await loadSave(stateJson);
+            await loadSave(result.stateJson);
             return true;
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);

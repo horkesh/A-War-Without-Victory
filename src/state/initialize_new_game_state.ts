@@ -28,6 +28,8 @@ export async function prepareNewGameState(
     mappingPath?: string,
     initOptions?: PoliticalControlInitOptions
 ): Promise<PoliticalControlInitResult> {
+    state.military.sector_intel ??= {};
+    state.military.corps_front_sectors ??= {};
     const result = await initializePoliticalControllers(state, settlementGraph, mappingPath, initOptions);
     const pc = state.political.political_controllers;
     if (!pc) {

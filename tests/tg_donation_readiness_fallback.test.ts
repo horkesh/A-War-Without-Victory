@@ -10,6 +10,9 @@
  * *multi-donor* TG — is preserved: it still fires when donors exist but pledge < 60%.
  */
 
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 import { donationReadinessBlocksAxis } from '../src/sim/combat/sector_offensive_launch_helpers.js';
 import {
@@ -55,6 +58,17 @@ describe('Phase 1.5 donor-readiness fallback', () => {
         // length>0 branch must keep firing for it (not just multi-donor pools).
         const donors = [{ personnel_lent: 1 }]; // 1 < 1200
         expect(donationReadinessBlocksAxis(donors, ANCHOR_PERSONNEL)).toBe(true);
+    });
+    it('documents donor-eligible attempts while preserving none-policy and zero-donor fallback', () => {
+        const sectorSource = readFileSync(resolve('src/sim/combat/sector_offensive.ts'), 'utf8');
+        const preparationSource = readFileSync(resolve('src/sim/combat/operation_preparation.ts'), 'utf8');
+        const combined = `${sectorSource}\n${preparationSource}`;
+
+        expect(combined).not.toContain('EVERY offensive forms a');
+        expect(combined).toContain('Every donor-eligible offensive attempts TG formation');
+        expect(combined).toContain('zero-donor fallback remains an ordinary operation');
+        expect(preparationSource).toContain("if (policy === 'none') return;");
+        expect(preparationSource.match(/if \(donors\.length === 0\) (?:continue|return);/g)).toHaveLength(2);
     });
 });
 

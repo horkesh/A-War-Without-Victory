@@ -5,7 +5,7 @@
  * president visits the front, force-queuing the authored visit_to_front_<faction>
  * event (morale +5 / cohesion +3 / patron_pressure -3 / standing shifts) so the
  * EventDecisionModal surfaces the branch choice. Costs FRONT_VISIT_COST (10) CA;
- * cooldown/cap reuse the event's OWN recurrence (max_fires 5 / cooldown 10t).
+ * cooldown/cap use the event's voluntary action cadence (max_fires 5 / cooldown 10t).
  *
  * ⚠ ENCLAVE REACHABILITY GATE: the president CANNOT visit a CUT-OFF enclave
  * (Srebrenica/Žepa/Goražde, Bihać-when-encircled). Availability + reachable
@@ -158,7 +158,7 @@ export function FrontVisitSection() {
                     className={`w-full text-xs font-bold uppercase tracking-wider px-3 py-1.5 border transition-colors text-left ${
                         canVisit
                             ? 'border-emerald-600/50 text-emerald-400 bg-emerald-900/20 hover:bg-emerald-900/40 hover:border-emerald-500/70 cursor-pointer'
-                            : 'border-panel-border text-text-secondary/40 bg-panel-bg/40 cursor-not-allowed'
+                            : 'border-panel-border text-text-secondary bg-panel-bg/40 cursor-not-allowed'
                     }`}
                     title={t('frontVisit.buttonTitle', { cost: FRONT_VISIT_COST })}
                 >

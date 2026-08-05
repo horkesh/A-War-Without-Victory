@@ -3,9 +3,10 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { startNewCampaign } from '../src/desktop/desktop_sim.js';
+import { advanceTurn, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import { parsePlayerVisibleWarroomState } from '../src/ui/warroom/data/player_visible_state_adapter.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
+import { buildDecisionConsequenceLedger } from '../src/ui/map/data/decisionConsequenceLedger.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 
 const require = createRequire(import.meta.url);
@@ -426,11 +427,50 @@ describe('desktop player-visible state projection', () => {
     expect(loaded.namedOfficerData?.map((officer) => officer.id)).toEqual(['rs_officer']);
   });
 
-  it('loads a freshly generated current RS campaign through the Warroom player-visible adapter', async () => {
+  it('keeps only the player faction durable proposal receipt through Advance, save/load, and Electron projection', async () => {
     const projector = loadProjector();
     const { state } = await startNewCampaign(process.cwd(), 'RS', 'apr_1992');
-    const canonicalJson = serializeState(state);
-    const projectedJson = projector.projectPlayerVisibleStateJson(canonicalJson);
+    state.meta.turn = 2;
+    state.meta.pending_proposal_reviews = [
+      {
+        id: 'rs_receipt',
+        turn: 1,
+        resolved_turn: 1,
+        faction: 'RS',
+        domain: 'military',
+        description: 'Own durable proposal receipt.',
+        proposed_action: 'SET_STANCE:vrs_main_staff:balanced',
+        current_value: 'defensive',
+        proposed_value: 'balanced',
+        accepted: true,
+      },
+      {
+        id: 'rbih_receipt',
+        turn: 1,
+        resolved_turn: 1,
+        faction: 'RBiH',
+        domain: 'military',
+        description: 'Foreign durable proposal receipt.',
+        proposed_action: 'SET_STANCE:arbih_general_staff:offensive',
+        current_value: 'balanced',
+        proposed_value: 'offensive',
+        accepted: false,
+      },
+    ];
+    const advanced = await advanceTurn(state, process.cwd());
+    expect(advanced.error).toBeUndefined();
+    expect(advanced.state.meta.turn).toBe(3);
+
+    const canonicalJson = serializeState(advanced.state);
+    const hydrated = deserializeState(canonicalJson);
+    expect(hydrated.meta.proposal_decision_history?.map((record) => record.id))
+      .toEqual(['rbih_receipt', 'rs_receipt']);
+    const projectedJson = projector.projectPlayerVisibleStateJson(serializeState(hydrated));
+    const projected = JSON.parse(projectedJson);
+
+    expect(projected.meta.proposal_decision_history.map((record: any) => record.id))
+      .toEqual(['rs_receipt']);
+    expect(projectedJson).not.toContain('Foreign durable proposal receipt.');
 
     expect(() => deserializeState(projectedJson)).toThrow();
 
@@ -440,7 +480,9 @@ describe('desktop player-visible state projection', () => {
     expect(Object.values(warroomState.military.formations).filter((formation) => formation.faction === 'RS').length)
       .toBeGreaterThan(0);
     expect(Object.values(warroomState.military.corps_command ?? {}).length).toBeGreaterThan(0);
-    expect(() => parseGameState(JSON.parse(projectedJson))).not.toThrow();
+    const loaded = parseGameState(projected);
+    expect(buildDecisionConsequenceLedger(loaded, 10).map((record) => record.id))
+      .toContain('proposal:rs_receipt::1');
   }, 120_000);
 
   it('projects every replay frame instead of sending canonical saves to the renderer', () => {
@@ -475,11 +517,10 @@ describe('desktop player-visible state projection', () => {
     expect(tacticalLoadBlock).not.toContain("send('game-state-updated', currentGameStateJson)");
   });
 
-  it('keeps canonical state out of every mutating IPC response', async () => {
+  it('keeps canonical state out of mutating IPC responses and returns only projected start state', async () => {
     const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
     const mutationHandlers = [
       ['load-scenario-dialog', 'start-new-campaign'],
-      ['start-new-campaign', 'load-state-dialog'],
       ['load-state-dialog', 'advance-turn'],
       ['advance-turn', 'save-game'],
       ['apply-recruitment', 'stage-attack-order'],
@@ -493,6 +534,12 @@ describe('desktop player-visible state projection', () => {
       expect(end, name).toBeGreaterThan(start);
       expect(source.slice(start, end), name).not.toMatch(/return\s+\{[\s\S]*?stateJson\s*:/);
     }
+
+    const start = source.indexOf("ipcMain.handle('start-new-campaign'");
+    const end = source.indexOf("ipcMain.handle('load-state-dialog'", start);
+    const startHandler = source.slice(start, end);
+    expect(startHandler).toContain('stateJson: projectCurrentGameStateForRenderer()');
+    expect(startHandler).not.toContain('stateJson: currentGameStateJson');
   });
 
   it('uses the explicit projected-state adapter for every desktop Warroom ingestion path', async () => {
@@ -504,7 +551,8 @@ describe('desktop player-visible state projection', () => {
     expect(source).toContain("import { parsePlayerVisibleWarroomState } from './data/player_visible_state_adapter.js';");
     expect(applyBlock).toContain('this.gameState = parsePlayerVisibleWarroomState(stateJson);');
     expect(applyBlock).not.toContain('deserializeState(stateJson)');
-    expect(source).not.toContain('result.stateJson');
+    expect(source).toContain('this.desktopStateGate.admitReserved(result.stateJson, campaignReservation)');
+    expect(source).toContain('this.applyAdmittedDesktopGameStateUpdate(');
   });
 
   it('keeps projected state subscriptions data-only so mutation handlers own navigation', async () => {
@@ -514,7 +562,7 @@ describe('desktop player-visible state projection', () => {
     const subscriptionBlock = source.slice(subscriptionStart, subscriptionEnd);
 
     expect(subscriptionStart).toBeGreaterThanOrEqual(0);
-    expect(subscriptionBlock).toContain('this.handleDesktopGameStateUpdated(stateJson);');
+    expect(subscriptionBlock).toContain('this.handleDesktopGameStateUpdated(stateJson, metadata);');
     expect(subscriptionBlock).not.toContain('this.showScreen(');
     expect(subscriptionBlock).not.toContain('this.showLoadedGameShellScene(');
   });
@@ -526,7 +574,7 @@ describe('desktop player-visible state projection', () => {
     const invokeBlock = source.slice(invokeStart, invokeEnd);
 
     expect(source).toContain('private pendingEmbeddedGameStateJson: string | null = null;');
-    expect(source).toContain('this.handleDesktopGameStateUpdated(stateJson);');
+    expect(source).toContain('this.handleDesktopGameStateUpdated(stateJson, metadata);');
     expect(invokeBlock).toContain('this.flushPendingEmbeddedGameState();');
     expect(invokeBlock.indexOf("type: 'awwv-bridge:response'"))
       .toBeLessThan(invokeBlock.indexOf('this.flushPendingEmbeddedGameState();'));

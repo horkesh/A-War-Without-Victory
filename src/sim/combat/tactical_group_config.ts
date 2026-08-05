@@ -92,16 +92,14 @@ export const PROMOTION_TG_FORMATION_THRESHOLD = 3;
 /**
  * Historian-confirmed ARBiH OG→Division number map (2nd Corps Tuzla). Keys are
  * "<corps_id>:<og_ordinal>"; values are the canonical promoted Division number.
- * 2nd Corps: 1st OG → 21st Division, 5th OG → 25th Division. When a (corps, ordinal)
- * pair is absent, the default rule applies: promoted Division number = og_ordinal + 20.
+ * 2nd Corps: 1st OG → 21st Division, 5th OG → 25th Division. No promoted identity is
+ * inferred for an absent (corps, ordinal) pair. Sources: Balkan Battlegrounds II p. 401;
+ * Balkan Battlegrounds I p. 509; docs/knowledge/ARBIH_ORDER_OF_BATTLE_MASTER.md lines 90, 98.
  */
 export const ARBIH_OG_TO_DIVISION_NUMBER: Readonly<Record<string, number>> = {
     'arbih_2nd_corps:1': 21,
     'arbih_2nd_corps:5': 25,
 };
-
-/** Default OG→Division number offset when no historical mapping exists (N. OG → {N+20}. Division). */
-export const OG_TO_DIVISION_DEFAULT_OFFSET = 20;
 
 /**
  * v3.0 flag: Army HQ Operations (faction-wide cross-corps offensives — Krivaja-95,
@@ -133,6 +131,18 @@ export const ARMY_HQ_OP_COOLDOWN_TURNS = 52;
  * ENABLE_TG_ARMY_HQ_OPS at the enforcement site.
  */
 export const ARMY_HQ_TG_CAP_REDUCTION = 2;
+
+/** Maximum active execution age before an operation-owned TG is retired. */
+export const TG_MAX_LIFECYCLE_TURNS = 12;
+
+/** Cohesion spent by each engaged TG on one unsuppressed War turn. */
+export const TG_COHESION_DRAIN_PER_ENGAGED_TURN = 4;
+
+/** Strict dissolution threshold: 15 survives; values below 15 do not. */
+export const TG_DISSOLVE_COHESION = 15;
+
+/** Calendar-turn tail for the Army-HQ faction TG-cap reduction. */
+export const ARMY_HQ_TG_CAP_RECOVERY_TURNS = 4;
 
 /**
  * Phase 1 donor-model fidelity constants (ADR-0005 §Distance falloff, §Constants

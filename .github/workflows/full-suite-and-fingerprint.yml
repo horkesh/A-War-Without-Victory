@@ -19,9 +19,17 @@ name: Full Suite + Structural Fingerprint
 # The detected path set below is IDENTICAL to the old workflow-level `paths:` filter
 # (src, tools, tests, data/scenarios, data/calibration, scripts, package.json,
 # vitest.config.ts, tsconfig.json, plus this workflow file) so coverage does not shrink.
+#
+# 2026-08-02: added codex/master-roadmap-execution to push triggers. This
+# workflow previously ran ONLY on main, so the long-lived execution branch's
+# commits accumulated 11 real, uncaught full-suite failures (10 pre-existing
+# plus the schema-version drift that started the investigation) across 24h+
+# and 20 pushes before anyone noticed — Event System CI covers only a narrow
+# slice, not the complete suite this job runs. Remove this branch name once
+# the branch merges to main and is retired.
 on:
   push:
-    branches: [main]
+    branches: [main, codex/master-roadmap-execution]
   pull_request:
     branches: [main]
 

@@ -26,6 +26,9 @@ export interface ChronicleEntry {
         costLedgerRef?: string;
         decisionRecordId?: string;
         decisionRecordSurface?: 'chronicle' | 'records';
+        receiptRecordId?: string;
+        receiptPredicate?: string;
+        receiptPredicateOwnerPaths?: string[];
         codexRef?: string;
         sensitiveSignals?: Array<'atrocity' | 'rupture'>;
         imageUrl?: string;
@@ -429,6 +432,9 @@ function buildConsequenceReceiptEntries(
             metadata: {
                 decisionRecordId: `event:${receipt.decisionEventId}`,
                 decisionRecordSurface: 'chronicle',
+                receiptRecordId: receipt.receiptRecordId,
+                receiptPredicate: receipt.claimPredicate.expression,
+                receiptPredicateOwnerPaths: [...receipt.claimPredicate.owner_paths],
             },
         });
     }

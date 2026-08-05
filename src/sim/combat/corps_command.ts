@@ -17,6 +17,11 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 import { releaseOperationCommander } from './officer_system.js';
 import { hasActiveOperation, findBrigadeOperation, removeOperation } from './corps_operation_helpers.js';
+import {
+    completeOperationLifecycle,
+    enterOperationRecovery,
+    markOperationExecuting,
+} from './tactical_group_lifecycle.js';
 
 // ---------------------------------------------------------------------------
 // Stance modifiers
@@ -253,19 +258,22 @@ export function advanceOperations(state: GameState): void {
         if (!hasActiveOperation(cmd)) continue;
 
         for (const op of [...cmd.active_operations]) {
-            if (op.type === 'sector_attack') continue;
+            // Every combat operation is owned by sector_offensive.ts. This legacy
+            // clock remains solely for non-combat reorganization operations.
+            if (op.type !== 'reorganization') continue;
 
             const turnsInPhase = state.meta.turn - op.phase_started_turn;
 
             if (op.phase === 'planning' && turnsInPhase >= OP_PHASE_DURATION.planning) {
                 op.phase = 'execution';
                 op.phase_started_turn = state.meta.turn;
+                markOperationExecuting(state, cid, op);
             } else if (op.phase === 'execution' && turnsInPhase >= OP_PHASE_DURATION.execution) {
-                op.phase = 'recovery';
-                op.phase_started_turn = state.meta.turn;
+                enterOperationRecovery(state, cid, op, state.meta.turn, 'completed');
             } else if (op.phase === 'recovery' && turnsInPhase >= OP_PHASE_DURATION.recovery) {
                 // Operation complete
                 releaseOperationCommander(state, op);
+                completeOperationLifecycle(state, cid, op);
                 removeOperation(cmd, op);
             }
         }

@@ -10,6 +10,7 @@
  */
 
 import type { FactionId, GameState } from './game_state.js';
+import { reconcileLoadedArmyHqOperationLifecycle } from './operation_lifecycle_reconciliation.js';
 import { canonicalizePoliticalSideId, defaultArmyLabelForSide, POLITICAL_SIDES, type ArmyLabel, type PoliticalSideId } from './identity.js';
 
 interface SaveMigration {
@@ -309,6 +310,8 @@ export function applyMigrations(state: GameState): number {
         m.migrate(state);
         state.schema_version = m.version;
     }
+
+    if (state.military) reconcileLoadedArmyHqOperationLifecycle(state);
 
     return pending.length;
 }
@@ -829,5 +832,15 @@ registerMigration({
     migrate: (state) => {
         const disp = ensureDisplacementRoot(state);
         ensureRecord(disp, 'displacement_flows_by_osid');
+    },
+});
+
+registerMigration({
+    version: 37,
+    description: 'Persist sector intelligence and the materialized current-turn corps-front standing OG snapshot. Sensitive: no; missing legacy fields begin as deterministic empty records.',
+    migrate: (state) => {
+        const military = asRecord(state.military);
+        ensureRecord(military, 'sector_intel');
+        ensureRecord(military, 'corps_front_sectors');
     },
 });

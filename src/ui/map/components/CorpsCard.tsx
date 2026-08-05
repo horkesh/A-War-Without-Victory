@@ -195,8 +195,8 @@ export function CorpsCard({
 
   const headerContent = (
     <>
-      <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
-      <span className="flex items-center gap-1.5 text-xs tabular-nums whitespace-nowrap">
+      <span className={`min-w-0 truncate font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
+      <span className="flex min-w-0 flex-wrap items-center justify-between gap-x-1.5 gap-y-0.5 text-xs tabular-nums">
         <span className="flex items-center gap-0.5">
           <span data-testid="corps-card-personnel-icon" data-color={personnelTone.colorState}>
             <Icon name="personnel" size={11} color={personnelTone.iconColor} />
@@ -216,7 +216,8 @@ export function CorpsCard({
 
   const cardFront = (
     <div
-      className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-visible border-l-3 ${stanceBorder}`}
+      data-testid="oob-corps-card"
+      className={`min-w-0 max-w-full rounded-lg border border-panel-border bg-panel-card/90 overflow-visible border-l-3 ${stanceBorder}`}
       style={{ position: 'relative', zIndex: Z.CORPS_CARD_LABEL }}
     >
       {onHeaderClick ? (
@@ -225,12 +226,12 @@ export function CorpsCard({
           onClick={(e) => { e.stopPropagation(); onHeaderClick(); }}
           aria-label={corpsHeaderLabel}
           title={corpsHeaderLabel}
-          className="w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 hover:bg-panel-hover transition-colors cursor-pointer"
+          className="w-full min-w-0 flex-col items-stretch px-3 py-2 bg-panel-bg border-b border-panel-border flex gap-1 hover:bg-panel-hover transition-colors cursor-pointer"
         >
           {headerContent}
         </button>
       ) : (
-        <div className="w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 cursor-default">
+        <div className="w-full min-w-0 flex-col items-stretch px-3 py-2 bg-panel-bg border-b border-panel-border flex gap-1 cursor-default">
           {headerContent}
         </div>
       )}
@@ -269,7 +270,7 @@ export function CorpsCard({
 
         {/* R4: Labeled equipment summary row */}
         {(equip.tanks.total > 0 || equip.arty.total > 0) && (
-          <div className="px-3 py-1.5 flex items-center gap-4 text-xs tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
+          <div className="px-3 py-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
             {equip.tanks.total > 0 && (
               <span className="flex items-center gap-1" title={formatEquipmentTitle('tanks', equip.tanks)}>
                 <Icon name="tanks" size={13} />
@@ -288,8 +289,8 @@ export function CorpsCard({
         )}
       </div>
 
-      <div className="px-3 py-1.5 flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
+      <div className="px-3 py-1.5 flex flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
           <span className="text-xs uppercase text-accent-gold font-sans tracking-wide font-semibold flex items-center gap-1" title={t('corpsCard.stanceTitle')}>
             <Icon name={STANCE_ICON[stanceKey] ?? 'balanced'} size={11} />
             {t('corpsCard.stance')}
@@ -300,7 +301,7 @@ export function CorpsCard({
               onChange={(event) => onStanceChange(event.target.value)}
               onClick={(e) => e.stopPropagation()}
               aria-label={t('corpsCard.stanceAria')}
-              className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-xs font-mono text-text-primary focus:outline-none"
+              className="max-w-full min-w-0 bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-xs font-mono text-text-primary focus:outline-none"
             >
               {stanceKey === 'unreported' && (
                 <option value="unreported" disabled>{t('corpsCard.stance.unreported')}</option>

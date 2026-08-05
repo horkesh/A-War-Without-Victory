@@ -144,13 +144,6 @@ function makePlayerDecisionSummary(overrides: Partial<PlayerDecisionSummaryView>
   };
 }
 
-const severityRank: Record<PresidentialDecisionRoomCard['severity'], number> = {
-  blocking: 0,
-  critical: 1,
-  warning: 2,
-  info: 3,
-};
-
 describe('buildPresidentialDecisionRoomView', () => {
   afterEach(() => {
     setLocale('en');
@@ -203,13 +196,14 @@ describe('buildPresidentialDecisionRoomView', () => {
     const second = buildPresidentialDecisionRoomView({ state });
 
     expect(second.cards.map((card) => card.id)).toEqual(first.cards.map((card) => card.id));
-    expect(first.cards.map((card) => severityRank[card.severity])).toEqual(
-      [...first.cards.map((card) => severityRank[card.severity])].sort((a, b) => a - b),
+    const priorityRank = { required: 0, recommended: 1, monitor: 2, record: 3 } as const;
+    expect(first.cards.map((card) => priorityRank[card.priorityBand])).toEqual(
+      [...first.cards.map((card) => priorityRank[card.priorityBand])].sort((a, b) => a - b),
     );
     expect(first.cards[0]).toMatchObject({
       id: 'review:pending',
       category: 'decision',
-      severity: 'blocking',
+      priorityBand: 'recommended',
       navigationTarget: { kind: 'inbox' },
     });
     expect(first.cards.find((card) => card.id === 'opportunity:opp_alpha')?.sortKey).toBeLessThan(
@@ -339,10 +333,7 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     const view = buildPresidentialDecisionRoomView({ state });
 
-    expect(view.cards.find((card) => card.id === 'review:pending')).toMatchObject({
-      sourceOwner: 'Presidential review queue',
-      navigationTarget: { kind: 'inbox' },
-    });
+    expect(view.cards.find((card) => card.id === 'review:pending')).toBeUndefined();
     expect(view.cards.find((card) => card.id === 'opportunity:opp_alpha')).toMatchObject({
       sourceOwner: 'Operation opportunity dossiers',
       navigationTarget: { kind: 'decision-room', lens: 'opportunity', cardId: 'opportunity:opp_alpha' },
@@ -621,28 +612,26 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(secondHandoffs).toEqual(firstHandoffs);
     expect(firstHandoffs.map((handoff) => handoff.id)).toEqual([
-      'presidential-inbox',
       'army-hq-briefing',
+      'presidential-inbox',
+      'army-hq-personnel',
       'army-hq-summary',
       'army-hq-corps-briefings',
+      'chronicle',
       'turn-aftermath-records',
       'army-hq-records-aftermath',
-      // The always-present front-visit Command & Personnel card (info severity)
-      // handoffs after the warning/critical surfaces, before the chronicle.
-      'army-hq-personnel',
-      'chronicle',
     ]);
     expect(byId['presidential-inbox']).toMatchObject({
       label: "President's Desk",
       count: 1,
-      urgentCount: 1,
+      priorityCounts: { required: 0, recommended: 1, monitor: 0, record: 0 },
       cardIds: ['review:pending'],
       navigationTarget: { kind: 'inbox' },
     });
     expect(byId['army-hq-briefing']).toMatchObject({
       label: 'Army HQ Briefing',
       count: 2,
-      urgentCount: 1,
+      priorityCounts: { required: 0, recommended: 2, monitor: 0, record: 0 },
       cardIds: ['opportunity:opp_alpha', 'opportunity:opp_beta'],
       navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     });
@@ -663,6 +652,16 @@ describe('buildPresidentialDecisionRoomView', () => {
       id: 'decision-record-card',
       category: 'memory',
       severity: 'info',
+      priorityBand: 'record',
+      priorityModel: {
+        id: 'decision-record-card',
+        priorityBand: 'record',
+        blocker: false,
+        urgency: 3_999_999,
+        source: { id: 'decision-record-card' },
+        deadlineTurn: null,
+        recommendedDestination: 'army-hq',
+      },
       title: 'Decision filed',
       explanation: 'A presidential decision has been filed to records.',
       sourceOwner: 'Decision consequences',
@@ -713,7 +712,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     const byId = Object.fromEntries(view.lenses.map((lens) => [lens.id, lens]));
 
     expect(lensIds[0]).toBe('all');
-    expect(lensIds).toContain('decision');
+    expect(lensIds).not.toContain('decision');
     expect(lensIds).toContain('opportunity');
     expect(lensIds).toContain('operational');
     expect(lensIds).toContain('turn');
@@ -867,7 +866,7 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(cardsById['review:pending'].title).toBe('Predsjednički pregledi na čekanju');
     expect(cardsById['review:pending'].sourceOwner).toBe('Predsjednički red pregleda');
-    expect(cardsById['review:pending'].evidence).toContain('2 na čekanju');
+    expect(cardsById['review:pending'].evidence).toContain('1 na čekanju');
     expect(cardsById['paramilitary:pending'].title).toBe('Odobrenje paravojske na čekanju');
     expect(cardsById['paramilitary:pending'].evidence).toContain('rizik ratnih zločina');
     expect(cardsById['manifest:peace_plan'].title).toBe('Odgovor na mirovni plan na čekanju');
@@ -1059,12 +1058,10 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
 
     expect(view.advanceReadiness.items.map((item) => item.id)).toEqual([
-      'review:pending',
       'opportunity:opp_alpha',
-      'sitrep:front-exposed',
-      'turn:24:hard-turn',
+      'review:pending',
     ]);
-    expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
+    expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
   });
 
   it('uses the manifest summary to block advance for modal-required decisions without treating advisory families as blockers', () => {
@@ -1274,17 +1271,17 @@ describe('buildPresidentialDecisionRoomView', () => {
     const second = buildPresidentialDecisionRoomView({ state });
 
     expect(first.activeDossier).toMatchObject({
-      cardId: 'review:pending',
-      title: 'Presidential reviews pending',
-      sourceOwner: 'Presidential review queue',
+      cardId: 'opportunity:opp_alpha',
+      title: 'Alpha Window',
+      sourceOwner: 'Operation opportunity dossiers',
       sourceHandoff: {
-        id: 'presidential-inbox',
-        cardIds: ['review:pending'],
+        id: 'army-hq-briefing',
+        cardIds: ['opportunity:opp_alpha', 'opportunity:opp_beta'],
       },
-      relatedCardIds: [],
+      relatedCardIds: ['opportunity:opp_beta'],
       advanceSensitive: true,
-      advanceLabel: 'Review before advance',
-      navigationTarget: { kind: 'inbox' },
+      advanceLabel: 'Recommended before advance',
+      navigationTarget: { kind: 'decision-room' },
     });
     expect(second.activeDossier).toEqual(first.activeDossier);
   });
@@ -1327,7 +1324,7 @@ describe('buildPresidentialDecisionRoomView', () => {
         cardIds: ['turn:24:hard-turn'],
       },
       relatedCardIds: [],
-      advanceSensitive: true,
+      advanceSensitive: false,
       navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:24:hard-turn' },
     });
     expect(fallbackView.cards.map((card) => card.id)).toEqual(defaultView.cards.map((card) => card.id));
@@ -1781,7 +1778,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
 
     const view = buildPresidentialDecisionRoomView({ state });
-    const review = view.cards.find((c) => c.id === 'review:pending');
+    const review = view.cards.find((c) => c.id === 'pushback:player-army-co');
 
     expect(review?.navigationTarget).toEqual({
       kind: 'decision-room',
@@ -1791,6 +1788,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(review?.sourceHandoffTarget).toEqual({ kind: 'army-hq-tab', tab: 'briefing' });
     expect(review?.actionLabel).toBe('Review Pushback');
     expect(review?.navigationTarget).not.toEqual({ kind: 'inbox' });
+    expect(review?.countWeight).toBe(1);
+    expect(review?.sourceIds).toEqual(['pushback_1']);
   });
 
   it('omits a replace-co card when the corps CO is only an acting commander', () => {

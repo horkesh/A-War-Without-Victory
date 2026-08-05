@@ -67,10 +67,11 @@ describe('event taxonomy diagnostic report', () => {
         expect(report.summary.required_response_events).toBe(76);
         // 79 → 82: the +3 HRHB summer-1992 events all carry title + narrative.
         expect(report.summary.choice_rows_with_title_and_narrative).toBe(84);
-        // Owen-Stoltenberg's Presidency stage and the two late-1992 HRHB
-        // posture reviews carry explicit historical-source fields.
-        expect(report.summary.choice_rows_with_source).toBe(74);
-        expect(report.summary.required_response_rows_with_source).toBe(70);
+        // Owen-Stoltenberg's Presidency stage, the two late-1992 HRHB posture
+        // reviews, and the remediated Drina accountability decision carry
+        // explicit historical-source fields.
+        expect(report.summary.choice_rows_with_source).toBe(75);
+        expect(report.summary.required_response_rows_with_source).toBe(71);
         // 56 → 59: the +3 HRHB summer-1992 events each carry a historical_default_response_id.
         // 59 → 60: Owen-Stoltenberg's Presidency stage now carries its documented default.
         expect(report.summary.historical_default_markers).toBe(62);

@@ -868,6 +868,43 @@ Sector :2 (Rogatica/Sokolac, 18 edges) has 0 assigned brigades. SCR still shows 
 
 ## Open / Under Investigation
 
+### 33. RS brigade-dissolution asymmetry (15x) via cohesion-ratchet — FIXED (flag default-ON, 188w floor re-blessed 633→630, 2026-08-05)
+
+**What we found (baseline n139, 188w run `apr1992_definitive_188w__63a3a0858050b865`):** Over the 188-week war RS suffers 61 brigade-dissolution events; RBiH only 4; HRHB 4. Three ARBiH corps (103 brigades) end the war at ~0% permanent brigade destruction; RS corps up to 61% (vrs_1st_krajina 22/36). A 15x asymmetry is absurd on its face — ARBiH lost formations historically (Srebrenica's 28th Division, Žepa, the 1992 eastern falls, the 1993 HVO war).
+
+**Root cause (mechanism, not data):** Dissolution is a 2-of-3 gate (personnel<400 / cohesion≤20 / morale≤15, `brigade_dissolution.ts`). At RS dissolutions the BINDING criterion is COHESION (≤20 in 95% of cases, avg 6; personnel<400 only 84%; morale≤15 only 30%). The faction cohesion FLOOR that is supposed to stop cohesion-death (RS 35 early→20 by turn 80, RBiH 62 late; `faction_progression.ts`) is applied ONLY inside `runCohesionDrift` (`cohesion_drift.ts:140`), which skips any brigade engaged in combat this turn. RS defends ~3x more than RBiH (392 vs 130 defenses) and holds only ~36% — so RS brigades fight almost every turn, never receive the floor clamp, never get ambient recovery, but still eat the per-battle decrement (`COHESION_DEFENDER`, `combat_math.ts:500`). Cohesion ratchets to 0 → the gate trips. RBiH is mostly on offense, gets rest turns, and its brigades essentially never dissolve. This is an implementation asymmetry (the floor silently doesn't protect the units that fight most), not design intent.
+
+**Why the RS collapse is directionally real but the mechanism is gamey:** RS WAS on the strategic defensive holding a hugely overextended front, and the western Krajina DID collapse Aug–Oct 1995 (Operations Storm / Summer'95 / Sana / Maestral rolled up Drvar, Bos. Grahovo, Glamoč, Šipovo, Jajce, Mrkonjić, Ključ). But that was a LATE, geographically-concentrated, HV-driven TERRITORIAL rout — not 61 brigades attriting to vapor across the whole war via a cohesion clock in quiet sectors. Units are being "destroyed" while still fielding 400+ men (16% of cases). Real worn brigades degrade in place / shed to desertion / get overrun — the destruction event is the enemy exploiting the weakness, not the calendar.
+
+**Fix trajectory (three experiments, panel-reviewed):**
+- **Exp1 (n140) — clamp per-battle defender decrement to the full faction cohesion floor, unconditional** (`AWWV_COHESION_FLOOR_AT_DECREMENT`). REJECTED. Reduced RS aggregate 45→30% but SMEARED the collapse geography: vrs_1st_krajina 61→17% (good) but vrs_east_bosnian 30→**70%** and vrs_herzegovina 25→**50%** (non-historical — those corps HELD). Also made ARBiH MORE immortal (1%→0%) because clamping to the RESTING floor imports RBiH's 3x-higher floor (62 vs RS 20) into the combat site. Moved the absurdity rather than removing it.
+- **Exp2 (n141) — cap the clamp at 35: `min(faction_floor, 35)`.** ACCEPTED. Re-concentrated the collapse in the WEST where it belongs: vrs_2nd_krajina 100% (8/8) + vrs_1st_krajina 39%, while vrs_east_bosnian 10%, vrs_drina 11%, vrs_sarajevo_romanija 30%, vrs_herzegovina 38% (moderate attrition, no collapse). RS aggregate 45→36%. Narrows the RBiH/RS combat-floor gap from 62/20 to 35/20.
+
+**Geography + temporal validation (Exp2 n141 vs baseline n139):**
+
+| corps | baseline | Exp1 (rejected) | Exp2 cap (shipped) | historical |
+|---|---|---|---|---|
+| vrs_2nd_krajina (west) | 88% | 63% | **100% (8/8)** | collapse corps — Storm/Sana zone |
+| vrs_1st_krajina (west) | 61% | 17% | **39%** | partial — held Banja Luka core, lost flank |
+| vrs_east_bosnian | 30% | 70% | **10%** | held (Drina/enclave ring) |
+| vrs_herzegovina | 25% | 50% | **38%** | stable |
+| vrs_sarajevo_romanija | 30% | 22% | **30%** | held siege line |
+| vrs_drina | 0% | 11% | **11%** | held to Dayton |
+
+vrs_2nd_krajina's 8 destructions are ALL t≥170: turns [172,174,174,174,182,183,185,186] — 100% inside the 1995 collapse window, ZERO pre-collapse (t<160 = 0). vrs_1st_krajina 13/14 at t≥170 (one t51 outlier). The western collapse is cleanly 1995-clustered, not smeared into the quiet 1993–94 western front. Srebrenica still fell (10 settlements to RS); Goražde + Bihać held; §6 intact. R6 anchors (Doboj/Gračanica) recovered → 31/31.
+
+**On vrs_2nd_krajina 100% — DEFENSIBLE, not the "vapor" overshoot.** It is THE collapse corps (Drvar HQ), in the actual collapse zone, driven by real HV/ARBiH offensive pressure at the historical moment, only +1 brigade over baseline's 88%, and engine "destruction" = routed-to-reserve (50% personnel to strategic reserve + salvaged equipment, reconstitution-eligible) — which matches the history (the 2nd Krajina Corps was routed out of its territory and shattered rearward toward Banja Luka). Minor nit: a remnant historically survived to hold the Banja Luka approaches, so the messy truth is ~90%+ shattered rather than a clean 8/8 — but forcing exactly one survivor would be its own railroad. Within the defensible band for the one corps where near-total collapse is historical.
+
+**War-or-Game verdict: SHIP (clean, unconditional) 2026-08-05.** The mechanism diagnosis is sound, the Exp2 cap produces the historically correct collapse geography (western-concentrated, 1995-clustered), and §6 / enclave destructions are intact via the separate enclave gate + event system. The originally-required supplied/not-encircled gate proved unnecessary — the cap achieved the same geography more simply.
+
+**Watch items:** (1) matched_osids delta — RESOLVED: the cap recovered 17 of Exp1's −20; final 188w is 630 (baseline 633, net −3), inside the scenario-tester's ≥628 gate. (2) ARBiH dissolution count — the cap lowers RBiH's combat floor 62→35; ARBiH field-corps near-zero brigade dissolution is itself near-historical (offensive posture; enclave losses handled by the separate enclave gate + event system). ARBiH formation-mortality at Srebrenica/Žepa (the 28th-Division analog should be destroyable, not just displaced) is a SEPARATE enclave/encirclement lane, not a defect in this fix. (3) RS ~36% defensive hold-rate may itself be low for the largely-static 1993–94 stalemate — a separate upstream question, not part of this fix.
+
+**Status: FIXED.** Panel-unanimous SHIP (War-or-Game + scenario-creator-runner-tester). Owner-signed 2026-08-05: flag `AWWV_COHESION_FLOOR_AT_DECREMENT` shipped **default-ON** (escape hatch retained via explicit `false`/`0`); the cap constant is `COMBAT_COHESION_FLOOR_CAP = 35`. 188w floor re-blessed 633→630 (`e050cb0a11944bad`); 52w golden + 40w structural fingerprint re-blessed. Recovers both R6 Task 0.3 anchors (Doboj/Gračanica → 31/31), halves RS dissolution (61→32 events), and makes the per-corps collapse historically coherent. Do NOT raise the cap above 35 (every RS floor is ≤35, so a higher cap only re-loosens RBiH's clamp and reintroduces the over-hold).
+
+**Files:** `src/sim/combat/attack_post_battle_effects.ts` (clamp site), `src/sim/combat/faction_progression.ts` (floors), `src/sim/combat/cohesion_drift.ts` (floor bypass for engaged units), `src/sim/combat/combat_math.ts` (`COHESION_DEFENDER`), `src/sim/combat/brigade_dissolution.ts` (gate).
+
+---
+
 ### 29. ~~Operations continue past viability — ARBiH suicide attacks at 7-21:1 ratios~~ — FIXED (n701 Phase, Issue #29 fix)
 
 **Original finding:** Multiple ARBiH operations running 8-12 weeks at 7-21:1 attacker:defender ratios with 0 objectives captured. Root cause: per-axis failure counter reset on brigade/target rotation, allowing indefinite cycling.

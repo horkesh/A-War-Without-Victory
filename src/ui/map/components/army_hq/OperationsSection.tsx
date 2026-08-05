@@ -61,7 +61,7 @@ function OutcomeCategoryBadge({ assessmentAtLaunch, wasForce }: {
 }
 
 const PHASE_BADGE: Record<string, { bg: string; text: string; border: string }> = {
-    execution: { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/40' },
+    execution: { bg: 'bg-red-500/10', text: 'text-red-300', border: 'border-red-500/40' },
     planning: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/40' },
     recovery: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/40' },
 };
@@ -111,6 +111,8 @@ const RECOVERY_REASON_LABELS: Record<string, string> = {
     orphaned_sector: 'Objective sector lost',
     manual_termination: 'Stood down by order',
     no_logged_attempt: 'No assault attempted',
+    tg_cohesion_exhausted: 'Tactical group exhausted',
+    tg_max_lifecycle: 'Operational duration reached',
 };
 
 /** Player-facing title-case labels for axis status (raw enum). */
@@ -804,7 +806,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                 {t('operationsSection.momentum')} <b className="font-bold">{momentum > 0 ? '+' : ''}{momentum.toFixed(1)}</b>
                                             </span>
                                         )}
-                                        <span className="text-text-secondary/60 border-l border-panel-border/50 pl-4 ml-auto">
+                                        <span className="text-text-secondary border-l border-panel-border/50 pl-4 ml-auto">
                                             {t('operationsSection.commanderShort')} {commander.kind === 'assigned' ? commander.officer.name.toUpperCase() : commander.label}
                                         </span>
                                     </div>

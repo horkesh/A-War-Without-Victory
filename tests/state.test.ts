@@ -47,6 +47,8 @@ const baseState: GameState = {
         front_posture: {},
         front_posture_regions: {},
         front_pressure: {},
+        corps_front_sectors: {},
+        sector_intel: {},
         militia_pools: {},
         theatres: {},
         army_theatre_assignment: {},
@@ -210,6 +212,16 @@ describe('state serialization contracts', () => {
                 proposed_action: 'APPROVE_OP:arbih_3rd_corps:plan-1',
             },
         ] as any;
+        original.meta.proposal_decision_history = [{
+            id: 'proposal-0',
+            turn: 10,
+            resolved_turn: 11,
+            faction: 'RBiH',
+            domain: 'military',
+            description: 'Adopt a defensive corps stance.',
+            proposed_action: 'SET_STANCE:arbih_3rd_corps:defensive',
+            accepted: true,
+        }] as any;
         original.factions = [
             {
                 id: 'RBiH',
@@ -381,6 +393,7 @@ describe('state serialization contracts', () => {
         const hydratedSitrep = getOperationalSitrepView(hydrated as any, 'RBiH');
 
         expect(hydrated.military.last_briefing).toEqual(original.military.last_briefing);
+        expect(hydrated.meta.proposal_decision_history).toEqual(original.meta.proposal_decision_history);
         expect(hydrated.military.front_segments).toEqual(original.military.front_segments);
         expect(hydratedSitrep).toEqual(expectedSitrep);
         expect(serializeState(hydrated)).toBe(payload);

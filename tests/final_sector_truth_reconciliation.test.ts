@@ -83,6 +83,8 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
         } as GameState['military'],
         political: {
             political_controllers: {
@@ -406,6 +408,8 @@ describe('final sector truth reconciliation', () => {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
             } as GameState['military'],
             political: {
                 political_controllers: {
@@ -497,13 +501,16 @@ describe('final sector truth reconciliation', () => {
         expect(state.military.unresolved_sector_brigades ?? []).toHaveLength(0);
     });
 
-    it('static contract: reconciliation fingerprint includes operation roster state', () => {
+    it('static contract: reconciliation uses explicit turn-local receipts, not a GameState cache', () => {
         const raw = readFileSync('src/sim/combat/final_sector_truth_reconciliation.ts', 'utf8');
-        expect(raw).toContain('function computeCorpsCommandFingerprint');
-        expect(raw).toContain('state.military.corps_command');
-        expect(raw).toContain('active_operations');
-        expect(raw).toContain('participating_brigades');
-        expect(raw).toContain('|ops');
+        expect(raw).toContain('interface FinalSectorReconciliationSession');
+        expect(raw).toContain("'geometry',");
+        expect(raw).toContain("'territory',");
+        expect(raw).toContain("'roster',");
+        expect(raw).toContain("'ratings',");
+        expect(raw).toContain("'operation-roster'");
+        expect(raw).toContain('dirty_worklist');
+        expect(raw).not.toContain('new WeakMap<GameState');
     });
 
     it('static contract: assignment emits warnings only from the final unresolved pass', () => {

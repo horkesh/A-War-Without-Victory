@@ -19,6 +19,25 @@ const EXPECTED_FAMILIES = [
 ] as const;
 
 describe('player decision manifest', () => {
+    it('owns one source, recommended workspace, and durable receipt path per family', () => {
+        expect(PLAYER_DECISION_FAMILIES.map((family) => ({
+            id: family.id,
+            source: family.statePath,
+            destination: family.recommendedDestination,
+            receipt: family.receiptPath,
+        }))).toEqual([
+            { id: 'event_decision', source: 'military.pending_event_decisions', destination: 'inbox', receipt: 'military.event_decision_log' },
+            { id: 'peace_plan', source: 'military.negotiation.pending_peace_plan', destination: 'inbox', receipt: 'military.negotiation.peace_plan_history' },
+            { id: 'dayton_negotiation', source: 'military.negotiation.pending_dayton', destination: 'inbox', receipt: 'military.negotiation.dayton_result' },
+            { id: 'paramilitary_request', source: 'pending_paramilitary_requests', destination: 'inbox', receipt: 'paramilitary_decision_history' },
+            { id: 'convoy_decision', source: 'military.pending_convoy_decisions', destination: 'inbox', receipt: 'military.convoy_decision_history' },
+            { id: 'reserve_request', source: 'military.pending_reserve_requests', destination: 'army-hq', receipt: 'military.reserve_request_history' },
+            { id: 'officer_event', source: 'military.pending_officer_events', destination: 'army-hq', receipt: 'military.officer_decision_history' },
+            { id: 'autonomy_proposal', source: 'meta.pending_proposal_reviews', destination: 'decision-room', receipt: 'meta.proposal_decision_history' },
+            { id: 'operation_opportunity', source: 'meta.pending_proposal_reviews + military.operation_opportunities', destination: 'decision-room', receipt: 'military.operation_opportunity_resolutions' },
+        ]);
+    });
+
     it('summarizes all current generated player-decision families in stable manifest order', () => {
         const state: any = {
             meta: {

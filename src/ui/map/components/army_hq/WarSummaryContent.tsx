@@ -108,9 +108,12 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
     // canonical per-corps explanation lives in Army HQ → Command Relationship.
     const playerWarExhaustion = playerFaction ? warExhaustionByFaction[playerFaction] : undefined;
     const hasElevatedWarExhaustion = typeof playerWarExhaustion === 'number' && playerWarExhaustion >= 500;
+    const isExecutiveHold = playerFaction != null
+        && strategicObjectives.length > 0
+        && strategicObjectives.every((objective) => !objective.nextLever.available);
 
     return (
-        <div className="w-full max-w-[1100px]">
+        <div className="w-full min-w-0 max-w-none overflow-x-clip">
             {/* Header */}
             <div className="mb-4">
                 <div className="text-[13px] font-bold text-amber-400 tracking-[0.08em] uppercase">
@@ -139,8 +142,18 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                 ))}
             </div>
 
+            {activeSection === 'overview' && isExecutiveHold && (
+                <div
+                    data-testid="war-summary-posture"
+                    role="note"
+                    className="mb-4 max-w-prose rounded border border-amber-400/30 bg-amber-400/[0.06] px-3 py-2 text-[12px] font-semibold leading-snug text-amber-200"
+                >
+                    {t('warSummary.posture.hold')}
+                </div>
+            )}
+
             {activeSection === 'overview' ? (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 min-[2200px]:grid-cols-3 gap-4">
                     {playerFaction ? (
                         <>
                             {strategicObjectives.length > 0 && (
@@ -153,7 +166,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                         <span className="text-text-secondary">{t('warSummary.label.friendlyControl')}</span>
                                         <span className="text-text-primary tabular-nums">{fmtPct(areaPct[playerFaction] ?? 0)}</span>
                                     </div>
-                                    <div className="text-xs text-text-secondary leading-snug">
+                                    <div className="max-w-prose text-xs text-text-secondary leading-snug">
                                         {t('warSummary.note.enemyControl')}
                                     </div>
                                 </div>
@@ -199,7 +212,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                         <span className="text-text-secondary">{t('warSummary.label.ownDisplaced')}</span>
                                         <span className="text-text-primary tabular-nums">{reportedK(displacedByFaction[playerFaction], displacedByFactionReported)}</span>
                                     </div>
-                                    <div className="text-xs text-text-secondary leading-snug">
+                                    <div className="max-w-prose text-xs text-text-secondary leading-snug">
                                         {t('warSummary.note.enemyDisplacement')}
                                     </div>
                                 </div>
@@ -246,7 +259,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                             <span className="text-text-secondary">{t('warSummary.label.warExhaustion')}</span>
                                             <span className="text-text-primary tabular-nums">{Math.round(playerWarExhaustion!)}</span>
                                         </div>
-                                        <div className="text-xs text-text-secondary leading-snug">
+                                        <div className="max-w-prose text-xs text-text-secondary leading-snug">
                                             {t('warSummary.note.commandStrain')}
                                         </div>
                                     </div>
@@ -256,7 +269,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                             {sitrep && (
                                 <SummarySection title={t('warSummary.section.operationalSitrep')}>
                                     <div className="space-y-1 text-[12px]">
-                                        <div className="text-text-secondary leading-snug">{localizedOperationalSitrepCopy(sitrep.headlineToken, sitrep.headline)}</div>
+                                        <div className="max-w-prose text-text-secondary leading-snug">{localizedOperationalSitrepCopy(sitrep.headlineToken, sitrep.headline)}</div>
                                         <div className="flex items-center justify-between gap-3">
                                             <span className="text-text-secondary">{t('warSummary.label.fronts')}</span>
                                             <span className="text-text-primary tabular-nums">{t('warSummary.value.fronts', { engaged: sitrep.front.engagedCount, exposed: sitrep.front.exposedCount })}</span>
@@ -273,7 +286,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                             <span className="text-text-primary tabular-nums">{sitrep.operations.activeCount}</span>
                                         </div>
                                         {sitrep.alerts.length > 0 && (
-                                            <div className="text-xs text-text-secondary leading-snug">
+                                            <div className="max-w-prose text-xs text-text-secondary leading-snug">
                                                 {sitrep.alerts.slice(0, 2).map((alert) => localizedOperationalSitrepCopy(alert.textToken, alert.text)).join(' ')}
                                             </div>
                                         )}
@@ -432,13 +445,13 @@ function StrategicObjectivesSection({ objectives }: { objectives: FactionStrateg
     const unavailable = t('corpsFront.unreported');
     return (
         <section
-            className="xl:col-span-2 border-y border-panel-border py-3"
+            className="xl:col-span-2 min-[2200px]:col-span-3 border-y border-panel-border py-3"
             aria-label={t('warSummary.section.strategicObjectives')}
         >
             <h2 className="mb-2 text-[12px] font-bold uppercase text-text-primary">
                 {t('warSummary.section.strategicObjectives')}
             </h2>
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            <div className="grid grid-cols-1 xl:grid-cols-2 min-[2200px]:grid-cols-3 gap-2">
                 {objectives.map((objective) => {
                     const owner = objective.nextLever.owner === 'army_hq'
                         ? t('warSummary.objective.owner.armyHq')
@@ -483,7 +496,7 @@ function StrategicObjectivesSection({ objectives }: { objectives: FactionStrateg
                                                 useGameStore.getState(),
                                             )}
                                             aria-label={`${owner}: ${objective.nextLever.label}`}
-                                            className="min-h-7 min-w-0 rounded border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-left text-[12px] font-semibold text-amber-300 hover:bg-amber-400/15"
+                                            className="min-h-7 min-w-0 max-w-prose rounded border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-left text-[12px] font-semibold text-amber-300 hover:bg-amber-400/15"
                                         >
                                             <span className="block text-text-secondary">{owner}</span>
                                             <span className="block">{objective.nextLever.label}</span>
@@ -492,7 +505,7 @@ function StrategicObjectivesSection({ objectives }: { objectives: FactionStrateg
                                         <div
                                             data-testid="strategic-objective-no-filed-action"
                                             data-owner={objective.nextLever.owner}
-                                            className="min-h-7 min-w-0 rounded border border-panel-border bg-panel-bg/60 px-2 py-1 text-left text-[12px] font-semibold text-text-secondary"
+                                            className="min-h-7 min-w-0 max-w-prose rounded border border-panel-border bg-panel-bg/60 px-2 py-1 text-left text-[12px] font-semibold text-text-secondary"
                                         >
                                             <span className="block text-text-muted">{owner}</span>
                                             <span className="block">{objective.nextLever.label}</span>
@@ -520,7 +533,7 @@ function ObjectiveRow({
     return (
         <div className="grid grid-cols-[8.5rem_minmax(0,1fr)] gap-2">
             <span className="text-text-secondary">{label}</span>
-            <span className={`min-w-0 ${valueClass}`}>{value}</span>
+            <span className={`min-w-0 max-w-prose break-words ${valueClass}`}>{value}</span>
         </div>
     );
 }

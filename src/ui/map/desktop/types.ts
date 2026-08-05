@@ -49,18 +49,23 @@ export interface StartNewCampaignPayload {
     scenarioKey?: string;
 }
 
-export type StartNewCampaignResult = DesktopOkError;
+export interface StartNewCampaignResult extends DesktopOkError {
+    stateJson?: string;
+}
 
 export interface RuntimeFeatureFlags {
     srkStranglePostureActive: boolean;
 }
+
+export type { GameStateUpdateMetadata } from '../../shared/gameStateUpdateMetadata';
+import type { GameStateUpdateMetadata } from '../../shared/gameStateUpdateMetadata';
 
 export interface AwwvBridge {
     stageAttackOrder?(brigadeId: string, targetSettlementId: string): Promise<DesktopOkError>;
     queryCombatEstimate?(brigadeId: string, targetSettlementId: string): Promise<CombatEstimateResult>;
     getCurrentGameState?(): Promise<unknown | null>;
     getRuntimeFeatureFlags?(): Promise<RuntimeFeatureFlags | null>;
-    subscribeGameStateUpdated?(callback: (stateJson: unknown) => void): () => void;
+    subscribeGameStateUpdated?(callback: (stateJson: unknown, metadata?: GameStateUpdateMetadata) => void): () => void;
     subscribeTurnReportUpdated?(callback: (report: unknown) => void): () => void;
     advanceTurn?(payload?: unknown): Promise<AdvanceTurnResult>;
     startNewCampaign?(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;
@@ -76,7 +81,7 @@ export interface DesktopBridgeClient {
     queryCombatEstimate(brigadeId: string, targetSettlementId: string): Promise<CombatEstimateResult>;
     getCurrentGameState(): Promise<unknown | null>;
     getRuntimeFeatureFlags(): Promise<RuntimeFeatureFlags | null>;
-    subscribeGameStateUpdated(callback: (stateJson: unknown) => void): () => void;
+    subscribeGameStateUpdated(callback: (stateJson: unknown, metadata?: GameStateUpdateMetadata) => void): () => void;
     subscribeTurnReportUpdated(callback: (report: unknown) => void): () => void;
     advanceTurn(payload?: unknown): Promise<AdvanceTurnResult>;
     startNewCampaign(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;

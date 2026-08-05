@@ -6,9 +6,12 @@
  * - cohesion <= DISSOLUTION_COHESION_THRESHOLD (20)
  * - morale <= DISSOLUTION_MORALE_THRESHOLD (15)
  *
- * Historical: BB1 p.455 confirms brigades were destroyed (9th Grahovo LIB).
- * BB1 p.443: After Srebrenica, survivors reconstituted into 28th Division —
- * old units ceased to exist. Pattern: attrition → ineffectiveness → dissolution.
+ * Historical: brigades were destroyed as fighting formations (e.g. 9th Grahovo LIB).
+ * After Srebrenica (July 1995) the enclave's formations were shattered; survivors who
+ * broke through to Bosnian-held territory reformed at reduced strength and the old units
+ * ceased to exist (ICTY Krstić IT-98-33-T for the column and take-over; exact reconstitution
+ * figures pending an ICTY paragraph cite — Balkan Battlegrounds disregarded for this material
+ * per owner directive 2026-08-05). Pattern: attrition → ineffectiveness → dissolution.
  *
  * On dissolution:
  * - status = 'inactive', lifecycle_status = 'destroyed'

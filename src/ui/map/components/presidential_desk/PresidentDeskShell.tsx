@@ -83,7 +83,15 @@ export function PresidentDeskShell({
           onClose();
         }
       }}
-      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-16 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-y-auto md:right-6 xl:right-10"
+      // Static, generous clearance (not measured) — a prior ResizeObserver-
+      // based dynamic-measurement approach (fc04f2902, reverted a39b29673)
+      // was unit-test-clean but regressed RS's early-game historical-event
+      // determinism in the interactive packaged harness, most likely via the
+      // extra render cycle its mount-time state update introduced. bottom-16
+      // (64px) proved insufficient once WarroomStatusBar's priority docket
+      // wraps to more than one row; bottom-28 (112px) comfortably covers a
+      // multi-row wrap with no additional state, effect, or render.
+      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-28 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden md:right-6 xl:right-10"
     >
       {onClose && (
         <button
@@ -91,20 +99,24 @@ export function PresidentDeskShell({
           onClick={onClose}
           aria-label={t('desk.closeOverlayAria')}
           data-testid="desk-close-overlay"
-          className="pointer-events-auto self-end border border-panel-border/80 bg-[#11141b] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)] transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+          className="pointer-events-auto shrink-0 self-end border border-panel-border/80 bg-[#11141b] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)] transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
           {t('common.close')}
         </button>
       )}
-      <div>
-        <DeskAuthorityHeader state={state} />
-      </div>
+      <div
+        data-testid="president-desk-scroll-region"
+        className="min-h-0 flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3"
+      >
+        <div className="shrink-0">
+          <DeskAuthorityHeader state={state} />
+        </div>
 
-      <div className="pointer-events-auto self-start border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)]">
-        <DeskPacket items={items} onAction={onAction} requiredItemIds={requiredItemIds} />
-      </div>
+        <div className="pointer-events-auto w-full shrink-0 border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)]">
+          <DeskPacket items={items} onAction={onAction} requiredItemIds={requiredItemIds} />
+        </div>
 
-      <aside className="pointer-events-auto self-start border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]">
+        <aside className="pointer-events-auto w-full shrink-0 border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]">
         <div className="border-b border-panel-border/70 pb-3">
           <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">{t('desk.strategicSituation')}</div>
           <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{factionTitle(state)}</h2>
@@ -186,7 +198,8 @@ export function PresidentDeskShell({
             onOpenChronicle={onOpenChronicle ?? onOpenRecords}
           />
         </div>
-      </aside>
+        </aside>
+      </div>
     </section>
   );
 }

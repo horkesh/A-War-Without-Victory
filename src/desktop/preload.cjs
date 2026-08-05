@@ -7,10 +7,10 @@ const turnReportUpdatedListeners = new Set();
 const replaySequenceUpdatedListeners = new Set();
 const replayManifestUpdatedListeners = new Set();
 
-function emitToListeners(listeners, payload) {
+function emitToListeners(listeners, ...payloads) {
   for (const listener of Array.from(listeners)) {
     try {
-      listener(payload);
+      listener(...payloads);
     } catch (error) {
       console.error('[awwv preload] desktop bridge listener failed', error);
     }
@@ -27,8 +27,8 @@ function subscribe(listeners, cb) {
   };
 }
 
-ipcRenderer.on('game-state-updated', (_event, stateJson) => {
-  emitToListeners(gameStateUpdatedListeners, stateJson);
+ipcRenderer.on('game-state-updated', (_event, stateJson, metadata) => {
+  emitToListeners(gameStateUpdatedListeners, stateJson, metadata);
 });
 ipcRenderer.on('turn-report-updated', (_event, report) => {
   emitToListeners(turnReportUpdatedListeners, report);

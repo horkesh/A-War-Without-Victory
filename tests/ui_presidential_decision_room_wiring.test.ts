@@ -198,7 +198,9 @@ describe('Presidential Decision Room wiring', () => {
     const inboxBranchStart = app.indexOf("if (target.kind === 'inbox')", enclaveBranchStart);
     const enclaveBranch = app.slice(enclaveBranchStart, inboxBranchStart);
     expect(enclaveBranch).toContain('gs.setArmyHQOpen(false)');
-    expect(app).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
+    expect(app).toMatch(
+      /<PresidentialDecisionRoomPanel[\s\S]{0,300}onNavigateTarget=\{reviewPreAdvanceTarget\}[\s\S]{0,300}\/>/,
+    );
     expect(app).toContain('<ArmyHQModal');
     expect(app).toContain('onDecisionRoomNavigateTarget={openDecisionRoomTarget}');
     expect(app).toContain('eventCatalog={eventCatalogFull}');

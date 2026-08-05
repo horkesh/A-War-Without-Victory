@@ -5,6 +5,7 @@ import {
 import { _TRIGGERED_OPS } from '../../../sim/combat/triggered_operations.js';
 import { getOsidDisplayName } from '../utils/osidDisplayName.js';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText.js';
+import { strictCompare } from '../../../state/validateGameState.js';
 
 export interface HistoricalOperationAuthorizationView {
   kind: 'preplanned' | 'triggered' | 'army_hq';
@@ -40,6 +41,10 @@ export function parseHistoricalOperationAuthorizationAction(
 }
 
 export interface HistoricalOperationAuthorizationDetails {
+  corpsId: string;
+  objectiveOsids: string[];
+  stagingOsids: string[];
+  formationIds: string[];
   command: string;
   commander: string;
   force: string | null;
@@ -116,7 +121,7 @@ function commanderLabel(
       officer.assigned_corps_id === corpsId
       && officer.status === 'active',
     )
-    .sort((a, b) => a.id.localeCompare(b.id))[0];
+    .sort((a, b) => strictCompare(a.id, b.id))[0];
   if (!commander) return 'not assigned in current save';
   const rank = humanizeRank(commander.rank);
   return rank ? `${rank} ${commander.name}` : commander.name;
@@ -139,7 +144,18 @@ function uniqueOperationFormationIds(def: OperationDetailDef): string[] {
       out.push(id);
     }
   }
-  return out;
+  return out.sort(strictCompare);
+}
+
+function uniqueOperationObjectiveOsids(def: OperationDetailDef): string[] {
+  return [...new Set(def.axes.flatMap((axis) => axis.objectives).filter(Boolean))].sort(strictCompare);
+}
+
+function uniqueOperationStagingOsids(def: OperationDetailDef): string[] {
+  return [...new Set([
+    def.staging_osid,
+    ...def.axes.map((axis) => axis.staging_osid ?? ''),
+  ].filter(Boolean))].sort(strictCompare);
 }
 
 function forceLabel(state: LoadedGameState, def: OperationDetailDef): string | null {
@@ -217,6 +233,10 @@ export function buildHistoricalOperationAuthorizationDetails(
   const commander = commanderLabel(state, historicalOp.corpsId);
   if (!match) {
     return {
+      corpsId: historicalOp.corpsId,
+      objectiveOsids: [],
+      stagingOsids: [],
+      formationIds: [],
       command,
       commander,
       force: null,
@@ -234,6 +254,10 @@ export function buildHistoricalOperationAuthorizationDetails(
   const { def, source } = match;
   const summary = objectiveSummary(def, osidNameMap);
   return {
+    corpsId: historicalOp.corpsId,
+    objectiveOsids: uniqueOperationObjectiveOsids(def),
+    stagingOsids: uniqueOperationStagingOsids(def),
+    formationIds: uniqueOperationFormationIds(def),
     command,
     commander,
     force: forceLabel(state, def),

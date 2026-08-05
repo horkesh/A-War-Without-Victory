@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 36 as const;
+export const CURRENT_SCHEMA_VERSION = 37 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -365,7 +365,7 @@ export interface CorpsOperation {
     /** Dig in participating brigades when manually halted. */
     dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** Named tactical_commander leading this op's Tactical Group anchor assault (ADR-0006 Phase 3A).
@@ -554,15 +554,17 @@ export interface TacticalGroup {
     dissolved_on_turn?: number;
     /** OG cohesion per canon §6.3; drains per-turn. */
     cohesion: number;
+    /** Idempotency marker for the last operation-owned exhaustion tick. */
+    last_exhaustion_tick_turn?: number;
 }
 
 /**
  * ARBiH OG→Division promotion record (ADR-0006 historical reorganization).
  *
  * A one-way IDENTITY / COMMAND-ECHELON re-badge of a standing OG into a permanent Division.
- * Records the upgrade so it is queryable and persistent across the per-turn sector rebuild
- * (corps_front_sectors is derived/recomputed each turn; this record lives on MilitaryState
- * and drives the projected display_name). NO force inflation: no brigades/personnel/equipment
+ * Records the upgrade so it is queryable and persistent across future turn-boundary sector rebuilds.
+ * `corps_front_sectors` is itself a materialized persisted snapshot; this record drives its next
+ * projected display_name. NO force inflation: no brigades/personnel/equipment
  * are added — the SAME brigades are re-badged under the Division identity.
  *
  * Determinism: written only inside the ENABLE_TG_OG_PROMOTION gate; one-way (never demoted).
@@ -575,7 +577,7 @@ export interface OgPromotionRecord {
     faction: FactionId;
     /** OG ordinal that was promoted (1-based). */
     og_ordinal: number;
-    /** Promoted Division number (historical map where known, else og_ordinal + offset). */
+    /** Promoted Division number from an explicit, verified (corps, OG ordinal) mapping. */
     division_number: number;
     /** New display identity, e.g. "21. Division". */
     division_display_name: string;
@@ -598,6 +600,8 @@ export interface ArmyHqOperation {
     tg_id?: TgId;
     status: 'queued' | 'planning' | 'executing' | 'recovering' | 'completed';
     formed_on_turn: number;
+    /** First real CorpsOperation execution-to-recovery transition; retained after completion. */
+    recovery_started_turn?: number;
     /** floor((started_turn - 1) / 52); for the once-per-year gate. */
     scenario_year: number;
 }
@@ -993,7 +997,7 @@ export interface FormationState {
     home_osid?: string;
     /** Elite reserve base OSID used for return after loan termination/recall. */
     base_osid?: string;
-    /** Sub-segment this brigade is assigned to defend (AoR). Derived each turn. */
+    /** Sub-segment this brigade is assigned to defend (AoR). Materialized at turn boundaries and persisted with the standing-OG snapshot. */
     assigned_sub_segment_id?: string;
     /** Garrison unit — only defends, never attacks. Set from OOB (e.g. VRS 65th Protection Regiment). */
     garrison?: boolean;
@@ -1648,6 +1652,12 @@ export interface PendingProposalReview {
     proposed_value?: string;
 }
 
+/** Durable receipt for an ordinary player-facing autonomy proposal disposition. */
+export interface ProposalDecisionRecord extends PendingProposalReview {
+    accepted: boolean;
+    resolved_turn: number;
+}
+
 /**
  * World-level deterministic bookkeeping (Engine Invariants §11).
  * Conceptually "WorldState": current_turn (weeks), phase, seed.
@@ -1754,6 +1764,8 @@ export interface StateMeta {
     autonomy_overrides?: AutonomyOverride[];
     /** v0.8.4 Phase B: Pending AI proposal reviews at Level 1 (Assisted). Player must accept or reject before they take effect. */
     pending_proposal_reviews?: PendingProposalReview[];
+    /** Durable Records receipt for resolved ordinary autonomy proposals. */
+    proposal_decision_history?: ProposalDecisionRecord[];
     /**
      * LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): frozen endgame snapshot.
      *
@@ -2268,7 +2280,9 @@ export interface GameState {
 
 /**
  * Corps front sector: a corps' managed slice of hostile boundary.
- * Derived each turn (Engine Invariants §13: no serialization of derived state).
+ * Materialized at each turn boundary and persisted as the current standing
+ * order-of-grouping/AoR snapshot. Loading must preserve it byte-for-byte;
+ * rebuilding can relocate formations and is therefore a gameplay mutation.
  * Deterministic: sorted iteration via strictCompare.
  */
 export interface CorpsFrontSector {
@@ -2379,13 +2393,13 @@ militia_pools: Record<string, MilitiaPoolState>;
 /** Faction-level strategic manpower reserve. Excess pool.available from rear municipalities flows here;
      *  under-strength front-line brigades draw from it at reduced rate. Key: FactionId → available manpower. */
 strategic_reserves?: Record<string, number>;
-/** War phase (Brigade AoR Redesign Phase B): Per-settlement militia garrison strength. Derived from militia_pools + org penetration; settlements with a brigade use brigade garrison instead. Recomputed each turn. */
+/** War phase (Brigade AoR Redesign Phase B): Per-settlement militia garrison strength. Derived from militia_pools + org penetration; settlements with a brigade use brigade garrison instead. Recomputed each turn. @persistence derived/transient */
 militia_garrison?: Record<SettlementId, number>;
 /** War phase (Brigade AoR Redesign Phase C): Per-brigade movement state (packing / in_transit / unpacking). When in_transit, brigade has no AoR. */
 brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
 /** War phase (Brigade AoR Redesign Phase C): Pending movement orders (consumed each turn). destination_sids = 1–4 contiguous faction-controlled settlements. */
 brigade_movement_orders?: Record<FormationId, BrigadeMovementOrder>;
-/** Retired compatibility residue from older saves/tools. Live runtime no longer consumes brigade reposition orders. */
+/** Retired compatibility residue from older saves/tools. Live runtime no longer consumes brigade reposition orders. Supported load boundary: every schema accepted by applyMigrations (v0 through CURRENT_SCHEMA_VERSION). @persistence compatibility-only */
 brigade_reposition_orders?: Record<FormationId, { settlement_ids: SettlementId[] }>;
 /** War phase tactical deploy/undeploy staging (consumed each turn). */
 brigade_deploy_orders?: Record<FormationId, BrigadeDeployAction>;
@@ -2419,19 +2433,19 @@ heavy_munitions_reserve?: Record<FactionId, number>;
 front_edges?: FrontEdgeState[];
 /** OSID front-edge snapshot (War phase operational view) for HoI/OSID consumers. */
 war_front_edges_osid?: FrontEdgeState[];
-/** Legacy compatibility snapshot for old saves/tests only. No live turn-pipeline step should rebuild or consume it as frontline truth. */
+/** Legacy compatibility snapshot for old saves/tests only. No live turn-pipeline step should rebuild or consume it as frontline truth. Supported load boundary: every schema accepted by applyMigrations (v0 through CURRENT_SCHEMA_VERSION). @persistence compatibility-only */
 assignable_front_segments?: AssignableFrontSegmentState[];
 // COMPATIBILITY-ONLY: brigade_front_assignment is not written by any live runtime code.
 // It is retained for save/load backward compatibility with pre-v0.8 saves only.
 // Do NOT read this field for frontline truth. Use corps_front_sectors instead.
 // See: docs/40_reports/implemented/20260403_FRONTLINE_AUTHORITY_AND_PLAYER_SHELL_INTEL_REDUCTION.md
-/** Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth. */
+/** Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth. Supported load boundary: every schema accepted by applyMigrations (v0 through CURRENT_SCHEMA_VERSION). @persistence compatibility-only */
 brigade_front_assignment?: Record<FormationId, string | null>;
-/** Legacy theatre compatibility state. Required current-save record; not a live player-shell or turn-pipeline authority. */
+/** Legacy theatre compatibility state. Required current-save record; not a live player-shell or turn-pipeline authority. Supported load boundary: every schema accepted by applyMigrations (v0 through CURRENT_SCHEMA_VERSION). @persistence compatibility-only */
 theatres: Record<string, TheatreState>;
-/** Legacy theatre compatibility assignment. Required current-save record; preserved only for old saves/tools. */
+/** Legacy theatre compatibility assignment. Required current-save record; preserved only for old saves/tools. Supported load boundary: every schema accepted by applyMigrations (v0 through CURRENT_SCHEMA_VERSION). @persistence compatibility-only */
 army_theatre_assignment: Record<FormationId, string>;
-/** Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values. */
+/** Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values. Supported load boundary: every schema accepted by applyMigrations (v0 through CURRENT_SCHEMA_VERSION). @persistence compatibility-only */
 brigade_desired_aor_cap?: Record<FormationId, number>;
 /** Pending brigade posture orders (consumed once per turn). */
 brigade_posture_orders?: BrigadePostureOrder[];
@@ -2483,23 +2497,22 @@ settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
 recruitment_state?: RecruitmentResourceState;
 /** Cumulative casualty ledger (killed, wounded, missing/captured) per faction and formation. */
 casualty_ledger?: CasualtyLedger;
-/** Legacy compatibility cache only. No longer rebuilt in the live war pipeline. */
-/** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
-corps_front_sectors?: Record<string, CorpsFrontSector>;
-/** Active non-exempt field brigades that could not be placed truthfully into any sector this turn. Derived each turn. */
+/** Corps front sectors: materialized current-turn standing OG/AoR snapshot. Rebuilt at turn boundaries and persisted for zero-turn command/UI continuity. @persistence required-persisted */
+corps_front_sectors: Record<string, CorpsFrontSector>;
+/** Active non-exempt field brigades that could not be placed truthfully into any sector this turn. Derived each turn. @persistence derived/transient */
 unresolved_sector_brigades?: FormationId[];
-/** Sector combat power ratings: per-sector offensive/defensive power. Derived each turn after sector partition. */
+/** Sector combat power ratings: per-sector offensive/defensive power. Derived each turn after sector partition. @persistence derived/transient */
 sector_combat_ratings?: Record<string, SectorCombatRating>;
-/** Sector-facing intelligence: per-friendly-sector intelligence records (one per facing enemy sector). Derived each turn. */
-sector_intel?: Record<string, SectorIntelRecord[]>;
-/** Home distance cache: formationId → BFS hop distance from home_osid to location_osid. Derived each turn. */
+/** Sector-facing intelligence: history-bearing confidence and contact memory updated each turn and persisted across save/load. @persistence required-persisted */
+sector_intel: Record<string, SectorIntelRecord[]>;
+/** Home distance cache: formationId → BFS hop distance from home_osid to location_osid. Derived each turn. @persistence derived/transient */
 home_distance_cache?: Record<string, number>;
 /** Fall-1995 mechanic E-A3 (multi-axis simultaneity penalty): count of active
  *  enemy offensive CorpsOperations (phase==='execution') whose objectives
  *  include at least one OSID currently controlled by this defender corps's
  *  faction. Built turn-start in `war_phases.ts` before combat resolution;
  *  read in `combat_math.ts` `computeDefenderPowerBreakdown`. Keyed by defender
- *  corps FormationId. Derived each turn (transient cache; safe to drop). */
+ *  corps FormationId. Derived each turn (transient cache; safe to drop). @persistence derived/transient */
 active_offensives_against_corps?: Record<FormationId, number>;
 /** Player-issued permanent sector assignments. Overrides bot assignment in classifyBrigadesByTerritory.
  *  Keyed by brigadeId → sector_id. Persists until manually cleared. */

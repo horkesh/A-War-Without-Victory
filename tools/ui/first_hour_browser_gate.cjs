@@ -768,7 +768,7 @@ async function verifyFirstHourDecisionRoomKnowledgeBoundary(page, summary, flow)
     const cards = Array.from(document.querySelectorAll('[data-testid^="command-card-"]'))
       .filter((el) => el instanceof HTMLElement && isVisible(el) && !String(el.getAttribute('data-testid')).includes('fallback'))
       .sort((a, b) => {
-        const urgentDelta = Number(b.getAttribute('data-awwv-urgent-count') ?? 0) - Number(a.getAttribute('data-awwv-urgent-count') ?? 0);
+        const urgentDelta = Number(b.getAttribute('data-awwv-required-count') ?? 0) - Number(a.getAttribute('data-awwv-required-count') ?? 0);
         if (urgentDelta !== 0) return urgentDelta;
         return Number(b.getAttribute('data-awwv-count') ?? 0) - Number(a.getAttribute('data-awwv-count') ?? 0);
       });
@@ -816,7 +816,7 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   if (await clickSelectorIfVisible(page, '[data-testid="desk-close-overlay"]')) {
     await waitForSelectorHidden(page, '[data-testid="desk-close-overlay"]');
   }
-  await page.keyboard.press('h');
+  await clickSelector(page, '[data-testid="warroom-toolbar-staff"]', 'Army HQ Warroom route');
   await waitForVisibleText(page, 'BRIEFING');
   await clickByText(page, 'RECORDS');
   await waitForVisibleText(page, 'Archive Routes');
@@ -824,11 +824,11 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   await captureEvidence(page, summary, 'army_hq_records');
   await waitForVisibleText(page, 'Latest Filed Decision');
   await waitForVisibleText(page, flow.decisionTitle);
-  await waitForVisibleText(page, 'Chronicle Filed');
+  await waitForVisibleText(page, 'Chronicle Decisions');
   await waitForVisibleText(page, '1');
   const recordsSummaryText = await visibleSurfaceText(page, [
     'Archive Routes',
-    'Chronicle Filed',
+    'Chronicle Decisions',
     flow.decisionTitle,
   ]);
   assertNoFirstHourKnowledgeLeaks('Army HQ Records summary', recordsSummaryText);

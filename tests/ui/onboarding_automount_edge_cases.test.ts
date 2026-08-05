@@ -71,7 +71,7 @@ describe('Codex #347 (P2) — onboarding auto-mount edge cases (task #85)', () =
       expect(source).toContain('chronicleOpen ||');
       expect(source).toContain('codexOpen ||');
       expect(source).toContain('const tacticalChromeVisible = !presidentialBlockingSurfaceActive;');
-      expect(source).toContain('{tacticalChromeVisible && (');
+      expect(source).toContain('{tacticalChromeVisible && fieldOperationPlanFocus === null && (');
     });
 
     it('OnboardingOverlayWrapper passes a null bridge when IPC is unavailable (mirrors SettingsScreen)', () => {

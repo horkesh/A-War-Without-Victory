@@ -11,10 +11,35 @@ describe('desktop pmtiles protocol route rewriting', () => {
     segs: string[]
   ) => Response | null;
   let isPathInside: (baseDir: string, filePath: string) => boolean;
+  let productionStaticHelpers: {
+    isPathInside: (baseDir: string, filePath: string) => boolean;
+    buildPackagedFileCacheHeaders: (
+      pathname: string,
+      stat: { size: number; mtimeMs: number },
+      packaged: boolean,
+    ) => Record<string, string>;
+    buildStaticFileResponseMetadata: (
+      pathname: string,
+      stat: { size: number; mtimeMs: number },
+      packaged: boolean,
+      contentType: string,
+      rangeHeader?: string | null,
+      ifNoneMatch?: string | null,
+    ) => { status: number; headers: Record<string, string>; range: { start: number; end: number } | null };
+  };
 
   beforeAll(async () => {
     // @ts-expect-error CJS helper module has no TypeScript declaration.
     ({ buildDataDerivedResponse, isPathInside } = await import('../src/desktop/protocol_data_route.cjs'));
+
+    const mainSource = fs.readFileSync(path.join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const helperStart = mainSource.indexOf("const STATIC_RESPONSE_EXPOSE_HEADERS =");
+    const helperEnd = mainSource.indexOf('function getMapTransitionSaveRoot()', helperStart);
+    const helperSource = mainSource.slice(helperStart, helperEnd);
+    productionStaticHelpers = Function(
+      'path',
+      `${helperSource}\nreturn { isPathInside, buildPackagedFileCacheHeaders, buildStaticFileResponseMetadata };`,
+    )(path) as typeof productionStaticHelpers;
   });
 
   const style = {
@@ -61,6 +86,54 @@ describe('desktop pmtiles protocol route rewriting', () => {
     expect(body).toBe('2345');
 
     fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('uses one behavioral production contract for packaged 200, 206, 304, and 416 responses', () => {
+    const stat = { size: 10, mtimeMs: 1_000 };
+    const full = productionStaticHelpers.buildStaticFileResponseMetadata(
+      '/data/derived/tiles/sample.pmtiles', stat, true, 'application/octet-stream', null, null,
+    );
+    const range = productionStaticHelpers.buildStaticFileResponseMetadata(
+      '/data/derived/tiles/sample.pmtiles', stat, true, 'application/octet-stream', 'bytes=2-5', null,
+    );
+    const conditionalRange = productionStaticHelpers.buildStaticFileResponseMetadata(
+      '/data/derived/tiles/sample.pmtiles', stat, true, 'application/octet-stream', 'bytes=2-5', full.headers.ETag,
+    );
+    const invalidRange = productionStaticHelpers.buildStaticFileResponseMetadata(
+      '/data/derived/tiles/sample.pmtiles', stat, true, 'application/octet-stream', 'bytes=20-30', null,
+    );
+
+    expect(full.status).toBe(200);
+    expect(range.status).toBe(206);
+    expect(conditionalRange.status).toBe(304);
+    expect(invalidRange.status).toBe(416);
+    expect(range.headers.ETag).toBe(full.headers.ETag);
+    expect(range.headers['Cache-Control']).toBe(full.headers['Cache-Control']);
+    expect(invalidRange.headers['Accept-Ranges']).toBe('bytes');
+    expect(invalidRange.headers['Access-Control-Expose-Headers']).toContain('Accept-Ranges');
+  });
+
+  it('only marks Vite content-hashed assets immutable and disables validators in development', () => {
+    const stat = { size: 10, mtimeMs: 1_000 };
+    const icon = productionStaticHelpers.buildPackagedFileCacheHeaders('/assets/ui/icons/icon_warning.svg', stat, true);
+    const ordinaryFont = productionStaticHelpers.buildPackagedFileCacheHeaders('/assets/ui/fonts/IBMPlexSans-SemiBold.ttf', stat, true);
+    const viteAsset = productionStaticHelpers.buildPackagedFileCacheHeaders('/assets/tactical_map-CNcXGW38.js', stat, true);
+    const development = productionStaticHelpers.buildStaticFileResponseMetadata(
+      '/assets/tactical_map-CNcXGW38.js', stat, false, 'application/javascript', null, '"a-3e8"',
+    );
+
+    expect(icon['Cache-Control']).toBe('no-cache');
+    expect(ordinaryFont['Cache-Control']).toBe('no-cache');
+    expect(viteAsset['Cache-Control']).toBe('public, max-age=31536000, immutable');
+    expect(development.status).toBe(200);
+    expect(development.headers['Cache-Control']).toBe('no-store');
+    expect(development.headers.ETag).toBeUndefined();
+  });
+
+  it('uses boundary-safe production containment for sibling-prefix paths', () => {
+    const base = path.resolve('resources', 'app');
+    expect(productionStaticHelpers.isPathInside(base, path.join(base, 'assets', 'map.js'))).toBe(true);
+    expect(productionStaticHelpers.isPathInside(base, path.resolve(base, '..', 'app.asar'))).toBe(false);
   });
 
   it('blocks traversal in derived data route', () => {

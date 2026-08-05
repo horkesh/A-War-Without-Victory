@@ -6,12 +6,16 @@
 
 
 import type { PhaseName } from './game_state.js';
+import { proposalDecisionIdentity } from './proposal_decision_history.js';
 import { COMMAND_AUTHORITY_ALLOWED_INCOME_SOURCES } from '../shared/commandAuthorityEconomy.js';
 
 
 /** Known phase names (must match PhaseName in game_state.ts). */
 const KNOWN_PHASES: readonly PhaseName[] = ['peace', 'war'];
 const CANONICAL_PLAYER_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
+const PROPOSAL_DECISION_DOMAINS = ['military', 'political', 'events', 'ops'] as const;
+const PROPOSAL_OPPORTUNITY_DECISIONS = ['approve', 'delay', 'redirect', 'under_resource', 'decline'] as const;
+const PROPOSAL_COMMITMENT_PROFILES = ['minimum', 'standard', 'reinforced'] as const;
 const DOCTRINE_OVERRIDE_FORCED_STANCES = ['defensive', 'balanced', 'offensive', 'reorganize'] as const;
 const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
 const MUNICIPALITY_SUPPORT_TYPES = ['weapons_shipment', 'staff_priority', 'croatian_support_package'] as const;
@@ -87,6 +91,9 @@ const BRIGADE_MOVEMENT_STATUSES = ['deployed', 'packing', 'in_transit', 'unpacki
 const BRIGADE_MOVEMENT_STANCES = ['combat', 'column'] as const;
 const BRIGADE_DEPLOY_ACTIONS = ['deploy', 'undeploy'] as const;
 const BRIGADE_POSTURES = ['hold', 'defend', 'defend_at_all_costs', 'elastic_defense', 'counterattack', 'dig_in', 'attack', 'assault'] as const;
+const SECTOR_INTEL_STRENGTH_CATEGORIES = ['unknown', 'thin', 'moderate', 'dense', 'fortress'] as const;
+const SECTOR_INTEL_POSTURES = ['unknown', 'defensive', 'entrenched', 'offensive_prep'] as const;
+const SECTOR_INTEL_SOURCES = ['passive_contact', 'patrol', 'scout', 'combat'] as const;
 const OP_INJECTION_CHECKS = [
     'staging_adjacency',
     'chain_gap',
@@ -185,6 +192,90 @@ function isNonNegativeInteger(value: unknown): value is number {
 
 function isNonEmptyString(value: unknown): value is string {
     return typeof value === 'string' && value.length > 0;
+}
+
+function validateProposalDecisionHistory(value: unknown, errors: string[]): void {
+    if (!Array.isArray(value)) {
+        errors.push('meta.proposal_decision_history must be an array when present');
+        return;
+    }
+    const seenIdentities = new Set<string>();
+    for (let index = 0; index < value.length; index += 1) {
+        const record = value[index];
+        const path = `meta.proposal_decision_history[${index}]`;
+        if (!isRecord(record)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        for (const key of ['id', 'description', 'proposed_action'] as const) {
+            if (!isNonEmptyString(record[key])) errors.push(`${path}.${key} must be a non-empty string`);
+        }
+        if (typeof record.domain !== 'string'
+            || !PROPOSAL_DECISION_DOMAINS.includes(record.domain as typeof PROPOSAL_DECISION_DOMAINS[number])) {
+            errors.push(`${path}.domain must be one of: ${PROPOSAL_DECISION_DOMAINS.join(', ')}`);
+        }
+        if (!isCanonicalPlayerFaction(record.faction)) {
+            errors.push(`${path}.faction must be one of: RBiH, RS, HRHB`);
+        }
+        if (!isNonNegativeInteger(record.turn)) {
+            errors.push(`${path}.turn must be a non-negative integer`);
+        }
+        if (!isNonNegativeInteger(record.resolved_turn)) {
+            errors.push(`${path}.resolved_turn must be a non-negative integer`);
+        } else if (isNonNegativeInteger(record.turn) && record.resolved_turn < record.turn) {
+            errors.push(`${path}.resolved_turn must be greater than or equal to turn`);
+        }
+        if (isNonEmptyString(record.id) && isNonNegativeInteger(record.resolved_turn)) {
+            const identity = proposalDecisionIdentity({ id: record.id, resolved_turn: record.resolved_turn });
+            if (seenIdentities.has(identity)) {
+                errors.push(`${path} duplicates durable identity ${identity}`);
+            } else {
+                seenIdentities.add(identity);
+            }
+        }
+        if (typeof record.accepted !== 'boolean') {
+            errors.push(`${path}.accepted must be boolean`);
+        }
+        for (const key of ['current_value', 'proposed_value'] as const) {
+            if (record[key] !== undefined && typeof record[key] !== 'string') {
+                errors.push(`${path}.${key} must be a string when present`);
+            }
+        }
+        if (record.opportunity_decision !== undefined && (
+            typeof record.opportunity_decision !== 'string'
+            || !PROPOSAL_OPPORTUNITY_DECISIONS.includes(
+                record.opportunity_decision as typeof PROPOSAL_OPPORTUNITY_DECISIONS[number],
+            )
+        )) {
+            errors.push(
+                `${path}.opportunity_decision must be one of: ${PROPOSAL_OPPORTUNITY_DECISIONS.join(', ')}`,
+            );
+        }
+        if (record.opportunity_decision_options !== undefined) {
+            const optionsPath = `${path}.opportunity_decision_options`;
+            if (!isRecord(record.opportunity_decision_options)) {
+                errors.push(`${optionsPath} must be an object when present`);
+            } else {
+                const options = record.opportunity_decision_options;
+                if (options.redirect_variant_id !== undefined && typeof options.redirect_variant_id !== 'string') {
+                    errors.push(`${optionsPath}.redirect_variant_id must be a string when present`);
+                }
+                if (options.delay_turns !== undefined && !isNonNegativeInteger(options.delay_turns)) {
+                    errors.push(`${optionsPath}.delay_turns must be a non-negative integer when present`);
+                }
+                if (options.commitment_profile !== undefined && (
+                    typeof options.commitment_profile !== 'string'
+                    || !PROPOSAL_COMMITMENT_PROFILES.includes(
+                        options.commitment_profile as typeof PROPOSAL_COMMITMENT_PROFILES[number],
+                    )
+                )) {
+                    errors.push(
+                        `${optionsPath}.commitment_profile must be one of: ${PROPOSAL_COMMITMENT_PROFILES.join(', ')}`,
+                    );
+                }
+            }
+        }
+    }
 }
 
 function isCivilianCasualtiesRecord(value: unknown): boolean {
@@ -1003,6 +1094,170 @@ function validateFiniteNonNegativeNumberRecord(value: unknown, path: string, err
         if (!isFiniteNonNegativeNumber(entry)) {
             errors.push(`${path}.${key} must be a finite non-negative number`);
         }
+    }
+}
+
+function validateCorpsFrontSectors(value: unknown, errors: string[]): void {
+    const rootPath = 'military.corps_front_sectors';
+    if (!isRecord(value)) {
+        errors.push(`${rootPath} must be an object`);
+        return;
+    }
+    for (const sectorKey of Object.keys(value).sort(strictCompare)) {
+        const sector = value[sectorKey];
+        const path = `${rootPath}.${sectorKey}`;
+        if (!isRecord(sector)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        for (const field of ['sector_id', 'corps_id', 'faction'] as const) {
+            if (!isNonEmptyString(sector[field])) {
+                errors.push(`${path}.${field} must be a non-empty string`);
+            }
+        }
+        if (sector.sector_id !== sectorKey) {
+            errors.push(`${path}.sector_id must match its record key`);
+        }
+        for (const field of [
+            'opposing_factions',
+            'edge_ids',
+            'territory_osids',
+            'assigned_brigade_ids',
+            'reserve_brigade_ids',
+        ] as const) {
+            if (!isStringArray(sector[field])) {
+                errors.push(`${path}.${field} must be a string array`);
+            }
+        }
+        if (sector.rear_brigade_ids !== undefined && !isStringArray(sector.rear_brigade_ids)) {
+            errors.push(`${path}.rear_brigade_ids must be a string array when present`);
+        }
+        if (!isNonNegativeInteger(sector.length_edges)) {
+            errors.push(`${path}.length_edges must be a non-negative integer`);
+        }
+        for (const field of ['density', 'threat_ratio', 'defensive_power'] as const) {
+            if (!isFiniteNonNegativeNumber(sector[field])) {
+                errors.push(`${path}.${field} must be a finite non-negative number`);
+            }
+        }
+        if (!isSectorStanceValue(sector.sector_stance)) {
+            errors.push(`${path}.sector_stance must be one of: ${SECTOR_STANCES.join(', ')}`);
+        }
+        if (sector.stance_source !== 'bot' && sector.stance_source !== 'player') {
+            errors.push(`${path}.stance_source must be bot or player`);
+        }
+        if (sector.unstaffed_front !== undefined && typeof sector.unstaffed_front !== 'boolean') {
+            errors.push(`${path}.unstaffed_front must be a boolean when present`);
+        }
+        if (sector.must_hold !== undefined && typeof sector.must_hold !== 'boolean') {
+            errors.push(`${path}.must_hold must be a boolean when present`);
+        }
+        if (sector.must_hold_source !== undefined
+            && !['scenario', 'bot', 'player'].includes(sector.must_hold_source as string)) {
+            errors.push(`${path}.must_hold_source must be scenario, bot, or player when present`);
+        }
+        for (const field of ['must_hold_reason', 'display_name'] as const) {
+            if (sector[field] !== undefined && !isNonEmptyString(sector[field])) {
+                errors.push(`${path}.${field} must be a non-empty string when present`);
+            }
+        }
+        if (!Array.isArray(sector.sub_segments)) {
+            errors.push(`${path}.sub_segments must be an array`);
+            continue;
+        }
+        sector.sub_segments.forEach((subSegment, index) => {
+            const subPath = `${path}.sub_segments[${index}]`;
+            if (!isRecord(subSegment)) {
+                errors.push(`${subPath} must be an object`);
+                return;
+            }
+            if (!isNonEmptyString(subSegment.sub_segment_id)) {
+                errors.push(`${subPath}.sub_segment_id must be a non-empty string`);
+            }
+            for (const field of ['edge_ids', 'friendly_osids', 'enemy_osids', 'primary_brigade_ids'] as const) {
+                if (!isStringArray(subSegment[field])) {
+                    errors.push(`${subPath}.${field} must be a string array`);
+                }
+            }
+            if (!isNonNegativeInteger(subSegment.length_edges)) {
+                errors.push(`${subPath}.length_edges must be a non-negative integer`);
+            }
+            if (subSegment.gap !== undefined && typeof subSegment.gap !== 'boolean') {
+                errors.push(`${subPath}.gap must be a boolean when present`);
+            }
+        });
+    }
+}
+
+function validateSectorIntel(value: unknown, errors: string[]): void {
+    const rootPath = 'military.sector_intel';
+    if (!isRecord(value)) {
+        errors.push(`${rootPath} must be an object when present`);
+        return;
+    }
+    for (const sectorId of Object.keys(value).sort(strictCompare)) {
+        const records = value[sectorId];
+        const sectorPath = `${rootPath}.${sectorId}`;
+        if (!Array.isArray(records)) {
+            errors.push(`${sectorPath} must be an array`);
+            continue;
+        }
+        records.forEach((record, index) => {
+            const path = `${sectorPath}[${index}]`;
+            if (!isRecord(record)) {
+                errors.push(`${path} must be an object`);
+                return;
+            }
+            for (const field of ['enemy_sector_id', 'enemy_faction', 'enemy_corps_id'] as const) {
+                if (!isNonEmptyString(record[field])) {
+                    errors.push(`${path}.${field} must be a non-empty string`);
+                }
+            }
+            for (const field of ['front_edge_count', 'turns_in_contact', 'last_updated_turn'] as const) {
+                if (!isNonNegativeInteger(record[field])) {
+                    errors.push(`${path}.${field} must be a non-negative integer`);
+                }
+            }
+            if (!SECTOR_INTEL_STRENGTH_CATEGORIES.includes(record.strength_category as typeof SECTOR_INTEL_STRENGTH_CATEGORIES[number])) {
+                errors.push(`${path}.strength_category must be one of: ${SECTOR_INTEL_STRENGTH_CATEGORIES.join(', ')}`);
+            }
+            if (!SECTOR_INTEL_POSTURES.includes(record.posture_observed as typeof SECTOR_INTEL_POSTURES[number])) {
+                errors.push(`${path}.posture_observed must be one of: ${SECTOR_INTEL_POSTURES.join(', ')}`);
+            }
+            if (typeof record.offensive_signs !== 'boolean') {
+                errors.push(`${path}.offensive_signs must be a boolean`);
+            }
+            if (!isFiniteNumber(record.confidence) || record.confidence < 0 || record.confidence > 1) {
+                errors.push(`${path}.confidence must be a finite number in [0,1]`);
+            }
+            if (!isStringArray(record.visible_brigade_ids)) {
+                errors.push(`${path}.visible_brigade_ids must be a string array`);
+            }
+            if (record.osid_confidence !== undefined) {
+                const osidEntries = record.osid_confidence;
+                if (!Array.isArray(osidEntries)) {
+                    errors.push(`${path}.osid_confidence must be an array when present`);
+                } else {
+                    osidEntries.forEach((entry, osidIndex) => {
+                        const osidPath = `${path}.osid_confidence[${osidIndex}]`;
+                        if (!isRecord(entry)) {
+                            errors.push(`${osidPath} must be an object`);
+                            return;
+                        }
+                        if (!isNonEmptyString(entry.osid)) {
+                            errors.push(`${osidPath}.osid must be a non-empty string`);
+                        }
+                        if (!isFiniteNumber(entry.confidence) || entry.confidence < 0 || entry.confidence > 1) {
+                            errors.push(`${osidPath}.confidence must be a finite number in [0,1]`);
+                        }
+                        if (!Array.isArray(entry.sources)
+                            || entry.sources.some((source) => !SECTOR_INTEL_SOURCES.includes(source as typeof SECTOR_INTEL_SOURCES[number]))) {
+                            errors.push(`${osidPath}.sources must contain only: ${SECTOR_INTEL_SOURCES.join(', ')}`);
+                        }
+                    });
+                }
+            }
+        });
     }
 }
 
@@ -3313,6 +3568,8 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     // every load. Absence must NOT hard-reject a same-version v36 state (the Codex
     // P1 load-break); a present value is still type-checked.
     { version: 36, path: 'displacement.displacement_flows_by_osid', check: isRecord, optionalWhenAbsent: true },
+    { version: 37, path: 'military.corps_front_sectors', check: isRecord },
+    { version: 37, path: 'military.sector_intel', check: isRecord },
 ];
 
 /**
@@ -3426,6 +3683,9 @@ export function validateGameStateShape(
             }
             if ('game_over' in m && m.game_over !== undefined && typeof m.game_over !== 'boolean') {
                 errors.push('meta.game_over must be boolean when present');
+            }
+            if ('proposal_decision_history' in m && m.proposal_decision_history !== undefined) {
+                validateProposalDecisionHistory(m.proposal_decision_history, errors);
             }
             if ('outcome' in m && m.outcome !== undefined && m.outcome !== null && typeof m.outcome !== 'string') {
                 errors.push('meta.outcome must be string or null when present');
@@ -3647,6 +3907,12 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'active_offensives_against_corps' in military && military.active_offensives_against_corps !== undefined) {
         validateNonNegativeIntegerRecord(military.active_offensives_against_corps, 'military.active_offensives_against_corps', errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'corps_front_sectors' in military && military.corps_front_sectors !== undefined) {
+        validateCorpsFrontSectors(military.corps_front_sectors, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'sector_intel' in military && military.sector_intel !== undefined) {
+        validateSectorIntel(military.sector_intel, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'casualty_ledger' in military && military.casualty_ledger !== undefined) {
         validateCasualtyLedger(military.casualty_ledger, errors);

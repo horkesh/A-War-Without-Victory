@@ -2,7 +2,7 @@
  * CommandCardStrip — the presidential command-surface card strip.
  *
  * Renders the six command-surface category cards (presidentialCategories.ts)
- * with live pending-counts + urgent pips derived from the Presidential Decision
+ * with live pending-counts + presidential-action pips derived from the Presidential Decision
  * Room view. Clicking a card deep-links the Decision Room to that exact
  * six-card category focus (via decisionRoomLensRequest) and invokes
  * `onOpenCategory` so the host can open the Warroom-native Decision Room

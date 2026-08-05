@@ -14,10 +14,11 @@ import {
 } from '../../data/decisionConsequenceLedger';
 import {
   buildConsequenceReceipts,
+  decisionSourceRecordId,
   type ConsequenceReceipt,
 } from '../../data/consequenceReceipts';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
-import { t, type MessageKey } from '../../i18n';
+import { t, useLocale, type MessageKey } from '../../i18n';
 import { useGameStore } from '../../store/gameStore';
 import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeDisplayLabel } from '../../utils/playerSafeText';
@@ -25,6 +26,7 @@ import { openChronicleDecisionRecord } from '../../utils/shellNavigation';
 
 const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKey> = {
   'event-decision': 'decisionConsequences.family.eventDecision',
+  'autonomy-proposal': 'decisionConsequences.family.autonomyProposal',
   'operation-opportunity': 'decisionConsequences.family.operationOpportunity',
   'army-reserve': 'decisionConsequences.family.armyReserve',
   'peace-proposal': 'decisionConsequences.family.peaceProposal',
@@ -106,6 +108,12 @@ function tallyReceipts(receipts: readonly ConsequenceReceipt[]): {
   return counts;
 }
 
+function receiptStatusLabel(receipt: ConsequenceReceipt): string {
+  if (receipt.status === 'confirmed') return t('decisionHistory.receipts.confirmed', { count: 1 });
+  if (receipt.status === 'pending') return t('decisionHistory.receipts.pending', { count: 1 });
+  return t('decisionHistory.receipts.contradicted', { count: 1 });
+}
+
 function DecisionHistoryRecordRow({
   decision,
   eventCatalog,
@@ -132,6 +140,7 @@ function DecisionHistoryRecordRow({
   const optionLabel = resolveOptionLabel(decision, eventCatalog);
   const counts = tallyReceipts(receipts);
   const hasReceipts = receipts.length > 0;
+  const sourceRecordId = decisionSourceRecordId(decision.event_id, decision.response_id, decision.turn);
   const descendants = useMemo(
     () => (isExpanded ? getCausalDescendants(decision.event_id, rawState) : []),
     [isExpanded, decision.event_id, rawState],
@@ -140,6 +149,7 @@ function DecisionHistoryRecordRow({
   return (
     <li
       data-testid="decision-history-row"
+      data-source-record-id={sourceRecordId}
       {...(diagMode ? { 'data-event-id': decision.event_id, 'data-response-id': decision.response_id } : {})}
       data-turn={decision.turn}
       className="rounded border border-panel-border/70 bg-black/20"
@@ -237,6 +247,44 @@ function DecisionHistoryRecordRow({
               {t('decisionHistory.descendants.empty')}
             </div>
           )}
+          {hasReceipts && (
+            <div className="mb-2">
+              <div className="mb-1 text-xs uppercase tracking-[0.12em] text-text-muted">
+                {t('decisionHistory.receipts.heading', { count: receipts.length })}
+              </div>
+              <ul data-testid="decision-history-receipts-list" className="space-y-1">
+                {receipts.map((receipt) => (
+                  <li
+                    key={receipt.receiptRecordId}
+                    data-testid="decision-history-receipt-row"
+                    data-receipt-record-id={receipt.receiptRecordId}
+                    data-source-record-id={receipt.sourceRecordId}
+                    className="rounded border border-panel-border/50 bg-black/20 px-2 py-1.5 text-xs text-text-secondary"
+                  >
+                    <div className="font-semibold text-text-primary">{receipt.predictedLabel}</div>
+                    <div className="mt-0.5 flex items-center justify-between gap-2">
+                      <span>
+                        {receiptStatusLabel(receipt)}
+                        {receipt.firedTurn !== null ? ` · ${turnToDateString(receipt.firedTurn)}` : ''}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const sourceRow = [...document.querySelectorAll<HTMLElement>(
+                            '[data-testid="decision-history-row"]',
+                          )].find((row) => row.dataset.sourceRecordId === receipt.sourceRecordId);
+                          sourceRow?.querySelector<HTMLElement>('button')?.focus();
+                        }}
+                        className="text-accent-gold hover:underline"
+                      >
+                        {t('decisionHistory.receipts.backToSource')}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {sourceNoteExcerpt && (
             <div
               data-testid="decision-history-source-note"
@@ -259,24 +307,25 @@ function DecisionHistoryRecordsSection({
 }: {
   eventCatalog?: ReadonlyMap<string, EventDefinition>;
 }) {
+  const [locale] = useLocale();
   const loadedState = useGameStore((s) => s.loadedGameState);
   const diagMode = useGameStore((s) => s.diagMode);
-  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [expandedSourceRecordId, setExpandedSourceRecordId] = useState<string | null>(null);
   const rawState = loadedState?.rawGameState;
   const decisions = useMemo(
     () => (rawState && eventCatalog ? getPlayerDecisionHistory(rawState) : []),
     [rawState, eventCatalog],
   );
-  const receiptsByEvent = useMemo(() => {
+  const receiptsBySourceRecord = useMemo(() => {
     const map = new Map<string, ConsequenceReceipt[]>();
     if (!rawState || !eventCatalog) return map;
-    for (const receipt of buildConsequenceReceipts(rawState, eventCatalog)) {
-      const arr = map.get(receipt.decisionEventId) ?? [];
+    for (const receipt of buildConsequenceReceipts(rawState, eventCatalog, locale)) {
+      const arr = map.get(receipt.sourceRecordId) ?? [];
       arr.push(receipt);
-      map.set(receipt.decisionEventId, arr);
+      map.set(receipt.sourceRecordId, arr);
     }
     return map;
-  }, [rawState, eventCatalog]);
+  }, [rawState, eventCatalog, locale]);
 
   if (!rawState || !eventCatalog) return null;
 
@@ -311,20 +360,27 @@ function DecisionHistoryRecordsSection({
         </div>
       ) : (
         <ul data-testid="decision-history-list" className="mt-3 space-y-2">
-          {decisions.map((decision) => (
-            <DecisionHistoryRecordRow
-              key={`${decision.event_id}::${decision.turn}::${decision.response_id}`}
-              decision={decision}
-              eventCatalog={eventCatalog}
-              rawState={rawState}
-              receipts={receiptsByEvent.get(decision.event_id) ?? []}
-              diagMode={diagMode}
-              isExpanded={expandedEventId === decision.event_id}
-              onToggle={() => setExpandedEventId(
-                expandedEventId === decision.event_id ? null : decision.event_id,
-              )}
-            />
-          ))}
+          {decisions.map((decision) => {
+            const sourceRecordId = decisionSourceRecordId(
+              decision.event_id,
+              decision.response_id,
+              decision.turn,
+            );
+            return (
+              <DecisionHistoryRecordRow
+                key={sourceRecordId}
+                decision={decision}
+                eventCatalog={eventCatalog}
+                rawState={rawState}
+                receipts={receiptsBySourceRecord.get(sourceRecordId) ?? []}
+                diagMode={diagMode}
+                isExpanded={expandedSourceRecordId === sourceRecordId}
+                onToggle={() => setExpandedSourceRecordId(
+                  expandedSourceRecordId === sourceRecordId ? null : sourceRecordId,
+                )}
+              />
+            );
+          })}
         </ul>
       )}
     </section>

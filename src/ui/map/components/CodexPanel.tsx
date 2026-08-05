@@ -29,7 +29,13 @@ import { Z } from '../../shared/zIndex.js';
 import type { EventDefinition } from '../../../sim/events/event_types.js';
 import type { GameState } from '../../../state/game_state.js';
 import { getEventChainSummary } from '../../../sim/events/causality_query.js';
+import {
+    buildGhostEntries,
+    type GhostRecordClassification,
+} from '../../../sim/codex/dynamic_section_builder.js';
 import { turnToDateString } from '../utils/formatters.js';
+import { parseGhostEntryProse, resolveGhostEntryProse } from '../data/ghostEntryProse.js';
+import { buildConsequenceReceipts } from '../data/consequenceReceipts.js';
 
 const YEARS = [1992, 1993, 1994, 1995] as const;
 
@@ -53,6 +59,15 @@ function formatAvailableCount(count: number): string {
     return count === 1
         ? t('codex.available.one')
         : t('codex.available.many', { count });
+}
+
+function ghostClassificationLabel(classification: GhostRecordClassification): string {
+    switch (classification) {
+        case 'path_not_taken': return t('codex.record.pathNotTaken');
+        case 'audit_context': return t('codex.record.auditContext');
+        case 'divergence_context':
+        default: return t('codex.record.divergenceContext');
+    }
 }
 
 /** A1a: tier order for grouping/sorting within a year (FIXED → AHISTORICAL). */
@@ -131,6 +146,14 @@ interface CodexPanelProps {
      * degradation rule as `eventCatalog`.
      */
     state?: GameState;
+}
+
+/** Closed Codex panels do not pay the dynamic decision/causality projection cost. */
+export function shouldProjectLiveDynamicCodex(
+    isOpen: boolean,
+    state: GameState | undefined,
+): state is GameState {
+    return isOpen && state !== undefined;
 }
 
 /** Phase H Packet 5 — Maximum number of per-event rows rendered inside any
@@ -287,6 +310,21 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
         return { fired, enabled, closed, summary };
     }, [state, eventCatalog]);
 
+    // Canonical live Dynamic Codex path. The app supplies the raw GameState,
+    // so the builder evaluates the same nested owner paths as the engine.
+    const liveDynamicCodex = useMemo(() => {
+        if (!shouldProjectLiveDynamicCodex(isOpen, state)) return { ghosts: [], receipts: [] };
+        const currentTurn = state.meta?.turn ?? loadedGameState?.turn ?? 0;
+        try {
+            return {
+                ghosts: buildGhostEntries(state, currentTurn),
+                receipts: buildConsequenceReceipts(state, eventCatalog, locale),
+            };
+        } catch {
+            return { ghosts: [], receipts: [] };
+        }
+    }, [isOpen, state, eventCatalog, locale, loadedGameState?.turn]);
+
     if (!isOpen) return null;
 
     return (
@@ -318,6 +356,83 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                     the linked codex essay. Rows with a null essayId surface the
                     dilemma without an essay link. Renders nothing when the spine
                     is empty/absent (flag-off / pre-Thread-2 saves). */}
+                {(liveDynamicCodex.receipts.length > 0 || liveDynamicCodex.ghosts.length > 0) && (
+                    <section
+                        data-testid="codex-live-campaign-records"
+                        className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2 max-h-44 overflow-y-auto"
+                    >
+                        <div className="text-amber-400 text-xs font-bold tracking-[0.12em] uppercase mb-1.5">
+                            {t('codex.campaignContext.title')}
+                        </div>
+                        <ul className="space-y-2">
+                            {liveDynamicCodex.receipts.map((receipt) => (
+                                <li
+                                    key={receipt.id}
+                                    data-testid="codex-realized-receipt"
+                                    data-receipt-record-id={receipt.receiptRecordId}
+                                    data-claim-predicate={receipt.claimPredicate.expression}
+                                    data-claim-owner-paths={receipt.claimPredicate.owner_paths.join('|')}
+                                    className="text-xs leading-relaxed text-neutral-300"
+                                >
+                                    <div className="font-semibold text-neutral-200">
+                                        {t('chronicle.generated.consequence.title', {
+                                            predictedLabel: receipt.predictedLabel,
+                                        })}
+                                    </div>
+                                    <div className="mt-1 text-neutral-400">
+                                        {t('chronicle.generated.consequence.detail', {
+                                            decisionOptionLabel: receipt.decisionOptionLabel,
+                                            date: turnToDateString(receipt.decisionTurn),
+                                        })}
+                                    </div>
+                                </li>
+                            ))}
+                            {liveDynamicCodex.ghosts.map((ghost) => {
+                                const prose = resolveGhostEntryProse(ghost.ghost_id, locale);
+                                const proseBlocks = prose === null
+                                    ? []
+                                    : parseGhostEntryProse(prose, ghost.classification);
+                                const headingIndex = proseBlocks.findIndex((block) => block.kind === 'heading');
+                                const rowTitle = headingIndex >= 0
+                                    ? proseBlocks[headingIndex].text
+                                    : t('chronicle.card.ghost');
+                                const bodyBlocks = headingIndex >= 0
+                                    ? proseBlocks.filter((_block, index) => index !== headingIndex)
+                                    : proseBlocks;
+                                return (
+                                    <li
+                                        key={ghost.ghost_id}
+                                        data-testid="codex-live-ghost"
+                                        data-ghost-id={ghost.ghost_id}
+                                        data-ghost-classification={ghost.classification}
+                                        data-claim-predicate={ghost.claim_predicate.expression}
+                                        data-claim-owner-paths={ghost.claim_predicate.owner_paths.join('|')}
+                                        className="text-xs leading-relaxed text-neutral-300"
+                                    >
+                                        <div className="font-semibold text-neutral-200">
+                                            {rowTitle}
+                                        </div>
+                                        <div className="text-[12px] uppercase tracking-[0.1em] text-neutral-500">
+                                            {ghostClassificationLabel(ghost.classification)}
+                                        </div>
+                                        {bodyBlocks.length > 0 && (
+                                            <div data-testid="codex-live-ghost-prose" className="mt-1 space-y-1 text-neutral-400">
+                                                {bodyBlocks.map((block, index) => block.kind === 'heading' ? (
+                                                    <div key={index} className="font-semibold text-neutral-300">
+                                                        {block.text}
+                                                    </div>
+                                                ) : (
+                                                    <p key={index}>{block.text}</p>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </section>
+                )}
+
                 {visibleDilemmaSpine.length > 0 && (
                     <div
                         data-testid="codex-dilemma-spine-section"

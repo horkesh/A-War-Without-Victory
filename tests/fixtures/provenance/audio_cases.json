@@ -1,0 +1,151 @@
+{
+  "valid": {
+    "cues": [
+      {
+        "id": "cue_provided",
+        "category": "ui",
+        "assetStatus": "provided",
+        "filePath": "audio/ui/cue_provided.ogg"
+      },
+      {
+        "id": "cue_optional_placeholder",
+        "category": "music",
+        "assetStatus": "missing_placeholder",
+        "filePath": "audio/music/cue_optional_placeholder.mp3"
+      }
+    ],
+    "resolved_cue_ids": [
+      "cue_provided"
+    ],
+    "manifest": {
+      "schema_version": 1,
+      "cues": {
+        "cue_optional_placeholder": {
+          "file": "src/ui/map/assets/audio/music/cue_optional_placeholder.mp3",
+          "original_filename": null,
+          "original_sha256": null,
+          "processed_sha256": null,
+          "duration_seconds": null,
+          "loudness_lufs": null,
+          "loudness_method": null,
+          "source_url": null,
+          "author": null,
+          "license": null,
+          "license_url": null,
+          "attribution": null,
+          "processing_command": null,
+          "license_note": null,
+          "sensitive_content_class": "restrained_music",
+          "disposition": "missing_optional_placeholder",
+          "notes": "Reserved slot."
+        },
+        "cue_provided": {
+          "file": "src/ui/map/assets/audio/ui/cue_provided.ogg",
+          "original_filename": "source.ogg",
+          "original_sha256": "68d9ed2adb24458ff173db06b41b9d1b6e228764c457030d63fad11b02bfae1e",
+          "processed_sha256": "68d9ed2adb24458ff173db06b41b9d1b6e228764c457030d63fad11b02bfae1e",
+          "duration_seconds": 0.25,
+          "loudness_lufs": -24,
+          "loudness_method": "ffmpeg ebur128 integrated loudness",
+          "source_url": "https://example.invalid/source",
+          "author": "Example Author",
+          "license": "CC0-1.0",
+          "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "attribution": "Example Tone — Example Author — CC0 1.0",
+          "processing_command": "none; bytes unchanged",
+          "license_note": "docs/audio/LICENSES/cue_provided.md",
+          "sensitive_content_class": "neutral_ui",
+          "disposition": "provided",
+          "notes": "Fixture asset."
+        }
+      }
+    }
+  },
+  "invalid": {
+    "cues": [
+      {
+        "id": "ambient_warroom",
+        "category": "ambient",
+        "assetStatus": "missing_placeholder",
+        "filePath": "audio/ambient/ambient_warroom.ogg"
+      },
+      {
+        "id": "cue_bad",
+        "category": "stinger",
+        "assetStatus": "provided",
+        "filePath": "audio/stingers/cue_bad.mp3"
+      },
+      {
+        "id": "cue_missing_manifest",
+        "category": "ui",
+        "assetStatus": "provided",
+        "filePath": "audio/ui/cue_missing_manifest.ogg"
+      }
+    ],
+    "resolved_cue_ids": [
+      "cue_bad"
+    ],
+    "manifest": {
+      "schema_version": 1,
+      "cues": {
+        "ambient_warroom": {
+          "file": "src/ui/map/assets/audio/ambient/ambient_warroom.ogg",
+          "original_filename": null,
+          "original_sha256": null,
+          "processed_sha256": null,
+          "duration_seconds": null,
+          "loudness_lufs": null,
+          "loudness_method": null,
+          "source_url": null,
+          "author": null,
+          "license": null,
+          "license_url": null,
+          "attribution": null,
+          "processing_command": null,
+          "license_note": null,
+          "sensitive_content_class": "restrained_ambient",
+          "disposition": "required_priority_missing",
+          "notes": "Required floor asset not yet supplied."
+        },
+        "cue_bad": {
+          "file": "src/ui/map/assets/audio/stingers/cue_bad.mp3",
+          "original_filename": "bad.mp3",
+          "original_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "processed_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "duration_seconds": null,
+          "loudness_lufs": null,
+          "loudness_method": null,
+          "source_url": "https://example.invalid/bad",
+          "author": "Example Author",
+          "license": "CC-BY-NC-4.0",
+          "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+          "attribution": "Bad Cue",
+          "processing_command": null,
+          "license_note": "docs/audio/LICENSES/missing.md",
+          "sensitive_content_class": "gunfire_spectacle",
+          "disposition": "provided",
+          "notes": "Intentionally invalid fixture."
+        },
+        "orphan_cue": {
+          "file": "src/ui/map/assets/audio/ui/orphan.ogg",
+          "original_filename": "orphan.ogg",
+          "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "processed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "duration_seconds": 0.1,
+          "loudness_lufs": -24,
+          "loudness_method": "fixture",
+          "source_url": "https://example.invalid/orphan",
+          "author": "Example Author",
+          "license": "CC0-1.0",
+          "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "attribution": "Orphan",
+          "processing_command": "none",
+          "license_note": "docs/audio/LICENSES/orphan.md",
+          "sensitive_content_class": "neutral_ui",
+          "disposition": "provided",
+          "notes": "Should be rejected."
+        }
+      }
+    }
+  }
+}

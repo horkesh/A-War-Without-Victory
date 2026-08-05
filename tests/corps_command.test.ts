@@ -16,6 +16,7 @@ import {
     updateOGLifecycle,
     validateOGOrder
 } from '../src/sim/combat/operational_groups.js';
+import { evaluateOperationProgress } from '../src/sim/combat/sector_offensive.js';
 import type { FactionId, FormationState, GameState, OGActivationOrder } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -128,14 +129,14 @@ describe('corps command - applyCorpsEffects', () => {
 });
 
 describe('corps command - advanceOperations', () => {
-    it('transitions non-sector operations planning -> execution -> recovery -> complete', () => {
+    it('transitions reorganization operations planning -> execution -> recovery -> complete', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
 
         // Start an operation in planning phase at turn 20
         state.military.corps_command!['rs-corps-1'].active_operations = [{
             name: 'Test Op',
-            type: 'general_offensive',
+            type: 'reorganization',
             phase: 'planning',
             started_turn: 20,
             phase_started_turn: 20,
@@ -158,6 +159,60 @@ describe('corps command - advanceOperations', () => {
         state.meta.turn = 30;
         advanceOperations(state);
         expect(state.military.corps_command!['rs-corps-1'].active_operations).toHaveLength(0);
+    });
+
+    it('keeps reorganization on one 3/4/3 owner with at most one transition per turn', () => {
+        const state = makeCorpsState();
+        initializeCorpsCommand(state);
+        const op = {
+            name: 'Single Owner Reorganization',
+            type: 'reorganization' as const,
+            phase: 'planning' as const,
+            started_turn: 20,
+            phase_started_turn: 20,
+            participating_brigades: ['rs-brig-1', 'rs-brig-2'],
+        };
+        state.military.corps_command!['rs-corps-1'].active_operations = [op];
+
+        state.meta.turn = 22;
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        expect(op).toMatchObject({ phase: 'planning', phase_started_turn: 20 });
+
+        state.meta.turn = 23;
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        expect(op).toMatchObject({ phase: 'execution', phase_started_turn: 23 });
+
+        state.meta.turn = 27;
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        expect(op).toMatchObject({ phase: 'recovery', phase_started_turn: 27 });
+    });
+
+    it('leaves combat-operation lifecycle ownership to sector_offensive', () => {
+        const state = makeCorpsState();
+        initializeCorpsCommand(state);
+        state.military.corps_command!['rs-corps-1'].active_operations = [{
+            name: 'Combat Op',
+            type: 'general_offensive',
+            phase: 'planning',
+            started_turn: 20,
+            phase_started_turn: 20,
+            participating_brigades: ['rs-brig-1', 'rs-brig-2'],
+        }];
+
+        state.meta.turn = 40;
+        advanceOperations(state);
+
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0]).toMatchObject({
+            phase: 'planning',
+            phase_started_turn: 20,
+        });
     });
 
     it('does not auto-advance sector_attack operations', () => {
@@ -232,7 +287,7 @@ describe('operational groups - validateOGOrder', () => {
 });
 
 describe('operational groups - activateOGs', () => {
-    it('creates OG formation, deducts donor personnel, registers with corps', () => {
+    it('discards queued legacy activation without mutating formations when TGs are enabled', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
 
@@ -249,27 +304,12 @@ describe('operational groups - activateOGs', () => {
             }
         ];
 
-        const report = activateOGs(state);
+        const formationsBefore = structuredClone(state.military.formations);
+        const commandBefore = structuredClone(state.military.corps_command);
 
-        expect(report.activated.length).toBe(1);
-        expect(report.rejected.length).toBe(0);
-
-        const ogId = report.activated[0];
-
-        // OG formation should exist
-        expect(state.military.formations[ogId]).toBeDefined();
-        expect(state.military.formations[ogId].kind).toBe('og');
-        expect(state.military.formations[ogId].personnel).toBe(600);
-        expect(state.military.formations[ogId].faction).toBe('RS');
-
-        // Donor personnel deducted
-        expect(state.military.formations['rs-brig-1'].personnel).toBe(700);
-        expect(state.military.formations['rs-brig-2'].personnel).toBe(700);
-
-        // Registered with corps
-        expect(state.military.corps_command!['rs-corps-1'].active_ogs).toContain(ogId);
-
-        // Orders cleared
+        expect(activateOGs(state)).toEqual({ activated: [], rejected: [] });
+        expect(state.military.formations).toEqual(formationsBefore);
+        expect(state.military.corps_command).toEqual(commandBefore);
         expect(state.military.og_orders).toEqual([]);
     });
 });

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "label": "20260801_r2_fr05_viewport_1920_3440_v3",
+  "status": "failed",
+  "repository": {
+    "head": "10c96a33b50c2bf80ac121cb94a4ef1248e8fff0",
+    "branch": "codex/r2-rs-friction"
+  },
+  "sourceSave": {
+    "path": "docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/autosaves/final-autosave.json",
+    "sha256": "aaebe5bd01d9ac78ffb264b74f3827ba34307c4f5ad312b4e735aa65fdca7062"
+  },
+  "isolation": {
+    "remoteDebugPort": 3247,
+    "userDataRoot": "F:\\AWWV-worktrees\\r2-rs-friction\\tmp-playtest-20260801_r2_fr05_viewport_1920_3440_v3\\user-data",
+    "saveRoot": "F:\\AWWV-worktrees\\r2-rs-friction\\tmp-playtest-20260801_r2_fr05_viewport_1920_3440_v3\\saves",
+    "outputRoot": "F:\\AWWV-worktrees\\r2-rs-friction\\docs\\40_reports\\playtests\\evidence\\20260801_r2_fr05_viewport_1920_3440_v3"
+  },
+  "runtime": {
+    "application": "0.9.9-beta.1",
+    "electron": "41.0.3",
+    "chromium": "146.0.7680.80"
+  },
+  "process": null,
+  "captures": [],
+  "diagnostics": {
+    "consoleErrorsAndWarnings": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "expectedDocumentAborts": [],
+    "httpErrors": [],
+    "unexpectedMainProcessOutput": [
+      "[29172:0801/034219.418:ERROR:gpu\\ipc\\client\\command_buffer_proxy_impl.cc:484] GPU state invalid after WaitForGetOffsetInRange."
+    ],
+    "expectedMainProcessOutput": [
+      "Tactical map server: http://127.0.0.1:58253",
+      "[AWWV] Map: using built server at http://127.0.0.1:58253/",
+      "Debugger ending on ws://127.0.0.1:58250/9bdaf9d8-6b9a-4a7a-99b3-52024ccac3d3",
+      "For help, see: https://nodejs.org/en/docs/inspector"
+    ]
+  },
+  "cleanup": {
+    "rootPid": 32476,
+    "exited": true,
+    "repositorySavesUnchanged": true,
+    "sourceSaveUnchanged": true,
+    "remoteDebugPortFree": true,
+    "rootProcessTreeAlive": false
+  },
+  "failures": [
+    "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"toolbar-route-army-hq\"]').first() to be visible\u001b[22m\n\n    at main (F:\\AWWV-worktrees\\r2-rs-friction\\tools\\tmp_r2_fr05_viewport.cjs:349:17)",
+    "main-process output: [\"[29172:0801/034219.418:ERROR:gpu\\\\ipc\\\\client\\\\command_buffer_proxy_impl.cc:484] GPU state invalid after WaitForGetOffsetInRange.\"]"
+  ]
+}

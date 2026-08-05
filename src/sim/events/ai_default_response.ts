@@ -3,7 +3,13 @@ import { applyDefinitionDimensionShifts, applyDefinitionFlags } from './evaluate
 import type { GameState } from '../../state/game_state.js';
 import type { EventDefinition, EventResponseOption } from './event_types.js';
 
-const CANONICAL_AI_DEFAULT_RESPONSE: Record<string, string> = {};
+export function hasAuthoredAIDefaultResponse(def: EventDefinition): boolean {
+    const options = def.response_options ?? [];
+    if (options.length === 0) return false;
+    if (def.bot_response_logic === 'accept_first') return true;
+    return typeof def.historical_default_response_id === 'string'
+        && options.some((option) => option.id === def.historical_default_response_id);
+}
 
 export function selectAIDefaultResponse(def: EventDefinition): EventResponseOption {
     const options = def.response_options ?? [];
@@ -11,18 +17,12 @@ export function selectAIDefaultResponse(def: EventDefinition): EventResponseOpti
 
     if (def.bot_response_logic === 'accept_first') return options[0]!;
 
-    const override = CANONICAL_AI_DEFAULT_RESPONSE[def.id];
-    if (override) {
-        const selected = options.find((option) => option.id === override);
-        if (selected) return selected;
-    }
-
     if (def.historical_default_response_id) {
         const selected = options.find((option) => option.id === def.historical_default_response_id);
         if (selected) return selected;
     }
 
-    return options[0]!;
+    throw new Error(`Event "${def.id}" has no authored AI default response`);
 }
 
 export function applyAIDefaultResponse(state: GameState, def: EventDefinition): EventResponseOption {

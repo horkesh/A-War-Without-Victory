@@ -18,12 +18,13 @@ describe('warroom new campaign flow truth', () => {
     expect(warroomSource).toContain('this.desktopBridge.startNewCampaign');
   });
 
-  it('passes a one-shot war-start intro flag from fresh Warroom campaigns into the React shell', () => {
+  it('passes a one-shot war-start intro/reset message from fresh Warroom campaigns into the stable React shell', () => {
     const warroomSource = readRepoFile('src', 'ui', 'warroom', 'warroom.ts');
 
     expect(warroomSource).toContain('freshCampaignIntroPending');
     expect(warroomSource).toContain('this.freshCampaignIntroPending = true;');
-    expect(warroomSource).toContain("intro=war_start");
+    expect(warroomSource).not.toContain('intro=war_start');
+    expect(warroomSource).toContain("type: 'awwv-shell:fresh-campaign-started'");
     const start = warroomSource.indexOf('const result = await this.desktopBridge.startNewCampaign({');
     const end = warroomSource.indexOf('} catch (error)', start);
     expect(start).toBeGreaterThanOrEqual(0);
@@ -32,10 +33,21 @@ describe('warroom new campaign flow truth', () => {
     const introArm = warroomSource.lastIndexOf('this.freshCampaignIntroPending = true;', start);
     expect(introArm).toBeGreaterThanOrEqual(0);
     expect(introArm).toBeLessThan(start);
-    expect(desktopStartBlock).not.toContain('result.stateJson');
-    expect(desktopStartBlock).not.toContain('applyGameStateFromJson');
+    expect(desktopStartBlock).toContain('result.stateJson');
+    expect(desktopStartBlock).toContain('this.desktopStateGate.admitReserved(');
+    expect(desktopStartBlock).toContain('CAMPAIGN_REPLACEMENT_UPDATE');
+    expect(desktopStartBlock).toContain('await this.pullLatestGameState({ showShell: false });');
     expect(desktopStartBlock).toContain("this.showScreen('none');");
     expect(desktopStartBlock).not.toContain("void this.showTacticalMapScene('warroom');");
+  });
+
+  it('keeps startup state acquisition alive through early side-picker navigation', () => {
+    const warroomSource = readRepoFile('src', 'ui', 'warroom', 'warroom.ts');
+
+    expect(warroomSource).toContain('if (this.desktopBridge?.getCurrentGameState) {');
+    expect(warroomSource).not.toContain('if (!this.userNavigatedFromMenu && this.desktopBridge?.getCurrentGameState) {');
+    expect(warroomSource).toContain('{ showShell: !this.userNavigatedFromMenu }');
+    expect(warroomSource).toContain("private async pullLatestGameState(options?: { showShell?: boolean })");
   });
 
   it('posts a fresh-campaign reset message into the embedded tactical map after iframe load or reuse', () => {
@@ -50,11 +62,11 @@ describe('warroom new campaign flow truth', () => {
     expect(loadEnd).toBeGreaterThan(loadStart);
     expect(warroomSource.slice(loadStart, loadEnd)).toContain('this.postFreshCampaignStartedToTacticalMap();');
 
-    const readyStart = warroomSource.indexOf('} else if (this.tacticalMapReady) {');
-    const readyEnd = warroomSource.indexOf('// Scene swap', readyStart);
-    expect(readyStart).toBeGreaterThanOrEqual(0);
-    expect(readyEnd).toBeGreaterThan(readyStart);
-    expect(warroomSource.slice(readyStart, readyEnd)).toContain('this.postFreshCampaignStartedToTacticalMap();');
+    const reuseStart = warroomSource.indexOf('const shell = await this.ensureOperationalShellIframe(tacticalScene);');
+    const reuseEnd = warroomSource.indexOf("const desk = document.getElementById('warroom-desk');", reuseStart);
+    expect(reuseStart).toBeGreaterThanOrEqual(0);
+    expect(reuseEnd).toBeGreaterThan(reuseStart);
+    expect(warroomSource.slice(reuseStart, reuseEnd)).toContain('this.postFreshCampaignStartedToTacticalMap();');
   });
 
   it('the React map handles fresh Warroom campaign messages as a hard first-hour reset without leaving the Warroom shell', () => {

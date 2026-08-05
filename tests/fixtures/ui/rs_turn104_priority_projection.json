@@ -1,0 +1,187 @@
+{
+  "provenance": {
+    "sourceDiary": "docs/40_reports/playtests/20260731_rs_104week_player_diary.md",
+    "sourceAutosave": "docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/autosaves/final-autosave.json",
+    "sourceAutosaveSha256": "aaebe5bd01d9ac78ffb264b74f3827ba34307c4f5ad312b4e735aa65fdca7062",
+    "projectedStateSha256": "fd480b60459e672504526144a770e927399e44933bb0506bf503619496c04b82",
+    "note": "Redacted player-visible projection; the 197 MiB evidence tree is not read by tests."
+  },
+  "turn": 104,
+  "phase": "war",
+  "playerFaction": "RS",
+  "commandAuthority": {
+    "current": 100,
+    "max": 100,
+    "reserve": 15,
+    "reserveMax": 15,
+    "spentThisTurn": 0,
+    "lifetimeSpent": 120,
+    "lastRecovery": 5,
+    "lastRecoverySource": "quiet_front_restraint"
+  },
+  "pendingCounterOffers": [
+    {
+      "id": "HRHB_001",
+      "author": "HRHB",
+      "parentOfferId": "owen_stoltenberg",
+      "planId": "owen_stoltenberg",
+      "planName": "Owen Stoltenberg Plan",
+      "chainDepth": 1,
+      "createdTurn": 70,
+      "response": "conditional_accept",
+      "proposedSplit": { "RBiH": 33, "RS": 52, "HRHB": 15 },
+      "institutionalModel": "union_3_republics",
+      "sourceCitation": "BB1 p.49",
+      "rider": "withdraw territorial concessions made to Bosnian Muslims"
+    },
+    {
+      "id": "RBiH_001",
+      "author": "RBiH",
+      "parentOfferId": "owen_stoltenberg",
+      "planId": "owen_stoltenberg",
+      "planName": "Owen Stoltenberg Plan",
+      "chainDepth": 1,
+      "createdTurn": 70,
+      "response": "conditional_accept",
+      "proposedSplit": { "RBiH": 33, "RS": 52, "HRHB": 15 },
+      "institutionalModel": "union_3_republics",
+      "sourceCitation": "BB1 p.49",
+      "rider": "return territory seized by force"
+    }
+  ],
+  "commandBriefing": {
+    "headline": "9 critical items require attention.",
+    "criticalCount": 9,
+    "pendingCount": 9,
+    "items": [
+      {
+        "id": "hum-enclave-bihac_pocket",
+        "kind": "humanitarian",
+        "category": "humanitarian",
+        "briefingCategory": "enclave",
+        "subject": { "type": "none", "label": "Bihac Pocket" },
+        "copyToken": "hum-enclave-bihac_pocket",
+        "severity": "critical",
+        "title": "Bihac Pocket under prolonged siege",
+        "detail": "Isolated for 85 turns. Resilience: 40.",
+        "actionChipLabel": "Bihac Pocket",
+        "target": { "type": "enclaves", "enclaveId": "bihac_pocket", "label": "Bihac Pocket" }
+      },
+      {
+        "id": "hum-enclave-gorazde",
+        "kind": "humanitarian",
+        "category": "humanitarian",
+        "briefingCategory": "enclave",
+        "subject": { "type": "none", "label": "Gorazde" },
+        "copyToken": "hum-enclave-gorazde",
+        "severity": "critical",
+        "title": "Gorazde under prolonged siege",
+        "detail": "Isolated for 104 turns. Resilience: 35.",
+        "actionChipLabel": "Gorazde",
+        "target": { "type": "enclaves", "enclaveId": "gorazde", "label": "Gorazde" }
+      },
+      {
+        "id": "hum-enclave-kiseljak",
+        "kind": "humanitarian",
+        "category": "humanitarian",
+        "briefingCategory": "enclave",
+        "subject": { "type": "none", "label": "Kiseljak" },
+        "copyToken": "hum-enclave-kiseljak",
+        "severity": "critical",
+        "title": "Kiseljak under prolonged siege",
+        "detail": "Isolated for 65 turns. Resilience: 20.",
+        "actionChipLabel": "Kiseljak",
+        "target": { "type": "enclaves", "enclaveId": "kiseljak", "label": "Kiseljak" }
+      },
+      {
+        "id": "hum-enclave-lasva_valley",
+        "kind": "humanitarian",
+        "category": "humanitarian",
+        "briefingCategory": "enclave",
+        "subject": { "type": "none", "label": "Lasva Valley" },
+        "copyToken": "hum-enclave-lasva_valley",
+        "severity": "critical",
+        "title": "Lasva Valley under prolonged siege",
+        "detail": "Isolated for 65 turns. Resilience: 25.",
+        "actionChipLabel": "Lasva Valley",
+        "target": { "type": "enclaves", "enclaveId": "lasva_valley", "label": "Lasva Valley" }
+      },
+      {
+        "id": "hum-enclave-sarajevo",
+        "kind": "humanitarian",
+        "category": "humanitarian",
+        "briefingCategory": "enclave",
+        "subject": { "type": "none", "label": "Sarajevo" },
+        "copyToken": "hum-enclave-sarajevo",
+        "severity": "critical",
+        "title": "Sarajevo under prolonged siege",
+        "detail": "Isolated for 104 turns. Resilience: 45.",
+        "actionChipLabel": "Sarajevo",
+        "target": { "type": "enclaves", "enclaveId": "sarajevo", "label": "Sarajevo" }
+      },
+      {
+        "id": "hum-enclave-srebrenica",
+        "kind": "humanitarian",
+        "category": "humanitarian",
+        "briefingCategory": "enclave",
+        "subject": { "type": "none", "label": "Srebrenica" },
+        "copyToken": "hum-enclave-srebrenica",
+        "severity": "critical",
+        "title": "Srebrenica under prolonged siege",
+        "detail": "Isolated for 89 turns. Resilience: 25.",
+        "actionChipLabel": "Srebrenica",
+        "target": { "type": "enclaves", "enclaveId": "srebrenica", "label": "Srebrenica" }
+      },
+      {
+        "id": "hum-enclave-teocak",
+        "kind": "humanitarian",
+        "category": "humanitarian",
+        "briefingCategory": "enclave",
+        "subject": { "type": "none", "label": "Teocak" },
+        "copyToken": "hum-enclave-teocak",
+        "severity": "critical",
+        "title": "Teocak under prolonged siege",
+        "detail": "Isolated for 89 turns. Resilience: 20.",
+        "actionChipLabel": "Teocak",
+        "target": { "type": "enclaves", "enclaveId": "teocak", "label": "Teocak" }
+      },
+      {
+        "id": "hum-enclave-zepa",
+        "kind": "humanitarian",
+        "category": "humanitarian",
+        "briefingCategory": "enclave",
+        "subject": { "type": "none", "label": "Zepa" },
+        "copyToken": "hum-enclave-zepa",
+        "severity": "critical",
+        "title": "Zepa under prolonged siege",
+        "detail": "Isolated for 89 turns. Resilience: 20.",
+        "actionChipLabel": "Zepa",
+        "target": { "type": "enclaves", "enclaveId": "zepa", "label": "Zepa" }
+      },
+      {
+        "id": "hum-enclave-zepce",
+        "kind": "humanitarian",
+        "category": "humanitarian",
+        "briefingCategory": "enclave",
+        "subject": { "type": "none", "label": "Zepce" },
+        "copyToken": "hum-enclave-zepce",
+        "severity": "critical",
+        "title": "Zepce under prolonged siege",
+        "detail": "Isolated for 75 turns. Resilience: 15.",
+        "actionChipLabel": "Zepce",
+        "target": { "type": "enclaves", "enclaveId": "zepce", "label": "Zepce" }
+      }
+    ]
+  },
+  "expectedSourceIds": [
+    "hum-enclave-bihac_pocket",
+    "hum-enclave-gorazde",
+    "hum-enclave-kiseljak",
+    "hum-enclave-lasva_valley",
+    "hum-enclave-sarajevo",
+    "hum-enclave-srebrenica",
+    "hum-enclave-teocak",
+    "hum-enclave-zepa",
+    "hum-enclave-zepce"
+  ]
+}

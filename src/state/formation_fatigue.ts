@@ -1,4 +1,4 @@
-import { buildAdjacencyMap, type AdjacencyMap } from '../map/adjacency_map.js';
+import { buildAdjacencyMapCached, type AdjacencyMap } from '../map/adjacency_map.js';
 import type { FrontEdge } from '../map/front_edges.js';
 import type { FrontRegionsFile } from '../map/front_regions.js';
 import { FATIGUE_MAX } from './formation_constants.js';
@@ -362,7 +362,7 @@ export function updateFormationFatigue(
     }
 
     // Compute local supply for all active edges
-    const adjacencyMap = buildAdjacencyMap(settlementEdges);
+    const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
     const localSupplyByEdge = computeLocalSupplyForEdges(state, derivedFrontEdges, adjacencyMap);
 
     const records: FormationFatigueRecord[] = [];

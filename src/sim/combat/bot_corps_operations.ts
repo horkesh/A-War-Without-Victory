@@ -3,7 +3,7 @@
  *
  * This file contains the ONLY permitted creation and activation entry points
  * that feed INTO the canonical operation lifecycle:
- *   - generateOGActivationOrders   — activates Operational Groups during execution
+ *   - generateOGActivationOrders   — legacy flag-off compatibility producer only
  *   - generateEmergencyDefensiveOperations — creates emergency ops for threatened defensive corps
  *
  * These functions CREATE or ACTIVATE operations. They do NOT advance operation phases.
@@ -72,23 +72,26 @@ import {
     getAvailableBrigades,
     hasActiveOperation,
 } from './corps_operation_helpers.js';
+import { ENABLE_TACTICAL_GROUPS } from './tactical_group_config.js';
 
 /**
- * Generate OG activation orders for active operations in execution phase.
- * Appends to state.og_orders.
+ * Legacy flag-off compatibility producer for OG activation orders.
+ * TG-enabled campaigns preserve an empty serialized queue and enqueue nothing.
  */
 export function generateOGActivationOrders(
     state: GameState,
     faction: FactionId,
     edges: EdgeRecord[]
 ): void {
+    // Keep the serialized legacy queue shape stable while TGs own temporary force concentration.
+    if (!state.military.og_orders) state.military.og_orders = [];
+    if (ENABLE_TACTICAL_GROUPS) return;
+
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const corpsList = getFactionCorps(state, faction);
     const formations = state.military.formations ?? {};
-
-    if (!state.military.og_orders) state.military.og_orders = [];
 
     for (const corps of corpsList) {
         const cmd = corpsCommand[corps.id];

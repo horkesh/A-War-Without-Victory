@@ -2,6 +2,7 @@ import type { Feature, FeatureCollection } from 'geojson';
 import { getIconDataUrl } from '../map/formationIcons';
 import {
   buildFormationCounterPixelOffsets,
+  filterFinalFormationCounterFeatures,
   getCounterFootprintHalfSize,
   getFormationStackPixelOffset,
   selectViewportFormationCounterFeatures,
@@ -59,8 +60,14 @@ export function buildFormationCounterDomOverlayItems(args: {
     getFormationPixelOffset,
   );
   const pixelOffsets = buildFormationCounterPixelOffsets(visibleFeatures, iconHeight, args.viewportClip);
+  const finalVisibleFeatures = filterFinalFormationCounterFeatures(
+    visibleFeatures,
+    pixelOffsets,
+    iconHeight,
+    args.viewportClip,
+  );
 
-  return visibleFeatures.flatMap((feature) => {
+  return finalVisibleFeatures.flatMap((feature) => {
     const coordinates = featureCoordinates(feature);
     const point = coordinates && args.viewportClip?.project(coordinates);
     if (!point) return [];

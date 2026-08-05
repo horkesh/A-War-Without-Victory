@@ -26,6 +26,7 @@ import { runScenario } from '../../src/scenario/scenario_runner.js';
 import { warPhases } from '../../src/sim/turn_phases/war_phases.js';
 
 const phaseTimings = new Map<string, { totalNs: bigint; count: number }>();
+let phaseBoundarySampledPeakHeapBytes = process.memoryUsage().heapUsed;
 
 for (const step of warPhases) {
   const origRun = step.run;
@@ -39,6 +40,7 @@ for (const step of warPhases) {
       cur.totalNs += dt;
       cur.count += 1;
       phaseTimings.set(step.name, cur);
+      phaseBoundarySampledPeakHeapBytes = Math.max(phaseBoundarySampledPeakHeapBytes, process.memoryUsage().heapUsed);
     }
   };
 }
@@ -63,10 +65,11 @@ async function main() {
   await runScenario({ scenarioPath: scenario, outDirBase: out, uniqueRunFolder: true });
   const totalMs = Number(process.hrtime.bigint() - t0) / 1e6;
   const endMem = process.memoryUsage();
+  phaseBoundarySampledPeakHeapBytes = Math.max(phaseBoundarySampledPeakHeapBytes, endMem.heapUsed);
 
   const sorted = [...phaseTimings.entries()]
     .map(([name, v]) => ({ name, totalMs: Number(v.totalNs) / 1e6, count: v.count }))
-    .sort((a, b) => b.totalMs - a.totalMs);
+    .sort((a, b) => b.totalMs - a.totalMs || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 
   const report = {
     scenario,
@@ -74,6 +77,7 @@ async function main() {
     totalWallS: totalMs / 1000,
     startHeapMB: startMem.heapUsed / (1024 * 1024),
     endHeapMB: endMem.heapUsed / (1024 * 1024),
+    phaseBoundarySampledPeakHeapMB: phaseBoundarySampledPeakHeapBytes / (1024 * 1024),
     rssMB: endMem.rss / (1024 * 1024),
     phaseTotals: sorted,
   };

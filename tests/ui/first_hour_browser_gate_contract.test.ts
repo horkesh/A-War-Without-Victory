@@ -72,6 +72,10 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain('The Assembly Speaks');
     expect(tool).toContain('What Is Herceg-Bosna?');
     expect(tool).toContain('verifyDecisionRecordsAndChronicle(page, summary, flow)');
+    expect(tool).toContain("clickSelector(page, '[data-testid=\"warroom-toolbar-staff\"]', 'Army HQ Warroom route')");
+    expect(tool).not.toContain("page.keyboard.press('h')");
+    expect(tool).toContain('Chronicle Decisions');
+    expect(tool).not.toContain("waitForVisibleText(page, 'Chronicle Filed')");
     expect(tool).toContain('assertTurnZeroRecordsProvenanceCounts');
     expect(tool).toContain('turnZeroRecordsProvenanceCountsByFaction');
     expect(tool).toContain('records-subtab-${id}');
@@ -261,7 +265,7 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain("const evidenceId = (id) => (journeyKey === 'rbih' ? id : `${journeyKey}_${id}`);");
     expect(tool).toContain('runTurnZeroSetupProvenanceLiveProof');
     expect(tool).toContain('turnZeroSetupProvenanceLiveProof');
-    expect(tool).toContain('command-card-cat_record"][data-awwv-count="0"][data-awwv-urgent-count="0"]');
+    expect(tool).toContain('command-card-cat_record"][data-awwv-count="0"][data-awwv-required-count="0"]');
     expect(tool).toContain('warroom-toolbar-command-surface');
     expect(tool).toContain('toolbar-route-desk');
     expect(tool).toContain('toolbar-route-war-map');

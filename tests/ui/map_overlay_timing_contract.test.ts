@@ -48,13 +48,52 @@ describe('Map overlay dev timing', () => {
     expect(source).toContain('createDevTimer(');
   });
 
-  it('marks overlay state stale when cleanup cancels deferred overlay work', () => {
+  it('cancels the in-flight revision when cleanup cancels deferred overlay work', () => {
     const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
     const cleanupStart = source.indexOf('if (deferredOverlayHandleRef.current != null)');
     const cleanupEnd = source.indexOf('if (sourceUpdatePollRef.current)', cleanupStart);
 
     expect(cleanupStart).toBeGreaterThan(0);
     expect(cleanupEnd).toBeGreaterThan(cleanupStart);
-    expect(source.slice(cleanupStart, cleanupEnd)).toContain('appliedStateRef.current = null');
+    expect(source.slice(cleanupStart, cleanupEnd)).toContain('cancelInFlightRevision();');
+  });
+
+  it('marks the complete transition lifecycle without replacing the readiness gate', () => {
+    const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+    const mapSource = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const loaderSource = readFileSync('src/ui/map/data/DataLoader.ts', 'utf8');
+
+    expect(appSource).toMatch(/beginMapTransition\(\)/);
+    for (const mark of [
+      'viewport-visible',
+      'map-created',
+      'style-loaded',
+      'current-state-rendered',
+      'interactive',
+    ]) {
+      expect(mapSource).toContain(`'${mark}'`);
+    }
+    expect(loaderSource).toMatch(/countMapTransitionResource/);
+    expect(mapSource).toMatch(/countMapTransitionConstruction/);
+    expect(mapSource).toMatch(/countMapTransitionRelease/);
+    expect(mapSource).toMatch(/map\.once\('style\.load',[\s\S]{0,240}styleReadinessRef\.current\.markLoaded\(\)[\s\S]{0,120}if \(activeRef\.current\) markMapTransition\('style-loaded'\)/);
+    expect(mapSource).not.toMatch(/map\.once\('load',\s*\(\) => markMapTransition\('style-loaded'\)\)/);
+    expect(mapSource).toMatch(/isTacticalMapStateReady/);
+    expect(mapSource).not.toMatch(/console\.time\(/);
+  });
+
+  it('counts the minimap MapLibre context in the same transition lifecycle', () => {
+    const source = readFileSync('src/ui/map/components/Minimap.tsx', 'utf8');
+    const construction = source.indexOf('const map = new maplibregl.Map(');
+    const constructionCount = source.indexOf('countMapTransitionConstruction()', construction);
+    const release = source.indexOf('releaseMapWebGlContext(map)', construction);
+    const releaseCount = source.indexOf('countMapTransitionRelease()', release);
+
+    expect(source).toMatch(/countMapTransitionConstruction/);
+    expect(source).toMatch(/countMapTransitionRelease/);
+    expect(construction).toBeGreaterThan(0);
+    expect(constructionCount).toBeGreaterThan(construction);
+    expect(release).toBeGreaterThan(constructionCount);
+    expect(releaseCount).toBeGreaterThan(release);
   });
 });

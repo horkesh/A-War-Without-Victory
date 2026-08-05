@@ -19,6 +19,7 @@
  */
 
 import type { EnclaveResilienceEntry, FactionId, FormationState, GameState } from '../../state/game_state.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import type { SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import {
@@ -43,7 +44,7 @@ export function isEnclaveBrigade(f: { tags?: string[] }): boolean {
 }
 
 export function getFormationEnclaveForMovement(
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
     originOsid: string,
 ): EnclaveDefinition | null {
     const isFixedHome = formation.tags?.includes(FIXED_HOME_OSID_TAG) === true;
@@ -61,7 +62,7 @@ export function getFormationEnclaveForMovement(
 }
 
 export function isEnclaveMovementDestinationAllowed(
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
     originOsid: string,
     destinationOsid: string,
 ): boolean {

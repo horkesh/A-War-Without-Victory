@@ -127,6 +127,15 @@ export function shouldRenderInboxPanel(
   return panel === 'inbox' && !operationsPanelOpen;
 }
 
+/**
+ * The compact map legend and left-anchored detail rails occupy the same map
+ * corridor. Keep one visible owner so opening a sector/corps/unit dossier never
+ * leaves readable legend content hidden underneath it.
+ */
+export function shouldRenderMapModeLegend(panel: PanelRailPanel | null): boolean {
+  return panel === 'inbox' || panel === null;
+}
+
 export interface TacticalDetailRailOwnerState {
   operationsPanelOpen: boolean;
   armyHQOpen: boolean;

@@ -101,6 +101,8 @@ function currentVersionState(): any {
             phantoms_spawned: [],
             closed_event_ids: [],
             event_causality_log: [],
+            corps_front_sectors: {},
+            sector_intel: {},
         },
         political: {
             political_controllers: {},
@@ -489,7 +491,7 @@ describe('Phase B Sub-slice B2 — state shape + save migration', () => {
                 fields: Array<{ field: string }>;
             };
 
-            expect(report.latest_schema_version).toBe(36);
+            expect(report.latest_schema_version).toBe(CURRENT_SCHEMA_VERSION);
             expect(report.anonymous_default_count).toBe(0);
             expect(report.fields).toEqual([]);
         });

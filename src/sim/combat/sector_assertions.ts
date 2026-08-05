@@ -8,11 +8,11 @@
 import type {
     CorpsFrontSector,
     FormationId,
-    FormationState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getSectorComponent } from './sector_utils.js';
 import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
 /**
  * Assert that every assigned/reserve brigade can physically reach its sector
@@ -30,7 +30,7 @@ import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js'
  */
 export function assertBrigadeReachability(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     componentOf: Map<string, number>,
 ): string[] {
     const unreachableBrigadeIds: string[] = [];
@@ -81,7 +81,7 @@ export function assertBrigadeReachability(
  */
 export function assertSectorBrigadesActive(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
 ): void {
     const violations: string[] = [];
     for (const sec of sectors) {
@@ -123,7 +123,7 @@ export function assertSectorBrigadesActive(
 export function filterReachableReassignmentOrders(
     orders: Array<{ brigade_id: string; to_sector_id: string }>,
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     componentOf: Map<string, number>,
 ): Array<{ brigade_id: string; to_sector_id: string }> {
     const sectorMap = new Map<string, CorpsFrontSector>();

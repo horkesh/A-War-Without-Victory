@@ -9,7 +9,7 @@
  *   - event-id resolution per faction
  *   - force-queue builds the player faction's authored decision (mirror of
  *     evaluate_events.ts:577) carrying the authored response_options
- *   - cooldown / cap REUSE the event's OWN recurrence (max_fires 5 / cooldown 10t)
+ *   - cooldown / cap use voluntary action_cadence (max_fires 5 / cooldown 10t)
  *   - address-the-nation is FACTION-WIDE (no reachability gate)
  *   - decorate-a-unit BRIGHT LINE: only REGULAR formations eligible — never
  *     paramilitary / militia / phantom — and the player picks WHICH (no auto-pick)
@@ -69,7 +69,7 @@ function makeAddressEventDef() {
     responding_faction: 'RBiH',
     requires_player_response: true,
     staff_recommended_response_id: 'address_endurance_rbih',
-    recurrence: { max_fires: 5, cooldown_turns: 10, escalation: 'static' },
+    action_cadence: { max_fires: 5, cooldown_turns: 10, escalation: 'static' },
     effect: { kind: 'narrative', text: 'The president prepares to address the nation.' },
     response_options: [
       { id: 'address_defiance_rbih', label: 'Defiant' },
@@ -88,7 +88,7 @@ function makeDecorateEventDef() {
     responding_faction: 'RBiH',
     requires_player_response: true,
     staff_recommended_response_id: 'decorate_decline_rbih',
-    recurrence: { max_fires: 5, cooldown_turns: 10, escalation: 'static' },
+    action_cadence: { max_fires: 5, cooldown_turns: 10, escalation: 'static' },
     effect: { kind: 'narrative', text: 'The president considers which regular formation to decorate.' },
     response_options: [
       {
@@ -136,6 +136,14 @@ describe('cost parity — leadership actions priced like the front visit (10)', 
 });
 
 describe('address-the-nation — event resolution + faction-wide queue', () => {
+  it('fails closed when voluntary action cadence metadata is absent', () => {
+    const def = makeAddressEventDef();
+    delete (def as any).action_cadence;
+    const a = addressContract.computeAddressNationAvailability(makeState(), 'RBiH', def);
+    expect(a.available).toBe(false);
+    expect(a.reason).toBe('no_action_cadence');
+  });
+
   it('resolves the player faction address event id', () => {
     expect(addressContract.addressNationEventIdForFaction('RBiH')).toBe('address_to_nation_rbih');
     expect(addressContract.addressNationEventIdForFaction('RS')).toBe('address_to_nation_rs');
@@ -193,6 +201,15 @@ describe('decorate-a-unit — BRIGHT LINE: regular formations only', () => {
     rs_1st_corps: { faction: 'RS', name: 'RS Corps', kind: 'corps', status: 'active' },
     arbih_inactive: { faction: 'RBiH', name: 'Disbanded', kind: 'brigade', status: 'inactive' },
   };
+
+  it('fails closed when voluntary action cadence metadata is absent', () => {
+    const def = makeDecorateEventDef();
+    delete (def as any).action_cadence;
+    const state = makeState({ eventId: 'decorate_a_unit_rbih', formations });
+    const a = decorateContract.computeDecorateUnitAvailability(state, 'RBiH', def);
+    expect(a.available).toBe(false);
+    expect(a.reason).toBe('no_action_cadence');
+  });
 
   it('excludes paramilitary / militia / phantom / wrong-faction / inactive', () => {
     const state = makeState({ eventId: 'decorate_a_unit_rbih', formations });

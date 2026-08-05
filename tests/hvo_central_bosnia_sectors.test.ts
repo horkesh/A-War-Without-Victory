@@ -132,6 +132,8 @@ function makeState(alliance: number): GameState {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
         } as GameState['military'],
         political: {
             political_controllers: {

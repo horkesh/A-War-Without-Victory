@@ -6,20 +6,13 @@
  * Tests pass event definitions via the registry parameter (no global mutation).
  */
 
-import { afterEach, describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { GameState } from '../src/state/game_state';
 import type { EventDefinition } from '../src/sim/events/event_types';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision';
 import { evaluateEvents } from '../src/sim/events/evaluate_events';
 import { updateEventReadiness } from '../src/sim/events/pressure_system';
-
-const ORIGINAL_TWO_LEVEL_FLAG = process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
-
-afterEach(() => {
-    if (ORIGINAL_TWO_LEVEL_FLAG === undefined) delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
-    else process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = ORIGINAL_TWO_LEVEL_FLAG;
-});
 
 function makeMinimalState(playerFaction?: string): GameState {
     return {
@@ -48,6 +41,22 @@ function loadLukavacEvent(): EventDefinition {
     return lukavac;
 }
 
+function loadNatoAirStrikeThreatEvent(): EventDefinition {
+    return loadEventFromFile('data/scenarios/events/war_1993.json', 'nato_air_strike_threat_1993');
+}
+
+function loadEssayById(id: string): {
+    content: string;
+    dynamic_sections?: Array<{ condition: string; content: string }>;
+} {
+    const index = JSON.parse(readFileSync('data/scenarios/essays/essay_index.json', 'utf8')) as {
+        essays: Array<{ id: string; content: string; dynamic_sections?: Array<{ condition: string; content: string }> }>;
+    };
+    const essay = index.essays.find((entry) => entry.id === id);
+    if (!essay) throw new Error(`${id} fixture not found`);
+    return essay;
+}
+
 function loadEventFromFile(file: string, eventId: string): EventDefinition {
     const events = JSON.parse(readFileSync(file, 'utf8')) as EventDefinition[];
     const event = events.find((entry) => entry.id === eventId);
@@ -57,7 +66,7 @@ function loadEventFromFile(file: string, eventId: string): EventDefinition {
 
 function makeLukavacReadyState(): GameState {
     const state = makeMinimalState('RS');
-    state.meta.turn = 65;
+    state.meta.turn = 69;
     state.military.event_flags = { sarajevo_siege_active: true };
     state.military.event_readiness = {};
     state.political = {
@@ -71,6 +80,144 @@ function makeLukavacReadyState(): GameState {
     } as any;
     return state;
 }
+
+describe('Operation Lukavac 93 source reconciliation', () => {
+    it('uses the BB2 strength and withdrawal-decision chronology', () => {
+        const lukavac = loadLukavacEvent();
+
+        expect(lukavac.trigger.turn_min).toBe(69);
+        expect(lukavac.trigger.turn_max).toBe(71);
+        expect(lukavac.narrative).toContain('about 10,000 troops');
+        expect(lukavac.narrative).not.toContain('15,000');
+        expect(lukavac.narrative).toContain('last supply link under immediate threat');
+        expect(lukavac.narrative).not.toMatch(/Karadzic agreed|agreed .*withdraw|withdrawal agreement/i);
+        expect(lukavac.source_note).toContain('Balkan Battlegrounds II pp. 410-411');
+        const defy = lukavac.response_options?.find((option) => option.id === 'defy_nato');
+        expect(defy?.effects?.some((effect) => effect.kind === 'humanitarian_impact')).toBe(false);
+    });
+
+    it('keeps the Codex base essay pre-choice and reveals the historical withdrawal only after compliance', () => {
+        const essay = loadEssayById('essay_operation_lukavac_93');
+        expect(essay.content).not.toMatch(/Karadzic .*agreed .*withdraw|all but about 200 .*withdrawn|compelled the VRS/i);
+        const comply = essay.dynamic_sections?.find(
+            (section) => section.condition === 'RESPONSE:operation_lukavac_93:comply',
+        );
+        expect(comply?.content).toMatch(/agreed .*withdraw|withdrawal/i);
+        expect(essay.dynamic_sections?.some(
+            (section) => section.condition === 'RESPONSE:operation_lukavac_93:defy_nato',
+        )).toBe(true);
+    });
+
+    it('keeps the NATO notice essay outcome-neutral until the RS Lukavac response', () => {
+        const essay = loadEssayById('essay_nato_air_strike_threat_1993');
+        expect(essay.content).not.toMatch(/VRS .*withdrew|withdrawal was real|tactical withdrawals|partial compliance/i);
+        expect(essay.dynamic_sections?.some(
+            (section) => section.condition === 'RESPONSE:operation_lukavac_93:comply',
+        )).toBe(true);
+        expect(essay.dynamic_sections?.some(
+            (section) => section.condition === 'RESPONSE:operation_lukavac_93:defy_nato',
+        )).toBe(true);
+    });
+
+    it('reaches the withdrawal decision at turn 70 on base-rate credibility alone', () => {
+        const lukavac = loadLukavacEvent();
+        const state = makeLukavacReadyState();
+        state.political.political_controllers = {
+            ...state.political.political_controllers,
+            'op:hadzici:lokve': 'RBiH',
+            'op:hadzici:pazaric': 'RBiH',
+            'op:hadzici:tarcin_2': 'RBiH',
+        };
+
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(1);
+        expect(evaluateEvents(state, () => 0, 69, [lukavac]).fired).toEqual([]);
+
+        state.meta.turn = 70;
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(2);
+        expect(evaluateEvents(state, () => 0, 70, [lukavac]).fired).toEqual([
+            { id: 'operation_lukavac_93', text: lukavac.title },
+        ]);
+    });
+
+    it('does not manufacture a withdrawal decision after the turn-71 source window', () => {
+        const lukavac = loadLukavacEvent();
+        const state = makeLukavacReadyState();
+        state.meta.turn = 71;
+        state.political.political_controllers = {
+            ...state.political.political_controllers,
+            'op:hadzici:lokve': 'RBiH',
+            'op:hadzici:pazaric': 'RBiH',
+            'op:hadzici:tarcin_2': 'RBiH',
+        };
+
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(1);
+        expect(evaluateEvents(state, () => 0, 71, [lukavac]).fired).toEqual([]);
+
+        state.meta.turn = 72;
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBe(0);
+        expect(evaluateEvents(state, () => 0, 72, [lukavac]).fired).toEqual([]);
+    });
+
+    it('keeps the August 9 NATO Council notice out of the August 2 Lukavac decision turn', () => {
+        const lukavac = loadLukavacEvent();
+        const natoNotice = loadNatoAirStrikeThreatEvent();
+        const state = makeLukavacReadyState();
+
+        updateEventReadiness(state, [lukavac]);
+        const report = evaluateEvents(state, () => 0, 69, [natoNotice, lukavac]);
+
+        expect(natoNotice.trigger.turn_min).toBe(70);
+        expect(report.fired.map((event) => event.id)).toEqual(['operation_lukavac_93']);
+    });
+
+    it('orders the sourced RS Lukavac decision before the NATO Council notice when both are eligible on turn 70', () => {
+        const lukavac = loadLukavacEvent();
+        const natoNotice = loadNatoAirStrikeThreatEvent();
+        const state = makeLukavacReadyState();
+        state.meta.turn = 70;
+
+        updateEventReadiness(state, [lukavac]);
+        expect(state.military.event_readiness?.operation_lukavac_93).toBeGreaterThan(lukavac.pressure!.threshold);
+
+        const report = evaluateEvents(state, () => 0, 70, [natoNotice, lukavac]);
+
+        expect(report.fired.map((event) => event.id)).toEqual([
+            'operation_lukavac_93',
+            'nato_air_strike_threat_1993',
+        ]);
+        expect(state.military.pending_event_decisions?.map((decision) => decision.event_id)).toEqual([
+            'operation_lukavac_93',
+        ]);
+    });
+
+    it('fires the historical NATO Council notice alone without asserting a Lukavac outcome', () => {
+        const lukavac = loadLukavacEvent();
+        const natoNotice = loadNatoAirStrikeThreatEvent();
+        const state = makeMinimalState('RS');
+        state.meta.turn = 70;
+        state.military.event_flags = { sarajevo_siege_active: false };
+        state.military.event_readiness = { operation_lukavac_93: 0 };
+        state.political.political_controllers = { 'op:trnovo:trnovo_2': 'RBiH' };
+
+        const report = evaluateEvents(state, () => 0, 70, [lukavac, natoNotice]);
+
+        expect(report.fired.map((event) => event.id)).toEqual(['nato_air_strike_threat_1993']);
+        expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
+        const primaryNarrative = natoNotice.effect.kind === 'narrative' ? natoNotice.effect.text : '';
+        expect(`${natoNotice.narrative ?? ''} ${primaryNarrative}`).not.toMatch(
+            /forces? .*withdraw|withdrawal (?:is|was|has been)|agreed .*withdraw|compliance|defiance/i,
+        );
+        const effectKinds = [natoNotice.effect, ...(natoNotice.effects ?? [])].map((effect) => effect.kind);
+        expect(effectKinds).not.toContain('control_change');
+        expect(effectKinds).not.toContain('territorial_control_change');
+        expect(natoNotice.sets_flags).toBeUndefined();
+        expect(natoNotice.enables_events).toBeUndefined();
+    });
+});
 
 const DECISION_EVENT: EventDefinition = {
     id: 'test_decision_event',
@@ -206,6 +353,29 @@ describe('Event Decisions', () => {
             {
                 event_id: 'test_explicit_historical_event',
                 response_id: 'historical_path',
+                decision_source: 'bot_ai_default',
+                faction: 'RBiH',
+                turn: 5,
+            },
+        ]);
+    });
+
+    it('historical mode does not claim an authored AI default when the event supplies none', () => {
+        const state = makeMinimalState(undefined);
+        state.meta.decision_mode = 'historical';
+        const event = {
+            ...EXPLICIT_HISTORICAL_EVENT,
+            id: 'test_missing_authored_default_event',
+            historical_default_response_id: undefined,
+            bot_response_logic: 'historical',
+        } as EventDefinition;
+
+        evaluateEvents(state, () => 0.5, 5, [event]);
+
+        expect(state.military.event_decision_log).toEqual([
+            {
+                event_id: 'test_missing_authored_default_event',
+                response_id: 'counterfactual_path',
                 decision_source: 'bot_v1',
                 faction: 'RBiH',
                 turn: 5,
@@ -230,8 +400,7 @@ describe('Event Decisions', () => {
         expect(state.military.event_decision_log?.[0]?.response_id).toBe('counterfactual_path');
     });
 
-    it('two-level bot default keeps accept_first on option 0 when explicit historical default points to option 2', () => {
-        process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = 'true';
+    it('authored accept_first keeps option 0 when explicit historical default points to option 2', () => {
         const state = makeMinimalState(undefined);
         const initialSupply = state.military.general_supply_reserve!['RBiH'];
         const rng = () => 0.5;
@@ -312,7 +481,7 @@ describe('Event Decisions', () => {
         updateEventReadiness(state, [lukavac]);
         expect(state.military.event_readiness?.operation_lukavac_93).toBeGreaterThan(lukavac.pressure!.threshold);
 
-        const report = evaluateEvents(state, () => 0, 65, [lukavac]);
+        const report = evaluateEvents(state, () => 0, 69, [lukavac]);
 
         expect(report.fired).toEqual([{ id: 'operation_lukavac_93', text: lukavac.title }]);
         expect(state.military.pending_event_decisions).toHaveLength(1);
@@ -337,7 +506,7 @@ describe('Event Decisions', () => {
         updateEventReadiness(state, [lukavac]);
         expect(state.military.event_readiness?.operation_lukavac_93).toBe(3);
 
-        const report = evaluateEvents(state, () => 0, 65, [lukavac]);
+        const report = evaluateEvents(state, () => 0, 69, [lukavac]);
 
         expect(report.fired.map((event) => event.id)).not.toContain('operation_lukavac_93');
         expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
@@ -358,7 +527,7 @@ describe('Event Decisions', () => {
         updateEventReadiness(state, [lukavac]);
         expect(state.military.event_readiness?.operation_lukavac_93).toBe(3);
 
-        const report = evaluateEvents(state, () => 0, 65, [lukavac]);
+        const report = evaluateEvents(state, () => 0, 69, [lukavac]);
 
         expect(report.fired.map((event) => event.id)).not.toContain('operation_lukavac_93');
         expect(state.military.pending_event_decisions ?? []).toHaveLength(0);

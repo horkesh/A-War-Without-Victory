@@ -86,6 +86,7 @@ function fixture(turn = 30): { state: GameState; op: CorpsOperation } {
 
     const op: CorpsOperation = {
         name: 'KRIVAJA_95',
+        army_hq_op_id: 'ahq:RBiH:KRIVAJA_95',
         type: 'sector_attack',
         phase: 'execution',
         started_turn: turn - 5,
@@ -181,12 +182,26 @@ describe('Army HQ AAR telemetry (flag ON)', () => {
         expect(aar.army_hq_telemetry!.total_cohesion_bled).toBe(8);
     });
 
+    it.each(['tg_cohesion_exhausted', 'tg_max_lifecycle'] as const)(
+        'preserves typed Tactical Group recovery reason %s in the AAR',
+        async (reason) => {
+            const { finalizeOperationAAR } = await import('../src/sim/combat/operation_aar.js');
+            const { state, op } = fixture();
+            op.recovery_reason = reason;
+
+            const aar = finalizeOperationAAR(state, 'corp_a', op);
+
+            expect(aar.recovery_reason).toBe(reason);
+        },
+    );
+
     it('omits army_hq_telemetry for an op NOT carried by an Army-HQ TG (even after dissolution)', async () => {
         const { advanceSectorOffensives } = await import('../src/sim/combat/sector_offensive.js');
         const { finalizeOperationAAR } = await import('../src/sim/combat/operation_aar.js');
         const { state, op } = fixture();
-        // Strip the army_hq_op_id → TG exists but is a regular (non-Army-HQ) TG.
+        // Strip both identities so the composite-linked pair is a regular TG.
         delete state.military.tactical_groups!['tg:corp_a:KRIVAJA_95:anchor'].army_hq_op_id;
+        delete op.army_hq_op_id;
         advanceSectorOffensives(state); // dissolves the (non-Army-HQ) TG; nothing to snapshot
         expect(op.army_hq_telemetry_snapshot).toBeUndefined();
         const aar = finalizeOperationAAR(state, 'corp_a', op);

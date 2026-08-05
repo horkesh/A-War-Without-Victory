@@ -1,6 +1,10 @@
 import assert from 'node:assert';
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { test } from 'vitest';
+
+const require = createRequire(import.meta.url);
+const inventory = require('../tools/diagnostics/codex_sensitive_claim_inventory.cjs');
 
 type EventRow = {
     id: string;
@@ -110,5 +114,60 @@ test('Srebrenica/Zepa source notes do not introduce forbidden gameplay framing',
             !sourceNotes.toLowerCase().includes(forbidden),
             `source notes must not introduce forbidden sensitive-history framing: ${forbidden}`,
         );
+    }
+});
+
+test('every inventoried sensitive claim has an explicit status and owner', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    assert.ok(report.claims.length > 0);
+    for (const claim of report.claims) {
+        assert.ok(claim.status, `missing status for ${claim.claim_id}`);
+        assert.ok(claim.owner, `missing owner for ${claim.claim_id}`);
+        assert.ok(claim.subject_id, `missing subject_id for ${claim.claim_id}`);
+        assert.ok(claim.ring, `missing ring for ${claim.claim_id}`);
+        assert.ok(claim.player_interaction_type, `missing interaction type for ${claim.claim_id}`);
+    }
+});
+
+test('production choice classification has no direct refused acts and excludes lexical references', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const blockedSubjects = [...new Set(report.claims
+        .filter((claim: { status: string }) => claim.status === 'blocked_sensitive_player_choice')
+        .map((claim: { subject_id: string }) => claim.subject_id))]
+        .sort();
+
+    for (const falsePositive of [
+        'dayton_talks_begin_1995',
+        'karadzic_mladic_split_1995',
+        'rs_paramilitary_policy_1992',
+        'strategic_posture_review_hrhb',
+        'visit_to_front_hrhb',
+    ]) {
+        assert.strictEqual(blockedSubjects.includes(falsePositive), false, falsePositive);
+    }
+    assert.deepStrictEqual(blockedSubjects, [] as string[]);
+});
+
+test('Neretva, Grabovica, and Uzdol anchors are source-owned September 1993 content', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    assert.strictEqual(report.historical_anchors.length, 2);
+    for (const anchor of report.historical_anchors) {
+        assert.strictEqual(anchor.chronology_status, 'pass', `${anchor.anchor_id} historical placement mismatch`);
+        assert.strictEqual(anchor.event_window, 'turns 74-76');
+        assert.strictEqual(anchor.provenance_status, 'pass');
+        assert.strictEqual(anchor.status, 'pass');
+        assert.deepStrictEqual(anchor.provenance_gaps, []);
+        assert.strictEqual(anchor.authored_provenance.event_source_tier, 'icty_icj_un');
+        assert.strictEqual(anchor.authored_provenance.event_source_tier_status, 'resolved');
+        assert.strictEqual(anchor.authored_provenance.essay_source_tier, 'icty_icj_un');
+        assert.strictEqual(anchor.authored_provenance.essay_source_tier_status, 'resolved');
+        assert.ok(anchor.authored_provenance.event_source_note);
+        assert.ok(Array.isArray(anchor.authored_provenance.essay_citations));
+        assert.ok(
+            anchor.authored_provenance.essay_citations.length
+                >= anchor.authored_provenance.required_essay_source_floor,
+        );
+        assert.strictEqual(anchor.source, undefined);
+        assert.strictEqual(anchor.owner, 'historian');
     }
 });

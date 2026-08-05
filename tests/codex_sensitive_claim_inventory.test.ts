@@ -1,10 +1,12 @@
 import assert from 'node:assert';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { test } from 'vitest';
+
+import { warningContinuationMatrix } from './fixtures/sensitive_history_warning_continuation_matrix.js';
 
 const require = createRequire(import.meta.url);
 const inventory = require('../tools/diagnostics/codex_sensitive_claim_inventory.cjs');
@@ -17,6 +19,36 @@ function expectedClaimId(file: string, line: number, fieldPath: string, matchedT
     const basis = [file, String(line), fieldPath, matchedTerms.join('|')].join('\n');
     return `sci_${createHash('sha256').update(basis).digest('hex').slice(0, 16)}`;
 }
+
+test('inventory applies the deterministic warning-continuation matrix', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-warning-matrix-'));
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1993.json'), [{
+            id: 'warning_continuation_matrix_1993',
+            historical_source: 'Fixture source.',
+            source_note: 'Fixture boundary note.',
+            source_tier: 'scholarship',
+            response_options: warningContinuationMatrix.map((row) => ({
+                id: row.id,
+                description: row.text,
+            })),
+        }]);
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        for (const row of warningContinuationMatrix) {
+            const claim = report.claims.find((candidate: { claim: string }) => candidate.claim === row.text);
+            assert.ok(claim, `missing inventory claim for ${row.id}`);
+            assert.strictEqual(
+                claim.status === 'blocked_sensitive_player_choice',
+                row.blocked,
+                `wrong inventory disposition for ${row.id}`,
+            );
+        }
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
 
 test('inventory scans bounded surfaces with stable ordering, ids, and source status', async () => {
     const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
@@ -81,12 +113,16 @@ test('inventory scans bounded surfaces with stable ordering, ids, and source sta
             'data/codex/ghost_entries/ghost.md',
             'data/codex/ghost_entries_bcs/ghost_bcs.md',
             'data/scenarios/essays/a_cited.json',
+            'data/scenarios/essays/a_cited.json',
+            'data/scenarios/essays/z_uncited.json',
             'data/scenarios/essays/z_uncited.json',
             'data/scenarios/events/consequences.json',
             'src/ui/map/data/decisionConsequenceLedger.ts',
         ]);
 
-        const cited = result.claims.find((claim: { file: string }) => claim.file === 'data/scenarios/essays/a_cited.json');
+        const cited = result.claims.find((claim: { file: string; field_path: string }) => (
+            claim.file === 'data/scenarios/essays/a_cited.json' && claim.field_path === '$.body'
+        ));
         assert.strictEqual(cited.surface, 'essay');
         assert.strictEqual(cited.field_path, '$.body');
         assert.strictEqual(cited.source_status, 'cited');
@@ -95,7 +131,9 @@ test('inventory scans bounded surfaces with stable ordering, ids, and source sta
         assert.strictEqual(cited.stop_gate, 'sensitive_history');
         assert.strictEqual(cited.claim_id, expectedClaimId(cited.file, cited.line, cited.field_path, cited.matched_terms));
 
-        const floorException = result.claims.find((claim: { file: string }) => claim.file === 'data/scenarios/essays/z_uncited.json');
+        const floorException = result.claims.find((claim: { file: string; field_path: string }) => (
+            claim.file === 'data/scenarios/essays/z_uncited.json' && claim.field_path === '$.body'
+        ));
         assert.strictEqual(floorException.source_status, 'source_floor_exception');
         assert.strictEqual(floorException.actor_faction, 'RBiH');
         assert.deepStrictEqual(floorException.matched_terms, ['5th Corps sweeps west', 'cleanses']);
@@ -173,12 +211,15 @@ test('inventory covers essay_index dynamic_sections (A1c morphing prose) the run
         const indexClaims = result.claims.filter(
             (claim: { surface: string }) => claim.surface === 'essay_dynamic_section',
         );
-        // Exactly one claim: the sensitive `detention` branch. The body-clone
-        // dynamic section has no sensitive vocabulary → no claim (no double-count
-        // of the canonical body).
-        assert.strictEqual(indexClaims.length, 1);
+        // Both dynamic-section prose fields are claims, including prose without
+        // a sensitive dictionary hit. The duplicated top-level canonical body
+        // remains excluded, so the body is not double-counted.
+        assert.strictEqual(indexClaims.length, 2);
 
-        const hostage = indexClaims[0];
+        const hostage = indexClaims.find((claim: { matched_terms: string[] }) => (
+            claim.matched_terms.includes('detention')
+        ));
+        assert.ok(hostage);
         assert.strictEqual(hostage.file, 'data/scenarios/essays/essay_index.json');
         assert.deepStrictEqual(hostage.matched_terms, ['detention']);
         assert.strictEqual(hostage.risk_class, 'sensitive_history_gated');
@@ -190,6 +231,8 @@ test('inventory covers essay_index dynamic_sections (A1c morphing prose) the run
         // `sourceStatusFor` only ran the floor check for surface === 'essay',
         // so this claim wrongly reported `cited` and bypassed the gate.)
         assert.strictEqual(hostage.source_status, 'source_floor_exception');
+  assert.strictEqual(hostage.state_predicate, 'RESPONSE:un_hostage_crisis_1995:maintain_hostages');
+  assert.deepStrictEqual(hostage.provenance_gaps, ['source_floor', 'source_note', 'source_tier']);
         // field_path is keyed by the parent essay id for human traceability.
         assert.strictEqual(
             hostage.field_path.startsWith('$.essay_un_hostage_crisis_1995.dynamic_sections'),
@@ -204,6 +247,55 @@ test('inventory covers essay_index dynamic_sections (A1c morphing prose) the run
     } finally {
         await rm(root, { recursive: true, force: true });
     }
+});
+
+test('real dynamic Codex claims name a non-calendar predicate and rupture tags stay on rupture essays', async () => {
+    const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const dynamicClaims = result.claims.filter(
+        (claim: { surface: string }) => claim.surface === 'essay_dynamic_section',
+    );
+
+    assert.ok(dynamicClaims.length > 0);
+    assert.strictEqual(dynamicClaims.every((claim: { state_predicate: string | null }) => (
+        typeof claim.state_predicate === 'string'
+        && claim.state_predicate.trim().length > 0
+        && !/^turn\s*[<=>]/i.test(claim.state_predicate)
+    )), true);
+
+    const essayIndex = JSON.parse(await readFile(
+        join(process.cwd(), 'data', 'scenarios', 'essays', 'essay_index.json'),
+        'utf8',
+    ));
+    const ruptureClaims = essayIndex.essays.flatMap((essay: { dynamic_sections?: Array<{ id: string; condition?: string }> }) => (
+        (essay.dynamic_sections ?? []).filter((section) => section.condition?.includes('FINDING:rupture_'))
+    ));
+    assert.deepStrictEqual(
+        [...new Set(ruptureClaims.map((claim: { id: string }) => claim.id))],
+        ['v091_cost_ledger_srebrenica_finding'],
+    );
+});
+
+test('inventory-identified safe essay residuals carry source notes without copied prose', async () => {
+    const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const safeFiles = new Map([
+        ['data/scenarios/essays/battle_of_the_barracks_sarajevo.json', 'icty_icj_un'],
+        ['data/scenarios/essays/battle_of_the_barracks_visoko.json', 'icty_icj_un'],
+        ['data/scenarios/essays/belgrade_embargo_rs_1994.json', 'icty_icj_un'],
+        ['data/scenarios/essays/mostar_liberation_1992.json', 'icty_icj_un'],
+        ['data/scenarios/essays/nato_air_strike_threat_1993.json', 'agreement_text'],
+        ['data/scenarios/essays/operation_lukavac_93.json', 'icty_icj_un'],
+        ['data/scenarios/essays/un_hostage_crisis_1995.json', 'icty_icj_un'],
+    ]);
+    const safeClaims = result.claims.filter((claim: { file: string; risk_class: string }) => (
+        safeFiles.has(claim.file) && claim.risk_class === 'safe_factual_correction'
+    ));
+
+    assert.strictEqual(safeClaims.length, safeFiles.size);
+    assert.strictEqual(safeClaims.every((claim: { status: string }) => claim.status === 'documented'), true);
+    assert.deepStrictEqual(
+        Object.fromEntries(safeClaims.map((claim: { file: string; source_tier: string }) => [claim.file, claim.source_tier])),
+        Object.fromEntries(safeFiles),
+    );
 });
 
 test('dynamic_section claims clear the source floor when the parent has enough sources (#338)', async () => {
@@ -290,7 +382,7 @@ test('inventory detects forbidden scaffold tokens and reports deterministic poli
         const second = await inventory.scanSensitiveClaimInventory({ rootDir: root });
 
         assert.deepStrictEqual(first, second);
-        assert.strictEqual(first.schema_version, 1);
+        assert.strictEqual(first.schema_version, 4);
         assert.strictEqual(first.summary.claim_count, 1);
         assert.deepStrictEqual(first.summary.risk_class_counts, { unsupported_remove: 1 });
         assert.deepStrictEqual(first.policy.term_sets.forbidden_scaffold, ['FIXME', 'TODO', 'atrocity lever', 'cleansing lever', 'placeholder']);
@@ -298,6 +390,431 @@ test('inventory detects forbidden scaffold tokens and reports deterministic poli
         assert.strictEqual(first.claims[0].risk_class, 'unsupported_remove');
         assert.strictEqual(first.claims[0].stop_gate, 'canon');
         assert.strictEqual(inventory.stableStringify(first), inventory.stableStringify(second));
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('inventory emits actionable historical provenance and interaction ownership', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1993.json'), [
+            {
+                id: 'grabovica_uzdol_massacres_1993',
+                category: 'humanitarian',
+                narrative: 'ARBiH soldiers killed Croat civilians at Grabovica and Uzdol in September 1993.',
+                source_tier: 'icty_icj_un',
+                historical_source: 'ICTY Halilovic Trial Judgment (IT-01-48-T).',
+                source_note: 'Provenance only; distinguishes charged acts from the acquittal on command responsibility.',
+                responding_faction: 'RBiH',
+                trigger: {
+                    turn_min: 74,
+                    turn_max: 76,
+                    phase: 'war',
+                    requires_events: ['operation_neretva_93_1993'],
+                },
+                once: true,
+            },
+            {
+                id: 'forbidden_choice_1993',
+                category: 'humanitarian',
+                narrative: 'A sensitive-history fixture.',
+                source_tier: 'design_counterfactual',
+                historical_source: 'Fixture citation.',
+                source_note: 'Fixture source note.',
+                responding_faction: 'RBiH',
+                trigger: { turn_min: 74, turn_max: 76, phase: 'war' },
+                response_options: [{ id: 'authorize', label: 'Authorize forced displacement of civilians' }],
+            },
+        ]);
+
+        const result = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        const grabovica = result.claims.find((claim: { subject_id: string; field_path: string }) => (
+            claim.subject_id === 'grabovica_uzdol_massacres_1993' && claim.field_path === '$[0].narrative'
+        ));
+        assert.ok(grabovica);
+        assert.strictEqual(result.schema_version, 4);
+        assert.strictEqual(grabovica.ring, 'ring_2_informational');
+        assert.strictEqual(grabovica.claim, grabovica.excerpt);
+        assert.strictEqual(grabovica.date_window, 'turns 74-76');
+        assert.strictEqual(grabovica.state_predicate, 'phase=war; requires_events=operation_neretva_93_1993');
+        assert.strictEqual(grabovica.source_tier, 'icty_icj_un');
+        assert.strictEqual(grabovica.source_tier_status, 'resolved');
+        assert.strictEqual(grabovica.citation, 'ICTY Halilovic Trial Judgment (IT-01-48-T).');
+        assert.strictEqual(grabovica.respondent, 'RBiH');
+        assert.strictEqual(grabovica.player_interaction_type, 'informational');
+        assert.strictEqual(grabovica.status, 'documented');
+        assert.strictEqual(grabovica.owner, 'historian');
+
+        const forbiddenChoice = result.claims.find((claim: { subject_id: string; field_path: string }) => (
+            claim.subject_id === 'forbidden_choice_1993' && claim.field_path.includes('response_options')
+        ));
+        assert.ok(forbiddenChoice);
+        assert.strictEqual(forbiddenChoice.ring, 'ring_3_refused_candidate');
+        assert.strictEqual(forbiddenChoice.player_interaction_type, 'player_choice');
+        assert.strictEqual(forbiddenChoice.status, 'blocked_sensitive_player_choice');
+        assert.strictEqual(forbiddenChoice.owner, 'historian+game-designer');
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('inventory blocks direct sensitive acts without treating contextual or canon-allowed wording as choices', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1992.json'), [
+            {
+                id: 'direct_displacement_choice_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [{ id: 'systematic', label: 'Systematic cleansing' }],
+            },
+            {
+                id: 'direct_genocide_choice_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [{
+                    id: 'aggressive',
+                    description: 'General Staff warned of genocide. Proceed anyway and make it swift.',
+                }],
+            },
+            {
+                id: 'direct_refused_verbs_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [
+                    { id: 'expel', label: 'Expel the population' },
+                    { id: 'camps', label: 'Authorize concentration camps' },
+                    { id: 'kill', label: 'Order civilians killed' },
+                    { id: 'deport', label: 'Deport the civilian population' },
+                    { id: 'continue', label: 'Continue expulsions' },
+                    { id: 'forced', label: 'Authorize forced displacement' },
+                    { id: 'cleansing', label: 'Proceed with ethnic cleansing' },
+                    { id: 'negated_then_kill', description: 'Do not authorize detention camps, then kill civilians' },
+                    { id: 'refuse_then_execute', description: 'Refuse to deploy paramilitary forces, then execute the displaced families' },
+                    { id: 'investigate_then_genocide', description: 'Authorize an investigation of concentration camps, then commit genocide' },
+                    { id: 'negated_scope_then_kill', description: 'Do not authorize or approve concentration camps, then kill civilians' },
+                    { id: 'accountability_scope_but_genocide', description: 'Authorize prosecutors to investigate concentration camps, but commit genocide' },
+                    { id: 'colon_then_kill', description: 'Do not authorize detention camps: kill civilians' },
+                    { id: 'em_dash_then_execute', description: 'Refuse to deploy paramilitary forces — execute the displaced families' },
+                    { id: 'forbid_then_kill', description: 'Forbid commanders to murder civilians: kill civilians' },
+                    { id: 'decline_then_genocide', description: 'Decline to authorize concentration camps — commit genocide' },
+                    { id: 'cannot_then_execute', description: 'Cannot authorize concentration camps: execute the displaced families' },
+                    { id: 'warning_offensive_anyway', description: 'General Staff warned of genocide. Proceed with the offensive anyway.' },
+                    { id: 'warning_continue_operation_regardless', description: 'General Staff warned of genocide. Continue the operation regardless.' },
+                    { id: 'warning_continue_regardless_offensive', description: 'General Staff warned of genocide. Continue regardless with the offensive.' },
+                    { id: 'warning_review_then_kill', description: 'General Staff warned of genocide. Proceed anyway with the command review. Then kill civilians.' },
+                    { id: 'warning_offensive_then_review', description: 'General Staff warned of genocide. Proceed with the offensive anyway and review the result.' },
+                    { id: 'warning_direct_action_then_review', description: 'General Staff warned of genocide. Proceed with direct action regardless and review the result.' },
+                    { id: 'warning_review_execute_offensive', description: 'General Staff warned of genocide. Proceed to review and execute the offensive regardless.' },
+                    { id: 'warning_review_continue_offensive', description: 'General Staff warned of genocide. Proceed to review and continue the offensive regardless.' },
+                    { id: 'warning_review_launch_offensive', description: 'General Staff warned of genocide. Proceed to review and launch the offensive regardless.' },
+                    { id: 'warning_multi_launch_operation', description: 'General Staff warned of genocide. Proceed regardless to document, review, and launch the operation.' },
+                    { id: 'warning_launch_then_document', description: 'General Staff warned of genocide. Proceed to review, launch the offensive, and document the result anyway.' },
+                    { id: 'warning_review_continue_direct_action', description: 'General Staff warned of genocide. Proceed to review and continue with direct action regardless.' },
+                    { id: 'warning_review_offensive', description: 'General Staff warned of genocide. Proceed to review the offensive regardless.' },
+                    { id: 'warning_review_document_offensive', description: 'General Staff warned of genocide. Proceed to review and document the offensive regardless.' },
+                    { id: 'warning_inspect_operation', description: 'General Staff warned of genocide. Proceed to inspect the operation and review the report anyway.' },
+                    { id: 'warning_review_begin_offensive', description: 'General Staff warned of genocide. Proceed to review and begin the offensive regardless.' },
+                    { id: 'warning_review_conduct_offensive', description: 'General Staff warned of genocide. Proceed to review and conduct the offensive regardless.' },
+                    { id: 'warning_review_resume_offensive', description: 'General Staff warned of genocide. Proceed to review and resume the offensive regardless.' },
+                    { id: 'warning_review_start_offensive', description: 'General Staff warned of genocide. Proceed to review and start the offensive regardless.' },
+                    { id: 'warning_review_order_offensive', description: 'General Staff warned of genocide. Proceed to review and order the offensive regardless.' },
+                    { id: 'warning_bare_proceed_anyway', description: 'General Staff warned of genocide. Proceed anyway.' },
+                    { id: 'warning_do_not_hesitate_offensive', description: 'General Staff warned of genocide. Do not hesitate, proceed with the offensive anyway.' },
+                    { id: 'warning_negated_review_then_offensive', description: 'General Staff warned of genocide. Do not proceed with the documentation review; continue with the offensive regardless.' },
+                    { id: 'warning_do_not_delay_then_offensive', description: 'General Staff warned of genocide. Do not delay. Continue with the offensive regardless.' },
+                    { id: 'warning_neutral_then_offensive', description: 'General Staff warned of genocide. The cabinet reviewed the report. Continue with the offensive regardless.' },
+                    { id: 'warning_first_negated_then_second_offensive', description: 'General Staff warned of genocide. Do not proceed with the documentation review, continue with the offensive regardless.' },
+                ],
+            },
+            {
+                id: 'lexical_context_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [
+                    { id: 'political', label: 'Keep the hardline camp together' },
+                    { id: 'command', description: 'Civilian authority over the military must be established.' },
+                    { id: 'press', description: 'Invite scrutiny of front-line conditions and treatment of civilians.' },
+                    { id: 'dayton', description: 'Accept Annex 7 refugee-return commitments.' },
+                    { id: 'safe_do_not_order', description: 'Do not order the population killed' },
+                    { id: 'safe_refuse_order', description: 'Refuse to order the population killed' },
+                    { id: 'safe_coordinated_genocide', description: 'Do not authorize, approve, or conduct genocide' },
+                    { id: 'safe_prosecutors', description: 'Authorize prosecutors to investigate concentration camps' },
+                    { id: 'safe_never_camps', description: 'Never authorize or approve concentration camps' },
+                    { id: 'safe_inspectors', description: 'Order inspectors to inspect detention camps' },
+                    { id: 'safe_proceed_then_document', description: 'Proceed with the command review. Document genocide allegations.' },
+                    { id: 'safe_document_then_proceed', description: 'Document genocide allegations. Proceed with the command review.' },
+                    { id: 'safe_forbid_commanders', description: 'Forbid commanders to murder civilians' },
+                    { id: 'safe_decline_authorize', description: 'Decline to authorize concentration camps' },
+                    { id: 'safe_cannot_authorize', description: 'Cannot authorize concentration camps' },
+                    { id: 'safe_warning_review_anyway', description: 'General Staff warned of genocide. Proceed anyway with the command review.' },
+                    { id: 'safe_warning_continue_regardless_review', description: 'General Staff warned of genocide. Continue regardless with the documentation review.' },
+                    { id: 'safe_warning_continue_review_regardless', description: 'General Staff warned of genocide. Continue with the documentation review regardless.' },
+                    { id: 'safe_warning_operational_review', description: 'General Staff warned of genocide. Proceed with the operational review anyway.' },
+                    { id: 'safe_negated_warning_offensive', description: 'General Staff did not warn of genocide. Proceed with the offensive anyway.' },
+                    { id: 'safe_negated_continuation_offensive', description: 'General Staff warned of genocide. Do not proceed with the offensive anyway.' },
+                    {
+                        id: 'guarded',
+                        label: 'Adopt the platform',
+                        future_consequences: [{
+                            explanation: 'This branch may not re-author cleansing or forced displacement.',
+                        }],
+                    },
+                ],
+            },
+            {
+                id: 'rs_paramilitary_policy_1992',
+                family: 'rs_paramilitary_policy',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                response_options: [
+                    {
+                        id: 'always_allow',
+                        label: 'Always allow paramilitary deployment',
+                        description: 'Each approved sweep records civilian casualties.',
+                    },
+                    { id: 'commit_genocide', label: 'Commit genocide' },
+                    { id: 'kill_civilians', label: 'Kill civilians' },
+                ],
+            },
+            {
+                id: 'generic_symmetry_1992',
+                historical_source: 'Fixture source.',
+                source_note: 'Fixture boundary note.',
+                narrative: 'No faction in the war holds clean hands after atrocities against civilians.',
+            },
+        ]);
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        const blocked = report.claims.filter((claim: { status: string }) => (
+            claim.status === 'blocked_sensitive_player_choice'
+        ));
+        assert.deepStrictEqual([...new Set(blocked.map((claim: { subject_id: string }) => claim.subject_id))], [
+            'direct_displacement_choice_1992',
+            'direct_genocide_choice_1992',
+            'direct_refused_verbs_1992',
+            'rs_paramilitary_policy_1992',
+        ]);
+        assert.strictEqual(blocked.filter((claim: { subject_id: string }) => (
+            claim.subject_id === 'direct_refused_verbs_1992'
+        )).length, 43);
+
+        const contextual = report.claims.filter((claim: { subject_id: string }) => (
+            claim.subject_id === 'lexical_context_1992'
+        ));
+        assert.ok(contextual.length > 0);
+        assert.strictEqual(contextual.every((claim: { status: string }) => (
+            claim.status !== 'blocked_sensitive_player_choice'
+        )), true);
+        assert.strictEqual(contextual.some((claim: { player_interaction_type: string }) => (
+            claim.player_interaction_type === 'decision_context'
+        )), true);
+
+        const allowed = report.claims.filter((claim: { subject_id: string; field_path: string }) => (
+            claim.subject_id === 'rs_paramilitary_policy_1992'
+            && claim.field_path === '$[4].response_options[0].label'
+        ));
+        assert.ok(allowed.length > 0);
+        assert.strictEqual(allowed.every((claim: { status: string }) => (
+            claim.status !== 'blocked_sensitive_player_choice'
+        )), true);
+        assert.strictEqual(blocked.filter((claim: { subject_id: string }) => (
+            claim.subject_id === 'rs_paramilitary_policy_1992'
+        )).length, 2);
+
+        const symmetry = report.claims.find((claim: { subject_id: string }) => (
+            claim.subject_id === 'generic_symmetry_1992'
+        ));
+        assert.ok(symmetry);
+        assert.strictEqual(symmetry.status, 'needs_actor_specificity');
+        assert.strictEqual(symmetry.owner, 'historian');
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('inventory reports the 1993 placement/window contract for Neretva, Grabovica, and Uzdol', async () => {
+    const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const anchors = result.historical_anchors;
+
+    assert.deepStrictEqual(anchors.map((row: { anchor_id: string }) => row.anchor_id), [
+        'grabovica_uzdol_massacres_1993',
+        'operation_neretva_93_1993',
+    ]);
+    assert.deepStrictEqual(anchors.map((row: { chronology_status: string }) => row.chronology_status), ['pass', 'pass']);
+    assert.deepStrictEqual(anchors.map((row: { provenance_status: string }) => row.provenance_status), ['pass', 'pass']);
+    for (const row of anchors) {
+        assert.strictEqual(row.event_file, 'data/scenarios/events/war_1993.json');
+        assert.strictEqual(row.event_window, 'turns 74-76');
+        assert.strictEqual(row.essay_file.endsWith('_1993.json'), true);
+        assert.strictEqual(row.status, 'pass');
+        assert.ok(row.authored_provenance);
+        assert.deepStrictEqual(row.provenance_gaps, []);
+        assert.strictEqual(row.authored_provenance.event_source_tier, 'icty_icj_un');
+        assert.strictEqual(row.authored_provenance.event_source_tier_status, 'resolved');
+        assert.strictEqual(row.authored_provenance.essay_source_tier, 'icty_icj_un');
+        assert.strictEqual(row.authored_provenance.essay_source_tier_status, 'resolved');
+        assert.ok(row.authored_provenance.event_source_note);
+        assert.ok(
+            row.authored_provenance.essay_citations.length
+                >= row.authored_provenance.required_essay_source_floor,
+        );
+        assert.strictEqual(row.source, undefined);
+    }
+});
+
+test('inventory covers claim prose without relying on a narrow keyword list', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const subjects = new Set(report.claims.map((claim: { subject_id: string }) => claim.subject_id));
+    for (const id of [
+        'operation_neretva_93_1993',
+        'turajlic_assassination_1993',
+        'essay_east_mostar_siege_1993',
+        'un_hostage_crisis_1995',
+    ]) {
+        assert.ok(subjects.has(id), `missing claim subject ${id}`);
+    }
+    const neretvaNarrative = report.claims.find((claim: { subject_id: string; field_path: string }) => (
+        claim.subject_id === 'operation_neretva_93_1993' && claim.field_path.endsWith('.narrative')
+    ));
+    assert.ok(neretvaNarrative);
+    assert.deepStrictEqual(neretvaNarrative.matched_terms, []);
+    const triggerEvidence = report.claims.find((claim: { field_path: string; matched_terms: string[] }) => (
+        claim.field_path.includes('.trigger_evidence[') && claim.matched_terms.length === 0
+    ));
+    assert.ok(triggerEvidence, 'missing unmatched trigger-evidence prose');
+    assert.ok(report.policy.claim_prose_keys.includes('trigger_evidence'));
+});
+
+test('documented status requires a recognized and resolved authored source tier', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1993.json'), [
+            {
+                id: 'missing_tier_1993',
+                title: 'A sourced historical record',
+                narrative: 'A documented event enters the record.',
+                historical_source: 'Fixture tribunal judgment.',
+                source_note: 'Fixture provenance boundary.',
+            },
+            {
+                id: 'invalid_tier_1993',
+                narrative: 'A second documented event enters the record.',
+                historical_source: 'Fixture citation.',
+                source_note: 'Fixture provenance boundary.',
+                source_tier: 'tribunal',
+            },
+            {
+                id: 'pending_tier_1993',
+                narrative: 'A third documented event enters the record.',
+                historical_source: 'Fixture citation.',
+                source_note: 'Fixture provenance boundary.',
+                source_tier: 'pending',
+            },
+        ]);
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        const narrative = report.claims.find((claim: { field_path: string }) => claim.field_path.endsWith('.narrative'));
+        assert.ok(narrative);
+        assert.strictEqual(narrative.source_tier, null);
+        assert.strictEqual(narrative.source_tier_status, 'missing');
+        assert.strictEqual(narrative.status, 'needs_source_tier');
+        assert.deepStrictEqual(narrative.provenance_gaps, ['source_tier']);
+
+        const invalid = report.claims.find((claim: { subject_id: string }) => claim.subject_id === 'invalid_tier_1993');
+        assert.ok(invalid);
+        assert.strictEqual(invalid.source_tier, 'tribunal');
+        assert.strictEqual(invalid.source_tier_status, 'invalid');
+        assert.strictEqual(invalid.status, 'needs_source_tier');
+        assert.deepStrictEqual(invalid.provenance_gaps, ['source_tier']);
+
+        const pending = report.claims.find((claim: { subject_id: string }) => claim.subject_id === 'pending_tier_1993');
+        assert.ok(pending);
+        assert.strictEqual(pending.source_tier, 'pending');
+        assert.strictEqual(pending.source_tier_status, 'pending');
+        assert.strictEqual(pending.status, 'needs_source_tier');
+        assert.deepStrictEqual(pending.provenance_gaps, ['source_tier']);
+        assert.deepStrictEqual(report.policy.source_tiers, {
+            recognized: [
+                'agreement_text',
+                'balkan_battlegrounds',
+                'corroborated_participant',
+                'design_counterfactual',
+                'icty_icj_un',
+                'pending',
+            ],
+            resolved: [
+                'agreement_text',
+                'balkan_battlegrounds',
+                'corroborated_participant',
+                'design_counterfactual',
+                'icty_icj_un',
+            ],
+        });
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('duplicate prose receives the exact line for each JSON field', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1993.json'), [{
+            id: 'duplicate_lines_1993',
+            narrative: 'Civilian displacement is recorded.',
+            effects: [
+                { kind: 'narrative', text: 'Civilian displacement is recorded.' },
+                { kind: 'narrative', text: 'Civilian displacement is recorded.' },
+            ],
+        }]);
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        const duplicates = report.claims.filter((claim: { claim: string }) => (
+            claim.claim === 'Civilian displacement is recorded.'
+        ));
+        assert.strictEqual(duplicates.length, 3);
+        assert.deepStrictEqual(duplicates.map((claim: { line: number }) => claim.line), [
+            ...new Set(duplicates.map((claim: { line: number }) => claim.line)),
+        ]);
+        assert.ok(duplicates[0].line < duplicates[1].line && duplicates[1].line < duplicates[2].line);
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
+test('inventory fails closed on event and essay year mismatches', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-claims-'));
+    try {
+        await mkdir(join(root, 'data', 'scenarios', 'events'), { recursive: true });
+        await mkdir(join(root, 'data', 'scenarios', 'essays'), { recursive: true });
+        await writeJson(join(root, 'data', 'scenarios', 'events', 'war_1992.json'), [{
+            id: 'misfiled_claim_1993',
+            title: 'Misfiled claim',
+            narrative: 'Civilian displacement is recorded.',
+        }]);
+        await writeJson(join(root, 'data', 'scenarios', 'essays', 'misfiled_claim_1994.json'), {
+            id: 'essay_misfiled_claim_1994',
+            event_id: 'misfiled_claim_1993',
+            year: 1994,
+            title: 'Misfiled essay',
+            content: 'Civilian displacement is recorded.',
+            sources: ['Fixture A', 'Fixture B'],
+        });
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        assert.deepStrictEqual(report.date_mismatches.map((row: { code: string }) => row.code), [
+            'event_essay_date_mismatch',
+            'event_essay_date_mismatch',
+        ]);
+        assert.strictEqual(report.date_mismatches.every((row: { status: string }) => row.status === 'blocked'), true);
+        assert.strictEqual(report.date_mismatches.every((row: { owner: string }) => row.owner === 'historian'), true);
     } finally {
         await rm(root, { recursive: true, force: true });
     }

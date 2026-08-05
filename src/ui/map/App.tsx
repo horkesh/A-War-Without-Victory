@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MapContainer } from './map/MapContainer';
 import { PresidentialToolbar } from './components/PresidentialToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
 import { CorpsFrontPanel } from './components/CorpsFrontPanel';
@@ -8,7 +7,8 @@ import { ArmyReservePanel } from './components/ArmyReservePanel';
 import { CorpsDetail } from './components/CorpsDetail';
 // ArmyDetail retired — faction click opens Army HQ modal directly
 import { ArmyHQModal } from './components/army_hq/ArmyHQModal';
-import { Minimap } from './components/Minimap';
+import type { TacticalMapInteractionReadiness } from './components/TacticalMapViewport';
+import { CampaignTacticalViewportOwner } from './components/CampaignTacticalViewportOwner';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
 import { OperationsPanel } from './components/OperationsPanel';
@@ -68,7 +68,7 @@ import { PresidentialDecisionRoomPanel } from './components/army_hq/Presidential
 import { Z } from '../shared/zIndex';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { PanelBreadcrumb } from './components/PanelBreadcrumb';
-import { derivePanelRailState, shouldRenderCommandBriefing, shouldRenderInboxPanel, shouldRenderTacticalDetailRails } from './components/panelRail';
+import { derivePanelRailState, shouldRenderCommandBriefing, shouldRenderInboxPanel, shouldRenderMapModeLegend, shouldRenderTacticalDetailRails } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
 import type { EventDefinition } from '../../sim/events/event_types';
@@ -79,9 +79,12 @@ import {
   officerResentmentReceiptsRealizedOnTurn,
 } from './data/officerResentmentReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
-import { t } from './i18n';
+import { t, useLocale } from './i18n';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
-import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import {
+  isCurrentTacticalInteractionReady,
+  TacticalInputOwners,
+} from './components/TacticalInputOwners';
 import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
 import { advanceTurnAndSync } from './desktop/orderActions';
@@ -94,7 +97,7 @@ import { isRequiredPendingEventDecision } from './data/eventDecisionRouting';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
 import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
-import { applyShellHandoffCommand, openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openChronicleDecisionRecord, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
+import { applyShellHandoffCommand, openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openChronicleDecisionRecord, openCodex, resolveInitialShellScreen, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
 import { requestDecisionRoomLens } from './utils/decisionRoomLensRequest';
 import { isKeyboardEventFromInteractiveControl } from './utils/interactiveFocus';
@@ -108,6 +111,10 @@ import {
   resolveBrowserEventDecision,
   startCampaignFromSidePicker,
 } from './desktop/campaignRecruitmentActions';
+import { beginMapTransition } from './perf/mapTransitionTiming';
+import { createCampaignReplacementCoordinator } from './utils/campaignViewportLifecycle';
+import type { FieldOperationPlanTarget } from './utils/fieldInspectionTarget';
+import { normalizeFieldOperationPlanTarget } from './data/fieldOperationPlanFocus';
 
 declare global {
   interface Window {
@@ -460,13 +467,12 @@ function WarroomNativeOverlay({
 }
 
 function App() {
-  // Phase C3: single key handler (Enter, 1–5, Escape)
-  useKeyboardShortcuts();
-  useDesktopSession();
+  const [locale] = useLocale();
   const ipc = useIPC();
   const devMode = useGameStore((s) => s.devMode);
 
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const loadedStateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint);
   const openingBriefDismissed = useGameStore((s) => s.openingBriefDismissed);
   const setOpeningBriefDismissed = useGameStore((s) => s.setOpeningBriefDismissed);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
@@ -521,6 +527,45 @@ function App() {
   // `?view=warroom` / `?view=game` URL-param overrides below (~:1022) still let
   // dev/automation deep-link past the menu.
   const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('mainMenu');
+  const [fieldOperationPlanFocus, setFieldOperationPlanFocus] = useState<FieldOperationPlanTarget | null>(null);
+  const [fieldOperationPlanReturnCardId, setFieldOperationPlanReturnCardId] = useState<string | null>(null);
+  const [campaignViewportEpoch, setCampaignViewportEpoch] = useState(0);
+  const [tacticalMapReadiness, setTacticalMapReadiness] = useState<TacticalMapInteractionReadiness>({
+    ready: false,
+    renderedTurn: null,
+    renderedFingerprint: null,
+  });
+  const tacticalMapInteractionReady = isCurrentTacticalInteractionReady({
+    screenActive: appScreen === 'game',
+    readiness: tacticalMapReadiness,
+    currentTurn: loadedGameState?.turn,
+    currentFingerprint: loadedStateFingerprint,
+  });
+  const markCampaignReplacementSucceeded = useCallback(() => {
+    setTacticalMapReadiness({ ready: false, renderedTurn: null, renderedFingerprint: null });
+    setFieldOperationPlanFocus(null);
+    setFieldOperationPlanReturnCardId(null);
+    setCampaignViewportEpoch((epoch) => epoch + 1);
+  }, []);
+  useEffect(() => {
+    if (appScreen !== 'game') {
+      setFieldOperationPlanFocus(null);
+      setFieldOperationPlanReturnCardId(null);
+    }
+  }, [appScreen]);
+  const campaignReplacementOwner = useMemo(
+    () => createCampaignReplacementCoordinator(
+      markCampaignReplacementSucceeded,
+      () => useGameStore.getState().loadedGameState !== null,
+    ),
+    [markCampaignReplacementSucceeded],
+  );
+  const runCampaignReplacement = campaignReplacementOwner.runReplacement;
+  const replaceCampaignState = useCallback(
+    (state: unknown) => runCampaignReplacement(() => loadSave(state)),
+    [loadSave, runCampaignReplacement],
+  );
+  useDesktopSession({ campaignReplacementOwner });
   // Command-surface card strip: open state + optional category highlight.
   // Warroom hotspots keep literal room meanings; the strip opens from the Desk.
   const [commandStripOpen, setCommandStripOpen] = useState(false);
@@ -629,8 +674,8 @@ function App() {
   // the aftermath modal surfaces only those whose CONFIRMED firing landed on
   // the just-advanced turn. Read-only; collapses to [] pre-substrate.
   const consequenceReceipts = useMemo(
-    () => buildConsequenceReceipts(loadedGameState?.rawGameState, eventCatalogFull),
-    [loadedGameState?.rawGameState, eventCatalogFull],
+    () => buildConsequenceReceipts(loadedGameState?.rawGameState, eventCatalogFull, locale),
+    [loadedGameState?.rawGameState, eventCatalogFull, locale],
   );
   const aftermathConsequences = useMemo(
     () => (turnAftermath ? receiptsRealizedOnTurn(consequenceReceipts, turnAftermath.turn) : []),
@@ -708,13 +753,13 @@ function App() {
       try {
         const text = await loadLatestRunSaveAsText();
         const json = JSON.parse(text);
-        await loadSave(json);
+        await runCampaignReplacement(() => loadSave(json));
       } catch (err) {
         console.error('[Live] Failed to auto-load latest save:', err);
         setLoadError(err instanceof Error ? err.message : String(err));
       }
     })();
-  }, []);
+  }, [ipc.isAvailable, loadSave, loadedGameState, runCampaignReplacement, setLoadError]);
 
   // Dev: ?showPanel=1 shows the selection panel with a placeholder OSID for layout verification
   useEffect(() => {
@@ -728,7 +773,7 @@ function App() {
     window.handleManualSaveLoad = async (json: unknown) => {
       try {
         resetCampaignScopedUiState();
-        await loadSave(json);
+        await runCampaignReplacement(() => loadSave(json));
         setSidePickerOpen(false);
         setSidePickerDismissed(false);
       } catch (err) {
@@ -741,7 +786,7 @@ function App() {
         const text = await loadLatestRunSaveAsText();
         const json: unknown = JSON.parse(text);
         resetCampaignScopedUiState();
-        await loadSave(json);
+        await runCampaignReplacement(() => loadSave(json));
         setSidePickerOpen(false);
         setSidePickerDismissed(false);
       } catch (err) {
@@ -753,7 +798,7 @@ function App() {
       delete window.handleManualSaveLoad;
       delete window.handleContinueLastRun;
     };
-  }, [loadSave, resetCampaignScopedUiState, setLoadError]);
+  }, [loadSave, resetCampaignScopedUiState, runCampaignReplacement, setLoadError]);
 
   // v0.4.1 Phase 5: detect new events from game state and queue for display
   // Only show in live gameplay (Electron IPC), not dev map inspection
@@ -1004,7 +1049,12 @@ function App() {
     setCampaignStarting(true);
     setOpeningBriefDismissed(false);
     // Use scenarioKey 'apr_1992' as default for dev map, mirroring Warroom fix
-    const ok = await startCampaignFromSidePicker({ ipc, loadSave, setLoadError }, faction, 'apr_1992');
+    const startCampaign = () => startCampaignFromSidePicker(
+      { ipc, loadSave, setLoadError },
+      faction,
+      'apr_1992',
+    );
+    const ok = await runCampaignReplacement(startCampaign, (started) => started);
     setCampaignStarting(false);
     if (ok) {
       useGameStore.getState().setPeaceWarTransitionSeen(false);
@@ -1018,7 +1068,7 @@ function App() {
   const handleMainMenuLoadGame = async (json: unknown) => {
     try {
       resetCampaignScopedUiState();
-      await loadSave(json);
+      await runCampaignReplacement(() => loadSave(json));
       setSidePickerOpen(false);
       setSidePickerDismissed(false);
       setAppScreen('game');
@@ -1055,8 +1105,7 @@ function App() {
   };
 
   // Keyboard shortcuts for Army HQ tabs + orphaned modals
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
+  const handleTacticalShellKeyDown = useCallback((e: KeyboardEvent) => {
       if (isKeyboardEventFromInteractiveControl(e)) return;
       if (activeEventDecisionIdRef.current !== null) return;
 
@@ -1071,7 +1120,8 @@ function App() {
         const gs = useGameStore.getState();
         if (gs.armyHQOpen) { gs.setArmyHQTab('summary'); return; }
         // Map-first: open WarSummaryModal on the tactical map instead of Army HQ
-        openSummary();
+        setSummaryFocus('overview');
+        setSummaryOpen(true);
       } else if (e.key === 'e' || e.key === 'E') {
         // Authored Choices ledger shortcut. Mirrors the 'D' hotkey.
         e.preventDefault();
@@ -1107,10 +1157,7 @@ function App() {
         e.preventDefault();
         setHumanitarianLedgerOpen((prev) => !prev);
       }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [appScreen, activeEventDecisionId]);
+  }, []);
 
   const openOrbat = () => {
     // If no corps selected for orbat, pick the first player corps
@@ -1319,6 +1366,7 @@ function App() {
     if (restoreFocus) restoreWarroomFocus();
   };
   const leaveWarroomForGame = () => {
+    beginMapTransition();
     setWarroomDeskOpen(false);
     setWarroomDecisionRoomOpen(false);
     setWarroomOverlaySurface(null);
@@ -1326,6 +1374,23 @@ function App() {
     setDiplomacyOpen(false);
     setSummaryOpen(false);
     setAppScreen('game');
+  };
+  const inspectFieldOperationPlanFromDossier = (
+    target: FieldOperationPlanTarget,
+    dossierCardId: string,
+  ) => {
+    const normalizedTarget = normalizeFieldOperationPlanTarget(target);
+    clearTacticalInspectionOverlays();
+    useGameStore.getState().inspectOnFieldTarget(normalizedTarget);
+    setFieldOperationPlanFocus(normalizedTarget);
+    setFieldOperationPlanReturnCardId(dossierCardId);
+    leaveWarroomForGame();
+  };
+  const returnToFieldOperationDossier = () => {
+    const dossierCardId = fieldOperationPlanReturnCardId;
+    setFieldOperationPlanFocus(null);
+    setFieldOperationPlanReturnCardId(null);
+    if (dossierCardId) openWarroomDecisionRoomFromField('all', dossierCardId);
   };
   const returnToWarroomShell = () => {
     const gs = useGameStore.getState();
@@ -1545,6 +1610,7 @@ function App() {
 
   useEffect(() => {
     const handleShellHandoff = (event: MessageEvent) => {
+      if (window.parent !== window && event.source !== window.parent) return;
       // warroom.ts posts this when REACT_SHELL_ENABLED and the player clicks "back to HQ"
       // from the game view — React switches back to the warroom screen without an iframe reload.
       if (event.data?.type === 'awwv-shell:show-warroom') {
@@ -1604,20 +1670,10 @@ function App() {
   // dev/automation deep-link straight into the in-game shell, bypassing the
   // menu (mirrors the existing `?view=warroom` override).
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const view = params.get('view');
-    if (view === 'warroom') {
-      setAppScreen('warroom');
-    } else if (view === 'game') {
-      setAppScreen('game');
-    } else if (params.has('desktop_window')) {
-      // Task #80 — the packaged desktop app opens its tactical map windows with
-      // `?desktop_window=operational` / `?desktop_window=sandbox`
-      // (electron-main.cjs `getTacticalMapWindowUrl`). These windows attach to
-      // an already-running session, so deep-link straight to the in-game shell
-      // — but do NOT force the SidePicker (no new-game flow here).
-      setAppScreen('game');
-    }
+    // Packaged tactical windows attach to an existing session, so their
+    // desktop_window route enters the game without forcing the SidePicker.
+    const initialShellScreen = resolveInitialShellScreen(window.location.search);
+    if (initialShellScreen) setAppScreen(initialShellScreen);
   }, []);
 
   return (
@@ -1630,6 +1686,18 @@ function App() {
     >
       <AudioCueObserver />
       <AudioSurfaceBedController appScreen={appScreen} />
+      <TacticalInputOwners
+        active={tacticalMapInteractionReady}
+        onShellKeyDown={handleTacticalShellKeyDown}
+      />
+      <CampaignTacticalViewportOwner
+        campaignViewportEpoch={campaignViewportEpoch}
+        loaded={loadedGameState !== null && appScreen !== 'mainMenu'}
+        active={appScreen === 'game'}
+        onInteractionReadyChange={setTacticalMapReadiness}
+        operationPlanFocus={fieldOperationPlanFocus}
+        onReturnToOperationDossier={returnToFieldOperationDossier}
+      />
       {/* LANE-NIGHTSHIFT-V093-A11Y-LANE-B: semantic landmarks.
           - <main>: MapContainer (the primary tactical-map view; landmark
             authored inside MapContainer.tsx, also tutorial spotlight target).
@@ -1641,9 +1709,6 @@ function App() {
           Faction-agnostic; UI-only; no sim path touched. */}
       {appScreen === 'game' && (
       <>
-      <RootErrorBoundary zone="map">
-        <MapContainer />
-      </RootErrorBoundary>
       <header
         role="banner"
         aria-label="Presidential command toolbar"
@@ -1670,10 +1735,11 @@ function App() {
             onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
         onOpenCodex={() => openCodex(useGameStore.getState())}
             onReviewPriorities={reviewPreAdvancePriorities}
+            onReplaceCampaignState={replaceCampaignState}
           />
         </RootErrorBoundary>
       </header>
-      {tacticalChromeVisible && (
+      {tacticalChromeVisible && fieldOperationPlanFocus === null && (
         <>
           {commandBriefingVisible && (
             <CommandBriefingLayer
@@ -1694,7 +1760,7 @@ function App() {
         </>
       )}
       {/* Tactical Detail Panel */}
-      {tacticalChromeVisible && (
+      {tacticalChromeVisible && fieldOperationPlanFocus === null && (
         <RootErrorBoundary zone="right panel">
         <OperationsPanel />
         <OrderQueue />
@@ -1976,8 +2042,7 @@ function App() {
         onReviewItem={reviewPreAdvanceItem}
         onResolveBlocker={handlePresidentialInboxAction}
       />
-      {appScreen === 'game' && <MapModeLegend />}
-      {appScreen === 'game' && <Minimap />}
+      {appScreen === 'game' && shouldRenderMapModeLegend(railState.panel) && <MapModeLegend />}
       {appScreen === 'game' && (
         <nav
           aria-label="Map controls and status"
@@ -1989,7 +2054,7 @@ function App() {
 
       {/* Warroom React shell — foundation layer, activated by ?view=warroom */}
       {appScreen === 'warroom' && (
-        <div className="fixed inset-0 z-50 bg-black">
+        <div data-testid="warroom-shell" tabIndex={-1} className="fixed inset-0 z-50 bg-black">
           <WarroomShellLayer
             onOpenSidePicker={() => {
               leaveWarroomForGame();
@@ -2008,14 +2073,8 @@ function App() {
             )}
             onNavigate={(command) => {
               if (isWarroomLocalCommand(command)) {
-                if (command.kind === 'warroom-overlay') {
-                  setWarroomDecisionRoomOpen(false);
-                  openWarroomOverlay(command.surface);
-                  return;
-                }
-                if (command.kind === 'war-map') {
-                  leaveWarroomForGame();
-                }
+                setWarroomDecisionRoomOpen(false);
+                openWarroomOverlay(command.surface);
                 return;
               }
               if (!command) return;
@@ -2028,9 +2087,7 @@ function App() {
                 setWarroomDecisionRoomOpen(false);
                 closeCommandStrip(false);
               }
-              if (command) {
-                applyShellCommand(command);
-              }
+              applyShellCommand(command);
               if (!warroomCommandStaysInRoom(command)) {
                 leaveWarroomForGame();
               }
@@ -2107,7 +2164,10 @@ function App() {
                 </button>
               </div>
               <div data-decision-room-scroll-owner="true" className="min-h-0 overflow-y-auto px-4 pb-4 pt-3">
-                <PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />
+                <PresidentialDecisionRoomPanel
+                  onNavigateTarget={reviewPreAdvanceTarget}
+                  onInspectFieldPlan={inspectFieldOperationPlanFromDossier}
+                />
               </div>
             </div>
           )}

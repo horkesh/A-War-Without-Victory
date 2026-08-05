@@ -468,6 +468,22 @@ test('loadEventDefinitionsFromDir throws on semantic enum and response metadata 
         /Invalid event row in war_1992\.json\[0\]: once must be a boolean when present/,
     );
     assertCatalogRowsThrow(
+        [validCatalogRow({ action_cadence: { max_fires: 0, cooldown_turns: 10, escalation: 'static' } })],
+        /Invalid event row in war_1992\.json\[0\]: action_cadence\.max_fires must be a positive integer/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ action_cadence: { max_fires: 5, cooldown_turns: -1, escalation: 'static' } })],
+        /Invalid event row in war_1992\.json\[0\]: action_cadence\.cooldown_turns must be a non-negative integer/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ action_cadence: { max_fires: 5, cooldown_turns: 10, escalation: 'random' } })],
+        /Invalid event row in war_1992\.json\[0\]: action_cadence\.escalation must be one of static, escalating, deteriorating/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ recurrence: { max_fires: 5, cooldown_turns: 10, escalation: 'static' } })],
+        /Invalid event row in war_1992\.json\[0\]: once and recurrence cannot both be set/,
+    );
+    assertCatalogRowsThrow(
         [validCatalogRow({ requires_player_response: 'true' })],
         /Invalid event row in war_1992\.json\[0\]: requires_player_response must be a boolean when present/,
     );

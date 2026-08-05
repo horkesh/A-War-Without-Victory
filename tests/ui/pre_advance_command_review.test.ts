@@ -170,18 +170,23 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.headline).toBe('Recommended before advance');
     expect(view.canReviewPriorities).toBe(true);
     expect(view.metrics).toMatchObject({
-      urgentCount: 4,
+      priorityCounts: { required: 0, recommended: 5, monitor: 1, record: 3 },
       pendingReviews: 2,
       opportunities: 1,
-      advanceReviewCount: 4,
+      advanceReviewCount: 2,
     });
     expect(view.items.map((item) => item.id)).toEqual([
-      'review:pending',
       'opportunity:opp_pre_advance',
-      'sitrep:front-critical',
-      'turn:31:hard-turn',
+      'review:pending',
     ]);
     expect(view.items[0]).toMatchObject({
+      severity: 'critical',
+      category: 'opportunity',
+      actionLabel: 'Review Dossier',
+      sourceOwner: 'Operation opportunity dossiers',
+      navigationTarget: { kind: 'decision-room' },
+    });
+    expect(view.items.find((item) => item.id === 'review:pending')).toMatchObject({
       severity: 'blocking',
       category: 'decision',
       actionLabel: "Open President's Desk",
@@ -197,27 +202,16 @@ describe('buildPreAdvanceCommandReviewView', () => {
       },
       sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     });
-    expect(view.items.find((item) => item.id === 'sitrep:front-critical')).toMatchObject({
-      actionLabel: 'Review',
-      navigationTarget: {
-        kind: 'decision-room',
-        lens: 'operational',
-        cardId: 'sitrep:front-critical',
-      },
-      sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'summary' },
-    });
-    expect(view.items.find((item) => item.id === 'turn:31:hard-turn')).toMatchObject({
-      actionLabel: 'Review',
-      navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:31:hard-turn' },
-      sourceHandoffTarget: { kind: 'army-hq-aftermath-record', turn: 31 },
-    });
     expect(view.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
-      'presidential-inbox',
       'army-hq-briefing',
-      'army-hq-summary',
-      'turn-aftermath-records',
+      'presidential-inbox',
     ]);
     expect(view.sourceHandoffs[0]).toMatchObject({
+      label: 'Army HQ Briefing',
+      count: 1,
+      cardIds: ['opportunity:opp_pre_advance'],
+    });
+    expect(view.sourceHandoffs[1]).toMatchObject({
       label: "President's Desk",
       count: 1,
       cardIds: ['review:pending'],
@@ -548,20 +542,16 @@ describe('buildPreAdvanceCommandReviewView', () => {
       review.items.map((item) => [item.id, sourceTargetsById[item.id]]),
     );
     expect(review.items.map((item) => [item.id, item.navigationTarget.kind])).toEqual([
-      ['review:pending', 'inbox'],
       ['opportunity:opp_pre_advance', 'decision-room'],
-      ['sitrep:front-critical', 'decision-room'],
-      ['turn:31:hard-turn', 'decision-room'],
+      ['review:pending', 'inbox'],
     ]);
     expect(review.sourceHandoffs.map((handoff) => [handoff.id, handoff.navigationTarget])).toEqual([
-      ['presidential-inbox', { kind: 'inbox' }],
       ['army-hq-briefing', { kind: 'army-hq-tab', tab: 'briefing' }],
-      ['army-hq-summary', { kind: 'army-hq-tab', tab: 'summary' }],
-      ['turn-aftermath-records', { kind: 'army-hq-aftermath-record', turn: 31 }],
+      ['presidential-inbox', { kind: 'inbox' }],
     ]);
   });
 
-  it('does not keep the retained aftermath turn as a separate pre-advance obligation', () => {
+  it('never treats retained aftermath records as pre-advance obligations', () => {
     const state = makeState({
       latestTurnSummary: makeSummary({
         turn: 31,
@@ -579,11 +569,11 @@ describe('buildPreAdvanceCommandReviewView', () => {
       reviewedAftermathTurn: 31,
     });
 
-    expect(unreviewed.items.map((item) => item.id)).toContain('turn:31:hard-turn');
+    expect(unreviewed.items.map((item) => item.id)).not.toContain('turn:31:hard-turn');
     expect(reviewed.items.map((item) => item.id)).not.toContain('turn:31:hard-turn');
     expect(reviewed.sourceHandoffs.map((handoff) => handoff.id))
       .not.toContain('turn-aftermath-records');
-    expect(reviewed.metrics.hardTurns).toBe(0);
+    expect(reviewed.metrics.hardTurns).toBe(1);
     expect(reviewed.metrics.advanceReviewCount).toBe(0);
     expect(reviewed.status).toBe('clear');
   });

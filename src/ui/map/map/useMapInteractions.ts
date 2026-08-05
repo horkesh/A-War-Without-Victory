@@ -163,7 +163,8 @@ export const queryPreferredFrontFeatureNearPoint = (
 
 export function useMapInteractions(
   map: MapLibreMap | null,
-  callbacks: MapInteractionCallbacks | ((osid: string) => void)
+  callbacks: MapInteractionCallbacks | ((osid: string) => void),
+  isActive: () => boolean = () => true,
 ) {
   let hoverTimeout: ReturnType<typeof globalThis.setTimeout> | undefined;
   let hoveredSectorId: string | null = null;
@@ -211,6 +212,7 @@ export function useMapInteractions(
 
 
   const handleOsidMouseMove = (e: MapLayerMouseEvent) => {
+    if (!isActive()) return;
     map.getCanvas().style.cursor = 'pointer';
     // Throttle: skip processing if called too frequently (queryRenderedFeatures is expensive)
     const now = performance.now();
@@ -232,6 +234,7 @@ export function useMapInteractions(
       if (osid) {
         if (hoverTimeout) clearTimeout(hoverTimeout);
         hoverTimeout = globalThis.setTimeout(() => {
+          if (!isActive()) return;
           onOsidHover(osid, point);
           hoverTimeout = undefined;
         }, HOVER_DELAY_MS);
@@ -244,12 +247,14 @@ export function useMapInteractions(
   };
 
   const handleOsidClick = (e: MapLayerMouseEvent) => {
+    if (!isActive()) return;
     const feature = e.features?.[0];
     const osid = feature?.properties?.osid as string | undefined;
     if (osid) onOsidClick?.(osid, (feature?.properties ?? {}) as Record<string, unknown>);
   };
 
   const handleOsidMouseLeave = () => {
+    if (!isActive()) return;
     map.getCanvas().style.cursor = '';
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
@@ -260,6 +265,7 @@ export function useMapInteractions(
   };
 
   const handleFormationMouseMove = (e: MapLayerMouseEvent) => {
+    if (!isActive()) return;
     if (e.point && queryPreferredFrontFeatureNearPoint(map, e.point, true)) {
       if (hoverTimeout) {
         clearTimeout(hoverTimeout);
@@ -276,6 +282,7 @@ export function useMapInteractions(
       if (id) {
         if (hoverTimeout) clearTimeout(hoverTimeout);
         hoverTimeout = globalThis.setTimeout(() => {
+          if (!isActive()) return;
           onFormationHover!(id, point, properties);
           hoverTimeout = undefined;
         }, HOVER_DELAY_MS);
@@ -288,6 +295,7 @@ export function useMapInteractions(
   };
 
   const handleFormationMouseLeave = () => {
+    if (!isActive()) return;
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
       hoverTimeout = undefined;
@@ -328,6 +336,7 @@ export function useMapInteractions(
       if (edgeId) {
         if (hoverTimeout) clearTimeout(hoverTimeout);
         hoverTimeout = globalThis.setTimeout(() => {
+          if (!isActive()) return;
           onFrontEdgeHover!(edgeId, point);
           hoverTimeout = undefined;
         }, HOVER_DELAY_MS);
@@ -339,6 +348,7 @@ export function useMapInteractions(
   };
 
   const handleFrontEdgeMouseMove = (e: MapLayerMouseEvent) => {
+    if (!isActive()) return;
     map.getCanvas().style.cursor = 'pointer';
     // Throttle: skip processing if called too frequently
     const now = performance.now();
@@ -352,6 +362,7 @@ export function useMapInteractions(
   };
 
   const handleFrontEdgeMouseLeave = () => {
+    if (!isActive()) return;
     map.getCanvas().style.cursor = '';
     setHoverHighlight(null, null);
     if (hoverTimeout) {
@@ -363,6 +374,7 @@ export function useMapInteractions(
   };
 
   const handleFrontEdgeClick = (e: MapLayerMouseEvent) => {
+    if (!isActive()) return;
     const fallbackFormation = e.point ? getFormationClickFallback?.(e.point) : null;
     if (fallbackFormation) {
       onFormationClick?.(fallbackFormation.id, fallbackFormation.properties, e.point);
@@ -383,6 +395,7 @@ export function useMapInteractions(
   };
 
   const handleMapMouseMove = (e: MapLayerMouseEvent) => {
+    if (!isActive()) return;
     onMouseMove?.([e.lngLat.lng, e.lngLat.lat]);
     if (!needsFrontSurfaceHover || !e.point) return;
 
@@ -410,6 +423,7 @@ export function useMapInteractions(
   };
 
   const handleMapClick = (e: MapLayerMouseEvent) => {
+    if (!isActive()) return;
     // Deck.gl overlay fires its onClick before MapLibre's click handler.
     // When Deck.gl already resolved a formation click, skip MapLibre fallthrough
     // to prevent front-edge/sector selection from overriding the formation.
@@ -517,6 +531,7 @@ export function useMapInteractions(
   };
 
   const handleContextMenu = (e: MapLayerMouseEvent) => {
+    if (!isActive()) return;
     e.preventDefault();
     if (!onContextMenu) return;
     const point = { x: e.originalEvent.clientX, y: e.originalEvent.clientY };
@@ -572,7 +587,9 @@ export function useMapInteractions(
   };
 
   // Suppress browser default context menu on map canvas
-  const suppressDefault = (e: Event) => e.preventDefault();
+  const suppressDefault = (e: Event) => {
+    if (isActive()) e.preventDefault();
+  };
   map.getCanvas().addEventListener('contextmenu', suppressDefault);
 
   map.on('contextmenu', handleContextMenu);
@@ -616,6 +633,7 @@ export function useMapInteractions(
   }
 
   const handleBattleMouseMove = (e: MapLayerMouseEvent) => {
+    if (!isActive()) return;
     map.getCanvas().style.cursor = 'pointer';
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
@@ -630,6 +648,7 @@ export function useMapInteractions(
     if (osid) onBattleHover?.(osid, point);
   };
   const handleBattleMouseLeave = () => {
+    if (!isActive()) return;
     map.getCanvas().style.cursor = '';
     onBattleHover?.(null, null);
   };

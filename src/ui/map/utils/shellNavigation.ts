@@ -16,6 +16,16 @@ import type { FieldInspectionTarget } from './fieldInspectionTarget';
 
 type ShellLoadedGameState = LoadedGameState | { player_faction: string | null | undefined };
 
+export type InitialShellScreen = 'game' | 'warroom';
+
+export function resolveInitialShellScreen(search: string): InitialShellScreen | null {
+  const params = new URLSearchParams(search);
+  const view = params.get('view');
+  if (view === 'warroom') return 'warroom';
+  if (view === 'game' || params.has('desktop_window')) return 'game';
+  return null;
+}
+
 export interface ShellNavigationState {
   loadedGameState?: ShellLoadedGameState | null;
   setSelectedArmyId: (id: string | null) => void;
@@ -212,6 +222,9 @@ export function openChronicleDecisionRecord(state: ShellNavigationState, recordI
 }
 
 export function applyShellHandoffCommand(state: ShellNavigationState, command: ShellHandoffCommand): boolean {
+  if (command.kind === 'war-map') {
+    return true;
+  }
   if (command.kind === 'codex') {
     return openCodex(state);
   }

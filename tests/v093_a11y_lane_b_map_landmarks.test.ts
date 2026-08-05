@@ -9,11 +9,11 @@
  *
  * Seven contracts (predecessor audit `20260506_V093_A11Y_PHASE_0_PANEL.md`
  * + `20260506_V092_TUTORIAL_FILL_OUT_PHASE_0_PANEL.md`):
- *   T1 — `<main>` landmark present in App.tsx tree.
+ *   T1 — `<main>` landmark present in the persistent viewport tree.
  *   T2 — `<aside>` landmark present in OOBSidebar tree (mounted by App.tsx).
  *   T3 — Each landmark (`<header>`, `<main>`, `<aside>`, `<nav>`) has
  *        an aria-label or aria-labelledby attribute.
- *   T4 — Tactical map canvas wrapper carries tabIndex={0} + aria-label.
+ *   T4 — Tactical map canvas wrapper is focusable only when active/current + aria-label.
  *   T5 — Tutorial `map-container` anchor wired in MapContainer.tsx.
  *   T6 — Keyboard handler exists on map canvas wrapper and dispatches
  *        ArrowKeys / +/- / Home to MapLibre instance methods.
@@ -36,6 +36,7 @@ const repoRoot = resolve(__dirname, '..');
 const read = (p: string) => readFileSync(resolve(repoRoot, p), 'utf8');
 
 const APP_PATH = 'src/ui/map/App.tsx';
+const TACTICAL_VIEWPORT_PATH = 'src/ui/map/components/TacticalMapViewport.tsx';
 const MAP_CONTAINER_PATH = 'src/ui/map/map/MapContainer.tsx';
 const EN_MESSAGES_PATH = 'src/ui/map/i18n/messages.en.ts';
 const BCS_MESSAGES_PATH = 'src/ui/map/i18n/messages.bcs.ts';
@@ -45,6 +46,7 @@ const PRESIDENTIAL_TOOLBAR_PATH = 'src/ui/map/components/PresidentialToolbar.tsx
 
 const ALL_OWNED_PATHS = [
     APP_PATH,
+    TACTICAL_VIEWPORT_PATH,
     MAP_CONTAINER_PATH,
     OOB_SIDEBAR_PATH,
     BOTTOM_STATUS_PATH,
@@ -85,21 +87,22 @@ function collectMessageValues(src: string, keys: string[]): string[] {
 }
 
 describe('LANE-NIGHTSHIFT-V093-A11Y-LANE-B — Map / tactical landmarks + keyboard + tutorial anchor', () => {
-    it('T1 — <main> landmark present in MapContainer (mounted at App root)', () => {
+    it('T1 — <main> landmark present in MapContainer (mounted by the persistent App viewport)', () => {
         // The <main> landmark is authored inside MapContainer.tsx so the
         // tutorial spotlight's `data-tutorial-step="map-container"` token
-        // resolves to the same wrapping element. App.tsx mounts <MapContainer/>
-        // at the App root; verify both the source landmark exists and the
-        // App imports the component.
+        // resolves to the same wrapping element. App.tsx mounts one retained
+        // TacticalMapViewport, which owns MapContainer across screen toggles.
+        // Verify the complete source ownership chain.
         const mapSrc = read(MAP_CONTAINER_PATH);
         const appSrc = read(APP_PATH);
+        const viewportSrc = read(TACTICAL_VIEWPORT_PATH);
 
         // Opening <main ...> tag with role="main" attribute.
         expect(mapSrc).toMatch(/<main[\s\S]*?role=["']main["']/);
         // Closing </main> tag — sanity-pair the opener.
         expect(mapSrc).toContain('</main>');
-        // App mounts the MapContainer.
-        expect(appSrc).toMatch(/<MapContainer\s*\/>/);
+        expect(appSrc).toMatch(/<CampaignTacticalViewportOwner[\s\S]*active=\{/);
+        expect(viewportSrc).toMatch(/<MapContainer\s+active=\{active\}[\s\S]*?\/>/);
         // The <main> wrapper carries id="main-content" (skip-link target
         // convention reserved by the audit; sibling Lane skip-link will
         // hash-link to this id when it ships).
@@ -141,13 +144,12 @@ describe('LANE-NIGHTSHIFT-V093-A11Y-LANE-B — Map / tactical landmarks + keyboa
         }
     });
 
-    it('T4 — tactical map canvas wrapper carries tabIndex={0} + aria-label', () => {
+    it('T4 — tactical map canvas wrapper is focusable only when active/current and carries an aria-label', () => {
         const mapSrc = read(MAP_CONTAINER_PATH);
 
         // The <main> wrapper is the focusable canvas description for SR users.
-        // It must declare tabIndex={0} so keyboard users can focus it and
-        // receive arrow-key/+/-/Home events.
-        expect(mapSrc).toMatch(/<main[\s\S]*?tabIndex=\{0\}[\s\S]*?>/);
+        // The retained map must leave the tab order while hidden or stale.
+        expect(mapSrc).toMatch(/<main[\s\S]*?tabIndex=\{inputActive && currentMapStateReady \? 0 : -1\}[\s\S]*?>/);
         // It must carry a localized aria-label that describes the map and
         // keyboard controls. Browser gates use data-testid, not localized copy.
         expect(mapSrc).toContain("aria-label={t('map.aria.tacticalMap')}");
@@ -205,6 +207,7 @@ describe('LANE-NIGHTSHIFT-V093-A11Y-LANE-B — Map / tactical landmarks + keyboa
 
         // The <main> wrapper must declare an onKeyDown handler.
         expect(mapSrc).toMatch(/<main[\s\S]*?onKeyDown=\{[\s\S]*?\}[\s\S]*?>/);
+        expect(mapSrc).toMatch(/const handleMapKeyDown[\s\S]{0,180}if \(!inputActive\) return;/);
 
         // The handler implementation must include the canonical key tokens.
         expect(mapSrc).toContain("'ArrowUp'");

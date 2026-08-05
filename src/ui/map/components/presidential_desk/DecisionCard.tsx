@@ -1,21 +1,20 @@
 import type { InboxItem } from '../../data/inboxItems';
-import { effectiveInboxSeverity } from '../../data/inboxItems';
 import { getDecisionSurfaceForInboxType } from '../../data/decisionSurfaceRegistry';
 import { getPacketThumbnailForInboxType } from '../../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../../i18n';
 
-const SEVERITY_CLASS: Record<InboxItem['severity'], string> = {
-  blocking: 'border-red-400/55 bg-red-950/35',
-  urgent: 'border-amber-300/45 bg-amber-950/25',
-  normal: 'border-sky-300/30 bg-sky-950/20',
-  info: 'border-stone-400/25 bg-black/20',
+const PRIORITY_CLASS: Record<InboxItem['priorityBand'], string> = {
+  required: 'border-red-400/55 bg-red-950/35',
+  recommended: 'border-amber-300/45 bg-amber-950/25',
+  monitor: 'border-sky-300/30 bg-sky-950/20',
+  record: 'border-stone-400/25 bg-black/20',
 };
 
-const BADGE_CLASS: Record<InboxItem['severity'], string> = {
-  blocking: 'border-red-300/45 bg-red-500/18 text-red-100',
-  urgent: 'border-amber-300/45 bg-amber-500/16 text-amber-100',
-  normal: 'border-sky-300/35 bg-sky-500/12 text-sky-100',
-  info: 'border-stone-300/25 bg-stone-500/10 text-stone-200',
+const PRIORITY_BADGE_CLASS: Record<InboxItem['priorityBand'], string> = {
+  required: 'border-red-300/45 bg-red-500/18 text-red-100',
+  recommended: 'border-amber-300/45 bg-amber-500/16 text-amber-100',
+  monitor: 'border-sky-300/35 bg-sky-500/12 text-sky-100',
+  record: 'border-stone-300/25 bg-stone-500/10 text-stone-200',
 };
 
 const FAMILY_LABEL_KEYS: Partial<Record<InboxItem['type'], MessageKey>> = {
@@ -64,24 +63,25 @@ function actionLabel(item: InboxItem): string {
   return getDecisionSurfaceForInboxType(item.type)?.actionLabel ?? t('desk.card.openFallback');
 }
 
-function severityLabel(severity: InboxItem['severity']): string {
-  if (severity === 'blocking') return t('desk.card.required');
-  if (severity === 'urgent') return t('desk.card.urgent');
-  if (severity === 'normal') return t('desk.card.normal');
-  return t('desk.card.info');
+function priorityLabel(priorityBand: InboxItem['priorityBand']): string {
+  if (priorityBand === 'required') return t('decisionRoom.metric.required');
+  if (priorityBand === 'recommended') return t('decisionRoom.metric.recommended');
+  if (priorityBand === 'monitor') return t('decisionRoom.metric.monitor');
+  return t('decisionRoom.metric.record');
 }
 
 export function DecisionCard({ item, onAction }: DecisionCardProps) {
   const actionable = item.action !== 'none';
   const thumbnail = getPacketThumbnailForInboxType(item.type);
   const family = familyLabel(item);
-  const severity = effectiveInboxSeverity(item);
   return (
     <article
-      className={`rounded-sm border px-3 py-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.22)] ${SEVERITY_CLASS[severity]}`}
+      className={`rounded-sm border px-3 py-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.22)] ${PRIORITY_CLASS[item.priorityBand]}`}
       data-testid={`desk-card-${item.type}`}
       data-inbox-item-id={item.id}
       data-inbox-action={item.action}
+      data-priority-band={item.priorityBand}
+      data-threat-severity={item.severity}
     >
       <div className="flex min-w-0 items-start gap-3">
         {thumbnail && (
@@ -93,8 +93,8 @@ export function DecisionCard({ item, onAction }: DecisionCardProps) {
         )}
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className={`border px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.16em] ${BADGE_CLASS[severity]}`}>
-              {severityLabel(severity)}
+            <span className={`border px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.16em] ${PRIORITY_BADGE_CLASS[item.priorityBand]}`}>
+              {priorityLabel(item.priorityBand)}
             </span>
             <span className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
               {family}

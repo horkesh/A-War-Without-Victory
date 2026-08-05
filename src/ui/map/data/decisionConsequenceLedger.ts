@@ -8,6 +8,11 @@ import type {
   PeacePlanDecisionRecordView,
   ReserveRequestDecisionRecordView,
 } from './types';
+import type { CorpsStance, ProposalDecisionRecord } from '../../../state/game_state.js';
+import {
+  proposalDecisionIdentity,
+  proposalDecisionLedgerId,
+} from '../../../state/proposal_decision_history.js';
 import {
     getPlayerSafeCorpsName,
     getPlayerSafeOperationName,
@@ -38,6 +43,7 @@ export interface DecisionConsequenceRecord {
 
 export type DecisionConsequenceFamilyId =
   | 'event-decision'
+  | 'autonomy-proposal'
   | 'operation-opportunity'
   | 'army-reserve'
   | 'peace-proposal'
@@ -199,6 +205,51 @@ function safeReserveReasonCopy(value: string | null | undefined): string | null 
 
 function safeConsequenceDetail(value: string | null | undefined, fallback = 'Decision filed in the campaign record.'): string {
   return getPlayerSafeRecordDetail(value, fallback);
+}
+
+const PROPOSAL_STANCE_LABEL_KEYS: Record<CorpsStance, MessageKey> = {
+  defensive: 'corpsCard.stance.defensive',
+  balanced: 'corpsCard.stance.balanced',
+  offensive: 'corpsCard.stance.offensive',
+  reorganize: 'corpsCard.stance.reorganize',
+};
+
+function isCorpsStance(value: unknown): value is CorpsStance {
+  return typeof value === 'string'
+    && Object.prototype.hasOwnProperty.call(PROPOSAL_STANCE_LABEL_KEYS, value);
+}
+
+function proposalDetailToken(
+  proposal: Pick<ProposalDecisionRecord, 'proposed_action' | 'current_value' | 'proposed_value'>,
+  displayMaps: { formationNames: ReadonlyMap<string, string>; corpsNames: ReadonlyMap<string, string> },
+): DecisionConsequenceCopyToken {
+  const [actionKind, formationId, actionStance, ...unexpected] = proposal.proposed_action.split(':');
+  const currentStance = isCorpsStance(proposal.current_value) ? proposal.current_value : null;
+  const proposedStance = isCorpsStance(proposal.proposed_value)
+    ? proposal.proposed_value
+    : isCorpsStance(actionStance)
+      ? actionStance
+      : null;
+  if (actionKind === 'SET_STANCE'
+    && formationId
+    && unexpected.length === 0
+    && currentStance
+    && proposedStance) {
+    const authoredName = displayMaps.corpsNames.get(formationId)
+      ?? displayMaps.formationNames.get(formationId);
+    const corps = authoredName
+      ? getPlayerSafeCorpsName(authoredName, formationId, t('decisionConsequences.fallback.thisCorpsCommand'))
+      : t('decisionConsequences.fallback.thisCorpsCommand');
+    return {
+      key: 'decisionConsequences.detail.autonomyProposal.stanceChange',
+      params: {
+        corps,
+        current: t(PROPOSAL_STANCE_LABEL_KEYS[currentStance]),
+        proposed: t(PROPOSAL_STANCE_LABEL_KEYS[proposedStance]),
+      },
+    };
+  }
+  return { key: 'decisionConsequences.detail.autonomyProposal.fallback' };
 }
 
 function reserveDetail(
@@ -579,6 +630,52 @@ export function buildDecisionConsequenceLedger(
   const records: DecisionConsequenceRecord[] = [];
   const formationDisplayMaps = buildFormationDisplayMaps(state.formations);
   const playerFaction = playerFactionFromState(state);
+
+  const archivedProposals = state.rawGameState?.meta?.proposal_decision_history ?? [];
+  const archivedProposalKeys = new Set(
+    archivedProposals.map(proposalDecisionIdentity),
+  );
+  const currentResolvedProposals = (state.rawGameState?.meta?.pending_proposal_reviews ?? [])
+    .filter((proposal) => (
+      proposal.proposed_action.startsWith('SET_STANCE:')
+      && typeof proposal.accepted === 'boolean'
+      && Number.isInteger(proposal.resolved_turn)
+      && !archivedProposalKeys.has(proposalDecisionIdentity({
+        id: proposal.id,
+        resolved_turn: proposal.resolved_turn!,
+      }))
+    ));
+  for (const proposal of [...archivedProposals, ...currentResolvedProposals]) {
+    if (playerFaction && !playerFactionMatch(proposal.faction, playerFaction)) continue;
+    if (typeof proposal.accepted !== 'boolean'
+      || typeof proposal.resolved_turn !== 'number'
+      || !Number.isInteger(proposal.resolved_turn)) continue;
+    const accepted = proposal.accepted;
+    const resolvedTurn = proposal.resolved_turn;
+    const identitySource = { id: proposal.id, resolved_turn: resolvedTurn };
+    const detailToken = proposalDetailToken(proposal, formationDisplayMaps);
+    records.push({
+      id: proposalDecisionLedgerId(identitySource),
+      turn: resolvedTurn,
+      familyId: 'autonomy-proposal',
+      family: 'Staff proposal',
+      title: accepted ? 'Staff proposal accepted' : 'Staff proposal declined',
+      titleToken: {
+        key: accepted
+          ? 'decisionConsequences.title.autonomyProposal.accepted'
+          : 'decisionConsequences.title.autonomyProposal.declined',
+      },
+      outcome: accepted ? 'Accepted' : 'Declined',
+      outcomeToken: {
+        key: accepted
+          ? 'decisionConsequences.outcome.accepted'
+          : 'decisionConsequences.outcome.declined',
+      },
+      detail: t(detailToken.key, detailToken.params),
+      detailToken,
+      recordTarget: 'records',
+    });
+  }
 
   for (const event of state.firedEvents ?? []) {
     if (!event.isDecision) continue;

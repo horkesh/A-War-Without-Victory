@@ -1,7 +1,7 @@
 /**
- * Stage 6: Operational groups (OGs).
- * Temporary formations created by borrowing personnel from donor brigades.
- * Used for concentrated force projection on specific objectives.
+ * Legacy Operational Group compatibility lifecycle.
+ * New temporary force concentration is owned by Tactical Groups; this module may only
+ * discard persisted queues on the live path or drain already-active old-save `kind: 'og'`.
  * Phase E: Donor AoR cap recalculates after contribution; shed one settlement if over cap.
  * Deterministic: no randomness, no timestamps.
  */
@@ -14,6 +14,7 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { ensureBrigadeHistory } from './brigade_history_recorder.js';
+import { ENABLE_TACTICAL_GROUPS } from './tactical_group_config.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -142,13 +143,20 @@ export function validateOGOrder(state: GameState, order: OGActivationOrder): str
 // ---------------------------------------------------------------------------
 
 /**
- * Activate OGs from pending orders.
- * Processes orders in deterministic order (sorted by corps_id).
+ * Activate OGs from pending orders only in flag-off compatibility runs.
+ * TG-enabled runs discard the persisted queue before validation or gameplay mutation.
  */
 export function activateOGs(state: GameState): OGActivationReport {
     const report: OGActivationReport = { activated: [], rejected: [] };
     const orders = state.military.og_orders;
     if (!orders || orders.length === 0) return report;
+
+    // Persisted legacy queues remain load-compatible, but TG-enabled games must never
+    // materialize their formations or mutate donor/corps state.
+    if (ENABLE_TACTICAL_GROUPS) {
+        state.military.og_orders = [];
+        return report;
+    }
 
     const sortedOrders = [...orders].sort((a, b) => strictCompare(a.corps_id, b.corps_id));
 
@@ -260,8 +268,27 @@ function returnOGPersonnel(state: GameState, og: FormationState): void {
     og.personnel = 0;
 }
 
+/** Rebuild legacy active-OG indexes from live formations, removing stale and duplicate ids. */
+function reconcileActiveLegacyOgIds(state: GameState): void {
+    const formations = state.military.formations ?? {};
+    const commands = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        const seen = new Set<FormationId>();
+        commands[corpsId].active_ogs = commands[corpsId].active_ogs
+            .filter((formationId) => {
+                if (seen.has(formationId)) return false;
+                seen.add(formationId);
+                const formation = formations[formationId];
+                return formation?.kind === 'og'
+                    && formation.status === 'active'
+                    && formation.corps_id === corpsId;
+            })
+            .sort(strictCompare);
+    }
+}
+
 /**
- * Update OG lifecycle each turn.
+ * Drain the compatibility lifecycle of already-active legacy OGs each turn.
  * Dissolves OGs when cohesion drops below threshold or max duration is exceeded.
  * Active OGs suffer per-turn cohesion drain (attack-rate).
  * Returns array of dissolved OG IDs.
@@ -269,7 +296,10 @@ function returnOGPersonnel(state: GameState, og: FormationState): void {
 export function updateOGLifecycle(state: GameState): FormationId[] {
     const dissolved: FormationId[] = [];
     const formations = state.military.formations;
-    if (!formations) return dissolved;
+    if (!formations) {
+        reconcileActiveLegacyOgIds(state);
+        return dissolved;
+    }
 
     const formationIds = Object.keys(formations).sort(strictCompare);
     for (const fid of formationIds) {
@@ -303,5 +333,6 @@ export function updateOGLifecycle(state: GameState): FormationId[] {
         }
     }
 
+    reconcileActiveLegacyOgIds(state);
     return dissolved;
 }

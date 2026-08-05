@@ -25,10 +25,12 @@
  * audit itself; no Math.random / Date.now / timestamps.
  */
 
+import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 
 import {
     buildSensitiveHistoryAudit,
+    hasBlockingViolations,
     type Violation,
 } from '../tools/diagnostics/sensitive_history_canon_gate_audit.js';
 
@@ -77,5 +79,25 @@ describe('sensitive_history_canon_gate_audit — strict CI gate', () => {
         // Lower bound is 0 (no INFO is fine). Upper bound is unconstrained.
         expect(info.length).toBeGreaterThanOrEqual(0);
         expect(report.summary.violations_by_severity.INFO).toBe(info.length);
+        expect(hasBlockingViolations(report)).toBe(false);
+    });
+
+    it('the actual --strict --violations-only CLI exits zero when only INFO remains', () => {
+        const result = spawnSync(process.execPath, [
+            'node_modules/tsx/dist/cli.mjs',
+            'tools/diagnostics/sensitive_history_canon_gate_audit.ts',
+            '--strict',
+            '--violations-only',
+            '--json',
+        ], {
+            cwd: process.cwd(),
+            encoding: 'utf8',
+        });
+        expect(result.error).toBeUndefined();
+        expect(result.status, result.stderr || result.stdout).toBe(0);
+        const report = JSON.parse(result.stdout) as ReturnType<typeof buildSensitiveHistoryAudit>;
+        expect(report.summary.violations_by_severity.CRITICAL).toBe(0);
+        expect(report.summary.violations_by_severity.WARNING).toBe(0);
+        expect(report.summary.violations_by_severity.INFO).toBeGreaterThanOrEqual(0);
     });
 });

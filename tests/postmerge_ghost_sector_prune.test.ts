@@ -73,8 +73,9 @@ describe('pruneGhostArtifactSectors', () => {
             [ghost.sector_id]: ghost,
         };
 
-        pruneGhostArtifactSectors(sectors);
+        const pruned = pruneGhostArtifactSectors(sectors);
 
+        expect(pruned).toBe(true);
         expect(Object.keys(sectors).sort()).toEqual(['sector:arbih_1st_corps:1']);
     });
 
@@ -98,8 +99,9 @@ describe('pruneGhostArtifactSectors', () => {
             [territoryOnly.sector_id]: territoryOnly,
         };
 
-        pruneGhostArtifactSectors(sectors);
+        const pruned = pruneGhostArtifactSectors(sectors);
 
+        expect(pruned).toBe(false);
         expect(Object.keys(sectors).sort()).toEqual([
             'sector:arbih_1st_corps:6',
             'sector:arbih_1st_corps:9',

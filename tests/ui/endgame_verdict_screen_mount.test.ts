@@ -155,6 +155,26 @@ describe('VerdictScreen mount — gating', () => {
         expect(html.length).toBeGreaterThan(500);
         expect(html).toContain('A War Without Victory');
     });
+
+    // Regression: docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md —
+    // the Wrapped overlay (Z.MODAL_RAISED, 1100) is opened from this screen's
+    // own "View Your War" button but renders below GAME_OVER (99999). Without
+    // yielding, WrappedOverlay mounts permanently invisible underneath the
+    // still-open Verdict screen. This screen must cede (display:none) rather
+    // than keep painting at GAME_OVER once wrappedOpen is true.
+    it('yields to the Wrapped overlay instead of covering it once wrappedOpen is true', () => {
+        storeState = { loadedGameState: endgame(), wrappedOpen: true };
+        const html = render();
+        expect(html).toContain('display:none');
+        expect(html).not.toContain('z-index:99999');
+    });
+
+    it('still paints at GAME_OVER when wrappedOpen is false', () => {
+        storeState = { loadedGameState: endgame(), wrappedOpen: false };
+        const html = render();
+        expect(html).toContain('z-index:99999');
+        expect(html).not.toContain('display:none');
+    });
 });
 
 describe('VerdictScreen mount — verdict content', () => {
@@ -190,6 +210,35 @@ describe('VerdictScreen mount — verdict content', () => {
     it('footer', () => {
         const h = render();
         expect(h).toContain('least bad version'); expect(h).toContain('View Your War'); expect(h).toContain('New Game');
+    });
+
+    it('renders mixed ghost classifications under a neutral Campaign Codex heading', () => {
+        storeState = {
+            loadedGameState: endgame({
+                rawGameState: {
+                    meta: { turn: 188, phase: 'war', player_faction: 'RBiH' },
+                    political: { political_controllers: {}, initial_political_controllers: {} },
+                    military: {
+                        formations: {},
+                        event_flags: {
+                            federation_never_fractured: true,
+                            vrs_quality_inverted: true,
+                        },
+                        event_fire_counts: {},
+                    },
+                } as any,
+            }),
+        };
+
+        const html = render();
+        expect(html).toContain('Campaign Codex');
+        expect(html).toContain('data-awwv-ghost-classification="path_not_taken"');
+        expect(html).toContain('data-awwv-ghost-classification="divergence_context"');
+        expect(html).toContain('Campaign divergence');
+        const divergenceRow = html.match(
+            /<li[^>]*data-awwv-ghost-classification="divergence_context"[\s\S]*?<\/li>/,
+        )?.[0] ?? '';
+        expect(divergenceRow).not.toMatch(/path[-\s]?not[-\s]?taken/i);
     });
 
     it('renders replay from a sparse manifest when full frame sequence is absent', () => {
@@ -290,6 +339,17 @@ describe('VerdictScreen mount — fallback', () => {
         expect(h).toContain('1 active brigade');
         expect(h).not.toContain('2 active brigades');
         expect(h).not.toContain('2000 personnel');
+    });
+
+    // Regression: docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md —
+    // FallbackGameOver has its own independent "View Your War" button and its
+    // own GAME_OVER-tier root; it needs the same yield-to-Wrapped fix as the
+    // main verdict branch above (they are separate render trees).
+    it('FallbackGameOver yields to the Wrapped overlay once wrappedOpen is true', () => {
+        storeState = { loadedGameState: endgame({ gameVerdict: undefined }), wrappedOpen: true };
+        const h = render();
+        expect(h).toContain('display:none');
+        expect(h).not.toContain('z-index:99999');
     });
 });
 

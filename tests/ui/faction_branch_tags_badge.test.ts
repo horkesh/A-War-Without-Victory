@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { BranchTagBadgeRow } from '../../src/ui/map/components/BranchTagBadgeRow.js';
 import type { EventDefinition, EventResponseOption } from '../../src/sim/events/event_types.js';
@@ -82,6 +82,10 @@ describe('BranchTagBadgeRow (Phase H Packet 4)', () => {
         }));
 
         const row = screen.getByTestId('branch-tag-badge-row');
+        expect(row.parentElement?.getAttribute('data-testid')).toBe('branch-tag-priority-owner');
+        expect(row.parentElement?.className).toContain('flex-1');
+        expect(row.parentElement?.className).toContain('min-w-10');
+        expect(row.parentElement?.className).not.toContain('shrink-0');
         expect(row.getAttribute('data-faction')).toBe('RBiH');
         const chips = screen.getAllByTestId('branch-tag-chip');
         expect(chips).toHaveLength(1);
@@ -172,12 +176,12 @@ describe('BranchTagBadgeRow (Phase H Packet 4)', () => {
             state,
         }));
 
-        const chips = screen.getAllByTestId('branch-tag-chip');
-        const tagsRendered = chips.map((c) => c.getAttribute('data-tag'));
-        expect(tagsRendered).toEqual([
-            'rbih_civic',
-            'rbih_dayton_accept',
-            'rbih_paramilitary_allow',
+        const compact = screen.getByRole('button', { name: /3 active paths/i });
+        fireEvent.click(compact);
+        expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+            'Civic republic',
+            'Dayton acceptance',
+            'Paramilitary authorization',
         ]);
     });
 

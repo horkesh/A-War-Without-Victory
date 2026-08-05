@@ -21,13 +21,19 @@ import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
 // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: read-only consumption of ghost-entry
-// path-not-taken records for the Codex tab. Builder is pure/deterministic
+// discriminated campaign-context records for the Codex tab. Builder is pure/deterministic
 // and refuses §6 sensitive-history flags via its own Ring guard.
-import { buildGhostEntries, buildDynamicSections, type BuiltGhostEntry, type BuiltDynamicSection } from '../../../sim/codex/dynamic_section_builder.js';
+import {
+    buildGhostEntries,
+    buildDynamicSections,
+    type BuiltGhostEntry,
+    type BuiltDynamicSection,
+    type GhostRecordClassification,
+} from '../../../sim/codex/dynamic_section_builder.js';
 // T2-A / content C5 (orphaned-wiring audit): resolve the authored ghost-entry
 // markdown body (EN/BCS) instead of rendering the raw repo path. §6-adjacent
 // bodies are gated out inside the resolver.
-import { resolveGhostEntryProse } from '../data/ghostEntryProse.js';
+import { parseGhostEntryProse, resolveGhostEntryProse } from '../data/ghostEntryProse.js';
 // LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER: read-only turn scrubber for the
 // Replay tab. Renders only when gameOver === true AND a save sequence has
 // been plumbed into the loaded adapter. Consumes byte-identical save
@@ -42,6 +48,15 @@ import {
 } from '../utils/playerSafeText.js';
 import { turnToDateString } from '../utils/formatters.js';
 import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
+
+function verdictGhostClassificationLabel(classification: GhostRecordClassification): string {
+    switch (classification) {
+        case 'path_not_taken': return t('codex.record.pathNotTaken');
+        case 'audit_context': return t('codex.record.auditContext');
+        case 'divergence_context':
+        default: return t('codex.record.divergenceContext');
+    }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
@@ -297,6 +312,11 @@ const LOWER_SECTION_LABEL_KEYS: Record<VerdictLowerSection, MessageKey> = {
 export function VerdictScreen() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const startReplayInspection = useGameStore((s) => s.startReplayInspection);
+    // The Wrapped overlay (Z.MODAL_RAISED) is opened FROM this screen's own
+    // "View Your War" button but renders below GAME_OVER — without this,
+    // it mounts permanently invisible underneath the still-open Verdict
+    // screen (see docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md).
+    const wrappedOpen = useGameStore((s) => s.wrappedOpen);
     const ipc = useIPC();
     const [locale] = useLocale();
     const [verdictSelection, setVerdictSelection] = useState<{ verdict: GameVerdict; faction: string } | null>(null);
@@ -308,9 +328,10 @@ export function VerdictScreen() {
     // call different numbers of hooks and React throws.
     const turnForCodex = loadedGameState?.turn ?? 0;
     const codexGhosts: BuiltGhostEntry[] = useMemo(() => {
-        if (!loadedGameState) return [];
+        const rawState = loadedGameState?.rawGameState;
+        if (!rawState) return [];
         try {
-            return buildGhostEntries(loadedGameState, turnForCodex);
+            return buildGhostEntries(rawState, turnForCodex);
         } catch {
             return [];
         }
@@ -416,7 +437,7 @@ export function VerdictScreen() {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm"
-             style={{ zIndex: Z.GAME_OVER }}
+             style={wrappedOpen ? { display: 'none' } : { zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="verdict"
              data-awwv-endgame-outcome={verdict.outcome_label}
              data-awwv-verdict-focus={selectedFaction}>
@@ -567,14 +588,13 @@ export function VerdictScreen() {
                     </section>
                 )}
 
-                {/* Codex — paths not taken (LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE).
-                    Ring 2 narrative observations only. Hidden when no ghosts emit. */}
+                {/* Campaign Codex context records. Ring 2 narrative only. */}
                 {hasCodex && (
                     <section className={`border-t border-panel-border px-6 py-4 bg-panel-card/20 sm:block ${mobileSectionClass('codex')}`}
                              data-awwv-mobile-section="codex"
                              data-awwv-codex-ghosts={codexGhosts.length}>
                         <div className="text-xs uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
-                            Codex &mdash; Paths Not Taken
+                            {t('codex.campaignContext.title')}
                         </div>
                         <ul className="space-y-3">
                             {codexGhosts.map((g) => {
@@ -583,15 +603,33 @@ export function VerdictScreen() {
                                 // null and fall back to the label only — never
                                 // the raw repo path that was shown before.
                                 const prose = resolveGhostEntryProse(g.ghost_id, locale);
+                                const proseBlocks = prose === null
+                                    ? []
+                                    : parseGhostEntryProse(prose, g.classification);
+                                const headingIndex = proseBlocks.findIndex((block) => block.kind === 'heading');
+                                const rowTitle = headingIndex >= 0
+                                    ? proseBlocks[headingIndex].text
+                                    : verdictGhostClassificationLabel(g.classification);
+                                const bodyBlocks = headingIndex >= 0
+                                    ? proseBlocks.filter((_block, index) => index !== headingIndex)
+                                    : proseBlocks;
                                 return (
                                 <li key={g.ghost_id} className="text-xs text-text-secondary"
                                     data-awwv-ghost-variant={g.variant}
+                                    data-awwv-ghost-classification={g.classification}
                                     data-awwv-ghost-has-prose={prose !== null ? 'true' : 'false'}>
-                                    <div className="text-text-primary font-semibold">{getPlayerSafeDisplayLabel(g.ghost_id, 'Path not taken')}</div>
-                                    {prose !== null && (
-                                        <div className="mt-1 whitespace-pre-wrap text-text-secondary/90 leading-relaxed"
+                                    <div className="text-text-primary font-semibold">{rowTitle}</div>
+                                    <div className="text-[12px] uppercase tracking-[0.1em] text-text-secondary/70">
+                                        {verdictGhostClassificationLabel(g.classification)}
+                                    </div>
+                                    {bodyBlocks.length > 0 && (
+                                        <div className="mt-1 space-y-1 text-text-secondary/90 leading-relaxed"
                                              data-awwv-ghost-prose>
-                                            {prose}
+                                            {bodyBlocks.map((block, index) => block.kind === 'heading' ? (
+                                                <div key={index} className="font-semibold">{block.text}</div>
+                                            ) : (
+                                                <p key={index}>{block.text}</p>
+                                            ))}
                                         </div>
                                     )}
                                 </li>
@@ -1050,10 +1088,13 @@ function FallbackGameOver({
 }) {
     useLocale();
     const display = fallbackOutcomeDisplay(outcome);
+    // Same yield-to-Wrapped fix as the main verdict branch above — see
+    // docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md.
+    const wrappedOpen = useGameStore((s) => s.wrappedOpen);
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-             style={{ zIndex: Z.GAME_OVER }}
+             style={wrappedOpen ? { display: 'none' } : { zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="fallback"
              data-awwv-endgame-outcome={display.title}>
             <div className="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">

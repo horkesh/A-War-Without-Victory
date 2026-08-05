@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 1,
+  "label": "20260801_r2_fr05_viewport_1920_3440_v5",
+  "status": "passed",
+  "repository": {
+    "head": "10c96a33b50c2bf80ac121cb94a4ef1248e8fff0",
+    "branch": "codex/r2-rs-friction"
+  },
+  "sourceSave": {
+    "path": "docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/autosaves/final-autosave.json",
+    "sha256": "aaebe5bd01d9ac78ffb264b74f3827ba34307c4f5ad312b4e735aa65fdca7062"
+  },
+  "isolation": {
+    "remoteDebugPort": 3247,
+    "userDataRoot": "F:\\AWWV-worktrees\\r2-rs-friction\\tmp-playtest-20260801_r2_fr05_viewport_1920_3440_v5\\user-data",
+    "saveRoot": "F:\\AWWV-worktrees\\r2-rs-friction\\tmp-playtest-20260801_r2_fr05_viewport_1920_3440_v5\\saves",
+    "outputRoot": "F:\\AWWV-worktrees\\r2-rs-friction\\docs\\40_reports\\playtests\\evidence\\20260801_r2_fr05_viewport_1920_3440_v5"
+  },
+  "runtime": {
+    "application": "0.9.9-beta.1",
+    "electron": "41.0.3",
+    "chromium": "146.0.7680.80"
+  },
+  "process": {
+    "rootPid": 32324,
+    "treeDuringProof": [
+      {
+        "pid": 32324,
+        "parentPid": 15804,
+        "name": "cmd.exe",
+        "executable": "C:\\WINDOWS\\system32\\cmd.exe"
+      },
+      {
+        "pid": 32532,
+        "parentPid": 32324,
+        "name": "electron.exe",
+        "executable": "F:\\A-War-Without-Victory\\node_modules\\electron\\dist\\electron.exe"
+      },
+      {
+        "pid": 22052,
+        "parentPid": 32532,
+        "name": "electron.exe",
+        "executable": "F:\\A-War-Without-Victory\\node_modules\\electron\\dist\\electron.exe"
+      },
+      {
+        "pid": 16520,
+        "parentPid": 32532,
+        "name": "electron.exe",
+        "executable": "F:\\A-War-Without-Victory\\node_modules\\electron\\dist\\electron.exe"
+      },
+      {
+        "pid": 30068,
+        "parentPid": 32532,
+        "name": "electron.exe",
+        "executable": "F:\\A-War-Without-Victory\\node_modules\\electron\\dist\\electron.exe"
+      },
+      {
+        "pid": 32048,
+        "parentPid": 32532,
+        "name": "electron.exe",
+        "executable": "F:\\A-War-Without-Victory\\node_modules\\electron\\dist\\electron.exe"
+      }
+    ],
+    "remoteDebugPortOwnersDuringProof": [
+      {
+        "address": "127.0.0.1",
+        "port": 3247,
+        "state": 5,
+        "pid": 32532
+      },
+      {
+        "address": "127.0.0.1",
+        "port": 3247,
+        "state": 2,
+        "pid": 32532
+      }
+    ]
+  },
+  "captures": [
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "expectedColumns": 2
+      },
+      "screenshot": "army-hq-summary-1920x1080.png",
+      "screenshotSha256": "4fdb7292cafaef47eeedd6d4bf8a34a260b9666bd2691f8d1cd9f81bafe5cf21",
+      "screenshotBytes": 98634,
+      "screenshotSize": {
+        "width": 1920,
+        "height": 1080
+      },
+      "loadedState": {
+        "turn": 104,
+        "playerFaction": "RS"
+      },
+      "probe": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080,
+          "deviceScaleFactor": 1
+        },
+        "document": {
+          "clientWidth": 1920,
+          "clientHeight": 1080,
+          "scrollWidth": 1920,
+          "scrollHeight": 1080
+        },
+        "modal": {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "right": 1920,
+            "bottom": 1080,
+            "width": 1920,
+            "height": 1080
+          },
+          "className": "fixed inset-0 flex overflow-hidden font-mono"
+        },
+        "panel": {
+          "rect": {
+            "left": 0,
+            "top": 88,
+            "right": 1920,
+            "bottom": 1080,
+            "width": 1920,
+            "height": 992
+          },
+          "clientWidth": 1910,
+          "clientHeight": 992,
+          "scrollWidth": 1910,
+          "scrollHeight": 1299,
+          "overflowX": "hidden",
+          "overflowY": "auto",
+          "className": "relative min-w-0 flex-1 overflow-y-auto overflow-x-clip px-3 pt-2 pb-3"
+        },
+        "summary": {
+          "rect": {
+            "left": 12,
+            "top": 96,
+            "right": 1898,
+            "bottom": 1374.5,
+            "width": 1886,
+            "height": 1278.5
+          },
+          "clientWidth": 1886,
+          "scrollWidth": 1886,
+          "className": "w-full min-w-0 max-w-none overflow-x-clip"
+        },
+        "objectiveSection": {
+          "present": true,
+          "rect": {
+            "left": 12,
+            "top": 258.5,
+            "right": 1898,
+            "bottom": 767.5,
+            "width": 1886,
+            "height": 509
+          },
+          "articleCount": 4,
+          "columns": 2,
+          "rowCounts": [
+            {
+              "top": 298,
+              "count": 2
+            },
+            {
+              "top": 530,
+              "count": 2
+            }
+          ],
+          "noActionCount": 4,
+          "interactiveControlCount": 0
+        },
+        "posture": {
+          "count": 1,
+          "text": "No presidential signature is due; current policy remains in force.",
+          "interactiveControlCount": 0
+        },
+        "copy": {
+          "holdPresentPolicyOccurrences": 0,
+          "duplicatedOperationOccurrences": 0,
+          "rawTokens": []
+        }
+      },
+      "passed": true,
+      "failures": []
+    },
+    {
+      "viewport": {
+        "width": 3440,
+        "height": 1440,
+        "expectedColumns": 3
+      },
+      "screenshot": "army-hq-summary-3440x1440.png",
+      "screenshotSha256": "f10f481a416481d98ae708d5c20f9fc967ebf527389077e00f2a9e04c366feb0",
+      "screenshotBytes": 109970,
+      "screenshotSize": {
+        "width": 3440,
+        "height": 1440
+      },
+      "loadedState": {
+        "turn": 104,
+        "playerFaction": "RS"
+      },
+      "probe": {
+        "viewport": {
+          "width": 3440,
+          "height": 1440,
+          "deviceScaleFactor": 1
+        },
+        "document": {
+          "clientWidth": 3440,
+          "clientHeight": 1440,
+          "scrollWidth": 3440,
+          "scrollHeight": 1440
+        },
+        "modal": {
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "right": 3440,
+            "bottom": 1440,
+            "width": 3440,
+            "height": 1440
+          },
+          "className": "fixed inset-0 flex overflow-hidden font-mono"
+        },
+        "panel": {
+          "rect": {
+            "left": 0,
+            "top": 88,
+            "right": 3440,
+            "bottom": 1440,
+            "width": 3440,
+            "height": 1352
+          },
+          "clientWidth": 3440,
+          "clientHeight": 1352,
+          "scrollWidth": 3440,
+          "scrollHeight": 1352,
+          "overflowX": "hidden",
+          "overflowY": "auto",
+          "className": "relative min-w-0 flex-1 overflow-y-auto overflow-x-clip px-3 pt-2 pb-3"
+        },
+        "summary": {
+          "rect": {
+            "left": 12,
+            "top": 96,
+            "right": 3428,
+            "bottom": 1223,
+            "width": 3416,
+            "height": 1127
+          },
+          "clientWidth": 3416,
+          "scrollWidth": 3416,
+          "className": "w-full min-w-0 max-w-none overflow-x-clip"
+        },
+        "objectiveSection": {
+          "present": true,
+          "rect": {
+            "left": 12,
+            "top": 258.5,
+            "right": 3428,
+            "bottom": 767.5,
+            "width": 3416,
+            "height": 509
+          },
+          "articleCount": 4,
+          "columns": 3,
+          "rowCounts": [
+            {
+              "top": 298,
+              "count": 3
+            },
+            {
+              "top": 530,
+              "count": 1
+            }
+          ],
+          "noActionCount": 4,
+          "interactiveControlCount": 0
+        },
+        "posture": {
+          "count": 1,
+          "text": "No presidential signature is due; current policy remains in force.",
+          "interactiveControlCount": 0
+        },
+        "copy": {
+          "holdPresentPolicyOccurrences": 0,
+          "duplicatedOperationOccurrences": 0,
+          "rawTokens": []
+        }
+      },
+      "passed": true,
+      "failures": []
+    }
+  ],
+  "diagnostics": {
+    "consoleErrorsAndWarnings": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "expectedDocumentAborts": [],
+    "httpErrors": [],
+    "unexpectedMainProcessOutput": [],
+    "expectedMainProcessOutput": [
+      "Tactical map server: http://127.0.0.1:64863",
+      "[AWWV] Map: using built server at http://127.0.0.1:64863/",
+      "Debugger ending on ws://127.0.0.1:64860/7d5fa9ae-737d-415b-b108-aa376d1c2865",
+      "For help, see: https://nodejs.org/en/docs/inspector"
+    ]
+  },
+  "cleanup": {
+    "rootPid": 32324,
+    "exited": true,
+    "repositorySavesUnchanged": true,
+    "sourceSaveUnchanged": true,
+    "remoteDebugPortFree": true,
+    "rootProcessTreeAlive": false
+  },
+  "failures": []
+}

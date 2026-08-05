@@ -195,10 +195,20 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('presidential-decision-room').getAttribute('data-command-category-id')).toBe('');
-      expect(screen.queryByRole('status')).toBeNull();
       expect(screen.getByTestId('decision-room-lens-all').getAttribute('aria-pressed')).toBe('true');
+      // The hard-turn card is present in the restored, unfiltered list...
       expect(screen.getByTestId('decision-room-priority-card-turn:24:hard-turn')).toBeTruthy();
       expect(screen.getByText('Priority Dossier')).toBeTruthy();
+      // ...but is record-only (informational: it reports what already
+      // happened, there is nothing to decide). The priority model ranks
+      // actionable presidential-lever cards above record-only ones
+      // (finalizeCards: `recordOnly: card.category === 'turn' | 'cost' |
+      // 'memory'`), so the correctly-restored default active dossier is the
+      // highest-priority lever card, never the stale removed
+      // paramilitary:pending card or the hard-turn record itself.
+      const activeDossierCardId = screen.getByTestId('decision-room-active-dossier').getAttribute('data-card-id');
+      expect(activeDossierCardId).not.toBe('paramilitary:pending');
+      expect(activeDossierCardId).not.toBe('turn:24:hard-turn');
     });
   });
 

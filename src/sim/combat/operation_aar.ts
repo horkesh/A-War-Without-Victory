@@ -11,6 +11,7 @@ import type { GameState, CorpsOperation, FormationId, CommanderAssessment, Tacti
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { resolveTacticalGroupIdsForOperation } from '../../state/operation_lifecycle_reconciliation.js';
 import { ENABLE_TG_ARMY_HQ_OPS } from './tactical_group_config.js';
 
 // ─── Sub-ledgers ────────────────────────────────────────────────────────────
@@ -172,7 +173,7 @@ export interface OperationAAR {
     force_quality_max_axes_at_launch?: number;
     /** Why the operation entered recovery — diagnostic carryover from
      *  `CorpsOperation.recovery_reason`. Preserved on AAR so post-mortem tools
-     *  can distinguish completed vs max_failures vs orphaned vs no_logged_attempt
+     *  can distinguish completion, failure, and typed TG exhaustion reasons
      *  without source spelunking through the lifecycle. */
     recovery_reason?: CorpsOperation['recovery_reason'];
     /** Commander's estimated force ratio at finalize — diagnostic carryover from
@@ -557,18 +558,16 @@ export function recordOperationWeeklyEntries(
 // ─── Army HQ telemetry (ENABLE_TG_ARMY_HQ_OPS) ─────────────────────────────
 
 /**
- * Find the TG carrying out this CorpsOperation, if any. Matches on TG.op_id === op.name
- * (operation_preparation.ts sets TG.op_id = op.name at formation).
- * Deterministic: scans tactical_groups in sorted id order, returns first match.
+ * Find the TG carrying out this CorpsOperation, if any. Army-HQ linkage is exact;
+ * legacy linkage uses the host-corps/name composite.
  */
-function findTgForOp(state: GameState, opId: string): TacticalGroup | undefined {
-    const tgs = state.military?.tactical_groups;
-    if (!tgs) return undefined;
-    for (const tgId of Object.keys(tgs).sort(strictCompare)) {
-        const tg = tgs[tgId];
-        if (tg?.op_id === opId) return tg;
-    }
-    return undefined;
+function findTgForOp(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+): TacticalGroup | undefined {
+    const tgId = resolveTacticalGroupIdsForOperation(state, hostCorpsId, op)[0];
+    return tgId ? state.military.tactical_groups?.[tgId] : undefined;
 }
 
 /**
@@ -577,9 +576,15 @@ function findTgForOp(state: GameState, opId: string): TacticalGroup | undefined 
  * the TG-dissolution path (beginRecovery → dissolveTgsForOp) can snapshot the telemetry onto
  * the op record BEFORE the TG is deleted; finalizeOperationAAR runs only after the recovery
  * window elapses, by which point the live TG is gone (P2 timing bug #48).
+ * A resolver-validated ID-less legacy TG may inherit its owning CorpsOperation id;
+ * an explicit TG id always remains authoritative.
  */
-export function buildArmyHqTelemetryFromTg(tg: TacticalGroup): ArmyHqOpAarTelemetry | undefined {
-    if (tg.army_hq_op_id == null) return undefined;
+export function buildArmyHqTelemetryFromTg(
+    tg: TacticalGroup,
+    legacyArmyHqOpId?: string,
+): ArmyHqOpAarTelemetry | undefined {
+    const armyHqOpId = tg.army_hq_op_id ?? legacyArmyHqOpId;
+    if (armyHqOpId == null) return undefined;
     const donorCorpsSet = new Set<string>();
     let totalCohesionBled = 0;
     for (const d of tg.donor_contributions) {
@@ -589,7 +594,7 @@ export function buildArmyHqTelemetryFromTg(tg: TacticalGroup): ArmyHqOpAarTeleme
     const donorCorpsLineage = [...donorCorpsSet].sort(strictCompare);
     const crossCorpsDonorCount = donorCorpsLineage.filter(c => c !== tg.corps_id).length;
     return {
-        army_hq_op_id: tg.army_hq_op_id,
+        army_hq_op_id: armyHqOpId,
         anchor_corps_id: tg.corps_id,
         donor_corps_lineage: donorCorpsLineage,
         cross_corps_donor_count: crossCorpsDonorCount,
@@ -604,11 +609,14 @@ export function buildArmyHqTelemetryFromTg(tg: TacticalGroup): ArmyHqOpAarTeleme
  * time (the real lifecycle: beginRecovery dissolves the TG, finalize runs turns later).
  * Caller gates on ENABLE_TG_ARMY_HQ_OPS.
  */
-function buildArmyHqTelemetry(state: GameState, op: CorpsOperation): ArmyHqOpAarTelemetry | undefined {
-    // TG.op_id is set to op.name at formation (operation_preparation.ts), so match on name.
-    const tg = findTgForOp(state, op.name);
+function buildArmyHqTelemetry(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+): ArmyHqOpAarTelemetry | undefined {
+    const tg = findTgForOp(state, hostCorpsId, op);
     if (tg) {
-        const live = buildArmyHqTelemetryFromTg(tg);
+        const live = buildArmyHqTelemetryFromTg(tg, op.army_hq_op_id);
         if (live) return live;
     }
     // Live TG absent (dissolved during beginRecovery) → use the snapshot captured then.
@@ -894,7 +902,7 @@ export function finalizeOperationAAR(
     // the op was carried by a TG belonging to an Army HQ op. Flag-off: branch never runs →
     // field omitted → byte-identical.
     if (ENABLE_TG_ARMY_HQ_OPS) {
-        const armyHqTelemetry = buildArmyHqTelemetry(state, op);
+        const armyHqTelemetry = buildArmyHqTelemetry(state, corpsId, op);
         if (armyHqTelemetry) {
             aar.army_hq_telemetry = armyHqTelemetry;
         }

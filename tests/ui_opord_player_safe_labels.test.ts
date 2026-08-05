@@ -180,7 +180,13 @@ describe('Army-HQ raw enum + faction-slug resolution (QA Batch F)', () => {
         expect(opsSource).toContain('COMMANDER_ASSESSMENT_LABELS[op.commander_assessment]');
         expect(opsSource).not.toContain('op.commander_assessment.toUpperCase()');
         expect(opsSource).toContain('RECOVERY_REASON_LABELS[op.recovery_reason]');
+        expect(opsSource).toContain("tg_cohesion_exhausted: 'Tactical group exhausted'");
+        expect(opsSource).toContain("tg_max_lifecycle: 'Operational duration reached'");
         expect(opsSource).not.toContain("op.recovery_reason.toUpperCase().replace(/_/g, ' ')");
+
+        const historySource = readFileSync('src/ui/map/components/OperationHistoryPanel.tsx', 'utf8');
+        expect(historySource).toContain("tg_cohesion_exhausted: { label: 'Tactical group exhausted'");
+        expect(historySource).toContain("tg_max_lifecycle: { label: 'Operational duration reached'");
         expect(opsSource).toContain('AXIS_STATUS_LABELS[axis.status]');
         expect(opsSource).toContain('GRADE_FACTOR_LABELS[key]');
         // FULL DECISION-ROOM CONVERGENCE: the request-op input moved OUT of Army HQ

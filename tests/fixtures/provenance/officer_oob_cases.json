@@ -1,0 +1,155 @@
+{
+  "valid": {
+    "officers": {
+      "officers": [
+        {
+          "id": "officer_exact",
+          "name": "Exact Officer",
+          "faction": "RBiH",
+          "home_corps_id": "corps_exact"
+        }
+      ]
+    },
+    "corps": {
+      "corps": [
+        {
+          "id": "corps_exact",
+          "name": "Exact Corps",
+          "faction": "RBiH"
+        }
+      ]
+    },
+    "brigades": [
+      {
+        "id": "brigade_exact",
+        "name": "Exact Brigade",
+        "faction": "RBiH",
+        "corps": "corps_exact"
+      }
+    ],
+    "manifest": {
+      "schema_version": 1,
+      "records": {
+        "brigade:brigade_exact": {
+          "source": "Official OOB",
+          "source_url": "https://example.invalid/oob",
+          "citation": "Official OOB, p. 3",
+          "source_tier": "official",
+          "confidence": "exact",
+          "identity_relation": null,
+          "court_record_citation": null,
+          "conflict_note": null,
+          "disposition": "supported",
+          "notes": "Exact formation row."
+        },
+        "corps:corps_exact": {
+          "source": "Official OOB",
+          "source_url": "https://example.invalid/oob",
+          "citation": "Official OOB, p. 1",
+          "source_tier": "official",
+          "confidence": "exact",
+          "identity_relation": null,
+          "court_record_citation": null,
+          "conflict_note": null,
+          "disposition": "supported",
+          "notes": "Exact corps row."
+        },
+        "officer:officer_exact": {
+          "source": "Official appointment record",
+          "source_url": "https://example.invalid/officer",
+          "citation": "Appointment record, item 2",
+          "source_tier": "official",
+          "confidence": "exact",
+          "identity_relation": null,
+          "court_record_citation": null,
+          "conflict_note": null,
+          "disposition": "supported",
+          "notes": "Exact identity and assignment."
+        }
+      }
+    }
+  },
+  "invalid": {
+    "officers": {
+      "officers": [
+        {
+          "id": "officer_conflict",
+          "name": "Conflict Officer",
+          "faction": "RS",
+          "home_corps_id": "missing_corps",
+          "war_crimes_record": {
+            "court": "Example Court",
+            "verdict": "example"
+          }
+        },
+        {
+          "id": "officer_conflict_2",
+          "name": "Conflict Officer (2nd tenure)",
+          "faction": "RS"
+        },
+        {
+          "id": "officer_duplicate",
+          "name": "First Duplicate",
+          "faction": "RS"
+        },
+        {
+          "id": "officer_duplicate",
+          "name": "Second Duplicate",
+          "faction": "RS"
+        }
+      ]
+    },
+    "corps": {
+      "corps": [
+        {
+          "id": "corps_rs",
+          "name": "RS Corps",
+          "faction": "RS"
+        }
+      ]
+    },
+    "brigades": [
+      {
+        "id": "brigade_conflict",
+        "name": "Conflict Brigade",
+        "faction": "RBiH",
+        "corps": "corps_rs",
+        "elite_commander": {
+          "name": "Conflict Officer"
+        }
+      }
+    ],
+    "manifest": {
+      "schema_version": 1,
+      "records": {
+        "officer:officer_conflict": {
+          "source": "Wikipedia",
+          "source_url": "https://en.wikipedia.org/wiki/Example",
+          "citation": null,
+          "source_tier": "unverified",
+          "confidence": "inferred",
+          "identity_relation": {
+            "kind": "inferred_name_similarity",
+            "target_record_key": "officer:officer_conflict_2"
+          },
+          "court_record_citation": null,
+          "conflict_note": "Name-only match.",
+          "disposition": "conflict",
+          "notes": "Must not be promoted."
+        },
+        "orphan:not_in_data": {
+          "source": "Orphan source",
+          "source_url": "https://example.invalid/orphan",
+          "citation": "Orphan citation",
+          "source_tier": "official",
+          "confidence": "exact",
+          "identity_relation": null,
+          "court_record_citation": null,
+          "conflict_note": null,
+          "disposition": "supported",
+          "notes": "Should be rejected."
+        }
+      }
+    }
+  }
+}

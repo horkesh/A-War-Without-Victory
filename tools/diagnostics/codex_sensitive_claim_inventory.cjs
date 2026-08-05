@@ -4,8 +4,13 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const sourceTierContract = require('../../src/sim/events/source_tiers.json');
+const {
+  isCanonAllowedParamilitaryChoice,
+  isDirectRefusedSensitiveChoice,
+} = require('./sensitive_history_semantics.cjs');
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 4;
 const EXCERPT_CHARS = 160;
 
 // The runtime Codex panel (src/ui/map/components/CodexPanel.tsx) imports
@@ -71,7 +76,7 @@ const TERM_SETS = Object.freeze({
   ]),
 });
 
-const SOURCE_KEYS = Object.freeze([
+const CITATION_KEYS = Object.freeze([
   'citation',
   'citations',
   'historical_source',
@@ -79,10 +84,48 @@ const SOURCE_KEYS = Object.freeze([
   'reference',
   'references',
   'source',
-  'source_note',
-  'source_notes',
   'sources',
 ]);
+const SOURCE_KEYS = Object.freeze([
+  ...CITATION_KEYS,
+  'source_note',
+  'source_notes',
+]);
+
+// These are authored player-facing prose fields. JSON identifiers, trigger
+// predicates, source metadata, and mechanical effect values are deliberately
+// excluded. The inventory must not depend on a sensitive-word dictionary:
+// ordinary historical prose can still contain an unsupported factual claim.
+const CLAIM_PROSE_KEYS = new Set([
+  'after_action',
+  'body',
+  'content',
+  'copy',
+  'description',
+  'detail',
+  'effect',
+  'effects',
+  'explanation',
+  'headline',
+  'historical_context',
+  'label',
+  'message',
+  'narrative',
+  'note',
+  'outcome',
+  'rationale',
+  'staff_assessment',
+  'summary',
+  'text',
+  'title',
+  'tooltip',
+  'trigger_evidence',
+]);
+
+const GENERIC_SYMMETRY_PATTERN = /\b(?:both|all) sides\b|\bno faction\b.{0,48}\bclean hands\b/i;
+const DIRECT_CHOICE_FIELDS_PATTERN = /\.response_options\[\d+\]\.(?:description|label|narrative|text)$/;
+const RECOGNIZED_SOURCE_TIERS = new Set(sourceTierContract.recognized);
+const RESOLVED_SOURCE_TIERS = new Set(sourceTierContract.resolved);
 
 const SRC_PATH_KEYWORDS = Object.freeze([
   'codex',
@@ -319,23 +362,105 @@ function termSetMatches(matchedTerms, setName) {
   return matchedTerms.some((term) => set.has(term));
 }
 
-function lineForOffset(text, offset) {
-  if (offset < 0) {
-    return 1;
-  }
+function buildJsonStringLineMap(raw) {
+  const linesByPath = new Map();
+  let index = 0;
   let line = 1;
-  for (let index = 0; index < offset; index += 1) {
-    if (text[index] === '\n') {
-      line += 1;
-    }
-  }
-  return line;
-}
 
-function lineForJsonString(raw, value) {
-  const encoded = JSON.stringify(value);
-  const offset = raw.indexOf(encoded);
-  return lineForOffset(raw, offset);
+  const skipWhitespace = () => {
+    while (index < raw.length && /\s/.test(raw[index])) {
+      if (raw[index] === '\n') line += 1;
+      index += 1;
+    }
+  };
+
+  const parseString = () => {
+    if (raw[index] !== '"') throw new Error(`Expected JSON string at line ${line}`);
+    const start = index;
+    const tokenLine = line;
+    index += 1;
+    let escaped = false;
+    while (index < raw.length) {
+      const char = raw[index];
+      if (char === '\n') line += 1;
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === '"') {
+        index += 1;
+        break;
+      }
+      index += 1;
+    }
+    return { value: JSON.parse(raw.slice(start, index)), line: tokenLine };
+  };
+
+  const parseValue = (pathParts) => {
+    skipWhitespace();
+    if (raw[index] === '"') {
+      const token = parseString();
+      linesByPath.set(pathParts.join(''), token.line);
+      return;
+    }
+    if (raw[index] === '{') {
+      index += 1;
+      skipWhitespace();
+      if (raw[index] === '}') {
+        index += 1;
+        return;
+      }
+      while (index < raw.length) {
+        const key = parseString().value;
+        skipWhitespace();
+        if (raw[index] !== ':') throw new Error(`Expected ':' after JSON key at line ${line}`);
+        index += 1;
+        parseValue([...pathParts, `.${key}`]);
+        skipWhitespace();
+        if (raw[index] === '}') {
+          index += 1;
+          return;
+        }
+        if (raw[index] !== ',') throw new Error(`Expected ',' in JSON object at line ${line}`);
+        index += 1;
+        skipWhitespace();
+      }
+      throw new Error('Unterminated JSON object');
+    }
+    if (raw[index] === '[') {
+      index += 1;
+      skipWhitespace();
+      if (raw[index] === ']') {
+        index += 1;
+        return;
+      }
+      let arrayIndex = 0;
+      while (index < raw.length) {
+        parseValue([...pathParts, `[${arrayIndex}]`]);
+        arrayIndex += 1;
+        skipWhitespace();
+        if (raw[index] === ']') {
+          index += 1;
+          return;
+        }
+        if (raw[index] !== ',') throw new Error(`Expected ',' in JSON array at line ${line}`);
+        index += 1;
+      }
+      throw new Error('Unterminated JSON array');
+    }
+    const primitiveStart = index;
+    while (index < raw.length && !/[\s,}\]]/.test(raw[index])) index += 1;
+    if (index === primitiveStart) {
+      throw new Error(`Expected JSON value at line ${line}`);
+    }
+  };
+
+  parseValue(['$']);
+  skipWhitespace();
+  if (index !== raw.length) {
+    throw new Error(`Unexpected JSON input at line ${line}`);
+  }
+  return linesByPath;
 }
 
 function normalizeExcerpt(text) {
@@ -368,6 +493,21 @@ function hasSourceValue(value) {
   return typeof value === 'string' ? value.trim().length > 0 : Boolean(value);
 }
 
+function asNonEmptyString(value) {
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
+}
+
+function flattenSourceValues(value) {
+  if (Array.isArray(value)) {
+    return value.flatMap(flattenSourceValues);
+  }
+  if (value && typeof value === 'object') {
+    return Object.keys(value).sort(compareText).flatMap((key) => flattenSourceValues(value[key]));
+  }
+  const text = asNonEmptyString(value);
+  return text ? [text] : [];
+}
+
 function nearestSourceObject(ancestors) {
   for (let index = ancestors.length - 1; index >= 0; index -= 1) {
     const value = ancestors[index];
@@ -381,6 +521,46 @@ function nearestSourceObject(ancestors) {
     }
   }
   return null;
+}
+
+function nearestSubjectObject(ancestors, rootValue) {
+  for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+    const value = ancestors[index];
+    if (value && typeof value === 'object' && !Array.isArray(value) && asNonEmptyString(value.id)
+      && (value.trigger || value.category || value.event_id || value.content || value.narrative
+        || value.title || Array.isArray(value.response_options))) {
+      return value;
+    }
+  }
+  for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+    const value = ancestors[index];
+    if (value && typeof value === 'object' && !Array.isArray(value) && asNonEmptyString(value.id)) return value;
+  }
+  return rootValue && typeof rootValue === 'object' && !Array.isArray(rootValue)
+    ? rootValue
+    : null;
+}
+
+function sourceTierStatusFor(sourceTier) {
+  if (!sourceTier) return 'missing';
+  if (sourceTier === 'pending') return 'pending';
+  if (RESOLVED_SOURCE_TIERS.has(sourceTier)) return 'resolved';
+  return RECOGNIZED_SOURCE_TIERS.has(sourceTier) ? 'pending' : 'invalid';
+}
+
+function sourceDetailsFor(ancestors, rootValue) {
+  const sourceObject = nearestSourceObject(ancestors) ?? nearestSubjectObject(ancestors, rootValue);
+  if (!sourceObject) {
+    return { citation: null, sourceTier: null, sourceTierStatus: 'missing', sourceNote: null };
+  }
+  const citations = CITATION_KEYS.flatMap((key) => flattenSourceValues(sourceObject[key]));
+  const sourceTier = asNonEmptyString(sourceObject.source_tier);
+  return {
+    citation: citations.length > 0 ? [...new Set(citations)].sort(compareText).join(' | ') : null,
+    sourceTier,
+    sourceTierStatus: sourceTierStatusFor(sourceTier),
+    sourceNote: asNonEmptyString(sourceObject.source_note),
+  };
 }
 
 function essayFloorStatus(rootValue) {
@@ -426,7 +606,7 @@ function sourceStatusFor(surface, rootValue, ancestors) {
   if (!sourceObject) {
     return { status: 'uncited', floorStatus: null };
   }
-  const cited = SOURCE_KEYS.some((key) => (
+  const cited = CITATION_KEYS.some((key) => (
     Object.prototype.hasOwnProperty.call(sourceObject, key) && hasSourceValue(sourceObject[key])
   ));
   return { status: cited ? 'cited' : 'uncited', floorStatus: null };
@@ -459,9 +639,125 @@ function dateWindowFor(relativeFile, ancestors) {
         return value[key].trim();
       }
     }
+    const trigger = value.trigger;
+    if (trigger && typeof trigger === 'object' && !Array.isArray(trigger)) {
+      const turnMin = Number.isInteger(trigger.turn_min) ? trigger.turn_min : null;
+      const turnMax = Number.isInteger(trigger.turn_max) ? trigger.turn_max : turnMin;
+      if (turnMin !== null) {
+        return turnMax === turnMin ? `turn ${turnMin}` : `turns ${turnMin}-${turnMax}`;
+      }
+    }
   }
   const fileYear = relativeFile.match(/\b(199[2-5])\b/);
   return fileYear ? fileYear[1] : null;
+}
+
+function stableInline(value) {
+  if (Array.isArray(value)) {
+    return value.map(stableInline);
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  const sorted = {};
+  for (const key of Object.keys(value).sort(compareText)) sorted[key] = stableInline(value[key]);
+  return sorted;
+}
+
+function statePredicateFor(ancestors, rootValue) {
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  const dynamicCondition = asNonEmptyString(subject?.condition);
+  if (dynamicCondition) return dynamicCondition;
+  const trigger = subject?.trigger;
+  if (!trigger || typeof trigger !== 'object' || Array.isArray(trigger)) return null;
+  const parts = [];
+  if (asNonEmptyString(trigger.phase)) parts.push(`phase=${trigger.phase.trim()}`);
+  if (Array.isArray(trigger.requires_events) && trigger.requires_events.length > 0) {
+    parts.push(`requires_events=${trigger.requires_events.filter((value) => typeof value === 'string').sort(compareText).join(',')}`);
+  }
+  if (trigger.condition && typeof trigger.condition === 'object') {
+    parts.push(`condition=${JSON.stringify(stableInline(trigger.condition))}`);
+  }
+  if (Array.isArray(trigger.conditions) && trigger.conditions.length > 0) {
+    parts.push(`conditions=${JSON.stringify(stableInline(trigger.conditions))}`);
+  }
+  return parts.length > 0 ? parts.join('; ') : null;
+}
+
+function subjectIdFor(ancestors, rootValue, relativeFile) {
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  return asNonEmptyString(subject?.id) ?? path.basename(relativeFile, path.extname(relativeFile));
+}
+
+function respondentFor(ancestors, rootValue) {
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  if (!subject) return null;
+  for (const key of ['responding_faction', 'respondent', 'player_faction', 'faction']) {
+    const value = asNonEmptyString(subject[key]);
+    if (value) return value;
+  }
+  return null;
+}
+
+function choiceAllowsParamilitaryPolicy(fieldPath, text, ancestors, rootValue) {
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  const id = asNonEmptyString(subject?.id) ?? '';
+  const family = asNonEmptyString(subject?.family) ?? '';
+  const optionIndex = Number(fieldPath.match(/\.response_options\[(\d+)\]\./)?.[1]);
+  const option = Number.isInteger(optionIndex) && Array.isArray(subject?.response_options)
+    ? subject.response_options[optionIndex]
+    : null;
+  const optionId = asNonEmptyString(option?.id);
+  return isCanonAllowedParamilitaryChoice(id, family, optionId, text);
+}
+
+function playerInteractionTypeFor(fieldPath, text, ancestors, rootValue) {
+  if (DIRECT_CHOICE_FIELDS_PATTERN.test(fieldPath)
+    && isDirectRefusedSensitiveChoice(text)
+    && !choiceAllowsParamilitaryPolicy(fieldPath, text, ancestors, rootValue)) {
+    return 'player_choice';
+  }
+  if (fieldPath.includes('.response_options[')) return 'decision_context';
+  const subject = nearestSubjectObject(ancestors, rootValue);
+  if (Array.isArray(subject?.response_options) && subject.response_options.length > 0) return 'decision_context';
+  return 'informational';
+}
+
+function ringFor(playerInteractionType) {
+  return playerInteractionType === 'player_choice'
+    ? 'ring_3_refused_candidate'
+    : 'ring_2_informational';
+}
+
+function provenanceGapsFor(sourceInfo, sourceDetails) {
+  const gaps = [];
+  if (sourceInfo.status === 'source_floor_exception') gaps.push('source_floor');
+  if (!sourceDetails.citation) gaps.push('citation');
+  if (!sourceDetails.sourceNote) gaps.push('source_note');
+  if (sourceDetails.sourceTierStatus !== 'resolved') gaps.push('source_tier');
+  return gaps;
+}
+
+function statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate, text }) {
+  if (ring === 'ring_3_refused_candidate') {
+    return { status: 'blocked_sensitive_player_choice', owner: 'historian+game-designer' };
+  }
+  if (riskClass === 'sensitive_history_gated' && GENERIC_SYMMETRY_PATTERN.test(text)) {
+    return { status: 'needs_actor_specificity', owner: 'historian' };
+  }
+  if (sourceInfo.status === 'source_floor_exception') {
+    return { status: 'needs_source_floor', owner: 'historian' };
+  }
+  if (sourceInfo.status !== 'cited' || !sourceDetails.citation || !sourceDetails.sourceNote) {
+    return { status: 'needs_source_note', owner: 'historian' };
+  }
+  if (sourceDetails.sourceTierStatus !== 'resolved') {
+    return { status: 'needs_source_tier', owner: 'historian' };
+  }
+  if (riskClass === 'dynamic_state_candidate' && !statePredicate) {
+    return { status: 'needs_state_predicate', owner: 'gameplay-programmer+historian' };
+  }
+  return { status: 'documented', owner: 'historian' };
 }
 
 function isDynamicConsequenceClaim(surface, text) {
@@ -526,8 +822,13 @@ function makeClaimId(file, line, fieldPath, matchedTerms) {
   return `sci_${crypto.createHash('sha256').update(basis).digest('hex').slice(0, 16)}`;
 }
 
-function makeClaim({ surface, file, line, fieldPath, text, matchedTerms, sourceInfo, dateWindow }) {
+function makeClaim({ surface, file, line, fieldPath, text, matchedTerms, sourceInfo, dateWindow, ancestors, rootValue }) {
   const riskClass = riskFor(surface, text, matchedTerms);
+  const sourceDetails = sourceDetailsFor(ancestors, rootValue);
+  const statePredicate = statePredicateFor(ancestors, rootValue);
+  const playerInteractionType = playerInteractionTypeFor(fieldPath, text, ancestors, rootValue);
+  const ring = ringFor(playerInteractionType);
+  const disposition = statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate, text });
   return {
     claim_id: makeClaimId(file, line, fieldPath, matchedTerms),
     surface,
@@ -535,12 +836,25 @@ function makeClaim({ surface, file, line, fieldPath, text, matchedTerms, sourceI
     line,
     field_path: fieldPath,
     excerpt: makeExcerpt(text, matchedTerms),
+    claim: makeExcerpt(text, matchedTerms),
     matched_terms: matchedTerms,
+    subject_id: subjectIdFor(ancestors, rootValue, file),
+    ring,
     actor_faction: actorFactionFor(text),
     date_window: dateWindow,
+    state_predicate: statePredicate,
     source_status: sourceInfo.status,
+    source_tier: sourceDetails.sourceTier,
+    source_tier_status: sourceDetails.sourceTierStatus,
+    citation: sourceDetails.citation,
+    source_note: sourceDetails.sourceNote,
+    provenance_gaps: provenanceGapsFor(sourceInfo, sourceDetails),
+    respondent: respondentFor(ancestors, rootValue),
+    player_interaction_type: playerInteractionType,
     risk_class: riskClass,
     stop_gate: stopGateFor(riskClass),
+    status: disposition.status,
+    owner: disposition.owner,
     notes: notesFor(riskClass, sourceInfo),
   };
 }
@@ -564,6 +878,11 @@ function walkJsonStrings(value, visitor, ancestors = [], pathParts = ['$']) {
   }
 }
 
+function isClaimProseField(fieldPath) {
+  const match = fieldPath.match(/\.([A-Za-z0-9_]+)(?:\[\d+\])?$/);
+  return match ? CLAIM_PROSE_KEYS.has(match[1]) : false;
+}
+
 function sortClaims(claims) {
   return claims.sort((a, b) => (
     compareText(a.file, b.file)
@@ -578,23 +897,31 @@ async function scanJsonFile(rootDir, relativeFile, surface) {
   const absoluteFile = path.join(rootDir, relativeFile);
   const raw = await fs.readFile(absoluteFile, 'utf8');
   const parsed = JSON.parse(raw);
+  const linesByPath = buildJsonStringLineMap(raw);
   const claims = [];
 
-  const collect = (text, fieldPath, ancestors, rootValue) => {
+  const collect = (text, fieldPath, ancestors, rootValue, sourceFieldPath = fieldPath) => {
+    if (/\.(?:citation|citations|historical_source|historical_sources|reference|references|source|source_note|source_notes|sources)(?:\[|$)/.test(fieldPath)) {
+      return;
+    }
     const matchedTerms = findMatchedTerms(text);
-    if (matchedTerms.length === 0) {
+    if (matchedTerms.length === 0 && !isClaimProseField(fieldPath)) {
       return;
     }
     const sourceInfo = sourceStatusFor(surface, rootValue, ancestors);
+    const line = linesByPath.get(sourceFieldPath);
+    if (!Number.isInteger(line)) throw new Error(`Missing JSON line for ${relativeFile}:${sourceFieldPath}`);
     claims.push(makeClaim({
       surface,
       file: relativeFile,
-      line: lineForJsonString(raw, text),
+      line,
       fieldPath,
       text,
       matchedTerms,
       sourceInfo,
       dateWindow: dateWindowFor(relativeFile, ancestors),
+      ancestors,
+      rootValue,
     }));
   };
 
@@ -617,9 +944,15 @@ async function scanJsonFile(rootDir, relativeFile, surface) {
         : `[${essayIndex}]`;
       walkJsonStrings(
         sections,
-        (text, fieldPath, ancestors) => collect(text, fieldPath, ancestors, essay),
+        (text, sourceFieldPath, ancestors) => {
+          const fieldPath = sourceFieldPath.replace(
+            `$.essays[${essayIndex}]`,
+            `$.${essayKey}`,
+          );
+          collect(text, fieldPath, ancestors, essay, sourceFieldPath);
+        },
         [parsed, essay],
-        ['$', `.${essayKey}`, '.dynamic_sections'],
+        ['$', '.essays', `[${essayIndex}]`, '.dynamic_sections'],
       );
     });
     return claims;
@@ -652,6 +985,8 @@ async function scanTextFile(rootDir, relativeFile, surface) {
       matchedTerms,
       sourceInfo,
       dateWindow: dateWindowFor(relativeFile, []),
+      ancestors: [],
+      rootValue: null,
     }));
   });
   return claims;
@@ -661,10 +996,14 @@ function summarize(files, claims) {
   const riskClassCounts = {};
   const sourceStatusCounts = {};
   const surfaceCounts = {};
+  const statusCounts = {};
+  const ownerCounts = {};
   for (const claim of claims) {
     riskClassCounts[claim.risk_class] = (riskClassCounts[claim.risk_class] ?? 0) + 1;
     sourceStatusCounts[claim.source_status] = (sourceStatusCounts[claim.source_status] ?? 0) + 1;
     surfaceCounts[claim.surface] = (surfaceCounts[claim.surface] ?? 0) + 1;
+    statusCounts[claim.status] = (statusCounts[claim.status] ?? 0) + 1;
+    ownerCounts[claim.owner] = (ownerCounts[claim.owner] ?? 0) + 1;
   }
   return {
     file_count: files.length,
@@ -673,7 +1012,163 @@ function summarize(files, claims) {
     risk_class_counts: sortedCounts(riskClassCounts),
     source_status_counts: sortedCounts(sourceStatusCounts),
     surface_counts: sortedCounts(surfaceCounts),
+    status_counts: sortedCounts(statusCounts),
+    owner_counts: sortedCounts(ownerCounts),
   };
+}
+
+const HISTORICAL_ANCHORS = Object.freeze([
+  Object.freeze({
+    anchor_id: 'grabovica_uzdol_massacres_1993',
+    event_file: 'data/scenarios/events/war_1993.json',
+    essay_file: 'data/scenarios/essays/grabovica_uzdol_massacres_1993.json',
+    expected_turn_min: 74,
+    expected_turn_max: 76,
+  }),
+  Object.freeze({
+    anchor_id: 'operation_neretva_93_1993',
+    event_file: 'data/scenarios/events/war_1993.json',
+    essay_file: 'data/scenarios/essays/operation_neretva_93_1993.json',
+    expected_turn_min: 74,
+    expected_turn_max: 76,
+  }),
+]);
+
+async function buildHistoricalAnchors(rootDir) {
+  const anchors = [];
+  for (const contract of HISTORICAL_ANCHORS) {
+    const eventAbsolute = path.join(rootDir, contract.event_file);
+    const essayAbsolute = path.join(rootDir, contract.essay_file);
+    const eventExists = await pathExists(eventAbsolute);
+    const essayExists = await pathExists(essayAbsolute);
+    let event = null;
+    let essay = null;
+    if (eventExists) {
+      const rows = JSON.parse(await fs.readFile(eventAbsolute, 'utf8'));
+      event = Array.isArray(rows) ? rows.find((row) => row?.id === contract.anchor_id) ?? null : null;
+    }
+    if (essayExists) essay = JSON.parse(await fs.readFile(essayAbsolute, 'utf8'));
+    const actualMin = Number.isInteger(event?.trigger?.turn_min) ? event.trigger.turn_min : null;
+    const actualMax = Number.isInteger(event?.trigger?.turn_max) ? event.trigger.turn_max : actualMin;
+    const eventWindow = actualMin === null
+      ? null
+      : actualMin === actualMax ? `turn ${actualMin}` : `turns ${actualMin}-${actualMax}`;
+    const checks = {
+      event_in_1993_file: eventExists && event !== null && contract.event_file.endsWith('war_1993.json'),
+      essay_in_1993_file: essayExists && essay?.event_id === contract.anchor_id && contract.essay_file.endsWith('_1993.json'),
+      september_window: actualMin === contract.expected_turn_min && actualMax === contract.expected_turn_max,
+    };
+    const eventCitation = event
+      ? CITATION_KEYS.flatMap((key) => flattenSourceValues(event[key])).filter(Boolean)
+      : [];
+    const essayCitations = Array.isArray(essay?.sources)
+      ? essay.sources.flatMap(flattenSourceValues)
+      : [];
+    const essayCategory = asNonEmptyString(essay?.category);
+    const essaySourceFloor = essayCategory ? SOURCE_FLOORS[essayCategory] ?? null : null;
+    const authoredProvenance = {
+      event_citations: [...new Set(eventCitation)].sort(compareText),
+      event_source_tier: asNonEmptyString(event?.source_tier),
+      event_source_tier_status: sourceTierStatusFor(asNonEmptyString(event?.source_tier)),
+      event_source_note: asNonEmptyString(event?.source_note),
+      essay_citations: [...new Set(essayCitations)].sort(compareText),
+      essay_source_tier: asNonEmptyString(essay?.source_tier),
+      essay_source_tier_status: sourceTierStatusFor(asNonEmptyString(essay?.source_tier)),
+      essay_category: essayCategory,
+      required_essay_source_floor: essaySourceFloor,
+    };
+    const provenanceGaps = [];
+    if (authoredProvenance.event_citations.length === 0) provenanceGaps.push('event_citation');
+    if (!authoredProvenance.event_source_note) provenanceGaps.push('event_source_note');
+    if (authoredProvenance.event_source_tier_status !== 'resolved') provenanceGaps.push('event_source_tier');
+    if (authoredProvenance.essay_citations.length === 0) provenanceGaps.push('essay_citation');
+    if (authoredProvenance.essay_source_tier_status !== 'resolved') provenanceGaps.push('essay_source_tier');
+    if (typeof essaySourceFloor === 'number' && authoredProvenance.essay_citations.length < essaySourceFloor) {
+      provenanceGaps.push('essay_source_floor');
+    }
+    const chronologyStatus = Object.values(checks).every(Boolean) ? 'pass' : 'blocked';
+    const provenanceStatus = provenanceGaps.length === 0 ? 'pass' : 'blocked';
+    anchors.push({
+      anchor_id: contract.anchor_id,
+      event_file: contract.event_file,
+      essay_file: contract.essay_file,
+      event_window: eventWindow,
+      expected_window: `turns ${contract.expected_turn_min}-${contract.expected_turn_max}`,
+      checks,
+      chronology_status: chronologyStatus,
+      provenance_status: provenanceStatus,
+      status: chronologyStatus === 'pass' && provenanceStatus === 'pass' ? 'pass' : 'blocked',
+      owner: 'historian',
+      authored_provenance: authoredProvenance,
+      provenance_gaps: provenanceGaps.sort(compareText),
+    });
+  }
+  return anchors.sort((a, b) => compareText(a.anchor_id, b.anchor_id));
+}
+
+function yearFromText(value) {
+  const match = asNonEmptyString(value)?.match(/(?:^|[^0-9])(199[2-5])(?:$|[^0-9])/);
+  return match ? Number(match[1]) : null;
+}
+
+async function buildContentDateMismatches(rootDir, files) {
+  const mismatches = [];
+  const eventYears = new Map();
+  for (const relativeFile of files.filter((file) => (
+    file.startsWith('data/scenarios/events/') || file.startsWith('data/scenarios/essays/')
+  ))) {
+    const fileYear = yearFromText(relativeFile);
+    if (fileYear === null || relativeFile === ESSAY_INDEX_RELATIVE) continue;
+    const parsed = JSON.parse(await fs.readFile(path.join(rootDir, relativeFile), 'utf8'));
+    const rows = Array.isArray(parsed) ? parsed : [parsed];
+    for (const row of rows) {
+      if (!row || typeof row !== 'object') continue;
+      const subjectId = asNonEmptyString(row.id) ?? path.basename(relativeFile, '.json');
+      const statedYear = Number.isInteger(row.year) ? row.year : yearFromText(subjectId);
+      if (relativeFile.startsWith('data/scenarios/events/') && asNonEmptyString(row.id)) {
+        eventYears.set(row.id, { year: statedYear ?? fileYear, file: relativeFile });
+      }
+      if (statedYear !== null && statedYear !== fileYear) {
+        mismatches.push({
+          code: 'event_essay_date_mismatch',
+          file: relativeFile,
+          subject_id: subjectId,
+          file_year: fileYear,
+          claim_year: statedYear,
+          related_file: null,
+          status: 'blocked',
+          owner: 'historian',
+        });
+      }
+    }
+  }
+  for (const relativeFile of files.filter((file) => (
+    file.startsWith('data/scenarios/essays/') && file !== ESSAY_INDEX_RELATIVE
+  ))) {
+    const parsed = JSON.parse(await fs.readFile(path.join(rootDir, relativeFile), 'utf8'));
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) continue;
+    const eventId = asNonEmptyString(parsed.event_id);
+    if (!eventId) continue;
+    const event = eventYears.get(eventId);
+    const essayYear = Number.isInteger(parsed.year) ? parsed.year : yearFromText(parsed.id) ?? yearFromText(relativeFile);
+    if (event && essayYear !== null && event.year !== essayYear) {
+      mismatches.push({
+        code: 'event_essay_date_mismatch',
+        file: relativeFile,
+        subject_id: asNonEmptyString(parsed.id) ?? path.basename(relativeFile, '.json'),
+        file_year: essayYear,
+        claim_year: event.year,
+        related_file: event.file,
+        status: 'blocked',
+        owner: 'historian',
+      });
+    }
+  }
+  return mismatches.sort((a, b) => (
+    compareText(a.file, b.file)
+    || compareText(a.subject_id, b.subject_id)
+    || compareText(a.related_file ?? '', b.related_file ?? '')
+  ));
 }
 
 async function scanSensitiveClaimInventory(options = {}) {
@@ -691,6 +1186,8 @@ async function scanSensitiveClaimInventory(options = {}) {
   }
 
   sortClaims(claims);
+  const historicalAnchors = await buildHistoricalAnchors(rootDir);
+  const dateMismatches = await buildContentDateMismatches(rootDir, files);
 
   return {
     schema_version: SCHEMA_VERSION,
@@ -701,15 +1198,24 @@ async function scanSensitiveClaimInventory(options = {}) {
     },
     summary: summarize(files, claims),
     claims,
+    historical_anchors: historicalAnchors,
+    date_mismatches: dateMismatches,
     policy: {
       excerpt_chars: EXCERPT_CHARS,
       source_floors: SOURCE_FLOORS,
+      citation_keys: Array.from(CITATION_KEYS),
       source_keys: Array.from(SOURCE_KEYS),
+      claim_prose_keys: Array.from(CLAIM_PROSE_KEYS).sort(compareText),
+      source_tiers: {
+        recognized: [...RECOGNIZED_SOURCE_TIERS].sort(compareText),
+        resolved: [...RESOLVED_SOURCE_TIERS].sort(compareText),
+      },
       term_sets: {
         forbidden_scaffold: Array.from(TERM_SETS.forbidden_scaffold),
         operational_overclaim: Array.from(TERM_SETS.operational_overclaim),
         sensitive_history: Array.from(TERM_SETS.sensitive_history),
       },
+      historical_anchor_contracts: HISTORICAL_ANCHORS,
     },
   };
 }
@@ -741,14 +1247,14 @@ function formatMarkdown(result) {
     '',
     '## Claims',
     '',
-    '| Claim ID | Surface | File | Line | Source | Risk | Terms | Excerpt |',
-    '|---|---|---|---:|---|---|---|---|',
+    '| Claim ID | Subject | Ring | File | Line | Source | Status | Owner | Interaction | Claim |',
+    '|---|---|---|---|---:|---|---|---|---|---|',
   );
   if (result.claims.length === 0) {
-    lines.push('| - | - | - | - | - | - | - | No claims found. |');
+    lines.push('| - | - | - | - | - | - | - | - | - | No claims found. |');
   } else {
     for (const claim of result.claims) {
-      lines.push(`| ${claim.claim_id} | ${claim.surface} | ${claim.file} | ${claim.line} | ${claim.source_status} | ${claim.risk_class} | ${claim.matched_terms.join(', ')} | ${claim.excerpt.replace(/\|/g, '\\|')} |`);
+      lines.push(`| ${claim.claim_id} | ${claim.subject_id} | ${claim.ring} | ${claim.file} | ${claim.line} | ${claim.source_status} | ${claim.status} | ${claim.owner} | ${claim.player_interaction_type} | ${claim.claim.replace(/\|/g, '\\|')} |`);
     }
   }
 
@@ -776,6 +1282,11 @@ async function main() {
   } else {
     process.stdout.write(content);
   }
+  if (args.includes('--strict')) {
+    const blockedClaims = result.claims.filter((claim) => claim.status !== 'documented').length;
+    const failedAnchors = result.historical_anchors.filter((anchor) => anchor.status !== 'pass').length;
+    if (blockedClaims > 0 || failedAnchors > 0 || result.date_mismatches.length > 0) process.exitCode = 2;
+  }
 }
 
 module.exports = {
@@ -786,6 +1297,8 @@ module.exports = {
   makeClaimId,
   scanSensitiveClaimInventory,
   stableStringify,
+  buildHistoricalAnchors,
+  buildContentDateMismatches,
 };
 
 if (require.main === module) {

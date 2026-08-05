@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  shouldRenderMapModeLegend,
   shouldRenderInboxPanel,
   shouldRenderTacticalDetailRails,
 } from '../../src/ui/map/components/panelRail.js';
 import * as panelRail from '../../src/ui/map/components/panelRail.js';
 
 describe('panel rail ownership', () => {
+  it('hides the map legend while a detail rail owns the same map area', () => {
+    expect(shouldRenderMapModeLegend('inbox')).toBe(true);
+    for (const panel of ['settlement', 'formation', 'corps', 'army', 'army_reserve', 'sector', 'operation', 'orbat'] as const) {
+      expect(shouldRenderMapModeLegend(panel)).toBe(false);
+    }
+  });
+
   it('renders the inbox only when it owns the primary rail and operations are closed', () => {
     expect(shouldRenderInboxPanel('inbox', false)).toBe(true);
     expect(shouldRenderInboxPanel('inbox', true)).toBe(false);

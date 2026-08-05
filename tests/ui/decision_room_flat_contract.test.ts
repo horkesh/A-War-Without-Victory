@@ -45,7 +45,11 @@ vi.mock('../../src/ui/map/data/presidentialDecisionRoom.js', () => {
       id,
       label: categoryLabels[id],
       count: cards.length,
-      urgentCount: cards.filter((card) => card.severity === 'blocking' || card.severity === 'critical').length,
+      priorityCounts: cards.reduce<Record<'required' | 'recommended' | 'monitor' | 'record', number>>((counts, card) => {
+        const band = String(card.priorityBand) as 'required' | 'recommended' | 'monitor' | 'record';
+        counts[band] += 1;
+        return counts;
+      }, { required: 0, recommended: 0, monitor: 0, record: 0 }),
       topCardId: (cards[0]?.id as string | undefined) ?? null,
       actionLabel: 'Review',
       navigationTarget: { kind: 'decision-room', lens: id },
@@ -87,7 +91,7 @@ vi.mock('../../src/ui/map/data/presidentialDecisionRoom.js', () => {
         items: advanceItems,
       },
       metrics: {
-        urgentCount: 2,
+        priorityCounts: { required: 1, recommended: 4, monitor: 0, record: 1 },
         pendingReviews: 6,
         opportunities: 2,
         hardTurns: 1,
@@ -111,6 +115,13 @@ function makeCard(
     id,
     category,
     severity,
+    priorityBand: severity === 'blocking'
+      ? 'required'
+      : category === 'turn' || category === 'cost' || category === 'memory'
+        ? 'record'
+        : category === 'operational' || category === 'briefing'
+          ? 'monitor'
+          : 'recommended',
     title,
     explanation: `${title} explanation.`,
     sourceOwner: 'Staff',
@@ -170,7 +181,7 @@ describe('PresidentialDecisionRoomPanel flat contract', () => {
     expect(screen.getAllByText('1 item').length).toBeGreaterThan(0);
     expect(screen.queryByText('1 items')).toBeNull();
     const allLens = screen.getAllByRole('button').find((button) => button.textContent?.includes('All'));
-    expect(allLens?.textContent).toContain('2 urgent');
+    expect(allLens?.textContent).toContain('REQ 1 · REC 4 · MON 0 · RECORD 1');
     expect(allLens?.getAttribute('data-testid')).toBe('decision-room-lens-all');
     expect(allLens?.getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByTestId('decision-room-lens-command').getAttribute('aria-pressed')).toBe('false');
@@ -276,7 +287,7 @@ describe('PresidentialDecisionRoomPanel flat contract', () => {
         label: 'Army HQ Summary',
         summary: '1 item',
         count: 1,
-        urgentCount: 0,
+        priorityCounts: { required: 0, recommended: 0, monitor: 1, record: 0 },
         cardIds: ['sitrep-hostile'],
         actionLabel: 'Open Summary',
         navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
@@ -296,7 +307,7 @@ describe('PresidentialDecisionRoomPanel flat contract', () => {
       label: 'Army HQ Corps Briefings',
       summary: '2 items',
       count: 2,
-      urgentCount: 0,
+      priorityCounts: { required: 0, recommended: 2, monitor: 0, record: 0 },
       cardIds: ['corps-alpha', 'corps-bravo'],
       actionLabel: 'Review Corps Briefing',
       navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: 'corps_alpha' },
@@ -352,7 +363,7 @@ describe('PresidentialDecisionRoomPanel flat contract', () => {
         label: 'Army HQ Personnel',
         summary: '1 request',
         count: 1,
-        urgentCount: 0,
+        priorityCounts: { required: 0, recommended: 1, monitor: 0, record: 0 },
         cardIds: ['reserve-drina'],
         actionLabel: 'Personnel',
         navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },

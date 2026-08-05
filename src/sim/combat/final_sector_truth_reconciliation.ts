@@ -1,206 +1,308 @@
-import type { EdgeRecord } from '../../map/settlements.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
-import type { FormationState, GameState } from '../../state/game_state.js';
+import type { EdgeRecord } from '../../map/settlements.js';
+import type { CorpsFrontSector, GameState } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import type { SpatialContext } from '../spatial_context.js';
-import type { Osid } from './osid_adjacency.js';
-import { buildOsidAdjacency } from './osid_adjacency.js';
+import { syncSectorAssignmentsToFormations } from './brigade_assignment.js';
 import {
     applyFinalSectorOwnerTruthPass,
     assignBrigadesToSubSegments,
     buildCorpsFrontSectors,
     collectUnresolvedSectorBrigades,
     emitFinalUnresolvedSectorWarnings,
+    reconcileOperationSensitiveSectorRoster,
     rescueUnassignedLoanedElitesInTerritory,
 } from './corps_front_sectors.js';
+import type { Osid } from './osid_adjacency.js';
+import { buildOsidAdjacency } from './osid_adjacency.js';
 import { computeSectorCombatRatings } from './sector_combat_rating.js';
-import { strictCompare } from '../../state/validateGameState.js';
-import { syncSectorAssignmentsToFormations } from './brigade_assignment.js';
+import { captureSectorTopologySolveInput } from './sector_topology_snapshot.js';
+import { solveCorpsFrontSectorsPure } from './sector_topology_solver.js';
+import { commitSectorTopologySolve } from './sector_topology_commit.js';
 
 export interface FinalSectorTruthReconciliationReport {
     sectors_rebuilt: number;
     sectors_rated: number;
     unresolved_brigades: number;
+    /** Active formation locations changed during the reconciliation stage. */
+    geometry_input_mutations: number;
+}
+
+export type FinalSectorReconciliationStage = 'geometry' | 'territory' | 'roster' | 'ratings';
+
+export type FinalSectorReconciliationMutation =
+    | 'geometry'
+    | 'operation-roster'
+    | 'distribution-roster'
+    | 'seal-roster'
+    | 'ratings';
+
+export interface FinalSectorReconciliationReceipt {
+    epoch: number;
+    mutation: FinalSectorReconciliationMutation;
+    source: string;
+    dirty_stages: FinalSectorReconciliationStage[];
+}
+
+/**
+ * Explicit single-turn reconciliation state. It is caller-owned, never
+ * serialized, and must never be reused for another turn.
+ */
+export interface FinalSectorReconciliationSession {
+    readonly turn: number;
+    stage_epochs: Record<FinalSectorReconciliationStage, number>;
+    requested_stage_epochs: Record<FinalSectorReconciliationStage, number>;
+    dirty_worklist: FinalSectorReconciliationStage[];
+    receipts: FinalSectorReconciliationReceipt[];
+    processed_receipts: number;
+    geometry_builds: number;
+    next_epoch: number;
+    last_report?: FinalSectorTruthReconciliationReport;
 }
 
 export interface FinalSectorTruthReconciliationOptions {
     finalSaveGeometryProjection?: boolean;
+    session?: FinalSectorReconciliationSession;
+    /**
+     * @internal Test-only. R5 Phase 2e Task 8's exact-parent measurement
+     * packet (2026-08-04, data/derived/_debug/r5_phase2e_task8/) found the
+     * `'pipeline'` path (capture -> pure solve -> serial commit) regresses
+     * wall-clock time 3-7% (6/6 alternating pairs across two independent
+     * packets, both under and over the plan's own repeat-once noise-check
+     * threshold), peak heap +45.5% over control, and RSS +26% over control
+     * -- all against Task 9's pre-declared retention gates. Disposition:
+     * FAIL_REVERT. Root cause: `buildDetachedWorkingFormations` copies every
+     * formation a second time on top of capture's own copy, multiplied by
+     * this function's own multi-pass receipt loop. Defaults to
+     * `'test-only-imperative-legacy'` (the restored production path) as a
+     * result. `'pipeline'` remains fully implemented, correctness-proven
+     * (Task 5's 300-case oracle), and reachable only by explicitly passing
+     * this option -- preserved as characterization/reference infrastructure
+     * for any future re-attempt that fixes the double-copy cost, not as a
+     * live production seam. Never set this outside a test.
+     */
+    geometrySolveStrategy?: 'pipeline' | 'test-only-imperative-legacy';
 }
 
-/**
- * v0.9.3 Lane 4 C5 — skip the rebuild when the step 2 → step 3 pair runs on
- * byte-identical inputs. `reconcile-final-sector-truth-after-ops` re-runs the
- * exact same pipeline as `reconcile-final-sector-truth`; the only intervening
- * step is `reconcile-final-operation-truth`, which mutates only
- * `operation.participating_brigades` / `operation.sector_id` — none of which
- * `buildCorpsFrontSectors`, `assignBrigadesToSubSegments`, or
- * `computeSectorCombatRatings` read. `isFinalPass` only changes whether the
- * final-unresolved warnings are emitted; everything else is identical.
- *
- * Cache key is a content fingerprint over every input the pipeline reads:
- *   - turn
- *   - war_front_edges_osid content (edge_id, endpoints, faction sides; sorted)
- *   - political_controllers entries (sorted)
- *   - active formations (id, location_osid, faction, status-active)
- *   - supply_state_by_osid report entries used by sector combat ratings
- *
- * On hit: all state writes from the prior run are still present. A false ->
- * true final-pass transition rebuilds once because final pass now enables
- * final-only sector repairs before emitting unresolved warnings.
- */
-interface ReconcileCacheEntry {
-    fingerprint: string;
-    report: FinalSectorTruthReconciliationReport;
-    lastFinalPass: boolean;
+export interface FinalSectorTruthSealOptions {
+    session?: FinalSectorReconciliationSession;
 }
-const reconcileCache = new WeakMap<GameState, ReconcileCacheEntry>();
 
-function computeSupplyFingerprint(supplyStateByOsid?: SupplyStateByOsidReport | null): string {
-    if (!supplyStateByOsid) return 'none';
-    const parts = [`schema=${supplyStateByOsid.schema}`, `turn=${supplyStateByOsid.turn}`];
-    for (const faction of [...(supplyStateByOsid.factions ?? [])].sort((a, b) => strictCompare(a.faction_id, b.faction_id))) {
-        parts.push(`f=${faction.faction_id}`);
-        for (const entry of [...(faction.by_osid ?? [])].sort((a, b) => strictCompare(a.osid, b.osid))) {
-            parts.push(`${entry.osid}:${entry.state}`);
+const RECONCILIATION_STAGE_ORDER: readonly FinalSectorReconciliationStage[] = [
+    'geometry',
+    'territory',
+    'roster',
+    'ratings',
+];
+
+function stagesForMutation(mutation: FinalSectorReconciliationMutation): FinalSectorReconciliationStage[] {
+    if (mutation === 'geometry') return [...RECONCILIATION_STAGE_ORDER];
+    if (mutation === 'ratings') return ['ratings'];
+    return ['roster', 'ratings'];
+}
+
+function refreshDirtyWorklist(session: FinalSectorReconciliationSession): void {
+    session.dirty_worklist = RECONCILIATION_STAGE_ORDER.filter(
+        (stage) => session.stage_epochs[stage] < session.requested_stage_epochs[stage],
+    );
+}
+
+export function recordFinalSectorReconciliationMutation(
+    session: FinalSectorReconciliationSession,
+    mutation: FinalSectorReconciliationMutation,
+    source: string,
+): FinalSectorReconciliationReceipt {
+    const epoch = session.next_epoch;
+    session.next_epoch += 1;
+    const dirtyStages = stagesForMutation(mutation);
+    for (const stage of dirtyStages) {
+        session.requested_stage_epochs[stage] = epoch;
+    }
+    const receipt: FinalSectorReconciliationReceipt = {
+        epoch,
+        mutation,
+        source,
+        dirty_stages: dirtyStages,
+    };
+    session.receipts.push(receipt);
+    refreshDirtyWorklist(session);
+    return receipt;
+}
+
+export function createFinalSectorReconciliationSession(
+    turn: number,
+    initialSource: string,
+): FinalSectorReconciliationSession {
+    const session: FinalSectorReconciliationSession = {
+        turn,
+        stage_epochs: { geometry: 0, territory: 0, roster: 0, ratings: 0 },
+        requested_stage_epochs: { geometry: 0, territory: 0, roster: 0, ratings: 0 },
+        dirty_worklist: [],
+        receipts: [],
+        processed_receipts: 0,
+        geometry_builds: 0,
+        next_epoch: 1,
+    };
+    recordFinalSectorReconciliationMutation(session, 'geometry', initialSource);
+    return session;
+}
+
+function assertSessionTurn(session: FinalSectorReconciliationSession, state: GameState): void {
+    if (session.turn !== state.meta.turn) {
+        throw new Error(
+            `Final-sector reconciliation session is turn-local: session=${session.turn}, state=${state.meta.turn}`,
+        );
+    }
+}
+
+function pendingReceipts(session: FinalSectorReconciliationSession): FinalSectorReconciliationReceipt[] {
+    return session.receipts.slice(session.processed_receipts);
+}
+
+function firstDirtyStage(session: FinalSectorReconciliationSession): FinalSectorReconciliationStage {
+    const stage = session.dirty_worklist[0];
+    if (!stage) {
+        throw new Error('Pending final-sector receipts have no dirty reconciliation stage');
+    }
+    return stage;
+}
+
+function completePendingStages(session: FinalSectorReconciliationSession): void {
+    for (const stage of RECONCILIATION_STAGE_ORDER) {
+        if (session.requested_stage_epochs[stage] > session.stage_epochs[stage]) {
+            session.stage_epochs[stage] = session.requested_stage_epochs[stage];
         }
     }
-    return parts.join('|');
+    session.processed_receipts = session.receipts.length;
+    refreshDirtyWorklist(session);
 }
 
-function computeCorpsCommandFingerprint(state: GameState): string {
-    const corpsCommand = state.military.corps_command ?? {};
-    const parts: string[] = [];
-    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
-        const cmd = corpsCommand[corpsId];
-        const participants = new Set<string>();
-        for (const op of cmd?.active_operations ?? []) {
-            for (const bid of op.participating_brigades ?? []) {
-                participants.add(bid);
-            }
+function reportFromCurrentState(state: GameState): FinalSectorTruthReconciliationReport {
+    return {
+        sectors_rebuilt: 0,
+        sectors_rated: Object.keys(state.military.sector_combat_ratings ?? {}).length,
+        unresolved_brigades: state.military.unresolved_sector_brigades?.length ?? 0,
+        geometry_input_mutations: 0,
+    };
+}
+
+function captureActiveFormationLocations(state: GameState): Map<string, string | undefined> {
+    const locations = new Map<string, string | undefined>();
+    const formations = state.military.formations ?? {};
+    for (const formationId of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[formationId];
+        if (formation?.status === 'active') {
+            locations.set(formationId, formation.location_osid);
         }
-        parts.push(`${corpsId}:${[...participants].sort(strictCompare).join(',')}`);
     }
-    return parts.join('|');
+    return locations;
 }
 
-function computeFrontEdgeFingerprint(state: GameState): string {
-    const edges = state.military.war_front_edges_osid ?? [];
-    const parts = edges.map((edge) => JSON.stringify([
-        edge.edge_id ?? '',
-        edge.a ?? '',
-        edge.b ?? '',
-        edge.side_a ?? '',
-        edge.side_b ?? '',
-    ]));
-    return parts.sort(strictCompare).join('|');
+function countActiveFormationLocationMutations(
+    before: ReadonlyMap<string, string | undefined>,
+    state: GameState,
+): number {
+    const formations = state.military.formations ?? {};
+    let mutations = 0;
+    for (const [formationId, locationOsid] of before) {
+        const formation = formations[formationId];
+        if (formation?.status === 'active' && formation.location_osid !== locationOsid) {
+            mutations += 1;
+        }
+    }
+    return mutations;
 }
 
-function computeReconcileFingerprint(state: GameState, supplyStateByOsid?: SupplyStateByOsidReport | null): string {
-    const turn = state.meta?.turn ?? 0;
-    const frontEdges = computeFrontEdgeFingerprint(state);
-
-    const pc = state.political?.political_controllers ?? {};
-    const pcKeys = Object.keys(pc).sort(strictCompare);
-    const pcParts: string[] = new Array(pcKeys.length);
-    for (let i = 0; i < pcKeys.length; i++) {
-        const k = pcKeys[i]!;
-        pcParts[i] = k + '=' + ((pc as Record<string, string | null | undefined>)[k] ?? '');
+function clearStaleSubSegmentAssignments(state: GameState): void {
+    const sectorOwnedBrigades = new Set<string>();
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        for (const brigadeId of sector.assigned_brigade_ids ?? []) sectorOwnedBrigades.add(brigadeId);
+        for (const brigadeId of sector.reserve_brigade_ids ?? []) sectorOwnedBrigades.add(brigadeId);
     }
-
-    const formations = state.military?.formations ?? {};
-    const fmIds = Object.keys(formations).sort(strictCompare);
-    const fmParts: string[] = [];
-    for (const id of fmIds) {
-        const f: FormationState | undefined = formations[id];
-        if (!f || f.status !== 'active') continue;
-        fmParts.push(id + '@' + (f.location_osid ?? '') + ':' + f.faction);
+    const formations = state.military.formations ?? {};
+    for (const formationId of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[formationId];
+        if (formation?.assigned_sub_segment_id && !sectorOwnedBrigades.has(formationId)) {
+            formation.assigned_sub_segment_id = undefined;
+        }
     }
-
-    return 't' + turn
-        + '|fe' + frontEdges
-        + '|pc' + pcParts.join('|')
-        + '|fm' + fmParts.join('|')
-        + '|supply' + computeSupplyFingerprint(supplyStateByOsid)
-        + '|ops' + computeCorpsCommandFingerprint(state);
 }
 
-export function reconcileFinalSectorTruth(
+function runFullGeometryReconciliation(
     state: GameState,
     edges: EdgeRecord[],
     reverseMap: Map<string, string[]> | null,
-    centroids?: OsidCentroidMap,
-    spatial?: SpatialContext,
-    supplyStateByOsid?: SupplyStateByOsidReport | null,
-    isFinalPass: boolean = false,
-    options?: FinalSectorTruthReconciliationOptions,
+    centroids: OsidCentroidMap | undefined,
+    spatial: SpatialContext | undefined,
+    supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
+    isFinalPass: boolean,
+    finalSaveGeometryProjection: boolean,
+    geometrySolveStrategy: 'pipeline' | 'test-only-imperative-legacy' = 'test-only-imperative-legacy',
 ): FinalSectorTruthReconciliationReport {
-    const fingerprint = computeReconcileFingerprint(state, supplyStateByOsid);
-    const cached = reconcileCache.get(state);
-    const finalPassNeedsRebuild = isFinalPass && !cached?.lastFinalPass;
-    const projectionNeedsRebuild = options?.finalSaveGeometryProjection === true;
-    if (cached && cached.fingerprint === fingerprint && !finalPassNeedsRebuild && !projectionNeedsRebuild) {
-        // State is byte-identical to the last reconcile run. All outputs
-        // (corps_front_sectors, sector_combat_ratings, unresolved_sector_brigades,
-        // formation.assigned_sub_segment_id) are still present in state.
-        return cached.report;
+    const activeFormationLocations = captureActiveFormationLocations(state);
+    let sectors: Record<string, CorpsFrontSector>;
+    if (geometrySolveStrategy === 'test-only-imperative-legacy') {
+        // R5 Phase 2e Task 9 (2026-08-04): restored production path. The
+        // capture -> pure solve -> serial commit pipeline (the 'pipeline'
+        // branch below) was measured in Task 8's exact-parent packet and
+        // found to regress wall-clock time 3-7%, peak heap +45.5%, and RSS
+        // +26% against the true pre-Phase-2e control -- FAIL_REVERT per the
+        // plan's own pre-declared gates. See
+        // data/derived/_debug/r5_phase2e_task8/measurement_manifest.json.
+        // This is the direct-call body, unchanged since before Task 4.
+        sectors = buildCorpsFrontSectors(
+            state,
+            edges,
+            reverseMap,
+            centroids,
+            spatial,
+            isFinalPass,
+            finalSaveGeometryProjection,
+        );
+        state.military.corps_front_sectors = sectors;
+    } else {
+        // @internal Rejected production path (R5 Phase 2e Task 9 FAIL_REVERT,
+        // 2026-08-04) -- reachable only when a caller explicitly requests
+        // `geometrySolveStrategy: 'pipeline'`. Preserved as correctness-proven
+        // (Task 5's 300-case equivalence oracle) characterization
+        // infrastructure for any future re-attempt that fixes the
+        // double-formation-copy cost identified in Task 6/8, not as a live
+        // production seam. Never set this outside a test.
+        const input = captureSectorTopologySolveInput(state, edges, reverseMap, centroids, spatial, {
+            isFinalPass,
+            finalSaveGeometryProjection,
+        });
+        const output = solveCorpsFrontSectorsPure(input);
+        commitSectorTopologySolve(state, input, output);
+        sectors = output.sectors;
     }
-
-    const sectors = buildCorpsFrontSectors(
-        state,
-        edges,
-        reverseMap,
-        centroids,
-        spatial,
-        isFinalPass,
-        options?.finalSaveGeometryProjection === true,
-    );
-    state.military.corps_front_sectors = sectors;
 
     const sectorList = Object.values(sectors);
     if (sectorList.length === 0) {
         state.military.sector_combat_ratings = {};
         state.military.unresolved_sector_brigades = [];
-        const emptyReport: FinalSectorTruthReconciliationReport = {
+        return {
             sectors_rebuilt: 0,
             sectors_rated: 0,
             unresolved_brigades: 0,
+            geometry_input_mutations: countActiveFormationLocationMutations(activeFormationLocations, state),
         };
-        reconcileCache.set(state, { fingerprint, report: emptyReport, lastFinalPass: isFinalPass });
-        return emptyReport;
     }
 
     const adjacency = (spatial?.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     assignBrigadesToSubSegments(state, sectorList, adjacency);
-
-    // Clear stale assigned_sub_segment_id on formations not in any sector's brigade lists.
-    // Life lesson: "When demoting a brigade, always clear derived cache fields."
-    // Late writers (recruitment, mobilization, elite recall) can re-assign ssids after
-    // the main sector pipeline clears them — this final sweep catches stragglers.
-    const sectorOwnedBrigades = new Set<string>();
-    for (const sector of sectorList) {
-        for (const bid of sector.assigned_brigade_ids ?? []) sectorOwnedBrigades.add(bid);
-        for (const bid of sector.reserve_brigade_ids ?? []) sectorOwnedBrigades.add(bid);
-    }
-    const formations = state.military.formations ?? {};
-    for (const fid of Object.keys(formations)) {
-        const f = formations[fid];
-        if (f.assigned_sub_segment_id && !sectorOwnedBrigades.has(fid)) {
-            f.assigned_sub_segment_id = undefined;
-        }
-    }
-
+    clearStaleSubSegmentAssignments(state);
     const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
-
-    const report: FinalSectorTruthReconciliationReport = {
+    return {
         sectors_rebuilt: sectorList.length,
         sectors_rated: ratings.sectors_rated,
         unresolved_brigades: state.military.unresolved_sector_brigades?.length ?? 0,
+        geometry_input_mutations: countActiveFormationLocationMutations(activeFormationLocations, state),
     };
-    reconcileCache.set(state, { fingerprint, report, lastFinalPass: isFinalPass });
-    return report;
 }
 
-export function sealFinalSectorTruthFromCurrentSectors(
+function runCurrentSectorSeal(
     state: GameState,
     edges: EdgeRecord[],
     supplyStateByOsid?: SupplyStateByOsidReport | null,
@@ -214,6 +316,7 @@ export function sealFinalSectorTruthFromCurrentSectors(
             sectors_rebuilt: 0,
             sectors_rated: 0,
             unresolved_brigades: 0,
+            geometry_input_mutations: 0,
         };
     }
 
@@ -236,23 +339,181 @@ export function sealFinalSectorTruthFromCurrentSectors(
 
     const sectorList = Object.values(sectors);
     assignBrigadesToSubSegments(state, sectorList, adjacency);
-    const sectorOwnedBrigades = new Set<string>();
-    for (const sector of sectorList) {
-        for (const bid of sector.assigned_brigade_ids ?? []) sectorOwnedBrigades.add(bid);
-        for (const bid of sector.reserve_brigade_ids ?? []) sectorOwnedBrigades.add(bid);
-    }
-    for (const fid of Object.keys(formations)) {
-        const f = formations[fid];
-        if (f.assigned_sub_segment_id && !sectorOwnedBrigades.has(fid)) {
-            f.assigned_sub_segment_id = undefined;
-        }
-    }
-
+    clearStaleSubSegmentAssignments(state);
     const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
     emitFinalUnresolvedSectorWarnings(state.military.unresolved_sector_brigades ?? [], formations);
     return {
         sectors_rebuilt: 0,
         sectors_rated: ratings.sectors_rated,
         unresolved_brigades: state.military.unresolved_sector_brigades?.length ?? 0,
+        geometry_input_mutations: 0,
     };
+}
+
+function runOperationRosterReconciliation(
+    state: GameState,
+    edges: EdgeRecord[],
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    spatial?: SpatialContext,
+): FinalSectorTruthReconciliationReport {
+    const activeFormationLocations = captureActiveFormationLocations(state);
+    const sectors = state.military.corps_front_sectors ?? {};
+    const adjacency = (spatial?.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
+    reconcileOperationSensitiveSectorRoster(state, sectors, adjacency, spatial);
+    const sectorList = Object.values(sectors);
+    assignBrigadesToSubSegments(state, sectorList, adjacency);
+    clearStaleSubSegmentAssignments(state);
+    const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
+    return {
+        sectors_rebuilt: 0,
+        sectors_rated: ratings.sectors_rated,
+        unresolved_brigades: state.military.unresolved_sector_brigades?.length ?? 0,
+        geometry_input_mutations: countActiveFormationLocationMutations(activeFormationLocations, state),
+    };
+}
+
+function runRatingsReconciliation(
+    state: GameState,
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+): FinalSectorTruthReconciliationReport {
+    const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
+    return {
+        sectors_rebuilt: 0,
+        sectors_rated: ratings.sectors_rated,
+        unresolved_brigades: state.military.unresolved_sector_brigades?.length ?? 0,
+        geometry_input_mutations: 0,
+    };
+}
+
+/**
+ * Run a full geometry epoch, or consume a caller-owned roster/rating receipt.
+ * Without a session this preserves the legacy direct-call contract: every call
+ * performs a complete rebuild. The turn pipeline always supplies a session.
+ */
+export function reconcileFinalSectorTruth(
+    state: GameState,
+    edges: EdgeRecord[],
+    reverseMap: Map<string, string[]> | null,
+    centroids?: OsidCentroidMap,
+    spatial?: SpatialContext,
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    isFinalPass: boolean = false,
+    options?: FinalSectorTruthReconciliationOptions,
+): FinalSectorTruthReconciliationReport {
+    const session = options?.session;
+    const geometrySolveStrategy = options?.geometrySolveStrategy ?? 'test-only-imperative-legacy';
+    if (!session) {
+        return runFullGeometryReconciliation(
+            state,
+            edges,
+            reverseMap,
+            centroids,
+            spatial,
+            supplyStateByOsid,
+            isFinalPass,
+            options?.finalSaveGeometryProjection === true,
+            geometrySolveStrategy,
+        );
+    }
+
+    assertSessionTurn(session, state);
+    if (pendingReceipts(session).length === 0) {
+        return session.last_report ?? reportFromCurrentState(state);
+    }
+
+    let report = session.last_report ?? reportFromCurrentState(state);
+    while (pendingReceipts(session).length > 0) {
+        const receipts = pendingReceipts(session);
+        const dirtyStage = firstDirtyStage(session);
+        let operationRosterLocationMutations = 0;
+
+        if (dirtyStage === 'geometry' || dirtyStage === 'territory') {
+            session.geometry_builds += 1;
+            report = runFullGeometryReconciliation(
+                state,
+                edges,
+                reverseMap,
+                centroids,
+                spatial,
+                supplyStateByOsid,
+                isFinalPass,
+                options?.finalSaveGeometryProjection === true,
+                geometrySolveStrategy,
+            );
+        } else if (dirtyStage === 'roster') {
+            const hasRosterSealMutation = receipts.some(
+                (receipt) => receipt.mutation === 'distribution-roster' || receipt.mutation === 'seal-roster',
+            );
+            if (hasRosterSealMutation) {
+                report = runCurrentSectorSeal(state, edges, supplyStateByOsid, spatial);
+            } else {
+                // Operation truth removes duplicate, inactive, or foreign-claimed
+                // participants. Geometry and territory stay authoritative unless
+                // coverage moves a formation; that writeback gets its own receipt
+                // and bounded full-geometry fixed point below.
+                report = runOperationRosterReconciliation(state, edges, supplyStateByOsid, spatial);
+                operationRosterLocationMutations = report.geometry_input_mutations;
+            }
+        } else {
+            report = runRatingsReconciliation(state, supplyStateByOsid);
+        }
+
+        completePendingStages(session);
+        session.last_report = report;
+        if (operationRosterLocationMutations > 0) {
+            recordFinalSectorReconciliationMutation(
+                session,
+                'geometry',
+                'operation-roster-formation-location-writeback',
+            );
+        }
+    }
+    return report;
+}
+
+/**
+ * Reconcile only roster/seal/rating truth against existing geometry. With a
+ * clean caller-owned session this is a deterministic no-op.
+ */
+export function sealFinalSectorTruthFromCurrentSectors(
+    state: GameState,
+    edges: EdgeRecord[],
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    spatial?: SpatialContext,
+    options?: FinalSectorTruthSealOptions,
+): FinalSectorTruthReconciliationReport {
+    const session = options?.session;
+    if (!session) return runCurrentSectorSeal(state, edges, supplyStateByOsid, spatial);
+
+    assertSessionTurn(session, state);
+    const receipts = pendingReceipts(session);
+    if (receipts.length === 0) {
+        return session.last_report ?? reportFromCurrentState(state);
+    }
+    const dirtyStage = firstDirtyStage(session);
+    if (dirtyStage === 'geometry' || dirtyStage === 'territory') {
+        throw new Error('A full geometry receipt must be processed by reconcileFinalSectorTruth');
+    }
+
+    let report: FinalSectorTruthReconciliationReport;
+    if (dirtyStage === 'roster' && receipts.some(
+        (receipt) => receipt.mutation === 'distribution-roster' || receipt.mutation === 'seal-roster',
+    )) {
+        report = runCurrentSectorSeal(state, edges, supplyStateByOsid, spatial);
+    } else if (dirtyStage === 'roster') {
+        report = runOperationRosterReconciliation(state, edges, supplyStateByOsid, spatial);
+    } else {
+        report = runRatingsReconciliation(state, supplyStateByOsid);
+    }
+
+    completePendingStages(session);
+    if (report.geometry_input_mutations > 0) {
+        recordFinalSectorReconciliationMutation(
+            session,
+            'geometry',
+            'operation-roster-formation-location-writeback',
+        );
+    }
+    session.last_report = report;
+    return report;
 }

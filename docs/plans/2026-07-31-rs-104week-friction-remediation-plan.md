@@ -1,11 +1,11 @@
 # RS 104-Week Friction Remediation Plan
 
-**Status:** Actionable implementation plan; friction work not yet implemented
+**Status:** IN PROGRESS — all source packets independently approved; fresh packaged 104-week RS acceptance and completed diary pending
 **Date:** 2026-07-31
 **Source diary:** `docs/40_reports/playtests/20260731_rs_104week_player_diary.md`
 **Scope:** The five confirmed friction findings from the RS 104-week owner-player Electron run
 **Order:** Correctness bugs first (completed locally in the originating repair pass), then information hierarchy, map handoff, cadence, and presentation
-**Release boundary:** No package, installer, version, baseline approval, commit, push, tag, or release-state change is authorized by this plan
+**Activation boundary:** Full roadmap execution is active. The owner separately authorized commits, remote pushes, final merge, documentation propagation, and repository cleanup. Signing, store upload, public release creation, and a public `1.0` tag remain unauthorized.
 
 ## 1. Outcome
 
@@ -65,7 +65,7 @@ Move all presidential work into a new single-screen owner.
 
 ### Approach C — one shared priority/read-model contract plus bounded surface changes
 
-Keep current shells, but give them one priority vocabulary and one set of derived groupings. Add a first-class operation-map focus route, source-gated optional cadence, responsive Army HQ composition, and bounded active-path overflow.
+Keep current shells, but give them one priority vocabulary and one set of derived groupings. Add a first-class operation-map focus route, source-bounded optional cadence, responsive Army HQ composition, and bounded active-path overflow.
 
 **Recommendation:** Approach C. It fixes the information model before changing presentation and reuses the existing Decision Room, field-inspection, and shell-navigation architecture.
 
@@ -120,7 +120,7 @@ Meanings:
 
 **Tests**
 
-- New `tests/ui/presidential_priority_contract.test.ts`.
+- Create `tests/ui/presidential_priority_contract.test.ts`.
 - Extend `presidential_decision_room.test.ts`, `presidential_categories.test.ts`, `pre_advance_command_review.test.ts`, `president_desk_shell.test.ts`, and `warroom_shell_ownership.test.ts`.
 - Feed the same turn-104 fixture to every surface and assert identical band totals.
 - Assert a critical no-lever briefing is `monitor`.
@@ -131,7 +131,7 @@ Meanings:
 
 - At the RS turn-104 fixture, all four surfaces report the same Required/Recommended/Monitor/Record totals.
 - No screen uses `urgent` as an unexplained aggregate.
-- `Advance` remains gated by exactly the pre-existing blocker set.
+- `Advance` remains blocked by exactly the pre-existing blocker set.
 
 ### Packet FR-02 — Consolidate repeated siege/enclave briefs
 
@@ -160,7 +160,7 @@ Meanings:
 
 **Tests**
 
-- New `tests/ui/command_briefing_consolidation.test.ts`.
+- Create `tests/ui/command_briefing_consolidation.test.ts`.
 - Assert nine siege/enclave inputs become one visible summary card with a count weight of nine.
 - Assert unrelated critical briefs do not merge.
 - Assert grouping is invariant under input-array permutation.
@@ -223,7 +223,7 @@ Meanings:
 
 **Tests**
 
-- New `tests/ui/historical_operation_map_focus.test.ts`.
+- Create `tests/ui/historical_operation_map_focus.test.ts`.
 - Extend `ui_shell_navigation.test.ts`, `ui_map_game_state_adapter.test.ts`, and Decision Room component tests.
 - Assert Cerska-Kamenica returns its exact authored objective/staging OSIDs in stable order.
 - Assert the field route clears conflicting selection, sets the focus, and retains a return receipt.
@@ -235,7 +235,7 @@ Meanings:
 - The player can answer “where is this operation and what is committed?” without manual name translation.
 - The dossier remains the decision owner; the map is supporting evidence and cannot authorize the operation.
 
-### Packet FR-04 — Source-gated cadence and near-cap Authority opportunities
+### Packet FR-04 — Source-bounded cadence and near-cap Authority opportunities
 
 **Problem:** The earlier 19-turn drought improved, but the RS run still had 13- and 12-week consequential gaps while Authority remained capped.
 
@@ -257,7 +257,7 @@ Use this order:
 
 1. retime an existing sourced event within its documented historical window;
 2. expose an already-existing operation, reserve, personnel, patron, or diplomatic lever as an optional presidential review;
-3. add a new authored initiative only with a Historian source packet and Game Designer approval;
+3. add a new authored initiative only when a Historian source packet and the locked design criteria below both pass;
 4. if none is justified, retain the quiet interval and make the hold posture explicit.
 
 Optional near-cap initiatives may appear when:
@@ -286,7 +286,7 @@ There must be no generic “spend Authority because it is full” event. Authori
 
 - New `src/sim/presidency/presidential_initiatives.ts`
 - New authored data file under `data/scenarios/presidential_initiatives/`
-- `src/sim/turn_phases/war_phases.ts` only after the read model and authored data pass their design gate
+- `src/sim/turn_phases/war_phases.ts` only after the read model and authored data pass the locked evidence/design criteria
 - `src/state/game_state.ts` only if an initiative receipt/cooldown cannot reuse existing proposal/event receipts
 - `src/ui/map/data/inboxItems.ts`
 - `src/ui/map/data/presidentialDecisionRoom.ts`
@@ -295,8 +295,8 @@ There must be no generic “spend Authority because it is full” event. Authori
 
 **Tests**
 
-- New `tests/presidential_initiatives.test.ts`.
-- New `tests/rs_104week_decision_cadence.test.ts`.
+- Create `tests/presidential_initiatives.test.ts`.
+- Create `tests/rs_104week_decision_cadence.test.ts`.
 - Extend the all-faction cadence diagnostics.
 - Assert initiative eligibility and ordering are deterministic under input permutation.
 - Assert no initiative appears without an authored source row.
@@ -305,9 +305,9 @@ There must be no generic “spend Authority because it is full” event. Authori
 - Assert historical defaults are absent unless the source row explicitly provides one.
 - Compare two identical 104-turn runs byte-for-byte for initiative receipts.
 
-**Historical stop gate**
+**Historical evidence disposition**
 
-Historian must approve each authored row and cite the relevant Balkan Battlegrounds volume/page or higher-tier primary/tribunal/UN source. If no source-backed lever exists for a gap, stop content authoring for that gap and document the positive-hold result.
+Every authored row requires Historian verification and a citation to the relevant *Balkan Battlegrounds* volume/page or a higher-tier primary, tribunal, or UN source. The Game Designer verifies only that the row uses an existing presidential lever, remains optional, and cannot become an Advance blocker. If no source-backed lever exists for a gap, the deterministic outcome is a documented positive-hold interval: close that gap as intentionally quiet, do not invent content, and continue with the remaining gaps.
 
 **Acceptance**
 
@@ -379,7 +379,7 @@ Historian must approve each authored row and cite the relevant Balkan Battlegrou
 
 **Tests**
 
-- New `tests/ui/bottom_status_active_paths.test.ts`.
+- Create `tests/ui/bottom_status_active_paths.test.ts`.
 - Extend `v47_readability_remediation.test.ts` and keyboard/focus tests.
 - Assert 0, 1, 2, and 8 active tags.
 - Assert stable visible-tag selection under input permutation.
@@ -391,16 +391,56 @@ Historian must approve each authored row and cite the relevant Balkan Battlegrou
 - No horizontal scrollbar or clipped half-chip appears in the late RS state.
 - All active paths remain discoverable and keyboard accessible.
 
+## 4.7 Activation Preflight Corrections
+
+The mandatory Product/UX/Historian preflight passed this packet for execution after R1 with these binding corrections:
+
+- Freeze `tests/fixtures/ui/rs_turn104_priority_projection.json` from the cited final autosave; include stable source ids and player-visible projection truth, never the 197 MiB evidence tree at test time.
+- FR-01 and FR-02 are one adjacent integration unit. Put shared band semantics in `presidentialPriority.ts`, attach the band to Inbox and Decision Room projections, and avoid the existing `presidentialDecisionRoom -> deriveInboxItems` dependency cycle. `warroomPriorityDocket.ts` must consume band counts rather than `urgentCount`.
+- Consolidated cards retain non-rendered stable `sourceIds`. A this-week delta is optional and omitted when no prior player-visible briefing exists; this packet adds no persistence merely to manufacture a delta.
+- FR-03 rebases on R1 and includes `App.tsx`, `field-operation-plan` in `fieldInspectionTarget.ts`, an App-owned return receipt, and UI-only focus cleared on hide/campaign replacement. It must preserve the retained viewport, apply focus only after current-revision reveal paint, perform no hidden camera work, create no renderer, serialize no focus, and never authorize from the map. `shellNavigation.ts` and `GameStateAdapter.ts` change only if the post-R1 API proves it necessary.
+- Replace `localeCompare` in touched historical-operation selection with `strictCompare`. Sort and deduplicate objective/staging/formation references, omit guessed data, and show only player-visible friendly formations.
+- FR-04A audits every faction before any content is written. A row requires the locked citation/lever/cost/once-or-cooldown schema; a gap may remain longer than ten turns only as an explicitly evidenced positive hold. `operation_lukavac_93` cannot support cadence work until its 15,000-troop prose is reconciled with *Balkan Battlegrounds* II p.410's approximately 10,000 and its July–August chronology.
+- FR-05 and FR-06 may develop independently, but one integration owner controls EN/BCS catalogs. R7, not this packet, owns the later `bcs -> bs` migration.
+- Invert the stale `bottom_status_strip_overflow.test.ts` contract that currently requires horizontal scrolling; the accepted strip has at most two visible paths plus an accessible deterministic overflow popover and no horizontal scroll.
+
+R1's post-integration lifetime remains two MapLibre owners (main plus minimap) and one Deck owner per campaign epoch, with zero additional warm construction/release. R2 verification must rerun that ownership, hidden-input/focus, and current-revision gate after its shared-file changes.
+
+## 4.8 2026-08-01 Source Closeout and Rejected Runtime Attempt
+
+FR-01/02/04/05 remain reviewed and green. FR-03 and FR-06 are now implemented and independently approved:
+
+- FR-03 uses exact authored references, the retained current-revision map/Deck owners, objective/staging/participant evidence, bounded focus, and same-dossier return. It performs no map-side authorization, hidden camera work, guessed targeting, or persistence.
+- FR-06 uses full semantic labels without truncation, one chip plus `+N` below 1600 px, at most two plus `+N` at wider geometry, stable ordering, and a complete keyboard-accessible popover.
+- Command/OOB Situation prose owns wrapping width. Packaged checkpoints now fail if document, strip, OOB, Situation prose, branch chips, or `+N` are locally or ancestor clipped.
+- The Warroom docket names `Review Before Advance` and `PENDING` counts separately. Near-cap quiet weeks reuse the shared sourced-policy-hold explanation; no decision or event was invented.
+- A missing visible final-tour stack badge produces an explicit not-applicable evidence receipt. Existing but unclickable/unstable stack surfaces still fail closed.
+- Exact-counter proof freezes the initial ready-map identity set. Later panel reflow may report an initial identity unavailable but cannot replace it with a newly visible, undeclared counter.
+
+The packaged attempt `20260801-r2-rs-104w-owner-postfix-v1` reached exact turn 104 and then failed the retired unconditional stack-badge assumption. Its 456 screenshots and progress/error artifacts are negative lineage only: no accepted final diagnostics packet was emitted, so it is not a completed diary or Electron acceptance. See the [R2 source closeout report](../40_reports/implemented/20260801_R2_RS_FRICTION_FR03_FR06_AND_RUNTIME_HARDENING.md).
+
+Later no-resume run `20260801_r2_rs104_fresh_v4` also reached exact turn 104 but exposed a field-route restoration defect after the Army HQ deep dive. The source repair restores the exact War Map and current-revision readiness before using the field Records toolbar. A bounded resume diagnostic proved the new route far enough to expose and repair a second harness bug: the adaptive counter probe substituted newly visible post-reflow counters for its frozen initial sample. RED/GREEN coverage now limits attempts to the declared initial identities. These are still negative diagnostics; the remaining gate must use a newly built package and a brand-new no-resume campaign.
+
+Fresh no-resume run `20260802-r2-rs104-fresh-v5` reached exact turn 104 and completed every final route/counter/Army-HQ/state-integrity checkpoint with zero runtime diagnostics, but correctly failed the readability gate. Ten observations reduced to four causes: a truncated long operation participant identity, an absolutely positioned event-category stamp colliding with faction badges, shrinkable Desk cards bleeding beneath the status dock, and the diagnostic classifier treating an explicitly non-modal Desk dialog as the active modal. RED-first coverage now requires wrapped identities, normal-flow wrapping event metadata, nonshrinking Desk cards under the shell scroll owner, and exclusion of `[aria-modal="false"]` dialogs. The repaired focused matrix passes 74 tests and the adjacent matrix passes 94; v5 remains negative lineage.
+
+Fresh no-resume run `20260802-r2-rs104-fresh-v6` also reached exact turn 104, completed the full final tour, captured 512 screenshots, preserved state/autosave integrity, and had zero runtime diagnostics. Every v5 readability defect was absent. Its sole failure was a QA false positive: the decorative Warroom whiteboard date belongs to an `aria-hidden="true"` scene board, has visibly dark ink on a light bitmap board, and is expected to be covered by Desk/Decision overlays. The diagnostic instead composited its transparent child against black and treated overlay coverage as occlusion. RED-first coverage now makes effective visibility reject ARIA-hidden ancestors for text, modal, alert, control, and overflow candidates; the focused 3-file / 101-test matrix is green. v6 remains negative lineage.
+
+Fresh no-resume run `20260802-r2-rs104-fresh-v7` reached exact turn 104, completed the full final tour, captured 512 screenshots, and had zero runtime diagnostics. Every v5/v6 finding was absent. Five repeated readability rows and screenshot inspection proved one residual product defect: a live Decision Packet `Intelligence brief` card painted beneath the fixed status dock. The cause was nested scroll ownership between the outer Desk and an inner `max-h-[48vh]` packet scroller. RED-first coverage now requires one outer scroll owner; the packet scroller is removed, and the shell owns containment, bottom clearance, and full-width intrinsic-height cards. The focused 3-file / 82-test matrix and TypeScript are green. v7 remains negative lineage.
+
+Fresh no-resume run `20260802-r2-rs104-fresh-v8` reached exact turn 104, completed every final route/counter/Army-HQ/state-integrity checkpoint, captured all 512 screenshots, and had zero runtime diagnostics. It failed closed on six duplicate-checkpoint observations of three live status-dock labels. A turn-1 instrumented probe recorded the exact top hit at every sample as the Strategic Situation `aside`, proving that the Desk's scrolling descendant could still escape the nominal bottom boundary. The same probe exposed three Army HQ contrast defects (4.20:1 and 3.07:1). RED-first coverage now requires a hard-clipped shell around one bounded inner Desk scroller and readable execution/commander/compliance tones; the focused six-file / 118-test matrix, TypeScript, harness syntax, and diff hygiene are green. v8 and the probe remain negative lineage.
+
+Remaining gate: rebuild the transient unpacked package containing the hard-clipped Desk viewport and Army HQ contrast repair and run a brand-new no-resume 104-week RS owner campaign. Acceptance requires exact turn 104, clean final diagnostics/readability, all operation handoff receipts, materialized geometry receipts, verified process cleanup, and a newly completed diary. Do not reuse or resume any rejected run.
+
 ## 5. Execution Order
 
 1. Freeze the turn-104 UI fixture and add RED cross-surface priority tests.
 2. Implement FR-01 and make all priority consumers green.
-3. Implement FR-02 so duplicate monitor volume cannot distort the new counts.
-4. Implement FR-03 and prove the Cerska-Kamenica round trip in Electron.
+3. Implement FR-02 immediately adjacent to FR-01 so duplicate monitor volume cannot distort the new counts.
+4. Rebase on the integrated R1 shared-file result, then implement FR-03 and prove the Cerska-Kamenica round trip in Electron.
 5. Complete the all-faction cadence/source audit before writing any FR-04 content.
-6. Implement only Historian-approved FR-04 initiative rows and replay determinism.
-7. Implement FR-05 and FR-06 presentation packets.
-8. Run the integrated verification matrix and a fresh RS 104-week owner diary.
+6. Implement only Historian-approved FR-04 initiative rows; otherwise close each gap as a positive hold, then prove replay determinism.
+7. Implement FR-05 and FR-06 presentation packets with one catalog owner.
+8. Run the integrated verification matrix and a fresh, clean RS 104-week owner diary.
 
 FR-01 and FR-02 must land together or in immediately adjacent changes: exposing a correct priority vocabulary while leaving nine duplicate monitor cards would still fail the player outcome.
 

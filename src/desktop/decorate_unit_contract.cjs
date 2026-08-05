@@ -8,7 +8,7 @@
  * (data/scenarios/events/war_1993.json) into
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
  * ZERO new sim/event code — the event's authored effects (morale / cohesion /
- * military_credibility / internal_cohesion shifts, all double-edged), recurrence
+ * military_credibility / internal_cohesion shifts, all double-edged), voluntary action cadence
  * (max_fires 5 / cooldown 10t), and branches are reused. This contract ADDS the
  * deterministic per-unit branch expansion so the PLAYER picks WHICH regular
  * formation to honour (we never auto-pick the unit).
@@ -93,7 +93,7 @@ function eligibleRegularFormations(state, playerFaction) {
 /**
  * Compute decorate-a-unit availability for the player faction WITHOUT mutating
  * state. Used by both the read-only availability IPC and the force-queue
- * pre-checks. Gated by player-faction resolution + the event's OWN recurrence;
+ * pre-checks. Gated by player-faction resolution + the event's action cadence;
  * there is NO reachability gate (a decoration is issued from the capital).
  *
  * @returns {{
@@ -127,9 +127,10 @@ function computeDecorateUnitAvailability(state, playerFaction, eventDef) {
   if (!playerFaction) return { ...base, reason: 'no_player_faction' };
   if (!eventId || !eventDef) return { ...base, reason: 'no_event' };
 
-  const recurrence = eventDef.recurrence || {};
-  const maxFires = typeof recurrence.max_fires === 'number' ? recurrence.max_fires : Infinity;
-  const cooldownTurns = typeof recurrence.cooldown_turns === 'number' ? recurrence.cooldown_turns : 0;
+  const actionCadence = eventDef.action_cadence;
+  if (!actionCadence) return { ...base, reason: 'no_action_cadence' };
+  const maxFires = actionCadence.max_fires;
+  const cooldownTurns = actionCadence.cooldown_turns;
   const fireCount = state?.military?.event_fire_counts?.[eventId] ?? 0;
   const lastFired = state?.military?.event_last_fired_turn?.[eventId];
   const firesLeft = Number.isFinite(maxFires) ? Math.max(0, maxFires - fireCount) : Infinity;

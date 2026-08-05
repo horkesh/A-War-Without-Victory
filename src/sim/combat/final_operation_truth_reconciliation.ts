@@ -1,6 +1,7 @@
 import type { CorpsOperation, FormationId, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { derivePrimarySectorForBrigades } from './corps_operation_helpers.js';
+import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 
 function buildSectorClaimsByBrigade(state: GameState): Map<FormationId, string[]> {
     const claims = new Map<FormationId, Set<string>>();
@@ -53,7 +54,13 @@ function uniqueActiveParticipants(
     return active;
 }
 
-function reconcileOperationRoster(state: GameState, corpsId: string, operation: CorpsOperation): void {
+function sameFormationIds(a: ReadonlyArray<FormationId>, b: ReadonlyArray<FormationId>): boolean {
+    return a.length === b.length && a.every((formationId, index) => formationId === b[index]);
+}
+
+function reconcileOperationRoster(state: GameState, corpsId: string, operation: CorpsOperation): boolean {
+    const previousParticipants = [...(operation.participating_brigades ?? [])];
+    const previousPhase = operation.phase;
     const activeParticipants = uniqueActiveParticipants(state, corpsId, operation.participating_brigades);
     const activeParticipantSet = new Set(activeParticipants);
     operation.participating_brigades = activeParticipants;
@@ -78,18 +85,35 @@ function reconcileOperationRoster(state: GameState, corpsId: string, operation: 
     }
 
     if (operation.phase === 'execution' && activeParticipants.length === 0) {
-        operation.phase = 'recovery';
-        operation.phase_started_turn = state.meta.turn;
-        operation.recovery_reason = 'brigade_attrition';
+        enterOperationRecovery(state, corpsId, operation, state.meta.turn, 'brigade_attrition');
     }
+
+    return !sameFormationIds(previousParticipants, activeParticipants)
+        || (operation.type === 'feint' && previousPhase !== operation.phase);
 }
 
-export function reconcileFinalOperationTruth(state: GameState): void {
+export interface FinalOperationTruthReconciliationReport {
+    operations_checked: number;
+    sector_reconciliation_changes: number;
+    sector_reconciliation_required: boolean;
+}
+
+export function reconcileFinalOperationTruth(state: GameState): FinalOperationTruthReconciliationReport {
     const corpsCommand = state.military.corps_command ?? {};
+    let operationsChecked = 0;
+    let sectorReconciliationChanges = 0;
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
         const cmd = corpsCommand[corpsId];
         for (const operation of cmd.active_operations ?? []) {
-            reconcileOperationRoster(state, corpsId, operation);
+            operationsChecked += 1;
+            if (reconcileOperationRoster(state, corpsId, operation)) {
+                sectorReconciliationChanges += 1;
+            }
         }
     }
+    return {
+        operations_checked: operationsChecked,
+        sector_reconciliation_changes: sectorReconciliationChanges,
+        sector_reconciliation_required: sectorReconciliationChanges > 0,
+    };
 }

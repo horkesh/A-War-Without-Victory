@@ -40,7 +40,7 @@ War consumes: GameState (meta.phase, meta.turn, political_controllers, factions,
 
 ## 4. Required State Fields
 
-**Persisted:** war_supply_pressure (Record<FactionId, number>, [0,100], monotonic); war_exhaustion (Record<FactionId, number>, non-negative, monotonic); war_exhaustion_local optional. **Derived (not serialized):** Front descriptors, command friction multiplier (Engine Invariants §13.1), corps_front_sectors (per-corps sector partition of front edges via multi-source BFS with Territory Voronoi depth assignment; see Systems Manual §2.1). **Brigade operations:** brigade_posture_orders, corps_command, army_stance, og_orders, settlement_holdouts; per-formation location_osid, entrenchment_turns, defense_streak, disrupted_turns, movement_state. Entrenchment init: scenario may set war_entrenchment_init_turns (0..12) at load; applied at War start. Movement-state contract: deployed = Combat, packing|in_transit|unpacking = Column; ZoC-constrained path validity.
+**Persisted:** war_supply_pressure (Record<FactionId, number>, [0,100], monotonic); war_exhaustion (Record<FactionId, number>, non-negative, monotonic); war_exhaustion_local optional; `sector_intel` cross-turn belief memory; and `corps_front_sectors` plus formation sector/sub-segment assignments as the materialized current-turn standing-OG/AoR snapshot. **Derived (not serialized):** Front descriptors, command friction multiplier (Engine Invariants §13.1), `active_offensives_against_corps`, `home_distance_cache`, `militia_garrison`, `sector_combat_ratings`, and `unresolved_sector_brigades`. The standing-OG snapshot is rebuilt at turn boundaries but not on save load, because reconstruction can relocate brigades and is therefore not observationally pure. **Brigade operations:** brigade_posture_orders, corps_command, army_stance, og_orders, settlement_holdouts; per-formation location_osid, entrenchment_turns, defense_streak, disrupted_turns, movement_state. Entrenchment init: scenario may set war_entrenchment_init_turns (0..12) at load; applied at War start. Movement-state contract: deployed = Combat, packing|in_transit|unpacking = Column; ZoC-constrained path validity.
 
 ---
 
@@ -64,7 +64,7 @@ Supply pressure: overextension (per front edge) + isolation (critical/strained f
 
 ## 8. Validation and Run Artifacts
 
-Determinism: same state + inputs → same outputs; no randomness; no timestamps. Exhaustion and supply pressure monotonic. No derived state serialized. War phases run only when meta.phase === "war". **run_summary.json** may include war_attack_resolution block (weeks_with_war, orders_processed, flips_applied, casualties, defender_present/absent_battles) for diagnostics.
+Determinism: same state + inputs → same outputs; no randomness; no timestamps. Exhaustion and supply pressure monotonic. Disposable derived caches are not serialized; the materialized standing-OG/AoR snapshot is the explicit exception required for zero-turn command and presentation continuity. War phases run only when meta.phase === "war". **run_summary.json** may include war_attack_resolution block (weeks_with_war, orders_processed, flips_applied, casualties, defender_present/absent_battles) for diagnostics.
 
 ---
 

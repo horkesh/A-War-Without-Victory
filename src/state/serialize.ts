@@ -2,7 +2,7 @@ import { validateState, ValidationIssue } from '../validate/validate.js';
 import { CURRENT_SCHEMA_VERSION, GameState } from './game_state.js';
 import { canonicalizePoliticalSideId } from './identity.js';
 import { applyMigrations } from './save_migration.js';
-import { serializeGameState } from './serializeGameState.js';
+import { serializeGameState, serializeRuntimeGameState } from './serializeGameState.js';
 import { validateGameStateShape } from './validateGameState.js';
 
 export interface ValidationResult {
@@ -11,6 +11,21 @@ export interface ValidationResult {
 }
 
 export function serializeState(state: GameState): string {
+    return serializePreparedState(state, serializeGameState);
+}
+
+/**
+ * Deterministic full runtime snapshot used only by Electron IPC/readback.
+ * Disk saves, replay, scenario hashes, and baselines must use serializeState.
+ */
+export function serializeRuntimeState(state: GameState): string {
+    return serializePreparedState(state, serializeRuntimeGameState);
+}
+
+function serializePreparedState(
+    state: GameState,
+    serializer: (state: GameState, space?: number) => string,
+): string {
     const canonicalState = migrateState({ ...state, schema_version: 0 });
     assertNoErrors(validateState(canonicalState), 'State failed validation before serialize');
 
@@ -19,7 +34,7 @@ export function serializeState(state: GameState): string {
         schema_version: CURRENT_SCHEMA_VERSION,
     };
 
-    return serializeGameState(withVersion, 2);
+    return serializer(withVersion, 2);
 }
 
 export function deserializeState(payload: string): GameState {

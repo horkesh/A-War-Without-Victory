@@ -9,7 +9,7 @@
  */
 
 
-import type { GameState } from './game_state.js';
+import type { GameState, MilitaryState } from './game_state.js';
 import { strictCompare, validateGameStateShape } from './validateGameState.js';
 
 
@@ -28,6 +28,27 @@ const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'political',
     'displacement'
 ]);
+
+/**
+ * Runtime-only military projections. They are rebuilt from persisted owners and
+ * must never cross the save/replay boundary (Engine Invariants section 13).
+ * Keep this named declaration machine-readable for the field-classification gate.
+ */
+export const TRANSIENT_MILITARY_STATE_FIELDS = [
+    'active_offensives_against_corps',
+    'home_distance_cache',
+    'militia_garrison',
+    'sector_combat_ratings',
+    'unresolved_sector_brigades',
+] as const satisfies readonly (keyof MilitaryState)[];
+
+function withoutTransientMilitaryState(state: GameState): GameState {
+    const military = { ...state.military } as MilitaryState & Record<string, unknown>;
+    for (const field of TRANSIENT_MILITARY_STATE_FIELDS) {
+        delete military[field];
+    }
+    return { ...state, military };
+}
 
 /**
  * Recursively normalize a value for deterministic JSON: sort object keys, preserve array order,
@@ -140,13 +161,27 @@ function assertNoWrapper(state: unknown): asserts state is Record<string, unknow
  * the serializable object without the string.
  */
 export function toSerializableGameState(state: GameState): unknown {
+    return toSerializableGameStateInternal(state, true);
+}
+
+function toSerializableGameStateInternal(state: GameState, omitTransient: boolean): unknown {
     assertNoWrapper(state);
     const result = validateGameStateShape(state);
     if (!result.ok) {
         throw new Error(`serializeGameState: shape validation failed: ${result.errors.join('; ')}`);
     }
-    const out = toDeterministicJsonValue(state, []) as Record<string, unknown>;
+    const source = omitTransient ? withoutTransientMilitaryState(state) : state;
+    const out = toDeterministicJsonValue(source, []) as Record<string, unknown>;
     return out;
+}
+
+/**
+ * Deterministic full runtime projection for Electron's in-memory IPC boundary.
+ * This representation includes transient caches and must never be written,
+ * hashed, replayed, or treated as canonical save bytes.
+ */
+export function toRuntimeSerializableGameState(state: GameState): unknown {
+    return toSerializableGameStateInternal(state, false);
 }
 
 /**
@@ -160,6 +195,15 @@ export function toSerializableGameState(state: GameState): unknown {
  */
 export function serializeGameState(state: GameState, space?: number): string {
     const serializable = toSerializableGameState(state);
+    if (space !== undefined) {
+        return JSON.stringify(serializable, null, space);
+    }
+    return JSON.stringify(serializable);
+}
+
+/** Full runtime-only counterpart to serializeGameState; never a persistence writer. */
+export function serializeRuntimeGameState(state: GameState, space?: number): string {
+    const serializable = toRuntimeSerializableGameState(state);
     if (space !== undefined) {
         return JSON.stringify(serializable, null, space);
     }

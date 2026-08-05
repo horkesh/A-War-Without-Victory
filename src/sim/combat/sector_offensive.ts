@@ -64,7 +64,7 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { ControlSide } from '../../state/political_control_types.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { releaseOperationCommander } from './officer_system.js';
-import { finalizeOperationAAR, buildArmyHqTelemetryFromTg } from './operation_aar.js';
+import { finalizeOperationAAR } from './operation_aar.js';
 import { linkOpportunityResolutionToAAR } from './operation_opportunities.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
@@ -73,8 +73,12 @@ import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/allianc
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition } from './operation_preparation.js';
 // ADR-0005 v2.2b #45: TG dissolution at execution→recovery. Flag-gated.
-import { ENABLE_TG_FORMATION, ENABLE_TG_ARMY_HQ_OPS } from './tactical_group_config.js';
-import { dissolveTacticalGroup } from './tactical_group_lifecycle.js';
+import {
+    completeOperationLifecycle,
+    enterOperationRecovery,
+    evaluateOperationTacticalGroupExhaustion,
+    markOperationExecuting,
+} from './tactical_group_lifecycle.js';
 import {
     BRIGADE_LOSS_THRESHOLD,
     COHESION_HEALTHY_THRESHOLD,
@@ -813,78 +817,26 @@ function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn
     }
 }
 
-/**
- * ADR-0005 v2.2b #45: dissolve every TG anchored to an operation.
- *
- * Called from beginRecovery — the single chokepoint for all execution→recovery
- * transitions (~30 callers). Iterates `tactical_groups` in strictCompare order
- * (determinism), collects matching ids in a first pass, dissolves in a second
- * pass (avoids mutating during iteration). Clears donor lent fields and sets
- * cooldowns per `dissolveTacticalGroup` (lifecycle.ts).
- *
- * Only called when ENABLE_TG_FORMATION is on; otherwise dormant. Anchor-
- * destroyed-mid-op immediate dissolution (Hard Invariant #6) is deferred to
- * v2.2c — anchor death currently flows through here on the next op tick when
- * the op aborts to recovery (slight delay; functionally correct).
- */
-function dissolveTgsForOp(state: GameState, opName: string, currentTurn: number): void {
-    const tgs = state.military?.tactical_groups;
-    if (!tgs) return;
-    const targetIds: string[] = [];
-    for (const id of Object.keys(tgs).sort(strictCompare)) {
-        const tg = tgs[id];
-        if (tg && tg.op_id === opName && tg.status !== 'dissolved') {
-            targetIds.push(id);
-        }
+/** Canonical sector-operation recovery wrapper, including AAR snapshotting. */
+function beginRecovery(
+    op: CorpsOperation,
+    turn: number,
+    reason: CorpsOperation['recovery_reason'],
+    state: GameState,
+    hostCorpsId?: FormationId,
+): void {
+    const resolvedHostCorpsId = hostCorpsId ?? Object.keys(state.military.corps_command ?? {})
+        .sort(strictCompare)
+        .find((corpsId) => state.military.corps_command?.[corpsId]?.active_operations.includes(op));
+    if (!resolvedHostCorpsId) {
+        throw new Error(`Cannot enter recovery for unhosted operation ${op.name}`);
     }
-    for (const id of targetIds) {
-        dissolveTacticalGroup(state, id, currentTurn);
-    }
-}
-
-function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation['recovery_reason'], state?: GameState): void {
-    op.phase = 'recovery';
-    op.phase_started_turn = turn;
-    op.recovery_reason = reason;
     op.force_launch = false;
     // Clean up OPSEC marking when operation leaves active phase
-    if (op.sector_id && state && Array.isArray(state.military.opsec_sectors)) {
+    if (op.sector_id && Array.isArray(state.military.opsec_sectors)) {
         state.military.opsec_sectors = state.military.opsec_sectors.filter(s => s !== op.sector_id);
     }
-    // P2 #48: snapshot Army-HQ telemetry BEFORE dissolving the TG. finalizeOperationAAR runs
-    // only after the recovery window elapses (sector_offensive ~:1338), by which point the live
-    // TG is gone — so the AAR sidecar would be silently omitted for real Army-HQ ops. Capture it
-    // here, on the op record, so finalize can read the snapshot. Flag-gated + only set when an
-    // Army-HQ TG matches → baseline (no Army-HQ ops) leaves the field undefined → no hash impact.
-    if (state && ENABLE_TG_ARMY_HQ_OPS) {
-        snapshotArmyHqTelemetryForOp(state, op);
-    }
-    // ADR-0005 v2.2b #45: dissolve TGs anchored to this op. Flag-gated; state-optional
-    // (some callers don't pass state — those callers also can't have created TGs).
-    if (state && ENABLE_TG_FORMATION) {
-        dissolveTgsForOp(state, op.name, turn);
-    }
-}
-
-/**
- * P2 #48: capture the Army-HQ telemetry from this op's live TG onto the op record, so it survives
- * TG dissolution and can be read by finalizeOperationAAR turns later. Deterministic: scans
- * tactical_groups in strictCompare order, matches on TG.op_id === op.name, snapshots the first
- * Army-HQ TG found. No-op when no Army-HQ TG matches (snapshot stays undefined). Caller gates on
- * ENABLE_TG_ARMY_HQ_OPS.
- */
-function snapshotArmyHqTelemetryForOp(state: GameState, op: CorpsOperation): void {
-    const tgs = state.military?.tactical_groups;
-    if (!tgs) return;
-    for (const id of Object.keys(tgs).sort(strictCompare)) {
-        const tg = tgs[id];
-        if (!tg || tg.op_id !== op.name) continue;
-        const telemetry = buildArmyHqTelemetryFromTg(tg);
-        if (telemetry) {
-            op.army_hq_telemetry_snapshot = telemetry;
-            return;
-        }
-    }
+    enterOperationRecovery(state, resolvedHostCorpsId, op, turn, reason);
 }
 
 function filterAxisPlanningObjectives(
@@ -951,6 +903,8 @@ function getRecoveryDuration(op: CorpsOperation): number {
         case 'participants_below_attack_floor':
         case 'no_approach_osid':
         case 'zero_eligible_axis':
+        case 'tg_cohesion_exhausted':
+        case 'tg_max_lifecycle':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(objectiveCount / 2));
@@ -1010,6 +964,8 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
         case 'participants_below_attack_floor':
         case 'no_approach_osid':
         case 'zero_eligible_axis':
+        case 'tg_cohesion_exhausted':
+        case 'tg_max_lifecycle':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(maxLen / 2));
@@ -1460,14 +1416,12 @@ export function advanceSectorOffensives(
                 op.phase_started_turn = turn;
                 op.recovery_reason = undefined;
 
-                // ADR-0005 Phase 2: canonical TG-formation gate. EVERY offensive forms a
-                // TG here at the single planning→execution transition, regardless of which
-                // sub-path released it (preparation-ready, force_launch, stagedEarly, probe,
-                // feint). For standard sector_attack ops the preparation 'ready' path may have
-                // already formed the TG — formTgsAtReadyTransition is idempotent (skips when a
-                // TG for this op+anchor exists) and policy-gated (probes/feints classify as
-                // 'none' → no TG). Flag-off (ENABLE_TG_FORMATION false): early-return, byte-identical.
+                // ADR-0005 Phase 2: Every donor-eligible offensive attempts TG formation
+                // here. The `none` policy forms no TG; zero-donor fallback remains an ordinary operation.
+                // The ready-path may already have formed the TG;
+                // formTgsAtReadyTransition is idempotent.
                 formTgsAtReadyTransition(state, op, turn);
+                markOperationExecuting(state, corpsId, op);
 
                 if (multiAxis) {
                     for (const axis of op.axes!) resetAxisForExecution(axis);
@@ -1492,6 +1446,11 @@ export function advanceSectorOffensives(
                 applyArtilleryPreparation(state, faction, op);
             }
         } else if (op.phase === 'execution') {
+            const tgExhaustionReason = evaluateOperationTacticalGroupExhaustion(state, corpsId, op, turn);
+            if (tgExhaustionReason != null) {
+                beginRecovery(op, turn, tgExhaustionReason, state, corpsId);
+                continue;
+            }
             if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
                 beginRecovery(op, turn, 'political_blocked', state);
                 continue;
@@ -1625,6 +1584,7 @@ export function advanceSectorOffensives(
                     cmd.last_completed_operation = op;
                     cmd.last_completed_operation_turn = turn;
                 }
+                completeOperationLifecycle(state, corpsId, op);
                 removeOperation(cmd, op);
             }
         }
@@ -2504,7 +2464,7 @@ export function reevaluateWeakenedOperations(state: GameState): void {
                 abortReason = anyComplete ? null : 'all_axes_stalled';
                 if (anyComplete) {
                     // Some axes completed, treat as partial success — enter recovery normally
-                    beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op));
+                    beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state, corpsId);
                     appendReevaluationLog(op, turn, 'abort', activeBrigadeCount, totalPersonnel,
                         'all_axes_terminal_partial_success');
                     continue;
@@ -2515,7 +2475,7 @@ export function reevaluateWeakenedOperations(state: GameState): void {
         // Append diagnostic log
         if (abortReason) {
             // Abort: enter recovery with brigade_attrition reason
-            beginRecovery(op, turn, 'brigade_attrition');
+            beginRecovery(op, turn, 'brigade_attrition', state, corpsId);
             appendReevaluationLog(op, turn, 'abort', activeBrigadeCount, totalPersonnel, abortReason);
 
             // Clean up participating_brigades: remove inactive brigade IDs
@@ -2580,10 +2540,14 @@ export function evaluateOperationProgress(
         if (!hasActiveOperation(cmd)) continue;
 
         for (const op of [...cmd.active_operations]) {
-            // sector_attack, probe, and feint ops have their own lifecycle in
-            // advanceSectorOffensives(). Processing them here would cause double
-            // phase transitions and double exhaustion costs.
-            if (op.type === 'sector_attack' || op.type === 'probe' || op.type === 'feint') continue;
+            // Sector ops are owned by advanceSectorOffensives; reorganization is
+            // owned by corps_command.advanceOperations on its canonical 3/4/3 clock.
+            if (
+                op.type === 'sector_attack'
+                || op.type === 'probe'
+                || op.type === 'feint'
+                || op.type === 'reorganization'
+            ) continue;
 
             const turnsInPhase = turn - op.phase_started_turn;
 
@@ -2598,30 +2562,36 @@ export function evaluateOperationProgress(
                     // → ≤2 donors) and any general_offensive ('full') form a TG. Idempotent +
                     // policy-gated. Flag-off: early-return, byte-identical.
                     formTgsAtReadyTransition(state, op, turn);
+                    markOperationExecuting(state, corps.id, op);
                 }
             } else if (op.phase === 'execution') {
+                const tgExhaustionReason = evaluateOperationTacticalGroupExhaustion(state, corps.id, op, turn);
+                if (tgExhaustionReason != null) {
+                    beginRecovery(op, turn, tgExhaustionReason, state, corps.id);
+                    continue;
+                }
                 // Check progress
                 const targets = op.target_settlements ?? [];
                 if (targets.length > 0) {
                     const captured = targets.filter(sid => pc[sid] === faction).length;
                     const captureRate = captured / targets.length;
 
-                    // Abort if failing after 2 turns
-                    if (turnsInPhase >= 2 && captureRate < PROGRESS_FAILURE_THRESHOLD) {
-                        op.phase = 'recovery';
-                        op.phase_started_turn = turn;
+                    // Only captured objectives constitute success. Early failure and
+                    // execution timeout retain the existing attempt-history diagnostic.
+                    if (captureRate >= PROGRESS_SUCCESS_THRESHOLD) {
+                        beginRecovery(op, turn, 'completed', state, corps.id);
                         continue;
                     }
 
-                    // Success or max duration reached
-                    if (captureRate >= PROGRESS_SUCCESS_THRESHOLD || turnsInPhase >= EXECUTION_MAX_DURATION) {
-                        op.phase = 'recovery';
-                        op.phase_started_turn = turn;
+                    if (
+                        (turnsInPhase >= 2 && captureRate < PROGRESS_FAILURE_THRESHOLD)
+                        || turnsInPhase >= EXECUTION_MAX_DURATION
+                    ) {
+                        beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state, corps.id);
                         continue;
                     }
                 } else if (turnsInPhase >= EXECUTION_MAX_DURATION) {
-                    op.phase = 'recovery';
-                    op.phase_started_turn = turn;
+                    beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state, corps.id);
                     continue;
                 }
 
@@ -2662,6 +2632,7 @@ export function evaluateOperationProgress(
                 // Clear operation after recovery duration
                 if (turnsInPhase >= RECOVERY_DURATION) {
                     releaseOperationCommander(state, op);
+                    completeOperationLifecycle(state, corps.id, op);
                     removeOperation(cmd, op);
                     // Add exhaustion from the operation
                     cmd.corps_exhaustion = Math.min(100, cmd.corps_exhaustion + 15);

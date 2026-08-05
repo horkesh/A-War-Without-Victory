@@ -8,7 +8,7 @@
  *   - CONTRADICTED: predicted id is in the closed-event set.
  *
  * Also covers determinism (sort order), defensive empties, bot-decision
- * exclusion, and last-wins recurring-decision semantics.
+ * exclusion, and exact recurring-decision identity semantics.
  */
 
 import { afterEach, describe, it, expect } from 'vitest';
@@ -138,7 +138,7 @@ describe('buildConsequenceReceipts', () => {
             closedEventIds: ['p_closed'],
             lastFiredTurn: { E: 3, p_confirmed: 9 },
             causalityLog: [
-                { turn: 9, from_event: 'E', to_event: 'p_confirmed', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 3, from_event: 'E', to_event: 'p_confirmed', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
 
@@ -151,6 +151,8 @@ describe('buildConsequenceReceipts', () => {
         expect(confirmed.status).toBe('confirmed');
         expect(confirmed.firedTurn).toBe(9);
         expect(confirmed.turnsElapsed).toBe(6);
+        expect(confirmed.sourceRecordId).toBe('decision:E::opt_a::3');
+        expect(confirmed.receiptRecordId).toBe('receipt:E::opt_a::3::p_confirmed');
         // Originating decision resolved to TITLES + option prose, not raw ids.
         expect(confirmed.decisionTitle).toBe('Authorize the Goražde relief column');
         expect(confirmed.decisionOptionLabel).toBe('Send the column through');
@@ -204,7 +206,7 @@ describe('buildConsequenceReceipts', () => {
             lastFiredTurn: { csq_patron_recovery_offer: 10 },
             causalityLog: [
                 {
-                    turn: 10,
+                    turn: 6,
                     from_event: 'evt_internal_crisis_1994',
                     to_event: 'csq_patron_recovery_offer',
                     to_flag: null,
@@ -215,7 +217,7 @@ describe('buildConsequenceReceipts', () => {
         });
 
         const [receipt] = buildConsequenceReceipts(state, catalog);
-        expect(receipt.id).toBe('evt_internal_crisis_1994::approve_emergency_measure::csq_patron_recovery_offer');
+        expect(receipt.id).toBe('evt_internal_crisis_1994::approve_emergency_measure::6::csq_patron_recovery_offer');
         expect(receipt.decisionEventId).toBe('evt_internal_crisis_1994');
         expect(receipt.predictedEventId).toBe('csq_patron_recovery_offer');
 
@@ -243,7 +245,7 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p'],
             lastFiredTurn: { p: 5 },
             causalityLog: [
-                { turn: 5, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_other' },
+                { turn: 2, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_other' },
             ],
         });
         expect(buildConsequenceReceipts(state, catalog)).toEqual([]);
@@ -281,7 +283,7 @@ describe('buildConsequenceReceipts', () => {
             lastFiredTurn: { p_same: 6, p_after: 11 }, // at-turn and after-turn
             causalityLog: [
                 { turn: 6, from_event: 'E', to_event: 'p_same', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
-                { turn: 11, from_event: 'E', to_event: 'p_after', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 6, from_event: 'E', to_event: 'p_after', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
         const receipts = buildConsequenceReceipts(state, catalog);
@@ -302,7 +304,7 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p'],
             lastFiredTurn: { p: 4 },
             causalityLog: [
-                { turn: 4, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
         expect(buildConsequenceReceipts(state, catalog)).toEqual([]);
@@ -319,7 +321,7 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p'],
             lastFiredTurn: { p: 4 },
             causalityLog: [
-                { turn: 4, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
 
@@ -338,8 +340,8 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p_late', 'p_early'],
             lastFiredTurn: { p_late: 12, p_early: 4 },
             causalityLog: [
-                { turn: 12, from_event: 'E', to_event: 'p_late', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
-                { turn: 4, from_event: 'E', to_event: 'p_early', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p_late', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p_early', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
         const receipts = buildConsequenceReceipts(state, catalog);
@@ -357,8 +359,8 @@ describe('buildConsequenceReceipts', () => {
             firedEventIds: ['E', 'p1', 'p2'],
             lastFiredTurn: { p1: 5, p2: 8 },
             causalityLog: [
-                { turn: 5, from_event: 'E', to_event: 'p1', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
-                { turn: 8, from_event: 'E', to_event: 'p2', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p1', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+                { turn: 1, from_event: 'E', to_event: 'p2', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
         const receipts = buildConsequenceReceipts(state, catalog);
@@ -369,6 +371,7 @@ describe('buildConsequenceReceipts', () => {
     it('keeps generated patron-defiance receipt copy localized in BCS mode', () => {
         setLocale('bcs');
         const state = {
+            meta: { player_faction: 'RS' },
             military: {
                 patron_defiance_supply_cuts: [{
                     faction: 'RS',
@@ -391,6 +394,55 @@ describe('buildConsequenceReceipts', () => {
         expect(text).toContain('Odbijen zahtjev Beograda');
         expect(text).toContain('Materijalna podrska Beograda smanjena za 25%');
         expect(text).not.toMatch(/Patron defiance|Refused|materiel cut|front fell|refusal stands/i);
+    });
+
+    it('uses authored BCS event and response localizations without leaking English future copy', () => {
+        setLocale('bcs');
+        const source = buildEventDef('E', ['p'], {
+            title: 'English decision dossier',
+            label: 'Accept the English option',
+            consequenceLabel: 'English future consequence label',
+            explanation: 'English future consequence explanation.',
+        });
+        source.localizations = {
+            bcs: {
+                title: 'Lokalizirani dosje odluke',
+                response_options: {
+                    opt_a: { label: 'Prihvati lokaliziranu opciju' },
+                },
+            },
+        };
+        const target = buildTargetDef('p', 'English target event title');
+        target.localizations = { bcs: { title: 'Lokalizirana ostvarena posljedica' } };
+        const catalog = new Map<string, EventDefinition>([
+            ['E', source],
+            ['p', target],
+        ]);
+        const state = buildState({
+            decisions: [{ event_id: 'E', response_id: 'opt_a', turn: 3 }],
+            firedEventIds: ['E', 'p'],
+            lastFiredTurn: { p: 9 },
+            causalityLog: [{
+                turn: 3,
+                from_event: 'E',
+                to_event: 'p',
+                to_flag: null,
+                kind: 'enables',
+                source_response_id: 'opt_a',
+            }],
+        });
+
+        const [receipt] = buildConsequenceReceipts(state, catalog);
+        expect(receipt.decisionTitle).toBe('Lokalizirani dosje odluke');
+        expect(receipt.decisionOptionLabel).toBe('Prihvati lokaliziranu opciju');
+        expect(receipt.predictedLabel).toBe('Lokalizirana ostvarena posljedica');
+        expect(receipt.predictedExplanation).toBe('');
+        expect([
+            receipt.decisionTitle,
+            receipt.decisionOptionLabel,
+            receipt.predictedLabel,
+            receipt.predictedExplanation,
+        ].join(' ')).not.toMatch(/English/);
     });
 
     it('filters patron-defiance receipts to the loaded player faction when ownership is known', () => {

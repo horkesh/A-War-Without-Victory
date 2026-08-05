@@ -408,9 +408,9 @@ The simulation starts at Week 0 = early April 1992. Each turn = 1 week.
 
 ### 27. Operation Lukavac 93 -- VRS Offensive on Igman/Bjelasnica [NEW]
 
-- **Date**: July 2 - August 14, 1993 (Turn ~65-71)
+- **Date**: July 2 - August 19, 1993 (decision window turns 69-71)
 - **Category**: military
-- **Description**: The VRS launches Operation Lukavac 93 with 15,000 troops against ARBiH positions on Mount Igman and Bjelasnica, aiming to sever Sarajevo's last supply route and link Serb-held Herzegovina with the rest of Republika Srpska. VRS forces capture parts of the Igman road on August 4, bringing Sarajevo to the brink of total isolation. The offensive provokes the first credible NATO threat of air strikes, forcing the VRS to withdraw under a UN-brokered agreement by August 14. The Igman crisis marks a turning point in international willingness to use military force.
+- **Description**: The VRS opens Operation Lukavac 93 on 2-3 July with about 10,000 troops, linking the Sarajevo-Romanija and Herzegovina Corps axes, taking Trnovo, and severing the ARBiH supply route to Gorazde. A renewed assault beginning 31 July reaches Bjelasnica and Igman and places Sarajevo's last supply link under immediate threat. Karadzic agrees on 5 August to withdraw to the 30 July line under UN-NATO pressure; most VRS troops withdraw by 15 August. (*Balkan Battlegrounds* II, pp. 410-411.)
 - **Factions affected**: RS, RBiH
 - **Mechanical effects**:
   - `morale_change` RS delta: -3 (forced withdrawal)
@@ -422,10 +422,10 @@ The simulation starts at Week 0 = early April 1992. Each turn = 1 week.
   - dimension_shift: RBiH `international_standing` +5
 - **Player decision**: Yes (for RS player -- comply with withdrawal or defy NATO)
   - **comply**: morale -3, aggression -0.10, military_credibility -5 (historical)
-  - **defy_nato**: triggers NATO air strikes, morale +3 short-term but massive equipment/supply losses
+  - **defy_nato**: risks NATO air strikes, morale +3 short-term, supply -15, patron pressure +20, and severe credibility/standing costs
 - **Bot response**: historical (comply)
-- **Trigger**: `turn_min: 65, turn_max: 72, phase: war, condition: territory_percentage RS above 0.48`
-- **Historical source**: ICTY Mladic Trial Judgment (IT-09-92-T). BB Vol. I. Washington Post, Aug 14 1993.
+- **Trigger**: `turn_min: 69, turn_max: 71, phase: war`; Sarajevo siege flag and RS control of Trnovo are required, while RS-held Hadzici route proxies accelerate readiness
+- **Historical source**: *Balkan Battlegrounds*, Vol. II, pp. 410-411. ICTY Mladic Trial Judgment (IT-09-92-T).
 
 ---
 
@@ -450,7 +450,7 @@ The simulation starts at Week 0 = early April 1992. Each turn = 1 week.
 
 - **Date**: August 9-10, 1993 (Turn ~70)
 - **Category**: diplomatic
-- **Description**: NATO formally agrees to launch air strikes against Bosnian Serb positions if the strangulation of Sarajevo or attacks on other safe areas continue. The decision marks the first time the Alliance has authorized the potential use of force in its 44-year history. The threat forces the VRS to withdraw from Mount Igman and temporarily eases the siege, but the dual-key arrangement between UN and NATO commands means execution remains politically constrained.
+- **Description**: NATO formally agrees to launch air strikes against Bosnian Serb positions if the strangulation of Sarajevo or attacks on other safe areas continue. The decision marks the first time the Alliance has authorized the potential use of force in its 44-year history, while the dual-key arrangement between UN and NATO commands means execution remains politically constrained. The historical withdrawal is recorded in the source chronology, but this automatic notice does not assert or apply that outcome; the separate `operation_lukavac_93` RS decision owns compliance or defiance.
 - **Factions affected**: RS, RBiH
 - **Mechanical effects**:
   - `patron_pressure` RS delta: +10
@@ -459,7 +459,7 @@ The simulation starts at Week 0 = early April 1992. Each turn = 1 week.
   - dimension_shift: RS `international_standing` -5
   - dimension_shift: RBiH `international_standing` +5
 - **Player decision**: No (automatic)
-- **Trigger**: `turn_min: 69, turn_max: 71, phase: war`
+- **Trigger**: `turn_min: 70, turn_max: 70, phase: war`; exact August 9 Council week, exogenous and intentionally not gated on the Lukavac operation predicate. Priority 50 places it after the priority-40 RS Lukavac decision when both are eligible on turn 70.
 - **Historical source**: NATO Council decision, August 9 1993. BB Vol. I. Operation Deny Flight history.
 
 ---
@@ -679,9 +679,9 @@ The simulation starts at Week 0 = early April 1992. Each turn = 1 week.
 | 23 | `hvo_detention_camps_1993` | 63-70 | humanitarian | Optional |
 | 24 | `battle_of_travnik_1993` | 60-68 | military | No |
 | 25 | `sarajevo_tunnel_completed_1993` | 64-66 | military | No |
-| 27 | `operation_lukavac_93` | 65-72 | military | Yes (RS) |
+| 27 | `operation_lukavac_93` | 69-71 | military | Yes (RS) |
 | 28 | `battle_of_bugojno_1993` | 66-72 | military | No |
-| 29 | `nato_air_strike_threat_1993` | 69-71 | diplomatic | No |
+| 29 | `nato_air_strike_threat_1993` | 70 | diplomatic | No |
 | 31 | `grabovica_uzdol_massacres_1993` | 73-76 | humanitarian | No |
 | 34 | `abdic_karadzic_pact_1993` | 80-83 | political | No |
 | 35 | `stupni_do_massacre_1993` | 80-83 | humanitarian | No |

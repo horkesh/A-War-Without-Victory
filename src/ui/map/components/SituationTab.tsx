@@ -266,7 +266,10 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   };
 
   return (
-    <div className="p-3 space-y-3 text-xs">
+    <div
+      data-testid="situation-tab-content"
+      className="min-w-0 max-w-full space-y-3 p-3 text-xs [overflow-wrap:anywhere]"
+    >
       {!focusedMode && (
       <section data-summary-section="overview" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
         <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('warSummary.section.territory')}</div>
@@ -286,25 +289,25 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {!focusedMode && sitrep && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.operationalSitrep')}</div>
-        <div className="text-text-secondary">{localizedOperationalSitrepCopy(sitrep.headlineToken, sitrep.headline)}</div>
-        <div className="text-text-secondary">
+        <div data-oob-wrapping-prose="true" className="min-w-0 max-w-full text-text-secondary">{localizedOperationalSitrepCopy(sitrep.headlineToken, sitrep.headline)}</div>
+        <div data-oob-wrapping-prose="true" className="min-w-0 max-w-full text-text-secondary">
           {t('situation.frontsLine', {
             contactBand: t(contactBandKey(sitrep.front.engagedCount)),
             thinBand: t(thinFrontBandKey(sitrep.front.exposedCount)),
           })}
         </div>
-        <div className="text-text-secondary">
+        <div data-oob-wrapping-prose="true" className="min-w-0 max-w-full text-text-secondary">
           {t('situation.sustainmentLine', { critical: sitrep.sustainment.criticalCount, strained: sitrep.sustainment.strainedCount })}
           {sitrep.sustainment.collapsedMunicipalities.length > 0 ? t('situation.sustainmentCollapsed', { count: sitrep.sustainment.collapsedMunicipalities.length }) : ''}
         </div>
-        <div className="text-text-secondary">
+        <div data-oob-wrapping-prose="true" className="min-w-0 max-w-full text-text-secondary">
           {t('situation.operationsLine', {
             count: sitrep.operations.activeCount,
             commandWord: t(sitrep.operations.activeCount === 1 ? 'situation.command.one' : 'situation.command.many'),
           })}
         </div>
         {sitrep.front.edges.length > 0 && (
-          <div className="text-text-secondary text-xs">
+          <div data-oob-wrapping-prose="true" className="min-w-0 max-w-full text-xs text-text-secondary">
             {t('situation.priorityFronts', {
               items: sitrep.front.edges
                 .slice(0, 2)
@@ -314,7 +317,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           </div>
         )}
         {sitrep.readiness.weakestBrigades.length > 0 && (
-          <div className="text-text-secondary text-xs">
+          <div data-oob-wrapping-prose="true" className="min-w-0 max-w-full text-xs text-text-secondary">
             {t('situation.weakestBrigades', { items: sitrep.readiness.weakestBrigades.slice(0, 2).map((brigade) => brigade.label).join('; ') })}
           </div>
         )}

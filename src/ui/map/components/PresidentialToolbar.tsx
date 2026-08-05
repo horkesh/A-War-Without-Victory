@@ -120,6 +120,7 @@ interface PresidentialToolbarProps {
     onOpenOpsHistory?: () => void;
     onOpenCodex?: () => void;
     onReviewPriorities?: () => void;
+    onReplaceCampaignState?: (state: unknown) => Promise<unknown>;
 }
 
 export function PresidentialToolbar({
@@ -131,6 +132,7 @@ export function PresidentialToolbar({
     onOpenRecords,
     onOpenCodex,
     onReviewPriorities,
+    onReplaceCampaignState,
 }: PresidentialToolbarProps) {
     const ipc = useIPC();
     const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -287,27 +289,31 @@ export function PresidentialToolbar({
     const [runIdInput, setRunIdInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [saveFlash, setSaveFlash] = useState(false);
+    const replaceCampaignState = useCallback(
+        (state: unknown) => onReplaceCampaignState ? onReplaceCampaignState(state) : loadSave(state),
+        [loadSave, onReplaceCampaignState],
+    );
 
     const handleLoadFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setLoading(true);
-        try { await loadSave(JSON.parse(await file.text())); } catch (err) { setLoadError(String(err)); }
+        try { await replaceCampaignState(JSON.parse(await file.text())); } catch (err) { setLoadError(String(err)); }
         finally { setLoading(false); if (fileInputRef.current) fileInputRef.current.value = ''; }
-    }, [loadSave, setLoadError]);
+    }, [replaceCampaignState, setLoadError]);
 
     const handleLoadLatest = useCallback(async () => {
         setLoading(true);
-        try { await loadSave(await loadLatestRunSaveAsText()); } catch (err) { setLoadError(String(err)); }
+        try { await replaceCampaignState(await loadLatestRunSaveAsText()); } catch (err) { setLoadError(String(err)); }
         finally { setLoading(false); }
-    }, [loadSave, setLoadError]);
+    }, [replaceCampaignState, setLoadError]);
 
     const handleLoadRun = useCallback(async () => {
         const id = runIdInput.trim(); if (!id) return;
         setLoading(true);
-        try { await loadSave(await loadRunFinalSaveAsText(id)); } catch (err) { setLoadError(String(err)); }
+        try { await replaceCampaignState(await loadRunFinalSaveAsText(id)); } catch (err) { setLoadError(String(err)); }
         finally { setLoading(false); }
-    }, [runIdInput, loadSave, setLoadError]);
+    }, [runIdInput, replaceCampaignState, setLoadError]);
 
     const handleSave = useCallback(async () => {
         if (!ipc.isAvailable) return;

@@ -6,9 +6,8 @@
 import type {
     CorpsFrontSector,
     FactionId,
+    FormationAssignment,
     FormationId,
-    FormationState,
-    GameState,
 } from '../../state/game_state.js';
 import { computeLocalFrontDefensivePower } from './local_front_defense.js';
 import { effectivePersonnel } from './tactical_group_personnel.js';
@@ -25,7 +24,15 @@ import { ELITE_LOAN_MIN_DURATION } from '../../state/elite_loan_types.js';
 import { getSectorComponent, getSectorFrontOsids } from './sector_utils.js';
 import type { CorpsCommanderProfile } from './commander_override.js';
 import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
+import {
+    createFormationOccupancyIndex,
+    type FormationOccupancyIndex,
+} from './sector_build_derived_context.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
+import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
+import type { SectorTopologyDiagnosticCollector } from './sector_topology_diagnostic.js';
+import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
+import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
 const COLLAPSED_REAR_GUARD_ABSORPTION_CORPS = new Set<string>(['vrs_2nd_krajina']);
@@ -63,7 +70,7 @@ function operationObjectives(op: { axes?: Array<{ objectives?: string[] }>; obje
 }
 
 function hasActiveEnemyFeintAgainstSector(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     sector: CorpsFrontSector,
     faction: FactionId,
 ): boolean {
@@ -247,7 +254,7 @@ export function buildOneHopReserveBand(
     return oneHopBehind;
 }
 
-export function buildOperationParticipantSet(state: GameState | undefined): Set<FormationId> {
+export function buildOperationParticipantSet(state: SectorTopologyNarrowReadState | undefined): Set<FormationId> {
     const participants = new Set<FormationId>();
     if (!state) return participants;
     const corpsCommand = state.military.corps_command ?? {};
@@ -262,7 +269,7 @@ export function buildOperationParticipantSet(state: GameState | undefined): Set<
 }
 
 function countActiveBrigadesByOsid(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
 ): Map<string, number> {
     const counts = new Map<string, number>();
     for (const formation of Object.values(formations)) {
@@ -274,8 +281,27 @@ function countActiveBrigadesByOsid(
     return counts;
 }
 
+type CoverageOccupancyCounts = Pick<FormationOccupancyIndex, 'get' | 'move'>;
+
+function createLegacyCoverageOccupancyCounts(
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
+): CoverageOccupancyCounts {
+    const counts = countActiveBrigadesByOsid(formations);
+    return {
+        get: (osid) => counts.get(osid),
+        move: (_formationId, previousOsid, targetOsid) => {
+            if (previousOsid) {
+                counts.set(previousOsid, Math.max(0, (counts.get(previousOsid) ?? 0) - 1));
+            }
+            if (targetOsid) {
+                counts.set(targetOsid, (counts.get(targetOsid) ?? 0) + 1);
+            }
+        },
+    };
+}
+
 function countActiveEnemyPersonnelByOsid(
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
 ): Map<string, number> {
     const personnelByOsid = new Map<string, number>();
@@ -307,9 +333,9 @@ function classifySectorPosition(
 }
 
 export function isMovementOwnedHomeReturn(
-    state: GameState | undefined,
+    state: SectorTopologyNarrowReadState | undefined,
     formationId: FormationId,
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
 ): boolean {
     if (!state || !formation.home_osid || formation.assignment?.kind != null) return false;
     const moveOrder = state.military.brigade_movement_orders?.[formationId];
@@ -323,9 +349,9 @@ export function isMovementOwnedHomeReturn(
 }
 
 export function isMovementOwnedReturnToCorps(
-    state: GameState | undefined,
+    state: SectorTopologyNarrowReadState | undefined,
     formationId: FormationId,
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
     sectors: CorpsFrontSector[],
 ): boolean {
     if (!state || formation.assignment?.kind != null || !formation.location_osid) return false;
@@ -355,7 +381,7 @@ export function isMovementOwnedReturnToCorps(
 }
 
 function columnDeploymentDestination(
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
     formationId: FormationId,
 ): string | null {
     const moveOrder = state.military.brigade_movement_orders?.[formationId] as { destination_sids?: string[]; stance?: string } | undefined;
@@ -372,9 +398,9 @@ function columnDeploymentDestination(
 }
 
 export function isMovementOwnedActiveLoanDeployment(
-    state: GameState | undefined,
+    state: SectorTopologyNarrowReadState | undefined,
     formationId: FormationId,
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
 ): boolean {
     if (!state || formation.assignment?.kind != null) return false;
     const loanedToCorps = formation.elite_loan_state?.on_loan
@@ -411,13 +437,14 @@ export function isMovementOwnedActiveLoanDeployment(
 export function classifyBrigadesByTerritory(
     sectors: CorpsFrontSector[],
     faction: FactionId,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
     commanderProfiles: Map<string, CorpsCommanderProfile>,
     playerOverrides?: Record<string, string>, // brigadeId → sector_id
-    state?: GameState,
+    state?: SectorTopologyNarrowReadState,
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): void {
     if (sectors.length === 0) return;
 
@@ -444,7 +471,9 @@ export function classifyBrigadesByTerritory(
             const brigComp = componentOf.get(f.location_osid) ?? -2;
             const sectorComp = getSectorComponent(sector, componentOf);
             if (sectorComp !== brigComp) {
-                emitRoutineConsoleWarn(`[brigade_assignment] Ignored stale player override ${bid} -> ${sector.sector_id}: component ${brigComp} cannot reach component ${sectorComp}`);
+                const message = `[brigade_assignment] Ignored stale player override ${bid} -> ${sector.sector_id}: component ${brigComp} cannot reach component ${sectorComp}`;
+                emitRoutineConsoleWarn(message);
+                diagnosticCollector?.record('warn', 'classifyBrigadesByTerritory', message);
                 continue;
             }
             sector.assigned_brigade_ids.push(bid);
@@ -830,7 +859,9 @@ export function classifyBrigadesByTerritory(
         for (const bid of [...pool]) {
             const f = formations[bid];
             if (!f?.location_osid) {
-                emitRoutineConsoleWarn(`[brigade_assignment] UNASSIGNED ${bid}: no location_osid`);
+                const message = `[brigade_assignment] UNASSIGNED ${bid}: no location_osid`;
+                emitRoutineConsoleWarn(message);
+                diagnosticCollector?.record('warn', 'classifyBrigadesByTerritory', message);
                 continue;
             }
             const brigComp = componentOf.get(f.location_osid) ?? -2;
@@ -977,7 +1008,11 @@ export function classifyBrigadesByTerritory(
                     const idx = sector.assigned_brigade_ids.indexOf(bid);
                     if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                     territoryMatches[0]!.assigned_brigade_ids.push(bid);
-                    emitRoutineConsoleDebug(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`);
+                    {
+                        const message = `[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`;
+                        emitRoutineConsoleDebug(message);
+                        diagnosticCollector?.record('debug', 'classifyBrigadesByTerritory', message);
+                    }
                     continue;
                 }
                 const sameCorps = sectors
@@ -1002,7 +1037,11 @@ export function classifyBrigadesByTerritory(
                     const idx = sector.assigned_brigade_ids.indexOf(bid);
                     if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                     sameCorps[0]!.sector.assigned_brigade_ids.push(bid);
-                    emitRoutineConsoleDebug(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to ${sameCorps[0]!.sector.sector_id}`);
+                    {
+                        const message = `[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to ${sameCorps[0]!.sector.sector_id}`;
+                        emitRoutineConsoleDebug(message);
+                        diagnosticCollector?.record('debug', 'classifyBrigadesByTerritory', message);
+                    }
                     continue;
                 }
                 const idx = sector.assigned_brigade_ids.indexOf(bid);
@@ -1058,9 +1097,11 @@ export function classifyBrigadesByTerritory(
                 const idx = sector.assigned_brigade_ids.indexOf(bid);
                 if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                 best.sector.assigned_brigade_ids.push(bid);
-                emitRoutineConsoleDebug(
-                    `[brigade_assignment] rear-guard rebalance ${bid}: ${sector.sector_id} (dist ${ownDist}) -> ${best.sector.sector_id} (dist ${best.dist})`
-                );
+                {
+                    const message = `[brigade_assignment] rear-guard rebalance ${bid}: ${sector.sector_id} (dist ${ownDist}) -> ${best.sector.sector_id} (dist ${best.dist})`;
+                    emitRoutineConsoleDebug(message);
+                    diagnosticCollector?.record('debug', 'classifyBrigadesByTerritory', message);
+                }
             }
         }
     }
@@ -1082,7 +1123,7 @@ export function classifyBrigadesByTerritory(
  */
 export function assignCrossCorpsEnclaveDefenders(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
     componentOf: Map<string, number>,
 ): void {
@@ -1105,7 +1146,7 @@ export function assignCrossCorpsEnclaveDefenders(
  */
 export function reclassifyRearBrigades(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>
 ): void {
@@ -1161,7 +1202,7 @@ export function reclassifyRearBrigades(
  */
 export function enforcePhysicalSectorOwnership(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
 ): void {
@@ -1236,11 +1277,12 @@ export function enforcePhysicalSectorOwnership(
  */
 export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     options?: { allowDeepRearOwnership?: boolean; allowCollapsedRearGuardAbsorption?: boolean },
+    diagnosticCollector?: SectorTopologyDiagnosticCollector,
 ): void {
     const sectorClaims = sectors.map((sector) => {
         const frontSet = getSectorFrontOsids(sector);
@@ -1352,7 +1394,9 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
             const ownCorpsSectors = sectorClaims.filter(c => c.sector.corps_id === corpsId);
             const homeStillOwnCorps = ownCorpsSectors.some(c => c.territorySet.has(formation.home_osid!));
             if (homeStillOwnCorps) {
-                emitRoutineConsoleDebug(`[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`);
+                const message = `[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`;
+                emitRoutineConsoleDebug(message);
+                diagnosticCollector?.record('debug', 'rehomeUnassignedBrigadesToPhysicalSectorOwners', message);
                 continue;
             }
         }
@@ -1391,7 +1435,11 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
                     collapsedBest.sector.reserve_brigade_ids.push(fid);
                 }
                 assigned.add(fid);
-                emitRoutineConsoleDebug(`[brigade_assignment] Rehomed collapsed rear-guard ${fid} into truthful sector owner ${collapsedBest.sector.sector_id} (${collapsedBest.claim})`);
+                {
+                    const message = `[brigade_assignment] Rehomed collapsed rear-guard ${fid} into truthful sector owner ${collapsedBest.sector.sector_id} (${collapsedBest.claim})`;
+                    emitRoutineConsoleDebug(message);
+                    diagnosticCollector?.record('debug', 'rehomeUnassignedBrigadesToPhysicalSectorOwners', message);
+                }
                 continue;
             }
         }
@@ -1406,7 +1454,11 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
             best.sector.reserve_brigade_ids.push(fid);
         }
         assigned.add(fid);
-        emitRoutineConsoleDebug(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${best.sector.sector_id} (${best.claim})`);
+        {
+            const message = `[brigade_assignment] Rehomed ${fid} into truthful sector owner ${best.sector.sector_id} (${best.claim})`;
+            emitRoutineConsoleDebug(message);
+            diagnosticCollector?.record('debug', 'rehomeUnassignedBrigadesToPhysicalSectorOwners', message);
+        }
     }
 }
 
@@ -1436,7 +1488,7 @@ function frontOsidsForFaction(
 }
 
 export function brigadeRequiresSectorAssignment(
-    formation: FormationState,
+    formation: SectorTopologyWorkingFormation,
     sectors: CorpsFrontSector[],
     adjacency: Map<Osid, Osid[]>,
     frontEdges: FrontEdgeSnapshot[],
@@ -1476,7 +1528,7 @@ export function brigadeRequiresSectorAssignment(
  */
 export function warnUnresolvedSectorAssignments(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
     adjacency?: Map<Osid, Osid[]>,
     frontEdges: FrontEdgeSnapshot[] = [],
@@ -1506,20 +1558,50 @@ export function warnUnresolvedSectorAssignments(
  */
 type EnsureMinimumSectorCoveragePerfTimer = <T>(label: string, fn: () => T) => T;
 
+export type EnsureMinimumSectorCoverageOccupancyStrategy =
+    | 'dense-index'
+    | 'test-only-legacy-scan';
+
 export function ensureMinimumSectorCoverage(
     allSectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
-    state?: GameState,
+    state?: SectorTopologyNarrowReadState,
     perfTime: EnsureMinimumSectorCoveragePerfTimer = (_label, fn) => fn(),
+    occupancyStrategy: EnsureMinimumSectorCoverageOccupancyStrategy = 'dense-index',
+    mutationRecorder?: SectorTopologyMutationRecorder,
 ): void {
+    if (occupancyStrategy !== 'dense-index' && occupancyStrategy !== 'test-only-legacy-scan') {
+        throw new Error(`Unknown occupancy strategy: ${String(occupancyStrategy)}`);
+    }
     const opParticipants = buildOperationParticipantSet(state);
     const brigadeMovementState = state?.military.brigade_movement_state;
     const brigadeMovementOrders = state?.military.brigade_movement_orders;
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
     const FRONT_DONOR_HOME_DISTANCE_MAX_HOPS = 4;
+
+    // Dense call-scoped occupancy replaces repeated full formation scans while
+    // retaining exactly the same eligibility rule and Map-like zero semantics.
+    // The universe contains every current counted location and every front target
+    // this function can select. Every location write below goes through move().
+    let denseActiveCounts: FormationOccupancyIndex | undefined;
+    if (occupancyStrategy === 'dense-index') {
+        const occupancyOsids = new Set<string>();
+        for (const formation of Object.values(formations)) {
+            if (formation?.location_osid) occupancyOsids.add(formation.location_osid);
+        }
+        for (const sector of allSectors) {
+            for (const subSegment of sector.sub_segments ?? []) {
+                for (const osid of subSegment.friendly_osids ?? []) occupancyOsids.add(osid);
+            }
+        }
+        denseActiveCounts = createFormationOccupancyIndex(occupancyOsids, formations);
+    }
+    const freshActiveCounts = (): CoverageOccupancyCounts => (
+        denseActiveCounts ?? createLegacyCoverageOccupancyCounts(formations)
+    );
 
     // ── Single-call-frame front-OSID memoization (perf) ──
     // `getSectorFrontOsids(sector)` rebuilds a Set by iterating every sub_segment's
@@ -1591,7 +1673,7 @@ export function ensureMinimumSectorCoverage(
     const pickVacantLocalFrontTargetFromFrontSet = (
         bid: FormationId,
         sectorFrontOsids: ReadonlySet<string>,
-        activeCounts: Map<string, number>,
+        activeCounts: CoverageOccupancyCounts,
         maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS,
     ): { target: string; dist: number } | null => {
         const formation = formations[bid];
@@ -1638,7 +1720,7 @@ export function ensureMinimumSectorCoverage(
     const pickVacantLocalFrontTarget = (
         bid: FormationId,
         sector: CorpsFrontSector,
-        activeCounts: Map<string, number>,
+        activeCounts: CoverageOccupancyCounts,
         maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS,
     ): { target: string; dist: number } | null => (
         pickVacantLocalFrontTargetFromFrontSet(
@@ -1652,16 +1734,20 @@ export function ensureMinimumSectorCoverage(
     const moveBrigadeToFrontTarget = (
         bid: FormationId,
         target: string,
-        activeCounts: Map<string, number>,
+        activeCounts: CoverageOccupancyCounts,
     ): void => {
         const formation = formations[bid];
         if (!formation?.location_osid) return;
         const previous = formation.location_osid;
         if (!isEnclaveMovementDestinationAllowed(formation, previous, target)) return;
-        formation.location_osid = target;
-        formation.entrenchment_turns = 0;
-        activeCounts.set(previous, Math.max(0, (activeCounts.get(previous) ?? 0) - 1));
-        activeCounts.set(target, (activeCounts.get(target) ?? 0) + 1);
+        activeCounts.move(bid, previous, target);
+        if (mutationRecorder) {
+            mutationRecorder.recordFormationLocation(formation, bid, target, 'ensureMinimumSectorCoverage');
+            mutationRecorder.recordFormationEntrenchment(formation, bid, 'ensureMinimumSectorCoverage');
+        } else {
+            formation.location_osid = target;
+            formation.entrenchment_turns = 0;
+        }
     };
 
     const targetPreservesHomeDistance = (
@@ -1791,7 +1877,7 @@ export function ensureMinimumSectorCoverage(
             // Step 1: promote first connected reserve to assigned
             const promotedReserve = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-reserve', () => {
                 if (sector.reserve_brigade_ids.length === 0) return false;
-                const activeCounts = countActiveBrigadesByOsid(formations);
+                const activeCounts = freshActiveCounts();
                 for (let ri = 0; ri < sector.reserve_brigade_ids.length; ri++) {
                     const bid = sector.reserve_brigade_ids[ri]!;
                     const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
@@ -1810,7 +1896,7 @@ export function ensureMinimumSectorCoverage(
             // Step 1b: promote the nearest reachable own-sector rear brigade.
             const promotedRear = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-rear', () => {
                 if ((sector.rear_brigade_ids?.length ?? 0) === 0) return false;
-                const activeCounts = countActiveBrigadesByOsid(formations);
+                const activeCounts = freshActiveCounts();
                 const rearCandidates = [...(sector.rear_brigade_ids ?? [])]
                     .sort(strictCompare)
                     .map((bid) => {
@@ -1834,19 +1920,13 @@ export function ensureMinimumSectorCoverage(
                 const rearDonors = sameComponentDonors
                     .filter(s => (s.rear_brigade_ids?.length ?? 0) > 0);
                 if (rearDonors.length === 0) return false;
-                // Hoisted from inside the flatMap callback: formations is read-only
-                // across donor iterations within this step, so the per-donor rebuild
-                // produced identical activeCounts maps. Byte-identical because
-                // pickVacantLocalFrontTargetFromFrontSet(...) consumes activeCounts read-only;
-                // the post-pick moveBrigadeToFrontTarget below can reuse the same
-                // map because no formation location changes between pick and move.
-                const stepActiveCounts = countActiveBrigadesByOsid(formations);
+                const activeCounts = freshActiveCounts();
                 const rearCandidates = rearDonors
                     .flatMap((donor) => {
                         return [...(donor.rear_brigade_ids ?? [])]
                             .sort(strictCompare)
                             .map((bid) => {
-                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts);
+                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                                 if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
@@ -1860,7 +1940,7 @@ export function ensureMinimumSectorCoverage(
                 if (rearCandidates.length > 0) {
                     const { donor, bid, target } = rearCandidates[0]!;
                     donor.rear_brigade_ids = (donor.rear_brigade_ids ?? []).filter((candidate) => candidate !== bid);
-                    moveBrigadeToFrontTarget(bid, target, stepActiveCounts);
+                    moveBrigadeToFrontTarget(bid, target, activeCounts);
                     sector.assigned_brigade_ids.push(bid);
                     return true;
                 }
@@ -1873,14 +1953,13 @@ export function ensureMinimumSectorCoverage(
                 const reserveDonors = sameComponentDonors
                     .filter(s => s.reserve_brigade_ids.length > 0);
                 if (reserveDonors.length === 0) return false;
-                // Hoisted from inside the flatMap callback (same justification as Step 1b).
-                const stepActiveCounts = countActiveBrigadesByOsid(formations);
+                const activeCounts = freshActiveCounts();
                 const reserveCandidates = reserveDonors
                     .flatMap((donor) => {
                         return [...donor.reserve_brigade_ids]
                             .sort(strictCompare)
                             .map((bid) => {
-                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts);
+                                const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                                 if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
@@ -1894,7 +1973,7 @@ export function ensureMinimumSectorCoverage(
                 if (reserveCandidates.length > 0) {
                     const { donor, bid, target } = reserveCandidates[0]!;
                     donor.reserve_brigade_ids = donor.reserve_brigade_ids.filter((candidate) => candidate !== bid);
-                    moveBrigadeToFrontTarget(bid, target, stepActiveCounts);
+                    moveBrigadeToFrontTarget(bid, target, activeCounts);
                     sector.assigned_brigade_ids.push(bid);
                     return true;
                 }
@@ -1953,7 +2032,7 @@ export function ensureMinimumSectorCoverage(
                 }
                 if (!transferred) {
                     const ZERO_FRONT_DONOR_MAX_THREAT = 250;
-                    const activeCounts = countActiveBrigadesByOsid(formations);
+                    const activeCounts = freshActiveCounts();
                     const frontCandidates = sameCompSectors
                         .filter((donor) =>
                             donor.length_edges > 0
@@ -2227,7 +2306,7 @@ export function ensureMinimumSectorCoverage(
 
             let promoted = 0;
             while (promoted < deficit) {
-                const activeCounts = countActiveBrigadesByOsid(formations);
+                const activeCounts = freshActiveCounts();
                 const candidates = [
                     ...(sector.rear_brigade_ids ?? []).map((bid) => ({ bid, role: 'rear' as const })),
                     ...sector.reserve_brigade_ids.map((bid) => ({ bid, role: 'reserve' as const })),
@@ -2286,20 +2365,13 @@ export function ensureMinimumSectorCoverage(
                 || (a.assigned_brigade_ids.length / a.length_edges) - (b.assigned_brigade_ids.length / b.length_edges)
                 || strictCompare(a.sector_id, b.sector_id));
 
-        // Per-recipient rebuild kept deliberately. Batch 27 attempted to hoist
-        // `countActiveBrigadesByOsid(formations)` to once-per-pass on the theory
-        // that moveBrigadeToFrontTarget below updates activeCounts in-place with
-        // an identical delta. Byte-identity held (40w hash unchanged) but the
-        // hoisted measurement consistently regressed `:floor-completion` from
-        // 696 ms to 907 ms across two confirmation runs (n1904 and n1905). The
-        // suspected cause is Map sparseness: the hoisted Map accumulates entries
-        // for transient OSIDs across the whole pass and V8's lookup cost grows
-        // with that footprint, while the per-recipient fresh build produces a
-        // tighter Map. Revert documented in BATCH27_FLOOR_COMPLETION_HOIST_REVERT.
+        // Batch 27's long-lived Map hoist regressed this pass as its sparse key
+        // footprint grew. The current candidate instead uses the fixed ordinal
+        // universe and dense counts owned by this one function invocation.
         for (const recipient of recipients) {
             const recipComp = componentForSector(recipient);
             const recipientDensity = recipient.assigned_brigade_ids.length / Math.max(1, recipient.length_edges);
-            const activeCounts = countActiveBrigadesByOsid(formations);
+            const activeCounts = freshActiveCounts();
             const deficit = Math.max(0, needed(recipient) - recipient.assigned_brigade_ids.length);
             let transferred = 0;
 
@@ -2434,7 +2506,7 @@ export function ensureMinimumSectorCoverage(
         for (const recipient of recipients) {
             const recipComp = componentForSector(recipient);
             const deficit = Math.max(0, needed(recipient) - recipient.assigned_brigade_ids.length);
-            const activeCounts = countActiveBrigadesByOsid(formations);
+            const activeCounts = freshActiveCounts();
             const recipientDensity = recipient.assigned_brigade_ids.length / Math.max(1, recipient.length_edges);
             const recipientThreat = recipient.threat_ratio ?? 0;
             let transferred = 0;
@@ -2583,9 +2655,9 @@ export function deduplicateBrigadesAcrossSectors(sectors: CorpsFrontSector[]): v
  */
 export function recomputeSectorPowerAndThreat(
     sectors: CorpsFrontSector[],
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     faction: FactionId,
-    state: GameState,
+    state: SectorTopologyNarrowReadState,
 ): void {
     const enemyPersonnelByOsid = countActiveEnemyPersonnelByOsid(formations, faction);
     for (const s of sectors) {
@@ -2620,8 +2692,9 @@ export function recomputeSectorPowerAndThreat(
  */
 export function syncSectorAssignmentsToFormations(
     sectors: Record<string, CorpsFrontSector>,
-    formations: Record<FormationId, FormationState>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
     adjacency?: Map<Osid, Osid[]>,
+    mutationRecorder?: SectorTopologyMutationRecorder,
 ): void {
     // Step 1: Clear assignment for all brigade-kind formations
     const formIds = Object.keys(formations).sort(strictCompare);
@@ -2632,11 +2705,19 @@ export function syncSectorAssignmentsToFormations(
             && f.kind !== undefined) continue;
         // Only clear sector assignments — preserve edge/region assignments from other systems
         if (f.assignment && f.assignment.kind === 'sector') {
-            f.assignment = null;
+            if (mutationRecorder) {
+                mutationRecorder.recordFormationAssignment(f, fid, null, 'syncSectorAssignmentsToFormations:clear');
+            } else {
+                f.assignment = null;
+            }
         }
         // Sub-segment ownership is derived from current frontline sector truth.
         // If a brigade is no longer sector-owned, stale residue must not survive.
-        f.assigned_sub_segment_id = undefined;
+        if (mutationRecorder) {
+            mutationRecorder.recordFormationAssignedSubSegment(f, fid, undefined, 'syncSectorAssignmentsToFormations:clear');
+        } else {
+            f.assigned_sub_segment_id = undefined;
+        }
     }
 
     // Step 2: Set assignment from sector data
@@ -2664,7 +2745,12 @@ export function syncSectorAssignmentsToFormations(
                         ? 'territory'
                         : null;
             if (!physicalClaim) continue;
-            f.assignment = { kind: 'sector', sector_id: sid, role: physicalClaim === 'territory' ? 'rear' : physicalClaim };
+            const nextAssignment: FormationAssignment = { kind: 'sector', sector_id: sid, role: physicalClaim === 'territory' ? 'rear' : physicalClaim };
+            if (mutationRecorder) {
+                mutationRecorder.recordFormationAssignment(f, bid, nextAssignment, 'syncSectorAssignmentsToFormations:assigned');
+            } else {
+                f.assignment = nextAssignment;
+            }
         }
         for (const bid of sector.reserve_brigade_ids) {
             const f = formations[bid];
@@ -2678,7 +2764,12 @@ export function syncSectorAssignmentsToFormations(
                         ? 'territory'
                         : null;
             if (!reserveClaim) continue;
-            f.assignment = { kind: 'sector', sector_id: sid, role: reserveClaim === 'territory' ? 'rear' : 'reserve' };
+            const nextAssignment: FormationAssignment = { kind: 'sector', sector_id: sid, role: reserveClaim === 'territory' ? 'rear' : 'reserve' };
+            if (mutationRecorder) {
+                mutationRecorder.recordFormationAssignment(f, bid, nextAssignment, 'syncSectorAssignmentsToFormations:reserve');
+            } else {
+                f.assignment = nextAssignment;
+            }
         }
         for (const bid of sector.rear_brigade_ids ?? []) {
             const f = formations[bid];
@@ -2692,7 +2783,12 @@ export function syncSectorAssignmentsToFormations(
                         ? 'territory'
                         : null;
             if (!rearClaim) continue;
-            f.assignment = { kind: 'sector', sector_id: sid, role: 'rear' };
+            const nextAssignment: FormationAssignment = { kind: 'sector', sector_id: sid, role: 'rear' };
+            if (mutationRecorder) {
+                mutationRecorder.recordFormationAssignment(f, bid, nextAssignment, 'syncSectorAssignmentsToFormations:rear');
+            } else {
+                f.assignment = nextAssignment;
+            }
         }
     }
 }

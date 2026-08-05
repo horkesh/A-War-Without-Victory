@@ -325,7 +325,8 @@ export function OOBSidebar() {
         className="flex-grow flex flex-col min-h-0 min-w-0 relative z-10"
       >
         <div
-          className="flex-1 overflow-auto min-h-0 min-w-0"
+          data-testid="oob-sidebar-scroll-region"
+          className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 min-w-0"
           ref={sidebarRef}
         >
           {/* ── Situation ── */}

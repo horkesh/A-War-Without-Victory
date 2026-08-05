@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 2,
+  "rows": [
+    {
+      "familyId": "autonomy_proposal",
+      "producer": "src/sim/ai_commander/proposal_generation.ts -> meta.pending_proposal_reviews",
+      "statePath": "meta.pending_proposal_reviews",
+      "blockerPredicate": "advisory; unresolved proposal review for the player faction",
+      "gatePolicy": "advisory",
+      "actionSurface": "decision_room:proposal_review_dossier",
+      "receiptOwner": "meta.pending_proposal_reviews (conditional retention)",
+      "receiptDurability": "conditional",
+      "receiptDisposition": "Resolved ordinary proposal reviews are retained only for the current turn; durable retention is limited to authored-operation proposal classes.",
+      "chronicleConsumers": [],
+      "recordsConsumers": [],
+      "receiptConsumers": [],
+      "codexConsumers": [],
+      "costLedgerConsumers": [],
+      "sourceProofStatus": "verified",
+      "sourceEvidence": {
+        "producer": [
+          "src/sim/ai_commander/proposal_generation.ts#export function generateLevel1StanceProposals(",
+          "src/sim/turn_phases/war_phases.ts#context.state.meta.pending_proposal_reviews.push(...proposals);"
+        ],
+        "action": [
+          "src/ui/map/App.tsx#if (action === 'decision_room')",
+          "src/ui/map/data/presidentialDecisionRoom.ts#function addProposalReviewDirectiveCards("
+        ],
+        "receipt": [
+          "src/sim/turn_phases/war_phases.ts#meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter((proposal) =>",
+          "src/sim/turn_phases/war_phases.ts#|| proposal.resolved_turn === meta.turn"
+        ],
+        "consumers": []
+      }
+    },
+    {
+      "familyId": "convoy_decision",
+      "producer": "src/state/supply_reserves.ts -> military.pending_convoy_decisions",
+      "statePath": "military.pending_convoy_decisions",
+      "blockerPredicate": "decision is undefined",
+      "gatePolicy": "modal_required",
+      "actionSurface": "desk:convoy_decision_modal",
+      "receiptOwner": "military.convoy_decision_history",
+      "receiptDurability": "durable",
+      "receiptDisposition": "Resolved convoy instruction remains in the humanitarian access history.",
+      "chronicleConsumers": [
+        "decision-consequence ledger"
+      ],
+      "recordsConsumers": [],
+      "receiptConsumers": [],
+      "codexConsumers": [],
+      "costLedgerConsumers": [],
+      "sourceProofStatus": "verified",
+      "sourceEvidence": {
+        "producer": [
+          "src/state/supply_reserves.ts#state.military.pending_convoy_decisions = pending.sort((a, b) => strictCompare(a.id, b.id));"
+        ],
+        "action": [
+          "src/ui/map/App.tsx#if (action === 'convoy_decision_modal')"
+        ],
+        "receipt": [
+          "src/state/supply_reserves.ts#state.military.convoy_decision_history = history.sort((a, b) =>"
+        ],
+        "consumers": [
+          "src/ui/map/data/decisionConsequenceLedger.ts#for (const convoy of state.convoyDecisionHistory ?? [])"
+        ]
+      }
+    },
+    {
+      "familyId": "dayton_negotiation",
+      "producer": "src/sim/turn_phases/war_phase_negotiation_steps.ts -> military.negotiation.pending_dayton",
+      "statePath": "military.negotiation.pending_dayton",
+      "blockerPredicate": "pending_dayton is present",
+      "gatePolicy": "modal_required",
+      "actionSurface": "desk:dayton_modal",
+      "receiptOwner": "military.negotiation.dayton_result",
+      "receiptDurability": "durable",
+      "receiptDisposition": "Signed settlement result persists into the game verdict and final campaign record.",
+      "chronicleConsumers": [
+        "decision-consequence ledger"
+      ],
+      "recordsConsumers": [],
+      "receiptConsumers": [],
+      "codexConsumers": [],
+      "costLedgerConsumers": [],
+      "sourceProofStatus": "verified",
+      "sourceEvidence": {
+        "producer": [
+          "src/sim/turn_phases/war_phase_negotiation_steps.ts#if (negotiation) negotiation.pending_dayton = menu;"
+        ],
+        "action": [
+          "src/ui/map/App.tsx#if (action === 'dayton_modal')"
+        ],
+        "receipt": [
+          "src/sim/negotiation/dayton_negotiation.ts#neg.dayton_result = result;"
+        ],
+        "consumers": [
+          "src/ui/map/data/decisionConsequenceLedger.ts#familyId: 'dayton-settlement'",
+          "src/ui/map/data/decisionConsequenceLedger.ts#state.gameVerdict?.outcome_type === 'dayton'"
+        ]
+      }
+    },
+    {
+      "familyId": "event_decision",
+      "producer": "src/sim/events/evaluate_events.ts -> military.pending_event_decisions",
+      "statePath": "military.pending_event_decisions",
+      "blockerPredicate": "requires_player_response === true",
+      "gatePolicy": "hard_block",
+      "actionSurface": "desk:event_modal",
+      "receiptOwner": "military.event_decision_log",
+      "receiptDurability": "durable",
+      "receiptDisposition": "Append-only player and bot response log retained in the canonical save.",
+      "chronicleConsumers": [
+        "decision-consequence ledger"
+      ],
+      "recordsConsumers": [],
+      "receiptConsumers": [
+        "confirmed consequence receipts"
+      ],
+      "codexConsumers": [
+        "dynamic section builder"
+      ],
+      "costLedgerConsumers": [],
+      "sourceProofStatus": "verified",
+      "sourceEvidence": {
+        "producer": [
+          "src/sim/events/evaluate_events.ts#def.requires_player_response === true",
+          "src/sim/events/evaluate_events.ts#state.military.pending_event_decisions.push({"
+        ],
+        "action": [
+          "src/ui/map/App.tsx#if (action === 'event_modal')"
+        ],
+        "receipt": [
+          "src/sim/events/evaluate_events.ts#state.military.event_decision_log.push({"
+        ],
+        "consumers": [
+          "src/sim/codex/dynamic_section_builder.ts#const log = input.state.military?.event_decision_log ?? [];",
+          "src/ui/map/data/consequenceReceipts.ts#for (const dec of decisionLog)",
+          "src/ui/map/data/decisionConsequenceLedger.ts#for (const event of state.firedEvents ?? [])",
+          "src/ui/map/data/decisionConsequenceLedger.ts#recordTarget: 'chronicle'"
+        ]
+      }
+    },
+    {
+      "familyId": "officer_event",
+      "producer": "src/sim/combat/officer_system.ts -> military.pending_officer_events",
+      "statePath": "military.pending_officer_events",
+      "blockerPredicate": "advisory; acknowledged !== true",
+      "gatePolicy": "advisory",
+      "actionSurface": "army_hq:officer_matter_modal",
+      "receiptOwner": "military.officer_decision_history",
+      "receiptDurability": "durable",
+      "receiptDisposition": "Acknowledgements, overrides, and replacements remain in personnel history.",
+      "chronicleConsumers": [],
+      "recordsConsumers": [
+        "decision-consequence ledger"
+      ],
+      "receiptConsumers": [],
+      "codexConsumers": [],
+      "costLedgerConsumers": [],
+      "sourceProofStatus": "verified",
+      "sourceEvidence": {
+        "producer": [
+          "src/sim/combat/officer_system.ts#const pendingEvents = state.military.pending_officer_events;",
+          "src/sim/combat/officer_system.ts#pendingEvents.push({"
+        ],
+        "action": [
+          "src/ui/map/App.tsx#if (action === 'army_hq_personnel')"
+        ],
+        "receipt": [
+          "src/desktop/officer_decision_history.cjs#state.military.officer_decision_history = existing;"
+        ],
+        "consumers": [
+          "src/ui/map/data/decisionConsequenceLedger.ts#for (const officer of state.officerDecisionHistory ?? [])"
+        ]
+      }
+    },
+    {
+      "familyId": "operation_opportunity",
+      "producer": "src/sim/combat/operation_opportunities.ts -> military.operation_opportunities + meta.pending_proposal_reviews",
+      "statePath": "meta.pending_proposal_reviews + military.operation_opportunities",
+      "blockerPredicate": "advisory; status === eligible_pending_review",
+      "gatePolicy": "advisory",
+      "actionSurface": "decision_room:operation_opportunity_dossier",
+      "receiptOwner": "military.operation_opportunity_resolutions",
+      "receiptDurability": "durable",
+      "receiptDisposition": "The canonical opportunity state and resolution ledger retain the response and downstream outcome.",
+      "chronicleConsumers": [],
+      "recordsConsumers": [
+        "operation opportunity records projection"
+      ],
+      "receiptConsumers": [],
+      "codexConsumers": [],
+      "costLedgerConsumers": [
+        "operation opportunity cost ledger"
+      ],
+      "sourceProofStatus": "verified",
+      "sourceEvidence": {
+        "producer": [
+          "src/sim/combat/operation_opportunities.ts#state.military.operation_opportunities = proposals;"
+        ],
+        "action": [
+          "src/ui/map/App.tsx#if (action === 'decision_room')",
+          "src/ui/map/data/presidentialDecisionRoom.ts#function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): void"
+        ],
+        "receipt": [
+          "src/sim/combat/operation_opportunities.ts#state.military.operation_opportunity_resolutions.push({"
+        ],
+        "consumers": [
+          "src/sim/endgame/cost_ledger.ts#const resolutions = [...(state.military?.operation_opportunity_resolutions ?? [])];",
+          "src/ui/map/data/operationOpportunityLedger.ts#? state.military.operation_opportunity_resolutions as RawRecord[]",
+          "src/ui/map/data/operationOpportunityLedger.ts#const resolutions = Array.isArray(state.military?.operation_opportunity_resolutions)"
+        ]
+      }
+    },
+    {
+      "familyId": "paramilitary_request",
+      "producer": "src/sim/combat/paramilitary_sweep.ts -> pending_paramilitary_requests",
+      "statePath": "pending_paramilitary_requests",
+      "blockerPredicate": "decision is not allow, deny, or regular",
+      "gatePolicy": "hard_block",
+      "actionSurface": "desk:paramilitary_review_modal",
+      "receiptOwner": "paramilitary_decision_history",
+      "receiptDurability": "durable",
+      "receiptDisposition": "Resolved authorization remains in the top-level paramilitary decision history.",
+      "chronicleConsumers": [],
+      "recordsConsumers": [
+        "decision-consequence ledger"
+      ],
+      "receiptConsumers": [],
+      "codexConsumers": [],
+      "costLedgerConsumers": [],
+      "sourceProofStatus": "verified",
+      "sourceEvidence": {
+        "producer": [
+          "src/sim/combat/paramilitary_sweep.ts#const requests = state.pending_paramilitary_requests ??= [];",
+          "src/sim/combat/paramilitary_sweep.ts#requests.push({"
+        ],
+        "action": [
+          "src/ui/map/App.tsx#if (action === 'paramilitary_review')"
+        ],
+        "receipt": [
+          "src/sim/combat/paramilitary_sweep.ts#state.paramilitary_decision_history = history.sort((a, b) =>"
+        ],
+        "consumers": [
+          "src/ui/map/data/decisionConsequenceLedger.ts#for (const paramilitary of state.paramilitaryDecisionHistory ?? [])"
+        ]
+      }
+    },
+    {
+      "familyId": "peace_plan",
+      "producer": "src/sim/negotiation/peace_plans.ts -> military.negotiation.pending_peace_plan",
+      "statePath": "military.negotiation.pending_peace_plan",
+      "blockerPredicate": "pending_peace_plan is present",
+      "gatePolicy": "modal_required",
+      "actionSurface": "desk:peace_plan_modal",
+      "receiptOwner": "military.negotiation.peace_plan_history",
+      "receiptDurability": "durable",
+      "receiptDisposition": "Resolved plan and all faction responses remain in negotiation history.",
+      "chronicleConsumers": [
+        "decision-consequence ledger"
+      ],
+      "recordsConsumers": [],
+      "receiptConsumers": [],
+      "codexConsumers": [],
+      "costLedgerConsumers": [],
+      "sourceProofStatus": "verified",
+      "sourceEvidence": {
+        "producer": [
+          "src/sim/negotiation/peace_plans.ts#neg.pending_peace_plan = {"
+        ],
+        "action": [
+          "src/ui/map/App.tsx#if (action === 'peace_plan_modal')"
+        ],
+        "receipt": [
+          "src/sim/negotiation/peace_plans.ts#neg.peace_plan_history.push(historyEntry);"
+        ],
+        "consumers": [
+          "src/ui/map/data/decisionConsequenceLedger.ts#for (const peace of state.peacePlanHistory ?? [])"
+        ]
+      }
+    },
+    {
+      "familyId": "reserve_request",
+      "producer": "src/sim/combat/army_reserve_system.ts -> military.pending_reserve_requests",
+      "statePath": "military.pending_reserve_requests",
+      "blockerPredicate": "advisory; never blocks Advance",
+      "gatePolicy": "advisory",
+      "actionSurface": "army_hq:reserve_request_modal",
+      "receiptOwner": "military.reserve_request_history",
+      "receiptDurability": "durable",
+      "receiptDisposition": "Player and staff reserve dispositions remain in Army HQ history.",
+      "chronicleConsumers": [],
+      "recordsConsumers": [
+        "decision-consequence ledger"
+      ],
+      "receiptConsumers": [],
+      "codexConsumers": [],
+      "costLedgerConsumers": [],
+      "sourceProofStatus": "verified",
+      "sourceEvidence": {
+        "producer": [
+          "src/sim/combat/army_reserve_system.ts#state.military.pending_reserve_requests = pending"
+        ],
+        "action": [
+          "src/ui/map/App.tsx#if (action === 'army_reserve')"
+        ],
+        "receipt": [
+          "src/sim/combat/army_reserve_system.ts#state.military.reserve_request_history.push(entry);"
+        ],
+        "consumers": [
+          "src/ui/map/data/decisionConsequenceLedger.ts#for (const reserve of state.reserveRequestHistory ?? [])"
+        ]
+      }
+    }
+  ],
+  "findings": [
+    {
+      "code": "missing_durable_receipt",
+      "familyId": "autonomy_proposal",
+      "detail": "Resolved ordinary proposal reviews are retained only for the current turn; durable retention is limited to authored-operation proposal classes."
+    }
+  ],
+  "summary": {
+    "familyCount": 9,
+    "reachableActionFamilyCount": 9,
+    "durableReceiptFamilyCount": 8,
+    "conditionalReceiptFamilyCount": 1,
+    "unresolvedFindingCount": 1,
+    "sourceVerifiedFamilyCount": 9
+  }
+}

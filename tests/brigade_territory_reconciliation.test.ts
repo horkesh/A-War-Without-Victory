@@ -102,6 +102,19 @@ function makeComponentOf(osidToComponent: Record<string, number>): Map<string, n
 // ── Tests ───────────────────────────────────────────────────────────────────
 
 describe('Phase 1.5: territory-based brigade assignment', () => {
+    it('fails closed on an unknown minimum-coverage occupancy strategy', () => {
+        expect(() => ensureMinimumSectorCoverage(
+            [],
+            {},
+            new Map(),
+            new Set(),
+            new Map(),
+            undefined,
+            undefined,
+            'unsupported' as never,
+        )).toThrow(/unknown occupancy strategy/i);
+    });
+
     it('assigns brigade in depth territory to correct sector', () => {
         // Sector 1 has front OSIDs (front_a, front_b) and depth territory (depth_c).
         // Sector 2 has front OSIDs (front_d, front_e) and depth territory (depth_f).

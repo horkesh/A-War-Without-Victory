@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { StartNewCampaignPayload } from './types';
+import type { GameStateUpdateMetadata, StartNewCampaignPayload, StartNewCampaignResult } from './types';
 
 export interface CorpsOperationOrderPayload {
     corpsId: string;
@@ -194,11 +194,11 @@ interface ParamilitaryReviewOptions {
 
 /** Shape of window.awwv as exposed by preload.cjs. */
 interface WindowAwwv {
-    startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; error?: string }>;
+    startNewCampaign: (payload: StartNewCampaignPayload) => Promise<StartNewCampaignResult>;
     advanceTurn: (payload?: { phase0Directives?: unknown[] }) => Promise<{ ok: boolean; report?: unknown; error?: string }>;
     getCurrentGameState: () => Promise<string | null>;
     getRuntimeFeatureFlags: () => Promise<{ srkStranglePostureActive: boolean } | null>;
-    subscribeGameStateUpdated: (cb: (stateJson: string) => void) => () => void;
+    subscribeGameStateUpdated: (cb: (stateJson: string, metadata?: GameStateUpdateMetadata) => void) => () => void;
     subscribeTurnReportUpdated: (cb: (report: unknown) => void) => () => void;
     /**
      * LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: subscribe to optional
@@ -431,7 +431,7 @@ export function useIPC() {
 
             startNewCampaign: awwv
                 ? (payload: StartNewCampaignPayload) => awwv.startNewCampaign(payload)
-                : makeNoop<{ ok: boolean; error?: string }>(),
+                : makeNoop<StartNewCampaignResult>(),
 
             advanceTurn: awwv
                 ? (payload?: { phase0Directives?: unknown[] }) => awwv.advanceTurn(payload)
@@ -446,8 +446,8 @@ export function useIPC() {
                 : (): Promise<{ srkStranglePostureActive: boolean } | null> => Promise.resolve(null),
 
             subscribeGameStateUpdated: awwv
-                ? (cb: (stateJson: string) => void) => awwv.subscribeGameStateUpdated(cb)
-                : (_cb: (stateJson: string) => void) => () => { /* noop */ },
+                ? (cb: (stateJson: string, metadata?: GameStateUpdateMetadata) => void) => awwv.subscribeGameStateUpdated(cb)
+                : (_cb: (stateJson: string, metadata?: GameStateUpdateMetadata) => void) => () => { /* noop */ },
 
             subscribeTurnReportUpdated: awwv
                 ? (cb: (report: unknown) => void) => awwv.subscribeTurnReportUpdated(cb)

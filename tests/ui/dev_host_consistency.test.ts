@@ -16,18 +16,11 @@ describe('dev host consistency', () => {
     expect(source).toContain('http://127.0.0.1:3002');
   });
 
-  it('Warroom tactical iframe document injection is same-origin gated', () => {
+  it('Warroom never reaches through the tactical iframe DOM boundary', () => {
     const source = readRepoFile('src/ui/warroom/warroom.ts');
-    const methodStart = source.indexOf('private injectBridgeIntoTacticalMap');
-    const methodEnd = source.indexOf('private postFreshCampaignStartedToTacticalMap');
-    const method = source.slice(methodStart, methodEnd);
 
-    const originGuard = method.indexOf('new URL(iframe.src, window.location.href).origin');
-    const documentAccess = method.indexOf('iframeWindow.document');
-
-    expect(methodStart).toBeGreaterThanOrEqual(0);
-    expect(methodEnd).toBeGreaterThan(methodStart);
-    expect(originGuard).toBeGreaterThanOrEqual(0);
-    expect(documentAccess).toBeGreaterThan(originGuard);
+    expect(source).not.toContain('iframeWindow.document');
+    expect(source).not.toContain('contentWindow.document');
+    expect(source).toContain('private isTrustedTacticalFrameMessage(event: MessageEvent): boolean');
   });
 });

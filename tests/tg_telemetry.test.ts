@@ -19,7 +19,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { formTacticalGroup } from '../src/sim/combat/tactical_group_lifecycle.js';
+import { distributeCasualtiesAcrossTg } from '../src/sim/combat/tactical_group_casualties.js';
+import {
+    dissolveTacticalGroup,
+    formTacticalGroup,
+} from '../src/sim/combat/tactical_group_lifecycle.js';
 import type {
     ArmyHqOperation,
     FormationState,
@@ -28,6 +32,7 @@ import type {
     TgDonorContribution,
 } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import type { TgParticipationRecord } from '../src/state/brigade_history.js';
 
 function brigade(id: string, overrides: Partial<FormationState> = {}): FormationState {
     return {
@@ -141,6 +146,104 @@ describe('TG telemetry — tg_participations (Phase 3A)', () => {
         const hist = state.military!.formations!.d1.brigade_history!;
         expect(hist.battles_fought).toBe(7);
         expect(hist.tg_participations).toHaveLength(1);
+    });
+
+    it('finalizes live and archived donor records exactly and leaves anchor terminal values uninvented', () => {
+        const state = stateWith([
+            brigade('z_anchor'),
+            brigade('a_archived_donor'),
+            brigade('m_live_donor'),
+        ]);
+        const formed = formTacticalGroup(state, {
+            op_id: 'op_terminal',
+            anchor_brigade_id: 'z_anchor',
+            donors: [
+                donorContribution('m_live_donor', 'corp_a', 200),
+                donorContribution('a_archived_donor', 'corp_a', 300),
+            ],
+            current_turn: 5,
+        });
+        const tgId = formed.tg_id!;
+        const tg = state.military.tactical_groups![tgId]!;
+        tg.donor_contributions.find((d) => d.brigade_id === 'a_archived_donor')!.casualties_so_far = 275;
+        tg.donor_contributions.find((d) => d.brigade_id === 'm_live_donor')!.casualties_so_far = 20;
+
+        const finalBattle = distributeCasualtiesAcrossTg(400, tg.anchor_brigade_id, tg.donor_contributions);
+        expect(finalBattle.anchor_casualties).toBe(295);
+        expect(finalBattle.donor_casualties).toEqual({
+            a_archived_donor: 25,
+            m_live_donor: 80,
+        });
+        expect(
+            finalBattle.anchor_casualties
+            + Object.values(finalBattle.donor_casualties).reduce((sum, casualties) => sum + casualties, 0),
+        ).toBe(400);
+        for (const contribution of tg.donor_contributions) {
+            contribution.casualties_so_far += finalBattle.donor_casualties[contribution.brigade_id] ?? 0;
+        }
+
+        const formations = state.military.formations!;
+        const archivedDonorHistory = formations.a_archived_donor.brigade_history!;
+        const unrelatedParticipation: TgParticipationRecord = {
+            tg_id: 'tg:corp_a:other:z_anchor',
+            op_id: 'other',
+            role: 'donor',
+            formed_turn: 1,
+            personnel_lent: 100,
+        };
+        archivedDonorHistory.archived_tg_participations = [
+            unrelatedParticipation,
+            ...archivedDonorHistory.tg_participations!,
+        ];
+        delete archivedDonorHistory.tg_participations;
+        const anchorHistory = formations.z_anchor.brigade_history!;
+        anchorHistory.archived_tg_participations = anchorHistory.tg_participations;
+        delete anchorHistory.tg_participations;
+
+        const personnelBefore = {
+            archived: formations.a_archived_donor.personnel,
+            live: formations.m_live_donor.personnel,
+        };
+
+        expect(dissolveTacticalGroup(state, tgId, 20)).toEqual({ dissolved: true, tg_id: tgId });
+
+        expect(archivedDonorHistory.archived_tg_participations!.map((record) => record.tg_id)).toEqual([
+            unrelatedParticipation.tg_id,
+            tgId,
+        ]);
+        expect(unrelatedParticipation.dissolved_turn).toBeUndefined();
+        expect(unrelatedParticipation.casualties).toBeUndefined();
+        expect(unrelatedParticipation.personnel_returned).toBeUndefined();
+        const archivedDonor = archivedDonorHistory.archived_tg_participations![1]!;
+        expect(archivedDonor).toMatchObject({
+            dissolved_turn: 20,
+            personnel_lent: 300,
+            casualties: 300,
+            personnel_returned: 0,
+        });
+        const liveDonor = formations.m_live_donor.brigade_history!.tg_participations![0]!;
+        expect(liveDonor).toMatchObject({
+            dissolved_turn: 20,
+            personnel_lent: 200,
+            casualties: 100,
+            personnel_returned: 100,
+        });
+        for (const record of [archivedDonor, liveDonor]) {
+            expect(record.casualties).toBeLessThanOrEqual(record.personnel_lent!);
+            expect(record.personnel_returned).toBe(Math.max(0, record.personnel_lent! - record.casualties!));
+            expect(record.casualties! + record.personnel_returned!).toBe(record.personnel_lent);
+        }
+
+        const anchor = anchorHistory.archived_tg_participations![0]!;
+        expect(anchor.dissolved_turn).toBe(20);
+        expect(anchor.casualties).toBeUndefined();
+        expect(anchor.personnel_returned).toBeUndefined();
+        expect(formations.a_archived_donor.personnel).toBe(personnelBefore.archived);
+        expect(formations.m_live_donor.personnel).toBe(personnelBefore.live);
+
+        const afterFirstDissolve = structuredClone(state);
+        expect(dissolveTacticalGroup(state, tgId, 21)).toEqual({ dissolved: false, tg_id: tgId });
+        expect(state).toEqual(afterFirstDissolve);
     });
 });
 

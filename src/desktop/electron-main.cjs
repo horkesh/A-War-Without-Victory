@@ -55,6 +55,133 @@ const {
   projectPlayerVisibleStateJson,
 } = require('./player_visible_state.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
+const MAP_TRANSITION_PROFILE_MODE = process.env.AWWV_MAP_TRANSITION_PROFILE === '1';
+const STATIC_RESPONSE_EXPOSE_HEADERS = 'Content-Range, Content-Length, Accept-Ranges, ETag, Cache-Control';
+
+function isPathInside(baseDir, filePath) {
+  const base = path.resolve(baseDir);
+  const target = path.resolve(filePath);
+  const relative = path.relative(base, target);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+function parseByteRange(rangeHeader, totalSize) {
+  if (typeof rangeHeader !== 'string' || !rangeHeader.startsWith('bytes=')) return null;
+  const match = /^(\d*)-(\d*)$/.exec(rangeHeader.slice('bytes='.length).trim());
+  if (!match || (match[1] === '' && match[2] === '')) return 'invalid';
+
+  let start;
+  let end;
+  if (match[1] === '') {
+    const suffixLength = Number(match[2]);
+    if (!Number.isInteger(suffixLength) || suffixLength <= 0) return 'invalid';
+    start = Math.max(totalSize - suffixLength, 0);
+    end = totalSize - 1;
+  } else {
+    start = Number(match[1]);
+    end = match[2] === '' ? totalSize - 1 : Number(match[2]);
+  }
+  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || start >= totalSize) {
+    return 'invalid';
+  }
+  return { start, end: Math.min(end, totalSize - 1) };
+}
+
+function buildPackagedFileCacheHeaders(pathname, stat, packaged) {
+  const normalized = String(pathname || '/').replace(/\\/g, '/');
+  let cacheControl = 'no-store';
+  if (packaged) {
+    const basename = path.posix.basename(normalized);
+    const contentHashedAsset = normalized.startsWith('/assets/')
+      && !normalized.slice('/assets/'.length).includes('/')
+      && /[.-][A-Za-z0-9_-]{8}\.[A-Za-z0-9]+$/.test(basename);
+    if (normalized === '/' || normalized === '/index.html' || normalized.endsWith('/index.html')) {
+      cacheControl = 'no-cache';
+    } else if (contentHashedAsset) {
+      cacheControl = 'public, max-age=31536000, immutable';
+    } else if (normalized.startsWith('/data/runs/') || normalized === '/data/derived/latest_run_final_save.json') {
+      cacheControl = 'no-store';
+    } else if (normalized.startsWith('/data/') || normalized.startsWith('/font/') || normalized.endsWith('.pmtiles')) {
+      cacheControl = 'public, max-age=0, must-revalidate';
+    } else {
+      cacheControl = 'no-cache';
+    }
+  }
+  const headers = {
+    'Cache-Control': cacheControl,
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Expose-Headers': STATIC_RESPONSE_EXPOSE_HEADERS,
+  };
+  if (packaged) {
+    const size = Number(stat?.size) || 0;
+    const mtime = Math.trunc(Number(stat?.mtimeMs) || 0);
+    headers.ETag = `"${size.toString(16)}-${mtime.toString(16)}"`;
+  }
+  return headers;
+}
+
+function buildStaticFileResponseMetadata(
+  pathname,
+  stat,
+  packaged,
+  contentType,
+  rangeHeader = null,
+  ifNoneMatch = null,
+) {
+  const cacheHeaders = buildPackagedFileCacheHeaders(pathname, stat, packaged);
+  if (cacheHeaders.ETag && ifNoneMatch === cacheHeaders.ETag) {
+    return { status: 304, headers: cacheHeaders, range: null };
+  }
+
+  const parsedRange = parseByteRange(rangeHeader, stat.size);
+  if (parsedRange === 'invalid') {
+    return {
+      status: 416,
+      headers: {
+        ...cacheHeaders,
+        'Content-Range': `bytes */${stat.size}`,
+        'Accept-Ranges': 'bytes',
+      },
+      range: null,
+    };
+  }
+  if (parsedRange) {
+    const length = parsedRange.end - parsedRange.start + 1;
+    return {
+      status: 206,
+      headers: {
+        ...cacheHeaders,
+        'Content-Type': contentType,
+        'Content-Range': `bytes ${parsedRange.start}-${parsedRange.end}/${stat.size}`,
+        'Content-Length': String(length),
+        'Accept-Ranges': 'bytes',
+      },
+      range: parsedRange,
+    };
+  }
+  return {
+    status: 200,
+    headers: {
+      ...cacheHeaders,
+      'Content-Type': contentType,
+      'Content-Length': String(stat.size),
+      'Accept-Ranges': 'bytes',
+    },
+    range: null,
+  };
+}
+
+function getMapTransitionSaveRoot() {
+  if (!MAP_TRANSITION_PROFILE_MODE) return null;
+  const configuredRoot = String(process.env.AWWV_MAP_TRANSITION_SAVE_ROOT || '').trim();
+  if (!configuredRoot) {
+    throw new Error('AWWV_MAP_TRANSITION_SAVE_ROOT is required in map-transition profile mode');
+  }
+  if (!path.isAbsolute(configuredRoot)) {
+    throw new Error('AWWV_MAP_TRANSITION_SAVE_ROOT must be an absolute path');
+  }
+  return path.resolve(configuredRoot);
+}
 
 function strictCompare(a, b) {
   return a < b ? -1 : a > b ? 1 : 0;
@@ -90,10 +217,13 @@ function getAppIconPath() {
   return path.join(getBaseDir(), 'build', 'icon.png');
 }
 
-/** In-memory game state for "play myself". Set by load-scenario or load-state; updated by advance-turn. */
+/** Full runtime snapshot for IPC/readback/renderer projection. Never written to disk. */
 let currentGameStateJson = null;
+/** Canonical persistence snapshot with runtime-only projections removed. */
+let currentCanonicalSaveJson = null;
 let mainWindow = null;
 let tacticalMapWindow = null;
+const CAMPAIGN_REPLACEMENT_UPDATE = Object.freeze({ campaignReplacement: true });
 
 // TIER1-REPLAY-LIVE: sparse manifest accumulator for live-play sessions.
 // Reset on campaign start or state load; appended per advance-turn.
@@ -152,13 +282,13 @@ function projectCurrentGameStateForRenderer() {
   return currentGameStateJson ? projectPlayerVisibleStateJson(currentGameStateJson) : null;
 }
 
-function sendGameStateToRenderer(stateJson, excludeSender) {
+function sendGameStateToRenderer(stateJson, excludeSender, metadata) {
   const playerVisibleStateJson = projectPlayerVisibleStateJson(stateJson);
   const targets = [mainWindow, tacticalMapWindow];
   for (const win of targets) {
     if (win && !win.isDestroyed()) {
       if (excludeSender && win.webContents === excludeSender) continue;
-      win.webContents.send('game-state-updated', playerVisibleStateJson);
+      win.webContents.send('game-state-updated', playerVisibleStateJson, metadata);
     }
   }
 }
@@ -264,19 +394,30 @@ function readCanonicalCurrentState(sim) {
   return sim.deserializeState(currentGameStateJson);
 }
 
-function writeCanonicalCurrentState(sim, state, excludeSender) {
+function setCurrentStateSnapshots(sim, state) {
+  const runtimeStateJson = sim.serializeRuntimeState(state);
+  const canonicalSaveJson = sim.serializeState(state);
+  currentGameStateJson = runtimeStateJson;
+  currentCanonicalSaveJson = canonicalSaveJson;
+}
+
+function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options = {}) {
   const previousGameStateJson = currentGameStateJson;
-  currentGameStateJson = sim.serializeState(state);
+  const previousCanonicalSaveJson = currentCanonicalSaveJson;
+  setCurrentStateSnapshots(sim, state);
   try {
     autoSave();
   } catch (error) {
     currentGameStateJson = previousGameStateJson;
+    currentCanonicalSaveJson = previousCanonicalSaveJson;
     throw error;
   }
-  // Mutating IPC calls return only status/report metadata, so the initiating
-  // renderer also needs the projected broadcast or it can retain stale state.
-  void excludeSender;
-  sendGameStateToRenderer(currentGameStateJson);
+  if (metadata) {
+    const broadcastExclude = options.excludeSenderFromBroadcast ? excludeSender : undefined;
+    sendGameStateToRenderer(currentGameStateJson, broadcastExclude, metadata);
+  } else {
+    sendGameStateToRenderer(currentGameStateJson);
+  }
 }
 
 function ensureCorpsCommandEntry(state, corpsId, stance = 'balanced') {
@@ -373,6 +514,7 @@ function fetchLocalText(url, options = {}) {
         resolve({
           statusCode: res.statusCode ?? 0,
           body,
+          headers: res.headers,
         });
       });
     });
@@ -909,10 +1051,20 @@ function createMainWindow(options = {}) {
   });
 
   attachRuntimeProbeFailureCapture(win, runtimeProbeLabel, runtimeFailureChecks);
-  win.loadURL(warroomUrl);
 
-  // Clear HTTP cache so the tactical map iframe always loads the latest bundle from the map server.
-  win.webContents.session.clearCache().catch(() => { });
+  // Cold profiling must start from an empty renderer cache, while warm cycles
+  // keep the cache accumulated in this one application lifetime. In ordinary
+  // development the historical clear-on-launch behavior remains, but it now
+  // finishes before navigation instead of racing the first resource requests.
+  const shouldClearColdCache = !MAP_TRANSITION_PROFILE_MODE
+    || process.env.AWWV_MAP_TRANSITION_COLD_CACHE === '1';
+  const navigation = (async () => {
+    if (shouldClearColdCache) await win.webContents.session.clearCache();
+    await win.loadURL(warroomUrl);
+  })();
+  navigation.catch((error) => {
+    console.error('[AWWV] Main window navigation failed:', error);
+  });
 
   if (openDevTools) {
     const devToolsPromise = win.webContents.openDevTools({ mode: 'detach' });
@@ -932,9 +1084,9 @@ function createMainWindow(options = {}) {
               if (result.canceled || !result.filePaths.length) return;
               const sim = getDesktopSim();
               const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
-              currentGameStateJson = sim.serializeState(state);
+              setCurrentStateSnapshots(sim, state);
               liveReplayManifestFrames = [];
-              sendGameStateToRenderer(currentGameStateJson);
+              sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
             } catch (e) { console.error('Load scenario failed:', e); }
           }
         },
@@ -945,14 +1097,14 @@ function createMainWindow(options = {}) {
               if (result.canceled || !result.filePaths.length) return;
               const sim = getDesktopSim();
               const { state } = await sim.loadStateFromPath(result.filePaths[0]);
-              currentGameStateJson = sim.serializeState(state);
+              setCurrentStateSnapshots(sim, state);
               liveReplayManifestFrames = [];
               // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
               const manifestJson = readReplaySaveManifestSidecar(result.filePaths[0]);
               if (manifestJson) sendReplayManifestToRenderer(manifestJson);
               const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
               if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
-              sendGameStateToRenderer(currentGameStateJson);
+              sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
             } catch (e) { console.error('Load state failed:', e); }
           }
         },
@@ -1030,7 +1182,7 @@ async function runPackagedRuntimeProbe() {
 
   const sim = getDesktopSim();
   const { state } = await sim.startNewCampaign(getBaseDir(), 'RBiH');
-  currentGameStateJson = sim.serializeState(state);
+  setCurrentStateSnapshots(sim, state);
   const probeTurnReport = {
     probe: 'awwv_turn_report_probe',
     player_faction: state?.meta?.player_faction ?? null,
@@ -1050,18 +1202,19 @@ async function runPackagedRuntimeProbe() {
     '/data/scenarios/events/war_1995.json',
     '/data/scenarios/events/consequences.json',
   ];
+  const revalidatedStaticPolicy = 'public, max-age=0, must-revalidate';
   const packagedRouteInventory = [
-    { route: '/data/derived/operational/operational_settlements.geojson', expected_status: 200 },
-    { route: '/data/derived/settlements_wgs84_1990.geojson', expected_status: 200 },
-    { route: '/data/derived/terrain/settlements_terrain_scalars.json', expected_status: 200 },
-    { route: '/data/derived/tiles/osm.pmtiles', expected_status: 206, range: 'bytes=0-15' },
-    { route: '/font/Open%20Sans%20Bold/0-255.pbf', expected_status: 200 },
-    { route: '/font/Open%20Sans%20Bold/256-511.pbf', expected_status: 200 },
-    { route: '/data/ui/hq_rbih_clickable_regions.json', expected_status: 200 },
-    { route: '/data/ui/hq_rs_clickable_regions.json', expected_status: 200 },
-    { route: '/data/ui/hq_hrhb_clickable_regions.json', expected_status: 200 },
-    { route: '/data/source/settlements_initial_master.json', expected_status: 200 },
-    { route: '/assets/ui/icons/icon_warning.svg', expected_status: 200 },
+    { route: '/data/derived/operational/operational_settlements.geojson', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/derived/settlements_wgs84_1990.geojson', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/derived/terrain/settlements_terrain_scalars.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/derived/tiles/osm.pmtiles', expected_status: 206, expected_cache_control: revalidatedStaticPolicy, range: 'bytes=0-15' },
+    { route: '/font/Open%20Sans%20Bold/0-255.pbf', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/font/Open%20Sans%20Bold/256-511.pbf', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/ui/hq_rbih_clickable_regions.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/ui/hq_rs_clickable_regions.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/ui/hq_hrhb_clickable_regions.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/data/source/settlements_initial_master.json', expected_status: 200, expected_cache_control: revalidatedStaticPolicy },
+    { route: '/assets/ui/icons/icon_warning.svg', expected_status: 200, expected_cache_control: 'no-cache' },
   ];
   const [mapIndexResponse, snapshotResponse, ...rawRouteResponses] = await Promise.all([
     fetchLocalText(getMapServerUrl('/')),
@@ -1080,6 +1233,7 @@ async function runPackagedRuntimeProbe() {
   }));
   const routeInventoryResponses = rawPackagedRouteResponses.map((response, index) => ({
     ...response,
+    expected_cache_control: packagedRouteInventory[index].expected_cache_control,
     expected_status: packagedRouteInventory[index].expected_status,
     range: packagedRouteInventory[index].range ?? null,
     route: packagedRouteInventory[index].route,
@@ -1100,6 +1254,17 @@ async function runPackagedRuntimeProbe() {
     throw new Error(
       `packaged tactical map server returned ${failedRouteInventoryResponse.statusCode} for route inventory ${failedRouteInventoryResponse.route}; expected ${failedRouteInventoryResponse.expected_status}`,
     );
+  }
+  const invalidCacheResponse = routeInventoryResponses.find(
+    (response) => response.headers['cache-control'] !== response.expected_cache_control
+      || typeof response.headers.etag !== 'string'
+      || response.headers.etag.length === 0,
+  );
+  if (invalidCacheResponse) {
+    throw new Error(`packaged tactical map cache contract failed for ${invalidCacheResponse.route}`);
+  }
+  if (mapIndexResponse.headers['cache-control'] !== 'no-cache' || typeof mapIndexResponse.headers.etag !== 'string') {
+    throw new Error('packaged tactical map index must be validator-revalidated');
   }
 
   const probeWindow = createMainWindow({
@@ -1196,8 +1361,8 @@ async function runPackagedRuntimeProbe() {
   // the packaged renderer.
   state.meta.game_over = true;
   state.meta.outcome = 'timeout_stalemate';
-  const endgameStateJson = sim.serializeState(state);
-  currentGameStateJson = endgameStateJson;
+  setCurrentStateSnapshots(sim, state);
+  const endgameStateJson = currentGameStateJson;
 
   const { win: endgameProbeWindow, targetUrl: endgameMapUrl } = createTacticalMapWindow({
     mode: 'operational',
@@ -1290,6 +1455,8 @@ async function runPackagedRuntimeProbe() {
     ],
     route_inventory_checks: routeInventoryResponses.map((response) => ({
       expected_status: response.expected_status,
+      cache_control: response.headers['cache-control'] ?? null,
+      etag_present: typeof response.headers.etag === 'string' && response.headers.etag.length > 0,
       range: response.range,
       route: response.route,
       status: response.statusCode,
@@ -1437,32 +1604,32 @@ function startMapServer() {
     let filePath;
     if (segments[0] === 'data' && segments[1] === 'derived') {
       filePath = path.join(derivedDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(derivedDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(derivedDir, filePath)) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'source') {
       filePath = path.join(sourceDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(sourceDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(sourceDir, filePath)) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'ui') {
       filePath = path.join(uiDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(uiDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(uiDir, filePath)) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'scenarios') {
       filePath = path.join(scenariosDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(scenariosDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(scenariosDir, filePath)) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'runs') {
       filePath = path.join(runsDir, ...segments.slice(2));
-      if (!path.resolve(filePath).startsWith(path.resolve(runsDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(runsDir, filePath)) { res.writeHead(403); res.end(); return; }
       if (!filePath.toLowerCase().endsWith('.json')) { res.writeHead(403); res.end(); return; }
     } else {
       // Tactical map static files
       const rel = segments.join(path.sep) || 'index.html';
       filePath = path.join(mapDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(mapDir))) { res.writeHead(403); res.end(); return; }
+      if (!isPathInside(mapDir, filePath)) { res.writeHead(403); res.end(); return; }
       if (!fs.existsSync(filePath) && segments[0] === 'tactical_sandbox.html') {
         filePath = path.join(mapDir, 'index.html');
       }
       if (!fs.existsSync(filePath) && segments[0] === 'assets') {
         const assetRel = segments.slice(1).join(path.sep);
         filePath = path.join(assetsDir, assetRel);
-        if (!path.resolve(filePath).startsWith(path.resolve(assetsDir))) { res.writeHead(403); res.end(); return; }
+        if (!isPathInside(assetsDir, filePath)) { res.writeHead(403); res.end(); return; }
       }
     }
 
@@ -1476,37 +1643,23 @@ function startMapServer() {
 
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME[ext] || 'application/octet-stream';
-
-    // Range request support (essential for PMTiles byte-range access)
-    const rangeHeader = req.headers.range;
-    if (rangeHeader) {
-      const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
-      if (match) {
-        const start = parseInt(match[1], 10);
-        const end = match[2] ? parseInt(match[2], 10) : stat.size - 1;
-        const chunkSize = end - start + 1;
-        res.writeHead(206, {
-          'Content-Type': contentType,
-          'Content-Range': `bytes ${start}-${end}/${stat.size}`,
-          'Content-Length': chunkSize,
-          'Accept-Ranges': 'bytes',
-          'Cache-Control': 'no-store',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
-        });
-        fs.createReadStream(filePath, { start, end }).pipe(res);
-        return;
-      }
+    const responseMetadata = buildStaticFileResponseMetadata(
+      pathname,
+      stat,
+      app.isPackaged,
+      contentType,
+      req.headers.range,
+      req.headers['if-none-match'],
+    );
+    res.writeHead(responseMetadata.status, responseMetadata.headers);
+    if (responseMetadata.status === 304 || responseMetadata.status === 416) {
+      res.end();
+      return;
     }
-
-    res.writeHead(200, {
-      'Content-Type': contentType,
-      'Content-Length': stat.size,
-      'Accept-Ranges': 'bytes',
-      'Cache-Control': 'no-store',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
-    });
+    if (responseMetadata.range) {
+      fs.createReadStream(filePath, responseMetadata.range).pipe(res);
+      return;
+    }
     fs.createReadStream(filePath).pipe(res);
   });
 
@@ -1596,17 +1749,19 @@ function showStateFileDialog(win) {
 }
 
 function getSavesDir() {
+  const profileSaveRoot = getMapTransitionSaveRoot();
+  if (profileSaveRoot) return profileSaveRoot;
   const root = app.isPackaged ? app.getPath('userData') : getBaseDir();
   return path.join(root, 'saves');
 }
 
-/** Write currentGameStateJson to the writable saves directory. Returns the file path. */
+/** Write canonical save bytes to the writable saves directory. Returns the file path. */
 function writeSaveFile(filename) {
-  if (!currentGameStateJson) throw new Error('No game loaded');
+  if (!currentCanonicalSaveJson) throw new Error('No game loaded');
   const savesDir = getSavesDir();
   fs.mkdirSync(savesDir, { recursive: true });
   const filePath = path.join(savesDir, filename);
-  fs.writeFileSync(filePath, currentGameStateJson, 'utf-8');
+  fs.writeFileSync(filePath, currentCanonicalSaveJson, 'utf-8');
   return filePath;
 }
 
@@ -1620,7 +1775,10 @@ function createWindow() {
   // builds, the detached DevTools window steals MainWindow focus and prevents
   // CloseMainWindow-driven clean exit (operator must force-kill). Dev tools
   // should not ship enabled-by-default in production anyway.
-  createMainWindow({ show: true, openDevTools: !app.isPackaged });
+  createMainWindow({
+    show: true,
+    openDevTools: !app.isPackaged && !MAP_TRANSITION_PROFILE_MODE,
+  });
 }
 
 function openTacticalMapWindow(mode = 'operational') {
@@ -1644,38 +1802,33 @@ function openTacticalMapWindow(mode = 'operational') {
  */
 function serveFileResponse(request, filePath, contentType) {
   const stat = fs.statSync(filePath);
-  const rangeHeader = request.headers.get('range');
-
-  if (rangeHeader) {
-    const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
-    if (match) {
-      const start = parseInt(match[1], 10);
-      const end = match[2] ? parseInt(match[2], 10) : stat.size - 1;
-      const length = end - start + 1;
-      const fd = fs.openSync(filePath, 'r');
-      const buf = Buffer.alloc(length);
-      fs.readSync(fd, buf, 0, length, start);
-      fs.closeSync(fd);
-      return new Response(buf, {
-        status: 206,
-        headers: {
-          'Content-Type': contentType,
-          'Content-Range': `bytes ${start}-${end}/${stat.size}`,
-          'Content-Length': String(length),
-          'Accept-Ranges': 'bytes',
-        },
-      });
-    }
+  const pathname = new URL(request.url).pathname.replace(/^\/app(?=\/)/, '');
+  const responseMetadata = buildStaticFileResponseMetadata(
+    pathname,
+    stat,
+    app.isPackaged,
+    contentType,
+    request.headers.get('range'),
+    request.headers.get('if-none-match'),
+  );
+  if (responseMetadata.status === 304 || responseMetadata.status === 416) {
+    return new Response(null, responseMetadata);
   }
-
+  if (responseMetadata.range) {
+    const { start, end } = responseMetadata.range;
+    const length = end - start + 1;
+    const buf = Buffer.alloc(length);
+    let fd = null;
+    try {
+      fd = fs.openSync(filePath, 'r');
+      fs.readSync(fd, buf, 0, length, start);
+    } finally {
+      if (fd !== null) fs.closeSync(fd);
+    }
+    return new Response(buf, responseMetadata);
+  }
   const buf = fs.readFileSync(filePath);
-  return new Response(buf, {
-    headers: {
-      'Content-Type': contentType,
-      'Content-Length': String(stat.size),
-      'Accept-Ranges': 'bytes',
-    },
-  });
+  return new Response(buf, responseMetadata);
 }
 
 /** MIME type map for data files (PMTiles, GeoJSON, etc.) */
@@ -1703,7 +1856,7 @@ function registerProtocol() {
     if (segs[0] === 'app' && segs[1] === 'data' && segs[2] === 'derived') {
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataDerivedDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataDerivedDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(dataDerivedDir, filePath)) return new Response(null, { status: 403 });
       try {
         const ext = path.extname(rel).toLowerCase();
         const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
@@ -1718,7 +1871,7 @@ function registerProtocol() {
     if (segs[0] === 'app' && segs[1] === 'data' && segs[2] === 'source') {
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataSourceDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataSourceDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(dataSourceDir, filePath)) return new Response(null, { status: 403 });
       try {
         const ext = path.extname(rel).toLowerCase();
         const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
@@ -1737,7 +1890,7 @@ function registerProtocol() {
     if (segs[0] === 'app' && segs[1] === 'data' && segs[2] === 'scenarios') {
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataScenariosDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataScenariosDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(dataScenariosDir, filePath)) return new Response(null, { status: 403 });
       try {
         const ext = path.extname(rel).toLowerCase();
         const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
@@ -1751,7 +1904,7 @@ function registerProtocol() {
     if (segs[0] === 'app') {
       const rel = segs.slice(1).join(path.sep) || 'index.html';
       const filePath = path.join(mapAppDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(mapAppDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(mapAppDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
@@ -1768,7 +1921,7 @@ function registerProtocol() {
       const dataDir = resourcePath('data', segs[2]);
       const rel = segs.slice(3).join(path.sep);
       const filePath = path.join(dataDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(dataDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(dataDir, filePath)) return new Response(null, { status: 403 });
       try {
         const ext = path.extname(rel).toLowerCase();
         const contentType = DATA_MIME_TYPES[ext] || 'application/octet-stream';
@@ -1790,7 +1943,7 @@ function registerProtocol() {
 
       // 1. Try Vite-built warroom assets first (JS, CSS, hashed images)
       const warroomAssetPath = path.join(warroomAppDir, 'assets', rel);
-      if (path.resolve(warroomAssetPath).startsWith(path.resolve(warroomAppDir))) {
+      if (isPathInside(warroomAppDir, warroomAssetPath)) {
         try {
           const buf = fs.readFileSync(warroomAssetPath);
           return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
@@ -1800,7 +1953,7 @@ function registerProtocol() {
       // 2. Fall back to project root assets/ (crests, flags for embedded tactical map)
       const assetsDir = resourcePath('assets');
       const filePath = path.join(assetsDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(assetsDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(assetsDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         return new Response(buf, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
@@ -1815,7 +1968,7 @@ function registerProtocol() {
     if (segs[0] === 'warroom' && segs[1] === 'tactical-map') {
       const rel = segs.slice(2).join(path.sep) || 'index.html';
       const filePath = path.join(mapAppDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(mapAppDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(mapAppDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
@@ -1830,7 +1983,7 @@ function registerProtocol() {
     if (segs[0] === 'warroom') {
       const rel = segs.slice(1).join(path.sep) || 'index.html';
       const filePath = path.join(warroomAppDir, rel);
-      if (!path.resolve(filePath).startsWith(path.resolve(warroomAppDir))) return new Response(null, { status: 403 });
+      if (!isPathInside(warroomAppDir, filePath)) return new Response(null, { status: 403 });
       try {
         const buf = fs.readFileSync(filePath);
         const ext = path.extname(rel).toLowerCase();
@@ -1887,9 +2040,9 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
-      currentGameStateJson = sim.serializeState(state);
+      setCurrentStateSnapshots(sim, state);
       liveReplayManifestFrames = [];
-      sendGameStateToRenderer(currentGameStateJson);
+      sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
@@ -1909,8 +2062,14 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const { state } = await sim.startNewCampaign(getBaseDir(), playerFaction, scenarioKey ?? 'apr_1992');
       liveReplayManifestFrames = [];
-      writeCanonicalCurrentState(sim, state, _event.sender);
-      return { ok: true };
+      writeCanonicalCurrentState(
+        sim,
+        state,
+        _event.sender,
+        CAMPAIGN_REPLACEMENT_UPDATE,
+        { excludeSenderFromBroadcast: true },
+      );
+      return { ok: true, stateJson: projectCurrentGameStateForRenderer() };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
     }
@@ -1922,7 +2081,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const { state } = await sim.loadStateFromPath(result.filePaths[0]);
-      currentGameStateJson = sim.serializeState(state);
+      setCurrentStateSnapshots(sim, state);
       liveReplayManifestFrames = [];
       // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
       // Carried alongside the state so the VerdictScreen Replay tab works
@@ -1932,7 +2091,7 @@ app.whenReady().then(() => {
       if (manifestJson) sendReplayManifestToRenderer(manifestJson);
       const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
       if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
-      sendGameStateToRenderer(currentGameStateJson);
+      sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
@@ -2334,7 +2493,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const sector = state.corps_front_sectors?.[sectorId];
+      const sector = state.military.corps_front_sectors?.[sectorId];
       if (!sector) {
         return { ok: false, error: `Unknown sector: ${sectorId}` };
       }
@@ -2540,9 +2699,9 @@ app.whenReady().then(() => {
   // Force-queues the authored visit_to_front_<faction> event into
   // state.military.pending_event_decisions (mirror evaluate_events.ts:577) so
   // EventDecisionModal surfaces it. ZERO new sim/event code — the event's authored
-  // effects/recurrence/branches are reused. Guards (in order):
+  // effects/action cadence/branches are reused. Guards (in order):
   //   1. player faction must resolve to a visit_to_front_<faction> event
-  //   2. cooldown/cap reuse the event's OWN recurrence (max_fires 5 / cooldown 10t)
+  //   2. cooldown/cap use the event's action_cadence (max_fires 5 / cooldown 10t)
   //   3. ENCLAVE REACHABILITY GATE: front branches filtered to corridored targets;
   //      all-cut-off → 'all_cut_off' refusal
   //   4. CA guard + debit FRONT_VISIT_COST (10)
@@ -2589,7 +2748,7 @@ app.whenReady().then(() => {
       }
       state.military.pending_event_decisions.push(decision);
 
-      // Record the fire so the event's OWN recurrence (max_fires 5 / cooldown 10t)
+      // Record the fire so the event's action_cadence (max_fires 5 / cooldown 10t)
       // gates subsequent visits. resolveEventDecision (the modal-resolve path)
       // does NOT increment these — so we record at queue time here, mirroring the
       // calendar-fire bookkeeping in evaluate_events.ts:194-202. The act of
@@ -2616,7 +2775,7 @@ app.whenReady().then(() => {
   // ── Presidential ADDRESS THE NATION (read-only availability) ────────────────
   // Mirrors get-front-visit-availability. An address is FACTION-WIDE — no
   // reachability gate (the president broadcasts from the capital); the only gates
-  // are player-faction resolution and the event's OWN recurrence (cap/cooldown).
+  // are player-faction resolution and the event's action_cadence (cap/cooldown).
   ipcMain.handle('get-address-nation-availability', async () => {
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded' };
@@ -2638,7 +2797,7 @@ app.whenReady().then(() => {
   // Force-queues the authored address_to_nation_<faction> event into
   // state.military.pending_event_decisions (mirror evaluate_events.ts:577 /
   // initiate-front-visit) so EventDecisionModal surfaces it. ZERO new sim/event
-  // code. Guards: 1. faction→event 2. cooldown/cap (event's OWN recurrence)
+  // code. Guards: 1. faction→event 2. cooldown/cap (event action_cadence)
   // 3. CA guard + debit ADDRESS_NATION_COST. Player-IPC-only → never headless →
   // byte-identical by construction.
   ipcMain.handle('initiate-address-nation', async (_event) => {
@@ -2680,7 +2839,7 @@ app.whenReady().then(() => {
       }
       state.military.pending_event_decisions.push(decision);
 
-      // Record the fire so the event's OWN recurrence gates subsequent addresses
+      // Record the fire so the event's action_cadence gates subsequent addresses
       // (mirror initiate-front-visit: resolveEventDecision does NOT increment these).
       if (!state.military.event_fire_counts) state.military.event_fire_counts = {};
       state.military.event_fire_counts[eventId] = (state.military.event_fire_counts[eventId] ?? 0) + 1;
@@ -2701,7 +2860,7 @@ app.whenReady().then(() => {
 
   // ── Presidential DECORATE A UNIT (read-only availability) ───────────────────
   // Mirrors get-front-visit-availability. No reachability gate (issued from the
-  // capital); gated by player-faction + the event's OWN recurrence. Returns the
+  // capital); gated by player-faction + the event's action_cadence. Returns the
   // BRIGHT-LINE-filtered eligible REGULAR formations (never paramilitary/militia/
   // phantom) so the renderer can show what the president may honour.
   ipcMain.handle('get-decorate-unit-availability', async () => {

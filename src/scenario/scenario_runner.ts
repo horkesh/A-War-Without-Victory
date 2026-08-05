@@ -78,7 +78,12 @@ import { loadUrbanOsidSet, loadForestOsidSet } from '../sim/combat/combat_terrai
 import { displaceFormationsInEnemyTerritory } from '../sim/combat/attack_resolution_osid.js';
 import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.js';
 import { computeSrkStrangleOsids } from '../sim/combat/srk_strangle.js';
-import { reconcileFinalSectorTruth, sealFinalSectorTruthFromCurrentSectors } from '../sim/combat/final_sector_truth_reconciliation.js';
+import {
+    createFinalSectorReconciliationSession,
+    recordFinalSectorReconciliationMutation,
+    reconcileFinalSectorTruth,
+    sealFinalSectorTruthFromCurrentSectors,
+} from '../sim/combat/final_sector_truth_reconciliation.js';
 import {
     applyBotOpportunityDecisions,
     autoResolveOpportunityProposalReviews,
@@ -262,7 +267,9 @@ export async function createInitialGameState(
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
-    militia_pools: {}
+    militia_pools: {},
+    sector_intel: {},
+    corps_front_sectors: {}
   } as GameState['military'],
   political: {} as GameState['political'],
   displacement: {} as GameState['displacement']
@@ -359,6 +366,8 @@ export type ReplayPayloadMode = 'manifest_only' | 'full';
 
 export interface RunScenarioOptions {
     scenarioPath: string;
+    /** Deterministic verification override; canonical scenarios default to `harness-seed`. */
+    seedOverride?: string;
     outDirBase?: string;
     emitEvery?: number;
     /** When true, emit a weekly save every turn to support tactical-map replay/video workflows. */
@@ -1384,7 +1393,8 @@ function validateScenarioMustHoldContract(
 
 export async function buildScenarioStartupState(
     scenario: Awaited<ReturnType<typeof loadScenario>>,
-    baseDir: string
+    baseDir: string,
+    seed = 'harness-seed',
 ): Promise<ScenarioStartupBuildResult> {
     const controlPath = scenario.init_control ? resolveInitControlPath(scenario.init_control, baseDir) : undefined;
     const formationsPath = scenario.init_formations ? resolveInitFormationsPath(scenario.init_formations, baseDir) : undefined;
@@ -1545,7 +1555,7 @@ export async function buildScenarioStartupState(
                 ...(baseDir ? { ethnicity_data_path: join(baseDir, 'data/derived/settlement_ethnicity_data.json') } : {})
             }
             : undefined;
-    let state = await createInitialGameState('harness-seed', controlPath, initOptions, {
+    let state = await createInitialGameState(seed, controlPath, initOptions, {
         baseDir,
         organizationalPenetrationSeed,
         settlementGraph: graph,
@@ -2056,7 +2066,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             injectFailureAfterRunMeta();
         }
         const startup = await timedAsync(emitTimingJson, timingTotals, 'setup', () =>
-            buildScenarioStartupState(scenario, baseDir)
+            buildScenarioStartupState(scenario, baseDir, options.seedOverride ?? 'harness-seed')
         );
         let {
             state,
@@ -2075,6 +2085,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             sidToMun,
             initOverrideChangeCount
         } = startup;
+        const operationalSettlementGraph = await timedAsync(
+            emitTimingJson,
+            timingTotals,
+            'setup',
+            () => loadSettlementGraph({
+                settlementsPath: join(baseDir, 'data/derived/operational/operational_settlements.geojson'),
+                edgesPath: join(baseDir, 'data/derived/operational/operational_contact_graph.json'),
+            }),
+        );
         let startWeekIndex = 0;
         if (resumeFromSavePath) {
             const resumedSerialized = await timedAsync(emitTimingJson, timingTotals, 'setup', () =>
@@ -2383,6 +2402,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 const runResult = await runTurn(state, {
                     seed: state.meta.seed,
                     settlementGraph: graph,
+                    operationalSettlementGraph,
+                    operationalData: operationalData && operationalCentroids
+                        ? {
+                            opData: operationalData,
+                            edges: operationalSettlementGraph.edges,
+                            centroids: operationalCentroids,
+                        }
+                        : undefined,
                     settlementEdges: graph.edges,
                     municipalityPopulation1991,
                     settlementPopulationBySid,
@@ -2901,6 +2928,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 'post-combat',
                 state.military.war_front_edges_osid,
             );
+            const finalSectorSession = createFinalSectorReconciliationSession(
+                state.meta.turn,
+                'final-save-geometry',
+            );
             reconcileFinalSectorTruth(
                 state,
                 finalOperationalEdges,
@@ -2909,13 +2940,19 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 finalSpatial,
                 null,
                 false,
-                { finalSaveGeometryProjection: true },
+                { finalSaveGeometryProjection: true, session: finalSectorSession },
+            );
+            recordFinalSectorReconciliationMutation(
+                finalSectorSession,
+                'seal-roster',
+                'final-save-seal',
             );
             sealFinalSectorTruthFromCurrentSectors(
                 state,
                 finalOperationalEdges,
                 null,
                 finalSpatial,
+                { session: finalSectorSession },
             );
         }
         const finalSerialized = _serTimeSync(emitTimingJson, timingTotals, 'final-save-serialize', () =>

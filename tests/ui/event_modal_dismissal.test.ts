@@ -57,4 +57,28 @@ describe('EventModal dismissal contract', () => {
         expect(actionBar.contains(acknowledge)).toBe(true);
         unmount();
     });
+
+    it('lays out the category stamp beside long faction badges without overlap', () => {
+        const diplomaticEvent: EventDisplayData = {
+            ...EVENT,
+            category: 'diplomatic',
+            effects: [
+                { kind: 'cohesion_change', description: 'RBiH cohesion -2' },
+                { kind: 'cohesion_change', description: 'HRHB cohesion -2' },
+            ],
+        };
+        const { unmount } = render(createElement(EventModal, {
+            event: diplomaticEvent,
+            onAcknowledge: vi.fn(),
+        }));
+
+        const metadata = screen.getByTestId('event-modal-metadata-row');
+        const factions = screen.getByTestId('event-modal-faction-badges');
+        const category = screen.getByTestId('event-modal-category-stamp');
+        expect(metadata.contains(factions)).toBe(true);
+        expect(metadata.contains(category)).toBe(true);
+        expect(category.className).not.toContain('absolute');
+        expect(metadata.className).toContain('flex-wrap');
+        unmount();
+    });
 });

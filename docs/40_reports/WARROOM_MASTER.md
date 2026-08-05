@@ -1,8 +1,12 @@
 # AWWV Warroom Master Reference
 
-**Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
+**Updated:** 2026-08-01 (one stable campaign shell now owns Command Room and Tactical Map navigation; R1 transition performance and player-visible Electron proof are closed locally)
 
-**Updated:** 2026-05-02
+## Current shell-transition contract
+
+The operational iframe document remains stable across Command Room and War Map routes. The React tactical viewport and its MapLibre/Deck owners stay campaign-scoped behind the opaque Command Room layer; returning to the map is a shared shell handoff, not an iframe reload. While the Command Room owns focus, the map viewport is `aria-hidden`, inert, pointer-disabled, and keyboard-disabled. Reveal admits input only after resize/render/repaint and exact current-turn/current-fingerprint readiness. Final three-launch evidence also proves that Desk-scoped `H` cannot escape ownership, the visible Warroom Advance route advances exactly one turn, and post-advance neutral/read-only surfaces are handled without inventing a policy decision. See [20260801_SEAMLESS_COMMAND_ROOM_MAP_TRANSITION.md](implemented/20260801_SEAMLESS_COMMAND_ROOM_MAP_TRANSITION.md).
+
+**Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
 
 **Relationship:** Warroom is part of the canonical GUI. For overall GUI status use [GUI_MASTER.md](GUI_MASTER.md). This document is the warroom-specific control file — one place to see what exists, what’s proposed, and where to record changes.
 

@@ -255,16 +255,16 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.queryByRole('button', { name: /resolve 2 pending decisions to continue/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /^advance/i })).toBeNull();
 
-    const prioritiesButton = screen.getByRole('button', { name: 'Review staff docket: 1 before-advance, 1 pending' });
+    const prioritiesButton = screen.getByRole('button', { name: 'Review staff docket: 2 before-advance, 2 pending' });
     expect(prioritiesButton.getAttribute('aria-expanded')).toBe('false');
 
     fireEvent.click(prioritiesButton);
 
     expect(screen.getByText('Review before advance')).toBeTruthy();
-    expect(screen.getByText('1 advance item / 1 urgent / 1 pending')).toBeTruthy();
+    expect(screen.getByText('2 advance items / 0 required / 5 recommended / 0 monitor / 0 record / 2 pending')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Open Decision Room' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: "Open President's Desk" })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Review staff docket: 1 before-advance, 1 pending' }).getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Review staff docket: 2 before-advance, 2 pending' }).getAttribute('aria-expanded')).toBe('true');
     expect(onReviewPriorities).not.toHaveBeenCalled();
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
@@ -285,11 +285,53 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(screen.getByText('REQUIRED 0')).toBeTruthy();
     const staffReview = screen.getByRole('button', {
-      name: 'Review staff docket: 1 before-advance, 1 pending',
+      name: 'Review staff docket: 2 before-advance, 2 pending',
     });
-    expect(within(staffReview).getByText('STAFF REVIEW')).toBeTruthy();
-    expect(within(staffReview).getByText('1')).toBeTruthy();
+    expect(within(staffReview).getByText('Review Before Advance')).toBeTruthy();
+    expect(within(staffReview).getByText('2', { selector: '[data-review-count="before-advance"]' })).toBeTruthy();
+    expect(within(staffReview).getByText('PENDING 2')).toBeTruthy();
     expect(staffReview.textContent).not.toContain('URG');
+  });
+
+  it('explains a capped-Authority decision drought in the weekly Warroom loop', () => {
+    setLoadedState(makeState({
+      commandAuthority: {
+        current: 100,
+        max: 100,
+        reserve: 15,
+        reserveMax: 15,
+        spentThisTurn: 0,
+        lifetimeSpent: 120,
+      },
+    }));
+
+    render(createElement(WarroomStatusBar, { onReviewPriorities: vi.fn() }));
+
+    const note = screen.getByRole('note', { name: /no sourced presidential initiative is filed this week/i });
+    expect(note.getAttribute('data-testid')).toBe('warroom-cadence-hold');
+    expect(note.textContent).toBe('NO SOURCED INITIATIVE · POLICY HOLDS');
+    expect(within(note).queryByRole('button')).toBeNull();
+  });
+
+  it('does not claim a policy hold while a presidential action is filed', () => {
+    setLoadedState(makeState({
+      commandAuthority: {
+        current: 100,
+        max: 100,
+        reserve: 15,
+        reserveMax: 15,
+        spentThisTurn: 0,
+        lifetimeSpent: 120,
+      },
+      pendingEventDecisions: makeRequiredEventDecisions(1),
+    }));
+
+    render(createElement(WarroomStatusBar, {
+      onReviewPriorities: vi.fn(),
+      onResolveBlocker: vi.fn(),
+    }));
+
+    expect(screen.queryByTestId('warroom-cadence-hold')).toBeNull();
   });
 
   it('Warroom status dock explains disabled priority review controls', () => {
@@ -382,13 +424,13 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(screen.getByText('RAT')).toBeTruthy();
     expect(screen.getByText('OBAVEZNO 0')).toBeTruthy();
-    expect(screen.getByText('ŠTABNI PREGLED')).toBeTruthy();
+    expect(screen.getByText('Pregled prije napredovanja')).toBeTruthy();
     expect(screen.queryByText('NASTAVI')).toBeNull();
     expect(screen.queryByText('WAR')).toBeNull();
     expect(screen.queryByText('PRIORITIES')).toBeNull();
     expect(screen.queryByText('ADVANCE')).toBeNull();
 
-    fireEvent.click(screen.getByText('ŠTABNI PREGLED'));
+    fireEvent.click(screen.getByText('Pregled prije napredovanja'));
 
     expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
     expect(screen.getByText('Nijedna živa stavka Sobe odluka ne zahtijeva pregled prije nastavka.')).toBeTruthy();

@@ -19,6 +19,7 @@
 
 import type {
     ArmyHqOpId,
+    CorpsOperation,
     FormationId,
     FormationState,
     GameState,
@@ -31,6 +32,11 @@ import type { TgParticipationRecord } from '../../state/brigade_history.js';
 import { createEmptyBrigadeHistory, TG_PARTICIPATION_WINDOW_TURNS } from '../../state/brigade_history.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
+    resolveArmyHqOperation,
+    resolveTacticalGroupIdsForOperation,
+} from '../../state/operation_lifecycle_reconciliation.js';
+import { buildArmyHqTelemetryFromTg } from './operation_aar.js';
+import {
     ENABLE_TG_COHESION_BLEED,
     ENABLE_TG_ARMY_HQ_OPS,
     ENABLE_TG_OG_PROMOTION,
@@ -42,6 +48,10 @@ import {
     MAX_CONCURRENT_TGS_PER_FACTION,
     MAX_TGS_PER_CORPS,
     ARMY_HQ_TG_CAP_REDUCTION,
+    ARMY_HQ_TG_CAP_RECOVERY_TURNS,
+    TG_COHESION_DRAIN_PER_ENGAGED_TURN,
+    TG_DISSOLVE_COHESION,
+    TG_MAX_LIFECYCLE_TURNS,
 } from './tactical_group_config.js';
 
 export interface FormTgParams {
@@ -129,7 +139,7 @@ export function formTacticalGroup(
     // earliest in that stable order — the deterministic tie-break. Army HQ ops bypass nothing;
     // instead they REDUCE the faction cap while running (Pyrrhic cost), forcing other ops quiet.
     {
-        const capCheck = checkConcurrencyCaps(mil, anchor.faction, anchor.corps_id);
+        const capCheck = checkConcurrencyCaps(mil, anchor.faction, anchor.corps_id, params.current_turn);
         if (capCheck != null) return { tg_id: null, rejection_reason: capCheck };
     }
 
@@ -279,7 +289,7 @@ export const TG_DONOR_COOLDOWN_TURNS = 6;
  * falls below this cohesion (or below MIN_ATTACK_PERSONNEL), the TG dissolves
  * immediately rather than waiting for the next-tick recovery transition.
  */
-export const TG_ANCHOR_DISSOLVE_COHESION_FLOOR = 15;
+export const TG_ANCHOR_DISSOLVE_COHESION_FLOOR = TG_DISSOLVE_COHESION;
 
 export function dissolveTacticalGroup(
     state: GameState,
@@ -293,6 +303,10 @@ export function dissolveTacticalGroup(
     const tg = mil.tactical_groups[tgId];
     const formations = mil.formations ?? {};
     const cooldownUntil = current_turn + TG_DONOR_COOLDOWN_TURNS;
+
+    // Terminal truth must exist before any loan is cleared or the live TG is deleted.
+    tg.status = 'dissolved';
+    finalizeTgParticipations(formations, tg, current_turn);
 
     // Clear donor lent fields + set cooldown.
     for (const d of tg.donor_contributions) {
@@ -335,6 +349,165 @@ export function dissolveTacticalGroup(
 }
 
 /**
+ * Finalize every participation row carrying this TG id. Formation ids use the
+ * canonical strict order; each history list retains its persisted row order.
+ */
+function finalizeTgParticipations(
+    formations: Record<FormationId, FormationState>,
+    tg: TacticalGroup,
+    dissolvedTurn: number,
+): void {
+    const donorByBrigadeId = new Map(
+        tg.donor_contributions.map((contribution) => [contribution.brigade_id, contribution] as const),
+    );
+    const historyLists = ['tg_participations', 'archived_tg_participations'] as const;
+
+    for (const brigadeId of Object.keys(formations).sort(strictCompare)) {
+        const history = formations[brigadeId]?.brigade_history;
+        if (!history) continue;
+        for (const historyList of historyLists) {
+            const records = history[historyList];
+            if (!records) continue;
+            for (const record of records) {
+                if (record.tg_id !== tg.id) continue;
+                record.dissolved_turn = dissolvedTurn;
+                if (record.role !== 'donor') continue;
+                const contribution = donorByBrigadeId.get(brigadeId);
+                if (!contribution) continue;
+                record.casualties = contribution.casualties_so_far;
+                record.personnel_returned = Math.max(
+                    0,
+                    contribution.personnel_lent - contribution.casualties_so_far,
+                );
+            }
+        }
+    }
+}
+
+/** Synchronize live TG and Army-HQ receipts after a CorpsOperation enters execution. */
+export function markOperationExecuting(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+): void {
+    const tgIds = resolveTacticalGroupIdsForOperation(state, hostCorpsId, op);
+    for (const tgId of tgIds) {
+        const tg = state.military.tactical_groups?.[tgId];
+        if (!tg) continue;
+        tg.status = 'engaged';
+        const anchorLocation = state.military.formations?.[tg.anchor_brigade_id]?.location_osid;
+        if (anchorLocation) tg.location_osid = anchorLocation;
+    }
+
+    const resolved = resolveArmyHqOperation(state, hostCorpsId, op);
+    if (!resolved) return;
+    resolved.operation.status = 'executing';
+    if (tgIds.length > 0) resolved.operation.tg_id = tgIds[0];
+    else delete resolved.operation.tg_id;
+}
+
+export type TgExhaustionRecoveryReason = 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
+
+/**
+ * Evaluate operation-owned TG exhaustion at the two canonical execution
+ * chokepoints. The CorpsOperation remains the only clock; this helper adds no
+ * scheduler or recovery transition of its own.
+ */
+export function evaluateOperationTacticalGroupExhaustion(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+    turn: number,
+): TgExhaustionRecoveryReason | null {
+    if (op.phase !== 'execution') return null;
+    if (state.meta?.phase != null && state.meta.phase !== 'war') return null;
+    if (state.military.event_flags?.coha_active === true) return null;
+    if (turn <= op.phase_started_turn) return null;
+
+    const engagedGroups = resolveTacticalGroupIdsForOperation(state, hostCorpsId, op)
+        .map((id) => state.military.tactical_groups?.[id])
+        .filter((group): group is TacticalGroup => group?.status === 'engaged');
+    if (engagedGroups.length === 0) return null;
+
+    for (const group of engagedGroups) {
+        if (group.cohesion < TG_DISSOLVE_COHESION) return 'tg_cohesion_exhausted';
+    }
+
+    const activeExecutionTurns = turn - op.phase_started_turn;
+    if (activeExecutionTurns >= TG_MAX_LIFECYCLE_TURNS) return 'tg_max_lifecycle';
+
+    let terminationReason: TgExhaustionRecoveryReason | null = null;
+    for (const group of engagedGroups) {
+        if (group.last_exhaustion_tick_turn === turn) continue;
+        group.cohesion = Math.max(
+            0,
+            Math.min(100, group.cohesion - TG_COHESION_DRAIN_PER_ENGAGED_TURN),
+        );
+        group.last_exhaustion_tick_turn = turn;
+        if (terminationReason == null && group.cohesion < TG_DISSOLVE_COHESION) {
+            terminationReason = 'tg_cohesion_exhausted';
+        }
+    }
+    return terminationReason;
+}
+
+/**
+ * Canonical, idempotent execution-to-recovery transition. TGs are marked
+ * recovering only during finalization and then removed; Army-HQ receipts remain.
+ */
+export function enterOperationRecovery(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+    turn: number,
+    reason: CorpsOperation['recovery_reason'],
+): void {
+    const enteringRecovery = op.phase !== 'recovery';
+    if (enteringRecovery) {
+        op.phase = 'recovery';
+        op.phase_started_turn = turn;
+        op.recovery_reason = reason;
+    }
+
+    const tgIds = resolveTacticalGroupIdsForOperation(state, hostCorpsId, op);
+    if (ENABLE_TG_ARMY_HQ_OPS && op.army_hq_telemetry_snapshot == null) {
+        for (const tgId of tgIds) {
+            const tg = state.military.tactical_groups?.[tgId];
+            if (!tg) continue;
+            const telemetry = buildArmyHqTelemetryFromTg(tg, op.army_hq_op_id);
+            if (!telemetry) continue;
+            op.army_hq_telemetry_snapshot = telemetry;
+            break;
+        }
+    }
+    for (const tgId of tgIds) {
+        const tg = state.military.tactical_groups?.[tgId];
+        if (tg) tg.status = 'recovering';
+        dissolveTacticalGroup(state, tgId, turn);
+    }
+
+    const resolved = resolveArmyHqOperation(state, hostCorpsId, op);
+    if (!resolved) return;
+    if (enteringRecovery && resolved.operation.recovery_started_turn == null) {
+        resolved.operation.recovery_started_turn = turn;
+    }
+    resolved.operation.status = 'recovering';
+    delete resolved.operation.tg_id;
+}
+
+/** Synchronize the durable Army-HQ receipt before its CorpsOperation is removed. */
+export function completeOperationLifecycle(
+    state: GameState,
+    hostCorpsId: FormationId,
+    op: CorpsOperation,
+): void {
+    const resolved = resolveArmyHqOperation(state, hostCorpsId, op);
+    if (!resolved) return;
+    resolved.operation.status = 'completed';
+    delete resolved.operation.tg_id;
+}
+
+/**
  * Concurrency-cap gate (ADR-0005 §Constants reference + §Army HQ Operations Pyrrhic cost #1).
  * Returns a rejection_reason string if forming a TG for `faction`/`corpsId` would exceed a cap,
  * else null. Deterministic: pure counting over the existing tactical_groups Record (sorted keys).
@@ -349,6 +522,7 @@ function checkConcurrencyCaps(
     mil: NonNullable<GameState['military']>,
     faction: string,
     corpsId: FormationId,
+    currentTurn: number,
 ): string | null {
     const tgs = mil.tactical_groups ?? {};
     const formations = mil.formations ?? {};
@@ -365,7 +539,7 @@ function checkConcurrencyCaps(
     if (corpsCount >= MAX_TGS_PER_CORPS) return 'corps_tg_cap_reached';
 
     let factionCap = MAX_CONCURRENT_TGS_PER_FACTION;
-    if (ENABLE_TG_ARMY_HQ_OPS && factionHasActiveArmyHqOp(mil, faction)) {
+    if (ENABLE_TG_ARMY_HQ_OPS && factionHasActiveArmyHqOp(mil, faction, currentTurn)) {
         factionCap = Math.max(0, factionCap - ARMY_HQ_TG_CAP_REDUCTION);
     }
     if (factionCount >= factionCap) return 'faction_tg_cap_reached';
@@ -373,16 +547,24 @@ function checkConcurrencyCaps(
     return null;
 }
 
-/** True if the faction has an Army HQ op in a planning or executing state (cap-reduction trigger). */
+/** True when any same-faction Army-HQ operation owns the live cap reduction. */
 function factionHasActiveArmyHqOp(
     mil: NonNullable<GameState['military']>,
     faction: string,
+    currentTurn: number,
 ): boolean {
     const ops = mil.army_hq_operations ?? {};
     for (const id of Object.keys(ops).sort(strictCompare)) {
         const op = ops[id];
         if (op.faction_id !== faction) continue;
         if (op.status === 'planning' || op.status === 'executing') return true;
+        if (op.status !== 'recovering' && op.status !== 'completed') continue;
+        const recoveryStart = op.recovery_started_turn;
+        if (
+            recoveryStart != null
+            && currentTurn >= recoveryStart
+            && currentTurn < recoveryStart + ARMY_HQ_TG_CAP_RECOVERY_TURNS
+        ) return true;
     }
     return false;
 }

@@ -1237,6 +1237,8 @@ describe('deriveInboxItems — opening brief conditions', () => {
         expect(gains).toHaveLength(1);
         expect(losses[0].action).toBe('decision_room');
         expect(gains[0].action).toBe('decision_room');
+        expect(losses[0].priorityBand).toBe('record');
+        expect(gains[0].priorityBand).toBe('record');
     });
 
     it('does not report startup control painting as turn-zero territory gained or lost', () => {
@@ -1264,7 +1266,7 @@ describe('deriveInboxItems — priority ordering', () => {
     it('sorts items by priority (blocking event first, then peace plan, then reserve, then situation)', () => {
         const state = makeStub({
             pendingEventDecisions: [
-                { event_id: 'evt_1', event_title: 'Crisis', turn_fired: 5, faction: 'RBiH', response_options: [{ id: 'a', label: 'A', effects: [] }] },
+                { event_id: 'evt_1', event_title: 'Crisis', turn_fired: 5, faction: 'RBiH', requires_player_response: true, response_options: [{ id: 'a', label: 'A', effects: [] }] },
             ],
             pendingPeacePlan: {
                 planId: 'vance', planName: 'Vance Plan', narrative: '', turnOffered: 5,

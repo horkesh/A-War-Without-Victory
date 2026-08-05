@@ -203,7 +203,7 @@ describe('v0.9.1 Dynamic Essay + Endgame Comparison milestone closure', () => {
         expect(plan).toContain('**Status:** CLOSED-FOR-AGENT-SCOPE');
         expect(plan).toContain('canonical historical text remains immutable substrate');
         expect(plan).toContain('All five execution phases are agent-closed');
-        expect(roadmap).toContain('**v0.9.1 Dynamic Essay + Endgame Comparison** — CLOSED-FOR-AGENT-SCOPE');
-        expect(roadmap).toContain('20260510_V091_DYNAMIC_ENDGAME_MILESTONE_CLOSURE.md');
+        expect(roadmap).toContain('| 12 | Dynamic Codex | R4 |');
+        expect(roadmap).toContain('Prior roadmap history remains in Git before this consolidation');
     });
 });

@@ -14,8 +14,8 @@ import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, 
 import { triggerMatches } from './event_types.js';
 import { isEventReady } from './pressure_system.js';
 import { pickBotResponseV1 } from './bot_response.js';
-import { applyAIDefaultResponse } from './ai_default_response.js';
-import { emitEventNotifications, isTwoLevelNotificationsEnabled } from './emit_notifications.js';
+import { applyAIDefaultResponse, hasAuthoredAIDefaultResponse } from './ai_default_response.js';
+import { emitEventNotifications } from './emit_notifications.js';
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { pickPoliticalResponse } from '../political/political_event_decision.js';
@@ -112,13 +112,17 @@ function collectEffects(def: EventDefinition) {
  */
 export function canEventFire(def: EventDefinition, state: GameState, currentTurn: number): boolean {
     const firedIds = state.military.fired_event_ids ?? [];
+    const fireCount = state.military.event_fire_counts?.[def.id] ?? 0;
 
-    // 1. once:true events that already fired
-    if (def.once && firedIds.includes(def.id)) return false;
+    // 1. once:true events that already fired through either canonical path.
+    // Natural evaluation records both the id and count; desktop-initiated
+    // actions record the count at queue time. Either receipt must seal the
+    // row against a later natural queue without coupling the evaluator to the
+    // desktop-only action_cadence contract.
+    if (def.once && (firedIds.includes(def.id) || fireCount > 0)) return false;
 
     // 2. Recurrence max_fires check
     if (def.recurrence) {
-        const fireCount = state.military.event_fire_counts?.[def.id] ?? 0;
         if (def.recurrence.max_fires != null && fireCount >= def.recurrence.max_fires) return false;
 
         // 3. Cooldown check
@@ -610,7 +614,7 @@ export function evaluateEvents(
                     ...(def.staff_recommended_response_id
                         ? { staff_recommended_response_id: def.staff_recommended_response_id }
                         : {}),
-                    ...(isTwoLevelNotificationsEnabled()
+                    ...(def.notifications_to_other_factions
                         ? { notifications_to_other_factions: def.notifications_to_other_factions }
                         : {}),
                 });
@@ -621,16 +625,11 @@ export function evaluateEvents(
                 let decisionSource: 'bot_political' | 'bot_v1' | 'bot_ai_default';
                 // Free War Phase 0 de-railroad: in 'emergent' mode, bypass the
                 // historical-default railroad and fall through to the live
-                // political/v1 scorers. Unset preserves today's flag-dependent
-                // behavior byte-identical (the calibration health check).
-                // Codex P2 (#88): EXPLICIT 'historical' is the source of truth for
-                // the calibration contract — it must replay historical defaults
-                // regardless of the AWWV_TWO_LEVEL_NOTIFICATIONS flag, so a future
-                // calibration scenario that sets historical mode without exporting
-                // the flag does not silently take emergent choices.
+                // political/v1 scorers. Unset follows the save-migration default
+                // ('historical') independently of notification delivery.
                 const emergent = state.meta.decision_mode === 'emergent';
-                const forceHistorical = state.meta.decision_mode === 'historical';
-                if (forceHistorical || (isTwoLevelNotificationsEnabled() && !emergent)) {
+                const historical = !emergent;
+                if (historical && hasAuthoredAIDefaultResponse(def)) {
                     chosen = applyAIDefaultResponse(state, def);
                     decisionSource = 'bot_ai_default';
                 // Free War Phase 0.5: in EMERGENT mode, route EVERY faction-attributed
@@ -638,7 +637,8 @@ export function evaluateEvents(
                 // POLITICAL_LOGICS subset. Most events carry bot_response_logic
                 // 'historical' (→ pickBotResponseV1, which hard-returns the historical
                 // default with no scoring); without this, emergent freedom is nominal.
-                // Historical/unset keeps the POLITICAL_LOGICS gate, byte-identical.
+                // Historical/unset uses the political scorer only when no authored
+                // AI default exists and the event explicitly selects political logic.
                 } else if (
                     respondingFaction !== null &&
                     (emergent || POLITICAL_LOGICS.has(def.bot_response_logic ?? ''))
@@ -669,7 +669,7 @@ export function evaluateEvents(
                 // (packet §3.3, §3.5). Mirror of player path in resolve_decision.ts
                 // — both paths produce identical deltas for the same choice.
                 applyResponseRuntimeCausality(state, def.id, chosen.id, chosen, currentTurn);
-                if (isTwoLevelNotificationsEnabled() && respondingFaction !== null) {
+                if (respondingFaction !== null) {
                     emitEventNotifications(
                         state,
                         { event_id: def.id, notifications_to_other_factions: def.notifications_to_other_factions },

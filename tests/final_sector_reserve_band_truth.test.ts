@@ -83,6 +83,8 @@ describe('final sector reserve-band truth', () => {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
             } as GameState['military'],
             political: {
                 political_controllers: {
@@ -192,6 +194,8 @@ describe('final sector reserve-band truth', () => {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
             } as GameState['military'],
             political: {
                 political_controllers: {
@@ -306,6 +310,8 @@ describe('final sector reserve-band truth', () => {
             event_flags: {},
             enabled_event_ids: [],
             phantoms_spawned: [],
+            corps_front_sectors: {},
+            sector_intel: {},
             } as GameState['military'],
             political: {
                 political_controllers: {

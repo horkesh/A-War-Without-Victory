@@ -6,7 +6,7 @@
  * delegate to front_visit_contract.cjs). Verifies the canon-safety contract:
  *   - force-queue builds the player faction's visit_to_front_<faction> decision
  *     (mirror of evaluate_events.ts:577) carrying the authored response_options
- *   - cooldown/cap REUSE the event's OWN recurrence (max_fires 5 / cooldown 10t):
+ *   - cooldown/cap use voluntary action_cadence (max_fires 5 / cooldown 10t):
  *     refuse 'exhausted' when fires used up; refuse 'on_cooldown' within cooldown
  *   - ENCLAVE REACHABILITY GATE: a cut-off enclave branch ('critical' supply)
  *     is EXCLUDED; a corridored target ('strained'/'adequate') is offered;
@@ -52,7 +52,7 @@ function makeRbihEventDef() {
     responding_faction: 'RBiH',
     requires_player_response: true,
     staff_recommended_response_id: 'stay_capital_rbih',
-    recurrence: { max_fires: 5, cooldown_turns: 10, escalation: 'static' },
+    action_cadence: { max_fires: 5, cooldown_turns: 10, escalation: 'static' },
     effect: { kind: 'narrative', text: 'Arrangements are made for the presidential visit.' },
     response_options: [
       { id: 'visit_sarajevo', label: 'Visit the Sarajevo front' },
@@ -138,7 +138,15 @@ describe('front visit — force-queue inserts the player faction event', () => {
   });
 });
 
-describe('front visit — cooldown / cap reuse the event recurrence', () => {
+describe('front visit — voluntary action cooldown / cap', () => {
+  it('fails closed when voluntary action cadence metadata is absent', () => {
+    const def = makeRbihEventDef();
+    delete (def as any).action_cadence;
+    const a = computeFrontVisitAvailability(makeState(), 'RBiH', def);
+    expect(a.available).toBe(false);
+    expect(a.reason).toBe('no_action_cadence');
+  });
+
   it('refuses with exhausted when max_fires reached', () => {
     const state = makeState({ fireCount: 5 }); // max_fires = 5
     const def = makeRbihEventDef();
@@ -159,8 +167,8 @@ describe('front visit — cooldown / cap reuse the event recurrence', () => {
     expect(a.onCooldown).toBe(true);
   });
 
-  it('is available once the cooldown has elapsed', () => {
-    const state = makeState({ turn: 96, fireCount: 1, lastFired: 85 });
+  it('allows a second explicit action only once the cooldown has elapsed', () => {
+    const state = makeState({ turn: 95, fireCount: 1, lastFired: 85 });
     const def = makeRbihEventDef();
     const a = computeFrontVisitAvailability(state, 'RBiH', def);
     expect(a.available).toBe(true);

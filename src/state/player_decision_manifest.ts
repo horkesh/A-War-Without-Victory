@@ -12,6 +12,7 @@ export type PlayerDecisionFamilyId =
     | 'operation_opportunity';
 
 export type PlayerDecisionGatePolicy = 'hard_block' | 'modal_required' | 'advisory';
+export type PlayerDecisionRecommendedDestination = 'inbox' | 'decision-room' | 'army-hq';
 
 export interface PlayerDecisionFamilyDefinition {
     id: PlayerDecisionFamilyId;
@@ -20,6 +21,10 @@ export interface PlayerDecisionFamilyDefinition {
     ownerSurface: string;
     resolver: string;
     gatePolicy: PlayerDecisionGatePolicy;
+    /** Canonical next presidential workspace for this family. */
+    recommendedDestination: PlayerDecisionRecommendedDestination;
+    /** Durable state owner used to file the resulting receipt. */
+    receiptPath: string;
 }
 
 export interface PlayerDecisionInstance {
@@ -58,6 +63,8 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         ownerSurface: 'event_modal',
         resolver: 'resolve-decision',
         gatePolicy: 'hard_block',
+        recommendedDestination: 'inbox',
+        receiptPath: 'military.event_decision_log',
     },
     {
         id: 'peace_plan',
@@ -66,6 +73,8 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         ownerSurface: 'peace_plan_modal',
         resolver: 'peace-plan-response',
         gatePolicy: 'modal_required',
+        recommendedDestination: 'inbox',
+        receiptPath: 'military.negotiation.peace_plan_history',
     },
     {
         id: 'dayton_negotiation',
@@ -74,6 +83,8 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         ownerSurface: 'dayton_modal',
         resolver: 'dayton-response',
         gatePolicy: 'modal_required',
+        recommendedDestination: 'inbox',
+        receiptPath: 'military.negotiation.dayton_result',
     },
     {
         id: 'paramilitary_request',
@@ -82,6 +93,8 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         ownerSurface: 'paramilitary_review',
         resolver: 'resolve-paramilitary-requests',
         gatePolicy: 'hard_block',
+        recommendedDestination: 'inbox',
+        receiptPath: 'paramilitary_decision_history',
     },
     {
         id: 'convoy_decision',
@@ -90,6 +103,8 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         ownerSurface: 'convoy_decision_modal',
         resolver: 'stage-convoy-decision',
         gatePolicy: 'modal_required',
+        recommendedDestination: 'inbox',
+        receiptPath: 'military.convoy_decision_history',
     },
     {
         id: 'reserve_request',
@@ -98,6 +113,8 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         ownerSurface: 'army_reserve',
         resolver: 'approve-reserve-request/decline-reserve-request',
         gatePolicy: 'advisory',
+        recommendedDestination: 'army-hq',
+        receiptPath: 'military.reserve_request_history',
     },
     {
         id: 'officer_event',
@@ -106,6 +123,8 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         ownerSurface: 'army_hq_personnel',
         resolver: 'acknowledge-officer-event/resolve-officer-event',
         gatePolicy: 'advisory',
+        recommendedDestination: 'army-hq',
+        receiptPath: 'military.officer_decision_history',
     },
     {
         id: 'autonomy_proposal',
@@ -114,6 +133,8 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         ownerSurface: 'decision_room',
         resolver: 'resolve-autonomy-proposal',
         gatePolicy: 'advisory',
+        recommendedDestination: 'decision-room',
+        receiptPath: 'meta.proposal_decision_history',
     },
     {
         id: 'operation_opportunity',
@@ -122,6 +143,8 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         ownerSurface: 'decision_room',
         resolver: 'resolve-operation-opportunity',
         gatePolicy: 'advisory',
+        recommendedDestination: 'decision-room',
+        receiptPath: 'military.operation_opportunity_resolutions',
     },
 ] as const;
 

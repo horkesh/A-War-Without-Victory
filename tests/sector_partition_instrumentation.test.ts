@@ -260,6 +260,23 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(recoverRegion).not.toMatch(/\bMath\.random\s*\(/);
     });
 
+    it('static contract: front-edge relation construction is invocation-local with explicit strategy and counters', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const buildStart = raw.indexOf('export function buildCorpsFrontSectors(');
+        const buildEnd = raw.indexOf('/** @internal Exact legacy fixed-point sequence', buildStart);
+        expect(buildStart).toBeGreaterThanOrEqual(0);
+        expect(buildEnd).toBeGreaterThan(buildStart);
+
+        const buildRegion = raw.slice(buildStart, buildEnd);
+        expect(buildRegion).toContain("frontEdgeAdjacencyStrategy: SectorFrontEdgeAdjacencyStrategy = 'invocation-front-edge-relation'");
+        expect(buildRegion).toContain("frontEdgeAdjacencyStrategy === 'test-only-legacy-edge-adjacency'");
+        expect(buildRegion).toContain('const frontEdgeRelations = new Map<FactionId, SectorFrontEdgeRelation>();');
+        expect(buildRegion).toContain('const frontEdgeRelationForFaction: SectorFrontEdgeRelationProvider');
+        expect(buildRegion).toContain('frontEdgeRelationTestCounters?: SectorFrontEdgeRelationTestCounters');
+        expect(buildRegion.match(/createSectorFrontEdgeRelation\(/g)).toHaveLength(1);
+        expect(buildRegion).not.toMatch(/process\.env|WeakMap|state\.military\.frontEdgeRelation/);
+    });
+
     it('static contract: buildFactionSectors has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
         const startIdx = raw.indexOf('function buildFactionSectors(');
@@ -654,13 +671,14 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         const region = raw.slice(startIdx, endIdx);
         expect(raw).toContain('const pickVacantLocalFrontTargetFromFrontSet = (');
         // Front-OSID lookup routes through the per-invocation `frontOsidsFor(...)`
-        // memoization cache (byte-identical to getSectorFrontOsids; sub_segments
-        // are immutable across this function's passes).
+        // memoization boundary. Both accepted occupancy strategies share this
+        // read-only lookup; only their active-formation counting differs.
         expect(region).toContain('const sectorFrontOsids = frontOsidsFor(sector);');
         expect(region).toContain('const sameComponentDonors = corpsSectors');
+        expect(region).toContain('const activeCounts = freshActiveCounts();');
         expect(region).toContain('pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts)');
-        expect(region).toContain('pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts)');
-        expect(region).toContain('moveBrigadeToFrontTarget(bid, target, stepActiveCounts);');
+        expect(region).toContain('moveBrigadeToFrontTarget(bid, target, activeCounts);');
+        expect(region).not.toContain('stepActiveCounts');
         expect(region).not.toContain('moveBrigadeToFrontTarget(bid, target, countActiveBrigadesByOsid');
         expect(region).not.toMatch(/\bDate\.now\s*\(/);
         expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
@@ -722,9 +740,13 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         const region = raw.slice(phaseIdx, phaseEnd);
         const distributeIdx = region.indexOf('distributeBrigadesToFront(');
+        const receiptIdx = region.indexOf('recordFinalSectorReconciliationMutation(');
         const sealIdx = region.indexOf('sealFinalSectorTruthFromCurrentSectors(');
         expect(distributeIdx).toBeGreaterThanOrEqual(0);
+        expect(receiptIdx).toBeGreaterThan(distributeIdx);
         expect(sealIdx).toBeGreaterThan(distributeIdx);
+        expect(sealIdx).toBeGreaterThan(receiptIdx);
+        expect(region).toContain("'distribution-roster'");
         expect(region).toContain('context.state.military.war_front_edges_osid ?? []');
     });
 
@@ -736,10 +758,18 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(serializeIdx).toBeGreaterThan(finalSaveIdx);
 
         const region = raw.slice(finalSaveIdx, serializeIdx);
+        const sessionIdx = region.indexOf('createFinalSectorReconciliationSession(');
         const reconcileIdx = region.indexOf('reconcileFinalSectorTruth(');
+        const receiptIdx = region.indexOf('recordFinalSectorReconciliationMutation(');
         const sealIdx = region.indexOf('sealFinalSectorTruthFromCurrentSectors(');
+        expect(sessionIdx).toBeGreaterThanOrEqual(0);
         expect(reconcileIdx).toBeGreaterThanOrEqual(0);
+        expect(reconcileIdx).toBeGreaterThan(sessionIdx);
+        expect(receiptIdx).toBeGreaterThan(reconcileIdx);
         expect(sealIdx).toBeGreaterThan(reconcileIdx);
+        expect(sealIdx).toBeGreaterThan(receiptIdx);
+        expect(region).toContain("'final-save-geometry'");
+        expect(region).toContain("'seal-roster'");
         expect(region).toContain('const finalOperationalEdges');
         expect(region).toContain('const finalSpatial');
         expect(region).toMatch(/sealFinalSectorTruthFromCurrentSectors\(\s*state,\s*finalOperationalEdges,/);
@@ -906,5 +936,17 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(isSectorPartitionPerfEnabled()).toBe(v1);
         delete process.env[FLAG];
         expect(isSectorPartitionPerfEnabled()).toBe(v1);
+    });
+
+    it('fixed-point shortcut consumes both prune and recovery mutation receipts', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const compact = raw.replace(/\s+/g, ' ');
+
+        expect(compact).toContain(
+            "const prunedGhostArtifacts = _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));",
+        );
+        expect(compact).toContain(
+            'if (!useFixedPointShortcuts || prunedGhostArtifacts || recoveredDroppedFrontEdges)',
+        );
     });
 });

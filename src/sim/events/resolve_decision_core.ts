@@ -13,7 +13,7 @@ import {
     applyResponseRuntimeCausality,
     recordEventDecision,
 } from './evaluate_events.js';
-import { emitEventNotifications, isTwoLevelNotificationsEnabled } from './emit_notifications.js';
+import { emitEventNotifications } from './emit_notifications.js';
 
 export function resolveEventDecisionCore(state: GameState, eventId: string, responseId: string): void {
     const pending = state.military.pending_event_decisions;
@@ -47,18 +47,16 @@ export function resolveEventDecisionCore(state: GameState, eventId: string, resp
     );
     applyResponseRuntimeCausality(state, eventId, chosen.id, chosen, decisionTurn);
 
-    if (isTwoLevelNotificationsEnabled()) {
-        emitEventNotifications(
-            state,
-            {
-                event_id: decision.event_id,
-                notifications_to_other_factions: decision.notifications_to_other_factions,
-            },
-            chosen.id,
-            decision.faction,
-            state.meta.turn ?? decision.turn_fired,
-        );
-    }
+    emitEventNotifications(
+        state,
+        {
+            event_id: decision.event_id,
+            notifications_to_other_factions: decision.notifications_to_other_factions,
+        },
+        chosen.id,
+        decision.faction,
+        state.meta.turn ?? decision.turn_fired,
+    );
 
     pending.splice(idx, 1);
 }

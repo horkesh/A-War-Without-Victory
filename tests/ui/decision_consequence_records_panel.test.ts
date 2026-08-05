@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { DecisionConsequenceRecordsPanel } from '../../src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.js';
@@ -40,6 +40,138 @@ afterEach(() => {
 });
 
 describe('DecisionConsequenceRecordsPanel', () => {
+  it('links an authored source decision forward to its filed receipt and back', () => {
+    const eventCatalog = new Map<string, any>([
+      ['source-event', {
+        id: 'source-event',
+        title: 'Source event',
+        family: 'test',
+        historical_default_response_id: 'accept',
+        response_options: [{
+          id: 'accept',
+          label: 'Accept the recommendation',
+          future_consequences: [{
+            label: 'Downstream consequence',
+            explanation: 'The dossier predicted this consequence.',
+            opens_events: ['downstream-event'],
+          }],
+        }],
+      }],
+      ['downstream-event', { id: 'downstream-event', title: 'Downstream event', response_options: [] }],
+    ]);
+    useGameStore.setState({
+      loadedGameState: makeState({
+        player_faction: 'RS',
+        rawGameState: {
+          meta: { player_faction: 'RS' },
+          military: {
+            event_decision_log: [{
+              event_id: 'source-event',
+              response_id: 'accept',
+              decision_source: 'player',
+              faction: 'RS',
+              turn: 4,
+            }],
+            event_causality_log: [{
+              turn: 4,
+              from_event: 'source-event',
+              to_event: 'downstream-event',
+              to_flag: null,
+              kind: 'enables',
+              source_response_id: 'accept',
+            }],
+            fired_event_ids: ['source-event', 'downstream-event'],
+            event_last_fired_turn: { 'source-event': 4, 'downstream-event': 7 },
+            closed_event_ids: [],
+          },
+        } as any,
+      }),
+    });
+
+    render(React.createElement(
+      DecisionConsequenceRecordsPanel as React.ComponentType<any>,
+      { eventCatalog },
+    ));
+
+    const sourceRow = screen.getByTestId('decision-history-row');
+    expect(sourceRow.getAttribute('data-source-record-id')).toBe('decision:source-event::accept::4');
+    fireEvent.click(screen.getByText('Source event'));
+    const receiptRow = screen.getByTestId('decision-history-receipt-row');
+    expect(receiptRow.getAttribute('data-receipt-record-id'))
+      .toBe('receipt:source-event::accept::4::downstream-event');
+    expect(receiptRow.getAttribute('data-source-record-id')).toBe('decision:source-event::accept::4');
+    fireEvent.click(screen.getByRole('button', { name: 'Back to source decision' }));
+    expect(document.activeElement).toBe(sourceRow.querySelector('button'));
+  });
+
+  it('matches same-response recurring receipts, expansion, and source focus by exact decision turn', () => {
+    const eventCatalog = new Map<string, any>([
+      ['recurring-event', {
+        id: 'recurring-event',
+        title: 'Recurring staff question',
+        family: 'test',
+        historical_default_response_id: 'accept',
+        response_options: [{
+          id: 'accept',
+          label: 'Accept the recurring recommendation',
+          future_consequences: [{
+            label: 'Matching downstream consequence',
+            explanation: 'Only the later recurrence made this promise.',
+            opens_events: ['matching-downstream'],
+          }],
+        }],
+      }],
+      ['matching-downstream', { id: 'matching-downstream', title: 'Matching downstream', response_options: [] }],
+    ]);
+    useGameStore.setState({
+      loadedGameState: makeState({
+        player_faction: 'RS',
+        rawGameState: {
+          meta: { player_faction: 'RS' },
+          military: {
+            event_decision_log: [
+              { event_id: 'recurring-event', response_id: 'accept', decision_source: 'player', faction: 'RS', turn: 4 },
+              { event_id: 'recurring-event', response_id: 'accept', decision_source: 'player', faction: 'RS', turn: 8 },
+            ],
+            event_causality_log: [
+              { turn: 8, from_event: 'recurring-event', to_event: 'matching-downstream', to_flag: null, kind: 'enables', source_response_id: 'accept' },
+            ],
+            fired_event_ids: ['recurring-event', 'matching-downstream'],
+            event_last_fired_turn: { 'recurring-event': 8, 'matching-downstream': 10 },
+            closed_event_ids: [],
+          },
+        } as any,
+      }),
+    });
+
+    render(React.createElement(
+      DecisionConsequenceRecordsPanel as React.ComponentType<any>,
+      { eventCatalog },
+    ));
+
+    const sourceRows = screen.getAllByTestId('decision-history-row');
+    expect(sourceRows.map((row) => row.getAttribute('data-source-record-id'))).toEqual([
+      'decision:recurring-event::accept::4',
+      'decision:recurring-event::accept::8',
+    ]);
+
+    fireEvent.click(sourceRows[0]!.querySelector('button')!);
+    expect(sourceRows[0]!.querySelector('[data-testid="decision-history-row-expanded"]')).toBeTruthy();
+    expect(sourceRows[0]!.querySelector('[data-testid="decision-history-receipt-row"]')).toBeNull();
+
+    fireEvent.click(sourceRows[1]!.querySelector('button')!);
+    expect(sourceRows[0]!.querySelector('[data-testid="decision-history-row-expanded"]')).toBeNull();
+    expect(sourceRows[1]!.querySelector('[data-testid="decision-history-row-expanded"]')).toBeTruthy();
+    expect(screen.getByText('Matching downstream consequence')).toBeTruthy();
+    const receiptRow = screen.getByTestId('decision-history-receipt-row');
+    expect(receiptRow.getAttribute('data-receipt-record-id'))
+      .toBe('receipt:recurring-event::accept::8::matching-downstream');
+    expect(receiptRow.getAttribute('data-source-record-id'))
+      .toBe('decision:recurring-event::accept::8');
+    fireEvent.click(screen.getByRole('button', { name: 'Back to source decision' }));
+    expect(document.activeElement).toBe(sourceRows[1]!.querySelector('button'));
+  });
+
   it('keeps Chronicle-filed presidential choices out of Army HQ Records rows', () => {
     useGameStore.setState({
       loadedGameState: makeState({
@@ -229,6 +361,57 @@ describe('DecisionConsequenceRecordsPanel', () => {
       expect(screen.queryByRole('button', { name: 'Otvori Hroniku' })).toBeNull();
       expect(screen.queryByText('Decision recorded')).toBeNull();
       expect(screen.queryByText(/Event decision \/ Turn 8/)).toBeNull();
+    } finally {
+      setLocale('en', undefined);
+    }
+  });
+
+  it('renders a BCS autonomy receipt from structured stance fields without English or raw tokens', async () => {
+    const { setLocale } = await import('../../src/ui/map/i18n/index.js');
+    setLocale('bcs', undefined);
+    useGameStore.setState({
+      loadedGameState: makeState({
+        player_faction: 'RS',
+        formations: [{
+          id: 'vrs_drina',
+          faction: 'RS',
+          name: 'Drinski korpus',
+          kind: 'corps',
+          readiness: 'ready',
+          cohesion: 70,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+        }],
+        rawGameState: {
+          meta: {
+            player_faction: 'RS',
+            proposal_decision_history: [{
+              id: 'PROP_12_military_0',
+              turn: 12,
+              resolved_turn: 13,
+              faction: 'RS',
+              domain: 'military',
+              description: 'Formula AI recommends Drina Corps shift from balanced to offensive.',
+              proposed_action: 'SET_STANCE:vrs_drina:offensive',
+              current_value: 'balanced',
+              proposed_value: 'offensive',
+              accepted: true,
+            }],
+          },
+          military: {},
+        } as any,
+      }),
+    });
+
+    try {
+      render(React.createElement(DecisionConsequenceRecordsPanel));
+
+      expect(screen.getByText('Drinski korpus: Uravnoteženo → Ofanzivno.')).toBeTruthy();
+      expect(document.body.textContent).not.toMatch(
+        /Formula AI|Drina Corps|balanced|offensive|SET_STANCE|vrs_drina|PROP_12/,
+      );
     } finally {
       setLocale('en', undefined);
     }
