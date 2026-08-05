@@ -31,6 +31,8 @@ const { stageAuthoredOperation, stageCanonAttackOrder } = require('./author_op_s
 const { stageOpHalt } = require('./op_halt.cjs');
 const { stageOpDirective } = require('./op_directive_staging.cjs');
 const { stageCoReplacement } = require('./co_replacement.cjs');
+const { createSerialMutex } = require('./ipc_mutex.cjs');
+const { wrapHandlerWithMutationPolicy } = require('./ipc_mutation_policy.cjs');
 const { stageMunicipalitySupportOrderOnState } = require('./municipality_support_staging.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const {
@@ -1683,6 +1685,29 @@ function registerIpcHandler(channel, handler) {
   ipcMain.handle(channel, handler);
 }
 
+// R4 Phase 6 Task 6.5 — IPC mutation serialization. Every MUTATING ipc handler does
+// read-modify-write against one shared module-global canonical-state string, and Electron
+// does NOT serialize concurrent `invoke` calls — so two overlapping presidential actions
+// could both read the same pre-state, both compute a valid mutation, and the later
+// `writeCanonicalCurrentState` silently discards the earlier one (losing an order + its
+// Command Authority debit). `installIpcMutationSerialization()` wraps `ipcMain.handle`
+// ONCE, before any handler registers, so EVERY registration — both the `registerIpcHandler`
+// probe-safe set and the direct `ipcMain.handle` calls — is policy-wrapped with zero
+// per-site edits: complete by construction, and a future handler is serialized by default
+// (fail-safe). Only the READ_ONLY set (ipc_mutation_policy.cjs) passes through unqueued, so
+// interactive queries/saves never wait behind a mutation. Deadlock-free: no mutating handler
+// re-enters another channel (handlers call sim.* / local helpers directly, never
+// ipcMain.invoke), so there is no nested acquire.
+const ipcStateMutex = createSerialMutex();
+let ipcMutationSerializationInstalled = false;
+function installIpcMutationSerialization() {
+  if (ipcMutationSerializationInstalled) return;
+  ipcMutationSerializationInstalled = true;
+  const rawHandle = ipcMain.handle.bind(ipcMain);
+  ipcMain.handle = (channel, handler) =>
+    rawHandle(channel, wrapHandlerWithMutationPolicy(channel, handler, ipcStateMutex));
+}
+
 async function resolveMapServerBaseUrl() {
   // Prefer Vite dev map when running. Vite may use 3003, 3004... if 3002 is in use.
   // Skip the port our built server uses so we never mistake it for dev.
@@ -2019,6 +2044,8 @@ if (process.platform === 'win32' && typeof app.setAppUserModelId === 'function')
 app.whenReady().then(() => {
   alignPackagedProcessCwdWithResources();
   registerProtocol();
+  // Task 6.5: install BEFORE any handler registers so every channel is policy-wrapped.
+  installIpcMutationSerialization();
   registerProbeSafeIpcHandlers();
 
   if (RUNTIME_PROBE_MODE) {

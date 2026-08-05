@@ -17,6 +17,7 @@ import { strictCompare } from '../../../state/validateGameState';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getDecisionSurface, getDecisionSurfaceForInboxType } from './decisionSurfaceRegistry';
+import { plainReason } from './opDirectiveObjection';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getActiveLocale, t, type MessageKey } from '../i18n';
@@ -582,6 +583,27 @@ export function deriveInboxItems(
         });
     }
 
+    // Task 6.2: REQUEST-OP directive rejections — the corps commander reporting WHY a
+    // presidential order could not be carried out (no free force, no reachable staging,
+    // objective already held, no operation slot). The engine computed the reason and
+    // (before this task) discarded it. Record-band situation item (type 'situation' keeps
+    // hasPresidentialLever false), turn-scoped in the adapter so a stale rejection does not
+    // haunt the desk. Sober CO voice; target + reason routed through the playerSafe boundary.
+    for (const receipt of state.directiveOutcomeReceipts ?? []) {
+        const corpsName = getPlayerFacingCorpsName(receipt.corpsId, state.formations, 'Your command');
+        const placeName = getOsidDisplayName(receipt.targetOsid, osidNameMap);
+        items.push({
+            id: `sit:directive-rejection:${receipt.corpsId}:${receipt.turn}`,
+            type: 'situation',
+            severity: 'info',
+            title: t('inbox.item.directiveRejected.title', { corps: corpsName }),
+            subtitle: t('inbox.item.directiveRejected.subtitle', { place: placeName, reason: plainReason(receipt.reason) }),
+            action: situationSurface.inboxAction,
+            priority: 62,
+            includeInDeskPacket: true,
+        });
+    }
+
     // Date marker
     items.push({
         id: `sit:date:${turn}`,
@@ -607,7 +629,8 @@ export function deriveInboxItems(
             required: isAdvanceBlockingInboxItem(item),
             recordOnly: item.id.startsWith('sit:date:')
                 || item.id.startsWith('sit:territory_gain:')
-                || item.id.startsWith('sit:territory_loss:'),
+                || item.id.startsWith('sit:territory_loss:')
+                || item.id.startsWith('sit:directive-rejection:'),
             hasPresidentialLever: item.type !== 'situation' && item.type !== 'intelligence_notification',
             sourceId,
             currentTurn: state.turn ?? 0,

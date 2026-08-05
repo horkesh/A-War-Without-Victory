@@ -276,6 +276,24 @@ describe('desktop player-visible state projection', () => {
     expect(projected.operation_history.map((operation: any) => operation.operation_id)).toEqual(['rs_op']);
   });
 
+  it('carries op_directive_rejection for the player\'s own corps and scrubs the foreign one (Task 6.2)', () => {
+    // The directive-outcome Desk card depends on this field crossing the projection for
+    // the player's own corps (and NEVER for a foreign corps). Lock both directions.
+    const state = makeState();
+    (state.military.corps_command.rs_corps as any).op_directive_rejection = {
+      target_osid: 'op:tuzla:tuzla_2', reason: 'objective_unreachable', turn: 12,
+    };
+    (state.military.corps_command.rbih_corps as any).op_directive_rejection = {
+      target_osid: 'op:secret:x', reason: 'no_available_force', turn: 12,
+    };
+    const projected = loadProjector().projectPlayerVisibleState(state);
+    expect(projected.military.corps_command.rs_corps.op_directive_rejection).toEqual({
+      target_osid: 'op:tuzla:tuzla_2', reason: 'objective_unreachable', turn: 12,
+    });
+    // Foreign corps is removed wholesale, so its rejection can never leak.
+    expect(projected.military.corps_command.rbih_corps).toBeUndefined();
+  });
+
   it('scopes intel, resources, decisions, proposals, and notifications to the player', () => {
     const projected = loadProjector().projectPlayerVisibleState(makeState());
     const intel = projected.military.sector_intel['sector:rs_corps:0'][0];

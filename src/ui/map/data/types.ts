@@ -1064,6 +1064,9 @@ export interface LoadedGameState {
     recentControlEvents: RecentControlEventView[];
     /** Full control event history (all turns, all OSIDs) for timeline. */
     allControlEvents: Array<{ turn: number; settlementId: string; from: string | null; to: string | null; mechanism: string }>;
+    /** Task 6.2: the current turn's REQUEST-OP directive rejections (why a president's
+     *  order could not be carried out), turn-scoped. Empty for bots/headless. */
+    directiveOutcomeReceipts?: import('./directiveOutcomeReceipts.js').DirectiveOutcomeReceipt[];
     /** Non-persisted renderer/runtime feature flags supplied by desktop bridge. */
     runtimeFeatureFlags?: {
         srkStranglePostureActive?: boolean;

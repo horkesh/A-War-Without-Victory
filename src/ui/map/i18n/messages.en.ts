@@ -3773,6 +3773,8 @@ export const enMessages = {
     'inbox.item.territoryGained.title': 'Territory Gained',
     'inbox.item.territoryGained.single': 'Your forces secured {place}.',
     'inbox.item.territoryGained.many': 'Your forces secured {count} positions including {place}.',
+    'inbox.item.directiveRejected.title': '{corps}: order cannot be executed',
+    'inbox.item.directiveRejected.subtitle': 'Your directive on {place} cannot be carried out — {reason}.',
     'inbox.item.operationOpportunity.titleFallback': 'Operation Opportunity',
     'inbox.item.operationOpportunity.detailFallback': 'ops proposal requires your review.',
     'inbox.item.operationOpportunity.recommendation.approve': 'authorization',
