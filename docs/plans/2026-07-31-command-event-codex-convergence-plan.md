@@ -381,6 +381,72 @@ npm.cmd run desktop:release:check
 git diff --check
 ```
 
+## Phase 6 -- Presidential-lever regression fixes (RS ahistorical playthrough panel findings, 2026-08-05)
+
+**Trigger:** a full 188-week RS campaign played through the real Electron app (`docs/40_reports/20260805_RS_AHISTORICAL_PRESIDENTIAL_PLAYTHROUGH.md`), reviewed by a 12-specialist Pyrrhic panel (`docs/40_reports/20260805_RS_PLAYTHROUGH_PYRRHIC_PANEL_SYNTHESIS.md`), surfaced four regression-shaped bugs against this workstream's owned surface (`player_decision_manifest.ts`, the presidential lever IPC handlers, and the Decision Room/Desk read models). R4 is closed; per the roadmap's Legacy 30-Lane Disposition (row 4, "Closed foundation; R4 regression coverage only"), these are fixed here rather than reopening the workstream.
+
+**Assigned role:** Gameplay Programmer
+**Independent review:** Code Review (canon/specs) + QA Engineer
+
+**Files:**
+
+- Modify `src/state/player_decision_manifest.ts`
+- Modify `src/sim/negotiation/dayton_negotiation.ts`
+- Modify `src/desktop/electron-main.cjs`
+- Modify `src/desktop/co_replacement.cjs`, `src/desktop/op_directive_staging.cjs`, `src/desktop/op_halt.cjs`
+- Modify `src/desktop/player_visible_state.cjs`
+- New/modify `src/ui/map/data/directiveOutcomeReceipts.ts` (model on the existing `commandFrictionReceipts.ts` pattern)
+- Modify `src/ui/map/components/army_hq/DirectiveCard.tsx` or the Desk inbox surface (Architect/UI-UX panel recommendation: reuse `PresidentialInbox.tsx`'s existing `record`-band card, not a new toast pattern)
+- Modify `tests/desktop_player_decision_gate_contract.test.ts`
+- New `tests/desktop_game_over_advance_gate.test.ts` (QA Engineer panel recommendation — pins `game_over ⇒ countBlockingPlayerDecisions() === 0`)
+- New `tests/dayton_close_out_desktop_parity.test.ts` (QA Engineer panel recommendation — proves the desktop terminal path reaches the same cleared-`pending_dayton` end state the existing headless proxy test already asserts)
+
+**Task 6.1 -- Terminal-state decision gate.** Root cause (converged, independently, by Technical Architect, Systems Programmer, Gameplay Programmer, and Determinism Auditor in the panel review): `player_decision_manifest.ts` never checks `meta.game_over` anywhere, so a concluded game still reports blocking decisions forever if any family's request/receipt pair isn't atomically consumed. `resolvePendingDaytonCloseOut` (`dayton_negotiation.ts:216-231`), the only code that ever deletes `pending_dayton`, is gated on a headless-only scenario flag (`meta.dayton_close_out`) and is never reachable from the desktop `resolve-dayton` path.
+
+- [ ] Add a `meta.game_over === true ⇒ no blocking instances` guard to `summarizePlayerDecisions`/`listBlockingPlayerDecisions` (general fix, covers every family, not just Dayton).
+- [ ] Move `delete neg.pending_dayton` into `resolveDaytonNegotiation` itself, in the same mutation that writes `neg.dayton_result` — request and receipt must be written by the same owner, atomically.
+- [ ] Add a re-entry guard (`if (neg.dayton_result || state.meta.game_over) return neg.dayton_result;`) so repeat resolution calls are provably first-write-wins, matching `freezeEndgameSnapshot`'s existing idempotency contract.
+- [ ] Decide `resolvePendingDaytonCloseOut`'s fate: either wire it into a real pipeline step or delete it and retarget `tests/dayton_headless_close_out.test.ts` at the resolver directly — it is currently unreachable production code covered by a passing test suite (a false-green, per QA Engineer's panel finding).
+
+**Task 6.2 -- Surface `op_directive_rejection` to the player.** `war_phases.ts:853-855` already computes and stores exactly why a REQUEST-OP directive failed (`{ target_osid, reason, turn }`); `src/ui/map/data/opDirectiveObjection.ts:216`'s `plainReason()` already has player-safe prose for every reason code. Confirmed independently by four panel specialists (Architect, UI/UX Developer, Game Designer, Gameplay Programmer): nothing in `src/ui/**` or `player_visible_state.cjs` reads the field.
+
+- [ ] Export `op_directive_rejection` through `player_visible_state.cjs`.
+- [ ] Build `directiveOutcomeReceipts.ts` (pure, `strictCompare`-sorted, collapses to `[]` headless) mapping each reason code to `plainReason()` prose, modeled on `commandFrictionReceipts.ts`.
+- [ ] Render as a Desk inbox card in the corps commander's voice (e.g. "*1st Krajina Corps: your directive on Tuzla cannot be executed — no axis reaches the objective from our positions*").
+- [ ] Also snapshot `requested_by_president` onto `OperationAAR` (alongside the existing `was_force_launched`) so a directive that *does* inject and then loses in combat also produces a receipt — today only force-launched ops get one (UI/UX Developer panel finding).
+
+**Task 6.3 -- Stop charging Command Authority for orders already known to fail.** `buildDirectiveObjection`'s own doc comment (`opDirectiveObjection.ts:64-71`) states the UI must not stage or debit CA when `issuable: false` — the contract exists on paper and isn't enforced at the IPC boundary.
+
+- [ ] Move the objection pre-check from the renderer-only convention (`DirectiveCard.tsx`) into `stage-op-directive-order` itself, so every caller gets the guard, not just the one known UI path.
+- [ ] Refund CA (or refuse to stage) when the engine's own pre-check says the order cannot succeed.
+
+**Task 6.4 -- Filter Main Staff (and any non-field-command entity) out of corps-scoped presidential levers.** Confirmed by five independent panel specialists (Formation Expert, Gameplay Programmer, Systems Programmer, Scenario Harness Engineer, UI/UX Developer) that the type distinction already exists in the data — `kind: "army_hq"` in `data/source/oob_corps.json`, `EXEMPT_CORPS_IDS`/`isSectorAssignmentExemptCorpsId` in `src/sim/combat/corps_front_sectors_constants.ts`, `main_staff_formation_id` in `src/sim/combat/army_co_lifecycle.ts` — and simply isn't consulted by the lever handlers. 1,047 automated REPLACE-CO attempts in the playthrough hit this; a real player exploring the UI would see the same dead-end.
+
+- [ ] Filter `co_replacement.cjs`, `op_directive_staging.cjs`, and `op_halt.cjs`'s eligibility checks against the existing `EXEMPT_CORPS_IDS`/`kind` data (reuse, do not build a second list).
+- [ ] Filter the UI eligibility list (`src/ui/map/data/presidentialDecisionRoom.ts`) so Main Staff never appears as a lever target in the first place.
+- [ ] Return a typed `not_a_field_command` error distinct from `no_current_co` for anything that still reaches the handler.
+
+**Task 6.5 -- Electron IPC mutation serialization (cross-cutting with the now-closed R5, folded in here since it's the same handler layer Tasks 6.1-6.4 touch).** New finding from the panel review, not from the playthrough itself: Systems Programmer found every mutating `ipcMain.handle` in `electron-main.cjs` does read-modify-write against one shared JSON string with no locking, and Electron does not serialize concurrent `invoke` calls — two overlapping presidential actions can both pass their own "not already pending" guard, both compute a valid mutation, and the later `writeCanonicalCurrentState` silently discards the earlier one, along with its Command Authority debit. A live correctness bug for real rapid double-clicks, independent of anything this playthrough's automation did.
+
+- [ ] Add a promise-chained mutex around every *mutating* `registerIpcHandler` channel in `electron-main.cjs`; leave read-only queries unqueued.
+- [ ] Regression test: fire N concurrent `invoke`s of a mutating channel (e.g. `stage-op-directive-order`), assert the result is state-equal to some serial ordering and that total CA debited equals CA charged on succeeded orders only.
+
+**Verification:**
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run test:vitest -- tests/desktop_player_decision_gate_contract.test.ts tests/desktop_game_over_advance_gate.test.ts tests/dayton_close_out_desktop_parity.test.ts tests/dayton_headless_close_out.test.ts --pool=forks --reporter=dot
+npm.cmd run test:baselines
+npm.cmd run engine:health:gate
+npm.cmd run qa:electron-runtime-contracts
+npm.cmd run desktop:release:check
+git diff --check
+```
+
+`/simplify` -> independent review -> commit `fix(r4): close presidential-lever findings from RS ahistorical playthrough panel`
+
+**Explicitly out of scope for this phase** (routed elsewhere, see `MASTER_ROADMAP.md` §10 and the R6 plan): the morale-asymmetry root cause behind `operations_launched`/`combat_effective_brigades` (R6), the Srebrenica-trigger-flag investigation and Mladić/Contact-Group institutional-veto candidate experiments (R6, panel sign-off required), `VICTORY_AND_PYRRHIC_SCORING.md` §3.2 documentation of `COST_GRADE_CAPS` (R6), and promoting the ad hoc playthrough script into an R8 pre-flight tool (R8 prep note, not an R4 task).
+
 ## 5. Determinism and schema rules
 
 - No `Math.random`, `Date.now`, locale-dependent ordering, wall-clock timestamps, or environment-dependent content.
