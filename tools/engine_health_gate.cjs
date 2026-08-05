@@ -121,6 +121,38 @@ for (const faction of Object.keys(ledger)) {
 }
 const kwRatio = killed > 0 ? +(wounded / killed).toFixed(3) : 0;
 
+// R6 Task 0.3 Step 8 instrumentation (2026-08-06): mean brigade morale + combat-effective
+// brigade count per faction, mirroring computeCombatEffectiveBrigades EXACTLY
+// (src/sim/negotiation/compute_combat_effective.ts): active brigade-kind formations
+// (kind === 'brigade' || undefined), personnel >= 200 && morale >= 40 (defaults 1000/100).
+// ADVISORY / diagnostic only — NO gate, NO threshold — so it unblocks measuring the RS
+// brigade-destruction / morale-compounding asymmetry without a rerun. Territory-flat:
+// reads the existing final_save, changes no sim behavior.
+const HEALTH_FACTIONS = ['RBiH', 'RS', 'HRHB'];
+const EFFECTIVE_PERSONNEL_MIN = 200;
+const EFFECTIVE_MORALE_MIN = 40;
+const moraleSum = { RBiH: 0, RS: 0, HRHB: 0 };
+const activeBrigades = { RBiH: 0, RS: 0, HRHB: 0 };
+const combatEffective = { RBiH: 0, RS: 0, HRHB: 0 };
+for (const f of formations) {
+  if (!f) continue;
+  const faction = f.faction;
+  if (!faction || HEALTH_FACTIONS.indexOf(faction) === -1) continue;
+  if (f.status !== 'active') continue;
+  if (f.kind !== 'brigade' && f.kind !== undefined) continue;
+  const personnel = typeof f.personnel === 'number' ? f.personnel : 1000;
+  const morale = typeof f.morale === 'number' ? f.morale : 100;
+  activeBrigades[faction]++;
+  moraleSum[faction] += morale;
+  if (personnel >= EFFECTIVE_PERSONNEL_MIN && morale >= EFFECTIVE_MORALE_MIN) combatEffective[faction]++;
+}
+const meanMoraleByFaction = {};
+for (const faction of HEALTH_FACTIONS) {
+  meanMoraleByFaction[faction] = activeBrigades[faction] > 0
+    ? +(moraleSum[faction] / activeBrigades[faction]).toFixed(1)
+    : 0;
+}
+
 const matchedOsids =
   (summary.historical_fit &&
     summary.historical_fit.osid_pair_match &&
@@ -165,6 +197,10 @@ const measured = {
   kw_ratio: kwRatio,
   total_killed: killed,
   total_wounded: wounded,
+  // Advisory diagnostics (R6 Task 0.3 Step 8) — reported, never gated.
+  mean_morale_by_faction: meanMoraleByFaction,
+  combat_effective_by_faction: combatEffective,
+  active_brigades_by_faction: activeBrigades,
 };
 
 // ---- thresholds ----
