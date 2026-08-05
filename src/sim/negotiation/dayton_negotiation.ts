@@ -221,13 +221,14 @@ export function resolvePendingDaytonCloseOut(state: GameState): DaytonResult | n
     if (neg.dayton_result) return null;     // already resolved
     if (!neg.pending_dayton) return null;   // no menu to close
 
-    const result = resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
-    // The menu has been consumed into a signed result; drop the stale pending packet
-    // so the terminal state carries the verdict, not a half-open menu.
-    if (state.military.negotiation) {
-        delete state.military.negotiation.pending_dayton;
-    }
-    return result;
+    // resolveDaytonNegotiation now consumes `pending_dayton` atomically with the signed
+    // result (R4 Phase 6 Task 6.1), so this headless close-out no longer deletes the
+    // menu separately — request and receipt travel together in one owner. This function
+    // remains the headless/historical terminal-close-out entry (gated on
+    // `meta.dayton_close_out`, set only by scenario_runner): it resolves an unresolved
+    // terminal menu via the deterministic historical-default proposal so a horizon-
+    // reached headless campaign closes on a coherent verdict instead of an open menu.
+    return resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -260,6 +261,18 @@ export function resolveDaytonNegotiation(
     ensureNegotiationState(state);
 
     const neg = state.military.negotiation!;
+
+    // R4 Phase 6 Task 6.1 — first-write-wins re-entry guard. `dayton_result`,
+    // `meta.game_over`, the consumed `pending_dayton`, and the frozen endgame snapshot
+    // are all written together at the end of this function, so a present `dayton_result`
+    // means Dayton is already signed. A repeat resolution call (e.g. a player who
+    // "Decline Talks" clears only their local copy and resubmits) is then a provable
+    // no-op returning the already-signed result — it can never re-sign, re-freeze, or
+    // re-open a consumed menu. Matches freezeEndgameSnapshot's idempotency contract.
+    if (neg.dayton_result) {
+        return neg.dayton_result;
+    }
+
     const playerFaction = state.meta.player_faction ?? 'RBiH';
     const botFactions = CANONICAL_FACTIONS.filter(f => f !== playerFaction).sort(strictCompare);
 
@@ -449,6 +462,20 @@ export function resolveDaytonNegotiation(
     // Mark game as over
     state.meta.game_over = true;
     state.meta.outcome = 'dayton';
+
+    // R4 Phase 6 Task 6.1 — request and receipt are ONE owner now: consume the pending
+    // menu in the SAME mutation that signs the result, so a resolved Dayton can never
+    // leave a dangling `pending_dayton` packet. Previously only the headless-only
+    // resolvePendingDaytonCloseOut deleted it and the desktop `resolve-dayton` path
+    // never did, so the terminal-state decision gate saw a forever-blocking Dayton
+    // decision — the self-sealing game-over deadlock the RS-playthrough panel
+    // root-caused. CALIBRATION-FLAT: resolveDaytonNegotiation is not reached on the
+    // byte-identical baselines (headless close-out is gated on `meta.dayton_close_out`,
+    // which the calibration scenarios never set), so moving the delete here moves no
+    // baseline — and on the close-out path the final state is identical either way.
+    if (neg.pending_dayton) {
+        delete neg.pending_dayton;
+    }
 
     // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
     // verdict / cost ledger / historical comparison are preserved across

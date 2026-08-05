@@ -158,6 +158,12 @@ export interface OperationAAR {
     axis_summaries?: AxisAAR[];
     /** True if the player force-launched this operation against command recommendation. */
     force_launched?: boolean;
+    /** True if this operation was injected by a presidential REQUEST-OP directive
+     *  (`requested_by_president` on the CorpsOperation). Distinct from `force_launched`:
+     *  a requested op the commander AGREED to is not forced. Lets a president-requested op
+     *  that injects then loses in combat produce its own receipt. Player-only (never set in
+     *  headless/historical runs), so it stays byte-identical on the calibration baselines. */
+    requested_by_president?: boolean;
     /** CA cost paid at time of force-launch. Always 15 when force_launched is true. */
     ca_cost_at_launch?: number;
     /** Snapshot of commander's recommendation at the moment of presidential decision. */
@@ -866,6 +872,11 @@ export function finalizeOperationAAR(
     if (op.was_force_launched) {
         aar.force_launched = true;
         aar.ca_cost_at_launch = 15;
+    }
+    // Task 6.2: provenance for a president-REQUESTED op (distinct from force-launched).
+    // Player-only tag → omitted in headless runs, so baselines stay byte-identical.
+    if (op.requested_by_president) {
+        aar.requested_by_president = true;
     }
     if (op.commander_assessment_at_launch != null) {
         aar.commander_assessment_at_launch = op.commander_assessment_at_launch;

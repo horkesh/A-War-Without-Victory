@@ -72,6 +72,7 @@ import { deriveOperationOpportunityProposals } from './operationOpportunityDossi
 import { buildBackTheOfficerViews, buildTgAftermathViews, buildOpProposalCards } from './backTheOfficer.js';
 import { buildDilemmaSpine } from './dilemmaSpine.js';
 import { buildDistanceFromHistory } from './distanceFromHistory.js';
+import { buildDirectiveOutcomeReceipts, directiveOutcomeReceiptsRealizedOnTurn } from './directiveOutcomeReceipts.js';
 import { buildDiplomacyView } from './diplomacyView.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting.js';
@@ -2771,6 +2772,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         formations: presentedFormations, militiaPools, controlBySettlement, initialControlBySettlement, statusBySettlement,
         brigadeAorByFormationId,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
+        // Task 6.2: the current turn's REQUEST-OP rejections (why a directive could not be
+        // carried out), turn-scoped so a stale rejection does not haunt the desk. Projection
+        // already scopes op_directive_rejection to the player's own corps.
+        directiveOutcomeReceipts: directiveOutcomeReceiptsRealizedOnTurn(buildDirectiveOutcomeReceipts(state as GameState), turn),
         runtimeFeatureFlags: options?.runtimeFeatureFlags,
         armyStance, armyCoDecisionTraces, armyCorpsDirectives, corpsCommanderActions,
         casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
