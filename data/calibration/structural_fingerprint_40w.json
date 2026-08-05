@@ -1,15 +1,15 @@
 {
   "schema_version": 2,
-  "fingerprint": "4fcdb21ab4bcff14",
+  "fingerprint": "5cfcf1c840bae488",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_40w",
     "weeks": 40,
     "final_turn": 40,
     "control_counts": {
-      "HRHB": 85,
-      "RBiH": 251,
-      "RS": 376
+      "HRHB": 87,
+      "RBiH": 255,
+      "RS": 370
     },
     "control_flips": [
       {
@@ -157,36 +157,6 @@
         "to": "RS"
       },
       {
-        "settlement_id": "op:bugojno:medini",
-        "municipality_id": "bugojno",
-        "from": "HRHB",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:bugojno:prijaci",
-        "municipality_id": "bugojno",
-        "from": "RBiH",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:bugojno:udurlije",
-        "municipality_id": "bugojno",
-        "from": "HRHB",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:bugojno:vesela_2",
-        "municipality_id": "bugojno",
-        "from": "RBiH",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:bugojno:vrpec",
-        "municipality_id": "bugojno",
-        "from": "RBiH",
-        "to": "RS"
-      },
-      {
         "settlement_id": "op:cajnice:todorovici",
         "municipality_id": "cajnice",
         "from": "RBiH",
@@ -224,18 +194,6 @@
       },
       {
         "settlement_id": "op:donji_vakuf:donji_vakuf_2",
-        "municipality_id": "donji_vakuf",
-        "from": "RBiH",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:donji_vakuf:jemanlici",
-        "municipality_id": "donji_vakuf",
-        "from": "RBiH",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:donji_vakuf:korenici",
         "municipality_id": "donji_vakuf",
         "from": "RBiH",
         "to": "RS"
@@ -455,12 +413,6 @@
         "municipality_id": "kotor_varos",
         "from": "HRHB",
         "to": "RS"
-      },
-      {
-        "settlement_id": "op:maglaj:jablanica",
-        "municipality_id": "maglaj",
-        "from": "RS",
-        "to": "RBiH"
       },
       {
         "settlement_id": "op:modrica:garevac_2",

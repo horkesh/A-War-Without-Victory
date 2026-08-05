@@ -20,6 +20,7 @@ import {
     DEFEAT_EXPERIENCE_GAIN,
     FACTION_LEARNING_RATE,
     DEFAULT_LEARNING_RATE,
+    COMBAT_COHESION_FLOOR_CAP,
 } from '../src/sim/combat/attack_post_battle_effects.js';
 import { recordBattleHistory } from '../src/sim/combat/attack_history_recording.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from '../src/sim/combat/officer_quality_update.js';
@@ -465,6 +466,88 @@ describe('applyDefenderBattleAftermath', () => {
         expect(reserve.defense_streak).toBe(0);
         expect(reserve.entrenchment_turns).toBe(2);
         expect(reserve.cohesion).toBe(60);
+    });
+
+    // Engine-health fix (RS brigade-attrition workstream, 2026-08-05, DEFAULT-ON):
+    // floor-aware per-battle cohesion decrement. RS cohesion floor at turn 30 is 35
+    // (faction_progression.getRSCohesionFloor). A decisive-victory defender delta is
+    // -15 (COHESION_DEFENDER). Defender at cohesion 40: DEFAULT/ON -> clamped to 35;
+    // explicit disable ('false'/'0') -> 40-15 = 25 (the pre-fix behavior).
+    describe('AWWV_COHESION_FLOOR_AT_DECREMENT floor-aware decrement', () => {
+        const FLAG = 'AWWV_COHESION_FLOOR_AT_DECREMENT';
+        const withFlag = (value: string | undefined, fn: () => void) => {
+            const prev = process.env[FLAG];
+            if (value === undefined) delete process.env[FLAG]; else process.env[FLAG] = value;
+            try { fn(); } finally {
+                if (prev === undefined) delete process.env[FLAG]; else process.env[FLAG] = prev;
+            }
+        };
+
+        it('DEFAULT (flag unset): floor-aware clamp is ON (clamps RS to floor 35 at turn 30)', () => {
+            withFlag(undefined, () => {
+                const d = makeFormation({ faction: 'RS', cohesion: 40 });
+                applyDefenderBattleAftermath({
+                    defenderFormations: [d], outcome: 'decisive_victory', turn: 30,
+                });
+                expect(d.cohesion).toBe(35);
+            });
+        });
+
+        it("explicit disable ('false'): decrement clamps only to 0 (pre-fix behavior)", () => {
+            withFlag('false', () => {
+                const d = makeFormation({ faction: 'RS', cohesion: 40 });
+                applyDefenderBattleAftermath({
+                    defenderFormations: [d], outcome: 'decisive_victory', turn: 30,
+                });
+                expect(d.cohesion).toBe(25);
+            });
+        });
+
+        it('flag ON: decrement is clamped to the RS faction floor (35 at turn 30)', () => {
+            withFlag('true', () => {
+                const d = makeFormation({ faction: 'RS', cohesion: 40 });
+                applyDefenderBattleAftermath({
+                    defenderFormations: [d], outcome: 'decisive_victory', turn: 30,
+                });
+                expect(d.cohesion).toBe(35);
+            });
+        });
+
+        it('flag ON but turn omitted: no clamp (production must thread turn)', () => {
+            withFlag('true', () => {
+                const d = makeFormation({ faction: 'RS', cohesion: 40 });
+                applyDefenderBattleAftermath({
+                    defenderFormations: [d], outcome: 'decisive_victory',
+                });
+                expect(d.cohesion).toBe(25);
+            });
+        });
+
+        it('flag ON: the clamp is CAPPED at COMBAT_COHESION_FLOOR_CAP (RBiH 62 floor does not act as a combat wall)', () => {
+            withFlag('true', () => {
+                // RBiH resting floor at turn 60 is 62. WITHOUT the Experiment-2 cap,
+                // a defender at 45 taking a decisive-victory delta (-15 -> 30) would be
+                // clamped UP to 62 (combat-immune). WITH the cap (35), it clamps to 35 —
+                // combat can still erode RBiH below its resting baseline.
+                const rbih = makeFormation({ faction: 'RBiH', cohesion: 45 });
+                applyDefenderBattleAftermath({
+                    defenderFormations: [rbih], outcome: 'decisive_victory', turn: 60,
+                });
+                expect(rbih.cohesion).toBe(COMBAT_COHESION_FLOOR_CAP); // 35, NOT 62
+            });
+        });
+
+        it('flag ON: an RS floor at/below the cap passes through unchanged (RS protection preserved)', () => {
+            withFlag('true', () => {
+                // RS floor at turn 30 is 35 == cap, so min(35, 35) = 35: RS keeps its floor.
+                const rs = makeFormation({ faction: 'RS', cohesion: 40 });
+                applyDefenderBattleAftermath({
+                    defenderFormations: [rs], outcome: 'decisive_victory', turn: 30,
+                });
+                expect(rs.cohesion).toBe(35);
+                expect(rs.cohesion).toBeLessThanOrEqual(COMBAT_COHESION_FLOOR_CAP);
+            });
+        });
     });
 
 });

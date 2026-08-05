@@ -1166,6 +1166,8 @@ export function resolveAttackOrdersOsid(
                 outcome,
                 primaryDefenderId: defenderFormation.id,
                 corpsFrontSectors: state.military.corps_front_sectors,
+                turn: state.meta?.turn ?? 0,
+                warTimeline: state.military.war_timeline,
             });
             recordFormationFatigue(defenderFormation, 1);
 
