@@ -460,6 +460,14 @@
         ]
       },
       {
+        "kind": "enclave_formation_displacement",
+        "faction": "RBiH",
+        "source_osids": ["op:srebrenica:srebrenica_2", "op:srebrenica:donji_potocari_2", "op:srebrenica:ljeskovik_2", "op:srebrenica:osmace_2"],
+        "destination_osid": "op:zivinice:gracanica_2",
+        "casualty_fraction": 0.6,
+        "reconstitute_as": "reduced"
+      },
+      {
         "kind": "narrative",
         "text": "Srebrenica falls. Over 8,000 Bosniak men and boys are executed in the worst atrocity in Europe since World War II."
       }
@@ -514,6 +522,14 @@
         "osids": [
           "op:rogatica:zepa_2"
         ]
+      },
+      {
+        "kind": "enclave_formation_displacement",
+        "faction": "RBiH",
+        "source_osids": ["op:rogatica:zepa_2"],
+        "destination_osid": "op:zivinice:gracanica_2",
+        "casualty_fraction": 0.15,
+        "reconstitute_as": "none"
       },
       {
         "kind": "narrative",

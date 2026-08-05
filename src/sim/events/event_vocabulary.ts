@@ -15,6 +15,7 @@ export const KNOWN_EVENT_EFFECT_KINDS = [
     'control_change',
     'cost_ledger_annotation',
     'doctrine_constraint',
+    'enclave_formation_displacement',
     'equipment_grant',
     'equipment_quality_modifier',
     'guerrilla_threat',
