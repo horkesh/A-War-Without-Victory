@@ -184,6 +184,16 @@ export const REACTIVE_DISTANCE_BASE = 0.60;
 /** Max BFS hops for reactive defense contribution. Beyond this = 0. */
 export const REACTIVE_DISTANCE_MAX_HOPS = 5;
 
+/**
+ * Max BFS hops a must-hold anchor's own garrison brigade may be loaned out as a
+ * reactive contributor for a DIFFERENT OSID. Genuinely local (adjacent-ish)
+ * reinforcement is still allowed; being pulled into a separate, distant front
+ * is not — that grinds the anchor's own garrison down by proxy before its own
+ * position is ever directly assaulted. Deliberately tighter than
+ * REACTIVE_DISTANCE_MAX_HOPS.
+ */
+export const ANCHOR_GARRISON_LOAN_MAX_HOPS = 2;
+
 /** Multiplier when defending brigade's home municipality matches attacked OSID. */
 export const HOME_DEFENSE_REACTIVE_BONUS = 1.3;
 

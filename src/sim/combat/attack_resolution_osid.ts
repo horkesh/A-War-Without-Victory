@@ -98,6 +98,7 @@ import {
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
     bfsDistanceFriendly,
     getReactiveDistanceWeight,
+    ANCHOR_GARRISON_LOAN_MAX_HOPS,
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
     getWarExhaustionTempoMult,
@@ -698,6 +699,14 @@ export function resolveAttackOrdersOsid(
             // Phase B: identify which sub-segment is responsible for this OSID
             const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
             defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
+            // Anchor-garrison guard: a brigade standing on its own corps's scenario-authored
+            // must-hold OSID is that anchor's dedicated garrison. It remains fully available
+            // to defend its own OSID, and may still reactively help a genuinely nearby fight
+            // (within ANCHOR_GARRISON_LOAN_MAX_HOPS), but is not loaned out as a distance-
+            // weighted contributor (and casualty-share recipient) to a DISTANT OSID under
+            // attack elsewhere in the sector — that grinds down the very unit the anchor
+            // depends on, by proxy, before its own position is ever directly assaulted.
+            const corpsMustHoldOsids = sector ? (state.military.must_hold_osids_by_corps?.[sector.corps_id] ?? []) : [];
             const sectorBrigades = sector
                 ? getStandingOgDefenseBrigadeIds(sector)
                     .map(id => state.military.formations?.[id])
@@ -706,6 +715,12 @@ export function resolveAttackOrdersOsid(
                         && f.status === 'active'
                         && isStandingOgDefenseBrigadeAvailable(state, f.id)
                     )
+                    .filter((f) => {
+                        const bLoc = (f as { location_osid?: string }).location_osid;
+                        if (!bLoc || !corpsMustHoldOsids.includes(bLoc) || bLoc === targetOsid) return true;
+                        const loanHops = bfsDistanceFriendly(bLoc, targetOsid, adjacency, pc, controller!);
+                        return loanHops <= ANCHOR_GARRISON_LOAN_MAX_HOPS;
+                    })
                 : [];
             for (const physicalDefender of defenderFormations) {
                 if (!sectorBrigades.some((brigade) => brigade.id === physicalDefender.id)) {
