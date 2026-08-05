@@ -7,6 +7,8 @@ import type { GameState, FactionId, ControlEvent } from '../../state/game_state.
 import type { EventEffect } from './event_types.js';
 import type { EventConstraints } from './event_constraints.js';
 import { getActiveAllianceBounds } from './active_modifiers.js';
+import { recordBattleCasualties } from '../../state/casualty_ledger.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 /** Deterministic kind ordering for effect application (alphabetical).
  *  NOTE: alphabetic insertion shifts indices of every kind sorted after the
@@ -23,17 +25,18 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     control_change: 5,
     cost_ledger_annotation: 6,
     doctrine_constraint: 7,
-    equipment_grant: 8,
-    equipment_quality_modifier: 9,
-    guerrilla_threat: 10,
-    humanitarian_impact: 11,
-    morale_change: 12,
-    narrative: 13,
-    negotiation_capital: 14,
-    offensive_ops_suppression: 15,
-    patron_pressure: 16,
-    recruitment_modifier: 17,
-    supply_delta: 18,
+    enclave_formation_displacement: 8,
+    equipment_grant: 9,
+    equipment_quality_modifier: 10,
+    guerrilla_threat: 11,
+    humanitarian_impact: 12,
+    morale_change: 13,
+    narrative: 14,
+    negotiation_capital: 15,
+    offensive_ops_suppression: 16,
+    patron_pressure: 17,
+    recruitment_modifier: 18,
+    supply_delta: 19,
 };
 
 /** Robustness audit P1-B (task #95): clamp traps non-finite input (NaN/±Infinity)
@@ -146,9 +149,82 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
         case 'offensive_ops_suppression':
             applyOffensiveOpsSuppression(state, effect.faction, effect.duration_turns, effect.reason);
             break;
+        case 'enclave_formation_displacement':
+            applyEnclaveFormationDisplacement(state, effect);
+            break;
         case 'narrative':
             // No mechanical effect; narrative text is logged via FiredEvent.
             break;
+    }
+}
+
+/** Enclave-column displacement (RS brigade-attrition follow-up, 2026-08-05).
+ *  When an enclave falls via EVENT (Srebrenica/Žepa), its ARBiH formations do not
+ *  fight to the death in place — they take heavy casualties and either break out to
+ *  friendly territory at reduced strength (Srebrenica: the column reached Tuzla and
+ *  reformed) or are forcibly deported (Žepa: ICTY Tolimir). Victim-side consequence
+ *  only; the perpetrator gains nothing here (its costs live on the fall event's other
+ *  effects — §6). Deterministic (sorted by formation id, no RNG). Flag-gated
+ *  `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` (default OFF => no-op => byte-identical).
+ *  Panel-reviewed spec: docs/plans/2026-08-05-enclave-column-displacement-and-codex-lane.md. */
+function applyEnclaveFormationDisplacement(
+    state: GameState,
+    effect: Extract<EventEffect, { kind: 'enclave_formation_displacement' }>,
+): void {
+    const raw = process.env.AWWV_ENCLAVE_COLUMN_DISPLACEMENT;
+    if (raw !== 'true' && raw !== '1') return; // default OFF => byte-identical no-op
+
+    // Guards (engine condition 2, handler backstop): malformed payload = safe no-op.
+    const frac = effect.casualty_fraction;
+    if (!Number.isFinite(frac) || frac < 0 || frac > 1) {
+        recordNonFiniteEffectAnomaly(state, effect.kind, effect.faction ?? null, frac);
+        return;
+    }
+    if (!Array.isArray(effect.source_osids) || effect.source_osids.length === 0) return;
+    if (!effect.destination_osid) return;
+
+    const sourceSet = new Set(effect.source_osids);
+    const formations = state.military.formations ?? {};
+    const ids = Object.keys(formations).sort(strictCompare);
+    for (const fid of ids) {
+        const f = formations[fid];
+        if (!f || f.faction !== effect.faction) continue;
+        if (f.status !== 'active') continue;
+        if (!f.tags?.includes('enclave')) continue;
+        // Match on the enclave-origin home_osid (pinned via placement:fixed_home_osid,
+        // stable) OR current location — by the time the fall event fires the formation
+        // may already have been relocated by the generic displace-enemy-territory safety
+        // net (war_phases displace-enemy-territory), so a location-only match misses it.
+        const inSource =
+            (f.home_osid != null && sourceSet.has(f.home_osid)) ||
+            (f.location_osid != null && sourceSet.has(f.location_osid));
+        if (!inSource) continue;
+
+        // Casualties: execution-skewed (killed + missing dominate; few wounded) — NOT the
+        // battle-calibrated split. Attributed to the event via the per-formation ledger totals.
+        const personnel = f.personnel ?? 0;
+        const lost = Math.floor(personnel * frac);
+        if (lost > 0 && state.military.casualty_ledger) {
+            recordBattleCasualties(state.military.casualty_ledger, f.faction!, fid, {
+                killed: Math.round(lost * 0.55),
+                wounded: Math.round(lost * 0.05),
+                missing_captured: lost - Math.round(lost * 0.55) - Math.round(lost * 0.05),
+            });
+        }
+
+        if (effect.reconstitute_as === 'reduced') {
+            // Survivors break out and reform at reduced strength in their own corps AOR.
+            (f as { personnel?: number }).personnel = Math.max(0, personnel - lost);
+            (f as { location_osid?: string }).location_osid = effect.destination_osid;
+            (f as { home_osid?: string }).home_osid = effect.destination_osid;
+            (f as { assignment: unknown }).assignment = null; // re-slotted by sector assignment next turn
+        } else {
+            // 'none' — forcibly deported / removed from theatre (Žepa). No reconstitution.
+            (f as { personnel?: number }).personnel = 0;
+            (f as { status?: string }).status = 'inactive';
+            (f as { lifecycle_status?: string }).lifecycle_status = 'destroyed';
+            (f as { destruction_turn?: number }).destruction_turn = state.meta?.turn ?? 0;
+        }
     }
 }
 

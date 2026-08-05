@@ -296,6 +296,32 @@ export interface EventEffectCostLedgerAnnotation {
     faction?: FactionId;
 }
 
+/** Effect: displace a faction's enclave formations when the enclave falls via
+ *  EVENT (Srebrenica/Žepa fall through the event path, not simulated combat).
+ *  Formations located on `source_osids` and tagged 'enclave' take `casualty_fraction`
+ *  personnel losses (execution-skewed KIA/WIA/MIA, attributed to the event not a
+ *  battle) and are either relocated to `destination_osid` at reduced strength
+ *  (`reconstitute_as: 'reduced'` — Srebrenica: the column reached Tuzla and reformed)
+ *  or removed from the theatre (`reconstitute_as: 'none'` — Žepa: forcible deportation,
+ *  ICTY Tolimir IT-05-88/2). Victim-side consequence only; confers NO benefit on the
+ *  perpetrator (that faction's costs live on the fall event's other effects — §6:
+ *  atrocity is never rewarded). Flag-gated (AWWV_ENCLAVE_COLUMN_DISPLACEMENT, default
+ *  OFF => no-op => byte-identical). Ref:
+ *  docs/plans/2026-08-05-enclave-column-displacement-and-codex-lane.md; ICTY Krstić
+ *  IT-98-33 para 546/68/88. */
+export interface EventEffectEnclaveFormationDisplacement {
+    kind: 'enclave_formation_displacement';
+    faction: FactionId;
+    /** OSIDs of the falling enclave; only formations located here AND tagged 'enclave' are affected. */
+    source_osids: string[];
+    /** Friendly OSID in the formation's own corps AOR where survivors relocate. */
+    destination_osid: string;
+    /** Fraction of personnel lost, [0,1]. Panel-set within the ICTY Krstić para-546 band (~0.5-0.7 for Srebrenica). */
+    casualty_fraction: number;
+    /** 'reduced' = survivors relocate and reform at reduced strength; 'none' = removed from theatre (deportation). */
+    reconstitute_as: 'reduced' | 'none';
+}
+
 export type EventEffect =
     | EventEffectNarrative
     | EventEffectMoraleChange
@@ -316,6 +342,7 @@ export type EventEffect =
     | EventEffectAllianceLock
     | EventEffectBotPriorityShift
     | EventEffectCostLedgerAnnotation
+    | EventEffectEnclaveFormationDisplacement
     // Fall-1995 mechanic E-A5
     | EventEffectOffensiveOpsSuppression;
 
