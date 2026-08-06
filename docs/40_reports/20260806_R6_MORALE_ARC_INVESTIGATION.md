@@ -43,3 +43,21 @@ Bound the fall-1995 RS collapse to "spent but coherent," not "erased." Candidate
 3. Model the **professional/rabble START** in morale (VRS higher, ARBiH lower at turn 1) so the reversal is a genuine crossover rather than "RBiH climbs from equal footing" — historically truer, and may change the fall-1995 dynamics.
 
 The reversal itself is a **feature to preserve** (it matches the war). The target is the *overshoot into mechanical collapse*, which is what breaks the eastern anchors. Given the 5-design cascade history + calibration/canon stakes, the actual experiment should be designed with the owner / a panel before any 188w tuning.
+
+---
+
+## Experiment 1 — hollowed-state co-ethnic morale floor: RETIRED (2026-08-06)
+
+Implemented (flag-gated `AWWV_HOLLOWED_MORALE_FLOOR`, default-OFF): floor a hollowed faction's co-ethnic-ground brigades to morale 32. Flag-OFF byte-identical (`test:baselines` pass). Flag-ON 188w (`n149`) result: **NEAR-NULL** — RS morale 33.6→34, combat-effective 7/53→7/53, active 53→53, matched_osids 630→630, K:W 3.75→3.79. Reverted the implementation; kept the report (adopt-or-retire discipline).
+
+**Scenario-tester root cause (decisive) — the 7/53 is NOT a death-spiral:**
+- Nothing dissolves (53/53 active both runs). The collapse is one-turn **ineffectiveness**, not attrition.
+- **A scripted event stack at turn ~179** applies a uniform **−13 to every active RS brigade**: `operation_mistral_2_1995` (−8) + `operation_sana_1995` (−8) + `csq_arbih_resistance_revival_RS` (+3), via `applyMoraleChange` looping all faction brigades (`apply_effects.ts:254-266`).
+- The RS army is **metastable at morale ~44–46** (just above the 40 combat-effective line), so a uniform −13 craters effective 52→5 in one week without killing a brigade.
+- The floor failed by construction: value 32 < the 40 effective line (can never restore effectiveness); the 0.35 hollowed-gate only trips at t179 (post-shock); the sub-15 dissolution legs never fire (collapse lands in the 32–40 band); and the western survivors sit on non-Serb ground so the co-ethnic sub-gate matches almost nobody. RETIRE.
+
+**Deeper issue exposed:** Sana/Mistral-2 were **western-theater** operations, but their morale shock is applied **faction-wide** — cratering the eastern Drina/Doboj/Semberija VRS that historically held through Dayton. A regional defeat should not uniformly demoralize a whole army.
+
+**Two candidate next levers (owner decision):**
+- **(A) Data-only tune (scenario-tester's rec):** reduce `operation_sana_1995` RS `morale_change` −8→−3 (net turn-179 shock −13→−8), landing the metastable band at ~36–38 (≥40 for the higher cohort) → recovers effective toward 20–30. Minimal, faction-agnostic, 40w byte-identical. Fallback: stagger Sana a few turns after Mistral-2 so the two −8s don't collide. But: softens a historically-rapid western collapse uniformly.
+- **(B) Regional application (deeper, more historical):** make a theater-scoped operation's `morale_change` fall on brigades in/near that theater, not the whole faction — so the western collapse spares the eastern corps. Bigger engine change (event-effect scoping); better models the war.
