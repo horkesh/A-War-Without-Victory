@@ -16,7 +16,7 @@
 | S-SERIALIZATION | State serialize/deserialize | Engine_Invariants §13.1; serialize.ts | serializeGameState.ts, serialize.ts | All paths that save/load state | final_save.json, replay | Serializer rejects Map/Set; validateState round-trip tests | Planned & Working | Denylist in validateGameState; stable key ordering | None | Y |
 | U-PHASE-G | Phase G dev UI (control/cost view) | V1_0_PACKAGING; ledger | dev_ui/phase_g.html, phase_g.ts | npm run dev:map | Read-only GameState view | Smoke tests | Planned & Working | Packaging doc; phase_g loads save JSON | None | Y |
 | U-WARROOM-GUI | Warroom UI (MVP 1.0) | IMPLEMENTATION_PLAN_GUI_MVP; EXECUTIVE_ROADMAP; ledger | src/ui/warroom/* | npm run dev:warroom; warroom:build | Staged assets, clickable regions, settlement_edges | warroom:build succeeds | Planned & Working | v0.2: typecheck green; advance turn wired to Phase 0 pipeline | None | Y |
-| U-WARROOM-TURN | Warroom Phase 0 turn advancement | EXECUTIVE_ROADMAP Phase 4; MVP_CHECKLIST | run_phase0_turn.ts, ClickableRegionManager | Calendar advance → runPhase0TurnAndAdvance | N/A | warroom:build | Planned & Working | Browser-safe runner; onGameStateChange; Phase I+ not wired | None | Y |
+| U-WARROOM-TURN | Warroom Phase 0 turn advancement | EXECUTIVE_ROADMAP Phase 4; MVP_CHECKLIST | run_phase0_turn.ts, ClickableRegionManager | Calendar advance → runPhase0TurnAndAdvance | N/A | warroom:build | Planned & Working | Browser-safe runner; onGameStateChange; Phase I+ not wired | None | Y | // legacy-phase-term-ok
 
 **Evidence policy:** Working = at least one gate or test reference; Planned = canon or roadmap ref. Blockers and MVP column inform mvp_backlog.md.
 

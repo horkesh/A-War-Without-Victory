@@ -36,13 +36,13 @@ Order: top = highest priority. Each item: why required for MVP (canon justificat
 
 ---
 
-## 4. Phase 0 → Phase I war-start gating — v0.2 Done
+## 4. Phase 0 → Phase I war-start gating — v0.2 Done // legacy-phase-term-ok
 
-- **Why MVP:** CANON.md War Start Rule: war begins only when referendum held and current_turn == referendum_turn + 4. No referendum → no war → Phase I never entered. Required for canon-aligned pre-war and war transition.
+- **Why MVP:** CANON.md War Start Rule: war begins only when referendum held and current_turn == referendum_turn + 4. No referendum → no war → Phase I never entered. Required for canon-aligned pre-war and war transition. // legacy-phase-term-ok
 - **Canon:** CANON.md; Phase_0_Specification_v0_4_0; Phase_Specifications_v0_4_0.
 - **Dependencies:** State and turn pipeline (A-TURN-PIPELINE-STATE) and scenario runner.
-- **Verification:** Scenario test: run Phase 0 scenario without referendum; assert Phase I is never entered. Scenario with referendum and war_start_turn; assert Phase I entered at correct turn.
-- **Done means:** Automated test(s) prove no Phase I without referendum; war start turn matches spec. v0.2: phase0_referendum_held_war_start_e2e.test.ts, phase0_v1_no_war_without_referendum_e2e.test.ts.
+- **Verification:** Scenario test: run Phase 0 scenario without referendum; assert Phase I is never entered. Scenario with referendum and war_start_turn; assert Phase I entered at correct turn. // legacy-phase-term-ok
+- **Done means:** Automated test(s) prove no Phase I without referendum; war start turn matches spec. v0.2: phase0_referendum_held_war_start_e2e.test.ts, phase0_v1_no_war_without_referendum_e2e.test.ts. // legacy-phase-term-ok
 
 ---
 
