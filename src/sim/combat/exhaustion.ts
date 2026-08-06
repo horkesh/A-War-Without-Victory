@@ -115,13 +115,26 @@ export function updateExhaustion(
         // and all downstream gates (WASH_COMBINED_EXHAUSTION 55→5500,
         // CEASEFIRE_HRHB_EXHAUSTION 35→3500, CEASEFIRE_RBIH_EXHAUSTION 30→3000,
         // combat_math tempo thresholds 30/80 → 3000/8000). Uniform 100× rescale
-        // preserves the original 0–100 percentage-scale semantics (Issue #29's
-        // band-aid clamp at 100 was correct re: the consumers' authored scale,
-        // but saturated at t13 destroying faction differentiation — RBiH 32
-        // static fronts and HRHB 8 produce identical cap-hits). The new cap
-        // gives the accumulator headroom for genuine faction differentiation
-        // across 188w runs while keeping all relative gating semantics intact.
-        exhaustion[fid] = Math.min(10000, current + finalDelta);
+        // preserves the original 0–100 percentage-scale semantics.
+        //
+        // R6 de-saturation (2026-08-06, `20260806_EXHAUSTION_SATURATION_ROOT_CAUSE.md`):
+        // the prior `Math.min(EXHAUSTION_CAP, current + finalDelta)` HARD clamp pinned
+        // every faction whose amplified per-turn delta exceeds MAX_DELTA_PER_TURN to a
+        // flat +200/turn line into the 10000 ceiling (RS wk51, HRHB wk77, RBiH wk83),
+        // then held all three there for 57% of the war → terminal gap 0, grade capped
+        // at C, §6 atrocity term inert at saturation. Replace the hard clamp with an
+        // ASYMPTOTIC approach: the increment is scaled by the remaining headroom
+        // `(1 - current/CAP)`, so the accumulator approaches — but never reaches — the
+        // cap, and distinct per-faction finalDelta trajectories stay differentiated near
+        // the top instead of collapsing onto the ceiling. Deliberately keeps the
+        // MAX_DELTA_PER_TURN clamp and every driver unchanged so the SUB-cap trajectory
+        // (hence every downstream threshold-gate fire-week: WA/ceasefire/Storm) is
+        // preserved and NO lockstep gate re-rescale is required — only the terminal
+        // near-cap region de-saturates. Monotonic (Engine Invariants §8): finalDelta ≥ 0
+        // and headroom ≥ 0 ⇒ increment ≥ 0, never decreases. Uses only +,−,*,/ (no
+        // exp/pow/log/tanh) ⇒ bit-identical across V8 versions/platforms.
+        const headroom = Math.max(0, 1 - current / 10000);
+        exhaustion[fid] = Math.min(10000, current + finalDelta * headroom);
     }
 }
 
