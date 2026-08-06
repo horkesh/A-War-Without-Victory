@@ -2511,10 +2511,16 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             const standingIdentity = (typeof s.display_name === 'string' && s.display_name.length > 0)
                 ? s.display_name
                 : resolveAttestedOgName(corpsId, munCounts);
+            // Fallback OG name (owner 2026-08-06): "OG {dominant municipality}" (OG first, then
+            // the place \u2014 e.g. "OG Banja Luka"), matching real designations like "OG West". The
+            // dominant mun is topMuns[0] (max edge-count, lexical-slug tie-break \u2014 identical to
+            // resolveAttestedOgName's dominant pick). Attested OG/TG/OZ names (state display_name
+            // or the ADR-0006 table) are preferred verbatim; this is the geographic default for
+            // corps/regions with no attested designation. Display-only; never written to state.
             const displayName = standingIdentity
                 ?? (topMuns.length > 0
-                    ? `${corpsName} \u2013 ${topMuns.join(', ')}`
-                    : corpsName);
+                    ? `OG ${topMuns[0]}`
+                    : `${corpsName} OG`);
 
             out.push({
                 sector_id: typeof s.sector_id === 'string' ? s.sector_id : sectorId,

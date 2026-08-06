@@ -38,10 +38,10 @@
 ## Effort & risk
 - Moderate display + i18n work (naming resolver reformat is small; the terminology sweep is the bulk). **Zero engine/calibration risk.** No panel/canon gate needed (no `FORAWWV.md`/canon-behavior change; ADR-0006 already sanctions the rename).
 
-## Open decisions (for owner confirmation before build)
-1. **Fallback format** — `"{dominant_mun} OG"` (recommended) vs `"{corps-short} OG – {mun}"` vs keep the multi-mun list.
-2. **How far to push the attested table** now — ship with the current 6 + geographic fallback, or first commission a historian pass to attest more OG/TG/OZ names across all corps (bigger, research-gated).
-3. **Abbreviation** — "OG" everywhere vs "Operational Group" in headers / "OG" in compact.
+## Decisions (owner-locked 2026-08-06 — build these)
+1. **Fallback format = `"OG {dominant_mun}"`** (OG first, then the municipality — e.g. `OG Banja Luka`, `OG Tuzla`), matching real designations like "OG West".
+2. **Do a historian pass for more attested names** — research real OG/TG/OZ designations across all corps from BB/ICTY and extend `ATTESTED_OG_NAMES` (owner example: ARBiH 3rd Corps had **OG West** / Operativna grupa Zapad). Attested names used verbatim where found; `"OG {mun}"` geographic fallback for the rest.
+3. **Abbreviation:** **"OG" everywhere** as the compact shorthand; expand to **"Operational Group"** when an OG is SELECTED and shown in a header.
 
 ## Roadmap placement
 Display/content item; fits alongside R7 (content/attribution/localization) or as a standalone display packet. Low-risk, no dependency on the exhaustion/scoring or morale lanes — schedulable any time.
