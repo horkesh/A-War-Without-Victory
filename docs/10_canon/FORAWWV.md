@@ -148,9 +148,9 @@ The items below are flagged in `docs/PROJECT_LEDGER.md` as potential addenda. Th
 - H1.2.1: Provenance/maintenance rule for `data/source/municipality_political_controllers.json` (source location + regeneration process).
 - H1.2.2: Canonical location of 1990 winners input and regeneration workflow (DOCX/Excel source and extraction steps).
 - H1.2.3: Municipality alias normalization for post-1995 renames in remap pipelines.
-- H1.10: If exhaustion bounds/units are formalized, document the bounds and downstream assumptions.
 
 > **H1.8, H1.9, H2.1, H2.4 were PROMOTED to canon on 2026-06-07 (owner-authorized). They are no longer pending — see §IX.6.**
+> **H1.10 was PROMOTED to canon on 2026-08-06 (exhaustion/scoring redesign panel, unanimous GO). No longer pending — see §IX.6.**
 
 ### IX.5 Ledger-flagged addenda (legacy, pending validation)
 Legacy ledger flags that should be reviewed against existing sections before promotion:
@@ -168,6 +168,7 @@ The following were promoted from §IX.4 by explicit owner ruling. They codify be
 - **H2.1 — Control flips are attributable.** Every control flip must be attributable to an explicit cause — a recorded control event, a resolved operation outcome, or a harness directive. A control flip with no logged explicit cause is a defect, not a sanctioned outcome.
 - **H2.4 — Agency requires explicit orders.** Agency — control flips and formation creation — requires explicit orders, operations, events, or harness directives. No control flip or formation comes into being without an explicit triggering cause.
 - **H1.9 — No autonomous degradation (ruled).** The world does not decay autonomously absent player or AI intent. All change — control, formations, exhaustion, supply — traces to explicit operations, events, or directives; there is no background world-decay process. `baseline_ops` is a harness-only calibration scaffold, never a canonical autonomous-degradation mechanism.
+- **H1.10 — Exhaustion bounds and units are formalized (promoted 2026-08-06, exhaustion/scoring redesign panel, unanimous GO).** Exhaustion accumulates on a 0–10000 scale (rescaled 100 → 10000 on 2026-05-22). It is monotonic/irreversible (Engine Invariants §8) and must be asymptotically bounded, never hard-clamped (Engine Invariants §8.6). Every downstream consumer keyed to this scale — combat tempo, Washington Agreement, bilateral ceasefire, Operation Storm, formation fatigue, command friction, and the `war_cost_index` scoring consumer — reads the same 0–10000 units; any change to the scale or bound requires re-deriving those consumers in lockstep (a non-linear re-derivation, NOT a proportional rescale). The scoring consumer's bounds and downstream assumptions are documented in `VICTORY_AND_PYRRHIC_SCORING.md` §3.5.
 - Shared-edge cancellation: if insufficient due to coordinate jitter, require fabric-oracle segment classification follow-up.
 - Municipality borders: must never be produced by boolean union; derive by shared-edge cancellation over settlement fabric.
 - Derived artifacts freshness: “always run derivations before viewing” as a canonical workflow rule.
