@@ -60,3 +60,10 @@ Display/content item; fits alongside R7 (content/attribution/localization) or as
   5. `messages.bs.ts` — Bosnian "sektor"→"OG" (bs is a Preview locale; can defer to R7 localization).
   6. Verify: `test:baselines` byte-identical (display-only) + `desktop:map:build` + full `vitest`.
 - **Owner-review value:** Part 2 changes 98 user-facing strings + touches the OG-shorthand-vs-discipline question — worth an eyeball before it's final.
+
+## Part-2 attempt 2 finding (2026-08-06) — REVERTED again; it is a real per-test maintenance job
+Re-ran the sweep with op-types excluded (owner choice B, 92 en strings) + a precise method-scoped test-assertion transform. Cleared 10 of 32, but **22 remain and they use MULTIPLE assertion patterns** a single script can't safely cover:
+- **regex matchers** — e.g. `getByRole('tab', { name: /Sectors/i })` (not a string literal);
+- double-quoted strings, template literals, and computed/expected values built from fixtures;
+- input FIXTURES (a test-supplied `display_name: 'X Sector'`) that must move in lockstep with their paired assertion.
+Each script pass revealed a new pattern (onion-peeling). CONCLUSION: Part 2 is a careful ~30-test per-file maintenance pass + header-expansion + label-discipline reconcile + bs locale — not a session-tail script. Reverted to keep the suite green; the committed NAMING (Parts 1+3) delivers the substantive ask. Do Part 2 as a dedicated pass with an owner eyeball on the 92 user-facing strings; budget for regex/fixture assertion updates, not just string swaps.
