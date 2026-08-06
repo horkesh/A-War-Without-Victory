@@ -463,7 +463,7 @@ function safeSectorLabel(sectorId: string, sectors: CorpsFrontSectorView[]): str
 
 function sanitizeDomIdPart(value: string): string {
     const sanitized = value.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-    return sanitized.length > 0 ? sanitized : 'sector';
+    return sanitized.length > 0 ? sanitized : 'OG';
 }
 
 function pickSectorInspectAnchorOsid(sector: CorpsFrontSectorView): string | null {

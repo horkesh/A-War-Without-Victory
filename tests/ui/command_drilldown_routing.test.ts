@@ -143,7 +143,7 @@ describe('command drilldown routing', () => {
     const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
 
     expect(screen.getByRole('tab', { name: 'Order of battle, 1 brigades' })).toBeTruthy();
-    expect(screen.getByRole('tab', { name: 'Sectors, 1 sectors' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'OGs, 1 OGs' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Ops Snapshot, 1 operations' })).toBeTruthy();
     expect(container.textContent).toContain('Order of battle 1');
     expect(container.textContent).not.toContain('Order of battle1');
@@ -233,7 +233,7 @@ describe('command drilldown routing', () => {
 
     const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /OGs/i }));
     const sectorRow = screen.getByTestId('corps-detail-sector-row');
     expect(sectorRow.getAttribute('data-coverage-tier')).toBe('dense');
     expect(container.textContent).toContain('Dense coverage');

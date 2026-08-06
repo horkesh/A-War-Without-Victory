@@ -189,7 +189,7 @@ describe('synthetic JNA command presentation', () => {
         expect(dossier.textContent).toContain(COMMANDER_NAME);
         expect(dossier.textContent).toContain('Temporary JNA/TO operation command');
         expect(dossier.textContent).toContain('No organic corps staff');
-        expect(dossier.textContent).toContain('No permanent front sectors');
+        expect(dossier.textContent).toContain('No permanent front OGs');
         expect(dossier.textContent).toContain('Scenario-authored grouping of JNA/TO actions; not a documented operation title.');
         expect(dossier.textContent).toContain('JNA Nevesinje Garrison');
         expect(dossier.textContent).toContain('JNA Bileca Garrison');

@@ -115,7 +115,7 @@ describe('GUI audit label discipline', () => {
 
     expect(screen.getByText(/Priority fronts:/).textContent).toContain('Cadjavica Gornja (Bijeljina) - Srednja Trnova (Ugljevik)');
     expect(screen.getByText(/Front posture:/).textContent).toContain('widespread contact');
-    expect(screen.getByText(/thinly held sectors:/).textContent).toContain('widespread');
+    expect(screen.getByText(/thinly held OGs:/).textContent).toContain('widespread');
     expect(screen.getByText(/Alliance posture:/).textContent).toContain('close coordination');
     expect(container.textContent).not.toMatch(/cadjavica_gornja|srednja_trnova|_\d\b/i);
     expect(container.textContent).not.toMatch(/Front contacts:\s*\d|thinly held:\s*\d|0\.75/);
@@ -559,7 +559,7 @@ describe('GUI audit label discipline', () => {
 
     expect(frontContainer.textContent).toContain('DEFENSIVE');
     expect(frontContainer.textContent).toContain('1 brigades');
-    expect(frontContainer.textContent).toContain('1 sectors');
+    expect(frontContainer.textContent).toContain('1 OGs');
     expect(frontContainer.textContent).not.toMatch(/\bOFF\b|\bDEF\b|\bBAL\b|\bREORG\b|\bBRG\b|\bSEC\b/);
     cleanup();
 
@@ -577,7 +577,7 @@ describe('GUI audit label discipline', () => {
 
     expect(backContainer.textContent).toContain('personnel');
     expect(backContainer.textContent).toContain('brigades');
-    expect(backContainer.textContent).toContain('sectors');
+    expect(backContainer.textContent).toContain('OGs');
     expect(backContainer.textContent).not.toMatch(/\bPers\b|\bBrg\b|\bSec\b/);
   });
 
@@ -1426,7 +1426,7 @@ describe('GUI audit label discipline', () => {
       corps_name: '1st Corps',
       faction: 'RBiH',
       opposing_factions: ['RS'],
-      display_name: 'Ali Pasino sector',
+      display_name: 'Ali Pasino OG',
       edge_ids: [],
       assigned_brigade_ids: [brigade.id],
       reserve_brigade_ids: [],
@@ -1649,11 +1649,11 @@ describe('GUI audit label discipline', () => {
 
   it('keeps Corps Front security controls free of OPSEC shorthand', () => {
     expect(enMessages['corpsFront.opsec']).toBe('Operational security');
-    expect(enMessages['corpsFront.enableOpsec']).toBe('Tighten sector security');
-    expect(enMessages['corpsFront.disableOpsec']).toBe('Relax sector security');
-    expect(enMessages['corpsFront.opsecEnabled']).toBe('Sector security tightened.');
-    expect(enMessages['corpsFront.opsecDisabled']).toBe('Sector security relaxed.');
-    expect(enMessages['corpsFront.opsecToggleFailed']).toBe('Failed to update sector security');
+    expect(enMessages['corpsFront.enableOpsec']).toBe('Tighten OG security');
+    expect(enMessages['corpsFront.disableOpsec']).toBe('Relax OG security');
+    expect(enMessages['corpsFront.opsecEnabled']).toBe('OG security tightened.');
+    expect(enMessages['corpsFront.opsecDisabled']).toBe('OG security relaxed.');
+    expect(enMessages['corpsFront.opsecToggleFailed']).toBe('Failed to update OG security');
 
     const panelSource = readFileSync('src/ui/map/components/CorpsFrontPanel.tsx', 'utf8');
     expect(panelSource).not.toMatch(/>[\s\r\n]*OPSEC[\s\r\n]*</);
@@ -1711,7 +1711,7 @@ describe('GUI audit label discipline', () => {
     expect(enMessages['sectorsSection.stance.activeDefense']).toBe('Active defense');
     expect(enMessages['corpsFront.tab.forces']).toBe('Order of battle');
     expect(enMessages['formationDetail.overridePermanentHelp']).not.toMatch(/frontline position/i);
-    expect(enMessages['formationDetail.overridePermanentHelp']).toMatch(/sector command responsibility/i);
+    expect(enMessages['formationDetail.overridePermanentHelp']).toMatch(/OG command responsibility/i);
     expect(bcsMessages['situation.operationalSitrep']).not.toMatch(/\bSITREP\b/);
     expect(bcsMessages['decisionRoom.category.operational']).not.toMatch(/\bSITREP\b/);
     expect(bcsMessages['warroom.status.category.operational']).not.toMatch(/\bSITREP\b/);

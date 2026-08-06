@@ -36,7 +36,7 @@ export function getAssignedCommandLabel(
 export function getPlayerFacingSectorName(
   sectorId: string | null | undefined,
   sectors: ReadonlyArray<{ sector_id?: string | null; display_name?: string | null }>,
-  fallback = 'Assigned sector',
+  fallback = 'Assigned OG',
 ): string {
   if (!sectorId) return fallback;
   const displayName = sectors.find((sector) => sector.sector_id === sectorId)?.display_name?.trim();

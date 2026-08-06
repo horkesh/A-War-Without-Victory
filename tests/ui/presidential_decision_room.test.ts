@@ -92,7 +92,7 @@ function makeSitrep(overrides: Partial<OperationalSitrepView> = {}): Operational
       {
         id: 'front-exposed',
         severity: 'critical',
-        text: '1 exposed front sector requires attention.',
+        text: '1 exposed front OG requires attention.',
       },
     ],
     ...overrides,
@@ -253,7 +253,7 @@ describe('buildPresidentialDecisionRoomView', () => {
             id: 'briefing:sector',
             kind: 'command',
             severity: 'warning',
-            title: 'Sector pressure',
+            title: 'OG pressure',
             detail: 'Inspect the sector in the field view.',
             target: { type: 'sector', sectorId: 'sector_tuzla' },
             corpsId: 'arbih_3rd_corps',
@@ -277,7 +277,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       navigationTarget: { kind: 'field', target: { kind: 'field-operation', operationKey: 'arbih_3rd_corps|op_alpha' } },
     });
     expect(view.cards.find((card) => card.id === 'briefing:briefing:sector')).toMatchObject({
-      actionLabel: 'Inspect Sector',
+      actionLabel: 'Inspect OG',
       navigationTarget: { kind: 'field', target: { kind: 'field-sector-in-corps', sectorId: 'sector_tuzla', corpsId: 'arbih_3rd_corps' } },
     });
     expect(view.cards.find((card) => card.id === 'briefing:briefing:settlement')).toMatchObject({
@@ -1001,10 +1001,10 @@ describe('buildPresidentialDecisionRoomView', () => {
             {
               id: 'front-exposed',
               severity: 'critical',
-              text: 'Widespread thinly held front sectors need staff review.',
+              text: 'Widespread thinly held front OGs need staff review.',
               evidence: [
                 'Affected fronts: West (Prijedor) - East (Sanski Most); +402 more.',
-                'Staff handoff: inspect front sectors in War Summary; no direct presidential order is required.',
+                'Staff handoff: inspect front OGs in War Summary; no direct presidential order is required.',
               ],
             },
             {
@@ -1022,11 +1022,11 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(front).toMatchObject({
       title: 'Thinly Held Fronts',
-      explanation: 'Widespread thinly held front sectors need staff review.',
+      explanation: 'Widespread thinly held front OGs need staff review.',
     });
     expect(front?.evidence).toContain('403 thinly held fronts');
     expect(front?.evidence).toContain('Affected fronts: West (Prijedor) - East (Sanski Most); +402 more.');
-    expect(front?.evidence).toContain('Staff handoff: inspect front sectors in War Summary; no direct presidential order is required.');
+    expect(front?.evidence).toContain('Staff handoff: inspect front OGs in War Summary; no direct presidential order is required.');
     expect(front?.evidence.join('\n')).not.toContain('hostile takeover');
 
     expect(hostile).toMatchObject({
@@ -1895,19 +1895,19 @@ describe('buildPresidentialDecisionRoomView', () => {
       cost: 25,
       payload: { requestId: 'reserve_alpha', brigadeId: 'elite_guards' },
     });
-    expect(alpha?.explanation).toBe('Anchor the thinnest sector-front line and stabilize local defensive depth.');
+    expect(alpha?.explanation).toBe('Anchor the thinnest OG-front line and stabilize local defensive depth.');
     expect(alpha?.explanation).not.toMatch(/arbih_3rd_corps|zone:|43 brigade/);
     expect(alpha?.evidence).toEqual([
-      'Reason: Sector Threat',
+      'Reason: OG Threat',
       'Severity: Immediate Army Need',
       'Requesting command: 3rd Corps',
-      'Recipient sector: Central Bosnia West',
+      'Recipient OG: Central Bosnia West',
       'Candidate force: Guards Brigade',
       'Donor command: 1st Corps',
       'Source position: Visoko',
       'Readiness: Ready',
       'Travel time: about 2 weeks travel',
-      'Expected effect: Anchor the thinnest sector-front line and stabilize local defensive depth.',
+      'Expected effect: Anchor the thinnest OG-front line and stabilize local defensive depth.',
       'Weakened position: 1st Corps at Visoko; 0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.',
       'Opportunity cost: 0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.',
     ]);
@@ -1948,7 +1948,7 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(card?.title).toContain('1st Corps');
     expect(card?.title).not.toContain('arbih_1st_corps');
-    expect(card?.evidence.join(' ')).toContain('Sector Threat');
+    expect(card?.evidence.join(' ')).toContain('OG Threat');
     expect(card?.evidence.join(' ')).not.toContain('sector_threat');
   });
 

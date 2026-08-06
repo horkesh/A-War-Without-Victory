@@ -107,16 +107,16 @@ describe('OOBSidebar drilldown routing', () => {
     render(React.createElement(OOBSidebar));
 
     const sectorsToggle = screen.getByTestId('oob-section-sectors-toggle');
-    expect(sectorsToggle.getAttribute('aria-label')).toBe('Expand Sectors');
-    expect(sectorsToggle.getAttribute('title')).toBe('Expand Sectors');
+    expect(sectorsToggle.getAttribute('aria-label')).toBe('Expand OGs');
+    expect(sectorsToggle.getAttribute('title')).toBe('Expand OGs');
     expect(sectorsToggle.getAttribute('aria-expanded')).toBe('false');
-    expect(sectorsToggle.textContent).toContain('Sectors');
+    expect(sectorsToggle.textContent).toContain('OGs');
     expect(sectorsToggle.textContent).toContain('1');
 
     fireEvent.click(sectorsToggle);
 
-    expect(sectorsToggle.getAttribute('aria-label')).toBe('Collapse Sectors');
-    expect(sectorsToggle.getAttribute('title')).toBe('Collapse Sectors');
+    expect(sectorsToggle.getAttribute('aria-label')).toBe('Collapse OGs');
+    expect(sectorsToggle.getAttribute('title')).toBe('Collapse OGs');
     expect(sectorsToggle.getAttribute('aria-expanded')).toBe('true');
   });
 
@@ -306,7 +306,7 @@ describe('OOBSidebar drilldown routing', () => {
     const { container } = render(React.createElement(OOBSidebar));
 
     fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
-    expect(container.textContent).toContain('Assigned sector');
+    expect(container.textContent).toContain('Assigned OG');
     expect(container.textContent).not.toMatch(/sector_vrs|vrs_main_staff|Main Staff North/i);
   });
 

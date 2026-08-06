@@ -436,13 +436,13 @@ describe('CorpsFrontPanel field routing', () => {
 
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    const bridgeReason = 'Desktop command bridge unavailable. Open the packaged desktop shell to stage sector commands.';
+    const bridgeReason = 'Desktop command bridge unavailable. Open the packaged desktop shell to stage OG commands.';
     for (const label of ['0.5x', '1.0x', '1.5x']) {
       const button = screen.getByRole('button', { name: label }) as HTMLButtonElement;
       expect(button.disabled).toBe(true);
       expect(button.getAttribute('title')).toBe(bridgeReason);
     }
-    const opsecButton = screen.getByRole('button', { name: /Tighten sector security/i }) as HTMLButtonElement;
+    const opsecButton = screen.getByRole('button', { name: /Tighten OG security/i }) as HTMLButtonElement;
     expect(opsecButton.disabled).toBe(true);
     expect(opsecButton.getAttribute('title')).toBe(bridgeReason);
     expect(container.textContent).toContain('Desktop command bridge unavailable');
@@ -490,7 +490,7 @@ describe('CorpsFrontPanel field routing', () => {
     render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
-    expect(screen.getByTestId('corps-front-forces-empty').textContent).toContain('No fielded forces reported in this sector.');
+    expect(screen.getByTestId('corps-front-forces-empty').textContent).toContain('No fielded forces reported in this OG.');
   });
 
   it('shows stale sector roster ids without counting them as fielded Forces-tab brigades', () => {
@@ -697,9 +697,9 @@ describe('CorpsFrontPanel field routing', () => {
 
     render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(screen.queryByRole('button', { name: /Tighten sector security/i })).toBeNull();
-    expect(screen.queryByRole('button', { name: /Relax sector security/i })).toBeNull();
-    expect(screen.getByRole('button', { name: /Set sector security active/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Tighten OG security/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Relax OG security/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /Set OG security active/i })).toBeTruthy();
   });
 
   it('labels missing Forces-tab personnel as unreported in visible rows and accessible names', () => {
@@ -788,7 +788,7 @@ describe('CorpsFrontPanel field routing', () => {
 
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(container.textContent).toContain('Assigned sector');
+    expect(container.textContent).toContain('Assigned OG');
     expect(container.textContent).not.toMatch(/sector:|arbih_1st_corps|1st Corps 0/i);
   });
 

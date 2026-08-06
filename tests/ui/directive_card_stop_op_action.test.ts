@@ -768,11 +768,11 @@ describe('DirectiveCard stop-op action host', () => {
     const detail = screen.getByRole('group', { name: 'Reserve commitment detail' });
     expect(detail.className).toContain('text-[12px]');
     expect(detail.textContent).toContain('Requesting command3rd Corps');
-    expect(detail.textContent).toContain('Recipient sectorCentral Bosnia West');
+    expect(detail.textContent).toContain('Recipient OGCentral Bosnia West');
     expect(detail.textContent).toContain('Candidate forceGuards Brigade');
     expect(detail.textContent).toContain('ReadinessReady');
     expect(detail.textContent).toContain('Travel timeabout 1 week travel');
-    expect(detail.textContent).toContain('Expected effectAnchor the thinnest sector-front line and stabilize local defensive depth.');
+    expect(detail.textContent).toContain('Expected effectAnchor the thinnest OG-front line and stabilize local defensive depth.');
     expect(detail.textContent).toContain('Opportunity cost0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.');
     expect(screen.getByRole('button', { name: 'Issue (25)' })).toBeTruthy();
   });

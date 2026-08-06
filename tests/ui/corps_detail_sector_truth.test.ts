@@ -77,7 +77,7 @@ describe('CorpsDetail sector truth', () => {
   it('does not label zero-formation sectors as held coverage', () => {
     const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /OGs/i }));
     const row = screen.getByTestId('corps-detail-sector-row');
 
     expect(container.textContent).toContain('0 on line');
@@ -101,8 +101,8 @@ describe('CorpsDetail sector truth', () => {
 
     const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
-    expect(container.textContent).toContain('Assigned sector');
+    fireEvent.click(screen.getByRole('tab', { name: /OGs/i }));
+    expect(container.textContent).toContain('Assigned OG');
     expect(container.textContent).not.toMatch(/sector:|arbih_1st_corps|1st Corps Uncovered/i);
   });
 
@@ -135,7 +135,7 @@ describe('CorpsDetail sector truth', () => {
     useGameStore.setState({ loadedGameState: state });
     const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /OGs/i }));
     const row = screen.getByTestId('corps-detail-sector-row');
 
     expect(container.textContent).toContain('0 on line');
@@ -182,7 +182,7 @@ describe('CorpsDetail sector truth', () => {
 
     const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /OGs/i }));
     const row = screen.getByTestId('corps-detail-sector-row');
 
     expect(container.textContent).toContain('0 on line');
@@ -212,7 +212,7 @@ describe('CorpsDetail sector truth', () => {
     expect(container.textContent).toContain('offensive posture');
     expect(container.textContent).not.toMatch(/\bOffensive\b/);
 
-    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /OGs/i }));
     expect(container.textContent).toContain('defend in depth');
     expect(container.textContent).not.toMatch(/\bDefend\b/);
   });
@@ -233,7 +233,7 @@ describe('CorpsDetail sector truth', () => {
     expect(container.textContent).toContain('Awaiting first posture order');
     expect(container.textContent).not.toMatch(/Wait For Weather|wait_for_weather/i);
 
-    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /OGs/i }));
     expect(container.textContent).toContain('Awaiting first posture order');
     expect(container.textContent).not.toMatch(/Probe Then Pause|probe_then_pause/i);
   });

@@ -283,11 +283,11 @@ describe('ArmyReservePanel elite commander identity', () => {
     expect(detail.className).toContain('text-[12px]');
     expect(detail.getAttribute('aria-label')).toBe('Reserve request detail for 1st Corps');
     expect(detail.textContent).toContain('Requesting command1st Corps');
-    expect(detail.textContent).toContain('Recipient sectorSarajevo North');
+    expect(detail.textContent).toContain('Recipient OGSarajevo North');
     expect(detail.textContent).toContain('Candidate forceGuards Brigade');
     expect(detail.textContent).toContain('ReadinessReady');
     expect(detail.textContent).toContain('Travel timeabout 1 week travel');
-    expect(detail.textContent).toContain('Expected effectAnchor the thinnest sector-front line and stabilize local defensive depth.');
+    expect(detail.textContent).toContain('Expected effectAnchor the thinnest OG-front line and stabilize local defensive depth.');
     expect(detail.textContent).toContain('Opportunity cost0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.');
 
     fireEvent.click(screen.getByRole('button', {

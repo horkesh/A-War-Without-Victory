@@ -113,7 +113,7 @@ describe('OrderQueue player copy', () => {
     expect(copy).toContain('Staged orders (3)');
     expect(copy).toContain('Attack order');
     expect(copy).toContain('Posture order');
-    expect(copy).toContain('Sector assignment');
+    expect(copy).toContain('OG assignment');
     expect(copy).toContain('Vitez');
     expect(copy).toContain('Attacking');
     expect(copy).toContain('Central line');

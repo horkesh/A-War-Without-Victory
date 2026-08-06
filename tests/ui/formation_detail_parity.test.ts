@@ -255,9 +255,9 @@ describe('Formation Detail parity display', () => {
 
     render(React.createElement(FormationDetail, { railSlot: 'secondary' }));
 
-    const sectorButton = screen.getByRole('button', { name: 'Inspect sector Assigned sector' });
-    expect(sectorButton.getAttribute('title')).toBe('Assigned sector');
-    expect(sectorButton.getAttribute('aria-label')).toBe('Inspect sector Assigned sector');
+    const sectorButton = screen.getByRole('button', { name: 'Inspect OG Assigned OG' });
+    expect(sectorButton.getAttribute('title')).toBe('Assigned OG');
+    expect(sectorButton.getAttribute('aria-label')).toBe('Inspect OG Assigned OG');
     expect(`${sectorButton.getAttribute('title')} ${sectorButton.getAttribute('aria-label')} ${sectorButton.textContent}`).not.toMatch(/sector_rbih|sector:rbih/i);
   });
 
@@ -282,7 +282,7 @@ describe('Formation Detail parity display', () => {
     useGameStore.setState({
       loadedGameState: state,
       selectedFormationId: 'rbih_heroic_brigade',
-      osidDisplayNames: { 'op:test_sector:known': 'Known sector' },
+      osidDisplayNames: { 'op:test_sector:known': 'Known OG' },
     });
 
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
@@ -290,7 +290,7 @@ describe('Formation Detail parity display', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Record' }));
 
     const copy = view.container.textContent ?? '';
-    expect(copy).toContain('Known sector');
+    expect(copy).toContain('Known OG');
     expect(copy).toContain('staff record');
     expect(copy).not.toContain('rbih_secret_story');
     expect(copy).not.toContain('op:test_sector:known');
@@ -511,7 +511,7 @@ describe('Formation Detail parity display', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
 
     const copy = view.container.textContent ?? '';
-    expect(copy).toContain('Field orders and sector responsibility are managed by the corps commander.');
+    expect(copy).toContain('Field orders and OG responsibility are managed by the corps commander.');
     expect(copy).toContain('Presidential intervention is issued through Army HQ directives.');
     expect(screen.queryByText('Clear override')).toBeNull();
     expect(view.container.querySelector('[data-testid="formation-detail-sector-option"]')).toBeNull();

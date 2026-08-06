@@ -233,7 +233,7 @@ describe('decision family modals', () => {
     expect(screen.queryByText('Priority')).toBeNull();
     expect(screen.getByText('Donor command').parentElement?.textContent).toContain('East Bosnia Corps');
     expect(screen.getByText('Source position').parentElement?.textContent).not.toContain('op:visoko');
-    expect(screen.getByText('Recipient sector').parentElement?.textContent).toContain('Unreported');
+    expect(screen.getByText('Recipient OG').parentElement?.textContent).toContain('Unreported');
     expect(screen.getAllByText('about 2 weeks travel')).toHaveLength(1);
     expect(screen.getByText('Expected effect').parentElement?.textContent).not.toContain('defensive_gap');
     expect(screen.getByText('Weakened position').parentElement?.textContent).toContain('East Bosnia Corps');
@@ -550,7 +550,7 @@ describe('decision family modals', () => {
           response_id: 'noted',
           surfaced_on_turn: 1,
           headline: 'Border movement reported',
-          body: 'Staff reports enemy movement near the assigned sector.',
+          body: 'Staff reports enemy movement near the assigned OG.',
           consumed: false,
         }],
       }),
@@ -559,7 +559,7 @@ describe('decision family modals', () => {
 
     expect(screen.getByRole('dialog', { name: 'Border movement reported' })).toBeTruthy();
     expect(screen.getByRole('img', { name: 'Intelligence Channel' }).getAttribute('src')).toContain('decision_header_intelligence');
-    expect(screen.getByText('Staff reports enemy movement near the assigned sector.')).toBeTruthy();
+    expect(screen.getByText('Staff reports enemy movement near the assigned OG.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Acknowledge' })).toBeTruthy();
   });
 
