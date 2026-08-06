@@ -45,3 +45,18 @@
 
 ## Roadmap placement
 Display/content item; fits alongside R7 (content/attribution/localization) or as a standalone display packet. Low-risk, no dependency on the exhaustion/scoring or morale lanes — schedulable any time.
+
+---
+
+## Progress (2026-08-06)
+- **PART 1 DONE** (commit 9dfcc6a8b): fallback → `"OG {dominant_mun}"`.
+- **PART 3 DONE** (attested names): 5 historian-cited rows added (OG West, OG Bosanska Krajina, OG 7-South, OG 6, TG "Majevica"). tsc + 67 adapter tests.
+- **PART 2 (terminology sweep) — DRAFTED THEN REVERTED, scoped for a clean follow-up.** The English i18n sweep (98 player-facing "sector"→"OG" values, interpolation tokens preserved, breadcrumb crumb → "Operational Group") is CORRECT but renaming user-facing copy breaks **32 component tests across 17 files** that assert the old strings (corps_detail_sector_truth, corps_front_panel_routing, formation_detail_parity, gui_audit_label_discipline, decision_family_modals, presidential_decision_room, etc.). Reverted to keep the tree green; the sweep itself is sound.
+- **Remaining to land Part 2 as a clean packet:**
+  1. Re-apply the token-safe en sweep (98 values) + breadcrumb full-term.
+  2. Update the 32 affected component-test assertions to the new OG copy (enumerate via `vitest run tests/ui`).
+  3. **Header-expansion helper** — a SELECTED OG's stored name `"OG X"/"TG X"/"OZ X"` → `"Operational Group X"/"Tactical Group X"/"Operational Zone X"` when rendered in its own detail header (locate the selected-sector header render site).
+  4. Reconcile "OG" shorthand with the label-discipline canon (`gui_audit_label_discipline`) — confirm bare "OG" is acceptable or add a first-use/glossary expansion; the owner chose "OG everywhere", so update the discipline expectations to match rather than block.
+  5. `messages.bs.ts` — Bosnian "sektor"→"OG" (bs is a Preview locale; can defer to R7 localization).
+  6. Verify: `test:baselines` byte-identical (display-only) + `desktop:map:build` + full `vitest`.
+- **Owner-review value:** Part 2 changes 98 user-facing strings + touches the OG-shorthand-vs-discipline question — worth an eyeball before it's final.
