@@ -39,9 +39,18 @@ Landing the per-faction `casualties_full` now is **behaviorally inert** (grades 
 
 ## Handoff to the casualty-realism lane (post-1.0)
 
+**Key insight for the lane:** the scoring references and the sim-output target are the SAME numbers by construction. Bring sim combined casualties down to ≈ the per-faction values below and `casualtyScore` lands near (not past) the 1.0 boundary, so the canon references differentiate grades naturally — no *further* scoring change needed beyond setting `casualties_full` to these values.
+
+Per-faction `casualties_full` (KIA+WIA+MIA combined basis; anchored on `historical_baseline.json` `military_killed` × ~1:3–3.5 KIA:WIA + modest MIA; mid-band of the canon §3.5 analogues):
+- **RBiH (ARBiH) = 140,000** (KIA 31,270 + WIA ~98k + MIA ~11k)
+- **RS (VRS) = 95,000** (KIA 21,173 + WIA ~66k + MIA ~8k)
+- **HRHB (HVO) = 35,000** (KIA 7,788 + WIA ~24k + MIA ~3k)
+
+Sim n153 output for comparison (the level to bring DOWN): RBiH 355,933 (2.5×) · RS 188,478 (2.0×) · HRHB 46,532 (1.3×).
+
 When combat-casualty realism is picked up, bundle the Phase-3 scoring-reference re-derivation with it:
-- Bring sim combined casualties toward the historical KIA+WIA+MIA scale (≈ ARBiH 137k / VRS 95k / HVO 35k).
-- THEN set `casualties_full` per-faction with headroom above the realistic scale so `casualtyScore < 1.0` for sub-maximal wars — grades differentiate naturally, atrocity becomes grade-decisive.
+- Bring sim combined casualties toward the target scale above.
+- Set `casualties_full` per-faction to those values (headroom above the realistic scale so `casualtyScore < 1.0` for sub-maximal wars) — grades differentiate naturally, atrocity becomes grade-decisive.
 - Re-derive `duration_full_weeks` (188 × severity — owner-reviewed) and `exhaustion_full` (vs the terminal band) in the same pass.
 - Acceptance: ≥2 distinct grades across a strategy set + nonzero `war_cost_index_spread`; all canon A0–A3 invariants hold; state the new historical-baseline grade.
 
