@@ -96,7 +96,7 @@ export function applyEventEffects(state: GameState, effects: EventEffect[]): voi
 function applySingleEffect(state: GameState, effect: EventEffect): void {
     switch (effect.kind) {
         case 'morale_change':
-            applyMoraleChange(state, effect.faction, effect.delta);
+            applyMoraleChange(state, effect.faction, effect.delta, effect.affected_corps);
             break;
         case 'supply_delta':
             applySupplyDelta(state, effect.faction, effect.delta);
@@ -251,15 +251,27 @@ function applyOffensiveOpsSuppression(
 
 /** Apply morale delta to all active brigades of the given faction. Clamped [0, 100].
  *  Non-finite delta is rejected (prior morale kept) + logged — NaN must never persist (P1-B). */
-function applyMoraleChange(state: GameState, faction: FactionId, delta: number): void {
+function applyMoraleChange(
+    state: GameState,
+    faction: FactionId,
+    delta: number,
+    affectedCorps?: string[],
+): void {
     if (!Number.isFinite(delta)) {
         recordNonFiniteEffectAnomaly(state, 'morale_change', faction, delta);
         return;
     }
+    // Theater scope (R6 Task 0.3): when the effect names affected_corps, the morale delta
+    // hits only brigades in those corps — a regional operation demoralizes only the corps
+    // in its theater, not the whole faction. Absent → faction-wide (byte-identical legacy).
+    const corpsScope = Array.isArray(affectedCorps) && affectedCorps.length > 0
+        ? new Set(affectedCorps)
+        : null;
     const formations = state.military.formations;
     for (const fid of Object.keys(formations).sort()) {
         const f = formations[fid];
         if (f.faction === faction && f.status === 'active' && f.morale != null) {
+            if (corpsScope && !(f.corps_id != null && corpsScope.has(f.corps_id))) continue;
             f.morale = clamp(f.morale + delta, 0, 100);
         }
     }

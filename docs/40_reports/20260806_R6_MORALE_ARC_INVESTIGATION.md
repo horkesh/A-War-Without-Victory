@@ -61,3 +61,16 @@ Implemented (flag-gated `AWWV_HOLLOWED_MORALE_FLOOR`, default-OFF): floor a holl
 **Two candidate next levers (owner decision):**
 - **(A) Data-only tune (scenario-tester's rec):** reduce `operation_sana_1995` RS `morale_change` −8→−3 (net turn-179 shock −13→−8), landing the metastable band at ~36–38 (≥40 for the higher cohort) → recovers effective toward 20–30. Minimal, faction-agnostic, 40w byte-identical. Fallback: stagger Sana a few turns after Mistral-2 so the two −8s don't collide. But: softens a historically-rapid western collapse uniformly.
 - **(B) Regional application (deeper, more historical):** make a theater-scoped operation's `morale_change` fall on brigades in/near that theater, not the whole faction — so the western collapse spares the eastern corps. Bigger engine change (event-effect scoping); better models the war.
+
+---
+
+## Experiment 2 — theater-scoped morale_change (direction B): ADOPTED (2026-08-06)
+
+Owner chose direction B (regional scoping). Implemented: optional `affected_corps` on `EventEffectMoraleChange`; `applyMoraleChange` scopes by corps when present (absent → faction-wide, byte-identical); `operation_sana_1995` + `operation_mistral_2_1995` RS `morale_change` scoped to `["vrs_1st_krajina","vrs_2nd_krajina"]` (western theater). Test `morale_change_theater_scope.test.ts` 3/3; `tsc` clean; `test:baselines` byte-identical (events fire t179).
+
+**188w result (n150 `e1e4ffd4e18b193d`) — scenario-creator-runner-tester ADOPT (independently verified):**
+- RS combat-effective **7 → 23/53** (mean morale 33.6 → 40.5); 19 of 23 at morale 50+ (robust). Concentrated in the eastern corps (vrs_drina 6/8, vrs_east_bosnian 5/9, vrs_herzegovina 4/5, vrs_sarajevo_romanija 4/7).
+- **TERRITORY-FLAT:** matched_osids 630→630; control_delta net identical (RS 305/RBiH 307/HRHB 100); only 2 EASTERN OSIDs swap (neutral, correctly_placed 274/315 both). Every western Sana/Mistral OSID byte-identical — RS holds zero extra western ground; western corps still shatter.
+- Anchors 31/31; engine-health gate PASS; K:W 3.788 in band; RBiH arc intact; reversal preserved (RBiH 95.1/125 ≫ RS 40.5/23, west still falls).
+
+**The five prior local anchor designs failed because they patched a symptom.** The real defect was a faction-wide application of a regional morale event; scoping it to the theater fixed the RS engine-health end-state at the root with a single minimal, historically-truer change, zero territory movement. Floor to CALIBRATION_MASTER 2026-08-06.

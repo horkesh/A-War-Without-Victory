@@ -1907,7 +1907,8 @@
       {
         "kind": "morale_change",
         "faction": "RS",
-        "delta": -8
+        "delta": -8,
+        "affected_corps": ["vrs_1st_krajina", "vrs_2nd_krajina"]
       },
       {
         "kind": "morale_change",
@@ -1974,7 +1975,8 @@
       {
         "kind": "morale_change",
         "faction": "RS",
-        "delta": -8
+        "delta": -8,
+        "affected_corps": ["vrs_1st_krajina", "vrs_2nd_krajina"]
       },
       {
         "kind": "supply_delta",

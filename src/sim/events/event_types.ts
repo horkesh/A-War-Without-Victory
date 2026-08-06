@@ -109,11 +109,17 @@ export interface EventEffectNarrative {
     text: string;
 }
 
-/** Effect: morale delta applied to all brigades of faction. Clamped [0, 100]. */
+/** Effect: morale delta applied to brigades of faction. Clamped [0, 100].
+ *  When `affected_corps` is present, the delta is THEATER-SCOPED — applied only to
+ *  brigades whose `corps_id` is in the list — so a regional operation (e.g. the western
+ *  fall-1995 offensives Sana/Mistral-2) demoralizes only the corps actually in that
+ *  theater, not the whole faction (the eastern VRS held historically). Absent → the
+ *  legacy faction-wide behavior (byte-identical). */
 export interface EventEffectMoraleChange {
     kind: 'morale_change';
     faction: FactionId;
     delta: number;
+    affected_corps?: string[];
 }
 
 /** Effect: general supply reserve delta for faction. */
