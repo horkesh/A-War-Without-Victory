@@ -9,8 +9,19 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type { FactionId, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-/** Friction contribution per point of faction exhaustion. */
-const FRICTION_PER_EXHAUSTION = 0.01;
+/** Friction contribution per point of faction exhaustion.
+ *  R6 friction fix #2 (2026-08-06): rescaled 0.01 → 0.0001 (100×) to match the
+ *  2026-05-22 war_exhaustion rescale (0–100 → 0–10000 scale) that this constant
+ *  was missed by. On the 0.01 value the exhaustion term (exhaustion·0.01) hit the
+ *  MAX_MULTIPLIER=10 ceiling once exhaustion exceeded ~900 (≈wk20), pinning every
+ *  faction's friction at a flat 10× — washing out the front-edge/exhaustion
+ *  differentiation the multiplier is meant to express and homogenising the
+ *  exhaustion accumulator delta. 0.0001 restores the ORIGINAL design intent: the
+ *  exhaustion term contributes 1.0 at full exhaustion (10000·0.0001), giving a
+ *  multiplier that tracks exhaustion proportionally (~1.0–2.0) instead of pinning
+ *  at the ceiling. Empirically verified de-pinned (per-faction mult range logged
+ *  before/after in the friction-fix#2 188w run). */
+const FRICTION_PER_EXHAUSTION = 0.0001;
 
 /** Friction contribution per front edge for that faction. */
 const FRICTION_PER_FRONT_EDGE = 0.02;
