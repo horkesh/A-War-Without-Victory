@@ -1,7 +1,7 @@
 # Launch & Opening-Screens Redesign — Design
 
 **Date:** 2026-08-05
-**Status:** Design validated with owner; ready for implementation planning.
+**Status:** Design validated with owner; **wired into the roadmap as an R7 sub-lane (2026-08-06)** — see the R7 row in `MASTER_ROADMAP.md`. Ready for implementation. **Hard §6 gates before ship:** the generated hero/loading images and the faction "Your war" sentences require historian + §6-panel review (the RS line is load-bearing on false-equivalence); the situation-tag table needs a determinism + player-safe pass. Overlaps in-flight UI-truth work (the "war phase" jargon leak, the sector→OG rename, the Continue/Load confusion).
 **Scope (owner-chosen):** Full opening *experience* — a designed sequence from first frame to in-war, not a targeted patch of four bugs.
 **Brainstormed with:** Pyrrhic team — ui-ux-developer, game-designer, narrative-designer, modern-wargame-expert (four independent seats; strong convergence).
 
