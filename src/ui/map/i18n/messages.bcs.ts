@@ -3625,6 +3625,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'inbox.item.territoryGained.title': 'Osvojena teritorija',
     'inbox.item.territoryGained.single': 'Vaše snage su osigurale {place}.',
     'inbox.item.territoryGained.many': 'Vaše snage su osigurale {count} položaja, uključujući {place}.',
+    'inbox.item.directiveRejected.title': '{corps}: naredba se ne može izvršiti',
+    'inbox.item.directiveRejected.subtitle': 'Vaša direktiva za {place} ne može biti izvršena — {reason}.',
     'inbox.item.operationOpportunity.titleFallback': 'Operativna prilika',
     'inbox.item.operationOpportunity.detailFallback': 'operativni prijedlog trazi pregled.',
     'inbox.item.operationOpportunity.recommendation.approve': 'odobrenje',
