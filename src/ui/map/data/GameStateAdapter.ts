@@ -650,6 +650,16 @@ const ATTESTED_OG_NAMES: readonly AttestedOgName[] = [
     { corps_id: 'vrs_sarajevo_romanija', anchor_mun: 'vogosca', name: '"Vogošća" OG' },
     // HVO Central Bosnia — whole corps is the OZ (ADR-0006 line 81).
     { corps_id: 'hvo_central_bosnia', anchor_mun: null, name: 'OZ Central Bosnia' },
+    // Historian pass 2026-08-06 (BB2, verbatim; anchor muns verified as engine OSID prefixes).
+    // ARBiH 3rd Corps — three attested OGs discriminated by region. (The real 7th Corps was
+    // carved from the 3rd's western brigades and folds into arbih_3rd_corps in the engine OOB.)
+    { corps_id: 'arbih_3rd_corps', anchor_mun: 'bugojno', name: 'OG West' },                 // BB2 p.529
+    { corps_id: 'arbih_3rd_corps', anchor_mun: 'travnik', name: 'OG Bosanska Krajina' },      // BB2 p.529
+    { corps_id: 'arbih_3rd_corps', anchor_mun: 'tesanj', name: 'OG 7-South' },                // BB2 p.500, p.498-499
+    // ARBiH 2nd Corps — OG 6 (absorbed the Kladanj-HQ OG 3), Tuzla-Kladanj sector.
+    { corps_id: 'arbih_2nd_corps', anchor_mun: 'kladanj', name: 'OG 6' },                     // BB2 p.497
+    // VRS East-Bosnian Corps — Tactical Group "Majevica" (Mt. Majevica / Stolice, Lopare).
+    { corps_id: 'vrs_east_bosnian', anchor_mun: 'lopare', name: 'TG "Majevica"' },            // BB2 p.490
 ];
 
 /**
