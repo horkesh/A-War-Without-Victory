@@ -177,7 +177,7 @@ test('B4 reserve presentation names the command, sector, candidate, effect, and 
             sourcePosition: 'Visoko',
             readiness: 'Ready',
             travelTime: 'about 1 week travel',
-            expectedEffect: 'Anchor the thinnest sector-front line and stabilize local defensive depth.',
+            expectedEffect: 'Anchor the thinnest OG-front line and stabilize local defensive depth.',
             weakenedPosition: 'Unreported',
             opportunityCost: '0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.',
             severity: 'Immediate Army Need',

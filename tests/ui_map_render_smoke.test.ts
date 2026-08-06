@@ -725,14 +725,14 @@ describe('Tactical map render smoke', () => {
     expect(getAssignedCommandLabel('arbih_3rd_corps', corpsNameById)).toBe('3rd Corps');
 
     expect(getPlayerFacingCorpsName('arbih_5th_corps', new Map())).toBe('This corps');
-    expect(getPlayerFacingSectorName('sector:arbih_5th:0', [])).toBe('Assigned sector');
+    expect(getPlayerFacingSectorName('sector:arbih_5th:0', [])).toBe('Assigned OG');
     expect(getAssignedCommandLabel('arbih_5th_corps', new Map())).toBe('Assigned command');
   });
 
   it('player-facing sector labels do not derive visible copy from raw ids', () => {
-    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', [{ sector_id: 'sector:arbih_3rd:0', display_name: 'sector:arbih_3rd:0' }], 'Assigned sector')).toBe('Assigned sector');
-    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', [{ sector_id: 'sector:arbih_3rd:0', display_name: 'sector_arbih_3rd_0' }], 'Assigned sector')).toBe('Assigned sector');
-    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', [{ sector_id: 'sector:arbih_3rd:0', display_name: 'arbih_3rd_corps - Ozren' }], 'Assigned sector')).toBe('Assigned sector');
+    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', [{ sector_id: 'sector:arbih_3rd:0', display_name: 'sector:arbih_3rd:0' }], 'Assigned OG')).toBe('Assigned OG');
+    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', [{ sector_id: 'sector:arbih_3rd:0', display_name: 'sector_arbih_3rd_0' }], 'Assigned OG')).toBe('Assigned OG');
+    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', [{ sector_id: 'sector:arbih_3rd:0', display_name: 'arbih_3rd_corps - Ozren' }], 'Assigned OG')).toBe('Assigned OG');
   });
 
   it('player-safe text helpers replace internal fallback ids with neutral labels', () => {

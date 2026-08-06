@@ -526,7 +526,7 @@ describe('player-safe tooltip models', () => {
       playerFaction: 'RBiH',
     });
 
-    expect(model.sectorName).toBe('Assigned sector');
+    expect(model.sectorName).toBe('Assigned OG');
     expect(model.sectorName).not.toMatch(/sector:|arbih|2nd Corps 0/i);
   });
 

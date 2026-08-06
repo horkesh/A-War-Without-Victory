@@ -137,7 +137,7 @@ describe('Army HQ readiness and threat copy', () => {
         expect(html).not.toContain('ineff');
         expect(html).not.toContain('disrupted');
         expect(html).not.toContain('overextended');
-        expect(html).not.toContain('Reinforce front sectors');
+        expect(html).not.toContain('Reinforce front OGs');
         expect(html).not.toContain('Corps</button>');
     });
 
@@ -179,11 +179,11 @@ describe('Army HQ readiness and threat copy', () => {
 
         expect(items).toHaveLength(1);
         expect(items[0]?.recommendationId).toBe('reinforce_front');
-        expect(items[0]?.recommendation).toBe('Reinforce front sectors');
+        expect(items[0]?.recommendation).toBe('Reinforce front OGs');
 
         const html = bcsMarkup(createElement(ForceReadiness, { items }));
         expect(html).toContain('Pojacati prednje sektore');
-        expect(html).not.toContain('Reinforce front sectors');
+        expect(html).not.toContain('Reinforce front OGs');
     });
 
     it('excludes active-but-forming brigades from ForceReadiness combat counts', () => {

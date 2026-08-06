@@ -89,7 +89,7 @@ describe('Army HQ sector truth', () => {
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
     expect(row.getAttribute('data-sector-id')).toBe('sector:arbih_1st_corps:uncovered');
     expect(toggle.getAttribute('aria-controls')).toBe('army-hq-sector-detail-sector-arbih-1st-corps-uncovered');
-    expect(toggle.getAttribute('aria-label')).toMatch(/Collapse sector details for Remote front/i);
+    expect(toggle.getAttribute('aria-label')).toMatch(/Collapse OG details for Remote front/i);
     expect(`${toggle.getAttribute('aria-label')} ${toggle.getAttribute('title')}`).not.toMatch(/sector:|arbih_1st_corps/i);
     expect(screen.getByTestId('army-hq-sector-detail').getAttribute('id')).toBe('army-hq-sector-detail-sector-arbih-1st-corps-uncovered');
     expect(document.getElementById(toggle.getAttribute('aria-controls') ?? '')).toBe(screen.getByTestId('army-hq-sector-detail'));
