@@ -5,7 +5,7 @@
  * No serialization of derived state; no timestamps; no randomness.
  */
 
-import type { FactionId, GameState, SettlementId } from '../state/game_state.js';
+import type { GameState, SettlementId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { clamp01 } from '../utils/math.js';
 import type { EngagementSignal } from './baseline_ops_types.js';
@@ -32,9 +32,21 @@ export function computeEngagementLevel(signal: EngagementSignal): number {
 }
 
 /**
- * Apply baseline-ops exhaustion delta to state (war_exhaustion and profile.exhaustion).
- * Monotonic, irreversible. War phase exhaustion is unbounded; we add delta only (no clamp to 1).
- * H1.11: optional scalar multiplies delta (harness-only; default 1).
+ * Apply baseline-ops pressure-"work" delta to each faction's `profile.exhaustion`.
+ * Monotonic, irreversible. H1.11: optional scalar multiplies delta (harness-only; default 1).
+ *
+ * R6 Phase 0 fix #1 (2026-08-06): this function NO LONGER writes
+ * `political.war_exhaustion`. That field's real, faction-differentiated, clamped
+ * writer is `updateExhaustion` (src/sim/combat/exhaustion.ts, run every war turn
+ * from war_phases.ts). The delta added here was faction-UNIFORM (identical for
+ * every faction) and applied AFTER the pipeline's per-faction clamp — it added no
+ * differentiation and violated the invariant that per-turn `war_exhaustion` deltas
+ * differ across factions with different inputs. Because `updateExhaustion` already
+ * populates the field, removing this write does NOT empty it; it only removes a
+ * redundant, faction-agnostic add. `profile.exhaustion` (semantically pressure
+ * "work", pending the pressure_work rename) is left as-is — its differentiated
+ * writer is `accumulateExhaustion` (src/state/exhaustion.ts); the baseline add
+ * here is that field's designed harness signal and is out of scope for this fix.
  */
 export function applyBaselineOpsExhaustion(
     state: GameState,
@@ -44,16 +56,8 @@ export function applyBaselineOpsExhaustion(
     if (state.meta?.phase !== 'war') return;
 
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
-    if (!state.political.war_exhaustion) {
-        (state as GameState & { war_exhaustion: Record<FactionId, number> }).political.war_exhaustion = {};
-    }
-    const exhaustion = state.political.war_exhaustion!;
-
     const delta = BASELINE_OPS_EXHAUSTION_RATE * level * Math.max(0, scalar);
     for (const fid of factionIds) {
-        const current = typeof exhaustion[fid] === 'number' ? exhaustion[fid]! : 0;
-        exhaustion[fid] = Math.max(0, current + delta);
-
         const faction = state.factions?.find((f) => f.id === fid);
         if (faction?.profile) {
             const profileCurrent = typeof faction.profile.exhaustion === 'number' ? faction.profile.exhaustion : 0;
