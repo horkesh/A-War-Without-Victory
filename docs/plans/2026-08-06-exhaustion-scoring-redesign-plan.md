@@ -50,13 +50,12 @@ Each of these restores behavior the 2026-05-22 rescale already intended but miss
 
 Both specialists independently insisted this land first, not after — the reviewable artifact is what distinguishes this cycle from the two that already failed silently.
 
-- [ ] **Build `tools/exhaustion_curve_gate.cjs`** (or fold into `tools/engine_health_gate.cjs` — Scenario Harness Engineer's preferred integration point, same charter, same run-directory ingestion, same `--update`-requires-`--force` ratchet discipline as the existing `matched_osids` floor). Reads the per-faction per-week `exhaustion` series already emitted in every run's `weekly_report.jsonl` — no new instrumentation needed. Computes QA Engineer's five metrics:
-  1. `exhaustion_first_saturation_week` (any faction ≥0.99·cap) — hard floor ≥150.
-  2. `exhaustion_dead_weeks_pct` (% of war-phase weeks where cross-faction spread <1% of cap) — hard ceiling ≤15%. **This is the keystone metric** — scale-free, would have caught both the original bug and its recurrence at any cap value.
-  3. `exhaustion_terminal_pairwise_min_gap` (smallest pairwise gap at final week, % of cap) — hard floor ≥5%.
-  4. `cost_index_saturated_components_max` (how many of {exhaustion, casualties, duration} clamp to exactly 1.0, worst faction) — hard ceiling ≤1.
-  5. `war_cost_index_spread` (max−min of `computeWarCostIndex` across factions) — hard floor ≥0.10.
-- [ ] **Run it now, on the current (pre-Phase-3/4) engine, and commit the result as the documented baseline.** All five metrics are expected to FAIL today — that failure, captured and dated, is the artifact that makes the eventual fix falsifiable instead of another unverified prediction.
+- [x] **Gate built — folded into `tools/engine_health_gate.cjs`** (Scenario Harness Engineer's preferred point; same run-directory ingestion). Reads the per-faction per-week `exhaustion` series from `weekly_report.jsonl` (no new instrumentation). Metrics **1-3 SHIPPED** (advisory, in `.measured.exhaustion_curve`), CAP=10000:
+  1. `first_saturation_week` (any faction ≥0.99·cap) — floor ≥150.
+  2. `dead_weeks_pct` (% weeks where cross-faction spread <1% of cap) — ceiling ≤15%. **Keystone.**
+  3. `terminal_min_gap_pct` (smallest pairwise gap at final week, % of cap) — floor ≥5%.
+  - [ ] **Metrics 4-5 = follow-up** (`cost_index_saturated_components_max` ≤1; `war_cost_index_spread` ≥0.10) — need `computeWarCostIndex` (scoring.ts) wired into the .cjs gate.
+- [x] **Ran it + committed the documented FAILING baseline** → `data/calibration/exhaustion_curve_baseline.json` (2026-08-06, run n150). Metrics 1-3 all FAIL exactly as predicted: **first_saturation_week 50** (<150), **dead_weeks_pct 57.4%** (>15%, keystone), **terminal_min_gap_pct 0** — all three factions pinned at exactly 10000 at week 188 (zero differentiation). This is the byte-identical-terminal saturation that makes COST_GRADE_CAPS cap every campaign at C. Advisory (reported, non-fatal) until Phases 0/3/4 fix it, then promote to gated.
 - [ ] **Add Tier-1 unit invariants to the fast vitest slice** (QA Engineer's 1a/1b): (a) assert the exhaustion clamp holds across *all* writers, not just `updateExhaustion` — this is the permanent regression guard against Phase 0's Surface-C bug recurring under a future third writer; (b) assert per-turn deltas differ across factions with materially different inputs (the invariant `applyBaselineOpsExhaustion` currently violates by construction).
 
 **Gate:** gate script runs clean against at least one existing 188w run directory; baseline JSON committed to `data/calibration/` alongside the existing `engine_health_thresholds.json` pattern.

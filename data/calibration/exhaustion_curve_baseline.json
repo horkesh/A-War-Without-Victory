@@ -1,0 +1,25 @@
+{
+  "_comment": "R6 exhaustion/scoring lane — Phase 1 documented FAILING baseline (the falsifiable artifact per docs/plans/2026-08-06-exhaustion-scoring-redesign-plan.md). Captured 2026-08-06 by `node tools/engine_health_gate.cjs <run> --json` (.measured.exhaustion_curve) on the current pre-fix engine. Every metric FAILS its panel threshold today — that is the point. When Phases 0/3/4 land, re-capture and require these to pass (promote from advisory to gated). The per-faction per-week exhaustion series is read from weekly_report.jsonl (no new instrumentation). CAP = 10000 (current war_exhaustion scale).",
+  "captured": "2026-08-06",
+  "source_run": "runs/apr1992_definitive_188w__63a3a0858050b865__w188_n150",
+  "exhaustion_cap": 10000,
+  "thresholds": {
+    "first_saturation_week_min": 150,
+    "dead_weeks_pct_max": 15,
+    "terminal_min_gap_pct_min": 5,
+    "_note_metrics_4_5": "cost_index_saturated_components_max <= 1 and war_cost_index_spread >= 0.10 require computeWarCostIndex (scoring.ts) — wired-in follow-up, not yet in the gate."
+  },
+  "baseline_measured": {
+    "weeks": 188,
+    "first_saturation_week": 50,
+    "dead_weeks_pct": 57.4,
+    "terminal_min_gap_pct": 0,
+    "terminal_by_faction": { "RBiH": 10000, "RS": 10000, "HRHB": 10000 }
+  },
+  "verdict": {
+    "first_saturation_week": "FAIL (50 < 150 — a faction saturates to the 10000 cap by week 50)",
+    "dead_weeks_pct": "FAIL (57.4% > 15% — the keystone metric: factions sit within 1% of each other 57% of the war)",
+    "terminal_min_gap_pct": "FAIL (0% < 5% — all three factions pinned at exactly 10000 at week 188; zero differentiation)",
+    "interpretation": "Confirms the panel finding: the war_exhaustion accumulator saturates every faction to the cap early and holds them there, which makes COST_GRADE_CAPS cap every full-length campaign at grade C and renders the atrocity bright-line term arithmetically inert at saturation."
+  }
+}

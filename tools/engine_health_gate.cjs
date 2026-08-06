@@ -153,6 +153,61 @@ for (const faction of HEALTH_FACTIONS) {
     : 0;
 }
 
+// R6 exhaustion/scoring lane — Phase 1 exhaustion-curve gate (2026-08-06,
+// docs/plans/2026-08-06-exhaustion-scoring-redesign-plan.md). Reads the per-faction
+// per-week `exhaustion` series already emitted in weekly_report.jsonl (no new
+// instrumentation) and computes the panel's exhaustion-CURVE health metrics. ADVISORY —
+// reported, never hard-fails — because the 17-specialist panel expects these to FAIL on
+// the current (pre-fix) engine; capturing that failing baseline is the falsifiable
+// artifact that distinguishes this fix cycle from the two that shipped green. Territory-
+// flat (reads existing run output; no sim behavior). CAP = 10000 (current war_exhaustion
+// scale). Metrics 4-5 (cost-index saturation/spread) need computeWarCostIndex (scoring.ts)
+// and are a wired-in follow-up.
+const EXHAUSTION_CAP = 10000;
+const weeklyPath = path.join(runDir, 'weekly_report.jsonl');
+let exhaustionCurve = null;
+if (fs.existsSync(weeklyPath)) {
+  const series = { RBiH: [], RS: [], HRHB: [] };
+  for (const line of fs.readFileSync(weeklyPath, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    let w;
+    try { w = JSON.parse(line); } catch (e) { continue; }
+    const facs = Array.isArray(w.factions) ? w.factions : [];
+    for (const fe of facs) {
+      if (fe && HEALTH_FACTIONS.indexOf(fe.id) !== -1 && typeof fe.exhaustion === 'number') {
+        series[fe.id].push(fe.exhaustion);
+      }
+    }
+  }
+  const weeksN = Math.min(series.RBiH.length, series.RS.length, series.HRHB.length);
+  if (weeksN > 0) {
+    // (1) first week ANY faction saturates (>= 0.99*cap); null if never. Floor >= 150.
+    let firstSat = null;
+    for (let i = 0; i < weeksN; i++) {
+      if (HEALTH_FACTIONS.some((f) => series[f][i] >= 0.99 * EXHAUSTION_CAP)) { firstSat = i + 1; break; }
+    }
+    // (2) KEYSTONE — % of weeks where cross-faction spread < 1% of cap. Ceiling <= 15.
+    let deadWeeks = 0;
+    for (let i = 0; i < weeksN; i++) {
+      const vals = HEALTH_FACTIONS.map((f) => series[f][i]);
+      if (Math.max.apply(null, vals) - Math.min.apply(null, vals) < 0.01 * EXHAUSTION_CAP) deadWeeks++;
+    }
+    // (3) smallest pairwise gap at the final week, as % of cap. Floor >= 5.
+    const last = HEALTH_FACTIONS.map((f) => series[f][weeksN - 1]);
+    let minGap = Infinity;
+    for (let a = 0; a < last.length; a++) {
+      for (let b = a + 1; b < last.length; b++) minGap = Math.min(minGap, Math.abs(last[a] - last[b]));
+    }
+    exhaustionCurve = {
+      weeks: weeksN,
+      first_saturation_week: firstSat,
+      dead_weeks_pct: +((deadWeeks / weeksN) * 100).toFixed(1),
+      terminal_min_gap_pct: +((minGap / EXHAUSTION_CAP) * 100).toFixed(2),
+      terminal_by_faction: { RBiH: Math.round(last[0]), RS: Math.round(last[1]), HRHB: Math.round(last[2]) },
+    };
+  }
+}
+
 const matchedOsids =
   (summary.historical_fit &&
     summary.historical_fit.osid_pair_match &&
@@ -197,6 +252,10 @@ const measured = {
   kw_ratio: kwRatio,
   total_killed: killed,
   total_wounded: wounded,
+  // Advisory diagnostics (R6 exhaustion/scoring lane Phase 1) — reported, never gated.
+  // Panel thresholds: first_saturation_week >= 150, dead_weeks_pct <= 15 (keystone),
+  // terminal_min_gap_pct >= 5. Expected to FAIL on the current pre-fix engine.
+  exhaustion_curve: exhaustionCurve,
   // Advisory diagnostics (R6 Task 0.3 Step 8) — reported, never gated.
   mean_morale_by_faction: meanMoraleByFaction,
   combat_effective_by_faction: combatEffective,
