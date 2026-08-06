@@ -338,7 +338,9 @@
       "src/desktop/co_replacement.cjs",
       "src/desktop/front_visit_contract.cjs",
       "src/desktop/address_nation_contract.cjs",
-      "src/desktop/decorate_unit_contract.cjs"
+      "src/desktop/decorate_unit_contract.cjs",
+      "src/desktop/ipc_mutex.cjs",
+      "src/desktop/ipc_mutation_policy.cjs"
     ],
     "extraResources": [
       {
