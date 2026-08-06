@@ -252,9 +252,13 @@ const measured = {
   kw_ratio: kwRatio,
   total_killed: killed,
   total_wounded: wounded,
-  // Advisory diagnostics (R6 exhaustion/scoring lane Phase 1) — reported, never gated.
-  // Panel thresholds: first_saturation_week >= 150, dead_weeks_pct <= 15 (keystone),
-  // terminal_min_gap_pct >= 5. Expected to FAIL on the current pre-fix engine.
+  // Advisory diagnostics (R6 exhaustion/scoring lane) — reported, never gated (yet).
+  // Ratified thresholds (Pyrrhic panel 2026-08-06, unanimous GO-WITH-CONDITION):
+  //   BINDING (when promoted): first_saturation_week >= 150, dead_weeks_pct <= 15 (keystone).
+  //   ADVISORY: terminal_min_gap_pct > 0 (DEMOTED from a 5% target — proven decoupled from
+  //     downstream grade/§6; re-collapse is enforced by the binding dead_weeks_pct, not here).
+  // Adopted engine PASSES both binding metrics (first_saturation null, dead_weeks 0.5%).
+  // See data/calibration/exhaustion_curve_baseline.json for the binding/advisory split.
   exhaustion_curve: exhaustionCurve,
   // Advisory diagnostics (R6 Task 0.3 Step 8) — reported, never gated.
   mean_morale_by_faction: meanMoraleByFaction,

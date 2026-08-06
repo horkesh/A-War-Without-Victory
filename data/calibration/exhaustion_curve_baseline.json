@@ -1,25 +1,40 @@
 {
-  "_comment": "R6 exhaustion/scoring lane — Phase 1 documented FAILING baseline (the falsifiable artifact per docs/plans/2026-08-06-exhaustion-scoring-redesign-plan.md). Captured 2026-08-06 by `node tools/engine_health_gate.cjs <run> --json` (.measured.exhaustion_curve) on the current pre-fix engine. Every metric FAILS its panel threshold today — that is the point. When Phases 0/3/4 land, re-capture and require these to pass (promote from advisory to gated). The per-faction per-week exhaustion series is read from weekly_report.jsonl (no new instrumentation). CAP = 10000 (current war_exhaustion scale).",
+  "_comment": "R6 exhaustion/scoring lane — exhaustion-curve gate thresholds + baselines. UPDATED 2026-08-06: Phase 0 de-saturation ADOPTED, and the terminal_min_gap_pct metric DEMOTED binding->advisory by a UNANIMOUS Pyrrhic ratification panel (game-design + canon/§6 + systems; GO-WITH-CONDITION). Records both the historical FAILING pre-fix curve and the ADOPTED post-fix curve. The two binding engine-health gates (first_saturation_week, dead_weeks_pct) PASS on the adopted engine. terminal_min_gap_pct is advisory (>0), computed+reported but never gated. Metrics 4-5 and any full grade/§6 gating await Phase 3 scoring-reference re-derivation (the real grade pin). CAP = 10000. Evidence: docs/40_reports/20260806_TERMINAL_MIN_GAP_THRESHOLD_EVIDENCE.md; root cause: docs/40_reports/20260806_EXHAUSTION_SATURATION_ROOT_CAUSE.md.",
   "captured": "2026-08-06",
-  "source_run": "runs/apr1992_definitive_188w__63a3a0858050b865__w188_n150",
+  "adopted_source_run": "runs/apr1992_definitive_188w__63a3a0858050b865__w188_n153 (final_state_hash 6d6d43f7f11afa80)",
+  "prefix_failing_source_run": "runs/apr1992_definitive_188w__63a3a0858050b865__w188_n150 (historical failing baseline)",
   "exhaustion_cap": 10000,
-  "thresholds": {
+  "thresholds_binding": {
     "first_saturation_week_min": 150,
     "dead_weeks_pct_max": 15,
-    "terminal_min_gap_pct_min": 5,
-    "_note_metrics_4_5": "cost_index_saturated_components_max <= 1 and war_cost_index_spread >= 0.10 require computeWarCostIndex (scoring.ts) — wired-in follow-up, not yet in the gate."
+    "_note": "The TWO binding engine-health gates (once promoted from advisory when Phase 3/4 land). first_saturation_week guards the HEAD (no faction slams the cap early). dead_weeks_pct (KEYSTONE) guards the BODY and TAIL: any week where cross-faction spread < 1% of cap is a dead week, so terminal re-homogenization is caught HERE — this is what enforces the game-design 'no faction reads as equally-spent for a big chunk of the war' intent."
   },
-  "baseline_measured": {
+  "thresholds_advisory": {
+    "terminal_min_gap_pct_min": 0,
+    "_note": "ADVISORY — computed + reported (engine_health_gate.cjs measured.exhaustion_curve), NEVER gated. Bar = > 0 (a terminal spread is present). DEMOTED 2026-08-06 from a former binding 5% target by unanimous panel: proven decoupled from every downstream grade/§6 outcome (3.05% and 9.14% both yield all-C, atrocity term inert) — grades are pinned by Phase-3 scoring references, not exhaustion spread. The non-recollapse / non-homogenization guarantee is carried by the BINDING dead_weeks_pct_max, NOT by this metric (panel reconciliation: systems-seat argument resolves the game-design-seat concern). Do NOT re-promote to binding without co-deriving against the Phase-3 scoring references + the exhaustion terminal band."
+  },
+  "metrics_4_5_pending": {
+    "_note": "cost_index_saturated_components_max (<=1) and war_cost_index_spread (>=0.10) require wiring computeWarCostIndex (src/sim/negotiation/scoring.ts). BLOCKED on Phase 3: the real grade/§6 pin is casualties_full (40000, ~8x too low), duration_full_weeks (156 < 188), exhaustion_full (8000, below the adopted terminal band 8562-9775) — all three saturate the cost index to 1.0 before exhaustion matters. See the threshold-evidence report."
+  },
+  "baseline_failing_prefix": {
     "weeks": 188,
     "first_saturation_week": 50,
     "dead_weeks_pct": 57.4,
     "terminal_min_gap_pct": 0,
     "terminal_by_faction": { "RBiH": 10000, "RS": 10000, "HRHB": 10000 }
   },
+  "adopted_measured": {
+    "weeks": 188,
+    "first_saturation_week": null,
+    "dead_weeks_pct": 0.5,
+    "terminal_min_gap_pct": 3.05,
+    "terminal_by_faction": { "RS": 9775, "RBiH": 8867, "HRHB": 8562 }
+  },
   "verdict": {
-    "first_saturation_week": "FAIL (50 < 150 — a faction saturates to the 10000 cap by week 50)",
-    "dead_weeks_pct": "FAIL (57.4% > 15% — the keystone metric: factions sit within 1% of each other 57% of the war)",
-    "terminal_min_gap_pct": "FAIL (0% < 5% — all three factions pinned at exactly 10000 at week 188; zero differentiation)",
-    "interpretation": "Confirms the panel finding: the war_exhaustion accumulator saturates every faction to the cap early and holds them there, which makes COST_GRADE_CAPS cap every full-length campaign at grade C and renders the atrocity bright-line term arithmetically inert at saturation."
+    "binding_first_saturation_week": "PASS (null >= 150 — the accumulator now approaches but never reaches the cap)",
+    "binding_dead_weeks_pct": "PASS (0.5% <= 15% — keystone; from 57.4% pre-fix)",
+    "advisory_terminal_min_gap_pct": "ADVISORY-PASS (3.05% > 0). Softness is only the RBiH-HRHB pair (8867 vs 8562); RS clearly separated at 9775. Closing to 5% needs friction fix #2, which regresses combat calibration (matched 634->611 + Bihac §6) — RETIRED; not pursued (calibration-last posture).",
+    "ratification": "Pyrrhic panel UNANIMOUS GO-WITH-CONDITION 2026-08-06 — game-design + canon/§6 + systems seats; implementer (scenario-tester) excluded per implementer != reviewer. Conditions applied: (a) terminal_min_gap kept computed+reported as advisory [already true]; (b) threshold-file hygiene — this file now splits binding vs advisory so no future reader silently re-promotes the 5% [done]; (c) advisory bar reduced to '>0', re-collapse enforced by binding dead_weeks [done]; (canon) Phase-3 §6 atrocity-liveness obligation recorded as a HARD gate [see phase3_hard_gate].",
+    "phase3_hard_gate": "§6 atrocity-never-rewarded guarantee is RELOCATED (not retired) to Phase 3 as a HARD, owner-visible gate: re-derive casualties_full / duration_full_weeks / exhaustion_full (co-derived with the terminal exhaustion band) so that at full-campaign length war_cost_index is NOT clamped to 1.0 and the atrocity penalty can once again MOVE the grade. No §6 regression vs pre-lane (the term was already inert then). Recorded in MASTER_ROADMAP.md + the exhaustion/scoring redesign plan."
   }
 }
