@@ -1,5 +1,18 @@
 # AWWV Calibration Master Reference
 
+## 2026-08-07 R6 Sarajevo lifeline (B7) COMPLETED + ADOPTED default-ON — TERRITORY BYTE-FLAT (52w re-blessed on siege-internal artifacts only)
+
+**Status: ADOPTED default-ON + MERGED to main (owner-approved the completion; validated territory byte-flat; scenario-tester built + verified; implementer≠reviewer via the belt-and-suspenders full-anchor diff).** Commits `a0298a863` (feat, 14 files) + `81d131747` (52w re-bless). Report: `docs/40_reports/20260807_BRCKO_CORRIDOR_REGRESSION.md` is unrelated; this is the B7 lifeline plan `docs/plans/2026-05-29-b7-sarajevo-siege-continuous-condition-plan.md`.
+
+**Change:** flipped `isSarajevoLifelineEnabled()` (`sarajevo_siege_params.ts`) opt-in→**default-ON** (opt-out `!== 'false'`), + the previously-invisible lifeline gained a read-only player UI: a "Sarajevo lifeline" row in SupplyPanel (status OPEN/STRANGLED/SEVERED + throughput % + tunnel/airlift indicators), a field-path-guarded `deriveSarajevoLifelineView` adapter surface (+ typed `LoadedGameState` field), a documented tunnel-opens-a-lifeline Chronicle beat (`sarajevo_tunnel_completed_1993`), and en/bcs i18n. §6-safe: siege SUPPLY-relief indicator only (UN airlift + Dobrinja–Butmir tunnel throughput) — NO civilian-casualty/starvation wording, NO lever (asserted by a §6 guard test).
+
+**Result (188w default-ON == the STEP-1 `ENABLE_SARAJEVO_LIFELINE=true` run n162, hash `18fc6a48`):** **TERRITORY BYTE-FLAT every one of 188 weeks** — `control_counts` byte-identical to baseline at every turn; `matched_osids` **634** (unchanged), anchors **30/31** (op:brcko:brcko the only fail — the accepted de-saturation debt; NO new flips, full anchor_checks diff), §6 correct (Srebrenica+Žepa fall, Goražde+Bihać+Sarajevo hold), K:W 3.804 in band, engine-health gate PASS. The lifeline alters only siege/supply/exhaustion INTERNALS (hence the save hash moves), never control.
+
+**Baselines:** 40w structural fingerprint `5cfcf1c840bae488` **UNCHANGED** (it encodes control+anchors+benchmarks = territory only → a territory-flat change doesn't move it — no 40w re-bless). 52w golden RE-BLESSED (`81d131747`): `control_delta.json` **BYTE-IDENTICAL** (the territory-flat proof) + weekly/activity/formation/watched/end_report all byte-identical — ONLY `final_save.json` (`ec72b814`→`bcdb9e04`, carries the new optional `political.sarajevo_state.lifeline` field) and `run_summary.json` moved. `test:baselines` "all scenarios match" post-update. tsc PASS; WHOLE tests/ui 331 files/2827 pass (incl. new `tests/ui/sarajevo_lifeline_panel.test.ts`); `desktop:map:build` PASS.
+
+**Scope/§6:** No canon/FORAWWV change. Read-only player-facing indicator, no lever; §6 guard test enforces no civilian-harm surface. R6 Sarajevo (Phase 3) DONE.
+
+
 ## 2026-08-06 R6 exhaustion lane — war_exhaustion DE-SATURATED (asymptotic cap) + redundant baseline-ops writer removed; keystone dead_weeks 57.4%→0.5%; matched 630→634 NET but ⚠ FLIPPED op:brcko:brcko RS→RBiH (anchors 31→30/31 — corridor regression, GUARD in flight; see correction below)
 
 **Status: ADOPTED (owner adopt call 2026-08-06 "adopt now, then run friction fix #2"; scenario-creator-runner-tester validated + ADOPT-recommended; implementer ≠ reviewer).** Two commits: `db87adc7e` (Phase 0 fix #1, baseline-ops) + `41b5c31cd` (asymptotic de-saturation). Root-cause forensics: `docs/40_reports/20260806_EXHAUSTION_SATURATION_ROOT_CAUSE.md`. Lane plan: `docs/plans/2026-08-06-exhaustion-scoring-redesign-plan.md`.
