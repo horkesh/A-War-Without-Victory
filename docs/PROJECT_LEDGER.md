@@ -26363,3 +26363,13 @@ Two leading hypotheses were tested directly and ruled out: (1) the dissolution-t
 **CI note:** the repo's GitHub Actions quota is exhausted (owner-confirmed), so no CI run fires on push; local validation is the gate until it resets. A full local `test:vitest` run is the definitive main-green confirmation.
 
 **Determinism:** No `Math.random`/`Date.now`/timestamp introduced. Packaging-manifest + test-data + baseline-golden changes only.
+
+## [2026-08-07] R6 engine-health: RS/ARBiH cohesion-railroad root found; structural fix DEFERRED to post-1.0
+
+**Type:** Engine-health investigation (read-only + two RETIRED probes) closing the owner-directed "deeper engine investigation" ("engine health is sacrosanct, the anchors are a symptom"). No engine change shipped.
+
+**Root:** the RS brigade permanent-loss asymmetry (RS 28 destroyed / ARBiH 0 over 188w) is the cohesion **floor-at-threshold railroad**: dissolution gates on cohesion≤20, but the faction cohesion floor (`getFactionCohesionFloor` / the overriding `war_timeline` `cohesion_floor` data in `apr1992.json`) sits at RBiH 62 (firewall, ARBiH cohesion-immune) vs RS 20 (at the criterion, pre-doomed). Smoking gun: cohesion≤20 hit RS 4,127 brigade-turns vs RBiH 5. Fate: RBiH 0 / RS 28 (all fall-1995) / HRHB 2; reconstitution is symmetric (not the asymmetry); `morale_drift` multipliers are a downstream amplifier.
+
+**Fix disproven:** RS-floor sweep 20/25/30 → matched_osids 634/623/629 (non-monotonic; 25 worse than 30; no sweet spot ≥634), both break §6 Bihać. Decisive reframe: much of the RS fall-1995 dissolution is HISTORICALLY correct (real western VRS collapse under Storm/Sana), so suppressing it makes RS over-hold fallen territory. The outcome is ~historical; the debt is the *scripted* mechanism, sharpest on the ARBiH-0-loss side (partly enclave-event-defensible).
+
+**Owner decision 2026-08-07:** document the debt + defer the "combat-earned cohesion" structural redesign to post-1.0 (§6-panel-gated, multi-run) — same disposition as the deferred scoring grade-unpin and Phase 4. Full writeup: `docs/40_reports/20260807_RS_COHESION_RAILROAD_ROOT_CAUSE.md`. Probe branch `codex/rs-cohesion-floor-probe` kept (RETIRE commits, repro only). Determinism preserved; no `Math.random`/`Date.now` introduced.
