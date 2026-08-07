@@ -271,8 +271,8 @@ npm.cmd run typecheck
 
 - [ ] Re-derive the threshold from current distributions rather than the stale value 40.
 - [ ] Require monotonic penalty, hard clamp, no positive feedback reward, and no precondition leakage.
-- [ ] Adopt only if it improves the named behavior without anchor/benchmark/cost regression; otherwise retire the mode.
-- [ ] Do not build a separate `both_on` tuning branch; enabled modes naturally compose if both independently pass.
+- [x] Adopt only if it improves the named behavior without anchor/benchmark/cost regression; otherwise retire the mode. **RESULT 2026-08-07: RETIRED (no-go).** Threshold was already recalibrated 40→15 (2026-06-08, sector_offensive.ts:369 — nothing stale to re-derive). Probe at threshold 15 (`AWWV_PDP_COHESION_CAUTION_BIAS=true`), baseline n158 → cohesion_only n161 (hash `ab1a84e2`): `matched_osids` 634 → **636 (+2)** BUT anchors **30/31 → 28/31** — TWO NEW flips (`op:doboj:boljanic_2` + `op:gracanica:petrovo_2` both RS→RBiH). Clean C1 fail: the +2 net matched MASKS two anchor losses (the Brčko net-vs-anchor-diff lesson recurring — caught by the full anchor_checks diff). Structural cause: the cohesion caution multiplier is NOT turn-gated (emit.ts:885, unlike intl_standing), so RBiH's early cohesion crush fires it and perturbs the tight Doboj/Gračanica corridor. A rescue would need a turn-gate + re-derived threshold = separate scoped change; not built (predeclared retire). Nothing baked into main.
+- [ ] Do not build a separate `both_on` tuning branch; enabled modes naturally compose if both independently pass. **(N/A — both intl_only and cohesion_only retired; political-dimension experiment lane CLOSED 2026-08-07.)**
 
 ```powershell
 npm.cmd run test:vitest -- tests/political_dimension_propagation_gate.test.ts tests/political_dimensions_snapshot.test.ts tests/consequence_pressure_c2_patron_distance.test.ts --pool=forks --reporter=dot
