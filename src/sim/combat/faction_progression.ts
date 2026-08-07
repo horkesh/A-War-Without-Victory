@@ -61,24 +61,20 @@ function getRBiHCohesionFloor(turn: number): number {
  *
  * Turn 0:  35 (JNA inherited professionalism — trained NCO/officer corps)
  * Turn 40: 35 (sustained professionalism through first year)
- * Turn 60: 30 (war fatigue, partial mobilization strain)
- * Turn 80: 30 (deep fatigue, reorganization)
- *
- * R6 engine-health probe A (2026-08-07): late-war floor raised 20 -> 30.
- * ROOT MECHANISM (evidence run n157): the RS floor of 20 sat AT the dissolution
- * cohesion criterion (<=20 default, <=15 via the RS war_timeline step-curve),
- * so ambient decay parked every RS brigade one criterion from the 2-of-3
- * dissolution gate (4127 RS brig-turns at cohesion<=20 vs 5 for RBiH, whose
- * floor is 62). Fall-1995 combat attrition (personnel<400) then tipped RS to
- * 2-of-3 en masse (28 destroyed, all t171-187). Lifting the floor to 30 pulls
- * RS clear of the criterion so dissolution reflects battlefield events, not a
- * scripted floor sitting on the threshold. Single-parameter probe; 188w-gated.
+ * Turn 60: 25 (war fatigue, partial mobilization strain)
+ * Turn 80: 20 (deep fatigue, reorganization)
  */
 function getRSCohesionFloor(turn: number): number {
     if (turn <= 0) return 35;
-    if (turn >= 80) return 30;
-    const keyframes: [number, number][] = [[0, 35], [40, 35], [60, 30], [80, 30]];
-    return interpolateKeyframes(turn, keyframes, 30);
+    // R6 engine-health probe A' (2026-08-07): late-war floor 20 -> 25 (half-step
+    // vs probe A's 30). EFFECTIVE lever is the war_timeline cohesion_floor.RS in
+    // data/scenarios/timelines/apr1992.json (overrides this fallback per
+    // getFactionCohesionFloor); kept consistent here. Pulls RS clear of the
+    // ≤20-default dissolution cohesion criterion with less territory over-hold
+    // than floor=30. 188w-gated.
+    if (turn >= 80) return 25;
+    const keyframes: [number, number][] = [[0, 35], [40, 35], [60, 25], [80, 25]];
+    return interpolateKeyframes(turn, keyframes, 25);
 }
 
 /**
