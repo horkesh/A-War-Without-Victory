@@ -265,7 +265,7 @@ npm.cmd run typecheck
 - [ ] Require no pre-war effect and no April 1992 takeover delay.
 - [ ] Require no loss of 31/31 anchors or six bot benchmarks.
 - [ ] Require early/mid-war direction consistent with sourced faction/patron pressure; do not tune to exact territory totals.
-- [ ] Adopt `intl_only` if all criteria pass; otherwise keep it off, record no-go, and continue.
+- [x] Adopt `intl_only` if all criteria pass; otherwise keep it off, record no-go, and continue. **RESULT 2026-08-07: RETIRED (no-go).** Env-flag experiment (`AWWV_POLITICAL_DIMENSION_PROPAGATION=true AWWV_PDP_INTL_STANDING_OPS_HESITATION=true`), baseline n158 vs intl_only n159 (hash `fbbe7e2b`, determinism cross-checked). Mechanically: no NEW anchor flips (30/31, still only op:brcko:brcko), §6 + K:W (3.804) + engine-health gate PASS, early-war byte-identical (turn-gated, first divergence w177 — no pre-war effect). BUT `matched_osids` **634 → 633 (−1)** — FAILS the predeclared ≥634 bar. Mechanism: the added international-standing ops-hesitation makes RBiH complete one fewer late-war op (w177), letting RS hold ONE OSID that history records as RBiH-held — mildly anti-historical, wrong direction for the floor. Nothing baked into main (main stays plain). Parked idea (not pursued): a retuned-threshold/later-gate retry, since the effect is a single OSID.
 
 ### Task 2.2 -- Test `cohesion_only` on the accepted base
 
