@@ -37,7 +37,7 @@ Aggregated from run artifacts; no wall-clock, no RNG, no timestamps (stable by c
 
 | config | status | matched_osids | anchors | §6 (Sreb/Žepa fall · Gor/Bih/Sar hold) | K:W | dead_ops | ghost | stranded |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| default | runnable | 634 | 30/31 | Sreb fell✓ / Žepa fell✓ / Gor held✓ / Bih held✓ / Sar held✓ | 3.804 | 0 | 2 | 8 |
+| default | runnable | 634 | 30/31 (fail: op:brcko:brcko) | Sreb fell✓ / Žepa fell✓ / Gor held✓ / Bih held✓ / Sar held✓ | 3.804 | 0 | 2 | 8 |
 | intel_ambush | no artifact | — | — | — | — | — | — | — |
 | intl_only | flag not wired | — | — | — | — | — | — | — |
 | cohesion_only | flag not wired | — | — | — | — | — | — | — |

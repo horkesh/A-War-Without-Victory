@@ -28,15 +28,15 @@ function fixedReport(): CandidateReport {
     return {
         cells: [
             { config: 'intel_ambush', horizon: 188, status: 'runnable', run_id: 'r-ia-188',
-              metrics: { matched_osids: 634, anchors_pass: 30, anchors_total: 31, kw_ratio: 3.804,
+              metrics: { matched_osids: 634, anchors_pass: 30, anchors_total: 31, failing_anchors: ['op:brcko:brcko'], kw_ratio: 3.804,
                          dead_ops: 0, ghost: 2, stranded: 8,
                          s6: { srebrenica_fell: true, zepa_fell: true, gorazde_held: true, bihac_held: true, sarajevo_held: true } } },
             { config: 'default', horizon: 40, status: 'runnable', run_id: 'r-d-40',
-              metrics: { matched_osids: 700, anchors_pass: 31, anchors_total: 31, kw_ratio: 3.5,
+              metrics: { matched_osids: 700, anchors_pass: 31, anchors_total: 31, failing_anchors: [], kw_ratio: 3.5,
                          dead_ops: 0, ghost: 0, stranded: 2,
                          s6: { srebrenica_fell: false, zepa_fell: false, gorazde_held: true, bihac_held: true, sarajevo_held: true } } },
             { config: 'default', horizon: 188, status: 'runnable', run_id: 'r-d-188',
-              metrics: { matched_osids: 634, anchors_pass: 30, anchors_total: 31, kw_ratio: 3.804,
+              metrics: { matched_osids: 634, anchors_pass: 30, anchors_total: 31, failing_anchors: ['op:brcko:brcko'], kw_ratio: 3.804,
                          dead_ops: 0, ghost: 2, stranded: 8,
                          s6: { srebrenica_fell: true, zepa_fell: true, gorazde_held: true, bihac_held: true, sarajevo_held: true } } },
             { config: 'intl_only', horizon: 188, status: 'flag_not_wired' },
@@ -96,6 +96,15 @@ describe('final calibration candidate report — determinism', () => {
         expect(out).toMatch(/intl_only/);
         expect(out).toMatch(/cohesion_only/);
         expect(out).toMatch(/not wired|flag_not_wired|not runnable/i);
+    });
+
+    it('names the failing anchor id in the anchors cell (self-identifying 30/31)', () => {
+        const out = renderCandidateReport(fixedReport());
+        // The 30/31 cells carry failing_anchors ['op:brcko:brcko'] — the report must
+        // NAME it, not just show the count (the visibility gap that let Brčko slip).
+        expect(out).toMatch(/30\/31 \(fail: op:brcko:brcko\)/);
+        // A clean 31/31 cell has no "(fail: ...)" annotation.
+        expect(out).toMatch(/\| 31\/31 \|/);
     });
 
     it('exposes the canonical horizon set 40/104/188', () => {
