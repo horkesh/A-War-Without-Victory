@@ -405,6 +405,15 @@ export function normalizeScenario(raw: unknown): Scenario {
         return Object.keys(result).length > 0 ? result : undefined;
     })();
 
+    // R6 INTERIM PATCH — anchor OSIDs whose sector reserves defend at full reactive
+    // weight (see GameState.military.reactive_full_weight_anchors patchwork note).
+    const reactive_full_weight_anchors: string[] | undefined = (() => {
+        const raw = o.reactive_full_weight_anchors;
+        if (!Array.isArray(raw)) return undefined;
+        const osids = raw.filter((x: unknown): x is string => typeof x === 'string').sort();
+        return osids.length > 0 ? osids : undefined;
+    })();
+
     // Supply reserves system (Phase A)
     const supply_reserves_enabled = o.supply_reserves_enabled === true ? true : undefined;
 
@@ -506,6 +515,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             war_force_transition_after_turns,
             avoided_osids_by_faction,
             must_hold_osids_by_corps,
+            reactive_full_weight_anchors,
             supply_reserves_enabled,
             initial_osid_controllers,
             osid_control_overrides,
@@ -558,6 +568,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         war_force_transition_after_turns,
         avoided_osids_by_faction,
         must_hold_osids_by_corps,
+        reactive_full_weight_anchors,
         supply_reserves_enabled,
         initial_osid_controllers,
         osid_control_overrides,

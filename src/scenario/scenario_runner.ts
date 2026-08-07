@@ -1864,6 +1864,13 @@ export async function buildScenarioStartupState(
         state.military.must_hold_osids_by_corps = scenario.must_hold_osids_by_corps;
     }
 
+    // R6 INTERIM PATCH — reactive_full_weight_anchors (see the patchwork note on
+    // GameState.military.reactive_full_weight_anchors). Set once at load; read by
+    // attack_resolution_osid.ts to defend listed anchors at full reactive weight.
+    if (Array.isArray(scenario.reactive_full_weight_anchors) && scenario.reactive_full_weight_anchors.length > 0) {
+        state.military.reactive_full_weight_anchors = [...scenario.reactive_full_weight_anchors].sort();
+    }
+
     if (scenario.comms_override_by_corps && Object.keys(scenario.comms_override_by_corps).length > 0) {
         state.military.comms_override_by_corps = scenario.comms_override_by_corps;
     }

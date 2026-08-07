@@ -75,6 +75,9 @@
       "op:zvornik:zvornik"
     ]
   },
+  "reactive_full_weight_anchors": [
+    "op:brcko:brcko"
+  ],
   "comms_override_by_corps": {
     "arbih_1st_corps": {
       "before_turn": 18,

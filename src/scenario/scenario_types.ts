@@ -203,6 +203,10 @@ export interface Scenario {
      * Keys: corps_id (e.g. "vrs_posavina"). Values: OSID list.
      */
     must_hold_osids_by_corps?: Record<string, string[]>;
+    /** R6 INTERIM PATCH — anchor OSIDs whose sector reserves defend at full reactive
+     *  weight (no distance decay). Masks RS corridor over-subscription; see the full
+     *  patchwork note on GameState.military.reactive_full_weight_anchors. */
+    reactive_full_weight_anchors?: string[];
     /** Per-corps comms quality override for scenarios with specific radio/comms constraints. */
     comms_override_by_corps?: Record<string, { before_turn: number; mode: 'radio' | 'full' }>;
 }

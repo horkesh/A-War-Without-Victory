@@ -764,7 +764,19 @@ export function resolveAttackOrdersOsid(
                     } else {
                         // Reserve: distance-weighted contribution
                         const hops = bfsDistanceFriendly(locOsid, targetOsid, adjacency, pc, controller!);
-                        const distWeight = getReactiveDistanceWeight(hops);
+                        // ── R6 INTERIM PATCH — reactive_full_weight_anchors (see the field
+                        // definition in game_state.ts for the full patchwork note). A listed
+                        // must-hold anchor's SECTOR RESERVES contribute at FULL weight (no
+                        // distance decay) so a marginally-defended corridor throat
+                        // (op:brcko:brcko) survives its wk58 attack WITHOUT moving a brigade
+                        // or firing the garrison-pin (which robs the corridor). This MASKS
+                        // the RS East-Bosnian corridor FORCE-OVER-SUBSCRIPTION (RS cannot
+                        // hold Brčko AND Doboj/Gračanica on correct OOB data — the deferred
+                        // RS thin-force problem); it is NOT a real fix. Root fix = Phase-4
+                        // pacing + RS force-density re-manning; revisit/remove when that lands.
+                        const fullWeightAnchor =
+                            state.military.reactive_full_weight_anchors?.includes(targetOsid) ?? false;
+                        const distWeight = fullWeightAnchor ? 1.0 : getReactiveDistanceWeight(hops);
                         const contribution = bPower * distWeight * homeBonus;
                         effectiveReserves += contribution;
                         brigadeWeights.set(b.id, contribution);

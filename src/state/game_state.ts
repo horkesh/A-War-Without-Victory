@@ -2425,6 +2425,26 @@ siege_turn_counters?: Record<string, number>;
 general_supply_reserve?: Record<FactionId, number>;
 /** Scenario-authored must-hold OSIDs per corps. Set once at scenario load; read by commander briefing. Key: corps_id. */
 must_hold_osids_by_corps?: Record<string, string[]>;
+/**
+ * R6 INTERIM PATCH (2026-08-07) — anchor OSIDs whose SECTOR RESERVES defend at
+ * FULL reactive weight (no distance decay) in attack_resolution_osid.ts.
+ *
+ * WHY THIS EXISTS / WHY IT IS A PATCH, NOT A FIX: under the adopted de-saturated
+ * exhaustion curve, op:brcko:brcko (VRS East-Bosnian corridor throat, registered
+ * anchor) loses a single wk58 battle to an ARBiH-2nd-Corps offensive because its
+ * reactive defender is a hop away and distance-decayed. The clean levers were
+ * exhausted: the must-hold garrison-PIN robs the corridor; correcting the (real)
+ * 1st-Posavina OOB mis-placement recovers Brčko but drops Doboj+Gračanica because
+ * RS is genuinely too thin to hold all three corridor anchors on correct data
+ * (the deferred RS force-density / thin-force problem — see the cohesion-railroad
+ * root cause, docs/40_reports/20260807_RS_COHESION_RAILROAD_ROOT_CAUSE.md). This
+ * flag MASKS that over-subscription by letting a listed anchor's existing sector
+ * reserves defend at full weight — no brigade moves, no de-sat/§8.6 touch. It is
+ * an INTERIM PATCH. Root fix = Phase-4 combat pacing + RS force-density re-manning;
+ * REVISIT / REMOVE this flag when that lands. Data-driven (scenario-authored list),
+ * not a hardcoded OSID; determinism-safe. Set once at scenario load.
+ */
+reactive_full_weight_anchors?: string[];
 /** Per-corps comms quality override loaded from scenario. Key: corps_id. */
 comms_override_by_corps?: Record<string, { before_turn: number; mode: 'radio' | 'full' }>;
 /** Heavy munitions reserves per faction [0..100]. Consumed by combat; replenished by ammo facilities/patron. */
