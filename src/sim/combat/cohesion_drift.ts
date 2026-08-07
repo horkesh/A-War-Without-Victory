@@ -27,6 +27,27 @@ const EXHAUSTION_COHESION_PENALTY = -0.5;
 const CRITICAL_EXHAUSTION_THRESHOLD = 0.97;
 const CRITICAL_EXHAUSTION_PENALTY = -1.5;
 
+/**
+ * R6 engine-health probe B (theater-scoped cohesion floor, 2026-08-07).
+ * The flat RS cohesion floor of 20 (war_timeline cohesion_floor.RS) sits AT the
+ * dissolution cohesion criterion, so every RS brigade floats one criterion from
+ * the 2-of-3 gate. Probes A/A' (flat floor 20->30 / ->25) confirmed the floor is
+ * the dissolution lever but craterred matched_osids non-monotonically (623/629)
+ * and flipped Bihac — because a GLOBAL raise props up the WESTERN Krajina corps
+ * (vrs_1st/2nd_krajina) that HISTORICALLY collapsed under Operation Storm/Sana
+ * (Sept-Oct 1995), making them over-hold Bihac. This set scopes the raise to the
+ * EASTERN HOLDING corps only (Drina / East-Bosnian / Sarajevo-Romanija) — which
+ * historically held their ground near the enclaves — so they resist AHISTORICAL
+ * dissolution while the western corps still collapse at the base floor of 20.
+ * Herzegovina is intentionally LEFT OUT of this first probe (candidate addition).
+ */
+const RS_EASTERN_HOLDING_CORPS = new Set<string>([
+    'vrs_drina',
+    'vrs_east_bosnian',
+    'vrs_sarajevo_romanija',
+]);
+const RS_EASTERN_HOLDING_COHESION_FLOOR = 30;
+
 /** Compute faction exhaustion ratio: committed / (committed + available). Deterministic. */
 function getFactionExhaustionRatio(state: GameState, faction: FactionId): number {
     const pools = state.military.militia_pools;
@@ -170,7 +191,12 @@ export function runCohesionDrift(
         // Apply drift
         let next = Math.max(0, Math.min(100, prev + drift));
         // C1: Clamp to faction cohesion floor (ARBiH professionalization) and ceiling (RS decay)
-        const floor = getFactionCohesionFloor(faction, turn, state.military.war_timeline);
+        let floor = getFactionCohesionFloor(faction, turn, state.military.war_timeline);
+        // R6 probe B: theater-scoped floor — eastern RS holding corps resist
+        // ahistorical dissolution; western Krajina corps still collapse at floor 20.
+        if (faction === 'RS' && f.corps_id && RS_EASTERN_HOLDING_CORPS.has(f.corps_id)) {
+            floor = Math.max(floor, RS_EASTERN_HOLDING_COHESION_FLOOR);
+        }
         const ceiling = getFactionCohesionCeiling(faction, turn, state.military.war_timeline);
         if (next < floor) next = floor;
         if (next > ceiling) next = ceiling;

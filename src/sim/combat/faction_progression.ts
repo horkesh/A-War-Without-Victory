@@ -66,15 +66,9 @@ function getRBiHCohesionFloor(turn: number): number {
  */
 function getRSCohesionFloor(turn: number): number {
     if (turn <= 0) return 35;
-    // R6 engine-health probe A' (2026-08-07): late-war floor 20 -> 25 (half-step
-    // vs probe A's 30). EFFECTIVE lever is the war_timeline cohesion_floor.RS in
-    // data/scenarios/timelines/apr1992.json (overrides this fallback per
-    // getFactionCohesionFloor); kept consistent here. Pulls RS clear of the
-    // ≤20-default dissolution cohesion criterion with less territory over-hold
-    // than floor=30. 188w-gated.
-    if (turn >= 80) return 25;
-    const keyframes: [number, number][] = [[0, 35], [40, 35], [60, 25], [80, 25]];
-    return interpolateKeyframes(turn, keyframes, 25);
+    if (turn >= 80) return 20;
+    const keyframes: [number, number][] = [[0, 35], [40, 35], [60, 25], [80, 20]];
+    return interpolateKeyframes(turn, keyframes, 20);
 }
 
 /**
