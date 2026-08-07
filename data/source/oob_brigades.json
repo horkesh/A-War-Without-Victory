@@ -2535,7 +2535,7 @@
     "corps": "vrs_east_bosnian",
     "home_mun": "brcko",
     "home_settlement": "Brčko",
-    "home_osid": "op:bosanski_samac:crkvina_2",
+    "home_osid": "op:brcko:brcko",
     "kind": "brigade",
     "default_equipment_class": "mountain",
     "available_from": 0,

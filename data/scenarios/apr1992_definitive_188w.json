@@ -73,9 +73,6 @@
   "must_hold_osids_by_corps": {
     "vrs_drina": [
       "op:zvornik:zvornik"
-    ],
-    "vrs_east_bosnian": [
-      "op:brcko:brcko"
     ]
   },
   "comms_override_by_corps": {
