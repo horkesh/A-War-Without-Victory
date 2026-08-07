@@ -30,14 +30,23 @@ Correcting 1st Posavina to Brčko holds Brčko (corridor 5/6 → 6/6) **but flip
 
 So RS is **structurally too thin** to hold Brčko + Doboj + Gračanica simultaneously on correct data. This is the same **RS force-density / cohesion-railroad asymmetry** root-caused and deferred to post-1.0 (`docs/40_reports/20260807_RS_COHESION_RAILROAD_ROOT_CAUSE.md`), surfacing here as a corridor knot. Per the owner's honesty gate, this is exactly the case where a data move must NOT be forced — the interim patchwork is the accepted stopgap.
 
-## Disposition — interim PATCHWORK (owner-directed), root fix deferred
+## Disposition — ACCEPTED SCHEDULED INTERIM DEBT (owner decision 2026-08-07): main stays 30/31
 
-- **KEEP** the `1st-Posavina → Brčko` OOB correction (a genuine data-bug fix, historically right).
-- **PATCHWORK (greenlit 2026-08-07, owner-directed to be flagged as such):** a minimal, data-driven `reactive_full_weight_anchors: [op:brcko:brcko]` scenario flag — the listed anchors' existing nearby sector defenders contribute at **full weight** (distance-decay removed) WITHOUT firing the corridor-robbing garrison-pin and WITHOUT moving a brigade, so Brčko survives the wk58 battle. Determinism-safe, minimally scoped.
-- **This is explicitly not the real fix.** It masks the RS corridor over-subscription. The root fix is **Phase 4** (exhaustion input-factor re-pacing so the mid-war curve stops nudging this combat) **+ the post-1.0 RS force-density re-manning**. When those land, the patch must be revisited — ideally removed once the corridor is correctly manned and paced so Brčko holds organically. Recorded in `MASTER_ROADMAP.md` R6 + the exhaustion/scoring redesign plan Phase 4.
-- **Revert was rejected:** unwinding the de-saturation to get Brčko back would violate the newly-landed Engine Invariants **§8.6** asymptotic-bounding canon and lose the keystone `dead_weeks` 57.4%→0.5% win.
+Every patch was tried and **none holds Brčko without a worse cost** — proven, not asserted (full matrix below). The reactive-boost patchwork (probe 4) was **RETIRED**: with the boost as the only lever it is **byte-identical to baseline** — a defense-*strength* lever cannot win the 7-brigade ARBiH-2nd-Corps offensive or recapture a lost anchor. The OOB move holds Brčko but structurally uncovers Doboj/Gračanica (RS is force-over-subscribed). **There is no cheap fix.**
+
+Owner options were: (1) pull the Phase-4 exhaustion re-pacing + RS force-density fix forward pre-1.0; (2) revert the de-saturation (rejected class — would violate the landed §8.6 asymptotic-bounding canon and lose the keystone `dead_weeks` 57.4%→0.5% win); (3) accept 30/31 as a documented, roadmap-scheduled interim. **Owner chose (3).**
+
+- **KEEP** the `1st-Posavina → Brčko` OOB correction? — NO for now: on its own it makes main *worse* (29/31, matched 613/630 — trades two anchors for one). It is a genuine data bug and stays recorded for the force-density lane, but is NOT applied to main in isolation. Main keeps the baseline placement until the force-density lane can man the corridor properly.
+- **ACCEPTED:** main stays at **30/31, matched 634, op:brcko:brcko = RBiH** — an explicitly-documented interim debt, surfaced self-identifyingly by the Phase 0.2 report tool ("30/31 (fail: op:brcko:brcko)").
+- **ROOT FIX OWNED BY:** Phase 4 (exhaustion input-factor re-pacing so the de-saturated curve stops handing ARBiH the mid-war tempo to open the Brčko attack — the attack did not exist pre-de-saturation) **+** the post-1.0 RS force-density re-manning (so RS can defend the corridor once attacked). Both must clear this anchor before 1.0.
+- **Revert not taken:** would violate §8.6 canon + lose the de-saturation engine-health win.
+- The `reactive_full_weight_anchors` flag is a clean, documented, RETIRED artifact on `codex/brcko-reactive-anchor` (not merged) — a reusable defense-buff primitive for a differently-shaped anchor (one that loses via reserve-decay, not force-density).
 
 ## Probe ledger (branch `codex/rs-cohesion-floor-probe` / `codex/brcko-anchor-guard`, RETIRE commits kept for reproducibility)
 - Probe 1 (data `must_hold` pin): RETIRE — robs the corridor (matched 619, new anchor break), still loses Brčko (no resident to pin).
 - Probe 3/3b (OOB `home_osid` → Brčko): correct data fix, holds Brčko + corridor 6/6, BUT trades Doboj+Gračanica (matched 613). Kept as the data-bug correction; can't stand alone.
-- Probe 4 (`reactive_full_weight_anchors` flag): the adopted-candidate patchwork (building at time of writing).
+- Probe 4 (`reactive_full_weight_anchors` flag): full matrix — baseline 30/31/634; OOB-move 29/31/613; OOB+boost-all-3 29/31/630; **boost-only BYTE-IDENTICAL to baseline** (Brčko still falls). RETIRE — wrong physics (defense strength vs force-density gap). No combination = Brčko+Doboj+Gračanica all RS AND matched≥634.
+
+## Outcome
+
+Owner accepted 30/31 as a scheduled interim debt (2026-08-07). Main unchanged; Brčko owned by Phase 4 + the RS force-density lane, both pre-1.0 gates. This report is the single source; MASTER_ROADMAP R6 + COMMAND_BOARD carry the current-state pointer.

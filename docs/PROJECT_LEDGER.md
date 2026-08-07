@@ -26383,3 +26383,11 @@ Two leading hypotheses were tested directly and ruled out: (1) the dissolution-t
 **Sync corrections:** `MASTER_ROADMAP.md` R6 (added a CURRENT-STATE marker: 30/31 anchors / Brčko lost; corrected the de-saturation row's stale "§6 byte-identical" to name the Brčko flip), `COMMAND_BOARD.md` R6 (Brčko current-state note), `CALIBRATION_MASTER.md` (de-saturation entry corrected earlier, `6f37703fd`). Lesson recorded: `memory/feedback_net_matched_masks_anchor_flips` (never accept a net matched delta as "anchors held"). Phase 4 re-activation (owner "done right") + the Brčko patchwork flag were recorded in the same docs (`341be975f`, `2f650ffe6`).
 
 **Determinism:** No `Math.random`/`Date.now`/timestamp introduced; docs only.
+
+## [2026-08-07] Brčko corridor regression — RESOLVED as accepted scheduled-interim debt (owner)
+
+**Type:** Owner decision + doc correction. No engine/code change to main.
+
+The de-saturation's `op:brcko:brcko` RS→RBiH flip (main 30/31) has NO cheap fix — proven via a full probe matrix: the `reactive_full_weight_anchors` reactive-boost is byte-identical to baseline (a defense-strength lever can't beat the 7-brigade ARBiH-2nd-Corps offensive or recapture a lost anchor); the 1st-Posavina OOB move holds Brčko but structurally uncovers Doboj/Gračanica (matched 613/630, 29/31) because the RS East-Bosnian corridor is force-over-subscribed (the deferred RS thin-force problem). Revert was rejected (would violate the landed §8.6 canon + lose the keystone de-saturation win). **Owner accepted main at 30/31 as a documented, roadmap-scheduled interim debt**, with the root fix owned by Phase 4 (exhaustion re-pacing, which removes the spurious ARBiH tempo) + the post-1.0 RS force-density re-manning — both now HARD pre-1.0 gates that must restore `op:brcko:brcko` to RS. All probe artifacts retired on `codex/brcko-reactive-anchor` (kept, not merged). Docs corrected (the earlier "patchwork building" language was stale): `MASTER_ROADMAP.md` R6, `COMMAND_BOARD.md`, the Phase-4 plan, and the consolidated report `docs/40_reports/20260807_BRCKO_CORRIDOR_REGRESSION.md`.
+
+**Determinism:** docs only; no `Math.random`/`Date.now`/timestamp.
