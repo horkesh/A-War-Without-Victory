@@ -85,6 +85,24 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
     }, { open: 0, brittle: 0, cut: 0 });
   }
 
+  // B7 Sarajevo lifeline — read-only siege SUPPLY-relief indicator. Present only when
+  // the lifeline is derived (siege active + flag on). §6: shows supply throughput +
+  // the documented airlift/tunnel lifelines ONLY — never shelling/starvation/harm, never a lever.
+  const lifeline = state.sarajevoLifeline;
+  const lifelinePct = lifeline ? Math.max(0, Math.min(100, lifeline.throughput * 100)) : 0;
+  const lifelineStatusLabel = !lifeline ? ''
+    : lifeline.status === 'OPEN' ? t('supply.lifelineStatusOpen')
+    : lifeline.status === 'STRANGLED' ? t('supply.lifelineStatusStrangled')
+    : t('supply.lifelineStatusSevered');
+  const lifelineStatusColor = !lifeline ? ''
+    : lifeline.status === 'OPEN' ? 'text-green-400'
+    : lifeline.status === 'STRANGLED' ? 'text-yellow-400'
+    : 'text-red-400';
+  const lifelineBarColor =
+    lifeline?.status === 'OPEN' ? 'bg-green-500'
+    : lifeline?.status === 'STRANGLED' ? 'bg-yellow-400'
+    : 'bg-red-500';
+
   return (
     <div
       data-testid="supply-logistics-panel"
@@ -129,6 +147,37 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
           <span className="text-red-400">{t('supply.corridorCutCount', { count: corridorTotals.cut })}</span>
         </div>
       </div>
+
+      {/* Sarajevo lifeline — read-only siege supply-relief indicator (§6: supply only, no lever) */}
+      {lifeline && (
+        <div
+          data-testid="sarajevo-lifeline"
+          className="border-t border-panel-border/50 pt-1.5 space-y-1"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-accent-gold">{t('supply.sarajevoLifeline')}</span>
+            <span className={`text-xs font-semibold tabular-nums ${lifelineStatusColor}`}>{lifelineStatusLabel}</span>
+          </div>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-[42px] shrink-0 text-xs text-text-secondary">{t('supply.lifelineRelief')}</span>
+            <div className="relative flex-1 h-1.5 bg-panel-border/40 rounded-full overflow-hidden">
+              <div
+                className={`absolute left-0 top-0 h-full rounded-full transition-all ${lifelineBarColor}`}
+                style={{ width: `${lifelinePct}%` }}
+              />
+            </div>
+            <span className="shrink-0 w-6 text-right text-xs tabular-nums text-text-secondary">{Math.round(lifelinePct)}</span>
+          </div>
+          <div className="flex gap-2 text-xs">
+            <span className={lifeline.tunnelActive ? 'text-green-400' : 'text-text-secondary/40 line-through'}>
+              {t('supply.lifelineTunnel')}
+            </span>
+            <span className={lifeline.airliftActive ? 'text-green-400' : 'text-text-secondary/40 line-through'}>
+              {t('supply.lifelineAirlift')}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

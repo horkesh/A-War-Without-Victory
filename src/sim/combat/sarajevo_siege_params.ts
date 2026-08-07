@@ -70,10 +70,17 @@ export function getSarajevoSiegeParams(state: GameState): SarajevoSiegeParams {
 }
 
 /**
- * B7 default-OFF flag gate (env). Mirrors the SIEGE_MORALE_DRAIN_ENABLED
- * precedent. When unset, the continuous lifeline substrate is never derived or
- * read and every consumer takes its identical pre-change path (byte-identical).
+ * B7 lifeline flag gate (env). DEFAULT-ON as of the Sarajevo-lifeline-completion
+ * adopt (2026-08-07): the continuous lifeline substrate is derived and read
+ * unless explicitly opted out. Explicit opt-out is `'false'` or `'0'` (used by
+ * the byte-identical-baseline regression tests). Unset (or any other value) => ON.
+ *
+ * The adopt was validated 188w territory-flat: the lifeline moves NO control on
+ * any turn (control_counts byte-identical to the pre-flag baseline every week);
+ * it only mediates siege supply/exhaustion internals. The 40w structural
+ * fingerprint + 52w golden were re-blessed for this internal-only change.
  */
 export function isSarajevoLifelineEnabled(): boolean {
-    return process.env.ENABLE_SARAJEVO_LIFELINE === 'true';
+    const raw = process.env.ENABLE_SARAJEVO_LIFELINE;
+    return raw !== 'false' && raw !== '0';
 }

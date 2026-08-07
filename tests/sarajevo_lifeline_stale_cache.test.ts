@@ -56,6 +56,9 @@ afterEach(() => {
 
 describe('B7 stale-cache refresh (#271)', () => {
     it('flag OFF: refresh is a no-op and leaves the cached lifeline untouched', () => {
+        // Flag is DEFAULT-ON (opt-out) as of the 2026-08-07 adopt — opt out explicitly
+        // to exercise the no-op OFF path.
+        process.env.ENABLE_SARAJEVO_LIFELINE = 'false';
         const state = baseState(30);
         const before = JSON.parse(JSON.stringify(state.political.sarajevo_state));
         const result = refreshSarajevoLifelineCache(state, undefined);

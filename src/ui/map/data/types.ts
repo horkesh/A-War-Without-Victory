@@ -1136,6 +1136,22 @@ export interface LoadedGameState {
     pendingConvoyDecisions?: PendingConvoyDecisionView[];
     municipalitySupportOrders?: Partial<Record<'RS' | 'RBiH' | 'HRHB', MunicipalitySupportOrderView>>;
     sarajevoTunnelOperational?: boolean;
+    /**
+     * B7 Sarajevo lifeline (present only when the lifeline is derived — i.e. the
+     * siege is active and ENABLE_SARAJEVO_LIFELINE is on). A READ-ONLY siege
+     * SUPPLY-pressure indicator: how much external relief (UN airlift + the
+     * Dobrinja–Butmir tunnel) is reaching the besieged core. Never a lever; never
+     * surfaces shelling/starvation/civilian harm (§6). Derived from the raw path
+     * `state.political.sarajevo_state.lifeline` — the adapter guards that field
+     * path (a wrong nested path silently returns undefined; see the field-path test).
+     */
+    sarajevoLifeline?: {
+        status: 'OPEN' | 'STRANGLED' | 'SEVERED';
+        /** 0..1 external-relief throughput. */
+        throughput: number;
+        tunnelActive: boolean;
+        airliftActive: boolean;
+    };
     warPhaseSupplyPressure?: Record<string, number>;
     /** Live per-faction supply condition [0,100], higher is better. */
     warPhaseSupplyCondition?: Record<string, number>;

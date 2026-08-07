@@ -190,3 +190,16 @@ export function sarajevoSiegeGloss(playerFaction: SiegeFaction | null): string {
       return t('chronicle.generated.sarajevo.gloss.neutral');
   }
 }
+
+/**
+ * B7 lifeline beat — the documented Dobrinja–Butmir tunnel relief. §6-safe: it
+ * names a lifeline (food/fuel/wounded through the encirclement), NOT a lifting of
+ * the siege and never civilian harm. Fires on event truth (sarajevo_tunnel_completed_1993).
+ */
+export function sarajevoTunnelLifelineTitle(): string {
+  return t('chronicle.generated.sarajevo.tunnel.title');
+}
+
+export function sarajevoTunnelLifelineDetail(): string {
+  return t('chronicle.generated.sarajevo.tunnel.detail');
+}

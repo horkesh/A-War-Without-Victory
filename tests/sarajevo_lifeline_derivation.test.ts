@@ -132,6 +132,9 @@ describe('B7 lifeline derivation (flag ON)', () => {
 
 describe('B7 updateSarajevoState wiring', () => {
     it('flag OFF: no lifeline field, external_supply aliases internal_supply', () => {
+        // Flag is DEFAULT-ON (opt-out) as of the 2026-08-07 adopt — opt out explicitly
+        // to exercise the no-lifeline OFF path.
+        process.env.ENABLE_SARAJEVO_LIFELINE = 'false';
         const s = makeBesiegedState(12, true);
         const sarajevo = updateSarajevoState(s, CRITICAL_SUPPLY);
         assert.strictEqual(sarajevo.lifeline, undefined);

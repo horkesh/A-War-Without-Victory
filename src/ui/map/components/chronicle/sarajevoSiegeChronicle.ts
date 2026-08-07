@@ -38,9 +38,12 @@ import {
   deriveSarajevoSiegeStateFromGameState,
   sarajevoSiegeGloss,
   sarajevoSiegeTitle,
+  sarajevoTunnelLifelineDetail,
+  sarajevoTunnelLifelineTitle,
   type SarajevoSiegeRuntimeOptions,
   type SiegeFaction,
 } from '../../data/sarajevoSiege.js';
+import { isTunnelActive } from '../../../../state/sarajevo_lifeline.js';
 import type { ChronicleEntry } from './generateChronicleEntries.js';
 
 function asSiegeFaction(fid: FactionId | string | null | undefined): SiegeFaction | null {
@@ -68,7 +71,7 @@ export function buildSarajevoSiegeChronicleEntries(
   if (!siege) return [];
 
   const turn = Number.isFinite(latestTurn) ? latestTurn : 0;
-  return [
+  const entries: ChronicleEntry[] = [
     {
       id: 'sarajevo-siege-active',
       turn,
@@ -80,4 +83,22 @@ export function buildSarajevoSiegeChronicleEntries(
       detail: sarajevoSiegeGloss(asSiegeFaction(playerFaction)),
     },
   ];
+
+  // B7 lifeline beat: once the documented Dobrinja–Butmir tunnel is operational
+  // (event truth: sarajevo_tunnel_completed_1993), add one somber lifeline card.
+  // Pure event-truth read; §6-safe — names the relief lifeline, never a lifting of
+  // the siege and never civilian harm. Stable id → shown once at the current week.
+  if (rawState && isTunnelActive(rawState)) {
+    entries.push({
+      id: 'sarajevo-tunnel-lifeline',
+      turn,
+      type: 'humanitarian',
+      // Secondary card (not a headline): the lifeline is a sub-note to the siege itself.
+      headline: false,
+      title: sarajevoTunnelLifelineTitle(),
+      detail: sarajevoTunnelLifelineDetail(),
+    });
+  }
+
+  return entries;
 }

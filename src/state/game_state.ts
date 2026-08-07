@@ -1958,13 +1958,14 @@ export type SarajevoSiegeStatus = 'OPEN' | 'PARTIAL' | 'BESIEGED';
 export type SiegeLifelineStatus = 'OPEN' | 'STRANGLED' | 'SEVERED';
 
 /**
- * B7 continuous siege-condition lifeline substrate (default-OFF, gated by
- * `ENABLE_SARAJEVO_LIFELINE`). Derived per-turn from event truth (the
- * Dobrinja–Butmir tunnel completion + UN airlift window), NOT calendar.
- * OPTIONAL: absent on every flag-OFF run and on legacy saves (re-derived each
- * turn, so safe to default `undefined`). When present, `throughput` (0..1) is
- * the single shared scalar the four siege fragments read instead of
- * self-deriving siege state.
+ * B7 continuous siege-condition lifeline substrate (DEFAULT-ON as of the
+ * 2026-08-07 adopt; opt out via `ENABLE_SARAJEVO_LIFELINE=false`). Derived
+ * per-turn from event truth (the Dobrinja–Butmir tunnel completion + UN airlift
+ * window), NOT calendar. OPTIONAL: absent on flag-opt-out runs and on legacy
+ * saves (re-derived each turn, so safe to default `undefined`). When present,
+ * `throughput` (0..1) is the single shared scalar the four siege fragments read
+ * instead of self-deriving siege state. The adopt is 188w territory-flat (moves
+ * no control on any turn); only siege supply/exhaustion internals change.
  */
 export interface SiegeLifelineState {
     /** Derived band from `throughput`. */
@@ -1992,9 +1993,10 @@ export interface SarajevoState {
     humanitarian_pressure: number; // 0..1
     last_updated_turn: number;
     /**
-     * B7 (default-OFF): continuous lifeline substrate. Present only when
-     * `ENABLE_SARAJEVO_LIFELINE` is set; absent (and inert) otherwise, so
-     * flag-OFF runs and legacy saves remain byte-identical.
+     * B7 (DEFAULT-ON as of 2026-08-07): continuous lifeline substrate. Present
+     * on default runs while the siege is active; absent (and inert) only when
+     * opted out (`ENABLE_SARAJEVO_LIFELINE=false`) or on legacy saves, which
+     * then remain byte-identical to the pre-flag path.
      */
     lifeline?: SiegeLifelineState;
 }

@@ -61,6 +61,13 @@ function baseState(): GameState {
     } as unknown as GameState;
 }
 
+beforeEach(() => {
+    // The flag is now DEFAULT-ON (opt-out). Each test's OFF-path baseline (offState,
+    // built before any 'true' assignment) needs an explicit opt-out to exercise the
+    // no-lifeline path; the ON cases below still set 'true' explicitly.
+    process.env.ENABLE_SARAJEVO_LIFELINE = 'false';
+});
+
 afterEach(() => {
     delete process.env.ENABLE_SARAJEVO_LIFELINE;
     delete process.env.SIEGE_MORALE_DRAIN_ENABLED;

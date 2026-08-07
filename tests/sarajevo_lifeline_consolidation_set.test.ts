@@ -55,7 +55,10 @@ describe('B7 lifeline consolidation set', () => {
 
     it('flag name is the single canonical ENABLE_SARAJEVO_LIFELINE env gate', () => {
         const params = read('src/sim/combat/sarajevo_siege_params.ts');
-        expect(params).toContain("process.env.ENABLE_SARAJEVO_LIFELINE === 'true'");
+        // DEFAULT-ON (opt-out) form as of the 2026-08-07 adopt: the single gate reads the
+        // env var once and treats only 'false'/'0' as an explicit opt-out.
+        expect(params).toContain('process.env.ENABLE_SARAJEVO_LIFELINE');
+        expect(params).toMatch(/raw !== 'false' && raw !== '0'/);
         // Consumers must not introduce their own ad-hoc env reads for this flag.
         for (const f of LIFELINE_CONSUMERS) {
             expect(read(f)).not.toContain('ENABLE_SARAJEVO_LIFELINE');

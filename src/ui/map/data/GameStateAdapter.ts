@@ -838,6 +838,32 @@ function emptySupplySummary() {
     };
 }
 
+/**
+ * B7 Sarajevo lifeline VIEW — a read-only siege SUPPLY-pressure indicator for the
+ * SupplyPanel: how much external relief (UN airlift + the Dobrinja–Butmir tunnel)
+ * is reaching the besieged core. Present only when the lifeline has been derived
+ * this run (siege active + ENABLE_SARAJEVO_LIFELINE on); returns undefined otherwise
+ * so the panel shows nothing on the flag-off / no-siege path.
+ *
+ * FIELD-PATH GUARD: reads the EXACT raw path `state.political.sarajevo_state.lifeline`.
+ * A wrong nested path silently returns undefined (the #1 UI-adapter chokepoint), so
+ * the path is pinned by the adapter field-path test against a known raw-save shape.
+ * §6: surfaces supply/relief truth only — never shelling, starvation, or civilian harm,
+ * and never a lever.
+ */
+export function deriveSarajevoLifelineView(state: any): LoadedGameState['sarajevoLifeline'] {
+    const ll = state?.political?.sarajevo_state?.lifeline;
+    if (!ll || typeof ll.throughput !== 'number') return undefined;
+    const status = ll.status;
+    if (status !== 'OPEN' && status !== 'STRANGLED' && status !== 'SEVERED') return undefined;
+    return {
+        status,
+        throughput: ll.throughput,
+        tunnelActive: Boolean(ll.tunnel_active),
+        airliftActive: Boolean(ll.airlift_active),
+    };
+}
+
 function deriveSupplySummaryByFaction(state: any): LoadedGameState['supplySummaryByFaction'] {
     const result: NonNullable<LoadedGameState['supplySummaryByFaction']> = {};
     const rawSupply = state.supply_state_by_osid;
@@ -2795,7 +2821,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         runtimeFeatureFlags: options?.runtimeFeatureFlags,
         armyStance, armyCoDecisionTraces, armyCorpsDirectives, corpsCommanderActions,
         casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
-        sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure: scopeToPlayerFaction(warPhaseSupplyPressure, playerFaction), warPhaseSupplyCondition: scopeToPlayerFaction(warPhaseSupplyCondition, playerFaction), warPhaseExhaustion: scopeToPlayerFaction(warPhaseExhaustion, playerFaction),
+        sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), sarajevoLifeline: deriveSarajevoLifelineView(state), warPhaseSupplyPressure: scopeToPlayerFaction(warPhaseSupplyPressure, playerFaction), warPhaseSupplyCondition: scopeToPlayerFaction(warPhaseSupplyCondition, playerFaction), warPhaseExhaustion: scopeToPlayerFaction(warPhaseExhaustion, playerFaction),
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
