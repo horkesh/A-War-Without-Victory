@@ -26401,3 +26401,19 @@ The de-saturation's `op:brcko:brcko` RS→RBiH flip (main 30/31) has NO cheap fi
 **Slice 4.2 (coherence consumers) — before the Pyrrhic panel (frozen brief `docs/40_reports/20260809_EB1_SLICE42_PYRRHIC_PANEL_BRIEF.md`):** two combat consumers — an op-launch admission block below a coherence threshold, and a `×0.80` defender-power modifier on abandoned PERIPHERAL OSIDs only (never a core town / Banja Luka). Combat-central → owner routed the GO/BLOCK to the panel (wargame-expert + calibration + red-team + historian; orchestrator = integrator). Adopt-or-retire criteria: matched ≥634, no new anchor flips, §6, K:W in band, engine-health PASS. Design fork (stateless vs stateful-accumulator) inside the panel's remit.
 
 **Determinism:** derivation is pure/sorted, no `Math.random`/`Date.now`/timestamp; ledger prose only.
+
+---
+
+## 2026-08-09 — R6 E-B1 slice 4.2 (op-launch coherence block) BUILT → RETIRED (adopt-or-retire); E-B3 self-fitting-AOR bug spun out
+
+Owner routed the combat-central slice-4.2 GO/BLOCK to a 4-specialist Pyrrhic panel (wargame/calibration/historian GO-COND, red-team BLOCK → split). Integrated recommendation, owner-approved: build ONLY the guarded op-launch admission block (stateless, depth-EXCLUDED dynamic-coherence guard so enclave geometry never trips it + min-consecutive-turns sustain); DROP the ×0.80 peripheral defender modifier (§6-unsafe by `strategic_priorities.json` default + redundant with strategic_depth/Krajina-collapse/NATO).
+
+**Built + validated** (F:/awwv-eb1, feature-flag `AWWV_OP_LAUNCH_COHERENCE_BLOCK` default OFF): tsc clean; 19/19 unit tests incl. the depth-exclusion §6-guard proof; flag-OFF 40w structural fingerprint `5cfcf1c840bae488` (inert when off). **Flag-ON 188w: matched 634, anchors 30/31 (op:brcko:brcko only), control/formation/activity BYTE-IDENTICAL to flag-OFF — the block NEVER FIRED.**
+
+**RETIRED** (scenario-tester disposition, verified vs code): dormant BY CONSTRUCTION — `territory_osids` is re-derived from current control each cycle (`sector_territory.ts:409/515/558`), so a collapsing corps' shrunken rump reads ~fully-held (aor_contested≈0); with the C2 floor pinned at 0.70 (load-bearing for the ARBiH-post-NATO guard — threshold can't rise), dynamic-coherence can't drop below 0.60. The western-collapse territory it targets flows through injected ops it bypasses. No retune exists inside constraints. Consumer wiring (uncommitted) reverted → branch clean at slice-4.1 tip `8f6b1d211`. §6 MOOT (never-firing retired block = zero exposure). Two §6 landmines the panel raised were also structurally closed independently: depth-exclusion guard + injected-op bypass (Srebrenica "Srebrenica Ring" is a pre-planned injected op, `pre_planned_operations.ts:226`), and no Goražde corps exists.
+
+**Spun out — E-B3 bug (`20260809_EB3_STRATEGIC_DEPTH_SELF_FITTING_AOR_BUG.md`):** the slice-4.1 diagnostic surfaced that `strategic_depth`/AOR-contested are SELF-FITTING and inert to territorial collapse (`strategic_depth=1.0` for 2nd Krajina through its Sept-Oct 1995 collapse, contradicting the documented intent at `game_state.ts:1061` "Storm drops 2KK depth 0.7→0.1"). `strategic_depth` feeds combat defender-power → medium-high severity, sector-expert-owned, decoupled from this experiment.
+
+**Slice 4.1 (inert coherence diagnostic, `8f6b1d211`):** HELD on branch, unmerged — its readings are currently misleading for collapsing corps BECAUSE of the E-B3 bug; merge (needs a 52w re-bless) waits on the E-B3 input fix.
+
+**Determinism:** all reverted/inert; ledger + report prose only. No `Math.random`/`Date.now`/timestamp.

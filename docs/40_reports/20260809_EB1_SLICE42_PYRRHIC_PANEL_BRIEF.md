@@ -59,3 +59,15 @@ All four. Accumulator adds save-migration + reload-exploit surface AND wrongly s
 3. **Validation adds** to the brief's criteria: (a) Drina-Corps coherence/op-eligibility trace in the weeks before the Srebrenica+Žepa anchors; (b) Bihać-5th / Goražde-81st op-eligibility across the full run; (c) explicit controller diff of `petrovo_2` / `boljanic_2` / `op:brcko:brcko`.
 
 This reduced, guarded scope satisfies every specialist's condition and converts red-team's (conditional) BLOCK to GO. Combat-central + a BLOCK was raised + this drops a consumer → owner go on the scope before build.
+
+---
+
+# OUTCOME (2026-08-09) — slice 4.2 RETIRED under adopt-or-retire
+
+Built the owner-approved reduced scope (guarded op-launch block only, stateless; peripheral modifier dropped). Validated: tsc clean, 19/19 unit tests (incl. the depth-exclusion §6-guard proof), flag-OFF 40w fingerprint `5cfcf1c8` (inert when off). Flag-ON 188w: matched **634**, anchors **30/31**, control/formation/activity BYTE-IDENTICAL to flag-OFF — **the block never fired**.
+
+**Disposition (scenario-tester, verified vs code): RETIRE.** Dormant BY CONSTRUCTION, not tuning: the AOR signal is self-fitting (`territory_osids` re-derived from current control each cycle, `sector_territory.ts:409/515/558`), so a collapsing corps' shrunken rump reads ~fully-held (`aor_contested≈0`); with the C2 floor pinned at 0.70 (load-bearing for the ARBiH guard — can't raise the threshold), dynamic-coherence can't fall below threshold. And the western-collapse territory the block targets flows through injected ops it bypasses. No retune exists inside the constraints. Consumer wiring (uncommitted) reverted → branch clean at slice-4.1 tip `8f6b1d211`. **§6 fully MOOT** — a never-firing, retired block has zero exposure.
+
+**Bigger finding, spun out:** the slice-4.1 diagnostic surfaced a real **E-B3 bug** — `strategic_depth`/AOR are self-fitting and inert to territorial collapse (`strategic_depth=1.0` for 2nd Krajina through its Sept-Oct collapse, contradicting `game_state.ts:1061`). `strategic_depth` feeds combat defender-power → filed as `20260809_EB3_STRATEGIC_DEPTH_SELF_FITTING_AOR_BUG.md`.
+
+**Slice 4.1 disposition:** HELD on branch (unmerged). Its diagnostic readings are currently misleading for collapsing corps *because* of the E-B3 bug — merging (which needs a 52w re-bless) waits until the E-B3 input fix makes the signal meaningful.
