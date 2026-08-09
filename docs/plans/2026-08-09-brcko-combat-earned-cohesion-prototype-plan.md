@@ -26,3 +26,13 @@ Cohesion is already combat-driven (post-battle deltas, `attack_post_battle_effec
 
 ## Guardrails
 634 floor + full 31-anchor `anchor_checks` diff (never net matched) + §6 + determinism (no wall-clock/RNG; sorted). §6-panel sign-off required BEFORE any adopt (touches atrocity-adjacent brigade fate). This plan is the prototype-MEASURE step; a positive result escalates to the design + §6/calibration panel, not a direct ship.
+
+---
+
+## OUTCOME (2026-08-09) — MEASURED → RETIRED; Brčko confirmed genuinely post-1.0
+
+Built the prototype (constants base 12 / bonus 40 / holds_for_full 8), flag-OFF proven byte-identical (40w `5cfcf1c8`). **Flag-ON 188w (n167):** Brčko **RECOVERED** (RS) ✓, ARBiH losability restored (RBiH brigade-deaths 0→3), RS dissolution 28→8 — **but matched 634→613 (−21), anchors 29/31**, two NEW fails `op:zavidovici:vozuca_2` + `op:lukavac:brijesnica_donja_2`, and western Krajina collapse partially suppressed.
+
+**Disposition: RETIRE (scenario-tester, verified vs code + canon).** The failure is a **structural time-confound, not a mistuned constant**: `defensive_holds` is a cumulative, time-unbounded counter. Brčko's decisive battle is turn ~58 (early war); Vozuća (Op Farz) and the western Krajina collapse land at ~week 150–190 — 2.5–3× more elapsed time to bank holds. **Any `(base, bonus, holds_for_full)` triple that lifts the corridor defender's floor enough to survive turn 58 necessarily lifts the late-war defenders' floors even higher, right before their historically-decisive rout.** The two new fails are canonically *correct* flips (`historical_anchors.ts:344-345`, BB1 p.459 Op Farz — RS→RBiH by w188), so rewarding a long-serving defender's lifetime hold-record is the **wrong signal**, not a wrongly-calibrated one. The levers are yoked; no triple decouples them. This reproduces the same non-monotonic pattern already disproven by the uniform floor sweep (20/25/30 → 634/623/629) and four prior Task 0.3 designs.
+
+**Brčko is CONFIRMED genuinely post-1.0.** Every pre-1.0 path is now exhausted: exhaustion re-pacing (off critical path), local force-density (3 probe families), emergent spawn (pool `available:0`), and this combat-earned prototype (structural time-confound). A real fix needs a **fundamentally different signal — recency-weighted/decaying hold-credit, or a floor gated by attacker strength at the culminating battle (not absolute lifetime holds)** — scoped as a fresh post-1.0, §6-panel-gated design lane (NOT a constant sweep of this shape). Prototype reverted (uncommitted); flag/code not retained. The measurement is the deliverable.

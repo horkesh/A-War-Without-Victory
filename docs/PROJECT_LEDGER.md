@@ -26443,3 +26443,13 @@ Owner decision 2026-08-09: defer the Mladić/Contact-Group institutional-veto ca
 **R6 remainder scorecard (this session, 2026-08-09):** E-B1 coherence CLOSED (4.1 inert/held-unmerged, 4.2 built→retired); intel-ambush depth RETIRED (dead-end); Srebrenica-trigger trace VERIFIED CLEAN; E-B3 strategic_depth measured VESTIGIAL (do-not-revive); institutional-veto DEFERRED post-1.0. Only the final re-floor remains.
 
 **Determinism:** docs only.
+
+---
+
+## 2026-08-09 — Brčko tackled to root: CONFIRMED genuinely post-1.0 (all pre-1.0 paths exhausted incl. combat-earned prototype)
+
+Owner: "tackle Brčko now — did we solve all the engine woes behind it?" Answer: **no**, and we traced it to the bottom. The turn-58 `op:brcko:brcko` flip runs through **`getWarExhaustionTempoMult`** (attacker-power, `combat_math.ts:1788`), NOT op-selection (corrects the 20260807 report). Brčko was **held by the exhaustion saturation bug** (ARBiH ahistorically over-exhausted → attacker ×0.85 → too weak); the de-saturation correctly made ARBiH capable, so it took the town. Ceiling diagnostic confirmed **exhaustion re-pacing (Phase 4) is OFF the Brčko critical path**. Local force-density exhausted (3 probe families); emergent spawn dead (RS Brčko militia pool `available:0`).
+
+The honest fix is the RS cohesion railroad. Owner chose **prototype-measure**. Built a combat-EARNED cohesion prototype (symmetric floor = base + bonus·min(1, defensive_holds/N), flag `AWWV_COMBAT_EARNED_COHESION` default-OFF, flag-OFF byte-identical 40w `5cfcf1c8`). **Flag-ON 188w:** Brčko RECOVERED (RS), ARBiH losability restored (RBiH deaths 0→3), RS dissolution 28→8 — **but matched 634→613, 29/31**, two new fails `vozuca_2`+`brijesnica_donja_2`. **RETIRED (scenario-tester):** structural **time-confound** — `defensive_holds` is cumulative/time-unbounded, so Brčko's turn-58 battle and Vozuća/Krajina's week-150-190 routs are yoked; any constants holding Brčko over-prop late-war defenders right before their *canonically correct* historical rout (`historical_anchors.ts:344`, BB1 p.459 Op Farz). No decoupling triple. Prototype reverted (uncommitted), base clean.
+
+**Brčko CONFIRMED genuinely post-1.0** — every pre-1.0 path exhausted. Real fix needs a *different* signal (recency-weighted/decaying hold-credit or attacker-relative floor), a post-1.0 §6-panel design lane. Reports: `20260809_BRCKO_REAL_CHANNEL_ATTACKER_TEMPO.md`, plan `2026-08-09-brcko-combat-earned-cohesion-prototype-plan.md`. Determinism: prototype reverted; docs only.
