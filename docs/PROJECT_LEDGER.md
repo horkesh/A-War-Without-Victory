@@ -26417,3 +26417,11 @@ Owner routed the combat-central slice-4.2 GO/BLOCK to a 4-specialist Pyrrhic pan
 **Slice 4.1 (inert coherence diagnostic, `8f6b1d211`):** HELD on branch, unmerged — its readings are currently misleading for collapsing corps BECAUSE of the E-B3 bug; merge (needs a 52w re-bless) waits on the E-B3 input fix.
 
 **Determinism:** all reverted/inert; ledger + report prose only. No `Math.random`/`Date.now`/timestamp.
+
+---
+
+## 2026-08-09 — R6 remainder: intel-ambush DEPTH amplifier RETIRED (dead-end)
+
+Ran the nested `AWWV_INTEL_AMBUSH_DEPTH` amplifier (already built, default OFF) flag-ON 188w vs flag-OFF baseline (both eb1 slice-4.1 tip). Result: matched 634, anchors 30/31, control/formation/activity BYTE-IDENTICAL; the amplifier fires (total attacker casualties 168234→168254, +20/+0.012%, weeks 39/40/42/59/128/157/161) but the effect is imperceptible. **RETIRE** (scenario-tester, verified vs code): the shipped gain `INTEL_EXECUTION_AMBUSH_DEPTH_GAIN=0.06` (`intel_ambush_depth.ts:47`) is already the calibrated ceiling — 0.5 breaks the floor (617, blocks historical Federation captures), 0.12 trips an unassigned-brigade anomaly, 0.06 is safe only by being a no-op. No safe headroom; fails the "adds readable uncertainty" half of the R6 adopt bar. Dead-end (class of `design_b_exhaustion_drag_dead_end`). Base umbrella `AWWV_INTEL_AMBUSH_FRICTION` (default ON) unaffected. Depth sub-flag/module left inert (default-OFF, byte-identical baseline); physical removal queued as a low-priority cleanup packet (deferred so no combat-file refactor destabilizes the R6 final re-floor). Memory: `intel_ambush_depth_dead_end`.
+
+**Determinism:** no code change; docs + inert flag only.
