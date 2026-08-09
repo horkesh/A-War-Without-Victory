@@ -27,6 +27,10 @@ import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
 import { initializeCorpsCommand } from '../sim/combat/corps_command.js';
 import { initStrategicDepth } from '../sim/combat/strategic_depth.js';
+import {
+    buildCoordinationCoherenceSnapshot,
+    type CoordinationCoherenceSnapshot,
+} from '../sim/combat/corps_coordination_coherence.js';
 import { findBrigadeOperation } from '../sim/combat/corps_operation_helpers.js';
 import { injectPrePlannedOperations } from '../sim/combat/pre_planned_operations.js';
 import { spawnJnaPhantomBrigades } from '../sim/combat/jna_phantom_brigades.js';
@@ -2243,6 +2247,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let firstReportRow: WeeklyReportRow | null = null;
         let lastReportRow: WeeklyReportRow | null = null;
         const activityCountsPerWeek: WeeklyActivityCounts[] = [];
+        // E-B1 slice 4.1 (diagnostics-only, behavior-inert): capture a READ-ONLY
+        // per-corps coordination_coherence snapshot at the synthesis-specified late-war
+        // turns (§"Diagnostic instrumentation": 154/160/166/175/180). Pure observability
+        // — computes but never persists the field; nothing consumes it (slice 4.2).
+        const coordinationCoherenceSnapshots: CoordinationCoherenceSnapshot[] = [];
+        const COORDINATION_COHERENCE_SNAPSHOT_TURNS: ReadonlySet<number> = new Set([154, 160, 166, 175, 180]);
         const replayManifestSummaries: ReplayFrameSummary[] = [];
         const weeklySavePaths: string[] = [];
         let replayTimelinePath: string | undefined;
@@ -2794,6 +2804,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
             if (firstReportRow === null) firstReportRow = reportRow;
             lastReportRow = reportRow;
+            // E-B1 slice 4.1: read-only coherence snapshot at the late-war diagnostic turns.
+            // Pure observability over the post-reconciliation state; mutates nothing.
+            if (COORDINATION_COHERENCE_SNAPSHOT_TURNS.has(state.meta.turn)) {
+                coordinationCoherenceSnapshots.push(buildCoordinationCoherenceSnapshot(state));
+            }
             timingAdd(timingTotals, 'diagnostics_reporting', weeklyDiagnosticsStart);
             _serTimeSync(emitTimingJson, timingTotals, 'weekly-report-write', () => {
                 reportStream.write(stableStringify(reportRow) + '\n');
@@ -3134,6 +3149,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 control_change_attribution:
                     controlChangeAttributionSummary ?? summarizeControlChangeAttribution([], initOverrideChangeCount)
             },
+            // E-B1 slice 4.1 (diagnostics-only, behavior-inert): per-corps coordination_coherence
+            // snapshots at the synthesis late-war turns (154/160/166/175/180). Read-only signal;
+            // no consumer yet (slice 4.2 wires the thresholds). Empty for runs shorter than turn 154.
+            coordination_coherence_diagnostic: coordinationCoherenceSnapshots,
             historical_fit: {
                 historical_alignment: historicalAlignmentDiagnostics,
                 ...(historicalControlAlignment
