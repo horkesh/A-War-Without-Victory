@@ -1,5 +1,17 @@
 # AWWV Calibration Master Reference
 
+## 2026-08-09 R6 FINAL RE-FLOOR — pre-1.0 calibration scope CLOSED at matched 634 / 30·31 (floor UNCHANGED; all R6-remainder experiments settled)
+
+**The R6 behavior-experiment remainder all settled this session with ZERO live calibration change** (E-B1 coherence: slice 4.1 inert-and-held-unmerged + slice 4.2 built→RETIRED dormant-by-construction; intel-ambush DEPTH amplifier RETIRED dead-end; Srebrenica-trigger trace VERIFIED CLEAN event-owned; E-B3 `strategic_depth` measured VESTIGIAL do-not-revive; institutional-veto DEFERRED post-1.0 by owner). A fresh 188w on the shippable branch (`codex/master-roadmap-execution`, run `n163`) **confirms the floor is unchanged**:
+
+- `matched_osids` **634**; anchors **30/31** — the ONLY fail is `op:brcko:brcko` (the owner-accepted, roadmap-scheduled interim debt owned by Phase 4 exhaustion re-pacing + the RS force-density lane; NOT a new regression). No other anchor fails.
+- §6 enclave anchors ALL correct: `srebrenica_2` + `zepa_2` = RS (fall); `gorazde_2` / `bihac_2` / Sarajevo-core / `teocak` = hold.
+- **40w structural fingerprint `5cfcf1c840bae488`** — golden-match (territory byte-flat).
+- **engine_health_gate PASS all 7**: zero_eligible_ops 0, dead_ops 0, ghost_destroyed 2, stranded_brigades 8, consistency_failures 0, matched 634≥622, K:W **3.804** in [3.211, 4.345].
+- exhaustion curve holds the de-saturation win: first_saturation_week null, dead_weeks_pct **0.5%**, terminal RBiH 8867 / RS 9775 / HRHB 8562; RS combat_effective 23 (theater-scoped morale fix holds).
+
+**Floor confirmed at 634 with a healthy engine; R6's pre-1.0 calibration scope is CLOSED** (scenario-tester GO 2026-08-09 — independently re-verified against `run_summary.json`: matched 634, exactly one anchor fail = the pre-accepted Brčko debt, all §6 anchors correct, and the `brcko_corridor_jan1993` control-band anchor itself PASSES `rs_corridor 5/6` / `federation_southern_shoulder 7/7` — only the point-anchor `op:brcko:brcko` fails). Deferred to post-1.0 (documented debt, not R6-blocking): the Brčko 30/31 (Phase 4 + RS force-density), the exhaustion Phase-4 input re-pacing, Phase-3 grade/§6 unpin (casualty realism), RS combat-earned-cohesion redesign, and the institutional-veto political layer.
+
 ## 2026-08-07 R6 Sarajevo lifeline (B7) COMPLETED + ADOPTED default-ON — TERRITORY BYTE-FLAT (52w re-blessed on siege-internal artifacts only)
 
 **Status: ADOPTED default-ON + MERGED to main (owner-approved the completion; validated territory byte-flat; scenario-tester built + verified; implementer≠reviewer via the belt-and-suspenders full-anchor diff).** Commits `a0298a863` (feat, 14 files) + `81d131747` (52w re-bless). Report: `docs/40_reports/20260807_BRCKO_CORRIDOR_REGRESSION.md` is unrelated; this is the B7 lifeline plan `docs/plans/2026-05-29-b7-sarajevo-siege-continuous-condition-plan.md`.

@@ -26433,3 +26433,13 @@ Ran the nested `AWWV_INTEL_AMBUSH_DEPTH` amplifier (already built, default OFF) 
 Traced how the eastern enclaves actually fall (the pre-planned "Srebrenica Ring" op is a documented broken axis that never fires). Confirmed the fall is **event-owned, single-source**: `srebrenica_falls_1995` (`data/scenarios/events/war_1995.json:363`) fires in window `[turn_min 160, turn_max 185]`, gated on the `srebrenica_enclave_formed` flag; its `control_change` effect transfers `srebrenica_2` + 5 OSIDs to RS, an `enclave_formation_displacement` displaces the ARBiH 28th-Division formations with a `casualty_fraction` (not in-place combat destruction — matches the historian's March-of-Death guidance), and a `narrative` surfaces the atrocity. `zepa_falls_1995` carries `requires_events: [srebrenica_falls_1995]` so Žepa cannot precede Srebrenica (correct 11→25 July 1995 chronology). Three would-be alternate delivery paths are all structurally blocked: the broken Ring op (never fires), Krivaja/Stupčanica triggered ops (contract-barred from fall-delivery, `triggered_operations.ts:333-346` — chronology/AAR only), and emergent combat (`enclave_resilience` holds the enclave defended until the turn_min 160 floor). Anchor outcome confirms `srebrenica_2`/`zepa_2` = RS. **§6-safe by design; no fix.** Item CLOSED.
 
 **Determinism:** trace/audit only; no code change.
+
+---
+
+## 2026-08-09 — R6 remainder: institutional-veto DEFERRED post-1.0 (owner); R6 closing with the final re-floor
+
+Owner decision 2026-08-09: defer the Mladić/Contact-Group institutional-veto candidate experiment post-1.0 and close R6 with the final re-floor. The gap (RS ahistorical playthrough panel, 2026-08-05): the engine accepts "remove Mladić" (t174) and "accept Contact Group 51/49" (t118) too cheaply vs the record. Reconciled design intent = model VRS Main Staff loyalty/insubordination as a general political ACTOR with a loyalty check (NOT a Mladić-specific hardcode — canon forbids `protected_officer`; Rulebook §5.8 officer-records are informational-only; faction-symmetric-mechanism rule). No existing hook; from-scratch, canon §8-gated (Game Designer + Historian), and calibration-INDEPENDENT (player-decision layer, can't touch the 634 floor). Documented as known post-1.0 depth debt alongside the deferred RS combat-earned-cohesion redesign + Phase 4 exhaustion re-pacing. Memory: `institutional_veto_deferred_post_1_0`.
+
+**R6 remainder scorecard (this session, 2026-08-09):** E-B1 coherence CLOSED (4.1 inert/held-unmerged, 4.2 built→retired); intel-ambush depth RETIRED (dead-end); Srebrenica-trigger trace VERIFIED CLEAN; E-B3 strategic_depth measured VESTIGIAL (do-not-revive); institutional-veto DEFERRED post-1.0. Only the final re-floor remains.
+
+**Determinism:** docs only.
