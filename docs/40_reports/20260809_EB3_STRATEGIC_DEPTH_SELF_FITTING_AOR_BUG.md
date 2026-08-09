@@ -30,3 +30,15 @@ Each risks the Zvornik/Brčko knife-edge corridors (the AOR reference change alt
 
 ## Determinism
 Any fix must stay pure/sorted (strictCompare), event-truth + field reads only — the current derivations already are; the reference set must be deterministic too.
+
+---
+
+## CORRECTION (2026-08-09, post-measurement) — the root is FROZEN-AT-INIT, and the disposition is DO-NOT-REVIVE
+
+Direct measurement refined the root cause and REVERSED the "fix it" direction:
+
+- **strategic_depth==1.0 for ALL 16 corps in ALL snapshots** (turns 154–180) — the signal is fully inert, not merely self-fitting.
+- **Grep-definitive root:** `updateStrategicDepth` (the only writer, via `computeStrategicDepth`) has **no per-turn caller anywhere** in `src/`/`tools/`. Only `initStrategicDepth` runs — **once, at `scenario_runner.ts:1910`** (turn 0). At turn 0 every corps holds its full assigned AOR (uncontested) → `computeStrategicDepth` returns 1.0 for all → the field is **frozen at 1.0 for the entire war.** `combat_math.ts:1636` reads that frozen field, so the `0.5+0.5×depth` defender term is permanently neutral (1.0). The self-fitting property is real for the *function* but moot: it's only ever evaluated at init.
+- **The live post-Storm collapse signature is delivered elsewhere** — `getKrajinaCollapseMult` (×0.65) + NATO Deliberate Force (×0.70) + injected `pre_planned_operations` — NOT by `strategic_depth`. Per the 2026-05-25 ledger, `strategic_depth` was wired into defender power but couldn't deliver the collapse signature, so the explicit Krajina mult was added to supersede it.
+
+**Disposition: DO NOT REVIVE.** `strategic_depth` is a **vestigial feed superseded by the Krajina collapse mult**. Wiring `updateStrategicDepth` per-turn would make it live and **stack** on the Krajina mult + NATO — double-counting the Krajina collapse (exactly the redundancy the slice-4.2 panel flagged for the ×0.80 peripheral modifier) and risking a calibration regression on the western-RS knife-edge corridors. The correct action is to **document it as vestigial** (and optionally remove the dead `updateStrategicDepth`/frozen-field wiring for clarity, as a determinism-flat cleanup) — not to activate it. This also means slice-4.1 coherence's `depth` modulator term is currently a constant 1.0; any future coherence consumer should drop the depth factor rather than depend on reviving E-B3.
