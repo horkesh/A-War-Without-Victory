@@ -146,6 +146,7 @@ function cleansingState(): GameState {
             RS: {
                 territory_controlled_pct: 58, // strictly MORE than the restrained 55
                 war_crimes_events: 3,
+                war_crimes_events_emergent: 3, // authorized in-war paramilitary sweeps (the §2a flag's clean signal)
                 refugees_created: 50000,
                 civilian_casualties_caused: 5000,
             },
@@ -193,6 +194,46 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         expect(cleansing.outcome_class).toBe('hollow_victory');
         // and the restrained (atrocity-free) variant reads as a strictly cleaner class.
         expect(outcomeRank(restrained.outcome_class)).toBeLessThan(outcomeRank(cleansing.outcome_class));
+    });
+
+    it('SIEGE alone (large refugees/civilians, ZERO emergent war crimes) does NOT trip the mass-atrocity flag', () => {
+        // Red-team fix: the flag keys on authorized war crimes (war_crimes_events_emergent),
+        // not the refugee+civilian legs — so legitimate years-long siege attrition (Sarajevo,
+        // Bihać) is not mislabeled "mass atrocity". Under the OLD blended atrocitySubScore this
+        // 60k/6k would have hit 0.5 and tripped the flag.
+        const siege = makeVerdictState(
+            {
+                RS: {
+                    territory_controlled_pct: 55,
+                    war_crimes_events: 0,
+                    war_crimes_events_emergent: 0,
+                    refugees_created: 60000,
+                    civilian_casualties_caused: 6000,
+                },
+            },
+            SHARED_COST,
+        );
+        const v = computeFactionVerdict(siege, 'RS');
+        expect(v.condemnation_flags).not.toContain('mass_atrocity_condemnation');
+        expect(v.outcome_class).not.toBe('hollow_victory');
+    });
+
+    it('GENOCIDE PRECEDENCE: co-occurring genocide + emergent war crimes → failure, NOT the milder mass-atrocity flag', () => {
+        // Calibration condition + amendment guard (v): the genocide rupture governs; the
+        // emergent-cumulative flag must not down-grade the more severe finding to hollow_victory.
+        const state = cleansingState(); // emergent, war_crimes_events_emergent = 3
+        // Inject a recorded Srebrenica genocide rupture attributed to RS.
+        state.military!.negotiation!.rupture_consequences = [{
+            id: 'srebrenica_genocide_1995',
+            recorded_turn: 168,
+            perpetrator_faction: 'RS',
+            description: 'Fall of the Srebrenica safe area and subsequent genocide',
+            condemnation_flag: 'genocide_condemnation',
+        } as any];
+        const v = computeFactionVerdict(state, 'RS');
+        expect(v.condemnation_flags).toContain('genocide_condemnation');
+        expect(v.condemnation_flags).not.toContain('mass_atrocity_condemnation');
+        expect(v.outcome_class).toBe('failure');
     });
 
     it('the extra territory cleansing buys is NET-NEGATIVE: cleansing scores strictly WORSE', () => {

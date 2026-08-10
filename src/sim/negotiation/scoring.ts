@@ -150,10 +150,20 @@ const ATROCITY_COST_GAIN = 0.85;
  * ≥ threshold) sets `mass_atrocity_condemnation`, which `classifyOutcome` turns
  * into a hollow_victory — so atrocity is grade-DECISIVE at the outcome-class level
  * (a bloody campaign's `pyrrhic_success` C becomes `hollow_victory`) without any
- * casualty-scoring change. EMERGENT-ONLY (historical mode byte-identical). Routed
- * via SENSITIVE_HISTORY_DESIGN_GATE §2; threshold pending §6-panel confirm.
+ * casualty-scoring change. EMERGENT-ONLY (historical mode byte-identical).
+ *
+ * TRIGGER (2026-08-10 §6-panel rework): keyed to `war_crimes_events_emergent` — a
+ * COUNT of genuine, player/bot-authorized in-war paramilitary sweeps (the sole writer
+ * is `recordWarCrime`; scripted `humanitarian_impact` narrative events do NOT touch it).
+ * This closes the red-team BLOCK: the earlier blended `atrocitySubScore ≥ 0.5` trigger
+ * was contaminated by calendar-windowed scripted events (`applyHumanitarianImpact`
+ * writes the shared `war_crimes_events`), could fire on ordinary siege displacement
+ * alone (refugee+civilian legs = 0.5), and had a gameable 2-vs-3 cliff. A discrete count
+ * of authorized cleansings is emergent by construction, siege-immune, and — at MIN=1 —
+ * has no sub-threshold gaming room ("atrocity is a consequence, not a lever"). MIN is
+ * panel-set (re-panel pending: 1 anti-gaming vs a higher mass-pattern count).
  */
-const MASS_ATROCITY_CONDEMNATION_THRESHOLD = 0.5;
+const MASS_ATROCITY_EMERGENT_WAR_CRIMES_MIN = 1;
 
 /**
  * Grade ceilings keyed by ascending war_cost_index threshold.
@@ -683,10 +693,11 @@ export function computeFactionVerdict(
     // making atrocity grade-DECISIVE where the additive cost term is inert. Skipped
     // when genocide is already flagged (that forces the worse `failure`). Historical/
     // unset mode untouched (emergent-gated), keeping the baseline verdict byte-identical.
+    const emergentWarCrimes = state.military?.negotiation?.capital?.[faction]?.war_crimes_events_emergent ?? 0;
     if (state.meta?.decision_mode === 'emergent'
         && !condemnationFlags.includes('genocide_condemnation')
         && !condemnationFlags.includes('mass_atrocity_condemnation')
-        && computeAtrocitySubScore(state, faction) >= MASS_ATROCITY_CONDEMNATION_THRESHOLD) {
+        && emergentWarCrimes >= MASS_ATROCITY_EMERGENT_WAR_CRIMES_MIN) {
         condemnationFlags.push('mass_atrocity_condemnation');
         condemnationFlags.sort();
     }

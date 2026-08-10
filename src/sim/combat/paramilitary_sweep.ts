@@ -758,11 +758,16 @@ export function detectOffensiveParamilitaryTargets(
     return report;
 }
 
-/** Record war_crimes_events increment on negotiation capital for a faction. */
+/** Record war_crimes_events increment on negotiation capital for a faction.
+ *  Also increments the EMERGENT-only counter (`war_crimes_events_emergent`) — this
+ *  is the sole writer of that field; scripted `humanitarian_impact` effects
+ *  (applyHumanitarianImpact) deliberately do NOT touch it, keeping it clean for the
+ *  §2a mass-atrocity condemnation flag (no calendar-driven contamination). */
 function recordWarCrime(state: GameState, faction: FactionId): void {
     const neg = state.military.negotiation;
     if (!neg?.capital?.[faction]) return;
     neg.capital[faction].war_crimes_events = (neg.capital[faction].war_crimes_events ?? 0) + 1;
+    neg.capital[faction].war_crimes_events_emergent = (neg.capital[faction].war_crimes_events_emergent ?? 0) + 1;
 }
 
 function estimateParamilitaryCivilianRisk(mode: 'rear_pocket' | 'offensive'): number {

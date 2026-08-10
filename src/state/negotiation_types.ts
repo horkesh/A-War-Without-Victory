@@ -31,6 +31,16 @@ export interface NegotiationBreakdown {
     operations_launched: number;
     operations_successful: number;
     war_crimes_events: number;
+    /**
+     * EMERGENT-only war-crimes count: incremented ONLY by `recordWarCrime()`
+     * (genuine in-war paramilitary sweeps the player/bot authorized), NEVER by
+     * scripted `humanitarian_impact` narrative effects (`applyHumanitarianImpact`).
+     * The shared `war_crimes_events` above conflates both; this counter is the clean
+     * emergent signal for the §2a `mass_atrocity_condemnation` flag so that flag can
+     * never be tripped by a calendar-windowed scripted event (SENSITIVE_HISTORY_
+     * DESIGN_GATE §2 criterion 11). Additive-optional; absent ⇒ 0.
+     */
+    war_crimes_events_emergent?: number;
     /** Count of brigades meeting combat effectiveness threshold this turn.
      *  Written by compute-combat-effective-brigades pipeline step.
      *  Sentinel -1 = not yet computed. Fallback in computePoliticalAssessment uses 0.5. */
