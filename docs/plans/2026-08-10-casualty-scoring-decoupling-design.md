@@ -31,3 +31,29 @@ Canon §3.5 A2 / units-basis currently forbids `casualtyScore` reading anything 
 4. **Red-team:** can the `f_wia` mapping be gamed to launder atrocity, or does the KIA-untouched + residual-reported guard hold?
 
 **Nothing builds until unanimous GO (or GO-with-conditions). A BLOCK/split escalates to the owner.** This is a scoring redefinition touching the §6 bright line — implementer ≠ reviewer.
+
+---
+
+## PANEL VERDICT (2026-08-10) + REVISED DESIGN (owner: revise per red-team + rebuild, emergent-scoped)
+
+**Tally:** canon/§6 GO-COND · historian GO-COND · calibration GO-COND · red-team **BLOCK-COND** → split → owner chose to revise + rebuild. Integrated by orchestrator.
+
+**Validated by the panel:** territory-invariance is structurally guaranteed (scoring.ts read-only/terminal-only); the WIA units-mismatch is genuine (sim K:W 1:3.74 = BB combat-narrative convention; historical 1:2.86 = administrative, BB1 p.463 — historian); the atrocity dominance term is base-independent so this can't weaken the bright line (canon).
+
+**Red-team's load-bearing catch:** the atrocity term is OFF in historical mode, so the real Drina-cleansing baseline's C-cap comes from blunt casualty saturation — de-saturating in ALL modes would loosen it (a §6 hole). Plus the honest f_wia=0.75 delivers atrocity-LIVENESS but not full grade-differentiation (that needs the real KIA lane; forcing it via a low per-faction f_wia = laundering).
+
+### REVISED DESIGN (build this — all 4 seats' conditions folded in)
+1. **EMERGENT MODE ONLY.** In `computeWarCostIndex`, the new casualtyScore formula + per-faction `casualties_full` + re-derived `duration_full_weeks` apply ONLY when `decision_mode === 'emergent'`. Historical/unset mode = byte-identical to today (Drina-cleansing cap preserved via the existing blunt floor). [red-team #1, LOAD-BEARING §6]
+2. **`f_wia` = 0.75, FIXED + CITED** (= 2.86/3.74, BB1 p.463; RS whole-war K:W). A named constant with the citation in code + canon; NEVER curve-fit to a grade. [red-team #4, canon (a)]
+3. **casualtyScore (emergent)** = `clamp01((killed + 0.75·wounded + missing) / casualties_full[faction])`. KIA + MIA never scaled. [canon (b), historian #2]
+4. **`casualties_full` → per-faction map** (restructure from scalar 40000), on the SAME administrative WIA convention as f_wia (units-symmetry): VRS = 18,543 KIA + 53,000 WIA + MIA (BB1 p.463); ARBiH ~30k KIA (BB1 p.462) + admin WIA + MIA; HVO ~6.5k KIA (BB1 p.462) + 20,649 WIA (BB1 p.462) + MIA. [canon (c), historian #1/#3, calibration #3]
+5. **Siege-WIA floor:** a minimum casualtyScore contribution keyed to RAW wounded volume (pre-f_wia), so a WIA-heavy siege war can't exit the cost floor merely by being f_wia-discounted + un-atrocity-tagged. [red-team #2]
+6. **Residual KIA ratio made LOAD-BEARING:** wire the sim-KIA-vs-historical ratio to an actual consequence (condemnation-flag or hard grade-floor) OR record it as a dated, owner-assigned engine-health-debt item (the real KIA-realism lane) — not a decorative string. [red-team #5]
+7. **Canon §3.5 amendment** (canon seat clauses a–f) lands atomically with the code.
+
+### VALIDATION (before adopt; §6-panel re-confirm)
+- Territory byte-identity: 188w before/after, matched 634, full 31-anchor diff, personnel/territory fields byte-identical.
+- **Historical-mode grade UNCHANGED** — before/after verdict grade + cost index on the historical 52w baseline (the Drina-cleansing case); its cap must NOT loosen. [red-team #1]
+- Emergent-mode: atrocity term becomes grade-decisive; monotonicity regression test (rising KIA always raises cost, any f_wia). [canon (f)]
+- Real per-faction K/W/M ledger pull to confirm the arithmetic. [calibration #2]
+- Document that exhaustion_full (8000) remains separately pinned (grade-diff rests on casualtyScore). [calibration #4]
