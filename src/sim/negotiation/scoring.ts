@@ -707,7 +707,13 @@ export function computeFactionVerdict(
     // (emergent-gated), keeping the baseline verdict byte-identical.
     const atrocityCapital = state.military?.negotiation?.capital?.[faction];
     const emergentWarCrimes = atrocityCapital?.war_crimes_events_emergent ?? 0;
-    const civilianHarmCaused = atrocityCapital?.civilian_casualties_caused ?? 0;
+    // Use the FRESHENED displacement aggregate (displayBreakdown already applies
+    // max(capital, freshDisplacementHarm) above), NOT the raw capital snapshot: on a
+    // TERMINAL turn capital can be frozen one step before the fresh displacement copy
+    // lands, which would let a catastrophic siege crossing the threshold on the final
+    // turn escape the flag (red-team staleness condition, §6-panel v2).
+    const civilianHarmCaused = displayBreakdown.civilian_casualties_caused
+        ?? (atrocityCapital?.civilian_casualties_caused ?? 0);
     if (state.meta?.decision_mode === 'emergent'
         && !condemnationFlags.includes('genocide_condemnation')
         && !condemnationFlags.includes('authorized_cleansing_condemnation')

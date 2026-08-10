@@ -240,6 +240,32 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         expect(v.outcome_class).toBe('hollow_victory');
     });
 
+    it('STALENESS: fresh terminal-turn siege harm ≥15k (capital snapshot still 0) still trips the flag', () => {
+        // Red-team staleness condition: the flag reads the FRESHENED displacement aggregate
+        // (displayBreakdown), not the raw capital snapshot — so a catastrophic siege crossing
+        // 15k on the terminal turn, before capital refreshes, is not missed.
+        const state = makeVerdictState(
+            {
+                RS: {
+                    territory_controlled_pct: 58,
+                    war_crimes_events: 0,
+                    war_crimes_events_emergent: 0,
+                    civilian_casualties_caused: 0, // STALE capital snapshot
+                },
+            },
+            SHARED_COST,
+        );
+        // Fresh displacement aggregate above threshold while capital stays 0 (the race).
+        (state as unknown as { displacement: unknown }).displacement = {
+            displacement_humanitarian_aggregates: {
+                RS: { bosniak: { refugees_created: 500000, civilian_casualties_caused: 20000 } },
+            },
+        };
+        const v = computeFactionVerdict(state, 'RS');
+        expect(v.condemnation_flags).toContain('authorized_cleansing_condemnation');
+        expect(v.outcome_class).toBe('hollow_victory');
+    });
+
     it('GENOCIDE PRECEDENCE: co-occurring genocide + emergent war crimes → failure, NOT the milder mass-atrocity flag', () => {
         // Calibration condition + amendment guard (v): the genocide rupture governs; the
         // emergent-cumulative flag must not down-grade the more severe finding to hollow_victory.
