@@ -57,3 +57,15 @@ Canon §3.5 A2 / units-basis currently forbids `casualtyScore` reading anything 
 - Emergent-mode: atrocity term becomes grade-decisive; monotonicity regression test (rising KIA always raises cost, any f_wia). [canon (f)]
 - Real per-faction K/W/M ledger pull to confirm the arithmetic. [calibration #2]
 - Document that exhaustion_full (8000) remains separately pinned (grade-diff rests on casualtyScore). [calibration #4]
+
+---
+
+## FINAL OUTCOME (2026-08-10) — decoupling FALSIFIED → condemnation-flag mechanism BUILT
+
+The revised emergent-scoped decoupling was built (branch, unit-tests passed) but **FALSIFIED against the real ledger** before adoption: even at f_wia=0.75 (even f_wia=0), `casualtyScore` stays saturated because the genuine KIA over-bloodiness alone fills the reference (RBiH killed 68,619 = 2.3× historical; killed+missing = 79% of the honest reference) — so `base ≥ 0.78` regardless and the atrocity term stays grade-inert. No honest WIA units-mapping can de-saturate a base that is over-full from real deaths. Decoupling branch RETIRED.
+
+Scenario-tester + canon re-read resolved the path: canon §3.5:158 **already accepts** a full-length historically-bloody campaign capping at C (intended floor, not a bug), and §3.5:166 assigns "pushing an outcome BELOW C" to **condemnation flags (§3.4)**, not the cost cap. The atrocity-liveness gap was that only `genocide_condemnation` (Srebrenica) existed; non-genocide atrocity set no flag.
+
+**ADOPTED MECHANISM (owner-chosen, `86927cf48`):** a non-genocide `mass_atrocity_condemnation` flag — emergent + `computeAtrocitySubScore ≥ 0.5` → the flag → `classifyOutcome` returns `hollow_victory`. Atrocity is now grade-DECISIVE at the outcome-class level (a bloody campaign's C `pyrrhic_success` → `hollow_victory`) with NO casualty-scoring change, NO territory effect (634 floor untouched), and historical mode byte-identical. Validated: tsc clean; 10/10 bright-line incl. a new decisive test; 97 scoring tests pass.
+
+**FINAL ADOPTION GATES (remaining):** canon registration — `mass_atrocity_condemnation` in §3.4's flag registry + a §3.5 note that below-C atrocity-decisiveness is delivered by this §3.4 flag (not the cost cap); §6-panel re-confirm of the 0.5 threshold; SENSITIVE_HISTORY_DESIGN_GATE §2 routing for the new flag. The additive `ATROCITY_COST_GAIN` term is retained (it still guarantees the C-cap for otherwise-cheap wars per A1).
