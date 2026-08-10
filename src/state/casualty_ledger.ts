@@ -63,15 +63,38 @@ export type CasualtyLedger = Record<FactionId, FactionCasualtyLedger>;
  *   AWWV_CASUALTY_REALISM_FRACTION (global), AWWV_CASUALTY_REALISM_{RBIH,RS,HRHB}.
  */
 function parseCasualtyRealismFraction(): Record<string, number> {
+    // DEFAULT-ON (owner-adopted 2026-08-10): per-faction permanent-casualty fractions that
+    // bring the double-counted gross ledger to historical totals (RBiH 140k / RS 95k /
+    // HRHB 35k = KIA+WIA+MIA). Territory byte-flat (proven n176/n177). The global
+    // AWWV_CASUALTY_REALISM_FRACTION or per-faction AWWV_CASUALTY_REALISM_{RBIH,RS,HRHB}
+    // env vars override; explicit 1.0 restores the legacy (inflated) ledger.
+    const DEFAULT: Record<string, number> = { RBiH: 0.39, RS: 0.50, HRHB: 0.75 };
     const g = Number(process.env.AWWV_CASUALTY_REALISM_FRACTION);
-    const base = Number.isFinite(g) && g > 0 ? g : 1.0;
-    const per = (k: string): number => {
+    const globalOverride = Number.isFinite(g) && g > 0 ? g : undefined;
+    const per = (k: string, faction: string): number => {
         const v = Number(process.env[`AWWV_CASUALTY_REALISM_${k}`]);
-        return Number.isFinite(v) && v > 0 ? v : base;
+        if (Number.isFinite(v) && v > 0) return v;
+        return globalOverride ?? DEFAULT[faction]!;
     };
-    return { RBiH: per('RBIH'), RS: per('RS'), HRHB: per('HRHB') };
+    return { RBiH: per('RBIH', 'RBiH'), RS: per('RS', 'RS'), HRHB: per('HRHB', 'HRHB') };
 }
 const CASUALTY_REALISM_FRACTION: Record<string, number> = parseCasualtyRealismFraction();
+
+/**
+ * Test/experiment override (mirrors the V2 gate idiom). Distribution/split UNIT tests
+ * that assert exact recorded values set an all-1.0 map here to isolate their concern
+ * from the realism scaling, then reset in afterEach. Null ⇒ use the module default.
+ */
+let _casualtyRealismOverride: Record<string, number> | null = null;
+export function setCasualtyRealismFractionOverride(map: Record<string, number> | null): void {
+    _casualtyRealismOverride = map;
+}
+export function resetCasualtyRealismFractionOverride(): void {
+    _casualtyRealismOverride = null;
+}
+function activeRealismFraction(faction: string): number {
+    return (_casualtyRealismOverride ?? CASUALTY_REALISM_FRACTION)[faction] ?? 1.0;
+}
 
 /** Scale a casualty count by a faction's permanent-casualty fraction (1.0 ⇒ unchanged). */
 function applyRealismFraction(value: number, frac: number): number {
@@ -129,7 +152,7 @@ export function recordBattleCasualties(
 
     // Casualty realism (ledger/territory decouple): scale the RECORDED casualties to
     // the permanent share. TERRITORY-NEUTRAL — applyPersonnelLoss is a separate call.
-    const frac = CASUALTY_REALISM_FRACTION[factionId] ?? 1.0;
+    const frac = activeRealismFraction(factionId);
     const killed = applyRealismFraction(casualties.killed, frac);
     const wounded = applyRealismFraction(casualties.wounded, frac);
     const missing = applyRealismFraction(casualties.missing_captured, frac);

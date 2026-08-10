@@ -474,8 +474,13 @@ const HISTORICAL_CASUALTY_BASELINE: Record<string, number> = Object.freeze({
     HRHB: 35000,
 });
 function scoringSimpleEnabled(): boolean {
+    // DEFAULT-ON (owner-adopted 2026-08-10): the simple grade model replaces the
+    // war_cost_index weighted-clamp-cap machine. Explicit '0'/'false'/'off' restores the
+    // legacy path (regression/comparison). Pairs with the DEFAULT-ON casualty decouple —
+    // the frozen 140k/95k/35k baseline is calibrated for decoupled (realistic) casualties.
     const raw = typeof process === 'undefined' ? undefined : process.env.AWWV_SCORING_SIMPLE;
-    return raw === '1' || raw === 'true' || raw === 'on';
+    if (raw === '0' || raw === 'false' || raw === 'off') return false;
+    return true;
 }
 /** Signed grade step from casualties vs the frozen historical baseline. +1..−2. */
 export function humanCostGradeShift(faction: string, casualties: number): number {

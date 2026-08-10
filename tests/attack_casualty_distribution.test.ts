@@ -5,7 +5,12 @@
  *         distributeDefenderCasualties, buildDefenderContributions
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { setCasualtyRealismFractionOverride, resetCasualtyRealismFractionOverride } from '../src/state/casualty_ledger.js';
+// Isolate distribution/split correctness from the DEFAULT-ON casualty-realism scaling:
+// these tests assert exact recorded ledger values, so force all-1.0 fractions.
+beforeEach(() => setCasualtyRealismFractionOverride({ RBiH: 1, RS: 1, HRHB: 1 }));
+afterEach(() => resetCasualtyRealismFractionOverride());
 import {
     splitKiaWiaMia,
     computeFinalCasualties,

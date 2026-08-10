@@ -317,27 +317,26 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         // negotiation.capital. So a faction can append displacement/civilian harm
         // EARLIER in the terminal turn that the stale capital snapshot omits.
         //
-        // Build exactly that: capital shows refugees_created=0 / civilian=0 (stale
-        // freeze), but the FRESH displacement aggregates record the cleansing.
-        // war_crimes_events stays on capital (recordWarCrime increments it in place,
-        // so it is already fresh). The atrocity penalty MUST still apply.
+        // Build exactly that: capital shows civilian=0 (stale freeze), but the FRESH
+        // displacement aggregates record CATASTROPHIC civilian harm (≥15000 caused) — the
+        // authorized_cleansing_condemnation flag's clean magnitude gate. The flag (and thus
+        // the letter-grade cap) MUST still fire off the fresh source despite the stale capital.
         const state = makeVerdictState(
             {
                 RS: {
                     territory_controlled_pct: 58, // the territory cleansing bought
-                    war_crimes_events: 3,         // fresh on capital (in-place increment)
-                    refugees_created: 0,          // STALE — capital frozen pre-refresh
                     civilian_casualties_caused: 0, // STALE — capital frozen pre-refresh
                 },
             },
             SHARED_COST,
         );
-        // Inject the FRESH displacement aggregates the terminal-turn freeze missed.
+        // Inject the FRESH displacement aggregates the terminal-turn freeze missed —
+        // 30000 civilian casualties caused, well past the ≥15000 catastrophic gate.
         (state as unknown as { displacement: { displacement_humanitarian_aggregates: Record<string, Record<string, { refugees_created: number; refugees_received: number; civilian_casualties_caused: number }>> } }).displacement.displacement_humanitarian_aggregates = {
             RS: {
                 // split across two ethnicity buckets to exercise the summation
-                RBiH: { refugees_created: 30000, refugees_received: 0, civilian_casualties_caused: 3000 },
-                HRHB: { refugees_created: 20000, refugees_received: 0, civilian_casualties_caused: 2000 },
+                RBiH: { refugees_created: 30000, refugees_received: 0, civilian_casualties_caused: 18000 },
+                HRHB: { refugees_created: 20000, refugees_received: 0, civilian_casualties_caused: 12000 },
             },
         };
 

@@ -266,24 +266,26 @@ describe('bright-line INTEGRATION — a single authorized sweep on a LOW-cost ba
 
 // ── Part A (a): high territory + HIGH cost → NOT strategic_success ─────────────
 
-describe('verdict cost-floor — high territory + HIGH cost is capped', () => {
-    it('RS holding A+ territory but in a long bloody war is NOT strategic_success', () => {
+describe('verdict cost-floor — high territory + a genuinely bloodier-than-history war is capped', () => {
+    // Simple model (default): "high cost" = casualties ABOVE the frozen historical baseline
+    // (RS 95k). 150k is ~1.6× history → −1 human-cost step → A+ capped, not strategic_success.
+    it('RS holding A+ territory but in a bloodier-than-history war is NOT strategic_success', () => {
         const state = makeVerdictState(
-            { RS: { territory_controlled_pct: 58, war_crimes_events: 1 } },
-            { turn: 156, exhaustion: { RS: 8000 }, casualties: { RS: { killed: 30000, wounded: 15000 } } },
+            { RS: { territory_controlled_pct: 58 } },
+            { turn: 156, casualties: { RS: { killed: 90000, wounded: 60000 } } }, // 150k, ~1.6× of 95k
         );
         const verdict = computeFactionVerdict(state, 'RS');
         expect(verdict.grade).not.toBe('A+');
         expect(verdict.outcome_class).not.toBe('strategic_success');
     });
 
-    it('the cap is reflected in the grade description', () => {
+    it('the human-cost adjustment is reflected in the grade description', () => {
         const state = makeVerdictState(
-            { RS: { territory_controlled_pct: 58, war_crimes_events: 1 } },
-            { turn: 156, exhaustion: { RS: 8000 }, casualties: { RS: { killed: 30000, wounded: 15000 } } },
+            { RS: { territory_controlled_pct: 58 } },
+            { turn: 156, casualties: { RS: { killed: 90000, wounded: 60000 } } },
         );
         const verdict = computeFactionVerdict(state, 'RS');
-        expect(verdict.grade_description).toContain('war cost');
+        expect(verdict.grade_description).toContain('human cost');
     });
 });
 

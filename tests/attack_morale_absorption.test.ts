@@ -5,7 +5,11 @@
  *         homeland determination extra casualties, snap event emission.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { setCasualtyRealismFractionOverride, resetCasualtyRealismFractionOverride } from '../src/state/casualty_ledger.js';
+// Isolate the KIA/WIA/MIA split assertions from the DEFAULT-ON casualty-realism scaling.
+beforeEach(() => setCasualtyRealismFractionOverride({ RBiH: 1, RS: 1, HRHB: 1 }));
+afterEach(() => resetCasualtyRealismFractionOverride());
 import {
     evaluateAndApplyMoraleAbsorption,
     MORALE_ABSORPTION_CAS_MULT,
