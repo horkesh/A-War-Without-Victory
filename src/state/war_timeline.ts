@@ -137,6 +137,20 @@ export interface WarTimeline {
      *   docs/40_reports/audits/20260506_KRIVAJA_PHASE_1_5_MINI_PANEL.md
      */
     morale_drift_max_per_turn?: Record<string, StepCurveEntry[]>;
+    /**
+     * Phase 4 exhaustion input re-pacing (2026-08-10). Per-faction step-curve
+     * MULTIPLIER on the front/supply-driven war_exhaustion per-turn delta in
+     * `updateExhaustion` (applied to `delta·frictionMult·(1+ext+leg)`, NOT the
+     * Sarajevo siege term). Optional; absent (or no matching entry) ⇒ 1.0 ⇒
+     * byte-identical. Shapes the war-weariness ARC toward the historian target
+     * (flatter-mid, 1994 WA/cessation plateau for ARBiH/HVO, later-peaking within
+     * the §8.6 asymptotic soft-stop) WITHOUT rescaling the 0-10000 accumulator
+     * (no downstream-gate rescale). FRICTION-SAFE ENVELOPE: the curve MUST keep
+     * every faction's exhaustion ≥ ~900 from ~wk8 so command friction stays pinned
+     * at its cap (combat byte-identical); shaping lives above the ~900 floor.
+     * Design: `docs/plans/2026-08-10-phase4-exhaustion-arc-repacing-design.md`.
+     */
+    exhaustion_pacing?: Record<string, StepCurveEntry[]>;
 }
 
 // ── Generic lookup functions ─────────────────────────────────────────────────
@@ -321,6 +335,24 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
                     throw new Error(`WarTimeline: morale_drift_max_per_turn["${faction}"] must be an array`);
                 }
                 validateStepCurveEntries(entries, `morale_drift_max_per_turn["${faction}"]`);
+            }
+        }
+    }
+
+    // Phase 4 exhaustion input re-pacing (2026-08-10): validate optional
+    // `exhaustion_pacing` step-curve. Same shape/contiguity invariants as
+    // cohesion_drift / dissolution_* / morale_drift_max_per_turn.
+    {
+        const fieldVal = obj.exhaustion_pacing;
+        if (fieldVal !== undefined) {
+            if (typeof fieldVal !== 'object' || fieldVal === null) {
+                throw new Error('WarTimeline: "exhaustion_pacing" must be an object when present');
+            }
+            for (const [faction, entries] of Object.entries(fieldVal as Record<string, unknown>)) {
+                if (!Array.isArray(entries)) {
+                    throw new Error(`WarTimeline: exhaustion_pacing["${faction}"] must be an array`);
+                }
+                validateStepCurveEntries(entries, `exhaustion_pacing["${faction}"]`);
             }
         }
     }

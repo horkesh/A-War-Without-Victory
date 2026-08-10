@@ -73,6 +73,21 @@ Drivers (`exhaustion.ts`): `delta = min(200, supplyPressure·0.1 + staticFronts�
 - **KEEP:** §8.6 headroom soft-stop; the 0-10000 scale (no downstream gate rescale — the
   de-sat precedent proved scale-preservation sidesteps the WA/ceasefire/Storm re-derivation).
 
+## 4b. CLAMP CONSTRAINT (found while wiring L1 — critical for curve derivation)
+
+`effectiveDelta = min(200, delta·frictionMult·(1+ext+leg)·pacingMult + sarajevoExtra)`.
+Because `frictionMult` is the pinned-10 friction (§2) and `delta` for a strong faction is
+~64 (RS ~27 static fronts·2 + supply·0.1), the product `64·10·1.2 ≈ 768` is **clamped at
+200 almost every turn**. So the baseline arc is essentially the pure exponential
+`current(t) ≈ 10000·(1 − 0.98ᵗ)` (predicts wk50 = 63.6%, matches measured RS 66%).
+**Implication: `pacingMult` only bites below ~200/768 ≈ 0.26** — gentle values (0.5-0.7)
+leave the delta clamped at 200 (no-op). The lever is COARSE: to slow a strong faction's
+early climb to e.g. effectiveDelta 130 (~35% slower) needs `pacingMult ≈ 0.17`. This is
+floor-safe (RS at delta 130 still clears 900 by ~wk11: `10000·(1−0.987¹¹) ≈ 1330`) PROVIDED
+the wk0-~10 ramp is left at 1.0 so the climb to the 900 friction floor is untouched.
+Curve-authoring rule: keep wk0-10 = 1.0 (hold the floor); use ≤0.2-ish where real early
+flattening is wanted; the 1994 plateau likewise needs ≤~0.2 to actually halt the climb.
+
 ## 5. Acceptance gate (one-change-per-run; 188w-first; full anchor diff)
 
 1. `matched_osids ≥ 634` AND **full 31-anchor_checks diff byte-compared** (never net matched

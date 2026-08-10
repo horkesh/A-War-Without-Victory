@@ -15,6 +15,7 @@ import { getSarajevoSiegeParams } from './sarajevo_siege_params.js';
 import { isSectorColdFront } from './sector_utils.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
 import { getActiveSarajevoLifeline } from '../../state/sarajevo_lifeline.js';
+import { lookupStepCurve } from '../../state/war_timeline.js';
 
 /** Exhaustion per static front (Engine Invariants §6, §8). */
 const EXHAUSTION_PER_STATIC_FRONT = 2;
@@ -105,7 +106,16 @@ export function updateExhaustion(
         if (sarajevoLifeline && fid === 'RBiH' && sarajevoExtra > 0) {
             sarajevoExtra = sarajevoExtra * (1 - 0.5 * sarajevoLifeline.throughput);
         }
-        const effectiveDelta = Math.min(MAX_DELTA_PER_TURN, delta * multiplier * (1 + externalMod + legitimacyMod) + sarajevoExtra);
+        // Phase 4 exhaustion input re-pacing (2026-08-10): per-faction step-curve
+        // MULTIPLIER on the front/supply-driven delta (NOT the Sarajevo siege term).
+        // Absent curve (or no matching turn) ⇒ 1.0 ⇒ byte-identical. Shapes the arc
+        // above the ~900 friction-saturation floor; the data itself is the gate.
+        const pacingMult = lookupStepCurve(
+            state.military?.war_timeline?.exhaustion_pacing?.[fid],
+            state.meta.turn,
+            1.0,
+        );
+        const effectiveDelta = Math.min(MAX_DELTA_PER_TURN, delta * multiplier * (1 + externalMod + legitimacyMod) * pacingMult + sarajevoExtra);
         // Phase C: enclave resilience reduces exhaustion growth (only RBiH has enclaves)
         const enclaveResilience = getMaxEnclaveResilienceForFaction(state, fid);
         const enclaveReduction = enclaveResilience * RESILIENCE_EFFECT_SCALE;
