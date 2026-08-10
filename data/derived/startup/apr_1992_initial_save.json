@@ -39026,6 +39026,22 @@
           "start_week": 26
         }
       ],
+      "exhaustion_pacing": {
+        "HRHB": [
+          {
+            "end_turn": 110,
+            "start_turn": 90,
+            "value": 0.15
+          }
+        ],
+        "RBiH": [
+          {
+            "end_turn": 110,
+            "start_turn": 90,
+            "value": 0.15
+          }
+        ]
+      },
       "external_support": [
         {
           "combat_multiplier": 1.26,
