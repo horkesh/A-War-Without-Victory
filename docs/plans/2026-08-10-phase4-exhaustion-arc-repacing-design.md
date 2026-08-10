@@ -1,6 +1,34 @@
 # Phase 4 — Exhaustion Input Re-Pacing (arc within the friction-safe envelope)
 
-**Date:** 2026-08-10 · **Branch:** codex/master-roadmap-execution · **Status:** DESIGN (pre-build)
+**Date:** 2026-08-10 · **Branch:** codex/master-roadmap-execution · **Status:** OUTCOME — 1994 plateau ADOPTED (territory byte-flat); RS-side RETIRED (fidelity ceiling)
+
+## OUTCOME (2026-08-10)
+
+**ADOPTED — the ARBiH/HVO 1994 plateau (`exhaustion_pacing` RBiH+HRHB {wk90-110: ×0.15}).**
+Validated vs a clean baseline (n174 vs n175): **territory byte-flat every one of 188 weeks**
+(0 control_counts mismatches; matched 634; net counts RS 301/RBiH 309/HRHB 102 identical;
+total_flips 171=171; all 31 anchors identical); §6 correct; fire-weeks identical (Washington
+wk99/102/106 inside the plateau window — unshifted; Carter 138, COHA 139/156, Storm 174/175).
+40w structural fingerprint `5cfcf1c8` UNCHANGED; 52w/4w goldens RE-BLESSED (only `final_save.json`
+moves — it serializes `military.war_timeline.exhaustion_pacing`; the plateau is beyond both
+horizons so behaviour is byte-identical). A pure fidelity gain (the BB-cited 1994 WA/cessation
+war-weariness plateau) at ZERO calibration cost.
+
+**RETIRED — the RS-side re-pacing (curve 1's RS {wk10-80: ×0.20}).** Ran n173: matched 620 (−14),
+flipped three sacred RS-corridor anchors (doboj:boljanic_2, gracanica:petrovo_2, brcko_corridor
+band 5/6→3/6). Structural kill-criterion §6.3: RS transits the [3000,8000] tempo band during
+wk26-95 (unavoidable — its exhaustion is there mid-war), so any RS arc change perturbs RS attacker
+tempo on the most knife-edge anchors; and above 8000 (wk100+) the §8.6 headroom blocks
+intensification. RS re-pacing is boxed between the tempo band below and the §8.6 cap above — the
+residual RS front-load is the documented **fidelity ceiling** (the price of keeping the §8.6
+soft-stop), not a fixable bug. The mechanism (`exhaustion_pacing`) is retained and now carries only
+the adopted ARBiH/HVO plateau.
+
+---
+
+**(original design follows)**
+
+**Branch:** codex/master-roadmap-execution · **Prior status:** DESIGN (pre-build)
 **Owner directive (2026-08-07):** "keep the soft-stop, but tweak the input factors as well… I want it done right."
 **Gate posture:** 188w on the FULL 31-anchor diff (not net matched) + engine-health gate + exhaustion-curve gate.
 

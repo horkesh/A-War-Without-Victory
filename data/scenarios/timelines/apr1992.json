@@ -1,5 +1,13 @@
 {
   "id": "apr1992",
+  "exhaustion_pacing": {
+    "RBiH": [
+      { "start_turn": 90, "end_turn": 110, "value": 0.15 }
+    ],
+    "HRHB": [
+      { "start_turn": 90, "end_turn": 110, "value": 0.15 }
+    ]
+  },
   "doctrine_phases": {
     "RS": [
       {
