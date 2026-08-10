@@ -181,6 +181,20 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         expect(cleansing.outcome_class).not.toBe('strategic_success');
     });
 
+    it('EMERGENT non-genocide mass-atrocity sets the §3.4 flag and forces hollow_victory (atrocity grade-DECISIVE)', () => {
+        const restrained = computeFactionVerdict(restrainedState(), 'RS');
+        const cleansing = computeFactionVerdict(cleansingState(), 'RS');
+        // The new non-genocide condemnation tier: significant atrocity sets the flag,
+        const cleansing2 = cleansing.condemnation_flags;
+        expect(cleansing2).toContain('mass_atrocity_condemnation');
+        expect(restrained.condemnation_flags).not.toContain('mass_atrocity_condemnation');
+        // which taints the outcome to hollow_victory even in a short/cheap war where the
+        // additive cost term is inert — so atrocity is decisive at the outcome-class level,
+        expect(cleansing.outcome_class).toBe('hollow_victory');
+        // and the restrained (atrocity-free) variant reads as a strictly cleaner class.
+        expect(outcomeRank(restrained.outcome_class)).toBeLessThan(outcomeRank(cleansing.outcome_class));
+    });
+
     it('the extra territory cleansing buys is NET-NEGATIVE: cleansing scores strictly WORSE', () => {
         // The strong form of the bright line: despite MORE territory, the
         // cleansing path lands a strictly worse grade than restraint.

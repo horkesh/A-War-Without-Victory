@@ -139,6 +139,23 @@ const ATROCITY_WEIGHTS = Object.freeze({
 const ATROCITY_COST_GAIN = 0.85;
 
 /**
+ * Non-genocide mass-atrocity condemnation (2026-08-10, EMERGENT-ONLY).
+ *
+ * The additive atrocity cost term (ATROCITY_COST_GAIN) is grade-INERT for a
+ * full-length campaign: the base war_cost_index already saturates to ≥0.78 from
+ * genuine casualties/exhaustion, so cleansing cannot make the C-cap worse. Canon
+ * §3.5:166 assigns "pushing an outcome BELOW C" to CONDEMNATION FLAGS (§3.4), not
+ * the cost cap — and today the only flag is `genocide_condemnation` (Srebrenica).
+ * This adds the missing tier: significant NON-genocide atrocity (`atrocitySubScore`
+ * ≥ threshold) sets `mass_atrocity_condemnation`, which `classifyOutcome` turns
+ * into a hollow_victory — so atrocity is grade-DECISIVE at the outcome-class level
+ * (a bloody campaign's `pyrrhic_success` C becomes `hollow_victory`) without any
+ * casualty-scoring change. EMERGENT-ONLY (historical mode byte-identical). Routed
+ * via SENSITIVE_HISTORY_DESIGN_GATE §2; threshold pending §6-panel confirm.
+ */
+const MASS_ATROCITY_CONDEMNATION_THRESHOLD = 0.5;
+
+/**
  * Grade ceilings keyed by ascending war_cost_index threshold.
  * Evaluated high-to-low; the first threshold the cost index meets or exceeds
  * sets the BEST achievable grade. A higher-cost war can never read as a clean
@@ -660,6 +677,19 @@ export function computeFactionVerdict(
 
     // Collect condemnation flags from rupture consequences (Ring 2)
     const condemnationFlags = collectCondemnationFlags(state, faction);
+    // EMERGENT-ONLY non-genocide mass-atrocity condemnation (§3.4 tier — see
+    // MASS_ATROCITY_CONDEMNATION_THRESHOLD): significant cleansing that isn't the
+    // adjudicated Srebrenica genocide still taints the outcome to hollow_victory,
+    // making atrocity grade-DECISIVE where the additive cost term is inert. Skipped
+    // when genocide is already flagged (that forces the worse `failure`). Historical/
+    // unset mode untouched (emergent-gated), keeping the baseline verdict byte-identical.
+    if (state.meta?.decision_mode === 'emergent'
+        && !condemnationFlags.includes('genocide_condemnation')
+        && !condemnationFlags.includes('mass_atrocity_condemnation')
+        && computeAtrocitySubScore(state, faction) >= MASS_ATROCITY_CONDEMNATION_THRESHOLD) {
+        condemnationFlags.push('mass_atrocity_condemnation');
+        condemnationFlags.sort();
+    }
     const baseOutcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);
 
     // Comprehensive Dayton D3 (2026-06-07): a high-dysfunction peace can never read
