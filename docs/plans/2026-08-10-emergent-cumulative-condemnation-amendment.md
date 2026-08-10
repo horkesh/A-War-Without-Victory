@@ -29,3 +29,10 @@ The §6-grade-liveness fix (make atrocity grade-DECISIVE, currently inert at ful
 2. **Historian:** is the `atrocitySubScore ≥ 0.5` threshold a defensible "mass atrocity" line given the deliberately-low atrocity references (war_crimes_full 3, refugees_full 50k, civilian_full 5k)? What threshold does the record justify?
 3. **Calibration/systems:** confirm deterministic, emergent-only, historical byte-identical, monotonic; no feedback into territory; no ledger-classification gaming surface.
 4. **Red-team:** can §2a be gamed to launder atrocity, re-introduce calendar-driven flagging, or let a high-atrocity run escape the flag (or a low-atrocity run trip it)? Strongest break.
+
+---
+
+## REWORK (2026-08-10) — addresses red-team BLOCK; emergent-only counter trigger (committed `8c9e7f05a`)
+Panel v1: 3 GO-COND (calibration/canon-§6/historian, keep threshold) + red-team **BLOCK** (proven: `war_crimes_events` calendar-contaminated by scripted `humanitarian_impact` events; siege-alone false-positive; 2-vs-3 cliff-gaming). Owner: do the rework.
+**Built:** new `war_crimes_events_emergent` counter (negotiation_types.ts) written ONLY by `recordWarCrime` (genuine authorized paramilitary sweeps), NEVER by `applyHumanitarianImpact`/scripted effects. The §2a flag now triggers on `war_crimes_events_emergent ≥ MASS_ATROCITY_EMERGENT_WAR_CRIMES_MIN` (=1). This is emergent-by-construction (no calendar leak), siege-immune (keyed to authorized war crimes, not refugee/civilian legs), and gaming-cliff-free at MIN=1. Validated: tsc; 12/12 bright-line incl. new siege-false-positive + genocide-precedence tests; 100 scoring tests; historical byte-identical.
+**Re-panel scope:** red-team confirm the rework closes the block; historian confirm the trigger count (1 vs higher). Then canon edits (§2a incl. canon-seat clause-(0) non-erosion + §3.4 two-source rewording + historian anchor citations) land atomically.
