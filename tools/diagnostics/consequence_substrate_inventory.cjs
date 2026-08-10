@@ -68,6 +68,12 @@ const SUBSTRATE_OWNERS = {
     consumer: 'operation blocking / doctrine override / scope filters',
     status: 'live',
   },
+  enclave_formation_displacement: {
+    class: 'mechanical',
+    writer: 'applyEventEffects -> applyEnclaveFormationDisplacement -> state.military.formations (enclave-tagged formations relocated + casualty fraction applied)',
+    consumer: 'enclave-fall scripted events (Srebrenica/Žepa); flag-gated AWWV_ENCLAVE_COLUMN_DISPLACEMENT, default OFF = byte-identical no-op',
+    status: 'live',
+  },
   equipment_grant: {
     class: 'mechanical',
     writer: 'applyEventEffects -> equipment pools',

@@ -107,6 +107,7 @@ const ARTIFACT_POLICY_GROUPS = {
         'data/derived/scenario/recruitment_test_matrix_2026_02_11/',
         'data/derived/scenario/sweeps/h2_4/h2_4_sweep/',
         'data/derived/terrain/',
+        'docs/40_reports/FINAL_CALIBRATION_CANDIDATE_REPORT.md',
         'tests/fixtures/fatigue_distribution/compact_run/',
         'tools/diagnostics/_force_quality_*.md',
     ],
