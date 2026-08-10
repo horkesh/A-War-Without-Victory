@@ -107,7 +107,7 @@
 1. **[2026-06-06] Windows-safe local CLIs are repo contract**
    Do instead: use local package entrypoints or repo wrappers; do not rely on PATH/.bin luck.
 1b. **[2026-08-10] node_modules/.bin can be unpopulated on a checkout — `npm run` then fails silently on `tsx`/`tsc`**
-   Do instead: if `npm run <script>` errors "'tsx' is not recognized," invoke the entrypoint directly: `node node_modules/tsx/dist/cli.mjs <script.ts>` and `node node_modules/typescript/bin/tsc --noEmit`. Applies to test:vitest/test:baselines too.
+   Do instead: run `npm rebuild` to repopulate `.bin` (confirmed fix — 237 entries restored, all subprocess-spawning tests that shell out via `npm run` then pass). Until then, invoke entrypoints directly: `node node_modules/tsx/dist/cli.mjs <script.ts>` and `node node_modules/typescript/bin/tsc --noEmit`. This caused 6 of 15 `test:vitest:fast` failures this session (audit_state/political_control_audit_cli/data_extract1990/desktop_sim_bundle_smoke) — all local-environment noise, NOT code regressions; CI's fresh `npm ci` would not reproduce this.
 2. **[2026-06-26] Generic abort filters are too broad**
    Do instead: ignore only deliberate subframe or named teardown aborts; keep real request failures reportable.
 3. **[2026-06-26] Browser gates use tileless proof by default**
