@@ -187,8 +187,8 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         const cleansing = computeFactionVerdict(cleansingState(), 'RS');
         // The new non-genocide condemnation tier: significant atrocity sets the flag,
         const cleansing2 = cleansing.condemnation_flags;
-        expect(cleansing2).toContain('mass_atrocity_condemnation');
-        expect(restrained.condemnation_flags).not.toContain('mass_atrocity_condemnation');
+        expect(cleansing2).toContain('authorized_cleansing_condemnation');
+        expect(restrained.condemnation_flags).not.toContain('authorized_cleansing_condemnation');
         // which taints the outcome to hollow_victory even in a short/cheap war where the
         // additive cost term is inert — so atrocity is decisive at the outcome-class level,
         expect(cleansing.outcome_class).toBe('hollow_victory');
@@ -214,8 +214,30 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
             SHARED_COST,
         );
         const v = computeFactionVerdict(siege, 'RS');
-        expect(v.condemnation_flags).not.toContain('mass_atrocity_condemnation');
+        expect(v.condemnation_flags).not.toContain('authorized_cleansing_condemnation');
         expect(v.outcome_class).not.toBe('hollow_victory');
+    });
+
+    it('CATASTROPHIC siege/encirclement civilian harm (≥15000 caused, ZERO war crimes) DOES trip the flag', () => {
+        // Union gate #2 (red-team item-4 fix): a faction inflicting catastrophic multi-city
+        // civilian harm via siege/encirclement — invisible to recordWarCrime — is still
+        // condemned. 20,000 > the 15,000 catastrophic threshold (a lone Sarajevo-scale siege
+        // ~3,500-5,500 stays under; RS-scale ~27,541 is over).
+        const catastrophic = makeVerdictState(
+            {
+                RS: {
+                    territory_controlled_pct: 58,
+                    war_crimes_events: 0,
+                    war_crimes_events_emergent: 0,
+                    refugees_created: 800000,
+                    civilian_casualties_caused: 20000,
+                },
+            },
+            SHARED_COST,
+        );
+        const v = computeFactionVerdict(catastrophic, 'RS');
+        expect(v.condemnation_flags).toContain('authorized_cleansing_condemnation');
+        expect(v.outcome_class).toBe('hollow_victory');
     });
 
     it('GENOCIDE PRECEDENCE: co-occurring genocide + emergent war crimes → failure, NOT the milder mass-atrocity flag', () => {
@@ -232,7 +254,7 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
         } as any];
         const v = computeFactionVerdict(state, 'RS');
         expect(v.condemnation_flags).toContain('genocide_condemnation');
-        expect(v.condemnation_flags).not.toContain('mass_atrocity_condemnation');
+        expect(v.condemnation_flags).not.toContain('authorized_cleansing_condemnation');
         expect(v.outcome_class).toBe('failure');
     });
 

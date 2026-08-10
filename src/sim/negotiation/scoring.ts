@@ -139,31 +139,41 @@ const ATROCITY_WEIGHTS = Object.freeze({
 const ATROCITY_COST_GAIN = 0.85;
 
 /**
- * Non-genocide mass-atrocity condemnation (2026-08-10, EMERGENT-ONLY).
+ * Non-genocide `authorized_cleansing_condemnation` (2026-08-10, EMERGENT-ONLY).
  *
  * The additive atrocity cost term (ATROCITY_COST_GAIN) is grade-INERT for a
  * full-length campaign: the base war_cost_index already saturates to ≥0.78 from
  * genuine casualties/exhaustion, so cleansing cannot make the C-cap worse. Canon
  * §3.5:166 assigns "pushing an outcome BELOW C" to CONDEMNATION FLAGS (§3.4), not
- * the cost cap — and today the only flag is `genocide_condemnation` (Srebrenica).
- * This adds the missing tier: significant NON-genocide atrocity (`atrocitySubScore`
- * ≥ threshold) sets `mass_atrocity_condemnation`, which `classifyOutcome` turns
- * into a hollow_victory — so atrocity is grade-DECISIVE at the outcome-class level
- * (a bloody campaign's `pyrrhic_success` C becomes `hollow_victory`) without any
- * casualty-scoring change. EMERGENT-ONLY (historical mode byte-identical).
+ * the cost cap — and the only pre-existing flag is `genocide_condemnation` (Srebrenica).
+ * This adds the missing tier: significant non-genocide cleansing sets
+ * `authorized_cleansing_condemnation`, which `classifyOutcome` turns into a
+ * hollow_victory — so atrocity is grade-DECISIVE at the outcome-class level (a bloody
+ * campaign's `pyrrhic_success` C becomes `hollow_victory`) without any casualty-scoring
+ * change. EMERGENT-ONLY (historical mode byte-identical). Genocide takes precedence.
  *
- * TRIGGER (2026-08-10 §6-panel rework): keyed to `war_crimes_events_emergent` — a
- * COUNT of genuine, player/bot-authorized in-war paramilitary sweeps (the sole writer
- * is `recordWarCrime`; scripted `humanitarian_impact` narrative events do NOT touch it).
- * This closes the red-team BLOCK: the earlier blended `atrocitySubScore ≥ 0.5` trigger
- * was contaminated by calendar-windowed scripted events (`applyHumanitarianImpact`
- * writes the shared `war_crimes_events`), could fire on ordinary siege displacement
- * alone (refugee+civilian legs = 0.5), and had a gameable 2-vs-3 cliff. A discrete count
- * of authorized cleansings is emergent by construction, siege-immune, and — at MIN=1 —
- * has no sub-threshold gaming room ("atrocity is a consequence, not a lever"). MIN is
- * panel-set (re-panel pending: 1 anti-gaming vs a higher mass-pattern count).
+ * TRIGGER — UNION of two calendar-CLEAN emergent signals (§6-panel v2, 2026-08-10):
+ *   (1) `war_crimes_events_emergent ≥ 1` — any single player/bot-AUTHORIZED paramilitary
+ *       sweep (deliberate cleansing of a settlement). Sole writer is `recordWarCrime`;
+ *       scripted `humanitarian_impact` events never touch it (no calendar leak). MIN=1
+ *       because a pattern requirement is a "free atrocity budget" the §6 bright line
+ *       forbids, and the record (Bijeljina/Zvornik/Višegrad/Foča 1992) shows a single
+ *       authorized cleansing was already atrocity-grade (ICTY Vasiljević/Kunarac/Krajišnik).
+ *   (2) `civilian_casualties_caused ≥ 15000` — CATASTROPHIC siege/encirclement-driven
+ *       civilian harm, backstopping the `updateDisplacement` blind spot (that pipeline
+ *       never calls `recordWarCrime`). Attributed to the CAUSER faction. 15,000 sits 2.7×
+ *       above a lone Sarajevo-scale siege (~3,500-5,500 civilian dead, ICTY Galić — a
+ *       single brutal siege must NOT trip this) and 1.84× below RS's modeled multi-
+ *       municipality campaign (~27,541) — the "brutal single siege vs catastrophic
+ *       campaign" line. `refugees_created` is deliberately NOT gated (too coarse: ordinary
+ *       front movement displaces on all sides).
+ * Panel history: v1 (blended atrocitySubScore≥0.5) RETIRED — calendar-contaminated +
+ * siege-false-positive + cliff-gameable. See docs/plans/2026-08-10-emergent-cumulative-
+ * condemnation-amendment.md.
  */
-const MASS_ATROCITY_EMERGENT_WAR_CRIMES_MIN = 1;
+const AUTHORIZED_CLEANSING_WAR_CRIMES_MIN = 1;
+/** Catastrophic siege/encirclement civilian harm (causer-attributed) that alone condemns. */
+const CATASTROPHIC_CIVILIAN_HARM_MIN = 15000;
 
 /**
  * Grade ceilings keyed by ascending war_cost_index threshold.
@@ -687,18 +697,23 @@ export function computeFactionVerdict(
 
     // Collect condemnation flags from rupture consequences (Ring 2)
     const condemnationFlags = collectCondemnationFlags(state, faction);
-    // EMERGENT-ONLY non-genocide mass-atrocity condemnation (§3.4 tier — see
-    // MASS_ATROCITY_CONDEMNATION_THRESHOLD): significant cleansing that isn't the
-    // adjudicated Srebrenica genocide still taints the outcome to hollow_victory,
-    // making atrocity grade-DECISIVE where the additive cost term is inert. Skipped
-    // when genocide is already flagged (that forces the worse `failure`). Historical/
-    // unset mode untouched (emergent-gated), keeping the baseline verdict byte-identical.
-    const emergentWarCrimes = state.military?.negotiation?.capital?.[faction]?.war_crimes_events_emergent ?? 0;
+    // EMERGENT-ONLY non-genocide authorized_cleansing_condemnation (§3.4 tier — see the
+    // AUTHORIZED_CLEANSING_WAR_CRIMES_MIN / CATASTROPHIC_CIVILIAN_HARM_MIN block above):
+    // significant cleansing that isn't the adjudicated Srebrenica genocide still taints the
+    // outcome to hollow_victory, making atrocity grade-DECISIVE where the additive cost term
+    // is inert. UNION of two calendar-clean emergent signals — ≥1 authorized paramilitary
+    // sweep OR catastrophic siege/encirclement civilian harm. Skipped when genocide is already
+    // flagged (that forces the worse `failure`). Historical/unset mode untouched
+    // (emergent-gated), keeping the baseline verdict byte-identical.
+    const atrocityCapital = state.military?.negotiation?.capital?.[faction];
+    const emergentWarCrimes = atrocityCapital?.war_crimes_events_emergent ?? 0;
+    const civilianHarmCaused = atrocityCapital?.civilian_casualties_caused ?? 0;
     if (state.meta?.decision_mode === 'emergent'
         && !condemnationFlags.includes('genocide_condemnation')
-        && !condemnationFlags.includes('mass_atrocity_condemnation')
-        && emergentWarCrimes >= MASS_ATROCITY_EMERGENT_WAR_CRIMES_MIN) {
-        condemnationFlags.push('mass_atrocity_condemnation');
+        && !condemnationFlags.includes('authorized_cleansing_condemnation')
+        && (emergentWarCrimes >= AUTHORIZED_CLEANSING_WAR_CRIMES_MIN
+            || civilianHarmCaused >= CATASTROPHIC_CIVILIAN_HARM_MIN)) {
+        condemnationFlags.push('authorized_cleansing_condemnation');
         condemnationFlags.sort();
     }
     const baseOutcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);

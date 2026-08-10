@@ -36,7 +36,7 @@ export interface NegotiationBreakdown {
      * (genuine in-war paramilitary sweeps the player/bot authorized), NEVER by
      * scripted `humanitarian_impact` narrative effects (`applyHumanitarianImpact`).
      * The shared `war_crimes_events` above conflates both; this counter is the clean
-     * emergent signal for the §2a `mass_atrocity_condemnation` flag so that flag can
+     * emergent signal for the §2a `authorized_cleansing_condemnation` flag so that flag can
      * never be tripped by a calendar-windowed scripted event (SENSITIVE_HISTORY_
      * DESIGN_GATE §2 criterion 11). Additive-optional; absent ⇒ 0.
      */
