@@ -105,28 +105,6 @@ const COST_WEIGHTS = Object.freeze({
     duration: 0.2,
 });
 
-/**
- * Flag-gated "catastrophe-ceiling" BASE references (Pyrrhic scoring A-reachability,
- * 2026-08-10). Default OFF ⇒ the frozen COST_REFERENCE above (byte-identical historical
- * verdict). ON (`AWWV_SCORING_CEILING_V2`): the base exhaustion/casualties/duration
- * references sit ABOVE historical (annihilation-scale), so historical-level play lands
- * ~B instead of the saturated flat-C, better-than-historical play reaches A, and worse
- * play caps to C/D/F. ONLY the base references move — the atrocity references
- * (war_crimes_full / refugees_full / civilian_casualties_full) stay ABSOLUTE at their
- * deliberately-low values (canon §3.5 A2; scoring-panel Condition 1). Weights unchanged.
- * This is the sign-off grade-table lever; it becomes the default only after owner
- * sign-off + the §3.5 canon amendment. Pairs with the casualty ledger/territory decouple
- * (realistic totals) and the hardened §6 letter-grade cap (capGradeByCondemnation).
- */
-const CEILING_V2_BASE = Object.freeze({
-    exhaustion_full: 12000,
-    casualties_full: 250000,
-    duration_full_weeks: 250,
-});
-function scoringCeilingV2Enabled(): boolean {
-    const raw = typeof process === 'undefined' ? undefined : process.env.AWWV_SCORING_CEILING_V2;
-    return raw === '1' || raw === 'true' || raw === 'on';
-}
 
 // ── ATROCITY TERM — the ethics bright line (Free War Phase 5, Slice 1) ────────
 //
@@ -369,23 +347,21 @@ function freshenBreakdownForDisplay(
  * the 52w baseline grade) is byte-identical to before this slice.
  */
 export function computeWarCostIndex(state: GameState, faction: string): number {
-    // Flag-gated catastrophe-ceiling BASE references (default OFF = byte-identical).
-    const v2 = scoringCeilingV2Enabled();
-    const exhFull = v2 ? CEILING_V2_BASE.exhaustion_full : COST_REFERENCE.exhaustion_full;
-    const casFull = v2 ? CEILING_V2_BASE.casualties_full : COST_REFERENCE.casualties_full;
-    const durFull = v2 ? CEILING_V2_BASE.duration_full_weeks : COST_REFERENCE.duration_full_weeks;
-
+    // LEGACY path: consulted only when AWWV_SCORING_SIMPLE is explicitly OFF (the simple
+    // grade model is default; see scoringSimpleEnabled / applyHumanCostShift). Retained
+    // for regression/comparison; the catastrophe-ceiling stepping-stone (CEILING_V2) was
+    // retired once the simple model landed — it superseded reference re-derivation.
     const exhaustion = state.political?.war_exhaustion?.[faction] ?? 0;
-    const exhaustionScore = clamp01(exhaustion / exhFull);
+    const exhaustionScore = clamp01(exhaustion / COST_REFERENCE.exhaustion_full);
 
     const ledger = state.military?.casualty_ledger?.[faction];
     const casualties = ledger
         ? (ledger.killed ?? 0) + (ledger.wounded ?? 0) + (ledger.missing_captured ?? 0)
         : 0;
-    const casualtyScore = clamp01(casualties / casFull);
+    const casualtyScore = clamp01(casualties / COST_REFERENCE.casualties_full);
 
     const weeks = state.meta?.turn ?? 0;
-    const durationScore = clamp01(weeks / durFull);
+    const durationScore = clamp01(weeks / COST_REFERENCE.duration_full_weeks);
 
     const baseIndex =
         exhaustionScore * COST_WEIGHTS.exhaustion +
