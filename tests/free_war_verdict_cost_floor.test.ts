@@ -17,6 +17,8 @@ import {
     capGradeByCondemnation,
     classifyOutcome,
     computeFactionVerdict,
+    humanCostGradeShift,
+    applyHumanCostShift,
 } from '../src/sim/negotiation/scoring.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
 import type { NegotiationBreakdown } from '../src/state/negotiation_types.js';
@@ -187,6 +189,47 @@ describe('classifyOutcome — condemnation taints at ANY territory (red-team L2)
     });
     it('no condemnation ⇒ grade-based mapping (survival for A) is untouched', () => {
         expect(classifyOutcome('RBiH', makeBreakdown({ territory_controlled_pct: 50 }), undefined, 'A', 0, [])).toBe('survival');
+    });
+});
+
+// ── SIMPLE SCORING MODEL (owner-directed, 2026-08-10) ─────────────────────────
+// earned grade ± human-cost-vs-frozen-historical, atrocity-hard-gated. No saturation,
+// no clamped references, no live baseline. A is reachable for a less-bloody-than-history
+// war; atrocity still caps to C via capGradeByCondemnation.
+
+describe('humanCostGradeShift — signed step vs the frozen historical baseline', () => {
+    it('materially less bloody than history ⇒ +1', () => {
+        expect(humanCostGradeShift('RBiH', 70000)).toBe(1);   // ~0.5× of 140k
+        expect(humanCostGradeShift('RS', 45000)).toBe(1);     // ~0.47× of 95k
+    });
+    it('historical-level ⇒ 0 (par — no free grade)', () => {
+        expect(humanCostGradeShift('RBiH', 140000)).toBe(0);
+        expect(humanCostGradeShift('RBiH', 160000)).toBe(0);  // 1.14×, within par band
+    });
+    it('markedly / catastrophically bloodier ⇒ −1 / −2', () => {
+        expect(humanCostGradeShift('RBiH', 210000)).toBe(-1); // 1.5×
+        expect(humanCostGradeShift('RBiH', 300000)).toBe(-2); // 2.14×
+    });
+    it('unknown faction / zero casualties ⇒ 0', () => {
+        expect(humanCostGradeShift('XYZ', 100000)).toBe(0);
+        expect(humanCostGradeShift('RBiH', 0)).toBe(0);
+    });
+});
+
+describe('applyHumanCostShift — earned grade shifted by human cost, A+ stays reserved', () => {
+    it('a less-bloody war lifts the earned grade (B ⇒ A)', () => {
+        expect(applyHumanCostShift('B', 'RBiH', 70000)).toBe('A');
+        expect(applyHumanCostShift('C', 'RBiH', 70000)).toBe('B');
+    });
+    it('cost alone NEVER manufactures A+ (strategic_success stays anchor-reserved)', () => {
+        expect(applyHumanCostShift('A', 'RBiH', 70000)).toBe('A'); // +1 floored at A
+    });
+    it('a bloodier war lowers the earned grade', () => {
+        expect(applyHumanCostShift('B', 'RBiH', 210000)).toBe('C'); // −1
+        expect(applyHumanCostShift('B', 'RBiH', 300000)).toBe('D'); // −2
+    });
+    it('historical-level play ⇒ grade unchanged', () => {
+        expect(applyHumanCostShift('B', 'RBiH', 140000)).toBe('B');
     });
 });
 

@@ -448,6 +448,64 @@ export function capGradeByCondemnation(grade: string, condemnationFlags: readonl
     return gradeRank(grade) >= gradeRank(cap) ? grade : cap;
 }
 
+/**
+ * SIMPLE SCORING MODEL (2026-08-10, owner-directed — replaces the war_cost_index
+ * weighted-clamp-cap machine that saturated every full campaign to C).
+ *
+ *   final grade = atrocityGate( earnedGrade + humanCostShift )
+ *
+ * - earnedGrade: the §3.2 anchor grade (already differentiates by play).
+ * - humanCostShift: a signed grade step from the faction's casualties vs a FROZEN
+ *   historical constant (no live baseline, no clamped references, no saturation).
+ *   Materially LESS bloody than history → +1 ("you authored a less-catastrophic war");
+ *   historical-level → 0 (par); markedly/​catastrophically bloodier → −1 / −2.
+ *   Positive shift is capped so cost alone can never MANUFACTURE A+ (strategic_success
+ *   stays anchor-reserved — game-design panel condition).
+ * - atrocityGate: capGradeByCondemnation (already shipped) — any authorized atrocity
+ *   caps to C regardless of how "cheap" the war was, closing the A0 inversion.
+ *
+ * Flag-gated `AWWV_SCORING_SIMPLE`; default OFF ⇒ the legacy war_cost_index path
+ * (byte-identical). The frozen baseline is a HISTORICAL FACT (KIA+WIA+MIA), not fit to
+ * sim output (§3.5 A2), and the cost axis is casualties, never territory (§3.5 A3).
+ */
+const HISTORICAL_CASUALTY_BASELINE: Record<string, number> = Object.freeze({
+    RBiH: 140000,
+    RS: 95000,
+    HRHB: 35000,
+});
+function scoringSimpleEnabled(): boolean {
+    const raw = typeof process === 'undefined' ? undefined : process.env.AWWV_SCORING_SIMPLE;
+    return raw === '1' || raw === 'true' || raw === 'on';
+}
+/** Signed grade step from casualties vs the frozen historical baseline. +1..−2. */
+export function humanCostGradeShift(faction: string, casualties: number): number {
+    const hist = HISTORICAL_CASUALTY_BASELINE[faction];
+    if (!hist || hist <= 0 || casualties <= 0) return 0;
+    const ratio = casualties / hist;
+    if (ratio <= 0.75) return 1;   // materially less bloody than history
+    if (ratio < 1.33) return 0;    // historical-level (par)
+    if (ratio < 2.0) return -1;    // markedly bloodier
+    return -2;                     // catastrophically bloodier
+}
+/**
+ * Apply the human-cost shift to an earned grade (simple model). Positive shift is
+ * floored at A — cost alone never manufactures A+ (that stays anchor-reserved).
+ */
+export function applyHumanCostShift(grade: string, faction: string, casualties: number): string {
+    const shift = humanCostGradeShift(faction, casualties);
+    if (shift === 0) return grade;
+    const earnedIdx = gradeRank(grade);
+    let newIdx = earnedIdx - shift; // +1 shift ⇒ toward the better (lower-index) grade
+    if (shift > 0 && earnedIdx > 0) newIdx = Math.max(1, newIdx); // no A+ from cost alone
+    newIdx = Math.max(0, Math.min(GRADE_RANK.length - 1, newIdx));
+    return GRADE_RANK[newIdx]!;
+}
+/** Sum a faction's cumulative casualties (killed + wounded + missing) from the ledger. */
+function factionTotalCasualties(state: GameState, faction: string): number {
+    const l = state.military?.casualty_ledger?.[faction];
+    return l ? (l.killed ?? 0) + (l.wounded ?? 0) + (l.missing_captured ?? 0) : 0;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Faction Grade Anchors — historical outcome-based grading
 // ═══════════════════════════════════════════════════════════════════════════
@@ -735,10 +793,13 @@ export function computeFactionVerdict(
     // read as a clean triumph. Post-termination reflection — reads accrued cost,
     // caps the grade downward only. Territory alone can no longer buy A+.
     const costIndex = computeWarCostIndex(state, faction);
-    // Cost cap first; the atrocity condemnation LETTER-grade cap (§6 bright line) is
-    // applied AFTER the condemnation flags are collected below (they are not known yet
-    // here), then the condemnation-capped grade drives description + classifyOutcome.
-    const costCappedGrade = capGradeByCost(earned.grade, costIndex);
+    // Human-cost step (simple model, flag ON) OR the legacy war_cost_index cap (default).
+    // Either way the atrocity condemnation LETTER-grade cap (§6 bright line) is applied
+    // AFTER the condemnation flags are collected below, then drives description +
+    // classifyOutcome. Default OFF ⇒ the legacy cap ⇒ byte-identical.
+    const costCappedGrade = scoringSimpleEnabled()
+        ? applyHumanCostShift(earned.grade, faction, factionTotalCasualties(state, faction))
+        : capGradeByCost(earned.grade, costIndex);
 
     const dimensionGrades = computeDimensionGrades(capital, faction, dimStore);
 
@@ -790,7 +851,9 @@ export function computeFactionVerdict(
         ? earned.description
         : grade !== costCappedGrade
             ? `${earned.description} — capped by atrocity condemnation`
-            : `${earned.description} — capped by war cost (index ${costIndex.toFixed(2)})`;
+            : scoringSimpleEnabled()
+                ? `${earned.description} — adjusted by human cost vs. the historical war`
+                : `${earned.description} — capped by war cost (index ${costIndex.toFixed(2)})`;
     const baseOutcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);
 
     // Comprehensive Dayton D3 (2026-06-07): a high-dysfunction peace can never read
