@@ -106,6 +106,8 @@
 ## Shell & Command Reliability
 1. **[2026-06-06] Windows-safe local CLIs are repo contract**
    Do instead: use local package entrypoints or repo wrappers; do not rely on PATH/.bin luck.
+1b. **[2026-08-10] node_modules/.bin can be unpopulated on a checkout — `npm run` then fails silently on `tsx`/`tsc`**
+   Do instead: if `npm run <script>` errors "'tsx' is not recognized," invoke the entrypoint directly: `node node_modules/tsx/dist/cli.mjs <script.ts>` and `node node_modules/typescript/bin/tsc --noEmit`. Applies to test:vitest/test:baselines too.
 2. **[2026-06-26] Generic abort filters are too broad**
    Do instead: ignore only deliberate subframe or named teardown aborts; keep real request failures reportable.
 3. **[2026-06-26] Browser gates use tileless proof by default**
