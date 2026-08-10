@@ -33,6 +33,51 @@ export interface FactionCasualtyLedger {
 
 export type CasualtyLedger = Record<FactionId, FactionCasualtyLedger>;
 
+// --- Casualty realism (ledger/territory decouple, 2026-08-10) ---
+
+/**
+ * The casualty ledger records CUMULATIVE gross battle personnel-removed. Because
+ * formations RECONSTITUTE between battles, the same soldier can be removed, returned,
+ * and removed again — each removal is recorded, but only the NON-reconstituted share
+ * is a PERMANENT casualty. The sim therefore over-produces cumulative casualties
+ * (~2.3× historical for RBiH, which fights the most battles → most reconstitution
+ * churn) which saturates the Pyrrhic `war_cost_index` (all factions → grade C).
+ *
+ * This per-faction fraction scales the RECORDED ledger casualties to the permanent
+ * share, so scoring + UI report realistic totals (target KIA: RBiH ~30k / RS ~24k /
+ * HRHB ~8k; the realistic ~1:3.8:0.4 KIA:WIA:MIA split is preserved by scaling all
+ * three uniformly). **TERRITORY-NEUTRAL by construction** (proven byte-flat 0/188 weeks,
+ * runs n176/n177): the two territory/power drivers are SEPARATE, upstream, and unscaled —
+ * (a) `applyPersonnelLoss` removes personnel at the call site; (b) the `pool.exhausted +=
+ * (killed+mia)*0.75` demographic feed (frontline_attrition.ts:370, siege_attrition.ts:193)
+ * reads the LOCAL killed/mia computed at the call site, NOT this ledger's accumulation.
+ * This lane RESOLVES the `casualty_realism_v2_gate.ts:50-54` "changing a total couples to
+ * territory" wall: that coupling is through the LOCAL killed+mia → pool.exhausted, so
+ * scaling here (at ledger accumulation, downstream of and orthogonal to that feed) is
+ * territory-free — the split-vs-total distinction the V2 lane needed. The V2 gate owns the
+ * KIA/WIA/MIA SPLIT at distribution; this owns the TOTAL realism SCALE at the ledger — two
+ * necessarily-separate pipeline stages, not overlapping ownership. Default 1.0 ⇒
+ * byte-identical (the ledger feeds only scoring/endgame/UI, never the combat/territory loop).
+ *
+ * Env override (per-faction, else the global, else 1.0), read once at module load:
+ *   AWWV_CASUALTY_REALISM_FRACTION (global), AWWV_CASUALTY_REALISM_{RBIH,RS,HRHB}.
+ */
+function parseCasualtyRealismFraction(): Record<string, number> {
+    const g = Number(process.env.AWWV_CASUALTY_REALISM_FRACTION);
+    const base = Number.isFinite(g) && g > 0 ? g : 1.0;
+    const per = (k: string): number => {
+        const v = Number(process.env[`AWWV_CASUALTY_REALISM_${k}`]);
+        return Number.isFinite(v) && v > 0 ? v : base;
+    };
+    return { RBiH: per('RBIH'), RS: per('RS'), HRHB: per('HRHB') };
+}
+const CASUALTY_REALISM_FRACTION: Record<string, number> = parseCasualtyRealismFraction();
+
+/** Scale a casualty count by a faction's permanent-casualty fraction (1.0 ⇒ unchanged). */
+function applyRealismFraction(value: number, frac: number): number {
+    return frac === 1.0 ? value : Math.round(value * frac);
+}
+
 // --- Helpers ---
 
 /** Create a zeroed-out casualty ledger for the given factions. */
@@ -82,13 +127,20 @@ export function recordBattleCasualties(
     const faction = ensureFaction(ledger, factionId);
     const formation = ensureFormation(faction, formationId);
 
-    faction.killed += casualties.killed;
-    faction.wounded += casualties.wounded;
-    faction.missing_captured += casualties.missing_captured;
+    // Casualty realism (ledger/territory decouple): scale the RECORDED casualties to
+    // the permanent share. TERRITORY-NEUTRAL — applyPersonnelLoss is a separate call.
+    const frac = CASUALTY_REALISM_FRACTION[factionId] ?? 1.0;
+    const killed = applyRealismFraction(casualties.killed, frac);
+    const wounded = applyRealismFraction(casualties.wounded, frac);
+    const missing = applyRealismFraction(casualties.missing_captured, frac);
 
-    formation.killed += casualties.killed;
-    formation.wounded += casualties.wounded;
-    formation.missing_captured += casualties.missing_captured;
+    faction.killed += killed;
+    faction.wounded += wounded;
+    faction.missing_captured += missing;
+
+    formation.killed += killed;
+    formation.wounded += wounded;
+    formation.missing_captured += missing;
 }
 
 /** Record equipment losses for a faction in the ledger. */
