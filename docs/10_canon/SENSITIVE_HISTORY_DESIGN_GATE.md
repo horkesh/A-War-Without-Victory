@@ -110,6 +110,18 @@ A new rupture requires:
 
 Adding a rupture is a capital-R Decision. The default is: do not add one.
 
+### §2a — Emergent-cumulative condemnation (verdict-time, non-rupture)
+
+Adopted 2026-08-10 (Pyrrhic §6 panel: calibration/canon-§6/historian/red-team, GO-with-conditions; owner-directed). Distinct from ruptures (§2: discrete, recorded, permanent, ICTY-adjudicated), the verdict MAY apply a verdict-time **emergent-cumulative condemnation flag** — currently `authorized_cleansing_condemnation` — subject to ALL of:
+
+- **(0) Non-erosion.** §2a does NOT amend, relax, or create precedent against §2 criterion 3's binding discrete-trigger requirement for **rupture** status, nor against criterion 11's calendar prohibition. Criterion 3 continues to govern rupture eligibility without exception; a future proposal citing §2a as precedent for a cumulative *rupture* trigger is out of scope and must be re-blocked. §2a is a structurally distinct, lower-severity, **non-adjudicative** construct: it MUST never be cited with a specific ICTY/ICJ finding, never named after a specific historical incident (Ahmići, Kravica, etc.), never given a Ring-2 essay or Chronicle "recorded on turn X" framing, and is labeled everywhere as a general aggregate severity judgment over the faction's own **modeled** harm — not an accusation of any named event.
+- **(i) Emergent-only.** Applies only when `decision_mode === 'emergent'`; historical/unset mode is byte-identical.
+- **(ii) Modeled-atrocity-driven, never calendar.** The trigger is a UNION of calendar-CLEAN emergent signals, each produced solely by the modeled war (never by scripted `humanitarian_impact`/calendar-windowed events): **(a)** `war_crimes_events_emergent ≥ 1` — any single player/bot-authorized paramilitary sweep (sole writer `recordWarCrime`; a pattern requirement is a §6-forbidden "free atrocity budget", and a single authorized cleansing was already atrocity-grade — Bijeljina/Zvornik/Višegrad/Foča 1992, ICTY *Vasiljević*/*Kunarac*/*Krajišnik*); **OR (b)** `civilian_casualties_caused ≥ 15,000` (causer-attributed, from the emergent displacement pipeline) — catastrophic siege/encirclement harm, backstopping the displacement blind spot; 2.7× above a lone Sarajevo-scale siege (~3,500–5,500, ICTY *Galić* — a single brutal siege must NOT trip) and 1.84× below a modeled multi-municipality campaign (~27,541). `refugees_created` is deliberately NOT gated (too coarse; ordinary front movement displaces on all sides).
+- **(iii) Monotonic + non-reducing.** More atrocity never yields a better outcome (A0). The flag only taints (→ `hollow_victory`), never improves.
+- **(iv) Not tradeable.** Recomputed from terminal state — never negotiable, removable, or mitigable (a stronger guarantee than a rupture's mid-game window).
+- **(v) Genocide precedence.** A discrete `genocide_condemnation` rupture governs (forces `failure`); §2a never down-grades the more severe finding.
+- **(vi) Thresholds cited + panel-set.** The trigger constants carry stated, cited rationale and are never curve-fit to a target grade.
+
 ---
 
 ## 3. Player-Authorized War Crime Surface (Ring 1 — explicit)

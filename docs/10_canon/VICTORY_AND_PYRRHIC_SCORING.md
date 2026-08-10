@@ -139,9 +139,11 @@ Six per-dimension letter grades (A+/A/B/C/D/F) threshold-gated on raw dimension 
 
 ### 3.4 Condemnation flags
 
-Currently one: `genocide_condemnation`, fired by the Srebrenica rupture (`src/sim/negotiation/rupture_consequences.ts`). See `SENSITIVE_HISTORY_DESIGN_GATE.md` §2 for the expansion rule.
+Condemnation flags come from **two sources**:
+1. Recorded discrete **ruptures** (`rupture_consequences[]` → `collectCondemnationFlags()`), each tied to a specific ICTY/ICJ-adjudicated historical event, permanent once recorded. Currently one: `genocide_condemnation`, fired by the Srebrenica rupture (`src/sim/negotiation/rupture_consequences.ts`). See `SENSITIVE_HISTORY_DESIGN_GATE.md` §2 for the rupture expansion rule.
+2. An emergent-only, verdict-time, **non-rupture** `authorized_cleansing_condemnation` flag, computed from terminal modeled-atrocity state per `SENSITIVE_HISTORY_DESIGN_GATE.md §2a` — a general aggregate severity judgment (a union of ≥1 authorized paramilitary sweep OR catastrophic siege-driven civilian harm), NOT an accusation of any specific historical incident.
 
-Flags propagate from `rupture_consequences[]` through `collectCondemnationFlags()` into `FactionVerdict.condemnation_flags[]`. Once recorded, a rupture is permanent.
+Both feed `FactionVerdict.condemnation_flags[]` and `classifyOutcome`. **Only source (1) may be cited with an ICTY finding or a named historical event in any narrative surface.** Below-C atrocity decisiveness for non-genocide cases is delivered by the §2a flag (→ `hollow_victory`), NOT the cost cap (which bottoms at C per §3.5); the additive `ATROCITY_COST_GAIN` term is retained (it still forces the C-cap for otherwise-cheap wars, invariant A1).
 
 ### 3.5 War-cost cap on faction grades (`war_cost_index` / `capGradeByCost`)
 
