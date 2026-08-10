@@ -14,6 +14,8 @@ import { describe, it, expect } from 'vitest';
 import {
     computeWarCostIndex,
     capGradeByCost,
+    capGradeByCondemnation,
+    classifyOutcome,
     computeFactionVerdict,
 } from '../src/sim/negotiation/scoring.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
@@ -135,6 +137,87 @@ describe('capGradeByCost', () => {
         expect(capGradeByCost('F', 1.0)).toBe('F');
         // B is already at/below the A cap → unchanged.
         expect(capGradeByCost('B', 0.45)).toBe('B');
+    });
+});
+
+// ── §6 bright-line LETTER-grade cap (Pyrrhic scoring panel, red-team L1/L2, 2026-08-10) ──
+// These exercise the PARTIAL-atrocity / LOW-cost-index quadrant that saturation used to
+// hide and that any grade-differentiation (casualty decouple / reference re-derivation)
+// exposes — the exact false-green the prior bright-line tests missed (they only used
+// FULLY-saturated atrocity on a low base). The bright line must be STRUCTURAL, not a
+// side effect of the cost floor.
+
+describe('capGradeByCondemnation — atrocity caps the LETTER grade independent of cost', () => {
+    it('authorized_cleansing caps any earned grade to C (even A+/A/B on a low cost base)', () => {
+        expect(capGradeByCondemnation('A+', ['authorized_cleansing_condemnation'])).toBe('C');
+        expect(capGradeByCondemnation('A', ['authorized_cleansing_condemnation'])).toBe('C');
+        expect(capGradeByCondemnation('B', ['authorized_cleansing_condemnation'])).toBe('C');
+    });
+
+    it('genocide caps to D (worse than authorized_cleansing — monotonic in atrocity severity)', () => {
+        expect(capGradeByCondemnation('A+', ['genocide_condemnation'])).toBe('D');
+        expect(capGradeByCondemnation('A', ['genocide_condemnation'])).toBe('D');
+        // genocide dominates when both flags are present (D is worse than C).
+        expect(capGradeByCondemnation('A', ['authorized_cleansing_condemnation', 'genocide_condemnation'])).toBe('D');
+    });
+
+    it('no condemnation flag ⇒ grade unchanged (historical byte-identity)', () => {
+        expect(capGradeByCondemnation('A+', [])).toBe('A+');
+        expect(capGradeByCondemnation('A', [])).toBe('A');
+        expect(capGradeByCondemnation('C', [])).toBe('C');
+    });
+
+    it('only LOWERS — never raises an already-worse grade', () => {
+        expect(capGradeByCondemnation('F', ['authorized_cleansing_condemnation'])).toBe('F');
+        expect(capGradeByCondemnation('D', ['authorized_cleansing_condemnation'])).toBe('D');
+        expect(capGradeByCondemnation('F', ['genocide_condemnation'])).toBe('F');
+    });
+});
+
+describe('classifyOutcome — condemnation taints at ANY territory (red-team L2)', () => {
+    const cleansed = ['authorized_cleansing_condemnation'];
+    it('a small faction (≤30% territory) that cleanses reads hollow_victory, not survival', () => {
+        // Grade is pre-capped to C by capGradeByCondemnation, but even a raw C at low
+        // territory must taint — the prior `territory > 30` gate let this read clean.
+        expect(classifyOutcome('HRHB', makeBreakdown({ territory_controlled_pct: 18 }), undefined, 'C', 0, cleansed)).toBe('hollow_victory');
+        expect(classifyOutcome('HRHB', makeBreakdown({ territory_controlled_pct: 18 }), undefined, 'A', 0, cleansed)).toBe('hollow_victory');
+    });
+    it('a large faction that cleanses still reads hollow_victory (unchanged)', () => {
+        expect(classifyOutcome('RS', makeBreakdown({ territory_controlled_pct: 55 }), undefined, 'C', 0, cleansed)).toBe('hollow_victory');
+    });
+    it('no condemnation ⇒ grade-based mapping (survival for A) is untouched', () => {
+        expect(classifyOutcome('RBiH', makeBreakdown({ territory_controlled_pct: 50 }), undefined, 'A', 0, [])).toBe('survival');
+    });
+});
+
+describe('bright-line INTEGRATION — a single authorized sweep on a LOW-cost base cannot reach A', () => {
+    it('caps a would-be-A faction to C + hollow_victory when it authorized a paramilitary sweep', () => {
+        // Low cost index (short war, low exhaustion/casualties → cost cap would NOT lower
+        // the earned grade), strong territory, emergent mode, ONE emergent war crime.
+        const base = makeVerdictState(
+            { RBiH: { territory_controlled_pct: 55 } },
+            { turn: 20, exhaustion: { RBiH: 500 }, casualties: { RBiH: { killed: 500 } } },
+        );
+        base.meta.decision_mode = 'emergent';
+        // Clean baseline (no atrocity): grade is NOT capped by condemnation.
+        const clean = computeFactionVerdict(base, 'RBiH');
+        expect(['A+', 'A', 'B']).toContain(clean.grade); // low cost ⇒ high grade survives
+        expect(clean.outcome_class).not.toBe('hollow_victory');
+
+        // Same low-cost state + a single authorized paramilitary sweep.
+        const dirty = makeVerdictState(
+            { RBiH: { territory_controlled_pct: 55, war_crimes_events_emergent: 1 } },
+            { turn: 20, exhaustion: { RBiH: 500 }, casualties: { RBiH: { killed: 500 } } },
+        );
+        dirty.meta.decision_mode = 'emergent';
+        const verdict = computeFactionVerdict(dirty, 'RBiH');
+        expect(verdict.condemnation_flags).toContain('authorized_cleansing_condemnation');
+        // The letter grade is capped to C by the atrocity — NOT reachable A/B — even though
+        // the cost index is low. This is the leak the panel found; it must be closed.
+        expect(['C', 'D', 'F']).toContain(verdict.grade);
+        expect(verdict.grade).not.toBe('A');
+        expect(verdict.grade).not.toBe('B');
+        expect(verdict.outcome_class).toBe('hollow_victory');
     });
 });
 

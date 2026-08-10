@@ -391,6 +391,34 @@ export function capGradeByCost(grade: string, costIndex: number): string {
     return gradeRank(grade) >= gradeRank(maxGrade) ? grade : maxGrade;
 }
 
+/**
+ * Cap a faction's LETTER grade by its atrocity condemnation flags — the §6 bright-line
+ * letter-grade guard. Can only LOWER the grade, never raise it (mirrors capGradeByCost).
+ *   genocide_condemnation            → max grade D (→ classifyOutcome `failure`)
+ *   authorized_cleansing_condemnation → max grade C
+ *
+ * INDEPENDENT of the cost index. Before this (Pyrrhic scoring panel, red-team L1,
+ * 2026-08-10) condemnation flags fed ONLY classifyOutcome (the outcome_class), so
+ * atrocity never capped the LETTER grade — the "impossible to atrocity your way to an A"
+ * bright line held ONLY by cost-index saturation (every full campaign saturated to C).
+ * The moment scoring de-saturates to differentiate good play (the casualty decouple /
+ * reference re-derivation), a low-cost run with a single authorized sweep could reach
+ * grade A. This makes the bright line STRUCTURAL: a condemnation caps the letter grade
+ * regardless of how low the cost index is driven. Determinism: pure, order-independent.
+ *
+ * Historical/unset mode is byte-identical: no condemnation flag fires there (genocide is
+ * event-gated to the Srebrenica path; authorized_cleansing is emergent-only), so with an
+ * empty flag list this returns the input grade unchanged.
+ */
+export function capGradeByCondemnation(grade: string, condemnationFlags: readonly string[]): string {
+    let cap: string | null = null;
+    if (condemnationFlags.includes('genocide_condemnation')) cap = 'D';
+    else if (condemnationFlags.includes('authorized_cleansing_condemnation')) cap = 'C';
+    if (cap === null) return grade;
+    // Only lower: keep the worse (higher-rank-index) of earned vs cap.
+    return gradeRank(grade) >= gradeRank(cap) ? grade : cap;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Faction Grade Anchors — historical outcome-based grading
 // ═══════════════════════════════════════════════════════════════════════════
@@ -566,8 +594,11 @@ export function classifyOutcome(
     // Failure: grade D or genocide condemnation forces failure
     if (grade === 'D' || condemnationFlags.includes('genocide_condemnation')) return 'failure';
 
-    // Hollow victory: any condemnation flags taint the result, even with strong territory
-    if (condemnationFlags.length > 0 && breakdown.territory_controlled_pct > 30) return 'hollow_victory';
+    // Hollow victory: any condemnation flag taints the result at ANY territory level.
+    // (Pyrrhic scoring panel, red-team L2, 2026-08-10: the prior `territory > 30` gate let
+    // a small faction — e.g. HRHB at 18% — commit an authorized sweep yet read a clean
+    // survival. A condemnation must taint regardless of how much territory is held.)
+    if (condemnationFlags.length > 0) return 'hollow_victory';
 
     // Strategic success: A+ grade, strong position
     if (grade === 'A+') return 'strategic_success';
@@ -675,10 +706,10 @@ export function computeFactionVerdict(
     // read as a clean triumph. Post-termination reflection — reads accrued cost,
     // caps the grade downward only. Territory alone can no longer buy A+.
     const costIndex = computeWarCostIndex(state, faction);
-    const grade = capGradeByCost(earned.grade, costIndex);
-    const description = grade === earned.grade
-        ? earned.description
-        : `${earned.description} — capped by war cost (index ${costIndex.toFixed(2)})`;
+    // Cost cap first; the atrocity condemnation LETTER-grade cap (§6 bright line) is
+    // applied AFTER the condemnation flags are collected below (they are not known yet
+    // here), then the condemnation-capped grade drives description + classifyOutcome.
+    const costCappedGrade = capGradeByCost(earned.grade, costIndex);
 
     const dimensionGrades = computeDimensionGrades(capital, faction, dimStore);
 
@@ -722,6 +753,15 @@ export function computeFactionVerdict(
         condemnationFlags.push('authorized_cleansing_condemnation');
         condemnationFlags.sort();
     }
+    // §6 bright-line LETTER-grade cap (Pyrrhic scoring panel, red-team L1, 2026-08-10):
+    // a condemnation caps the letter grade INDEPENDENT of the cost index, so atrocity can
+    // never reach A even once scoring de-saturates. Worst-of cost-cap and condemnation-cap.
+    const grade = capGradeByCondemnation(costCappedGrade, condemnationFlags);
+    const description = grade === earned.grade
+        ? earned.description
+        : grade !== costCappedGrade
+            ? `${earned.description} — capped by atrocity condemnation`
+            : `${earned.description} — capped by war cost (index ${costIndex.toFixed(2)})`;
     const baseOutcomeClass = classifyOutcome(faction, displayBreakdown, dimStore, grade, pyrrhicScore, condemnationFlags);
 
     // Comprehensive Dayton D3 (2026-06-07): a high-dysfunction peace can never read
