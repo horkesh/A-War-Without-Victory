@@ -169,6 +169,19 @@ The faction grade earned by the anchors (§3.2) is then **capped downward** by a
 
 Any change to `COST_REFERENCE`, `COST_GRADE_CAPS`, or invariants A0–A3 must go through the §8 sign-off structure.
 
+### 3.5a Simple grade model — the redesign, SHIPPED (2026-08-10, owner-adopted; supersedes §3.5 as the default)
+
+The "KNOWN DEFECT under active redesign" of §3.5 (every full campaign → `war_cost_index` 1.0 → flat grade C; atrocity term arithmetically inert; references fragile and, once de-saturated, contaminated by scripted `war_crimes_events` + coarse `refugees_created`) is resolved by REPLACING the cost-index cap with a simple model. The `war_cost_index` / `capGradeByCost` apparatus of §3.5 is RETAINED as a legacy fallback only (env `AWWV_SCORING_SIMPLE=0`); the simple model is the default (`scoring.ts`).
+
+**Mechanism.** `grade = capGradeByCondemnation( applyHumanCostShift( earnedGrade, faction, casualties ) )`:
+- **earnedGrade** — the §3.2 anchor grade (already play-differentiating).
+- **humanCostGradeShift(faction, casualties)** — a SIGNED grade step vs a FROZEN historical casualty constant `HISTORICAL_CASUALTY_BASELINE` (RBiH 140 000 / RS 95 000 / HRHB 35 000, KIA+WIA+MIA): ≤ 0.75× → +1 (a less-catastrophic war than history — "authorship of the tragedy" made arithmetic); < 1.33× → 0 (par); < 2× → −1; ≥ 2× → −2. The **positive** shift is floored at grade A: cost alone NEVER manufactures A+ (`strategic_success` stays anchor-reserved). Requires the casualty ledger/territory decouple (realistic totals; territory byte-flat) — the baseline assumes decoupled casualties.
+- **atrocity** — `capGradeByCondemnation` (§3.4/§6): `genocide_condemnation` → max D, `authorized_cleansing_condemnation` → max C, INDEPENDENT of cost. This makes A0 STRUCTURAL rather than an arithmetic property of a saturating index.
+
+**Invariant mapping (why the bright line is strictly stronger here).** A0 — atrocity caps the LETTER grade via `capGradeByCondemnation` regardless of how "cheap" the war was, so the shorter-war / fewer-own-casualties inversion that a live base would reopen cannot arise (validated: a faction holding the MOST territory grades D when it commits the Srebrenica genocide). A1 — the condemnation caps subsume the `ATROCITY_COST_GAIN` role; retained for the legacy path. A2 — the frozen casualty baseline is a HISTORICAL FACT (RDC/ICTY magnitudes), not fit to sim output; the deliberately-low atrocity references are UNCHANGED and un-relativized. A3 — the cost axis is casualties, never territory/objectives/gain. No live counterfactual (frozen constant ⇒ no circularity), no clamped-ratio saturation.
+
+**Reachability / historical baseline.** A clean, materially-less-bloody war lifts the earned grade toward A (A reachable for humane, skilled play); a bloodier-than-history war lowers it; historical-level bloodshed is par (earned grade unchanged). The four archived RBiH strategies go flat-C → B/B/A/A. Adopting kept the 40w structural fingerprint byte-flat (territory) and re-blessed 52w/4w goldens (ledger+verdict serialization). Any change to `HISTORICAL_CASUALTY_BASELINE`, the shift thresholds, or the atrocity caps goes through the §8 sign-off structure. Known follow-ups (non-blocking): validate the +1 threshold against a full-intensity run; the `outcome_class` labels are still pulled by the legacy Dayton/structural caps independent of the letter grade.
+
 ---
 
 ## 4. Scenario Contract
