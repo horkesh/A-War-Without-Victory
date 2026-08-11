@@ -65,9 +65,22 @@ export interface EquipmentDecayConfig {
  * External support window: combat multiplier for a faction in specific municipalities.
  * Uses end_turn (not end_week) because it gates on absolute turn count — turn and week
  * are synonymous in this codebase (1 turn = 1 week).
+ *
+ * `role` (2026-08-11, Brčko defense lever): 'attack' (default when absent, preserving
+ * every existing entry's behavior byte-identically) applies to the ATTACKER's combat
+ * power when they attack a listed municipality; 'defend' applies to the DEFENDER's
+ * combat power when a listed municipality they hold is attacked. `start_turn` (default 0
+ * when absent) bounds the window's start — existing entries that omit it are unaffected
+ * (they were always implicitly active from turn 0). Both fields let a single window
+ * model a historically-bounded reinforcement (e.g. a temporary cross-corps/tactical-group
+ * attachment), not just an early-war decay boundary.
  */
 export interface ExternalSupportWindow {
     faction: string;
+    /** Optional: 'attack' (default) or 'defend'. See interface doc above. */
+    role?: 'attack' | 'defend';
+    /** Optional: window start (default 0 — active from scenario start). */
+    start_turn?: number;
     end_turn: number;
     municipalities: string[];
     combat_multiplier: number;
@@ -379,6 +392,12 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
         if (typeof s.end_turn !== 'number') throw new Error(`WarTimeline: external_support[${i}].end_turn must be a number`);
         if (!Array.isArray(s.municipalities)) throw new Error(`WarTimeline: external_support[${i}].municipalities must be an array`);
         if (typeof s.combat_multiplier !== 'number') throw new Error(`WarTimeline: external_support[${i}].combat_multiplier must be a number`);
+        if (s.role !== undefined && s.role !== 'attack' && s.role !== 'defend') {
+            throw new Error(`WarTimeline: external_support[${i}].role must be 'attack' or 'defend' when present`);
+        }
+        if (s.start_turn !== undefined && typeof s.start_turn !== 'number') {
+            throw new Error(`WarTimeline: external_support[${i}].start_turn must be a number when present`);
+        }
     }
 
     // Validate maintenance_decay entries
