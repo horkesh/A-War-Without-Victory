@@ -35,6 +35,7 @@ import {
 } from './local_front_defense.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import type { Osid } from './osid_adjacency.js';
+import { munFromOsid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
 import { getActiveEquipmentQualityMultiplier, getCascadePenaltyForOsid } from '../events/active_modifiers.js';
 import { getStrategicDepth, getKrajinaCollapseMult } from './strategic_depth.js';
@@ -1380,6 +1381,34 @@ export function classifyOutcome(powerRatio: number): CombatOutcome {
  *   keyed and recomputing in this hot path is a layer violation; effect is
  *   marginal vs the supply-state binary cliff 1.0 → 0.45).
  */
+/**
+ * Defender-side historically-bounded reinforcement multiplier (2026-08-11, Brčko
+ * defense lever). Reads `WarTimeline.external_support` entries with `role: 'defend'`
+ * (see war_timeline.ts doc) for the defending faction; models a temporary, dated,
+ * historically-attested reinforcement (e.g. a cross-corps tactical-group attachment)
+ * to the defender of a listed municipality, distinct from any attacker-side window.
+ * No matching entry (the default) ⇒ exact 1.0 no-op — byte-stable for every faction/
+ * OSID/turn that isn't explicitly configured.
+ */
+function getExternalDefenseSupportMultiplier(
+    state: GameState,
+    defenderFaction: string,
+    targetOsid: Osid,
+): number {
+    const timeline = state.military.war_timeline;
+    if (!timeline?.external_support) return 1.0;
+    const support = timeline.external_support.find(
+        s => s.faction === defenderFaction && s.role === 'defend'
+    );
+    if (!support) return 1.0;
+    const turn = state.meta.turn ?? 0;
+    if (turn < (support.start_turn ?? 0)) return 1.0;
+    if (turn >= support.end_turn) return 1.0;
+    const mun = munFromOsid(targetOsid);
+    if (!mun || !support.municipalities.includes(mun)) return 1.0;
+    return support.combat_multiplier;
+}
+
 export function computeAttackerPower(
     state: GameState,
     formation: FormationState,
@@ -1658,6 +1687,14 @@ export function computeDefenderPowerBreakdown(
         getKrajinaCollapseMult(state, formation)
     );
     if (krajinaCollapseMult !== 1.0) power *= krajinaCollapseMult;
+
+    // ── External defense support (2026-08-11, Brčko lever) ────────────────
+    // Historically-bounded reinforcement to the defender of a WarTimeline-listed
+    // municipality (role: 'defend'). No configured window ⇒ 1.0 ⇒ byte-stable.
+    const externalDefenseSupportMult = combatMathProfileTime(profileTime, '.externalDefenseSupport', () =>
+        getExternalDefenseSupportMultiplier(state, formation.faction, targetOsid)
+    );
+    if (externalDefenseSupportMult !== 1.0) power *= externalDefenseSupportMult;
 
     return {
         base,

@@ -225,6 +225,8 @@ describe('war-phase step ordering', () => {
         // +1 from jna-transition (event-backed JNA withdrawal lifecycle projection).
         // -1 from consolidating offensive paramilitary detection into the bounded sweep path.
         // +1 from rear-pocket-consolidation after the paramilitary fade week.
-        expect(stepNames.length).toBe(187);
+        // +1 from apply-brcko-tactical-group-relocation (Brčko defense lever part 2,
+        // flag-gated AWWV_BRCKO_TACTICAL_GROUP, default OFF, 2026-08-11).
+        expect(stepNames.length).toBe(188);
     });
 });

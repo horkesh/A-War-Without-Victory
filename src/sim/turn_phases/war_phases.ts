@@ -217,6 +217,7 @@ import { warPhaseReconciliationSteps } from './war_phase_reconciliation_steps.js
 import { warPhaseNegotiationSteps } from './war_phase_negotiation_steps.js';
 import { warPhaseBriefingSteps } from './war_phase_briefing_steps.js';
 import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
+import { applyBrckoTacticalGroupRelocation } from '../combat/brcko_tactical_group.js';
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
@@ -2859,6 +2860,13 @@ export const warPhases: NamedPhase[] = [
                 if (count > 0) cache[defenderCorpsId] = count;
             }
             context.state.military.active_offensives_against_corps = cache;
+        }
+    },
+    {
+        name: 'apply-brcko-tactical-group-relocation',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            applyBrckoTacticalGroupRelocation(context.state);
         }
     },
     {

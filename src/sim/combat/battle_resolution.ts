@@ -422,15 +422,10 @@ function getExternalSupportMultiplier(
     targetSid: SettlementId,
     timeline?: WarTimeline
 ): number {
-    // Timeline-driven when available. role filter added 2026-08-11 alongside the
-    // defender-side counterpart below; `role ?? 'attack'` preserves every pre-existing
-    // entry (which omits role) matching exactly as before.
+    // Timeline-driven when available
     if (timeline?.external_support) {
-        const support = timeline.external_support.find(
-            s => s.faction === attackerFaction && (s.role ?? 'attack') === 'attack'
-        );
+        const support = timeline.external_support.find(s => s.faction === attackerFaction);
         if (support) {
-            if (turn < (support.start_turn ?? 0)) return 1.0;
             if (turn >= support.end_turn) return 1.0;
             const mun = settlementToMun.get(targetSid);
             if (!mun) return 1.0;
@@ -446,35 +441,6 @@ function getExternalSupportMultiplier(
     if (!mun) return 1.0;
     if (!RS_EXTERNAL_SUPPORT_MUNS.has(mun)) return 1.0;
     return RS_EXTERNAL_SUPPORT_MULT;
-}
-
-/**
- * Defender-side counterpart to getExternalSupportMultiplier (2026-08-11, Brčko
- * defense lever). Models a historically-bounded reinforcement to the DEFENDER of a
- * listed municipality — e.g. a temporary cross-corps tactical-group attachment —
- * distinct from the attacker-side early-war JNA-support window above. Only ever
- * consulted via `timeline.external_support` entries with `role: 'defend'`; there is
- * no hardcoded fallback (no defender-side historical default existed before this),
- * so an absent/empty timeline or no matching entry is an exact 1.0 no-op.
- */
-function getExternalDefenseSupportMultiplier(
-    defenderFaction: FactionId,
-    turn: number,
-    settlementToMun: Map<string, string>,
-    targetSid: SettlementId,
-    timeline?: WarTimeline
-): number {
-    if (!timeline?.external_support) return 1.0;
-    const support = timeline.external_support.find(
-        s => s.faction === defenderFaction && s.role === 'defend'
-    );
-    if (!support) return 1.0;
-    if (turn < (support.start_turn ?? 0)) return 1.0;
-    if (turn >= support.end_turn) return 1.0;
-    const mun = settlementToMun.get(targetSid);
-    if (!mun) return 1.0;
-    if (!support.municipalities.includes(mun)) return 1.0;
-    return support.combat_multiplier;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1053,13 +1019,6 @@ export function resolveBattleOrders(
                 defenderFaction,
                 attackerFaction,
                 targetSid,
-            );
-            defenderPower.total_combat_power *= getExternalDefenseSupportMultiplier(
-                defenderFaction,
-                turn,
-                settlementToMun,
-                targetSid,
-                state.military.war_timeline,
             );
         }
 
