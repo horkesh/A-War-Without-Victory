@@ -153,6 +153,23 @@ const BIHAC_PETROVAC_OBJECTIVES = [
 // and got stranded as a 1-OSID RS island once the axis fanned past it into the
 // town center, tripping a disconnected_sector_territory critical on
 // vrs_1st_krajina:2. Pulling it forward keeps the captured belt contiguous.
+// 2026-08-11: hadzici/kljuc_2/krasulje_2 RESTORED here (additive, not removed
+// from BIHAC_PETROVAC_OBJECTIVES). The panel-GO 2026-06-11 re-route moved
+// them onto the Bihać-Petrovac axis alone, citing 501st+510th historically
+// advancing on Ključ from the south (BB1). Under this session's launch
+// timing (op fires t175, not the earlier calibration context the re-root
+// was tuned against), that axis is saturated — 5 brigades sequentially
+// walking Bihać(3)+Krupa-tail+all of Petrovac(7) before ever reaching
+// Ključ — and never gets there by t188 (confirmed via operation_diagnostics
+// trace, n201: still on bosanski_petrovac_2/kljevci at the final turn).
+// This axis (506th/517th, dedicated fresh brigades, no shared-roster
+// recovery-phase exhaustion) finishes its own 10-objective Sanski Most list
+// with turns to spare in the same run. Appending the verified adjacency
+// tail here (per the walk documented above: ...kljevci → sanica_2 →
+// hadzici → kljuc_2 → krasulje_2) gives Ključ a second, faster path without
+// touching the historically-cited axis at all — whichever axis's combat
+// tempo actually reaches it first captures it; the other's copy is filtered
+// as friendly-controlled once taken (spawnCorpsOperationFromOpportunity).
 const SANSKI_KLJUC_OBJECTIVES = [
     'op:sanski_most:budimlic_japra_2',
     'op:sanski_most:lusci_palanka_2',
@@ -164,8 +181,9 @@ const SANSKI_KLJUC_OBJECTIVES = [
     'op:sanski_most:ilidza_2',
     'op:sanski_most:kljevci',
     'op:kljuc:sanica_2',
-    // hadzici/kljuc_2/krasulje_2 re-routed to sana_bihac_petrovac axis
-    // (Petrovac extension, panel-GO 2026-06-11). 506th/517th deliver sanica_2.
+    'op:kljuc:hadzici',
+    'op:kljuc:kljuc_2',
+    'op:kljuc:krasulje_2',
 ];
 
 /** Sana pocket-survival anchors. If any one is RS-controlled, the pocket
