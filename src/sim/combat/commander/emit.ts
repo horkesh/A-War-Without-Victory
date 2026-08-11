@@ -48,6 +48,7 @@ import { buildOfficerCombatLookup } from '../combat_math.js';
 import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
 import {
     getCohesionCautionBiasMultiplier,
+    getEmbargoOpsHesitationMultiplier,
     getIntlStandingOpsHesitationMultiplier,
     getMilitaryCredibilityCautionBiasMultiplier,
     getPatronConfidenceOpsHesitationMultiplier,
@@ -897,7 +898,14 @@ function buildOperations(
         const credibilityMult = getMilitaryCredibilityCautionBiasMultiplier(
             briefing.political_dimensions?.military_credibility,
         );
-        const combinedMult = hesitationMult * cohesionMult * patronMult * credibilityMult;
+        // Embargo-driven op-launch dampener (independent of the four MVS/Phase-E
+        // political multipliers above — see getEmbargoOpsHesitationMultiplier doc).
+        // No-op (1.0) unless embargo_offensive_gate_enabled and briefing.state_ref
+        // is present.
+        const embargoMult = briefing.state_ref
+            ? getEmbargoOpsHesitationMultiplier(briefing.state_ref, briefing.faction)
+            : 1.0;
+        const combinedMult = hesitationMult * cohesionMult * patronMult * credibilityMult * embargoMult;
         const effectiveMinForOp = combinedMult !== 1.0
             ? Math.ceil(baseMinForOp / combinedMult)
             : baseMinForOp;

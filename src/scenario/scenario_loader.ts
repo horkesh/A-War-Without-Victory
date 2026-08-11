@@ -408,6 +408,12 @@ export function normalizeScenario(raw: unknown): Scenario {
     // Supply reserves system (Phase A)
     const supply_reserves_enabled = o.supply_reserves_enabled === true ? true : undefined;
 
+    // Embargo-driven offensive-eligibility gate (independent of supply_reserves_enabled)
+    const embargo_offensive_gate_enabled = o.embargo_offensive_gate_enabled === true ? true : undefined;
+
+    // Attacker firepower-deficit penalty (independent of the two flags above)
+    const firepower_deficit_penalty_enabled = o.firepower_deficit_penalty_enabled === true ? true : undefined;
+
     // Baked initial OSID controllers (replaces runtime derivation when present)
     const initial_osid_controllers = (() => {
         const raw = o.initial_osid_controllers;
@@ -507,6 +513,8 @@ export function normalizeScenario(raw: unknown): Scenario {
             avoided_osids_by_faction,
             must_hold_osids_by_corps,
             supply_reserves_enabled,
+            embargo_offensive_gate_enabled,
+            firepower_deficit_penalty_enabled,
             initial_osid_controllers,
             osid_control_overrides,
             war_timeline,
@@ -559,6 +567,8 @@ export function normalizeScenario(raw: unknown): Scenario {
         avoided_osids_by_faction,
         must_hold_osids_by_corps,
         supply_reserves_enabled,
+        embargo_offensive_gate_enabled,
+        firepower_deficit_penalty_enabled,
         initial_osid_controllers,
         osid_control_overrides,
         war_timeline,

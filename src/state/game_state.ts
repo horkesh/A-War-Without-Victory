@@ -1739,6 +1739,23 @@ export interface StateMeta {
     avoided_osids_by_faction?: Record<string, string[]>;
     /** Phase A: When true, supply reserves system is active (general supply + heavy munitions). */
     supply_reserves_enabled?: boolean;
+    /**
+     * When true, gates offensive-operation launch eligibility on the RBiH arms
+     * embargo phase (`EMBARGO_PHASE_CAPS`), independent of `supply_reserves_enabled`
+     * — does not touch the general-supply-reserve pipeline, siege counters, or
+     * enclave resilience. A faction whose current embargo cap is below
+     * `EMBARGO_OFFENSIVE_GATE_CAP_THRESHOLD` cannot launch new offensive corps
+     * operations that turn (RS/HRHB caps are always 1.0, so this is a no-op for
+     * them by data, not a hardcoded faction check).
+     */
+    embargo_offensive_gate_enabled?: boolean;
+    /**
+     * When true, penalizes attacker power when the attacking force has
+     * negligible heavy weapons (tanks/artillery) against a defender with real
+     * heavy weapons — independent of `embargo_offensive_gate_enabled`. See
+     * `getAttackerFirepowerDeficitMult` (combat_math.ts) for the mechanism.
+     */
+    firepower_deficit_penalty_enabled?: boolean;
     /** Maximum turns before game ends in stalemate. Default 208 (4 years). Set from scenario.weeks or explicit override. */
     max_turns?: number;
     /** Scenario victory conditions, stored at scenario load for pipeline evaluation. */

@@ -31,6 +31,21 @@
  * returns the formation to its home_osid when the window closes, mirroring the
  * real redeployment after the operation concluded.
  *
+ * Candidate selection (2026-08-11, first empirical iteration): the first attempt
+ * used `rs_16th_krajina_motorized` — BUT it turns out to already be committed to
+ * an ACTIVE front (Modriča, `sector:vrs_1st_krajina:7`) with cohesion already
+ * ground down from 59 to ~26-27 by turn 56 (near the 20-point dissolution floor).
+ * Relocating an already-attritted, unentrenched-at-destination unit produced a
+ * MUCH WORSE single-battle result (power_ratio 4.95, a decisive loss) than doing
+ * nothing — the unit simply lacked combat power wherever it fought. Checked the
+ * other two named Sadejstvo-93 participants at the same turn: `rs_43rd_prijedor_
+ * motorized` is already DEAD (inactive, 0 personnel) by turn 56 — unusable.
+ * `rs_5th_kozara_light_infantry` is healthy (cohesion 59, its starting value —
+ * not worn down at all) and, per BB2 p.401 fn.8-14, is the unit BB explicitly
+ * describes as RELOCATED under "Tactical Group 4" to Ulice on 9 July 1993 with
+ * attached armor/AD — the closest historical match to "a unit that moved for
+ * this operation," not just "a unit that fought nearby." Switched to it.
+ *
  * Flag-gated (`AWWV_BRCKO_TACTICAL_GROUP`, default OFF ⇒ byte-identical no-op).
  * Deterministic: pure turn-number + formation-ID gate, no randomness, no
  * wall-clock. Byte-stable for every faction/formation/turn not explicitly
@@ -45,9 +60,11 @@ const RELOCATE_TURN = 56;
 /** Turn the Tactical Group returns home (mirrors Sadejstvo 93's 20-26 July
  *  1993 conclusion plus a short stand-down buffer). */
 const RETURN_TURN = 70;
-/** Named, BB-cited 1st Krajina Corps participants. Starts with the single
- *  most-documented unit (16th Krajina Motorized); escalate only if needed. */
-const TACTICAL_GROUP_FORMATION_IDS: readonly string[] = ['rs_16th_krajina_motorized'];
+/** Named, BB-cited 1st Krajina Corps participant. 5th Kozara Light Infantry —
+ *  healthy (not attritted on another front) and the unit BB explicitly
+ *  describes as relocating for the operation. See module doc for why the
+ *  first candidate (16th Krajina Motorized) was replaced. */
+const TACTICAL_GROUP_FORMATION_IDS: readonly string[] = ['rs_5th_kozara_light_infantry'];
 const BRCKO_OSID = 'op:brcko:brcko';
 
 export function isBrckoTacticalGroupEnabled(): boolean {

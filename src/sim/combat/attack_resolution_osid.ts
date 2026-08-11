@@ -86,6 +86,7 @@ import {
     classifyOutcome,
     computeAttackerPower,
     computeDefenderPower,
+    getAttackerFirepowerDeficitMult,
     buildTerrainMultByOsid,
     getPowerRatioCasualtyMult,
     // Re-exported for test consumers
@@ -928,7 +929,15 @@ export function resolveAttackOrdersOsid(
             return s + rawPower * supportMult;
         }, 0);
         const tempoMult = getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
-        let attackerPower = physicalPower * coordPenalty * seasonal.attack_mult * concentrationBonus * tempoMult;
+        // Attacker firepower-deficit penalty: no-op (1.0) unless
+        // firepower_deficit_penalty_enabled and the defender has real heavy
+        // weapons the attacker cannot match. See getAttackerFirepowerDeficitMult doc.
+        const firepowerDeficitMult = getAttackerFirepowerDeficitMult(
+            state,
+            attackerFormations,
+            sectorDefenseBrigades ?? (defenderFormation ? [defenderFormation] : []),
+        );
+        let attackerPower = physicalPower * coordPenalty * seasonal.attack_mult * concentrationBonus * tempoMult * firepowerDeficitMult;
         // ADR-0005 v2.2b: TG donor personnel scales anchor combat output. Donors are
         // NOT physical brigades sharing frontage; they do NOT get concentrationBonus.
         // Flag-off: donor branch dead; attackerPower equals the original expression.

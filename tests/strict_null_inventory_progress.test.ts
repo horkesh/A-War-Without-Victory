@@ -690,15 +690,24 @@ describe('strict null inventory progress', () => {
             // optional -> required (sim domain, -2), while StateMeta gains +1 optional field
             // `proposal_decision_history` (the durable Records receipt for resolved ordinary
             // autonomy proposals, state domain). Net 529->528 / sim 337->335 / state 182->183.
-            optional_fields_game_state: 528,
+            // Brčko-corridor investigation: StateMeta gains +2 optional fields,
+            // `embargo_offensive_gate_enabled` and `firepower_deficit_penalty_enabled`
+            // (both default-off scenario flags; the embargo gate throttles offensive-op
+            // launch eligibility off the RBiH arms-embargo phase, the firepower-deficit
+            // penalty reduces attacker power when assaulting a heavy-weapons-equipped
+            // defender with negligible heavy weapons of its own, turn-175-gated). state
+            // domain, absent on every run unless the owning scenario sets the flag ->
+            // calibration byte-identical when unset. 528->530 / state 183->185. No new
+            // type-escape casts.
+            optional_fields_game_state: 530,
         });
-        expect(current.optional_field_domains.total).toBe(528);
+        expect(current.optional_field_domains.total).toBe(530);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 335,
-            state: 183,
+            state: 185,
             ui_adapter: 0,
             unknown: 0,
         });

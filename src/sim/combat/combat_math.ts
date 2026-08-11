@@ -971,6 +971,94 @@ export function getHeavyWeaponsOffensiveMult(formation: FormationState, terrainM
 }
 
 /**
+ * Attacker firepower-deficit penalty. Historian citation: BB1 p.179 — the JNA
+ * handover left VRS "already a regular, combined-arms army" while ARBiH had
+ * "virtually no heavy weapons"; BB2 p.506-509 — ARBiH's numerically superior
+ * mass offensives against VRS armor/artillery-backed defenses (Vozuća/Ozren
+ * June 1994, Bihać late 1994) were repeatedly thrown back with heavy losses
+ * ("a massacre"; VRS "firepower... artillery and minefield 'ambush' tactics")
+ * — a RECURRING pattern, not a one-off, and not resolved until autumn 1995
+ * (VRS overextension/degradation post-Storm + captured stocks, not ARBiH
+ * fielding its own armor/artillery parity).
+ *
+ * `getHeavyWeaponsOffensiveMult` already rewards an attacker for HAVING heavy
+ * weapons; this is the missing mirror — an attacker with essentially none,
+ * assaulting a defender with real armor/artillery, should be penalized, not
+ * merely denied a bonus. `getDefensiveFireMult` (attack_resolution_osid.ts)
+ * already makes such an assault costlier via casualties, but only AFTER the
+ * outcome/power_ratio is decided — it cannot prevent a decisive capture. This
+ * function instead reduces attacker POWER before the outcome is determined.
+ *
+ * RELIEF GATE: EMERGENT, not a calendar date. The penalty goes inert once
+ * `state.meta.operation_storm_triggered === true` — the SAME flag
+ * `getKrajinaCollapseMult` (strategic_depth.ts) already uses for the
+ * historical VRS Krajina/SVK collapse. That flag only sets once
+ * `checkAndApplyOperationStorm` (operation_storm.ts) sees ALL of: Washington
+ * signed, RS territorial share ≥35%, combined RBiH+HRHB war_exhaustion ≥60,
+ * and IVP negotiation_momentum ≥0.55 — genuinely simulated multi-factor
+ * conditions, not a fixed turn. Historian: the change was VRS overextension/
+ * degradation on multiple fronts after the Krajina collapse and captured
+ * stocks — NOT any attacker fielding armor/artillery parity it never had, so
+ * the relief should track the SAME simulated rupture that already models
+ * that collapse, not an independent calendar constant. (An earlier version
+ * of this mechanic used a flat turn-175 relief; a flat, non-simulated gate
+ * would ALSO suppress the real, historically successful ARBiH 5th Corps
+ * counter-offensives around Bihać in this same under-equipped condition
+ * whenever the sim's own timeline drifted from the historical date —
+ * confirmed empirically: without ANY relief the entire Bihać pocket flipped
+ * to RS. Tying relief to the emergent trigger instead of a constant means it
+ * tracks wherever THIS run's simulated collapse actually lands.)
+ *
+ * Deterministic, no randomness — `operation_storm_triggered` is itself a pure
+ * function of prior state, never Math.random()/Date.now(). Gated by
+ * `firepower_deficit_penalty_enabled` (independent of every other flag
+ * touched this session) — returns 1.0 (no-op) when off, once Storm has
+ * triggered, when the defender has negligible heavy weapons of their own
+ * (nothing to be deficient against), or when the attacker's own heavy
+ * firepower is already at parity with the defender's.
+ */
+export function getAttackerFirepowerDeficitMult(
+    state: Pick<GameState, 'meta'>,
+    attackerFormations: readonly FormationState[],
+    defenderFormations: readonly FormationState[],
+): number {
+    if (!state.meta?.firepower_deficit_penalty_enabled) return 1.0;
+    if (state.meta.operation_storm_triggered === true) return 1.0;
+    const defenderHeavy = sumRawHeavyFirepower(defenderFormations);
+    if (defenderHeavy < FIREPOWER_DEFICIT_DEFENDER_FLOOR) return 1.0;
+    const attackerHeavy = sumRawHeavyFirepower(attackerFormations);
+    const ratio = attackerHeavy / defenderHeavy;
+    if (ratio >= FIREPOWER_DEFICIT_PARITY_RATIO) return 1.0;
+    return FIREPOWER_DEFICIT_FLOOR_MULT
+        + (1.0 - FIREPOWER_DEFICIT_FLOOR_MULT) * Math.min(1.0, ratio / FIREPOWER_DEFICIT_PARITY_RATIO);
+}
+
+/** Raw (terrain-independent) heavy firepower — same tank/artillery weighting
+ *  as `getHeavyWeaponsOffensiveMult`, summed across a formation list, used
+ *  only for the attacker/defender firepower-deficit COMPARISON. */
+function sumRawHeavyFirepower(formations: readonly FormationState[]): number {
+    let total = 0;
+    for (const f of formations) {
+        const comp = f.composition ?? ensureBrigadeComposition(f);
+        const artEff = comp.artillery * (comp.artillery_condition?.operational ?? 0.5);
+        const tankEff = comp.tanks * (comp.tank_condition?.operational ?? 0.5);
+        total += tankEff * 10 + artEff * 8;
+    }
+    return total;
+}
+
+/** Below this raw heavy-firepower total, the defender is treated as
+ *  effectively unequipped — nothing for an attacker to be deficient against. */
+const FIREPOWER_DEFICIT_DEFENDER_FLOOR = 50;
+/** Attacker/defender raw-heavy-firepower ratio at/above which the attacker is
+ *  considered adequately equipped to assault — no penalty. */
+const FIREPOWER_DEFICIT_PARITY_RATIO = 0.5;
+/** Floor multiplier when the attacker has ~zero heavy weapons against a fully
+ *  equipped defender (ratio → 0). Historian: such assaults were "COSTLY and
+ *  often FAIL outright" pre-autumn-1995 — a punishing floor, not a mild one. */
+const FIREPOWER_DEFICIT_FLOOR_MULT = 0.35;
+
+/**
  * Equipment effectiveness ratio (0.5–1.5).
  * Militia formations use tier-based overrides.
  */

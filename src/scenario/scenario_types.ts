@@ -162,6 +162,18 @@ export interface Scenario {
      */
     supply_reserves_enabled?: boolean;
     /**
+     * When true, gates offensive-operation launch eligibility on the RBiH arms
+     * embargo phase, independent of `supply_reserves_enabled`. See
+     * `GameState.meta.embargo_offensive_gate_enabled` for the mechanism.
+     */
+    embargo_offensive_gate_enabled?: boolean;
+    /**
+     * When true, penalizes attacker power when attacking with negligible heavy
+     * weapons against a defender with real heavy weapons. See
+     * `GameState.meta.firepower_deficit_penalty_enabled`.
+     */
+    firepower_deficit_penalty_enabled?: boolean;
+    /**
      * Stuck-in-Peace-phase fallback: after this many Peace phase turns (since war_start_turn) without transition,
      * force transition to War phase. Optional; when absent, default 52 is used for phase_0/phase_i starts. // legacy-phase-term-ok
      * See docs/30_planning/PHASE_I_II_EDGE_CASES.md.

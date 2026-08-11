@@ -1696,6 +1696,14 @@ export async function buildScenarioStartupState(
         applyJnaInheritanceBonus(state);
     }
 
+    if (scenario.embargo_offensive_gate_enabled) {
+        state.meta.embargo_offensive_gate_enabled = true;
+    }
+
+    if (scenario.firepower_deficit_penalty_enabled) {
+        state.meta.firepower_deficit_penalty_enabled = true;
+    }
+
     if (scenario.war_timeline) {
         const { validateWarTimeline } = await import('../state/war_timeline.js');
         const timelinePath = join(baseDir, `data/scenarios/timelines/${scenario.war_timeline}.json`);

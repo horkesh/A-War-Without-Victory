@@ -59,6 +59,7 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
+import { resolveActiveEmbargoPhase, EMBARGO_PHASE_CAPS } from '../../state/embargo.js';
 import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { ControlSide } from '../../state/political_control_types.js';
@@ -154,6 +155,30 @@ export {
 // fail 3 consecutive idle turns, and "complete" with 0 captures.
 // 2 brigades = minimum for realistic combined-arms commitment.
 const MIN_BRIGADES_FOR_OFFENSIVE = 2;
+
+/**
+ * Embargo-offensive-gate cap threshold. A faction whose current
+ * `EMBARGO_PHASE_CAPS[phase][faction].general` is below this value cannot
+ * launch a NEW offensive corps operation that turn (existing operations are
+ * unaffected — this gates launch eligibility only). RBiH sits at 0.6 (phase 1)
+ * / 0.65 (phases 2-3) / 0.8 (phase 4-5, "unenforced"/"lifted"); RS and HRHB are
+ * always 1.0 in every phase, so this never gates them — a data property of
+ * `EMBARGO_PHASE_CAPS`, not a hardcoded faction check. Historian citation:
+ * BB1 p.199 — the embargo hit heavy weapons/ammunition hardest, the exact
+ * resource a sustained multi-brigade offensive depends on; ARBiH 2nd Corps'
+ * first real offensive against VRS in this theatre was mid-1994, and it failed
+ * from overextension (BB1 p.422).
+ */
+const EMBARGO_OFFENSIVE_GATE_CAP_THRESHOLD = 0.7;
+
+/** Independent of `supply_reserves_enabled` — reads only the embargo phase,
+ *  never touches general_supply_reserve, siege counters, or enclave resilience. */
+function isFactionOffensiveGatedByEmbargo(state: GameState, faction: FactionId): boolean {
+    if (!state.meta?.embargo_offensive_gate_enabled) return false;
+    const phase = resolveActiveEmbargoPhase(state);
+    const cap = EMBARGO_PHASE_CAPS[phase]?.[faction]?.general ?? 1.0;
+    return cap < EMBARGO_OFFENSIVE_GATE_CAP_THRESHOLD;
+}
 
 /** Maximum objectives per offensive (absolute cap). */
 const MAX_OBJECTIVES_CAP = 6;
@@ -285,6 +310,43 @@ export function getIntlStandingOpsHesitationMultiplier(
     }
     return 1.0;
 }
+
+/**
+ * Embargo-driven op-launch dampener — chains alongside the four hesitation
+ * multipliers above (same `combinedMult` consumer, `emit.ts` buildOperations).
+ * Gated by `embargo_offensive_gate_enabled` (independent of
+ * `supply_reserves_enabled`, touches no reserve/siege/enclave state).
+ *
+ * Unlike the political-hesitation multipliers (0.7-0.85×, soft caution), this
+ * models a hard material constraint — no ammunition means no sustained
+ * multi-brigade offensive is physically possible, not just politically
+ * disfavored — so the multiplier is deliberately punishing (0.15×) rather than
+ * a mild dampener. Historian citation: BB1 p.199, the embargo hit heavy
+ * weapons/ammunition hardest; ARBiH 2nd Corps' first real offensive against
+ * VRS in the Brčko/Tuzla theatre was mid-1994 (BB1 p.422) and failed from
+ * overextension — spring 1993 offensive capability against VRS should be
+ * near-zero, not merely reduced.
+ *
+ * Returns 1.0 (no-op) when the gate is off, the faction's current embargo cap
+ * (`EMBARGO_PHASE_CAPS`) is at/above threshold, or `faction` is unrecognized.
+ * RS/HRHB are always capped at 1.0 in every embargo phase, so this never
+ * fires for them — a data property of `EMBARGO_PHASE_CAPS`, not a hardcoded
+ * per-faction branch.
+ */
+export function getEmbargoOpsHesitationMultiplier(
+    state: Pick<GameState, 'meta' | 'military'>,
+    faction: FactionId,
+): number {
+    if (!state.meta?.embargo_offensive_gate_enabled) return 1.0;
+    const phase = resolveActiveEmbargoPhase(state as GameState);
+    const cap = EMBARGO_PHASE_CAPS[phase]?.[faction]?.general ?? 1.0;
+    return cap < EMBARGO_OFFENSIVE_GATE_CAP_THRESHOLD ? EMBARGO_OFFENSIVE_GATE_MULTIPLIER : 1.0;
+}
+
+/** Soft-consumer multiplier applied when `getEmbargoOpsHesitationMultiplier`
+ *  fires — deliberately punishing (not a mild dampener like its 0.7-0.85×
+ *  siblings), see function doc for why. */
+const EMBARGO_OFFENSIVE_GATE_MULTIPLIER = 0.15;
 
 /** Phase E MVS: international_standing threshold below which a faction's corps
  *  COs hesitate on op launch. Orchestrator-accepted Architect default. */
@@ -2089,6 +2151,12 @@ export function evaluateCorpsOffensiveLaunch(
 ): CorpsOperation | null {
     const turn = state.meta?.turn ?? 0;
     const formations = state.military.formations ?? {};
+
+    // Embargo-driven offensive-eligibility gate. Independent of
+    // supply_reserves_enabled: while the faction's embargo cap is below
+    // threshold, it cannot open a NEW offensive corps operation this turn.
+    // Existing operations already in flight are untouched.
+    if (isFactionOffensiveGatedByEmbargo(state, faction)) return null;
 
     // Exclude brigades at critical supply from offensive operations.
     // Siege-isolated units lack ammunition, fuel, and rations to sustain attacks.
