@@ -52,9 +52,16 @@ const MISTRAL_CINCAR_DEPENDENCY_ANCHORS: readonly string[] = [
     'op:glamoc:glamoc_2',
 ];
 
+// 2026-08-11: op:glamoc:halapic and op:glamoc:stekerovci_2 REMOVED. Both are
+// ALSO Mistral 1's own Glamoč Shoulder Axis objectives (MISTRAL_1_95_OPPORTUNITY
+// below) — Mistral 1 already owns and eventually secures them (halapic locks in
+// turn 183 after an 18-week contested seesaw, turns 165-183). Mistral 2 was
+// independently re-targeting the SAME two OSIDs, burning 9 of its own turns
+// (175-183) on ground Mistral 1 was already fighting for, before ever reaching
+// Drvar/remaining Grahovo — the objectives ONLY Mistral 2 owns. Root cause of
+// Drvar (0/3) and residual Grahovo (3/4) staying RS at 188w: confirmed via
+// operation_diagnostics trace, n200 run (see PROJECT_LEDGER.md 2026-08-11).
 const MISTRAL_DRVAR_GRAHOVO_OBJECTIVES: readonly string[] = [
-    'op:glamoc:halapic',
-    'op:glamoc:stekerovci_2',
     'op:titov_drvar:prekaja_2',
     'op:titov_drvar:drvar_2',
     'op:titov_drvar:sipovljani_2',
