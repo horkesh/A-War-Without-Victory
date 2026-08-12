@@ -1,6 +1,7 @@
 /**
  * Render a settlement-level (OSID) control map from a scenario save, shading
- * every OSID whose engine controller disagrees with a painted-control snapshot.
+ * every OSID whose engine controller disagrees with a painted-control snapshot
+ * AND indicating which faction the reference says SHOULD hold it.
  *
  * Usage:
  *   node tools/render_control_map.mjs <save.json> <paintedKey> <outPath> "<title>" ["<caveat>"]
@@ -10,9 +11,16 @@
  *   caveat      optional second header line, e.g. when the painted reference is
  *               the nearest available rather than an exact date match.
  *
- * PALETTE NOTE: blue is reserved for MISMATCH here, so HRHB is drawn amber
- * rather than its usual slate blue. The legend states this on every image so a
- * reader never has to guess.
+ * PALETTE CHANGE 2026-08-12 — this is the INVERSE of the original scheme.
+ * Mismatch is now AMBER and HRHB keeps its usual slate BLUE. Images rendered
+ * before this date used blue-for-mismatch / amber-for-HRHB and their baked-in
+ * legends say so; do not compare legends across that boundary.
+ *
+ * A mismatched OSID carries THREE marks, all keyed to the EXPECTED controller:
+ *   - amber fill            "the engine has this wrong"
+ *   - coloured outline      who the reference says should hold it
+ *   - coloured centroid dot same, legible where the polygon is too small to
+ *                           show an outline colour
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createCanvas } from '@napi-rs/canvas';
@@ -24,14 +32,21 @@ if (!SAVE_PATH || !PAINTED_KEY || !OUT_PATH) {
   process.exit(2);
 }
 
+/** Fill colours for a CORRECTLY-held OSID. HRHB is blue again (see header). */
 const FACTION_COLORS = {
   RBiH: 'rgb(74, 124, 84)',
   RS: 'rgb(176, 54, 54)',
-  HRHB: 'rgb(198, 148, 58)', // amber — blue is reserved for mismatch on this map
+  HRHB: 'rgb(72, 110, 190)',
   null: '#6b7280',
 };
-const MISMATCH_FILL = 'rgb(20, 34, 122)';
-const MISMATCH_EDGE = 'rgb(125, 211, 252)';
+/** Brightened variants used ONLY to say "this faction should hold it". */
+const EXPECTED_COLORS = {
+  RBiH: 'rgb(122, 200, 140)',
+  RS: 'rgb(255, 110, 110)',
+  HRHB: 'rgb(130, 175, 255)',
+  null: '#d1d5db',
+};
+const MISMATCH_FILL = 'rgb(201, 142, 38)';
 
 const geo = JSON.parse(readFileSync(`${ROOT}/data/derived/operational/operational_settlements.geojson`, 'utf-8'));
 const save = JSON.parse(readFileSync(SAVE_PATH, 'utf-8'));
@@ -83,11 +98,26 @@ function tracePolygon(coords) {
   }
 }
 
+/** Centroid of the largest outer ring — good enough to place a marker dot. */
+function largestRingCentroid(f) {
+  const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+  let best = null, bestLen = -1;
+  for (const poly of polys) {
+    const ring = poly[0];
+    if (ring && ring.length > bestLen) { bestLen = ring.length; best = ring; }
+  }
+  if (!best) return null;
+  let cx = 0, cy = 0;
+  for (const pt of best) { cx += pt[0]; cy += pt[1]; }
+  return project([cx / best.length, cy / best.length]);
+}
+
 let mismatched = 0, compared = 0, unpainted = 0;
+const byExpected = { RBiH: 0, RS: 0, HRHB: 0 };
 const mismatchList = [];
 
-// Two passes so mismatch outlines are never overdrawn by a later neighbour.
-for (const pass of ['fill', 'outline']) {
+// Three passes so an outline/dot is never overdrawn by a later neighbour's fill.
+for (const pass of ['fill', 'outline', 'dot']) {
   for (const f of features) {
     const osid = f.properties.osid;
     const controller = pc[osid] ?? null;
@@ -96,14 +126,34 @@ for (const pass of ['fill', 'outline']) {
 
     if (pass === 'fill') {
       if (want === undefined) { if (painted) unpainted += 1; } else { compared += 1; }
-      if (isMismatch) { mismatched += 1; mismatchList.push({ osid, engine: controller, want }); }
+      if (isMismatch) {
+        mismatched += 1;
+        if (want in byExpected) byExpected[want] += 1;
+        mismatchList.push({ osid, engine: controller, want });
+      }
       ctx.fillStyle = isMismatch ? MISMATCH_FILL : (FACTION_COLORS[controller ?? 'null'] ?? FACTION_COLORS.null);
       ctx.strokeStyle = 'rgba(255,255,255,0.30)';
       ctx.lineWidth = 0.6;
     } else {
       if (!isMismatch) continue;
-      ctx.strokeStyle = MISMATCH_EDGE;
-      ctx.lineWidth = 1.6;
+    }
+
+    if (pass === 'dot') {
+      const c = largestRingCentroid(f);
+      if (!c) continue;
+      ctx.beginPath();
+      ctx.arc(c[0], c[1], 3.4, 0, Math.PI * 2);
+      ctx.fillStyle = EXPECTED_COLORS[want ?? 'null'] ?? EXPECTED_COLORS.null;
+      ctx.fill();
+      ctx.lineWidth = 1.1;
+      ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+      ctx.stroke();
+      continue;
+    }
+
+    if (pass === 'outline') {
+      ctx.strokeStyle = EXPECTED_COLORS[want ?? 'null'] ?? EXPECTED_COLORS.null;
+      ctx.lineWidth = 2.0;
     }
 
     const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
@@ -122,19 +172,17 @@ const LABEL_OSIDS = [
 ];
 for (const f of features) {
   if (!LABEL_OSIDS.includes(f.properties.osid)) continue;
-  const ring = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
-  let cx = 0, cy = 0;
-  for (const pt of ring) { cx += pt[0]; cy += pt[1]; }
-  const [px, py] = project([cx / ring.length, cy / ring.length]);
+  const c = largestRingCentroid(f);
+  if (!c) continue;
   // settlement_name carries a " (+N)" merged-constituent suffix — drop it for labels.
   const label = String(f.properties.settlement_name ?? f.properties.osid).replace(/\s*\(\+\d+\)\s*$/, '');
   ctx.font = 'bold 13px sans-serif';
   ctx.textAlign = 'center';
   ctx.lineWidth = 3;
   ctx.strokeStyle = 'rgba(0,0,0,0.85)';
-  ctx.strokeText(label, px, py);
+  ctx.strokeText(label, c[0], c[1]);
   ctx.fillStyle = '#fff';
-  ctx.fillText(label, px, py);
+  ctx.fillText(label, c[0], c[1]);
 }
 
 ctx.textAlign = 'left';
@@ -152,15 +200,32 @@ if (CAVEAT) {
 
 let ly = CAVEAT ? 112 : 92;
 const legend = [
-  ['RBiH', FACTION_COLORS.RBiH],
-  ['RS', FACTION_COLORS.RS],
-  ['HRHB  (amber here — blue is reserved for mismatch)', FACTION_COLORS.HRHB],
+  ['RBiH holds, correct', FACTION_COLORS.RBiH, null],
+  ['RS holds, correct', FACTION_COLORS.RS, null],
+  ['HRHB holds, correct', FACTION_COLORS.HRHB, null],
 ];
-if (painted) legend.push([`MISMATCH vs painted — ${mismatched} OSIDs`, MISMATCH_FILL]);
-for (const [name, color] of legend) {
+if (painted) {
+  legend.push([`WRONG vs painted — ${mismatched} OSIDs (amber fill)`, MISMATCH_FILL, null]);
+  legend.push([`  \u2192 should be RBiH — ${byExpected.RBiH}`, MISMATCH_FILL, EXPECTED_COLORS.RBiH]);
+  legend.push([`  \u2192 should be RS — ${byExpected.RS}`, MISMATCH_FILL, EXPECTED_COLORS.RS]);
+  legend.push([`  \u2192 should be HRHB — ${byExpected.HRHB}`, MISMATCH_FILL, EXPECTED_COLORS.HRHB]);
+}
+for (const [name, color, expected] of legend) {
   ctx.fillStyle = color;
   ctx.fillRect(20, ly - 14, 20, 20);
-  if (color === MISMATCH_FILL) { ctx.strokeStyle = MISMATCH_EDGE; ctx.lineWidth = 1.6; ctx.strokeRect(20, ly - 14, 20, 20); }
+  if (expected) {
+    // Mirror the map: amber swatch, expected-controller outline + dot.
+    ctx.strokeStyle = expected;
+    ctx.lineWidth = 2.0;
+    ctx.strokeRect(20, ly - 14, 20, 20);
+    ctx.beginPath();
+    ctx.arc(30, ly - 4, 3.4, 0, Math.PI * 2);
+    ctx.fillStyle = expected;
+    ctx.fill();
+    ctx.lineWidth = 1.1;
+    ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+    ctx.stroke();
+  }
   ctx.fillStyle = '#e5e7eb';
   ctx.font = '16px sans-serif';
   ctx.fillText(name, 48, ly + 2);
@@ -169,8 +234,10 @@ for (const [name, color] of legend) {
 if (painted) {
   ctx.fillStyle = '#9ca3af';
   ctx.font = '14px sans-serif';
-  ctx.fillText(`${compared} OSIDs compared · ${unpainted} unpainted (no reference, drawn by faction)`, 20, ly + 4);
+  ctx.fillText('outline + dot colour = which faction the reference says should hold it', 20, ly + 4);
+  ctx.fillText(`${compared} OSIDs compared · ${unpainted} unpainted (no reference, drawn by faction)`, 20, ly + 24);
 }
 
 writeFileSync(OUT_PATH, canvas.toBuffer('image/png'));
 console.log(`${OUT_PATH}  turn=${turn}  ref=${PAINTED_KEY}  mismatched=${mismatched}/${compared}  unpainted=${unpainted}`);
+console.log(`  expected-controller split: RBiH ${byExpected.RBiH} · RS ${byExpected.RS} · HRHB ${byExpected.HRHB}`);
