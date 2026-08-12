@@ -2053,7 +2053,7 @@
   {
     "id": "us_halts_federation_advance_1995",
     "title": "Washington Halts the Federation Advance",
-    "narrative": "Banja Luka is within reach. Federation forces have driven the VRS from a third of its territory in six weeks. But the phone rings from Washington. Holbrooke is blunt: take Banja Luka and you will have 200,000 Serb refugees, a humanitarian catastrophe, and no peace agreement. Zagreb backs down immediately. Sarajevo follows reluctantly. The front lines freeze. The 51/49 line that has defined every peace plan since July 1994 becomes reality not through negotiation, but through the calculated halt of a military advance.",
+    "narrative": "Banja Luka is within reach. Federation forces have driven the VRS from a third of its territory in six weeks. But the phone rings from Washington. Holbrooke is blunt: take Banja Luka and you will have 200,000 Serb refugees, a humanitarian catastrophe, and no peace agreement. Sarajevo bows, reluctantly, and sets conditions the Serbs can argue over so the offensive has a few more days to run. Zagreb listens, agrees, and orders one more operation anyway. The front lines freeze where the ceasefire date finds them, not where Washington asked. The 51/49 line that has defined every peace plan since July 1994 becomes reality not through negotiation, but through the calculated halt of a military advance.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 182,
@@ -2111,12 +2111,6 @@
           {
             "kind": "offensive_ops_suppression",
             "faction": "RBiH",
-            "duration_turns": 6,
-            "reason": "us_halts_federation_advance_1995"
-          },
-          {
-            "kind": "offensive_ops_suppression",
-            "faction": "HRHB",
             "duration_turns": 6,
             "reason": "us_halts_federation_advance_1995"
           }
