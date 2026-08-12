@@ -1715,3 +1715,93 @@ What specifically in the kijevo_2 bundle flips the brigade selection; the noise 
 replicates); whether the western cascade is reachable by any perturbation other than kijevo_2; why the
 seven shared ops are susceptible; whether `tg_max_lifecycle` terminating Prsten is correct behaviour or
 a second-order problem; and whether the 147 territorially-inert battle-turns are expected or defective.
+
+### PAINTED-REFERENCE QUESTION CLOSED — verified against the project's own BB corpus
+
+Owner correction: *"We have a whole system for data extracted from BB books."* Correct, and it made the
+external-source request unnecessary. Balkan Battlegrounds **is** the CIA product; both volumes are in
+`docs/`, and `data/derived/knowledge_base/balkan_battlegrounds/` holds a 406-page extraction. The
+reference question is answerable locally and is now answered.
+
+**Citation-convention note (integrator error, retracted).** The integrator initially claimed the
+Historian's BB2 page citations "did not match content." That was **wrong**. The KB indexes by **PDF
+page**; the Historian cited **printed folio**. Verified: KB index `BB2_p0478` carries printed folio
+**459** — a consistent **+19 offset**. All the Historian's citations were correct. Retracted.
+
+**KB coverage:** BB1 250 pages (PDF idx 38-77, 156-225, 401-545), BB2 156 pages (401-501, 506-560) —
+i.e. BB2 printed ~382-541. Cerska 93 (printed 385), Lukavac 93 (printed 390) and Zvezda 94 (printed
+459) all fall inside coverage. `map_catalog.json` has only 2 entries and no Goražde map, so no
+cartographic shortcut exists.
+
+#### `kolovarice` — CONFIRMED WRONG at oct1995. Verbatim primary source.
+
+BB2 printed p.459 (KB `BB2_p0479`):
+> *"By 8 April Serb forces had advanced another two kilometers, seizing the village of Biljin and
+> **isolating ARBiH forces on the southern bank in two pockets, one centered on Uhotic Hill** and the
+> other around Gradina. **On 10 April VRS forces eliminated the pocket around Uhotic** while continuing
+> the advance along the road, capturing the village of Zupcici. The VRS now controlled the Drina River
+> bank up to Zupcici."*
+
+BB2 printed p.461 (KB `BB2_p0480`):
+> *"...including nearly all of the southern (right) bank of the Drina"* — and the agreed pullback was
+> *"the withdrawal of VRS troops from a **three-kilometer exclusion zone on the left bank of the
+> Drina**"*, with heavy weapons out of a 20 km zone.
+
+**Uhotići is a constituent of `op:gorazde:kolovarice`** (verified from `census_rolled_up_wgs84` →
+`operational_settlements` constituent membership). Kolovarice's centroid is **11 km SSW, on the right
+bank** — outside a 3 km *left*-bank pullback. The VRS took it on 10 April 1994 and the record contains
+no mechanism returning it. **The owner's recollection is confirmed from the project's own primary
+corpus.**
+
+#### The three western rim OSIDs — evidence favours apr1994/apr1995 being the error, NOT oct1995
+
+Testing the Historian's LOW-MODERATE reading directly against the corpus. Every settlement BB
+explicitly names as captured in Zvezda 94 is present; **not one** of the 15 rim-OSID settlements
+appears anywhere in the 406-page corpus:
+
+| set | corpus hits |
+|---|---|
+| BB-named captures — Biljin, Župčići, Gostunj, Trebinjača, Gradina, Kopači, Jabuka, Trovrh, Uhotić | **9 of 9 present** |
+| `hrancici` + `faocici_2` + `zorovici` constituents — Hrančići, Bezmilje, Crvica, Bogovići, Gusići, Žilići, Faočići, Bahovo, Batkovići, Konjevići, Raškovići, Zorovići, Ilovača, Orahovice, Šehovići | **0 of 15** |
+
+Combined with BB naming only three axes — northern (Rogatica → Jabuka pass), eastern (across the Prača
+west of Ustiprača → Kopači), southeastern (Čajniče–Goražde road) — **and no western axis at all**,
+while these three sit 17-19 km due W/WSW; and with the arithmetic that oct1995's 282 km² is a **−20%**
+reduction matching contemporary reporting while apr1995's 175 km² is **−50%**.
+
+**HONEST LIMIT — this is absence of evidence.** BB is an operational-level history that names hills and
+villages on main axes; it would not necessarily name every hamlet, so "not in corpus" does not prove
+"not captured." The argument rests on the *combination* of the three strands above, not on the silence
+alone. It remains **LOW-MODERATE**, weaker than the kolovarice finding, and should be labelled as such
+wherever it is used.
+
+#### What correcting the reference would actually do to the engine's score
+
+All four OSIDs currently **match** at oct1995 (engine RBiH = painted RBiH):
+
+| osid | jan93 | apr94 | apr95 | oct95 | engine t188 | effect of correction |
+|---|---|---|---|---|---|---|
+| `kolovarice` | RS | RS | RS | RBiH | RBiH | oct95 → RS ⇒ engine becomes **MISmatched**; a real new target appears |
+| `hrancici` | RBiH | RS | RS | RBiH | RBiH | apr94/apr95 → RBiH ⇒ engine correct at **all four** dates |
+| `faocici_2` | RBiH | RS | RS | RBiH | RBiH | same |
+| `zorovici` | RBiH | RS | RS | RBiH | RBiH | same |
+
+So the corrections move in **opposite directions**, which is a useful sanity signal that this is not
+motivated reasoning toward a better score:
+- **One correction ADDS a genuine calibration target** — the engine holds `kolovarice` RBiH and should
+  not; total oct1995 error rises 73 → 74.
+- **Three corrections REMOVE phantom targets** at the mid-war snapshots, where the engine is currently
+  being penalised for holding ground it correctly held.
+
+Net: the engine is scored slightly **generously** at oct1995 and slightly **harshly** at
+apr1994/apr1995. Neither is large; both are real.
+
+#### Disposition
+
+**Nothing repainted.** Painted control is calibration ground truth and does not move on a session
+finding — this is a scoped, evidenced proposal for the owner. If it is actioned: correct `kolovarice`
+at oct1995 (HIGH confidence, verbatim primary source), and treat the three rim OSIDs as a single
+**boundary decision** at apr1994/apr1995 rather than three separate cells (LOW-MODERATE, and the
+weakest link is absence-of-evidence). The `kolovarice` **merge defect** — 23 settlements, 41.7 km²,
+straddling the front line, wrong under any single controller — is a separate data-pipeline item and is
+**not** fixed by any repaint.
