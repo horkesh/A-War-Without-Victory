@@ -121,3 +121,42 @@ Four specialists (Historian, scenario-creator-runner-tester, operations-expert, 
 ## Status
 
 23 total settlement-level mismatches found, all previously invisible to the 31-anchor tracked list. **Trnovo corridor cluster (3 osids) is now root-caused to two specific engine bugs** (queue-injection delay + stuck-in-planning eligibility decay) in `Operation Trnovo`/SRK. Remaining ~20 mismatches (Goražde's other 4, Foça, Čajniče, Rogatica, Pale, Srebrenica/Bratunac holdouts, Donji Vakuf holdout) are triaged into likely bug classes but not individually root-caused. Nothing fixed yet — awaiting direction on fix order (one-change-per-run).
+
+## CORRECTION 2026-08-12 — panel bugs (2) and (3) REFUTED by the run artifacts; operative blocker is elsewhere
+
+Re-derived from run n201's own artifacts + source before implementing the panel's recommended fix order. Two of the panel's three bugs do not survive contact with the evidence.
+
+**Panel bug (2) — "east axis structurally broken: kijevo_2 is a friendly waypoint that strips, leaving non-adjacent delijas" — REFUTED.** The AAR records `trnovo_east.objectives_targeted = [op:trnovo:kijevo_2, op:trnovo:delijas]` with `kijevo_2` still at index 0. It was never stripped, because it is not friendly: engine live control of `op:trnovo:kijevo_2` is **RBiH at init and RBiH at turn 188**. The panel read *painted* control (RS) as if it were live control. `kijevo_2` is an enemy-held OSID directly adjacent to the staging OSID (`operational_contact_graph.json`: gornja_presjenica adj kijevo_2 = true), i.e. a perfectly valid first objective. The axis's objective chain is sound; nothing about it guarantees `zero_eligible_axis`.
+
+Painted control is also snapshot-dependent, which is what trapped the panel — the four snapshots disagree because the ground genuinely changed hands in July 1993 (Lukavac 93):
+
+| osid | jan1993 | apr1994 | apr1995 | oct1995 | engine init | engine t188 |
+|---|---|---|---|---|---|---|
+| kijevo_2 | RS | RS | RS | RS | RBiH | RBiH |
+| delijas | RBiH | RS | RS | RS | RBiH | RBiH |
+| trnovo | RBiH | RS | RS | RS | RBiH | RBiH |
+| gornja_presjenica | RS | RS | RBiH | RBiH | RS | RS |
+
+**Panel bug (3) — "town-axis brigade drifted to gornje_pale and was not at staging" — REFUTED as stated.** `brigade_temporal_log.jsonl` shows `rs_1st_romanija_infantry` at `op:pale:gornje_pale` for t135-t144, then **arriving at `op:trnovo:gornja_presjenica` at t145** and remaining there through t156+. It was at its correct staging OSID, adjacent to its objective (`trnovo` town), for 12+ turns of the 19-turn window, and still never attacked. Drift was real but self-correcting; it is not the reason the axis failed.
+
+**Panel bug (1) — mobilization starvation — STANDS.** `rs_trnovo_brigade` (OOB `available_from:6`, `initial_personnel:500`, `initial_officer_quality:0.15`, home `gornja_presjenica`) first appears in the temporal log at t140, which is why the op injected at t141 rather than at its `available_from:69`. Unchanged from the panel's finding.
+
+**`zero_eligible_axis` is an ATTACKER-side blocker, not an objective-chain blocker.** `sector_offensive_launch_helpers.ts:908-918` emits it when `axisHasExecutableOpeningAttack` returns false, which requires a brigade that is active, `personnel >= MIN_ATTACK_PERSONNEL` (=500, `formation_constants.ts:82`), undisrupted, **physically adjacent to the objective**, and predicting an outcome at or above threshold. Staging-adjacency failures are the *separate* `no_approach_osid` blocker (line 858-862). `rs_trnovo_brigade` sat AT staging (adjacent to kijevo_2) with exactly 500 personnel — it cleared position and floor, so the only remaining failing term is the **predicted outcome**: a 500-man mountain brigade at officer_quality 0.15, morale 58->8, cohesion 45->32 cannot predict better than catastrophic against the RBiH defender.
+
+**The operative blocker (new finding, supersedes panel bug 2 as the fix target): `evaluateOpeningAttackReadiness` conflates "still marching" with "present but too weak."** At `sector_offensive_launch_helpers.ts:1013-1028`:
+
+```ts
+if (result.blocker === 'zero_eligible_axis') anyApproaching = true;
+...
+if (anyExecutable && !anyApproaching) return { executable: true };
+```
+
+The comment states the intent — "true when any non-terminal axis has brigades mid-march ... hold until all axes are adjacent." But `zero_eligible_axis` does not mean mid-march. It covers both (a) brigades still en route, where waiting is correct, and (b) brigades already present and simply too weak to clear the prediction threshold, where waiting is futile **and actively harmful**, because ambient morale/cohesion drift degrades them monotonically while they wait. Operation Trnovo is case (b): the op held in `planning` for all 19 turns and aborted with `total_attacks: 0` while both brigades stood at the staging OSID losing ~2 morale/turn.
+
+Consistent with this, `trnovo_town` carries **no `launch_blocker` at all** in the AAR while `trnovo_east` carries `zero_eligible_axis`, and the op-level `recovery_reason` is `zero_eligible_axis` — which `rankOpeningAttackBlocker` (line 837) returns whenever ANY axis reports it. Reading: the stronger town axis (2200 men, at staging from t145, adjacent to Trnovo town) was held hostage by its weak sibling and never allowed to execute.
+
+**Confidence:** the refutations of bugs (2) and (3) are CONFIRMED — they rest on directly recorded artifact values, not inference. The "town axis was executable and was held hostage" reading is PLAUSIBLE, not confirmed: `launch_blocker` is set on failure and never cleared, so its absence is strong but indirect evidence, and it does not explain why no blocker was recorded for t141-144 when that brigade was at `gornje_pale` and demonstrably not adjacent to `trnovo`. **Decisive test before any fix:** instrument one 188w run to log per-axis `classifyAxisOpeningAttack` results per turn for this op, and confirm `trnovo_town` returns `executable: true` from t145 onward.
+
+**Risk class and gate.** This is an op-lifecycle change in `evaluateOpeningAttackReadiness`, a shared multi-axis code path used by every pre-planned, triggered, and opportunity operation in the game — categorically the EH-3/EH-4 high-risk class, NOT the "surgical, lowest-risk" class the panel assigned to its (now-refuted) east-axis restructure. `docs/life_lessons/calibration.md:350` is the governing precedent: EH-3 fix(a) passed **30/30 anchors and every §6 invariant** and was still a **−39 floor regression** (658->619), entirely in non-anchor western-Krajina OSIDs. Anchors-pass is therefore not sufficient evidence for this class of change. The scenario-tester gate already recorded above stands unchanged and is now more binding, not less: fresh clean 188w baseline off branch head; one change per run; full non-net `anchor_checks` diff; 40w structural fingerprint byte-flat; full 188-week trajectory diff for collateral flips; automatic NO-GO on any Igman/Bjelašnica flip to RS. Add one gate item specific to this finding: because the change would let *every* multi-axis op in the game launch in situations where it previously stalled, the trajectory diff must be repo-wide across all operations, not scoped to the Sarajevo-Romanija-Drina theatre.
+
+**Note on floor provenance:** `docs/40_reports/CALIBRATION_MASTER.md` still records the floor as `matched_osids 634, anchors 30/31`. The 2026-08-11 ledger entries move it to **639, anchors 31/31** (Brčko firepower-deficit −4 then Mistral 2 duplicate-objective +9) and explicitly say to update CALIBRATION_MASTER; that update was never made. CALIBRATION_MASTER is stale — reconcile it before it is used as a baseline reference for this lane.
