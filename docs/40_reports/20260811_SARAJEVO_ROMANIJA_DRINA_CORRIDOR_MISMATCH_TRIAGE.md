@@ -578,3 +578,98 @@ consecutive tunings of the same predicate toward the same map is the definition 
   its first objective — anomalous, flagged by calibration, not investigated.
 - **Probe deletion is a tracked obligation**, not a comment: delete `axis_readiness_debug.ts` and both
   call sites once the fix is signed off.
+
+## OWNER CORRECTION 2026-08-12 — the prize was understated by the panel and by the integrator
+
+**Owner:** *"prize is not just 3 OSIDs. Entire Goražde enclave is hugely wrong."* Measured against
+n205, and the owner is right. The "3 non-anchor OSIDs out of 712" framing — calibration's, relayed
+uncritically by the integrator — is wrong on both of its terms.
+
+**Measured corridor complex** (all 8 municipalities the triage checked: Goražde, Foča, Čajniče,
+Rogatica, Višegrad, Kalinovik, Trnovo, Pale), engine turn 188 vs `painted_control_oct1995`:
+
+| municipality | wrong / tracked |
+|---|---|
+| Goražde | 5 / 17 |
+| Foča | 2 / 14 |
+| Čajniče | 3 / 5 |
+| Rogatica | 1 / 8 |
+| Višegrad | 0 / 9 |
+| Kalinovik | 1 / 7 |
+| Trnovo | 4 / 6 |
+| Pale | 2 / 8 |
+| **total** | **18 / 74** |
+
+**Whole map: 73 mismatches of 712. This one contiguous corridor holds 18 of them — 24.7% of ALL
+settlement-level error in the game.**
+
+**Why it was invisible.** Goražde has 17 OSIDs; the engine holds 14 RBiH against a painted 13. The
+*gross count is nearly right* while **5 specific settlements are swapped**. Every count-based and
+anchor-based metric therefore reads Goražde as healthy — it is the enclave's SHAPE that is wrong, not
+its size, and shape is only visible on a map. This is exactly how 23 mismatches survived 31 tracked
+anchors and a 639/712 match rate. It also means `matched_osids` is a poor instrument for this defect
+class: a fix could correct the enclave's shape while barely moving the count.
+
+**Correcting the two bad terms in the park-it argument:**
+1. *"3 non-anchor OSIDs"* — the 3 Trnovo OSIDs are the **mechanism**, not the prize. The report's own
+   Trnovo section already said so: the un-severed corridor is why RBiH retains a contiguous claim that
+   reads as an ARBiH wedge cutting RS in two.
+2. *"twenty other unfixed mismatches of equal standing"* — they are **not** independent and of equal
+   standing. They are the same cluster: one corridor, a quarter of all map error, on the most
+   historically consequential terrain in the game (the ground whose loss isolated Goražde and linked
+   RS's two halves — BB2 p.391 makes both the operation's explicit objectives).
+
+**Honest scoping — fixing Trnovo does NOT fix all 18.** They decompose into at least three causes:
+- **Operation-execution failures (~7)**: the Trnovo deadlock (`trnovo`, `delijas`, `kijevo_2`) and the
+  Operation Pracha River stall (`rogatica:brcigovo`, `gorazde:ustipraca_2`, `gorazde:slatina_2` — the
+  op lost `brcigovo` three times in w43-45 and never reached its later objectives). This is the share
+  the current lane can address, and the widened probe will observe **both** operations.
+- **Orphaned / missing-operation (~9)**: `foca:brusna_2`, `foca:mazlina`, all 3 Čajniče,
+  `pale:podgrab`, `pale:praca`, `gorazde:glamoc`, `gorazde:kamen` — RBiH since turn 0, zero battles
+  ever, and repo-wide grep finds no operation targeting them. A different defect class entirely.
+- **Init-control / separate later operations (~2)**: `kalinovik:golubici_2` and
+  `trnovo:gornja_presjenica` (the latter a missing 1994-95 ARBiH operation, per the historian).
+
+So the lane's realistic reach is roughly **7 of 18**, not 3 and not 18. That is still the largest
+single concentration of addressable settlement error identified anywhere in this project's calibration
+record, and it is the reason the measurement run is worth a slot.
+
+---
+
+## PRE-COMMITTED DECISION RULE — fixed BEFORE the measurement run, per calibration condition 1
+
+Recorded and committed **before** the run executes, so it cannot be retrofitted to whatever the result
+turns out to be. This is the discipline calibration asked for in HOLE A: *"the panel must pre-commit
+to the decision rule before the run or it will rationalise whichever result appears."*
+
+**Q1 — Does the recommended fix even apply to Operation Trnovo?**
+The probe will log `found_in_predictor`, `predicted_outcome` and `power_ratio` per brigade per axis.
+- **STATE 3** (`found_in_predictor: true`, outcome below threshold) ⇒ the diagnosis holds and the
+  `isCommittedInTransitTo` remedy is the right instrument.
+- **STATE 2** (`found_in_predictor: false`) ⇒ **the fix does not apply to this operation.** The lane is
+  re-scoped to the predictor, and no `anyApproaching` change is proposed on Trnovo's evidence.
+This is binding and is the run's primary question.
+
+**Q2 — Blast radius (calibration's trigger, UNCHANGED as a measurement).**
+Count every evaluation where `any_executable && any_approaching` across all operations and turns.
+- If the veto fires **only** on Trnovo and Cerska-Kamenica ⇒ blast radius is small; proceed to propose
+  the fix under the full merged gate.
+- If it fires on **any operation launching before t40** ⇒ the blast radius reaches the operations that
+  open the war.
+
+**Disposition on the Q2 trigger — CHANGED, and the change is declared here rather than discovered
+later.** Calibration's original rule was automatic deferral past D2 on trigger. That disposition was
+priced against a 3-OSID prize. At a measured 24.7% of all map error the trade is materially different,
+so on trigger the disposition becomes an **explicit owner decision**, not an automatic defer.
+
+**The measurement itself is NOT weakened, and no gate condition is relaxed.** The threshold, the
+counting, and every NO-GO in the merged gate stand exactly as the panel set them — including panel
+NO-GO at matched < 630, all 31 anchors, §6 owner sign-off, the Igman/Bjelašnica bright line, the
+Brčko-byte-flat requirement, and the hard stop at attempt two. Only the *disposition* on one trigger
+moves, and it moves from "automatic defer" to "owner decides", because the input that justified
+automatic deferral has been measured and found wrong. Red team's motivated-reasoning warning applies
+directly here and is the reason this is written down before the run rather than after it.
+
+**Q3 — Instrument health.** The widened filter must reproduce baseline byte-identically
+(`final_state_hash c657ad81f4d94cc0`, matched 639/712, anchors 31/31). If it does not, the probe is
+not observation-only at volume and **the trace is discarded** — no conclusions drawn from it.
