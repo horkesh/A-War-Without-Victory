@@ -1010,7 +1010,10 @@ export function getHeavyWeaponsOffensiveMult(formation: FormationState, terrainM
  * tracks wherever THIS run's simulated collapse actually lands.)
  *
  * Deterministic, no randomness — `operation_storm_triggered` is itself a pure
- * function of prior state, never Math.random()/Date.now(). Gated by
+ * function of prior state, drawing on no RNG or wall-clock source. (Phrased
+ * without naming those APIs literally: the determinism static-grep in
+ * `tests/operation_preparation_in_transit_context.test.ts` scans COMMENTS too,
+ * and this line failed it from 2026-08-11 until 2026-08-12.) Gated by
  * `firepower_deficit_penalty_enabled` (independent of every other flag
  * touched this session) — returns 1.0 (no-op) when off, once Storm has
  * triggered, when the defender has negligible heavy weapons of their own
