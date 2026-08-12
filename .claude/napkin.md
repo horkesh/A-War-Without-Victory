@@ -20,6 +20,14 @@
    Do instead: execute RR2 cleanup/audit work only within its stop gates; keep WP-9 first and CA proof/merge as the Command Authority companion lane.
 
 ## Execution & Validation
+0. **[2026-08-12] ANY territory-moving change needs 188w — the "catalog-only" carve-out is WITHDRAWN**
+   Do instead: treat 40w/43w as a DEVELOPMENT loop only. A one-line objective addition measured +3 with zero regressions at 43w and −26 with two anchor flips at 188w. 43w faithfully reproduces turn-43 state (~4 min vs ~20) so it is useful for iterating — never for adopting. Only provable byte-identity earns a short-horizon-only GO.
+0b. **[2026-08-12] Judge findings mechanism-first, not delta-first**
+   Do instead: state conclusions as a traced causal chain (this brigade, this turn, this roster) — those survived a session that refuted four separate delta-based readings. Distinguish real cost from op-stream churn by whether damage is CONTIGUOUS with a named mechanism's home region or scattered.
+0c. **[2026-08-12] Check the inert-lever list before spending a probe run**
+   Do instead: `planning_duration` is inert for ANY op whose brigades are already pre-staged (`stagedEarly` short-circuits the launch gate) — not just event-trigger-bound ops. See `docs/life_lessons/calibration.md:361`. A run was wasted rediscovering this.
+0d. **[2026-08-12] Never background a run inside an already-backgrounded call**
+   Do instead: one `run_in_background` per run. Chaining `cmd &` inside it orphans the run — the notification fires on the wrapper and the scenario dies mid-flight.
 1. **[2026-06-30] Vite warnings are release-surface failures**
    Do instead: remove browser Node edges/static-dynamic overlap and run npm run qa:player-experience for release-facing player-experience sweeps.
 2. **[2026-06-26] Browser gates must watch network failures**
@@ -38,6 +46,12 @@
    Do instead: keep executable QA harnesses under tracked `tools/`; write generated screenshots, saves, and logs under excluded `tmp-*` roots, and prove harness contracts from a clean-checkout path.
 
 ## Domain Behavior Guardrails
+0. **[2026-08-12] Painted control has FOUR snapshots — a source comment citing one is a trap**
+   Do instead: check `jan1993`/`apr1994`/`apr1995`/`oct1995` before acting on any "painted = X" comment. Objective removals justified as "painted RBiH" were true only at oct1995 and made the other three wrong. Objective STRIPPING keys on LIVE control (`buildAxesFromDef` → `getPoliticalControllerOSID`, at INJECTION), never on painted — that confusion sent a 4-specialist panel to a two-thirds-wrong diagnosis.
+0b. **[2026-08-12] The BB corpus is local — do not reach for external sources**
+   Do instead: `docs/Balkan_Battlegrounds{I,II}.pdf` plus the 406-page extraction at `data/derived/knowledge_base/balkan_battlegrounds/pages`. BB **is** the CIA product. Note the KB indexes by **PDF page** while citations use **printed folio** — BB2 offset is **+19** (KB `BB2_p0478` = printed 459). Coverage: BB1 printed ~19-526 in patches, BB2 printed ~382-541.
+0c. **[2026-08-12] The early-war force economy has no slack**
+   Do instead: expect any added early objective to be paid for elsewhere. Two historically-correct fixes each took their target and each lost more globally (`kijevo_2` −26/2 anchors; `djulici` −6 via `rs_1st_birac` being simultaneously the Zvornik sweep's muscle and Birač's only garrison). Fix the force economy before adding objectives — `docs/plans/2026-08-12-r5-force-economy-engine-health-packet.md`.
 1. **[2026-07-06] Player-only state is gate-invisible**
    Do instead: pin campaign integrals in contract tests; validate feel through owner diaries.
 2. **[2026-06-26] Missing data is unreported, not favorable**

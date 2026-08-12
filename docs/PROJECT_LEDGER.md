@@ -26609,3 +26609,72 @@ Panel convened on the corrected Operation Trnovo diagnosis. Four specialists (Hi
 **Two lanes, explicitly NOT to be bundled.** Lane A = engine health (the in-transit predicate), judged on op-population health across all multi-axis ops, **never** on whether the 3 Trnovo OSIDs flip. Lane B = historical fidelity: the op models only the *supporting* attack, since BB2 p.391 puts the main effort in the south (TG "Kalinovik"/Herzegovina Corps, 1st Guards Motorized); adding a southern Kalinovik axis is a catalog change of the Mistral-2 class, and red-team red line 7 forbids bundling any Trnovo objective edit with Lane A.
 
 **Nothing implemented. No behavioral change.** Awaiting owner decision between (a) the agreed measurement-only run — probe extended to log `predicted_outcome`/`power_ratio`/`found_in_predictor` across t138-t162 including the recovery turn, widened to all operations, inertness re-verified for the wider filter, decision rule pre-committed before the run — and (b) parking the lane, which calibration argues for outright on the grounds that the prize is 3 non-anchor OSIDs of 712 and this is not a D2 blocker. Full panel synthesis, merged gate, and separate lanes opened: `docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISMATCH_TRIAGE.md`.
+
+---
+
+## 2026-08-12 — Calibration reference CORRECTED (floor 639→638, engine unchanged); two historically-correct fixes built and both REVERTED; force-economy packet opened
+
+**BEHAVIORAL/OUTPUT CHANGE — one, and it is to the reference, not the engine.** `op:gorazde:kolovarice`
+repainted **RBiH → RS at oct1995** (owner-directed, `e3a28e25f`). The engine is untouched and produces
+the identical map; the *reference* became more accurate, so the same engine now scores **638/712 instead
+of 639/712**. **This is not a regression** — any run compared against a pre-2026-08-12 "639" is being
+compared against a reference containing a known error. Verified verbatim from the project's own BB
+corpus: BB2 printed p.459 — VRS *"eliminated the pocket around Uhotic"* on 10 April 1994; BB2 p.461 —
+VRS retained *"nearly all of the southern (right) bank of the Drina"* and the pullback was a
+three-kilometre zone **on the left bank**. Uhotići is a verified constituent of the OSID, whose centroid
+is 11 km SSW on the right bank. `engine_health_gate` `matched_osids_min` is 622, so 638 still passes; no
+test pins the 639 literal. `CALIBRATION_MASTER.md` restated accordingly.
+
+**Two historically-correct data fixes built, validated, and BOTH REVERTED — each worked locally and lost
+more globally.**
+- **`op:trnovo:kijevo_2` → Operation Prsten.** Painted RS in all four snapshots; census Bosniak-majority
+  so init RBiH is correct and it must be *taken*. At 43w: **+3, zero regressions**, and emergently — the
+  same Operation Foča attack on `kolovarice` that stalemated in baseline became a decisive victory, and
+  a sector attack on `praca` occurred that had never happened in any prior run. At 188w: **matched
+  −26, anchors 31→29/31** (`op:doboj:boljanic_2`, `op:gracanica:petrovo_2`), 34 regressed vs 8 fixed,
+  concentrated in non-anchor western Krajina; the entire Mistral/Sana cascade collapsed (Mistral 1
+  13atk/7cap → 5atk/1cap).
+- **`op:zvornik:djulici` → Operation Drina** (§6-signed). Target **taken**, anchors **31/31**, §6 correct,
+  western cascade **intact**. But **matched −6, 9 regressed vs 3 fixed**, in the contiguous **Birač belt**
+  — and traced: the extra objective ran Drina t0→t10 → t0→t12, costing `rs_1st_birac` ~480 personnel and
+  displacing it (t40 `brezovice_2` 1676 → `bratunac_2` 1192). Šekovići ×3, Vlasenica, Kladanj, Olovo,
+  Doboj, Ugljevik then fall. **One brigade is both the Zvornik sweep's muscle and the only thing holding
+  Birač.**
+
+**The instrument itself was investigated and partly discredited.** Probe A (Koridor `planning_duration`
+9→10) was a **null probe** — zero OSIDs differing at any of 189 turns, 38/38 op-stream commonality — and
+`planning_duration` is now understood to be inert for **any** op whose brigades are already pre-staged
+(`stagedEarly` short-circuits the gate), not merely for event-trigger-bound ops. Probe D (a permanently
+unreachable enemy objective on Prsten) **excluded slot occupancy** as the cause of the western collapse
+via brigade-identity evidence: it preserved `hvo_3rd_guard_jastrebovi` in both Cincar and Mistral 1
+where the `kijevo_2` run swapped to `hvo_1st_guard_abb`. Probe D also produced the session's most
+striking measurement — **first battles divergence t10, first control divergence t157: 147 turns of
+demonstrably different fighting produced byte-identical territory.**
+
+**Four delta-based readings were refuted during the session and are recorded as such**: a five-link
+causal chain (3 links dead), a "territory-coupling" inference, a "−6 noise floor" (n=1 twice), and a
+dose-response argument. **Mechanism-first conclusions survived; delta-first did not.** The claim that
+"188w A/B is an invalid instrument early-war" stands only at **n=1** — an archive sweep found `n210` is
+the only run that perturbs territory before t183, so nothing corroborates or refutes it. The `kijevo_2`
+−26 is itself **confounded** (it flipped an OSID *and* extended Prsten's slot t5→t8).
+
+**Diagnoses completed, no code changed:** Operation Trnovo's deadlock confirmed by measurement and
+panel-escalated (4/4 GO-WITH-CONDITIONS, no signature); Cerska/Kamenica shown to be **1992-93 losses,
+not Srebrenica-1995 residue**, with the primary defect a **trigger date** (`turn >= 40` = Dec 1992 vs
+the historical Feb-Mar 1993); `djulici` root-caused as an orphaned objective; the January-1993 Goražde
+lane measured at **15 errors = 31.3% of all jan1993 map error**, 12 of 15 wrong from turn 0 and all 12
+census-consistent; and the Goražde painted reference shown to be systematically suspect (4 rim OSIDs
+imply a 62% enclave expansion no source supports; `kolovarice` is additionally a **merge defect** —
+23 settlements, 41.7 km², straddling the front line, wrong under any single controller).
+
+**Opened:** `docs/plans/2026-08-12-r5-force-economy-engine-health-packet.md` — the force-economy /
+force-density work as a **R6-owned pre-1.0 gate** (R5 is closed; the roadmap already names the "RS
+force-density knot", and this evidence shows it is *not* RS-specific). Five sub-items, EH-F1
+(participant-selection stability) first. **Acceptance criteria deliberately not keyed on
+`matched_osids`** — binding is a per-item mechanism invariant plus anchors/§6/health-gate; matched is
+advisory with a full FIXED/REGRESSED breakdown.
+
+**Also:** `CALIBRATION_MASTER.md` reconciled to the real floor (it had recorded 634/30·31 while the
+2026-08-11 ledger had moved it to 639/31·31); the triage report's denominator corrected 744 → 712; and
+`tools/render_control_map.mjs` added — a settlement-level control-map renderer with painted-mismatch
+shading, replacing the untracked throwaway.
