@@ -37109,7 +37109,10 @@
                   "op:sanski_most:ostra_luka",
                   "op:sanski_most:ilidza_2",
                   "op:sanski_most:kljevci",
-                  "op:kljuc:sanica_2"
+                  "op:kljuc:sanica_2",
+                  "op:kljuc:hadzici",
+                  "op:kljuc:kljuc_2",
+                  "op:kljuc:krasulje_2"
                 ],
                 "staging_osid": "op:bosanska_krupa:jasenica_2",
                 "status": "executing",
