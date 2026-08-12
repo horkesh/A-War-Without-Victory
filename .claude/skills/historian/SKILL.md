@@ -46,6 +46,42 @@ description: Use when discussing historical events, BiH war scenarios, citation-
 2. **Answer with citations:** Every factual claim must cite BB1 or BB2 + page number (e.g. "BB1 p.404", "BB2 p.509"). If the KB has no relevant content, say so and do not invent.
 3. **Structured answers (optional):** Summarize takeover/consolidation/displacement, holdouts (e.g. Sapna in Zvornik), enclaves (Srebrenica, Žepa, Goražde), pockets (Bihać), JNA deployment and 12 May 1992 conversion to VRS, with one citation per finding.
 
+## Settled modelling facts — DO NOT re-litigate these as engine defects
+
+Things that look like faction-asymmetric railroads but are **deliberate history**. If an audit,
+gap-finder, or red-team flags one of these, the correct answer is "this is modelled history," with
+the reasoning below.
+
+### The cohesion floors are inverted BY DESIGN (owner-confirmed 2026-08-12)
+
+`data/scenarios/timelines/apr1992.json` → `cohesion_floor`:
+
+| faction | curve (week, floor) | direction |
+|---|---|---|
+| RBiH | `[0,35] [13,42] [26,50] [39,56] [52,62]` | **rising** 35 → 62 |
+| RS | `[0,35] [40,35] [60,25] [80,20]` | **falling** 35 → 20 |
+| HRHB | `[0,40] [52,40] [53,30]` | late step down |
+
+**This mirrors the real armies' trajectories.** The VRS began as a professional force — JNA cadre,
+equipment, officers, doctrine — and degraded into an increasingly hollow, poorly-motivated
+organisation, while remaining locally capable into 1995. The ARBiH ran the opposite arc: a barely-armed
+irregular force in 1992 that professionalised into a real army by 1994-95. The floors encode those two
+arcs, not a thumb on the scale.
+
+**Why this keeps getting flagged, and why the flag is wrong.** The brigade-dissolution gate sits at
+cohesion ≤ 20. The RS floor reaches exactly 20; the RBiH floor never descends below 62. So RS brigades
+can dissolve and RBiH brigades structurally cannot — measured at 4,127 RS brigade-turns at/below the
+threshold versus 5 for RBiH. That asymmetry is a *consequence* of the historical arcs meeting a fixed
+threshold, not evidence of a railroad. It was investigated to root on 2026-08-07
+(`docs/40_reports/20260807_RS_COHESION_RAILROAD_ROOT_CAUSE.md`) and the late-war RS dissolution was
+found to be **largely historical** — the western VRS really did collapse.
+
+**What IS still open** (do not confuse with the above): whether the *dissolution threshold* should be
+faction-blind when the floors are not, and the deferred "combat-earned cohesion" redesign. Three
+specific remedies are already dead on merits and must not be re-proposed: a naive floor bump
+(disproven, non-monotonic — 20/25/30 → 634/623/629, and both alternatives break the §6 Bihać hold),
+cumulative/windowed cohesion, and the attacker-relative floor.
+
 ## Constraints
 
 - **No invention:** Do not add locations, events, or numbers without a BB KB (or pipeline) citation. User-mentioned places are **research seeds** — look them up in the KB.

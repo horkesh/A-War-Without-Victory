@@ -26594,7 +26594,7 @@ Panel convened on the corrected Operation Trnovo diagnosis. Four specialists (Hi
 
 **Four claims in the 2026-08-12 entry above are corrected, all upheld against the frozen artifact:**
 1. **EH-4 "32 dead_ops" link WITHDRAWN** — `invalid_operation_count: 0` in n205; and 29 of the original 32 were `attack_orders_without_battles`, requiring `execution` phase, while this deadlock holds ops in `planning`. The remedy pushes that counter the wrong way (it converts planning-stalls into execution entries, against a ceiling of 6).
-2. **"Only failing term is the predicted outcome" is an INFERENCE, not a measurement** — `axisHasExecutableOpeningAttack` has a second silent `continue` at `:699` when `predictAllAdjacentTargets` does not return the objective at all. The probe logs no prediction value, so STATE 2 vs STATE 3 is **undetermined**; if `trnovo_east` fails at `:699`, the recommended fix does nothing for this op and the lane is re-scoped.
+2. **"Only failing term is the predicted outcome" is an INFERENCE, not a measurement** — `axisHasExecutableOpeningAttack` has a second silent `continue` at `:699` when `predictAllAdjacentTargets` does not return the objective at all. The probe logs no prediction value, so STATE 2 vs STATE 3 is **undetermined**; if `trnovo_east` fails at `:699`, the recommended fix does nothing for this op and the lane is re-scoped. **[SUPERSEDED 2026-08-12 — RESOLVED by measurement, this caveat is stale. Run n206 (`792573b63`) widened the probe to log `found_in_predictor`/`predicted_outcome`/`power_ratio` and answered **STATE 3, 4/4**: `trnovo_east` has `found_in_predictor` TRUE, `staged_adjacent` 1, and `predicted_outcome: catastrophic` against a `repulsed` threshold — the failing term IS the predicted outcome, so the `isCommittedInTransitTo` remedy is the right instrument for this op and the lane is NOT re-scoped. Instrument health PASS (n206 reproduced baseline byte-identically at volume: `c657ad81f4d94cc0`, matched 639/712, anchors 31/31, 748 trace records). The self-worsening spiral is quantified: `power_ratio` decays 0.334 → 0.295 across four turns of waiting. **The pre-committed Q2 trigger also FIRED** — the `anyApproaching` veto cost an otherwise-executable operation in **12 evaluations across 6 ops**, earliest at **t1**: Koridor t1-t3, Corridor t7, Herzegovina Consolidation t21, Cerska-Kamenica t44-45, Trnovo t156-159, Mistral 2 t176. Three of those are pre-t40, so this is NOT a late-war-only or Trnovo-only phenomenon, and the "prize is 3 non-anchor OSIDs" framing that argued for parking the lane is understated by the measurement.]**
 3. **The "19-turn window" is a COHA ceasefire artifact** — `sector_offensive.ts:1148-1168` early-returns for every corps while `coha_active`, bumping `phase_started_turn`. n205 fires `coha_ceasefire_begins_1995` at t139, `coha_expires_1995` at t156; Trnovo was created at **t141, inside the freeze**, and got ~4 live turns. Explains the `battleless_weeks` 138-154 run. Kills both prior explanations for the t141-t155 silence (grace window would have opened at t147; pre-planned ops bypass preparation entirely, `operation_preparation.ts:831-843`).
 4. **"This closes the diagnosis" overstated** — `min_attack_outcome: 'repulsed'` is rank 2, the floor of the ladder (all 16 authored ops that set it use `'repulsed'`; only `catastrophic` is lower), so `executable: true` means only "we predict at least being repulsed". The four traces also exclude the abort turn.
 
@@ -26678,3 +26678,315 @@ advisory with a full FIXED/REGRESSED breakdown.
 2026-08-11 ledger had moved it to 639/31·31); the triage report's denominator corrected 744 → 712; and
 `tools/render_control_map.mjs` added — a settlement-level control-map renderer with painted-mismatch
 shading, replacing the untracked throwaway.
+
+---
+
+## 2026-08-12 — EH-F1 BLOCKED on mechanism; transient-filter hypothesis MEASURED FALSE (probe built, run, deleted); floor re-measured 638 at HEAD
+
+**NO BEHAVIORAL CHANGE. Working tree byte-identical to `e5ea2aacd` at close** — the diagnostic built for
+this measurement was deleted per its own pre-committed rule, verified by an empty `git diff` against the
+commit and an empty working-tree diff. The day's product is negative knowledge plus a *measured* floor.
+
+**EH-F1 (participant-selection stability) is CLOSED — unanimous BLOCK.** A 5-seat blind panel was
+convened on the force-economy packet's first sub-item; 3 seats delivered (operations, determinism,
+calibration), 2 failed repeatedly and the integrator took over their questions — **gap recorded, not
+papered over**. Every mechanism claim below was independently verified by the integrator.
+
+**EH-F1 cannot change which brigades fight, at any site, in either element.** No selection site
+truncates: `pre_planned_operations.ts:1013-1051` and `triggered_operations.ts:852-860` are uncapped
+`.filter()`; `operation_opportunities.ts:1197-1207` is a capped loop whose `targetCount` is
+`Number.POSITIVE_INFINITY` on the bot path (the bot passes `commitment_profile ?? 'standard'` at
+`:1070`), so the `break` at `:1206` has never executed in any archive run. With no cap, membership is
+order-independent — ordering cannot select, and neither can incumbency, because every eligible brigade
+is already in. `reconcileOperationRoster` (`final_operation_truth_reconciliation.ts:61-73`) rewrites
+`axis.assigned_brigades` every turn regardless. **Both of the packet's motivating cases are out of
+scope**: Operation Drina is pre-planned (`pre_planned_operations.ts:164`), and the Kupres two-guards
+swap is governed by elite-loan timing (`army_reserve_system.ts:271`) — the two brigades are never
+candidates on the same axis. **The packet's proposed success test would have produced a false green**:
+measured, `djulici` passes EH-F1's invariant in the *unmodified* engine (n213 fields the same brigade as
+baseline); only `kijevo_2` flips it.
+
+**Three corrections to the packet, all verified, that outlive the lane:**
+
+1. **`matched_osids` is HARD-gated at 622**, not advisory — `engine_health_gate.cjs:349`. The packet's
+   central acceptance claim is wrong. This matters: EH-3 passed 30/30 anchors and every §6 invariant and
+   was still −39 (658→619); the binding list *minus* the 622 floor would have adopted it, and the floor
+   catches it by 3 OSIDs.
+2. The gate is **6 hard integer checks + 1 advisory float** (`kw_ratio`, `soft()` at `:357`,
+   non-binding unless `--strict`, which must be forbidden). The cross-platform authority is the
+   structural fingerprint, not the gate.
+3. **Never use a tolerance band as an equality predicate in a comparator** — non-transitive, hence
+   implementation-defined `Array.prototype.sort`. Demonstrated on a real 5-brigade axis: **9 distinct
+   sorted outputs across 120 input permutations**. Local Node **v24.13.0** vs CI **22**. Correct pattern
+   is integer bucketing (`Math.floor(p / BAND)`) as a *primary sort key*, terminating in
+   `strictCompare(formationId)`.
+
+**The panel then converged on a different mechanism — and MEASUREMENT KILLED IT TOO.** All three sites
+end `if (axisBrigades.length === 0) continue;`, so an axis whose every candidate is transiently filtered
+is **deleted, not thinned**, and never rebuilt; `in_transit` is set by `apply-brigade-movement`
+(`war_phases.ts:1542`) *earlier in the same turn* as selection. A probe
+(`participant_filter_debug.ts`, env-gated, second-pass, live predicates byte-identical) was built to
+size it, with the decision rule fixed **before** either run (0-2 close / 3-5 diagnostic / 6+ open a lane
+/ any anchor-or-§6 contact escalates regardless).
+
+**Result: `axis_dropped_transient_only` = 0** at all three sites (pre_planned 0/257, triggered 0/6,
+opportunity 0/16). **The sharper number: across 562 candidate evaluations, `disrupted_turns > 0`
+occurred 0 times and `in_transit` occurred once (0.18%).** The hypothesis fails one step earlier than
+argued — the transient *condition* barely coincides with selection at all. That single `in_transit`
+(Operation Jackal::stolac_sweep, t8) is the probe's **positive control**: the instrument demonstrably
+detects the condition, so the zero means *absent*, not *unmeasured*.
+
+**Inertness proven on 14/15 artifacts** (n215 probe-off vs n216 probe-on): `control_delta`,
+`formation_delta`, `final_save`, `run_summary`, `operation_aars` all byte-identical; only
+`run_meta.json` differs, on the `out_dir` string. Both runs `c657ad81f4d94cc0`.
+
+**PRECISE CLOSURE LANGUAGE — do not loosen.** This closes *"axes are silently deleted by TRANSIENT
+PARTICIPANT FILTERS at the three participant-selection sites."* It does **not** close *"axes are lost to
+transient conditions somewhere in the engine."* Two uninstrumented axis-loss paths remain real:
+`reconcilePlanningObjectives` (`sector_offensive.ts:918-936`, objective-side deletion) and the readiness
+veto (`axisHasExecutableOpeningAttack` / `evaluateOpeningAttackReadiness`), which vetoes ops whose axes
+are *fully populated* and is therefore invisible to a selection-stage probe by construction — that is
+where the known Trnovo deadlock lives.
+
+**FLOOR RE-MEASURED AT HEAD: `matched_osids` 638/712, anchors 31/31, `final_state_hash`
+`c657ad81f4d94cc0`.** Previously derived, now measured. The 639→638 delta was proven **100%
+reference-side** by replicating the match against both reference versions and diffing the FULL matched
+sets: LOST exactly `["op:gorazde:kolovarice"]`, GAINED none, and the counterfactual (this sim × the
+pre-repaint reference) returns 639. **No other OSID moved.** Engine-health gate: all six hard checks
+pass — `zero_eligible_ops` 0, `dead_ops` 0, `ghost_destroyed` 2, `stranded_brigades` 7, `matched_osids`
+638 (16 margin), `consistency_failures` 0; `kw_ratio` 3.722 advisory.
+
+**FLAG: `dead_ops` is 0 at HEAD, against the 32 recorded in project memory (a stale June baseline).**
+This retro-invalidates the *rationale* the integrator used for the probe's "6+" threshold (justified as
+"`dead_ops_max` = 6 is a consumed budget"). The threshold was never reached so nothing rests on it, but
+the reasoning was wrong and any future threshold must not reuse it. Also `stranded_brigades` 4→7.
+
+**A second candidate mechanism was proposed and REFUTED the same session.** The integrator found that
+`garrison_locks` + `surplus_pool` are computed at `allocate.ts:400` with zero consumers outside
+`commander/`, and proposed it as the `rs_1st_birac` dual-role mechanism. Falsified on two independent
+legs: (a) `garrison_locks` is **never persisted** (0 occurrences in both `initial_save.json` and
+`final_save.json`) and `vrs_drina.commander_state` is **ABSENT at turn 0** while the corps entry exists —
+Operation Drina injects during scenario setup, before the commander loop has ever run, so there is no
+lock to consult; (b) at t188 `zone_assessments[0].surplus_brigades` is `[]` for the must-hold Birač zone
+(budget 12 vs 8 assigned), so substitution is impossible anyway.
+
+**TRAP, recorded because the integrator fell into it and wrongly "corrected" a correct report:**
+`force_assessment.total_surplus: 5` looks like a non-empty pool and is **not**. It is the **assess-stage**
+figure (`force_eval.ts:246-249`; `ceil(43 front edges / 20) = 3` budget → 8−3 = 5), computed *before*
+`allocate.ts:277` recomputes the budget with the must-hold multiplier. The **allocate-stage**
+`surplus_brigades: []` is what governs substitution, and it is a field of each `zone_assessments[]`
+element — not a top-level `commander_state` key. Two persisted numbers from different pipeline stages.
+
+**FLAGGED, UNTESTED — do not scope against it without a trace:** `plan.ts:275`, `:392`
+(`forces.total_surplus === 0`) and `:659` (`> 0`) reason on the **stale assess-stage** figure while
+`emit.ts:1658` gates operation generation on the **allocate-stage** `can_launch_ops`. For `vrs_drina`
+these disagree — 5 vs 0. Possibly a real engine inconsistency; no outcome trace performed.
+
+**§6: NO ESCALATION REQUIRED** (integrator escalated, then retracted after verification). The
+`Operation Zvezda 94::gorazde_encirclement` axis — dropped 89/89 evaluations, op never launched — targets
+`op:gorazde:slatina_2` and `op:gorazde:sopotnica` from staging `op:gorazde:podkozara_donja_2`. Three
+independent sufficient grounds: (a) the three named Goražde anchors are `bacci`/`citluk_2`/`gorazde_2`,
+**disjoint** from the objectives, and `gorazde_2` is explicitly excluded in the op's own source — all 31
+anchors pass; (b) canon **H1.8** (`FORAWWV.md:167`) structurally decouples enclave outcomes from
+operations — enclave falls occur *only* via explicit events, never proximity or accumulated activity, so
+a dropped axis cannot move a §6 outcome by construction; (c) direction of effect is **protective** — the
+dead axis suppresses an RS attack that would have tightened a pocket Goražde historically survived.
+
+**PARKED, characterised, deliberately NOT scoped** (refused conversion of a post-hoc observation into a
+lane on data gathered for a different pre-committed question). The 162 dropped-axis records resolve to
+only **3 distinct `op::axis`**, all previously known: `Zvezda 94::gorazde_encirclement` (89 — documented
+in its own source at `pre_planned_operations.ts:304-311` since 2026-05-28: vrs_drina brigades
+sector-pinned after w46, never execute march orders), `Trnovo::trnovo_east` (72), `Prijedor::kljuc` (1,
+immaterial — the op succeeded on its other axis). Reject reasons across dropped axes: `unreachable` 218,
+`missing` 72, `below_attack_floor` 51, **zero transient**.
+
+**`Trnovo::trnovo_east` here is a DIFFERENT PHENOMENON from the readiness deadlock** — non-overlapping
+windows, different code sites. This probe: t69-t140, brigade **not yet spawned**, blocking op
+*injection* at `buildAxesFromDef`. The deadlock: t156-t159, brigade present at staging, vetoing
+*execution*. New mechanism detail: with `trnovo_east` empty the op carried 1 participant against
+`MIN_OPERATION_PARTICIPANTS = 2` (`pre_planned_operations.ts:81`), blocking injection for 72 turns;
+it then injected t141 with both axes, brigade destroyed t174. Corroborates the standing
+`PROJECT_LEDGER.md:26575` finding that `rs_trnovo_brigade` first appears at t140.
+
+**Fidelity hypothesis, parked, needs its own designed measurement:** four contiguous Goražde-rim OSIDs
+are sim-RBiH / painted-RS at t188 (`slatina_2`, `podkozara_donja_2`, `ustipraca_2`, `kolovarice`) with a
+dead RS operation aimed at them — and the axis's own **staging ground is itself enemy-held**, which may
+be *why* `canReachAxisStaging` fails. That would make `unreachable` a symptom of a territorial error
+rather than a separate engine defect. Not tested.
+
+**Net effect on the force-economy packet
+(`docs/plans/2026-08-12-r5-force-economy-engine-health-packet.md`): it has NO surviving mechanism.**
+EH-F1 blocked; EH-F2 refuted as scoped; EH-F3 was to be measured after EH-F1. Four candidate
+explanations were refuted in one session. The packet's durable contribution is its **§3 acceptance
+frame**, which survives its subject with the three corrections above plus: every mechanism invariant
+must name the artifact **field** and be read at the **same lifecycle stage the change acts on** (EH-F1's
+invariant read an operation-*end* field for a *spawn*-time change), and must carry a **paired sensitivity
+control** that legitimately breaks it. Perturbed control arms must be scoped out of §3.4 — n210 scored
+613, below the 622 floor, so a perturbed arm fails the gate by construction. **Recommendation: rewrite
+the packet from evidence rather than swapping sub-items.**
+
+---
+
+## 2026-08-12 (evening) — Multi-axis veto fix + US-halt correction ADOPTED; cohesion floor reverted; **−9 floor accepted as a NAMED, TRACKED DEBT**
+
+**BEHAVIOURAL. Six commits on `codex/master-roadmap-execution`, base `e5ea2aacd`, none pushed.**
+Owner ruling governing all of it: *"Engine health is sacrosanct. If calibration suffers, so be it,
+that calibration was built on wrong premises."* `matched_osids` is REPORTED; §6 + health gate binding.
+
+| commit | disposition |
+|---|---|
+| `b9da847f1` multi-axis veto waits only for brigades ACTUALLY in transit | **KEPT** (owner) |
+| `a42fdae9a` theater-scoped RS cohesion floor | applied → **REVERTED** by `77d1c4867` (owner) |
+| `ccd0d2e4e` gate: stranded lifecycle guard + hollow-ratio advisory | KEPT |
+| `77d1c4867` revert of the cohesion floor | KEPT |
+| `cc3e288f2` US halt suppressed HRHB — the party that historically defied it | KEPT |
+| `e4da054f0` repair EA5 pin + mutation-verified veto tests | KEPT |
+
+**Floor movement, one change per run:** base **638** → `n218` **627** (veto fix, −11) → `n219` 626
+(cohesion, reverted) → `n220` **629** (halt fix, +2) = **HEAD 629, nine below base.**
+Anchors **31/31 throughout** — the anchor set MASKS the loss, the inverse of the usual
+`feedback_net_matched_masks_anchor_flips` trap. `matched_osids_min` is 622, so **CI goes green on a
+−9**. Recorded explicitly so nobody reads the green gate as "no cost".
+
+### ★ THE DEBT — 9 towns to be recovered on a healthier engine (owner-directed, 2026-08-12)
+
+Owner: *"Keep it, but write down that those 9 towns have to be recovered in future efforts, building
+on healthier engine."* This is an **accepted, tracked debt, not a write-off.** The veto fix stays
+because it repairs a real defect; the territory it costs is owed back, and the repayment must come
+from a **sounder engine**, never from re-tuning `matched_osids` directly.
+
+**Lost (14), all `b9da847f1`, concentrated in the Sept–Oct 1995 Federation counteroffensive:**
+```
+op:sanski_most:sanski_most_2          ref RBiH -> RS   (Operation Sana '95 — the TOWN)
+op:sanski_most:ilidza_2               ref RBiH -> RS
+op:sanski_most:ostra_luka             ref RBiH -> RS
+op:bosanski_petrovac:bosanski_petrovac_2  ref RBiH -> RS   (the TOWN; regresses fac76630a's side-effect win)
+op:bosanski_petrovac:dobro_selo_2     ref RBiH -> RS
+op:bosanski_petrovac:kolonic_2        ref RBiH -> RS
+op:mrkonjic_grad:mrkonjic_grad_2      ref HRHB -> RS   (the TOWN; Juzni Potez, fell 10 Oct 1995)
+op:mrkonjic_grad:podrasnica_2         ref HRHB -> RS
+op:bihac:orasac_2                     ref RBiH -> RS   ** see note — FAILED RECAPTURE, not a loss
+op:bihac:trubar                       ref RBiH -> RS   ** see note
+op:konjic:glavaticevo_2               ref RBiH -> RS
+op:gornji_vakuf:vaganjac              ref HRHB -> RBiH
+op:kladanj:vucinici_2                 ref RS   -> RBiH
+op:sekovici:kastijelj_2               ref RS   -> RBiH
+```
+**Gained (5):** `op:gornji_vakuf:zdrimci`, `op:konjic:sitnik`, `op:lopare:lopare_selo_2`,
+`op:nevesinje:hrusta_2`, `op:travnik:varosluk`. Net **−9**.
+
+**★ The two Bihać entries are NOT losses — canon review traced them and corrected its own framing.**
+`rs_1st_drvar_light_infantry` took `orasac_2` at **week 2**, identically in the base run, during the
+1992 VRS Krajina offensive and *before* the pocket's `resilience_start_turn: 20`. The w179-181 records
+are the ARBiH 5th Corps trying to **retake** it. In the base that recapture succeeds; after the veto
+fix it does not. **What regressed is a failed late-war liberation, not territory lost to RS.** The −9
+count stands; any enclave-risk reading of it does not.
+
+**Three named mechanisms own the debt — repayment work should target these, not the score:**
+1. **Sanski Most / Petrovac / Bihać (8).** `Operation Sana` runs with **identical
+   `attack_attempt_count: 29`** in both runs but captures 21 → 17. The 5th Corps attacked exactly as
+   much and won less, because RS permanent brigade losses fell 22 → 18 and the survivors are the
+   defenders of precisely those municipalities. **A healthier VRS holds the Krajina** — which is the
+   owner ruling working as intended, and simultaneously the bill.
+2. **Mrkonjić Grad (4, of which 2 already recovered by `cc3e288f2`).** `Operation Southern Move` is
+   **single-axis**, so the veto fix cannot touch it directly; it died downstream to **EH-F6**
+   (`offensive_ops_suppressed` terminates PLANNING-phase ops but not executing ones). The halt fix
+   returned `gerzovo_2` + `majdan_2`; the **town itself and `podrasnica_2` remain owed**, and are
+   blocked by **EH-F8 (horizon)**, not by a defect — see below.
+3. **Scattered (4).** Not attributed. Likely op-stream churn; needs its own measurement before anyone
+   scopes work against it.
+
+**The most likely repayment lanes, in order:** EH-F6 (suppression kills planning-phase ops — bounded,
+identified, worth ~4 OSIDs on merit); the veto fix's own **transition guard** (below); EH-F8 (horizon).
+**Hard rule: do not repay this by tuning toward `matched_osids`.** The debt is owed to a *sounder*
+engine — if the towns come back because the engine got more truthful, that is repayment; if they come
+back because a constant was fitted to the map, it is not.
+
+### The veto fix — what it bought, and that it is HALF-DONE
+
+Fixed: `recovery_reason: "zero_eligible_axis"` census **2 → 0**. `Operation Trnovo` was 19 turns,
+0 attacks, **0 casualties in either direction** — two brigades committed to an operation that never
+touched the enemy; now 3 attacks. `Operation Cerska-Kamenica` 0 → 4 attacks. `Operation Koridor`
+launched **3 turns earlier**, and `op:bosanski_samac:samac_2` flips t4 → **t1**, which is *more*
+historical (Šamac fell 16-17 April 1992). RS hollow ratio **0.295 → 0.415**.
+
+**Still owed on this lane:** it moved idle time from `planning` into `execution` rather than removing
+it — zero-attack execution turns **99 (20.7%) → 171 (33.3%)**, zero-attack completed ops 9 → 11, new
+17-turn ghost `Operacija Čelik` (`vrs_1st_krajina`, t140-157). **Remedy:** pair `approaching` with a
+transition guard — an op must not ENTER execution when the axis would have
+`eligible_attacker_count === 0`. **Pre-committed targets: zero-attack execution turns ≤ 99,
+zero-attack completed ops ≤ 9.**
+
+**KNOWN GAP found by code review, recorded in-code, NOT fixed** (needs its own 188w): `approaching`
+tests membership in the **friendly-filtered** `approachOsids`, while the executability gate counts the
+wider `liveAdjacency ∪ approachOsids`. A brigade in transit to a tile the gate counts but which is
+enemy-held reads as not-approaching and releases the veto mid-march. One-line remedy:
+compute against `objectiveAdjacentOsids(openingAttackAdjacency, objective)`, already in scope.
+The commit's "Brčko is safe **by construction**" was **false** and is corrected in-code to "by
+measurement" (31/31, corridor 6/6 + 7/7).
+
+### The US-halt correction — historically right AND +2, no cost found
+
+BB1 p.462 en.823: *"The US pressure to halt the HV/HVO operations apparently came in September after
+'Maestral.' … **Nevertheless, Zagreb went ahead and ordered 'Juzni Potez' in October.**"* Croatia
+launched 8 Oct and took Mrkonjić Grad 10 Oct (BB1 p.427). Sarajevo complied, reluctantly, while
+setting conditions to buy the ARBiH days (en.821). **The engine suppressed HRHB — the non-complier —
+and its prose said "Zagreb backs down immediately."** Both corrected. Second, independent ground: the
+event's `responding_faction` is RBiH, so one faction's political answer was silently suppressing
+another faction's operations.
+
+Measured: **186 of 188 weekly reports byte-identical**, divergence beginning on the exact turn the
+event fires. **+2 FIXED / 0 REGRESSED / 0 churn** — exactly two OSIDs changed in the whole 712-OSID
+map. RBiH and RS final faction state **identical**; RBiH orders 464 → 464, RS 200 → 200.
+`civilian_casualties` **byte-identical** — the gain was paid entirely in soldiers, and the attacker
+paid more than the defender (180 KIA / 604 WIA to inflict 149 / 502). `control_change_attribution`:
+the entire delta is **+2 combat**; paramilitary flat at 20, consolidation flat at 10.
+
+### Cohesion floor — REVERTED, and why it must not be re-applied as-is
+
+It removed a dissolution CRITERION without restoring capability (`brigade_dissolution.ts:168-174` is
+2-of-3; the RS floor of 20 sits exactly on the cohesion term). Eastern active 23 → 27 but
+combat-effective **15 → 12**, morale −10.4, personnel flat. **RS attack orders exactly 200 in both
+runs** — three more surviving brigades bought zero additional offensive activity. Its "surgical" claim
+did not reproduce: `vrs_drina` (a PROTECTED corps) 0 → 2 destroyed; `vrs_2nd_krajina` (west) 4 → 5.
+**Real defect it did fix, now unfixed again:** `rs_igman_brigade` + `rs_trnovo_brigade` dissolving at
+t174 with **0 battles, 0 casualties** (`ghost_destroyed` 2 → 0). Needs a remedy that does not trade
+capability for bodies. Do **not** extend the floor to `vrs_herzegovina`.
+
+### Gate instrument fixes
+
+`stranded_brigades` was counting **DESTROYED** formations — the comment always said "alive", the filter
+never checked. Guarded; now **flat at 6 across n215/n218/n219/n220**, so every movement previously read
+off it was artifact. ⚠ **Owed:** the band was blessed against the inflated metric and must be
+re-derived or re-blessed — narrowing a hard-gated quantity without re-ratcheting loosens it.
+New `hollow_ratio_by_faction` (combat_effective / active_brigades), **reported, never gated, no band**
+— inventing a threshold would repeat the error it exists to catch. It immediately exposed the standing
+finding: **RS ~0.32-0.42 vs RBiH 0.98 in every run including the untouched baseline** — two thirds of
+surviving RS brigades cannot fight. Not caused by today's work; made visible by it.
+
+### Review panel (owner delegated review to the team; implementer ≠ reviewer — I wrote all six commits)
+
+**Code review: REQUEST-CHANGES. Canon: NON-COMPLIANT. Determinism: PASS.** They caught what I missed:
+- **I broke `tests/sim/events/ea5_us_halts_comply_suppression.test.ts` and never ran the suite.** Both
+  reviewers found it by RUNNING it. The commit carried paragraphs of 188w evidence and said nothing
+  about tests — **evidence density is not evidence coverage.** Fixed in `e4da054f0`.
+- **My replacement tests were vacuous twice** — first asserting against `'held_by_approaching'`, a
+  value that does not exist (the blocker comes from `rankOpeningAttackBlocker`), so they passed under
+  both behaviours; then with a fixture that never produced an executable axis. Now **mutation-verified**:
+  32/32 pass with the fix, and exactly the 2 discriminating tests fail when the old trigger is restored.
+- **An undisclosed second behaviour change**, found independently by both: the empty-objective early
+  return omitted `approaching`, silently stopping that site vetoing. Code review notes such an axis can
+  never gain an objective, so it used to deadlock the op **permanently** — the narrowing fixes a latent
+  deadlock nobody had documented. Now explicit.
+
+**§6 and the enclave guard: COMPLIANT, signed by the panel under the delegation the owner extended
+today.** Mechanism proof (every paramilitary path is dead 162+ turns before the halt window;
+`recordWarCrime` has one caller, unreachable here) plus outcome measurement
+(`control_change_attribution` delta is purely +2 combat) plus byte-identical civilian casualties. Full
+9-enclave member diff across all three runs: **zero changes, no capital moved.** H1.8 satisfied by
+measurement rather than inference.
+
+**Still open (not blockers on the owner decision):** the Ring-2 essay
+`data/scenarios/essays/us_halts_federation_advance_1995.json` still asserts Croatia *"complied
+immediately"* — the exact claim corrected here, one file away, on a player-facing surface; routed to
+`/historian` + `/narrative-designer`. And `stranded_brigades_max` re-bless.

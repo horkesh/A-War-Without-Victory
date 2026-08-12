@@ -45,10 +45,62 @@ Full derivation: `docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISM
 | n202 | + Ključ Lever 1, kept (`d5fa0445e`) | 639 / 712 | 31/31 | `c657ad81f4d94cc0` |
 | n203 | Ključ Lever 2, turn-176 gate — REVERTED | 638 / 712 | 31/31 | `a2145e80cd3f8d42` |
 | n204 | Ključ Lever 2, turn-170 gate — REVERTED | 636 / 712 | 31/31 | `8fe7b8c42f3b60c8` |
+| **n215** | **probe-OFF inertness proof at HEAD, POST-repaint reference — THE FLOOR, MEASURED** | **638 / 712** | **31/31** | `c657ad81f4d94cc0` |
+| n216 | probe-ON (`AWWV_DEBUG_PARTICIPANT_FILTER=*`) — 14/15 artifacts byte-identical to n215 | 638 / 712 | 31/31 | `c657ad81f4d94cc0` |
+| n218 | + multi-axis veto fix `b9da847f1` (KEPT) — **−11**, see the debt below | 627 / 712 | 31/31 | `9cffee73f16317cd` |
+| n219 | + theater-scoped RS cohesion floor — **REVERTED** (`77d1c4867`), not in HEAD | 626 / 712 | 31/31 | `79ff019ffcc8a694` |
+| **n220** | **+ US-halt HRHB correction `cc3e288f2` (KEPT) — +2. THIS IS HEAD.** | **629 / 712** | **31/31** | `96a084151e9cdf02` |
 
 **Residual, traced not hidden:** `op:kljuc:kljuc_2` and the Ključ municipality stay RS. Investigated and NOT fixed — characterised as a genuine 5th Corps resource/logistics ceiling (10 line brigades split 3 ways over ~30 objectives in a 13-turn post-Storm window), not a data or catalog bug. Lever 1 (additively restoring Ključ's 3 objectives to the dedicated Sanski Most axis) is kept: harmless, historically correct, zero measured benefit — the axis stalls at its own 9th objective `kljevci` before reaching them. Lever 2 (cross-corps transfer of `arbih_17th_vitezka_mountain`, BB1 pp.420/426) was built, measured at both gate timings, and reverted — the brigade is physically in Travnik and the participant-selection path has no reachability check, so it marched to Skender Vakuf and contributed nothing while the corps change alone cost matched.
 
 **RECONCILIATION NOTE (2026-08-12).** This entry was written on 2026-08-12, back-dated to the work it records. The 2026-08-11 ledger entries instructed that CALIBRATION_MASTER be updated to 639/31·31 and that update was never made, so this file recorded a stale 634/30·31 floor for a day. All five rows above were re-derived from the run artifacts rather than copied from the ledger; every value matches the ledger prose exactly. **The `total_osids` denominator is 712**, per the artifacts — a "639/744" figure appearing in `docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISMATCH_TRIAGE.md` is wrong on the denominator only.
+
+**FLOOR NOW MEASURED, NOT DERIVED (2026-08-12, n215).** The 638 above was previously *derived* — inferred from the `op:gorazde:kolovarice` reference repaint (`e3a28e25f`) with no run executed against the corrected reference. n215 measures it: **638 / 712, anchors 31/31, `c657ad81f4d94cc0`**. The 639→638 delta was proven **100% reference-side** by replicating `computeOsidPairMatchDiagnostics` against *both* reference versions and diffing the FULL matched sets (`sample_mismatches` caps at 20 and could never have answered this): **LOST exactly `["op:gorazde:kolovarice"]`, GAINED none**, and the counterfactual — n215's sim against the PRE-repaint reference — returns 639. **No other OSID moved.** Note n202 and n215 share the hash `c657ad81f4d94cc0`: identical engine output scored against different references, which is the cleanest available demonstration that a moving floor number does not imply a moving engine.
+
+**Engine-health gate at n215** (no `--strict`), all six HARD checks pass: `zero_eligible_ops` 0 ≤ 3, `dead_ops` 0 ≤ 6, `ghost_destroyed` 2 ≤ 4, `stranded_brigades` 7 ≤ 10, `matched_osids` 638 ≥ 622 (16 margin), `consistency_failures` 0 ≤ 3; `kw_ratio` 3.722 in band, **advisory only** (`soft()`, non-binding unless `--strict`). ⚠ `dead_ops` has moved **32 → 0** and `stranded_brigades` **4 → 7** versus the EH-1b baseline recorded in project memory — both pass, but the 32 is a stale June figure and must not be cited as current.
+
+## ★ HEAD IS 629, NINE BELOW THE 638 BASE — an ACCEPTED, TRACKED DEBT (owner, 2026-08-12)
+
+**Do not read the green gate as "no cost".** Anchors are **31/31 at every step**, so the anchor set
+MASKS this — the inverse of the usual `feedback_net_matched_masks_anchor_flips` trap — and
+`matched_osids_min` is 622, so **CI passes on a −9**. The cost is owned by the multi-axis veto fix
+(`b9da847f1`, −11); the US-halt correction (`cc3e288f2`, +2) is a net gain.
+
+Owner ruling: *"Engine health is sacrosanct. If calibration suffers, so be it, that calibration was
+built on wrong premises."* Then, on being shown the price: *"Keep it, but write down that those 9 towns
+have to be recovered in future efforts, building on healthier engine."*
+
+**The 14 lost (5 gained → net −9), concentrated in the Sept–Oct 1995 Federation counteroffensive:**
+`op:sanski_most:{sanski_most_2, ilidza_2, ostra_luka}` · `op:bosanski_petrovac:{bosanski_petrovac_2,
+dobro_selo_2, kolonic_2}` · `op:mrkonjic_grad:{mrkonjic_grad_2, podrasnica_2}` ·
+`op:bihac:{orasac_2, trubar}` · `op:konjic:glavaticevo_2` · `op:gornji_vakuf:vaganjac` ·
+`op:kladanj:vucinici_2` · `op:sekovici:kastijelj_2`.
+Gained: `op:gornji_vakuf:zdrimci`, `op:konjic:sitnik`, `op:lopare:lopare_selo_2`,
+`op:nevesinje:hrusta_2`, `op:travnik:varosluk`.
+
+**★ The two Bihać entries are NOT territory lost to RS.** `rs_1st_drvar_light_infantry` took
+`orasac_2` at **week 2**, identically in the base run, before the pocket's `resilience_start_turn: 20`.
+The w179-181 records are the ARBiH 5th Corps trying to **retake** it. What regressed is a **failed
+late-war liberation**, not a loss. The −9 count stands; any enclave-risk reading of it does not
+(full 9-enclave member diff across n215/n218/n220: zero changes, no capital moved).
+
+**Mechanisms that own the debt — target these, not the score:**
+1. **Sanski Most / Petrovac / Bihać (8).** `Operation Sana` runs with **identical
+   `attack_attempt_count: 29`** in both runs but captures 21 → 17 — the 5th Corps attacked exactly as
+   much and won less, because RS permanent brigade losses fell 22 → 18 and the survivors are the
+   defenders of those very municipalities. A healthier VRS holding the Krajina is the ruling working as
+   intended, and simultaneously the bill.
+2. **Mrkonjić Grad (2 still owed).** `Operation Southern Move` is single-axis, so the veto fix cannot
+   touch it; it died to **EH-F6** (`offensive_ops_suppressed` kills PLANNING-phase ops but not
+   executing ones). `cc3e288f2` returned 2 of 4; the town and `podrasnica_2` are blocked by **EH-F8
+   (horizon)** — the op launched t187 against a t188 horizon and captured on *every* turn it was
+   allowed to fight.
+3. **Scattered (4).** Unattributed; needs its own measurement before anyone scopes against it.
+
+**HARD RULE ON REPAYMENT.** The debt is owed to a *sounder engine*. If the towns return because the
+engine became more truthful (EH-F6, the veto fix's transition guard, EH-F8), that is repayment. If they
+return because a constant was fitted toward the map, it is **not** — that is the failure mode this
+whole session was spent escaping.
 
 **Gate floor deliberately NOT changed.** `data/calibration/engine_health_thresholds.json` still carries `188w.matched_osids_min: 622`. That guard is untouched by this reconcile: raising it to 639 would tighten CI for every subsequent experiment and is a posture decision for the owner/panel, not a documentation edit. Per the standing posture the floor is a **regression guard, not a target** — re-bless deliberately via `node tools/engine_health_gate.cjs <run_dir> --horizon 188w --update` if and when that is the intent.
 

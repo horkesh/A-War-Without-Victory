@@ -4299,3 +4299,47 @@ R5 Phase 2e's pure-solve/serial-commit extraction passed every correctness gate 
 ## 2026-08-04 - A plan's "exact parent" commit reference goes stale on a shared branch -- verify ancestry before trusting it, don't blindly quote the literal hash
 
 A plan document written mid-arc named a specific "exact parent" commit hash for a future measurement gate. By the time that gate actually ran (multiple sessions later), 76 commits had landed on the shared branch since that hash — most of them unrelated work from other roadmap tracks (R2, R4, R6, R7) that happened to interleave with this arc's own commits. Using the literal stale hash as the measurement's control would have silently attributed ~20 unrelated commits' performance/behavioral effects to the arc actually being measured. The fix was mechanical once checked: `git rev-list --count <hash>..HEAD` and a spot-check of the commit range's subjects immediately revealed the contamination, and the arc's own true first commit's parent was the correct, clean control. This is the same category of discipline as [[floor_hash_literals_stale_post_360]] and the earlier front-edge-mock investigation this session: a written-down reference (hash, count, filename) is a claim about the state of the world *when it was written*, not a fact that stays true on a branch other work keeps landing on. Before trusting any "exact parent," "baseline," or "current state" reference in a plan doc for a consequential measurement, verify the ancestry/range is still what the author intended.
+
+## 2026-08-12 - The inverted cohesion floors are modelled history, not a faction railroad (owner-settled)
+
+The `cohesion_floor` curves in `data/scenarios/timelines/apr1992.json` run in opposite directions —
+RBiH **rising** `[0,35] [13,42] [26,50] [39,56] [52,62]`, RS **falling** `[0,35] [40,35] [60,25] [80,20]`,
+HRHB stepping down late `[0,40] [52,40] [53,30]`. Because the brigade-dissolution gate sits at cohesion
+≤ 20, and only the RS floor ever reaches 20, RS brigades can dissolve while RBiH brigades structurally
+cannot: 4,127 RS brigade-turns at or below the threshold against 5 for RBiH.
+
+That measured asymmetry has now been flagged as a suspected railroad **at least three times** — the
+2026-08-07 root-cause investigation, the 2026-08-12 parked-items sweep (which ranked it the single
+highest-value engine-health item available), and by this orchestrator, who verified the curves and
+brought it to the owner as the top candidate after the in-flight `anyApproaching` fix.
+
+**It is not a railroad. Owner ruling, 2026-08-12:** *"Cohesion curves mirror history. VRS started as
+professional army that turned into rabble, albeit still capable in 1995, while the ARBiH went from
+unarmed rabble to professional army."* The VRS inherited JNA cadre, equipment, officers and doctrine
+and degraded into an increasingly hollow force that nonetheless retained local capability into 1995;
+the ARBiH ran the inverse arc from barely-armed irregulars in 1992 to a genuine army by 1994-95. The
+floors encode those two trajectories. The dissolution asymmetry is a **consequence** of two historical
+arcs meeting one fixed threshold — not a thumb on the scale. This is consistent with the 2026-08-07
+finding (`docs/40_reports/20260807_RS_COHESION_RAILROAD_ROOT_CAUSE.md`) that the late-war RS
+dissolution is largely historical: the western VRS really did collapse.
+
+**The generalisable lesson, which is why this is here and not only in a bug tracker.** A
+faction-asymmetric constant is not evidence of a railroad. Asymmetry is exactly what modelling two
+armies with opposite trajectories *should* produce, and a metric as lopsided as 4,127-versus-5 reads as
+damning precisely when it is most likely to be correct. The tell that this needed an owner/historian
+ruling rather than an engine fix: the asymmetry lives in **authored scenario data with a historical
+rationale**, not in engine logic. Before proposing a remedy for any faction-asymmetric constant, first
+establish whether the asymmetry is *modelling a real difference between the belligerents* — and route
+that question to the Historian, who now holds this as a settled fact (`.claude/skills/historian/SKILL.md`,
+"Settled modelling facts"), not to a calibration sweep.
+
+**Recorded so it stops being rediscovered.** Three separate passes spent effort re-deriving the same
+"finding." What was missing was never analysis — it was written-down provenance for a deliberate design
+choice. Any authored constant encoding a historical judgement should carry its rationale where the next
+auditor will look; a bare number in a JSON timeline invites the same false positive indefinitely.
+
+**Still genuinely open, do not conflate:** whether the *dissolution threshold itself* should be
+faction-blind when the floors are not, and the post-1.0 "combat-earned cohesion" redesign. Three
+remedies are already dead on merits and must not be re-proposed — a naive floor bump (disproven and
+non-monotonic: 20/25/30 → 634/623/629, with both alternatives breaking the §6 Bihać hold),
+cumulative/windowed cohesion, and the attacker-relative floor.

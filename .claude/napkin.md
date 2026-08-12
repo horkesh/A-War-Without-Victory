@@ -28,14 +28,16 @@
    Do instead: `planning_duration` is inert for ANY op whose brigades are already pre-staged (`stagedEarly` short-circuits the launch gate) — not just event-trigger-bound ops. See `docs/life_lessons/calibration.md:361`. A run was wasted rediscovering this.
 0d. **[2026-08-12] Never background a run inside an already-backgrounded call**
    Do instead: one `run_in_background` per run. Chaining `cmd &` inside it orphans the run — the notification fires on the wrapper and the scenario dies mid-flight.
+0e. **[2026-08-12] `matched_osids` is HARD-GATED at 622 — it is NOT advisory, whatever a packet says**
+   Do instead: read `engine_health_gate.cjs:345-357` before quoting acceptance criteria. SIX hard checks (all integer) + ONE advisory float (`kw_ratio`, `soft()`); `fail = hardFail || (strict && softFail)`, so never pass `--strict`. The 622 floor is the ONLY criterion that would have caught EH-3's −39 (it passed 30/30 anchors and every §6 invariant). Cross-platform authority = the structural fingerprint, NOT the health gate.
+0f. **[2026-08-12] Two persisted numbers can be the SAME quantity at different pipeline stages — check which stage governs**
+   Do instead: `force_assessment.total_surplus` (assess-stage, `force_eval.ts:246-249`) vs `zone_assessments[].surplus_brigades` (allocate-stage, after `allocate.ts:277` applies the must-hold multiplier) disagree by construction — 5 vs `[]` for `vrs_drina`. I read the wrong one and wrongly "corrected" a correct agent report. Also: `surplus_brigades` is nested INSIDE `zone_assessments[]`, so a top-level key listing will not show it. Ask which stage the consumer reads.
+0g. **[2026-08-12] "Arbitrary" is not "nondeterministic" — and a tolerance band in a comparator creates the latter**
+   Do instead: catalog-order selection is fully deterministic (same input ⇒ same output); it is *sensitive*, not nondeterministic. Never use a tolerance band as an equality predicate in a sort comparator — non-transitive ⇒ implementation-defined `Array.prototype.sort` (measured: 9 distinct outputs from 120 permutations of one real 5-brigade axis), and local Node is v24 vs CI 22. Use integer bucketing `Math.floor(x / BAND)` as a PRIMARY sort key, terminating in `strictCompare(id)`.
 1. **[2026-06-30] Vite warnings are release-surface failures**
    Do instead: remove browser Node edges/static-dynamic overlap and run npm run qa:player-experience for release-facing player-experience sweeps.
-2. **[2026-06-26] Browser gates must watch network failures**
-   Do instead: collect requestfailed and HTTP >=400, ignoring only deterministic teardown noise.
 3. **[2026-06-26] Packaged runtime resources are release inputs**
    Do instead: keep desktop/full-suite filters covering data/derived, data/ui, scenarios, assets, icons, package locks, and release workflow edits.
-4. **[2026-06-26] Trusted CI detectors must restore HEAD**
-   Do instead: run trusted base detector, then restore detector scripts from HEAD before setup/build/test.
 5. **[2026-07-06] Output-changing branches need baseline reconciliation**
    Do instead: run npm.cmd run test:baselines; if intentional, refresh with the documented strict rerun path and ledger note.
 6. **[2026-07-07] Engine-health refloors use the gate path**

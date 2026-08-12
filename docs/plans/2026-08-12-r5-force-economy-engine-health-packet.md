@@ -161,7 +161,17 @@ This session established that `matched_osids` is the wrong primary instrument fo
    change under perturbation). This is the success test.
 2. **All 31 anchors pass**, verified on a full non-net `anchor_checks` diff, entry by entry.
 3. **§6 enclave invariants correct** — Srebrenica + Žepa fall; Goražde, Bihać, Teočak, Sarajevo core
-   hold. Enclave-guard sign-off remains non-delegable owner authority.
+   hold. **Sign-off is the Pyrrhic panel's (owner, 2026-08-12: *"Hand over the enclave guard and bright
+   line to panel as well."*).** This supersedes the "non-delegable owner authority" wording that stood
+   here, and completes the 2026-06-11 delegation which had left the enclave guard carved out. The panel
+   rules and does not escalate.
+   **What is delegated vs what nobody holds — the distinction is load-bearing:** the panel decides
+   *whether* a change touches §6, whether the guard holds, and whether the evidence suffices. It does
+   **not** hold the substance — atrocity is never rewarded, and enclave outcomes stay event-owned per
+   canon **H1.8** (consequences require explicit cause; never proximity or accumulated activity). A
+   panel may return COMPLIANT or NON-COMPLIANT; it may not rule a breach acceptable this once, and
+   neither may the owner. On a breach the correct output is **NON-COMPLIANT, does not merge** — that is
+   the delegation being exercised, not escalated.
 4. `engine_health_gate` passes all 7.
 5. **One change per 188w run.** No bundling, and explicitly **no adopting a measured regression on the
    promise of a later offsetting change**.
@@ -219,3 +229,128 @@ Full derivation, all runs and all refutations:
 Runs: `n200`-`n214` under `runs/apr1992_definitive_188w__9e902ad68783fbe7__w188_*`.
 Retained diagnostic: `src/sim/combat/axis_readiness_debug.ts` (env-gated, proven byte-identical; delete
 when the `anyApproaching` fix lands).
+
+---
+
+## 7. ADDENDUM 2026-08-12 — three MEASURED items, from the multi-axis veto fix run (n218)
+
+**Provenance.** These are not hypotheses. They were surfaced by an independent scenario-tester reading
+`n215` (baseline) against `n218` (the multi-axis veto fix, `b9da847f1`), and each is traced to named
+artifacts. They replace this packet's original sub-items, all of which are now closed: **EH-F1 BLOCKED**
+on mechanism (no selection site truncates), **EH-F2 REFUTED** as scoped (no garrison lock exists at
+turn-0 injection; the allocate-stage surplus pool is empty), **EH-F3** was to be measured after EH-F1.
+
+Adopted under the owner ruling of 2026-08-12: *"Engine health is sacrosanct. If calibration suffers,
+so be it, that calibration was built on wrong premises."*
+
+### EH-F6 — `offensive_ops_suppressed` terminates PLANNING-phase ops but not EXECUTING ones
+
+**Risk class: MEDIUM. Best-understood of the three; cleanest reproduction.**
+
+`hvo_tomislavgrad:Operation Southern Move` (t182, 6 objectives, 5 brigades — identical in both runs):
+
+| | n215 | n218 |
+|---|---|---|
+| phase at end | `execution` | `recovery` |
+| `phase_started_turn` | 184 | 187 |
+| preparation elapsed | 2/5 | **5/5** |
+| attacks / captures | 5 / 4 | **0 / 0** |
+| `force_ratio_estimate` | 3 | **10.99** |
+| `recovery_reason` | — | **`offensive_ops_suppressed`** |
+
+`military.offensive_ops_suppressions` — `{reason: "us_halts_federation_advance_1995", faction: HRHB,
+expires_turn: 193}` — is **present and identical in both saves**. In n215 it arrived after the op was
+already executing, so the op kept attacking. In n218 a 3-turn preparation delay left it still in
+`planning`, and the same suppression killed it outright. Weekly log shows t185/t186/t187 all `planning`,
+0 attacks.
+
+**Cost: 4 permanent OSIDs** (the Mrkonjić Grad cluster: `gerzovo_2`, `majdan_2`, `mrkonjic_grad_2`,
+`podrasnica_2`) — an operation with a 10.99 force ratio and `commander_assessment: "launch"` that never
+fired a shot.
+
+**Not caused by the veto fix.** `Southern Move` is single-axis, and for a single-axis op the
+`approaching` term is a mathematical no-op (`isMultiAxis` is `axes.length > 0`; the gate is
+`anyExecutable && !anyApproaching`, and a lone executable axis sets `anyExecutable` and is never
+considered for `anyApproaching`). The fix merely walked the engine off a cliff that was already there.
+
+**Mechanism invariant (binding):** a suppression that would not terminate an executing operation must
+not terminate an otherwise-launch-ready one solely because it is still in `planning`. Whether the
+correct remedy is to let a ready op launch into the suppression window, to terminate both phases
+consistently, or to grandfather ops already committed, is a DESIGN question — route to game-designer +
+historian (the suppression models the real US halt on the Federation advance, so "just let it attack"
+may be historically wrong).
+
+### EH-F7 — op population UP, combat throughput DOWN
+
+**Risk class: UNKNOWN until diagnosed. Diagnosis item, not a fix.**
+
+| `behavioral_health.combat_causality` | n215 | n218 | Δ |
+|---|---|---|---|
+| ops in AARs | 38 | 45 | +7, **all failures** |
+| non-probe ops incl. in-flight | 44 | 49 | +5 |
+| **total_attack_orders** | 829 | 770 | **−59** |
+| — RBiH | 528 | 464 | **−64** |
+| — RS / HRHB | 195 / 106 | 200 / 106 | +5 / 0 |
+| **total_battles** | 622 | 553 | **−11%** |
+| objective_attempts | 1966 | 2156 | +190 |
+| objective_captures | 698 | 607 | −91 |
+| attempt→capture conversion | 35.5% | 28.2% | **−7.3 pt** |
+
+**Eight n218 ops end with `total_attacks: 0`** (vs four in n215), mostly `vrs_1st_krajina` /
+`vrs_east_bosnian`. They occupy corps operation slots and hold brigades without ever attacking, and do
+**not** trip `dead_ops` because they carry a valid recovery reason. **A larger op ledger is not by
+itself evidence of health** — and `dead_ops` is 0 in both runs, so the existing gate is blind to this.
+
+Not attributable to the veto fix by the tester. Directly in this packet's original character: brigades
+committed to operations that never fight are a force-economy loss.
+
+**Investigate before proposing anything:** enumerate ops finishing with 0 attacks across a full run,
+by corps and by recovery reason, and determine whether the slot/brigade occupancy is real (brigades
+genuinely withheld from other duty) or bookkeeping. If real, this is the force-economy defect this
+packet was opened to find.
+
+### EH-F8 — the 188w horizon may be one or two turns short of where the endgame settles
+
+**Risk class: N/A — this is a measurement-validity question, not an engine change.**
+
+**Five of the eleven OSIDs lost between n215 and n218 were won in the baseline by
+`mechanism: "consolidation"` on turn 188 — the literal final tick of the run**: `op:bihac:orasac_2`,
+`op:bihac:trubar`, `op:bosanski_petrovac:{bosanski_petrovac_2, dobro_selo_2, kolonic_2}`. Seven more of
+the twelve-OSID contiguous arc flipped at t184–t187.
+
+So the 638 floor contains five points of last-turn pocket-collapse. **Any change that shifts the endgame
+by a single turn loses them**, regardless of merit. That is a fragile basis for a regression guard, and
+it partly explains why territory-moving changes keep measuring negative.
+
+**Do not act on this by extending the horizon** — that re-baselines everything and is a much larger
+decision. The deliverable is a *finding*: whoever next re-blesses the floor should know that ~5 of its
+points are decided on the last tick, and consider whether a horizon of 190–192 weeks would produce a
+more stable guard. Owner/panel posture decision.
+
+### Cross-cutting: the TG-drain hypothesis is FALSIFIED — do not re-propose it
+
+The Pyrrhic panel predicted that any change increasing launches would cascade via
+`formTgsAtReadyTransition` ⇒ more tactical groups ⇒ more `personnel_lent` stripped from defensive
+brigades corps-wide ⇒ **scattered** damage in unrelated non-anchor OSIDs, "the most likely route to an
+EH-3-style −39."
+
+Measured on n218, all three legs absent:
+- **TG formations 12 → 12** (identical; one merely moved `arbih_3rd_corps` → `vrs_sarajevo_romanija`, which is Trnovo launching);
+- **`personnel_lent` FELL 4909 → 3059** across 9 → 6 donor contributions;
+- damage is **contiguous** (12 of 16 in one Western Krajina arc), not scattered.
+
+The hypothesis was worth measuring and is now closed. It was a good prediction, correctly priced as a
+risk, and it did not occur.
+
+### What the −11 actually was, recorded because it is this packet's thesis in miniature
+
+`Operation Sana` ran with **identical `attack_attempt_count: 29`** in both runs but captured 21 → 17.
+The 5th Corps attacked exactly as much and won less, because **RS permanent brigade losses fell 22 → 18**
+and the survivors include the defenders of precisely those municipalities
+(`rs_3rd_petrovac_light_infantry`, `rs_9th_grahovo_light_infantry`, `rs_15th_biha_infantry`). RS
+`combat_effective` 18 → 27, `active_brigades` 61 → 65, mean morale 38.2 → 42.3.
+
+A **materially healthier VRS holds the Krajina**, and it costs 8 painted OSIDs. Against the standing RS
+brigade-destruction asymmetry (ARBiH 0% permanent loss vs RS 61–63% at 188w), an 18% cut in RS
+annihilation is movement in the right direction. This is the owner's ruling working exactly as intended:
+engine health bought with calibration score.
