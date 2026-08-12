@@ -6,6 +6,8 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+// TEMPORARY DIAGNOSTIC import — remove together with axis_readiness_debug.ts.
+import { emitAxisReadinessTrace, emitOperationReadinessTrace } from './axis_readiness_debug.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -1017,6 +1019,9 @@ export function evaluateOpeningAttackReadiness(
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
             const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, operationStaticAdjacency, op.army_hq_op_id);
+            // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts. Inert
+            // unless AWWV_DEBUG_AXIS_READINESS is set; remove with that file.
+            emitAxisReadinessTrace(state, corpsId, op, axis, result.executable, result.blocker);
             if (result.executable) {
                 anyExecutable = true;
             } else {
@@ -1024,6 +1029,8 @@ export function evaluateOpeningAttackReadiness(
                 if (result.blocker === 'zero_eligible_axis') anyApproaching = true;
             }
         }
+        // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts.
+        emitOperationReadinessTrace(state, corpsId, op, anyExecutable, anyApproaching);
         if (anyExecutable && !anyApproaching) return { executable: true };
         return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
     }

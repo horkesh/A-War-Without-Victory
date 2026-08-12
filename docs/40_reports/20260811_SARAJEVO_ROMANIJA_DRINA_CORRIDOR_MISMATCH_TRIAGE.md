@@ -160,3 +160,87 @@ Consistent with this, `trnovo_town` carries **no `launch_blocker` at all** in th
 **Risk class and gate.** This is an op-lifecycle change in `evaluateOpeningAttackReadiness`, a shared multi-axis code path used by every pre-planned, triggered, and opportunity operation in the game — categorically the EH-3/EH-4 high-risk class, NOT the "surgical, lowest-risk" class the panel assigned to its (now-refuted) east-axis restructure. `docs/life_lessons/calibration.md:350` is the governing precedent: EH-3 fix(a) passed **30/30 anchors and every §6 invariant** and was still a **−39 floor regression** (658->619), entirely in non-anchor western-Krajina OSIDs. Anchors-pass is therefore not sufficient evidence for this class of change. The scenario-tester gate already recorded above stands unchanged and is now more binding, not less: fresh clean 188w baseline off branch head; one change per run; full non-net `anchor_checks` diff; 40w structural fingerprint byte-flat; full 188-week trajectory diff for collateral flips; automatic NO-GO on any Igman/Bjelašnica flip to RS. Add one gate item specific to this finding: because the change would let *every* multi-axis op in the game launch in situations where it previously stalled, the trajectory diff must be repo-wide across all operations, not scoped to the Sarajevo-Romanija-Drina theatre.
 
 **Note on floor provenance:** `docs/40_reports/CALIBRATION_MASTER.md` still records the floor as `matched_osids 634, anchors 30/31`. The 2026-08-11 ledger entries move it to **639, anchors 31/31** (Brčko firepower-deficit −4 then Mistral 2 duplicate-objective +9) and explicitly say to update CALIBRATION_MASTER; that update was never made. CALIBRATION_MASTER is stale — reconcile it before it is used as a baseline reference for this lane.
+
+## INSTRUMENTATION RUN 2026-08-12 (n205) — deadlock CONFIRMED; the PLAUSIBLE reading is now CONFIRMED
+
+The correction above marked one claim PLAUSIBLE rather than CONFIRMED: that `trnovo_town` was
+executable and was held hostage by its sibling axis. That claim is now **confirmed by direct
+measurement**, using the decisive test the correction itself specified.
+
+**Probe.** `src/sim/combat/axis_readiness_debug.ts` + two call sites in
+`evaluateOpeningAttackReadiness` (`sector_offensive_launch_helpers.ts`). Observation-only: reads
+state, emits to stdout, no wall-clock/RNG, inert unless `AWWV_DEBUG_AXIS_READINESS` is set. Logs
+per-axis `executable`/`blocker` with each assigned brigade's location, personnel, morale and
+cohesion, plus an operation-level line carrying `held_by_approaching` — true when at least one axis
+WAS executable and the operation was refused execution anyway.
+
+**Probe proven inert (determinism check).** HEAD's code state equals n202, so an observation-only
+probe must reproduce n202 exactly. Run **n205** returned `final_state_hash`
+**`c657ad81f4d94cc0`**, `matched_osids` **639/712**, anchors **31/31** — byte-identical to n202 on
+all three. The trace is therefore a faithful record of the unmodified engine, not of a perturbed one.
+
+**Result — every traced evaluation shows the deadlock, with no exceptions:**
+
+| turn | axis | objective | executable | blocker | brigade (all at staging `trnovo:gornja_presjenica`, all ADJ to objective) |
+|---|---|---|---|---|---|
+| t156 | trnovo_east | kijevo_2 | **false** | `zero_eligible_axis` | `rs_trnovo_brigade` p=500 m=30 c=33 |
+| t156 | trnovo_town | trnovo | **true** | — | `rs_1st_romanija_infantry` p=2200 m=21 c=53 |
+| t157 | trnovo_east | kijevo_2 | **false** | `zero_eligible_axis` | `rs_trnovo_brigade` p=500 m=25 c=32 |
+| t157 | trnovo_town | trnovo | **true** | — | `rs_1st_romanija_infantry` p=2200 m=17 c=53 |
+| t158 | trnovo_east | kijevo_2 | **false** | `zero_eligible_axis` | `rs_trnovo_brigade` p=500 m=23 c=31 |
+| t158 | trnovo_town | trnovo | **true** | — | `rs_1st_romanija_infantry` p=2200 m=20 c=52 |
+| t159 | trnovo_east | kijevo_2 | **false** | `zero_eligible_axis` | `rs_trnovo_brigade` p=500 m=21 c=30 |
+| t159 | trnovo_town | trnovo | **true** | — | `rs_1st_romanija_infantry` p=2200 m=20 c=51 |
+
+Operation-level: **4 of 4 evaluations** report `any_executable=true`, `any_approaching=true`,
+`executed=false`, `held_by_approaching=true`. `trnovo_town` was executable in **4/4** evaluations and
+was refused every time. `trnovo_east` reported `zero_eligible_axis` in 4/4 — with its brigade
+**present, at staging, and adjacent to its objective**, at exactly `MIN_ATTACK_PERSONNEL` (500, which
+passes the floor since the test is `<`). Position and floor both clear, so the only failing term is
+the **predicted outcome** — confirming the correction's inference. Nothing was "mid-march"; the
+`anyApproaching` comment's assumption is simply false in this case.
+
+**This closes the diagnosis.** `Operation Trnovo` captured nothing not because its objectives,
+staging, or brigade positions were wrong — all four are sound, and panel bugs (2) and (3) remain
+refuted — but because one under-strength axis is read as "still approaching" and vetoes an entire
+multi-axis operation, indefinitely, while ambient drift degrades every brigade waiting on it.
+
+### Open items this probe did NOT settle
+
+1. **t141–t155 is untraced.** Readiness is only evaluated once
+   `earlyElapsed > earlyPlanDuration + PLANNING_INVALIDATION_GRACE_TURNS`
+   (`sector_offensive.ts:1263-1272`), so the first 15 turns of the op's 19-turn window produce no
+   records at all. Whatever held the op during those turns is a **separate gate** (force-staging
+   assembly), not this deadlock. The deadlock is confirmed only for t156-t159.
+2. **Phase reads `planning` in all four evaluations**, even though the t156 evaluation should have
+   driven `beginRecovery(...)` at `sector_offensive.ts:1269`. There are two call sites (1267 and
+   1440) and the probe does not distinguish which emitted. Not resolved; flagged.
+3. **A fix to `anyApproaching` alone is necessary but may not be sufficient.** Even with the veto
+   removed, `trnovo_town` only becomes evaluable at t156 and the op aborts at t160 — roughly four
+   turns for a morale-20 brigade to take Trnovo town. Bug (1) (mobilization starvation delaying
+   injection from t69 to t141) plausibly has to be fixed as well before the op can do its
+   historical job. Do not assume the single fix closes the 3-OSID gap; measure it.
+
+### Fix framing (unchanged risk class, now better evidenced)
+
+The finding is **general, not Trnovo-specific**: `evaluateOpeningAttackReadiness` is the shared
+multi-axis readiness path for every pre-planned, triggered, and opportunity operation in the game.
+Any multi-axis op with one weak axis is vetoed the same way, which makes this a plausible
+contributor to EH-4's 32 `dead_ops` — worth measuring across all ops, not just this one.
+
+The remedy must distinguish the two meanings currently collapsed into `zero_eligible_axis`:
+*brigades en route* (waiting is correct) versus *brigades present but below the prediction
+threshold* (waiting is futile and self-worsening). It must stay emergent — no hardcoded force-flip
+of the three Trnovo OSIDs, per gap-finder's constraint.
+
+Risk class and validation gate are **unchanged** from the correction above and remain binding:
+EH-3/EH-4 class, `docs/life_lessons/calibration.md:350` precedent (30/30 anchors + every §6
+invariant, still a −39 floor regression), fresh baseline, one change per run, full non-net
+`anchor_checks` diff, 40w fingerprint byte-flat, repo-wide trajectory diff across all operations
+(not theatre-scoped), automatic NO-GO on any Igman/Bjelašnica flip to RS. Panel + §6 sign-off before
+any code change — not yet convened.
+
+**Probe retained, not deleted.** `axis_readiness_debug.ts` is kept in the tree rather than reverted:
+it is proven byte-identical, env-gated to a single named operation, and the validation gate above
+requires exactly this trace again when a fix is measured. Delete it once the `anyApproaching` fix
+lands and is signed off.
