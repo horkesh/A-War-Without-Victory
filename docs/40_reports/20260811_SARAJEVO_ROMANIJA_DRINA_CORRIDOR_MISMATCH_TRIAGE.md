@@ -1805,3 +1805,52 @@ at oct1995 (HIGH confidence, verbatim primary source), and treat the three rim O
 weakest link is absence-of-evidence). The `kolovarice` **merge defect** — 23 settlements, 41.7 km²,
 straddling the front line, wrong under any single controller — is a separate data-pipeline item and is
 **not** fixed by any repaint.
+
+### `djulici` FIX — works, costs −6 through a traced mechanism, REVERTED
+
+Owner §6-signed. Appended `op:zvornik:djulici` to Operation Drina's `zvornik_sweep` objectives
+(adjacent to the axis's own staging OSID `op:zvornik:kozluk_2`, RS from init). 188w run n214, measured
+against the **corrected** oct1995 reference (baseline n207 = 638 under that reference).
+
+**Objective achieved.** `op:zvornik:djulici` ends **RS** — taken, matching painted. All **31/31 anchors
+pass**. §6 enclave invariants hold (Srebrenica RS, Goražde RBiH, Bihać RBiH). **The western cascade is
+intact** — Mistral 1 12atk/7cap vs baseline 13atk/7cap, Cincar unchanged. This is not a
+`kijevo_2`-class failure.
+
+**But: matched 638 → 632 (−6). 3 fixed, 9 regressed**, and the regressions are geographically coherent
+rather than scattered:
+
+| fixed | regressed (all RS → RBiH, i.e. RS loses ground it should hold) |
+|---|---|
+| `zvornik:djulici`, `konjic:sitnik`, `nevesinje:hrusta_2` | `sekovici:kastijelj_2`, `sekovici:sekovici_2`, `sekovici:udbina_2`, `vlasenica:grabovica`, `kladanj:vucinici_2`, `olovo:slivnje`, `doboj:zelinja_gornja_2`, `ugljevik:donja_trnova_2` (+ `konjic:glavaticevo_2` RBiH→RS) |
+
+**Mechanism — traced, not inferred.** The regressions are the **Birač belt**, and the axis roster names
+`rs_1st_birac`:
+
+| | baseline n207 | with djulici n214 |
+|---|---|---|
+| Operation Drina | t0→**t10**, 7 attacks, 7 captured | t0→**t12**, 10 attacks, 8 captured |
+| `zvornik_sweep` | 4 objectives / 4 captured | 5 objectives / 5 captured |
+| `rs_1st_birac` at t40 | `srebrenica:brezovice_2`, **1676** personnel | `bratunac:bratunac_2`, **1192** personnel |
+
+Two extra turns of commitment cost `rs_1st_birac` roughly **480 personnel** and left it displaced, and
+the Šekovići–Vlasenica–Kladanj–Olovo belt it would otherwise backstop is exactly what falls. **This is
+a real cost with a causal chain, not op-stream churn** — distinguishable from noise precisely because
+the damage is contiguous with the brigade's home region rather than scattered.
+
+(Op-stream commonality 24/38 is heavy — comparable to `kijevo_2`'s 23/38 — but on this evidence the
+territorial damage is the roster effect, not the churn.)
+
+**REVERTED.** Nine regressions to gain one OSID is a bad trade, and unlike the earlier instrument
+argument this one is not ambiguous.
+
+**The engine-health finding underneath, which is worth more than the fix:** an entire belt's control
+depends on **one brigade being free for two turns**. `rs_1st_birac` is simultaneously the Zvornik
+sweep's muscle and the only thing holding Birač; the engine has no slack there. That is the same
+fragility class as the participant-selection defect — the force economy is tight enough that any added
+early objective is paid for somewhere else, which is why *both* early-war data fixes attempted this
+session (kijevo_2, djulici) worked locally and lost globally.
+
+**Re-attempt shape, if ever:** give `zvornik_sweep` a fourth brigade, or host `djulici` on an operation
+whose roster does not include the Birač garrison — not simply a different objective position. Do not
+re-add it to this axis as-is.
