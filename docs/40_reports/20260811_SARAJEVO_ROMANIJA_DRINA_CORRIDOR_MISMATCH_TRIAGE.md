@@ -792,3 +792,148 @@ fix and against a broad one.
 **not** this deadlock. Also observed: Foča (STATE_2 ×2), Podrinje Sweep (STATE_2 ×4), and three probe
 operations. None of these are veto-cost cases; they are recorded so the corridor lanes are not
 misattributed to `anyApproaching`.
+
+## CERSKA / KAMENICA / OSMAČE / ĐULIĆI — 2026-08-12. These are 1992-93 losses, NOT Srebrenica-1995 residue
+
+Investigated on owner question ("why are Cerska-Kamenica cut off from the rest of the Srebrenica
+enclave, how did that happen? How many brigades end up there?"). The integrator's first answer framed
+these as residue of Srebrenica's fall. **That framing was WRONG.** Historian dispatch + painted-snapshot
+verification corrects it decisively.
+
+### The four OSIDs are 1992-93 losses, and the snapshots prove it
+
+| osid | jan93 | apr94 | apr95 | oct95 | engine t188 | actually fell |
+|---|---|---|---|---|---|---|
+| `op:vlasenica:cerska_2` | RBiH | **RS** | RS | RS | **RBiH** | 1 Mar 1993 |
+| `op:bratunac:pobudje_2` | RBiH | **RS** | RS | RS | **RBiH** | 13-16 Mar 1993 |
+| `op:srebrenica:osmace_2` | RBiH | **RS** | RS | RS | **RBiH** | 24 Mar 1993 |
+| `op:zvornik:djulici` | **RS** | RS | RS | RS | **RBiH** | 9-10 Apr 1992 |
+
+By contrast the **actual final Srebrenica enclave is exactly five OSIDs** — `srebrenica_2`,
+`donji_potocari_2`, `suceska`, `milacevici`, `bostahovine_2` — RBiH at jan93 AND apr94 AND apr95,
+flipping only at oct95. **The engine gets all five exactly right.**
+
+**Consequence: modelling Srebrenica's fall correctly can never close these four.** They are a 1993
+problem (April 1992 for Đulići) surfacing 28-43 months downstream. Any fix aimed at the July 1995
+mechanism is aimed at the wrong year of the war.
+
+### Contiguity: the engine's turn-0 topology is CORRECT — do not "fix" it
+
+BB1 p.151: the Cerska-Kamenica enclave's fighters were trying "to link up to Bosnian Army forces
+southeast of Tuzla. **This Muslim-held enclave near Zvornik also lacked a territorial link to that
+around Srebrenica.**" The engine has exactly that at turn 0: Cerska sits in a *separate* RBiH connected
+component (81 OSIDs, oriented toward Zvornik/Sapna/Tuzla) from the Srebrenica core (180 OSIDs).
+
+Correct shape over time: **separate (Apr 1992 – early Jan 1993) → briefly contiguous (~Jan – Feb 1993,
+via the ARBiH offensive of 14 Dec 1992 – 26 Jan 1993 that took Kravica on 7 Jan and linked up with
+Ferid Hodžić's troops) → gone entirely by 16 Mar 1993.** The engine should never show the pocket
+surviving past mid-March 1993.
+
+### PRIMARY DEFECT for Cerska is the TRIGGER DATE, not the `anyApproaching` deadlock
+
+`triggered_operations.ts:300` — `trigger: (_state, turn) => turn >= 40`. With turn 0 = 1992-03-06:
+
+| turn | date | |
+|---|---|---|
+| 40 | **1992-12-11** | engine op becomes available |
+| 46 | **1993-01-22** | engine op aborted (0 attacks) |
+| 49 | 1993-02-12 | **historical Operation "Cerska 93" BEGINS** (10 Feb) |
+| 52 | 1993-03-05 | Cerska falls (1 Mar) |
+| 54 | 1993-03-19 | Konjević Polje falls (16 Mar) |
+
+**The engine's operation fires ~2 months early and is dead before the historical operation begins.**
+Worse, its window t40-t46 coincides almost exactly with the **ARBiH offensive of 14 Dec 1992 –
+26 Jan 1993** — the one that *linked* Srebrenica to Cerska and took Kravica. The VRS op therefore
+launched into the teeth of a successful enemy offensive.
+
+**That reframes the catastrophic predictions measured at t44/t45** (`rs_1st_birac` 0.337,
+`rs_1st_milii` 0.090): they are not an engine pathology, they are **historically correct for
+December 1992 – January 1993**. RS *should* be unable to take Cerska on that date.
+
+So for Cerska the `anyApproaching` deadlock is largely a **red herring for the territorial outcome**.
+The veto did fire (2 evaluations, t44/t45, an executable sibling axis refused) and that is a real
+instance of the general defect — but lifting it would only let a doomed operation attack on a date
+when it historically lost. **The fix that would actually take Cerska is the trigger date**
+(`turn >= 40` → `turn >= 49`), which is a catalog/data change of the low-risk Mistral-2 class, not an
+engine change. This should be measured on its own, and it is independent of Lane A.
+
+Historical operation for reference (BB1 p.184; BB2 pp.387-388, section "Operation Cerska 93",
+10 Feb – 16 Mar 1993, run by the **VRS Main Staff**, not Drina Corps alone — BB2 p.396 fn 25):
+Kamenica fell ~16 Feb (65th Protection Regiment + Zvornik Brigade, three-pronged from Zvornik,
+Drinjača, Šekovići); Cerska fell **1 Mar** (1st Guards Motorized + 1st Birač, main effort from west
+and south); Konjević Polje fell 13-16 Mar (65th Protection + 1st Guards + 1st Zvornik from the
+northwest with a **VJ armoured battalion**, 1st Bratunac from the southeast).
+
+### The "kamenica" axis is MISNAMED — it models a different operation 30 km away
+
+**Real Kamenica is in Zvornik municipality, ~20 km north of Srebrenica**: `op:zvornik:donja_kamenica`
+(Donja Kamenica, Liplje, Samari, Snagovo, Sultanovići), with Gornja Kamenica inside
+`op:zvornik:krizevici`. `donja_kamenica` is **directly adjacent to `op:vlasenica:cerska_2`** — the
+pocket is that pair plus `pomol_2`/`sebiocina`/`pobudje_2`.
+
+The engine's `kamenica` axis instead targets `srebrenica:osmace_2`, `radovcici`, `sulice_2` — which are
+on the **Skelani-Srebrenica axis, southeast**, and fell in a *different* phase: the Main Staff shifted
+main effort to Skelani after Konjević Polje, the advance opened 20 Mar under Mladić personally, and
+Osmače was stormed **24 Mar 1993** by the 65th Protection Regiment + **VJ 63rd Airborne Brigade**
+(BB2 p.388). BB2 p.396 fn 25 names the axes explicitly — "Vlasenica-Cerska", "Zvornik-Kamenica",
+"Bratunac-Potocari-Srebrenica", "Skelani-Srebrenica" — Cerska and Kamenica are two axes of one
+northern operation; Osmače is on a fourth, ~30 km away and 3-5 weeks later.
+
+Both operations are historically real and both belong in the game, but they are **not one operation**:
+different forces, different dates, different approach directions. Separate lane.
+
+### Brigades in the pockets at t188 — 4 ARBiH formations, 6,600 men, all at full strength
+
+| brigade | location | personnel | morale | historically |
+|---|---|---|---|---|
+| `arbih_1st_cerska` | `op:bratunac:pobudje_2` | 1,800 | 52 | Ferid Hodžić's Cerska-Kamenica command; **destroyed/dispersed 16 Feb – 16 Mar 1993** |
+| `arbih_246th_vitezka_mountain` | `op:vlasenica:cerska_2` | 1,800 | 57 | **OOB is CORRECT** — BB1 p.477 lists it HQ **Sapna**, 28th Independent Division. In-run displacement drift, ~20 km off |
+| `arbih_281st_east_bosnian_light` | `op:srebrenica:osmace_2` | 1,500 | 57 | Srebrenica-based 28th Division |
+| `arbih_284th_east_bosnian_light` | `op:srebrenica:osmace_2` | 1,500 | 57 | 28th Division |
+
+Historically correct disposition of the 281st/284th at Dayton: **died or broke out in the 11-16 July
+1995 column, remnants reconstituted around Živinice/Tuzla**. BB1 p.406 fn 268 — Delić stated in
+August 1995 that 2,700 Srebrenica survivors had joined a reconstituted 28th Division, against ~3,200
+ARBiH soldiers unaccounted for. BB1 p.477 — the 28th Independent Division was formed by merging the
+24th Division (HQ Živinice) with "the remnants of the Srebrenica-based 28th Division in July-August
+1995". Not 1,500 men each, intact, inside an enclave that no longer exists.
+
+**This is a direct instance of the known RS/ARBiH brigade-destruction asymmetry** (ARBiH corps 0%
+permanent loss vs RS 61-63% at 188w): four ARBiH brigades that should have been destroyed, captured or
+dispersed instead survive to Dayton at full strength.
+
+**Separate OOB data flag:** `arbih_284th_east_bosnian_light` has `home_osid: op:srebrenica:osmace_2` —
+ground the VRS took on 24 Mar 1993 (~week 51). A brigade homed on an OSID that should be enemy-held
+from early 1993 is a data-side contributor worth checking independently of any engine behaviour.
+
+### §6 — `op:zvornik:djulici` is the most serious item here, and it is NOT a match-count issue
+
+Zvornik town fell to Serb forces **9-10 April 1992** (BB1 p.151); `djulici` is painted RS in **all
+four** snapshots, yet the engine holds it RBiH through turn 188 — wrong from essentially turn 0.
+
+The OSID contains **Đulići, Klisa, Šetići, Petkovci, Boškovići, Baljkovica Donja**. Klisa, Đulići and
+Šetići are among the villages named in the 31 May 1992 "voluntary evacuation" agreement that preceded
+the separation of the men, their detention at the Technical School in Karakaj, and the **Bijeli Potok
+killings within Đulići** (~675 Bosniak men and boys). The same OSID contains **Petkovci** — site of the
+ICTY-established Petkovci School detention and Petkovci Dam executions of ~1,000 Srebrenica men on the
+night of 14 July 1995 (Krstić IT-98-33-T; Popović et al.).
+
+Both require Serb control of that ground — in June 1992 and again in July 1995. **An engine that
+leaves `op:zvornik:djulici` ARBiH through turn 188 has, as a side effect, made two documented
+mass-atrocity sites unreachable.** Flagged as a §6 consideration for whoever scopes the fix, not as an
+argument about match counts. Owner sign-off territory.
+
+### Historian confidence, as given
+
+- **HIGH, directly quoted:** all Operation Cerska 93 dates/forces and the Skelani push (BB2 pp.385-388,
+  BB1 pp.151, 184); turn-0 non-contiguity (BB1 p.151); the Kamenica-vs-Osmače axis separation (BB2
+  p.396 fn 25); the 246th at Sapna and the 28th Division reconstitution (BB1 p.477, p.406 fn 268);
+  Zvornik 9-10 Apr 1992.
+- **HIGH but cross-checked via secondary summaries rather than judgement text:** Petkovci School/Dam
+  (~1,000, 14-15 July 1995); the Đulići/Bijeli Potok ~675 figure — treat the number as approximate,
+  the event as established.
+- **THIN / a BB error caught:** BB1 p.151 places the pocket "about 4 kilometers south of Zvornik",
+  wrong by roughly an order of magnitude (Cerska is ~20 km south-west). The relational claim in that
+  sentence is corroborated elsewhere and stands; the distance is a BB error — exactly the class of
+  thing the source hierarchy warns about.
+- **Not found in the BB KB:** any mention of Sulice, or of Đulići by name.
