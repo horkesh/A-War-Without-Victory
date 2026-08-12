@@ -387,3 +387,194 @@ comment as the state — that is the mechanism of its error, and it is systemic 
 The same pattern appears in at least five ops: Trnovo `kijevo_2`, Foča `prevrac`, Kalinovik
 `vlaholje`, Mostar `vranjevici_2`, Konjic `glavaticevo_2`. Each is primed for the same mistake. Cheap,
 high-value audit lane.
+
+## PANEL COMPLETE — 4 of 4 verdicts. INTEGRATOR RECONCILIATION AND DISPOSITION
+
+**Disposition: NO PANEL SIGNATURE. Escalates to the owner.** All four returned
+**GO-WITH-CONDITIONS**, which is not the unanimous clean GO that constitutes a signature under the
+standing rule. Calibration explicitly BLOCKS the behavioural change pending a measured trigger and
+expects it to defer past D2; §6 scope is now established by measurement (Cerska-Kamenica t40 stages
+from `op:srebrenica:osmace_2`), and the enclave guard is non-delegable owner sign-off. Both
+escalation triggers are met.
+
+**But the panel is unanimous on the next step, unconditionally: MEASURE BEFORE CHANGING.** All four
+independently reached it. That step carries zero floor risk and is the recommendation below.
+
+| Panelist | Verdict | Position |
+|---|---|---|
+| Historian | GO-WITH-CONDITIONS | Execution is historically warranted — the non-firing op is the ahistorical state. Neutral on the remedy class (it encodes no historical claim). |
+| Operations | GO-WITH-CONDITIONS | Core mechanism CONFIRMED independently. Recommends one precise intervention. Re-instrument BEFORE implementing. |
+| Calibration | GO-WITH-CONDITIONS | Measurement GO now; behavioural change BLOCK until a measured trigger clears; expects deferral past D2. |
+| Red team | GO-WITH-CONDITIONS | Not a railroad — emergent-restoring. But a named Chesterton's Fence, and 10 red lines. |
+
+### Four corrections to THIS REPORT's own claims, all upheld
+
+The report is the frozen artifact the panel was asked to attack, and it lost four exchanges. Each is
+corrected in place above or superseded here:
+
+1. **The EH-4 "32 dead_ops" link is WITHDRAWN** (calibration; integrator-verified). n205 measures
+   `invalid_operation_count: 0`. And 29 of the original 32 were `attack_orders_without_battles`,
+   which requires an op in `execution` — this deadlock holds ops in `planning`, so that counter could
+   never have seen it. The remedy pushes it the **wrong** way, converting planning-stalls into
+   execution entries against a ceiling of 6.
+
+2. **"The only failing term is the predicted outcome" is an INFERENCE, not a measurement**
+   (operations). `axisHasExecutableOpeningAttack` has a second silent `continue` at :699 —
+   `if (!directObjectiveAttack) continue` — reached when `predictAllAdjacentTargets` does not return
+   the objective at all. The probe logs no prediction value, so **STATE 2 vs STATE 3 is undetermined**.
+   This is decisive: if `trnovo_east` fails at :699 rather than on the threshold, the recommended fix
+   **does nothing for this operation** and the lane must be re-scoped.
+
+3. **The "19-turn window" is a COHA artifact — the operation got roughly FOUR live turns**
+   (operations; integrator-verified). `sector_offensive.ts:1148-1168`: while
+   `event_flags.coha_active === true`, `advanceSectorOffensives` early-returns for **every** corps and
+   bumps `phase_started_turn += 1`. n205's `weekly_report.jsonl` fires `coha_ceasefire_begins_1995` at
+   line-index 139 and `coha_expires_1995` at 156 (`turn_min` 139/156 in `war_1995.json`). Operation
+   Trnovo was created at **t141 — inside the freeze**. `duration_turns: 19` in the AAR is a ceasefire
+   artifact. Any assessment premised on "it had 19 turns and did nothing" is assessing a fiction.
+   This also explains the `battleless_weeks` 138–154 run the integrator had logged without
+   interpreting. It further kills BOTH previously-proposed explanations for the t141–t155 silence: not
+   the grace window (which would have opened at t147), and not force-staging (pre-planned ops bypass
+   preparation entirely, `operation_preparation.ts:831-843`).
+
+4. **"This closes the diagnosis" is overstated** (red team + operations). Trnovo sets
+   `min_attack_outcome: 'repulsed'` — rank 2, the floor of the ladder — so `executable: true` means
+   only *"we predict at least being repulsed"*, not that the OSIDs would flip. Separately, the four
+   traced records **do not include the abort turn**: recovery at t160 implies a fifth evaluation not
+   in the trace, and operations' `phase_started_turn` arithmetic through the COHA bumps does not
+   reconcile to within ±1 turn. The recovery path is unverified.
+
+Also corrected: `phase: "planning"` in all four records is **expected, not anomalous** — both call
+sites sit inside the `if (op.phase === 'planning')` branch, and `op.phase = 'execution'` is assigned
+at `sector_offensive.ts:1478`, after the gate passes. And the call site **is** determinable: :1269
+calls `beginRecovery` on any non-executable result, so :1267 can emit at most one non-executable trace
+per operation — four consecutive traces therefore came from **:1440**.
+
+### The recommended remedy, in one precise form (operations)
+
+Not removal, not inversion of `anyApproaching`:
+
+> `anyApproaching = true` **iff** some attack-floor-eligible assigned brigade satisfies
+> `isCommittedInTransitTo(state, brigadeId, objectiveAdjacentSet)` — i.e. somebody is literally on the road.
+
+This is exactly the meaning the comment at :1015-1017 already claims. It reuses one existing
+deterministic predicate (:500-516), adds no tunable, and is **Brčko-safe by construction**: in Brčko
+the brigades *are* in transit, so the veto survives byte-identical; in Trnovo nobody is, so the veto
+correctly lifts. Operations explicitly rejected the weaker `stagedAdjacent === 0 && gateAdjacent > 0`
+form because it mishandles a mixed axis (one brigade staged-but-weak, one still marching and strong).
+
+Operations' mapping of the three states is sharper than the red team's and supersedes it:
+**Brčko reaches the blocker via STATE 2** (in-transit ⇒ `gateAdjacent > 0`, so the :676 early-exit
+does NOT fire; the loop then finds the objective non-adjacent to current location and continues out),
+while **Trnovo reaches it via STATE 3**. Two semantically opposite states share one enum value, and
+`anyApproaching` keys off the enum. That is the bug, stated exactly.
+
+Alternatives ranked and rejected: **(b) force-staging is INAPPLICABLE** — pre-planned ops bypass
+preparation (`operation_preparation.ts:831-843`), so it is a no-op for all 17 pre-planned ops and
+perturbs only triggered/opportunity ops: maximum blast radius, zero effect on target. **(d) threshold
+is already at floor** — all 16 authored ops that set `min_attack_outcome` set `'repulsed'`, and the
+only lower rank is `catastrophic`. **(e) axis stall** is a good complement but every existing
+`status = 'stalled'` writer is in the execution branch; a planning-phase stall is a NEW mechanism
+needing a new hysteresis tunable, and it permanently amputates an axis that may become viable.
+
+### There is no backstop, which raises the stakes
+
+`areParticipantsReadyForExecution` (:518-565) returns on `readyAxisCount > 0` — any one axis.
+**`anyApproaching` is the ONLY "wait for the slow axis" mechanism at the planning→execution
+transition.** Removing or weakening it imprecisely reopens 263569bfb's regression directly onto the
+anchor the current floor was just bought with (`dc66c6fc0`, three days old).
+
+### The cascade nobody had priced (operations)
+
+`formTgsAtReadyTransition` fires **at** the planning→execution transition (`sector_offensive.ts:1485`).
+More transitions ⇒ more tactical groups ⇒ more `selectDonors` `personnel_lent` stripped from
+defensive brigades corps-wide, thinning lines nowhere near the operation being fixed. **This is the
+mechanism most likely to reproduce an EH-3-style −39 in unrelated non-anchor OSIDs.** Also expected:
+casualties UP (and the simple grade model is human-cost-vs-historical, so grades move even with
+territory flat — §6/grade invariants must be checked, not just anchors), and attacker-side brigade
+destruction UP, landing on the known open RS brigade-destruction asymmetry.
+
+Mitigating precedent: `donationReadinessBlocksAxis` returns `insufficient_donation`, which does **not**
+set `anyApproaching` — so donation-blocked axes already fail to veto today. Partial-axis launch is an
+existing, tolerated behaviour, which lowers the novelty risk.
+
+### Two independent lanes, NOT to be bundled
+
+- **Lane A — engine health (general).** The in-transit predicate. Frame and judge it as a general
+  engine-health fix *found via* Trnovo, never as a Trnovo fix. Success is op-population health across
+  all multi-axis ops, defined **before** the run — never "did the 3 OSIDs flip."
+- **Lane B — historical fidelity (data).** The operation models only the *supporting* attack; BB2
+  p.391 puts the main effort in the south (TG "Kalinovik"/Herzegovina Corps, 1st Guards Motorized).
+  Adding a southern Kalinovik axis is a catalog change of the Mistral-2 class. **Red-team red line 7
+  forbids bundling any objective-list edit to Operation Trnovo with Lane A** — so Lane B is a separate
+  change, a separate run, and requires first verifying that matching OOB formations exist in-engine.
+
+Operations adds the observation that reorders both: if the **mobilization** bug (panel bug 1) is fixed
+first, the operation injects near t69 with an undegraded brigade and **outside** the COHA window — in
+which case this deadlock may never arise for Trnovo at all. That does not change which fix is correct;
+it changes how success is judged, and it argues against treating the 3 OSIDs as the acceptance test
+for anything.
+
+### AGREED NEXT STEP — measurement only, zero floor risk (unanimous)
+
+One further instrumented 188w, no behavioural change. It must answer the question that determines
+whether the lane is real:
+
+1. **Extend the probe** to log `predicted_outcome`, `power_ratio`, and a `found_in_predictor` boolean,
+   and capture **t138–t162 inclusive, including the recovery turn**. This settles STATE 2 vs STATE 3.
+   If `trnovo_east` fails at :699, the recommended fix does not apply here and the lane is re-scoped.
+2. **Widen the filter** from the operation-name substring to all operations, and log every evaluation
+   where `any_executable && any_approaching`, with turn and op id. This produces the counterfactual
+   list the trajectory diff would otherwise be built on guesswork.
+3. **Re-verify inertness for the widened filter** — the byte-identical result is proven only for the
+   `Trnovo`-only value emitting ~8 lines, not for a broad filter emitting thousands through the same
+   stdout the harness writes artifacts through.
+4. **Pre-commit the decision rule BEFORE the run** (calibration): if the veto never fires on the eight
+   t0–t10 multi-axis ops and bites only Trnovo and Cerska-Kamenica, blast radius is genuinely small and
+   the lane may proceed under the full gate. **If it fires on ANY op launching before t40, the
+   behavioural change is DEFERRED PAST D2, full stop.**
+
+Integrator note on rule 4: an AAR-only check already shows the two t0 ops that carry a blocked axis
+(Prsten, Prijedor) are blocked by `insufficient_donation`, which does **not** set `anyApproaching` —
+suggestive of a small blast radius. It is **not** decisive: the AAR records only each axis's final
+blocker state, so an op that transiently hit `zero_eligible_axis` during planning and later resolved
+leaves no trace. That is exactly what rule 4 measures.
+
+### Gate for any eventual behavioural change (merged, all four panelists, binding)
+
+Beyond the gate already recorded above, which stands: fresh clean baseline off branch head, no
+comparison against numbers carried in prose; one change per run, and **no adoption of a measured
+regression on the promise of a later offsetting change** (bundling by instalment, explicitly refused
+in advance); full non-net `anchor_checks` diff entry by entry; all 31/31 anchors; §6 enclave
+invariants explicit and **owner-signed**, in scope by measurement; no Igman/Bjelašnica-massif OSID to
+RS; `engine_health_gate` all 7 with the `dead_ops` delta reported explicitly; 40w fingerprint as a
+**pre-committed decision rule, not pass/fail**; `test:baselines` pre-flighted before any PR;
+repo-wide trajectory diff as a **named artifact** — per-op `started_turn`/`total_attacks`/
+`objectives_captured`/`outcome`/`recovery_reason` across all 38 AARs, plus per-turn `control_counts`,
+plus `destroyed_brigades.json` per faction, total battles, KIA/WIA per faction, and TG formation
+counts. **Panel NO-GO at matched < 630**, tighter than the CI floor of 622 — and note CI will not
+catch a moderate regression, since `matched_osids_min: 622` against a floor of 639 lets a −16 pass
+green. Plus: a **targeted regression test for 263569bfb's scenario** (fast axis staged + slow axis
+genuinely in transit ⇒ still non-executable), currently protected only by the 188w floor; any patch
+whose Brčko diff is not byte-flat is an automatic NO-GO; hard stop at attempt two, since two
+consecutive tunings of the same predicate toward the same map is the definition of reverse-engineering.
+
+### Separate lanes opened by this panel (not blockers)
+
+- **Comment-vs-live-control trap**, systemic. Catalogue comments assert *painted* control while
+  `buildAxesFromDef` strips on *live* control (`pre_planned_operations.ts:1034-1037`). This is the
+  mechanism of the prior panel's error — systemic, not personal. Same pattern in at least five ops:
+  Trnovo `kijevo_2`, Foča `prevrac`, Kalinovik `vlaholje`, Mostar `vranjevici_2`, Konjic
+  `glavaticevo_2`. Cheap, high-value audit.
+- **`kijevo_2` init-control defect** — painted RS at jan1993 and every later snapshot; the engine holds
+  it RBiH at init. Flagged, not blessed; the clean fix is init-control, and this op must not be cited
+  as evidence the init-control is fine.
+- **`gornja_presjenica` 1995 flip** — a missing 1994-95 ARBiH operation (Bjelašnica-Treskavica, BB2
+  pp.500-501); 1995 mechanism rated MODERATE confidence, needs its own research. Must not be resolved
+  inside Operation Trnovo.
+- **Comment fix** at `pre_planned_operations.ts:437-438`: month reads "August 1993", should be July.
+  Number (69) is exact and stays.
+- **`Cerska-Kamenica` kamenica axis** stages from `op:srebrenica:osmace_2` and lists that same OSID as
+  its first objective — anomalous, flagged by calibration, not investigated.
+- **Probe deletion is a tracked obligation**, not a comment: delete `axis_readiness_debug.ts` and both
+  call sites once the fix is signed off.
