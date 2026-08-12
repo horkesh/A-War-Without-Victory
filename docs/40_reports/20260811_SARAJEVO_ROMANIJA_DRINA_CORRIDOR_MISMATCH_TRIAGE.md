@@ -937,3 +937,54 @@ argument about match counts. Owner sign-off territory.
   sentence is corroborated elsewhere and stands; the distance is a BB error — exactly the class of
   thing the source hierarchy warns about.
 - **Not found in the BB KB:** any mention of Sulice, or of Đulići by name.
+
+### `op:zvornik:djulici` ROOT-CAUSED — an orphaned objective, not a contested loss
+
+Owner question: how can it be RS in painted oct95 but RBiH in the engine at t188? Answer: **it was
+never contested.** Zero battles in 188 weeks; it appears in **zero objective lists anywhere in `src/`**
+(repo-wide grep).
+
+**Why it starts RBiH — correctly.** Đulići (+5 constituents) is pop 4,203, Bosniak 3,277 / Serb 911,
+`ethnic_key: B`. Census-derived initial control therefore gives it RBiH at turn 0, which is right and
+is sacrosanct under the Sacred Rule (never override initial OSIDs). Historically Zvornik town fell
+9-10 April 1992 (~turn 5) to JNA and paramilitaries, and the Đulići/Klisa/Šetići villages were emptied
+via the 31 May 1992 "evacuation" (~turn 12) — i.e. the ground changes hands by **takeover**, which the
+engine models through an operation. No operation covers it, so nothing ever happens there.
+
+**The correlation is exact.** `Operation Drina` (`vrs_drina`, staging `op:zvornik:kozluk_2`), axis
+`zvornik_sweep`, objectives — and their outcomes:
+
+| OSID | in objective list? | init | t188 | painted oct95 |
+|---|---|---|---|---|
+| `op:zvornik:zvornik` | YES | RBiH | **RS** | RS ✓ |
+| `op:zvornik:novo_selo` | YES | RBiH | **RS** | RS ✓ |
+| `op:zvornik:krizevici` | YES | RBiH | **RS** | RS ✓ |
+| `op:zvornik:donja_kamenica` | YES | RBiH | **RS** | RS ✓ |
+| **`op:zvornik:djulici`** | **NO** | RBiH | **RBiH** | RS ✗ |
+
+Every targeted OSID flipped. The one omitted from the list did not.
+
+**There is no reachability obstacle.** `djulici` is directly adjacent to **`op:zvornik:kozluk_2` — the
+operation's own staging OSID**, RS from init and throughout — and also to objectives `zvornik` and
+`krizevici`. Its only other neighbour is `op:zvornik:sapna` (RBiH in all four snapshots, correctly the
+Sapna thumb). The operation stages next door, sweeps four OSIDs around it, and skips it.
+
+**Candidate fix:** add `op:zvornik:djulici` to `ZVORNIK_SWEEP` objectives. One-line catalog/data change,
+adjacent to staging, no new mechanic — the same class as the Mistral 2 duplicate-objective fix (+9).
+Historically warranted: Operation Drina is the modelled vehicle for the April-1992 Zvornik takeover.
+
+**§6 dimension — must be surfaced before this is run, not after.** The OSID contains **Petkovci**
+(Petkovci School detention and Dam executions of ~1,000 Srebrenica men, 14 July 1995; Krstić
+IT-98-33-T) and **Đulići/Bijeli Potok** (~675 Bosniak men and boys, June 1992). Both events require
+Serb control of that ground, so leaving the OSID RBiH makes two documented mass-atrocity sites
+unreachable in the model. Correcting it necessarily hands RS the territory and its population, which
+engages the displacement and atrocity machinery and the §6 bright line (atrocity is never rewarded).
+This is owner sign-off territory and should not be treated as a routine calibration nudge.
+
+**Class note:** this is the same defect class as the other corridor orphans already flagged —
+`op:foca:brusna_2`, `op:foca:mazlina`, the three Čajniče OSIDs, `op:pale:podgrab`, `op:pale:praca`,
+`op:gorazde:glamoc`, `op:gorazde:kamen` — all RBiH since turn 0, zero battles ever, no operation
+targeting them. Roughly **9 of the 18 corridor mismatches are orphaned OSIDs**, and Đulići now has a
+worked example showing the fix shape: find the operation that already sweeps the neighbourhood and add
+the missing objective, after checking staging adjacency. That is a materially cheaper and lower-risk
+lane than Lane A, and it addresses a larger share of the map error.
