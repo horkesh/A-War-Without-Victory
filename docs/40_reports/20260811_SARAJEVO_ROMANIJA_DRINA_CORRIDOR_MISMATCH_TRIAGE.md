@@ -1475,3 +1475,126 @@ single defensible host op (referred to operations-expert + historian — the pro
 judgment and the calibration specialist explicitly declined to make it); and whether op-stream
 commonality is the right metric versus something finer (per-corps op counts, emission turns) — it was
 chosen because it is cheap and separates the archive, not because it is principled.
+
+### PROBE DESIGN VERDICT (operations-expert, 2026-08-12) — plus a §6 blocker on the noise-floor set
+
+#### A §6 BLOCKER on the proposed Čajniče noise-floor arms — STOP
+
+The three Čajniče OSIDs are **Bosniak-majority hamlets** (batotici 586B/512S, miljeno_2 1844B/594S,
+todorovici 223B/220S) in a Serb-held municipality, RS-painted in all four snapshots, never contested.
+**The historical mechanism by which they became RS in spring 1992 was paramilitary and police
+cleansing, not a corps offensive.**
+
+Authoring a new VRS `sector_attack` whose objective list is three Bosniak-majority hamlets therefore
+**models an atrocity as a military capture.** That is a §6-sensitive authoring act regardless of
+calibration purpose, and it is **outside the scope of the owner's existing §6 sign-off** (which covered
+`djulici` and the Cerska/Srebrenica scope). It needs Historian + §6 sign-off *before* any such
+operation is authored, not after the probe runs.
+
+**Recommendation (operations-expert, endorsed by the integrator): do not seek approval for this —
+choose three interchangeable OSIDs whose historical transfer genuinely WAS a military capture, and
+avoid the bright line entirely.** A cleaner probe, and no exposure.
+
+**Second-order implication, potentially more valuable than the probe:** if the correct model for that
+ground is displacement/control rather than a `sector_attack`, then the mechanism the probe would
+measure **should not exist there at all** — which may be the real reason those OSIDs have never seen a
+battle in 188 weeks.
+
+#### Q1 — confound breaker: (a) and (c) are dead; (d) is clean
+
+- **(a) append an already-RS-held objective — DEAD TWICE OVER.** The strip is at
+  `pre_planned_operations.ts:1055-1058` (the integrator mis-cited :1034-1037, which is
+  `canReachAxisStaging` inside the *brigade* filter — a different gate), and it happens at
+  **INJECTION**, not execution (`buildAxesFromDef` called at :1194 and :1358). A friendly objective
+  never enters the built axis at all, and `axisObjectives.length === 0 → continue` at :1060 would drop
+  the whole axis. It is then stripped **again every planning turn** via
+  `filterAxisPlanningObjectives` (`sector_offensive.ts:904-913`) through `reconcilePlanningObjectives`
+  (:915-952, called at :1379).
+- **(c) `planning_duration` — DEAD STRUCTURALLY, and this generalises.** Prsten runs t0→t5 inside the
+  RS blitz window, so `isPrePlannedBlitz` is true (`sector_offensive.ts:1274-1276`) and the whole
+  preparation block is skipped; `preparation_sub_phase` is never set, so `preparationReady` (:1421) is
+  false and the launch gate (:1422) reduces to `elapsed > planDuration || stagedEarly`. Prsten's
+  brigades are pre-staged, so `stagedEarly` (:1391) is true at elapsed=1 and **short-circuits
+  `planning_duration` entirely**. So **`planning_duration` is inert for ANY operation whose brigades
+  already sit on approach OSIDs** — not merely for event-trigger-bound ops.
+  **`docs/life_lessons/calibration.md:361` has the right conclusion for the wrong reason.**
+- **(b) an objective it attacks but never captures — REJECT.** Extends occupancy, but adds casualties
+  and brigade-state deltas: a second confound.
+- **(d) RECOMMENDED — append an enemy-held objective with NO friendly approach OSID, LAST.** Verified
+  step by step: survives the injection strip (enemy-held); survives the planning re-filter (which
+  strips only friendly); does not invalidate the op, because `reconcilePlanningObjectives` :950-951
+  calls `collectObjectiveApproachOsids` over all objectives and that function **breaks on the first
+  objective yielding any approach** (`sector_offensive_launch_helpers.ts:398-400`); is **not** rejected
+  for non-contiguity, because **`validateAxisContiguity` is never called anywhere in `src/`** — it is
+  defined at `sector_offensive_axis_helpers.ts:191` and referenced only by
+  `tests/multi_axis_operations.test.ts`, i.e. a test-time assertion, not a runtime gate. At execution
+  it sets `unreachable_at_launch` (:531-540); with no approach there are no movement orders either, so
+  the axis goes truly idle and stalls at `idleStallThreshold = 4` (`sector_offensive.ts:1875-1885`).
+  **Net: ~+4 turns of slot occupancy, 0 attacks, 0 casualties, 0 movement, 0 territory change.**
+
+**Why `western_sarajevo` specifically:** it has 2 objectives against `ilijas_ring`'s 3, so appending one
+takes it to 3 and leaves `maxLen` at 3 — both `computeMultiAxisPlanningDuration` and
+`getMultiAxisRecoveryDuration` (`sector_offensive.ts:1013-1017`) stay **unchanged**, so the entire
+delta is an execution tail. (This also confirms n210's +3 turns came from execution, not recovery.)
+Appending to `ilijas_ring` would move planning and recovery too — three moving parts instead of one.
+
+**Decisive read:** if `control_delta` is byte-identical to n207 at every one of 188 turns and the op
+stream **still** diverges → slot occupancy is causal on its own. If control is byte-identical and the
+op stream does **not** diverge → the territorial flip was the cause. Verify `total_attacks` and
+`objectives_captured` are unchanged on the probe op before trusting either. **Honest caveat:** Prsten's
+brigades stay committed ~4 turns longer and are unavailable for reassignment in that window — arguably
+part of slot occupancy rather than a confound, but it is not perfect isolation.
+
+**Integrator's probe-D instantiation:** `op:fojnica:zivcici_2` — verified **RBiH at both t0 and t188
+with ZERO RS neighbours at either time** (degree 12), so RS can never reach it and it cannot flip.
+
+#### THE REFRAME — the confound is asymmetric, and it points at territory
+
+**Prsten is RS / `vrs_sarajevo_romanija`. Operation Cincar/Kupres is HRHB. They share no corps
+operation slot and no brigade roster** — one op per corps, and brigades follow their own `corps_id`.
+So SRK slot-occupancy extension has **no direct channel** to an HVO operation. The only routes from a
+Prsten change to a Cincar change are shared state: territory and front geometry, territory-derived
+event conditions, or per-faction scalars.
+
+Slot occupancy plausibly explains SRK-local effects (Operation Trnovo's injection turn); it does **not**
+explain the Cincar → `hvo_tomislavgrad` → Mistral 1 chain at all. That is an a priori argument that the
+**territorial flip is the operative cause** and the confound is asymmetric — to be tested by probe D,
+not assumed.
+
+#### Q2 — NO single host can reach all three Čajniče OSIDs (geometric fact)
+
+Verified in `operational_contact_graph.json`:
+
+| osid | neighbours |
+|---|---|
+| batotici | cajnice_2, miljeno_2, foca:brusna_2, foca:prevrac, gorazde:kolovarice, gorazde:podkozara_donja_2 |
+| miljeno_2 | batotici, cajnice_2, todorovici, zaborak, gorazde:podkozara_donja_2, gorazde:ustipraca_2, rudo:gornja_strmica |
+| todorovici | miljeno_2, zaborak, rudo:gornja_strmica, rudo:mrsovo_2 |
+
+The intersection of batotici's and todorovici's neighbour sets is **{miljeno_2} alone** — itself a probe
+target and RBiH in-engine. **No friendly OSID is adjacent to all three.** Not a host-selection failure;
+a hard geometric fact. Existing hosts evaluated and rejected: **Operation Foča** reaches batotici only
+(via `prevrac`); **Operation Zvezda 94** reaches batotici + miljeno_2 but is `available_from: 100`
+(wrong era for a spring-1992 event) and stages from the very OSID flagged as flipping RBiH mid-run with
+zero battles; **Operation Pracha River** reaches none.
+
+If the probe ever proceeds, hold constant what is mechanically load-bearing — corps, injection turn,
+brigade, and **staging-to-objective hop count = 1** — and let the staging OSID vary (`cajnice_2` for
+batotici/miljeno_2, `zaborak` for todorovici; both RS at init). Staging-OSID *identity* is not
+load-bearing; *hop count* is, and forcing todorovici onto a `cajnice_2`-staged axis makes it 2 hops,
+silently converting the variable from "which OSID" into "which OSID plus a march delay". Natural
+formation would be `rs_ajnie_brigade` (`oob_brigades.json:2915-2917`, home `op:cajnice:cajnice_2`).
+
+#### Blocking check RESOLVED by the integrator — and it deepens the mystery
+
+Operations-expert flagged that `collectObjectiveApproachOsids` builds from
+`buildOsidAdjacencyFromFrontEdges(state)` — the **live front-edge graph**, not the static contact graph
+— and that zero battles in 188 weeks might mean no corps front sector covers Čajniče, which would make
+every host emit `no_approach_osid`.
+
+**Measured: front sectors DO cover Čajniče, from both sides.** From n207's `initial_save`:
+`sector:vrs_herzegovina:9` contains batotici, miljeno_2, cajnice_2, zaborak; `sector:vrs_drina:9`
+contains todorovici, zaborak; and `sector:arbih_1st_corps:{2,13,15,16}` cover the same ground from the
+ARBiH side. So the coverage hypothesis is **refuted** — and the zero-battles fact becomes *more*
+puzzling, not less. (`front_edges` is derived per-turn and not serialized, per Engine Invariants
+§13.1-13.2, so it cannot be read from a save.)
