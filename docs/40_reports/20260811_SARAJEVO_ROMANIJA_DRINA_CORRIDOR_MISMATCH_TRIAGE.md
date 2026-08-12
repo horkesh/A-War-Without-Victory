@@ -1,6 +1,6 @@
 # Sarajevo-Romanija-Drina corridor mismatch triage — 2026-08-11
 
-**Trigger:** User inspected a settlement-level turn-188 map (run `apr1992_definitive_188w__9e902ad68783fbe7__w188_n201`, matched 639/744, anchors 31/31) and flagged Goražde as visually too large, ARBiH cut-off islands near Srebrenica, and an RS cut-off island near Donji Vakuf.
+**Trigger:** User inspected a settlement-level turn-188 map (run `apr1992_definitive_188w__9e902ad68783fbe7__w188_n201`, matched 639/712, anchors 31/31 — the denominator originally read 744 here, corrected 2026-08-12 against `historical_fit.osid_pair_match` in the run artifact; 712 is the true `total_osids`) and flagged Goražde as visually too large, ARBiH cut-off islands near Srebrenica, and an RS cut-off island near Donji Vakuf.
 
 **Method:** Cross-referenced engine `political_controllers` (turn 188, Nov 1995) against `data/source/calibration/painted_control_oct1995.json` (`by_settlement_id`) — the project's settlement-level ground truth, more granular than the 31 tracked sacred anchors. All mismatches below are new; none are on the tracked anchor list.
 
