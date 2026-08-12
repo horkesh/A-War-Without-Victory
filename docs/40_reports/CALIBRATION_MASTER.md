@@ -1,6 +1,35 @@
 # AWWV Calibration Master Reference
 
-## 2026-08-11 R6 western-Bosnia lane — NEW FLOOR matched_osids **639**, anchors **31/31** (supersedes 634 / 30·31; Brčko debt CLOSED)
+## 2026-08-12 REFERENCE CORRECTION — floor restated as **638 / 31·31**; the ENGINE DID NOT REGRESS
+
+**`op:gorazde:kolovarice` repainted RBiH → RS at oct1995 (owner-directed).** The engine is unchanged and
+still produces exactly the same map; the *reference* got more accurate, so the same engine now scores
+**638/712 instead of 639/712**. **This is not a regression and must never be treated as one** — anyone
+comparing a future run against a pre-2026-08-12 "639" is comparing against a reference that contained a
+known error.
+
+**Evidence (project's own BB corpus, verbatim).** BB2 printed p.459: Serb forces were *"isolating ARBiH
+forces on the southern bank in two pockets, one centered on Uhotic Hill"* and *"On 10 April [1994] VRS
+forces eliminated the pocket around Uhotic."* BB2 printed p.461: the VRS retained *"nearly all of the
+southern (right) bank of the Drina"*, and the agreed pullback was *"a three-kilometer exclusion zone on
+the **left** bank"* (heavy weapons out to 20 km). **Uhotići is a verified constituent of
+`op:gorazde:kolovarice`**, whose centroid is 11 km SSW **on the right bank** — outside a left-bank 3 km
+pullback — and nothing in the record returns it to ARBiH. Painted oct1995 asserting RBiH was wrong.
+
+**Consequence: a genuine new calibration target.** The engine holds `kolovarice` RBiH at t188 and
+should not. It is now a real mismatch rather than a false match. `engine_health_gate`
+`188w.matched_osids_min` is 622, so 638 still passes; the gate was not touched.
+
+**Not corrected (deliberately):** `hrancici`, `faocici_2`, `zorovici` — the other three OSIDs in the
+same apr1995-RS → oct1995-RBiH rim. Evidence there points the *opposite* way (the error is more likely
+at apr1994/apr1995) but rests on absence-of-evidence and is only LOW-MODERATE. Left alone pending a
+single boundary decision rather than three cell edits. **Also not fixed by any repaint:** the
+`kolovarice` **merge defect** — 23 constituent settlements, 41.7 km², straddling the front line, wrong
+under any single controller. That is a data-pipeline item.
+
+Full derivation: `docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISMATCH_TRIAGE.md`.
+
+## 2026-08-11 R6 western-Bosnia lane — floor matched_osids **639**, anchors **31/31** (supersedes 634 / 30·31; Brčko debt CLOSED) — *numerator restated to 638 by the 2026-08-12 reference correction above*
 
 **Floor MOVED: `matched_osids` 634 → 639, anchors 30/31 → 31/31.** Two independent fixes landed on `codex/master-roadmap-execution`. `op:brcko:brcko` — the single accepted anchor debt carried since the 2026-08-06 de-saturation entry below — now **PASSES**, so the 30/31 line in every entry beneath this one is superseded.
 
