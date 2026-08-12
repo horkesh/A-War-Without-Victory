@@ -1598,3 +1598,120 @@ contains todorovici, zaborak; and `sector:arbih_1st_corps:{2,13,15,16}` cover th
 ARBiH side. So the coverage hypothesis is **refuted** — and the zero-battles fact becomes *more*
 puzzling, not less. (`front_edges` is derived per-turn and not serialized, per Engine Invariants
 §13.1-13.2, so it cannot be read from a save.)
+
+### PROBE D RESULT — slot occupancy EXCLUDED; and 147 turns of different battles moved no territory
+
+Probe D appended `op:fojnica:zivcici_2` (enemy-held, RBiH at t0 **and** t188 with zero RS neighbours at
+either time, hence permanently unreachable) as the last objective of Prsten's `western_sarajevo` axis.
+Reverted after measuring; floor state restored.
+
+| | baseline n207 | probe D n213 | kijevo_2 n210 |
+|---|---|---|---|
+| `matched_osids` | 639 | **633 (−6)** | 613 (−26) |
+| anchors | 31/31 | **31/31** | 29/31 |
+| op-stream common | — | **30/38** (8 replaced) | 23/38 (15 replaced) |
+| control turns differing | — | 26, first **t157** | 183, first t6 |
+| Prsten window | t0→t5 | t0→**t14** | t0→t8 |
+| Prsten attacks / captures | 6 / 6 | **6 / 6** | 7 / 7 |
+| Prsten outcome | success, `completed` | **partial, `tg_max_lifecycle`** | success, `completed` |
+
+#### Slot occupancy is EXCLUDED — but not by the argument the integrator first used
+
+**The integrator's dose-response argument ("+9 slot turns did less damage than +3, so slot occupancy
+isn't the cause") is INVALID and is withdrawn.** It assumes slot damage is monotonic in duration, which
+is unsupported: what plausibly matters is *when* the slot frees relative to the corps' next emission
+window (t5 / t8 / t14 are three arbitrary points against an unknown window), and — more seriously —
+**probe D's Prsten is not a bigger dose of the same thing, it is a different thing.** It has an
+unsatisfiable objective list and grinds until a lifecycle cap terminates it (`outcome: partial`,
+`recovery_reason: tg_max_lifecycle`), where n210's Prsten *completed successfully*, just later. A broken
+op versus a longer op is not a dose series.
+
+**The evidence that actually carries the conclusion is brigade identity:**
+
+| | n207 baseline | n213 probe D | n210 kijevo_2 |
+|---|---|---|---|
+| Cincar brigades | `hvo_3rd_guard_jastrebovi` | **`hvo_3rd_guard_jastrebovi`** | `hvo_1st_guard_abb` |
+| Mistral 1 brigades | `hvo_3rd_guard_jastrebovi` | **`hvo_3rd_guard_jastrebovi`** | `hvo_1st_guard_abb` |
+| Mistral 1 glamoc blocker | none | **none** | `recent_catastrophic_losses_at_objective` |
+
+**Probe D preserves the brigade identity exactly.** Nine turns of slot extension did not flip the
+selection; Cincar still runs t132→t156 with the same roster and Mistral 1 still fields `jastrebovi` and
+still captures 7. That is a mechanism-level exoneration of slot occupancy requiring no monotonicity
+assumption.
+
+**Carry this caveat:** probe D excludes **slot occupancy**. It does **not** isolate "the territorial
+flip." n210 still bundles at least four simultaneous differences from baseline — the OSID flip, a 7th
+attack, the resulting front-geometry change, and a successful-vs-partial op outcome. State it as
+**"slot occupancy is excluded," never "territory is proven."**
+
+#### The −6 is NOT a noise floor — REJECTED
+
+The integrator proposed −6 as a noise-floor estimate. Rejected on three independent grounds, any one
+fatal:
+1. **n=1 again.** A noise floor is a *spread over replicates*; one probe gives one number and no
+   dispersion. This is the same error already flagged on the kijevo_2 result — it must not pass twice.
+2. **Probe D is not a small perturbation — it is mechanically pathological.** It puts an operation into
+   an unsatisfiable state and lets it burn to a lifecycle cap. −6 measures *the cost of breaking one
+   early operation*, not background sensitivity to ordinary changes.
+3. **Wrong class for the comparison.** Divergence onsets: probe D **t157**; n203 **t187** (2 turns);
+   n204 **t183** (6 turns). Probe D is a turn-0 op-definition change; n203/n204 are late-war, tiny and
+   localised. A band from one class does not transfer to another.
+
+So "−26 sits comfortably outside a −6 band" is **not supported**: two numbers, two perturbation
+classes, no replicates.
+
+#### n203 / n204 are NOT invalidated — and the reason generalises
+
+Beyond the class mismatch: **the Ključ Lever 2 conclusion never rested on the matched delta.** It was
+reverted because `arbih_17th_vitezka_mountain` is physically in Travnik, the participant-selection path
+has no reachability check, and it marched to Skender Vakuf and contributed nothing — a *mechanistic*
+finding, established by tracing where the brigade went, not by reading a number. It stands whether −1
+and −3 were signal or noise.
+
+**Lesson worth generalising: mechanism-first conclusions are robust to the instrument problem;
+delta-first conclusions are not.** That is how conclusions in this project should be written so they do
+not need revisiting when the instrument's resolution is finally characterised.
+
+#### THE LEAD FINDING — mid-war combat is largely territorially inert
+
+Measured in probe D: **first BATTLES divergence t10. First CONTROL divergence t157.**
+
+**147 turns of demonstrably different battles produced byte-identical territory.** The two runs fight
+differently from t10 onward — differing battle sets at t10, t11, t12, t17, t18, t19 and intermittently
+after — and the map does not move at all until t157.
+
+This is an engine-health finding independent of this lane, and it explains why the op stream can churn
+substantially at low calibration cost. **Not yet classified as a defect:** attrition without ground
+change is historically normal for 1993-94 Bosnia, so it is defensible on fidelity grounds; mechanically
+it deserves a look. Needs war-or-game to weigh before anyone calls it a defect.
+
+#### The susceptible set is REAL (statistics, not impression)
+
+Probe D replaced 8 ops, kijevo_2 replaced 15, of 38. **Expected overlap under random draw =
+8 × 15 / 38 = 3.16. Observed overlap = 7**, on a maximum possible of 8 — more than double chance. Not a
+sample-size artifact.
+
+Concentrated in `vrs_1st_krajina` (Munja t97, Ponor t104, Stjena t115) and `arbih_4th_corps` (Osvit
+t124, Ihlas t132, Pravda t175), plus `arbih_3rd_corps` Farz 95 t162. Only `arbih_4th_corps` Nada t98 is
+probe-D-only. Reading to attach: these two corps emit opportunity operations from a **marginal decision
+boundary**, so almost any upstream perturbation re-rolls them. Cheap to investigate — two independent
+runs already hit the same seven.
+
+#### Hypothesis RETIRED
+
+**Op-stream churn is NOT territory-gated.** Probe D re-drew 8 operations while changing zero territory
+until t157. This retires the territory-coupling hypothesis the integrator drew from probe A, which was
+already withdrawn as unsupported and is now positively refuted.
+
+#### Tooling correction
+
+**Do not use the weekly report's `ops` field for operation timing** — it is a scalar
+`{enabled, level}`, not an operation list. Any "op stream diverges at tN" derived from it is
+meaningless. Operation identity must come from `operation_aars.json`.
+
+#### Still not settled
+
+What specifically in the kijevo_2 bundle flips the brigade selection; the noise floor (still no
+replicates); whether the western cascade is reachable by any perturbation other than kijevo_2; why the
+seven shared ops are susceptible; whether `tg_max_lifecycle` terminating Prsten is correct behaviour or
+a second-order problem; and whether the 147 territorially-inert battle-turns are expected or defective.
