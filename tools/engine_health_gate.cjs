@@ -98,8 +98,21 @@ const formations = Array.isArray(formationsRaw) ? formationsRaw : Object.values(
 // 'reconnected'). 'collapsed' is the TERMINAL dead-stranded marker (load-bearing
 // permanent-death state per EH-3 2026-06-11) — those are intentional, numerous, and
 // counting them would saturate the metric. We want the live cut-off-from-front signal.
+// LIFECYCLE GUARD (2026-08-12). The comment above always SAID "alive", but the
+// filter never checked, so this metric was counting DESTROYED formations that
+// merely retained a stale `stranded_status`. It credited the theater-scoped
+// cohesion change with an 8 -> 7 "improvement" it did not make: the delta was
+// entirely `rs_1st_novigrad_infantry`, a destroyed brigade at personnel 0, no
+// longer being destroyed. Living formations carry `lifecycle_status: undefined`
+// and `status: 'active'`; the dead ones carry `lifecycle_status: 'destroyed'`
+// and `status: 'inactive'` — both are checked because neither field alone is
+// reliably populated across the formation set.
+const isAliveFormation = (f) =>
+  f.lifecycle_status !== 'destroyed' && f.status !== 'inactive';
 const stranded = formations.filter(
-  (f) => f && (f.stranded_status === 'holding' || f.stranded_status === 'reconnected')
+  (f) => f
+    && (f.stranded_status === 'holding' || f.stranded_status === 'reconnected')
+    && isAliveFormation(f)
 ).length;
 
 // K:W from faction-level casualty_ledger (fall back to summing per_formation).
@@ -264,6 +277,31 @@ const measured = {
   mean_morale_by_faction: meanMoraleByFaction,
   combat_effective_by_faction: combatEffective,
   active_brigades_by_faction: activeBrigades,
+  // HOLLOW RATIO (2026-08-12) — combat_effective / active_brigades, per faction.
+  // REPORTED, NEVER GATED, and deliberately carries NO band: there is no evidence
+  // base for a threshold yet, and inventing one would be the same error this metric
+  // exists to expose.
+  //
+  // WHY IT EXISTS. The gate could see how many brigades EXIST but not how many can
+  // FIGHT, and that blind spot was exploited twice on 2026-08-12. The theater-scoped
+  // cohesion floor removed a dissolution CRITERION without restoring any capability
+  // (brigade_dissolution.ts is a 2-of-3 gate — personnel<400, cohesion<=20,
+  // morale<=15 — and the RS faction floor of 20 sits EXACTLY on the cohesion
+  // criterion, so clamping the east to 30 simply un-ticks it). Result: RS active
+  // brigades 65 -> 68 while RS combat-effective FELL 27 -> 22 and mean morale fell
+  // 42.3 -> 37.6. Hollow ratio 0.42 -> 0.32. Every hard check passed.
+  //
+  // This is the brigade-ledger form of the same trap recorded as EH-F7 for the
+  // operation ledger ("a larger op ledger is not by itself evidence of health").
+  // Read it alongside mean_morale_by_faction: a ratio falling while active_brigades
+  // rises means formations are being kept alive but hollow.
+  hollow_ratio_by_faction: Object.fromEntries(
+    Object.keys(activeBrigades).sort().map((faction) => {
+      const active = activeBrigades[faction] || 0;
+      const effective = combatEffective[faction] || 0;
+      return [faction, active > 0 ? Number((effective / active).toFixed(3)) : null];
+    })
+  ),
 };
 
 // ---- thresholds ----
@@ -369,6 +407,13 @@ if (flags.json) {
     const tag = c.ok ? 'PASS' : c.hard ? 'FAIL' : 'WARN';
     console.log(`  [${tag}] ${c.name.padEnd(18)} ${c.detail}`);
   }
+  // Surfaced on its own line because it is the one signal the hard checks cannot
+  // see: a faction can gain brigades while losing the ability to fight with them.
+  // Advisory — no band, never gated. See hollow_ratio_by_faction above.
+  const hollow = Object.entries(measured.hollow_ratio_by_faction || {})
+    .map(([f, r]) => `${f} ${r === null ? 'n/a' : r.toFixed(2)} (${measured.combat_effective_by_faction[f] || 0}/${measured.active_brigades_by_faction[f] || 0})`)
+    .join('  ');
+  console.log(`  [ADVISORY] hollow_ratio     ${hollow}   <- combat-effective / active; falling while active rises = hollow ledger`);
   console.log(`  metrics: ${JSON.stringify(measured)}`);
   if (measured.consistency_failures > band.consistency_failures_max) {
     console.log('  --- validate_run_consistency output (tail) — failures exceeded ceiling ---');
