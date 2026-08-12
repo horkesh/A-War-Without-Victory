@@ -244,3 +244,146 @@ any code change — not yet convened.
 it is proven byte-identical, env-gated to a single named operation, and the validation gate above
 requires exactly this trace again when a fix is measured. Delete it once the `anyApproaching` fix
 lands and is signed off.
+
+## PYRRHIC PANEL 2026-08-12 — convened on the corrected diagnosis (CHECKPOINT, 3 of 4 verdicts in)
+
+Frozen artifact: this report at commit `839b87ae0`. Four specialists polled **blind and in parallel**
+(Historian, scenario-tester/calibration, operations-expert, red-team/railroad-hunter); integrator did
+not relay any panelist's findings to another. Implementer ≠ reviewer holds: the integrator has
+implemented no fix, only the proven-inert probe. Each panelist was explicitly told the PRIOR panel
+was two-thirds wrong on this same operation and instructed not to defer to the frozen artifact.
+
+**Status: 3 of 4 in. Operations outstanding. No panel signature yet.** Recorded now as a crash-safe
+checkpoint; the integrator's reconciliation and disposition follow when the fourth lands.
+
+### Verdicts so far
+
+| Panelist | Verdict | One-line position |
+|---|---|---|
+| Calibration | GO-WITH-CONDITIONS | Measurement GO now; behavioural change BLOCK until a measured trigger clears, expected not before D2 |
+| Red team | GO-WITH-CONDITIONS | Not a railroad — emergent-restoring — but `anyApproaching` is a named Chesterton's Fence and the remedy as framed misses a third state |
+| Historian | GO-WITH-CONDITIONS | Execution is historically warranted and the non-firing op is the ahistorical state; bright line sharpened; a southern axis is the faithful remedy |
+
+### Findings the integrator independently re-verified (not taken on trust)
+
+Every check below was run by the integrator against the repo/artifacts, not accepted from a panelist.
+
+1. **Blast radius (calibration).** n205 `operation_aars.json`: **38** operations, **13** multi-axis
+   (12×2 axes, 1×3), **8** of them launching t0–t10 (Prsten, Prijedor, Koridor, Herzegovina, Drina at
+   t0; Corridor t6; Foča t8; Podrinje Sweep t10). Exactly **2** operations end with the terminal
+   signature (`recovery_reason: zero_eligible_axis`, `total_attacks: 0`): Trnovo t141 and
+   **`vrs_drina:Operation Cerska-Kamenica:t40`** — the latter previously unnamed anywhere in this
+   report, identical held-hostage shape (`cerska_pocket` blocked, `kamenica` unblocked), staging from
+   `op:srebrenica:osmace_2`, itself a Cluster-3 mismatch above. **Srebrenica/Cerska is therefore in
+   scope by measurement, not assumption** — and per the standing roadmap the §6 enclave guard is
+   non-delegable OWNER sign-off, not panel sign-off.
+
+2. **EH-4 premise is stale — corrects a claim made earlier in THIS report.** The section above states
+   this deadlock is "a plausible contributor to EH-4's 32 `dead_ops`". That is **wrong on two
+   counts**, and the claim is withdrawn. (a) n205 measures `invalid_operation_count: 0` and
+   `zero_eligible_attacker_operation_count: 0` — there are no 32 dead_ops left to explain; the 32 was
+   the June 2026 baseline. (b) 29 of the original 32 were `attack_orders_without_battles`, which
+   requires an op in `execution`; this deadlock holds ops in `planning`, so that counter could never
+   have observed it. The risk moves the **wrong** way: the remedy converts planning-stalls into
+   execution entries, the exact population that generates those events, against a ceiling of 6.
+
+3. **`anyApproaching` is a Chesterton's Fence (red team).** Commit **`263569bfb`** (2026-05-28,
+   "fix(ops): per-axis execution readiness for multi-axis operations") added it deliberately —
+   verbatim: *"Previously, any single executable axis (e.g. posavina_flank) would immediately fire the
+   whole op into execution, dragging brcko_corridor into execution before its brigades completed the
+   5-hop march to donji_rahic — causing zero_eligible_axis every turn."* The pre-existing semantics
+   are exactly what a naive remedy would restore, and the fence was erected for **Brčko** — the
+   theatre whose hold was bought four commits ago (`dc66c6fc0`) at a −4 cost. This commit is absent
+   from the analysis above. **Nobody edits line 1029 before reading it.**
+
+4. **`zero_eligible_axis` collapses THREE states, not two** (`sector_offensive_launch_helpers.ts:661-713`).
+   The discriminator already exists in the same function — no new state, no new constants:
+   - `gateAdjacent <= 0` (line 676) — nobody adjacent AND nobody committed-in-transit: **dead axis**, waiting is pointless.
+   - `gateAdjacent > 0 ∧ stagedAdjacent == 0` (line 683) — **genuinely mid-march**: waiting is correct. This is the Brčko case and preserving it is non-negotiable.
+   - `stagedAdjacent > 0`, prediction loop falls through — **present but too weak**: the Trnovo case.
+   The remedy class stated above names only two of the three; the **dead-axis** case also vetoes its
+   siblings forever and is plausibly the larger contributor.
+
+5. **`available_from: 69` is exact, the comment's month is wrong (historian).** Scenario turn 0 =
+   1992-03-06 (`scenario_runner.ts`), so turn 69 = **1993-07-02** — the literal day TG "Kalinovik"
+   opened the offensive (BB2 p.391, "On 2-3 July"). Keep the number; correct the comment at
+   `pre_planned_operations.ts:437-438` from "August 1993" to July 1993 (August is the Igman Phase 2
+   withdrawal).
+
+6. **The prior panel's Šabići/Dejčići recommendation is a trap — REJECTED.** Resolved via
+   `census_rolled_up_wgs84.json` → `operational_settlements.geojson` constituent membership:
+   **Šabići → `op:trnovo:tusila`**, a bright-line OSID that must stay RBiH. Adding it as an objective
+   would trigger the panel's own automatic NO-GO. **Dejčići → `op:trnovo:trnovo`** and
+   **Ledići → `op:trnovo:trnovo`** — already inside the existing objective, nothing to add. This is
+   the third prior-panel conclusion to fall.
+
+7. **The integrator's own "open tension" on `gornja_presjenica` is RESOLVED — against the
+   integrator's hypothesis.** Painted control is **RS at jan1993 and RS at apr1994** — the two
+   snapshots bracketing July 1993 — flipping to RBiH only by apr1995. Staging there in July 1993 is
+   historically correct and the staging premise stands. The 1995 flip is a **separate missing 1994-95
+   ARBiH operation** (Bjelašnica-Treskavica, BB2 pp.500-501; the 1995 mechanism rated MODERATE
+   confidence, not confirmed) and must NOT be resolved inside Operation Trnovo.
+
+8. **Denominator reconciled.** This report quoted `639/744` (trigger line) and `639/712`
+   (instrumentation section) as the same floor. `historical_fit.osid_pair_match.total_osids` is
+   **712**; 744 was wrong. Fixed in commit `4d1a0bc69`, and in `CALIBRATION_MASTER.md` at `ec9ccb433`.
+
+### Sharpened bright line (historian, supersedes the earlier formulation)
+
+The earlier "never flip any Igman/Bjelašnica-massif OSID" is too broad as stated: the VRS **kept** its
+first-phase gains, because the August 1993 withdrawal was to **30 July positions**. Stated as an
+absolute geographic ban it would forbid historically correct outcomes. The line is **the massif proper
+and its NW/Hadžići approaches**, and it covers exactly:
+
+`op:trnovo:tusila`, `op:hadzici:lokve`, `op:hadzici:luke`, `op:hadzici:tarcin_2`,
+`op:hadzici:pazaric`, `op:hadzici:budmolici`, `op:hadzici:hadzici`, `op:hadzici:binjezevo`
+— all painted RBiH in all four snapshots. Any of them RS at any turn = automatic NO-GO.
+
+**`op:trnovo:tusila` and `op:hadzici:lokve` are ONE HOP from the op's staging OSID** — reachable by a
+single objective expansion or sweep out of `gornja_presjenica`.
+
+Explicitly NOT covered (do not over-extend): `op:hadzici:misevici_2` (RS in all four snapshots,
+correctly RS); `op:konjic:ljuta` and `op:konjic:glavaticevo_2` (RS at jan1993 AND apr1994, RBiH only
+by apr1995 — legitimately RS during Lukavac 93; their flip belongs to the 1994-95 ARBiH Konjic-
+Kalinovik push, BB2 p.500).
+
+Trnovo municipality's correct Dayton end-state is **5 RS / 1 RBiH** (RS: trnovo, delijas, kijevo_2,
+tosici; RBiH: tusila; plus gornja_presjenica RBiH per painted oct1995). A fix that takes all six is
+wrong even though it would raise the match count.
+
+### The alternative nobody had proposed: the operation is missing its main effort
+
+BB2 p.391 is explicit that the main effort came from the **SOUTH** — TG "Kalinovik"/Herzegovina Corps
+striking with the 1st Guards Motorized toward the Rogoj pass, 18th Herzegovina covering the left
+flank, TG "Foča"/11th Herzegovina the right — while *"The Sarajevo-Romanija Corps appears to have
+launched a supporting attack from the north."*
+
+**The engine models only the supporting attack.** That reframes the entire symptom: a lone 500-man SRK
+brigade unable to predict better than catastrophic is exactly what modelling only the supporting
+attack should produce. The historically faithful remedy is to **add a southern Herzegovina-Corps axis
+staging from Kalinovik** — and the terrain graph supports the scheme of manoeuvre:
+`op:kalinovik:golubici_2` is adjacent to `op:trnovo:trnovo` and `op:trnovo:tosici`;
+`op:kalinovik:varos_2` is adjacent to `op:trnovo:delijas` and `op:trnovo:tosici`. Kalinovik OSIDs are
+painted RS throughout.
+
+**This is a catalog/data change — the same class as the Mistral 2 duplicate-objective fix that gained
++9 — not an EH-3-class change to the shared readiness path.** Whether matching OOB formations exist
+in-engine is unverified and is a precondition, not an assumption.
+
+### Objective-set corrections (historian)
+
+- `trnovo`, `delijas` — historically correct; painted RBiH jan1993 → RS apr1994 → RS oct1995, the exact Lukavac-93 signature.
+- `kijevo_2` — **end-state right, mechanism and date wrong.** Painted **RS at jan1993 and every later snapshot**; it was never a Lukavac-93 gain (Kasindo/Krupac/Donja Presjenica/Klanac, Serb-held from spring 1992). The real defect is that the **engine** holds it RBiH at init. Taking it via Trnovo in July 1993 reaches the right map ~14 months late by the wrong hand. Tolerable as an interim; flagged, not blessed; the clean fix is init-control and this op must not be cited as evidence the init-control is fine.
+- `op:trnovo:tosici` — the genuinely missing 4th Lukavac-93 OSID by painted signature, but the engine already holds it RS at init, so no change is needed. Right answer, wrong reason.
+- **Add nothing for Jabuka-Grebak / Osanica**: `op:foca:izbisno` already correctly RS, `op:gorazde:kola` already correctly RBiH.
+- **Do not fold the Goražde-corridor mismatches into this op**: `ustipraca_2`/`slatina_2`/`sopotnica` belong to TG "Višegrad" / the Praća-river operation of 26 May – 4 June 1993 (BB2 p.390), already modelled as Operation Pracha River.
+
+### Systemic trap identified (red team) — worth its own lane
+
+Catalogue comments assert **painted** control (e.g. `// kijevo_2 = RS (RS waypoint — strips at
+execution)`) while `buildAxesFromDef` strips on **live** control
+(`pre_planned_operations.ts:1034-1037`, via `getPoliticalControllerOSID`). The prior panel read the
+comment as the state — that is the mechanism of its error, and it is systemic rather than personal.
+The same pattern appears in at least five ops: Trnovo `kijevo_2`, Foča `prevrac`, Kalinovik
+`vlaholje`, Mostar `vranjevici_2`, Konjic `glavaticevo_2`. Each is primed for the same mistake. Cheap,
+high-value audit lane.
