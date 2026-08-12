@@ -747,3 +747,200 @@ describe('LANE-2026-05-02-IN-TRANSIT-PREDICTOR G: static-grep guards', () => {
         }
     });
 });
+
+// ---------------------------------------------------------------------------
+// 2026-08-12 — multi-axis veto narrowing (`approaching`)
+//
+// Added on a determinism-review finding: the behaviour change shipped in
+// b9da847f1 had NO test pinning it, so nothing prevented a future edit from
+// silently restoring the old broad trigger.
+//
+// The defect: the multi-axis gate inferred "brigades are still marching" from
+// blocker === 'zero_eligible_axis'. That blocker actually means "no assigned
+// brigade is adjacent to the objective WITH A SUFFICIENT PREDICTED OUTCOME" —
+// equally true when the brigades have ARRIVED and are merely too weak. So
+// anyExecutable && !anyApproaching held whole operations indefinitely, waiting
+// for troops already standing on the start line, while ambient morale/cohesion
+// drift made the prediction monotonically worse every turn.
+//
+// The fence that must NOT be removed: anyApproaching (263569bfb) is the only
+// wait-for-the-slow-axis mechanism at the planning->execution transition,
+// because areParticipantsReadyForExecution returns on any ONE ready axis. It
+// exists to stop a fast axis dragging a still-marching sibling into execution.
+// ---------------------------------------------------------------------------
+
+/** Two-axis synthetic op: axis A reaches objective_a, axis B reaches objective_b. */
+function makeTwoAxisOp(
+    axisABrigades: FormationId[],
+    axisBBrigades: FormationId[],
+    axisBObjectives: string[] = ['op:test:objective_b'],
+): CorpsOperation {
+    return {
+        participating_brigades: [...axisABrigades, ...axisBBrigades],
+        staging_osid: 'op:test:staging_a',
+        sector_id: 'synth_sector_a',
+        objectives: [],
+        current_objective_index: 0,
+        faction: 'TEST_FACTION',
+        corps_id: 'synth_corps',
+        // Pre-planned so the static-adjacency overlay supplies the approach edges,
+        // matching the known-executable single-axis fixture above. Without this the
+        // op is blocked on `no_approach_osid` and the veto assertions are never
+        // reached — which made an earlier draft of these tests vacuously pass under
+        // BOTH the old and new behaviour.
+        is_pre_planned: true,
+        axes: [
+            {
+                axis_id: 'synth_axis_a',
+                name: 'Synthetic Axis A',
+                objectives: ['op:test:objective_a'],
+                current_objective_index: 0,
+                assigned_brigades: axisABrigades,
+                staging_osid: 'op:test:staging_a',
+            },
+            {
+                axis_id: 'synth_axis_b',
+                name: 'Synthetic Axis B',
+                objectives: axisBObjectives,
+                current_objective_index: 0,
+                assigned_brigades: axisBBrigades,
+                staging_osid: 'op:test:staging_b',
+            },
+        ],
+    } as unknown as CorpsOperation;
+}
+
+const TWO_AXIS_ADJACENCY = new Map<string, string[]>([
+    ['op:test:objective_a', ['op:test:approach_a']],
+    ['op:test:approach_a', ['op:test:objective_a']],
+    ['op:test:objective_b', ['op:test:approach_b']],
+    ['op:test:approach_b', ['op:test:objective_b']],
+]);
+
+function prepTwoAxisState(state: GameState): GameState {
+    state.military.war_front_edges_osid = [];
+    state.military.corps_front_sectors = {};
+    state.political!.political_controllers!['op:test:approach_a'] = 'TEST_FACTION';
+    state.political!.political_controllers!['op:test:approach_b'] = 'TEST_FACTION';
+    return state;
+}
+
+describe('2026-08-12 multi-axis veto narrowing: approaching means ACTUALLY in transit', () => {
+    it('an axis with no current objective reports approaching:false and cannot hold the operation', () => {
+        // Regression pin for the SECOND site the narrowing changed (determinism
+        // review NOTE B). An axis with no objective has nothing to march toward,
+        // so nobody can be "still arriving". Before the narrowing this site DID
+        // set anyApproaching, because the caller keyed on the blocker enum.
+        const state = prepTwoAxisState(buildState({
+            synth_alpha: { location_osid: 'op:test:approach_a', personnel: 1200 },
+            synth_bravo: { location_osid: 'op:test:approach_b', personnel: 1200 },
+        }));
+        const op = makeTwoAxisOp(
+            ['synth_alpha' as FormationId],
+            ['synth_bravo' as FormationId],
+            [],
+        );
+
+        const result = evaluateOpeningAttackReadiness(
+            state,
+            'synth_corps' as FormationId,
+            'TEST_FACTION' as never,
+            op,
+            TWO_AXIS_ADJACENCY,
+        );
+
+        // DISCRIMINATING ASSERTION. Axis A is ready, so `anyExecutable` is true.
+        // Under the OLD code axis B's `zero_eligible_axis` blocker set
+        // `anyApproaching`, making `anyExecutable && !anyApproaching` false and
+        // holding the op. Under the narrowing, axis B reports approaching:false
+        // and the op launches. Asserting on `executable` is what separates the
+        // two; asserting on `blocker` does NOT (there is no 'held_by_approaching'
+        // value — the blocker comes from rankOpeningAttackBlocker — so such an
+        // assertion is vacuous and passes under both behaviours).
+        assert.equal(
+            result.executable,
+            true,
+            'an objective-less axis must not hold a ready operation out of execution',
+        );
+    });
+
+    it('FENCE INTACT: a genuinely in-transit sibling axis still holds the operation', () => {
+        // The regression the narrowing must NOT reopen (263569bfb): a fast axis
+        // must not drag a still-marching sibling into execution. Axis A is ready
+        // at its approach; axis B is on the road TOWARD its own approach.
+        const state = prepTwoAxisState(buildState({
+            synth_alpha: { location_osid: 'op:test:approach_a', personnel: 1200 },
+            synth_bravo: {
+                location_osid: 'op:test:far_rear',
+                in_transit_destinations: ['op:test:approach_b'],
+                personnel: 1200,
+            },
+        }));
+        const op = makeTwoAxisOp(['synth_alpha' as FormationId], ['synth_bravo' as FormationId]);
+
+        const result = evaluateOpeningAttackReadiness(
+            state,
+            'synth_corps' as FormationId,
+            'TEST_FACTION' as never,
+            op,
+            TWO_AXIS_ADJACENCY,
+        );
+
+        assert.equal(
+            result.executable,
+            false,
+            'a sibling axis with brigades genuinely marching to its approach must still hold the op',
+        );
+    });
+
+    it('in-transit toward an UNRELATED destination does not count as approaching this axis', () => {
+        // "On the road" must mean on the road TO HERE. A brigade marching
+        // somewhere irrelevant is not arriving at this axis.
+        const state = prepTwoAxisState(buildState({
+            synth_alpha: { location_osid: 'op:test:approach_a', personnel: 1200 },
+            synth_bravo: {
+                location_osid: 'op:test:far_rear',
+                in_transit_destinations: ['op:test:somewhere_else_entirely'],
+                personnel: 1200,
+            },
+        }));
+        const op = makeTwoAxisOp(['synth_alpha' as FormationId], ['synth_bravo' as FormationId]);
+
+        const result = evaluateOpeningAttackReadiness(
+            state,
+            'synth_corps' as FormationId,
+            'TEST_FACTION' as never,
+            op,
+            TWO_AXIS_ADJACENCY,
+        );
+
+        // Same discriminating assertion as above: axis A is ready, axis B's
+        // brigade is marching somewhere irrelevant, so it is NOT approaching this
+        // axis and must not hold the operation. Under the old blocker-enum trigger
+        // this was held; under the narrowing it launches.
+        assert.equal(
+            result.executable,
+            true,
+            'a brigade marching to an unrelated OSID must not hold a ready operation',
+        );
+    });
+
+    it('is deterministic: repeated evaluation on identical state returns identical results', () => {
+        const evaluate = () => evaluateOpeningAttackReadiness(
+            prepTwoAxisState(buildState({
+                synth_alpha: { location_osid: 'op:test:approach_a', personnel: 1200 },
+                synth_bravo: {
+                    location_osid: 'op:test:far_rear',
+                    in_transit_destinations: ['op:test:approach_b'],
+                    personnel: 1200,
+                },
+            })),
+            'synth_corps' as FormationId,
+            'TEST_FACTION' as never,
+            makeTwoAxisOp(['synth_alpha' as FormationId], ['synth_bravo' as FormationId]),
+            TWO_AXIS_ADJACENCY,
+        );
+        assert.deepEqual(evaluate(), evaluate());
+        assert.deepEqual(evaluate(), evaluate());
+    });
+});

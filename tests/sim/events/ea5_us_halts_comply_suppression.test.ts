@@ -76,12 +76,33 @@ describe('E-A5 us_halts_federation_advance_1995 — suppression lives on the com
         expect(eventLevel).toHaveLength(0);
     });
 
-    it('comply carries the RBiH + HRHB suppression with the original duration and reason', () => {
+    /**
+     * RBiH ONLY — HRHB is deliberately NOT suppressed (2026-08-12).
+     *
+     * DO NOT "restore" HRHB here as a regression fix. The engine used to suppress
+     * both factions, which is historically backwards. BB1 p.462 endnote 823:
+     * "The US pressure to halt the HV/HVO operations apparently came in September
+     * after 'Maestral.' ... NEVERTHELESS, ZAGREB WENT AHEAD AND ORDERED 'JUZNI
+     * POTEZ' IN OCTOBER." Croatia launched on 8 Oct and took Mrkonjic Grad on
+     * 10 Oct (BB1 p.427). Sarajevo is the party that complied, reluctantly, while
+     * setting conditions to buy the ARBiH more days (BB1 p.462 endnote 821, which
+     * also records Delic begging Izetbegovic to let the fighting continue).
+     *
+     * Second, independent reason: this event's `responding_faction` is RBiH, so
+     * suppressing HRHB let one faction's political answer silently stop a
+     * different faction's operations.
+     *
+     * Measured consequence of the correction: Operation Southern Move, previously
+     * killed in planning with recovery_reason 'offensive_ops_suppressed', launches
+     * and takes 2 of its 6 painted-HRHB objectives. +2 matched, 0 regressed,
+     * civilian casualties byte-identical.
+     */
+    it('comply carries the RBiH suppression ONLY — Zagreb defied the halt (BB1 p.462 en.823)', () => {
         const suppressions = (comply.effects ?? []).filter(
             (e): e is Extract<typeof e, { kind: 'offensive_ops_suppression' }> =>
                 e.kind === 'offensive_ops_suppression',
         );
-        expect(suppressions.map((s) => s.faction)).toEqual(['RBiH', 'HRHB']);
+        expect(suppressions.map((s) => s.faction)).toEqual(['RBiH']);
         for (const s of suppressions) {
             expect(s.duration_turns).toBe(6);
             expect(s.reason).toBe(EVENT_ID);
@@ -109,9 +130,9 @@ describe('E-A5 us_halts_federation_advance_1995 — suppression lives on the com
     it('applying comply effects writes the same suppression entries as the old event-level authoring', () => {
         const state = makeState();
         applyEventEffects(state, comply.effects ?? []);
+        // RBiH only — see the BB1 p.462 en.823 rationale on the effects test above.
         expect(state.military.offensive_ops_suppressions).toEqual([
             { faction: 'RBiH', expires_turn: 190, reason: EVENT_ID },
-            { faction: 'HRHB', expires_turn: 190, reason: EVENT_ID },
         ]);
     });
 

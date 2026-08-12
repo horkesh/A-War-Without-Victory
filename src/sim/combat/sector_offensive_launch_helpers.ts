@@ -919,7 +919,15 @@ function classifyAxisOpeningAttack(
     const objective = axis.objectives[axis.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
         axis.launch_blocker = 'zero_eligible_axis';
-        return { executable: false, blocker: 'zero_eligible_axis' };
+        // `approaching: false` is EXPLICIT, not incidental (determinism review,
+        // 2026-08-12). This axis has no current objective, so there is nothing to
+        // march toward and nobody can be "still arriving" — it must not hold the
+        // whole operation out of execution. Before the in-transit narrowing, this
+        // site DID set `anyApproaching` (the caller keyed on the blocker enum, and
+        // this returns `zero_eligible_axis`), so the narrowing changed behaviour
+        // here as well as at the weak-axis site. Stated outright so the next reader
+        // sees a decision rather than an omitted field.
+        return { executable: false, blocker: 'zero_eligible_axis', approaching: false };
     }
 
     const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency);
@@ -1099,8 +1107,18 @@ export function evaluateOpeningAttackReadiness(
         // dragging `brcko_corridor` into execution mid-march — the Brcko anchor
         // whose hold was bought at `dc66c6fc0`. The 2026-08-12 change NARROWS the
         // trigger (see `approaching` on OpeningAttackReadinessResult); it does not
-        // remove the wait. Brcko is safe by construction there: those brigades ARE
-        // in transit, so `approaching` stays true and the veto survives.
+        // remove the wait. Brcko is safe there BY MEASUREMENT, not by construction
+        // (code review, 2026-08-12 — the original wording overclaimed): anchors
+        // 31/31 with `op:brcko:brcko` PASS and the corridor at 6/6 + 7/7 in the
+        // 188w run. The construction guarantees nothing on its own, because
+        // `approaching` tests membership in the FRIENDLY-FILTERED `approachOsids`
+        // while the executability gate counts the wider
+        // `liveAdjacency ∪ approachOsids`. A brigade in transit to a tile the gate
+        // counts but which is enemy-held would read as not-approaching and release
+        // the veto mid-march. KNOWN GAP, not yet fixed — the remedy is to compute
+        // `approaching` against `objectiveAdjacentOsids(openingAttackAdjacency,
+        // objective)` instead, which is already in scope. Needs its own 188w.
+        // Re-measure Brcko if this gate is touched again.
         let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
