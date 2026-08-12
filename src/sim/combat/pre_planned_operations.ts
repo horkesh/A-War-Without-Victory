@@ -369,6 +369,20 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:ilidza:sarajevo_dio_ilidza_2',
                     'op:ilidza:rakovica_2',
+                    // TRIED AND REVERTED 2026-08-12 — do not re-attempt without reading
+                    // docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISMATCH_TRIAGE.md.
+                    // Appending 'op:trnovo:kijevo_2' here is historically correct (painted RS in
+                    // ALL FOUR snapshots; census Bosniak-majority so init RBiH is right and
+                    // untouchable, meaning it must be TAKEN in 1992) and it WORKS locally: at
+                    // 43w it fixed kijevo_2 + kolovarice + praca, +3 with ZERO regressions.
+                    // At 188w it is a disaster: matched 639 -> 613 (-26), anchors 31 -> 29/31
+                    // (op:doboj:boljanic_2 and op:gracanica:petrovo_2 both flip RBiH), and the
+                    // damage is 34 regressed / 8 fixed concentrated in NON-ANCHOR WESTERN
+                    // KRAJINA — Sipovo 5, Glamoc 5, Bosansko Grahovo 4, Mrkonjic 4, Drvar 3,
+                    // Petrovac 3, Sanski Most 2, Bihac 2, Livno 1. A turn-5 Sarajevo-belt
+                    // capture propagates 170 turns and ~200 km to break the Mistral/Sana
+                    // late-war cascade. Same signature as the EH-3 -39 (life_lessons/
+                    // calibration.md:350). The 43w result is a FALSE GREEN for this change class.
                 ],
                 staging_osid: 'op:ilidza:kasindo',
             },
@@ -412,7 +426,14 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         //
         // Painted control (Sacred Rule 4):
         //   gornja_presjenica = RS (staging — not an objective)
-        //   kijevo_2         = RS (RS waypoint — strips at execution, not a real objective)
+        //   kijevo_2         = RS in ALL FOUR painted snapshots. CAUTION (2026-08-12): these
+        //     lines state PAINTED control; the strip at execution keys on LIVE control
+        //     (`buildAxesFromDef` → `getPoliticalControllerOSID`). In practice kijevo_2 is
+        //     RBiH-held in-engine for the entire war, so it does NOT strip and IS a real
+        //     (enemy) first objective for this axis — the opposite of what this comment block
+        //     implied for years, and the specific error that sent a 4-specialist panel to a
+        //     two-thirds-wrong diagnosis. Read live control, never these comments, when
+        //     reasoning about stripping.
         //   delijas          = RBiH (painted) — valid RS attack objective
         //   trnovo           = RBiH (painted) — valid RS attack objective
         //   praca/podgrab    = RS/RBiH but not adjacent to any RS staging — excluded

@@ -1088,3 +1088,77 @@ settlements from spring 1992 ... the real defect is that the engine has it RBiH 
 Not implemented. Requires the standard gate, but at 43 weeks first — and note the 40w structural
 fingerprint is **inside** this lane's horizon, so any change here will move it by design, unlike the
 late-war lanes.
+
+### EXPERIMENT — `op:trnovo:kijevo_2` onto Operation Prsten: 43w GREEN, 188w NO-GO, REVERTED
+
+First change attempted in the January 1993 lane. Historically well-founded, locally successful,
+and a −26 disaster at full horizon. Recorded in full because the negative result is the valuable part.
+
+**Change:** appended `op:trnovo:kijevo_2` to Operation Prsten's `western_sarajevo` axis (SRK, staging
+`op:ilidza:kasindo`, directly adjacent, RS from init, op completes t5). Rationale: painted RS in all
+four snapshots, census Bosniak-majority so init RBiH is correct and untouchable — it must be taken in
+1992, and Prsten is the only 1992 vehicle with adjacency.
+
+**43-week result — GREEN, and emergent:**
+
+| | baseline n208 | with change n209 |
+|---|---|---|
+| correct vs painted jan1993 | 664 / 712 | **667 / 712** |
+| Goražde-region wrong | 15 | **12** |
+| OSIDs changed | — | 3, **all FIXED, zero regressed** |
+
+`kijevo_2`, `gorazde:kolovarice` and `pale:praca` all flipped to RS, all matching painted jan1993.
+The mechanism was genuinely emergent, not authored: battle logs show the **same** Operation Foča
+attack on `kolovarice` at t9 that produced a *stalemate* in baseline produced a *decisive victory*
+with the change, because taking `kijevo_2` at t5 altered SRK force posture; holding `kolovarice` then
+opened an opportunistic sector attack on `praca` at t14 that had never occurred in any prior run.
+One authored objective, two further historically-correct flips through the engine's own combat.
+
+**188-week result — NO-GO on every gate condition:**
+
+| | floor | with change n210 |
+|---|---|---|
+| `matched_osids` | 639 | **613 (−26)** |
+| anchors | 31/31 | **29/31** |
+| failing anchors | none | `op:doboj:boljanic_2`, `op:gracanica:petrovo_2` (both RBiH, must be RS) |
+
+43 OSIDs changed at t188: **8 fixed, 34 regressed.** The damage is concentrated in **non-anchor
+western Krajina** — Šipovo 5, Glamoč 5, Bosansko Grahovo 4, Mrkonjić Grad 4, Titov Drvar 3, Bosanski
+Petrovac 3, Sanski Most 2, Bihać 2, Livno 1 — i.e. the entire Mistral 1 / Mistral 2 / Southern Move /
+Sana late-war cascade collapses. A turn-5 capture on the Sarajevo belt propagates 170 turns and ~200 km
+to break offensives in the far west.
+
+**This is the EH-3 signature exactly** (`docs/life_lessons/calibration.md:350`: 30/30 anchors, every §6
+invariant, still −39, entirely in non-anchor western-Krajina HRHB territory). It is also a direct
+vindication of the calibration panel's warning that **the 639 floor is co-adapted to current engine
+behaviour** — the western cascade is evidently balanced on a knife-edge of force availability and
+timing that an unrelated early-war capture disturbs.
+
+**LESSON — the 43-week horizon is a FALSE GREEN for this change class.** +3 with zero regressions at
+43w; −26 with two anchor flips at 188w. The cheap-iteration finding still stands (43w faithfully
+reproduces turn-43 state, ~4 min vs ~20), but it is a *development* loop only. **No January-1993 change
+may be adopted on 43-week evidence.** Every candidate must clear 188w before it lands.
+
+**REVERTED.** The objective is removed; `tsc` 0; the remaining diff against the pre-experiment state is
+comments only (verified: no non-comment lines in the diff), so the floor returns to 639/31·31 by
+determinism without a confirming run. Two comments were deliberately KEPT:
+- a `TRIED AND REVERTED` block at the Prsten axis recording the exact numbers, so no one repeats it;
+- a corrected caution at the Operation Trnovo block, which for years asserted `kijevo_2 = RS (RS
+  waypoint — strips at execution)`. That states PAINTED control while stripping keys on LIVE control
+  (`buildAxesFromDef` → `getPoliticalControllerOSID`); `kijevo_2` is RBiH-held in-engine all war, so it
+  does NOT strip and IS a real enemy objective. That single confusion is what sent a 4-specialist panel
+  to a two-thirds-wrong diagnosis.
+
+**Revised finding on the "orphaned OSID" category.** `pale:praca` was in the earlier list of ~9 OSIDs
+that "no operation targets, zero battles ever." It was attacked at t14 in this experiment. So that
+category is softer than stated: some of those OSIDs are reachable by *opportunistic sector attacks*
+once front geometry improves, and do not need authored objectives at all. The orphan list should be
+re-derived as "unreachable under current geometry" rather than "untargeted."
+
+**Open — owner-flagged data-quality question on `op:gorazde:kolovarice`.** The owner notes ARBiH did
+not retake it as late as Oct 1995, i.e. `painted_control_oct1995` may be wrong for this OSID (it
+asserts RS/RS/RS/RBiH across the four snapshots). If so the engine is being scored against a faulty
+reference there, and this experiment's kolovarice flip to RS would have been penalised for being
+correct. Note this does NOT rescue the experiment: at best it makes the result −25 rather than −26,
+and the two anchor flips and the western-Krajina collapse are untouched by it. Dispatched to the
+Historian for verification against ICTY/BB; tracked as a separate reference-data lane.
