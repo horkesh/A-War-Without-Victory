@@ -1258,3 +1258,101 @@ Concretely, and in order:
 **Nothing repainted. Painted control is calibration ground truth and is not edited on a
 single-session finding** — this is a scoped, evidenced proposal for the owner, with the split verdict
 stated rather than smoothed over.
+
+### CAUSAL VALIDATION — the integrator's provisional chain is REFUTED; the real mechanism is bigger
+
+The integrator proposed a causal chain for how a turn-5 change produced a −26 western collapse, and
+sent it to the calibration specialist for validation rather than presenting it as established. **Three
+of its five links are refuted, one of its supporting observations was factually wrong, and the true
+mechanism is simpler and larger.** Recorded in full because the refutation is the finding.
+
+**Correction to the integrator's own evidence:** "Cincar/Kupres and Jajce Recovery IDENTICAL" was
+wrong for Cincar. Same attacks and captures, but it runs **four turns longer** (t156 → t160) with a
+completely different combat profile (`exchange_ratio` 4.66 → 25.44, tempo 25.0 → 12.5), and it
+releases `hvo_tomislavgrad` at **exactly t160 — the turn Mistral 1 launches**. The integrator's
+comparison matched on attacks/captures only and missed it.
+
+#### The actual mechanism: a global re-draw of the operation stream
+
+**15 of the baseline's 38 operations do not exist in the changed run, replaced by 16 different ones —
+only 23 of 38 are common.**
+
+- Baseline-only: Herzegovina Consolidation t16, Farz t37, Ćuprija t44, Trokut t54, Munja t97, Crveni Lav t102, Ponor t104, Sjekira t105, Stijena t115, Osvit t124, Ihlas t132, Kiša t138, Grmeč t149, Farz 95 t162, Pravda t175
+- Changed-only: Herzegovina Consolidation t12, Uragan t36, Sabur t39, Naprijed t52, Tekbir t53, Čelik t76, Odmazda t83, Grab t91, Crveni Lav t94, Stijena t96, Gvožđe t101, Topola t115, Hrast t140, Ćuprija t160, Farz 95 t167, Odbrana t175
+
+`vrs_1st_krajina` alone goes from 3 opportunity ops to 5. This is **deterministic state-dependence,
+not nondeterminism** — nobody should hunt for an RNG bug.
+
+**Proximate cause in the west — a participant-selection swap, not a strength problem.** Mistral 1's
+`mistral_1_glamoc` axis: baseline no blocker, 13 attacks, 6 captures; changed
+`launch_blocker: recent_catastrophic_losses_at_objective`, 5 attacks, 1 capture. The roster differs by
+exactly one brigade, in both Cincar and Mistral 1: **`hvo_3rd_guard_jastrebovi` (baseline) vs
+`hvo_1st_guard_abb` (changed)**. Both exist in both runs, both 2800 personnel, neither in
+`destroyed_brigades.json` — **selection, not availability**. It does not reduce to "picks highest
+morale": `1st_guard_abb` outranks `jastrebovi` on morale in *both* runs, yet baseline selected
+`jastrebovi`. The actual predicate is **unidentified**.
+
+#### Link-by-link verdict
+
+| link | verdict |
+|---|---|
+| t5 `kijevo_2` → cascades to `kolovarice` t9, `praca` t14 | plausible, consistent with first divergence at t6, **not verified** |
+| RBiH must-hold 18→37 pins brigades → HVO capacity collapses | **REFUTED.** HRHB `hold_osids_total` is byte-identical in both runs at every sampled turn (t43 3/3, t80 11/11, t120 0/0, t159 0/0, t173 0/0). The 18→37 is RBiH-only and cannot pin HVO brigades — different faction, corps and assignment pool. Mistral 1 is an HVO operation. A cross-faction jump with zero support. |
+| Federation exhaustion +25 → Mistral 1 weak | **REFUTED by controlled comparison.** Cincar/Kupres is the *same corps* in the *same exhaustion window* and captured 5/5 in **both** runs. +25 on ~8100 is +0.31%. Exhaustion is a co-traveller, not a driver. |
+| HVO offensive_targets 11→2 → Mistral 1 weak | **ARROW BACKWARDS, TIMING WRONG.** Diverges from **t150**, not t173, and initially **inverted** (changed run has *more*, 5 vs 1-3). Runs converge t159-162. Collapse to 0-2 begins **t169 — nine turns AFTER Mistral 1 launched and while it was already failing.** Baseline climbs to 20 at t176-178 *because* Mistral 1 captured 7 objectives and forward ground generates targets. It is **downstream** of the captures. Baseline itself passes through offensive_targets=2 at t160 — the exact state called "collapse" at t173, so that state is **oscillatory in both runs**. |
+| Mistral 1 weak → Grahovo/Glamoč never fall → Mistral 2/Southern Move have no ground → −34 west | **SOUND — keep verbatim.** Baseline captured crni_lug, glamoc_2, pribelja, kovacevci_2, gubin_2, stekerovci_2, vidimlije_2; changed captured `vidimlije_2` alone. |
+
+**Still unexplained:** the two anchor flips are `op:doboj:boljanic_2` and `op:gracanica:petrovo_2` —
+Doboj/Ozren, the **northern** corridor, not the west. The chain says nothing about them. Probably the
+same op-stream re-draw hitting the 2nd Corps / 1st Krajina theatre (Farz/Ćuprija/Grmeč replaced by
+Uragan/Naprijed/Hrast), but that is inference, not measurement.
+
+#### The consequence that outranks the Trnovo lane
+
+**A single-change 188w A/B is not a valid instrument for any change that moves territory before ~t150.**
+A 188w delta cannot be attributed to a t5 change when 40% of the intervening operation stream has been
+replaced. The −26 is dominated by which opportunity operations happened to draw; a different-but-
+equally-arbitrary t5 change would give a different number bearing no relation to historical fidelity.
+**The 43w +3 / 188w −26 split is the instrument failing, not a finding about January 1993.**
+
+**This also puts a large asterisk on the EH-3 precedent cited throughout this report.** EH-3's −39 was
+"entirely in non-anchor western-Krajina OSIDs" — the *same theatre and same signature* as this −34. It
+is now a live possibility that EH-3's −39 was this same op-stream re-draw rather than the
+`stranded_status` mechanism it was attributed to. **Do not cite EH-3 as evidence about op-lifecycle
+changes specifically until that is checked.**
+
+**Required next step before any further early-war calibration work: establish the NOISE FLOOR.** Run
+2-3 deliberately trivial, historically-neutral early perturbations; measure the `matched_osids` spread
+and the op-stream commonality. If a meaningless t5 change routinely produces ±25, then every early-war
+single-change verdict on record — including adopted ones — was read off an instrument with no
+signal-to-noise.
+
+#### Two engine-health defects, both independent of calibration
+
+1. **Participant selection between interchangeable brigades has no stability or hysteresis.** Two
+   2800-man guards brigades, both healthy and available; morale drift accumulated over 127 turns flips
+   which is committed, and that propagates into the next operation the same corps runs. Nothing
+   historical cares which of two HV/HVO guards brigades leads at Kupres, yet the engine makes the
+   western 1995 campaign turn on it. A tie-break stability rule (prefer incumbent, or a stable key
+   within tolerance) would remove large chaos at zero fidelity cost.
+2. **The opportunity-operation stream has no stability under perturbation** — the same defect one level
+   up. 15 operations replaced by a single-OSID change is not a nuance.
+
+**One sentence: the engine is not fragile in the west; it is fragile in WHO GETS PICKED, and the west
+is merely where that shows on the map.**
+
+**Explicitly NOT a defect, and dropped:** "sensitive dependence on initial conditions in a 188-turn
+deterministic sim with sequential resource contention" is expected and arguably correct for a
+negative-sum war model. The integrator's "0.3% exhaustion perturbation collapses a late-war offensive"
+framing is refuted above and is withdrawn.
+
+**Separate flag:** RS `war_exhaustion` is **bit-identical** between runs (9110.026111973562 at t120,
+verified at full float precision) while RS territory moves 367→368. RS exhaustion carries no
+information about RS's war in this regime. Cause unknown — likely a per-turn clamp interacting with
+asymptotic headroom. Own engine-health question; build no argument on RS exhaustion being "unaffected."
+
+**Not established:** the selection predicate that flipped `jastrebovi` → `1st_guard_abb` (needs
+operations-expert or corps-army-commander on the participant-selection path); whether the op-stream
+re-draw is driven by target scoring, corps slot/timing contention, or ordering; the Doboj/Gračanica
+flips; the t9/t14 cascade; and whether `recent_catastrophic_losses_at_objective` firing on the Glamoč
+axis is itself correct behaviour or a second-order problem.
