@@ -7,7 +7,8 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 // TEMPORARY DIAGNOSTIC import — remove together with axis_readiness_debug.ts.
-import { emitAxisReadinessTrace, emitOperationReadinessTrace } from './axis_readiness_debug.js';
+import { emitAxisReadinessTrace, emitOperationReadinessTrace, emitExecutabilityTrace } from './axis_readiness_debug.js';
+import type { AxisReadinessDebugContext, BrigadePredictionFact } from './axis_readiness_debug.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -665,15 +666,25 @@ export function axisHasExecutableOpeningAttack(
     brigadeIds: FormationId[],
     adjacency: Map<string, string[]>,
     threshold: PredictedOutcome,
+    // TEMPORARY DIAGNOSTIC — optional; when omitted nothing is emitted and behaviour
+    // is unchanged. Remove with axis_readiness_debug.ts.
+    debugCtx?: AxisReadinessDebugContext,
 ): boolean {
     if (typeof objective !== 'string' || objective.length === 0) return false;
+    const debugFacts: BrigadePredictionFact[] | undefined = debugCtx ? [] : undefined;
 
     // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: gate count includes brigades
     // committed-in-transit toward objective-adjacent OSIDs. Pre-fix the gate
     // saw only currently-adjacent brigades and silent-skipped en-route
     // participants, defeating the planning_duration grace window.
     const gateAdjacent = countAdjacentGateParticipants(state, brigadeIds, adjacency, objective);
-    if (gateAdjacent <= 0) return false;
+    if (gateAdjacent <= 0) {
+        if (debugCtx && debugFacts) {
+            // STATE 1 — dead axis. Emitted before the early return so the state is observable.
+            emitExecutabilityTrace(state, debugCtx, objective, gateAdjacent, 0, threshold, debugFacts, false);
+        }
+        return false;
+    }
 
     // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: concentrated stack is staged-only.
     // En-route brigades raise the gate (above) but do not concentrate combat
@@ -684,9 +695,24 @@ export function axisHasExecutableOpeningAttack(
 
     for (const brigadeId of brigadeIds) {
         const brigade = state.military.formations?.[brigadeId];
-        if (!brigade || brigade.faction !== faction || brigade.status !== 'active') continue;
-        if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
-        if ((brigade.disrupted_turns ?? 0) > 0) continue;
+        if (!brigade || brigade.faction !== faction || brigade.status !== 'active') {
+            debugFacts?.push({
+                id: brigadeId,
+                considered: false,
+                skip_reason: !brigade
+                    ? 'missing'
+                    : (brigade.faction !== faction ? 'wrong_faction' : 'inactive'),
+            });
+            continue;
+        }
+        if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) {
+            debugFacts?.push({ id: brigadeId, considered: false, skip_reason: 'below_personnel_floor' });
+            continue;
+        }
+        if ((brigade.disrupted_turns ?? 0) > 0) {
+            debugFacts?.push({ id: brigadeId, considered: false, skip_reason: 'disrupted' });
+            continue;
+        }
 
         const directObjectiveAttack = predictAllAdjacentTargets(
             state,
@@ -696,19 +722,39 @@ export function axisHasExecutableOpeningAttack(
             {},
             'attack',
         ).find((target) => target.osid === objective);
-        if (!directObjectiveAttack) continue;
+        if (!directObjectiveAttack) {
+            // STATE 2 discriminator: the objective is not reachable from this
+            // brigade's current position (the genuinely-marching case).
+            debugFacts?.push({ id: brigadeId, considered: true, found_in_predictor: false });
+            continue;
+        }
 
         const concentratedOutcome = stagedAdjacent > 1
             ? estimateConcentratedOutcome(directObjectiveAttack.prediction.power_ratio, stagedAdjacent - 1)
             : null;
+        debugFacts?.push({
+            id: brigadeId,
+            considered: true,
+            found_in_predictor: true,
+            predicted_outcome: directObjectiveAttack.prediction.predicted_outcome,
+            power_ratio: directObjectiveAttack.prediction.power_ratio,
+            concentrated_outcome: concentratedOutcome,
+        });
         if (
             isOutcomeSufficientForAttack(directObjectiveAttack.prediction.predicted_outcome, threshold)
             || (concentratedOutcome != null && isOutcomeSufficientForAttack(concentratedOutcome, threshold))
         ) {
+            if (debugCtx && debugFacts) {
+                emitExecutabilityTrace(state, debugCtx, objective, gateAdjacent, stagedAdjacent, threshold, debugFacts, true);
+            }
             return true;
         }
     }
 
+    if (debugCtx && debugFacts) {
+        // STATE 2 or STATE 3 — the emitter classifies from found_in_predictor.
+        emitExecutabilityTrace(state, debugCtx, objective, gateAdjacent, stagedAdjacent, threshold, debugFacts, false);
+    }
     return false;
 }
 
@@ -849,6 +895,8 @@ function classifyAxisOpeningAttack(
     threshold: PredictedOutcome,
     staticAdjacency?: Map<string, string[]>,
     armyHqOpId?: CorpsOperation['army_hq_op_id'],
+    // TEMPORARY DIAGNOSTIC — remove with axis_readiness_debug.ts.
+    debugOpName?: string,
 ): OpeningAttackReadinessResult {
     const objective = axis.objectives[axis.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
@@ -914,6 +962,8 @@ function classifyAxisOpeningAttack(
         executabilityBrigades,
         openingAttackAdjacency,
         threshold,
+        // TEMPORARY DIAGNOSTIC — undefined unless a caller supplies the op name.
+        debugOpName === undefined ? undefined : { opName: debugOpName, axisId: axis.axis_id },
     )) {
         axis.launch_blocker = 'zero_eligible_axis';
         return { executable: false, blocker: 'zero_eligible_axis' };
@@ -1018,7 +1068,7 @@ export function evaluateOpeningAttackReadiness(
         let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
-            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, operationStaticAdjacency, op.army_hq_op_id);
+            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, operationStaticAdjacency, op.army_hq_op_id, op.name);
             // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts. Inert
             // unless AWWV_DEBUG_AXIS_READINESS is set; remove with that file.
             emitAxisReadinessTrace(state, corpsId, op, axis, result.executable, result.blocker);

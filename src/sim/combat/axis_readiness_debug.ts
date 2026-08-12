@@ -31,6 +31,8 @@
  * Usage: AWWV_DEBUG_AXIS_READINESS=Trnovo npm run <scenario script>
  * The value is a case-insensitive substring matched against the operation name,
  * so the trace stays scoped to one operation instead of every op in the game.
+ * The values `*` and `all` match every operation — needed for the blast-radius
+ * measurement, at the cost of far more output.
  */
 
 import type { CorpsOperation, FormationId, GameState } from '../../state/game_state.js';
@@ -49,6 +51,7 @@ function debugOperationFilter(): string | undefined {
 export function isAxisReadinessDebugEnabled(operationName: string): boolean {
     const filter = debugOperationFilter();
     if (filter === undefined) return false;
+    if (filter === '*' || filter === 'all') return true;
     return operationName.toLowerCase().includes(filter);
 }
 
@@ -74,6 +77,72 @@ function describeBrigades(
             cohesion: brigade.cohesion ?? null,
             disrupted_turns: brigade.disrupted_turns ?? 0,
         };
+    });
+}
+
+/**
+ * Context handed down into `axisHasExecutableOpeningAttack` so the executability
+ * probe can name the operation/axis it is reporting on. Optional everywhere —
+ * when absent, nothing is emitted.
+ */
+export interface AxisReadinessDebugContext {
+    opName: string;
+    axisId: string;
+}
+
+/** Per-brigade prediction facts, one record per brigade considered. */
+export interface BrigadePredictionFact {
+    id: FormationId;
+    /** false when the brigade was skipped before any prediction was attempted. */
+    considered: boolean;
+    skip_reason?: 'missing' | 'wrong_faction' | 'inactive' | 'below_personnel_floor' | 'disrupted';
+    /** Whether predictAllAdjacentTargets returned the objective from this brigade's position. */
+    found_in_predictor?: boolean;
+    predicted_outcome?: string;
+    power_ratio?: number;
+    concentrated_outcome?: string | null;
+}
+
+/**
+ * THE DECISIVE RECORD for the pre-committed Q1 rule. Distinguishes the three
+ * states that `zero_eligible_axis` collapses into one `false`:
+ *
+ *   STATE 1  gate_adjacent === 0                  — dead axis: nobody adjacent, nobody marching.
+ *   STATE 2  found_in_predictor false for all     — the objective is not reachable from where the
+ *                                                   brigades actually are (this is the en-route case).
+ *   STATE 3  found_in_predictor true, outcome     — present and targetable but too weak.
+ *            below threshold
+ *
+ * If Operation Trnovo's east axis reports STATE 2 rather than STATE 3, the
+ * `isCommittedInTransitTo` remedy does not apply to it and the lane is re-scoped.
+ */
+export function emitExecutabilityTrace(
+    state: GameState,
+    ctx: AxisReadinessDebugContext,
+    objective: string | undefined,
+    gateAdjacent: number,
+    stagedAdjacent: number,
+    threshold: string,
+    brigades: readonly BrigadePredictionFact[],
+    result: boolean,
+): void {
+    if (!isAxisReadinessDebugEnabled(ctx.opName)) return;
+    const anyFound = brigades.some((b) => b.found_in_predictor === true);
+    const stateLabel = gateAdjacent <= 0
+        ? 'STATE_1_dead_axis'
+        : (anyFound ? 'STATE_3_present_too_weak' : 'STATE_2_not_reachable_from_position');
+    emit({
+        kind: 'executability',
+        turn: state.meta.turn,
+        op: ctx.opName,
+        axis_id: ctx.axisId,
+        objective: objective ?? null,
+        gate_adjacent: gateAdjacent,
+        staged_adjacent: stagedAdjacent,
+        threshold,
+        executable: result,
+        collapsed_state: result ? 'EXECUTABLE' : stateLabel,
+        brigades,
     });
 }
 

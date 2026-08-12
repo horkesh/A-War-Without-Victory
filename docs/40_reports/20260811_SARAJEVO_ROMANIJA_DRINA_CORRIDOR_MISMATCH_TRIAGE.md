@@ -673,3 +673,122 @@ directly here and is the reason this is written down before the run rather than 
 **Q3 — Instrument health.** The widened filter must reproduce baseline byte-identically
 (`final_state_hash c657ad81f4d94cc0`, matched 639/712, anchors 31/31). If it does not, the probe is
 not observation-only at volume and **the trace is discarded** — no conclusions drawn from it.
+
+## MEASUREMENT RUN n206 — RESULT, against the rule pre-committed at `09ddaa38a`
+
+Probe widened to all operations (`AWWV_DEBUG_AXIS_READINESS='*'`), extended to log
+`found_in_predictor`, `predicted_outcome`, `power_ratio`, and the `gate_adjacent`/`staged_adjacent`
+discriminator. 748 trace records: 258 executability, 261 axis, 229 operation-level.
+
+### Q3 — instrument health: PASS
+
+n206 reproduced baseline **byte-identically at volume**: `final_state_hash` **`c657ad81f4d94cc0`**,
+`matched_osids` **639/712**, anchors **31/31**. The widened probe is observation-only even while
+emitting 748 records. The trace stands.
+
+### Q1 (BINDING) — STATE 3. The diagnosis HOLDS.
+
+`trnovo_east`, all four evaluations, unambiguous:
+
+| turn | state | gate | staged | brigade | found_in_predictor | predicted_outcome | power_ratio |
+|---|---|---|---|---|---|---|---|
+| t156 | STATE_3 | 1 | 1 | `rs_trnovo_brigade` | **true** | catastrophic | 0.334 |
+| t157 | STATE_3 | 1 | 1 | `rs_trnovo_brigade` | **true** | catastrophic | 0.320 |
+| t158 | STATE_3 | 1 | 1 | `rs_trnovo_brigade` | **true** | catastrophic | 0.307 |
+| t159 | STATE_3 | 1 | 1 | `rs_trnovo_brigade` | **true** | catastrophic | 0.295 |
+
+The objective **is** returned by the predictor (so not STATE 2), the brigade **is** staged and
+adjacent (`staged_adjacent = 1`), and the prediction is **catastrophic** against a `repulsed`
+threshold. The failing term is the predicted outcome, exactly as inferred — now measured. Per the
+pre-committed Q1 rule the `isCommittedInTransitTo` remedy is the right instrument for this operation.
+
+**The self-worsening spiral is now quantified**: `power_ratio` decays monotonically 0.334 → 0.295
+across four turns of waiting. Waiting does not help this axis; it strictly harms it.
+
+### Q2 — the pre-committed trigger FIRED. Stated plainly, before any mitigation.
+
+The veto cost an otherwise-executable operation in **12 evaluations across 6 operations**, and
+**three of them are pre-t40**:
+
+| operation | n | turns |
+|---|---|---|
+| Operation Koridor | 3 | **t1–t3** |
+| Operation Corridor | 1 | **t7** |
+| Operation Herzegovina Consolidation | 1 | **t21** |
+| Operation Cerska-Kamenica | 2 | t44–t45 |
+| Operation Trnovo | 4 | t156–t159 |
+| Operation Mistral 2 | 1 | t176 |
+
+**Earliest veto-cost: t1.** The rule's trigger condition — "fires on ANY op launching before t40" —
+**is met**. Under calibration's original disposition that meant automatic deferral past D2; under the
+amendment recorded at `09ddaa38a` it is an explicit owner decision. The trigger fired; that is not
+softened by anything below.
+
+### The discriminator separates the cases perfectly — a new finding, not a reason to discount the trigger
+
+Every veto-cost evaluation falls cleanly on one side of `staged_adjacent`:
+
+| | staged_adjacent | meaning | cases |
+|---|---|---|---|
+| STATE_1 / STATE_2 | **0** — nobody has arrived | genuinely marching, or nobody coming | Koridor t1/t2/t3, Corridor t7, Herzegovina Consolidation t21, Mistral 2 t176 |
+| STATE_3 | **> 0** — brigades arrived | present and too weak | Cerska-Kamenica t44/t45, Trnovo t156–t159 |
+
+**Every pre-t40 case has `staged_adjacent = 0`.** Koridor t2/t3 is the clearest: `gate_adjacent = 3`,
+`staged_adjacent = 0`, all four brigades `not-reachable-from-position`, objective `op:brcko:krepsic`,
+axis id **`brcko_corridor`** — this is literally the case commit `263569bfb` erected the fence for,
+observed firing in the live run. The gate count of 3 comes entirely from brigades committed in
+transit, so `isCommittedInTransitTo` is true for them.
+
+**Therefore, under operations-expert's conservative v1** (lift the veto only for STATE_3; keep STATE_1
+and in-transit STATE_2 vetoing), the predicted blast radius is **two operations — Trnovo and
+Cerska-Kamenica — and every pre-t40 operation is preserved**, Koridor included.
+
+**This is a PREDICTION about the remedy, not a measurement of it.** It is derived from the current
+run's state classification, not from running a modified engine. It is exactly the kind of tidy story
+the red team warned would appear, and it must be verified by implementing the change and measuring,
+not assumed. Two specific reasons it could be wrong:
+- Koridor **t1** is STATE_1 (`gate_adjacent = 0` — nobody present, nobody in transit). A remedy that
+  keys purely on "is anyone in transit" would **lift** the veto there, changing the opening
+  operation of the war at t1. Only operations-expert's conservative v1 (STATE_1 keeps vetoing) avoids
+  this. **The distinction between v1 and the naive form is the difference between a 2-operation and a
+  war-opening blast radius.**
+- The classification is of the *unmodified* run. Once any operation launches earlier, subsequent state
+  diverges and later evaluations are no longer comparable.
+
+### §6 escalation — sharper than before
+
+`Operation Cerska-Kamenica` t44/t45 is blocked on objective **`op:vlasenica:cerska_2`** — the Cerska
+pocket — with both brigades predicting catastrophic (`rs_1st_birac` 0.337/0.270, `rs_1st_milii`
+0.090/0.070). Lifting the veto there would send RS at the Cerska pocket **earlier and weaker**, in the
+Srebrenica catchment. This is §6 ground, the enclave guard is non-delegable owner sign-off, and this
+run converts that from a scoping assumption into a measured consequence of the proposed change.
+
+It is also the red team's "losing branch" made concrete: `rs_1st_milii` at `power_ratio` 0.070 is not
+a marginal attacker, it is a brigade that would be destroyed. Launching it is not obviously better
+than stalling it.
+
+### Red team's STATE_1 hypothesis — REFUTED by measurement
+
+Red team argued the dead-axis case (`gateAdjacent <= 0`) was "almost certainly the larger contributor"
+and that a remedy scoped to present-but-weak would miss it. Distribution across all 258 executability
+evaluations:
+
+| state | count |
+|---|---|
+| EXECUTABLE | 230 |
+| STATE_2 (not reachable from position) | 17 |
+| STATE_3 (present but too weak) | 10 |
+| **STATE_1 (dead axis)** | **1** |
+
+STATE_1 occurs **once in the entire 188-week campaign**. It is not the larger contributor; it is
+negligible. STATE_2 — the case the fence legitimately protects — is the most common non-executable
+state, which means **the veto is mostly doing its intended job**. That is an argument for a precise
+fix and against a broad one.
+
+### Operations also newly implicated (non-veto-cost, but observed stalling)
+
+`Operation Pracha River` shows STATE_2 — relevant because it owns `op:gorazde:ustipraca_2` and
+`op:gorazde:slatina_2`, two of the Goražde-cluster mismatches, and its failure mode is therefore
+**not** this deadlock. Also observed: Foča (STATE_2 ×2), Podrinje Sweep (STATE_2 ×4), and three probe
+operations. None of these are veto-cost cases; they are recorded so the corridor lanes are not
+misattributed to `anyApproaching`.
