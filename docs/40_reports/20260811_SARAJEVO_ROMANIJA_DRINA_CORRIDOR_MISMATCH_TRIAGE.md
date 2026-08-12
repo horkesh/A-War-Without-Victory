@@ -1356,3 +1356,122 @@ operations-expert or corps-army-commander on the participant-selection path); wh
 re-draw is driven by target scoring, corps slot/timing contention, or ordering; the Doboj/Gračanica
 flips; the t9/t14 cascade; and whether `recent_catastrophic_losses_at_objective` firing on the Glamoč
 axis is itself correct behaviour or a second-order problem.
+
+### NOISE-FLOOR PROBE A — null result, and it downgrades the instrument claim above
+
+**Probe A:** Operation Koridor `planning_duration` 9 → 10. One-turn planning nudge on an early op; no
+objective change, no adjacency risk, no historical claim.
+
+**Result (n212 vs baseline n207):** `matched_osids` **639 → 639 (delta 0)**, anchors **31/31**,
+`final_state_hash` `c657ad81f4d94cc0` → `80a6e90ae3b23b4a`, op-stream commonality **38/38 — zero
+operations replaced**.
+
+**But probe A is a NULL PROBE and proves nothing about the noise floor.** Control counts compared at
+all 189 weekly records: **first divergence NONE, turns with differing control 0, max per-faction delta
+0.** It never moved a single OSID at any turn — the hash moved on internals only. So "the op stream
+held when territory didn't move" is close to tautological, since the opportunity-op selector reads
+control state. **The integrator's inference that the re-draw is "territory-coupled" is UNSUPPORTED and
+is withdrawn.** `planning_duration` was already recorded as an inert lever for event-trigger-bound,
+staging-gated ops (`docs/life_lessons/calibration.md:361`) — that list should be checked before
+spending a run on any probe.
+
+### Archive sweep (free — no runs spent): the instrument claim rests on n=1
+
+Every archived 188w run measured against n207 for matched delta, op-stream commonality, and the turn
+at which control first diverges:
+
+| run | matched | delta | op commonality | first control divergence | turns differing |
+|---|---|---|---|---|---|
+| n200 | 630 | −9 | 38/38 | t184 | 5 |
+| n201 | 639 | 0 | 38/38 | inert | 0 |
+| n202 | 639 | 0 | 38/38 | inert | 0 |
+| n203 | 638 | −1 | 38/38 | t187 | 2 |
+| n204 | 636 | −3 | 38/38 | t183 | 6 |
+| n205 | 639 | 0 | 38/38 | inert | 0 |
+| n206 | 639 | 0 | 38/38 | inert | 0 |
+| **n210** | **613** | **−26** | **23/38** | **t6** | **183** |
+| n212 | 639 | 0 | 38/38 | inert | 0 |
+
+**`n210` is the only archived run that perturbs territory before t183.** Everything else is either
+territorially inert or a last-five-weeks effect — even n200, the adopted firepower-deficit penalty and
+a game-wide combat-math change, does not move control until t184.
+
+**Therefore, two claims recorded earlier in this report are DOWNGRADED to hypotheses with a single
+supporting observation, and must not be cited as established:**
+1. "A single-change 188w A/B is not a valid instrument for any change moving territory before ~t150."
+2. "EH-3's −39 may have been this same op-stream re-draw rather than the `stranded_status` mechanism."
+
+Both remain plausible. Neither can currently be corroborated **or** refuted, because the archive
+contains no second early-territorial perturbation. n200/n203/n204 holding 38/38 does **not** support
+them either — none of those three moved territory early enough to test it.
+
+### The −26 is itself CONFOUNDED — previously unflagged
+
+From the AARs:
+
+| | Prsten window | objectives targeted | attacks |
+|---|---|---|---|
+| n207 baseline | t0 → **t5** | 6 | 6 |
+| n210 changed | t0 → **t8** | 7 | 7 |
+
+Appending the objective did **two things at once**: flipped an OSID at ~t6, **and extended Operation
+Prsten's occupancy of the SRK operation slot by three turns.** Because the downstream damage runs
+through operation slot and roster contention — Operation Cincar/Kupres extends four turns and releases
+`hvo_tomislavgrad` at exactly t160, the turn Mistral 1 launches — **slot-occupancy extension is at
+least as plausible a trigger as the territorial flip, and n210 cannot distinguish them.** Any
+follow-up that does not break this confound will produce more numbers with the same ambiguity.
+
+### Redesigned measurement — 3 arms, not 5, plus a confound breaker
+
+Rejected from the original five: **`op:pale:praca`** (the panel already recorded praca/podgrab as a
+separate, earlier-1992 mechanism — it carries a different historical claim and does not belong in an
+equivalence set) and **`op:foca:brusna_2`** (appears in zero objective lists anywhere in `src/`, so
+assigning it a host is a larger fabrication than the Čajniče three).
+
+Deeper flaw in the original design: five arms would each attach a different OSID to a **different host
+operation, in a different corps, at a different turn** — varying two things at once, making any spread
+exactly as uninterpretable as the −26 it is meant to explain.
+
+**Design: append each of `op:cajnice:batotici`, `op:cajnice:miljeno_2`, `op:cajnice:todorovici` to the
+SAME host operation, one per 188w run.** Host op, corps, turn and theatre held constant; the only
+variable is which of three historically-interchangeable OSIDs is added (all painted RS in all four
+snapshots, all RBiH in-engine from t0 with zero battles ever). **Spread across the three IS the noise
+floor**, with no host-op confound. They need only be equivalent to *each other*, not to `kijevo_2`.
+
+**Fourth run, worth more than the two arms cut:** a probe that extends an early op's slot occupancy
+while moving no territory. If that alone re-draws the op stream, the trigger is slot occupancy rather
+than territory and the entire framing changes. Design is **open** — the obvious construction (append an
+already-RS-held objective) appears broken, because `buildAxesFromDef` strips friendly objectives on
+**live** control, so such an objective would strip at execution and the op would not extend. Referred
+to operations-expert; "no clean separation is available" is an acceptable answer.
+
+### Primary readout changes: OP-STREAM COMMONALITY, not `matched_osids`
+
+Commonality is the mechanism; matched is a downstream symptom of it. The archive separates cleanly on
+commonality (38/38 across runs scoring −9, −3 and −1; 23/38 on the −26) and not on matched.
+
+**Pre-committed interpretation rule, on the three-arm design:**
+- **All three hold 38/38** → the re-draw is not a generic property of early territorial change; the
+  instrument has signal, and attention returns to what was specific about `kijevo_2` (most likely the
+  Prsten slot extension). Early-war calibration remains tractable under the existing gate.
+- **All three re-draw (≤ ~30/38), matched spread < ~8** → re-draw is real and general but its
+  calibration consequence is bounded and reproducible; instrument usable with a widened tolerance band.
+- **All three re-draw, matched spread ≥ ~15** → single-run matched deltas are uninterpretable at the
+  resolution this project has been using them. The serious outcome.
+- **Arms differ in SIGN** → strongest evidence of noise; a single early-war run's direction is not
+  attributable to the change.
+- **Arms re-draw but damage lands in DIFFERENT theatres each time** → magnitude and location are noise,
+  direction may still be real; report separately.
+
+**If a noise floor is demonstrated, the response is to change the ACCEPTANCE RULE, not to abandon
+early-war work** — justify on historical and mechanical grounds, validate on op-stream commonality +
+full `anchor_checks` + §6 invariants, and treat `matched_osids` as **advisory inside the measured band**
+rather than a pass/fail floor. Anchors and §6 stay binding. Abandoning the lane would be a far larger
+response than the evidence supports.
+
+**Not established:** whether the trigger is the territorial flip or the slot extension (confounded in
+n210; the fourth run is the only clean separation); whether the three Čajniče OSIDs can attach to a
+single defensible host op (referred to operations-expert + historian — the probe depends on that
+judgment and the calibration specialist explicitly declined to make it); and whether op-stream
+commonality is the right metric versus something finer (per-corps op counts, emission turns) — it was
+chosen because it is cheap and separates the archive, not because it is principled.
