@@ -188,3 +188,91 @@ describe('essay_index_integrity', () => {
         }
     });
 });
+
+/**
+ * Invariant 5 — INDEX CONTENT MUST EQUAL DEPOSIT CONTENT (added 2026-08-13).
+ *
+ * WHY THIS EXISTS. This file's own docblock already stated the convention —
+ * "the index `content` is copied from the on-disk file" — but nothing asserted
+ * it, and the corpus silently drifted.
+ *
+ * On 2026-08-12 the event `us_halts_federation_advance_1995` was corrected: the
+ * engine had suppressed HRHB offensives on the strength of the US halt, when
+ * BB1 p.462 endnote 823 records that Zagreb DEFIED that pressure and ordered
+ * Juzni Potez anyway (Mrkonjic Grad fell 10 Oct 1995, BB1 p.427). The
+ * accompanying essay asserted the opposite — "Croatia ... complied immediately.
+ * The Bosnian government, with greater reluctance, followed." A historian +
+ * narrative-designer pass corrected the DEPOSIT file.
+ *
+ * The player never saw the correction. `CodexPanel.tsx:19` imports
+ * `essay_index.json`, and the index carried its own stale copy of the prose, so
+ * the false claim stayed live in the Codex while the deposit read correctly.
+ * A full-corpus scan then showed 146 of 147 rows byte-identical and exactly one
+ * divergent — this one — i.e. equality is the real convention and this row was
+ * the sole exception even before the correction widened the gap.
+ *
+ * Two copies of the same prose that can drift is how a corrected falsehood
+ * survives a correction. This test makes that impossible to do silently.
+ *
+ * Deterministic: filesystem + JSON parse only. No RNG, no wall-clock.
+ */
+describe('essay index content parity with the on-disk deposit', () => {
+    it('every indexed essay has content byte-identical to its deposit file', () => {
+        const index = JSON.parse(readFileSync(INDEX_PATH, 'utf8')) as {
+            essays: Array<{ id: string; event_id: string; content?: string }>;
+        };
+        const divergent: Array<{ id: string; indexLen: number; depositLen: number }> = [];
+
+        for (const row of index.essays) {
+            const depositPath = resolve(ESSAY_DIR, `${row.event_id}.json`);
+            // Invariant 1 already pins that the file exists; skip defensively so a
+            // failure there reports as invariant 1 rather than cascading into this one.
+            if (!existsSync(depositPath)) continue;
+            const deposit = JSON.parse(readFileSync(depositPath, 'utf8')) as { content?: string };
+            if (typeof deposit.content !== 'string' || typeof row.content !== 'string') continue;
+            if (deposit.content !== row.content) {
+                divergent.push({
+                    id: row.id,
+                    indexLen: row.content.length,
+                    depositLen: deposit.content.length,
+                });
+            }
+        }
+
+        expect(
+            divergent,
+            `Index rows whose content has drifted from the deposit file. The Codex reads the INDEX, `
+            + `so a correction applied only to the deposit does NOT reach players. Re-sync by copying `
+            + `the deposit's \`content\` into the matching index row. Divergent: `
+            + JSON.stringify(divergent),
+        ).toEqual([]);
+    });
+
+    it('every indexed essay carries at least as many sources as its deposit file', () => {
+        // Sources drifted alongside content in the same incident: the deposit gained
+        // five BB Vol. I citations that the index row never received, leaving the
+        // player-facing row citing only UNSCR 1031 and ICTY Karadzic — neither of
+        // which speaks to the claim the essay makes about Zagreb's compliance.
+        const index = JSON.parse(readFileSync(INDEX_PATH, 'utf8')) as {
+            essays: Array<{ id: string; event_id: string; sources?: string[] }>;
+        };
+        const underCited: Array<{ id: string; index: number; deposit: number }> = [];
+
+        for (const row of index.essays) {
+            const depositPath = resolve(ESSAY_DIR, `${row.event_id}.json`);
+            if (!existsSync(depositPath)) continue;
+            const deposit = JSON.parse(readFileSync(depositPath, 'utf8')) as { sources?: string[] };
+            if (!Array.isArray(deposit.sources)) continue;
+            const rowCount = Array.isArray(row.sources) ? row.sources.length : 0;
+            if (rowCount < deposit.sources.length) {
+                underCited.push({ id: row.id, index: rowCount, deposit: deposit.sources.length });
+            }
+        }
+
+        expect(
+            underCited,
+            `Index rows citing FEWER sources than their deposit. The player-facing row must not `
+            + `under-cite the authored record. Under-cited: ${JSON.stringify(underCited)}`,
+        ).toEqual([]);
+    });
+});
