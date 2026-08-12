@@ -988,3 +988,103 @@ targeting them. Roughly **9 of the 18 corridor mismatches are orphaned OSIDs**, 
 worked example showing the fix shape: find the operation that already sweeps the neighbourhood and add
 the missing objective, after checking staging adjacency. That is a materially cheaper and lower-risk
 lane than Lane A, and it addresses a larger share of the map error.
+
+## JANUARY 1993 CALIBRATION LANE — Goražde region (2026-08-12)
+
+Owner directive: work the January 1993 calibration, because those errors compound; focus on Goražde.
+Owner's historical frame, **confirmed against painted jan1993**: until the July 1993 VRS offensive
+Goražde had a tenuous land link through Trnovo, and also held ground in Višegrad, Pale and Foča.
+
+### Process win — this lane iterates at 43 weeks, not 188
+
+A `--weeks 43` run reproduced the 188w run's turn-43 state exactly (HRHB 87 / RBiH 258 / RS 367,
+cross-checked against the 188w `replay_save_manifest` frame for turn 43). **January 1993 calibration
+can therefore be iterated in ~4 minutes instead of ~20**, and only promoted to a full 188w for
+regression sign-off. That makes this the cheapest calibration lane currently open.
+
+### The painted January 1993 corridor is real, and the engine already has it
+
+Painted jan1993 puts Goražde town in the **largest RBiH component (142 OSIDs)**, linked by an 11-hop
+land corridor:
+
+`gorazde_2 → gorazde:glamoc → gorazde:osjecani_2 → pale:podgrab → foca:mazlina → trnovo:delijas →
+trnovo:tosici → trnovo:trnovo → trnovo:tusila → konjic:dzepi_2 → konjic_2`
+
+It runs to **Konjic/Jablanica, not Sarajevo** — there is no painted RBiH path to Sarajevo, which is
+correct: Sarajevo is separately besieged in its own 5-OSID component. The engine reproduces the link
+(Goražde in component #0 at both t0 and t43), so corridor *existence* is not the defect. The defect
+is the corridor's **shape** and the ground around it.
+
+### Measured: 15 errors, 31.3% of ALL January 1993 map error
+
+Whole map at turn 43: **48 wrong of 712**. Goražde region: **15** — a higher concentration than the
+24.7% this region carries at oct1995. **12 of the 15 are wrong from turn 0**; only 3 drift later.
+
+**Every one of the 12 init-wrong OSIDs is census-CONSISTENT.** The engine's initial control follows
+the 1991 census faithfully in all 12 cases; the census and painted-January-1993 simply disagree,
+because nine months of war moved control against demography in both directions. Under the Sacred Rule
+(initial OSID control is sacrosanct) none of these can be fixed by editing init — they must be
+*taken*, by operations.
+
+### The decisive cut: which errors are wrong at EVERY snapshot
+
+| category | OSIDs | painted trajectory | engine | fixing it improves |
+|---|---|---|---|---|
+| **A — static RS, engine RBiH forever** | `cajnice:batotici`, `cajnice:miljeno_2`, `cajnice:todorovici`, `foca:brusna_2`, `pale:praca`, `trnovo:kijevo_2` | RS in all 4 | RBiH in all | **all four snapshots** |
+| **A2 — static RS, engine starts right then loses it** | `gorazde:podkozara_donja_2` | RS in all 4 | init RS → RBiH by t43, no battles | all four |
+| **B — static RBiH, engine RS forever** | `gorazde:glamoc`, `gorazde:kamen` | RBiH in all 4 | RS in all | all four |
+| **C — changes hands, engine ~1 year early** | `foca:donje_zesce`, `gorazde:sopotnica`, `trnovo:tosici`, `visegrad:drinsko`, `visegrad:medjedja_2` | RBiH jan93 → RS after | RS already at t43 (3 from init) | jan1993 only |
+| **C2 — changes hands, engine never flips** | `gorazde:kolovarice` | RS jan93/apr94/apr95 → RBiH oct95 | RBiH always | jan93 + apr94 + apr95 |
+
+**Categories A + A2 + B are nine OSIDs that are wrong at all four snapshots.** They are the
+compounding error the owner identified: seeded in 1992, never corrected, and counted against the
+engine at every date. Fixing them pays four times over. Category C is a timing problem — the engine
+runs RS's 1992-93 eastern gains roughly a year early.
+
+### Root cause, structural
+
+- **Category A/A2 (RS should hold, engine gives RBiH):** the 1992 VRS/paramilitary takeover of eastern
+  Bosnia — Čajniče, the Foča periphery, Pale, the Trnovo/Sarajevo belt — is not modelled over these
+  OSIDs. Consistent with the earlier orphan finding: repo-wide grep shows no operation targets
+  `brusna_2`, `praca`, or the Čajniče three, and none has ever seen a battle.
+- **Category B (RBiH should hold, engine gives RS):** `ARBIH_PRE_PLANNED` is an **empty array** — the
+  engine has *zero* RBiH pre-planned operations, and RBiH's only discretionary offensives live in the
+  late-war opportunity catalogues. **ARBiH structurally cannot take ground in 1992.** Any OSID where
+  painted January 1993 shows ARBiH holding census-Serb ground is therefore unreachable by
+  construction. `glamoc` and `kamen` are both census Serb-majority and painted RBiH throughout.
+
+### The single-snapshot trap, caught red-handed
+
+`pre_planned_operations.ts:519-523` (Operation Foča) removes `gorazde:kolovarice` and
+`gorazde:ustipraca_2` as objectives, justified as *"painted RBiH and caused RS over-capture."*
+That reading is true only of the **oct1995** snapshot. Painted `kolovarice` is **RS at jan1993,
+apr1994 AND apr1995**, flipping to RBiH only by oct1995. So removing it made oct1995 right and the
+other three snapshots wrong — the engine currently gets `kolovarice` right in **1 of 4** snapshots.
+(For `ustipraca_2` the same comment happens to be correct at jan1993, which is how the two got
+conflated.)
+
+The same pattern appears at `pre_planned_operations.ts:525-529`, which replaced Operation Foča's
+`trnovo:delijas` + `trnovo:kijevo_2` objectives as *"painted RBiH."* Split verdict: `delijas` **is**
+painted RBiH at jan1993 (removal correct), but **`kijevo_2` is painted RS in all four snapshots**
+(removal wrong). This is exactly the comment-vs-snapshot trap the red-team panel flagged as systemic.
+
+### Proposed first change — `op:trnovo:kijevo_2`, and why it is the right one
+
+Best single candidate: category A, wrong at all four snapshots, census Bosniak-majority so init RBiH
+is correct and untouchable, and it must therefore be **captured in 1992**.
+
+It cannot go back onto Operation Foča's Kalinovik axis — `kijevo_2`'s neighbours are
+`ilidza:kasindo`, `novo_sarajevo:lukavica`, `trnovo:delijas`, `trnovo:gornja_presjenica`,
+`trnovo:tosici`, `trnovo:trnovo`, none of which are on that axis's chain, so it would fail
+`no_approach_osid`. It also cannot wait for Operation Trnovo, which is correctly a **July 1993**
+(t69) operation and is separately deadlocked.
+
+The natural vehicle is **Operation Prsten** — SRK, staging `op:ilidza:kasindo`, which is **directly
+adjacent to `kijevo_2`**, RS from init, and completes at turn 5. Historically this is the 1992 SRK
+consolidation of the Serb-held Sarajevo belt (Kasindo/Krupac/Donja Presjenica/Klanac are inside
+`kijevo_2`), which is precisely what the historian said `kijevo_2` was: *"Serb-held Sarajevo-belt
+settlements from spring 1992 ... the real defect is that the engine has it RBiH at init."*
+
+Not implemented. Requires the standard gate, but at 43 weeks first — and note the 40w structural
+fingerprint is **inside** this lane's horizon, so any change here will move it by design, unlike the
+late-war lanes.
