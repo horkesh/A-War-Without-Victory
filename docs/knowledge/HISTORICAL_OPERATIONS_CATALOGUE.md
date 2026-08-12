@@ -1,0 +1,112 @@
+# Historical Operations Catalogue (engine-modeled)
+
+**Purpose:** a single reference for the Historian (and anyone else) to check which named historical operations the engine already models, without grepping `pre_planned_operations.ts`/`triggered_operations.ts` from scratch each time.
+
+**Status: COMPLETE 2026-08-11 (three systems).** Extracted mechanically from source. All 15 RS pre-planned ops (verified table below), the single HRHB pre-planned op (Operation Jackal), and all 8 `triggered_operations.ts` defs (Posavina Corridor, Herzegovina Consolidation, Kotor Varoš, Cerska-Kamenica, Krivaja-95, Farz 95, Stupčanica-95, Mistral 2) are catalogued with corps/faction/timing/citation/staging/objectives. **As of 2026-08-11 the third system — the `operation_opportunity_catalog_*.ts` "operation opportunity" family (RBiH/HRHB late-war offensives + a T3 defensive triad) — is now included** in the new section below; it was previously (wrongly) framed as "out of scope." Note: `ARBIH_PRE_PLANNED` is an **empty array** — there are zero RBiH *pre-planned* ops, and the only RBiH op in `triggered_operations.ts` is the triggered Operation Farz 95; RBiH/HRHB's real discretionary offensives all live in that third system. Treat comments in the source as ground truth over this doc if they ever diverge — this file needs periodic re-sync, and comments themselves can go stale (see the Trnovo `available_from` discrepancy noted below, found 2026-08-11).
+
+## Verified: RS pre-planned operations (`src/sim/combat/pre_planned_operations.ts`)
+
+| Operation | Corps | available_from | Citation | Staging OSID |
+|---|---|---|---|---|
+| Operation Koridor | vrs_east_bosnian | — | — | op:bijeljina:dvorovi_2 |
+| Operation Drina | vrs_drina | — | — | op:zvornik:kozluk_2 |
+| Operation Podrinje Sweep | vrs_drina | — | — | op:rogatica:stara_gora |
+| Operation Pracha River | vrs_drina | w41 | — | op:rogatica:stara_gora |
+| Operation Zvezda 94 | vrs_drina | w100 | BB2 p.289 | op:gorazde:podkozara_donja_2 |
+| Operation Visegrad | vrs_herzegovina | — | — | op:visegrad:okrugla |
+| Operation Prsten | vrs_sarajevo_romanija | — | — | op:ilidza:kasindo |
+| **Operation Trnovo** (Lukavac '93) | vrs_sarajevo_romanija | **w69** (~July/Aug 1993) | BB2 p.289 | op:trnovo:gornja_presjenica |
+| Operation Herzegovina | jna_herzegovina_command | — | BB1 p.480 | op:nevesinje:krekovi_2 |
+| Operation Foca | vrs_herzegovina | — | BB2 p.514, BB2 p.289 | op:foca:foca_3 |
+| Operation Prijedor | vrs_1st_krajina | — | — | op:prijedor:prijedor_2 |
+| Operation Corridor | vrs_1st_krajina | — | BB1 p.183, BB1 p.181 | op:modrica:skugric_gornji_2 |
+| Operation Jajce | vrs_1st_krajina | — | BB1 p.182 | op:mrkonjic_grad:bjelajce_2 |
+| Operation Donji Vakuf | vrs_1st_krajina | — | BB1 p.177 | op:sipovo:pribeljci_2 |
+| Operation Bosanski Novi | vrs_1st_krajina | — | — | op:bosanski_novi:novi_grad_3 |
+
+## Verified: HRHB pre-planned operations (`src/sim/combat/pre_planned_operations.ts`)
+
+The `HRHB_PRE_PLANNED` array holds exactly one op.
+
+| Operation | Corps | available_from | Citation | Staging OSID | Objectives (single axis `stolac_sweep`) |
+|---|---|---|---|---|---|
+| Operation Jackal (Stolac-Čapljina) | hvo_southeast_herzegovina | w8 | — | op:capljina:capljina_2 | tasovcici_2 → mostar:hodbina_2 → stolac:rotimlja_2 → stolac:stolac_2 |
+
+## RBiH pre-planned operations — NONE
+
+The `ARBIH_PRE_PLANNED` array is **empty** (comment-only). A previous attempt (R28) to add "Op Sana 95" on `arbih_5th_corps` was BLOCKED for regression (−6 OSIDs / −1pp) because the triggered "Operation Sana" already ran on 5th Corps at w175-188 and the pre-planned entry stalled behind it. RBiH's only modeled discretionary offensive is the triggered **Operation Farz 95** (Vozuća, below). Note: "Operation Herzegovina Consolidation" (from an earlier name-scan) lives in `triggered_operations.ts`, NOT here — it is catalogued in the triggered table below. The Sana/western-Bosnia RBiH offensives (plus the Central-Bosnia and Federation/Western-Bosnia HRHB offensives) live in the separate "opportunity" system (`operation_opportunity_catalog_*.ts`) — catalogued in full in the new "Verified: operation-opportunity-catalog operations" section below.
+
+**Known stale-comment trap (found 2026-08-11):** `pre_planned_operations.ts` line 426 has a leftover comment reading "available_from: 6 — injects right after Op Prsten recovery (~w4)" directly above the ACTUAL field on line 439, `available_from: 69` (with its own, correct, comment: "historical Lukavac 93 = August 1993 (~w69)"). The 69 value is what's live in code and matches history; the "6" comment is dead prose from an earlier version. A near-identical stale reference exists in `triggered_operations.ts` line 1222 ("Trnovo (available_from:6) injects immediately after"). Anyone reading only comments (as a prior investigation in this session briefly did) will get the wrong timing — always check the literal field value.
+
+## Verified: triggered / conditional operations (`src/sim/combat/triggered_operations.ts`)
+
+These use predicate `trigger(state, turn)` gating rather than a plain `available_from` turn number. The **Trigger** column states the actual gating logic read from the predicate (not a guess). "Primary corps" replaces "Corps" (joint ops draw brigades from multiple corps via per-axis `corps`).
+
+| Operation | Faction | Primary corps | Trigger (predicate logic) | Citation | Staging OSID | Objectives |
+|---|---|---|---|---|---|---|
+| Operation Posavina Corridor (Orašje Pocket) | RS | vrs_1st_krajina | 1KK has completed Op Corridor (`corpsCompletedOp`) | BB1 p.182 | op:bosanski_samac:domaljevac_2 | orasje:donja_mahala → orasje:orasje |
+| Operation Herzegovina Consolidation | RS | vrs_herzegovina | vrs_herzegovina completed **both** Op Visegrad AND Op Foca AND has no active/queued op | BB1 p.193, BB2 p.514 | op:nevesinje:sopilja | *mostar_heights*: vranjevici_2(way)→blagaj_2→hodbina_2 · *konjic_south*: glavaticevo_2(way)→dzepi_2→konjic_2 |
+| Operation Kotor Varos | RS | vrs_1st_krajina | turn ≥ 10 AND ≥1 of {kotor_varos_2, vrbanjci_2, prisocka_2} still enemy-held | — | op:kotor_varos:kotor_varos_2 | kotor_varos_2, vrbanjci_2, prisocka_2 |
+| Operation Cerska-Kamenica (Cerska Pocket, Kamenica) | RS | vrs_drina | turn ≥ 40 | — | op:vlasenica:grabovica | *cerska_pocket*: vlasenica:cerska_2 · *kamenica*: srebrenica:osmace_2, radovcici, sulice_2 |
+| **Operation Krivaja-95** (Srebrenica Enclave) | RS | vrs_drina | turn ≥ 170 AND `srebrenica_falls_1995` event receipt fired | ICTY Popović IT-05-88-T §244/§245 fn757/§247 (no BB page) | op:bratunac:bratunac_2 | srebrenica: donji_potocari_2, srebrenica_2, bostahovine_2, milacevici, suceska |
+| **Operation Farz 95** (Vozuća Pocket) | RBiH | arbih_3rd_corps | turn ≥ 160 (**Army-HQ-only — see note; inert on the legacy triggered path**) | BB2 pp.508-509 | op:zavidovici:hajderovici_2 | zavidovici:vozuca_2, maglaj:gornja_bocinja, maglaj:donja_bocinja_2, lukavac:brijesnica_donja_2 |
+| **Operation Stupčanica-95** (Žepa Pocket) | RS | vrs_drina | turn ≥ 172 AND `zepa_falls_1995` event receipt fired | BB2 p.611, ICTY Krstić verdict | op:vlasenica:grabovica | rogatica:zepa_2 |
+| Operation Mistral 2 (Drvar–Grahovo / Šipovo–Mrkonjić) | HRHB | hvo_main_staff | turn ≥ 175 (**filtered OUT of the live catalogue — see note; never fires via triggered path**) | BB2 pp.629-642 | op:livno:misi_2 | *mistral_drvar*: glamoc:halapic, stekerovci_2; titov_drvar:prekaja_2, drvar_2, sipovljani_2; bosansko_grahovo:crni_lug, bosansko_grahovo_2, malesevci, ugarci · *mistral_sipovo*: sipovo:brdjani, gornji_mujdzici_2, sipovo_2, volari_2, pribeljci_2; mrkonjic_grad:gerzovo_2, mrkonjic_grad_2, bjelajce_2, baljvine_2, majdan_2, podrasnica_2 |
+
+"(way)" = RS waypoint objective, painted-own from t0, stripped at execution (not a real target). Objective OSIDs are shown without the `op:` prefix except where the municipality differs from the column context; each is `op:<mun>:<settlement>` in source.
+
+**Two defs are NOT live via the triggered path:**
+- **Operation Mistral 2** is defined in `TRIGGERED_OPS_RAW` but explicitly filtered out (`TRIGGERED_OPS = TRIGGERED_OPS_RAW.filter(d => d.name !== 'Operation Mistral 2')`, line ~691). It is kept only as historical footprint text; the live behaviour is owned by the Federation/Western-Bosnia **opportunity catalog**. So the Mistral 2 row above documents design intent, not an operation that actually fires here.
+- **Operation Sana** was fully removed from the array (migrated to `operation_opportunity_catalog_5th_corps.ts` `SANA_95_OPPORTUNITY`, LANE B Phase 3 2026-05-01) — no def remains; it appears only in a trailing comment.
+
+**Army HQ (ADR-0005 v3.0) flag class — cross-check result.** Only **one** op in this file carries `army_hq_only: true`: **Operation Farz 95** (net-new; NEVER fires via the legacy triggered path — flag-off the AHQ step early-returns and it stays fully inert; flag-on it injects via `inject-army-hq-operations`). **Operation Krivaja-95** carries `army_hq_op_id: 'krivaja_95'` but is **promoted, not `army_hq_only`** — flag-off it keeps firing on the legacy path exactly as before; flag-on the AHQ step owns it (skipped in `checkTriggeredOperations` when `ENABLE_TG_ARMY_HQ_OPS` is set). No other def in the file carries either flag. The type-comment (lines ~92-96, ~1007) references "Vozuća-94 / Lukavac-93" as conceptual examples of the net-new `army_hq_only` class, but **no def by either of those names exists in the file** — Farz 95 is the actual Vozuća op and its own comment states the capture was **1995, not 1994**. Operation Trnovo (Lukavac '93) is a *pre-planned* op in the other file and has no `army_hq_only` field at all. (If a prior note asserted Trnovo/Lukavac-93/Vozuća-94 carry `army_hq_only`, that is inaccurate — corrected here.)
+
+## Verified: operation-opportunity-catalog operations (`operation_opportunity_catalog_*.ts`)
+
+This is the **third** operation system, and a **different architecture** from the other two. Instead of a plain `available_from` turn or a single `trigger()` predicate, each op is an `OperationOpportunityDef` (type in `operation_opportunities.ts`) evaluated against **ten prerequisite axes** — `date_window`, `political_authorization`, `corps_readiness`, `logistics`, `staging_access`, `weather_season`, `commander_confidence`, `enemy_weakness`, `alliance_context`, `force_quality` — each tagged `required` / `optional` / `n_a`. An op surfaces as a **player/bot proposal** (approve / delay / redirect / under-resource / decline) only when *all* `required` axes are green **and** at least `min_optional_axes` of the `optional` axes are green. On approval the op routes through the same `buildCorpsOperation` factory as everything else. The **turn window** below is the `date_window` predicate's actual `[min, max]` range (this is the real gating mechanism — there is no `available_from` field here). Tier `T1` = offensive; **`T3` = defensive-crisis** (approve = "commit reserves, accept the strain" — *no* offensive CorpsOperation is spawned; the axis carries an empty objective list by design).
+
+Catalog composition is `OPERATION_OPPORTUNITY_CATALOG = [...FIFTH_CORPS, ...CENTRAL_BOSNIA_VLASIC, ...FEDERATION_WESTERN_BOSNIA]`. **Live op counts: 5th Corps 7/7, Central Bosnia 3/4 (one defined-but-unenumerated), Federation-Western Bosnia 4/4 — 14 live, 15 defined.** OSIDs below are shown without the `op:` prefix; each is `op:<mun>:<settlement>` in source. Objectives are per-axis, in priority order.
+
+### 5th Corps (`operation_opportunity_catalog_5th_corps.ts`) — all faction RBiH, corps `arbih_5th_corps`, family `fifth_corps`
+
+| Operation (`id`) | Tier | Turn window | Citation | Staging OSID(s) | Axes → objectives |
+|---|---|---|---|---|---|
+| Operation Sana (`sana_95`) | T1 | w175–200 | BB1 pp.417, 419-420 | bihac:bihac_2 (op); per-axis otoka_2 / bihac_2 / jasenica_2 | *sana_krupa* (Krupa Una Valley): krupa:ivanjska_2, arapusa_2, donji_dubovik_2, vranjska_2, jasenica_2, gornja_suvaja; petrovac:krnjeusa; novi:krslje_2, matavazi_2 · *sana_bihac_petrovac* (Bihać–Petrovac Corridor): bihac:ripac, racic, orasac_2; petrovac:vrtoce, prkosi, vodjenica, kolonic_2, bosanski_petrovac_2, dobro_selo_2, jasenovac_2; kljuc:hadzici, kljuc_2, krasulje_2 · *sana_sanski_most_kljuc* (Sanski Most + Ključ Liberation): sanski_most:budimlic_japra_2, lusci_palanka_2, jelasinovci, skucani_vakuf_2, stari_majdan, sanski_most_2, ostra_luka, ilidza_2, kljevci; kljuc:sanica_2, hadzici, kljuc_2, krasulje_2 |
+| Operation Tigar-Sloboda (`tigar_sloboda_94`) | T1 | w113–122 | BB2 pp.532-534, 541, 555 | cazin:cazin_2 | *tigar_cazin_salient* (Cazin Salient): cazin:coralici, liskovac_2, mutnik_2, sturlic_2 (all `targets_friendly_overrides` — APWB-held) |
+| Operation APWB Pressure (`apwb_pressure_94`) | T1 | w113–130 | BB2 pp.534-535 (AMBER scope) | cazin:cazin_2 | *apwb_pecigrad_kladusa* (Pecigrad – Velika Kladuša Drive): cazin:sturlic_2 (reused from Tigar); velika_kladusa:vejinac_2, zboriste_2, poljana_2, velika_kladusa_2 (all `targets_friendly_overrides`) |
+| Operation Una 94 Defense (`una_94`) | **T3** | w113–115 | BB2 p.534 | bihac:bihac_2 | *una_grabez_stiffening* (Grabež Plateau Stiffening) — **no objectives** (defensive reserve-commit) |
+| Operation Breza 94 Defense (`breza_94`) | **T3** | w125–130 | BB2 pp.540-542 | bihac:bihac_2 | *breza_three_axis_defense* (Grabež–Otoka–Buzim Defense) — **no objectives** (defensive) |
+| Operation Spider Defense / Pauk (`pauk_94_95`) | **T3** | w135–145 | BB1 p.417, BB2 p.556 | bihac:bihac_2 | *pauk_siege_endurance* (Pocket-Wide Siege Endurance) — **no objectives** (defensive; `alliance_context` = pre-Storm only, hardest gate) |
+| Operation Grmeč 94 (`grmec_94`) | T1 | w133–138 | BB2 pp.546-547, 555 | bihac:bihac_2 | *grmec_ridge_breakout* (Grmeč Ridge Breakout): bihac:ripac, racic, orasac_2; bosanski_petrovac:vodjenica, prkosi; bosanska_krupa:gornja_suvaja |
+
+### Central Bosnia / Vlašić / Kupres (`operation_opportunity_catalog_central_bosnia.ts`) — family `central_bosnia_vlasic`
+
+| Operation (`id`) | Tier | Faction / Corps | Turn window | Citation | Staging OSID(s) | Axes → objectives |
+|---|---|---|---|---|---|---|
+| Operation Cincar / Kupres (`kupres_cincar_94`) | T1 | HRHB / hvo_tomislavgrad | w132–142 | design/research docs; BB v2 ch.28 (per adjacent notes) | livno:livno_2 | *kupres_cincar_line* (Kupres Line): kupres:bucovaca, donji_malovan, goravci, kupres_2, novo_selo_2 · variants: *kupres_line_only*, *glamoc_shoulder* (glamoc:glamoc_2, pribelja, vidimlije_2) |
+| Operation Vlasic Ridge (`vlasic_ridge_95`) | T1 | RBiH / arbih_3rd_corps | w152–166 | research/design docs + painted_control apr/oct1995 | travnik:travnik_2 (op); axes turbe_2 / cukle_2 | *vlasic_travnik_ridge* (Travnik Ridge Line): travnik:paklarevo, varosluk, gornje_krcevine · *vlasic_skender_vakuf* (Skender Vakuf Shoulder): skender_vakuf:donji_koricani, imljani_2, javorani_2, knezevo_2 · variant *ridge_probe* |
+| Operation Donji Vakuf 95 (`donji_vakuf_95`) | T1 | RBiH / arbih_3rd_corps | w177–180 | audit memos + painted_control apr/oct1995 | travnik:turbe_2 | *donji_vakuf_komar_line* (Donji Vakuf Komar Line): donji_vakuf:komar_2, donji_vakuf_2, babin_potok_2, kutanja, torlakovac_2, pribraca_2, prusac_2, jemanlici, korenici, oborci_2 |
+| Operation Cincar Phase 2 / Kupres Town (`kupres_phase_2_94`) | T1 | HRHB / hvo_tomislavgrad | w148–158 | BB v2 ch.28 pp.529-530; Historija.ba; ICTY Gotovina §44-58 | livno:livno_2 | **DEFINED BUT NOT LIVE** — the def is intentionally *unenumerated* in `CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES` (Wave 11): brigade pool overlaps 5/5 with Mistral 1, and it captured 0 OSIDs across n1969-n1973. Retained for forensic reference. Axes (if re-enabled): *kupres_phase_2_southern* (Donji Malovan Thrust: kupres:donji_malovan, kupres_2) · *kupres_phase_2_northern* (Goravci Thrust: kupres:goravci, kupres_2, novo_selo_2) |
+
+### Federation / Western Bosnia (`operation_opportunity_catalog_federation_western_bosnia.ts`) — family `federation_western_bosnia`
+
+| Operation (`id`) | Tier | Faction / Corps | Turn window | Citation | Staging OSID(s) | Axes → objectives |
+|---|---|---|---|---|---|---|
+| Operation Mistral 1 (`mistral_1_95`) | T1 | HRHB / hvo_tomislavgrad | w160–170 (**pre-Storm**) | ICTY Gotovina IT-06-90-T §44-58; BB v2 ch.28 | livno:misi_2 (op); axes misi_2 / tomislavgrad_2 | *mistral_1_grahovo* (Bosansko Grahovo Axis): bosansko_grahovo:crni_lug, malesevci, bosansko_grahovo_2, ugarci · *mistral_1_glamoc* (Glamoč Shoulder Axis): glamoc:vidimlije_2, glamoc_2, pribelja, kovacevci_2, halapic; livno:gubin_2; glamoc:stekerovci_2 |
+| Operation Mistral 2 (`mistral_2_95`) | T1 | HRHB / hvo_tomislavgrad | w175–190 | research/design docs; legacy `triggered_operations.ts` footprint (BB2 pp.629-642 there) | livno:misi_2 (op); axes misi_2 / livno_2 | *mistral_drvar_grahovo* (Drvar / Grahovo Axis): titov_drvar:prekaja_2, drvar_2, sipovljani_2; bosansko_grahovo:crni_lug, bosansko_grahovo_2, malesevci, ugarci · *mistral_sipovo* (Sipovo Axis): sipovo:brdjani, gornji_mujdzici_2, sipovo_2, volari_2, pribeljci_2 · variants *drvar_grahovo_axis*, *sipovo_axis* |
+| Operation Southern Move (`southern_move_95`) | T1 | HRHB / hvo_tomislavgrad | w182–188 | HVO catalog synthesis proposal + legacy footprint | sipovo:sipovo_2 | *southern_move_mrkonjic* (Mrkonjic Grad Axis): mrkonjic_grad:gerzovo_2, majdan_2, podrasnica_2, mrkonjic_grad_2, bjelajce_2, baljvine_2 |
+| Operation Jajce Recovery (`jajce_95`) | T1 | RBiH / arbih_3rd_corps | w178–184 | BB v2 ch.30; ICTY Hadžihasanović IT-01-47-T; UNHCR sitrep 15 Sep 1995 | bugojno:gracanica | *jajce_recovery_near* (Donji Vakuf Shoulder Axis): **jajce:grdovo only** — see flag below |
+
+### Notes / flags (odd or possibly-dead findings — flagged, not fixed)
+
+- **`kupres_phase_2_94` is a defined-but-dead op** — exactly the same class as Mistral 2 on the triggered path: the `OperationOpportunityDef` is fully authored (constants, predicates, variant) but is deliberately **left out of the family export array** (`CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES`, Wave 11 2026-05-22), so it never enters the catalog and never fires. Cause: 5/5 brigade-pool overlap with Mistral 1 would leave Mistral 1 launching empty. Counted as "defined" but not "live" above.
+- **`jajce_95` only ever attacks one OSID (`jajce:grdovo`)** despite being "Jajce Recovery." The file defines `JAJCE_RING_OBJECTIVES` (7 deep-Jajce OSIDs incl. `jajce:jajce_3` = Jajce town) and `JAJCE_RING_AXIS_BRIGADES`, but **no ring axis is ever assembled** — `JAJCE_AXES` contains only the NEAR axis with the single objective `grdovo`. The ring OSIDs are referenced *only* inside the `enemy_weakness` eligibility predicate (via `JAJCE_OBJECTIVES`), so they gate whether the op surfaces but are never actually targeted. The Wave-14 comments describe a "DEFERRED axis" that would open via the engine's skip-empty-axis path, but that deferred axis was never added to `JAJCE_AXES`. So the modeled op cannot take Jajce town on its own — worth confirming this is intended vs. a dropped-axis regression.
+- **`donji_vakuf_95` and `jajce_95` are hosted on `arbih_3rd_corps`, not the historical 7th Corps** under Alagić. This is a *known, documented* reduced-OOB decision (7th Corps brigades rolled into 3rd Corps per user directive 2026-05-19), not a geography error — the brigade pools (705th/707th/717th/727th/770th Bugojno–Donji Vakuf–Travnik) are the historically-correct instruments, just re-parented. Noting for the record, not flagging as a bug.
+- **Mistral 1 / Mistral 2 host on `hvo_tomislavgrad` (SECONDARY_CORPS), not the nominal `hvo_main_staff`** the module constant `PRIMARY_CORPS` names. This is deliberate (Wave 19A/25/28): `hvo_main_staff` is a zero-front-sector shell whose brigades get drained by `reconcileOperationRoster`. Their `corps_readiness` predicate still checks *both* corps. Not a bug — just note the `primary_corps` field ≠ the `PRIMARY_CORPS` constant.
+- **T3 defensive triad (`una_94`, `breza_94`, `pauk_94_95`) build no operation.** By design the T3 approve branch short-circuits before `buildCorpsOperation`; the axis objective lists are intentionally empty. They will never appear in `operation_aars.json` as offensives — don't treat their absence there as a chronic failure.
+- **`enemy_weakness` defender-trajectory floors were lowered 0.40 → 0.20** for the VRS-Krajina-facing ops (`sana_95`, `mistral_1_95`, `mistral_2_95`, `southern_move_95`) because the composite-weakness formula can't reach 0.40 against a late-war VRS 2nd Krajina that still shows non-zero readiness; and the floor is **bypassed entirely** when the defender corps has no active subordinates (`evaluateDefenderTrajectoryWeakness` returns `available=false` → green). Source comments note identical hashes at 0.20 vs 0.28 — the western cascade is combat-math-driven, not floor-gated.
+
+## Known chronic-failure flags (cross-reference before assuming a "missing operation")
+
+- **Operation Trnovo**: designed correctly in intent (Lukavac '93, w69, right objectives) but chronically fails in practice — this is the pre-existing **EH-4 `dead_ops` finding** (`docs/40_reports/proposals/20260611_eh4_dead_ops_diagnosis.md`, diagnosed 2026-06-11, PARKED pending panel+§6 sign-off). **Fully root-caused 2026-08-11** by a 4-specialist Pyrrhic panel (`docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISMATCH_TRIAGE.md`) to THREE independent structural bugs, not one: (1) `rs_trnovo_brigade` doesn't exist at init and is starved by shared RS mandatory-mobilization budget contention until ~t140 (explains both the June t184 and August t141 injection-delay observations — the exact turn is emergent/run-dependent, not a fixed gate); (2) the east axis is structurally broken regardless of timing — a friendly waypoint followed by a non-adjacent real objective guarantees `zero_eligible_axis`; (3) the town axis's brigade physically drifts away from its assumed staging position over the course of the war. None is a hardcoded railroad (confirmed by gap-finder: injection turn varies run-to-run). Fix proposed, risk-ordered, NOT yet implemented — see the triage report for the full panel synthesis and Historian's Igman/Bjelašnica bright-line constraint.
+- Before assuming any settlement mismatch means "no operation targets this," check this catalogue AND `operation_aars.json` for the run in question — several mismatches turn out to be a *designed* operation failing quietly rather than a *missing* one.
