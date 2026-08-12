@@ -1162,3 +1162,99 @@ reference there, and this experiment's kolovarice flip to RS would have been pen
 correct. Note this does NOT rescue the experiment: at best it makes the result −25 rather than −26,
 and the two anchor flips and the western-Krajina collapse are untouched by it. Dispatched to the
 Historian for verification against ICTY/BB; tracked as a separate reference-data lane.
+
+## REFERENCE-DATA LANE — the Goražde calibration target is itself suspect (2026-08-12)
+
+Opened by an owner observation: *"Kolovarice might be an error in painted map for oct95. RBiH didn't
+retake it that late."* Historian dispatch + integrator verification. **The owner is right about
+kolovarice, and the problem is larger than kolovarice.**
+
+### Provenance settled: painted_control_oct1995 is the OCTOBER 1995 CEASEFIRE LINE, not the Dayton IEBL
+
+Established by discriminator — these all went to the **Federation** under Dayton yet are **RS** in
+painted_oct1995: `ilidza:sarajevo_dio_ilidza_2`, `ilidza:rakovica_2`, `vogosca:vogosca_3`,
+`vogosca:svrake`, `stari_grad_sarajevo:faletici`, `pale:praca`, `pale:podgrab`, `foca:ustikolina`.
+Useful: it means any flip in the map is a claim about **fighting**, testable against the record — and
+that the map is not uniformly Dayton-contaminated.
+
+### Finding 1 — the anomaly is SYSTEMATIC, not one settlement (integrator-verified)
+
+Exactly **four** Goražde OSIDs flip `RS at apr1995 → RBiH at oct1995`, and they form one contiguous
+western/southern rim:
+
+| osid | jan93 | apr94 | apr95 | oct95 | km² | position |
+|---|---|---|---|---|---|---|
+| `kolovarice` | RS | RS | RS | **RBiH** | 41.7 | 11.0 km SSW |
+| `hrancici` | RBiH | RS | RS | **RBiH** | 25.3 | 19.3 km W |
+| `faocici_2` | RBiH | RS | RS | **RBiH** | 21.0 | 16.8 km WSW |
+| `zorovici` | RBiH | RS | RS | **RBiH** | 19.6 | 18.8 km W |
+
+**Verified:** the painted enclave goes **175 km² (9 OSIDs) at apr1995 → 282 km² (13) at oct1995 — a
+62% expansion**, and the oct1995 enclave is still one connected component and still landlocked (so
+not a floating-island blunder — a coherently drawn but larger enclave). **A 62% expansion of a
+besieged, UN-monitored safe area between April and October 1995 appears in no source.** BB2 has no
+1995 Goražde narrative at all (only endnote pages), and en/bs-wiki record exactly one 1995 Goražde
+event — the 28 May 1995 VRS attack on UNPROFOR — then jump to a **December 1995** land bridge via
+Trnovo and the "newly formed" Foča-Ustikolina and Pale-Prača municipalities, i.e. Dayton. The enclave
+was still landlocked at the October ceasefire.
+
+### Finding 2 — SPLIT VERDICT, and it does not all go the owner's way
+
+- **`kolovarice`: painted oct1995 is WRONG. Confidence MODERATE-HIGH. Owner's recollection supported.**
+  BB2 p.460 (Operation "Zvezda 94") records the VRS **eliminating the Uhotić pocket on 10 April 1994**;
+  **Uhotići is inside this OSID** (verified below). BB2 p.461: the VRS kept "nearly all of the southern
+  (right) bank of the Drina", and the NATO-forced pullback was from a **3 km exclusion zone on the LEFT
+  bank** — kolovarice's centroid is 11 km out, on the right bank, so the pullback cannot apply. Nothing
+  anywhere records a retake.
+- **`hrancici` / `faocici_2` / `zorovici`: the suspect end is more likely apr1994/apr1995, NOT oct1995
+  — this cuts AGAINST the owner. Confidence LOW-MODERATE.** BB names the Zvezda 94 axes as north/east
+  (Trovrh → Jabuka → Kopači), southeast (Čajniče road → Gradina → Biserna) and a northwest SRK axis.
+  **There is no far-western attack axis in the record**, yet these three sit 17-19 km due W/WSW. Their
+  being lost in April 1994 is unsupported.
+- **What holds for all four: they did not change hands in 1995.** So each series is internally
+  inconsistent *somewhere*, but "RS through spring 1995, ARBiH by October" is not defensible for any.
+
+Corroborating arithmetic, cutting both ways: contemporary reporting on Zvezda 94 says the enclave was
+**"reduced by 20%"** from ~350 km². painted apr1995 = 175 km² is a **50%** reduction; painted oct1995 =
+282 km² is a **20%** reduction, matching almost exactly. BB's own dismissive framing of Zvezda 94
+("none of the operation's primary objectives were achieved") reads like −20%, not −50%. (A competing
+"350 → 30 km²" figure is near-certainly the 3 km NATO exclusion zone, ~28 km², misreported.)
+
+### Finding 3 — THE ONE THAT MATTERS: `kolovarice` cannot be correct under ANY controller
+
+**Integrator-verified:** `op:gorazde:kolovarice` is **41.7 km², 23 constituent settlements** —
+Ahmovići, Bošanje, Donje Selo, **Dragolji**, **Dragovići**, Džindići, Gunjevići, Hajradinovići,
+Karauzovići, Karovići, **Kodžaga Polje**, Kolovarice ×2, Krašići, Kučine, Ljeskovik, Nevorići,
+**Podmeljine**, Radmilovići, **Uhotići**, Zubovići u Oglečevi, Šućurići, Žigovi.
+
+It aggregates **Podmeljine and Kodžaga Polje** — effectively at Goražde town, inside the enclave
+throughout — with **Uhotići**, which the VRS took on 10 April 1994, and with **Dragolji/Dragovići** out
+toward the Foča boundary. It is the largest RBiH-held OSID in the enclave and **it straddles the front
+line**. Whichever way it is painted it is wrong for roughly half its territory.
+
+**So the root cause here may not be the painting at all — it may be that this OSID should never have
+been merged into one unit.** That is a data-pipeline question, not a history question. Repainting a
+cell that spans both sides of the line just relocates the error. Also noted: `op:gorazde:hrusanj` has
+**area 0.0 km² and no painted entry in any snapshot** — a separate degenerate-OSID flag.
+
+### Consequence for the January 1993 Goražde lane — this is the strategic finding
+
+The lane's premise was that Goražde-area error is the densest on the map and compounds. Both still
+true. But the target we are calibrating **against** is now known to be suspect in the same theatre:
+four of its 13 oct1995 enclave OSIDs are historically indefensible, and at least one of them is
+un-paintable at current granularity. Chasing `matched_osids` in Goražde therefore optimises partly
+toward a wrong reference and partly through OSIDs too coarse to be right either way.
+
+**Recommended sequencing change: settle the reference before spending more calibration runs here.**
+Concretely, and in order:
+1. Fetch the CIA readingroom products the historian identified as covering the Goražde offensive and
+   its aftermath (`cia.gov/readingroom/docs/1994-04-08A.pdf`, `1994-05-19B.pdf`) — they would give the
+   actual post-Zvezda-94 perimeter and convert MODERATE into firm, either way.
+2. Decide the whole western/southern rim as one repaint, not cell-by-cell (it is a boundary decision,
+   not four typos).
+3. Treat `op:gorazde:kolovarice` (and check `ustipraca_2` at 42.0 km²) as candidate **merge defects**
+   for the data-pipeline owner, independent of any repaint.
+
+**Nothing repainted. Painted control is calibration ground truth and is not edited on a
+single-session finding** — this is a scoped, evidenced proposal for the owner, with the split verdict
+stated rather than smoothed over.
