@@ -768,6 +768,24 @@ export type OpeningAttackBlocker =
 export interface OpeningAttackReadinessResult {
     executable: boolean;
     blocker?: OpeningAttackBlocker;
+    /**
+     * True ONLY when this axis is blocked AND at least one of its
+     * executability brigades is literally on the road toward the axis's own
+     * approach OSIDs (`isCommittedInTransitTo`).
+     *
+     * WHY THIS EXISTS (2026-08-12). The multi-axis gate used to infer
+     * "brigades are still marching" from `blocker === 'zero_eligible_axis'`.
+     * That blocker actually means "no assigned brigade is adjacent to the
+     * objective WITH A SUFFICIENT PREDICTED OUTCOME" — which is also true when
+     * the brigades have ALREADY ARRIVED and are merely too weak. In that state
+     * waiting is futile and self-worsening (ambient morale/cohesion drift makes
+     * the prediction monotonically worse every turn), so the operation waited
+     * forever for troops that were already standing on the start line.
+     * Measured at n206: the veto cost an otherwise-executable operation in 12
+     * evaluations across 6 operations, earliest at t1, and `power_ratio` decayed
+     * 0.334 -> 0.295 over four turns of waiting.
+     */
+    approaching?: boolean;
 }
 
 function hasAttackFloorParticipant(
@@ -966,7 +984,14 @@ function classifyAxisOpeningAttack(
         debugOpName === undefined ? undefined : { opName: debugOpName, axisId: axis.axis_id },
     )) {
         axis.launch_blocker = 'zero_eligible_axis';
-        return { executable: false, blocker: 'zero_eligible_axis' };
+        // Distinguish "still marching" from "arrived but too weak". Only the
+        // former justifies holding the whole operation (see `approaching` on
+        // OpeningAttackReadinessResult). Reuses this axis's OWN approach set and
+        // executability pool — "on the road" must mean on the road TO HERE.
+        const approaching = executabilityBrigades.some(
+            (brigadeId) => isCommittedInTransitTo(state, brigadeId, approachOsids),
+        );
+        return { executable: false, blocker: 'zero_eligible_axis', approaching };
     }
 
     // ADR-0005 v2.2c #3: donation-readiness gate. With TG formation on, the anchor must be
@@ -1062,9 +1087,20 @@ export function evaluateOpeningAttackReadiness(
     if (isMultiAxis(op) && op.axes) {
         const blockers: OpeningAttackBlocker[] = [];
         let anyExecutable = false;
-        // True when any non-terminal axis has brigades mid-march (zero_eligible_axis).
-        // A fast-assembling sibling must not drag a slow axis into execution before
-        // its brigades reach the objective — hold until all axes are adjacent.
+        // True when any non-terminal axis has brigades ACTUALLY mid-march toward
+        // its own approach OSIDs. A fast-assembling sibling must not drag a slow
+        // axis into execution before its brigades arrive — hold while someone is
+        // genuinely on the road.
+        //
+        // CHESTERTON'S FENCE, DO NOT REMOVE THIS GATE (commit `263569bfb`,
+        // 2026-05-28): it is the ONLY wait-for-the-slow-axis mechanism at the
+        // planning->execution transition, because `areParticipantsReadyForExecution`
+        // returns on any ONE ready axis. It was added to stop `posavina_flank`
+        // dragging `brcko_corridor` into execution mid-march — the Brcko anchor
+        // whose hold was bought at `dc66c6fc0`. The 2026-08-12 change NARROWS the
+        // trigger (see `approaching` on OpeningAttackReadinessResult); it does not
+        // remove the wait. Brcko is safe by construction there: those brigades ARE
+        // in transit, so `approaching` stays true and the veto survives.
         let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
@@ -1076,7 +1112,7 @@ export function evaluateOpeningAttackReadiness(
                 anyExecutable = true;
             } else {
                 if (result.blocker) blockers.push(result.blocker);
-                if (result.blocker === 'zero_eligible_axis') anyApproaching = true;
+                if (result.approaching === true) anyApproaching = true;
             }
         }
         // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts.
