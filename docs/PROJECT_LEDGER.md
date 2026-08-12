@@ -26990,3 +26990,65 @@ measurement rather than inference.
 `data/scenarios/essays/us_halts_federation_advance_1995.json` still asserts Croatia *"complied
 immediately"* — the exact claim corrected here, one file away, on a player-facing surface; routed to
 `/historian` + `/narrative-designer`. And `stranded_brigades_max` re-bless.
+
+---
+
+## 2026-08-13 — Debt resolution: gate band re-blessed after redefinition; Ring-2 essay contradiction closed
+
+Continuation of the 2026-08-12 veto/halt/cohesion arc (entry above). Owner: *"Resolve the debts."*
+These are the two items the review panel left open after the branch verdict; the **−9 territory debt is
+NOT one of them** — that remains explicitly owed, to be recovered on a healthier engine, per the
+standing record in `CALIBRATION_MASTER.md`.
+
+**1. `stranded_brigades_max` re-blessed 10 → 9** (`data/calibration/engine_health_thresholds.json`).
+Raised by BOTH code review and canon review. `ccd0d2e4e` added a lifecycle guard because the metric was
+counting **destroyed** formations carrying a stale `stranded_status`; the band of 10 had been blessed
+against that inflated measure, so leaving it silently **loosened a HARD check**. Under the new
+definition the metric reads **6, flat across n215/n218/n219/n220** — every movement previously read off
+it (7, 8, the "8 → 7 improvement") was artifact. `ceilH(6) = max(ceil(6×1.15), 6+3) = 9`.
+
+**HAND-EDITED, NOT `--update`, and this is the load-bearing part.** A blanket `--update` on any current
+run would also have raised `matched_osids_min` **622 → 629**, locking the −9 debt in as the new floor.
+That is an owner posture decision and it contradicts the standing record that the towns are *owed*, not
+accepted. Only the band whose **definition** changed was touched. **40w deliberately left at 3**: it
+measures 2 under the new definition and a fresh bless would give `ceilH(2) = 5`, i.e. LOOSER — the
+existing band is already the stricter one, so re-blessing it would have been a regression in rigour.
+Rationale recorded in the thresholds file itself, beside the number. Verified: n215/n218/n220 all
+`6 <= 9` PASS.
+
+**2. Ring-1 / Ring-2 contradiction closed** (`data/scenarios/essays/us_halts_federation_advance_1995.json`).
+`cc3e288f2` corrected the event to reflect that **Zagreb defied the halt** (BB1 p.462 en.823:
+*"Nevertheless, Zagreb went ahead and ordered 'Juzni Potez' in October"*) while Sarajevo complied
+reluctantly, stalling for days (en.821; Delić begging Izetbegović to let the fighting continue). The
+accompanying essay — a **player-facing** surface, and the one that carries the record of what happened —
+still asserted the exact opposite: *"Croatia … complied immediately. The Bosnian government, with
+greater reluctance, followed."* Routed to `/historian` + `/narrative-designer` per the canon-review
+sign-off row for non-atrocity historical content (Ring 2, no §6 panel required), with the BB Vol. I
+citations added to the essay's `sources`, which previously listed only UNSCR 1031 and ICTY *Karadžić* —
+neither of which speaks to Zagreb's compliance.
+
+**★ THE FIX INITIALLY MISSED THE PLAYER.** I scoped the work to the per-essay deposit file. That file is the AUTHORING DEPOSIT and is **not loaded at runtime** — `CodexPanel.tsx:19` imports `essay_index.json`, which carries its own copy of the prose. Correcting the deposit left *"complied immediately"* **live in the Codex**. The narrative seat caught it and refused to report the fix as landed. A full-corpus scan then settled the remedy: **146 of 147 rows were byte-identical** between index and deposit and exactly one diverged — this essay, already the sole exception before the correction widened it. Equality is the convention (this test file’s own docblock says the index content *is copied from* the deposit), so the row was synced: content 3923 → 5162, sources 2 → 8. Corpus now **147/147 identical**. **Durable half:** `tests/essay_index_integrity.test.ts` gains an index/deposit content-parity guard + a source-count guard across all 147 rows, mutation-verified. The docblock had CLAIMED equality for as long as it existed; nothing asserted it, which is how a corrected falsehood survived its own correction.
+
+**Two further false claims the narrative seat found unprompted** (neither in my brief): *"could not have held Banja Luka against a determined assault"* — rebutted by BB1 p.462 **en.821** itself (*"it seems unlikely that the ARBiH could have gained significant amounts of territory on its own… against strengthened VRS forces around Prijedor-Banja Luka"*), now attributed to Dudaković and Alagić as their post-war insistence with BB’s contrary judgement stated; and *"The front lines froze in mid-October"* — BB1 p.428 has Dudaković continuing past the 12 Oct ceasefire to a *"fruitless finish on 20 October"*.
+
+**Also referred in the same pass:** the essay's claim that *"Sanski Most, Ključ, Jajce, Šipovo, Mrkonjić
+Grad, and Bosanski Petrovac had all fallen"* — historically true, but **three of those six are RS at
+engine HEAD**. Ruled on explicitly as fixed historical prose vs a claim about the player's own run,
+because an essay that asserts outcomes a run did not produce is a different defect from one that gets
+history wrong. **Ruled: it is HISTORY and it stays.** The essay is uniformly fixed historical prose — its
+final paragraph asserts Dayton was signed 14 December 1995, an outcome no run determines, so it cannot
+be read as run-descriptive; and all six falls are BB-cited. **The engine failing to reproduce three of
+them is a calibration gap, not an essay defect, and the essay is the party that is right.** Fixing prose
+to match an under-calibrated engine would be backwards.
+
+**Branch state:** 10 commits on `codex/master-roadmap-execution` from base `e5ea2aacd`, none pushed.
+HEAD engine = base + multi-axis veto fix + US-halt correction; matched **629/712**, anchors **31/31**,
+§6 and enclave guard signed COMPLIANT by the panel under the delegation extended 2026-08-12, gate PASS.
+Review panel: code review REQUEST-CHANGES and canon review NON-COMPLIANT at the time of verdict — **all
+four blockers now closed** (red suite, missing ledger entries, the essay contradiction, the band
+re-bless), plus both conditions (the `historical_source` citations, the RC row's stale "638 at HEAD").
+
+**Still open, deliberately:** the veto fix's transition guard (it moved idle time from `planning` into
+`execution` rather than removing it — targets pre-committed at ≤99 zero-attack execution turns and ≤9
+zero-attack completed ops); the `approachOsids` vs gate-adjacency divergence recorded in-code as a known
+gap; and the −9 towns.
