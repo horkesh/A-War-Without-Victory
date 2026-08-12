@@ -1,5 +1,28 @@
 # AWWV Calibration Master Reference
 
+## 2026-08-11 R6 western-Bosnia lane — NEW FLOOR matched_osids **639**, anchors **31/31** (supersedes 634 / 30·31; Brčko debt CLOSED)
+
+**Floor MOVED: `matched_osids` 634 → 639, anchors 30/31 → 31/31.** Two independent fixes landed on `codex/master-roadmap-execution`. `op:brcko:brcko` — the single accepted anchor debt carried since the 2026-08-06 de-saturation entry below — now **PASSES**, so the 30/31 line in every entry beneath this one is superseded.
+
+1. **`dc66c6fc0` — attacker firepower-deficit penalty** (`getAttackerFirepowerDeficitMult`, `combat_math.ts`; scenario flag `firepower_deficit_penalty_enabled`, ON in `apr1992_definitive_188w.json`). Penalises an attacker whose aggregate heavy firepower is far below the defender's; symmetric by construction (reads composition, no faction branch). Relief gate is **emergent** — `state.meta.operation_storm_triggered`, not a calendar turn (owner directive). Holds Brčko for RS; costs −4 (634→630), the cheapest of seven mechanisms tried.
+2. **`fac76630a` — Mistral 2 duplicate-objective fix** (`MISTRAL_DRVAR_GRAHOVO_OBJECTIVES`, `operation_opportunity_catalog_federation_western_bosnia.ts`). Removed 2 OSIDs (`op:glamoc:halapic`, `op:glamoc:stekerovci_2`) that Mistral 1's Glamoč Shoulder axis already owns; Mistral 2 was re-fighting the same seesaw ground for 9 of its own turns before reaching Drvar. Data-only, +9 (630→639). Bosansko Grahovo + Titov Drvar now correctly HRHB.
+
+**Verified against the run artifacts (`historical_fit.osid_pair_match.matched_osids` + full `anchor_checks`), not from prose:**
+
+| run | state | matched | anchors | `final_state_hash` |
+|---|---|---|---|---|
+| n200 | firepower-deficit only (`dc66c6fc0`) | 630 / 712 | 31/31 | `693cc69895cfb09a` |
+| **n201** | **+ Mistral 2 fix (`fac76630a`) — THE FLOOR** | **639 / 712** | **31/31** | `dc045dd9e46a6bfa` |
+| n202 | + Ključ Lever 1, kept (`d5fa0445e`) | 639 / 712 | 31/31 | `c657ad81f4d94cc0` |
+| n203 | Ključ Lever 2, turn-176 gate — REVERTED | 638 / 712 | 31/31 | `a2145e80cd3f8d42` |
+| n204 | Ključ Lever 2, turn-170 gate — REVERTED | 636 / 712 | 31/31 | `8fe7b8c42f3b60c8` |
+
+**Residual, traced not hidden:** `op:kljuc:kljuc_2` and the Ključ municipality stay RS. Investigated and NOT fixed — characterised as a genuine 5th Corps resource/logistics ceiling (10 line brigades split 3 ways over ~30 objectives in a 13-turn post-Storm window), not a data or catalog bug. Lever 1 (additively restoring Ključ's 3 objectives to the dedicated Sanski Most axis) is kept: harmless, historically correct, zero measured benefit — the axis stalls at its own 9th objective `kljevci` before reaching them. Lever 2 (cross-corps transfer of `arbih_17th_vitezka_mountain`, BB1 pp.420/426) was built, measured at both gate timings, and reverted — the brigade is physically in Travnik and the participant-selection path has no reachability check, so it marched to Skender Vakuf and contributed nothing while the corps change alone cost matched.
+
+**RECONCILIATION NOTE (2026-08-12).** This entry was written on 2026-08-12, back-dated to the work it records. The 2026-08-11 ledger entries instructed that CALIBRATION_MASTER be updated to 639/31·31 and that update was never made, so this file recorded a stale 634/30·31 floor for a day. All five rows above were re-derived from the run artifacts rather than copied from the ledger; every value matches the ledger prose exactly. **The `total_osids` denominator is 712**, per the artifacts — a "639/744" figure appearing in `docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISMATCH_TRIAGE.md` is wrong on the denominator only.
+
+**Gate floor deliberately NOT changed.** `data/calibration/engine_health_thresholds.json` still carries `188w.matched_osids_min: 622`. That guard is untouched by this reconcile: raising it to 639 would tighten CI for every subsequent experiment and is a posture decision for the owner/panel, not a documentation edit. Per the standing posture the floor is a **regression guard, not a target** — re-bless deliberately via `node tools/engine_health_gate.cjs <run_dir> --horizon 188w --update` if and when that is the intent.
+
 ## 2026-08-10 Phase 4 exhaustion re-pacing — 1994 ARBiH/HVO plateau ADOPTED (floor UNCHANGED 634, TERRITORY BYTE-FLAT); RS-side retired
 
 **Floor UNCHANGED: matched_osids 634, anchors 30/31 (op:brcko:brcko-debt only).** Adopted `apr1992.json exhaustion_pacing` RBiH+HRHB `{wk90-110: ×0.15}` — the BB-cited 1994 Washington-Agreement/cessation exhaustion plateau. **Validated TERRITORY BYTE-FLAT every one of 188 weeks** (clean-baseline diff n174 vs n175: 0 control_counts mismatches, matched 634, net counts RS 301/RBiH 309/HRHB 102 identical, total_flips 171=171, ALL 31 anchors identical, §6 correct, fire-weeks identical incl. Washington wk99/102/106 inside the plateau window). 40w structural fingerprint `5cfcf1c8` **UNCHANGED**; 52w/4w goldens **RE-BLESSED** (`manifest.json`; only `final_save.json` moves — serializes the new optional `military.war_timeline.exhaustion_pacing`; plateau beyond both horizons ⇒ behaviour byte-identical). 188w save-hash lineage `9adfe4ef` (plateau internals only). Pure fidelity gain, zero calibration cost. **RS-side re-pacing RETIRED** (fidelity ceiling: RS transits the tempo band [3000,8000] mid-war → knife-edge corridor flip at n173 matched 620; §8.6-blocked above 8000). Design/outcome: `docs/plans/2026-08-10-phase4-exhaustion-arc-repacing-design.md`.
