@@ -73,15 +73,32 @@ const SPATIAL_IMPACT = 0.4;   // spec C17 — supply_mult = 1 - SPATIAL_IMPACT *
  * OSIDs MOST likely to register Tier-1 spatial/authority strain (isolated + supply-fragile),
  * and the genocide-rupture floor (`srebrenica_genocide_1995`, turn ≥ 160) is a §6 invariant.
  *
- * The predicate is enforced at THREE sites: the PRIMARY chokepoint in
- * getOrInitCollapseDamage (keeps the OSID out of collapse_damage.by_entity → blocks the
- * recompute path AND the loss_of_control will_not_recover marking), a loop-skip before
- * updateCapacityModifiers (keeps the OSID out of capacity_modifiers), and a
- * defense-in-depth check inside recomputePhase3DCapacityModifiersFromDamage. Together
- * the enclave is provably absent from BOTH maps on the PRODUCTION path → no OWN-OSID
- * collapse effect on any §6 OSID. Two documented gaps sit outside that proof, neither
- * reaching a combat path: the CLI audit harness makes one unguarded direct write that
- * bypasses the chokepoint, and G1 does not neutralize a protected OSID's EDGES. Both
+ * The predicate is enforced at THREE sites, and which one is LOAD-BEARING is not obvious
+ * from reading them — get this wrong and a two-step edit produces a §6 breach with a green
+ * suite, so it is stated explicitly:
+ *
+ *   1. LOAD-BEARING TODAY — the loop-skip in applyPhase3DCollapseResolution. It `continue`s
+ *      on every guarded OSID before any damage or modifier work, and it is what actually
+ *      keeps enclaves out of both maps. Behaviourally covered: defeat it and the G1 tests
+ *      fail. **This is the line that must not be removed.**
+ *   2. DEFENCE-IN-DEPTH, CURRENTLY UNREACHABLE — the guard inside getOrInitCollapseDamage.
+ *      That function has exactly one caller, downstream of the loop-skip, so for a guarded
+ *      OSID this branch never executes. **Deleting it leaves every test green.** It is NOT
+ *      dead code: it is a precondition on a shared helper with one caller today, and it goes
+ *      live and correct the moment a second caller is added. A source-text pin holds it in
+ *      place precisely because no behavioural test can.
+ *   3. DEFENCE-IN-DEPTH — the check in recomputePhase3DCapacityModifiersFromDamage, which
+ *      guards the seed/recompute path the CLI harness uses.
+ *
+ * THE HAZARD THIS ORDERING CREATES: remove (2) — suite green, the redundancy is silently
+ * gone — then later remove (1) believing (2) still covers it. That composition is a §6
+ * breach that no test in this repo would catch. Neither guard may be removed on the grounds
+ * that the other exists.
+ *
+ * Together the enclave is provably absent from BOTH maps on the PRODUCTION path → no
+ * OWN-OSID collapse effect on any §6 OSID. Two documented gaps sit outside that proof,
+ * neither reaching a combat path: the CLI audit harness makes one unguarded direct write
+ * that bypasses the chokepoint, and G1 does not neutralize a protected OSID's EDGES. Both
  * are detailed on getOrInitCollapseDamage below.
  *
  * Phase 3D never flips `political_controllers`; the only §6 risk is INDIRECT
@@ -142,10 +159,16 @@ export interface Phase3DCollapseResolutionResult {
  * §6 GUARD G1 (RATIFIED — owner + /historian + Pyrrhic §6 panel, packet #368).
  * Spec: docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md §4.3.
  *
- * This is the SOLE production write site for `collapse_damage.by_entity` (panel
- * grep-verified). Guarding it here is the single chokepoint: for any protected enclave
- * OSID we return a DETACHED zero-damage object WITHOUT writing it to state, so the OSID
- * is provably ABSENT from collapse_damage.by_entity. That absence transitively guarantees:
+ * This is the SOLE production write site for `collapse_damage.by_entity`, and the guard here
+ * is the function defending its own contract. It is NOT, today, what keeps enclaves out of
+ * the map — the loop-skip in applyPhase3DCollapseResolution `continue`s first, so this branch
+ * is unreachable for a guarded OSID (see the module docblock's three-site note, and the
+ * source-text pin in tests/collapse_phase1_disabled.test.ts). Keep it: it is the guarantee
+ * that any FUTURE caller of this function inherits the guard automatically.
+ *
+ * For any protected enclave OSID we return a DETACHED zero-damage object WITHOUT writing it
+ * to state, so the OSID is provably ABSENT from collapse_damage.by_entity. Were this branch
+ * reached, that absence would transitively guarantee:
  *   • the capacity_modifier derivation never runs for it (updateCapacityModifiers is
  *     only called on the returned object's owner in the resolution loop, which skips it),
  *   • recomputePhase3DCapacityModifiersFromDamage() iterates collapse_damage.by_entity →

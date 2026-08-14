@@ -532,8 +532,17 @@ describe('collapse Phase I — §6 guard G1 against the six MEASURED pending haz
      * WHAT THIS PIN BUYS, AND WHAT IT DOES NOT: it is a source-text assertion, so it binds the
      * MECHANISM's presence, not its behaviour. It cannot verify the guard works — nothing can,
      * while the line is unreachable. Treat it as a tripwire on the first of those two edits,
-     * not as proof of protection. The real fix is for the module docblock to stop calling this
-     * the primary guard when the loop-skip is what is load-bearing.
+     * not as proof of protection.
+     *
+     * NOT DEAD CODE, and this is the argument against deleting it: the guard is a precondition
+     * on a shared helper that happens to have exactly one caller today. A function defending
+     * its own contract is correct design irrespective of the current call graph, and this one
+     * goes live the moment a second caller is added.
+     *
+     * The module docblock of `phase3d_collapse_resolution.ts` now states the same three-site
+     * ordering, naming the loop-skip as load-bearing and this site as unreachable
+     * defence-in-depth. THE TWO MUST STAY IN AGREEMENT — if you change one, change the other,
+     * or the next reader resolves the contradiction by guessing.
      */
     it('STRUCTURAL: the shadowed chokepoint guard in getOrInitCollapseDamage is still present', () => {
         const src = readFileSync(
@@ -550,10 +559,24 @@ describe('collapse Phase I — §6 guard G1 against the six MEASURED pending haz
 
         expect(
             body.includes('isPhase3DEnclaveGuarded(entityId)'),
-            'the G1 chokepoint guard was removed from getOrInitCollapseDamage. Deleting it breaks '
-            + 'NO test, because the loop-skip at the resolution loop shadows it — which is exactly '
-            + 'why this pin exists. Restore it, or remove the loop-skip in the same change and '
-            + 'update the module docblock to say which site is load-bearing.'
+            'The G1 predicate call was removed from (or replaced inside) getOrInitCollapseDamage.\n'
+            + '\n'
+            + 'WHY NO BEHAVIOURAL TEST COVERS THIS, AND WHY A GREEN SUITE IS NOT EVIDENCE:\n'
+            + 'the line is UNREACHABLE today. getOrInitCollapseDamage has exactly one caller, and '
+            + 'the loop-skip in applyPhase3DCollapseResolution `continue`s on every guarded OSID '
+            + 'before reaching it. No input can therefore distinguish this guard being present '
+            + 'from it being absent, and every other test in this repo passes either way — so a '
+            + 'source-text pin is the ONLY instrument that can hold this defence layer in place. '
+            + 'Do not delete this pin as unrigorous because you cannot write a behavioural '
+            + 'version; that impossibility is the reason it exists.\n'
+            + '\n'
+            + 'IT IS NOT DEAD CODE: it is a precondition on a shared helper that happens to have '
+            + 'one caller today, and it goes live and correct the moment a second caller is added.\n'
+            + '\n'
+            + 'THE HAZARD: remove this guard (suite green, redundancy silently gone), then later '
+            + 'remove the loop-skip believing this one still covers it. That composition is a §6 '
+            + 'breach no test would catch. Restore the call, and keep it and the module docblock '
+            + 'telling the same story.'
         ).toBe(true);
     });
 
