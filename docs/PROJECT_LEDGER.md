@@ -27052,3 +27052,109 @@ re-bless), plus both conditions (the `historical_source` citations, the RC row's
 `execution` rather than removing it — targets pre-committed at ≤99 zero-attack execution turns and ≤9
 zero-attack completed ops); the `approachOsids` vs gate-adjacency divergence recorded in-code as a known
 gap; and the −9 towns.
+
+---
+
+## 2026-08-14 — RC reinstated, panelled, and re-scoped: breadth was the wrong question
+
+Owner asked what was next on the roadmap. Sequencing said **RC** (the pressure→exhaustion→COLLAPSE
+pipeline): it moves territory, so it must precede final calibration or the map gets calibrated twice.
+A four-seat Pyrrhic panel plus a **named reconciler** was convened on the lane's stated open question —
+eligibility breadth. Read-only throughout; **no scenario was fired**. Full record committed at
+`216936344`: `docs/40_reports/20260813_RC_COLLAPSE_PANEL_FROZEN_ARTIFACT.md` (the seats, frozen before
+reconciliation) and `..._RECONCILER_SYNTHESIS.md` (the adjudication). Kept as two documents on purpose —
+merging them would destroy the freeze/reconcile distinction that makes the retractions legible.
+
+**The finding, stated for the first time by the reconciler:** *the only faction eligible to collapse is
+the only faction that cannot accumulate enough strain to collapse.* Tier-0 is a permanent **faction
+filter**, not a threshold pressure can open — HRHB's gate is open from turn <=10, RBiH's and RS's are
+effectively hard-wired closed — and HRHB has zero cells reaching the strain floor under every edge
+assumption. The two gates are **anti-aligned by construction**: fragmentation means low strain,
+consolidation means a closed gate.
+
+Supporting, each independently derived:
+
+- **Breadth at HEAD is 0, VERIFIED not inferred.** War-or-Game validated twice before concluding —
+  control replay reproduces the final save at **712/712 OSIDs**, and its rebuilt front-edge model gives
+  **300 edges against the artifact's 300**. Closest near-miss `op:stolac:stolac_2` at strain 53.70 vs a
+  55 floor. June's sole collapse OSID `op:stolac:hatelji_2` is **RS at t0 and t188** and never flips, so
+  any argument resting on "the one collapse we observed" rests on a two-month-old engine.
+- **Frontage-days is falsified by the historical record.** Historian's C-1: Teocak/Majevica held 52 weeks
+  of maximal frontage under five ARBiH attacks and moved nothing. C-2, the decisive control: **Drvar vs
+  Sipovo, same VRS corps, same week of Sept 1995, opposite outcomes** — isolating the mechanism from
+  every faction-scoped and time-integrated variable at once. **Any metric returning the same value for
+  those two is falsified.**
+- **Cascade does not exist at any breadth.** No neighbour coupling anywhere: `local_strain[Y]` is a
+  function of Y's own edge count alone. Widening changes N; it cannot change the topology.
+- **Two of three collapse domains are dead by construction** — authority pinned at 50 against a `<30`
+  gate; cohesion tests `ops.fatigue > 30` against `FATIGUE_MAX = 30` with every writer clamped.
+- **Only 4 of 17 constants are live and correctly scaled** (Systems). C14 is the real bottleneck:
+  effective floor 55 against ~0.3/turn, i.e. ~185 weeks of continuous front contact.
+
+**Panel integrity.** Two claims were RETRACTED under the reconciler questioning the seats, both from
+War-or-Game — the RBiH Tier-0 trip point (RBiH peaks at 6.4% and falls to 1.0% against a 10% gate; the
+original count wrongly included 12 cells that had already fallen) and its own contiguity tripwire.
+Systems retracted nothing and dissented usefully on one point (the exhaustion term is a *timing* gate,
+not zero discrimination). The reconciler was told to test the three-seat convergence rather than inherit
+it; it looked for a fifth neighbour-coupling path, found one the seats missed (a control feedback loop),
+and showed it runs through the faction-wide gate and so cannot cascade — **strengthening** the
+convergence rather than ratifying it.
+
+**Section 6: COMPLIANT with 9 blocking criteria** (Canon-S6, ruling under the 2026-08-12 delegation). The
+field guard is genuinely structural — static OSID-space predicate at the write root — but the **outcome**
+invariant is contingent, because the guard is own-OSID-only and enclave *rims* are unguarded. Named
+concrete break path: **`op:zvornik:rastosnica_2`**, the Teocak corridor, strain 56.40, unguarded, and
+**inside the measured 34-entry cliff** — lose it and Teocak is severed without any guarded OSID ever
+acquiring `collapse_damage`. 10 of the 34 are rim cells; zero of the 6 guard-suppressed cells are.
+Also found: the combat consumer **went live after the clearance** (PR #398, `attack_resolution_osid.ts:867`)
+against the guard header's own revisit condition, and the collapse-ON section-6 proof **does not exist** —
+zero markers across 102 run dirs, the only ON PASS expired at a 649 floor.
+
+**OWNER DECISIONS (2026-08-13/14):** **B now, then D-shape, then D-selection. C STRUCK. D-topology
+RESERVED.** The MASTER_ROADMAP RC row still describes C and is now stale. Separately: branch pushed
+(`eb56d2f93..29d7fadbb`, 43 commits, fast-forward verified); **E1 authorised** — a 188w structural
+fingerprint to be captured off Stage 2's OFF baseline (drift detector, NOT a quality gate:
+`matched_osids_min` stays **622** and the -9 town debt remains owed); and the CLAUDE.md pointer fix.
+
+**D-shape ruled: NO non-compliance** (`local_strain` is positively a *different object* from Section 8's
+Control Strain, which is `war_control_strain` — municipality-keyed, demographic, and already bound to
+Section 8 by the 2026-05-21 canon audit). Section 8:145's "must never" attaches only to Exhaustion. This
+**falsified the reconciler's reason for sequencing D-shape first**, so the order was reversed to
+**D-selection first**. `Math.exp` at `phase3a_pressure_eligibility.ts:218,223` is NOT a Section 8.6
+violation — the argument is map geometry, not a bounded exhaustion read. (My brief had pointed at the
+wrong file; the seat corrected it.)
+
+**RC Stage 0 landed** (`9a7a11818`, 953 insertions / 9 files): flag-lifecycle contamination fixed by
+establish-don't-remember-to-reset (a teardown is skipped on throw, which is when contamination is worst);
+the section-6 gate's **false green** closed on two counts — mtime ordering replaced with deterministic
+name-only selection, and `it.skipIf` removed so G2-A/G2-B always run, with `AWWV_REQUIRE_S6_EXECUTION=true`
+as criterion-3 enforcement. `computeSeverity` lost its never-referenced `persistence` argument (spec-cited,
+not an invented curve). **Criterion 1 verified by the orchestrator, not asserted by the implementers: the
+guard predicate is byte-unchanged.**
+
+**THE FULL SUITE WAS NOT CLEAN AND THE LAST AGENT REPORT SAID IT WAS.** Both implementers hit session
+limits mid-lane; the final report read "zero failures so far". The suite completed at **1279 passed /
+4 skipped / 2 files failed**. Both proven PRE-EXISTING rather than assumed: `army_reserve_legibility` (4)
+is a stale **sector to OG rename** whose source string in `messages.en.ts` is not in the diff, and
+`operation_opportunities_catalog` (1) **reproduces identically on a detached clean-HEAD worktree**
+carrying none of the changes. Taking the last report at face value would have recorded Stage 0 as clean.
+
+**Open / owed:** independent review of `9a7a11818` (both implementers died before it; dispatched).
+**E2** — `computeSupplyReachabilityOsid` runs on the MAINLINE and may be blind to Bihac and Gorazde; the
+`isEnclaveContainable` comment claiming it reads the same BFS must be verified, not trusted.
+**D2 dead keys** (`op:gorazde:novakovici`, `op:gorazde:zorlaci` — absent from the 712 universe)
+deliberately unfixed, since fixing them touches the file criterion 1 requires unchanged; ordering referred
+to the section-6 seat. A **latent Section 8.6 breach by gate ordering** at
+`phase3a_pressure_eligibility.ts:265` (compliant only because the `:328` gate provably prevents the clamp
+binding). The **two-strain namespace collision** (`war_control_strain` vs `local_strain`, both monotone,
+no doc disambiguating them). And the whole RC report class is **unindexed** in `40_reports/README.md`.
+
+**Process:** CI has not run since ~2026-08-10 — GitHub **account billing rejection**, not a code failure —
+so every "CI green" in that window is void and local `tsc` + `vitest` is the only verification. Two lanes
+were dispatched into one working tree both told to run the full suite; they collided and killed one run at
+55 minutes. That was a dispatch error: partial trees are not what ships, so the full gate belongs to the
+integration step, not to each lane.
+
+**Reconciler's caution, recorded because it is the most misusable output of this work:** the Historian's
+figures (8-12 episodes / 100-180 cumulative / 40-80 concurrent) are **SHAPE, NOT ACCEPTANCE THRESHOLDS**.
+A future lane fitting to them as targets has misread this panel.
