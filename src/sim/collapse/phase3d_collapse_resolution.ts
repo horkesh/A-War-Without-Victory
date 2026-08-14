@@ -167,8 +167,9 @@ export interface Phase3DCollapseResolutionResult {
  * that any FUTURE caller of this function inherits the guard automatically.
  *
  * For any protected enclave OSID we return a DETACHED zero-damage object WITHOUT writing it
- * to state, so the OSID is provably ABSENT from collapse_damage.by_entity. Were this branch
- * reached, that absence would transitively guarantee:
+ * to state. The OSID is provably ABSENT from collapse_damage.by_entity — today because the
+ * loop-skip returns before this branch is reached, and by this branch as well should any
+ * future caller reach it. That absence, however it is achieved, guarantees:
  *   • the capacity_modifier derivation never runs for it (updateCapacityModifiers is
  *     only called on the returned object's owner in the resolution loop, which skips it),
  *   • recomputePhase3DCapacityModifiersFromDamage() iterates collapse_damage.by_entity →
