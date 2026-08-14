@@ -1,8 +1,26 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 280 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 288 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-08-14) — RC collapse batch (eight green-but-vacuous instances in one session)
+
+### [Testing] Ask not "does this pass?" but "could this have failed?" — eight green tests/guards asserted nothing, and NONE was found by reading — see `docs/life_lessons/process.md`
+
+### [Testing] Mutate at EVERY layer the guard claims to cover — five honest mutations all hit the already-covered pure-function layer while the caller-side wiring went untested, twice — see `docs/life_lessons/process.md`
+
+### [Testing] A loop over an empty set is a green test that asserted nothing — assert how much was COMPARED, not just that violations were zero — see `docs/life_lessons/process.md`
+
+### [Architecture] Verifying a guard is at the right PLACE is not verifying it is REACHED — deleting the "sole write site" guard left all 21 tests green because a loop-skip short-circuits first — see `docs/life_lessons/architecture.md`
+
+### [Process] A comment can be wrong four times running, each correction accurate and each inheriting its neighbour's error — make it enforced and DELETE the prose — see `docs/life_lessons/process.md`
+
+### [Calibration] A permanently-red gate is worse than a missing one — it swallows everything after it, and every later change becomes indistinguishable from the original breaker — see `docs/life_lessons/calibration.md`
+
+### [Calibration] The CHEAP check is the one that gets skipped — the commit that broke the 52w golden had passed a full 188w with 31/31 anchors — see `docs/life_lessons/calibration.md`
+
+### [Process] NEVER `git checkout --` in a tree another agent works in — it silently discarded an uncommitted seam pin and made two truthful reports disagree with the tree — see `docs/life_lessons/process.md`
 
 ## New Lessons (2026-08-12) — four-refutation batch (EH-F1 blocked, transient hypothesis measured false)
 

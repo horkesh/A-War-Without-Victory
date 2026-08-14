@@ -4343,3 +4343,45 @@ faction-blind when the floors are not, and the post-1.0 "combat-earned cohesion"
 remedies are already dead on merits and must not be re-proposed — a naive floor bump (disproven and
 non-monotonic: 20/25/30 → 634/623/629, with both alternatives breaking the §6 Bihać hold),
 cumulative/windowed cohesion, and the attacker-relative floor.
+
+## 2026-08-14 - A green test that CANNOT fail is the dominant defect class — eight instances in one session, none found by reading
+
+Eight separate things were green while asserting nothing, across tests, guards and a §6 proof. Every one was found by someone deliberately trying to make it lie; not one was found by reading the code. Five were agents catching themselves.
+
+The instances, because the variety is the point: (1) `it.skipIf` made two §6 cases vanish into skips for their entire existence — a green suite proved nothing about §6; (2) five honest mutations all landed on the already-covered pure-function layer while the caller-side wiring went untested, so reintroducing the original bug left 11 tests green; (3) an equality pin passed the realistic bypass because two orderings coincided *on this checkout* — mtime-newest and counter-newest were the same directory; (4) two empty controller maps compared 84 keys of `undefined` against `undefined` and reported a clean §6 identity proof over zero comparisons; (5) deleting the guard the docblock called "the SOLE production write site" left all 21 tests green, because a loop-skip 33 lines earlier already short-circuited every guarded OSID — the "primary chokepoint" is unreachable for guarded input; (6) the Stage 2 §6 pass itself was vacuous, passing because nothing ever reached the guard; (7) two of four manifest scenarios had not been compared since Aug 11, masked by a first-mismatch abort; (8) a regex matching nothing yields an empty importer set and passes an allowlist check.
+
+**The generative rule: ask not "does this pass?" but "could this have failed?"** For a guard, delete it and see. For a loop, assert how much was COMPARED, not just that violations were zero. For a pin, mutate the mechanism it bans AND the answer it binds — they are different things and neither subsumes the other.
+
+**The corollary that produced most of the finds: mutate at every layer the guard CLAIMS to cover.** Honest, thorough mutation of the wrong layer is the trap, because it produces real evidence of the wrong thing. The uncovered layer is almost always the wiring between a well-tested pure function and its caller — "is the caller forced to use this?" rather than "does the function behave?".
+
+## 2026-08-14 - Verifying a guard is at the right PLACE is not verifying it is REACHED
+
+The §6 canon seat traced every writer of `collapse_damage`, correctly established the guard sits at the write root, and called the property structural. All of that was true. Then a mutation deleted the guard and every test stayed green: the site has one caller, downstream of a loop-skip that already `continue`s on guarded input, so the line is unreachable and no behavioural test can distinguish its presence. Its own words: *"I verified the guard is at the write root; I did not verify the write root is reached by guarded input."*
+
+**The hazard is an ORDERING of two individually-safe edits.** Delete the redundant guard — suite green, the redundancy is silently gone. Later delete the load-bearing one believing the first still covers it. Breach, with a green suite, and neither commit looked wrong.
+
+Remedies, both required: document WHICH of N guards is load-bearing rather than merely that N exist; and where a behavioural test is impossible *by construction*, a source-text pin is the only available instrument — pin the PREDICATE CALL rather than "a guard statement" (swapping in `startsWith('op:srebrenica:')` compiles clean and silently protects one enclave of nine), and put the reason in the failure message, because pins get removed by people who do not know why they exist.
+
+## 2026-08-14 - A comment can be wrong four times running, each correction accurate and each inheriting its neighbour's error
+
+The §6 consumer docblock was wrong four times: the original "all consumers report-only"; a false "the CLI harness honours the guard automatically"; the "primary chokepoint" claim; and very nearly a fourth, a subjunctive rewrite that would have implied `will_not_recover` might currently trip on a §6 enclave when it provably cannot.
+
+**Each correction was accurate about the thing it fixed and silently inherited a neighbouring assumption.** Every one was made carefully by a competent reader. That is why it kept happening and why "be more careful" is not the fix.
+
+Two structural remedies. **Subordinate the drift-prone part to the checkable part** — lead with the one claim that is verifiable and stable ("no collapse consumer reaches attack-launch or defender-strength, except X at file:line"), then state explicitly that everything below it is context that drifts, and that on disagreement the reader re-derives from the call sites rather than the prose. **Then make it enforced rather than asserted and DELETE the prose** — a frozen importer manifest replaced the per-consumer inventory entirely. The payoff of that test is not the guard, it is the deletion; keeping both would be a fifth thing to hold in sync.
+
+Note the counter-argument that has to be answered first, and it is a good one: an enumeration cannot simply be deleted while the claim above it quantifies over it. "No edge consumer reaches combat" is unfalsifiable unless the edge consumers are enumerated somewhere. So the inventory survives *until* the manifest exists, and then it goes — the exit condition, not an indefinite duplication.
+
+## 2026-08-14 - A permanently-red gate is worse than a missing one — it silently swallows everything after it
+
+`test:baselines` had been red since 2026-08-12, bisected to a single commit whose own body recorded the debt as PENDING. Two consequences, and the second is the expensive one.
+
+The house rule that output-changing branches must reconcile baselines became unenforceable for two days — every branch that ran it saw red and learned nothing. Worse, **every 52w-affecting change committed in that window is now indistinguishable from the original breaker**, because they all roll up into one actual hash. A gate that fails for a known reason stops discriminating between that reason and any new one.
+
+And the abort masked the rest: two of four manifest scenarios had not been compared since Aug 11, so of four gates only one was live. **Collect all failures and throw once** — a first-mismatch abort makes the alphabetically-first artifact look like the whole story (here it was 7 of 8 drifting) and hides every scenario behind the failing one.
+
+**Do not bless out of a red.** The breaker's parent was verified green, so if that lane reverts, the golden goes green with no bless at all; blessing would have baked half-adopted behaviour in and required a second bless to undo. Diagnose to a commit first, then reconcile to whatever survives.
+
+## 2026-08-14 - The cheap check is the one that gets skipped, and it is the one that catches this
+
+The commit that broke the 52w golden had been validated at 188 weeks — anchors 31/31, §6 invariants correct, engine-health gate 7/7. It skipped the two-minute check, not the twenty-minute one. Thoroughness on the expensive axis reads as diligence and produces exactly the confidence that makes the cheap axis feel unnecessary.
