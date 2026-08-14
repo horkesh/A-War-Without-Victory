@@ -88,6 +88,18 @@ export async function runScenarioAndHash(
     return { hashes, runDir: result.outDir };
 }
 
+/**
+ * NOTE (2026-08-14) — `scenarios` keeps FILE ORDER; only `artifacts` and `expected_files` are
+ * sorted. That was a live hazard while compareAgainstBaselines threw on the first mismatch: the
+ * 188w entry is checked today only because it happens to sit first in the file, and a manual
+ * manifest reorder or an id rename would have moved it behind the failing `apr1992_52w` entry and
+ * made the 188w fingerprint INERT with no error to say so.
+ *
+ * Collecting all failures removes the hazard, so this is left as-is deliberately rather than
+ * sorted — sorting `scenarios` here would change which entry runs first and is not needed once
+ * every entry is always reached. Recorded so the ordering is understood as incidental, not relied
+ * upon.
+ */
 export function loadManifestSync(content: string): BaselineManifest {
     const raw = JSON.parse(content) as unknown;
     if (typeof raw !== 'object' || raw === null) throw new Error('manifest.json: invalid root');
@@ -105,46 +117,172 @@ export function loadManifestSync(content: string): BaselineManifest {
     };
 }
 
-function formatMismatchReport(
-    scenarioId: string,
-    artifact: string,
-    expectedHash: string,
-    actualHash: string,
-    runDir: string
-): string {
+/**
+ * One reason a scenario failed its baseline check.
+ *
+ * `run_error` carries no hashes — the scenario never got far enough to produce any.
+ */
+export interface BaselineFailure {
+    kind: 'mismatch' | 'missing_artifact' | 'run_error';
+    scenario_id: string;
+    /** Artifact name; null for a `run_error`, which is not attributable to one artifact. */
+    artifact: string | null;
+    expected: string | null;
+    actual: string | null;
+    run_dir: string | null;
+}
+
+function formatFailure(f: BaselineFailure): string {
+    if (f.kind === 'run_error') {
+        return [
+            `Baseline run FAILED: scenario=${f.scenario_id}`,
+            `  error: ${f.actual ?? '(unknown)'}`
+        ].join('\n');
+    }
     return [
-        `Baseline mismatch: scenario=${scenarioId} artifact=${artifact}`,
-        `  expected: ${expectedHash}`,
-        `  actual:   ${actualHash}`,
-        `  run dir:  ${runDir}`
+        `Baseline mismatch: scenario=${f.scenario_id} artifact=${f.artifact}`,
+        `  expected: ${f.expected}`,
+        `  actual:   ${f.actual}`,
+        `  run dir:  ${f.run_dir}`
     ].join('\n');
 }
 
 /**
- * Compare current run hashes to manifest. Throws on first mismatch with clear report.
+ * Aggregate report. Leads with a per-scenario tally so a broad drift is not mistaken for a
+ * single-file problem — the exact misreading that happened when `apr1992_52w` was reported as an
+ * `activity_summary.json` issue while it was in fact drifting on 7 of its 8 artifacts, that file
+ * being merely alphabetically first.
  */
-export async function compareAgainstBaselines(manifest: BaselineManifest): Promise<void> {
+export function formatFailureSummary(failures: readonly BaselineFailure[]): string {
+    const byScenario = new Map<string, number>();
+    for (const f of failures) {
+        byScenario.set(f.scenario_id, (byScenario.get(f.scenario_id) ?? 0) + 1);
+    }
+    const tally = [...byScenario.entries()]
+        .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+        .map(([id, n]) => `  ${id}: ${n} failure${n === 1 ? '' : 's'}`)
+        .join('\n');
+    return [
+        `Baseline regression FAILED: ${failures.length} failure${failures.length === 1 ? '' : 's'} ` +
+        `across ${byScenario.size} scenario${byScenario.size === 1 ? '' : 's'}.`,
+        tally,
+        '',
+        ...failures.map(formatFailure)
+    ].join('\n');
+}
+
+/**
+ * Carries the STRUCTURED failure list alongside the formatted message.
+ *
+ * Without this, the only way to assert "all failures were collected" is to string-match the
+ * prose, which is brittle and easy to satisfy accidentally. Callers and tests should read
+ * `.failures`; the message stays human-facing.
+ */
+export class BaselineRegressionError extends Error {
+    readonly failures: readonly BaselineFailure[];
+    constructor(failures: readonly BaselineFailure[]) {
+        super(formatFailureSummary(failures));
+        this.name = 'BaselineRegressionError';
+        this.failures = failures;
+    }
+}
+
+/**
+ * Pure per-scenario comparison — every mismatching artifact, not just the first.
+ *
+ * Exported so the aggregation can be tested without paying for scenario runs (188w alone is
+ * ~6 minutes).
+ */
+export function diffScenarioHashes(
+    entry: ScenarioBaselineEntry,
+    artifacts: readonly string[],
+    actualHashes: Record<string, string>,
+    runDir: string
+): BaselineFailure[] {
+    const failures: BaselineFailure[] = [];
+    for (const name of artifacts) {
+        const expected = entry.hashes[name];
+        if (expected == null) continue;
+        const actual = actualHashes[name];
+        if (actual == null) {
+            failures.push({
+                kind: 'missing_artifact',
+                scenario_id: entry.id,
+                artifact: name,
+                expected,
+                actual: '(file missing)',
+                run_dir: runDir
+            });
+            continue;
+        }
+        if (actual !== expected) {
+            failures.push({
+                kind: 'mismatch',
+                scenario_id: entry.id,
+                artifact: name,
+                expected,
+                actual,
+                run_dir: runDir
+            });
+        }
+    }
+    return failures;
+}
+
+/** Injectable for tests; production always uses runScenarioAndHash. */
+export type ScenarioHasher = (
+    scenarioPath: string,
+    outDir: string,
+    artifactNames: string[]
+) => Promise<{ hashes: Record<string, string>; runDir: string }>;
+
+/**
+ * Compare current run hashes to manifest. Collects EVERY failure and throws ONCE at the end.
+ *
+ * WHY NOT FAIL FAST (2026-08-14). This threw on the first mismatch, and that abort was hiding two
+ * of the four manifest scenarios. `apr1992_52w` has been red since 2026-08-12 (bisected to
+ * b9da847f1, the veto fix), and because it sits second in the manifest, `baseline_ops_4w` and
+ * `noop_4w` were never reached — their `_baseline_tmp` artifacts were last written 2026-08-11
+ * while 188w and 52w were re-run the same day. Four scenarios in the manifest, one live gate in
+ * practice. The same masking applied one level down, per artifact: 52w drifts on 7 of 8 artifacts
+ * but only `activity_summary.json` was ever named, purely because it sorts first.
+ *
+ * A scenario whose RUN throws is likewise recorded and iteration continues — otherwise a broken
+ * scenario file masks the rest exactly as a mismatch did.
+ *
+ * This also removes a latent hazard in loadManifestSync (see the note there): with fail-fast, a
+ * manifest reorder could push the 188w fingerprint behind a failing entry and silently make it
+ * inert. Do NOT "optimise" this back into an early throw.
+ */
+export async function compareAgainstBaselines(
+    manifest: BaselineManifest,
+    hasher: ScenarioHasher = runScenarioAndHash
+): Promise<void> {
     await mkdir(BASE_TMP, { recursive: true });
+    const failures: BaselineFailure[] = [];
     for (const entry of manifest.scenarios) {
         const outDir = join(BASE_TMP, entry.id);
-        const { hashes: actualHashes, runDir } = await runScenarioAndHash(
-            entry.scenario_path,
-            outDir,
-            manifest.artifacts
-        );
-        for (const name of manifest.artifacts) {
-            const expected = entry.hashes[name];
-            if (expected == null) continue;
-            const actual = actualHashes[name];
-            if (actual == null) {
-                throw new Error(
-                    formatMismatchReport(entry.id, name, expected, '(file missing)', runDir)
-                );
-            }
-            if (actual !== expected) {
-                throw new Error(formatMismatchReport(entry.id, name, expected, actual, runDir));
-            }
+        let actualHashes: Record<string, string>;
+        let runDir: string;
+        try {
+            const res = await hasher(entry.scenario_path, outDir, manifest.artifacts.slice());
+            actualHashes = res.hashes;
+            runDir = res.runDir;
+        } catch (err) {
+            failures.push({
+                kind: 'run_error',
+                scenario_id: entry.id,
+                artifact: null,
+                expected: null,
+                actual: err instanceof Error ? err.message : String(err),
+                run_dir: null
+            });
+            continue;
         }
+        failures.push(...diffScenarioHashes(entry, manifest.artifacts, actualHashes, runDir));
+    }
+    if (failures.length > 0) {
+        throw new BaselineRegressionError(failures);
     }
 }
 
