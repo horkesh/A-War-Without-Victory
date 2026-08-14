@@ -22,6 +22,31 @@
         "weekly_report.jsonl"
       ],
       "hashes": {
+        "activity_summary.json": "434c51f4884678ddffc3b80efc6ff2816f24e47b02b9619f589d22720b5682a8",
+        "control_delta.json": "5ba3324da5e6dfc691f44d718639a780417d74ab90f356cf9637582754887d27",
+        "end_report.md": "33eacc5c21980503955c490d0eb0450fd94e98ebf769eff23254cddbe84b6449",
+        "final_save.json": "96a084151e9cdf02487665173bcd7977039a23692ed3b423db7930a9481b3243",
+        "formation_delta.json": "43e8e9d5c76e1253949e5cefd372188c9c4f03cc211359ca531eff163fac0791",
+        "run_summary.json": "45d07a107c1960338236191e08770e4dc42fdabd05d18307b4994ba2b7937ad7",
+        "watched_operations.json": "81c3082dbb7d1a3c03035806424cc522b37ccd25e3e9eec4f1754c96b9550c65",
+        "weekly_report.jsonl": "737057f92a127f3e3c16fe0c49c9bcafd87627e87f38617cfe6439a3ba69e7b6"
+      },
+      "id": "apr1992_188w",
+      "scenario_path": "data/scenarios/apr1992_definitive_188w.json",
+      "weeks": 188
+    },
+    {
+      "expected_files": [
+        "activity_summary.json",
+        "control_delta.json",
+        "end_report.md",
+        "final_save.json",
+        "formation_delta.json",
+        "run_summary.json",
+        "watched_operations.json",
+        "weekly_report.jsonl"
+      ],
+      "hashes": {
         "activity_summary.json": "76e7b2bb2ad3e8ad331dbd3284ddd7b0323d997a795f573b2b413ab9fd8d1298",
         "control_delta.json": "cf9b272000bcc1edefd2ae050286e7d5ee1908edf3ba07e9b50122a7d65131a4",
         "end_report.md": "e9fa3f3d12a96ec6cfbc47b5595ca03e95c1196b44d0b79e10563e19bf3ae71b",
