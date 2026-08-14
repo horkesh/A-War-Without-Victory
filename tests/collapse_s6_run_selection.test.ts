@@ -159,8 +159,13 @@ describe('the §6 suite itself carries no filesystem-metadata dependence', () =>
     ));
 
     it('does not order artifacts by mtime', () => {
-        expect(/mtimeMs/.test(s6Src), 'mtimeMs must not appear in the §6 suite').toBe(false);
+        // The BARE token, not just `mtimeMs`. A re-pick via node:fs/promises `stat()` reading
+        // `.mtime` contains neither `mtimeMs` nor `statSync` and evaded the narrower ban — the
+        // review guard sweep derived that bypass and it was then demonstrated live. Comments are
+        // stripped by codeOnly() above, so the prose explaining the retired rule does not trip it.
+        expect(/mtime/.test(s6Src), 'no mtime read of any kind may appear in the §6 suite').toBe(false);
         expect(/statSync/.test(s6Src), 'statSync must not appear in the §6 suite').toBe(false);
+        expect(/fs\/promises/.test(s6Src), 'the §6 suite needs no async fs — a stat() re-pick is the bypass').toBe(false);
     });
 
     it('selects through the deterministic helper', () => {

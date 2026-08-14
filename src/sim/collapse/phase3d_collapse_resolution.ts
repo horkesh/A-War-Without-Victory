@@ -168,31 +168,47 @@ export interface Phase3DCollapseResolutionResult {
  * which is why this is latent rather than live. This is harness-only: no production
  * path writes by_entity except through this function.
  *
- * CONSUMER MAP (corrected 2026-08-13 — this comment previously claimed ALL collapse
- * consumers were "report-only/scaffolding" and set a revisit condition on the first
- * attack-launch / defender-strength wiring. That condition HAS BEEN MET, the claim was
- * never updated, and two reviewers were misled by it. Neither half was accurate: one
- * consumer is now combat, and the others were never report-only.)
+ * ── THE §6 CLAIM ────────────────────────────────────────────────────────────
+ * Exactly ONE collapse consumer reaches combat, and it is own-OSID-only:
  *
- *   • OWN-OSID, COMBAT, LIVE — `attack_resolution_osid.ts:867` does
- *     `defenderPower *= getCollapseDefenderMultiplier(state, targetOsid)` (Phase IV-e,
- *     PR #398 / 03eb82c4e). Reads `capacity_modifiers.by_sid[osid].supply_mult` with a
- *     COLLAPSE_DEFENDER_FLOOR of 0.6, and takes NO edge read (capacity_modifiers.ts:79-86).
- *     G1 keeps enclaves out of by_sid → returns 1.0 on every §6 OSID.
- *   • EDGE, NON-COMBAT, LIVE — `front_pressure.ts:150-151` scales supplied intent and the
- *     generated pressure delta (:165-168); `formation_fatigue.ts:217,229` scales an
- *     edge/region-assigned formation's supply multiplier. These are real state effects
- *     whenever collapse is ON, NOT reports. `front_breaches` is no longer a consumer.
+ *     src/sim/combat/attack_resolution_osid.ts:867
+ *     defenderPower *= getCollapseDefenderMultiplier(state, targetOsid)
+ *
+ * It reads `capacity_modifiers.by_sid[targetOsid].supply_mult` with a floor of
+ * COLLAPSE_DEFENDER_FLOOR = 0.6 and performs NO edge read
+ * (src/sim/collapse/capacity_modifiers.ts:79-86). G1 keeps enclaves out of `by_sid`, so it
+ * returns 1.0 on every §6 OSID. Landed by Phase IV-e, PR #398 / 03eb82c4e.
+ *
+ * That single sentence — "one combat consumer, own-OSID-only, enclave-safe by G1" — is the
+ * load-bearing §6 property, and it is now ENFORCED, not asserted:
+ *
+ *     tests/collapse_consumer_manifest.test.ts
+ *
+ * THE CONSUMER INVENTORY LIVES THERE, NOT HERE. That test freezes the complete set of
+ * modules importing `capacity_modifiers` (with each one's classification) and asserts that
+ * nothing under `src/sim/combat/` touches `getEdgeCapacityMultiplier`. Read it for the
+ * current consumer list; add a consumer and it fails until you classify it.
+ *
+ * DO NOT RESTATE THAT INVENTORY IN THIS COMMENT. It used to live here and was WRONG THREE
+ * TIMES — each revision written carefully by a competent reviewer and each still wrong:
+ * (1) "all consumers report-only/scaffolding" (the combat consumer had already landed);
+ * (2) corrected to name it, but still understated the others; (3) "both edge consumers are
+ * real state effects, NOT reports" (true of front_pressure, false of formation_fatigue,
+ * which terminates in reporters). The failure was structural — prose describing five files
+ * across three directories cannot stay true as they move — so the fix was to delete the
+ * prose, not to write a fourth careful version. The manifest test's own docblock records
+ * its honest limits; it is an import scan, so do not over-trust it either.
  *
  * EDGE-MULTIPLIER RESIDUAL (red-team #2 — still open, Phase-III review item):
  * getEdgeCapacityMultiplier() returns min(mult_a, mult_b), so an edge between a protected
  * OSID and a COLLAPSED non-protected neighbor carries the collapsed value. G1 is
  * own-OSID-only and does NOT neutralize that edge, so a §6 OSID's EDGES can still be
- * degraded through the two edge consumers above. What bounds this is scope, not inertness:
- * no EDGE consumer feeds attack-launch or defender-strength, so the residual cannot
- * accelerate an enclave's fall — the §6 risk G1 exists to prevent. Do not restate this
- * residual as "inert"; it is live-but-out-of-scope, and it becomes a §6 blocker the moment
- * an edge multiplier reaches a combat path.
+ * degraded through whichever edge consumers the manifest currently lists. What bounds this
+ * is scope, not inertness: no EDGE consumer feeds attack-launch or defender-strength, so
+ * the residual cannot accelerate an enclave's fall — the §6 risk G1 exists to prevent. Do
+ * not restate this residual as "inert"; it is live-but-out-of-scope, and it becomes a §6
+ * blocker the moment an edge multiplier reaches a combat path. That moment is exactly what
+ * the manifest test's "no edge multiplier reaches combat" case is there to catch.
  */
 function getOrInitCollapseDamage(
     state: GameState,

@@ -17,8 +17,9 @@
  * Determinism: pure flag state + one env var; no RNG, no clock, no fs (bar the source pin).
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { runScenario } from '../src/scenario/scenario_runner.js';
 import {
     COLLAPSE_FLAGS,
     COLLAPSE_GATE_ENV_VAR,
@@ -62,11 +63,55 @@ afterEach(() => {
     resetCollapseFlags();
 });
 
+/**
+ * F2 (review finding, 2026-08-13) — the registry-completeness claim must be TRUE.
+ *
+ * The original test pinned the registry against a hardcoded 5-name list, which catches a REMOVED
+ * flag and nothing else: a new, unregistered sixth flag passed everything, while the module header
+ * claimed such a flag would be caught. That is the same false-comment defect class as Defect 3.
+ *
+ * The set is now DERIVED FROM SOURCE. Every collapse flag module exposes exactly one
+ * `export function setEnableX(...)`, and named functions keep their identifier at runtime, so the
+ * registry's own `set.name` values can be compared against what the source actually declares.
+ * Add a flag module without registering it and this fails.
+ */
+const COLLAPSE_FLAG_SOURCE_DIRS = [
+    join(process.cwd(), 'src', 'sim', 'pressure'),
+    join(process.cwd(), 'src', 'sim', 'collapse'),
+];
+
+/** Every `export function setEnableX(` declared under the collapse/pressure source dirs. */
+function declaredCollapseFlagSetters(): string[] {
+    const found: string[] = [];
+    for (const dir of COLLAPSE_FLAG_SOURCE_DIRS) {
+        for (const file of readdirSync(dir)) {
+            if (!file.endsWith('.ts')) continue;
+            const src = readFileSync(join(dir, file), 'utf8');
+            for (const m of src.matchAll(/export function (setEnable\w+)\s*\(/g)) {
+                found.push(m[1]);
+            }
+        }
+    }
+    return found.sort();
+}
+
 describe('collapse flag registry', () => {
-    it('covers every collapse enable flag in the engine, sorted', () => {
+    it('covers every collapse flag DECLARED IN SOURCE (derived, not hardcoded)', () => {
+        const declared = declaredCollapseFlagSetters();
+        const registered = COLLAPSE_FLAGS.map(f => f.set.name).sort();
+        expect(
+            registered,
+            'every setEnable* declared under src/sim/pressure + src/sim/collapse must appear in ' +
+            'COLLAPSE_FLAGS — an unregistered flag would silently escape resetCollapseFlags()'
+        ).toEqual(declared);
+        // Sanity: the scan must actually be finding something, or the equality above is vacuous.
+        expect(declared.length).toBeGreaterThanOrEqual(5);
+    });
+
+    it('is sorted and free of duplicates', () => {
         const names = COLLAPSE_FLAGS.map(f => f.name);
-        expect(names).toEqual(['phase3a', 'phase3a_diffusion', 'phase3b', 'phase3c', 'phase3d']);
         expect(names).toEqual([...names].sort());
+        expect(new Set(names).size).toBe(names.length);
     });
 
     it('each registry entry is wired to its own module accessors (no copy-paste crossover)', () => {
@@ -160,6 +205,64 @@ describe('env gate', () => {
 function codeOnly(src: string): string {
     return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
 }
+
+/**
+ * F1 (review finding, 2026-08-13) — BEHAVIOURAL proof at the real call site.
+ *
+ * The structural pins below are grep-shaped: they assert the call is textually present and the
+ * old setters are gone. The reviewer showed they are NOT sufficient — mutating the call site to
+ * `if (readCollapseGateFromEnv()) { applyCollapseGateFromEnv(); }` reinstates the ORIGINAL BUG
+ * (reset never runs on the OFF path) and every structural pin still passed. Only a test that
+ * DRIVES runScenario ON-then-OFF and asserts an all-off snapshot can catch conditionalization.
+ *
+ * How this drives the real entry point cheaply: `applyCollapseGateFromEnv()` is the first
+ * statement in runScenario's body (scenario_runner.ts, immediately after the replayPayloadMode
+ * validation), and `loadScenario` is a bare `readFile`. Pointing runScenario at a nonexistent
+ * scenario therefore executes the genuine call site and then rejects with ENOENT, having written
+ * nothing to disk. `consoleDiagnostics: true` keeps it from pushing a console-suppression frame
+ * it would never pop on the throw path.
+ *
+ * This also pins the gate's POSITION, not just its presence: move the call below loadScenario and
+ * the ON assertion fails, because the throw would come first.
+ */
+describe('runScenario call site — a run cannot inherit collapse state (BEHAVIOURAL, F1)', () => {
+    const MISSING_SCENARIO = join(process.cwd(), 'scenarios', '__rc_s0_nonexistent_scenario__.json');
+
+    /** Enter runScenario for real; it applies the gate, then rejects on the missing scenario. */
+    async function driveRunScenarioGate(): Promise<void> {
+        await expect(
+            runScenario({ scenarioPath: MISSING_SCENARIO, consoleDiagnostics: true })
+        ).rejects.toThrow();
+    }
+
+    it('an ON run followed by an OFF run leaves EVERY collapse flag off', async () => {
+        process.env[COLLAPSE_GATE_ENV_VAR] = 'true';
+        await driveRunScenarioGate();
+        // Proves the gate really executed at the call site — without this the OFF assertion
+        // below could pass trivially on a runScenario that threw before ever reaching it.
+        expect(getCollapseFlagSnapshot(), 'the ON run must have enabled the chain').toEqual(CHAIN_ON);
+
+        delete process.env[COLLAPSE_GATE_ENV_VAR];
+        await driveRunScenarioGate();
+        expect(
+            getCollapseFlagSnapshot(),
+            'THE CONTAMINATION REGRESSION: the OFF run must not inherit the ON run\'s flags. ' +
+            'Fails if the applyCollapseGateFromEnv() call is conditionalized, moved after ' +
+            'loadScenario, or removed.'
+        ).toEqual(ALL_OFF);
+    });
+
+    it('an OFF run after harness-set flags also clears them', async () => {
+        // Not reachable through ENABLE_COLLAPSE at all — diffusion is harness-only. A leaked
+        // harness flag must still not survive into the next scenario run.
+        setEnablePhase3A(true);
+        setEnablePhase3ADiffusion(true);
+
+        delete process.env[COLLAPSE_GATE_ENV_VAR];
+        await driveRunScenarioGate();
+        expect(getCollapseFlagSnapshot()).toEqual(ALL_OFF);
+    });
+});
 
 describe('scenario_runner wiring (structural — the reset must not be bypassable)', () => {
     const runnerSrc = codeOnly(readFileSync(

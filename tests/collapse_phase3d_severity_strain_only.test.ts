@@ -18,6 +18,14 @@
  * These tests exist so that reintroducing a persistence term is a RED TEST, not a silent
  * behavioural change. If a future calibration packet genuinely wants persistence to shape
  * magnitude, amend the spec §2 transform first, then update this file deliberately.
+ *
+ * KNOWN SAMPLING LIMIT (RC-S0-Review, accepted as low risk): these cases sample persistence
+ * only at {0, 4, 400} and strain only at {70, 80, 100}. A persistence term that is active
+ * ONLY outside those points — e.g. one keyed to a narrow band, or one that saturates below
+ * persistence 4 — would survive them. Two mutations were verified to fail here
+ * (`strain × (1 + persistence/100)` and the reviewer's `s * Math.min(1, persistence / 8)`),
+ * which covers the plausible shapes; exhaustive range coverage was judged not worth the
+ * test weight for a parameter the spec does not have.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 import type { GameState } from '../src/state/game_state.js';

@@ -16,10 +16,13 @@
  * caller has to remember a teardown call, and a teardown could not be trusted anyway —
  * it is skipped on a throw or an early return, which is when contamination is worst.
  *
- * The flag registry below is the other half of the fix: adding a new collapse flag
- * without registering it here is caught by tests/collapse_flag_lifecycle.test.ts, so the
- * lifecycle cannot silently go partial the way it did when `phase3a_diffusion` was left
- * out of the scenario-runner gate block.
+ * The flag registry below is the other half of the fix, and the lifecycle is only as
+ * complete as the registry. tests/collapse_flag_lifecycle.test.ts derives the expected
+ * set FROM SOURCE — it scans src/sim/pressure + src/sim/collapse for
+ * `export function setEnable*` and compares against this array's own `set.name` values —
+ * so a new flag module that is not registered here fails that test. Keep every collapse
+ * flag registered or the lifecycle silently goes partial, which is exactly how
+ * `phase3a_diffusion` came to be missing from the old scenario-runner gate block.
  *
  * Determinism: reads one env var at run start (same as the gate block it replaces); no
  * RNG, no clock, no fs. The registry is sorted with `strictCompare` so any iteration over

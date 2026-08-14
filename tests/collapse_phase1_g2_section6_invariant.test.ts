@@ -280,6 +280,44 @@ function reportNonExecution(caseId: string, skipReason: string): void {
 
 describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
 
+    /**
+     * SEAM PIN (review guard sweep, 2026-08-13) — the caller must USE the helper's answer.
+     *
+     * tests/_helpers/s6_run_selection.ts is itself well covered behaviourally, but this suite's
+     * USE of it was pinned only textually (an `includes('selectS6RunDirs(scanS6RunCandidates(')`
+     * grep plus the /mtime/ and /statSync/ bans over in the selection suite). Those survive a
+     * caller that invokes the helper and then IGNORES its result: the grep still matches, and an
+     * mtime re-pick via node:fs/promises `stat()` reading `.mtime` contains neither banned
+     * literal. Same shape as F1 — a well-tested pure function whose caller is not forced to use it.
+     *
+     * These assertions close that seam behaviourally: the three dirs the §6 cases actually read
+     * MUST be exactly what selectS6RunDirs returned. Any re-pick, by any API, diverging by any
+     * amount, fails here.
+     *
+     * Keep the greps too, and know what each buys — they are not redundant. This pin catches
+     * DIVERGENCE; it cannot catch a re-pick that happens to agree. Measured on this checkout: a
+     * newest-first mtime re-pick (what the original defect actually did) passes this pin, because
+     * mtime-newest and counter-newest are currently the SAME dir. The greps ban the mechanism;
+     * this pin binds the answer.
+     */
+    it('SEAM: the dirs the §6 cases read are exactly the deterministic helper\'s answer', () => {
+        expect(runDir, 'sentinel dir must be selection.any, not a re-pick').toBe(
+            selection.any === null ? null : join(RUNS_DIR, selection.any)
+        );
+        expect(onRunDir, 'collapse-ON dir must be selection.on, not a re-pick').toBe(
+            selection.on === null ? null : join(RUNS_DIR, selection.on)
+        );
+        expect(offRunDir, 'collapse-OFF dir must be selection.off, not a re-pick').toBe(
+            selection.off === null ? null : join(RUNS_DIR, selection.off)
+        );
+        // Non-vacuity: with artifacts present these must be real paths, so the identity above is
+        // not being satisfied by three nulls.
+        if (selection.counts.total > 0) {
+            expect(runDir).not.toBeNull();
+            expect(offRunDir).not.toBeNull();
+        }
+    });
+
     it('hardcoded PROTECTED_ENCLAVE_OSIDS stay in sync with the G1 predicate (getEnclaveDefForOsid)', () => {
         for (const osid of PROTECTED_ENCLAVE_OSIDS) {
             expect(getEnclaveDefForOsid(osid), `${osid} must resolve to an enclave definition`).not.toBeNull();
