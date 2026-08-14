@@ -8,6 +8,8 @@
  * Spec: docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md §3, §4, §5.
  */
 import { afterEach, describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { GameState } from '../src/state/game_state.js';
 import type { SupplyReachabilityOsidReport } from '../src/state/supply_reachability_osid.js';
 import {
@@ -263,7 +265,13 @@ describe('collapse Phase I — Phase 3D resolution + §6 guard G1', () => { // l
             ['op:rogatica:zepa_2', 'RBiH'],
             ['op:gorazde:gorazde_2', 'RBiH'],
             ['op:bihac:bihac_2', 'RBiH'],          // bihac_pocket prefix op:bihac:
+            // Sarajevo is a PREFIX enclave. The LOGICAL capital below is not a node in the
+            // 712-OSID universe, so no operation can target it and no control flip can touch
+            // it. It still genuinely exercises G1 — the predicate is a pure string test — so
+            // this row is not vacuous, but it can never be the cell that matters. The PAINTED
+            // core cell is therefore pinned alongside it, as the G2 suite already does.
             ['op:centar_sarajevo:centar_sarajevo', 'RBiH'],
+            ['op:centar_sarajevo:sarajevo_dio_centar_sajarevo', 'RBiH'],
             ['op:ugljevik:teocak_krstac_2', 'RBiH'],
             ['op:kiseljak:kiseljak_2', 'HRHB'],    // HRHB enclaves
             ['op:vitez:vitez_2', 'HRHB'],          // lasva_valley
@@ -347,6 +355,236 @@ describe('collapse Phase I — Phase 3D resolution + §6 guard G1', () => { // l
             return JSON.stringify(r.applied_events);
         };
         expect(run()).toBe(run());
+    });
+});
+
+/**
+ * §6 GUARD G1 — THE SIX MEASURED PENDING HAZARDS (RC panel, Stage 2, 2026-08-14).
+ *
+ * WHY THIS EXISTS, AND WHY IT IS NOT A DUPLICATE OF THE BLOCK ABOVE.
+ * The Stage-2 collapse-ON 188w run (n222 ON / n221 OFF) passed every §6 case — and passed
+ * VACUOUSLY. Tier-0 opened for HRHB spatial only; Tier-1 yielded exactly two HRHB entities,
+ * at strain 53.475 and 42.300 against the 55.0 field floor, and both hit `severity <= 0`
+ * before the sole write site. **G1 was never reached.** The empirical §6 proof from that
+ * pair is therefore silent about the guard: the independent variable never moved.
+ *
+ * The fixture above closes that with a synthetic seed, and it is sound — it bypasses Tier-0
+ * and carries a real discriminator. What it does NOT cover is the hazard the run actually
+ * measured. Forty OSIDs sit at or above the 55.0 floor (RBiH 20, RS 20, HRHB 0) and SIX of
+ * them are enclave-guarded, held back by nothing except their faction's closed Tier-0 gate.
+ * Any packet that opens RBiH's or RS's Tier-0 — including exhaustion re-tuning that never
+ * mentions collapse — puts all six through G1 on the first turn it opens.
+ *
+ * Two things here that no existing fixture touches:
+ *  1. These are prefix/list MEMBERS at their real measured strains, not enclave capitals at
+ *     a synthetic strain 100. Severity at 56.40 is 0.2733 — barely over the 0.25 floor — so
+ *     these exercise the guard in the narrow band where it actually has to work.
+ *  2. FOUR OF THE SIX ARE RS-HELD. A guarded cell held by the BESIEGER is a class no fixture
+ *     covered before. `op:novo_sarajevo:lukavica` is the SRK's own corps HQ: the guard
+ *     written to protect the besieged currently also protects the besieger's headquarters.
+ *     That is a real finding (panel P0-4), not a defect of this test — it is recorded here
+ *     because the guard's behaviour on those cells is now pinned either way.
+ *
+ * Determinism: pure seeded state, no RNG/clock, sorted iteration inside the SUT.
+ */
+describe('collapse Phase I — §6 guard G1 against the six MEASURED pending hazards', () => { // legacy-phase-term-ok
+    afterEach(() => {
+        resetEnablePhase3C();
+        resetEnablePhase3D();
+    });
+
+    /**
+     * The six §6-guarded OSIDs measured at or above the severity floor in the Stage-2 run,
+     * at their REAL strains — not rounded, not a stand-in. `severity` is
+     * `(strain - 40) / (100 - 40)`, recorded per row so the multiplier expectations below
+     * are pinned against the ratified impact constants rather than recomputed by the test.
+     */
+    const PENDING_HAZARDS: ReadonlyArray<{
+        osid: string; controller: 'RBiH' | 'RS'; strain: number; severity: number;
+    }> = [
+        { osid: 'op:gorazde:osjecani_2', controller: 'RBiH', strain: 84.60, severity: 44.60 / 60 },
+        { osid: 'op:novo_sarajevo:lukavica', controller: 'RS', strain: 84.60, severity: 44.60 / 60 },
+        { osid: 'op:gorazde:sopotnica', controller: 'RS', strain: 70.50, severity: 30.50 / 60 },
+        { osid: 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo', controller: 'RBiH', strain: 70.43, severity: 30.43 / 60 },
+        { osid: 'op:centar_sarajevo:radava', controller: 'RS', strain: 56.40, severity: 16.40 / 60 },
+        { osid: 'op:gorazde:kamen', controller: 'RS', strain: 56.40, severity: 16.40 / 60 },
+    ];
+
+    /** Real non-enclave OSIDs, one per hazard row, for the same-strain control. */
+    const CONTROL_OSIDS: readonly string[] = [
+        'op:zvornik:zvornik', 'op:banja_luka:banja_luka_2', 'op:tuzla:tuzla_2',
+        'op:prijedor:prijedor_2', 'op:travnik:travnik_2', 'op:kalesija:tojsici_2',
+    ];
+
+    /** Tier-1-eligible state carrying MANY entities at their own strains. */
+    function tier1ReadyMulti(entries: ReadonlyArray<{ osid: string; strain: number }>): GameState {
+        const state = baseState();
+        const tier1: Record<string, unknown> = {};
+        const strain: Record<string, number> = {};
+        for (const { osid, strain: s } of entries) {
+            tier1[osid] = {
+                domains: { authority: true, cohesion: false, spatial: true },
+                persistence: { authority: 4, cohesion: 0, spatial: 4 },
+                suppressed: false,
+                immune: false,
+            };
+            strain[osid] = s;
+        }
+        state.political.collapse_eligibility_tier1 = tier1 as GameState['political']['collapse_eligibility_tier1'];
+        state.political.local_strain = { by_entity: strain };
+        return state;
+    }
+
+    // ── Liveness + premise ──────────────────────────────────────────────────
+    //
+    // A seeded set of zero would make every assertion below pass having examined nothing.
+    // These pin the SIZE and the PREMISE before anything asserts an absence.
+
+    it('LIVENESS + PREMISE: all six are enclave-guarded, at real strains that clear the severity floor', () => {
+        expect(PENDING_HAZARDS.length, 'the measured hazard set must be all six').toBe(6);
+        expect(CONTROL_OSIDS.length, 'one non-enclave control per hazard row').toBe(6);
+        expect(new Set(PENDING_HAZARDS.map(h => h.osid)).size, 'hazard OSIDs must be distinct').toBe(6);
+
+        for (const { osid, strain, severity } of PENDING_HAZARDS) {
+            // Guarded — otherwise the absence assertions below prove nothing.
+            expect(getEnclaveDefForOsid(osid), `${osid} must be enclave-guarded`).not.toBeNull();
+            // AND above the floor — otherwise `severity <= 0` stops them and the GUARD is
+            // untested, which is exactly how the Stage-2 run passed vacuously.
+            expect(severity, `${osid} strain ${strain} must clear SEVERITY_MIN 0.25`).toBeGreaterThan(0.25);
+            expect(severity).toBeCloseTo((strain - 40) / 60, 10);
+        }
+        for (const osid of CONTROL_OSIDS) {
+            expect(getEnclaveDefForOsid(osid), `control ${osid} must NOT be enclave-guarded`).toBeNull();
+        }
+        // Four RS-held: the besieger-held guarded class no other fixture covers.
+        expect(PENDING_HAZARDS.filter(h => h.controller === 'RS').length).toBe(4);
+    });
+
+    // ── 1. The six, seeded together, at their measured strains ──────────────
+
+    it('the six measured hazards get NO collapse_damage and NO capacity_modifier (enclave_guarded_count === 6)', () => {
+        setEnablePhase3C(true);
+        setEnablePhase3D(true);
+        const state = tier1ReadyMulti(PENDING_HAZARDS);
+        const r = applyPhase3DCollapseResolution(state);
+        expect(r.applied).toBe(true);
+
+        for (const { osid } of PENDING_HAZARDS) {
+            expect(state.political.collapse_damage?.by_entity?.[osid], `collapse_damage must not contain ${osid}`).toBeUndefined();
+            expect(state.political.capacity_modifiers?.by_sid?.[osid], `capacity_modifiers must not contain ${osid}`).toBeUndefined();
+            expect((r.applied_events ?? []).some(e => e.sid === osid), `no applied event for ${osid}`).toBe(false);
+        }
+        // Every one of the six was seen and withheld — not skipped for being below the floor.
+        expect(
+            r.stats.enclave_guarded_count,
+            'all six must be COUNTED as guarded; a lower count means one fell below the severity '
+            + 'floor and was never actually offered to the guard'
+        ).toBe(6);
+        // Nothing else leaked in either.
+        expect(Object.keys(state.political.collapse_damage?.by_entity ?? {})).toEqual([]);
+    });
+
+    // ── 2. Same strains, non-enclave: damage MUST appear ────────────────────
+
+    it('DISCRIMINATOR: non-enclave OSIDs at the SAME six strains DO receive damage and modifiers', () => {
+        setEnablePhase3C(true);
+        setEnablePhase3D(true);
+        const paired = PENDING_HAZARDS.map((h, i) => ({ osid: CONTROL_OSIDS[i], strain: h.strain, severity: h.severity }));
+        const state = tier1ReadyMulti(paired);
+        const r = applyPhase3DCollapseResolution(state);
+        expect(r.applied).toBe(true);
+
+        for (const { osid, severity } of paired) {
+            const damage = state.political.collapse_damage?.by_entity?.[osid];
+            expect(damage, `control ${osid} MUST receive collapse_damage`).toBeDefined();
+            const mods = state.political.capacity_modifiers?.by_sid?.[osid];
+            expect(mods, `control ${osid} MUST receive capacity_modifiers`).toBeDefined();
+            // Ratified impacts C15 = 0.3 (authority), C17 = 0.4 (spatial→supply).
+            expect(mods!.authority_mult, osid).toBeCloseTo(1 - 0.3 * severity, 6);
+            expect(mods!.supply_mult, osid).toBeCloseTo(1 - 0.4 * severity, 6);
+            expect(mods!.cohesion_mult, osid).toBeCloseTo(1.0, 6); // cohesion domain not eligible
+        }
+        expect(r.stats.enclave_guarded_count, 'no control is guarded').toBe(0);
+        expect(r.stats.collapses_applied_count, 'every control must have collapsed').toBeGreaterThan(0);
+        // THE POINT: the harness produces damage in the 56-85 band, so the six enclaves'
+        // absence above is the GUARD and not a silently-zeroed severity in that band.
+        expect(Object.keys(state.political.collapse_damage?.by_entity ?? {}).sort()).toEqual([...CONTROL_OSIDS].sort());
+    });
+
+    /**
+     * STRUCTURAL PIN for a guard site that is UNREACHABLE, and therefore untestable
+     * behaviourally. Found by mutation, not by reading.
+     *
+     * Deleting the G1 check inside `getOrInitCollapseDamage` — the site the module docblock
+     * calls "the PRIMARY chokepoint" and "the SOLE production write site" — leaves the ENTIRE
+     * suite green, this file's 21 tests included. Not because the tests are weak: because the
+     * site is SHADOWED. `getOrInitCollapseDamage` has exactly one call site (`:543`), inside
+     * the resolution loop, and the loop-skip at `:510` already `continue`s on every guarded
+     * OSID before reaching it. The inline comment at `:542` concedes this — "enclaves
+     * short-circuited above". So for a guarded OSID the chokepoint is dead code, no input can
+     * reach it, and no behavioural test can distinguish its presence.
+     *
+     * It is still worth keeping, and that is the whole point: it is the safety net for the
+     * refactor that removes the loop-skip. The hazard is the ORDER of two safe-looking edits —
+     * delete the chokepoint (tests green, net silently gone), then later delete the loop-skip
+     * believing the chokepoint covers it, and §6 breaches with a green suite.
+     *
+     * WHAT THIS PIN BUYS, AND WHAT IT DOES NOT: it is a source-text assertion, so it binds the
+     * MECHANISM's presence, not its behaviour. It cannot verify the guard works — nothing can,
+     * while the line is unreachable. Treat it as a tripwire on the first of those two edits,
+     * not as proof of protection. The real fix is for the module docblock to stop calling this
+     * the primary guard when the loop-skip is what is load-bearing.
+     */
+    it('STRUCTURAL: the shadowed chokepoint guard in getOrInitCollapseDamage is still present', () => {
+        const src = readFileSync(
+            join(process.cwd(), 'src', 'sim', 'collapse', 'phase3d_collapse_resolution.ts'), 'utf8'
+        );
+        // Strip comments first — the docblock names the function and the guard repeatedly,
+        // so an unstripped match would pass on prose alone.
+        const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+
+        const start = code.indexOf('function getOrInitCollapseDamage(');
+        expect(start, 'getOrInitCollapseDamage must exist').toBeGreaterThan(-1);
+        const nextFn = code.indexOf('\nfunction ', start + 1);
+        const body = code.slice(start, nextFn === -1 ? undefined : nextFn);
+
+        expect(
+            body.includes('isPhase3DEnclaveGuarded(entityId)'),
+            'the G1 chokepoint guard was removed from getOrInitCollapseDamage. Deleting it breaks '
+            + 'NO test, because the loop-skip at the resolution loop shadows it — which is exactly '
+            + 'why this pin exists. Restore it, or remove the loop-skip in the same change and '
+            + 'update the module docblock to say which site is load-bearing.'
+        ).toBe(true);
+    });
+
+    // ── 3. The recompute path (defense-in-depth, and where D1 would land) ───
+
+    it('recompute-from-damage: pre-seeded enclave damage yields NO modifier for any of the six', () => {
+        // The CLI harness (phase3abc_audit_harness.ts:1193, defect D1) writes
+        // collapse_damage.by_entity DIRECTLY, bypassing the getOrInitCollapseDamage
+        // chokepoint entirely. recomputePhase3DCapacityModifiersFromDamage is the only thing
+        // standing between that bypass and an enclave capacity_modifier. Nothing tested it
+        // against these six.
+        const state = baseState();
+        const byEntity: Record<string, { authority: number; cohesion: number; spatial: number }> = {};
+        for (const { osid, severity } of PENDING_HAZARDS) {
+            byEntity[osid] = { authority: severity, cohesion: 0, spatial: severity };
+        }
+        const control = CONTROL_OSIDS[0];
+        byEntity[control] = { authority: 1.0, cohesion: 0, spatial: 1.0 };
+        state.political.collapse_damage = { by_entity: byEntity };
+
+        recomputePhase3DCapacityModifiersFromDamage(state);
+
+        for (const { osid } of PENDING_HAZARDS) {
+            expect(
+                state.political.capacity_modifiers?.by_sid?.[osid],
+                `recompute must not derive a modifier for guarded ${osid}`
+            ).toBeUndefined();
+        }
+        // Discriminator on the same call: the control DID get one, so the recompute ran.
+        expect(state.political.capacity_modifiers?.by_sid?.[control]?.authority_mult).toBeCloseTo(0.7, 6);
+        expect(Object.keys(state.political.capacity_modifiers?.by_sid ?? {})).toEqual([control]);
     });
 });
 
