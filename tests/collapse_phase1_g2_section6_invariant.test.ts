@@ -12,8 +12,8 @@
  *    with no proof it was collapse-ON → they passed trivially on collapse-OFF runs.
  *    Collapse-ON runs (ENABLE_COLLAPSE=true, scenario_runner.ts) now write a sidecar
  *    marker `collapse_enabled.json` into the run dir; the collapse-ON §6 suite below
- *    runs ONLY against a marker-verified artifact and SKIPS (visibly, via skipIf — not
- *    a silent pass) when none exists. The latest-artifact assertions are KEPT as the
+ *    runs ONLY against a marker-verified artifact and REPORTS non-execution when none
+ *    exists (see RC DEFECT 8 below). The selected-artifact assertions are KEPT as the
  *    collapse-OFF regression sentinel.
  *  - G2-B (BLOCKING): rupture-timing IDENTITY (gate-packet G2.3), not just the ≥160
  *    floor: `recorded_turn` and the scripted-fall trigger inputs must be IDENTICAL
@@ -48,52 +48,43 @@
  * G2-A would assert the §6 collapse-ON proof against an OFF artifact). Regression test:
  * tests/collapse_run_marker_hygiene.test.ts.
  *
- * Determinism: reads persisted artifacts + pure helpers; no RNG/clock.
+ * RC DEFECT 8 FIX (2026-08-13) — this suite was a FALSE GREEN on two counts:
+ *  (i)  ARTIFACT SELECTION BY MTIME. Candidates were ordered by `statSync().mtimeMs`, so
+ *       which artifact §6 was asserted against depended on this checkout's filesystem
+ *       metadata, not on the run — nondeterministic across machines and checkouts, and
+ *       against the determinism rule. Selection now happens on the run-dir NAME (marker
+ *       partition, then `_n<counter>` descending, terminating in strictCompare) and
+ *       excludes truncated runs of the same scenario — see tests/_helpers/s6_run_selection.ts.
+ *  (ii) SILENT SKIPS. G2-A and G2-B used `it.skipIf`. With ~100 unmarked 188w dirs in
+ *       runs/ and ZERO marked ones, both cases skipped out of existence — a fully green
+ *       suite proved nothing about §6. Both cases now always RUN and report their status
+ *       in their own test name, plus a §6 execution receipt at the end. Setting
+ *       `AWWV_REQUIRE_S6_EXECUTION=true` (do this for any run used as §6 evidence) turns
+ *       a non-executed case into a hard FAILURE, per panel criterion 3.
+ *
+ * Determinism: reads persisted artifacts + pure helpers; no RNG/clock, no fs metadata.
  */
 import { describe, it, expect } from 'vitest';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getSidCapacityModifiers } from '../src/sim/collapse/capacity_modifiers.js';
 import { ENCLAVE_DEFINITIONS, getEnclaveDefForOsid } from '../src/sim/combat/enclave_resilience.js';
+import { scanS6RunCandidates, selectS6RunDirs } from './_helpers/s6_run_selection.js';
 import type { GameState } from '../src/state/game_state.js';
 
 const RUNS_DIR = join(process.cwd(), 'runs');
 
-/** G2-A marker written by scenario_runner.ts on the ENABLE_COLLAPSE=true path only. */
-function isCollapseOnRunDir(dir: string): boolean {
-    return existsSync(join(dir, 'collapse_enabled.json'));
-}
-
-function all188wRunDirsNewestFirst(): string[] {
-    if (!existsSync(RUNS_DIR)) return [];
-    const dirs = readdirSync(RUNS_DIR)
-        .filter(d => d.startsWith('apr1992_definitive_188w__'))
-        .map(d => join(RUNS_DIR, d))
-        .filter(p => {
-            try { return statSync(p).isDirectory() && existsSync(join(p, 'final_save.json')); }
-            catch { return false; }
-        });
-    // Most-recently-modified first (deterministic given a fixed fs snapshot).
-    dirs.sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
-    return dirs;
-}
-
-function latest188wRunDir(): string | null {
-    const dirs = all188wRunDirsNewestFirst();
-    return dirs.length > 0 ? dirs[0] : null;
-}
-
-/** Latest 188w artifact VERIFIABLY produced with collapse enabled (G2-A). */
-function latestCollapseOn188wRunDir(): string | null {
-    const dirs = all188wRunDirsNewestFirst().filter(isCollapseOnRunDir);
-    return dirs.length > 0 ? dirs[0] : null;
-}
-
-/** Latest 188w artifact with NO collapse marker (collapse-OFF baseline side of the pair). */
-function latestCollapseOff188wRunDir(): string | null {
-    const dirs = all188wRunDirsNewestFirst().filter(d => !isCollapseOnRunDir(d));
-    return dirs.length > 0 ? dirs[0] : null;
-}
+/**
+ * Strict mode: a §6 case that does NOT execute becomes a hard FAILURE.
+ *
+ * Set `AWWV_REQUIRE_S6_EXECUTION=true` for any run that is being used as §6 EVIDENCE
+ * (the D2 two-run measurement harness, a pre-merge §6 gate). Panel criterion 3: a
+ * skipped §6 case is a NO-GO, not a pass. It is OFF by default because a fresh checkout
+ * legitimately has no `runs/` artifacts and must not be permanently red — in that mode
+ * the non-execution is still LOUD (it is written into the test names and the receipt),
+ * just not fatal.
+ */
+const REQUIRE_S6_EXECUTION = process.env.AWWV_REQUIRE_S6_EXECUTION === 'true';
 
 function loadFinalSave(runDir: string): Record<string, unknown> {
     return JSON.parse(readFileSync(join(runDir, 'final_save.json'), 'utf8')) as Record<string, unknown>;
@@ -236,10 +227,58 @@ function assertSection6Invariants(finalSave: Record<string, unknown>): void {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Artifact selection — DETERMINISTIC, no filesystem mtime (see
+// tests/_helpers/s6_run_selection.ts for the rule and the defect it fixes).
+// ---------------------------------------------------------------------------
+const selection = selectS6RunDirs(scanS6RunCandidates(RUNS_DIR));
+const runDir = selection.any === null ? null : join(RUNS_DIR, selection.any);
+const onRunDir = selection.on === null ? null : join(RUNS_DIR, selection.on);
+const offRunDir = selection.off === null ? null : join(RUNS_DIR, selection.off);
+
+/** Why a §6 case cannot run, or null when it can. */
+const SENTINEL_SKIP_REASON = runDir !== null
+    ? null
+    : 'no runs/apr1992_definitive_188w__*__w188* dir carries a final_save.json';
+const G2A_SKIP_REASON = onRunDir !== null
+    ? null
+    : `no full-length 188w run dir carries collapse_enabled.json (${selection.counts.total} candidates, ${selection.counts.marked} marked) — the collapse-ON §6 proof is NOT ESTABLISHED`;
+const G2B_SKIP_REASON = onRunDir !== null && offRunDir !== null
+    ? null
+    : `no marker-verified ON/OFF 188w artifact pair (${selection.counts.marked} marked, ${selection.counts.unmarked} unmarked)`;
+
+function statusOf(skipReason: string | null): string {
+    return skipReason === null ? 'EXECUTED' : 'SKIPPED';
+}
+
+/** Every §6 case and whether this invocation actually ran it. */
+const S6_CASES: ReadonlyArray<{ id: string; skipReason: string | null }> = [
+    { id: 'sentinel', skipReason: SENTINEL_SKIP_REASON },
+    { id: 'G2-A', skipReason: G2A_SKIP_REASON },
+    { id: 'G2-B', skipReason: G2B_SKIP_REASON },
+];
+
+const S6_RECEIPT = S6_CASES.map(c => `${c.id}=${statusOf(c.skipReason)}`).join(' ');
+
+/**
+ * A §6 case that could not run reports itself rather than vanishing.
+ *
+ * `it.skipIf` was the defect: `runs/` holds ~100 unmarked 188w dirs and ZERO marked ones,
+ * so G2-A and G2-B skipped out of existence and a fully green suite proved NOTHING about
+ * §6 — precisely the false green the §6 apparatus exists to prevent. Now the status is in
+ * the test name (always visible), on stderr, and fatal under AWWV_REQUIRE_S6_EXECUTION.
+ */
+function reportNonExecution(caseId: string, skipReason: string): void {
+    console.warn(`[§6 G2] ${caseId} DID NOT EXECUTE — ${skipReason}`);
+    expect(
+        REQUIRE_S6_EXECUTION,
+        `§6 ${caseId} DID NOT EXECUTE and AWWV_REQUIRE_S6_EXECUTION=true: ${skipReason}. ` +
+        'Panel criterion 3 — a skipped §6 case is a NO-GO, not a pass. Produce the missing ' +
+        'artifact (a collapse-ON 188w run writes runs/<dir>/collapse_enabled.json) and rerun.'
+    ).toBe(false);
+}
+
 describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
-    const runDir = latest188wRunDir();
-    const onRunDir = latestCollapseOn188wRunDir();
-    const offRunDir = latestCollapseOff188wRunDir();
 
     it('hardcoded PROTECTED_ENCLAVE_OSIDS stay in sync with the G1 predicate (getEnclaveDefForOsid)', () => {
         for (const osid of PROTECTED_ENCLAVE_OSIDS) {
@@ -272,7 +311,8 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
     // invariants must hold on EVERY 188w artifact; on a collapse-OFF run the G1
     // assertions pass trivially (sentinel against non-collapse regressions).
     // ---------------------------------------------------------------------------
-    it.runIf(runDir !== null)('sentinel (latest 188w artifact, ON or OFF): full §6 assertion set', () => {
+    it(`[${statusOf(SENTINEL_SKIP_REASON)}] sentinel (selected 188w artifact, ON or OFF): full §6 assertion set`, () => {
+        if (SENTINEL_SKIP_REASON !== null) return reportNonExecution('sentinel', SENTINEL_SKIP_REASON);
         assertSection6Invariants(loadFinalSave(runDir!));
     });
 
@@ -284,10 +324,11 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
     // the collapse-ON §6 proof is then NOT YET ESTABLISHED (it bites at D2's
     // two-run harness, which must produce a marked collapse-ON 188w run).
     // ---------------------------------------------------------------------------
-    it.skipIf(onRunDir === null)(
-        'G2-A collapse-ON proof: full §6 assertion set against a marker-verified ENABLE_COLLAPSE=true 188w artifact ' +
-        '(SKIP reason when skipped: no runs/apr1992_definitive_188w__* dir contains collapse_enabled.json)',
+    it(
+        `[${statusOf(G2A_SKIP_REASON)}] G2-A collapse-ON proof: full §6 assertion set against a ` +
+        'marker-verified ENABLE_COLLAPSE=true 188w artifact',
         () => {
+            if (G2A_SKIP_REASON !== null) return reportNonExecution('G2-A', G2A_SKIP_REASON);
             assertSection6Invariants(loadFinalSave(onRunDir!));
         }
     );
@@ -300,10 +341,11 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
     // records on the FIRST turn >= 160 with controller === 'RS', and both runs assert
     // recorded_turn >= 160 above, so no earlier flip can hide in the receipt window.
     // ---------------------------------------------------------------------------
-    it.skipIf(onRunDir === null || offRunDir === null)(
-        'G2-B rupture-timing identity: srebrenica_genocide_1995 recorded_turn + first-RS-turn + fall-event timing ' +
-        'IDENTICAL collapse-ON vs collapse-OFF (SKIP reason when skipped: no marker-verified ON/OFF 188w artifact pair)',
+    it(
+        `[${statusOf(G2B_SKIP_REASON)}] G2-B rupture-timing identity: srebrenica_genocide_1995 recorded_turn + ` +
+        'first-RS-turn + fall-event timing IDENTICAL collapse-ON vs collapse-OFF',
         () => {
+            if (G2B_SKIP_REASON !== null) return reportNonExecution('G2-B', G2B_SKIP_REASON);
             const onSave = loadFinalSave(onRunDir!);
             const offSave = loadFinalSave(offRunDir!);
 
@@ -343,12 +385,32 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
         }
     );
 
-    it('documents the gate when no 188w run artifact is present', () => {
-        // Always-on marker so the suite records that G2 exists even on a fresh checkout.
-        // The substantive assertions above run whenever the corresponding artifacts exist:
-        //  - sentinel: any 188w run dir
-        //  - G2-A: a collapse_enabled.json-marked (ENABLE_COLLAPSE=true) run dir
-        //  - G2-B: a marked ON dir + an unmarked OFF dir (D2's two-run harness output)
-        expect(true).toBe(true);
+    // ---------------------------------------------------------------------------
+    // §6 EXECUTION RECEIPT (RC defect 8) — replaces the old always-green
+    // `expect(true).toBe(true)` marker, which recorded that G2 EXISTS while saying
+    // nothing about whether any of it RAN. The receipt is in this test's own name, so
+    // every invocation of the suite prints which §6 cases executed and which did not.
+    // ---------------------------------------------------------------------------
+    it(`§6 execution receipt — ${S6_RECEIPT} (strict=${REQUIRE_S6_EXECUTION})`, () => {
+        // Selection provenance, so the receipt says WHICH artifacts were used.
+        console.warn(
+            `[§6 G2] receipt: ${S6_RECEIPT} | candidates=${selection.counts.total} ` +
+            `marked=${selection.counts.marked} unmarked=${selection.counts.unmarked} | ` +
+            `sentinel=${selection.any ?? '-'} ON=${selection.on ?? '-'} OFF=${selection.off ?? '-'}`
+        );
+
+        // The receipt must cover every §6 case — a case added without a receipt entry is
+        // a case that can go silent again.
+        expect(S6_CASES.map(c => c.id)).toEqual(['sentinel', 'G2-A', 'G2-B']);
+
+        const notExecuted = S6_CASES.filter(c => c.skipReason !== null);
+        for (const c of notExecuted) {
+            console.warn(`[§6 G2] NOT EXECUTED — ${c.id}: ${c.skipReason}`);
+        }
+        expect(
+            REQUIRE_S6_EXECUTION && notExecuted.length > 0,
+            `§6 cases did not execute [${notExecuted.map(c => c.id).join(', ')}] and ` +
+            'AWWV_REQUIRE_S6_EXECUTION=true — panel criterion 3: NO-GO, not a pass.'
+        ).toBe(false);
     });
 });

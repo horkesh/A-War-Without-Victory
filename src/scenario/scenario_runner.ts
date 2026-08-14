@@ -105,10 +105,11 @@ import {
     spreadBrigadesToFrontOsids
 } from './oob_early_war_entry.js';
 import { buildOpsCompareConclusion, formatOpsCompareMarkdown } from './ops_compare.js';
-import { setEnablePhase3A } from '../sim/pressure/phase3a_pressure_eligibility.js';
-import { setEnablePhase3B } from '../sim/pressure/phase3b_pressure_exhaustion.js';
-import { setEnablePhase3C } from '../sim/pressure/phase3c_exhaustion_collapse_gating.js';
-import { setEnablePhase3D } from '../sim/collapse/phase3d_collapse_resolution.js';
+import {
+    COLLAPSE_GATE_ENV_VAR,
+    applyCollapseGateFromEnv,
+    readCollapseGateFromEnv,
+} from '../sim/collapse/collapse_flag_lifecycle.js';
 import {
     buildCombatCausalitySummary,
     buildOperationCombatDiagnostics,
@@ -975,10 +976,13 @@ async function ensureRunOutputDir(outDir: string): Promise<void> {
  */
 export async function syncCollapseEnabledMarker(outDir: string): Promise<void> {
     const collapseMarkerPath = join(outDir, 'collapse_enabled.json');
-    if (process.env.ENABLE_COLLAPSE === 'true') {
+    // RC defect 7: the gate predicate has ONE owner (collapse_flag_lifecycle). The marker
+    // must answer the same question the flags were set from — a second inline
+    // `process.env.ENABLE_COLLAPSE === 'true'` here is how marker and flag state drift apart.
+    if (readCollapseGateFromEnv()) {
         await writeFile(
             collapseMarkerPath,
-            stableStringify({ collapse_enabled: true, gate: 'ENABLE_COLLAPSE' }, 2),
+            stableStringify({ collapse_enabled: true, gate: COLLAPSE_GATE_ENV_VAR }, 2),
             'utf8'
         );
     } else {
@@ -2010,16 +2014,20 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     // Phase IV finalizes the enable + re-floor under owner sign-off. This env gate lets the
     // first-fire measurement run collapse-ON over a real 188w campaign WITHOUT touching any default
     // or scenario file. `ENABLE_COLLAPSE=true` turns on the whole serial chain (3A required by 3B
-    // required by 3C required by 3D). When unset, this block is a no-op and the run is byte-identical
-    // to the collapse-OFF baseline (the setters are only called when the env var is exactly 'true').
+    // required by 3C required by 3D). Do NOT wire this into a default scenario — it is the Phase IV
+    // exploration switch.
+    //
+    // RC DEFECT 7 FIX (2026-08-13): this used to be an `if (env === 'true') { set...; set...; }`
+    // block with NO reset anywhere, so the flags — module-level process globals — survived the run
+    // and a collapse-ON run contaminated every later run in the same process (its artifacts would be
+    // collapse-ON while its `collapse_enabled.json` marker said OFF). applyCollapseGateFromEnv()
+    // runs UNCONDITIONALLY and clears every collapse flag before applying this run's gate, so a run
+    // cannot inherit a previous run's collapse state — see src/sim/collapse/collapse_flag_lifecycle.ts.
+    // With the env unset the run is still byte-identical to the collapse-OFF baseline: the reset
+    // restores the module defaults, which are exactly the values a pristine process starts with.
     // Determinism: reads only an env var at run start; no RNG/clock; identical across two runs with
-    // the same env. Do NOT wire this into a default scenario — it is the Phase IV exploration switch.
-    if (process.env.ENABLE_COLLAPSE === 'true') {
-        setEnablePhase3A(true);
-        setEnablePhase3B(true);
-        setEnablePhase3C(true);
-        setEnablePhase3D(true);
-    }
+    // the same env.
+    applyCollapseGateFromEnv();
     const emitFullReplayPayload = replayPayloadMode === 'full';
     const timingTotals = createScenarioTimingTotals();
     const totalTimingStart = timingStart(emitTimingJson);

@@ -2,7 +2,9 @@
  * Phase 3D: Collapse Resolution
  * 
  * Applies irreversible degradation effects (negative-sum) based on Phase 3C Tier-1 eligibility.
- * Deterministic, localized outcomes driven by Tier-1 eligibility + persistence + local_strain.
+ * Deterministic, localized outcomes driven by Tier-1 eligibility + local_strain. Persistence
+ * is consumed UPSTREAM in Phase 3C (TIER1_PERSIST_TURNS, spec C10) as the eligibility gate;
+ * 3D reads only the eligibility verdict it produces, never the counter itself.
  * 
  * Phase 3D does NOT:
  * - Create map geometry or rewire contact graph
@@ -71,12 +73,16 @@ const SPATIAL_IMPACT = 0.4;   // spec C17 — supply_mult = 1 - SPATIAL_IMPACT *
  * OSIDs MOST likely to register Tier-1 spatial/authority strain (isolated + supply-fragile),
  * and the genocide-rupture floor (`srebrenica_genocide_1995`, turn ≥ 160) is a §6 invariant.
  *
- * The predicate is enforced at TWO sites: the PRIMARY chokepoint in
+ * The predicate is enforced at THREE sites: the PRIMARY chokepoint in
  * getOrInitCollapseDamage (keeps the OSID out of collapse_damage.by_entity → blocks the
- * recompute path AND the loss_of_control will_not_recover marking, and makes the CLI
- * harness seed path honor the guard), plus a loop-skip before updateCapacityModifiers
- * (keeps the OSID out of capacity_modifiers). Together the enclave is provably absent
- * from BOTH maps → collapse is inert on every §6 OSID.
+ * recompute path AND the loss_of_control will_not_recover marking), a loop-skip before
+ * updateCapacityModifiers (keeps the OSID out of capacity_modifiers), and a
+ * defense-in-depth check inside recomputePhase3DCapacityModifiersFromDamage. Together
+ * the enclave is provably absent from BOTH maps on the PRODUCTION path → no OWN-OSID
+ * collapse effect on any §6 OSID. Two documented gaps sit outside that proof, neither
+ * reaching a combat path: the CLI audit harness makes one unguarded direct write that
+ * bypasses the chokepoint, and G1 does not neutralize a protected OSID's EDGES. Both
+ * are detailed on getOrInitCollapseDamage below.
  *
  * Phase 3D never flips `political_controllers`; the only §6 risk is INDIRECT
  * ACCELERATION (a degraded supply_mult softening a defender so a scripted fall lands
@@ -144,19 +150,49 @@ export interface Phase3DCollapseResolutionResult {
  *     only called on the returned object's owner in the resolution loop, which skips it),
  *   • recomputePhase3DCapacityModifiersFromDamage() iterates collapse_damage.by_entity →
  *     never sees the OSID, and
- *   • loss_of_control_trends.ts:132 `will_not_recover = !!collapse_damage.by_entity[sid]`
+ *   • loss_of_control_trends.ts:133 `will_not_recover = !!collapse_damage.by_entity[sid]`
  *     stays false (presence ALONE, even at damage 0, would trip it — hence the guard
  *     must prevent the ENTRY, not just zero the values).
- * Guarding the chokepoint also makes the CLI harness seed path
- * (phase3abc_audit_harness.ts seedPhase3DDamage) honor the guard automatically.
  *
- * EDGE-MULTIPLIER RESIDUAL (red-team #2 — Phase-III review item, inert today):
+ * HARNESS BYPASS (correction, 2026-08-13 — the previous text claimed the opposite):
+ * guarding this chokepoint does NOT make the CLI harness seed path honor the guard.
+ * `phase3abc_audit_harness.ts:1193` (seedPhase3DDamage) assigns
+ * `state.political.collapse_damage.by_entity[sid0] = {...}` DIRECTLY and never calls
+ * this function, so the guard cannot see it. What that path does still get is the
+ * defense-in-depth check inside recomputePhase3DCapacityModifiersFromDamage, which it
+ * calls on the next line — so no enclave capacity_modifier can be derived. The
+ * UNGUARDED residue is the collapse_damage ENTRY itself: presence alone sets
+ * `will_not_recover` (loss_of_control_trends.ts:133), so if `sid0` ever resolved to an
+ * enclave OSID the harness would mark a §6 OSID unrecoverable. It seeds exactly one SID
+ * — `nodes_sorted[0]`, the lexicographically-first node of its synthetic BFS graph —
+ * which is why this is latent rather than live. This is harness-only: no production
+ * path writes by_entity except through this function.
+ *
+ * CONSUMER MAP (corrected 2026-08-13 — this comment previously claimed ALL collapse
+ * consumers were "report-only/scaffolding" and set a revisit condition on the first
+ * attack-launch / defender-strength wiring. That condition HAS BEEN MET, the claim was
+ * never updated, and two reviewers were misled by it. Neither half was accurate: one
+ * consumer is now combat, and the others were never report-only.)
+ *
+ *   • OWN-OSID, COMBAT, LIVE — `attack_resolution_osid.ts:867` does
+ *     `defenderPower *= getCollapseDefenderMultiplier(state, targetOsid)` (Phase IV-e,
+ *     PR #398 / 03eb82c4e). Reads `capacity_modifiers.by_sid[osid].supply_mult` with a
+ *     COLLAPSE_DEFENDER_FLOOR of 0.6, and takes NO edge read (capacity_modifiers.ts:79-86).
+ *     G1 keeps enclaves out of by_sid → returns 1.0 on every §6 OSID.
+ *   • EDGE, NON-COMBAT, LIVE — `front_pressure.ts:150-151` scales supplied intent and the
+ *     generated pressure delta (:165-168); `formation_fatigue.ts:217,229` scales an
+ *     edge/region-assigned formation's supply multiplier. These are real state effects
+ *     whenever collapse is ON, NOT reports. `front_breaches` is no longer a consumer.
+ *
+ * EDGE-MULTIPLIER RESIDUAL (red-team #2 — still open, Phase-III review item):
  * getEdgeCapacityMultiplier() returns min(mult_a, mult_b), so an edge between a protected
- * OSID and a COLLAPSED non-protected neighbor would carry the collapsed value. G1 is
- * own-OSID-only and does NOT neutralize that edge. Today ALL consumers (front_pressure,
- * formation_fatigue commit_points, front_breaches) are report-only/scaffolding, so it is
- * inert. If any is ever wired into attack-launch / defender-strength, this must be
- * revisited (flagged in the build spec).
+ * OSID and a COLLAPSED non-protected neighbor carries the collapsed value. G1 is
+ * own-OSID-only and does NOT neutralize that edge, so a §6 OSID's EDGES can still be
+ * degraded through the two edge consumers above. What bounds this is scope, not inertness:
+ * no EDGE consumer feeds attack-launch or defender-strength, so the residual cannot
+ * accelerate an enclave's fall — the §6 risk G1 exists to prevent. Do not restate this
+ * residual as "inert"; it is live-but-out-of-scope, and it becomes a §6 blocker the moment
+ * an edge multiplier reaches a combat path.
  */
 function getOrInitCollapseDamage(
     state: GameState,
@@ -216,12 +252,33 @@ function getOrInitCapacityModifiers(
 }
 
 /**
- * Compute deterministic severity from local_strain and persistence.
+ * Compute deterministic severity from local_strain.
  * Returns severity in [0,1] or 0 if below threshold.
+ *
+ * STRAIN-ONLY BY SPEC. The ratified 3D transform is
+ * `severity = clamp((strain − STRAIN_THRESHOLD)/(STRAIN_MAX − STRAIN_THRESHOLD), 0, 1)`,
+ * zeroed below SEVERITY_MIN — docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md
+ * §2 (Phase 3D "Transform" row). There is no persistence term in it, and no canon
+ * requires one: Engine Invariants §8 / Systems Manual §7.1–7.3 are prose-only.
+ *
+ * A `persistence` parameter WAS accepted here and never referenced in the body. It has
+ * been removed rather than wired up, for three reasons:
+ *   1. Persistence is already consumed, upstream and as a GATE. Phase 3C requires
+ *      `persistence ≥ TIER1_PERSIST_TURNS` (4, spec C10) before an OSID is Tier-1
+ *      eligible at all. Chronic strain therefore already decides WHETHER collapse
+ *      applies; the spec deliberately does not also let it decide how hard.
+ *   2. Duration is already inside `strain`. `local_strain` is a monotonic accumulator
+ *      (`clamp(strain + exposure × STRAIN_FRACTION, 0, STRAIN_MAX)`, 3C:290-301), so a
+ *      chronically-exposed OSID reaches a HIGHER strain and thus a higher severity by
+ *      construction. Multiplying by persistence as well would double-count the same
+ *      elapsed-turns signal.
+ *   3. Any curve chosen for it would be invented, not derived — a railroad. Damage is
+ *      monotonic (`max(prev, severity)`), so chronic exposure already ratchets.
+ * If a future calibration packet wants persistence to shape magnitude, that is a
+ * spec change to the §2 transform, not a silent restoration of this parameter.
  */
 function computeSeverity(
-    localStrain: number,
-    persistence: number
+    localStrain: number
 ): number {
     // Severity is based on how far above threshold the strain is
     if (localStrain < STRAIN_THRESHOLD) {
@@ -303,7 +360,7 @@ export function recomputePhase3DCapacityModifiersFromDamage(state: GameState): v
  * Apply Phase 3D collapse resolution.
  * 
  * For each entity (settlement SID) with Tier-1 eligibility in a domain:
- * - Compute severity from local_strain and persistence
+ * - Compute severity from local_strain (persistence already gated eligibility in 3C)
  * - Apply monotonic collapse damage (max of current and new severity)
  * - Update capacity modifiers derived from damage
  * 
@@ -439,7 +496,7 @@ export function applyPhase3DCollapseResolution(
             let wouldCollapse = false;
             for (const domain of ['authority', 'cohesion', 'spatial'] as CollapseDomain[]) {
                 if (!tier1State.domains[domain]) continue;
-                if (computeSeverity(localStrain[entityId] ?? 0, tier1State.persistence[domain]) > 0) {
+                if (computeSeverity(localStrain[entityId] ?? 0) > 0) {
                     wouldCollapse = true;
                     break;
                 }
@@ -460,11 +517,10 @@ export function applyPhase3DCollapseResolution(
 
             entitiesEvaluated++;
 
-            // Get persistence for this domain
-            const persistence = tier1State.persistence[domain];
-
-            // Compute severity
-            const severity = computeSeverity(strain, persistence);
+            // Compute severity. Strain-only by spec §2 — persistence is the 3C
+            // eligibility gate already passed above, not a magnitude term (see
+            // computeSeverity).
+            const severity = computeSeverity(strain);
             if (severity <= 0) continue; // Below threshold, skip
 
             // Get current damage (non-enclave OSIDs only — enclaves short-circuited above)
