@@ -73,7 +73,7 @@ cohesion ≤ 20. The RS floor reaches exactly 20; the RBiH floor never descends 
 can dissolve and RBiH brigades structurally cannot — measured at 4,127 RS brigade-turns at/below the
 threshold versus 5 for RBiH. That asymmetry is a *consequence* of the historical arcs meeting a fixed
 threshold, not evidence of a railroad. It was investigated to root on 2026-08-07
-(`docs/40_reports/20260807_RS_COHESION_RAILROAD_ROOT_CAUSE.md`) and the late-war RS dissolution was
+(`docs/40_reports/20260807_RS_BRIGADE_LOSS_ASYMMETRY_ROOT_CAUSE_FIX_DEFERRED.md`) and the late-war RS dissolution was
 found to be **largely historical** — the western VRS really did collapse.
 
 **What IS still open** (do not confuse with the above): whether the *dissolution threshold* should be

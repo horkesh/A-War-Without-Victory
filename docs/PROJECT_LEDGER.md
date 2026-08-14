@@ -26372,7 +26372,7 @@ Two leading hypotheses were tested directly and ruled out: (1) the dissolution-t
 
 **Fix disproven:** RS-floor sweep 20/25/30 → matched_osids 634/623/629 (non-monotonic; 25 worse than 30; no sweet spot ≥634), both break §6 Bihać. Decisive reframe: much of the RS fall-1995 dissolution is HISTORICALLY correct (real western VRS collapse under Storm/Sana), so suppressing it makes RS over-hold fallen territory. The outcome is ~historical; the debt is the *scripted* mechanism, sharpest on the ARBiH-0-loss side (partly enclave-event-defensible).
 
-**Owner decision 2026-08-07:** document the debt + defer the "combat-earned cohesion" structural redesign to post-1.0 (§6-panel-gated, multi-run) — same disposition as the deferred scoring grade-unpin and Phase 4. Full writeup: `docs/40_reports/20260807_RS_COHESION_RAILROAD_ROOT_CAUSE.md`. Probe branch `codex/rs-cohesion-floor-probe` kept (RETIRE commits, repro only). Determinism preserved; no `Math.random`/`Date.now` introduced.
+**Owner decision 2026-08-07:** document the debt + defer the "combat-earned cohesion" structural redesign to post-1.0 (§6-panel-gated, multi-run) — same disposition as the deferred scoring grade-unpin and Phase 4. Full writeup: `docs/40_reports/20260807_RS_BRIGADE_LOSS_ASYMMETRY_ROOT_CAUSE_FIX_DEFERRED.md`. Probe branch `codex/rs-cohesion-floor-probe` kept (RETIRE commits, repro only). Determinism preserved; no `Math.random`/`Date.now` introduced.
 
 ## [2026-08-07] Doc sync — Brčko corridor regression documented; stale "31/31" anchor claims corrected to current 30/31
 

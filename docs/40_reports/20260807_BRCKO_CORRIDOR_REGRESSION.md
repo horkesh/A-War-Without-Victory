@@ -28,7 +28,7 @@ Correcting 1st Posavina to Brčko holds Brčko (corridor 5/6 → 6/6) **but flip
 - Doboj/Gračanica/Ozren have their **correct resident garrisons** (`rs_2nd_armored` + `rs_3rd_ozren` on Doboj; `rs_1st_ozren` on Gračanica), consistent placements — no mis-placement, no missing unit.
 - The 1st Posavina mis-placement was the ONLY corridor data bug; it was doing **double duty** — its reactive contribution from Bosanski Šamac was the margin holding Doboj/Gračanica.
 
-So RS is **structurally too thin** to hold Brčko + Doboj + Gračanica simultaneously on correct data. This is the same **RS force-density / cohesion-railroad asymmetry** root-caused and deferred to post-1.0 (`docs/40_reports/20260807_RS_COHESION_RAILROAD_ROOT_CAUSE.md`), surfacing here as a corridor knot. Per the owner's honesty gate, this is exactly the case where a data move must NOT be forced — the interim patchwork is the accepted stopgap.
+So RS is **structurally too thin** to hold Brčko + Doboj + Gračanica simultaneously on correct data. This is the same **RS force-density / cohesion-railroad asymmetry** root-caused and deferred to post-1.0 (`docs/40_reports/20260807_RS_BRIGADE_LOSS_ASYMMETRY_ROOT_CAUSE_FIX_DEFERRED.md`), surfacing here as a corridor knot. Per the owner's honesty gate, this is exactly the case where a data move must NOT be forced — the interim patchwork is the accepted stopgap.
 
 ## Disposition — ACCEPTED SCHEDULED INTERIM DEBT (owner decision 2026-08-07): main stays 30/31
 

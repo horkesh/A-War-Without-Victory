@@ -4320,7 +4320,7 @@ and degraded into an increasingly hollow force that nonetheless retained local c
 the ARBiH ran the inverse arc from barely-armed irregulars in 1992 to a genuine army by 1994-95. The
 floors encode those two trajectories. The dissolution asymmetry is a **consequence** of two historical
 arcs meeting one fixed threshold — not a thumb on the scale. This is consistent with the 2026-08-07
-finding (`docs/40_reports/20260807_RS_COHESION_RAILROAD_ROOT_CAUSE.md`) that the late-war RS
+finding (`docs/40_reports/20260807_RS_BRIGADE_LOSS_ASYMMETRY_ROOT_CAUSE_FIX_DEFERRED.md`) that the late-war RS
 dissolution is largely historical: the western VRS really did collapse.
 
 **The generalisable lesson, which is why this is here and not only in a bug tracker.** A
