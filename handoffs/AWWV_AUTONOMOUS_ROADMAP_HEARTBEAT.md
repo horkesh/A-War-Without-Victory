@@ -37,5 +37,5 @@
 - Relative Markdown links: 145 targets checked across the seven synchronized entrypoint documents; all targets exist.
 - Targeted stale-status and localization-gate scan: no obsolete R2/R5/Stage-2-next/WP-9-current phrases remain, and unfinished multilingual work is consistently post-1.0 rather than an R7/R8/R9/1.0 blocker.
 - `git diff --check`: passed.
-- `npm.cmd run canon:check`: determinism static scan passed 1/1; the command exited 1 in baseline regression on seven existing `apr1992_52w` artifact mismatches (`activity_summary`, `control_delta`, `end_report`, `final_save`, `formation_delta`, `run_summary`, `weekly_report`). No baseline was refreshed. The docs-only sync cannot produce scenario artifact hashes.
+- `npm.cmd run canon:check`: determinism static scan passed 1/1 and all four baseline scenarios matched without refresh after the seven stale `apr1992_52w` hashes were causally reconciled to the owner-kept multi-axis veto behavior from `b9da847f1`. The manifest update changed exactly those seven hashes; the 188-week fingerprint, both four-week scenarios, and `watched_operations.json` remained unchanged.
 - Typecheck and runtime/UI suites: not required for a docs-only status reconciliation.
