@@ -228,6 +228,12 @@ npm.cmd run test:baselines
 - Every changed leaf essay is mirrored in `essay_index.json`; index-integrity and source-note contracts pass. A production regression now fails if any player-facing history claim enters `needs_actor_specificity`.
 - Live census: 3,654 claims / 228 files; 2,081 documented, 12 non-player-facing deposits, 1,561 source-note rows, and zero source-floor, actor-specificity, or source-tier rows. Phase 1.2 continues on the sole remaining provenance class: source notes.
 
+**Phase 1.2 checkpoint D -- 2026-08-15:**
+
+- The summer-1992 Herceg-Bosna posture packet is machine-citable. Three decisions already carrying exact claim-bounded source notes and resolved tiers now expose the corresponding `historical_source` field; no narrative, choice, effect, or timing changed.
+- The 63 claims owned by consolidation, local alliance-friction, and Zagreb supply-channel decisions move from `needs_source_note` to `documented`. The citations are limited to the exact *Balkan Battlegrounds* pages and ICTY Prlić sections already named in their authored notes.
+- Live census: 3,654 claims / 228 files; 2,144 documented, 12 non-player-facing deposits, 1,498 source-note rows, and zero source-floor, actor-specificity, or source-tier rows.
+
 `/simplify` -> historian/canon review -> commit `fix(content): close sensitive history claims`
 
 ## Phase 2 -- Officer/OOB attribution closeout

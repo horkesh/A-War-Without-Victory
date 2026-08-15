@@ -111,6 +111,12 @@ The sensitive-history inventory's `both sides` / `all sides` pattern found ten g
 
 **Reusable rule:** resolve generic-symmetry findings by reading the full claim, naming the political or military actors supported by its evidence, and preserving asymmetric responsibility. Recast spatial collisions without changing meaning. Keep the player-facing actor-specificity queue pinned at zero and mirror every essay edit into the runtime index.
 
+## 2026-08-15 - A prose source note is not a machine-readable citation
+
+Three HRHB decisions had exact pages, judgment sections, a resolved tier, and a careful provenance boundary in `source_note`, yet all 63 owned claims remained uncited because no recognized citation key was present.
+
+**Reusable rule:** historical event metadata needs both roles: `historical_source` identifies the cited instrument, and `source_note` explains which claims it supports and where the counterfactual boundary begins. When repairing older rows, promote only citations already present in the note; do not expand the evidence claim merely to clear the inventory.
+
 ## Engine Runtime Patterns
 1. **[2026-07-13] Terminal lifecycle truth must close live synthetic commands**
    Do instead: project authoritative event flags through persisted lifecycle state, retire synthetic commands only after spawned subordinates are gone, and hide them from live UI without deleting historical AARs.

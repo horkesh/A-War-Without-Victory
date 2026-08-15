@@ -726,6 +726,26 @@ test('inventory documents the sourced 1993 central-Bosnia provenance packet', as
     )), true);
 });
 
+test('inventory documents the summer 1992 Herceg-Bosna posture packet', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const subjects = new Set([
+        'hrhb_herceg_bosna_consolidation_1992',
+        'hrhb_summer_alliance_strain_1992',
+        'hrhb_zagreb_supply_channel_1992',
+    ]);
+    const claims = report.claims.filter((claim: { subject_id: string }) => (
+        subjects.has(claim.subject_id)
+    ));
+
+    assert.strictEqual(claims.length, 63);
+    assert.strictEqual(claims.every((claim: { status: string }) => (
+        claim.status === 'documented'
+    )), true);
+    assert.strictEqual(claims.every((claim: { source_tier: string }) => (
+        claim.source_tier === 'icty_icj_un'
+    )), true);
+});
+
 test('inventory clears the source floor for the Jajce-to-final-offensives packet', async () => {
     const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
     const essayFiles = new Set([

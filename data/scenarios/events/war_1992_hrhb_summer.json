@@ -6,6 +6,7 @@
     "category": "political",
     "family": "hrhb_political_goal",
     "source_tier": "icty_icj_un",
+    "historical_source": "Balkan Battlegrounds Vol. I, pp. 180, 192, and 194; ICTY Prlic et al. Trial Judgment (IT-04-74-T), Vol. 1 §§490-525; ICTY Prlic et al. Appeals Judgment (IT-04-74-A), §§601-650.",
     "emergence_class": "compound",
     "trigger": {
       "turn_min": 13,
@@ -146,6 +147,7 @@
     "category": "political",
     "family": "hrhb_political_goal",
     "source_tier": "icty_icj_un",
+    "historical_source": "Balkan Battlegrounds Vol. I, p. 194 (July 1992 clashes over the Kaonik barracks, Bratstvo arms factory, and Ljuta Territorial Defense depot).",
     "emergence_class": "compound",
     "trigger": {
       "turn_min": 14,
@@ -286,6 +288,7 @@
     "category": "diplomatic",
     "family": "hrhb_political_goal",
     "source_tier": "icty_icj_un",
+    "historical_source": "Balkan Battlegrounds Vol. I, p. 180; ICTY Prlic et al. Trial Judgment (IT-04-74-T), Vol. 2 §§220-260.",
     "emergence_class": "compound",
     "trigger": {
       "turn_min": 16,

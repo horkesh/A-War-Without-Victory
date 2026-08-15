@@ -104,6 +104,12 @@ The 11-row actor-specificity queue is closed across eleven live essay families a
 
 The live schema-4 inventory remains 3,654 claims across 228 files: 2,081 documented, 12 non-player-facing deposits, 1,561 source-note rows, and zero source-floor, actor-specificity, or source-tier rows. A corpus regression now requires the player-facing actor-specificity queue to remain empty. The focused inventory passes 22/22; essay-index integrity and source-note contracts pass 14/14. Phase 1.2 continues with source-note remediation as its sole remaining provenance class.
 
+### Phase 1.2 checkpoint D — 2026-08-15
+
+Three summer-1992 Herceg-Bosna posture decisions already contained detailed source notes and resolved `icty_icj_un` tiers, but lacked a citation key recognized by the inventory. Their existing evidence boundaries are now promoted into `historical_source`: *Balkan Battlegrounds* Vol. I pp. 180, 192, and 194, plus the already named ICTY Prlić trial/appeal sections where applicable. Player-facing prose, choices, effects, triggers, and timing are unchanged.
+
+This resolves 63 claims. The live schema-4 inventory remains 3,654 claims across 228 files: 2,144 documented, 12 non-player-facing deposits, 1,498 source-note rows, and zero source-floor, actor-specificity, or source-tier rows. A focused regression pins all 63 claims as documented; Phase 1.2 continues on the remaining source-note queue.
+
 - Phase 1.1 RED reproduced blocked provenance anchors, missing tier/citation metadata, the missing crime/acquittal distinction, incorrect detail boundaries, generic symmetry, unsupported Neretva synthesis, and runtime-index drift. GREEN passes the 16-file fast matrix with 247 tests passed and 5 intentional skips, plus the separate 2-test source-quality suite. TypeScript, targeted JSON parsing, the actual strict CLI, and diff hygiene pass; the CLI reports 0 CRITICAL, 0 WARNING, and 1 observational INFO.
 - File-system walks, keys, findings, claims, citations, counters, and anchor rows use explicit stable ordering.
 - Reports contain no generated timestamp or absolute path.
