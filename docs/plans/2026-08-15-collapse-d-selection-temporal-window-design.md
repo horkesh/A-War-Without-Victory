@@ -1,6 +1,6 @@
 # Collapse D-selection Temporal Window Design
 
-**Status:** DECIDED for measurement implementation on 2026-08-15.
+**Status:** ACCEPTED and retained after two fresh 188-week measurements on 2026-08-15.
 
 **Decision:** replace the retired same-turn municipality-support candidate with a symmetric two-turn combat-incidence window, behind the existing default-OFF collapse gate. Do not change `STRAIN_FRACTION`, the 40/55 thresholds, Phase 3D, or Section 6 in this packet.
 
@@ -19,13 +19,13 @@ An inclusive distance of two turns is the smallest symmetric window that sees ev
 
 Each valid resolved battle row contributes direct exposure `+1` to its `target_osid`.
 
-Each unordered pair of valid battle rows contributes peer exposure `+0.5` to **both** targets when all of the following hold:
+For each distinct attacked target, every battle row at another target contributes peer exposure `+0.5` when all of the following hold:
 
 1. the targets are different OSIDs;
 2. both canonical OSIDs parse to the same municipality token in `op:<municipality>:<settlement>`;
 3. the absolute difference between their turn numbers is at most two.
 
-The pair is credited exactly once, when its later row is processed. Same-turn pairs use stable sorted row order. Crediting both sides means an earlier target may receive a later retroactive increment; this removes attack-order bias. An OSID can receive peer exposure only after it has itself been directly attacked within the active window. Missing/quiet reports contribute nothing. Casualties, outcome, attacker count, frontage, adjacency, control, and faction do not weight the selector.
+The support is credited exactly once, when the later target's rows are processed. Same-turn targets use stable sorted order. Crediting both sides means an earlier target may receive a later retroactive increment; this removes attack-order bias. Multiple direct rows at the receiving target do not multiply its peer support: two direct rows at target A plus three rows at target B produce A `2 + 0.5×3 = 3.5` and B `3 + 0.5×2 = 4`, matching the accepted target-level v2 arithmetic. An OSID can receive peer exposure only after it has itself been directly attacked within the active window. Missing/quiet reports contribute nothing. Casualties, outcome, attacker count, frontage, adjacency, control, and faction do not weight the selector.
 
 ## State and data flow
 
@@ -60,3 +60,9 @@ The candidate advances only if two fresh collapse-ON 188-week runs:
 - truthfully report threshold, damage, capacity, and Section 6 liveness.
 
 Selector acceptance does not authorize scaling or D-shape. If the exact discriminator fails, the temporal candidate is reverted. If it succeeds but remains below thresholds, the next packet may design scaling against the accepted selector without claiming live Section 6 clearance.
+
+## Measured disposition
+
+The candidate passed the predeclared gate and is retained. Two fresh collapse-ON 188-week runs produced the exact Sipovo/Drvar main-town exposure split `3/2`, final-state hash `2cfb52c1e7811915`, and structural fingerprint `22cf3c5d8884bfb8`. Fifteen of sixteen artifacts were byte-identical; only `run_meta.json` differed because it records the deliberately different output root. The run retained 31/31 anchors and passed all seven engine-health checks.
+
+The accepted selector remains under-scaled: maximum exposure stayed 33 / strain 4.95, with zero 40/55 crossings and no damage or capacity writes. Section 6 passed as an instrument but remained unexercised by a live protected write. D-shape is still unauthorized. The next bounded packet is scaling against this accepted selector, beginning with a `STRAIN_FRACTION=3.0` probe: the current HRHB maximum exposure is 20, so 3.0 yields strain 60, above the 55 live severity floor on the only faction whose Tier-0 spatial gate is currently open.

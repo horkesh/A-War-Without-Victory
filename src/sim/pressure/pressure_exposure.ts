@@ -9,10 +9,134 @@
 
 import type { FrontEdge } from '../../map/front_edges.js';
 import type { AttackResolutionOsidReport } from '../combat/attack_resolution_types.js';
-import type { GameState } from '../../state/game_state.js';
+import type {
+    CollapseCombatIncidenceWindowRow,
+    CollapseCombatIncidenceWindowState,
+    GameState,
+} from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 export type EntityId = string; // Settlement SID
+
+const COMBAT_INCIDENCE_WINDOW_TURNS = 2;
+
+function parseCanonicalMunicipalityId(targetOsid: string): string | null {
+    const parts = targetOsid.split(':');
+    if (parts.length < 3 || parts[0] !== 'op' || !parts[1] || !parts[2]) {
+        return null;
+    }
+    return parts[1];
+}
+
+function compareCombatWindowRows(
+    a: CollapseCombatIncidenceWindowRow,
+    b: CollapseCombatIncidenceWindowRow
+): number {
+    if (a.turn !== b.turn) return a.turn - b.turn;
+    const byTarget = strictCompare(a.target_osid, b.target_osid);
+    return byTarget !== 0 ? byTarget : strictCompare(a.battle_id, b.battle_id);
+}
+
+function addExposure(exposure: Map<EntityId, number>, entityId: EntityId, amount: number): void {
+    exposure.set(entityId, (exposure.get(entityId) ?? 0) + amount);
+}
+
+export interface CombatIncidenceWindowAdvanceResult {
+    exposure_by_entity: Map<EntityId, number>;
+    window: CollapseCombatIncidenceWindowState;
+}
+
+/**
+ * Advance the symmetric two-turn municipality combat-incidence window.
+ *
+ * Current battles add one direct exposure at their target. For each distinct
+ * attacked target, battle rows at other targets in the same municipality from
+ * the current or preceding two turns contribute 0.5 each. Later combat
+ * retroactively credits earlier targets without multiplying the support by the
+ * receiving target's own number of direct rows.
+ */
+export function advanceCombatIncidenceExposureWindow(
+    priorWindow: CollapseCombatIncidenceWindowState | undefined,
+    currentTurn: number,
+    report: Pick<AttackResolutionOsidReport, 'battles'> | undefined
+): CombatIncidenceWindowAdvanceResult {
+    const minTurn = currentTurn - COMBAT_INCIDENCE_WINDOW_TURNS;
+    const priorRows = (priorWindow?.rows ?? [])
+        .filter((row) => Number.isInteger(row?.turn)
+            && row.turn >= minTurn
+            && row.turn <= currentTurn
+            && typeof row.battle_id === 'string'
+            && row.battle_id.trim().length > 0
+            && typeof row.target_osid === 'string'
+            && parseCanonicalMunicipalityId(row.target_osid) !== null)
+        .map((row) => ({
+            turn: row.turn,
+            battle_id: row.battle_id,
+            target_osid: row.target_osid,
+        }))
+        .sort(compareCombatWindowRows);
+
+    const currentRows: CollapseCombatIncidenceWindowRow[] = (report?.battles ?? [])
+        .filter((battle) => typeof battle?.battle_id === 'string'
+            && battle.battle_id.trim().length > 0
+            && typeof battle.target_osid === 'string'
+            && parseCanonicalMunicipalityId(battle.target_osid) !== null)
+        .map((battle) => ({
+            turn: currentTurn,
+            battle_id: battle.battle_id,
+            target_osid: battle.target_osid,
+        }))
+        .sort(compareCombatWindowRows);
+
+    const exposure = new Map<EntityId, number>();
+    const priorCounts = new Map<EntityId, number>();
+    const currentCounts = new Map<EntityId, number>();
+    for (const row of priorRows) {
+        priorCounts.set(row.target_osid, (priorCounts.get(row.target_osid) ?? 0) + 1);
+    }
+    for (const row of currentRows) {
+        currentCounts.set(row.target_osid, (currentCounts.get(row.target_osid) ?? 0) + 1);
+    }
+
+    const currentTargets = [...currentCounts.keys()].sort(strictCompare);
+    const priorTargets = [...priorCounts.keys()].sort(strictCompare);
+    for (const currentTarget of currentTargets) {
+        const currentCount = currentCounts.get(currentTarget) ?? 0;
+        addExposure(exposure, currentTarget, currentCount);
+        const municipalityId = parseCanonicalMunicipalityId(currentTarget);
+        if (!municipalityId) continue;
+
+        for (const priorTarget of priorTargets) {
+            if (priorTarget === currentTarget) continue;
+            if (parseCanonicalMunicipalityId(priorTarget) !== municipalityId) continue;
+            const priorCount = priorCounts.get(priorTarget) ?? 0;
+            addExposure(exposure, currentTarget, 0.5 * priorCount);
+            addExposure(exposure, priorTarget, 0.5 * currentCount);
+        }
+    }
+
+    for (let i = 0; i < currentTargets.length; i++) {
+        const target = currentTargets[i];
+        const municipalityId = parseCanonicalMunicipalityId(target);
+        if (!municipalityId) continue;
+        for (let j = i + 1; j < currentTargets.length; j++) {
+            const peerTarget = currentTargets[j];
+            if (parseCanonicalMunicipalityId(peerTarget) !== municipalityId) continue;
+            addExposure(exposure, target, 0.5 * (currentCounts.get(peerTarget) ?? 0));
+            addExposure(exposure, peerTarget, 0.5 * (currentCounts.get(target) ?? 0));
+        }
+    }
+
+    const orderedExposure = new Map<EntityId, number>();
+    for (const entityId of [...exposure.keys()].sort(strictCompare)) {
+        orderedExposure.set(entityId, exposure.get(entityId) ?? 0);
+    }
+
+    return {
+        exposure_by_entity: orderedExposure,
+        window: { rows: [...priorRows, ...currentRows].sort(compareCombatWindowRows) },
+    };
+}
 
 /**
  * Compute local-collapse exposure from resolved combat incidence.

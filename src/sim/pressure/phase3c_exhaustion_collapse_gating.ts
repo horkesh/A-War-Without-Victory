@@ -14,7 +14,11 @@ import type { CollapseEligibilityState, FactionId, GameState, Tier1EntityEligibi
 import type { SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getEnablePhase3B } from './phase3b_pressure_exhaustion.js';
-import { computeCombatIncidenceExposureByEntity, computePressureExposureByEntity, type EntityId } from './pressure_exposure.js';
+import {
+    advanceCombatIncidenceExposureWindow,
+    computePressureExposureByEntity,
+    type EntityId,
+} from './pressure_exposure.js';
 
 
 // Feature flag (OFF by default)
@@ -605,14 +609,29 @@ export function applyPhase3CExhaustionCollapseGating(
 
     // Compute local exposure per entity.
     // RC D-SELECTION (2026-08-15): OSID-native scenarios use resolved defender-side
-    // combat incidence — exactly one exposure unit per battle target. A quiet or
-    // missing report contributes zero; there is deliberately no fallback to frontage
-    // presence because that would silently preserve the falsified frontage-days model.
+    // combat incidence. Direct target battles add one exposure; different targets in
+    // the same municipality within two turns add symmetric half-unit peer support.
+    // A quiet or missing report contributes zero while pruning the rolling window;
+    // there is deliberately no fallback to frontage presence because that would
+    // silently preserve the falsified frontage-days model.
     // The legacy settlement adapter remains only for non-OSID harness/scenario paths.
     // Reached solely through the existing default-OFF Phase 3C gate.
-    const exposureByEntity = state.military.war_front_edges_osid !== undefined
-        ? computeCombatIncidenceExposureByEntity(attackResolution)
-        : computePressureExposureByEntity(state, derivedFrontEdges);
+    let exposureByEntity: Map<EntityId, number>;
+    if (state.military.war_front_edges_osid !== undefined) {
+        const windowAdvance = advanceCombatIncidenceExposureWindow(
+            state.political.collapse_combat_incidence_window,
+            currentTurn,
+            attackResolution
+        );
+        exposureByEntity = windowAdvance.exposure_by_entity;
+        if (windowAdvance.window.rows.length > 0) {
+            state.political.collapse_combat_incidence_window = windowAdvance.window;
+        } else {
+            delete state.political.collapse_combat_incidence_window;
+        }
+    } else {
+        exposureByEntity = computePressureExposureByEntity(state, derivedFrontEdges);
+    }
 
     // Build map of entity -> faction (for Tier-0 gating).
     //

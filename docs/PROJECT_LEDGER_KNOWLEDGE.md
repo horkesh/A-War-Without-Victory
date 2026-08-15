@@ -4407,3 +4407,11 @@ Sipovo's five defender-side battle targets versus Drvar's three made a same-muni
 **Reusable rule:** before deriving a selector from terminal or campaign-wide totals, audit whether the contributing events co-occur at the consumer's actual temporal grain. A same-turn consumer cannot recover a campaign-level pattern without an explicitly designed window or persisted accumulator. Synthetic tests prove formula semantics, not that campaign timing supplies the inputs.
 
 Do not respond by scaling. A multiplier can make a signal reach downstream thresholds, but it cannot make equal inputs discriminate. The next design question is temporal memory: its window, decay or accumulation rule, persisted-state and save implications, reset semantics, and determinism contract must be explicit and owner-accepted before another implementation or D-shape work begins.
+
+## 2026-08-15 - Use the minimum temporal memory that restores the registered signal, and credit it symmetrically
+
+The campaign evidence placed Sipovo peers at turns 177-181 around its turn-179 main-town battle and Drvar peers at turns 179-182 around its turn-181 main-town battle. Same-turn grouping lost the signal; an inclusive one-turn window was still insufficient; an inclusive two-turn window was the smallest window that produced the registered 3/2 distinction. Wider windows added reach without improving that discriminator.
+
+**Reusable rule:** choose temporal memory from the consumer's observed event spacing, use the smallest window that satisfies the registered comparison, and reject wider memory unless it adds a separately required signal. When peers can arrive before or after the focal event, credit both attacked targets symmetrically so the result does not depend on attack order. Aggregate peer support at the receiving target level rather than multiplying it by that target's direct-row count. Persist only the bounded source rows needed for replay, sort them canonically, and prove absent-field compatibility before treating a windowed selector as deterministic save state.
+
+Selector acceptance and scale acceptance remain separate. The two-turn window solved historical discrimination while maximum exposure stayed 33 / strain 4.95, so it did not by itself make downstream collapse live.

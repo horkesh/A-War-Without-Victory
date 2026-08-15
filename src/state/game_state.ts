@@ -2124,6 +2124,17 @@ export interface LocalStrainState {
     by_entity: Record<string, number>; // EntityId -> strain value (monotonic, clamped)
 }
 
+export interface CollapseCombatIncidenceWindowRow {
+    turn: number;
+    battle_id: string;
+    target_osid: string;
+}
+
+export interface CollapseCombatIncidenceWindowState {
+    /** Canonically sorted resolved-battle rows from the current and prior two turns. */
+    rows: CollapseCombatIncidenceWindowRow[];
+}
+
 export interface CollapseDamageState {
     // Per-entity (settlement SID) collapse damage accumulator
     by_entity: Record<string, {
@@ -2919,6 +2930,7 @@ end_state?: EndState;
 collapse_eligibility?: Record<FactionId, CollapseEligibilityState>;
 collapse_eligibility_tier1?: Record<string, Tier1EntityEligibilityState>;
 local_strain?: LocalStrainState;
+collapse_combat_incidence_window?: CollapseCombatIncidenceWindowState;
 collapse_damage?: CollapseDamageState;
 capacity_modifiers?: CapacityModifiersState;
 effective_posture_exposure?: EffectivePostureExposureState;

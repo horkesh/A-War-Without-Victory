@@ -205,3 +205,15 @@ Run two fresh collapse-ON 188-week measurements with unchanged multiplier and th
 - Maximum exposure remained 33 at `op:visoko:gornja_vratnica_2`, producing strain 4.95. No entity crossed 40 or 55; Tier-1 eligibility, collapse damage, and capacity modifiers remained empty.
 - Both runs retained 31/31 anchors and passed all seven engine-health checks. The Section 6 verifier and turn-162 rupture comparison passed as instruments, but zero live damage reached the protected boundary, so they provide no new Section 6 clearance.
 - Scaling is not the next experiment: multiplying a tied 1/1 signal cannot make it discriminate Sipovo from Drvar. Any successor must first define and obtain owner acceptance for an explicit temporal aggregation contract, then repeat deterministic measurement and live Section 6 review before D-shape begins.
+
+---
+
+## D-selection v3 two-turn window outcome (2026-08-15)
+
+- **Disposition: PASS_RETAIN.** The symmetric inclusive two-turn municipality window is the accepted D-selector. Direct current battle rows add 1 at their target; different-target municipality peers within two turns add 0.5 symmetrically, including retroactive credit to the earlier attacked target. Peer support is target-level, so direct-row multiplicity does not multiply support, and unattacked OSIDs remain absent.
+- Two fresh collapse-ON runs under `runs/collapse_d_selection_v3_a` and `runs/collapse_d_selection_v3_b` produced final-state hash `2cfb52c1e7811915` and structural fingerprint `22cf3c5d8884bfb8`. Fifteen of sixteen artifacts were byte-identical; only `run_meta.json` differed because it records the deliberately different output root.
+- Across the unchanged 555 resolved battles and 188 attacked targets, `op:sipovo:sipovo_2` reached exposure 3 / strain 0.45 and `op:titov_drvar:drvar_2` reached exposure 2 / strain 0.30. This satisfies the pre-registered exact historical discriminator that v1 and v2 failed.
+- Maximum exposure remained 33 at `op:visoko:gornja_vratnica_2`, producing maximum strain 4.95 at the unchanged 0.15 multiplier. Zero entities crossed 40 or 55; all Tier-1 domains remained false; collapse damage and capacity modifiers remained empty.
+- Both runs retained 31/31 anchors and all six bot benchmarks, passed all seven engine-health checks, and recorded the expected turn-162 Srebrenica rupture. The Section 6 verifier passed every case and full scan, but no live damage reached the protected boundary, so this remains instrument proof rather than live Section 6 clearance.
+- The optional queue persisted 20 canonical rows from turns 186-188 in the terminal save, and focused serialization coverage proved byte-stable round-trip plus absent-field compatibility for old/default-OFF saves.
+- **Next autonomous packet:** scale the accepted selector without changing its topology. Start with a `STRAIN_FRACTION=3.0` measurement candidate: HRHB's measured maximum exposure is 20, so strain becomes 60, just above the 55 live severity floor while the HRHB spatial Tier-0 gate is open. Do not begin D-shape, open RBiH/RS Tier-0, or claim Section 6 clearance in that packet.

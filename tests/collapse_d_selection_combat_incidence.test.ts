@@ -10,7 +10,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { AttackResolutionOsidReport } from '../src/sim/combat/attack_resolution_types.js';
 import type { FrontEdge } from '../src/map/front_edges.js';
-import { computeCombatIncidenceExposureByEntity } from '../src/sim/pressure/pressure_exposure.js';
+import {
+    advanceCombatIncidenceExposureWindow,
+    computeCombatIncidenceExposureByEntity,
+} from '../src/sim/pressure/pressure_exposure.js';
 import {
     applyPhase3CExhaustionCollapseGating,
     resetEnablePhase3C,
@@ -20,7 +23,8 @@ import {
     resetEnablePhase3B,
     setEnablePhase3B,
 } from '../src/sim/pressure/phase3b_pressure_exhaustion.js';
-import type { GameState } from '../src/state/game_state.js';
+import type { CollapseCombatIncidenceWindowState, GameState } from '../src/state/game_state.js';
+import { serializeGameState } from '../src/state/serializeGameState.js';
 
 type Battle = AttackResolutionOsidReport['battles'][number];
 
@@ -121,6 +125,108 @@ describe('RC D-selection combat-incidence exposure', () => {
             ['op:titov_drvar:drvar_2', 1],
         ]);
     });
+
+    it('credits different targets symmetrically within two turns and prunes older rows', () => {
+        const first = advanceCombatIncidenceExposureWindow(undefined, 10, report([
+            battle('b1', 'op:sipovo:brdjani'),
+        ]));
+        expect([...first.exposure_by_entity]).toEqual([['op:sipovo:brdjani', 1]]);
+
+        const paired = advanceCombatIncidenceExposureWindow(first.window, 12, report([
+            battle('b2', SIPOVO),
+        ]));
+        expect([...paired.exposure_by_entity]).toEqual([
+            ['op:sipovo:brdjani', 0.5],
+            [SIPOVO, 1.5],
+        ]);
+
+        const expired = advanceCombatIncidenceExposureWindow(paired.window, 15, report([
+            battle('b3', 'op:sipovo:volari_2'),
+        ]));
+        expect([...expired.exposure_by_entity]).toEqual([['op:sipovo:volari_2', 1]]);
+        expect(expired.window.rows.map((row) => row.turn)).toEqual([15]);
+    });
+
+    it('does not peer-credit repeated battles at one target or unattacked municipality members', () => {
+        const first = advanceCombatIncidenceExposureWindow(undefined, 20, report([
+            battle('b1', SIPOVO),
+        ]));
+        const repeated = advanceCombatIncidenceExposureWindow(first.window, 21, report([
+            battle('b2', SIPOVO),
+        ]));
+
+        expect([...repeated.exposure_by_entity]).toEqual([[SIPOVO, 1]]);
+        expect(repeated.exposure_by_entity.has('op:sipovo:unattacked')).toBe(false);
+    });
+
+    it('does not multiply peer support by the number of direct rows at the receiving target', () => {
+        const result = advanceCombatIncidenceExposureWindow(undefined, 25, report([
+            battle('a1', SIPOVO),
+            battle('a2', SIPOVO),
+            battle('b1', 'op:sipovo:volari_2'),
+            battle('b2', 'op:sipovo:volari_2'),
+            battle('b3', 'op:sipovo:volari_2'),
+        ]));
+
+        expect([...result.exposure_by_entity]).toEqual([
+            [SIPOVO, 3.5],
+            ['op:sipovo:volari_2', 4],
+        ]);
+    });
+
+    it('is permutation-invariant and rejects malformed queued and current rows', () => {
+        const prior: CollapseCombatIncidenceWindowState = {
+            rows: [
+                { turn: 29, battle_id: 'old-b', target_osid: 'op:sipovo:volari_2' },
+                { turn: 40, battle_id: 'future', target_osid: 'op:sipovo:future' },
+                { turn: 29, battle_id: 'blank', target_osid: '   ' },
+            ],
+        };
+        const rows = [
+            battle('b2', SIPOVO),
+            battle('bad', 'not-an-osid'),
+            battle('b1', 'op:sipovo:brdjani'),
+        ];
+
+        const forward = advanceCombatIncidenceExposureWindow(prior, 30, report(rows));
+        const permuted = advanceCombatIncidenceExposureWindow(
+            { rows: [...prior.rows].reverse() },
+            30,
+            report([rows[2], rows[1], rows[0]])
+        );
+
+        expect([...permuted.exposure_by_entity]).toEqual([...forward.exposure_by_entity]);
+        expect(permuted.window).toEqual(forward.window);
+        expect([...forward.exposure_by_entity]).toEqual([
+            ['op:sipovo:brdjani', 2],
+            [SIPOVO, 2],
+            ['op:sipovo:volari_2', 1],
+        ]);
+    });
+
+    it('replays the registered campaign timing as Sipovo 3 versus Drvar 2', () => {
+        const schedule = new Map<number, Battle[]>([
+            [177, [battle('s1', 'op:sipovo:brdjani')]],
+            [178, [battle('s2', 'op:sipovo:gornji_mujdzici_2')]],
+            [179, [battle('s3', SIPOVO), battle('d1', 'op:titov_drvar:prekaja_2')]],
+            [180, [battle('s4', 'op:sipovo:volari_2')]],
+            [181, [battle('s5', 'op:sipovo:pribeljci_2'), battle('d2', DRVAR)]],
+            [182, [battle('d3', 'op:titov_drvar:sipovljani_2')]],
+        ]);
+        let window: CollapseCombatIncidenceWindowState | undefined;
+        const totals = new Map<string, number>();
+
+        for (const [turn, rows] of schedule) {
+            const next = advanceCombatIncidenceExposureWindow(window, turn, report(rows));
+            window = next.window;
+            for (const [target, exposure] of next.exposure_by_entity) {
+                totals.set(target, (totals.get(target) ?? 0) + exposure);
+            }
+        }
+
+        expect(totals.get(SIPOVO)).toBe(3);
+        expect(totals.get(DRVAR)).toBe(2);
+    });
 });
 
 describe('RC D-selection Phase 3C wiring', () => {
@@ -196,6 +302,49 @@ describe('RC D-selection Phase 3C wiring', () => {
         expect(JSON.stringify(first.political.local_strain)).toBe(JSON.stringify(second.political.local_strain));
         expect(JSON.stringify(first.political.collapse_eligibility_tier1))
             .toBe(JSON.stringify(second.political.collapse_eligibility_tier1));
+    });
+
+    it('retroactively applies two-turn municipality support and persists only the active queue', () => {
+        const state = osidState();
+        state.political.political_controllers = {
+            ...state.political.political_controllers,
+            'op:sipovo:brdjani': 'RS',
+        };
+
+        state.meta.turn = 177;
+        run(state, report([battle('s1', 'op:sipovo:brdjani')]));
+        state.meta.turn = 179;
+        run(state, report([battle('s2', SIPOVO)]));
+
+        expect(state.political.local_strain?.by_entity).toEqual({
+            'op:sipovo:brdjani': 0.22499999999999998,
+            [SIPOVO]: 0.22499999999999998,
+        });
+        expect(state.political.collapse_combat_incidence_window?.rows).toEqual([
+            { turn: 177, battle_id: 's1', target_osid: 'op:sipovo:brdjani' },
+            { turn: 179, battle_id: 's2', target_osid: SIPOVO },
+        ]);
+
+        state.meta.turn = 182;
+        run(state, report([]));
+        expect(state.political.collapse_combat_incidence_window).toBeUndefined();
+    });
+
+    it('round-trips the active window byte-identically and leaves absent state absent', () => {
+        const state = osidState();
+        state.meta.turn = 177;
+        run(state, report([battle('s1', SIPOVO)]));
+
+        const serialized = serializeGameState(state);
+        const hydrated = JSON.parse(serialized) as GameState;
+        expect(hydrated.political.collapse_combat_incidence_window?.rows).toEqual([
+            { turn: 177, battle_id: 's1', target_osid: SIPOVO },
+        ]);
+        expect(serializeGameState(hydrated)).toBe(serialized);
+
+        const absent = osidState();
+        expect(JSON.parse(serializeGameState(absent)).political)
+            .not.toHaveProperty('collapse_combat_incidence_window');
     });
 
     it('passes the already-resolved OSID battle report through the canonical War step', () => {

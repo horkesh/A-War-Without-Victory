@@ -4,6 +4,8 @@
 
 **Goal:** Implement and measure the decided symmetric two-turn municipality combat-incidence window behind the existing default-OFF collapse gate.
 
+**Disposition:** COMPLETE / PASS_RETAIN on 2026-08-15. The exact Sipovo/Drvar result was 3/2; determinism, anchors, and health gates passed. Scaling and D-shape remain separate follow-up packets.
+
 **Architecture:** A pure deterministic window-advance helper consumes an optional prior two-turn queue plus the current resolved-battle report, emits this turn's direct and symmetric peer exposure increments, and returns the pruned next queue. Phase 3C applies those increments through the existing monotonic local-strain writer and persists the optional queue only on the enabled OSID path.
 
 **Tech Stack:** TypeScript, Vitest, AWWV War pipeline, JSON GameState serialization, scenario-runner 188-week evidence.
