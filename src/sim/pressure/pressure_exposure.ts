@@ -8,10 +8,42 @@
  */
 
 import type { FrontEdge } from '../../map/front_edges.js';
+import type { AttackResolutionOsidReport } from '../combat/attack_resolution_types.js';
 import type { GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 export type EntityId = string; // Settlement SID
+
+/**
+ * Compute local-collapse exposure from resolved combat incidence.
+ *
+ * Each resolved OSID battle contributes exactly one exposure unit to its
+ * defender-side `target_osid`. Quiet or missing reports contribute nothing.
+ * Casualties, outcome, attacker count, and frontage geometry deliberately do
+ * not affect this measurement-first D-selection signal.
+ */
+export function computeCombatIncidenceExposureByEntity(
+    report: Pick<AttackResolutionOsidReport, 'battles'> | undefined
+): Map<EntityId, number> {
+    const exposure = new Map<EntityId, number>();
+    if (!Array.isArray(report?.battles) || report.battles.length === 0) {
+        return exposure;
+    }
+
+    const battles = report.battles
+        .filter((battle) => typeof battle?.target_osid === 'string' && battle.target_osid.trim().length > 0)
+        .map((battle) => ({ battle_id: battle.battle_id, target_osid: battle.target_osid }))
+        .sort((a, b) => {
+            const byTarget = strictCompare(a.target_osid, b.target_osid);
+            return byTarget !== 0 ? byTarget : strictCompare(a.battle_id, b.battle_id);
+        });
+
+    for (const battle of battles) {
+        exposure.set(battle.target_osid, (exposure.get(battle.target_osid) ?? 0) + 1);
+    }
+
+    return exposure;
+}
 
 /**
  * Parse edge ID (format: "a__b" where a < b) into [a, b] pair.

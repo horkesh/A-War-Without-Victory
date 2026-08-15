@@ -4011,7 +4011,12 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             const edges = context.input.settlementEdges;
             if (!edges) {
-                const result = applyPhase3CExhaustionCollapseGating(context.state);
+                const result = applyPhase3CExhaustionCollapseGating(
+                    context.state,
+                    undefined,
+                    null,
+                    context.report.attack_resolution_osid
+                );
                 context.report.phase3c_exhaustion_collapse_gating = result;
                 return;
             }
@@ -4039,7 +4044,12 @@ export const warPhases: NamedPhase[] = [
                     );
                 }
             }
-            const result = applyPhase3CExhaustionCollapseGating(context.state, derivedFrontEdges, supplyReach);
+            const result = applyPhase3CExhaustionCollapseGating(
+                context.state,
+                derivedFrontEdges,
+                supplyReach,
+                context.report.attack_resolution_osid
+            );
             context.report.phase3c_exhaustion_collapse_gating = result;
         }
     },

@@ -9,11 +9,12 @@
  */
 
 import type { FrontEdge } from '../../map/front_edges.js';
+import type { AttackResolutionOsidReport } from '../combat/attack_resolution_types.js';
 import type { CollapseEligibilityState, FactionId, GameState, Tier1EntityEligibilityState } from '../../state/game_state.js';
 import type { SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getEnablePhase3B } from './phase3b_pressure_exhaustion.js';
-import { computePressureExposureByEntity, computePressureExposureByEntityOsid, type EntityId } from './pressure_exposure.js';
+import { computeCombatIncidenceExposureByEntity, computePressureExposureByEntity, type EntityId } from './pressure_exposure.js';
 
 
 // Feature flag (OFF by default)
@@ -363,12 +364,14 @@ function checkTier1Immunity(state: GameState, entityId: EntityId): boolean {
  * 
  * @param state Game state (mutated: collapse_eligibility and collapse_eligibility_tier1 state updated)
  * @param derivedFrontEdges Optional front edges for pressure exposure computation
+ * @param attackResolution Optional resolved OSID combat report for D-selection
  * @returns Result object with applied flag, reason if not applied, and stats
  */
 export function applyPhase3CExhaustionCollapseGating(
     state: GameState,
     derivedFrontEdges?: FrontEdge[],
-    supplyReach?: SupplyReachabilityOsidReport | null
+    supplyReach?: SupplyReachabilityOsidReport | null,
+    attackResolution?: Pick<AttackResolutionOsidReport, 'battles'>
 ): Phase3CEligibilityResult {
     // Feature gate check
     if (!getEnablePhase3C()) {
@@ -600,15 +603,15 @@ export function applyPhase3CExhaustionCollapseGating(
     let maxPersistenceSpatial = 0;
     const exposureEntities: Array<{ entity_id: EntityId; exposure: number }> = [];
 
-    // Compute pressure exposure per entity.
-    // COLLAPSE PHASE IV-b D2 (scope §A.3 Option 2 + M1): in OSID-native scenarios the
-    // settlement-level front_pressure is structurally empty (edge-universe mismatch),
-    // so prefer the OSID exposure adapter when the live OSID front topology is
-    // populated; else keep the settlement variant (harness/settlement-scenario path
-    // byte-identical). Reached only via the existing collapse flags (3C gating runs
-    // only when getEnablePhase3C() — defaults OFF), so the default path is inert.
-    const exposureByEntity = (state.military.war_front_edges_osid?.length ?? 0) > 0
-        ? computePressureExposureByEntityOsid(state)
+    // Compute local exposure per entity.
+    // RC D-SELECTION (2026-08-15): OSID-native scenarios use resolved defender-side
+    // combat incidence — exactly one exposure unit per battle target. A quiet or
+    // missing report contributes zero; there is deliberately no fallback to frontage
+    // presence because that would silently preserve the falsified frontage-days model.
+    // The legacy settlement adapter remains only for non-OSID harness/scenario paths.
+    // Reached solely through the existing default-OFF Phase 3C gate.
+    const exposureByEntity = state.military.war_front_edges_osid !== undefined
+        ? computeCombatIncidenceExposureByEntity(attackResolution)
         : computePressureExposureByEntity(state, derivedFrontEdges);
 
     // Build map of entity -> faction (for Tier-0 gating).

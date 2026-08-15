@@ -20,18 +20,18 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
 | 6 | R6 | **PRE-1.0 SCOPE COMPLETE -- CLOSED 2026-08-09** | None in the pre-1.0 R6 packet. Named Brcko, exhaustion re-pacing, casualty-grade, cohesion, and institutional-veto work remains post-1.0 debt unless explicitly reactivated. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
-| 6.5 | RC | **ACTIVE -- STAGE 0 AND STAGE 2 COMPLETE** | Execute D-selection: re-source local strain selection to combat incidence under a fresh Section 6 review. Then execute D-shape. Do not revive eligibility-breadth tuning or lane C; D-topology remains reserved for an explicit later decision. | [Collapse scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) / [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) |
+| 6.5 | RC | **ACTIVE -- D-SELECTION MEASUREMENT BUILT, NOT ACCEPTED** | Decide how to refine or scale resolved-combat incidence, then obtain fresh live Section 6 evidence. Current unchanged scaling peaks at 4.95 strain with zero damage, and the main-town Sipovo/Drvar discriminator ties 1/1. Do not begin D-shape yet. | [Collapse scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) / [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [measurement plan](2026-08-15-collapse-d-selection-measurement-plan.md) |
 | 7 | R7 | **IN PROGRESS -- WAITING BEHIND RC** | Resume historical/source, officer/OOB, audio/licensing, English accessibility/readability, opening-screen, and packaged-proof phases after RC. Localization Phase 3 is post-1.0 and does not gate this lane. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) |
 | 8 | R8 | **WAITING ON RC AND R1-R7 GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
 ## Current Critical Path
 
-`RC D-selection -> RC D-shape -> R7 -> R8 -> R9`
+`RC D-selection refinement/scaling decision -> live Section 6 evidence -> RC D-shape -> R7 -> R8 -> R9`
 
 Stage 2 retained a marker-verified 188-week collapse ON/OFF pair at 629 matched OSIDs and 31/31 anchors. It is a deterministic baseline, **not Section 6 clearance**: no `collapse_damage` entry was written, so the live enclave guard was never reached. Any change that opens RBiH or RS Tier-0 eligibility invalidates that Section 6 inference and requires fresh criteria 4 and 7 evidence.
 
-The old breadth-tuning frame is struck. Frontage-days cannot distinguish the pre-registered Drvar/Sipovo historical control, and the current model has no neighbor-coupling path capable of producing cascade behavior. D-selection changes the selection signal first; D-shape follows. The historian's 8-12 / 100-180 / 40-80 figures describe shape and are not acceptance thresholds.
+The old breadth-tuning frame is struck. Frontage-days could not distinguish the pre-registered Drvar/Sipovo historical control. Raw defender-side battle incidence is now implemented behind the default-OFF gate and is deterministic, but at unchanged scaling it produces no damage; its main-town Drvar/Sipovo values also tie at 1/1. The selector/scaling question therefore remains open. D-shape follows only after D-selection is accepted. The historian's 8-12 / 100-180 / 40-80 figures describe shape and are not acceptance thresholds.
 
 ## Fixed Decisions
 
