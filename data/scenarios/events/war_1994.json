@@ -149,6 +149,7 @@
   },
   {
     "id": "nato_ultimatum_sarajevo_1994",
+    "source_tier": "agreement_text",
     "title": "NATO Issues Ultimatum on Sarajevo",
     "narrative": "In the aftermath of Markale, NATO issues an ultimatum demanding the withdrawal of all VRS heavy weapons from a 20-kilometer exclusion zone around Sarajevo within ten days, or face air strikes. The ultimatum marks NATO's first credible threat of force and fundamentally changes the calculation for the VRS around the capital. This is a pivotal moment — compliance eases international pressure, defiance risks becoming the first belligerent to face NATO bombing.",
     "category": "diplomatic",
@@ -1158,6 +1159,7 @@
   },
   {
     "id": "ic_rbih_restraint_post_washington",
+    "source_tier": "balkan_battlegrounds",
     "title": "Washington to Sarajevo: Don't Exploit the Military Window",
     "narrative": "Western capitals warn Izetbegović not to launch aggressive offensives in the wake of the Washington Agreement. Dramatic ARBiH advances would destabilize the federation, hand RS propaganda victories, and jeopardize the Contact Group process.",
     "category": "diplomatic",
@@ -1343,6 +1345,7 @@
   },
   {
     "id": "contact_group_plan_1994",
+    "source_tier": "agreement_text",
     "title": "Contact Group Plan Presented",
     "narrative": "The Contact Group — the US, Russia, UK, France, and Germany — presents a take-it-or-leave-it peace plan offering the Federation 51% and Republika Srpska 49% of Bosnian territory. The Bosnian government and Croats accept under pressure, but the Bosnian Serb leadership rejects the plan, further isolating Pale even from its Belgrade patron.",
     "category": "diplomatic",
@@ -3232,6 +3235,7 @@
   },
   {
     "id": "carter_ceasefire_1994",
+    "source_tier": "agreement_text",
     "image": "event_ceasefire.webp",
     "title": "Carter Brokers Winter Ceasefire",
     "narrative": "Jimmy Carter arrives in Sarajevo. The former president, acting as private mediator, shuttles between the warring parties and extracts a commitment to a complete cessation of hostilities effective New Year's Day. Humanitarian corridors will reopen. Behind the scenes, both sides know the ceasefire is a breathing space — time to rearm, resupply, and prepare for whatever comes next.",

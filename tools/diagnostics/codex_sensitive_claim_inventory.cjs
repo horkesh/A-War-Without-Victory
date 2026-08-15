@@ -233,6 +233,27 @@ async function indexHasDynamicSections(rootDir) {
   ));
 }
 
+async function indexedEssayFiles(rootDir) {
+  const absolute = path.join(rootDir, ESSAY_INDEX_RELATIVE);
+  if (!(await pathExists(absolute))) return null;
+  let parsed;
+  try {
+    parsed = JSON.parse(await fs.readFile(absolute, 'utf8'));
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(parsed?.essays)) return null;
+  return new Set(parsed.essays
+    .map((essay) => {
+      const eventId = asNonEmptyString(essay?.event_id);
+      if (eventId) return eventId;
+      const essayId = asNonEmptyString(essay?.id);
+      return essayId?.startsWith('essay_') ? essayId.slice('essay_'.length) : null;
+    })
+    .filter(Boolean)
+    .map((eventId) => toPosixPath(path.join('data', 'scenarios', 'essays', `${eventId}.json`))));
+}
+
 async function listInputFiles(rootDir) {
   const essayFiles = await listFilesInDir(
     rootDir,
@@ -283,11 +304,14 @@ async function listInputFiles(rootDir) {
   ].sort(compareText);
 }
 
-function classifySurface(relativeFile) {
+function classifySurface(relativeFile, runtimeEssayFiles = null) {
   if (relativeFile === ESSAY_INDEX_RELATIVE) {
     return 'essay_dynamic_section';
   }
   if (relativeFile.startsWith('data/scenarios/essays/')) {
+    if (runtimeEssayFiles instanceof Set && !runtimeEssayFiles.has(relativeFile)) {
+      return 'essay_deposit';
+    }
     return 'essay';
   }
   if (relativeFile.startsWith('data/codex/ghost_entries_bcs/')) {
@@ -739,6 +763,9 @@ function provenanceGapsFor(sourceInfo, sourceDetails) {
 }
 
 function statusAndOwnerFor({ ring, sourceInfo, sourceDetails, riskClass, statePredicate, text }) {
+  if (riskClass === 'non_runtime_deposit') {
+    return { status: 'not_player_facing', owner: 'documentation-specialist' };
+  }
   if (ring === 'ring_3_refused_candidate') {
     return { status: 'blocked_sensitive_player_choice', owner: 'historian+game-designer' };
   }
@@ -769,6 +796,9 @@ function isDynamicConsequenceClaim(surface, text) {
 }
 
 function riskFor(surface, text, matchedTerms) {
+  if (surface === 'essay_deposit') {
+    return 'non_runtime_deposit';
+  }
   if (termSetMatches(matchedTerms, 'forbidden_scaffold')) {
     return 'unsupported_remove';
   }
@@ -785,6 +815,9 @@ function riskFor(surface, text, matchedTerms) {
 }
 
 function stopGateFor(riskClass) {
+  if (riskClass === 'non_runtime_deposit') {
+    return 'none';
+  }
   if (riskClass === 'safe_factual_correction') {
     return 'none';
   }
@@ -813,6 +846,8 @@ function notesFor(riskClass, sourceInfo) {
     notes.push('Sensitive-history term requires review before prose changes.');
   } else if (riskClass === 'safe_factual_correction') {
     notes.push('Operational wording may overclaim outcome or agency; verify against source/state.');
+  } else if (riskClass === 'non_runtime_deposit') {
+    notes.push('Unindexed authoring deposit; retained in inventory but excluded from the player-facing release queue.');
   }
   return notes.sort(compareText);
 }
@@ -1174,10 +1209,11 @@ async function buildContentDateMismatches(rootDir, files) {
 async function scanSensitiveClaimInventory(options = {}) {
   const rootDir = options.rootDir ?? process.cwd();
   const files = await listInputFiles(rootDir);
+  const runtimeEssayFiles = await indexedEssayFiles(rootDir);
   const claims = [];
 
   for (const file of files) {
-    const surface = classifySurface(file);
+    const surface = classifySurface(file, runtimeEssayFiles);
     if (file.endsWith('.json')) {
       claims.push(...await scanJsonFile(rootDir, file, surface));
     } else {

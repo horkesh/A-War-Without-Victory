@@ -86,6 +86,12 @@ No unsupported historical claim is promoted by this report. Independent committe
 
 ## Determinism and verification
 
+### Phase 1.2 checkpoint A — 2026-08-15
+
+The live schema-4 inventory now records 3,654 claims across 228 files. It explicitly classifies 12 claims in the six known unindexed Wave-4 essay deposits as non-runtime authoring material: they remain inventoried, but do not enter the player-facing release queue. Every previously tier-only claim is resolved (491 to zero), and seven two-source essay families plus their runtime-index mirrors reduce source-floor rows from 104 to 62. Documented claims rise from 1,483 to 2,016; 1,553 source-note and 11 actor-specificity rows remain. No prose, trigger, response, effect, state predicate, simulation rule, or save schema changed.
+
+The focused Phase 1.2 matrix passes 5 files / 65 tests, TypeScript passes, and `canon:check` passes its static determinism scan plus embedded no-refresh baseline regression. The separate explicit baseline command was redundant and was interrupted only after the embedded baseline had completed successfully.
+
 - Phase 1.1 RED reproduced blocked provenance anchors, missing tier/citation metadata, the missing crime/acquittal distinction, incorrect detail boundaries, generic symmetry, unsupported Neretva synthesis, and runtime-index drift. GREEN passes the 16-file fast matrix with 247 tests passed and 5 intentional skips, plus the separate 2-test source-quality suite. TypeScript, targeted JSON parsing, the actual strict CLI, and diff hygiene pass; the CLI reports 0 CRITICAL, 0 WARNING, and 1 observational INFO.
 - File-system walks, keys, findings, claims, citations, counters, and anchor rows use explicit stable ordering.
 - Reports contain no generated timestamp or absolute path.

@@ -131,6 +131,7 @@
   },
   {
     "id": "ic_pressure_vopp_engagement",
+    "source_tier": "agreement_text",
     "title": "Western Powers Press Sarajevo: Engage with Vance-Owen",
     "narrative": "Western capitals and mediators increase pressure on Sarajevo to engage seriously with the Vance-Owen Peace Plan. The diplomatic sequence signals that refusal would risk isolating the government internationally.",
     "category": "diplomatic",
@@ -831,6 +832,7 @@
   },
   {
     "id": "morillon_enters_srebrenica_1993",
+    "source_tier": "icty_icj_un",
     "title": "General Morillon Enters Srebrenica",
     "narrative": "UNPROFOR Commander General Philippe Morillon reaches the besieged Srebrenica enclave after months of convoy blockades. Confronted by desperate civilians, he publicly declares 'You are now under the protection of the United Nations. I will never abandon you.' His personal guarantee raises hopes but lacks any enforcement mechanism.",
     "source_note": "ICTY Krstic and MSF sources ground the row's Srebrenica convoy and UNPROFOR context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -1673,6 +1675,7 @@
   },
   {
     "id": "un_resolution_819_srebrenica_1993",
+    "source_tier": "icty_icj_un",
     "title": "UN Resolution 819 — Srebrenica Safe Area",
     "narrative": "The UN Security Council passes Resolution 819, declaring Srebrenica a 'safe area' free from armed attack or any hostile act, and demanding an immediate VRS ceasefire and unimpeded humanitarian access. The declaration creates a promise of protection without committing the military means to enforce it.",
     "source_note": "UNSCR 819 grounds the row's safe-area mandate and diplomatic context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
@@ -2306,6 +2309,7 @@
   },
   {
     "id": "un_safe_areas_declared_1993",
+    "source_tier": "icty_icj_un",
     "image": "event_un_presence.webp",
     "title": "UN Resolution 824 — Six Safe Areas",
     "narrative": "The UN Security Council passes Resolution 824, extending safe-area status beyond Srebrenica to Sarajevo, Tuzla, Zepa, Gorazde, and Bihac. Six enclaves now carry a promise of protection without adequate military force to deliver it — a fatal gap between mandate and means.",
@@ -2543,6 +2547,7 @@
   },
   {
     "id": "hvo_detention_camps_1993",
+    "source_tier": "icty_icj_un",
     "title": "HVO Detention Camps Established",
     "narrative": "Following the eruption of full-scale Croat-Bosniak war, HVO forces conduct mass arrests of Bosniak men across Herzegovina, including Bosniak members of the HVO itself. Thousands are held in a network of camps including Dretelj Prison, Gabela, and the Heliodrom complex near Mostar. Conditions are brutal — overcrowding, starvation, beatings, and forced labor — paralleling the Serb-run camps revealed at Omarska the previous year.",
     "category": "humanitarian",
@@ -3134,6 +3139,7 @@
   },
   {
     "id": "operation_lukavac_93",
+    "source_tier": "balkan_battlegrounds",
     "title": "Operation Lukavac 93 — VRS Offensive on Igman",
     "narrative": "The VRS opened Operation Lukavac 93 on 2-3 July with about 10,000 troops, captured Trnovo, and severed the ARBiH supply route to Gorazde. A renewed assault from 31 July has carried VRS forces onto Bjelasnica and Igman, putting Sarajevo's last supply link under immediate threat. NATO and the UN are now demanding a withdrawal while the captured positions remain in VRS hands.",
     "category": "military",
@@ -3313,6 +3319,7 @@
   },
   {
     "id": "nato_air_strike_threat_1993",
+    "source_tier": "agreement_text",
     "title": "NATO Threatens Air Strikes — Sarajevo Ultimatum",
     "narrative": "NATO formally agrees to launch air strikes against Bosnian Serb positions if the strangulation of Sarajevo or attacks on other safe areas continue. The decision marks the first time the Alliance has authorized potential force in its 44-year history. The dual-key arrangement between UN and NATO commands means execution remains politically constrained; the VRS disposition on Mount Igman remains a separate political-military choice.",
     "category": "diplomatic",
@@ -3367,6 +3374,7 @@
   },
   {
     "id": "owen_stoltenberg_plan_1993",
+    "source_tier": "agreement_text",
     "title": "Owen-Stoltenberg: Presidency Review",
     "narrative": "International mediators David Owen and Thorvald Stoltenberg present a loose union of three ethnic republics. This is the Presidency stage: Sarajevo may conditionally accept the framework while reserving the Drina-enclaves and Posavina questions for the final Assembly vote.",
     "category": "diplomatic",
@@ -6104,6 +6112,7 @@
   },
   {
     "id": "strategic_posture_review_hrhb",
+    "source_tier": "balkan_battlegrounds",
     "title": "Strategic Posture Review",
     "narrative": "Zagreb's expectations grow heavier with each passing month. The HVO holds territory across Herzegovina, but central Bosnia slips away and the war with the Bosniaks bleeds both sides white. Tudjman watches the map. Your assembly watches Tudjman. What direction will Herceg-Bosna take in the months ahead?",
     "category": "political",
@@ -6371,6 +6380,7 @@
   },
   {
     "id": "visit_to_front_rbih",
+    "source_tier": "design_counterfactual",
     "title": "Visit to the Front",
     "narrative": "Your chief of staff suggests a presidential visit to the front. The troops have been fighting for months without seeing their president. A visit would lift spirits — but it also means time away from Sarajevo, exposure to risk, and a political signal about which theater you prioritize. Sarajevo, Tuzla, and Bihac each carry different command and diplomatic costs. Where will you go?",
     "category": "command",
@@ -6661,6 +6671,7 @@
   },
   {
     "id": "visit_to_front_rs",
+    "source_tier": "design_counterfactual",
     "title": "Visit to the Front",
     "narrative": "Your generals suggest a presidential tour of the front. The VRS soldier is loyal — but loyalty is a currency spent by long campaigns and poor rations. The Posavina corridor is under constant pressure. Sarajevo draws international scrutiny. The Drina Corps holds the east. Where will Republika Srpska's president be seen today?",
     "category": "command",
@@ -6936,6 +6947,7 @@
   },
   {
     "id": "visit_to_front_hrhb",
+    "source_tier": "design_counterfactual",
     "title": "Visit to the Front",
     "narrative": "Your defence minister suggests a presidential tour of HVO positions. HVO soldiers have endured a long campaign and expect visible political attention. Central Bosnia is under pressure. Herzegovina holds. The Neretva front shapes Herceg-Bosna's southern position. Where will the president of the Croatian Community be seen?",
     "category": "command",
@@ -7211,6 +7223,7 @@
   },
   {
     "id": "address_to_nation_rbih",
+    "source_tier": "design_counterfactual",
     "title": "Address the Nation",
     "narrative": "Your chief of staff lays a draft speech on the desk. RTV BiH can carry your voice into every cellar and shelter still holding a working radio. An address can steady a frightened, exhausted population and signal resolve abroad — but every word is a promise the war may not let you keep. Defiance hardens the lines and raises expectations that later curdle into disillusion; a sober call for endurance spends political credit; an appeal to the world invites the patron's irritation at being lectured. What does the president say to a people in the fourth year of siege?",
     "category": "command",
@@ -7434,6 +7447,7 @@
   },
   {
     "id": "address_to_nation_rs",
+    "source_tier": "design_counterfactual",
     "title": "Address the Nation",
     "narrative": "Pale radio is ready to carry your words to every Serb household from Banja Luka to the Drina. An address can bind a tired people to the project and steady the assembly — but defiance commits Republika Srpska to a course its sponsors may not fund, and any line you draw tonight you will have to defend or disown. A measured speech spends credit you are short of; a hard one invites the patron's displeasure at being committed without consultation. What does the president tell his nation?",
     "category": "command",
@@ -7656,6 +7670,7 @@
   },
   {
     "id": "address_to_nation_hrhb",
+    "source_tier": "design_counterfactual",
     "title": "Address the Nation",
     "narrative": "Herceg-Bosna's airwaves wait for the president. An address can steady a Croat community stretched between Herzegovina and the central-Bosnia pockets, and reassure Zagreb that the project is in steady hands — but a defiant line commits the HVO publicly and tightens the noose around any reconciliation with Sarajevo, while a conciliatory one risks the hardliners and Zagreb's patrons reading weakness. What does the president of the Croatian Community tell his people?",
     "category": "command",
@@ -7873,6 +7888,7 @@
   },
   {
     "id": "decorate_a_unit_rbih",
+    "source_tier": "design_counterfactual",
     "title": "Decorate a Unit",
     "narrative": "Your staff brings forward citations for units that have held the line under impossible conditions. A decoration — a unit citation, a streamer for the colours — costs nothing in materiel and can lift a battered formation's spirit and the watching army's morale. But honours are political: the unit you single out is the unit you are seen to favour, and every formation passed over reads the omission. Decorate the wrong unit, or decorate at all amid heavy losses, and the gesture rings hollow or breeds resentment. Which formation will the president honour — and only a regular formation of the armed forces is eligible?",
     "category": "command",
@@ -8035,6 +8051,7 @@
   },
   {
     "id": "decorate_a_unit_rs",
+    "source_tier": "design_counterfactual",
     "title": "Decorate a Unit",
     "narrative": "Your staff lays out citations for VRS formations that have held or advanced at heavy cost. A decoration costs no materiel and can steady a tired army — but in Republika Srpska honours are watched closely. Single out a corps and you are seen to favour it; honour the wrong formation and you reward the wrong faction in the officer corps; decorate amid loss and the gesture can curdle. Eligibility is restricted to regular VRS formations — no irregular or volunteer paramilitary unit is on the list. Which regular formation will the president honour?",
     "category": "command",
@@ -8197,6 +8214,7 @@
   },
   {
     "id": "decorate_a_unit_hrhb",
+    "source_tier": "design_counterfactual",
     "title": "Decorate a Unit",
     "narrative": "Your staff brings citations for HVO formations that have held the divided geography of Herceg-Bosna at heavy cost. A decoration costs no materiel and can lift a stretched force — but honours carry weight between Herzegovina and the central-Bosnia pockets, and singling out one formation tells the others where they stand. Honour amid loss, or honour the wrong unit, and the gesture sours. Eligibility is restricted to regular HVO formations — no irregular or paramilitary unit is on the list. Which regular formation will the president honour?",
     "category": "command",

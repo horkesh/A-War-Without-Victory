@@ -18,6 +18,8 @@
    Do instead: finish historical/source remediation, officer/OOB provenance, audio/licensing, English accessibility/readability, opening screens, and packaged proof before R8. Keep `bs` migration, pseudolocalization, Bosnian completion/native review, and locale-specific proof in post-1.0 Phase 3.
 5. **[2026-08-15] Publication remains separately authorized**
    Do instead: transient validation packages are allowed, but do not sign, upload, create a public release, or tag `1.0` without an explicit `Publish 1.0` instruction.
+6. **[2026-08-15] R7 Phase 1.2 live provenance census**
+   Do instead: continue from 2,016 documented / 1,553 source-note / 62 source-floor / 11 actor-specificity / 0 source-tier claims. Keep the 12 known unindexed deposit claims auditable but non-player-facing; mirror every live essay metadata fix into `essay_index.json`.
 
 ## Execution & Validation
 0. **[2026-08-12] ANY territory-moving change needs 188w — the "catalog-only" carve-out is WITHDRAWN**

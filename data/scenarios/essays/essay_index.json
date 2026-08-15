@@ -125,6 +125,7 @@
     },
     {
       "id": "essay_concentration_camps_revealed_1992",
+      "source_tier": "icty_icj_un",
       "tier": 2,
       "event_id": "concentration_camps_revealed_1992",
       "title": "Omarska and Trnopolje: The Camps That Shocked the World",
@@ -257,6 +258,7 @@
     },
     {
       "id": "essay_foca_1992",
+      "source_tier": "icty_icj_un",
       "tier": 0,
       "event_id": "foca_1992",
       "title": "Foca: The Takeover and Its Aftermath",
@@ -414,6 +416,7 @@
     },
     {
       "id": "essay_keraterm_camp_1992",
+      "source_tier": "icty_icj_un",
       "tier": 0,
       "event_id": "keraterm_camp_1992",
       "title": "The Keraterm Camp",
@@ -444,8 +447,11 @@
       "year": 1992,
       "category": "diplomatic",
       "sources": [
-        "London Conference on Yugoslavia, August 1992, final declaration"
+        "London Conference on Yugoslavia, August 1992, final declaration",
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Vol. I, paras. 3324-3340"
       ],
+      "source_tier": "icty_icj_un",
+      "source_note": "The conference declaration establishes its adopted principles and institutions; the Karadzic judgment supplies adjudicated chronology and context. The essay is original synthesis and does not infer enforcement from the declaration alone.",
       "generated": true,
       "content": "By late August 1992, the Bosnian War had been raging for nearly five months, and the international community's response had been defined by its inadequacy. Diplomatic statements condemned the violence in general terms. A UN arms embargo, imposed on all parties but disproportionately affecting the Bosnian government, remained in force. UNPROFOR's mandate in Bosnia was limited to humanitarian convoy protection. Then, on 26 August 1992, the London Conference on the Former Yugoslavia convened under British chairmanship, co-sponsored by the United Nations and the European Community. It was the largest and most senior diplomatic gathering yet assembled to address the crisis — and it would become a case study in the distance between diplomatic language and operational commitment.\n\nThe conference brought together representatives of the warring parties, the permanent members of the UN Security Council, the European Community, and neighboring states. Its immediate catalyst was the international outcry following the revelation of Bosnian Serb detention camps near Prijedor earlier that month, which had generated intense public pressure on Western governments to act. The conference was convened under the joint auspices of the United Nations and the European Community, with British Prime Minister John Major as host and UN Secretary-General Boutros Boutros-Ghali presiding.\n\nThe conference produced a final declaration that was sweeping in its principles. It condemned ethnic cleansing, demanded the closure of detention camps, called for unimpeded humanitarian access, and insisted on respect for Bosnia-Herzegovina's sovereignty and territorial integrity. It established the International Conference on the Former Yugoslavia as a permanent negotiating framework, appointing Cyrus Vance and Lord David Owen as co-chairmen of the steering committee that would pursue a comprehensive peace settlement. The declaration's language was firm, its demands were clear, and its enforcement mechanisms were essentially nonexistent.\n\nThe Bosnian Serb delegation, led by Radovan Karadžić, accepted the conference's principles — a signature that carried no discernible military consequence. Serbian President Slobodan Milošević participated as a nominally constructive interlocutor while maintaining the institutional and material relationships that sustained the VRS war effort. For the Bosnian government delegation under President Alija Izetbegović, London represented both a validation of their claims about the scale of atrocities being committed and a frustrating demonstration that international recognition of those facts did not translate into protective action.\n\nThe conference's most lasting institutional contribution was the Vance-Owen negotiating framework, which would produce the Vance-Owen Peace Plan in early 1993 — a proposal to divide Bosnia into ten semi-autonomous provinces organized partly along ethnic lines. That plan's eventual failure would itself become a significant chapter in the war's diplomatic history.\n\nCritically, the London Conference declined to authorize military enforcement of its declarations. Proposals for the use of force to protect civilian populations, break the siege of Sarajevo, or enforce no-fly zones over Bosnia were discussed but not adopted in binding form. The gap between rhetoric and action that characterized the conference would persist for three more years, until NATO airstrikes in the summer of 1995 finally altered the military equation.\n\nThe London Conference matters historically not for what it achieved but for what it revealed: the international community could diagnose the crisis with precision, articulate principles with eloquence, and assemble political authority at the highest levels — yet still decline to deploy the coercive power necessary to stop the killing. For the people of Bosnia, the conference's declarations offered words where survival required force.",
       "dynamic_sections": [
@@ -519,6 +525,7 @@
     },
     {
       "id": "essay_omarska_camp_1992",
+      "source_tier": "icty_icj_un",
       "tier": 0,
       "event_id": "omarska_camp_1992",
       "title": "The Omarska Camp",
@@ -578,6 +585,7 @@
     },
     {
       "id": "essay_prijedor_takeover_1992",
+      "source_tier": "icty_icj_un",
       "tier": 0,
       "event_id": "prijedor_takeover_1992",
       "title": "Prijedor: The Takeover and the Counterattack",
@@ -777,6 +785,7 @@
     },
     {
       "id": "essay_visegrad_1992",
+      "source_tier": "icty_icj_un",
       "tier": 0,
       "event_id": "visegrad_1992",
       "title": "Visegrad: The Bridge on the Drina, 1992",
@@ -801,6 +810,7 @@
     },
     {
       "id": "essay_zvornik_takeover_1992",
+      "source_tier": "icty_icj_un",
       "tier": 0,
       "event_id": "zvornik_takeover_1992",
       "title": "The Takeover of Zvornik",
@@ -825,6 +835,7 @@
     },
     {
       "id": "essay_bijeljina_killings_1992",
+      "source_tier": "icty_icj_un",
       "tier": 0,
       "event_id": "bijeljina_killings_1992",
       "title": "Bijeljina: The First Days of April 1992",
@@ -1296,6 +1307,7 @@
     },
     {
       "id": "essay_hvo_detention_camps_1993",
+      "source_tier": "icty_icj_un",
       "tier": 2,
       "event_id": "hvo_detention_camps_1993",
       "title": "Dretelj, Gabela, Heliodrom: The HVO Camp System",
@@ -1898,8 +1910,11 @@
       "year": 1993,
       "category": "political",
       "sources": [
-        "ICTY Karadzic Trial Judgment (IT-95-5/18-T)"
+        "ICTY Karadzic Trial Judgment (IT-95-5/18-T)",
+        "Balkan Battlegrounds Vol. II, pp. 28-31"
       ],
+      "source_tier": "icty_icj_un",
+      "source_note": "The Karadzic judgment establishes the Assembly and referendum sequence; Balkan Battlegrounds Vol. II pp. 28-31 corroborates the Vance-Owen rejection chronology. The essay is original synthesis and does not convert the rejected plan into a realized settlement.",
       "generated": true,
       "content": "On 5-6 May 1993, the National Assembly of the Republika Srpska convened in Pale to consider the Vance-Owen Peace Plan, which Radovan Karadzic had personally signed in Athens on 2 May under intense international pressure. The assembly's decision to reject the plan and refer it to a popular referendum -- which produced a 96 percent vote against -- marked the definitive collapse of the most comprehensive peace proposal that would have preserved a unified Bosnian state. Lord Owen formally declared the plan dead on 18 June. The war would continue for more than two additional years.\n\nThe assembly session at Pale was a dramatic confrontation between international diplomatic expectations and the political dynamics within Republika Srpska. Karadzic had signed the plan under pressure from Serbian President Slobodan Milosevic, who was himself responding to the threat of further international sanctions against the Federal Republic of Yugoslavia. But the assembly deputies, many representing municipalities where VRS forces had spent a year establishing military control over territory, were unwilling to accept terms that would have required surrendering approximately half of the land their forces held.\n\nThe ICTY Karadzic Trial Judgment (IT-95-5/18-T) examined the assembly's rejection as part of the broader pattern of Bosnian Serb political and military decision-making. The judgment established that the strategic goals adopted by the assembly in May 1992 -- particularly the consolidation of contiguous Serb-held territory along the Drina Valley, the Posavina corridor, and around Sarajevo -- were incompatible with the Vance-Owen provincial map. The plan would have divided VRS-controlled territory into non-contiguous provinces and required the withdrawal of Serb forces from areas where ethnic cleansing had already altered the demographic composition. For the assembly deputies, acceptance would have meant undoing the military accomplishments of the preceding year.\n\nThe political dynamics within the assembly were not monolithic. General Ratko Mladic addressed the deputies, and his remarks -- later cited in ICTY proceedings -- reflected the military establishment's assessment that the plan was unacceptable on strategic grounds. The VRS high command viewed the proposed provincial boundaries as militarily indefensible and the demilitarization provisions as an existential threat to Serb security. Civilian hardliners, meanwhile, framed the vote in terms of national survival, arguing that acceptance would lead to the dissolution of Republika Srpska as a political entity.\n\nMilosevic's response to the rejection was swift and consequential. Belgrade imposed temporary restrictions on the Republika Srpska, a precursor to the far more consequential blockade that would follow the Contact Group Plan rejection in August 1994, restricting fuel and military supplies crossing the Drina. This represented a genuine rupture in the patron-client relationship between Serbia and the Bosnian Serb leadership, though the blockade was inconsistently enforced and eventually eased. The episode demonstrated both the limits of Belgrade's influence over Pale and the Bosnian Serb leadership's willingness to defy its patron when it perceived its core territorial interests to be at stake.\n\nFor the Bosnian government, the rejection confirmed what many in Sarajevo had long suspected -- that the Bosnian Serb leadership would not voluntarily relinquish territory gained through force. The failure of Vance-Owen shifted the diplomatic landscape decisively. Subsequent peace proposals, including the Owen-Stoltenberg plan later in 1993, moved away from preserving a unified state and toward various forms of ethnic partition. The principle that territorial gains achieved through violence could not be reversed through negotiation alone gained implicit acceptance in international circles.\n\nThe assembly vote at Pale was a pivot point in the war. It demonstrated that the Bosnian Serb political system could resist both international pressure and its own patron's demands when the stakes involved territorial concessions. It also exposed the fundamental tension in international peace efforts -- the gap between the diplomatic assumption that all parties could be brought to accept a negotiated settlement and the military reality that one party's war aims were incompatible with any settlement that preserved Bosnia's territorial integrity.",
       "localizations": {
@@ -2390,8 +2405,11 @@
       "year": 1993,
       "category": "diplomatic",
       "sources": [
-        "ICTY Prlić et al. Trial Judgment (IT-04-74-T)"
+        "ICTY Prlić et al. Trial Judgment (IT-04-74-T)",
+        "UN S/25479, 8 April 1993, Co-Chairmen's letter transmitting the Vance-Owen Peace Plan"
       ],
+      "source_tier": "icty_icj_un",
+      "source_note": "UN S/25479 establishes the plan presented to the parties; the Prlic judgment supplies adjudicated Croat-Bosniak context. The essay is original synthesis and does not portray the unimplemented plan as delivered peace.",
       "generated": true,
       "content": "By the winter of 1992-93, the international community's attempts to halt the Bosnian War had produced little beyond ceasefire agreements that collapsed within hours of their signing. Against this backdrop, UN envoy Cyrus Vance and European Community mediator David Owen presented their peace plan in January 1993 at the International Conference on the Former Yugoslavia in Geneva. It was the most ambitious diplomatic effort of the war to date, and its consequences -- intended and otherwise -- would reshape the conflict's trajectory for the year ahead.\n\nThe Vance-Owen Peace Plan proposed dividing Bosnia-Herzegovina into ten semi-autonomous provinces, each assigned a dominant ethnic character based on the 1991 census, while preserving the country's international borders and nominal sovereignty. Three provinces would be Bosniak-majority, three Croat-majority, three Serb-majority, and Sarajevo would be a demilitarized district under mixed administration. The plan required all heavy weapons to be placed under UN supervision and all armed forces to be progressively demobilized within defined timelines.\n\nFor the Bosnian government under President Alija Izetbegovic, the plan presented an excruciating dilemma. Accepting it meant legitimizing many of the territorial gains achieved through ethnic cleansing over the preceding year. Rejecting it meant defying the international community -- the same community whose intervention the government desperately sought. After considerable American pressure, the Bosniak side reluctantly signed in March 1993.\n\nThe Bosnian Croat leadership under Mate Boban embraced the plan with enthusiasm that revealed more than diplomatic pragmatism. The proposed provincial map allocated significant territories in central Bosnia and Herzegovina to Croat-majority provinces. HVO commanders interpreted this allocation as international validation of their territorial claims and moved to impose administrative control over municipalities designated as Croat provinces -- including areas with substantial Bosniak populations. The ICTY Prlic et al. Trial Judgment (IT-04-74-T) later found that the Vance-Owen provincial map was exploited by the Herceg-Bosna leadership to justify the forcible removal of Bosniaks from areas assigned to Croat provinces.\n\nThe Bosnian Serb response proved decisive. Though Radovan Karadzic initially signed the plan under pressure, he submitted it to the Bosnian Serb assembly in Pale for ratification. On 5-6 May 1993, the assembly voted overwhelmingly to reject the plan and submit it to a referendum, which produced an emphatic rejection. The Serb position was that accepting the plan would mean surrendering roughly half the territory their forces controlled, including the critical land corridors connecting Serb-held regions.\n\nThe plan's failure had consequences far beyond the negotiating table. Its provincial map had already catalyzed the Croat-Bosniak conflict by providing a cartographic justification for HVO operations in central Bosnia. Its rejection by the Bosnian Serbs convinced many in the international community that diplomacy alone could not resolve the conflict. And its underlying logic -- that Bosnia's ethnic communities required territorial separation -- persisted through subsequent peace proposals until it found its ultimate expression in the Dayton Agreement's two-entity structure. The Vance-Owen Plan did not bring peace, but it defined the terms on which peace would eventually be sought.",
       "dynamic_sections": [
@@ -2673,8 +2691,11 @@
       "year": 1994,
       "category": "diplomatic",
       "sources": [
-        "Contact Group proposal, July 1994"
+        "Contact Group proposal, July 1994",
+        "Balkan Battlegrounds Vol. I, p. 22"
       ],
+      "source_tier": "agreement_text",
+      "source_note": "The Contact Group proposal establishes the offered settlement; Balkan Battlegrounds Vol. I p. 22 corroborates the 51/49 formula and the acceptance-rejection chronology. The essay is original synthesis and does not treat the proposed map as an implemented peace.",
       "generated": true,
       "content": "The Contact Group — comprising the United States, Russia, the United Kingdom, France, and Germany — presented its peace plan to the warring parties in July 1994. The proposal represented the most serious attempt at a negotiated settlement since the failed Vance-Owen Peace Plan of early 1993, and it introduced the territorial formula that would ultimately underpin the Dayton Agreement: a 51-49 percent division of Bosnian territory between the newly established Federation of Bosnia and Herzegovina and the Republika Srpska.\n\nThe plan emerged from a diplomatic context reshaped by the Washington Agreement of March 1994. With the Bosniak-Croat conflict ended and a joint Federation established, the international community could present a simplified two-entity model. The Federation would receive 51 percent of Bosnia's territory, the Republika Srpska 49 percent. The specific map drawn by the Contact Group required significant Bosnian Serb territorial concessions from the approximately 70 percent of Bosnia that VRS forces controlled at the time. For the Bosnian government in Sarajevo, the plan demanded acceptance of a Serb entity within Bosnia — a bitter concession given the ethnic cleansing through which that entity had been carved out.\n\nThe plan was presented on a take-it-or-leave-it basis. The Contact Group insisted that no amendments or counter-proposals would be entertained. This rigidity was deliberate, designed to prevent the kind of prolonged negotiation-as-delay that had characterized earlier peace processes. The Bosnian government, under heavy international pressure and recognizing that the Federation's military position was not yet strong enough to recover territory by force, accepted the plan. Croatia endorsed it. The Federal Republic of Yugoslavia under Slobodan Milošević also signaled acceptance, increasingly willing to distance Belgrade from the Bosnian Serb leadership.\n\nThe Bosnian Serb Assembly, however, rejected the plan. Meeting in Pale in late July and again in August 1994, the assembly voted against acceptance, unwilling to relinquish territory that the VRS held on the ground. Karadžić and the Pale leadership calculated that the international community lacked the will to enforce the plan militarily, and that time remained on their side. The rejection was decisive and repeated — a referendum organized among Bosnian Serbs produced an overwhelming vote against the Contact Group map.\n\nThe consequences of rejection were significant but slow to materialize. Milošević, furious at what he regarded as Pale's reckless defiance, imposed a partial blockade on the Republika Srpska, restricting the flow of supplies across the Drina River from Serbia proper. This blockade, while imperfect and often circumvented, represented a genuine rupture between Belgrade and Pale. International monitors were deployed along the Serbia-Bosnia border to verify compliance. The Bosnian Serb entity found itself increasingly isolated — cut off from its patron state, facing a unified Federation with growing international support, and confronting the possibility that the military balance was beginning to shift.\n\nYet the Contact Group Plan also exposed the limits of diplomacy without enforcement. The plan contained no mechanism for implementation against a party that refused to accept it. The international community proved unwilling to impose the settlement by force in the summer of 1994. It would take another year of war — including the fall of Srebrenica, the Markale marketplace massacre, and Operation Storm — before the military and political conditions existed for a settlement to be imposed. The 51-49 formula survived, but only after the battlefield had been reshaped to match the map that diplomacy alone could not deliver.",
       "dynamic_sections": [
@@ -2863,8 +2884,11 @@
       "year": 1994,
       "category": "diplomatic",
       "sources": [
-        "NATO North Atlantic Council decision, 9 February 1994"
+        "NATO North Atlantic Council decision, 9 February 1994",
+        "ICTY Galic Trial Judgment (IT-98-29-T), Sarajevo siege and heavy-weapons context"
       ],
+      "source_tier": "agreement_text",
+      "source_note": "The North Atlantic Council decision establishes the ultimatum and deadline; the Galic judgment supplies adjudicated siege context. The essay is original synthesis and distinguishes the exclusion-zone measure from an end to the siege.",
       "generated": true,
       "content": "Four days after the Markale massacre, on 9 February 1994, the North Atlantic Council issued an ultimatum that marked a fundamental shift in the international posture toward the Bosnian War. NATO demanded that all heavy weapons — artillery, mortars, tanks, and anti-aircraft weapons — be withdrawn to a distance of at least twenty kilometres from the centre of Sarajevo, or placed under UNPROFOR control at designated collection points, by 20 February. Any heavy weapons found within the exclusion zone after the deadline and not under UN control would be subject to NATO air strikes.\n\nThe ultimatum emerged from a convergence of political pressures that had been building for months but which the Markale marketplace shelling finally rendered irresistible. Since the siege of Sarajevo had begun in April 1992, the international community had responded with a succession of measures — arms embargo, humanitarian aid, the deployment of UNPROFOR, a no-fly zone — that fell conspicuously short of decisive military intervention. The United States, the United Kingdom, and France held different views on the use of force, and the presence of UNPROFOR peacekeepers on the ground complicated any escalation. The Markale massacre collapsed these deliberations into a moment of political clarity: the status quo was no longer defensible before Western publics.\n\nThe Bosnian Serb response to the ultimatum unfolded through a combination of partial compliance and diplomatic manoeuvre. Russian intervention proved decisive in averting an immediate confrontation. Moscow dispatched a battalion of Russian peacekeepers to Sarajevo's Serb-held suburbs, providing the Bosnian Serb leadership with political cover to comply without appearing to capitulate to NATO pressure. VRS forces withdrew or surrendered a substantial portion of their heavy weapons to UNPROFOR collection points before the deadline expired on 20 February, though compliance was incomplete and monitoring remained imperfect throughout.\n\nThe immediate effect on Sarajevo was significant. The intensity of shelling dropped markedly in the weeks following the ultimatum. For the first time in nearly two years, the city experienced a relative calm that allowed some normalization of daily life — markets reopened, movement became less dangerous, and the psychological grip of constant bombardment loosened. This respite, however, proved partial and temporary. Sniper fire continued, the siege was not lifted, and heavy weapons would eventually return to positions around the city.\n\nStrategically, the exclusion zone established a precedent that carried consequences in both directions. It demonstrated that NATO was prepared to threaten force and that such threats could produce results. But it also revealed the limits of coercive diplomacy without ground commitment. The VRS retained its siege positions, its infantry, and its capacity to resume bombardment whenever the political calculus shifted. The exclusion zone addressed the symptom — heavy weapons within shelling range — without resolving the underlying condition of a besieged capital.\n\nThe February 1994 ultimatum is best understood as a transitional moment. It broke the pattern of international passivity that had defined the first two years of the war, but it did not yet represent the commitment to sustained military action that would eventually come in the summer of 1995. For the people of Sarajevo, the exclusion zone brought genuine if incomplete relief. For the broader trajectory of the conflict, it signalled that the calculus governing Western intervention was shifting — slowly, grudgingly, but perceptibly — toward the use of force.",
       "localizations": {
@@ -3139,8 +3163,11 @@
       "year": 1995,
       "category": "diplomatic",
       "sources": [
-        "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995"
+        "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995",
+        "Richard Holbrooke, To End a War (1998), account of the October 1995 ceasefire negotiations"
       ],
+      "source_tier": "corroborated_participant",
+      "source_note": "The Dayton text establishes the settlement reached after the ceasefire; Holbrooke's participant account supports the October negotiation sequence. The essay is original synthesis, and the memoir is used as a corroborated participant source rather than sole authority for casualty or legal findings.",
       "generated": true,
       "content": "On 12 October 1995, the guns fell silent across Bosnia-Herzegovina. A general ceasefire, brokered by American envoy Richard Holbrooke after weeks of intensive shuttle diplomacy, took effect at one minute past midnight. It held. After more than three and a half years of continuous warfare — one of the most devastating conflicts in Europe since 1945 — the fighting stopped.\n\nThe ceasefire was not the product of exhaustion alone, though exhaustion was pervasive on all sides. It emerged from the convergence of military realities that, for the first time since April 1992, gave every belligerent a reason to stop fighting at the same moment. The VRS, battered by NATO air strikes and reeling from the loss of nearly a third of its territory to the Federation ground offensive, faced the prospect of further catastrophic reverses if fighting continued. The Bosnian Serb leadership, which had rejected or undermined every previous peace proposal, now confronted a military situation that threatened to reduce their holdings below the 49 percent that diplomacy might still preserve.\n\nFor the Bosnian government, the ceasefire arrived at an agonizing moment. ARBiH forces were advancing. The 5th Corps had broken the siege of Bihac. Territory lost in 1992 was being recovered. There were voices in Sarajevo arguing that the offensive should continue — that military momentum should be exploited to recover more land, more towns, more of what had been taken by force. Stopping now meant accepting that Srebrenica, Zepa, and vast stretches of eastern Bosnia would remain under Serb control, their pre-war populations expelled and unlikely to return in meaningful numbers.\n\nCroatia's calculus was different still. Zagreb had achieved its primary strategic objective with Operation Storm — the recovery of the Krajina — and the subsequent advance into western Bosnia had secured Croatian interests along the border. President Tudjman had little appetite for a prolonged campaign deeper into Bosnia that would serve Sarajevo's territorial ambitions more than his own.\n\nHolbrooke's achievement was in recognizing that this narrow window — where all three sides had reasons to stop, however different those reasons were — would not remain open indefinitely. The Federation offensive, if it continued, risked provoking a response from Belgrade. The military balance could shift again. The political consensus in Washington that had enabled NATO intervention could erode. The ceasefire had to happen now or it might not happen at all.\n\nThe agreement committed all parties to maintain current positions, allow unimpeded humanitarian access, and enter into comprehensive peace negotiations. It was, in its essentials, a framework for freezing the military situation while diplomats attempted to convert a battlefield stalemate into a political settlement.\n\nThe silence that fell on 12 October was not peace. It was the absence of war — a distinction that the people of Bosnia-Herzegovina would come to understand intimately in the years that followed. The ceasefire preserved a country whose communities had been shattered, whose cities bore the scars of sustained bombardment, and whose population had been rearranged by force along ethnic lines that pre-war geography would scarcely have predicted. Approximately 100,000 people were dead. Over two million had been displaced. The task of converting this ceasefire into something durable enough to be called peace would fall to negotiators gathering at an air force base in Ohio.",
       "localizations": {
@@ -3313,8 +3340,11 @@
       "year": 1995,
       "category": "diplomatic",
       "sources": [
-        "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995"
+        "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995",
+        "Richard Holbrooke, To End a War (1998), Dayton negotiations account"
       ],
+      "source_tier": "agreement_text",
+      "source_note": "The signed agreement controls the institutional terms and dates; Holbrooke's participant account supports the negotiation setting and sequence. The essay is original synthesis, and legal or crime findings remain attributable to the cited tribunal record rather than to the memoir.",
       "generated": true,
       "content": "On 1 November 1995, the presidents of Bosnia-Herzegovina, Croatia, and Serbia arrived at Wright-Patterson Air Force Base near Dayton, Ohio, to negotiate an end to the Bosnian War. They were escorted to a complex of military buildings surrounded by flat farmland — a deliberately isolated setting chosen to keep the delegations focused and away from the press. Alija Izetbegovic, Franjo Tudjman, and Slobodan Milosevic — the last negotiating on behalf of the Bosnian Serbs, whose own leadership had been sidelined — would spend twenty-one days in this improbable location, bargaining over the future of a country that three and a half years of war had nearly destroyed.\n\nThe negotiations were driven by American envoy Richard Holbrooke, whose diplomatic style combined relentless personal pressure with a willingness to confront each party with uncomfortable realities. The architecture of the agreement had been largely prefigured by the Contact Group plan and, more immediately, by the territorial facts established on the battlefield. Bosnia-Herzegovina would continue to exist as a single sovereign state — Izetbegovic's irreducible demand — but would be divided internally into two entities: the Federation of Bosnia and Herzegovina, encompassing 51 percent of the territory and joining Bosniaks and Croats in an uneasy constitutional partnership, and the Republika Srpska, holding 49 percent. The percentage split mirrored, almost exactly, the front lines as they stood at the October ceasefire.\n\nEvery major provision was contested. The status of Sarajevo — held by the Bosnian government throughout the war but partly claimed by the Bosnian Serbs — nearly collapsed the talks. The Posavina corridor, a narrow strip of Serb-held territory connecting the eastern and western halves of the RS, was another flashpoint. Brcko, which sat at the corridor's narrowest point, proved so intractable that it was deferred to international arbitration. Eastern Bosnia — including Srebrenica and Zepa, whose populations had been expelled or killed just months earlier — was assigned to the Republika Srpska, a provision that Izetbegovic accepted with visible anguish.\n\nThe agreement that emerged was initialed on 21 November 1995 and formally signed in Paris on 14 December. The General Framework Agreement for Peace in Bosnia and Herzegovina — universally known as the Dayton Agreement — created a state of extraordinary constitutional complexity. A weak central government presided over two largely autonomous entities, each with its own army, police, and political institutions. A NATO-led Implementation Force of 60,000 troops would enforce the military provisions. Refugees were granted the right to return to their pre-war homes — a provision whose implementation would prove painfully incomplete.\n\nDayton succeeded in ending the killing. That achievement, given the scale of what had preceded it, was not small. But the agreement also crystallized the war's demographic consequences into constitutional form. The ethnic partition that had been achieved through campaigns of persecution, siege, and mass killing was not reversed at Dayton — it was institutionalized. The Republika Srpska, whose creation the ICTY Karadzic Trial Judgment (IT-95-5/18-T) and Mladic Trial Judgment (IT-09-92-T) documented as inseparable from systematic crimes against civilians, became a permanent constitutional entity.\n\nThirty years later, Bosnia-Herzegovina endures as a state — fractured, dysfunctional, but intact. The war produced no victors. Each side achieved something less than what it fought for, at a cost greater than any had imagined. That is the nature of the conflict this game has asked you to navigate: a war without victory, whose peace remains unfinished.",
       "dynamic_sections": [
@@ -4068,6 +4098,7 @@
     },
     {
       "id": "essay_us_halts_federation_advance_1995",
+      "source_tier": "balkan_battlegrounds",
       "tier": 2,
       "event_id": "us_halts_federation_advance_1995",
       "title": "Washington Halts the Advance: Diplomacy Overrides the Battlefield",

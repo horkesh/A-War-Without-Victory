@@ -4427,3 +4427,9 @@ The accepted D-selector's 3.0 scale probe pushed campaign strain into the live n
 The retained D-shape fixed two contradictory clocks together. Local Control Strain now recovers every enabled turn, and Tier-1 evaluates every tracked entity against that recovered value every turn. This allowed one HRHB candidate to satisfy four-turn persistence after its faction gate opened, then naturally leave eligibility as strain recovered. Updating only recovery would have left persistence event-sparse; updating only persistence would have preserved permanently frozen strain.
 
 **Reusable rule:** when a state variable both recovers and gates a persistence machine, drive recovery, threshold comparison, persistence advancement/reset, and eligibility from one canonical every-turn entity set. Apply the recovery and current shock in a documented order, use stable union ordering, and measure peak versus terminal values—not only the final save—to prove reversibility.
+
+## 2026-08-15 - Historical inventories must distinguish authoring deposits from runtime surfaces
+
+An on-disk essay is not necessarily player-facing. Six Wave-4 files are deliberately absent from `essay_index.json`; treating their prose as live Codex content created 12 false release blockers, including sensitive-term and generic-symmetry findings that no runtime path could render.
+
+**Reusable rule:** keep non-runtime deposits inventoried, but classify runtime reachability before applying launch stop gates. Derive that distinction from the canonical runtime index rather than a duplicated filename allowlist, preserve a visible `not_player_facing` disposition, and test the exact known deposit set. Source metadata on leaf essays and the runtime index must remain mirrored; fixing only the deposit does not fix what the player reads.

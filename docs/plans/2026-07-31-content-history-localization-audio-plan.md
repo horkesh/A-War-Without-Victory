@@ -201,6 +201,14 @@ npm.cmd run typecheck
 - [ ] Use current-state predicates for divergent outcomes.
 - [ ] If a claim lacks evidence, omit it and close the row as `unsupported/omitted`; do not pause the entire phase.
 
+**Phase 1.2 checkpoint A -- 2026-08-15:**
+
+- The inventory now distinguishes the six known unindexed Wave-4 authoring deposits from player-facing Codex essays. Their 12 prose claims remain auditable as `essay_deposit` / `non_runtime_deposit`, but carry no release stop gate and no longer inflate the sensitive-history remediation queue.
+- All 491 claims whose citations and provenance notes were already complete but whose source tier was missing now carry a resolved tier. Explicit fictional command abstractions use `design_counterfactual`; formal instruments, BB-grounded operational accounts, adjudicated history, and corroborated participant accounts retain distinct tier identities.
+- Seven source-floor essay families were completed and mirrored into the runtime index: London Conference, Vance-Owen, the RS Assembly rejection, Contact Group, Sarajevo NATO ultimatum, October 1995 ceasefire, and Dayton talks. Exact BB pages are used where BB is the corroborating source (`BB1 p. 22`; `BB2 pp. 28-31`); other rows use named UN/NATO/ICTY instruments or Holbrooke's bounded participant account.
+- Live census: 3,654 claims / 228 files; 2,016 documented, 12 non-player-facing deposits, 1,553 source-note rows, 62 source-floor rows, 11 actor-specificity rows, and zero source-tier rows. Phase 1.2 remains active.
+- Focused verification passes 5 files / 65 tests and TypeScript. `canon:check` passed its static determinism scan and embedded no-refresh baseline regression; a redundant explicit second baseline invocation was interrupted after that successful embedded run.
+
 ```powershell
 npm.cmd run test:vitest -- tests/codex_sensitive_claim_inventory.test.ts tests/codex_sensitive_history_source_notes.test.ts tests/event_timing.test.ts tests/event_timeline_integrity.test.ts tests/essay_index_integrity.test.ts --pool=forks --reporter=dot
 npm.cmd run canon:check

@@ -298,6 +298,43 @@ test('inventory-identified safe essay residuals carry source notes without copie
     );
 });
 
+test('unindexed Wave-4 essay deposits remain inventoried without entering the player-facing history queue', async () => {
+    const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const depositFiles = new Set([
+        'data/scenarios/essays/cutileiro_plan_lisbon_1992.json',
+        'data/scenarios/essays/gorazde_pocket_consolidation_1992.json',
+        'data/scenarios/essays/kupres_battle_1992.json',
+        'data/scenarios/essays/milosevic_isolation_warning_aug92.json',
+        'data/scenarios/essays/sarajevo_jna_column_dobrovoljacka_1992.json',
+        'data/scenarios/essays/vase_miskina_breadline_1992.json',
+    ]);
+    const depositClaims = result.claims.filter((claim: { file: string }) => depositFiles.has(claim.file));
+
+    assert.strictEqual(depositClaims.length, 12);
+    assert.strictEqual(depositClaims.every((claim: {
+        surface: string;
+        risk_class: string;
+        stop_gate: string;
+        status: string;
+        player_interaction_type: string;
+    }) => (
+        claim.surface === 'essay_deposit'
+        && claim.risk_class === 'non_runtime_deposit'
+        && claim.stop_gate === 'none'
+        && claim.status === 'not_player_facing'
+        && claim.player_interaction_type === 'informational'
+    )), true);
+});
+
+test('player-facing claims with complete citations and source notes carry a resolved source tier', async () => {
+    const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const unresolved = result.claims
+        .filter((claim: { status: string }) => claim.status === 'needs_source_tier')
+        .map((claim: { file: string; subject_id: string }) => `${claim.file}:${claim.subject_id}`);
+
+    assert.deepStrictEqual([...new Set(unresolved)].sort(), []);
+});
+
 test('dynamic_section claims clear the source floor when the parent has enough sources (#338)', async () => {
     // Codex #338 P2 positive case: the floor exception is conditional on the
     // PARENT essay's source count, not a blanket downgrade. A diplomatic parent

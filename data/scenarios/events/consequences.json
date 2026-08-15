@@ -1853,6 +1853,7 @@
   },
   {
     "id": "csq_patron_recovery_offer",
+    "source_tier": "design_counterfactual",
     "title": "Patron Recovery Offer",
     "narrative": "The patron's emissary returns with terms: structural concessions in exchange for a managed recovery of the relationship. Acceptance buys back arms, briefings, and the soft cover of recognized backing. Refusal locks in the disavowal. Either way the choice is binding for the rest of the war.",
     "category": "diplomatic",

@@ -2197,6 +2197,7 @@
   },
   {
     "id": "holbrooke_ceasefire_demand_oct95",
+    "source_tier": "corroborated_participant",
     "title": "Holbrooke: Agree to the Ceasefire",
     "narrative": "Holbrooke demands a two-month ceasefire to create space for Dayton negotiations. ARBiH is advancing in northwestern Bosnia. Complying sacrifices military momentum; refusing risks losing US air support and international legitimacy.",
     "category": "diplomatic",
