@@ -1,3 +1,7 @@
+// historical_source: Canonical ChronicleEntry schema and generated Chronicle signal contract.
+// source_tier: design_counterfactual
+// source_note: Chapter signals classify already-authored live-run entries; keyword detection does not create or attribute a historical atrocity claim.
+
 import type { ChronicleEntry } from '../components/chronicle/generateChronicleEntries.js';
 import { t, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters.js';

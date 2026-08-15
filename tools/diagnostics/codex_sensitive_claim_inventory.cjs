@@ -1000,17 +1000,54 @@ async function scanJsonFile(rootDir, relativeFile, surface) {
   return claims;
 }
 
+function textFileProvenance(lines) {
+  const metadata = {};
+  const metadataLines = new Set();
+  const assign = (key, value, lineIndex) => {
+    const normalized = asNonEmptyString(value);
+    if (!normalized) return;
+    metadata[key] = normalized;
+    metadataLines.add(lineIndex);
+  };
+
+  if (lines[0]?.trim() === '---') {
+    metadataLines.add(0);
+    for (let index = 1; index < lines.length; index += 1) {
+      const text = lines[index];
+      if (text.trim() === '---') {
+        metadataLines.add(index);
+        break;
+      }
+      const match = text.match(/^\s*(historical_source|source_tier|source_note)\s*:\s*(.+?)\s*$/);
+      if (match) assign(match[1], match[2], index);
+    }
+  }
+
+  for (let index = 0; index < Math.min(lines.length, 24); index += 1) {
+    const match = lines[index].match(/^\s*\/\/\s*(historical_source|source_tier|source_note)\s*:\s*(.+?)\s*$/);
+    if (match) assign(match[1], match[2], index);
+  }
+
+  const citation = asNonEmptyString(metadata.historical_source);
+  return {
+    metadata,
+    metadataLines,
+    sourceInfo: { status: citation ? 'cited' : 'uncited', floorStatus: null },
+  };
+}
+
 async function scanTextFile(rootDir, relativeFile, surface) {
   const absoluteFile = path.join(rootDir, relativeFile);
   const raw = await fs.readFile(absoluteFile, 'utf8');
   const claims = [];
   const lines = raw.split(/\r?\n/);
+  const provenance = textFileProvenance(lines);
   lines.forEach((lineText, index) => {
+    if (provenance.metadataLines.has(index)) return;
     const matchedTerms = findMatchedTerms(lineText);
     if (matchedTerms.length === 0) {
       return;
     }
-    const sourceInfo = { status: 'uncited', floorStatus: null };
     claims.push(makeClaim({
       surface,
       file: relativeFile,
@@ -1018,10 +1055,10 @@ async function scanTextFile(rootDir, relativeFile, surface) {
       fieldPath: '$.line',
       text: lineText,
       matchedTerms,
-      sourceInfo,
+      sourceInfo: provenance.sourceInfo,
       dateWindow: dateWindowFor(relativeFile, []),
       ancestors: [],
-      rootValue: null,
+      rootValue: provenance.metadata,
     }));
   });
   return claims;

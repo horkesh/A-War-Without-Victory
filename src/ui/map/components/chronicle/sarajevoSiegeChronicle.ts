@@ -1,3 +1,7 @@
+// historical_source: ICTY Galić Appeal Judgment (IT-98-29-A), especially §389; ICTY Dragomir Milošević Judgment (IT-98-29/1-T).
+// source_tier: icty_icj_un
+// source_note: The judgments anchor the siege and terror-campaign framing. The card exposes a live containment predicate and never treats civilian harm or capture of Sarajevo as an achievement.
+
 /**
  * Sarajevo-Siege Chronicle beat — make the SRK strangle-not-capture posture
  * LEGIBLE in the Chronicle (D2 task #41).

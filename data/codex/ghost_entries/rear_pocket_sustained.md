@@ -1,3 +1,9 @@
+---
+historical_source: ICTY Tadić (IT-94-1-T), Stakić (IT-97-24-T), Prlić et al. (IT-04-74-T), and related municipality Trial Judgments; canonical discipline and incident ledgers.
+source_tier: design_counterfactual
+source_note: The judgments anchor the historical conduct baseline. The unbroken discipline streak is a narrow live-run ledger receipt and does not revise or compare away the adjudicated crimes.
+---
+
 # Rear-Pocket Discipline: The Streak That Held
 
 **Ring 2 — narrative observation. Path-not-taken. Ghost entry.**

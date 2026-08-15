@@ -1,3 +1,7 @@
+// historical_source: Canonical ChronicleEntry schema, recorded combat history, and player-faction formation ledgers.
+// source_tier: design_counterfactual
+// source_note: Digest prose summarizes persisted live-run outcomes and deliberately authors no atrocity, perpetrator, or historical enclave claim.
+
 /**
  * Generals' Digest Chronicle beats — "what your generals did this week" (D2 task #42).
  *

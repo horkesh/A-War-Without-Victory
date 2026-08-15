@@ -113,6 +113,8 @@
     "narrative": "A mortar shell strikes the Markale marketplace in Sarajevo, killing 68 civilians and wounding over 140. The images of carnage broadcast worldwide provoke outrage and push NATO toward its first decisive action in the Bosnian war. The VRS denies responsibility, but the international community overwhelmingly attributes the attack to Serb forces.",
     "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
+    "historical_source": "ICTY Galic Trial Judgment (IT-98-29-T), Markale shelling incident of 5 February 1994; UNPROFOR investigation report, February 1994",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 96,
       "turn_max": 96,
@@ -458,6 +460,8 @@
     "title": "Sarajevo Exclusion Zone Takes Effect",
     "narrative": "Under threat of NATO air strikes, the VRS begins withdrawing heavy weapons from a 20-kilometer exclusion zone around Sarajevo. Hundreds of artillery pieces and mortars are moved or placed under UNPROFOR control at collection points. On February 12, Sarajevo experiences its first day without a single casualty since April 1992. The siege is not lifted, but its deadliest instrument is temporarily muzzled.",
     "category": "military",
+    "source_tier": "icty_icj_un",
+    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "trigger": {
       "turn_min": 97,
       "turn_max": 98,
@@ -501,6 +505,9 @@
     "title": "NATO Shoots Down Serb Aircraft",
     "narrative": "NATO F-16 fighters intercept six VRS aircraft violating the no-fly zone over central Bosnia, shooting down four. The incident — NATO's first combat action in its forty-five-year history — signals a shift from passive observation to active enforcement. The VRS command begins to factor NATO air power into its operational calculations.",
     "category": "military",
+    "historical_source": "NATO operational records, 28 February 1994; Balkan Battlegrounds, Vol. I, p. 18",
+    "source_tier": "balkan_battlegrounds",
+    "source_note": "NATO operational records establish the interception and alliance mission record; Balkan Battlegrounds Vol. I p. 18 independently anchors the 28 February 1994 chronology and the operation's first-combat significance. The essay is original synthesis and does not overstate the incident's immediate strategic effect.",
     "trigger": {
       "turn_min": 99,
       "turn_max": 99,
@@ -1134,6 +1141,9 @@
     "title": "Gorazde Crisis",
     "narrative": "The VRS launches a major offensive against the Gorazde safe area, overrunning UN observation posts and pushing into the outskirts of the town. Limited NATO air strikes prove insufficient to halt the advance. The crisis exposes the hollow nature of safe area protection and the mismatch between UN mandates and military reality.",
     "category": "military",
+    "historical_source": "UN Report on Srebrenica (A/54/549, 1999), Gorazde context; ICTY Karadzic Trial Judgment (IT-95-5/18-T), Gorazde findings",
+    "source_tier": "icty_icj_un",
+    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "trigger": {
       "turn_min": 105,
       "turn_max": 105,
@@ -1341,7 +1351,10 @@
           }
         ]
       }
-    ]
+    ],
+    "historical_source": "ICTY, Prosecutor v. Radovan Karadzic, IT-95-5/18-T, Trial Judgment (24 March 2016), findings on the Contact Group Plan and Belgrade-Pale relations; UN Security Council Resolution 942 (23 September 1994), S/RES/942 (1994).",
+    "source_tier": "icty_icj_un",
+    "source_note": "The sources document Belgrade's pressure on the RS leadership over the Contact Group Plan and the ensuing border-closure and sanctions context. The displayed warning is a diplomatic synthesis, not a verbatim transcript of a private exchange."
   },
   {
     "id": "contact_group_plan_1994",
@@ -2792,6 +2805,8 @@
     "narrative": "An anti-sniping agreement is reached for Sarajevo, aiming to reduce the daily toll of civilians killed by snipers along the city's exposed boulevards and intersections. Compliance is sporadic, but the agreement represents a small step in civilian protection and provides UNPROFOR with additional monitoring authority.",
     "source_note": "Existing event/essay/project sources ground the row's institutional and diplomatic context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "diplomatic",
+    "historical_source": "UNPROFOR Sarajevo sector records, August 1994; ICTY Galic Trial Judgment (IT-98-29-T), sniping campaign",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 123,
       "turn_max": 123,
@@ -3120,6 +3135,8 @@
     "title": "Operation Cincar — Kupres Falls to HVO",
     "narrative": "The HVO, reinforced by Croatian Army units, launches Operation Cincar against VRS positions around Kupres. After fierce fighting in mountainous terrain, Kupres falls on November 3. The operation captures a strategically vital junction that threatens VRS supply routes to Donji Vakuf. The Washington Agreement's military dividend is becoming apparent.",
     "category": "military",
+    "source_tier": "icty_icj_un",
+    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "trigger": {
       "turn_min": 131,
       "turn_max": 133,
@@ -3172,6 +3189,9 @@
     "title": "Bihac Crisis Deepens",
     "narrative": "The VRS, supported by forces from the Republic of Serbian Krajina and Abdic's APWB militia, launches a major counteroffensive against the Bihac pocket. The 5th Corps is pushed back toward the town itself, and the crisis threatens the complete fall of the enclave. NATO air strikes against VRS airfields prove too limited to change the situation.",
     "category": "military",
+    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Bihac findings; Balkan Battlegrounds, Vol. I, p. 27",
+    "source_tier": "icty_icj_un",
+    "source_note": "The Karadzic Trial Judgment supplies adjudicated Bihać-enclave context; Balkan Battlegrounds Vol. I p. 27 independently anchors the November 1994 air attacks, UN response, and NATO strikes associated with the crisis. The essay and dynamic annotations are original synthesis and do not claim that limited air action alone determined the enclave's survival.",
     "trigger": {
       "turn_min": 135,
       "turn_max": 135,
@@ -3231,7 +3251,9 @@
     },
     "historian_audit_row": "H4",
     "source": "BB1 p.63; docs/40_reports/audits/20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md H4",
-    "historical_source": "BB1 p.63; 2026-05-17 Historian audit H4."
+    "historical_source": "BB1 p.63; 2026-05-17 Historian audit H4.",
+    "source_tier": "balkan_battlegrounds",
+    "source_note": "BB1 p.63 and the H4 audit support the nonbinding General Assembly action and the shift in enforcement posture. The event keeps the legal distinction explicit: the Security Council embargo remained in force even as outside support channels widened."
   },
   {
     "id": "carter_ceasefire_1994",

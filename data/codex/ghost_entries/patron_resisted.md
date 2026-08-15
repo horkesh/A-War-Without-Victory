@@ -1,3 +1,9 @@
+---
+historical_source: ICTY Perišić Trial Judgment (IT-04-81-T); ICTY Prlić et al. Trial Judgment (IT-04-74-T); canonical patron-pressure decision ledger.
+source_tier: design_counterfactual
+source_note: The judgments anchor the patron relationships. Repeated refusal is a live-run decision receipt and carries no claim that it prevented an atrocity or secured a favorable historical outcome.
+---
+
 # The Patron That Was Refused
 
 **Ring 2 — narrative observation. Path-not-taken. Ghost entry.**

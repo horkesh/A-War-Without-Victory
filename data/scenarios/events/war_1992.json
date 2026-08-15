@@ -9,6 +9,8 @@
         "narrative": "Narodna skupstina se sastala. Nacrtano je sest strateskih ciljeva za srpski narod u Bosni: drzavno razdvajanje, posavski koridor, granica na Drini, granica Una-Neretva, podjela Sarajeva i izlaz na more. General Ratko Mladic, komandant Glavnog staba VRS-a, pregledao ih je i skupstini jasno upozorio da ce njihovo ostvarenje, posebno na Drini i u Sarajevu, traziti radnje koje cine genocid. Skupstina ceka vasu odluku.",
         "staff_assessment": "Skupstinski paket zadrzava historijski maksimalisticki kurs i daje jasan politicki okvir VRS-u, ali upozorenje generala Ratka Mladica znaci da je cijena legitimnosti vec upisana u samu odluku.",
         "source_note": "Presude Karadzicu i Mladicu dokumentuju sest strateskih ciljeva i upozorenje generala Ratka Mladica pred skupstinom.",
+        "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 2016); ICTY Mladic Trial Judgment (IT-09-92-T, 2017); ICJ Bosnia and Herzegovina v. Serbia and Montenegro (2007).",
+        "source_tier": "icty_icj_un",
         "response_options": {
           "all_six": {
             "label": "Usvojiti svih sest ciljeva",
@@ -1178,6 +1180,8 @@
         "narrative": "Predsjednistvo mora proglasiti viziju drzave. Platforma iz maja govori o gradjanskoj, multietnickoj republici u kojoj su svi gradjani jednaki bez obzira na etnicku pripadnost. Rat vec ispituje taj ideal. Srpski i hrvatski vojnici jos sluze u vasoj armiji. Dio stranke tvrdi da je ovo bosnjacka borba, a ne gradjanska. Medjunarodna zajednica pazljivo posmatra. Vasa deklaracija odredit ce ko se bori za vas, ko vas podrzava i za sta se borite.",
         "staff_assessment": "Sarajevsko Predsjednistvo cuva gradjanski zahtjev i medjunarodni polozaj tako sto republiku definise kroz jednako drzavljanstvo, uz prihvatanje trenja sa tvrdjim ratnim nacionalnim strujama.",
         "source_note": "Kontekst presude Karadzicu o sporu oko drzavnosti Bosne; sastav ARBiH i Divjak navedeni su za ratnu multietnicku sluzbu.",
+        "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 2016); ICJ Bosnia and Herzegovina v. Serbia and Montenegro (2007).",
+        "source_tier": "icty_icj_un",
         "trigger_evidence": [
           "Majska platforma iz 1992. nalazi se pred Predsjednistvom.",
           "Ratna mobilizacija prisiljava Sarajevo da imenuje politicku osnovu republike koju tvrdi da brani."
@@ -2350,6 +2354,8 @@
         "narrative": "Zagreb je na vezi. Direktiva patrona je jasna: Herceg-Bosna postoji da osigura hrvatski teritorij u Bosni, s pogledom prema mogucem ujedinjenju s Hrvatskom. Ali na terenu se HVO bori uz ARBiH protiv srpskih snaga. Neki komandanti, posebno Kljuic, tvrde da hrvatska buducnost lezi u jedinstvenoj Bosni, a ne u odvojenoj tvorevini. Patron se ne slaze. Izaberite put: on ce odrediti saveze, ratove i vas polozaj za pregovarackim stolom.",
         "staff_assessment": "Vodstvo Herceg-Bosne dobija uskladjenost s patronom i jasniju institucionalnu koheziju slijedeci Zagreb, ali taj izbor saradnju sa Sarajevom cini krhkijom.",
         "source_note": "Presude Kordicu i Prlicu, zajedno s kontekstom zagrebackih sastanaka i uklanjanja Kljuica, utemeljuju separatisticki politicki projekat Herceg-Bosne.",
+        "historical_source": "ICTY Prlic et al. Trial Judgment (IT-04-74-T, 2013); ICTY Kordic and Cerkez Trial Judgment (IT-95-14/2-T, 2001).",
+        "source_tier": "icty_icj_un",
         "trigger_evidence": [
           "Zagrebacka direktiva i institucije Herceg-Bosne vec oblikuju politiku HVO-a.",
           "HVO i ARBiH jos dijele protuvrsovske frontove, pa politicki smjer odmah postaje operativno pitanje."
@@ -3244,6 +3250,9 @@
     "title": "UN Arms Embargo Strangles Bosnia",
     "narrative": "The UN arms embargo, originally imposed on all of Yugoslavia, disproportionately impacts the fledgling Bosnian government. While the VRS inherits vast JNA stockpiles and the HVO receives supplies from Croatia, the ARBiH faces severe weapons shortages across all fronts.",
     "category": "military",
+    "historical_source": "UN Security Council Resolution 713 (1991); ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), ARBiH equipment shortages; ICTY Mladic Trial Judgment (IT-09-92-T), VRS inheritance of JNA arsenal",
+    "source_tier": "icty_icj_un",
+    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "priority": 1,
     "trigger": {
       "turn_min": 3,
@@ -3505,6 +3514,8 @@
     "narrative": "TDF units and Green Berets storm JNA barracks across Sarajevo. The Maršal Tito barracks and Viktor Bubanj complex are seized after fierce fighting. Tanks, APCs, and artillery pieces are captured — the first heavy weapons in ARBiH hands. JNA soldiers are taken prisoner. Belgrade vows retaliation.",
     "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
     "category": "military",
+    "historical_source": "ICTY Galic Trial Judgment (IT-98-29-T), siege context and Sarajevo military balance; ICTY Mladic Trial Judgment (IT-09-92-T), JNA withdrawal and VRS formation",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 4,
       "turn_max": 6,
@@ -3573,6 +3584,8 @@
     "narrative": "The Tuzla column incident: JNA's 92nd Motorized Brigade is ambushed on Brčanska Malta while withdrawing from the city. In the chaos, TDF forces seize the barracks complex with its armored vehicles and artillery depot. Over 50 JNA soldiers are killed — the bloodiest barracks seizure in Bosnia. The captured equipment transforms 2nd Corps capability.",
     "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
     "category": "military",
+    "historical_source": "ICTY Mladic Trial Judgment (IT-09-92-T), JNA withdrawal and VRS formation context; ICTY Tolimir Trial Judgment (IT-05-88/2), VRS intelligence operations in northeastern Bosnia",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 4,
       "turn_max": 6,
@@ -3648,6 +3661,8 @@
     "narrative": "ARBiH forces seize the JNA barracks in Zenica, capturing artillery pieces and ammunition stores. The Zenica garrison, weakened by Bosniak desertions, offers limited resistance. The captured equipment is distributed to 3rd Corps formations defending central Bosnia.",
     "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
     "category": "military",
+    "historical_source": "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), 3rd Corps formation and equipment acquisition; Balkan Battlegrounds, Vol. I, p. 140",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 4,
       "turn_max": 6,
@@ -3700,6 +3715,8 @@
     "narrative": "The small JNA depot at Visoko is overrun by local TDF. A handful of armored vehicles and mortar tubes are captured. The symbolic victory boosts morale among defenders of the Sarajevo approaches.",
     "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
     "category": "military",
+    "historical_source": "ICTY Galic Trial Judgment (IT-98-29-T), Sarajevo corridor military context; ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), 3rd Corps formation and central Bosnia equipment",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 4,
       "turn_max": 6,
@@ -3752,6 +3769,9 @@
     "title": "Siege of Sarajevo Intensifies",
     "narrative": "The SRK tightens its grip around Sarajevo as artillery bombardment from surrounding hills intensifies. The city's 350,000 residents face daily shelling, sniper fire, and the severing of water and electricity supplies. The siege becomes the longest in modern European warfare.",
     "category": "military",
+    "historical_source": "ICTY Galic Trial Judgment (IT-98-29-T), Sarajevo-Romanija Corps campaign findings; ICTY Karadzic Trial Judgment (IT-95-5/18-T), strategic directive and siege authorization",
+    "source_tier": "icty_icj_un",
+    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "trigger": {
       "turn_min": 4,
       "turn_max": 10,
@@ -3806,6 +3826,9 @@
     "title": "JNA Forces Begin Withdrawal from Bosnia",
     "narrative": "The Yugoslav People's Army formally announces its withdrawal from Bosnia-Herzegovina. In practice, Bosnian Serb personnel simply change insignia, and massive quantities of heavy weapons, ammunition depots, and military infrastructure are transferred directly to the newly formed VRS.",
     "category": "military",
+    "historical_source": "ICTY Mladic Trial Judgment (IT-09-92-T), VRS formation and JNA asset transfer; ICTY Karadzic Trial Judgment (IT-95-5/18-T), political direction of VRS formation; ICTY Perisic Trial Judgment (IT-04-81-T), VJ-VRS institutional continuity",
+    "source_tier": "icty_icj_un",
+    "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "priority": 1,
     "trigger": {
       "turn_min": 5,
@@ -3884,6 +3907,8 @@
     "title": "Mostar Liberated",
     "narrative": "Joint HVO-ARBiH forces have pushed the JNA out of Mostar. The city is free — but the question of who controls it is already causing friction between your allies. The east bank is mostly Bosniak. The west bank is mostly Croat. The liberation was shared. The city may not be.",
     "category": "territorial",
+    "source_tier": "icty_icj_un",
+    "source_note": "Editorial provenance: the cited records anchor chronology, actors, and bounded military context; this essay is an original synthesis and does not reproduce source prose.",
     "trigger": {
       "turn_min": 6,
       "turn_max": 20,
@@ -3939,6 +3964,8 @@
     "narrative": "Under the command of Naser Oric, Bosniak forces in the Drina Valley consolidate a defensive perimeter around Srebrenica. Despite being vastly outgunned, local TDF fighters and volunteers launch raids on surrounding VRS positions, establishing a tenuous enclave that shelters tens of thousands of displaced civilians.",
     "source_note": "Existing Srebrenica arc sources ground the row's enclave-formation context and institutional setting. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "military",
+    "historical_source": "ICTY Oric Trial Judgment (IT-03-68-T), Srebrenica enclave defense conditions; ICTY Karadzic Trial Judgment (IT-95-5/18-T), Strategic Goal 3 and Drina valley campaign; ICTY Tolimir Trial Judgment (IT-05-88/2), VRS operations in eastern Bosnia",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 6,
       "turn_max": 20,
@@ -4155,6 +4182,8 @@
     "narrative": "VRS and paramilitary forces systematically expel the Bosniak population from towns along the Drina River valley. Višegrad, Foča, Zvornik, and Bratunac witness mass killings, forced deportations, and the destruction of mosques. The campaign aims to create a contiguous Serb-held corridor along the Serbian border.",
     "source_note": "Existing ICTY/UN and project sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
+    "historical_source": "ICTY Kunarac et al. Trial Judgment (IT-96-23-T), Foca sexual violence findings; ICTY Lukic and Lukic Trial Judgment (IT-98-32/1-T), Visegrad findings; ICTY Krnojelac Trial Judgment (IT-97-25-T), Foca KPD detention conditions; ICTY Karadzic Trial Judgment (IT-95-5/18-T), Zvornik municipality findings",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 8,
       "turn_max": 25,
@@ -4250,6 +4279,8 @@
     "narrative": "The VRS launches Operation Corridor to link the Krajina region with Serbia proper through the narrow Posavina corridor near Brcko. Fierce fighting against HVO and ARBiH forces gradually widens the corridor, establishing a critical supply and communication link that sustains the western Bosnian Serb entity.",
     "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "military",
+    "historical_source": "ICTY Brdanin Trial Judgment (IT-99-36-T), Autonomous Region of Krajina and corridor operations; ICTY Karadzic Trial Judgment (IT-95-5/18-T), Strategic Goal 2 and Posavina Corridor findings",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 12,
       "turn_max": 22,
@@ -4607,7 +4638,9 @@
     },
     "historian_audit_row": "H4",
     "source": "BB1 p.167; docs/40_reports/audits/20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md H4",
-    "historical_source": "BB1 p.167; 2026-05-17 Historian audit H4."
+    "historical_source": "BB1 p.167; 2026-05-17 Historian audit H4.",
+    "source_tier": "balkan_battlegrounds",
+    "source_note": "BB1 p.167 and the H4 audit support the limited, contested Croatia transit channel and the continuing equipment asymmetry under the embargo. This row deliberately makes no quantitative claim about shipment volume or parity beyond that bounded comparison."
   },
   {
     "id": "omarska_camp_1992",
@@ -4986,8 +5019,8 @@
   },
   {
     "id": "gorazde_pocket_consolidation_1992",
-    "title": "Operation Circle: The Gorazde Pocket Holds",
-    "narrative": "The 1st and 31st Drina Strike Brigades of the ARBiH launch Operation Circle, a counteroffensive to push VRS forces out of Gorazde's eastern approaches. After weeks of fighting through August, the operation succeeds in consolidating the enclave's perimeter, securing outlying settlements and establishing a defensible pocket. Gorazde — the largest Bosniak-held enclave in the Drina valley — will endure under siege for the remainder of the war, but it will not fall.",
+    "title": "The Gorazde Pocket Holds",
+    "narrative": "ARBiH forces counterattack around Gorazde in August 1992 and consolidate a defensible pocket. The enclave remains under pressure and siege, but endures through the war.",
     "category": "military",
     "trigger": {
       "turn_min": 18,
@@ -5018,13 +5051,15 @@
     "effects": [
       {
         "kind": "narrative",
-        "text": "Operation Circle consolidates the Gorazde pocket. ARBiH forces secure the enclave perimeter, pushing VRS from outlying settlements."
+        "text": "ARBiH forces consolidate the Gorazde pocket and improve the enclave's defensive perimeter."
       }
     ],
     "sets_flags": {
       "gorazde_pocket_consolidated": true
     },
-    "historical_source": "Wikipedia: Siege of Gorazde. Operation Krug (Circle), August 1992."
+    "historical_source": "ICTY, Prosecutor v. Radovan Karadzic, IT-95-5/18-T, Trial Judgment (24 March 2016), findings on Gorazde and the Drina municipalities; ICTY, Prosecutor v. Stanislav Galic, IT-98-29-T, Trial Judgment (5 December 2003), contextual findings on enclave isolation and siege warfare.",
+    "source_tier": "icty_icj_un",
+    "source_note": "The cited judgments support the bounded historical claim that Bosnian government forces consolidated and sustained the Gorazde enclave amid continuing VRS pressure. The earlier unit-by-unit Operation Circle wording and settlement-level claims were removed because the available repo sources did not verify that specificity."
   },
   {
     "id": "milosevic_isolation_warning_aug92",
@@ -5100,7 +5135,10 @@
           }
         ]
       }
-    ]
+    ],
+    "historical_source": "ICTY, Prosecutor v. Radovan Karadzic, IT-95-5/18-T, Trial Judgment (24 March 2016), findings on Belgrade-Pale relations in 1992; ICTY, Prosecutor v. Slobodan Milosevic, IT-02-54, amended indictments and trial record concerning Serbian support and political influence over the Bosnian Serb leadership.",
+    "source_tier": "icty_icj_un",
+    "source_note": "The tribunal record supports mounting international pressure and Belgrade's political leverage over Pale in 1992. The warning presented here is a bounded diplomatic synthesis for the simulation, not a quotation or claim that the exact private wording is documented."
   },
   {
     "id": "london_conference_1992",
@@ -5260,6 +5298,8 @@
     "narrative": "The fragile alliance between the HVO and ARBiH fractures openly at Prozor in central Bosnia. HVO forces attack Bosniak civilians and ARBiH positions in a calculated bid to assert Croat control over the town. Further clashes erupt near Novi Travnik. The incidents mark the first serious military confrontation between the two nominal allies.",
     "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "political",
+    "historical_source": "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Prozor findings; ICTY Kordic Trial Judgment (IT-95-14/2-T), Novi Travnik",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 20,
       "turn_max": 35,
@@ -5325,6 +5365,8 @@
     "narrative": "The strategic town of Jajce in central Bosnia falls to the VRS after a prolonged siege. The loss is a major blow to both the ARBiH and HVO, who blame each other for failing to coordinate the defense. Tens of thousands of civilians flee westward, and recriminations between the two forces deepen the growing rift.",
     "source_note": "Existing Jajce essay and project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "territorial",
+    "historical_source": "ICTY Prlic et al. Trial Judgment (IT-04-74-T), Jajce recriminations; Balkan Battlegrounds, Vol. I, pp. 146-147",
+    "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 28,
       "turn_max": 39,

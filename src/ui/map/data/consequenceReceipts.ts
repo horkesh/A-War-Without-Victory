@@ -1,3 +1,7 @@
+// historical_source: Canonical future_consequences and event_causality_log contracts.
+// source_tier: design_counterfactual
+// source_note: Receipts describe whether a promised live simulation consequence fired or was foreclosed; fallback labels make no historical assertion.
+
 // Consequence-Receipt read-model — closes the promise→receipt loop.
 //
 // Event decision modals PROMISE downstream consequences via each response
@@ -60,7 +64,7 @@ export interface ConsequenceReceipt {
     /** Originating decision — the event the player responded to. */
     decisionEventId: string;
     /** Player-facing title of the originating event (resolved from catalog;
-     *  falls back to a player-safe label when the catalog lacks it). */
+     *  falls back to a player-safe label when live state has no matching catalog row). */
     decisionTitle: string;
     /** Player-facing label of the chosen option (resolved from catalog; falls
      *  back to a player-safe label). */

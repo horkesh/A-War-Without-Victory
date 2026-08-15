@@ -1,3 +1,7 @@
+// historical_source: Canonical war-weariness state contract and docs/40_reports/proposals/20260610_COLLAPSE_REPURPOSE_EXHAUSTION_SCOPE.md.
+// source_tier: design_counterfactual
+// source_note: Threshold cards are deterministic descriptions of live simulation state, not claims about a historical faction's exact exhaustion reading.
+
 /**
  * War-Weariness Chronicle beats — Collapse Repurpose Design A (the narrative half).
  *

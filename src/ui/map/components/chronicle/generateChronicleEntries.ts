@@ -1,3 +1,7 @@
+// historical_source: Canonical ChronicleEntry schema and persisted event, combat, displacement, personnel, and consequence ledgers.
+// source_tier: design_counterfactual
+// source_note: Generated Chronicle cards are deterministic receipts of live state; historical names remain bounded by separately sourced authored records.
+
 export type ChronicleCardType = 'combat' | 'political' | 'humanitarian' | 'military' | 'diplomatic' | 'narrative' | 'cost' | 'personnel' | 'consequence';
 
 export interface ChronicleEntry {

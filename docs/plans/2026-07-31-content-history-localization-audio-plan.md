@@ -196,10 +196,10 @@ npm.cmd run typecheck
 - Specific JSON under `data/scenarios/essays/`
 - `tests/2026...` focused files or existing event/essay suites
 
-- [ ] Reclassify nonsensitive deposit essays out of the sensitive queue.
-- [ ] Author only inventory rows with adequate sources and a concrete player-facing purpose.
-- [ ] Use current-state predicates for divergent outcomes.
-- [ ] If a claim lacks evidence, omit it and close the row as `unsupported/omitted`; do not pause the entire phase.
+- [x] Reclassify nonsensitive deposit essays out of the sensitive queue.
+- [x] Author only inventory rows with adequate sources and a concrete player-facing purpose.
+- [x] Use current-state predicates for divergent outcomes.
+- [x] If a claim lacks evidence, omit it and close the row as `unsupported/omitted`; do not pause the entire phase.
 
 **Phase 1.2 checkpoint A -- 2026-08-15:**
 
@@ -233,6 +233,14 @@ npm.cmd run test:baselines
 - The summer-1992 Herceg-Bosna posture packet is machine-citable. Three decisions already carrying exact claim-bounded source notes and resolved tiers now expose the corresponding `historical_source` field; no narrative, choice, effect, or timing changed.
 - The 63 claims owned by consolidation, local alliance-friction, and Zagreb supply-channel decisions move from `needs_source_note` to `documented`. The citations are limited to the exact *Balkan Battlegrounds* pages and ICTY Prlić sections already named in their authored notes.
 - Live census: 3,654 claims / 228 files; 2,144 documented, 12 non-player-facing deposits, 1,498 source-note rows, and zero source-floor, actor-specificity, or source-tier rows.
+
+**Phase 1.2 closeout -- 2026-08-15:**
+
+- The retained provenance queue is closed: 3,642 claims are documented and the 12 known unindexed deposits remain explicitly `not_player_facing`; there are zero unresolved player-facing claims across all 3,654 inventoried rows.
+- All 549 conditional consequence claims are classified `design_counterfactual`. Every runtime essay and dynamic section carries complete provenance, and paired event rows inherit missing metadata without overwriting stronger authored evidence.
+- Every player-facing historical event claim is documented. The unsupported Operation Circle unit/settlement detail was narrowed to the sourced Gorazde-pocket claim; the unsupported post-Storm caliber/depot/transfusion story was replaced by BB1 pp.417-419's bounded 5th Corps Sana evidence.
+- Text-file provenance is now machine-readable: TypeScript/TSX accepts bounded leading `// historical_source|source_tier|source_note` headers and Markdown accepts the same keys in leading frontmatter. Header lines are excluded from claim scanning. The remaining 16 ghost-entry and 50 source read-model claims now carry explicit historical or design-counterfactual boundaries.
+- Regression coverage requires every consequence row, runtime essay/dynamic section, paired event, historical event, and global player-facing claim to stay documented. Focused RED/GREEN and the essay-integrity matrix pass; full workstream verification is recorded in the ledger closeout entry.
 
 `/simplify` -> historian/canon review -> commit `fix(content): close sensitive history claims`
 

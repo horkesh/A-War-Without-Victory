@@ -1,3 +1,9 @@
+---
+historical_source: UNHCR displacement reporting for Bosnia and Herzegovina; Balkan Battlegrounds Vols. I-II; ICTY Krajišnik Trial Judgment (IT-00-39-T) and related forced-displacement findings.
+source_tier: icty_icj_un
+source_note: The sources anchor the historical displacement baseline. The below-baseline trajectory is a live-run audit counterfactual and makes no claim that the historical displacement record changed.
+---
+
 # Civilian Displacement: The Wave That Did Not Crest
 
 **Ring 2 — narrative observation. Path-not-taken. Ghost entry.**

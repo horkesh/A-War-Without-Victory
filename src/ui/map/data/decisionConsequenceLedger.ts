@@ -1,3 +1,7 @@
+// historical_source: Canonical decision records, event-causality log, cost ledger, and displacement summary contracts.
+// source_tier: design_counterfactual
+// source_note: The ledger renders deterministic estimates and observed live-run receipts; numeric civilian-risk and displacement values are simulation state, not historical totals.
+
 import type {
   FormationView,
   LoadedGameState,

@@ -1,3 +1,7 @@
+// historical_source: ICTY Krstić (IT-98-33), Karadžić (IT-95-5/18), and Mladić (IT-09-92) Judgments; UN A/54/549; canonical Dynamic Codex and endgame-ledger contracts.
+// source_tier: icty_icj_un
+// source_note: Adjudicated history remains locked; all generated divergence and ghost prose is gated by observable live state and cannot turn genocide, atrocity, or rupture into a player-authored achievement.
+
 /**
  * Dynamic Codex section builder — LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE.
  *

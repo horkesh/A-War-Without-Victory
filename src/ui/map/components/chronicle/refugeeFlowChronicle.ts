@@ -1,3 +1,7 @@
+// historical_source: Persisted displacement_recent_by_turn contract; canonical displacement ledger; docs/40_reports/playtest/20260610_D2_PREP_AUDIT.md.
+// source_tier: design_counterfactual
+// source_note: Refugee-flow cards report live displacement counters without naming perpetrators or asserting that the generated totals are historical figures.
+
 /**
  * Refugee-Flow Chronicle beats — D2 cadence beats for the mid-1995 void (task #40).
  *

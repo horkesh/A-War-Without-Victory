@@ -1,3 +1,7 @@
+// historical_source: ICTY Krstić (IT-98-33), Karadžić (IT-95-5/18), and Mladić (IT-09-92) Judgments; UN A/54/549.
+// source_tier: icty_icj_un
+// source_note: The sources anchor the locked Srebrenica record. Rupture consequences are state-triggered historical records, never player commands or optimization rewards.
+
 /**
  * Rupture consequence enforcement — Ring 2 of the sensitive-history boundary.
  *

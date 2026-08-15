@@ -1,3 +1,9 @@
+---
+historical_source: ICTY Perišić Trial Judgment (IT-04-81-T); Balkan Battlegrounds Vol. II ch. 51; canonical equipment-quality and order-of-battle ledgers.
+source_tier: design_counterfactual
+source_note: The sources anchor the historical equipment baseline. Recovery is a live-run divergence emitted from equipment and replacement predicates, not an asserted historical outcome.
+---
+
 # Equipment Quality: The Recovery Recorded in This Run
 
 **Ring 2 — narrative observation. Divergence note. Ghost entry. CoS analytical assessment.**

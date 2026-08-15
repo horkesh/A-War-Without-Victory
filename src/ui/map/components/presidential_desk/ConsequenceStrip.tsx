@@ -1,3 +1,7 @@
+// historical_source: Canonical presidential-review queue and decision-consequence ledger contracts.
+// source_tier: design_counterfactual
+// source_note: The strip renders persisted live-run consequence totals and labels; it does not present them as historical figures.
+
 import type { LoadedGameState } from '../../data/types';
 import { buildDecisionConsequenceLedger, buildDecisionConsequenceLedgerSummary, resolveDecisionConsequenceCopy } from '../../data/decisionConsequenceLedger';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';

@@ -1,3 +1,9 @@
+---
+historical_source: ICTY Krstić (IT-98-33), Karadžić (IT-95-5/18), and Mladić (IT-09-92) Judgments; ICJ Bosnia and Herzegovina v. Serbia and Montenegro (2007); UN A/54/549.
+source_tier: icty_icj_un
+source_note: The sources preserve the locked historical record of Srebrenica and the eastern enclaves. This audit-only entry reports a current simulation snapshot and neither forecasts nor rewrites the adjudicated outcome.
+---
+
 # Eastern Enclaves: Audit-Only Situation Report
 
 **Ring 2 — narrative observation. AUDIT-ONLY. Present-state register only — UNHCR situation-report voice. This entry does not address Srebrenica 1995 in any causal or counterfactual register.**

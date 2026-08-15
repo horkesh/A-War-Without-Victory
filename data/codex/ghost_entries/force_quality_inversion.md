@@ -1,3 +1,9 @@
+---
+historical_source: ICTY Mladić Trial Judgment (IT-09-92-T); ICTY Perišić Trial Judgment (IT-04-81-T); UN Security Council Resolution 713 (1991); canonical force-quality ledgers.
+source_tier: design_counterfactual
+source_note: The sources anchor the historical asymmetry. A sustained inversion is recorded only when live per-brigade combat-power predicates fire and is not presented as historical fact.
+---
+
 # Force Quality: The Inversion That History Did Not Show
 
 **Ring 2 — narrative observation. Path-not-taken. Ghost entry. CoS analytical assessment.**

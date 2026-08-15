@@ -8,8 +8,8 @@
 - Topic archives: [QA gates](napkin/qa_gates.md), [unreported sparse truth](napkin/unreported.md), [map counters](napkin/map_counters.md), [release process](napkin/release_process.md), [engine runtime](napkin/engine_runtime.md), [Warroom/legacy](napkin/warroom_and_legacy.md).
 
 ## Current Release State
-1. **[2026-08-15] R7 is the current 1.0 critical path; narrow RC is closed**
-   Do instead: execute R7 Phase 1.2, then officer/OOB, audio, English accessibility/readability, opening screens, and packaged proof; continue to R8/R9. D-topology is post-1.0/reserved.
+1. **[2026-08-15] R7 is the current 1.0 critical path; Phase 1.2 is closed**
+   Do instead: execute R7 Phase 2 officer/OOB provenance, then audio, English accessibility/readability, opening screens, and packaged proof; continue to R8/R9. D-topology is post-1.0/reserved.
 2. **[2026-08-15] Retain collapse v3 selection plus reversible D-shape**
    Do instead: preserve the default-OFF two-turn selector and 4.0/0.5 shock/recovery union pass. Do not revive struck breadth tuning; any RBiH/RS Tier-0 opening or neighbour topology requires fresh Section 6 and paired 188w evidence.
 3. **[2026-08-15] D-shape proved a live writer, not protected-boundary campaign reach**
@@ -18,8 +18,8 @@
    Do instead: finish historical/source remediation, officer/OOB provenance, audio/licensing, English accessibility/readability, opening screens, and packaged proof before R8. Keep `bs` migration, pseudolocalization, Bosnian completion/native review, and locale-specific proof in post-1.0 Phase 3.
 5. **[2026-08-15] Publication remains separately authorized**
    Do instead: transient validation packages are allowed, but do not sign, upload, create a public release, or tag `1.0` without an explicit `Publish 1.0` instruction.
-6. **[2026-08-15] R7 Phase 1.2 live provenance census**
-   Do instead: continue from 2,078 documented / 1,553 source-note / 0 source-floor / 11 actor-specificity / 0 source-tier claims. Keep the 12 known unindexed deposit claims auditable but non-player-facing; mirror every live essay metadata fix into `essay_index.json`. The corpus test now requires the player-facing essay source-floor queue to stay empty.
+6. **[2026-08-15] R7 Phase 1.2 provenance is a zero-queue contract**
+   Do instead: preserve 3,642 documented claims plus 12 explicitly non-player-facing deposits, with zero unresolved player-facing rows. Keep essay metadata mirrored into `essay_index.json`; use leading provenance headers for inventoried TS/TSX/Markdown read models; narrow or omit unsupported specificity rather than clearing it with vague citations.
 
 ## Execution & Validation
 0. **[2026-08-12] ANY territory-moving change needs 188w — the "catalog-only" carve-out is WITHDRAWN**

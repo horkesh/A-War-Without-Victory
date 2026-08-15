@@ -1,3 +1,9 @@
+---
+historical_source: Balkan Battlegrounds Vol. II chs. 31 and 51; ICTY Karadžić (IT-95-5/18-T) and Prlić et al. (IT-04-74-T) Trial Judgments; canonical negotiation-capital ledger.
+source_tier: design_counterfactual
+source_note: The sources anchor the historical negotiation context. Recovery is a live-run ledger divergence and does not displace the canonical peace-process record.
+---
+
 # Negotiation Capital: The Recovery Recorded in This Run
 
 **Ring 2 — narrative observation. Divergence note. Ghost entry. CoS analytical assessment.**

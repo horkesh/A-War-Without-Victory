@@ -1,3 +1,9 @@
+---
+historical_source: Balkan Battlegrounds Vol. II ch. 51; canonical doctrine-reform predicates and the run cohesion, exhaustion, morale, and order-of-battle ledgers.
+source_tier: design_counterfactual
+source_note: The historical source anchors the reform baseline; the completed-without-drift result is emitted only from live simulation predicates and asserts no historical outcome.
+---
+
 # Doctrine Reform Without Drift: The Reform That Took Hold
 
 **Ring 2 — narrative observation. Path-not-taken. Ghost entry.**

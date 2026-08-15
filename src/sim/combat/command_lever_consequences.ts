@@ -1,3 +1,7 @@
+// historical_source: ICTY Karadžić (IT-95-5/18-T), Mladić (IT-09-92-T), and Prlić et al. (IT-04-74-T) Judgments; Balkan Battlegrounds Vol. II; Presidential Command Model §4.
+// source_tier: icty_icj_un
+// source_note: Historical command relationships anchor faction asymmetry; thresholds and numeric consequences are deterministic simulation abstractions, not claims of exact historical causation.
+
 /**
  * Faction-asymmetric COMMAND-LEVER CONSEQUENCES (Presidential Command Model §4).
  *

@@ -150,6 +150,54 @@ test('inventory scans bounded surfaces with stable ordering, ids, and source sta
     }
 });
 
+test('inventory applies file-level provenance headers to text and TypeScript claims', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'awwv-sensitive-text-provenance-'));
+
+    try {
+        await mkdir(join(root, 'src', 'ui', 'map', 'data'), { recursive: true });
+        await mkdir(join(root, 'data', 'codex', 'ghost_entries'), { recursive: true });
+        await writeFile(
+            join(root, 'src', 'ui', 'map', 'data', 'decisionConsequenceLedger.ts'),
+            [
+                '// historical_source: Canonical consequence-state contract.',
+                '// source_tier: design_counterfactual',
+                '// source_note: Player-facing prose describes live simulation receipts, not an asserted historical outcome.',
+                '',
+                "export const row = 'The Chronicle says the army captures the corridor.';",
+                '',
+            ].join('\n'),
+        );
+        await writeFile(
+            join(root, 'data', 'codex', 'ghost_entries', 'counterfactual.md'),
+            [
+                '---',
+                'historical_source: Canonical ghost-entry predicate contract.',
+                'source_tier: design_counterfactual',
+                'source_note: This entry appears only when live state records the counterfactual result.',
+                '---',
+                '',
+                '# The enclave is defended',
+                '',
+                'Civilian displacement is recorded in the counterfactual.',
+                '',
+            ].join('\n'),
+        );
+
+        const report = await inventory.scanSensitiveClaimInventory({ rootDir: root });
+        assert.strictEqual(report.claims.length, 2);
+        for (const claim of report.claims) {
+            assert.strictEqual(claim.source_status, 'cited');
+            assert.strictEqual(claim.source_tier, 'design_counterfactual');
+            assert.strictEqual(claim.source_tier_status, 'resolved');
+            assert.ok(claim.citation);
+            assert.ok(claim.source_note);
+            assert.strictEqual(claim.status, 'documented');
+        }
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
+});
+
 test('inventory covers essay_index dynamic_sections (A1c morphing prose) the runtime serves', async () => {
     // Regression for the #334 §6-governance gap: the runtime Codex panel imports
     // essay_index.json and serves its dynamic_sections to the player, but the
@@ -744,6 +792,70 @@ test('inventory documents the summer 1992 Herceg-Bosna posture packet', async ()
     assert.strictEqual(claims.every((claim: { source_tier: string }) => (
         claim.source_tier === 'icty_icj_un'
     )), true);
+});
+
+test('inventory documents conditional consequence rows as design counterfactuals', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const claims = report.claims.filter((claim: { file: string }) => (
+        claim.file === 'data/scenarios/events/consequences.json'
+    ));
+
+    assert.strictEqual(claims.length, 549);
+    assert.strictEqual(claims.every((claim: { status: string }) => (
+        claim.status === 'documented'
+    )), true);
+    assert.strictEqual(claims.every((claim: { source_tier: string }) => (
+        claim.source_tier === 'design_counterfactual'
+    )), true);
+});
+
+test('inventory documents every player-facing essay and dynamic section', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const claims = report.claims.filter((claim: { surface: string; status: string }) => (
+        (claim.surface === 'essay' || claim.surface === 'essay_dynamic_section')
+            && claim.status !== 'not_player_facing'
+    ));
+
+    assert.strictEqual(claims.length > 0, true);
+    assert.strictEqual(claims.every((claim: { status: string }) => (
+        claim.status === 'documented'
+    )), true);
+});
+
+test('inventory documents event rows paired with player-facing essays', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const essayIndex = JSON.parse(await readFile(
+        join(process.cwd(), 'data', 'scenarios', 'essays', 'essay_index.json'),
+        'utf8',
+    )) as { essays: Array<{ event_id: string }> };
+    const eventIds = new Set(essayIndex.essays.map((essay) => essay.event_id));
+    const claims = report.claims.filter((claim: { surface: string; subject_id: string }) => (
+        claim.surface === 'event' && eventIds.has(claim.subject_id)
+    ));
+
+    assert.strictEqual(claims.length > 0, true);
+    assert.strictEqual(claims.every((claim: { status: string }) => (
+        claim.status === 'documented'
+    )), true);
+});
+
+test('inventory documents every player-facing historical event claim', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const claims = report.claims.filter((claim: { surface: string }) => claim.surface === 'event');
+
+    assert.strictEqual(claims.length > 0, true);
+    assert.strictEqual(claims.every((claim: { status: string }) => (
+        claim.status === 'documented'
+    )), true);
+});
+
+test('inventory has no unresolved player-facing claim', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const unresolved = report.claims.filter((claim: { status: string }) => (
+        claim.status !== 'documented' && claim.status !== 'not_player_facing'
+    ));
+
+    assert.deepStrictEqual(unresolved, []);
 });
 
 test('inventory clears the source floor for the Jajce-to-final-offensives packet', async () => {

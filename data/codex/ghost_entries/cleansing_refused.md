@@ -1,3 +1,9 @@
+---
+historical_source: ICTY Karadžić (IT-95-5/18-T), Krajišnik (IT-00-39-T), Lukić & Lukić (IT-98-32/1-T), Kunarac et al. (IT-96-23 & IT-96-23/1), and Prlić et al. (IT-04-74-T) Trial Judgments.
+source_tier: icty_icj_un
+source_note: The judgments anchor the historical campaigns and actors. The refusal record is a live-run policy receipt and does not revise, relativize, or counterfactually prevent the adjudicated crimes.
+---
+
 # Paramilitary Deployment: The Authorisation That Was Never Given
 
 **Ring 2 — narrative observation. Path-not-taken. Ghost entry.**

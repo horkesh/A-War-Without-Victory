@@ -1,3 +1,7 @@
+// historical_source: Canonical essay_index, endgame comparison, cost-ledger, and historical-divergence contracts.
+// source_tier: design_counterfactual
+// source_note: Resolver substitutions expose authored sources and live-run findings; fallback behavior creates no independent historical claim.
+
 import type { ComparisonResult } from '../../../../sim/endgame/endgame_comparison.js';
 import type { CostLedger, CostLedgerAnnotation, CostLedgerFinding } from '../../../../sim/endgame/cost_ledger.js';
 import { getPeacePlanById } from '../../../../sim/negotiation/peace_plan_data.js';
