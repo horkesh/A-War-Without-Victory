@@ -146,5 +146,62 @@ Run the focused suite, typecheck, `canon:check`, baseline regression, and diff h
 - The run resolved 555 battles across 188 distinct target OSIDs. Maximum raw incidence was 33 at `op:visoko:gornja_vratnica_2`, producing maximum strain 4.95 with the unchanged 0.15 multiplier.
 - No entity crossed strain 40 or 55; Tier-1 eligibility and `collapse_damage` remained empty. The Section 6 instruments passed but did not exercise the protected write boundary, so this is not Section 6 clearance.
 - Sipovo municipality accumulated five target incidences and Drvar municipality three, but `op:sipovo:sipovo_2` and `op:titov_drvar:drvar_2` each accumulated one incidence / 0.15 strain. The strict pre-registered city discriminator therefore remains unsatisfied.
-- Disposition: retain the deterministic default-OFF measurement substrate. Do not tune constants within this packet and do not advance to D-shape. The next step is an explicit owner/design decision on D-selection refinement or scaling, followed by fresh live Section 6 evidence.
+- V1 disposition at measurement close: retain the deterministic default-OFF measurement substrate and do not advance to D-shape. The subsequent v2 decision and failed/reverted outcome below supersede the then-open refinement-or-scaling question; the live next step is an explicit temporal aggregation contract.
 - Closeout: the focused 87-test gate, typecheck, deterministic static scan, and all baseline scenarios passed. The global Vitest attempt separately exposed the unrelated stale `sana_95` catalog expectation (13 current objectives versus 10 expected) and a later worker did not report within 30 CPU-minutes; the full suite is therefore not represented as green.
+
+---
+
+## D-selection v2 owner decision (2026-08-15)
+
+The owner accepted a second measurement-only selector before any multiplier tuning:
+
+```text
+exposure(target_osid)
+  = direct_battles_at_target
+  + 0.5 * other_battles_in_the_same_municipality
+```
+
+The municipality contribution is **target-gated**: only OSIDs with at least one resolved defender-side battle receive an exposure entry. An unattacked settlement receives zero even when another settlement in its municipality was attacked. The municipality is the second token in canonical `op:<municipality>:<settlement>` OSIDs. Missing/quiet reports still contribute zero; casualties, outcomes, attacker count, frontage, adjacency, clocks, randomness, thresholds, and `STRAIN_FRACTION` remain outside the selector.
+
+This formula would map the first measurement's main-town controls from Sipovo/Drvar 1/1 to 3/2 because their municipality totals were 5/3. That arithmetic is a design hypothesis, not acceptance evidence; fresh runs must establish the actual distribution and Section 6 liveness.
+
+### Task 4: Municipality-supported target-gated selector
+
+**Files:**
+- Modify: `tests/collapse_d_selection_combat_incidence.test.ts`
+- Modify: `src/sim/pressure/pressure_exposure.ts`
+
+**Step 1: Write failing pure-selector tests**
+
+Prove that one direct battle at Sipovo plus four battles at other Sipovo OSIDs yields exposure 3 at the attacked main-town OSID; one direct battle at Drvar plus two other Drvar battles yields 2; an unattacked OSID in either municipality is absent; multiple direct battles subtract from `other_battles` rather than being double-counted; malformed/blank rows cannot create municipality support; and permuted rows produce the same ordered map.
+
+**Step 2: Run RED**
+
+```powershell
+npx.cmd vitest run tests/collapse_d_selection_combat_incidence.test.ts --pool=forks --reporter=dot
+```
+
+Expected: the existing direct-only selector returns 1/1 for the main-town comparison.
+
+**Step 3: Implement the minimal deterministic aggregation**
+
+Count direct incidence by target and total incidence by parsed municipality from the same stably sorted valid battle rows. Iterate attacked targets in `strictCompare` order and emit `direct + 0.5 * (municipality_total - direct)`. Do not emit municipality peers that have no direct battle.
+
+**Step 4: Run GREEN and focused regression gates**
+
+Run the focused D-selection test, then the combined collapse/Section 6/lifecycle pack and typecheck.
+
+### Task 5: Fresh v2 measurement and disposition
+
+Run two fresh collapse-ON 188-week measurements with unchanged multiplier and thresholds. Record byte/structural determinism, incidence/exposure distribution, Sipovo/Drvar exact main-town and municipality results, threshold crossings, damage/capacity writes, engine health, anchors, and Section 6 liveness. Synchronize the build spec, roadmap, command board, heartbeat, project ledger, and knowledge base. Do not authorize D-shape or tune scaling unless the measured selector is historically accepted and the owner makes the next decision.
+
+---
+
+## D-selection v2 measurement outcome (2026-08-15)
+
+- **Disposition: FAIL_REVERTED.** The same-turn municipality-supported selector was implemented test-first, measured twice, and removed after it failed the pre-registered exact main-town discriminator. Production and focused tests were restored to the retained v1 direct-incidence substrate at `ced78d3eb`.
+- The two v2 runs under `runs/rc_d_selection_v2_measurement_a` and `runs/rc_d_selection_v2_measurement_b` produced final-state hash `b3d60834a7aa5cf1` and structural fingerprint `22cf3c5d8884bfb8`. Fifteen of sixteen files were byte-identical; only `run_meta.json` differed because it records the deliberately different output directory.
+- The synthetic contract behaved as designed, but the campaign did not supply the assumed temporal co-occurrence. Sipovo's and Drvar's other municipality battles occurred on different turns from the main-town battles, so `op:sipovo:sipovo_2` and `op:titov_drvar:drvar_2` remained tied at exposure 1 / strain 0.15 rather than the hypothesized 3 / 2.
+- Maximum exposure remained 33 at `op:visoko:gornja_vratnica_2`, producing strain 4.95. No entity crossed 40 or 55; Tier-1 eligibility, collapse damage, and capacity modifiers remained empty.
+- Both runs retained 31/31 anchors and passed all seven engine-health checks. The Section 6 verifier and turn-162 rupture comparison passed as instruments, but zero live damage reached the protected boundary, so they provide no new Section 6 clearance.
+- Scaling is not the next experiment: multiplying a tied 1/1 signal cannot make it discriminate Sipovo from Drvar. Any successor must first define and obtain owner acceptance for an explicit temporal aggregation contract, then repeat deterministic measurement and live Section 6 review before D-shape begins.
