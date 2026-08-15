@@ -18,16 +18,17 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | ID | Plan | Start condition |
 |---|---|---|
 | R1 | [Seamless Command Room ↔ Tactical Map](2026-07-31-seamless-command-room-map-transition-plan.md) | Complete; closed 2026-08-01 |
-| R2 | [RS Desk → Decision → Advance friction](2026-07-31-rs-104week-friction-remediation-plan.md) | Source complete/reviewed; fresh packaged 104-week RS acceptance next |
+| R2 | [RS Desk → Decision → Advance friction](2026-07-31-rs-104week-friction-remediation-plan.md) | Complete; closed 2026-08-03 on the clean v14 acceptance |
 | R3 | [Operational/Tactical Group convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | Complete; final full fast slice green |
-| R4 | [Command, event, and Dynamic Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) | R2 priority/cadence contract |
-| R5 | [Engine quality, performance, and stability](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | R1–R3 source/state floor; Task 8A retained; Phase 2e ready |
-| R6 | [Historical gameplay depth and final calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) | R3/R5 deterministic floor |
-| R7 | [Content, history, Bosnian localization, and audio](2026-07-31-content-history-localization-audio-plan.md) | R4 inventory; R1/R2 UI convergence |
-| R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | R1–R7 green |
+| R4 | [Command, event, and Dynamic Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) | Complete; Phase 6 packaging follow-up closed 2026-08-07 |
+| R5 | [Engine quality, performance, and stability](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Complete; current ~1.09 s/turn floor accepted and 100 ms target retired |
+| R6 | [Historical gameplay depth and final calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) | Pre-1.0 calibration scope closed 2026-08-09; remaining named debt is post-1.0 |
+| RC | [Collapse scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) / [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) | Active; Stage 0 and Stage 2 complete; D-selection next, then D-shape |
+| R7 | [Content, history, audio, accessibility, and opening experience](2026-07-31-content-history-localization-audio-plan.md) | In progress; resumes after RC; localization Phase 3 is post-1.0 |
+| R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | RC and R1-R7 green |
 | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | R8 produces two clean 5/5 diaries |
 
-Each roadmap point has exactly one detailed plan with named files, red-first tests, commands, evidence, acceptance, collision rules, and an orchestrator closeout. If new evidence changes a workstream, amend that plan and the master roadmap instead of creating a competing active packet.
+Each R1–R9 workstream has exactly one detailed plan with named files, red-first tests, commands, evidence, acceptance, collision rules, and an orchestrator closeout. The reactivated RC lane uses its linked scope, build specification, and Section 6 gate packet. If new evidence changes a workstream, amend that packet and the master roadmap instead of creating a competing active plan.
 
 ## Activation Boundary
 
@@ -41,7 +42,7 @@ See [Master Roadmap §2](MASTER_ROADMAP.md#2-authority-and-activation) for the e
 
 ## Current State
 
-The seven RBiH/RS/HRHB owner-style Electron diaries and completed bug-first repair history are indexed in the [D2 owner-diary closeout](../40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md). Remaining work is consolidated into R1–R9; there are no separate active D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, signing-credential, or release-operator queues.
+The seven RBiH/RS/HRHB owner-style Electron diaries and completed bug-first repair history are indexed in the [D2 owner-diary closeout](../40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md). Remaining work is consolidated into RC and R7-R9; there are no separate active D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, signing-credential, or release-operator queues.
 
 Research has resolved the product choices. Verification barriers remain: determinism, conservation, migration, baselines, canon, historical substantiation, accessibility, security, licensing, clean package/runtime, and explicit external publication authority.
 

@@ -4385,3 +4385,11 @@ And the abort masked the rest: two of four manifest scenarios had not been compa
 ## 2026-08-14 - The cheap check is the one that gets skipped, and it is the one that catches this
 
 The commit that broke the 52w golden had been validated at 188 weeks — anchors 31/31, §6 invariants correct, engine-health gate 7/7. It skipped the two-minute check, not the twenty-minute one. Thoroughness on the expensive axis reads as diligence and produces exactly the confidence that makes the cheap axis feel unnecessary.
+
+## 2026-08-15 - English is the sole required 1.0 language; unfinished localization is post-1.0
+
+Owner scope decision recorded in `PROJECT_LEDGER.md` on 2026-08-15: multilingual completeness no longer gates 1.0. Keep already-landed translations, locale inventories, and compatibility behavior; do not revert them, but do not represent Bosnian support as production-complete.
+
+The retained post-1.0 packet is R7 Phase 3: canonical `bs`/`bs-BA`, unfinished legacy-`bcs` migration, deterministic pseudolocalization, Bosnian string completion, native linguistic and in-product review, and locale-specific packaged visual proof. Pre-1.0 R7 still owns history/source accuracy, officer/OOB provenance, audio licensing/assets, English accessibility/readability, opening screens, and packaged proof.
+
+**Do instead:** when evaluating R7/R8/R9 readiness, require English release quality and treat localization findings as tracked post-1.0 debt unless they cause a language-independent crash, data loss, security issue, or English-surface defect. Existing optional Bosnian content is allowed to remain, but native-review absence and untranslated keys are not 1.0 blockers.

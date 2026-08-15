@@ -27187,3 +27187,28 @@ Per-criterion: **2, 3, 5, 6 DISCHARGED permanently** (evidence production and ex
 
 **★ The §6 consumer docblock has now been wrong FOUR times, and the pattern is worth naming** (RC-Canon-S6, 2026-08-14). The original "all consumers report-only" claim; the false "the CLI harness seed path honours the guard automatically" claim; the "primary chokepoint" claim (the named site is unreachable for guarded input — deleting it left all 21 tests green); and very nearly a fourth, the subjunctive rewrite, which would have implied `will_not_recover` might currently trip on a §6 enclave when it provably cannot. **Each correction was accurate about the thing it fixed and silently inherited a neighbouring assumption.** The indicative misattributed causation; the subjunctive misstated the facts; the accepted form separates the two — the guarantees hold unconditionally today via the loop-skip, *and* this branch would deliver them for any future caller. Recorded because the next person to edit this block will be under exactly the same pressure: fixing one clause carefully while trusting its neighbours.
 
+## 2026-08-15 — Roadmap control-plane documentation synchronized
+
+Documentation-only workflow reconciliation; no source, data, runtime, baseline, or canon behavior changed.
+
+- Updated `docs/plans/MASTER_ROADMAP.md` with a dated current-execution snapshot: R1-R6 pre-1.0 scope complete; RC collapse is active; Stage 0 and Stage 2 are complete; D-selection is next, followed by D-shape; R7-R9 remain downstream.
+- Rebuilt the derived `docs/plans/COMMAND_BOARD.md` around that snapshot, removing obsolete R2 packaged-acceptance and R5 100-ms/turn blocker language.
+- Updated `docs/plans/README.md`, `docs/00_start_here/docs_index.md`, `.claude/napkin.md`, and `handoffs/AWWV_AUTONOMOUS_ROADMAP_HEARTBEAT.md` so live entrypoints no longer advertise the superseded WP-9/D2/D3/D4 sequence.
+- Preserved the Stage 2 evidence boundary: 629 matched OSIDs and 31/31 anchors establish a deterministic collapse ON/OFF baseline, not Section 6 clearance, because no live `collapse_damage` reached G1.
+- Preserved the publication boundary: signing, upload, public release creation, and a public `1.0` tag still require explicit `Publish 1.0` authority.
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` was not changed because this sync records no new decision or reusable pattern; it reconciles existing decisions already captured in the 2026-08-13/14 ledger and panel record.
+- `docs/10_canon/FORAWWV.md` and all other canon files were not edited.
+- Verification: all 142 relative Markdown targets across the six synchronized entrypoint documents exist; the targeted stale-status scan returned no hits; `git diff --check` passed. `npm.cmd run canon:check` passed its determinism static scan 1/1, then exited 1 on seven existing `apr1992_52w` baseline artifact mismatches. No baseline was refreshed; the docs-only diff cannot alter scenario output.
+
+## 2026-08-15 — Owner moved unfinished localization to post-1.0
+
+**Decision:** localization no longer gates 1.0. English is the sole required release language for 1.0. Already-landed translations, inventories, and compatibility behavior remain in place; this is a scope deferral, not a runtime rollback or a claim that Bosnian support is complete.
+
+- R7 remains a pre-1.0 lane for historical/source remediation, officer/OOB provenance, audio/licensing, English accessibility/readability, opening screens, and integrated packaged proof.
+- R7 Phase 3 moves intact to the master roadmap's post-1.0 backlog: canonical `bs`/`bs-BA`, unfinished legacy-`bcs` migration, deterministic pseudolocalization, Bosnian string completion, native linguistic/in-product review, and locale-specific packaged visual proof.
+- R7, R8, R9, and 1.0 acceptance no longer require multilingual completeness or native-review availability. Existing Bosnian content must not be advertised as production-complete until post-1.0 Phase 3 closes.
+- No milestone renumbering, source/data/runtime behavior, baseline, package, version, or canon changed.
+- Updated `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/README.md`, the R7 execution plan, `docs/00_start_here/docs_index.md`, `.claude/napkin.md`, and the autonomous roadmap heartbeat.
+- Reusable scope boundary recorded in `docs/PROJECT_LEDGER_KNOWLEDGE.md` under this date.
+- `docs/10_canon/FORAWWV.md` and all other canon files were not edited.
+- Verification: all 145 relative Markdown targets across the seven synchronized entrypoint documents exist; the R7 plan has exactly one deferred Phase 3 packet and the master roadmap has exactly one matching post-1.0 backlog row; targeted review found no active localization checkbox outside Phase 3 (the two later references are non-blocking debt/claim checks); `git diff --check` passed; and `git diff --name-only -- docs/10_canon` returned no files. Runtime, typecheck, and scenario suites were not rerun for this docs-only scope decision. The previously recorded `canon:check` baseline failure on seven existing `apr1992_52w` artifacts remains unresolved, and no baseline was refreshed.

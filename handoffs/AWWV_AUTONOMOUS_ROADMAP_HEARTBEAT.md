@@ -1,28 +1,41 @@
 # AWWV Autonomous Roadmap Heartbeat
 
-- Current branch/worktree: `main` at `F:\A-War-Without-Victory`
-- Lane name: Order queue shell-frame docking
-- Files changed: `src/ui/map/components/OrderQueue.tsx`, `tests/ui_shell_frame_contract.test.ts`, GUI/report index docs, project ledgers, root heartbeat.
-- Tests run and exact result: `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\z_index_canonical.test.ts` passed 14/14. Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed the default shell no longer renders `ORDER QUEUE (0)`.
-- Scenario/run IDs and hashes: performance and formation lanes retained 40w hash `0cb626c032204372`; operation-opportunity proof used 40w `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` hash `0cb626c032204372` and 188w `runs\apr1992_definitive_188w__210e69404d054959__w188_n1` hash `a0111273f26f907d`.
-- Ledger/report docs updated: `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`.
-- Commit SHA: `40f6fd9c` (`fix(ui): dock order queue in shell frame`).
-- Next lane selected and why: continue the broader AAA-style UI inspection requested by the user. The next likely owner is remaining hard-coded offsets and visually detached surfaces in ops planning, minimap, map legend, modal trays, and Warroom/tactical handoffs.
+**Synchronized:** 2026-08-15
 
-## Lane Status
+- Current branch/worktree: `codex/master-roadmap-execution` at `F:\A-War-Without-Victory`.
+- Current integration head before this docs-only sync: `9a4f740f6` (`docs(reports): dedupe three entries, and correct the premise`).
+- Current lane: RC pressure/exhaustion/COLLAPSE pipeline.
+- Completed RC stages: Stage 0 guard/evidence repair and Stage 2 retained 188-week ON/OFF baseline.
+- Current baseline: 629 matched OSIDs, 31/31 anchors, byte-identical control output. This establishes a deterministic baseline, not Section 6 clearance, because no live collapse damage reached G1.
+- Next lane: D-selection under a fresh Section 6 review, then D-shape. Eligibility-breadth tuning and lane C are struck; D-topology is reserved for an explicit later decision.
+- Downstream sequence: finish the reduced pre-1.0 R7 content/history/audio/accessibility/opening scope, then R8 packaged full-campaign validation, then R9 release-candidate readiness. Localization Phase 3 is post-1.0.
+- Publication boundary: signing, upload, public release creation, and a public `1.0` tag require a separate explicit `Publish 1.0` instruction.
 
-| Lane | Branch / commit | Status | Verification summary |
-| --- | --- | --- | --- |
-| Wall-clock performance | `main` through `789bb89f`; recent perf commits include `68407817`, `9ff000bd`, `f241d36d`, `9eba4a0a`, `e0ecca61` | Closed for this packet with profiler-backed, hash-preserving bot-orders/commander CPU wins | Focused perf tests, `npm.cmd run typecheck`, profiled 40w hash `0cb626c032204372`; latest docs gate passed in committed perf lane |
-| Force-quality trajectory | merged via `22ff3b5e` from `codex/force-quality-trajectory` / `f3bb208f` | Cleanly deferred as audit-only; no multiplier/tuning without better evidence | `git diff --check` passed except CRLF warnings; docs-only, scenario run not required |
-| Formation-life believability | merged via `0847eb44` from `codex/formation-life-believability` / `f672895f` | Closed as detector-only classification for active-never-fights subtypes | Focused docs/anomaly tests 10/10; 40w proof hash `0cb626c032204372`; diagnostics 0 errors, consistency PASS |
-| Operation opportunity families | merged via `761ab2b8` from `codex/operation-opportunity-families` / `f5ee4cc7` | Closed for Kupres/Cincar plus first Federation/Western Bosnia Mistral slice | Focused/docs tests 86/86; 40w hash `0cb626c032204372`; 188w hash `a0111273f26f907d`; opportunity health audit clean |
-| Product-loop cohesion | merged via `1e7b3b5b` from `codex/product-loop-cohesion` / `b6d34c9b` | Closed with Decision Room product-loop heartbeat read model/handoff | Focused UI/docs suite 28/28; `git diff --check` passed; typecheck blocked by missing map deps |
-| Packaging/playtest support | merged via `69510b4b` from `codex/packaging-playtest-support` / `12b60db7` | Closed for deterministic artifact smoke release logs; operator-only clean-VM checks deferred | Focused tests 8/8; docs truth 6/6; `git diff --check` CRLF warnings only |
-| Docs/canon maintenance | merged via `e2ee1bb2` from `codex/docs-canon-maintenance` / `a1ff5ae0`, `440d492f` | Closed with safe pointer sweep and audit; FORAWWV left untouched | docs truth 6/6; `git diff --check` CRLF warnings only |
+## Workstream Status
 
-## Remaining Human / Operator Work
+| Lane | Status | Next action |
+|---|---|---|
+| R1 | Complete | None |
+| R2 | Complete | None |
+| R3 | Complete | None |
+| R4 | Complete | None |
+| R5 | Complete | None; accepted performance floor is approximately 1.09 seconds/turn |
+| R6 | Pre-1.0 scope complete | Post-1.0 debt remains recorded unless explicitly reactivated |
+| RC | Active; Stage 0 and Stage 2 complete | D-selection, then D-shape |
+| R7 | In progress, waiting behind RC | Finish content/history/audio/accessibility/opening packet; localization Phase 3 is post-1.0 |
+| R8 | Waiting | Start after RC and R1-R7 are green |
+| R9 | Waiting | Start after two clean 5/5 R8 diaries |
 
-- Packaging clean-VM checks remain operator-only: SmartScreen UX, Settings -> Apps entry/version, `%APPDATA%` persistence, NSIS uninstaller registry, and Linux clean-VM AppImage launch/save/load.
-- Product-loop local desktop/dev-map playtest remains a human/operator inspection task.
-- Substantive canon propagation from `docs/CANON_PROPAGATION_NEEDED.md` remains a separate canon/human-review lane; `docs/10_canon/FORAWWV.md` was not edited.
+## Working Tree
+
+- Documentation sync files: `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/README.md`, `docs/plans/2026-07-31-content-history-localization-audio-plan.md`, `docs/00_start_here/docs_index.md`, `.claude/napkin.md`, this heartbeat, `docs/PROJECT_LEDGER.md`, and `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+- Pre-existing unrelated modification: `.claude/scheduled_tasks.lock`; preserve and do not include in the docs sync.
+- Canon/code/runtime changes: none.
+
+## Verification
+
+- Relative Markdown links: 145 targets checked across the seven synchronized entrypoint documents; all targets exist.
+- Targeted stale-status and localization-gate scan: no obsolete R2/R5/Stage-2-next/WP-9-current phrases remain, and unfinished multilingual work is consistently post-1.0 rather than an R7/R8/R9/1.0 blocker.
+- `git diff --check`: passed.
+- `npm.cmd run canon:check`: determinism static scan passed 1/1; the command exited 1 in baseline regression on seven existing `apr1992_52w` artifact mismatches (`activity_summary`, `control_delta`, `end_report`, `final_save`, `formation_delta`, `run_summary`, `weekly_report`). No baseline was refreshed. The docs-only sync cannot produce scenario artifact hashes.
+- Typecheck and runtime/UI suites: not required for a docs-only status reconciliation.

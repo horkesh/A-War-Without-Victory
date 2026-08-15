@@ -1,15 +1,15 @@
-# Content, Historical Attribution, Bosnian Localization, and Audio Implementation Plan
+# Content, Historical Attribution, Audio, and Accessibility Implementation Plan
 
 > **For implementation:** REQUIRED SUB-SKILL: use `executing-plans` and execute one phase at a time.
 
-**Goal:** Finish the sensitive-event, officer/OOB attribution, Bosnian localization, and soundscape lanes with explicit evidence/licensing rules and no unresolved content gate.
+**Goal:** Finish the sensitive-event, officer/OOB attribution, English accessibility/readability, and soundscape lanes with explicit evidence/licensing rules and no unresolved 1.0 content gate.
 
-**Architecture:** Build four machine-auditable inventories: historical claims, named identities, localizable strings, and audio assets. Unsupported claims/identities are omitted rather than guessed; sensitive events are informational consequences rather than choices; Bosnian uses a canonical BCP 47 locale with legacy preference compatibility; audio uses first-party or CC0/approved CC BY assets with a checksum and attribution manifest.
+**Architecture:** Build four machine-auditable inventories: historical claims, named identities, localizable strings, and audio assets. Unsupported claims/identities are omitted rather than guessed; sensitive events are informational consequences rather than choices; the completed localization inventory is retained as the post-1.0 baseline; audio uses first-party or CC0/approved CC BY assets with a checksum and attribution manifest.
 
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS -- Phase 1.1 sensitive-history closeout complete; Phase 1.2 historical backlog and localization remain
+**Status:** IN PROGRESS -- Phase 1.1 sensitive-history closeout complete; pre-1.0 Phases 1.2, 2, 4, and 5 remain; Phase 3 localization deferred post-1.0 by owner decision 2026-08-15
 **Roadmap workstream:** R7
 **Canonical owner:** authored JSON plus source/license manifests; `src/ui/map/i18n/` for locale; `src/ui/map/audio/` for playback
 **Collision rule:** Do not edit the same event/essay as R4. Do not edit map/Desk layout until R1/R2 finish.
@@ -23,8 +23,8 @@
 2. The stale symmetric `ethnic cleansing on both sides` sentence is removed unless a precise side-specific tribunal/primary citation supports each claim. No generic balancing sentence is permitted.
 3. Grabovica/Uzdol and Operation Neretva content is dated September 1993. It must distinguish findings about crimes from findings about individual command responsibility.
 4. Named officers/formations require an exact identity plus source. Uncertain or conflicting matches remain absent with an audit row; no approximate identity is promoted into game data.
-5. The canonical Bosnian locale is BCP 47 `bs` with regional formatting `bs-BA`. Persisted `bcs` preferences remain a legacy alias and migrate without breaking old saves/settings.
-6. Automated translation may create a draft, never the production-quality claim. Pseudolocalization catches layout defects; a native-language pass catches linguistic defects. If native review is unavailable at release, Bosnian ships labeled `Preview` while English remains default rather than blocking the program.
+5. **Post-1.0:** the canonical Bosnian locale remains BCP 47 `bs` with regional formatting `bs-BA`. Persisted `bcs` preferences remain a legacy alias and migrate without breaking old saves/settings.
+6. **Post-1.0:** automated translation may create a draft, never the production-quality claim. Pseudolocalization catches layout defects; a native-language pass catches linguistic defects. English is the sole required 1.0 language; existing Bosnian content must not be represented as production-complete before native review.
 7. Audio sourcing order is first-party/generated UI cues, then CC0 ambience, then carefully attributed CC BY only when irreplaceable. CC BY-NC, anthem/folk melodies, speeches, screams, gunfire spectacle, and sensational atrocity audio are excluded.
 8. `FORAWWV.md` is not an execution dependency and is not edited by this lane. Accepted product decisions live in the master roadmap and implementation reports.
 
@@ -56,15 +56,16 @@
 
 - finite sensitive-history claim/source cleanup and retained Ring-2 backlog;
 - officer/OOB exact-identity and provenance completion;
-- full localizable-string inventory, `bs` locale contract, pseudo pass, Bosnian draft/review workflow;
+- English string correctness, accessibility, readability, and packaged-offline presentation proof;
 - real UI cues and restrained ambient beds with manifest/checksum/license proof;
-- accessibility and packaged-offline verification for localized/audio surfaces.
+- packaged-offline verification for English/audio surfaces.
 
 ### Non-goals
 
 - no atrocity mechanic, camp subsystem, body-count optimization, faction atrocity ranking, or prevent-genocide reward;
 - no uncertain officer identity, invented quotation, or unverified event date;
 - no machine-only production translation claim;
+- no unfinished multilingual locale migration, pseudolocalization, translation completion, native LQA, or locale-specific visual proof in the 1.0 gate; Phase 3 is post-1.0;
 - no remote font/audio runtime dependency, unlicensed media, anthem/folk tune, or graphic/sensational sound;
 - no package/version/tag/release or `FORAWWV.md` edit.
 
@@ -131,9 +132,9 @@ Rules:
 - Officer/OOB: 374/374 rows keyed, 0 supported, 2,286 blocking findings, 12 normalized-name collisions. Positive support must be owned per row and cannot be inherited from manifest defaults.
 - Audio: 36/36 cues keyed, 17 provided, 19 placeholders, 0 unregistered binaries, 54 blocking findings, 5 warnings, and three required ambient beds absent. Registry/bundle resolution and recursive binary ownership are fail-closed; `OggS` remains a container-signature precheck rather than decode/LUFS proof.
 - Verification: focused 5 files / 22 tests; parent integration 2 files / 11 tests; TypeScript, canon/determinism/baseline, EOL, and diff checks green.
-- All four Phase 0 inventories are accepted. The historical/localization contract survived fourteen bounded review corrections and an integrated R4/R7 repair: sensitive-warning continuations are structural and fail closed; exact paramilitary exceptions remain option-bounded; seven safe R4 essays now carry reviewed source tiers; and neutral operational `both sides` prose no longer triggers a moral-symmetry false positive. The production Ring-3 choices remain remediated; historical, identity, localization, licensing, and audio remediation remains open in Phases 1-4.
+- All four Phase 0 inventories are accepted. The historical/localization contract survived fourteen bounded review corrections and an integrated R4/R7 repair: sensitive-warning continuations are structural and fail closed; exact paramilitary exceptions remain option-bounded; seven safe R4 essays now carry reviewed source tiers; and neutral operational `both sides` prose no longer triggers a moral-symmetry false positive. The production Ring-3 choices remain remediated. Historical, identity, licensing, and audio remediation remains open in pre-1.0 Phases 1, 2, and 4; localization remediation is retained for post-1.0 Phase 3.
 
-### Phase 0 accepted evidence -- historical claims and localization
+### Phase 0 accepted evidence -- historical claims and retained localization inventory
 
 - [Historical-claim and localization inventory report](../40_reports/audits/20260801_R7_HISTORICAL_CLAIM_LOCALIZATION_INVENTORIES.md).
 - Historical claims: schema 4 records 3,651 prose rows across 227 files; 1,466 documented, 1,574 need source notes, 489 need source tiers, 108 need source-floor completion, 14 need actor specificity, and zero direct sensitive-choice rows remain blocked. Unknown tiers are invalid and recognized `pending` tiers remain unresolved. Zero event/essay year mismatches; zero calendar-only rupture claims.
@@ -238,7 +239,9 @@ npm.cmd run test:baselines
 
 `/simplify` -> historian/QA review -> commit `fix(oob): close officer provenance`
 
-## Phase 3 -- Bosnian locale contract and localizability
+## Phase 3 -- DEFERRED POST-1.0 -- Bosnian locale contract and localizability
+
+**Scope boundary (owner decision 2026-08-15):** Tasks 3.1-3.3 remain the executable localization packet but do not gate R7 completion, R8, R9, or 1.0. Do not revert already-landed translations or compatibility. English remains the sole required 1.0 language, and existing Bosnian support must not be advertised as production-complete until this phase and native review are complete.
 
 **Assigned role:** UI/UX Developer + Documentation Specialist
 **Independent review:** QA Engineer; external native Bosnian language review remains an evidence input when available
@@ -337,11 +340,11 @@ npm.cmd run desktop:release:check
 **Assigned role:** QA Engineer
 **Independent review:** Process QA + Historian
 
-- [ ] Require zero failing historical claim, identity, locale, and audio inventory rows except explicitly `unsupported/omitted` or `preview-language-review` dispositions.
-- [ ] Run full content/event/Codex, locale, accessibility, audio, baseline, browser, and packaged-runtime tests.
-- [ ] Inspect English, Bosnian, and pseudo locale at the three viewport sizes.
+- [ ] Require zero failing historical claim, identity, and audio inventory rows except explicitly `unsupported/omitted` dispositions; localization findings remain tracked post-1.0 and are non-blocking here.
+- [ ] Run full content/event/Codex, English accessibility, audio, baseline, browser, and packaged-runtime tests.
+- [ ] Inspect English at 1920x1080, 1366x768, and 3440x1440 across the required surfaces.
 - [ ] Verify packaged runtime makes no remote font/audio request.
-- [ ] Create `docs/40_reports/implemented/20260731_CONTENT_HISTORY_LOCALIZATION_AUDIO.md`.
+- [ ] Create `docs/40_reports/implemented/20260731_CONTENT_HISTORY_AUDIO.md` and record the Phase 3 post-1.0 deferral explicitly.
 - [ ] Update master roadmap, ledger, and reusable knowledge.
 
 ```powershell
@@ -361,28 +364,28 @@ git diff --check
 - [ ] Sensitive-history inventory has no unsupported live claim or prohibited interaction.
 - [ ] Grabovica/Uzdol/Neretva content is correctly placed in 1993 and legally/factually precise.
 - [ ] No playable officer/OOB identity lacks exact provenance.
-- [ ] `bs`/`bs-BA` is canonical, `bcs` migrates, pseudo coverage is complete, and Bosnian is honestly labeled for its review state.
 - [ ] Every audible asset has source/license/checksum lineage and passes sensitivity rules.
-- [ ] Offline packaged runtime, accessibility, browser, baseline, and content suites are green.
+- [ ] English offline packaged runtime, accessibility, browser, baseline, and content suites are green.
+- [ ] Post-1.0 localization debt remains linked to Phase 3 and no 1.0 surface claims production-complete Bosnian support.
 
 ## 7. Copy-ready execution prompt
 
 ```text
-Role and objective: Implement roadmap R7 using docs/plans/2026-07-31-content-history-localization-audio-plan.md, one phase at a time.
+Role and objective: Implement the pre-1.0 scope of roadmap R7 using docs/plans/2026-07-31-content-history-localization-audio-plan.md, one phase at a time; skip deferred Phase 3.
 
-Locked decisions: sensitive history is informational consequence, unsupported claims/identities are omitted, Neretva/Grabovica/Uzdol is 1993, locale is bs/bs-BA with bcs compatibility, Bosnian without native review is Preview, audio is first-party/CC0 then approved CC BY with TASL and no sensational/anthem/folk material.
+Locked decisions: sensitive history is informational consequence, unsupported claims/identities are omitted, Neretva/Grabovica/Uzdol is 1993, English is the sole required 1.0 language, localization Phase 3 is post-1.0, and audio is first-party/CC0 then approved CC BY with TASL and no sensational/anthem/folk material.
 
 Read first: .claude/napkin.md, docs/life_lessons.md, docs/plans/MASTER_ROADMAP.md, docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md, local BB pages and official sources cited in the plan, docs/audio manifests, and target files.
 
 Constraints: TDD, exact provenance, deterministic inventories, /simplify before verification, one logical commit, no FORAWWV/package/version/tag/release change.
 
-Handoff: files, tests/results, claims/identity/locale/audio inventory counts, source/license citations, screenshots/audio proof, docs/ledger updates, next phase.
+Handoff: files, tests/results, claims/identity/audio inventory counts, non-blocking localization-debt status, source/license citations, English screenshots/audio proof, docs/ledger updates, next phase.
 ```
 
 ## 8. Orchestrator completion block
 
-**Canonical owner:** authored source manifests, locale dictionary, audio manifest.
-**Demoted path:** owner-wait content gate, guessed identity, generic BCS claim, untracked/unlicensed asset.
-**Player-visible truth:** precise sourced history, honest language support, restrained functional sound.
-**Canonical UI surface:** existing event/Codex surfaces, Settings language/audio controls, and surface ambience.
-**Done means:** every retained content row has a sourced/omitted disposition and every locale/audio asset has testable lineage.
+**Canonical owner:** authored source manifests and audio manifest; locale dictionary remains post-1.0 Phase 3 scope.
+**Demoted path:** owner-wait content gate, guessed identity, production-complete Bosnian claim, untracked/unlicensed asset.
+**Player-visible truth:** precise sourced history, English release-language honesty, restrained functional sound.
+**Canonical UI surface:** existing event/Codex surfaces, English Settings/audio controls, and surface ambience.
+**Done means:** every retained content row has a sourced/omitted disposition, every audio asset has testable lineage, English accessibility/package proof is green, and Phase 3 remains explicitly tracked post-1.0.

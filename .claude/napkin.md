@@ -8,16 +8,16 @@
 - Topic archives: [QA gates](napkin/qa_gates.md), [unreported sparse truth](napkin/unreported.md), [map counters](napkin/map_counters.md), [release process](napkin/release_process.md), [engine runtime](napkin/engine_runtime.md), [Warroom/legacy](napkin/warroom_and_legacy.md).
 
 ## Current Release State
-1. **[2026-07-07] Technical road to 1.0 is closed**
-   Do instead: keep current path as WP-9 owner friction diaries -> D2 owner full-campaign playthrough -> D3 operator release gate -> D4 final docs/release sweep -> 1.0 tag.
-2. **[2026-07-17] Campaign QA publication is authorized; packaging remains paused**
-   Do instead: commit and push the reviewed campaign QA packet through PR #477, retain RBiH v47 and RS v17 as local evidence, keep `tmp-*` evidence roots untracked, and do not package, tag, or release without separate authorization. Current required 188w floor is the explicit current-canon `622/712` re-floor; RR2 `646` remains lineage. The canon-corrected deterministic endpoint passes 31/31 anchors after the centralized bilateral gate closed the pre-war consolidation leak and Brcko debt.
-3. **[2026-07-07] WP-9 diaries outrank speculative UI backlog**
-   Do instead: use docs/40_reports/playtests/TEMPLATE.md; top-three diary friction items move to the front before new polish.
-4. **[2026-07-09] CA-2/CA-3 Command Authority is merged**
-   Do instead: keep Section 6 income exclusions binding, preserve headless byte-identical output, and treat WP-9 owner diaries as the current release-path action.
-5. **[2026-07-08] RR2 packets do not displace D2 path**
-   Do instead: execute RR2 cleanup/audit work only within its stop gates; keep WP-9 first and CA proof/merge as the Command Authority companion lane.
+1. **[2026-08-15] RC collapse is the current 1.0 critical path**
+   Do instead: execute D-selection under a fresh Section 6 review, then D-shape; do not revive the struck eligibility-breadth tuning path or lane C. D-topology requires an explicit later decision.
+2. **[2026-08-15] R1-R6 pre-1.0 scope is closed**
+   Do instead: treat old WP-9/D2/D3/D4 and R2/R5 execution language as history; current sequence is RC -> R7 -> R8 -> R9.
+3. **[2026-08-15] RC Stage 2 is a baseline, not Section 6 clearance**
+   Do instead: cite the retained 188w ON/OFF pair as 629 matched / 31-of-31 anchors and byte-identical control only; rerun criteria 4 and 7 after any change that opens RBiH or RS Tier-0 because no live collapse damage reached G1 in the retained pair.
+4. **[2026-08-15] R7 remains open after RC; localization does not gate 1.0**
+   Do instead: finish historical/source remediation, officer/OOB provenance, audio/licensing, English accessibility/readability, opening screens, and packaged proof before R8. Keep `bs` migration, pseudolocalization, Bosnian completion/native review, and locale-specific proof in post-1.0 Phase 3.
+5. **[2026-08-15] Publication remains separately authorized**
+   Do instead: transient validation packages are allowed, but do not sign, upload, create a public release, or tag `1.0` without an explicit `Publish 1.0` instruction.
 
 ## Execution & Validation
 0. **[2026-08-12] ANY territory-moving change needs 188w — the "catalog-only" carve-out is WITHDRAWN**
