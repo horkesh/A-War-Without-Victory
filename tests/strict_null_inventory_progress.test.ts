@@ -699,15 +699,19 @@ describe('strict null inventory progress', () => {
             // domain, absent on every run unless the owning scenario sets the flag ->
             // calibration byte-identical when unset. 528->530 / state 183->185. No new
             // type-escape casts.
-            optional_fields_game_state: 530,
+            // D-selection persistence (#72): +1 optional SettlementState field,
+            // `legitimacy_state`, stores the deterministic legitimacy classification used
+            // by the retained two-turn selection window. State domain; legacy saves remain
+            // absent-safe. 530->531 / state 185->186. No new type-escape casts.
+            optional_fields_game_state: 531,
         });
-        expect(current.optional_field_domains.total).toBe(530);
+        expect(current.optional_field_domains.total).toBe(531);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 335,
-            state: 185,
+            state: 186,
             ui_adapter: 0,
             unknown: 0,
         });
