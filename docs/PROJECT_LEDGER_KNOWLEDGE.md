@@ -4415,3 +4415,9 @@ The campaign evidence placed Sipovo peers at turns 177-181 around its turn-179 m
 **Reusable rule:** choose temporal memory from the consumer's observed event spacing, use the smallest window that satisfies the registered comparison, and reject wider memory unless it adds a separately required signal. When peers can arrive before or after the focal event, credit both attacked targets symmetrically so the result does not depend on attack order. Aggregate peer support at the receiving target level rather than multiplying it by that target's direct-row count. Persist only the bounded source rows needed for replay, sort them canonically, and prove absent-field compatibility before treating a windowed selector as deterministic save state.
 
 Selector acceptance and scale acceptance remain separate. The two-turn window solved historical discrimination while maximum exposure stayed 33 / strain 4.95, so it did not by itself make downstream collapse live.
+
+## 2026-08-15 - A magnitude probe cannot repair a sparse persistence clock
+
+The accepted D-selector's 3.0 scale probe pushed campaign strain into the live numeric band—HRHB 60 and global 99—but still produced zero Tier-1 domains. The best HRHB candidate received only three exposure-bearing evaluations after its faction's Tier-0 gate opened, while Tier-1 required four. Because the implementation advances per-entity persistence only for entities present in the current exposure map, larger historic strain cannot create the missing fourth evaluation.
+
+**Reusable rule:** before tuning a signal's magnitude, trace every downstream clock at the consumer's actual evaluation cadence. A threshold crossing is insufficient when persistence advances only on sparse event turns. If the modeled state is meant to remain active or recover between events, evaluate the existing state every turn and define its recovery semantics explicitly; do not compensate for a temporal-shape defect with a larger multiplier.

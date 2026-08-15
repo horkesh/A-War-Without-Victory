@@ -8,6 +8,8 @@
 
 **Tech Stack:** TypeScript, Vitest, AWWV War pipeline, scenario-runner evidence tools.
 
+**Outcome:** COMPLETE — FAIL_REVERTED. Tasks 1-4 were executed. The paired runs were deterministic and healthy but produced zero true Tier-1 domains and zero live writes; production and test scale changes were reverted as required. Task 5 records the failed experiment and hands the lane to D-shape.
+
 ---
 
 ### Task 1: Pin the scale contract RED

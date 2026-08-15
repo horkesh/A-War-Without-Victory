@@ -1,6 +1,6 @@
 # Collapse D-selection Scaling Design
 
-**Status:** DECIDED for bounded measurement on 2026-08-15.
+**Status:** MEASURED and FAIL_REVERTED on 2026-08-15.
 
 **Decision:** retain the accepted symmetric two-turn D-selector unchanged and change only `STRAIN_FRACTION` from `0.15` to `3.0` behind the existing default-OFF collapse gate. Keep the 40 Tier-1 threshold, effective 55 Phase 3D severity floor, eligibility topology, Phase 3D formulas, control writers, and Section 6 guards unchanged.
 
@@ -38,6 +38,14 @@ Retain 3.0 only if two fresh collapse-ON 188-week runs:
 - pass the Section 6 verifier and truthfully identify whether any protected OSID reached its live guard.
 
 If live damage remains zero or health/anchor/Section 6 gates fail, revert the multiplier. Selector v3 remains accepted either way. D-shape is outside this packet.
+
+## Measurement outcome
+
+Two fresh collapse-ON 188-week runs completed at final hash `625ffd6b24154674` and structural fingerprint `22cf3c5d8884bfb8`. Fifteen of sixteen artifacts were byte-identical; only `run_meta.json` differed because it records the deliberately different output root. Both runs retained 31/31 anchors, six of six bot benchmarks, and all seven engine-health checks. The Section 6 verifier passed every named and full-scan exclusion.
+
+The scale transform worked numerically: Sipovo/Drvar became strain 9/6, `op:kupres:bucovaca` reached 60, and campaign peaks reached 99. It did not work behaviorally. No Tier-1 domain became true and no `collapse_damage` or `capacity_modifiers` entry was written. The highest reachable HRHB candidate, `op:kupres:bucovaca`, ended with spatial persistence 3 against the required 4. HRHB Tier-0 spatial eligibility opened too late for that target to receive four post-gate exposure-bearing evaluations; multiplying the same sparse samples cannot repair that temporal mismatch.
+
+Per the predeclared rule, `STRAIN_FRACTION=3.0` was reverted. The retained runtime remains 0.15 with the accepted selector v3. The next packet is D-shape: resolve `local_strain` against canon's reversible Control Strain rule and make Tier-1 evaluation/recovery semantics explicit before any combined scale measurement.
 
 ## Determinism and canon
 
