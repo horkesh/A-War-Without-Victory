@@ -11,8 +11,8 @@
  * — docs/40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md §2 (Phase 3D
  * "Transform" row). Persistence is consumed UPSTREAM in Phase 3C as the eligibility gate
  * (TIER1_PERSIST_TURNS = 4, spec C10), and elapsed exposure is already carried by
- * `local_strain`, which is itself a monotonic accumulator. Letting persistence also scale
- * magnitude would double-count duration and would require inventing a curve no canon
+ * `local_strain`, which integrates weekly recovery and combat shocks. Letting persistence
+ * also scale magnitude would double-count duration and would require inventing a curve no canon
  * states — a railroad.
  *
  * These tests exist so that reintroducing a persistence term is a RED TEST, not a silent

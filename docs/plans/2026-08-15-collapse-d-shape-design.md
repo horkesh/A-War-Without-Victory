@@ -1,6 +1,6 @@
 # Collapse D-shape Design
 
-**Status:** DECIDED for bounded implementation and measurement on 2026-08-15.
+**Status:** MEASURED and PASS_RETAIN on 2026-08-15.
 
 ## Canon ruling
 
@@ -62,3 +62,13 @@ Retain D-shape only if two fresh collapse-ON 188-week runs:
 - pass the Section 6 verifier and report protected-boundary reach truthfully.
 
 If liveness remains zero, or determinism/health/anchors/Section 6 fail, revert the D-shape production changes. D-topology remains reserved.
+
+## Measurement outcome
+
+Two fresh collapse-ON 188-week runs completed at final hash `70d5e04c6f49e041` and structural fingerprint `22cf3c5d8884bfb8`. Fifteen of sixteen artifacts were byte-identical; only `run_meta.json` differed because it records the deliberately different output root. Control, weekly, formation, activity, and AAR artifacts remained byte-identical to the accepted trajectory.
+
+The replayed strain shape matched the design: `op:kupres:bucovaca` peaked at 62 on turn 138 and recovered to 37 terminal; Sipovo peaked at 11 and ended 7, while Drvar peaked at 7.5 and ended 4. One non-protected HRHB spatial domain crossed persistence and produced live damage at Bucovaca: spatial damage `0.35833333333333334`, with `supply_mult` and `pressure_cap_mult` `0.8566666666666667`. Eligibility later turned off as strain recovered; monotonic damage correctly remained.
+
+Both runs retained 31/31 anchors, six of six bot benchmarks, all seven engine-health checks, and 629 matched OSIDs. The Section 6 verifier passed every named outcome and full-scan exclusion with one live global damage/capacity entry. No protected OSID itself reached Tier-1, so the campaign proves a live writer plus protected absence, while the existing discriminating fixture remains the proof that G1 withholds when protected input reaches Phase 3D. Opening RBiH/RS Tier-0 still requires fresh evidence.
+
+D-shape is retained. The pre-1.0 narrow RC packet—hygiene, selection, shape, live writer, and Section 6 instruments—is complete. Neighbour-cascade D-topology remains reserved and moves to the post-1.0 backlog rather than blocking R7.

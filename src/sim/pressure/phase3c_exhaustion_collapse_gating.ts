@@ -71,14 +71,15 @@ const COHESION_DEGRADATION_THRESHOLD = 30;  // spec C7 — formation ops.fatigue
 const SPATIAL_ISOLATION_FRACTION = 0.1; // spec C8 — ≥10% of controlled OSIDs BFS-isolated from supply = spatially degraded.
 
 // Phase 3C Tier-1 constants — RATIFIED Phase-I defaults (spec §3).
-// local_strain on [0,100]. With STRAIN_FRACTION=0.05, strain 40 = sustained high
-// per-OSID pressure exposure over many turns. CONSISTENCY INVARIANT: these MUST equal
+// local_strain is canon's reversible Control Strain on [0,100]. Combat raises it and
+// quiet turns recover it before the current turn's shock. CONSISTENCY INVARIANT: these MUST equal
 // Phase 3D STRAIN_THRESHOLD (C13==C9) so Tier-1-eligible OSIDs can produce non-zero severity.
 const TIER1_AUTH_THRESHOLD = 40; // spec C9
 const TIER1_COH_THRESHOLD = 40;  // spec C9
 const TIER1_SPA_THRESHOLD = 40;  // spec C9
 const TIER1_PERSIST_TURNS = 4;   // spec C10 — match C5 (Tier-1 not faster than Tier-0).
-const STRAIN_FRACTION = 0.15;    // spec C11 (Phase IV-c Lever 1: 0.05→0.15) — ×3 accrual lifts max strain ~28.2→~84.6 so chronically-exposed OSIDs clear the real 55 severity floor (40 + SEVERITY_MIN 0.25 × range 60). A threshold drop alone is a no-op (SEVERITY_MIN scales with the range); magnitude is the honest lever.
+const STRAIN_FRACTION = 4.0;     // RC D-shape: accepted combat-incidence exposure becomes an acute weekly shock.
+const STRAIN_RECOVERY_PER_TURN = 0.5; // RC D-shape: linear weekly Control Strain recovery, applied before combat accrual.
 const STRAIN_MAX = 100;          // spec C12 — clamp ceiling; identical to Phase 3D STRAIN_MAX.
 
 export type CollapseDomain = 'authority' | 'cohesion' | 'spatial';
@@ -291,8 +292,8 @@ function getOrInitLocalStrain(state: GameState): void {
 }
 
 /**
- * Update local strain for an entity based on pressure exposure.
- * Monotonic accumulator: strain = clamp(strain + exposure * STRAIN_FRACTION, 0, STRAIN_MAX)
+ * Recover then update local Control Strain for one entity.
+ * strain = clamp(strain - recovery + exposure * STRAIN_FRACTION, 0, STRAIN_MAX)
  */
 function updateLocalStrain(state: GameState, entityId: EntityId, exposure: number): number {
     getOrInitLocalStrain(state);
@@ -302,8 +303,9 @@ function updateLocalStrain(state: GameState, entityId: EntityId, exposure: numbe
         throw new Error('Phase 3C local strain state failed to initialize');
     }
     const current = localStrain.by_entity[entityId] ?? 0;
+    const recovered = Math.max(0, current - STRAIN_RECOVERY_PER_TURN);
     const increment = exposure * STRAIN_FRACTION;
-    const newStrain = Math.min(Math.max(0, current + increment), STRAIN_MAX);
+    const newStrain = Math.min(recovered + increment, STRAIN_MAX);
 
     localStrain.by_entity[entityId] = newStrain;
     return newStrain;
@@ -635,7 +637,7 @@ export function applyPhase3CExhaustionCollapseGating(
 
     // Build map of entity -> faction (for Tier-0 gating).
     //
-    // COLLAPSE PHASE IV-d (sits on IV-c's STRAIN_FRACTION 0.15): in OSID-native 188w
+    // COLLAPSE PHASE IV-d (now composed with D-shape's 4.0/0.5 shock/recovery): in OSID-native 188w
     // runs `faction.areasOfResponsibility` is EMPTY at runtime — it is only populated by
     // applyControlFlipProposals when a front-breach FLIP is applied, whereas the historical
     // path establishes control via init/census + event control_changes. Empirically the
@@ -676,13 +678,18 @@ export function applyPhase3CExhaustionCollapseGating(
         }
     }
 
-    // Evaluate Tier-1 eligibility per entity
-    const entityIds = [...exposureByEntity.keys()].sort(strictCompare);
+    // Evaluate every tracked Control Strain entity every turn, not only targets exposed
+    // this turn. Quiet entities recover and their persistence clock advances or resets
+    // against the recovered value. The canonical union avoids event-order dependence.
+    const entityIds = [...new Set([
+        ...Object.keys(state.political.local_strain?.by_entity ?? {}),
+        ...exposureByEntity.keys(),
+    ])].sort(strictCompare);
     for (const entityId of entityIds) {
         const exposure = exposureByEntity.get(entityId) ?? 0;
         if (exposure > maxExposure) maxExposure = exposure;
 
-        // Update local strain (monotonic accumulator)
+        // Recover existing Control Strain, then apply this turn's combat shock.
         const strain = updateLocalStrain(state, entityId, exposure);
 
         // Get faction for this entity (for Tier-0 gating)

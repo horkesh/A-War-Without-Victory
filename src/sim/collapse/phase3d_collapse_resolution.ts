@@ -307,11 +307,9 @@ function getOrInitCapacityModifiers(
  *      `persistence ≥ TIER1_PERSIST_TURNS` (4, spec C10) before an OSID is Tier-1
  *      eligible at all. Chronic strain therefore already decides WHETHER collapse
  *      applies; the spec deliberately does not also let it decide how hard.
- *   2. Duration is already inside `strain`. `local_strain` is a monotonic accumulator
- *      (`clamp(strain + exposure × STRAIN_FRACTION, 0, STRAIN_MAX)`, 3C:290-301), so a
- *      chronically-exposed OSID reaches a HIGHER strain and thus a higher severity by
- *      construction. Multiplying by persistence as well would double-count the same
- *      elapsed-turns signal.
+ *   2. Duration is already inside `strain`. `local_strain` integrates weekly recovery
+ *      and combat shocks, while Tier-1 persistence requires the recovered value to stay
+ *      above threshold. Multiplying by persistence again would double-count duration.
  *   3. Any curve chosen for it would be invented, not derived — a railroad. Damage is
  *      monotonic (`max(prev, severity)`), so chronic exposure already ratchets.
  * If a future calibration packet wants persistence to shape magnitude, that is a

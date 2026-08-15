@@ -4,6 +4,8 @@
 
 **Architecture:** Refactor Phase 3C from event-only strain updates into one canonical union pass over existing strain keys and current exposure keys. Apply linear recovery before combat accrual, then run the existing Tier-1 gates for every tracked entity. No new persisted fields, topology, faction gates, or Phase 3D behavior.
 
+**Outcome:** COMPLETE — PASS_RETAIN. Focused RED/GREEN, the 11-file 104-test adjacent pack, typecheck, default-OFF canon regression, and paired 188-week measurement all passed. The pair produced one live non-enclave HRHB write while preserving deterministic artifacts, anchors, engine health, and Section 6 exclusions.
+
 ---
 
 ### Task 1: Pin D-shape RED

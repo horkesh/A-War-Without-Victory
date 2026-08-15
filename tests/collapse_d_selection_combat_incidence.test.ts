@@ -24,6 +24,7 @@ import {
     setEnablePhase3B,
 } from '../src/sim/pressure/phase3b_pressure_exhaustion.js';
 import type { CollapseCombatIncidenceWindowState, GameState } from '../src/state/game_state.js';
+import type { SupplyReachabilityOsidReport } from '../src/state/supply_reachability_osid.js';
 import { serializeGameState } from '../src/state/serializeGameState.js';
 
 type Battle = AttackResolutionOsidReport['battles'][number];
@@ -238,14 +239,30 @@ describe('RC D-selection Phase 3C wiring', () => {
     function run(
         state: GameState,
         combatReport?: Pick<AttackResolutionOsidReport, 'battles'>,
-        derivedFrontEdges: FrontEdge[] = []
+        derivedFrontEdges: FrontEdge[] = [],
+        supplyReach: SupplyReachabilityOsidReport | null = null,
     ): void {
         setEnablePhase3B(true);
         setEnablePhase3C(true);
-        applyPhase3CExhaustionCollapseGating(state, derivedFrontEdges, null, combatReport);
+        applyPhase3CExhaustionCollapseGating(state, derivedFrontEdges, supplyReach, combatReport);
     }
 
-    it('adds existing 0.15 strain per target battle without attributing frontage or attacker origin', () => {
+    function degradedHrhbSupply(): SupplyReachabilityOsidReport {
+        return {
+            schema: 1,
+            turn: 170,
+            factions: [{
+                faction_id: 'HRHB',
+                sources: [],
+                controlled: Array.from({ length: 20 }, (_, i) => i === 0 ? SIPOVO : `op:x:h${i}`),
+                reachable_osids: [],
+                isolated_osids: [SIPOVO, 'op:x:h1', 'op:x:h2'],
+                edges_used: [],
+            }],
+        };
+    }
+
+    it('adds 4.0 strain per target battle without attributing frontage or attacker origin', () => {
         const state = osidState();
         run(state, report([
             battle('b2', SIPOVO),
@@ -254,10 +271,57 @@ describe('RC D-selection Phase 3C wiring', () => {
         ]));
 
         expect(state.political.local_strain?.by_entity).toEqual({
-            [DRVAR]: 0.15,
-            [SIPOVO]: 0.3,
+            [DRVAR]: 4,
+            [SIPOVO]: 8,
         });
         expect(state.political.local_strain?.by_entity[ATTACKER_ORIGIN]).toBeUndefined();
+    });
+
+    it('recovers tracked quiet strain and evaluates Tier-1 persistence every turn', () => {
+        const state = osidState();
+        state.political.political_controllers![SIPOVO] = 'HRHB';
+        state.political.war_exhaustion.HRHB = 8000;
+        state.political.local_strain = { by_entity: { [SIPOVO]: 60 } };
+        const supplyReach = degradedHrhbSupply();
+
+        for (let turn = 170; turn < 177; turn++) {
+            state.meta.turn = turn;
+            run(state, report([]), [], supplyReach);
+        }
+
+        expect(state.political.local_strain.by_entity[SIPOVO]).toBe(56.5);
+        expect(state.political.collapse_eligibility_tier1?.[SIPOVO].persistence.spatial).toBe(4);
+        expect(state.political.collapse_eligibility_tier1?.[SIPOVO].domains.spatial).toBe(true);
+    });
+
+    it('resets quiet Tier-1 persistence when recovery reaches the threshold', () => {
+        const state = osidState();
+        state.political.political_controllers![SIPOVO] = 'HRHB';
+        state.political.war_exhaustion.HRHB = 8000;
+        state.political.local_strain = { by_entity: { [SIPOVO]: 42 } };
+        state.political.collapse_eligibility = {
+            HRHB: {
+                eligible_authority: false,
+                eligible_cohesion: false,
+                eligible_spatial: true,
+                persistence_authority: 0,
+                persistence_cohesion: 0,
+                persistence_spatial: 4,
+                suppressed: false,
+                immune: false,
+                last_updated_turn: 169,
+            },
+        };
+        const supplyReach = degradedHrhbSupply();
+
+        for (let turn = 170; turn < 174; turn++) {
+            state.meta.turn = turn;
+            run(state, report([]), [], supplyReach);
+        }
+
+        expect(state.political.local_strain.by_entity[SIPOVO]).toBe(40);
+        expect(state.political.collapse_eligibility_tier1?.[SIPOVO].persistence.spatial).toBe(0);
+        expect(state.political.collapse_eligibility_tier1?.[SIPOVO].domains.spatial).toBe(false);
     });
 
     it('uses zero exposure for missing and quiet reports instead of falling back to OSID frontage', () => {
@@ -317,8 +381,8 @@ describe('RC D-selection Phase 3C wiring', () => {
         run(state, report([battle('s2', SIPOVO)]));
 
         expect(state.political.local_strain?.by_entity).toEqual({
-            'op:sipovo:brdjani': 0.22499999999999998,
-            [SIPOVO]: 0.22499999999999998,
+            'op:sipovo:brdjani': 5.5,
+            [SIPOVO]: 6,
         });
         expect(state.political.collapse_combat_incidence_window?.rows).toEqual([
             { turn: 177, battle_id: 's1', target_osid: 'op:sipovo:brdjani' },

@@ -8,12 +8,12 @@
 - Topic archives: [QA gates](napkin/qa_gates.md), [unreported sparse truth](napkin/unreported.md), [map counters](napkin/map_counters.md), [release process](napkin/release_process.md), [engine runtime](napkin/engine_runtime.md), [Warroom/legacy](napkin/warroom_and_legacy.md).
 
 ## Current Release State
-1. **[2026-08-15] RC collapse is the current 1.0 critical path**
-   Do instead: execute D-selection under a fresh Section 6 review, then D-shape; do not revive the struck eligibility-breadth tuning path or lane C. D-topology requires an explicit later decision.
-2. **[2026-08-15] R1-R6 pre-1.0 scope is closed**
-   Do instead: treat old WP-9/D2/D3/D4 and R2/R5 execution language as history; current sequence is RC -> R7 -> R8 -> R9.
-3. **[2026-08-15] RC Stage 2 is a baseline, not Section 6 clearance**
-   Do instead: cite the retained 188w ON/OFF pair as 629 matched / 31-of-31 anchors and byte-identical control only; rerun criteria 4 and 7 after any change that opens RBiH or RS Tier-0 because no live collapse damage reached G1 in the retained pair.
+1. **[2026-08-15] R7 is the current 1.0 critical path; narrow RC is closed**
+   Do instead: execute R7 Phase 1.2, then officer/OOB, audio, English accessibility/readability, opening screens, and packaged proof; continue to R8/R9. D-topology is post-1.0/reserved.
+2. **[2026-08-15] Retain collapse v3 selection plus reversible D-shape**
+   Do instead: preserve the default-OFF two-turn selector and 4.0/0.5 shock/recovery union pass. Do not revive struck breadth tuning; any RBiH/RS Tier-0 opening or neighbour topology requires fresh Section 6 and paired 188w evidence.
+3. **[2026-08-15] D-shape proved a live writer, not protected-boundary campaign reach**
+   Do instead: cite the `70d5e04c6f49e041` pair as one live non-enclave HRHB write with full protected absence. Keep the discriminating G1 fixture as protected-input proof, and rerun if faction gates/topology change.
 4. **[2026-08-15] R7 remains open after RC; localization does not gate 1.0**
    Do instead: finish historical/source remediation, officer/OOB provenance, audio/licensing, English accessibility/readability, opening screens, and packaged proof before R8. Keep `bs` migration, pseudolocalization, Bosnian completion/native review, and locale-specific proof in post-1.0 Phase 3.
 5. **[2026-08-15] Publication remains separately authorized**
@@ -142,8 +142,8 @@
    Do instead: start large renderer save loads behind a unique token and poll synchronous browser-owned status from Node; do not directly await a churn-prone renderer promise through `Runtime.callFunctionOn`.
 
 ## User Directives
-1. **[2026-07-08] Execute plans through their stop gates**
-   Do instead: when a packet says stop-and-report, file the proof/report rather than forcing an unsafe edit.
+1. **[2026-08-15] Do not stop for routine implementation decisions**
+   Do instead: decide from canon/evidence or convene the Pyrrhic panel; continue until a genuine authority/safety blocker or the active roadmap outcome is complete.
 2. **[2026-06-20] Do not edit FORAWWV automatically**
    Do instead: flag design insights for a Pyrrhic panel; only edit canon with explicit approval.
 3. **[2026-06-26] Packaging remains paused until owner satisfaction**
