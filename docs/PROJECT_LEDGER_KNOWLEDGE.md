@@ -4122,6 +4122,8 @@ Applied in `[2026-08-01] R7 officer/OOB and audio provenance inventory accepted`
 
 **Chronology and provenance are separate gates:** a year suffix alone does not prove the right event window, while a correct turn window does not prove authored sourcing. Durable rule: report event file, essay relation, and exact turn window as chronology; separately expose only repository-authored citations, tiers, notes, and source floors. Never fill an anchor with a hard-coded research citation.
 
+**A numeric source floor is not permission to pad citations:** a second source must independently support the claim-bearing chronology, finding, or instrument. Durable rule: use printed book pages rather than extraction filenames, distinguish operational context from adjudicated responsibility, and prefer two distinct case records over a generic institutional or timeline label. If independent corroboration is absent, narrow or omit the claim instead of satisfying the counter cosmetically.
+
 Applied in `[2026-08-01] R7 historical-claim and localization inventories completed`, `tools/diagnostics/codex_sensitive_claim_inventory.cjs`, and `tools/diagnostics/localization_coverage.ts`.
 ## 2026-08-01 - Reconciliation invalidation must include writes made by the reconciler
 

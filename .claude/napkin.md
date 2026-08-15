@@ -19,7 +19,7 @@
 5. **[2026-08-15] Publication remains separately authorized**
    Do instead: transient validation packages are allowed, but do not sign, upload, create a public release, or tag `1.0` without an explicit `Publish 1.0` instruction.
 6. **[2026-08-15] R7 Phase 1.2 live provenance census**
-   Do instead: continue from 2,016 documented / 1,553 source-note / 62 source-floor / 11 actor-specificity / 0 source-tier claims. Keep the 12 known unindexed deposit claims auditable but non-player-facing; mirror every live essay metadata fix into `essay_index.json`.
+   Do instead: continue from 2,078 documented / 1,553 source-note / 0 source-floor / 11 actor-specificity / 0 source-tier claims. Keep the 12 known unindexed deposit claims auditable but non-player-facing; mirror every live essay metadata fix into `essay_index.json`. The corpus test now requires the player-facing essay source-floor queue to stay empty.
 
 ## Execution & Validation
 0. **[2026-08-12] ANY territory-moving change needs 188w — the "catalog-only" carve-out is WITHDRAWN**

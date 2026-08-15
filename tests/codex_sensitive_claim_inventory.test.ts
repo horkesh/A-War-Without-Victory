@@ -705,6 +705,92 @@ test('inventory reports the 1993 placement/window contract for Neretva, Grabovic
     }
 });
 
+test('inventory documents the sourced 1993 central-Bosnia provenance packet', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const subjects = new Set([
+        'essay_battle_of_bugojno_1993',
+        'essay_sovici_doljani_attack_1993',
+        'essay_stupni_do_massacre_1993',
+        'v091_stupni_do_hrhb_war_crimes_findings',
+    ]);
+    const claims = report.claims.filter((claim: { subject_id: string }) => (
+        subjects.has(claim.subject_id)
+    ));
+
+    assert.strictEqual(claims.length, 8);
+    assert.strictEqual(claims.every((claim: { status: string }) => (
+        claim.status === 'documented'
+    )), true);
+    assert.strictEqual(claims.every((claim: { source_tier: string }) => (
+        claim.source_tier === 'icty_icj_un'
+    )), true);
+});
+
+test('inventory clears the source floor for the Jajce-to-final-offensives packet', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const essayFiles = new Set([
+        'data/scenarios/essays/jajce_falls_1992.json',
+        'data/scenarios/essays/maglaj_enclave_blockade_1993.json',
+        'data/scenarios/essays/nato_deliberate_force_1995.json',
+        'data/scenarios/essays/operation_mistral_2_1995.json',
+        'data/scenarios/essays/operation_summer_95.json',
+        'data/scenarios/essays/operation_storm_1995.json',
+    ]);
+    const dynamicSubjects = new Set([
+        'v091_deliberate_force_dayton_timing_note',
+        'v091_mistral_human_cost_findings',
+        'v091_summer95_hrhb_war_crimes_findings',
+        'v091_operation_storm_displacement_findings',
+    ]);
+    const claims = report.claims.filter((claim: { file: string; subject_id: string }) => (
+        essayFiles.has(claim.file) || dynamicSubjects.has(claim.subject_id)
+    ));
+
+    assert.strictEqual(claims.length, 21);
+    assert.strictEqual(claims.every((claim: { provenance_gaps: string[] }) => (
+        !claim.provenance_gaps.includes('source_floor')
+    )), true);
+    assert.strictEqual(claims.every((claim: { source_tier_status: string }) => (
+        claim.source_tier_status === 'resolved'
+    )), true);
+});
+
+test('inventory documents the state-identity and adjudicated-command provenance packet', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const essayFiles = new Set([
+        'data/scenarios/essays/rbih_state_identity.json',
+        'data/scenarios/essays/croatia_herceg_bosna_control_1993.json',
+        'data/scenarios/essays/east_mostar_siege_1993.json',
+        'data/scenarios/essays/federation_ground_offensive_1995.json',
+    ]);
+    const dynamicSubjects = new Set([
+        'a1c_rbih_identity_branch_bosniak_national',
+        'a1c_rbih_identity_branch_civic',
+        'a1c_rbih_identity_branch_pragmatic',
+        'v091_federation_offensive_human_cost_findings',
+    ]);
+    const claims = report.claims.filter((claim: { file: string; subject_id: string }) => (
+        essayFiles.has(claim.file) || dynamicSubjects.has(claim.subject_id)
+    ));
+
+    assert.strictEqual(claims.length, 16);
+    assert.strictEqual(claims.every((claim: { status: string }) => (
+        claim.status === 'documented'
+    )), true);
+    assert.strictEqual(claims.every((claim: { source_tier_status: string }) => (
+        claim.source_tier_status === 'resolved'
+    )), true);
+});
+
+test('inventory has no player-facing essay below the two-source floor', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const floorClaims = report.claims.filter((claim: { status: string }) => (
+        claim.status === 'needs_source_floor'
+    ));
+
+    assert.deepStrictEqual(floorClaims, []);
+});
+
 test('inventory covers claim prose without relying on a narrow keyword list', async () => {
     const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
     const subjects = new Set(report.claims.map((claim: { subject_id: string }) => claim.subject_id));

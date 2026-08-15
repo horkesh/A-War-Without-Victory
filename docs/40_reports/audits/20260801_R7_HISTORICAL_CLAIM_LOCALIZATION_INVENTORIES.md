@@ -92,6 +92,12 @@ The live schema-4 inventory now records 3,654 claims across 228 files. It explic
 
 The focused Phase 1.2 matrix passes 5 files / 65 tests, TypeScript passes, and `canon:check` passes its static determinism scan plus embedded no-refresh baseline regression. The separate explicit baseline command was redundant and was interrupted only after the embedded baseline had completed successfully.
 
+### Phase 1.2 checkpoint B — 2026-08-15
+
+The live two-source floor is complete. The 62 remaining source-floor claims were resolved across 20 standalone essay families plus inherited runtime-index dynamic sections, with every source/tier/note change mirrored into `essay_index.json`. The packet uses exact printed *Balkan Battlegrounds* pages where that work supplies operational corroboration, distinct trial and appeal records where adjudicated findings control, and two separate Court of Bosnia and Herzegovina proceedings for Trusina. No generic timeline, chapter-only placeholder, or unrelated context citation was accepted merely to satisfy the count.
+
+The live schema-4 inventory remains 3,654 claims across 228 files: 2,078 documented, 12 non-player-facing deposits, 1,553 source-note rows, zero source-floor rows, 11 actor-specificity rows, and zero source-tier rows. A corpus regression now requires the player-facing essay source-floor queue to remain empty. The broader Phase 1.2 matrix passes 5 files / 69 tests; TypeScript, diff hygiene, and `canon:check` (static scan plus embedded no-refresh baseline regression) pass. Phase 1.2 continues with source-note remediation and the bounded actor-specificity queue; no trigger, response, effect, state predicate, simulation rule, or save schema changed.
+
 - Phase 1.1 RED reproduced blocked provenance anchors, missing tier/citation metadata, the missing crime/acquittal distinction, incorrect detail boundaries, generic symmetry, unsupported Neretva synthesis, and runtime-index drift. GREEN passes the 16-file fast matrix with 247 tests passed and 5 intentional skips, plus the separate 2-test source-quality suite. TypeScript, targeted JSON parsing, the actual strict CLI, and diff hygiene pass; the CLI reports 0 CRITICAL, 0 WARNING, and 1 observational INFO.
 - File-system walks, keys, findings, claims, citations, counters, and anchor rows use explicit stable ordering.
 - Reports contain no generated timestamp or absolute path.

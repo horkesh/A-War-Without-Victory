@@ -215,6 +215,13 @@ npm.cmd run canon:check
 npm.cmd run test:baselines
 ```
 
+**Phase 1.2 checkpoint B -- 2026-08-15:**
+
+- The remaining two-source essay floor is closed: 62 deficient claims across 20 live essay families and their index-only dynamic sections moved to complete authored provenance. Every standalone essay fix is mirrored in `essay_index.json`.
+- Corroboration is claim-bounded. Operational rows use exact printed pages from *Balkan Battlegrounds*; legal and atrocity rows keep adjudicated findings separate from military context; diplomatic rows distinguish agreements from participant accounts. Trusina uses two distinct Court of Bosnia and Herzegovina proceedings rather than a generic timeline citation.
+- Live census: 3,654 claims / 228 files; 2,078 documented, 12 non-player-facing deposits, 1,553 source-note rows, zero source-floor rows, 11 actor-specificity rows, and zero source-tier rows. Phase 1.2 continues with the source-note and actor-specificity queues.
+- A regression now fails if any player-facing essay falls below the two-source floor. The broader Phase 1.2 matrix passes 5 files / 69 tests; TypeScript, diff hygiene, and `canon:check` (static scan plus embedded no-refresh baseline regression) pass.
+
 `/simplify` -> historian/canon review -> commit `fix(content): close sensitive history claims`
 
 ## Phase 2 -- Officer/OOB attribution closeout
