@@ -4435,3 +4435,9 @@ The retained D-shape fixed two contradictory clocks together. Local Control Stra
 An on-disk essay is not necessarily player-facing. Six Wave-4 files are deliberately absent from `essay_index.json`; treating their prose as live Codex content created 12 false release blockers, including sensitive-term and generic-symmetry findings that no runtime path could render.
 
 **Reusable rule:** keep non-runtime deposits inventoried, but classify runtime reachability before applying launch stop gates. Derive that distinction from the canonical runtime index rather than a duplicated filename allowlist, preserve a visible `not_player_facing` disposition, and test the exact known deposit set. Source metadata on leaf essays and the runtime index must remain mirrored; fixing only the deposit does not fix what the player reads.
+
+## 2026-08-15 - Generic symmetry diagnostics require claim-bounded named actors
+
+Phrases such as `both sides` and `all sides` can hide materially different actors and responsibilities, but the same lexical pattern can also catch a purely spatial phrase such as `surrounded on all sides`. The inventory correctly forced review, while editorial resolution required reading the complete claim rather than blindly substituting faction names.
+
+**Reusable rule:** treat generic-symmetry matches as review gates, not factual conclusions. Replace collective phrasing with the specific political or military actors supported by the claim's evidence, preserve asymmetric responsibility where the record requires it, and rewrite spatial false positives without changing their meaning. Keep a production zero-queue regression so new ambiguous language cannot silently enter player-facing history.

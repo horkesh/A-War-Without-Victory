@@ -98,6 +98,12 @@ The live two-source floor is complete. The 62 remaining source-floor claims were
 
 The live schema-4 inventory remains 3,654 claims across 228 files: 2,078 documented, 12 non-player-facing deposits, 1,553 source-note rows, zero source-floor rows, 11 actor-specificity rows, and zero source-tier rows. A corpus regression now requires the player-facing essay source-floor queue to remain empty. The broader Phase 1.2 matrix passes 5 files / 69 tests; TypeScript, diff hygiene, and `canon:check` (static scan plus embedded no-refresh baseline regression) pass. Phase 1.2 continues with source-note remediation and the bounded actor-specificity queue; no trigger, response, effect, state predicate, simulation rule, or save schema changed.
 
+### Phase 1.2 checkpoint C — 2026-08-15
+
+The 11-row actor-specificity queue is closed across eleven live essay families and their runtime-index mirrors. Generic combined-party wording now names the Bosnian government, Bosnian Serb leadership, VRS, ARBiH, and/or HVO as the underlying record requires; the one spatial `all sides` diagnostic collision was recast as VRS encirclement without altering the claim. No chronology, mechanic, trigger, response, effect, state predicate, simulation rule, or save schema changed.
+
+The live schema-4 inventory remains 3,654 claims across 228 files: 2,081 documented, 12 non-player-facing deposits, 1,561 source-note rows, and zero source-floor, actor-specificity, or source-tier rows. A corpus regression now requires the player-facing actor-specificity queue to remain empty. The focused inventory passes 22/22; essay-index integrity and source-note contracts pass 14/14. Phase 1.2 continues with source-note remediation as its sole remaining provenance class.
+
 - Phase 1.1 RED reproduced blocked provenance anchors, missing tier/citation metadata, the missing crime/acquittal distinction, incorrect detail boundaries, generic symmetry, unsupported Neretva synthesis, and runtime-index drift. GREEN passes the 16-file fast matrix with 247 tests passed and 5 intentional skips, plus the separate 2-test source-quality suite. TypeScript, targeted JSON parsing, the actual strict CLI, and diff hygiene pass; the CLI reports 0 CRITICAL, 0 WARNING, and 1 observational INFO.
 - File-system walks, keys, findings, claims, citations, counters, and anchor rows use explicit stable ordering.
 - Reports contain no generated timestamp or absolute path.

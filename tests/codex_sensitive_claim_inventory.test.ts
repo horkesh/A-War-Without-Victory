@@ -791,6 +791,15 @@ test('inventory has no player-facing essay below the two-source floor', async ()
     assert.deepStrictEqual(floorClaims, []);
 });
 
+test('inventory has no generic actor-symmetry claim in player-facing history', async () => {
+    const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const actorClaims = report.claims.filter((claim: { status: string }) => (
+        claim.status === 'needs_actor_specificity'
+    ));
+
+    assert.deepStrictEqual(actorClaims, []);
+});
+
 test('inventory covers claim prose without relying on a narrow keyword list', async () => {
     const report = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
     const subjects = new Set(report.claims.map((claim: { subject_id: string }) => claim.subject_id));

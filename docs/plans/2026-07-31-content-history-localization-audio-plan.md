@@ -222,6 +222,12 @@ npm.cmd run test:baselines
 - Live census: 3,654 claims / 228 files; 2,078 documented, 12 non-player-facing deposits, 1,553 source-note rows, zero source-floor rows, 11 actor-specificity rows, and zero source-tier rows. Phase 1.2 continues with the source-note and actor-specificity queues.
 - A regression now fails if any player-facing essay falls below the two-source floor. The broader Phase 1.2 matrix passes 5 files / 69 tests; TypeScript, diff hygiene, and `canon:check` (static scan plus embedded no-refresh baseline regression) pass.
 
+**Phase 1.2 checkpoint C -- 2026-08-15:**
+
+- The bounded actor-specificity queue is closed. Eleven live essay claims that used generic `both sides` / `all sides` wording now name the relevant parties (Bosnian government, Bosnian Serb leadership, VRS, ARBiH, and/or HVO) while retaining the established chronology and attribution boundaries. The spatial phrase `surrounded on all sides` was rewritten without changing its meaning so it no longer collides with the symmetry diagnostic.
+- Every changed leaf essay is mirrored in `essay_index.json`; index-integrity and source-note contracts pass. A production regression now fails if any player-facing history claim enters `needs_actor_specificity`.
+- Live census: 3,654 claims / 228 files; 2,081 documented, 12 non-player-facing deposits, 1,561 source-note rows, and zero source-floor, actor-specificity, or source-tier rows. Phase 1.2 continues on the sole remaining provenance class: source notes.
+
 `/simplify` -> historian/canon review -> commit `fix(content): close sensitive history claims`
 
 ## Phase 2 -- Officer/OOB attribution closeout

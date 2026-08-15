@@ -105,6 +105,12 @@
 10. **[2026-07-15] Modal completion actions stay outside narrative scrolling**
    Do instead: keep the only acknowledge/commit action in a persistent footer and scroll the long dispatch body independently; pin DOM ownership and inspect a real Electron viewport.
 
+## 2026-08-15 - Name actors at the claim boundary
+
+The sensitive-history inventory's `both sides` / `all sides` pattern found ten genuinely vague combined-party formulations and one spatial phrase (`surrounded on all sides`). All required review, but only the former required actor attribution.
+
+**Reusable rule:** resolve generic-symmetry findings by reading the full claim, naming the political or military actors supported by its evidence, and preserving asymmetric responsibility. Recast spatial collisions without changing meaning. Keep the player-facing actor-specificity queue pinned at zero and mirror every essay edit into the runtime index.
+
 ## Engine Runtime Patterns
 1. **[2026-07-13] Terminal lifecycle truth must close live synthetic commands**
    Do instead: project authoritative event flags through persisted lifecycle state, retire synthetic commands only after spawned subordinates are gone, and hide them from live UI without deleting historical AARs.
