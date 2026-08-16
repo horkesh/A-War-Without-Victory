@@ -25,11 +25,26 @@ name: Full Suite + Structural Fingerprint
 # commits accumulated 11 real, uncaught full-suite failures (10 pre-existing
 # plus the schema-version drift that started the investigation) across 24h+
 # and 20 pushes before anyone noticed — Event System CI covers only a narrow
-# slice, not the complete suite this job runs. Remove this branch name once
-# the branch merges to main and is retired.
+# slice, not the complete suite this job runs.
+#
+# 2026-08-16 (owner-directed): REMOVED the codex/** push trigger. This job takes
+# ~77 minutes; on a private repo that is ~26 pushes to exhaust the 2,000-minute
+# Free-tier allowance, and it did — Actions was billing-blocked from ~2026-08-10,
+# so EVERY run since rejected in 3-4s at the account level and nothing on this
+# branch was CI-validated for six days. A gate that cannot run is worse than one
+# that runs late: it reports failure indistinguishably from a real failure.
+#
+# THE 2026-08-02 GAP IS REAL AND IS NOT BEING IGNORED — it is being covered
+# differently. The full suite still gates the MERGE (pull_request -> main below),
+# which is the point at which uncaught failures would actually reach main. Push-time
+# coverage on codex/** falls to Event System CI, which is the fast slice and still
+# triggers on this branch. The 2026-08-02 incident happened because NOTHING ran on
+# push; something fast runs now. If a long-lived branch again accumulates real
+# failures that the fast slice misses, the fix is to widen the fast slice, not to
+# put a 77-minute job back on every push.
 on:
   push:
-    branches: [main, codex/master-roadmap-execution]
+    branches: [main]
   pull_request:
     branches: [main]
 
