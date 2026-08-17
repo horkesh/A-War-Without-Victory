@@ -36,18 +36,22 @@
  * here in the same change — the failure mode is silent: two runs differing only in that
  * file produce an IDENTICAL digest.
  *
- * ★ KNOWN-UNCOVERED, NAMED SO THE CAVEAT ABOVE CANNOT BE READ AS COVERING THEM. A reader
- * who sees an honest completeness caveat will assume it means UNKNOWN reads. These are
- * known, they have live `src/sim/` consumers, and they are NOT stamped today:
+ * ★ KNOWN-UNCOVERED — DO NOT MAINTAIN THE LIST HERE. A reader who sees an honest
+ * completeness caveat will assume it covers UNKNOWN reads; these are known and unstamped.
+ * But a hand-maintained list in a comment is exactly what kept being wrong: an eight-entry
+ * version of it had THREE bad paths (`army_co_roster.json` is under `data/scenarios/`, not
+ * `data/source/`; `formation_lifecycle_events.json` is under `data/source/`, not
+ * `data/derived/`; `paramilitary_named_units` is a `.ts` SOURCE MODULE, so it is code, not
+ * data) and one entry that is not a runtime read at all (`painted_control_oct1995.json`
+ * appears in `triggered_operations.ts` only in a COMMENT describing an authoring-time check).
  *
- *   data/derived/operational/urban_osids.json     combat_math.ts — terrain multiplier in EVERY battle
- *   data/derived/operational/forest_osids.json    combat_math.ts — same
- *   data/source/army_co_roster.json               army_co_lifecycle.ts — the R7 Phase 2 elite_commander class
- *   data/source/paramilitary_named_units.js       paramilitary_sweep.ts — §6-ADJACENT: civilian deaths, atrocity attribution
- *   data/source/strategic_priorities.json         strategic_priorities.ts — bot targeting
- *   data/derived/operational/osid_areas.json      jna_phantom_brigades.ts (also operational_data.ts) — phantom placement, area-share metrics
- *   data/derived/formation_lifecycle_events.json  formation_lifecycle_events.ts
- *   data/derived/painted_control_oct1995.json     triggered_operations.ts — also the reference map matched_osids scores against
+ * THE LIST LIVES IN `tests/run_provenance_input_surface_scan.test.ts`, in
+ * `EXCLUSION_REGISTER`, where it is checked against a walk of the real import graph from
+ * `scenario_runner.ts`. Every concrete data read that graph reaches is either stamped here
+ * or carries a justification there; the register is compared exhaustively, so it cannot
+ * silently widen and it cannot go stale. As of that scan: **16 real run inputs are read and
+ * NOT hashed**, plus the templated `painted_control_{refKey}` maps, plus the desktop-only
+ * startup snapshot which is excluded on purpose.
  *
  * Two runs differing only in one of those compare IDENTICAL. Commit and dirty-tree
  * hard-fails cover the ordinary case (a tracked edit moves the commit), so the exposure is

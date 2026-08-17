@@ -190,38 +190,16 @@ describe('the consumed set is the set a headless run actually reads', () => {
         expect(paths).toContain('data/scenarios/presidential_initiatives/apr1992.json');
     });
 
-    /**
-     * KNOWN-UNCOVERED, pinned so the header's list cannot quietly drift from reality.
+    /*
+     * The hand-maintained known-uncovered list that used to live here has been DELETED, not
+     * moved: `tests/run_provenance_input_surface_scan.test.ts` derives the same fact from a
+     * walk of the real import graph and pins it exhaustively in `EXCLUSION_REGISTER`.
      *
-     * These eight have live `src/sim/` consumers and are deliberately NOT stamped yet. The
-     * pin exists so that stamping one (good) or the header claiming one is covered (bad)
-     * both show up as a test change rather than as prose nobody re-read.
+     * Keeping both would have been two sources of truth for one fact — the defect this module
+     * removed from the collapse marker. And the hand-built one was measurably the worse
+     * source: of its eight entries, three had wrong paths and one named a file that appears
+     * only in a comment. A list nobody can mechanically check is a list that drifts.
      */
-    it('the header\'s known-uncovered list matches what is actually unstamped', async () => {
-        const KNOWN_UNCOVERED = [
-            'data/derived/formation_lifecycle_events.json',
-            'data/derived/operational/forest_osids.json',
-            'data/derived/operational/osid_areas.json',
-            'data/derived/operational/urban_osids.json',
-            'data/derived/painted_control_oct1995.json',
-            'data/source/army_co_roster.json',
-            'data/source/paramilitary_named_units.js',
-            'data/source/strategic_priorities.json',
-        ];
-        const { root, scenarioPath } = seedFullTree();
-        const p = await buildRunProvenance({
-            baseDir: root, scenarioPath, harness: 'headless', collapseEnabled: false,
-        });
-        const stamped = new Set(p.consumed_inputs.files.map(f => f.path));
-        for (const path of KNOWN_UNCOVERED) {
-            expect(
-                stamped.has(path),
-                `${path} is listed as known-uncovered in run_provenance.ts. If you have just `
-                + 'stamped it, remove it from BOTH this list and the header — the header must '
-                + 'never claim coverage it does not have, and must never disclaim coverage it does.'
-            ).toBe(false);
-        }
-    });
 
     it('nodeMajorOf parses the major and tolerates junk', () => {
         expect(nodeMajorOf('v24.13.0')).toBe('24');
