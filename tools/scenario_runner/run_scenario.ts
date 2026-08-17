@@ -15,6 +15,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
+import { S6_GRADE_RUN_ENV_VAR } from '../../src/scenario/run_provenance.js';
 import { runScenario } from '../../src/scenario/scenario_runner.js';
 import { dumpBotOrdersPerfProfile } from '../../src/sim/combat/_perf_profile_bot_orders_node.js';
 
@@ -146,7 +147,33 @@ async function main(): Promise<void> {
     process.stdout.write(`bot_orders_perf_profile: ${botOrdersPerfPath}\n`);
   }
 
-  if (enableMap) {
+  /*
+   * ★ AN EVIDENCE RUN MUST NOT MUTATE TRACKED STATE (2026-08-17).
+   *
+   * `--map` copies the final save to `data/derived/latest_run_final_save.json`, which is a
+   * TRACKED file. `sim:scenario:run:188w` passes `--map`, so every 188w run dirties the
+   * working tree — and a §6 pair is two runs from ONE clean commit. Run 1 started clean,
+   * wrote that file, and run 2 was then refused by the start-time cleanliness gate: every
+   * exit closed, and the serial pair the gate exists to enable became impossible.
+   *
+   * The copy is a convenience for the map viewer and nothing consumes it on the run path
+   * (readers are `src/ui/map/data/DataLoader.ts` and `tools/diagnose_*.cjs`). So an
+   * evidence run skips it, loudly. This is deliberately NOT a `git_dirty` exclusion list:
+   * dirtiness stays whole-tree, because its one unique job is catching engine changes the
+   * consumed-input hashes structurally cannot see.
+   *
+   * The deeper defect — a tracked file that every `--map` run rewrites — is repo hygiene
+   * this merely surfaced, and is owned separately (several diagnostics read it by path).
+   */
+  const s6GradeRun = process.env[S6_GRADE_RUN_ENV_VAR] === 'true';
+  if (enableMap && s6GradeRun) {
+    process.stdout.write(
+      `\n--- Tactical map copy SKIPPED (${S6_GRADE_RUN_ENV_VAR}=true) ---\n`
+      + 'data/derived/latest_run_final_save.json is TRACKED, so writing it would dirty the tree\n'
+      + 'and the next half of this §6 pair would be refused at start. The run artifacts under\n'
+      + `${result.outDir} are unaffected; re-run without ${S6_GRADE_RUN_ENV_VAR} to refresh the viewer.\n`
+    );
+  } else if (enableMap) {
     await copyFinalSaveToLatestRun(result.paths.final_save, process.cwd());
     process.stdout.write('\n--- Tactical map viewer ---\n');
     process.stdout.write('Final state copied to: data/derived/latest_run_final_save.json\n');

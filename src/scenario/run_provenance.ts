@@ -248,9 +248,16 @@ function gitCapture(baseDir: string, args: readonly string[]): string | null {
  * with the state at first read, which is the only state that could be meaningful for them
  * anyway. The measurement runs that matter are separate processes, serial per napkin 0d.
  */
-const gitStateCache = new Map<string, { commit: string | null; dirty: boolean | null }>();
+interface GitState {
+    readonly commit: string | null;
+    readonly dirty: boolean | null;
+    /** Porcelain lines, e.g. ` M data/derived/x.json`. Empty when clean, null when git is unavailable. */
+    readonly dirtyPaths: readonly string[] | null;
+}
 
-function readGitState(baseDir: string): { commit: string | null; dirty: boolean | null } {
+const gitStateCache = new Map<string, GitState>();
+
+function readGitState(baseDir: string): GitState {
     const cached = gitStateCache.get(baseDir);
     if (cached !== undefined) return cached;
 
@@ -264,9 +271,12 @@ function readGitState(baseDir: string): { commit: string | null; dirty: boolean 
     // decorative. Gitignored output roots (`runs/`, `tmp-*`) are not untracked files and
     // never appear here; verified against this repo's .gitignore.
     const statusOut = gitCapture(baseDir, ['status', '--porcelain']);
-    const dirty = statusOut === null ? null : statusOut.trim().length > 0;
+    const dirtyPaths = statusOut === null
+        ? null
+        : statusOut.split('\n').map(l => l.trimEnd()).filter(l => l.length > 0);
+    const dirty = dirtyPaths === null ? null : dirtyPaths.length > 0;
 
-    const state = { commit, dirty };
+    const state: GitState = { commit, dirty, dirtyPaths };
     gitStateCache.set(baseDir, state);
     return state;
 }
@@ -284,6 +294,19 @@ export function readGitCommit(baseDir: string): string | null {
 /** Working-tree dirtiness including untracked non-ignored files, or null when git cannot answer. */
 export function readGitDirty(baseDir: string): boolean | null {
     return readGitState(baseDir).dirty;
+}
+
+/**
+ * The porcelain lines behind `readGitDirty`, so a refusal can NAME what is dirty.
+ *
+ * A gate whose whole job is preventing an attribution error must not emit a message you
+ * cannot attribute. The first version said only "the working tree has uncommitted or
+ * untracked changes" and cost a round trip: the dirty file turned out to be the PREVIOUS
+ * evidence run's own `--map` output, which a one-line list would have made obvious.
+ * Same cached read as `readGitDirty` — no extra `git` subprocess.
+ */
+export function readGitDirtyPaths(baseDir: string): readonly string[] | null {
+    return readGitState(baseDir).dirtyPaths;
 }
 
 /** The escape-hatch reason from the environment, or undefined. Blank/whitespace is not a reason. */

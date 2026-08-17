@@ -16,6 +16,7 @@ import {
   S6_GRADE_RUN_ENV_VAR,
   MIN_OVERRIDE_REASON_LENGTH,
   readGitDirty,
+  readGitDirtyPaths,
   readProvenanceOverride,
 } from '../../src/scenario/run_provenance.js';
 
@@ -63,11 +64,22 @@ if (process.env[S6_GRADE_RUN_ENV_VAR] === 'true') {
       const why = dirty === null
         ? 'git could not be read, so the tree cannot be CERTIFIED clean'
         : 'the working tree has uncommitted or untracked changes';
+      // NAME THE PATHS. A gate that exists to prevent an attribution error must not emit a
+      // message you cannot attribute — the first version said only "the tree is dirty" and
+      // cost a round trip, because the dirty file was the previous evidence run's own --map
+      // output and one line of `git status` would have said so.
+      const paths = readGitDirtyPaths(process.cwd());
+      const listing = paths === null || paths.length === 0
+        ? '    (git could not enumerate the changes)\n'
+        : paths.map(l => `    ${l}\n`).join('');
       process.stderr.write(
-        `REFUSING to start a §6-grade run: ${why}.\n`
+        `REFUSING to start a §6-grade run: ${why}.\n\n`
+        + `  DIRTY:\n${listing}\n`
         + `  A dirty tree makes the run un-pairable — its commit does not describe it, and the\n`
         + `  §6 comparison will reject the pair AFTER both runs have cost their full wall-clock.\n`
         + `  Fix: commit or 'git stash' the tree and re-launch.\n`
+        + `  If a listed path is a previous run's OUTPUT rather than an input, that is a repo-hygiene\n`
+        + `  defect worth fixing at the source, not a reason to weaken this check.\n`
         + `  Or, for exploratory work that is NOT going to license a §6 verdict, set\n`
         + `  ${PROVENANCE_OVERRIDE_ENV_VAR}="<why this run is worth taking dirty>" — the reason is\n`
         + `  stamped into run_meta.json and permanently disqualifies the run from §6.\n`

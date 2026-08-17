@@ -388,6 +388,57 @@ describe('git state is cached per process; the override is NOT', () => {
     });
 });
 
+/**
+ * ★ AN EVIDENCE RUN MUST NOT MUTATE TRACKED STATE.
+ *
+ * `--map` copies the final save into `data/derived/latest_run_final_save.json`, a TRACKED
+ * file, and `sim:scenario:run:188w` passes `--map`. So run 1 of a §6 pair dirtied the tree
+ * and run 2 was refused at start: every exit closed, and the serial pair the gate exists to
+ * enable became impossible. `run_scenario.ts` now skips that copy under
+ * `AWWV_S6_GRADE_RUN=true`.
+ *
+ * Pinned in SOURCE because the behaviour lives in a CLI `main()` that the suite does not
+ * invoke — the alternative is a measurement nobody re-runs. Verified live at the time of
+ * writing: with the flag set, the file's sha256 was byte-identical before and after a real
+ * `--map` run; without it, the same run changed it (so the suppression is not global).
+ */
+describe('the map copy is suppressed on an evidence run', () => {
+    it('run_scenario.ts gates the tracked-file copy on the §6-grade flag', async () => {
+        const fsp = await import('node:fs/promises');
+        const src = await fsp.readFile(join(process.cwd(), 'tools/scenario_runner/run_scenario.ts'), 'utf8');
+        const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+
+        expect(
+            /if\s*\(enableMap\s*&&\s*s6GradeRun\)/.test(code),
+            'the --map copy must be gated on AWWV_S6_GRADE_RUN. Without this, run 1 of a §6 pair '
+            + 'writes data/derived/latest_run_final_save.json (TRACKED), dirties the tree, and run 2 '
+            + 'is refused at start — the pair becomes impossible to take.'
+        ).toBe(true);
+        // The copy must still happen for ordinary runs: the map viewer depends on it, and a
+        // global suppression would be a silent regression rather than a fix.
+        expect(
+            /else if \(enableMap\)/.test(code),
+            'ordinary --map runs must still refresh the viewer'
+        ).toBe(true);
+        expect(code).toContain('S6_GRADE_RUN_ENV_VAR');
+    });
+
+    it('the refusal message NAMES the dirty paths', async () => {
+        const fsp = await import('node:fs/promises');
+        const src = await fsp.readFile(
+            join(process.cwd(), 'tools/scenario_runner/run_scenario_with_preflight.ts'), 'utf8'
+        );
+        const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+        expect(
+            code.includes('readGitDirtyPaths'),
+            'A gate that exists to prevent an attribution error must not emit a message you cannot '
+            + 'attribute. The first version said only "the tree is dirty" and cost a round trip — the '
+            + 'dirty file was the previous evidence run\'s own output.'
+        ).toBe(true);
+        expect(code).toContain('DIRTY:');
+    });
+});
+
 describe('★ ABSENT and CORRUPT are different answers', () => {
     it('an unstamped run_meta reads ABSENT', () => {
         expect(readRunProvenanceFrom({ run_id: 'x', weeks: 188 })).toEqual({ kind: 'absent' });
