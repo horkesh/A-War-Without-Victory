@@ -1,7 +1,8 @@
 # Sensitive History Design Gate — Canonical
 
 **Status:** CANON (v0.9.0 gate — moral and design)
-**Last Updated:** 2026-04-16
+**Last Updated:** 2026-08-16
+**Amended:** 2026-08-16 — §10 added ("Provenance and the Integrity of the Historical Record"); §7 scope entry for officer-level `war_crimes_record` corrected to point at §10. Sections §0–§9 keep their existing numbers; nothing was renumbered.
 **Authority:** Canon hierarchy, Tier 2 (above Rulebook, below Engine Invariants)
 **Owners:** Game Designer, Historian, Product Manager, Documentation Specialist
 **Supersedes:** open question #7 in `MASTER_ROADMAP.md` ("Srebrenica — how do we handle the genocide mechanically and narratively?")
@@ -173,6 +174,8 @@ Draw the register from: ICTY summary judgments, UN investigative reports, ICRC s
 
 Historical essays in `data/scenarios/essays/` are Ring 2 representation. They are the place where the game carries the record of what happened. Every ICTY-relevant atrocity has or will have an essay.
 
+> **Provenance is governed by §10.** Sourcing, citation, and the removal or downgrade of any adjudicated finding — in essays, in officer `war_crimes_record` annotations, or anywhere else the game states that a named real person was charged, convicted, acquitted, or the subject of a tribunal finding — is ruled by §10, not by this section.
+
 ### Constraints on essay content
 
 - **ICTY findings cited verbatim or near-verbatim** where the tribunal produced a specific finding.
@@ -236,7 +239,7 @@ Any sign-off dispute escalates to the Pyrrhic §6-panel for a formal vote. A BLO
 This gate is specifically about **sensitive history representation**. Out of scope:
 
 - General gameplay balance (covered in `VICTORY_AND_PYRRHIC_SCORING.md`)
-- Officer-level `war_crimes_record` annotations (informational per Rulebook; do not affect gameplay)
+- The **gameplay effect** of officer-level `war_crimes_record` annotations. They are informational and do not affect simulation mechanics (`Rulebook_v0_9_0.md` §5.8, `Engine_Invariants_v0_9_0.md` §15.2). **Their content is IN scope, and is governed by §10.** *Informational-for-gameplay does not mean removable-as-content.* A record that changes no simulation output is still a statement the game makes about a named real person, and the fact that deleting it moves no metric is a reason for care, not a licence. Prior to the 2026-08-16 amendment this entry read as a flat out-of-scope disclaimer, and an automated pass used it as cover to delete adjudicated findings that no gate was watching.
 - Faction bot political personality (covered in `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`)
 - International intervention and NATO mechanics (covered in events + design docs)
 
@@ -280,3 +283,118 @@ Three rules derived from settling this gate. These belong in `docs/life_lessons.
 - ICJ Bosnia v. Serbia (2007)
 - UN A/54/549 (1999) — Srebrenica fall report
 - Balkan Battlegrounds vols. I-II
+
+### Provenance (see §10)
+- `docs/provenance/OFFICER_OOB_PROVENANCE.json` — the officer/OOB provenance manifest
+- `tools/diagnostics/officer_oob_provenance.ts` — the harness that reads it
+- `tests/officer_war_crimes_record_guard.test.ts` — the superset guard that makes deletion of a `war_crimes_record` loud
+- `data/scenarios/officers/apr1992_officers.json`, `data/source/oob_brigades.json` — the playable rows that carry `war_crimes_record`
+
+---
+
+## 10. Provenance and the Integrity of the Historical Record
+
+**Status:** CANON. Adopted 2026-08-16.
+
+**Numbering note.** This is a top-level section, not a subsection of §5. Its subject is not "Essays and Codex"; it governs every surface on which the game states something adjudicated about a named real person. It is numbered §10 and placed after §9 deliberately: §1, §2, §4, §5 and above all §6 are load-bearing tokens cited by name across code, plans, event data and the ledger; §8 is cited by number elsewhere, including in the sub-section form "§8.3"; and at least one external citation of "§7" is already stale, pointing at a section whose content moved. Renumbering to open a slot mid-document would have multiplied exactly the citation drift this section exists to stop.
+
+### 10.0 Scope, and how scope is determined
+
+These rules bind any record the game ships that states or implies an **adjudication against a named real person** — that the person was indicted, convicted, acquitted, sentenced, had proceedings dismissed or discontinued, or was referred to another forum — and any process, automated or human, that removes, downgrades, or re-dispositions such a record.
+
+**They also reach formations, in part. §10.5 rules on exactly which part, and names what governs the rest.**
+
+**Applicability is read off structured data, never off the record's own description of itself.** A machine determines that these rules apply by the presence of the adjudication-bearing structure on a row keyed to a named person: today, a `war_crimes_record` on an officer or `elite_commander` row, and the `court_record_citation` field of the provenance manifest. A rule whose reach is self-declared will be complied with by exactly those authors who have already mis-declared. The pre-correction Odžak row carried its own scope note — "formation identity and command attribution only" — and that note was false; the identical sentence is boilerplate across the great majority of manifest rows, so it distinguishes nothing. **Any future provenance rule must key on a predicate a machine reads off structured data, not on a claim the author makes about what their row covers.**
+
+**The disease this section names.** *A green provenance gate bought with a fabricated source is the same disease as one bought by deleting the record.* Both convert an open research question into a closed one without doing the research, and both leave the harness reporting success. Every rule below is written so that neither exit is available.
+
+**No counts in canon prose — none, not even a dated one.** No count of records, officers, rows or findings appears in this section, and none may be introduced into it. The authority for any magnitude is `tools/diagnostics/officer_oob_provenance.ts`, run against the manifest at the moment the question is asked. Where a magnitude must be conveyed in prose, convey it as a pattern rather than a quantity — *"the dominant citation pattern in the manifest"* — a form that is true, stable, and not falsified by the next commit.
+
+This is stronger than the usual "date the number and name the harness" discipline, and it is stronger for a measured reason. While this amendment was being reviewed, three seats independently counted the manifest's records and returned three different figures; one seat counted the same expression against the same file twice, twenty minutes apart, and got two answers. Nobody was wrong and nobody disagreed. The files were uncommitted and another lane was writing to them, so the artifact moved underneath the measurement. **A number in canon is a claim about a moving file, made at a moment the reader cannot recover.** `Rulebook_v0_9_0.md` §5.8 is the cautionary case in this very investigation: it asserts a fixed count of officers carrying `war_crimes_record` annotations, the figure is stale, and it drifted in the direction that under-reports what the game asserts about real people.
+
+### 10.1 Rule 1 — An uncited finding is uncited, not untrue
+
+> An adjudicated finding that lacks a citation is UNCITED, NOT UNTRUE. No automated provenance rule, and no reviewer acting for want of a citation alone, may remove it; the gap must be raised. Whether a record states an adjudicated finding is the question to be established by research, not a premise the record may assert about itself.
+
+The remedy for a missing citation is a citation. It is never a deletion, and it is never a downgrade adopted because the citation could not be found (§10.2).
+
+**The hazard, stated so it cannot be designed around: Andrić and pre-correction Živanović present identically at observation — empty `court_record_citation` — and require opposite outcomes.** For Andrić no adjudication had ever occurred, so this rule's predicate never attached; there was nothing here that forbade the removal. For Živanović the row asserted an ICTY genocide indictment that has never existed anywhere — and that assertion had to go — yet the man is under a Court of BiH indictment for crimes against humanity with an international arrest warrant outstanding, so deleting the record wholesale would have replaced one falsehood with a worse one.
+
+It follows that **no rule keyed on the emptiness of a citation field can decide either case.** The field is silent about which case it is looking at. Only research separates them, and until the research is done the correct state is HELD (§10.4) — not deleted, and not `supported`.
+
+**Do not cite the Andrić or Arsić removals as precedent for wrongful deletion.** No adjudication existed for either man, this rule's predicate never attached, and those removals were never forbidden by this section. They were wrong for reasons recorded elsewhere. Enshrining them here would enshrine a misreading of the rule.
+
+### 10.2 Rule 2 — The citation must be a citation for the adjudication
+
+> An adjudication is not established by a source for the identity. A conviction, acquittal, indictment, sentence, dismissal, discontinuance, or referral asserted against a named real person requires its own claim-scoped citation in `court_record_citation`, naming court, case number, and date. A populated `source`, `citation`, or `source_tier` on the row speaks to identity and never to the adjudication. Where no claim-scoped citation is locatable, the disposition is HELD — never `supported`.
+
+**Why claim-scoped and not row-scoped.** Provenance in this repo is per-row, but the claims inside a row are not of one kind. The pre-correction Živanović row — which shipped — carried a real book, a real page, a resolved scholarly tier, `confidence: exact` and `disposition: supported`. Every one of those fields was true, and every one of them was about his command of the Drina Corps. None was about the ICTY genocide indictment the same row asserted, which does not exist. A rule barring an adjudication "without a locatable source" is satisfied by that row, and rule 1 then forbids deleting it: the false genocide accusation ships, protected by both rules at once. The rule must therefore demand a source **for the adjudication**, in the field that carries adjudications, or it fails on the record that motivated it.
+
+**Why the enumeration is exhaustive and disposition-neutral.** The list is *conviction, acquittal, indictment, sentence, dismissal, discontinuance, referral*, and it deliberately does not privilege inculpatory outcomes. **An unsourced acquittal is the more dangerous kind, because nobody instinctively challenges it.** An under-sourced acquittal read as exoneration is a §4 minimisation running in the opposite direction from the one this repo usually guards against, and it is harder to catch precisely because it flatters the subject. There is a live instance: the Belgrade acquittal recorded in the Živanović row rests on media reporting, the ruling date could not be separated from the publication date, and no Serbian case number was obtainable. It is held to the same standard as the indictment in the same row, and the row says so.
+
+**On downgrading.** A record may be downgraded **only when research establishes the lesser fact** — when a source shows the person was named in findings rather than charged, or that the proceeding reached a different stage than the record claims. **A downgrade adopted because a citation could not be found is forbidden.** It is a deletion of content by another name, it is a §4 minimisation, and rule 1 bars it as squarely as it bars removal. The distinction is not academic: converting the Živanović record to `named_in_findings` for want of a docket reference "would tell the player that a man under a confirmed CAH indictment and an international warrant was never accused." Where the lesser fact is not established, the disposition is HELD.
+
+### 10.3 Rule 3 — Absence from one docket is not absence from all
+
+**ABSENCE FROM ONE DOCKET IS NOT ABSENCE FROM ALL.** Before downgrading, re-dispositioning, or removing an adjudication against a named person, search every forum with competence: the ICTY and its successor the IRMCT; the Court of Bosnia and Herzegovina; the cantonal and district courts of BiH; the War Crimes Prosecutor's Office and courts of Serbia; and the county courts of Croatia. **"Not indicted by the ICTY" is a finding about the ICTY, not about the person.**
+
+**Corollary — record it as a finding, not as a charge.** A tribunal finding *about* a person in a case against others is not a charge against that person. Such a record is retained and is typed as a finding; it is not typed as a charge, and it is not removed for failing to be one. The wording matters: a rule saying such a record "must not be recorded as one" is one dropped word away from authorising deletion, and there is a live record that a careless reading would destroy — the Šiljeg record *is* a finding-about-a-person-in-a-case-against-others, carrying `verdict: "named_in_findings"` with empty `charges`, and it is correct as it stands.
+
+**A negative search has its own field.** The narrative of a search that found nothing is evidence about the search, not a citation of a court record. It is recorded in a dedicated `adjudication_search_note` field. **Negative assertions are forbidden in `court_record_citation`**, which holds an affirmative docket reference or nothing at all. This is not a hypothetical tidiness rule: rows in the live manifest currently satisfy `court_record_citation` with prose that opens "NOT AN ICTY ACCUSED" and "NOT AN ACCUSED — findings only", and because the harness tests only that the field is non-empty, **a sentence asserting that no indictment exists scores as a present citation.** The rule and the code must be brought into line together; the migration is named in §10.7.
+
+**Per-forum minimum.** A negative-search record states, for each forum searched: the forum, the instrument or register actually consulted, what surfaced, and what could not be established. It does not round any of these up into a conclusion.
+
+- **Content template — record key `officer:vrs_zivanovic` in `docs/provenance/OFFICER_OOB_PROVENANCE.json`.** It searches each competent forum separately and reports each separately: it distinguishes the ICTY non-accusation from the live Court of BiH indictment from the distinct Serbian proceeding, declines to guess an S1-1-K case number, declines to state a confirmation date it could not establish, and labels its own weakest evidence media-tier. That is the standard. Its **placement is the defect** this rule corrects — the narrative belongs in `adjudication_search_note`, not in `court_record_citation`.
+- **Cross-anchor template — record key `officer:hvo_siljeg`, `verification_note`, in the same file.** Where a cited document is not held in the repo, anchor the citation to an existing in-repo citation of the same document produced independently, and record the agreement field by field. Same placement caveat as above.
+
+### 10.4 Dispositions: what "not yet established" is called
+
+**HELD** — the adjudication is corroborated but not docket-verified. The record is retained, the claim ships attributed to the tier that actually supports it, and the row records forum, charge, and the absence of a docket reference. HELD is discharged only by a docket reference: case number and date from the court register or a court or prosecution publication. HELD does not expire and never converts to deletion by lapse of time.
+
+**HELD governs adjudications. `omitted_candidates` governs identities.** The manifest already carries a third state — `omitted_candidates`, with `disposition: "omitted"`, a reason enforced by `omitted_candidate_missing_reason` and a still-playable check enforced by `omitted_candidate_still_playable`. That machinery is correct and must be used rather than duplicated. But it is **row-granular, and adjudications are claim-granular.** Sending a `war_crimes_record` to `omitted_candidates` removes the whole officer from playable data — deletion by another name, which rule 1 forbids. The two states are therefore not interchangeable: an identity that cannot be sourced at all is an `omitted_candidate`; an adjudication that cannot be docket-verified is HELD on a row that stays playable.
+
+**`unsupported_pending_research` is the default for an identity record whose evidence is missing.** The manifest already declares `default_missing_evidence_disposition: "unsupported_pending_research"` — a genuinely pending state. Where an implementation has substituted `omitted`, it has baked in the conclusion that the research will fail. Absence of evidence downgrades confidence; it does not delete a person.
+
+### 10.5 Formations and unit-existence rows — how far this section reaches
+
+**Ruling: §10.1 and §10.4 reach formations. §10.2 and §10.3 do not.** The rest is governed by the temporal-scope rule in `FORAWWV.md` §XIII, which at the time of this amendment is drafted and **not adopted** — so the second half of the protection does not exist yet, and this section says so rather than implying coverage it does not have.
+
+**What triggers it, read off structured data.** For a person the trigger is a `war_crimes_record`. For a formation the trigger is an **existence-at-epoch claim** — a row in `data/source/oob_brigades.json` asserting `available_from`, and any `omitted_candidates` entry that removes a formation from playable data. Both are schema features. Neither is something an author declares or can decline to declare.
+
+**§10.1 applies verbatim in its unit form:**
+
+> A 1995 snapshot cannot establish that a formation did not exist in April 1992, any more than an empty citation field establishes that a court made no finding.
+
+An absence in a source is not a positive finding of non-existence, whatever the subject of the source. The remedy for a formation whose existence at the scenario epoch cannot be sourced is a citation or a HELD-equivalent disposition, never removal from playable data. This is not a hypothetical extension: HRHB brigade rows have been removed from playable data as duplicates, and the `omitted_candidates` entries backing them cite a Croatian Defence Council order of battle dated **October 1995** — a real citation, to a real source, incapable by its date of establishing anything about April 1992. Those particular merges may well be correct on other evidence; the doctrine that permitted them is what this ruling closes.
+
+**§10.4 applies:** an identity that cannot be sourced at all is an `omitted_candidate` with a stated reason; a claim about that formation that cannot be established is HELD on a row that stays playable. The claim-versus-row granularity distinction carries over unchanged.
+
+**§10.2 and §10.3 do not apply.** A formation has no docket, no forum, and no acquittal. Their analogue — that a citation must positively establish the epoch of the claim it supports, and that a citation silent on epoch is a violation rather than an exemption — is the subject of `FORAWWV.md` §XIII and is **not in force**. Until it is, the live gap is not wrongful deletion but its mirror: **an unsourced existence claim riding past the row's own disclaimer.** Posavina brigade rows assert `available_from: 0` — an existence-at-epoch claim — and they *do* carry provenance entries, `disposition: supported`, cited to a page of the narrative. But those entries' own scope notes read *"Exact formation identity only; gameplay personnel, **timing**, and combat statistics are separately authored."* The manifest therefore disclaims timing in the same breath as the playable row asserts it, and nothing checks that a row's claims stay inside the scope its own provenance entry declares. The timing is believed correct on the narrative evidence, and that is not the point: the evidence for it lives in a test-file comment rather than in the manifest, so the game asserts an epoch the provenance record explicitly declines to support. A claim can be true and still be unsourced where the game states it. **Note what this costs the disclaimer as an instrument:** here it is accurate, and it still provides no protection, because a scope note that nothing enforces is a description of good intentions. This is §10.0's rule about self-declared scope arriving from the other direction.
+
+### 10.6 Why this section exists
+
+Rule 1 exists because an automated provenance pass deleted adjudicated findings — including a live Court of BiH indictment — on the inference that a blank citation field meant the history was not real, and then wrote a test asserting the deleted field was `undefined`, so that restoring the truth read as a regression.
+
+Rule 2 exists because rule 1, shipped alone, would have **protected** the pre-correction Živanović row: every field on it was true, none was about the adjudication it asserted, and the false genocide accusation would have ridden out under rule 1's shelter.
+
+Rule 3 exists because a canon reviewer ruled Živanović a non-accused on the strength of the ICTY docket alone — *"I checked one docket and wrote a universal"* — when the Prosecutor's Office of BiH had filed and the Court of BiH had confirmed an indictment for crimes against humanity at Srebrenica and Žepa in December 2021, with an international arrest warrant requested in 2023 after he failed to appear. Had that ruling shipped, the game would have stated that a man under a live crimes-against-humanity indictment was never accused: a §4 minimisation worse than the mis-attribution being corrected.
+
+### 10.7 Enforcement, and what this section does not do
+
+**Remediation under this section is baseline-moving and territory-inert. The correct disposition is an observer re-bless, not a revert.** Read this before concluding that a red baseline means your restoration was wrong.
+
+`initializeNamedOfficers` in `src/sim/combat/officer_system.ts` assigns the whole officer array to `state.military.named_officer_data`, prose included. `bio_short`, `known_for`, `political_alignment_note` and `war_crimes_record` therefore serialize verbatim into `final_save.json`. The moment anyone obeys §10.1 and restores a deleted finding, or merely adds a citation to one, `npm run test:baselines` goes **RED** against `data/derived/scenario/baselines/manifest.json`.
+
+**The discriminator is not the manifest.** It is `control_delta.json` byte-identical plus an unmoved structural fingerprint. When those two hold, the change touched observer prose and nothing the simulation reads: re-bless the observer baselines and keep the correction. This repo has already shipped a defect *with a test defending it* on this exact surface — a provenance pass deleted findings and then asserted their absence, so that restoring the truth read as a regression. **A test that goes red on a correct fix is a hypothesis about the test, not proof the fix is wrong.** Anyone who reverts a §10 remediation because three baselines went red has re-committed the original error with the harness's blessing.
+
+**This section does not amend §6.** The sign-off table stands as written. A change to the content of an adjudicated record is already covered by the existing §6 rows for atrocity content, and requires `/historian` review meeting §6's evidence standard. What §10 adds is that **no automated gate, and no reviewer acting on a gate's output alone, may discharge such a change** — a green harness is not a sign-off.
+
+**Code obligations created by this section.** These are stated here because the rules are unenforceable without them; they are engineering work, tracked separately, and are not themselves canon:
+
+1. **HELD must exist as a value.** `IdentityDisposition` in `tools/diagnostics/officer_oob_provenance.ts` offers `supported`, `unsupported_pending_research`, `conflict` and `omitted`. Until it also offers `held`, §10.2's "the disposition is HELD — never `supported`" has nowhere to land, and every corroborated-but-not-docket-verified adjudication is forced to choose between overstating itself and being treated as a candidate for omission. This obligation is load-bearing for §10.2 and §10.4 and should land first.
+2. **A field for negative searches, and a check that keeps them out of the citation field.** `OfficerOobProvenanceEntry` in `tools/diagnostics/officer_oob_provenance.ts` must declare `adjudication_search_note`, and the harness must reject a negative assertion in `court_record_citation` rather than accepting any non-empty string. Until both land, the rows named in §10.3 satisfy the harness with prose that denies the very thing the field records. Migrating those rows is part of the same change.
+3. **The harness must be able to see media-tier sourcing.** `ACCEPTED_SOURCE_TIERS` in the same file has no `media` value, so a row that honestly labels its own evidence media-tier can say so only in prose, invisible to every machine check. Both `/historian` and red-team review asked for it.
+4. **A raised gap must be able to hold a merge.** Rule 1's only mechanism is raising the gap. A raise that gates nothing is a raise nobody has to answer, and the severity and volume of the existing citation-gap warning must be resolved before rule 1 has teeth.
+5. **`Rulebook_v0_9_0.md` §5.8 must stop stating a count.** Correct the figure, then delete the bare integer and point at the data and at `tests/officer_war_crimes_record_guard.test.ts`.
+
+---
