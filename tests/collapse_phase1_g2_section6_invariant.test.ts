@@ -69,7 +69,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getSidCapacityModifiers } from '../src/sim/collapse/capacity_modifiers.js';
 import { ENCLAVE_DEFINITIONS, getEnclaveDefForOsid } from '../src/sim/combat/enclave_resilience.js';
-import { scanS6RunCandidates, selectS6RunDirs } from './_helpers/s6_run_selection.js';
+import { assertS6PairComparable, scanS6RunCandidates, selectS6RunDirs } from './_helpers/s6_run_selection.js';
 import type { GameState } from '../src/state/game_state.js';
 
 const RUNS_DIR = join(process.cwd(), 'runs');
@@ -234,7 +234,19 @@ function assertSection6Invariants(finalSave: Record<string, unknown>): void {
 const selection = selectS6RunDirs(scanS6RunCandidates(RUNS_DIR));
 const runDir = selection.any === null ? null : join(RUNS_DIR, selection.any);
 const onRunDir = selection.on === null ? null : join(RUNS_DIR, selection.on);
-const offRunDir = selection.off === null ? null : join(RUNS_DIR, selection.off);
+/**
+ * PAIR vs PARTITION (ledger 2026-08-17). The sentinel and G2-A read ONE artifact each, so
+ * they take the raw partition winners. G2-B is a DIFFERENTIAL and takes `selection.pair`,
+ * which is refused unless both runs are provenance-stamped and consumed identical inputs —
+ * the n222/n223 pair differed by the collapse flag AND an entire OOB change set, and the
+ * artifacts could not tell. `offRunDir` therefore exists only for G2-B.
+ */
+const offRunDir = selection.pair === null ? null : join(RUNS_DIR, selection.pair.off);
+const pairOnRunDir = selection.pair === null ? null : join(RUNS_DIR, selection.pair.on);
+
+if (selection.pairWarnings.length > 0) {
+    console.warn(`[§6 G2] pair is comparable with caveats: ${selection.pairWarnings.join('; ')}`);
+}
 
 /** Why a §6 case cannot run, or null when it can. */
 const SENTINEL_SKIP_REASON = runDir !== null
@@ -242,23 +254,38 @@ const SENTINEL_SKIP_REASON = runDir !== null
     : 'no runs/apr1992_definitive_188w__*__w188* dir carries a final_save.json';
 const G2A_SKIP_REASON = onRunDir !== null
     ? null
-    : `no full-length 188w run dir carries collapse_enabled.json (${selection.counts.total} candidates, ${selection.counts.marked} marked) — the collapse-ON §6 proof is NOT ESTABLISHED`;
-const G2B_SKIP_REASON = onRunDir !== null && offRunDir !== null
+    : `no full-length 188w run dir records collapse_enabled (${selection.counts.total} candidates, ${selection.counts.marked} collapse-ON) — the collapse-ON §6 proof is NOT ESTABLISHED`;
+/**
+ * ★ SKIPPED and INCOMPARABLE are DIFFERENT STATES and must not look alike.
+ *
+ * SKIPPED = benign: the runs predate the stamp, or one side does not exist. Nobody erred.
+ * INCOMPARABLE = a pair exists and it is BAD. That is a hard FAILURE, because if a
+ * confounded pair degraded to SKIPPED it would be indistinguishable from "no runs yet" —
+ * and n222/n223 would have skipped silently instead of teaching anybody anything.
+ */
+const G2B_SKIP_REASON = selection.pair !== null || selection.pairFailure !== null
     ? null
-    : `no marker-verified ON/OFF 188w artifact pair (${selection.counts.marked} marked, ${selection.counts.unmarked} unmarked)`;
+    : `no COMPARABLE ON/OFF 188w artifact pair — ${selection.pairRefusal ?? 'unknown'} (${selection.counts.marked} collapse-ON, ${selection.counts.unmarked} collapse-OFF)`;
 
+/** Two-state status for cases that read ONE artifact. */
 function statusOf(skipReason: string | null): string {
     return skipReason === null ? 'EXECUTED' : 'SKIPPED';
 }
 
+/** THREE-state status for pair-dependent cases. INCOMPARABLE is a red, never a skip. */
+function pairStatusOf(skipReason: string | null): string {
+    if (selection.pairFailure !== null) return 'INCOMPARABLE';
+    return skipReason === null ? 'EXECUTED' : 'SKIPPED';
+}
+
 /** Every §6 case and whether this invocation actually ran it. */
-const S6_CASES: ReadonlyArray<{ id: string; skipReason: string | null }> = [
-    { id: 'sentinel', skipReason: SENTINEL_SKIP_REASON },
-    { id: 'G2-A', skipReason: G2A_SKIP_REASON },
-    { id: 'G2-B', skipReason: G2B_SKIP_REASON },
+const S6_CASES: ReadonlyArray<{ id: string; skipReason: string | null; status: string }> = [
+    { id: 'sentinel', skipReason: SENTINEL_SKIP_REASON, status: statusOf(SENTINEL_SKIP_REASON) },
+    { id: 'G2-A', skipReason: G2A_SKIP_REASON, status: statusOf(G2A_SKIP_REASON) },
+    { id: 'G2-B', skipReason: G2B_SKIP_REASON, status: pairStatusOf(G2B_SKIP_REASON) },
 ];
 
-const S6_RECEIPT = S6_CASES.map(c => `${c.id}=${statusOf(c.skipReason)}`).join(' ');
+const S6_RECEIPT = S6_CASES.map(c => `${c.id}=${c.status}`).join(' ');
 
 /**
  * A §6 case that could not run reports itself rather than vanishing.
@@ -299,6 +326,11 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
      * newest-first mtime re-pick (what the original defect actually did) passes this pin, because
      * mtime-newest and counter-newest are currently the SAME dir. The greps ban the mechanism;
      * this pin binds the answer.
+     *
+     * EXTENDED 2026-08-17 for pair comparability. The differential case (G2-B) must read
+     * `selection.pair`, never `selection.on`+`selection.off` — the raw partition winners are
+     * exactly what paired a pre-OOB-change run against a post-OOB-change one. A caller that
+     * reverts to the partition winners diverges here as soon as the pair is refused.
      */
     it('SEAM: the dirs the §6 cases read are exactly the deterministic helper\'s answer', () => {
         expect(runDir, 'sentinel dir must be selection.any, not a re-pick').toBe(
@@ -307,14 +339,37 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
         expect(onRunDir, 'collapse-ON dir must be selection.on, not a re-pick').toBe(
             selection.on === null ? null : join(RUNS_DIR, selection.on)
         );
-        expect(offRunDir, 'collapse-OFF dir must be selection.off, not a re-pick').toBe(
-            selection.off === null ? null : join(RUNS_DIR, selection.off)
+        expect(offRunDir, 'G2-B OFF dir must be selection.pair.off, not selection.off and not a re-pick').toBe(
+            selection.pair === null ? null : join(RUNS_DIR, selection.pair.off)
         );
-        // Non-vacuity: with artifacts present these must be real paths, so the identity above is
-        // not being satisfied by three nulls.
+        expect(pairOnRunDir, 'G2-B ON dir must be selection.pair.on, not selection.on and not a re-pick').toBe(
+            selection.pair === null ? null : join(RUNS_DIR, selection.pair.on)
+        );
+        // Non-vacuity: with artifacts present the single-artifact dir must be a real path, so the
+        // identity above is not being satisfied by nulls throughout.
         if (selection.counts.total > 0) {
             expect(runDir).not.toBeNull();
+        }
+        // A null pair must null BOTH pair dirs — a half-applied refusal would let a
+        // differential case read one validated dir and one partition winner.
+        if (selection.pair === null) {
+            expect(offRunDir).toBeNull();
+            expect(pairOnRunDir).toBeNull();
+            // Exactly one of the two no-verdict states, and they are not interchangeable:
+            // REFUSED means nobody erred and G2-B skips; INCOMPARABLE means a bad pair exists
+            // and G2-B must go RED.
+            expect(
+                (selection.pairRefusal === null) !== (selection.pairFailure === null),
+                'exactly one of pairRefusal (skip) / pairFailure (red) must explain a null pair'
+            ).toBe(true);
+            expect(
+                G2B_SKIP_REASON === null,
+                'INCOMPARABLE must not degrade to SKIPPED, and REFUSED must not present as executable'
+            ).toBe(selection.pairFailure !== null);
+        } else {
             expect(offRunDir).not.toBeNull();
+            expect(pairOnRunDir).not.toBeNull();
+            expect(selection.pairFailure).toBeNull();
         }
     });
 
@@ -380,11 +435,16 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
     // recorded_turn >= 160 above, so no earlier flip can hide in the receipt window.
     // ---------------------------------------------------------------------------
     it(
-        `[${statusOf(G2B_SKIP_REASON)}] G2-B rupture-timing identity: srebrenica_genocide_1995 recorded_turn + ` +
+        `[${pairStatusOf(G2B_SKIP_REASON)}] G2-B rupture-timing identity: srebrenica_genocide_1995 recorded_turn + ` +
         'first-RS-turn + fall-event timing IDENTICAL collapse-ON vs collapse-OFF',
         () => {
+            // A BAD pair is a hard failure here, at the case — never at module scope, which
+            // would take the derivation pins down with it, and never a skip, which would make
+            // a confound indistinguishable from "no runs yet".
+            assertS6PairComparable(selection);
             if (G2B_SKIP_REASON !== null) return reportNonExecution('G2-B', G2B_SKIP_REASON);
-            const onSave = loadFinalSave(onRunDir!);
+            // pairOnRunDir, NOT onRunDir — the differential reads the comparability-validated pair.
+            const onSave = loadFinalSave(pairOnRunDir!);
             const offSave = loadFinalSave(offRunDir!);
 
             // Both runs must have the enclave RS-held at Dayton.
@@ -431,15 +491,48 @@ describe('collapse §6 GUARD G2 invariant (188w rupture floor)', () => {
     // ---------------------------------------------------------------------------
     it(`§6 execution receipt — ${S6_RECEIPT} (strict=${REQUIRE_S6_EXECUTION})`, () => {
         // Selection provenance, so the receipt says WHICH artifacts were used.
-        console.warn(
+        // Built ONCE and asserted on below — the assertion must read the string that is
+        // actually emitted, not a re-derivation of it, or it proves nothing about the receipt.
+        const receipt =
             `[§6 G2] receipt: ${S6_RECEIPT} | candidates=${selection.counts.total} ` +
-            `marked=${selection.counts.marked} unmarked=${selection.counts.unmarked} | ` +
-            `sentinel=${selection.any ?? '-'} ON=${selection.on ?? '-'} OFF=${selection.off ?? '-'}`
-        );
+            `collapse_on=${selection.counts.marked} collapse_off=${selection.counts.unmarked} | ` +
+            `sentinel=${selection.any ?? '-'} ON=${selection.on ?? '-'} OFF=${selection.off ?? '-'} | ` +
+            `pair=${selection.pair === null ? 'NONE' : 'FORMED'} ` +
+            `verdict=${selection.pairFailure !== null ? 'INCOMPARABLE' : selection.pairRefusal !== null ? 'REFUSED' : 'OK'} | ` +
+            `excluded_override=${selection.excludedOverrideRuns.length}` +
+            (selection.excludedOverrideRuns.length > 0 ? ` [${selection.excludedOverrideRuns.join(', ')}]` : '');
+        console.warn(receipt);
+
+        /*
+         * NEVER EXEMPT, ALWAYS ROUTE INTO AN ASSERTED BUCKET.
+         *
+         * Excluded override runs must be NAMED in the emitted receipt, not merely counted — a
+         * bare count cannot be audited, and an exclusion nobody can see is exactly the silent
+         * degradation this module exists to remove. Asserting against `receipt` (the string
+         * that was printed) is what makes trimming the receipt go RED instead of quiet; an
+         * assertion that rebuilt the substring locally would pass on a gutted receipt.
+         */
+        expect(receipt, 'the receipt must always disclose the override-exclusion count')
+            .toContain(`excluded_override=${selection.excludedOverrideRuns.length}`);
+        for (const name of selection.excludedOverrideRuns) {
+            expect(receipt, `excluded override run ${name} must be NAMED in the receipt, not just counted`)
+                .toContain(name);
+        }
 
         // The receipt must cover every §6 case — a case added without a receipt entry is
         // a case that can go silent again.
         expect(S6_CASES.map(c => c.id)).toEqual(['sentinel', 'G2-A', 'G2-B']);
+
+        // Refusal and failure are mutually exclusive by construction. If both were ever set,
+        // the receipt would be reporting one state while a case threw for the other.
+        expect(
+            selection.pairRefusal !== null && selection.pairFailure !== null,
+            'pairRefusal (skip) and pairFailure (red) are mutually exclusive states'
+        ).toBe(false);
+
+        if (selection.pairFailure !== null) {
+            console.warn(`[§6 G2] INCOMPARABLE PAIR — this is a FAILURE, not a skip:\n${selection.pairFailure}`);
+        }
 
         const notExecuted = S6_CASES.filter(c => c.skipReason !== null);
         for (const c of notExecuted) {

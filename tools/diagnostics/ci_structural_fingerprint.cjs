@@ -35,7 +35,17 @@ function runScenario() {
   const result = spawnSync(
     process.execPath,
     [tsxCli, runner, '--scenario', SCENARIO, '--unique', '--out', OUT_ROOT],
-    { cwd: REPO_ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+    {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024,
+      // The 40w structural fingerprint is a calibration check, NOT a §6 differential, so it
+      // must never trip the preflight's §6-grade cleanliness gate. Cleared explicitly rather
+      // than left to inheritance: a developer with AWWV_S6_GRADE_RUN exported in their shell
+      // would otherwise find this tool refusing to run on a dirty tree, which is precisely
+      // the over-strictness that gets a gate disabled in its first week.
+      env: { ...process.env, AWWV_S6_GRADE_RUN: '' },
+    },
   );
   if (result.stdout) process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);

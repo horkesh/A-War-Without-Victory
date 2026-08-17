@@ -44,7 +44,7 @@ const EVENTS_DIR = resolve(getModuleDir(), '../../../data/scenarios/events');
  *  then v0.9.0 Consequence System events (gated on ahistorical flags —
  *  calibration-safe by construction since they literally cannot fire on the
  *  historical path). */
-const EVENT_FILES = [
+export const EVENT_FILES = [
     'war_1992.json',
     // Jul–Sep 1992 HRHB (Herceg-Bosna / HVO) decision-event content. Separate
     // file (additive hook) so it does not collide with the RS-events lane that

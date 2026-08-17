@@ -11,12 +11,70 @@ import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
+import {
+  PROVENANCE_OVERRIDE_ENV_VAR,
+  S6_GRADE_RUN_ENV_VAR,
+  MIN_OVERRIDE_REASON_LENGTH,
+  readGitDirty,
+  readProvenanceOverride,
+} from '../../src/scenario/run_provenance.js';
 
 
 const prereqResult = checkDataPrereqs();
 if (!prereqResult.ok) {
   process.stderr.write(formatMissingRemediation(prereqResult));
   process.exit(1);
+}
+
+/**
+ * §6-GRADE CLEANLINESS GATE — checked at run START, not at comparison time.
+ *
+ * A dirty tree makes a run un-pairable: the commit does not describe it, so the comparison
+ * hard-fails. If that only surfaced when the two artifacts were compared, you would have
+ * burned TWO 188w runs (~55 min each, serialized) before learning the pair was void. That
+ * is how a correct rule becomes a hated one and then gets disabled. So the launcher refuses
+ * to begin; the comparison-time check stays as the backstop for pairs produced some other
+ * way, or by a §6-grade run that forgot the flag.
+ *
+ * OPT-IN by `AWWV_S6_GRADE_RUN=true`, because it cannot apply to every run: the harness
+ * contract suite runs real scenarios constantly against a tree that is dirty most of the
+ * working day, and it cannot key on `ENABLE_COLLAPSE` either, since the OFF half of a §6
+ * pair is unmarked and looks like any other run.
+ *
+ * The ESCAPE HATCH (`AWWV_PROVENANCE_OVERRIDE="<reason>"`) permits the start and SILENCES
+ * NOTHING: the reason is stamped into `run_meta.json`, ordinary comparisons warn on it, and
+ * the §6 comparison hard-fails on its presence. Fully usable for exploratory work,
+ * structurally unavailable for a §6 verdict — using it is what disqualifies the run.
+ */
+if (process.env[S6_GRADE_RUN_ENV_VAR] === 'true') {
+  const override = readProvenanceOverride();
+  if (override !== undefined && override.length < MIN_OVERRIDE_REASON_LENGTH) {
+    process.stderr.write(
+      `${PROVENANCE_OVERRIDE_ENV_VAR} is set but the reason is too short to act on `
+      + `(${override.length} chars, minimum ${MIN_OVERRIDE_REASON_LENGTH}): "${override}".\n`
+      + `The reason is stamped into run_meta.json and read by whoever finds the run later. `
+      + `Say what was uncommitted and why the run was worth taking anyway.\n`
+    );
+    process.exit(1);
+  }
+  if (override === undefined) {
+    const dirty = readGitDirty(process.cwd());
+    if (dirty !== false) {
+      const why = dirty === null
+        ? 'git could not be read, so the tree cannot be CERTIFIED clean'
+        : 'the working tree has uncommitted or untracked changes';
+      process.stderr.write(
+        `REFUSING to start a §6-grade run: ${why}.\n`
+        + `  A dirty tree makes the run un-pairable — its commit does not describe it, and the\n`
+        + `  §6 comparison will reject the pair AFTER both runs have cost their full wall-clock.\n`
+        + `  Fix: commit or 'git stash' the tree and re-launch.\n`
+        + `  Or, for exploratory work that is NOT going to license a §6 verdict, set\n`
+        + `  ${PROVENANCE_OVERRIDE_ENV_VAR}="<why this run is worth taking dirty>" — the reason is\n`
+        + `  stamped into run_meta.json and permanently disqualifies the run from §6.\n`
+      );
+      process.exit(1);
+    }
+  }
 }
 
 const args = process.argv.slice(2);

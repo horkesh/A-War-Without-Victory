@@ -58,6 +58,7 @@ import {
 } from '../state/seed_organizational_penetration_from_control.js';
 import { applyJnaInheritanceBonus, ensureSupplyReserves } from '../state/supply_reserves.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
+import { buildRunProvenance, type RunHarness } from './run_provenance.js';
 import { runOneTurn } from '../state/turn_pipeline.js';
 import { computeSpatialContext } from '../sim/spatial_context.js';
 import { strictCompare } from '../state/validateGameState.js';
@@ -393,6 +394,15 @@ export interface RunScenarioOptions {
     bot_diagnostics?: boolean;
     /** Optional base directory for data paths (default process.cwd()). Used by desktop createStateFromScenario. */
     baseDir?: string;
+    /**
+     * Which harness is producing this run. Recorded in `run_meta.json` provenance because the
+     * consumed input set differs: the desktop path also reads the baked startup snapshot, which
+     * has no headless consumer. Today every `run_meta.json` in the repo comes from the headless
+     * harness — the desktop's real startup path (`createStateFromScenario` with
+     * `initialStateOnly`) builds state in memory and writes no run dir at all — so this is
+     * forward-looking, not currently exercised. Default `headless`.
+     */
+    harness?: RunHarness;
     /** When true, build state and write initial_save only; skip week loop and end-of-run artifacts (faster for desktop New Campaign). */
     initialStateOnly?: boolean;
     /** Resume a scenario run from a canonical save artifact produced by the harness or desktop save pipeline. */
@@ -1997,6 +2007,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         use_smart_bots = false,
         bot_diagnostics = false,
         baseDir: optionsBaseDir,
+        harness: runHarness = 'headless',
         initialStateOnly = false,
         resumeFromSavePath,
         resumeFromWeekIndex,
@@ -2059,13 +2070,43 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     const outDir = outDirOverride ?? join(outDirBase, runDirName);
     await ensureRunOutputDir(outDir);
 
+    const baseDir = optionsBaseDir ?? process.cwd();
+
     const out_dir_relative = outDirOverride ?? (uniqueRunFolder ? `${outDirBase}/${runDirName}` : `${outDirBase}/${run_id}`);
+    // RUN PROVENANCE (2026-08-17) — what this run was actually produced FROM.
+    //
+    // Without it, `run_meta.json` recorded nothing that distinguishes two runs on different
+    // armies: the run-dir hash covers the SCENARIO DEFINITION FILE, which an OOB edit never
+    // touches, so `…w188_n222` and `…w188_n223` carried the same hash while their initial
+    // saves differed by three HVO brigades AND the collapse flag. See src/scenario/
+    // run_provenance.ts for the consumed set, why the derived startup snapshot is excluded
+    // from it, and the four hashing constraints.
+    const provenance = await timedAsync(emitTimingJson, timingTotals, 'setup', () =>
+        buildRunProvenance({
+            baseDir,
+            scenarioPath,
+            // Declared keys, not resolved paths: buildRunProvenance resolves them through the
+            // same functions the loader uses, so the stamped list cannot drift from what is
+            // actually read. The scenario file merely NAMES these — hashing it alone leaves
+            // initial control, t0 formations, the timeline and the event catalogue unhashed.
+            initControl: scenario.init_control,
+            initFormations: scenario.init_formations,
+            warTimeline: scenario.war_timeline,
+            initOfficers: scenario.init_officers,
+            harness: runHarness,
+            // Same owner as the `collapse_enabled.json` sidecar (RC defect 7): a second inline
+            // `process.env.ENABLE_COLLAPSE === 'true'` here is how the stamp and the marker
+            // would drift apart, which is the confound this stamp exists to detect.
+            collapseEnabled: readCollapseGateFromEnv(),
+        })
+    );
     const run_meta = {
         scenario_id: scenario.scenario_id,
         run_id,
         weeks,
         scenario_path: scenarioPath,
         out_dir: out_dir_relative,
+        provenance,
         ...(resumeFromSavePath ? { resume_from_save_path: resumeFromSavePath } : {}),
         ...(resumeFromWeekIndex != null ? { resume_from_week_index: resumeFromWeekIndex } : {})
     };
@@ -2074,8 +2115,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         await ensureRunOutputDir(outDir);
         await writeFile(runMetaPath, stableStringify(run_meta, 2), 'utf8');
     });
-
-    const baseDir = optionsBaseDir ?? process.cwd();
 
     try {
         if (injectFailureAfterRunMeta) {

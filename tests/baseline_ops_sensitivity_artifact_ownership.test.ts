@@ -107,7 +107,14 @@ test('baseline ops sensitivity committed artifacts have explicit ownership and r
             assert.notStrictEqual(primaryMeta.out_dir, run2Meta.out_dir, `${relativePath} out_dir should identify each retained tree`);
             delete primaryMeta.out_dir;
             delete run2Meta.out_dir;
-            assert.deepStrictEqual(run2Meta, primaryMeta, `${relativePath} should only differ by out_dir`);
+            // `provenance` (2026-08-17) records the commit, tree state, Node version and input
+            // hashes of the run that produced the tree. These two trees are RETAINED evidence,
+            // regenerated only deliberately — and if they are ever regenerated at different
+            // commits, provenance legitimately differs while the simulation output does not.
+            // This comparison is about run-to-run artifact identity, not about provenance.
+            delete primaryMeta.provenance;
+            delete run2Meta.provenance;
+            assert.deepStrictEqual(run2Meta, primaryMeta, `${relativePath} should only differ by out_dir and provenance`);
         } else {
             assert.strictEqual(run2Raw, primaryRaw, `${relativePath} should be byte-identical across retained runs`);
         }

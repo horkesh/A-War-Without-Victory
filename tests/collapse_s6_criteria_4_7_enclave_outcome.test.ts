@@ -87,7 +87,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { strictCompare } from '../src/state/validateGameState.js';
-import { scanS6RunCandidates, selectS6RunDirs } from './_helpers/s6_run_selection.js';
+import { assertS6PairComparable, scanS6RunCandidates, selectS6RunDirs } from './_helpers/s6_run_selection.js';
 import {
     MUST_HOLD_ENCLAVE_IDS,
     TEOCAK_OSID,
@@ -147,17 +147,37 @@ const PANEL_DEAD_KEYS: readonly string[] = ['op:gorazde:novakovici', 'op:gorazde
 
 // ── Artifact selection — deterministic, name-based, no mtime ────────────────
 const selection = selectS6RunDirs(scanS6RunCandidates(RUNS_DIR));
-const onRunDir = selection.on === null ? null : join(RUNS_DIR, selection.on);
-const offRunDir = selection.off === null ? null : join(RUNS_DIR, selection.off);
+/**
+ * COMPARABILITY, not just selection (ledger 2026-08-17). Every criterion in this file is a
+ * DIFFERENTIAL — it reads meaning out of ON-vs-OFF — so it is worthless unless the two runs
+ * consumed the same inputs. `selection.pair` is the comparability-validated pair;
+ * `selection.on`/`.off` are the raw partition winners and must NOT be used here. Reading
+ * those two is exactly what produced the n222/n223 verdict: 33 differing cells attributed
+ * wholly to the collapse flag by this file and wholly to an OOB change by the ledger.
+ */
+const onRunDir = selection.pair === null ? null : join(RUNS_DIR, selection.pair.on);
+const offRunDir = selection.pair === null ? null : join(RUNS_DIR, selection.pair.off);
 
-const PAIR_SKIP_REASON = onRunDir !== null && offRunDir !== null
+if (selection.pairWarnings.length > 0) {
+    console.warn(`[§6 C4/C7] pair is comparable with caveats: ${selection.pairWarnings.join('; ')}`);
+}
+
+/**
+ * ★ SKIPPED and INCOMPARABLE are DIFFERENT STATES. SKIPPED is benign — the runs predate the
+ * stamp, or one side does not exist. INCOMPARABLE means a pair exists and it is BAD, which
+ * is a hard FAILURE: if a confounded pair degraded to SKIPPED it would be indistinguishable
+ * from "no runs yet", and n222/n223 would have vanished into a skip instead of surfacing.
+ */
+const PAIR_SKIP_REASON = selection.pair !== null || selection.pairFailure !== null
     ? null
-    : 'no marker-verified collapse-ON/OFF 188w artifact pair '
-      + `(${selection.counts.total} full-length candidates, ${selection.counts.marked} marked ON, `
-      + `${selection.counts.unmarked} unmarked OFF) — Stage 2 must produce it; `
+    : `no COMPARABLE collapse-ON/OFF 188w artifact pair — ${selection.pairRefusal ?? 'unknown'} `
+      + `(${selection.counts.total} full-length candidates, ${selection.counts.marked} collapse-ON, `
+      + `${selection.counts.unmarked} collapse-OFF) — Stage 2 must produce it; `
       + 'panel criterion 2: criteria 4 and 7 are NO-GO, not skip';
 
+/** THREE-state status: every case in this file is a differential. */
 function statusOf(skipReason: string | null): string {
+    if (selection.pairFailure !== null) return 'INCOMPARABLE';
     return skipReason === null ? 'EXECUTED' : 'SKIPPED';
 }
 
@@ -193,6 +213,44 @@ function loadControllers(runDir: string): ControllerMap {
 }
 
 describe('§6 criteria 4 + 7 — enclave key-space identity and rim regression', () => {
+
+    /**
+     * SEAM PIN (2026-08-17) — the differential cases must read the COMPARABILITY-VALIDATED
+     * pair, not the raw partition winners.
+     *
+     * Every criterion in this file is ON-vs-OFF. `selection.on`/`selection.off` answer "which
+     * marked and unmarked run is newest", which is not "which two runs are comparable" — the
+     * n222/n223 pair satisfied the former and failed the latter, and 33 cells were attributed
+     * to opposite causes by two readers. This binds the dirs the cases open to
+     * `selection.pair`, so a caller that reverts to the partition winners fails here rather
+     * than quietly producing an unattributable verdict.
+     */
+    it('SEAM: criteria 4/7 read selection.pair, not selection.on/selection.off', () => {
+        expect(onRunDir, 'ON dir must be selection.pair.on').toBe(
+            selection.pair === null ? null : join(RUNS_DIR, selection.pair.on)
+        );
+        expect(offRunDir, 'OFF dir must be selection.pair.off').toBe(
+            selection.pair === null ? null : join(RUNS_DIR, selection.pair.off)
+        );
+        if (selection.pair === null) {
+            expect(onRunDir).toBeNull();
+            expect(offRunDir).toBeNull();
+            // Exactly one of the two no-verdict states must be set, and they mean different
+            // things: REFUSED skips, INCOMPARABLE reds.
+            expect(
+                (selection.pairRefusal === null) !== (selection.pairFailure === null),
+                'exactly one of pairRefusal (skip) / pairFailure (red) must explain a null pair'
+            ).toBe(true);
+            if (selection.pairFailure === null) {
+                expect(PAIR_SKIP_REASON, 'a REFUSED pair must skip every differential case').not.toBeNull();
+            } else {
+                expect(PAIR_SKIP_REASON, 'an INCOMPARABLE pair must NOT skip — it must fail').toBeNull();
+            }
+        } else {
+            expect(PAIR_SKIP_REASON).toBeNull();
+            expect(selection.pairFailure).toBeNull();
+        }
+    });
 
     // ── Derivation pins (always run; no artifacts required) ─────────────────
 
@@ -239,6 +297,9 @@ describe('§6 criteria 4 + 7 — enclave key-space identity and rim regression',
         `[${statusOf(PAIR_SKIP_REASON)}(keys=${keySpace.guarded.length})] criterion 4: political_controllers `
         + 'IDENTICAL collapse-ON vs collapse-OFF across the full 84-OSID enclave key space',
         () => {
+            // A BAD pair is a hard failure here, at the case — never at module scope (it would take
+            // the derivation pins down too) and never a skip (a confound must not look like "no runs").
+            assertS6PairComparable(selection);
             if (PAIR_SKIP_REASON !== null) return reportNonExecution('C4-keyspace-identity', PAIR_SKIP_REASON);
             const off = loadControllers(offRunDir!);
             const on = loadControllers(onRunDir!);
@@ -282,6 +343,9 @@ describe('§6 criteria 4 + 7 — enclave key-space identity and rim regression',
         `[${statusOf(PAIR_SKIP_REASON)}(rim=${rim.ring1.length})] criterion 7a: no OFF-baseline RBiH-held `
         + 'enclave-rim cell is newly lost in the collapse-ON run',
         () => {
+            // A BAD pair is a hard failure here, at the case — never at module scope (it would take
+            // the derivation pins down too) and never a skip (a confound must not look like "no runs").
+            assertS6PairComparable(selection);
             if (PAIR_SKIP_REASON !== null) return reportNonExecution('C7-rim-regression', PAIR_SKIP_REASON);
             const off = loadControllers(offRunDir!);
             const on = loadControllers(onRunDir!);
@@ -331,6 +395,9 @@ describe('§6 criteria 4 + 7 — enclave key-space identity and rim regression',
         `[${statusOf(PAIR_SKIP_REASON)}(chain=teocak→tuzla)] criterion 7b: Teočak stays in the same RBiH-held `
         + 'component as Tuzla (corridor severable at depth 2, where the 1-ring is blind)',
         () => {
+            // A BAD pair is a hard failure here, at the case — never at module scope (it would take
+            // the derivation pins down too) and never a skip (a confound must not look like "no runs").
+            assertS6PairComparable(selection);
             if (PAIR_SKIP_REASON !== null) return reportNonExecution('C7-teocak-corridor', PAIR_SKIP_REASON);
             const off = loadControllers(offRunDir!);
             const on = loadControllers(onRunDir!);
@@ -554,17 +621,42 @@ describe('§6 criteria 4 + 7 — enclave key-space identity and rim regression',
     // ── Receipt ─────────────────────────────────────────────────────────────
 
     it(`§6 C4/C7 execution receipt — ${S6_RECEIPT} (strict=${REQUIRE_S6_EXECUTION})`, () => {
-        console.warn(
+        // Built ONCE and asserted on below — the assertion must read the emitted string.
+        const receipt =
             `[§6 C4/C7] receipt: ${S6_RECEIPT} | candidates=${selection.counts.total} `
-            + `marked=${selection.counts.marked} unmarked=${selection.counts.unmarked} | `
+            + `collapse_on=${selection.counts.marked} collapse_off=${selection.counts.unmarked} | `
             + `ON=${selection.on ?? '-'} OFF=${selection.off ?? '-'} | `
-            + `SET A=${keySpace.guarded.length} SET B=${rim.ring1.length} 2-ring=${rim.ring2.length}`
-        );
+            + `pair=${selection.pair === null ? 'NONE' : 'FORMED'} `
+            + `verdict=${selection.pairFailure !== null ? 'INCOMPARABLE' : selection.pairRefusal !== null ? 'REFUSED' : 'OK'} | `
+            + `excluded_override=${selection.excludedOverrideRuns.length}`
+            + (selection.excludedOverrideRuns.length > 0 ? ` [${selection.excludedOverrideRuns.join(', ')}]` : '')
+            + ` | SET A=${keySpace.guarded.length} SET B=${rim.ring1.length} 2-ring=${rim.ring2.length}`;
+        console.warn(receipt);
+
+        // Never exempt, always route into an asserted bucket — see the §6 G2 receipt for the
+        // full reasoning. Asserting on the EMITTED string is what makes a trimmed receipt red.
+        expect(receipt, 'the receipt must always disclose the override-exclusion count')
+            .toContain(`excluded_override=${selection.excludedOverrideRuns.length}`);
+        for (const name of selection.excludedOverrideRuns) {
+            expect(receipt, `excluded override run ${name} must be NAMED in the receipt, not just counted`)
+                .toContain(name);
+        }
 
         // A case added without a receipt entry is a case that can go silent again.
         expect(S6_CASES.map(c => c.id)).toEqual([
             'C4-keyspace-identity', 'C7-rim-regression', 'C7-teocak-corridor',
         ]);
+
+        // Refusal (skip) and failure (red) are mutually exclusive; both set would mean the
+        // receipt reports one state while the cases throw for the other.
+        expect(
+            selection.pairRefusal !== null && selection.pairFailure !== null,
+            'pairRefusal (skip) and pairFailure (red) are mutually exclusive states'
+        ).toBe(false);
+
+        if (selection.pairFailure !== null) {
+            console.warn(`[§6 C4/C7] INCOMPARABLE PAIR — this is a FAILURE, not a skip:\n${selection.pairFailure}`);
+        }
 
         const notExecuted = S6_CASES.filter(c => c.skipReason !== null);
         for (const c of notExecuted) console.warn(`[§6 C4/C7] NOT EXECUTED — ${c.id}: ${c.skipReason}`);
