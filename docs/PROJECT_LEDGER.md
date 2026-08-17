@@ -27453,3 +27453,29 @@ Documentation-only workflow reconciliation; no source, data, runtime, baseline, 
 **Not attributed, flagged rather than fitted:** eight eastern RS→RBiH losses (Kalinovik ×4, Konjic, Nevesinje, Čajniče, Olovo), non-contiguous with either t0 change, Herzegovina Corps rather than Krajina or Drina. **And unexplained: `total_objective_attempts` 3,038 → 1,836**, a 40% collapse in offensive attempts while `total_attack_orders` rose 818 → 843.
 
 **Disposition: accept the pair as an instrument; do not accept the tree at 611.** The floor is one of six hard integer checks and 31/31 anchors do not offset it — EH-3 passed 30/30 anchors and every §6 invariant at −39.
+
+## 2026-08-17 — CORRECTION: the brigade is not missing, it spawns on turn 1, and 629 is partly a number we have already refused
+
+**The preceding entry's attribution is wrong in its central claim and this corrects it.** Found when the restoration was dispatched and the implementing seat checked the premise instead of executing it.
+
+**`hvo_hrvoje_vukcic_brigade` is present in n225 with `created_turn: 1`.** Its turn-1 row in `brigade_temporal_log.jsonl` is 1,100 personnel, active, at `op:odzak:donja_dubica` — **byte-for-byte the same position and strength as n222's turn-1 row.** `initial_save.json` is a turn-0 snapshot; recruitment re-runs every turn and the Odžak pool refills past 800 within a week. **226 → 225 and HRHB 39 → 38 are a one-turn spawn delay, not a deletion.** There is no missing brigade to restore, and every mechanism in the candidate list moves creation from turn 1 to turn 0 and nothing else.
+
+**Two further load-bearing claims do not survive checking, and both were mine.**
+
+*"Dies at Čapljina, ~150 km from anywhere relevant"* is an artifact: brigades teleport to `op:capljina:capljina_2` on the turn they go inactive, and two other inactive HRHB brigades rest at that cell. It dies in the Odžak/Bosanski Šamac pocket. In the current tree that is **turn 15 ≈ mid-July 1992, and Odžak fell 12 July 1992** — the present behaviour is historically correct for an Odžak brigade, and the turn-9 death in the older run was the worse one. **This same artifact was a pillar of the original "leave it dropped" ruling and of the reversal of it, pointing opposite ways each time.**
+
+*"One 1,100-man HVO brigade deleted at t0 doubles a VRS corps"* does not hold. **n222 also scores 629 and ends with `vrs_1st_krajina` at 29 bde / 38,034 — larger than n225's 21 / 28,918.** The 16 bde / 14,519 figure is n223-specific: at Jajce the brigade tied down 1st Krajina for 178 turns. Every terminal-force figure in the preceding entry — `hvo_central_bosnia` 13→12, 1st Krajina 16→21, Mistral 1, Jajce Recovery — is the **Jajce counterfactual**, which is the placement the panel disqualified.
+
+**★ Where the −18 actually is, diffed three ways across all 712 cells against `painted_control_oct1995.json`.** n222 (Odžak) 629 · n223 (Jajce) 629 · n224/225/226 (current) 611. **Of the 25 lost cells, n222 recovers only 13.** The other 12 are Jajce-theatre — Mrkonjić Grad ×3, Ključ, Sanski Most, Donji Vakuf, Bihać, Bosanski Novi, Prozor ×2, Čajniče, and **`op:jajce:lupnica`, which this project's own provenance record already calls a FALSE MATCH — "right controller, entirely wrong reason."** Only the banned placement wins those. The 13 that n222 does win come from the **other** n222-vs-n225 differences: the three SE Herzegovina deletions (`hvo_southeast_herzegovina` terminal 14 vs 11) and the 102nd's Orašje→Odžak re-home.
+
+> **~12 of the 25 are recoverable only via a placement the panel disqualified, one of them a documented false match. 629 is partly a number this project has already decided it does not want.**
+
+**Also unexcluded:** the revert commit changed **two** rows, and `rs_5th_podrinje` (Goražde→Vlasenica) is a confound in the n223→n225 attribution. It is excluded from the n222 comparison only because n222 and n225 share that value.
+
+**Partial closure on the "unexplained" eastern losses:** Kalinovik, Konjic, Nevesinje and Olovo are all cells n222 gets right, tracking the same n222/n225 delta as the western ones. Not a separate mystery and not Herzegovina-Corps-specific.
+
+**★ AND THE REAL MISSING FORMATION, found by running the predicate for the first time: `rs_2nd_romanija_brigade` NEVER SPAWNS.** Absent from every turn of the 188-week campaign — Sokolac RS pool 249 against the 800 `manpower_cost` default. A VRS brigade in the Sarajevo siege ring that does not exist, and nobody has ever noticed. Five `available_from: 0` rows are absent at t0: three recover on turn 1, `rs_2nd_herzegovina_light_infantry` recovers on **turn 22** — twenty weeks late, unexplained — and Romanija never does.
+
+**A cost-model incoherence found underneath all of it:** the elective recruitment path **debits `manpower_cost` (the 800 global default) but instantiates `initial_personnel`** — 300 men created from nothing for every elective row, every time. Same quantity, two stages, disagreeing. That is why the "741 < 800" arithmetic felt arbitrary: it is arbitrary.
+
+**Disposition: the reversal is NOT executed.** No row changed; `data/source/oob_brigades.json` is byte-identical. The live lanes for the −18 are the SE Herzegovina deletions and the Podrinje confound, both needing a controlled pair; the live lane for a genuinely missing formation is Romanija.
