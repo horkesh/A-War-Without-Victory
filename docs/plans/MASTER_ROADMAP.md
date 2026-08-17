@@ -2,7 +2,7 @@
 
 **Status:** IN AUTONOMOUS EXECUTION; R1-R6 and the narrow pre-1.0 RC collapse packet are complete. R7 is the current critical path, followed by R8 and R9.
 
-**Last updated:** 2026-08-15
+**Last updated:** 2026-08-17
 
 **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
 
@@ -16,7 +16,9 @@
 
 - **Complete:** R1, R2, R3, R4, R5, and the defined pre-1.0 scope of R6.
 - **Complete RC narrow packet:** the default-OFF v3 selector plus reversible D-shape is retained. Paired 188-week runs produced hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 bot benchmarks, 7/7 health gates, one live non-enclave HRHB damage/capacity write, and full Section 6 pass. Bucovaca peaked at strain 62 and recovered to 37; Sipovo/Drvar peaks remained 11/7.5. D-topology neighbour cascade remains owner-reserved and is post-1.0.
-- **Current lane / next action:** R7 Phase 2 officer/OOB provenance is complete: all 334 playable identities are exact-supported, 40 unresolved candidates are audit-only, and startup/save/read-model persistence is covered. Execute Phase 4 bounded audio next, then English accessibility/readability, opening screens, and packaged proof. Unfinished multilingual localization remains post-1.0.
+- **Current lane / next action:** **R7 Phase 2 is REOPENED. The 2026-08-15 "complete" claim above was falsified on 2026-08-16/17 and is retained only as history.** The pass reported 334 exact-supported identities and 0 blockers — all true as counts — while having deleted an Odžak garrison, a Srebrenica enclave commander, three decorated dead ARBiH officers, an ICTY finding and a live Court-of-BiH indictment, and having asserted an ICTY genocide indictment that has never existed. Root cause: *"unsupported" meant "the harness did not find it"* against a 406-of-1,152-page index. Restorations, a measured 188w (`n223`), a partial revert, and two known-divergence test suites are committed. **Remaining before Phase 2 closes:** one 188w on a *controlled* pair (the reverted tree is a third state neither prior run measured), then Phase 4 bounded audio, English accessibility/readability, opening screens, and packaged proof. Unfinished multilingual localization remains post-1.0.
+- **Canon landed this cycle:** `SENSITIVE_HISTORY_DESIGN_GATE.md` **§10, "Provenance and the Integrity of the Historical Record"** — ratified by unanimous Pyrrhic panel (`5f462e8aa`), twelve conditions discharged across two rounds. `FORAWWV.md` §XIII temporal scope is drafted-but-**HELD** behind two engineering items (provenance channel separation + the determinism-scan pair) and is **not** canon.
+- **Measurement instrumentation is a known blocker on §6 verdicts.** `run_meta.json` records no commit, no data hash and no flag state, and the run-directory hash is taken over the scenario *definition* file — so two runs on different armies carry the same hash. Until runs are stamped and pair selection hard-fails on mismatch, no §6 verdict on the enclave outcome criteria is admissible in either direction.
 - **After R7:** R8 packaged full-campaign validation, then R9 release-candidate readiness.
 - **Publication boundary:** signing, store upload, public release creation, and a public `1.0` tag still require a separate explicit `Publish 1.0` instruction.
 
