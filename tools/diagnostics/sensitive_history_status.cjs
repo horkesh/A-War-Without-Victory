@@ -66,7 +66,6 @@ const WATCH_BRIGADES = [
     'rs_1st_birac',
     'rs_5th_podrinje',
     'rs_skelani_battalion',
-    'rs_visegrad_brigade',
 ].sort(strictCompare);
 
 function strictCompare(a, b) {

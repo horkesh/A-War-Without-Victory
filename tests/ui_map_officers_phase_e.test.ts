@@ -110,6 +110,19 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
   brigade_aor: {},
   military: {
     formations: {
+                arbih_120th_liberation_black_swans: {
+                    id: 'arbih_120th_liberation_black_swans',
+                    faction: 'RBiH',
+                    name: '120th Liberation "Black Swans"',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    cohesion: 55,
+                    fatigue: 0,
+                    status: 'active',
+                    created_turn: 14,
+                    tags: [],
+                    officer_quality: 0.35,
+                },
                 arbih_guards_brigade: {
                     id: 'arbih_guards_brigade',
                     faction: 'RBiH',
@@ -158,16 +171,26 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
 };
 
         const result = parseGameState(state);
+        const blackSwans = result.formations.find((f) => f.id === 'arbih_120th_liberation_black_swans');
         const guards = result.formations.find((f) => f.id === 'arbih_guards_brigade');
         const vitezovi = result.formations.find((f) => f.id === 'hrhb_vitezovi_brigade_vitez');
         const protection = result.formations.find((f) => f.id === 'rs_65th_protection_motorized_regiment');
 
-        expect(guards?.eliteCommander).toEqual({
-            name: 'Dževad Rađo',
+        // Positive case: an ATTESTED pairing reaches the UI read model from the
+        // OOB sidecar with no save-state mutation. Hase Tirić is named at Balkan
+        // Battlegrounds Vol. II, PDF p.361 / printed 342.
+        expect(blackSwans?.eliteCommander).toEqual({
+            name: 'Hase Tirić',
             competence: 4,
-            aggressiveness: 3,
+            aggressiveness: 4,
             defensive_skill: 3,
         });
+        // Negative case, absent BY VERDICT rather than by oversight: the former
+        // "Dževad Rađo" attribution on this row has zero support in the full text
+        // of either BB volume, so the row carries no elite_commander and the UI
+        // must surface nothing rather than inventing a name. The gap is
+        // allowlisted with its basis in tests/oob_elite_commander_contract.test.ts.
+        expect(guards?.eliteCommander).toBeUndefined();
         expect(vitezovi?.eliteCommander).toBeUndefined();
         expect(protection?.eliteCommander?.name).toBe('Milomir Savčić');
         expect(JSON.stringify(protection?.eliteCommander)).not.toContain('war_crimes_record');

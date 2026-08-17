@@ -511,8 +511,8 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
                 lifecycle_status: 'active',
                 tags: ['pocket_destroyable'],
             }),
-            hvo_hrvoje_vukcic_brigade: makeFormation({
-                id: 'hvo_hrvoje_vukcic_brigade',
+            hrhb_102nd_brigade: makeFormation({
+                id: 'hrhb_102nd_brigade',
                 faction: 'HRHB',
                 corps_id: 'hvo_northwest_bosnia',
                 location_osid: 'op:odzak:donja_dubica',
@@ -553,7 +553,7 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
             expect(formation.readiness).toBe('active');
         }
         expect(formations.hrhb_103rd_derventa_brigade.personnel).toBe(600);
-        expect(formations.hvo_hrvoje_vukcic_brigade.personnel).toBe(1100);
+        expect(formations.hrhb_102nd_brigade.personnel).toBe(1100);
     });
 
     it('keeps loaned brigades unresolved when the loan target corps has only other-component sectors', () => {

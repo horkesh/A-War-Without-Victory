@@ -194,6 +194,11 @@ test('baked April 1992 UI read model shows opening commanders without backdating
     const view = parseGameState(state);
     const officers = state.military.named_officers ?? {};
 
+    // Reverted to the pre-R7P2 value. This pin was moved to "Vidoje Blagojević"
+    // only because the provenance pass had deleted 30 officers, which changed who
+    // won `compareOpeningOfficer` for vrs_drina. With the 22 attested officers
+    // restored, the opening read model resolves to Andrić again, as it did before
+    // the deletions — this is a revert, not a re-blessing.
     assert.deepStrictEqual(resolveCorpsCommanderDisplay('vrs_drina', 'RS', view), {
         name: 'Svetozar Andrić',
         acting: true,
@@ -317,7 +322,7 @@ test('baked April 1992 HVO Bosnian Posavina frontage is not claimed by Central B
 
     assert.deepStrictEqual(owners, [
         {
-            sector_id: 'sector:hvo_northwest_bosnia:0',
+            sector_id: 'sector:hvo_northwest_bosnia:5',
             corps_id: 'hvo_northwest_bosnia',
         },
     ]);

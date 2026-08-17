@@ -762,6 +762,8 @@ export const enMessages = {
     'warCrimes.acquitted': 'WAR CRIMES - ACQUITTED',
     'warCrimes.indicted': 'WAR CRIMES - INDICTED',
     'warCrimes.diedBeforeTrial': 'WAR CRIMES - DIED BEFORE TRIAL',
+    // Deliberately NOT prefixed "WAR CRIMES" — the man was never accused of any.
+    'warCrimes.namedInFindings': 'NAMED IN COURT FINDINGS - NOT CHARGED',
     'warCrimes.charges': 'Charges',
     'attention.title': 'PRESIDENTIAL ATTENTION',
     'attention.emptyDetail': 'No presidential military reviews pending. Situation briefing below is context only.',

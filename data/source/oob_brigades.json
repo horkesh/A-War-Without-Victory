@@ -14,14 +14,7 @@
     "initial_personnel": 480,
     "initial_cohesion": 55,
     "initial_officer_quality": 0.35,
-    "is_elite": true,
-    "elite_commander": {
-      "name": "Dževad Rađo",
-      "competence": 4,
-      "aggressiveness": 3,
-      "defensive_skill": 3,
-      "origin": "military"
-    }
+    "is_elite": true
   },
   {
     "id": "arbih_120th_liberation_black_swans",
@@ -1873,14 +1866,7 @@
     "mandatory": true,
     "initial_personnel": 1200,
     "initial_cohesion": 72,
-    "is_elite": true,
-    "elite_commander": {
-      "name": "Zdravko Samardžić",
-      "competence": 4,
-      "aggressiveness": 4,
-      "defensive_skill": 4,
-      "origin": "jna"
-    }
+    "is_elite": true
   },
   {
     "id": "rs_1st_armored",
@@ -3125,21 +3111,6 @@
     "initial_cohesion": 64
   },
   {
-    "id": "hrhb_iroki_brijeg_brigade",
-    "faction": "HRHB",
-    "name": "Široki Brijeg Brigade",
-    "corps": "hvo_southeast_herzegovina",
-    "home_mun": "listica",
-    "home_settlement": "Široki Brijeg",
-    "home_osid": "op:listica:kocerin_2",
-    "kind": "brigade",
-    "default_equipment_class": "mountain",
-    "available_from": 0,
-    "mandatory": true,
-    "initial_personnel": 900,
-    "initial_cohesion": 62
-  },
-  {
     "id": "hrhb_ljubuki_brigade",
     "faction": "HRHB",
     "name": "Ljubuški Brigade",
@@ -3155,21 +3126,6 @@
     "initial_cohesion": 62
   },
   {
-    "id": "hrhb_grude_brigade",
-    "faction": "HRHB",
-    "name": "Grude Brigade",
-    "corps": "hvo_southeast_herzegovina",
-    "home_mun": "grude",
-    "home_settlement": "Grude",
-    "home_osid": "op:grude:grude_2",
-    "kind": "brigade",
-    "default_equipment_class": "mountain",
-    "available_from": 0,
-    "mandatory": true,
-    "initial_personnel": 900,
-    "initial_cohesion": 62
-  },
-  {
     "id": "hrhb_itluk_brigade",
     "faction": "HRHB",
     "name": "Čitluk Brigade",
@@ -3177,21 +3133,6 @@
     "home_mun": "citluk",
     "home_settlement": "Čitluk",
     "home_osid": "op:citluk:citluk_2",
-    "kind": "brigade",
-    "default_equipment_class": "mountain",
-    "available_from": 0,
-    "mandatory": true,
-    "initial_personnel": 900,
-    "initial_cohesion": 62
-  },
-  {
-    "id": "hrhb_apljina_brigade",
-    "faction": "HRHB",
-    "name": "Čapljina Brigade",
-    "corps": "hvo_southeast_herzegovina",
-    "home_mun": "capljina",
-    "home_settlement": "Čapljina",
-    "home_osid": "op:capljina:capljina_2",
     "kind": "brigade",
     "default_equipment_class": "mountain",
     "available_from": 0,
@@ -3459,18 +3400,18 @@
   {
     "id": "hrhb_102nd_brigade",
     "faction": "HRHB",
-    "name": "102nd Brigade",
+    "name": "102nd Odžak Brigade",
     "corps": "hvo_northwest_bosnia",
-    "home_mun": "orasje",
-    "home_settlement": "Orašje",
-    "home_osid": "op:orasje:orasje",
+    "home_mun": "odzak",
+    "home_settlement": "Odžak",
+    "home_osid": "op:odzak:donja_dubica",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,
     "mandatory": true,
     "initial_personnel": 650,
     "initial_cohesion": 52,
-    "fallback_osid": "op:orasje:orasje"
+    "fallback_osid": "op:odzak:donja_dubica"
   },
   {
     "id": "hrhb_103rd_derventa_brigade",
@@ -3481,7 +3422,7 @@
     "home_osid": "op:derventa:derventa_2",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 8,
+    "available_from": 0,
     "mandatory": true,
     "initial_personnel": 600,
     "initial_cohesion": 50,
@@ -3499,7 +3440,7 @@
     "home_osid": "op:bosanski_brod:brod",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 8,
+    "available_from": 0,
     "mandatory": true,
     "initial_personnel": 600,
     "initial_cohesion": 50,
@@ -3517,7 +3458,7 @@
     "home_osid": "op:modrica:garevac_2",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 8,
+    "available_from": 0,
     "mandatory": true,
     "initial_personnel": 600,
     "initial_cohesion": 50,
@@ -3631,9 +3572,10 @@
     "id": "hvo_hrvoje_vukcic_brigade",
     "faction": "HRHB",
     "name": "Hrvoje Vukčić Hrvatinić Brigade",
-    "corps": "hvo_northwest_bosnia",
-    "home_mun": "odzak",
-    "home_osid": "op:odzak:donja_dubica",
+    "corps": "hvo_central_bosnia",
+    "home_mun": "jajce",
+    "home_settlement": "Jajce",
+    "home_osid": "op:jajce:jajce_3",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 0,
@@ -3748,14 +3690,7 @@
     "initial_personnel": 1500,
     "initial_cohesion": 65,
     "is_elite": true,
-    "distinction_potential": "tier_1",
-    "elite_commander": {
-      "name": "Mato Bilonjić",
-      "competence": 3,
-      "aggressiveness": 3,
-      "defensive_skill": 4,
-      "origin": "military"
-    }
+    "distinction_potential": "tier_1"
   },
   {
     "id": "hrhb_110th_usora_brigade",
@@ -3883,7 +3818,7 @@
   {
     "id": "arbih_116th_mountain",
     "faction": "RBiH",
-    "name": "116th Mountain Brigade",
+    "name": "116th Muslim Brigade",
     "corps": "arbih_2nd_corps",
     "home_mun": "zivinice",
     "home_settlement": "Živinice",
@@ -4197,9 +4132,9 @@
     "faction": "RS",
     "name": "5th Podrinje",
     "corps": "vrs_drina",
-    "home_mun": "vlasenica",
+    "home_mun": "gorazde",
     "home_settlement": "",
-    "home_osid": "op:vlasenica:sebiocina",
+    "home_osid": "op:gorazde:podkozara_donja_2",
     "kind": "brigade",
     "default_equipment_class": "mountain",
     "available_from": 0,

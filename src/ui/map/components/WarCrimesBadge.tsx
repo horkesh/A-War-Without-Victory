@@ -5,6 +5,9 @@ const VERDICT_STYLE: Record<string, { border: string; text: string; bg: string; 
     acquitted: { border: 'border-green-500/50', text: 'text-green-400', bg: 'bg-green-900/20', iconKey: 'warCrimes.acquitted' },
     indicted: { border: 'border-amber-500/50', text: 'text-amber-400', bg: 'bg-amber-900/20', iconKey: 'warCrimes.indicted' },
     died_before_trial: { border: 'border-neutral-500/50', text: 'text-neutral-400', bg: 'bg-neutral-800/30', iconKey: 'warCrimes.diedBeforeTrial' },
+    // Findings about a non-accused. Must never inherit the `indicted` fallback below: the whole
+    // point of this state is that no one charged the man. Neutral styling, no war-crime framing.
+    named_in_findings: { border: 'border-neutral-500/50', text: 'text-neutral-400', bg: 'bg-neutral-800/30', iconKey: 'warCrimes.namedInFindings' },
 };
 
 export interface WarCrimesRecord {
@@ -16,7 +19,10 @@ export interface WarCrimesRecord {
 }
 
 export function WarCrimesBadge({ record, className }: { record: WarCrimesRecord; className?: string }) {
-    const style = VERDICT_STYLE[record.verdict] ?? VERDICT_STYLE.indicted;
+    // Unknown verdicts fall back to the non-asserting state, never to `indicted`. Rendering an
+    // unrecognised value as an indictment would have the UI accuse a named real person on the
+    // strength of a typo — the §4 failure this component exists downstream of.
+    const style = VERDICT_STYLE[record.verdict] ?? VERDICT_STYLE.named_in_findings;
     return (
         <div className={`text-xs px-1.5 py-1.5 rounded border ${style.border} ${style.bg} space-y-0.5${className ? ` ${className}` : ''}`}>
             <div className="flex items-center justify-between gap-2">

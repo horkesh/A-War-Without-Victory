@@ -70,14 +70,22 @@ export interface NamedOfficer {
 
     /** War crimes record from ICTY or BiH State Court. Informational — does not affect gameplay. */
     war_crimes_record?: {
-        /** Court that handled the case. */
+        /** Court whose record this is. For `named_in_findings`, the court that made the finding. */
         court: 'ICTY' | 'BiH State Court';
-        /** Outcome of proceedings. */
-        verdict: 'convicted' | 'acquitted' | 'died_before_trial' | 'indicted';
+        /**
+         * Outcome of proceedings.
+         *
+         * `named_in_findings` is NOT a proceeding against this officer: it records that a court
+         * made findings about him in a case where he was **not** the accused. It exists because
+         * two records once rendered "the tribunal discussed him" as "the tribunal charged him"
+         * (Milenko Živanović, Željko Šiljeg). Anything in this state has no charges and no
+         * sentence, and the UI must never label it as an indictment.
+         */
+        verdict: 'convicted' | 'acquitted' | 'died_before_trial' | 'indicted' | 'named_in_findings';
         /** Sentence if convicted (e.g. "Life imprisonment", "20 years"). */
         sentence?: string;
-        /** Primary charges. */
-        charges: string;
+        /** Primary charges. Absent when there are none — see `named_in_findings`. */
+        charges?: string;
         /** One-line summary. */
         summary: string;
     };

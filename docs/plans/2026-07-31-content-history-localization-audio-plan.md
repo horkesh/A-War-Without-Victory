@@ -260,11 +260,11 @@ npm.cmd run test:baselines
 - Create `tests/officer_state_persistence.test.ts`
 - Create `tests/officer_bio_read_model.test.ts`
 
-- [ ] Resolve exact duplicate IDs and dead corps refs.
-- [ ] Require explicit source/citation for new named rows.
-- [ ] Preserve uncertain/conflicting candidates only in the audit output, not playable data.
-- [ ] Ensure officer bios and faction/corps assignments survive startup/save/round-trip.
-- [ ] Do not derive historical identity from name similarity alone.
+- [x] Resolve exact duplicate IDs and dead corps refs.
+- [x] Require explicit source/citation for new named rows.
+- [x] Preserve uncertain/conflicting candidates only in the audit output, not playable data.
+- [x] Ensure officer bios and faction/corps assignments survive startup/save/round-trip.
+- [x] Do not derive historical identity from name similarity alone.
 
 ```powershell
 npm.cmd run test:vitest -- tests/canon_officer_corps_refs.test.ts tests/officer_oob_provenance.test.ts tests/officer_state_persistence.test.ts tests/officer_bio_read_model.test.ts --pool=forks --reporter=dot
@@ -273,6 +273,15 @@ npm.cmd run test:baselines
 ```
 
 `/simplify` -> historian/QA review -> commit `fix(oob): close officer provenance`
+
+**Phase 2 closeout -- 2026-08-15:**
+
+- The playable census is 334 exact supported identities: 68 officers, 19 corps, 244 brigades, and 3 named elite-command links. Forty unsupported, conflicting, or duplicate candidates remain explicit research-only audit rows and are absent from playable data. The diagnostic reports zero unsupported playable rows and zero blocking violations.
+- Four exact brigade alias families now have one immutable playable ID apiece. The unsupported `Hrvoje Vukčić Hrvatinić` Odžak assignment is omitted because the accepted evidence instead identifies a Jajce formation/remnant and a later same-name Prozor-Rama regiment. All live operation, localization, diagnostic, and regression references use retained IDs.
+- Two exact official-source officer mappings, Slavko Lisica and Midhat Hujdur, are retained. Unsupported officer identities and five unsupported elite-commander attributions were removed; two unsupported court dispositions were removed rather than inferred.
+- The OOB lookup now exposes exact immutable-ID resolution and rejects duplicate IDs. Startup, canonical serialization, hydration, and the UI read model preserve the retained officer roster, assignment fields, and biographies without name-similarity promotion.
+- Opening Posavina availability now reflects the documented April-May 1992 Brod-Derventa-Modriča force. The regenerated startup artifact keeps the Bosnian Posavina edge under Northwest Bosnia command and passes sector-truth validation.
+- Focused verification passes 8 files / 84 tests; adjacent stale-reference coverage passes 2 files / 55 tests; TypeScript passes. The simplification pass retained the explicit implementation, and independent QA/determinism review is recorded in the project ledger.
 
 ## Phase 3 -- DEFERRED POST-1.0 -- Bosnian locale contract and localizability
 

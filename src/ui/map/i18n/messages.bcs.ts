@@ -762,6 +762,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'warCrimes.acquitted': 'RATNI ZLOČINI - OSLOBOĐEN',
     'warCrimes.indicted': 'RATNI ZLOČINI - OPTUŽEN',
     'warCrimes.diedBeforeTrial': 'RATNI ZLOČINI - UMRO PRIJE SUĐENJA',
+    // Namjerno bez prefiksa "RATNI ZLOČINI" — nije bio optužen.
+    'warCrimes.namedInFindings': 'IMENOVAN U SUDSKIM NALAZIMA - NIJE OPTUŽEN',
     'warCrimes.charges': 'Optužbe',
     'attention.title': 'PREDSJEDNIČKA PAŽNJA',
     'attention.emptyDetail': 'Nema predsjedničkih vojnih pregleda na čekanju. Brifing situacije ispod je samo kontekst.',

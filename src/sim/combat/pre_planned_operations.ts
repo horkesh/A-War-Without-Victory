@@ -830,7 +830,6 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                 // (VRS held those positions; HVO did not take them in Op Jackal)
                 brigades: [
                     'hrhb_stolac_units',
-                    'hrhb_apljina_brigade',
                     'hrhb_1st_herzegovina_brigade_knez_domagoj',
                     'hv_4th_guards_tg',
                     'hv_1st_guards_tg',

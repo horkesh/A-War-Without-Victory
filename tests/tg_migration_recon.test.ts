@@ -77,14 +77,14 @@ describe('Phase 4 Fix 1 — phantom anchors never anchor a TG', () => {
         // Phantom has more personnel + heavy equipment (higher basePower) but would evaporate.
         const state = stateWith([
             phantom('jna_uzice_corps_tg'),
-            brigade('rs_visegrad_brigade', { personnel: 1400 }),
+            brigade('rs_5th_podrinje', { personnel: 1400 }),
         ]);
         const anchor = resolveTgAnchor(
             state,
-            { assigned_brigades: ['jna_uzice_corps_tg', 'rs_visegrad_brigade'] },
+            { assigned_brigades: ['jna_uzice_corps_tg', 'rs_5th_podrinje'] },
             new Set(),
         );
-        expect(anchor).toBe('rs_visegrad_brigade');
+        expect(anchor).toBe('rs_5th_podrinje');
     });
 
     it('returns null for an all-phantom axis (Op Prsten ilijas_ring) → no TG, legacy path', () => {

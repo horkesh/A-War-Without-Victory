@@ -96,11 +96,11 @@
       "id": "arbih_116th_mountain",
       "faction": "RBiH",
       "designation_code": "AWWV-BDE-ARBIH-116TH-MOUNTAIN",
-      "english_gloss": "116th Mountain Brigade",
-      "official_bcs": "116. brdska brigada",
-      "unit_type": "mountain",
+      "english_gloss": "116th Muslim Brigade",
+      "official_bcs": "116. muslimanska brigada",
+      "unit_type": "infantry",
       "echelon": "brigade",
-      "source_basis": "catalogued_designation"
+      "source_basis": "source_verified_designation"
     },
     {
       "id": "arbih_120th_liberation_black_swans",
@@ -1226,11 +1226,11 @@
       "id": "hrhb_102nd_brigade",
       "faction": "HRHB",
       "designation_code": "AWWV-BDE-HRHB-102ND-BRIGADE",
-      "english_gloss": "102nd Brigade",
-      "official_bcs": "102. brigada",
+      "english_gloss": "102nd Odžak Brigade",
+      "official_bcs": "102. odžačka brigada",
       "unit_type": "brigade",
       "echelon": "brigade",
-      "source_basis": "catalogued_designation"
+      "source_basis": "source_verified_designation"
     },
     {
       "id": "hrhb_103rd_derventa_brigade",
@@ -1383,16 +1383,6 @@
       "source_basis": "catalogued_designation"
     },
     {
-      "id": "hrhb_apljina_brigade",
-      "faction": "HRHB",
-      "designation_code": "AWWV-BDE-HRHB-APLJINA-BRIGADE",
-      "english_gloss": "Čapljina Brigade",
-      "official_bcs": "Čapljinska brigada",
-      "unit_type": "brigade",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
       "id": "hrhb_ban_jelai_brigade",
       "faction": "HRHB",
       "designation_code": "AWWV-BDE-HRHB-BAN-JELAI-BRIGADE",
@@ -1403,31 +1393,11 @@
       "source_basis": "catalogued_designation"
     },
     {
-      "id": "hrhb_grude_brigade",
-      "faction": "HRHB",
-      "designation_code": "AWWV-BDE-HRHB-GRUDE-BRIGADE",
-      "english_gloss": "Grude Brigade",
-      "official_bcs": "Grudska brigada",
-      "unit_type": "brigade",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
       "id": "hrhb_herceg_stjepan_brigade",
       "faction": "HRHB",
       "designation_code": "AWWV-BDE-HRHB-HERCEG-STJEPAN-BRIGADE",
       "english_gloss": "Herceg Stjepan Brigade",
       "official_bcs": "Brigada \"Herceg Stjepan\"",
-      "unit_type": "brigade",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "hrhb_iroki_brijeg_brigade",
-      "faction": "HRHB",
-      "designation_code": "AWWV-BDE-HRHB-IROKI-BRIJEG-BRIGADE",
-      "english_gloss": "Široki Brijeg Brigade",
-      "official_bcs": "Širokobriješka brigada",
       "unit_type": "brigade",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -1623,21 +1593,21 @@
       "source_basis": "catalogued_designation"
     },
     {
-      "id": "hvo_hrvoje_vukcic_brigade",
-      "faction": "HRHB",
-      "designation_code": "AWWV-BDE-HVO-HRVOJE-VUKCIC-BRIGADE",
-      "english_gloss": "Hrvoje Vukčić Hrvatinić Brigade",
-      "official_bcs": "Brigada \"Hrvoje Vukčić Hrvatinić\"",
-      "unit_type": "brigade",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
       "id": "hvo_nikola_subic_zrinski_brigade",
       "faction": "HRHB",
       "designation_code": "AWWV-BDE-HVO-NIKOLA-SUBIC-ZRINSKI-BRIGADE",
       "english_gloss": "Nikola Šubić Zrinski Brigade",
       "official_bcs": "Brigada \"Nikola Šubić Zrinski\"",
+      "unit_type": "brigade",
+      "echelon": "brigade",
+      "source_basis": "catalogued_designation"
+    },
+    {
+      "id": "hvo_hrvoje_vukcic_brigade",
+      "faction": "HRHB",
+      "designation_code": "AWWV-BDE-HVO-HRVOJE-VUKCIC-BRIGADE",
+      "english_gloss": "Hrvoje Vukčić Hrvatinić Brigade",
+      "official_bcs": "Brigada \"Hrvoje Vukčić Hrvatinić\"",
       "unit_type": "brigade",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -2468,16 +2438,6 @@
       "designation_code": "AWWV-BDE-RS-TRNOVO-BRIGADE",
       "english_gloss": "Trnovo Brigade",
       "official_bcs": "Trnovska brigada",
-      "unit_type": "brigade",
-      "echelon": "brigade",
-      "source_basis": "catalogued_designation"
-    },
-    {
-      "id": "rs_visegrad_brigade",
-      "faction": "RS",
-      "designation_code": "AWWV-BDE-RS-VISEGRAD-BRIGADE",
-      "english_gloss": "Višegrad Brigade",
-      "official_bcs": "2. podrinjska laka pješadijska brigada (Višegrad)",
       "unit_type": "brigade",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"

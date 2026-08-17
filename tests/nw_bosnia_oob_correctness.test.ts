@@ -33,17 +33,29 @@
  * Fix scope (4 OOB rows):
  *   - `hvo_northwest_bosnia` (corps): 10 → 0
  *   - `hrhb_101st_oraje_brigade`: 2 → 0  (Orašje, survived 1992)
- *   - `hrhb_102nd_brigade`: 8 → 0        (Orašje, survived 1992)
+ *   - `hrhb_102nd_brigade`: 8 → 0        (survived 1992)
  *   - `hrhb_106th_bosanska_posavina_brigade`: 8 → 0 (Orašje, survived 1992)
  *
+ * Provenance correction after this lane:
+ *   - `hvo_hrvoje_vukcic_brigade`: removed from the playable Posavina OOB.
+ *     ICTY testimony identifies it as a Jajce formation/remnant, while a later
+ *     OOB identifies a same-name home-defence regiment in Prozor-Rama; neither
+ *     supports the former Odžak assignment.
+ *   - `hrhb_102nd_brigade`: re-homed Orašje → Odžak and glossed "102nd Odžak
+ *     Brigade". BB1 PDF p.437 names the six original Orašje Corps District
+ *     brigades — "101st Bosanski Brod, 102nd Odzak, 103rd Derventa, 104th
+ *     Samac, 105th Modrica, 106th Orasje" — and pp.437-438 record that five of
+ *     the six lost their home regions in 1992 and were folded into the
+ *     201st/202nd Home Defence Regiments at Orašje in early 1994. The Orašje
+ *     home came from the October 1995 OOB (post-consolidation) and is wrong for
+ *     an April 1992 start. Removing the Hrvoje row was a NAME correction only;
+ *     BB1 p.182 has HV/HVO holding strong positions near Odžak until the town
+ *     fell on 12 July 1992, so Odžak must open with an HVO defender (T8).
  * Out of scope (kept as-is):
- *   - `hvo_hrvoje_vukcic_brigade`: already `available_from=0`
- *   - `hrhb_103rd_derventa_brigade`: kept `available_from=8`
- *     (`pocket_destroyable` is legacy authored metadata, not removal authority)
- *   - `hrhb_104th_bosanski_brod_brigade`: kept `available_from=8`
- *     (`pocket_destroyable` is legacy authored metadata, not removal authority)
- *   - `hrhb_105th_modrica_brigade`: kept `available_from=8`
- *     (ordinary canonical dissolution rules apply)
+ *   - `hrhb_103rd_derventa_brigade`, `hrhb_104th_bosanski_brod_brigade`,
+ *     and `hrhb_105th_modrica_brigade`: corrected to `available_from=0`.
+ *     BB1 pp. 181-182 places the HVO/HV Posavina force in combat across
+ *     Brod-Derventa-Modriča during April-May 1992.
  */
 
 import assert from 'node:assert';
@@ -180,31 +192,46 @@ test('T5: static-grep — no per-faction OOB branches added (faction-symmetric m
     }
 });
 
-test('T6: hvo_hrvoje_vukcic_brigade unchanged at available_from=0 (pre-existing canonical value, NOT in this lane scope)', async () => {
-    // The existing 0-availability entry in NW Bosnia. Test asserts we did not
-    // accidentally regress it while editing sibling rows.
+test('T6: the Hrvoje Vukčić brigade is a JAJCE formation under Central Bosnia, not Odžak and not Tomislavgrad', async () => {
+    // This row has now been wrong in three different ways, so all three are pinned.
+    //  - It was homed at ODŽAK under NW Bosnia. Unsupported; that was the original defect.
+    //  - It was then DELETED outright on the strength of the name being a Jajce one.
+    //    That threw away a real formation: BB2 Annex 29, PDF p.349/330, has the
+    //    defenders "organized under the Jajce Municipal Headquarters ... about two
+    //    battalions of local troops -- about 1,000 men", and Jajce had zero brigades
+    //    of any faction at t0 while it was gone.
+    //  - The obvious repo table (WIKIPEDIA_OOB_CROSS_REFERENCE.md:484) maps the 97th
+    //    dom. puk. "(ex-Jajce)" to TOMISLAVGRAD, which is the POST-FALL reconstitution
+    //    in the Prozor-Rama area. Implementing off that line reproduces the wrong-year
+    //    defect inside its own fix. At April 1992 the parent is Central Bosnia, per
+    //    BB2 p.349/330: "the Central Bosnia Regional headquarters -- which had overall
+    //    responsibility for Jajce".
     const brigades = await loadOobBrigades(REPO_ROOT);
     const hrvoje = brigades.find(b => b.id === 'hvo_hrvoje_vukcic_brigade');
-    assert.ok(hrvoje, 'hvo_hrvoje_vukcic_brigade must exist');
-    assert.strictEqual(hrvoje.available_from, 0,
-        'hvo_hrvoje_vukcic_brigade was already at available_from=0 (Odžak; HVO original Apr 1992); must remain 0');
-    assert.strictEqual(hrvoje.corps, 'hvo_northwest_bosnia');
+    assert.ok(hrvoje, 'hvo_hrvoje_vukcic_brigade must exist as a Jajce formation');
+    assert.strictEqual(hrvoje.home_mun, 'jajce',
+        'the honorific belongs to the Jajce brigade; Odžak was never supported');
+    assert.strictEqual(hrvoje.corps, 'hvo_central_bosnia',
+        'April 1992 parent is Central Bosnia (BB2 p.349/330); Tomislavgrad is the post-fall reconstitution');
+    assert.strictEqual(hrvoje.available_from, 0);
+
+    // Jajce must not be left undefended at t0 — the condition the deletion created.
+    const jajceOpeners = brigades.filter(b => b.home_mun === 'jajce' && b.available_from === 0);
+    assert.ok(jajceOpeners.length >= 1,
+        'Jajce must open with at least one available_from=0 brigade; it held out for months against a VRS division');
 });
 
-test('T7: sibling NW-Bosnia brigades keep authored availability and pocket metadata without bypassing canonical dissolution', async () => {
-    // Per BB1 timing, these brigades historically existed in April 1992 too,
-    // but they fell to VRS during 1992 (Modrica 28 Jun, Derventa 4-5 Jul,
-    // Bosanski Brod 6 Oct). They are out of this lane's scope; their
-    // `available_from=8` value is unchanged by this fix. `pocket_destroyable`
-    // remains legacy authored metadata and does not authorize removal outside
-    // the canonical dissolution evaluator.
+test('T7: Brod-Derventa-Modriča brigades open with their documented April force and retain pocket metadata', async () => {
+    // BB1 pp. 181-182 places this HVO/HV force in combat during April-May 1992.
+    // `pocket_destroyable` remains legacy authored metadata and does not
+    // authorize removal outside the canonical dissolution evaluator.
     const brigades = await loadOobBrigades(REPO_ROOT);
     const siblings = ['hrhb_103rd_derventa_brigade', 'hrhb_104th_bosanski_brod_brigade', 'hrhb_105th_modrica_brigade'];
     for (const bid of siblings) {
         const b = brigades.find(x => x.id === bid);
         assert.ok(b, `${bid} must exist`);
-        assert.strictEqual(b.available_from, 8,
-            `${bid}.available_from must remain 8 (out of this lane's scope); got ${b.available_from}`);
+        assert.strictEqual(b.available_from, 0,
+            `${bid}.available_from must be 0 for the documented opening Posavina campaign; got ${b.available_from}`);
     }
     // Spot-check the legacy authored metadata remains on the 103rd + 104th.
     const has103rd = brigades.find(b => b.id === 'hrhb_103rd_derventa_brigade');
@@ -213,4 +240,44 @@ test('T7: sibling NW-Bosnia brigades keep authored availability and pocket metad
         'hrhb_103rd_derventa_brigade retains its authored pocket_destroyable metadata');
     assert.ok(has104th && Array.isArray(has104th.tags) && has104th.tags.includes('pocket_destroyable'),
         'hrhb_104th_bosanski_brod_brigade retains its authored pocket_destroyable metadata');
+});
+
+test('T8: Odžak opens with an HVO defender — a name correction must never leave the municipality empty', async () => {
+    // WHY THIS PIN EXISTS. `hvo_hrvoje_vukcic_brigade` was deleted outright (T6)
+    // because ICTY evidence makes "Hrvoje Vukčić Hrvatinić" a Jajce/Prozor-Rama
+    // name. That establishes only that the NAME was wrong at Odžak. BB1 p.182 has
+    // HV/HVO forces holding strong positions near Odžak against the 1st Krajina
+    // Corps until the town fell on 12 July 1992, and BB1 p.437 names the 102nd
+    // Odžak Brigade among the six original Orašje Corps District brigades. So an
+    // Odžak HVO garrison at t0 is a sourced structural fact, independent of which
+    // row carries it. Deleting a row on name grounds silently removed it once;
+    // this test is what makes that recur loudly instead of silently.
+    const brigades = await loadOobBrigades(REPO_ROOT);
+    const odzakHvo = brigades.filter(b =>
+        b.faction === 'HRHB' &&
+        b.home_mun === 'odzak' &&
+        b.available_from === 0);
+
+    assert.ok(odzakHvo.length >= 1,
+        'Odžak must open with at least one available_from=0 HRHB brigade ' +
+        '(BB1 p.182: HV/HVO held positions near Odžak until 12 July 1992). ' +
+        `Found ${odzakHvo.length}. If a row was renamed or retired, re-home the ` +
+        'garrison — do not leave the municipality undefended.');
+
+    // Liveness + placement: the garrison must sit on an Odžak OSID, not merely
+    // claim odzak as home_mun while physically homed elsewhere.
+    for (const b of odzakHvo) {
+        assert.ok(typeof b.home_osid === 'string' && b.home_osid.startsWith('op:odzak:'),
+            `${b.id}.home_osid must be an Odžak OSID; got ${String(b.home_osid)}`);
+    }
+
+    // The 102nd is the sourced carrier (BB1 p.437). Pinned by id so that a future
+    // re-home away from Odžak has to confront this citation rather than pass by
+    // satisfying the count above with an unrelated row.
+    const the102nd = brigades.find(b => b.id === 'hrhb_102nd_brigade');
+    assert.ok(the102nd, 'hrhb_102nd_brigade must exist');
+    assert.strictEqual(the102nd.home_mun, 'odzak',
+        'BB1 p.437 names the 102nd as the Odžak brigade of the original six; its ' +
+        'Orašje home came from the October 1995 post-consolidation OOB and is ' +
+        'wrong for an April 1992 start');
 });

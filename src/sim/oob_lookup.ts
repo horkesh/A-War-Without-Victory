@@ -22,6 +22,8 @@ export interface MunPopRecord {
 }
 
 export type OOBLookupFunctions = {
+    /** Exact immutable-ID lookup. Never normalizes or compares display names. */
+    brigadeByIdLookup: (formationId: string) => MinimalBrigade | null;
     nameLookup: (faction: string, mun_id: string, ordinal: number) => string | null;
     hqLookup: (faction: string, mun_id: string, ordinal: number) => string | null;
 };
@@ -41,8 +43,13 @@ export function createOOBLookup(
 
     // 1. Build map: (faction, mun_id) -> sorted list of brigades
     const brigadesByKey = new Map<string, MinimalBrigade[]>();
+    const brigadesById = new Map<string, MinimalBrigade>();
 
     for (const b of brigades) {
+        if (brigadesById.has(b.id)) {
+            throw new Error(`Duplicate OOB formation id: ${b.id}`);
+        }
+        brigadesById.set(b.id, b);
         if (!b.faction || !b.home_mun) continue;
         const key = `${b.faction}:${b.home_mun}`;
         if (!brigadesByKey.has(key)) {
@@ -82,6 +89,9 @@ export function createOOBLookup(
         return list[ordinal - 1].name;
     };
 
+    const brigadeByIdLookup = (formationId: string): MinimalBrigade | null =>
+        brigadesById.get(formationId) ?? null;
+
     const hqLookup = (faction: string, mun_id: string, ordinal: number): string | null => {
         const key = `${faction}:${mun_id}`;
         const list = brigadesByKey.get(key);
@@ -115,5 +125,5 @@ export function createOOBLookup(
         return null;
     };
 
-    return { nameLookup, hqLookup };
+    return { brigadeByIdLookup, nameLookup, hqLookup };
 }

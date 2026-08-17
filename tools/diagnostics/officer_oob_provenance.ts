@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 export const OFFICER_OOB_PROVENANCE_MANIFEST_PATH = 'docs/provenance/OFFICER_OOB_PROVENANCE.json';
 
-export type ProvenanceRecordKind = 'officer' | 'corps' | 'brigade' | 'elite_commander' | 'manifest_orphan';
+export type ProvenanceRecordKind = 'officer' | 'corps' | 'brigade' | 'elite_commander' | 'omitted_candidate' | 'manifest_orphan';
 export type ProvenanceSeverity = 'blocking' | 'warning';
 export type SourceTier = 'official' | 'primary' | 'tribunal' | 'scholarly' | 'archival' | 'dataset' | 'unverified';
 export type IdentityConfidence = 'exact' | 'inferred' | 'conflict' | 'unverified';
@@ -31,7 +31,16 @@ export interface OfficerOobProvenanceEntry {
 export interface OfficerOobProvenanceManifest {
     schema_version: 1;
     defaults?: OfficerOobProvenanceEntry;
+    omitted_candidates?: Record<string, OfficerOobOmittedCandidateEntry>;
     records: Record<string, Partial<OfficerOobProvenanceEntry>>;
+}
+
+export interface OfficerOobOmittedCandidateEntry extends OfficerOobProvenanceEntry {
+    former_record_kind: 'officer' | 'brigade' | 'elite_commander';
+    display_name: string;
+    faction: string;
+    formation_ref: string | null;
+    corps_refs: string[];
 }
 
 export interface OfficerLike {
@@ -108,6 +117,7 @@ export interface OfficerOobProvenanceReport {
     summary: {
         total_records: number;
         manifest_records: number;
+        omitted_candidate_records: number;
         supported_records: number;
         unsupported_records: number;
         blocking_violations: number;
@@ -115,11 +125,12 @@ export interface OfficerOobProvenanceReport {
         violations_by_code: Record<string, number>;
     };
     records: OfficerOobProvenanceRecord[];
+    omitted_candidates: OfficerOobProvenanceRecord[];
 }
 
 interface DerivedIdentity {
     record_key: string;
-    record_kind: Exclude<ProvenanceRecordKind, 'manifest_orphan'>;
+    record_kind: Exclude<ProvenanceRecordKind, 'omitted_candidate' | 'manifest_orphan'>;
     record_id: string;
     display_name: string;
     faction: string;
@@ -318,7 +329,12 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
                 const requiredFields: Array<keyof OfficerOobProvenanceEntry> = [
                     ...REQUIRED_EXPLICIT_SUPPORTED_FIELDS,
                 ];
-                if (identity.has_court_record) requiredFields.push('court_record_citation');
+                // Positive court evidence, when a row asserts it, must be row-owned like any
+                // other positive claim. An ABSENT court citation is deliberately not required
+                // here — see the court_record_citation_todo rule below for why.
+                if (identity.has_court_record && asNonEmpty(entry.court_record_citation)) {
+                    requiredFields.push('court_record_citation');
+                }
                 if (entry.identity_relation != null) requiredFields.push('identity_relation');
                 const inheritedPositiveFields = requiredFields.filter((field) => !hasOwnField(manifestRow, field));
                 if (inheritedPositiveFields.length > 0) {
@@ -369,10 +385,28 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
                     ));
                 }
             }
+            // SEMANTICS — an adjudicated finding without a citation is UNCITED, NOT UNTRUE.
+            //
+            // A blank `court_record_citation` says only that the paperwork is outstanding.
+            // It says nothing about whether the court, verdict, and charges recorded in the
+            // source data are correct. This rule therefore raises a TODO *against the
+            // citation field* and is deliberately non-blocking: it must never be clearable
+            // by deleting the `war_crimes_record` from playable data.
+            //
+            // This is not hypothetical. The blocking form of this rule was cleared, twice, by
+            // stripping the finding instead of sourcing it — Milenko Živanović (ICTY,
+            // indicted, genocide) and Željko Šiljeg (BiH State Court, convicted), both
+            // `disposition: supported`, both with exact source evidence sitting in the
+            // adjacent `source`/`citation` fields, both left playable with the finding gone.
+            // Content is restored by evidence, not erased by its absence; see
+            // docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md. The superset guard in
+            // tests/officer_war_crimes_record_guard.test.ts now makes that deletion loud.
             if (identity.has_court_record && !asNonEmpty(entry.court_record_citation)) {
                 violations.push(violation(
-                    'missing_court_record_citation',
-                    `${identity.record_key} carries a court record without an exact court citation.`,
+                    'court_record_citation_todo',
+                    `${identity.record_key} carries a court record that still needs an exact court citation. `
+                    + 'Supply the citation — do NOT remove the war_crimes_record to clear this.',
+                    'warning',
                 ));
             }
         }
@@ -449,7 +483,52 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
     }
     records.sort((a, b) => compareText(a.record_key, b.record_key));
 
-    const allViolations = records.flatMap((record) => record.violations);
+    const omittedCandidates = Object.entries(input.manifest.omitted_candidates ?? {})
+        .sort(([a], [b]) => compareText(a, b))
+        .map(([recordKey, entry]): OfficerOobProvenanceRecord => {
+            const violations: ProvenanceViolation[] = [];
+            if (identityByKey.has(recordKey)) {
+                violations.push(violation(
+                    'omitted_candidate_still_playable',
+                    `${recordKey} is listed as omitted but remains in playable source data.`,
+                ));
+            }
+            if (entry.disposition !== 'omitted') {
+                violations.push(violation(
+                    'omitted_candidate_wrong_disposition',
+                    `${recordKey} must use disposition omitted.`,
+                ));
+            }
+            if (!asNonEmpty(entry.conflict_note) && !asNonEmpty(entry.notes)) {
+                violations.push(violation(
+                    'omitted_candidate_missing_reason',
+                    `${recordKey} has no reason for omission.`,
+                ));
+            }
+            return {
+                record_key: recordKey,
+                record_kind: 'omitted_candidate',
+                record_id: recordKey.split(':').slice(1).join(':'),
+                display_name: entry.display_name,
+                faction: entry.faction,
+                formation_ref: entry.formation_ref,
+                corps_refs: uniqueSorted(entry.corps_refs),
+                source: entry.source,
+                source_url: entry.source_url,
+                citation: entry.citation,
+                source_tier: entry.source_tier,
+                confidence: entry.confidence,
+                identity_relation: entry.identity_relation,
+                court_record_citation: entry.court_record_citation,
+                duplicate_record_keys: [],
+                conflict: entry.conflict_note,
+                disposition: entry.disposition,
+                notes: entry.notes,
+                violations: sortViolations(violations),
+            };
+        });
+
+    const allViolations = [...records, ...omittedCandidates].flatMap((record) => record.violations);
     const violationCounts = new Map<string, number>();
     for (const item of allViolations) violationCounts.set(item.code, (violationCounts.get(item.code) ?? 0) + 1);
     const supportedRecords = records.filter((record) =>
@@ -469,6 +548,7 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
         summary: {
             total_records: sourceRecordCount,
             manifest_records: Object.keys(input.manifest.records).length,
+            omitted_candidate_records: omittedCandidates.length,
             supported_records: supportedRecords,
             unsupported_records: sourceRecordCount - supportedRecords,
             blocking_violations: allViolations.filter((item) => item.severity === 'blocking').length,
@@ -476,6 +556,7 @@ export function buildOfficerOobProvenanceReport(input: OfficerOobProvenanceInput
             violations_by_code: Object.fromEntries([...violationCounts.entries()].sort(([a], [b]) => compareText(a, b))),
         },
         records,
+        omitted_candidates: omittedCandidates,
     };
 }
 

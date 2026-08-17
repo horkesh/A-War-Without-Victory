@@ -30,13 +30,29 @@ test('loadOobBrigades preserves elite commander metadata from source rows', asyn
     const brigades = await loadOobBrigades(process.cwd());
     const byId = new Map(brigades.map((brigade) => [brigade.id, brigade]));
 
-    assert.deepStrictEqual(byId.get('arbih_guards_brigade')?.elite_commander, {
-        name: 'Dževad Rađo',
+    // Attested pairing, carried verbatim through the loader. Hase Tirić is named
+    // at Balkan Battlegrounds Vol. II, PDF p.361 / printed 342, alongside Mehdin
+    // Hodžić and Hajrudin Mešić. Do NOT swap this for arbih_guards_brigade —
+    // that row's "Dževad Rađo" is unattested and is asserted absent below.
+    assert.deepStrictEqual(byId.get('arbih_120th_liberation_black_swans')?.elite_commander, {
+        name: 'Hase Tirić',
         competence: 4,
-        aggressiveness: 3,
+        aggressiveness: 4,
         defensive_skill: 3,
         origin: 'military',
     });
+    assert.strictEqual(byId.get('hvo_3rd_guard_jastrebovi')?.elite_commander?.name, 'Ilija Nakić');
+
+    // Absent BY VERDICT, not by oversight: full-text search of both BB volumes
+    // returns zero occurrences of Rađo/Radjo/Dževad (the one "Rado" is Gaby Rado,
+    // a Sunday Telegraph journalist, BB1 p.446). The gap is allowlisted with its
+    // basis in tests/oob_elite_commander_contract.test.ts. Re-adding the block
+    // here would restore an attribution no source supports.
+    assert.strictEqual(
+        byId.get('arbih_guards_brigade')?.elite_commander,
+        undefined,
+        'arbih_guards_brigade carries no elite_commander: the Dževad Rađo attribution is unattested in the full BB corpus',
+    );
     assert.strictEqual(byId.get('rs_65th_protection_motorized_regiment')?.elite_commander?.name, 'Milomir Savčić');
     assert.strictEqual(
         byId.get('rs_65th_protection_motorized_regiment')?.elite_commander?.war_crimes_record?.verdict,

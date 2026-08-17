@@ -29,6 +29,25 @@
     ],
     "manifest": {
       "schema_version": 1,
+      "omitted_candidates": {
+        "officer:officer_candidate": {
+          "former_record_kind": "officer",
+          "display_name": "Candidate Officer",
+          "faction": "RBiH",
+          "formation_ref": null,
+          "corps_refs": ["corps_exact"],
+          "source": null,
+          "source_url": null,
+          "citation": null,
+          "source_tier": "unverified",
+          "confidence": "unverified",
+          "identity_relation": null,
+          "court_record_citation": null,
+          "conflict_note": "Identity or assignment is not supported by an accepted source.",
+          "disposition": "omitted",
+          "notes": "Retained for research only; absent from playable data."
+        }
+      },
       "records": {
         "brigade:brigade_exact": {
           "source": "Official OOB",
