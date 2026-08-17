@@ -37,10 +37,15 @@
  *   - `hrhb_106th_bosanska_posavina_brigade`: 8 → 0 (Orašje, survived 1992)
  *
  * Provenance correction after this lane:
- *   - `hvo_hrvoje_vukcic_brigade`: removed from the playable Posavina OOB.
- *     ICTY testimony identifies it as a Jajce formation/remnant, while a later
- *     OOB identifies a same-name home-defence regiment in Prozor-Rama; neither
- *     supports the former Odžak assignment.
+ *   - `hvo_hrvoje_vukcic_brigade`: the evidence identifies it as a JAJCE formation
+ *     (BB2 Annex 29, PDF p.349/330) under Central Bosnia, and a later OOB
+ *     identifies a same-name home-defence regiment in Prozor-Rama; neither
+ *     supports the Odžak assignment. THE ROW NONETHELESS CARRIES THE ODŽAK VALUE
+ *     ON CALIBRATION GROUNDS — the Jajce placement was implemented, measured in
+ *     run n223, and withdrawn because it produced an indestructible attrition sink
+ *     (85 defensive battles, 79 lost, 8,932 casualties absorbed, finishing ACTIVE
+ *     at 1,440 from a 1,100 start). This is a documented divergence, enforced by
+ *     T6 below, not an unexamined error. Read T6's header before touching the row.
  *   - `hrhb_102nd_brigade`: re-homed Orašje → Odžak and glossed "102nd Odžak
  *     Brigade". BB1 PDF p.437 names the six original Orašje Corps District
  *     brigades — "101st Bosanski Brod, 102nd Odzak, 103rd Derventa, 104th
@@ -192,33 +197,90 @@ test('T5: static-grep — no per-faction OOB branches added (faction-symmetric m
     }
 });
 
-test('T6: the Hrvoje Vukčić brigade is a JAJCE formation under Central Bosnia, not Odžak and not Tomislavgrad', async () => {
-    // This row has now been wrong in three different ways, so all three are pinned.
-    //  - It was homed at ODŽAK under NW Bosnia. Unsupported; that was the original defect.
-    //  - It was then DELETED outright on the strength of the name being a Jajce one.
-    //    That threw away a real formation: BB2 Annex 29, PDF p.349/330, has the
-    //    defenders "organized under the Jajce Municipal Headquarters ... about two
-    //    battalions of local troops -- about 1,000 men", and Jajce had zero brigades
-    //    of any faction at t0 while it was gone.
-    //  - The obvious repo table (WIKIPEDIA_OOB_CROSS_REFERENCE.md:484) maps the 97th
-    //    dom. puk. "(ex-Jajce)" to TOMISLAVGRAD, which is the POST-FALL reconstitution
-    //    in the Prozor-Rama area. Implementing off that line reproduces the wrong-year
-    //    defect inside its own fix. At April 1992 the parent is Central Bosnia, per
-    //    BB2 p.349/330: "the Central Bosnia Regional headquarters -- which had overall
-    //    responsibility for Jajce".
+/**
+ * T6 IS A KNOWN-DIVERGENCE TEST, NOT A FIDELITY PIN. READ THIS BEFORE CHANGING IT.
+ *
+ * The playable data on this row is DELIBERATELY WRONG ON THE HISTORY, and this test
+ * exists to keep both halves of that statement true at once:
+ *   (a) the historical finding stays RECORDED and unaltered in provenance, and
+ *   (b) the playable value stays PINNED at the mechanically-required one, so the
+ *       divergence cannot drift silently into something nobody decided.
+ *
+ * Do NOT "fix" this test by asserting `home_mun === 'jajce'` again. That is not a
+ * restoration, it is a re-application of a change that was measured and withdrawn.
+ * Do NOT delete the provenance half either — without it, the only remaining record
+ * of the correct history is a comment, and comments are not enforced.
+ *
+ * WHY THE HISTORICALLY CORRECT VALUE COULD NOT BE USED, measured in run n223
+ * (runs/apr1992_definitive_188w__9e902ad68783fbe7__w188_n223). Homed at Jajce the
+ * brigade fought 85 battles across turns 18-178, ALL as defender and none as
+ * attacker, LOST 79 of them, absorbed 8,932 casualties, faced a worst-case
+ * power_ratio of 54.38 — and finished the campaign `active` with 1,440 personnel,
+ * MORE than the 1,100 it started with. It is a reinforcement sink, not a brigade.
+ * Historically the unit did not survive at all: Jajce fell in October 1992 and BB1
+ * PDF p.248 / printed 211 folds the remnants into the 55th Home Defense Regiment.
+ * Any op:jajce:* controller match it produced was a FALSE MATCH — right controller,
+ * wrong reason. The revert is therefore ON CALIBRATION GROUNDS, NOT EVIDENCE GROUNDS.
+ *
+ * THE RESTORED ODŽAK VALUE IS ALSO WRONG, and this test does not claim otherwise.
+ * At Odžak in the n222 baseline the same brigade dies at turn 9 at
+ * op:capljina:capljina_2 — five months before Jajce fell, ~150 km from either place.
+ * Neither placement is correct; the Jajce one was judged worse.
+ *
+ * TWO KNOWN CONSEQUENCES, decided rather than overlooked:
+ *   1. JAJCE OPENS UNDEFENDED at t0 — zero brigades of any faction. The former
+ *      `jajceOpeners >= 1` assertion is deliberately gone. Restoring it would
+ *      re-impose the requirement whose only available solution is the broken row.
+ *   2. THIS ROW NO LONGER SPAWNS AT ALL. It is not `mandatory`, and the retained
+ *      hrhb_102nd_brigade re-home now draws the shared Odžak manpower pool first
+ *      (recruitment_engine.ts all-or-nothing gate: 741 available < 800 cost), so
+ *      HRHB t0 formations are 38 rather than 39. That combined state was measured
+ *      by neither n222 nor n223 and is pending its own 188w. It is NOT asserted
+ *      here on purpose — pinning an unmeasured behaviour would bless it.
+ */
+test('T6: KNOWN DIVERGENCE — the Hrvoje Vukčić row carries the mechanically-required Odžak value while provenance retains the Jajce finding', async () => {
     const brigades = await loadOobBrigades(REPO_ROOT);
     const hrvoje = brigades.find(b => b.id === 'hvo_hrvoje_vukcic_brigade');
-    assert.ok(hrvoje, 'hvo_hrvoje_vukcic_brigade must exist as a Jajce formation');
-    assert.strictEqual(hrvoje.home_mun, 'jajce',
-        'the honorific belongs to the Jajce brigade; Odžak was never supported');
-    assert.strictEqual(hrvoje.corps, 'hvo_central_bosnia',
-        'April 1992 parent is Central Bosnia (BB2 p.349/330); Tomislavgrad is the post-fall reconstitution');
+    assert.ok(hrvoje, 'hvo_hrvoje_vukcic_brigade must exist; the row was deleted once already and that threw away a real formation');
+
+    // HALF 1 — the playable value is pinned at the mechanically-required one.
+    const why =
+        'This row is deliberately divergent from the evidence. At the historically ' +
+        'correct Jajce home it fought 85 defensive battles across turns 18-178, lost ' +
+        '79, absorbed 8,932 casualties, and still finished ACTIVE at 1,440 personnel ' +
+        'from a 1,100 start — an immortal attrition sink producing false op:jajce:* ' +
+        'matches, when BB1 p.248/211 has the unit destroyed at the October 1992 fall ' +
+        'of Jajce. Reverted on CALIBRATION GROUNDS, NOT EVIDENCE GROUNDS. Do not ' +
+        'restore the Jajce value without a destruction path for the 1992 fall and a ' +
+        'fresh 188w; see docs/provenance/OFFICER_OOB_PROVENANCE.json.';
+    assert.strictEqual(hrvoje.home_mun, 'odzak', why);
+    assert.strictEqual(hrvoje.home_osid, 'op:odzak:donja_dubica', why);
+    assert.strictEqual(hrvoje.corps, 'hvo_northwest_bosnia', why);
     assert.strictEqual(hrvoje.available_from, 0);
 
-    // Jajce must not be left undefended at t0 — the condition the deletion created.
-    const jajceOpeners = brigades.filter(b => b.home_mun === 'jajce' && b.available_from === 0);
-    assert.ok(jajceOpeners.length >= 1,
-        'Jajce must open with at least one available_from=0 brigade; it held out for months against a VRS division');
+    // HALF 2 — the historical finding must survive the divergence, in machine-readable
+    // form. If this half fails, the correct history has been lost and the row above is
+    // no longer a documented divergence but an undocumented error.
+    const provenanceRaw = await fs.readFile(
+        path.join(REPO_ROOT, 'docs', 'provenance', 'OFFICER_OOB_PROVENANCE.json'), 'utf8');
+    const record = JSON.parse(provenanceRaw).records?.['brigade:hvo_hrvoje_vukcic_brigade'];
+    assert.ok(record, 'the provenance record must exist — it is the only remaining carrier of the Jajce finding');
+
+    const citation = String(record.citation ?? '');
+    for (const fragment of ['Annex 29', 'p. 349 / printed 330', 'Central Bosnia Regional headquarters']) {
+        assert.ok(citation.includes(fragment),
+            `provenance citation must still carry the BB2 Jajce evidence (${fragment}). ` +
+            'The playable data diverges from this finding; deleting the finding would ' +
+            'convert a documented divergence into a silent error.');
+    }
+
+    const conflictNote = String(record.conflict_note ?? '');
+    assert.ok(conflictNote.includes('CALIBRATION GROUNDS, NOT ON EVIDENCE GROUNDS'),
+        'the provenance conflict_note must state that the Odžak value is restored on ' +
+        'calibration grounds and not on evidence grounds — that sentence is what stops ' +
+        'a future reader from re-deriving the Jajce fix and rediscovering the same failure.');
+    assert.ok(conflictNote.includes('55th Home Defense Regiment'),
+        'the provenance conflict_note must retain BB1 p.248/211 on the destruction of the unit at the fall of Jajce');
 });
 
 test('T7: Brod-Derventa-Modriča brigades open with their documented April force and retain pocket metadata', async () => {
