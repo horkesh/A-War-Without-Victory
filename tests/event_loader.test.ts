@@ -17,6 +17,18 @@ const REQUIRED_EVENT_FILES = [
 
 const REPO_EVENTS_DIR = resolve(__dirname, '..', 'data', 'scenarios', 'events');
 
+/**
+ * Independent count of catalog entries, read off the JSON rather than through
+ * the loader under test — so comparing the two catches silent drops and
+ * duplications instead of restating today's catalog size as a magic number.
+ */
+function catalogEntryCountOnDisk(): number {
+    return REQUIRED_EVENT_FILES.reduce((total, file) => {
+        const parsed = JSON.parse(readFileSync(join(REPO_EVENTS_DIR, file), 'utf8')) as unknown[];
+        return total + parsed.length;
+    }, 0);
+}
+
 const tempDirs: string[] = [];
 
 afterEach(() => {
@@ -85,20 +97,20 @@ function assertCatalogRowsThrow(rows: unknown[], expected: RegExp): void {
     );
 }
 
-test('loadEventDefinitions(0) returns the current 299-row catalog', () => {
+test('loadEventDefinitions(0) loads every entry of every catalog file, dropping none', () => {
     const loaded = loadEventDefinitions(0);
 
-    // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events in
-    // consequences.json (csq_winter_held_audit, csq_corridor_blocked_audit,
-    // csq_arms_embargo_compliance_audit, csq_political_unity_audit).
-    // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992 (war_1992.json).
-    // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json):
-    //   hrhb_herceg_bosna_consolidation_1992, hrhb_summer_alliance_strain_1992,
-    //   hrhb_zagreb_supply_channel_1992. Calibration-inert (historical-default
-    //   path carries only narrative / cost_ledger_annotation / read-model flags).
-    // 297 → 299: +2 sourced HRHB October/November 1992 decision events:
-    //   hrhb_posavina_orasje_posture_1992, hrhb_jajce_withdrawal_posture_1992.
-    assert.strictEqual(loaded.length, 299);
+    // Derived, not pinned. The loader's row count is compared against an
+    // independent count taken straight off the catalog JSON, so this asserts
+    // the property that matters — the loader drops and duplicates nothing —
+    // rather than restating today's catalog size.
+    //
+    // Until 2026-08-17 this was `assert.strictEqual(loaded.length, 299)` with
+    // a hand-written `NN → NN` changelog above it. The changelog had gone
+    // wrong: it named `hrhb_jajce_withdrawal_posture_1992`, an id that does
+    // not exist — the event is `hrhb_jajce_joint_defense_1992`.
+    assert.strictEqual(loaded.length, catalogEntryCountOnDisk());
+    assert.ok(loaded.length > 0);
 });
 
 test('loadEventDefinitions(0) returns deterministic order by trigger turn_min then id', () => {

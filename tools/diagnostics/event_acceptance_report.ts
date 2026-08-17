@@ -104,6 +104,10 @@ export const SENSITIVE_RING3_REFUSED_IDS = [
 ] as const;
 
 export const SOURCE_OR_DESIGN_DEFAULT_BLOCKED_IDS = [
+    // 2026-08-17 — see the matching entry and rationale in
+    // `event_taxonomy_report.ts` HISTORICAL_DEFAULT_BLOCKED_IDS. Held for
+    // ICTY re-sourcing; the BB1 evidence is sound and the claim stands.
+    'hrhb_zagreb_supply_channel_1992',
     'karadzic_mladic_split_1995',
     'visit_to_front_hrhb',
 ] as const;

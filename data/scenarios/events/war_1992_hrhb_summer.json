@@ -6,7 +6,7 @@
     "category": "political",
     "family": "hrhb_political_goal",
     "source_tier": "icty_icj_un",
-    "historical_source": "Balkan Battlegrounds Vol. I, pp. 180, 192, and 194; ICTY Prlic et al. Trial Judgment (IT-04-74-T), Vol. 1 §§490-525; ICTY Prlic et al. Appeals Judgment (IT-04-74-A), §§601-650.",
+    "historical_source": "Balkan Battlegrounds Vol. I, PDF pp. 181, 193 and 195 / printed 144, 156 and 158 (verified against the source PDF); ICTY Prlic et al. Trial Judgment (IT-04-74-T), Vol. 1 §§490-525 [UNVERIFIED — no local copy]; ICTY Prlic et al. Appeals Judgment (IT-04-74-A), §§601-650 [UNVERIFIED — no local copy].",
     "emergence_class": "compound",
     "trigger": {
       "turn_min": 13,
@@ -30,7 +30,7 @@
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
     "historical_default_response_id": "formalize_institutions",
-    "source_note": "HZ HB first proclaimed November 1991 (Balkan Battlegrounds I p.180: 'the first overt steps toward Bosnian Croat political autonomy came in November 1991 with the formation of the Croatian Community of Herceg-Bosna'); statutory consolidation on 3 July 1992 declared the HVO the supreme defence body of HZ HB and established its executive (ICTY Prlic et al. IT-04-74 Trial Judgement Vol. 1 §§490-525). Mate Boban rose to political dominance over HZ HB 'through the workings of Tudjman's visible hand' (BB1 p.194). Mostar = seat; 1939 Banovina territorial template (Prlic Appeals §§601-650). Operation Jackal (June 1992) relieved Mostar from the JNA under joint HV-HVO command (BB1 p.192), so the anti-VRS alliance held through summer 1992. Historical bot formalizes the institutions per the documented HZ HB statutory record.",
+    "source_note": "HZ HB first proclaimed November 1991 (Balkan Battlegrounds I, PDF p.181 / printed 144: 'the first overt steps toward Bosnian Croat political autonomy came in November 1991 with the formation of the Croatian Community of Herceg-Bosna'); statutory consolidation on 3 July 1992 declared the HVO the supreme defence body of HZ HB and established its executive (ICTY Prlic et al. IT-04-74 Trial Judgement Vol. 1 §§490-525 — UNVERIFIED, no local copy). Mate Boban rose to political dominance over HZ HB 'through the workings of Tudjman's visible hand' (BB1 PDF p.195 / printed 158). Mostar = seat; 1939 Banovina territorial template (Prlic Appeals §§601-650 — UNVERIFIED, no local copy). Operation Jackal (June 1992) relieved Mostar from the JNA under joint HV-HVO command (BB1 PDF p.193 / printed 156), so the anti-VRS alliance held through summer 1992. PAGE CONVENTION: BB1 references in this file give the PDF page with the printed folio alongside; the offset is PDF = printed + 37, read off docs/Balkan_BattlegroundsI.pdf directly. Each page above was confirmed to contain its quoted text. ADJUDICATION BOUNDARY: the Prlic Appeals Chamber REVERSED the Trial Chamber's finding that Tudjman, Susak and Bobetko were JCE members, holding that the Trial Chamber 'made no explicit findings concerning their participation in the JCE' (docs/50_research/icty_hrhb_political_goal.md:55). Nothing in this row asserts, or may be read to assert, an adjudicated finding of JCE membership against any of them; the row states institutional consolidation and Boban's political rise, which BB1 supports directly. Historical bot formalizes the institutions per the documented HZ HB statutory record.",
     "staff_assessment": "Standing up Herceg-Bosna's institutions this summer matches the documented 3 July 1992 statutory record and raises the political ceiling for the Croat project, at the cost of harder questions later about parallel institutions inside Bosnia. A dual-track posture preserves more room with Sarajevo; a minimal entity keeps the joint front cleanest but forfeits the institutional fact-on-the-ground.",
     "trigger_evidence": [
       "The HZ HB statutory decision of 3 July 1992 is on the table; the HVO is to be named its supreme defence body.",
@@ -62,7 +62,7 @@
             "certainty": "guaranteed",
             "opens_flags": [ "hrhb_1992_institutionalization" ],
             "material_effect_refs": [ "cost_ledger_annotation.hzhb_institutions_formalized_1992" ],
-            "explanation": "Recording hrhb_1992_institutionalization=formalized marks the documented 3 July 1992 HZ HB statutory consolidation (Prlic IT-04-74 Vol. 1 §§490-525; BB1 p.180, p.194). Calibration-inert: the historical default carries only an audit-only cost-ledger annotation and a read-model flag — no control, supply, morale, or alliance change on the historical path. The institutional fact informs the diplomatic-scope and Vance-Owen/Owen-Stoltenberg branches authored elsewhere (hrhb_territorial_scope_1993, hrhb_vance_owen_acceptance_1993) without opening or closing them here."
+            "explanation": "Recording hrhb_1992_institutionalization=formalized marks the documented 3 July 1992 HZ HB statutory consolidation (BB1 PDF p.181 / printed 144 and PDF p.195 / printed 158; Prlic IT-04-74 Vol. 1 §§490-525 — UNVERIFIED). Calibration-inert: the historical default carries only an audit-only cost-ledger annotation and a read-model flag — no control, supply, morale, or alliance change on the historical path. The institutional fact informs the diplomatic-scope and Vance-Owen/Owen-Stoltenberg branches authored elsewhere (hrhb_territorial_scope_1993, hrhb_vance_owen_acceptance_1993) without opening or closing them here."
           }
         ],
         "dimension_shifts": [
@@ -147,7 +147,7 @@
     "category": "political",
     "family": "hrhb_political_goal",
     "source_tier": "icty_icj_un",
-    "historical_source": "Balkan Battlegrounds Vol. I, p. 194 (July 1992 clashes over the Kaonik barracks, Bratstvo arms factory, and Ljuta Territorial Defense depot).",
+    "historical_source": "Balkan Battlegrounds Vol. I, PDF p. 195 / printed 158 (July 1992 clashes over the Kaonik barracks, Bratstvo arms factory, and Ljuta Territorial Defense depot); verified verbatim against the source PDF.",
     "emergence_class": "compound",
     "trigger": {
       "turn_min": 14,
@@ -171,7 +171,7 @@
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
     "historical_default_response_id": "accept_local_consolidation",
-    "source_note": "Balkan Battlegrounds I p.194: 'Muslims and Croats first clashed over control over the Kaonik Barracks at Busovaca, then at the Novi Travnik Bratstvo arms factory, and over the contents of the Ljuta Territorial Defense depot. In July the disputes escalated and confrontations spread to Vares and Vitez.' These are LOCAL, arms-and-barracks frictions in July 1992 — NOT open war. Open Croat-Muslim war is a 1993 phenomenon (Gornji Vakuf Jan 1993, Ahmici Apr 1993); the major Prozor escalation is late October 1992 (BB1 p.195) and is OUT of this Jul-Sep scope. Per docs/.../ARBIH_HVO_HOSTILITIES_TIMING.md the engine gates open RBiH-HRHB war to >= week 26 (Oct 1992); this event depicts tension only. Historical bot lets local consolidation stand.",
+    "source_note": "Balkan Battlegrounds I, PDF p.195 / printed 158: 'Muslims and Croats first clashed over control over the Kaonik Barracks at Busovaca, then at the Novi Travnik Bratstvo arms factory, and over the contents of the Ljuta Territorial Defense depot. In July the disputes escalated and confrontations spread to Vares and Vitez.' These are LOCAL, arms-and-barracks frictions in July 1992 — NOT open war. Open Croat-Muslim war is a 1993 phenomenon (Gornji Vakuf Jan 1993, Ahmici Apr 1993); the major Prozor escalation is late October 1992 (BB1 PDF p.196 / printed 159) and is OUT of this Jul-Sep scope. Per docs/.../ARBIH_HVO_HOSTILITIES_TIMING.md the engine gates open RBiH-HRHB war to >= week 26 (Oct 1992); this event depicts tension only. Historical bot lets local consolidation stand.",
     "staff_assessment": "Letting the local consolidations stand matches the documented summer-1992 drift — the joint front degrades through dispute, not through a central decision to break — and raises the institutional ceiling for Herceg-Bosna, at the cost of the anti-VRS alliance fraying. Disciplining the commanders preserves the alliance floor but cedes the barracks and depots. Negotiating local arms-sharing is the hardest needle to thread.",
     "trigger_evidence": [
       "Local clashes over the Kaonik barracks (Busovaca), the Novi Travnik 'Bratstvo' factory, and the Ljuta depot are documented for July 1992.",
@@ -203,7 +203,7 @@
             "certainty": "conditional",
             "opens_flags": [ "hrhb_1992_summer_friction" ],
             "material_effect_refs": [ "cost_ledger_annotation.hrhb_summer_friction_1992" ],
-            "explanation": "Recording hrhb_1992_summer_friction=consolidation_stands marks the documented July 1992 arms-and-barracks frictions (BB1 p.194). Calibration-inert: the historical default carries only an audit-only annotation and a read-model flag — no control flip, no morale/supply/alliance change. Per ARBIH_HVO_HOSTILITIES_TIMING.md open RBiH-HRHB war is engine-gated to >= week 26; this event cannot and does not produce a bilateral flip. The accumulating friction informs the existing 1993 Graz-collapse and Gornji-Vakuf branches (hrhb_1992_graz_cooperation_collapse, gornji_vakuf_clashes_1993) without opening or closing them here."
+            "explanation": "Recording hrhb_1992_summer_friction=consolidation_stands marks the documented July 1992 arms-and-barracks frictions (BB1 PDF p.195 / printed 158). Calibration-inert: the historical default carries only an audit-only annotation and a read-model flag — no control flip, no morale/supply/alliance change. Per ARBIH_HVO_HOSTILITIES_TIMING.md open RBiH-HRHB war is engine-gated to >= week 26; this event cannot and does not produce a bilateral flip. The accumulating friction informs the existing 1993 Graz-collapse and Gornji-Vakuf branches (hrhb_1992_graz_cooperation_collapse, gornji_vakuf_clashes_1993) without opening or closing them here."
           }
         ],
         "dimension_shifts": [
@@ -288,7 +288,7 @@
     "category": "diplomatic",
     "family": "hrhb_political_goal",
     "source_tier": "icty_icj_un",
-    "historical_source": "Balkan Battlegrounds Vol. I, p. 180; ICTY Prlic et al. Trial Judgment (IT-04-74-T), Vol. 2 §§220-260.",
+    "historical_source": "Balkan Battlegrounds Vol. I, PDF p. 181 / printed 144 (Zagreb's two-track plan to arm indigenous Bosnian Croat units while deploying regular HV and MUP troops; the 'Zagreb-controlled HVO').",
     "emergence_class": "compound",
     "trigger": {
       "turn_min": 16,
@@ -312,10 +312,10 @@
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
     "historical_default_response_id": "deepen_patron_channel",
-    "source_note": "Balkan Battlegrounds I p.180: Zagreb pursued 'a two-track plan to organize and arm indigenous Bosnian Croat military units — begun in 1991 by Croatian Army volunteers under Zagreb's control — while deploying regular Croatian Army (HV) and MUP troops to the republic.' The HVO is described as 'the Zagreb-controlled HVO' (BB1 p.180). Gojko Susak (Croatian Defence Minister) ran the arming/officer-secondment channel; Tudjman's directives transmitted via Susak are documented in the Tudjman Presidential Transcripts admitted at ICTY Prlic et al. IT-04-74 (Vol. 2 §§220-260 on logistical support; Vol. 3 on the Tudjman-Susak channel). Historical bot deepens the patron channel — the documented summer-1992 posture.",
+    "source_note": "Balkan Battlegrounds I, PDF p.181 / printed 144: Zagreb pursued 'a two-track plan to organize and arm indigenous Bosnian Croat military units — begun in 1991 by Croatian Army volunteers under Zagreb's control — while deploying regular Croatian Army (HV) and MUP troops to the republic.' The HVO is described as 'the Zagreb-controlled HVO' (same page). BB1 attributes the channel to Zagreb and to Croatian Army 'volunteers under Zagreb's control'; it does not name an individual minister, and no such attribution is made here. Historical bot deepens the patron channel — the documented summer-1992 posture.",
     "staff_assessment": "Deepening the Zagreb channel is the documented posture: the guns, fuel, and seconded officers that keep the HVO in the field flow from Susak's logistics, and with them comes patron confidence and a clearer order of battle — at the cost of binding the HVO ever more tightly to Zagreb's agenda. Diversifying the supply base buys autonomy at a real material cost. Asserting full HVO autonomy is the cleanest break and the most expensive one.",
     "trigger_evidence": [
-      "Zagreb's two-track arming plan — Croatian Army volunteers plus regular HV/MUP deployments — is operative across summer 1992 (BB1 p.180).",
+      "Zagreb's two-track arming plan — Croatian Army volunteers plus regular HV/MUP deployments — is operative across summer 1992 (BB1 PDF p.181 / printed 144).",
       "The HVO depends on Susak's logistics channel for arms, fuel, and seconded officers."
     ],
     "response_options": [
@@ -344,7 +344,7 @@
             "certainty": "guaranteed",
             "opens_flags": [ "hrhb_1992_patron_posture" ],
             "material_effect_refs": [ "cost_ledger_annotation.hrhb_zagreb_channel_deepened_1992" ],
-            "explanation": "Recording hrhb_1992_patron_posture=channel_deepened marks the documented Zagreb two-track arming channel (BB1 p.180; Prlic IT-04-74 Vol. 2 §§220-260, Vol. 3 Tudjman-Susak transcripts). Calibration-inert: the historical default carries only an audit-only annotation, a read-model flag, and political dimension shifts — NO supply_delta, equipment_grant, control, morale, or alliance change on the historical path, so the HVO order of battle and territory are byte-identical to the floor. The deepened patron dependence informs the 1993-94 Zagreb-direction branches (zagreb_restrains_boban_vopp, zagreb_orders_hrhb_ceasefire) without opening or closing them here."
+            "explanation": "Recording hrhb_1992_patron_posture=channel_deepened marks the documented Zagreb two-track arming channel (BB1 PDF p.181 / printed 144). Calibration-inert: the historical default carries only an audit-only annotation, a read-model flag, and political dimension shifts — NO supply_delta, equipment_grant, control, morale, or alliance change on the historical path, so the HVO order of battle and territory are byte-identical to the floor. The deepened patron dependence informs the 1993-94 Zagreb-direction branches (zagreb_restrains_boban_vopp, zagreb_orders_hrhb_ceasefire) without opening or closing them here."
           }
         ],
         "dimension_shifts": [
@@ -455,8 +455,8 @@
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
     "historical_default_response_id": "hold_orasje_bridgehead",
-    "historical_source": "Balkan Battlegrounds Vol. I, pp. 181-183 (Bosanski Brod bridgehead, 4-6 October breakthrough and withdrawal, and continued Orašje corridor pressure).",
-    "source_note": "Balkan Battlegrounds I pp.181-183: HV-HVO forces first stopped the Serb takeover of Bosanski Brod, then held a constricted bridgehead until the VRS breakthrough of 4 October and capture of the town on 6 October. The withdrawal of men and equipment was in good order. The remaining HVO/ARBiH position at Orašje continued to threaten and intermittently cut the corridor in September-November 1992; the November VRS offensive failed. Historical default preserves the documented Orašje commitment without inventing a retaking of Bosanski Brod.",
+    "historical_source": "Balkan Battlegrounds Vol. I, PDF pp. 182-184 / printed 145-147 (Bosanski Brod bridgehead, 4-6 October breakthrough and withdrawal, and continued Orašje corridor pressure).",
+    "source_note": "Balkan Battlegrounds I, PDF pp.182-184 / printed 145-147: HV-HVO forces first stopped the Serb takeover of Bosanski Brod, then held a constricted bridgehead until the VRS breakthrough of 4 October and capture of the town on 6 October. The withdrawal of men and equipment was in good order. The remaining HVO/ARBiH position at Orašje continued to threaten and intermittently cut the corridor in September-November 1992; the November VRS offensive failed. Historical default preserves the documented Orašje commitment without inventing a retaking of Bosanski Brod.",
     "staff_assessment": "Bosanski Brod cannot be restored by declaration. The historically grounded course is to preserve the remaining Orašje bridgehead and keep pressure on the corridor. A Brod counterattack would gamble the withdrawn force against the VRS breakthrough; abandoning the north would release formations but surrender the one Posavina position that remained in the fight.",
     "trigger_evidence": [
       "Bosanski Brod fell on 6 October after a shifted VRS attack broke the bridgehead.",
@@ -488,7 +488,7 @@
             "certainty": "guaranteed",
             "opens_flags": [ "hrhb_1992_posavina_posture" ],
             "material_effect_refs": [ "cost_ledger_annotation.hrhb_orasje_commitment_1992" ],
-            "explanation": "Historical record: the Orašje pocket remained held and defeated the November VRS offensive (BB1 p.182). Calibration-inert: the historical default records the posture but does not grant control, supply, or combat bonuses."
+            "explanation": "Historical record: the Orašje pocket remained held and defeated the November VRS offensive (BB1 PDF p.183 / printed 146). Calibration-inert: the historical default records the posture but does not grant control, supply, or combat bonuses."
           }
         ],
         "dimension_shifts": [
@@ -571,8 +571,8 @@
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
     "historical_default_response_id": "maintain_joint_defense",
-    "historical_source": "Balkan Battlegrounds Vol. I, pp. 183-184 (Jajce joint defence, alliance strain, and the 25-29 October 1992 VRS assault).",
-    "source_note": "Balkan Battlegrounds I pp.183-184: HVO and Bosnian Territorial Defence fielded more than 5,500 motivated defenders at Jajce, weakened by the lack of unified command and alliance disputes. Bosnian Croats signed a separate ceasefire on 9 October; Croat and Muslim units exchanged fire on the supply route on 21 October. Nevertheless, both defended Jajce hard during the VRS attack of 25-29 October and yielded only after four days. BB1 explicitly finds no evidence of a Croat-Serb deal over the fall. Historical default maintains the joint defence through defeat.",
+    "historical_source": "Balkan Battlegrounds Vol. I, PDF pp. 184-185 / printed 147-148 (Jajce joint defence, alliance strain, and the 25-29 October 1992 VRS assault).",
+    "source_note": "Balkan Battlegrounds I, PDF pp.184-185 / printed 147-148: HVO and Bosnian Territorial Defence fielded more than 5,500 motivated defenders at Jajce, weakened by the lack of unified command and alliance disputes. Bosnian Croats signed a separate ceasefire on 9 October; Croat and Muslim units exchanged fire on the supply route on 21 October. Nevertheless, both defended Jajce hard during the VRS attack of 25-29 October and yielded only after four days. BB1 explicitly finds no evidence of a Croat-Serb deal over the fall. Historical default maintains the joint defence through defeat.",
     "staff_assessment": "The alliance is frayed, not absent. Keeping the joint defence intact matches the documented four-day stand and rejects the unsupported deal narrative. Splitting command during the assault prioritizes Herceg-Bosna's chain of command over battlefield unity; an early withdrawal saves forces but concedes the salient before the documented defence is exhausted.",
     "trigger_evidence": [
       "The VRS final assault is advancing on three axes after months of step-by-step pressure.",
@@ -604,7 +604,7 @@
             "certainty": "guaranteed",
             "opens_flags": [ "hrhb_1992_jajce_posture" ],
             "material_effect_refs": [ "cost_ledger_annotation.hrhb_jajce_joint_defense_1992" ],
-            "explanation": "Historical record: HVO and TO defenders fought together until Jajce fell on 29 October, with no evidence of a deal (BB1 pp.183-184). Calibration-inert: the historical default does not change control, alliance, supply, or combat values."
+            "explanation": "Historical record: HVO and TO defenders fought together until Jajce fell on 29 October, with no evidence of a deal (BB1 PDF pp.184-185 / printed 147-148). Calibration-inert: the historical default does not change control, alliance, supply, or combat values."
           }
         ],
         "dimension_shifts": [

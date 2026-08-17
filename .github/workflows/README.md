@@ -11,7 +11,7 @@ This directory contains the GitHub Actions workflow definitions for A War Withou
 | Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see "Always-report path-filter shim" below. |
 | Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |
 | Release | `release.yml` | (see file) | Tagged-release publication pipeline. |
-| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**`, PR to `main`** | **Named, explicit CI surface for event-system validation. Wraps the Phase G3 F2 strict canon-compliance gate so it is visible at PR-review time as a discrete check rather than buried inside the broader fast-test slice. Phase H Packet 10 extended the test gate with 7 Phase H suites (74 tests) for the consequence-visualization layer.** |
+| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**`, PR to `main`** | **Named, explicit CI surface for event-system validation. Wraps the Phase G3 F2 strict canon-compliance gate so it is visible at PR-review time as a discrete check rather than buried inside the broader fast-test slice. Phase H Packet 10 extended the test gate with the Phase H suites for the consequence-visualization layer.** |
 
 ## Always-report path-filter shim
 
@@ -112,15 +112,21 @@ Phase E political-dimension propagation + Phase F diagnostics:
 - `tests/sensitive_history_canon_gate_audit.test.ts` (Phase F2 audit unit tests)
 - `tests/phase_d_causality_runtime_integration.test.ts` (Phase F5 runtime integration)
 
-Phase H causality-query API + UI consequence-visualization layer (Packet 10, 74 tests):
+Phase H causality-query API + UI consequence-visualization layer (Packet 10):
 
-- `tests/causality_query.test.ts` (H2 — causality query API, 25 tests)
-- `tests/ui/event_decision_modal_decision_context.test.ts` (H3 — decision-context modal, 5 tests)
-- `tests/ui/faction_branch_tags_badge.test.ts` (H4 — faction-branch badges, 6 tests)
-- `tests/ui/codex_panel_unlock_state.test.ts` (H5 — codex unlock state, 8 tests)
-- `tests/ui/chronicle_causality_slides.test.ts` (H6 — chronicle causality slides, 11 tests)
-- `tests/ui/catalog_wireup_integration.test.ts` (H7 — catalog wire-up, 8 tests)
-- `tests/ui/decision_history_overlay.test.ts` (H8 — decision-history overlay, 11 tests)
+- `tests/causality_query.test.ts` (H2 — causality query API)
+- `tests/ui/event_decision_modal_decision_context.test.ts` (H3 — decision-context modal)
+- `tests/ui/faction_branch_tags_badge.test.ts` (H4 — faction-branch badges)
+- `tests/ui/codex_panel_unlock_state.test.ts` (H5 — codex unlock state)
+- `tests/ui/chronicle_causality_slides.test.ts` (H6 — chronicle causality slides)
+- `tests/ui/catalog_wireup_integration.test.ts` (H7 — catalog wire-up)
+- `tests/ui/archive_spine_contract.test.ts` (H8 successor — Army HQ Records → Decision Consequences)
+
+Gate integrity:
+
+- `tests/ci_workflow_test_paths_exist.test.ts` — asserts every `tests/**` path named in this directory resolves on disk.
+
+> **H8 note (2026-08-17).** This list named `tests/ui/decision_history_overlay.test.ts` until today, six weeks after `7ceddab8f` (2026-07-07) deleted it in "Retire decision history overlay into records". Vitest treats those arguments as *filters*, so the unmatched name matched nothing and failed nothing — the gate ran one file fewer than it advertised, in silence. The coverage was **migrated, not retired**: `archive_spine_contract.test.ts` is its named successor per the WP-6 ledger entry. Per-file test counts have been dropped from this list; they were hand-maintained, drifted, and are not what a reader needs from a catalog.
 
 ### Gate 3 — Phase F2 strict gate (canon-compliance hard rail)
 
@@ -146,7 +152,7 @@ SHA256 comparison of run artifacts against committed baselines. Detects engine-b
 # Gate 1
 npx tsc --noEmit
 
-# Gate 2 (one-shot all 25 files — Phase E/F substrate + Phase H consequence layer)
+# Gate 2 (one shot — Phase E/F substrate + Phase H consequence layer)
 node node_modules/vitest/vitest.mjs run \
   tests/event_loader.test.ts \
   tests/event_loader_runtime_substrate.test.ts \
@@ -172,7 +178,8 @@ node node_modules/vitest/vitest.mjs run \
   tests/ui/codex_panel_unlock_state.test.ts \
   tests/ui/chronicle_causality_slides.test.ts \
   tests/ui/catalog_wireup_integration.test.ts \
-  tests/ui/decision_history_overlay.test.ts \
+  tests/ui/archive_spine_contract.test.ts \
+  tests/ci_workflow_test_paths_exist.test.ts \
   --reporter=dot
 
 # Gate 3 (strict canon-compliance gate; the one to run after editing event JSON)

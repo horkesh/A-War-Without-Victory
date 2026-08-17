@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -9,23 +12,51 @@ import {
     loadCatalogRows,
 } from '../../../tools/diagnostics/event_taxonomy_report';
 
-describe('event taxonomy diagnostic report', () => {
-    it('loads the fixed five-file catalog in deterministic order', () => {
-        const rows = loadCatalogRows();
+/**
+ * The catalog file list is the ONE thing here that is hand-maintained on
+ * purpose: adding a file is a deliberate authoring act and should require a
+ * deliberate test edit. Everything downstream of it — totals, partitions,
+ * readiness counts — is DERIVED, because those move on every content commit
+ * and a bare pinned integer for them is a maintenance tax that gets paid
+ * late, in CI, by whoever pushes next.
+ *
+ * This file used to pin ~14 such integers, each with a hand-written
+ * `NN → NN` changelog in the comment beside it. On 2026-08-17 three of those
+ * comments were measured stale against the integer they annotated, and the
+ * suite had been red since 2026-08-15 behind a billing-blocked Actions
+ * account. The comments are gone: git history records this correctly and
+ * prose does not.
+ */
+const CATALOG_FILES = [
+    'data/scenarios/events/war_1992.json',
+    'data/scenarios/events/war_1992_hrhb_summer.json',
+    'data/scenarios/events/war_1993.json',
+    'data/scenarios/events/war_1994.json',
+    'data/scenarios/events/war_1995.json',
+    'data/scenarios/events/consequences.json',
+] as const;
 
-        // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
-        // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992.
-        // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json).
-        // 297 → 299: +2 sourced HRHB October/November 1992 decision events.
-        expect(rows).toHaveLength(299);
-        expect([...new Set(rows.map((row) => row.file))]).toEqual([
-            'data/scenarios/events/war_1992.json',
-            'data/scenarios/events/war_1992_hrhb_summer.json',
-            'data/scenarios/events/war_1993.json',
-            'data/scenarios/events/war_1994.json',
-            'data/scenarios/events/war_1995.json',
-            'data/scenarios/events/consequences.json',
-        ]);
+/**
+ * Independent count of catalog entries, read straight off disk rather than
+ * through the loader under test. Comparing the loader's row count against
+ * this catches silent drops and duplications — which a self-referential
+ * `rows.length === rows.length` derivation cannot.
+ */
+function catalogEntryCountOnDisk(): number {
+    return CATALOG_FILES.reduce((total, file) => {
+        const parsed = JSON.parse(readFileSync(join(process.cwd(), file), 'utf8')) as unknown[];
+        return total + parsed.length;
+    }, 0);
+}
+
+describe('event taxonomy diagnostic report', () => {
+    it('loads every entry of the pinned catalog file set in deterministic order', () => {
+        const rows = loadCatalogRows();
+        const onDisk = catalogEntryCountOnDisk();
+
+        expect(onDisk).toBeGreaterThan(0);
+        expect(rows).toHaveLength(onDisk);
+        expect([...new Set(rows.map((row) => row.file))]).toEqual([...CATALOG_FILES]);
         expect(rows.map((row) => `${row.file_index}:${row.catalog_index}:${row.id}`).slice(0, 3)).toEqual([
             '0:1:foca_1992',
             '0:0:rs_strategic_goals',
@@ -34,11 +65,12 @@ describe('event taxonomy diagnostic report', () => {
     });
 
     it('reports one row per current event id and no duplicate ids', () => {
-        const report = buildEventTaxonomyReport(loadCatalogRows());
+        const rows = loadCatalogRows();
+        const report = buildEventTaxonomyReport(rows);
 
-        expect(report.summary.total_events).toBe(299);
+        expect(report.summary.total_events).toBe(rows.length);
         expect(report.summary.duplicate_event_ids).toEqual([]);
-        expect(new Set(report.rows.map((row) => row.id)).size).toBe(299);
+        expect(new Set(report.rows.map((row) => row.id)).size).toBe(rows.length);
     });
 
     it('classifies trigger emergence from phase, prerequisites, pressure, and condition types', () => {
@@ -52,31 +84,39 @@ describe('event taxonomy diagnostic report', () => {
         expect(classifyTriggerEmergence(conditional!)).toMatch(/condition/);
     });
 
-    it('pins current choice and required-response inventory without changing catalog behavior', () => {
-        const report = buildEventTaxonomyReport(loadCatalogRows());
+    it('keeps the choice inventory a consistent, fully sourced partition of the catalog', () => {
+        const rows = loadCatalogRows();
+        const report = buildEventTaxonomyReport(rows);
+        const choiceRows = report.rows.filter((row) => row.is_choice_event);
+        const requiredRows = report.rows.filter((row) => row.requires_player_response);
 
-        // 79 → 82: +3 HRHB Jul–Sep 1992 decision events (all carry response_options).
-        expect(report.summary.choice_events).toBe(84);
-        // 210 → 214: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events are
-        // pure flag-setters (no response_options), so they are no-choice events.
-        // 214 → 215: +1 §6 atrocity-record event bijeljina_killings_1992
-        // (representation-only, no response_options). The +3 HRHB summer-1992
-        // events are choice events, so no_choice_events is unchanged at 215.
-        expect(report.summary.no_choice_events).toBe(215);
-        // 71 → 74: the +3 HRHB summer-1992 events are required-response.
-        expect(report.summary.required_response_events).toBe(76);
-        // 79 → 82: the +3 HRHB summer-1992 events all carry title + narrative.
-        expect(report.summary.choice_rows_with_title_and_narrative).toBe(84);
-        // Owen-Stoltenberg's Presidency stage, the two late-1992 HRHB posture
-        // reviews, and the remediated Drina accountability decision carry
-        // explicit historical-source fields.
-        expect(report.summary.choice_rows_with_source).toBe(75);
-        expect(report.summary.required_response_rows_with_source).toBe(71);
-        // 56 → 59: the +3 HRHB summer-1992 events each carry a historical_default_response_id.
-        // 59 → 60: Owen-Stoltenberg's Presidency stage now carries its documented default.
-        expect(report.summary.historical_default_markers).toBe(62);
-        expect(report.summary.historical_default_ids).toBe(62);
-        expect(report.summary.modal_ready_events).toBe(47);
+        // Liveness: every assertion below is a comparison over these two
+        // populations, and all of them hold vacuously if either is empty.
+        expect(choiceRows.length).toBeGreaterThan(0);
+        expect(requiredRows.length).toBeGreaterThan(0);
+
+        // Partition, not census. `choice + no_choice === total` is invariant
+        // under content growth; `choice === 84` is invalidated by it.
+        expect(report.summary.choice_events).toBe(choiceRows.length);
+        expect(report.summary.choice_events + report.summary.no_choice_events).toBe(report.summary.total_events);
+        expect(report.summary.required_response_events).toBe(requiredRows.length);
+
+        // Content invariants the R7 provenance close-out established. Stated
+        // as "all of them" rather than as a number, these now HOLD the
+        // achievement instead of merely recording its size on the day it
+        // landed: every choice row is titled, narrated and sourced, and every
+        // required-response row is sourced.
+        expect(report.summary.choice_rows_with_title_and_narrative).toBe(choiceRows.length);
+        expect(report.summary.choice_rows_with_source).toBe(choiceRows.length);
+        expect(report.summary.required_response_rows_with_source).toBe(requiredRows.length);
+
+        // The two historical-default projections must agree with each other
+        // and with the rows; their absolute magnitude is not the property.
+        expect(report.summary.historical_default_markers).toBe(report.summary.historical_default_ids);
+        expect(report.summary.historical_default_markers).toBe(
+            report.rows.filter((row) => row.has_historical_default_marker).length,
+        );
+        expect(report.summary.modal_ready_events).toBe(report.rows.filter((row) => row.modal_ready).length);
         expect(new Map(report.rows
             .filter((row) => row.future_consequence_count > 0)
             .map((row) => [row.id, row.future_consequence_count]))).toEqual(new Map([
@@ -200,19 +240,47 @@ describe('event taxonomy diagnostic report', () => {
     });
 
     it('surfaces missing source, unknown effect kinds, and unknown condition types as diagnostic findings', () => {
-        const sourceFinding = collectCatalogFindings(loadCatalogRows()).find((finding) => finding.code === 'missing_source');
-        const fixture = {
+        // All three codes are proved against FIXTURES. `missing_source` used
+        // to be proved against the live catalog instead — an assertion that a
+        // real unsourced row exists — so it began failing on 2026-08-15 when
+        // `514d379e3` sourced the last of them. A test that requires a defect
+        // to exist in order to pass punishes the fix; the live-catalog half of
+        // this claim now lives in the test below, stated the other way round.
+        const unsourced = {
+            ...loadCatalogRows()[0],
+            id: 'missing_source_fixture',
+            historical_source: null,
+            historical_source_status: 'missing' as const,
+            findings: [],
+        };
+        const unknownVocabulary = {
             ...loadCatalogRows()[0],
             id: 'unknown_taxonomy_fixture',
             effect_kinds: ['new_effect_kind'],
             condition_types: ['new_condition_type'],
             findings: [],
         };
-        const fixtureFindings = collectCatalogFindings([fixture]);
+        const findings = collectCatalogFindings([unsourced, unknownVocabulary]);
 
-        expect(sourceFinding).toBeDefined();
-        expect(fixtureFindings.some((finding) => finding.code === 'unknown_effect_kind')).toBe(true);
-        expect(fixtureFindings.some((finding) => finding.code === 'unknown_condition_type')).toBe(true);
+        expect(findings.some((finding) => finding.code === 'missing_source' && finding.id === 'missing_source_fixture')).toBe(true);
+        expect(findings.some((finding) => finding.code === 'unknown_effect_kind')).toBe(true);
+        expect(findings.some((finding) => finding.code === 'unknown_condition_type')).toBe(true);
+    });
+
+    it('leaves no unsourced row in the live catalog', () => {
+        const rows = loadCatalogRows();
+        const findings = collectCatalogFindings(rows);
+
+        // The inverse of the fixture above, and the point of the split: the
+        // live catalog is asserted to be CLEAN, so `514d379e3`'s 38-to-0
+        // sourcing sweep is now permanently defended instead of invisible.
+        // Liveness comes from the row count — an empty catalog would satisfy
+        // the emptiness claim vacuously.
+        expect(rows.length).toBeGreaterThan(0);
+        expect(
+            findings.filter((finding) => finding.code === 'missing_source').map((finding) => finding.id),
+            `checked ${rows.length} catalog rows for missing_source`,
+        ).toEqual([]);
     });
 
     it('includes pressure modifier condition types in taxonomy and validates them against the event vocabulary', () => {
@@ -310,15 +378,43 @@ describe('event taxonomy diagnostic report', () => {
     it('keeps current required-response debt visible until source and historical-default markers exist', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
         const requiredRows = report.rows.filter((row) => row.requires_player_response);
+        const modalReady = requiredRows.filter((row) => row.modal_ready);
+        // Derived by SUBTRACTION from the parent set, never by its own
+        // predicate: a row that stops being modal-ready lands in the debt
+        // bucket automatically instead of escaping both buckets.
+        const debt = requiredRows.filter((row) => !modalReady.includes(row));
 
-        // 71 → 74: +3 HRHB Jul–Sep 1992 required-response decision events.
-        expect(requiredRows).toHaveLength(76);
-        expect(requiredRows.filter((row) => row.modal_ready).map((row) => row.id)).toEqual([
+        // Liveness, and the partition. How much was compared matters as much
+        // as what came out — the named list below is vacuously satisfiable if
+        // the population is empty.
+        expect(requiredRows.length).toBeGreaterThan(0);
+        expect(modalReady.length + debt.length).toBe(requiredRows.length);
+
+        // THE adjudicable assertion. A newly modal-ready event fails exactly
+        // this one and names itself in the diff, so a reviewer can rule on
+        // whether that event should be a live presidential decision — which
+        // is a content question, not an arithmetic one. Do not replace this
+        // with a count.
+        expect(modalReady.map((row) => row.id)).toEqual([
             'rbih_state_identity',
             'hrhb_political_goal',
             'rbih_paramilitary_policy_1992',
             'hrhb_1992_graz_cooperation_collapse',
             'rbih_minority_retention_1992',
+            // Graduated 2026-08-15 by `abbe54793`, which promoted its BB1
+            // citation out of `source_note` prose into the machine-readable
+            // `historical_source` field, clearing the `missing_source`
+            // finding that `buildEventTaxonomyReport` demotes on. Verified
+            // 2026-08-17: BB1 PDF p.194 / printed 158 carries the quoted
+            // Kaonik / Bratstvo / Ljuta passage verbatim, and the row has no
+            // ICTY dependency.
+            'hrhb_summer_alliance_strain_1992',
+            // NOT `hrhb_zagreb_supply_channel_1992`. It was promoted by the
+            // same commit but on an ICTY citation that turned out to be
+            // categorically wrong, so it is held in
+            // HISTORICAL_DEFAULT_BLOCKED_IDS pending re-sourcing.
+            // NOT `hrhb_herceg_bosna_consolidation_1992` either — still held
+            // by its sensitive-history keyword review.
             'hrhb_posavina_orasje_posture_1992',
             'hrhb_jajce_joint_defense_1992',
             'gornji_vakuf_clashes_1993',
@@ -362,7 +458,12 @@ describe('event taxonomy diagnostic report', () => {
             'rs_dayton_acceptance_1995',
             'csq_patron_recovery_offer',
         ]);
-        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(47);
+        // Classification agrees with the flag, for the same population. The
+        // number is whatever the named list above is; it is not a separate
+        // fact and must not be pinned as one.
+        expect(requiredRows.filter((row) => classifyEventTaxonomy(row) === 'finished_modal_ready')).toHaveLength(
+            modalReady.length,
+        );
     });
 
     it('classifies packet 3 target rows as finished modal-ready after authored defaults and source notes', () => {

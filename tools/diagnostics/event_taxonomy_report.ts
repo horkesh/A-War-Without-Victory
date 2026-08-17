@@ -146,6 +146,15 @@ const SENSITIVE_KEYWORDS = [
 const HISTORICAL_DEFAULT_BLOCKED_IDS = new Set([
     'srebrenica_demilitarization_1993',
     'karadzic_mladic_split_1995',
+    // 2026-08-17 — held out of modal-readiness pending ICTY re-sourcing. The
+    // row carried `Prlic et al. Trial Judgment Vol. 2 §§220-260` as support
+    // for a 1992 logistics claim; that range is 1993 Herzegovina detention,
+    // forced-labour and assault findings. The pointer has been removed from
+    // the event. Its BB1 evidence (PDF p.180 / printed 144) is sound and the
+    // row's claim stands on it, so this is a readiness hold, not a retraction.
+    // Remove this entry when the ICTY citation is re-established or the row is
+    // formally accepted on BB1 alone.
+    'hrhb_zagreb_supply_channel_1992',
 ]);
 
 const STAFF_RECOMMENDATION_DEFAULT_IDS = new Set([

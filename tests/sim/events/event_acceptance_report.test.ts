@@ -10,6 +10,7 @@ import {
     SOURCE_OR_DESIGN_DEFAULT_BLOCKED_IDS,
     buildEventAcceptanceReport,
 } from '../../../tools/diagnostics/event_acceptance_report';
+import { loadCatalogRows } from '../../../tools/diagnostics/event_taxonomy_report';
 
 type EventFixture = {
     id?: string;
@@ -46,6 +47,12 @@ const EXPECTED_SENSITIVE_BLOCKED = [
 ];
 
 const EXPECTED_SOURCE_DESIGN_BLOCKED = [
+    // Held 2026-08-17: the row's ICTY citation (Prlic Trial Judgment Vol. 2
+    // §§220-260) was cited for 1992 logistics but is 1993 Herzegovina
+    // detention, forced-labour and assault findings. The pointer was removed
+    // from the event; its BB1 evidence is sound, so the claim stands and only
+    // modal-readiness is held pending re-sourcing.
+    'hrhb_zagreb_supply_channel_1992',
     'karadzic_mladic_split_1995',
     'visit_to_front_hrhb',
 ];
@@ -109,31 +116,50 @@ describe('event acceptance diagnostic report', () => {
         const second = buildEventAcceptanceReport();
 
         expect(JSON.stringify(first)).toBe(JSON.stringify(second));
-        // 289 → 293: +4 LANE-OBSERVER-FLAG-WRITER deadline "audit" events.
-        // 293 → 294: +1 §6 atrocity-record event bijeljina_killings_1992 (no response options).
-        // 294 → 297: +3 HRHB Jul–Sep 1992 decision events (war_1992_hrhb_summer.json).
-        // 297 → 299: +2 sourced HRHB October/November 1992 decision events.
-        // Each carries a historical_default_response_id + markers + source_note,
-        // so the debt counts below (missing_*) are unchanged — only the totals move.
-        expect(first.summary.total_events).toBe(299);
-        expect(first.summary.required_response_events).toBe(76);
-        expect(first.summary.production_modal_authoring_ready_events).toBe(47);
+
+        // Totals and debt counts are DERIVED from the rows the same report
+        // emits, not pinned as integers. Pinned integers here were stale from
+        // 2026-08-15 to 2026-08-17 and had to be hand-bumped four times before
+        // that; the invariant worth asserting is that the summary agrees with
+        // its own rows, which content growth cannot invalidate.
+        expect(first.summary.total_events).toBe(loadCatalogRows().length);
+        expect(first.summary.required_response_events).toBe(first.required_response_rows.length);
+        expect(first.required_response_rows.length).toBeGreaterThan(0);
+        expect(first.summary.production_modal_authoring_ready_events).toBe(
+            first.production_modal_authoring_ready_rows.length,
+        );
         expect(first.summary.acceptance_status).toBe('NOT_READY');
         expect(first.summary.full_catalog_accepted).toBe(false);
-        // +6 from the 6 new leadership-action events (address_to_nation /
-        // decorate_a_unit ×{RBiH,RS,HRHB}): each is requires_player_response with
-        // no historical default/marker (required-response debt), so they add to
-        // missing_approved_default / historical_default / historical_marker debt.
-        // They DO carry a source_note. The R7 Ring-3 remediation adds source
-        // notes to rs_strategic_goals and drina_cleansing_decision_1992, so
-        // missing_source_note falls from 9 to 7.
-        // 16 → 15: Owen-Stoltenberg's Presidency stage now carries the
-        // historically sourced conditional-acceptance default and historical bot policy.
-        expect(first.summary.missing_approved_default_events).toBe(15);
-        expect(first.summary.missing_historical_default_response_id_events).toBe(18);
-        expect(first.summary.missing_historical_marker_events).toBe(18);
-        expect(first.summary.source_blocked_events).toBeGreaterThan(0);
-        expect(first.summary.missing_source_note_events).toBe(7);
+
+        // Debt counters, likewise derived — each against the row list the
+        // same report publishes for it, so summary and detail cannot drift
+        // apart silently.
+        expect(first.summary.missing_historical_default_response_id_events).toBe(
+            first.required_response_rows.filter((row) => !row.has_historical_default_response_id).length,
+        );
+        expect(first.summary.missing_historical_marker_events).toBe(
+            first.required_response_rows.filter((row) => !row.has_historical_marker).length,
+        );
+        expect(first.summary.missing_approved_default_events).toBe(first.missing_historical_default_rows.length);
+        expect(first.summary.source_blocked_events).toBe(first.source_blocked_rows.length);
+        expect(first.summary.missing_source_note_events).toBe(first.missing_source_note_rows.length);
+
+        // Two further assertions here were stale and INVISIBLE: `vitest` stops
+        // an `it` at its first failure, so while the count above was red these
+        // never ran. `source_blocked_events > 0` required a source-blocked row
+        // to EXIST, and `missing_source_note_events` was pinned at 7. The R7
+        // provenance close-out took both to zero. Asserted as zero, they now
+        // defend that outcome instead of demanding the debt back.
+        expect(
+            first.source_blocked_rows.map((row) => row.id),
+            `checked ${first.required_response_rows.length} required-response rows`,
+        ).toEqual([]);
+        expect(first.missing_source_note_rows.map((row) => row.id)).toEqual([]);
+
+        // Design-blocked defaults are a separate concept from source-blocked
+        // and are still live; keeping this here stops the two zeros above from
+        // being read as "the blocking machinery is dead".
+        expect(first.source_design_default_blocked_rows.length).toBeGreaterThan(0);
     });
 
     it('lists the approved first production authoring packet candidates without changing JSON content', () => {
@@ -283,12 +309,24 @@ describe('event acceptance diagnostic report', () => {
             expect(row.has_source_note, row.id).toBe(true);
             expect(row.sensitive_gate, row.id).toBe('clear');
         }
+        // THE adjudicable assertion for production readiness. Named ids, not
+        // a count: an event that newly becomes a live presidential decision
+        // names itself in this diff, and whether it should be one is a content
+        // question for a reviewer.
         expect(report.production_modal_authoring_ready_rows.map((row) => row.id)).toEqual([
             'rbih_state_identity',
             'hrhb_political_goal',
             'rbih_paramilitary_policy_1992',
             'hrhb_1992_graz_cooperation_collapse',
             'rbih_minority_retention_1992',
+            // Added 2026-08-15 by `abbe54793`, which promoted its BB1
+            // citation from `source_note` prose into the machine-readable
+            // `historical_source` field. Verified against the local BB1
+            // extraction 2026-08-17. Its sibling
+            // `hrhb_zagreb_supply_channel_1992` is deliberately absent: same
+            // commit, but its ICTY citation was wrong and it is held for
+            // re-sourcing.
+            'hrhb_summer_alliance_strain_1992',
             'hrhb_posavina_orasje_posture_1992',
             'hrhb_jajce_joint_defense_1992',
             'gornji_vakuf_clashes_1993',

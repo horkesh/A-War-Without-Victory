@@ -7,19 +7,29 @@ name: Event System CI
 # via the test:vitest:fast slice).
 #
 # Phase H Packet 10 (2026-05-29) — extended the test gate with the seven
-# Phase H suites (causality query + six UI integration files, 74 tests) so
-# PR-time enforcement covers the Phase H consequence-visualization layer
-# alongside the Phase B/D/E/F regression substrate.
+# Phase H suites (causality query + the UI integration files) so PR-time
+# enforcement covers the Phase H consequence-visualization layer alongside
+# the Phase B/D/E/F regression substrate.
+#
+# 2026-08-17 — `tests/ui/decision_history_overlay.test.ts` was listed here
+# until today, six weeks after `7ceddab8f` (2026-07-07) deleted it. Vitest
+# treats these arguments as FILTERS, not paths, so an unmatched filter
+# matches nothing and fails nothing: the job silently ran one file fewer
+# than it advertised. The overlay's coverage was migrated, not retired —
+# `tests/ui/archive_spine_contract.test.ts` is its named successor (see the
+# WP-6 ledger entry) and now stands in this list in its place.
+# `tests/ci_workflow_test_paths_exist.test.ts` asserts every path named in
+# this file exists on disk, so the next deletion fails loudly instead.
 #
 # Three layered gates run sequentially:
 #   1. TypeScript typecheck — catches loader / vocabulary / shape errors.
-#   2. Event-system + Phase E/F/H suite — 25 test files covering loader,
-#      decisions, evaluation, taxonomy, presidential acceptance, families,
-#      causality, political-dimension propagation, F2 audit, F3 graph,
-#      F5 runtime substrate integration, and the Phase H causality-query
-#      API + UI consequence-visualization layer (decision-context modal,
+#   2. Event-system + Phase E/F/H suite — covering loader, decisions,
+#      evaluation, taxonomy, presidential acceptance, families, causality,
+#      political-dimension propagation, F2 audit, F3 graph, F5 runtime
+#      substrate integration, and the Phase H causality-query API + UI
+#      consequence-visualization layer (decision-context modal,
 #      faction-branch badges, codex unlock state, chronicle causality
-#      slides, catalog wire-up, decision-history overlay).
+#      slides, catalog wire-up, archive spine / decision consequences).
 #   3. Phase F2 strict gate (Phase G3) — asserts CRITICAL + WARNING = 0
 #      on the real catalog. This is the canon-compliance hard rail.
 #   4. Baseline regression — byte-identical run-artifact hash check via
@@ -96,7 +106,8 @@ jobs:
             tests/ui/codex_panel_unlock_state.test.ts \
             tests/ui/chronicle_causality_slides.test.ts \
             tests/ui/catalog_wireup_integration.test.ts \
-            tests/ui/decision_history_overlay.test.ts \
+            tests/ui/archive_spine_contract.test.ts \
+            tests/ci_workflow_test_paths_exist.test.ts \
             --reporter=dot
 
       - name: Phase F2 strict gate (canon-compliance hard rail)
