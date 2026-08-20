@@ -27887,3 +27887,58 @@ Turn-0 `odzak:HRHB` pool: blessed **591 available / 800 committed**; HEAD **741 
 **The gap both seats name, and neither papers over: per-group `brigade_temporal_log.jsonl` was not preserved.** Only blessed and full HEAD have one. That leaves one inference open — attributing the 2nd Guards' Žepče posting to G2 specifically — and **preserving the temporal log for per-group runs costs nothing at run time and would have made this a ten-minute investigation.** Also asked for, unbuilt: reason-code counters on `canFormEmergentBrigade` refusals and in-run `recruitBrigade` `no_manpower` (both currently silent; `brigades_skipped_no_manpower` exists only for the t0 pass), and `disrupted_turns` + `morale` in the temporal log.
 
 **Confidence:** HIGH on the mechanism, the two gate predicates, the timing table, the four manpower negatives and the turn-0 arithmetic — all measured. **INFERRED and flagged:** the G2→Žepče attribution, why the reallocator moved it at t109, why `hrhb_kralj_petar_kresimir_iv` was dropped from the Glamoč roster (only visible difference cohesion 30 vs 41; `disrupted_turns` is not in the temporal log), and the Modriča gate-block.
+
+### ★ CORRECTION TO `28583adf6` AND `52d5e5d2f` — the `oob:` tag trap caught me a SECOND time, in the entry that recorded it as a lesson
+
+**`hrhb_kralj_tomislav_brigade` IS ALIVE IN BOTH RUNS.** The preceding entry states it "never spawns in either run (0 turns, absent from `final_save`)". **That is FALSE and is withdrawn.** Verified by the orchestrator in `n225/final_save.json`:
+
+```
+key: F_HRHB_0001 · name: "Kralj Tomislav Brigade" · personnel: 3000 · status: active
+corps_id: hvo_tomislavgrad · tags: [generated_phase_i0, kind:brigade, mun:duvno,
+                                    oob:hrhb_kralj_tomislav_brigade]
+formations["hrhb_kralj_tomislav_brigade"] → absent
+```
+
+Full strength at Duvno, in the western corps, all war — under a synthetic key **carrying a tag that names it explicitly**. `F_HRHB_0002` in n222, same unit.
+
+**★ THE INSTRUCTIVE PART: I RECORDED THIS TRAP AS A LESSON TODAY, WARNED THE FORMATION SEAT ABOUT IT BY NAME, AND THEN COMMITTED A CLAIM THAT FELL TO IT ANYWAY** — because the sector seat said it had checked `final_save` and I accepted that rather than running the check myself. **A colleague's "I verified" is a derived signal too.** That is the same failure in its tenth costume, and the costume this time was trust rather than a stale index or a coerced default.
+
+**AND THE DOWNSTREAM CONCLUSION SURVIVES, FOR THE OPPOSITE REASON. The unit exists; the REFERENCE is dead.** `hrhb_kralj_tomislav_brigade` is hardcoded `as FormationId` in **seven live places across three operation files** — verified: `operation_opportunity_catalog_central_bosnia.ts:247, 270, 808, 825`; `operation_opportunity_catalog_federation_western_bosnia.ts:403, 654`; `triggered_operations.ts:657`. The live formation's id is `F_HRHB_0001`/`F_HRHB_0002`, so **every one of those lookups misses.** `federation_western_bosnia.ts:403` is a **western** roster, permanently one authored brigade short **in every run ever measured.** It is identical in both trees, so it does not explain the belt delta — it is a standing defect the lane walked past.
+
+**THE GENERAL MECHANISM, and it is a live trap for future work: `available_from: 8` on a MANDATORY brigade in a municipality with a live pool means the catalog row never instantiates under its own id.** The pool spawn beats the turn-8 catalog pass, `markExistingFormationAsRecruited` (`recruitment_engine.ts:773`) claims the OOB identity onto the synthetic key so no duplicate is made, and the catalog id is thereafter unresolvable. **Six formations do this across three factions in these runs** — `hrhb_kralj_tomislav_brigade`, `hrhb_103rd_derventa_brigade` (n222 only), `arbih_223rd_mountain`, `arbih_254th_mountain`, `rs_ilijas_brigade`, `rs_2nd_romanija_brigade`. **Only `kralj_tomislav` is referenced by operation code, so this is ONE live bug, not six — but the mechanism produces another the moment anyone adds a roster reference to a late-`available_from` mandatory brigade.**
+
+### THREE MORE CLAIMS IN THE PRECEDING ENTRIES, FALSIFIED
+
+**1. "At `available_from: 8` the 103rd and 105th never enter the game at all" (`52d5e5d2f`) — HALF FALSE.** The **103rd DOES enter**: live from turn 1 in n222, 800 men at `op:derventa:derventa_2` as `F_HRHB_0001` tagged `oob:hrhb_103rd_derventa_brigade`, fighting through t8 and destroyed at t11. **Only the 105th genuinely never enters.** So it is **one** brigade that never exists, not two — and the orchestrator's *original* framing survives better than the replacement it was superseded with: **G2 is two added brigades and one substitution.** At Derventa both trees read **840 at t1**; the catalog row replaces a pool brigade of equal strength.
+
+**2. "The 104th and 105th pinned at 100 personnel from t16, never recovering" — FALSIFIED.** `MIN_COMBAT_PERSONNEL = 100` (`formation_constants.ts:73`) is a **hard casualty floor** — *"below this the unit routes/dissolves rather than taking further casualties"* — not starvation.
+```
+104th @ HEAD     t16 146 → t17-t32 pinned at exactly 100 (16 turns) → +9/turn → t188 1,500  FULL RECOVERY
+104th @ blessed  t11 101 → t12 173, 245, 318 → +70/turn → t188 1,500      NO STALL
+105th @ HEAD     t7 155 → t11-t30 pinned at 100 → t31 DESTROYED — never recovers because it DIES
+```
+**Same brigade, same floor, no stall in blessed and an eight-fold recovery rate.** The answer is **floor first, then a rate difference**, and the rate difference is the interesting half. **A gap the seat named rather than papering over:** the documented reinforcement path (`formation_spawn.ts:396-440`) keys the pool off the `mun:` tag, and **that tag is never rewritten on relocation** — the 104th still reads `mun:bosanski_brod` at t188 while standing in Orašje, and that pool is dead (`available: 0`, `updated_turn` frozen at 9/15). So the channel that actually rebuilt it to 1,500 is **not** the one quoted, and it has not been found.
+
+**3. `arbih_328th_mountain` is NOT absent at HEAD.** It spawns in **both** — t20 in n222, t17 in n225 — and finishes at 1,800 in both. Its absence is specific to **blessed+G2 in isolation** and reverses once G1 and G3 are also applied: an **interaction**, consistent with the +25 term already recorded, not a standing effect.
+
+**And the sector seat's geography claim is weaker than it sounded.** Vozuća sits on the **Ozren salient — the southern shoulder of the same Corridor 92 axis that runs through Modriča and Odžak, ~50 km from Doboj.** It is not "150 km in the other direction"; it is the far end of the same operational corridor, and it should not be leaned on as the refutation of coupling.
+
+### ★ THE FRAGILITY VERDICT SURVIVES ON BETTER EVIDENCE: IT IS FRAGILITY AT THRESHOLD CROSSINGS
+
+Both seats reach fragility; the formation seat reaches it from **measured margins** rather than from the ARBiH datum that does not hold up. Not "fragile to any perturbation" — G1 moves 2,700 turn-0 men and touches no belt cell, G5 moves the hash and zero cells. **Fragile specifically where a slow-accumulating quantity crosses a hard threshold with no hysteresis, and none of the three writes a counter or a reason code:**
+
+| threshold | margin | consequence when it flips |
+|---|---|---|
+| elective `manpower_cost` 800 vs Odžak pool 741 | **59 men** | a brigade appears a turn late |
+| `arbih_328th_mountain` needs 480; `zavidovici:RBiH` starts at 163 | **15-18 turns of accumulation** | spawn turn moves, or never |
+| `MIN_COMBAT_PERSONNEL` 100 | rate-limited climb-out | 16-turn stall vs none |
+
+**A threshold crossed by slow accumulation re-times on any few-percent perturbation anywhere in that faction's economy — and a re-timed spawn changes which brigade stands where when an operation launches.** That is falsifiable and it says where to look, which generic fragility does not. **It also composes with the sector seat's mechanism rather than competing with it:** the thresholds decide *when* units exist, the sector-claim gate decides *whether they may fight*, and the t160-188 window is where both bite at once.
+
+### THE THREE FIXES THAT CAME OUT OF THIS, none belonging to the belt lane
+
+1. **`hrhb_kralj_tomislav_brigade` resolves nowhere from seven op-catalog references, in every run.** Either resolve op rosters through the `oob:` tag, or stop the pool path claiming identities that op code addresses by catalog id.
+2. **Add a reason code to the silent refusals** — `canFormEmergentBrigade` and in-run `recruitBrigade` `no_manpower` both refuse without writing anything; `brigades_skipped_no_manpower` exists only for the t0 pass. **Every hour spent on this lane traces back to that.**
+3. **The `mun:` tag is not rewritten on relocation**, so the documented reinforcement path reads a dead pool for every displaced brigade. Either the tag or the path is wrong; which one is not yet known.
+
+**Unchanged:** the coupling does not travel through HRHB force generation, and the sector-claim mechanism on `hvo_2nd_guard_mechanized` stands as the belt's proximate cause.
