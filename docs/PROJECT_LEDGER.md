@@ -27800,3 +27800,90 @@ sum of isolated: −2 −24 −17 +0 +0 = −43     actual combined (HEAD) = −
 **Verification:** 8 runs against a 6+2 authorised budget, nothing further taken. Worktrees `F:\awwv-lane-a` and `F:\awwv-rev` both removed; **no junction used in either** — real `npm ci`, and `node_modules` confirmed not a link before deletion, per napkin §Shell 1c after that hazard cost a full reinstall earlier the same day. Main `node_modules` intact (707 entries, `tsc` 5.9.3). `manifest.json` untouched, `UPDATE_BASELINES` never set, nothing committed by any seat. Main tree `3d74807d6`. Evidence for all eight runs preserved outside the repo at `scratchpad/lane_a_evidence/n0..n5/` and `scratchpad/revert_evidence/`.
 
 **Unrelated repo residue found while verifying, NOT touched:** `/f/awwv-flake-check` (2026-08-04, an orphaned non-worktree copy with its own `node_modules`) and stale `.git/worktrees/broader-assisted-execution` metadata for a directory that no longer exists. Neither is this lane's; `git worktree prune` would clear the second.
+
+## 2026-08-21 — The belt is not lost, it is never taken: one sectorless brigade parked in the wrong corps' sector
+
+Two seats worked the two halves of the mechanism question independently — formation/recruitment on the Posavina cause, sector/operations on the western effect. **Neither launched a run.** Both worked from artifacts already on disk, and the formation seat noted that `runs/…n222` and `…n225` carry full 188-turn `brigade_temporal_log.jsonl`, `initial_save.json` and `final_save.json` for both trees and **nobody in this lane had opened them.**
+
+### ★ THE MECHANISM: A MAIN-STAFF BRIGADE HAS NO SECTOR OF ITS OWN AND INHERITS WHERE IT STANDS
+
+`hvo_main_staff` is in `EXEMPT_CORPS_IDS` (`corps_front_sectors_constants.ts`) — main-staff brigades are **intentionally sectorless**, *"until loaned or attached."* They therefore carry **no claim of their own** and inherit whichever corps' sector they are physically standing in. Two gates then decide operation eligibility, both verified by the orchestrator at source:
+
+- `final_operation_truth_reconciliation.ts:47` — `hasOnlyForeignClaims = sectorClaims.length > 0 && !hasSameCorpsClaim; if (hasOnlyForeignClaims) continue;`
+- `operation_opportunities.ts:1199` — `if (getFormationCorpsId(formation) !== axis.corps) continue;` (and a `disrupted_turns > 0` gate beside it)
+
+**`hvo_2nd_guard_mechanized`** — 2,800 men, cohesion 95, elite — is **not on Mistral 1's authored roster.** It joins only because it happens to be standing in `hvo_tomislavgrad`'s sector.
+
+| | n222 (629) | n225 (611) |
+|---|---|---|
+| 2nd Guards, t134-171 | Tomislavgrad → Kupres, sector **NONE** | **Žepče, `hvo_central_bosnia:2`** — 74 turns idle, full strength, fatigue 0 |
+| Mistral 1 Glamoč axis | 3 brigades, **7/7 captured** | 1 brigade, **`zero_eligible_axis`, 0 attacks** |
+| Mistral 2 | launches t175, 9 objectives | **never appears in the AAR** |
+
+Parked in a foreign corps' sector it becomes **permanently ineligible for every `hvo_tomislavgrad` operation for the rest of the war.** Mistral 1's *Grahovo* axis fails in **both** runs (`no_approach_osid`) — **the Glamoč axis is the entire hinge**, and Mistral 2 launches off the ground Mistral 1 opens.
+
+**UPSTREAM, unambiguously: Mistral 1 in n225 inflicted 0 KIA and suffered 0.** Nobody arrived and lost. Nobody arrived.
+
+### ★ TWO SEATS, TWO METHODS, ONE FAILURE — AND THE TIMING IS DECISIVE
+
+The formation seat, working only from weekly `control_counts` and knowing nothing of the sector finding, produced this independently:
+
+```
+week    1     9    13    17    53    81   131   157   171   177   181   188
+blessed 102   88    87    87    78    75    75    80    86    90    97   102
+HEAD    102   95    94    87    78    77    79    83    83    83    84    89
+dHRHB     0   +7    +7     0     0    +2    +4    +3    -3    -7   -13   -13
+```
+
+**HEAD is level or AHEAD from week 2 to week 157.** The extra Posavina brigades *help* the HVO for 170 weeks, by up to +7 OSIDs at weeks 9-13 — exactly when Corridor 92 bites. **The entire −13 arrives in weeks 171-188**: blessed goes 86 → 102 (+16) across Storm and Mistral 2; HEAD goes 83 → 89 (+6).
+
+> **The belt is not lost. It is never taken.** A turn-0 force-generation defect that is invisible for 170 weeks and then costs 13 OSIDs in 17 is not a force-generation defect.
+
+### ★ IT IS NOT A MANPOWER STORY — the formation seat's negative result, proved four ways
+
+1. **Every western/central HRHB municipality pool is BYTE-IDENTICAL at t0** — livno, duvno, glamoc, kupres, sipovo, mrkonjic_grad, jajce, bosansko_grahovo, titov_drvar, gornji_vakuf, prozor, travnik, vitez, busovaca. Not close: identical.
+2. **Casualty feedback is home-keyed, not national.** `applyCasualtyPoolExhaustion` (`pool_population.ts:438`) keys on `formation.origin_mun`, so Posavina deaths drain Posavina pools. **There is no national HRHB manpower channel for the effect to travel down.**
+3. Faction resources at t0 are effectively identical (capital 270 vs 280 — the unspent Hrvoje Vukčić, spent at t1; equipment 350 both).
+4. **At t188 HEAD's west has MORE unused manpower, not less** — `livno:HRHB` available **5,000 (HEAD) vs 596 (blessed)**. Supply is not the binding constraint on the losing side.
+
+**The handoff that closes it:** the west has **the same seven brigades and 93% of the strength — in entirely different places.** At t188 blessed has `hv_4th_guards_split` at Bosansko Grahovo, `hv_5th_guards_karlovac` at Šipovo, `kralj_petar` at Mrkonjić Grad; HEAD has them at Livno, Kupres and Glamoč. `hvo_tomislavgrad`'s brigade count is **identical at every sampled turn** (3,3,3…7,7,7,7). Personnel is identical through t104.
+
+### ★ THE FRAMING QUESTION: THE SEATS APPEAR TO DISAGREE AND DO NOT
+
+- **Sector seat:** fragility — *"any perturbation **that moves a national-reserve brigade** re-rolls the t160-188 window."* Decisive support: `b+G2` also destroys **ARBiH Operation Farz 95's entire objective set** (`vozuca_2`, `gornja_bocinja`, `donja_bocinja_2`, `brijesnica_donja_2`, all four, `arbih_3rd_corps`) 150 km the other way, and makes the ARBiH *better* elsewhere — Sanski Most ×4, Bihać, Bosanski Novi, Ključ, Kalinovik ×4, Nevesinje ×3. **The whole late-war schedule is re-rolled, not one region.**
+- **Formation seat:** *not* generic fragility — **G1 is a LARGER force-structure perturbation** (−2,700 turn-0 men) **than G2 (+1,800) or G3 (−1,100), and costs −2 while touching no belt cell.** If the belt broke on perturbation size, G1 would be the worst of the three; it is the mildest by an order of magnitude.
+
+**RECONCILED — and the reconciliation is sharper than either seat alone.** The sector seat's claim carries the qualifier *"that moves a national-reserve brigade"*, and G1 does not: the 2nd Guards sits at `op:mostar:mostar_zapad_2` in **both** runs until t108/t133, so deleting three SE Herzegovina brigades never relocates it.
+
+> **The discriminator is neither perturbation SIZE nor GEOGRAPHY. It is whether a change relocates a SECTORLESS MAIN-STAFF BRIGADE before t160.** Force-structure changes that leave the national reserve where it stands are cheap (G1, −2). Changes that move it are catastrophic (G2 −24, G3 −17), regardless of which faction or theatre they nominally touch — which is why the same change also broke an ARBiH operation.
+
+**`vozuca_2` dissolves.** It was never a lone anchor break; it is Farz 95's whole objective set failing as one, in the same two-turn window and with the same failure shape as Mistral 1.
+
+### ★ WE HAVE BEEN CALIBRATING AGAINST LUCK
+
+Mistral 1's authored five-brigade roster **delivers at most two, in every run**: `hvo_1st_guard_abb` is `hvo_main_staff` and is dropped by the corps-id gate **before the reconciler runs** — so the Wave-19A comment in `operation_opportunity_catalog_federation_western_bosnia.ts` claiming the hosting choice *"lets the reconciler keep all 4 brigades"* is **FALSE**; it reasons about gate 1 and does not account for gate 2. And `hrhb_kralj_tomislav_brigade` **never spawns in either run** (0 turns, absent from `final_save`, `available_from: 8`, home `op:duvno:dobrici` — safely HRHB, so not a captured-home case; unexplained).
+
+**The operation succeeds only when an off-roster brigade drifts into theatre.** That is not a designed dependency. **632 is therefore not a better configuration — it is one in which a reserve brigade happened to be standing in the right field**, which retires the last case for treating it as a target rather than a diagnostic.
+
+### THE ODŽAK RACE, CONFIRMED EXACTLY — and a ledger premise corrected
+
+Turn-0 `odzak:HRHB` pool: blessed **591 available / 800 committed**; HEAD **741 / 650**. Same total, different draw order. At HEAD the re-homed 102nd is *mandatory*, runs first (`recruitment_engine.ts:763`), drains its `initial_personnel` 650, and leaves **741 against an 800 cost** → `no_manpower`. **59 men short.** **But this is a ONE-TURN delay, not a loss** — at t1 HEAD carries *both* at `op:odzak:donja_dubica` (102nd 889, Hrvoje Vukčić 1,100), measured from the temporal log. The `formation_delta` reading "185 → 184, hvo_hrvoje_vukcic moves to formations_added" reads like a lost brigade and is not one. **The capacity gate did NOT fire for any of these** — `available_from === 0` short-circuits `canFormEmergentBrigade` at both the mandatory (`:750`) and elective (`:876`) filters.
+
+**Turn-0 HRHB force decomposes exactly:** blessed 30 brigades / 24,900 men → HEAD 29 / 22,900. G1 −3/−2,700; G2 +3/+1,800; G3 −1/−1,100 (recovered at t1). Sum −1/−2,000, exact. **And G2's Derventa component is not an addition at all** — blessed has an 800-man emergent standing at `op:derventa:derventa_2` at t1 which the OOB row *replaces* (`isEmergentFormationSuppressed`), both reading 840. **G2 is two more brigades and one substitution**, not three additions.
+
+**★ RECOMMENDATION, independent of where the belt lands:** the 102nd's re-home puts it on `op:odzak:donja_dubica`, the **identical `home_osid`** as `hvo_hrvoje_vukcic_brigade`, producing a draw of 741 against an 800 threshold. **That is a 59-man knife-edge that will re-fire on any pool, population or cost change and produce an unexplained brigade disappearance.** Worth a Historian check on whether both units genuinely home on that OSID, independent of calibration.
+
+### FOUR DEFECTS FOUND IN PASSING
+
+1. **`pocket_destroyable` has ZERO consumers in `src/`** — verified by the orchestrator; it appears only in `data/`, `tests/` and `docs/`. The tag on the 103rd and 104th does nothing, and **anyone reasoning from it is reasoning from a no-op.**
+2. **`destroyed_brigades.json`'s `location_osid` is a post-death field, not the death site** — `F_HRHB_0001` is at `op:bosanski_brod:brod` at t10 and reads `op:capljina:capljina_2` at t11 with 0 personnel. The formation seat nearly filed "HVO NW Bosnia brigades march 250 km to Čapljina" off it and checked the temporal log instead. **Same teleport-on-inactive artifact that was a pillar of two opposing rulings on 2026-08-17.**
+3. **Floor-pinned zombie brigades manufacture spawn-blockers.** `hrhb_105th_modrica` spawns at 640, is at 155 by t7, then sits at **exactly 100 personnel for twenty turns** (t11-t30) before dying at t31 — still `status: 'active'` and still tagged `mun:modrica`, so `getMunBrigadesForFaction` sees it and `canFormEmergentBrigade`'s 60%-of-max check **silently refuses Modriča any new brigade for that whole span**, with no counter and no reason code. (Gate-blocks-Modriča is **INFERRED**; the seat has not seen it fire.)
+4. **Emergent formation ids are a faction-global monotone counter** (`formation_spawn.ts:149-161`, verified). Because blessed spawns an emergent at Derventa and HEAD does not, the *western* corps' emergent is renumbered `F_HRHB_0002` → `F_HRHB_0001` at t1 — same unit, same OSID, same 800 men. Formation-id ordering is a tiebreak in `brigade_assignment`, `attack_resolution_osid` and `commander/allocate`. **The seat judged it NOT load-bearing here** — `strictCompare` sorts every `F_*` ahead of every `hrhb_*`/`hvo_*`, the two affected emergents are in different corps, relative order unchanged — **and recorded it anyway because it is the only turn-1 western difference in the entire dataset and someone will otherwise find it and over-read it.**
+
+### THE FIX, AND THE ONE GAP
+
+**Give `hvo_main_staff` brigades an explicit availability contract for catalog operations instead of an accidental one.** That addresses the belt *and* the whole class of "any perturbation moves western Bosnia" regressions — the seventh instance of `calibration.md:31` (2026-05-26), now with its mechanism named for the first time.
+
+**The gap both seats name, and neither papers over: per-group `brigade_temporal_log.jsonl` was not preserved.** Only blessed and full HEAD have one. That leaves one inference open — attributing the 2nd Guards' Žepče posting to G2 specifically — and **preserving the temporal log for per-group runs costs nothing at run time and would have made this a ten-minute investigation.** Also asked for, unbuilt: reason-code counters on `canFormEmergentBrigade` refusals and in-run `recruitBrigade` `no_manpower` (both currently silent; `brigades_skipped_no_manpower` exists only for the t0 pass), and `disrupted_turns` + `morale` in the temporal log.
+
+**Confidence:** HIGH on the mechanism, the two gate predicates, the timing table, the four manpower negatives and the turn-0 arithmetic — all measured. **INFERRED and flagged:** the G2→Žepče attribution, why the reallocator moved it at t109, why `hrhb_kralj_petar_kresimir_iv` was dropped from the Glamoč roster (only visible difference cohesion 30 vs 41; `disrupted_turns` is not in the temporal log), and the Modriča gate-block.
