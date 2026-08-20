@@ -27732,3 +27732,71 @@ Same commit, byte-identical git blob at `514d379e3` and `7e0715dd9`, no commit i
 Removing the temp worktree with `git worktree remove --force` **recursed through a junctioned `node_modules` and emptied the main repo's copy**, silently, until something needed to build. Recovered exactly by `npm ci` (1,234 packages, `tsc` 5.9.3 and `tsx` verified back) because `package-lock.json` is byte-identical across the whole commit range. **No tracked file was touched, and all eight artifacts were hashed and verified BEFORE cleanup, so the measurement is unaffected.** The seat owned it immediately and named the missing step precisely: not the intent but the **check** — its link removal failed on a NonInteractive prompt and it proceeded without verifying the exit. **A different seat had solved this correctly hours earlier**, deleting the link first and confirming `.bin/tsx.cmd` still present afterwards; that fix lived only in a transcript, which is why it did not propagate. Napkin §Shell & Command Reliability 1c.
 
 **Verification:** worktree removed (`git worktree list` shows only the main tree and the pre-existing `F:/awwv-eb1`); `manifest.json` untouched (`git diff --stat` on that path empty); `UPDATE_BASELINES` never set; main tree at `7e0715dd9` with only `.claude/scheduled_tasks.lock` dirty; `npm_restore.log` deleted, leaving no untracked residue. Evidence set preserved outside the repo at `scratchpad/blessed188_evidence/`.
+
+## 2026-08-20/21 — The belt lane: the −18 is two interacting groups, and the only configuration that clears the gate is the one carrying dates we know are wrong
+
+**Eight 188-week runs, one variable each, every result cell-verified rather than count-verified.** The lane asked which of the `02822200a` change groups costs the western belt. The orchestrator briefed **four** groups; the seat enumerated **six** by parsed row-diff and proved the decomposition complete — applying G1+G2+G3+G4+G6 to blessed's OOB yields 246 rows, **0 differing from HEAD**, 11 from blessed (3+3+1+3+1).
+
+**The orchestrator's four-group brief was wrong and the answer was already in the repo.** `02822200a`'s own commit message reads *"Change groups in this commit (**nine-plus, not the four originally reported**)"* and names the `elite_commander` deletions — *"Dzevad Rado, Mato Bilonjic, Zdravko Samardzic. **Not run-inert**; these carry competence/aggressiveness/defensive_skill"* — and the 116th rename. **A derived summary taken as the primary record, for the ninth time this session.** That message also already contained findings the panel spent hours re-deriving: *"THE 629 IS NOT THE SAME 629 … 33 OSIDs changed controller — 16 match→miss, 16 miss→match, netting exactly zero"* and *"The fac76630a Mistral 2 gain (Bosansko Grahovo, Titov Drvar) is reversed"* — the belt, named at the time.
+
+### THE COMPLETE PICTURE, BOTH DIRECTIONS
+
+| configuration | matched | anchors | vs gate 622 |
+|---|---|---|---|
+| **HEAD − G2** | **632** | 31/31 | **PASS +10** |
+| blessed | 629 | 31/31 | PASS +7 |
+| blessed + G1 | 627 | 31/31 | PASS |
+| **HEAD − G3** | **620** | 31/31 | **FAIL −2** |
+| blessed + G3 | 612 | 31/31 | FAIL |
+| **HEAD** | **611** | 31/31 | **FAIL −11** |
+| blessed + G2 | 605 | **29/31** | FAIL |
+| blessed + G4 (`elite_commander` ×3) | 629 | 31/31 | inert, hash byte-identical to blessed |
+| blessed + G5 (officers) | 629 | 31/31 | inert, identical on all 712 cells |
+
+**R0 control:** blessed code + all six data groups reproduces HEAD's map on **all 712 cells, 0 differences**. So the six data groups fully explain the −18, and **the `src/` changes in this window — `oob_lookup.ts`, `pre_planned_operations.ts`, `event_loader.ts`, `scenario_runner.ts` — are TERRITORIALLY INERT.** The event edit is re-confirmed inert at 188w independently of the 52w evidence.
+
+### ★ THE METHODOLOGICAL RESULT: ISOLATED EFFECTS DO NOT PREDICT REVERT EFFECTS
+
+```
+G2:  −24 added to blessed  |  +21 removed from HEAD   (3-cell gap)
+G3:  −17 added to blessed  |  +9  removed from HEAD   (8-cell gap)
+sum of isolated: −2 −24 −17 +0 +0 = −43     actual combined (HEAD) = −18     interaction = +25
+```
+
+**No single group "carries" the −18.** G2 and G3 each cost more in isolation than the entire tree does, and in combination they substantially cancel. **G3 is the worse trap: from the add direction it looks like a 17-cell problem that would clear the gate on revert. It recovers 9 and misses by 2** — the wrong answer to the only question that decides whether a revert ships. The seat refused to answer from add-direction data and asked for two more runs instead; that refusal is the reason this entry is not a retraction.
+
+### WHAT EACH GROUP ACTUALLY DOES
+
+- **G2 — `available_from` 8→0 on the 103rd Derventa, 104th Bosanski Brod, 105th Modriča — IS THE BELT.** Alone it takes Bosansko Grahovo ×4, Glamoč ×5, Šipovo ×5, Titov Drvar ×3, Mrkonjić Grad ×2, Livno, Travnik, Gornji Vakuf, and is **the only configuration in the entire arc that breaks `op:zavidovici:vozuca_2`**.
+- **G3 — the 102nd `orasje`→`odzak` re-home — independently destroys almost the same set** (−17 added).
+- **G1 — the three SE Herzegovina deletions — costs −2 and touches NO belt cell.** Its losses are eastern (Kalinovik, Konjic, Nevesinje) plus Jajce grdovo and Lopare.
+- **G4 and G5 are perfectly inert.**
+
+**★ THE SIGN IS BACKWARDS: giving the HVO three more brigades eight weeks EARLIER makes HRHB LOSE 24 cells** — terminal HRHB territory 102 → 83. The shared-pool-starvation shape is **INFERRED**; the seat stated three times that it had not seen the mechanism fire and declined to claim it. What is MEASURED is the deltas and the cell lists.
+
+**★ AND THIS IS THE SIXTH AND SEVENTH INSTANCE OF A DOCUMENTED FRAGILITY, NOT A NEW DISCOVERY.** `docs/life_lessons/calibration.md:31` (2026-05-26): *"R23/R24/R25/R27/R28 — five consecutive additive pre-planned op additions — all regressed or were zero-delta. **Any new combat op, regardless of corps or geography, disrupted the HRHB western-Bosnia cascade (bosansko_grahovo/Sipovo).**"* EH-3's −39 was the same cells (Glamoč/Bosansko Grahovo). Today's G2 and G3 are the first clean isolations of it. **Framing this as consistent with a known fragility is stronger evidence than presenting it as new.**
+
+### ★ THE CENTRAL TENSION: THE ONLY PASSING CONFIGURATION CARRIES DATES THE RECORD CALLS WRONG
+
+**HEAD−G2 = 632, full anchors, +10 over the gate and +3 ABOVE the blessed 629 — the best 188-week number measured anywhere in this arc, and the first to exceed the blessed floor.** It is a **remedy, not a rearrangement**: 26 recovered, 5 given up, the entire belt back, and both contested anchors (`vozuca_2`, `brijesnica_donja_2`) holding.
+
+**But reverting G2 restores `available_from: 8` — the values the Historian graded HISTORICALLY WRONG with high confidence.** Derventa (Feb 1992) and Bosanski Brod (3 Mar 1992) genuinely predate the scenario; week 8 is late May, by which point the VRS offensive that took those towns had begun, so a week-8 brigade **arrives as its own municipality falls**.
+
+> **632 IS A DIAGNOSTIC, NOT A TARGET.** It measures the engine coupling at **21 cells**; it does not fix it. Shipping it would be calibrating to a known-false date — the "a high calibration % with broken mechanics is a lie" trap in its purest form.
+
+**The orchestrator's prior — "the remedy is probably not to put the wrong dates back" — was withdrawn as unmeasured one message before the data landed, and the data then settled it against him outright: measured, the remedy IS the wrong dates.** That is why it is a diagnostic and not a proposal.
+
+**Two orchestrator overstatements corrected by the seat before they became doctrine, both from its own data:** (1) "accurate changes punished, dubious ones free" fails — **G1 is also a claimed correction** (`02822200a`: *"Believed genuine alias merges"*) and costs −2, so accuracy is not the variable; (2) "every Posavina change is punished" is falsified by **`hvo_4th_guard_sinovi_posavine` — "Sons of Posavina", homed at Orašje — which G4 changes at ZERO cost.** **The claim the data supports: changes to HVO turn-0 PRESENCE and PLACEMENT in the Posavina pocket cost the western belt; changes to unit QUALITY do not.** That distinction is load-bearing for routing — it points the operations/sector lane at spawn timing and home-OSID placement, not at strength or leadership.
+
+### ROUTED, NOT CLOSED HERE
+
+- **§6 lane:** HEAD−G3 recovers `op:bihac:orasac_2` and `op:bosanski_novi:krslje_2` — the two cells the 2026-08-17 entry flagged as having stopped disagreeing with the enclave guard *"not because Bihać got safer but because the baseline that disagreed with it was lost."* **They return under G3's revert and stay lost under G2's.**
+- **Sector lane:** HEAD−G2 gives up two Sarajevo-ring cells, `op:ilidza:sarajevo_dio_ilidza_2` and `op:novo_sarajevo:lukavica`, both painted RS and held RBiH — the only Sarajevo movement in the entire lane.
+- **Operations/sector:** the mechanism. Why does more HVO turn-0 commitment in the Posavina pocket cost western Bosnia? Not attempted by the calibration seat, deliberately.
+- **Historian:** unchanged by any of this. G2's and G3's historical correctness stands; the engine's response to it is not a historical verdict.
+
+**RE-BLESS: nothing should be blessed at 611 while a measured +21 three-row alternative is on the table.** There is now a configuration **above** the blessed floor, and any future re-floor conversation contains 632, not 629 — which does not make 632 the right floor.
+
+**Verification:** 8 runs against a 6+2 authorised budget, nothing further taken. Worktrees `F:\awwv-lane-a` and `F:\awwv-rev` both removed; **no junction used in either** — real `npm ci`, and `node_modules` confirmed not a link before deletion, per napkin §Shell 1c after that hazard cost a full reinstall earlier the same day. Main `node_modules` intact (707 entries, `tsc` 5.9.3). `manifest.json` untouched, `UPDATE_BASELINES` never set, nothing committed by any seat. Main tree `3d74807d6`. Evidence for all eight runs preserved outside the repo at `scratchpad/lane_a_evidence/n0..n5/` and `scratchpad/revert_evidence/`.
+
+**Unrelated repo residue found while verifying, NOT touched:** `/f/awwv-flake-check` (2026-08-04, an orphaned non-worktree copy with its own `node_modules`) and stale `.git/worktrees/broader-assisted-execution` metadata for a directory that no longer exists. Neither is this lane's; `git worktree prune` would clear the second.
