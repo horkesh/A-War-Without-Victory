@@ -27733,7 +27733,7 @@ Removing the temp worktree with `git worktree remove --force` **recursed through
 
 **Verification:** worktree removed (`git worktree list` shows only the main tree and the pre-existing `F:/awwv-eb1`); `manifest.json` untouched (`git diff --stat` on that path empty); `UPDATE_BASELINES` never set; main tree at `7e0715dd9` with only `.claude/scheduled_tasks.lock` dirty; `npm_restore.log` deleted, leaving no untracked residue. Evidence set preserved outside the repo at `scratchpad/blessed188_evidence/`.
 
-## 2026-08-20/21 — The belt lane: the −18 is two interacting groups, and the only configuration that clears the gate is the one carrying dates we know are wrong
+## 2026-08-21 (lane opened 2026-08-20) — The belt lane: the −18 is two interacting groups, and the only configuration that clears the gate is the one carrying dates we know are wrong
 
 **Eight 188-week runs, one variable each, every result cell-verified rather than count-verified.** The lane asked which of the `02822200a` change groups costs the western belt. The orchestrator briefed **four** groups; the seat enumerated **six** by parsed row-diff and proved the decomposition complete — applying G1+G2+G3+G4+G6 to blessed's OOB yields 246 rows, **0 differing from HEAD**, 11 from blessed (3+3+1+3+1).
 
