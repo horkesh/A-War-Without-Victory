@@ -35,6 +35,8 @@ import type {
     SetupPhaseRecruitmentReport
 } from '../state/recruitment_types.js';
 import { strictCompare } from '../state/validateGameState.js';
+// REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
+import { isReasonCodeTopicEnabled } from './combat/reason_code_debug.js';
 import {
     bestAffordableClass,
     DEFAULT_FACTION_RESOURCES,
@@ -463,6 +465,56 @@ export function canFormEmergentBrigade(
     return true;
 }
 
+/**
+ * REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
+ *
+ * THE PROBLEM THIS SOLVES. `canFormEmergentBrigade` collapses FOUR materially
+ * different refusals into a single `false`, and both of its call sites use it
+ * inside a `.filter(...)`, so a rejected brigade never reaches `recruitBrigade`
+ * and is therefore counted NOWHERE — not by `brigades_skipped_no_manpower`, not
+ * by anything else. "No manpower in the pool" and "the municipality's existing
+ * brigades are not full yet" call for opposite remedies and are today
+ * indistinguishable from outside.
+ *
+ * THE CONTRACT. This function MUST mirror `canFormEmergentBrigade`'s predicate
+ * order exactly, and must return `null` on precisely the inputs for which that
+ * function returns `true`. It is a separate function rather than a refactor of
+ * the original deliberately: the original is on the hot path of a decision, and
+ * an observation lane does not restructure a live predicate. `tests/` pins the
+ * two against each other so the mirror cannot silently drift.
+ */
+export type EmergentFormationRefusalReason =
+    /** currentTurn < availableFrom — not a shortage, just early. */
+    | 'not_yet_available'
+    /** No militia pool exists for this municipality/faction key at all. */
+    | 'no_pool'
+    /** A pool exists but holds fewer men than the formation requires. */
+    | 'pool_below_required'
+    /** At least one existing brigade in the municipality is below the capacity threshold. */
+    | 'existing_brigade_below_capacity';
+
+/**
+ * Returns the reason `canFormEmergentBrigade` would refuse, or `null` if it
+ * would permit. Pure; reads nothing this module does not already read.
+ */
+export function classifyEmergentBrigadeRefusal(
+    existingBrigades: Array<{ personnel: number; max_personnel?: number }>,
+    pool: { available: number } | undefined,
+    requiredPersonnel: number,
+    currentTurn: number,
+    availableFrom: number,
+    capacityThreshold: number = FORMATION_CAPACITY_THRESHOLD
+): EmergentFormationRefusalReason | null {
+    if (currentTurn < availableFrom) return 'not_yet_available';
+    if (!pool) return 'no_pool';
+    if (pool.available < requiredPersonnel) return 'pool_below_required';
+    for (const b of existingBrigades) {
+        const max = b.max_personnel ?? 3000;
+        if (b.personnel < max * capacityThreshold) return 'existing_brigade_below_capacity';
+    }
+    return null;
+}
+
 /** Get all active brigades in a municipality for a given faction. */
 export function getMunBrigadesForFaction(
     state: GameState, munId: string, faction: string
@@ -667,6 +719,45 @@ function markExistingFormationAsRecruited(
  * 2. Score all eligible catalog entries.
  * 3. Spend greedily in score order, respecting all three resource pools.
  */
+/**
+ * REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
+ *
+ * Appends one refusal record when the emergent-formation filter would drop this
+ * candidate. No-op when the topic is off, which is the only reason it is safe to
+ * call from inside a `.filter(...)` predicate: on a default run it reads one
+ * cached boolean and returns.
+ *
+ * DELIBERATELY NOT a `.filter()` side effect that anything reads back — the
+ * array it appends to is report-only, and the caller's `return` value comes from
+ * `canFormEmergentBrigade`, not from here.
+ */
+function recordEmergentRefusal(
+    report: SetupPhaseRecruitmentReport,
+    pass: 'mandatory' | 'elective',
+    brigade: OobBrigade,
+    faction: FactionId,
+    munBrigades: Array<{ personnel: number; max_personnel?: number }>,
+    pool: { available: number } | undefined,
+    requiredPersonnel: number,
+    currentTurn: number,
+    capacityThreshold: number,
+): void {
+    if (!isReasonCodeTopicEnabled('formation_refusal')) return;
+    const reason = classifyEmergentBrigadeRefusal(
+        munBrigades, pool, requiredPersonnel, currentTurn, brigade.available_from, capacityThreshold,
+    );
+    if (reason === null) return;
+    (report.emergent_formation_refusals ??= []).push({
+        brigade_id: brigade.id,
+        faction,
+        home_mun: brigade.home_mun,
+        pass,
+        reason,
+        required_personnel: requiredPersonnel,
+        pool_available: pool ? pool.available : null,
+    });
+}
+
 export function runBotRecruitment(
     state: GameState,
     oobCorps: OobCorps[],
@@ -754,7 +845,13 @@ export function runBotRecruitment(
                     const munBrigades = getMunBrigadesForFaction(state, b.home_mun, faction);
                     const pool = pools?.[militiaPoolKey(b.home_mun, b.recruit_pool_faction ?? faction)];
                     const threshold = ENCLAVE_MUNICIPALITY_IDS.has(b.home_mun) ? ENCLAVE_FORMATION_CAPACITY_THRESHOLD : FORMATION_CAPACITY_THRESHOLD;
-                    return canFormEmergentBrigade(munBrigades, pool, b.initial_personnel ?? b.manpower_cost ?? 500, currentTurn, b.available_from, threshold);
+                    const required = b.initial_personnel ?? b.manpower_cost ?? 500;
+                    // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
+                    // Observation only: the `canFormEmergentBrigade` call below is the
+                    // decision, unchanged. The classifier runs BESIDE it, not instead of
+                    // it, and only when the topic is on.
+                    recordEmergentRefusal(report, 'mandatory', b, faction, munBrigades, pool, required, currentTurn, threshold);
+                    return canFormEmergentBrigade(munBrigades, pool, required, currentTurn, b.available_from, threshold);
                 })
                 .sort((a, b) => a.priority - b.priority || strictCompare(a.id, b.id))
             : [];
@@ -883,7 +980,11 @@ export function runBotRecruitment(
                 const munBrigades = getMunBrigadesForFaction(state, b.home_mun, faction);
                 const pool = pools?.[militiaPoolKey(b.home_mun, b.recruit_pool_faction ?? faction)];
                 const threshold = ENCLAVE_MUNICIPALITY_IDS.has(b.home_mun) ? ENCLAVE_FORMATION_CAPACITY_THRESHOLD : FORMATION_CAPACITY_THRESHOLD;
-                return canFormEmergentBrigade(munBrigades, pool, b.initial_personnel ?? b.manpower_cost ?? 500, currentTurn, b.available_from, threshold);
+                const required = b.initial_personnel ?? b.manpower_cost ?? 500;
+                // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — see the
+                // mandatory site above. Same contract: beside the decision, never in it.
+                recordEmergentRefusal(report, 'elective', b, faction, munBrigades, pool, required, currentTurn, threshold);
+                return canFormEmergentBrigade(munBrigades, pool, required, currentTurn, b.available_from, threshold);
             });
 
         // Score each brigade
@@ -938,6 +1039,17 @@ export function runBotRecruitment(
     for (const faction of factions) {
         report.remaining_capital[faction] = resources.recruitment_capital[faction]?.points ?? 0;
         report.remaining_equipment[faction] = resources.equipment_pools[faction]?.points ?? 0;
+    }
+
+    // REASON-CODE INSTRUMENTATION (topic `formation_refusal`): canonicalise the
+    // order before the list leaves this function. The records were appended in
+    // catalog-filter order, which is deterministic but is a promise made by a
+    // caller — an artifact must not depend on one. Sorted by (pass, brigade_id):
+    // brigade ids are unique within a pass, so the comparison is total and no tie
+    // can fall through to insertion order.
+    if (report.emergent_formation_refusals) {
+        report.emergent_formation_refusals.sort((a, b) =>
+            strictCompare(a.pass, b.pass) || strictCompare(a.brigade_id, b.brigade_id));
     }
 
     return report;

@@ -16,6 +16,8 @@ import {
 import type { DisplacementStepReport } from '../state/displacement.js';
 import type { TakeoverDisplacementReport } from '../state/displacement_takeover.js';
 import type { ExhaustionStats } from '../state/exhaustion.js';
+// REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — see reason_code_debug.ts.
+import type { EmergentFormationRefusalRecord } from '../state/recruitment_types.js';
 import type { FormationFatigueStepReport } from '../state/formation_fatigue.js';
 import type { FormationLifecycleStepReport } from '../state/formation_lifecycle.js';
 import type { CommitmentStepReport } from '../state/front_posture_commitment.js';
@@ -272,6 +274,30 @@ export interface TurnReport {
         recruited_by_faction: Record<FactionId, number>;
         remaining_capital: Record<FactionId, number>;
         remaining_equipment: Record<FactionId, number>;
+        /**
+         * REASON-CODE INSTRUMENTATION, topic `formation_refusal` — item 4b. Absent
+         * unless `AWWV_DEBUG_REASON_CODES` requests it.
+         *
+         * ★ THESE COUNTERS ARE ALREADY COMPUTED EVERY TURN AND THROWN AWAY. The
+         * per-turn `runOngoingRecruitment` returns a full
+         * `SetupPhaseRecruitmentReport` with all four `brigades_skipped_*` counters
+         * populated; the pipeline step reads `ongoingReport.actions` and nothing
+         * else. That is the same defect as the weekly-report projection dropping
+         * `attacker_brigades` — data built, then discarded at the projection — in a
+         * third subsystem. The counters were never t0-only; only their surfacing was.
+         */
+        skipped?: {
+            no_control: number;
+            no_manpower: number;
+            no_capital: number;
+            no_equipment: number;
+        };
+        /**
+         * REASON-CODE INSTRUMENTATION, topic `formation_refusal` — item 4a. Refusals
+         * from the `canFormEmergentBrigade` filter, which reach no counter at all
+         * because the filter runs before `recruitBrigade`. Sorted by (pass, brigade_id).
+         */
+        emergent_formation_refusals?: EmergentFormationRefusalRecord[];
     };
     /** War phase: OSID column movement report */
     osid_column_movement?: OsidColumnMovementReport;

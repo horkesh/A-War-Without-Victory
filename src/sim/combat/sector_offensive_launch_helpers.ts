@@ -9,6 +9,8 @@ import { strictCompare } from '../../state/validateGameState.js';
 // TEMPORARY DIAGNOSTIC import — remove together with axis_readiness_debug.ts.
 import { emitAxisReadinessTrace, emitOperationReadinessTrace, emitExecutabilityTrace } from './axis_readiness_debug.js';
 import type { AxisReadinessDebugContext, BrigadePredictionFact } from './axis_readiness_debug.js';
+// REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
+import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -669,15 +671,26 @@ export function axisHasExecutableOpeningAttack(
     // TEMPORARY DIAGNOSTIC — optional; when omitted nothing is emitted and behaviour
     // is unchanged. Remove with axis_readiness_debug.ts.
     debugCtx?: AxisReadinessDebugContext,
+    // REASON-CODE INSTRUMENTATION (topic `axis_reject`) — optional OUT-parameter.
+    // When supplied, the per-candidate facts this function already builds for the
+    // stdout probe are ALSO written here, so the caller can put them on the
+    // artifact instead of requiring the reader to know which operation to filter
+    // for in advance. Purely additive: when omitted, every branch below behaves
+    // exactly as it does today.
+    factsOut?: AxisRejectionFactsOut,
 ): boolean {
     if (typeof objective !== 'string' || objective.length === 0) return false;
-    const debugFacts: BrigadePredictionFact[] | undefined = debugCtx ? [] : undefined;
+    // One array serves both consumers when both are active, so the stdout probe
+    // and the artifact can never disagree about what was observed.
+    const debugFacts: BrigadePredictionFact[] | undefined =
+        factsOut ? factsOut.brigades : (debugCtx ? [] : undefined);
 
     // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: gate count includes brigades
     // committed-in-transit toward objective-adjacent OSIDs. Pre-fix the gate
     // saw only currently-adjacent brigades and silent-skipped en-route
     // participants, defeating the planning_duration grace window.
     const gateAdjacent = countAdjacentGateParticipants(state, brigadeIds, adjacency, objective);
+    if (factsOut) factsOut.gate_adjacent = gateAdjacent;
     if (gateAdjacent <= 0) {
         if (debugCtx && debugFacts) {
             // STATE 1 — dead axis. Emitted before the early return so the state is observable.
@@ -692,6 +705,7 @@ export function axisHasExecutableOpeningAttack(
     // count at staged-only avoids fantasy-ratio inflation in
     // `estimateConcentratedOutcome(...)`.
     const stagedAdjacent = countAdjacentStagedParticipants(state, brigadeIds, adjacency, objective);
+    if (factsOut) factsOut.staged_adjacent = stagedAdjacent;
 
     for (const brigadeId of brigadeIds) {
         const brigade = state.military.formations?.[brigadeId];
@@ -756,6 +770,18 @@ export function axisHasExecutableOpeningAttack(
         emitExecutabilityTrace(state, debugCtx, objective, gateAdjacent, stagedAdjacent, threshold, debugFacts, false);
     }
     return false;
+}
+
+/**
+ * REASON-CODE INSTRUMENTATION (topic `axis_reject`) — mutable collector handed
+ * into `axisHasExecutableOpeningAttack`. The caller allocates it only when the
+ * topic is on, so a default run allocates nothing and takes no extra branch of
+ * consequence.
+ */
+export interface AxisRejectionFactsOut {
+    gate_adjacent: number;
+    staged_adjacent: number;
+    brigades: BrigadePredictionFact[];
 }
 
 export type OpeningAttackBlocker =
@@ -916,6 +942,21 @@ function classifyAxisOpeningAttack(
     // TEMPORARY DIAGNOSTIC — remove with axis_readiness_debug.ts.
     debugOpName?: string,
 ): OpeningAttackReadinessResult {
+    // REASON-CODE INSTRUMENTATION (topic `axis_reject`): clear any detail from a
+    // PREVIOUS evaluation before this one decides anything.
+    //
+    // WHY, AND THIS WAS A REAL DEFECT CAUGHT IN THE FLAG-ON RUN. The detail is
+    // written only on the `zero_eligible_axis` path, but `launch_blocker` is
+    // rewritten by every other blocking return here AND by
+    // `sector_offensive.ts` (`recent_catastrophic_losses_at_objective`). Without
+    // this clear, an axis that failed on `zero_eligible_axis` in week N and on a
+    // DIFFERENT blocker in week N+1 carried week N's explanation next to week
+    // N+1's verdict — observed on Operation Cerska-Kamenica. A reason code that
+    // explains the wrong refusal is worse than none.
+    //
+    // Unconditional and ungated: deleting an absent key is a no-op, so on a
+    // default run — where the key is never written — this changes nothing.
+    delete axis.launch_blocker_detail;
     const objective = axis.objectives[axis.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
         axis.launch_blocker = 'zero_eligible_axis';
@@ -981,6 +1022,12 @@ function classifyAxisOpeningAttack(
         staticAdjacency,
     );
 
+    // REASON-CODE INSTRUMENTATION (topic `axis_reject`) — item 3. Allocated only
+    // when the topic is on; `undefined` otherwise, which is today's exact call.
+    const rejectionFacts: AxisRejectionFactsOut | undefined =
+        isReasonCodeTopicEnabled('axis_reject')
+            ? { gate_adjacent: 0, staged_adjacent: 0, brigades: [] }
+            : undefined;
     if (!axisHasExecutableOpeningAttack(
         state,
         faction,
@@ -990,8 +1037,41 @@ function classifyAxisOpeningAttack(
         threshold,
         // TEMPORARY DIAGNOSTIC — undefined unless a caller supplies the op name.
         debugOpName === undefined ? undefined : { opName: debugOpName, axisId: axis.axis_id },
+        rejectionFacts,
     )) {
         axis.launch_blocker = 'zero_eligible_axis';
+        // REASON-CODE INSTRUMENTATION (topic `axis_reject`) — record WHICH predicate
+        // refused, not merely that all of them did. Written after `launch_blocker` so
+        // the two always agree, and only under the gate, so a default run neither
+        // allocates this object nor writes it into GameState — the save hash is
+        // unmoved. Brigade facts are re-sorted by id here: the loop above visits
+        // `executabilityBrigades` in engine order, and an artifact must not inherit
+        // an ordering promise from a caller.
+        if (rejectionFacts) {
+            axis.launch_blocker_detail = {
+                collapsed_state: rejectionFacts.gate_adjacent <= 0
+                    ? 'dead_axis'
+                    : (rejectionFacts.brigades.some((b) => b.found_in_predictor === true)
+                        ? 'present_too_weak'
+                        : 'not_reachable_from_position'),
+                gate_adjacent: rejectionFacts.gate_adjacent,
+                staged_adjacent: rejectionFacts.staged_adjacent,
+                threshold,
+                // Normalised from the probe's optional-field shape to the artifact's
+                // required-with-null shape. See `AxisRejectionBrigadeFact`.
+                brigades: [...rejectionFacts.brigades]
+                    .sort((a, b) => strictCompare(a.id, b.id))
+                    .map((f) => ({
+                        id: f.id,
+                        considered: f.considered,
+                        skip_reason: f.skip_reason ?? null,
+                        found_in_predictor: f.found_in_predictor ?? null,
+                        predicted_outcome: f.predicted_outcome ?? null,
+                        power_ratio: f.power_ratio ?? null,
+                        concentrated_outcome: f.concentrated_outcome ?? null,
+                    })),
+            };
+        }
         // Distinguish "still marching" from "arrived but too weak". Only the
         // former justifies holding the whole operation (see `approaching` on
         // OpeningAttackReadinessResult). Reuses this axis's OWN approach set and
@@ -1025,6 +1105,11 @@ function classifyAxisOpeningAttack(
     }
 
     delete axis.launch_blocker;
+    // REASON-CODE INSTRUMENTATION (topic `axis_reject`): the detail must not outlive
+    // the blocker it explains. Mirrors the `delete` above exactly. Unconditional
+    // because deleting an absent key is a no-op — on a default run the key was never
+    // written, so this changes nothing and serializes nothing.
+    delete axis.launch_blocker_detail;
     return { executable: true };
 }
 

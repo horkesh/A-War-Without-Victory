@@ -113,6 +113,8 @@ import { isIntelAmbushDepthEnabled } from './intel_ambush_depth_gate.js';
 import { getAmbushDepthFactor } from './intel_ambush_depth.js';
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import { SUPPORT_POWER_MULT } from './bot_constants.js';
+// REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
+import { whenReasonCodeTopic } from './reason_code_debug.js';
 // ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
 import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
 import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
@@ -684,6 +686,18 @@ export function resolveAttackOrdersOsid(
         // Phase B: sub-segment responsible for defending this OSID
         let defendingSubSegmentId: string | undefined;
         let defendingSectorId: string | undefined;
+        // REASON-CODE INSTRUMENTATION (topic `battle_power`) — DECLARATIONS ONLY.
+        // These mirror locals that already exist inside the sector-defence branch
+        // below. Hoisting the declaration lets the battle record read them without
+        // moving a single assignment or branch: each is written in exactly the place
+        // its original is computed, and read only where the record is constructed.
+        // Nothing the sim decides reads them, and on a default run nothing reads them
+        // at all.
+        let dbgDefenderPowerPath: 'sector' | 'osid_brigades' | 'non_enemy_osid' | 'militia_only' = 'militia_only';
+        let dbgDefenderPhysicalPower = 0;
+        let dbgDefenderReactiveResponse = 0;
+        let dbgMinFloorApplied = false;
+        let dbgSectorStance: string | null = null;
         const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
         const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
         const pc = state.political?.political_controllers ?? {};
@@ -786,10 +800,20 @@ export function resolveAttackOrdersOsid(
                 );
                 defenderPower = physicalPower + reactiveResponse;
                 const minFloor = avgReactivePower * MIN_DEFENSE_FLOOR_FRACTION;
+                // REASON-CODE INSTRUMENTATION (topic `battle_power`): capture the
+                // floor comparison BEFORE the Math.max collapses it. Read-only —
+                // the comparison below is the engine's, unchanged.
+                dbgMinFloorApplied = minFloor > defenderPower;
                 defenderPower = Math.max(defenderPower, minFloor);
                 if (defenderFormations.length === 0) {
                     defenderPower = Math.max(defenderPower, localMilitiaDefensePower);
                 }
+                // REASON-CODE INSTRUMENTATION (topic `battle_power`): mirror the
+                // decomposition out of this block's scope. No engine value changes.
+                dbgDefenderPowerPath = 'sector';
+                dbgDefenderPhysicalPower = physicalPower;
+                dbgDefenderReactiveResponse = reactiveResponse;
+                dbgSectorStance = sector?.sector_stance ?? null;
                 defenderFormation = primary;
                 isSectorCoverageDefense = true;
                 sectorDefenseBrigades = sectorBrigades;
@@ -799,6 +823,10 @@ export function resolveAttackOrdersOsid(
                 // Brigade at OSID but not in any sector (edge case: garrison, enclave)
                 const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
                 defenderPower = totalPower;
+                // REASON-CODE INSTRUMENTATION (topic `battle_power`): no sector, so the
+                // whole denominator is physical — there is no reactive term to report.
+                dbgDefenderPowerPath = 'osid_brigades';
+                dbgDefenderPhysicalPower = totalPower;
                 defenderFormation = primary;
                 // Populate sector defense data for proportional casualty distribution
                 if (defenderFormations.length > 1) {
@@ -820,6 +848,9 @@ export function resolveAttackOrdersOsid(
             // Non-enemy OSID with defenders (shouldn't happen, but safe fallback)
             const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
             defenderPower = totalPower;
+            // REASON-CODE INSTRUMENTATION (topic `battle_power`): as above — all physical.
+            dbgDefenderPowerPath = 'non_enemy_osid';
+            dbgDefenderPhysicalPower = totalPower;
             defenderFormation = primary;
             // Populate sector defense data for proportional casualty distribution
             if (defenderFormations.length > 1) {
@@ -1279,6 +1310,27 @@ export function resolveAttackOrdersOsid(
                 operation_id: activeOperationId,
                 operation_name: executionOp.name,
             } : {}),
+            // REASON-CODE INSTRUMENTATION (topic `battle_power`) — item 2. Absent on a
+            // default run, so this record serializes byte-identically to today's.
+            // Every value is a local already computed above; `effectiveAttackerPower`
+            // and `defenderPower` are literally the two operands of the `powerRatio`
+            // division earlier in this block, and neither is touched again between
+            // that division and here (verified: no assignment to either in between).
+            ...whenReasonCodeTopic('battle_power', () => ({
+                power_breakdown: {
+                    attacker_power: effectiveAttackerPower,
+                    attacker_power_raw: attackerPower,
+                    attacker_count: attackerFormations.length,
+                    defender_power: defenderPower,
+                    defending_sector_id: defendingSectorId ?? null,
+                    defender_power_path: dbgDefenderPowerPath,
+                    sector_brigade_count: sectorDefenseBrigades?.length ?? 0,
+                    sector_stance: dbgSectorStance,
+                    physical_power: dbgDefenderPhysicalPower,
+                    reactive_response: dbgDefenderReactiveResponse,
+                    min_floor_applied: dbgMinFloorApplied,
+                },
+            })),
         });
 
         const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;

@@ -7,7 +7,7 @@
  * compiled into a full OperationAAR and stored in GameState.operation_history.
  */
 
-import type { GameState, CorpsOperation, FormationId, CommanderAssessment, TacticalGroup } from '../../state/game_state.js';
+import type { AxisRejectionDetail, GameState, CorpsOperation, FormationId, CommanderAssessment, TacticalGroup } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -81,6 +81,14 @@ export interface AxisAAR {
     unreachable_at_launch?: boolean;
     /** Typed launch blocker for axes that never had an executable opening attack. */
     launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `axis_reject` — item 3. Carryover of
+     * `OperationAxis.launch_blocker_detail`, which is written only when
+     * `AWWV_DEBUG_REASON_CODES` requests it. This is the field that puts WHICH
+     * predicate refused into `operation_aars.json`, alongside the `launch_blocker`
+     * that only says THAT something did.
+     */
+    launch_blocker_detail?: AxisRejectionDetail;
 }
 
 // ─── Grading ────────────────────────────────────────────────────────────────
@@ -829,6 +837,12 @@ export function finalizeOperationAAR(
             }
             if (axis.launch_blocker) {
                 axisSummary.launch_blocker = axis.launch_blocker;
+            }
+            // REASON-CODE INSTRUMENTATION (topic `axis_reject`): present on the axis
+            // only when the topic is on, so this carryover is inert by construction —
+            // no gate read needed here.
+            if (axis.launch_blocker_detail) {
+                axisSummary.launch_blocker_detail = axis.launch_blocker_detail;
             }
             axisSummaries.push(axisSummary);
         }

@@ -6,9 +6,11 @@
 import type { GameState, FormationId, FactionId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { OperationCombatDiagnostic } from './combat_causality.js';
+// REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — see reason_code_debug.ts.
+import type { EmergentFormationRefusalRecord } from '../state/recruitment_types.js';
 import type { CombatOutcome } from '../sim/combat/combat_math.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
-import type { PublicIntelFrictionAnnotation } from '../sim/combat/attack_resolution_types.js';
+import type { BattlePowerBreakdown, DefenderContribution, PublicIntelFrictionAnnotation } from '../sim/combat/attack_resolution_types.js';
 import { getFactionLiveSupplyCondition } from '../sim/combat/supply_condition.js';
 
 /** Phase H1.7: Per-week activity diagnostics (counts only; derived reporting). */
@@ -91,6 +93,42 @@ export interface WeeklyReportRow {
     column_movement?: unknown;
     /** Legacy movement diagnostic payload copied from the turn report when present. */
     movement_report?: unknown;
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `formation_refusal` — item 4. Absent
+     * unless `AWWV_DEBUG_REASON_CODES` requests it.
+     *
+     * ★ WHY THIS LIVES ON THE WEEKLY ROW AND NOT ON `recruitment_report`. The
+     * turn report already HAS a `recruitment_report` block, and grepping the
+     * whole of `src/` finds NO consumer for it — not the scenario runner, not the
+     * weekly projection, nothing. It is written every turn and read by no one, so
+     * putting these counters there would have surfaced them into a dead end. They
+     * are routed here instead, where an artifact actually exists to read.
+     */
+    recruitment_refusals?: WeeklyRecruitmentRefusals;
+}
+
+/**
+ * REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4, both halves.
+ * See `WeeklyReportRow.recruitment_refusals`.
+ */
+export interface WeeklyRecruitmentRefusals {
+    /**
+     * The four `brigades_skipped_*` counters for THIS turn. They were always
+     * computed per-turn by `runBotRecruitment` and always discarded by the
+     * pipeline step that called it.
+     */
+    skipped?: {
+        no_control: number;
+        no_manpower: number;
+        no_capital: number;
+        no_equipment: number;
+    };
+    /**
+     * Candidates the `canFormEmergentBrigade` filter dropped before
+     * `recruitBrigade` was ever reached — refusals that reach no counter at all
+     * in the shipped engine. Sorted by (pass, brigade_id).
+     */
+    emergent_formation_refusals?: EmergentFormationRefusalRecord[];
 }
 
 /** Compact per-dissolution entry persisted in weekly report. */
@@ -134,6 +172,35 @@ export interface WeeklyBattleEntry {
     operation_id?: string;
     /** Human-readable operation name. */
     operation_name?: string;
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `battle_stack` — item 1.
+     *
+     * EVERY validated attacker that contributed to this battle, sorted by id.
+     * `attacker_brigade` above names only `firstAttacker`, while
+     * `attacker_casualties` sums the WHOLE STACK. Reading those two as a pair is
+     * reading a brigade label against a stack quantity, and doing so already
+     * produced one published false finding ("the casualty field is inflated 10x").
+     * This field is what makes the pair legible.
+     *
+     * Absent unless `AWWV_DEBUG_REASON_CODES` requests it: `weekly_report.jsonl`
+     * is a baselined artifact and this must not move the golden manifest.
+     */
+    attacker_brigades?: FormationId[];
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `battle_stack` — item 1.
+     *
+     * Per-brigade defender contributions. `defender_brigade` above is only
+     * `primary` from `rankDefendersByPower` — the STRONGEST brigade present, not
+     * the opposition. Populated by the engine only when the sector roster has more
+     * than one brigade, so its ABSENCE with the topic on is itself informative:
+     * a single-brigade defence. Same gating rationale as `attacker_brigades`.
+     */
+    defender_contributions?: DefenderContribution[];
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `battle_power` — item 2. The two halves
+     * of `power_ratio` plus the sector context that built the denominator.
+     */
+    power_breakdown?: BattlePowerBreakdown;
 }
 
 function sortedKeys(obj: Record<string, unknown>): string[] {

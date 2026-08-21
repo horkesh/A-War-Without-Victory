@@ -1537,6 +1537,12 @@ export function advanceSectorOffensives(
                     )) {
                         axis.status = 'stalled';
                         axis.launch_blocker = 'recent_catastrophic_losses_at_objective';
+                        // REASON-CODE INSTRUMENTATION (topic `axis_reject`): the detail
+                        // explains a `zero_eligible_axis` verdict specifically. This site
+                        // overwrites the blocker with a different one, so the explanation
+                        // must not survive alongside it. Deleting an absent key is a no-op,
+                        // so a default run is unaffected.
+                        delete axis.launch_blocker_detail;
                     }
                 }
                 // Multi-axis: check if all axes are terminal

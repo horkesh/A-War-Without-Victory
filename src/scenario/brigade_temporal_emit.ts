@@ -39,6 +39,8 @@
 import type { FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/turn_phases.js';
 import { asRecord } from '../state/schema_validators.js';
+// REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
+import { isReasonCodeTopicEnabled } from '../sim/combat/reason_code_debug.js';
 
 /** One row of the per-turn brigade temporal log. Fixed field shape. */
 export interface BrigadeTemporalRow {
@@ -101,6 +103,22 @@ export interface BrigadeTemporalRow {
      * requiring another schema bump.
      */
     officer_count_active?: number | null;
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `brigade_state` — item 5.
+     *
+     * Turns remaining under disruption. Absent unless `AWWV_DEBUG_REASON_CODES`
+     * requests it, because `brigade_temporal_log.jsonl` is a BASELINED artifact.
+     *
+     * WHY IT MATTERS AND WHY IT IS NOT IN THE SAME CLASS AS `personnel`: a
+     * disrupted brigade is skipped OUTRIGHT by `axisHasExecutableOpeningAttack`
+     * (`sector_offensive_launch_helpers.ts`, `skip_reason: 'disrupted'`) and by
+     * the catastrophic-memory predicate. So a brigade can be at full strength, in
+     * position, on the roster, and still be invisible to launch — and the temporal
+     * log, which is where a seat goes to reconstruct why a unit did nothing that
+     * week, cannot currently show it. `morale` is NOT added here: it is already
+     * emitted as a required field on this row and always has been.
+     */
+    disrupted_turns?: number;
 }
 
 /** Find the first active op for a given brigade. Stable iteration order. */
@@ -213,6 +231,13 @@ export function buildBrigadeTemporalRows(
             row.officer_count_active = officerCountActive;
         } else if (officerCountActive === null) {
             row.officer_count_active = null;
+        }
+        // REASON-CODE INSTRUMENTATION (topic `brigade_state`) — item 5. Emitted
+        // unconditionally-when-on (0 included), because "not disrupted" is exactly
+        // the answer a reader needs and an omitted 0 is indistinguishable from an
+        // omitted field. Off: the key is absent, so the row serializes byte-identically.
+        if (isReasonCodeTopicEnabled('brigade_state')) {
+            row.disrupted_turns = typeof f.disrupted_turns === 'number' ? f.disrupted_turns : 0;
         }
         out.push(row);
     }

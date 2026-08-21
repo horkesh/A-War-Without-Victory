@@ -117,7 +117,65 @@ export interface AttackResolutionOsidReport {
         operation_id?: string;
         /** Human-readable operation name. */
         operation_name?: string;
+        /**
+         * REASON-CODE INSTRUMENTATION, topic `battle_power`. Absent unless
+         * `AWWV_DEBUG_REASON_CODES` requests it — see `reason_code_debug.ts` for
+         * why absence rather than null is load-bearing.
+         */
+        power_breakdown?: BattlePowerBreakdown;
     }>;
+}
+
+/**
+ * REASON-CODE INSTRUMENTATION (topic `battle_power`) — the two halves of
+ * `power_ratio`, plus the sector context that produced the denominator.
+ *
+ * WHY THIS EXISTS. `powerRatio = effectiveAttackerPower / defenderPower`, and
+ * `defenderPower` is a SECTOR aggregate assembled in `attack_resolution_osid.ts`
+ * from every brigade the sector roster contributes, distance-weighted. The two
+ * NAMED combatants on the battle record can therefore be byte-identical between
+ * two runs while the ratio swings sevenfold, because a brigade that never
+ * appears on the record moved the denominator. Without this breakdown no
+ * artifact can distinguish "the defender got stronger" from "the sector got
+ * repartitioned" — a distinction that cost one lane a full investigation.
+ *
+ * Every field is a local that already existed at the point the record is built.
+ * Nothing here is newly computed, and nothing here is read back by the sim.
+ */
+export interface BattlePowerBreakdown {
+    /**
+     * The ratio's NUMERATOR as used: `attackerPower × intel attacker mult`.
+     * Compare against `attacker_power_raw` to see the intel-friction share.
+     */
+    attacker_power: number;
+    /** Numerator before intel friction was applied. */
+    attacker_power_raw: number;
+    /** Number of validated attacker formations in the stack. */
+    attacker_count: number;
+    /**
+     * The ratio's DENOMINATOR as used — AFTER every post-assembly multiplier
+     * (enclave garrison, collapse, post-Washington joint pressure, last-stand
+     * ×1.5, intel friction). This is the value the ratio was actually divided by.
+     */
+    defender_power: number;
+    /**
+     * Sector id whose roster assembled the denominator, or null when the battle
+     * took a non-sector defence path. Only the SUB-segment id is on the record
+     * today, and a sub-segment does not identify the roster.
+     */
+    defending_sector_id: string | null;
+    /** Which of the four defence branches ran. Names the shape of the denominator. */
+    defender_power_path: 'sector' | 'osid_brigades' | 'non_enemy_osid' | 'militia_only';
+    /** Brigades on the defending roster — the count that repartitioning moves. */
+    sector_brigade_count: number;
+    /** Sector stance driving `SECTOR_STANCE_REACTIVE_BONUS` (0.5 screening … 1.3 fortify). */
+    sector_stance: string | null;
+    /** Full-power contribution of brigades physically standing on the target OSID. */
+    physical_power: number;
+    /** Distance-weighted reserve contribution, after stance bonus and the attack-size cap. */
+    reactive_response: number;
+    /** True when the `avgBrigadePower × MIN_DEFENSE_FLOOR_FRACTION` floor beat the sum. */
+    min_floor_applied: boolean;
 }
 
 export interface DefenderContribution {
