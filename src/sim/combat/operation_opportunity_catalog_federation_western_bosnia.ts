@@ -390,7 +390,13 @@ const SOUTHERN_MOVE_DEFENDER_WEAKNESS_FLOOR = 0.20;
 // Root cause: hvo_1st_guard_abb, hvo_2nd_guard_mechanized, hvo_3rd_guard_jastrebovi
 // are all corps=hvo_main_staff in the OOB; hv_4th_guards_brigade_1995,
 // hv_7th_guards_brigade_1995, hv_134th_hgr_1995 are jna_phantom_brigades with wrong
-// corps assignments (not hvo_tomislavgrad). reconcileOperationRoster drops any brigade
+// corps assignments (not hvo_tomislavgrad).
+// HISTORICAL NOTE (2026-08-21): the two 1995 Guards phantoms named above no longer
+// exist — they double-counted the permanent hv_integration.ts pool and were dropped;
+// hv_134th_hgr_1995 survives and is now corps=hvo_tomislavgrad. The root-cause
+// account above is kept because it explains why THIS roster was rewritten in June,
+// not because those ids are still live. See HV_PHANTOM_DEFS_1995.
+// reconcileOperationRoster drops any brigade
 // whose sector claim ≠ axis host corps → zero_eligible_axis at t182 → 6 Mrkonjić
 // OSIDs stay RS. Fix: substitutes confirmed hvo_tomislavgrad in oob_brigades.json:
 // hrhb_kralj_petar_kreimir_iv_brigade, hrhb_kralj_tomislav_brigade, hvo_rama_brigade
