@@ -26,7 +26,7 @@
    Do instead: preserve 3,642 documented claims plus 12 explicitly non-player-facing deposits, with zero unresolved player-facing rows. Keep essay metadata mirrored into `essay_index.json`; use leading provenance headers for inventoried TS/TSX/Markdown read models; narrow or omit unsupported specificity rather than clearing it with vague citations.
 
 ## Execution & Validation
-0. **[2026-08-22] A probe that cannot fail is indistinguishable from a probe that works**
+00. **[2026-08-22] A probe that cannot fail is indistinguishable from a probe that works**
    Do instead: give every monitoring/verification check a positive control before quoting its output. Five failures in one session came from a check answering a narrower question than the claim it carried — grep scoped to `src/` with an unscoped conclusion; `attacker_brigade` (first attacker only) read as non-participation; and **two "0 failures" reports on a gating suite produced by grepping `×` when vitest marks a failing FILE with `❯`**. Also: **Windows caches a file's size/mtime while a writer holds the handle** — a healthy 73-min run looked frozen for 33 minutes. File size is not a liveness signal here; process CPU time is.
 0. **[2026-08-12] ANY territory-moving change needs 188w — the "catalog-only" carve-out is WITHDRAWN**
    Do instead: treat 40w/43w as a DEVELOPMENT loop only. A one-line objective addition measured +3 with zero regressions at 43w and −26 with two anchor flips at 188w. 43w faithfully reproduces turn-43 state (~4 min vs ~20) so it is useful for iterating — never for adopting. Only provable byte-identity earns a short-horizon-only GO.
