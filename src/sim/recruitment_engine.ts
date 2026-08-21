@@ -447,6 +447,18 @@ export function evaluateRecruitmentEligibility(
  * Check if a new brigade can form via pool-gated emergent formation.
  * Conditions: (1) currentTurn >= availableFrom, (2) pool can afford it,
  * (3) all existing same-faction brigades in the municipality are at capacity.
+ *
+ * ★ THIS PREDICATE HAS A MIRROR: `classifyEmergentBrigadeRefusal`, below, which
+ * names WHICH of these conditions refused. IF YOU ADD, REMOVE OR REORDER A
+ * CONDITION HERE, CHANGE THE MIRROR IN THE SAME EDIT.
+ *
+ * `tests/reason_code_debug.test.ts` pins the two against each other, but that
+ * pin is ENUMERATED, not generated: it crosses every boundary of the four
+ * conditions that exist today and is therefore BLIND TO A FIFTH. Add a
+ * `max_brigades_per_mun` cap here and all thirteen cases still pass while the
+ * classifier silently stops reporting a real refusal class — a reason code that
+ * has gone quiet, which is the failure mode this lane exists to remove. The
+ * comment is the guard the test cannot be.
  */
 export function canFormEmergentBrigade(
     existingBrigades: Array<{ personnel: number; max_personnel?: number }>,

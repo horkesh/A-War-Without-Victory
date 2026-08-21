@@ -102,11 +102,78 @@ if (withPower.length) {
                 + '  reactive=' + p.reactive_response.toFixed(2)
                 + '  floor=' + p.min_floor_applied);
         }
+        // ── REVIEW C2 ────────────────────────────────────────────────────────
+        // THE DENOMINATOR IS CHECKED FIRST, AND THAT ORDER IS THE FIX.
+        //
+        // This verdict previously read only `defending_sector_id` and
+        // `sector_brigade_count` and announced "THE SECTOR WAS REPARTITIONED"
+        // whenever either moved — WITHOUT EVER COMPARING `defender_power`. Its own
+        // flagship case was the counterexample: at `op:zavidovici:cardak_2` the
+        // maximum swing in the run (x11.50) had `defender_power` bit-identical
+        // across all four visits on a `militia_only` path, with the entire swing in
+        // the numerator. It was reporting a repartition of a sector that
+        // contributed nothing, off a sector id that should have been null (C1).
+        //
+        // A seat handed that goes and investigates sector partitioning for a battle
+        // where nothing on the defending side moved — a published false finding of
+        // the same species as the 10x casualty claim this whole lane exists to
+        // prevent. Item 2 earned its place by CONTRADICTING the obvious guess at
+        // Bosanski Petrovac; a tool that only ever confirms the guess is worse than
+        // no tool.
+        //
+        // So: if the denominator did not move, say so and stop. Only once the
+        // denominator HAS moved is it meaningful to ask whether the roster explains it.
         const lp = lo.power_breakdown, hp = hi.power_breakdown;
-        console.log('  VERDICT: '
-            + (lp.sector_brigade_count !== hp.sector_brigade_count || lp.defending_sector_id !== hp.defending_sector_id
-                ? 'THE SECTOR WAS REPARTITIONED (roster/sector differ) — not a stronger defender.'
-                : 'same sector and roster; the movement is inside the power terms.'));
+        const defDelta = Math.abs(hp.defender_power - lp.defender_power);
+        const defMoved = defDelta > 1e-9;
+        const attDelta = Math.abs(hp.attacker_power - lp.attacker_power);
+        const rosterChanged = lp.sector_brigade_count !== hp.sector_brigade_count
+            || lp.defending_sector_id !== hp.defending_sector_id;
+        let verdict;
+        if (!defMoved) {
+            verdict = 'THE DEFENDER DID NOT MOVE AT ALL — defender_power is identical ('
+                + lp.defender_power + '). The entire swing is in the NUMERATOR (attacker_power '
+                + lp.attacker_power.toFixed(2) + ' -> ' + hp.attacker_power.toFixed(2) + ').'
+                + (rosterChanged
+                    ? ' The sector/roster fields differ but are IRRELEVANT here — do not read this as a repartition.'
+                    : '');
+        } else if (rosterChanged) {
+            verdict = 'the denominator moved (' + lp.defender_power.toFixed(2) + ' -> '
+                + hp.defender_power.toFixed(2) + ', delta ' + defDelta.toFixed(2)
+                + ') AND the sector/roster changed — repartition is a CANDIDATE explanation.'
+                + (attDelta > defDelta
+                    ? ' NOTE the numerator moved MORE (delta ' + attDelta.toFixed(2) + '); the ratio is mostly attacker-driven.'
+                    : '');
+        } else {
+            verdict = 'the denominator moved (' + lp.defender_power.toFixed(2) + ' -> '
+                + hp.defender_power.toFixed(2) + ') with the SAME sector and roster — '
+                + 'the movement is inside the power terms, not the partition.';
+        }
+        console.log('  VERDICT: ' + verdict);
+
+        // Population-level version of the same discipline. An earlier ad-hoc pass
+        // reported "21 of 103 repeated triples changed defending sector or roster"
+        // as evidence that the front repartitions between visits. That figure was
+        // computed off the pre-C1 field and counted phantom sector ids on paths
+        // where the sector contributed nothing, so it is WITHDRAWN and replaced by
+        // this, which requires the denominator to have actually moved.
+        let repeated = 0, defMovedN = 0, rosterAndDefMoved = 0, phantomOnly = 0;
+        for (const arr of byPair.values()) {
+            if (arr.length < 2) continue;
+            repeated += 1;
+            const dp = arr.map((x) => x.power_breakdown.defender_power);
+            const moved = Math.max(...dp) - Math.min(...dp) > 1e-9;
+            const roster = new Set(arr.map((x) => x.power_breakdown.sector_brigade_count)).size > 1
+                || new Set(arr.map((x) => x.power_breakdown.defending_sector_id)).size > 1;
+            if (moved) defMovedN += 1;
+            if (moved && roster) rosterAndDefMoved += 1;
+            if (!moved && roster) phantomOnly += 1;
+        }
+        console.log('\nrepeated (osid, attacker, defender) triples: ' + repeated);
+        console.log('  defender_power actually MOVED between visits:            ' + defMovedN);
+        console.log('  ...and sector/roster also changed (repartition CANDIDATE): ' + rosterAndDefMoved);
+        console.log('  sector/roster changed while defender_power did NOT:      ' + phantomOnly
+            + '   <- would have been miscounted as repartition before C1');
     } else {
         console.log('(no repeated attacker/defender/OSID triple with a >1.5x ratio swing in this run)');
     }

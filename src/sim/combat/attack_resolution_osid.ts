@@ -1322,7 +1322,22 @@ export function resolveAttackOrdersOsid(
                     attacker_power_raw: attackerPower,
                     attacker_count: attackerFormations.length,
                     defender_power: defenderPower,
-                    defending_sector_id: defendingSectorId ?? null,
+                    // REVIEW C1: `defendingSectorId` is assigned near the top of the
+                    // `isEnemyControlled` block, BEFORE the branch that chooses the
+                    // defence path, and is never cleared. So a `militia_only` battle —
+                    // where the sector roster contributed NOTHING — still had a sector
+                    // named next to `physical_power: 0`, `reactive_response: 0` and
+                    // `sector_brigade_count: 0`. Measured at 49 of 155 battles on a 40w
+                    // flag-on run: every non-sector battle. A reader who does not
+                    // already know the mechanism infers a sector that was not involved,
+                    // which is a reason code explaining the wrong thing — the exact
+                    // failure this lane exists to retire, and the second time it has
+                    // appeared in this lane's own output.
+                    //
+                    // Reported as null off the sector path. The ENGINE local is
+                    // untouched: it is read elsewhere (the opsec-sector check) and
+                    // clearing it would be a behaviour change, not an observation.
+                    defending_sector_id: dbgDefenderPowerPath === 'sector' ? (defendingSectorId ?? null) : null,
                     defender_power_path: dbgDefenderPowerPath,
                     sector_brigade_count: sectorDefenseBrigades?.length ?? 0,
                     sector_stance: dbgSectorStance,

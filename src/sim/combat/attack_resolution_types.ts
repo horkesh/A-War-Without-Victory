@@ -159,9 +159,16 @@ export interface BattlePowerBreakdown {
      */
     defender_power: number;
     /**
-     * Sector id whose roster assembled the denominator, or null when the battle
-     * took a non-sector defence path. Only the SUB-segment id is on the record
-     * today, and a sub-segment does not identify the roster.
+     * Sector id whose roster assembled the denominator, or **null on every
+     * non-sector defence path** — i.e. null unless `defender_power_path` is
+     * `'sector'`. Only the SUB-segment id is on the record today, and a
+     * sub-segment does not identify the roster.
+     *
+     * The null is load-bearing, not tidiness. The underlying engine local is set
+     * before the defence path is chosen and survives into paths where the sector
+     * contributed nothing, so reporting it verbatim named a sector beside a zero
+     * roster and invited exactly the wrong inference. Read this field only
+     * together with `defender_power_path`.
      */
     defending_sector_id: string | null;
     /** Which of the four defence branches ran. Names the shape of the denominator. */

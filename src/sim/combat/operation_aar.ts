@@ -841,7 +841,15 @@ export function finalizeOperationAAR(
             // REASON-CODE INSTRUMENTATION (topic `axis_reject`): present on the axis
             // only when the topic is on, so this carryover is inert by construction —
             // no gate read needed here.
-            if (axis.launch_blocker_detail) {
+            //
+            // GUARDED ON THE BLOCKER TOO, not just the detail's presence. The detail
+            // explains a `zero_eligible_axis` verdict SPECIFICALLY, and this lane has
+            // already shipped one instance of it outliving the blocker it explained
+            // (Operation Cerska-Kamenica). Both write sites now clear it, so this
+            // condition should be unreachable — it is defence in depth against a
+            // future third write site, and it fails CLOSED: a detail with no matching
+            // blocker is dropped rather than published next to the wrong verdict.
+            if (axis.launch_blocker_detail && axis.launch_blocker === 'zero_eligible_axis') {
                 axisSummary.launch_blocker_detail = axis.launch_blocker_detail;
             }
             axisSummaries.push(axisSummary);
