@@ -387,19 +387,54 @@ const HV_PHANTOM_DEFS: PhantomDef[] = [
 /**
  * HV (Croatian Army) 1995 expeditionary phantom brigades — second wave.
  *
- * Historical: post-Split Agreement (22 July 1995, ≈ turn 150) HV deployed openly
- * inside BiH under Tuđman + Izetbegović + Zubak + Silajdžić consent. Three
- * operational groups under HV Maj Gen Ante Gotovina ran Mistral 2 (8–15 Sept)
- * and Southern Move (8–11 Oct). HVO Guards Brigades were embedded as line units
+ * Historical: post-Split Agreement (22 July 1995) HV deployed openly inside BiH
+ * under Tudjman + Izetbegovic + Zubak + Silajdzic consent. Operational groups
+ * under HV Maj Gen Ante Gotovina ran Operation Summer '95 (25-29 July, took
+ * Bosansko Grahovo + Glamoc), Storm (4 Aug), Maestral / Mistral 2 (8-15 Sept)
+ * and Southern Move (8-11 Oct). HVO Guards Brigades were embedded as line units
  * (those remain HRHB-native — see `data/source/oob_brigades.json`); the
  * brigades below are the HV regulars + home guard regiments that joined them.
  *
- * Sources: ICTY Gotovina IT-06-90 trial chamber (HV order of battle for Mistral 2,
- * Summer '95, Southern Move); BB Vol. II ch.12–13; Tanner, *Croatia* ch.13.
+ * ── ROSTER (corrected 2026-08-21) ──────────────────────────────────────────
+ * The original 8-def wave DOUBLE-COUNTED three formations against the permanent
+ * pool in `hv_integration.ts`, which spawns a 4th Guards (Split), 7th Guards
+ * (Varazdin), 1st Guards (Tigers) and 5th Guards (Karlovac) at turn ~107 with NO
+ * withdrawal turn — they are live for the entire window this wave occupies.
+ * There was one of each of these brigades historically. Resolved by:
+ *   - dropping `hv_4th_guards_brigade_1995` and `hv_7th_guards_brigade_1995`,
+ *     already represented — at greater strength — by the permanent pool;
+ *   - re-specifying the third as the 1st HGZ (1. Hrvatski Gardijski Zbor, the
+ *     1st Croatian Guards *Corps*), a genuinely distinct formation from the 1st
+ *     Guards *Brigade* "Tigrovi" that the permanent pool already holds.
  *
- * Spawn turn 150 (≈ Split Agreement window). Withdraw turn 188 (Dayton ceasefire)
- * or earlier on `holbrooke_us_belgrade_channel_1995` flag (dynamic trigger handled
- * in `processJnaWithdrawals`). Equipment returns to Croatia (no handoff to HVO).
+ * All six survivors are `hvo_tomislavgrad`. Hosting OG North on
+ * `hvo_central_bosnia` and OG South on `hvo_southeast_herzegovina` placed them
+ * under corps that do not own the western belt they were authored to fight in.
+ *
+ * Locations are deliberately UNCHANGED. Livno and Tomislavgrad were the actual
+ * HV/HVO staging areas for Summer '95 and Maestral; the geography is the part of
+ * the original design that was right.
+ *
+ * Sources: BB Vol. I ch. 91 and 93; Wikipedia "Operation Summer '95" (OG Rujani,
+ * Gotovina, 8,500 HV/HVO vs VRS 2nd Krajina Corps, Glamoc + B. Grahovo 25-29 Jul
+ * 1995); Tanner, *Croatia* ch.13. ICTY Gotovina IT-06-90 trial chamber is cited
+ * by the original design memo for the Mistral 2 / Summer '95 HV order of battle,
+ * but that pointer is **[UNVERIFIED]** — nobody on this project has read the
+ * judgement, and a wrong ICTY citation was pulled from live content 2026-08-17.
+ *
+ * Withdraw turn 188 (Dayton ceasefire). There is NO dynamic early-withdrawal
+ * trigger for this wave. The prior comment claimed one on a
+ * `holbrooke_us_belgrade_channel_1995` flag. That event is REAL — it fires in
+ * `data/scenarios/events/war_1995.json` at turns 176-178 — but nothing in `src/`
+ * ever reads it as a withdrawal trigger: `processJnaWithdrawals` implements
+ * exactly one dynamic trigger, the Graz east-Herzegovina check, scoped to the
+ * 1992 Op-Jackal phantoms. The comment described intent that was never built,
+ * which is a different failure from a fabricated citation.
+ * Equipment returns to Croatia (no handoff to HVO).
+ *
+ * NOTE: personnel is NOT authorable per def. `getPhantomSpawnProfile` returns a
+ * flat 2000 for any def carrying any equipment and 800 for one carrying none, so
+ * wave strength moves only in 2000-man steps, by adding or removing rows.
  *
  * Coexists with the permanent 4-brigade pool in `hv_integration.ts` (which models
  * post-Washington 1994 Federation Military Council integration). The two pools
@@ -408,39 +443,11 @@ const HV_PHANTOM_DEFS: PhantomDef[] = [
  * See: `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`.
  */
 const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
-    // ── OG North (main effort, Mistral 2 + Southern Move) ────────────────
+    // ── OG North (main effort, Maestral + Southern Move) ──────────────────
     {
-        id: 'hv_4th_guards_brigade_1995' as FormationId,
-        name: 'HV 4th Guards Brigade (Split, OG North)',
-        corps_id: 'hvo_southeast_herzegovina' as FormationId,
-        faction: 'HRHB',
-        location_osid: 'op:livno:livno_2',
-        spawn_turn: 150,
-        withdrawal_turn: 188,
-        tanks: 40, artillery: 30, apcs: 12,
-        no_equipment_handoff: true,
-        kind_tag: 'hv_phantom',
-    },
-    {
-        id: 'hv_7th_guards_brigade_1995' as FormationId,
-        name: 'HV 7th Guards Brigade (Varaždin, OG North)',
-        corps_id: 'hvo_central_bosnia' as FormationId,
-        faction: 'HRHB',
-        // Canonical OSID is op:duvno:tomislavgrad_2 (Duvno = pre-1990 muni name
-        // for Tomislavgrad). Prior 'op:tomislavgrad:tomislavgrad_2' did not exist
-        // in data/derived/operational/osid_areas.json, so this phantom spawned
-        // into a void and could not be sector-classified.
-        location_osid: 'op:duvno:tomislavgrad_2',
-        spawn_turn: 150,
-        withdrawal_turn: 188,
-        tanks: 30, artillery: 25, apcs: 10,
-        no_equipment_handoff: true,
-        kind_tag: 'hv_phantom',
-    },
-    {
-        id: 'hv_1st_guards_brigade_1995' as FormationId,
-        name: 'HV 1st Croatian Guards Brigade Tigrovi (Zagreb, OG North)',
-        corps_id: 'hvo_central_bosnia' as FormationId,
+        id: 'hv_1st_hgz_1995' as FormationId,
+        name: 'HV 1st Croatian Guards Corps (1. HGZ)',
+        corps_id: 'hvo_tomislavgrad' as FormationId,
         faction: 'HRHB',
         location_osid: 'op:livno:livno_2',
         spawn_turn: 150,
@@ -449,29 +456,32 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         no_equipment_handoff: true,
         kind_tag: 'hv_phantom',
     },
-    // ── OG South (flank + Southern Move main effort 8-11 Oct) ────────────
+    // ── OG South (flank + Southern Move main effort 8-11 Oct) ─────────────
     {
         id: 'hv_126th_hgr_1995' as FormationId,
         name: 'HV 126th Home Guard Regiment (Sinj, OG South)',
-        corps_id: 'hvo_southeast_herzegovina' as FormationId,
+        corps_id: 'hvo_tomislavgrad' as FormationId,
         faction: 'HRHB',
         location_osid: 'op:livno:livno_2',
         spawn_turn: 150,
         withdrawal_turn: 188,
-        tanks: 12, artillery: 15, apcs: 8,
+        // Home guard regiments (domobranske pukovnije) were second-line
+        // territorial infantry. 12 tanks for an HGR was the least defensible
+        // line in the original loadout; trimmed to a token armoured element.
+        tanks: 6, artillery: 12, apcs: 6,
         no_equipment_handoff: true,
         kind_tag: 'hv_phantom',
     },
     {
         id: 'hv_141st_reserve_brigade_1995' as FormationId,
         name: 'HV 141st Reserve Infantry Brigade (OG South)',
-        corps_id: 'hvo_southeast_herzegovina' as FormationId,
+        corps_id: 'hvo_tomislavgrad' as FormationId,
         faction: 'HRHB',
         // Canonical OSID is op:duvno:tomislavgrad_2 (Duvno = pre-1990 muni name).
         location_osid: 'op:duvno:tomislavgrad_2',
         spawn_turn: 150,
         withdrawal_turn: 188,
-        tanks: 8, artillery: 10, apcs: 6,
+        tanks: 6, artillery: 10, apcs: 6,
         no_equipment_handoff: true,
         kind_tag: 'hv_phantom',
     },
@@ -484,7 +494,7 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         location_osid: 'op:livno:livno_2',
         spawn_turn: 150,
         withdrawal_turn: 188,
-        tanks: 10, artillery: 10, apcs: 6,
+        tanks: 5, artillery: 10, apcs: 6,
         no_equipment_handoff: true,
         kind_tag: 'hv_phantom',
     },
@@ -508,7 +518,7 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         location_osid: 'op:livno:livno_2',
         spawn_turn: 150,
         withdrawal_turn: 188,
-        tanks: 5, artillery: 8, apcs: 4,
+        tanks: 3, artillery: 8, apcs: 4,
         no_equipment_handoff: true,
         kind_tag: 'hv_phantom',
     },
