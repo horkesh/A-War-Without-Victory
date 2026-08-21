@@ -2057,7 +2057,13 @@ export const warPhases: NamedPhase[] = [
         name: 'apply-resolved-opportunity-decisions',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            applyResolvedOpportunityDecisions(context.state, context.state.meta.turn);
+            const opportunitySpatial = getSpatialContextCache(context);
+            applyResolvedOpportunityDecisions(
+                context.state,
+                context.state.meta.turn,
+                undefined,
+                opportunitySpatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+            );
         },
     },
     {
@@ -2486,7 +2492,14 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const playerFaction = context.state.meta.player_faction ?? null;
-            applyBotOpportunityDecisions(context.state, context.state.meta.turn, playerFaction);
+            const botOpportunitySpatial = getSpatialContextCache(context);
+            applyBotOpportunityDecisions(
+                context.state,
+                context.state.meta.turn,
+                playerFaction,
+                undefined,
+                botOpportunitySpatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+            );
         },
     },
     {

@@ -72,8 +72,12 @@ import type {
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { canEliteLoanReachCorpsTerritory, deployEliteLoan } from './army_reserve_system.js';
+import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { buildCorpsOperation } from './corps_operation_helpers.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
+import { isMainStaffOpAvailabilityEnabled } from './mainstaff_op_availability_gate.js';
+import type { Osid } from './osid_adjacency.js';
 import {
     computeCorpsOperationReadiness,
     type CorpsOperationReadinessTraits,
@@ -877,6 +881,13 @@ export interface OpportunityDecisionOptions {
     readonly delay_turns?: number;
     /** Reduces brigade roster on under-resource; "minimum" cuts to half (rounded down). */
     readonly commitment_profile?: 'minimum' | 'standard' | 'reinforced';
+    /**
+     * Friendly-OSID adjacency, used ONLY to check that a sector-exempt roster
+     * member can actually walk to the host corps's territory before it is loaned
+     * onto the operation. Omitted (tests, IPC) the reachability check is skipped,
+     * matching `buildAxesFromDef`'s optional-adjacency contract.
+     */
+    readonly adjacency?: Map<Osid, Osid[]>;
 }
 
 function normalizeOpportunityDecision(value: unknown): OpportunityDecision | null {
@@ -987,6 +998,7 @@ export function applyOpportunityDecision(
                 variant.axes,
                 variant.staging_osid ?? def.staging_osid,
                 'standard',
+                options.adjacency,
             );
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
@@ -1016,6 +1028,7 @@ export function applyOpportunityDecision(
                 def.axes,
                 def.staging_osid,
                 'minimum',
+                options.adjacency,
             );
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
@@ -1068,6 +1081,7 @@ export function applyOpportunityDecision(
                 def.axes,
                 def.staging_osid,
                 options.commitment_profile ?? 'standard',
+                options.adjacency,
             );
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
@@ -1104,6 +1118,7 @@ function spawnCorpsOperationFromOpportunity(
     axesIn: readonly OpportunityAxisDef[],
     stagingOsid: string,
     commitment: 'minimum' | 'standard' | 'reinforced',
+    adjacency?: Map<Osid, Osid[]>,
 ): string | null {
     const cmd = state.military.corps_command?.[def.primary_corps];
     if (!cmd) return null;
@@ -1118,8 +1133,12 @@ function spawnCorpsOperationFromOpportunity(
 
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
+    // Elite loans owed to sector-exempt roster members, deployed only once the
+    // operation is certain to spawn so an aborted spawn mutates nothing.
+    const eliteLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
     for (const axis of axesIn) {
-        const brigadesForAxis = selectEligibleOpportunityParticipants(state, axis, commitment);
+        const axisLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
+        const brigadesForAxis = selectEligibleOpportunityParticipants(state, axis, commitment, adjacency, axisLoans);
         if (brigadesForAxis.length === 0) continue;
 
         // Friendly-controller filter — mirrors triggered_operations.ts:buildOperation
@@ -1156,8 +1175,11 @@ function spawnCorpsOperationFromOpportunity(
             ...(axis.staging_osid ? { staging_osid: axis.staging_osid } : {}),
         });
         for (const b of brigadesForAxis) allParticipating.push(b);
+        for (const loan of axisLoans) eliteLoans.push(loan);
     }
     if (builtAxes.length === 0) return null;
+
+    deployOpportunityEliteLoans(state, eliteLoans, def, turn, adjacency);
 
     const op = buildCorpsOperation(
         {
@@ -1178,6 +1200,51 @@ function spawnCorpsOperationFromOpportunity(
 }
 
 /**
+ * Deploy elite loans for sector-exempt brigades named on an opportunity roster.
+ *
+ * Mirrors `deployPrePlannedEliteLoans` in pre_planned_operations.ts, with one
+ * deliberate difference: `auto_join_operation: false`. The pre-planned path is
+ * safe to let `deployEliteLoan` auto-join because it refuses to inject when the
+ * corps already has an active operation. Opportunity operations do NOT occupy
+ * slot 0, so the receiving corps may well have another op running — auto-join
+ * would attach the brigade to whichever axis of THAT op has the fewest brigades.
+ * The roster already places the brigade on the axis its author named.
+ */
+function deployOpportunityEliteLoans(
+    state: GameState,
+    eliteLoans: ReadonlyArray<{ brigadeId: FormationId; corpsId: string }>,
+    def: OperationOpportunityDef,
+    turn: number,
+    adjacency?: Map<Osid, Osid[]>,
+): void {
+    const deployed = new Set<FormationId>();
+    for (const loan of eliteLoans) {
+        if (deployed.has(loan.brigadeId)) continue;
+        deployed.add(loan.brigadeId);
+        if (adjacency && !canEliteLoanReachCorpsTerritory(state, loan.brigadeId, loan.corpsId, adjacency)) {
+            continue;
+        }
+        deployEliteLoan(
+            state,
+            loan.brigadeId,
+            loan.corpsId,
+            'offensive_support',
+            0,
+            turn,
+            {
+                purpose: 'offensive',
+                why_needed: `Opportunity roster: ${loan.brigadeId} named on ${def.name}`,
+                how_to_use: `Assault reserve on the authored axis of ${def.name}`,
+            },
+            `Opportunity elite loan for ${def.name}`,
+            'army_ai',
+            adjacency,
+            { auto_join_operation: false },
+        );
+    }
+}
+
+/**
  * Apply the triggered-operation formation gates while retaining the catalog's
  * authored priority. For minimum commitments, later eligible entries substitute
  * for ineligible leading entries until the authored commitment size is filled.
@@ -1186,6 +1253,8 @@ function selectEligibleOpportunityParticipants(
     state: GameState,
     axis: OpportunityAxisDef,
     commitment: 'minimum' | 'standard' | 'reinforced',
+    adjacency?: Map<Osid, Osid[]>,
+    eliteLoansOut?: Array<{ brigadeId: FormationId; corpsId: string }>,
 ): FormationId[] {
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
@@ -1196,11 +1265,34 @@ function selectEligibleOpportunityParticipants(
 
     for (const brigadeId of axis.brigades) {
         const formation = formations[brigadeId];
-        if (!formation || getFormationCorpsId(formation) !== axis.corps) continue;
+        if (!formation) continue;
+
+        // Sector-exempt reserves (main staff / general staff) never carry the
+        // host corps' id, so this predicate alone makes every main-staff brigade
+        // an author NAMES on a roster undeliverable. Mirrors the contract the
+        // pre-planned path already implements (pre_planned_operations.ts
+        // `buildAxesFromDef`): being named on the roster authorises the loan, and
+        // the loan is what delivers the brigade. Default-OFF; see
+        // mainstaff_op_availability_gate.ts.
+        let admittedByRosterAttachment = false;
+        if (getFormationCorpsId(formation) !== axis.corps) {
+            if (!isMainStaffOpAvailabilityEnabled()) continue;
+            if (!isSectorAssignmentExemptCorpsId(getFormationCorpsId(formation))) continue;
+            if (!formation.elite_loan_state) continue; // non-elite exempt = skip
+            if (adjacency && !canEliteLoanReachCorpsTerritory(state, brigadeId, axis.corps, adjacency)) continue;
+            admittedByRosterAttachment = true;
+        }
         if (!isEligibleOperationFormation(formation)) continue;
         if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
         if ((formation.disrupted_turns ?? 0) > 0) continue;
         if (movementState[brigadeId]?.status === 'in_transit') continue;
+
+        if (admittedByRosterAttachment && eliteLoansOut) {
+            const loanState = formation.elite_loan_state!;
+            if (!loanState.on_loan || loanState.loaned_to_corps !== axis.corps) {
+                eliteLoansOut.push({ brigadeId, corpsId: axis.corps });
+            }
+        }
 
         selected.push(brigadeId);
         if (selected.length >= targetCount) break;
@@ -1262,6 +1354,7 @@ export function applyBotOpportunityDecisions(
     turn: number,
     playerFaction: FactionId | null,
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
+    adjacency?: Map<Osid, Osid[]>,
 ): void {
     const proposals = state.military.operation_opportunities;
     if (!proposals || proposals.length === 0) return;
@@ -1278,7 +1371,7 @@ export function applyBotOpportunityDecisions(
     targets.sort((a, b) => strictCompare(a.proposalId, b.proposalId));
     for (const t of targets) {
         const decision = defaultBotDecisionForOpportunity(t.proposal, t.def);
-        applyOpportunityDecision(state, turn, t.proposalId, decision, catalog);
+        applyOpportunityDecision(state, turn, t.proposalId, decision, catalog, { adjacency });
     }
 }
 
@@ -1377,6 +1470,7 @@ export function applyResolvedOpportunityDecisions(
     state: GameState,
     turn: number,
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
+    adjacency?: Map<Osid, Osid[]>,
 ): void {
     const reviews = state.meta.pending_proposal_reviews;
     if (!reviews || reviews.length === 0) return;
@@ -1393,6 +1487,6 @@ export function applyResolvedOpportunityDecisions(
         const options = explicitDecision
             ? normalizeOpportunityDecisionOptions(r.opportunity_decision_options)
             : {};
-        applyOpportunityDecision(state, turn, proposalId, decision, catalog, options);
+        applyOpportunityDecision(state, turn, proposalId, decision, catalog, { ...options, adjacency });
     }
 }

@@ -897,6 +897,15 @@ export function deployEliteLoan(
     approvalReason?: string,
     approvalBy: 'army_ai' | 'player' = 'army_ai',
     adjacency?: Map<Osid, Osid[]>,
+    options?: {
+        /**
+         * Whether an offensive loan auto-joins the receiving corps's active
+         * operation. Defaults to true (the shipped behavior). Callers that place
+         * the brigade on a specific authored axis themselves pass false, so the
+         * auto-join cannot also attach it to an unrelated concurrent operation.
+         */
+        auto_join_operation?: boolean;
+    },
 ): void {
     const f = state.military.formations?.[brigadeId];
     if (!f?.elite_loan_state) return;
@@ -954,7 +963,7 @@ export function deployEliteLoan(
     // ── Auto-join target corps's active operation ──
     // If deployed for offensive reasons and the corps has an active operation,
     // add the elite to participating_brigades so march-first logic moves it to the front.
-    if (reason === 'offensive_support' || reason === 'exploitation') {
+    if ((reason === 'offensive_support' || reason === 'exploitation') && options?.auto_join_operation !== false) {
         const activeOp = pickActiveOperation(state, corpsId, brigadeId);
         if (activeOp) {
             attachEliteToOperation(activeOp, brigadeId);
