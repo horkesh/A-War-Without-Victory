@@ -210,6 +210,9 @@ import {
 import { generateLevel1StanceProposals, generateLevel1OpProposals } from '../ai_commander/proposal_generation.js';
 import { generateCorpsStanceOrders } from '../combat/bot_corps_stance.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
+// REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
+import { isReasonCodeTopicEnabled } from '../combat/reason_code_debug.js';
+import type { EmergentFormationRefusalRecord } from '../../state/recruitment_types.js';
 import { reroutePoolSurplus } from '../recruitment_engine.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
@@ -3334,6 +3337,10 @@ export const warPhases: NamedPhase[] = [
             }
 
             let recruited_actions = 0;
+            // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
+            // Undefined on a default run, so the report spread below is a no-op.
+            let recruitment_skipped: { no_control: number; no_manpower: number; no_capital: number; no_equipment: number } | undefined;
+            let emergent_formation_refusals: EmergentFormationRefusalRecord[] | undefined;
             const recruited_by_faction: Record<FactionId, number> = {} as Record<FactionId, number>;
             for (const factionId of factions) recruited_by_faction[factionId] = 0;
 
@@ -3358,6 +3365,26 @@ export const warPhases: NamedPhase[] = [
                 for (const action of ongoingReport?.actions ?? []) {
                     recruited_by_faction[action.faction] = (recruited_by_faction[action.faction] ?? 0) + 1;
                 }
+                // ── REASON-CODE INSTRUMENTATION — item 4 ───────────────────────
+                // THIS IS THE DISCARD SITE. `ongoingReport` carries all four
+                // `brigades_skipped_*` counters, freshly computed for THIS turn, and
+                // the two lines above read `.actions` and drop the rest on the floor.
+                // A seat asking "why did no brigade form in Goražde this week?" has
+                // had no artifact answer, and the answer was computed and thrown away
+                // every turn of every run.
+                //
+                // Gated rather than restored outright because the turn report feeds
+                // baselined artifacts; off, `recruitment_skipped` stays undefined and
+                // the spread below contributes nothing.
+                if (ongoingReport && isReasonCodeTopicEnabled('formation_refusal')) {
+                    recruitment_skipped = {
+                        no_control: ongoingReport.brigades_skipped_no_control,
+                        no_manpower: ongoingReport.brigades_skipped_no_manpower,
+                        no_capital: ongoingReport.brigades_skipped_no_capital,
+                        no_equipment: ongoingReport.brigades_skipped_no_equipment,
+                    };
+                    emergent_formation_refusals = ongoingReport.emergent_formation_refusals;
+                }
             }
 
             const remaining_capital: Record<FactionId, number> = {} as Record<FactionId, number>;
@@ -3372,7 +3399,11 @@ export const warPhases: NamedPhase[] = [
                 recruited_actions,
                 recruited_by_faction,
                 remaining_capital,
-                remaining_equipment
+                remaining_equipment,
+                // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
+                // Both keys absent on a default run.
+                ...(recruitment_skipped ? { skipped: recruitment_skipped } : {}),
+                ...(emergent_formation_refusals ? { emergent_formation_refusals } : {})
             };
         }
     },

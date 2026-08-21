@@ -28,6 +28,8 @@ import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/
 import { initializeCorpsCommand } from '../sim/combat/corps_command.js';
 import { initStrategicDepth } from '../sim/combat/strategic_depth.js';
 import { findBrigadeOperation } from '../sim/combat/corps_operation_helpers.js';
+// REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
+import { sortedIds, whenReasonCodeTopic } from '../sim/combat/reason_code_debug.js';
 import { injectPrePlannedOperations } from '../sim/combat/pre_planned_operations.js';
 import { spawnJnaPhantomBrigades } from '../sim/combat/jna_phantom_brigades.js';
 import {
@@ -2813,6 +2815,30 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         ...(b.execution_friction ? { execution_friction: b.execution_friction } : {}),
                         ...(b.equipment ? { equipment: b.equipment } : {}),
                         ...(operation_id ? { operation_id, operation_name } : {}),
+                        // ── REASON-CODE INSTRUMENTATION — item 1 ────────────────────
+                        // THIS PROJECTION IS THE DEFECT. It enumerates its output fields
+                        // explicitly, and `attacker_brigades` / `defender_contributions`
+                        // are BUILT by `attack_resolution_osid.ts` and dropped right here.
+                        // Their absence is what let a seat read `attacker_casualties` (a
+                        // STACK total) against ONE named brigade and publish a 10x
+                        // inflation that does not exist.
+                        //
+                        // Restored under `AWWV_DEBUG_REASON_CODES=battle_stack` rather
+                        // than unconditionally, because `weekly_report.jsonl` is a
+                        // BASELINED artifact: an unconditional restore moves the golden
+                        // manifest, which is already mismatched, and would make this
+                        // observation change unmergeable behind a calibration dispute.
+                        // Sorting is the engine's own (`attackerBrigadeIds` is already
+                        // strictCompare-sorted at construction); re-sorted here anyway so
+                        // the artifact's ordering does not depend on an upstream promise.
+                        ...whenReasonCodeTopic('battle_stack', () => ({
+                            ...(b.attacker_brigades ? { attacker_brigades: sortedIds(b.attacker_brigades) } : {}),
+                            ...(b.defender_contributions ? { defender_contributions: b.defender_contributions } : {}),
+                        })),
+                        // ── REASON-CODE INSTRUMENTATION — item 2 ────────────────────
+                        // Present on `b` only when the engine-side `battle_power` topic
+                        // is on, so this pass-through is doubly inert by default.
+                        ...(b.power_breakdown ? { power_breakdown: b.power_breakdown } : {}),
                     };
                 });
 
@@ -2842,6 +2868,21 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
             if (turnReport.movement_report) {
                 reportRow.movement_report = turnReport.movement_report;
+            }
+            // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
+            // `turnReport.recruitment_report` has NO other consumer anywhere in
+            // `src/`, so without this attachment the counters would be surfaced into
+            // a block nothing reads. Both sub-fields are populated only under the
+            // gate, so on a default run this condition is false and the weekly row
+            // serializes byte-identically.
+            const recruitmentRefusals = turnReport.recruitment_report;
+            if (recruitmentRefusals?.skipped || recruitmentRefusals?.emergent_formation_refusals) {
+                reportRow.recruitment_refusals = {
+                    ...(recruitmentRefusals.skipped ? { skipped: recruitmentRefusals.skipped } : {}),
+                    ...(recruitmentRefusals.emergent_formation_refusals
+                        ? { emergent_formation_refusals: recruitmentRefusals.emergent_formation_refusals }
+                        : {}),
+                };
             }
             // Attach fired events from turn report
             if (turnReport.events_fired && turnReport.events_fired.length > 0) {

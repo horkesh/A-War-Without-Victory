@@ -279,12 +279,81 @@ export interface OperationAxis {
     unreachable_at_launch?: boolean;
     /** Typed diagnostic for axes that fail the opening-attack launch gate. */
     launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `axis_reject` — item 3. Written ONLY
+     * when `AWWV_DEBUG_REASON_CODES` requests it, so a default run never carries
+     * this field and the save hash is unmoved.
+     *
+     * `launch_blocker: 'zero_eligible_axis'` above names THAT every candidate was
+     * rejected. It never names WHICH predicate rejected them, and the three states
+     * it collapses call for opposite remedies: nobody adjacent at all, brigades
+     * present but the objective unreachable from where they stand, or brigades
+     * present and targetable but predicted too weak. This field is the
+     * discrimination, on the artifact rather than on stdout.
+     */
+    launch_blocker_detail?: AxisRejectionDetail;
     /** Battles conducted by this axis this turn (reset each turn). */
     battles_this_turn?: number;
     /** Battles resolved against this axis's current objective this turn. */
     objective_battles_this_turn?: number;
     /** Total battles conducted by this axis since operation start. */
     total_battles?: number;
+}
+
+/**
+ * REASON-CODE INSTRUMENTATION (topic `axis_reject`) — the discrimination behind
+ * a `zero_eligible_axis` verdict.
+ *
+ * Every field is a value `axisHasExecutableOpeningAttack` already computes and
+ * discards on its way to returning `false`. Nothing here is recomputed and
+ * nothing here is read by any predicate.
+ */
+export interface AxisRejectionDetail {
+    /**
+     * Which of the three collapsed states this rejection actually was:
+     *   dead_axis                    — no brigade adjacent and none in transit.
+     *   not_reachable_from_position  — brigades exist, but the predictor does not
+     *                                  offer the objective from where they stand.
+     *                                  This is the genuinely-still-marching case.
+     *   present_too_weak             — brigades are adjacent and targetable, and
+     *                                  every predicted outcome fell below threshold.
+     */
+    collapsed_state: 'dead_axis' | 'not_reachable_from_position' | 'present_too_weak';
+    /** Brigades counted by the gate, INCLUDING committed-in-transit ones. */
+    gate_adjacent: number;
+    /** Brigades physically adjacent — the ones that actually concentrate power. */
+    staged_adjacent: number;
+    /** Predicted-outcome threshold this axis was judged against. */
+    threshold: string;
+    /** One record per candidate, sorted by brigade id. */
+    brigades: AxisRejectionBrigadeFact[];
+}
+
+/**
+ * Per-candidate record inside {@link AxisRejectionDetail}. Sorted by `id`.
+ *
+ * EVERY FIELD IS REQUIRED, WITH `null` FOR "DID NOT APPLY", and that is a
+ * deliberate departure from the optional-field shape the underlying probe uses.
+ * Two reasons. First, absence carries no byte-identity value here: the whole
+ * parent object is absent on a default run, so optionality inside it buys
+ * nothing and only widens the GameState optional-field surface that
+ * `tests/strict_null_inventory_progress.test.ts` exists to hold down — six new
+ * optional fields for one diagnostic is a bad trade. Second, a reader diffing
+ * two rejections wants `"skip_reason": null` to mean "this brigade was
+ * considered", not to wonder whether the key was dropped by a serializer.
+ */
+export interface AxisRejectionBrigadeFact {
+    id: FormationId;
+    /** False when the brigade was dropped before any prediction was attempted. */
+    considered: boolean;
+    /** THE REASON CODE. Non-null exactly when `considered` is false. */
+    skip_reason: 'missing' | 'wrong_faction' | 'inactive' | 'below_personnel_floor' | 'disrupted' | null;
+    /** Whether the predictor offered the objective from this brigade's position. */
+    found_in_predictor: boolean | null;
+    predicted_outcome: string | null;
+    power_ratio: number | null;
+    /** Outcome with stack concentration applied, or null when it did not apply. */
+    concentrated_outcome: string | null;
 }
 
 /** Named corps operation (multi-turn: planning → execution → recovery). */

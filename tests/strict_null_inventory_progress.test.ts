@@ -703,14 +703,29 @@ describe('strict null inventory progress', () => {
             // `legitimacy_state`, stores the deterministic legitimacy classification used
             // by the retained two-turn selection window. State domain; legacy saves remain
             // absent-safe. 530->531 / state 185->186. No new type-escape casts.
-            optional_fields_game_state: 531,
+            // Reason-code instrumentation (item 3): +1 optional OperationAxis field,
+            // `launch_blocker_detail`, which records WHICH predicate refused an axis
+            // behind a `zero_eligible_axis` verdict. Written only under
+            // `AWWV_DEBUG_REASON_CODES=axis_reject`, so it is absent from every default
+            // run and the save hash is unmoved (verified: 188w reproduces
+            // final_state_hash 8bb624ebafa7a925 with all eight run artifacts
+            // byte-identical to the reference run). 531->532 / state 186->187.
+            // ONLY +1, DELIBERATELY: the nested `AxisRejectionBrigadeFact` fields are
+            // declared REQUIRED-WITH-NULL rather than optional precisely so a single
+            // gated diagnostic does not cost six entries against this floor — see the
+            // type's own comment in game_state.ts. No new type-escape casts.
+            optional_fields_game_state: 532,
         });
-        expect(current.optional_field_domains.total).toBe(531);
+        // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
+        // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
+        // so sim 335->336 and state is UNCHANGED at 186. Gated by
+        // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
+        expect(current.optional_field_domains.total).toBe(532);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 335,
+            sim: 336,
             state: 186,
             ui_adapter: 0,
             unknown: 0,

@@ -115,6 +115,34 @@ export interface SetupPhaseRecruitmentReport {
     brigades_skipped_no_equipment: number;
     remaining_capital: Record<FactionId, number>;
     remaining_equipment: Record<FactionId, number>;
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `formation_refusal` — item 4. Absent
+     * unless `AWWV_DEBUG_REASON_CODES` requests it.
+     *
+     * One record per brigade the `canFormEmergentBrigade` filter dropped, sorted
+     * by `brigade_id`. These refusals reach NO counter today: the filter runs
+     * before `recruitBrigade`, so the dropped candidate never touches
+     * `brigades_skipped_no_manpower` or any sibling. Emitted as a list rather
+     * than a count map because "which municipality is stuck, and on what" is the
+     * question a seat actually arrives with; the counts are trivially derivable
+     * from the list, the reverse is not.
+     */
+    emergent_formation_refusals?: EmergentFormationRefusalRecord[];
+}
+
+/** One refused emergent-formation candidate. See `emergent_formation_refusals`. */
+export interface EmergentFormationRefusalRecord {
+    brigade_id: string;
+    faction: FactionId;
+    home_mun: string;
+    /** `mandatory` or `elective` — the two filter sites refuse independently. */
+    pass: 'mandatory' | 'elective';
+    /** THE REASON CODE. See `EmergentFormationRefusalReason`. */
+    reason: string;
+    /** Men the candidate required. */
+    required_personnel: number;
+    /** Men available in the consulted pool; null when no pool exists for the key. */
+    pool_available: number | null;
 }
 
 // ---------------------------------------------------------------------------
