@@ -28276,3 +28276,55 @@ OG North's 11,000 is **HV and HVO combined**, three of its formations being HVO 
 **On "either answer produces work": the Historian agrees and adds that the third option is the worst.** An operation reporting three brigades and fielding one is a reporting falsehood — but **fixing the movement while leaving the turn would make the falsehood true in the wrong direction.**
 
 **What would change the ruling:** the ICTY Gotovina order of battle, if it gives HV-only strengths for Maestral, would replace the 12,000-14,000 band with a figure. **Nothing found would move the timing or the Central Bosnia ruling — those are settled.**
+
+## 2026-08-21 — The HV data corrections buy +16, and the isolation proves it is the one edit nobody credited
+
+**MEASURED, 188w, and the endpoints are verified three ways:** `matched_osids` **611 → 627**, anchors **31/31** held, hash `dd90c75508a9cf2e` → `e4f01cd17eb8520c`. The reviewer replicated the engine's own predicate (`computeOsidPairMatchDiagnostics`) against `painted_control_oct1995.json` rather than reading a reported number, reproduced **both** endpoints exactly, and then ran its own 188w reaching the same hash. **Commit `86eb00339` on `lane/hv-1995-data-corrections`, source-only, NOT merged.**
+
+**The cell diff is unusually clean: 16 gained, 0 lost, and exactly 16 OSIDs differ across the whole 712-cell map.** A strict superset, not a coincident total — the failure mode this project has been fooled by twice is ruled out by measurement.
+
+### ★ THE ISOLATION REFUTES THE LANE'S CAUSAL ACCOUNT, AND THE BUNDLE IS THE ORCHESTRATOR'S FAULT
+
+| run | tree | matched |
+|---|---|---|
+| baseline | `607ef038c` clean | **611** |
+| treatment | full patch, 5 edits | **627** |
+| **isolation** | **full patch, spawn turn reverted 174 → 150** | **611** |
+
+**Delete the two double-counted brigades, re-spec the third as the 1st HGZ, reassign four corps ids to `hvo_tomislavgrad`, trim four tank counts — and calibration does not move by a single cell.** Add back one integer, `spawn_turn: 150 → 174`, and all sixteen appear. The isolation diff, verified unique, is two lines: `+ spawn_turn: 150` / `- spawn_turn: 174`.
+
+**So the implementing seat's account — that the gain came from deleting a formation that could never act, which stopped an operation building a dead axis — is NOT what happened.** The four historical edits measure at exactly zero. The timing change is necessary for the entire +16.
+
+> **★ "Verifying 611 and 627 twice each cannot detect a misattribution — only isolation can."** Three independent measurements agreed on both endpoints, and every one of them was equally consistent with the wrong cause. **The orchestrator sent a six-item brief and called it "the data corrections", packaging five independent edits into one change against the sacred rule *"Change ONE thing… Never bundle."*** The reviewer caught it, tested the alternative hypothesis it raised — that 24 extra turns of six formations parked on western-belt OSIDs was doing the work — and refuted the lane's story instead.
+
+**AND IT INVERTS WHAT THE LANE IS.** Presented as a historical data correction that happened to yield +16, it is **a timing change worth +16 with four inert historical corrections attached.** It must be reviewed, ledgered and gated as a **calibration change**, not as a history cleanup. **A converse run (timing alone, on the original 8-def roster) is in flight to establish whether the timing is also sufficient; either way the four historical edits are already measured at zero.**
+
+### THE TANK BAND WAS COMPUTED AGAINST THE WRONG DENOMINATOR
+
+The orchestrator asked whether to keep the trim at 51 tanks or revert to the 66 cap, and **asked against the wave alone.** The reviewer measured the permanent pool in `hv_integration.ts`: **85 authored tanks, ~10,000 men, spawning at ~t107 with NO `withdrawal_turn`** — all four confirmed `status: active` at t188 with 9,580 personnel. **Combined authored HV presence in the Maestral window is therefore 136 tanks and ~22,000 men against the Historian's 90-110 / 12,000-14,000 band.**
+
+**So the band is not "unreachable" — it is already exceeded by the permanent pool before the wave adds anything**, and the model overshoots armour by ~25% and personnel by ~60%. **Keep the trim at 51**; it moves the combined figure 151 → 136, toward the band. **★ And the deeper point, routed back to the Historian: the lane fixed NOMINAL duplication (one brigade appearing twice) and left AGGREGATE over-modelling untouched — consolidating onto the permanent pool, which is the LESS historical of the two representations, since HV regulars were not permanently garrisoned in BiH from 1994 and that pool never withdraws.**
+
+### ORCHESTRATOR CORRECTION — "no such flag exists" was wrong, and the distinction matters
+
+The orchestrator escalated a comment claim as **"a third false claim… No such flag exists."** **`holbrooke_us_belgrade_channel_1995` is a REAL EVENT** — verified in `war_1995.json` at **turns 176-178**, referenced three further times in `war_1992.json`. **The grep behind the claim was scoped to `src/` and the conclusion was not.** Same shape as every other failure in this arc: a check answering a narrower question than the claim it supports.
+
+**The substantive half stands:** `processJnaWithdrawals` implements one dynamic trigger, `isHv1992OpJackal && grazEastActive`, gated on `created_turn < 100`, so **no early-withdrawal path exists for the 1995 wave.** But **the reviewer's distinction is the finding: documented-but-unbuilt design intent is not a fabricated citation.** The author pointed at a real modelled event and described a trigger they intended and never implemented. **That must not be filed alongside the ICTY pointer**, which is a genuinely unverified source reference and is correctly marked `[UNVERIFIED]`.
+
+### ★ PROCESS FAILURE, THE ORCHESTRATOR'S: A COMMIT WAS ORDERED INTO A WORKTREE A REVIEWER WAS RUNNING IN
+
+The orchestrator instructed the implementing seat to commit `86eb00339` into `F:\awwv-hv-data` **while the reviewer was executing 188w runs in that same worktree**, having itself told the reviewer the worktree was "left in place for you." That is `feedback_never_commit_in_a_running_agents_worktree`, violated by the orchestrator.
+
+**It did not corrupt the review, and that is provable rather than hopeful only because the reviewer sha256'd all three modified files before touching anything** — a commit records content and does not alter it, and both source files hash identically before and after. **The near-miss is the finding: had the commit carried a source edit, the isolation would have silently measured a different tree and reported a false attribution with total confidence.**
+
+### THE INERTNESS, NOW MEASURED RATHER THAN INFERRED — with one caveat still open
+
+On the treatment run: **616 battles, zero name a 1995-wave brigade**; the four permanent HV brigades attack **9** times. **The only difference between the working HV force and the inert one is `kind`** — the permanent pool is `kind: 'brigade'`, the wave is `kind: 'hv_phantom'`, and `hv_phantom` is absent from the movement-order allowlist at `brigade_movement_orders.ts:75` and from the `subordinate_count` filters at `corps_command.ts:126/151`, both of which include `jna_phantom`.
+
+**CAVEAT STATED, NOT BURIED:** `attacker_brigade` names only the stack's **first** attacker, so "zero named" does not prove non-participation — and `hv_112th_infantry_1995` does appear in a `sector_attack` operation's `participating_brigades`. **The instrument that settles it is `attacker_brigades`, which the reason-code lane merged three commits earlier**, and a single re-run with `AWWV_DEBUG_REASON_CODES=battle_stack` closes it. **There is a symmetry worth recording: that instrumentation exists precisely because a false finding was published this morning from reading a stack total against one named brigade. This is the same read, and now there is an instrument for it.** The reviewer also corrected its own instinct here — the brigade temporal log shows zero rows for the wave, but `brigade_temporal_emit.ts:179` filters to `kind === 'brigade'` by design, so that proves nothing.
+
+### ALSO CONFIRMED — the instrumentation merge is clean
+
+Full suite on `lane/instrumentation-reason-codes`: **7 files failed, 1,287 passed, 4 skipped (1,298); 15 tests failed.** Identical file set and identical per-file counts to the orchestrator's main baseline. **Zero new failures.** The suspension condition on `3bc488c60` did not fire and that merge stands.
+
+**STATUS: NOT MERGED. Reviewer's lean is HOLD — not on the result, which is real and clean, but on the bundle and on 10 of the 16 cells sitting in a neighbouring corps' sector the lane never touched.** Verdict pending the converse and `battle_stack` runs.
