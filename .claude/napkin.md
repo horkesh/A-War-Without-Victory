@@ -8,20 +8,26 @@
 - Topic archives: [QA gates](napkin/qa_gates.md), [unreported sparse truth](napkin/unreported.md), [map counters](napkin/map_counters.md), [release process](napkin/release_process.md), [engine runtime](napkin/engine_runtime.md), [Warroom/legacy](napkin/warroom_and_legacy.md).
 
 ## Current Release State
-1. **[2026-08-15] R7 is the current 1.0 critical path; Phase 1.2 is closed**
+1. **[2026-08-22] HV 1995 wave: history merged, timing HELD, movement STILL BROKEN — read the handoff first**
+   Do instead: read `docs/40_reports/20260822_HV_1995_WAVE_HANDOFF.md` before touching `HV_PHANTOM_DEFS_1995`, `hv_phantom` movement, or the golden manifest. Merged `0fd09c19f` (history corrections, 611, zero cells). Held unmerged: `lane/hv-1995-spawn-timing` @ `3b40d1619` (+16, 611→627) — a calibration decision, not a technical one. **The movement fix and the timing change MUST land in the same tree**: legs at spawn_turn 150 = 12,000 HV troops in western Bosnia from February 1995, through Srebrenica and Storm.
+2. **[2026-08-22] CI red is PRE-EXISTING and the golden manifest is BLOCKED on an unresolved anomaly**
+   Do instead: treat run `32532844577` as byte-identical to `32050627175` (2026-08-17) — same 16 mismatches, same hash pairs. **Do NOT refresh `data/derived/scenario/baselines/manifest.json` pins** until this is settled: the merge deletes two brigades from `apr1992_definitive_188w` and the local `final_save.json` hash moved, but CI's `actual` did not, and the workflow step has no caching.
+3. **[2026-08-15] R7 is the current 1.0 critical path; Phase 1.2 is closed**
    Do instead: execute R7 Phase 2 officer/OOB provenance, then audio, English accessibility/readability, opening screens, and packaged proof; continue to R8/R9. D-topology is post-1.0/reserved.
-2. **[2026-08-15] Retain collapse v3 selection plus reversible D-shape**
+4. **[2026-08-15] Retain collapse v3 selection plus reversible D-shape**
    Do instead: preserve the default-OFF two-turn selector and 4.0/0.5 shock/recovery union pass. Do not revive struck breadth tuning; any RBiH/RS Tier-0 opening or neighbour topology requires fresh Section 6 and paired 188w evidence.
-3. **[2026-08-15] D-shape proved a live writer, not protected-boundary campaign reach**
+5. **[2026-08-15] D-shape proved a live writer, not protected-boundary campaign reach**
    Do instead: cite the `70d5e04c6f49e041` pair as one live non-enclave HRHB write with full protected absence. Keep the discriminating G1 fixture as protected-input proof, and rerun if faction gates/topology change.
-4. **[2026-08-15] R7 remains open after RC; localization does not gate 1.0**
+6. **[2026-08-15] R7 remains open after RC; localization does not gate 1.0**
    Do instead: finish historical/source remediation, officer/OOB provenance, audio/licensing, English accessibility/readability, opening screens, and packaged proof before R8. Keep `bs` migration, pseudolocalization, Bosnian completion/native review, and locale-specific proof in post-1.0 Phase 3.
-5. **[2026-08-15] Publication remains separately authorized**
+7. **[2026-08-15] Publication remains separately authorized**
    Do instead: transient validation packages are allowed, but do not sign, upload, create a public release, or tag `1.0` without an explicit `Publish 1.0` instruction.
-6. **[2026-08-15] R7 Phase 1.2 provenance is a zero-queue contract**
+8. **[2026-08-15] R7 Phase 1.2 provenance is a zero-queue contract**
    Do instead: preserve 3,642 documented claims plus 12 explicitly non-player-facing deposits, with zero unresolved player-facing rows. Keep essay metadata mirrored into `essay_index.json`; use leading provenance headers for inventoried TS/TSX/Markdown read models; narrow or omit unsupported specificity rather than clearing it with vague citations.
 
 ## Execution & Validation
+0. **[2026-08-22] A probe that cannot fail is indistinguishable from a probe that works**
+   Do instead: give every monitoring/verification check a positive control before quoting its output. Five failures in one session came from a check answering a narrower question than the claim it carried — grep scoped to `src/` with an unscoped conclusion; `attacker_brigade` (first attacker only) read as non-participation; and **two "0 failures" reports on a gating suite produced by grepping `×` when vitest marks a failing FILE with `❯`**. Also: **Windows caches a file's size/mtime while a writer holds the handle** — a healthy 73-min run looked frozen for 33 minutes. File size is not a liveness signal here; process CPU time is.
 0. **[2026-08-12] ANY territory-moving change needs 188w — the "catalog-only" carve-out is WITHDRAWN**
    Do instead: treat 40w/43w as a DEVELOPMENT loop only. A one-line objective addition measured +3 with zero regressions at 43w and −26 with two anchor flips at 188w. 43w faithfully reproduces turn-43 state (~4 min vs ~20) so it is useful for iterating — never for adopting. Only provable byte-identity earns a short-horizon-only GO.
 0o. **[2026-08-16] A DISPATCHED AGENT'S PLAIN OUTPUT IS INVISIBLE TO THE ORCHESTRATOR — only `SendMessage` lands. Say so IN THE BRIEF.**
