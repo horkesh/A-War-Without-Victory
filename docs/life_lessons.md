@@ -1,8 +1,22 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 288 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 294 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-08-21) — crash-recovery / attribution / belt-lane batch (ten failed premises, all caught)
+
+### [Process] ★ A DERIVED SIGNAL READ AS A PRIMARY ONE — ten instances in one session, each in a different costume — see `docs/life_lessons/process.md`
+
+### [Architecture] A catalog row can be LIVE under a synthetic key — `formations[catalogId]` returns false while the unit is standing there — see `docs/life_lessons/architecture.md`
+
+### [Calibration] Isolated effects do NOT predict revert effects — measure in the direction you intend to SHIP — see `docs/life_lessons/calibration.md`
+
+### [Testing] A guard cannot mutation-test a sentence it does not assert — prose beside a passing assertion is unverified — see `docs/life_lessons/process.md`
+
+### [Process] A subagent that finishes without SENDING is indistinguishable from one that hung — ask before concluding — see `docs/life_lessons/process.md`
+
+### [Calibration] The manifest beats the stamp — content-verification over self-report; prefer the instrument that does not touch what it measures — see `docs/life_lessons/calibration.md`
 
 ## New Lessons (2026-08-14) — RC collapse batch (eight green-but-vacuous instances in one session)
 
@@ -375,7 +389,7 @@
 - Three dispatched builders in 48h passed their OWN targeted tests but shipped a real regression visible only in the full suite: #436 (ran baseline, not full suite → missed nothing local but the golden-manifest move surfaced in CI), the SRK contain-purity (ran SRK suite → missed `contain_posture_release_laneA`), and #441 (ran its 22 digest tests → missed `ui_chronicle_operation_aar_link`, the chronicle-displacement). **Common root:** an isolated worktree builder defaults to running ONLY the file it wrote. CI caught all three (the gates are doing their job), but a RED CI round-trip per lane is the cost. **Mitigation (apply in the dispatch prompt):** for any change touching a SHARED surface (chronicle/event list, a capped/sorted/grouped render, a registry the UI/engine iterates, a flag feeding a shared predicate, an in-window persisted/logged field), explicitly instruct the builder to run the FULL relevant suite (grep tests for the host component/predicate + run all) AND, for sim-touching, `test:baselines`. Watch whether the explicit instruction reduces the RED round-trips.
 
 ### [Process] Worktree builders stall mid-task — MITIGATION VALIDATED 2026-06-14 (was ACTIVE 4–5× 2026-06-12) — see `docs/life_lessons/process.md`
-- Dispatched worktree builders repeatedly stalled 2026-06-12 (EH-4 Fix B, C3 freeze, SRK fix builders) — auto-removed-unchanged (no work) or dirty-uncommitted (salvageable). **Mitigation:** small precise specs (≤ ~15 LOC + 1 test) → orchestrator builds DIRECTLY; salvage a dirty stall via patch-extraction (never git-inside-the-worktree); reserve dispatch for large/parallel work. **2026-06-14 VALIDATION:** 3 LARGE content/UI lanes (warroom art, RS-goals, HRHB events) dispatched as isolated worktree builders → ALL completed cleanly, opened PRs, reported full evidence (ZERO stalls). The pattern was small-spec dispatch-overhead, not worktree-agents per se. The small-direct / large-dispatch discrimination holds; demote toward archive after one more clean large-dispatch cycle.
+- Dispatched worktree builders repeatedly stalled 2026-06-12 (EH-4 Fix B, C3 freeze, SRK fix builders) — auto-removed-unchanged (no work) or dirty-uncommitted (salvageable). **Mitigation:** small precise specs (≤ ~15 LOC + 1 test) → orchestrator builds DIRECTLY; salvage a dirty stall via patch-extraction (never git-inside-the-worktree); reserve dispatch for large/parallel work. **2026-06-14 VALIDATION:** 3 LARGE content/UI lanes (warroom art, RS-goals, HRHB events) dispatched as isolated worktree builders → ALL completed cleanly, opened PRs, reported full evidence (ZERO stalls). The pattern was small-spec dispatch-overhead, not worktree-agents per se. The small-direct / large-dispatch discrimination holds; demote toward archive after one more clean large-dispatch cycle. **2026-08-21 — THAT CYCLE RAN AND PASSED CLEAN: seven large dispatches (one attribution seat, a four-seat panel, two coupling seats), ALL completed, ALL reported full evidence, ZERO stalls, and several corrected the orchestrator's own premises unprompted.** Archive condition MET. **But do not archive silently, because a NEW and visually identical failure mode appeared in the same cycle:** a seat finished its analysis and went idle **without sending it**, which from outside is indistinguishable from a stall. See the 2026-08-21 process entry — the mitigation is to ask, never to conclude from silence.
 
 ### [Process] Verify PWD before worktree git ops — NEW 2026-06-12 (near-miss) — see `docs/life_lessons/process.md`
 - A `git cherry-pick` ran from a stale cwd inside a half-removed worktree; `rev-parse --show-toplevel` falsely reported main, so the worktree-safety check passed but the op misfired (empty cherry-pick + a "missing" file via relative-path resolution). The tell was `pwd`, not `--show-toplevel`. Add `pwd` to the pre-git-op worktree check. Recovery clean; cost a diagnostic cycle.
@@ -385,6 +399,7 @@
 
 ### [Process] Validate expert diagnosis against run data BEFORE implementing the fix — VIOLATED 2026-04-07 (second instance) + RE-VALIDATED 2026-06-11 — see `docs/life_lessons/process.md`
 - 2026-06-11 strong compliance: EH-3 fix(a) builder asserted "calibration-inert" without measuring → a synchronous 188w diff caught the −39 before merge; EH-4 Fix B "near-zero risk" panel premise was code-checked and refuted before building. The discipline held this session, but only because the orchestrator ran the verification rather than trusting the claim. Promote: ANY "inert / byte-identical / near-zero-risk" claim on a sim-touching change is unproven until a 188w `matched_osids` diff says so.
+- **VIOLATED AGAIN 2026-08-21 (THIRD INSTANCE) — and in the costume with no tell.** A seat reported it had checked `final_save.json` and that `hrhb_kralj_tomislav_brigade` never spawns. The orchestrator accepted that report instead of running the check, and committed it to the ledger. It was **false** — the brigade is live as `F_HRHB_0001`, 3,000 men, under an `oob:` tag. **Aggravating: the orchestrator had recorded that exact trap as a lesson earlier the same session and warned another seat about it by name.** Sharpened rule: **a colleague's "I verified" is itself a derived signal.** The prior two instances were subagent ROOT-CAUSE claims; this one was a subagent VERIFICATION claim, which is harder to catch because it looks like the discipline rather than a conclusion. Data point worth keeping: the orchestrator independently verified roughly fifteen claims that session and skipped one — **and the one it skipped is the one that was wrong.**
 - Phase F DRINA investigation: subagent claimed "Op Teočak deleted" as the root cause — Op Teočak had NOT been deleted. Claim was deferred rather than immediately verified in code. Also violated in 2026-03-31 (trimming diagnosis). Two instances in two weeks: this pattern is an active threat. Require mechanistic verification ("what diagnostic field would change if this fix is correct?") before accepting any subagent root-cause claim.
 
 ### [Architecture] When a guard is added to one pipeline path, audit ALL paths — CONFIRMED STRONG PATTERN (promoted 2026-04-11) — see `docs/life_lessons/architecture.md`
