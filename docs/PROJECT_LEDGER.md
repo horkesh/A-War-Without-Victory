@@ -28038,3 +28038,32 @@ ON    Šipovo in ONE 18-OSID sector — the 22nd pooled with rs_2nd_banja_luka_l
 2. **Emit the ratio's two halves and the sector context** on the battle record: `attacker_power`, `defender_power`, `defending_sector_id` (only the *sub*-segment id is emitted today), `sector_brigade_count`, `physical_power`, `reactive_response`, `min_floor_applied` — all live locals at the point the record is pushed. **Without these, no artifact can distinguish "the defender got stronger" from "the sector got repartitioned."**
 
 This is now the **third** reason-code-with-no-reason in three lanes, alongside `canFormEmergentBrigade`'s silent refusals and `zero_eligible_axis` naming that every candidate was rejected but never which predicate rejected them.
+
+### ★ CORRECTION TO `ef3854851` AND `28583adf6` — the belt is MISTRAL 2, not Mistral 1
+
+**A falsifiable prediction was made, authorised as one run, and came back false.** The calibration seat predicted Mistral 1 would execute at HEAD−G2. **It does not.** Verified by the orchestrator against the preserved artifacts:
+
+| configuration | Mistral 1 | Mistral 2 | matched |
+|---|---|---|---|
+| blessed | w160–w176, **7/11**, partial | w175–w187, **9/11** | 629 |
+| **HEAD−G2** | w160–**w164**, **0/6, FAILURE, 0 attacks** | execution, 12 attacks, **11/12** | **632** |
+| HEAD | w160–w168, **0/10**, failure | **4/12** at t188 | 611 |
+
+**At the best-scoring configuration in the entire arc, Mistral 1 delivers nothing at all — zero objectives, zero attacks — and the belt comes back anyway.** Positive control: the run reproduces 632 / 31·31 with `control_delta` **byte-identical to the preserved HEAD−G2**, so it is the same tree and the same result.
+
+**★ THE BELT IS MISTRAL 2, AND IT IS MONOTONE.** `9/11 → 11/12 → 4/12` maps to `629 → 632 → 611` in perfect rank order across three configurations. **Mistral 1's `7 → 0 → 0` is monotone with nothing.**
+
+**WHAT THIS CORRECTS.** The merge commit `ef3854851` states Mistral 1's death in planning is the blocker, and `28583adf6` records the sector seat's chain that *"Mistral 2 launches off the ground Mistral 1 opened."* **Both are falsified on that point.** At HEAD−G2 Mistral 2 reaches 11/12 while Mistral 1 opens nothing. **What SURVIVES, and is now more strongly supported than when it was written: the belt is not behind brigade availability.** The merged change is unaffected — it is default-OFF and byte-identical to HEAD — and the three mechanical defects named in that commit (`MAX_PLANNING_DURATION = 4`, staging anchors 4 and 6 hops from first objectives, and the `anyApproaching` deadlock confirmed at n205 on 2026-08-12 with the fix unlanded) are **all still real defects**. They are simply not the belt's cause.
+
+**★ THE SHAPE OF THE ERROR, AND IT IS THE TWELFTH INSTANCE IN THIS ARC.** The seat had two configurations in which Mistral 1 and Mistral 2 **both** moved, and attributed the delta to Mistral 1. **A two-variable comparison with one variable attributed** — identical in class to the n222/n223 confound that took three sessions to unwind, and to the orchestrator's own conflation of two seats' findings an hour earlier. **The third data point is what broke it, and the third point existed only because the run was authorised rather than the prediction accepted.** Two of these twelve are now the calibration seat's own; it reported this one against itself unprompted.
+
+**THREE SUB-FINDINGS, MEASURED:**
+- **The reason code is CONFIGURATION-DEPENDENT.** Mistral 1 exits with `zero_eligible_axis` at HEAD and **`brigade_attrition`** at HEAD−G2. **So the reason code the main-staff lane was designed against changes with the tree** — a diagnosis anchored on a single configuration's reason code is anchored on something that moves.
+- **The objective DENOMINATORS move.** Mistral 1 carries **11 / 10 / 6** objectives across the three configurations; Mistral 2 carries **11 / 12 / 12**. **"0/6" and "0/10" are not comparable** — the operation's own axis composition varies by configuration, and any future comparison of these operations must state the denominator or it is comparing different operations under one name.
+- **Failing FAST looks better than failing slowly.** At HEAD−G2 Mistral 1 releases the corps at w164 and `hvo_tomislavgrad` immediately becomes productive — Operacija Nakovanj w164–w167 **2/2 success**, Mistral 2 to 11/12, Southern Move 5/6. At HEAD it lingers to w168. **HYPOTHESIS, NOT MEASURED, and flagged as such by the seat:** freeing the corps op-slot early is worth more than a slow failure. Consistent with the one-active-op-per-corps rule; untested.
+
+**WHERE THE LANE GOES: the target is Mistral 2's COMPLETION, not Mistral 1's launch.** At HEAD, Mistral 2 launches late and is a third done when the scenario ends. **The question is what delays Mistral 2's launch at HEAD.**
+
+**One reconciliation owed before anything is commissioned on this:** the sector seat's finding in `28583adf6` — a Tomislavgrad-bound reserve parked outside the corps' sectors — is a candidate for **both** Mistral 1's `brigade_attrition` **and** Mistral 2's late launch, and may be the same object seen from the sector side rather than a competing explanation. **Put that finding and this table side by side before opening a new lane.**
+
+**The artifact gap that blocked two seats is CLOSED for this configuration.** `scratchpad/HEADminusG2_full/` now holds `end_report.md`, `operation_aars.json` and the 23 MB `brigade_temporal_log.jsonl` alongside the usual deltas — verified present. It should be closed for every future per-group run, at run time, rather than reconstructed after the fact.
