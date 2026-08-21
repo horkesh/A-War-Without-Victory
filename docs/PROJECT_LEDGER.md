@@ -27995,3 +27995,46 @@ F_RBiH_0002    t35  1,910 → t36    777 → … → t39 1,774 → t41 745 → t
 **And the trajectory is worse than the belt lane assumed.** From CALIBRATION_MASTER's own table: **n215 = 638, the measured floor** → n218 = 627 (**−11**, multi-axis veto fix `b9da847f1`, **KEPT**, debt acknowledged at the time) → n220 = 629 (+2) → HEAD = 611 (−18, the belt). **That is −27 from the measured floor, not −18, and two of the three largest losses in this arc were knowingly accepted and never paid back.** Also worth recording: n220 and the blessed tree both score **629 with different final-state hashes** — the same number over a different map, at a pair nobody had compared.
 
 **Nothing changed in `src/` or `data/` in any of the seven commits of this session.** Everything above is measurement and record.
+
+### ★ CORRECTION TO `9aa4cf83d` — the casualty claim is WITHDRAWN and re-framed, and the power-ratio anomaly is SOLVED
+
+**The morning entry's headline — "the per-battle casualty field is not a count of men", ×10.2 and ×11.1 — is WITHDRAWN by the seat that made it.** The ratios were computed against **one brigade's** manpower delta when the field sums a **stack**.
+
+**Mechanism, verified by the orchestrator at source:** `attack_resolution_osid.ts:1009` sums `personnelAttacker` over **all** `attackerFormations`, while the record names only `firstAttacker.id`. The code *does* build the disambiguating fields — **`attacker_brigades: attackerBrigadeIds` at `:1258` and `defender_contributions: defenderContributions` at `:1270`** — and the weekly-report projection at `scenario_runner.ts:2803` **enumerates its output fields explicitly and includes neither.** Measured against the run: at Ripač t135, **five 5th Corps brigades in Operation Grmeč 94 lost 1,718 men between them**, not one brigade losing 403.
+
+**★ THE CORRECTED FINDING, which is subtler and more useful than the withdrawn one: the battle record names ONE attacker and ONE defender for an engagement the engine resolves between a STACK and a SECTOR.** `defender_brigade` is only `primary` from `rankDefendersByPower` — the strongest present, not the opposition. Both `attacker_casualties` and `power_ratio` are **correctly computed over those aggregates**; the record simply does not say so, and **both fields that would say so are dropped in the projection.** Any lane reading `attacker_brigade` + `attacker_casualties` as a pair is reading **a brigade label against a stack quantity.**
+
+**A RESIDUAL SURVIVES AND IS STILL OPEN.** 4,489 reported against 1,718 applied at Ripač, and 4,489 against 2,900 at Donji Koričani — **the same value off two different stacks with different applied losses.** `finalAttackerCas = min(personnelAttacker − 100, round(baseAttackerCas))`, and the cap cannot produce it (the Ripač stack is 8,882), so 4,489 is a computed figure hit twice. Not settleable from the current artifacts.
+
+**Unaffected by this correction** — they rest on personnel deltas in the temporal log, not on the casualty field: attrition-has-no-memory (the two-turn returns to establishment), the 40-attack Radava loop, the power-ratio distribution, and the 50%-of-wins-don't-stick figure. **The standup's biggest-realism-gap verdict stands.**
+
+### ★ THE 7-FOLD POWER-RATIO SWING IS SOLVED — IT IS NOT A DETERMINISM BREAK
+
+Stated first and plainly, because the orchestrator's brief asked for the opposite to be shouted if true: **the path is fully deterministic** — `strictCompare`-sorted iteration, BFS over static adjacency, no RNG, no wall-clock. **The two arms have genuinely different state.**
+
+**The state that differs is the SECTOR PARTITION.** In `final_save.json`, the sectors of `vrs_1st_krajina` touching Šipovo:
+
+```
+OFF   Šipovo fragmented across FOUR sectors — rs_22nd_krajina_infantry defends ALONE
+      on a ONE-OSID sector (defensive_power 4.32)
+ON    Šipovo in ONE 18-OSID sector — the 22nd pooled with rs_2nd_banja_luka_light_infantry
+      (defensive_power 10.22)
+      Corps-wide: 12 sectors in OFF, 8 in ON. Sectors 8-11 exist only in OFF.
+```
+
+`powerRatio = effectiveAttackerPower / defenderPower` (`attack_resolution_osid.ts:983`), and **`defenderPower` is a SECTOR aggregate**, built at `:698-793` from `getStandingOgDefenseBrigadeIds(sector)`: an `avgBrigadePower` over the sector roster, a `reactiveResponse` capped by `attackerCount × avgBrigadePower × 1.5`, and a floor of `avgBrigadePower × 0.75`. **`rs_2nd_banja_luka_light_infantry` never appears in the battle record and moves the denominator several-fold.** The named combatants can be byte-identical while the ratio swings 7×.
+
+**Why the finding seat got the wrong sign, and it was a good negative result:** it was reasoning about the *attacker's* concentration term, `getConcentrationBonus`, which is **capped at `CONCENTRATION_BONUS_CAP = 0.30`** and cannot move the ratio beyond ~1.3×. The 7× is on the **denominator**. Its measurement was right and its target was the numerator.
+
+**★ THE TRAP, NAMED SO IT DOES NOT RECUR: the brigade's own `sector_id` field is NOT what the combat path reads.** It reads the sector object's `assigned_brigade_ids` / `reserve_brigade_ids`. Checking the brigade side and concluding "same sector, same brigades" is wrong — and at t184 the brigade-side rosters ARE identical in both arms, so that check would have closed the question with the wrong answer. The seat checked both sides.
+
+**Two further denominator terms with real range and no representation in the record:** `SECTOR_STANCE_REACTIVE_BONUS` spans 0.5 (screening) to 1.3 (fortify), a 2.6× swing; and `getReactiveDistanceWeight(hops) = 0.60^hops` returns a hard **0** beyond 5 hops or if BFS-unreachable through friendly territory — **a cliff, not a gradient.** Neither drove this case (exactly one control cell differs at t188), but both can drive others invisibly.
+
+**★ AND THE OBSERVATION BEYOND THE LANE, flagged not opened: the front repartitions turn to turn.** The 22nd Krajina's `sector_id` walks **1 → 0 → 8 → 4** across t185-188 in OFF and **1 → 0 → 7 → 5** in ON. **Defensive power in this engine is partly a function of how the front happens to be diced that week, rather than of what is standing on the ground.** That is the ledger's documented "any perturbation re-rolls the late-war window" fragility surfacing in **combat resolution**, not in force generation — a second face of the same defect, in a different subsystem.
+
+### INSTRUMENTATION — the first item costs nothing to compute
+
+1. **Stop dropping `attacker_brigades` and `defender_contributions` at `scenario_runner.ts:2803`.** Both are already built and thrown away at the projection. **Restoring them would have answered this question with no new instrumentation and retires the casualty-field confusion permanently.**
+2. **Emit the ratio's two halves and the sector context** on the battle record: `attacker_power`, `defender_power`, `defending_sector_id` (only the *sub*-segment id is emitted today), `sector_brigade_count`, `physical_power`, `reactive_response`, `min_floor_applied` — all live locals at the point the record is pushed. **Without these, no artifact can distinguish "the defender got stronger" from "the sector got repartitioned."**
+
+This is now the **third** reason-code-with-no-reason in three lanes, alongside `canFormEmergentBrigade`'s silent refusals and `zero_eligible_axis` naming that every candidate was rejected but never which predicate rejected them.
