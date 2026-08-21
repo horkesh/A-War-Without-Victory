@@ -27942,3 +27942,56 @@ Both seats reach fragility; the formation seat reaches it from **measured margin
 3. **The `mun:` tag is not rewritten on relocation**, so the documented reinforcement path reads a dead pool for every displaced brigade. Either the tag or the path is wrong; which one is not yet known.
 
 **Unchanged:** the coupling does not travel through HRHB force generation, and the sector-claim mechanism on `hvo_2nd_guard_mechanized` stands as the belt's proximate cause.
+
+## 2026-08-21 — Standup findings: the casualty field is not a count of men, and attrition has no memory
+
+Surfaced by the War-or-Game seat during the daily standup's Friday battle smell test, on `runs/…w188_n225`. **Every load-bearing figure below was independently re-verified by the orchestrator against the run artifacts.** Read-only; nothing changed.
+
+### ★ THE PER-BATTLE CASUALTY FIELD RUNS 10-11× THE ACTUAL MANPOWER LOSS, AND CLAMPS
+
+**Two battles report `attacker_casualties: 4489` — different brigades, 29 turns apart, identical to the digit.** Verified: **4,489 is the MAXIMUM across all 607 battles in the run.** Two independent engagements hitting the exact maximum is a ceiling, not a coincidence.
+
+Against `brigade_temporal_log.jsonl`, verified turn by turn:
+
+| brigade | battle | before → after | ACTUAL loss | REPORTED | ratio |
+|---|---|---|---|---|---|
+| `arbih_17th_vitezka_mountain` | t106 `op:skender_vakuf:donji_koricani`, PR 0.37 | 1,750 → 1,308 | **442** | 4,489 | **×10.2** |
+| `arbih_501st_slavna_mountain` | t135 `op:bihac:ripac`, PR 0.33 | 1,741 → 1,338 | **403** | 4,489 | **×11.1** |
+
+**A 1,800-man brigade cannot suffer 4,489 casualties.** The seat ruled out pooling: at t135 the 501st was the only RBiH brigade fighting in the Bihać area that week. **MEASURED:** the field is 10-11× the named brigade's manpower delta and recurs at an exact value. **INFERRED:** a clamp or a shared formula ceiling; the mechanism is not identified.
+
+**★ THE CONSEQUENCE IS RETROACTIVE AND WIDE.** Total reported casualties for the run are **346,853** (RBiH 195,634) against a historical ~62k KIA / ~250k KIA+WIA. **Those numbers must not be compared until this is resolved — and every calibration lane that has ever read a per-battle casualty figure has read this field.** Before anything else is built on casualty data, the scenario-tester seat should rule on whether any committed calibration conclusion rests on it. Note this is a *reporting-surface* defect as far as anyone has shown: the manpower deltas in the temporal log are internally consistent, so the sim may be fine and the log wrong. **Nobody has yet proven which.**
+
+### ★ ATTRITION HAS NO MEMORY — the biggest realism gap on the board
+
+Verified in the turn-by-turn log, three independent cases:
+
+```
+17th Vitezka   t105 1,750 → t106 1,308 → t107 1,768 → t108 1,800   (2 turns to establishment)
+501st Slavna   t134 1,741 → t135 1,338 → t136 1,616 → t137 1,800   (2 turns)
+F_RBiH_0002    t35  1,910 → t36    777 → … → t39 1,774 → t41 745 → t44 1,748  (shattered twice, recovers twice)
+```
+
+**A brigade reduced to 43% strength is back at exact establishment two turns later, at roughly +340 men per turn, all war.** The seat framed the significance correctly and honestly: the *effect* is already on the books — project memory records *"ARBiH corps 0% permanent loss vs RS 61-63% at 188w, root mechanism not yet found"* — and what is new is a measured signature of the mechanism.
+
+> **The bot can attack one village forty times because forty defeats cost it nothing it keeps.** A corps commander's central 1993-95 problem — that men spent are gone, and a brigade burned in one attack is not available for the next — is not modelled, so **the exhaustion this game is about never reaches the units.**
+
+### ★ THE #39 SUICIDE-ATTACK GUARD DOES NOT HOLD AT 188 WEEKS
+
+**`op:centar_sarajevo:radava` — the exact position `REAL_WAR_MASTER #39` records as FIXED — is attacked 40 times between t51 and t186 by six different ARBiH brigades, with ZERO wins.** Orchestrator-verified: 40 attacks, 0 wins, 6 distinct attackers. 36 catastrophic, 4 repulsed; 31,532 reported attacker casualties (see the scale defect above) against 1,713 inflicted. **The guard stalls an axis after two CONSECUTIVE catastrophic outcomes on one objective — the bot satisfies it by rotating brigades and by returning 60 turns later.** `lopare_selo_2` shows the same shape: six attacks, six failures. The failure class is known; **the count is new. Forty attacks on one village is not a bot gamble, it is a loop.**
+
+### Two further smell-test findings, measured
+
+- **High power ratios are not battles.** PR p90 = 20.5, p99 = 93.7, **max 166.5**; 64 engagements above 20:1, 7 above 100:1. Cost does not track ratio — **PR 133.78 costs the attacker 608 men while PR 4.47 costs 19.**
+- **Half of all wins do not stick.** **198 of 397 attacker wins (50%) are followed by the same faction attacking the same OSID within three turns.** At `op:visoko:gornja_vratnica_2` the Guards Brigade wins a *decisive victory* at PR 9.8-11.7 on **five consecutive turns** and the objective is still there each morning.
+- **Flagged, not claimed as the answer:** the VRS launches **32 attacks across the 136 weeks from t53 to t188** — 134 of its 166 all-war attacks fall in the first 52 weeks — against the ARBiH's 305. A VRS that goes passive after 1992 does not fight Goražde '94, Bihać '94, or Srebrenica and Žepa '95.
+
+**Method note, and the seat gets credit for it:** `weekly_report.jsonl` carries **no per-battle territory field.** The seat said so plainly and used `attacker_won` cross-checked against re-attacks on the same OSID, rather than inventing one. Its sample was also declared before it was drawn — all 607 battles flattened chronologically, every 60th taken, spanning t3 to t182 — so the sample cannot be accused of being picked.
+
+### And the standup's other finding: THE CALIBRATION RECORD IS STALE ABOUT THE PRESENT
+
+**`docs/40_reports/CALIBRATION_MASTER.md` has not been touched since 2026-08-14 and still labels `n220 / 629` as "THIS IS HEAD". HEAD is 611.** The entire belt arc — n222 through n226, the blessed-tree proof, the eight-run decomposition — is absent from the document every calibration decision cites. `.claude/napkin.md`'s "Current Release State" is likewise dated 2026-08-15 and names R7 Phase 2 as the critical path; **R7 Phase 2 was reopened on 2026-08-17.**
+
+**And the trajectory is worse than the belt lane assumed.** From CALIBRATION_MASTER's own table: **n215 = 638, the measured floor** → n218 = 627 (**−11**, multi-axis veto fix `b9da847f1`, **KEPT**, debt acknowledged at the time) → n220 = 629 (+2) → HEAD = 611 (−18, the belt). **That is −27 from the measured floor, not −18, and two of the three largest losses in this arc were knowingly accepted and never paid back.** Also worth recording: n220 and the blessed tree both score **629 with different final-state hashes** — the same number over a different map, at a pair nobody had compared.
+
+**Nothing changed in `src/` or `data/` in any of the seven commits of this session.** Everything above is measurement and record.
