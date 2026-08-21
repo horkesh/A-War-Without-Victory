@@ -28137,3 +28137,56 @@ This is now the **third** reason-code-with-no-reason in three lanes, alongside `
 **MEASURED vs INFERRED, kept separate by the seat:** G2's three rows are `hrhb_103rd_derventa`, `hrhb_104th_bosanski_brod`, `hrhb_105th_modrica` — **none is a Mistral participant, none is in `hvo_tomislavgrad`, all are Posavina.** So the effect on a w175 launch is **indirect, a 175-turn cascade that has not been traced and is not asserted.** Why `hv_4th_guards_split` moves in one tree and not the other is likewise **not established**.
 
 **One run of four used. The seat declined the second** rather than spend it re-confirming the tool's blind spot. Worktree removed, no junction, nothing committed, main clean.
+
+## 2026-08-21 — Eight Croatian Army brigades cannot move, and the operation disarmed the one that could
+
+Three symptoms, **two** mechanisms, zero runs used. The orchestrator's corps-filter hypothesis is **FALSIFIED and closed**: all three formations carry `corps_id: hvo_tomislavgrad`, exactly `axis.corps` on every Mistral axis, and `isEligibleOperationFormation` explicitly admits `hv_phantom`. They pass every eligibility gate.
+
+### ★ MECHANISM A — the `hv_phantom` class has NO MOVEMENT PATH AT ALL
+
+**Verified by the orchestrator at `brigade_movement_orders.ts:75`:** the kind list reads `brigade | og | operational_group | jna_phantom` — **`hv_phantom` is omitted** — and `grep -c hv_phantom` returns **0** across `brigade_movement.ts`, `brigade_movement_orders.ts` and `brigade_front_distribution.ts`. Six kind-lists exclude it: the column-march state machine (both passes), single-hop adjacent moves, front distribution (7 sites), brigade assignment, sector assignment, and the corps subordinate roster. **`jna_phantom` is on the movement-order list and `hv_phantom` is not. That asymmetry is the single line.**
+
+**Its only locomotion is advance-after-capture** (`attack_resolution_osid.ts:1562-1564` moves `attackerFormations[0]` into a flipped OSID with no kind check). So an `hv_phantom` has exactly **one legal first move in the entire war: attack something adjacent to its spawn cell.**
+
+**The geometry makes that fatal.** All three OG West phantoms spawn at `op:livno:livno_2`, whose six neighbours include **exactly one** of the twelve Mistral objectives — `op:glamoc:vidimlije_2` — and that cell is **not first** on HEAD's Glamoč list, which starts at `op:glamoc:glamoc_2`, two hops out. `gate_adjacent = 0` permanently; `dead_axis` at every launch attempt across t160-t168.
+
+**MEASURED AT HEAD: across 188 turns, 607 battle records and the full HRHB casualty ledger, not one of the eight 1995 HV expeditionary brigades appears anywhere. Zero battles, zero casualties inflicted, zero suffered.** They spawn at t150, occupy roster slots, and are deleted at t188.
+
+**POSITIVE CONTROL, and it is decisive.** In a different tree, `mistral_1_glamoc`'s objective list **begins with `vidimlije_2`** — the one cell the phantom already touches — and the axis took `vidimlije_2` → `glamoc_2` → `pribelja` → `kovacevci_2`, with `hv_7th_hgr_1995` at **27 KIA / 95 WIA**. **Give the immobile ghost an adjacent first objective and it fights a four-objective advance; move that objective one cell out and it is inert for 38 turns.**
+
+**NOT WORKING AS DESIGNED — a class reused outside its purpose.** `JNA_PHANTOM_DEFS` carry `capture_osids` and flip control at spawn, then dissolve; such a thing never needs legs. **Neither HV wave carries `capture_osids`** — verified — so the 1995 wave has **neither the ghost's capture power nor a brigade's mobility**. `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md` proposes it as *"minimal new code — mostly data + a turn-gated spawn step"* and **never addresses mobility once**, while claiming a composition *"matching the historical Mistral 2 + Southern Move"*. **A manoeuvre-force claim delivered by a class that cannot manoeuvre. The historical expectation is not wrong; the implementation silently dropped a requirement nobody wrote down.**
+
+### MECHANISM B — `hv_4th_guards_split` is fully mobile, and JOINING THE OPERATION is what disarmed it
+
+From `hv_integration.ts`, `kind: brigade`. Traced turn by turn in both preserved trees:
+
+- **HEAD:** idle at Kupres → **Mistral 1 recruits it at t160** and orders it to staging `op:livno:misi_2` → arrives t163 → **26 turns, zero advances.**
+- **HEAD−G2, where Mistral 1 never recruits it:** ordinary front distribution puts it on the Glamoč shoulder by t161 → Mistral 2 joins it there at t179 **already in position** → **eight objectives walked** (`gubin_2` → `crni_lug` → `prekaja_2` → `jasenovac_2` → `drvar_2` → `sipovljani_2` → `bosansko_grahovo_2` → `malesevci`).
+
+**Identically capable in both trees. The difference is where the operation put it.**
+
+**★ ALL THREE STAGING OSIDs VIOLATE THE OPERATIONS SACRED RULE, and the distance is measured.** BFS over the operational contact graph: `op:livno:misi_2` is **4 hops** from its nearest objective and **5** from its first; `op:duvno:tomislavgrad_2` is **3**. **Not one is adjacent to any of its own objectives.** `misi_2` is a rear-area cul-de-sac — all six neighbours are HRHB interior cells. **The operation marched its heaviest brigade away from the front to reach it.**
+
+**Then the axis cannot launch at all:** `mistral_drvar_grahovo`'s first objective `op:titov_drvar:prekaja_2` has **all seven neighbours RS** → `collectObjectiveApproachOsids` returns empty → `no_approach_osid` → `unreachable_at_launch: true`. Same for `crni_lug`: six neighbours, all RS.
+
+### ★ THE CELL IT ALL TURNS ON: `op:livno:gubin_2`
+
+The gate into the Grahovo/Drvar pocket from Livno. **HEAD: never flips. HEAD−G2: flips to HRHB.** Glamoč town falls in *both* trees — **`gubin_2` alone separates them.** And `gubin_2` is **objective #5 on `mistral_1_glamoc`, the axis whose sole candidate is the immobile phantom that never reaches objective #1.**
+
+**The chain at HEAD:** phantom cannot move → Glamoč axis `dead_axis` t160-168 → `gubin_2` never pressed → `crni_lug` and `prekaja_2` keep no friendly neighbour → `no_approach_osid` on both Grahovo axes → Mistral 2's Drvar/Grahovo axis never launches → **the belt is left to `hvo_rama_brigade` alone, `eligible_attacker_count: 1` every week of the operation.**
+
+### TWO CORRECTIONS — both reporting artifacts, and one is inside today's instrumentation
+
+**1. The empty candidate list on `mistral_1_glamoc` is NOT empty.** The roster is `[hv_7th_hgr_1995]`. The empty array is `launch_blocker_detail.brigades`, empty because `axisHasExecutableOpeningAttack` (`sector_offensive_launch_helpers.ts:694-700`) computes `gateAdjacent` first and **returns before the loop that populates `debugFacts`**. So `collapsed_state: dead_axis` **always ships with an empty brigades array, by construction, for every axis in that state.** **A fourth reason-code-with-no-reason — inside the reason-code instrumentation itself**, silent in exactly the state where the refusal happened before any predicate ran. Fix: emit the roster ids with `considered: false, skip_reason: gate_not_adjacent` on that path.
+
+**2. `hv_112th_infantry_1995` IS on Mistral 2's live roster.** It is absent from the t188 final save only because `processJnaWithdrawals` strips phantoms from `op.participating_brigades` at `withdrawal_turn: 188` before the save is written. `weekly_report.jsonl` shows it rostered live from w182, with `eligible_attacker_count: 1` and `hvo_rama_brigade` alone in `participant_attack_orders` every week.
+
+### NOT ESTABLISHED, stated by the seat rather than papered over
+
+- **No direct positional observation of any phantom exists on disk.** `brigade_temporal_log.jsonl` filters to `kind === brigade` — all 44,508 rows — so no phantom appears in it, and `movement_report` is aggregate-only. The immobility case is six code kind-lists, `gate_adjacent = 0` for nine consecutive turns while an operation was actively staging it, zero battles, zero casualties, and the positive control. **Convergent and strong; not a direct sighting.** A temporal log that includes phantoms would settle it and costs one run.
+- Why `hv_4th_guards_split` is on Mistral 1's roster at HEAD and not at HEAD−G2 — the G2 revert's 175-turn cascade into roster composition. Not traced, not asserted.
+- Who captures `gubin_2` at HEAD−G2, and when.
+
+**★ A TRAP FOUND WHILE WORKING: `data/derived/latest_run_final_save.json` is TRACKED and is from a DIFFERENT TREE.** It hashes `a9ebcea4`; `n225`'s `final_save` hashes `8bb624eb`. **Do not read HEAD claims off it.** Combined with the earlier finding that every 188w run rewrites it, this file is both a dirty-tree hazard and a false-evidence hazard.
+
+**RECOMMENDED NEXT MEASUREMENT — data, not engine, one run:** reorder `mistral_1_glamoc`'s objective list to begin with `op:glamoc:vidimlije_2`, the cell the phantom already touches. It reproduces the exact configuration in which this phantom demonstrably fought, and **if `gubin_2` flips, the whole chain is confirmed in one measurement.** **NOT the movement fix** — giving eight Croatian Army brigades legs at t150 is a large calibration object and belongs behind a Historian ruling on whether that force should exist at all.
