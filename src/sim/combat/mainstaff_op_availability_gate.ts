@@ -83,8 +83,32 @@
  * anchor. Mistral 1's outcome does not move by one objective. A brigade cannot
  * help an operation that never reaches execution.
  *
- * BRIGADE AVAILABILITY WAS THE WRONG LEVER ON THE RIGHT OPERATION. The belt is
- * behind Mistral 1's EXECUTION, and three measured facts gate that, none of them
+ * BRIGADE AVAILABILITY WAS THE WRONG LEVER. [SUPERSEDED 2026-08-21, see below.]
+ *
+ * ★ CORRECTION — THE BELT IS MISTRAL 2, NOT MISTRAL 1. The paragraph above said
+ * the belt sits behind Mistral 1's execution. A third configuration, measured
+ * after this comment was written, falsifies that:
+ *
+ *   config      Mistral 1                    Mistral 2   matched
+ *   blessed     w160-w176, 7/11              9/11        629
+ *   HEAD-G2     w160-w164, 0/6, 0 attacks    11/12       632   <- best in arc
+ *   HEAD        w160-w168, 0/10              4/12        611
+ *
+ * At the best-scoring tree ever measured, Mistral 1 delivers NOTHING and the belt
+ * returns anyway. Mistral 2 is monotone with the score; Mistral 1 is monotone with
+ * nothing. Two configurations had BOTH operations moving and the delta was
+ * attributed to one of them — a two-variable comparison with one variable
+ * attributed. The third point broke it. Ledger 8d380b560.
+ *
+ * Also measured, and it matters to anyone reasoning from the numbers above: the
+ * exit reason is CONFIGURATION-DEPENDENT (`zero_eligible_axis` at HEAD,
+ * `brigade_attrition` at HEAD-G2), and Mistral 1's objective DENOMINATOR moves
+ * 11/10/6 across configs — so "0/6" and "0/10" are not comparable quantities.
+ *
+ * What survives from the paragraph above, and is now better supported than when
+ * it was written: brigade availability is not what the belt rides on, and the
+ * three mechanical gates below are all real defects. They are simply not the
+ * belt's cause. Three measured facts gate Mistral 1, none of them
  * about rosters:
  *
  *   1. `MAX_PLANNING_DURATION = 4` (sector_offensive.ts) — planning is hard-capped
