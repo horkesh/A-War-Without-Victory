@@ -209,6 +209,26 @@ export function resetMainStaffOpAvailabilityOverride(): void {
 // OFF/ON weekly reports are identical through week 159. It removes a real
 // accident and pins two regression tests at zero measured cost — but it has never
 // been shown to earn a cell, and no one should claim it does.
+//
+// ★ DORMANT IN THIS CONFIGURATION — NOT DORMANT BY CONSTRUCTION. DO NOT DELETE
+// THIS AS DEAD CODE. The paragraph above, read alone, is the sentence a future
+// cleanup pass would quote while removing this gate, so the activation condition
+// is recorded here alongside it.
+//
+// The reason it is inert AT HEAD is specific and measurable: the free ride it
+// exists to withdraw is `hvo_2nd_guard_mechanized` riding into a `hvo_tomislavgrad`
+// operation on an empty sector claim — and at HEAD that brigade is ALREADY excluded,
+// by GATE 1's original predicate, because it is parked at Žepče holding a FOREIGN
+// claim (`hvo_central_bosnia:2`). There is nothing left for this half to withdraw.
+// In a configuration where the reserve stands on unclaimed ground — blessed, where
+// it sits at Kupres with sector NONE and rides into Mistral 1's Glamoč axis — the
+// free ride is live and this gate is what closes it.
+//
+// So the correct disposition is "no measured effect on the tree we happened to
+// measure", not "no possible effect". This project has retired a flag before for
+// being dormant BY CONSTRUCTION (E-B1 slice 4.2, which could never fire); that
+// disposition does not apply here and the two must not be conflated. Before
+// deleting this, measure it on a tree where the reserve holds no foreign claim.
 
 let _mainStaffOpRetentionOverride: boolean | null = null;
 
