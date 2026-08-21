@@ -28190,3 +28190,32 @@ The gate into the Grahovo/Drvar pocket from Livno. **HEAD: never flips. HEAD−G
 **★ A TRAP FOUND WHILE WORKING: `data/derived/latest_run_final_save.json` is TRACKED and is from a DIFFERENT TREE.** It hashes `a9ebcea4`; `n225`'s `final_save` hashes `8bb624eb`. **Do not read HEAD claims off it.** Combined with the earlier finding that every 188w run rewrites it, this file is both a dirty-tree hazard and a false-evidence hazard.
 
 **RECOMMENDED NEXT MEASUREMENT — data, not engine, one run:** reorder `mistral_1_glamoc`'s objective list to begin with `op:glamoc:vidimlije_2`, the cell the phantom already touches. It reproduces the exact configuration in which this phantom demonstrably fought, and **if `gubin_2` flips, the whole chain is confirmed in one measurement.** **NOT the movement fix** — giving eight Croatian Army brigades legs at t150 is a large calibration object and belongs behind a Historian ruling on whether that force should exist at all.
+
+### The objective filter is a SILENT AMPLIFIER, not an independent defect — proven by a control case
+
+**The reorder was never run: `mistral_1_glamoc` ALREADY begins with `op:glamoc:vidimlije_2`** (`operation_opportunity_catalog_federation_western_bosnia.ts:612`), with a Wave 23A comment stating the intent outright — *"inserted reachable-first so the brigade brain never heads an unreachable objective."* **The engine deletes it.** `operation_opportunities.ts:1149-1154` strips friendly-held objectives at op-build time, and `vidimlije_2` was captured at t116/t117 — **43 turns before Mistral 1 builds at t160.** Both verified by the orchestrator. **Someone already authored the fix; nothing told them it had been removed.**
+
+**No reordering could ever have worked.** BFS from the phantom's spawn cell `op:livno:livno_2`: `vidimlije_2` is the **only** adjacent Mistral objective and it is the one filtered out; every survivor is 2-4 hops. **And since the reachable cell is friendly, there is nothing there to capture — which closes the advance-after-capture escape hatch too.** `hv_7th_hgr_1995` is structurally inert from spawn to withdrawal.
+
+**★ THE CONTROL CASE. 4 of 19 authored catalog axes lose objectives to the filter; 3 lose their FIRST. One of the three succeeded anyway:**
+
+| axis | authored → built | outcome at HEAD |
+|---|---|---|
+| **`kupres_cincar_line`** | 5 → 4, **first lost** | **SUCCESS — 4 attacks, 4/4 captured** |
+| **`mistral_1_glamoc`** | 7 → 6, **first lost** | **FAILURE — 0 attacks, `zero_eligible_axis`** |
+| `vlasic_travnik_ridge` | 3 → **1**, first lost | failure, but **3 attacks** — it engaged |
+| `donji_vakuf_komar_line` | 10 → 8, first retained | live at t188 |
+
+**Orchestrator-verified in `operation_aars.json`:** `kupres_cincar_line` carries **six brigades** and inflicted **60 killed / 203 wounded**; `mistral_1_glamoc` carries **one** (`hv_7th_hgr_1995`) and inflicted **0 / 0**, `launch_blocker: zero_eligible_axis`, `objectives_captured: []`, with `objectives_targeted` beginning at `glamoc_2` — the stripped list.
+
+> **The filter costs an axis its intended entry point, and the engine absorbs that IFF the axis's formations can march. The two roots compound. Fixing the filter's silence would NOT by itself have saved Mistral 1.**
+
+**The technique is unique; the loss is not.** `grep -i "reachable.first"` returns exactly one hit across every catalog — so nobody else ordered objectives this way — yet four axes lose objectives regardless. **Silent objective loss is a property of the filter, not of that technique.** Wave 23A is simply the one place an author wrote the intent down, which is why it was findable at all.
+
+**TWO HARDER SILENT FAILURES IN THE SAME FUNCTION — code-reading, NOT observed firing at HEAD:** `if (filteredObjectives.length === 0) continue;` makes **an entire axis vanish** when every authored objective is friendly-held; `if (builtAxes.length === 0) return null;` makes **the whole operation decline to spawn.** Neither logs anything.
+
+**INSTRUMENTATION, same class as the reason-code lane:** at the filter site, when `filteredObjectives.length < axis.objectives.length`, record `objectives_authored`, `objectives_dropped_friendly[]` and `first_objective_dropped`. All live locals. **Today an axis authored with seven objectives and built with six is indistinguishable in every artifact from one authored with six** — which is precisely why a comment sat for three months asserting an intent the engine had already deleted.
+
+**★ THIS IS THE FIFTH REASON-CODE-WITH-NO-REASON IN THIS ARC**, alongside `canFormEmergentBrigade`'s four-into-one boolean, `zero_eligible_axis` naming no predicate, the `dead_axis` early return that guarantees an empty `brigades` array, and the t0 recruitment pass that computes refusals and discards them. **The recurring shape is not missing computation — it is computed truth discarded at a boundary.**
+
+**SEAT SELF-CORRECTION, reported rather than quietly dropped:** its sweep flagged `una_grabez_stiffening`, `breza_three_axis_defense` and `pauk_siege_endurance` as axes that would be dropped entirely. **False positive** — they are authored with `objectives: []` deliberately (`operation_opportunity_catalog_5th_corps.ts:1125-1127`: *"the empty objective list is a deliberate signal that this is a defensive-commitment authorization, not a target list"*) and never reach the filter. The heuristic scored `0 friendly of 0` as 100%.
