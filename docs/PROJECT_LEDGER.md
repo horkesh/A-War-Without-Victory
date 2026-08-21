@@ -28105,3 +28105,35 @@ This is now the **third** reason-code-with-no-reason in three lanes, alongside `
 - **The refusal mirror can drift silently in one direction.** Its 13-case pin is two-way on every boundary that exists today and **blind to an ADDED fifth predicate** — add a `max_brigades_per_mun` cap and all 13 still pass while real refusals stop being reported. Mitigated with a pointer comment naming the mirror; not closed.
 - **`data/derived/latest_run_final_save.json` is TRACKED and rewritten by every 188w run.** An evidence run followed by `git add -A` ships **397,674 changed lines** — caught in `git status` before a commit here. `.gitignore` cannot help; the file is tracked on purpose. This is the sharp form of the "an evidence run must not dirty the tree" rule.
 - **`tests/sector_partition_buildCorpsFrontSectors_integration.test.ts` takes 38 minutes alone** (one test alone is 21 minutes) and emits nothing until the end, so a 400-second probe reads as a hang. **It passes inside the full suite.** Two seats lost time to it today; the inference that it was "masking full-suite results for everyone" was wrong in both directions.
+
+## 2026-08-21 — The belt is not contested and lost. It is un-walked.
+
+**Every Mistral 2 battle at HEAD is a decisive victory** — power ratios **14.52, 16.36, 11.01, 3.34**. There is no enemy-resistance problem in the western belt at all. **The 21 cells are a throughput-times-runway product, not a combat outcome.**
+
+**TWO CAUSES, NOT ONE.** Mistral 2 is created at **t182** at HEAD against **t175** at HEAD−G2 and blessed — **6 turns of runway against 13** — *and* it fields half the mobile force:
+
+| | HEAD (611) | HEAD−G2 (632) |
+|---|---|---|
+| op created | t182 (event fired t178) | **t175** |
+| `hvo_rama_brigade` | t183-188, 5 locations | t175-188, 6 locations |
+| `hv_4th_guards_split` | t182-188, **2 locations** | t179-188, **8 locations** |
+| rostered, never joins | **`hv_112th_infantry_1995`** | — |
+| objectives | **4/12** | **11/12** |
+
+**★ AND THE THREAD JOINING BOTH OPERATIONS: EVERY HV FORMATION IS INERT.** `hv_4th_guards_split` is `unreachable_at_launch` on Mistral 1's Grahovo axis and moves across 2 OSIDs on Mistral 2; `hv_7th_hgr_1995` is Mistral 1 Glamoč's only candidate and its candidate list is **empty**; `hv_112th_infantry_1995` is rostered on Mistral 2 and never joins. **The belt is historically the Croatian Army's operation, and in the sim the entire outcome rides on one HVO brigade walking as far as the clock allows.** That is the next lane — HV mobility and eligibility — not the launch turn. Fixing the launch turn alone buys runway for a one-brigade operation.
+
+**RECONCILIATION DONE FIRST, AND IT SPLIT THE PROBLEM.** `hvo_2nd_guard_mechanized` — the parked sectorless reserve the sector seat found holding a foreign claim at Žepče — is **identical across HEAD and HEAD−G2: 34 rows each, zero differing fields** (turn, location, sector, corps, personnel), independently verified by the orchestrator. **A constant cannot be the variable.** The clean division: **the sector seat explains why Mistral 1 fails EVERYWHERE; this lane explains why Mistral 2 is late ONLY at HEAD.** Both findings stand; they are different objects.
+
+**MISTRAL 1'S TWO AXES FAIL FOR TWO DIFFERENT REASONS, which nobody knew before the reason codes:** `mistral_1_grahovo` → `no_approach_osid`, `unreachable_at_launch: true`; `mistral_1_glamoc` → `zero_eligible_axis`, `collapsed_state: dead_axis`, **`brigades: []` — an EMPTY candidate list, not a weak one**, `gate_adjacent 0`. That confirms the sector seat's Glamoč finding at the predicate level.
+
+**`Operacija Grmljavina` (t176-t183) runs ONLY at HEAD** — absent from blessed and from HEAD−G2. **It is a symptom, not the blocker:** it starts one turn *after* the t175 window Mistral 2 uses in both other trees, so at t175 the slot was free and **Mistral 2 declined it anyway**.
+
+### ★ A BLIND SPOT IN THE INSTRUMENTATION MERGED THE SAME DAY
+
+**`axis_reject` could not see Mistral 2 at all.** `launch_blocker_detail` is written into `operation_aars.json`, and **an operation still in execution at t188 produces no AAR.** Mistral 2 is in execution at t188 in *both* trees. **So the topic structurally cannot observe the operations that matter most in a scenario that ends mid-offensive** — the four AARs that carried the field were all completed ops. What actually answered the question was **`eligible_attacker_count` in the weekly report, which is ungated and was always there.** The fix is to emit the detail for in-flight operations too. Recorded against the tool, not as a criticism of it; the seat reported the negative result unprompted, which is what it was asked to do.
+
+**The gate is territorially inert, confirmed on a fourth run:** flag-ON gives `matched_osids` **611, 31/31** — identical territory, different `final_state_hash` (`dd90c75508a9cf2e`), exactly as the absent-not-null contract predicts for added keys.
+
+**MEASURED vs INFERRED, kept separate by the seat:** G2's three rows are `hrhb_103rd_derventa`, `hrhb_104th_bosanski_brod`, `hrhb_105th_modrica` — **none is a Mistral participant, none is in `hvo_tomislavgrad`, all are Posavina.** So the effect on a w175 launch is **indirect, a 175-turn cascade that has not been traced and is not asserted.** Why `hv_4th_guards_split` moves in one tree and not the other is likewise **not established**.
+
+**One run of four used. The seat declined the second** rather than spend it re-confirming the tool's blind spot. Worktree removed, no junction, nothing committed, main clean.
