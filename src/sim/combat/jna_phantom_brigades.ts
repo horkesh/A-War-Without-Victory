@@ -395,6 +395,21 @@ const HV_PHANTOM_DEFS: PhantomDef[] = [
  * (those remain HRHB-native — see `data/source/oob_brigades.json`); the
  * brigades below are the HV regulars + home guard regiments that joined them.
  *
+ * ── SPAWN TURN (corrected 2026-08-21) ──────────────────────────────────────
+ * Was 150, justified in-comment as "≈ Split Agreement window". That was wrong by
+ * roughly five months. The scenario's own event anchors put Storm at turn 174
+ * (`operation_storm_1995`, turn_min = turn_max = 174), Mistral 2 at 179-180 and
+ * the Dayton talks at 184 (`data/scenarios/events/war_1995.json`), so **turn 150
+ * is mid-February 1995** and the Split Agreement (22 July 1995) is ≈ turn 172.
+ *
+ * The wave now spawns at 174, anchored to `operation_storm_1995` — a FIXED event
+ * turn — rather than to the Mistral 2 catalog operation, whose build turn is
+ * emergent and has been observed anywhere from t175 to t182 across trees.
+ * Spawning at or after the earliest observed build would make participation a
+ * coin-flip on that timing. `phantom-brigade-spawn` runs at war_phases.ts:1752,
+ * ahead of `evaluate-operation-opportunities` at :2483, so a wave spawning on
+ * turn T is already on the roster for an operation built during turn T.
+ *
  * ── ROSTER (corrected 2026-08-21) ──────────────────────────────────────────
  * The original 8-def wave DOUBLE-COUNTED three formations against the permanent
  * pool in `hv_integration.ts`, which spawns a 4th Guards (Split), 7th Guards
@@ -450,7 +465,7 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         corps_id: 'hvo_tomislavgrad' as FormationId,
         faction: 'HRHB',
         location_osid: 'op:livno:livno_2',
-        spawn_turn: 150,
+        spawn_turn: 174,
         withdrawal_turn: 188,
         tanks: 25, artillery: 25, apcs: 10,
         no_equipment_handoff: true,
@@ -463,7 +478,7 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         corps_id: 'hvo_tomislavgrad' as FormationId,
         faction: 'HRHB',
         location_osid: 'op:livno:livno_2',
-        spawn_turn: 150,
+        spawn_turn: 174,
         withdrawal_turn: 188,
         // Home guard regiments (domobranske pukovnije) were second-line
         // territorial infantry. 12 tanks for an HGR was the least defensible
@@ -479,7 +494,7 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         faction: 'HRHB',
         // Canonical OSID is op:duvno:tomislavgrad_2 (Duvno = pre-1990 muni name).
         location_osid: 'op:duvno:tomislavgrad_2',
-        spawn_turn: 150,
+        spawn_turn: 174,
         withdrawal_turn: 188,
         tanks: 6, artillery: 10, apcs: 6,
         no_equipment_handoff: true,
@@ -492,7 +507,7 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         corps_id: 'hvo_tomislavgrad' as FormationId,
         faction: 'HRHB',
         location_osid: 'op:livno:livno_2',
-        spawn_turn: 150,
+        spawn_turn: 174,
         withdrawal_turn: 188,
         tanks: 5, artillery: 10, apcs: 6,
         no_equipment_handoff: true,
@@ -504,7 +519,7 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         corps_id: 'hvo_tomislavgrad' as FormationId,
         faction: 'HRHB',
         location_osid: 'op:livno:livno_2',
-        spawn_turn: 150,
+        spawn_turn: 174,
         withdrawal_turn: 188,
         tanks: 6, artillery: 8, apcs: 4,
         no_equipment_handoff: true,
@@ -516,7 +531,7 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
         corps_id: 'hvo_tomislavgrad' as FormationId,
         faction: 'HRHB',
         location_osid: 'op:livno:livno_2',
-        spawn_turn: 150,
+        spawn_turn: 174,
         withdrawal_turn: 188,
         tanks: 3, artillery: 8, apcs: 4,
         no_equipment_handoff: true,
@@ -669,7 +684,8 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
         // (Op Jackal complete → HV returns to Croatia), or at withdrawal_turn fallback.
         // SCOPE: this dynamic trigger applies ONLY to the 1992 Op-Jackal HV phantoms
         // (created at scenario init, turn 0). 1995 HV expeditionary phantoms have
-        // `created_turn >= 150` (post-Split Agreement) and must NOT be evicted by the
+        // `created_turn >= 174` (Storm; was 150 before the 2026-08-21 turn
+        // correction, see HV_PHANTOM_DEFS_1995) and must NOT be evicted by the
         // long-past Graz Accords (May 1992). n2005 verified the prior shared-trigger
         // semantics caused the 1995 brigades to spawn-and-withdraw in the same turn.
         const isHvPhantom = phantom.kind === 'hv_phantom';
