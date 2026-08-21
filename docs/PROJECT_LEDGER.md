@@ -28219,3 +28219,60 @@ The gate into the Grahovo/Drvar pocket from Livno. **HEAD: never flips. HEAD−G
 **★ THIS IS THE FIFTH REASON-CODE-WITH-NO-REASON IN THIS ARC**, alongside `canFormEmergentBrigade`'s four-into-one boolean, `zero_eligible_axis` naming no predicate, the `dead_axis` early return that guarantees an empty `brigades` array, and the t0 recruitment pass that computes refusals and discards them. **The recurring shape is not missing computation — it is computed truth discarded at a boundary.**
 
 **SEAT SELF-CORRECTION, reported rather than quietly dropped:** its sweep flagged `una_grabez_stiffening`, `breza_three_axis_defense` and `pauk_siege_endurance` as axes that would be dropped entirely. **False positive** — they are authored with `objectives: []` deliberately (`operation_opportunity_catalog_5th_corps.ts:1125-1127`: *"the empty objective list is a deliberate signal that this is a defensive-commitment authorization, not a target list"*) and never reach the filter. The heuristic scored `0 friendly of 0` as 100%.
+
+## 2026-08-21 — HISTORIAN RULING: the HV force belongs, and every specification detail around it is wrong
+
+**VERDICT: activate them — but not at that turn, not under those corps, and not quite at that scale.** Partial ruling, and one part is bigger than the question asked.
+
+### ★ THE TIMING PREMISE WAS WRONG BY SEVEN MONTHS, AND THE REPO PROVES IT
+
+The brief said the force spawns "at turn 150 (~September 1995)". **Turn 150 is mid-February 1995.** Verified by the orchestrator in `data/scenarios/events/war_1995.json`: `operation_storm_1995` fires at turn **174**, `operation_mistral_2_1995` at **179-180**, `dayton_talks_begin_1995` at 184. Against `HISTORICAL_TIMELINE_MASTER.md` (week 1 = 6-12 April 1992), turn 174 ≈ 1-7 August 1995 (Storm was 4-7 August ✔) and turn 180 ≈ 11 September (Maestral 2 was 8-15 September ✔); a third anchor, Washington at turns 99-102 ≈ late Feb-March 1994, also lands ✔.
+
+**So the force arrives 29 turns before the operation it exists to fight.** `jna_phantom_brigades.ts:400` justifies it as *"Spawn turn 150 (≈ Split Agreement window)"* — **the Split Agreement was 22 July 1995 ≈ turn 173.** The comment's own reasoning does not reach 150.
+
+> **★ THIS DOMINATES THE DECISION. Fix the movement exclusion and leave the turn, and you do not get reinforcements arriving for the western offensive — you get 16,000 elite troops with 136 tanks loose in western Bosnia from mid-February 1995, through Srebrenica and through Storm. That is not a calibration event; it is a different war, and it would be the largest ahistorical intervention in the scenario. IF THE TIMING CANNOT MOVE IN THE SAME CHANGE, DO NOT FIX THE MOVEMENT — remove them from operation eligibility and come back to it.**
+
+### 1. DID THE HV FIGHT THERE? — YES, AT CORPS SCALE, AND BB NAMES THE UNITS
+
+**BB1 PDF p.417 / printed 380** (Maestral, 8-15 Sep 1995): *"General **Gotovina**, the commander of the HV **Split Corps District**, was placed in overall command … assigning to OG '**North**' all of the elite shock units available, including the **4th and 7th Guards Brigades, the 1st Croatian Guards Brigade (1st HGZ)**, all three HVO Guards brigades … **totaling 11,000 troops**. … **five HV Home Defense regiments and three reserve infantry brigades** deployed southeast and southwest of Drvar … organized into **OG 'West'** and **OG 'South'**."* **BB1 PDF p.427 / printed 390** (Southern Move, from 8 Oct): the **HV 126th Home Defense Regiment** in the diversionary attack, Gotovina again commanding through Glasnović's OG "East", *"11,000 to 12,000 troops."* Execution detail at BB1 p.418: 7th Guards at the Mliniste pass, 1st HGZ over Vitorog and through the 4th Guards to Pribelja.
+
+### 2. SCALE — RIGHT MAGNITUDE, TOP OF THE BAND OR SLIGHTLY OVER
+
+**★ The governing citation, and it is the trap a simultaneous spawn falls into. BB1 PDF p.298 / printed 261 fn 304:** *"**HV frontline units regularly rotated so that, although possibly as many as 9,000 HV troops were involved in 'Zima 94,' only 3,000 to 4,000 probably were ever on the ground in Bosnia at any one time.**"* BB separates cumulative involvement from concurrent presence at better than 2:1, and **any figure lifted from a campaign narrative must be discounted the same way.**
+
+OG North's 11,000 is **HV and HVO combined**, three of its formations being HVO Guards — **HV component ≈ 5,000-6,000**. OG West/South add five HDRs and three reserve brigades, ≈ 8,000-11,000, and BB says that echelon *"had made little headway."* **HV-only concurrent peak ≈ 11,000-15,000. Ruling: 16,000 is right in magnitude and 10-30% over; set it at 12,000-14,000.** Confidence medium-high on the band, low on any single figure.
+
+**136 tanks is high, and this is INFERENCE not citation** — BB gives no HV armour count for Maestral. Three shock formations at roughly a tank battalion each ≈ **90**; HDRs and reserve brigades carried little or none, whereas the AWWV rows give them 5-12 each. **~90-110 better supported.**
+
+### 3. CENTRAL BOSNIA — FLATLY WRONG. AND SE HERZEGOVINA TOO, WHICH WAS NOT ASKED.
+
+**Every location BB names in either operation is in the western belt** — Glamoč, Mliniste, Vitorog, Pribelja, Jastrebnjak, Kupres, Šipovo, Jajce, Drvar, Mrkonjić Grad, Podrašnica, Čađavica, Manjača, Bočac, Sanski Most. **Not one Lašva-valley location; the HV was never in Central Bosnia in 1995**, and the operation ran through the HV Split Corps District on the Livno-Glamoč-Šipovo axis. **The two rows on `hvo_central_bosnia` are the worst possible pair to misplace** — `hv_7th_guards_brigade_1995` and `hv_1st_guards_brigade_1995`, two of the three elite shock formations. **`hvo_southeast_herzegovina` is also wrong**: it holds the 4th Guards and both OG "South" rows, and BB places OG West/South *"southeast and southwest of **Drvar**"*, not 150 km south at Mostar/Čapljina. **All eight belong under `hvo_tomislavgrad`.**
+
+**★ ONE THING THE DESIGN GOT RIGHT AND WHICH MUST SURVIVE THE FIX: the spawn locations.** All eight sit at `op:livno:livno_2` or `op:duvno:tomislavgrad_2`, and **Livno and Tomislavgrad were the actual HV/HVO staging areas for Maestral.** Only the corps assignment is wrong — which makes this a cheaper fix than it looks. **Leave the `location_osid`s alone.**
+
+### 4. THE FORMATIONS — SUBSTANTIALLY RIGHT, WITH ONE REAL ERROR
+
+**Correction to the orchestrator's list: `hv_4th_guards_split` is NOT one of the eight** — it belongs to the separate permanent pool in `hv_integration.ts`. The eight are `HV_PHANTOM_DEFS_1995`, whose Split brigade is `hv_4th_guards_brigade_1995`. **No duplicate inside the eight.**
+
+**CITED:** `hv_4th_guards_brigade_1995`, `hv_7th_guards_brigade_1995` (BB1 pp.417/418/427), `hv_126th_hgr_1995` (BB1 p.427, named in the Southern Move diversionary attack). **UNCITED BUT STRUCTURALLY RIGHT:** the four HDR/reserve rows — BB's *"five HV Home Defense regiments and three reserve infantry brigades"* is exactly that kind of unit; **uncited, not untrue.**
+
+**★ THE ONE REAL ERROR: `hv_1st_guards_brigade_1995` is a CONFLATION.** BB names the **1st HGZ** — *1. Hrvatski Gardijski Zbor*, the **1st Croatian Guards CORPS** — six times across BB1 pp.417/418/427. That is a **different formation** from the **1st Guards BRIGADE "Tigrovi"** of Zagreb. The AWWV row welds them into one string, and **BB never places the Tigers in Maestral.**
+
+**Is the proposal's "matching the historical Mistral 2 + Southern Move" claim true? Substantially yes, and better than expected** — three named formations verified, and the OG **North/West/South** designations are **BB's own**. What is false: the 1st HGZ conflation, the corps assignments, the timing, and the source line — **`jna_phantom_brigades.ts:398` says "BB Vol. II ch.12-13"; it is BB Vol. I, chapters 91 and 93.**
+
+**★ UNVERIFIED AND FLAGGED, NOT ASSUMED WRONG:** the same source line cites *"ICTY Gotovina IT-06-90 trial chamber (HV order of battle for Mistral 2 …)"*. **No local copy; NOT verified.** Given this project pulled a wrong ICTY citation from live event content on 2026-08-17, and given §10.0's rule that promotion is a verification event, **treat that pointer as unverified until someone reads the judgment.**
+
+**★ A POSSIBLE DOUBLE-COUNT TO CHECK BEFORE ANY ACTIVATION.** `hv_integration.ts` defines a *permanent* pool containing `hv_4th_guards_split`, an HV 7th Guards (Varaždin), an HV 1st Guards (Tigers) and an HV 5th Guards (Karlovac). The 1995 set adds a 4th, a 7th and a 1st Guards of its own. **If both pools are live concurrently, three formations exist twice in the game.** Historically there was one of each.
+
+### THE RULING, IN ORDER OF WEIGHT
+
+1. **Move the spawn from turn 150 to ≈ 179**, aligned to `operation_mistral_2_1995`. Withdrawal at 188 is fine.
+2. **Reassign all eight to `hvo_tomislavgrad`.** Leave `location_osid` alone.
+3. **Re-specify `hv_1st_guards_brigade_1995` as the 1st HGZ**, not the Tigers.
+4. **Trim to ~12,000-14,000 men and ~90-110 tanks**, taking the cut mostly from the home-guard regiments' armour.
+5. **Check the `hv_integration.ts` overlap** or field three formations twice.
+6. **Fix the source line** to BB Vol. I ch. 91 and 93, and mark the ICTY pointer `[UNVERIFIED]`.
+
+**On "either answer produces work": the Historian agrees and adds that the third option is the worst.** An operation reporting three brigades and fielding one is a reporting falsehood — but **fixing the movement while leaving the turn would make the falsehood true in the wrong direction.**
+
+**What would change the ruling:** the ICTY Gotovina order of battle, if it gives HV-only strengths for Maestral, would replace the 12,000-14,000 band with a figure. **Nothing found would move the timing or the Central Bosnia ruling — those are settled.**
