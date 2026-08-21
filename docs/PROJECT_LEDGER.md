@@ -28328,3 +28328,32 @@ On the treatment run: **616 battles, zero name a 1995-wave brigade**; the four p
 Full suite on `lane/instrumentation-reason-codes`: **7 files failed, 1,287 passed, 4 skipped (1,298); 15 tests failed.** Identical file set and identical per-file counts to the orchestrator's main baseline. **Zero new failures.** The suspension condition on `3bc488c60` did not fire and that merge stands.
 
 **STATUS: NOT MERGED. Reviewer's lean is HOLD — not on the result, which is real and clean, but on the bundle and on 10 of the 16 cells sitting in a neighbouring corps' sector the lane never touched.** Verdict pending the converse and `battle_stack` runs.
+
+### ★ CORRECTION TO THE ENTRY ABOVE — the isolation CONFIRMS the lane; it was the HEADLINE that was wrong, not the analysis
+
+**The reviewer withdrew "refutes the lane's causal account" within the hour, unprompted, after reading the commit message it had been testing. The orchestrator's entry above inherited the same error and is corrected here.**
+
+**`86eb00339` contradicts itself in consecutive paragraphs.** Its bold headline reads *"THE GAIN COMES FROM DELETING AN INERT UNIT, NOT FROM THE FORCE ACTING."* Its very next sentence traces the mechanism **correctly**:
+
+> *"What moved the map: with the wave spawning at 174, `hv_7th_hgr_1995` does not exist during Mistral 1's t160-170 window. It was `mistral_1_glamoc`'s ONLY candidate, so `selectEligibleOpportunityParticipants` returns empty and the axis is never constructed. Mistral 1 dies at t163 instead of t168, releasing the `hvo_tomislavgrad` op slot five turns early."*
+
+**`hv_7th_hgr_1995` is one of the six SURVIVORS, not one of the two deleted rows.** Nothing was deleted to produce the +16 — **a survivor was made LATE.** The headline is wrong, the body is right, and the orchestrator's brief and the entry above both quoted the headline.
+
+**So the correct grading:** the lane traced the mechanism by reading run logs; the reviewer proved it by varying one variable and getting 611. **Confirmation at a higher grade of evidence, not refutation** — and the merge should rest on the second.
+
+**What survives from the entry above, unchanged and still the operative point:** the four historical edits measure at **exactly zero**, only the integer moves the map, **the bundle was the orchestrator's**, and *"verifying both endpoints twice each cannot detect a misattribution — only isolation can."* Those stand. **The lane is still a timing change with four inert corrections attached, and still gets gated as calibration.**
+
+**Two further deflations, both the reviewer's own:**
+- **The tank arithmetic was already in the commit** — *"Theatre total incl. the permanent pool: 26,000 men / 221 tanks → 22,000 / 136."* **The implementer did the sum; the orchestrator's brief dropped it.** What remains the reviewer's is narrower and still worth having: the fix consolidates onto the permanent pool, which never withdraws and is therefore the **less historical** of the two representations.
+- **The "five ARBiH cells" is an internal contradiction in the commit, not merely a brief error.** Its own breakdown reads *"4 stopped going RS … 6 new RBiH gains … 6 new HRHB gains"* — **10 RBiH-side and 6 HRHB-side** — while its closing line says *"NOT established: why the five ARBiH 5th Corps cells moved."* **The breakdown is right; the summary line is wrong.**
+
+### ★ FOUR NEW HISTORICAL FINDINGS FROM THE REVIEWER, WITH THE CITATIONS THE LANE'S COMMENT LACKED
+
+- **BB1 p.417 vindicates the 1st HGZ substitution and supplies the missing page.** Gotovina assigned to OG "North" *"the 4th and 7th Guards Brigades, the **1st Croatian Guards Brigade (1st HGZ)**, all three HVO Guards brigades."* The lane's comment cites ch. 91/93 generally; **p.417 is the specific citation it needed**, and BB1 pp.402-403 names the 1st HGZ and the 1st Guards Brigade in one sentence, confirming they are distinct.
+- **★ 25 TANKS ON THE 1st HGZ IS NOW THE LEAST DEFENSIBLE LINE IN THE LOADOUT.** BB1 p.410 has the 1st HGZ **airlifted by Mi-8 to positions southeast of Obrovac** alongside MUP Special Police — a **light, air-mobile elite formation.** The trim removed armour from three home-guard regiments (12→6, 10→5, 5→3) on plausibility grounds and **left the single largest number in the wave untouched, because that row was RENAMED rather than RE-COSTED.** 25 of the wave's 51 tanks now sit on a helicopter-inserted formation.
+- **The supporting echelon is UNDER-modelled.** BB1 p.417 n.643: *"**five** HV Home Defense regiments and **three** reserve infantry brigades deployed southeast and southwest of Drvar were to conduct holding attacks against VRS 2nd Krajina Corps troops."* The wave models **three** home-guard regiments and **one** reserve brigade.
+- **★ AND THAT NOTE SUBSTANTIALLY EXPLAINS THE TEN "UNEXPLAINED" CELLS — WHILE SHOWING THE ENGINE REACHES A CORRECT ANSWER BY THE WRONG ROUTE.** The historical job of the HV supporting echelon was **pinning the VRS 2nd Krajina Corps southeast and southwest of Drvar — precisely where the ten RBiH-side cells sit.** So the map outcome is historically **right**. But in the sim those formations fight **zero battles**, so the engine cannot be reproducing that mechanism; it reaches the same map through an **operation-slot cascade** instead. **Right answer, wrong reason — an engine-health concern, not a calibration one, and exactly the kind of agreement that looks like validation and is not.**
+
+**FLAGGED AGAINST THE HISTORIAN'S OWN RULING: the reviewer could not find the 12,000-14,000 men / 90-110 tank band anywhere in the BB knowledge base.** The Historian derived it from BB1 p.417 (11,000 HV+HVO in OG North), p.427 (11,000-12,000) and the p.298 fn 304 rotation note, so it is a reasoned band rather than a quoted one — **but if it is going to be used to judge a loadout it should be cited as derived, not quoted.**
+
+**STATUS UNCHANGED: NOT MERGED**, converse and full-suite runs still outstanding, and the ledger entry this lane requires is the reviewer's fifth outstanding item — now discharged by this entry and the one above it.
