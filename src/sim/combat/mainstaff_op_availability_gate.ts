@@ -63,6 +63,46 @@
  *
  * Non-exempt brigades are untouched in both gates, in every configuration.
  *
+ * ═══ WHAT THIS FIX DOES NOT DO — READ BEFORE BUILDING ON IT ═══
+ *
+ * It closes the availability defect and it does NOT recover the western-Bosnia
+ * belt, because the belt is not behind brigade availability. Measured 188w:
+ *
+ *   blessed   Mistral 1 EXECUTES w160-w176, takes 7/11 objectives
+ *             Mistral 2 finishes 9/11
+ *   HEAD      Mistral 1 dies at w168 with 0/10 — `recovery_reason:
+ *             zero_eligible_axis`, `eligible_attacker_count: 0` for seven
+ *             consecutive turns, NEVER LEAVING `planning`
+ *             Mistral 2 is only 4/12 when the scenario ends
+ *
+ * (blessed figures from the calibration seat, 2026-08-21.)
+ *
+ * With this flag ON, `hvo_1st_guard_abb` — 2,800 elite, named on the roster,
+ * previously undeliverable — reaches BOTH operations for the first time, is
+ * loaned to `hvo_tomislavgrad` at t160, and ends the war at Mistral's own staging
+ * anchor. Mistral 1's outcome does not move by one objective. A brigade cannot
+ * help an operation that never reaches execution.
+ *
+ * BRIGADE AVAILABILITY WAS THE WRONG LEVER ON THE RIGHT OPERATION. The belt is
+ * behind Mistral 1's EXECUTION, and three measured facts gate that, none of them
+ * about rosters:
+ *
+ *   1. `MAX_PLANNING_DURATION = 4` (sector_offensive.ts) — planning is hard-capped
+ *      at four turns.
+ *   2. The staging anchors are not adjacent to their objectives. Over
+ *      `operational_contact_graph.json`: Grahovo axis stages at `op:livno:misi_2`,
+ *      which is 4 hops from its first objective `crni_lug` and 6 from
+ *      `bosansko_grahovo_2`. A four-turn cap against a four-hop approach. This is
+ *      a direct hit on the operations-expert's staging-adjacency rule.
+ *   3. Multi-axis launch requires `anyExecutable && !anyApproaching`
+ *      (sector_offensive_launch_helpers.ts) — ONE axis with a brigade mid-march
+ *      vetoes the whole operation. `axis_readiness_debug.ts` documents this exact
+ *      deadlock as CONFIRMED at n205 (2026-08-12) with the fix NOT landed:
+ *      `anyApproaching` fires on any axis returning `zero_eligible_axis`, which
+ *      means "present but too weak", not "still marching" as its comment assumes.
+ *
+ * So the next lever is operation launch geometry, not force availability.
+ *
  * Idiom mirrors `src/sim/combat/intel_ambush_depth_gate.ts`: module-local
  * override (set/reset for tests) layered over an env read. No `Date.now`, no
  * `Math.random` — deterministic. For both env vars, `"1"`/`"true"`/`"on"`/`"yes"`
@@ -78,6 +118,42 @@ function readEnvFlag(name: 'AWWV_MAINSTAFF_OP_AVAILABILITY' | 'AWWV_MAINSTAFF_OP
 }
 
 // ─── GATE 2 — admission ──────────────────────────────────────────────────────
+//
+// ★ KNOWN ON-PATH COST, MEASURED — read this before flipping the default.
+//
+// 188w controlled quad, one variable each, same tree (runs n0-n3, 2026-08-21):
+//
+//   OFF              611 matched, anchors 31/31, hash 8bb624ebafa7a925
+//   GATE2-only       610 matched, anchors 31/31, hash 8e3fe63f26a21865
+//   GATE2 + GATE1    610 matched, anchors 31/31, hash 8e3fe63f26a21865  (byte-identical
+//                                                                        final_save to
+//                                                                        GATE2-only)
+//
+// The OFF arm reproduces HEAD n225's hash exactly, so the default path is
+// byte-identical to the shipped baseline by MEASUREMENT, not by inspection.
+//
+// Turning GATE 2 ON costs exactly ONE cell across all 712 OSIDs:
+// `op:sipovo:volari_2`, HRHB -> RS. Total controller churn is also 1, so this is
+// not a coincident total over a different map.
+//
+// THE COST IS A RUN-BOUNDARY ARTIFACT, NOT LOST GROUND. Both arms end at t188
+// with Mistral 2 still executing; the ON arm's Šipovo axis is exactly one
+// objective behind (3 captures vs 4) because it lost a turn to a stalemate at
+// `op:sipovo:sipovo_2` in w187.
+//
+// AND IT RIDES ON A 7-FOLD POWER-RATIO SWING. Same attacker (`hvo_rama_brigade`),
+// same defender (`rs_22nd_krajina_infantry`), same OSIDs, same weeks, identical
+// pre-battle state at t184 — yet power_ratio reads 14.52/16.36/11.01 (OFF) against
+// 1.97/1.43/0.77 (ON). Root-caused by a later seat (PROJECT_LEDGER `b200accc2`) to
+// the SECTOR PARTITION: `defenderPower` is a sector aggregate, Šipovo is fragmented
+// across four sectors in OFF and pooled into one 18-OSID sector in ON, so the named
+// combatants can be byte-identical while the denominator moves several-fold. NOT a
+// determinism break; the path is fully deterministic and the two arms hold
+// genuinely different state.
+//
+// DO NOT TUNE ANYTHING TO RECOVER THIS CELL. That theatre measured +/-5 cells of
+// sensitivity to an unrelated three-row date change, so targeting one cell there is
+// chasing noise with a ruler.
 
 let _mainStaffOpAvailabilityOverride: boolean | null = null;
 
@@ -103,6 +179,12 @@ export function resetMainStaffOpAvailabilityOverride(): void {
 }
 
 // ─── GATE 1 — retention ──────────────────────────────────────────────────────
+//
+// MEASURED (188w, 2026-08-21): this half is BYTE-IDENTICALLY INERT at HEAD.
+// GATE2-only and GATE2+GATE1 produce identical `final_save.json` files, and the
+// OFF/ON weekly reports are identical through week 159. It removes a real
+// accident and pins two regression tests at zero measured cost — but it has never
+// been shown to earn a cell, and no one should claim it does.
 
 let _mainStaffOpRetentionOverride: boolean | null = null;
 
