@@ -33,13 +33,16 @@ import {
 import { reconcileFinalOperationTruth } from '../src/sim/combat/final_operation_truth_reconciliation.js';
 import {
     resetMainStaffOpAvailabilityOverride,
+    resetMainStaffOpRetentionOverride,
     setMainStaffOpAvailabilityOverride,
+    setMainStaffOpRetentionOverride,
 } from '../src/sim/combat/mainstaff_op_availability_gate.js';
 import type { CorpsCommandState, CorpsOperation, GameState } from '../src/state/game_state.js';
 import { makeFormation, makeSector } from './test_factories.js';
 
 afterEach(() => {
     resetMainStaffOpAvailabilityOverride();
+    resetMainStaffOpRetentionOverride();
 });
 
 // ─── GATE 2 — admission by roster + loan ────────────────────────────────────
@@ -202,8 +205,9 @@ function spawnFixtureOperation(state: GameState, turn: number, def: OperationOpp
 }
 
 describe('GATE 2 — opportunity roster admission for sector-exempt brigades', () => {
-    it('flag OFF: a NAMED main-staff brigade is dropped (shipped baseline)', () => {
+    it('AVAILABILITY OFF: a NAMED main-staff brigade is dropped (shipped baseline)', () => {
         setMainStaffOpAvailabilityOverride(false);
+        setMainStaffOpRetentionOverride(false);
         const state = buildOpportunityState(175);
         const op = spawnFixtureOperation(state, 175, mistralLikeDef());
 
@@ -212,8 +216,9 @@ describe('GATE 2 — opportunity roster admission for sector-exempt brigades', (
         expect(state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.on_loan).toBe(false);
     });
 
-    it('flag ON: a NAMED main-staff elite is admitted and loaned to the host corps', () => {
+    it('AVAILABILITY ON: a NAMED main-staff elite is admitted and loaned to the host corps', () => {
         setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
         const state = buildOpportunityState(175);
         const op = spawnFixtureOperation(state, 175, mistralLikeDef());
 
@@ -227,24 +232,27 @@ describe('GATE 2 — opportunity roster admission for sector-exempt brigades', (
         expect(loan.loan_start_turn).toBe(175);
     });
 
-    it('flag ON: admission is by ROSTER, not by exemption — a foreign REAL corps stays out', () => {
+    it('AVAILABILITY ON: admission is by ROSTER, not by exemption — a foreign REAL corps stays out', () => {
         setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
         const state = buildOpportunityState(175);
         const op = spawnFixtureOperation(state, 175, mistralLikeDef());
 
         expect(op!.axes![0].assigned_brigades).not.toContain('hvo_other_corps_brigade');
     });
 
-    it('flag ON: a sector-exempt brigade with NO loan channel is still not deliverable', () => {
+    it('AVAILABILITY ON: a sector-exempt brigade with NO loan channel is still not deliverable', () => {
         setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
         const state = buildOpportunityState(175);
         const op = spawnFixtureOperation(state, 175, mistralLikeDef());
 
         expect(op!.axes![0].assigned_brigades).not.toContain('hvo_staff_militia');
     });
 
-    it('flag ON: the loan does not auto-join a concurrent operation of the same corps', () => {
+    it('AVAILABILITY ON: the loan does not auto-join a concurrent operation of the same corps', () => {
         setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
         const state = buildOpportunityState(175);
         const concurrent = {
             name: 'Concurrent Op',
@@ -380,8 +388,13 @@ function participantsAfterReconcile(state: GameState): string[] {
 }
 
 describe('GATE 1 — reconciliation retention for sector-exempt brigades', () => {
-    it('flag OFF: a foreign sector claim evicts the exempt brigade (shipped baseline)', () => {
-        setMainStaffOpAvailabilityOverride(false);
+    // Every case here drives AWWV_MAINSTAFF_OP_RETENTION and pins
+    // AWWV_MAINSTAFF_OP_AVAILABILITY to the OPPOSITE value, so a passing
+    // assertion cannot be produced by the admission half.
+
+    it('RETENTION OFF: a foreign sector claim evicts the exempt brigade (shipped baseline)', () => {
+        setMainStaffOpRetentionOverride(false);
+        setMainStaffOpAvailabilityOverride(true);
         const state = buildReconciliationState({
             exemptLoanedTo: HOST_CORPS,
             exemptSectorCorps: 'hvo_central_bosnia',
@@ -389,8 +402,9 @@ describe('GATE 1 — reconciliation retention for sector-exempt brigades', () =>
         expect(participantsAfterReconcile(state)).toEqual(['hvo_local_brigade']);
     });
 
-    it('flag ON: a brigade LOANED to the host corps is retained despite a foreign sector claim', () => {
-        setMainStaffOpAvailabilityOverride(true);
+    it('RETENTION ON: a brigade LOANED to the host corps is retained despite a foreign sector claim', () => {
+        setMainStaffOpRetentionOverride(true);
+        setMainStaffOpAvailabilityOverride(false);
         const state = buildReconciliationState({
             exemptLoanedTo: HOST_CORPS,
             exemptSectorCorps: 'hvo_central_bosnia',
@@ -399,21 +413,24 @@ describe('GATE 1 — reconciliation retention for sector-exempt brigades', () =>
             .toEqual(['hvo_2nd_guard_mechanized', 'hvo_local_brigade']);
     });
 
-    it('flag OFF: a sectorless, unattached exempt brigade rides along (the accident)', () => {
-        setMainStaffOpAvailabilityOverride(false);
+    it('RETENTION OFF: a sectorless, unattached exempt brigade rides along (the accident)', () => {
+        setMainStaffOpRetentionOverride(false);
+        setMainStaffOpAvailabilityOverride(true);
         const state = buildReconciliationState({ exemptLoanedTo: null, exemptSectorCorps: null });
         expect(participantsAfterReconcile(state))
             .toEqual(['hvo_2nd_guard_mechanized', 'hvo_local_brigade']);
     });
 
-    it('flag ON: the free ride is withdrawn — no loan, no claim, no participation', () => {
-        setMainStaffOpAvailabilityOverride(true);
+    it('RETENTION ON: the free ride is withdrawn — no loan, no claim, no participation', () => {
+        setMainStaffOpRetentionOverride(true);
+        setMainStaffOpAvailabilityOverride(false);
         const state = buildReconciliationState({ exemptLoanedTo: null, exemptSectorCorps: null });
         expect(participantsAfterReconcile(state)).toEqual(['hvo_local_brigade']);
     });
 
-    it('flag ON: a loan to a DIFFERENT corps does not confer participation here', () => {
-        setMainStaffOpAvailabilityOverride(true);
+    it('RETENTION ON: a loan to a DIFFERENT corps does not confer participation here', () => {
+        setMainStaffOpRetentionOverride(true);
+        setMainStaffOpAvailabilityOverride(false);
         const state = buildReconciliationState({
             exemptLoanedTo: 'hvo_central_bosnia',
             exemptSectorCorps: null,
@@ -421,11 +438,12 @@ describe('GATE 1 — reconciliation retention for sector-exempt brigades', () =>
         expect(participantsAfterReconcile(state)).toEqual(['hvo_local_brigade']);
     });
 
-    it('flag ON: non-exempt brigades keep the unchanged sector-claim predicate', () => {
-        setMainStaffOpAvailabilityOverride(true);
+    it('RETENTION ON: non-exempt brigades keep the unchanged sector-claim predicate', () => {
+        setMainStaffOpRetentionOverride(true);
+        setMainStaffOpAvailabilityOverride(false);
         const state = buildReconciliationState({ exemptLoanedTo: HOST_CORPS, exemptSectorCorps: null });
         // Move the local brigade's claim to a foreign corps; it must be evicted
-        // by the ORIGINAL predicate, which the flag does not touch.
+        // by the ORIGINAL predicate, which neither flag touches.
         state.military.corps_front_sectors!['sector:other'] = makeSector({
             sector_id: 'sector:foreign:0',
             corps_id: 'hvo_central_bosnia',
@@ -436,5 +454,45 @@ describe('GATE 1 — reconciliation retention for sector-exempt brigades', () =>
         });
         delete state.military.corps_front_sectors!.host;
         expect(participantsAfterReconcile(state)).toEqual(['hvo_2nd_guard_mechanized']);
+    });
+});
+
+// ─── The split itself — the two halves must not be able to hide each other ──
+
+describe('the two flags are INDEPENDENT', () => {
+    // The reason the halves are on separate switches: GATE 2 admits and GATE 1
+    // evicts. If either flag could produce the other's effect, a bundled
+    // measurement could show a +N and a −N cancelling and read as inert.
+
+    it('AVAILABILITY alone does not change retention — the free ride survives it', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildReconciliationState({ exemptLoanedTo: null, exemptSectorCorps: null });
+        expect(participantsAfterReconcile(state))
+            .toEqual(['hvo_2nd_guard_mechanized', 'hvo_local_brigade']);
+    });
+
+    it('RETENTION alone does not change admission — the named brigade stays dropped', () => {
+        setMainStaffOpRetentionOverride(true);
+        setMainStaffOpAvailabilityOverride(false);
+        const state = buildOpportunityState(175);
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+        expect(op!.axes![0].assigned_brigades).toEqual(['hvo_local_brigade']);
+        expect(state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('BOTH ON: admission and retention compose — named, loaned, and kept', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(true);
+        const spawned = buildOpportunityState(175);
+        const op = spawnFixtureOperation(spawned, 175, mistralLikeDef());
+        expect(op!.axes![0].assigned_brigades).toContain('hvo_1st_guard_abb');
+
+        const reconciled = buildReconciliationState({
+            exemptLoanedTo: HOST_CORPS,
+            exemptSectorCorps: 'hvo_central_bosnia',
+        });
+        expect(participantsAfterReconcile(reconciled))
+            .toEqual(['hvo_2nd_guard_mechanized', 'hvo_local_brigade']);
     });
 });

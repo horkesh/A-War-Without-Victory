@@ -3,7 +3,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { derivePrimarySectorForBrigades } from './corps_operation_helpers.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
-import { isMainStaffOpAvailabilityEnabled } from './mainstaff_op_availability_gate.js';
+import { isMainStaffOpRetentionEnabled } from './mainstaff_op_availability_gate.js';
 import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 
 function buildSectorClaimsByBrigade(state: GameState): Map<FormationId, string[]> {
@@ -53,9 +53,12 @@ function uniqueActiveParticipants(
         // their own, so the sector claim says only where they are STANDING. Read
         // the loan instead: an attached reserve stays on the roster wherever it
         // is, and an unattached one does not ride along on an empty claim.
-        // Default-OFF; see mainstaff_op_availability_gate.ts.
+        // Default-OFF, and on its OWN flag (AWWV_MAINSTAFF_OP_RETENTION) rather
+        // than the admission flag: this half EVICTS where the admission half
+        // ADMITS, and bundling opposite signs makes a cancellation read as
+        // inertness. See the header note in mainstaff_op_availability_gate.ts.
         if (
-            isMainStaffOpAvailabilityEnabled()
+            isMainStaffOpRetentionEnabled()
             && isSectorAssignmentExemptCorpsId(getFormationCorpsId(formation))
         ) {
             const loanState = formation.elite_loan_state;
