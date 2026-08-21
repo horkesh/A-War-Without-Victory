@@ -1,6 +1,9 @@
 import type { CorpsOperation, FormationId, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { derivePrimarySectorForBrigades } from './corps_operation_helpers.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
+import { isMainStaffOpAvailabilityEnabled } from './mainstaff_op_availability_gate.js';
 import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 
 function buildSectorClaimsByBrigade(state: GameState): Map<FormationId, string[]> {
@@ -40,10 +43,28 @@ function uniqueActiveParticipants(
     for (const brigadeId of brigadeIds ?? []) {
         if (seen.has(brigadeId)) continue;
         seen.add(brigadeId);
-        if (formations[brigadeId]?.status !== 'active') continue;
+        const formation = formations[brigadeId];
+        if (formation?.status !== 'active') continue;
 
         const sectorClaims = sectorClaimsByBrigade.get(brigadeId) ?? [];
         const hasSameCorpsClaim = sectorClaims.includes(corpsId);
+
+        // Sector-exempt reserves (main staff / general staff) hold no sector of
+        // their own, so the sector claim says only where they are STANDING. Read
+        // the loan instead: an attached reserve stays on the roster wherever it
+        // is, and an unattached one does not ride along on an empty claim.
+        // Default-OFF; see mainstaff_op_availability_gate.ts.
+        if (
+            isMainStaffOpAvailabilityEnabled()
+            && isSectorAssignmentExemptCorpsId(getFormationCorpsId(formation))
+        ) {
+            const loanState = formation.elite_loan_state;
+            const attachedToHostCorps = loanState?.on_loan === true && loanState.loaned_to_corps === corpsId;
+            if (!attachedToHostCorps && !hasSameCorpsClaim) continue;
+            active.push(brigadeId);
+            continue;
+        }
+
         const hasOnlyForeignClaims = sectorClaims.length > 0 && !hasSameCorpsClaim;
         if (hasOnlyForeignClaims) continue;
 
