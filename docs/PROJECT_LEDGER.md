@@ -28357,3 +28357,36 @@ Full suite on `lane/instrumentation-reason-codes`: **7 files failed, 1,287 passe
 **FLAGGED AGAINST THE HISTORIAN'S OWN RULING: the reviewer could not find the 12,000-14,000 men / 90-110 tank band anywhere in the BB knowledge base.** The Historian derived it from BB1 p.417 (11,000 HV+HVO in OG North), p.427 (11,000-12,000) and the p.298 fn 304 rotation note, so it is a reasoned band rather than a quoted one — **but if it is going to be used to judge a loadout it should be cited as derived, not quoted.**
 
 **STATUS UNCHANGED: NOT MERGED**, converse and full-suite runs still outstanding, and the ledger entry this lane requires is the reviewer's fifth outstanding item — now discharged by this entry and the one above it.
+
+### ★ DECOMPOSITION COMPLETE — the spawn turn is NECESSARY AND SUFFICIENT
+
+| # | tree | matched | hash |
+|---|---|---|---|
+| 0 | baseline `607ef038c` | 611 | — |
+| 1 | full patch, 5 edits | **627** | `e4f01cd17eb8520c` |
+| 2 | full patch **−** spawn turn | **611** | `034820889a972be7` |
+| 3 | **spawn turn ONLY**, original 8-def roster | **627** | `4ac1c64ee5a197e8` |
+
+**Run 3 keeps both duplicate brigades, the original corps ids and all 136 tanks, and still reaches 627.** And the stronger check: **run 3 against run 1 differs in 0 OSIDs across the whole 712-cell map.** A one-integer edit and a five-edit patch produce **territorially identical worlds.**
+
+**Precision the reviewer insisted on, and it is right: "inert" is too strong.** The hashes differ between 1 and 3 because six defs are not eight — **the four historical edits change world STATE; they change no TERRITORY.**
+
+### ★ AND THE COMMIT'S HASH PAIR IS NOT A VALID PAIR — the baseline was run with instrumentation ON
+
+`scratchpad/HEAD_axisreject/` at `3bc488c60` is the commit's stated baseline, and **its `operation_aars.json` carries four `launch_blocker_detail` keys — orchestrator-verified.** That field only exists when `AWWV_DEBUG_REASON_CODES=axis_reject` is set. **So the commit's *"Baseline … hash `dd90c75508a9cf2e`. This run: hash `e4f01cd17eb8520c`"* compares a flag-ON run against a flag-OFF run**, and part of that delta is the instrumentation rather than the lane.
+
+**The `matched_osids` comparison survives intact** — because the same reviewer proved in the preceding review that the reason-code flag moves `final_state_hash` while leaving territory byte-identical, which is exactly the property that rescues this. **But the hash pair in the commit message must be struck or re-derived.**
+
+**★ THE FOLLOW-ON IS WORTH MORE THAN THE CORRECTION: a run's flag configuration is nowhere in its artifacts.** Orchestrator-verified — `run_meta.json`'s keys are `out_dir, provenance, run_id, scenario_id, scenario_path, weeks`, and **nothing records `AWWV_DEBUG_REASON_CODES` or any other flag.** The directory *name* was the only surviving record of the flag state, **for the second time in two reviews.** A flag configuration belongs in `run_meta.json`, not in whoever remembered to name the folder — and the provenance stamping shipped four days ago is exactly the mechanism that should carry it.
+
+### THE TRACKED-DERIVED-FILE RULE NEEDS AN EXECUTABLE — and the argument is correctness, not hygiene
+
+**`.gitignore` is genuinely unavailable:** the UI loads `data/derived/latest_run_final_save.json` at `src/ui/map/data/DataLoader.ts:278` and `electron-main.cjs:104` serves it. **It is a shipped artifact; ignoring it would break the map.**
+
+**The existing gate is at the wrong end.** The `AWWV_S6_GRADE_RUN` preflight refuses to *start* on a dirty tree — but it cannot see a file the run itself is about to write. **The failure is created after the only check that looks for it.**
+
+**★ And the measured argument, which is the one to lead with: the dirty copy still contained `hv_4th_guards_brigade_1995`, `hv_7th_guards_brigade_1995` and `hv_1st_guards_brigade_1995` — all three ids the patch removes.** It was not merely uncommitted, it was **stale against its own lane**: a saved world contradicting the source file beside it. **Had it been committed, the repo would ship a map save containing three formations the engine can no longer produce.** *(Note main's tracked copy is likewise from a different tree — it hashes `a9ebcea4` against `n225`'s `8bb624eb` — so the repo already ships a stale map save.)*
+
+**Proposed scope, narrow:** fail non-zero at exit if any **tracked** file under `data/derived/` is modified and the run was not invoked with `--map`, naming the paths. **`a64fbd5f1` legislated this and nothing enforces it — and a rule that a seat cited twice and then broke inside the same lane is a rule that needs an executable.**
+
+**Reviewer self-correction, third of the session and its own:** it reported the review artifacts missing. **They were in the session scratchpad the whole time** — it searched four worktrees and concluded "nowhere" from a search that only covered where it had guessed. Same shape as the two already logged.
