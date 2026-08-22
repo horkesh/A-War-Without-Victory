@@ -24,6 +24,7 @@ function operation(decision: string) {
             launch_readiness_detail: {
                 executable: true,
                 result_state: 'executable',
+                threshold: 'repulsed',
                 brigades: [{
                     id: 'arbih_706th',
                     considered: true,
@@ -170,6 +171,38 @@ describe('operation launch/order consistency diagnostic', () => {
             reason: 'executable_launch_immediate_refusal',
             refused_launch_brigades: ['arbih_706th'],
         })]);
+    });
+
+    it('accepts a strong launch candidate when a weaker sibling correctly refuses', () => {
+        const runDir = join(TMP_ROOT, 'weak_and_strong_candidates');
+        const mixed = operation('direct_attack');
+        mixed.axis_decision_diagnostics[0].launch_readiness_detail.brigades.unshift({
+            id: 'arbih_weak',
+            considered: true,
+            found_in_predictor: true,
+            power_ratio: 0.5,
+            predicted_outcome: 'repulsed',
+        });
+        mixed.axis_decision_diagnostics[0].launch_readiness_detail.threshold = 'costly_victory';
+        mixed.axis_decision_diagnostics[0].launch_readiness_detail.brigades[1].predicted_outcome = 'costly_victory';
+        mixed.axis_decision_diagnostics[0].order_generation_details.unshift({
+            brigade_id: 'arbih_weak',
+            decision: 'direct_attack_below_threshold',
+            turn: 90,
+            phase: 'execution',
+            objective: 'op:test:opening',
+            issued_target_osid: '',
+            power_ratio: 0.5,
+            predicted_outcome: 'repulsed',
+        });
+        writeWeeklyReport(runDir, [{ week_index: 90, operation_diagnostics: [mixed] }]);
+
+        const stdout = execFileSync(
+            process.execPath,
+            ['tools/diagnostics/operation_launch_order_consistency.cjs', runDir, '--json'],
+            { cwd: process.cwd(), encoding: 'utf8' },
+        );
+        expect(JSON.parse(stdout).mismatches).toEqual([]);
     });
 
     it('proves its positive control while keeping production results separate', () => {

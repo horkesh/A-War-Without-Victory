@@ -43,7 +43,7 @@ Commit `c2333a900` couples the required turn-174 timing with admission of `hv_ph
 - `npm run diagnose:hv1995 -- <run-dir> --write` emits `hv_1995_lifecycle_diagnostic.json`.
 - `npm run diagnose:operation-commitments -- <run-dir>` audits every weekly planning/execution membership and injects a deliberate collision as its positive control.
 - `AWWV_DEBUG_REASON_CODES=objective_filter` exposes friendly-objective rejection rows only when requested. The payload is validated and deterministically sorted; the focused test proves a friendly rejection is recorded while an enemy objective remains as the positive control.
-- The launch/order audit binds every successful order back to the launch-considered brigade in the same execution turn and phase. A direct attack must target its recorded objective. Its injected control combines a launched-brigade refusal, unrelated current movement, and stale planning movement, so an axis-level or stale-row matcher cannot report a false pass.
+- The launch/order audit derives the brigade candidates whose direct or concentrated prediction meets the recorded launch threshold, then requires at least one of those launch-sufficient candidates to have a valid order in the same execution turn and phase. A direct attack must target its recorded objective. Its injected control combines a launch-sufficient brigade refusal, unrelated current movement, and stale planning movement, so an axis-level or stale-row matcher cannot report a false pass.
 - Default runs do not serialize the optional objective/roster debug payloads.
 
 ## CI and Manifest Anomaly
@@ -96,7 +96,7 @@ The threshold-based engine-health gate passes, but the artifact is **not valid f
 
 Follow-up tracing disproved two narrower launch fixes before identifying the remaining defect. Operation readiness used the live opening-contact graph as the adjacency supplied to combat prediction, while brigade order generation used the full tactical graph. The sparse graph undercounted reactive defenders and allowed operations such as Kopljem/Gazija to launch on a favorable prediction, then immediately refuse the same opening attack under the order generator's complete combat context.
 
-The readiness predictor now receives the same terrain, supply, population, officer, reverse-formation, and full tactical-adjacency context as order generation. The live opening graph remains responsible only for contact/gate eligibility. The permanent `operation_launch_order_consistency.cjs` audit checks the first execution week of every traced executable axis. It joins same-turn execution orders to each launch-considered brigade and verifies direct attacks retain the recorded objective; unrelated movement and stale planning rows cannot satisfy the check.
+The readiness predictor now receives the same terrain, supply, population, officer, reverse-formation, and full tactical-adjacency context as order generation. The live opening graph remains responsible only for contact/gate eligibility. The permanent `operation_launch_order_consistency.cjs` audit checks the first execution week of every traced executable axis. It derives the candidates meeting the recorded launch threshold, joins their same-turn execution orders, and verifies direct attacks retain the recorded objective; unrelated movement, stale planning rows, and correct refusals by weaker candidates cannot distort the verdict.
 
 Diagnostic-on n265 checked 965 traced axes and 181 first-execution executable axes: zero contradictions, with the injected contradiction detected. Combat causality is valid: zero invalid operations, 755 attack orders, 553 battles, and zero recovery-without-attempt rows. Diagnostic-off n266 reproduced the same gameplay trajectory. After removing only the three env-gated trace fields (`launch_readiness_detail`, `order_generation_details`, and `launch_blocker_detail`), canonical final-save serialization is byte-identical at SHA-256 `F5237F5F9BAF33B288F43BB7AE97F87269B2752CABC42128B6ACD9EA256F41F0`; a mutated turn produced a different hash as the comparator positive control.
 
@@ -104,7 +104,7 @@ n266 is clean at commit `c700a18d441df90234f2c13f60184856325d2413`. It passes al
 
 ## Verification Status
 
-- The final engine/HV focused gate passes 322/322 tests across 16 files, including launch/order controls for unrelated-brigade masking, stale planning rows, wrong direct-attack targets, and the composite injected defect.
+- The final engine/HV focused gate passes 323/323 tests across 16 files, including launch/order controls for unrelated-brigade masking, stale planning rows, wrong direct-attack targets, mixed weak/strong candidates, and the composite injected defect.
 - The regenerated startup artifact passes `desktop:startup-snapshot:check`, 22/22 startup/desktop contract tests, and `desktop:sim:build`.
 - TypeScript typecheck and the emitting build pass; `git diff --check` passes.
 - The scenario-anchor suite passes 4 selected tests; its Brcko negative case is an explicit positive control.

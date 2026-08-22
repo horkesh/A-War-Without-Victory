@@ -16,6 +16,14 @@ const fs = require('fs');
 const path = require('path');
 
 const MOVEMENT_DECISIONS = new Set(['in_transit_skipped', 'march_to_approach']);
+const OUTCOME_RANK = new Map([
+    ['catastrophic', 1],
+    ['repulsed', 2],
+    ['stalemate', 3],
+    ['costly_victory', 4],
+    ['victory', 5],
+    ['decisive_victory', 6],
+]);
 
 function asArray(value) {
     return Array.isArray(value) ? value : [];
@@ -38,8 +46,15 @@ function mismatchForAxis(week, operation, axis) {
     if (launch?.executable !== true) return null;
 
     const orders = asArray(axis.order_generation_details);
+    const thresholdRank = OUTCOME_RANK.get(String(launch.threshold || ''));
     const launchBrigades = asArray(launch.brigades)
-        .filter((brigade) => brigade?.considered === true && brigade?.found_in_predictor === true)
+        .filter((brigade) => {
+            if (brigade?.considered !== true || brigade?.found_in_predictor !== true) return false;
+            if (thresholdRank === undefined) return false;
+            const directRank = OUTCOME_RANK.get(String(brigade.predicted_outcome || '')) ?? 0;
+            const concentratedRank = OUTCOME_RANK.get(String(brigade.concentrated_outcome || '')) ?? 0;
+            return Math.max(directRank, concentratedRank) >= thresholdRank;
+        })
         .map((brigade) => String(brigade.id || ''))
         .filter(Boolean);
     const launchBrigadeSet = new Set(launchBrigades);
@@ -69,8 +84,7 @@ function mismatchForAxis(week, operation, axis) {
                 && String(order.issued_target_osid || '') === String(order.objective || '');
         })
         .map((order) => String(order.brigade_id || '')));
-    const refusedLaunchBrigades = launchBrigades.filter((brigadeId) => !validOrderBrigades.has(brigadeId));
-    if (refusedLaunchBrigades.length === 0) return null;
+    if (launchBrigades.some((brigadeId) => validOrderBrigades.has(brigadeId))) return null;
 
     return {
         week,
@@ -79,7 +93,7 @@ function mismatchForAxis(week, operation, axis) {
         axis_id: String(axis.axis_id || ''),
         reason: 'executable_launch_immediate_refusal',
         launch_brigades: launchBrigades,
-        refused_launch_brigades: refusedLaunchBrigades,
+        refused_launch_brigades: launchBrigades,
         order_decisions: currentExecutionOrders.map((order) => ({
             brigade_id: String(order.brigade_id || ''),
             decision: String(order.decision || ''),
@@ -138,10 +152,12 @@ function positiveControlRow() {
                 axis_id: '__positive_control__',
                 launch_readiness_detail: {
                     executable: true,
+                    threshold: 'repulsed',
                     brigades: [{
                         id: '__positive_control_brigade__',
                         considered: true,
                         found_in_predictor: true,
+                        predicted_outcome: 'decisive_victory',
                     }],
                 },
                 order_generation_details: [{
