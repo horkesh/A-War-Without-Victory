@@ -941,7 +941,7 @@ export function reconcilePlanningObjectives(
         }> = [];
         for (const axis of op.axes) {
             const enemyObjectives = filterAxisPlanningObjectives(state, axis, faction);
-            const filteredObjectives = op.is_pre_planned === true || op.preserve_objective_sequence === true
+            const filteredObjectives = op.preserve_objective_sequence === true
                 ? enemyObjectives
                 : pruneUnreachablePlanningObjectivePrefix(
                     state,
@@ -979,7 +979,7 @@ export function reconcilePlanningObjectives(
                 const controller = getPoliticalControllerOSID(state, osid, undefined);
                 return controller !== null && controller !== faction;
             });
-        const filteredObjectives = op.is_pre_planned === true || op.preserve_objective_sequence === true
+        const filteredObjectives = op.preserve_objective_sequence === true
             ? enemyObjectives
             : pruneUnreachablePlanningObjectivePrefix(
                 state,
