@@ -148,6 +148,7 @@ describe('combat causality diagnostics', () => {
             launch_readiness_detail: {
                 executable: true,
                 result_state: 'executable',
+                objective: 'op:test:objective',
                 gate_adjacent: 1,
                 staged_adjacent: 1,
                 threshold: 'stalemate',

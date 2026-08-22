@@ -345,6 +345,8 @@ export interface AxisRejectionDetail {
 export interface AxisLaunchReadinessDetail {
     executable: boolean;
     result_state: 'executable' | AxisRejectionDetail['collapsed_state'];
+    /** Immutable opening objective evaluated by launch prediction. */
+    objective: string;
     gate_adjacent: number;
     staged_adjacent: number;
     threshold: string;

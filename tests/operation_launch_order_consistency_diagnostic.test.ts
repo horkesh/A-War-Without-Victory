@@ -24,6 +24,7 @@ function operation(decision: string) {
             launch_readiness_detail: {
                 executable: true,
                 result_state: 'executable',
+                objective: 'op:test:opening',
                 threshold: 'repulsed',
                 brigades: [{
                     id: 'arbih_706th',
@@ -170,6 +171,33 @@ describe('operation launch/order consistency diagnostic', () => {
         expect(JSON.parse(stdout).mismatches).toEqual([expect.objectContaining({
             reason: 'executable_launch_immediate_refusal',
             refused_launch_brigades: ['arbih_706th'],
+        })]);
+    });
+
+    it('rejects self-consistent downstream fields that drift from the launch objective', () => {
+        const runDir = join(TMP_ROOT, 'downstream_objective_drift');
+        const drifted = operation('direct_attack');
+        drifted.axis_decision_diagnostics[0].order_generation_details[0].objective = 'op:test:sibling';
+        drifted.axis_decision_diagnostics[0].order_generation_details[0].issued_target_osid = 'op:test:sibling';
+        writeWeeklyReport(runDir, [{ week_index: 90, operation_diagnostics: [drifted] }]);
+
+        let stdout = '';
+        try {
+            stdout = execFileSync(
+                process.execPath,
+                ['tools/diagnostics/operation_launch_order_consistency.cjs', runDir, '--json'],
+                { cwd: process.cwd(), encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+            );
+        } catch (error) {
+            stdout = String((error as { stdout?: string | Buffer }).stdout ?? '');
+        }
+        expect(JSON.parse(stdout).mismatches).toEqual([expect.objectContaining({
+            reason: 'executable_launch_immediate_refusal',
+            order_decisions: [expect.objectContaining({
+                launch_objective: 'op:test:opening',
+                objective: 'op:test:sibling',
+                issued_target_osid: 'op:test:sibling',
+            })],
         })]);
     });
 

@@ -1063,6 +1063,7 @@ function classifyAxisOpeningAttack(
         axis.launch_readiness_detail = {
             executable,
             result_state: resultState,
+            objective,
             gate_adjacent: rejectionFacts.gate_adjacent,
             staged_adjacent: rejectionFacts.staged_adjacent,
             threshold,
@@ -1311,6 +1312,7 @@ export function evaluateOpeningAttackReadiness(
                         : (singleAxisFacts.brigades.some((b) => b.found_in_predictor === true)
                             ? 'present_too_weak'
                             : 'not_reachable_from_position')),
+                objective,
                 gate_adjacent: singleAxisFacts.gate_adjacent,
                 staged_adjacent: singleAxisFacts.staged_adjacent,
                 threshold,

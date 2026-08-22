@@ -47,6 +47,7 @@ function mismatchForAxis(week, operation, axis) {
 
     const orders = asArray(axis.order_generation_details);
     const thresholdRank = OUTCOME_RANK.get(String(launch.threshold || ''));
+    const launchObjective = String(launch.objective || '');
     const launchBrigades = asArray(launch.brigades)
         .filter((brigade) => {
             if (brigade?.considered !== true || brigade?.found_in_predictor !== true) return false;
@@ -63,7 +64,7 @@ function mismatchForAxis(week, operation, axis) {
         && Number(order.turn) === week
         && String(order.phase || '') === 'execution'
     ));
-    if (launchBrigades.length === 0 || currentExecutionOrders.length === 0) {
+    if (launchObjective === '' || launchBrigades.length === 0 || currentExecutionOrders.length === 0) {
         return {
             week,
             corps_id: String(operation.corps_id || ''),
@@ -80,8 +81,8 @@ function mismatchForAxis(week, operation, axis) {
             const decision = String(order.decision || '');
             if (MOVEMENT_DECISIONS.has(decision) || decision === 'attack_intermediate') return true;
             return decision === 'direct_attack'
-                && String(order.issued_target_osid || '') !== ''
-                && String(order.issued_target_osid || '') === String(order.objective || '');
+                && String(order.objective || '') === launchObjective
+                && String(order.issued_target_osid || '') === launchObjective;
         })
         .map((order) => String(order.brigade_id || '')));
     if (launchBrigades.some((brigadeId) => validOrderBrigades.has(brigadeId))) return null;
@@ -99,6 +100,7 @@ function mismatchForAxis(week, operation, axis) {
             decision: String(order.decision || ''),
             issued_target_osid: String(order.issued_target_osid || ''),
             objective: String(order.objective || ''),
+            launch_objective: launchObjective,
             power_ratio: order.power_ratio ?? null,
             predicted_outcome: order.predicted_outcome ?? null,
         })),
@@ -152,6 +154,7 @@ function positiveControlRow() {
                 axis_id: '__positive_control__',
                 launch_readiness_detail: {
                     executable: true,
+                    objective: '__positive_control_objective__',
                     threshold: 'repulsed',
                     brigades: [{
                         id: '__positive_control_brigade__',
