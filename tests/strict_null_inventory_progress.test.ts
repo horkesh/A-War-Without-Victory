@@ -714,18 +714,22 @@ describe('strict null inventory progress', () => {
             // declared REQUIRED-WITH-NULL rather than optional precisely so a single
             // gated diagnostic does not cost six entries against this floor — see the
             // type's own comment in game_state.ts. No new type-escape casts.
-            optional_fields_game_state: 532,
+            // Triggered-operation sequence preservation: +1 optional CorpsOperation field,
+            // `preserve_objective_sequence`. The flag is authored only on historical
+            // triggered operations whose sequential route must retain its prefix; legacy
+            // and ordinary/pre-planned operations remain absent-safe. 532->533 / sim 336->337.
+            optional_fields_game_state: 533,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(532);
+        expect(current.optional_field_domains.total).toBe(533);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 336,
+            sim: 337,
             state: 186,
             ui_adapter: 0,
             unknown: 0,
