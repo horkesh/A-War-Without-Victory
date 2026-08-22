@@ -57,7 +57,11 @@ describe('HV 1995 lifecycle diagnostic', () => {
                         from_osid: 'op:a',
                         to_osid: 'op:b',
                     }],
-                    battles: [],
+                    battles: [{
+                        osid: 'op:positive-control',
+                        outcome: 'victory',
+                        territory_flipped: true,
+                    }],
                 },
             ],
             temporalRows,
@@ -74,6 +78,30 @@ describe('HV 1995 lifecycle diagnostic', () => {
                 event: 'blocked',
                 failed_required_axes: [{ axis: 'staging_access', reason: 'closed' }],
             }],
+            operationAars: [{
+                operation_name: 'Operation Mistral 1',
+                operation_id: 'hvo_tomislavgrad:Operation Mistral 1:t160',
+                started_turn: 160,
+                ended_turn: 165,
+                outcome: 'failure',
+                recovery_reason: 'max_failures',
+                participating_brigades: ['hv_4th_guards_split'],
+                objectives_targeted: ['op:glamoc:vidimlije_2'],
+                objectives_captured: [],
+                total_attacks: 1,
+                axis_summaries: [{
+                    axis_id: 'mistral_1_glamoc',
+                    brigades: ['hv_4th_guards_split'],
+                    launch_blocker: 'max_failures',
+                    total_attacks: 1,
+                }],
+            }],
+            politicalControllers: {
+                'op:kupres:bucovaca': 'HRHB',
+                'op:glamoc:glamoc_2': 'RS',
+                'op:sipovo:sipovo_2': 'RS',
+                'op:sipovo:pribeljci_2': 'HRHB',
+            },
             positiveControlId: 'hv_4th_guards_split',
         });
 
@@ -107,6 +135,26 @@ describe('HV 1995 lifecycle diagnostic', () => {
             opportunity_id: 'mistral_2_95',
             turn: 176,
         }]);
+        expect(result.cascade.positive_controls).toEqual({
+            final_controller_projection: true,
+            operation_aar_projection: true,
+            opportunity_trace_projection: true,
+            turn_battle_flip_projection: true,
+            weekly_operation_diagnostic_projection: false,
+        });
+        expect(result.cascade.operations).toContainEqual(expect.objectContaining({
+            opportunity_id: 'mistral_1_95',
+            operation_name: 'Operation Mistral 1',
+            aar: expect.objectContaining({
+                outcome: 'failure',
+                recovery_reason: 'max_failures',
+            }),
+        }));
+        expect(result.cascade.dependency_anchors).toContainEqual({
+            consumer_opportunity_id: 'mistral_2_95',
+            osid: 'op:glamoc:glamoc_2',
+            final_controller: 'RS',
+        });
     });
 
     it('marks zero battle hits NOT_ESTABLISHED when stack projection has no positive control', () => {
@@ -124,6 +172,8 @@ describe('HV 1995 lifecycle diagnostic', () => {
             })),
             weeklyRows: [{ week_index: 175, battles: [{ battle_id: 'legacy-shape' }] }],
             opportunityTraces: [],
+            operationAars: [],
+            politicalControllers: {},
             positiveControlId: 'hv_4th_guards_split',
         });
 

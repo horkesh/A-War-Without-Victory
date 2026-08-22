@@ -24,8 +24,25 @@ export interface Hv1995LifecycleArtifacts {
     temporalRows: Array<Record<string, unknown>>;
     weeklyRows: Array<Record<string, unknown>>;
     opportunityTraces: Array<Record<string, unknown>>;
+    operationAars: Array<Record<string, unknown>>;
+    politicalControllers: Record<string, unknown>;
     positiveControlId: string;
 }
+
+const CASCADE_OPERATIONS = [
+    { opportunity_id: 'kupres_cincar_94', operation_name: 'Operation Cincar / Kupres' },
+    { opportunity_id: 'mistral_1_95', operation_name: 'Operation Mistral 1' },
+    { opportunity_id: 'mistral_2_95', operation_name: 'Operation Mistral 2' },
+    { opportunity_id: 'southern_move_95', operation_name: 'Operation Southern Move' },
+] as const;
+
+const CASCADE_DEPENDENCY_ANCHORS = [
+    { consumer_opportunity_id: 'mistral_1_95', osid: 'op:kupres:bucovaca' },
+    { consumer_opportunity_id: 'mistral_2_95', osid: 'op:kupres:bucovaca' },
+    { consumer_opportunity_id: 'mistral_2_95', osid: 'op:glamoc:glamoc_2' },
+    { consumer_opportunity_id: 'southern_move_95', osid: 'op:sipovo:sipovo_2' },
+    { consumer_opportunity_id: 'southern_move_95', osid: 'op:sipovo:pribeljci_2' },
+] as const;
 
 export function parseJsonLines(payload: string): Array<Record<string, unknown>> {
     const rows: Array<Record<string, unknown>> = [];
@@ -68,6 +85,125 @@ function countRows(rows: Array<Record<string, unknown>>, predicate: (row: Record
     let count = 0;
     for (const row of rows) if (predicate(row)) count += 1;
     return count;
+}
+
+function strings(value: unknown): string[] {
+    return Array.isArray(value)
+        ? value.filter((item): item is string => typeof item === 'string').slice().sort(compareText)
+        : [];
+}
+
+function compactAxis(axis: Record<string, unknown>) {
+    return {
+        axis_id: typeof axis.axis_id === 'string' ? axis.axis_id : '',
+        brigades: strings(axis.brigades),
+        launch_blocker: typeof axis.launch_blocker === 'string' ? axis.launch_blocker : null,
+        objectives_captured: strings(axis.objectives_captured),
+        objectives_targeted: strings(axis.objectives_targeted),
+        total_attacks: typeof axis.total_attacks === 'number' ? axis.total_attacks : 0,
+        unreachable_at_launch: axis.unreachable_at_launch === true,
+    };
+}
+
+function compactAar(aar: Record<string, unknown> | undefined) {
+    if (!aar) return null;
+    return {
+        operation_id: typeof aar.operation_id === 'string' ? aar.operation_id : '',
+        started_turn: typeof aar.started_turn === 'number' ? aar.started_turn : null,
+        ended_turn: typeof aar.ended_turn === 'number' ? aar.ended_turn : null,
+        outcome: typeof aar.outcome === 'string' ? aar.outcome : null,
+        recovery_reason: typeof aar.recovery_reason === 'string' ? aar.recovery_reason : null,
+        participating_brigades: strings(aar.participating_brigades),
+        objectives_targeted: strings(aar.objectives_targeted),
+        objectives_captured: strings(aar.objectives_captured),
+        total_attacks: typeof aar.total_attacks === 'number' ? aar.total_attacks : 0,
+        axes: records(aar.axis_summaries).map(compactAxis).sort((a, b) => compareText(a.axis_id, b.axis_id)),
+    };
+}
+
+function analyzeCascade(artifacts: Hv1995LifecycleArtifacts) {
+    const turnBattleRows = artifacts.turnSummaries.flatMap((summary) => records(summary.battles).map((battle) => ({
+        battle,
+        turn: typeof summary.turn === 'number' ? summary.turn : null,
+    })));
+    const weeklyDiagnostics = artifacts.weeklyRows.flatMap((weekly) => records(weekly.operation_diagnostics).map((diagnostic) => ({
+        diagnostic,
+        turn: typeof weekly.week_index === 'number' ? weekly.week_index : null,
+    })));
+
+    const operations = CASCADE_OPERATIONS.map((definition) => {
+        const traces = artifacts.opportunityTraces
+            .filter((row) => row.opportunity_id === definition.opportunity_id)
+            .map((row) => ({
+                turn: typeof row.turn === 'number' ? row.turn : null,
+                event: typeof row.event === 'string' ? row.event : '',
+                failed_required_axes: records(row.failed_required_axes),
+            }))
+            .sort((a, b) => (a.turn ?? 0) - (b.turn ?? 0) || compareText(a.event, b.event));
+        const aar = artifacts.operationAars.find((row) => row.operation_name === definition.operation_name);
+        const diagnostics = weeklyDiagnostics
+            .filter((row) => row.diagnostic.operation_name === definition.operation_name)
+            .map((row) => ({
+                turn: row.turn,
+                phase: typeof row.diagnostic.operation_phase === 'string' ? row.diagnostic.operation_phase : null,
+                participating_brigades: strings(row.diagnostic.participating_brigades),
+                eligible_attacker_count: typeof row.diagnostic.eligible_attacker_count === 'number' ? row.diagnostic.eligible_attacker_count : 0,
+                movement_order_count: typeof row.diagnostic.movement_order_count === 'number' ? row.diagnostic.movement_order_count : 0,
+                attack_attempt_count: typeof row.diagnostic.attack_attempt_count === 'number' ? row.diagnostic.attack_attempt_count : 0,
+                battle_count: typeof row.diagnostic.battle_count === 'number' ? row.diagnostic.battle_count : 0,
+                objective_capture_count: typeof row.diagnostic.objective_capture_count === 'number' ? row.diagnostic.objective_capture_count : 0,
+                recovery_reason: typeof row.diagnostic.recovery_reason === 'string' ? row.diagnostic.recovery_reason : null,
+            }));
+        const battles = artifacts.weeklyRows.flatMap((weekly) => records(weekly.battles)
+            .filter((battle) => battle.operation_name === definition.operation_name)
+            .map((battle) => {
+                const turn = typeof weekly.week_index === 'number' ? weekly.week_index : null;
+                const target = typeof battle.target_osid === 'string' ? battle.target_osid : '';
+                const attacker = typeof battle.attacker_brigade === 'string' ? battle.attacker_brigade : '';
+                const outcome = typeof battle.outcome === 'string' ? battle.outcome : '';
+                const turnProjection = turnBattleRows.find((candidate) =>
+                    candidate.turn === turn
+                    && candidate.battle.osid === target
+                    && candidate.battle.primary_attacker_id === attacker
+                    && candidate.battle.outcome === outcome);
+                return {
+                    turn,
+                    target_osid: target,
+                    outcome,
+                    attacker_won: battle.attacker_won === true,
+                    attacker_brigades: strings(battle.attacker_brigades),
+                    power_ratio: typeof battle.power_ratio === 'number' ? battle.power_ratio : null,
+                    territory_flipped: typeof turnProjection?.battle.territory_flipped === 'boolean'
+                        ? turnProjection.battle.territory_flipped
+                        : null,
+                };
+            }));
+        return {
+            ...definition,
+            traces,
+            aar: compactAar(aar),
+            weekly_diagnostics: diagnostics,
+            battles,
+        };
+    });
+
+    return {
+        positive_controls: {
+            final_controller_projection: CASCADE_DEPENDENCY_ANCHORS.some(({ osid }) =>
+                Object.prototype.hasOwnProperty.call(artifacts.politicalControllers, osid)),
+            operation_aar_projection: artifacts.operationAars.length > 0,
+            opportunity_trace_projection: artifacts.opportunityTraces.length > 0,
+            turn_battle_flip_projection: turnBattleRows.some((row) => typeof row.battle.territory_flipped === 'boolean'),
+            weekly_operation_diagnostic_projection: weeklyDiagnostics.length > 0,
+        },
+        operations,
+        dependency_anchors: CASCADE_DEPENDENCY_ANCHORS.map((anchor) => ({
+            ...anchor,
+            final_controller: typeof artifacts.politicalControllers[anchor.osid] === 'string'
+                ? artifacts.politicalControllers[anchor.osid]
+                : null,
+        })),
+    };
 }
 
 export function analyzeHv1995Lifecycle(artifacts: Hv1995LifecycleArtifacts) {
@@ -179,6 +315,7 @@ export function analyzeHv1995Lifecycle(artifacts: Hv1995LifecycleArtifacts) {
         positive_controls: positiveControls,
         formations,
         opportunity_blockers: opportunityBlockers,
+        cascade: analyzeCascade(artifacts),
     };
 }
 
@@ -203,6 +340,10 @@ export function analyzeHv1995Run(runDir: string, positiveControlId = 'hv_4th_gua
             temporalRows: parseJsonLines(readFileSync(join(resolvedRunDir, 'brigade_temporal_log.jsonl'), 'utf8')),
             weeklyRows: parseJsonLines(readFileSync(join(resolvedRunDir, 'weekly_report.jsonl'), 'utf8')),
             opportunityTraces: records(military.operation_opportunity_traces),
+            operationAars: JSON.parse(readFileSync(join(resolvedRunDir, 'operation_aars.json'), 'utf8')) as Array<Record<string, unknown>>,
+            politicalControllers: finalSave.political !== null && typeof finalSave.political === 'object'
+                ? ((finalSave.political as Record<string, unknown>).political_controllers as Record<string, unknown> ?? {})
+                : {},
             positiveControlId,
         }),
     };
