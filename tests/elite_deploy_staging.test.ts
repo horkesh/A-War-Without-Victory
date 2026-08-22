@@ -195,6 +195,28 @@ describe('reserve-loan redirect — transactional retasking', () => {
         });
     });
 
+    it('preserves the brigade current location when base differs during retask', async () => {
+        const state = makeState();
+        const brigade = state.military.formations!.arbih_guards;
+        const loan = brigade.elite_loan_state!;
+        brigade.base_osid = 'op:srebrenica:srebrenica';
+        loan.on_loan = true;
+        loan.loaned_to_corps = 'arbih_1st_corps';
+        loan.loan_start_turn = 5;
+        state.military.corps_front_sectors!.sec_b = {
+            corps_id: 'arbih_2nd_corps',
+            territory_osids: ['op:bihac:bihac_2'],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+        } as any;
+
+        const result = await redirectReserveLoan(state, 'arbih_guards', 'arbih_2nd_corps', process.cwd());
+
+        expect(result.ok).toBe(true);
+        expect(brigade.location_osid).toBe('op:bihac:bihac_2');
+        expect(loan.loaned_to_corps).toBe('arbih_2nd_corps');
+    });
+
     it('leaves the active loan byte-identical when the target route is invalid', async () => {
         const state = makeState();
         const loan = state.military.formations!.arbih_guards.elite_loan_state!;

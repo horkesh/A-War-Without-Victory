@@ -1055,9 +1055,14 @@ export function retaskEliteLoan(
     if (ls.loaned_to_corps === corpsId) return false;
 
     const previousRecallTurn = ls.last_recall_turn;
+    const previousLocation = f.location_osid;
     recallEliteLoan(state, brigadeId, 'player_recall', turn);
     // Retasking is a continuation of the live commitment, not a return to the
-    // reserve pool. Preserve the cooldown history that existed before retask.
+    // reserve pool. Preserve both its physical position and the cooldown
+    // history that existed before retask; the caller validated the new route
+    // from this position, not from the brigade's reserve base.
+    if (previousLocation !== undefined) f.location_osid = previousLocation;
+    else delete f.location_osid;
     ls.last_recall_turn = null;
     const deployed = deployEliteLoan(
         state,
