@@ -2,9 +2,9 @@
 
 **Date:** 2026-08-22
 **Branch:** `codex/hv-1995-timing-mobility`
-**Run ID:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n238`
-**Baseline:** `n237`, 637/712, 31/31 anchors, `50be25fe9efb67ae`
-**Result:** scoped engine defects resolved; 637/712, 31/31 anchors, `7e9dc5cce015640d`
+**Run ID:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n239`
+**Baseline:** `n238`, 637/712, 31/31 anchors, `7e9dc5cce015640d`
+**Result:** scoped engine defects resolved; 634/712, 31/31 anchors, `55a0d578686dbd56`
 
 ## Summary
 
@@ -29,6 +29,7 @@
 ### Elite-loan contract hardening
 
 - Opportunity and pre-planned rosters now use the reserve pool's canonical availability predicate: an elite is rejected when permanently degraded, inside the four-turn recall cooldown, or already loaned. A live loan to the proposed host is still a commitment and cannot be double-rostered into a concurrent operation.
+- The per-turn elite-loan tick applies the same commitment rule. It auto-joins a newly executing host operation only when the brigade belongs to no other live operation in any corps; it no longer bypasses the opportunity/pre-planned selectors on the following turn.
 - `deployEliteLoan` defends the same invariant and returns explicit success/failure. Desktop approval rejects cooldown before command-authority debit or request consumption. Desktop redirect uses a transactional retask primitive: invalid routes leave military state byte-identical; a valid route closes the old episode and opens the new host commitment without being defeated by the recall cooldown created inside the transaction. Retask preserves the brigade's physical location, so the route validated from its current position remains the route the deployment order uses.
 - The desktop retask path does not run in the headless scenario. Desktop-level red/green tests establish its caller behavior; clean n238 establishes the headless same-host double-commitment correction.
 
@@ -57,6 +58,7 @@
 | n236 | shared resolver across all authored operation paths | 637 | 31/31 | `f3ee13afaee32e9d` |
 | n237 | enforce canonical elite-loan availability in opportunity, pre-planned, and deployment paths | 637 | 31/31 | `50be25fe9efb67ae` |
 | n238 | reject a live same-host elite loan from a second concurrent operation | 637 | 31/31 | `7e9dc5cce015640d` |
+| n239 | prevent the per-turn loan tick from reattaching a committed elite to another operation | 634 | 31/31 | `55a0d578686dbd56` |
 
 `n234` and `n235` final saves have identical SHA-256 `AAEED1E8D0439859A7EDEDF2E667ADC24B6B511454A2E852B69B2F09A5EBEC8E`. This establishes that the retention default is behaviorally inert in that repaired run, not merely equal in matched-cell count.
 
@@ -66,13 +68,15 @@ The n236→n237 final-save delta is exactly one leaf: Mistral 2's already-loaned
 
 The n237→n238 change is behaviorally active. At turn 175, `hvo_1st_guard_abb` already had a live loan to `hvo_tomislavgrad`; n237 nevertheless admitted it to Mistral 2 as another roster attachment. n238 rejects that second commitment as `elite_committed_to_host_corps`, reducing Mistral 2 initial strength from 12,059 to 9,259 and its weekly brigade count from five to four. Mistral 2 still succeeds 11/11 on the same turn window. The final save has 754 changed leaves through the resulting combat cascade and the weekly report hash changes; activity summary, control delta, and formation delta remain byte-identical. This is not an inert diagnostic-only change.
 
-### Late-war cascade at n238
+The n238→n239 change closes the independent per-turn bypass and is broader: 38,311 final-save leaves change, together with activity, control, and weekly artifacts; formation delta remains byte-identical. Matched OSIDs fall 637→634, while all 31 anchors and every hard health gate remain green. Mistral 2 changes from 11/11 success to 9/11 partial. This is the measured cost of enforcing one live operation commitment through the tick, and it is intentionally reported rather than hidden behind the unchanged hard-gate result.
+
+### Late-war cascade at n239
 
 | Operation | Result | Attacks | Captured |
 |---|---|---:|---:|
 | Cincar / Kupres | success / completed | 5 | 5/5 |
 | Mistral 1 | partial / max failures | 7 | 7/11 |
-| Mistral 2 | success / completed | 12 | 11/11 |
+| Mistral 2 | partial / completed | 12 | 9/11 |
 | Southern Move | executing at turn-188 boundary | 6 through boundary | 5/6 |
 
 All five dependency checks used by the harness end HRHB: Bučovača for Mistral 1 and 2, Glamoč for Mistral 2, and Šipovo plus Pribeljci for Southern Move.
@@ -80,7 +84,7 @@ All five dependency checks used by the harness end HRHB: Bučovača for Mistral 
 ### Formation evidence
 
 - All six delayed formations spawned once and were present in the temporal trace.
-- `hv_112th_infantry_1995` recorded six movement-order turns, three transit turns, six movement events, eleven operation turns, and four full-stack battle hits.
+- `hv_112th_infantry_1995` recorded six movement-order turns, three transit turns, four movement events, eleven operation turns, and two full-stack battle hits.
 - Five formations recorded no operation membership. The operation-membership projection had a positive control, so that absence is established. Four have no current authored catalog entry; `hv_7th_hgr_1995` is authored for Mistral 1, but that opportunity window closes at turn 170 before its required turn-174 spawn. None has a reachable post-turn-174 roster; no conclusion is drawn that their movement executor is broken.
 
 ### Reference-integrity evidence
@@ -95,8 +99,8 @@ All five dependency checks used by the harness end HRHB: Bučovača for Mistral 
 - Focused engine, desktop reserve, and harness suites include explicit invalid-loan and atomic-failure coverage across movement, reserve loans, opportunity, triggered, pre-planned, validation, reconciliation, and diagnostics.
 - TypeScript typecheck passed.
 - `git diff --check` passed.
-- n238 completed 188 turns from clean commit `cd4e6addc` (`run_meta.json` records `git_dirty:false`) with every harness positive control true, including the corrected spawn and battle-stack controls.
-- The n238 188-week engine-health gate passed every hard check: zero-eligible ops 0/3, dead ops 0/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, and matched OSIDs 637/622 minimum. Advisory K:W was inside band at 3.728.
+- n239 completed 188 turns from clean commit `fa40bf566` (`run_meta.json` records `git_dirty:false`) with every harness positive control true, including the corrected spawn and battle-stack controls.
+- The n239 188-week engine-health gate passed every hard check: zero-eligible ops 0/3, dead ops 0/6, ghost-destroyed 1/4, stranded brigades 6/9, consistency failures 0/3, and matched OSIDs 634/622 minimum. Advisory K:W was inside band at 3.728.
 - `data/derived/latest_run_final_save.json` restored to SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`; no backup remained.
 - `data/derived/scenario/baselines/manifest.json` was not refreshed and has no diff.
 - Independent review is still required before promotion because the implementer cannot serve as reviewer.
