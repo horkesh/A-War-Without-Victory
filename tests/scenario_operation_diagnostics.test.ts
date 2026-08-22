@@ -120,6 +120,65 @@ function makeOsidReport(
 }
 
 describe('combat causality diagnostics', () => {
+    it('omits axis decision diagnostics by default and preserves an enabled launch-to-order trace', () => {
+        const state = makeState();
+        const op = state.military.corps_command!.corps_1.active_operations[0]!;
+
+        const defaultDiagnostic = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({}),
+            makeOsidReport([]),
+        )[0]!;
+        assert.equal(Object.prototype.hasOwnProperty.call(defaultDiagnostic, 'axis_decision_diagnostics'), false);
+
+        op.axes = [{
+            axis_id: 'main',
+            name: 'Main',
+            assigned_brigades: ['b1'],
+            objectives: ['op:enemy:obj1'],
+            current_objective_index: 0,
+            status: 'executing',
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            launch_readiness_detail: {
+                executable: true,
+                result_state: 'executable',
+                gate_adjacent: 1,
+                staged_adjacent: 1,
+                threshold: 'stalemate',
+                brigades: [],
+            },
+            order_generation_details: [{
+                brigade_id: 'b1',
+                turn: 5,
+                phase: 'execution',
+                location_osid: 'op:rs:staging',
+                objective: 'op:enemy:obj1',
+                objective_controller: 'RBiH',
+                tactically_adjacent: true,
+                threshold: 'stalemate',
+                predicted_outcome: 'catastrophic',
+                power_ratio: 0.2,
+                concentrated_outcome: null,
+                decision: 'direct_attack_below_threshold',
+                issued_target_osid: null,
+            }],
+        }];
+
+        const traced = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({}),
+            makeOsidReport([]),
+        )[0]!;
+        assert.equal(traced.axis_decision_diagnostics?.[0]?.launch_readiness_detail?.executable, true);
+        assert.equal(traced.axis_decision_diagnostics?.[0]?.order_generation_details[0]?.decision, 'direct_attack_below_threshold');
+    });
+
     it('flags execution-phase operation with zero attack attempts', () => {
         const diagnostics = buildOperationCombatDiagnostics(
             makeState(),

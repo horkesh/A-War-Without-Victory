@@ -1,5 +1,5 @@
 import type { AttackResolutionOsidReport } from '../sim/combat/attack_resolution_osid.js';
-import type { CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../state/game_state.js';
+import type { AxisLaunchReadinessDetail, AxisOrderGenerationDetail, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 
 export interface BotOrderDiagnosticsSnapshot {
@@ -57,6 +57,12 @@ export interface OperationCombatDiagnostic {
         target_osid: string;
         reason: string;
         target_controller: FactionId | null;
+    }>;
+    /** Env-gated `axis_reject` trace joining launch and order decisions. */
+    axis_decision_diagnostics?: Array<{
+        axis_id: string;
+        launch_readiness_detail: AxisLaunchReadinessDetail | null;
+        order_generation_details: AxisOrderGenerationDetail[];
     }>;
     recovery_reason: string | null;
     invalid_for_combat_calibration: boolean;
@@ -226,6 +232,15 @@ export function buildOperationCombatDiagnostics(
             const recoveryReason = typeof operation.recovery_reason === 'string'
                 ? operation.recovery_reason
                 : null;
+            const axisDecisionDiagnostics = operation.axes
+                ?.filter((axis) => axis.launch_readiness_detail !== undefined || axis.order_generation_details !== undefined)
+                .map((axis) => ({
+                    axis_id: axis.axis_id,
+                    launch_readiness_detail: axis.launch_readiness_detail ?? null,
+                    order_generation_details: [...(axis.order_generation_details ?? [])]
+                        .sort((a, b) => strictCompare(a.brigade_id, b.brigade_id)),
+                }))
+                .sort((a, b) => strictCompare(a.axis_id, b.axis_id));
             const hadResolvedAttackThisTurn =
                 operation.last_result === 'captured' || operation.last_result === 'failed';
             let attackAttemptCount = 0;
@@ -367,6 +382,9 @@ export function buildOperationCombatDiagnostics(
                 attack_order_targets: attackOrderTargets,
                 participant_attack_orders: participantAttackOrders,
                 skipped_attack_orders: skippedAttackOrders,
+                ...(axisDecisionDiagnostics && axisDecisionDiagnostics.length > 0
+                    ? { axis_decision_diagnostics: axisDecisionDiagnostics }
+                    : {}),
                 recovery_reason: recoveryReason,
                 invalid_for_combat_calibration: invalidationReasons.length > 0,
                 invalidation_reasons: invalidationReasons

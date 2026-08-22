@@ -933,6 +933,7 @@ function classifyAxisOpeningAttack(
     // Unconditional and ungated: deleting an absent key is a no-op, so on a
     // default run — where the key is never written — this changes nothing.
     delete axis.launch_blocker_detail;
+    delete axis.launch_readiness_detail;
     const objective = axis.objectives[axis.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
         axis.launch_blocker = 'zero_eligible_axis';
@@ -1004,7 +1005,7 @@ function classifyAxisOpeningAttack(
         isReasonCodeTopicEnabled('axis_reject')
             ? { gate_adjacent: 0, staged_adjacent: 0, brigades: [] }
             : undefined;
-    if (!axisHasExecutableOpeningAttack(
+    const executable = axisHasExecutableOpeningAttack(
         state,
         faction,
         objective,
@@ -1014,7 +1015,35 @@ function classifyAxisOpeningAttack(
         // TEMPORARY DIAGNOSTIC — undefined unless a caller supplies the op name.
         debugOpName === undefined ? undefined : { opName: debugOpName, axisId: axis.axis_id },
         rejectionFacts,
-    )) {
+    );
+    if (rejectionFacts) {
+        const resultState = executable
+            ? 'executable'
+            : (rejectionFacts.gate_adjacent <= 0
+                ? 'dead_axis'
+                : (rejectionFacts.brigades.some((b) => b.found_in_predictor === true)
+                    ? 'present_too_weak'
+                    : 'not_reachable_from_position'));
+        axis.launch_readiness_detail = {
+            executable,
+            result_state: resultState,
+            gate_adjacent: rejectionFacts.gate_adjacent,
+            staged_adjacent: rejectionFacts.staged_adjacent,
+            threshold,
+            brigades: [...rejectionFacts.brigades]
+                .sort((a, b) => strictCompare(a.id, b.id))
+                .map((f) => ({
+                    id: f.id,
+                    considered: f.considered,
+                    skip_reason: f.skip_reason ?? null,
+                    found_in_predictor: f.found_in_predictor ?? null,
+                    predicted_outcome: f.predicted_outcome ?? null,
+                    power_ratio: f.power_ratio ?? null,
+                    concentrated_outcome: f.concentrated_outcome ?? null,
+                })),
+        };
+    }
+    if (!executable) {
         axis.launch_blocker = 'zero_eligible_axis';
         // REASON-CODE INSTRUMENTATION (topic `axis_reject`) — record WHICH predicate
         // refused, not merely that all of them did. Written after `launch_blocker` so
@@ -1025,11 +1054,9 @@ function classifyAxisOpeningAttack(
         // an ordering promise from a caller.
         if (rejectionFacts) {
             axis.launch_blocker_detail = {
-                collapsed_state: rejectionFacts.gate_adjacent <= 0
-                    ? 'dead_axis'
-                    : (rejectionFacts.brigades.some((b) => b.found_in_predictor === true)
-                        ? 'present_too_weak'
-                        : 'not_reachable_from_position'),
+                collapsed_state: axis.launch_readiness_detail?.result_state === 'executable'
+                    ? 'present_too_weak'
+                    : (axis.launch_readiness_detail?.result_state ?? 'dead_axis'),
                 gate_adjacent: rejectionFacts.gate_adjacent,
                 staged_adjacent: rejectionFacts.staged_adjacent,
                 threshold,
@@ -1219,14 +1246,51 @@ export function evaluateOpeningAttackReadiness(
         adjacency,
         operationStaticAdjacency,
     );
-    return axisHasExecutableOpeningAttack(
+    const singleAxisFacts: AxisRejectionFactsOut | undefined =
+        isReasonCodeTopicEnabled('axis_reject')
+            ? { gate_adjacent: 0, staged_adjacent: 0, brigades: [] }
+            : undefined;
+    const singleAxisExecutable = axisHasExecutableOpeningAttack(
         state,
         faction,
         objective,
         op.participating_brigades ?? [],
         openingAttackAdjacency,
         threshold,
-    )
+        undefined,
+        singleAxisFacts,
+    );
+    const representedAxis = op.axes?.[0];
+    if (representedAxis) {
+        delete representedAxis.launch_readiness_detail;
+        if (singleAxisFacts) {
+            representedAxis.launch_readiness_detail = {
+                executable: singleAxisExecutable,
+                result_state: singleAxisExecutable
+                    ? 'executable'
+                    : (singleAxisFacts.gate_adjacent <= 0
+                        ? 'dead_axis'
+                        : (singleAxisFacts.brigades.some((b) => b.found_in_predictor === true)
+                            ? 'present_too_weak'
+                            : 'not_reachable_from_position')),
+                gate_adjacent: singleAxisFacts.gate_adjacent,
+                staged_adjacent: singleAxisFacts.staged_adjacent,
+                threshold,
+                brigades: [...singleAxisFacts.brigades]
+                    .sort((a, b) => strictCompare(a.id, b.id))
+                    .map((fact) => ({
+                        id: fact.id,
+                        considered: fact.considered,
+                        skip_reason: fact.skip_reason ?? null,
+                        found_in_predictor: fact.found_in_predictor ?? null,
+                        predicted_outcome: fact.predicted_outcome ?? null,
+                        power_ratio: fact.power_ratio ?? null,
+                        concentrated_outcome: fact.concentrated_outcome ?? null,
+                    })),
+            };
+        }
+    }
+    return singleAxisExecutable
         ? { executable: true }
         : { executable: false, blocker: 'zero_eligible_axis' };
 }

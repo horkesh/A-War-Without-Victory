@@ -65,7 +65,7 @@ import { buildSectorDefenseByFactionAndOsid } from './corps_front_sectors.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
 import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
-import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive } from './bot_brigade_eval_attack.js';
+import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, recordAxisOrderGenerationDetail } from './bot_brigade_eval_attack.js';
 import { evaluateInteriorMovement } from './bot_brigade_eval_movement.js';
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 
@@ -636,6 +636,28 @@ function executeFactionDirectivesImpl(
         // Skip brigades already in column transit — re-issuing orders resets progress.
         const existingTransit = state.military.brigade_movement_state?.[brigade.id];
         if (existingTransit?.stance === 'column' && existingTransit?.status === 'in_transit') {
+            if (isActiveSectorOperationParticipant && activeOp) {
+                const objective = getSectorOffensiveCurrentObjective(activeOp, brigade.id);
+                const controller = objective
+                    ? getPoliticalControllerOSID(state, objective, reverseMap)
+                    : null;
+                recordAxisOrderGenerationDetail(activeOp, brigade.id, {
+                    turn: state.meta?.turn ?? 0,
+                    phase: activeOp.phase,
+                    location_osid: loc,
+                    objective: objective ?? null,
+                    objective_controller: controller,
+                    tactically_adjacent: objective
+                        ? getTacticalAdjacentOsids(state, loc as Osid, adjacency).includes(objective)
+                        : false,
+                    threshold: getSectorOffensiveProbeThreshold(activeOp, brigade.id),
+                    predicted_outcome: null,
+                    power_ratio: null,
+                    concentrated_outcome: null,
+                    decision: 'in_transit_skipped',
+                    issued_target_osid: existingTransit.destination_sids?.[0] ?? null,
+                });
+            }
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             continue;
         }

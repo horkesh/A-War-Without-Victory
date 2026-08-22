@@ -23,7 +23,7 @@
 
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { describe, it } from 'vitest';
+import { afterEach, describe, it } from 'vitest';
 
 import {
     areParticipantsReadyForExecution,
@@ -38,6 +38,15 @@ import {
     resolveOpeningAttackGateBrigades,
 } from '../src/sim/combat/sector_offensive_launch_helpers.js';
 import type { CorpsOperation, FormationId, GameState } from '../src/state/game_state.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
+
+function setReasonCodes(value: string | undefined): void {
+    if (value === undefined) delete process.env.AWWV_DEBUG_REASON_CODES;
+    else process.env.AWWV_DEBUG_REASON_CODES = value;
+    resetReasonCodeTopicCacheForTests();
+}
+
+afterEach(() => setReasonCodes(undefined));
 
 // ---------------------------------------------------------------------------
 // Synthetic fixture
@@ -187,6 +196,21 @@ describe('LANE-2026-05-02-IN-TRANSIT-PREDICTOR T1: in_transit toward staging cou
             },
         });
         const op = makeOp(['synth_alpha' as FormationId], { multiAxis: false });
+        op.axes = [{
+            axis_id: 'single_authored_axis',
+            name: 'Single Authored Axis',
+            assigned_brigades: ['synth_alpha' as FormationId],
+            objectives: ['op:test:objective_a'],
+            current_objective_index: 0,
+            status: 'executing',
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        }];
         assert.equal(
             areParticipantsReadyForExecution(state, 'synth_corps' as FormationId, 'TEST_FACTION' as never, op),
             true,
@@ -497,6 +521,23 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
         state.political!.political_controllers!['op:test:other_front'] = 'TEST_FACTION';
         state.political!.political_controllers!['op:test:other_enemy'] = 'RIVAL_FACTION';
         const op = makeOp(['synth_alpha' as FormationId], { multiAxis: false });
+        op.axes = [{
+            axis_id: 'single_authored_axis',
+            name: 'Single Authored Axis',
+            assigned_brigades: ['synth_alpha' as FormationId],
+            objectives: ['op:test:objective_a'],
+            current_objective_index: 0,
+            status: 'executing',
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        }];
+
+        setReasonCodes('axis_reject');
 
         assert.deepEqual(
             evaluateOpeningAttackReadiness(
@@ -507,6 +548,8 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
             ),
             { executable: false, blocker: 'zero_eligible_axis' },
         );
+        assert.equal(op.axes?.[0]?.launch_readiness_detail?.executable, false);
+        assert.equal(op.axes?.[0]?.launch_readiness_detail?.result_state, 'dead_axis');
 
         state.military.war_front_edges_osid.push({
             edge_id: 'op:test:staging_a__op:test:objective_a',
@@ -524,6 +567,8 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
             ).executable,
             true,
         );
+        assert.equal(op.axes?.[0]?.launch_readiness_detail?.executable, true);
+        assert.equal(op.axes?.[0]?.launch_readiness_detail?.result_state, 'executable');
     });
 
     it('prefers static objective neighbors over spurious live approach edges', () => {

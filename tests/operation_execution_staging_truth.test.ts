@@ -1,10 +1,19 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { evaluateSectorAttack } from '../src/sim/combat/bot_brigade_eval_attack.js';
 import type { BrigadeEvaluationContext } from '../src/sim/combat/bot_brigade_eval_types.js';
 import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
 import type { CorpsOperation, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { makeCorps, makeFormation } from './test_factories.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
+
+function setReasonCodes(value: string | undefined): void {
+    if (value === undefined) delete process.env.AWWV_DEBUG_REASON_CODES;
+    else process.env.AWWV_DEBUG_REASON_CODES = value;
+    resetReasonCodeTopicCacheForTests();
+}
+
+afterEach(() => setReasonCodes(undefined));
 
 function makeLaunchGateState(overrides: {
     personnel?: number;
@@ -197,6 +206,21 @@ describe('operation execution staging truth', () => {
             failure_count: 0,
             consecutive_failures_on_current: 0,
             sector_id: 'sector:rs_corps:0',
+            axes: [{
+                axis_id: 'main',
+                name: 'Main Axis',
+                assigned_brigades: ['b1'],
+                objectives: ['op:target:objective'],
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
         };
 
         const ctx: BrigadeEvaluationContext = {
@@ -255,6 +279,19 @@ describe('operation execution staging truth', () => {
         expect(ctx.result.attack_orders.b1).toBeUndefined();
         expect(ctx.result.column_march_orders.b1).toBeUndefined();
         expect(ctx.result.posture_orders).toContainEqual({ brigade_id: 'b1', posture: 'defend' });
+        expect(activeOp.axes![0]!.order_generation_details).toBeUndefined();
+
+        setReasonCodes('axis_reject');
+        evaluateSectorAttack(ctx);
+        expect(activeOp.axes![0]!.order_generation_details).toEqual([expect.objectContaining({
+            brigade_id: 'b1',
+            turn: 35,
+            objective: 'op:target:objective',
+            objective_controller: 'RBiH',
+            tactically_adjacent: true,
+            decision: 'direct_attack_below_threshold',
+            issued_target_osid: null,
+        })]);
     });
 
     it('plans column march to the approach destination instead of the first route step', () => {

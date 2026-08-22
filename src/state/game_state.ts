@@ -292,6 +292,19 @@ export interface OperationAxis {
      * discrimination, on the artifact rather than on stdout.
      */
     launch_blocker_detail?: AxisRejectionDetail;
+    /**
+     * Diagnostic-only snapshot of the most recent opening-attack readiness
+     * evaluation. Written only for `AWWV_DEBUG_REASON_CODES=axis_reject` and
+     * never read by engine decisions. Unlike `launch_blocker_detail`, this is
+     * retained when readiness succeeds so the launch verdict can be compared
+     * with downstream brigade-order generation from the same artifact.
+     */
+    launch_readiness_detail?: AxisLaunchReadinessDetail;
+    /**
+     * Diagnostic-only order-generation outcomes for this axis in the current
+     * turn. Written only for `AWWV_DEBUG_REASON_CODES=axis_reject`.
+     */
+    order_generation_details?: AxisOrderGenerationDetail[];
     /** Battles conducted by this axis this turn (reset each turn). */
     battles_this_turn?: number;
     /** Battles resolved against this axis's current objective this turn. */
@@ -327,6 +340,40 @@ export interface AxisRejectionDetail {
     threshold: string;
     /** One record per candidate, sorted by brigade id. */
     brigades: AxisRejectionBrigadeFact[];
+}
+
+export interface AxisLaunchReadinessDetail {
+    executable: boolean;
+    result_state: 'executable' | AxisRejectionDetail['collapsed_state'];
+    gate_adjacent: number;
+    staged_adjacent: number;
+    threshold: string;
+    brigades: AxisRejectionBrigadeFact[];
+}
+
+export interface AxisOrderGenerationDetail {
+    brigade_id: FormationId;
+    turn: number;
+    phase: CorpsOperation['phase'];
+    location_osid: string;
+    objective: string | null;
+    objective_controller: FactionId | null;
+    tactically_adjacent: boolean;
+    threshold: string | null;
+    predicted_outcome: string | null;
+    power_ratio: number | null;
+    concentrated_outcome: string | null;
+    decision:
+        | 'objective_missing_or_friendly'
+        | 'direct_attack'
+        | 'direct_attack_unavailable'
+        | 'direct_attack_below_threshold'
+        | 'direct_attack_capacity_reached'
+        | 'march_to_approach'
+        | 'attack_intermediate'
+        | 'defend_no_route_or_viable_target'
+        | 'in_transit_skipped';
+    issued_target_osid: string | null;
 }
 
 /**
