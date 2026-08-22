@@ -52,6 +52,8 @@
 
 `n234` and `n235` final saves have identical SHA-256 `AAEED1E8D0439859A7EDEDF2E667ADC24B6B511454A2E852B69B2F09A5EBEC8E`. This establishes that the retention default is behaviorally inert in that repaired run, not merely equal in matched-cell count.
 
+Provenance limitation: every retained `n230`–`n236` `run_meta.json` records `git_dirty: true`, and the reason-code environment selection was not stamped. The commit sequence and session procedure support the table's intended one-change sequence, but the retained artifacts do not independently establish the exact dirty paths or flags. Treat that attribution as session-supported, not self-contained run provenance. A clean-start rerun is required for promotion evidence.
+
 ### Late-war cascade at n236
 
 | Operation | Result | Attacks | Captured |
@@ -66,8 +68,8 @@ All five dependency checks used by the harness end HRHB: Bučovača for Mistral 
 ### Formation evidence
 
 - All six delayed formations spawned once and were present in the temporal trace.
-- `hv_112th_infantry_1995` recorded six movement-order turns, three transit turns, four movement events, eleven operation turns, and two full-stack battle hits.
-- Five formations recorded no operation membership. The operation-membership projection had a positive control, so that absence is established. Current live catalogs do not author those five into a reachable post-turn-174 operation roster; no conclusion is drawn that their movement executor is broken.
+- `hv_112th_infantry_1995` recorded six movement-order turns, three transit turns, six movement events, eleven operation turns, and four full-stack battle hits.
+- Five formations recorded no operation membership. The operation-membership projection had a positive control, so that absence is established. Four have no current authored catalog entry; `hv_7th_hgr_1995` is authored for Mistral 1, but that opportunity window closes at turn 170 before its required turn-174 spawn. None has a reachable post-turn-174 roster; no conclusion is drawn that their movement executor is broken.
 
 ### Reference-integrity evidence
 
@@ -108,4 +110,4 @@ All five dependency checks used by the harness end HRHB: Bučovača for Mistral 
 
 1. Obtain independent review of the final branch before promotion.
 2. Keep the manifest frozen until baseline ownership deliberately chooses new pins; n236 is evidence, not an automatic golden floor.
-3. Treat any proposal to add the other five delayed HV formations to operation catalogs as a separate historical/content calibration, one change and one run at a time.
+3. Treat any proposal to add the four uncatalogued delayed HV formations, or to reconcile the 7th HGR's pre-spawn Mistral 1 window, as separate historical/content calibration, one change and one run at a time.

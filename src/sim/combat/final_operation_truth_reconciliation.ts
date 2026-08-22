@@ -53,7 +53,7 @@ function uniqueActiveParticipants(
         // their own, so the sector claim says only where they are STANDING. Read
         // the loan instead: an attached reserve stays on the roster wherever it
         // is, and an unattached one does not ride along on an empty claim.
-        // Default-OFF, and on its OWN flag (AWWV_MAINSTAFF_OP_RETENTION) rather
+        // Independently gated, and on its OWN flag (AWWV_MAINSTAFF_OP_RETENTION) rather
         // than the admission flag: this half EVICTS where the admission half
         // ADMITS, and bundling opposite signs makes a cancellation read as
         // inertness. See the header note in mainstaff_op_availability_gate.ts.

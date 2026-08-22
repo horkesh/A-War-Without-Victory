@@ -1,9 +1,9 @@
 /**
- * REASON-CODE INSTRUMENTATION — one env gate, seven topics, inert by default.
+ * REASON-CODE INSTRUMENTATION — one env gate, nine topics, inert by default.
  *
  * ═══ WHAT THIS IS FOR ═══
  *
- * Six subsystems refuse things without saying which predicate refused them,
+ * Multiple subsystems refuse things without saying which predicate refused them,
  * and each refusal has cost a seat hours of reconstruction from artifacts that
  * do not carry the answer. In one case it produced a FALSE PUBLISHED FINDING:
  * a seat read `attacker_casualties` (a STACK total) against one named brigade's
@@ -51,7 +51,7 @@
  * an order the engine already fixed upstream. Reading `process.env` is a pure
  * read of process configuration and does not vary within a run.
  *
- * ═══ ONE VARIABLE, SEVEN TOPICS — AND WHY NOT SEVEN VARIABLES ═══
+ * ═══ ONE VARIABLE, NINE TOPICS — AND WHY NOT NINE VARIABLES ═══
  *
  * `mainstaff_op_availability_gate.ts` deliberately uses two separate flags,
  * because its two halves move participation in OPPOSITE directions and a
