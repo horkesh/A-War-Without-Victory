@@ -2951,6 +2951,7 @@ Per-criterion: **2, 3, 5, 6 DISCHARGED permanently** (evidence production and ex
 - Diagnostic-on n265 checked 965 traced operation axes and 181 first-execution executable axes with zero launch/order contradictions. Its injected immediate-refusal positive control was detected.
 - Removing only env-gated trace payloads makes n265/n266 final saves canonically byte-identical (SHA-256 `F5237F5F9BAF33B288F43BB7AE97F87269B2752CABC42128B6ACD9EA256F41F0`); a mutated turn is detected.
 - This is verification evidence, not a baseline refresh. `data/derived/scenario/baselines/manifest.json` remains frozen.
+- Promotion hardening n269 at clean `448f6c3ef` extends the env-gated trace with the immutable launch objective. The strengthened audit checks the threshold-sufficient brigade, turn, execution phase, launch objective, downstream objective, and issued target: 965 axes traced, 181 first-execution axes checked, zero mismatches, composite defect detected. Stripping only the three trace fields makes n269 canonically byte-identical to n266 at SHA-256 `F5237F5F9BAF33B288F43BB7AE97F87269B2752CABC42128B6ACD9EA256F41F0`.
 
 ## 2026-08-23 — HV promotion control pair (n267/n268; manifest anomaly closed)
 
