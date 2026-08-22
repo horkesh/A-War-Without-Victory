@@ -90,6 +90,8 @@ import { strictCompare } from '../../state/validateGameState.js';
  *                        joined from spawn through withdrawal.
  *  movement_reject   — item 8. Formation-specific column-order rejection reason
  *                      and routing scope, emitted on the movement report.
+ *  opportunity_roster — item 9. Why each catalog-authored brigade was admitted
+ *                       to or rejected from an opportunity operation axis.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -99,7 +101,8 @@ export type ReasonCodeTopic =
     | 'brigade_state'
     | 'formation_lifecycle'
     | 'movement_reject'
-    | 'objective_filter';
+    | 'objective_filter'
+    | 'opportunity_roster';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -110,6 +113,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'formation_refusal',
     'movement_reject',
     'objective_filter',
+    'opportunity_roster',
 ];
 
 /**

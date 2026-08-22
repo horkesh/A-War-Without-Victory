@@ -2345,6 +2345,58 @@ function validateOperationOpportunityTrace(value: unknown, path: string, errors:
             });
         }
     }
+    if ('participant_evaluations' in value && value.participant_evaluations !== undefined) {
+        if (!Array.isArray(value.participant_evaluations)) {
+            errors.push(`${path}.participant_evaluations must be an array when present`);
+        } else {
+            const validDecisions = new Set(['admitted', 'rejected']);
+            const validReasons = new Set([
+                'eligible_same_corps',
+                'eligible_roster_attachment',
+                'missing_formation',
+                'corps_mismatch_gate_disabled',
+                'corps_mismatch_not_sector_exempt',
+                'missing_elite_loan_state',
+                'unreachable_to_host_corps',
+                'ineligible_operation_formation',
+                'below_min_attack_personnel',
+                'disrupted',
+                'in_transit',
+            ]);
+            value.participant_evaluations.forEach((entry, i) => {
+                const entryPath = `${path}.participant_evaluations[${i}]`;
+                if (!isRecord(entry)) {
+                    errors.push(`${entryPath} must be an object`);
+                    return;
+                }
+                for (const field of ['axis_id', 'formation_id', 'host_corps_id'] as const) {
+                    if (!isNonEmptyString(entry[field])) {
+                        errors.push(`${entryPath}.${field} must be a non-empty string`);
+                    }
+                }
+                if (!validDecisions.has(String(entry.decision))) {
+                    errors.push(`${entryPath}.decision must be admitted or rejected`);
+                }
+                if (!validReasons.has(String(entry.reason))) {
+                    errors.push(`${entryPath}.reason must be a valid participant evaluation reason`);
+                }
+                for (const field of ['formation_corps_id', 'kind', 'status', 'movement_status'] as const) {
+                    if (entry[field] !== null && !isNonEmptyString(entry[field])) {
+                        errors.push(`${entryPath}.${field} must be null or a non-empty string`);
+                    }
+                }
+                for (const field of ['personnel', 'disrupted_turns'] as const) {
+                    if (entry[field] !== null && (
+                        typeof entry[field] !== 'number'
+                        || !Number.isFinite(entry[field])
+                        || entry[field] < 0
+                    )) {
+                        errors.push(`${entryPath}.${field} must be null or a non-negative finite number`);
+                    }
+                }
+            });
+        }
+    }
 }
 
 function validateOperationOpportunityArray(

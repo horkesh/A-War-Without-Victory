@@ -103,6 +103,19 @@ describe('operation opportunity state validation', () => {
                     acting_faction: 'RBiH',
                     reason: 'friendly_controlled_without_override',
                 }],
+                participant_evaluations: [{
+                    axis_id: 'western',
+                    formation_id: 'arbih_501_slavna',
+                    decision: 'admitted',
+                    reason: 'eligible_same_corps',
+                    host_corps_id: 'arbih_5th_corps',
+                    formation_corps_id: 'arbih_5th_corps',
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 2500,
+                    disrupted_turns: 0,
+                    movement_status: null,
+                }],
             },
         ];
 
@@ -187,6 +200,11 @@ describe('operation opportunity state validation', () => {
                     acting_faction: 'unknown',
                     reason: 'maybe',
                 }],
+                participant_evaluations: [{
+                    axis_id: '', formation_id: '', decision: 'maybe', reason: 'maybe', host_corps_id: '',
+                    formation_corps_id: 42, kind: '', status: 42, personnel: -1,
+                    disrupted_turns: 'bad', movement_status: 42,
+                }],
             },
             42,
         ];
@@ -214,6 +232,8 @@ describe('operation opportunity state validation', () => {
                 'military.operation_opportunity_traces[0].failed_required_axes must be an array when present',
                 'military.operation_opportunity_traces[0].objective_filter_rejections[0].objective_osid must be a non-empty string',
                 'military.operation_opportunity_traces[0].objective_filter_rejections[0].reason must be friendly_controlled_without_override',
+                'military.operation_opportunity_traces[0].participant_evaluations[0].decision must be admitted or rejected',
+                'military.operation_opportunity_traces[0].participant_evaluations[0].reason must be a valid participant evaluation reason',
             ]));
         }
     });

@@ -366,6 +366,8 @@ export interface OperationOpportunityTraceRow {
     readonly redirect_variant_id?: string;
     /** Env-gated (`objective_filter`); absent from default-run serialization. */
     readonly objective_filter_rejections?: readonly OperationObjectiveFilterRejection[];
+    /** Env-gated (`opportunity_roster`); includes admissions as its positive control. */
+    readonly participant_evaluations?: readonly OperationParticipantEvaluation[];
 }
 
 export interface OperationObjectiveFilterRejection {
@@ -376,12 +378,48 @@ export interface OperationObjectiveFilterRejection {
     readonly reason: 'friendly_controlled_without_override';
 }
 
+export type OperationParticipantEvaluationReason =
+    | 'eligible_same_corps'
+    | 'eligible_roster_attachment'
+    | 'missing_formation'
+    | 'corps_mismatch_gate_disabled'
+    | 'corps_mismatch_not_sector_exempt'
+    | 'missing_elite_loan_state'
+    | 'unreachable_to_host_corps'
+    | 'ineligible_operation_formation'
+    | 'below_min_attack_personnel'
+    | 'disrupted'
+    | 'in_transit';
+
+export interface OperationParticipantEvaluation {
+    readonly axis_id: string;
+    readonly formation_id: FormationId;
+    readonly decision: 'admitted' | 'rejected';
+    readonly reason: OperationParticipantEvaluationReason;
+    readonly host_corps_id: string;
+    readonly formation_corps_id: string | null;
+    readonly kind: string | null;
+    readonly status: string | null;
+    readonly personnel: number | null;
+    readonly disrupted_turns: number | null;
+    readonly movement_status: string | null;
+}
+
 function sortObjectiveFilterRejections(
     rows: readonly OperationObjectiveFilterRejection[],
 ): OperationObjectiveFilterRejection[] {
     return [...rows].sort((a, b) => {
         const axisCmp = strictCompare(a.axis_id, b.axis_id);
         return axisCmp !== 0 ? axisCmp : strictCompare(a.objective_osid, b.objective_osid);
+    });
+}
+
+function sortParticipantEvaluations(
+    rows: readonly OperationParticipantEvaluation[],
+): OperationParticipantEvaluation[] {
+    return [...rows].sort((a, b) => {
+        const axisCmp = strictCompare(a.axis_id, b.axis_id);
+        return axisCmp !== 0 ? axisCmp : strictCompare(a.formation_id, b.formation_id);
     });
 }
 
@@ -1014,6 +1052,9 @@ export function applyOpportunityDecision(
             const objectiveFilterRejections = isReasonCodeTopicEnabled('objective_filter')
                 ? [] as OperationObjectiveFilterRejection[]
                 : undefined;
+            const participantEvaluations = isReasonCodeTopicEnabled('opportunity_roster')
+                ? [] as OperationParticipantEvaluation[]
+                : undefined;
             const opName = spawnCorpsOperationFromOpportunity(
                 state,
                 turn,
@@ -1023,6 +1064,7 @@ export function applyOpportunityDecision(
                 'standard',
                 options.adjacency,
                 objectiveFilterRejections,
+                participantEvaluations,
             );
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
@@ -1042,6 +1084,9 @@ export function applyOpportunityDecision(
                 ...whenReasonCodeTopic('objective_filter', () => ({
                     objective_filter_rejections: sortObjectiveFilterRejections(objectiveFilterRejections ?? []),
                 })),
+                ...whenReasonCodeTopic('opportunity_roster', () => ({
+                    participant_evaluations: sortParticipantEvaluations(participantEvaluations ?? []),
+                })),
             }]);
             return proposal;
         }
@@ -1050,6 +1095,9 @@ export function applyOpportunityDecision(
             proposal.response_turn = turn;
             const objectiveFilterRejections = isReasonCodeTopicEnabled('objective_filter')
                 ? [] as OperationObjectiveFilterRejection[]
+                : undefined;
+            const participantEvaluations = isReasonCodeTopicEnabled('opportunity_roster')
+                ? [] as OperationParticipantEvaluation[]
                 : undefined;
             const opName = spawnCorpsOperationFromOpportunity(
                 state,
@@ -1060,6 +1108,7 @@ export function applyOpportunityDecision(
                 'minimum',
                 options.adjacency,
                 objectiveFilterRejections,
+                participantEvaluations,
             );
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
@@ -1077,6 +1126,9 @@ export function applyOpportunityDecision(
                 executed_op_name: opName ?? undefined,
                 ...whenReasonCodeTopic('objective_filter', () => ({
                     objective_filter_rejections: sortObjectiveFilterRejections(objectiveFilterRejections ?? []),
+                })),
+                ...whenReasonCodeTopic('opportunity_roster', () => ({
+                    participant_evaluations: sortParticipantEvaluations(participantEvaluations ?? []),
                 })),
             }]);
             return proposal;
@@ -1111,6 +1163,9 @@ export function applyOpportunityDecision(
             const objectiveFilterRejections = isReasonCodeTopicEnabled('objective_filter')
                 ? [] as OperationObjectiveFilterRejection[]
                 : undefined;
+            const participantEvaluations = isReasonCodeTopicEnabled('opportunity_roster')
+                ? [] as OperationParticipantEvaluation[]
+                : undefined;
             const opName = spawnCorpsOperationFromOpportunity(
                 state,
                 turn,
@@ -1120,6 +1175,7 @@ export function applyOpportunityDecision(
                 options.commitment_profile ?? 'standard',
                 options.adjacency,
                 objectiveFilterRejections,
+                participantEvaluations,
             );
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
@@ -1137,6 +1193,9 @@ export function applyOpportunityDecision(
                 executed_op_name: opName ?? undefined,
                 ...whenReasonCodeTopic('objective_filter', () => ({
                     objective_filter_rejections: sortObjectiveFilterRejections(objectiveFilterRejections ?? []),
+                })),
+                ...whenReasonCodeTopic('opportunity_roster', () => ({
+                    participant_evaluations: sortParticipantEvaluations(participantEvaluations ?? []),
                 })),
             }]);
             return proposal;
@@ -1161,6 +1220,7 @@ function spawnCorpsOperationFromOpportunity(
     commitment: 'minimum' | 'standard' | 'reinforced',
     adjacency?: Map<Osid, Osid[]>,
     objectiveFilterRejections?: OperationObjectiveFilterRejection[],
+    participantEvaluations?: OperationParticipantEvaluation[],
 ): string | null {
     const cmd = state.military.corps_command?.[def.primary_corps];
     if (!cmd) return null;
@@ -1180,7 +1240,9 @@ function spawnCorpsOperationFromOpportunity(
     const eliteLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
     for (const axis of axesIn) {
         const axisLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
-        const brigadesForAxis = selectEligibleOpportunityParticipants(state, axis, commitment, adjacency, axisLoans);
+        const brigadesForAxis = selectEligibleOpportunityParticipants(
+            state, axis, commitment, adjacency, axisLoans, participantEvaluations,
+        );
         if (brigadesForAxis.length === 0) continue;
 
         // Friendly-controller filter — mirrors triggered_operations.ts:buildOperation
@@ -1305,6 +1367,7 @@ function selectEligibleOpportunityParticipants(
     commitment: 'minimum' | 'standard' | 'reinforced',
     adjacency?: Map<Osid, Osid[]>,
     eliteLoansOut?: Array<{ brigadeId: FormationId; corpsId: string }>,
+    evaluationsOut?: OperationParticipantEvaluation[],
 ): FormationId[] {
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
@@ -1315,7 +1378,29 @@ function selectEligibleOpportunityParticipants(
 
     for (const brigadeId of axis.brigades) {
         const formation = formations[brigadeId];
-        if (!formation) continue;
+        const movementStatus = movementState[brigadeId]?.status ?? null;
+        const record = (
+            decision: OperationParticipantEvaluation['decision'],
+            reason: OperationParticipantEvaluationReason,
+        ): void => {
+            evaluationsOut?.push({
+                axis_id: axis.axis_id,
+                formation_id: brigadeId,
+                decision,
+                reason,
+                host_corps_id: axis.corps,
+                formation_corps_id: formation ? getFormationCorpsId(formation) : null,
+                kind: formation?.kind ?? null,
+                status: formation?.status ?? null,
+                personnel: formation?.personnel ?? null,
+                disrupted_turns: formation?.disrupted_turns ?? null,
+                movement_status: movementStatus,
+            });
+        };
+        if (!formation) {
+            record('rejected', 'missing_formation');
+            continue;
+        }
 
         // Sector-exempt reserves (main staff / general staff) never carry the
         // host corps' id, so this predicate alone makes every main-staff brigade
@@ -1326,16 +1411,40 @@ function selectEligibleOpportunityParticipants(
         // mainstaff_op_availability_gate.ts.
         let admittedByRosterAttachment = false;
         if (getFormationCorpsId(formation) !== axis.corps) {
-            if (!isMainStaffOpAvailabilityEnabled()) continue;
-            if (!isSectorAssignmentExemptCorpsId(getFormationCorpsId(formation))) continue;
-            if (!formation.elite_loan_state) continue; // non-elite exempt = skip
-            if (adjacency && !canEliteLoanReachCorpsTerritory(state, brigadeId, axis.corps, adjacency)) continue;
+            if (!isMainStaffOpAvailabilityEnabled()) {
+                record('rejected', 'corps_mismatch_gate_disabled');
+                continue;
+            }
+            if (!isSectorAssignmentExemptCorpsId(getFormationCorpsId(formation))) {
+                record('rejected', 'corps_mismatch_not_sector_exempt');
+                continue;
+            }
+            if (!formation.elite_loan_state) {
+                record('rejected', 'missing_elite_loan_state');
+                continue;
+            }
+            if (adjacency && !canEliteLoanReachCorpsTerritory(state, brigadeId, axis.corps, adjacency)) {
+                record('rejected', 'unreachable_to_host_corps');
+                continue;
+            }
             admittedByRosterAttachment = true;
         }
-        if (!isEligibleOperationFormation(formation)) continue;
-        if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
-        if ((formation.disrupted_turns ?? 0) > 0) continue;
-        if (movementState[brigadeId]?.status === 'in_transit') continue;
+        if (!isEligibleOperationFormation(formation)) {
+            record('rejected', 'ineligible_operation_formation');
+            continue;
+        }
+        if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) {
+            record('rejected', 'below_min_attack_personnel');
+            continue;
+        }
+        if ((formation.disrupted_turns ?? 0) > 0) {
+            record('rejected', 'disrupted');
+            continue;
+        }
+        if (movementStatus === 'in_transit') {
+            record('rejected', 'in_transit');
+            continue;
+        }
 
         if (admittedByRosterAttachment && eliteLoansOut) {
             const loanState = formation.elite_loan_state!;
@@ -1345,6 +1454,7 @@ function selectEligibleOpportunityParticipants(
         }
 
         selected.push(brigadeId);
+        record('admitted', admittedByRosterAttachment ? 'eligible_roster_attachment' : 'eligible_same_corps');
         if (selected.length >= targetCount) break;
     }
 

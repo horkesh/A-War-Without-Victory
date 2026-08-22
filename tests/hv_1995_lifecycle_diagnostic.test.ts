@@ -86,6 +86,12 @@ describe('HV 1995 lifecycle diagnostic', () => {
                 opportunity_id: 'mistral_2_95',
                 event: 'blocked',
                 failed_required_axes: [{ axis: 'staging_access', reason: 'closed' }],
+                participant_evaluations: [{
+                    axis_id: 'mistral_2_main',
+                    formation_id: lead,
+                    decision: 'admitted',
+                    reason: 'eligible_same_corps',
+                }],
             }],
             operationAars: [{
                 operation_name: 'Operation Mistral 1',
@@ -150,6 +156,8 @@ describe('HV 1995 lifecycle diagnostic', () => {
             movement_reject_projection: true,
             operation_aar_projection: true,
             opportunity_trace_projection: true,
+            opportunity_roster_projection: true,
+            opportunity_roster_admission_positive_control: true,
             turn_battle_flip_projection: true,
             weekly_operation_diagnostic_projection: false,
         });

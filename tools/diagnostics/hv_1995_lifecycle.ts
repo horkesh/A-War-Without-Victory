@@ -144,6 +144,7 @@ function analyzeCascade(artifacts: Hv1995LifecycleArtifacts) {
                 turn: typeof row.turn === 'number' ? row.turn : null,
                 event: typeof row.event === 'string' ? row.event : '',
                 failed_required_axes: records(row.failed_required_axes),
+                participant_evaluations: records(row.participant_evaluations),
             }))
             .sort((a, b) => (a.turn ?? 0) - (b.turn ?? 0) || compareText(a.event, b.event));
         const aar = artifacts.operationAars.find((row) => row.operation_name === definition.operation_name);
@@ -221,6 +222,10 @@ function analyzeCascade(artifacts: Hv1995LifecycleArtifacts) {
                 Object.prototype.hasOwnProperty.call(report, 'column_rejections')),
             operation_aar_projection: artifacts.operationAars.length > 0,
             opportunity_trace_projection: artifacts.opportunityTraces.length > 0,
+            opportunity_roster_projection: artifacts.opportunityTraces.some((row) =>
+                Object.prototype.hasOwnProperty.call(row, 'participant_evaluations')),
+            opportunity_roster_admission_positive_control: artifacts.opportunityTraces.some((row) =>
+                records(row.participant_evaluations).some((entry) => entry.decision === 'admitted')),
             turn_battle_flip_projection: turnBattleRows.some((row) => typeof row.battle.territory_flipped === 'boolean'),
             weekly_operation_diagnostic_projection: weeklyDiagnostics.length > 0,
         },

@@ -662,6 +662,7 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
         const trace = state.military.operation_opportunity_traces?.at(-1);
         expect(trace?.event).toBe('approved');
         expect(Object.prototype.hasOwnProperty.call(trace, 'objective_filter_rejections')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(trace, 'participant_evaluations')).toBe(false);
     });
 
     it('objective_filter records friendly rejections and keeps enemy objectives as a positive control', () => {
@@ -717,6 +718,67 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
             expect(op.axes).toHaveLength(1);
             expect(op.axes![0].axis_id).toBe('z_axis');
             expect(op.axes![0].objectives).toEqual(['op:cazin:cazin_3']);
+        } finally {
+            delete process.env.AWWV_DEBUG_REASON_CODES;
+            resetReasonCodeTopicCacheForTests();
+        }
+    });
+
+    it('opportunity_roster records both participant admissions and every silent rejection', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'opportunity_roster';
+        resetReasonCodeTopicCacheForTests();
+        try {
+            const state = buildStateWithControllers(175, {
+                'op:bihac:bihac_2': 'RS',
+            });
+            const formations = state.military.formations!;
+            const baseFormation = formations.arbih_5_brigade_a!;
+            formations.inactive = {
+                ...baseFormation, id: 'inactive', name: 'inactive', status: 'inactive',
+            };
+            formations.understrength = {
+                ...baseFormation, id: 'understrength', name: 'understrength', personnel: 1,
+            };
+            formations.disrupted = {
+                ...baseFormation, id: 'disrupted', name: 'disrupted', disrupted_turns: 2,
+            };
+            formations.transit = {
+                ...baseFormation, id: 'transit', name: 'transit',
+            };
+            formations.wrong_corps = {
+                ...baseFormation, id: 'wrong_corps', name: 'wrong_corps', corps_id: 'arbih_1st_corps',
+            };
+            state.military.brigade_movement_state = {
+                transit: { status: 'in_transit' },
+            } as GameState['military']['brigade_movement_state'];
+            const fixture = fixtureSana();
+            const def: OperationOpportunityDef = {
+                ...fixture,
+                axes: [{
+                    ...fixture.axes[0]!,
+                    brigades: [
+                        'missing', 'inactive', 'understrength', 'disrupted',
+                        'transit', 'wrong_corps', 'arbih_5_brigade_a',
+                    ],
+                }],
+            };
+            runOpportunityEvaluationStep(state, 175, [def]);
+            applyOpportunityDecision(
+                state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+            );
+
+            const trace = state.military.operation_opportunity_traces?.at(-1);
+            expect(trace?.participant_evaluations?.map(({ formation_id, decision, reason }) => ({
+                formation_id, decision, reason,
+            }))).toEqual([
+                { formation_id: 'arbih_5_brigade_a', decision: 'admitted', reason: 'eligible_same_corps' },
+                { formation_id: 'disrupted', decision: 'rejected', reason: 'disrupted' },
+                { formation_id: 'inactive', decision: 'rejected', reason: 'ineligible_operation_formation' },
+                { formation_id: 'missing', decision: 'rejected', reason: 'missing_formation' },
+                { formation_id: 'transit', decision: 'rejected', reason: 'in_transit' },
+                { formation_id: 'understrength', decision: 'rejected', reason: 'below_min_attack_personnel' },
+                { formation_id: 'wrong_corps', decision: 'rejected', reason: 'corps_mismatch_gate_disabled' },
+            ]);
         } finally {
             delete process.env.AWWV_DEBUG_REASON_CODES;
             resetReasonCodeTopicCacheForTests();
