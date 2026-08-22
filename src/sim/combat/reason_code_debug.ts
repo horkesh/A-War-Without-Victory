@@ -1,5 +1,5 @@
 /**
- * REASON-CODE INSTRUMENTATION — one env gate, six topics, inert by default.
+ * REASON-CODE INSTRUMENTATION — one env gate, seven topics, inert by default.
  *
  * ═══ WHAT THIS IS FOR ═══
  *
@@ -51,7 +51,7 @@
  * an order the engine already fixed upstream. Reading `process.env` is a pure
  * read of process configuration and does not vary within a run.
  *
- * ═══ ONE VARIABLE, SIX TOPICS — AND WHY NOT SIX VARIABLES ═══
+ * ═══ ONE VARIABLE, SEVEN TOPICS — AND WHY NOT SEVEN VARIABLES ═══
  *
  * `mainstaff_op_availability_gate.ts` deliberately uses two separate flags,
  * because its two halves move participation in OPPOSITE directions and a
@@ -70,7 +70,7 @@
 import { strictCompare } from '../../state/validateGameState.js';
 
 /**
- * The six refusals, one topic each.
+ * The seven diagnostic topics.
  *
  *  battle_stack      — item 1. `attacker_brigades` + `defender_contributions` on the
  *                      weekly battle entry. Answers: is this casualty figure a
@@ -85,6 +85,9 @@ import { strictCompare } from '../../state/validateGameState.js';
  *  brigade_state     — item 5. `disrupted_turns` on the brigade temporal row.
  *  objective_filter  — item 6. Which friendly-controlled opportunity objectives
  *                      were removed at the CorpsOperation spawn seam.
+ *  formation_lifecycle — item 7. Include expeditionary `hv_phantom` formations in
+ *                        the per-turn temporal stream so their live state can be
+ *                        joined from spawn through withdrawal.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -92,6 +95,7 @@ export type ReasonCodeTopic =
     | 'axis_reject'
     | 'formation_refusal'
     | 'brigade_state'
+    | 'formation_lifecycle'
     | 'objective_filter';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
@@ -99,6 +103,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'battle_power',
     'battle_stack',
     'brigade_state',
+    'formation_lifecycle',
     'formation_refusal',
     'objective_filter',
 ];

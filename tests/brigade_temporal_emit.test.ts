@@ -20,12 +20,21 @@
  *  - Test fixtures cite no faction-specific narrative; brigade IDs are arbitrary.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
 import {
     buildBrigadeTemporalRows,
     type BrigadeTemporalRow,
 } from '../src/scenario/brigade_temporal_emit.js';
 import type { GameState } from '../src/state/game_state.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
+
+function setReasonTopics(value: string | undefined): void {
+    if (value === undefined) delete process.env.AWWV_DEBUG_REASON_CODES;
+    else process.env.AWWV_DEBUG_REASON_CODES = value;
+    resetReasonCodeTopicCacheForTests();
+}
+
+afterEach(() => setReasonTopics(undefined));
 
 /** Minimal GameState shape sufficient for buildBrigadeTemporalRows. */
 function makeState(overrides: Partial<GameState['military']> = {}): GameState {
@@ -293,5 +302,26 @@ describe('LANE-A1 brigade temporal emit', () => {
         });
         const rows = buildBrigadeTemporalRows(state, 1);
         expect(rows.map((r) => r.brigade_id)).toEqual(['real_brigade']);
+    });
+
+    it('T12 formation_lifecycle — includes hv_phantom only when explicitly requested', () => {
+        const state = makeState({
+            formations: {
+                hv_wave: baseFormation('hv_wave', 'HRHB', { kind: 'hv_phantom' }) as unknown as never,
+                real_brigade: baseFormation('real_brigade', 'HRHB') as unknown as never,
+                jna_ghost: baseFormation('jna_ghost', 'RS', { kind: 'jna_phantom' }) as unknown as never,
+            },
+        });
+
+        setReasonTopics(undefined);
+        expect(buildBrigadeTemporalRows(state, 174).map((row) => row.brigade_id))
+            .toEqual(['real_brigade']);
+
+        setReasonTopics('formation_lifecycle');
+        const traced = buildBrigadeTemporalRows(state, 174);
+        expect(traced.map((row) => row.brigade_id))
+            .toEqual(['hv_wave', 'real_brigade']);
+        expect(traced.find((row) => row.brigade_id === 'hv_wave')?.kind)
+            .toBe('hv_phantom');
     });
 });

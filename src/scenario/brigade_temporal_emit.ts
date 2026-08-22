@@ -29,6 +29,8 @@
  * Scope:
  *  - Brigade-kind formations only (`kind === 'brigade'` or undefined for
  *    backward compatibility — the canonical default per FormationState).
+ *  - The default-off `formation_lifecycle` diagnostic additionally includes
+ *    `hv_phantom` formations. Default artifacts retain the original population.
  *  - Corps / militia / paramilitary / OG / corps_asset / army_hq / phantom
  *    are filtered out — they have separate lifecycles and do not belong on
  *    a "brigade" temporal log.
@@ -176,7 +178,9 @@ export function buildBrigadeTemporalRows(
         const f = formations[id] as FormationState;
         if (!f) continue;
         const kind = (f.kind ?? 'brigade') as string;
-        if (kind !== 'brigade') continue;
+        const traceExpeditionaryLifecycle =
+            kind === 'hv_phantom' && isReasonCodeTopicEnabled('formation_lifecycle');
+        if (kind !== 'brigade' && !traceExpeditionaryLifecycle) continue;
 
         const mv = movementState?.[id];
         const order = movementOrders?.[id];
