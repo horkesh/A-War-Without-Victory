@@ -39,6 +39,8 @@ import {
 } from '../src/sim/combat/sector_offensive_launch_helpers.js';
 import type { CorpsOperation, FormationId, GameState } from '../src/state/game_state.js';
 import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
+import { predictCombatOutcome } from '../src/sim/combat/combat_predictor.js';
+import type { BrigadePredictionFact } from '../src/sim/combat/axis_readiness_debug.js';
 
 function setReasonCodes(value: string | undefined): void {
     if (value === undefined) delete process.env.AWWV_DEBUG_REASON_CODES;
@@ -504,6 +506,75 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T7: stale TG anchor fallback', () => 
 });
 
 describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launch gate', () => {
+    it('uses the same contextual prediction as brigade order generation', () => {
+        const state = buildState({
+            synth_alpha: {
+                location_osid: 'op:test:staging_a',
+                personnel: 1500,
+            },
+            synth_enemy: {
+                location_osid: 'op:test:objective_a',
+                personnel: 3500,
+                faction: 'RIVAL_FACTION',
+                corps_id: 'rival_corps',
+            },
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:test:staging_a__op:test:objective_a',
+            a: 'op:test:staging_a',
+            b: 'op:test:objective_a',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        }];
+        const adjacency = buildOsidAdjacencyFromFrontEdges(state);
+        const terrainMultByOsid = { 'op:test:objective_a': 2.5 };
+        const context = {
+            reverseMap: new Map(),
+            terrainMultByOsid,
+        };
+        const direct = predictCombatOutcome(
+            state,
+            'synth_alpha' as FormationId,
+            'op:test:objective_a',
+            adjacency,
+            context.reverseMap,
+            terrainMultByOsid,
+            'attack',
+        );
+        assert.ok(direct);
+
+        const contextualFacts = { gate_adjacent: 0, staged_adjacent: 0, brigades: [] as BrigadePredictionFact[] };
+        axisHasExecutableOpeningAttack(
+            state,
+            'TEST_FACTION' as never,
+            'op:test:objective_a',
+            ['synth_alpha' as FormationId],
+            adjacency,
+            'stalemate',
+            undefined,
+            contextualFacts,
+            context,
+        );
+        assert.equal(contextualFacts.brigades[0]?.power_ratio, direct.power_ratio);
+
+        const strippedFacts = { gate_adjacent: 0, staged_adjacent: 0, brigades: [] as BrigadePredictionFact[] };
+        axisHasExecutableOpeningAttack(
+            state,
+            'TEST_FACTION' as never,
+            'op:test:objective_a',
+            ['synth_alpha' as FormationId],
+            adjacency,
+            'stalemate',
+            undefined,
+            strippedFacts,
+        );
+        assert.notEqual(
+            strippedFacts.brigades[0]?.power_ratio,
+            direct.power_ratio,
+            'positive control: stripping terrain context must change this prediction',
+        );
+    });
+
     it('does not fabricate an executable attack from ordinary sector metadata without a live contact edge', () => {
         const state = buildState({
             synth_alpha: {

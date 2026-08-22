@@ -14,7 +14,9 @@ import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
+import type { OsidEthnicComposition } from './ethnic_defense.js';
+import type { OfficerCombatLookup } from './combat_math.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import {
@@ -25,7 +27,7 @@ import {
     STACKING_DEFENDER_SUPPORT,
     VICTORY_THRESHOLD_COSTLY,
 } from './combat_math.js';
-import { predictAllAdjacentTargets, type PredictedOutcome } from './combat_predictor.js';
+import { predictAllAdjacentTargets, predictCombatOutcome, type PredictedOutcome } from './combat_predictor.js';
 import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
@@ -45,6 +47,15 @@ import { resolveTgAnchor } from './tactical_group_anchor.js';
 // `undefined` to that optional `operationalToCanonical` parameter (Map.get
 // returns undefined → null fallback). Replaces the prior placeholder cast.
 const EMPTY_REVERSE_MAP: OperationalToCanonicalReverseMap = new Map();
+
+export interface OpeningAttackPredictionContext {
+    reverseMap: OperationalToCanonicalReverseMap;
+    terrainMultByOsid: Record<string, number>;
+    supplyStateByOsid?: SupplyStateByOsidReport | null;
+    osidPopulationMap?: OsidPopulationMap | null;
+    ethnicComposition?: OsidEthnicComposition | null;
+    officerLookup?: OfficerCombatLookup;
+}
 
 export type LaunchFeasibilityBlocker =
     | 'no_enemy_objective'
@@ -654,6 +665,7 @@ export function axisHasExecutableOpeningAttack(
     // for in advance. Purely additive: when omitted, every branch below behaves
     // exactly as it does today.
     factsOut?: AxisRejectionFactsOut,
+    predictionContext?: OpeningAttackPredictionContext,
 ): boolean {
     if (typeof objective !== 'string' || objective.length === 0) return false;
     // One array serves both consumers when both are active, so the stdout probe
@@ -704,14 +716,34 @@ export function axisHasExecutableOpeningAttack(
             continue;
         }
 
-        const directObjectiveAttack = predictAllAdjacentTargets(
-            state,
-            brigadeId,
-            adjacency,
-            EMPTY_REVERSE_MAP,
-            {},
-            'attack',
-        ).find((target) => target.osid === objective);
+        const contextualPrediction = predictionContext
+            ? predictCombatOutcome(
+                state,
+                brigadeId,
+                objective,
+                adjacency,
+                predictionContext.reverseMap,
+                predictionContext.terrainMultByOsid,
+                'attack',
+                undefined,
+                predictionContext.supplyStateByOsid,
+                predictionContext.osidPopulationMap,
+                undefined,
+                predictionContext.ethnicComposition,
+                undefined,
+                predictionContext.officerLookup,
+            )
+            : null;
+        const directObjectiveAttack = predictionContext
+            ? (contextualPrediction ? { osid: objective, prediction: contextualPrediction } : undefined)
+            : predictAllAdjacentTargets(
+                state,
+                brigadeId,
+                adjacency,
+                EMPTY_REVERSE_MAP,
+                {},
+                'attack',
+            ).find((target) => target.osid === objective);
         if (!directObjectiveAttack) {
             // STATE 2 discriminator: the objective is not reachable from this
             // brigade's current position (the genuinely-marching case).
@@ -917,6 +949,7 @@ function classifyAxisOpeningAttack(
     armyHqOpId?: CorpsOperation['army_hq_op_id'],
     // TEMPORARY DIAGNOSTIC — remove with axis_readiness_debug.ts.
     debugOpName?: string,
+    predictionContext?: OpeningAttackPredictionContext,
 ): OpeningAttackReadinessResult {
     // REASON-CODE INSTRUMENTATION (topic `axis_reject`): clear any detail from a
     // PREVIOUS evaluation before this one decides anything.
@@ -1015,6 +1048,7 @@ function classifyAxisOpeningAttack(
         // TEMPORARY DIAGNOSTIC — undefined unless a caller supplies the op name.
         debugOpName === undefined ? undefined : { opName: debugOpName, axisId: axis.axis_id },
         rejectionFacts,
+        predictionContext,
     );
     if (rejectionFacts) {
         const resultState = executable
@@ -1170,6 +1204,7 @@ export function evaluateOpeningAttackReadiness(
     faction: FactionId,
     op: CorpsOperation,
     staticAdjacency?: Map<string, string[]>,
+    predictionContext?: OpeningAttackPredictionContext,
 ): OpeningAttackReadinessResult {
     const operationStaticAdjacency = op.is_pre_planned === true ? staticAdjacency : undefined;
     const adjacency = buildOsidAdjacencyFromFrontEdges(state);
@@ -1210,7 +1245,7 @@ export function evaluateOpeningAttackReadiness(
         let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
-            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, operationStaticAdjacency, op.army_hq_op_id, op.name);
+            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, operationStaticAdjacency, op.army_hq_op_id, op.name, predictionContext);
             // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts. Inert
             // unless AWWV_DEBUG_AXIS_READINESS is set; remove with that file.
             emitAxisReadinessTrace(state, corpsId, op, axis, result.executable, result.blocker);
@@ -1259,6 +1294,7 @@ export function evaluateOpeningAttackReadiness(
         threshold,
         undefined,
         singleAxisFacts,
+        predictionContext,
     );
     const representedAxis = op.axes?.[0];
     if (representedAxis) {

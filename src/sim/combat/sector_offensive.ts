@@ -130,6 +130,7 @@ import {
     resolveEquipmentClass,
     shouldStallAxisForRecentCatastrophicObjective,
 } from './sector_offensive_launch_helpers.js';
+import type { OpeningAttackPredictionContext } from './sector_offensive_launch_helpers.js';
 
 export {
     assignBrigadeRoles,
@@ -1162,6 +1163,7 @@ export function advanceSectorOffensives(
     supplyByOsid?: SupplyStateByOsidReport | null,
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
     staticAdjacency?: Map<string, string[]>,
+    openingAttackPredictionContext?: OpeningAttackPredictionContext,
 ): PreparationEvent[] {
     const prepEvents: PreparationEvent[] = [];
     const corpsCommand = state.military.corps_command;
@@ -1301,7 +1303,7 @@ export function advanceSectorOffensives(
                 op.force_launch !== true &&
                 earlyElapsed > earlyPlanDuration + PLANNING_INVALIDATION_GRACE_TURNS
             ) {
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency, openingAttackPredictionContext);
                 if (!openingReadiness.executable) {
                     beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
                     continue;
@@ -1482,7 +1484,7 @@ export function advanceSectorOffensives(
                     beginRecovery(op, turn, 'no_launch_readiness', state);
                     continue;
                 }
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency, openingAttackPredictionContext);
                 if (!forcedLaunch && !openingReadiness.executable) {
                     // stagedEarly fires via isCommittedInTransitTo when a brigade is en-route
                     // to its approach OSID but not yet settled. Its CURRENT location may not be

@@ -162,6 +162,7 @@ import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeaken
 import { buildStaticOsidAdjacency } from '../combat/sector_offensive_launch_helpers.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration — terrain cache for advance-sector-offensives
 import { buildTerrainCache } from '../combat/combat_predictor.js';
+import { buildOfficerCombatLookup } from '../combat/combat_math.js';
 import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
 import { runJNATransition } from '../early_war/jna_transition.js';
 import { injectPrePlannedOperations, injectQueuedOperation } from '../combat/pre_planned_operations.js';
@@ -1833,7 +1834,45 @@ export const warPhases: NamedPhase[] = [
                 terrainMultByOsid = buildTerrainCache(od.opData.operationalToCanonical, terrainData);
             }
             const staticAdjacency = od?.edges ? buildStaticOsidAdjacency(od.edges) : undefined;
-            const prepEvents = advanceSectorOffensives(context.state, supplyByOsid, terrainMultByOsid, staticAdjacency);
+            let openingAttackPredictionContext;
+            if (od?.opData?.operationalToCanonical) {
+                let ethnicComposition;
+                try {
+                    const ethnicityData = await loadSettlementEthnicityData();
+                    ethnicComposition = computeOsidEthnicComposition(
+                        od.opData.operationalToCanonical,
+                        ethnicityData,
+                    );
+                } catch {
+                    // Matches bot brigade order generation: ethnic context is optional.
+                }
+                openingAttackPredictionContext = {
+                    reverseMap: od.opData.operationalToCanonical,
+                    // Must match generateAllBotOrdersOsid exactly. Preparation's
+                    // separately-loaded terrain cache remains authoritative for
+                    // force-ratio preparation, but launch and brigade orders must
+                    // judge the same tactical attack with the same predictor inputs.
+                    terrainMultByOsid: buildTerrainCache(od.opData.operationalToCanonical),
+                    supplyStateByOsid: supplyByOsid,
+                    osidPopulationMap: context.input.municipalityPopulation1991
+                        ? computeOsidPopulation(
+                            od.opData.operationalToCanonical,
+                            context.input.municipalityPopulation1991,
+                        )
+                        : undefined,
+                    ethnicComposition,
+                    officerLookup: context.state.military.named_officers && context.state.military.named_officer_data
+                        ? buildOfficerCombatLookup(context.state)
+                        : undefined,
+                };
+            }
+            const prepEvents = advanceSectorOffensives(
+                context.state,
+                supplyByOsid,
+                terrainMultByOsid,
+                staticAdjacency,
+                openingAttackPredictionContext,
+            );
             if (prepEvents.length > 0) {
                 context.report.preparation_events = prepEvents;
             }
