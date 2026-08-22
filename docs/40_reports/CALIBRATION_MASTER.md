@@ -1,5 +1,11 @@
 # AWWV Calibration Master Reference
 
+## 2026-08-22 HV 1995 coupled timing+mobility candidate — **609 / 31·31; NOT ADOPTED, floor unchanged**
+
+One controlled 188-week run on `codex/hv-1995-timing-mobility` measured **609/712 matched OSIDs, 31/31 anchors**, final-state hash `260700c127941ea5` (`...w188_n227`). The tree atomically combines all six HV expeditionary spawn turns at 174 with admission of `hv_phantom` to the two live definitive-scenario movement executors. Three of six formations recorded movement; zero appeared in 637 battle records carrying full-stack instrumentation. Mistral 2 remained blocked through turn 188.
+
+**Disposition:** candidate evidence only. This does not replace the established calibration reference or authorize a manifest refresh. Full report: `docs/40_reports/implemented/20260822_HV_1995_TIMING_MOBILITY_CI_RESOLUTION.md`.
+
 ## 2026-08-12 REFERENCE CORRECTION — floor restated as **638 / 31·31**; the ENGINE DID NOT REGRESS
 
 **`op:gorazde:kolovarice` repainted RBiH → RS at oct1995 (owner-directed).** The engine is unchanged and
