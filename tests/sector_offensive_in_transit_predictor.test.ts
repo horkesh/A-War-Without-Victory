@@ -23,7 +23,7 @@
 
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { describe, it } from 'vitest';
+import { afterEach, describe, it } from 'vitest';
 
 import {
     areParticipantsReadyForExecution,
@@ -38,6 +38,17 @@ import {
     resolveOpeningAttackGateBrigades,
 } from '../src/sim/combat/sector_offensive_launch_helpers.js';
 import type { CorpsOperation, FormationId, GameState } from '../src/state/game_state.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
+import { predictCombatOutcome } from '../src/sim/combat/combat_predictor.js';
+import type { BrigadePredictionFact } from '../src/sim/combat/axis_readiness_debug.js';
+
+function setReasonCodes(value: string | undefined): void {
+    if (value === undefined) delete process.env.AWWV_DEBUG_REASON_CODES;
+    else process.env.AWWV_DEBUG_REASON_CODES = value;
+    resetReasonCodeTopicCacheForTests();
+}
+
+afterEach(() => setReasonCodes(undefined));
 
 // ---------------------------------------------------------------------------
 // Synthetic fixture
@@ -187,6 +198,21 @@ describe('LANE-2026-05-02-IN-TRANSIT-PREDICTOR T1: in_transit toward staging cou
             },
         });
         const op = makeOp(['synth_alpha' as FormationId], { multiAxis: false });
+        op.axes = [{
+            axis_id: 'single_authored_axis',
+            name: 'Single Authored Axis',
+            assigned_brigades: ['synth_alpha' as FormationId],
+            objectives: ['op:test:objective_a'],
+            current_objective_index: 0,
+            status: 'executing',
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        }];
         assert.equal(
             areParticipantsReadyForExecution(state, 'synth_corps' as FormationId, 'TEST_FACTION' as never, op),
             true,
@@ -480,6 +506,143 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T7: stale TG anchor fallback', () => 
 });
 
 describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launch gate', () => {
+    it('uses the same contextual prediction as brigade order generation', () => {
+        const state = buildState({
+            synth_alpha: {
+                location_osid: 'op:test:staging_a',
+                personnel: 1500,
+            },
+            synth_enemy: {
+                location_osid: 'op:test:objective_a',
+                personnel: 3500,
+                faction: 'RIVAL_FACTION',
+                corps_id: 'rival_corps',
+            },
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:test:staging_a__op:test:objective_a',
+            a: 'op:test:staging_a',
+            b: 'op:test:objective_a',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        }];
+        const adjacency = buildOsidAdjacencyFromFrontEdges(state);
+        const terrainMultByOsid = { 'op:test:objective_a': 2.5 };
+        const context = {
+            adjacency,
+            reverseMap: new Map(),
+            terrainMultByOsid,
+        };
+        const direct = predictCombatOutcome(
+            state,
+            'synth_alpha' as FormationId,
+            'op:test:objective_a',
+            adjacency,
+            context.reverseMap,
+            terrainMultByOsid,
+            'attack',
+        );
+        assert.ok(direct);
+
+        const contextualFacts = { gate_adjacent: 0, staged_adjacent: 0, brigades: [] as BrigadePredictionFact[] };
+        axisHasExecutableOpeningAttack(
+            state,
+            'TEST_FACTION' as never,
+            'op:test:objective_a',
+            ['synth_alpha' as FormationId],
+            adjacency,
+            'stalemate',
+            undefined,
+            contextualFacts,
+            context,
+        );
+        assert.equal(contextualFacts.brigades[0]?.power_ratio, direct.power_ratio);
+
+        const strippedFacts = { gate_adjacent: 0, staged_adjacent: 0, brigades: [] as BrigadePredictionFact[] };
+        axisHasExecutableOpeningAttack(
+            state,
+            'TEST_FACTION' as never,
+            'op:test:objective_a',
+            ['synth_alpha' as FormationId],
+            adjacency,
+            'stalemate',
+            undefined,
+            strippedFacts,
+        );
+        assert.notEqual(
+            strippedFacts.brigades[0]?.power_ratio,
+            direct.power_ratio,
+            'positive control: stripping terrain context must change this prediction',
+        );
+    });
+
+    it('does not fabricate an executable attack from ordinary sector metadata without a live contact edge', () => {
+        const state = buildState({
+            synth_alpha: {
+                location_osid: 'op:test:staging_a',
+                personnel: 1200,
+            },
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:test:other_front__op:test:other_enemy',
+            a: 'op:test:other_front',
+            b: 'op:test:other_enemy',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        }];
+        state.political!.political_controllers!['op:test:other_front'] = 'TEST_FACTION';
+        state.political!.political_controllers!['op:test:other_enemy'] = 'RIVAL_FACTION';
+        const op = makeOp(['synth_alpha' as FormationId], { multiAxis: false });
+        op.axes = [{
+            axis_id: 'single_authored_axis',
+            name: 'Single Authored Axis',
+            assigned_brigades: ['synth_alpha' as FormationId],
+            objectives: ['op:test:objective_a'],
+            current_objective_index: 0,
+            status: 'executing',
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        }];
+
+        setReasonCodes('axis_reject');
+
+        assert.deepEqual(
+            evaluateOpeningAttackReadiness(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+            ),
+            { executable: false, blocker: 'zero_eligible_axis' },
+        );
+        assert.equal(op.axes?.[0]?.launch_readiness_detail?.executable, false);
+        assert.equal(op.axes?.[0]?.launch_readiness_detail?.result_state, 'dead_axis');
+
+        state.military.war_front_edges_osid.push({
+            edge_id: 'op:test:staging_a__op:test:objective_a',
+            a: 'op:test:staging_a',
+            b: 'op:test:objective_a',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        });
+        assert.equal(
+            evaluateOpeningAttackReadiness(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+            ).executable,
+            true,
+        );
+        assert.equal(op.axes?.[0]?.launch_readiness_detail?.executable, true);
+        assert.equal(op.axes?.[0]?.launch_readiness_detail?.result_state, 'executable');
+    });
+
     it('prefers static objective neighbors over spurious live approach edges', () => {
         const state = buildState({});
         state.military.war_front_edges_osid = [
@@ -511,7 +674,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
         );
     });
 
-    it('adds accepted static approach edges when live front edges omit the objective contact', () => {
+    it('does not promote an authored static approach into a live attack edge', () => {
         const state = buildState({
             synth_alpha: {
                 location_osid: 'op:test:static_approach',
@@ -553,7 +716,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
                 openingAdjacency,
                 'op:test:objective_a',
             ),
-            1,
+            0,
         );
     });
 
@@ -605,7 +768,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
         );
     });
 
-    it('allows pre-planned operations to use static-only opening approach edges', () => {
+    it('does not launch a pre-planned operation until its authored approach is a live contact edge', () => {
         const state = buildState({
             synth_alpha: {
                 location_osid: 'op:test:static_approach',
@@ -642,7 +805,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
                 op,
                 staticAdjacency,
             ),
-            { executable: true },
+            { executable: false, blocker: 'zero_eligible_axis' },
         );
     });
 
@@ -783,11 +946,8 @@ function makeTwoAxisOp(
         current_objective_index: 0,
         faction: 'TEST_FACTION',
         corps_id: 'synth_corps',
-        // Pre-planned so the static-adjacency overlay supplies the approach edges,
-        // matching the known-executable single-axis fixture above. Without this the
-        // op is blocked on `no_approach_osid` and the veto assertions are never
-        // reached — which made an earlier draft of these tests vacuously pass under
-        // BOTH the old and new behaviour.
+        // Keep pre-planned provenance in the fixture while prepTwoAxisState supplies
+        // the live contact edges that make the opening genuinely executable.
         is_pre_planned: true,
         axes: [
             {
@@ -818,7 +978,22 @@ const TWO_AXIS_ADJACENCY = new Map<string, string[]>([
 ]);
 
 function prepTwoAxisState(state: GameState): GameState {
-    state.military.war_front_edges_osid = [];
+    state.military.war_front_edges_osid = [
+        {
+            edge_id: 'op:test:approach_a__op:test:objective_a',
+            a: 'op:test:approach_a',
+            b: 'op:test:objective_a',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        },
+        {
+            edge_id: 'op:test:approach_b__op:test:objective_b',
+            a: 'op:test:approach_b',
+            b: 'op:test:objective_b',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        },
+    ];
     state.military.corps_front_sectors = {};
     state.political!.political_controllers!['op:test:approach_a'] = 'TEST_FACTION';
     state.political!.political_controllers!['op:test:approach_b'] = 'TEST_FACTION';

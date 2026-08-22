@@ -1,8 +1,22 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 294 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 299 lessons across 9 topic files (count verified 2026-08-22).
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-08-22) — HV-1995 handoff batch (three handoff claims refuted by the successor, all three mine)
+
+### [Process] ★ THE DERIVED-SIGNAL PATTERN CONTINUED — four more costumes, and the positive-control rule that catches it was written by the session that violated it — see `docs/life_lessons/process.md`
+- Direct continuation of the 2026-08-21 ten-instance entry. New instances: a monitoring grep for `×` that **could not have matched a vitest failing-FILE marker (`❯`)** reporting "0 failures" twice on a gating suite where seven files had already failed; **one CI artifact compared, mislabelled, and generalised to sixteen** — the `-A6` window slid past the label so `activity_summary.json` was read as `final_save.json`, publishing "byte-identical, my merge added nothing" when three 188w artifacts had changed and the new actual was bit-for-bit the local branch's own hash; a stale personnel figure quoted **after** one's own merge invalidated it; and a code path named fatal without a reachability check. **The successor refuted the CI claim within a day using a fake-hash positive control — the exact discipline the handoff prompt prescribed and its author had not applied to himself.**
+
+### [Architecture] ★ RE-VIOLATION of "right PLACE is not REACHED" — a handoff named `brigade_movement.ts:167/198/219` a fatal wall; the step early-returns on every OSID scenario — see `docs/life_lessons/architecture.md`
+- Line numbers right, exclusion real, module never runs: `if (getOperationalData(context)) return;` guards its pipeline step. A `grep` hit proves a line exists, not that control reaches it. Same error as the 2026-08-14 dead-guard lesson, opposite direction.
+
+### [Platform] Windows caches a file's size/mtime while a writer holds the handle — a healthy 73-minute run looked frozen for 33 minutes — see `docs/life_lessons/platform.md`
+- File growth is not a liveness signal here; the process CPU counter is.
+
+### [Process] ★ POSITIVE PATTERN — a successor that honoured a hard constraint, refuted its brief, and reported a WORSE number without spin — see `docs/life_lessons/process.md`
+- Codex coupled the timing and mobility changes into one tree exactly as the handoff required (the constraint whose violation would have put 12,000 HV troops in western Bosnia from February 1995), independently refuted two of the handoff's factual claims, measured **609 — below the 611 floor — and declined to promote it**, recording it as candidate evidence with the manifest untouched. **Worth keeping as the model for what a handoff should produce:** the constraint was obeyed, the assertions were not.
 
 ## New Lessons (2026-08-21) — crash-recovery / attribution / belt-lane batch (ten failed premises, all caught)
 
@@ -384,6 +398,9 @@
 ---
 
 ## Recently Violated (always read these)
+
+### [Architecture] A code path verified by grep but never checked for REACHABILITY — RE-VIOLATED 2026-08-22 (2nd instance, opposite direction) — see `docs/life_lessons/architecture.md`
+- 2026-08-14: a "sole write site" guard was deleted and 21 tests stayed green because a loop-skip short-circuited before it — live-looking guard, dead in practice. 2026-08-22: the inverse — `brigade_movement.ts:167/198/219` was written into a handoff as a fatal second movement wall on the strength of three correct grep hits, but its pipeline step early-returns via `if (getOperationalData(context)) return;` on every OSID scenario. **TELL: a fatality claim whose entire support is grep output.** Walk up to the call site and read the guard on the invoking step before naming any path a cause or a blocker.
 
 ### [Testing] Builder runs only its own test file, misses a full-suite interaction — ACTIVE PATTERN (3× in 48h, 2026-06-14/15) — see `docs/life_lessons/process.md`
 - Three dispatched builders in 48h passed their OWN targeted tests but shipped a real regression visible only in the full suite: #436 (ran baseline, not full suite → missed nothing local but the golden-manifest move surfaced in CI), the SRK contain-purity (ran SRK suite → missed `contain_posture_release_laneA`), and #441 (ran its 22 digest tests → missed `ui_chronicle_operation_aar_link`, the chronicle-displacement). **Common root:** an isolated worktree builder defaults to running ONLY the file it wrote. CI caught all three (the gates are doing their job), but a RED CI round-trip per lane is the cost. **Mitigation (apply in the dispatch prompt):** for any change touching a SHARED surface (chronicle/event list, a capped/sorted/grouped render, a registry the UI/engine iterates, a flag feeding a shared predicate, an in-window persisted/logged field), explicitly instruct the builder to run the FULL relevant suite (grep tests for the host component/predicate + run all) AND, for sim-touching, `test:baselines`. Watch whether the explicit instruction reduces the RED round-trips.

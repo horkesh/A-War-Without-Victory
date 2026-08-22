@@ -13,6 +13,7 @@ import type {
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isOperationalLineFormationKind } from '../../state/formation_constants.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import {
@@ -49,7 +50,7 @@ export function getFactionBrigades(state: GameState, faction: FactionId): Format
     for (const [, f] of Object.entries(formations)) {
         if (f.faction !== faction) continue;
         if (f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!isOperationalLineFormationKind(f.kind)) continue;
         if (!f.location_osid) continue;
         // Skip brigades in column transit (they're redeploying; no new orders)
         if (!isBrigadeDeployed(state, f.id)) continue;
@@ -221,7 +222,7 @@ export function countCorpsBrigadesAtOsid(state: GameState, faction: FactionId, c
         const f = formations[fid]!;
         if (f.faction !== faction) continue;
         if (f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!isOperationalLineFormationKind(f.kind)) continue;
         if (f.location_osid !== osid) continue;
         if (corpsId) {
             // Corps-level: only count brigades from the same corps
@@ -251,7 +252,7 @@ export function buildCorpsBrigadeCountsByOsid(state: GameState, faction: Faction
         const f = formations[fid]!;
         if (f.faction !== faction) continue;
         if (f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!isOperationalLineFormationKind(f.kind)) continue;
         if (!f.location_osid) continue;
 
         const osid = f.location_osid as Osid;
@@ -309,7 +310,7 @@ export function countFactionBrigadesAtOsid(state: GameState, faction: FactionId,
         const f = formations[fid]!;
         if (f.faction !== faction) continue;
         if (f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!isOperationalLineFormationKind(f.kind)) continue;
         if (f.location_osid !== osid) continue;
         count++;
     }

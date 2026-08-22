@@ -1215,7 +1215,7 @@
           "Operation Jackal"
         ],
         "stance": "balanced",
-        "subordinate_count": 11
+        "subordinate_count": 15
       },
       "hvo_tomislavgrad": {
         "active_ogs": [],
@@ -7124,11 +7124,14 @@
         "assigned_brigade_ids": [
           "hrhb_1st_brigade_mostar",
           "hrhb_mostar_brigade",
-          "hrhb_stolac_units"
+          "hrhb_stolac_units",
+          "hv_113th_brigade_tg",
+          "hv_1st_guards_tg",
+          "hv_4th_guards_tg"
         ],
         "corps_id": "hvo_southeast_herzegovina",
-        "defensive_power": 79.1702479338843,
-        "density": 0.2727272727272727,
+        "defensive_power": 486.2181818181818,
+        "density": 0.5454545454545454,
         "edge_ids": [
           "op:capljina:capljina_2__op:capljina:tasovcici_2",
           "op:capljina:tasovcici_2__op:capljina:visici_2",
@@ -7148,13 +7151,14 @@
           "RS"
         ],
         "rear_brigade_ids": [
+          "hrhb_2nd_brigade_mostar",
           "hrhb_6th_brigade_ranko_boban",
           "hrhb_itluk_brigade",
           "hrhb_ljubuki_brigade",
           "hrhb_mario_hrka_ikota_brigade"
         ],
         "reserve_brigade_ids": [
-          "hrhb_2nd_brigade_mostar"
+          "hv_116th_brigade_tg"
         ],
         "sector_id": "sector:hvo_southeast_herzegovina:0",
         "sector_stance": "defend",
@@ -18890,7 +18894,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "reserve",
+          "role": "rear",
           "sector_id": "sector:hvo_southeast_herzegovina:0"
         },
         "cohesion": 64,
@@ -20220,7 +20224,11 @@
       "hv_113th_brigade_tg": {
         "activation_gated": false,
         "activation_turn": null,
-        "assignment": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:hvo_southeast_herzegovina:0"
+        },
         "cohesion": 85,
         "composition": {
           "aa_systems": 2,
@@ -20266,7 +20274,11 @@
       "hv_116th_brigade_tg": {
         "activation_gated": false,
         "activation_turn": null,
-        "assignment": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "reserve",
+          "sector_id": "sector:hvo_southeast_herzegovina:0"
+        },
         "cohesion": 85,
         "composition": {
           "aa_systems": 2,
@@ -20312,7 +20324,11 @@
       "hv_1st_guards_tg": {
         "activation_gated": false,
         "activation_turn": null,
-        "assignment": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:hvo_southeast_herzegovina:0"
+        },
         "cohesion": 85,
         "composition": {
           "aa_systems": 2,
@@ -20358,7 +20374,11 @@
       "hv_4th_guards_tg": {
         "activation_gated": false,
         "activation_turn": null,
-        "assignment": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:hvo_southeast_herzegovina:0"
+        },
         "cohesion": 85,
         "composition": {
           "aa_systems": 2,

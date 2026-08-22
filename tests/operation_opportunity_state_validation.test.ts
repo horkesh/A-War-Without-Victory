@@ -96,11 +96,62 @@ describe('operation opportunity state validation', () => {
                 min_optional_axes: 2,
                 executed_op_name: 'Operation Sana',
                 redirect_variant_id: 'western_axis',
+                objective_filter_rejections: [{
+                    axis_id: 'western',
+                    objective_osid: 'op:velika_kladusa:velika_kladusa_2',
+                    controller: 'RBiH',
+                    acting_faction: 'RBiH',
+                    reason: 'friendly_controlled_without_override',
+                }],
+                participant_evaluations: [{
+                    axis_id: 'western',
+                    formation_id: 'arbih_501_slavna',
+                    resolved_formation_id: 'F_RBiH_0001',
+                    decision: 'admitted',
+                    reason: 'eligible_same_corps',
+                    host_corps_id: 'arbih_5th_corps',
+                    formation_corps_id: 'arbih_5th_corps',
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 2500,
+                    disrupted_turns: 0,
+                    movement_status: null,
+                }],
             },
         ];
 
         expect(validateGameStateShape(absent).ok).toBe(true);
         expect(validateGameStateShape(withRows).ok).toBe(true);
+    });
+
+    it('accepts the live-operation commitment rejection emitted by the opportunity selector', () => {
+        const state = minimalState();
+        state.military.operation_opportunity_traces = [{
+            turn: 175,
+            opportunity_id: 'mistral_2_95',
+            event: 'eligible',
+            proposal_id: 'OPP_175_mistral_2_95',
+            failed_required_axes: [],
+            failed_optional_axes: [],
+            optional_green_count: 0,
+            min_optional_axes: 0,
+            participant_evaluations: [{
+                axis_id: 'mistral_drvar_grahovo',
+                formation_id: 'hv_4th_guards_split',
+                resolved_formation_id: 'hv_4th_guards_split',
+                decision: 'rejected',
+                reason: 'committed_to_live_operation',
+                host_corps_id: 'hvo_tomislavgrad',
+                formation_corps_id: 'hvo_tomislavgrad',
+                kind: 'brigade',
+                status: 'active',
+                personnel: 2500,
+                disrupted_turns: 0,
+                movement_status: null,
+            }],
+        }];
+
+        expect(validateGameStateShape(state).ok).toBe(true);
     });
 
     it('rejects malformed present operation opportunity lifecycle records', () => {
@@ -173,6 +224,19 @@ describe('operation opportunity state validation', () => {
                 min_optional_axes: 1.5,
                 executed_op_name: 42,
                 redirect_variant_id: '',
+                objective_filter_rejections: [{
+                    axis_id: '',
+                    objective_osid: 42,
+                    controller: 'unknown',
+                    acting_faction: 'unknown',
+                    reason: 'maybe',
+                }],
+                participant_evaluations: [{
+                    axis_id: '', formation_id: '', decision: 'maybe', reason: 'maybe', host_corps_id: '',
+                    resolved_formation_id: 42,
+                    formation_corps_id: 42, kind: '', status: 42, personnel: -1,
+                    disrupted_turns: 'bad', movement_status: 42,
+                }],
             },
             42,
         ];
@@ -198,6 +262,10 @@ describe('operation opportunity state validation', () => {
                 'military.operation_opportunity_diagnostics[0].failed_required_axes[0].axis must be a valid opportunity axis',
                 'military.operation_opportunity_traces[0].event must be a valid opportunity trace event',
                 'military.operation_opportunity_traces[0].failed_required_axes must be an array when present',
+                'military.operation_opportunity_traces[0].objective_filter_rejections[0].objective_osid must be a non-empty string',
+                'military.operation_opportunity_traces[0].objective_filter_rejections[0].reason must be friendly_controlled_without_override',
+                'military.operation_opportunity_traces[0].participant_evaluations[0].decision must be admitted or rejected',
+                'military.operation_opportunity_traces[0].participant_evaluations[0].reason must be a valid participant evaluation reason',
             ]));
         }
     });

@@ -618,6 +618,85 @@ describe('sector offensive idle recovery', () => {
         expect(op?.recovery_reason).toBe('political_blocked');
     });
 
+    it('moves a post-Washington planning operation into political recovery before launch', () => {
+        const state = {
+            schema_version: CURRENT_SCHEMA_VERSION,
+            meta: { turn: 101, phase: 'war', seed: 'post-washington-planning-block' },
+            military: {
+                formations: {
+                    arbih_4th_corps: {
+                        id: 'arbih_4th_corps', faction: 'RBiH', name: '4th Corps', created_turn: 1,
+                        status: 'active', assignment: null, kind: 'corps', personnel: 50,
+                        cohesion: 80, hq_sid: 'S1', tags: [],
+                    },
+                    arbih_bde: {
+                        ...makeBrigade('arbih_bde', 'op:jablanica:approach'),
+                        faction: 'RBiH', corps_id: 'arbih_4th_corps',
+                    },
+                },
+                war_front_edges_osid: [{
+                    edge_id: 'blocked-front',
+                    a: 'op:jablanica:approach',
+                    b: 'op:jablanica:doljani_2',
+                    side_a: 'RBiH',
+                    side_b: 'HRHB',
+                }],
+                corps_front_sectors: {
+                    arbih_sector: makeSector(
+                        'arbih_sector',
+                        'arbih_4th_corps',
+                        'RBiH',
+                        ['blocked-front'],
+                        ['op:jablanica:approach'],
+                        ['op:jablanica:doljani_2'],
+                    ),
+                },
+                corps_command: {
+                    arbih_4th_corps: {
+                        command_span: 5,
+                        subordinate_count: 1,
+                        og_slots: 1,
+                        active_ogs: [],
+                        corps_exhaustion: 0,
+                        stance: 'offensive',
+                        active_operations: [{
+                            name: 'Operacija Osvit shape',
+                            type: 'probe',
+                            phase: 'planning',
+                            started_turn: 100,
+                            phase_started_turn: 100,
+                            participating_brigades: ['arbih_bde'],
+                            objectives: ['op:jablanica:doljani_2'],
+                            current_objective_index: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            sector_id: 'arbih_sector',
+                        }],
+                    },
+                },
+            },
+            political: {
+                war_alliance_rbih_hrhb: -0.5,
+                rbih_hrhb_state: { washington_signed: true },
+                political_controllers: {
+                    'op:jablanica:approach': 'RBiH',
+                    'op:jablanica:doljani_2': 'HRHB',
+                },
+            },
+        } as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.arbih_4th_corps?.active_operations[0];
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('political_blocked');
+        expect(op?.objectives).toEqual(['op:jablanica:doljani_2']);
+    });
+
     it('never promotes a planning operation into execution when participants never reach staging', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,

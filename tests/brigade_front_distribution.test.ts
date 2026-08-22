@@ -5,6 +5,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { distributeBrigadesToFront } from '../src/sim/combat/brigade_front_distribution.js';
+import { syncSectorAssignmentsToFormations } from '../src/sim/combat/brigade_assignment.js';
 import { makeAdjacency } from './_helpers/adjacency.js';
 
 // ── Test helpers ──────────────────────────────────────────────────────────────
@@ -50,6 +51,65 @@ function makeFormation(overrides: Partial<any> = {}): any {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('distributeBrigadesToFront', () => {
+    it('distributes HV expeditionary formations across their host-corps front', () => {
+        const state = makeState({
+            hv_alpha: makeFormation({ kind: 'hv_phantom', corps_id: 'test_corps' }),
+            hv_zeta: makeFormation({ kind: 'hv_phantom', corps_id: 'test_corps' }),
+        });
+        state.political.political_controllers = {
+            'op:test:a': 'RS',
+            'op:test:b': 'RS',
+        };
+        const sectors = [makeSector({
+            assigned_brigade_ids: ['hv_alpha', 'hv_zeta'],
+            sub_segments: [{
+                sub_segment_id: 'subseg:test:0',
+                friendly_osids: ['op:test:a', 'op:test:b'],
+                enemy_osids: ['op:enemy:x'],
+                primary_brigade_ids: ['hv_alpha', 'hv_zeta'],
+                edge_ids: [],
+                length_edges: 2,
+            }],
+        })];
+        const adjacency = makeAdjacency([['op:test:a', 'op:test:b']]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        const locations = [state.military.formations.hv_alpha.location_osid, state.military.formations.hv_zeta.location_osid].sort();
+        expect(locations).toEqual(['op:test:a', 'op:test:b']);
+    });
+
+    it('synchronizes host-sector ownership onto an HV expeditionary formation', () => {
+        const formations = {
+            hv_wave: makeFormation({
+                id: 'hv_wave',
+                kind: 'hv_phantom',
+                corps_id: 'test_corps',
+                assignment: null,
+            }),
+        };
+        const sector = makeSector({
+            territory_osids: ['op:test:a'],
+            assigned_brigade_ids: ['hv_wave'],
+            sub_segments: [{
+                sub_segment_id: 'subseg:test:0',
+                friendly_osids: ['op:test:a'],
+                enemy_osids: ['op:enemy:x'],
+                primary_brigade_ids: ['hv_wave'],
+                edge_ids: [],
+                length_edges: 1,
+            }],
+        });
+
+        syncSectorAssignmentsToFormations({ [sector.sector_id]: sector }, formations, makeAdjacency([]));
+
+        expect(formations.hv_wave.assignment).toEqual({
+            kind: 'sector',
+            sector_id: 'sector:test:0',
+            role: 'front',
+        });
+    });
+
     it('keeps a fixed-home Zepa defender out of a Srebrenica-only front assignment', () => {
         const zepa = 'op:rogatica:zepa_2';
         const srebrenica = 'op:srebrenica:srebrenica_2';

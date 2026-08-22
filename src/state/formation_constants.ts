@@ -171,6 +171,18 @@ export function isEligibleOperationFormation(f: { kind?: string; status: string 
         && f.status === 'active';
 }
 
+/**
+ * Formation kinds that participate in ordinary corps line command, topology,
+ * and readiness systems. HV phantoms are temporary by lifecycle, not by combat
+ * capability; JNA phantoms remain outside these persistent corps-line systems.
+ */
+export function isOperationalLineFormationKind(kind: string | undefined): boolean {
+    return kind === 'brigade'
+        || kind === 'og'
+        || kind === 'operational_group'
+        || kind === 'hv_phantom';
+}
+
 /** Whether a brigade is eligible for reinforcement (not degraded, not forming, not enclave, not dead). */
 export function isEligibleForReinforcement(f: { kind?: string; readiness?: string; tags?: string[]; status?: string }): boolean {
     if (f.status === 'inactive') return false;

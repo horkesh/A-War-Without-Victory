@@ -103,4 +103,31 @@ describe('assertOperationLifecycle', () => {
 
         expect(assertOperationLifecycle(state)).toEqual([]);
     });
+
+    it('rejects a brigade committed to two simultaneous live operations', () => {
+        const state = makeState({
+            corps_command: {
+                corps_1: {
+                    active_operations: [makeOp({ name: 'First Op', participating_brigades: ['brig_1'] })],
+                } as CorpsCommandState,
+                corps_2: {
+                    active_operations: [makeOp({
+                        name: 'Second Op',
+                        phase: 'planning',
+                        participating_brigades: ['brig_1'],
+                    })],
+                } as CorpsCommandState,
+            },
+            formations: {
+                brig_1: { id: 'brig_1', status: 'active', faction: 'RS' },
+            },
+        });
+
+        expect(assertOperationLifecycle(state)).toContainEqual({
+            severity: 'error',
+            code: 'operation.participant_double_committed',
+            message: "corps_2 operation 'Second Op' double-commits participant brig_1 already assigned to corps_1 operation 'First Op'",
+            path: 'military.corps_command.corps_2.active_operations.0.participating_brigades.0',
+        });
+    });
 });

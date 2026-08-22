@@ -16,6 +16,13 @@ function brigade(id: string, corpsId: string, status: FormationState['status'] =
     } as FormationState;
 }
 
+function hvPhantom(id: string, corpsId: string): FormationState {
+    return {
+        ...brigade(id, corpsId),
+        kind: 'hv_phantom',
+    } as FormationState;
+}
+
 describe('corps subordinate index', () => {
     it('matches fallback subordinate ordering and returns copies', () => {
         const state = {
@@ -46,5 +53,22 @@ describe('corps subordinate index', () => {
         const firstRead = getCorpsSubordinates(state, 'corps_a', indexed);
         firstRead.pop();
         expect(getCorpsSubordinates(state, 'corps_a', indexed).map(f => f.id)).toEqual(['alpha', 'zeta']);
+    });
+
+    it('includes active HV expeditionary formations as corps subordinates', () => {
+        const state = {
+            military: {
+                formations: {
+                    local: brigade('local', 'hvo_tomislavgrad'),
+                    hv_wave: hvPhantom('hv_wave', 'hvo_tomislavgrad'),
+                },
+            },
+        } as unknown as GameState;
+
+        const indexed = buildCorpsSubordinatesByCorps(state);
+        expect(getCorpsSubordinates(state, 'hvo_tomislavgrad').map(f => f.id))
+            .toEqual(['hv_wave', 'local']);
+        expect(getCorpsSubordinates(state, 'hvo_tomislavgrad', indexed).map(f => f.id))
+            .toEqual(['hv_wave', 'local']);
     });
 });

@@ -32,6 +32,8 @@ import {
 } from '../src/sim/combat/operation_opportunities.js';
 import { reconcileFinalOperationTruth } from '../src/sim/combat/final_operation_truth_reconciliation.js';
 import {
+    isMainStaffOpAvailabilityEnabled,
+    isMainStaffOpRetentionEnabled,
     resetMainStaffOpAvailabilityOverride,
     resetMainStaffOpRetentionOverride,
     setMainStaffOpAvailabilityOverride,
@@ -205,6 +207,18 @@ function spawnFixtureOperation(state: GameState, turn: number, def: OperationOpp
 }
 
 describe('GATE 2 — opportunity roster admission for sector-exempt brigades', () => {
+    it('defaults availability ON so authored main-staff roster members are deliverable', () => {
+        const prior = process.env.AWWV_MAINSTAFF_OP_AVAILABILITY;
+        delete process.env.AWWV_MAINSTAFF_OP_AVAILABILITY;
+        resetMainStaffOpAvailabilityOverride();
+        try {
+            expect(isMainStaffOpAvailabilityEnabled()).toBe(true);
+        } finally {
+            if (prior === undefined) delete process.env.AWWV_MAINSTAFF_OP_AVAILABILITY;
+            else process.env.AWWV_MAINSTAFF_OP_AVAILABILITY = prior;
+            resetMainStaffOpAvailabilityOverride();
+        }
+    });
     it('AVAILABILITY OFF: a NAMED main-staff brigade is dropped (shipped baseline)', () => {
         setMainStaffOpAvailabilityOverride(false);
         setMainStaffOpRetentionOverride(false);
@@ -230,6 +244,47 @@ describe('GATE 2 — opportunity roster admission for sector-exempt brigades', (
         expect(loan.on_loan).toBe(true);
         expect(loan.loaned_to_corps).toBe(HOST_CORPS);
         expect(loan.loan_start_turn).toBe(175);
+    });
+
+    it('AVAILABILITY ON: a permanently degraded elite is not admitted or loaned', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.permanently_degraded = true;
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op!.axes![0].assigned_brigades).not.toContain('hvo_1st_guard_abb');
+        expect(state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('AVAILABILITY ON: a cooldown-ineligible elite is not admitted or loaned', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.last_recall_turn = 174;
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op!.axes![0].assigned_brigades).not.toContain('hvo_1st_guard_abb');
+        expect(state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('AVAILABILITY ON: an elite loaned to another corps is not admitted or reassigned', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        const loan = state.military.formations!.hvo_1st_guard_abb.elite_loan_state!;
+        loan.on_loan = true;
+        loan.loaned_to_corps = 'hvo_central_bosnia';
+        loan.loan_start_turn = 170;
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op!.axes![0].assigned_brigades).not.toContain('hvo_1st_guard_abb');
+        expect(loan.on_loan).toBe(true);
+        expect(loan.loaned_to_corps).toBe('hvo_central_bosnia');
+        expect(loan.loan_start_turn).toBe(170);
     });
 
     it('AVAILABILITY ON: admission is by ROSTER, not by exemption — a foreign REAL corps stays out', () => {
@@ -286,6 +341,83 @@ describe('GATE 2 — opportunity roster admission for sector-exempt brigades', (
         // The brigade belongs to the axis its author named, and to nothing else.
         expect(concurrent.axes[0].assigned_brigades).toEqual([]);
         expect(concurrent.participating_brigades).toEqual([]);
+    });
+
+    it('AVAILABILITY ON: an elite committed to a concurrent same-corps operation is not double-rostered', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        const loan = state.military.formations!.hvo_1st_guard_abb.elite_loan_state!;
+        loan.on_loan = true;
+        loan.loaned_to_corps = HOST_CORPS;
+        loan.loan_start_turn = 170;
+        const concurrent = {
+            name: 'Concurrent Op',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 170,
+            phase_started_turn: 170,
+            participating_brigades: ['hvo_1st_guard_abb'],
+            axes: [{
+                axis_id: 'concurrent:axis',
+                name: 'Concurrent Axis',
+                assigned_brigades: ['hvo_1st_guard_abb'],
+                objectives: ['op:kupres:bucovaca'],
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+        } as unknown as CorpsOperation;
+        state.military.corps_command![HOST_CORPS].active_operations.push(concurrent);
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op!.participating_brigades).not.toContain('hvo_1st_guard_abb');
+        expect(concurrent.participating_brigades).toEqual(['hvo_1st_guard_abb']);
+        expect(loan.loaned_to_corps).toBe(HOST_CORPS);
+        expect(loan.loan_start_turn).toBe(170);
+    });
+
+    it('does not double-roster an ordinary brigade already committed to a live operation', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        const concurrent = {
+            name: 'Concurrent Op',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 170,
+            phase_started_turn: 170,
+            participating_brigades: ['hvo_local_brigade'],
+            axes: [{
+                axis_id: 'concurrent:axis',
+                name: 'Concurrent Axis',
+                assigned_brigades: ['hvo_local_brigade'],
+                objectives: ['op:kupres:bucovaca'],
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+        } as unknown as CorpsOperation;
+        state.military.corps_command![HOST_CORPS].active_operations.push(concurrent);
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op).not.toBeNull();
+        expect(op!.participating_brigades).not.toContain('hvo_local_brigade');
+        expect(concurrent.participating_brigades).toEqual(['hvo_local_brigade']);
     });
 });
 
@@ -388,6 +520,18 @@ function participantsAfterReconcile(state: GameState): string[] {
 }
 
 describe('GATE 1 — reconciliation retention for sector-exempt brigades', () => {
+    it('defaults retention ON so loans, not sectorless parking, own participation', () => {
+        const prior = process.env.AWWV_MAINSTAFF_OP_RETENTION;
+        delete process.env.AWWV_MAINSTAFF_OP_RETENTION;
+        resetMainStaffOpRetentionOverride();
+        try {
+            expect(isMainStaffOpRetentionEnabled()).toBe(true);
+        } finally {
+            if (prior === undefined) delete process.env.AWWV_MAINSTAFF_OP_RETENTION;
+            else process.env.AWWV_MAINSTAFF_OP_RETENTION = prior;
+            resetMainStaffOpRetentionOverride();
+        }
+    });
     // Every case here drives AWWV_MAINSTAFF_OP_RETENTION and pins
     // AWWV_MAINSTAFF_OP_AVAILABILITY to the OPPOSITE value, so a passing
     // assertion cannot be produced by the admission half.

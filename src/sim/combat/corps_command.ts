@@ -123,7 +123,7 @@ export function initializeCorpsCommand(state: GameState): void {
             let subCount = 0;
             for (const fid of formationIds) {
                 const f = state.military.formations[fid];
-                if (f.corps_id === cid && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom') && f.status === 'active') {
+                if (f.corps_id === cid && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom') && f.status === 'active') {
                     subCount++;
                 }
             }
@@ -148,7 +148,7 @@ export function initializeCorpsCommand(state: GameState): void {
         let subordinateCount = 0;
         for (const fid of formationIds) {
             const f = state.military.formations[fid];
-            if (f.corps_id === cid && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom') && f.status === 'active') {
+            if (f.corps_id === cid && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom') && f.status === 'active') {
                 subordinateCount++;
             }
         }
@@ -302,7 +302,7 @@ export function applyCorpsEffects(state: GameState): void {
         const formationIds = Object.keys(state.military.formations).sort(strictCompare);
         for (const fid of formationIds) {
             const f = state.military.formations[fid];
-            if (f.corps_id !== cid || f.kind !== 'brigade' || f.status !== 'active') continue;
+            if (f.corps_id !== cid || (f.kind !== 'brigade' && f.kind !== 'hv_phantom') || f.status !== 'active') continue;
             subCount++;
 
             // Force posture override (e.g. reorganize forces defend)

@@ -467,7 +467,7 @@ function collectAdjacentCorpsSummaries(
 
     for (const formation of Object.values(formations)) {
         if (!formation || formation.status !== 'active') continue;
-        if (formation.kind !== 'brigade') continue;
+        if (formation.kind !== 'brigade' && formation.kind !== 'hv_phantom') continue;
         if (formation.faction !== faction) continue;
         if (!formation.location_osid || !neighboringOsids.has(formation.location_osid)) continue;
         const neighboringCorpsId = formation.corps_id;

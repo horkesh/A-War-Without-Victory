@@ -38,7 +38,11 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'battle_power',
     'battle_stack',
     'brigade_state',
+    'formation_lifecycle',
     'formation_refusal',
+    'movement_reject',
+    'objective_filter',
+    'opportunity_roster',
 ];
 
 function setFlag(value: string | undefined): void {
@@ -70,7 +74,11 @@ describe('reason-code gate', () => {
         expect(isReasonCodeTopicEnabled('brigade_state')).toBe(true);
         expect(isReasonCodeTopicEnabled('battle_power')).toBe(false);
         expect(isReasonCodeTopicEnabled('axis_reject')).toBe(false);
+        expect(isReasonCodeTopicEnabled('formation_lifecycle')).toBe(false);
         expect(isReasonCodeTopicEnabled('formation_refusal')).toBe(false);
+        expect(isReasonCodeTopicEnabled('movement_reject')).toBe(false);
+        expect(isReasonCodeTopicEnabled('objective_filter')).toBe(false);
+        expect(isReasonCodeTopicEnabled('opportunity_roster')).toBe(false);
     });
 
     it('accepts all and * as every topic, and tolerates whitespace and case', () => {

@@ -1,5 +1,5 @@
 /**
- * Main-staff operation availability — two feature gates, both default OFF.
+ * Main-staff operation availability — two independently measurable contracts.
  *
  * A sector-exempt corps (`EXEMPT_CORPS_IDS` in corps_front_sectors_constants.ts:
  * `arbih_general_staff`, `vrs_main_staff`, `hvo_main_staff`) is a reserve pool,
@@ -48,8 +48,10 @@
  *   AWWV_MAINSTAFF_OP_AVAILABILITY — GATE 2, ADMISSION  (isMainStaffOpAvailabilityEnabled)
  *   AWWV_MAINSTAFF_OP_RETENTION    — GATE 1, RETENTION  (isMainStaffOpRetentionEnabled)
  *
- * Both default OFF and they are INDEPENDENT: neither implies the other, so the
- * measurable configurations are OFF / GATE2-only / GATE1-only / BOTH.
+ * Both contracts now default ON: an authored reserve roster must be deliverable,
+ * and the resulting loan—not sectorless parking—must own retention. The flags
+ * remain independent so each contract can still be disabled in a controlled
+ * comparison.
  *
  * With AVAILABILITY ON:
  *   - GATE 2 admits a sector-exempt brigade that is NAMED on the axis roster and
@@ -134,9 +136,12 @@
  * byte-identical to the shipped baseline.
  */
 
-function readEnvFlag(name: 'AWWV_MAINSTAFF_OP_AVAILABILITY' | 'AWWV_MAINSTAFF_OP_RETENTION'): boolean {
+function readEnvFlag(
+    name: 'AWWV_MAINSTAFF_OP_AVAILABILITY' | 'AWWV_MAINSTAFF_OP_RETENTION',
+    defaultValue = false,
+): boolean {
     const raw = typeof process === 'undefined' ? undefined : process.env[name];
-    if (raw === undefined) return false; // default OFF — preserves shipped baseline
+    if (raw === undefined) return defaultValue;
     const normalized = raw.trim().toLowerCase();
     return normalized === '1' || normalized === 'true' || normalized === 'on' || normalized === 'yes';
 }
@@ -183,13 +188,15 @@ let _mainStaffOpAvailabilityOverride: boolean | null = null;
 
 /**
  * Whether a sector-exempt brigade NAMED on an opportunity roster is admitted to
- * the axis and loaned to the host corps. Default: FALSE (shipped baseline).
+ * the axis and loaned to the host corps. Default: TRUE — authored roster
+ * membership is the authority; explicit env/override false remains available
+ * for controlled comparisons.
  * Module-local override wins over env.
  */
 export function isMainStaffOpAvailabilityEnabled(): boolean {
     return _mainStaffOpAvailabilityOverride !== null
         ? _mainStaffOpAvailabilityOverride
-        : readEnvFlag('AWWV_MAINSTAFF_OP_AVAILABILITY');
+        : readEnvFlag('AWWV_MAINSTAFF_OP_AVAILABILITY', true);
 }
 
 /** Test/experiment hook: force the admission flag on or off, bypassing env. */
@@ -197,7 +204,7 @@ export function setMainStaffOpAvailabilityOverride(value: boolean): void {
     _mainStaffOpAvailabilityOverride = value;
 }
 
-/** Test/experiment hook: clear the admission override, reverting to env-default (OFF when unset). */
+/** Test/experiment hook: clear the admission override, reverting to env-default (ON when unset). */
 export function resetMainStaffOpAvailabilityOverride(): void {
     _mainStaffOpAvailabilityOverride = null;
 }
@@ -234,15 +241,14 @@ let _mainStaffOpRetentionOverride: boolean | null = null;
 
 /**
  * Whether reconciliation keeps a sector-exempt brigade on the roster by its LOAN
- * rather than by which corps' territory it happens to stand in. Default: FALSE
- * (shipped baseline). Independent of the admission flag — see the header note on
- * why the two halves are never switched together. Module-local override wins
- * over env.
+ * rather than by which corps' territory it happens to stand in. Default: TRUE —
+ * loan truth owns roster retention. Independent of the admission flag;
+ * module-local override wins over env.
  */
 export function isMainStaffOpRetentionEnabled(): boolean {
     return _mainStaffOpRetentionOverride !== null
         ? _mainStaffOpRetentionOverride
-        : readEnvFlag('AWWV_MAINSTAFF_OP_RETENTION');
+        : readEnvFlag('AWWV_MAINSTAFF_OP_RETENTION', true);
 }
 
 /** Test/experiment hook: force the retention flag on or off, bypassing env. */
@@ -250,7 +256,7 @@ export function setMainStaffOpRetentionOverride(value: boolean): void {
     _mainStaffOpRetentionOverride = value;
 }
 
-/** Test/experiment hook: clear the retention override, reverting to env-default (OFF when unset). */
+/** Test/experiment hook: clear the retention override, reverting to env-default (ON when unset). */
 export function resetMainStaffOpRetentionOverride(): void {
     _mainStaffOpRetentionOverride = null;
 }

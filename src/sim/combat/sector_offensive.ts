@@ -70,7 +70,7 @@ import { linkOpportunityResolutionToAAR } from './operation_opportunities.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
-import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
+import { isFriendlyFaction as isFriendlyFactionCtrl, isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition } from './operation_preparation.js';
 // ADR-0005 v2.2b #45: TG dissolution at execution→recovery. Flag-gated.
@@ -97,9 +97,10 @@ import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.j
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
-import { hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
+import { findBrigadeLiveOperationAnywhere, hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
+import { isOperationObjectiveForeignControlled } from './operation_objective_hostility.js';
 import {
     allAxesTerminal,
     assignBrigadeRoles,
@@ -129,6 +130,7 @@ import {
     resolveEquipmentClass,
     shouldStallAxisForRecentCatastrophicObjective,
 } from './sector_offensive_launch_helpers.js';
+import type { OpeningAttackPredictionContext } from './sector_offensive_launch_helpers.js';
 
 export {
     assignBrigadeRoles,
@@ -766,7 +768,7 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
     for (const bid of allBrigades) {
         const f = formations[bid];
         if (!f || f.status !== 'active') continue;
-        if ((f.kind ?? 'brigade') !== 'brigade') continue;
+        if ((f.kind ?? 'brigade') !== 'brigade' && f.kind !== 'hv_phantom') continue;
         // Line-assigned brigades should return to their assigned sector fronts via
         // brigade AI, not be force-pulled to home municipality after each operation.
         if (lineAssigned.has(bid)) continue;
@@ -908,11 +910,25 @@ function filterAxisPlanningObjectives(
 ): string[] {
     return (axis.objectives ?? []).filter((osid) => {
         const controller = getPoliticalControllerOSID(state, osid, undefined);
-        return controller !== null && controller !== faction;
+        return isOperationObjectiveForeignControlled(faction, controller);
     });
 }
 
-function reconcilePlanningObjectives(
+function pruneUnreachablePlanningObjectivePrefix(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    objectives: string[],
+    staticAdjacency?: Map<string, string[]>,
+): string[] {
+    const firstReachableIndex = objectives.findIndex((objective) =>
+        collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency).size > 0);
+    if (firstReachableIndex <= 0) return objectives;
+
+    return objectives.slice(firstReachableIndex);
+}
+
+export function reconcilePlanningObjectives(
     state: GameState,
     corpsId: FormationId,
     op: CorpsOperation,
@@ -920,26 +936,48 @@ function reconcilePlanningObjectives(
     staticAdjacency?: Map<string, string[]>,
 ): 'completed' | 'valid' | 'invalidated' {
     if (isMultiAxis(op) && op.axes) {
-        const retainedAxes: OperationAxis[] = [];
-        const retainedObjectives: string[] = [];
+        const candidates: Array<{
+            axis: OperationAxis;
+            objectives: string[];
+        }> = [];
         for (const axis of op.axes) {
-            const filteredObjectives = filterAxisPlanningObjectives(state, axis, faction);
+            const enemyObjectives = filterAxisPlanningObjectives(state, axis, faction);
+            const filteredObjectives = op.preserve_objective_sequence === true
+                ? enemyObjectives
+                : pruneUnreachablePlanningObjectivePrefix(
+                    state,
+                    corpsId,
+                    faction,
+                    enemyObjectives,
+                    staticAdjacency,
+                );
             if (filteredObjectives.length === 0) continue;
             axis.objectives = filteredObjectives;
             axis.current_objective_index = Math.min(axis.current_objective_index ?? 0, filteredObjectives.length - 1);
-            retainedAxes.push(axis);
-            retainedObjectives.push(...filteredObjectives);
+            candidates.push({
+                axis,
+                objectives: filteredObjectives,
+            });
         }
-        if (retainedAxes.length === 0) {
+        if (candidates.length === 0) {
             return (op.objectives ?? []).length > 0 ? 'completed' : 'invalidated';
         }
-        op.axes = retainedAxes;
-        op.objectives = [...new Set(retainedObjectives)].sort(strictCompare);
+        op.axes = candidates.map((candidate) => candidate.axis);
+        op.objectives = [...new Set(candidates.flatMap((candidate) => candidate.objectives))].sort(strictCompare);
     } else {
-        const filteredObjectives = (op.objectives ?? []).filter((osid) => {
-            const controller = getPoliticalControllerOSID(state, osid, undefined);
-            return controller !== null && controller !== faction;
-        });
+        const enemyObjectives = (op.objectives ?? []).filter((osid) => {
+                const controller = getPoliticalControllerOSID(state, osid, undefined);
+                return isOperationObjectiveForeignControlled(faction, controller);
+            });
+        const filteredObjectives = op.preserve_objective_sequence === true
+            ? enemyObjectives
+            : pruneUnreachablePlanningObjectivePrefix(
+                state,
+                corpsId,
+                faction,
+                enemyObjectives,
+                staticAdjacency,
+            );
         if (filteredObjectives.length === 0) {
             return (op.objectives ?? []).length > 0 ? 'completed' : 'invalidated';
         }
@@ -1125,6 +1163,7 @@ export function advanceSectorOffensives(
     supplyByOsid?: SupplyStateByOsidReport | null,
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
     staticAdjacency?: Map<string, string[]>,
+    openingAttackPredictionContext?: OpeningAttackPredictionContext,
 ): PreparationEvent[] {
     const prepEvents: PreparationEvent[] = [];
     const corpsCommand = state.military.corps_command;
@@ -1264,7 +1303,7 @@ export function advanceSectorOffensives(
                 op.force_launch !== true &&
                 earlyElapsed > earlyPlanDuration + PLANNING_INVALIDATION_GRACE_TURNS
             ) {
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency, openingAttackPredictionContext);
                 if (!openingReadiness.executable) {
                     beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
                     continue;
@@ -1376,6 +1415,14 @@ export function advanceSectorOffensives(
                 beginRecovery(op, turn, 'defender_power_too_high', state);
                 continue;
             }
+            // A foreign-controlled objective can be temporarily or permanently
+            // combat-blocked without being completed. Retain it during objective
+            // reconciliation, but never consume launch readiness or create a
+            // failed-objective cooldown while the political gate is closed.
+            if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
+                beginRecovery(op, turn, 'political_blocked', state);
+                continue;
+            }
             const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction, operationStaticAdjacency);
             if (planningObjectiveState === 'completed') {
                 beginRecovery(op, turn, 'completed', state);
@@ -1437,7 +1484,7 @@ export function advanceSectorOffensives(
                     beginRecovery(op, turn, 'no_launch_readiness', state);
                     continue;
                 }
-                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op, operationStaticAdjacency, openingAttackPredictionContext);
                 if (!forcedLaunch && !openingReadiness.executable) {
                     // stagedEarly fires via isCommittedInTransitTo when a brigade is en-route
                     // to its approach OSID but not yet settled. Its CURRENT location may not be
@@ -1948,13 +1995,15 @@ function hasOnlyPoliticallyBlockedCurrentObjectives(
             const objective = axis.objectives[axis.current_objective_index ?? 0];
             if (!objective) return false;
             const controller = politicalControllers[objective] ?? '';
-            return shouldGrazBlockAttack(state, corpsId, faction, objective, controller);
+            return shouldGrazBlockAttack(state, corpsId, faction, objective, controller)
+                || isRbihHrhbCombatBlocked(state, faction, controller);
         });
     }
     const objective = op.objectives?.[op.current_objective_index ?? 0];
     if (!objective) return false;
     const controller = politicalControllers[objective] ?? '';
-    return shouldGrazBlockAttack(state, corpsId, faction, objective, controller);
+    return shouldGrazBlockAttack(state, corpsId, faction, objective, controller)
+        || isRbihHrhbCombatBlocked(state, faction, controller);
 }
 
 /** Collect friendly OSIDs adjacent to a target objective for attack detection. */
@@ -2683,6 +2732,8 @@ export function evaluateOperationProgress(
                         const subordinates = getCorpsSubordinates(state, corps.id);
                         const replacement = subordinates.find(s =>
                             !op.participating_brigades.includes(s.id) &&
+                            !updatedParticipants.includes(s.id) &&
+                            findBrigadeLiveOperationAnywhere(state, s.id) === null &&
                             (s.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= PERSONNEL_HEALTHY_THRESHOLD &&
                             (s.cohesion ?? 60) >= COHESION_HEALTHY_THRESHOLD
                         );

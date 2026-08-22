@@ -8,10 +8,10 @@
 - Topic archives: [QA gates](napkin/qa_gates.md), [unreported sparse truth](napkin/unreported.md), [map counters](napkin/map_counters.md), [release process](napkin/release_process.md), [engine runtime](napkin/engine_runtime.md), [Warroom/legacy](napkin/warroom_and_legacy.md).
 
 ## Current Release State
-1. **[2026-08-22] HV 1995 wave: history merged, timing HELD, movement STILL BROKEN — read the handoff first**
-   Do instead: read `docs/40_reports/20260822_HV_1995_WAVE_HANDOFF.md` before touching `HV_PHANTOM_DEFS_1995`, `hv_phantom` movement, or the golden manifest. Merged `0fd09c19f` (history corrections, 611, zero cells). Held unmerged: `lane/hv-1995-spawn-timing` @ `3b40d1619` (+16, 611→627) — a calibration decision, not a technical one. **The movement fix and the timing change MUST land in the same tree**: legs at spawn_turn 150 = 12,000 HV troops in western Bosnia from February 1995, through Srebrenica and Storm.
-2. **[2026-08-22] CI red is PRE-EXISTING and the golden manifest is BLOCKED on an unresolved anomaly**
-   Do instead: treat run `32532844577` as byte-identical to `32050627175` (2026-08-17) — same 16 mismatches, same hash pairs. **Do NOT refresh `data/derived/scenario/baselines/manifest.json` pins** until this is settled: the merge deletes two brigades from `apr1992_definitive_188w` and the local `final_save.json` hash moved, but CI's `actual` did not, and the workflow step has no caching.
+1. **[2026-08-22] HV 1995 timing+mobility is one atomic candidate, and its first 188w result got worse**
+   Do instead: keep all six defs at turn 174 in the same tree as both live T3 executor changes (`osid_column_movement` and `brigade_movement_orders`); never land legs with turn 150. The controlled combined run `...n227` scored **609/712, 31/31 anchors**: 3/6 wave formations recorded movement, 0 appeared in 637 full-stack battle records, and Mistral 2 stayed blocked through turn 188. Treat this as an engine-fix candidate with unresolved calibration/mechanism evidence, not a +16 lane.
+2. **[2026-08-22] The CI/manifest anomaly was a false comparison; keep pins untouched until deliberate reconciliation**
+   Do instead: compare actual hash values, not failure counts. Runs `32532844577` and `32050627175` both report 16 mismatches, but three 188w actual hashes changed (final save, run summary, weekly report); the newer CI final-save actual matches the post-history local hash. CI did exercise the merge. The workflow caches npm dependencies only. **Do not refresh `manifest.json` opportunistically**; the current task explicitly forbids it and the candidate run is 609/712.
 3. **[2026-08-15] R7 is the current 1.0 critical path; Phase 1.2 is closed**
    Do instead: execute R7 Phase 2 officer/OOB provenance, then audio, English accessibility/readability, opening screens, and packaged proof; continue to R8/R9. D-topology is post-1.0/reserved.
 4. **[2026-08-15] Retain collapse v3 selection plus reversible D-shape**

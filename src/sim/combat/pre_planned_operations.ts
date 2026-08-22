@@ -26,7 +26,11 @@ import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
-import { canEliteLoanReachCorpsTerritory, deployEliteLoan } from './army_reserve_system.js';
+import {
+    canEliteLoanReachCorpsTerritory,
+    deployEliteLoan,
+    isEliteAvailableForLoan,
+} from './army_reserve_system.js';
 import {
     validateOpAtInjection,
     collectOpInjectionWarnings,
@@ -43,6 +47,8 @@ import {
     ensureHistoricalOperationAuthorizationReview,
     getAcceptedHistoricalOperationAuthorizationTurn,
 } from './historical_operation_authorization.js';
+import { resolveOperationFormation } from './operation_formation_resolver.js';
+import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -1009,18 +1015,20 @@ function buildAxesFromDef(
 
     const movementState = state.military.brigade_movement_state ?? {};
     for (const axisDef of def.axes) {
-        const axisBrigades = axisDef.brigades.filter((fid) => {
-            const formation = formations[fid];
-            if (!formation) return false;
-            if (!isEligibleOperationFormation(formation)) return false;
+        const axisBrigades = axisDef.brigades.flatMap((authoredFormationId) => {
+            const resolved = resolveOperationFormation(formations, authoredFormationId);
+            const fid = resolved.formation_id;
+            const formation = resolved.formation;
+            if (!fid || !formation) return [];
+            if (!isEligibleOperationFormation(formation)) return [];
             // Exclude combat-ineffective brigades — they pass isEligibleOperationFormation
             // (which only checks kind/status) but will fail at execution, causing zero
             // eligible attackers per turn.
-            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
-            if ((formation.disrupted_turns ?? 0) > 0) return false;
+            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return [];
+            if ((formation.disrupted_turns ?? 0) > 0) return [];
             // Exclude brigades currently in column-march transit — they are already
             // marching somewhere else and contribute zero eligible attackers until they arrive.
-            if (movementState[fid]?.status === 'in_transit') return false;
+            if (movementState[fid]?.status === 'in_transit') return [];
             if (
                 !isForwardDeployedOnAxis(formation, axisDef)
                 && !canReachAxisStaging(
@@ -1031,29 +1039,27 @@ function buildAxesFromDef(
                     adjacency,
                     def.planning_duration != null ? Math.max(0, def.planning_duration - 1) : undefined,
                 )
-            ) return false;
+            ) return [];
             // Exempt-corps brigades (e.g. General Staff elites) are allowed
             // if explicitly named in a pre-planned op — they get an elite loan
             // to the operation's corps at injection time.
             const corpsId = getFormationCorpsId(formation);
             if (isSectorAssignmentExemptCorpsId(corpsId)) {
-                if (!formation.elite_loan_state) return false; // non-elite exempt = skip
-                if (adjacency && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)) return false;
-                // Only schedule a new loan if not already loaned to this corps
-                // (e.g. a probe may have already loaned the brigade at the same turn).
+                if (!formation.elite_loan_state) return []; // non-elite exempt = skip
                 const ls = formation.elite_loan_state;
-                if (!ls.on_loan || ls.loaned_to_corps !== def.corps) {
-                    eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
-                }
+                if (ls.on_loan) return [];
+                if (!isEliteAvailableForLoan(formation, state.meta.turn)) return [];
+                if (adjacency && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)) return [];
+                eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
             }
-            return true;
+            return [fid];
         });
 
         if (axisBrigades.length === 0) continue;
 
         const axisObjectives = axisDef.objectives.filter((osid) => {
             const controller = getPoliticalControllerOSID(state, osid, undefined);
-            return controller !== null && controller !== def.faction;
+            return isOperationObjectiveHostile(state, def.faction, controller);
         });
 
         if (axisObjectives.length === 0) continue;

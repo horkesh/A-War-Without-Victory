@@ -14,6 +14,7 @@ import { computeLocalFrontDefensivePower } from './local_front_defense.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isOperationalLineFormationKind } from '../../state/formation_constants.js';
 import type { Osid } from './osid_adjacency.js';
 import {
     MAX_SECTOR_BRIGADES,
@@ -62,7 +63,7 @@ export interface SectorFormationScanIndex {
 function isActiveCombatFormation(formation: SectorTopologyWorkingFormation | undefined): formation is SectorTopologyWorkingFormation {
     return !!formation
         && formation.status === 'active'
-        && (formation.kind === 'brigade' || formation.kind === 'og' || formation.kind === 'operational_group');
+        && isOperationalLineFormationKind(formation.kind);
 }
 
 export function buildActiveCombatFormationScanIds(

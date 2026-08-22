@@ -4447,3 +4447,9 @@ Phrases such as `both sides` and `all sides` can hide materially different actor
 Runtime historical and counterfactual prose is not confined to JSON. TypeScript read models, TSX presentation components, and Markdown ghost entries can carry player-facing claims, so a diagnostic that hard-codes every text claim as uncited creates a queue that authors cannot honestly close.
 
 **Reusable rule:** permit bounded, machine-readable provenance at the start of an inventoried text file (`historical_source`, resolved `source_tier`, and `source_note`), exclude those metadata lines from claim scanning, and apply the metadata to every claim in that file. Use `design_counterfactual` only for prose derived from explicit live-run contracts; adjudicated historical assertions retain their tribunal/UN source class. File-level metadata does not rescue an overclaim: remove unit, equipment, quotation, or causal specificity that the cited record does not establish, then describe the remaining claim boundary in the note. Keep a global zero-unresolved-player-facing regression so provenance debt cannot silently return.
+
+## 2026-08-22 - Authored formation identity and live registry identity are separate engine concepts
+
+Recruitment may preserve a historical OOB identity in `oob:<authored id>` while assigning a synthetic live formation key. Any catalog that looks up only `formations[authoredId]` can silently omit a real formation even when the enclosing operation succeeds, as Farz 95 did before the shared resolver.
+
+**Reusable rule:** operation catalogs author historical identity; execution consumes live identity. Prefer an exact live key, otherwise resolve exactly one deterministically sorted OOB-tag match, and reject ambiguity. Validation and execution must share that resolver. Diagnose warning-time identity with temporal evidence: a final registry can make a pre-spawn warning look false, while a completed AAR can conceal an omitted participant.

@@ -287,6 +287,8 @@
     "map:validate:operational-geometry": "tsx scripts/map/validate_operational_settlements_geometry.ts",
     "audit:mun1990:zero": "tsx scripts/audits/list_zero_settlement_municipalities_1990.ts",
     "audit:breza:trace": "tsx scripts/audits/trace_breza_presence_and_mapping.ts",
+    "diagnose:hv1995": "tsx tools/diagnostics/hv_1995_lifecycle.ts",
+    "diagnose:operation-commitments": "tsx tools/diagnostics/operation_commitment_audit.ts",
     "audit:settlementNames:feasibility": "tsx scripts/audits/scan_settlement_name_sources.ts",
     "audit:settlements:missingTargets": "tsx scripts/audits/find_missing_settlements_by_municipality.ts",
     "map:importMissingSettlements": "tsx scripts/map/import_missing_settlements_from_donor.ts",

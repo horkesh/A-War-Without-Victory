@@ -14,7 +14,9 @@ import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
+import type { OsidEthnicComposition } from './ethnic_defense.js';
+import type { OfficerCombatLookup } from './combat_math.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import {
@@ -25,7 +27,7 @@ import {
     STACKING_DEFENDER_SUPPORT,
     VICTORY_THRESHOLD_COSTLY,
 } from './combat_math.js';
-import { predictAllAdjacentTargets, type PredictedOutcome } from './combat_predictor.js';
+import { predictAllAdjacentTargets, predictCombatOutcome, type PredictedOutcome } from './combat_predictor.js';
 import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
@@ -45,6 +47,17 @@ import { resolveTgAnchor } from './tactical_group_anchor.js';
 // `undefined` to that optional `operationalToCanonical` parameter (Map.get
 // returns undefined → null fallback). Replaces the prior placeholder cast.
 const EMPTY_REVERSE_MAP: OperationalToCanonicalReverseMap = new Map();
+
+export interface OpeningAttackPredictionContext {
+    /** Full tactical graph used by brigade order generation and reserve BFS. */
+    adjacency: Map<string, string[]>;
+    reverseMap: OperationalToCanonicalReverseMap;
+    terrainMultByOsid: Record<string, number>;
+    supplyStateByOsid?: SupplyStateByOsidReport | null;
+    osidPopulationMap?: OsidPopulationMap | null;
+    ethnicComposition?: OsidEthnicComposition | null;
+    officerLookup?: OfficerCombatLookup;
+}
 
 export type LaunchFeasibilityBlocker =
     | 'no_enemy_objective'
@@ -445,43 +458,19 @@ export function collectObjectiveApproachOsids(
     return staticApproachOsids;
 }
 
-function addUndirectedAdjacencyEdge(
-    adjacency: Map<string, string[]>,
-    a: string,
-    b: string,
-): void {
-    const addOneWay = (from: string, to: string): void => {
-        const existing = adjacency.get(from) ?? [];
-        if (existing.includes(to)) return;
-        adjacency.set(from, [...existing, to].sort(strictCompare));
-    };
-    addOneWay(a, b);
-    addOneWay(b, a);
-}
-
 export function buildOpeningAttackAdjacency(
-    state: GameState,
-    corpsId: FormationId,
-    faction: FactionId,
-    objective: string,
+    _state: GameState,
+    _corpsId: FormationId,
+    _faction: FactionId,
+    _objective: string,
     liveAdjacency: Map<string, string[]>,
-    staticAdjacency?: Map<string, string[]>,
+    _staticAdjacency?: Map<string, string[]>,
 ): Map<string, string[]> {
-    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency);
-    if (approachOsids.size === 0) return liveAdjacency;
-
-    const liveAdjacent = objectiveAdjacentOsids(liveAdjacency, objective);
-    const missingApproach = [...approachOsids].some((approach) => !liveAdjacent.has(approach));
-    if (!missingApproach) return liveAdjacency;
-
-    const merged = new Map<string, string[]>();
-    for (const [osid, neighbors] of liveAdjacency) {
-        merged.set(osid, [...neighbors].sort(strictCompare));
-    }
-    for (const approach of [...approachOsids].sort(strictCompare)) {
-        addUndirectedAdjacencyEdge(merged, objective, approach);
-    }
-    return merged;
+    // Launch must be proven against the same live contact graph consumed by
+    // brigade attack-order generation. Authored/static and sector-derived
+    // approaches remain valid staging and routing hints, but neither is an
+    // executable combat edge until the live front graph contains it.
+    return liveAdjacency;
 }
 
 // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: shared predicate.
@@ -678,6 +667,7 @@ export function axisHasExecutableOpeningAttack(
     // for in advance. Purely additive: when omitted, every branch below behaves
     // exactly as it does today.
     factsOut?: AxisRejectionFactsOut,
+    predictionContext?: OpeningAttackPredictionContext,
 ): boolean {
     if (typeof objective !== 'string' || objective.length === 0) return false;
     // One array serves both consumers when both are active, so the stdout probe
@@ -728,14 +718,34 @@ export function axisHasExecutableOpeningAttack(
             continue;
         }
 
-        const directObjectiveAttack = predictAllAdjacentTargets(
-            state,
-            brigadeId,
-            adjacency,
-            EMPTY_REVERSE_MAP,
-            {},
-            'attack',
-        ).find((target) => target.osid === objective);
+        const contextualPrediction = predictionContext
+            ? predictCombatOutcome(
+                state,
+                brigadeId,
+                objective,
+                predictionContext.adjacency,
+                predictionContext.reverseMap,
+                predictionContext.terrainMultByOsid,
+                'attack',
+                undefined,
+                predictionContext.supplyStateByOsid,
+                predictionContext.osidPopulationMap,
+                undefined,
+                predictionContext.ethnicComposition,
+                undefined,
+                predictionContext.officerLookup,
+            )
+            : null;
+        const directObjectiveAttack = predictionContext
+            ? (contextualPrediction ? { osid: objective, prediction: contextualPrediction } : undefined)
+            : predictAllAdjacentTargets(
+                state,
+                brigadeId,
+                adjacency,
+                EMPTY_REVERSE_MAP,
+                {},
+                'attack',
+            ).find((target) => target.osid === objective);
         if (!directObjectiveAttack) {
             // STATE 2 discriminator: the objective is not reachable from this
             // brigade's current position (the genuinely-marching case).
@@ -861,7 +871,7 @@ export function hasRecentCatastrophicObjectiveMemory(
     for (const formationId of Object.keys(formations).sort(strictCompare)) {
         const formation = formations[formationId];
         if (!formation || formation.faction !== faction || formation.corps_id !== corpsId) continue;
-        if ((formation.kind ?? 'brigade') !== 'brigade') continue;
+        if ((formation.kind ?? 'brigade') !== 'brigade' && formation.kind !== 'hv_phantom') continue;
         const engagements = formation.brigade_history?.engagements ?? [];
         for (const engagement of engagements) {
             if (engagement.role !== 'attacker') continue;
@@ -941,6 +951,7 @@ function classifyAxisOpeningAttack(
     armyHqOpId?: CorpsOperation['army_hq_op_id'],
     // TEMPORARY DIAGNOSTIC — remove with axis_readiness_debug.ts.
     debugOpName?: string,
+    predictionContext?: OpeningAttackPredictionContext,
 ): OpeningAttackReadinessResult {
     // REASON-CODE INSTRUMENTATION (topic `axis_reject`): clear any detail from a
     // PREVIOUS evaluation before this one decides anything.
@@ -957,6 +968,7 @@ function classifyAxisOpeningAttack(
     // Unconditional and ungated: deleting an absent key is a no-op, so on a
     // default run — where the key is never written — this changes nothing.
     delete axis.launch_blocker_detail;
+    delete axis.launch_readiness_detail;
     const objective = axis.objectives[axis.current_objective_index ?? 0];
     if (typeof objective !== 'string' || objective.length === 0) {
         axis.launch_blocker = 'zero_eligible_axis';
@@ -1028,7 +1040,7 @@ function classifyAxisOpeningAttack(
         isReasonCodeTopicEnabled('axis_reject')
             ? { gate_adjacent: 0, staged_adjacent: 0, brigades: [] }
             : undefined;
-    if (!axisHasExecutableOpeningAttack(
+    const executable = axisHasExecutableOpeningAttack(
         state,
         faction,
         objective,
@@ -1038,7 +1050,37 @@ function classifyAxisOpeningAttack(
         // TEMPORARY DIAGNOSTIC — undefined unless a caller supplies the op name.
         debugOpName === undefined ? undefined : { opName: debugOpName, axisId: axis.axis_id },
         rejectionFacts,
-    )) {
+        predictionContext,
+    );
+    if (rejectionFacts) {
+        const resultState = executable
+            ? 'executable'
+            : (rejectionFacts.gate_adjacent <= 0
+                ? 'dead_axis'
+                : (rejectionFacts.brigades.some((b) => b.found_in_predictor === true)
+                    ? 'present_too_weak'
+                    : 'not_reachable_from_position'));
+        axis.launch_readiness_detail = {
+            executable,
+            result_state: resultState,
+            objective,
+            gate_adjacent: rejectionFacts.gate_adjacent,
+            staged_adjacent: rejectionFacts.staged_adjacent,
+            threshold,
+            brigades: [...rejectionFacts.brigades]
+                .sort((a, b) => strictCompare(a.id, b.id))
+                .map((f) => ({
+                    id: f.id,
+                    considered: f.considered,
+                    skip_reason: f.skip_reason ?? null,
+                    found_in_predictor: f.found_in_predictor ?? null,
+                    predicted_outcome: f.predicted_outcome ?? null,
+                    power_ratio: f.power_ratio ?? null,
+                    concentrated_outcome: f.concentrated_outcome ?? null,
+                })),
+        };
+    }
+    if (!executable) {
         axis.launch_blocker = 'zero_eligible_axis';
         // REASON-CODE INSTRUMENTATION (topic `axis_reject`) — record WHICH predicate
         // refused, not merely that all of them did. Written after `launch_blocker` so
@@ -1049,11 +1091,9 @@ function classifyAxisOpeningAttack(
         // an ordering promise from a caller.
         if (rejectionFacts) {
             axis.launch_blocker_detail = {
-                collapsed_state: rejectionFacts.gate_adjacent <= 0
-                    ? 'dead_axis'
-                    : (rejectionFacts.brigades.some((b) => b.found_in_predictor === true)
-                        ? 'present_too_weak'
-                        : 'not_reachable_from_position'),
+                collapsed_state: axis.launch_readiness_detail?.result_state === 'executable'
+                    ? 'present_too_weak'
+                    : (axis.launch_readiness_detail?.result_state ?? 'dead_axis'),
                 gate_adjacent: rejectionFacts.gate_adjacent,
                 staged_adjacent: rejectionFacts.staged_adjacent,
                 threshold,
@@ -1167,6 +1207,7 @@ export function evaluateOpeningAttackReadiness(
     faction: FactionId,
     op: CorpsOperation,
     staticAdjacency?: Map<string, string[]>,
+    predictionContext?: OpeningAttackPredictionContext,
 ): OpeningAttackReadinessResult {
     const operationStaticAdjacency = op.is_pre_planned === true ? staticAdjacency : undefined;
     const adjacency = buildOsidAdjacencyFromFrontEdges(state);
@@ -1207,7 +1248,7 @@ export function evaluateOpeningAttackReadiness(
         let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
-            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, operationStaticAdjacency, op.army_hq_op_id, op.name);
+            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, operationStaticAdjacency, op.army_hq_op_id, op.name, predictionContext);
             // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts. Inert
             // unless AWWV_DEBUG_AXIS_READINESS is set; remove with that file.
             emitAxisReadinessTrace(state, corpsId, op, axis, result.executable, result.blocker);
@@ -1243,14 +1284,53 @@ export function evaluateOpeningAttackReadiness(
         adjacency,
         operationStaticAdjacency,
     );
-    return axisHasExecutableOpeningAttack(
+    const singleAxisFacts: AxisRejectionFactsOut | undefined =
+        isReasonCodeTopicEnabled('axis_reject')
+            ? { gate_adjacent: 0, staged_adjacent: 0, brigades: [] }
+            : undefined;
+    const singleAxisExecutable = axisHasExecutableOpeningAttack(
         state,
         faction,
         objective,
         op.participating_brigades ?? [],
         openingAttackAdjacency,
         threshold,
-    )
+        undefined,
+        singleAxisFacts,
+        predictionContext,
+    );
+    const representedAxis = op.axes?.[0];
+    if (representedAxis) {
+        delete representedAxis.launch_readiness_detail;
+        if (singleAxisFacts) {
+            representedAxis.launch_readiness_detail = {
+                executable: singleAxisExecutable,
+                result_state: singleAxisExecutable
+                    ? 'executable'
+                    : (singleAxisFacts.gate_adjacent <= 0
+                        ? 'dead_axis'
+                        : (singleAxisFacts.brigades.some((b) => b.found_in_predictor === true)
+                            ? 'present_too_weak'
+                            : 'not_reachable_from_position')),
+                objective,
+                gate_adjacent: singleAxisFacts.gate_adjacent,
+                staged_adjacent: singleAxisFacts.staged_adjacent,
+                threshold,
+                brigades: [...singleAxisFacts.brigades]
+                    .sort((a, b) => strictCompare(a.id, b.id))
+                    .map((fact) => ({
+                        id: fact.id,
+                        considered: fact.considered,
+                        skip_reason: fact.skip_reason ?? null,
+                        found_in_predictor: fact.found_in_predictor ?? null,
+                        predicted_outcome: fact.predicted_outcome ?? null,
+                        power_ratio: fact.power_ratio ?? null,
+                        concentrated_outcome: fact.concentrated_outcome ?? null,
+                    })),
+            };
+        }
+    }
+    return singleAxisExecutable
         ? { executable: true }
         : { executable: false, blocker: 'zero_eligible_axis' };
 }

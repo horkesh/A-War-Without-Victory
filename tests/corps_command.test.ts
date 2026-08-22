@@ -81,6 +81,19 @@ describe('corps command - initializeCorpsCommand', () => {
         expect(state.military.corps_command!['rs-corps-1'].active_ogs).toEqual([]);
         expect(state.military.corps_command!['rs-corps-1'].corps_exhaustion).toBe(0);
     });
+
+    it('counts active HV expeditionary formations under their host corps', () => {
+        const state = makeCorpsState();
+        state.military.formations.hv_wave = {
+            ...makeFormation('hv_wave', 'HRHB', 'S1', 2400),
+            kind: 'hv_phantom',
+            corps_id: 'rs-corps-1',
+        } as FormationState;
+
+        initializeCorpsCommand(state);
+
+        expect(state.military.corps_command!['rs-corps-1'].subordinate_count).toBe(3);
+    });
 });
 
 describe('corps command - getEffectiveCorpsStance', () => {
@@ -125,6 +138,25 @@ describe('corps command - applyCorpsEffects', () => {
         // Reorganize adds +2 cohesion recovery
         expect(state.military.formations['rs-brig-1'].cohesion).toBe(52);
         expect(state.military.formations['rs-brig-2'].cohesion).toBe(52);
+    });
+
+    it('applies host-corps stance effects to HV expeditionary formations', () => {
+        const state = makeCorpsState();
+        state.military.formations.hv_wave = {
+            ...makeFormation('hv_wave', 'HRHB', 'S1', 2400),
+            kind: 'hv_phantom',
+            corps_id: 'rs-corps-1',
+            posture: 'attack',
+            cohesion: 50,
+        } as FormationState;
+        initializeCorpsCommand(state);
+        state.military.corps_command!['rs-corps-1'].stance = 'reorganize';
+
+        applyCorpsEffects(state);
+
+        expect(state.military.formations.hv_wave.posture).toBe('defend');
+        expect(state.military.formations.hv_wave.cohesion).toBe(52);
+        expect(state.military.corps_command!['rs-corps-1'].subordinate_count).toBe(3);
     });
 });
 

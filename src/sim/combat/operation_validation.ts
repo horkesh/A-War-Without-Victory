@@ -22,7 +22,9 @@ import type { CorpsCommandState, FactionId, FormationId, GameState } from '../..
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { resolveOperationFormation } from './operation_formation_resolver.js';
 import type { Osid } from './osid_adjacency.js';
+import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -133,13 +135,16 @@ export function validateOpAtInjection(
         // ── Check B: brigade_missing / brigade_ineligible ──────────────
         const sortedBrigades = [...axisDef.brigades].sort(strictCompare);
         for (const fid of sortedBrigades) {
-            const formation = formations[fid];
+            const resolved = resolveOperationFormation(formations, fid);
+            const formation = resolved.formation;
             if (!formation) {
                 warnings.push({
                     op_name: def.name,
                     axis_id: axisDef.axis_id,
                     check: 'brigade_missing',
-                    detail: `Brigade "${fid}" not found in formations`,
+                    detail: resolved.resolution === 'ambiguous_oob_alias'
+                        ? `Brigade "${fid}" has ambiguous live OOB aliases: ${resolved.alias_matches.join(', ')}`
+                        : `Brigade "${fid}" not found in formations`,
                     severity: 'warning',
                     turn,
                 });
@@ -164,7 +169,7 @@ export function validateOpAtInjection(
         let enemyObjectiveCount = 0;
         for (const osid of sortedObjectives) {
             const controller = getPoliticalControllerOSID(state, osid, undefined);
-            if (controller !== null && controller !== def.faction) {
+            if (isOperationObjectiveHostile(state, def.faction, controller)) {
                 enemyObjectiveCount++;
             }
         }

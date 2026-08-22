@@ -173,7 +173,7 @@ export function computeDeployPriority(rawPriority: number, hops: number): number
  * Returns true if the formation is an elite brigade available for loan
  * (not already on loan, not in cooldown, not permanently degraded).
  */
-function isEliteAvailable(f: FormationState, turn: number): boolean {
+export function isEliteAvailableForLoan(f: FormationState, turn: number): boolean {
     // Elite brigades are identified by presence of elite_loan_state (set on OOB load for is_elite=true)
     const ls = f.elite_loan_state;
     if (!ls) return false;
@@ -192,7 +192,7 @@ function getAvailableElites(state: GameState, faction: string, turn: number): Fo
     return Object.keys(formations)
         .filter(fid => {
             const f = formations[fid];
-            return f.faction === faction && isEliteAvailable(f, turn);
+            return f.faction === faction && isEliteAvailableForLoan(f, turn);
         })
         .sort(strictCompare);
 }
@@ -460,6 +460,13 @@ function issueEliteDeploymentOrder(
 ): void {
     const targetOsid = resolveEliteDeploymentTarget(state, formation, brigadeId, corpsId, adjacency);
     if (!targetOsid || targetOsid === formation.location_osid) return;
+    // An accepted T5 reserve deployment supersedes a stale defensive posture.
+    // Without this release, T3 rejects the column order every turn while the
+    // reserve system keeps reissuing it, leaving the elite permanently dug in.
+    if (formation.posture === 'dig_in') {
+        formation.posture = 'defend';
+        formation.dig_in_progress = 0;
+    }
     if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
     (state.military.brigade_movement_orders as Record<FormationId, BrigadeMovementOrder>)[brigadeId] = {
         destination_sids: [targetOsid as SettlementId],
@@ -906,9 +913,10 @@ export function deployEliteLoan(
          */
         auto_join_operation?: boolean;
     },
-): void {
+): boolean {
     const f = state.military.formations?.[brigadeId];
-    if (!f?.elite_loan_state) return;
+    if (!f?.elite_loan_state) return false;
+    if (!isEliteAvailableForLoan(f, turn)) return false;
 
     const ls = f.elite_loan_state;
     ls.on_loan = true;
@@ -971,6 +979,7 @@ export function deployEliteLoan(
     }
 
     issueEliteDeploymentOrder(state, f, brigadeId, corpsId, adjacency);
+    return true;
 }
 
 /**
@@ -1022,6 +1031,53 @@ export function recallEliteLoan(
     if (returnBase) {
         f.location_osid = returnBase;
     }
+}
+
+/**
+ * Retask a live elite loan to another corps as one continuous army-level
+ * commitment. The old episode is closed and a new one opened, but the ordinary
+ * post-recall cooldown is not started because the brigade never returns to the
+ * available reserve pool between assignments. Callers must validate route
+ * feasibility before invoking this synchronous state transition.
+ */
+export function retaskEliteLoan(
+    state: GameState,
+    brigadeId: FormationId,
+    corpsId: string,
+    reason: ReserveRequestReason,
+    travelHops: number,
+    turn: number,
+    adjacency?: Map<Osid, Osid[]>,
+): boolean {
+    const f = state.military.formations?.[brigadeId];
+    const ls = f?.elite_loan_state;
+    if (!f || !ls?.on_loan || ls.permanently_degraded) return false;
+    if (ls.loaned_to_corps === corpsId) return false;
+
+    const previousRecallTurn = ls.last_recall_turn;
+    const previousLocation = f.location_osid;
+    recallEliteLoan(state, brigadeId, 'player_recall', turn);
+    // Retasking is a continuation of the live commitment, not a return to the
+    // reserve pool. Preserve both its physical position and the cooldown
+    // history that existed before retask; the caller validated the new route
+    // from this position, not from the brigade's reserve base.
+    if (previousLocation !== undefined) f.location_osid = previousLocation;
+    else delete f.location_osid;
+    ls.last_recall_turn = null;
+    const deployed = deployEliteLoan(
+        state,
+        brigadeId,
+        corpsId,
+        reason,
+        travelHops,
+        turn,
+        undefined,
+        'Army CO redirected an active elite commitment.',
+        'player',
+        adjacency,
+    );
+    ls.last_recall_turn = previousRecallTurn;
+    return deployed;
 }
 
 // ─── Bot AI assignment ────────────────────────────────────────────────────────
@@ -1116,7 +1172,7 @@ export function evaluateArmyReserveAssignments(
 
         // Verify the suggested brigade is still available (another request may have claimed it)
         const f = state.military.formations?.[brigadeId];
-        if (!f || !isEliteAvailable(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS || !canEliteLoanReachCorpsTerritory(state, brigadeId, req.corps_id, adjacency)) {
+        if (!f || !isEliteAvailableForLoan(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS || !canEliteLoanReachCorpsTerritory(state, brigadeId, req.corps_id, adjacency)) {
             remaining.push(req);
             continue;
         }
@@ -1188,8 +1244,14 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         // If the target corps launched a NEW operation since deployment, join it.
         // This handles operation transitions: old op ends, new op launches, elite joins.
         const targetCmd = corpsCommand[ls.loaned_to_corps];
+        const alreadyCommittedToLiveOperation = Object.keys(corpsCommand)
+            .sort(strictCompare)
+            .some((corpsId) => (corpsCommand[corpsId]?.active_operations ?? []).some((operation) =>
+                operation.participating_brigades.includes(bid)
+                || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
+            ));
         // Auto-join any execution-phase operation the target corps is running
-        if (targetCmd) {
+        if (targetCmd && !alreadyCommittedToLiveOperation) {
             for (const activeOp of targetCmd.active_operations ?? []) {
                 if (activeOp.phase !== 'execution') continue;
                 attachEliteToOperation(activeOp, bid);

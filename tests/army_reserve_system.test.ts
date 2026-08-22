@@ -201,8 +201,9 @@ describe('deployEliteLoan', () => {
         const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1');
         const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
 
-        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+        const deployed = deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
 
+        expect(deployed).toBe(true);
         const ls = state.military.formations!['arbih_guards'].elite_loan_state!;
         expect(ls.on_loan).toBe(true);
         expect(ls.loaned_to_corps).toBe('arbih_1st_corps');
@@ -215,6 +216,61 @@ describe('deployEliteLoan', () => {
         expect(tracker.episodes[0].corps_id).toBe('arbih_1st_corps');
         expect(tracker.episodes[0].reason).toBe('offensive_support');
         expect(tracker.episodes[0].travel_hops).toBe(2);
+    });
+
+    it('refuses to overwrite an elite loan already committed to another corps', () => {
+        const loanState = {
+            ...createEliteLoanState(),
+            on_loan: true,
+            loaned_to_corps: 'arbih_2nd_corps',
+            loan_start_turn: 3,
+        };
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1', {
+            elite_loan_state: loanState,
+        });
+        const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
+
+        const deployed = deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+
+        expect(deployed).toBe(false);
+        expect(brigade.elite_loan_state).toMatchObject({
+            on_loan: true,
+            loaned_to_corps: 'arbih_2nd_corps',
+            loan_start_turn: 3,
+        });
+        expect(state.military.elite_brigade_tracker!.arbih_guards).toBeUndefined();
+    });
+
+    it('refuses to deploy a permanently degraded elite', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1', {
+            elite_loan_state: {
+                ...createEliteLoanState(),
+                permanently_degraded: true,
+            },
+        });
+        const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
+
+        const deployed = deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+
+        expect(deployed).toBe(false);
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+        expect(state.military.elite_brigade_tracker!.arbih_guards).toBeUndefined();
+    });
+
+    it('refuses to deploy an elite before its recall cooldown expires', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1', {
+            elite_loan_state: {
+                ...createEliteLoanState(),
+                last_recall_turn: 4,
+            },
+        });
+        const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
+
+        const deployed = deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+
+        expect(deployed).toBe(false);
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+        expect(state.military.elite_brigade_tracker!.arbih_guards).toBeUndefined();
     });
 
     it('clears stale homeward movement when redeploying a recalled elite', () => {
@@ -319,6 +375,40 @@ describe('deployEliteLoan', () => {
         deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'defensive_gap', 3, 5, undefined, undefined, 'army_ai', chainAdj(4));
 
         expect(state.military.brigade_movement_orders?.arbih_guards).toEqual({
+            destination_sids: ['op:mun:o3'],
+            stance: 'column',
+        });
+    });
+
+    it('releases a dug-in elite before issuing its accepted deployment march', () => {
+        const brigade = makeElite('hvo_3rd_guard_jastrebovi', 'HRHB', 'op:mun:o0', {
+            corps_id: 'hvo_main_staff',
+            posture: 'dig_in',
+        });
+        const state = makeState({
+            formations: { hvo_3rd_guard_jastrebovi: brigade },
+            corps_front_sectors: {
+                'sector:hvo_tomislavgrad:0': makeSector('hvo_tomislavgrad', 'HRHB', 'op:mun:o3'),
+            },
+            turn: 5,
+        });
+
+        deployEliteLoan(
+            state,
+            'hvo_3rd_guard_jastrebovi',
+            'hvo_tomislavgrad',
+            'offensive_support',
+            3,
+            5,
+            undefined,
+            undefined,
+            'army_ai',
+            chainAdj(4),
+        );
+
+        expect(state.military.formations!.hvo_3rd_guard_jastrebovi.posture).toBe('defend');
+        expect(state.military.formations!.hvo_3rd_guard_jastrebovi.dig_in_progress).toBe(0);
+        expect(state.military.brigade_movement_orders?.hvo_3rd_guard_jastrebovi).toEqual({
             destination_sids: ['op:mun:o3'],
             stance: 'column',
         });
@@ -993,6 +1083,52 @@ describe('tickEliteLoans', () => {
         const activeOp = state.military.corps_command!.vrs_drina.active_operations[0];
         expect(activeOp.participating_brigades).toEqual(['rs_1st_guards', 'rs_line_1']);
         expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['rs_1st_guards']);
+    });
+
+    it('does not auto-join a second operation when the live loan is already committed', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        const operation = (name: string, assignedBrigades: string[]) => ({
+            name,
+            phase: 'execution' as const,
+            participating_brigades: [...assignedBrigades],
+            axes: [{
+                axis_id: `axis:${name}`,
+                assigned_brigades: [...assignedBrigades],
+                objectives: ['enemy_a'],
+                current_objective_index: 0,
+                status: 'executing' as const,
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+        });
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [
+                        operation('Operation Old', ['rs_line_1']),
+                        operation('Operation Authored', ['rs_1st_guards']),
+                    ],
+                },
+            },
+            turn: 10,
+        });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        brigade.elite_loan_state!.loan_start_turn = 0;
+
+        tickEliteLoans(state, 10);
+
+        const [oldOperation, authoredOperation] = state.military.corps_command!.vrs_drina.active_operations;
+        expect(oldOperation.participating_brigades).toEqual(['rs_line_1']);
+        expect(oldOperation.axes?.[0]?.assigned_brigades).toEqual(['rs_line_1']);
+        expect(authoredOperation.participating_brigades).toContain('rs_1st_guards');
+        expect(authoredOperation.axes?.[0]?.assigned_brigades).toContain('rs_1st_guards');
     });
 });
 

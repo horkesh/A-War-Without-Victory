@@ -1,9 +1,9 @@
 /**
- * REASON-CODE INSTRUMENTATION — one env gate, five topics, inert by default.
+ * REASON-CODE INSTRUMENTATION — one env gate, nine topics, inert by default.
  *
  * ═══ WHAT THIS IS FOR ═══
  *
- * Five subsystems refuse things without saying which predicate refused them,
+ * Multiple subsystems refuse things without saying which predicate refused them,
  * and each refusal has cost a seat hours of reconstruction from artifacts that
  * do not carry the answer. In one case it produced a FALSE PUBLISHED FINDING:
  * a seat read `attacker_casualties` (a STACK total) against one named brigade's
@@ -51,7 +51,7 @@
  * an order the engine already fixed upstream. Reading `process.env` is a pure
  * read of process configuration and does not vary within a run.
  *
- * ═══ ONE VARIABLE, FIVE TOPICS — AND WHY NOT FIVE VARIABLES ═══
+ * ═══ ONE VARIABLE, NINE TOPICS — AND WHY NOT NINE VARIABLES ═══
  *
  * `mainstaff_op_availability_gate.ts` deliberately uses two separate flags,
  * because its two halves move participation in OPPOSITE directions and a
@@ -70,7 +70,7 @@
 import { strictCompare } from '../../state/validateGameState.js';
 
 /**
- * The five refusals, one topic each.
+ * The eight diagnostic topics.
  *
  *  battle_stack      — item 1. `attacker_brigades` + `defender_contributions` on the
  *                      weekly battle entry. Answers: is this casualty figure a
@@ -83,20 +83,37 @@ import { strictCompare } from '../../state/validateGameState.js';
  *  formation_refusal — item 4. Why `canFormEmergentBrigade` / in-run `recruitBrigade`
  *                      said no, for the in-run passes that have no counter today.
  *  brigade_state     — item 5. `disrupted_turns` on the brigade temporal row.
+ *  objective_filter  — item 6. Which friendly-controlled opportunity objectives
+ *                      were removed at the CorpsOperation spawn seam.
+ *  formation_lifecycle — item 7. Include expeditionary `hv_phantom` formations in
+ *                        the per-turn temporal stream so their live state can be
+ *                        joined from spawn through withdrawal.
+ *  movement_reject   — item 8. Formation-specific column-order rejection reason
+ *                      and routing scope, emitted on the movement report.
+ *  opportunity_roster — item 9. Why each catalog-authored brigade was admitted
+ *                       to or rejected from an opportunity operation axis.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
     | 'battle_power'
     | 'axis_reject'
     | 'formation_refusal'
-    | 'brigade_state';
+    | 'brigade_state'
+    | 'formation_lifecycle'
+    | 'movement_reject'
+    | 'objective_filter'
+    | 'opportunity_roster';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
     'battle_power',
     'battle_stack',
     'brigade_state',
+    'formation_lifecycle',
     'formation_refusal',
+    'movement_reject',
+    'objective_filter',
+    'opportunity_roster',
 ];
 
 /**

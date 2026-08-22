@@ -17,7 +17,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { createRequire } from 'node:module';
-import { approveReserveRequest } from '../src/desktop/desktop_sim.js';
+import { approveReserveRequest, redirectReserveLoan } from '../src/desktop/desktop_sim.js';
 import { ELITE_DEPLOY_COST } from '../src/ui/map/utils/commandAuthority.js';
 import type { CommandAuthority, FormationState, GameState } from '../src/state/game_state.js';
 
@@ -142,6 +142,24 @@ describe('ELITE-DEPLOY — command-authority guard + debit (player IPC path)', (
         expect(state.military.pending_reserve_requests?.map((r) => r.request_id)).toEqual(['req-alpha']);
     });
 
+    it('rejects a cooldown-bound approval before charging authority or consuming the request', async () => {
+        const state = makeState({ current: 80, max: 100, spent_this_turn: 5, lifetime_spent: 20 });
+        state.military.formations!.arbih_guards.elite_loan_state!.last_recall_turn = 9;
+
+        const result = await approveReserveRequest(state, 'req-alpha', 'arbih_guards', undefined, process.cwd());
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) expect(result.error).toContain('cooldown');
+        expect(state.military.command_authority).toMatchObject({
+            current: 80,
+            spent_this_turn: 5,
+            lifetime_spent: 20,
+        });
+        expect(state.military.formations!.arbih_guards.elite_loan_state!.on_loan).toBe(false);
+        expect(state.military.reserve_request_history).toEqual([]);
+        expect(state.military.pending_reserve_requests?.map((r) => r.request_id)).toEqual(['req-alpha']);
+    });
+
     it('is a no-op when command_authority is absent (headless / pre-Phase-2): deploys, charges nothing', async () => {
         const state = makeState(); // no command_authority
         const result = await approveReserveRequest(state, 'req-alpha', 'arbih_guards', undefined, process.cwd());
@@ -149,6 +167,76 @@ describe('ELITE-DEPLOY — command-authority guard + debit (player IPC path)', (
         expect(result.ok).toBe(true);
         expect(state.military.command_authority).toBeUndefined();
         expect(state.military.formations!.arbih_guards.elite_loan_state!.on_loan).toBe(true);
+    });
+});
+
+describe('reserve-loan redirect — transactional retasking', () => {
+    it('moves an active loan to the new corps as a continuous commitment', async () => {
+        const state = makeState();
+        const loan = state.military.formations!.arbih_guards.elite_loan_state!;
+        loan.on_loan = true;
+        loan.loaned_to_corps = 'arbih_1st_corps';
+        loan.loan_start_turn = 5;
+        state.military.corps_front_sectors!.sec_b = {
+            corps_id: 'arbih_2nd_corps',
+            territory_osids: ['op:bihac:bihac_2'],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+        } as any;
+
+        const result = await redirectReserveLoan(state, 'arbih_guards', 'arbih_2nd_corps', process.cwd());
+
+        expect(result.ok).toBe(true);
+        expect(loan).toMatchObject({
+            on_loan: true,
+            loaned_to_corps: 'arbih_2nd_corps',
+            loan_start_turn: 10,
+            last_recall_turn: null,
+        });
+    });
+
+    it('preserves the brigade current location when base differs during retask', async () => {
+        const state = makeState();
+        const brigade = state.military.formations!.arbih_guards;
+        const loan = brigade.elite_loan_state!;
+        brigade.base_osid = 'op:srebrenica:srebrenica';
+        loan.on_loan = true;
+        loan.loaned_to_corps = 'arbih_1st_corps';
+        loan.loan_start_turn = 5;
+        state.military.corps_front_sectors!.sec_b = {
+            corps_id: 'arbih_2nd_corps',
+            territory_osids: ['op:bihac:bihac_2'],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+        } as any;
+
+        const result = await redirectReserveLoan(state, 'arbih_guards', 'arbih_2nd_corps', process.cwd());
+
+        expect(result.ok).toBe(true);
+        expect(brigade.location_osid).toBe('op:bihac:bihac_2');
+        expect(loan.loaned_to_corps).toBe('arbih_2nd_corps');
+    });
+
+    it('leaves the active loan byte-identical when the target route is invalid', async () => {
+        const state = makeState();
+        const loan = state.military.formations!.arbih_guards.elite_loan_state!;
+        loan.on_loan = true;
+        loan.loaned_to_corps = 'arbih_1st_corps';
+        loan.loan_start_turn = 5;
+        state.military.corps_front_sectors!.sec_b = {
+            corps_id: 'arbih_2nd_corps',
+            territory_osids: ['op:srebrenica:srebrenica'],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+        } as any;
+        state.political.political_controllers!['op:srebrenica:srebrenica'] = 'RBiH';
+        const before = JSON.stringify(state.military);
+
+        const result = await redirectReserveLoan(state, 'arbih_guards', 'arbih_2nd_corps', process.cwd());
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) expect(result.error).toContain('No friendly route');
+        expect(JSON.stringify(state.military)).toBe(before);
     });
 });
 

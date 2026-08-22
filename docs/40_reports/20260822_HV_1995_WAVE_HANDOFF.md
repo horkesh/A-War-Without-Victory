@@ -4,6 +4,33 @@
 Durable handoff for whoever picks this up next. Pairs with the `docs/PROJECT_LEDGER.md` entries
 of 2026-08-21/22, which carry the same arc in narrative form.
 
+> ## ★ SUPERSEDED IN TWO PLACES — read this before acting on anything below
+>
+> Codex executed this handoff on 2026-08-22 and **refuted two of its factual claims**. Both
+> corrections are upheld, independently re-verified, and recorded in
+> `docs/life_lessons/` (process + architecture, 2026-08-22 batch). Full successor report:
+> `docs/40_reports/implemented/20260822_HV_1995_TIMING_MOBILITY_CI_RESOLUTION.md`.
+>
+> 1. **§4's "wall 2" is WRONG.** `brigade_movement.ts:167/198/219` is a **non-operational fallback
+>    mover**: its pipeline step is guarded by `if (getOperationalData(context)) return;`
+>    (`war_phases.ts:1730-1743`), so it never runs in any OSID scenario, including
+>    `apr1992_definitive_188w`. The line numbers and the exclusion are real; the module is not
+>    reached. **The two live executors are `processOsidColumnMovement` and
+>    `applyBrigadeMovementOrders`**, and both now admit `hv_phantom`.
+> 2. **§8's CI claim is WRONG.** The two runs are **not** byte-identical. Three 188w actuals
+>    changed (`final_save.json`, `run_summary.json`, `weekly_report.jsonl`); equal red *counts*
+>    hid changed *outputs*. The new `final_save` actual is `034820889a972be7…` — bit-for-bit the
+>    local branch hash — so **CI did exercise the history merge**. The anomaly does not exist and
+>    does not gate the manifest. The original claim came from comparing a single artifact whose
+>    label had been mis-read (`activity_summary.json`), then generalising to all sixteen.
+>
+> **What still stands:** the measurements table (§3), the coupling constraint (§4, honoured by the
+> successor), the reading of the +16 as a cascade rather than the force fighting (§5), the
+> objective-filter analysis (§6), and the open items (§7).
+>
+> **Outcome of the work this handoff commissioned:** the coupled timing+mobility candidate measured
+> **609/712, 31/31 anchors** — *below* the 611 floor — and was **not promoted**. Floor unchanged.
+
 Read this with `docs/PROJECT_LEDGER.md` (last ~6 entries cover the same arc in detail).
 Everything below is measured unless marked NOT ESTABLISHED.
 

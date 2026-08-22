@@ -21,7 +21,7 @@ import { countFactionBrigadesAtOsid, getCorpsBrigadeCountAtOsid, hasActiveFormat
 import type { Osid } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import { effectivePersonnel } from './tactical_group_personnel.js';
-import type { BrigadePosture, FactionId, FormationState, GameState } from '../../state/game_state.js';
+import type { AxisOrderGenerationDetail, BrigadePosture, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
 import { isFriendlyFaction, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
@@ -73,6 +73,26 @@ import {
 } from './bot_brigade_ai_osid.js'; // Will need to export these from bot_brigade_ai_osid.ts
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { countAxisConcentrationSupport } from './corps_operation_helpers.js';
+import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
+
+export function recordAxisOrderGenerationDetail(
+    activeOp: CorpsOperation,
+    brigadeId: FormationId,
+    detail: Omit<AxisOrderGenerationDetail, 'brigade_id'>,
+): void {
+    if (!isReasonCodeTopicEnabled('axis_reject')) return;
+    const axis = getBrigadeAxis(activeOp, brigadeId);
+    if (!axis) return;
+    if (axis.order_generation_details?.[0]?.turn !== detail.turn) {
+        axis.order_generation_details = [];
+    }
+    const facts = axis.order_generation_details ??= [];
+    const existing = facts.findIndex((fact) => fact.brigade_id === brigadeId);
+    const fact = { brigade_id: brigadeId, ...detail };
+    if (existing >= 0) facts[existing] = fact;
+    else facts.push(fact);
+    facts.sort((a, b) => strictCompare(a.brigade_id, b.brigade_id));
+}
 
 export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, loc, adjacency, result, isActiveSectorOperationParticipant, graphAnalysis, adjEnemy } = ctx;
@@ -251,7 +271,27 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             const objController = currentObjective ? getPoliticalControllerOSID(state, currentObjective, reverseMap) : null;
             const objCapturedByFriendly = objController === faction
                 || (objController != null && isFriendlyFaction(objController, faction, state));
+            const recordOrderDecision = (
+                decision: AxisOrderGenerationDetail['decision'],
+                overrides: Partial<Pick<AxisOrderGenerationDetail,
+                    'tactically_adjacent' | 'threshold' | 'predicted_outcome' | 'power_ratio' |
+                    'concentrated_outcome' | 'issued_target_osid'>> = {},
+            ): void => recordAxisOrderGenerationDetail(activeOp, brigade.id, {
+                turn: state.meta?.turn ?? 0,
+                phase: activeOp.phase,
+                location_osid: loc,
+                objective: currentObjective ?? null,
+                objective_controller: objController,
+                tactically_adjacent: overrides.tactically_adjacent ?? false,
+                threshold: overrides.threshold ?? null,
+                predicted_outcome: overrides.predicted_outcome ?? null,
+                power_ratio: overrides.power_ratio ?? null,
+                concentrated_outcome: overrides.concentrated_outcome ?? null,
+                decision,
+                issued_target_osid: overrides.issued_target_osid ?? null,
+            });
             if (!currentObjective || objCapturedByFriendly) {
+                recordOrderDecision('objective_missing_or_friendly');
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                 return true;
             }
@@ -302,8 +342,12 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 })
                 : undefined;
             const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
+            let directAttackSufficient = false;
+            let directAttackThreshold: string | null = null;
+            let directConcentratedOutcome: string | null = null;
             if (directObjectiveAttack) {
                 const probeThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
+                directAttackThreshold = probeThreshold;
                 const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
                 const axisBrigades = getBrigadeAxis(activeOp, brigade.id)?.assigned_brigades
                     ?? activeOp.participating_brigades ?? [];
@@ -334,11 +378,21 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     isOutcomeSufficientForAttack(predictedOutcome, probeThreshold) ||
                     (concentratedOutcome != null &&
                         isOutcomeSufficientForAttack(concentratedOutcome, probeThreshold));
+                directAttackSufficient = canDirectAttackObjective;
+                directConcentratedOutcome = concentratedOutcome;
                 if (canDirectAttackObjective && brigade.corps_id) {
                     result.eligible_attackers_by_corps[brigade.corps_id] =
                         (result.eligible_attackers_by_corps[brigade.corps_id] ?? 0) + 1;
                 }
                 if (canDirectAttackObjective && alreadyAssigned < MAX_ATTACKERS_PER_TARGET) {
+                    recordOrderDecision('direct_attack', {
+                        tactically_adjacent: true,
+                        threshold: probeThreshold,
+                        predicted_outcome: predictedOutcome,
+                        power_ratio: directObjectiveAttack.prediction.power_ratio,
+                        concentrated_outcome: concentratedOutcome,
+                        issued_target_osid: currentObjective,
+                    });
                     const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
                     result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
                     result.attack_orders[brigade.id] = currentObjective;
@@ -348,6 +402,20 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 }
             }
             if (tacticallyAdjacentToObjective) {
+                recordOrderDecision(
+                    !directObjectiveAttack
+                        ? 'direct_attack_unavailable'
+                        : (directAttackSufficient && alreadyAssigned >= MAX_ATTACKERS_PER_TARGET
+                            ? 'direct_attack_capacity_reached'
+                            : 'direct_attack_below_threshold'),
+                    {
+                        tactically_adjacent: true,
+                        threshold: directAttackThreshold,
+                        predicted_outcome: directObjectiveAttack?.prediction.predicted_outcome ?? null,
+                        power_ratio: directObjectiveAttack?.prediction.power_ratio ?? null,
+                        concentrated_outcome: directConcentratedOutcome,
+                    },
+                );
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                 return true;
             }
@@ -387,6 +455,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     )
                 );
                 if (approachDest) {
+                    recordOrderDecision('march_to_approach', { issued_target_osid: approachDest });
                     result.column_march_orders[brigade.id] = approachDest;
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                     return true;
@@ -461,6 +530,12 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             );
             if (intermediateTargets.length > 0) {
                 if (bestIntermediate) {
+                    recordOrderDecision('attack_intermediate', {
+                        threshold: getSectorOffensiveProbeThreshold(activeOp, brigade.id),
+                        predicted_outcome: bestIntermediate.prediction.predicted_outcome,
+                        power_ratio: bestIntermediate.prediction.power_ratio,
+                        issued_target_osid: bestIntermediate.osid,
+                    });
                     const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
                     result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
                     result.attack_orders[brigade.id] = bestIntermediate.osid;
@@ -470,6 +545,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 }
             }
 
+            recordOrderDecision('defend_no_route_or_viable_target');
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             return true;
         }

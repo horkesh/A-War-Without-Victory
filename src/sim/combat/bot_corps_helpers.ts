@@ -125,7 +125,7 @@ export function buildCorpsSubordinatesByCorps(state: GameState): Map<FormationId
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
         if (!f || f.status !== 'active') continue;
-        if ((f.kind ?? 'brigade') !== 'brigade') continue;
+        if ((f.kind ?? 'brigade') !== 'brigade' && f.kind !== 'hv_phantom') continue;
         if (!f.corps_id) continue;
         const existing = result.get(f.corps_id) ?? [];
         existing.push(f);
@@ -146,7 +146,7 @@ export function getCorpsSubordinates(
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
         if (!f || f.status !== 'active') continue;
-        if ((f.kind ?? 'brigade') !== 'brigade') continue;
+        if ((f.kind ?? 'brigade') !== 'brigade' && f.kind !== 'hv_phantom') continue;
         if (f.corps_id !== corpsId) continue;
         result.push(f);
     }

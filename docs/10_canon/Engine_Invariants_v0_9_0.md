@@ -103,6 +103,8 @@ Defense at any OSID = `totalPower * (1/sector_edges) * densityMod`. No brigade-a
 
 **Roster eligibility:** A formation with `lifecycle_status: 'forming'` is not a line holder, reserve, security formation, loan rescue, operation participant, or historical-opportunity commitment. Every sector-roster and operation-admission path must apply the shared live-formation eligibility contract before assigning it.
 
+**Authored operation identity:** Pre-planned, triggered, and opportunity catalogs reference historical OOB identities, while recruitment may assign a synthetic live dictionary key and preserve that identity as `oob:<authored id>`. Operation admission must prefer an exact live key, otherwise resolve exactly one matching OOB tag, and reject an ambiguous match deterministically. Validation and execution must use the same resolved live formation ID.
+
 ### 6.10 Siege Defender Morale Drain
 
 **LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1 (commit `5313fd41`, 2026-05-08).** Formations of a faction `F` whose `location_osid` is keyed in `state.military.siege_turn_counters[F:osid]` with counter `c > 0` receive a per-turn morale decrement scaled to siege duration. The mechanism is faction-symmetric by construction: the predicate has zero faction/corps/OSID condition; the siege counters are faction-keyed by data and the same coefficient schedule applies regardless of which faction is besieged. Models cumulative siege manning fatigue documented in ICTY Galić IT-98-29-T (SRK 1992–1994), ICTY Dragomir Milošević IT-98-29/1 (1994–1995), and Balkan Battlegrounds 2 (chapter on VRS late-war manning).

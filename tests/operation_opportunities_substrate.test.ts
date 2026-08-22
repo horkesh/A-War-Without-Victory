@@ -36,6 +36,8 @@ import {
     type OperationOpportunityDef,
     type OperationOpportunityState,
 } from '../src/sim/combat/operation_opportunities.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
+import { assertOperationLifecycle } from '../src/sim/combat/assert_operation_lifecycle.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
 
@@ -404,6 +406,124 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         expect(updated!.executed_op_id).toBe(def.name);
     });
 
+    it('preempts disposable probes for an approved opportunity without double-committing participants', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'opportunity_roster';
+        resetReasonCodeTopicCacheForTests();
+        try {
+        const state = buildMinimalState(175);
+        state.military.formations!.b_elite = {
+            ...state.military.formations!.b_a!,
+            id: 'b_elite',
+            name: 'b_elite',
+            corps_id: 'arbih_general_staff',
+            elite_loan_state: {
+                on_loan: true,
+                loaned_to_corps: 'arbih_5th_corps',
+                loan_start_turn: 170,
+                last_recall_turn: null,
+                loan_start_personnel: 1000,
+                permanently_degraded: false,
+                current_episode_id: 1,
+            },
+        };
+        const cmd = state.military.corps_command!.arbih_5th_corps!;
+        const probe = {
+            name: 'probe_before_opportunity',
+            type: 'probe' as const,
+            phase: 'execution' as const,
+            started_turn: 173,
+            phase_started_turn: 174,
+            participating_brigades: ['b_a', 'b_elite'],
+            objectives: ['op:probe'],
+            current_objective_index: 0,
+        };
+        cmd.active_operations.push(probe);
+        const def: OperationOpportunityDef = {
+            ...fixtureSana(),
+            axes: [{
+                axis_id: 'line_axis',
+                name: 'Line Axis',
+                corps: 'arbih_5th_corps',
+                brigades: ['b_a'],
+                objectives: ['op:line'],
+            }, {
+                axis_id: 'elite_axis',
+                name: 'Elite Axis',
+                corps: 'arbih_5th_corps',
+                brigades: ['b_elite'],
+                objectives: ['op:elite'],
+            }],
+        };
+        expect(assertOperationLifecycle(state)).toEqual([]);
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        const approved = applyOpportunityDecision(
+            state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+        );
+
+        expect(approved).toMatchObject({ status: 'approved', executed_op_id: def.name });
+        expect(probe).toMatchObject({
+            phase: 'recovery',
+            recovery_reason: 'probe_complete',
+            participating_brigades: [],
+        });
+        expect(cmd.active_operations.find((op) => op.name === def.name)?.participating_brigades)
+            .toEqual(['b_a', 'b_elite']);
+        const trace = state.military.operation_opportunity_traces?.at(-1);
+        expect(trace?.participant_evaluations
+            ?.filter(({ reason }) => reason === 'eligible_probe_preemption')
+            .map(({ formation_id, decision, reason }) => ({ formation_id, decision, reason })))
+            .toEqual([
+                { formation_id: 'b_elite', decision: 'admitted', reason: 'eligible_probe_preemption' },
+                { formation_id: 'b_a', decision: 'admitted', reason: 'eligible_probe_preemption' },
+            ]);
+        expect(assertOperationLifecycle(state)).toEqual([]);
+        } finally {
+            delete process.env.AWWV_DEBUG_REASON_CODES;
+            resetReasonCodeTopicCacheForTests();
+        }
+    });
+
+    it('does not preempt a participant from a non-probe live operation', () => {
+        const state = buildMinimalState(175);
+        const cmd = state.military.corps_command!.arbih_5th_corps!;
+        const liveOperation = {
+            name: 'protected_sector_attack',
+            type: 'sector_attack' as const,
+            phase: 'execution' as const,
+            started_turn: 170,
+            phase_started_turn: 172,
+            participating_brigades: ['b_a'],
+            objectives: ['op:protected'],
+            current_objective_index: 0,
+        };
+        cmd.active_operations.push(liveOperation);
+        const def: OperationOpportunityDef = {
+            ...fixtureSana(),
+            axes: [{
+                axis_id: 'main',
+                name: 'Main',
+                corps: 'arbih_5th_corps',
+                brigades: ['b_a', 'b_b'],
+                objectives: ['op:new'],
+            }],
+        };
+        expect(assertOperationLifecycle(state)).toEqual([]);
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        applyOpportunityDecision(
+            state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+        );
+
+        expect(liveOperation).toMatchObject({
+            phase: 'execution',
+            participating_brigades: ['b_a'],
+        });
+        expect(cmd.active_operations.find((op) => op.name === def.name)?.participating_brigades)
+            .toEqual(['b_b']);
+        expect(assertOperationLifecycle(state)).toEqual([]);
+    });
+
     it('links a completed operation AAR back to the opportunity resolution', () => {
         const state = buildMinimalState(175);
         const def = fixtureSana();
@@ -645,6 +765,172 @@ function fixtureFifthCorpsT1WithFriendlyTarget(
 }
 
 describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friendly_overrides)', () => {
+    it('objective-filter diagnostics are absent by default', () => {
+        delete process.env.AWWV_DEBUG_REASON_CODES;
+        resetReasonCodeTopicCacheForTests();
+        const state = buildStateWithControllers(175, {
+            'op:velika_kladusa:velika_kladusa_2': 'RBiH',
+            'op:cazin:cazin_3': 'RS',
+        });
+        const def = fixtureFifthCorpsT1WithFriendlyTarget();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        applyOpportunityDecision(
+            state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+        );
+
+        const trace = state.military.operation_opportunity_traces?.at(-1);
+        expect(trace?.event).toBe('approved');
+        expect(Object.prototype.hasOwnProperty.call(trace, 'objective_filter_rejections')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(trace, 'participant_evaluations')).toBe(false);
+    });
+
+    it('objective_filter records friendly rejections and keeps enemy objectives as a positive control', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'objective_filter';
+        resetReasonCodeTopicCacheForTests();
+        try {
+            const state = buildStateWithControllers(175, {
+                'op:velika_kladusa:velika_kladusa_2': 'RBiH',
+                'op:cazin:cazin_3': 'RS',
+                'op:mostar:allied': 'HRHB',
+            });
+            state.political.war_alliance_rbih_hrhb = -0.5;
+            state.political.rbih_hrhb_state = {
+                washington_signed: true,
+            } as GameState['political']['rbih_hrhb_state'];
+            const def = fixtureFifthCorpsT1WithFriendlyTarget({
+                axes: [{
+                    axis_id: 'z_axis',
+                    name: 'Z axis',
+                    corps: 'arbih_5th_corps',
+                    brigades: ['arbih_5_brigade_a'],
+                    objectives: [
+                        'op:velika_kladusa:velika_kladusa_2',
+                        'op:cazin:cazin_3',
+                    ],
+                }, {
+                    axis_id: 'a_axis',
+                    name: 'A axis',
+                    corps: 'arbih_5th_corps',
+                    brigades: ['arbih_5_brigade_b'],
+                    objectives: ['op:bihac:bihac_2'],
+                }, {
+                    axis_id: 'm_axis',
+                    name: 'M axis',
+                    corps: 'arbih_5th_corps',
+                    brigades: ['b_c'],
+                    objectives: ['op:mostar:allied'],
+                }],
+            });
+            (state.political.political_controllers as Record<string, FactionId>)['op:bihac:bihac_2'] = 'RBiH';
+            runOpportunityEvaluationStep(state, 175, [def]);
+            applyOpportunityDecision(
+                state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+            );
+
+            const trace = state.military.operation_opportunity_traces?.at(-1);
+            expect(trace?.objective_filter_rejections).toEqual([
+                {
+                    axis_id: 'a_axis',
+                    objective_osid: 'op:bihac:bihac_2',
+                    controller: 'RBiH',
+                    acting_faction: 'RBiH',
+                    reason: 'friendly_controlled_without_override',
+                },
+                {
+                    axis_id: 'm_axis',
+                    objective_osid: 'op:mostar:allied',
+                    controller: 'HRHB',
+                    acting_faction: 'RBiH',
+                    reason: 'friendly_controlled_without_override',
+                },
+                {
+                    axis_id: 'z_axis',
+                    objective_osid: 'op:velika_kladusa:velika_kladusa_2',
+                    controller: 'RBiH',
+                    acting_faction: 'RBiH',
+                    reason: 'friendly_controlled_without_override',
+                },
+            ]);
+            const op = state.military.corps_command![def.primary_corps].active_operations[0];
+            expect(op.axes).toHaveLength(1);
+            expect(op.axes![0].axis_id).toBe('z_axis');
+            expect(op.axes![0].objectives).toEqual(['op:cazin:cazin_3']);
+        } finally {
+            delete process.env.AWWV_DEBUG_REASON_CODES;
+            resetReasonCodeTopicCacheForTests();
+        }
+    });
+
+    it('opportunity_roster records both participant admissions and every silent rejection', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'opportunity_roster';
+        resetReasonCodeTopicCacheForTests();
+        try {
+            const state = buildStateWithControllers(175, {
+                'op:bihac:bihac_2': 'RS',
+            });
+            const formations = state.military.formations!;
+            const baseFormation = formations.arbih_5_brigade_a!;
+            formations.inactive = {
+                ...baseFormation, id: 'inactive', name: 'inactive', status: 'inactive',
+            };
+            formations.understrength = {
+                ...baseFormation, id: 'understrength', name: 'understrength', personnel: 1,
+            };
+            formations.disrupted = {
+                ...baseFormation, id: 'disrupted', name: 'disrupted', disrupted_turns: 2,
+            };
+            formations.transit = {
+                ...baseFormation, id: 'transit', name: 'transit',
+            };
+            formations.wrong_corps = {
+                ...baseFormation, id: 'wrong_corps', name: 'wrong_corps', corps_id: 'arbih_1st_corps',
+            };
+            formations.synthetic_alias = {
+                ...baseFormation,
+                id: 'synthetic_alias',
+                name: 'synthetic_alias',
+                tags: ['oob:authored_alias'],
+            };
+            state.military.brigade_movement_state = {
+                transit: { status: 'in_transit' },
+            } as GameState['military']['brigade_movement_state'];
+            const fixture = fixtureSana();
+            const def: OperationOpportunityDef = {
+                ...fixture,
+                axes: [{
+                    ...fixture.axes[0]!,
+                    brigades: [
+                        'missing', 'inactive', 'understrength', 'disrupted',
+                        'transit', 'wrong_corps', 'authored_alias', 'arbih_5_brigade_a',
+                    ],
+                }],
+            };
+            runOpportunityEvaluationStep(state, 175, [def]);
+            applyOpportunityDecision(
+                state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+            );
+
+            const trace = state.military.operation_opportunity_traces?.at(-1);
+            expect(trace?.participant_evaluations?.map(({ formation_id, resolved_formation_id, decision, reason }) => ({
+                formation_id, resolved_formation_id, decision, reason,
+            }))).toEqual([
+                { formation_id: 'arbih_5_brigade_a', resolved_formation_id: 'arbih_5_brigade_a', decision: 'admitted', reason: 'eligible_same_corps' },
+                { formation_id: 'authored_alias', resolved_formation_id: 'synthetic_alias', decision: 'admitted', reason: 'eligible_oob_alias_same_corps' },
+                { formation_id: 'disrupted', resolved_formation_id: 'disrupted', decision: 'rejected', reason: 'disrupted' },
+                { formation_id: 'inactive', resolved_formation_id: 'inactive', decision: 'rejected', reason: 'ineligible_operation_formation' },
+                { formation_id: 'missing', resolved_formation_id: null, decision: 'rejected', reason: 'missing_formation' },
+                { formation_id: 'transit', resolved_formation_id: 'transit', decision: 'rejected', reason: 'in_transit' },
+                { formation_id: 'understrength', resolved_formation_id: 'understrength', decision: 'rejected', reason: 'below_min_attack_personnel' },
+                { formation_id: 'wrong_corps', resolved_formation_id: 'wrong_corps', decision: 'rejected', reason: 'corps_mismatch_not_sector_exempt' },
+            ]);
+            expect(state.military.corps_command?.arbih_5th_corps?.active_operations[0]
+                ?.participating_brigades).toContain('synthetic_alias');
+        } finally {
+            delete process.env.AWWV_DEBUG_REASON_CODES;
+            resetReasonCodeTopicCacheForTests();
+        }
+    });
+
     it('targets_friendly_overrides=undefined is no-op (Sana parity — no friendly objectives kept)', () => {
         // Sana 95 fixture has its objectives controlled by RS/null in test state.
         // With override undefined and no friendly-controlled objective, the spawned

@@ -54,6 +54,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
+import { whenReasonCodeTopic } from './reason_code_debug.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Corps boundary helpers
@@ -299,6 +300,27 @@ export interface OsidColumnMovementReport {
     column_arrivals: number;
     /** Brigades whose column order was blocked (no path, not friendly, etc.). */
     column_blocked: number;
+    /** Default-off, formation-specific evidence for rejected column orders. */
+    column_rejections?: Array<{
+        formation_id: string;
+        reason:
+            | 'missing_formation'
+            | 'inactive_formation'
+            | 'unsupported_kind'
+            | 'posture_dig_in'
+            | 'missing_location'
+            | 'invalid_destination'
+            | 'destination_equals_location'
+            | 'no_friendly_path';
+        location_osid: string | null;
+        destination_osid: string | null;
+        formation_corps_id: string | null;
+        loaned_to_corps_id: string | null;
+        routing_corps_id: string | null;
+        routing_scope_osid_count: number | null;
+        source_in_routing_scope: boolean | null;
+        destination_in_routing_scope: boolean | null;
+    }>;
 }
 
 /**
@@ -324,13 +346,39 @@ export function processOsidColumnMovement(
         column_starts: 0,
         column_advances: 0,
         column_arrivals: 0,
-        column_blocked: 0
+        column_blocked: 0,
+        ...whenReasonCodeTopic('movement_reject', () => ({ column_rejections: [] })),
     };
     const formations = state.military.formations ?? {};
     const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     const movementOrders = state.military.brigade_movement_orders ?? {};
     if (!state.military.brigade_movement_state) state.military.brigade_movement_state = {};
     const movementState = state.military.brigade_movement_state;
+    const recordRejection = (
+        formationId: FormationId,
+        reason: NonNullable<OsidColumnMovementReport['column_rejections']>[number]['reason'],
+        formation: FormationState | undefined,
+        locationOsid: string | null,
+        destinationOsid: string | null,
+        allowedOsids?: Set<string>,
+    ): void => {
+        if (!report.column_rejections) return;
+        const corpsId = formation?.corps_id ?? null;
+        report.column_rejections.push({
+            formation_id: formationId,
+            reason,
+            location_osid: locationOsid,
+            destination_osid: destinationOsid,
+            formation_corps_id: corpsId,
+            loaned_to_corps_id: formation?.elite_loan_state?.on_loan === true
+                ? formation.elite_loan_state.loaned_to_corps ?? null
+                : null,
+            routing_corps_id: corpsId,
+            routing_scope_osid_count: allowedOsids?.size ?? null,
+            source_in_routing_scope: allowedOsids && locationOsid ? allowedOsids.has(locationOsid) : null,
+            destination_in_routing_scope: allowedOsids && destinationOsid ? allowedOsids.has(destinationOsid) : null,
+        });
+    };
 
     // Pass 1: Advance existing column transits (before processing new orders)
     const transitIds = Object.keys(movementState).sort(strictCompare) as FormationId[];
@@ -376,11 +424,36 @@ export function processOsidColumnMovement(
         if (!order || order.stance !== 'column') continue;
 
         const f = formations[formationId];
-        if (!f || f.status !== 'active') {
+        if (!f) {
+            recordRejection(
+                formationId,
+                'missing_formation',
+                undefined,
+                null,
+                order.destination_sids?.[0] ?? null,
+            );
             delete movementOrders[formationId];
             continue;
         }
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') {
+        if (f.status !== 'active') {
+            recordRejection(
+                formationId,
+                'inactive_formation',
+                f,
+                f.location_osid ?? null,
+                order.destination_sids?.[0] ?? null,
+            );
+            delete movementOrders[formationId];
+            continue;
+        }
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group' && f.kind !== 'hv_phantom') {
+            recordRejection(
+                formationId,
+                'unsupported_kind',
+                f,
+                f.location_osid ?? null,
+                order.destination_sids?.[0] ?? null,
+            );
             delete movementOrders[formationId];
             continue;
         }
@@ -388,18 +461,38 @@ export function processOsidColumnMovement(
         // dig_in lockout: brigades actively fortifying cannot be ordered to move
         if (f.posture === 'dig_in') {
             report.column_blocked += 1;
+            recordRejection(
+                formationId,
+                'posture_dig_in',
+                f,
+                f.location_osid ?? null,
+                order.destination_sids?.[0] ?? null,
+            );
             delete movementOrders[formationId];
             continue;
         }
 
         const loc = (f as { location_osid?: string }).location_osid as Osid | undefined;
         if (!loc) {
+            recordRejection(
+                formationId,
+                'missing_location',
+                f,
+                null,
+                order.destination_sids?.[0] ?? null,
+            );
             delete movementOrders[formationId];
             continue;
         }
 
         const destOsid = order.destination_sids?.[0] as Osid | undefined;
-        if (!destOsid || destOsid === loc) {
+        if (!destOsid) {
+            recordRejection(formationId, 'invalid_destination', f, loc, null);
+            delete movementOrders[formationId];
+            continue;
+        }
+        if (destOsid === loc) {
+            recordRejection(formationId, 'destination_equals_location', f, loc, destOsid);
             delete movementOrders[formationId];
             continue;
         }
@@ -416,6 +509,7 @@ export function processOsidColumnMovement(
         const result = dijkstraFriendlyPath(loc, destOsid, factionId, adjacency, state, reverseMap, terrainData, allowedOsids);
         if (!result || result.path.length <= 1) {
             report.column_blocked += 1;
+            recordRejection(formationId, 'no_friendly_path', f, loc, destOsid, allowedOsids);
             delete movementOrders[formationId];
             continue;
         }
