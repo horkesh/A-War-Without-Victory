@@ -407,6 +407,9 @@ describe('operation_opportunities — Phase 1 substrate', () => {
     });
 
     it('preempts disposable probes for an approved opportunity without double-committing participants', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'opportunity_roster';
+        resetReasonCodeTopicCacheForTests();
+        try {
         const state = buildMinimalState(175);
         state.military.formations!.b_elite = {
             ...state.military.formations!.b_a!,
@@ -466,7 +469,19 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         });
         expect(cmd.active_operations.find((op) => op.name === def.name)?.participating_brigades)
             .toEqual(['b_a', 'b_elite']);
+        const trace = state.military.operation_opportunity_traces?.at(-1);
+        expect(trace?.participant_evaluations
+            ?.filter(({ reason }) => reason === 'eligible_probe_preemption')
+            .map(({ formation_id, decision, reason }) => ({ formation_id, decision, reason })))
+            .toEqual([
+                { formation_id: 'b_elite', decision: 'admitted', reason: 'eligible_probe_preemption' },
+                { formation_id: 'b_a', decision: 'admitted', reason: 'eligible_probe_preemption' },
+            ]);
         expect(assertOperationLifecycle(state)).toEqual([]);
+        } finally {
+            delete process.env.AWWV_DEBUG_REASON_CODES;
+            resetReasonCodeTopicCacheForTests();
+        }
     });
 
     it('does not preempt a participant from a non-probe live operation', () => {
