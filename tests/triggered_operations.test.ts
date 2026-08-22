@@ -160,6 +160,37 @@ describe('triggered operations definitions', () => {
 });
 
 describe('checkTriggeredOperations', () => {
+    it('uses a unique live OOB alias for an authored Army-HQ participant', () => {
+        const state = makeState(160);
+        const authored = state.military.formations!.arbih_328th_mountain!;
+        delete state.military.formations!.arbih_328th_mountain;
+        state.military.formations!.F_RBiH_0001 = {
+            ...authored,
+            id: 'F_RBiH_0001',
+            tags: [...(authored.tags ?? []), 'oob:arbih_328th_mountain'],
+        };
+        const farz = _TRIGGERED_OPS.find((def) => def.name === 'Operation Farz 95')!;
+        state.political.political_controllers![farz.staging_osid] = 'RBiH';
+        for (const axis of farz.axes) {
+            for (const objective of axis.objectives) {
+                state.political.political_controllers![objective] = 'RS';
+            }
+        }
+
+        const injected = injectArmyHqOperations(state);
+
+        assert.ok(injected.includes('Operation Farz 95'));
+        const operation = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        assert.ok(operation.participating_brigades.includes('F_RBiH_0001'));
+        assert.equal(
+            (state.military.op_injection_warnings ?? []).some((warning) =>
+                warning.op_name === 'Operation Farz 95'
+                && warning.check === 'brigade_missing'
+                && warning.detail.includes('arbih_328th_mountain')),
+            false,
+        );
+    });
+
     it('injects Posavina Corridor after Operation Corridor is complete', () => {
         const state = makeState(5);
         state.operation_history = [{

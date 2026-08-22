@@ -78,6 +78,7 @@ import { buildCorpsOperation } from './corps_operation_helpers.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { isMainStaffOpAvailabilityEnabled } from './mainstaff_op_availability_gate.js';
 import { isReasonCodeTopicEnabled, whenReasonCodeTopic } from './reason_code_debug.js';
+import { resolveOperationFormation } from './operation_formation_resolver.js';
 import type { Osid } from './osid_adjacency.js';
 import {
     computeCorpsOperationReadiness,
@@ -1383,20 +1384,12 @@ function selectEligibleOpportunityParticipants(
     const selected: FormationId[] = [];
 
     for (const authoredBrigadeId of axis.brigades) {
-        const exactFormation = formations[authoredBrigadeId];
-        const aliasMatches = exactFormation
-            ? []
-            : Object.keys(formations)
-                .sort(strictCompare)
-                .filter((formationId) => formations[formationId]?.tags?.includes(`oob:${authoredBrigadeId}`));
-        const brigadeId = exactFormation
-            ? authoredBrigadeId
-            : aliasMatches.length === 1
-                ? aliasMatches[0]!
-                : null;
-        const formation = brigadeId ? formations[brigadeId] : undefined;
+        const resolved = resolveOperationFormation(formations, authoredBrigadeId);
+        const aliasMatches = resolved.alias_matches;
+        const brigadeId = resolved.formation_id;
+        const formation = resolved.formation ?? undefined;
         const movementStatus = brigadeId ? movementState[brigadeId]?.status ?? null : null;
-        const resolvedByOobAlias = brigadeId !== null && brigadeId !== authoredBrigadeId;
+        const resolvedByOobAlias = resolved.resolution === 'oob_alias';
         const record = (
             decision: OperationParticipantEvaluation['decision'],
             reason: OperationParticipantEvaluationReason,
@@ -1430,7 +1423,7 @@ function selectEligibleOpportunityParticipants(
         // an author NAMES on a roster undeliverable. Mirrors the contract the
         // pre-planned path already implements (pre_planned_operations.ts
         // `buildAxesFromDef`): being named on the roster authorises the loan, and
-        // the loan is what delivers the brigade. Default-OFF; see
+        // the loan is what delivers the brigade. See the explicit contract in
         // mainstaff_op_availability_gate.ts.
         let admittedByRosterAttachment = false;
         if (getFormationCorpsId(formation) !== axis.corps) {

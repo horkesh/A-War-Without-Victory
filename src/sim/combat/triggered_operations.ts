@@ -51,6 +51,7 @@ import {
     getAnchorBrigade,
 } from './tactical_group_config.js';
 import type { ArmyHqOpId, ArmyHqOperation } from '../../state/game_state.js';
+import { resolveOperationFormation } from './operation_formation_resolver.js';
 
 const MIN_OPERATION_PARTICIPANTS = 2;
 
@@ -511,9 +512,9 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         // mandatory, motorized). It serves as the 3rd Corps shock-brigade stand-in for the
         // El Mujahid Detachment (the *Detachment itself* has no OOB id, but this seed does
         // NOT inject a phantom — it references an existing brigade). The triggered-op
-        // injection (`buildAxesFromDef`) filters every brigade id through `formations[fid]`,
-        // so any unresolved seed id is silently dropped, never injected as a phantom — the
-        // seed list is therefore robust by construction. No OOB authoring action required.
+        // injection resolves every authored id through the shared operation-formation
+        // resolver. Recruitment-generated live keys therefore participate through their
+        // unique `oob:<authored id>` tag; truly missing or ambiguous references are dropped.
         // Donor candidates beyond these are pulled faction-wide by the Army HQ Phase-A
         // selection; the brigades list only seeds the participant set for injection — the
         // cross-corps donor pool is NOT pinned.
@@ -849,14 +850,17 @@ function buildOperation(
     const corpsAxes = new Map<string, OperationAxis[]>();
 
     for (const axisDef of def.axes) {
-        const axisBrigades = axisDef.brigades.filter((fid) => {
-            const formation = formations[fid];
-            if (!formation || getFormationCorpsId(formation) !== axisDef.corps) return false;
-            if (!isEligibleOperationFormation(formation)) return false;
-            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
-            if ((formation.disrupted_turns ?? 0) > 0) return false;
-            if (movementState[fid]?.status === 'in_transit') return false;
-            return true;
+        const axisBrigades = axisDef.brigades.flatMap((authoredFormationId) => {
+            const resolved = resolveOperationFormation(formations, authoredFormationId);
+            const fid = resolved.formation_id;
+            const formation = resolved.formation;
+            if (!fid || !formation) return [];
+            if (getFormationCorpsId(formation) !== axisDef.corps) return [];
+            if (!isEligibleOperationFormation(formation)) return [];
+            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return [];
+            if ((formation.disrupted_turns ?? 0) > 0) return [];
+            if (movementState[fid]?.status === 'in_transit') return [];
+            return [fid];
         }).sort(strictCompare);
 
         if (axisBrigades.length === 0) continue;

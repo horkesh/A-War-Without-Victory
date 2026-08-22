@@ -101,6 +101,30 @@ function makeMinimalState(): GameState {
 }
 
 describe('pre-planned operations', () => {
+    it('uses a unique live OOB alias for an authored pre-planned participant', () => {
+        const state = makeMinimalState();
+        const authoredId = 'rs_1st_semberija_light_infantry';
+        const authored = state.military.formations![authoredId]!;
+        delete state.military.formations![authoredId];
+        state.military.formations!.F_RS_0001 = {
+            ...authored,
+            id: 'F_RS_0001',
+            tags: [...(authored.tags ?? []), `oob:${authoredId}`],
+        };
+
+        injectPrePlannedOperations(state);
+
+        const operation = state.military.corps_command!.vrs_east_bosnian!.active_operations[0]!;
+        assert.ok(operation.participating_brigades.includes('F_RS_0001'));
+        assert.equal(
+            (state.military.op_injection_warnings ?? []).some((warning) =>
+                warning.op_name === 'Operation Koridor'
+                && warning.check === 'brigade_missing'
+                && warning.detail.includes(authoredId)),
+            false,
+        );
+    });
+
     it('defines the current pre-planned operation catalog', () => {
         assert.equal(_ALL_PRE_PLANNED.length, 16);
         assert.deepEqual(
