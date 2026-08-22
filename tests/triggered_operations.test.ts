@@ -202,6 +202,7 @@ describe('checkTriggeredOperations', () => {
         assert.ok(injected.includes('Operation Posavina Corridor'));
         const posavina = state.military.corps_command!['vrs_1st_krajina']!.active_operations[0];
         assert.equal(posavina?.sector_id, 'sector:vrs_1st_krajina:0');
+        assert.equal(posavina?.preserve_objective_sequence, true);
     });
 
     it('does not inject Posavina when the primary corps already has an active operation', () => {

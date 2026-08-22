@@ -921,7 +921,9 @@ function pruneUnreachablePlanningObjectivePrefix(
 ): string[] {
     const firstReachableIndex = objectives.findIndex((objective) =>
         collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency).size > 0);
-    return firstReachableIndex > 0 ? objectives.slice(firstReachableIndex) : objectives;
+    if (firstReachableIndex <= 0) return objectives;
+
+    return objectives.slice(firstReachableIndex);
 }
 
 export function reconcilePlanningObjectives(
@@ -932,38 +934,60 @@ export function reconcilePlanningObjectives(
     staticAdjacency?: Map<string, string[]>,
 ): 'completed' | 'valid' | 'invalidated' {
     if (isMultiAxis(op) && op.axes) {
-        const retainedAxes: OperationAxis[] = [];
-        const retainedObjectives: string[] = [];
+        const candidates: Array<{
+            axis: OperationAxis;
+            objectives: string[];
+            hasApproach: boolean;
+        }> = [];
         for (const axis of op.axes) {
-            const filteredObjectives = pruneUnreachablePlanningObjectivePrefix(
-                state,
-                corpsId,
-                faction,
-                filterAxisPlanningObjectives(state, axis, faction),
-                staticAdjacency,
-            );
+            const enemyObjectives = filterAxisPlanningObjectives(state, axis, faction);
+            const filteredObjectives = op.is_pre_planned === true || op.preserve_objective_sequence === true
+                ? enemyObjectives
+                : pruneUnreachablePlanningObjectivePrefix(
+                    state,
+                    corpsId,
+                    faction,
+                    enemyObjectives,
+                    staticAdjacency,
+                );
             if (filteredObjectives.length === 0) continue;
             axis.objectives = filteredObjectives;
             axis.current_objective_index = Math.min(axis.current_objective_index ?? 0, filteredObjectives.length - 1);
-            retainedAxes.push(axis);
-            retainedObjectives.push(...filteredObjectives);
+            candidates.push({
+                axis,
+                objectives: filteredObjectives,
+                hasApproach: collectObjectiveApproachOsids(
+                    state,
+                    corpsId,
+                    faction,
+                    filteredObjectives,
+                    staticAdjacency,
+                ).size > 0,
+            });
         }
-        if (retainedAxes.length === 0) {
+        if (candidates.length === 0) {
             return (op.objectives ?? []).length > 0 ? 'completed' : 'invalidated';
         }
-        op.axes = retainedAxes;
-        op.objectives = [...new Set(retainedObjectives)].sort(strictCompare);
+        const hasAnyReachableAxis = candidates.some((candidate) => candidate.hasApproach);
+        const retained = hasAnyReachableAxis
+            ? candidates.filter((candidate) => candidate.hasApproach)
+            : candidates;
+        op.axes = retained.map((candidate) => candidate.axis);
+        op.objectives = [...new Set(retained.flatMap((candidate) => candidate.objectives))].sort(strictCompare);
     } else {
-        const filteredObjectives = pruneUnreachablePlanningObjectivePrefix(
-            state,
-            corpsId,
-            faction,
-            (op.objectives ?? []).filter((osid) => {
+        const enemyObjectives = (op.objectives ?? []).filter((osid) => {
                 const controller = getPoliticalControllerOSID(state, osid, undefined);
                 return controller !== null && controller !== faction;
-            }),
-            staticAdjacency,
-        );
+            });
+        const filteredObjectives = op.is_pre_planned === true || op.preserve_objective_sequence === true
+            ? enemyObjectives
+            : pruneUnreachablePlanningObjectivePrefix(
+                state,
+                corpsId,
+                faction,
+                enemyObjectives,
+                staticAdjacency,
+            );
         if (filteredObjectives.length === 0) {
             return (op.objectives ?? []).length > 0 ? 'completed' : 'invalidated';
         }

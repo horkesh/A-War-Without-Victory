@@ -904,6 +904,7 @@ function buildOperation(
     // Not pre-planned (no is_pre_planned flag) — does not occupy the slot-0 queue.
     // Sector anchoring now derives from the primary corps brigade set.
     const op = buildCorpsOperation(def, builtAxes, allParticipating, turn, false, primarySectorId);
+    op.preserve_objective_sequence = true;
     const feasibility = evaluateLaunchFeasibility(
         state,
         op.participating_brigades,
