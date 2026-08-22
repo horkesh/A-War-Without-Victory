@@ -371,6 +371,10 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
             ...fixtureOpp(),
             opportunity_id: 'b_op',
             name: 'B Op',
+            axes: [{
+                ...fixtureOpp().axes[0],
+                brigades: ['b_c', 'b_d'],
+            }],
         };
         const def_a: OperationOpportunityDef = {
             ...fixtureOpp(),
@@ -379,6 +383,16 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
             primary_corps: 'arbih_5th_corps',
         };
         const state = buildMinimalState(175, 'HRHB', 1);
+        state.military.formations.b_c = {
+            ...state.military.formations.b_a,
+            id: 'b_c',
+            name: 'Brigade C',
+        };
+        state.military.formations.b_d = {
+            ...state.military.formations.b_b,
+            id: 'b_d',
+            name: 'Brigade D',
+        };
         runOpportunityEvaluationStep(state, 175, [def_b, def_a]);
         // Both eligible.
         expect(state.military.operation_opportunities).toHaveLength(2);
@@ -393,6 +407,33 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
         // A Op spawns first (a_op < b_op alphabetically).
         expect(opNames[0]).toBe('A Op');
         expect(opNames[1]).toBe('B Op');
+    });
+
+    it('bot apply does not double-commit one roster to two same-turn opportunities', () => {
+        const def_b: OperationOpportunityDef = {
+            ...fixtureOpp(),
+            opportunity_id: 'b_op',
+            name: 'B Op',
+        };
+        const def_a: OperationOpportunityDef = {
+            ...fixtureOpp(),
+            opportunity_id: 'a_op',
+            name: 'A Op',
+        };
+        const state = buildMinimalState(175, 'HRHB', 1);
+        runOpportunityEvaluationStep(state, 175, [def_b, def_a]);
+
+        applyBotOpportunityDecisions(state, 175, 'HRHB', [def_b, def_a]);
+
+        const cmd = state.military.corps_command!['arbih_5th_corps'];
+        expect(cmd.active_operations.map(op => op.name)).toEqual(['A Op']);
+        const proposals = state.military.operation_opportunities!;
+        expect(proposals.find(p => p.opportunity_id === 'a_op')?.executed_op_id).toBe('A Op');
+        expect(proposals.find(p => p.opportunity_id === 'b_op')?.executed_op_id).toBeUndefined();
+        expect(state.military.operation_opportunity_traces).toContainEqual(expect.objectContaining({
+            opportunity_id: 'b_op',
+            event: 'spawn_failed',
+        }));
     });
 
     it('player opportunity proposals are absent when the catalog has no matching def', () => {
