@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { assertOperationLifecycle } from '../src/sim/combat/assert_operation_lifecycle.js';
 import { evaluateOperationProgress } from '../src/sim/combat/sector_offensive.js';
 import type { GameState } from '../src/state/game_state.js';
 import { makeFormation } from './test_factories.js';
 
 describe('evaluateOperationProgress', () => {
-    it('keeps axis assignments in sync when a damaged participant is replaced', () => {
+    it('skips a healthy replacement committed to another live operation', () => {
         const state = {
             meta: { turn: 12, phase: 'war' },
             factions: [{ id: 'RS' }],
@@ -14,7 +15,8 @@ describe('evaluateOperationProgress', () => {
                     rs_corps: makeFormation({ id: 'rs_corps', faction: 'RS', kind: 'corps', corps_id: 'rs_corps', location_osid: 'rear', home_osid: 'rear' }),
                     rs_old: makeFormation({ id: 'rs_old', faction: 'RS', corps_id: 'rs_corps', personnel: 600, cohesion: 60, location_osid: 'front_a', home_osid: 'front_a' }),
                     rs_keep: makeFormation({ id: 'rs_keep', faction: 'RS', corps_id: 'rs_corps', personnel: 2200, cohesion: 60, location_osid: 'front_b', home_osid: 'front_b' }),
-                    rs_fresh: makeFormation({ id: 'rs_fresh', faction: 'RS', corps_id: 'rs_corps', personnel: 2600, cohesion: 70, location_osid: 'reserve', home_osid: 'reserve' }),
+                    rs_a_committed: makeFormation({ id: 'rs_a_committed', faction: 'RS', corps_id: 'rs_corps', personnel: 2600, cohesion: 70, location_osid: 'reserve', home_osid: 'reserve' }),
+                    rs_b_available: makeFormation({ id: 'rs_b_available', faction: 'RS', corps_id: 'rs_corps', personnel: 2500, cohesion: 70, location_osid: 'reserve', home_osid: 'reserve' }),
                 },
                 corps_command: {
                     rs_corps: {
@@ -58,17 +60,28 @@ describe('evaluateOperationProgress', () => {
                                     idle_execution_turn_streak: 0,
                                 },
                             ],
+                        }, {
+                            name: 'Operation Already Committed',
+                            type: 'sector_attack',
+                            phase: 'planning',
+                            started_turn: 11,
+                            phase_started_turn: 11,
+                            participating_brigades: ['rs_a_committed'],
+                            target_settlements: ['enemy_c'],
                         }],
                     },
                 },
             },
         } as unknown as GameState;
 
+        expect(assertOperationLifecycle(state)).toEqual([]);
+
         evaluateOperationProgress(state, 'RS');
 
         const op = state.military.corps_command!.rs_corps.active_operations[0];
-        expect(op.participating_brigades).toEqual(['rs_fresh', 'rs_keep']);
-        expect(op.axes?.[0]?.assigned_brigades).toEqual(['rs_fresh']);
+        expect(op.participating_brigades).toEqual(['rs_b_available', 'rs_keep']);
+        expect(op.axes?.[0]?.assigned_brigades).toEqual(['rs_b_available']);
         expect(op.axes?.[1]?.assigned_brigades).toEqual(['rs_keep']);
+        expect(assertOperationLifecycle(state)).toEqual([]);
     });
 });

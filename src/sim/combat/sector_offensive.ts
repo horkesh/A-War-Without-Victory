@@ -97,7 +97,7 @@ import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.j
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
-import { hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
+import { findBrigadeLiveOperationAnywhere, hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
 import {
@@ -2719,6 +2719,7 @@ export function evaluateOperationProgress(
                         const subordinates = getCorpsSubordinates(state, corps.id);
                         const replacement = subordinates.find(s =>
                             !op.participating_brigades.includes(s.id) &&
+                            findBrigadeLiveOperationAnywhere(state, s.id) === null &&
                             (s.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= PERSONNEL_HEALTHY_THRESHOLD &&
                             (s.cohesion ?? 60) >= COHESION_HEALTHY_THRESHOLD
                         );
