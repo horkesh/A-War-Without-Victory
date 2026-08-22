@@ -48,9 +48,10 @@
  *   AWWV_MAINSTAFF_OP_AVAILABILITY — GATE 2, ADMISSION  (isMainStaffOpAvailabilityEnabled)
  *   AWWV_MAINSTAFF_OP_RETENTION    — GATE 1, RETENTION  (isMainStaffOpRetentionEnabled)
  *
- * Availability now defaults ON: an authored reserve roster must be deliverable.
- * Retention remains default OFF until its independent blast radius is measured
- * on the repaired roster path. Neither flag implies the other.
+ * Both contracts now default ON: an authored reserve roster must be deliverable,
+ * and the resulting loan—not sectorless parking—must own retention. The flags
+ * remain independent so each contract can still be disabled in a controlled
+ * comparison.
  *
  * With AVAILABILITY ON:
  *   - GATE 2 admits a sector-exempt brigade that is NAMED on the axis roster and
@@ -240,15 +241,14 @@ let _mainStaffOpRetentionOverride: boolean | null = null;
 
 /**
  * Whether reconciliation keeps a sector-exempt brigade on the roster by its LOAN
- * rather than by which corps' territory it happens to stand in. Default: FALSE
- * (shipped baseline). Independent of the admission flag — see the header note on
- * why the two halves are never switched together. Module-local override wins
- * over env.
+ * rather than by which corps' territory it happens to stand in. Default: TRUE —
+ * loan truth owns roster retention. Independent of the admission flag;
+ * module-local override wins over env.
  */
 export function isMainStaffOpRetentionEnabled(): boolean {
     return _mainStaffOpRetentionOverride !== null
         ? _mainStaffOpRetentionOverride
-        : readEnvFlag('AWWV_MAINSTAFF_OP_RETENTION');
+        : readEnvFlag('AWWV_MAINSTAFF_OP_RETENTION', true);
 }
 
 /** Test/experiment hook: force the retention flag on or off, bypassing env. */
@@ -256,7 +256,7 @@ export function setMainStaffOpRetentionOverride(value: boolean): void {
     _mainStaffOpRetentionOverride = value;
 }
 
-/** Test/experiment hook: clear the retention override, reverting to env-default (OFF when unset). */
+/** Test/experiment hook: clear the retention override, reverting to env-default (ON when unset). */
 export function resetMainStaffOpRetentionOverride(): void {
     _mainStaffOpRetentionOverride = null;
 }

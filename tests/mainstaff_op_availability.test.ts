@@ -33,6 +33,7 @@ import {
 import { reconcileFinalOperationTruth } from '../src/sim/combat/final_operation_truth_reconciliation.js';
 import {
     isMainStaffOpAvailabilityEnabled,
+    isMainStaffOpRetentionEnabled,
     resetMainStaffOpAvailabilityOverride,
     resetMainStaffOpRetentionOverride,
     setMainStaffOpAvailabilityOverride,
@@ -401,6 +402,18 @@ function participantsAfterReconcile(state: GameState): string[] {
 }
 
 describe('GATE 1 — reconciliation retention for sector-exempt brigades', () => {
+    it('defaults retention ON so loans, not sectorless parking, own participation', () => {
+        const prior = process.env.AWWV_MAINSTAFF_OP_RETENTION;
+        delete process.env.AWWV_MAINSTAFF_OP_RETENTION;
+        resetMainStaffOpRetentionOverride();
+        try {
+            expect(isMainStaffOpRetentionEnabled()).toBe(true);
+        } finally {
+            if (prior === undefined) delete process.env.AWWV_MAINSTAFF_OP_RETENTION;
+            else process.env.AWWV_MAINSTAFF_OP_RETENTION = prior;
+            resetMainStaffOpRetentionOverride();
+        }
+    });
     // Every case here drives AWWV_MAINSTAFF_OP_RETENTION and pins
     // AWWV_MAINSTAFF_OP_AVAILABILITY to the OPPOSITE value, so a passing
     // assertion cannot be produced by the admission half.
