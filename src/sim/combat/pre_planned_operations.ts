@@ -26,7 +26,11 @@ import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
-import { canEliteLoanReachCorpsTerritory, deployEliteLoan } from './army_reserve_system.js';
+import {
+    canEliteLoanReachCorpsTerritory,
+    deployEliteLoan,
+    isEliteAvailableForLoan,
+} from './army_reserve_system.js';
 import {
     validateOpAtInjection,
     collectOpInjectionWarnings,
@@ -1041,10 +1045,12 @@ function buildAxesFromDef(
             const corpsId = getFormationCorpsId(formation);
             if (isSectorAssignmentExemptCorpsId(corpsId)) {
                 if (!formation.elite_loan_state) return []; // non-elite exempt = skip
+                const ls = formation.elite_loan_state;
+                if (ls.on_loan && ls.loaned_to_corps !== def.corps) return [];
+                if (!ls.on_loan && !isEliteAvailableForLoan(formation, state.meta.turn)) return [];
                 if (adjacency && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)) return [];
                 // Only schedule a new loan if not already loaned to this corps
                 // (e.g. a probe may have already loaned the brigade at the same turn).
-                const ls = formation.elite_loan_state;
                 if (!ls.on_loan || ls.loaned_to_corps !== def.corps) {
                     eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
                 }

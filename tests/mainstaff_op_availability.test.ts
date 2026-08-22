@@ -246,6 +246,47 @@ describe('GATE 2 — opportunity roster admission for sector-exempt brigades', (
         expect(loan.loan_start_turn).toBe(175);
     });
 
+    it('AVAILABILITY ON: a permanently degraded elite is not admitted or loaned', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.permanently_degraded = true;
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op!.axes![0].assigned_brigades).not.toContain('hvo_1st_guard_abb');
+        expect(state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('AVAILABILITY ON: a cooldown-ineligible elite is not admitted or loaned', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.last_recall_turn = 174;
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op!.axes![0].assigned_brigades).not.toContain('hvo_1st_guard_abb');
+        expect(state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('AVAILABILITY ON: an elite loaned to another corps is not admitted or reassigned', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        const loan = state.military.formations!.hvo_1st_guard_abb.elite_loan_state!;
+        loan.on_loan = true;
+        loan.loaned_to_corps = 'hvo_central_bosnia';
+        loan.loan_start_turn = 170;
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op!.axes![0].assigned_brigades).not.toContain('hvo_1st_guard_abb');
+        expect(loan.on_loan).toBe(true);
+        expect(loan.loaned_to_corps).toBe('hvo_central_bosnia');
+        expect(loan.loan_start_turn).toBe(170);
+    });
+
     it('AVAILABILITY ON: admission is by ROSTER, not by exemption — a foreign REAL corps stays out', () => {
         setMainStaffOpAvailabilityOverride(true);
         setMainStaffOpRetentionOverride(false);

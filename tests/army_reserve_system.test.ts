@@ -217,6 +217,58 @@ describe('deployEliteLoan', () => {
         expect(tracker.episodes[0].travel_hops).toBe(2);
     });
 
+    it('refuses to overwrite an elite loan already committed to another corps', () => {
+        const loanState = {
+            ...createEliteLoanState(),
+            on_loan: true,
+            loaned_to_corps: 'arbih_2nd_corps',
+            loan_start_turn: 3,
+        };
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1', {
+            elite_loan_state: loanState,
+        });
+        const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+
+        expect(brigade.elite_loan_state).toMatchObject({
+            on_loan: true,
+            loaned_to_corps: 'arbih_2nd_corps',
+            loan_start_turn: 3,
+        });
+        expect(state.military.elite_brigade_tracker!.arbih_guards).toBeUndefined();
+    });
+
+    it('refuses to deploy a permanently degraded elite', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1', {
+            elite_loan_state: {
+                ...createEliteLoanState(),
+                permanently_degraded: true,
+            },
+        });
+        const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+        expect(state.military.elite_brigade_tracker!.arbih_guards).toBeUndefined();
+    });
+
+    it('refuses to deploy an elite before its recall cooldown expires', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1', {
+            elite_loan_state: {
+                ...createEliteLoanState(),
+                last_recall_turn: 4,
+            },
+        });
+        const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+        expect(state.military.elite_brigade_tracker!.arbih_guards).toBeUndefined();
+    });
+
     it('clears stale homeward movement when redeploying a recalled elite', () => {
         const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1');
         const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });

@@ -72,7 +72,11 @@ import type {
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import { canEliteLoanReachCorpsTerritory, deployEliteLoan } from './army_reserve_system.js';
+import {
+    canEliteLoanReachCorpsTerritory,
+    deployEliteLoan,
+    isEliteAvailableForLoan,
+} from './army_reserve_system.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { buildCorpsOperation } from './corps_operation_helpers.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
@@ -389,6 +393,9 @@ export type OperationParticipantEvaluationReason =
     | 'corps_mismatch_gate_disabled'
     | 'corps_mismatch_not_sector_exempt'
     | 'missing_elite_loan_state'
+    | 'elite_permanently_degraded'
+    | 'elite_in_cooldown'
+    | 'elite_loaned_to_other_corps'
     | 'unreachable_to_host_corps'
     | 'ineligible_operation_formation'
     | 'below_min_attack_personnel'
@@ -1437,6 +1444,17 @@ function selectEligibleOpportunityParticipants(
             }
             if (!formation.elite_loan_state) {
                 record('rejected', 'missing_elite_loan_state');
+                continue;
+            }
+            const loanState = formation.elite_loan_state;
+            if (loanState.on_loan && loanState.loaned_to_corps !== axis.corps) {
+                record('rejected', 'elite_loaned_to_other_corps');
+                continue;
+            }
+            if (!loanState.on_loan && !isEliteAvailableForLoan(formation, state.meta.turn)) {
+                record('rejected', loanState.permanently_degraded
+                    ? 'elite_permanently_degraded'
+                    : 'elite_in_cooldown');
                 continue;
             }
             if (adjacency && !canEliteLoanReachCorpsTerritory(state, brigadeId!, axis.corps, adjacency)) {

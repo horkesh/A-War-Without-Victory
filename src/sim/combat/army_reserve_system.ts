@@ -173,7 +173,7 @@ export function computeDeployPriority(rawPriority: number, hops: number): number
  * Returns true if the formation is an elite brigade available for loan
  * (not already on loan, not in cooldown, not permanently degraded).
  */
-function isEliteAvailable(f: FormationState, turn: number): boolean {
+export function isEliteAvailableForLoan(f: FormationState, turn: number): boolean {
     // Elite brigades are identified by presence of elite_loan_state (set on OOB load for is_elite=true)
     const ls = f.elite_loan_state;
     if (!ls) return false;
@@ -192,7 +192,7 @@ function getAvailableElites(state: GameState, faction: string, turn: number): Fo
     return Object.keys(formations)
         .filter(fid => {
             const f = formations[fid];
-            return f.faction === faction && isEliteAvailable(f, turn);
+            return f.faction === faction && isEliteAvailableForLoan(f, turn);
         })
         .sort(strictCompare);
 }
@@ -916,6 +916,7 @@ export function deployEliteLoan(
 ): void {
     const f = state.military.formations?.[brigadeId];
     if (!f?.elite_loan_state) return;
+    if (!isEliteAvailableForLoan(f, turn)) return;
 
     const ls = f.elite_loan_state;
     ls.on_loan = true;
@@ -1123,7 +1124,7 @@ export function evaluateArmyReserveAssignments(
 
         // Verify the suggested brigade is still available (another request may have claimed it)
         const f = state.military.formations?.[brigadeId];
-        if (!f || !isEliteAvailable(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS || !canEliteLoanReachCorpsTerritory(state, brigadeId, req.corps_id, adjacency)) {
+        if (!f || !isEliteAvailableForLoan(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS || !canEliteLoanReachCorpsTerritory(state, brigadeId, req.corps_id, adjacency)) {
             remaining.push(req);
             continue;
         }

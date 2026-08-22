@@ -125,6 +125,69 @@ describe('pre-planned operations', () => {
         );
     });
 
+    it('does not admit a permanently degraded main-staff elite to a pre-planned operation', () => {
+        const state = makeMinimalState();
+        const brigade = state.military.formations!.rs_1st_semberija_light_infantry!;
+        brigade.corps_id = 'vrs_main_staff';
+        brigade.elite_loan_state = {
+            on_loan: false,
+            loaned_to_corps: null,
+            loan_start_turn: null,
+            last_recall_turn: null,
+            loan_start_personnel: null,
+            permanently_degraded: true,
+            current_episode_id: null,
+        };
+
+        injectPrePlannedOperations(state);
+
+        const operation = state.military.corps_command!.vrs_east_bosnian!.active_operations[0]!;
+        assert.ok(!operation.participating_brigades.includes(brigade.id));
+        assert.equal(brigade.elite_loan_state.on_loan, false);
+    });
+
+    it('does not admit a cooldown-bound main-staff elite to a pre-planned operation', () => {
+        const state = makeMinimalState();
+        const brigade = state.military.formations!.rs_1st_semberija_light_infantry!;
+        brigade.corps_id = 'vrs_main_staff';
+        brigade.elite_loan_state = {
+            on_loan: false,
+            loaned_to_corps: null,
+            loan_start_turn: null,
+            last_recall_turn: -1,
+            loan_start_personnel: null,
+            permanently_degraded: false,
+            current_episode_id: null,
+        };
+
+        injectPrePlannedOperations(state);
+
+        const operation = state.military.corps_command!.vrs_east_bosnian!.active_operations[0]!;
+        assert.ok(!operation.participating_brigades.includes(brigade.id));
+        assert.equal(brigade.elite_loan_state.on_loan, false);
+    });
+
+    it('does not admit a main-staff elite already loaned to another corps', () => {
+        const state = makeMinimalState();
+        const brigade = state.military.formations!.rs_1st_semberija_light_infantry!;
+        brigade.corps_id = 'vrs_main_staff';
+        brigade.elite_loan_state = {
+            on_loan: true,
+            loaned_to_corps: 'vrs_drina',
+            loan_start_turn: -2,
+            last_recall_turn: null,
+            loan_start_personnel: 1000,
+            permanently_degraded: false,
+            current_episode_id: null,
+        };
+
+        injectPrePlannedOperations(state);
+
+        const operation = state.military.corps_command!.vrs_east_bosnian!.active_operations[0]!;
+        assert.ok(!operation.participating_brigades.includes(brigade.id));
+        assert.equal(brigade.elite_loan_state.loaned_to_corps, 'vrs_drina');
+    });
+
     it('defines the current pre-planned operation catalog', () => {
         assert.equal(_ALL_PRE_PLANNED.length, 16);
         assert.deepEqual(
