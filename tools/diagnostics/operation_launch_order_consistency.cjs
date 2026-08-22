@@ -15,7 +15,6 @@
 const fs = require('fs');
 const path = require('path');
 
-const ATTACK_DECISIONS = new Set(['direct_attack', 'attack_intermediate']);
 const MOVEMENT_DECISIONS = new Set(['in_transit_skipped', 'march_to_approach']);
 
 function asArray(value) {
@@ -39,21 +38,39 @@ function mismatchForAxis(week, operation, axis) {
     if (launch?.executable !== true) return null;
 
     const orders = asArray(axis.order_generation_details);
-    if (orders.length === 0) {
+    const launchBrigades = asArray(launch.brigades)
+        .filter((brigade) => brigade?.considered === true && brigade?.found_in_predictor === true)
+        .map((brigade) => String(brigade.id || ''))
+        .filter(Boolean);
+    const launchBrigadeSet = new Set(launchBrigades);
+    const currentExecutionOrders = orders.filter((order) => (
+        launchBrigadeSet.has(String(order.brigade_id || ''))
+        && Number(order.turn) === week
+        && String(order.phase || '') === 'execution'
+    ));
+    if (launchBrigades.length === 0 || currentExecutionOrders.length === 0) {
         return {
             week,
             corps_id: String(operation.corps_id || ''),
             operation_name: String(operation.operation_name || ''),
             axis_id: String(axis.axis_id || ''),
             reason: 'executable_launch_missing_order_evidence',
-            launch_brigades: asArray(launch.brigades).map((brigade) => brigade.id),
+            launch_brigades: launchBrigades,
             order_decisions: [],
         };
     }
 
-    const decisions = orders.map((order) => String(order.decision || ''));
-    if (decisions.some((decision) => ATTACK_DECISIONS.has(decision))) return null;
-    if (decisions.some((decision) => MOVEMENT_DECISIONS.has(decision))) return null;
+    const validOrderBrigades = new Set(currentExecutionOrders
+        .filter((order) => {
+            const decision = String(order.decision || '');
+            if (MOVEMENT_DECISIONS.has(decision) || decision === 'attack_intermediate') return true;
+            return decision === 'direct_attack'
+                && String(order.issued_target_osid || '') !== ''
+                && String(order.issued_target_osid || '') === String(order.objective || '');
+        })
+        .map((order) => String(order.brigade_id || '')));
+    const refusedLaunchBrigades = launchBrigades.filter((brigadeId) => !validOrderBrigades.has(brigadeId));
+    if (refusedLaunchBrigades.length === 0) return null;
 
     return {
         week,
@@ -61,10 +78,13 @@ function mismatchForAxis(week, operation, axis) {
         operation_name: String(operation.operation_name || ''),
         axis_id: String(axis.axis_id || ''),
         reason: 'executable_launch_immediate_refusal',
-        launch_brigades: asArray(launch.brigades).map((brigade) => brigade.id),
-        order_decisions: orders.map((order) => ({
+        launch_brigades: launchBrigades,
+        refused_launch_brigades: refusedLaunchBrigades,
+        order_decisions: currentExecutionOrders.map((order) => ({
             brigade_id: String(order.brigade_id || ''),
             decision: String(order.decision || ''),
+            issued_target_osid: String(order.issued_target_osid || ''),
+            objective: String(order.objective || ''),
             power_ratio: order.power_ratio ?? null,
             predicted_outcome: order.predicted_outcome ?? null,
         })),
@@ -118,13 +138,29 @@ function positiveControlRow() {
                 axis_id: '__positive_control__',
                 launch_readiness_detail: {
                     executable: true,
-                    brigades: [{ id: '__positive_control_brigade__' }],
+                    brigades: [{
+                        id: '__positive_control_brigade__',
+                        considered: true,
+                        found_in_predictor: true,
+                    }],
                 },
                 order_generation_details: [{
                     brigade_id: '__positive_control_brigade__',
                     decision: 'direct_attack_below_threshold',
+                    turn: -1,
+                    phase: 'execution',
                     power_ratio: 0,
                     predicted_outcome: 'catastrophic',
+                }, {
+                    brigade_id: '__unrelated_moving_brigade__',
+                    decision: 'march_to_approach',
+                    turn: -1,
+                    phase: 'execution',
+                }, {
+                    brigade_id: '__positive_control_brigade__',
+                    decision: 'march_to_approach',
+                    turn: -2,
+                    phase: 'planning',
                 }],
             }],
         }],

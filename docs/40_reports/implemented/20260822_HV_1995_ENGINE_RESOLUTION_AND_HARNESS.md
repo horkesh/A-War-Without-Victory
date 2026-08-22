@@ -43,6 +43,7 @@ Commit `c2333a900` couples the required turn-174 timing with admission of `hv_ph
 - `npm run diagnose:hv1995 -- <run-dir> --write` emits `hv_1995_lifecycle_diagnostic.json`.
 - `npm run diagnose:operation-commitments -- <run-dir>` audits every weekly planning/execution membership and injects a deliberate collision as its positive control.
 - `AWWV_DEBUG_REASON_CODES=objective_filter` exposes friendly-objective rejection rows only when requested. The payload is validated and deterministically sorted; the focused test proves a friendly rejection is recorded while an enemy objective remains as the positive control.
+- The launch/order audit binds every successful order back to the launch-considered brigade in the same execution turn and phase. A direct attack must target its recorded objective. Its injected control combines a launched-brigade refusal, unrelated current movement, and stale planning movement, so an axis-level or stale-row matcher cannot report a false pass.
 - Default runs do not serialize the optional objective/roster debug payloads.
 
 ## CI and Manifest Anomaly
@@ -72,7 +73,7 @@ The manifest remains frozen at SHA-256 `2BD8549068935249C7FEE8C9BFC27C9B21950C0A
 
 Short diagnostic runs n250 and n252 were evidence-gathering runs, not calibration results. n250 established that Mistral 1 participants were being consumed by a disposable probe; n252 established that the failed n251 heuristic discarded a valid staged sibling axis. Those observations, not conjecture, drove the later fixes.
 
-## Final Scenario Evidence
+## Pre-launch-closure Scenario Evidence (n257)
 
 Clean provenance: commit `d7e6929d6008ccc9f21b19841667be6523d00029`, `git_dirty:false`, headless harness.
 
@@ -85,7 +86,7 @@ Clean provenance: commit `d7e6929d6008ccc9f21b19841667be6523d00029`, `git_dirty:
 
 All six delayed HV formations spawned exactly once and recorded movement events. `hv_112th_infantry_1995` recorded six movement events, 13 operation turns, and five full-stack battle hits. The other five recorded two or three movement events but no operation membership or battle-stack hit. Because the operation and battle projections have positive controls, those absences are established. Four have no authored catalog entry; `hv_7th_hgr_1995` is authored only for Mistral 1, whose eligibility window closes before the required turn-174 spawn. That is an authored-content/calibration boundary, not evidence that their movement executor is broken.
 
-The final engine-health gate passed: zero-eligible operations 0/3, dead operations 2/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, matched OSIDs 630/622 minimum, advisory K:W 3.696 inside band. The 31 anchor checks all passed; an in-memory wrong-controller mutation produced one failure. The commitment audit found no collisions across 1,988 live memberships; its injected collision produced `collision_delta: 1`.
+The n257 threshold engine-health gate passed: zero-eligible operations 0/3, dead operations 2/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, matched OSIDs 630/622 minimum, advisory K:W 3.696 inside band. The 31 anchor checks all passed; an in-memory wrong-controller mutation produced one failure. The commitment audit found no collisions across 1,988 live memberships; its injected collision produced `collision_delta: 1`.
 
 The casualty-replacement guards did not change n256 or n257 relative to n255. Therefore the 188-week trajectory did not establish that either replacement path fired. The focused red/green state reproducer establishes both reachable defects and their corrections.
 
@@ -95,7 +96,7 @@ The threshold-based engine-health gate passes, but the artifact is **not valid f
 
 Follow-up tracing disproved two narrower launch fixes before identifying the remaining defect. Operation readiness used the live opening-contact graph as the adjacency supplied to combat prediction, while brigade order generation used the full tactical graph. The sparse graph undercounted reactive defenders and allowed operations such as Kopljem/Gazija to launch on a favorable prediction, then immediately refuse the same opening attack under the order generator's complete combat context.
 
-The readiness predictor now receives the same terrain, supply, population, officer, reverse-formation, and full tactical-adjacency context as order generation. The live opening graph remains responsible only for contact/gate eligibility. The permanent `operation_launch_order_consistency.cjs` audit checks the first execution week of every traced executable axis and injects an immediate-refusal defect as its positive control.
+The readiness predictor now receives the same terrain, supply, population, officer, reverse-formation, and full tactical-adjacency context as order generation. The live opening graph remains responsible only for contact/gate eligibility. The permanent `operation_launch_order_consistency.cjs` audit checks the first execution week of every traced executable axis. It joins same-turn execution orders to each launch-considered brigade and verifies direct attacks retain the recorded objective; unrelated movement and stale planning rows cannot satisfy the check.
 
 Diagnostic-on n265 checked 965 traced axes and 181 first-execution executable axes: zero contradictions, with the injected contradiction detected. Combat causality is valid: zero invalid operations, 755 attack orders, 553 battles, and zero recovery-without-attempt rows. Diagnostic-off n266 reproduced the same gameplay trajectory. After removing only the three env-gated trace fields (`launch_readiness_detail`, `order_generation_details`, and `launch_blocker_detail`), canonical final-save serialization is byte-identical at SHA-256 `F5237F5F9BAF33B288F43BB7AE97F87269B2752CABC42128B6ACD9EA256F41F0`; a mutated turn produced a different hash as the comparator positive control.
 
@@ -103,7 +104,7 @@ n266 is clean at commit `c700a18d441df90234f2c13f60184856325d2413`. It passes al
 
 ## Verification Status
 
-- The final engine/HV focused gate passes 319/319 tests across 16 files, including the launch/order consistency diagnostic and its injected immediate-refusal positive control.
+- The final engine/HV focused gate passes 322/322 tests across 16 files, including launch/order controls for unrelated-brigade masking, stale planning rows, wrong direct-attack targets, and the composite injected defect.
 - The regenerated startup artifact passes `desktop:startup-snapshot:check`, 22/22 startup/desktop contract tests, and `desktop:sim:build`.
 - TypeScript typecheck and the emitting build pass; `git diff --check` passes.
 - The scenario-anchor suite passes 4 selected tests; its Brcko negative case is an explicit positive control.
