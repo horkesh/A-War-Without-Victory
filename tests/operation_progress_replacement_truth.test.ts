@@ -5,7 +5,7 @@ import type { GameState } from '../src/state/game_state.js';
 import { makeFormation } from './test_factories.js';
 
 describe('evaluateOperationProgress', () => {
-    it('skips a healthy replacement committed to another live operation', () => {
+    it('skips committed candidates and does not reuse one replacement twice', () => {
         const state = {
             meta: { turn: 12, phase: 'war' },
             factions: [{ id: 'RS' }],
@@ -14,7 +14,7 @@ describe('evaluateOperationProgress', () => {
                 formations: {
                     rs_corps: makeFormation({ id: 'rs_corps', faction: 'RS', kind: 'corps', corps_id: 'rs_corps', location_osid: 'rear', home_osid: 'rear' }),
                     rs_old: makeFormation({ id: 'rs_old', faction: 'RS', corps_id: 'rs_corps', personnel: 600, cohesion: 60, location_osid: 'front_a', home_osid: 'front_a' }),
-                    rs_keep: makeFormation({ id: 'rs_keep', faction: 'RS', corps_id: 'rs_corps', personnel: 2200, cohesion: 60, location_osid: 'front_b', home_osid: 'front_b' }),
+                    rs_keep: makeFormation({ id: 'rs_keep', faction: 'RS', corps_id: 'rs_corps', personnel: 600, cohesion: 60, location_osid: 'front_b', home_osid: 'front_b' }),
                     rs_a_committed: makeFormation({ id: 'rs_a_committed', faction: 'RS', corps_id: 'rs_corps', personnel: 2600, cohesion: 70, location_osid: 'reserve', home_osid: 'reserve' }),
                     rs_b_available: makeFormation({ id: 'rs_b_available', faction: 'RS', corps_id: 'rs_corps', personnel: 2500, cohesion: 70, location_osid: 'reserve', home_osid: 'reserve' }),
                 },

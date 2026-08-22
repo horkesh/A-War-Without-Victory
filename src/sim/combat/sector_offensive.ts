@@ -2719,6 +2719,7 @@ export function evaluateOperationProgress(
                         const subordinates = getCorpsSubordinates(state, corps.id);
                         const replacement = subordinates.find(s =>
                             !op.participating_brigades.includes(s.id) &&
+                            !updatedParticipants.includes(s.id) &&
                             findBrigadeLiveOperationAnywhere(state, s.id) === null &&
                             (s.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= PERSONNEL_HEALTHY_THRESHOLD &&
                             (s.cohesion ?? 60) >= COHESION_HEALTHY_THRESHOLD
