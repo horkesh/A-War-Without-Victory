@@ -45,6 +45,16 @@ describe('HV 1995 lifecycle diagnostic', () => {
             active_op_id: 'corps:Positive Control:t174',
             current_op_phase: 'execution',
         });
+        temporalRows.push({
+            turn: 100,
+            brigade_id: 'future_exact',
+            kind: 'brigade',
+            location_osid: 'op:a',
+            mv_state: null,
+            mv_destinations: null,
+            active_op_id: null,
+            current_op_phase: null,
+        });
 
         const result = analyzeHv1995Lifecycle({
             turnSummaries: [
@@ -120,6 +130,7 @@ describe('HV 1995 lifecycle diagnostic', () => {
             positiveControlId: 'hv_4th_guards_split',
             formations: {
                 F_RBiH_0001: { tags: ['oob:alias_backed'] },
+                future_exact: { tags: [] },
             },
             opInjectionWarnings: [
                 {
@@ -135,6 +146,13 @@ describe('HV 1995 lifecycle diagnostic', () => {
                     axis_id: 'main',
                     check: 'brigade_missing',
                     detail: 'Brigade "truly_missing" not found in formations',
+                },
+                {
+                    turn: 50,
+                    op_name: 'Deferred operation',
+                    axis_id: 'main',
+                    check: 'brigade_missing',
+                    detail: 'Brigade "future_exact" not found in formations',
                 },
             ],
         });
@@ -201,7 +219,7 @@ describe('HV 1995 lifecycle diagnostic', () => {
         expect(result.operation_reference_integrity).toMatchObject({
             positive_controls: {
                 brigade_missing_warning_projection: true,
-                true_missing_warning_positive_control: true,
+                non_alias_warning_positive_control: true,
             },
             alias_backed_false_missing_count: 1,
             ambiguous_oob_alias_count: 0,
@@ -210,6 +228,11 @@ describe('HV 1995 lifecycle diagnostic', () => {
             authored_formation_id: 'alias_backed',
             live_oob_aliases: ['F_RBiH_0001'],
             classification: 'alias_backed_false_missing',
+        }));
+        expect(result.operation_reference_integrity.warnings).toContainEqual(expect.objectContaining({
+            authored_formation_id: 'future_exact',
+            first_observed_turn: 100,
+            classification: 'not_yet_spawned_at_warning',
         }));
     });
 

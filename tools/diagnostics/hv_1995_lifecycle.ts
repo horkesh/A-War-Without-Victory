@@ -116,6 +116,17 @@ function analyzeOperationReferenceIntegrity(artifacts: Hv1995LifecycleArtifacts)
         .filter((warning) => warning.check === 'brigade_missing')
         .map((warning) => {
             const authoredFormationId = warningFormationId(warning.detail);
+            const warningTurn = typeof warning.turn === 'number' ? warning.turn : null;
+            const exactFormationPresent = authoredFormationId !== null
+                && Object.prototype.hasOwnProperty.call(formations, authoredFormationId);
+            const firstObservedTurn = authoredFormationId === null
+                ? null
+                : artifacts.temporalRows
+                    .filter((row) => row.brigade_id === authoredFormationId && typeof row.turn === 'number')
+                    .reduce<number | null>((earliest, row) => {
+                        const turn = row.turn as number;
+                        return earliest === null || turn < earliest ? turn : earliest;
+                    }, null);
             const aliasMatches = authoredFormationId === null
                 ? []
                 : Object.entries(formations)
@@ -123,16 +134,21 @@ function analyzeOperationReferenceIntegrity(artifacts: Hv1995LifecycleArtifacts)
                     .map(([formationId]) => formationId)
                     .sort(compareText);
             return {
-                turn: typeof warning.turn === 'number' ? warning.turn : null,
+                turn: warningTurn,
                 operation_name: typeof warning.op_name === 'string' ? warning.op_name : '',
                 axis_id: typeof warning.axis_id === 'string' ? warning.axis_id : null,
                 authored_formation_id: authoredFormationId,
+                first_observed_turn: firstObservedTurn,
                 live_oob_aliases: aliasMatches,
-                classification: aliasMatches.length === 0
-                    ? 'true_missing'
-                    : aliasMatches.length === 1
-                        ? 'alias_backed_false_missing'
-                        : 'ambiguous_oob_alias',
+                classification: exactFormationPresent
+                    ? warningTurn !== null && firstObservedTurn !== null && firstObservedTurn > warningTurn
+                        ? 'not_yet_spawned_at_warning'
+                        : 'exact_formation_present_in_final_registry'
+                    : aliasMatches.length === 0
+                        ? 'true_missing'
+                        : aliasMatches.length === 1
+                            ? 'alias_backed_false_missing'
+                            : 'ambiguous_oob_alias',
             };
         })
         .sort((a, b) => (a.turn ?? 0) - (b.turn ?? 0)
@@ -142,7 +158,9 @@ function analyzeOperationReferenceIntegrity(artifacts: Hv1995LifecycleArtifacts)
     return {
         positive_controls: {
             brigade_missing_warning_projection: missingWarnings.length > 0,
-            true_missing_warning_positive_control: missingWarnings.some((row) => row.classification === 'true_missing'),
+            non_alias_warning_positive_control: missingWarnings.some((row) =>
+                row.classification !== 'alias_backed_false_missing'
+                && row.classification !== 'ambiguous_oob_alias'),
         },
         alias_backed_false_missing_count: missingWarnings.filter((row) =>
             row.classification === 'alias_backed_false_missing').length,
