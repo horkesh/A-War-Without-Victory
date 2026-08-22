@@ -28460,4 +28460,6 @@ Full suite on `lane/instrumentation-reason-codes`: **7 files failed, 1,287 passe
 
 **RETENTION IS CORRECT AND INERT IN THIS RUN.** `n234` and `n235` final saves are byte-identical at SHA-256 `AAEED1E8D0439859A7EDEDF2E667ADC24B6B511454A2E852B69B2F09A5EBEC8E`, not merely equal in match count. Focused final verification is 207/207 plus typecheck and diff-check. Independent review remains required before promotion because implementer is not reviewer.
 
+**THE ENGINE-HEALTH GATE PASSES ON `n236`.** Hard checks: zero-eligible ops 0≤3, dead ops 0≤6, ghost-destroyed 2≤4, stranded brigades 6≤9, consistency failures 0≤3, matched OSIDs 637≥622. Advisory K:W is inside band at 3.727. The command was read-only: `node tools/engine_health_gate.cjs <n236> --horizon 188w --json`; no thresholds were updated.
+
 **DERIVED ARTIFACT DISCIPLINE HELD.** `data/derived/latest_run_final_save.json` was restored after every run and ends at SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`. No backup remains. `data/derived/scenario/baselines/manifest.json` was neither regenerated nor edited. Full report: `docs/40_reports/implemented/20260822_HV_1995_ENGINE_RESOLUTION_AND_HARNESS.md`.

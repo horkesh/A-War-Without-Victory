@@ -82,6 +82,7 @@ All five dependency checks used by the harness end HRHB: Bučovača for Mistral 
 - TypeScript typecheck passed.
 - `git diff --check` passed.
 - n236 completed 188 turns with every harness positive control true.
+- The 188-week engine-health gate passed every hard check: zero-eligible ops 0/3, dead ops 0/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, and matched OSIDs 637/622 minimum. Advisory K:W was inside band at 3.727.
 - `data/derived/latest_run_final_save.json` restored to SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`; no backup remained.
 - `data/derived/scenario/baselines/manifest.json` was not refreshed and has no diff.
 - Independent review is still required before promotion because the implementer cannot serve as reviewer.
