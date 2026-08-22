@@ -381,6 +381,47 @@ describe('processOsidColumnMovement', () => {
         }]);
     });
 
+    it('emits an opt-in reason when posture rejects a column order before pathfinding', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'movement_reject';
+        resetReasonCodeTopicCacheForTests();
+        const state = makeState([
+            makeFormation('dug_in_guard', 'HRHB', 'A', {
+                corps_id: 'hvo_main_staff' as any,
+                posture: 'dig_in',
+                elite_loan_state: {
+                    on_loan: true,
+                    loaned_to_corps: 'hvo_tomislavgrad' as any,
+                } as any,
+            }),
+        ], {
+            military: {
+                brigade_movement_orders: {
+                    dug_in_guard: { destination_sids: ['C'], stance: 'column' },
+                },
+            } as any,
+            political: {
+                political_controllers: { A: 'HRHB', B: 'HRHB', C: 'HRHB' },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+            flatTerrain(),
+        );
+
+        expect(report.column_blocked).toBe(1);
+        expect(report.column_rejections).toEqual([expect.objectContaining({
+            formation_id: 'dug_in_guard',
+            reason: 'posture_dig_in',
+            location_osid: 'A',
+            destination_osid: 'C',
+            formation_corps_id: 'hvo_main_staff',
+            loaned_to_corps_id: 'hvo_tomislavgrad',
+        })]);
+    });
+
     it('does not add column rejection payload when the diagnostic topic is off', () => {
         const state = makeState([
             makeFormation('brig1', 'RS', 'A'),
