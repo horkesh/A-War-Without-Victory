@@ -1,129 +1,108 @@
 # HV 1995 Engine Resolution and Evidence Harness
 
 **Date:** 2026-08-22
+
 **Branch:** `codex/hv-1995-timing-mobility`
-**Run ID:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n239`
-**Baseline:** `n238`, 637/712, 31/31 anchors, `7e9dc5cce015640d`
-**Result:** scoped engine defects resolved; 634/712, 31/31 anchors, `55a0d578686dbd56`
+
+**Final clean run:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n256`
+
+**Result:** 630/712 matched OSIDs, 31/31 anchors, final hash `5cb43c593610b335`
 
 ## Summary
 
-- Kept all six `spawn_turn: 174` edits and both live `hv_phantom` movement admissions in the same tree. Neither half was separated.
-- Built a permanent artifact-driven lifecycle/cascade harness with positive controls for spawn, temporal presence, movement intent and execution, operation membership, battle stacks, opportunity rosters, objective filtering, movement rejection, AARs, controller dependencies, and operation-reference integrity.
-- Repaired the measured engine cascade: stale reserve `dig_in`; synthetic OOB-key resolution; main-staff opportunity admission and loan retention; and shared authored-ID resolution across opportunity, triggered, pre-planned, and validation paths.
-- Did not refresh or edit the baseline manifest. Restored the tracked latest-run save byte-for-byte after every 188-week run.
+- The six `spawn_turn: 174` edits and both live `hv_phantom` movement admissions remain in the same tree. No movement-only tree was created or promoted.
+- The engine now carries the wave through spawn and movement, resolves authored OOB aliases, admits the necessary main-staff/loaned participants, preserves authored objective order and staged axes, and lets an approved historical opportunity preempt disposable probe commitments.
+- All known double-commitment paths found in this investigation are guarded: operation birth, elite-loan tick/deployment, and casualty replacement during execution.
+- The permanent diagnostics make spawn, movement, roster, objective-filter, operation, battle, dependency, reference-integrity, and commitment claims falsifiable with positive controls.
+- The baseline manifest was not regenerated or edited. The tracked latest-run save was restored after every 188-week run.
 
-## Changes Made
+## Root Causes and Fixes
 
 ### Atomic timing and movement
 
-- `src/sim/combat/jna_phantom_brigades.ts`: the six 1995 HV expeditionary formations spawn at turn 174; live phantom lifecycle/movement gates admit `hv_phantom` alongside the existing JNA path where applicable.
-- `src/sim/combat/osid_column_movement.ts`: active `hv_phantom` formations can enter column movement. JNA phantom behavior is not broadened.
-- Commit `c2333a900` owns the coupled timing/mobility change and is an ancestor of the final tree.
+Commit `c2333a900` couples the required turn-174 timing with admission of `hv_phantom` to the two live definitive-scenario movement executors. The earlier handoff's fallback-movement claim was corrected: the definitive OSID path uses column movement and application of brigade movement orders.
 
-### Movement-state repair
+### Operation and roster truth
 
-- `src/sim/combat/army_reserve_system.ts`: an accepted reserve deployment that issues movement changes stale `dig_in` posture to `defend` and clears dig-in progress. This prevents T5 deployment from handing T3 an order it must reject.
-- Movement-rejection reason codes provide the positive control: earlier traces recorded `posture_dig_in`; repaired HV movement records real orders, transit, and movement events.
+- Accepted reserve deployment no longer leaves stale `dig_in` state that makes the movement executor reject its order.
+- A shared deterministic formation resolver prefers an exact live key and otherwise accepts exactly one `oob:<authored id>` alias; ambiguity is rejected.
+- Opportunity, triggered, pre-planned, and validation paths use the same authored-ID resolution.
+- Main-staff formations and valid elite loans can enter authored opportunities without becoming unloaned free riders.
+- Authored objective sequences are not shortened merely because the first objective is not immediately approachable. Mixed/staged axes survive planning reconciliation.
+- An approved authored opportunity may preempt participants from a live `probe`, but not from another planning/execution operation. Empty probes enter canonical recovery.
 
-### Elite-loan contract hardening
+### Commitment invariants
 
-- Opportunity and pre-planned rosters now use the reserve pool's canonical availability predicate: an elite is rejected when permanently degraded, inside the four-turn recall cooldown, or already loaned. A live loan to the proposed host is still a commitment and cannot be double-rostered into a concurrent operation.
-- The per-turn elite-loan tick applies the same commitment rule. It auto-joins a newly executing host operation only when the brigade belongs to no other live operation in any corps; it no longer bypasses the opportunity/pre-planned selectors on the following turn.
-- `deployEliteLoan` defends the same invariant and returns explicit success/failure. Desktop approval rejects cooldown before command-authority debit or request consumption. Desktop redirect uses a transactional retask primitive: invalid routes leave military state byte-identical; a valid route closes the old episode and opens the new host commitment without being defeated by the recall cooldown created inside the transaction. Retask preserves the brigade's physical location, so the route validated from its current position remains the route the deployment order uses.
-- The desktop retask path does not run in the headless scenario. Desktop-level red/green tests establish its caller behavior; clean n238 establishes the headless same-host double-commitment correction.
+- Operation selection and per-turn elite-loan attachment reject brigades committed to another live operation.
+- `evaluateOperationProgress` formerly selected a healthy casualty replacement by excluding only the current operation's participants. A deterministic reproducer showed it selecting a brigade already committed to a second planning operation and creating `operation.participant_double_committed`. The selector now excludes every brigade returned by `findBrigadeLiveOperationAnywhere`.
+- The replacement test proves the initial state is lifecycle-clean, makes the committed candidate sort first, expects the uncommitted candidate, and proves the resulting state remains lifecycle-clean.
 
-### Authored operation roster repair
+### Permanent evidence harness
 
-- `src/sim/combat/operation_formation_resolver.ts`: exact live formation keys win; otherwise exactly one sorted `oob:<authored id>` match resolves to the live key; ambiguity is rejected rather than arbitrarily selected.
-- The shared resolver is used by opportunity, triggered, pre-planned, and injection-validation paths.
-- Main-staff roster admission and loan-truth retention defaults are enabled. An authored sector-exempt elite can enter an opportunity through an explicit loan; reconciliation no longer retains an unloaned free rider.
+- `npm run diagnose:hv1995 -- <run-dir> --write` emits `hv_1995_lifecycle_diagnostic.json`.
+- `npm run diagnose:operation-commitments -- <run-dir>` audits every weekly planning/execution membership and injects a deliberate collision as its positive control.
+- `AWWV_DEBUG_REASON_CODES=objective_filter` exposes friendly-objective rejection rows only when requested. The payload is validated and deterministically sorted; the focused test proves a friendly rejection is recorded while an enemy objective remains as the positive control.
+- Default runs do not serialize the optional objective/roster debug payloads.
 
-### Permanent harness
+## CI and Manifest Anomaly
 
-- `npm run diagnose:hv1995 -- <run-dir> --write` writes `hv_1995_lifecycle_diagnostic.json` inside the run directory.
-- Absence is never reported from a zero alone. Each projection carries a positive control, and the operation-reference audit classifies warnings as alias-backed false missing, ambiguous alias, not-yet-spawned, exact-present-later, or genuinely absent.
-- The Trnovo warning originally described as true missing was corrected by temporal evidence: warning at turn 69, first live observation at turn 140, operation membership at turn 141.
+The handoff's assertion that CI runs `32532844577` and `32050627175` were byte-identical was false. Both reported 16 mismatches, but the newer run changed the 188-week actual hashes for `final_save.json`, `run_summary.json`, and `weekly_report.jsonl`. A deliberately false tuple was detected as a positive control. The workflow caches dependencies, not scenario artifacts. Equal red counts concealed changed outputs; CI did exercise the history merge.
 
-## Scenario Results
+The manifest remains frozen at SHA-256 `2BD8549068935249C7FEE8C9BFC27C9B21950C0AA11C2D38B41043024124D03F`.
 
-| Run | Isolated change | Matched | Anchors | Hash |
-|---|---|---:|---:|---|
-| n230 | diagnostic baseline before reserve movement repair | 609 | 31/31 | `1eaa3f381072db96` |
-| n231 | clear stale reserve `dig_in` on accepted movement deployment | 607 | 31/31 | `b5c1a503ac0e5ab6` |
-| n232 | opportunity-roster diagnostics only | 607 | 31/31 | `010e21ba80349cca` |
-| n233 | opportunity OOB-alias resolution | 638 | 31/31 | `05ef15d4eceb52ad` |
-| n234 | main-staff opportunity admission default on | 637 | 31/31 | `aaeed1e8d0439859` |
-| n235 | main-staff loan-truth retention default on | 637 | 31/31 | `aaeed1e8d0439859` |
-| n236 | shared resolver across all authored operation paths | 637 | 31/31 | `f3ee13afaee32e9d` |
-| n237 | enforce canonical elite-loan availability in opportunity, pre-planned, and deployment paths | 637 | 31/31 | `50be25fe9efb67ae` |
-| n238 | reject a live same-host elite loan from a second concurrent operation | 637 | 31/31 | `7e9dc5cce015640d` |
-| n239 | prevent the per-turn loan tick from reattaching a committed elite to another operation | 634 | 31/31 | `55a0d578686dbd56` |
+## Controlled Run Record
 
-`n234` and `n235` final saves have identical SHA-256 `AAEED1E8D0439859A7EDEDF2E667ADC24B6B511454A2E852B69B2F09A5EBEC8E`. This establishes that the retention default is behaviorally inert in that repaired run, not merely equal in matched-cell count.
+| Run | Isolated purpose | Matched | Anchors | Final hash | Disposition |
+|---|---|---:|---:|---|---|
+| n246 | stale-prefix pruning candidate | 632 | 30/31 | `ca338f347d84a26b` | rejected: Orašje fell to RS |
+| n247 | controller heuristic | 604 | 31/31 | `15418713862f4bda` | rejected: Mistral cascade regressed |
+| n248 | preserve authored objectives | 604 | 31/31 | `8e8f4e5a726e2e7f` | retained, insufficient alone |
+| n249 | pre-planned prefix correction | 604 | 31/31 | `8e8f4e5a726e2e7f` | byte-identical; inert here |
+| n251 | defer nonviable opportunity rosters | 601 | 31/31 | `b581b2d3bacb5d65` | rejected and reverted |
+| n253 | exact revert proof | 604 | 31/31 | `8e8f4e5a726e2e7f` | byte-identical to n248/n249 |
+| n254 | retain staged operation axes | 614 | 31/31 | `f3b1e244e39f23a3` | retained |
+| n255 | authored opportunity preempts probes | 630 | 31/31 | `5cb43c593610b335` | retained; cascade restored |
+| n256 | casualty replacement commitment guard | 630 | 31/31 | `5cb43c593610b335` | retained; byte-identical in this trajectory |
 
-Provenance limitation: every retained `n230`–`n236` `run_meta.json` records `git_dirty: true`, and the reason-code environment selection was not stamped. The commit sequence and session procedure support the table's intended one-change sequence, but the retained artifacts do not independently establish the exact dirty paths or flags. `n237` closes the clean-tree gap: `run_meta.json` records `git_dirty:false` at commit `c7459228a`, and the task record pins `AWWV_DEBUG_REASON_CODES=battle_stack,brigade_state,formation_lifecycle,movement_reject,objective_filter,opportunity_roster`.
+Short diagnostic runs n250 and n252 were evidence-gathering runs, not calibration results. n250 established that Mistral 1 participants were being consumed by a disposable probe; n252 established that the failed n251 heuristic discarded a valid staged sibling axis. Those observations, not conjecture, drove the later fixes.
 
-The n236→n237 final-save delta is exactly one leaf: Mistral 2's already-loaned `hvo_2nd_guard_mechanized` rejection reason changes from `unreachable_to_host_corps` to the earlier and more accurate `elite_loaned_to_other_corps`. Activity, control delta, formation delta, weekly report, and brigade temporal artifacts are byte-identical. This establishes that the availability hardening changes diagnostic classification in this scenario but not its simulated military outcome.
+## Final Scenario Evidence
 
-The n237→n238 change is behaviorally active. At turn 175, `hvo_1st_guard_abb` already had a live loan to `hvo_tomislavgrad`; n237 nevertheless admitted it to Mistral 2 as another roster attachment. n238 rejects that second commitment as `elite_committed_to_host_corps`, reducing Mistral 2 initial strength from 12,059 to 9,259 and its weekly brigade count from five to four. Mistral 2 still succeeds 11/11 on the same turn window. The final save has 754 changed leaves through the resulting combat cascade and the weekly report hash changes; activity summary, control delta, and formation delta remain byte-identical. This is not an inert diagnostic-only change.
+Clean provenance: commit `f91b80ca1a00c56ecbae33597806ce99ddbbb75a`, `git_dirty:false`, headless harness.
 
-The n238→n239 change closes the independent per-turn bypass and is broader: 38,311 final-save leaves change, together with activity, control, and weekly artifacts; formation delta remains byte-identical. Matched OSIDs fall 637→634, while all 31 anchors and every hard health gate remain green. Mistral 2 changes from 11/11 success to 9/11 partial. This is the measured cost of enforcing one live operation commitment through the tick, and it is intentionally reported rather than hidden behind the unchanged hard-gate result.
+| Operation | Observed result at n256 | Evidence boundary |
+|---|---|---|
+| Cincar / Kupres | success, 5/5 captured | AAR completed |
+| Mistral 1 | partial, 7 captures | AAR ended turn 173, `max_failures` |
+| Mistral 2 | approved t175, execution t178, 7 captures by t184 | still in recovery at turn-188 boundary; no final AAR yet |
+| Southern Move | blocked t182–188 | Sipovo staging anchors not HRHB-held |
 
-### Late-war cascade at n239
+All six delayed HV formations spawned exactly once and recorded movement events. `hv_112th_infantry_1995` recorded six movement events, 13 operation turns, and five full-stack battle hits. The other five recorded two or three movement events but no operation membership or battle-stack hit. Because the operation and battle projections have positive controls, those absences are established. Four have no authored catalog entry; `hv_7th_hgr_1995` is authored only for Mistral 1, whose eligibility window closes before the required turn-174 spawn. That is an authored-content/calibration boundary, not evidence that their movement executor is broken.
 
-| Operation | Result | Attacks | Captured |
-|---|---|---:|---:|
-| Cincar / Kupres | success / completed | 5 | 5/5 |
-| Mistral 1 | partial / max failures | 7 | 7/11 |
-| Mistral 2 | partial / completed | 12 | 9/11 |
-| Southern Move | executing at turn-188 boundary | 6 through boundary | 5/6 |
+The final engine-health gate passed: zero-eligible operations 0/3, dead operations 2/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, matched OSIDs 630/622 minimum, advisory K:W 3.696 inside band. The 31 anchor checks all passed; an in-memory wrong-controller mutation produced one failure. The commitment audit found no collisions across 1,988 live memberships; its injected collision produced `collision_delta: 1`.
 
-All five dependency checks used by the harness end HRHB: Bučovača for Mistral 1 and 2, Glamoč for Mistral 2, and Šipovo plus Pribeljci for Southern Move.
+The casualty-replacement guard did not change n256's final state relative to n255. Therefore the 188-week trajectory did not establish that this path fired. The focused red/green state reproducer establishes the reachable defect and its correction.
 
-### Formation evidence
+## Verification Status
 
-- All six delayed formations spawned once and were present in the temporal trace.
-- `hv_112th_infantry_1995` recorded six movement-order turns, three transit turns, four movement events, eleven operation turns, and two full-stack battle hits.
-- Five formations recorded no operation membership. The operation-membership projection had a positive control, so that absence is established. Four have no current authored catalog entry; `hv_7th_hgr_1995` is authored for Mistral 1, but that opportunity window closes at turn 170 before its required turn-174 spawn. None has a reachable post-turn-174 roster; no conclusion is drawn that their movement executor is broken.
-
-### Reference-integrity evidence
-
-- n235 positive case: Farz 95 warned `arbih_328th_mountain` missing while `F_RBiH_0001` carried `oob:arbih_328th_mountain`.
-- n236: alias-backed false missing count `0`; ambiguous alias count `0`.
-- Farz 95 participants changed from three authored exact-key formations to five live formations including `F_RBiH_0001`; it still completed all four objectives.
-- The remaining `brigade_missing` warning is Trnovo pre-spawn observability, not an alias-resolution failure.
-
-## Verification
-
-- Focused engine, desktop reserve, and harness suites include explicit invalid-loan and atomic-failure coverage across movement, reserve loans, opportunity, triggered, pre-planned, validation, reconciliation, and diagnostics.
-- TypeScript typecheck passed.
-- `git diff --check` passed.
-- n239 completed 188 turns from clean commit `fa40bf566` (`run_meta.json` records `git_dirty:false`) with every harness positive control true, including the corrected spawn and battle-stack controls.
-- The n239 188-week engine-health gate passed every hard check: zero-eligible ops 0/3, dead ops 0/6, ghost-destroyed 1/4, stranded brigades 6/9, consistency failures 0/3, and matched OSIDs 634/622 minimum. Advisory K:W was inside band at 3.728.
-- `data/derived/latest_run_final_save.json` restored to SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`; no backup remained.
-- `data/derived/scenario/baselines/manifest.json` was not refreshed and has no diff.
-- Independent review is still required before promotion because the implementer cannot serve as reviewer.
+- Focused replacement, lifecycle, sector-offensive, opportunity, state-validation, and HV diagnostic tests pass.
+- TypeScript typecheck passes.
+- The scenario-anchor suite passes 4 selected tests; its Brcko negative case is an explicit positive control.
+- n256 passes the engine-health, HV lifecycle, anchor, provenance, and operation-commitment harnesses.
+- `data/derived/latest_run_final_save.json` is restored to SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`.
+- Full-suite/build verification and final independent review are recorded separately when complete.
 
 ## Lessons Learned
 
-- Final-save identity alone cannot explain a warning emitted 119 turns earlier; temporal evidence changed Trnovo from “true missing” to “not yet spawned.”
-- A successful operation can conceal a silently omitted participant. Farz completed in n235 despite the engine dropping a real brigade.
-- Exact matched-cell parity can conceal a real state change, while equal failure counts can conceal changed CI artifacts. Hashes and typed boundary receipts are both necessary.
-- The five non-participating HV formations now stop at an authored-content boundary. Treating that as an engine defect without a catalog reference would repeat the original hypothesis-first failure.
+- A count can stay constant while artifact hashes change; compare the actual tuples.
+- A zero is not an absence proof unless the same projection proves it can observe a known event.
+- Mixed-axis opportunity planning is staged movement, not evidence that an unreachable sibling axis is invalid.
+- Generic probes are disposable planning devices; historical opportunities need an explicit, bounded preemption rule rather than accidental starvation.
+- A clean scenario hash can mean a defensive invariant was not exercised, not that the unit-level defect was imaginary.
 
-## Files Changed
+## Remaining Boundaries
 
-| Area | Files |
-|---|---|
-| Timing/movement | `jna_phantom_brigades.ts`, `osid_column_movement.ts`, war-pipeline comments/tests |
-| Movement state | `army_reserve_system.ts` and tests |
-| Operation identity | `operation_formation_resolver.ts`, opportunity/triggered/pre-planned/validation paths and tests |
-| Main-staff loans | `mainstaff_op_availability_gate.ts`, opportunity/reconciliation paths and tests |
-| Diagnostics | `hv_1995_lifecycle.ts`, reason-code traces, state validation, diagnostic tests |
-
-## Next Steps
-
-1. Obtain independent review of the final branch before promotion.
-2. Keep the manifest frozen until baseline ownership deliberately chooses new pins; n236 is evidence, not an automatic golden floor.
-3. Treat any proposal to add the four uncatalogued delayed HV formations, or to reconcile the 7th HGR's pre-spawn Mistral 1 window, as separate historical/content calibration, one change and one run at a time.
+- Do not regenerate baseline pins as part of this work.
+- Adding authored post-turn-174 roster paths for the five non-participating formations is a separate historical/content calibration decision.
+- Southern Move's Sipovo dependency is a measured scenario outcome, not silently relabeled as an engine failure.
+- Promotion requires independent review of the final HEAD; the implementer is not the reviewer.
