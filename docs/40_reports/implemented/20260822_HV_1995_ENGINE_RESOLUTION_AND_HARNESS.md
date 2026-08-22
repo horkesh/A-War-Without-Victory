@@ -67,6 +67,8 @@ The manifest remains frozen at SHA-256 `2BD8549068935249C7FEE8C9BFC27C9B21950C0A
 | n257 | reserve replacements within one operation | 630 | 31/31 | `5cb43c593610b335` | retained; byte-identical in this trajectory |
 | n265 | launch/order trace enabled | 628 | 31/31 | `32b614231a2601e2` | diagnostic evidence; env-gated payload changes raw hash |
 | n266 | launch/order trace disabled | 628 | 31/31 | `68fb8b09c4fd7260` | final clean run; combat-calibration valid |
+| n267 | collapse OFF control at final implementation HEAD | not re-scored | not re-scored | `68fb8b09c4fd7260` | clean half of same-commit ON/OFF pair |
+| n268 | collapse ON control at final implementation HEAD | not re-scored | not re-scored | `354a4e4deb109ac5` | clean paired half; Section 6 comparison executed |
 
 Short diagnostic runs n250 and n252 were evidence-gathering runs, not calibration results. n250 established that Mistral 1 participants were being consumed by a disposable probe; n252 established that the failed n251 heuristic discarded a valid staged sibling axis. Those observations, not conjecture, drove the later fixes.
 
@@ -101,12 +103,16 @@ n266 is clean at commit `c700a18d441df90234f2c13f60184856325d2413`. It passes al
 
 ## Verification Status
 
-- Focused replacement, lifecycle, sector-offensive, opportunity, state-validation, and HV diagnostic tests pass.
-- TypeScript typecheck passes.
+- The final engine/HV focused gate passes 319/319 tests across 16 files, including the launch/order consistency diagnostic and its injected immediate-refusal positive control.
+- The regenerated startup artifact passes `desktop:startup-snapshot:check`, 22/22 startup/desktop contract tests, and `desktop:sim:build`.
+- TypeScript typecheck and the emitting build pass; `git diff --check` passes.
 - The scenario-anchor suite passes 4 selected tests; its Brcko negative case is an explicit positive control.
 - n265 passes the launch/order consistency audit with its injected positive control; n266 passes threshold health, anchors, and combat-calibration validity.
+- A controlled collapse pair was rebuilt at the identical clean commit `709e3aa511325cffd71760e237b649622891eeb4`, Node `v24.13.0`, and consumed-input digest `be30f7c708f3e27a0df84507bc0566219f88fa5a5772ca961b3cce486625752b`. Only `collapse_enabled` differs. The three comparison files pass 70/70 with `pair=FORMED verdict=OK`; all Section 6 sentinels execute, all 84 enclave keys are identical, and none of 17 OFF-held RBiH rim cells is newly lost.
+- The earlier broad-suite run reported 12 failing files / 23 failing tests: 7 files / 15 tests were the established pre-existing baseline, four collapse assertions were invalid because they selected an ON/OFF pair from different commits, two startup/desktop failures exposed the stale baked artifact, and one operation-opportunity failure exposed an overlapping test roster. Those three branch-local causes are now independently green in their focused gates. A complete post-correction broad-suite rerun is not claimed here.
 - `data/derived/latest_run_final_save.json` is restored to SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`.
-- Full-suite/build verification and final independent review are recorded separately when complete.
+- `data/derived/scenario/baselines/manifest.json` remains frozen at SHA-256 `2BD8549068935249C7FEE8C9BFC27C9B21950C0AA11C2D38B41043024124D03F`; no pin was regenerated.
+- Final independent review is recorded separately when complete.
 
 ## Lessons Learned
 

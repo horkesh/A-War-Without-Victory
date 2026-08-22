@@ -2949,3 +2949,10 @@ Per-criterion: **2, 3, 5, 6 DISCHARGED permanently** (evidence production and ex
 - Diagnostic-on n265 checked 965 traced operation axes and 181 first-execution executable axes with zero launch/order contradictions. Its injected immediate-refusal positive control was detected.
 - Removing only env-gated trace payloads makes n265/n266 final saves canonically byte-identical (SHA-256 `F5237F5F9BAF33B288F43BB7AE97F87269B2752CABC42128B6ACD9EA256F41F0`); a mutated turn is detected.
 - This is verification evidence, not a baseline refresh. `data/derived/scenario/baselines/manifest.json` remains frozen.
+
+## 2026-08-23 — HV promotion control pair (n267/n268; manifest anomaly closed)
+
+- n267 collapse-OFF and n268 collapse-ON were produced from the identical clean commit `709e3aa511325cffd71760e237b649622891eeb4`, Node `v24.13.0`, and consumed-input digest `be30f7c708f3e27a0df84507bc0566219f88fa5a5772ca961b3cce486625752b`; their sole provenance switch is `collapse_enabled:false/true`.
+- OFF reproduces the n266 gameplay hash `68fb8b09c4fd7260`; ON is `354a4e4deb109ac5`. The divergence is expected collapse state, not evidence for a golden-pin refresh.
+- All three collapse comparison files pass 70/70 with `pair=FORMED verdict=OK`. The G2 sentinels execute; 84/84 live enclave keys resolve identically; none of 17 OFF-held RBiH rim cells is newly lost; the Teočak–Tuzla component remains attached.
+- The prior four collapse failures selected artifacts from different commits. The controlled pair settles that comparison anomaly. It does not authorize regenerating scenario baselines: the manifest remains frozen at SHA-256 `2BD8549068935249C7FEE8C9BFC27C9B21950C0AA11C2D38B41043024124D03F`.
