@@ -460,6 +460,13 @@ function issueEliteDeploymentOrder(
 ): void {
     const targetOsid = resolveEliteDeploymentTarget(state, formation, brigadeId, corpsId, adjacency);
     if (!targetOsid || targetOsid === formation.location_osid) return;
+    // An accepted T5 reserve deployment supersedes a stale defensive posture.
+    // Without this release, T3 rejects the column order every turn while the
+    // reserve system keeps reissuing it, leaving the elite permanently dug in.
+    if (formation.posture === 'dig_in') {
+        formation.posture = 'defend';
+        formation.dig_in_progress = 0;
+    }
     if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
     (state.military.brigade_movement_orders as Record<FormationId, BrigadeMovementOrder>)[brigadeId] = {
         destination_sids: [targetOsid as SettlementId],

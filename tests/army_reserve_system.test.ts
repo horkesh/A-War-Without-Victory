@@ -324,6 +324,40 @@ describe('deployEliteLoan', () => {
         });
     });
 
+    it('releases a dug-in elite before issuing its accepted deployment march', () => {
+        const brigade = makeElite('hvo_3rd_guard_jastrebovi', 'HRHB', 'op:mun:o0', {
+            corps_id: 'hvo_main_staff',
+            posture: 'dig_in',
+        });
+        const state = makeState({
+            formations: { hvo_3rd_guard_jastrebovi: brigade },
+            corps_front_sectors: {
+                'sector:hvo_tomislavgrad:0': makeSector('hvo_tomislavgrad', 'HRHB', 'op:mun:o3'),
+            },
+            turn: 5,
+        });
+
+        deployEliteLoan(
+            state,
+            'hvo_3rd_guard_jastrebovi',
+            'hvo_tomislavgrad',
+            'offensive_support',
+            3,
+            5,
+            undefined,
+            undefined,
+            'army_ai',
+            chainAdj(4),
+        );
+
+        expect(state.military.formations!.hvo_3rd_guard_jastrebovi.posture).toBe('defend');
+        expect(state.military.formations!.hvo_3rd_guard_jastrebovi.dig_in_progress).toBe(0);
+        expect(state.military.brigade_movement_orders?.hvo_3rd_guard_jastrebovi).toEqual({
+            destination_sids: ['op:mun:o3'],
+            stance: 'column',
+        });
+    });
+
     it('uses active operation axis staging evidence before generic threatened-sector evidence', () => {
         const brigade = makeElite('arbih_guards', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
         const state = makeState({
