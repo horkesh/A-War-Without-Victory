@@ -861,7 +861,7 @@ export function hasRecentCatastrophicObjectiveMemory(
     for (const formationId of Object.keys(formations).sort(strictCompare)) {
         const formation = formations[formationId];
         if (!formation || formation.faction !== faction || formation.corps_id !== corpsId) continue;
-        if ((formation.kind ?? 'brigade') !== 'brigade') continue;
+        if ((formation.kind ?? 'brigade') !== 'brigade' && formation.kind !== 'hv_phantom') continue;
         const engagements = formation.brigade_history?.engagements ?? [];
         for (const engagement of engagements) {
             if (engagement.role !== 'attacker') continue;

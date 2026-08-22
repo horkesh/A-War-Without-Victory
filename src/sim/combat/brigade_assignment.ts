@@ -2701,7 +2701,7 @@ export function syncSectorAssignmentsToFormations(
     for (const fid of formIds) {
         const f = formations[fid];
         if (!f) continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group'
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group' && f.kind !== 'hv_phantom'
             && f.kind !== undefined) continue;
         // Only clear sector assignments — preserve edge/region assignments from other systems
         if (f.assignment && f.assignment.kind === 'sector') {

@@ -7,6 +7,7 @@ export function isSectorRosterEligibleFormation(formation: SectorTopologyWorking
         && formation.kind !== 'brigade'
         && formation.kind !== 'og'
         && formation.kind !== 'operational_group'
+        && formation.kind !== 'hv_phantom'
     ) {
         return false;
     }

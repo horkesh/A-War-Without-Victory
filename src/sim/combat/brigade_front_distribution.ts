@@ -211,7 +211,7 @@ function countActiveBrigadesByOsid(formations: GameState['military']['formations
     const counts = new Map<string, number>();
     for (const f of Object.values(formations)) {
         if (!f || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group' && f.kind !== 'hv_phantom') continue;
         const loc = f.location_osid;
         if (!loc) continue;
         counts.set(loc, (counts.get(loc) ?? 0) + 1);
@@ -254,7 +254,7 @@ function disperseStackedRearBrigadesForSector(
     for (const bid of [...rearOwned].sort(strictCompare)) {
         const f = formations[bid];
         if (!f || f.status !== 'active' || !f.location_osid) continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group' && f.kind !== 'hv_phantom') continue;
         if (opParticipants.has(bid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
         if (frontOsids.has(f.location_osid)) continue;
@@ -355,7 +355,7 @@ function commitReserveToThreatenedFront(
         .map((bid) => ({ bid, formation: formations[bid] }))
         .filter((entry): entry is { bid: string; formation: FormationState } => !!entry.formation)
         .filter((entry) => entry.formation.status === 'active')
-        .filter((entry) => entry.formation.kind === 'brigade' || entry.formation.kind === 'og' || entry.formation.kind === 'operational_group')
+        .filter((entry) => entry.formation.kind === 'brigade' || entry.formation.kind === 'og' || entry.formation.kind === 'operational_group' || entry.formation.kind === 'hv_phantom')
         .filter((entry) => !!entry.formation.location_osid)
         .filter((entry) => !opParticipants.has(entry.bid))
         .filter((entry) => (entry.formation.disrupted_turns ?? 0) === 0)
@@ -439,7 +439,7 @@ function fillEmptyFrontSubsegmentsFromSectorReserve(
         .map((bid) => formations[bid])
         .filter((formation): formation is FormationState => !!formation)
         .filter((formation) => formation.status === 'active')
-        .filter((formation) => formation.kind === 'brigade' || formation.kind === 'og' || formation.kind === 'operational_group')
+        .filter((formation) => formation.kind === 'brigade' || formation.kind === 'og' || formation.kind === 'operational_group' || formation.kind === 'hv_phantom')
         .filter((formation) => !!formation.location_osid)
         .length;
     if (activeSectorPoolCount === 0) return;
@@ -469,7 +469,7 @@ function fillEmptyFrontSubsegmentsFromSectorReserve(
             .map((bid) => ({ bid, formation: formations[bid] }))
             .filter((entry): entry is { bid: string; formation: FormationState } => !!entry.formation)
             .filter((entry) => entry.formation.status === 'active')
-            .filter((entry) => entry.formation.kind === 'brigade' || entry.formation.kind === 'og' || entry.formation.kind === 'operational_group')
+            .filter((entry) => entry.formation.kind === 'brigade' || entry.formation.kind === 'og' || entry.formation.kind === 'operational_group' || entry.formation.kind === 'hv_phantom')
             .filter((entry) => !!entry.formation.location_osid)
             .filter((entry) => !allFrontOsids.has(entry.formation.location_osid!))
             .filter((entry) => !opParticipants.has(entry.bid))
@@ -550,7 +550,7 @@ function deconflictSharedFrontOsidStacks(
         for (const bid of [...(sector.assigned_brigade_ids ?? [])].sort(strictCompare)) {
             const formation = formations[bid];
             if (!formation || formation.status !== 'active') continue;
-            if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+            if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group' && formation.kind !== 'hv_phantom') continue;
             const loc = formation.location_osid;
             if (!loc || !frontSet.has(loc)) continue;
             const list = claimsByOsid.get(loc) ?? [];
@@ -723,7 +723,7 @@ function pinGarrisonToMustHoldFrontEdge(
                 .filter((e): e is { bid: string; f: FormationState } => !!e.f)
                 .filter((e) => e.f.corps_id === corpsId)                                  // Guard 2
                 .filter((e) => e.f.status === 'active')
-                .filter((e) => e.f.kind === 'brigade' || e.f.kind === 'og' || e.f.kind === 'operational_group')
+                .filter((e) => e.f.kind === 'brigade' || e.f.kind === 'og' || e.f.kind === 'operational_group' || e.f.kind === 'hv_phantom')
                 .filter((e) => !!e.f.location_osid)
                 .filter((e) => !opParticipants.has(e.bid))                                // Guard 3 (idle)
                 .filter((e) => (e.f.personnel ?? 0) >= MUST_HOLD_GARRISON_MIN_PERSONNEL)  // Guard 4

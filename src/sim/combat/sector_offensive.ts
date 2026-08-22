@@ -766,7 +766,7 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
     for (const bid of allBrigades) {
         const f = formations[bid];
         if (!f || f.status !== 'active') continue;
-        if ((f.kind ?? 'brigade') !== 'brigade') continue;
+        if ((f.kind ?? 'brigade') !== 'brigade' && f.kind !== 'hv_phantom') continue;
         // Line-assigned brigades should return to their assigned sector fronts via
         // brigade AI, not be force-pulled to home municipality after each operation.
         if (lineAssigned.has(bid)) continue;

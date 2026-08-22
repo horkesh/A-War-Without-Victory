@@ -2493,7 +2493,7 @@ function recoverDroppedFrontEdges(
                 for (const fid of Object.keys(formations).sort(strictCompare)) {
                     const formation = formations[fid];
                     if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
-                    if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+                    if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group' && formation.kind !== 'hv_phantom') continue;
                     if (getFormationCorpsId(formation) !== corpsId) continue;
                     if (!formation.location_osid) continue;
                     mappedCorpsBrigadeLocations.push(formation.location_osid);
@@ -2758,7 +2758,7 @@ function getRecoveredFrontClaimSetup(
             for (const fid of Object.keys(formations).sort(strictCompare)) {
                 const formation = formations[fid];
                 if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
-                if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+                if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group' && formation.kind !== 'hv_phantom') continue;
                 if (!formation.location_osid) continue;
                 locations.push(formation.location_osid);
                 const componentId = mappedComponentOf.get(formation.location_osid);
