@@ -78,7 +78,7 @@ import {
     isEliteAvailableForLoan,
 } from './army_reserve_system.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
-import { buildCorpsOperation } from './corps_operation_helpers.js';
+import { buildCorpsOperation, findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { isMainStaffOpAvailabilityEnabled } from './mainstaff_op_availability_gate.js';
 import { isReasonCodeTopicEnabled, whenReasonCodeTopic } from './reason_code_debug.js';
@@ -397,6 +397,7 @@ export type OperationParticipantEvaluationReason =
     | 'elite_in_cooldown'
     | 'elite_committed_to_host_corps'
     | 'elite_loaned_to_other_corps'
+    | 'committed_to_live_operation'
     | 'unreachable_to_host_corps'
     | 'ineligible_operation_formation'
     | 'below_min_attack_personnel'
@@ -1465,6 +1466,10 @@ function selectEligibleOpportunityParticipants(
                 continue;
             }
             admittedByRosterAttachment = true;
+        }
+        if (findBrigadeLiveOperationAnywhere(state, brigadeId)) {
+            record('rejected', 'committed_to_live_operation');
+            continue;
         }
         if (!isEligibleOperationFormation(formation)) {
             record('rejected', 'ineligible_operation_formation');

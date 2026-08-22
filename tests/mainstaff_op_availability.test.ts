@@ -383,6 +383,42 @@ describe('GATE 2 — opportunity roster admission for sector-exempt brigades', (
         expect(loan.loaned_to_corps).toBe(HOST_CORPS);
         expect(loan.loan_start_turn).toBe(170);
     });
+
+    it('does not double-roster an ordinary brigade already committed to a live operation', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        const concurrent = {
+            name: 'Concurrent Op',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 170,
+            phase_started_turn: 170,
+            participating_brigades: ['hvo_local_brigade'],
+            axes: [{
+                axis_id: 'concurrent:axis',
+                name: 'Concurrent Axis',
+                assigned_brigades: ['hvo_local_brigade'],
+                objectives: ['op:kupres:bucovaca'],
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+        } as unknown as CorpsOperation;
+        state.military.corps_command![HOST_CORPS].active_operations.push(concurrent);
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op).not.toBeNull();
+        expect(op!.participating_brigades).not.toContain('hvo_local_brigade');
+        expect(concurrent.participating_brigades).toEqual(['hvo_local_brigade']);
+    });
 });
 
 // ─── GATE 1 — retention reads the loan, not the parking spot ────────────────

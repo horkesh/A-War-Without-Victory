@@ -19,6 +19,7 @@ export function assertOperationLifecycle(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const corpsCommand = state.military.corps_command ?? {};
     const formations = state.military.formations ?? {};
+    const liveCommitments = new Map<string, { corpsId: string; operationName: string }>();
 
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
         const operations = corpsCommand[corpsId]?.active_operations ?? [];
@@ -30,6 +31,19 @@ export function assertOperationLifecycle(state: GameState): ValidationIssue[] {
 
             for (let participantIndex = 0; participantIndex < participants.length; participantIndex += 1) {
                 const participantId = participants[participantIndex]!;
+                if (operation.phase === 'planning' || operation.phase === 'execution') {
+                    const prior = liveCommitments.get(participantId);
+                    if (prior) {
+                        issues.push({
+                            severity: 'error',
+                            code: 'operation.participant_double_committed',
+                            message: `${corpsId} operation '${operation.name}' double-commits participant ${participantId} already assigned to ${prior.corpsId} operation '${prior.operationName}'`,
+                            path: `${operationPath}.participating_brigades.${participantIndex}`,
+                        });
+                    } else {
+                        liveCommitments.set(participantId, { corpsId, operationName: operation.name });
+                    }
+                }
                 const formation = formations[participantId];
                 if (!formation) {
                     issues.push({

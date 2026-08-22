@@ -93,6 +93,27 @@ export function findBrigadeOperationAnywhere(
     return null;
 }
 
+/** Find a brigade's planning/execution commitment anywhere in corps command. */
+export function findBrigadeLiveOperationAnywhere(
+    state: GameState,
+    brigadeId: string,
+): { corps_id: FormationId; cmd: CorpsCommandState; op: CorpsOperation } | null {
+    const corpsCommand = state.military?.corps_command;
+    if (!corpsCommand) return null;
+    const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    for (const cid of corpsIds) {
+        const cmd = corpsCommand[cid];
+        if (!cmd) continue;
+        for (const op of cmd.active_operations) {
+            if (op.phase !== 'planning' && op.phase !== 'execution') continue;
+            if (op.participating_brigades.includes(brigadeId)) {
+                return { corps_id: cid as FormationId, cmd, op };
+            }
+        }
+    }
+    return null;
+}
+
 /** Get brigade IDs not committed to any active operation */
 export function getAvailableBrigades(cmd: CorpsCommandState, allCorpsBrigadeIds: string[]): string[] {
     const busy = new Set<string>();
