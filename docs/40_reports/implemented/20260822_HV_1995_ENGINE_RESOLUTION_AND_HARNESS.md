@@ -29,7 +29,7 @@
 ### Elite-loan contract hardening
 
 - Opportunity and pre-planned rosters now use the reserve pool's canonical availability predicate: an elite is rejected when permanently degraded, inside the four-turn recall cooldown, or already loaned. A live loan to the proposed host is still a commitment and cannot be double-rostered into a concurrent operation.
-- `deployEliteLoan` defends the same invariant and returns explicit success/failure. Desktop approval rejects cooldown before command-authority debit or request consumption. Desktop redirect uses a transactional retask primitive: invalid routes leave military state byte-identical; a valid route closes the old episode and opens the new host commitment without being defeated by the recall cooldown created inside the transaction.
+- `deployEliteLoan` defends the same invariant and returns explicit success/failure. Desktop approval rejects cooldown before command-authority debit or request consumption. Desktop redirect uses a transactional retask primitive: invalid routes leave military state byte-identical; a valid route closes the old episode and opens the new host commitment without being defeated by the recall cooldown created inside the transaction. Retask preserves the brigade's physical location, so the route validated from its current position remains the route the deployment order uses.
 - The desktop retask path does not run in the headless scenario. Desktop-level red/green tests establish its caller behavior; clean n238 establishes the headless same-host double-commitment correction.
 
 ### Authored operation roster repair
