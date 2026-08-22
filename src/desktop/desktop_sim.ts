@@ -56,6 +56,7 @@ import {
     holdReserveAtMainStaff,
     isEliteAvailableForLoan,
     recallEliteLoan,
+    retaskEliteLoan,
 } from '../sim/combat/army_reserve_system.js';
 import { ELITE_DEPLOY_COST } from '../ui/map/utils/commandAuthority.js';
 import { resolvePlayerParamilitaryDecisions } from '../sim/combat/paramilitary_sweep.js';
@@ -1114,7 +1115,7 @@ export function recallEliteBrigade(
     return { ok: true };
 }
 
-/** Player redirects a loaned elite brigade to a different corps (recall + re-deploy). */
+/** Player transactionally retasks a live elite loan to a different corps. */
 export async function redirectReserveLoan(
     state: GameState,
     brigadeId: string,
@@ -1124,11 +1125,12 @@ export async function redirectReserveLoan(
     const f = state.military.formations?.[brigadeId];
     if (!f) return { ok: false, error: `Brigade not found: ${brigadeId}` };
     if (!f.elite_loan_state) return { ok: false, error: `${brigadeId} is not an elite brigade` };
-    if (f.elite_loan_state.on_loan) {
-        return { ok: false, error: `${brigadeId} must be recalled before redirect; elite-loan cooldown then applies` };
+    if (!f.elite_loan_state.on_loan) return { ok: false, error: `${brigadeId} is not currently on loan` };
+    if (f.elite_loan_state.loaned_to_corps === newCorpsId) {
+        return { ok: false, error: `${brigadeId} is already loaned to ${newCorpsId}` };
     }
-    if (!isEliteAvailableForLoan(f, state.meta.turn)) {
-        return { ok: false, error: `${brigadeId} is not available for elite loan` };
+    if (f.elite_loan_state.permanently_degraded) {
+        return { ok: false, error: `${brigadeId} has permanently lost elite status` };
     }
     if (!baseDir) return { ok: false, error: 'Base directory required to validate reserve redeployment route' };
     if (!canEliteLoanReachCorpsTerritory(state, brigadeId, newCorpsId, await getCachedOsidAdjacency(baseDir))) {
@@ -1136,8 +1138,8 @@ export async function redirectReserveLoan(
     }
     const req = state.military.pending_reserve_requests?.find(r => r.corps_id === newCorpsId);
     const reason = req?.reason ?? 'offensive_support';
-    if (!deployEliteLoan(state, brigadeId, newCorpsId, reason, 0, state.meta.turn)) {
-        return { ok: false, error: `${brigadeId} is not available for elite loan` };
+    if (!retaskEliteLoan(state, brigadeId, newCorpsId, reason, 0, state.meta.turn, await getCachedOsidAdjacency(baseDir))) {
+        return { ok: false, error: `${brigadeId} could not be redirected` };
     }
     return { ok: true };
 }

@@ -170,8 +170,8 @@ describe('ELITE-DEPLOY — command-authority guard + debit (player IPC path)', (
     });
 });
 
-describe('reserve-loan redirect — truthful atomic failure', () => {
-    it('rejects an active-loan redirect before recalling the brigade', async () => {
+describe('reserve-loan redirect — transactional retasking', () => {
+    it('moves an active loan to the new corps as a continuous commitment', async () => {
         const state = makeState();
         const loan = state.military.formations!.arbih_guards.elite_loan_state!;
         loan.on_loan = true;
@@ -186,14 +186,35 @@ describe('reserve-loan redirect — truthful atomic failure', () => {
 
         const result = await redirectReserveLoan(state, 'arbih_guards', 'arbih_2nd_corps', process.cwd());
 
-        expect(result.ok).toBe(false);
-        if (!result.ok) expect(result.error).toContain('recall');
+        expect(result.ok).toBe(true);
         expect(loan).toMatchObject({
             on_loan: true,
-            loaned_to_corps: 'arbih_1st_corps',
-            loan_start_turn: 5,
+            loaned_to_corps: 'arbih_2nd_corps',
+            loan_start_turn: 10,
             last_recall_turn: null,
         });
+    });
+
+    it('leaves the active loan byte-identical when the target route is invalid', async () => {
+        const state = makeState();
+        const loan = state.military.formations!.arbih_guards.elite_loan_state!;
+        loan.on_loan = true;
+        loan.loaned_to_corps = 'arbih_1st_corps';
+        loan.loan_start_turn = 5;
+        state.military.corps_front_sectors!.sec_b = {
+            corps_id: 'arbih_2nd_corps',
+            territory_osids: ['op:srebrenica:srebrenica'],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+        } as any;
+        state.political.political_controllers!['op:srebrenica:srebrenica'] = 'RBiH';
+        const before = JSON.stringify(state.military);
+
+        const result = await redirectReserveLoan(state, 'arbih_guards', 'arbih_2nd_corps', process.cwd());
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) expect(result.error).toContain('No friendly route');
+        expect(JSON.stringify(state.military)).toBe(before);
     });
 });
 

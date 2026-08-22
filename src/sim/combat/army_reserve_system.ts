@@ -1033,6 +1033,48 @@ export function recallEliteLoan(
     }
 }
 
+/**
+ * Retask a live elite loan to another corps as one continuous army-level
+ * commitment. The old episode is closed and a new one opened, but the ordinary
+ * post-recall cooldown is not started because the brigade never returns to the
+ * available reserve pool between assignments. Callers must validate route
+ * feasibility before invoking this synchronous state transition.
+ */
+export function retaskEliteLoan(
+    state: GameState,
+    brigadeId: FormationId,
+    corpsId: string,
+    reason: ReserveRequestReason,
+    travelHops: number,
+    turn: number,
+    adjacency?: Map<Osid, Osid[]>,
+): boolean {
+    const f = state.military.formations?.[brigadeId];
+    const ls = f?.elite_loan_state;
+    if (!f || !ls?.on_loan || ls.permanently_degraded) return false;
+    if (ls.loaned_to_corps === corpsId) return false;
+
+    const previousRecallTurn = ls.last_recall_turn;
+    recallEliteLoan(state, brigadeId, 'player_recall', turn);
+    // Retasking is a continuation of the live commitment, not a return to the
+    // reserve pool. Preserve the cooldown history that existed before retask.
+    ls.last_recall_turn = null;
+    const deployed = deployEliteLoan(
+        state,
+        brigadeId,
+        corpsId,
+        reason,
+        travelHops,
+        turn,
+        undefined,
+        'Army CO redirected an active elite commitment.',
+        'player',
+        adjacency,
+    );
+    ls.last_recall_turn = previousRecallTurn;
+    return deployed;
+}
+
 // ─── Bot AI assignment ────────────────────────────────────────────────────────
 
 /**
