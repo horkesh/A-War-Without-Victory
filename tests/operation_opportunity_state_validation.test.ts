@@ -96,6 +96,13 @@ describe('operation opportunity state validation', () => {
                 min_optional_axes: 2,
                 executed_op_name: 'Operation Sana',
                 redirect_variant_id: 'western_axis',
+                objective_filter_rejections: [{
+                    axis_id: 'western',
+                    objective_osid: 'op:velika_kladusa:velika_kladusa_2',
+                    controller: 'RBiH',
+                    acting_faction: 'RBiH',
+                    reason: 'friendly_controlled_without_override',
+                }],
             },
         ];
 
@@ -173,6 +180,13 @@ describe('operation opportunity state validation', () => {
                 min_optional_axes: 1.5,
                 executed_op_name: 42,
                 redirect_variant_id: '',
+                objective_filter_rejections: [{
+                    axis_id: '',
+                    objective_osid: 42,
+                    controller: 'unknown',
+                    acting_faction: 'unknown',
+                    reason: 'maybe',
+                }],
             },
             42,
         ];
@@ -198,6 +212,8 @@ describe('operation opportunity state validation', () => {
                 'military.operation_opportunity_diagnostics[0].failed_required_axes[0].axis must be a valid opportunity axis',
                 'military.operation_opportunity_traces[0].event must be a valid opportunity trace event',
                 'military.operation_opportunity_traces[0].failed_required_axes must be an array when present',
+                'military.operation_opportunity_traces[0].objective_filter_rejections[0].objective_osid must be a non-empty string',
+                'military.operation_opportunity_traces[0].objective_filter_rejections[0].reason must be friendly_controlled_without_override',
             ]));
         }
     });

@@ -2317,6 +2317,34 @@ function validateOperationOpportunityTrace(value: unknown, path: string, errors:
     if ('redirect_variant_id' in value && value.redirect_variant_id !== undefined && !isNonEmptyString(value.redirect_variant_id)) {
         errors.push(`${path}.redirect_variant_id must be a non-empty string when present`);
     }
+    if ('objective_filter_rejections' in value && value.objective_filter_rejections !== undefined) {
+        if (!Array.isArray(value.objective_filter_rejections)) {
+            errors.push(`${path}.objective_filter_rejections must be an array when present`);
+        } else {
+            value.objective_filter_rejections.forEach((entry, i) => {
+                const entryPath = `${path}.objective_filter_rejections[${i}]`;
+                if (!isRecord(entry)) {
+                    errors.push(`${entryPath} must be an object`);
+                    return;
+                }
+                if (!isNonEmptyString(entry.axis_id)) {
+                    errors.push(`${entryPath}.axis_id must be a non-empty string`);
+                }
+                if (!isNonEmptyString(entry.objective_osid)) {
+                    errors.push(`${entryPath}.objective_osid must be a non-empty string`);
+                }
+                if (!isCanonicalPlayerFaction(entry.controller)) {
+                    errors.push(`${entryPath}.controller must be one of: ${CANONICAL_PLAYER_FACTIONS.join(', ')}`);
+                }
+                if (!isCanonicalPlayerFaction(entry.acting_faction)) {
+                    errors.push(`${entryPath}.acting_faction must be one of: ${CANONICAL_PLAYER_FACTIONS.join(', ')}`);
+                }
+                if (entry.reason !== 'friendly_controlled_without_override') {
+                    errors.push(`${entryPath}.reason must be friendly_controlled_without_override`);
+                }
+            });
+        }
+    }
 }
 
 function validateOperationOpportunityArray(

@@ -1,9 +1,9 @@
 /**
- * REASON-CODE INSTRUMENTATION — one env gate, five topics, inert by default.
+ * REASON-CODE INSTRUMENTATION — one env gate, six topics, inert by default.
  *
  * ═══ WHAT THIS IS FOR ═══
  *
- * Five subsystems refuse things without saying which predicate refused them,
+ * Six subsystems refuse things without saying which predicate refused them,
  * and each refusal has cost a seat hours of reconstruction from artifacts that
  * do not carry the answer. In one case it produced a FALSE PUBLISHED FINDING:
  * a seat read `attacker_casualties` (a STACK total) against one named brigade's
@@ -51,7 +51,7 @@
  * an order the engine already fixed upstream. Reading `process.env` is a pure
  * read of process configuration and does not vary within a run.
  *
- * ═══ ONE VARIABLE, FIVE TOPICS — AND WHY NOT FIVE VARIABLES ═══
+ * ═══ ONE VARIABLE, SIX TOPICS — AND WHY NOT SIX VARIABLES ═══
  *
  * `mainstaff_op_availability_gate.ts` deliberately uses two separate flags,
  * because its two halves move participation in OPPOSITE directions and a
@@ -70,7 +70,7 @@
 import { strictCompare } from '../../state/validateGameState.js';
 
 /**
- * The five refusals, one topic each.
+ * The six refusals, one topic each.
  *
  *  battle_stack      — item 1. `attacker_brigades` + `defender_contributions` on the
  *                      weekly battle entry. Answers: is this casualty figure a
@@ -83,13 +83,16 @@ import { strictCompare } from '../../state/validateGameState.js';
  *  formation_refusal — item 4. Why `canFormEmergentBrigade` / in-run `recruitBrigade`
  *                      said no, for the in-run passes that have no counter today.
  *  brigade_state     — item 5. `disrupted_turns` on the brigade temporal row.
+ *  objective_filter  — item 6. Which friendly-controlled opportunity objectives
+ *                      were removed at the CorpsOperation spawn seam.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
     | 'battle_power'
     | 'axis_reject'
     | 'formation_refusal'
-    | 'brigade_state';
+    | 'brigade_state'
+    | 'objective_filter';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -97,6 +100,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'battle_stack',
     'brigade_state',
     'formation_refusal',
+    'objective_filter',
 ];
 
 /**

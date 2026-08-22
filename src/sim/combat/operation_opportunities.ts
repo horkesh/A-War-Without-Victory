@@ -77,6 +77,7 @@ import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants
 import { buildCorpsOperation } from './corps_operation_helpers.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { isMainStaffOpAvailabilityEnabled } from './mainstaff_op_availability_gate.js';
+import { isReasonCodeTopicEnabled, whenReasonCodeTopic } from './reason_code_debug.js';
 import type { Osid } from './osid_adjacency.js';
 import {
     computeCorpsOperationReadiness,
@@ -363,6 +364,25 @@ export interface OperationOpportunityTraceRow {
     readonly min_optional_axes?: number;
     readonly executed_op_name?: string;
     readonly redirect_variant_id?: string;
+    /** Env-gated (`objective_filter`); absent from default-run serialization. */
+    readonly objective_filter_rejections?: readonly OperationObjectiveFilterRejection[];
+}
+
+export interface OperationObjectiveFilterRejection {
+    readonly axis_id: string;
+    readonly objective_osid: string;
+    readonly controller: FactionId;
+    readonly acting_faction: FactionId;
+    readonly reason: 'friendly_controlled_without_override';
+}
+
+function sortObjectiveFilterRejections(
+    rows: readonly OperationObjectiveFilterRejection[],
+): OperationObjectiveFilterRejection[] {
+    return [...rows].sort((a, b) => {
+        const axisCmp = strictCompare(a.axis_id, b.axis_id);
+        return axisCmp !== 0 ? axisCmp : strictCompare(a.objective_osid, b.objective_osid);
+    });
 }
 
 function opportunityTraceEventRank(event: OperationOpportunityTraceEvent): number {
@@ -991,6 +1011,9 @@ export function applyOpportunityDecision(
             proposal.redirect_variant_id = variantId;
             // Spawning the redirected op is the same approval path with overridden axes.
             const variant = def.variants.find(v => v.variant_id === variantId)!;
+            const objectiveFilterRejections = isReasonCodeTopicEnabled('objective_filter')
+                ? [] as OperationObjectiveFilterRejection[]
+                : undefined;
             const opName = spawnCorpsOperationFromOpportunity(
                 state,
                 turn,
@@ -999,6 +1022,7 @@ export function applyOpportunityDecision(
                 variant.staging_osid ?? def.staging_osid,
                 'standard',
                 options.adjacency,
+                objectiveFilterRejections,
             );
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
@@ -1015,12 +1039,18 @@ export function applyOpportunityDecision(
                 proposal_id: proposal.proposal_id,
                 executed_op_name: opName ?? undefined,
                 redirect_variant_id: variantId,
+                ...whenReasonCodeTopic('objective_filter', () => ({
+                    objective_filter_rejections: sortObjectiveFilterRejections(objectiveFilterRejections ?? []),
+                })),
             }]);
             return proposal;
         }
         case 'under_resource': {
             proposal.status = 'under_resourced_approved';
             proposal.response_turn = turn;
+            const objectiveFilterRejections = isReasonCodeTopicEnabled('objective_filter')
+                ? [] as OperationObjectiveFilterRejection[]
+                : undefined;
             const opName = spawnCorpsOperationFromOpportunity(
                 state,
                 turn,
@@ -1029,6 +1059,7 @@ export function applyOpportunityDecision(
                 def.staging_osid,
                 'minimum',
                 options.adjacency,
+                objectiveFilterRejections,
             );
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
@@ -1044,6 +1075,9 @@ export function applyOpportunityDecision(
                 event: opName ? 'under_resourced_approved' : 'spawn_failed',
                 proposal_id: proposal.proposal_id,
                 executed_op_name: opName ?? undefined,
+                ...whenReasonCodeTopic('objective_filter', () => ({
+                    objective_filter_rejections: sortObjectiveFilterRejections(objectiveFilterRejections ?? []),
+                })),
             }]);
             return proposal;
         }
@@ -1074,6 +1108,9 @@ export function applyOpportunityDecision(
                 }]);
                 return proposal;
             }
+            const objectiveFilterRejections = isReasonCodeTopicEnabled('objective_filter')
+                ? [] as OperationObjectiveFilterRejection[]
+                : undefined;
             const opName = spawnCorpsOperationFromOpportunity(
                 state,
                 turn,
@@ -1082,6 +1119,7 @@ export function applyOpportunityDecision(
                 def.staging_osid,
                 options.commitment_profile ?? 'standard',
                 options.adjacency,
+                objectiveFilterRejections,
             );
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
@@ -1097,6 +1135,9 @@ export function applyOpportunityDecision(
                 event: opName ? 'approved' : 'spawn_failed',
                 proposal_id: proposal.proposal_id,
                 executed_op_name: opName ?? undefined,
+                ...whenReasonCodeTopic('objective_filter', () => ({
+                    objective_filter_rejections: sortObjectiveFilterRejections(objectiveFilterRejections ?? []),
+                })),
             }]);
             return proposal;
         }
@@ -1119,6 +1160,7 @@ function spawnCorpsOperationFromOpportunity(
     stagingOsid: string,
     commitment: 'minimum' | 'standard' | 'reinforced',
     adjacency?: Map<Osid, Osid[]>,
+    objectiveFilterRejections?: OperationObjectiveFilterRejection[],
 ): string | null {
     const cmd = state.military.corps_command?.[def.primary_corps];
     if (!cmd) return null;
@@ -1150,7 +1192,15 @@ function spawnCorpsOperationFromOpportunity(
             const controller = getPoliticalControllerOSID(state, osid, undefined);
             if (controller === null) return true;            // unpainted / unknown → keep
             if (controller !== def.faction) return true;     // enemy-controlled → keep
-            return overrideSet.has(osid);                    // friendly-controlled → keep iff override
+            if (overrideSet.has(osid)) return true;          // scoped friendly override → keep
+            objectiveFilterRejections?.push({
+                axis_id: axis.axis_id,
+                objective_osid: osid,
+                controller,
+                acting_faction: def.faction,
+                reason: 'friendly_controlled_without_override',
+            });
+            return false;
         });
 
         if (filteredObjectives.length === 0) continue;

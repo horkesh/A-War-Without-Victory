@@ -36,6 +36,7 @@ import {
     type OperationOpportunityDef,
     type OperationOpportunityState,
 } from '../src/sim/combat/operation_opportunities.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
 
@@ -645,6 +646,83 @@ function fixtureFifthCorpsT1WithFriendlyTarget(
 }
 
 describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friendly_overrides)', () => {
+    it('objective-filter diagnostics are absent by default', () => {
+        delete process.env.AWWV_DEBUG_REASON_CODES;
+        resetReasonCodeTopicCacheForTests();
+        const state = buildStateWithControllers(175, {
+            'op:velika_kladusa:velika_kladusa_2': 'RBiH',
+            'op:cazin:cazin_3': 'RS',
+        });
+        const def = fixtureFifthCorpsT1WithFriendlyTarget();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        applyOpportunityDecision(
+            state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+        );
+
+        const trace = state.military.operation_opportunity_traces?.at(-1);
+        expect(trace?.event).toBe('approved');
+        expect(Object.prototype.hasOwnProperty.call(trace, 'objective_filter_rejections')).toBe(false);
+    });
+
+    it('objective_filter records friendly rejections and keeps enemy objectives as a positive control', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'objective_filter';
+        resetReasonCodeTopicCacheForTests();
+        try {
+            const state = buildStateWithControllers(175, {
+                'op:velika_kladusa:velika_kladusa_2': 'RBiH',
+                'op:cazin:cazin_3': 'RS',
+            });
+            const def = fixtureFifthCorpsT1WithFriendlyTarget({
+                axes: [{
+                    axis_id: 'z_axis',
+                    name: 'Z axis',
+                    corps: 'arbih_5th_corps',
+                    brigades: ['arbih_5_brigade_a'],
+                    objectives: [
+                        'op:velika_kladusa:velika_kladusa_2',
+                        'op:cazin:cazin_3',
+                    ],
+                }, {
+                    axis_id: 'a_axis',
+                    name: 'A axis',
+                    corps: 'arbih_5th_corps',
+                    brigades: ['arbih_5_brigade_b'],
+                    objectives: ['op:bihac:bihac_2'],
+                }],
+            });
+            (state.political.political_controllers as Record<string, FactionId>)['op:bihac:bihac_2'] = 'RBiH';
+            runOpportunityEvaluationStep(state, 175, [def]);
+            applyOpportunityDecision(
+                state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+            );
+
+            const trace = state.military.operation_opportunity_traces?.at(-1);
+            expect(trace?.objective_filter_rejections).toEqual([
+                {
+                    axis_id: 'a_axis',
+                    objective_osid: 'op:bihac:bihac_2',
+                    controller: 'RBiH',
+                    acting_faction: 'RBiH',
+                    reason: 'friendly_controlled_without_override',
+                },
+                {
+                    axis_id: 'z_axis',
+                    objective_osid: 'op:velika_kladusa:velika_kladusa_2',
+                    controller: 'RBiH',
+                    acting_faction: 'RBiH',
+                    reason: 'friendly_controlled_without_override',
+                },
+            ]);
+            const op = state.military.corps_command![def.primary_corps].active_operations[0];
+            expect(op.axes).toHaveLength(1);
+            expect(op.axes![0].axis_id).toBe('z_axis');
+            expect(op.axes![0].objectives).toEqual(['op:cazin:cazin_3']);
+        } finally {
+            delete process.env.AWWV_DEBUG_REASON_CODES;
+            resetReasonCodeTopicCacheForTests();
+        }
+    });
+
     it('targets_friendly_overrides=undefined is no-op (Sana parity — no friendly objectives kept)', () => {
         // Sana 95 fixture has its objectives controlled by RS/null in test state.
         // With override undefined and no friendly-controlled objective, the spawned
