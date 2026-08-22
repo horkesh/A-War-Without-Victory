@@ -4,7 +4,7 @@ import { reconcilePlanningObjectives } from '../src/sim/combat/sector_offensive.
 import type { CorpsOperation, GameState } from '../src/state/game_state.js';
 
 describe('planning objective reconciliation', () => {
-    it('drops combat-blocked allied objectives while retaining an enemy positive control', () => {
+    it('retains foreign-controlled objectives during reconciliation, including a combat-blocked one', () => {
         const axis = (axis_id: string, objective: string) => ({
             axis_id,
             name: axis_id,
@@ -53,11 +53,11 @@ describe('planning objective reconciliation', () => {
         } as unknown as GameState;
 
         expect(reconcilePlanningObjectives(state, 'arbih_corps', op, 'RBiH')).toBe('valid');
-        expect(op.axes?.map((entry) => entry.axis_id)).toEqual(['enemy_axis']);
-        expect(op.objectives).toEqual(['op:enemy']);
+        expect(op.axes?.map((entry) => entry.axis_id)).toEqual(['allied_axis', 'enemy_axis']);
+        expect(op.objectives).toEqual(['op:allied', 'op:enemy']);
     });
 
-    it('completes planning when every remaining objective is combat-blocked allied territory', () => {
+    it('does not misclassify a combat-blocked foreign objective as completed', () => {
         const op: CorpsOperation = {
             name: 'Operacija Osvit shape',
             type: 'sector_attack',
@@ -70,15 +70,27 @@ describe('planning objective reconciliation', () => {
         };
         const state = {
             meta: { turn: 101, phase: 'war' },
-            military: { war_front_edges_osid: [] },
+            military: {
+                war_front_edges_osid: [{
+                    edge_id: 'blocked-front',
+                    a: 'op:jablanica:approach',
+                    b: 'op:jablanica:doljani_2',
+                    side_a: 'RBiH',
+                    side_b: 'HRHB',
+                }],
+            },
             political: {
                 war_alliance_rbih_hrhb: -0.5,
                 rbih_hrhb_state: { washington_signed: true },
-                political_controllers: { 'op:jablanica:doljani_2': 'HRHB' },
+                political_controllers: {
+                    'op:jablanica:approach': 'RBiH',
+                    'op:jablanica:doljani_2': 'HRHB',
+                },
             },
         } as unknown as GameState;
 
-        expect(reconcilePlanningObjectives(state, 'arbih_4th_corps', op, 'RBiH')).toBe('completed');
+        expect(reconcilePlanningObjectives(state, 'arbih_4th_corps', op, 'RBiH')).toBe('valid');
+        expect(op.objectives).toEqual(['op:jablanica:doljani_2']);
     });
 
     it('drops a stale objective prefix when a later objective still has a live corps approach', () => {

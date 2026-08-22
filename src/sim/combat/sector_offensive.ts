@@ -70,7 +70,7 @@ import { linkOpportunityResolutionToAAR } from './operation_opportunities.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
-import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
+import { isFriendlyFaction as isFriendlyFactionCtrl, isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition } from './operation_preparation.js';
 // ADR-0005 v2.2b #45: TG dissolution at execution→recovery. Flag-gated.
@@ -100,7 +100,7 @@ import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_rei
 import { findBrigadeLiveOperationAnywhere, hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
-import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
+import { isOperationObjectiveForeignControlled } from './operation_objective_hostility.js';
 import {
     allAxesTerminal,
     assignBrigadeRoles,
@@ -909,7 +909,7 @@ function filterAxisPlanningObjectives(
 ): string[] {
     return (axis.objectives ?? []).filter((osid) => {
         const controller = getPoliticalControllerOSID(state, osid, undefined);
-        return isOperationObjectiveHostile(state, faction, controller);
+        return isOperationObjectiveForeignControlled(faction, controller);
     });
 }
 
@@ -966,7 +966,7 @@ export function reconcilePlanningObjectives(
     } else {
         const enemyObjectives = (op.objectives ?? []).filter((osid) => {
                 const controller = getPoliticalControllerOSID(state, osid, undefined);
-                return isOperationObjectiveHostile(state, faction, controller);
+                return isOperationObjectiveForeignControlled(faction, controller);
             });
         const filteredObjectives = op.preserve_objective_sequence === true
             ? enemyObjectives
@@ -1411,6 +1411,14 @@ export function advanceSectorOffensives(
                 && op.force_ratio_estimate < launchFloorForOp(op)
             ) {
                 beginRecovery(op, turn, 'defender_power_too_high', state);
+                continue;
+            }
+            // A foreign-controlled objective can be temporarily or permanently
+            // combat-blocked without being completed. Retain it during objective
+            // reconciliation, but never consume launch readiness or create a
+            // failed-objective cooldown while the political gate is closed.
+            if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
+                beginRecovery(op, turn, 'political_blocked', state);
                 continue;
             }
             const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction, operationStaticAdjacency);
@@ -1985,13 +1993,15 @@ function hasOnlyPoliticallyBlockedCurrentObjectives(
             const objective = axis.objectives[axis.current_objective_index ?? 0];
             if (!objective) return false;
             const controller = politicalControllers[objective] ?? '';
-            return shouldGrazBlockAttack(state, corpsId, faction, objective, controller);
+            return shouldGrazBlockAttack(state, corpsId, faction, objective, controller)
+                || isRbihHrhbCombatBlocked(state, faction, controller);
         });
     }
     const objective = op.objectives?.[op.current_objective_index ?? 0];
     if (!objective) return false;
     const controller = politicalControllers[objective] ?? '';
-    return shouldGrazBlockAttack(state, corpsId, faction, objective, controller);
+    return shouldGrazBlockAttack(state, corpsId, faction, objective, controller)
+        || isRbihHrhbCombatBlocked(state, faction, controller);
 }
 
 /** Collect friendly OSIDs adjacent to a target objective for attack detection. */
