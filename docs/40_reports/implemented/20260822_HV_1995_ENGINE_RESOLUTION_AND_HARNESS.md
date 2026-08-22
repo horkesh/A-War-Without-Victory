@@ -26,6 +26,12 @@
 - `src/sim/combat/army_reserve_system.ts`: an accepted reserve deployment that issues movement changes stale `dig_in` posture to `defend` and clears dig-in progress. This prevents T5 deployment from handing T3 an order it must reject.
 - Movement-rejection reason codes provide the positive control: earlier traces recorded `posture_dig_in`; repaired HV movement records real orders, transit, and movement events.
 
+### Elite-loan contract hardening
+
+- Opportunity and pre-planned rosters now use the reserve pool's canonical availability predicate: an elite is rejected when permanently degraded, inside the four-turn recall cooldown, or already loaned to another corps.
+- `deployEliteLoan` defends the same invariant and returns explicit success/failure. Desktop approval rejects cooldown before command-authority debit or request consumption; redirect rejects an active loan before recalling it, rather than reporting success after a cooldown-blocked redeployment.
+- The desktop correction does not run in the headless scenario path. n237 remains the isolated scenario evidence for the shared engine predicate; desktop-level red/green tests establish the caller behavior.
+
 ### Authored operation roster repair
 
 - `src/sim/combat/operation_formation_resolver.ts`: exact live formation keys win; otherwise exactly one sorted `oob:<authored id>` match resolves to the live key; ambiguity is rejected rather than arbitrarily selected.
@@ -83,7 +89,7 @@ All five dependency checks used by the harness end HRHB: Bučovača for Mistral 
 
 ## Verification
 
-- Focused engine and harness suites: 207/207 passed across movement, reserve loans, opportunity, triggered, pre-planned, validation, reconciliation, and diagnostics.
+- Focused engine, desktop reserve, and harness suites include explicit invalid-loan and atomic-failure coverage across movement, reserve loans, opportunity, triggered, pre-planned, validation, reconciliation, and diagnostics.
 - TypeScript typecheck passed.
 - `git diff --check` passed.
 - n237 completed 188 turns with every harness positive control true, including the corrected spawn and battle-stack controls.
