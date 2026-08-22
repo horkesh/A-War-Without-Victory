@@ -912,7 +912,19 @@ function filterAxisPlanningObjectives(
     });
 }
 
-function reconcilePlanningObjectives(
+function pruneUnreachablePlanningObjectivePrefix(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    objectives: string[],
+    staticAdjacency?: Map<string, string[]>,
+): string[] {
+    const firstReachableIndex = objectives.findIndex((objective) =>
+        collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency).size > 0);
+    return firstReachableIndex > 0 ? objectives.slice(firstReachableIndex) : objectives;
+}
+
+export function reconcilePlanningObjectives(
     state: GameState,
     corpsId: FormationId,
     op: CorpsOperation,
@@ -923,7 +935,13 @@ function reconcilePlanningObjectives(
         const retainedAxes: OperationAxis[] = [];
         const retainedObjectives: string[] = [];
         for (const axis of op.axes) {
-            const filteredObjectives = filterAxisPlanningObjectives(state, axis, faction);
+            const filteredObjectives = pruneUnreachablePlanningObjectivePrefix(
+                state,
+                corpsId,
+                faction,
+                filterAxisPlanningObjectives(state, axis, faction),
+                staticAdjacency,
+            );
             if (filteredObjectives.length === 0) continue;
             axis.objectives = filteredObjectives;
             axis.current_objective_index = Math.min(axis.current_objective_index ?? 0, filteredObjectives.length - 1);
@@ -936,10 +954,16 @@ function reconcilePlanningObjectives(
         op.axes = retainedAxes;
         op.objectives = [...new Set(retainedObjectives)].sort(strictCompare);
     } else {
-        const filteredObjectives = (op.objectives ?? []).filter((osid) => {
-            const controller = getPoliticalControllerOSID(state, osid, undefined);
-            return controller !== null && controller !== faction;
-        });
+        const filteredObjectives = pruneUnreachablePlanningObjectivePrefix(
+            state,
+            corpsId,
+            faction,
+            (op.objectives ?? []).filter((osid) => {
+                const controller = getPoliticalControllerOSID(state, osid, undefined);
+                return controller !== null && controller !== faction;
+            }),
+            staticAdjacency,
+        );
         if (filteredObjectives.length === 0) {
             return (op.objectives ?? []).length > 0 ? 'completed' : 'invalidated';
         }
