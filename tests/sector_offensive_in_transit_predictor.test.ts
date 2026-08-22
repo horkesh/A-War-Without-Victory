@@ -557,7 +557,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
         );
     });
 
-    it('adds accepted static approach edges when live front edges omit the objective contact', () => {
+    it('does not promote an authored static approach into a live attack edge', () => {
         const state = buildState({
             synth_alpha: {
                 location_osid: 'op:test:static_approach',
@@ -599,7 +599,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
                 openingAdjacency,
                 'op:test:objective_a',
             ),
-            1,
+            0,
         );
     });
 
@@ -651,7 +651,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
         );
     });
 
-    it('allows pre-planned operations to use static-only opening approach edges', () => {
+    it('does not launch a pre-planned operation until its authored approach is a live contact edge', () => {
         const state = buildState({
             synth_alpha: {
                 location_osid: 'op:test:static_approach',
@@ -688,7 +688,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
                 op,
                 staticAdjacency,
             ),
-            { executable: true },
+            { executable: false, blocker: 'zero_eligible_axis' },
         );
     });
 
@@ -829,11 +829,8 @@ function makeTwoAxisOp(
         current_objective_index: 0,
         faction: 'TEST_FACTION',
         corps_id: 'synth_corps',
-        // Pre-planned so the static-adjacency overlay supplies the approach edges,
-        // matching the known-executable single-axis fixture above. Without this the
-        // op is blocked on `no_approach_osid` and the veto assertions are never
-        // reached — which made an earlier draft of these tests vacuously pass under
-        // BOTH the old and new behaviour.
+        // Keep pre-planned provenance in the fixture while prepTwoAxisState supplies
+        // the live contact edges that make the opening genuinely executable.
         is_pre_planned: true,
         axes: [
             {
@@ -864,7 +861,22 @@ const TWO_AXIS_ADJACENCY = new Map<string, string[]>([
 ]);
 
 function prepTwoAxisState(state: GameState): GameState {
-    state.military.war_front_edges_osid = [];
+    state.military.war_front_edges_osid = [
+        {
+            edge_id: 'op:test:approach_a__op:test:objective_a',
+            a: 'op:test:approach_a',
+            b: 'op:test:objective_a',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        },
+        {
+            edge_id: 'op:test:approach_b__op:test:objective_b',
+            a: 'op:test:approach_b',
+            b: 'op:test:objective_b',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        },
+    ];
     state.military.corps_front_sectors = {};
     state.political!.political_controllers!['op:test:approach_a'] = 'TEST_FACTION';
     state.political!.political_controllers!['op:test:approach_b'] = 'TEST_FACTION';

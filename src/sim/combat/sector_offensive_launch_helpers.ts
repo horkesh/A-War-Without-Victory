@@ -445,51 +445,19 @@ export function collectObjectiveApproachOsids(
     return staticApproachOsids;
 }
 
-function addUndirectedAdjacencyEdge(
-    adjacency: Map<string, string[]>,
-    a: string,
-    b: string,
-): void {
-    const addOneWay = (from: string, to: string): void => {
-        const existing = adjacency.get(from) ?? [];
-        if (existing.includes(to)) return;
-        adjacency.set(from, [...existing, to].sort(strictCompare));
-    };
-    addOneWay(a, b);
-    addOneWay(b, a);
-}
-
 export function buildOpeningAttackAdjacency(
-    state: GameState,
-    corpsId: FormationId,
-    faction: FactionId,
-    objective: string,
+    _state: GameState,
+    _corpsId: FormationId,
+    _faction: FactionId,
+    _objective: string,
     liveAdjacency: Map<string, string[]>,
-    staticAdjacency?: Map<string, string[]>,
+    _staticAdjacency?: Map<string, string[]>,
 ): Map<string, string[]> {
-    // Ordinary operations must prove an opening attack against the same live
-    // contact graph used by brigade order generation. Sector sub-segments are
-    // useful staging metadata, but they are not attack edges; promoting them
-    // here creates launch-ready operations that the order resolver cannot
-    // prosecute. Only pre-planned operations supply the authored static graph
-    // and may use its explicitly constrained opening overlay.
-    if (!staticAdjacency) return liveAdjacency;
-
-    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency);
-    if (approachOsids.size === 0) return liveAdjacency;
-
-    const liveAdjacent = objectiveAdjacentOsids(liveAdjacency, objective);
-    const missingApproach = [...approachOsids].some((approach) => !liveAdjacent.has(approach));
-    if (!missingApproach) return liveAdjacency;
-
-    const merged = new Map<string, string[]>();
-    for (const [osid, neighbors] of liveAdjacency) {
-        merged.set(osid, [...neighbors].sort(strictCompare));
-    }
-    for (const approach of [...approachOsids].sort(strictCompare)) {
-        addUndirectedAdjacencyEdge(merged, objective, approach);
-    }
-    return merged;
+    // Launch must be proven against the same live contact graph consumed by
+    // brigade attack-order generation. Authored/static and sector-derived
+    // approaches remain valid staging and routing hints, but neither is an
+    // executable combat edge until the live front graph contains it.
+    return liveAdjacency;
 }
 
 // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: shared predicate.
