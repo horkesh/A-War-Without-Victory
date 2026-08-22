@@ -1084,6 +1084,52 @@ describe('tickEliteLoans', () => {
         expect(activeOp.participating_brigades).toEqual(['rs_1st_guards', 'rs_line_1']);
         expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['rs_1st_guards']);
     });
+
+    it('does not auto-join a second operation when the live loan is already committed', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        const operation = (name: string, assignedBrigades: string[]) => ({
+            name,
+            phase: 'execution' as const,
+            participating_brigades: [...assignedBrigades],
+            axes: [{
+                axis_id: `axis:${name}`,
+                assigned_brigades: [...assignedBrigades],
+                objectives: ['enemy_a'],
+                current_objective_index: 0,
+                status: 'executing' as const,
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+        });
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [
+                        operation('Operation Old', ['rs_line_1']),
+                        operation('Operation Authored', ['rs_1st_guards']),
+                    ],
+                },
+            },
+            turn: 10,
+        });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        brigade.elite_loan_state!.loan_start_turn = 0;
+
+        tickEliteLoans(state, 10);
+
+        const [oldOperation, authoredOperation] = state.military.corps_command!.vrs_drina.active_operations;
+        expect(oldOperation.participating_brigades).toEqual(['rs_line_1']);
+        expect(oldOperation.axes?.[0]?.assigned_brigades).toEqual(['rs_line_1']);
+        expect(authoredOperation.participating_brigades).toContain('rs_1st_guards');
+        expect(authoredOperation.axes?.[0]?.assigned_brigades).toContain('rs_1st_guards');
+    });
 });
 
 // ── evaluateArmyReserveAssignments ────────────────────────────────────────────

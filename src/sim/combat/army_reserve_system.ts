@@ -1244,8 +1244,14 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         // If the target corps launched a NEW operation since deployment, join it.
         // This handles operation transitions: old op ends, new op launches, elite joins.
         const targetCmd = corpsCommand[ls.loaned_to_corps];
+        const alreadyCommittedToLiveOperation = Object.keys(corpsCommand)
+            .sort(strictCompare)
+            .some((corpsId) => (corpsCommand[corpsId]?.active_operations ?? []).some((operation) =>
+                operation.participating_brigades.includes(bid)
+                || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
+            ));
         // Auto-join any execution-phase operation the target corps is running
-        if (targetCmd) {
+        if (targetCmd && !alreadyCommittedToLiveOperation) {
             for (const activeOp of targetCmd.active_operations ?? []) {
                 if (activeOp.phase !== 'execution') continue;
                 attachEliteToOperation(activeOp, bid);
