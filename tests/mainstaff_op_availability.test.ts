@@ -342,6 +342,47 @@ describe('GATE 2 — opportunity roster admission for sector-exempt brigades', (
         expect(concurrent.axes[0].assigned_brigades).toEqual([]);
         expect(concurrent.participating_brigades).toEqual([]);
     });
+
+    it('AVAILABILITY ON: an elite committed to a concurrent same-corps operation is not double-rostered', () => {
+        setMainStaffOpAvailabilityOverride(true);
+        setMainStaffOpRetentionOverride(false);
+        const state = buildOpportunityState(175);
+        const loan = state.military.formations!.hvo_1st_guard_abb.elite_loan_state!;
+        loan.on_loan = true;
+        loan.loaned_to_corps = HOST_CORPS;
+        loan.loan_start_turn = 170;
+        const concurrent = {
+            name: 'Concurrent Op',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 170,
+            phase_started_turn: 170,
+            participating_brigades: ['hvo_1st_guard_abb'],
+            axes: [{
+                axis_id: 'concurrent:axis',
+                name: 'Concurrent Axis',
+                assigned_brigades: ['hvo_1st_guard_abb'],
+                objectives: ['op:kupres:bucovaca'],
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+        } as unknown as CorpsOperation;
+        state.military.corps_command![HOST_CORPS].active_operations.push(concurrent);
+
+        const op = spawnFixtureOperation(state, 175, mistralLikeDef());
+
+        expect(op!.participating_brigades).not.toContain('hvo_1st_guard_abb');
+        expect(concurrent.participating_brigades).toEqual(['hvo_1st_guard_abb']);
+        expect(loan.loaned_to_corps).toBe(HOST_CORPS);
+        expect(loan.loan_start_turn).toBe(170);
+    });
 });
 
 // ─── GATE 1 — retention reads the loan, not the parking spot ────────────────

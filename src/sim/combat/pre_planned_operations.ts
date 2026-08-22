@@ -1046,14 +1046,10 @@ function buildAxesFromDef(
             if (isSectorAssignmentExemptCorpsId(corpsId)) {
                 if (!formation.elite_loan_state) return []; // non-elite exempt = skip
                 const ls = formation.elite_loan_state;
-                if (ls.on_loan && ls.loaned_to_corps !== def.corps) return [];
-                if (!ls.on_loan && !isEliteAvailableForLoan(formation, state.meta.turn)) return [];
+                if (ls.on_loan) return [];
+                if (!isEliteAvailableForLoan(formation, state.meta.turn)) return [];
                 if (adjacency && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)) return [];
-                // Only schedule a new loan if not already loaned to this corps
-                // (e.g. a probe may have already loaned the brigade at the same turn).
-                if (!ls.on_loan || ls.loaned_to_corps !== def.corps) {
-                    eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
-                }
+                eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
             }
             return [fid];
         });

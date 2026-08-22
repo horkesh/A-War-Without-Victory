@@ -188,6 +188,28 @@ describe('pre-planned operations', () => {
         assert.equal(brigade.elite_loan_state.loaned_to_corps, 'vrs_drina');
     });
 
+    it('does not double-roster a main-staff elite already loaned to the host corps', () => {
+        const state = makeMinimalState();
+        const brigade = state.military.formations!.rs_1st_semberija_light_infantry!;
+        brigade.corps_id = 'vrs_main_staff';
+        brigade.elite_loan_state = {
+            on_loan: true,
+            loaned_to_corps: 'vrs_east_bosnian',
+            loan_start_turn: -2,
+            last_recall_turn: null,
+            loan_start_personnel: 1000,
+            permanently_degraded: false,
+            current_episode_id: null,
+        };
+
+        injectPrePlannedOperations(state);
+
+        const operation = state.military.corps_command!.vrs_east_bosnian!.active_operations[0]!;
+        assert.ok(!operation.participating_brigades.includes(brigade.id));
+        assert.equal(brigade.elite_loan_state.loaned_to_corps, 'vrs_east_bosnian');
+        assert.equal(brigade.elite_loan_state.loan_start_turn, -2);
+    });
+
     it('defines the current pre-planned operation catalog', () => {
         assert.equal(_ALL_PRE_PLANNED.length, 16);
         assert.deepEqual(

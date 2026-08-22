@@ -2362,6 +2362,7 @@ function validateOperationOpportunityTrace(value: unknown, path: string, errors:
                 'missing_elite_loan_state',
                 'elite_permanently_degraded',
                 'elite_in_cooldown',
+                'elite_committed_to_host_corps',
                 'elite_loaned_to_other_corps',
                 'unreachable_to_host_corps',
                 'ineligible_operation_formation',

@@ -395,6 +395,7 @@ export type OperationParticipantEvaluationReason =
     | 'missing_elite_loan_state'
     | 'elite_permanently_degraded'
     | 'elite_in_cooldown'
+    | 'elite_committed_to_host_corps'
     | 'elite_loaned_to_other_corps'
     | 'unreachable_to_host_corps'
     | 'ineligible_operation_formation'
@@ -1447,11 +1448,13 @@ function selectEligibleOpportunityParticipants(
                 continue;
             }
             const loanState = formation.elite_loan_state;
-            if (loanState.on_loan && loanState.loaned_to_corps !== axis.corps) {
-                record('rejected', 'elite_loaned_to_other_corps');
+            if (loanState.on_loan) {
+                record('rejected', loanState.loaned_to_corps === axis.corps
+                    ? 'elite_committed_to_host_corps'
+                    : 'elite_loaned_to_other_corps');
                 continue;
             }
-            if (!loanState.on_loan && !isEliteAvailableForLoan(formation, state.meta.turn)) {
+            if (!isEliteAvailableForLoan(formation, state.meta.turn)) {
                 record('rejected', loanState.permanently_degraded
                     ? 'elite_permanently_degraded'
                     : 'elite_in_cooldown');
@@ -1482,9 +1485,7 @@ function selectEligibleOpportunityParticipants(
 
         if (admittedByRosterAttachment && eliteLoansOut) {
             const loanState = formation.elite_loan_state!;
-            if (!loanState.on_loan || loanState.loaned_to_corps !== axis.corps) {
-                eliteLoansOut.push({ brigadeId, corpsId: axis.corps });
-            }
+            eliteLoansOut.push({ brigadeId, corpsId: axis.corps });
         }
 
         selected.push(brigadeId);
