@@ -480,6 +480,52 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T7: stale TG anchor fallback', () => 
 });
 
 describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launch gate', () => {
+    it('does not fabricate an executable attack from ordinary sector metadata without a live contact edge', () => {
+        const state = buildState({
+            synth_alpha: {
+                location_osid: 'op:test:staging_a',
+                personnel: 1200,
+            },
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:test:other_front__op:test:other_enemy',
+            a: 'op:test:other_front',
+            b: 'op:test:other_enemy',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        }];
+        state.political!.political_controllers!['op:test:other_front'] = 'TEST_FACTION';
+        state.political!.political_controllers!['op:test:other_enemy'] = 'RIVAL_FACTION';
+        const op = makeOp(['synth_alpha' as FormationId], { multiAxis: false });
+
+        assert.deepEqual(
+            evaluateOpeningAttackReadiness(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+            ),
+            { executable: false, blocker: 'zero_eligible_axis' },
+        );
+
+        state.military.war_front_edges_osid.push({
+            edge_id: 'op:test:staging_a__op:test:objective_a',
+            a: 'op:test:staging_a',
+            b: 'op:test:objective_a',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        });
+        assert.equal(
+            evaluateOpeningAttackReadiness(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+            ).executable,
+            true,
+        );
+    });
+
     it('prefers static objective neighbors over spurious live approach edges', () => {
         const state = buildState({});
         state.military.war_front_edges_osid = [

@@ -467,6 +467,14 @@ export function buildOpeningAttackAdjacency(
     liveAdjacency: Map<string, string[]>,
     staticAdjacency?: Map<string, string[]>,
 ): Map<string, string[]> {
+    // Ordinary operations must prove an opening attack against the same live
+    // contact graph used by brigade order generation. Sector sub-segments are
+    // useful staging metadata, but they are not attack edges; promoting them
+    // here creates launch-ready operations that the order resolver cannot
+    // prosecute. Only pre-planned operations supply the authored static graph
+    // and may use its explicitly constrained opening overlay.
+    if (!staticAdjacency) return liveAdjacency;
+
     const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency);
     if (approachOsids.size === 0) return liveAdjacency;
 
