@@ -1071,7 +1071,7 @@ export function applyOpportunityDecision(
             const participantEvaluations = isReasonCodeTopicEnabled('opportunity_roster')
                 ? [] as OperationParticipantEvaluation[]
                 : undefined;
-            const { opName } = spawnCorpsOperationFromOpportunity(
+            const opName = spawnCorpsOperationFromOpportunity(
                 state,
                 turn,
                 def,
@@ -1115,7 +1115,7 @@ export function applyOpportunityDecision(
             const participantEvaluations = isReasonCodeTopicEnabled('opportunity_roster')
                 ? [] as OperationParticipantEvaluation[]
                 : undefined;
-            const { opName } = spawnCorpsOperationFromOpportunity(
+            const opName = spawnCorpsOperationFromOpportunity(
                 state,
                 turn,
                 def,
@@ -1150,6 +1150,8 @@ export function applyOpportunityDecision(
             return proposal;
         }
         case 'approve': {
+            proposal.status = 'approved';
+            proposal.response_turn = turn;
             // CANONICAL: T3 = defensive-crisis subtype. Approve = "commit reserves to
             // defend, accept the strain." Resolution flows through existing reactive
             // defense / sector morale chain. NO offensive CorpsOperation, NO new
@@ -1157,8 +1159,6 @@ export function applyOpportunityDecision(
             // for T3 are unchanged and behave identically to T1 — only `approve` short-
             // circuits.
             if (def.tier === 'T3') {
-                proposal.status = 'approved';
-                proposal.response_turn = turn;
                 state.military.operation_opportunity_resolutions.push({
                     proposal_id: proposal.proposal_id,
                     opportunity_id: proposal.opportunity_id,
@@ -1182,7 +1182,7 @@ export function applyOpportunityDecision(
             const participantEvaluations = isReasonCodeTopicEnabled('opportunity_roster')
                 ? [] as OperationParticipantEvaluation[]
                 : undefined;
-            const spawn = spawnCorpsOperationFromOpportunity(
+            const opName = spawnCorpsOperationFromOpportunity(
                 state,
                 turn,
                 def,
@@ -1193,27 +1193,6 @@ export function applyOpportunityDecision(
                 objectiveFilterRejections,
                 participantEvaluations,
             );
-            const { opName } = spawn;
-            if (!opName && spawn.failure === 'insufficient_viable_axes') {
-                proposal.status = 'delayed';
-                proposal.reevaluate_at_turn = Math.min(turn + 1, proposal.expires_turn + 1);
-                appendOpportunityTraces(state, [{
-                    turn,
-                    opportunity_id: proposal.opportunity_id,
-                    event: 'delayed',
-                    proposal_id: proposal.proposal_id,
-                    ...whenReasonCodeTopic('objective_filter', () => ({
-                        objective_filter_rejections: sortObjectiveFilterRejections(objectiveFilterRejections ?? []),
-                    })),
-                    ...whenReasonCodeTopic('opportunity_roster', () => ({
-                        participant_evaluations: sortParticipantEvaluations(participantEvaluations ?? []),
-                    })),
-                }]);
-                return proposal;
-            }
-            proposal.status = 'approved';
-            proposal.response_turn = turn;
-            proposal.reevaluate_at_turn = undefined;
             if (opName) proposal.executed_op_id = opName;
             state.military.operation_opportunity_resolutions.push({
                 proposal_id: proposal.proposal_id,
@@ -1245,18 +1224,9 @@ export function applyOpportunityDecision(
  * primary corps's active operations. Single owner path — never builds a
  * CorpsOperation directly; never bypasses `buildCorpsOperation`.
  *
- * Returns the operation name on success and a reason-coded failure otherwise.
- * Standard/reinforced commitments require at least one eligible participant on
- * every axis that still has a live objective; `minimum` is the explicit reduced-
- * commitment path and may omit an unavailable axis.
+ * Returns the operation name on success, null if the primary corps does not
+ * exist or no axis has any participating brigades.
  */
-type OpportunitySpawnFailure = 'missing_primary_corps' | 'insufficient_viable_axes';
-
-interface OpportunitySpawnResult {
-    readonly opName: string | null;
-    readonly failure: OpportunitySpawnFailure | null;
-}
-
 function spawnCorpsOperationFromOpportunity(
     state: GameState,
     turn: number,
@@ -1267,9 +1237,9 @@ function spawnCorpsOperationFromOpportunity(
     adjacency?: Map<Osid, Osid[]>,
     objectiveFilterRejections?: OperationObjectiveFilterRejection[],
     participantEvaluations?: OperationParticipantEvaluation[],
-): OpportunitySpawnResult {
+): string | null {
     const cmd = state.military.corps_command?.[def.primary_corps];
-    if (!cmd) return { opName: null, failure: 'missing_primary_corps' };
+    if (!cmd) return null;
 
     // CANONICAL: scope-restricted to T1 fifth_corps to prevent cross-family contamination.
     // Other tiers / families ignore the override even if authored, so an accidental copy
@@ -1278,10 +1248,6 @@ function spawnCorpsOperationFromOpportunity(
     const overrideSet: ReadonlySet<string> = overrideActive && def.targets_friendly_overrides
         ? new Set(def.targets_friendly_overrides)
         : new Set<string>();
-    const liveAxisCount = axesIn.filter((axis) => axis.objectives.some((osid) => {
-        const controller = getPoliticalControllerOSID(state, osid, undefined);
-        return controller === null || controller !== def.faction || overrideSet.has(osid);
-    })).length;
 
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
@@ -1339,10 +1305,7 @@ function spawnCorpsOperationFromOpportunity(
         for (const b of brigadesForAxis) allParticipating.push(b);
         for (const loan of axisLoans) eliteLoans.push(loan);
     }
-    if (builtAxes.length === 0
-        || (commitment !== 'minimum' && builtAxes.length < liveAxisCount)) {
-        return { opName: null, failure: 'insufficient_viable_axes' };
-    }
+    if (builtAxes.length === 0) return null;
 
     deployOpportunityEliteLoans(state, eliteLoans, def, turn, adjacency);
 
@@ -1361,7 +1324,7 @@ function spawnCorpsOperationFromOpportunity(
     );
 
     cmd.active_operations.push(op);
-    return { opName: op.name, failure: null };
+    return op.name;
 }
 
 /**
