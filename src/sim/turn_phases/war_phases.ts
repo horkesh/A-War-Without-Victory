@@ -1743,8 +1743,8 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        // Spawn turn-gated phantom brigades (e.g. HV 1995 expeditionary wave that
-        // arrives post-Split Agreement turn ≈ 150). Idempotent — defs already
+        // Spawn turn-gated phantom brigades (e.g. the HV 1995 expeditionary wave
+        // anchored to Operation Storm at turn 174). Idempotent — defs already
         // spawned at scenario init or earlier turn are skipped. See
         // `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`.
         // Runs BEFORE withdrawals each turn so a phantom can't spawn and withdraw

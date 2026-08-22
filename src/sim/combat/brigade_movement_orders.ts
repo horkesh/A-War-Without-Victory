@@ -72,7 +72,7 @@ export function applyBrigadeMovementOrders(
     }
     const formationIds = Object.keys(formations).filter(id => {
         const f = formations[id];
-        return f?.status === 'active' && (f as { location_osid?: string }).location_osid != null && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom');
+        return f?.status === 'active' && (f as { location_osid?: string }).location_osid != null && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom');
     }).sort(strictCompare) as FormationId[];
 
     for (const formationId of formationIds) {

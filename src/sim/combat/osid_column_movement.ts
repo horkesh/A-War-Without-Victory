@@ -380,7 +380,7 @@ export function processOsidColumnMovement(
             delete movementOrders[formationId];
             continue;
         }
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') {
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group' && f.kind !== 'hv_phantom') {
             delete movementOrders[formationId];
             continue;
         }

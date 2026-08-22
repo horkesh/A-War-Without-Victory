@@ -277,6 +277,87 @@ describe('processOsidColumnMovement', () => {
         expect(state.military.brigade_movement_orders?.brig1).toBeUndefined();
     });
 
+    it('starts column transit for an active HV expeditionary phantom', () => {
+        const state = makeState([
+            makeFormation('hv_4th_guards_1995', 'HRHB', 'A', {
+                kind: 'hv_phantom',
+                corps_id: 'hvo_tomislavgrad' as any,
+            }),
+        ], {
+            military: {
+                brigade_movement_orders: {
+                    hv_4th_guards_1995: { destination_sids: ['C'], stance: 'column' },
+                },
+            } as any,
+            political: {
+                political_controllers: { A: 'HRHB', B: 'HRHB', C: 'HRHB' },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+            flatTerrain(),
+        );
+
+        expect(report.column_starts).toBe(1);
+        expect(state.military.brigade_movement_state?.hv_4th_guards_1995?.status).toBe('in_transit');
+        expect(state.military.brigade_movement_orders?.hv_4th_guards_1995).toBeUndefined();
+    });
+
+    it('does not broaden new column transit to a JNA phantom', () => {
+        const state = makeState([
+            makeFormation('jna_uzice_corps_tg', 'RS', 'A', {
+                kind: 'jna_phantom',
+                corps_id: 'vrs_herzegovina' as any,
+            }),
+        ], {
+            military: {
+                brigade_movement_orders: {
+                    jna_uzice_corps_tg: { destination_sids: ['C'], stance: 'column' },
+                },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+            flatTerrain(),
+        );
+
+        expect(report.column_starts).toBe(0);
+        expect(state.military.brigade_movement_state?.jna_uzice_corps_tg).toBeUndefined();
+    });
+
+    it('applies an adjacent friendly move for an active HV expeditionary phantom', () => {
+        const state = makeState([
+            makeFormation('hv_112th_infantry_1995', 'HRHB', 'A', {
+                kind: 'hv_phantom',
+                corps_id: 'hvo_tomislavgrad' as any,
+            }),
+        ], {
+            military: {
+                brigade_movement_orders: {
+                    hv_112th_infantry_1995: { destination_sids: ['B'] },
+                },
+            } as any,
+            political: {
+                political_controllers: { A: 'HRHB', B: 'HRHB' },
+            } as any,
+        });
+
+        const report = applyBrigadeMovementOrders(
+            state,
+            [makeEdge('A', 'B')],
+            mockReverseMap(['A', 'B']),
+        );
+
+        expect(report.moves_applied).toBe(1);
+        expect(state.military.formations?.hv_112th_infantry_1995?.location_osid).toBe('B');
+    });
+
     it('single-hop movement pass ignores column orders owned by column movement', () => {
         const state = makeState([
             makeFormation('brig1', 'RS', 'A'),

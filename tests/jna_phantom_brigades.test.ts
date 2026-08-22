@@ -82,6 +82,19 @@ function defsSpawnedByTurn(turn: number): typeof _ALL_PHANTOM_DEFS {
 }
 
 describe('phantom spawn catalog', () => {
+    it('keeps the 1995 HV expeditionary wave coupled to the Storm turn', () => {
+        assert.equal(_HV_PHANTOM_DEFS.length > 0, true, 'positive control: HV catalog must not be empty');
+        const expeditionaryWave = _ALL_PHANTOM_DEFS.filter(
+            (def) => def.kind_tag === 'hv_phantom' && (def.spawn_turn ?? 0) > 0,
+        );
+
+        assert.equal(expeditionaryWave.length, 6);
+        assert.deepEqual(
+            expeditionaryWave.map((def) => def.spawn_turn),
+            [174, 174, 174, 174, 174, 174],
+        );
+    });
+
     it('spawns the full current JNA + HV phantom catalog', () => {
         const state = makeState(0);
         spawnJnaPhantomBrigades(state);
