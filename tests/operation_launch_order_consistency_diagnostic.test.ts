@@ -201,6 +201,32 @@ describe('operation launch/order consistency diagnostic', () => {
         })]);
     });
 
+    it.each(['march_to_approach', 'in_transit_skipped', 'attack_intermediate'])(
+        'rejects %s evidence whose downstream objective drifts from launch',
+        (decision) => {
+            const runDir = join(TMP_ROOT, `drifted_${decision}`);
+            const drifted = operation(decision);
+            drifted.axis_decision_diagnostics[0].order_generation_details[0].objective = 'op:test:sibling';
+            drifted.axis_decision_diagnostics[0].order_generation_details[0].issued_target_osid = 'op:test:approach';
+            writeWeeklyReport(runDir, [{ week_index: 90, operation_diagnostics: [drifted] }]);
+
+            let stdout = '';
+            try {
+                stdout = execFileSync(
+                    process.execPath,
+                    ['tools/diagnostics/operation_launch_order_consistency.cjs', runDir, '--json'],
+                    { cwd: process.cwd(), encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+                );
+            } catch (error) {
+                stdout = String((error as { stdout?: string | Buffer }).stdout ?? '');
+            }
+            expect(JSON.parse(stdout).mismatches).toEqual([expect.objectContaining({
+                reason: 'executable_launch_immediate_refusal',
+                refused_launch_brigades: ['arbih_706th'],
+            })]);
+        },
+    );
+
     it('accepts a strong launch candidate when a weaker sibling correctly refuses', () => {
         const runDir = join(TMP_ROOT, 'weak_and_strong_candidates');
         const mixed = operation('direct_attack');

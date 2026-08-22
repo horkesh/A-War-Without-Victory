@@ -79,9 +79,9 @@ function mismatchForAxis(week, operation, axis) {
     const validOrderBrigades = new Set(currentExecutionOrders
         .filter((order) => {
             const decision = String(order.decision || '');
+            if (String(order.objective || '') !== launchObjective) return false;
             if (MOVEMENT_DECISIONS.has(decision) || decision === 'attack_intermediate') return true;
             return decision === 'direct_attack'
-                && String(order.objective || '') === launchObjective
                 && String(order.issued_target_osid || '') === launchObjective;
         })
         .map((order) => String(order.brigade_id || '')));
