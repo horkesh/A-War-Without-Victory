@@ -37,6 +37,7 @@ import {
     type OperationOpportunityState,
 } from '../src/sim/combat/operation_opportunities.js';
 import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
+import { assertOperationLifecycle } from '../src/sim/combat/assert_operation_lifecycle.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
 
@@ -403,6 +404,109 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         expect(op.axes?.[0].assigned_brigades).toEqual(['arbih_5_brigade_a', 'arbih_5_brigade_b']);
         expect(op.axes?.[0].status).toBe('executing');
         expect(updated!.executed_op_id).toBe(def.name);
+    });
+
+    it('preempts disposable probes for an approved opportunity without double-committing participants', () => {
+        const state = buildMinimalState(175);
+        state.military.formations!.b_elite = {
+            ...state.military.formations!.b_a!,
+            id: 'b_elite',
+            name: 'b_elite',
+            corps_id: 'arbih_general_staff',
+            elite_loan_state: {
+                on_loan: true,
+                loaned_to_corps: 'arbih_5th_corps',
+                loan_start_turn: 170,
+                last_recall_turn: null,
+                loan_start_personnel: 1000,
+                permanently_degraded: false,
+                current_episode_id: 1,
+            },
+        };
+        const cmd = state.military.corps_command!.arbih_5th_corps!;
+        const probe = {
+            name: 'probe_before_opportunity',
+            type: 'probe' as const,
+            phase: 'execution' as const,
+            started_turn: 173,
+            phase_started_turn: 174,
+            participating_brigades: ['b_a', 'b_elite'],
+            objectives: ['op:probe'],
+            current_objective_index: 0,
+        };
+        cmd.active_operations.push(probe);
+        const def: OperationOpportunityDef = {
+            ...fixtureSana(),
+            axes: [{
+                axis_id: 'line_axis',
+                name: 'Line Axis',
+                corps: 'arbih_5th_corps',
+                brigades: ['b_a'],
+                objectives: ['op:line'],
+            }, {
+                axis_id: 'elite_axis',
+                name: 'Elite Axis',
+                corps: 'arbih_5th_corps',
+                brigades: ['b_elite'],
+                objectives: ['op:elite'],
+            }],
+        };
+        expect(assertOperationLifecycle(state)).toEqual([]);
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        const approved = applyOpportunityDecision(
+            state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+        );
+
+        expect(approved).toMatchObject({ status: 'approved', executed_op_id: def.name });
+        expect(probe).toMatchObject({
+            phase: 'recovery',
+            recovery_reason: 'probe_complete',
+            participating_brigades: [],
+        });
+        expect(cmd.active_operations.find((op) => op.name === def.name)?.participating_brigades)
+            .toEqual(['b_a', 'b_elite']);
+        expect(assertOperationLifecycle(state)).toEqual([]);
+    });
+
+    it('does not preempt a participant from a non-probe live operation', () => {
+        const state = buildMinimalState(175);
+        const cmd = state.military.corps_command!.arbih_5th_corps!;
+        const liveOperation = {
+            name: 'protected_sector_attack',
+            type: 'sector_attack' as const,
+            phase: 'execution' as const,
+            started_turn: 170,
+            phase_started_turn: 172,
+            participating_brigades: ['b_a'],
+            objectives: ['op:protected'],
+            current_objective_index: 0,
+        };
+        cmd.active_operations.push(liveOperation);
+        const def: OperationOpportunityDef = {
+            ...fixtureSana(),
+            axes: [{
+                axis_id: 'main',
+                name: 'Main',
+                corps: 'arbih_5th_corps',
+                brigades: ['b_a', 'b_b'],
+                objectives: ['op:new'],
+            }],
+        };
+        expect(assertOperationLifecycle(state)).toEqual([]);
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        applyOpportunityDecision(
+            state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+        );
+
+        expect(liveOperation).toMatchObject({
+            phase: 'execution',
+            participating_brigades: ['b_a'],
+        });
+        expect(cmd.active_operations.find((op) => op.name === def.name)?.participating_brigades)
+            .toEqual(['b_b']);
+        expect(assertOperationLifecycle(state)).toEqual([]);
     });
 
     it('links a completed operation AAR back to the opportunity resolution', () => {

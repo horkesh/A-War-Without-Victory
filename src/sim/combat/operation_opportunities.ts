@@ -92,6 +92,7 @@ import type { OperationAAR } from './operation_aar.js';
 import { FIFTH_CORPS_OPPORTUNITIES } from './operation_opportunity_catalog_5th_corps.js';
 import { CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES } from './operation_opportunity_catalog_central_bosnia.js';
 import { FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES } from './operation_opportunity_catalog_federation_western_bosnia.js';
+import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -388,6 +389,7 @@ export type OperationParticipantEvaluationReason =
     | 'eligible_oob_alias_same_corps'
     | 'eligible_roster_attachment'
     | 'eligible_oob_alias_roster_attachment'
+    | 'eligible_probe_preemption'
     | 'missing_formation'
     | 'ambiguous_oob_reference'
     | 'corps_mismatch_gate_disabled'
@@ -1251,13 +1253,21 @@ function spawnCorpsOperationFromOpportunity(
 
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
+    const probePreemptions: ProbePreemption[] = [];
     // Elite loans owed to sector-exempt roster members, deployed only once the
     // operation is certain to spawn so an aborted spawn mutates nothing.
     const eliteLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
     for (const axis of axesIn) {
         const axisLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
+        const axisProbePreemptions: ProbePreemption[] = [];
         const brigadesForAxis = selectEligibleOpportunityParticipants(
-            state, axis, commitment, adjacency, axisLoans, participantEvaluations,
+            state,
+            axis,
+            commitment,
+            adjacency,
+            axisLoans,
+            participantEvaluations,
+            axisProbePreemptions,
         );
         if (brigadesForAxis.length === 0) continue;
 
@@ -1304,9 +1314,11 @@ function spawnCorpsOperationFromOpportunity(
         });
         for (const b of brigadesForAxis) allParticipating.push(b);
         for (const loan of axisLoans) eliteLoans.push(loan);
+        for (const preemption of axisProbePreemptions) probePreemptions.push(preemption);
     }
     if (builtAxes.length === 0) return null;
 
+    preemptOpportunityProbeParticipants(state, turn, probePreemptions);
     deployOpportunityEliteLoans(state, eliteLoans, def, turn, adjacency);
 
     const op = buildCorpsOperation(
@@ -1325,6 +1337,40 @@ function spawnCorpsOperationFromOpportunity(
 
     cmd.active_operations.push(op);
     return op.name;
+}
+
+interface ProbePreemption {
+    readonly brigadeId: FormationId;
+    readonly hostCorpsId: FormationId;
+    readonly op: CorpsOperation;
+}
+
+function preemptOpportunityProbeParticipants(
+    state: GameState,
+    turn: number,
+    preemptions: readonly ProbePreemption[],
+): void {
+    const seen = new Set<string>();
+    for (const preemption of preemptions) {
+        const key = `${preemption.hostCorpsId}:${preemption.op.name}:${preemption.brigadeId}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        preemption.op.participating_brigades = preemption.op.participating_brigades
+            .filter((brigadeId) => brigadeId !== preemption.brigadeId);
+        for (const axis of preemption.op.axes ?? []) {
+            axis.assigned_brigades = axis.assigned_brigades
+                .filter((brigadeId) => brigadeId !== preemption.brigadeId);
+        }
+        if (preemption.op.participating_brigades.length === 0) {
+            enterOperationRecovery(
+                state,
+                preemption.hostCorpsId,
+                preemption.op,
+                turn,
+                'probe_complete',
+            );
+        }
+    }
 }
 
 /**
@@ -1384,6 +1430,7 @@ function selectEligibleOpportunityParticipants(
     adjacency?: Map<Osid, Osid[]>,
     eliteLoansOut?: Array<{ brigadeId: FormationId; corpsId: string }>,
     evaluationsOut?: OperationParticipantEvaluation[],
+    probePreemptionsOut?: ProbePreemption[],
 ): FormationId[] {
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
@@ -1398,6 +1445,7 @@ function selectEligibleOpportunityParticipants(
         const brigadeId = resolved.formation_id;
         const formation = resolved.formation ?? undefined;
         const movementStatus = brigadeId ? movementState[brigadeId]?.status ?? null : null;
+        const liveCommitment = brigadeId ? findBrigadeLiveOperationAnywhere(state, brigadeId) : null;
         const resolvedByOobAlias = resolved.resolution === 'oob_alias';
         const record = (
             decision: OperationParticipantEvaluation['decision'],
@@ -1435,6 +1483,7 @@ function selectEligibleOpportunityParticipants(
         // the loan is what delivers the brigade. See the explicit contract in
         // mainstaff_op_availability_gate.ts.
         let admittedByRosterAttachment = false;
+        let alreadyLoanedToHost = false;
         if (getFormationCorpsId(formation) !== axis.corps) {
             if (!isMainStaffOpAvailabilityEnabled()) {
                 record('rejected', 'corps_mismatch_gate_disabled');
@@ -1450,24 +1499,28 @@ function selectEligibleOpportunityParticipants(
             }
             const loanState = formation.elite_loan_state;
             if (loanState.on_loan) {
-                record('rejected', loanState.loaned_to_corps === axis.corps
-                    ? 'elite_committed_to_host_corps'
-                    : 'elite_loaned_to_other_corps');
-                continue;
+                if (loanState.loaned_to_corps !== axis.corps) {
+                    record('rejected', 'elite_loaned_to_other_corps');
+                    continue;
+                }
+                admittedByRosterAttachment = true;
+                alreadyLoanedToHost = true;
             }
-            if (!isEliteAvailableForLoan(formation, state.meta.turn)) {
+            if (!alreadyLoanedToHost && !isEliteAvailableForLoan(formation, state.meta.turn)) {
                 record('rejected', loanState.permanently_degraded
                     ? 'elite_permanently_degraded'
                     : 'elite_in_cooldown');
                 continue;
             }
-            if (adjacency && !canEliteLoanReachCorpsTerritory(state, brigadeId!, axis.corps, adjacency)) {
+            if (!alreadyLoanedToHost
+                && adjacency
+                && !canEliteLoanReachCorpsTerritory(state, brigadeId!, axis.corps, adjacency)) {
                 record('rejected', 'unreachable_to_host_corps');
                 continue;
             }
             admittedByRosterAttachment = true;
         }
-        if (findBrigadeLiveOperationAnywhere(state, brigadeId)) {
+        if (liveCommitment && liveCommitment.op.type !== 'probe') {
             record('rejected', 'committed_to_live_operation');
             continue;
         }
@@ -1488,13 +1541,22 @@ function selectEligibleOpportunityParticipants(
             continue;
         }
 
-        if (admittedByRosterAttachment && eliteLoansOut) {
+        if (admittedByRosterAttachment && !alreadyLoanedToHost && eliteLoansOut) {
             const loanState = formation.elite_loan_state!;
             eliteLoansOut.push({ brigadeId, corpsId: axis.corps });
         }
+        if (liveCommitment?.op.type === 'probe' && probePreemptionsOut) {
+            probePreemptionsOut.push({
+                brigadeId,
+                hostCorpsId: liveCommitment.corps_id,
+                op: liveCommitment.op,
+            });
+        }
 
         selected.push(brigadeId);
-        record('admitted', admittedByRosterAttachment
+        record('admitted', liveCommitment?.op.type === 'probe'
+            ? 'eligible_probe_preemption'
+            : admittedByRosterAttachment
             ? resolvedByOobAlias ? 'eligible_oob_alias_roster_attachment' : 'eligible_roster_attachment'
             : resolvedByOobAlias ? 'eligible_oob_alias_same_corps' : 'eligible_same_corps');
         if (selected.length >= targetCount) break;

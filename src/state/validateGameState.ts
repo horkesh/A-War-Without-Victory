@@ -2355,6 +2355,7 @@ function validateOperationOpportunityTrace(value: unknown, path: string, errors:
                 'eligible_oob_alias_same_corps',
                 'eligible_roster_attachment',
                 'eligible_oob_alias_roster_attachment',
+                'eligible_probe_preemption',
                 'missing_formation',
                 'ambiguous_oob_reference',
                 'corps_mismatch_gate_disabled',
