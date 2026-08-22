@@ -106,6 +106,7 @@ describe('operation opportunity state validation', () => {
                 participant_evaluations: [{
                     axis_id: 'western',
                     formation_id: 'arbih_501_slavna',
+                    resolved_formation_id: 'F_RBiH_0001',
                     decision: 'admitted',
                     reason: 'eligible_same_corps',
                     host_corps_id: 'arbih_5th_corps',
@@ -202,6 +203,7 @@ describe('operation opportunity state validation', () => {
                 }],
                 participant_evaluations: [{
                     axis_id: '', formation_id: '', decision: 'maybe', reason: 'maybe', host_corps_id: '',
+                    resolved_formation_id: 42,
                     formation_corps_id: 42, kind: '', status: 42, personnel: -1,
                     disrupted_turns: 'bad', movement_status: 42,
                 }],

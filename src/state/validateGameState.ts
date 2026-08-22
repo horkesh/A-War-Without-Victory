@@ -2352,8 +2352,11 @@ function validateOperationOpportunityTrace(value: unknown, path: string, errors:
             const validDecisions = new Set(['admitted', 'rejected']);
             const validReasons = new Set([
                 'eligible_same_corps',
+                'eligible_oob_alias_same_corps',
                 'eligible_roster_attachment',
+                'eligible_oob_alias_roster_attachment',
                 'missing_formation',
+                'ambiguous_oob_reference',
                 'corps_mismatch_gate_disabled',
                 'corps_mismatch_not_sector_exempt',
                 'missing_elite_loan_state',
@@ -2373,6 +2376,13 @@ function validateOperationOpportunityTrace(value: unknown, path: string, errors:
                     if (!isNonEmptyString(entry[field])) {
                         errors.push(`${entryPath}.${field} must be a non-empty string`);
                     }
+                }
+                if (
+                    entry.resolved_formation_id !== undefined
+                    && entry.resolved_formation_id !== null
+                    && !isNonEmptyString(entry.resolved_formation_id)
+                ) {
+                    errors.push(`${entryPath}.resolved_formation_id must be null or a non-empty string`);
                 }
                 if (!validDecisions.has(String(entry.decision))) {
                     errors.push(`${entryPath}.decision must be admitted or rejected`);

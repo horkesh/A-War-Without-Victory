@@ -748,6 +748,12 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
             formations.wrong_corps = {
                 ...baseFormation, id: 'wrong_corps', name: 'wrong_corps', corps_id: 'arbih_1st_corps',
             };
+            formations.synthetic_alias = {
+                ...baseFormation,
+                id: 'synthetic_alias',
+                name: 'synthetic_alias',
+                tags: ['oob:authored_alias'],
+            };
             state.military.brigade_movement_state = {
                 transit: { status: 'in_transit' },
             } as GameState['military']['brigade_movement_state'];
@@ -758,7 +764,7 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
                     ...fixture.axes[0]!,
                     brigades: [
                         'missing', 'inactive', 'understrength', 'disrupted',
-                        'transit', 'wrong_corps', 'arbih_5_brigade_a',
+                        'transit', 'wrong_corps', 'authored_alias', 'arbih_5_brigade_a',
                     ],
                 }],
             };
@@ -768,17 +774,20 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
             );
 
             const trace = state.military.operation_opportunity_traces?.at(-1);
-            expect(trace?.participant_evaluations?.map(({ formation_id, decision, reason }) => ({
-                formation_id, decision, reason,
+            expect(trace?.participant_evaluations?.map(({ formation_id, resolved_formation_id, decision, reason }) => ({
+                formation_id, resolved_formation_id, decision, reason,
             }))).toEqual([
-                { formation_id: 'arbih_5_brigade_a', decision: 'admitted', reason: 'eligible_same_corps' },
-                { formation_id: 'disrupted', decision: 'rejected', reason: 'disrupted' },
-                { formation_id: 'inactive', decision: 'rejected', reason: 'ineligible_operation_formation' },
-                { formation_id: 'missing', decision: 'rejected', reason: 'missing_formation' },
-                { formation_id: 'transit', decision: 'rejected', reason: 'in_transit' },
-                { formation_id: 'understrength', decision: 'rejected', reason: 'below_min_attack_personnel' },
-                { formation_id: 'wrong_corps', decision: 'rejected', reason: 'corps_mismatch_gate_disabled' },
+                { formation_id: 'arbih_5_brigade_a', resolved_formation_id: 'arbih_5_brigade_a', decision: 'admitted', reason: 'eligible_same_corps' },
+                { formation_id: 'authored_alias', resolved_formation_id: 'synthetic_alias', decision: 'admitted', reason: 'eligible_oob_alias_same_corps' },
+                { formation_id: 'disrupted', resolved_formation_id: 'disrupted', decision: 'rejected', reason: 'disrupted' },
+                { formation_id: 'inactive', resolved_formation_id: 'inactive', decision: 'rejected', reason: 'ineligible_operation_formation' },
+                { formation_id: 'missing', resolved_formation_id: null, decision: 'rejected', reason: 'missing_formation' },
+                { formation_id: 'transit', resolved_formation_id: 'transit', decision: 'rejected', reason: 'in_transit' },
+                { formation_id: 'understrength', resolved_formation_id: 'understrength', decision: 'rejected', reason: 'below_min_attack_personnel' },
+                { formation_id: 'wrong_corps', resolved_formation_id: 'wrong_corps', decision: 'rejected', reason: 'corps_mismatch_gate_disabled' },
             ]);
+            expect(state.military.corps_command?.arbih_5th_corps?.active_operations[0]
+                ?.participating_brigades).toContain('synthetic_alias');
         } finally {
             delete process.env.AWWV_DEBUG_REASON_CODES;
             resetReasonCodeTopicCacheForTests();

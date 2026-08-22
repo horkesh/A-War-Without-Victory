@@ -380,8 +380,11 @@ export interface OperationObjectiveFilterRejection {
 
 export type OperationParticipantEvaluationReason =
     | 'eligible_same_corps'
+    | 'eligible_oob_alias_same_corps'
     | 'eligible_roster_attachment'
+    | 'eligible_oob_alias_roster_attachment'
     | 'missing_formation'
+    | 'ambiguous_oob_reference'
     | 'corps_mismatch_gate_disabled'
     | 'corps_mismatch_not_sector_exempt'
     | 'missing_elite_loan_state'
@@ -393,7 +396,10 @@ export type OperationParticipantEvaluationReason =
 
 export interface OperationParticipantEvaluation {
     readonly axis_id: string;
+    /** Catalog-authored reference. */
     readonly formation_id: FormationId;
+    /** Live formation key after exact/OOB-tag resolution; null when unresolved. */
+    readonly resolved_formation_id?: FormationId | null;
     readonly decision: 'admitted' | 'rejected';
     readonly reason: OperationParticipantEvaluationReason;
     readonly host_corps_id: string;
@@ -1376,16 +1382,29 @@ function selectEligibleOpportunityParticipants(
         : Number.POSITIVE_INFINITY;
     const selected: FormationId[] = [];
 
-    for (const brigadeId of axis.brigades) {
-        const formation = formations[brigadeId];
-        const movementStatus = movementState[brigadeId]?.status ?? null;
+    for (const authoredBrigadeId of axis.brigades) {
+        const exactFormation = formations[authoredBrigadeId];
+        const aliasMatches = exactFormation
+            ? []
+            : Object.keys(formations)
+                .sort(strictCompare)
+                .filter((formationId) => formations[formationId]?.tags?.includes(`oob:${authoredBrigadeId}`));
+        const brigadeId = exactFormation
+            ? authoredBrigadeId
+            : aliasMatches.length === 1
+                ? aliasMatches[0]!
+                : null;
+        const formation = brigadeId ? formations[brigadeId] : undefined;
+        const movementStatus = brigadeId ? movementState[brigadeId]?.status ?? null : null;
+        const resolvedByOobAlias = brigadeId !== null && brigadeId !== authoredBrigadeId;
         const record = (
             decision: OperationParticipantEvaluation['decision'],
             reason: OperationParticipantEvaluationReason,
         ): void => {
             evaluationsOut?.push({
                 axis_id: axis.axis_id,
-                formation_id: brigadeId,
+                formation_id: authoredBrigadeId,
+                resolved_formation_id: brigadeId,
                 decision,
                 reason,
                 host_corps_id: axis.corps,
@@ -1397,7 +1416,11 @@ function selectEligibleOpportunityParticipants(
                 movement_status: movementStatus,
             });
         };
-        if (!formation) {
+        if (aliasMatches.length > 1) {
+            record('rejected', 'ambiguous_oob_reference');
+            continue;
+        }
+        if (!brigadeId || !formation) {
             record('rejected', 'missing_formation');
             continue;
         }
@@ -1423,7 +1446,7 @@ function selectEligibleOpportunityParticipants(
                 record('rejected', 'missing_elite_loan_state');
                 continue;
             }
-            if (adjacency && !canEliteLoanReachCorpsTerritory(state, brigadeId, axis.corps, adjacency)) {
+            if (adjacency && !canEliteLoanReachCorpsTerritory(state, brigadeId!, axis.corps, adjacency)) {
                 record('rejected', 'unreachable_to_host_corps');
                 continue;
             }
@@ -1454,7 +1477,9 @@ function selectEligibleOpportunityParticipants(
         }
 
         selected.push(brigadeId);
-        record('admitted', admittedByRosterAttachment ? 'eligible_roster_attachment' : 'eligible_same_corps');
+        record('admitted', admittedByRosterAttachment
+            ? resolvedByOobAlias ? 'eligible_oob_alias_roster_attachment' : 'eligible_roster_attachment'
+            : resolvedByOobAlias ? 'eligible_oob_alias_same_corps' : 'eligible_same_corps');
         if (selected.length >= targetCount) break;
     }
 
