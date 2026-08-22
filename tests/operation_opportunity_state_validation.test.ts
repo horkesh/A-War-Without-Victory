@@ -124,6 +124,36 @@ describe('operation opportunity state validation', () => {
         expect(validateGameStateShape(withRows).ok).toBe(true);
     });
 
+    it('accepts the live-operation commitment rejection emitted by the opportunity selector', () => {
+        const state = minimalState();
+        state.military.operation_opportunity_traces = [{
+            turn: 175,
+            opportunity_id: 'mistral_2_95',
+            event: 'eligible',
+            proposal_id: 'OPP_175_mistral_2_95',
+            failed_required_axes: [],
+            failed_optional_axes: [],
+            optional_green_count: 0,
+            min_optional_axes: 0,
+            participant_evaluations: [{
+                axis_id: 'mistral_drvar_grahovo',
+                formation_id: 'hv_4th_guards_split',
+                resolved_formation_id: 'hv_4th_guards_split',
+                decision: 'rejected',
+                reason: 'committed_to_live_operation',
+                host_corps_id: 'hvo_tomislavgrad',
+                formation_corps_id: 'hvo_tomislavgrad',
+                kind: 'brigade',
+                status: 'active',
+                personnel: 2500,
+                disrupted_turns: 0,
+                movement_status: null,
+            }],
+        }];
+
+        expect(validateGameStateShape(state).ok).toBe(true);
+    });
+
     it('rejects malformed present operation opportunity lifecycle records', () => {
         const state = minimalState();
         state.military.operation_opportunities = [

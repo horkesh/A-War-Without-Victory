@@ -2364,6 +2364,7 @@ function validateOperationOpportunityTrace(value: unknown, path: string, errors:
                 'elite_in_cooldown',
                 'elite_committed_to_host_corps',
                 'elite_loaned_to_other_corps',
+                'committed_to_live_operation',
                 'unreachable_to_host_corps',
                 'ineligible_operation_formation',
                 'below_min_attack_personnel',
