@@ -784,7 +784,7 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
                 { formation_id: 'missing', resolved_formation_id: null, decision: 'rejected', reason: 'missing_formation' },
                 { formation_id: 'transit', resolved_formation_id: 'transit', decision: 'rejected', reason: 'in_transit' },
                 { formation_id: 'understrength', resolved_formation_id: 'understrength', decision: 'rejected', reason: 'below_min_attack_personnel' },
-                { formation_id: 'wrong_corps', resolved_formation_id: 'wrong_corps', decision: 'rejected', reason: 'corps_mismatch_gate_disabled' },
+                { formation_id: 'wrong_corps', resolved_formation_id: 'wrong_corps', decision: 'rejected', reason: 'corps_mismatch_not_sector_exempt' },
             ]);
             expect(state.military.corps_command?.arbih_5th_corps?.active_operations[0]
                 ?.participating_brigades).toContain('synthetic_alias');

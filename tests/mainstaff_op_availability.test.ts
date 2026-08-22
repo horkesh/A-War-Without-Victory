@@ -32,6 +32,7 @@ import {
 } from '../src/sim/combat/operation_opportunities.js';
 import { reconcileFinalOperationTruth } from '../src/sim/combat/final_operation_truth_reconciliation.js';
 import {
+    isMainStaffOpAvailabilityEnabled,
     resetMainStaffOpAvailabilityOverride,
     resetMainStaffOpRetentionOverride,
     setMainStaffOpAvailabilityOverride,
@@ -205,6 +206,18 @@ function spawnFixtureOperation(state: GameState, turn: number, def: OperationOpp
 }
 
 describe('GATE 2 — opportunity roster admission for sector-exempt brigades', () => {
+    it('defaults availability ON so authored main-staff roster members are deliverable', () => {
+        const prior = process.env.AWWV_MAINSTAFF_OP_AVAILABILITY;
+        delete process.env.AWWV_MAINSTAFF_OP_AVAILABILITY;
+        resetMainStaffOpAvailabilityOverride();
+        try {
+            expect(isMainStaffOpAvailabilityEnabled()).toBe(true);
+        } finally {
+            if (prior === undefined) delete process.env.AWWV_MAINSTAFF_OP_AVAILABILITY;
+            else process.env.AWWV_MAINSTAFF_OP_AVAILABILITY = prior;
+            resetMainStaffOpAvailabilityOverride();
+        }
+    });
     it('AVAILABILITY OFF: a NAMED main-staff brigade is dropped (shipped baseline)', () => {
         setMainStaffOpAvailabilityOverride(false);
         setMainStaffOpRetentionOverride(false);
