@@ -2940,3 +2940,12 @@ Per-criterion: **2, 3, 5, 6 DISCHARGED permanently** (evidence production and ex
 **Gap logged, not fixed:** no per-turn collapse diagnostics survive anywhere. `war_phases.ts:4050` assigns `context.report.phase3d_collapse_resolution`, but the strings `phase3d`/`phase3c`/`collapse` appear in none of `run_summary.json`, `end_report.md` or `weekly_report.jsonl`. The pair yields terminal state only — no trajectory, no per-turn `entities_evaluated`, no `enclave_guarded_count`.
 
 **Pair validity (RC-Stage2-Tester, VERIFIED):** marker semantics correct — `collapse_enabled.json` is written from the same `readCollapseGateFromEnv()` the flags come from and is `rm -f`'d on the OFF path, so n221's missing marker is an *affirmative OFF*, not an absent file. Both halves full-length 188w (188 `weekly_report.jsonl` lines each). One build — zero `src/`/`tools/`/`data/` diff between the runs. Clean single variable: 12 of 14 artifacts byte-identical including the 24 MB `brigade_temporal_log.jsonl`; only `final_save.json` (the three collapse fields) and `run_summary.json` differ, and the latter differs in `final_state_hash` alone, which is derivative of the former.
+
+## 2026-08-22 — HV launch-prediction engine closure (n265/n266; pins frozen)
+
+- Clean diagnostic-off n266 at `c700a18d4`: 628/712 matched OSIDs, 31/31 anchors, final hash `68fb8b09c4fd7260`.
+- Combat-calibration validity is true: 0 invalid operations, 755 attack orders, 553 battles, and 0 recovery-without-logged-attempt rows.
+- The 188-week engine-health gate passes all hard checks, including stranded brigades 6/9 and matched OSIDs 628/622 minimum.
+- Diagnostic-on n265 checked 965 traced operation axes and 181 first-execution executable axes with zero launch/order contradictions. Its injected immediate-refusal positive control was detected.
+- Removing only env-gated trace payloads makes n265/n266 final saves canonically byte-identical (SHA-256 `F5237F5F9BAF33B288F43BB7AE97F87269B2752CABC42128B6ACD9EA256F41F0`); a mutated turn is detected.
+- This is verification evidence, not a baseline refresh. `data/derived/scenario/baselines/manifest.json` remains frozen.

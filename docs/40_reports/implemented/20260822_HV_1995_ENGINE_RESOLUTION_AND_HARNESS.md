@@ -4,9 +4,9 @@
 
 **Branch:** `codex/hv-1995-timing-mobility`
 
-**Final clean run:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n257`
+**Final clean run:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n266`
 
-**Result:** 630/712 matched OSIDs, 31/31 anchors, final hash `5cb43c593610b335`
+**Result:** 628/712 matched OSIDs, 31/31 anchors, final hash `68fb8b09c4fd7260`; combat-calibration valid
 
 ## Summary
 
@@ -65,6 +65,8 @@ The manifest remains frozen at SHA-256 `2BD8549068935249C7FEE8C9BFC27C9B21950C0A
 | n255 | authored opportunity preempts probes | 630 | 31/31 | `5cb43c593610b335` | retained; cascade restored |
 | n256 | casualty replacement commitment guard | 630 | 31/31 | `5cb43c593610b335` | retained; byte-identical in this trajectory |
 | n257 | reserve replacements within one operation | 630 | 31/31 | `5cb43c593610b335` | retained; byte-identical in this trajectory |
+| n265 | launch/order trace enabled | 628 | 31/31 | `32b614231a2601e2` | diagnostic evidence; env-gated payload changes raw hash |
+| n266 | launch/order trace disabled | 628 | 31/31 | `68fb8b09c4fd7260` | final clean run; combat-calibration valid |
 
 Short diagnostic runs n250 and n252 were evidence-gathering runs, not calibration results. n250 established that Mistral 1 participants were being consumed by a disposable probe; n252 established that the failed n251 heuristic discarded a valid staged sibling axis. Those observations, not conjecture, drove the later fixes.
 
@@ -87,12 +89,22 @@ The casualty-replacement guards did not change n256 or n257 relative to n255. Th
 
 The threshold-based engine-health gate passes, but the artifact is **not valid for combat calibration**. `behavioral_health.combat_causality.valid_for_combat_calibration` is false with two `operation_attack_orders_without_battles` invalidations. Direct weekly tracing identifies Operacija Osvit at weeks 101 and 102: three attack orders each were skipped as `alliance_blocked`, with zero battles. This qualification is separate from the passing health thresholds and is why n257 is evidence for engine/lifecycle behavior, not a new calibration pin.
 
+## Launch-Prediction Engine Closure
+
+Follow-up tracing disproved two narrower launch fixes before identifying the remaining defect. Operation readiness used the live opening-contact graph as the adjacency supplied to combat prediction, while brigade order generation used the full tactical graph. The sparse graph undercounted reactive defenders and allowed operations such as Kopljem/Gazija to launch on a favorable prediction, then immediately refuse the same opening attack under the order generator's complete combat context.
+
+The readiness predictor now receives the same terrain, supply, population, officer, reverse-formation, and full tactical-adjacency context as order generation. The live opening graph remains responsible only for contact/gate eligibility. The permanent `operation_launch_order_consistency.cjs` audit checks the first execution week of every traced executable axis and injects an immediate-refusal defect as its positive control.
+
+Diagnostic-on n265 checked 965 traced axes and 181 first-execution executable axes: zero contradictions, with the injected contradiction detected. Combat causality is valid: zero invalid operations, 755 attack orders, 553 battles, and zero recovery-without-attempt rows. Diagnostic-off n266 reproduced the same gameplay trajectory. After removing only the three env-gated trace fields (`launch_readiness_detail`, `order_generation_details`, and `launch_blocker_detail`), canonical final-save serialization is byte-identical at SHA-256 `F5237F5F9BAF33B288F43BB7AE97F87269B2752CABC42128B6ACD9EA256F41F0`; a mutated turn produced a different hash as the comparator positive control.
+
+n266 is clean at commit `c700a18d441df90234f2c13f60184856325d2413`. It passes all 31 anchors, the 188-week engine-health gate (stranded 6/9, matched 628/622 minimum), and combat-calibration validity. No baseline pin was regenerated.
+
 ## Verification Status
 
 - Focused replacement, lifecycle, sector-offensive, opportunity, state-validation, and HV diagnostic tests pass.
 - TypeScript typecheck passes.
 - The scenario-anchor suite passes 4 selected tests; its Brcko negative case is an explicit positive control.
-- n257 passes the threshold health, HV lifecycle, anchor, provenance, and operation-commitment harnesses; its combat-calibration-validity flag remains false as disclosed above.
+- n265 passes the launch/order consistency audit with its injected positive control; n266 passes threshold health, anchors, and combat-calibration validity.
 - `data/derived/latest_run_final_save.json` is restored to SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`.
 - Full-suite/build verification and final independent review are recorded separately when complete.
 
