@@ -70,7 +70,7 @@
 import { strictCompare } from '../../state/validateGameState.js';
 
 /**
- * The seven diagnostic topics.
+ * The eight diagnostic topics.
  *
  *  battle_stack      — item 1. `attacker_brigades` + `defender_contributions` on the
  *                      weekly battle entry. Answers: is this casualty figure a
@@ -88,6 +88,8 @@ import { strictCompare } from '../../state/validateGameState.js';
  *  formation_lifecycle — item 7. Include expeditionary `hv_phantom` formations in
  *                        the per-turn temporal stream so their live state can be
  *                        joined from spawn through withdrawal.
+ *  movement_reject   — item 8. Formation-specific column-order rejection reason
+ *                      and routing scope, emitted on the movement report.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -96,6 +98,7 @@ export type ReasonCodeTopic =
     | 'formation_refusal'
     | 'brigade_state'
     | 'formation_lifecycle'
+    | 'movement_reject'
     | 'objective_filter';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
@@ -105,6 +108,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'brigade_state',
     'formation_lifecycle',
     'formation_refusal',
+    'movement_reject',
     'objective_filter',
 ];
 

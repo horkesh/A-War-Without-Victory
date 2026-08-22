@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import type { GameState, FactionId, FormationState } from '../src/state/game_state.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
@@ -14,6 +14,12 @@ import {
 } from '../src/sim/combat/osid_column_movement.js';
 import { buildOsidAdjacency } from '../src/sim/combat/osid_adjacency.js';
 import { applyBrigadeMovementOrders } from '../src/sim/combat/brigade_movement_orders.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
+
+afterEach(() => {
+    delete process.env.AWWV_DEBUG_REASON_CODES;
+    resetReasonCodeTopicCacheForTests();
+});
 
 function makeEdge(a: string, b: string): EdgeRecord {
     return { a, b } as EdgeRecord;
@@ -329,6 +335,71 @@ describe('processOsidColumnMovement', () => {
 
         expect(report.column_starts).toBe(0);
         expect(state.military.brigade_movement_state?.jna_uzice_corps_tg).toBeUndefined();
+    });
+
+    it('emits an opt-in, formation-specific reason when a column order has no friendly path', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'movement_reject';
+        resetReasonCodeTopicCacheForTests();
+        const state = makeState([
+            makeFormation('loaned_guard', 'HRHB', 'A', {
+                corps_id: 'hvo_main_staff' as any,
+                elite_loan_state: {
+                    on_loan: true,
+                    loaned_to_corps: 'hvo_tomislavgrad' as any,
+                } as any,
+            }),
+        ], {
+            military: {
+                brigade_movement_orders: {
+                    loaned_guard: { destination_sids: ['C'], stance: 'column' },
+                },
+            } as any,
+            political: {
+                political_controllers: { A: 'HRHB', B: 'RS', C: 'HRHB' },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+            flatTerrain(),
+        );
+
+        expect(report.column_blocked).toBe(1);
+        expect(report.column_rejections).toEqual([{
+            formation_id: 'loaned_guard',
+            reason: 'no_friendly_path',
+            location_osid: 'A',
+            destination_osid: 'C',
+            formation_corps_id: 'hvo_main_staff',
+            loaned_to_corps_id: 'hvo_tomislavgrad',
+            routing_corps_id: 'hvo_main_staff',
+            routing_scope_osid_count: null,
+            source_in_routing_scope: null,
+            destination_in_routing_scope: null,
+        }]);
+    });
+
+    it('does not add column rejection payload when the diagnostic topic is off', () => {
+        const state = makeState([
+            makeFormation('brig1', 'RS', 'A'),
+        ], {
+            military: {
+                brigade_movement_orders: {
+                    brig1: { destination_sids: ['E'], stance: 'column' },
+                },
+            } as any,
+        });
+
+        const report = processOsidColumnMovement(
+            state,
+            makeLinearEdges(),
+            mockReverseMap(['A', 'B', 'C', 'D', 'E']),
+            flatTerrain(),
+        );
+
+        expect(Object.prototype.hasOwnProperty.call(report, 'column_rejections')).toBe(false);
     });
 
     it('applies an adjacent friendly move for an active HV expeditionary phantom', () => {

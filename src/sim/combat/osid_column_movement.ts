@@ -54,6 +54,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
+import { whenReasonCodeTopic } from './reason_code_debug.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Corps boundary helpers
@@ -299,6 +300,19 @@ export interface OsidColumnMovementReport {
     column_arrivals: number;
     /** Brigades whose column order was blocked (no path, not friendly, etc.). */
     column_blocked: number;
+    /** Default-off, formation-specific evidence for rejected column orders. */
+    column_rejections?: Array<{
+        formation_id: string;
+        reason: 'no_friendly_path';
+        location_osid: string;
+        destination_osid: string;
+        formation_corps_id: string | null;
+        loaned_to_corps_id: string | null;
+        routing_corps_id: string | null;
+        routing_scope_osid_count: number | null;
+        source_in_routing_scope: boolean | null;
+        destination_in_routing_scope: boolean | null;
+    }>;
 }
 
 /**
@@ -324,7 +338,8 @@ export function processOsidColumnMovement(
         column_starts: 0,
         column_advances: 0,
         column_arrivals: 0,
-        column_blocked: 0
+        column_blocked: 0,
+        ...whenReasonCodeTopic('movement_reject', () => ({ column_rejections: [] })),
     };
     const formations = state.military.formations ?? {};
     const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
@@ -416,6 +431,20 @@ export function processOsidColumnMovement(
         const result = dijkstraFriendlyPath(loc, destOsid, factionId, adjacency, state, reverseMap, terrainData, allowedOsids);
         if (!result || result.path.length <= 1) {
             report.column_blocked += 1;
+            report.column_rejections?.push({
+                formation_id: formationId,
+                reason: 'no_friendly_path',
+                location_osid: loc,
+                destination_osid: destOsid,
+                formation_corps_id: corpsId ?? null,
+                loaned_to_corps_id: f.elite_loan_state?.on_loan === true
+                    ? f.elite_loan_state.loaned_to_corps ?? null
+                    : null,
+                routing_corps_id: corpsId ?? null,
+                routing_scope_osid_count: allowedOsids?.size ?? null,
+                source_in_routing_scope: allowedOsids ? allowedOsids.has(loc) : null,
+                destination_in_routing_scope: allowedOsids ? allowedOsids.has(destOsid) : null,
+            });
             delete movementOrders[formationId];
             continue;
         }

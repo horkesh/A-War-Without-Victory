@@ -67,6 +67,15 @@ describe('HV 1995 lifecycle diagnostic', () => {
             temporalRows,
             weeklyRows: [{
                 week_index: 175,
+                column_movement: {
+                    column_starts: 1,
+                    column_rejections: [{
+                        formation_id: lead,
+                        reason: 'no_friendly_path',
+                        location_osid: 'op:a',
+                        destination_osid: 'op:c',
+                    }],
+                },
                 battles: [{
                     battle_id: 'positive-control-battle',
                     attacker_brigades: [lead, 'hv_4th_guards_split'],
@@ -136,7 +145,9 @@ describe('HV 1995 lifecycle diagnostic', () => {
             turn: 176,
         }]);
         expect(result.cascade.positive_controls).toEqual({
+            column_movement_projection: true,
             final_controller_projection: true,
+            movement_reject_projection: true,
             operation_aar_projection: true,
             opportunity_trace_projection: true,
             turn_battle_flip_projection: true,
@@ -155,6 +166,11 @@ describe('HV 1995 lifecycle diagnostic', () => {
             osid: 'op:glamoc:glamoc_2',
             final_controller: 'RS',
         });
+        expect(result.cascade.movement_rejections).toEqual([expect.objectContaining({
+            formation_id: lead,
+            reason: 'no_friendly_path',
+            turn: 175,
+        })]);
     });
 
     it('marks zero battle hits NOT_ESTABLISHED when stack projection has no positive control', () => {

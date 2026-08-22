@@ -77,6 +77,12 @@ function records(value: unknown): Array<Record<string, unknown>> {
         : [];
 }
 
+function record(value: unknown): Record<string, unknown> | null {
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : null;
+}
+
 function compareText(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
 }
@@ -186,17 +192,40 @@ function analyzeCascade(artifacts: Hv1995LifecycleArtifacts) {
             battles,
         };
     });
+    const cascadeParticipants = new Set<string>(HV_1995_FORMATION_IDS);
+    for (const operation of operations) {
+        for (const id of operation.aar?.participating_brigades ?? []) cascadeParticipants.add(id);
+        for (const diagnostic of operation.weekly_diagnostics) {
+            for (const id of diagnostic.participating_brigades) cascadeParticipants.add(id);
+        }
+    }
+    const columnReports = artifacts.weeklyRows
+        .map((weekly) => ({
+            turn: typeof weekly.week_index === 'number' ? weekly.week_index : null,
+            report: record(weekly.column_movement),
+        }))
+        .filter((row): row is { turn: number | null; report: Record<string, unknown> } => row.report !== null);
+    const movementRejections = columnReports.flatMap(({ turn, report }) =>
+        records(report.column_rejections)
+            .filter((rejection) => typeof rejection.formation_id === 'string'
+                && cascadeParticipants.has(rejection.formation_id))
+            .map((rejection) => ({ turn, ...rejection })));
 
     return {
         positive_controls: {
+            column_movement_projection: columnReports.some(({ report }) =>
+                typeof report.column_starts === 'number' && report.column_starts > 0),
             final_controller_projection: CASCADE_DEPENDENCY_ANCHORS.some(({ osid }) =>
                 Object.prototype.hasOwnProperty.call(artifacts.politicalControllers, osid)),
+            movement_reject_projection: columnReports.some(({ report }) =>
+                Object.prototype.hasOwnProperty.call(report, 'column_rejections')),
             operation_aar_projection: artifacts.operationAars.length > 0,
             opportunity_trace_projection: artifacts.opportunityTraces.length > 0,
             turn_battle_flip_projection: turnBattleRows.some((row) => typeof row.battle.territory_flipped === 'boolean'),
             weekly_operation_diagnostic_projection: weeklyDiagnostics.length > 0,
         },
         operations,
+        movement_rejections: movementRejections,
         dependency_anchors: CASCADE_DEPENDENCY_ANCHORS.map((anchor) => ({
             ...anchor,
             final_controller: typeof artifacts.politicalControllers[anchor.osid] === 'string'

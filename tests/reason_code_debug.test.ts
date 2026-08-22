@@ -40,6 +40,7 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'brigade_state',
     'formation_lifecycle',
     'formation_refusal',
+    'movement_reject',
     'objective_filter',
 ];
 
@@ -74,6 +75,7 @@ describe('reason-code gate', () => {
         expect(isReasonCodeTopicEnabled('axis_reject')).toBe(false);
         expect(isReasonCodeTopicEnabled('formation_lifecycle')).toBe(false);
         expect(isReasonCodeTopicEnabled('formation_refusal')).toBe(false);
+        expect(isReasonCodeTopicEnabled('movement_reject')).toBe(false);
         expect(isReasonCodeTopicEnabled('objective_filter')).toBe(false);
     });
 
