@@ -1,6 +1,14 @@
 # AWWV Calibration Master Reference
 
-## 2026-08-22 HV 1995 coupled timing+mobility candidate — **609 / 31·31; NOT ADOPTED, floor unchanged**
+## 2026-08-22 HV 1995 engine resolution — **637 / 31·31; scoped engine defects resolved, manifest unchanged**
+
+The permanent lifecycle/cascade harness and seven one-change 188-week runs (`n230`–`n236`) isolated and repaired four engine failures after the atomic turn-174 timing+mobility tree: stale `dig_in` state rejected reserve movement; recruitment-generated OOB identities were omitted from authored operation rosters; named main-staff reserves could not enter opportunity rosters; and retention reconciled roster truth without honoring live loans. The shared formation resolver now covers opportunity, triggered, pre-planned, and injection-validation paths.
+
+Final isolated run `apr1992_definitive_188w__9e902ad68783fbe7__w188_n236`: **637/712 matched OSIDs, 31/31 anchors**, hash `f3ee13afaee32e9d`. Mistral 1 captured 7/11; Mistral 2 completed **11/11**; Southern Move was live at the turn-188 boundary with 5/6 captured. The alias audit fell from one alias-backed false-missing warning in `n235` (Farz 95 / `arbih_328th_mountain` → `F_RBiH_0001`) to zero in `n236`; the remaining Trnovo warning is classified from temporal evidence as pre-spawn (`warning t69`, first observed `t140`), not an unresolved alias. `n234` and `n235` were byte-identical, proving the retention-default correction inert on this repaired path. The tracked latest-run save was restored to SHA-256 `A9EBCEA4…`; `data/derived/scenario/baselines/manifest.json` was not regenerated or edited.
+
+This does **not** make `n236` a new golden pin. Five of six delayed HV formations still have no authored operation assignment in the live catalog; that is a measured content/calibration boundary, not evidence of another movement-engine failure. See `docs/40_reports/implemented/20260822_HV_1995_ENGINE_RESOLUTION_AND_HARNESS.md`.
+
+## 2026-08-22 HV 1995 coupled timing+mobility candidate — **609 / 31·31; superseded by engine-resolution investigation**
 
 One controlled 188-week run on `codex/hv-1995-timing-mobility` measured **609/712 matched OSIDs, 31/31 anchors**, final-state hash `260700c127941ea5` (`...w188_n227`). The tree atomically combines all six HV expeditionary spawn turns at 174 with admission of `hv_phantom` to the two live definitive-scenario movement executors. Three of six formations recorded movement; zero appeared in 637 battle records carrying full-stack instrumentation. Mistral 2 remained blocked through turn 188.
 

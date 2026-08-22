@@ -172,6 +172,8 @@ The OSID model uses two related command forms. A corps sector is the **standing-
 
 **Implementation-note (operation participant eligibility, 2026-07-17):** Historical opportunity participants retain authored order but pass the same live status, personnel, disruption, transit, and host-corps eligibility gates as generated operations. Ineligible authored rows are skipped and later authored eligible reserves may fill minimum commitment.
 
+**Implementation-note (operation formation identity, 2026-08-22):** Historical operation catalogs author OOB identities, not necessarily live formation dictionary keys. The shared resolver used by pre-planned, triggered, and opportunity operations prefers the exact key, otherwise admits one deterministic `oob:<authored id>` match, and rejects zero or multiple matches. Injection validation uses the same resolver, so a recruitment-generated formation cannot be warned missing and silently omitted merely because its live key is synthetic.
+
 ### 6.5 War phase bot (brigade AI) — implementation-note
 
 When staff execution controls a faction in War phase, corps and brigade AI generate deterministic directives, posture orders, movement orders, and attack orders. **Column march:** interior and reassigned brigades receive `column` orders toward a reachable front destination; in-transit brigades are not retasked. `osid-column-movement` consumes column intent before `apply-brigade-movement` applies remaining adjacent movement.
