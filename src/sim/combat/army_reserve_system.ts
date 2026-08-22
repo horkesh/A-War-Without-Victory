@@ -913,10 +913,10 @@ export function deployEliteLoan(
          */
         auto_join_operation?: boolean;
     },
-): void {
+): boolean {
     const f = state.military.formations?.[brigadeId];
-    if (!f?.elite_loan_state) return;
-    if (!isEliteAvailableForLoan(f, turn)) return;
+    if (!f?.elite_loan_state) return false;
+    if (!isEliteAvailableForLoan(f, turn)) return false;
 
     const ls = f.elite_loan_state;
     ls.on_loan = true;
@@ -979,6 +979,7 @@ export function deployEliteLoan(
     }
 
     issueEliteDeploymentOrder(state, f, brigadeId, corpsId, adjacency);
+    return true;
 }
 
 /**

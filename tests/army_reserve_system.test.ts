@@ -201,8 +201,9 @@ describe('deployEliteLoan', () => {
         const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1');
         const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
 
-        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+        const deployed = deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
 
+        expect(deployed).toBe(true);
         const ls = state.military.formations!['arbih_guards'].elite_loan_state!;
         expect(ls.on_loan).toBe(true);
         expect(ls.loaned_to_corps).toBe('arbih_1st_corps');
@@ -229,8 +230,9 @@ describe('deployEliteLoan', () => {
         });
         const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
 
-        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+        const deployed = deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
 
+        expect(deployed).toBe(false);
         expect(brigade.elite_loan_state).toMatchObject({
             on_loan: true,
             loaned_to_corps: 'arbih_2nd_corps',
@@ -248,8 +250,9 @@ describe('deployEliteLoan', () => {
         });
         const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
 
-        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+        const deployed = deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
 
+        expect(deployed).toBe(false);
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
         expect(state.military.elite_brigade_tracker!.arbih_guards).toBeUndefined();
     });
@@ -263,8 +266,9 @@ describe('deployEliteLoan', () => {
         });
         const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
 
-        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+        const deployed = deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
 
+        expect(deployed).toBe(false);
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
         expect(state.military.elite_brigade_tracker!.arbih_guards).toBeUndefined();
     });

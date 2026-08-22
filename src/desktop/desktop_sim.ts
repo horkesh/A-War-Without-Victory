@@ -54,6 +54,7 @@ import {
     canEliteLoanReachCorpsTerritory,
     deployEliteLoan,
     holdReserveAtMainStaff,
+    isEliteAvailableForLoan,
     recallEliteLoan,
 } from '../sim/combat/army_reserve_system.js';
 import { ELITE_DEPLOY_COST } from '../ui/map/utils/commandAuthority.js';
@@ -968,6 +969,9 @@ export async function approveReserveRequest(
     if (!f.elite_loan_state) return { ok: false, error: `${brigadeId} is not an elite brigade` };
     if (f.elite_loan_state.on_loan) return { ok: false, error: `${brigadeId} is already on loan` };
     if (f.elite_loan_state.permanently_degraded) return { ok: false, error: `${brigadeId} has permanently lost elite status` };
+    if (!isEliteAvailableForLoan(f, state.meta.turn)) {
+        return { ok: false, error: `${brigadeId} is still in elite-loan cooldown` };
+    }
     if (!baseDir) return { ok: false, error: 'Base directory required to validate reserve deployment route' };
     const pending = state.military.pending_reserve_requests ?? [];
     const req = pending.find((request) => getReserveRequestId(request) === requestId);
@@ -982,8 +986,9 @@ export async function approveReserveRequest(
     // ── ELITE-DEPLOY command-authority guard + debit (Presidential Command Model) ──
     // PLAYER IPC path ONLY. All deployability checks above (elite brigade exists, not
     // on loan / degraded, base dir present, request found, corps owner valid, friendly
-    // route reachable) have passed — so reaching here means deployEliteLoan WILL succeed.
-    // Ordering is therefore: validate deployability → CA guard → debit → deploy, which
+    // route reachable) have passed. The primitive still returns an explicit result so
+    // no caller can report success if its own validation ever drifts from the shared
+    // contract. Ordering is: validate deployability → CA guard → deploy → debit, which
     // guarantees the president is NEVER charged for a rejected approval.
     // `command_authority` is player-only and absent in headless/calibration, so the
     // entire guard is a no-op there (the bot/headless auto-deploy path is unaffected —
@@ -993,9 +998,6 @@ export async function approveReserveRequest(
         if (auth.current < ELITE_DEPLOY_COST) {
             return { ok: false, error: `insufficient_command_authority (${auth.current}/${ELITE_DEPLOY_COST})` };
         }
-        auth.current -= ELITE_DEPLOY_COST;
-        auth.spent_this_turn += ELITE_DEPLOY_COST;
-        auth.lifetime_spent += ELITE_DEPLOY_COST;
     }
     const reason = req?.reason ?? 'offensive_support';
     const hops = req?.travel_hops ?? 0;
@@ -1005,7 +1007,7 @@ export async function approveReserveRequest(
     const armyReason = (decisionReason && decisionReason.trim().length > 0)
         ? decisionReason.trim()
         : 'Army CO accepted: request is actionable and priority justifies elite commitment.';
-    deployEliteLoan(
+    const deployed = deployEliteLoan(
         state,
         brigadeId,
         corpsId,
@@ -1016,6 +1018,12 @@ export async function approveReserveRequest(
         armyReason,
         'player'
     );
+    if (!deployed) return { ok: false, error: `${brigadeId} is not available for elite loan` };
+    if (auth) {
+        auth.current -= ELITE_DEPLOY_COST;
+        auth.spent_this_turn += ELITE_DEPLOY_COST;
+        auth.lifetime_spent += ELITE_DEPLOY_COST;
+    }
     if (!state.military.reserve_request_history) state.military.reserve_request_history = [];
     state.military.reserve_request_history.push({
         request_id: requestId,
@@ -1116,15 +1124,20 @@ export async function redirectReserveLoan(
     const f = state.military.formations?.[brigadeId];
     if (!f) return { ok: false, error: `Brigade not found: ${brigadeId}` };
     if (!f.elite_loan_state) return { ok: false, error: `${brigadeId} is not an elite brigade` };
+    if (f.elite_loan_state.on_loan) {
+        return { ok: false, error: `${brigadeId} must be recalled before redirect; elite-loan cooldown then applies` };
+    }
+    if (!isEliteAvailableForLoan(f, state.meta.turn)) {
+        return { ok: false, error: `${brigadeId} is not available for elite loan` };
+    }
     if (!baseDir) return { ok: false, error: 'Base directory required to validate reserve redeployment route' };
     if (!canEliteLoanReachCorpsTerritory(state, brigadeId, newCorpsId, await getCachedOsidAdjacency(baseDir))) {
         return { ok: false, error: `No friendly route from ${brigadeId} to ${newCorpsId} sector territory` };
     }
-    if (f.elite_loan_state.on_loan) {
-        recallEliteLoan(state, brigadeId, 'player_recall', state.meta.turn);
-    }
     const req = state.military.pending_reserve_requests?.find(r => r.corps_id === newCorpsId);
     const reason = req?.reason ?? 'offensive_support';
-    deployEliteLoan(state, brigadeId, newCorpsId, reason, 0, state.meta.turn);
+    if (!deployEliteLoan(state, brigadeId, newCorpsId, reason, 0, state.meta.turn)) {
+        return { ok: false, error: `${brigadeId} is not available for elite loan` };
+    }
     return { ok: true };
 }
