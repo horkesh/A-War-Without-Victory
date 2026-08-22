@@ -4,7 +4,7 @@
 
 **Branch:** `codex/hv-1995-timing-mobility`
 
-**Final clean run:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n256`
+**Final clean run:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n257`
 
 **Result:** 630/712 matched OSIDs, 31/31 anchors, final hash `5cb43c593610b335`
 
@@ -28,14 +28,15 @@ Commit `c2333a900` couples the required turn-174 timing with admission of `hv_ph
 - A shared deterministic formation resolver prefers an exact live key and otherwise accepts exactly one `oob:<authored id>` alias; ambiguity is rejected.
 - Opportunity, triggered, pre-planned, and validation paths use the same authored-ID resolution.
 - Main-staff formations and valid elite loans can enter authored opportunities without becoming unloaned free riders.
-- Authored objective sequences are not shortened merely because the first objective is not immediately approachable. Mixed/staged axes survive planning reconciliation.
+- Triggered operations explicitly marked `preserve_objective_sequence` keep their authored sequence; `is_pre_planned` alone does not disable prefix pruning. Separately, mixed/staged sibling axes survive planning reconciliation.
 - An approved authored opportunity may preempt participants from a live `probe`, but not from another planning/execution operation. Empty probes enter canonical recovery.
 
 ### Commitment invariants
 
 - Operation selection and per-turn elite-loan attachment reject brigades committed to another live operation.
 - `evaluateOperationProgress` formerly selected a healthy casualty replacement by excluding only the current operation's participants. A deterministic reproducer showed it selecting a brigade already committed to a second planning operation and creating `operation.participant_double_committed`. The selector now excludes every brigade returned by `findBrigadeLiveOperationAnywhere`.
-- The replacement test proves the initial state is lifecycle-clean, makes the committed candidate sort first, expects the uncommitted candidate, and proves the resulting state remains lifecycle-clean.
+- Independent review then reproduced a second path: two damaged participants could reuse the same uncommitted replacement in one pass. The selector now reserves IDs already placed in `updatedParticipants`.
+- The strengthened replacement test proves the initial state is lifecycle-clean, makes the committed candidate sort first, damages two participants, expects the sole uncommitted replacement exactly once, and proves the resulting state remains lifecycle-clean.
 
 ### Permanent evidence harness
 
@@ -63,14 +64,15 @@ The manifest remains frozen at SHA-256 `2BD8549068935249C7FEE8C9BFC27C9B21950C0A
 | n254 | retain staged operation axes | 614 | 31/31 | `f3b1e244e39f23a3` | retained |
 | n255 | authored opportunity preempts probes | 630 | 31/31 | `5cb43c593610b335` | retained; cascade restored |
 | n256 | casualty replacement commitment guard | 630 | 31/31 | `5cb43c593610b335` | retained; byte-identical in this trajectory |
+| n257 | reserve replacements within one operation | 630 | 31/31 | `5cb43c593610b335` | retained; byte-identical in this trajectory |
 
 Short diagnostic runs n250 and n252 were evidence-gathering runs, not calibration results. n250 established that Mistral 1 participants were being consumed by a disposable probe; n252 established that the failed n251 heuristic discarded a valid staged sibling axis. Those observations, not conjecture, drove the later fixes.
 
 ## Final Scenario Evidence
 
-Clean provenance: commit `f91b80ca1a00c56ecbae33597806ce99ddbbb75a`, `git_dirty:false`, headless harness.
+Clean provenance: commit `d7e6929d6008ccc9f21b19841667be6523d00029`, `git_dirty:false`, headless harness.
 
-| Operation | Observed result at n256 | Evidence boundary |
+| Operation | Observed result at n257 | Evidence boundary |
 |---|---|---|
 | Cincar / Kupres | success, 5/5 captured | AAR completed |
 | Mistral 1 | partial, 7 captures | AAR ended turn 173, `max_failures` |
@@ -81,14 +83,16 @@ All six delayed HV formations spawned exactly once and recorded movement events.
 
 The final engine-health gate passed: zero-eligible operations 0/3, dead operations 2/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, matched OSIDs 630/622 minimum, advisory K:W 3.696 inside band. The 31 anchor checks all passed; an in-memory wrong-controller mutation produced one failure. The commitment audit found no collisions across 1,988 live memberships; its injected collision produced `collision_delta: 1`.
 
-The casualty-replacement guard did not change n256's final state relative to n255. Therefore the 188-week trajectory did not establish that this path fired. The focused red/green state reproducer establishes the reachable defect and its correction.
+The casualty-replacement guards did not change n256 or n257 relative to n255. Therefore the 188-week trajectory did not establish that either replacement path fired. The focused red/green state reproducer establishes both reachable defects and their corrections.
+
+The threshold-based engine-health gate passes, but the artifact is **not valid for combat calibration**. `behavioral_health.combat_causality.valid_for_combat_calibration` is false with two `operation_attack_orders_without_battles` invalidations. Direct weekly tracing identifies Operacija Osvit at weeks 101 and 102: three attack orders each were skipped as `alliance_blocked`, with zero battles. This qualification is separate from the passing health thresholds and is why n257 is evidence for engine/lifecycle behavior, not a new calibration pin.
 
 ## Verification Status
 
 - Focused replacement, lifecycle, sector-offensive, opportunity, state-validation, and HV diagnostic tests pass.
 - TypeScript typecheck passes.
 - The scenario-anchor suite passes 4 selected tests; its Brcko negative case is an explicit positive control.
-- n256 passes the engine-health, HV lifecycle, anchor, provenance, and operation-commitment harnesses.
+- n257 passes the threshold health, HV lifecycle, anchor, provenance, and operation-commitment harnesses; its combat-calibration-validity flag remains false as disclosed above.
 - `data/derived/latest_run_final_save.json` is restored to SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`.
 - Full-suite/build verification and final independent review are recorded separately when complete.
 
