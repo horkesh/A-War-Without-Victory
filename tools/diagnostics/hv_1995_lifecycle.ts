@@ -329,26 +329,38 @@ export function analyzeHv1995Lifecycle(artifacts: Hv1995LifecycleArtifacts) {
     let battleStackProjection = false;
     for (const weekly of artifacts.weeklyRows) {
         for (const battle of records(weekly.battles)) {
-            if (!Array.isArray(battle.attacker_brigades)) continue;
-            const ids = battle.attacker_brigades
-                .filter((id): id is string => typeof id === 'string')
-                .slice()
-                .sort(compareText);
-            if (ids.includes(artifacts.positiveControlId)) battleStackProjection = true;
+            const ids = [
+                ...strings(battle.attacker_brigades),
+                ...(typeof battle.attacker_brigade === 'string' ? [battle.attacker_brigade] : []),
+            ].filter((id, index, values) => values.indexOf(id) === index).sort(compareText);
+            if (ids.length > 0) battleStackProjection = true;
             for (const id of ids) battleStackCounts.set(id, (battleStackCounts.get(id) ?? 0) + 1);
         }
     }
 
-    const positiveRows = artifacts.temporalRows.filter(
-        (row) => row.brigade_id === artifacts.positiveControlId,
-    );
+    const weeklyOperationTurns = new Map<string, Set<number>>();
+    let weeklyOperationProjection = false;
+    for (const weekly of artifacts.weeklyRows) {
+        const turn = typeof weekly.week_index === 'number' ? weekly.week_index : 0;
+        for (const diagnostic of records(weekly.operation_diagnostics)) {
+            const participants = strings(diagnostic.participating_brigades);
+            if (participants.length > 0) weeklyOperationProjection = true;
+            for (const id of participants) {
+                const turns = weeklyOperationTurns.get(id) ?? new Set<number>();
+                turns.add(turn);
+                weeklyOperationTurns.set(id, turns);
+            }
+        }
+    }
+
     const positiveControls = {
         battle_stack_projection: battleStackProjection,
-        movement_event_projection: (movementCounts.get(artifacts.positiveControlId) ?? 0) > 0,
-        movement_order_projection: positiveRows.some((row) => Array.isArray(row.mv_destinations) && row.mv_destinations.length > 0),
-        operation_membership_projection: positiveRows.some((row) => typeof row.active_op_id === 'string' && row.active_op_id.length > 0),
-        spawn_projection: (spawnCounts.get(artifacts.positiveControlId) ?? 0) > 0,
-        temporal_population: positiveRows.length > 0,
+        movement_event_projection: movementCounts.size > 0,
+        movement_order_projection: artifacts.temporalRows.some((row) => Array.isArray(row.mv_destinations) && row.mv_destinations.length > 0),
+        operation_membership_projection: weeklyOperationProjection
+            || artifacts.temporalRows.some((row) => typeof row.active_op_id === 'string' && row.active_op_id.length > 0),
+        spawn_projection: spawnCounts.size > 0,
+        temporal_population: artifacts.temporalRows.length > 0,
     };
 
     const formations: Hv1995FormationDiagnostic[] = HV_1995_FORMATION_IDS.map((formationId) => {
@@ -362,22 +374,18 @@ export function analyzeHv1995Lifecycle(artifacts: Hv1995LifecycleArtifacts) {
             temporal,
             (row) => typeof row.mv_state === 'string' && row.mv_state !== 'deployed',
         );
-        const operationTurnCount = countRows(
+        const temporalOperationTurns = countRows(
             temporal,
             (row) => typeof row.active_op_id === 'string' && row.active_op_id.length > 0,
         );
+        const operationTurnCount = Math.max(temporalOperationTurns, weeklyOperationTurns.get(formationId)?.size ?? 0);
         const movementEventCount = movementCounts.get(formationId) ?? 0;
         const battleStackHitCount = battleStackCounts.get(formationId) ?? 0;
 
         let firstUnobservedBoundary: string | null = null;
         if (spawnCount === 0 && positiveControls.spawn_projection) firstUnobservedBoundary = 'spawn';
-        else if (temporal.length === 0 && positiveControls.temporal_population) firstUnobservedBoundary = 'temporal_observation';
         else if (operationTurnCount === 0 && positiveControls.operation_membership_projection) {
             firstUnobservedBoundary = 'operation_assignment';
-        } else if (movementOrderTurnCount === 0 && positiveControls.movement_order_projection) {
-            firstUnobservedBoundary = 'movement_intent';
-        } else if (movementEventCount === 0 && positiveControls.movement_event_projection) {
-            firstUnobservedBoundary = 'physical_movement';
         } else if (battleStackHitCount === 0 && positiveControls.battle_stack_projection) {
             firstUnobservedBoundary = 'battle_participation';
         }
@@ -417,6 +425,12 @@ export function analyzeHv1995Lifecycle(artifacts: Hv1995LifecycleArtifacts) {
             expected_formations: HV_1995_FORMATION_IDS.length,
             spawned_formations: formations.filter((row) => row.spawn_count > 0).length,
             traced_formations: formations.filter((row) => row.temporal_row_count > 0).length,
+            observed_formations: formations.filter((row) => row.spawn_count > 0
+                || row.temporal_row_count > 0
+                || row.movement_order_turn_count > 0
+                || row.operation_turn_count > 0
+                || row.movement_event_count > 0
+                || row.battle_stack_hit_count > 0).length,
         },
         positive_controls: positiveControls,
         formations,

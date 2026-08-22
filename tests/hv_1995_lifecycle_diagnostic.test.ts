@@ -293,6 +293,38 @@ describe('HV 1995 lifecycle diagnostic', () => {
             row.battle_participation_status === 'NOT_ESTABLISHED')).toBe(true);
     });
 
+    it('recognizes standard weekly operation and scalar attacker projections without temporal tracing', () => {
+        const observed = HV_1995_FORMATION_IDS[3];
+        const result = analyzeHv1995Lifecycle({
+            turnSummaries: completeSpawnRows(),
+            temporalRows: [],
+            weeklyRows: [{
+                week_index: 183,
+                battles: [{ battle_id: 'standard-shape', attacker_brigade: observed }],
+                operation_diagnostics: [{
+                    operation_name: 'Generated Probe',
+                    operation_phase: 'execution',
+                    participating_brigades: [observed],
+                }],
+            }],
+            opportunityTraces: [],
+            operationAars: [],
+            politicalControllers: {},
+            positiveControlId: 'hv_4th_guards_split',
+        });
+
+        expect(result.positive_controls.battle_stack_projection).toBe(true);
+        expect(result.positive_controls.operation_membership_projection).toBe(true);
+        expect(result.liveness.traced_formations).toBe(0);
+        expect(result.liveness.observed_formations).toBe(6);
+        expect(result.formations.find((row) => row.formation_id === observed)).toMatchObject({
+            operation_turn_count: 1,
+            battle_stack_hit_count: 1,
+            battle_participation_status: 'OBSERVED',
+            first_unobserved_boundary: null,
+        });
+    });
+
     it('does not diagnose spawn or temporal absence when those projections lack a positive control', () => {
         const result = analyzeHv1995Lifecycle({
             turnSummaries: [],
