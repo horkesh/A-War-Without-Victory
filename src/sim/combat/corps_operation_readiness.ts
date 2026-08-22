@@ -49,6 +49,7 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isOperationalLineFormationKind } from '../../state/formation_constants.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -161,7 +162,7 @@ function corpsBrigadeOfficerQuality(state: GameState, corpsId: FormationId): Bri
     for (const id of ids) {
         const f = formations[id] as FormationState | undefined;
         if (!f || f.status !== 'active') continue;
-        if (f.kind !== 'brigade') continue;
+        if (!isOperationalLineFormationKind(f.kind)) continue;
         if (f.corps_id !== corpsId) continue;
         const q = f.officer_quality;
         if (typeof q !== 'number' || !Number.isFinite(q)) continue;
@@ -270,7 +271,7 @@ function corpsCohesionMorale(state: GameState, corpsId: FormationId): CohesionMo
     for (const id of ids) {
         const f = formations[id] as FormationState | undefined;
         if (!f || f.status !== 'active') continue;
-        if (f.kind !== 'brigade') continue;
+        if (!isOperationalLineFormationKind(f.kind)) continue;
         if (f.corps_id !== corpsId) continue;
         if (typeof f.cohesion === 'number' && Number.isFinite(f.cohesion)) {
             cohSum += f.cohesion;
@@ -339,7 +340,7 @@ function corpsEquipmentSupport(state: GameState, corpsId: FormationId): number {
     for (const id of ids) {
         const f = formations[id] as FormationState | undefined;
         if (!f || f.status !== 'active') continue;
-        if (f.kind !== 'brigade') continue;
+        if (!isOperationalLineFormationKind(f.kind)) continue;
         if (f.corps_id !== corpsId) continue;
         const comp = f.composition;
         if (!comp) continue;
