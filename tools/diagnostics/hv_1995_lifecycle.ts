@@ -27,6 +27,8 @@ export interface Hv1995LifecycleArtifacts {
     operationAars: Array<Record<string, unknown>>;
     politicalControllers: Record<string, unknown>;
     positiveControlId: string;
+    formations?: Record<string, unknown>;
+    opInjectionWarnings?: Array<Record<string, unknown>>;
 }
 
 const CASCADE_OPERATIONS = [
@@ -97,6 +99,57 @@ function strings(value: unknown): string[] {
     return Array.isArray(value)
         ? value.filter((item): item is string => typeof item === 'string').slice().sort(compareText)
         : [];
+}
+
+function warningFormationId(detail: unknown): string | null {
+    if (typeof detail !== 'string') return null;
+    const firstQuote = detail.indexOf('"');
+    const secondQuote = firstQuote >= 0 ? detail.indexOf('"', firstQuote + 1) : -1;
+    return firstQuote >= 0 && secondQuote > firstQuote
+        ? detail.slice(firstQuote + 1, secondQuote)
+        : null;
+}
+
+function analyzeOperationReferenceIntegrity(artifacts: Hv1995LifecycleArtifacts) {
+    const formations = artifacts.formations ?? {};
+    const missingWarnings = (artifacts.opInjectionWarnings ?? [])
+        .filter((warning) => warning.check === 'brigade_missing')
+        .map((warning) => {
+            const authoredFormationId = warningFormationId(warning.detail);
+            const aliasMatches = authoredFormationId === null
+                ? []
+                : Object.entries(formations)
+                    .filter(([, value]) => strings(record(value)?.tags).includes(`oob:${authoredFormationId}`))
+                    .map(([formationId]) => formationId)
+                    .sort(compareText);
+            return {
+                turn: typeof warning.turn === 'number' ? warning.turn : null,
+                operation_name: typeof warning.op_name === 'string' ? warning.op_name : '',
+                axis_id: typeof warning.axis_id === 'string' ? warning.axis_id : null,
+                authored_formation_id: authoredFormationId,
+                live_oob_aliases: aliasMatches,
+                classification: aliasMatches.length === 0
+                    ? 'true_missing'
+                    : aliasMatches.length === 1
+                        ? 'alias_backed_false_missing'
+                        : 'ambiguous_oob_alias',
+            };
+        })
+        .sort((a, b) => (a.turn ?? 0) - (b.turn ?? 0)
+            || compareText(a.operation_name, b.operation_name)
+            || compareText(a.authored_formation_id ?? '', b.authored_formation_id ?? ''));
+
+    return {
+        positive_controls: {
+            brigade_missing_warning_projection: missingWarnings.length > 0,
+            true_missing_warning_positive_control: missingWarnings.some((row) => row.classification === 'true_missing'),
+        },
+        alias_backed_false_missing_count: missingWarnings.filter((row) =>
+            row.classification === 'alias_backed_false_missing').length,
+        ambiguous_oob_alias_count: missingWarnings.filter((row) =>
+            row.classification === 'ambiguous_oob_alias').length,
+        warnings: missingWarnings,
+    };
 }
 
 function compactAxis(axis: Record<string, unknown>) {
@@ -349,6 +402,7 @@ export function analyzeHv1995Lifecycle(artifacts: Hv1995LifecycleArtifacts) {
         positive_controls: positiveControls,
         formations,
         opportunity_blockers: opportunityBlockers,
+        operation_reference_integrity: analyzeOperationReferenceIntegrity(artifacts),
         cascade: analyzeCascade(artifacts),
     };
 }
@@ -379,6 +433,8 @@ export function analyzeHv1995Run(runDir: string, positiveControlId = 'hv_4th_gua
                 ? ((finalSave.political as Record<string, unknown>).political_controllers as Record<string, unknown> ?? {})
                 : {},
             positiveControlId,
+            formations: record(military.formations) ?? {},
+            opInjectionWarnings: records(military.op_injection_warnings),
         }),
     };
 }

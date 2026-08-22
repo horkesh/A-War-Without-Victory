@@ -118,6 +118,25 @@ describe('HV 1995 lifecycle diagnostic', () => {
                 'op:sipovo:pribeljci_2': 'HRHB',
             },
             positiveControlId: 'hv_4th_guards_split',
+            formations: {
+                F_RBiH_0001: { tags: ['oob:alias_backed'] },
+            },
+            opInjectionWarnings: [
+                {
+                    turn: 164,
+                    op_name: 'Alias-backed operation',
+                    axis_id: 'main',
+                    check: 'brigade_missing',
+                    detail: 'Brigade "alias_backed" not found in formations',
+                },
+                {
+                    turn: 69,
+                    op_name: 'Positive control operation',
+                    axis_id: 'main',
+                    check: 'brigade_missing',
+                    detail: 'Brigade "truly_missing" not found in formations',
+                },
+            ],
         });
 
         expect(result.liveness.expected_formations).toBe(6);
@@ -179,6 +198,19 @@ describe('HV 1995 lifecycle diagnostic', () => {
             reason: 'no_friendly_path',
             turn: 175,
         })]);
+        expect(result.operation_reference_integrity).toMatchObject({
+            positive_controls: {
+                brigade_missing_warning_projection: true,
+                true_missing_warning_positive_control: true,
+            },
+            alias_backed_false_missing_count: 1,
+            ambiguous_oob_alias_count: 0,
+        });
+        expect(result.operation_reference_integrity.warnings).toContainEqual(expect.objectContaining({
+            authored_formation_id: 'alias_backed',
+            live_oob_aliases: ['F_RBiH_0001'],
+            classification: 'alias_backed_false_missing',
+        }));
     });
 
     it('marks zero battle hits NOT_ESTABLISHED when stack projection has no positive control', () => {
