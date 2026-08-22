@@ -61,7 +61,10 @@ describe('HV 1995 lifecycle diagnostic', () => {
                 ...completeSpawnRows(),
                 {
                     turn: 175,
-                    formation_spawns: [],
+                    formation_spawns: [{
+                        formation_id: 'hv_4th_guards_split',
+                        kind: 'brigade',
+                    }],
                     movements: [{
                         formation_id: 'hv_4th_guards_split',
                         from_osid: 'op:a',
@@ -164,6 +167,7 @@ describe('HV 1995 lifecycle diagnostic', () => {
             movement_event_projection: true,
             movement_order_projection: true,
             operation_membership_projection: true,
+            spawn_projection: true,
             temporal_population: true,
         });
         expect(result.formations[0]).toMatchObject({
@@ -259,5 +263,49 @@ describe('HV 1995 lifecycle diagnostic', () => {
         expect(result.positive_controls.battle_stack_projection).toBe(false);
         expect(result.formations.every((row) =>
             row.battle_participation_status === 'NOT_ESTABLISHED')).toBe(true);
+    });
+
+    it('does not treat an empty attacker stack as a battle-stack positive control', () => {
+        const result = analyzeHv1995Lifecycle({
+            turnSummaries: completeSpawnRows(),
+            temporalRows: HV_1995_FORMATION_IDS.map((brigade_id) => ({
+                turn: 175,
+                brigade_id,
+                kind: 'hv_phantom',
+                location_osid: 'op:a',
+                mv_state: null,
+                mv_destinations: null,
+                active_op_id: null,
+                current_op_phase: null,
+            })),
+            weeklyRows: [{
+                week_index: 175,
+                battles: [{ battle_id: 'empty-stack', attacker_brigades: [] }],
+            }],
+            opportunityTraces: [],
+            operationAars: [],
+            politicalControllers: {},
+            positiveControlId: 'hv_4th_guards_split',
+        });
+
+        expect(result.positive_controls.battle_stack_projection).toBe(false);
+        expect(result.formations.every((row) =>
+            row.battle_participation_status === 'NOT_ESTABLISHED')).toBe(true);
+    });
+
+    it('does not diagnose spawn or temporal absence when those projections lack a positive control', () => {
+        const result = analyzeHv1995Lifecycle({
+            turnSummaries: [],
+            temporalRows: [],
+            weeklyRows: [],
+            opportunityTraces: [],
+            operationAars: [],
+            politicalControllers: {},
+            positiveControlId: 'hv_4th_guards_split',
+        });
+
+        expect(result.positive_controls.spawn_projection).toBe(false);
+        expect(result.positive_controls.temporal_population).toBe(false);
+        expect(result.formations.every((row) => row.first_unobserved_boundary === null)).toBe(true);
     });
 });

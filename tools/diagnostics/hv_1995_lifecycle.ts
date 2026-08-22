@@ -330,11 +330,11 @@ export function analyzeHv1995Lifecycle(artifacts: Hv1995LifecycleArtifacts) {
     for (const weekly of artifacts.weeklyRows) {
         for (const battle of records(weekly.battles)) {
             if (!Array.isArray(battle.attacker_brigades)) continue;
-            battleStackProjection = true;
             const ids = battle.attacker_brigades
                 .filter((id): id is string => typeof id === 'string')
                 .slice()
                 .sort(compareText);
+            if (ids.includes(artifacts.positiveControlId)) battleStackProjection = true;
             for (const id of ids) battleStackCounts.set(id, (battleStackCounts.get(id) ?? 0) + 1);
         }
     }
@@ -347,6 +347,7 @@ export function analyzeHv1995Lifecycle(artifacts: Hv1995LifecycleArtifacts) {
         movement_event_projection: (movementCounts.get(artifacts.positiveControlId) ?? 0) > 0,
         movement_order_projection: positiveRows.some((row) => Array.isArray(row.mv_destinations) && row.mv_destinations.length > 0),
         operation_membership_projection: positiveRows.some((row) => typeof row.active_op_id === 'string' && row.active_op_id.length > 0),
+        spawn_projection: (spawnCounts.get(artifacts.positiveControlId) ?? 0) > 0,
         temporal_population: positiveRows.length > 0,
     };
 
@@ -369,8 +370,8 @@ export function analyzeHv1995Lifecycle(artifacts: Hv1995LifecycleArtifacts) {
         const battleStackHitCount = battleStackCounts.get(formationId) ?? 0;
 
         let firstUnobservedBoundary: string | null = null;
-        if (spawnCount === 0) firstUnobservedBoundary = 'spawn';
-        else if (temporal.length === 0) firstUnobservedBoundary = 'temporal_observation';
+        if (spawnCount === 0 && positiveControls.spawn_projection) firstUnobservedBoundary = 'spawn';
+        else if (temporal.length === 0 && positiveControls.temporal_population) firstUnobservedBoundary = 'temporal_observation';
         else if (operationTurnCount === 0 && positiveControls.operation_membership_projection) {
             firstUnobservedBoundary = 'operation_assignment';
         } else if (movementOrderTurnCount === 0 && positiveControls.movement_order_projection) {
