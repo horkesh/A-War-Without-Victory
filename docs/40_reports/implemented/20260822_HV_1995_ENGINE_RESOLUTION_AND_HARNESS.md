@@ -2,9 +2,9 @@
 
 **Date:** 2026-08-22
 **Branch:** `codex/hv-1995-timing-mobility`
-**Run ID:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n237`
-**Baseline:** `n236`, 637/712, 31/31 anchors, `f3ee13afaee32e9d`
-**Result:** scoped engine defects resolved; 637/712, 31/31 anchors, `50be25fe9efb67ae`
+**Run ID:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n238`
+**Baseline:** `n237`, 637/712, 31/31 anchors, `50be25fe9efb67ae`
+**Result:** scoped engine defects resolved; 637/712, 31/31 anchors, `7e9dc5cce015640d`
 
 ## Summary
 
@@ -28,9 +28,9 @@
 
 ### Elite-loan contract hardening
 
-- Opportunity and pre-planned rosters now use the reserve pool's canonical availability predicate: an elite is rejected when permanently degraded, inside the four-turn recall cooldown, or already loaned to another corps.
-- `deployEliteLoan` defends the same invariant and returns explicit success/failure. Desktop approval rejects cooldown before command-authority debit or request consumption; redirect rejects an active loan before recalling it, rather than reporting success after a cooldown-blocked redeployment.
-- The desktop correction does not run in the headless scenario path. n237 remains the isolated scenario evidence for the shared engine predicate; desktop-level red/green tests establish the caller behavior.
+- Opportunity and pre-planned rosters now use the reserve pool's canonical availability predicate: an elite is rejected when permanently degraded, inside the four-turn recall cooldown, or already loaned. A live loan to the proposed host is still a commitment and cannot be double-rostered into a concurrent operation.
+- `deployEliteLoan` defends the same invariant and returns explicit success/failure. Desktop approval rejects cooldown before command-authority debit or request consumption. Desktop redirect uses a transactional retask primitive: invalid routes leave military state byte-identical; a valid route closes the old episode and opens the new host commitment without being defeated by the recall cooldown created inside the transaction.
+- The desktop retask path does not run in the headless scenario. Desktop-level red/green tests establish its caller behavior; clean n238 establishes the headless same-host double-commitment correction.
 
 ### Authored operation roster repair
 
@@ -56,6 +56,7 @@
 | n235 | main-staff loan-truth retention default on | 637 | 31/31 | `aaeed1e8d0439859` |
 | n236 | shared resolver across all authored operation paths | 637 | 31/31 | `f3ee13afaee32e9d` |
 | n237 | enforce canonical elite-loan availability in opportunity, pre-planned, and deployment paths | 637 | 31/31 | `50be25fe9efb67ae` |
+| n238 | reject a live same-host elite loan from a second concurrent operation | 637 | 31/31 | `7e9dc5cce015640d` |
 
 `n234` and `n235` final saves have identical SHA-256 `AAEED1E8D0439859A7EDEDF2E667ADC24B6B511454A2E852B69B2F09A5EBEC8E`. This establishes that the retention default is behaviorally inert in that repaired run, not merely equal in matched-cell count.
 
@@ -63,7 +64,9 @@ Provenance limitation: every retained `n230`–`n236` `run_meta.json` records `g
 
 The n236→n237 final-save delta is exactly one leaf: Mistral 2's already-loaned `hvo_2nd_guard_mechanized` rejection reason changes from `unreachable_to_host_corps` to the earlier and more accurate `elite_loaned_to_other_corps`. Activity, control delta, formation delta, weekly report, and brigade temporal artifacts are byte-identical. This establishes that the availability hardening changes diagnostic classification in this scenario but not its simulated military outcome.
 
-### Late-war cascade at n236
+The n237→n238 change is behaviorally active. At turn 175, `hvo_1st_guard_abb` already had a live loan to `hvo_tomislavgrad`; n237 nevertheless admitted it to Mistral 2 as another roster attachment. n238 rejects that second commitment as `elite_committed_to_host_corps`, reducing Mistral 2 initial strength from 12,059 to 9,259 and its weekly brigade count from five to four. Mistral 2 still succeeds 11/11 on the same turn window. The final save has 754 changed leaves through the resulting combat cascade and the weekly report hash changes; activity summary, control delta, and formation delta remain byte-identical. This is not an inert diagnostic-only change.
+
+### Late-war cascade at n238
 
 | Operation | Result | Attacks | Captured |
 |---|---|---:|---:|
@@ -92,8 +95,8 @@ All five dependency checks used by the harness end HRHB: Bučovača for Mistral 
 - Focused engine, desktop reserve, and harness suites include explicit invalid-loan and atomic-failure coverage across movement, reserve loans, opportunity, triggered, pre-planned, validation, reconciliation, and diagnostics.
 - TypeScript typecheck passed.
 - `git diff --check` passed.
-- n237 completed 188 turns with every harness positive control true, including the corrected spawn and battle-stack controls.
-- The n237 188-week engine-health gate passed every hard check: zero-eligible ops 0/3, dead ops 0/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, and matched OSIDs 637/622 minimum. Advisory K:W was inside band at 3.727.
+- n238 completed 188 turns from clean commit `cd4e6addc` (`run_meta.json` records `git_dirty:false`) with every harness positive control true, including the corrected spawn and battle-stack controls.
+- The n238 188-week engine-health gate passed every hard check: zero-eligible ops 0/3, dead ops 0/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, and matched OSIDs 637/622 minimum. Advisory K:W was inside band at 3.728.
 - `data/derived/latest_run_final_save.json` restored to SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`; no backup remained.
 - `data/derived/scenario/baselines/manifest.json` was not refreshed and has no diff.
 - Independent review is still required before promotion because the implementer cannot serve as reviewer.
