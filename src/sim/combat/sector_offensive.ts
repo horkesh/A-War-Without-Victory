@@ -937,7 +937,6 @@ export function reconcilePlanningObjectives(
         const candidates: Array<{
             axis: OperationAxis;
             objectives: string[];
-            hasApproach: boolean;
         }> = [];
         for (const axis of op.axes) {
             const enemyObjectives = filterAxisPlanningObjectives(state, axis, faction);
@@ -956,24 +955,13 @@ export function reconcilePlanningObjectives(
             candidates.push({
                 axis,
                 objectives: filteredObjectives,
-                hasApproach: collectObjectiveApproachOsids(
-                    state,
-                    corpsId,
-                    faction,
-                    filteredObjectives,
-                    staticAdjacency,
-                ).size > 0,
             });
         }
         if (candidates.length === 0) {
             return (op.objectives ?? []).length > 0 ? 'completed' : 'invalidated';
         }
-        const hasAnyReachableAxis = candidates.some((candidate) => candidate.hasApproach);
-        const retained = hasAnyReachableAxis
-            ? candidates.filter((candidate) => candidate.hasApproach)
-            : candidates;
-        op.axes = retained.map((candidate) => candidate.axis);
-        op.objectives = [...new Set(retained.flatMap((candidate) => candidate.objectives))].sort(strictCompare);
+        op.axes = candidates.map((candidate) => candidate.axis);
+        op.objectives = [...new Set(candidates.flatMap((candidate) => candidate.objectives))].sort(strictCompare);
     } else {
         const enemyObjectives = (op.objectives ?? []).filter((osid) => {
                 const controller = getPoliticalControllerOSID(state, osid, undefined);

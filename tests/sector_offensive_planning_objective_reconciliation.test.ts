@@ -220,7 +220,7 @@ describe('planning objective reconciliation', () => {
         expect(op.objectives).toEqual(['op:first', 'op:deep']);
     });
 
-    it('drops a wholly unreachable axis when another axis remains viable', () => {
+    it('retains a staged sibling axis when another axis has an immediate approach', () => {
         const axis = (axis_id: string, objectives: string[]) => ({
             axis_id,
             name: axis_id,
@@ -267,7 +267,7 @@ describe('planning objective reconciliation', () => {
         } as unknown as GameState;
 
         expect(reconcilePlanningObjectives(state, 'hvo_corps', op, 'HRHB')).toBe('valid');
-        expect(op.axes?.map((entry) => entry.axis_id)).toEqual(['live']);
-        expect(op.objectives).toEqual(['op:live']);
+        expect(op.axes?.map((entry) => entry.axis_id)).toEqual(['dead', 'live']);
+        expect(op.objectives).toEqual(['op:dead', 'op:live']);
     });
 });
