@@ -791,7 +791,12 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
             const state = buildStateWithControllers(175, {
                 'op:velika_kladusa:velika_kladusa_2': 'RBiH',
                 'op:cazin:cazin_3': 'RS',
+                'op:mostar:allied': 'HRHB',
             });
+            state.political.war_alliance_rbih_hrhb = -0.5;
+            state.political.rbih_hrhb_state = {
+                washington_signed: true,
+            } as GameState['political']['rbih_hrhb_state'];
             const def = fixtureFifthCorpsT1WithFriendlyTarget({
                 axes: [{
                     axis_id: 'z_axis',
@@ -808,6 +813,12 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
                     corps: 'arbih_5th_corps',
                     brigades: ['arbih_5_brigade_b'],
                     objectives: ['op:bihac:bihac_2'],
+                }, {
+                    axis_id: 'm_axis',
+                    name: 'M axis',
+                    corps: 'arbih_5th_corps',
+                    brigades: ['b_c'],
+                    objectives: ['op:mostar:allied'],
                 }],
             });
             (state.political.political_controllers as Record<string, FactionId>)['op:bihac:bihac_2'] = 'RBiH';
@@ -822,6 +833,13 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
                     axis_id: 'a_axis',
                     objective_osid: 'op:bihac:bihac_2',
                     controller: 'RBiH',
+                    acting_faction: 'RBiH',
+                    reason: 'friendly_controlled_without_override',
+                },
+                {
+                    axis_id: 'm_axis',
+                    objective_osid: 'op:mostar:allied',
+                    controller: 'HRHB',
                     acting_faction: 'RBiH',
                     reason: 'friendly_controlled_without_override',
                 },

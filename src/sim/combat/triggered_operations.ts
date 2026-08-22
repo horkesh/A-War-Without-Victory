@@ -52,6 +52,7 @@ import {
 } from './tactical_group_config.js';
 import type { ArmyHqOpId, ArmyHqOperation } from '../../state/game_state.js';
 import { resolveOperationFormation } from './operation_formation_resolver.js';
+import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 
 const MIN_OPERATION_PARTICIPANTS = 2;
 
@@ -124,7 +125,7 @@ function hasEnemyObjective(
 ): boolean {
     return objectives.some((osid) => {
         const controller = getPoliticalControllerOSID(state, osid, undefined);
-        return controller !== null && controller !== faction;
+        return isOperationObjectiveHostile(state, faction, controller);
     });
 }
 
@@ -867,7 +868,7 @@ function buildOperation(
 
         const axisObjectives = axisDef.objectives.filter((osid) => {
             const controller = getPoliticalControllerOSID(state, osid, undefined);
-            return controller !== null && controller !== def.faction;
+            return isOperationObjectiveHostile(state, def.faction, controller);
         });
 
         if (axisObjectives.length === 0) continue;
@@ -1099,7 +1100,7 @@ export function checkTriggeredOperations(state: GameState): string[] {
                 ...axis,
                 objectives: axis.objectives.filter((osid) => {
                     const controller = getPoliticalControllerOSID(state, osid, undefined);
-                    return controller !== null && controller !== def.faction;
+                    return isOperationObjectiveHostile(state, def.faction, controller);
                 }),
             }))
             .filter((axis) => axis.objectives.length > 0);
@@ -1286,7 +1287,7 @@ export function injectArmyHqOperations(state: GameState): string[] {
                 ...axis,
                 objectives: axis.objectives.filter((osid) => {
                     const controller = getPoliticalControllerOSID(state, osid, undefined);
-                    return controller !== null && controller !== def.faction;
+                    return isOperationObjectiveHostile(state, def.faction, controller);
                 }),
             }))
             .filter((axis) => axis.objectives.length > 0);

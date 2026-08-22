@@ -4,6 +4,83 @@ import { reconcilePlanningObjectives } from '../src/sim/combat/sector_offensive.
 import type { CorpsOperation, GameState } from '../src/state/game_state.js';
 
 describe('planning objective reconciliation', () => {
+    it('drops combat-blocked allied objectives while retaining an enemy positive control', () => {
+        const axis = (axis_id: string, objective: string) => ({
+            axis_id,
+            name: axis_id,
+            assigned_brigades: ['arbih_bde'],
+            objectives: [objective],
+            current_objective_index: 0,
+            status: 'executing' as const,
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        });
+        const op: CorpsOperation = {
+            name: 'Post-Washington operation',
+            type: 'sector_attack',
+            phase: 'planning',
+            started_turn: 101,
+            phase_started_turn: 101,
+            participating_brigades: ['arbih_bde'],
+            objectives: ['op:allied', 'op:enemy'],
+            axes: [axis('allied_axis', 'op:allied'), axis('enemy_axis', 'op:enemy')],
+        };
+        const state = {
+            meta: { turn: 101, phase: 'war' },
+            military: {
+                war_front_edges_osid: [{
+                    edge_id: 'enemy-front',
+                    a: 'op:approach',
+                    b: 'op:enemy',
+                    side_a: 'RBiH',
+                    side_b: 'RS',
+                }],
+            },
+            political: {
+                war_alliance_rbih_hrhb: -0.5,
+                rbih_hrhb_state: { washington_signed: true },
+                political_controllers: {
+                    'op:approach': 'RBiH',
+                    'op:allied': 'HRHB',
+                    'op:enemy': 'RS',
+                },
+            },
+        } as unknown as GameState;
+
+        expect(reconcilePlanningObjectives(state, 'arbih_corps', op, 'RBiH')).toBe('valid');
+        expect(op.axes?.map((entry) => entry.axis_id)).toEqual(['enemy_axis']);
+        expect(op.objectives).toEqual(['op:enemy']);
+    });
+
+    it('completes planning when every remaining objective is combat-blocked allied territory', () => {
+        const op: CorpsOperation = {
+            name: 'Operacija Osvit shape',
+            type: 'sector_attack',
+            phase: 'planning',
+            started_turn: 101,
+            phase_started_turn: 101,
+            participating_brigades: ['arbih_bde'],
+            objectives: ['op:jablanica:doljani_2'],
+            current_objective_index: 0,
+        };
+        const state = {
+            meta: { turn: 101, phase: 'war' },
+            military: { war_front_edges_osid: [] },
+            political: {
+                war_alliance_rbih_hrhb: -0.5,
+                rbih_hrhb_state: { washington_signed: true },
+                political_controllers: { 'op:jablanica:doljani_2': 'HRHB' },
+            },
+        } as unknown as GameState;
+
+        expect(reconcilePlanningObjectives(state, 'arbih_4th_corps', op, 'RBiH')).toBe('completed');
+    });
+
     it('drops a stale objective prefix when a later objective still has a live corps approach', () => {
         const op: CorpsOperation = {
             name: 'Generated operation',

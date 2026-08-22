@@ -100,6 +100,7 @@ import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_rei
 import { findBrigadeLiveOperationAnywhere, hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
+import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import {
     allAxesTerminal,
     assignBrigadeRoles,
@@ -908,7 +909,7 @@ function filterAxisPlanningObjectives(
 ): string[] {
     return (axis.objectives ?? []).filter((osid) => {
         const controller = getPoliticalControllerOSID(state, osid, undefined);
-        return controller !== null && controller !== faction;
+        return isOperationObjectiveHostile(state, faction, controller);
     });
 }
 
@@ -965,7 +966,7 @@ export function reconcilePlanningObjectives(
     } else {
         const enemyObjectives = (op.objectives ?? []).filter((osid) => {
                 const controller = getPoliticalControllerOSID(state, osid, undefined);
-                return controller !== null && controller !== faction;
+                return isOperationObjectiveHostile(state, faction, controller);
             });
         const filteredObjectives = op.preserve_objective_sequence === true
             ? enemyObjectives

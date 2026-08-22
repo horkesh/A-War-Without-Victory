@@ -24,6 +24,7 @@ import { isEligibleOperationFormation } from '../../state/formation_constants.js
 import { strictCompare } from '../../state/validateGameState.js';
 import { resolveOperationFormation } from './operation_formation_resolver.js';
 import type { Osid } from './osid_adjacency.js';
+import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -168,7 +169,7 @@ export function validateOpAtInjection(
         let enemyObjectiveCount = 0;
         for (const osid of sortedObjectives) {
             const controller = getPoliticalControllerOSID(state, osid, undefined);
-            if (controller !== null && controller !== def.faction) {
+            if (isOperationObjectiveHostile(state, def.faction, controller)) {
                 enemyObjectiveCount++;
             }
         }

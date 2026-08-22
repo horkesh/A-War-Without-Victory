@@ -48,6 +48,7 @@ import {
     getAcceptedHistoricalOperationAuthorizationTurn,
 } from './historical_operation_authorization.js';
 import { resolveOperationFormation } from './operation_formation_resolver.js';
+import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -1058,7 +1059,7 @@ function buildAxesFromDef(
 
         const axisObjectives = axisDef.objectives.filter((osid) => {
             const controller = getPoliticalControllerOSID(state, osid, undefined);
-            return controller !== null && controller !== def.faction;
+            return isOperationObjectiveHostile(state, def.faction, controller);
         });
 
         if (axisObjectives.length === 0) continue;

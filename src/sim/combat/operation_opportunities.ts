@@ -72,6 +72,7 @@ import type {
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import {
     canEliteLoanReachCorpsTerritory,
     deployEliteLoan,
@@ -1279,7 +1280,7 @@ function spawnCorpsOperationFromOpportunity(
         const filteredObjectives = axis.objectives.filter((osid) => {
             const controller = getPoliticalControllerOSID(state, osid, undefined);
             if (controller === null) return true;            // unpainted / unknown → keep
-            if (controller !== def.faction) return true;     // enemy-controlled → keep
+            if (isOperationObjectiveHostile(state, def.faction, controller)) return true;
             if (overrideSet.has(osid)) return true;          // scoped friendly override → keep
             objectiveFilterRejections?.push({
                 axis_id: axis.axis_id,
