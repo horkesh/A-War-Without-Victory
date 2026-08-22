@@ -49,6 +49,8 @@ import { resolveTgAnchor } from './tactical_group_anchor.js';
 const EMPTY_REVERSE_MAP: OperationalToCanonicalReverseMap = new Map();
 
 export interface OpeningAttackPredictionContext {
+    /** Full tactical graph used by brigade order generation and reserve BFS. */
+    adjacency: Map<string, string[]>;
     reverseMap: OperationalToCanonicalReverseMap;
     terrainMultByOsid: Record<string, number>;
     supplyStateByOsid?: SupplyStateByOsidReport | null;
@@ -721,7 +723,7 @@ export function axisHasExecutableOpeningAttack(
                 state,
                 brigadeId,
                 objective,
-                adjacency,
+                predictionContext.adjacency,
                 predictionContext.reverseMap,
                 predictionContext.terrainMultByOsid,
                 'attack',

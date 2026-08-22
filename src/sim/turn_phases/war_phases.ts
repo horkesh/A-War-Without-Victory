@@ -1847,6 +1847,9 @@ export const warPhases: NamedPhase[] = [
                     // Matches bot brigade order generation: ethnic context is optional.
                 }
                 openingAttackPredictionContext = {
+                    adjacency: (getSpatialContextCache(context)?.preCombat.adjacency
+                        ?? staticAdjacency
+                        ?? new Map()) as Map<string, string[]>,
                     reverseMap: od.opData.operationalToCanonical,
                     // Must match generateAllBotOrdersOsid exactly. Preparation's
                     // separately-loaded terrain cache remains authoritative for

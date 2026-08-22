@@ -529,6 +529,7 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
         const adjacency = buildOsidAdjacencyFromFrontEdges(state);
         const terrainMultByOsid = { 'op:test:objective_a': 2.5 };
         const context = {
+            adjacency,
             reverseMap: new Map(),
             terrainMultByOsid,
         };
