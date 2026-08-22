@@ -2,9 +2,9 @@
 
 **Date:** 2026-08-22
 **Branch:** `codex/hv-1995-timing-mobility`
-**Run ID:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n236`
-**Baseline:** `n235`, 637/712, 31/31 anchors, `aaeed1e8d0439859`
-**Result:** scoped engine defects resolved; 637/712, 31/31 anchors, `f3ee13afaee32e9d`
+**Run ID:** `apr1992_definitive_188w__9e902ad68783fbe7__w188_n237`
+**Baseline:** `n236`, 637/712, 31/31 anchors, `f3ee13afaee32e9d`
+**Result:** scoped engine defects resolved; 637/712, 31/31 anchors, `50be25fe9efb67ae`
 
 ## Summary
 
@@ -49,10 +49,13 @@
 | n234 | main-staff opportunity admission default on | 637 | 31/31 | `aaeed1e8d0439859` |
 | n235 | main-staff loan-truth retention default on | 637 | 31/31 | `aaeed1e8d0439859` |
 | n236 | shared resolver across all authored operation paths | 637 | 31/31 | `f3ee13afaee32e9d` |
+| n237 | enforce canonical elite-loan availability in opportunity, pre-planned, and deployment paths | 637 | 31/31 | `50be25fe9efb67ae` |
 
 `n234` and `n235` final saves have identical SHA-256 `AAEED1E8D0439859A7EDEDF2E667ADC24B6B511454A2E852B69B2F09A5EBEC8E`. This establishes that the retention default is behaviorally inert in that repaired run, not merely equal in matched-cell count.
 
-Provenance limitation: every retained `n230`–`n236` `run_meta.json` records `git_dirty: true`, and the reason-code environment selection was not stamped. The commit sequence and session procedure support the table's intended one-change sequence, but the retained artifacts do not independently establish the exact dirty paths or flags. Treat that attribution as session-supported, not self-contained run provenance. A clean-start rerun is required for promotion evidence.
+Provenance limitation: every retained `n230`–`n236` `run_meta.json` records `git_dirty: true`, and the reason-code environment selection was not stamped. The commit sequence and session procedure support the table's intended one-change sequence, but the retained artifacts do not independently establish the exact dirty paths or flags. `n237` closes the clean-tree gap: `run_meta.json` records `git_dirty:false` at commit `c7459228a`, and the task record pins `AWWV_DEBUG_REASON_CODES=battle_stack,brigade_state,formation_lifecycle,movement_reject,objective_filter,opportunity_roster`.
+
+The n236→n237 final-save delta is exactly one leaf: Mistral 2's already-loaned `hvo_2nd_guard_mechanized` rejection reason changes from `unreachable_to_host_corps` to the earlier and more accurate `elite_loaned_to_other_corps`. Activity, control delta, formation delta, weekly report, and brigade temporal artifacts are byte-identical. This establishes that the availability hardening changes diagnostic classification in this scenario but not its simulated military outcome.
 
 ### Late-war cascade at n236
 
@@ -83,8 +86,8 @@ All five dependency checks used by the harness end HRHB: Bučovača for Mistral 
 - Focused engine and harness suites: 207/207 passed across movement, reserve loans, opportunity, triggered, pre-planned, validation, reconciliation, and diagnostics.
 - TypeScript typecheck passed.
 - `git diff --check` passed.
-- n236 completed 188 turns with every harness positive control true.
-- The 188-week engine-health gate passed every hard check: zero-eligible ops 0/3, dead ops 0/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, and matched OSIDs 637/622 minimum. Advisory K:W was inside band at 3.727.
+- n237 completed 188 turns with every harness positive control true, including the corrected spawn and battle-stack controls.
+- The n237 188-week engine-health gate passed every hard check: zero-eligible ops 0/3, dead ops 0/6, ghost-destroyed 2/4, stranded brigades 6/9, consistency failures 0/3, and matched OSIDs 637/622 minimum. Advisory K:W was inside band at 3.727.
 - `data/derived/latest_run_final_save.json` restored to SHA-256 `A9EBCEA481BDE4FEF0E69FAC119E124812922247C1D07F19D95A3F8BF2BE1E4C`; no backup remained.
 - `data/derived/scenario/baselines/manifest.json` was not refreshed and has no diff.
 - Independent review is still required before promotion because the implementer cannot serve as reviewer.
