@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-23  
 **Branch:** `codex/four-week-phantom-boundary`  
-**Status:** Implemented, locally measured, and independently reviewed; remote CI remains the promotion gate
+**Status:** Implemented, locally measured, independently reviewed, and green in remote CI
 
 ## Outcome
 
@@ -41,6 +41,7 @@ The tracked `data/derived/latest_run_final_save.json` was restored after the 188
 - TypeScript: passed.
 - Short-run repeatability: 0 differing artifacts for both four-week scenarios.
 - Full `npm run canon:check`: determinism scan passed and all four baseline scenarios matched the reconciled manifest.
+- Exact reviewed commit `6894500634844750870a8046b72d6b5b65ce7021`: Event System CI run `32665667629` passed TypeScript, the event/phase suite, the strict canon rail, and baseline regression in 7m15s.
 
 Independent ultrareview consolidated three verifier signals into one non-blocking quality finding: the new spawn guard duplicated the existing synthetic-command literal. The guard now derives from the pre-existing `SYNTHETIC_JNA_COMMAND_IDS` list through one shared set, so spawn and retirement cannot drift if the exception registry grows. The review's fourth candidate was refuted.
 
@@ -48,4 +49,4 @@ An attempted ad-hoc repeat imported the baseline CLI module and unintentionally 
 
 ## Boundaries
 
-This changes no phantom definition, personnel value, capture OSID, withdrawal turn, operation roster, or calibration threshold. The coupled 1995 HV `spawn_turn: 174` and mobility repair remain in the same tree and are untouched. This report does not claim remote CI until that gate runs.
+This changes no phantom definition, personnel value, capture OSID, withdrawal turn, operation roster, or calibration threshold. The coupled 1995 HV `spawn_turn: 174` and mobility repair remain in the same tree and are untouched.
