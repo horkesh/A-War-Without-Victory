@@ -40,6 +40,11 @@ describe('test-suite hazard inventory', () => {
     expect(inventory.map((row) => row.file)).toEqual([...expected].sort());
     expect(new Set(inventory.map((row) => row.file)).size).toBe(expected.length);
   });
+
+  it('gives unprofiled files a realistic deterministic weight', () => {
+    const inventory = buildTestInventory(process.cwd(), {});
+    expect(new Set(inventory.map((row) => row.durationMs))).toEqual(new Set([1_000]));
+  });
 });
 
 describe('duration-balanced shards', () => {

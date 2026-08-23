@@ -11,6 +11,8 @@ export interface TestShard {
   files: string[];
 }
 
+export const DEFAULT_UNMEASURED_DURATION_MS: 1000;
+
 export function classifyTestSource(file: string, source: string): Pick<TestInventoryRow, 'serial' | 'reasons'>;
 export function buildTestInventory(rootDir: string, durationsByFile?: Record<string, number>): TestInventoryRow[];
 export function balanceTestFiles(rows: TestInventoryRow[], shardCount: number): TestShard[];

@@ -6,6 +6,8 @@ function strictCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
+export const DEFAULT_UNMEASURED_DURATION_MS = 1_000;
+
 /**
  * Conservative static classification. A false positive costs parallelism; a false
  * negative can corrupt another test's evidence, so ambiguous shared-state patterns stay
@@ -36,7 +38,9 @@ export function buildTestInventory(rootDir, durationsByFile = {}) {
     const source = readFileSync(resolve(rootDir, file), 'utf8');
     const hazard = classifyTestSource(file, source);
     const measured = durationsByFile[file];
-    const durationMs = Number.isFinite(measured) && measured > 0 ? measured : 1;
+    const durationMs = Number.isFinite(measured) && measured > 0
+      ? measured
+      : DEFAULT_UNMEASURED_DURATION_MS;
     return { file, durationMs, ...hazard };
   });
 }
