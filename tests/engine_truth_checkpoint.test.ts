@@ -189,6 +189,20 @@ describe('engine truth checkpoint', () => {
         expect(check(report, 'assignment_warning_stream')).toMatchObject({ ok: true });
     });
 
+    it.each([
+        ['missing', undefined],
+        ['negative', -1],
+        ['at horizon', 2],
+    ])('positive control: %s resume index fails force and seal coverage closed', (_label, resumeIndex) => {
+        const input: any = fixture();
+        input.runMeta.resume_from_save_path = 'runs/checkpoint.json';
+        input.runMeta.resume_from_week_index = resumeIndex;
+
+        const report = buildEngineTruthCheckpoint(input);
+        expect(check(report, 'force_timeline')).toMatchObject({ ok: false });
+        expect(check(report, 'assignment_warning_stream')).toMatchObject({ ok: false });
+    });
+
     it('positive control: parses an exact warning emission and fails health', () => {
         const input: any = fixture();
         input.assignmentLog = '[brigade_assignment] UNRESOLVED a (90 pers): fell through sector pipeline, corps=arbih_1st_corps\n' + input.assignmentLog;
