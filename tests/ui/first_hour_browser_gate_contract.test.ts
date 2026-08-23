@@ -408,6 +408,7 @@ describe('browser QA CI wiring contract', () => {
     expect(fullSuiteJob).not.toContain('lfs: true');
     expect(read('.github/workflows/README.md')).toContain('does not eager-fetch Git LFS before path');
     expect(fullSuiteJob).toContain('timeout-minutes: 75');
+    expect(fullSuiteJob).toContain('run: npm run test:vitest:balanced');
     expect(workflow).toContain('name: Player experience gate');
     expect(workflow).toContain('run: npm run qa:player-experience');
     expect(workflow).not.toContain('run: npm run qa:first-hour:browser');
