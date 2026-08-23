@@ -28,7 +28,7 @@ describe('Army reserve cause legibility', () => {
       }),
     ).toEqual({
       label: 'Why This Is Critical',
-      summary: 'A corps is reporting a thin defensive sector that needs immediate reinforcement.',
+      summary: 'A corps is reporting a thin defensive OG that needs immediate reinforcement.',
       detail: 'Current reserve pressure has exceeded routine army reserve handling.',
       tone: 'critical',
     });
@@ -101,7 +101,7 @@ describe('Army reserve cause legibility', () => {
     ).toEqual({
       heading: '2 critical reserve requests need immediate army attention.',
       detail:
-        'Lead cause: A corps is reporting a thin defensive sector that needs immediate reinforcement. Lead driver: This request was produced by an explicit corps commander reinforcement escalation. Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.',
+        'Lead cause: A corps is reporting a thin defensive OG that needs immediate reinforcement. Lead driver: This request was produced by an explicit corps commander reinforcement escalation. Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.',
       tone: 'critical',
     });
   });
@@ -213,7 +213,7 @@ describe('Army reserve driver evidence legibility', () => {
     ).toEqual({
       label: 'What Signal Triggered This',
       summary: 'Threat ratio 2.6 with 1 brigade on the line triggered this reserve request.',
-      detail: 'Army HQ flagged this sector as too threatened for its current frontage.',
+      detail: 'Army HQ flagged this OG as too threatened for its current frontage.',
     });
   });
 
@@ -341,7 +341,7 @@ describe('Army reserve driver provenance legibility', () => {
       }),
     ).toEqual({
       label: 'What Produced This Request',
-      summary: 'This request was produced by Army HQ threat assessment on a thin sector-front line.',
+      summary: 'This request was produced by Army HQ threat assessment on a thin OG-front line.',
       detail: 'Derived from the current reserve-generation pressure owned by Army HQ and corps command state.',
     });
   });
