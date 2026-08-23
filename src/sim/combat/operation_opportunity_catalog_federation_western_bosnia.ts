@@ -137,6 +137,9 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
         brigades: [
             'hvo_3rd_guard_jastrebovi' as FormationId,
             'hvo_rama_brigade' as FormationId,
+            // BB Volume I, printed pp.380-381 (digital pp.417-418): 1st HGZ
+            // broke through Vitorog and then supported the advance into Sipovo.
+            'hv_1st_hgz_1995' as FormationId,
         ],
         objectives: MISTRAL_SIPOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
@@ -178,6 +181,7 @@ const MISTRAL_SIPOVO_AXIS: readonly OpportunityAxisDef[] = [
         brigades: [
             'hvo_3rd_guard_jastrebovi' as FormationId,
             'hvo_rama_brigade' as FormationId,
+            'hv_1st_hgz_1995' as FormationId,
         ],
         objectives: MISTRAL_SIPOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
@@ -311,6 +315,7 @@ export const MISTRAL_2_95_OPPORTUNITY: OperationOpportunityDef = {
     planning_duration: 4,
     min_attack_outcome: 'repulsed',
     citations: [
+        'Balkan Battlegrounds, Volume I, pp.380-381 (digital pp.417-418) - 1st HGZ on the Vitorog-Sipovo main effort',
         'docs/research/2026-05-01-late-war-operation-opportunity-research.md - Federation / Western Bosnia candidates',
         'docs/plans/late-war-operation-opportunity-system-design.md - T1 opportunity proposal contract and dependency model',
         'src/sim/combat/triggered_operations.ts - legacy Mistral 2 objective footprint',

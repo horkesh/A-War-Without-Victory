@@ -55,13 +55,22 @@ describe('HV 1995 lifecycle diagnostic', () => {
         });
         expect(result.formations.find((row) => row.formation_id === 'hv_1st_hgz_1995')).toMatchObject({
             status: 'REACHABLE_POST_SPAWN',
-            assignments: [expect.objectContaining({
-                opportunity_id: 'southern_move_95',
-                axis_id: 'southern_move_mrkonjic',
-                first_open_turn: 182,
-                last_open_turn: 188,
-                post_spawn_open_turn_count: 7,
-            })],
+            assignments: [
+                expect.objectContaining({
+                    opportunity_id: 'mistral_2_95',
+                    axis_id: 'mistral_sipovo',
+                    first_open_turn: 175,
+                    last_open_turn: 188,
+                    post_spawn_open_turn_count: 14,
+                }),
+                expect.objectContaining({
+                    opportunity_id: 'southern_move_95',
+                    axis_id: 'southern_move_mrkonjic',
+                    first_open_turn: 182,
+                    last_open_turn: 188,
+                    post_spawn_open_turn_count: 7,
+                }),
+            ],
         });
         for (const formationId of [
             'hv_126th_hgr_1995',

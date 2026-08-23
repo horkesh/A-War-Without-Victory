@@ -49,6 +49,7 @@ const MISTRAL_BRIGADES = [
     'hv_4th_guards_split',
     'hvo_2nd_guard_mechanized',
     'hv_112th_infantry_1995',
+    'hv_1st_hgz_1995',
     'hvo_3rd_guard_jastrebovi',
     'hvo_rama_brigade',
 ];
@@ -119,7 +120,7 @@ function buildMistralState(opts: {
         formations[id] = {
             id,
             name: id,
-            kind: id === 'hv_112th_infantry_1995' ? 'hv_phantom' : 'brigade',
+            kind: id === 'hv_112th_infantry_1995' || id === 'hv_1st_hgz_1995' ? 'hv_phantom' : 'brigade',
             status: 'active',
             faction: 'HRHB',
             corps_id: 'hvo_tomislavgrad',
@@ -396,6 +397,11 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         expect(op.name).toBe('Operation Mistral 2');
         expect(op.axes).toHaveLength(2);
         expect(op.axes!.map(axis => axis.axis_id).sort()).toEqual(['mistral_drvar_grahovo', 'mistral_sipovo']);
+        expect(op.axes!.find(axis => axis.axis_id === 'mistral_sipovo')!.assigned_brigades)
+            .toContain('hv_1st_hgz_1995');
+        expect(MISTRAL_2_95_OPPORTUNITY.variants
+            ?.find(variant => variant.variant_id === 'sipovo_axis')?.axes[0]?.brigades)
+            .toContain('hv_1st_hgz_1995');
         expect(op.axes!.flatMap(axis => axis.objectives))
             .not.toContain('op:mrkonjic_grad:mrkonjic_grad_2');
     });
@@ -420,7 +426,7 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
                 'hv_112th_infantry_1995',
             ]);
         expect(op.axes!.find(axis => axis.axis_id === 'mistral_sipovo')!.assigned_brigades)
-            .toEqual(['hvo_3rd_guard_jastrebovi']);
+            .toEqual(['hvo_3rd_guard_jastrebovi', 'hv_1st_hgz_1995']);
     });
 
     it('uses later eligible authored participants as deterministic minimum-commitment reserves', () => {
