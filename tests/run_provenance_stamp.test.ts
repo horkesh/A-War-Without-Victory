@@ -160,10 +160,15 @@ describe('the consumed set is the set a headless run actually reads', () => {
      * recomputes it from the live fixed set plus the live derivation, so adding an input
      * turns it RED and forces the header to be updated in the same change.
      */
-    it('★ the 188w stamp is exactly 27 named rows, derived not remembered', async () => {
+    it('★ the 188w stamp is exactly 28 named rows, derived not remembered', async () => {
         const fsp = await import('node:fs/promises');
+        const { pickHistoricalReferenceKey, usesPaintedControlReference } =
+            await import('../src/scenario/scenario_runner.js');
         const scenarioPath = join(process.cwd(), 'data/scenarios/apr1992_definitive_188w.json');
         const scenario = JSON.parse(await fsp.readFile(scenarioPath, 'utf8')) as Record<string, string>;
+        // Derive the painted key exactly as the runner does — a literal here would let the
+        // stamp and the loader drift, which is the whole failure this row exists to prevent.
+        const scenarioObj = scenario as unknown as Parameters<typeof pickHistoricalReferenceKey>[0];
         const p = await buildRunProvenance({
             baseDir: process.cwd(),
             scenarioPath,
@@ -171,14 +176,23 @@ describe('the consumed set is the set a headless run actually reads', () => {
             initFormations: scenario.init_formations,
             warTimeline: scenario.war_timeline,
             initOfficers: scenario.init_officers,
+            paintedReferenceKey: usesPaintedControlReference(scenarioObj)
+                ? pickHistoricalReferenceKey(scenarioObj)
+                : undefined,
             harness: 'headless',
             collapseEnabled: false,
         });
         const paths = p.consumed_inputs.files.map(f => f.path);
-        expect(paths.length, `27 = ${HEADLESS_CONSUMED_INPUTS.length} fixed + scenario + 4 declared + ${EVENT_FILES.length} events`)
-            .toBe(27);
+        expect(paths.length, `28 = ${HEADLESS_CONSUMED_INPUTS.length} fixed + scenario + 4 declared + ${EVENT_FILES.length} events + 1 painted`)
+            .toBe(28);
         // Cross-check the arithmetic rather than the literal, so the two cannot drift apart.
-        expect(paths.length).toBe(HEADLESS_CONSUMED_INPUTS.length + 5 + EVENT_FILES.length);
+        expect(paths.length).toBe(HEADLESS_CONSUMED_INPUTS.length + 5 + EVENT_FILES.length + 1);
+        // ★ The SCORING REFERENCE is stamped, and it is the one this 188w run actually reads.
+        // Without this row a repaint of the painted map moves every recorded score while the
+        // digest and the state hash both stay identical — measured twice in this repo.
+        expect(paths).toContain('data/source/calibration/painted_control_oct1995.json');
+        expect(paths.filter(x => x.includes('painted_control_')), 'exactly one painted row')
+            .toHaveLength(1);
         expect(new Set(paths).size, 'no duplicate rows').toBe(paths.length);
         expect(paths).toEqual([...paths].sort(strictCompare));
         // Every row resolved to real content — an ABSENT row would make the stamp match
@@ -206,6 +220,51 @@ describe('the consumed set is the set a headless run actually reads', () => {
         expect(nodeMajorOf('22.11.0')).toBe('22');
         expect(nodeMajorOf(null)).toBeNull();
         expect(nodeMajorOf('not-a-version')).toBeNull();
+    });
+});
+
+describe('★ the painted SCORING REFERENCE is stamped conditionally, and fails closed both ways', () => {
+    // A conditional row needs BOTH directions asserted. Present-when-read alone would pass on a
+    // stamp hardcoded to always add oct1995 — which is the defect this module refuses elsewhere
+    // ("the stamp would MATCH while the armies differed"). Absent-when-unread is the control.
+    const PAINTED = 'data/source/calibration/painted_control_oct1995.json';
+
+    it('stamps the painted map with REAL content when the scenario reads one', async () => {
+        const { root, scenarioPath } = seedFullTree({ [PAINTED]: '{"by_settlement_id":{"op:a:b":"RS"}}\n' });
+        const p = await buildRunProvenance({
+            baseDir: root,
+            scenarioPath,
+            paintedReferenceKey: 'oct1995',
+            harness: 'headless',
+            collapseEnabled: false,
+        });
+        const row = p.consumed_inputs.files.find(f => f.path === PAINTED);
+        expect(row, 'painted reference must be stamped when supplied').toBeDefined();
+        // A row present but unhashed is a vacuous stamp: it would match across two runs that
+        // read different references.
+        expect(row?.sha256).toMatch(/^[0-9a-f]{64}$/);
+    });
+
+    it('CONTROL — omits it entirely when the scenario reads no painted reference', async () => {
+        const { root, scenarioPath } = seedFullTree({ [PAINTED]: '{"by_settlement_id":{"op:a:b":"RS"}}\n' });
+        const p = await buildRunProvenance({
+            baseDir: root,
+            scenarioPath,
+            harness: 'headless',
+            collapseEnabled: false,
+        });
+        // The file EXISTS in the tree — so its absence here proves the conditional, not a missing file.
+        expect(p.consumed_inputs.files.map(f => f.path).filter(x => x.includes('painted_control_')))
+            .toEqual([]);
+    });
+
+    it('a repaint of the reference changes the digest — the whole point of the row', async () => {
+        const before = seedFullTree({ [PAINTED]: '{"by_settlement_id":{"op:kladanj:kladanj_3":"RS"}}\n' });
+        const after = seedFullTree({ [PAINTED]: '{"by_settlement_id":{"op:kladanj:kladanj_3":"RBiH"}}\n' });
+        const args = { paintedReferenceKey: 'oct1995', harness: 'headless' as const, collapseEnabled: false };
+        const a = await buildRunProvenance({ baseDir: before.root, scenarioPath: before.scenarioPath, ...args });
+        const b = await buildRunProvenance({ baseDir: after.root, scenarioPath: after.scenarioPath, ...args });
+        expect(a.consumed_inputs.digest).not.toBe(b.consumed_inputs.digest);
     });
 });
 

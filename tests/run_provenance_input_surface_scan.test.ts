@@ -38,9 +38,12 @@
  *     vision rather than in the coverage;
  *   - ★ paths built from SEPARATE `join()` SEGMENTS — `join(baseDir, 'data', 'source', …)`
  *     contains no literal with `data/` in it. This one is live, not theoretical
- *     (`scenario_runner.ts:745`, the `painted_control_{refKey}` reference maps), so rather
+ *     (`scenario_runner.ts`, the `painted_control_{refKey}` reference maps), so rather
  *     than disclaiming it the scan DETECTS the sites and pins them; see the segment-join
- *     case below.
+ *     case below. As of 2026-08-24 that templated SCORING reference IS stamped, per run and
+ *     conditionally on `usesPaintedControlReference`. The separate hardcoded
+ *     `painted_control_jan1993.json` read in `anomaly_checks_extended.ts` (Check #27) remains
+ *     a `deferred_stamp` below — two different reads of the same family, only one closed.
  *
  * Comments are stripped before scanning. That is load-bearing twice over: the known-uncovered
  * register in `run_provenance.ts` names paths in prose, and `triggered_operations.ts`
