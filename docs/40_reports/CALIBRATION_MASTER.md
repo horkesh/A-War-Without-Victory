@@ -1,5 +1,13 @@
 # AWWV Calibration Master Reference
 
+## 2026-08-23 HV 1995 roster calibration — **637 / 31·31; +9 clean gains, pins frozen**
+
+Clean one-change runs n272 and n273 isolate the late-war roster correction on top of the already-merged atomic turn-174 timing+mobility and engine-resolution tree. n272 added 1st HGZ to Southern Move's historically documented main shock roster but remained byte-identical to the 628/712 engine floor because Sipovo staging stayed blocked. n273 added 1st HGZ to Mistral II's historically documented Vitorog-Sipovo axis: the formation recorded 12 operation turns and 5 full-stack battle hits, Mistral II completed 11/11, Southern Move launched and held 5/6 by turn 188, and final fit rose to **637/712 with 31/31 anchors** (`cc88344e922ac8b4`).
+
+The n272→n273 political-control delta contains exactly nine changes: all nine are RS→HRHB corrections matching the October 1995 painted target, with zero losses and zero neutral churn. The strict engine-health gate passes at K:W 3.702, 6 stranded brigades, 2 ghost-destroyed rows, and 0 consistency failures; combat calibration is valid with 764 attack orders, 556 battles, and 0 invalid operations. The permanent catalog diagnostic now separates default and redirect routes, requires formation-specific spawn evidence, and refuses catalog claims when the run-commit and checkout catalog blobs differ. It reports authorship/date overlap only, not runtime reachability.
+
+This is measured evidence, not a baseline refresh. The tracked latest save was restored to SHA-256 `A9EBCEA4…`; `data/derived/scenario/baselines/manifest.json` remains frozen at SHA-256 `2BD85490…`. Full report: `docs/40_reports/implemented/20260823_HV_1995_ROSTER_CALIBRATION.md`.
+
 ## 2026-08-22 HV 1995 engine resolution — **628 / 31·31; final clean combat-valid run, manifest unchanged**
 
 The permanent lifecycle/cascade harness and seven intended one-change 188-week runs (`n230`–`n236`) isolated and repaired four engine failures after the atomic turn-174 timing+mobility tree: stale `dig_in` state rejected reserve movement; recruitment-generated OOB identities were omitted from authored operation rosters; named main-staff reserves could not enter opportunity rosters; and retention reconciled roster truth without honoring live loans. Their commit sequence supports the isolation sequence, but every retained run records `git_dirty: true`, so exact one-change attribution is not self-contained in run provenance. The shared formation resolver now covers opportunity, triggered, pre-planned, and injection-validation paths.
