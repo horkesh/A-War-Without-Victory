@@ -44,6 +44,16 @@ export function aggregateChildStatuses(statuses) {
   return statuses.every((status) => status === 0) ? 0 : 1;
 }
 
+export function buildWorkerPlans(plan, shardCount) {
+  return plan.parallelShards
+    .map((shard) => ({
+      shardIndex: shard.index,
+      files: [...shard.files, ...plan.partitionedFiles].sort(strictCompare),
+    }))
+    .filter((worker) => worker.files.length > 0)
+    .map((worker) => ({ ...worker, shardCount }));
+}
+
 export function filterInventoryByPattern(inventory, pattern) {
   let matcher;
   try {
@@ -181,26 +191,16 @@ export async function runBalancedVitest(argv, root = process.cwd()) {
   const generatedRoot = join(root, '.tmp_vitest_balanced', String(process.pid));
   mkdirSync(generatedRoot, { recursive: true });
   try {
-    const parallelConfigs = plan.parallelShards
-      .filter((shard) => shard.files.length > 0)
-      .map((shard) => {
-        const path = join(generatedRoot, `parallel-${shard.index}.config.mjs`);
-        writeFileSync(path, renderBalancedVitestConfig(shard.files), 'utf8');
-        return path;
-      });
-    const partitionedConfigs = plan.partitionedFiles.flatMap((file, fileIndex) =>
-      Array.from({ length: cli.shards }, (_, shardIndex) => {
-        const path = join(generatedRoot, `partitioned-${fileIndex}-${shardIndex}.config.mjs`);
-        writeFileSync(path, renderBalancedVitestConfig([file]), 'utf8');
-        return { path, shardIndex };
-      }));
+    const workerConfigs = buildWorkerPlans(plan, cli.shards).map((worker) => {
+      const path = join(generatedRoot, `worker-${worker.shardIndex}.config.mjs`);
+      writeFileSync(path, renderBalancedVitestConfig(worker.files), 'utf8');
+      return { path, ...worker };
+    });
     console.log(
-      `[balanced-vitest] parallel shards=${parallelConfigs.length}; `
-      + `partitioned children=${partitionedConfigs.length}; serial files=${plan.serialFiles.length}`,
+      `[balanced-vitest] workers=${workerConfigs.length}; `
+      + `partitioned files=${plan.partitionedFiles.length}; serial files=${plan.serialFiles.length}`,
     );
-    const statuses = await Promise.all([
-      ...parallelConfigs.map((config) => runChild(vitestCli, config, cli.passthrough, root)),
-      ...partitionedConfigs.map(({ path, shardIndex }) => runChild(
+    const statuses = await Promise.all(workerConfigs.map(({ path, shardIndex }) => runChild(
         vitestCli,
         path,
         cli.passthrough,
@@ -210,8 +210,7 @@ export async function runBalancedVitest(argv, root = process.cwd()) {
           AWWV_PROPERTY_SHARD_INDEX: String(shardIndex),
           AWWV_PROPERTY_SHARD_COUNT: String(cli.shards),
         },
-      )),
-    ]);
+      )));
     if (plan.serialFiles.length > 0) {
       const serialConfig = join(generatedRoot, 'serial.config.mjs');
       writeFileSync(serialConfig, renderBalancedVitestConfig(plan.serialFiles), 'utf8');

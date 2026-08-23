@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   aggregateChildStatuses,
+  buildWorkerPlans,
   deterministicShardValues,
   filterInventoryByPattern,
   partitionInventory,
@@ -41,6 +42,18 @@ describe('balanced Vitest execution plan', () => {
     );
     expect(new Set(partitions.flat()).size).toBe(100);
     expect(() => deterministicShardValues(100, 4, 4)).toThrow(/shard index/);
+  });
+
+  it('never starts more concurrent workers than the requested shard count', () => {
+    const plan = partitionInventory(inventory, 2);
+    const workers = buildWorkerPlans(plan, 2);
+    expect(workers).toHaveLength(2);
+    expect(workers.map((worker) => worker.shardIndex)).toEqual([0, 1]);
+    expect(workers.every((worker) => worker.files.includes(
+      'tests/sector_partition_buildCorpsFrontSectors_integration.test.ts',
+    ))).toBe(true);
+    expect(workers.flatMap((worker) => worker.files).filter((file) => file === 'tests/slow.test.ts'))
+      .toHaveLength(1);
   });
 
   it('is stable when discovery order changes', () => {
