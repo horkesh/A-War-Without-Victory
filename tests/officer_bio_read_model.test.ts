@@ -31,11 +31,12 @@ describe('officer biography read model', () => {
         });
     });
 
-    it('keeps unsupported identities absent instead of resolving similar names', () => {
-        const ids = new Set((view.namedOfficerData ?? []).map((officer) => officer.id));
-        expect(ids.has('hvo_i_nakic')).toBe(false);
-        expect(ids.has('hvo_bilonjic')).toBe(false);
-        expect(ids.has('hvo_nakic')).toBe(true);
+    it('keeps the two Nakić identities distinct and does not invent similar names', () => {
+        const byId = new Map((view.namedOfficerData ?? []).map((officer) => [officer.id, officer]));
+        expect(byId.get('hvo_nakic')?.name).toBe('Franjo Nakić');
+        expect(byId.get('hvo_i_nakic')?.name).toBe('Ilija Nakić');
+        expect(byId.get('hvo_bilonjic')?.name).toBe('Mato Bilonjić');
+        expect(byId.has('hvo_nakic_unreviewed_alias')).toBe(false);
     });
 
     it('sorts the read model by immutable officer ID', () => {
