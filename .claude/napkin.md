@@ -12,14 +12,14 @@
    Do instead: keep all six defs at turn 174 in the same tree as both live T3 executor changes (`osid_column_movement` and `brigade_movement_orders`); never land legs with turn 150. The controlled combined run `...n227` scored **609/712, 31/31 anchors**: 3/6 wave formations recorded movement, 0 appeared in 637 full-stack battle records, and Mistral 2 stayed blocked through turn 188. Treat this as an engine-fix candidate with unresolved calibration/mechanism evidence, not a +16 lane.
 2. **[2026-08-23] The CI/manifest anomaly is settled; reconcile pins only from byte-identical local/CI evidence**
    Do instead: compare actual hash values, not failure counts. Latest CI `32619857153` and a clean local run exposed the same 24 mismatch keys and all 24 local artifact hashes matched CI's actual hashes byte-for-byte. Across the previous CI run, 18 actual hashes stayed fixed and only six 188w hashes moved with the later accepted roster calibration. The workflow caches npm dependencies only, not scenario artifacts. This is sufficient evidence for the deliberate 24-pin reconciliation; it does not authorize an unrelated refloor.
-3. **[2026-08-15] R7 is the current 1.0 critical path; Phase 1.2 is closed**
-   Do instead: execute R7 Phase 2 officer/OOB provenance, then audio, English accessibility/readability, opening screens, and packaged proof; continue to R8/R9. D-topology is post-1.0/reserved.
+3. **[2026-08-23] R7 remains the 1.0 critical path; Phase 2 and opening screens are closed**
+   Do instead: execute bounded audio/licensing, English accessibility/readability, and integrated packaged proof; then continue to R8/R9. The case-file opening, explicit campaign mode, Field Records, and browser proof are merged. D-topology is post-1.0/reserved.
 4. **[2026-08-15] Retain collapse v3 selection plus reversible D-shape**
    Do instead: preserve the default-OFF two-turn selector and 4.0/0.5 shock/recovery union pass. Do not revive struck breadth tuning; any RBiH/RS Tier-0 opening or neighbour topology requires fresh Section 6 and paired 188w evidence.
 5. **[2026-08-15] D-shape proved a live writer, not protected-boundary campaign reach**
    Do instead: cite the `70d5e04c6f49e041` pair as one live non-enclave HRHB write with full protected absence. Keep the discriminating G1 fixture as protected-input proof, and rerun if faction gates/topology change.
-6. **[2026-08-15] R7 remains open after RC; localization does not gate 1.0**
-   Do instead: finish historical/source remediation, officer/OOB provenance, audio/licensing, English accessibility/readability, opening screens, and packaged proof before R8. Keep `bs` migration, pseudolocalization, Bosnian completion/native review, and locale-specific proof in post-1.0 Phase 3.
+6. **[2026-08-23] R7 remains open only for audio, English accessibility, and packaged proof; localization does not gate 1.0**
+   Do instead: preserve the completed history/source, officer/OOB, and opening work; finish audio/licensing, English accessibility/readability, and packaged proof before R8. Keep `bs` migration, pseudolocalization, Bosnian completion/native review, and locale-specific proof in post-1.0 Phase 3.
 7. **[2026-08-15] Publication remains separately authorized**
    Do instead: transient validation packages are allowed, but do not sign, upload, create a public release, or tag `1.0` without an explicit `Publish 1.0` instruction.
 8. **[2026-08-15] R7 Phase 1.2 provenance is a zero-queue contract**

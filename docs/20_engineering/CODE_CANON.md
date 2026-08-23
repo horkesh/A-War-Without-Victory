@@ -5,7 +5,7 @@ The codebase follows the same precedence rules as canonical docs:
 - Engine invariants: `docs/10_canon/Engine_Invariants_v0_9_0.md`
 - Rulebook: `docs/10_canon/Rulebook_v0_9_0.md`
 - Systems Manual: `docs/10_canon/Systems_Manual_v0_9_0.md`
-- FORAWWV addenda: `docs/FORAWWV.md`
+- FORAWWV addenda: `docs/10_canon/FORAWWV.md`
 - Code: this repository
 
 When code contradicts canon, follow the contradiction protocol in this doc.
@@ -25,7 +25,7 @@ If you touch determinism-sensitive areas, also read:
 - `docs/20_engineering/INVARIANTS_IN_CODE.md`
 
 ## Where to Start Reading the Code (First 30 Minutes)
-Read `docs/context.md` first (workflow discipline and validation rules).
+Read `docs/10_canon/context.md` first (workflow discipline and validation rules).
 
 ### Canonical turn pipelines (one owner per phase)
 - **War-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Sole canonical runtime for live war behavior. Steps in `src/sim/turn_phases/war_phases.ts` and `early_war_phases.ts`; types in `src/sim/turn_pipeline_types.ts`.
@@ -42,6 +42,7 @@ If you are changing war behavior, start at `src/sim/turn_pipeline.ts`. If you ar
 - Map pipeline: `docs/20_engineering/MAP_BUILD_SYSTEM.md` (scripts under `scripts/map/`).
 - Tactical Map (canonical map GUI): `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §0 and `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — React + MapLibre app in `src/ui/map/`; `npm run dev:map`.
 - Product architecture authority: `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`.
+- Complete-suite test runner: `tools/test/run_vitest_balanced.mjs` (`npm run test:vitest:balanced`), backed by the deterministic hazard inventory in `tools/test/test_suite_inventory.mjs`. Fast/scenario slices are diagnostic subsets, not complete pre-merge proof.
 
 ### Bounded variant (not co-equal with canonical pipelines)
 - `src/sim/run_combat_browser.ts` — `runPhaseIITurn()`. Browser-safe war-phase turn advance (no Node/fs). Increments the turn counter only; does not run supply pressure or exhaustion. Used by the warroom when advancing a turn in war phase. Full war-phase behavior comes from `runTurn()` in Node; do not treat this file as equivalent to `src/sim/turn_pipeline.ts`.

@@ -22,13 +22,22 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Behavior: opens scenario file picker, builds initial state via `loadScenarioFromPath()`.
 
 - `start-new-campaign` (invoke)
-  - Payload: `{ playerFaction: 'RBiH' | 'RS' | 'HRHB', scenarioKey?: 'apr_1992' }`
+  - Payload: `{ playerFaction: 'RBiH' | 'RS' | 'HRHB', decisionMode: 'emergent' | 'historical', scenarioKey?: 'apr_1992' }`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
-  - Behavior: for `apr_1992`, consumes the baked startup artifact via `loadStartupSnapshotState(...)` (`data/derived/startup/apr_1992_initial_save.json`), which is a one-way derived copy of canonical builder truth from `data/scenarios/apr1992_definitive_52w.json`; then sets `meta.player_faction`, initializes `recruitment_state` if missing, clears startup control-history noise for the player-authored campaign path, enables emergent decision mode, queues exactly the selected faction's opening foundational decision, and serializes + pushes state via `game-state-updated`. Non-baked scenario keys continue through `createStateFromScenario(...)`. Called by warroom launcher and tactical-map side picker. (Note: legacy `sep_1991` scenario decommissioned in v0.7.0). The renderer first-hour choreography is war-start briefing -> President's Desk opening brief -> foundational decision -> command map/tutorial.
+  - Behavior: for `apr_1992`, consumes the baked startup artifact via `loadStartupSnapshotState(...)` (`data/derived/startup/apr_1992_initial_save.json`), which is a one-way derived copy of canonical builder truth from `data/scenarios/apr1992_definitive_52w.json`; then validates and persists the explicit `decisionMode` as `meta.decision_mode`, sets `meta.player_faction`, initializes `recruitment_state` if missing, clears startup control-history noise for the player-authored campaign path, queues exactly the selected faction's opening foundational decision, and serializes + pushes state via `game-state-updated`. Non-baked scenario keys continue through `createStateFromScenario(...)`. Called after the case-file landing -> faction dossier -> campaign-mode sequence. (Note: legacy `sep_1991` scenario decommissioned in v0.7.0). The renderer handoff is date transition -> one opening brief -> foundational decision -> command map/tutorial; the duplicate war-start briefing is retired.
 
 - `load-state-dialog` (invoke)
   - Returns: `{ ok: boolean, error?: string, stateJson?: string, replaySequenceJson?: string | null, replayManifestJson?: string | null }`
   - Behavior: opens state file picker, loads serialized GameState via `loadStateFromPath()`. If the selected save has a sibling `replay_save_manifest.json`, main process broadcasts it via `replay-manifest-updated` before `game-state-updated`; otherwise it falls back to sibling `replay_save_sequence.json` via `replay-sequence-updated`. This is not a standalone replay-loader contract: replay sidecars attach only to a loaded save.
+
+- `list-save-records` (invoke)
+  - Returns: `{ ok: boolean, error?: string, records?: Array<{ filename: string, turn: number, faction: 'RBiH' | 'RS' | 'HRHB' | null, modifiedAtMs: number }> }`
+  - Behavior: enumerates validated JSON records from the desktop saves directory in deterministic newest-first order. The renderer uses this for the case-file **Field Records** view; arbitrary paths are never returned.
+
+- `load-save-record` (invoke)
+  - Payload: `{ filename: string }`
+  - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
+  - Behavior: re-lists the saves directory, accepts only an exact filename currently present in that validated inventory, resolves it within the saves directory, deserializes it through the canonical load path, and returns the renderer projection. Traversal, stale, absolute, and unlisted filenames fail without loading state.
 
 - `advance-turn` (invoke)
   - Payload (optional): `{}`

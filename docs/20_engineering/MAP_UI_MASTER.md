@@ -85,7 +85,8 @@ src/ui/map/
 │   ├── BrigadeRow.tsx             Compact brigade list item in OOBSidebar
 │   ├── CorpsCard.tsx              Corps card in OOBSidebar accordion
 │   ├── SettlementDetailContent.tsx Reusable settlement info (used in SelectionPanel + Tooltip)
-│   ├── SidePickerOverlay.tsx      Faction selection overlay shown before game load (Phase 4)
+│   ├── MainMenu.tsx               Mounted case-file opening: New War faction/mode dossiers + Field Records
+│   ├── SidePickerOverlay.tsx      Retained compatibility component; not the mounted opening flow
 │   ├── RecruitmentModal.tsx       Brigade recruitment modal: catalog, eligibility, recruit action (Phase 4)
 │   ├── WarSummaryModal.tsx        War Summary modal: area-weighted territory, military strength, displacement (Phase 5)
 │   ├── panelRail.ts               Shared panel positioning constants (DETAIL_PANEL_STYLE, SECONDARY_PANEL_STYLE)
