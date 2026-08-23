@@ -137,6 +137,9 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
         brigades: [
             'hvo_3rd_guard_jastrebovi' as FormationId,
             'hvo_rama_brigade' as FormationId,
+            // BB Volume I, printed pp.380-381 (digital pp.417-418): 1st HGZ
+            // broke through Vitorog and then supported the advance into Sipovo.
+            'hv_1st_hgz_1995' as FormationId,
         ],
         objectives: MISTRAL_SIPOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
@@ -178,6 +181,7 @@ const MISTRAL_SIPOVO_AXIS: readonly OpportunityAxisDef[] = [
         brigades: [
             'hvo_3rd_guard_jastrebovi' as FormationId,
             'hvo_rama_brigade' as FormationId,
+            'hv_1st_hgz_1995' as FormationId,
         ],
         objectives: MISTRAL_SIPOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
@@ -311,6 +315,7 @@ export const MISTRAL_2_95_OPPORTUNITY: OperationOpportunityDef = {
     planning_duration: 4,
     min_attack_outcome: 'repulsed',
     citations: [
+        'Balkan Battlegrounds, Volume I, pp.380-381 (digital pp.417-418) - 1st HGZ on the Vitorog-Sipovo main effort',
         'docs/research/2026-05-01-late-war-operation-opportunity-research.md - Federation / Western Bosnia candidates',
         'docs/plans/late-war-operation-opportunity-system-design.md - T1 opportunity proposal contract and dependency model',
         'src/sim/combat/triggered_operations.ts - legacy Mistral 2 objective footprint',
@@ -408,6 +413,9 @@ const _SOUTHERN_MOVE_BRIGADES: readonly FormationId[] = [
     'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
     'hrhb_kralj_tomislav_brigade' as FormationId,
     'hvo_rama_brigade' as FormationId,
+    // BB Volume I, printed p.390 (digital p.427): 1st HGZ was one of
+    // Southern Move's three main shock formations on the Mrkonjic axis.
+    'hv_1st_hgz_1995' as FormationId,
     // HV loan brigades — spawn into hvo_tomislavgrad via HV_CORPS_ID (hv_integration.ts):
     'hv_4th_guards_split' as FormationId,
     'hv_1st_guards_tigers' as FormationId,
@@ -522,6 +530,7 @@ export const SOUTHERN_MOVE_95_OPPORTUNITY: OperationOpportunityDef = {
     planning_duration: 2,
     min_attack_outcome: 'repulsed',
     citations: [
+        'Balkan Battlegrounds, Volume I, p.390 (digital p.427) - 1st HGZ as a Southern Move main shock formation on the Mrkonjic Grad assault',
         'docs/40_reports/proposals/20260523_HVO_CATALOG_SYNTHESIS.md - Southern Move HVO/HV catalog synthesis',
         'src/sim/combat/triggered_operations.ts - legacy late-war western Bosnia operation footprint',
     ],
