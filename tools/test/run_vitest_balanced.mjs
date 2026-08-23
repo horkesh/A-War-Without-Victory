@@ -139,7 +139,7 @@ function parseArgs(argv) {
   return parsed;
 }
 
-function runChild(vitestCli, configPath, passthrough, root, env = process.env) {
+export function runVitestChild(vitestCli, configPath, passthrough, root, env = process.env) {
   return new Promise((resolveStatus) => {
     const child = spawn(process.execPath, [
       vitestCli,
@@ -153,7 +153,7 @@ function runChild(vitestCli, configPath, passthrough, root, env = process.env) {
   });
 }
 
-export async function runBalancedVitest(argv, root = process.cwd()) {
+export async function runBalancedVitest(argv, root = process.cwd(), dependencies = {}) {
   let cli;
   try {
     cli = parseArgs(argv);
@@ -166,9 +166,12 @@ export async function runBalancedVitest(argv, root = process.cwd()) {
     console.error(`Missing vitest CLI at ${vitestCli}. Run npm install.`);
     return 1;
   }
-  const durationPath = join(root, 'tools', 'test', 'test_duration_baseline.json');
-  const durationDocument = JSON.parse(readFileSync(durationPath, 'utf8'));
-  const discoveredInventory = buildTestInventory(root, durationDocument.durations_ms ?? {});
+  const discoveredInventory = dependencies.inventory ?? (() => {
+    const durationPath = join(root, 'tools', 'test', 'test_duration_baseline.json');
+    const durationDocument = JSON.parse(readFileSync(durationPath, 'utf8'));
+    return buildTestInventory(root, durationDocument.durations_ms ?? {});
+  })();
+  const childRunner = dependencies.runVitestChild ?? runVitestChild;
   let inventory = discoveredInventory;
   if (cli.match !== null) {
     try {
@@ -200,7 +203,7 @@ export async function runBalancedVitest(argv, root = process.cwd()) {
       `[balanced-vitest] workers=${workerConfigs.length}; `
       + `partitioned files=${plan.partitionedFiles.length}; serial files=${plan.serialFiles.length}`,
     );
-    const statuses = await Promise.all(workerConfigs.map(({ path, shardIndex }) => runChild(
+    const statuses = await Promise.all(workerConfigs.map(({ path, shardIndex }) => childRunner(
         vitestCli,
         path,
         cli.passthrough,
@@ -214,7 +217,7 @@ export async function runBalancedVitest(argv, root = process.cwd()) {
     if (plan.serialFiles.length > 0) {
       const serialConfig = join(generatedRoot, 'serial.config.mjs');
       writeFileSync(serialConfig, renderBalancedVitestConfig(plan.serialFiles), 'utf8');
-      statuses.push(await runChild(vitestCli, serialConfig, cli.passthrough, root));
+      statuses.push(await childRunner(vitestCli, serialConfig, cli.passthrough, root));
     }
     return aggregateChildStatuses(statuses);
   } finally {

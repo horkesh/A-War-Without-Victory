@@ -1,3 +1,5 @@
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   aggregateChildStatuses,
@@ -5,6 +7,9 @@ import {
   deterministicShardValues,
   filterInventoryByPattern,
   partitionInventory,
+  renderBalancedVitestConfig,
+  runBalancedVitest,
+  runVitestChild,
 } from '../tools/test/run_vitest_balanced.mjs';
 
 describe('balanced Vitest execution plan', () => {
@@ -60,10 +65,40 @@ describe('balanced Vitest execution plan', () => {
     expect(partitionInventory([...inventory].reverse(), 2)).toEqual(partitionInventory(inventory, 2));
   });
 
-  it('propagates a deliberately failing child status', () => {
+  it('propagates aggregate child status', () => {
     expect(aggregateChildStatuses([0, 1, 0])).toBe(1);
     expect(aggregateChildStatuses([0, 0])).toBe(0);
     expect(() => aggregateChildStatuses([])).toThrow(/at least one child/);
+  });
+
+  it('propagates a deliberately failing real Vitest child', async () => {
+    const root = process.cwd();
+    const generatedRoot = join(root, '.tmp_vitest_balanced_test', String(process.pid));
+    const configPath = join(generatedRoot, 'deliberate-failure.config.mjs');
+    mkdirSync(generatedRoot, { recursive: true });
+    try {
+      writeFileSync(configPath, renderBalancedVitestConfig([
+        'tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts',
+      ]), 'utf8');
+      const status = await runVitestChild(
+        join(root, 'node_modules', 'vitest', 'vitest.mjs'),
+        configPath,
+        ['--reporter=dot', '--silent'],
+        root,
+      );
+      expect(status).toBe(1);
+    } finally {
+      rmSync(generatedRoot, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it('returns failure when a planned worker child fails', async () => {
+    const root = process.cwd();
+    const status = await runBalancedVitest(['--shards=1'], root, {
+      inventory: [{ file: 'tests/run_vitest_balanced.test.ts', durationMs: 1, serial: false, reasons: [] }],
+      runVitestChild: async () => 1,
+    });
+    expect(status).toBe(1);
   });
 
   it('selects a bounded smoke subset without changing discovery order', () => {

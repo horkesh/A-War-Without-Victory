@@ -18,4 +18,20 @@ export function aggregateChildStatuses(statuses: number[]): 0 | 1;
 export function buildWorkerPlans(plan: BalancedTestPlan, shardCount: number): BalancedWorkerPlan[];
 export function filterInventoryByPattern(inventory: TestInventoryRow[], pattern: string): TestInventoryRow[];
 export function renderBalancedVitestConfig(files: string[]): string;
-export function runBalancedVitest(argv: string[], root?: string): Promise<number>;
+export function runVitestChild(
+  vitestCli: string,
+  configPath: string,
+  passthrough: string[],
+  root: string,
+  env?: NodeJS.ProcessEnv,
+): Promise<number>;
+export interface BalancedVitestDependencies {
+  inventory?: TestInventoryRow[];
+  runVitestChild?: typeof runVitestChild;
+}
+
+export function runBalancedVitest(
+  argv: string[],
+  root?: string,
+  dependencies?: BalancedVitestDependencies,
+): Promise<number>;
