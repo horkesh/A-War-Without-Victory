@@ -2197,6 +2197,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     `resume week ${startWeekIndex} exceeds scenario length ${weeks}`
                 );
             }
+            await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                writeFile(
+                    runMetaPath,
+                    stableStringify({ ...run_meta, resume_from_week_index: startWeekIndex }, 2),
+                    'utf8',
+                )
+            );
         }
         let oobCreated = resumeFromSavePath
             ? state.meta.phase === 'war' || Object.keys(state.military.formations ?? {}).length > 0

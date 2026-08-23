@@ -3,7 +3,7 @@
 **Date:** 2026-08-23  
 **Branch:** `codex/engine-truth-checkpoint`  
 **Simulation commit measured:** `26929e6b86e08f0438e97b7917f779ac8271b237`  
-**Status:** Implemented, independently reviewed, campaign-verified; affected baseline pins reconciled
+**Status:** Implemented, independently reviewed, campaign-verified; affected baseline pins reconciled; post-review local gates green
 
 ## Outcome
 
@@ -85,8 +85,12 @@ All six HV expeditionary formations spawn at turn 174 and move. Two have reachab
 - Remote CI run `32659474284` independently reproduced exactly those ten mismatches, including 188-week final hash `930195c6879502c7`, while typecheck, event/phase tests, and the strict canon rail passed.
 - After updating exactly those ten hashes through the repository baseline-update path, a fresh comparison-mode run exited 0 with `Baseline regression: all scenarios match.`
 - Final-tree `npm run canon:check`: determinism static scan passed and the regenerated comparison passed all scenarios; top-level exit code 0.
+- Reconciled-manifest remote CI run `32660643670`: passed every workflow step with top-level success.
+- Post-review portability/resume repair: checkpoint and real split/resume slices passed 84/84, TypeScript typecheck passed, and a fresh complete `npm run test:vitest:balanced` exited 0. Its four isolated lanes completed in 887.79 s, 955.35 s, 986.45 s, and 1,017.52 s; the serial hazard tail passed 50 files / 800 tests in 33.78 s.
 
-Follow-up remote CI on the reconciled manifest remains a promotion gate recorded separately.
+Review found two real harness defects after the first remote green run. The fixture encoded a Windows path separator, so Linux resolved the advertised output directory differently; it now emits the platform-native path. The checkpoint also incorrectly demanded week-zero force rows and turn-one seals from a resumed-run tail. `run_meta.json` now stamps the resume turn derived from the loaded save, and the checkpoint validates force rows and seals only across that stamped tail. Missing or invalid resume-window metadata fails closed. The tests establish this force/seal window and the real runner stamp; they do not claim that every other checkpoint section can certify an arbitrary cumulative resumed run.
+
+Fresh remote CI on the post-review commit remains the promotion gate.
 
 ## Files and ownership
 

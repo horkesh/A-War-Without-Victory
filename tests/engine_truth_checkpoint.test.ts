@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
@@ -12,6 +12,7 @@ const {
 };
 
 function fixture(): Record<string, unknown> {
+    const emittedOutDir = join('runs', 'run-1');
     return {
         runDir: resolve('runs/run-1'),
         runMeta: {
@@ -100,7 +101,7 @@ function fixture(): Record<string, unknown> {
             '[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0\n' +
             '[brigade_assignment] FINAL_SEAL kind=turn turn=2 unresolved=0\n' +
             '[brigade_assignment] FINAL_SEAL kind=final_save turn=2 unresolved=0\n' +
-            'outDir: runs\\run-1\nfinal_state_hash: abc123\n',
+            `outDir: ${emittedOutDir}\nfinal_state_hash: abc123\n`,
     };
 }
 
@@ -171,6 +172,21 @@ describe('engine truth checkpoint', () => {
             warnings: [],
             binding: { status: 'NOT_ESTABLISHED', bound: false },
         });
+    });
+
+    it('accepts complete force and seal evidence for a stamped resumed-run tail', () => {
+        const input: any = fixture();
+        input.runMeta.resume_from_save_path = 'runs/checkpoint.json';
+        input.runMeta.resume_from_week_index = 1;
+        input.temporalRows = input.temporalRows.filter((row: any) => row.week_index >= 1);
+        input.assignmentLog = input.assignmentLog.replace(
+            '[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0\n',
+            '',
+        );
+
+        const report = buildEngineTruthCheckpoint(input);
+        expect(check(report, 'force_timeline')).toMatchObject({ ok: true });
+        expect(check(report, 'assignment_warning_stream')).toMatchObject({ ok: true });
     });
 
     it('positive control: parses an exact warning emission and fails health', () => {
@@ -246,9 +262,9 @@ describe('engine truth checkpoint', () => {
     });
 
     it.each([
-        ['missing output directory', (log: string) => log.replace('outDir: runs\\run-1\n', '')],
+        ['missing output directory', (log: string) => log.replace(`outDir: ${join('runs', 'run-1')}\n`, '')],
         ['wrong final hash', (log: string) => log.replace('final_state_hash: abc123', 'final_state_hash: bad999')],
-        ['wrong output directory', (log: string) => log.replace('outDir: runs\\run-1', 'outDir: runs\\wrong-run')],
+        ['wrong output directory', (log: string) => log.replace(`outDir: ${join('runs', 'run-1')}`, `outDir: ${join('runs', 'wrong-run')}`)],
     ])('positive control: isolated console binding mutation fails: %s', (_label, mutateLog) => {
         const input: any = fixture();
         input.assignmentLog = mutateLog(input.assignmentLog);

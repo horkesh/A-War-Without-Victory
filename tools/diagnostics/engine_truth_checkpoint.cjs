@@ -181,8 +181,12 @@ function parseAssignmentLog(assignmentLog, finalSave, bindingInput) {
   const unknownOrMalformedCount = rawSealMarkerCount - knownSeals.length;
   const markerProtocolValid = rawSealMarkerCount === parsedSeals.length && unknownOrMalformedCount === 0;
   const sealTurns = [...new Set(turnSeals.map((seal) => seal.turn))].sort((a, b) => a - b);
-  const expectedTurns = Number.isInteger(bindingInput.weeks) && bindingInput.weeks > 0
-    ? Array.from({ length: bindingInput.weeks }, (_, index) => index + 1)
+  const resumeWindowValid = bindingInput.resumeFromSavePath == null ||
+    (Number.isInteger(bindingInput.resumeFromWeekIndex) && bindingInput.resumeFromWeekIndex >= 0 &&
+      bindingInput.resumeFromWeekIndex < bindingInput.weeks);
+  const expectedStartWeek = Number.isInteger(bindingInput.resumeFromWeekIndex) ? bindingInput.resumeFromWeekIndex : 0;
+  const expectedTurns = resumeWindowValid && Number.isInteger(bindingInput.weeks) && bindingInput.weeks > expectedStartWeek
+    ? Array.from({ length: bindingInput.weeks - expectedStartWeek }, (_, index) => expectedStartWeek + index + 1)
     : [];
   const turnCoverageComplete = expectedTurns.length > 0 && expectedTurns.length === sealTurns.length &&
     expectedTurns.every((turn, index) => turn === sealTurns[index]);
@@ -316,9 +320,13 @@ function buildChecks(input, sections) {
     'run_id, scenario_id, weeks, or final turn mismatch/missing');
 
   const expectedWeeks = input.runMeta?.weeks;
+  const resumeWindowValid = input.runMeta?.resume_from_save_path == null ||
+    (Number.isInteger(input.runMeta?.resume_from_week_index) && input.runMeta.resume_from_week_index >= 0 &&
+      input.runMeta.resume_from_week_index < expectedWeeks);
+  const expectedStartWeek = Number.isInteger(input.runMeta?.resume_from_week_index) ? input.runMeta.resume_from_week_index : 0;
   const expectedCellKeys = new Set();
-  if (Number.isInteger(expectedWeeks) && expectedWeeks > 0) {
-    for (let week = 0; week < expectedWeeks; week += 1) {
+  if (resumeWindowValid && Number.isInteger(expectedWeeks) && expectedWeeks > expectedStartWeek) {
+    for (let week = expectedStartWeek; week < expectedWeeks; week += 1) {
       for (const faction of CANONICAL_FACTIONS) expectedCellKeys.add(`${week}\u0000${faction}`);
     }
   }
@@ -347,7 +355,7 @@ function buildChecks(input, sections) {
   const finalSurvivorsCovered = finalActiveBrigadeIds.every((formationId) => finalWeekFormationIds.has(formationId));
   const exactCells = actualCellKeys.size === expectedCellKeys.size &&
     [...expectedCellKeys].every((key) => actualCellKeys.has(key));
-  const forceValid = expectedCellKeys.size > 0 && input.temporalRows.length > 0 && !duplicateFormationWeek && !temporalTurnMismatch &&
+  const forceValid = resumeWindowValid && expectedCellKeys.size > 0 && input.temporalRows.length > 0 && !duplicateFormationWeek && !temporalTurnMismatch &&
     formationTimelinesContiguous && finalSurvivorsCovered &&
     input.temporalRows.every((row) => typeof row.brigade_id === 'string' &&
     Number.isInteger(row.week_index) && typeof row.faction === 'string' && finiteNonNegative(row.personnel)) &&
@@ -440,6 +448,8 @@ function buildEngineTruthCheckpoint(input) {
       finalStateHash: normalized.runSummary.final_state_hash,
       scenarioPath: normalized.runMeta.scenario_path,
       weeks: normalized.runMeta.weeks,
+      resumeFromSavePath: normalized.runMeta.resume_from_save_path,
+      resumeFromWeekIndex: normalized.runMeta.resume_from_week_index,
     }),
     operations_combat: operationsReport(normalized.runSummary),
     calibration: calibrationReport(normalized.runSummary, normalized.runMeta),

@@ -66,14 +66,18 @@ describe('scenario continue-from-save equivalence', () => {
         replayPayloadMode: 'full',
       });
 
-      const [fullFinal, resumedFinal, checkpoint, resumedInitial] = await Promise.all([
+      const [fullFinal, resumedFinal, checkpoint, resumedInitial, resumedMetaRaw] = await Promise.all([
         readFile(fullRun.paths.final_save, 'utf8'),
         readFile(resumedRun.paths.final_save, 'utf8'),
         readFile(resumeSave!, 'utf8'),
         readFile(resumedRun.paths.initial_save, 'utf8'),
+        readFile(join(resumedRun.outDir, 'run_meta.json'), 'utf8'),
       ]);
+      const resumedMeta = JSON.parse(resumedMetaRaw) as { resume_from_week_index?: number };
+      const checkpointTurn = (JSON.parse(checkpoint) as { meta: { turn: number } }).meta.turn;
 
       expect(resumedInitial).toBe(checkpoint);
+      expect(resumedMeta.resume_from_week_index).toBe(checkpointTurn);
       expect(resumedRun.final_state_hash).toBe(fullRun.final_state_hash);
       expect(resumedFinal).toBe(fullFinal);
 
