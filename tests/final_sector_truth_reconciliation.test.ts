@@ -669,7 +669,11 @@ describe('final sector truth reconciliation', () => {
         expect(
             warnSpy.mock.calls.some(([msg]) => String(msg).includes('UNRESOLVED loaned_elite')),
         ).toBe(false);
-        expect(debugSpy).toHaveBeenCalledWith('[brigade_assignment] FINAL_SEAL turn=52 unresolved=0');
+        expect(debugSpy).toHaveBeenCalledWith('[brigade_assignment] FINAL_SEAL kind=turn turn=52 unresolved=0');
+
+        debugSpy.mockClear();
+        sealFinalSectorTruthFromCurrentSectors(state, edges, null, undefined, { diagnosticKind: 'final_save' });
+        expect(debugSpy).toHaveBeenCalledWith('[brigade_assignment] FINAL_SEAL kind=final_save turn=52 unresolved=0');
     });
 
     it('static contract: final seal rescues loaned elites after final owner truth pass', () => {

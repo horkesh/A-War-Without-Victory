@@ -3073,7 +3073,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 finalOperationalEdges,
                 null,
                 finalSpatial,
-                { session: finalSectorSession },
+                { session: finalSectorSession, diagnosticKind: 'final_save' },
             );
         }
         const finalSerialized = _serTimeSync(emitTimingJson, timingTotals, 'final-save-serialize', () =>

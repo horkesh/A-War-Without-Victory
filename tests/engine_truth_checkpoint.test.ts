@@ -97,8 +97,9 @@ function fixture(): Record<string, unknown> {
             { turn: 2, killed: 5, displaced: 20, fled_abroad: 14 },
         ],
         assignmentLog: '> tsx tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/test.json --unique --out runs\n' +
-            '[brigade_assignment] FINAL_SEAL turn=1 unresolved=0\n' +
-            '[brigade_assignment] FINAL_SEAL turn=2 unresolved=0\n' +
+            '[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0\n' +
+            '[brigade_assignment] FINAL_SEAL kind=turn turn=2 unresolved=0\n' +
+            '[brigade_assignment] FINAL_SEAL kind=final_save turn=2 unresolved=0\n' +
             'outDir: runs\\run-1\nfinal_state_hash: abc123\n',
     };
 }
@@ -127,7 +128,13 @@ describe('engine truth checkpoint', () => {
             evidence_available: true,
             binding: { status: 'ESTABLISHED', bound: true },
             warning_count: 0,
-            final_seals: { marker_count: 2, turn_coverage_complete: true, warnings_reconciled: true },
+            final_seals: {
+                marker_count: 3,
+                turn_coverage_complete: true,
+                exactly_one_turn_marker_per_turn: true,
+                exactly_one_final_save_marker: true,
+                warnings_reconciled: true,
+            },
         });
         expect(a.calibration).toMatchObject({ matched_osids: 8, total_osids: 10, match_ratio: 0.8 });
         expect(a.calibration.anchors.map((anchor: any) => anchor.anchor_id)).toEqual(['anchor:a', 'anchor:b']);
@@ -142,7 +149,7 @@ describe('engine truth checkpoint', () => {
         ['assignment log binding', 'assignment_log_binding', (x: any) => { delete x.assignmentLog; }],
         ['unresolved assignment health', 'assignment_unresolved_health', (x: any) => {
             x.assignmentLog = '[brigade_assignment] UNRESOLVED a (90 pers): fell through sector pipeline, corps=arbih_1st_corps\n' + x.assignmentLog;
-            x.assignmentLog = x.assignmentLog.replace('FINAL_SEAL turn=2 unresolved=0', 'FINAL_SEAL turn=2 unresolved=1');
+            x.assignmentLog = x.assignmentLog.replace('FINAL_SEAL kind=turn turn=2 unresolved=0', 'FINAL_SEAL kind=turn turn=2 unresolved=1');
         }],
         ['operations/combat', 'operations_combat', (x: any) => { x.runSummary.combat_causality.valid_for_combat_calibration = false; }],
         ['calibration and anchors', 'calibration_anchors', (x: any) => { x.runSummary.anchor_checks[0].passed = false; }],
@@ -169,7 +176,7 @@ describe('engine truth checkpoint', () => {
     it('positive control: parses an exact warning emission and fails health', () => {
         const input: any = fixture();
         input.assignmentLog = '[brigade_assignment] UNRESOLVED a (90 pers): fell through sector pipeline, corps=arbih_1st_corps\n' + input.assignmentLog;
-        input.assignmentLog = input.assignmentLog.replace('FINAL_SEAL turn=2 unresolved=0', 'FINAL_SEAL turn=2 unresolved=1');
+        input.assignmentLog = input.assignmentLog.replace('FINAL_SEAL kind=turn turn=2 unresolved=0', 'FINAL_SEAL kind=turn turn=2 unresolved=1');
         const report = buildEngineTruthCheckpoint(input);
         expect(report.assignment_log.warning_count).toBe(1);
         expect(report.assignment_log.warning_resolution_correctness).toBe('NOT_ESTABLISHED');
@@ -187,7 +194,7 @@ describe('engine truth checkpoint', () => {
         const input: any = fixture();
         input.finalSave.military.formations.a.status = 'destroyed';
         input.assignmentLog = '[brigade_assignment] UNRESOLVED a (90 pers): fell through sector pipeline, corps=arbih_1st_corps\n' + input.assignmentLog;
-        input.assignmentLog = input.assignmentLog.replace('FINAL_SEAL turn=2 unresolved=0', 'FINAL_SEAL turn=2 unresolved=1');
+        input.assignmentLog = input.assignmentLog.replace('FINAL_SEAL kind=turn turn=2 unresolved=0', 'FINAL_SEAL kind=turn turn=2 unresolved=1');
         const report = buildEngineTruthCheckpoint(input);
         expect(report.assignment_log.warnings[0]).toMatchObject({
             formation_record_exists_in_final_save: true,
@@ -209,9 +216,10 @@ describe('engine truth checkpoint', () => {
         const input: any = fixture();
         input.runMeta.weeks = input.runSummary.weeks = input.finalSave.meta.turn = 3;
         input.assignmentLog = input.assignmentLog.replace(
-            'FINAL_SEAL turn=2 unresolved=0',
-            'FINAL_SEAL turn=2 unresolved=0\n[brigade_assignment] FINAL_SEAL turn=3 unresolved=0',
+            'FINAL_SEAL kind=turn turn=2 unresolved=0',
+            'FINAL_SEAL kind=turn turn=2 unresolved=0\n[brigade_assignment] FINAL_SEAL kind=turn turn=3 unresolved=0',
         );
+        input.assignmentLog = input.assignmentLog.replace('FINAL_SEAL kind=final_save turn=2', 'FINAL_SEAL kind=final_save turn=3');
         input.temporalRows.push(
             { ...input.temporalRows[0], week_index: 2, turn: 3 },
             { ...input.temporalRows[1], week_index: 2, turn: 3 },
@@ -251,7 +259,7 @@ describe('engine truth checkpoint', () => {
 
     it('positive control: rejects incoherent seals and concatenated multi-run logs', () => {
         const badSeal: any = fixture();
-        badSeal.assignmentLog = badSeal.assignmentLog.replace('FINAL_SEAL turn=2 unresolved=0', 'FINAL_SEAL turn=2 unresolved=1');
+        badSeal.assignmentLog = badSeal.assignmentLog.replace('FINAL_SEAL kind=turn turn=2 unresolved=0', 'FINAL_SEAL kind=turn turn=2 unresolved=1');
         expect(check(buildEngineTruthCheckpoint(badSeal), 'assignment_warning_stream')).toMatchObject({ ok: false });
 
         const multiRun: any = fixture();
@@ -262,13 +270,27 @@ describe('engine truth checkpoint', () => {
     it('positive control: rejects a duplicate same-turn final seal', () => {
         const input: any = fixture();
         input.assignmentLog = input.assignmentLog.replace(
-            'FINAL_SEAL turn=1 unresolved=0',
-            'FINAL_SEAL turn=1 unresolved=0\n[brigade_assignment] FINAL_SEAL turn=1 unresolved=0',
+            'FINAL_SEAL kind=turn turn=1 unresolved=0',
+            'FINAL_SEAL kind=turn turn=1 unresolved=0\n[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0',
         );
         const report = buildEngineTruthCheckpoint(input);
         expect(report.assignment_log.final_seals.turn_coverage_complete).toBe(true);
-        expect(report.assignment_log.final_seals.exactly_one_per_turn).toBe(false);
+        expect(report.assignment_log.final_seals.exactly_one_turn_marker_per_turn).toBe(false);
         expect(check(report, 'assignment_warning_stream')).toMatchObject({ ok: false });
+    });
+
+    it.each([
+        ['duplicate final-save marker', (log: string) => log.replace(
+            'FINAL_SEAL kind=final_save turn=2 unresolved=0',
+            'FINAL_SEAL kind=final_save turn=2 unresolved=0\n[brigade_assignment] FINAL_SEAL kind=final_save turn=2 unresolved=0',
+        )],
+        ['wrong final-save turn', (log: string) => log.replace('kind=final_save turn=2', 'kind=final_save turn=1')],
+        ['unknown marker kind', (log: string) => log.replace('kind=final_save', 'kind=mystery')],
+        ['legacy marker without kind', (log: string) => log.replace('FINAL_SEAL kind=final_save', 'FINAL_SEAL')],
+    ])('positive control: rejects final-seal protocol violation: %s', (_label, mutateLog) => {
+        const input: any = fixture();
+        input.assignmentLog = mutateLog(input.assignmentLog);
+        expect(check(buildEngineTruthCheckpoint(input), 'assignment_warning_stream')).toMatchObject({ ok: false });
     });
 
     it('positive control: rejects casualty faction drift and anchor-copy drift', () => {

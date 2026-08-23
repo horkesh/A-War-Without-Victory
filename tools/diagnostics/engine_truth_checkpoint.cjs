@@ -129,7 +129,9 @@ function parseAssignmentLog(assignmentLog, finalSave, bindingInput) {
       },
       final_seals: {
         marker_count: 0, unresolved_sum: null, turns: [], turn_coverage_complete: false,
-        exactly_one_per_turn: false, warnings_reconciled: false,
+        turn_marker_count: 0, final_save_marker_count: 0,
+        exactly_one_turn_marker_per_turn: false, exactly_one_final_save_marker: false,
+        marker_protocol_valid: false, unknown_or_malformed_count: 0, warnings_reconciled: false,
       },
       warnings: [],
     };
@@ -170,20 +172,28 @@ function parseAssignmentLog(assignmentLog, finalSave, bindingInput) {
       formation_survives_final_state: formation?.status === 'active',
     };
   });
-  const seals = [...assignmentLog.matchAll(/\[brigade_assignment\]\s+FINAL_SEAL\s+turn=(\d+)\s+unresolved=(\d+)/g)]
-    .map((match, markerIndex) => ({ marker_index: markerIndex, turn: Number(match[1]), unresolved: Number(match[2]) }));
-  const sealTurns = [...new Set(seals.map((seal) => seal.turn))].sort((a, b) => a - b);
+  const rawSealMarkerCount = [...assignmentLog.matchAll(/\[brigade_assignment\]\s+FINAL_SEAL\b/g)].length;
+  const parsedSeals = [...assignmentLog.matchAll(/\[brigade_assignment\]\s+FINAL_SEAL\s+kind=([^\s]+)\s+turn=(\d+)\s+unresolved=(\d+)/g)]
+    .map((match, markerIndex) => ({ kind: match[1], marker_index: markerIndex, turn: Number(match[2]), unresolved: Number(match[3]) }));
+  const knownSeals = parsedSeals.filter((seal) => seal.kind === 'turn' || seal.kind === 'final_save');
+  const turnSeals = knownSeals.filter((seal) => seal.kind === 'turn');
+  const finalSaveSeals = knownSeals.filter((seal) => seal.kind === 'final_save');
+  const unknownOrMalformedCount = rawSealMarkerCount - knownSeals.length;
+  const markerProtocolValid = rawSealMarkerCount === parsedSeals.length && unknownOrMalformedCount === 0;
+  const sealTurns = [...new Set(turnSeals.map((seal) => seal.turn))].sort((a, b) => a - b);
   const expectedTurns = Number.isInteger(bindingInput.weeks) && bindingInput.weeks > 0
     ? Array.from({ length: bindingInput.weeks }, (_, index) => index + 1)
     : [];
   const turnCoverageComplete = expectedTurns.length > 0 && expectedTurns.length === sealTurns.length &&
     expectedTurns.every((turn, index) => turn === sealTurns[index]);
   const markerCountsByTurn = new Map();
-  for (const seal of seals) markerCountsByTurn.set(seal.turn, (markerCountsByTurn.get(seal.turn) ?? 0) + 1);
-  const exactlyOnePerTurn = turnCoverageComplete && seals.length === expectedTurns.length &&
+  for (const seal of turnSeals) markerCountsByTurn.set(seal.turn, (markerCountsByTurn.get(seal.turn) ?? 0) + 1);
+  const exactlyOneTurnMarkerPerTurn = turnCoverageComplete && turnSeals.length === expectedTurns.length &&
     expectedTurns.every((turn) => markerCountsByTurn.get(turn) === 1);
-  const unresolvedSum = seals.reduce((sum, seal) => sum + seal.unresolved, 0);
-  const warningsReconciled = seals.length > 0 && unresolvedSum === warnings.length;
+  const exactlyOneFinalSaveMarker = expectedTurns.length > 0 && finalSaveSeals.length === 1 &&
+    finalSaveSeals[0].turn === expectedTurns[expectedTurns.length - 1];
+  const unresolvedSum = knownSeals.reduce((sum, seal) => sum + seal.unresolved, 0);
+  const warningsReconciled = knownSeals.length > 0 && unresolvedSum === warnings.length;
   return {
     evidence_available: true,
     warning_count: warnings.length,
@@ -200,11 +210,16 @@ function parseAssignmentLog(assignmentLog, finalSave, bindingInput) {
       single_run_segment: singleRunSegment,
     },
     final_seals: {
-      marker_count: seals.length,
+      marker_count: knownSeals.length,
+      turn_marker_count: turnSeals.length,
+      final_save_marker_count: finalSaveSeals.length,
       unresolved_sum: unresolvedSum,
       turns: sealTurns,
       turn_coverage_complete: turnCoverageComplete,
-      exactly_one_per_turn: exactlyOnePerTurn,
+      exactly_one_turn_marker_per_turn: exactlyOneTurnMarkerPerTurn,
+      exactly_one_final_save_marker: exactlyOneFinalSaveMarker,
+      marker_protocol_valid: markerProtocolValid,
+      unknown_or_malformed_count: unknownOrMalformedCount,
       warnings_reconciled: warningsReconciled,
     },
     warnings,
@@ -364,13 +379,14 @@ function buildChecks(input, sections) {
     'combined stdout/stderr missing or outDir/final_state_hash binding NOT_ESTABLISHED/mismatched');
   const seal = sections.assignment_log.final_seals;
   const warningStreamValid = bindingValid && seal.marker_count > 0 && seal.turn_coverage_complete &&
-    seal.exactly_one_per_turn && seal.warnings_reconciled;
+    seal.exactly_one_turn_marker_per_turn && seal.exactly_one_final_save_marker &&
+    seal.marker_protocol_valid && seal.warnings_reconciled;
   add('assignment_warning_stream', warningStreamValid, warningStreamValid ?
-    `${seal.marker_count} final-seal markers cover every turn exactly once; unresolved sum reconciles to warning emissions` :
-    'final-seal marker missing/duplicate/incomplete or unresolved sum does not reconcile to parsed warning emissions');
+    `${seal.turn_marker_count} turn seals plus 1 final-save seal; unresolved sum reconciles to warning emissions` :
+    'turn/final-save seal missing, duplicate, malformed, unknown, misplaced, or unresolved sum does not reconcile');
   const assignmentHealthValid = warningStreamValid && sections.assignment_log.warning_count === 0;
-  add('assignment_unresolved_health', assignmentHealthValid, !bindingValid ?
-    'cannot assess unresolved health without bound console evidence' :
+  add('assignment_unresolved_health', assignmentHealthValid, !warningStreamValid ?
+    'cannot assess unresolved health without a bound, coherent turn/final-save seal stream' :
     assignmentHealthValid ? '0 UNRESOLVED warning emissions' : `${sections.assignment_log.warning_count} UNRESOLVED warning emission(s)`);
 
   const ops = sections.operations_combat;
