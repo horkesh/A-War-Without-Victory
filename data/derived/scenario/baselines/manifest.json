@@ -22,14 +22,14 @@
         "weekly_report.jsonl"
       ],
       "hashes": {
-        "activity_summary.json": "434c51f4884678ddffc3b80efc6ff2816f24e47b02b9619f589d22720b5682a8",
-        "control_delta.json": "5ba3324da5e6dfc691f44d718639a780417d74ab90f356cf9637582754887d27",
-        "end_report.md": "33eacc5c21980503955c490d0eb0450fd94e98ebf769eff23254cddbe84b6449",
-        "final_save.json": "4f412fb20217babfac0c11e33cf2c08fd07fa5db3e9b55b91ae2ed6ebd53d9a0",
-        "formation_delta.json": "43e8e9d5c76e1253949e5cefd372188c9c4f03cc211359ca531eff163fac0791",
-        "run_summary.json": "e820e2767ded03074b6c032f56f2837fee3f1d10b1263c97ba3442400c4042e8",
-        "watched_operations.json": "81c3082dbb7d1a3c03035806424cc522b37ccd25e3e9eec4f1754c96b9550c65",
-        "weekly_report.jsonl": "0b93420bbe92fe3f34d4319ec88954a2ce3131ca6de270c9bbb8110453fd96ab"
+        "activity_summary.json": "d81f6e1dd7987c70b37c977cc6b706d27a87bb54ae76fbf8d8ad10268a4e39c4",
+        "control_delta.json": "ee0ab43832e1029c1dd36609b1a3db150a2424fb1a41048f73f23cd0eac7aa66",
+        "end_report.md": "f93f272bf4e2d25aa76bd701a8a64802b02bebba4c75e6963720fed72218458b",
+        "final_save.json": "cc88344e922ac8b42b1f5ebc85029bdb04a6cd9f824adad192f32fc67698de5e",
+        "formation_delta.json": "8203f9c1a95e1aad59486b558718aa9e89d17466ef921dda643c55c698909933",
+        "run_summary.json": "04b22dc1ccc066db6c35c51e5063f776372cbd3ce7eb4b0ac83cef6b8d67c8e1",
+        "watched_operations.json": "39b3f28b87d38912951c96d23bab47a75e2f874acbdf60b7b41280c9d89d7743",
+        "weekly_report.jsonl": "0f70606f9885486cada0f29ea8c1b6220f8b3219129436e4ba46ca1d8dfd2ca4"
       },
       "id": "apr1992_188w",
       "scenario_path": "data/scenarios/apr1992_definitive_188w.json",
@@ -47,14 +47,14 @@
         "weekly_report.jsonl"
       ],
       "hashes": {
-        "activity_summary.json": "6c543259ee0c0080ff0d20178caf91a476219c23311029b94d7122dd58879690",
-        "control_delta.json": "501d1d578411a50a4338fd83d709bbfe5269edcd69d6c2c18de90bdf167d0a1b",
-        "end_report.md": "d0f24ed02652940407c2f8eca2dcfc01f2b97f14edd561bfa31d76bdfe7672e4",
-        "final_save.json": "01a7d988b0b54ae9a63d521c08aa32d73c6ec6e4f3645786c78e9a51bbb16fe1",
-        "formation_delta.json": "153afcfed9bfe51195e12df5c495d20d01ab4bf42c7ac2cf7eeb20ec04813d64",
-        "run_summary.json": "1a3356c4b48dcc38d643488ae1c0019c7dc4cef4367ccdbd735fc7d481f33a9a",
-        "watched_operations.json": "acda0a5b9a4a42075b5117a09e71f75ebe76177a81749ab927e7981eff0de05f",
-        "weekly_report.jsonl": "b5e23c7111bcbfabb055b474aae9f5088fe4346bdc791d718028c7bd809ccd8a"
+        "activity_summary.json": "b03cb4cfa44971df0b380601b3ef5797952b38a04effc4498880e58d1e03cbaf",
+        "control_delta.json": "af105ce78146edac74eee36a21631f6e735c1929c54ea23610beb38eb84b7518",
+        "end_report.md": "04269f106ab6d2d3ff9cfad8dc5c8170dac5bbbf91f06eda606289e67f7772c8",
+        "final_save.json": "4296b6ab2e9a253bdb013a25a24663c5b0a94eff7293a3a68fbf160a4c630344",
+        "formation_delta.json": "da301931a7cab41800e8b2c769e9a79a9622fd054c76b7c2aa7f79d93edd4d74",
+        "run_summary.json": "8f5b9edce2b34d00c41e663c1631f31dca160abdbfd40696fccece31666d861f",
+        "watched_operations.json": "a7bae68b2514eafa22b4ad4aee34c72ec63f5088c9a5dfda340573ff26f86cfe",
+        "weekly_report.jsonl": "a1d7ccdbf8a679072e6c9122334dfa5dd601ec0df5e0e654d194d504676faeb1"
       },
       "id": "apr1992_52w",
       "scenario_path": "data/scenarios/apr1992_definitive_52w.json",
@@ -74,12 +74,12 @@
       "hashes": {
         "activity_summary.json": "50a9777653e25796bd8ecb31d6bfbaaee7f365161f770aa14155cf8d2736d557",
         "control_delta.json": "c9f6de2197fe26888881494c1c6219deb665e050960d76da35e516db93d251c0",
-        "end_report.md": "e83646f2d019a450c6da2ea38ab150c859f9689d5089d8786a7d7b4102d72689",
-        "final_save.json": "9b9f43728604d9199cf82a3548e8d33025b8b5eadfc57afa5e69de3fde1716c3",
+        "end_report.md": "e5bcf8b112774c3dcd718e5c6fab55ea4cd2b599a0f42a2b54ae9c0c03b99d32",
+        "final_save.json": "b9af44353843e54ec223a37daca616fe0e433cdabf924714590e91cdecdeb065",
         "formation_delta.json": "d8e4ca311e4ceafba9fdbf47d72d576efb2d2230960b7a55050bcabc798e60d4",
-        "run_summary.json": "ec4125197c06da727dd2a7d6bd1c0b075a94252b7da7fef01ead3d034b056367",
+        "run_summary.json": "1db4532e025edcc963299faf67cd2bddd6023fd41d383024f687a77d1e1bdc0a",
         "watched_operations.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "weekly_report.jsonl": "fa70b9791ace64ce6aa1cbd5d27addcaa0d3ad36c73a927a1cc6070718416aa6"
+        "weekly_report.jsonl": "fba9efc059271ab95856eda3bd17ae8185b6b75a4015d069824e1bac095fae8b"
       },
       "id": "baseline_ops_4w",
       "scenario_path": "data/scenarios/baseline_ops_4w.json",
@@ -99,12 +99,12 @@
       "hashes": {
         "activity_summary.json": "50a9777653e25796bd8ecb31d6bfbaaee7f365161f770aa14155cf8d2736d557",
         "control_delta.json": "c9f6de2197fe26888881494c1c6219deb665e050960d76da35e516db93d251c0",
-        "end_report.md": "d5c6782fe5868dcd6e40bd58087a89f25a0fee81d62078e0fd7fe4b7438a7e75",
-        "final_save.json": "522ca4b8996bbeb66ffe3a75a9beeeb069c6b3a0ce0bcd7fd60d9b2b1499793d",
+        "end_report.md": "bf7449f4be8be304101680be5b14873b87dbe9d88f7625ff3872ae1cd347abd6",
+        "final_save.json": "f84b7a57227902900c053139cf47e49a4bfa3626cab0dddd0f9e9386ddb599a6",
         "formation_delta.json": "d8e4ca311e4ceafba9fdbf47d72d576efb2d2230960b7a55050bcabc798e60d4",
-        "run_summary.json": "857aea19eac4dab0d110cc1c7371277b6a821b1a99469d2d680e60a9f4c1ea12",
+        "run_summary.json": "58b2b2e597c9076faba714337997c59b6823c52618c56a041d06a1af167f6a37",
         "watched_operations.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "weekly_report.jsonl": "0ad103a2ef3402c5c3af334833ba3ce8b2c25eeee918e0e8ae66e42967971151"
+        "weekly_report.jsonl": "6159ec288fc92231b549f80adf8dd716e23eb060a7d6d927d23855b60e5a777a"
       },
       "id": "noop_4w",
       "scenario_path": "data/scenarios/noop_4w.json",
