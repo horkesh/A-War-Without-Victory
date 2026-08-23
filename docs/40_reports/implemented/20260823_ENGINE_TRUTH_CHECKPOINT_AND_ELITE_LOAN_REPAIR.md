@@ -3,13 +3,13 @@
 **Date:** 2026-08-23  
 **Branch:** `codex/engine-truth-checkpoint`  
 **Simulation commit measured:** `26929e6b86e08f0438e97b7917f779ac8271b237`  
-**Status:** Implemented, independently reviewed, campaign-verified; baseline pins frozen
+**Status:** Implemented, independently reviewed, campaign-verified; affected baseline pins reconciled
 
 ## Outcome
 
-The engine's final known assignment defect is closed. A live elite loan whose sector assignment is invalidated by the final topology rebuild now receives its normal deterministic deployment order in that same turn, rather than remaining without movement ownership until the next turn. A permanent, read-only campaign checkpoint establishes this from live evidence and fails closed when evidence is missing, suppressed, truncated, duplicated, or drawn from incomparable runs.
+The observed 188-week elite-loan assignment defect is closed. A live elite loan whose sector assignment is invalidated by the final topology rebuild now receives its normal deterministic deployment order in that same turn, rather than remaining without movement ownership until the next turn. A permanent, read-only campaign checkpoint establishes this from live evidence and fails closed when evidence is missing, suppressed, truncated, duplicated, or drawn from incomparable runs.
 
-Two fresh clean 188-week runs (`n3`, `n4`) are byte-identical across eight core artifacts and finish at `930195c6879502c7`. Both pass the checkpoint with zero unresolved-assignment emissions. No baseline or calibration pin was regenerated.
+Two fresh clean 188-week runs (`n3`, `n4`) are byte-identical across eight core artifacts and finish at `930195c6879502c7`. Both pass the checkpoint with zero unresolved-assignment emissions. After remote CI reproduced exactly the same ten expected 188-week/52-week artifact changes, those ten baseline hashes were reconciled; no calibration threshold changed.
 
 ## Root cause and repair
 
@@ -81,9 +81,12 @@ All six HV expeditionary formations spawn at turn 174 and move. Two have reachab
 - TypeScript typecheck: passed before the clean campaign runs.
 - Same-commit clean 188-week repeat: passed and byte-identical over eight core artifacts.
 - Complete final-tree `npm run test:vitest:balanced`: passed with all four isolated lanes and the 50-file / 800-test serial hazard tail; top-level exit code 0.
-- `npm run canon:check`: determinism static scan passed; baseline comparison failed against the deliberately frozen pre-repair manifest (six 188-week and four 52-week artifact mismatches). No pin was regenerated.
+- Initial `npm run canon:check`: determinism static scan passed; baseline comparison failed against the pre-repair manifest with six 188-week and four 52-week artifact mismatches.
+- Remote CI run `32659474284` independently reproduced exactly those ten mismatches, including 188-week final hash `930195c6879502c7`, while typecheck, event/phase tests, and the strict canon rail passed.
+- After updating exactly those ten hashes through the repository baseline-update path, a fresh comparison-mode run exited 0 with `Baseline regression: all scenarios match.`
+- Final-tree `npm run canon:check`: determinism static scan passed and the regenerated comparison passed all scenarios; top-level exit code 0.
 
-Remote CI remains a promotion gate recorded separately. The canon gate cannot be green while the protected manifest remains intentionally stale, and that red is reported rather than bypassed.
+Follow-up remote CI on the reconciled manifest remains a promotion gate recorded separately.
 
 ## Files and ownership
 
@@ -96,4 +99,6 @@ Remote CI remains a promotion gate recorded separately. The canon gate cannot be
 
 ## Protected state
 
-`data/derived/scenario/baselines/manifest.json` was not refreshed. The tracked `data/derived/latest_run_final_save.json` remained clean; scenario runs used the grade-run isolation flag. The HV spawn timing and mobility changes remain in the same tree and were not separated.
+Exactly six `apr1992_188w` hashes and four `apr1992_52w` hashes in `data/derived/scenario/baselines/manifest.json` were refreshed only after local repeatability, the earlier cache/hash anomaly settlement, and an exact remote mismatch reproduction. The tracked `data/derived/latest_run_final_save.json` remained clean. The HV spawn timing and mobility changes remain in the same tree and were not separated.
+
+The baseline runner still emits four unresolved HV task-group rows in each synthetic four-week scenario: `hv_113th_brigade_tg`, `hv_116th_brigade_tg`, `hv_1st_guards_tg`, and `hv_4th_guards_tg`. Those fixtures use the initial-municipal substrate rather than the audited 188-week campaign path. This report does not classify that signal as harmless or fixed; it is separate engine-health debt.
