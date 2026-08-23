@@ -62,6 +62,18 @@
  *     and read on EVERY scenario regardless of length. **Still unstamped**, still in the
  *     register. Its output lands in `run_summary.json` via `anomaly_detection.reports`, so a
  *     jan1993 repaint moves a byte-pinned artifact through a read this stamp does not cover.
+ *     Measured 2026-08-24: Check #27 is VACUOUS at 188w — 143 OSIDs mismatch jan1993 in the
+ *     final state and it emits nothing, because `hasCanonicalDefense` is true for all of them.
+ *     Sibling Check #28 fires in the same run (same cwd-relative pattern), so that silence is
+ *     the predicate, not a failed load. Expect it to fire at 4w, where sector coverage is thin.
+ *
+ * DO NOT READ THE ABOVE AS "jan1993 only affects anomaly reports". It is ALSO a SCORING
+ * reference: `pickHistoricalReferenceKey` sends every `weeks <= 56` scenario to it, so the 52w
+ * baseline scores `historical_fit` / `vs_historical` / `anchor_checks` against jan1993 — and
+ * `counts_by_controller[].reference_count` counts the REFERENCE, so a repainted cell moves that
+ * run's summary unconditionally, whatever the sim did. That scoring half IS stamped by the row
+ * below, so there is no provenance hole; the point is that a jan1993 edit moves more artifacts
+ * than the Check #27 sentence alone suggests.
  *
  * The scoring half was closed AHEAD of a reference repaint rather than alongside it: had both
  * landed together, no run would ever have recorded the stamp beside the OLD reference, so the

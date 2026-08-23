@@ -11,7 +11,7 @@
       "HRHB": 107
     },
     "source": "painted_control_targets",
-    "revision": 1,
+    "revision": 2,
     "changelog": [
       {
         "date": "2026-08-12",
@@ -26,7 +26,7 @@
         "osid": "op:kladanj:kladanj_3",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "cd0228c37",
         "rationale": "BB2 printed 475 and BB1 printed 341/359 describe Kladanj town as Muslim-held in 1994 and twice in July 1995; BB1 printed 477 places two ARBiH brigade HQs there in the 1995 OOB. Pyrrhic panel 2026-08-23, 4/4 GO."
       },
       {
@@ -34,7 +34,7 @@
         "osid": "op:kladanj:staric_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "cd0228c37",
         "rationale": "BB1 printed 341 fixes the confrontation line ~10km east of Kladanj town in July 1995 (Srebrenica deportee drop-off at Tisca); all staric_2 settlements lie 5.3-9.7km. BB2 printed 476 records the May 1994 offensive pushing the line east of every constituent. Pyrrhic panel 2026-08-23, no dissent. NOT applied to jan1993/apr1994: pre-offensive, unevidenced."
       }
     ]
