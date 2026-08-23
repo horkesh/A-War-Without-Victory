@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "Measured full Vitest run on 2026-08-23; unspecified files use weight 1 until refreshed.",
+  "durations_ms": {
+    "tests/sector_partition_buildCorpsFrontSectors_integration.test.ts": 2057267,
+    "tests/supply_bridge_finding_property.test.ts": 126090,
+    "tests/phase_d_causality_runtime_integration.test.ts": 102967,
+    "tests/scenario_anchor_contract.test.ts": 51648,
+    "tests/scenario_harness_contracts.test.ts": 49980,
+    "tests/strict_null_inventory_progress.test.ts": 49602,
+    "tests/integration_deployment_health.test.ts": 43393,
+    "tests/scenario_diagnostics.test.ts": 44560,
+    "tests/scenario_run_summary.test.ts": 39545,
+    "tests/scenario_anomaly.test.ts": 39354,
+    "tests/scenario_formation_integrity.test.ts": 38432,
+    "tests/scenario_pool_integrity.test.ts": 38950,
+    "tests/scenario_continue_from_save.test.ts": 38642
+  }
+}
