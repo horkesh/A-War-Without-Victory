@@ -69,10 +69,16 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getSidCapacityModifiers } from '../src/sim/collapse/capacity_modifiers.js';
 import { ENCLAVE_DEFINITIONS, getEnclaveDefForOsid } from '../src/sim/combat/enclave_resilience.js';
-import { assertS6PairComparable, scanS6RunCandidates, selectS6RunDirs } from './_helpers/s6_run_selection.js';
+import {
+    assertS6PairComparable,
+    resolveS6EvidenceRoot,
+    scanS6RunCandidates,
+    selectS6RunDirs,
+} from './_helpers/s6_run_selection.js';
 import type { GameState } from '../src/state/game_state.js';
 
-const RUNS_DIR = join(process.cwd(), 'runs');
+const RUNS_DIR = resolveS6EvidenceRoot(process.env)
+    ?? join(process.cwd(), 'tests', 'fixtures', '__s6_evidence_not_configured__');
 
 /**
  * Strict mode: a §6 case that does NOT execute becomes a hard FAILURE.

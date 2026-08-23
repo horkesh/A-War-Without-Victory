@@ -18,6 +18,7 @@ import {
     S6_RUN_DIR_PATTERN,
     assertS6PairComparable,
     compareS6Candidates,
+    resolveS6EvidenceRoot,
     runCounterOf,
     scanS6RunCandidates,
     selectS6RunDirs,
@@ -52,6 +53,14 @@ function reorderings<T>(items: readonly T[]): Array<{ label: string; items: T[] 
 function codeOnly(src: string): string {
     return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
 }
+
+describe('S6 evidence root', () => {
+    it('does not inspect ambient repository runs unless the evidence root is explicit', () => {
+        expect(resolveS6EvidenceRoot({}, 'F:/repo')).toBeNull();
+        expect(resolveS6EvidenceRoot({ AWWV_S6_EVIDENCE_DIR: 'evidence/s6' }, 'F:/repo'))
+            .toBe('F:\\repo\\evidence\\s6');
+    });
+});
 
 describe('S6 run-dir pattern', () => {
     it('accepts full-length 188w run dirs', () => {
