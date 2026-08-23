@@ -19,9 +19,10 @@ The harness will traverse the production western-Bosnia opportunity catalog, inc
 - authored opportunity and axis references;
 - the turns on which each opportunity's date-window predicate is green;
 - whether any green turn exists at or after the formation's authored spawn turn;
-- one of `REACHABLE_POST_SPAWN`, `AUTHORED_WINDOW_PRE_SPAWN_ONLY`, `NO_AUTHORED_CATALOG_ASSIGNMENT`, or `NOT_ESTABLISHED`.
+- whether the assignment is on the default route or a named redirect variant;
+- one of `AUTHORED_POST_SPAWN_WINDOW`, `AUTHORED_WINDOW_PRE_SPAWN_ONLY`, `NO_AUTHORED_CATALOG_ASSIGNMENT`, or `NOT_ESTABLISHED`.
 
-Zero-reference and no-overlap conclusions are valid only when the traversal detects the known `hv_112th_infantry_1995` Mistral 2 assignment and a live post-spawn date window. The diagnostic remains deterministic: sorted catalog traversal, sorted axes, bounded integer turn sweep, no time or randomness.
+These statuses describe catalog authorship and date-window overlap only; they do not claim runtime eligibility, staging access, selection, or battle participation. Zero-reference and no-overlap conclusions are valid only when the traversal detects the known default-route `hv_112th_infantry_1995` Mistral 2 assignment, a formation-specific spawn turn, and a live post-spawn date window. The run analyzer binds current catalog content to the run commit by Git blob identity and returns `NOT_ESTABLISHED` rather than reinterpreting an older artifact through a changed checkout. The diagnostic remains deterministic: sorted catalog traversal, sorted axes and variants, bounded integer turn sweep, no time or randomness.
 
 ## First content hypothesis
 

@@ -4,6 +4,7 @@ import {
     analyzeHv1995CatalogCoverage,
     analyzeHv1995Lifecycle,
     parseJsonLines,
+    validateCatalogProvenance,
 } from '../tools/diagnostics/hv_1995_lifecycle.js';
 import { FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES } from '../src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -34,13 +35,20 @@ describe('HV 1995 lifecycle diagnostic', () => {
             known_post_spawn_window_observed: true,
         });
         expect(result.formations.find((row) => row.formation_id === 'hv_112th_infantry_1995')).toMatchObject({
-            status: 'REACHABLE_POST_SPAWN',
+            status: 'AUTHORED_POST_SPAWN_WINDOW',
             assignments: [expect.objectContaining({
                 opportunity_id: 'mistral_2_95',
                 axis_id: 'mistral_drvar_grahovo',
+                route_kind: 'default',
+                variant_id: null,
                 first_open_turn: 175,
                 last_open_turn: 188,
                 post_spawn_open_turn_count: 14,
+            }), expect.objectContaining({
+                opportunity_id: 'mistral_2_95',
+                axis_id: 'mistral_drvar_grahovo',
+                route_kind: 'variant',
+                variant_id: 'drvar_grahovo_axis',
             })],
         });
         expect(result.formations.find((row) => row.formation_id === 'hv_7th_hgr_1995')).toMatchObject({
@@ -54,18 +62,29 @@ describe('HV 1995 lifecycle diagnostic', () => {
             })],
         });
         expect(result.formations.find((row) => row.formation_id === 'hv_1st_hgz_1995')).toMatchObject({
-            status: 'REACHABLE_POST_SPAWN',
+            status: 'AUTHORED_POST_SPAWN_WINDOW',
             assignments: [
                 expect.objectContaining({
                     opportunity_id: 'mistral_2_95',
                     axis_id: 'mistral_sipovo',
+                    route_kind: 'default',
+                    variant_id: null,
                     first_open_turn: 175,
                     last_open_turn: 188,
                     post_spawn_open_turn_count: 14,
                 }),
                 expect.objectContaining({
+                    opportunity_id: 'mistral_2_95',
+                    axis_id: 'mistral_sipovo',
+                    route_kind: 'variant',
+                    variant_id: 'sipovo_axis',
+                    post_spawn_open_turn_count: 14,
+                }),
+                expect.objectContaining({
                     opportunity_id: 'southern_move_95',
                     axis_id: 'southern_move_mrkonjic',
+                    route_kind: 'default',
+                    variant_id: null,
                     first_open_turn: 182,
                     last_open_turn: 188,
                     post_spawn_open_turn_count: 7,
@@ -82,6 +101,66 @@ describe('HV 1995 lifecycle diagnostic', () => {
                 assignments: [],
             });
         }
+    });
+
+    it('keeps default and redirect-variant authorship independently visible', () => {
+        const mistral = FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES
+            .find((opportunity) => opportunity.opportunity_id === 'mistral_2_95')!;
+        const withoutDefault = {
+            ...mistral,
+            axes: mistral.axes.map((axis) => axis.axis_id === 'mistral_sipovo'
+                ? { ...axis, brigades: axis.brigades.filter((id) => id !== 'hv_1st_hgz_1995') }
+                : axis),
+        };
+        const result = analyzeHv1995CatalogCoverage(
+            [withoutDefault],
+            Object.fromEntries(HV_1995_FORMATION_IDS.map((formationId) => [formationId, 174])),
+            {} as GameState,
+            188,
+        );
+        const row = result.formations.find((formation) => formation.formation_id === 'hv_1st_hgz_1995')!;
+
+        expect(row.assignments).toEqual([
+            expect.objectContaining({
+                opportunity_id: 'mistral_2_95',
+                axis_id: 'mistral_sipovo',
+                route_kind: 'variant',
+                variant_id: 'sipovo_axis',
+            }),
+        ]);
+    });
+
+    it('does not infer pre-spawn-only when the formation-specific spawn is absent', () => {
+        const spawnTurns = Object.fromEntries(HV_1995_FORMATION_IDS
+            .filter((formationId) => formationId !== 'hv_1st_hgz_1995')
+            .map((formationId) => [formationId, 174]));
+        const result = analyzeHv1995CatalogCoverage(
+            FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES,
+            spawnTurns,
+            {} as GameState,
+            188,
+        );
+
+        expect(result.formations.find((row) => row.formation_id === 'hv_1st_hgz_1995')).toMatchObject({
+            status: 'NOT_ESTABLISHED',
+            spawn_turn: null,
+        });
+    });
+
+    it('refuses current-catalog claims when run and checkout commits differ', () => {
+        expect(validateCatalogProvenance('run-commit', 'run-commit')).toMatchObject({
+            run_commit: 'run-commit',
+            catalog_commit: 'run-commit',
+            matches_run: true,
+        });
+        expect(validateCatalogProvenance('run-commit', 'later-checkout')).toMatchObject({
+            run_commit: 'run-commit',
+            catalog_commit: 'later-checkout',
+            matches_run: false,
+        });
+        expect(validateCatalogProvenance('run-commit', 'later-checkout', 'same-blob', 'same-blob').matches_run)
+            .toBe(true);
+        expect(validateCatalogProvenance(undefined, 'later-checkout').matches_run).toBe(false);
     });
 
     it('parses CRLF/LF JSONL deterministically and ignores blank lines', () => {

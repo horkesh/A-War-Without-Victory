@@ -7,7 +7,8 @@
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { GameState } from '../../src/state/game_state.js';
 import type { OperationOpportunityDef } from '../../src/sim/combat/operation_opportunities.js';
@@ -77,7 +78,7 @@ export interface Hv1995FormationDiagnostic {
 }
 
 export type Hv1995CatalogCoverageStatus =
-    | 'REACHABLE_POST_SPAWN'
+    | 'AUTHORED_POST_SPAWN_WINDOW'
     | 'AUTHORED_WINDOW_PRE_SPAWN_ONLY'
     | 'NO_AUTHORED_CATALOG_ASSIGNMENT'
     | 'NOT_ESTABLISHED';
@@ -85,10 +86,30 @@ export type Hv1995CatalogCoverageStatus =
 export interface Hv1995CatalogAssignmentDiagnostic {
     opportunity_id: string;
     axis_id: string;
+    route_kind: 'default' | 'variant';
+    variant_id: string | null;
     first_open_turn: number | null;
     last_open_turn: number | null;
     open_turn_count: number;
     post_spawn_open_turn_count: number;
+}
+
+export function validateCatalogProvenance(
+    runCommit: string | undefined,
+    catalogCommit: string | undefined,
+    runCatalogBlob?: string,
+    currentCatalogBlob?: string,
+) {
+    const blobMatch = typeof runCatalogBlob === 'string'
+        && runCatalogBlob.length > 0
+        && runCatalogBlob === currentCatalogBlob;
+    return {
+        run_commit: runCommit ?? null,
+        catalog_commit: catalogCommit ?? null,
+        run_catalog_blob: runCatalogBlob ?? null,
+        current_catalog_blob: currentCatalogBlob ?? null,
+        matches_run: blobMatch || (runCommit !== undefined && runCommit === catalogCommit),
+    };
 }
 
 function records(value: unknown): Array<Record<string, unknown>> {
@@ -138,23 +159,33 @@ export function analyzeHv1995CatalogCoverage(
         formation_id: string;
         opportunity: OperationOpportunityDef;
         axis_id: string;
+        route_kind: 'default' | 'variant';
+        variant_id: string | null;
     }>();
     const sortedOpportunities = opportunities.slice().sort((a, b) =>
         compareText(a.opportunity_id, b.opportunity_id));
     for (const opportunity of sortedOpportunities) {
-        const axes = [
-            ...opportunity.axes,
-            ...(opportunity.variants ?? []).flatMap((variant) => variant.axes),
-        ].slice().sort((a, b) => compareText(a.axis_id, b.axis_id));
-        for (const axis of axes) {
+        const routes = [
+            ...opportunity.axes.map((axis) => ({ axis, route_kind: 'default' as const, variant_id: null })),
+            ...(opportunity.variants ?? []).flatMap((variant) => variant.axes.map((axis) => ({
+                axis,
+                route_kind: 'variant' as const,
+                variant_id: variant.variant_id,
+            }))),
+        ].sort((a, b) => compareText(a.axis.axis_id, b.axis.axis_id)
+            || compareText(a.route_kind, b.route_kind)
+            || compareText(a.variant_id ?? '', b.variant_id ?? ''));
+        for (const { axis, route_kind, variant_id } of routes) {
             for (const formationId of axis.brigades.slice().sort(compareText)) {
                 if (!HV_1995_FORMATION_IDS.includes(formationId as typeof HV_1995_FORMATION_IDS[number])) continue;
-                const key = `${opportunity.opportunity_id}\u0000${axis.axis_id}\u0000${formationId}`;
+                const key = `${opportunity.opportunity_id}\u0000${axis.axis_id}\u0000${route_kind}\u0000${variant_id ?? ''}\u0000${formationId}`;
                 if (!assignmentByKey.has(key)) {
                     assignmentByKey.set(key, {
                         formation_id: formationId,
                         opportunity,
                         axis_id: axis.axis_id,
+                        route_kind,
+                        variant_id,
                     });
                 }
             }
@@ -164,8 +195,10 @@ export function analyzeHv1995CatalogCoverage(
     const assignments = Array.from(assignmentByKey.values())
         .sort((a, b) => compareText(a.formation_id, b.formation_id)
             || compareText(a.opportunity.opportunity_id, b.opportunity.opportunity_id)
-            || compareText(a.axis_id, b.axis_id))
-        .map(({ formation_id, opportunity, axis_id }) => {
+            || compareText(a.axis_id, b.axis_id)
+            || compareText(a.route_kind, b.route_kind)
+            || compareText(a.variant_id ?? '', b.variant_id ?? ''))
+        .map(({ formation_id, opportunity, axis_id, route_kind, variant_id }) => {
             const openTurns: number[] = [];
             for (let turn = 0; turn <= horizonTurn; turn += 1) {
                 if (opportunity.evaluators.date_window(state, turn, opportunity).green) openTurns.push(turn);
@@ -175,6 +208,8 @@ export function analyzeHv1995CatalogCoverage(
                 formation_id,
                 opportunity_id: opportunity.opportunity_id,
                 axis_id,
+                route_kind,
+                variant_id,
                 first_open_turn: openTurns[0] ?? null,
                 last_open_turn: openTurns.at(-1) ?? null,
                 open_turn_count: openTurns.length,
@@ -187,7 +222,8 @@ export function analyzeHv1995CatalogCoverage(
     const knownAssignment = assignments.some((row) =>
         row.formation_id === 'hv_112th_infantry_1995'
         && row.opportunity_id === 'mistral_2_95'
-        && row.axis_id === 'mistral_drvar_grahovo');
+        && row.axis_id === 'mistral_drvar_grahovo'
+        && row.route_kind === 'default');
     const knownPostSpawnWindow = assignments.some((row) =>
         row.formation_id === 'hv_112th_infantry_1995'
         && row.opportunity_id === 'mistral_2_95'
@@ -200,17 +236,23 @@ export function analyzeHv1995CatalogCoverage(
             known_post_spawn_window_observed: knownPostSpawnWindow,
         },
         formations: HV_1995_FORMATION_IDS.map((formationId) => {
+            const spawnTurn = spawnTurns[formationId];
             const formationAssignments = assignments
                 .filter((row) => row.formation_id === formationId)
                 .map(({ formation_id: _formationId, ...row }) => row);
             let status: Hv1995CatalogCoverageStatus = 'NOT_ESTABLISHED';
-            if (knownAssignment && knownPostSpawnWindow) {
+            if (knownAssignment && knownPostSpawnWindow && Number.isInteger(spawnTurn)) {
                 if (formationAssignments.length === 0) status = 'NO_AUTHORED_CATALOG_ASSIGNMENT';
                 else if (formationAssignments.some((row) => row.post_spawn_open_turn_count > 0)) {
-                    status = 'REACHABLE_POST_SPAWN';
+                    status = 'AUTHORED_POST_SPAWN_WINDOW';
                 } else status = 'AUTHORED_WINDOW_PRE_SPAWN_ONLY';
             }
-            return { formation_id: formationId, status, assignments: formationAssignments };
+            return {
+                formation_id: formationId,
+                spawn_turn: Number.isInteger(spawnTurn) ? spawnTurn : null,
+                status,
+                assignments: formationAssignments,
+            };
         }),
     };
 }
@@ -562,9 +604,33 @@ function readJsonObject(path: string): Record<string, unknown> {
     return parsed as Record<string, unknown>;
 }
 
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const WESTERN_BOSNIA_CATALOG_PATH = 'src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.ts';
+
+function gitValue(args: string[]): string | undefined {
+    try {
+        return execFileSync('git', ['-C', REPO_ROOT, ...args], { encoding: 'utf8' }).trim() || undefined;
+    } catch {
+        return undefined;
+    }
+}
+
+function readCatalogProvenance(runMeta: Record<string, unknown>) {
+    const provenance = record(runMeta.provenance);
+    const runCommit = typeof provenance?.git_commit === 'string' ? provenance.git_commit : undefined;
+    const catalogCommit = gitValue(['rev-parse', 'HEAD']);
+    const runCatalogBlob = runCommit === undefined
+        ? undefined
+        : gitValue(['rev-parse', `${runCommit}:${WESTERN_BOSNIA_CATALOG_PATH}`]);
+    const currentCatalogBlob = gitValue(['hash-object', WESTERN_BOSNIA_CATALOG_PATH]);
+    return validateCatalogProvenance(runCommit, catalogCommit, runCatalogBlob, currentCatalogBlob);
+}
+
 export function analyzeHv1995Run(runDir: string, positiveControlId = 'hv_4th_guards_split') {
     const resolvedRunDir = resolve(runDir);
     const finalSave = readJsonObject(join(resolvedRunDir, 'final_save.json'));
+    const runMeta = readJsonObject(join(resolvedRunDir, 'run_meta.json'));
+    const catalogProvenance = readCatalogProvenance(runMeta);
     const turnSummaries = records(finalSave.turn_summaries);
     const observedHorizonTurn = turnSummaries.reduce((latest, summary) =>
         typeof summary.turn === 'number' && summary.turn > latest ? summary.turn : latest, 0);
@@ -578,12 +644,29 @@ export function analyzeHv1995Run(runDir: string, positiveControlId = 'hv_4th_gua
         : {};
     return {
         run_dir: basename(resolvedRunDir),
-        catalog_coverage: analyzeHv1995CatalogCoverage(
-            FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES,
-            observedSpawnTurns,
-            finalSave as unknown as GameState,
-            observedHorizonTurn,
-        ),
+        catalog_provenance: catalogProvenance,
+        catalog_coverage: catalogProvenance.matches_run
+            ? analyzeHv1995CatalogCoverage(
+                FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES,
+                observedSpawnTurns,
+                finalSave as unknown as GameState,
+                observedHorizonTurn,
+            )
+            : {
+                status: 'NOT_ESTABLISHED',
+                reason: 'catalog_provenance_mismatch',
+                positive_controls: {
+                    catalog_opportunity_count: 0,
+                    known_assignment_observed: false,
+                    known_post_spawn_window_observed: false,
+                },
+                formations: HV_1995_FORMATION_IDS.map((formation_id) => ({
+                    formation_id,
+                    spawn_turn: observedSpawnTurns[formation_id] ?? null,
+                    status: 'NOT_ESTABLISHED' as const,
+                    assignments: [],
+                })),
+            },
         ...analyzeHv1995Lifecycle({
             turnSummaries,
             temporalRows: parseJsonLines(readFileSync(join(resolvedRunDir, 'brigade_temporal_log.jsonl'), 'utf8')),
