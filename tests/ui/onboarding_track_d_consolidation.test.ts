@@ -122,7 +122,7 @@ describe('Track D onboarding consolidation', () => {
     expect(block.indexOf('setPeaceWarTransitionSeen(false)')).toBeLessThan(block.indexOf("setAppScreen('game')"));
   });
 
-  it('resets the two-step war-start intro when a new faction campaign is loaded before briefing dismiss', () => {
+  it('uses one war-start handoff and does not repeat the faction dossier after dismissal', () => {
     vi.useFakeTimers();
     try {
       useGameStore.setState({
@@ -137,16 +137,8 @@ describe('Track D onboarding consolidation', () => {
       act(() => {
         vi.advanceTimersByTime(800);
       });
-      expect(screen.getByRole('dialog', { name: /War begins: 6 Apr 1992/i })).toBeTruthy();
-
-      act(() => {
-        useGameStore.setState({
-          loadedGameState: minimalState({ phase: 'war', turn: 0, player_faction: 'RS' }),
-          peaceWarTransitionSeen: false,
-        });
-      });
-
-      expect(screen.getByRole('dialog', { name: 'WAR HAS STARTED' })).toBeTruthy();
+      expect(useGameStore.getState().peaceWarTransitionSeen).toBe(true);
+      expect(screen.queryByRole('dialog', { name: 'WAR HAS STARTED' })).toBeNull();
       expect(screen.queryByRole('dialog', { name: /War begins:/i })).toBeNull();
     } finally {
       vi.useRealTimers();

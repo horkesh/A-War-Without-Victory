@@ -44,11 +44,16 @@ describe('browser new-campaign fallback', () => {
       ipc,
       loadSave,
       setLoadError: vi.fn(),
-    }, 'RBiH', 'apr_1992');
+    }, { playerFaction: 'RBiH', decisionMode: 'historical', scenarioKey: 'apr_1992' });
 
     expect(ok).toBe(true);
     expect(loadSave).toHaveBeenCalledOnce();
     expect(loadSave).toHaveBeenCalledWith('response-state');
+    expect(ipc.startNewCampaign).toHaveBeenCalledWith({
+      playerFaction: 'RBiH',
+      decisionMode: 'historical',
+      scenarioKey: 'apr_1992',
+    });
     expect(getCurrentGameState).not.toHaveBeenCalled();
   });
 
@@ -74,7 +79,7 @@ describe('browser new-campaign fallback', () => {
         ipc,
         loadSave: async (state) => { loaded.push(state); },
         setLoadError,
-      }, faction, 'apr_1992');
+      }, { playerFaction: faction, decisionMode: 'emergent', scenarioKey: 'apr_1992' });
 
       expect(ok).toBe(true);
       expect(setLoadError).not.toHaveBeenCalled();
@@ -132,6 +137,25 @@ describe('browser new-campaign fallback', () => {
     }
   });
 
+  it('records historical mode explicitly in browser fallback', async () => {
+    const loaded: unknown[] = [];
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith('/data/derived/startup/apr_1992_initial_save.json')) return response(STARTUP);
+      if (url.endsWith('/data/scenarios/events/war_1992.json')) return response(WAR_1992);
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const ok = await startCampaignFromSidePicker({
+      ipc: { isAvailable: false } as IPC,
+      loadSave: async (state) => { loaded.push(state); },
+      setLoadError: vi.fn(),
+    }, { playerFaction: 'RS', decisionMode: 'historical', scenarioKey: 'apr_1992' });
+
+    expect(ok).toBe(true);
+    expect((loaded[0] as { meta: { decision_mode?: string } }).meta.decision_mode).toBe('historical');
+  });
+
   it('resolves a browser-fallback foundational decision locally', async () => {
     const loaded: unknown[] = [];
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
@@ -145,7 +169,7 @@ describe('browser new-campaign fallback', () => {
       ipc: { isAvailable: false } as IPC,
       loadSave: async (state) => { loaded.push(state); },
       setLoadError: vi.fn(),
-    }, 'RS', 'apr_1992');
+    }, { playerFaction: 'RS', decisionMode: 'emergent', scenarioKey: 'apr_1992' });
 
     const state = loaded[0] as typeof STARTUP;
     resolveBrowserEventDecision(state, 'rs_strategic_goals', 'all_six');

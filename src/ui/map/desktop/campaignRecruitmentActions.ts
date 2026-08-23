@@ -252,11 +252,11 @@ export function resolveBrowserEventDecision(
  */
 export async function startCampaignFromSidePicker(
     { ipc, loadSave, setLoadError }: LoadDeps,
-    faction: StartNewCampaignPayload['playerFaction'],
-    scenarioKey?: string,
+    payload: StartNewCampaignPayload,
 ): Promise<boolean> {
+    const { playerFaction: faction, decisionMode, scenarioKey } = payload;
     if (ipc.isAvailable) {
-        const result = await ipc.startNewCampaign({ playerFaction: faction, scenarioKey });
+        const result = await ipc.startNewCampaign(payload);
         if (!result.ok) {
             setLoadError(result.error ?? 'Failed to start campaign.');
             return false;
@@ -301,9 +301,9 @@ export async function startCampaignFromSidePicker(
             state.meta = {
                 ...(state.meta ?? {}),
                 player_faction: faction,
-                decision_mode: 'emergent',
                 headless_scenario_auto_control: false,
             };
+            state.meta.decision_mode = decisionMode;
             state.political = { ...(state.political ?? {}), control_events: [] };
             deferUnauthorizedHistoricalOperationsForPlayer(state as GameState);
             const eventResponse = await fetch(BROWSER_EVENT_CATALOG_PATH);

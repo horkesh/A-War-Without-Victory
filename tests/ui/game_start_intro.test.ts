@@ -27,7 +27,7 @@ describe('WarHasBegunSplash (game-start intro — step 1)', () => {
         setLocale('en');
     });
 
-    it('renders the blood-red splash title, date, and acknowledge affordance', () => {
+    it('renders the restrained date handoff title, date, and acknowledge affordance', () => {
         render(createElement(WarHasBegunSplash, { onDismiss: vi.fn() }));
         expect(screen.getByText('WAR HAS STARTED')).toBeTruthy();
         expect(screen.getByText('APRIL 1992')).toBeTruthy();
@@ -42,9 +42,21 @@ describe('WarHasBegunSplash (game-start intro — step 1)', () => {
         const acknowledge = screen.getByRole('button', { name: 'Acknowledge' });
 
         expect(dialog.style.opacity).toBe('1');
-        expect(dialog.style.backgroundColor).toBe('rgba(24, 4, 4, 0.94)');
+        expect(dialog.style.backgroundColor).toBe('rgba(18, 16, 12, 0.97)');
         expect(getComputedStyle(title).color).toBe('rgb(255, 244, 222)');
         expect(getComputedStyle(acknowledge).backgroundColor).toBe('rgb(255, 244, 222)');
+    });
+
+    it('dismisses without animation when reduced motion is requested', () => {
+        const originalMatchMedia = window.matchMedia;
+        window.matchMedia = vi.fn().mockReturnValue({ matches: true });
+        const onDismiss = vi.fn();
+        render(createElement(WarHasBegunSplash, { onDismiss }));
+
+        expect(screen.getByRole('dialog').style.transition).toBe('none');
+        fireEvent.click(screen.getByRole('button', { name: 'Acknowledge' }));
+        expect(onDismiss).toHaveBeenCalledTimes(1);
+        window.matchMedia = originalMatchMedia;
     });
 
     it('auto-advances exactly once after the hold elapses', () => {

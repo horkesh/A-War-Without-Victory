@@ -539,7 +539,7 @@ describe('desktop player-visible state projection', () => {
     const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
     const mutationHandlers = [
       ['load-scenario-dialog', 'start-new-campaign'],
-      ['load-state-dialog', 'advance-turn'],
+      ['load-state-dialog', 'list-save-records'],
       ['advance-turn', 'save-game'],
       ['apply-recruitment', 'stage-attack-order'],
       ['resolve-paramilitary-requests', 'resolve-dayton'],
@@ -558,6 +558,14 @@ describe('desktop player-visible state projection', () => {
     const startHandler = source.slice(start, end);
     expect(startHandler).toContain('stateJson: projectCurrentGameStateForRenderer()');
     expect(startHandler).not.toContain('stateJson: currentGameStateJson');
+
+    const recordStart = source.indexOf("ipcMain.handle('load-save-record'");
+    const recordEnd = source.indexOf("ipcMain.handle('advance-turn'", recordStart);
+    const recordHandler = source.slice(recordStart, recordEnd);
+    expect(recordStart).toBeGreaterThanOrEqual(0);
+    expect(recordEnd).toBeGreaterThan(recordStart);
+    expect(recordHandler).toContain('stateJson: projectCurrentGameStateForRenderer()');
+    expect(recordHandler).not.toContain('stateJson: currentGameStateJson');
   });
 
   it('uses the explicit projected-state adapter for every desktop Warroom ingestion path', async () => {

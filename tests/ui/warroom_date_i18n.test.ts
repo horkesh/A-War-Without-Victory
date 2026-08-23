@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import {
   setScenarioStartDate,
@@ -32,5 +33,18 @@ describe('warroom date localization', () => {
     expect(turnToMonthYear(0)).toBe('SEPTEMBAR 1991');
     expect(turnToWeekString(0)).toBe('Sedmica 1, septembar 1991');
     expect(turnToShortLabel(0)).toBe('sep 1991');
+  });
+
+  it('shows the campaign date in the toolbar without leaking an internal phase label', () => {
+    const source = readFileSync('src/ui/warroom/warroom.ts', 'utf8');
+    const start = source.indexOf('private updateToolbarTurnDisplay');
+    const end = source.indexOf('private showWarroomScene', start);
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(end).toBeGreaterThan(start);
+    const block = source.slice(start, end);
+
+    expect(block).toContain('el.textContent = label;');
+    expect(block).not.toContain('War phase');
+    expect(block).not.toContain('Post-War');
   });
 });

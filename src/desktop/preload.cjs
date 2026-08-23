@@ -45,6 +45,8 @@ contextBridge.exposeInMainWorld('awwv', {
   loadScenarioDialog: () => ipcRenderer.invoke('load-scenario-dialog'),
   startNewCampaign: (payload) => ipcRenderer.invoke('start-new-campaign', payload),
   loadStateDialog: () => ipcRenderer.invoke('load-state-dialog'),
+  listSaveRecords: () => ipcRenderer.invoke('list-save-records'),
+  loadSaveRecord: (filename) => ipcRenderer.invoke('load-save-record', { filename }),
   saveGame: (payload) => ipcRenderer.invoke('save-game', payload),
   quickSave: () => ipcRenderer.invoke('quick-save'),
   advanceTurn: (payload) => ipcRenderer.invoke('advance-turn', payload),

@@ -52,6 +52,7 @@ const {
 } = require('./decorate_unit_contract.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
+const { listSaveRecords, resolveSaveRecordPath } = require('./save_records.cjs');
 const {
   projectPlayerVisibleReplaySequenceJson,
   projectPlayerVisibleStateJson,
@@ -2079,15 +2080,19 @@ app.whenReady().then(() => {
   ipcMain.handle('start-new-campaign', async (_event, payload) => {
     const playerFaction = payload && payload.playerFaction;
     const scenarioKey = payload && payload.scenarioKey;
+    const decisionMode = payload && payload.decisionMode;
     if (playerFaction !== 'RBiH' && playerFaction !== 'RS' && playerFaction !== 'HRHB') {
       return { ok: false, error: 'Invalid playerFaction. Use RBiH, RS, or HRHB.' };
     }
     if (scenarioKey !== undefined && scenarioKey !== 'apr_1992') {
       return { ok: false, error: 'Invalid scenarioKey. Use apr_1992.' };
     }
+    if (decisionMode !== 'emergent' && decisionMode !== 'historical') {
+      return { ok: false, error: 'Invalid decisionMode. Use emergent or historical.' };
+    }
     try {
       const sim = getDesktopSim();
-      const { state } = await sim.startNewCampaign(getBaseDir(), playerFaction, scenarioKey ?? 'apr_1992');
+      const { state } = await sim.startNewCampaign(getBaseDir(), playerFaction, scenarioKey ?? 'apr_1992', decisionMode);
       liveReplayManifestFrames = [];
       writeCanonicalCurrentState(
         sim,
@@ -2120,6 +2125,31 @@ app.whenReady().then(() => {
       if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
       sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
       return { ok: true };
+    } catch (e) {
+      return { ok: false, error: classifyLoadError(e) };
+    }
+  });
+
+  ipcMain.handle('list-save-records', async () => {
+    try {
+      return { ok: true, records: await listSaveRecords(getSavesDir()) };
+    } catch (e) {
+      return { ok: false, error: classifyLoadError(e) };
+    }
+  });
+
+  ipcMain.handle('load-save-record', async (_event, payload) => {
+    try {
+      const filename = payload && payload.filename;
+      const records = await listSaveRecords(getSavesDir());
+      if (!records.some((record) => record.filename === filename)) {
+        return { ok: false, error: 'Save record is unavailable.' };
+      }
+      const sim = getDesktopSim();
+      const { state } = await sim.loadStateFromPath(resolveSaveRecordPath(getSavesDir(), filename));
+      setCurrentStateSnapshots(sim, state);
+      liveReplayManifestFrames = [];
+      return { ok: true, stateJson: projectCurrentGameStateForRenderer() };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
     }
