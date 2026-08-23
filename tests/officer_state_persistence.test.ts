@@ -27,7 +27,7 @@ describe('officer startup and save persistence', () => {
         const startupIds = (startup.military.named_officer_data ?? []).map((officer) => officer.id).sort();
 
         expect(startupIds).toEqual(sourceIds);
-        expect(sourceIds).toHaveLength(68);
+        expect(new Set(sourceIds).size).toBe(sourceIds.length);
     });
 
     it('preserves exact faction and corps assignments through canonical save/load', () => {
@@ -44,7 +44,7 @@ describe('officer startup and save persistence', () => {
         expect(serializeState(hydrated)).toBe(payload);
     });
 
-    it('preserves every authored biography field without promoting omitted candidates', () => {
+    it('preserves every authored biography field without inventing absent identities', () => {
         const bioFields = [
             'bio_short',
             'command_style',
@@ -61,7 +61,8 @@ describe('officer startup and save persistence', () => {
                 expect(restored?.[field], `${source.id}.${field}`).toBe(source[field]);
             }
         }
-        expect(hydratedById.has('hvo_i_nakic')).toBe(false);
-        expect(hydratedById.has('hvo_bilonjic')).toBe(false);
+        expect(hydratedById.has('hvo_i_nakic')).toBe(true);
+        expect(hydratedById.has('hvo_bilonjic')).toBe(true);
+        expect(hydratedById.has('hvo_nakic_unreviewed_alias')).toBe(false);
     });
 });

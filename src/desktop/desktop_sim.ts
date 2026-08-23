@@ -257,7 +257,8 @@ export async function loadScenarioFromPath(
 export async function startNewCampaign(
     baseDir: string,
     playerFaction: 'RBiH' | 'RS' | 'HRHB',
-    scenarioKey: DesktopScenarioKey = DEFAULT_DESKTOP_SCENARIO_KEY
+    scenarioKey: DesktopScenarioKey = DEFAULT_DESKTOP_SCENARIO_KEY,
+    decisionMode: 'emergent' | 'historical' = 'emergent',
 ): Promise<{ state: GameState }> {
     const key = scenarioKey in SCENARIO_KEY_TO_PATH ? scenarioKey : DEFAULT_DESKTOP_SCENARIO_KEY;
     const scenarioPath = join(baseDir, SCENARIO_KEY_TO_PATH[key]);
@@ -284,11 +285,10 @@ export async function startNewCampaign(
     if (state.meta) {
         state.meta.player_faction = playerFaction;
         state.meta.headless_scenario_auto_control = false;
-        // Free War Phase 0: the live player campaign is the FREE, emergent war —
-        // AI factions choose event responses from battlefield/political signals,
-        // not historical replay. Calibration (scenario_runner) never routes
-        // through this entry, so it stays unset = historical = byte-identical.
-        state.meta.decision_mode = 'emergent';
+        // Live play explicitly records the selected response policy. Legacy
+        // unset states migrate to historical, but new campaigns do not rely on
+        // that migration side effect.
+        state.meta.decision_mode = decisionMode;
     }
     deferUnauthorizedHistoricalOperationsForPlayer(state);
     const canonicalState = canonicalizeStartupState(state).state;

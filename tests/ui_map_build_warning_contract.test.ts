@@ -15,7 +15,13 @@ describe('tactical map build warning contracts', () => {
 
     expect(config).toContain('manualChunks');
     expect(config).toContain('vendor-maplibre');
-    expect(config).toContain('feature-command-ui');
+    expect(config).toContain('feature-warroom-ui');
+    expect(config).toContain('feature-army-hq');
+    expect(config).toContain('feature-army-hq-records');
+    expect(config).toContain('feature-army-hq-operations');
+    expect(config).toContain('feature-army-hq-forces');
+    expect(config).toContain('feature-chronicle');
+    expect(config).not.toContain("return 'feature-command-ui'");
     expect(config).toContain('map-rendering');
     expect(config).toContain('map-sim');
   });

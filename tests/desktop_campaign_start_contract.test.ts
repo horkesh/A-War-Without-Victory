@@ -60,7 +60,7 @@ test('initial_save is already in canonical loaded-save form at campaign birth', 
 }, 120_000);
 
 test('startNewCampaign returns canonicalized state before the first manual save', async () => {
-    const { state } = await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992');
+    const { state } = await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992', 'emergent');
     const payload = serializeState(state);
     const hydrated = deserializeState(payload);
 
@@ -135,6 +135,14 @@ test('queryBattleEvents reads persisted political control events', () => {
         ],
     });
 });
+
+test('startNewCampaign records historical mode explicitly', async () => {
+    const { state } = await startNewCampaign(process.cwd(), 'RS', 'apr_1992', 'historical');
+
+    assert.strictEqual(state.meta.player_faction, 'RS');
+    assert.strictEqual(state.meta.decision_mode, 'historical');
+    assert.notStrictEqual(state.meta.headless_scenario_auto_control, true);
+}, 120_000);
 
 test('startNewCampaign queues the selected faction foundational decision at campaign birth', async () => {
     const cases = [

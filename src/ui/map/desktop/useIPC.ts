@@ -1,5 +1,11 @@
 import { useMemo } from 'react';
-import type { GameStateUpdateMetadata, StartNewCampaignPayload, StartNewCampaignResult } from './types';
+import type {
+    GameStateUpdateMetadata,
+    ListSaveRecordsResult,
+    LoadSaveRecordResult,
+    StartNewCampaignPayload,
+    StartNewCampaignResult,
+} from './types';
 
 export interface CorpsOperationOrderPayload {
     corpsId: string;
@@ -262,6 +268,8 @@ interface WindowAwwv {
     focusWarroom: () => Promise<void>;
     loadScenarioDialog: () => Promise<{ ok: boolean; error?: string }>;
     loadStateDialog: () => Promise<{ ok: boolean; error?: string }>;
+    listSaveRecords: () => Promise<ListSaveRecordsResult>;
+    loadSaveRecord: (filename: string) => Promise<LoadSaveRecordResult>;
     saveGame: (payload?: { filename?: string }) => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     quickSave: () => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     openTacticalMapWindow: (payload?: { mode?: string }) => Promise<void>;
@@ -616,6 +624,14 @@ export function useIPC() {
             loadStateDialog: awwv
                 ? () => awwv.loadStateDialog()
                 : makeNoop<{ ok: boolean; error?: string }>(),
+
+            listSaveRecords: awwv
+                ? () => awwv.listSaveRecords()
+                : (): Promise<ListSaveRecordsResult> => Promise.resolve({ ok: true, records: [] }),
+
+            loadSaveRecord: awwv
+                ? (filename: string) => awwv.loadSaveRecord(filename)
+                : makeNoop<LoadSaveRecordResult>(),
 
             saveGame: awwv
                 ? (payload?: { filename?: string }) => awwv.saveGame(payload)

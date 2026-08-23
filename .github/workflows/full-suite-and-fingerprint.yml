@@ -49,8 +49,11 @@ on:
     branches: [main]
 
 jobs:
-  # The single gate that runs the COMPLETE vitest suite (`npm run test:vitest` ==
-  # `vitest run` over vitest.config.ts == ALL discovered vitest files), NOT a slice.
+  # The single gate that runs the COMPLETE vitest suite (`npm run test:vitest:balanced`
+  # inventories ALL files discovered by vitest.config.ts), NOT a slice. Ordinary files
+  # are deterministically balanced across isolated processes; tests that write tracked
+  # state, read ambient run evidence, mutate process-wide environment, or claim a fixed
+  # port run in the serial tail.
   #
   # WHY: the Baseline Regression `test` job runs only the `fast` slice and `scenarios`
   # runs only the `scenario` slice. Slice membership is decided by
@@ -110,9 +113,9 @@ jobs:
         if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
-      - name: Full vitest suite (all slices — no stale pin can hide)
+      - name: Full vitest suite (balanced; all files — no stale pin can hide)
         if: steps.changes.outputs.relevant == 'true'
-        run: npm run test:vitest
+        run: npm run test:vitest:balanced
 
       - name: Install Puppeteer Chrome for browser gates
         if: steps.changes.outputs.relevant == 'true'

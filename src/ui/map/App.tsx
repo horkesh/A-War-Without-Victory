@@ -1044,15 +1044,14 @@ function App() {
     void refreshRecruitmentCatalog();
   };
 
-  const handleSelectFaction = async (faction: StartNewCampaignPayload['playerFaction']) => {
+  const handleSelectFaction = async (payload: StartNewCampaignPayload) => {
     resetCampaignScopedUiState();
     setCampaignStarting(true);
     setOpeningBriefDismissed(false);
     // Use scenarioKey 'apr_1992' as default for dev map, mirroring Warroom fix
     const startCampaign = () => startCampaignFromSidePicker(
       { ipc, loadSave, setLoadError },
-      faction,
-      'apr_1992',
+      { ...payload, scenarioKey: 'apr_1992' },
     );
     const ok = await runCampaignReplacement(startCampaign, (started) => started);
     setCampaignStarting(false);
@@ -1799,7 +1798,10 @@ function App() {
             setAppScreen('mainMenu');
           }
         }}
-        onSelectFaction={handleSelectFaction}
+        onSelectFaction={(faction) => void handleSelectFaction({
+          playerFaction: faction,
+          decisionMode: 'emergent',
+        })}
       />
       <RecruitmentModal
         isOpen={recruitmentOpen}
@@ -2189,7 +2191,7 @@ function App() {
           errorMessage={loadError}
           // Main-menu side selection is inline; the SidePicker modal is not
           // part of the New Game / Load path from the splash screen.
-          onNewGame={(faction) => void handleSelectFaction(faction)}
+          onNewGame={(payload) => void handleSelectFaction(payload)}
           onContinue={() => setAppScreen('game')}
           onLoadGame={(json) => void handleMainMenuLoadGame(json)}
           onSettings={() => setSettingsOpen(true)}

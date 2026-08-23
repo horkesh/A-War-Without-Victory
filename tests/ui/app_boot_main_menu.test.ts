@@ -56,17 +56,18 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
     });
 
     it('does not open the SidePicker modal from Main Menu New Game or Load', () => {
-        expect(app).toContain('onNewGame={(faction) => void handleSelectFaction(faction)}');
+        expect(app).toContain('onNewGame={(payload) => void handleSelectFaction(payload)}');
         expect(app).toContain('onLoadGame={(json) => void handleMainMenuLoadGame(json)}');
         expect(app).not.toContain("onNewGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}");
         expect(app).not.toContain("onLoadGame={() => { setAppScreen('game'); setSidePickerOpen(true); }}");
         expect(app).not.toContain('clearLoadedGameState');
     });
 
-    it('renders faction choices inline on the Main Menu', () => {
+    it('renders faction choices inside the Main Menu opening flow', () => {
         const menu = read('src/ui/map/components/MainMenu.tsx');
-        expect(menu).toContain("const FACTIONS: StartNewCampaignPayload['playerFaction'][] = ['RBiH', 'RS', 'HRHB'];");
-        expect(menu).toContain('onClick={() => onNewGame(faction)}');
+        expect(menu).toContain("const FACTIONS: PlayerFaction[] = ['RBiH', 'RS', 'HRHB'];");
+        expect(menu).toContain("setView('factions')");
+        expect(menu).toContain('onNewGame({ playerFaction: selectedFaction, decisionMode });');
         expect(menu).not.toContain('<Modal');
     });
 

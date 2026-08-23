@@ -1235,19 +1235,25 @@ async function runFoundationalFlow(page, summary) {
   await waitForVisibleText(page, 'A WAR WITHOUT VICTORY');
   await captureEvidence(page, summary, 'main_menu');
 
-  await clickByText(page, 'Republic of Bosnia and Herzegovina');
+  await clickByText(page, 'New War');
+  await activateVisibleControl(page, '[data-testid="main-menu-faction-RBiH"]', 15000);
+  await waitForVisibleText(page, 'Take command');
+  const dossierText = await visibleText(page);
+  if (!dossierText.includes('President of the Presidency of the Republic of Bosnia and Herzegovina')) {
+    throw new Error(`RBiH faction dossier did not show RBiH identity copy: ${dossierText.replace(/\s+/g, ' ').slice(0, 1400)}`);
+  }
+  await captureEvidence(page, summary, 'faction_dossier');
+
+  await clickByText(page, 'Take command');
+  await waitForVisibleText(page, 'How should the war unfold?');
+  await captureEvidence(page, summary, 'decision_mode');
+
+  await clickByText(page, 'Begin');
   await waitForVisibleText(page, 'WAR HAS STARTED');
   await captureEvidence(page, summary, 'war_start_splash');
 
   await clickByText(page, 'Acknowledge');
-  await waitForVisibleText(page, 'WAR BEGINS');
-  const identityDialog = await dialogText(page);
-  if (!identityDialog.includes('President of the Presidency of the Republic of Bosnia and Herzegovina')) {
-    throw new Error(`WAR BEGINS identity dialog did not show RBiH identity copy: ${identityDialog}`);
-  }
-  await captureEvidence(page, summary, 'war_begins_identity');
-
-  await clickByText(page, 'Begin');
+  await waitUntilDialogTextAbsent(page, 'WAR HAS STARTED');
   await waitForVisibleText(page, 'President');
   await clickFirstMatchingText(page, ['Open Desk', 'President', 'Desk', 'Begin at Desk', 'Open President']);
   await waitForVisibleText(page, 'What Is Bosnia?');

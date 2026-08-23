@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error JS-only repo helper exercised at runtime by the test suite.
 import { discoverTests, toRepoRelative } from '../tools/test/discover_test_files.mjs';
 
 describe('test discovery contracts', () => {

@@ -68,7 +68,7 @@
  * read `pair`, never `on`+`off`.
  */
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { strictCompare } from '../../src/state/validateGameState.js';
 import {
     compareRunProvenance,
@@ -86,6 +86,19 @@ export const S6_RUN_DIR_PATTERN = /^apr1992_definitive_188w__[0-9a-f]+__w188(?:_
  * carry no provenance stamp.
  */
 export const COLLAPSE_MARKER_FILE = 'collapse_enabled.json';
+export const S6_EVIDENCE_DIR_ENV = 'AWWV_S6_EVIDENCE_DIR';
+
+/**
+ * Ordinary Vitest is hermetic: verdict artifacts are read only when the caller names an
+ * evidence root. This prevents unrelated local `runs/` contents from changing suite truth.
+ */
+export function resolveS6EvidenceRoot(
+    env: Readonly<Record<string, string | undefined>> = process.env,
+    cwd = process.cwd()
+): string | null {
+    const configured = env[S6_EVIDENCE_DIR_ENV]?.trim();
+    return configured === undefined || configured.length === 0 ? null : resolve(cwd, configured);
+}
 
 export interface S6RunCandidate {
     /** Run-dir basename (NOT a path) — the whole selection key. */

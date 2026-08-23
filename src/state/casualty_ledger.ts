@@ -69,10 +69,11 @@ function parseCasualtyRealismFraction(): Record<string, number> {
     // AWWV_CASUALTY_REALISM_FRACTION or per-faction AWWV_CASUALTY_REALISM_{RBIH,RS,HRHB}
     // env vars override; explicit 1.0 restores the legacy (inflated) ledger.
     const DEFAULT: Record<string, number> = { RBiH: 0.39, RS: 0.50, HRHB: 0.75 };
-    const g = Number(process.env.AWWV_CASUALTY_REALISM_FRACTION);
+    const env = typeof process !== 'undefined' && process?.env ? process.env : {};
+    const g = Number(env.AWWV_CASUALTY_REALISM_FRACTION);
     const globalOverride = Number.isFinite(g) && g > 0 ? g : undefined;
     const per = (k: string, faction: string): number => {
-        const v = Number(process.env[`AWWV_CASUALTY_REALISM_${k}`]);
+        const v = Number(env[`AWWV_CASUALTY_REALISM_${k}`]);
         if (Number.isFinite(v) && v > 0) return v;
         return globalOverride ?? DEFAULT[faction]!;
     };

@@ -33,7 +33,8 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain("fs.rmSync(SCREENSHOT_DIR");
     expect(tool).toContain('resolveBrowserGateEnv');
     expect(tool).toContain('WAR HAS STARTED');
-    expect(tool).toContain('WAR BEGINS');
+    expect(tool).not.toContain("waitForVisibleText(page, 'WAR BEGINS')");
+    expect(tool).toContain('faction dossier did not show expected identity copy');
     expect(tool).toContain('President of the Presidency of the Republic of Bosnia and Herzegovina');
     expect(tool).toContain('What Is Bosnia?');
     expect(tool).toContain('deskBlockedWhileDecisionActive');
@@ -84,6 +85,24 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).not.toContain('receiptCheck: false');
     expect(tool).not.toContain('verifyRbihRecordsAndChronicle');
   });
+
+  it('traverses the case-file route before expecting the war-start handoff', () => {
+    const tool = read('tools/ui/first_hour_browser_gate.cjs');
+    const flowStart = tool.indexOf('async function runFoundationalFlow');
+    const flowEnd = tool.indexOf('\nasync function', flowStart + 1);
+    const flow = tool.slice(flowStart, flowEnd);
+
+    const newWarClick = flow.indexOf("clickByText(page, 'New War')");
+    const factionClick = flow.indexOf('main-menu-faction-${flow.faction}');
+    const dossierClick = flow.indexOf("clickByText(page, 'Take command')");
+    const beginClick = flow.indexOf("clickByText(page, 'Begin')");
+    const warStartWait = flow.indexOf("waitForVisibleText(page, 'WAR HAS STARTED')");
+    expect(newWarClick).toBeGreaterThan(-1);
+    expect(factionClick).toBeGreaterThan(newWarClick);
+    expect(dossierClick).toBeGreaterThan(factionClick);
+    expect(beginClick).toBeGreaterThan(dossierClick);
+    expect(warStartWait).toBeGreaterThan(beginClick);
+  });
 });
 
 describe('live surface browser sweep contract', () => {
@@ -91,6 +110,24 @@ describe('live surface browser sweep contract', () => {
     const packageJson = JSON.parse(read('package.json')) as { scripts?: Record<string, string> };
 
     expect(packageJson.scripts?.['qa:live-surface:browser']).toBe('node tools/ui/live_surface_browser_sweep.cjs');
+  });
+
+  it('traverses the case-file route before the live surface sweep', () => {
+    const tool = read('tools/ui/live_surface_browser_sweep.cjs');
+    const flowStart = tool.indexOf('async function runFoundationalFlow');
+    const flowEnd = tool.indexOf('\nasync function', flowStart + 1);
+    const flow = tool.slice(flowStart, flowEnd);
+
+    const newWarClick = flow.indexOf("clickByText(page, 'New War')");
+    const factionClick = flow.indexOf('main-menu-faction-RBiH');
+    const dossierClick = flow.indexOf("clickByText(page, 'Take command')");
+    const beginClick = flow.indexOf("clickByText(page, 'Begin')");
+    const warStartWait = flow.indexOf("waitForVisibleText(page, 'WAR HAS STARTED')");
+    expect(newWarClick).toBeGreaterThan(-1);
+    expect(factionClick).toBeGreaterThan(newWarClick);
+    expect(dossierClick).toBeGreaterThan(factionClick);
+    expect(beginClick).toBeGreaterThan(dossierClick);
+    expect(warStartWait).toBeGreaterThan(beginClick);
   });
 
   it('pins the requested live surface browser invariants in the sweep tool', () => {
@@ -114,7 +151,8 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain("fs.rmSync(SCREENSHOT_DIR");
     expect(tool).toContain('resolveBrowserGateEnv');
     expect(tool).toContain('WAR HAS STARTED');
-    expect(tool).toContain('WAR BEGINS');
+    expect(tool).not.toContain("waitForVisibleText(page, 'WAR BEGINS')");
+    expect(tool).toContain('faction dossier did not show RBiH identity copy');
     expect(tool).toContain('Civic multi-ethnic republic');
     expect(tool).toContain('LIVE_SURFACES');
     expect(tool).toContain('Desk');
@@ -408,6 +446,7 @@ describe('browser QA CI wiring contract', () => {
     expect(fullSuiteJob).not.toContain('lfs: true');
     expect(read('.github/workflows/README.md')).toContain('does not eager-fetch Git LFS before path');
     expect(fullSuiteJob).toContain('timeout-minutes: 75');
+    expect(fullSuiteJob).toContain('run: npm run test:vitest:balanced');
     expect(workflow).toContain('name: Player experience gate');
     expect(workflow).toContain('run: npm run qa:player-experience');
     expect(workflow).not.toContain('run: npm run qa:first-hour:browser');

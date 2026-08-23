@@ -89,6 +89,13 @@ function entryPath(id: string): string {
     return resolve(GHOST_DIR, `${id}.md`);
 }
 
+function bodyAfterOptionalFrontmatter(markdown: string): string {
+    const normalized = markdown.replace(/^\uFEFF/, '');
+    if (!normalized.startsWith('---\n')) return normalized;
+    const closing = normalized.indexOf('\n---\n', 4);
+    return closing < 0 ? '' : normalized.slice(closing + 5).replace(/^\s+/, '');
+}
+
 // ─── W1: file presence ─────────────────────────────────────────────────────
 
 describe('LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION-WAVE-3 — W1: file presence', () => {
@@ -106,12 +113,17 @@ describe('LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION-WAVE-3 — W2: title heading',
     it.each(WAVE_3_ENTRIES.map((e) => [e.id]))(
         '%s opens with a level-1 markdown heading',
         (id: string) => {
-            const body = readEntry(id);
+            const body = bodyAfterOptionalFrontmatter(readEntry(id));
             expect(body.startsWith('# ')).toBe(true);
             const firstLine = body.split('\n', 1)[0];
             expect(firstLine.length).toBeGreaterThan(5);
         },
     );
+
+    it('does not mistake frontmatter itself for a title', () => {
+        expect(bodyAfterOptionalFrontmatter('---\nsource: test\n---\n\nNo heading')).toBe('No heading');
+        expect(bodyAfterOptionalFrontmatter('---\nsource: test')).toBe('');
+    });
 });
 
 // ─── W3: Ring 2 marker (frontmatter shape) ────────────────────────────────

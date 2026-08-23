@@ -1,19 +1,16 @@
 /**
- * WarHasBegunSplash — step 1 of the game-start intro.
+ * WarHasBegunSplash — the live game-start handoff.
  *
- * A dramatic, full-screen blood-red overlay that announces "WAR HAS STARTED"
- * at the live peace→war handoff, then fades out and chains into the existing
- * PeaceWarTransition briefing (step 2).
+ * A full-screen overlay that announces "WAR HAS STARTED" at the live
+ * peace→war handoff, then fades into the command room. The faction dossier is
+ * presented before campaign creation and is intentionally not repeated here.
  *
- * Faithful reproduction (in React) of the legacy vanilla-DOM declaration
- * splash look — src/ui/warroom/components/DeclarationEventModal.ts +
- * src/ui/warroom/styles/modals.css (.decl-overlay / .decl-content /
- * .decl-title): blood-red backdrop, ~0.8s opacity fade in/out, IBM Plex
- * Mono, big letter-spaced caps, an Acknowledge button.
+ * Uses the same restrained paper-and-wood visual language as the opening
+ * case file, with a short fade and an explicit acknowledge control.
  *
  * Dismiss paths: a timed auto-advance, or click / any key to skip. All paths
  * resolve through onDismiss exactly once (guarded), which the caller uses to
- * advance the intro sequence to the briefing.
+ * reveal the command room.
  *
  * Determinism note: pure UI. Headless scenarios never render this component,
  * so there is zero hash / calibration risk. Animation timing uses
@@ -41,6 +38,8 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
     const [visible, setVisible] = useState(true);
     const dismissedRef = useRef(false);
     const timersRef = useRef<number[]>([]);
+    const reducedMotion = typeof window.matchMedia === 'function'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const finish = useCallback(() => {
         if (dismissedRef.current) return;
@@ -53,10 +52,14 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
     // Skip → fade out, then dismiss after the fade completes.
     const skip = useCallback(() => {
         if (dismissedRef.current) return;
+        if (reducedMotion) {
+            finish();
+            return;
+        }
         setVisible(false);
         const id = window.setTimeout(finish, FADE_MS);
         timersRef.current.push(id);
-    }, [finish]);
+    }, [finish, reducedMotion]);
 
     useEffect(() => {
         // Begin fade-out so it completes right as the hold elapses.
@@ -86,11 +89,11 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
             className="fixed inset-0 flex flex-col items-center justify-center"
             style={{
                 zIndex: Z.TURN_AFTERMATH,
-                backgroundColor: 'rgba(24, 4, 4, 0.94)',
+                backgroundColor: 'rgba(18, 16, 12, 0.97)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
                 opacity: visible ? 1 : 0,
-                transition: `opacity ${FADE_MS}ms ease-in-out`,
+                transition: reducedMotion ? 'none' : `opacity ${FADE_MS}ms ease-in-out`,
                 cursor: 'pointer',
             }}
         >
@@ -100,21 +103,21 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
             >
                 <div
                     style={{
-                        fontFamily: "'IBM Plex Mono', 'Consolas', monospace",
+                        fontFamily: "Georgia, 'Times New Roman', serif",
                         fontSize: '32px',
                         fontWeight: 700,
                         letterSpacing: '8px',
                         textTransform: 'uppercase',
                         marginBottom: '12px',
                         color: '#fff4de',
-                        textShadow: '0 2px 18px rgba(0, 0, 0, 0.9), 0 0 22px rgba(255, 61, 0, 0.55)',
+                        textShadow: '0 2px 18px rgba(0, 0, 0, 0.9)',
                     }}
                 >
                     {t('intro.warHasStarted')}
                 </div>
                 <div
                     style={{
-                        fontFamily: "'IBM Plex Mono', 'Consolas', monospace",
+                        fontFamily: "'IBM Plex Sans Condensed', Arial, sans-serif",
                         fontSize: '14px',
                         fontWeight: 400,
                         letterSpacing: '4px',
@@ -139,7 +142,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                     onClick={skip}
                     style={{
                         padding: '12px 40px',
-                        fontFamily: "'IBM Plex Mono', 'Consolas', monospace",
+                        fontFamily: "'IBM Plex Sans Condensed', Arial, sans-serif",
                         fontSize: '12px',
                         fontWeight: 600,
                         letterSpacing: '3px',
@@ -156,7 +159,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                 <div
                     style={{
                         marginTop: '20px',
-                        fontFamily: "'IBM Plex Mono', 'Consolas', monospace",
+                        fontFamily: "'IBM Plex Sans Condensed', Arial, sans-serif",
                         fontSize: '12px',
                         letterSpacing: '2px',
                         textTransform: 'uppercase',

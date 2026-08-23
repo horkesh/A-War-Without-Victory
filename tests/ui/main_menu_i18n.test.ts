@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { setLocale } from '../../src/ui/map/i18n';
 import { MainMenu } from '../../src/ui/map/components/MainMenu';
 
@@ -37,12 +37,13 @@ describe('MainMenu localization', () => {
         renderMainMenu();
 
         expect(screen.getByText('Pyrrhic Games presents')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'New War' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Field Records' })).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'New War' }));
         expect(screen.getByRole('button', { name: /Republic of Bosnia and Herzegovina/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Republika Srpska/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Croatian Republic of Herzeg-Bosnia/i })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Load Game' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Credits' })).toBeTruthy();
     });
 
     it('renders BCS main menu copy when BCS is selected', () => {
@@ -52,12 +53,13 @@ describe('MainMenu localization', () => {
 
         expect(screen.getByText('Pyrrhic Games predstavlja')).toBeTruthy();
         expect(screen.getByText('Bosna i Hercegovina, 1992-1995')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Nastavi' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Ratni zapisi' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Zasluge' })).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Novi rat' }));
         expect(screen.getByRole('button', { name: /Republika Bosna i Hercegovina/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Republika Srpska/i })).toBeTruthy();
         expect(screen.queryByRole('button', { name: /Republic of Bosnia and Herzegovina/i })).toBeNull();
-        expect(screen.getByRole('button', { name: 'Nastavi' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Učitaj igru' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Zasluge' })).toBeTruthy();
     });
 
     it('hides localized continue action when no save exists', () => {

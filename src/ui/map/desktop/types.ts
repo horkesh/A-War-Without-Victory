@@ -46,10 +46,26 @@ export interface ApplyRecruitmentResult extends DesktopOkError {
 
 export interface StartNewCampaignPayload {
     playerFaction: 'RBiH' | 'RS' | 'HRHB';
+    decisionMode: 'emergent' | 'historical';
     scenarioKey?: string;
 }
 
 export interface StartNewCampaignResult extends DesktopOkError {
+    stateJson?: string;
+}
+
+export interface SaveRecord {
+    filename: string;
+    turn: number;
+    faction: StartNewCampaignPayload['playerFaction'] | null;
+    modifiedAtMs: number;
+}
+
+export interface ListSaveRecordsResult extends DesktopOkError {
+    records?: SaveRecord[];
+}
+
+export interface LoadSaveRecordResult extends DesktopOkError {
     stateJson?: string;
 }
 

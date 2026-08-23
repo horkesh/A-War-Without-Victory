@@ -617,8 +617,7 @@ class WarroomApp {
         if (!el || !this.gameState) return;
         const turn = this.gameState.meta.turn;
         const label = turnToShortLabel(turn);
-        const phase = this.gameState.meta.phase === 'war' ? 'War phase' : 'Post-War';
-        el.textContent = `${label} \u2014 ${phase}`;
+        el.textContent = label;
         const investBtn = document.getElementById('wr-btn-invest') as HTMLButtonElement | null;
         if (investBtn) {
             investBtn.style.display = 'none';

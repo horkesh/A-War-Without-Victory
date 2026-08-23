@@ -2451,6 +2451,17 @@
       "unit_type": "light",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
+    },
+    {
+      "id": "rs_visegrad_brigade",
+      "faction": "RS",
+      "designation_code": "AWWV-BDE-RS-VISEGRAD-BRIGADE",
+      "english_gloss": "1st Višegrad Light Infantry Brigade",
+      "official_bcs": null,
+      "playable_bcs": "Višegradska brigada",
+      "unit_type": "light_infantry",
+      "echelon": "brigade",
+      "source_basis": "playable_name_localization"
     }
   ]
 }
