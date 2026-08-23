@@ -295,6 +295,7 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
 ];
 
 const SYNTHETIC_JNA_COMMAND_IDS = ['jna_herzegovina_command'] as const;
+const SYNTHETIC_JNA_COMMAND_ID_SET: ReadonlySet<string> = new Set(SYNTHETIC_JNA_COMMAND_IDS);
 
 function retireEmptySyntheticJnaCommands(state: GameState): void {
     const formations = state.military.formations ?? {};
@@ -532,7 +533,6 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
 
 const ALL_PHANTOM_DEFS: PhantomDef[] = [...JNA_PHANTOM_DEFS, ...HV_PHANTOM_DEFS, ...HV_PHANTOM_DEFS_1995];
 const ALL_PHANTOM_IDS = new Set<string>(ALL_PHANTOM_DEFS.map((def) => def.id));
-const SYNTHETIC_JNA_COMMAND_ID = 'jna_herzegovina_command';
 
 export interface SpawnJnaPhantomBrigadesOptions {
     emitControlEvents?: boolean;
@@ -589,7 +589,7 @@ export function spawnJnaPhantomBrigades(state: GameState, options: SpawnJnaPhant
         // authored host command. The JNA Herzegovina command is the sole
         // exception because initializeCorpsCommand intentionally synthesizes
         // that command from its already-spawned JNA phantoms.
-        if (def.corps_id !== SYNTHETIC_JNA_COMMAND_ID && !state.military.formations[def.corps_id]) continue;
+        if (!SYNTHETIC_JNA_COMMAND_ID_SET.has(def.corps_id) && !state.military.formations[def.corps_id]) continue;
 
         const faction: FactionId = def.faction ?? 'RS';
         const kindTag = def.kind_tag ?? 'jna_phantom';

@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-23  
 **Branch:** `codex/four-week-phantom-boundary`  
-**Status:** Implemented and locally measured; remote CI and independent review remain promotion gates
+**Status:** Implemented, locally measured, and independently reviewed; remote CI remains the promotion gate
 
 ## Outcome
 
@@ -42,8 +42,10 @@ The tracked `data/derived/latest_run_final_save.json` was restored after the 188
 - Short-run repeatability: 0 differing artifacts for both four-week scenarios.
 - Full `npm run canon:check`: determinism scan passed and all four baseline scenarios matched the reconciled manifest.
 
+Independent ultrareview consolidated three verifier signals into one non-blocking quality finding: the new spawn guard duplicated the existing synthetic-command literal. The guard now derives from the pre-existing `SYNTHETIC_JNA_COMMAND_IDS` list through one shared set, so spawn and retirement cannot drift if the exception registry grows. The review's fourth candidate was refuted.
+
 An attempted ad-hoc repeat imported the baseline CLI module and unintentionally invoked its `main()` side effect. That extra run was interrupted at turn 25 and was excluded from every comparison; the tracked latest-run save was restored immediately. Repeatability conclusions use the two explicitly named completed short-run directories only.
 
 ## Boundaries
 
-This changes no phantom definition, personnel value, capture OSID, withdrawal turn, operation roster, or calibration threshold. The coupled 1995 HV `spawn_turn: 174` and mobility repair remain in the same tree and are untouched. This report does not claim remote CI or independent review until those gates run.
+This changes no phantom definition, personnel value, capture OSID, withdrawal turn, operation roster, or calibration threshold. The coupled 1995 HV `spawn_turn: 174` and mobility repair remain in the same tree and are untouched. This report does not claim remote CI until that gate runs.
