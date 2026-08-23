@@ -151,4 +151,3 @@
 8. Run determinism added-line scans for randomness, clocks, unsorted filesystem iteration, and persisted diagnostics.
 9. Obtain independent review before promotion.
 10. Push only after all required gates are evidenced green; do not publish or refresh pins.
-

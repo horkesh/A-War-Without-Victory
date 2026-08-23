@@ -33,4 +33,3 @@ Expensive tests retain their discriminating power. Performance work removes repe
 3. The full suite passes twice from a clean worktree with no tracked-file changes.
 4. Parallel and serial runs report the same discovered files, tests, outcomes, and deterministic artifact hashes.
 5. Measured full-suite wall time is materially lower, with timing evidence committed as a report rather than asserted from expectation.
-
