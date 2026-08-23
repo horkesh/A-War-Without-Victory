@@ -1,7 +1,7 @@
 # HV 1995 Roster Calibration
 
-**Date:** 2026-08-23  
-**Baseline:** n272 at clean `4dd557537f6ca5e453440729ad270b1d453d2e92`  
+**Date:** 2026-08-23
+**Baseline:** n272 at clean `4dd557537f6ca5e453440729ad270b1d453d2e92`
 **Result:** n273 at clean `99bc0cf62729e43908a714dda3621c1100a1cbad`
 
 ## Summary

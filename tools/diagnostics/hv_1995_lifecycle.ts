@@ -100,6 +100,7 @@ export function validateCatalogProvenance(
     runCatalogBlob?: string,
     currentCatalogBlob?: string,
 ) {
+    const hasBlobEvidence = runCatalogBlob !== undefined || currentCatalogBlob !== undefined;
     const blobMatch = typeof runCatalogBlob === 'string'
         && runCatalogBlob.length > 0
         && runCatalogBlob === currentCatalogBlob;
@@ -108,7 +109,9 @@ export function validateCatalogProvenance(
         catalog_commit: catalogCommit ?? null,
         run_catalog_blob: runCatalogBlob ?? null,
         current_catalog_blob: currentCatalogBlob ?? null,
-        matches_run: blobMatch || (runCommit !== undefined && runCommit === catalogCommit),
+        matches_run: hasBlobEvidence
+            ? blobMatch
+            : runCommit !== undefined && runCommit === catalogCommit,
     };
 }
 

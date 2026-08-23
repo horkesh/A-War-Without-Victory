@@ -160,6 +160,8 @@ describe('HV 1995 lifecycle diagnostic', () => {
         });
         expect(validateCatalogProvenance('run-commit', 'later-checkout', 'same-blob', 'same-blob').matches_run)
             .toBe(true);
+        expect(validateCatalogProvenance('run-commit', 'run-commit', 'committed-blob', 'dirty-blob').matches_run)
+            .toBe(false);
         expect(validateCatalogProvenance(undefined, 'later-checkout').matches_run).toBe(false);
     });
 
