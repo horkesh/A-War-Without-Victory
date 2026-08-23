@@ -12,7 +12,7 @@
 import { describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import {
     S6PairComparabilityError,
     S6_RUN_DIR_PATTERN,
@@ -56,9 +56,10 @@ function codeOnly(src: string): string {
 
 describe('S6 evidence root', () => {
     it('does not inspect ambient repository runs unless the evidence root is explicit', () => {
-        expect(resolveS6EvidenceRoot({}, 'F:/repo')).toBeNull();
-        expect(resolveS6EvidenceRoot({ AWWV_S6_EVIDENCE_DIR: 'evidence/s6' }, 'F:/repo'))
-            .toBe('F:\\repo\\evidence\\s6');
+        const cwd = process.cwd();
+        expect(resolveS6EvidenceRoot({}, cwd)).toBeNull();
+        expect(resolveS6EvidenceRoot({ AWWV_S6_EVIDENCE_DIR: 'evidence/s6' }, cwd))
+            .toBe(resolve(cwd, 'evidence/s6'));
     });
 });
 
