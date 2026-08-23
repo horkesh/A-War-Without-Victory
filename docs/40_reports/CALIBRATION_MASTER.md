@@ -2976,3 +2976,11 @@ Per-criterion: **2, 3, 5, 6 DISCHARGED permanently** (evidence production and ex
 - All three collapse comparison files pass 70/70 with `pair=FORMED verdict=OK`. The G2 sentinels execute; 84/84 live enclave keys resolve identically; none of 17 OFF-held RBiH rim cells is newly lost; the Teočak–Tuzla component remains attached.
 - The prior four collapse failures selected artifacts from different commits. The controlled pair settles that comparison anomaly. It does not authorize regenerating scenario baselines: the manifest remains frozen at SHA-256 `2BD8549068935249C7FEE8C9BFC27C9B21950C0AA11C2D38B41043024124D03F`.
 - When n269 later became the newest collapse-OFF artifact, selection correctly invalidated n267/n268 as stale history. Final clean pair n270/n271 at identical commit `777cac528108ced18508481d37ed1b102f1cd026` and identical consumed-input digest restored `pair=FORMED verdict=OK`; the three suites pass 70/70.
+
+## 2026-08-23 — Four-week phantom host boundary (long floor unchanged)
+
+- Root cause of the four synthetic-fixture unresolved rows was premature spawn: `hv_113th_brigade_tg`, `hv_116th_brigade_tg`, `hv_1st_guards_tg`, and `hv_4th_guards_tg` were created before their authored host formation `hvo_southeast_herzegovina` existed.
+- Phantom creation now requires a non-phantom military substrate and the authored host-corps formation. `jna_herzegovina_command` remains the sole synthetic-host exception.
+- Complete baseline measurement found **0/8 mismatches at 188w** and **0/8 at 52w**. The accepted long-campaign floor therefore remains 637/712, 31/31 anchors, final hash `930195c6879502c7`; those pins did not move.
+- Each synthetic four-week scenario changed 7/8 artifacts. Independent repeats were byte-identical across all eight artifacts. Semantic comparison found exactly the four premature HV formations removed and **zero control changes** in each fixture.
+- Exactly 14 short-fixture hashes were reconciled. No calibration threshold, scenario input, phantom definition, timing constant, or long-campaign pin changed. Full evidence: `docs/40_reports/implemented/20260823_FOUR_WEEK_PHANTOM_HOST_BOUNDARY.md`.

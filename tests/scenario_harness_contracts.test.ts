@@ -137,6 +137,51 @@ describe('H1.4 scenario harness smoke', () => {
         await ensureRemoved(BASE_A);
         await ensureRemoved(BASE_B);
     }, 60_000);
+
+    test('no-formation startups stay empty and turn-time phantoms require host commands', async () => {
+        const prereq = checkDataPrereqs({ baseDir: process.cwd() });
+        if (!prereq.ok) return;
+
+        const populatedScenario = await loadScenario(join(process.cwd(), 'data', 'scenarios', 'apr1992_4w.json'));
+        const populatedStartup = await buildScenarioStartupState(populatedScenario, process.cwd());
+        const populatedFormations = Object.values(populatedStartup.state.military.formations ?? {});
+        const populatedConventional = populatedFormations.filter(
+            (formation) => formation.kind !== 'jna_phantom' && formation.kind !== 'hv_phantom',
+        );
+        const populatedPhantoms = populatedFormations.filter(
+            (formation) => formation.kind === 'jna_phantom' || formation.kind === 'hv_phantom',
+        );
+
+        expect(populatedConventional.length, 'positive control: apr1992_4w must contain authored formations').toBeGreaterThan(0);
+        expect(populatedPhantoms.length, 'positive control: a populated war scenario must receive historical phantoms').toBeGreaterThan(0);
+
+        const emptyScenarioPath = join(process.cwd(), 'data', 'scenarios', 'noop_4w.json');
+        await ensureRemoved(BASE_OUT);
+        const emptyResult = await runScenario({
+            scenarioPath: emptyScenarioPath,
+            outDirBase: BASE_OUT,
+            consoleDiagnostics: false,
+        });
+
+        try {
+            const initial = JSON.parse(await readFile(emptyResult.paths.initial_save, 'utf8')) as GameState;
+            const final = JSON.parse(await readFile(emptyResult.paths.final_save, 'utf8')) as GameState;
+            expect(Object.keys(initial.military.formations ?? {}), 'noop startup must honor the no-initial-formations contract').toEqual([]);
+
+            const finalFormations = Object.values(final.military.formations ?? {});
+            const finalPhantoms = finalFormations.filter(
+                (formation) => formation.kind === 'jna_phantom' || formation.kind === 'hv_phantom',
+            );
+            expect(finalPhantoms.length, 'positive control: turn processing must exercise eligible phantom spawning').toBeGreaterThan(0);
+            const unresolvedHosts = finalPhantoms
+                .filter((formation) => !final.military.formations?.[formation.corps_id!])
+                .map((formation) => formation.id)
+                .sort(strictCompare);
+            expect(unresolvedHosts, 'phantoms must not precede their host command').toEqual([]);
+        } finally {
+            await ensureRemoved(BASE_OUT);
+        }
+    }, 60_000);
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
