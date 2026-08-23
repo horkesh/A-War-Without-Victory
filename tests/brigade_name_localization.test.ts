@@ -58,7 +58,9 @@ describe('BCS brigade name localizations', () => {
     expect(extras).toEqual([]);
     expect(duplicateCodes).toEqual([]);
     expect(BRIGADE_DESIGNATION_CATALOG.every((row) => row.echelon === 'brigade' || row.echelon === 'battalion' || row.echelon === 'regiment' || row.echelon === 'unit_group')).toBe(true);
-    expect(BRIGADE_DESIGNATION_CATALOG.every((row) => row.english_gloss.length > 0 && row.official_bcs.length > 0)).toBe(true);
+    expect(BRIGADE_DESIGNATION_CATALOG.every((row) =>
+      row.english_gloss.length > 0
+      && ((row.official_bcs?.length ?? 0) > 0 || (row.playable_bcs?.length ?? 0) > 0))).toBe(true);
   });
 
   test('cover every source OOB brigade id', () => {
@@ -120,6 +122,21 @@ describe('BCS brigade name localizations', () => {
       kind: 'brigade',
       name: '1st Sarajevo Mechanized',
     })).toBe('mechanized');
+  });
+
+  test('uses the provenance-supported April 1992 Višegrad designation', () => {
+    expect(getFormationDesignation('rs_visegrad_brigade')).toMatchObject({
+      english_gloss: '1st Višegrad Light Infantry Brigade',
+      official_bcs: null,
+      playable_bcs: 'Višegradska brigada',
+      unit_type: 'light_infantry',
+      source_basis: 'playable_name_localization',
+    });
+    expect(getLocalizedFormationName({
+      id: 'rs_visegrad_brigade',
+      kind: 'brigade',
+      name: 'Višegrad Brigade',
+    }, 'bcs')).toBe('Višegradska brigada');
   });
 
   test('sorts formation rows by displayed localized name with stable id tiebreaks', () => {
