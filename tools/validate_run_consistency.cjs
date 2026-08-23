@@ -7,7 +7,8 @@
  * Checks:
  *  1. Casualty balance: battle-specific taken vs inflicted across factions
  *  2. Peak personnel: no brigade exceeds its historical peak
- *  3. Brigade assignment completeness: canonical final unresolved-sector truth is empty
+ *  3. Brigade assignment completeness: canonical final unresolved-sector truth is empty,
+ *     or explicitly NOT ESTABLISHED when the transient list is absent from the artifact
  *  4. Ghost paramilitaries: inactive paramilitaries with personnel > 0
  *  5. Offensive intel blindness: after turn 20, at least some intel records show offensive_signs
  *  6. Formation.assignment sync: sector-assigned brigades must have formation.assignment set
@@ -71,6 +72,14 @@ function collectAssignmentCompletenessIssues(state) {
                 faction: formation.faction ?? 'unknown',
             };
         });
+}
+
+function inspectAssignmentCompletenessEvidence(state) {
+    const evidenceAvailable = Array.isArray(state.military?.unresolved_sector_brigades);
+    return {
+        evidence_available: evidenceAvailable,
+        issues: evidenceAvailable ? collectAssignmentCompletenessIssues(state) : [],
+    };
 }
 
 function getSectorFrontOsids(sector) {
@@ -1215,9 +1224,12 @@ function validateState(state, runLabel) {
 
     // ── 3. Brigade Assignment Completeness ──────────────────────────────
     log('--- Brigade Assignment ---');
-    const unresolved = collectAssignmentCompletenessIssues(state);
+    const assignmentEvidence = inspectAssignmentCompletenessEvidence(state);
+    const unresolved = assignmentEvidence.issues;
 
-    if (unresolved.length === 0) {
+    if (!assignmentEvidence.evidence_available) {
+        log('  ? NOT ESTABLISHED: military.unresolved_sector_brigades is absent from this artifact');
+    } else if (unresolved.length === 0) {
         ok('0 unresolved');
     } else {
         for (const u of unresolved) {
@@ -1515,6 +1527,7 @@ if (require.main === module) {
 
 module.exports = {
     collectAssignmentCompletenessIssues,
+    inspectAssignmentCompletenessEvidence,
     collectAdjacentUncontestedTerritoryIssues,
     collectEmptyContestedSectorIssues,
     collectSectorFloorShortfallIssues,

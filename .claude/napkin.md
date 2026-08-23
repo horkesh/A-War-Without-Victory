@@ -156,6 +156,8 @@ Three HRHB decisions had exact pages, judgment sections, a resolved tier, and a 
    Do instead: verify canonical helpers have production callers; distinguish legal isolation from reachable gaps; resolve reachable gaps through explicit T1 intent, T2 routing, and delayed T3 movement, while marking no-donor sectors `unstaffed_front` instead of teleporting or paper-staffing.
 
 ## Shell & Command Reliability
+0. **[2026-08-23] A missing transient field is not an empty set, and silence needs liveness proof**
+   Do instead: when serialization deliberately strips diagnostic truth such as `unresolved_sector_brigades`, final-save validators must say **NOT ESTABLISHED**, never default absence to `[]` and print zero. Bind health claims to live evidence with a positive counter/marker. Distinguish one normal turn seal from a final-save artifact-projection seal (`kind=turn|final_save`) so legitimate projection cannot masquerade as a duplicate or let concatenated logs pass.
 1. **[2026-06-06] Windows-safe local CLIs are repo contract**
    Do instead: use local package entrypoints or repo wrappers; do not rely on PATH/.bin luck.
 1b. **[2026-08-10] node_modules/.bin can be unpopulated on a checkout — `npm run` then fails silently on `tsx`/`tsc`**

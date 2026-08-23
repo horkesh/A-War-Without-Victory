@@ -1,5 +1,20 @@
 # Real War Master
 
+## Latest Review: clean 188w engine checkpoint — headline military deaths plausible; independent lethality proof still open (2026-08-23)
+
+**Runs:** clean same-commit `n3` and `n4` at `26929e6b8`, final hash `930195c6879502c7`; core artifacts byte-identical.
+
+| Faction | KIA | WIA | Missing/Captured |
+|---|---:|---:|---:|
+| RBiH | 27,378 | 107,181 | 5,308 |
+| RS | 19,964 | 69,191 | 12,252 |
+| HRHB | 9,211 | 32,747 | 2,762 |
+| **Total** | **56,553** | **209,119** | **20,322** |
+
+The total KIA now lies inside the working historical military-death band of roughly 57–62k, with the faction ordering broadly consistent with the RDC by-formation anchors (ARBiH 30,906; HVO 5,919; VRS approximately 21–25k). WIA/KIA is 3.698. This is a plausible reported headline, not independent proof that raw combat lethality is historically solved: default-on casualty-reporting scalars author the presented KIA/WIA split. Missing/captured semantics and scale remain **NOT ESTABLISHED** against a like-for-like historical quantity.
+
+Modeled civilian output is 31,115 killed, 287,229 fled abroad, and 1,286,801 displacement events across 88,126 reconciled event rows. Those figures cover the engine's modeled takeover/displacement pathways, not every historical civilian-death pathway, so full civilian casualty coverage is also **NOT ESTABLISHED**. Territory remains 637/712 raw OSID matches with 31/31 authored anchors; an area-weighted endpoint score was not measured in this checkpoint.
+
 ## Latest Review: 188w casualty output — KIA x2.4 too high, killed:wounded inverted, missing/captured x10 absurd; civilian model the one bright spot (2026-06-08)
 
 **Run:** `apr1992_definitive_188w__3a26ccdf831ca525__w188_n2018` | end week 188 (Apr 1992 → Nov 1995)
