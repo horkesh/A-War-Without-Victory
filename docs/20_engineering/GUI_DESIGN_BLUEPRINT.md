@@ -1131,8 +1131,8 @@ Full-screen. Dark background with subtle topographic map texture. Center-aligned
           ║    Bosnia-Herzegovina, 1992–1995   ║
           ║                                   ║
           ║    ┌─────────────────────────┐     ║
-          ║    │   NEW CAMPAIGN          │     ║
-          ║    │   LOAD SAVE             │     ║
+          ║    │   NEW WAR               │     ║
+          ║    │   FIELD RECORDS         │     ║
           ║    │   LOAD REPLAY           │     ║
           ║    │   SCENARIOS             │     ║
           ║    │   SETTINGS              │     ║
@@ -1143,9 +1143,9 @@ Full-screen. Dark background with subtle topographic map texture. Center-aligned
           ╚═══════════════════════════════════╝
 ```
 
-### 19.2 New Campaign (desktop)
+### 19.2 New War (desktop)
 
-When the user clicks **New Campaign** in the desktop app, the main menu closes and a **side-selection overlay** is shown (no scenario file picker). The overlay displays three options with faction flags: **RBiH (ARBiH)**, **RS (VRS)**, and **HRHB (HVO)**. Choosing one invokes the `start-new-campaign` IPC with that faction as `playerFaction`; the app then loads the canon April 1992 scenario (`data/scenarios/apr1992_definitive_52w.json`), sets `meta.player_faction`, injects recruitment state for the toolbar and Recruitment modal, and applies the state to the map. Other factions run on bot AI. Flag assets: same folder as crests (`/assets/sources/crests/`, see README there for `flag_RBiH.png`, `flag_RS.png`, `flag_HRHB.png`).
+**New War** opens the case-file campaign flow inside the main menu. The player first chooses one of three faction dossiers — **RBiH (ARBiH)**, **RS (VRS)**, or **HRHB (HVO)** — and then explicitly chooses **Emergent** or **Historical** decision mode. Beginning the war invokes `start-new-campaign` with both `playerFaction` and `decisionMode`; the desktop loads the canonical April 1992 start, records those choices in state metadata, and hands the resulting state to the map. Other factions run on bot AI. The adjacent **Field Records** flow lists canonical save records and loads the selected record through the desktop IPC instead of opening an operating-system file picker.
 
 ### 19.3 Scenario Selection Screen (Load scenario…)
 
