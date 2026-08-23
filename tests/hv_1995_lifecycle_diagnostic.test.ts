@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
     HV_1995_FORMATION_IDS,
+    analyzeHv1995CatalogCoverage,
     analyzeHv1995Lifecycle,
     parseJsonLines,
 } from '../tools/diagnostics/hv_1995_lifecycle.js';
+import { FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES } from '../src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.js';
+import type { GameState } from '../src/state/game_state.js';
 
 function completeSpawnRows(): Array<Record<string, unknown>> {
     return HV_1995_FORMATION_IDS.map((formation_id) => ({
@@ -17,6 +20,52 @@ function completeSpawnRows(): Array<Record<string, unknown>> {
 }
 
 describe('HV 1995 lifecycle diagnostic', () => {
+    it('distinguishes absent roster authorship from a roster window that closes before spawn', () => {
+        const result = analyzeHv1995CatalogCoverage(
+            FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES,
+            Object.fromEntries(HV_1995_FORMATION_IDS.map((formationId) => [formationId, 174])),
+            {} as GameState,
+            188,
+        );
+
+        expect(result.positive_controls).toEqual({
+            catalog_opportunity_count: 4,
+            known_assignment_observed: true,
+            known_post_spawn_window_observed: true,
+        });
+        expect(result.formations.find((row) => row.formation_id === 'hv_112th_infantry_1995')).toMatchObject({
+            status: 'REACHABLE_POST_SPAWN',
+            assignments: [expect.objectContaining({
+                opportunity_id: 'mistral_2_95',
+                axis_id: 'mistral_drvar_grahovo',
+                first_open_turn: 175,
+                last_open_turn: 188,
+                post_spawn_open_turn_count: 14,
+            })],
+        });
+        expect(result.formations.find((row) => row.formation_id === 'hv_7th_hgr_1995')).toMatchObject({
+            status: 'AUTHORED_WINDOW_PRE_SPAWN_ONLY',
+            assignments: [expect.objectContaining({
+                opportunity_id: 'mistral_1_95',
+                axis_id: 'mistral_1_glamoc',
+                first_open_turn: 160,
+                last_open_turn: 170,
+                post_spawn_open_turn_count: 0,
+            })],
+        });
+        for (const formationId of [
+            'hv_126th_hgr_1995',
+            'hv_134th_hgr_1995',
+            'hv_141st_reserve_brigade_1995',
+            'hv_1st_hgz_1995',
+        ]) {
+            expect(result.formations.find((row) => row.formation_id === formationId)).toMatchObject({
+                status: 'NO_AUTHORED_CATALOG_ASSIGNMENT',
+                assignments: [],
+            });
+        }
+    });
+
     it('parses CRLF/LF JSONL deterministically and ignores blank lines', () => {
         expect(parseJsonLines('{"b":2}\r\n\r\n{"a":1}\n')).toEqual([{ b: 2 }, { a: 1 }]);
     });
