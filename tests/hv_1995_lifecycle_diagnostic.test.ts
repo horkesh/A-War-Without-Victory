@@ -53,11 +53,20 @@ describe('HV 1995 lifecycle diagnostic', () => {
                 post_spawn_open_turn_count: 0,
             })],
         });
+        expect(result.formations.find((row) => row.formation_id === 'hv_1st_hgz_1995')).toMatchObject({
+            status: 'REACHABLE_POST_SPAWN',
+            assignments: [expect.objectContaining({
+                opportunity_id: 'southern_move_95',
+                axis_id: 'southern_move_mrkonjic',
+                first_open_turn: 182,
+                last_open_turn: 188,
+                post_spawn_open_turn_count: 7,
+            })],
+        });
         for (const formationId of [
             'hv_126th_hgr_1995',
             'hv_134th_hgr_1995',
             'hv_141st_reserve_brigade_1995',
-            'hv_1st_hgz_1995',
         ]) {
             expect(result.formations.find((row) => row.formation_id === formationId)).toMatchObject({
                 status: 'NO_AUTHORED_CATALOG_ASSIGNMENT',

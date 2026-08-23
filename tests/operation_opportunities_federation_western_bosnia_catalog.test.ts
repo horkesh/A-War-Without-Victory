@@ -71,6 +71,7 @@ const SOUTHERN_MOVE_BRIGADES = [
     'hvo_1st_guard_abb',
     'hvo_2nd_guard_mechanized',
     'hvo_3rd_guard_jastrebovi',
+    'hv_1st_hgz_1995',
     'hv_4th_guards_brigade_1995',
     'hv_7th_guards_brigade_1995',
 ];
@@ -483,5 +484,6 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         expect(op!.axes).toHaveLength(1);
         expect(op!.axes![0].axis_id).toBe('southern_move_mrkonjic');
         expect(op!.axes![0].objectives).toEqual(SOUTHERN_MOVE_OBJECTIVES);
+        expect(op!.axes![0].assigned_brigades).toContain('hv_1st_hgz_1995');
     });
 });

@@ -25,7 +25,7 @@ Zero-reference and no-overlap conclusions are valid only when the traversal dete
 
 ## First content hypothesis
 
-BB1 p.427 explicitly places the HV 126th Home Defense Regiment in the opening diversion of Operation Southern Move on 8 October 1995. The current Southern Move roster omits it. This is the strongest first candidate because the source names the exact formation, operation, and role. BB1 p.417 supports unnamed groups of five Home Defense regiments and three reserve brigades in Maestral, but does not identify the 7th/134th/141st individually; those remain open rather than inferred.
+BB Volume I, printed p.390 (digital p.427), explicitly places the 1st HGZ among Southern Move's main shock forces. The current single modeled Southern Move axis is the main Mrkonjić assault, so adding `hv_1st_hgz_1995` there matches formation, operation, and role. The same page places the 126th Home Defense Regiment in a diversion 15-20 km west; adding it to the main axis would be a role error, while authoring a new diversion axis needs separate map evidence. BB Volume I, printed p.380 (digital p.417), supports unnamed groups of five Home Defense regiments and three reserve brigades in Maestral but does not identify the 7th/134th/141st individually; those remain open rather than inferred.
 
 ## Verification
 
