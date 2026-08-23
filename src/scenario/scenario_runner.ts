@@ -695,6 +695,11 @@ interface HistoricalAnchorCheck {
     passed: boolean;
 }
 
+type HistoricalAnchorContractEntry = Pick<
+    HistoricalAnchorCheck,
+    'anchor_type' | 'anchor_id' | 'expected_controller'
+>;
+
 interface OverrideInventoryEntry {
     mechanism: 'osid_control_overrides' | 'avoided_osids_by_faction';
     classification: 'initial_state_correction' | 'bot_compensation';
@@ -848,47 +853,54 @@ function computeHistoricalControlAlignmentDiagnostics(
  * painted-control diagnostics use (`pickHistoricalReferenceKey`). This touches
  * ONLY the report/validation field — never sim state or the final hash.
  */
-function computeHistoricalAnchorChecks(
-    final: ControlKey[],
+function buildHistoricalAnchorContract(
     epoch: 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995'
-): HistoricalAnchorCheck[] {
-    const bySid = new Map(final.map((row) => [row.settlement_id, row.controller ?? null]));
-    const settlementChecks = CANONICAL_HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
-        const actual = bySid.get(anchor.settlement_id) ?? null;
-        return {
+): HistoricalAnchorContractEntry[] {
+    return [
+        ...CANONICAL_HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992.map((anchor) => ({
             anchor_type: 'settlement' as const,
             anchor_id: anchor.settlement_id,
             expected_controller: anchor.expected_controller,
-            actual_controller: actual,
-            passed: actual === anchor.expected_controller
-        };
-    });
-    const osidChecks = resolveEpochOsidAnchors(epoch).map((anchor) => {
-        const actual = bySid.get(anchor.osid) ?? null;
-        return {
+        })),
+        ...resolveEpochOsidAnchors(epoch).map((anchor) => ({
             anchor_type: 'osid' as const,
             anchor_id: anchor.osid,
             expected_controller: anchor.expected_controller,
-            actual_controller: actual,
-            passed: actual === anchor.expected_controller
-        };
-    });
-    const controllers = Object.fromEntries(bySid.entries());
-    const controlBandChecks = HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
-        const evaluation = evaluateHistoricalControlBand(anchor, controllers);
-        return {
+        })),
+        ...HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992.map((anchor) => ({
             anchor_type: 'control_band' as const,
             anchor_id: anchor.anchor_id,
             expected_controller: anchor.clauses
                 .map((clause) => `${clause.clause_id}>=${clause.min_count}/${clause.osids.length}`)
                 .join(';'),
+        })),
+    ];
+}
+
+function computeHistoricalAnchorChecks(
+    final: ControlKey[],
+    epoch: 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995'
+): HistoricalAnchorCheck[] {
+    const bySid = new Map(final.map((row) => [row.settlement_id, row.controller ?? null]));
+    const controllers = Object.fromEntries(bySid.entries());
+    const controlBandById = new Map(
+        HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992.map((anchor) => [anchor.anchor_id, anchor]),
+    );
+    return buildHistoricalAnchorContract(epoch).map((anchor) => {
+        if (anchor.anchor_type !== 'control_band') {
+            const actual = bySid.get(anchor.anchor_id) ?? null;
+            return { ...anchor, actual_controller: actual, passed: actual === anchor.expected_controller };
+        }
+        const authored = controlBandById.get(anchor.anchor_id)!;
+        const evaluation = evaluateHistoricalControlBand(authored, controllers);
+        return {
+            ...anchor,
             actual_controller: evaluation.clauses
                 .map((clause) => `${clause.clause_id}=${clause.actual_count}/${clause.total_count}`)
                 .join(';'),
             passed: evaluation.passed,
         };
     });
-    return [...settlementChecks, ...osidChecks, ...controlBandChecks];
 }
 
 function buildOverrideInventory(scenario: Scenario): OverrideInventoryEntry[] {
@@ -2102,6 +2114,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             collapseEnabled: readCollapseGateFromEnv(),
         })
     );
+    const usesHistoricalAnchorContract = scenario.init_control === 'apr1992'
+        || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'));
+    const anchorEpoch = pickHistoricalReferenceKey(scenario);
     const run_meta = {
         scenario_id: scenario.scenario_id,
         run_id,
@@ -2109,6 +2124,16 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         scenario_path: scenarioPath,
         out_dir: out_dir_relative,
         provenance,
+        ...(usesHistoricalAnchorContract ? {
+            anchor_contract: {
+                schema_version: 1,
+                scenario_id: scenario.scenario_id,
+                weeks,
+                epoch: anchorEpoch,
+                source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1' as const,
+                anchors: buildHistoricalAnchorContract(anchorEpoch),
+            },
+        } : {}),
         ...(resumeFromSavePath ? { resume_from_save_path: resumeFromSavePath } : {}),
         ...(resumeFromWeekIndex != null ? { resume_from_week_index: resumeFromWeekIndex } : {})
     };
