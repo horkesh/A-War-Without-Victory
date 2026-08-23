@@ -16,6 +16,21 @@ import {
 import { CURRENT_SCHEMA_VERSION, type FormationId, type FormationState, type FactionId, type GameState } from '../src/state/game_state.js';
 
 function makeState(turn: number): GameState {
+    const hostFormations = Object.fromEntries(
+        [...new Set(_ALL_PHANTOM_DEFS.map((def) => def.corps_id))].map((corpsId) => [
+            corpsId,
+            {
+                id: corpsId as FormationId,
+                faction: (corpsId.startsWith('hvo_') ? 'HRHB' : 'RS') as FactionId,
+                name: `Test host ${corpsId}`,
+                created_turn: 0,
+                status: 'active',
+                assignment: null,
+                kind: 'corps',
+                personnel: 0,
+            } as FormationState,
+        ]),
+    );
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
@@ -26,7 +41,7 @@ function makeState(turn: number): GameState {
         } as GameState['meta'],
         factions: [{ id: 'RS' as FactionId }, { id: 'HRHB' as FactionId }] as GameState['factions'],
         military: {
-            formations: {},
+            formations: hostFormations,
             corps_command: {},
         } as any,
         political: {
@@ -82,6 +97,42 @@ function defsSpawnedByTurn(turn: number): typeof _ALL_PHANTOM_DEFS {
 }
 
 describe('phantom spawn catalog', () => {
+    it('does not manufacture an OOB in a state with no conventional formations', () => {
+        const populatedState = makeState(0);
+        spawnJnaPhantomBrigades(populatedState);
+        assert.ok(phantomIdsByKind(populatedState, 'jna_phantom').length > 0, 'positive control: populated military world spawns phantoms');
+
+        const emptyState = makeState(0);
+        emptyState.military.formations = {};
+        spawnJnaPhantomBrigades(emptyState);
+
+        assert.deepEqual(emptyState.military.formations, {});
+        assert.deepEqual(emptyState.military.phantoms_spawned ?? [], []);
+    });
+
+    it('waits for a real host command before spawning its subordinate phantoms', () => {
+        const state = makeState(0);
+        delete state.military.formations!['hvo_southeast_herzegovina'];
+
+        spawnJnaPhantomBrigades(state);
+        assert.ok(phantomIdsByKind(state, 'jna_phantom').length > 0, 'positive control: phantoms with present hosts must spawn');
+        assert.deepEqual(phantomIdsByKind(state, 'hv_phantom'), []);
+
+        state.military.formations!['hvo_southeast_herzegovina'] = {
+            id: 'hvo_southeast_herzegovina' as FormationId,
+            faction: 'HRHB',
+            name: 'Southeast Herzegovina OZ',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            kind: 'corps',
+            personnel: 0,
+        } as FormationState;
+        spawnJnaPhantomBrigades(state);
+
+        assert.equal(phantomIdsByKind(state, 'hv_phantom').length, _HV_PHANTOM_DEFS.length);
+    });
+
     it('keeps the 1995 HV expeditionary wave coupled to the Storm turn', () => {
         assert.equal(_HV_PHANTOM_DEFS.length > 0, true, 'positive control: HV catalog must not be empty');
         const expeditionaryWave = _ALL_PHANTOM_DEFS.filter(

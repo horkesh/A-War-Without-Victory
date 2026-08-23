@@ -352,6 +352,8 @@ Formation cohesion must remain in [0, 100] after all updates.
 
 `location_osid` is the physical placement truth used by combat, movement, validation, and map rendering. `hq_osid`, `corps_id`, parent assignment, and other command metadata are command/navigation context and must never substitute for physical placement. Non-spatial army-HQ or corps-asset records may omit `location_osid`; every active combat brigade may not. Newly recruited or spawned brigades must be placed on a valid faction-controlled OSID in their home municipality, using deterministic fallback ordering, or not be created.
 
+Temporary JNA/HV phantom brigades are subordinate additions to an authored military world, not a substitute order of battle. Phantom spawning requires at least one non-phantom formation in state, and each phantom requires its authored `corps_id` formation to exist before it may spawn. The sole exception is `jna_herzegovina_command`: that command is intentionally synthesized by corps-command initialization after its JNA phantom subordinates spawn. A scenario that starts without formations therefore receives no phantoms at startup; later turn-gated spawning remains possible only after the required military command substrate exists.
+
 ### 14.5 Retreat determinism
 
 When a defender retreats, valid destinations are chosen deterministically. **Tie-break:** enemy adjacency count ascending (prefer rear), then OSID string sort (stable ordering).

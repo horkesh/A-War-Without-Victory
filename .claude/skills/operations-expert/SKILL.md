@@ -91,6 +91,7 @@ For parallel early-war JNA-directed operations:
 2. `initializeCorpsCommand` must be called AFTER `spawnJnaPhantomBrigades` in `scenario_runner.ts`
 3. Only JNA phantoms (with matching `corps_id`) on the synthetic corps op — VRS brigades follow their own corps
 4. JNA phantoms withdraw w6-w8; captured territory needs VRS follow-up (triggered op or corps-level auto-ops)
+5. Phantom spawning requires a non-phantom military substrate and the authored host `corps_id` formation. `jna_herzegovina_command` is the only host-existence exception because step 2 synthesizes it from its already-spawned subordinates. Never weaken this into a kind-only or faction-only check.
 
 ## Attack Evaluation Pipeline (lines 143-212 of bot_brigade_eval_attack.ts)
 1. Phase = execution check

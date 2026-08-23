@@ -531,6 +531,8 @@ const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
 ];
 
 const ALL_PHANTOM_DEFS: PhantomDef[] = [...JNA_PHANTOM_DEFS, ...HV_PHANTOM_DEFS, ...HV_PHANTOM_DEFS_1995];
+const ALL_PHANTOM_IDS = new Set<string>(ALL_PHANTOM_DEFS.map((def) => def.id));
+const SYNTHETIC_JNA_COMMAND_ID = 'jna_herzegovina_command';
 
 export interface SpawnJnaPhantomBrigadesOptions {
     emitControlEvents?: boolean;
@@ -546,6 +548,18 @@ export interface SpawnJnaPhantomBrigadesOptions {
  * Handles both JNA (VRS) and HV (HRHB) phantoms.
  */
 export function spawnJnaPhantomBrigades(state: GameState, options: SpawnJnaPhantomBrigadesOptions = {}): void {
+    const existingFormations = state.military.formations ?? {};
+    const hasMilitarySubstrate = Object.entries(existingFormations).some(([id, formation]) =>
+        formation != null
+        && !ALL_PHANTOM_IDS.has(id)
+        && formation.kind !== 'jna_phantom'
+        && formation.kind !== 'hv_phantom'
+    );
+    // Phantom task groups are temporary additions to an authored military world,
+    // not a substitute OOB. In particular, Option-B/noop harness scenarios
+    // deliberately omit all formations, so phantoms cannot manufacture their startup OOB.
+    if (!hasMilitarySubstrate) return;
+
     if (!state.military.formations) state.military.formations = {};
     const turn = state.meta?.turn ?? 0;
     const emitControlEvents = options.emitControlEvents ?? true;
@@ -570,6 +584,12 @@ export function spawnJnaPhantomBrigades(state: GameState, options: SpawnJnaPhant
         // preserves all existing JNA + 1992 HV Op-Jackal phantoms).
         const spawnTurn = def.spawn_turn ?? 0;
         if (turn < spawnTurn) continue;
+
+        // A phantom is subordinate military content: it cannot precede its
+        // authored host command. The JNA Herzegovina command is the sole
+        // exception because initializeCorpsCommand intentionally synthesizes
+        // that command from its already-spawned JNA phantoms.
+        if (def.corps_id !== SYNTHETIC_JNA_COMMAND_ID && !state.military.formations[def.corps_id]) continue;
 
         const faction: FactionId = def.faction ?? 'RS';
         const kindTag = def.kind_tag ?? 'jna_phantom';
