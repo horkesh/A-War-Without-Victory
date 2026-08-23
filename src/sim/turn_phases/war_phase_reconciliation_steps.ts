@@ -10,6 +10,8 @@ import {
     sealFinalSectorTruthFromCurrentSectors,
 } from '../combat/final_sector_truth_reconciliation.js';
 import { computeCombatEffectiveBrigades } from '../negotiation/compute_combat_effective.js';
+import { repairActiveEliteDeploymentOrdersAfterFinalTopology } from '../combat/army_reserve_system.js';
+import type { Osid } from '../combat/osid_adjacency.js';
 import { computeSpatialContext } from '../spatial_context.js';
 import type { NamedPhase, TurnContext } from '../turn_pipeline_types.js';
 import {
@@ -150,6 +152,19 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
                 { session: reconciliationSession },
             );
         }
+    },
+    {
+        name: 'repair-active-elite-deployment-after-final-topology',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const spatial = getSpatialContextCache(context);
+            const adjacency = spatial?.postCombat?.adjacency ?? spatial?.preCombat.adjacency;
+            if (!adjacency) return;
+            repairActiveEliteDeploymentOrdersAfterFinalTopology(
+                context.state,
+                adjacency as Map<Osid, Osid[]>,
+            );
+        },
     },
     {
         name: 'final-distribute-brigades-to-front',
