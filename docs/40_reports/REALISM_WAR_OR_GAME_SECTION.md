@@ -6,6 +6,14 @@
 
 ## 8. Realism (War-or-Game)
 
+### Current 188-week verdict (2026-08-23)
+
+**B+; an A is withheld.** The engine now completes a clean, deterministic 188-week campaign with a fail-closed truth checkpoint, 31/31 authored anchors, 637/712 raw OSID matches, coherent operation/combat counters, and a plausible headline military-death total. A commander can trust the run as reproducible engine output. An A-grade historical claim is not yet justified because casualty-reporting scalars prevent the headline split from independently validating raw lethality; missing/captured lacks a like-for-like historical contract; civilian deaths cover only modeled pathways; and endpoint territory has not been evaluated area-weighted. Four of six 1995 HV formations also have no reachable authored operation window after spawning, a catalog/timing limitation rather than a movement-engine failure.
+
+The former r65 sector-ownership defect is closed: after final topology invalidates a live elite loan, a narrow post-topology pass issues the normal deterministic deployment order in the same turn. Repeat clean runs are byte-identical over eight core artifacts. The campaign consequence is not neutral—four final OSIDs change versus the old run, two toward and two away from the painted target—so the score stays 637 rather than concealing the cascade.
+
+The sections below preserve the earlier 40-week assessment as historical evidence; their casualty totals, territorial deltas, and open-defect list are superseded by this current 188-week verdict.
+
 ### Grade
 
 **B.** Attack outcomes are now plausible (posture bug fixed in n482: ~25% catastrophic, ~53% decisive; early-war success 77%). A real commander would still find RS over-capture (+104 OSID delta), low total casualties (~17.5k KIA at w40 vs 40–60k target), HVO near-passivity, and zero-morale units fighting at full strength absurd. Until RS territorial gain is reined in and at least one of casualty volume or HVO/morale is fixed, the sim is "recognizable but too gamey" — not yet A-tier.

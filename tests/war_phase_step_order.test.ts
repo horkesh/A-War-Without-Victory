@@ -88,7 +88,8 @@ describe('war-phase step ordering', () => {
         assertBefore('tick-elite-loans', 'reconcile-final-sector-truth');
         assertBefore('rederive-osid-front-segments', 'reconcile-final-sector-truth');
         assertBefore('reconcile-final-operation-truth', 'reconcile-final-sector-truth-after-ops');
-        assertBefore('reconcile-final-sector-truth-after-ops', 'final-distribute-brigades-to-front');
+        assertBefore('reconcile-final-sector-truth-after-ops', 'repair-active-elite-deployment-after-final-topology');
+        assertBefore('repair-active-elite-deployment-after-final-topology', 'final-distribute-brigades-to-front');
         assertBefore('final-distribute-brigades-to-front', 'seal-final-sector-truth-after-distribution');
         expect(stepNames.filter(name => name.startsWith('assert-'))).toEqual([]);
     });
@@ -227,6 +228,8 @@ describe('war-phase step ordering', () => {
         // +1 from rear-pocket-consolidation after the paramilitary fade week.
         // +1 from apply-brcko-tactical-group-relocation (Brčko defense lever part 2,
         // flag-gated AWWV_BRCKO_TACTICAL_GROUP, default OFF, 2026-08-11).
-        expect(stepNames.length).toBe(188);
+        // +1 from repair-active-elite-deployment-after-final-topology: restores
+        // movement ownership if final topology invalidates a live loan assignment.
+        expect(stepNames.length).toBe(189);
     });
 });

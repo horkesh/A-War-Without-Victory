@@ -228,6 +228,7 @@ describe('scenario end report h1.5', () => {
 
 describe('scenario failure reporting h1.5.1', () => {
     const BASE_OUT = join(process.cwd(), '.tmp_scenario_failure_h1_5_1');
+    const BASE_ANCHOR_OUT = join(process.cwd(), '.tmp_scenario_anchor_contract');
     const SCENARIO_PATH = join(process.cwd(), 'data', 'scenarios', 'noop_4w.json');
 
     it('writes run_meta.json and failure_report.* after an early controlled crash', async () => {
@@ -297,6 +298,52 @@ describe('scenario failure reporting h1.5.1', () => {
             }
         } finally {
             await ensureRemoved(BASE_OUT);
+        }
+    }, 20_000);
+
+    it('stamps the authored anchor contract into run metadata before simulation starts', async () => {
+        const prereq = checkDataPrereqs({ baseDir: process.cwd() });
+        if (!prereq.ok) return;
+
+        await ensureRemoved(BASE_ANCHOR_OUT);
+        const scenarioPath = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json');
+        try {
+            await runScenario({
+                scenarioPath,
+                outDirBase: BASE_ANCHOR_OUT,
+                injectFailureAfterRunMeta: () => { throw new Error('anchor-contract-control'); },
+                consoleDiagnostics: false,
+            });
+            throw new Error('runScenario should throw');
+        } catch (err) {
+            const outDir = (err as Error & { out_dir: string }).out_dir;
+            const runMeta = JSON.parse(await readFile(join(outDir, 'run_meta.json'), 'utf8')) as {
+                anchor_contract: {
+                    schema_version: number;
+                    scenario_id: string;
+                    weeks: number;
+                    epoch: string;
+                    source: string;
+                    anchors: Array<{ anchor_id: string; anchor_type: string; expected_controller: string }>;
+                };
+            };
+            expect(runMeta.anchor_contract).toMatchObject({
+                schema_version: 1,
+                scenario_id: 'apr1992_definitive_188w',
+                weeks: 188,
+                epoch: 'oct1995',
+                source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1',
+            });
+            expect(runMeta.anchor_contract.anchors).toHaveLength(31);
+            expect(new Set(runMeta.anchor_contract.anchors.map((anchor) => anchor.anchor_id)).size).toBe(31);
+            expect(runMeta.anchor_contract.anchors).toContainEqual(expect.objectContaining({
+                anchor_id: 'op:srebrenica:srebrenica_2',
+                anchor_type: 'osid',
+                expected_controller: 'RS',
+            }));
+            expect(runMeta.anchor_contract.anchors.filter((anchor) => anchor.anchor_type === 'control_band')).toHaveLength(1);
+        } finally {
+            await ensureRemoved(BASE_ANCHOR_OUT);
         }
     }, 20_000);
 });

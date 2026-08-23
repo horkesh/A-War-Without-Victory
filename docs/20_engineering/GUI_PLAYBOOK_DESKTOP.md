@@ -9,7 +9,7 @@
    - Left sidebar `WAR STATUS` + `ORDER OF BATTLE`
    - Center map order arrows and front lines
    - Right panel tabs (`OVER`, `ADMIN`, `CTRL`, `INTEL`, `ORDERS`, `AAR`, `EVENTS`)
-5. Review the loaded save state in-place. Completed saves with replay sidecars expose the `VerdictScreen` replay scrubber; large replay sidecars use manifest summaries rather than parsing the full frame sequence in the renderer. When a full `replay_save_sequence.json` sidecar is loaded, the scrubber also exposes `Inspect Map` for read-only tactical-map inspection of the selected frame.
+5. Review the loaded save state in-place. For completed saves, `VerdictScreen` loads replay summaries from `replay_save_manifest.json` rather than parsing a large full-frame sequence in the renderer. When a compatible full `replay_save_sequence.json` sidecar is loaded, the scrubber also exposes `Inspect Map` for read-only tactical-map inspection of the selected frame.
 
 ## New UI Elements
 
