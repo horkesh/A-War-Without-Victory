@@ -6,11 +6,38 @@
     "description": "Painted control target: October 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 315,
-      "RBiH": 290,
+      "RS": 314,
+      "RBiH": 291,
       "HRHB": 107
     },
-    "source": "painted_control_targets"
+    "source": "painted_control_targets",
+    "revision": 1,
+    "changelog": [
+      {
+        "date": "2026-08-12",
+        "osid": "op:gorazde:kolovarice",
+        "from": "RBiH",
+        "to": "RS",
+        "commit": "e3a28e25f",
+        "rationale": "Owner-directed correction of a known reference error; recorded retroactively. Note this OSID is separately a merge defect, wrong under any single controller."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kladanj:kladanj_3",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "BB2 printed 475 and BB1 printed 341/359 describe Kladanj town as Muslim-held in 1994 and twice in July 1995; BB1 printed 477 places two ARBiH brigade HQs there in the 1995 OOB. Pyrrhic panel 2026-08-23, 4/4 GO."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kladanj:staric_2",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "BB1 printed 341 fixes the confrontation line ~10km east of Kladanj town in July 1995 (Srebrenica deportee drop-off at Tisca); all staric_2 settlements lie 5.3-9.7km. BB2 printed 476 records the May 1994 offensive pushing the line east of every constituent. Pyrrhic panel 2026-08-23, no dissent. NOT applied to jan1993/apr1994: pre-offensive, unevidenced."
+      }
+    ]
   },
   "by_settlement_id": {
     "op:banja_luka:banja_luka_2": "RS",
@@ -356,9 +383,9 @@
     "op:kiseljak:gromiljak_2": "HRHB",
     "op:kiseljak:kiseljak_2": "HRHB",
     "op:kladanj:brgule": "RS",
-    "op:kladanj:kladanj_3": "RS",
+    "op:kladanj:kladanj_3": "RBiH",
     "op:kladanj:olovci_2": "RBiH",
-    "op:kladanj:staric_2": "RS",
+    "op:kladanj:staric_2": "RBiH",
     "op:kladanj:tarevo_2": "RBiH",
     "op:kladanj:tuholj_2": "RBiH",
     "op:kladanj:vucinici_2": "RS",
