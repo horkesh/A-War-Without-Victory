@@ -80,9 +80,10 @@ All six HV expeditionary formations spawn at turn 174 and move. Two have reachab
 - Focused final slices: 55/55 validator + checkpoint tests; earlier engine/phase slices 106/106 and 47/47.
 - TypeScript typecheck: passed before the clean campaign runs.
 - Same-commit clean 188-week repeat: passed and byte-identical over eight core artifacts.
+- Complete final-tree `npm run test:vitest:balanced`: passed with all four isolated lanes and the 50-file / 800-test serial hazard tail; top-level exit code 0.
 - `npm run canon:check`: determinism static scan passed; baseline comparison failed against the deliberately frozen pre-repair manifest (six 188-week and four 52-week artifact mismatches). No pin was regenerated.
 
-The complete balanced suite and remote CI are promotion gates recorded separately; this report does not claim them before they run on the final documentation/validator tree. The canon gate cannot be green while the protected manifest remains intentionally stale, and that red is reported rather than bypassed.
+Remote CI remains a promotion gate recorded separately. The canon gate cannot be green while the protected manifest remains intentionally stale, and that red is reported rather than bypassed.
 
 ## Files and ownership
 
