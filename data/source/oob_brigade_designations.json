@@ -2451,6 +2451,16 @@
       "unit_type": "light",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
+    },
+    {
+      "id": "rs_visegrad_brigade",
+      "faction": "RS",
+      "designation_code": "AWWV-BDE-RS-VISEGRAD-BRIGADE",
+      "english_gloss": "Višegrad Brigade",
+      "official_bcs": "Višegradska brigada",
+      "unit_type": "brigade",
+      "echelon": "brigade",
+      "source_basis": "catalogued_designation"
     }
   ]
 }
