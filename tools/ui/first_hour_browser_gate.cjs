@@ -662,20 +662,26 @@ async function runFoundationalFlow(page, summary, flow) {
   await waitForVisibleText(page, 'A WAR WITHOUT VICTORY');
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_main_menu`);
 
+  await clickByText(page, 'New War');
+  await page.waitForSelector('[data-testid="main-menu-faction-RBiH"]', { visible: true, timeout: 15000 });
   await clickSelector(page, `[data-testid="main-menu-faction-${flow.faction}"]`, `${flow.faction} faction`);
+  await waitForVisibleText(page, 'Take command');
+  const dossierText = await visibleText(page);
+  if (!dossierText.includes(flow.identityNeedle)) {
+    throw new Error(`${flow.faction} faction dossier did not show expected identity copy: ${dossierText.replace(/\s+/g, ' ').slice(0, 1400)}`);
+  }
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_faction_dossier`);
+
+  await clickByText(page, 'Take command');
+  await waitForVisibleText(page, 'How should the war unfold?');
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_decision_mode`);
+
+  await clickByText(page, 'Begin');
   await waitForVisibleText(page, 'WAR HAS STARTED');
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_war_start_splash`);
 
   await clickByText(page, 'Acknowledge');
-  await waitForVisibleText(page, 'WAR BEGINS');
-  const identityDialog = await dialogText(page);
-  if (!identityDialog.includes(flow.identityNeedle)) {
-    throw new Error(`${flow.faction} WAR BEGINS identity dialog did not show expected copy: ${identityDialog}`);
-  }
-  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_war_begins_identity`);
-
-  await clickByText(page, 'Begin');
-  await waitUntilTextAbsent(page, 'WAR BEGINS');
+  await waitUntilTextAbsent(page, 'WAR HAS STARTED');
   await waitForVisibleText(page, 'President');
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_opening_brief`);
 
