@@ -3164,3 +3164,33 @@ redundant now, but they are load-bearing elsewhere — 40w is referenced by 38 f
 26 tests and the UI `DataLoader`, 52w by `desktop_sim.ts` and `startup_snapshot.ts` (it is the
 desktop campaign scenario), 104w by the presidential-cadence tests. Retiring those is a
 refactor, not a cleanup, and needs its own decision.
+
+## 2026-08-24 (later) — three cells fixed uniformly across all four checkpoints; floor 645 → 648
+
+`op:olovo:gurdici_2`, `op:kladanj:vucinici_2` and `op:kladanj:staric_2` set to RBiH in ALL
+FOUR references on the owner's determination that each was RBiH-held throughout and never
+changed hands. All twelve cells read reference RS against engine RBiH, so all twelve were
+pure fixes: **673 / 661 / 660 / 648** at weeks 39/104/156/188, +3 at every checkpoint.
+
+**Applied uniformly on purpose.** A cell that "never changed hands" must read the same in
+every snapshot; correcting a subset would leave the reference describing a flip the
+correction denies. That failure mode was live earlier the same day — the first `staric_2`
+reversal touched oct1995 only and had to be extended to apr1995 to stop the reference saying
+Starić went RBiH in spring 1995 and back to RS by autumn.
+
+**`staric_2` moved three times today and ended where the panel put it.** `cd0228c37` set
+apr1995/oct1995 RS→RBiH on Pyrrhic panel 2026-08-23 (BB1 printed 341 / BB2 printed 476);
+`b9529eb77` reversed both to RS on an owner determination; this change restores RBiH in all
+four. The end state AGREES with the original panel finding and extends it. The intervening
+reversal is left in the changelog rather than erased — three same-day entries on one cell is
+confusing, but a silently tidied log is worse, and the panel being vindicated is worth having
+on the record.
+
+**Baseline signature, second confirmation:** 6 of 32 artifacts moved — `run_summary.json` for
+188w and 52w, plus `end_report.md` and `run_summary.json` for both 4w fixtures. The 4w pair
+moved this round and not the last because jan1993 changed here, and Check #27
+(`anomaly_checks_extended.ts:558`) reads jan1993 on EVERY scenario regardless of length. **No
+`final_save.json` pin moved.** Same discriminator as before: a reference-only edit that moves
+a final-save pin has leaked scoring into the sim.
+
+**Day total: 50 corrections, floor 639 → 648, engine untouched throughout.**

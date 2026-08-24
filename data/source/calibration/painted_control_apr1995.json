@@ -6,12 +6,12 @@
     "description": "Painted control target: April 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 391,
-      "RBiH": 245,
+      "RS": 388,
+      "RBiH": 248,
       "HRHB": 76
     },
     "source": "painted_control_targets",
-    "revision": 3,
+    "revision": 4,
     "changelog": [
       {
         "date": "2026-08-24",
@@ -34,7 +34,7 @@
         "osid": "op:breza:podgora",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -42,7 +42,7 @@
         "osid": "op:donji_vakuf:komar_2",
         "from": "RBiH",
         "to": "RS",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -50,7 +50,7 @@
         "osid": "op:donji_vakuf:prusac_2",
         "from": "RBiH",
         "to": "RS",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -58,7 +58,7 @@
         "osid": "op:glamoc:glamoc_2",
         "from": "HRHB",
         "to": "RS",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence. CORROBORATED: this cell is anchored at apr1995 and the reference contradicted its own anchor; the correction restores agreement."
       },
       {
@@ -66,7 +66,7 @@
         "osid": "op:glamoc:kovacevci_2",
         "from": "HRHB",
         "to": "RS",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -74,7 +74,7 @@
         "osid": "op:glamoc:pribelja",
         "from": "HRHB",
         "to": "RS",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -82,7 +82,7 @@
         "osid": "op:glamoc:vidimlije_2",
         "from": "HRHB",
         "to": "RS",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -90,7 +90,7 @@
         "osid": "op:gorazde:faocici_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -98,7 +98,7 @@
         "osid": "op:gorazde:hrancici",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -106,7 +106,7 @@
         "osid": "op:gorazde:zorovici",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -114,7 +114,7 @@
         "osid": "op:kiseljak:brnjaci_2",
         "from": "RBiH",
         "to": "HRHB",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -122,7 +122,7 @@
         "osid": "op:kladanj:brgule",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -130,7 +130,7 @@
         "osid": "op:konjic:bijela_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -138,7 +138,7 @@
         "osid": "op:kresevo:kresevo_2",
         "from": "RBiH",
         "to": "HRHB",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -146,7 +146,7 @@
         "osid": "op:livno:gubin_2",
         "from": "HRHB",
         "to": "RS",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -154,7 +154,7 @@
         "osid": "op:mostar:kruzanj_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -162,7 +162,7 @@
         "osid": "op:mostar:vranjevici_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -170,7 +170,7 @@
         "osid": "op:travnik:varosluk",
         "from": "RBiH",
         "to": "RS",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the apr1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -178,8 +178,32 @@
         "osid": "op:kladanj:staric_2",
         "from": "RBiH",
         "to": "RS",
-        "commit": "pending",
+        "commit": "b9529eb77",
         "rationale": "Owner determination, 2026-08-24: Staric historically never changed hands. Applied for CONSISTENCY with the same-day oct1995 reversal — leaving apr1995 as RBiH would have described Staric flipping to RBiH in spring 1995 and back to RS by autumn, which is precisely the history this correction denies. Like the oct1995 entry this reverses the RS->RBiH change of commit cd0228c37 (Pyrrhic panel 2026-08-23, no dissent, BB1 printed 341 / BB2 printed 476 geometric reading); the panel entry carried citations, this one carries owner authority."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:olovo:gurdici_2",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24: held by RBiH throughout the war; the cell never changed hands. Applied UNIFORMLY across all four checkpoints so the reference cannot describe a flip that did not occur. No documentary source cited; Pyrrhic-panel review overridden by the owner."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kladanj:vucinici_2",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24: held by RBiH throughout the war; the cell never changed hands. Applied UNIFORMLY across all four checkpoints so the reference cannot describe a flip that did not occur. No documentary source cited; Pyrrhic-panel review overridden by the owner."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kladanj:staric_2",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24: held by RBiH throughout the war; the cell never changed hands. Applied UNIFORMLY across all four checkpoints so the reference cannot describe a flip that did not occur. No documentary source cited; Pyrrhic-panel review overridden by the owner. NOTE THE SEQUENCE FOR THIS CELL: cd0228c37 set apr1995/oct1995 RS->RBiH on Pyrrhic panel 2026-08-23 (BB1 printed 341 / BB2 printed 476); b9529eb77 reversed those to RS the same day on an owner determination that it never changed hands; this entry restores RBiH everywhere. The end state therefore AGREES with the original panel finding for both 1995 snapshots and extends it to jan1993/apr1994 — the intervening reversal was churn, and is left in the log rather than erased so the record shows what actually happened."
       }
     ]
   },
@@ -529,10 +553,10 @@
     "op:kladanj:brgule": "RBiH",
     "op:kladanj:kladanj_3": "RBiH",
     "op:kladanj:olovci_2": "RBiH",
-    "op:kladanj:staric_2": "RS",
+    "op:kladanj:staric_2": "RBiH",
     "op:kladanj:tarevo_2": "RBiH",
     "op:kladanj:tuholj_2": "RBiH",
-    "op:kladanj:vucinici_2": "RS",
+    "op:kladanj:vucinici_2": "RBiH",
     "op:kljuc:cadjavica": "RS",
     "op:kljuc:donje_ratkovo_2": "RS",
     "op:kljuc:donji_vrbljani_2": "RS",
@@ -655,7 +679,7 @@
     "op:odzak:donja_dubica": "RS",
     "op:odzak:gornji_svilaj": "RS",
     "op:odzak:potocani_2": "RS",
-    "op:olovo:gurdici_2": "RS",
+    "op:olovo:gurdici_2": "RBiH",
     "op:olovo:kamensko_2": "RBiH",
     "op:olovo:milankovici_2": "RBiH",
     "op:olovo:olovo_2": "RBiH",

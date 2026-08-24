@@ -28798,3 +28798,24 @@ script. 156w existed only as a workaround for the absent per-week-snapshot featu
 change adds. `40w`, `52w` and `104w` were NOT retired despite being calibration-redundant: they
 are load-bearing as test fixtures and as the desktop campaign scenario (38, 20 and 11
 referencing files respectively). That retirement is a separate refactor.
+
+### 2026-08-24 (later) — three OSIDs corrected uniformly across all four painted references
+
+`op:olovo:gurdici_2`, `op:kladanj:vucinici_2`, `op:kladanj:staric_2` → RBiH in jan1993,
+apr1994, apr1995 and oct1995 (12 cells). Owner determination: RBiH-held throughout, never
+changed hands. Every cell read reference RS against engine RBiH, so all twelve were pure
+fixes — checkpoints move to **673 / 661 / 660 / 648**, +3 each. All four references hold 712
+OSIDs; revisions now 3/3/4/4.
+
+Applied to all four deliberately: a cell that never changed hands must read identically in
+every snapshot, and a partial correction would leave the reference asserting a flip the
+correction denies.
+
+`staric_2` reached its third state today and settled on the one the Pyrrhic panel originally
+found (`cd0228c37`), reversing the same-day reversal in `b9529eb77`. The full sequence is
+recorded in the changelog rather than tidied away.
+
+Baselines re-pinned: 6 of 32 artifacts moved (188w/52w `run_summary`, both 4w fixtures on
+`end_report` + `run_summary` — the 4w pair because jan1993 changed and Check #27 reads it on
+every scenario). No `final_save.json` pin moved; the simulation is byte-identical. The 38
+entries written by `b9529eb77` had their commit field stamped from `pending`.
