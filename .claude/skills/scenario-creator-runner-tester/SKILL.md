@@ -15,7 +15,7 @@ description: Creates historical BiH war scenario starting points, runs and tests
 - **One change per calibration run.** Change ONE thing, run, compare, sign off. Never bundle.
 - **40w GO + green CI is a FALSE-GREEN for combat-behavior changes** — validate at 188w before declaring GO (corridor attrition compounds only there; it broke the Zvornik sacred anchor at a 40w-pass).
 - **Never override initial OSIDs** (census/referendum control is sacrosanct) — fix engine/OOB/ops/scenario params instead.
-- **BB is NOT ultimate:** ICTY first, then BB, then cross-check Wikipedia/Google at the least doubt. OOB master files win over BB aggregate strength.
+- **BB is NOT ultimate:** ICTY and Court of BiH judgments first, then BB, then cross-check Wikipedia/Google at the least doubt. Preserve procedural posture; an indictment is not a verdict. OOB master files win over BB aggregate strength.
 
 ## Required Reading (before any work)
 - `docs/life_lessons/calibration.md` — calibration, OOB, and combat lessons

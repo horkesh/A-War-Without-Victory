@@ -1,5 +1,19 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-23] Canon source policy: Court of BiH judgments accepted alongside ICTY judgments
+
+**Type:** Owner-directed canon and process clarification; documentation-only, no simulation or schema behavior change.
+
+**Change:** Judgments of the Court of Bosnia and Herzegovina (Court of BiH) are now explicit canonical judicial sources alongside ICTY judgments. The sensitive-history gate, Game Bible, War Specification, victory/scoring gate, event-authoring guide, and historian/narrative/scenario review skills now carry the same rule. Court of BiH judgments may ground historical claims, narrative citations, historian sign-off, and—when final and of equivalent subject-matter weight—the legal-finding limb of rupture eligibility. Every use must preserve procedural posture: an indictment establishes an indictment, a non-final judgment remains non-final, and neither may be restated as a final verdict or conviction.
+
+**Compatibility:** The loader-enforced event `source_tier` enum is unchanged. Properly cited Court of BiH judgments use the existing legacy `icty_icj_un` adjudicative/public-law tier, documented as a compatibility mapping rather than a new schema value.
+
+**Files:** `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`, `docs/10_canon/Game_Bible_v0_9_0.md`, `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`, `docs/10_canon/War_Specification_v0_9_0.md`, `docs/10_canon/FORAWWV.md`, `docs/20_engineering/EVENT_SYSTEM_AUTHORING_GUIDE.md`, `.claude/skills/{historian,narrative-designer,scenario-creator-runner-tester,war-or-game}/SKILL.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and the local Codex historian skill.
+
+**Manual-review resolution:** Following explicit owner instruction, the stale shorthand in `docs/10_canon/FORAWWV.md` §XVI.2 was updated to include Court of BiH judgments and the procedural-posture safeguard. The earlier section reference “§XI.2” was itself incorrect and is corrected here.
+
+---
+
 ## [2026-08-03] Doboj/Gračanica/Zvornik 188w regression: true root causes found (two legitimate R4/R7 commits), including a documented false start
 
 **Type:** Calibration root-cause investigation, correction of an earlier wrong attribution, and a reverted-then-restored engine commit. Full sequence recorded honestly because it includes a real mistake.

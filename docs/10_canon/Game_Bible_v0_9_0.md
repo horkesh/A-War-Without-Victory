@@ -312,7 +312,7 @@ The full canonical statement is `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`
 Every depiction of sensitive history lives in exactly one of three rings:
 
 - **Ring 1 — Modeled mechanically:** enclaves, displacement, paramilitary sweeps, war crimes counter, and rupture consequences (currently only `srebrenica_genocide_1995`).
-- **Ring 2 — Represented narratively:** historical events, ICTY-cited essays, Chronicle entries, Cost Ledger prose. The game depicts every major atrocity from BB and ICTY in this ring.
+- **Ring 2 — Represented narratively:** historical events, judicially cited essays, Chronicle entries, Cost Ledger prose. The game depicts every major atrocity grounded in BB, ICTY, and applicable Court of BiH judgments in this ring.
 - **Ring 3 — Refused:** no "commit genocide" decision tree, no concentration camp system, no negotiable condemnation, no body-count optimization surface, no "atrocity efficiency" metric, no calendar-driven atrocity recording, and seven other refused surfaces. This list is exhaustive and binding.
 
 A feature that fits in none of the three rings does not exist yet. If you cannot place it in a ring, do not build it.
@@ -322,7 +322,7 @@ A feature that fits in none of the three rings does not exist yet. If you cannot
 A historical event becomes eligible for rupture status only if it meets all four criteria:
 
 1. **Mass scale:** >1,000 civilian deaths in a bounded event, or systematic over a bounded timeframe.
-2. **International legal finding:** ICTY conviction (genocide, crimes against humanity, grave breaches) or ICJ/UN finding of equivalent weight.
+2. **Authoritative legal finding:** ICTY conviction (genocide, crimes against humanity, grave breaches), final Court of BiH conviction of equivalent subject-matter weight, or ICJ/UN finding of equivalent weight. Court of BiH judgments are canonical alongside ICTY judgments, with their actual procedural posture preserved.
 3. **Specific trigger condition:** discrete, deterministic game-state condition (control of a specific OSID, presence of a flag, turn range), NOT a cumulative threshold and NOT a calendar-window heuristic.
 4. **Non-reversible:** once recorded, the event is a fact of the world for the run.
 
@@ -330,11 +330,11 @@ Adding a rupture is a capital-R Decision requiring `/historian` + `/war-or-game`
 
 ### 22.3 Counterfactual silence is canon
 
-When a player's modeled war does not satisfy the rupture trigger condition, the rupture is correctly silent. The historical record (Ring 2: essays + ICTY citations) remains canonical and accessible regardless of campaign path. The §3 ghost-entry register (e.g., Mission E `enclave_defended` ghost at `data/codex/ghost_entries/enclave_defended.md`) records the divergence in historical voice without celebration, minimization, or "less deadly than history" framing. (Q-CANON-RUPT-4 resolution, 2026-05-04.)
+When a player's modeled war does not satisfy the rupture trigger condition, the rupture is correctly silent. The historical record (Ring 2: essays + applicable ICTY and Court of BiH citations) remains canonical and accessible regardless of campaign path. The §3 ghost-entry register (e.g., Mission E `enclave_defended` ghost at `data/codex/ghost_entries/enclave_defended.md`) records the divergence in historical voice without celebration, minimization, or "less deadly than history" framing. (Q-CANON-RUPT-4 resolution, 2026-05-04.)
 
 ### 22.4 Cost Ledger wording
 
-The Cost Ledger is the closing prosecutorial voice. Required: historical voice, ICTY case citations, specific atrocity names, integer civilian counts. Forbidden: euphemisms, trivializing comparisons, minimization, second-person framing, achievement-style language, humor or ironic distance. Tone draws from ICTY summary judgments and UN investigative reports — not sports commentary, not Paradox endgame summaries. Full constraints in `SENSITIVE_HISTORY_DESIGN_GATE.md` §4.
+The Cost Ledger is the closing prosecutorial voice. Required: historical voice, applicable ICTY or Court of BiH case citations, specific atrocity names, integer civilian counts. Forbidden: euphemisms, trivializing comparisons, minimization, second-person framing, achievement-style language, humor or ironic distance. Tone draws from ICTY and Court of BiH judgments and UN investigative reports — not sports commentary, not Paradox endgame summaries. Full constraints in `SENSITIVE_HISTORY_DESIGN_GATE.md` §4.
 
 ## 23. Victory Conditions and Pyrrhic Scoring (canon, v0.9.0)
 

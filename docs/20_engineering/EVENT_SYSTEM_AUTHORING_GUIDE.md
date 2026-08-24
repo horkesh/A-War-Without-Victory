@@ -31,7 +31,7 @@ Phase D ships 44 causal-chain packets in Layer 1. Phase B authored the writers a
 - **`closes_events_runtime`** — Per-option array naming events this option forecloses when chosen. Writers fire `recordClosedEvents`. Subject to the rupture-foreclosure policy.
 - **`future_consequences[]`** — Branch-visibility narrative annotations of what an option opens / closes / shifts. Distinct from `enables_events_runtime` (narrative/receipt metadata vs engine wiring). May overlap; both are deterministic. As of P17 (2026-06-27), this metadata is not rendered as a pre-choice `EventDecisionModal` preview; it remains available to diagnostics, post-choice receipts, and consequence accounting.
 - **Ring 3** — Categorically refused sensitive-history surfaces per canon §1.3 (11 binding refusals). Engine-enforced via `RING3_SENSITIVE_FAMILIES` + `isRing3SensitiveFamily()` in `src/sim/events/event_families.ts`.
-- **`source_tier`** — Required field on every event row. One of `icty_icj_un`, `agreement_text`, `balkan_battlegrounds`, `corroborated_participant`, `design_counterfactual`, `pending`. Loader-enforced.
+- **`source_tier`** — Required field on every event row. One of `icty_icj_un`, `agreement_text`, `balkan_battlegrounds`, `corroborated_participant`, `design_counterfactual`, `pending`. Loader-enforced. The legacy `icty_icj_un` identifier is the adjudicative/public-law tier and also covers properly cited Court of BiH judgments; the identifier remains stable for schema compatibility.
 - **`historical_default` / `staff_recommended`** — Two distinct response options. `historical_default` is the response history actually produced (used by bots under `bot_response_logic: "historical"` and is the calibration-discipline canonical path). `staff_recommended` is the design layer's separated recommendation surface for the human player; never the bot's path.
 
 ---
@@ -61,7 +61,7 @@ When the event has historical content (not pure design counterfactual), author a
 
 - Location: `docs/40_reports/research/YYYYMMDD_EVENT_FAMILY_<id>.md`
 - Required sections: trigger window with ICTY/ICJ/BB citations; canonical `historical_default`; the 2-3 counterfactual options with cost floors; the `source_note` paragraph including §3.6 forward-looking guard if sensitive-adjacent.
-- Source hierarchy (from `docs/PROJECT_LEDGER_KNOWLEDGE.md`): ICTY/ICJ/UN first, then agreement text, then Balkan Battlegrounds, then corroborated participant accounts, then design counterfactual. The `source_tier` field on the row must match the strongest source actually cited.
+- Source hierarchy (from `docs/PROJECT_LEDGER_KNOWLEDGE.md`): authoritative judicial/public-law sources first (ICTY, Court of BiH judgments, ICJ/UN), then agreement text, then Balkan Battlegrounds, then corroborated participant accounts, then design counterfactual. The `source_tier` field on the row must match the strongest source actually cited; Court of BiH judgments use the legacy `icty_icj_un` tier.
 
 ### 2.2 JSON authoring
 
@@ -156,7 +156,7 @@ Per canon §6, sensitive-adjacent events require a 4-specialist panel before aut
 
 | Specialist | Role |
 |---|---|
-| `/historian` | ICTY/ICJ/UN source-tier evidence; named perpetrators in documented roles |
+| `/historian` | ICTY/Court of BiH/ICJ/UN source-tier evidence; named perpetrators in documented roles |
 | `/game-designer` | Ring 3 boundary verification per canon §1.3; cost-floor magnitudes per Rulebook §3.6 |
 | `/canon-compliance-reviewer` | §3.6 forward-looking guard enforcement; `RING3_SENSITIVE_FAMILIES` exact-match; `validateRing3EnablingRejection` pass |
 | `/narrative-designer` | Canon §4 prosecutorial wording; no reward language; consequence framing |
@@ -170,12 +170,12 @@ Reference precedent (read these before drafting a new sensitive packet):
 
 ### 3.3 §3.6 forward-looking guard text
 
-Required content for any sensitive-adjacent `source_note`. One paragraph, ICTY/ICJ-cited:
+Required content for any sensitive-adjacent `source_note`. One paragraph, cited to an applicable ICTY, Court of BiH, or ICJ source:
 
 1. Frame the event as a **response to existing state**, NOT authorization of a new sensitive act.
 2. Explicitly prohibit downstream `csq_*` consequence rows from re-authoring: cleansing / forced-displacement / civilian-targeting / paramilitary-deployment / hostage-taking / detention-camp-expansion / ethnic-targeting.
 3. Enumerate the adjacent sensitive surfaces that remain canon-gated through their existing event surfaces. Typical list: `drina_valley_ethnic_cleansing_1992`, `srebrenica_falls_1995`, `srebrenica_genocide_1995`, `un_hostage_crisis_1995`, `paramilitary_policy_rs_1992`, `deliberate_force_rs_compliance_1995`, `concentration_camps_revealed_1992`.
-4. Cite the specific ICTY case and paragraph. Wikipedia is not acceptable. Balkan Battlegrounds is acceptable but not preferred when an ICTY paragraph is available.
+4. Cite the specific ICTY or Court of BiH case and paragraph where available, preserving procedural posture. Wikipedia is not acceptable. Balkan Battlegrounds is acceptable but not preferred when a judicial paragraph is available.
 
 The canonical reference example is the `source_note` on `concentration_camps_revealed_1992` in `data/scenarios/events/war_1992.json`. Read it before drafting your own.
 
@@ -364,7 +364,7 @@ The F3 tool is the entrypoint for new authoring — it answers "what does the ch
 
 - Author `historical_default` with `bot_response_logic: "historical"`. Preserves calibration discipline.
 - Use canonical engine DimensionIds + EffectKinds; never invent new dimension names.
-- Cite ICTY case + paragraph in `source_note` for any historical claim.
+- Cite the applicable ICTY or Court of BiH case + paragraph in `source_note` for any adjudicated historical claim.
 - Add the §3.6 forward-looking guard paragraph to sensitive-adjacent rows.
 - Mirror existing patterns: Packet 40 for sensitive Ring 1/2; Packet 38 for non-sensitive RS-side; Phase E2 for new dimension wiring.
 - Run loader validation (`tsc --noEmit` then vitest run on event_loader.test.ts) before any further integration testing.
@@ -410,6 +410,7 @@ The F3 tool is the entrypoint for new authoring — it answers "what does the ch
 
 ### Source canon for citations
 - ICTY completed cases: https://www.icty.org/en/cases
+- Court of Bosnia and Herzegovina judgments and case records
 - ICJ Bosnia v. Serbia (2007)
 - UN A/54/549 (1999) — Srebrenica fall report
 - Balkan Battlegrounds vols. I-II

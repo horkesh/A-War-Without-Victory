@@ -4453,3 +4453,9 @@ Runtime historical and counterfactual prose is not confined to JSON. TypeScript 
 Recruitment may preserve a historical OOB identity in `oob:<authored id>` while assigning a synthetic live formation key. Any catalog that looks up only `formations[authoredId]` can silently omit a real formation even when the enclosing operation succeeds, as Farz 95 did before the shared resolver.
 
 **Reusable rule:** operation catalogs author historical identity; execution consumes live identity. Prefer an exact live key, otherwise resolve exactly one deterministically sorted OOB-tag match, and reject ambiguity. Validation and execution must share that resolver. Diagnose warning-time identity with temporal evidence: a final registry can make a pre-spawn warning look false, while a completed AAR can conceal an omitted participant.
+
+## 2026-08-23 - Court of BiH judgments are canonical judicial sources
+
+**Judicial canon is not confined to the ICTY docket.** Judgments of the Court of Bosnia and Herzegovina are accepted alongside ICTY judgments for AWWV historical grounding, sensitive-history narrative, and historian review. A final Court of BiH conviction of equivalent subject-matter weight may satisfy the authoritative-legal-finding limb of rupture eligibility, but it does not waive the other rupture criteria.
+
+**Procedural posture is part of the fact.** A citation must state what the source actually is: indictment, trial judgment, final judgment, conviction, acquittal, or other disposition. An indictment cannot be promoted into a verdict or conviction, and a non-final judgment cannot be described as final. The existing event `source_tier: icty_icj_un` remains the backward-compatible adjudicative/public-law bucket for Court of BiH judgments; no schema migration is implied. Applied in `[2026-08-23] Canon source policy: Court of BiH judgments accepted alongside ICTY judgments`.

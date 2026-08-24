@@ -40,7 +40,7 @@ The game simulates these as structured state:
 
 ### Ring 2 — Represented narratively
 
-The game depicts these in player-facing content, drawing on ICTY judgments and primary sources:
+The game depicts these in player-facing content, drawing on ICTY judgments, judgments of the Court of Bosnia and Herzegovina (Court of BiH), and primary sources:
 
 - **Historical events** in `data/scenarios/events/` — Ahmići massacre, Markale I/II shellings, Bijeljina massacre, Kravica raid, Stupni Do, Grabovica/Uždol, Tuzla Gate, Cerska breakthrough, Srebrenica arc (enclave forms → shelling → demilitarization → UN 819 → Morillon → fall).
 - **Historical essays** in `data/scenarios/essays/` — ICTY-cited essays for every major atrocity, including the full Srebrenica arc with Krstić, Karadžić, Mladić tribunal findings and the ICJ 2007 genocide declaration.
@@ -74,7 +74,7 @@ Ruptures are the highest-tier sensitive-history construct in the codebase. They 
 A historical event becomes eligible for rupture status **only if it meets all four criteria**:
 
 1. **Mass scale** — >1,000 civilian deaths in a bounded event, or systematic over a bounded timeframe.
-2. **International legal finding** — ICTY conviction (any of genocide, crimes against humanity, grave breaches) or an ICJ/UN finding of equivalent weight.
+2. **Authoritative legal finding** — an ICTY conviction (any of genocide, crimes against humanity, grave breaches), a final Court of BiH conviction of equivalent subject-matter weight, or an ICJ/UN finding of equivalent weight. Court of BiH judgments are canonical judicial sources alongside ICTY judgments, but every citation must preserve the judgment's actual procedural posture; an indictment is evidence of an indictment, not a verdict or conviction.
 3. **Specific trigger condition** — the rupture fires on a discrete, deterministic game-state condition (control of a specific OSID, presence of a flag, turn range), not a cumulative threshold. **This is the BINDING criterion: ruptures fire only on emergent satisfaction of the discrete game-state condition. No calendar-window heuristic substitution is permitted — the historical calendar alone cannot stand in for the OSID/flag/turn predicate.** Counterfactual silence (the rupture not firing because the modeled war produced no fall) is canonically correct and is the responsibility of the §3 ghost-entry register, not the rupture evaluator. (Q-CANON-RUPT-4 resolution, recommendation §5, 2026-05-04.)
 4. **Non-reversible** — once recorded, the event is a fact of the world for the remainder of the run.
 
@@ -86,7 +86,7 @@ A historical event becomes eligible for rupture status **only if it meets all fo
 
 ### Events that are **not** ruptures (and why)
 
-| Event | Deaths (approx.) | ICTY finding | Why not a rupture |
+| Event | Deaths (approx.) | Legal finding | Why not a rupture |
 |---|---|---|---|
 | Ahmići massacre | ~116 | Blaškić, Kordić, Kupreškić convictions | Scale below mass threshold; operational-level atrocity |
 | Markale I/II shellings | 68 + 43 | Findings within Sarajevo siege case law | Part of ongoing siege; no discrete single-event legal finding |
@@ -151,7 +151,7 @@ The Cost Ledger is the game's closing summary — the closest thing AWWV has to 
 ### Required
 
 - **Historical voice, third-person.** Not "you caused" or "you ordered." The war happened; the ledger records it.
-- **ICTY case citations** where applicable: Krstić (IT-98-33-T), Karadžić (IT-95-5/18-T), Mladić (IT-09-92-T), Blaškić (IT-95-14-T), Kordić (IT-95-14/2-T), Kupreškić (IT-95-16-T), Orić (IT-03-68), ICJ Bosnia v. Serbia (2007), UN A/54/549 (1999).
+- **Judicial case citations** where applicable, including ICTY and Court of BiH judgments: Krstić (IT-98-33-T), Karadžić (IT-95-5/18-T), Mladić (IT-09-92-T), Blaškić (IT-95-14-T), Kordić (IT-95-14/2-T), Kupreškić (IT-95-16-T), Orić (IT-03-68), ICJ Bosnia v. Serbia (2007), UN A/54/549 (1999). Court of BiH citations must identify the case and the judgment's procedural posture.
 - **Specific names for specific atrocities.** "Srebrenica genocide," not "a mass killing." "Ahmići massacre," not "a village incident."
 - **Civilian casualty counts as integers**, not as percentages or rates. 8,000 is 8,000; not "0.15% of the prewar population."
 
@@ -166,7 +166,7 @@ The Cost Ledger is the game's closing summary — the closest thing AWWV has to 
 
 ### Tone reference
 
-Draw the register from: ICTY summary judgments, UN investigative reports, ICRC situation reports, the Balkan Battlegrounds historical volumes. Not from: sports commentary, Paradox Interactive endgame summaries, news magazine prose.
+Draw the register from: ICTY summary judgments, Court of BiH judgments, UN investigative reports, ICRC situation reports, the Balkan Battlegrounds historical volumes. Not from: sports commentary, Paradox Interactive endgame summaries, news magazine prose.
 
 ---
 
@@ -178,7 +178,7 @@ Historical essays in `data/scenarios/essays/` are Ring 2 representation. They ar
 
 ### Constraints on essay content
 
-- **ICTY findings cited verbatim or near-verbatim** where the tribunal produced a specific finding.
+- **ICTY or Court of BiH findings cited verbatim or near-verbatim** where the court produced a specific finding, with procedural posture preserved.
 - **Named historical perpetrators in their documented roles** (Krstić, Karadžić, Mladić, Arkan, Orić, Blaškić, Kordić, etc.).
 - **Named historical victims only when the source record names them** and their families have consented (via published memorial sources) or they are public historical figures.
 - **No alternate-history essays that minimize real-world events.** A "ghost essay" for a path not taken may describe the path-not-taken outcome; it may not say "the real war was worse" as a comparison.
@@ -198,7 +198,7 @@ The Mission E `enclave_defended` ghost entry is the §3-compliant counterfactual
 
 - **Predicate location:** `src/sim/codex/dynamic_section_builder.ts` — `predEnclaveDefended()` gates emission on the `enclave_held_through_turn` flag (set when ARBiH retains `op:srebrenica:srebrenica_2`, `op:zepa:zepa_2`, `op:gorazde:gorazde_2` at the recorded turn).
 - **Narrative location:** `data/codex/ghost_entries/enclave_defended.md` — historical-voice text register, no celebration, no minimization, no "less deadly than history" framing.
-- **Canonical role:** This is the §3 register for ahistorical paths where the §1.5 #11 / §2 criterion-3 mechanical condition for a rupture is not satisfied. The Ring 2 historical record (essays + ICTY citations) remains canonical and accessible regardless; the ghost entry observes the divergence without overwriting either layer.
+- **Canonical role:** This is the §3 register for ahistorical paths where the §1.5 #11 / §2 criterion-3 mechanical condition for a rupture is not satisfied. The Ring 2 historical record (essays + applicable ICTY and Court of BiH citations) remains canonical and accessible regardless; the ghost entry observes the divergence without overwriting either layer.
 
 Any future canon-permitted counterfactual recorder (for other Ring-1 sensitive events) must follow this shape: a deterministic predicate on a flag set by the simulation's own observation system, plus a narrative file in the §4-compliant register. (Q-CANON-RUPT-4 resolution, recommendation §5, 2026-05-04.)
 
@@ -223,7 +223,7 @@ Changes that touch sensitive history require explicit multi-party review. No exc
 
 ### Evidence required for each sign-off
 
-- `/historian` reviews must cite ICTY, ICJ, or published academic-historical sources. BB (Balkan Battlegrounds) is acceptable; Wikipedia is not.
+- `/historian` reviews must cite ICTY, Court of BiH, ICJ, or published academic-historical sources. Court of BiH judgments are canonical alongside ICTY judgments; indictments and non-final judgments may be cited only as what they are. BB (Balkan Battlegrounds) is acceptable; Wikipedia is not.
 - `/war-or-game` reviews must test the change against "would a real Bosnian War observer find this absurd" — reference REAL_WAR_MASTER.md.
 - `/game-designer` reviews must verify the change does not create a Ring 3 refused surface by accident.
 - `/narrative-designer` reviews must verify §4 wording constraints are met.
@@ -280,6 +280,7 @@ Three rules derived from settling this gate. These belong in `docs/life_lessons.
 
 ### Historical sources
 - ICTY completed cases: https://www.icty.org/en/cases
+- Court of Bosnia and Herzegovina judgments and case records
 - ICJ Bosnia v. Serbia (2007)
 - UN A/54/549 (1999) — Srebrenica fall report
 - Balkan Battlegrounds vols. I-II

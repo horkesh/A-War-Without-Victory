@@ -12,8 +12,8 @@ description: Use when discussing historical events, BiH war scenarios, citation-
 - `docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md` — house execution standard.
 
 ## Source hierarchy (DIRECTIVE — BB is NOT ultimate)
-- **ICTY judgements/transcripts FIRST**, Balkan Battlegrounds second, then the rest.
-- **Cross-check Wikipedia/Google whenever there is the LEAST doubt.** BB has documented errors (e.g. it wrongly placed the 4th Corps HQ at Jablanica — real = Mostar; Jablanica was the short-lived 6th Corps' Neretva command). When BB conflicts with ICTY or a cross-check, BB loses.
+- **ICTY judgments/transcripts and Court of Bosnia and Herzegovina judgments FIRST**, Balkan Battlegrounds second, then the rest. Court of BiH judgments are canonical alongside ICTY judgments; preserve procedural posture and never restate an indictment as a verdict or conviction.
+- **Cross-check Wikipedia/Google whenever there is the LEAST doubt.** BB has documented errors (e.g. it wrongly placed the 4th Corps HQ at Jablanica — real = Mostar; Jablanica was the short-lived 6th Corps' Neretva command). When BB conflicts with an ICTY or Court of BiH judgment, or a stronger cross-check, BB loses.
 - For AWWV troop strengths/OOB, the OOB master files win over BB aggregate figures (see below).
 
 ## Mandate

@@ -129,7 +129,7 @@ The canonical pattern for counterfactual recording (Q-CANON-RUPT-4 Path (d), com
 - Deterministic predicate on a flag set by the simulation's own observation system (e.g., `predEnclaveDefended` reading `enclave_held_through_turn` flag in `dynamic_section_builder.ts`).
 - Narrative file in the §4-compliant register at `data/codex/ghost_entries/<key>.md`.
 
-Rupture consequences (`evaluateRuptureConsequences()`) fire ONLY on emergent satisfaction of a discrete game-state condition (control of a specific OSID + flag + turn predicate). Calendar-window heuristic substitution is forbidden. Counterfactual silence (no rupture in an ahistorical campaign that did not produce the trigger condition) is canonically correct. The historical record (Ring 2: essays + ICTY citations) remains accessible regardless of campaign path.
+Rupture consequences (`evaluateRuptureConsequences()`) fire ONLY on emergent satisfaction of a discrete game-state condition (control of a specific OSID + flag + turn predicate). Calendar-window heuristic substitution is forbidden. Counterfactual silence (no rupture in an ahistorical campaign that did not produce the trigger condition) is canonically correct. The historical record (Ring 2: essays + applicable ICTY and Court of BiH citations) remains accessible regardless of campaign path.
 
 The single live rupture is `srebrenica_genocide_1995` (RS controls `op:srebrenica:srebrenica_2` + `enclave_formed` flag + event-owned fall-receipt window turn ≥160). Srebrenica/Zepa fall receipts are authored by the sensitive-history event rows (`control_change` effects); Krivaja-95/Stupcanica-95 remain chronology/AAR context, not the mechanical fall-delivery acceptance criterion. See `SENSITIVE_HISTORY_DESIGN_GATE.md` §1.5 #11, §2 criterion 3, §5.
 

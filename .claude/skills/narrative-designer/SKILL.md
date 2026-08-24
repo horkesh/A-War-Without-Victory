@@ -10,7 +10,7 @@ description: Owns narrative content — event text, essay dynamic sections, brie
 - `docs/40_reports/PRODUCT_FACING_MASTER.md` — player-facing surface state.
 
 ## Source discipline (BB is NOT ultimate)
-- Consult /historian for every factual claim. The historian's hierarchy is **ICTY first, BB second, then cross-check Wikipedia/Google at the least doubt.** Never put a fact in player prose that the historian hasn't grounded.
+- Consult /historian for every factual claim. The historian's hierarchy is **ICTY and Court of BiH judgments first, BB second, then cross-check Wikipedia/Google at the least doubt.** Never put a fact in player prose that the historian hasn't grounded; preserve each judgment's procedural posture.
 - Atrocity content is sensitive — handle with dignity, never sensationalize (Ring 2 narrative gate).
 
 ## Mandate

@@ -140,10 +140,10 @@ Six per-dimension letter grades (A+/A/B/C/D/F) threshold-gated on raw dimension 
 ### 3.4 Condemnation flags
 
 Condemnation flags come from **two sources**:
-1. Recorded discrete **ruptures** (`rupture_consequences[]` → `collectCondemnationFlags()`), each tied to a specific ICTY/ICJ-adjudicated historical event, permanent once recorded. Currently one: `genocide_condemnation`, fired by the Srebrenica rupture (`src/sim/negotiation/rupture_consequences.ts`). See `SENSITIVE_HISTORY_DESIGN_GATE.md` §2 for the rupture expansion rule.
+1. Recorded discrete **ruptures** (`rupture_consequences[]` → `collectCondemnationFlags()`), each tied to a specific event supported by an authoritative legal finding under `SENSITIVE_HISTORY_DESIGN_GATE.md` §2 (ICTY, a final Court of BiH judgment of equivalent subject-matter weight, or an ICJ/UN finding), permanent once recorded. Currently one: `genocide_condemnation`, fired by the Srebrenica rupture (`src/sim/negotiation/rupture_consequences.ts`).
 2. An emergent-only, verdict-time, **non-rupture** `authorized_cleansing_condemnation` flag, computed from terminal modeled-atrocity state per `SENSITIVE_HISTORY_DESIGN_GATE.md §2a` — a general aggregate severity judgment (a union of ≥1 authorized paramilitary sweep OR catastrophic siege-driven civilian harm), NOT an accusation of any specific historical incident.
 
-Both feed `FactionVerdict.condemnation_flags[]` and `classifyOutcome`. **Only source (1) may be cited with an ICTY finding or a named historical event in any narrative surface.** Below-C atrocity decisiveness for non-genocide cases is delivered by the §2a flag (→ `hollow_victory`), NOT the cost cap (which bottoms at C per §3.5); the additive `ATROCITY_COST_GAIN` term is retained (it still forces the C-cap for otherwise-cheap wars, invariant A1).
+Both feed `FactionVerdict.condemnation_flags[]` and `classifyOutcome`. **Only source (1) may be cited with an ICTY or Court of BiH finding, or a named historical event, in any narrative surface.** Below-C atrocity decisiveness for non-genocide cases is delivered by the §2a flag (→ `hollow_victory`), NOT the cost cap (which bottoms at C per §3.5); the additive `ATROCITY_COST_GAIN` term is retained (it still forces the C-cap for otherwise-cheap wars, invariant A1).
 
 ### 3.5 War-cost cap on faction grades (`war_cost_index` / `capGradeByCost`)
 
@@ -266,7 +266,7 @@ Victory conditions terminate the war. They do **not** assign grades, outcome cla
 
 ### 5.3 Cost Ledger wording rules
 
-See `SENSITIVE_HISTORY_DESIGN_GATE.md` §4 for the full wording constraints. Summary: historical voice, ICTY-case language where available, no euphemisms, no trivializing comparisons.
+See `SENSITIVE_HISTORY_DESIGN_GATE.md` §4 for the full wording constraints. Summary: historical voice, ICTY- or Court of BiH-case language where available, no euphemisms, no trivializing comparisons.
 
 ### 5.4 What belongs in score vs narrative
 
@@ -276,7 +276,7 @@ See `SENSITIVE_HISTORY_DESIGN_GATE.md` §4 for the full wording constraints. Sum
 | Grade (A+/A/…/F) | Chronicle entries |
 | Outcome class badge | Wrapped slides |
 | Dimension grades | Historian-voiced essays |
-| Condemnation flags (structured) | Condemnation text (ICTY-cited) |
+| Condemnation flags (structured) | Condemnation text (judicially cited) |
 
 **Rule:** Anything that can be optimized against is a score. Anything that is read once and judged is narrative. Do not let the narrative surface drift into score-like comparisons that invite optimization.
 

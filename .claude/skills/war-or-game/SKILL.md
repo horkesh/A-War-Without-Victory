@@ -13,7 +13,7 @@ description: Realism auditor. Investigates sim outputs, AARs, battle logs, and c
 ## Posture
 - **CALIBRATION-LAST:** the current 188w floor is a **regression GUARD**, not a target — flag realism breaks, but don't push anyone to chase match-%.
 - **40w GO + green CI is a FALSE-GREEN for combat-behavior changes.** Demand the 188w horizon before signing off on any combat fix — corridor attrition only compounds there.
-- **BB is NOT ultimate:** when you need a historical fact, ICTY first, then BB, then cross-check Wikipedia/Google at the least doubt. Lean on Historian for citations.
+- **BB is NOT ultimate:** when you need a historical fact, ICTY and Court of BiH judgments first, then BB, then cross-check Wikipedia/Google at the least doubt. Preserve procedural posture and lean on Historian for citations.
 
 ## Required Reading (before any work)
 - `docs/life_lessons/calibration.md` — calibration, OOB, combat lessons
