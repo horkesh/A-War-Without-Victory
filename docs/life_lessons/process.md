@@ -537,3 +537,29 @@
   14. **A code path named as a fatal wall without checking it is reached.** See the architecture entry of the same date.
 - **★ Do instead — the rule, and the reason it earns its own entry:** **give every verification and monitoring check a positive control before quoting its output.** Ask of each probe: *what would this print if the thing I am ruling out were actually happening?* If you cannot answer, the check is decorative. Two sub-rules, both bought at cost here: **(a)** when comparing N things, compare N — or state plainly that you compared one; a spot-check generalised is a fabrication with a true premise; **(b)** **do not read a label and a value from different rows** — `grep -A/-B` context windows silently slide past the field they were anchored to, so print the label and the value from the *same* parsed record, never from a line-offset guess.
 - **★ AND THE PART THAT MATTERS MOST.** The positive-control rule was written into the handoff prompt *by the same session that violated it four times*, and the successor honoured it — a fake-hash control is exactly what refuted instance 12 within a day. **The rule works; the failure is that it was aimed outward.** Apply verification discipline to your own comparisons with the same suspicion you apply to code under test, to a colleague's report, and to a panel's premise. **You are not a more reliable instrument than the things you distrust.**
+
+### [Process] ★ WHEN EVERY REVIEWER FINDS MORE INSTANCES, YOUR SITE COUNT WAS IMAGINATION, NOT SURFACE — 2 → 3 → 4 → 6 in one panel (2026-08-24)
+
+A finding proposed fixing a defect at **two** call sites. Operations found a **third**. Engine found a **fourth**. Red Team found **six**, plus a seventh structural gap of the same class. Nobody contradicted anyone — each seat searched and each found more, because the author had stopped searching at the point the story became coherent.
+
+**The tell is the monotone direction.** If review had found the count *wrong in both directions* — some of my sites spurious, some missed — that would be ordinary error. A count that only ever goes **up** under scrutiny means the search was terminated by narrative sufficiency, not by exhaustion. Two sites made a clean story ("both must move together, or you recreate the split-brain"), and the story stopped the search.
+
+**Why it is dangerous rather than merely embarrassing:** the author's own atomicity argument — *these sites must move together or the fix builds a new split-brain* — applied with equal force to the four sites he had not found. Shipping the two-site version would have **created** the exact defect the fix was justified by removing. A partial fix is not a smaller fix; when the justification is "make these agree", a partial fix is a NEW disagreement.
+
+**Rule:** before proposing a fix at N sites, enumerate the call surface mechanically (grep the constructor/helper, not the symptom) and state N with the search that produced it. If a reviewer raises it to N+1, do not patch the list — **re-run the enumeration**, because one miss means the method missed, not that one site was overlooked. And where the fix's rationale is *consistency between sites*, the site list is not a detail of the fix — it IS the fix.
+
+### [Process] ★ VERIFY THE SIZE OF THE SET, NOT ONLY THE OPERATION ON IT (2026-08-24)
+
+Claim under review: RS mandatory mobilization is contended alphabetically because `a.priority - b.priority || strictCompare(a.id, b.id)` collapses to alphabetical when no row carries `priority`. I verified exactly that — 81 rows, zero with `priority`, `undefined - undefined` is `NaN` and falsy, sort falls through — and escalated it as an 81-brigade defect.
+
+**The sort was right. The population was 4.** The filter immediately above it ends `&& !state.military.formations?.[brigade.id]`, and 77 of the 81 rows have `available_from: 0`, so they exist at t0 and never enter the queue. **The excluding clause was in the same block of output I had already read.** I checked what the operation does and never asked how many things it does it to.
+
+The counterexample was in my own data: `rs_visegrad_brigade` ranks **80/81** — worse than the brigade I claimed was starved at 79/81 — and is present at turn 0. Two adjacent ranks, opposite outcomes; rank never predicted anything, `available_from` did.
+
+**Rule:** a claim of the form "this operation mistreats N items" has two independent halves — the operation, and N. Verifying the first feels like verifying the claim and is not. **Print the filtered set before quoting a rank, a share, or a blast radius.** Sibling of the vacuous-guard family: there the loop asserted nothing because the set was empty; here the sort was real but the set was four.
+
+### [Process] A PARTIAL FIX RECORDED AS A WHOLE ONE SURVIVES FOR MONTHS (2026-08-24)
+
+`REAL_WAR_MASTER.md` logged a **P1** on 2026-04-02: *"Predictor ignores defender artillery, terrain, entrenchment."* COMBAT-P14 then closed artillery and entrenchment — and the closure note was written as *"prediction↔resolution parity holds."* **Terrain was never closed.** The parity claim was true of the two items fixed and false of the one that remained, and because the record said parity held, nobody looked again. Four months.
+
+**Rule:** when closing a defect that was logged as a LIST, close it item by item in the record and name what remains open, even if what remains is one word. A summary sentence that generalises a partial repair into a whole one is not documentation — it is a silencer on the next audit. Same shape as the guard family (a green check asserting less than its name claims), applied to prose.

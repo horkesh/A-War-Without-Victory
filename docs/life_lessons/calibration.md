@@ -408,3 +408,54 @@
 
 - **Context**: a run was needed at a commit that **predates run-provenance stamping by two days**, so the artifact would carry no `git_commit`, `git_dirty` or consumed-input digest. The proposed fix was to cherry-pick the (measured-inert) provenance stack onto that tree so the run would be stamped. The calibration seat declined, having measured that **the blessed commit re-blessed the 188w golden ITSELF** — three of the eight hashes move in that very commit. So a pristine checkout that reproduces all eight manifest hashes is proven **by content** to be that tree's output.
 - **Do instead**: **a git stamp answers "which tree produced this?" by ASSERTION — it records what the runner believed about its own checkout. A golden-manifest match answers the same question by VERIFICATION. You do not need the stamp where you already hold the golden.** Two further reasons the cherry-pick was wrong and they generalise: it would have **modified the tree under measurement**, and it would have made a hash mismatch **three-way ambiguous** (stack perturbed / manifest blessed elsewhere / tree genuinely differs) where the pristine run has only two branches. **Prefer the instrument that does not touch the thing it measures.** Related and measured the same day: the consumed-input digest hashes **working-tree bytes**, so on Windows `core.autocrlf` makes two checkouts of one commit produce different digests — `pair=REFUSED` can fire on byte-identical trees. It fails safe (a MATCHING digest still proves matching inputs) but it is a **checkout** fingerprint, not a **tree** fingerprint.
+
+### [Calibration] ★ A SCORE IS NOT AN IDENTITY — `matched_osids` IS NON-INJECTIVE, SO GET THE HASH BEFORE BANKING ANY DELTA (2026-08-24)
+
+Four investigation lanes ran a full day against a 188w artifact that scored **637/712 with 31/31 anchors** — the accepted floor, matching on every number anyone checks. A seat asked for the `final_state_hash` rather than accepting the score. It was **`930195c6879502c7`, which appears in neither `PROJECT_LEDGER.md` nor `CALIBRATION_MASTER.md`**, against the recorded floor's `cc88344e922ac8b4` — and its provenance recorded **`git_dirty: true`**. Same consumed-input digest, same score, same anchor result, **different map**, produced from a dirty tree.
+
+`matched_osids` is a scalar over a 712-dimensional object. This repo had already been bitten once (the ledger records n220 and the blessed tree both scoring **629** over different maps, at a pair nobody had compared) and it happened again. Later the same day a *third* instance appeared benignly: a clean pair scoring **637 and 639 with an IDENTICAL `final_state_hash`** — same engine output, two versions of the scoring reference.
+
+**Two rules, and the second is the one that keeps being missed:**
+1. **Never treat a score as a baseline identity.** Before banking any delta, confirm `final_state_hash` AND `git_dirty: false` AND the consumed-input digest. A matching score across a mismatched hash means two different maps; a matching hash across mismatched scores means two different *references*.
+2. **The scoring reference is not covered by `git_commit`.** Two runs at the same commit, on the same clean tree, with identical digests and identical state hashes, can still report different scores if a painted cell was repainted between them — with nothing anywhere recording it. That gap was closed for the scoring map on 2026-08-24 by stamping it into `consumed_inputs`; the `jan1993` anomaly-check read remains unstamped.
+
+**Corollary that cost a day of lane work:** the per-OSID *mismatch set* can differ even at an identical count. Two 75-mismatch sets differed by four cells. If lanes are assigned per-OSID from an artifact, an unverified artifact means the lanes may be investigating the wrong settlements.
+
+### [Calibration] "NOT A GRAPH CUT" IS NOT "COMPONENT-PRESERVING" — filtered subgraphs break differently (2026-08-24)
+
+A sweep established that none of 49 engine-rejected adjacency edges was a graph cut: every endpoint stayed reachable through valid edges. The inference drawn — that component structure was therefore unaffected — was wrong, and wrong in a way that only showed on one of three maps.
+
+`op:cajnice:todorovici` keeps three valid edges, so it is not cut. **All three lead to enemy-held OSIDs.** Its only same-faction link was the rejected one, so on the **faction-filtered** subgraph it becomes an island. Reachability is a property of the unfiltered graph; components here are computed on a filtered one, and a detour through enemy ground is not a detour.
+
+It is also **time- and controller-dependent**: that OSID had a valid same-faction neighbour at t0 which flipped away during the war. Invisible from the graph, from init, and from the painted target — visible only on the map being scored, which is why the same test came out clean on painted and dirty on the engine map.
+
+**Rules:** (a) recompute component structure **per map**, never generalise from the one where the filter happens to be a no-op; (b) **a change that flips a NEIGHBOUR of a thin holdout can strand that holdout**, so component re-check belongs AFTER a run, not only before it.
+
+### [Calibration] ★ A WON BATTLE DOES NOT FLIP A CO-ETHNIC OSID — screen objectives against the absorption rule BEFORE proposing them (2026-08-24)
+
+Added one settlement to a 1992 operation's objective list. Textbook justification: painted RS at **both** jan1993 and oct1995, engine RBiH from init to t188, **zero** flips in 188 weeks, reachable from the axis's own staging OSID plus two objectives that axis already captures. Called it the lowest-risk item on the board.
+
+**Result: −10 matched, and the settlement did not fall.** It was attacked **three times and the attacker WON ALL THREE** (`power_ratio` 2.00, 1.62, 1.92, `attacker_won: true` each time). `control_events` for it: zero entries. The flip was refused.
+
+**The gate is `attack_morale_absorption.ts:113`, not brigade allocation:**
+```ts
+const homelandLastStand = defenderFaction === 'RBiH' && coEthnicShare >= 0.50;
+absorb = capitalLastStand ? (outcome !== 'decisive_victory')
+       : homelandLastStand ? (outcome === 'costly_victory' || outcome === 'victory')
+       : professionalResilience;
+```
+The OSID is **78% Bosniak**, so an RBiH defender absorbs everything below `decisive_victory` — **at any morale, permanently**. `VICTORY_THRESHOLD_DECISIVE = 2.0`, and the best ratio ever achieved was 2.00, classified `victory`. Unsatisfiable by construction at the strongest moment those brigades would ever have.
+
+**Three compounding harms, all from listing an uncapturable objective:**
+1. Every absorbed battle applies `MORALE_ABSORPTION_CAS_MULT = 1.6` extra casualties **to both sides**. The lead brigade lost 55% of its strength and carried the deficit ~100 turns.
+2. Three consecutive failures tripped `max_failures` and **aborted the whole operation** two turns early — converting a 4-of-4 success into a partial.
+3. That two-turn shift **re-rolled the entire 188-week emergent-operation schedule**: only 15 of ~45 operations matched between runs, and the −10 landed in 13 municipalities **none of which were near the target**. The loss was not a price paid for the objective; it was unattributable noise.
+
+**MANDATORY PRE-CHECK before adding or repointing ANY objective — cheap, static, no run:**
+- defender faction × `coEthnicShare` of the target OSID. RBiH defender ≥50% co-ethnic ⇒ **needs `decisive_victory` (ratio ≥ 2.0)**; if the operation cannot plausibly reach 2.0, the objective is a casualty pump and an abort trigger, not a gain.
+- RS/HRHB defenders get `professionalResilience` — absorbs `victory` AND `costly_victory` at morale ≥ floor. Not as absolute, but not free either.
+- `isEnclaveCapital(osid)` absorbs everything except decisive.
+
+Applied retroactively to a seven-item queue, this screen killed **five of seven** targets before they were ever run (99.2%, 87.4%, 77.8%, 66.0%, 64.9% co-ethnic). **Those are combat-power problems wearing objective-list clothing.**
+
+⇒ **And the deeper rule: at this altitude the harness cannot attribute ±10.** A two-turn change to one early operation re-rolls the campaign. Before reading any delta of that size as the cost of a change, check whether the operation *schedule* diverged — if it did, the number is noise and the run has told you nothing about your hypothesis.
