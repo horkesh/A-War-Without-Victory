@@ -182,6 +182,18 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:zvornik:novo_selo',
                     'op:zvornik:krizevici',
                     'op:zvornik:donja_kamenica',
+                    // Added 2026-08-24. Djulići was never listed, so this axis captured 4/4 of its
+                    // objectives and left one settlement of the same sweep permanently RBiH: painted
+                    // has it RS at jan1993 AND oct1995, the engine has it RBiH from init to t188, and
+                    // control_delta records no flip in 188 weeks. BB1 PDF p.188 / printed 151: after
+                    // the capture of Zvornik on 9-10 April the Serb TO "moved to expand the Serb-held
+                    // bridgehead around Zvornik, pushing government forces back toward Kalesija" —
+                    // this is inside that bridgehead. Reachability verified under the engine's own
+                    // front-edge rule (min_dist <= 0.0003 AND shared_segments > 0): adjacent to the
+                    // axis's staging OSID kozluk_2 (seg 6) and to krizevici (seg 4) and zvornik
+                    // (seg 4), both of which this axis already takes by t10 — three valid approaches,
+                    // no chaining required.
+                    'op:zvornik:djulici',
                 ],
                 staging_osid: 'op:zvornik:kozluk_2',
             },
