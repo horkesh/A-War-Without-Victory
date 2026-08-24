@@ -52,7 +52,7 @@
         "end_report.md": "a00a5638e449ab76509458a3b46af47d7f66de2c7392a0667b497a83bf16c173",
         "final_save.json": "b7e70bac93bfd8918d10c28ab461e9f390bd17ee762c2226532ccf742ac7711b",
         "formation_delta.json": "da301931a7cab41800e8b2c769e9a79a9622fd054c76b7c2aa7f79d93edd4d74",
-        "run_summary.json": "f6f1bccc54e16908e5dc03a622e035b07ce9026fb10d18fc4840f6fb49e9c745",
+        "run_summary.json": "ccd1ec3c6f1e494e80998589f9da6f762c35deb7c449eb023def52ac58cefcdf",
         "watched_operations.json": "a7bae68b2514eafa22b4ad4aee34c72ec63f5088c9a5dfda340573ff26f86cfe",
         "weekly_report.jsonl": "e7db9c1b88fa36428064f76a235baa728d56cf0566865851634d877bf547d887"
       },
@@ -74,10 +74,10 @@
       "hashes": {
         "activity_summary.json": "9f67de482fb5aeb0665308d89e1bdb8cebe72b29bfad3814a661395c1d47c8c2",
         "control_delta.json": "6517d62da9b647c0d5aa53f7a7748974625cf81999dfccc33481a0c922ff718d",
-        "end_report.md": "72f98413f4e1760d40f37d9e0b89c0354a106ef63243ca6555c877e89e5f8b6c",
+        "end_report.md": "637240fdff38055a33a9b4002a9982b4707e1f74cd3fa7f4e3d7fca5b5dfeb25",
         "final_save.json": "9a65ff65cb7636063ff8afaaec9cf13881fcf1c3f13536893a7ec52d0c54f05d",
         "formation_delta.json": "1d852857e227eb03c432e9be376da7f0ad767f82bb34771f9dd7e3533951a416",
-        "run_summary.json": "ce59ae666dc8ccf17f96021f1e8495c407da1d6ef80d75b61bba500d89aa11e3",
+        "run_summary.json": "162f2099092be6bffe39c1b7fd3783130f44c3e4123db9cb73b20103cb3a95f8",
         "watched_operations.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
         "weekly_report.jsonl": "94c2155519a20f4ff9ad7655ec36f382c9c713972ef3fc9ec1b225bc9ddd6f44"
       },
@@ -99,10 +99,10 @@
       "hashes": {
         "activity_summary.json": "9f67de482fb5aeb0665308d89e1bdb8cebe72b29bfad3814a661395c1d47c8c2",
         "control_delta.json": "6517d62da9b647c0d5aa53f7a7748974625cf81999dfccc33481a0c922ff718d",
-        "end_report.md": "b0e8e74f1232b423d2aadad7ea9bc24933dfa6e81fd88734cec6191fac9c13ef",
+        "end_report.md": "d44cb92b04a5d31baf2e254ca2f322367b70084510dbb94285c34a9b7af7897a",
         "final_save.json": "2487ea2290519a493647f16cf3dac413c0babae37f4f34e1be24d8c02bf19d02",
         "formation_delta.json": "1d852857e227eb03c432e9be376da7f0ad767f82bb34771f9dd7e3533951a416",
-        "run_summary.json": "a3c61953a87a12c280811e3b5dc1d63ea113365edbf36fb36a8717137cc1e473",
+        "run_summary.json": "2a9cc8a18c20ae3907f343f8e3ad78ca94347945d1063820bf2bda8eb60cae66",
         "watched_operations.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
         "weekly_report.jsonl": "64ba4096c7ff83c6acbb718d4f4139a4d6544c16b4202be80e5362f01f339fe0"
       },

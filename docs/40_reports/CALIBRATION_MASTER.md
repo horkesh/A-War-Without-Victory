@@ -3026,3 +3026,74 @@ disagrees with the floor everyone is measuring against.
 - Complete baseline measurement found **0/8 mismatches at 188w** and **0/8 at 52w**. The accepted long-campaign floor therefore remains 637/712, 31/31 anchors, final hash `930195c6879502c7`; those pins did not move.
 - Each synthetic four-week scenario changed 7/8 artifacts. Independent repeats were byte-identical across all eight artifacts. Semantic comparison found exactly the four premature HV formations removed and **zero control changes** in each fixture.
 - Exactly 14 short-fixture hashes were reconciled. No calibration threshold, scenario input, phantom definition, timing constant, or long-campaign pin changed. Full evidence: `docs/40_reports/implemented/20260823_FOUR_WEEK_PHANTOM_HOST_BOUNDARY.md`.
+
+## 2026-08-24 — Owner-authored jan1993 reference corrections (5 cells, panel overridden)
+
+Five OSIDs repainted in `painted_control_jan1993.json`, all RS → non-RS:
+`op:kladanj:brgule`→RBiH, `op:livno:priluka_2`→HRHB, `op:livno:zastinje`→HRHB,
+`op:mostar:kruzanj_2`→RBiH, `op:mostar:vranjevici_2`→RBiH. Reference counts move
+RS 384→379, RBiH 248→251, HRHB 80→82. `total_osids` unchanged at 712. Revision 1→2.
+
+**Authority: owner override, no sources cited.** The owner painted these directly in the
+Jan 1993 Reference Painter artifact and explicitly overrode Pyrrhic-panel review
+("Override the panel, those are my decisions"). The changelog records them as owner
+determinations rather than as sourced evidence. This is a deliberate departure from the
+2026-08-23 Kladanj precedent, which carried BB/ICTY citations and a 4/4 panel GO. Anyone
+re-deriving these cells later will find authority but no evidence — that is the known cost.
+
+**Measured effect is +1, not +5.** The +5 figure quoted while the corrections were being
+made was computed against `apr1992_188w` reconstructed at week 39. Against the scenario
+that actually scores this reference it is smaller:
+
+- `apr1992_definitive_40w` at w40: **matched 670→671 / 712** (ratio 0.942416).
+- Three corrections convert a mismatch to a match (`priluka_2`, `zastinje`, `kruzanj_2`).
+- Two BREAK a previously-matching cell (`brgule`, `vranjevici_2`): the 40w engine holds
+  both as RS, so the old RS reference was matching them for the wrong reason.
+
+**The two 1992-start scenarios are not the same trajectory.** `apr1992_definitive_40w` and
+`apr1992_188w` disagree on **17 of 712 OSIDs at the same week 39**. This is expected, not a
+determinism defect: the scenario files differ on 11 of 31 keys, including
+`firepower_deficit_penalty_enabled`, `max_recruits_per_faction_per_turn` (4 vs 2),
+`recruitment_capital` RS (400 vs 600), `recruitment_capital_trickle` RS (3 vs 6),
+`supply_reserves_enabled`, `initial_osid_controllers`, `must_hold_osids_by_corps`,
+`osid_control_overrides` and `coercion_pressure_by_municipality`.
+
+**Consequence for anyone doing jan1993 work:** `pickHistoricalReferenceKey` sends weeks ≤56
+to `jan1993`, so the scenarios actually scored against this reference are 40w and 52w. A
+188-week run is scored against `oct1995` only — its week-39 state is never compared to
+`jan1993` by the harness. Reconstructing week 39 out of a 188w run is informative but it is
+NOT the state any pinned scenario scores. Use 40w for jan1993 calibration.
+
+**A correction that lowers the score is not a bad correction.** `brgule` and `vranjevici_2`
+went from matching to mismatching. If the new reference is right, that is an engine gap the
+old reference was masking, not a regression — consistent with "engine soundness over %".
+
+**Long floor untouched:** the 188w scoring reference is `oct1995`, unchanged, so the accepted
+188w floor (639/712, 31/31 anchors) does not move on scoring grounds. Note however that
+Check #27 (`anomaly_checks_extended.ts:558`) hardcodes `painted_control_jan1993.json` and
+runs on EVERY scenario, so baseline artifact hashes can still move for scenarios whose
+scoring reference is not jan1993 — the same coupling that moved the 4w entries on 2026-08-23.
+
+Scope: `jan1993` only. The same cells are plausibly wrong in apr1994/apr1995/oct1995;
+not investigated, not changed.
+
+**Baselines re-pinned — 5 of 32 artifacts, no `final_save.json` among them.** Measured before
+re-pinning: `apr1992_52w/run_summary.json` (52w scores against jan1993), plus
+`baseline_ops_4w` and `noop_4w` on both `end_report.md` and `run_summary.json` (Check #27,
+`anomaly_checks_extended.ts:558`, hardcoded to jan1993 and run on every scenario).
+`apr1992_188w` moved **nothing** — it scores against oct1995, so the 639/712 / 31-anchor floor
+and its `930195c6879502c7…` final-save pin are untouched.
+
+**That no `final_save.json` moved is the load-bearing evidence** that this was a scoring-only
+change: the simulation is byte-identical and only the yardstick moved. Any future
+painted-reference edit should show the same signature — if a `final_save.json` pin moves on a
+reference-only edit, something has leaked from scoring into the sim and the change is not what
+it claims to be. The tracked latest-run save, dirtied by the confirming 40w run, was restored to
+Git blob `09441651a91cacfcc3b711da52cfbd6cfeb7d0f0`.
+
+**Open lead, not actioned (scope was jan1993 only):** the same five cells read RS in `apr1994`,
+and Livno is internally contradictory across snapshots — 3/7 Livno cells RS at apr1994 but 0/7
+at both apr1995 and oct1995, which describes a VRS capture and loss of Livno that did not happen.
+Both Mostar cells stay RS through oct1995, eighteen months past the Washington Agreement.
+`apr1994` looks like the most RS-saturated snapshot in these municipalities; if there is a
+systematic painting defect it may be concentrated there rather than spread across all four.

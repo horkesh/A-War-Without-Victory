@@ -28713,3 +28713,47 @@ Only **trial** judgements were opened; **Krstić was modified on appeal in 2004*
 **Independent review:** Claude ultrareview consolidated three verifier signals into one non-blocking quality finding: the spawn guard duplicated the existing sole synthetic-command literal instead of consuming its registry. The guard now uses a set derived from `SYNTHETIC_JNA_COMMAND_IDS`, leaving one literal authority for both spawn exemption and empty-command retirement. The review's fourth candidate was refuted. Fresh focused tests and TypeScript are required on that repair; remote CI remains the final promotion gate.
 
 **Remote promotion gate:** Exact reviewed commit `6894500634844750870a8046b72d6b5b65ce7021` passed Event System CI run `32665667629` in 7m15s. TypeScript, the event/phase suite, the strict canon rail, and baseline regression all completed successfully. This evidence closes the executable promotion gate for the reviewed engine tree; the subsequent documentation-only closeout commit must independently remain green before merge.
+
+### 2026-08-24 — Owner-authored jan1993 painted-reference corrections and an interactive painter
+
+**Change:** Five cells in `data/source/calibration/painted_control_jan1993.json` moved off RS —
+`op:kladanj:brgule`→RBiH, `op:livno:priluka_2`→HRHB, `op:livno:zastinje`→HRHB,
+`op:mostar:kruzanj_2`→RBiH, `op:mostar:vranjevici_2`→RBiH. Reference counts RS 384→379,
+RBiH 248→251, HRHB 80→82; `total_osids` unchanged at 712; revision 1→2; five changelog entries
+appended. The owner painted these directly and explicitly overrode Pyrrhic-panel review; no
+documentary source was cited, and the changelog says so in those words rather than implying
+evidence. Implementer did not review or endorse the historical claims.
+
+**Tooling:** A remote-usable painter was published as an Artifact (dark ops-map, brush per faction,
+live rescoring, per-edit rationale field). It persists twice: a debounced data-file write for
+zero work loss, and a full-page republish after idle that embeds the corrections, because reading
+an artifact returns only its page and not its data files — the page-embedded copy is the channel
+that actually reaches a session. The self-republish path was verified as a fixed point across four
+generations with a hostile payload containing a closing-script sequence, quotes, backslashes and
+diacritics. Two real defects were caught pre-publish: a non-reversible `</`-escape that the page's
+own regex text defeated, and a literal closing-script sequence inside a JS comment that truncated
+the page script. Note `tools/control_painter/index.html` already existed and was not consulted
+before building.
+
+**Measured:** `apr1992_definitive_40w` at w40 scores **671/712** (ratio 0.942416) against the new
+reference and 670/712 against the old — net **+1**, not the +5 estimated from a 188w week-39
+reconstruction. Three corrections fix a mismatch; two (`brgule`, `vranjevici_2`) break a cell that
+was matching because the 40w engine holds both RS. Six focused suites covering the painted targets,
+anchors and provenance passed 101/101 with no pinned count disturbed.
+
+**Finding:** `apr1992_definitive_40w` and `apr1992_188w` disagree on 17 of 712 OSIDs at the same
+week 39. Not a determinism defect — the scenario files differ on 11 of 31 keys including
+firepower-deficit penalty, recruit caps, recruitment capital and trickle, supply reserves and
+initial OSID controllers. Because `pickHistoricalReferenceKey` routes weeks ≤56 to `jan1993`, the
+scenarios scored against this reference are 40w and 52w; a 188w run is scored against `oct1995`
+alone and its week-39 state is never compared to jan1993 by the harness.
+
+**Scope held:** jan1993 only; apr1994/apr1995/oct1995 untouched despite the same cells being
+plausibly wrong there. Full calibration record in `docs/40_reports/CALIBRATION_MASTER.md`.
+
+**Baseline reconciliation:** 5 of 32 pinned artifacts moved and were re-pinned —
+`apr1992_52w/run_summary.json`, and `end_report.md` + `run_summary.json` for both
+`baseline_ops_4w` and `noop_4w`. `apr1992_188w` moved nothing. No `final_save.json` pin moved
+in any scenario, which is the evidence that the simulation was untouched and only scoring
+changed. Tracked latest-run save restored to blob `09441651a91cacfcc3b711da52cfbd6cfeb7d0f0`
+after the confirming 40w run dirtied it.

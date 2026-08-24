@@ -6,13 +6,13 @@
     "description": "Painted control state",
     "total_osids": 712,
     "counts": {
-      "RS": 384,
-      "RBiH": 248,
-      "HRHB": 80
+      "RS": 379,
+      "RBiH": 251,
+      "HRHB": 82
     },
     "source": "painted_control_targets",
     "painted_at": "2026-03-17T10:04:59.555Z",
-    "revision": 1,
+    "revision": 2,
     "changelog": [
       {
         "date": "2026-08-24",
@@ -21,6 +21,46 @@
         "to": "RBiH",
         "commit": "cd0228c37",
         "rationale": "BB2 printed 475 and BB1 printed 341/359 describe Kladanj town as Muslim-held in 1994 and twice in July 1995; BB1 printed 477 places two ARBiH brigade HQs there in the 1995 OOB. Pyrrhic panel 2026-08-23, 4/4 GO."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kladanj:brgule",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:livno:priluka_2",
+        "from": "RS",
+        "to": "HRHB",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:livno:zastinje",
+        "from": "RS",
+        "to": "HRHB",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:mostar:kruzanj_2",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:mostar:vranjevici_2",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
       }
     ]
   },
@@ -367,7 +407,7 @@
     "op:kiseljak:drazevici": "RBiH",
     "op:kiseljak:gromiljak_2": "HRHB",
     "op:kiseljak:kiseljak_2": "HRHB",
-    "op:kladanj:brgule": "RS",
+    "op:kladanj:brgule": "RBiH",
     "op:kladanj:kladanj_3": "RBiH",
     "op:kladanj:olovci_2": "RBiH",
     "op:kladanj:staric_2": "RS",
@@ -419,10 +459,10 @@
     "op:livno:gubin_2": "RS",
     "op:livno:livno_2": "HRHB",
     "op:livno:misi_2": "HRHB",
-    "op:livno:priluka_2": "RS",
+    "op:livno:priluka_2": "HRHB",
     "op:livno:prolog_2": "HRHB",
     "op:livno:zabljak_2": "HRHB",
-    "op:livno:zastinje": "RS",
+    "op:livno:zastinje": "HRHB",
     "op:ljubinje:bancici": "RS",
     "op:ljubinje:ljubinje_2": "RS",
     "op:ljubuski:grab": "HRHB",
@@ -463,11 +503,11 @@
     "op:mostar:gornja_dreznica": "RBiH",
     "op:mostar:hodbina_2": "HRHB",
     "op:mostar:jasenica": "HRHB",
-    "op:mostar:kruzanj_2": "RS",
+    "op:mostar:kruzanj_2": "RBiH",
     "op:mostar:mostar_istok_2": "RBiH",
     "op:mostar:mostar_zapad_2": "HRHB",
     "op:mostar:potoci": "RBiH",
-    "op:mostar:vranjevici_2": "RS",
+    "op:mostar:vranjevici_2": "RBiH",
     "op:mrkonjic_grad:baljvine_2": "RS",
     "op:mrkonjic_grad:bjelajce_2": "RS",
     "op:mrkonjic_grad:gerzovo_2": "RS",
