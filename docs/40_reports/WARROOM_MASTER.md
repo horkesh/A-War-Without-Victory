@@ -1,10 +1,14 @@
 # AWWV Warroom Master Reference
 
-**Updated:** 2026-08-01 (one stable campaign shell now owns Command Room and Tactical Map navigation; R1 transition performance and player-visible Electron proof are closed locally)
+**Updated:** 2026-08-23 (stable campaign shell plus merged case-file opening, explicit campaign mode, Field Records, and real-flow browser proof)
 
 ## Current shell-transition contract
 
 The operational iframe document remains stable across Command Room and War Map routes. The React tactical viewport and its MapLibre/Deck owners stay campaign-scoped behind the opaque Command Room layer; returning to the map is a shared shell handoff, not an iframe reload. While the Command Room owns focus, the map viewport is `aria-hidden`, inert, pointer-disabled, and keyboard-disabled. Reveal admits input only after resize/render/repaint and exact current-turn/current-fingerprint readiness. Final three-launch evidence also proves that Desk-scoped `H` cannot escape ownership, the visible Warroom Advance route advances exactly one turn, and post-advance neutral/read-only surfaces are handled without inventing a policy decision. See [20260801_SEAMLESS_COMMAND_ROOM_MAP_TRANSITION.md](implemented/20260801_SEAMLESS_COMMAND_ROOM_MAP_TRANSITION.md).
+
+## Current opening contract
+
+The campaign shell begins with the case-file flow owned by `MainMenu.tsx`: landing, faction dossier, four-slot briefing, historical/emergent mode choice, then Begin Campaign. Electron Field Records is an inventory-backed load path rather than an arbitrary pathname field. Successful start performs one date handoff and one opening brief before the foundational decision; it does not replay a second war-start briefing. The first-hour and live-surface browser gates traverse this exact route and verify cleanup. See [the 2026-08-23 opening implementation plan](../plans/2026-08-23-opening-screens-implementation-plan.md) and [DESKTOP_GUI_IPC_CONTRACT.md](../20_engineering/DESKTOP_GUI_IPC_CONTRACT.md).
 
 **Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
 

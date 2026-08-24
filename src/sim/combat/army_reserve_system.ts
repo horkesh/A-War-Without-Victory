@@ -501,6 +501,43 @@ function ensureActiveEliteDeploymentOrder(
     issueEliteDeploymentOrder(state, formation, brigadeId, corpsId, adjacency);
 }
 
+/**
+ * Repair movement ownership for active loans after the turn's final sector
+ * topology has been rebuilt.
+ *
+ * The ordinary elite-loan tick runs earlier in the War pipeline. A later
+ * topology rebuild can invalidate a previously truthful sector assignment and
+ * leave the loaned formation sectorless until the next turn. This narrow pass
+ * reuses the normal deployment-order policy against the finalized sectors; it
+ * does not recall, attach, or otherwise advance the loan lifecycle.
+ */
+export function repairActiveEliteDeploymentOrdersAfterFinalTopology(
+    state: GameState,
+    adjacency?: Map<Osid, Osid[]>,
+): FormationId[] {
+    if (!adjacency) return [];
+    const formations = state.military.formations ?? {};
+    const repaired: FormationId[] = [];
+    const unresolvedIds = [...new Set(state.military.unresolved_sector_brigades ?? [])]
+        .sort(strictCompare);
+    for (const brigadeId of unresolvedIds) {
+        const formation = formations[brigadeId];
+        const loan = formation?.elite_loan_state;
+        if (
+            formation?.status !== 'active' ||
+            formation.assignment != null ||
+            !loan?.on_loan ||
+            !loan.loaned_to_corps
+        ) continue;
+
+        const before = state.military.brigade_movement_orders?.[brigadeId];
+        ensureActiveEliteDeploymentOrder(state, formation, brigadeId, loan.loaned_to_corps, adjacency);
+        const after = state.military.brigade_movement_orders?.[brigadeId];
+        if (after !== undefined && after !== before) repaired.push(brigadeId as FormationId);
+    }
+    return repaired;
+}
+
 const COMMANDER_REQUEST_PRIORITY_SCORE: Record<'critical' | 'high' | 'medium' | 'low', number> = {
     critical: 90,
     high: 75,

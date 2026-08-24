@@ -26,11 +26,11 @@ describe('desktop and roadmap truth docs', () => {
     const plansIndex = readRepoFile('docs', 'plans', 'README.md');
 
     expect(roadmap).toContain('This file is the sole source of truth for unfinished product work.');
-    expect(roadmap).toContain('nine executable workstreams, R1–R9');
-    expect(board).toContain('Derived execution view');
+    expect(roadmap).toContain('nine executable product workstreams, R1–R9');
+    expect(board).toContain('Derived dispatch view');
     expect(board).toContain('MASTER_ROADMAP.md');
     expect(plansIndex).toContain('**Sole authority**');
-    expect(plansIndex).toContain('Each roadmap point has exactly one detailed plan');
+    expect(plansIndex).toContain('Each R1–R9 workstream has exactly one detailed plan');
 
     expect(roadmap.length).toBeLessThan(60_000);
     expect(board.length).toBeLessThan(20_000);
@@ -88,7 +88,7 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('maximum 12 turns, cohesion drain 4 per engaged turn, dissolve at cohesion 15');
     expect(roadmap).toContain('ADR-0007 Phase C stays retired.');
     expect(roadmap).toContain('Neretva/Grabovica/Uzdol belongs to 1993');
-    expect(roadmap).toContain('Canonical Bosnian locale is `bs`; formatting uses `bs-BA`.');
+    expect(roadmap).toContain('canonical Bosnian locale `bs`, formatting `bs-BA`');
     expect(roadmap).toContain('first-party/generated UI sound, then CC0');
     expect(roadmap).toContain('Steam is the primary store.');
   });

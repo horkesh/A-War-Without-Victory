@@ -87,7 +87,12 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { strictCompare } from '../src/state/validateGameState.js';
-import { assertS6PairComparable, scanS6RunCandidates, selectS6RunDirs } from './_helpers/s6_run_selection.js';
+import {
+    assertS6PairComparable,
+    resolveS6EvidenceRoot,
+    scanS6RunCandidates,
+    selectS6RunDirs,
+} from './_helpers/s6_run_selection.js';
 import {
     MUST_HOLD_ENCLAVE_IDS,
     TEOCAK_OSID,
@@ -105,7 +110,8 @@ import {
 } from './_helpers/s6_enclave_keyspace.js';
 
 const BASE_DIR = process.cwd();
-const RUNS_DIR = join(BASE_DIR, 'runs');
+const RUNS_DIR = resolveS6EvidenceRoot(process.env, BASE_DIR)
+    ?? join(BASE_DIR, 'tests', 'fixtures', '__s6_evidence_not_configured__');
 
 /** Same contract as the §6 G2 suite: a §6 case that does not execute is a hard failure. */
 const REQUIRE_S6_EXECUTION = process.env.AWWV_REQUIRE_S6_EXECUTION === 'true';

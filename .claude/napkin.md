@@ -12,17 +12,19 @@
    Do instead: keep all six defs at turn 174 in the same tree as both live T3 executor changes (`osid_column_movement` and `brigade_movement_orders`); never land legs with turn 150. The controlled combined run `...n227` scored **609/712, 31/31 anchors**: 3/6 wave formations recorded movement, 0 appeared in 637 full-stack battle records, and Mistral 2 stayed blocked through turn 188. Treat this as an engine-fix candidate with unresolved calibration/mechanism evidence, not a +16 lane.
 2. **[2026-08-23] The CI/manifest anomaly is settled; reconcile pins only from byte-identical local/CI evidence**
    Do instead: compare actual hash values, not failure counts. Latest CI `32619857153` and a clean local run exposed the same 24 mismatch keys and all 24 local artifact hashes matched CI's actual hashes byte-for-byte. Across the previous CI run, 18 actual hashes stayed fixed and only six 188w hashes moved with the later accepted roster calibration. The workflow caches npm dependencies only, not scenario artifacts. This is sufficient evidence for the deliberate 24-pin reconciliation; it does not authorize an unrelated refloor.
-3. **[2026-08-15] R7 is the current 1.0 critical path; Phase 1.2 is closed**
-   Do instead: execute R7 Phase 2 officer/OOB provenance, then audio, English accessibility/readability, opening screens, and packaged proof; continue to R8/R9. D-topology is post-1.0/reserved.
-4. **[2026-08-15] Retain collapse v3 selection plus reversible D-shape**
+3. **[2026-08-23] R7 remains the 1.0 critical path; Phase 2 and opening screens are closed**
+   Do instead: execute bounded audio/licensing, English accessibility/readability, and integrated packaged proof; then continue to R8/R9. The case-file opening, explicit campaign mode, Field Records, and browser proof are merged. D-topology is post-1.0/reserved.
+4. **[2026-08-23] Phantom brigades require their military substrate; the synthetic JNA command is the sole exception**
+   Do instead: never let temporary JNA/HV content manufacture an OOB. Require at least one non-phantom formation and the phantom's authored host-corps formation before spawn. Preserve `jna_herzegovina_command` as the single explicit exception because corps initialization synthesizes it after its subordinates exist. The 188w/52w artifacts stayed byte-identical; only the four premature HV rows left each synthetic 4w fixture.
+5. **[2026-08-15] Retain collapse v3 selection plus reversible D-shape**
    Do instead: preserve the default-OFF two-turn selector and 4.0/0.5 shock/recovery union pass. Do not revive struck breadth tuning; any RBiH/RS Tier-0 opening or neighbour topology requires fresh Section 6 and paired 188w evidence.
-5. **[2026-08-15] D-shape proved a live writer, not protected-boundary campaign reach**
+6. **[2026-08-15] D-shape proved a live writer, not protected-boundary campaign reach**
    Do instead: cite the `70d5e04c6f49e041` pair as one live non-enclave HRHB write with full protected absence. Keep the discriminating G1 fixture as protected-input proof, and rerun if faction gates/topology change.
-6. **[2026-08-15] R7 remains open after RC; localization does not gate 1.0**
-   Do instead: finish historical/source remediation, officer/OOB provenance, audio/licensing, English accessibility/readability, opening screens, and packaged proof before R8. Keep `bs` migration, pseudolocalization, Bosnian completion/native review, and locale-specific proof in post-1.0 Phase 3.
-7. **[2026-08-15] Publication remains separately authorized**
+7. **[2026-08-23] R7 remains open only for audio, English accessibility, and packaged proof; localization does not gate 1.0**
+   Do instead: preserve the completed history/source, officer/OOB, and opening work; finish audio/licensing, English accessibility/readability, and packaged proof before R8. Keep `bs` migration, pseudolocalization, Bosnian completion/native review, and locale-specific proof in post-1.0 Phase 3.
+8. **[2026-08-15] Publication remains separately authorized**
    Do instead: transient validation packages are allowed, but do not sign, upload, create a public release, or tag `1.0` without an explicit `Publish 1.0` instruction.
-8. **[2026-08-15] R7 Phase 1.2 provenance is a zero-queue contract**
+9. **[2026-08-15] R7 Phase 1.2 provenance is a zero-queue contract**
    Do instead: preserve 3,642 documented claims plus 12 explicitly non-player-facing deposits, with zero unresolved player-facing rows. Keep essay metadata mirrored into `essay_index.json`; use leading provenance headers for inventoried TS/TSX/Markdown read models; narrow or omit unsupported specificity rather than clearing it with vague citations.
 
 ## Execution & Validation
@@ -162,6 +164,8 @@ Three HRHB decisions had exact pages, judgment sections, a resolved tier, and a 
    Do instead: verify canonical helpers have production callers; distinguish legal isolation from reachable gaps; resolve reachable gaps through explicit T1 intent, T2 routing, and delayed T3 movement, while marking no-donor sectors `unstaffed_front` instead of teleporting or paper-staffing.
 
 ## Shell & Command Reliability
+0. **[2026-08-23] A missing transient field is not an empty set, and silence needs liveness proof**
+   Do instead: when serialization deliberately strips diagnostic truth such as `unresolved_sector_brigades`, final-save validators must say **NOT ESTABLISHED**, never default absence to `[]` and print zero. Bind health claims to live evidence with a positive counter/marker. Distinguish one normal turn seal from a final-save artifact-projection seal (`kind=turn|final_save`) so legitimate projection cannot masquerade as a duplicate or let concatenated logs pass.
 1. **[2026-06-06] Windows-safe local CLIs are repo contract**
    Do instead: use local package entrypoints or repo wrappers; do not rely on PATH/.bin luck.
 1b. **[2026-08-10] node_modules/.bin can be unpopulated on a checkout — `npm run` then fails silently on `tsx`/`tsc`**

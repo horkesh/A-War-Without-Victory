@@ -13,8 +13,8 @@ describe('HRHB late-1992 presidential cadence', () => {
     expect(selected.every(Boolean)).toBe(true);
     expect(selected.map((event) => event?.trigger.turn_min)).toEqual([26, 29]);
     expect(selected.map((event) => event?.responding_faction)).toEqual(['HRHB', 'HRHB']);
-    expect(selected[0]?.source_note).toContain('Balkan Battlegrounds I pp.181-183');
-    expect(selected[1]?.source_note).toContain('Balkan Battlegrounds I pp.183-184');
+    expect(selected[0]?.historical_source).toContain('PDF pp. 182-184 / printed 145-147');
+    expect(selected[1]?.historical_source).toContain('PDF pp. 184-185 / printed 147-148');
 
     for (const event of selected) {
       expect(event?.requires_player_response).toBe(true);

@@ -12,12 +12,13 @@
 import { describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import {
     S6PairComparabilityError,
     S6_RUN_DIR_PATTERN,
     assertS6PairComparable,
     compareS6Candidates,
+    resolveS6EvidenceRoot,
     runCounterOf,
     scanS6RunCandidates,
     selectS6RunDirs,
@@ -52,6 +53,15 @@ function reorderings<T>(items: readonly T[]): Array<{ label: string; items: T[] 
 function codeOnly(src: string): string {
     return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
 }
+
+describe('S6 evidence root', () => {
+    it('does not inspect ambient repository runs unless the evidence root is explicit', () => {
+        const cwd = process.cwd();
+        expect(resolveS6EvidenceRoot({}, cwd)).toBeNull();
+        expect(resolveS6EvidenceRoot({ AWWV_S6_EVIDENCE_DIR: 'evidence/s6' }, cwd))
+            .toBe(resolve(cwd, 'evidence/s6'));
+    });
+});
 
 describe('S6 run-dir pattern', () => {
     it('accepts full-length 188w run dirs', () => {

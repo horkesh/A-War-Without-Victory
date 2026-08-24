@@ -11,6 +11,7 @@ import {
     evaluateArmyReserveAssignments,
     generateArmyReserveRequests,
     holdReserveAtMainStaff,
+    repairActiveEliteDeploymentOrdersAfterFinalTopology,
     STANDING_RESERVE_HOLD_REASON,
 } from '../src/sim/combat/army_reserve_system.js';
 import {
@@ -1004,6 +1005,13 @@ describe('tickEliteLoans', () => {
             'op:mun:o1': 'RS',
             'op:mun:o2': 'RS',
         } as any;
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:mun:o0__op:enemy:e0',
+            a: 'op:mun:o0',
+            b: 'op:enemy:e0',
+            side_a: 'RS',
+            side_b: 'RBiH',
+        }] as any;
         brigade.elite_loan_state!.on_loan = true;
         brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
         brigade.elite_loan_state!.loan_start_turn = 0;
@@ -1022,6 +1030,106 @@ describe('tickEliteLoans', () => {
             state.military.formations!,
             chainAdj(3),
         )).toEqual([]);
+    });
+
+    it('repairs a live main-staff loan after final topology invalidates its prior sector assignment', () => {
+        const brigade = makeOnLoanBrigade('rs_65th_protection_motorized_regiment', { loanStartTurn: 8 });
+        brigade.corps_id = 'vrs_main_staff';
+        brigade.location_osid = 'op:mun:o0';
+        brigade.assignment = null;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_sarajevo_romanija';
+        const sector = makeSector('vrs_sarajevo_romanija', 'RS', 'op:mun:o2');
+        const state = makeState({
+            formations: { rs_65th_protection_motorized_regiment: brigade },
+            corps_command: { vrs_sarajevo_romanija: { active_operations: [] } },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 14,
+        });
+        state.political.political_controllers = {
+            'op:mun:o0': 'RS',
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RS',
+        } as any;
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:mun:o0__op:enemy:e0',
+            a: 'op:mun:o0',
+            b: 'op:enemy:e0',
+            side_a: 'RS',
+            side_b: 'RBiH',
+        }] as any;
+        state.military.unresolved_sector_brigades = collectUnresolvedSectorBrigades(
+            state,
+            { [sector.sector_id]: sector },
+            state.military.formations!,
+            chainAdj(3),
+        );
+
+        expect(state.military.unresolved_sector_brigades).toEqual([
+            'rs_65th_protection_motorized_regiment',
+        ]);
+
+        expect(repairActiveEliteDeploymentOrdersAfterFinalTopology(state, chainAdj(3))).toEqual([
+            'rs_65th_protection_motorized_regiment',
+        ]);
+        expect(state.military.brigade_movement_orders?.rs_65th_protection_motorized_regiment).toEqual({
+            destination_sids: ['op:mun:o2'],
+            stance: 'column',
+        });
+        expect(collectUnresolvedSectorBrigades(
+            state,
+            { [sector.sector_id]: sector },
+            state.military.formations!,
+            chainAdj(3),
+        )).toEqual([]);
+    });
+
+    it('limits final-topology repair to unresolved, unassigned, active loans', () => {
+        const assigned = makeOnLoanBrigade('assigned_loan', { loanStartTurn: 8 });
+        assigned.corps_id = 'vrs_main_staff';
+        assigned.location_osid = 'op:mun:o0';
+        assigned.assignment = { kind: 'sector', sector_id: 'sector:vrs_drina:0', role: 'reserve' } as any;
+        assigned.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        const inactive = makeOnLoanBrigade('inactive_loan', { loanStartTurn: 8 });
+        inactive.status = 'inactive';
+        inactive.location_osid = 'op:mun:o0';
+        inactive.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        const state = makeState({
+            formations: { assigned_loan: assigned, inactive_loan: inactive },
+            corps_front_sectors: {
+                'sector:vrs_drina:0': makeSector('vrs_drina', 'RS', 'op:mun:o2'),
+            },
+        });
+        state.military.unresolved_sector_brigades = ['inactive_loan', 'assigned_loan'];
+
+        expect(repairActiveEliteDeploymentOrdersAfterFinalTopology(state, chainAdj(3))).toEqual([]);
+        expect(state.military.brigade_movement_orders).toEqual({});
+    });
+
+    it('preserves valid column ownership and returns repaired ids in stable order', () => {
+        const alpha = makeOnLoanBrigade('alpha_loan', { loanStartTurn: 8 });
+        const zulu = makeOnLoanBrigade('zulu_loan', { loanStartTurn: 8 });
+        const owned = makeOnLoanBrigade('owned_loan', { loanStartTurn: 8 });
+        for (const brigade of [alpha, zulu, owned]) {
+            brigade.corps_id = 'vrs_main_staff';
+            brigade.location_osid = 'op:mun:o0';
+            brigade.assignment = null;
+            brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        }
+        const state = makeState({
+            formations: { zulu_loan: zulu, owned_loan: owned, alpha_loan: alpha },
+            corps_front_sectors: {
+                'sector:vrs_drina:0': makeSector('vrs_drina', 'RS', 'op:mun:o2'),
+            },
+        });
+        const ownedOrder = { destination_sids: ['op:mun:o1'], stance: 'column' } as any;
+        state.military.brigade_movement_orders = { owned_loan: ownedOrder };
+        state.military.unresolved_sector_brigades = ['zulu_loan', 'owned_loan', 'alpha_loan'];
+
+        expect(repairActiveEliteDeploymentOrdersAfterFinalTopology(state, chainAdj(3))).toEqual([
+            'alpha_loan',
+            'zulu_loan',
+        ]);
+        expect(state.military.brigade_movement_orders?.owned_loan).toBe(ownedOrder);
     });
 
     it('refreshes deployment orders for any active loan still outside receiving-corps territory', () => {

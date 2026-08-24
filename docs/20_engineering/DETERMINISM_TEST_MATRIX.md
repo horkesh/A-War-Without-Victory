@@ -57,10 +57,15 @@
 
 ### Full vitest suite required on code-path PRs (stale-pin false-green closure, C1)
 - Gate: CI job `full-suite` in `.github/workflows/full-suite-and-fingerprint.yml` runs
-  `npm run test:vitest` (the COMPLETE suite via `vitest.config.ts`, not a slice). The
+  `npm run test:vitest:balanced` (the COMPLETE suite inventoried via `vitest.config.ts`,
+  not a slice). Ordinary files are assigned by deterministic longest-processing-time
+  balancing to isolated worker processes. Files classified as tracked-save writers,
+  ambient-run readers, process-environment mutators, or fixed-port owners run in a
+  serial tail. `tests/test_suite_inventory.test.ts` pins exact discovery coverage,
+  hazard classification, stable ordering, and partition-seed coverage. The
   Baseline Regression `test`/`scenarios` jobs run only the fast/scenario SLICES, so a test
   the `tools/test/discover_test_files.mjs` heuristics mis-bucket can drop from both with no
-  signal. The full-suite job runs everything the config discovers, so full-suite-only pins
+  signal. The balanced full-suite job runs everything the config discovers, so full-suite-only pins
    (`strict_null_inventory_progress`, `war_phase_step_order`, consequence/substrate
    inventory) can no longer reach main green.
 - **JNA lifecycle/presentation:** `tests/early_war_jna_transition.test.ts` pins event-backed

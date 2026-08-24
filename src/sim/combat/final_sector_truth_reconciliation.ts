@@ -3,6 +3,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type { CorpsFrontSector, GameState } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { emitRoutineConsoleDebug } from '../../utils/routine_console_diagnostics.js';
 import type { SpatialContext } from '../spatial_context.js';
 import { syncSectorAssignmentsToFormations } from './brigade_assignment.js';
 import {
@@ -87,6 +88,7 @@ export interface FinalSectorTruthReconciliationOptions {
 
 export interface FinalSectorTruthSealOptions {
     session?: FinalSectorReconciliationSession;
+    diagnosticKind?: 'turn' | 'final_save';
 }
 
 const RECONCILIATION_STAGE_ORDER: readonly FinalSectorReconciliationStage[] = [
@@ -307,6 +309,7 @@ function runCurrentSectorSeal(
     edges: EdgeRecord[],
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     spatial?: SpatialContext,
+    diagnosticKind: 'turn' | 'final_save' = 'turn',
 ): FinalSectorTruthReconciliationReport {
     const sectors = state.military.corps_front_sectors;
     if (!sectors || Object.keys(sectors).length === 0) {
@@ -342,6 +345,9 @@ function runCurrentSectorSeal(
     clearStaleSubSegmentAssignments(state);
     const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
     emitFinalUnresolvedSectorWarnings(state.military.unresolved_sector_brigades ?? [], formations);
+    emitRoutineConsoleDebug(
+        `[brigade_assignment] FINAL_SEAL kind=${diagnosticKind} turn=${state.meta.turn} unresolved=${state.military.unresolved_sector_brigades?.length ?? 0}`,
+    );
     return {
         sectors_rebuilt: 0,
         sectors_rated: ratings.sectors_rated,
@@ -483,7 +489,13 @@ export function sealFinalSectorTruthFromCurrentSectors(
     options?: FinalSectorTruthSealOptions,
 ): FinalSectorTruthReconciliationReport {
     const session = options?.session;
-    if (!session) return runCurrentSectorSeal(state, edges, supplyStateByOsid, spatial);
+    if (!session) return runCurrentSectorSeal(
+        state,
+        edges,
+        supplyStateByOsid,
+        spatial,
+        options?.diagnosticKind,
+    );
 
     assertSessionTurn(session, state);
     const receipts = pendingReceipts(session);
@@ -499,7 +511,13 @@ export function sealFinalSectorTruthFromCurrentSectors(
     if (dirtyStage === 'roster' && receipts.some(
         (receipt) => receipt.mutation === 'distribution-roster' || receipt.mutation === 'seal-roster',
     )) {
-        report = runCurrentSectorSeal(state, edges, supplyStateByOsid, spatial);
+        report = runCurrentSectorSeal(
+            state,
+            edges,
+            supplyStateByOsid,
+            spatial,
+            options?.diagnosticKind,
+        );
     } else if (dirtyStage === 'roster') {
         report = runOperationRosterReconciliation(state, edges, supplyStateByOsid, spatial);
     } else {

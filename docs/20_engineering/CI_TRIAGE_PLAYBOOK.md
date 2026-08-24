@@ -20,7 +20,10 @@ npm.cmd run desktop:startup-snapshot:build
 npm.cmd run test:vitest:scenario:anchors
 npm.cmd run test:vitest:fast
 npm.cmd run test:vitest:scenario
+npm.cmd run test:vitest:balanced
 ```
+
+The fast and scenario commands are diagnostic slices. They can localize a failure but cannot establish complete-suite green. Before closing a code-path CI repair, run `test:vitest:balanced`, whose inventory covers every file discovered by `vitest.config.ts`; shared-state hazards run in its serial tail.
 
 For `engine-health-188w`, first check whether the failure is its own 188w gate or the explicit `Require upstream scenario gate` step. If the upstream guard failed, triage the `scenarios` job first; the engine-health job is intentionally red so a required check never disappears behind a skipped dependency.
 
@@ -52,3 +55,4 @@ Every CI repair closeout should record:
 - exact file that owned the fix;
 - final Baseline Regression and Desktop Release Guard run IDs;
 - confirmation that no scenario gates were skipped or weakened.
+- complete-suite disposition (`test:vitest:balanced` locally and the `full-suite` required check on a PR/push to `main` when relevant paths changed).

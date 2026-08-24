@@ -36,6 +36,7 @@ type UndefendedSubsegmentIssues = {
 
 const {
     collectAssignmentCompletenessIssues,
+    inspectAssignmentCompletenessEvidence,
     collectAdjacentUncontestedTerritoryIssues,
     collectEmptyContestedSectorIssues,
     collectSectorFloorShortfallIssues,
@@ -48,6 +49,10 @@ const {
     validateState,
 } = require('../tools/validate_run_consistency.cjs') as {
     collectAssignmentCompletenessIssues: (state: any) => Array<{ id: string; corps: string; faction: string }>;
+    inspectAssignmentCompletenessEvidence: (state: any) => {
+        evidence_available: boolean;
+        issues: Array<{ id: string; corps: string; faction: string }>;
+    };
     collectAdjacentUncontestedTerritoryIssues: (state: any) => AdjacentIssues;
     collectEmptyContestedSectorIssues: (state: any) => EmptyContestedIssues;
     collectSectorFloorShortfallIssues: (state: any) => SectorFloorIssues;
@@ -79,6 +84,26 @@ function makeBrigade(id: string, overrides: Record<string, unknown> = {}) {
 }
 
 describe('validate_run_consistency assignment completeness', () => {
+    it('reports assignment completeness as not established when the serialized save omits canonical evidence', () => {
+        const state = {
+            meta: { turn: 10 },
+            military: {
+                formations: {},
+                corps_front_sectors: {},
+                sector_intel: {},
+            },
+        };
+
+        expect(inspectAssignmentCompletenessEvidence(state)).toEqual({
+            evidence_available: false,
+            issues: [],
+        });
+
+        const result = validateState(state, 'synthetic-missing-assignment-evidence');
+        expect(result.lines).toContain('  ? NOT ESTABLISHED: military.unresolved_sector_brigades is absent from this artifact');
+        expect(result.lines).not.toContain('  OK  0 unresolved');
+    });
+
     it('uses canonical final unresolved-sector truth instead of treating every unassigned brigade as a failure', () => {
         const state = {
             meta: { turn: 10 },

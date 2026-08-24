@@ -18,13 +18,17 @@ Run these on the merge candidate branch from a clean working tree (`git status
    - Equivalent: `npx.cmd tsc --noEmit -p tsconfig.json`
    - Failure class: schema drift, strict-null escape, unresolved import.
 
-2. **Fast Vitest suite (full, not focused)**
-   - Command: `npm.cmd test`
-   - Equivalent: `npm.cmd run test:vitest:fast`
-   - Failure class: fixture drift, docs-truth drift, behavior expectation
-     drift. See `docs/40_reports/audits/20260519_FAST_SUITE_DRIFT_TAXONOMY.md`.
-   - Forbidden shortcut: passing only a focused slice. Post-Batch-36 a focused
-     slice was green while the full fast suite was red on the same tree.
+2. **Complete balanced Vitest suite**
+   - Command: `npm.cmd run test:vitest:balanced`
+   - Inventory check: `npm.cmd run test:inventory:check`
+   - Failure class: fixture drift, docs-truth drift, behavior expectation drift,
+     discovery omission, shared-state collision, or worker-failure propagation.
+   - The runner deterministically balances ordinary tests across four isolated
+     processes and runs tracked-save writers, ambient-evidence readers,
+     environment mutators, and fixed-port owners in a serial tail.
+   - Forbidden shortcut: `npm test`, `test:vitest:fast`, `test:vitest:scenario`,
+     or a focused slice. Those remain useful diagnostic subsets but are not
+     complete pre-merge proof.
 
 3. **Baseline regression**
    - Command: `npm.cmd run test:baselines`
@@ -33,12 +37,13 @@ Run these on the merge candidate branch from a clean working tree (`git status
    - Failure class: generated-artifact drift, scenario behavior change. See
      `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`.
 
-4. **Desktop / map / UI build**
-   - Command: `npm.cmd run desktop:map:build`
+4. **Player-experience gate for UI/desktop/runtime changes**
+   - Command: `npm.cmd run qa:player-experience`
    - Skip-permitted only when: no UI, map, visual, or packaging surface was
      touched.
-   - Failure class: bundler config drift, missing dep, broken main-process
-     helper packaging contract.
+   - Failure class: type/build drift, Electron runtime-contract failure,
+     player-journey regression, browser opening/live-surface failure, server
+     cleanup failure, or blocked warning/error signature.
 
 5. **Diff hygiene**
    - Command: `git diff --check`
@@ -52,11 +57,10 @@ Run these on the merge candidate branch from a clean working tree (`git status
 "qa:all": "npm run typecheck && npm run test:coverage && npm run desktop:map:build && npm run test:baselines"
 ```
 
-`qa:all` substitutes `test:coverage` for the plain fast suite. Coverage runs
-the same vitest set and exits non-zero on the same failures, so it satisfies
-step 2 for branches that want coverage signal in the same pass. The canonical
-sequence above keeps step 2 and step 3 separate so reviewers can see which
-gate failed first.
+`qa:all` remains a legacy aggregate for typecheck, coverage, map build, and
+baselines. It does not use the balanced hazard-aware runner and does not run
+the browser/player-experience gate, so it no longer substitutes for steps 2
+and 4 above.
 
 Do not edit `qa:all` to "make it stricter." It is the existing contract.
 Adding a stricter gate goes here as a new step, not inside `qa:all`.
@@ -65,12 +69,13 @@ Adding a stricter gate goes here as a new step, not inside `qa:all`.
 
 - Typecheck first because it is the fastest fail and a typecheck failure
   invalidates downstream results.
-- Fast suite second because schema and fixture drift fail there with concrete
-  error messages.
+- Complete balanced suite second because it preserves full discovery while
+  isolating known shared-state hazards and propagating worker failures.
 - Baselines third because they are expensive but catch real scenario behavior
   changes that the fast suite cannot reach.
-- Map build fourth because it is large but only relevant when UI surfaces
-  changed.
+- Player-experience fourth because UI/runtime changes require the built
+  product, player journeys, and real browser routes rather than build-only
+  success.
 - `git diff --check` last as a cheap final hygiene pass.
 
 ## CI-only proof
@@ -81,6 +86,9 @@ Local pre-merge gate is not equivalent to CI. The following only CI runs:
   `scenario-anchors`, `test`, `scenarios` on Linux ubuntu-latest with the
   built startup snapshot freshly produced from the workflow's
   `desktop:startup-snapshot:build`.
+- `.github/workflows/full-suite-and-fingerprint.yml` — complete balanced suite,
+  player-experience gate, and fresh structural fingerprint on relevant PRs or
+  pushes to `main`.
 - `.github/workflows/desktop-release-guard.yml` — Linux AppImage smoke +
   Windows NSIS smoke on `windows-latest`.
 

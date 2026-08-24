@@ -74,6 +74,7 @@ import type {
 import { strictCompare } from '../src/state/validateGameState.js';
 import { serializeState } from '../src/state/serialize.js';
 import { createSectorFrontEdgeRelationTestCounters } from '../src/sim/combat/sector_front_edge_relation.js';
+import { deterministicShardValues } from '../tools/test/run_vitest_balanced.mjs';
 
 const ROOT = process.cwd();
 const SAVE_PATH = path.join(ROOT, 'data', 'derived', 'latest_run_final_save.json');
@@ -88,6 +89,9 @@ const CONTACT_GRAPH_PATH = path.join(
 const hasFixture = fs.existsSync(SAVE_PATH) && fs.existsSync(CONTACT_GRAPH_PATH);
 
 const CACHE_DISABLED_FLAG = 'SECTOR_COLDSTART_CACHE_DISABLED';
+const PROPERTY_SHARD_INDEX = Number.parseInt(process.env.AWWV_PROPERTY_SHARD_INDEX ?? '0', 10);
+const PROPERTY_SHARD_COUNT = Number.parseInt(process.env.AWWV_PROPERTY_SHARD_COUNT ?? '1', 10);
+const PROPERTY_SEEDS = deterministicShardValues(100, PROPERTY_SHARD_INDEX, PROPERTY_SHARD_COUNT);
 
 type ContactGraphEdge = {
     edge_id: string;
@@ -674,9 +678,8 @@ describe.skipIf(!hasFixture)(
         it('cached path matches uncached path across ≥100 deterministic state variants', () => {
             // 100 variants × cached + uncached = 200 buildCorpsFrontSectors calls.
             // Each variant is a deterministic mutation of the base state.
-            const NUM_VARIANTS = 100;
             const failures: Array<{ seed: number; diff: string }> = [];
-            for (let seed = 0; seed < NUM_VARIANTS; seed++) {
+            for (const seed of PROPERTY_SEEDS) {
                 const variant = makeVariant(baseState, seed);
                 const { cached, uncached } = runBothModes(variant, edges, false);
                 if (cached !== uncached) {
@@ -740,7 +743,7 @@ describe.skipIf(!hasFixture)(
 
         it('fixed-point shortcuts preserve every sector field and direct state side effect across production modes and 100 real-save variants', () => {
             for (const mode of FIXED_POINT_PRODUCTION_MODES) {
-                for (let seed = 0; seed < 100; seed++) {
+                for (const seed of PROPERTY_SEEDS) {
                     const variant = makeVariant(baseState, seed);
                     const { optimized, reference } = runFixedPointModes(variant, edges, mode);
                     if (optimized !== reference) {
@@ -764,7 +767,7 @@ describe.skipIf(!hasFixture)(
 
         it('dense occupancy preserves every sector field and direct state side effect against legacy scans across production modes and 100 real-save variants', () => {
             for (const mode of FIXED_POINT_PRODUCTION_MODES) {
-                for (let seed = 0; seed < 100; seed++) {
+                for (const seed of PROPERTY_SEEDS) {
                     const variant = makeVariant(baseState, seed);
                     const { candidate, legacy } = runOccupancyModes(variant, edges, mode);
                     if (candidate !== legacy) {
@@ -788,7 +791,7 @@ describe.skipIf(!hasFixture)(
 
         it('invocation-local front-edge relations preserve reconciliation reports, sessions, receipts, geometry order, sectors, full state, warnings, bytes, and rerun hashes across production modes and 100 real-save variants', () => {
             for (const mode of FIXED_POINT_PRODUCTION_MODES) {
-                for (let seed = 0; seed < 100; seed++) {
+                for (const seed of PROPERTY_SEEDS) {
                     const variant = makeVariant(baseState, seed);
                     const { candidate, legacy, rerun } = runFrontEdgeRelationModes(variant, edges, mode);
                     if (candidate !== legacy || candidate !== rerun) {

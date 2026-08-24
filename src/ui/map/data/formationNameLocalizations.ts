@@ -27,7 +27,8 @@ export interface BrigadeDesignationCatalogRow {
   faction: 'RBiH' | 'RS' | 'HRHB';
   designation_code: string;
   english_gloss: string;
-  official_bcs: string;
+  official_bcs: string | null;
+  playable_bcs?: string;
   unit_type: FormationUnitType;
   echelon: 'brigade' | 'battalion' | 'regiment' | 'unit_group';
   source_basis: string;
@@ -236,7 +237,9 @@ export function getLocalizedFormationName(
 ): string {
   if (locale !== 'bcs') return formation.name;
   if (formation.kind && !['brigade', 'operational_group'].includes(formation.kind)) return formation.name;
-  return DESIGNATION_BY_ID.get(formation.id)?.official_bcs
+  const designation = DESIGNATION_BY_ID.get(formation.id);
+  return designation?.official_bcs
+    ?? designation?.playable_bcs
     ?? EXACT_BCS_NAMES[formation.id]
     ?? localizeGenericBrigadeName(formation.name);
 }
