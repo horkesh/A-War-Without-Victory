@@ -226,6 +226,18 @@ const matchedOsids =
     summary.historical_fit.osid_pair_match &&
     summary.historical_fit.osid_pair_match.matched_osids) || 0;
 
+// CHECKPOINT FLOORS (2026-08-24). matchedOsids above is the TERMINAL reference only
+// (oct1995 at 188w). A single definitive run now scores four historical checkpoints, and
+// until this block existed the gate could not see three of them: a change could regress
+// jan1993 by 20 OSIDs and pass green so long as oct1995 held. Same semantics as
+// matched_osids -- a ratcheting floor with NO headroom.
+const checkpointMatched = {};
+for (const c of (summary.historical_fit && summary.historical_fit.checkpoints) || []) {
+  if (c && c.reference_key && c.osid_pair_match) {
+    checkpointMatched[c.reference_key] = c.osid_pair_match.matched_osids || 0;
+  }
+}
+
 // ---- state-integrity delegation ----
 // T2: use process.execPath so the child runs the same Node as the parent.
 const consistency = spawnSync(
@@ -262,6 +274,7 @@ const measured = {
   stranded_brigades: stranded,
   consistency_failures: consistencyFailures,
   matched_osids: matchedOsids,
+  checkpoint_matched: checkpointMatched,
   kw_ratio: kwRatio,
   total_killed: killed,
   total_wounded: wounded,
@@ -315,11 +328,16 @@ function defaultBand() {
     consistency_failures_max: measured.consistency_failures,
     // ratcheting floor (higher is better)
     matched_osids_min: measured.matched_osids,
+    // per-checkpoint floors, same no-headroom semantics
+    checkpoint_matched_min: { ...measured.checkpoint_matched },
     // advisory band (informational unless --strict)
     kw_ratio_lo: +(measured.kw_ratio * 0.85).toFixed(3),
     kw_ratio_hi: +(measured.kw_ratio * 1.15).toFixed(3),
   };
 }
+/** Turn-boundary jitter absorbed by each per-checkpoint floor. See withHeadroom. */
+const CHECKPOINT_JITTER_TOLERANCE = 3;
+
 function withHeadroom(band) {
   // counts get +15% or +3 headroom (whichever larger) so trivial noise doesn't false-red;
   // matched_osids floor takes NO headroom (a single-OSID regression must be caught).
@@ -331,6 +349,16 @@ function withHeadroom(band) {
     stranded_brigades_max: ceilH(band.stranded_brigades_max),
     consistency_failures_max: ceilH(band.consistency_failures_max),
     matched_osids_min: band.matched_osids_min,
+    // Checkpoint floors DO take a small tolerance, unlike matched_osids. Turn-boundary
+    // jitter is endemic and real: adding two captures at t9/t10 shifted ~two dozen
+    // unrelated captures across the map by one turn, and a capture that lands on turn 188
+    // in one run falls off the end in the next. Pinning a checkpoint at its exact measured
+    // value would red the gate on that noise and teach everyone to pass --force, which is
+    // strictly worse than a floor with a stated tolerance. 3 still catches the regression
+    // class this exists for (a 20-OSID checkpoint collapse passing green on oct1995 alone).
+    checkpoint_matched_min: Object.fromEntries(
+      Object.entries(band.checkpoint_matched_min || {}).map(([k, v]) => [k, Math.max(0, v - CHECKPOINT_JITTER_TOLERANCE)])
+    ),
     kw_ratio_lo: band.kw_ratio_lo,
     kw_ratio_hi: band.kw_ratio_hi,
   };
@@ -360,6 +388,21 @@ if (flags.update) {
       2
     );
   }
+  // Same N3 protection for every per-checkpoint floor: an --update must never quietly
+  // ratchet a checkpoint DOWN. Without this, blessing a run that traded 8 points of
+  // jan1993 for 1 point of oct1995 would lock the loss in as the new floor.
+  const existingCp = (thresholds[horizon] && thresholds[horizon].checkpoint_matched_min) || {};
+  const lowered = Object.keys(existingCp)
+    .filter((k) => measured.checkpoint_matched[k] != null && measured.checkpoint_matched[k] < existingCp[k])
+    .map((k) => `${k} ${existingCp[k]} -> ${measured.checkpoint_matched[k]}`);
+  if (lowered.length && !flags.force) {
+    die(
+      `refusing to lower checkpoint floor(s) for ${horizon}: ${lowered.join(', ')}. ` +
+        `This run is WORSE at those checkpoints than the blessed floor. Pass --force only ` +
+        `if you deliberately intend to drop them.`,
+      2
+    );
+  }
   thresholds[horizon] = withHeadroom(defaultBand());
   thresholds._note =
     'Engine-health gate thresholds (EH-1 Part B). Counts = ratcheting ceilings (+15%/+3 headroom); ' +
@@ -385,6 +428,20 @@ hard('dead_ops', measured.dead_ops <= band.dead_ops_max, `${measured.dead_ops} <
 hard('ghost_destroyed', measured.ghost_destroyed <= band.ghost_destroyed_max, `${measured.ghost_destroyed} <= ${band.ghost_destroyed_max}`);
 hard('stranded_brigades', measured.stranded_brigades <= band.stranded_brigades_max, `${measured.stranded_brigades} <= ${band.stranded_brigades_max}`);
 hard('matched_osids', measured.matched_osids >= band.matched_osids_min, `${measured.matched_osids} >= ${band.matched_osids_min}`);
+// One hard check per checkpoint the band knows about. A band predating this feature has
+// no checkpoint_matched_min, so nothing is checked and the gate stays green until blessed.
+for (const key of Object.keys((band && band.checkpoint_matched_min) || {}).sort()) {
+  const floor = band.checkpoint_matched_min[key];
+  const got = measured.checkpoint_matched[key];
+  hard(
+    `checkpoint_${key}`,
+    got != null && got >= floor,
+    got == null
+      ? `run emitted no ${key} checkpoint (expected >= ${floor}) — scoring may be off`
+      : `${got} >= ${floor}`
+  );
+}
+
 hard(
   'consistency_failures',
   !consistencyParseError && measured.consistency_failures <= band.consistency_failures_max,

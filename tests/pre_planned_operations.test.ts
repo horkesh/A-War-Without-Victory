@@ -211,11 +211,17 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 16);
+        assert.equal(_ALL_PRE_PLANNED.length, 17);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
                 'Operation Koridor',
+                // Second vrs_east_bosnian op. It runs ONLY because the corps has a
+                // queued_operations entry: for a headless calibration run
+                // injectPrePlannedOperations executes once, at scenario load, so a corps'
+                // second op is otherwise skipped by the injectedCorps guard and never
+                // reconsidered -- silently, with no validation warning.
+                'Operation Majevica',
                 'Operation Drina',
                 'Operation Podrinje Sweep',
                 'Operation Pracha River',

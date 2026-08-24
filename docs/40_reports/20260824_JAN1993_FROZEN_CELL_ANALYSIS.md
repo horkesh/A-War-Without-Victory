@@ -86,3 +86,51 @@ non-§6 subset should move `jan1993` upward and leave the three later checkpoint
 within noise. If those cells still do not flip after being targeted, the wall is
 combat resolution (the `decisive_victory` threshold), not coverage — the same
 wall `glamoc` hit — and operation tuning is exhausted as a lever for jan1993.
+
+---
+
+## Addendum — target ranking (measured 2026-08-24)
+
+Two properties decide what a frozen cell is worth. **STABLE** = the reference wants it
+RS at all four checkpoints, so taking it pays +1 four times. **MOVES** = the reference
+returns it later, so the gain is partly or wholly given back unless the engine already
+recaptures in that municipality at the right time.
+
+Every one of the 18 has at least one RS-held neighbour at turn 0, verified against
+`buildOsidAdjacency` — adjacency-valid chains exist for all of them. The older
+"not adjacent" notes in `pre_planned_operations.ts` (krivajevici, praca) rule out
+*specific* chains, not the cells.
+
+| cell | painted profile | class | net value if taken | note |
+|---|---|---|---|---|
+| ugljevik:jasikovac | RS RS RS RS | STABLE | **+4** | RS nbr `zabrdje_2`; free Majevica bdes |
+| ugljevik:srednja_trnova_2 | RS RS RS RS | STABLE | **+4** | same chain |
+| kalesija:seher_2 | RS RS RS RS | STABLE | +4 | no brigades homed at any RS nbr — needs a march |
+| pale:praca | RS RS RS RS | STABLE | +4 | `rs_4th_sarajevo` at `bulozi`, already committed |
+| trnovo:kijevo_2 | RS RS RS RS | STABLE | +4 | `rs_trnovo_brigade` known destroyed pre-injection |
+| donji_vakuf:jemanlici | RS RS RS RBiH | MOVES | +4 if recaptured | engine retakes `pribraca_2` t187 — timing fits |
+| donji_vakuf:korenici | RS RS RS RBiH | MOVES | +4 if recaptured | engine retakes `komar_2` t182 — timing fits |
+| bosanska_krupa:veliki_badic | RS RS RS RBiH | MOVES | +4 if recaptured | engine retakes all 3 RS nbrs t178–185 |
+| konjic:ljuta | RS RS RBiH RBiH | MOVES | +2 | engine retakes `sitnik` t121, before apr1995 |
+| ilijas:krivajevici | RS RS RS RBiH | MOVES | +2 | engine NEVER recaptures in Ilijaš — keeps 3, loses 1 |
+| travnik:gornje_krcevine | RS RS RBiH RBiH | MOVES | **0** | engine never recaptures in Travnik — do not pursue |
+| travnik:paklarevo | RS RS RBiH RBiH | MOVES | **0** | same — do not pursue |
+| gorazde:kolovarice | RS RS RS RS | STABLE | — | known merge defect, unwinnable under any controller |
+| foca:brusna_2, cajnice ×3, zvornik:djulici | RS ×4 | STABLE | +4 each | **§6 — ICTY municipalities, panel matter** |
+
+The Travnik pair is the useful negative result: it is frozen, adjacency-reachable, and
+still worth nothing, because the reference hands it back and the engine has no mechanism
+to hand it back. Frozen does not imply worth fixing.
+
+## First coverage test — Operation Majevica
+
+Added as a **separate operation** (not a third Koridor axis: Koridor's multi-axis
+readiness gate is documented as order-sensitive and Brčko is load-bearing).
+`vrs_east_bosnian`, staging `op:ugljevik:zabrdje_2`, chain
+`zabrdje_2 → jasikovac → srednja_trnova_2`, all links adjacency-verified. Brigades
+`rs_1st/2nd/3rd_majevica` (1,904 / 1,819 / 1,251 men, available from turn 0, homed
+in-sector, uncommitted elsewhere) against a local ARBiH presence of one 273-man brigade.
+
+**Enclave guard:** both objectives border `op:ugljevik:teocak_krstac_2`. Teočak must hold
+(canon H1.8) and holds RBiH at all four checkpoints in the baseline. It is deliberately
+not an objective; every run carrying this op must re-verify it.

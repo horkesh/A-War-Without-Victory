@@ -18,7 +18,14 @@
     "stranded_brigades_max": 9,
     "consistency_failures_max": 3,
     "matched_osids_min": 622,
+    "checkpoint_matched_min": {
+      "jan1993": 674,
+      "apr1994": 660,
+      "apr1995": 659,
+      "oct1995": 644
+    },
     "kw_ratio_lo": 3.211,
     "kw_ratio_hi": 4.345
-  }
+  },
+  "_note_checkpoints_2026_08_24": "checkpoint_matched_min ADDED BY HAND, not via --update. The gate previously read only historical_fit.osid_pair_match.matched_osids -- the TERMINAL (oct1995) figure -- so a change could regress jan1993 by 20 OSIDs and pass green. Values are n287 measured (677/663/662/647) minus a 3-OSID turn-boundary jitter tolerance; jitter is endemic (two captures at t9/t10 moved ~two dozen unrelated captures by one turn, and sanski_most:kljevci lands on turn 188 in one run and falls off the end in the next), and an exact pin would just teach everyone to pass --force. Done by hand because a blanket --update on n287 would ALSO have loosened ghost_destroyed_max 4 -> 5 and raised matched_osids_min 622 -> 647; the first is a silent weakening and the second is an owner posture decision. Both were declined."
 }

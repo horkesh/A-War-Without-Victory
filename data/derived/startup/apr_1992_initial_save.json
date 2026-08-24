@@ -1631,6 +1631,9 @@
         "command_span": 5,
         "corps_exhaustion": 0,
         "og_slots": 2,
+        "queued_operations": [
+          "Operation Majevica"
+        ],
         "stance": "offensive",
         "subordinate_count": 11
       },

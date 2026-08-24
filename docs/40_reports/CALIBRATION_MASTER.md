@@ -61,6 +61,66 @@ under any single controller. That is a data-pipeline item.
 
 Full derivation: `docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISMATCH_TRIAGE.md`.
 
+## 2026-08-24 — CHECKPOINT ERA: floor is now FOUR numbers, not one. Majevica coverage fix ADOPTED.
+
+**READ THIS BEFORE QUOTING ANY FIGURE BELOW THIS LINE.** Every headline number in the
+entries beneath (637 / 638 / 639 / 628 / 630 ...) was scored against the painted references
+*as they stood before the 2026-08-24 owner corrections* (50 corrections across four
+snapshots). They are **stale as absolute figures** and must not be quoted as current. The
+gate floor `188w.matched_osids_min: 622` is unaffected and was not touched.
+
+A single definitive run now scores four checkpoints. Quoting one number without its
+checkpoint key is meaningless.
+
+**Adopted:** `Operation Majevica` + the `vrs_east_bosnian` follow-on queue.
+
+| checkpoint | before | after | delta |
+|---|---|---|---|
+| jan1993 | 675 | **677** | +2 |
+| apr1994 | 661 | **663** | +2 |
+| apr1995 | 660 | **662** | +2 |
+| oct1995 | 648 | **647** | −1 |
+|  |  | **NET** | **+5** |
+
+Run `apr1992_definitive_188w__0589220209545186__w188_n287`. Engine-health gate PASS
+(matched_osids 647 >= 622; zero_eligible_ops 0, dead_ops 0, ghost 2, stranded 5,
+consistency 0, K:W 3.699).
+
+**What changed and why it was invisible before.** `op:ugljevik:jasikovac` and
+`op:ugljevik:srednja_trnova_2` are painted RS at all four checkpoints and were objectives
+of no operation, so nothing ever attacked them and they held their turn-0 Bosniak-majority
+assignment for 188 weeks. 32 of the 37 jan1993 mismatches were frozen this way. Giving them
+an operation took them at t9 and t10.
+
+The op needed a `queued_operations` entry to run at all: for a headless calibration run
+`injectPrePlannedOperations` executes **exactly once**, at scenario load, so a corps' second
+operation is skipped by the `injectedCorps` guard and never reconsidered — silently, with no
+validation warning. See `20260824_SCENARIO_TESTER_N286_ASSESSMENT.md`.
+
+**The −1 at oct1995 is a run-boundary artefact, not a regression.** In the baseline,
+`op:sanski_most:kljevci` is captured on turn 188 — the final turn. Two new captures at
+t9/t10 shift global turn ordering by ~1 turn and that capture falls off the end. The rest of
+the diff is the same jitter, netting near zero. **Owner accepted the trade (2026-08-24).**
+
+**Guards verified, not assumed.** Teočak holds RBiH at all four checkpoints (canon H1.8
+enclave guard). The documented HRHB western-Bosnia cascade site is intact: Grahovo 4/4,
+Šipovo 5/5, Glamoč 6/6, Petrovac 7/8, Mrkonjić 5/6, Sanski Most 9/10. This matters because
+`pre_planned_operations.ts` records a 2026-08-12 attempt (`kijevo_2` via Prsten) that read
++3 at 43w and **−26 at 188w** with the damage concentrated in exactly that western Krajina
+cluster. Majevica does not reproduce that signature.
+
+**New tooling.** `tools/verify_checkpoints.cjs` replays `control_events` against the CURRENT
+painted files, so runs from different days are comparable, and checks the enclave guard and
+the cascade site unconditionally. `tools/engine_health_gate.cjs` now carries per-checkpoint
+floors (`checkpoint_matched_min`, no headroom, `--update` refuses to lower one without
+`--force`) — before this it read only the terminal oct1995 figure and a 20-OSID jan1993
+regression would have passed green.
+
+**Standing constraint discovered.** Every VRS corps stops taking ground within the first ~28
+turns and is idle for the remaining 160-184 (1KK last capture t28, Drina t18, East Bosnian
+t5, Herzegovina t11, 2KK t4). Any coverage objective must sit inside that early window or it
+cannot be taken at all. Tracked as a separate engine-health lane.
+
 ## 2026-08-11 R6 western-Bosnia lane — floor matched_osids **639**, anchors **31/31** (supersedes 634 / 30·31; Brčko debt CLOSED) — *numerator restated to 638 by the 2026-08-12 reference correction above*
 
 **Floor MOVED: `matched_osids` 634 → 639, anchors 30/31 → 31/31.** Two independent fixes landed on `codex/master-roadmap-execution`. `op:brcko:brcko` — the single accepted anchor debt carried since the 2026-08-06 de-saturation entry below — now **PASSES**, so the 30/31 line in every entry beneath this one is superseded.

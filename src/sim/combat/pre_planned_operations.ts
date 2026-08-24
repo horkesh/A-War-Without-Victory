@@ -165,6 +165,45 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        corps: 'vrs_east_bosnian',
+        faction: 'RS',
+        name: 'Operation Majevica',
+        staging_osid: 'op:ugljevik:zabrdje_2',
+        min_attack_outcome: 'repulsed',
+        // 2026-08-24 coverage lane. jasikovac and srednja_trnova_2 are painted RS at ALL FOUR
+        // checkpoints yet were objectives of NO operation, so nothing ever attacked them and they
+        // held their turn-0 Bosniak-majority assignment for 188 weeks (32 of the 37 jan1993
+        // mismatches are frozen this way — see 20260824_JAN1993_FROZEN_CELL_ANALYSIS.md).
+        //
+        // Separate op rather than a third Koridor axis on purpose: Koridor's multi-axis readiness
+        // gate is documented above as order-sensitive (posavina_flank firing before brcko_corridor
+        // finished its march caused zero_eligible_axis), and Brcko is a load-bearing anchor.
+        //
+        // Chain is adjacency-valid at every link (verified against buildOsidAdjacency):
+        //   zabrdje_2 (RS t0) -> jasikovac -> srednja_trnova_2
+        // All three Majevica brigades are homed in-sector and uncommitted to any other op.
+        //
+        // ENCLAVE GUARD: both objectives border op:ugljevik:teocak_krstac_2. Teocak MUST HOLD
+        // (canon H1.8). Teocak is deliberately NOT an objective; verify it still holds after any
+        // run that includes this op.
+        axes: [
+            {
+                axis_id: 'majevica_trnova',
+                name: 'Majevica — Trnova',
+                brigades: [
+                    'rs_1st_majevica_light_infantry',
+                    'rs_2nd_majevica_light_infantry',
+                    'rs_3rd_majevica_infantry',
+                ],
+                objectives: [
+                    'op:ugljevik:jasikovac',
+                    'op:ugljevik:srednja_trnova_2',
+                ],
+                staging_osid: 'op:ugljevik:zabrdje_2',
+            },
+        ],
+    },
+    {
         corps: 'vrs_drina',
         faction: 'RS',
         name: 'Operation Drina',
@@ -1233,6 +1272,21 @@ export function injectPrePlannedOperations(
         const cmd = corpsCommand['vrs_herzegovina'];
         if (focaDef && cmd && !cmd.queued_operations) {
             cmd.queued_operations = [focaDef.name];
+        }
+    }
+
+    // Queue East Bosnian Corps: Operation Koridor -> Operation Majevica
+    // Koridor takes all seven of its objectives by ~t17 and the corps then goes idle for the
+    // remaining 171 turns. Majevica is the only follow-on. WHY THIS BLOCK IS REQUIRED: for a
+    // headless calibration run injectPrePlannedOperations executes EXACTLY ONCE, at scenario
+    // load — the per-turn 'inject-player-pre-planned-operations' step returns early on
+    // headless_scenario_auto_control and on absent player_faction. So a corps' second op can
+    // only ever run if it is named in one of these queues; without an entry it is skipped by
+    // the injectedCorps guard at turn 0 and never reconsidered, silently and with no warning.
+    if (injectedCorps.has('vrs_east_bosnian')) {
+        const cmd = corpsCommand['vrs_east_bosnian'];
+        if (cmd && !cmd.queued_operations) {
+            cmd.queued_operations = ['Operation Majevica'];
         }
     }
 

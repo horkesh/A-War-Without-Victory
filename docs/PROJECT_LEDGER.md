@@ -28903,3 +28903,33 @@ not a LOW-risk data lever.** ~11 are ordinary front-line cells with no §6 expos
 
 Full analysis: `docs/40_reports/20260824_JAN1993_FROZEN_CELL_ANALYSIS.md`.
 No engine or data change made. Operation and OOB experiments reverted; tree clean.
+
+## 2026-08-24 — Operation Majevica ADOPTED: jan1993 675→677, net +5 across four checkpoints
+
+Owner accepted (2026-08-24). Run `apr1992_definitive_188w__...__w188_n287`.
+
+    jan1993 675 -> 677 (+2)   apr1994 661 -> 663 (+2)
+    apr1995 660 -> 662 (+2)   oct1995 648 -> 647 (-1)   NET +5
+
+- New pre-planned op `Operation Majevica` (`vrs_east_bosnian`, staging `op:ugljevik:zabrdje_2`,
+  chain `zabrdje_2 -> jasikovac -> srednja_trnova_2`, brigades `rs_1st/2nd/3rd_majevica`).
+  Both objectives painted RS at all four checkpoints; captured t9 and t10.
+- **Engine defect fixed**: `injectPrePlannedOperations` runs exactly ONCE for a headless
+  calibration run (the per-turn step returns early on `headless_scenario_auto_control` and on
+  absent `player_faction`). A corps' second op is therefore skipped by the `injectedCorps`
+  guard and never reconsidered — silently, no validation warning. Added the missing
+  `vrs_east_bosnian` follow-on queue. Run n286 (same op, no queue) was a correctly-executed
+  null: zero delta, zero events, no warning.
+- Separate op rather than a third Koridor axis, deliberately: Koridor's multi-axis readiness
+  is order-sensitive and Brčko is load-bearing.
+- oct1995 −1 is a run-boundary artefact — `sanski_most:kljevci` is captured on turn 188 in the
+  baseline and slips off the end when turn ordering shifts by ~1.
+- Guards verified: Teočak holds (canon H1.8). Western-Bosnia cascade intact (Grahovo 4/4,
+  Šipovo 5/5, Glamoč 6/6) — the site where a 2026-08-12 Prsten attempt cost −26 at 188w.
+
+Tooling: `tools/verify_checkpoints.cjs` (replay-scores a run against CURRENT painted files +
+enclave guard + cascade site). `tools/engine_health_gate.cjs` gained per-checkpoint floors —
+it previously read only the terminal oct1995 figure, so a large jan1993 regression passed green.
+
+Standing constraint: every VRS corps stops capturing within ~28 turns and is idle for the
+remaining 160-184. Coverage objectives must sit inside that window. Separate lane.
