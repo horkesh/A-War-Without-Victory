@@ -90,6 +90,26 @@ export interface Scenario {
      * verdict layer over the final state.
      */
     dayton_close_out?: boolean;
+    /**
+     * Whether this scenario is THE calibration instrument.
+     *
+     * ONE DEFINITIVE SCENARIO (owner, 2026-08-24). Exactly one scenario should declare this:
+     * `apr1992_definitive_188w`. Only a declaring scenario reads the painted-control
+     * references and emits `historical_fit` scoring — everything else runs as a test fixture
+     * and produces no score.
+     *
+     * WHY A DECLARATION AND NOT A DURATION RULE. Scoring used to be implied by
+     * `init_control === 'apr1992'`, which made THIRTY scenarios emit a calibration figure —
+     * every 4w probe, every bots variant, every `historical_mvp_*` fork. Any of them could be
+     * quoted as "the" number, and one was: `apr1992_definitive_104w` scored 639 against
+     * apr1994 while the definitive line scored 647 at the same week, because that fork had
+     * silently missed two combat flags. A competing score is worse than no score.
+     *
+     * A fixture that stops scoring is not degraded — it still runs the same simulation and
+     * still produces `final_save.json`, `control_delta.json` and the rest. It just no longer
+     * publishes an opinion about historical fidelity that nobody calibrates against.
+     */
+    calibration_scenario?: boolean;
     weeks: number;
     turns?: ScenarioTurn[];
     /** Phase H2.4: When true, harness injects baseline_ops for each week that has none (harness-only; off by default). */

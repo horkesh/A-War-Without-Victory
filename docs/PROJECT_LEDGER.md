@@ -28819,3 +28819,40 @@ Baselines re-pinned: 6 of 32 artifacts moved (188w/52w `run_summary`, both 4w fi
 `end_report` + `run_summary` — the 4w pair because jan1993 changed and Check #27 reads it on
 every scenario). No `final_save.json` pin moved; the simulation is byte-identical. The 38
 entries written by `b9529eb77` had their commit field stamped from `pending`.
+
+### 2026-08-24 — calibration scoring becomes a declaration, not an inference
+
+**Change:** `Scenario.calibration_scenario` gates the painted-reference read.
+`usesPaintedControlReference` — already the single source of truth for both the diagnostics
+gate and the provenance stamp — now requires the flag, so a non-declaring scenario reads no
+painted file and stamps none. Exactly one scenario declares it: `apr1992_definitive_188w`.
+
+**Measured scope, which was larger than expected: 30 scenarios emitted a `historical_fit`
+figure before this; now 1.** Scoring had been inferred from `init_control === 'apr1992'`, so
+every 4w probe, every bots fork and every `historical_mvp_*` variant published a calibration
+number. Any could be quoted as "the" figure and one was — `apr1992_definitive_104w` reported
+639 against apr1994 where the definitive line reported 647 at the same week, because that
+fork had silently missed `firepower_deficit_penalty_enabled`.
+
+**Nothing was deleted.** The gate is on the painted read, not on simulation: a fixture that
+stops scoring still runs the same sim and still emits `final_save.json`, `control_delta.json`
+and the rest. 40w remains the fast integration fixture, 52w the desktop campaign scenario,
+104w the cadence fixture. Retiring those files stays a separate refactor.
+
+**DEFECT FOUND AND FIXED IN THE SAME CHANGE — and the test did not catch it.**
+`loadScenario` REBUILDS the scenario from named fields rather than spreading the parsed JSON,
+so `calibration_scenario` was present in the type and in the JSON and silently dropped in
+between. The gate then read `undefined` for EVERY scenario including the calibration one and
+switched scoring off everywhere; the 188w baseline artifact came back with no
+`osid_pair_match` and zero checkpoints. The contract test passed throughout because it read
+the raw JSON with `JSON.parse` while the runner uses the loader. Caught by inspecting the
+re-pinned artifacts, not by any test. The loader now carries the field through both of its
+construction sites, the contract test goes through `loadScenario`, and a dedicated pin asserts
+the flag survives loading — the type and the JSON agreeing is not sufficient.
+
+**Verified:** 188w scores 648/712 with 4 checkpoints; 52w, noop_4w and baseline_ops_4w score
+nothing. Baselines re-pinned: 3 artifacts moved (188w `end_report`+`run_summary` because its
+scenario JSON gained the declaration, 52w `run_summary` because it shed its scoring block); no
+`final_save.json` pin moved. Typecheck clean; 12 checkpoint-contract tests and 109 tests across
+the six most-affected suites pass — including `scenario_anchor_contract` and
+`desktop_calibration_compare`, which I had predicted would need repointing and did not.

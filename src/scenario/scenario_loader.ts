@@ -215,6 +215,13 @@ export function normalizeScenario(raw: unknown): Scenario {
     // A2 Dayton close-out (task #71): default-off boolean flag. The loader whitelists
     // fields, so this must be parsed explicitly (an unknown JSON key is dropped).
     const dayton_close_out = o.dayton_close_out === true ? true : undefined;
+    // ONE DEFINITIVE SCENARIO. Must be carried through explicitly: this loader REBUILDS the
+    // scenario from named fields rather than spreading the parsed JSON, so a field added to
+    // the type and the JSON but NOT here is silently dropped. That happened to this very
+    // flag -- the gate then read undefined for every scenario INCLUDING the calibration one,
+    // switching scoring off everywhere while the contract test (which read the raw JSON)
+    // still passed.
+    const calibration_scenario = o.calibration_scenario === true ? true : undefined;
     const weeks = typeof o.weeks === 'number' ? Math.floor(o.weeks) : undefined;
     const scenario_start_week =
         typeof o.scenario_start_week === 'number' && Number.isInteger(o.scenario_start_week)
@@ -473,6 +480,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             ...(player_faction !== undefined ? { player_faction } : {}),
             ...(decision_mode !== undefined ? { decision_mode } : {}),
             ...(dayton_close_out !== undefined ? { dayton_close_out } : {}),
+            ...(calibration_scenario !== undefined ? { calibration_scenario } : {}),
             scenario_start_week,
             start_lifecycle_phase,
             peace_referendum_held_at_start,
@@ -527,6 +535,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         ...(player_faction !== undefined ? { player_faction } : {}),
         ...(decision_mode !== undefined ? { decision_mode } : {}),
         ...(dayton_close_out !== undefined ? { dayton_close_out } : {}),
+        ...(calibration_scenario !== undefined ? { calibration_scenario } : {}),
         scenario_start_week,
         start_lifecycle_phase,
         peace_referendum_held_at_start,

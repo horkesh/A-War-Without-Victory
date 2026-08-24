@@ -66,15 +66,26 @@ describe('historical checkpoints', () => {
     });
 
     it('CONTROL — a horizon shorter than the first checkpoint reaches none', () => {
-        const short = { scenario_id: 'apr1992_probe_4w', init_control: 'apr1992', weeks: 4 } as unknown as ScenarioLike;
-        expect(usesPaintedControlReference(short), 'this one DOES read a painted reference').toBe(true);
+        // Declared, so scoring is enabled — this isolates the HORIZON rule from the
+        // declaration rule. Without the flag it would return [] for the other reason.
+        const short = {
+            scenario_id: 'apr1992_probe_4w',
+            init_control: 'apr1992',
+            calibration_scenario: true,
+            weeks: 4,
+        } as unknown as ScenarioLike;
+        expect(usesPaintedControlReference(short), 'declared, so it DOES read a painted reference').toBe(true);
         expect(checkpointsForScenario(short), 'but week 4 reaches no checkpoint').toEqual([]);
     });
 
     it('checkpoint boundaries are inclusive at the checkpoint week and exclusive below it', () => {
         const at = (weeks: number) =>
-            checkpointsForScenario({ scenario_id: 'apr1992_x', init_control: 'apr1992', weeks } as unknown as ScenarioLike)
-                .map((c) => c.week);
+            checkpointsForScenario({
+                scenario_id: 'apr1992_x',
+                init_control: 'apr1992',
+                calibration_scenario: true,
+                weeks,
+            } as unknown as ScenarioLike).map((c) => c.week);
         expect(at(38), 'one week short of the first checkpoint').toEqual([]);
         expect(at(39), 'exactly on it').toEqual([39]);
         expect(at(103)).toEqual([39]);
@@ -89,6 +100,7 @@ describe('historical checkpoints', () => {
         const midWar = {
             scenario_id: 'jan1993_to_dayton',
             init_control: 'apr1992',
+            calibration_scenario: true,
             scenario_start_week: 39,
             weeks: 149,
         } as unknown as ScenarioLike;
@@ -106,5 +118,76 @@ describe('historical checkpoints', () => {
         expect(counts).toEqual({ jan1993: 30, apr1994: 31, apr1995: 39, oct1995: 30 });
         expect(new Set(Object.values(counts)).size, 'not all epochs agree — that is the point')
             .toBeGreaterThan(1);
+    });
+});
+
+/**
+ * ONE DEFINITIVE SCENARIO — the declaration, not a duration rule.
+ *
+ * Scoring used to be inferred from `init_control === 'apr1992'`, which made THIRTY scenarios
+ * emit a historical_fit figure: every 4w probe, every bots fork, every historical_mvp_*
+ * variant. Any of them could be quoted as "the" calibration number, and one was —
+ * apr1992_definitive_104w reported 639 against apr1994 where the definitive line reported 647
+ * at the same week, because that fork had silently missed firepower_deficit_penalty_enabled.
+ */
+describe('exactly one calibration scenario', () => {
+    it('★ exactly one scenario in the repo emits historical_fit scoring, and it is the 188w', async () => {
+        // THROUGH THE LOADER, NOT JSON.parse. The first version of this test read the raw
+        // JSON and passed while the real path was broken: `loadScenario` rebuilds the
+        // scenario from named fields and was silently dropping `calibration_scenario`, so
+        // the runner saw undefined for EVERY scenario and scored none -- including the
+        // calibration one. A test that bypasses the loader cannot see that class of defect.
+        const { readdirSync } = await import('node:fs');
+        const { loadScenario } = await import('../src/scenario/scenario_loader.js');
+        const scoring: string[] = [];
+        for (const f of readdirSync('data/scenarios').filter((x) => x.endsWith('.json'))) {
+            let s: ScenarioLike & { scenario_id?: string };
+            try {
+                s = (await loadScenario('data/scenarios/' + f)) as typeof s;
+            } catch {
+                continue;
+            }
+            if (!s.scenario_id) continue;
+            if (usesPaintedControlReference(s)) scoring.push(s.scenario_id);
+        }
+        expect(scoring, 'a second scoring scenario is a second calibration number').toEqual([
+            'apr1992_definitive_188w',
+        ]);
+    });
+
+    it('★ the loader CARRIES the declaration — the flag must survive loadScenario', async () => {
+        // Regression pin for the silent-drop above. The type and the JSON agreeing is not
+        // enough; the loader has to be taught the field too.
+        const { loadScenario } = await import('../src/scenario/scenario_loader.js');
+        const loaded = (await loadScenario('data/scenarios/apr1992_definitive_188w.json')) as {
+            calibration_scenario?: boolean;
+        };
+        expect(loaded.calibration_scenario, 'dropped by the loader = scoring silently off').toBe(true);
+        expect(checkpointsForScenario(loaded as ScenarioLike)).toHaveLength(4);
+    });
+
+    it('the declaration is what gates it — a 188w clone without the flag does not score', () => {
+        const declared = {
+            scenario_id: 'apr1992_definitive_188w',
+            init_control: 'apr1992',
+            weeks: 188,
+            calibration_scenario: true,
+        } as unknown as ScenarioLike;
+        const clone = {
+            scenario_id: 'apr1992_definitive_188w_experiment',
+            init_control: 'apr1992',
+            weeks: 188,
+        } as unknown as ScenarioLike;
+        expect(usesPaintedControlReference(declared)).toBe(true);
+        expect(usesPaintedControlReference(clone), 'identical duration, no declaration').toBe(false);
+        expect(checkpointsForScenario(clone), 'and therefore no checkpoints').toEqual([]);
+    });
+
+    it('a fixture that stops scoring still runs — the flag gates scoring only', () => {
+        // The gate is on the painted-reference read, not on simulation. A non-declaring
+        // scenario is a fixture: same sim, same final_save, no opinion about fidelity.
+        const fixture = { scenario_id: 'apr1992_4w', init_control: 'apr1992', weeks: 4 } as unknown as ScenarioLike;
+        expect(usesPaintedControlReference(fixture)).toBe(false);
+        expect(fixture.weeks).toBe(4);
     });
 });

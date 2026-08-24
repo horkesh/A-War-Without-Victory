@@ -818,6 +818,14 @@ export function checkpointsForScenario(scenario: Scenario): readonly {
  * record an input they never consumed.
  */
 export function usesPaintedControlReference(scenario: Scenario): boolean {
+    // ONE DEFINITIVE SCENARIO. Scoring is now DECLARED (`calibration_scenario`), not inferred
+    // from init_control. The old inference made 30 scenarios emit a historical_fit figure —
+    // every 4w probe, every bots fork, every historical_mvp_* variant — so any of them could
+    // be quoted as "the" calibration number. One was: apr1992_definitive_104w reported 639
+    // against apr1994 where the definitive line reported 647 at the same week, because that
+    // fork had silently missed firepower_deficit_penalty_enabled. A competing score is worse
+    // than no score, and a duration rule cannot tell an instrument from a fixture.
+    if (scenario.calibration_scenario !== true) return false;
     return scenario.init_control === 'apr1992'
         || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'));
 }
