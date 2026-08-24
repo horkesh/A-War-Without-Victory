@@ -6,13 +6,13 @@
     "description": "Painted control state",
     "total_osids": 712,
     "counts": {
-      "RS": 376,
+      "RS": 375,
       "RBiH": 254,
-      "HRHB": 82
+      "HRHB": 83
     },
     "source": "painted_control_targets",
     "painted_at": "2026-03-17T10:04:59.555Z",
-    "revision": 3,
+    "revision": 4,
     "changelog": [
       {
         "date": "2026-08-24",
@@ -85,6 +85,22 @@
         "to": "RBiH",
         "commit": "9883e81ab",
         "rationale": "Owner determination, 2026-08-24: held by RBiH throughout the war; the cell never changed hands. Applied UNIFORMLY across all four checkpoints so the reference cannot describe a flip that did not occur. No documentary source cited; Pyrrhic-panel review overridden by the owner. NOTE THE SEQUENCE FOR THIS CELL: cd0228c37 set apr1995/oct1995 RS->RBiH on Pyrrhic panel 2026-08-23 (BB1 printed 341 / BB2 printed 476); b9529eb77 reversed those to RS the same day on an owner determination that it never changed hands; this entry restores RBiH everywhere. The end state therefore AGREES with the original panel finding for both 1995 snapshots and extends it to jan1993/apr1994 — the intervening reversal was churn, and is left in the log rather than erased so the record shows what actually happened."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kiseljak:brnjaci_2",
+        "from": "RBiH",
+        "to": "HRHB",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. COMPLETES A CORRECTION-PASS OMISSION: this cell was corrected in apr1994, apr1995 and oct1995 earlier the same day and jan1993 was skipped, leaving the reference internally inconsistent and the cell reading as an engine failure when it was a reference gap. The omission was found by the Pyrrhic red-team seat during the jan1993 panel. Engine already holds HRHB at week 39, so this removes a false mismatch rather than creating a target."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:breza:podgora",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. COMPLETES A CORRECTION-PASS OMISSION: this cell was corrected in apr1994, apr1995 and oct1995 earlier the same day and jan1993 was skipped, leaving the reference internally inconsistent and the cell reading as an engine failure when it was a reference gap. The omission was found by the Pyrrhic red-team seat during the jan1993 panel. Engine already holds RBiH at week 39, so this removes a false mismatch rather than creating a target."
       }
     ]
   },
@@ -205,7 +221,7 @@
     "op:brcko:skakava_donja": "RS",
     "op:breza:koritnik": "RBiH",
     "op:breza:mahala": "RBiH",
-    "op:breza:podgora": "RS",
+    "op:breza:podgora": "RBiH",
     "op:breza:zupca_2": "RBiH",
     "op:bugojno:brizina": "RBiH",
     "op:bugojno:gracanica": "RBiH",
@@ -426,7 +442,7 @@
     "op:kalinovik:vlaholje": "RS",
     "op:kiseljak:azapovici_2": "HRHB",
     "op:kiseljak:bilalovac_2": "RBiH",
-    "op:kiseljak:brnjaci_2": "RBiH",
+    "op:kiseljak:brnjaci_2": "HRHB",
     "op:kiseljak:bukovica": "RBiH",
     "op:kiseljak:drazevici": "RBiH",
     "op:kiseljak:gromiljak_2": "HRHB",
