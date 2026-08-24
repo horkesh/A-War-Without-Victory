@@ -67,7 +67,7 @@
         "osid": "op:olovo:gurdici_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "9883e81ab",
         "rationale": "Owner determination, 2026-08-24: held by RBiH throughout the war; the cell never changed hands. Applied UNIFORMLY across all four checkpoints so the reference cannot describe a flip that did not occur. No documentary source cited; Pyrrhic-panel review overridden by the owner."
       },
       {
@@ -75,7 +75,7 @@
         "osid": "op:kladanj:vucinici_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "9883e81ab",
         "rationale": "Owner determination, 2026-08-24: held by RBiH throughout the war; the cell never changed hands. Applied UNIFORMLY across all four checkpoints so the reference cannot describe a flip that did not occur. No documentary source cited; Pyrrhic-panel review overridden by the owner."
       },
       {
@@ -83,7 +83,7 @@
         "osid": "op:kladanj:staric_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "9883e81ab",
         "rationale": "Owner determination, 2026-08-24: held by RBiH throughout the war; the cell never changed hands. Applied UNIFORMLY across all four checkpoints so the reference cannot describe a flip that did not occur. No documentary source cited; Pyrrhic-panel review overridden by the owner. NOTE THE SEQUENCE FOR THIS CELL: cd0228c37 set apr1995/oct1995 RS->RBiH on Pyrrhic panel 2026-08-23 (BB1 printed 341 / BB2 printed 476); b9529eb77 reversed those to RS the same day on an owner determination that it never changed hands; this entry restores RBiH everywhere. The end state therefore AGREES with the original panel finding for both 1995 snapshots and extends it to jan1993/apr1994 — the intervening reversal was churn, and is left in the log rather than erased so the record shows what actually happened."
       }
     ]
