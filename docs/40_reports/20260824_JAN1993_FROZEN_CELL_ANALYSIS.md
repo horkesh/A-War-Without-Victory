@@ -134,3 +134,58 @@ in-sector, uncommitted elsewhere) against a local ARBiH presence of one 273-man 
 **Enclave guard:** both objectives border `op:ugljevik:teocak_krstac_2`. Teočak must hold
 (canon H1.8) and holds RBiH at all four checkpoints in the baseline. It is deliberately
 not an objective; every run carrying this op must re-verify it.
+
+---
+
+## Čajniče coverage — TWO ATTEMPTS, BOTH NET-NEGATIVE. Reverted. (2026-08-24)
+
+The three Čajniče cells CAN be taken, easily and repeatably. Both attempts captured
+`batotici` t1, `miljeno_2` t2, `todorovici` t3, and both picked up two free riders:
+`foca:brusna_2` and — notably — `gorazde:kolovarice`, the cell recorded for months as an
+unwinnable merge defect. jan1993 gained **+7 in both runs**. They hold no ARBiH formation
+at turn 0; nothing was ever attacking them.
+
+The problem is never Čajniče. It is what the run does everywhere else.
+
+| run | axis staffing | jan1993 | apr1994 | apr1995 | oct1995 | NET |
+|---|---|---|---|---|---|---|
+| n287 (committed) | — | 677 | 663 | 662 | 647 | — |
+| n288 | `rs_ajnie_brigade` moved off visegrad_seizure | 680 (+3) | 661 (−2) | 660 (−2) | 644 (−3) | **−4** |
+| n289 | phantom-only, nothing taken from any axis | 678 (+1) | 656 (−7) | 655 (−7) | 640 (−7) | **−20** |
+
+**A wrong diagnosis, corrected by n289.** n288 was read as "moving `rs_ajnie_brigade` off
+`visegrad_seizure` weakened it, so `visegrad:medjedja_2` was never taken (t6 in n287, never
+in n288)". n289 restored that brigade and staffed the sweep with two phantoms instead —
+**and `medjedja_2` was still never captured.** The brigade was not the cause. Adding a
+*second axis* to Operation Visegrad is: it had been single-axis, and the multi-axis
+readiness dynamic is the same one documented at the top of Operation Koridor
+(`posavina_flank` firing before `brcko_corridor` finished its march → `zero_eligible_axis`).
+
+**The phantom-only version was WORSE, not better,** which is the finding that matters.
+It subtracted nothing from any working axis — two new ghost formations and one axis, pure
+addition — and still cost −7 at every later checkpoint. The damage in n289 lands on
+Operation Donji Vakuf (`torlakovac_2`, `babin_potok_2`, `komar_2`, `kutanja`, `pribraca_2`,
+`oborci_2`), plus Šekovići, Kalinovik and Nevesinje — a different corps, hundreds of km
+away, with the western-Bosnia cascade site itself untouched (Grahovo 4/4, Šipovo 5/5,
+Mrkonjić 5/6). So this is not the R23–R29 cascade *site*; it is the same underlying
+property seen through a different outlet: **any new early combat perturbs global turn
+ordering, and something downstream loses a battle it used to win.**
+
+This is precisely what `life_lessons/calibration.md` (2026-05-26) records: five consecutive
+additive pre-planned op changes all regressed or went zero-delta, and *"trying to find an
+additive op that doesn't cascade is a dead end."* Two more data points now say the same
+thing at the current floor. **Do not attempt a third variant.**
+
+**Why Majevica worked and this did not.** Majevica added an operation to a corps with an
+EMPTY queue and no existing op to interfere with, on a corps whose work was already
+finished by t17. Čajniče adds an axis to an operation that is *currently executing*. The
+distinction — new op on an idle corps vs new axis on a live op — is the one that predicts
+the outcome, and it is the rule to carry forward.
+
+**What would actually unlock these cells** is the frozen-VRS-front defect (every VRS corps
+stops capturing within ~28 turns, then idles 160+). Fixing that is an engine-health lane;
+until it is fixed, coverage additions must fight for room inside a 28-turn window that is
+already fully subscribed, and every one of them costs more elsewhere than it gains.
+
+**Reverted.** `jna_uzice_cajnice_tg`, `jna_cajnice_to_tg` and the `cajnice_sweep` axis are
+removed. HEAD stays at the n287 line: 677 / 663 / 662 / 647.

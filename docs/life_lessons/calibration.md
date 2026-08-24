@@ -459,3 +459,31 @@ The OSID is **78% Bosniak**, so an RBiH defender absorbs everything below `decis
 Applied retroactively to a seven-item queue, this screen killed **five of seven** targets before they were ever run (99.2%, 87.4%, 77.8%, 66.0%, 64.9% co-ethnic). **Those are combat-power problems wearing objective-list clothing.**
 
 ⇒ **And the deeper rule: at this altitude the harness cannot attribute ±10.** A two-turn change to one early operation re-rolls the campaign. Before reading any delta of that size as the cost of a change, check whether the operation *schedule* diverged — if it did, the number is noise and the run has told you nothing about your hypothesis.
+
+### [Calibration] A new op on an IDLE corps is safe; a new AXIS on a LIVE op is not (2026-08-24) — NEW
+- **Context**: Two changes, same lane, opposite outcomes. `Operation Majevica` added a new
+  operation to `vrs_east_bosnian` — a corps whose only op (Koridor) had finished by t17 and
+  which then idled 171 turns — and scored **net +5** across four checkpoints with the
+  western-Bosnia cascade untouched. `cajnice_sweep` added a second AXIS to `Operation
+  Visegrad`, which was single-axis and *executing*: **net −4** (n288), and **net −20** when
+  restaffed to take nothing from any existing axis (n289).
+- **Wrong approach**: Reading a multi-axis regression as a brigade-staffing problem. n288
+  moved `rs_ajnie_brigade` off `visegrad_seizure` and `visegrad:medjedja_2` stopped being
+  captured (t6 → never), which looks exactly like "the axis got too weak". n289 put the
+  brigade back and staffed the new axis with two ghost phantoms instead — `medjedja_2` was
+  STILL never captured. The brigade was never the cause; the second axis was.
+- **Wrong approach**: Assuming a purely additive change (adds formations, subtracts nothing)
+  is therefore safe. n289 subtracted nothing and was **five times worse** than n288. Its
+  damage landed on Operation Donji Vakuf, a different corps hundreds of km away, while the
+  documented western-Bosnia cascade site stayed clean — any new early combat perturbs global
+  turn ordering and something downstream loses a battle it used to win.
+- **Right approach**: Before adding coverage, ask which corps is IDLE and whether the target
+  op is currently executing. New op on an idle corps with an empty `queued_operations` = the
+  Majevica shape, safe. New axis on a live op = the Čajniče shape, expect a net loss.
+- **Do instead**: `grep -n "queued_operations" src/sim/combat/pre_planned_operations.ts` to
+  see which corps already have follow-on chains, and attribute captures per corps from
+  `control_events` (`mechanism==='combat'`, map `attacker_brigade` → corps) to find the idle
+  ones. Note the cells themselves were never the obstacle: all three Čajniče cells fell at
+  t1/t2/t3 in both runs, and dragged `foca:brusna_2` and `gorazde:kolovarice` (long recorded
+  as an unwinnable merge defect) in with them. They are blocked by the engine's capacity to
+  absorb new combat, not by their own difficulty.
