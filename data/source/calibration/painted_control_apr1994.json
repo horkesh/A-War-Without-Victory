@@ -6,11 +6,22 @@
     "description": "Painted control target: April 1994",
     "total_osids": 712,
     "counts": {
-      "RS": 411,
-      "RBiH": 234,
+      "RS": 410,
+      "RBiH": 235,
       "HRHB": 67
     },
-    "source": "painted_control_targets"
+    "source": "painted_control_targets",
+    "revision": 1,
+    "changelog": [
+      {
+        "date": "2026-08-24",
+        "osid": "op:kladanj:kladanj_3",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "cd0228c37",
+        "rationale": "BB2 printed 475 and BB1 printed 341/359 describe Kladanj town as Muslim-held in 1994 and twice in July 1995; BB1 printed 477 places two ARBiH brigade HQs there in the 1995 OOB. Pyrrhic panel 2026-08-23, 4/4 GO."
+      }
+    ]
   },
   "by_settlement_id": {
     "op:banja_luka:banja_luka_2": "RS",
@@ -356,7 +367,7 @@
     "op:kiseljak:gromiljak_2": "HRHB",
     "op:kiseljak:kiseljak_2": "HRHB",
     "op:kladanj:brgule": "RS",
-    "op:kladanj:kladanj_3": "RS",
+    "op:kladanj:kladanj_3": "RBiH",
     "op:kladanj:olovci_2": "RBiH",
     "op:kladanj:staric_2": "RS",
     "op:kladanj:tarevo_2": "RBiH",

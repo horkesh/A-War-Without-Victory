@@ -1,8 +1,36 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 299 lessons across 9 topic files (count verified 2026-08-22).
+> Last restructured: 2026-04-11. 305 lessons across 9 topic files (count verified 2026-08-24).
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-08-24) — calibration-reference + terrain-panel batch (nine orchestrator claims killed by measurement)
+
+> **Session shape worth naming: every one of the nine refutations came from a reviewer checking, not from the author noticing.** Five panel seats and four diagnosis lanes each refuted at least one claim of mine, and three refuted *their own* prior claims unprompted. The instrument that worked was independent polling with an explicit "this is a claim to test, not a briefing to ratify"; the instrument that failed, repeatedly, was my own confidence at the moment a story became coherent.
+
+### [Process] ★ WHEN EVERY REVIEWER FINDS MORE INSTANCES, YOUR SITE COUNT WAS IMAGINATION — 2 → 3 → 4 → 6 in one panel — see `docs/life_lessons/process.md`
+- A fix proposed at two call sites; each seat found more, monotonically upward, nobody contradicting anyone. **A count that only rises under scrutiny was terminated by narrative sufficiency, not exhaustion.** And where the fix's rationale is *"these sites must agree"*, shipping a partial fix does not make a smaller fix — it **creates** the disagreement the fix was justified by removing.
+
+### [Process] ★ VERIFY THE SIZE OF THE SET, NOT ONLY THE OPERATION ON IT — see `docs/life_lessons/process.md`
+- Verified that a sort collapses to alphabetical (true), escalated it as an 81-brigade defect, and never checked that the filter one line above admits **four**. The excluding clause was in the same output I had already read, and the counterexample was in my own data. Checking the operation feels like checking the claim; it is half of it.
+
+### [Calibration] ★ A SCORE IS NOT AN IDENTITY — `matched_osids` is NON-INJECTIVE — see `docs/life_lessons/calibration.md`
+- Four lanes worked a full day against an artifact scoring 637/712, 31/31 — the accepted floor on every number anyone checks — whose `final_state_hash` appears in no project record and whose provenance says `git_dirty: true`. Third instance in this repo. **Confirm hash + `git_dirty: false` + consumed digest before banking any delta**, and note the scoring reference is not covered by `git_commit`: same commit, same clean tree, same hash, different score is possible if a reference cell was repainted.
+
+### [Calibration] "NOT A GRAPH CUT" IS NOT "COMPONENT-PRESERVING" — see `docs/life_lessons/calibration.md`
+- Reachability is a property of the *unfiltered* graph; faction components are computed on a filtered one, where a detour through enemy ground is not a detour. Recompute per map; a change that flips a NEIGHBOUR of a thin holdout can strand it, so the component check belongs AFTER the run.
+
+### [Process] A PARTIAL FIX RECORDED AS A WHOLE ONE SURVIVES FOR MONTHS — see `docs/life_lessons/process.md`
+- A P1 logged three items; two were fixed and the closure note generalised to *"parity holds"*. The third stayed open four months because the record said it did not. Close list-shaped defects item by item and name what remains, even if it is one word.
+
+### [Process] RE-VIOLATED — the derived-signal pattern, four more costumes in one session
+- Continuation of the 2026-08-21/22 entries, and the count is not improving. This session: **an adjacency count that was really a node count** (read `nodes`, never `edges`, then reported the node total as coverage); **a mid-operation `git status` read as a failure** — caught between a background job's `add` and its `commit`, I declared the commit lost and killed a valid run; **"stable across four painted snapshots" read as three corroborations** when 78.8% of the map is identical across all four, so stability is the signature of a row nobody edited; and **a positive control that its own stated filter could not have produced** (the cited cell fails the filter's `available_from` conjunct outright). **TELL: any time a number is quoted as evidence, ask which question it answers, not which question you asked.**
+
+### [Process] RE-VIOLATED — "a report is only true as of its last measurement"
+- Repeated "Codex holds the CPU" for three exchanges after the process had gone idle; the reading was already an hour stale when I last asserted it. Re-measure before repeating a constraint that gates someone's decision.
+
+### [Process] RE-VIOLATED — the ledger is not the calibration record
+- Wrote a full PROJECT_LEDGER entry for a floor change and did not update `CALIBRATION_MASTER.md`, leaving the authoritative file recording 637 against a live 639. **That file's own reconciliation note records the identical failure twelve days earlier.** Caught by a panel seat convened for something unrelated. Any change moving `matched_osids` updates both in the same commit.
 
 ## New Lessons (2026-08-22) — HV-1995 handoff batch (three handoff claims refuted by the successor, all three mine)
 

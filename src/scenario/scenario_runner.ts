@@ -722,12 +722,28 @@ function countControllers(snapshot: ControlKey[]): Map<string, number> {
  * 188w run that ended in oct1995 was compared to a 30-month-stale snapshot.
  * Painted snapshots come from `data/source/calibration/painted_control_*.json`.
  */
-function pickHistoricalReferenceKey(scenario: Scenario): 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995' {
+export function pickHistoricalReferenceKey(scenario: Scenario): 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995' {
     const weeks = scenario.weeks ?? 0;
     if (weeks <= 56) return 'jan1993';   // 40w / 52w / 56w apr1992-start scenarios
     if (weeks <= 108) return 'apr1994';  // ~104 weeks from apr1992 → apr1994
     if (weeks <= 160) return 'apr1995';  // ~156 weeks from apr1992 → apr1995
     return 'oct1995';                     // ~187+ weeks → oct1995 endpoint
+}
+
+/**
+ * Whether this scenario scores against a painted-control reference at all.
+ *
+ * ONE SOURCE OF TRUTH, DELIBERATELY. Both the diagnostics gate below and the run-provenance
+ * stamp call this — a second copy of the predicate is how a stamp starts hashing a file the
+ * run never reads, which is the exact defect `run_provenance.ts` refuses for the derived
+ * startup snapshot ("the stamp would MATCH while the armies differed"). Keep them bound.
+ *
+ * Scenarios that do NOT satisfy this read no painted file, so stamping one for them would
+ * record an input they never consumed.
+ */
+export function usesPaintedControlReference(scenario: Scenario): boolean {
+    return scenario.init_control === 'apr1992'
+        || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'));
 }
 
 /**
@@ -2095,6 +2111,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             initFormations: scenario.init_formations,
             warTimeline: scenario.war_timeline,
             initOfficers: scenario.init_officers,
+            // The scoring reference. Computed from the SAME predicate and key function the
+            // diagnostics gate uses below, so the stamped path is the path actually read —
+            // undefined when this scenario reads no painted file at all.
+            paintedReferenceKey: usesPaintedControlReference(scenario)
+                ? pickHistoricalReferenceKey(scenario)
+                : undefined,
             harness: runHarness,
             // Same owner as the `collapse_enabled.json` sidecar (RC defect 7): a second inline
             // `process.env.ENABLE_COLLAPSE === 'true'` here is how the stamp and the marker
@@ -3141,7 +3163,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let historicalControlAlignment: HistoricalControlAlignmentDiagnostics | undefined;
         let osidPairMatch: OsidPairMatchDiagnostics | undefined;
         let historicalAnchorChecks: HistoricalAnchorCheck[] | undefined;
-        if (scenario.init_control === 'apr1992' || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'))) {
+        if (usesPaintedControlReference(scenario)) {
             // Wave 15: pick the painted reference matching scenario duration.
             // Loads the OSID-keyed painted_control_{key}.json directly, skipping
             // the createInitialGameState detour used by the legacy mun1990 path.

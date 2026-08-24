@@ -17,8 +17,9 @@
  * The consumed set is DERIVED PER RUN, not hardcoded: the fixed inputs below, plus the
  * files the scenario itself declares — `init_control`, `init_formations`, `war_timeline`,
  * `init_officers` — resolved through the same functions the runner uses, plus the event
- * catalogue's own `EVENT_FILES` list imported from its loader. For the definitive 188w
- * scenario that is **27 rows** = 16 fixed + scenario + 4 declared keys + 6 `EVENT_FILES`.
+ * catalogue's own `EVENT_FILES` list imported from its loader, plus the painted-control
+ * SCORING REFERENCE when the scenario reads one. For the definitive 188w scenario that is
+ * **28 rows** = 16 fixed + scenario + 4 declared keys + 6 `EVENT_FILES` + 1 painted map.
  *
  * DO NOT TRUST THAT NUMBER FROM THIS COMMENT. Two earlier drafts said 20 and 24, and both
  * were wrong — 24 was the count before the three cwd-relative reads below were added. The
@@ -50,8 +51,34 @@
  * `scenario_runner.ts`. Every concrete data read that graph reaches is either stamped here
  * or carries a justification there; the register is compared exhaustively, so it cannot
  * silently widen and it cannot go stale. As of that scan: **16 real run inputs are read and
- * NOT hashed**, plus the templated `painted_control_{refKey}` maps, plus the desktop-only
- * startup snapshot which is excluded on purpose.
+ * NOT hashed**, plus the desktop-only startup snapshot which is excluded on purpose.
+ *
+ * ★ PARTIALLY CLOSED 2026-08-24 — and the remaining half matters, so read the distinction.
+ * There are TWO painted reads, not one:
+ *   - the SCORING reference, templated by `pickHistoricalReferenceKey` and segment-joined in
+ *     `scenario_runner.ts`. **This one is now stamped**, per run and conditionally (see
+ *     `deriveScenarioConsumedInputs`). It was the register's one entry flagged "a real gap".
+ *   - `painted_control_jan1993.json`, hardcoded in `anomaly_checks_extended.ts` (Check #27)
+ *     and read on EVERY scenario regardless of length. **Still unstamped**, still in the
+ *     register. Its output lands in `run_summary.json` via `anomaly_detection.reports`, so a
+ *     jan1993 repaint moves a byte-pinned artifact through a read this stamp does not cover.
+ *     Measured 2026-08-24: Check #27 is VACUOUS at 188w — 143 OSIDs mismatch jan1993 in the
+ *     final state and it emits nothing, because `hasCanonicalDefense` is true for all of them.
+ *     Sibling Check #28 fires in the same run (same cwd-relative pattern), so that silence is
+ *     the predicate, not a failed load. Expect it to fire at 4w, where sector coverage is thin.
+ *
+ * DO NOT READ THE ABOVE AS "jan1993 only affects anomaly reports". It is ALSO a SCORING
+ * reference: `pickHistoricalReferenceKey` sends every `weeks <= 56` scenario to it, so the 52w
+ * baseline scores `historical_fit` / `vs_historical` / `anchor_checks` against jan1993 — and
+ * `counts_by_controller[].reference_count` counts the REFERENCE, so a repainted cell moves that
+ * run's summary unconditionally, whatever the sim did. That scoring half IS stamped by the row
+ * below, so there is no provenance hole; the point is that a jan1993 edit moves more artifacts
+ * than the Check #27 sentence alone suggests.
+ *
+ * The scoring half was closed AHEAD of a reference repaint rather than alongside it: had both
+ * landed together, no run would ever have recorded the stamp beside the OLD reference, so the
+ * instrument's first observation would already be post-change and the re-basing would have
+ * gone unrecorded exactly like the previous one (`e3a28e25f`).
  *
  * Two runs differing only in one of those compare IDENTICAL. Commit and dirty-tree
  * hard-fails cover the ordinary case (a tracked edit moves the commit), so the exposure is
@@ -332,6 +359,13 @@ export interface BuildRunProvenanceArgs {
     readonly warTimeline?: string;
     /** `scenario.init_officers` as declared, when present. */
     readonly initOfficers?: string;
+    /**
+     * The painted-control snapshot key this run scores against (`jan1993` | `apr1994` |
+     * `apr1995` | `oct1995`), or undefined when the scenario reads no painted reference.
+     * Supplied by the caller from the runner's own `pickHistoricalReferenceKey` /
+     * `usesPaintedControlReference`, so the stamp and the loader share one source of truth.
+     */
+    readonly paintedReferenceKey?: string;
     readonly harness: RunHarness;
     readonly collapseEnabled: boolean;
 }
@@ -350,6 +384,7 @@ export function deriveScenarioConsumedInputs(args: {
     readonly initFormations?: string;
     readonly warTimeline?: string;
     readonly initOfficers?: string;
+    readonly paintedReferenceKey?: string;
 }): string[] {
     const out: string[] = [toRepoRelativePath(args.baseDir, args.scenarioPath)];
     if (args.initControl) {
@@ -369,6 +404,25 @@ export function deriveScenarioConsumedInputs(args: {
     // from the loader rather than copied: a second list here would be a second source of truth.
     for (const name of EVENT_FILES) {
         out.push(`data/scenarios/events/${name}`);
+    }
+    // ── The SCORING REFERENCE. Closes the last KNOWN-UNCOVERED entry in this module's header.
+    //
+    // WHY IT MATTERS: the painted map is what `matched_osids` is measured AGAINST, and it is not
+    // engine code, so `git_commit` does not cover it. Before this row, two runs at the same commit
+    // on the same clean tree could carry an identical `consumed_inputs.digest` AND an identical
+    // `final_state_hash` — provably the same simulation — and still report different scores,
+    // because someone had repainted a cell in between, with NOTHING anywhere recording it. That
+    // is not hypothetical: it has now happened twice (`e3a28e25f`, and the Kladanj correction this
+    // row was added ahead of).
+    //
+    // CONDITIONAL AND PER-RUN, NOT A FIXED ROW. The key is a function of `scenario.weeks`
+    // (`pickHistoricalReferenceKey`) and the read is gated on `usesPaintedControlReference`, both
+    // exported from the runner so this stamp and the loader cannot drift. A fixed `oct1995` row
+    // would hash a file a 40w run never opens — the same defect this module refuses for
+    // `apr_1992_initial_save.json`, where "the stamp would MATCH while the armies differed".
+    // Scenarios that read no painted file get no row, so absence here is itself truthful.
+    if (args.paintedReferenceKey) {
+        out.push(`data/source/calibration/painted_control_${args.paintedReferenceKey}.json`);
     }
     return out;
 }

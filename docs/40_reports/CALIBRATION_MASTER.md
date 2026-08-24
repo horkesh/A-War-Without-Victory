@@ -2968,3 +2968,46 @@ Per-criterion: **2, 3, 5, 6 DISCHARGED permanently** (evidence production and ex
 - All three collapse comparison files pass 70/70 with `pair=FORMED verdict=OK`. The G2 sentinels execute; 84/84 live enclave keys resolve identically; none of 17 OFF-held RBiH rim cells is newly lost; the Teočak–Tuzla component remains attached.
 - The prior four collapse failures selected artifacts from different commits. The controlled pair settles that comparison anomaly. It does not authorize regenerating scenario baselines: the manifest remains frozen at SHA-256 `2BD8549068935249C7FEE8C9BFC27C9B21950C0AA11C2D38B41043024124D03F`.
 - When n269 later became the newest collapse-OFF artifact, selection correctly invalidated n267/n268 as stale history. Final clean pair n270/n271 at identical commit `777cac528108ced18508481d37ed1b102f1cd026` and identical consumed-input digest restored `pair=FORMED verdict=OK`; the three suites pass 70/70.
+
+## 2026-08-24 — Kladanj reference correction — floor restated to **639 / 712**, anchors **31/31**, engine UNCHANGED
+
+**THE FLOOR IS 639 AGAINST THE CURRENT REFERENCE. Any comparison against a "637" produced before
+2026-08-24 is a comparison against a superseded reference, not against a better engine.**
+
+| run | commit | reference state | matched | anchors | `final_state_hash` |
+|---|---|---|---|---|---|
+| `…w188_n0` | `72062041c` | pre-repaint `painted_control_oct1995.json` | 637 / 712 | 31/31 | `cc88344e922ac8b4` |
+| `…w188_n1` | `cd0228c37` | post-repaint (`fb8e50c1…`) | **639 / 712** | 31/31 | **`cc88344e922ac8b4`** |
+
+**Identical `final_state_hash` on both sides.** 13 of 15 artifacts byte-identical, including
+`final_save.json`, the 23.7 MB brigade log and the 15.6 MB displacement log; the `run_summary.json`
+diff is exactly 15 leaves, all score-bearing. **Same engine output, two references, ±2.** This is the
+same demonstration as the n202/n215 pair above (`c657ad81f4d94cc0`, 639→638 across the `kolovarice`
+repaint) and it carries the same lesson: a moving floor number does not imply a moving engine.
+
+**What moved.** `op:kladanj:kladanj_3` RS→RBiH in all four painted snapshots; `op:kladanj:staric_2`
+RS→RBiH in `apr1995` and `oct1995` only (per-cell scoping — at `apr1994` the May 1994 offensive had
+not happened and `jan1993` has no supporting evidence). `op:olovo:gurdici_2` was REJECTED by the
+panel and is unchanged (RS) in all four. 52w moved 650 → 651 against `jan1993`.
+
+**This is a reference correction, NOT an engine gain, and it buys ZERO engine headroom.** A later
+−2 is a real −2, not "back to where we were."
+
+**Evidence:** BB2 printed 475, BB1 printed 341/359/477, plus ICTY trial-chamber findings of fact —
+*Krstić* IT-98-33-T, *Popović* IT-05-88-T, *Tolimir* IT-05-88/2-T — placing the July 1995 Srebrenica
+and Žepa transfers into ARBiH-held territory at Kladanj. Note the `staric_2` line inference was
+subsequently **withdrawn**: ICTY straddles that cell and does not reach it, so `staric_2` is
+supported, not well-supported. Full record:
+`docs/40_reports/proposals/20260823_PANEL_PACKET_PAINTED_OCT1995_KLADANJ_OLOVO.md`.
+
+**Baselines re-pinned** — all four manifest entries, each traced (188w and 52w via their scoring
+references; both 4w entries via Check #27, which is hardcoded to `jan1993` and runs on every
+scenario). `final_save.json` pins did NOT move. Verified green by a fresh comparison run:
+`Baseline regression: all scenarios match.`
+
+**PROCESS NOTE — this file was stale for the second time in twelve days.** The 2026-08-12
+reconciliation note above records the identical failure: the ledger entry was written and
+CALIBRATION_MASTER was not updated. It happened again on 2026-08-24 and was caught by the Calibration
+seat during an unrelated panel, not by the author. **The ledger is not the calibration record. Any
+change that moves `matched_osids` must update BOTH in the same commit**, or the authoritative file
+disagrees with the floor everyone is measuring against.
