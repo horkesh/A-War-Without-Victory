@@ -160,15 +160,15 @@ describe('the consumed set is the set a headless run actually reads', () => {
      * recomputes it from the live fixed set plus the live derivation, so adding an input
      * turns it RED and forces the header to be updated in the same change.
      */
-    it('★ the 188w stamp is exactly 28 named rows, derived not remembered', async () => {
+    it('★ the 188w stamp is exactly 31 named rows, derived not remembered', async () => {
         const fsp = await import('node:fs/promises');
-        const { pickHistoricalReferenceKey, usesPaintedControlReference } =
+        const { checkpointsForScenario } =
             await import('../src/scenario/scenario_runner.js');
         const scenarioPath = join(process.cwd(), 'data/scenarios/apr1992_definitive_188w.json');
         const scenario = JSON.parse(await fsp.readFile(scenarioPath, 'utf8')) as Record<string, string>;
-        // Derive the painted key exactly as the runner does — a literal here would let the
-        // stamp and the loader drift, which is the whole failure this row exists to prevent.
-        const scenarioObj = scenario as unknown as Parameters<typeof pickHistoricalReferenceKey>[0];
+        // Derive the painted keys exactly as the runner does — literals here would let the
+        // stamp and the loader drift, which is the whole failure these rows exist to prevent.
+        const scenarioObj = scenario as unknown as Parameters<typeof checkpointsForScenario>[0];
         const p = await buildRunProvenance({
             baseDir: process.cwd(),
             scenarioPath,
@@ -176,23 +176,25 @@ describe('the consumed set is the set a headless run actually reads', () => {
             initFormations: scenario.init_formations,
             warTimeline: scenario.war_timeline,
             initOfficers: scenario.init_officers,
-            paintedReferenceKey: usesPaintedControlReference(scenarioObj)
-                ? pickHistoricalReferenceKey(scenarioObj)
-                : undefined,
+            paintedReferenceKeys: checkpointsForScenario(scenarioObj).map((c) => c.key),
             harness: 'headless',
             collapseEnabled: false,
         });
         const paths = p.consumed_inputs.files.map(f => f.path);
-        expect(paths.length, `28 = ${HEADLESS_CONSUMED_INPUTS.length} fixed + scenario + 4 declared + ${EVENT_FILES.length} events + 1 painted`)
-            .toBe(28);
+        expect(paths.length, `31 = ${HEADLESS_CONSUMED_INPUTS.length} fixed + scenario + 4 declared + ${EVENT_FILES.length} events + 4 painted`)
+            .toBe(31);
         // Cross-check the arithmetic rather than the literal, so the two cannot drift apart.
-        expect(paths.length).toBe(HEADLESS_CONSUMED_INPUTS.length + 5 + EVENT_FILES.length + 1);
-        // ★ The SCORING REFERENCE is stamped, and it is the one this 188w run actually reads.
-        // Without this row a repaint of the painted map moves every recorded score while the
-        // digest and the state hash both stay identical — measured twice in this repo.
-        expect(paths).toContain('data/source/calibration/painted_control_oct1995.json');
-        expect(paths.filter(x => x.includes('painted_control_')), 'exactly one painted row')
-            .toHaveLength(1);
+        expect(paths.length).toBe(HEADLESS_CONSUMED_INPUTS.length + 5 + EVENT_FILES.length + 4);
+        // ★ EVERY SCORING REFERENCE is stamped, not just the terminal one. A 188w run scores
+        // at all four historical checkpoints, so it opens all four painted files. Stamping
+        // only oct1995 would leave three consumed files unhashed and reopen exactly the hole
+        // this row closes: identical digest, identical state hash, a moved intermediate score.
+        for (const key of ['jan1993', 'apr1994', 'apr1995', 'oct1995']) {
+            expect(paths, `${key} is scored by a 188w run, so it must be stamped`)
+                .toContain(`data/source/calibration/painted_control_${key}.json`);
+        }
+        expect(paths.filter(x => x.includes('painted_control_')), 'one row per checkpoint')
+            .toHaveLength(4);
         expect(new Set(paths).size, 'no duplicate rows').toBe(paths.length);
         expect(paths).toEqual([...paths].sort(strictCompare));
         // Every row resolved to real content — an ABSENT row would make the stamp match
@@ -234,7 +236,7 @@ describe('★ the painted SCORING REFERENCE is stamped conditionally, and fails 
         const p = await buildRunProvenance({
             baseDir: root,
             scenarioPath,
-            paintedReferenceKey: 'oct1995',
+            paintedReferenceKeys: ['oct1995'],
             harness: 'headless',
             collapseEnabled: false,
         });
@@ -261,7 +263,7 @@ describe('★ the painted SCORING REFERENCE is stamped conditionally, and fails 
     it('a repaint of the reference changes the digest — the whole point of the row', async () => {
         const before = seedFullTree({ [PAINTED]: '{"by_settlement_id":{"op:kladanj:kladanj_3":"RS"}}\n' });
         const after = seedFullTree({ [PAINTED]: '{"by_settlement_id":{"op:kladanj:kladanj_3":"RBiH"}}\n' });
-        const args = { paintedReferenceKey: 'oct1995', harness: 'headless' as const, collapseEnabled: false };
+        const args = { paintedReferenceKeys: ['oct1995'], harness: 'headless' as const, collapseEnabled: false };
         const a = await buildRunProvenance({ baseDir: before.root, scenarioPath: before.scenarioPath, ...args });
         const b = await buildRunProvenance({ baseDir: after.root, scenarioPath: after.scenarioPath, ...args });
         expect(a.consumed_inputs.digest).not.toBe(b.consumed_inputs.digest);

@@ -6,12 +6,12 @@
     "description": "Painted control target: October 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 314,
-      "RBiH": 291,
-      "HRHB": 107
+      "RS": 310,
+      "RBiH": 293,
+      "HRHB": 109
     },
     "source": "painted_control_targets",
-    "revision": 2,
+    "revision": 3,
     "changelog": [
       {
         "date": "2026-08-12",
@@ -36,6 +36,70 @@
         "to": "RBiH",
         "commit": "cd0228c37",
         "rationale": "BB1 printed 341 fixes the confrontation line ~10km east of Kladanj town in July 1995 (Srebrenica deportee drop-off at Tisca); all staric_2 settlements lie 5.3-9.7km. BB2 printed 476 records the May 1994 offensive pushing the line east of every constituent. Pyrrhic panel 2026-08-23, no dissent. NOT applied to jan1993/apr1994: pre-offensive, unevidenced."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kiseljak:brnjaci_2",
+        "from": "RBiH",
+        "to": "HRHB",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the oct1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kladanj:brgule",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the oct1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kladanj:staric_2",
+        "from": "RBiH",
+        "to": "RS",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24: Starić historically never changed hands. REVERSES the RS->RBiH change made the same day in commit cd0228c37, which rested on Pyrrhic panel 2026-08-23 (no dissent) and a geometric reading of BB1 printed 341 / BB2 printed 476 -- the panel placed the July 1995 confrontation line ~10km east of Kladanj town with staric_2 constituents at 5.3-9.7km. The owner overrides that reading. Recorded as a deliberate reversal of a sourced, panel-reviewed finding, not as a gap-fill: a later reader comparing the two entries should know the earlier one carried citations and this one carries owner authority."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:konjic:bijela_2",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the oct1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:konjic:sitnik",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the oct1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:kresevo:kresevo_2",
+        "from": "RBiH",
+        "to": "HRHB",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the oct1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:mostar:kruzanj_2",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the oct1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
+      },
+      {
+        "date": "2026-08-24",
+        "osid": "op:mostar:vranjevici_2",
+        "from": "RS",
+        "to": "RBiH",
+        "commit": "pending",
+        "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the oct1995 Reference Painter; the reference assigned a controller the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was overridden by the owner. Recorded as an owner decision, not as sourced evidence."
       }
     ]
   },
@@ -377,15 +441,15 @@
     "op:kalinovik:vlaholje": "RS",
     "op:kiseljak:azapovici_2": "HRHB",
     "op:kiseljak:bilalovac_2": "RBiH",
-    "op:kiseljak:brnjaci_2": "RBiH",
+    "op:kiseljak:brnjaci_2": "HRHB",
     "op:kiseljak:bukovica": "RBiH",
     "op:kiseljak:drazevici": "RBiH",
     "op:kiseljak:gromiljak_2": "HRHB",
     "op:kiseljak:kiseljak_2": "HRHB",
-    "op:kladanj:brgule": "RS",
+    "op:kladanj:brgule": "RBiH",
     "op:kladanj:kladanj_3": "RBiH",
     "op:kladanj:olovci_2": "RBiH",
-    "op:kladanj:staric_2": "RBiH",
+    "op:kladanj:staric_2": "RS",
     "op:kladanj:tarevo_2": "RBiH",
     "op:kladanj:tuholj_2": "RBiH",
     "op:kladanj:vucinici_2": "RS",
@@ -396,7 +460,7 @@
     "op:kljuc:kljuc_2": "RBiH",
     "op:kljuc:krasulje_2": "RBiH",
     "op:kljuc:sanica_2": "RBiH",
-    "op:konjic:bijela_2": "RS",
+    "op:konjic:bijela_2": "RBiH",
     "op:konjic:bradina": "RBiH",
     "op:konjic:brdjani": "RBiH",
     "op:konjic:buturovic_polje_2": "RBiH",
@@ -407,7 +471,7 @@
     "op:konjic:jasenik_2": "RBiH",
     "op:konjic:konjic_2": "RBiH",
     "op:konjic:ljuta": "RBiH",
-    "op:konjic:sitnik": "RS",
+    "op:konjic:sitnik": "RBiH",
     "op:konjic:turija": "RBiH",
     "op:kotor_varos:kotor_varos_2": "RS",
     "op:kotor_varos:krusevo_brdo_i": "RS",
@@ -415,7 +479,7 @@
     "op:kotor_varos:prisocka_2": "RS",
     "op:kotor_varos:vagani_2": "RS",
     "op:kotor_varos:vrbanjci_2": "RS",
-    "op:kresevo:kresevo_2": "RBiH",
+    "op:kresevo:kresevo_2": "HRHB",
     "op:kresevo:mratinici": "RBiH",
     "op:kresevo:polje_2": "HRHB",
     "op:kupres:bucovaca": "HRHB",
@@ -478,11 +542,11 @@
     "op:mostar:gornja_dreznica": "RBiH",
     "op:mostar:hodbina_2": "HRHB",
     "op:mostar:jasenica": "HRHB",
-    "op:mostar:kruzanj_2": "RS",
+    "op:mostar:kruzanj_2": "RBiH",
     "op:mostar:mostar_istok_2": "RBiH",
     "op:mostar:mostar_zapad_2": "HRHB",
     "op:mostar:potoci": "RBiH",
-    "op:mostar:vranjevici_2": "RS",
+    "op:mostar:vranjevici_2": "RBiH",
     "op:mrkonjic_grad:baljvine_2": "HRHB",
     "op:mrkonjic_grad:bjelajce_2": "HRHB",
     "op:mrkonjic_grad:gerzovo_2": "HRHB",

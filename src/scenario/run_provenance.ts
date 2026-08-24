@@ -17,11 +17,12 @@
  * The consumed set is DERIVED PER RUN, not hardcoded: the fixed inputs below, plus the
  * files the scenario itself declares — `init_control`, `init_formations`, `war_timeline`,
  * `init_officers` — resolved through the same functions the runner uses, plus the event
- * catalogue's own `EVENT_FILES` list imported from its loader, plus the painted-control
- * SCORING REFERENCE when the scenario reads one. For the definitive 188w scenario that is
- * **28 rows** = 16 fixed + scenario + 4 declared keys + 6 `EVENT_FILES` + 1 painted map.
+ * catalogue's own `EVENT_FILES` list imported from its loader, plus one painted-control
+ * SCORING REFERENCE PER HISTORICAL CHECKPOINT the run reaches. For the definitive 188w
+ * scenario that is **31 rows** = 16 fixed + scenario + 4 declared keys + 6 `EVENT_FILES`
+ * + 4 painted maps (jan1993, apr1994, apr1995, oct1995 — the run scores at every one).
  *
- * DO NOT TRUST THAT NUMBER FROM THIS COMMENT. Two earlier drafts said 20 and 24, and both
+ * DO NOT TRUST THAT NUMBER FROM THIS COMMENT. Three earlier drafts said 20, 24 and 28, and all
  * were wrong — 24 was the count before the three cwd-relative reads below were added. The
  * pin in tests/run_provenance_stamp.test.ts recomputes it from the live set against the
  * REAL scenario, so adding an input turns it red and forces this line to be corrected in
@@ -53,14 +54,17 @@
  * silently widen and it cannot go stale. As of that scan: **16 real run inputs are read and
  * NOT hashed**, plus the desktop-only startup snapshot which is excluded on purpose.
  *
- * ★ PARTIALLY CLOSED 2026-08-24 — and the remaining half matters, so read the distinction.
- * There are TWO painted reads, not one:
- *   - the SCORING reference, templated by `pickHistoricalReferenceKey` and segment-joined in
- *     `scenario_runner.ts`. **This one is now stamped**, per run and conditionally (see
- *     `deriveScenarioConsumedInputs`). It was the register's one entry flagged "a real gap".
+ * ★ PARTIALLY CLOSED 2026-08-24, WIDENED LATER THE SAME DAY — read the distinction, because
+ * what is still open is now SHORT RUNS ONLY. There are TWO painted reads, not one:
+ *   - the SCORING references. **Stamped**, and since checkpoint scoring landed there is one row
+ *     per checkpoint the run reaches, not one per scenario (see `deriveScenarioConsumedInputs`
+ *     and `checkpointsForScenario`). This was the register's one entry flagged "a real gap".
  *   - `painted_control_jan1993.json`, hardcoded in `anomaly_checks_extended.ts` (Check #27)
- *     and read on EVERY scenario regardless of length. **Still unstamped**, still in the
- *     register. Its output lands in `run_summary.json` via `anomaly_detection.reports`, so a
+ *     and read on EVERY scenario regardless of length. Now stamped INCIDENTALLY for any run
+ *     reaching week 39, because jan1993 is that run's first checkpoint — so the 188w and 52w
+ *     lines are covered. **Still unstamped for runs shorter than 39 weeks**, which is exactly
+ *     where Check #27 is expected to fire (the 4w fixtures), so the register entry stands.
+ *     Do not read "the 188w stamp covers jan1993" as "Check #27 is covered". Its output lands in `run_summary.json` via `anomaly_detection.reports`, so a
  *     jan1993 repaint moves a byte-pinned artifact through a read this stamp does not cover.
  *     Measured 2026-08-24: Check #27 is VACUOUS at 188w — 143 OSIDs mismatch jan1993 in the
  *     final state and it emits nothing, because `hasCanonicalDefense` is true for all of them.
@@ -360,12 +364,18 @@ export interface BuildRunProvenanceArgs {
     /** `scenario.init_officers` as declared, when present. */
     readonly initOfficers?: string;
     /**
-     * The painted-control snapshot key this run scores against (`jan1993` | `apr1994` |
-     * `apr1995` | `oct1995`), or undefined when the scenario reads no painted reference.
-     * Supplied by the caller from the runner's own `pickHistoricalReferenceKey` /
-     * `usesPaintedControlReference`, so the stamp and the loader share one source of truth.
+     * EVERY painted-control snapshot key this run reads, ascending by checkpoint week.
+     *
+     * A run now scores at every historical checkpoint it reaches, not only its terminal
+     * one (HISTORICAL_CHECKPOINTS), so a 188w run opens jan1993, apr1994, apr1995 AND
+     * oct1995. Stamping only the terminal key would leave three consumed files unhashed
+     * and reintroduce exactly the hole this row exists to close: an identical digest and
+     * an identical `final_state_hash` while an intermediate score moved underneath.
+     *
+     * Supplied by the caller from the runner's own `checkpointsForScenario`, so the stamp
+     * and the loader share one source of truth. Empty for scenarios that read none.
      */
-    readonly paintedReferenceKey?: string;
+    readonly paintedReferenceKeys?: readonly string[];
     readonly harness: RunHarness;
     readonly collapseEnabled: boolean;
 }
@@ -384,7 +394,7 @@ export function deriveScenarioConsumedInputs(args: {
     readonly initFormations?: string;
     readonly warTimeline?: string;
     readonly initOfficers?: string;
-    readonly paintedReferenceKey?: string;
+    readonly paintedReferenceKeys?: readonly string[];
 }): string[] {
     const out: string[] = [toRepoRelativePath(args.baseDir, args.scenarioPath)];
     if (args.initControl) {
@@ -415,14 +425,15 @@ export function deriveScenarioConsumedInputs(args: {
     // is not hypothetical: it has now happened twice (`e3a28e25f`, and the Kladanj correction this
     // row was added ahead of).
     //
-    // CONDITIONAL AND PER-RUN, NOT A FIXED ROW. The key is a function of `scenario.weeks`
-    // (`pickHistoricalReferenceKey`) and the read is gated on `usesPaintedControlReference`, both
-    // exported from the runner so this stamp and the loader cannot drift. A fixed `oct1995` row
+    // CONDITIONAL AND PER-RUN, NOT A FIXED SET. The keys are a function of the checkpoints the
+    // run reaches (`checkpointsForScenario`, which is itself gated on
+    // `usesPaintedControlReference`), exported from the runner so this stamp and the loader
+    // cannot drift. A fixed `oct1995` row
     // would hash a file a 40w run never opens — the same defect this module refuses for
     // `apr_1992_initial_save.json`, where "the stamp would MATCH while the armies differed".
     // Scenarios that read no painted file get no row, so absence here is itself truthful.
-    if (args.paintedReferenceKey) {
-        out.push(`data/source/calibration/painted_control_${args.paintedReferenceKey}.json`);
+    for (const key of args.paintedReferenceKeys ?? []) {
+        out.push(`data/source/calibration/painted_control_${key}.json`);
     }
     return out;
 }

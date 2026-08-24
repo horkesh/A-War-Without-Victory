@@ -28757,3 +28757,44 @@ plausibly wrong there. Full calibration record in `docs/40_reports/CALIBRATION_M
 in any scenario, which is the evidence that the simulation was untouched and only scoring
 changed. Tracked latest-run save restored to blob `09441651a91cacfcc3b711da52cfbd6cfeb7d0f0`
 after the confirming 40w run dirtied it.
+
+### 2026-08-24 — Checkpoint scoring: one definitive scenario, four scored snapshots
+
+**Change:** A run now scores at every historical checkpoint it reaches, not only its terminal
+one. `HISTORICAL_CHECKPOINTS` (weeks 39/104/156/188 → jan1993/apr1994/apr1995/oct1995) and
+`checkpointsForScenario()` in `scenario_runner.ts`; control is captured LIVE inside the weekly
+loop and emitted as `historical_fit.checkpoints[]`. The terminal fields are untouched, and the
+last checkpoint of a full run reproduces them exactly — measured, and pinned by test, so the
+existing floor lineage keeps its meaning.
+
+**Why:** Owner directive — one definitive 188-week scenario, snapshots taken from its runs.
+Before this, a SCORED intermediate could only be obtained by running a shorter scenario whose
+duration selected that reference, which is why the `apr1992_definitive_{40,52,56,104,156}w`
+family existed. Those forks then drifted: `apr1992_definitive_104w` was measured missing
+`firepower_deficit_penalty_enabled` and `must_hold_osids_by_corps`, scoring 639 where the 188w
+line scored 647 at the same week 104 — a fossil answering for an engine two fixes old.
+
+**Provenance widened:** a 188w run now opens all four painted files, so `paintedReferenceKey`
+became `paintedReferenceKeys`, derived from the same resolver the checkpoint loop uses. The
+stamp goes 28 → 31 rows and the test asserts all four painted rows individually. Stamping only
+the terminal key would have left three consumed references unhashed — the exact hole that row
+exists to close. The header's claim that the Check #27 jan1993 read is unstamped was corrected:
+it is now covered incidentally for any run reaching week 39, and remains open only below that,
+which is where Check #27 actually fires.
+
+**38 reference corrections applied** (owner-authored, Pyrrhic-panel review overridden, no
+sources cited): 11 at apr1994, 19 at apr1995, 8 at oct1995. Every `from` validated against the
+live file before writing; all four references hold 712 OSIDs; no anchor contradicted;
+`op:glamoc:glamoc_2` independently corroborated by its own anchor. `op:kladanj:staric_2`
+reverses `cd0228c37` and is recorded as such.
+
+**Measured:** checkpoints read 670 / 658 / 657 / 645. Baseline re-pin moved **2 of 32**
+artifacts, both `run_summary.json`; **no `final_save.json` pin moved anywhere**, which is the
+evidence the simulation was untouched and only scoring changed. The accepted floor re-bases
+639 → 645 as a yardstick correction, not engine progress.
+
+**Retired:** `apr1992_definitive_156w`, `apr1992_definitive_56w`, and the `sim:scenario:run:56w`
+script. 156w existed only as a workaround for the absent per-week-snapshot feature that this
+change adds. `40w`, `52w` and `104w` were NOT retired despite being calibration-redundant: they
+are load-bearing as test fixtures and as the desktop campaign scenario (38, 20 and 11
+referencing files respectively). That retirement is a separate refactor.

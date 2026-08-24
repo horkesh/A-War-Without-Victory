@@ -3097,3 +3097,70 @@ at both apr1995 and oct1995, which describes a VRS capture and loss of Livno tha
 Both Mostar cells stay RS through oct1995, eighteen months past the Washington Agreement.
 `apr1994` looks like the most RS-saturated snapshot in these municipalities; if there is a
 systematic painting defect it may be concentrated there rather than spread across all four.
+
+## 2026-08-24 — Checkpoint scoring, 38 owner-authored reference corrections, floor re-based 639 → 645
+
+**THE FLOOR MOVED FROM 639/712 TO 645/712 AND THIS IS NOT PROGRESS.** The engine is
+byte-identical: of 32 pinned baseline artifacts exactly two moved, both `run_summary.json`
+(188w and 52w — the two scenarios scoring against a changed reference), and **no
+`final_save.json` pin moved in any scenario**. The yardstick was corrected, not the war.
+Anyone reading 645 as six settlements of engine improvement has misread it. That
+final-save signature is the discriminator to apply to any future reference edit: a
+reference-only change that moves a `final_save.json` pin has leaked scoring into the sim
+and is not what it claims to be.
+
+**ONE DEFINITIVE SCENARIO, MANY SNAPSHOTS** (owner, 2026-08-24). A single run now scores at
+every historical checkpoint it reaches — `HISTORICAL_CHECKPOINTS` in `scenario_runner.ts`,
+weeks 39/104/156/188 → jan1993/apr1994/apr1995/oct1995 — emitted as
+`historical_fit.checkpoints[]`. The terminal fields are unchanged, and the last checkpoint of
+a full run reproduces them exactly (measured, and pinned by test). Snapshots are captured
+LIVE inside the weekly loop, not re-derived from `control_events` afterwards.
+
+Measured on `apr1992_definitive_188w` after the corrections:
+
+| week | reference | matched | mismatched | anchors |
+|------|-----------|---------|------------|---------|
+|   39 | jan1993   | 670     | 42         | 31/31   |
+|  104 | apr1994   | 658     | 54         | 31/32   |
+|  156 | apr1995   | 657     | 55         | 39/40   |
+|  188 | oct1995   | 645     | 67         | 31/31   |
+
+**ANCHOR COUNTS ARE EPOCH-SCOPED, NOT A CONSTANT.** `resolveEpochOsidAnchors` merges a
+27-entry early-war base with a per-epoch supplement: 30 OSID anchors at jan1993 and oct1995,
+31 at apr1994 (it adds Vareš), 39 at apr1995 (the whole western Krajina sweep), plus one
+control-band check in every case. **The "31/31" this file has recorded for months is the
+OCT1995 figure.** Quoting a floor or an anchor count without its epoch invites comparing it
+against the wrong denominator — the same defect class as quoting `matched_osids` without its
+reference key, which produced a wrong delta earlier the same day.
+
+**38 corrections applied, owner-authored, panel overridden.** 11 at apr1994 (647→658), 19 at
+apr1995 (640→657), 8 at oct1995 (639→645); the 5 at jan1993 landed earlier in `51e2862ea`.
+Every `from` value was verified against the live file before writing, all four references hold
+712 OSIDs, and no correction contradicts an anchor. One is independently corroborated:
+`op:glamoc:glamoc_2` — the apr1995 reference said HRHB while its own anchor said RS, the only
+anchor/reference disagreement in that file, and the correction restores agreement.
+
+**A correction that LOWERS the score is not a bad correction.** `op:kladanj:staric_2` costs a
+point at both apr1995 and oct1995 because the engine holds it as RBiH. It reverses the
+RS→RBiH change of `cd0228c37` (Pyrrhic panel 2026-08-23, no dissent, BB1 printed 341 / BB2
+printed 476), on the owner's determination that Starić never changed hands. Applied to BOTH
+1995 snapshots for consistency — leaving apr1995 alone would have described a flip to RBiH in
+spring and back to RS by autumn, which is the history the correction denies. The changelog
+records it as a deliberate reversal of a sourced finding, not a gap-fill.
+
+**Open, not actioned: the same settlements are wrong in file after file.** Brgule, Kružanj,
+Vranjevići, Brnjaci and Kreševo each needed the same correction in three of the four
+independently-painted references. These are not 38 separate errors but roughly a dozen
+settlements mispainted repeatedly, which points at the painting process rather than at each
+file. Direction is not uniform either: apr1994's errors all over-credited RS, while apr1995
+mixed five HRHB→RS against four RS→RBiH. Root cause unknown; worth a pass before the next
+reference edit.
+
+**Retired:** `apr1992_definitive_156w` and `apr1992_definitive_56w`. The 156w file existed
+only because "no per-week-snapshot runner feature exists"
+(`20260521_PLAN_OPEN_QUESTIONS_RESEARCH.md`); checkpoint scoring is that feature, so it is
+obsolete by its own rationale. **NOT retired: 40w, 52w, 104w.** Their calibration role is
+redundant now, but they are load-bearing elsewhere — 40w is referenced by 38 files including
+26 tests and the UI `DataLoader`, 52w by `desktop_sim.ts` and `startup_snapshot.ts` (it is the
+desktop campaign scenario), 104w by the presidential-cadence tests. Retiring those is a
+refactor, not a cleanup, and needs its own decision.

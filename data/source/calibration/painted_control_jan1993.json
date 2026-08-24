@@ -27,7 +27,7 @@
         "osid": "op:kladanj:brgule",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "51e2862ea",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -35,7 +35,7 @@
         "osid": "op:livno:priluka_2",
         "from": "RS",
         "to": "HRHB",
-        "commit": "pending",
+        "commit": "51e2862ea",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -43,7 +43,7 @@
         "osid": "op:livno:zastinje",
         "from": "RS",
         "to": "HRHB",
-        "commit": "pending",
+        "commit": "51e2862ea",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -51,7 +51,7 @@
         "osid": "op:mostar:kruzanj_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "51e2862ea",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
       },
       {
@@ -59,7 +59,7 @@
         "osid": "op:mostar:vranjevici_2",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "51e2862ea",
         "rationale": "Owner determination, 2026-08-24. Painted directly by the owner in the Jan 1993 Reference Painter; the reference assigned RS control here, which the owner assessed as wrong. No documentary source was cited and Pyrrhic-panel review was explicitly overridden by the owner (\"Override the panel, those are my decisions\"). Recorded as an owner decision, not as sourced evidence."
       }
     ]

@@ -700,6 +700,26 @@ type HistoricalAnchorContractEntry = Pick<
     'anchor_type' | 'anchor_id' | 'expected_controller'
 >;
 
+/**
+ * One historical checkpoint scored inside a single run — see HISTORICAL_CHECKPOINTS.
+ *
+ * `anchors_total` is stated per checkpoint on purpose: the anchor set is EPOCH-SCOPED,
+ * not a constant. `resolveEpochOsidAnchors` merges a 27-entry early-war base with a
+ * per-epoch supplement, so apr1994 carries 31 OSID anchors where jan1993 and oct1995
+ * carry 30 and apr1995 carries 39 (plus one control-band check in every case). Quoting
+ * "31/31" without its epoch invites comparing a figure against the wrong denominator.
+ */
+interface HistoricalCheckpointFit {
+    week: number;
+    reference_key: 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995';
+    label: string;
+    control_alignment: HistoricalControlAlignmentDiagnostics;
+    osid_pair_match: OsidPairMatchDiagnostics;
+    anchor_checks: HistoricalAnchorCheck[];
+    anchors_passed: number;
+    anchors_total: number;
+}
+
 interface OverrideInventoryEntry {
     mechanism: 'osid_control_overrides' | 'avoided_osids_by_faction';
     classification: 'initial_state_correction' | 'bot_compensation';
@@ -733,6 +753,57 @@ export function pickHistoricalReferenceKey(scenario: Scenario): 'jan1993' | 'apr
     if (weeks <= 108) return 'apr1994';  // ~104 weeks from apr1992 → apr1994
     if (weeks <= 160) return 'apr1995';  // ~156 weeks from apr1992 → apr1995
     return 'oct1995';                     // ~187+ weeks → oct1995 endpoint
+}
+
+/**
+ * The historical checkpoints of the definitive campaign, as absolute weeks from
+ * an apr1992 start.
+ *
+ * ONE SCENARIO, MANY SNAPSHOTS (owner, 2026-08-24: *"All we should have is one
+ * definitive 188-weeks scenario. Then we take our relevant snapshots from its
+ * runs."*). Before this, the only way to obtain a SCORED intermediate was to run a
+ * shorter scenario whose duration happened to select that reference — which is why
+ * apr1992_definitive_{40,52,56,104,156}w existed at all. Those forks then drifted:
+ * `apr1992_definitive_104w` was measured on 2026-08-24 to be missing
+ * `firepower_deficit_penalty_enabled` and `must_hold_osids_by_corps`, scoring 639
+ * where the 188w line scored 647 at the same week 104 — a fossil answering for an
+ * engine two fixes old.
+ *
+ * A single run now scores at EVERY checkpoint it reaches, so an intermediate
+ * snapshot is a view of the definitive campaign rather than a separate campaign.
+ *
+ * Weeks are elapsed weeks from scenario start; a run of `weeks` reaches checkpoint
+ * `w` when `w <= weeks`. Keep sorted ascending — the emitted array follows this order.
+ */
+export const HISTORICAL_CHECKPOINTS: readonly {
+    readonly week: number;
+    readonly key: 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995';
+    readonly label: string;
+}[] = [
+    { week: 39, key: 'jan1993', label: 'January 1993' },
+    { week: 104, key: 'apr1994', label: 'April 1994' },
+    { week: 156, key: 'apr1995', label: 'April 1995' },
+    { week: 188, key: 'oct1995', label: 'October 1995' },
+];
+
+/**
+ * The checkpoints a scenario of this duration reaches, in ascending week order.
+ *
+ * Empty for scenarios that read no painted reference at all, so a caller can use
+ * this alone to decide whether any painted file is consumed — the provenance stamp
+ * depends on that equivalence.
+ */
+export function checkpointsForScenario(scenario: Scenario): readonly {
+    readonly week: number;
+    readonly key: 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995';
+    readonly label: string;
+}[] {
+    if (!usesPaintedControlReference(scenario)) return [];
+    const weeks = scenario.weeks ?? 0;
+    const startWeek = scenario.scenario_start_week ?? 0;
+    // A scenario starting mid-war reaches a checkpoint only if the checkpoint's
+    // absolute week falls inside [startWeek, startWeek + weeks].
+    return HISTORICAL_CHECKPOINTS.filter((c) => c.week > startWeek && c.week <= startWeek + weeks);
 }
 
 /**
@@ -2123,12 +2194,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             initFormations: scenario.init_formations,
             warTimeline: scenario.war_timeline,
             initOfficers: scenario.init_officers,
-            // The scoring reference. Computed from the SAME predicate and key function the
-            // diagnostics gate uses below, so the stamped path is the path actually read —
-            // undefined when this scenario reads no painted file at all.
-            paintedReferenceKey: usesPaintedControlReference(scenario)
-                ? pickHistoricalReferenceKey(scenario)
-                : undefined,
+            // Every scoring reference this run opens. Computed from the SAME resolver the
+            // checkpoint loop uses below, so the stamped paths are the paths actually read —
+            // empty when this scenario reads no painted file at all. A run scores at every
+            // checkpoint it reaches, so this is a set, not the terminal key alone.
+            paintedReferenceKeys: Array.from(
+                new Set([
+                    ...checkpointsForScenario(scenario).map((c) => c.key),
+                    ...(usesPaintedControlReference(scenario)
+                        ? [pickHistoricalReferenceKey(scenario)]
+                        : []),
+                ])
+            ).sort(strictCompare),
             harness: runHarness,
             // Same owner as the `collapse_enabled.json` sidecar (RC defect 7): a second inline
             // `process.env.ENABLE_COLLAPSE === 'true'` here is how the stamp and the marker
@@ -2438,6 +2515,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
         // Load historical event definitions from scenario JSON files
         const eventDefinitions = loadEventDefinitions(scenario.scenario_start_week ?? 0);
+
+        // Checkpoints this run will reach, and the control snapshot captured at each.
+        // Keyed by absolute week so ordering is the table's, not insertion order.
+        const activeCheckpoints = checkpointsForScenario(scenario);
+        const checkpointSnapshots = new Map<number, ReturnType<typeof extractSettlementControlSnapshot>>();
 
         for (let week_index = startWeekIndex; week_index < weeks; week_index++) {
             const weekSimulationStart = timingStart(emitTimingJson);
@@ -3016,6 +3098,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     replayTimelineFirstFrame = false;
                 }
             }
+            // Historical checkpoint: capture control the moment the campaign passes this
+            // week, so an intermediate snapshot is the live state rather than something
+            // re-derived from control_events afterwards. `week_index` is zero-based, so
+            // elapsed weeks after simulating it is week_index + 1.
+            const elapsedWeeks = (scenario.scenario_start_week ?? 0) + week_index + 1;
+            const checkpointHere = activeCheckpoints.find((c) => c.week === elapsedWeeks);
+            if (checkpointHere) {
+                checkpointSnapshots.set(
+                    checkpointHere.week,
+                    extractSettlementControlSnapshot(state, graph)
+                );
+            }
         }
 
         // A2 Dayton close-out (task #71): the campaign has reached its horizon. If a
@@ -3219,6 +3313,35 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // are not measured against 1992 expectations.
             historicalAnchorChecks = computeHistoricalAnchorChecks(finalControlSnapshot, referenceKey);
         }
+        // One definitive scenario, many snapshots: score every checkpoint this run
+        // reached, each against its own painted reference and its own anchor epoch.
+        // `historical_fit` above remains the TERMINAL result and is unchanged, so the
+        // existing floor lineage keeps its meaning; this adds the intermediates that
+        // previously required a separate, drift-prone scenario to obtain.
+        const historicalCheckpoints: HistoricalCheckpointFit[] = [];
+        for (const checkpoint of activeCheckpoints) {
+            const snapshot = checkpointSnapshots.get(checkpoint.week);
+            // A checkpoint inside the horizon must have been captured; if the loop was
+            // cut short (resume window, early stop) it legitimately has no snapshot.
+            if (!snapshot) continue;
+            const reference = await loadPaintedControlReferenceSnapshot(checkpoint.key, baseDir);
+            const pairMatch = computeOsidPairMatchDiagnostics(snapshot, reference, checkpoint.key);
+            const anchors = computeHistoricalAnchorChecks(snapshot, checkpoint.key);
+            historicalCheckpoints.push({
+                week: checkpoint.week,
+                reference_key: checkpoint.key,
+                label: checkpoint.label,
+                control_alignment: computeHistoricalControlAlignmentDiagnostics(
+                    snapshot,
+                    reference,
+                    checkpoint.key
+                ),
+                osid_pair_match: pairMatch,
+                anchor_checks: anchors,
+                anchors_passed: anchors.filter((a) => a.passed).length,
+                anchors_total: anchors.length,
+            });
+        }
         const runHasAnyBattles = (combatCausalitySummary?.total_battles ?? 0) > 0;
         if (combatCausalitySummary && !runHasAnyBattles) {
             combatCausalitySummary.valid_for_combat_calibration = false;
@@ -3293,6 +3416,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         anchor_checks: historicalAnchorChecks
                     }
                     : {}),
+                // Every checkpoint this run reached, ascending by week. The last entry of a
+                // full 188w run is the same measurement as the terminal fields above.
+                ...(historicalCheckpoints.length ? { checkpoints: historicalCheckpoints } : {}),
                 ...(botBenchmarkSummary
                     ? {
                         bot_benchmark_evaluation: botBenchmarkSummary,
