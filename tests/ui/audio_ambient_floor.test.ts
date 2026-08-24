@@ -16,6 +16,7 @@ import {
   unlockAudioForUserGesture,
 } from '../../src/ui/map/audio/audio_engine.js';
 import { getCueConfig } from '../../src/ui/map/audio/sound_manifest.js';
+import { hasResolvedCueAsset, resolveCueAssetUrl } from '../../src/ui/map/audio/audioAssets.js';
 import { AudioSurfaceBedController } from '../../src/ui/map/components/AudioSurfaceBedController.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
@@ -81,22 +82,16 @@ describe('WP-8 ambient audio floor', () => {
     expect(globalThis.AudioContext).not.toHaveBeenCalled();
   });
 
-  it('registers sober placeholder ambient beds that can no-op without assets', async () => {
-    expect(getCueConfig('ambient_warroom')).toMatchObject({
-      category: 'ambient',
-      loop: true,
-      assetStatus: 'missing_placeholder',
-    });
-    expect(getCueConfig('ambient_field')).toMatchObject({
-      category: 'ambient',
-      loop: true,
-      assetStatus: 'missing_placeholder',
-    });
-    expect(getCueConfig('ambient_archive')).toMatchObject({
-      category: 'ambient',
-      loop: true,
-      assetStatus: 'missing_placeholder',
-    });
+  it('registers and bundle-resolves the three sober ambient beds', async () => {
+    for (const cueId of ['ambient_warroom', 'ambient_field', 'ambient_archive']) {
+      expect(getCueConfig(cueId)).toMatchObject({
+        category: 'ambient',
+        loop: true,
+        assetStatus: 'provided',
+      });
+      expect(hasResolvedCueAsset(cueId)).toBe(true);
+      expect(resolveCueAssetUrl(cueId)).toMatch(/\.ogg$/u);
+    }
 
     applyAudioPreferences({ muted: false, masterVolume: 0.5 });
     unlockAudioForUserGesture();
@@ -104,8 +99,8 @@ describe('WP-8 ambient audio floor', () => {
 
     expect(getAudioState()).toMatchObject({
       currentAmbientId: 'ambient_warroom',
-      lastResolvedAssetUrl: null,
     });
+    expect(getAudioState().lastResolvedAssetUrl).toMatch(/\.ogg$/u);
     expect(globalThis.fetch).not.toHaveBeenCalled();
     expect(globalThis.AudioContext).not.toHaveBeenCalled();
   });

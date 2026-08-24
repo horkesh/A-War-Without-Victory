@@ -261,6 +261,11 @@ export function buildAudioAssetProvenanceReport(input: AudioAssetProvenanceInput
                 }
                 if (!(typeof entry.loudness_lufs === 'number' && Number.isFinite(entry.loudness_lufs))) {
                     violations.push(violation('missing_loudness', `${cue.id} lacks measured integrated loudness.`));
+                } else if (cue.category === 'ui' && entry.loudness_lufs <= -69) {
+                    violations.push(violation(
+                        'invalid_ui_loudness_sentinel',
+                        `${cue.id} uses the EBU R128 no-gated-block sentinel instead of measured UI loudness.`,
+                    ));
                 }
                 checkRequiredText(violations, cue.id, entry.loudness_method, 'missing_loudness_method', 'loudness method');
                 checkRequiredText(violations, cue.id, entry.source_url, 'missing_source_url', 'source URL');

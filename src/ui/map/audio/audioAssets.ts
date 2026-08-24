@@ -10,9 +10,9 @@
  * Slot-stable, placeholder-first contract (Soundscape packet §5):
  * - Cue IDs are the stable public contract; nothing here is referenced by call
  *   sites — the bus looks cues up by ID.
- * - The priority-1 UI feedback set has committed CC0 `.ogg` binaries and static
- *   imports below. Ambient, music, and stinger slots remain placeholders until
- *   their separate approval/content lane lands binaries.
+ * - The priority-1 UI feedback set has committed CC0 `.ogg` binaries and the
+ *   three required ambient beds have first-party `.ogg` binaries. Optional
+ *   ambience, music, and stinger slots remain placeholders.
  * - When another binary lands, add ONE static import + ONE map entry, and flip
  *   that cue's `assetStatus` to `'provided'` in `sound_manifest.ts`. No
  *   call-site or schema change.
@@ -58,11 +58,16 @@ import peacePlanUrl from '../assets/audio/ui/peace_plan.ogg';
 import gameOverUrl from '../assets/audio/ui/game_over.ogg';
 import tutorialCompleteUrl from '../assets/audio/ui/tutorial_complete.ogg';
 
+// --- Required restrained ambient beds (first-party deterministic recipes) ---
+import ambientWarroomUrl from '../assets/audio/ambient/ambient_warroom.ogg';
+import ambientFieldUrl from '../assets/audio/ambient/ambient_field.ogg';
+import ambientArchiveUrl from '../assets/audio/ambient/ambient_archive.ogg';
+
 /**
  * Cue ID -> hashed, bundle-resolved asset URL.
  *
- * Keys MUST match cue IDs registered in `sound_manifest.ts`. Ambient, music, and
- * stinger slots stay empty (placeholder-first) until those binaries land.
+ * Keys MUST match cue IDs registered in `sound_manifest.ts`. Optional ambience,
+ * music, and stinger slots stay empty (placeholder-first) until binaries land.
  */
 export const AUDIO_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze({
     // Priority-1 UI feedback set (CC0 — Kenney Interface Sounds; see header).
@@ -83,6 +88,9 @@ export const AUDIO_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze(
     peace_plan_offered: peacePlanUrl,
     game_over: gameOverUrl,
     tutorial_objective_complete: tutorialCompleteUrl,
+    ambient_warroom: ambientWarroomUrl,
+    ambient_field: ambientFieldUrl,
+    ambient_archive: ambientArchiveUrl,
 });
 
 /**

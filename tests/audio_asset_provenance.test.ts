@@ -103,6 +103,22 @@ describe('audio asset provenance inventory', () => {
         expect(violationCodes(report)).toContain('invalid_ogg_container');
     });
 
+    it('rejects the EBU R128 no-gated-block sentinel for provided UI cues', () => {
+        const root = makeRoot();
+        writeOggStub(root, 'src/ui/map/assets/audio/ui/cue_provided.ogg');
+        writeBytes(root, 'docs/audio/LICENSES/cue_provided.md', new Uint8Array());
+        const manifest = structuredClone(fixture.valid.manifest);
+        manifest.cues.cue_provided.loudness_lufs = -70;
+
+        const report = buildAudioAssetProvenanceReport({
+            ...fixture.valid,
+            root_dir: root,
+            manifest,
+        });
+
+        expect(violationCodes(report)).toContain('invalid_ui_loudness_sentinel');
+    });
+
     it('fails missing required beds, missing manifests/files, non-OGG assets, hash drift, NC licenses, and prohibited content', () => {
         const root = makeRoot();
         writeBytes(root, 'src/ui/map/assets/audio/stingers/cue_bad.mp3', new Uint8Array());
@@ -183,9 +199,10 @@ describe('audio asset provenance inventory', () => {
 
         expect(report.summary).toMatchObject({
             total_cues: 36,
-            provided_cues: 17,
-            placeholder_cues: 19,
+            provided_cues: 20,
+            placeholder_cues: 16,
             manifest_cues: 36,
+            blocking_violations: 0,
         });
         expect(codes).not.toContain('missing_provenance');
         expect(codes).not.toContain('missing_asset_file');
@@ -196,10 +213,26 @@ describe('audio asset provenance inventory', () => {
         expect(codes).not.toContain('placeholder_asset_resolved');
         expect(codes).not.toContain('unregistered_audio_binary');
 
+        const providedRecords = report.records.filter((record) => record.disposition === 'provided');
+        expect(providedRecords).toHaveLength(20);
+        for (const record of providedRecords) {
+            expect(record.duration_seconds).toBeGreaterThan(0);
+            expect(Number.isFinite(record.loudness_lufs)).toBe(true);
+            expect(record.loudness_method?.trim().length).toBeGreaterThan(0);
+            if (record.category === 'ui') expect(record.loudness_lufs).toBeGreaterThan(-69);
+        }
+
         for (const cueId of ['ambient_archive', 'ambient_field', 'ambient_warroom']) {
             const record = report.records.find((candidate) => candidate.cue_id === cueId);
-            expect(record?.disposition).toBe('required_priority_missing');
-            expect(record?.violations.map((violation) => violation.code)).toContain('required_asset_missing');
+            expect(record).toMatchObject({
+                cue_id: cueId,
+                asset_status: 'provided',
+                disposition: 'provided',
+                binary_present: true,
+                bundle_resolved: true,
+            });
+            expect(record?.file).toMatch(/^src\/ui\/map\/assets\/audio\/ambient\/.+\.ogg$/u);
+            expect(record?.violations).toEqual([]);
         }
     });
 });
