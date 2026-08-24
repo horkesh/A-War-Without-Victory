@@ -91,7 +91,7 @@
         "osid": "op:kiseljak:brnjaci_2",
         "from": "RBiH",
         "to": "HRHB",
-        "commit": "pending",
+        "commit": "434036b35",
         "rationale": "Owner determination, 2026-08-24. COMPLETES A CORRECTION-PASS OMISSION: this cell was corrected in apr1994, apr1995 and oct1995 earlier the same day and jan1993 was skipped, leaving the reference internally inconsistent and the cell reading as an engine failure when it was a reference gap. The omission was found by the Pyrrhic red-team seat during the jan1993 panel. Engine already holds HRHB at week 39, so this removes a false mismatch rather than creating a target."
       },
       {
@@ -99,7 +99,7 @@
         "osid": "op:breza:podgora",
         "from": "RS",
         "to": "RBiH",
-        "commit": "pending",
+        "commit": "434036b35",
         "rationale": "Owner determination, 2026-08-24. COMPLETES A CORRECTION-PASS OMISSION: this cell was corrected in apr1994, apr1995 and oct1995 earlier the same day and jan1993 was skipped, leaving the reference internally inconsistent and the cell reading as an engine failure when it was a reference gap. The omission was found by the Pyrrhic red-team seat during the jan1993 panel. Engine already holds RBiH at week 39, so this removes a false mismatch rather than creating a target."
       }
     ]
