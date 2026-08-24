@@ -28856,3 +28856,29 @@ scenario JSON gained the declaration, 52w `run_summary` because it shed its scor
 `final_save.json` pin moved. Typecheck clean; 12 checkpoint-contract tests and 109 tests across
 the six most-affected suites pass — including `scenario_anchor_contract` and
 `desktop_calibration_compare`, which I had predicted would need repointing and did not.
+
+### 2026-08-24 — reference-verification lane closed without action
+
+Opened on ~15 settlements needing the same correction across three or four independently
+painted references. Measurement closed it: there is no systemic painting defect.
+
+Two successive framings were wrong. "Errors cluster in split municipalities" (98% vs 43%
+baseline) was true but meaningless — control is per-OSID and prewar municipalities were
+extremely mixed, so the statistic measures mixedness, not error. "186 cells deviate from
+ethnic majority and the engine disagrees" was worse: deviation is what a war does, and the
+reference is supposed to deviate wherever control changed hands.
+
+What survives: the owner's corrections were ethnically LOPSIDED cells (67% at >60-point
+margins, 2% knife-edge) where the reference contradicted an unambiguous majority. The
+remaining candidates are only 35% lopsided, below the 57% baseline — mixed OSIDs where
+deviation is expected.
+
+Srebrenica settles it: the reference tracks the fall correctly (RBiH through apr1995, RS at
+oct1995) and the engine agrees. The lopsided-minority filter flagged exactly those cells as
+suspect. Automating a correction toward ethnic majority would have erased the genocide and
+raised the match score while doing it — the reason this work must stay case-by-case.
+
+Residue is five individually-explained cells with no common cause, recorded in
+CALIBRATION_MASTER. Only `op:gorazde:glamoc` (≈95% Serb, painted RBiH in all four references,
+engine says RS throughout) is a genuine reference-error candidate; `kolovarice` is the known
+merge defect and `osmace_2` is a known engine gap. No lane, no follow-up task.

@@ -3194,3 +3194,52 @@ moved this round and not the last because jan1993 changed here, and Check #27
 a final-save pin has leaked scoring into the sim.
 
 **Day total: 50 corrections, floor 639 → 648, engine untouched throughout.**
+
+## 2026-08-24 — reference-verification lane CLOSED: there is no systemic painting defect
+
+Opened on the observation that ~15 settlements needed the same correction across three or
+four independently-painted references, which looked like a production defect. **It is not.
+Closed after measurement, and the closing evidence is worth keeping because the analysis was
+wrong twice in the same direction.**
+
+**What was claimed and what it was worth.**
+1. *"Errors cluster in municipalities the reference splits between factions"* — 98% of
+   corrected cells vs a 43% baseline. TRUE BUT MEANINGLESS. Control is per-OSID and prewar
+   municipalities were extremely mixed, so "sits in a split municipality" just says "is in a
+   mixed area". Grouping by municipality was an imposed frame; the municipality is not the
+   unit of control.
+2. *"186 cells deviate from ethnic majority and the engine disagrees — a suspect queue"* —
+   deviation from ethnic majority is what a WAR DOES. The reference SHOULD deviate wherever
+   control changed hands, which is most of the interesting map. Tightening to a >60-point
+   ethnic margin cut it to 66, and that was still noise.
+
+**What is actually true.** The owner's 57 corrections were **ethnically lopsided cells**: 67%
+had the leading group ahead by more than 60 points, only 2% were knife-edge. The reference had
+assigned control against an unambiguous majority. The remaining suspects are the opposite —
+only 35% lopsided, BELOW the 57% baseline, i.e. concentrated in genuinely mixed OSIDs where
+departing from a thin plurality is unremarkable.
+
+**Srebrenica is the proof the reference works.** It tracks the fall correctly — cells RBiH
+through apr1995, RS at oct1995 — and the engine agrees on nearly all of them. The
+lopsided-minority filter flagged those as suspicious when they encode the single most
+important thing the reference gets right. Any automated "correction" toward ethnic majority
+would have erased the genocide and RAISED the match score doing it. That is the reason this
+lane must never be scripted.
+
+**Residue — individual questions, no common cause, NOT a lane:**
+- `op:gorazde:glamoc` — 5% Bosniak (so ~95% Serb), painted RBiH in ALL FOUR references, engine
+  says RS throughout. The one genuine reference-error candidate. Worth a Historian question.
+- `op:gorazde:kolovarice` — the KNOWN MERGE DEFECT, wrong under any single controller. Leave.
+- `op:gorazde:slatina_2` — 98% Bosniak, RBiH at jan1993 then RS from apr1994, inside an
+  enclave that held. Worth a look.
+- `op:gorazde:ustipraca_2` — 96% Bosniak, RS from apr1994; but Ustiprača IS the corridor cut,
+  so RS is plausibly correct. Probably not an error.
+- `op:srebrenica:osmace_2` — 97% Bosniak, reference RS from apr1994, engine holds RBiH even at
+  oct1995. An ENGINE gap (known ARBiH holdout that should have fallen), not a reference error.
+
+**Method note worth more than the finding.** Three hypotheses were tested and three refuted:
+cluster size (7.54 vs 7.83 mean — no signal), municipality-bleed (49% vs an 88% baseline —
+refuted BACKWARDS), and ethnic-majority deviation (the war itself). The signal that survived —
+lopsided margin — was found only after the owner pointed out that the municipality frame was
+wrong. **A correlation that holds against a baseline can still be measuring the terrain rather
+than the defect.**
