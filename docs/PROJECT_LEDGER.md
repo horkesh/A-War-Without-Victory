@@ -28882,3 +28882,24 @@ Residue is five individually-explained cells with no common cause, recorded in
 CALIBRATION_MASTER. Only `op:gorazde:glamoc` (≈95% Serb, painted RBiH in all four references,
 engine says RS throughout) is a genuine reference-error candidate; `kolovarice` is the known
 merge defect and `osmace_2` is a known engine gap. No lane, no follow-up task.
+
+## 2026-08-24 — jan1993 calibration: 86% of remaining error is frozen at turn 0
+
+Replayed `control_events` over `initial_political_controllers` from the definitive
+188w run; replay reproduces reported figures exactly (675/661/660/648).
+
+- Only **183 of 712 OSIDs ever change hands** across 188 weeks.
+- At jan1993, **32 of 37 mismatches (86%) are never contested** — turn-0 assignment held all war.
+- Six operation runs (n280–n285) targeting Goražde produced **zero** movement because all four
+  objectives (`glamoc`, `kamen`, `sopotnica`, `tosici`) are in that frozen set.
+- When attacks were forced (n285, 1,700-man brigade, nominal 2.12), outcomes were
+  `costly_victory`→`stalemate`→`catastrophic`; an OSID flips only on `decisive_victory`.
+- The 18 `RBiH→RS` frozen cells are targeted by **none** of the 16 pre-planned operations —
+  the engine never delivers the 1992 VRS Podrinje/Posavina campaign.
+
+Lever identified: operation objective coverage. **Six of the 18 sit in ICTY-documented
+cleansing municipalities (Foča, Čajniče, Zvornik, Višegrad) — §6-sensitive, panel matter,
+not a LOW-risk data lever.** ~11 are ordinary front-line cells with no §6 exposure.
+
+Full analysis: `docs/40_reports/20260824_JAN1993_FROZEN_CELL_ANALYSIS.md`.
+No engine or data change made. Operation and OOB experiments reverted; tree clean.
