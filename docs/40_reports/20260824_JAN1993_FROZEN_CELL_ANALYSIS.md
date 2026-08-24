@@ -35,8 +35,25 @@ the cells were never the kind of cell a combat lever reaches.
 When the operation *did* force attacks (n285: three attacks on `glamoc` at
 t17/t18/t19 with a 1,700-man assault brigade, nominal ratio 2.12 against an
 800-man defender) the outcomes were `costly_victory` → `stalemate` →
-`catastrophic`. An OSID flips only on `decisive_victory` (ratio 2.0 *after*
-terrain and entrenchment), and these are the hills ringing the town.
+`catastrophic`.
+
+**CORRECTION (2026-08-24, later the same day).** This paragraph originally read "an OSID
+flips only on `decisive_victory` (ratio 2.0)". **That is wrong**, and the error was repeated
+in the Majevica commit message. The real rule, `attack_resolution_osid.ts:1397`:
+
+    let flip = (outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory')
+        && !isProbeOp;
+
+Three outcomes flip, not one — and the flip is then re-examined by
+`evaluateAndApplyMoraleAbsorption`, which can cancel it. Measured over the whole 188w run:
+`decisive_victory` flips 49% of the time (n=305), `victory` 38% (n=32), `costly_victory` 18%
+(n=45), `catastrophic` 0% (n=127). So a `victory` at Glamoč COULD have taken it; the flip was
+cancelled downstream. The operative gate is **morale absorption**, not the outcome tier.
+
+Also measured, and worth keeping: the mean `power_ratio` behind a `decisive_victory` is
+**17.5**, not ~2. Decisive victories are overwhelming attacks on weak or absent defenders,
+which is what early-1992 fighting against undefended villages looks like — not close-run
+assaults on entrenched hills.
 
 ## What the 32 frozen cells actually are
 
@@ -84,7 +101,7 @@ controller — exclude it from any target count.
 If operation-objective extension is the right lever, adding objectives for the
 non-§6 subset should move `jan1993` upward and leave the three later checkpoints
 within noise. If those cells still do not flip after being targeted, the wall is
-combat resolution (the `decisive_victory` threshold), not coverage — the same
+combat resolution (morale absorption cancelling flips — see the correction above), not coverage — the same
 wall `glamoc` hit — and operation tuning is exhausted as a lever for jan1993.
 
 ---
