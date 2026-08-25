@@ -563,3 +563,36 @@ The counterexample was in my own data: `rs_visegrad_brigade` ranks **80/81** —
 `REAL_WAR_MASTER.md` logged a **P1** on 2026-04-02: *"Predictor ignores defender artillery, terrain, entrenchment."* COMBAT-P14 then closed artillery and entrenchment — and the closure note was written as *"prediction↔resolution parity holds."* **Terrain was never closed.** The parity claim was true of the two items fixed and false of the one that remained, and because the record said parity held, nobody looked again. Four months.
 
 **Rule:** when closing a defect that was logged as a LIST, close it item by item in the record and name what remains open, even if what remains is one word. A summary sentence that generalises a partial repair into a whole one is not documentation — it is a silencer on the next audit. Same shape as the guard family (a green check asserting less than its name claims), applied to prose.
+
+### [Process] ★ A STALE MEMORY NOTE COSTS MORE THAN A MISSING ONE — it actively steers you wrong (2026-08-25) — NEW
+- **Context**: `memory/v1_anchor_only_smoke_result.md` said "don't expect v1 to unblock Op
+  Trnovo/Pracha/Zvezda 94 — v2 donors mandatory", written 2026-05-28 during a staged rollout.
+  All five ADR-0005 flags have been `true` since; TGs and OGs are fully live (62 standing OGs,
+  live `tactical_groups` records with donor contributions). Acting on the stale note, an entire
+  session of operation edits was written treating `brigades: [...]` as an unordered roster —
+  when `getAnchorBrigade` returns `main_brigade ?? assigned_brigades[0]`, so **the first entry is
+  the anchor** and carries the readiness gate. Operation Trnovo was "fixed" by APPENDING a
+  brigade, leaving a formation that does not spawn until t140 as the anchor. The error surfaced
+  only because the owner asked "why are we not using OGs for ops" — a question whose premise was
+  false, and checking it was what exposed the stale note.
+- **Wrong approach**: Treating memory as current state. A memory file records what was true when
+  written; a staged-rollout note is guaranteed to expire, and nothing expires it.
+- **Right approach**: Any memory note describing a FLAGGED or STAGED feature must be re-checked
+  against the flag's current value before use. The check is one grep.
+- **Do instead**: When a memory says a feature is partial/pending/flag-gated, `grep` the flag
+  constant before relying on it, and if it has shipped, EDIT THE MEMORY IN PLACE with a
+  SUPERSEDED banner. Do not leave a corrected fact only in the session transcript.
+
+### [Process] THE TASK-NOTIFICATION EXIT CODE IS THE WRAPPER'S, NOT THE COMMAND'S (2026-08-25) — NEW
+- **Context**: `npm run test:vitest > log 2>&1; echo "TESTS_EXIT=$?" >> log; sed ... | grep ...`
+  reports the exit status of the **final pipeline element** (`grep`), not vitest. Two full suites
+  were announced by the harness as "completed (exit code 0)" while the log recorded
+  `TESTS_EXIT=1` with a real failing test. Believing the notification would have committed a red
+  tree; both times the recorded value was the truth.
+- **Wrong approach**: Reading the harness's completion status as the tool's verdict when the
+  command is a compound or a pipeline.
+- **Right approach**: Capture the status you care about explicitly (`$?` immediately after the
+  command) and read THAT back. Gate scripts on the recorded value, never on the wrapper.
+- **Do instead**: In any auto-gating script, parse `TESTS_EXIT=` (or equivalent) out of the log.
+  A direct instance of the derived-signal pattern: the harness status is a derived signal about
+  a pipeline, not a primary signal about the tool.

@@ -61,6 +61,44 @@ under any single controller. That is a data-pipeline item.
 
 Full derivation: `docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISMATCH_TRIAGE.md`.
 
+## 2026-08-25 — Lukavac 93 timing fix: oct1995 647 → **650** (new high). VERIFICATION OWED.
+
+Commit `414ec3f61`. `Operation Trnovo` moved t141-159 → **t69-79**, its authored
+`available_from` and the historical August-1993 date.
+
+| checkpoint | before | after |
+|---|---|---|
+| jan1993 | 677 | 677 |
+| apr1994 | 663 | **664** |
+| apr1995 | 662 | **664** |
+| oct1995 | 647 | **650** |
+
+Cause: `rs_trnovo_brigade` is authored `mandatory, available_from: 6`, but
+`canFormEmergentBrigade` gates a later-forming mandatory brigade on its home municipality's
+militia pool, and Trnovo's RS pool is `available: 0 / committed: 4428` because
+`rs_1st_romanija_infantry` shares its `home_mun`. The brigade did not exist until t140, so the
+axis was empty at t69, the op fell below its 2-participant floor and deferred 72 turns.
+Fixed by adding `rs_igman_brigade` (spawns t29, uncommitted, historically correct) +
+`planning_duration: 6`.
+
+**The +6 is turn-ordering jitter, NOT causal.** RS captures after t28 are 1 both before and
+after. The change is justified by correctness — an operation authored for August 1993 no longer
+fires in 1995 — not by the score. Do not treat 650 as evidence the frozen-VRS front improved.
+
+**⚠ VERIFICATION OWED — this figure has NOT been reproduced on a clean tree.** Runs n290 and
+n293 both carry `git_dirty: true` in `run_meta.json` (the dirty state was the change under
+test, which is ordinary, but it means the committed code has not itself been measured). Per the
+2026-08-24 "A SCORE IS NOT AN IDENTITY" entry, a delta is not banked until hash +
+`git_dirty: false` + consumed digest are confirmed. **Next session: run 188w on a clean tree at
+`414ec3f61` and confirm 677/664/664/650 before this line is relied on.**
+
+Guards verified in every run: Teočak holds RBiH at all four checkpoints (canon H1.8); the HRHB
+western-Bosnia cascade site is intact (Grahovo 4/4, Šipovo 5/5, Glamoč 6/6, Sanski Most 10/10).
+
+Also landed: a latent `operation.participant_double_committed` crash (a pre-planned op could
+claim a brigade a bot probe held — `buildAxesFromDef` never checked commitment), fixed and
+proven inert by hash identity n293 ≡ n290 (`4714d66780640887`).
+
 ## 2026-08-24 — CHECKPOINT ERA: floor is now FOUR numbers, not one. Majevica coverage fix ADOPTED.
 
 **READ THIS BEFORE QUOTING ANY FIGURE BELOW THIS LINE.** Every headline number in the

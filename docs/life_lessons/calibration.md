@@ -518,3 +518,41 @@ Applied retroactively to a seven-item queue, this screen killed **five of seven*
 - **Do instead**: When adding brigades to a pre-planned op, remember bot probes compete for the
   same formations. Probes are NOT recorded in `operation_history`, so they are invisible to an
   operation-type audit.
+
+### [Calibration] ★ A GATE BUILT ON AN UNVERIFIED FIELD'S SEMANTICS IS A NO-OP YOU CANNOT SEE IN THE RESULT (2026-08-25) — NEW
+- **Context**: The consolidation sweep was gated on
+  `penetration.to_control === 'controlled'`, written to mean "this faction holds the
+  municipality". That field is a single municipality-level value that reads `'controlled'` for
+  **every municipality in the game** — it says someone holds the TO, never who. The gate
+  admitted everything. The run then read as "the mechanism is too permissive" (net −36, 11 of 25
+  new flips wrong), which is a *behavioural* diagnosis, when the actual fault was that one
+  conjunct of the predicate had zero discriminating power.
+- **Why it is hard to catch**: a no-op gate does not throw, does not warn, and produces a
+  plausible-looking bad result. The failure is indistinguishable from an honest over-broad
+  design, so the natural next move is to tune thresholds — which cannot work, because the
+  broken clause is not a threshold.
+- **Wrong approach**: Reading a field's NAME and its type, confirming it exists on the object,
+  and gating on it. `to_control` exists, is spelled exactly that, and takes the value the code
+  compares against. Every check short of the right one passes.
+- **Right approach**: Before gating on any data field, print its **distribution across the
+  dataset** — how many distinct values does it take, and how many rows sit in each? A field that
+  takes one value everywhere cannot gate anything. One `node -e` over the municipalities object
+  would have shown `{controlled: 109}` and killed the design before the run.
+- **Do instead**: For any new predicate over authored data, assert the discriminator is real
+  first: `node -e "const m=...; const v={}; for(const k of Object.keys(m)) v[m[k].field]=(v[m[k].field]||0)+1; console.log(v)"`. If the histogram has one bucket, the clause is decoration.
+  Extends "measure the premise before building" from mechanism premises DOWN to field semantics.
+
+### [Calibration] "FROZEN" MEANT NEVER-FLIPPED, NOT NEVER-ATTACKED — the two need opposite fixes (2026-08-25) — NEW
+- **Context**: A cell with no `control_events` was labelled "never contested" and counted as
+  coverage-reachable. `donji_vakuf:jemanlici` had **zero** control events and had been attacked
+  **ten times**, winning decisively every time at ratios 2.2–3.66 — every attack was a probe, and
+  a probe can never capture (`!isProbeOp` in the flip predicate). `bugojno:medini` the same, at
+  ratios up to 7.34.
+- **Wrong approach**: Deriving "was never attacked" from "never changed hands". Absence of a
+  control event is absence of a *flip*, and the flip log is not an attack log.
+- **Right approach**: Split the frozen set explicitly — never-attacked cells need coverage
+  (an operation that targets them); attacked-but-unflippable cells need the resolution path
+  fixed and are completely immune to coverage work. Cross-reference `weekly_report.jsonl`
+  `battles[].target_osid` against `control_events`, not `control_events` alone.
+- **Do instead**: Never infer "no attempt" from "no result" in this engine. The battle record
+  lives in the weekly report; the outcome lives in the save. Read both.
