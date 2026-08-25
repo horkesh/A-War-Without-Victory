@@ -29053,12 +29053,19 @@ Herzegovina Consolidation. BB1 pp.187 and 204 support only the broad 1992 theatr
 exact OSIDs remain painter-derived, staging is graph/live-control-derived, and rosters are explicit
 scenario-OOB choices. Launch windows are bounded to the 40-week historical cadence.
 
-**Measured result:** accepted runs n28/n29 are byte-identical at `64572b4915f2298e`. The exact
+**Measured result:** clean-provenance runs n32/n33 at `096fcc100` are byte-identical at
+`e8dc3750e880278b`. The exact
 January score is 684/712 overall and 74/77 across Goražde, Foča, Rudo, Čajniče, Višegrad, Pale,
 Trnovo, Rogatica, and Kalinovik. Relative to the prior accepted 681/712 state, the only changed
 cells are `op:rogatica:varosiste_2`, `op:pale:praca`, and
 `op:gorazde:podkozara_donja_2`; all three move to their painted RS control, with zero regressions.
 Relative to the original 676/712 baseline, the completed slice is +8 exact cells.
+
+**Runtime-accounting hardening:** the first Podkožara candidate used two axes with the same
+objective, which let one physical battle credit both axis summaries. It was rejected as dishonest
+operation accounting. The accepted shape uses one axis with both brigades and records one physical
+battle, one axis attack, and one captured objective; both clean repeats preserve the same +1 control
+gain without the duplicate-objective ambiguity.
 
 **Rejected residue:** stronger Međeđa and Tošići trials still failed their live launch gates before
 the ARBiH 1st Corps slot became occupied; Drinsko remains topologically dependent on Međeđa. These
