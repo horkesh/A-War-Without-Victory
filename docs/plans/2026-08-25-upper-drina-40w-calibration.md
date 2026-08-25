@@ -30,6 +30,6 @@
 
 - Accepted five exact theatre fixes with no January regression: `op:cajnice:batotici`, `op:cajnice:miljeno_2`, `op:foca:brusna_2`, `op:kalinovik:varos_2`, and `op:trnovo:kijevo_2`.
 - Final exact score: 681/712 overall and 71/77 across the nine-municipality upper-Drina/Sarajevo theatre, versus 676/712 and 66/77 at baseline.
-- Final repeated state hash: `3768f95ee6c8f447`. The two accepted-path saves were byte-identical before the final chronology-only hardening; a post-hardening repeat is the final acceptance artifact.
+- Final repeated state hash: `3768f95ee6c8f447`. Post-hardening runs n21/n22 are byte-identical final acceptance artifacts.
 - Rejected experiments included Podkožara defender restoration, Rogatica–Prača joint axes, Višegrad ripostes, Prsten axis extension, and a Trnovo/Tošići counterstroke. Each either failed to execute or displaced a correct January cell and was reverted.
 - Historian review required and received explicit painter/OOB/graph provenance boundaries plus bounded 1992 launch windows (`turn <= 14`) for the new local axes.

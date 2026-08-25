@@ -29027,13 +29027,14 @@ bound to prevent an ahistorical late retry.
 **Measured result:** baseline n295 was 676/712 overall and 66/77 in the nine-municipality theatre
 (`ad0763075a1a2562`). Accepted state is 681/712 overall and 71/77 theatre: Batotići, Miljeno,
 Brusna, Kalinovik Varoš, and Kijevo fixed; zero previously correct January cells regressed.
-Accepted pre-hardening repeats n18/n20 were byte-identical with state hash `3768f95ee6c8f447`.
+Accepted post-hardening repeats n21/n22 are byte-identical with state hash `3768f95ee6c8f447`.
 
 **Verification:** focused triggered/pre-planned operation suites pass (70 tests); TypeScript
 typecheck passes after correcting the accepted-operation fixture to store its turn number.
 Independent scenario review reproduced the +5/zero-regression inventory. Historian review blocked
 the first wording/window draft; its provenance and chronology corrections were applied before final
-acceptance. Rejected candidates and their reverts remain in branch history for auditability.
+acceptance. Final historian/canon and engine/determinism re-reviews both returned APPROVE/GO.
+Rejected candidates and their reverts remain in branch history for auditability.
 
 Docs reconciled to this in the same commit: the mechanism report (4 corrections), the memory
 topic file (frontmatter + 3 body corrections), and this ledger entry.
