@@ -708,7 +708,6 @@ describe('pre-planned operations', () => {
         state.military.formations['rs_gacko_brigade']!.personnel = 300;
         state.military.formations['rs_kalinovik_brigade']!.personnel = 300;
         state.military.formations['jna_kalinovik_to_tg']!.status = 'inactive';
-        state.military.formations['rs_ajnie_brigade']!.personnel = 300;
 
         const injected = injectQueuedOperation(state, 'vrs_herzegovina');
 
@@ -886,18 +885,12 @@ describe('pre-planned operations', () => {
         assert.deepEqual(command.queued_operations ?? [], ['Operation Jackal']);
     });
 
-    it('authors a dedicated reachable Cajnice axis for Operation Foca', () => {
+    it('keeps the post-Foca Cajnice local axis out of Operation Foca', () => {
         const foca = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
         assert.ok(foca, 'Operation Foca must exist in the pre-planned catalog');
 
-        const cajnice = foca.axes.find((axis) => axis.axis_id === 'cajnice_seizure');
-        assert.deepEqual(cajnice, {
-            axis_id: 'cajnice_seizure',
-            name: 'Cajnice Seizure',
-            brigades: ['rs_ajnie_brigade'],
-            objectives: ['op:cajnice:batotici'],
-            staging_osid: 'op:cajnice:cajnice_2',
-        });
+        assert.equal(foca.axes.find((axis) => axis.axis_id === 'cajnice_local'), undefined);
+        assert.equal(foca.axes.find((axis) => axis.axis_id === 'cajnice_seizure'), undefined);
     });
 
     it('does not pin queued Operation Foca to a phantom that predictably withdraws before queue time', () => {

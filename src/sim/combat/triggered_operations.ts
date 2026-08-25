@@ -261,6 +261,22 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                 ],
                 staging_osid: 'op:konjic:bijela_2',
             },
+            {
+                axis_id: 'cajnice_local',
+                name: 'Cajnice Local Axis',
+                corps: 'vrs_herzegovina',
+                brigades: [
+                    'rs_ajnie_brigade' as FormationId,
+                ],
+                // HISTORICAL PROVENANCE BOUNDARY: BB1 pp. 175, 187 supports the
+                // Čajniče/Foča theatre and local-force context, not Batotići as a named
+                // operational target. The exact Batotici OSID comes solely from the
+                // authoritative January 1993 painted-control reference.
+                objectives: [
+                    'op:cajnice:batotici',
+                ],
+                staging_osid: 'op:cajnice:cajnice_2',
+            },
         ],
     },
     {

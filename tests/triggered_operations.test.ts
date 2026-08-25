@@ -139,13 +139,28 @@ describe('triggered operations definitions', () => {
         );
     });
 
-    it('keeps Posavina as a single-corps follow-on and Herzegovina as a dual-axis consolidation', () => {
+    it('keeps Posavina as a single-corps follow-on and Herzegovina as a three-axis consolidation', () => {
         const posavina = _TRIGGERED_OPS.find((def) => def.name === 'Operation Posavina Corridor')!;
         const herzegovina = _TRIGGERED_OPS.find((def) => def.name === 'Operation Herzegovina Consolidation')!;
 
         assert.deepEqual(new Set(posavina.axes.map((axis) => axis.corps)), new Set(['vrs_1st_krajina']));
-        assert.equal(herzegovina.axes.length, 2);
+        assert.equal(herzegovina.axes.length, 3);
         assert.deepEqual(new Set(herzegovina.axes.map((axis) => axis.corps)), new Set(['vrs_herzegovina']));
+    });
+
+    it('authors the neutral Cajnice local axis on post-Foca Herzegovina Consolidation', () => {
+        const herzegovina = _TRIGGERED_OPS.find((def) => def.name === 'Operation Herzegovina Consolidation');
+        assert.ok(herzegovina, 'Operation Herzegovina Consolidation must exist in the triggered catalog');
+
+        const cajnice = herzegovina.axes.find((axis) => axis.axis_id === 'cajnice_local');
+        assert.deepEqual(cajnice, {
+            axis_id: 'cajnice_local',
+            name: 'Cajnice Local Axis',
+            corps: 'vrs_herzegovina',
+            brigades: ['rs_ajnie_brigade'],
+            objectives: ['op:cajnice:batotici'],
+            staging_osid: 'op:cajnice:cajnice_2',
+        });
     });
 
     it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
@@ -247,7 +262,40 @@ describe('checkTriggeredOperations', () => {
         const op = state.military.corps_command!['vrs_herzegovina']!.active_operations[0];
         assert.equal(op?.name, 'Operation Herzegovina Consolidation');
         assert.equal(op?.sector_id, 'sector:vrs_herzegovina:0');
-        assert.equal(op?.axes?.length, 2);
+        assert.equal(op?.axes?.length, 3);
+    });
+
+    it('builds the Cajnice local axis only after Operation Foca completes', () => {
+        const state = makeState(12);
+        state.military.formations!.rs_ajnie_brigade ??= makeFormation(
+            'rs_ajnie_brigade',
+            'vrs_herzegovina',
+            { location_osid: 'op:cajnice:cajnice_2' },
+        );
+        const sector = state.military.corps_front_sectors!['sector:vrs_herzegovina:0']!;
+        if (!sector.assigned_brigade_ids.includes('rs_ajnie_brigade')) {
+            sector.assigned_brigade_ids.push('rs_ajnie_brigade');
+        }
+        state.political.political_controllers!['op:cajnice:cajnice_2'] = 'RS';
+        state.political.political_controllers!['op:cajnice:batotici'] = 'RBiH';
+        state.operation_history = [{
+            corps_id: 'vrs_herzegovina',
+            operation_name: 'Operation Visegrad',
+        } as any];
+
+        const beforeFoca = checkTriggeredOperations(state);
+        assert.ok(!beforeFoca.includes('Operation Herzegovina Consolidation'));
+        assert.equal(state.military.corps_command!.vrs_herzegovina!.active_operations.length, 0);
+
+        state.operation_history.push({
+            corps_id: 'vrs_herzegovina',
+            operation_name: 'Operation Foca',
+        } as any);
+        const afterFoca = checkTriggeredOperations(state);
+        assert.ok(afterFoca.includes('Operation Herzegovina Consolidation'));
+        const operation = state.military.corps_command!.vrs_herzegovina!.active_operations[0]!;
+        const cajnice = operation.axes?.find((axis) => axis.axis_id === 'cajnice_local');
+        assert.deepEqual(cajnice?.assigned_brigades, ['rs_ajnie_brigade']);
     });
 
     it('treats scenario-start satisfied pre-planned operations as completed chain prerequisites', () => {
