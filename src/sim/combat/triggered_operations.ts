@@ -305,13 +305,13 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
     },
     {
         // Goražde Local Approach — a narrow post-consolidation follow-on against
-        // Podkožara from two already-adjacent local positions.
+        // Podkožara using two local brigades on one Miljeno-staged axis.
         // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 187 supports only the broad 1992
         // upper-Drina/Goražde combat context. It does not name Podkožara as an
         // operational target or these brigades as participants. The exact target
-        // comes solely from the authoritative January 1993 painter; Miljeno and
-        // Kolovarice are graph/live-control staging choices, and the roster is the
-        // scenario OOB. Turn 17 is bounded scenario cadence after the accepted
+        // comes solely from the authoritative January 1993 painter; Miljeno is a
+        // graph/live-control staging choice, and the roster is the scenario OOB.
+        // Turn 17 is bounded scenario cadence after the accepted
         // Herzegovina consolidation, not a sourced date.
         name: 'Operation Gorazde Local Approach',
         faction: 'RS',

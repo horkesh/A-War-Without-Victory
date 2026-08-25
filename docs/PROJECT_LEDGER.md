@@ -29048,8 +29048,8 @@ criterion was introduced.
 **Behavioral change:** three isolated ordinary-combat follow-ons were accepted. `Operation Rogatica
 Local Approach` targets only Varošište from Kramer Selo after Podrinje Sweep. `Praca Local
 Containment` targets only Prača post-Prsten at turn 12. `Operation Gorazde Local
-Approach` targets only Podkožara from already adjacent Miljeno and Kolovarice positions after
-Herzegovina Consolidation. BB1 pp.187 and 204 support only the broad 1992 theatre/force context;
+Approach` targets only Podkožara after Herzegovina Consolidation, using both brigades on one
+Miljeno-staged axis. BB1 pp.187 and 204 support only the broad 1992 theatre/force context;
 exact OSIDs remain painter-derived, staging is graph/live-control-derived, and rosters are explicit
 scenario-OOB choices. Launch windows are bounded to the 40-week historical cadence.
 
