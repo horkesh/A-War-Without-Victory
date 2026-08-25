@@ -301,55 +301,6 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     {
-        // Operation Upper Drina Local Approaches is a bounded, scenario-local
-        // follow-on after Operation Podrinje Sweep, not a claimed historical
-        // operation title or codename. The exact t20 window is one-shot so this
-        // calibration packet cannot drift into the later Pracha River chronology.
-        //
-        // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 204 assigns the Pale, Prača,
-        // and Jahorina battalions to the 1st Sarajevo Mechanized Brigade and
-        // places them southeast of Sarajevo in operations containing Bosnian Army
-        // forces around Goražde. That supports the SRK formation/theatre pairing
-        // only. Gornje Pale is a verified local graph staging point; exact Prača,
-        // Kramer Selo, and Varosište OSIDs come solely from the authoritative
-        // January 1993 painted-control reference, not from BB1. The Drina brigade
-        // choice is local scenario OOB continuity from Operation Podrinje Sweep.
-        name: 'Operation Upper Drina Local Approaches',
-        faction: 'RS',
-        primary_corps: 'vrs_drina',
-        staging_osid: 'op:rogatica:kramer_selo_2',
-        planning_duration: 4,
-        min_attack_outcome: 'repulsed',
-        trigger: (state, turn) => turn === 20
-            && corpsCompletedOp(state, 'vrs_drina', 'Operation Podrinje Sweep'),
-        axes: [
-            {
-                axis_id: 'rogatica_local',
-                name: 'Rogatica Local Axis',
-                corps: 'vrs_drina',
-                brigades: [
-                    'rs_1st_podrinje' as FormationId,
-                ],
-                objectives: [
-                    'op:rogatica:varosiste_2',
-                ],
-                staging_osid: 'op:rogatica:kramer_selo_2',
-            },
-            {
-                axis_id: 'praca_local',
-                name: 'Praca Local Axis',
-                corps: 'vrs_sarajevo_romanija',
-                brigades: [
-                    'rs_1st_sarajevo_mechanized' as FormationId,
-                ],
-                objectives: [
-                    'op:pale:praca',
-                ],
-                staging_osid: 'op:pale:gornje_pale',
-            },
-        ],
-    },
-    {
         name: 'Operation Kotor Varos',
         faction: 'RS',
         primary_corps: 'vrs_1st_krajina',
