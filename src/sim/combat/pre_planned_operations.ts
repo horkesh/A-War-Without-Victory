@@ -414,20 +414,12 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:ilidza:sarajevo_dio_ilidza_2',
                     'op:ilidza:rakovica_2',
-                    // TRIED AND REVERTED 2026-08-12 — do not re-attempt without reading
-                    // docs/40_reports/20260811_SARAJEVO_ROMANIJA_DRINA_CORRIDOR_MISMATCH_TRIAGE.md.
-                    // Appending 'op:trnovo:kijevo_2' here is historically correct (painted RS in
-                    // ALL FOUR snapshots; census Bosniak-majority so init RBiH is right and
-                    // untouchable, meaning it must be TAKEN in 1992) and it WORKS locally: at
-                    // 43w it fixed kijevo_2 + kolovarice + praca, +3 with ZERO regressions.
-                    // At 188w it is a disaster: matched 639 -> 613 (-26), anchors 31 -> 29/31
-                    // (op:doboj:boljanic_2 and op:gracanica:petrovo_2 both flip RBiH), and the
-                    // damage is 34 regressed / 8 fixed concentrated in NON-ANCHOR WESTERN
-                    // KRAJINA — Sipovo 5, Glamoc 5, Bosansko Grahovo 4, Mrkonjic 4, Drvar 3,
-                    // Petrovac 3, Sanski Most 2, Bihac 2, Livno 1. A turn-5 Sarajevo-belt
-                    // capture propagates 170 turns and ~200 km to break the Mistral/Sana
-                    // late-war cascade. Same signature as the EH-3 -39 (life_lessons/
-                    // calibration.md:350). The 43w result is a FALSE GREEN for this change class.
+                    // BB1 pp. 187, 204 supports the 1992 Trnovo containment phase and
+                    // the SRK force assignment, not this exact settlement objective.
+                    // Kijevo comes solely from the authoritative January painter and
+                    // verified graph adjacency. The known 188-week cascade is accepted
+                    // here under the calibration owner's explicit 40-week-only scope.
+                    'op:trnovo:kijevo_2',
                 ],
                 staging_osid: 'op:ilidza:kasindo',
             },
