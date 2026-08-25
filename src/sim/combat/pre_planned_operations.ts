@@ -665,6 +665,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 staging_osid: 'op:kalinovik:kalinovik_2',
             },
+            {
+                axis_id: 'cajnice_seizure',
+                name: 'Cajnice Seizure',
+                brigades: ['rs_ajnie_brigade'],
+                objectives: ['op:cajnice:batotici'],
+                staging_osid: 'op:cajnice:cajnice_2',
+            },
         ],
     },
     {
