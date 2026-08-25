@@ -124,12 +124,13 @@ describe('triggered operations definitions', () => {
         // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
         // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
         // the real VRS operation_lukavac_93 event).
-        assert.equal(_TRIGGERED_OPS.length, 7);
+        assert.equal(_TRIGGERED_OPS.length, 8);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
                 'Operation Posavina Corridor',
                 'Operation Herzegovina Consolidation',
+                'Trnovo Local Containment',
                 'Operation Kotor Varos',
                 'Operation Cerska-Kamenica',
                 'Operation Krivaja-95',
@@ -187,6 +188,24 @@ describe('triggered operations definitions', () => {
         });
     });
 
+    it('authors a narrow post-Prsten Kijevo containment operation', () => {
+        const operation = _TRIGGERED_OPS.find((def) => def.name === 'Trnovo Local Containment');
+        assert.ok(operation, 'Trnovo Local Containment must exist in the triggered catalog');
+        assert.equal(operation.primary_corps, 'vrs_sarajevo_romanija');
+        assert.equal(operation.planning_duration, 6);
+        assert.deepEqual(operation.axes, [{
+            axis_id: 'trnovo_local_containment',
+            name: 'Trnovo Local Containment Axis',
+            corps: 'vrs_sarajevo_romanija',
+            brigades: [
+                'rs_2nd_sarajevo_light_infantry',
+                'rs_1st_sarajevo_mechanized',
+            ],
+            objectives: ['op:trnovo:kijevo_2'],
+            staging_osid: 'op:trnovo:gornja_presjenica',
+        }]);
+    });
+
     it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
         const cerskaAxis = operation.axes.find((axis) => axis.axis_id === 'cerska_pocket')!;
@@ -199,6 +218,32 @@ describe('triggered operations definitions', () => {
 });
 
 describe('checkTriggeredOperations', () => {
+    it('offers Trnovo Local Containment from turn 6 after Prsten completes', () => {
+        const state = makeState(6);
+        state.operation_history = [{
+            corps_id: 'vrs_sarajevo_romanija',
+            operation_name: 'Operation Prsten',
+        } as any];
+        state.political.political_controllers!['op:trnovo:gornja_presjenica'] = 'RS';
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Trnovo Local Containment'));
+        const operation = state.military.corps_command!.vrs_sarajevo_romanija!.active_operations[0]!;
+        assert.deepEqual(operation.axes?.[0]?.objectives, ['op:trnovo:kijevo_2']);
+
+        const late = makeState(7);
+        late.operation_history = state.operation_history;
+        late.political.political_controllers!['op:trnovo:gornja_presjenica'] = 'RS';
+        assert.ok(checkTriggeredOperations(late).includes('Trnovo Local Containment'));
+
+        const accepted = makeState(7);
+        accepted.operation_history = state.operation_history;
+        accepted.political.political_controllers!['op:trnovo:gornja_presjenica'] = 'RS';
+        accepted.military.triggered_operations_accepted = { 'Trnovo Local Containment': true };
+        assert.ok(!checkTriggeredOperations(accepted).includes('Trnovo Local Containment'));
+    });
+
     it('uses a unique live OOB alias for an authored Army-HQ participant', () => {
         const state = makeState(160);
         const authored = state.military.formations!.arbih_328th_mountain!;

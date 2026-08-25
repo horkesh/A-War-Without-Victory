@@ -301,6 +301,40 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     {
+        // Trnovo Local Containment — a deliberately narrow post-Prsten follow-on.
+        // HISTORICAL PROVENANCE BOUNDARY: BB1 pp. 187, 204 supports the 1992
+        // Trnovo containment fighting and places the Trnovo Battalion under the
+        // 2nd Sarajevo Light Infantry Brigade. It does not identify Kijevo as an
+        // operational objective or name this axis. The 1st Sarajevo Mechanized is
+        // Kijevo comes only from the authoritative January 1993 painted reference,
+        // Gornja Presjenica from verified map adjacency and the brigade's local
+        // concentration geometry, and turn 6 is scenario cadence after Prsten rather
+        // than a sourced calendar date.
+        name: 'Trnovo Local Containment',
+        faction: 'RS',
+        primary_corps: 'vrs_sarajevo_romanija',
+        staging_osid: 'op:trnovo:gornja_presjenica',
+        planning_duration: 6,
+        min_attack_outcome: 'repulsed' as const,
+        trigger: (state, turn) => turn >= 6
+            && corpsCompletedOp(state, 'vrs_sarajevo_romanija', 'Operation Prsten'),
+        axes: [
+            {
+                axis_id: 'trnovo_local_containment',
+                name: 'Trnovo Local Containment Axis',
+                corps: 'vrs_sarajevo_romanija',
+                brigades: [
+                    'rs_2nd_sarajevo_light_infantry' as FormationId,
+                    'rs_1st_sarajevo_mechanized' as FormationId,
+                ],
+                objectives: [
+                    'op:trnovo:kijevo_2',
+                ],
+                staging_osid: 'op:trnovo:gornja_presjenica',
+            },
+        ],
+    },
+    {
         name: 'Operation Kotor Varos',
         faction: 'RS',
         primary_corps: 'vrs_1st_krajina',
