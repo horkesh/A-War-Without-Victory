@@ -304,6 +304,51 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     {
+        // Goražde Local Approach — a narrow post-consolidation follow-on against
+        // Podkožara from two already-adjacent local positions.
+        // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 187 supports only the broad 1992
+        // upper-Drina/Goražde combat context. It does not name Podkožara as an
+        // operational target or these brigades as participants. The exact target
+        // comes solely from the authoritative January 1993 painter; Miljeno and
+        // Kolovarice are graph/live-control staging choices, and the roster is the
+        // scenario OOB. Turn 17 is bounded scenario cadence after the accepted
+        // Herzegovina consolidation, not a sourced date.
+        name: 'Operation Gorazde Local Approach',
+        faction: 'RS',
+        primary_corps: 'vrs_herzegovina',
+        staging_osid: 'op:cajnice:miljeno_2',
+        planning_duration: 2,
+        min_attack_outcome: 'repulsed' as const,
+        trigger: (state, turn) => turn >= 17 && turn <= 20
+            && corpsCompletedOp(state, 'vrs_herzegovina', 'Operation Herzegovina Consolidation'),
+        axes: [
+            {
+                axis_id: 'podkozara_cajnice',
+                name: 'Podkozara Cajnice Approach',
+                corps: 'vrs_herzegovina',
+                brigades: [
+                    'rs_ajnie_brigade' as FormationId,
+                ],
+                objectives: [
+                    'op:gorazde:podkozara_donja_2',
+                ],
+                staging_osid: 'op:cajnice:miljeno_2',
+            },
+            {
+                axis_id: 'podkozara_foca',
+                name: 'Podkozara Foca Approach',
+                corps: 'vrs_herzegovina',
+                brigades: [
+                    'rs_foa_brigade' as FormationId,
+                ],
+                objectives: [
+                    'op:gorazde:podkozara_donja_2',
+                ],
+                staging_osid: 'op:gorazde:kolovarice',
+            },
+        ],
+    },
+    {
         // Trnovo Local Containment — a deliberately narrow post-Prsten follow-on.
         // HISTORICAL PROVENANCE BOUNDARY: BB1 pp. 187, 204 support 1992 Trnovo
         // containment fighting and place the Trnovo Battalion under 2nd Sarajevo Light.

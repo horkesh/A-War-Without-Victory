@@ -124,12 +124,13 @@ describe('triggered operations definitions', () => {
         // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
         // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
         // the real VRS operation_lukavac_93 event).
-        assert.equal(_TRIGGERED_OPS.length, 10);
+        assert.equal(_TRIGGERED_OPS.length, 11);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
                 'Operation Posavina Corridor',
                 'Operation Herzegovina Consolidation',
+                'Operation Gorazde Local Approach',
                 'Trnovo Local Containment',
                 'Praca Local Containment',
                 'Operation Rogatica Local Approach',
@@ -188,6 +189,31 @@ describe('triggered operations definitions', () => {
             ],
             staging_osid: 'op:kalinovik:kalinovik_2',
         });
+    });
+
+    it('authors a two-sided local approach to Podkozara', () => {
+        const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Gorazde Local Approach');
+        assert.ok(operation, 'Operation Gorazde Local Approach must exist in the triggered catalog');
+        assert.equal(operation.primary_corps, 'vrs_herzegovina');
+        assert.equal(operation.planning_duration, 2);
+        assert.deepEqual(operation.axes, [
+            {
+                axis_id: 'podkozara_cajnice',
+                name: 'Podkozara Cajnice Approach',
+                corps: 'vrs_herzegovina',
+                brigades: ['rs_ajnie_brigade'],
+                objectives: ['op:gorazde:podkozara_donja_2'],
+                staging_osid: 'op:cajnice:miljeno_2',
+            },
+            {
+                axis_id: 'podkozara_foca',
+                name: 'Podkozara Foca Approach',
+                corps: 'vrs_herzegovina',
+                brigades: ['rs_foa_brigade'],
+                objectives: ['op:gorazde:podkozara_donja_2'],
+                staging_osid: 'op:gorazde:kolovarice',
+            },
+        ]);
     });
 
     it('authors a narrow post-Prsten Kijevo containment operation', () => {
@@ -256,6 +282,33 @@ describe('triggered operations definitions', () => {
 });
 
 describe('checkTriggeredOperations', () => {
+    it('offers Gorazde Local Approach in a bounded window after Herzegovina Consolidation', () => {
+        const state = makeState(17);
+        state.operation_history = [{
+            corps_id: 'vrs_herzegovina',
+            operation_name: 'Operation Herzegovina Consolidation',
+        } as any];
+        state.military.triggered_operations_accepted = { 'Operation Herzegovina Consolidation': 12 };
+        state.political.political_controllers!['op:cajnice:miljeno_2'] = 'RS';
+        state.political.political_controllers!['op:gorazde:kolovarice'] = 'RS';
+        state.political.political_controllers!['op:gorazde:podkozara_donja_2'] = 'RBiH';
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Gorazde Local Approach'));
+        const operation = state.military.corps_command!.vrs_herzegovina!.active_operations[0]!;
+        assert.equal(operation.axes?.length, 2);
+        assert.deepEqual(operation.objectives, ['op:gorazde:podkozara_donja_2']);
+
+        const late = makeState(21);
+        late.operation_history = state.operation_history;
+        late.military.triggered_operations_accepted = { 'Operation Herzegovina Consolidation': 12 };
+        late.political.political_controllers!['op:cajnice:miljeno_2'] = 'RS';
+        late.political.political_controllers!['op:gorazde:kolovarice'] = 'RS';
+        late.political.political_controllers!['op:gorazde:podkozara_donja_2'] = 'RBiH';
+        assert.ok(!checkTriggeredOperations(late).includes('Operation Gorazde Local Approach'));
+    });
+
     it('offers Praca Local Containment only on turn 12 after Prsten completes', () => {
         const state = makeState(12);
         state.operation_history = [{
@@ -440,6 +493,7 @@ describe('checkTriggeredOperations', () => {
         }
         state.political.political_controllers!['op:cajnice:cajnice_2'] = 'RS';
         state.political.political_controllers!['op:cajnice:batotici'] = 'RBiH';
+        state.political.political_controllers!['op:cajnice:miljeno_2'] = 'RBiH';
         state.operation_history = [{
             corps_id: 'vrs_herzegovina',
             operation_name: 'Operation Visegrad',
