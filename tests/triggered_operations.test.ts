@@ -124,12 +124,13 @@ describe('triggered operations definitions', () => {
         // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
         // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
         // the real VRS operation_lukavac_93 event).
-        assert.equal(_TRIGGERED_OPS.length, 7);
+        assert.equal(_TRIGGERED_OPS.length, 8);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
                 'Operation Posavina Corridor',
                 'Operation Herzegovina Consolidation',
+                'Operation Upper Drina Local Approaches',
                 'Operation Kotor Varos',
                 'Operation Cerska-Kamenica',
                 'Operation Krivaja-95',
@@ -187,6 +188,33 @@ describe('triggered operations definitions', () => {
         });
     });
 
+    it('authors the Upper Drina local approaches as corps-owned local axes', () => {
+        const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Upper Drina Local Approaches');
+        assert.ok(operation);
+        assert.equal(operation.primary_corps, 'vrs_drina');
+        assert.equal(operation.staging_osid, 'op:rogatica:kramer_selo_2');
+        assert.equal(operation.planning_duration, 4);
+        assert.equal(operation.min_attack_outcome, 'repulsed');
+        assert.deepEqual(operation.axes, [
+            {
+                axis_id: 'rogatica_local',
+                name: 'Rogatica Local Axis',
+                corps: 'vrs_drina',
+                brigades: ['rs_1st_podrinje'],
+                objectives: ['op:rogatica:varosiste_2'],
+                staging_osid: 'op:rogatica:kramer_selo_2',
+            },
+            {
+                axis_id: 'praca_local',
+                name: 'Praca Local Axis',
+                corps: 'vrs_sarajevo_romanija',
+                brigades: ['rs_1st_sarajevo_mechanized'],
+                objectives: ['op:pale:praca'],
+                staging_osid: 'op:pale:gornje_pale',
+            },
+        ]);
+    });
+
     it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
         const cerskaAxis = operation.axes.find((axis) => axis.axis_id === 'cerska_pocket')!;
@@ -199,6 +227,93 @@ describe('triggered operations definitions', () => {
 });
 
 describe('checkTriggeredOperations', () => {
+    it('offers Upper Drina Local Approaches only at turn 20 after Podrinje Sweep completes', () => {
+        for (const turn of [19, 20, 21]) {
+            const state = makeState(turn);
+            state.operation_history = [{
+                corps_id: 'vrs_drina',
+                operation_name: 'Operation Podrinje Sweep',
+            } as any];
+
+            const injected = checkTriggeredOperations(state);
+
+            assert.equal(
+                injected.includes('Operation Upper Drina Local Approaches'),
+                turn === 20,
+                `turn ${turn} must ${turn === 20 ? '' : 'not '}launch the one-shot operation`,
+            );
+        }
+
+        const incomplete = makeState(20);
+        assert.ok(!checkTriggeredOperations(incomplete).includes('Operation Upper Drina Local Approaches'));
+    });
+
+    it('builds the live Upper Drina operation with canonical multi-corps membership and prestaging', () => {
+        const state = makeState(20);
+        state.operation_history = [{
+            corps_id: 'vrs_drina',
+            operation_name: 'Operation Podrinje Sweep',
+        } as any];
+        state.military.formations!.rs_1st_sarajevo_mechanized!.location_osid =
+            'op:ilidza:sarajevo_dio_ilidza_2';
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Upper Drina Local Approaches'));
+        const operation = state.military.corps_command!.vrs_drina!.active_operations
+            .find((candidate) => candidate.name === 'Operation Upper Drina Local Approaches');
+        assert.ok(operation);
+        assert.deepEqual(operation.participating_brigades, [
+            'rs_1st_podrinje',
+            'rs_1st_sarajevo_mechanized',
+        ]);
+        assert.deepEqual(operation.axes?.map((axis) => ({
+            axis_id: axis.axis_id,
+            assigned_brigades: axis.assigned_brigades,
+            objectives: axis.objectives,
+            staging_osid: axis.staging_osid,
+        })), [
+            {
+                axis_id: 'rogatica_local',
+                assigned_brigades: ['rs_1st_podrinje'],
+                objectives: ['op:rogatica:varosiste_2'],
+                staging_osid: 'op:rogatica:kramer_selo_2',
+            },
+            {
+                axis_id: 'praca_local',
+                assigned_brigades: ['rs_1st_sarajevo_mechanized'],
+                objectives: ['op:pale:praca'],
+                staging_osid: 'op:pale:gornje_pale',
+            },
+        ]);
+        assert.equal(state.military.brigade_movement_orders?.rs_1st_podrinje, undefined);
+        assert.deepEqual(state.military.brigade_movement_orders?.rs_1st_sarajevo_mechanized, {
+            destination_sids: ['op:pale:gornje_pale'],
+            stance: 'column',
+        });
+    });
+
+    it('does not launch Upper Drina Local Approaches while the secondary SRK corps is busy', () => {
+        const state = makeState(20);
+        state.operation_history = [{
+            corps_id: 'vrs_drina',
+            operation_name: 'Operation Podrinje Sweep',
+        } as any];
+        state.military.corps_command!.vrs_sarajevo_romanija!.active_operations = [{
+            name: 'Temporary SRK Operation',
+            phase: 'planning',
+        } as any];
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(!injected.includes('Operation Upper Drina Local Approaches'));
+        assert.equal(
+            state.military.watched_operations?.find((row: any) =>
+                row.operation_name === 'Operation Upper Drina Local Approaches')?.blocker_code,
+            'active_secondary_corps',
+        );
+    });
+
     it('uses a unique live OOB alias for an authored Army-HQ participant', () => {
         const state = makeState(160);
         const authored = state.military.formations!.arbih_328th_mountain!;
