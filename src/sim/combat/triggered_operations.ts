@@ -337,6 +337,39 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     {
+        // Prača Local Containment — a one-cell post-Prsten follow-on.
+        // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 204 supports the Pale/Prača/
+        // Jahorina battalion context under 1st Sarajevo Mechanized, not Prača as
+        // this exact operation's named objective or 4th Sarajevo Light as a named
+        // participant. The exact OSID comes solely from the authoritative January
+        // 1993 painter. Gornje Pale is a graph/live-control staging choice and the
+        // second brigade is a scenario-OOB availability choice. Turn 12 is bounded
+        // scenario cadence after the accepted Trnovo follow-on, not a sourced date.
+        name: 'Praca Local Containment',
+        faction: 'RS',
+        primary_corps: 'vrs_sarajevo_romanija',
+        staging_osid: 'op:pale:gornje_pale',
+        planning_duration: 4,
+        min_attack_outcome: 'repulsed' as const,
+        trigger: (state, turn) => turn === 12
+            && corpsCompletedOp(state, 'vrs_sarajevo_romanija', 'Operation Prsten'),
+        axes: [
+            {
+                axis_id: 'praca_local',
+                name: 'Praca Local Containment Axis',
+                corps: 'vrs_sarajevo_romanija',
+                brigades: [
+                    'rs_4th_sarajevo_light_infantry' as FormationId,
+                    'rs_1st_sarajevo_mechanized' as FormationId,
+                ],
+                objectives: [
+                    'op:pale:praca',
+                ],
+                staging_osid: 'op:pale:gornje_pale',
+            },
+        ],
+    },
+    {
         // Rogatica Local Approach — a one-cell, post-Podrinje-Sweep follow-on.
         // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 187 supports the broad 1992
         // Rogatica/upper-Drina seizure context, not Varošište as a named objective

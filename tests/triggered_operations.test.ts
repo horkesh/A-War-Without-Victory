@@ -124,13 +124,14 @@ describe('triggered operations definitions', () => {
         // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
         // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
         // the real VRS operation_lukavac_93 event).
-        assert.equal(_TRIGGERED_OPS.length, 9);
+        assert.equal(_TRIGGERED_OPS.length, 10);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
                 'Operation Posavina Corridor',
                 'Operation Herzegovina Consolidation',
                 'Trnovo Local Containment',
+                'Praca Local Containment',
                 'Operation Rogatica Local Approach',
                 'Operation Kotor Varos',
                 'Operation Cerska-Kamenica',
@@ -225,6 +226,24 @@ describe('triggered operations definitions', () => {
         }]);
     });
 
+    it('authors a one-cell post-Prsten containment at Praca', () => {
+        const operation = _TRIGGERED_OPS.find((def) => def.name === 'Praca Local Containment');
+        assert.ok(operation, 'Praca Local Containment must exist in the triggered catalog');
+        assert.equal(operation.primary_corps, 'vrs_sarajevo_romanija');
+        assert.equal(operation.planning_duration, 4);
+        assert.deepEqual(operation.axes, [{
+            axis_id: 'praca_local',
+            name: 'Praca Local Containment Axis',
+            corps: 'vrs_sarajevo_romanija',
+            brigades: [
+                'rs_4th_sarajevo_light_infantry',
+                'rs_1st_sarajevo_mechanized',
+            ],
+            objectives: ['op:pale:praca'],
+            staging_osid: 'op:pale:gornje_pale',
+        }]);
+    });
+
     it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
         const cerskaAxis = operation.axes.find((axis) => axis.axis_id === 'cerska_pocket')!;
@@ -237,6 +256,30 @@ describe('triggered operations definitions', () => {
 });
 
 describe('checkTriggeredOperations', () => {
+    it('offers Praca Local Containment only on turn 12 after Prsten completes', () => {
+        const state = makeState(12);
+        state.operation_history = [{
+            corps_id: 'vrs_sarajevo_romanija',
+            operation_name: 'Operation Prsten',
+        } as any];
+        state.military.triggered_operations_accepted = { 'Trnovo Local Containment': 6 };
+        state.political.political_controllers!['op:pale:gornje_pale'] = 'RS';
+        state.political.political_controllers!['op:pale:praca'] = 'RBiH';
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Praca Local Containment'));
+        const operation = state.military.corps_command!.vrs_sarajevo_romanija!.active_operations[0]!;
+        assert.deepEqual(operation.axes?.[0]?.objectives, ['op:pale:praca']);
+
+        const late = makeState(13);
+        late.operation_history = state.operation_history;
+        late.military.triggered_operations_accepted = { 'Trnovo Local Containment': 6 };
+        late.political.political_controllers!['op:pale:gornje_pale'] = 'RS';
+        late.political.political_controllers!['op:pale:praca'] = 'RBiH';
+        assert.ok(!checkTriggeredOperations(late).includes('Praca Local Containment'));
+    });
+
     it('offers Rogatica Local Approach only on turn 12 after Podrinje Sweep completes', () => {
         const state = makeState(12);
         state.operation_history = [{
