@@ -301,40 +301,6 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     {
-        name: 'Visegrad Local Riposte',
-        faction: 'RBiH',
-        primary_corps: 'arbih_1st_corps',
-        staging_osid: 'op:rogatica:brcigovo',
-        planning_duration: 4,
-        min_attack_outcome: 'repulsed' as const,
-        trigger: (state, turn) => {
-            return turn === 32
-                && corpsCompletedOp(state, 'vrs_herzegovina', 'Operation Visegrad');
-        },
-        axes: [
-            {
-                axis_id: 'visegrad_local_riposte',
-                name: 'Visegrad Local Riposte Axis',
-                corps: 'arbih_1st_corps',
-                brigades: [
-                    'arbih_808th_liberation' as FormationId,
-                    'arbih_851st_vitezka_liberation' as FormationId,
-                ],
-                // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 187 supports the
-                // late-August-November 1992 ARBiH attacks that retook key ground
-                // around Visegrad. It does not name these formations or exact cells.
-                // The 808th/851st choices are local scenario-OOB selections; Brcigovo
-                // and both objectives come solely from the authoritative January
-                // painter and verified operational-graph adjacency.
-                objectives: [
-                    'op:visegrad:medjedja_2',
-                    'op:visegrad:drinsko',
-                ],
-                staging_osid: 'op:rogatica:brcigovo',
-            },
-        ],
-    },
-    {
         name: 'Operation Kotor Varos',
         faction: 'RS',
         primary_corps: 'vrs_1st_krajina',

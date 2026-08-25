@@ -45,19 +45,13 @@ function makeState(turn: number): GameState {
     const corpsFrontSectors: Record<string, ReturnType<typeof makeSector>> = {};
 
     const allCorpsIds = [...new Set(_TRIGGERED_OPS.flatMap((def) => [def.primary_corps, ...def.axes.map((axis) => axis.corps)]))];
-    const corpsFactions = new Map<string, FactionId>();
-    for (const def of _TRIGGERED_OPS) {
-        corpsFactions.set(def.primary_corps, def.faction);
-        for (const axis of def.axes) corpsFactions.set(axis.corps, def.faction);
-    }
     for (const corpsId of allCorpsIds) {
-        const corpsFaction = corpsFactions.get(corpsId) ?? ('RS' as FactionId);
         corpsCommand[corpsId] = makeCorpsCmd();
         corpsFrontSectors[`sector:${corpsId}:0`] = makeSector({
             sector_id: `sector:${corpsId}:0`,
             corps_id: corpsId,
-            faction: corpsFaction,
-            opposing_factions: [corpsFaction === 'RBiH' ? 'RS' : 'RBiH'] as FactionId[],
+            faction: 'RS' as FactionId,
+            opposing_factions: ['RBiH' as FactionId],
             edge_ids: [],
             assigned_brigade_ids: [],
             reserve_brigade_ids: [],
@@ -71,7 +65,6 @@ function makeState(turn: number): GameState {
             for (const brigadeId of axisDef.brigades) {
                 if (formations[brigadeId]) continue;
                 formations[brigadeId] = makeFormation(brigadeId, axisDef.corps, {
-                    faction: def.faction,
                     location_osid: axisDef.staging_osid ?? def.staging_osid,
                 });
                 corpsFrontSectors[`sector:${axisDef.corps}:0`]!.assigned_brigade_ids.push(brigadeId);
@@ -82,9 +75,9 @@ function makeState(turn: number): GameState {
     const politicalControllers: Record<string, string> = {};
     for (const def of _TRIGGERED_OPS) {
         for (const axisDef of def.axes) {
-            politicalControllers[axisDef.staging_osid ?? def.staging_osid] = def.faction;
+            politicalControllers[axisDef.staging_osid ?? def.staging_osid] = 'RS';
             for (const osid of axisDef.objectives) {
-                politicalControllers[osid] = def.faction === 'RBiH' ? 'RS' : 'RBiH';
+                politicalControllers[osid] = 'RBiH';
             }
         }
     }
@@ -131,13 +124,12 @@ describe('triggered operations definitions', () => {
         // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
         // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
         // the real VRS operation_lukavac_93 event).
-        assert.equal(_TRIGGERED_OPS.length, 8);
+        assert.equal(_TRIGGERED_OPS.length, 7);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
                 'Operation Posavina Corridor',
                 'Operation Herzegovina Consolidation',
-                'Visegrad Local Riposte',
                 'Operation Kotor Varos',
                 'Operation Cerska-Kamenica',
                 'Operation Krivaja-95',
@@ -195,29 +187,6 @@ describe('triggered operations definitions', () => {
         });
     });
 
-    it('authors the late-1992 Visegrad local riposte as a narrow RBiH axis', () => {
-        const operation = _TRIGGERED_OPS.find((def) => def.name === 'Visegrad Local Riposte');
-        assert.ok(operation, 'Visegrad Local Riposte must exist in the triggered catalog');
-
-        assert.equal(operation.faction, 'RBiH');
-        assert.equal(operation.primary_corps, 'arbih_1st_corps');
-        assert.equal(operation.planning_duration, 4);
-        assert.deepEqual(operation.axes, [{
-            axis_id: 'visegrad_local_riposte',
-            name: 'Visegrad Local Riposte Axis',
-            corps: 'arbih_1st_corps',
-            brigades: [
-                'arbih_808th_liberation',
-                'arbih_851st_vitezka_liberation',
-            ],
-            objectives: [
-                'op:visegrad:medjedja_2',
-                'op:visegrad:drinsko',
-            ],
-            staging_osid: 'op:rogatica:brcigovo',
-        }]);
-    });
-
     it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
         const cerskaAxis = operation.axes.find((axis) => axis.axis_id === 'cerska_pocket')!;
@@ -230,45 +199,6 @@ describe('triggered operations definitions', () => {
 });
 
 describe('checkTriggeredOperations', () => {
-    it('injects the Visegrad local riposte only at turn 32 after the opening seizure', () => {
-        const beforeWindow = makeState(31);
-        beforeWindow.military.preplanned_operations_satisfied_by_start = [{
-            corps_id: 'vrs_herzegovina',
-            operation_name: 'Operation Visegrad',
-            faction: 'RS',
-            turn: 0,
-            objective_count: 3,
-        }];
-        assert.ok(!checkTriggeredOperations(beforeWindow).includes('Visegrad Local Riposte'));
-
-        const inWindow = makeState(32);
-        inWindow.military.preplanned_operations_satisfied_by_start = [{
-            corps_id: 'vrs_herzegovina',
-            operation_name: 'Operation Visegrad',
-            faction: 'RS',
-            turn: 0,
-            objective_count: 3,
-        }];
-        const injected = checkTriggeredOperations(inWindow);
-        assert.ok(injected.includes('Visegrad Local Riposte'));
-
-        const operation = inWindow.military.corps_command!.arbih_1st_corps!.active_operations[0]!;
-        assert.deepEqual(operation.axes?.[0]?.objectives, [
-            'op:visegrad:medjedja_2',
-            'op:visegrad:drinsko',
-        ]);
-
-        const afterWindow = makeState(33);
-        afterWindow.military.preplanned_operations_satisfied_by_start = [{
-            corps_id: 'vrs_herzegovina',
-            operation_name: 'Operation Visegrad',
-            faction: 'RS',
-            turn: 0,
-            objective_count: 3,
-        }];
-        assert.ok(!checkTriggeredOperations(afterWindow).includes('Visegrad Local Riposte'));
-    });
-
     it('uses a unique live OOB alias for an authored Army-HQ participant', () => {
         const state = makeState(160);
         const authored = state.military.formations!.arbih_328th_mountain!;
