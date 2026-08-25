@@ -124,14 +124,13 @@ describe('triggered operations definitions', () => {
         // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
         // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
         // the real VRS operation_lukavac_93 event).
-        assert.equal(_TRIGGERED_OPS.length, 9);
+        assert.equal(_TRIGGERED_OPS.length, 8);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
                 'Operation Posavina Corridor',
                 'Operation Herzegovina Consolidation',
                 'Trnovo Local Containment',
-                'Trnovo Local Counterstroke',
                 'Operation Kotor Varos',
                 'Operation Cerska-Kamenica',
                 'Operation Krivaja-95',
@@ -207,22 +206,6 @@ describe('triggered operations definitions', () => {
         }]);
     });
 
-    it('authors a narrow RBiH counterstroke from Trnovo toward Tosici', () => {
-        const operation = _TRIGGERED_OPS.find((def) => def.name === 'Trnovo Local Counterstroke');
-        assert.ok(operation, 'Trnovo Local Counterstroke must exist in the triggered catalog');
-        assert.equal(operation.faction, 'RBiH');
-        assert.equal(operation.primary_corps, 'arbih_1st_corps');
-        assert.equal(operation.planning_duration, 2);
-        assert.deepEqual(operation.axes, [{
-            axis_id: 'trnovo_local_counterstroke',
-            name: 'Trnovo Local Counterstroke Axis',
-            corps: 'arbih_1st_corps',
-            brigades: ['arbih_181st_mountain', 'arbih_109th_mountain'],
-            objectives: ['op:trnovo:tosici'],
-            staging_osid: 'op:trnovo:trnovo',
-        }]);
-    });
-
     it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
         const cerskaAxis = operation.axes.find((axis) => axis.axis_id === 'cerska_pocket')!;
@@ -257,7 +240,7 @@ describe('checkTriggeredOperations', () => {
         const accepted = makeState(7);
         accepted.operation_history = state.operation_history;
         accepted.political.political_controllers!['op:trnovo:gornja_presjenica'] = 'RS';
-        accepted.military.triggered_operations_accepted = { 'Trnovo Local Containment': 6 };
+        accepted.military.triggered_operations_accepted = { 'Trnovo Local Containment': true };
         assert.ok(!checkTriggeredOperations(accepted).includes('Trnovo Local Containment'));
     });
 

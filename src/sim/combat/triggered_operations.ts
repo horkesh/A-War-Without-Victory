@@ -335,37 +335,6 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     {
-        // Trnovo Local Counterstroke — RBiH pressure after the first local VRS
-        // containment effort. HISTORICAL PROVENANCE BOUNDARY: BB1 p. 187 supports
-        // an ARBiH Trnovo passage and renewed upper-Drina pressure in 1992; it does
-        // not name Tosići or these brigades as participants. The brigade pair comes
-        // from the local scenario OOB, Tosići only from the authoritative January
-        // 1993 painted reference, and Trnovo staging from verified live adjacency.
-        name: 'Trnovo Local Counterstroke',
-        faction: 'RBiH',
-        primary_corps: 'arbih_1st_corps',
-        staging_osid: 'op:trnovo:trnovo',
-        planning_duration: 2,
-        min_attack_outcome: 'repulsed' as const,
-        trigger: (state, turn) => turn >= 12
-            && corpsCompletedOp(state, 'vrs_sarajevo_romanija', 'Trnovo Local Containment'),
-        axes: [
-            {
-                axis_id: 'trnovo_local_counterstroke',
-                name: 'Trnovo Local Counterstroke Axis',
-                corps: 'arbih_1st_corps',
-                brigades: [
-                    'arbih_181st_mountain' as FormationId,
-                    'arbih_109th_mountain' as FormationId,
-                ],
-                objectives: [
-                    'op:trnovo:tosici',
-                ],
-                staging_osid: 'op:trnovo:trnovo',
-            },
-        ],
-    },
-    {
         name: 'Operation Kotor Varos',
         faction: 'RS',
         primary_corps: 'vrs_1st_krajina',
