@@ -206,8 +206,8 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
     {
         // Herzegovina Consolidation — VRS secures Mostar hills + southern Konjic
         // after Op Višegrad + Op Foča complete. Historically held throughout war
-        // (BB1 p.193 Mostar hills, BB2 p.514 Glavatičevo). Two separate axes
-        // with dedicated brigades (no sharing with Op Foča brigades).
+        // (BB1 p.193 Mostar hills, BB2 p.514 Glavatičevo). Separate local follow-on
+        // axes; brigades may be reused only after Operation Foca completes.
         name: 'Operation Herzegovina Consolidation',
         faction: 'RS',
         primary_corps: 'vrs_herzegovina',
@@ -277,6 +277,23 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'op:cajnice:miljeno_2',
                 ],
                 staging_osid: 'op:cajnice:cajnice_2',
+            },
+            {
+                axis_id: 'kalinovik_local',
+                name: 'Kalinovik Local Axis',
+                corps: 'vrs_herzegovina',
+                brigades: [
+                    'rs_kalinovik_brigade' as FormationId,
+                ],
+                // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 193 and BB2 p. 514
+                // support only broad western Foča–Trnovo sector activity, not Varoš
+                // as a named operational target. The exact Varos OSID comes solely
+                // from the authoritative January 1993 painted-control reference.
+                objectives: [
+                    'op:kalinovik:vlaholje',
+                    'op:kalinovik:varos_2',
+                ],
+                staging_osid: 'op:kalinovik:kalinovik_2',
             },
         ],
     },

@@ -139,12 +139,12 @@ describe('triggered operations definitions', () => {
         );
     });
 
-    it('keeps Posavina as a single-corps follow-on and Herzegovina as a three-axis consolidation', () => {
+    it('keeps Posavina as a single-corps follow-on and Herzegovina as a four-axis consolidation', () => {
         const posavina = _TRIGGERED_OPS.find((def) => def.name === 'Operation Posavina Corridor')!;
         const herzegovina = _TRIGGERED_OPS.find((def) => def.name === 'Operation Herzegovina Consolidation')!;
 
         assert.deepEqual(new Set(posavina.axes.map((axis) => axis.corps)), new Set(['vrs_1st_krajina']));
-        assert.equal(herzegovina.axes.length, 3);
+        assert.equal(herzegovina.axes.length, 4);
         assert.deepEqual(new Set(herzegovina.axes.map((axis) => axis.corps)), new Set(['vrs_herzegovina']));
     });
 
@@ -163,6 +163,24 @@ describe('triggered operations definitions', () => {
                 'op:cajnice:miljeno_2',
             ],
             staging_osid: 'op:cajnice:cajnice_2',
+        });
+    });
+
+    it('authors the neutral Kalinovik local axis on post-Foca Herzegovina Consolidation', () => {
+        const herzegovina = _TRIGGERED_OPS.find((def) => def.name === 'Operation Herzegovina Consolidation');
+        assert.ok(herzegovina, 'Operation Herzegovina Consolidation must exist in the triggered catalog');
+
+        const kalinovik = herzegovina.axes.find((axis) => axis.axis_id === 'kalinovik_local');
+        assert.deepEqual(kalinovik, {
+            axis_id: 'kalinovik_local',
+            name: 'Kalinovik Local Axis',
+            corps: 'vrs_herzegovina',
+            brigades: ['rs_kalinovik_brigade'],
+            objectives: [
+                'op:kalinovik:vlaholje',
+                'op:kalinovik:varos_2',
+            ],
+            staging_osid: 'op:kalinovik:kalinovik_2',
         });
     });
 
@@ -265,7 +283,7 @@ describe('checkTriggeredOperations', () => {
         const op = state.military.corps_command!['vrs_herzegovina']!.active_operations[0];
         assert.equal(op?.name, 'Operation Herzegovina Consolidation');
         assert.equal(op?.sector_id, 'sector:vrs_herzegovina:0');
-        assert.equal(op?.axes?.length, 3);
+        assert.equal(op?.axes?.length, 4);
     });
 
     it('builds the Cajnice local axis only after Operation Foca completes', () => {
@@ -303,6 +321,34 @@ describe('checkTriggeredOperations', () => {
             'op:cajnice:batotici',
             'op:cajnice:miljeno_2',
         ]);
+    });
+
+    it('builds the post-Foca Kalinovik local axis with its owned waypoint stripped', () => {
+        const state = makeState(12);
+        state.military.formations!.rs_kalinovik_brigade ??= makeFormation(
+            'rs_kalinovik_brigade',
+            'vrs_herzegovina',
+            { location_osid: 'op:kalinovik:kalinovik_2' },
+        );
+        const sector = state.military.corps_front_sectors!['sector:vrs_herzegovina:0']!;
+        if (!sector.assigned_brigade_ids.includes('rs_kalinovik_brigade')) {
+            sector.assigned_brigade_ids.push('rs_kalinovik_brigade');
+        }
+        state.political.political_controllers!['op:kalinovik:kalinovik_2'] = 'RS';
+        state.political.political_controllers!['op:kalinovik:vlaholje'] = 'RS';
+        state.political.political_controllers!['op:kalinovik:varos_2'] = 'RBiH';
+        state.operation_history = [
+            { corps_id: 'vrs_herzegovina', operation_name: 'Operation Visegrad' } as any,
+            { corps_id: 'vrs_herzegovina', operation_name: 'Operation Foca' } as any,
+        ];
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Herzegovina Consolidation'));
+        const operation = state.military.corps_command!.vrs_herzegovina!.active_operations[0]!;
+        const kalinovik = operation.axes?.find((axis) => axis.axis_id === 'kalinovik_local');
+        assert.deepEqual(kalinovik?.assigned_brigades, ['rs_kalinovik_brigade']);
+        assert.deepEqual(kalinovik?.objectives, ['op:kalinovik:varos_2']);
     });
 
     it('treats scenario-start satisfied pre-planned operations as completed chain prerequisites', () => {
