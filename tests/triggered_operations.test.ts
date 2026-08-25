@@ -191,29 +191,22 @@ describe('triggered operations definitions', () => {
         });
     });
 
-    it('authors a two-sided local approach to Podkozara', () => {
+    it('authors a single-axis local approach to Podkozara', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Gorazde Local Approach');
         assert.ok(operation, 'Operation Gorazde Local Approach must exist in the triggered catalog');
         assert.equal(operation.primary_corps, 'vrs_herzegovina');
         assert.equal(operation.planning_duration, 2);
-        assert.deepEqual(operation.axes, [
-            {
-                axis_id: 'podkozara_cajnice',
-                name: 'Podkozara Cajnice Approach',
-                corps: 'vrs_herzegovina',
-                brigades: ['rs_ajnie_brigade'],
-                objectives: ['op:gorazde:podkozara_donja_2'],
-                staging_osid: 'op:cajnice:miljeno_2',
-            },
-            {
-                axis_id: 'podkozara_foca',
-                name: 'Podkozara Foca Approach',
-                corps: 'vrs_herzegovina',
-                brigades: ['rs_foa_brigade'],
-                objectives: ['op:gorazde:podkozara_donja_2'],
-                staging_osid: 'op:gorazde:kolovarice',
-            },
-        ]);
+        assert.deepEqual(operation.axes, [{
+            axis_id: 'podkozara_local',
+            name: 'Podkozara Local Approach Axis',
+            corps: 'vrs_herzegovina',
+            brigades: [
+                'rs_ajnie_brigade',
+                'rs_foa_brigade',
+            ],
+            objectives: ['op:gorazde:podkozara_donja_2'],
+            staging_osid: 'op:cajnice:miljeno_2',
+        }]);
     });
 
     it('authors a narrow post-Prsten Kijevo containment operation', () => {
@@ -297,7 +290,7 @@ describe('checkTriggeredOperations', () => {
 
         assert.ok(injected.includes('Operation Gorazde Local Approach'));
         const operation = state.military.corps_command!.vrs_herzegovina!.active_operations[0]!;
-        assert.equal(operation.axes?.length, 2);
+        assert.equal(operation.axes?.length, 1);
         assert.deepEqual(operation.objectives, ['op:gorazde:podkozara_donja_2']);
 
         const late = makeState(21);

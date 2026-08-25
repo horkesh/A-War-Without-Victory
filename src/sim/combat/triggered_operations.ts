@@ -323,28 +323,17 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
             && corpsCompletedOp(state, 'vrs_herzegovina', 'Operation Herzegovina Consolidation'),
         axes: [
             {
-                axis_id: 'podkozara_cajnice',
-                name: 'Podkozara Cajnice Approach',
+                axis_id: 'podkozara_local',
+                name: 'Podkozara Local Approach Axis',
                 corps: 'vrs_herzegovina',
                 brigades: [
                     'rs_ajnie_brigade' as FormationId,
-                ],
-                objectives: [
-                    'op:gorazde:podkozara_donja_2',
-                ],
-                staging_osid: 'op:cajnice:miljeno_2',
-            },
-            {
-                axis_id: 'podkozara_foca',
-                name: 'Podkozara Foca Approach',
-                corps: 'vrs_herzegovina',
-                brigades: [
                     'rs_foa_brigade' as FormationId,
                 ],
                 objectives: [
                     'op:gorazde:podkozara_donja_2',
                 ],
-                staging_osid: 'op:gorazde:kolovarice',
+                staging_osid: 'op:cajnice:miljeno_2',
             },
         ],
     },

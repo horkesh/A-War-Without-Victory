@@ -29038,3 +29038,29 @@ Rejected candidates and their reverts remain in branch history for auditability.
 
 Docs reconciled to this in the same commit: the mechanism report (4 corrections), the memory
 topic file (frontmatter + 3 body corrections), and this ledger entry.
+
+## 2026-08-25 — Upper Drina January-1993 follow-on calibration (+3 exact, no regressions)
+
+**Scope:** continued the definitive 40-week January-1993 calibration only. The January painter
+remained authoritative; no initial-control override, global combat scalar, or later-war acceptance
+criterion was introduced.
+
+**Behavioral change:** three isolated ordinary-combat follow-ons were accepted. `Operation Rogatica
+Local Approach` targets only Varošište from Kramer Selo after Podrinje Sweep. `Praca Local
+Containment` targets only Prača post-Prsten at turn 12. `Operation Gorazde Local
+Approach` targets only Podkožara from already adjacent Miljeno and Kolovarice positions after
+Herzegovina Consolidation. BB1 pp.187 and 204 support only the broad 1992 theatre/force context;
+exact OSIDs remain painter-derived, staging is graph/live-control-derived, and rosters are explicit
+scenario-OOB choices. Launch windows are bounded to the 40-week historical cadence.
+
+**Measured result:** accepted runs n28/n29 are byte-identical at `64572b4915f2298e`. The exact
+January score is 684/712 overall and 74/77 across Goražde, Foča, Rudo, Čajniče, Višegrad, Pale,
+Trnovo, Rogatica, and Kalinovik. Relative to the prior accepted 681/712 state, the only changed
+cells are `op:rogatica:varosiste_2`, `op:pale:praca`, and
+`op:gorazde:podkozara_donja_2`; all three move to their painted RS control, with zero regressions.
+Relative to the original 676/712 baseline, the completed slice is +8 exact cells.
+
+**Rejected residue:** stronger Međeđa and Tošići trials still failed their live launch gates before
+the ARBiH 1st Corps slot became occupied; Drinsko remains topologically dependent on Međeđa. These
+trials were reverted. The three remaining theatre mismatches therefore require nonlocal force pulls
+or a multi-cell chain and were not retained under the one-lever/no-regression rule.

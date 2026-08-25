@@ -28,8 +28,8 @@
 
 ### Final outcome (2026-08-25)
 
-- Accepted five exact theatre fixes with no January regression: `op:cajnice:batotici`, `op:cajnice:miljeno_2`, `op:foca:brusna_2`, `op:kalinovik:varos_2`, and `op:trnovo:kijevo_2`.
-- Final exact score: 681/712 overall and 71/77 across the nine-municipality upper-Drina/Sarajevo theatre, versus 676/712 and 66/77 at baseline.
-- Final repeated state hash: `3768f95ee6c8f447`. Post-hardening runs n21/n22 are byte-identical final acceptance artifacts.
-- Rejected experiments included Podkožara defender restoration, Rogatica–Prača joint axes, Višegrad ripostes, Prsten axis extension, and a Trnovo/Tošići counterstroke. Each either failed to execute or displaced a correct January cell and was reverted.
-- Historian review required and received explicit painter/OOB/graph provenance boundaries plus bounded 1992 launch windows (`turn <= 14`) for the new local axes.
+- Accepted eight exact theatre fixes with no January regression: `op:cajnice:batotici`, `op:cajnice:miljeno_2`, `op:foca:brusna_2`, `op:kalinovik:varos_2`, `op:trnovo:kijevo_2`, `op:rogatica:varosiste_2`, `op:pale:praca`, and `op:gorazde:podkozara_donja_2`.
+- Final exact score: 684/712 overall and 74/77 across the nine-municipality upper-Drina/Sarajevo theatre, versus 676/712 and 66/77 at baseline.
+- Final repeated state hash: `64572b4915f2298e`. Runs n28/n29 are byte-identical final acceptance artifacts.
+- Rejected experiments included brigade restoration at Podkožara, Rogatica–Prača joint axes, Prsten axis extension, multiple Višegrad/Međeđa ripostes, and multiple Trnovo/Tošići counterstrokes. Each either failed to execute, produced no January change, or displaced a correct January cell and was reverted.
+- Historian review required and received explicit painter/OOB/graph provenance boundaries plus bounded 1992 scenario-cadence windows: turn 12 for Varošište/Prača and turns 17–20 for Podkožara; none is asserted as a source-dated operation.
