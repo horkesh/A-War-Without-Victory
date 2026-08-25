@@ -269,11 +269,12 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'rs_ajnie_brigade' as FormationId,
                 ],
                 // HISTORICAL PROVENANCE BOUNDARY: BB1 pp. 175, 187 supports the
-                // Čajniče/Foča theatre and local-force context, not Batotići as a named
-                // operational target. The exact Batotici OSID comes solely from the
+                // Čajniče/Foča theatre and local-force context, not Batotići or Miljeno
+                // as named operational targets. Both exact OSIDs come solely from the
                 // authoritative January 1993 painted-control reference.
                 objectives: [
                     'op:cajnice:batotici',
+                    'op:cajnice:miljeno_2',
                 ],
                 staging_osid: 'op:cajnice:cajnice_2',
             },

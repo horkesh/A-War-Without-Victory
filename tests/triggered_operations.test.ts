@@ -158,7 +158,10 @@ describe('triggered operations definitions', () => {
             name: 'Cajnice Local Axis',
             corps: 'vrs_herzegovina',
             brigades: ['rs_ajnie_brigade'],
-            objectives: ['op:cajnice:batotici'],
+            objectives: [
+                'op:cajnice:batotici',
+                'op:cajnice:miljeno_2',
+            ],
             staging_osid: 'op:cajnice:cajnice_2',
         });
     });
@@ -296,6 +299,10 @@ describe('checkTriggeredOperations', () => {
         const operation = state.military.corps_command!.vrs_herzegovina!.active_operations[0]!;
         const cajnice = operation.axes?.find((axis) => axis.axis_id === 'cajnice_local');
         assert.deepEqual(cajnice?.assigned_brigades, ['rs_ajnie_brigade']);
+        assert.deepEqual(cajnice?.objectives, [
+            'op:cajnice:batotici',
+            'op:cajnice:miljeno_2',
+        ]);
     });
 
     it('treats scenario-start satisfied pre-planned operations as completed chain prerequisites', () => {
