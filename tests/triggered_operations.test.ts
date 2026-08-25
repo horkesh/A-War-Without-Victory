@@ -124,13 +124,14 @@ describe('triggered operations definitions', () => {
         // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
         // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
         // the real VRS operation_lukavac_93 event).
-        assert.equal(_TRIGGERED_OPS.length, 8);
+        assert.equal(_TRIGGERED_OPS.length, 9);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
                 'Operation Posavina Corridor',
                 'Operation Herzegovina Consolidation',
                 'Trnovo Local Containment',
+                'Operation Rogatica Local Approach',
                 'Operation Kotor Varos',
                 'Operation Cerska-Kamenica',
                 'Operation Krivaja-95',
@@ -206,6 +207,24 @@ describe('triggered operations definitions', () => {
         }]);
     });
 
+    it('authors a one-cell post-Podrinje approach to Varosiste', () => {
+        const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Rogatica Local Approach');
+        assert.ok(operation, 'Operation Rogatica Local Approach must exist in the triggered catalog');
+        assert.equal(operation.primary_corps, 'vrs_drina');
+        assert.equal(operation.planning_duration, 4);
+        assert.deepEqual(operation.axes, [{
+            axis_id: 'rogatica_local',
+            name: 'Rogatica Local Approach Axis',
+            corps: 'vrs_drina',
+            brigades: [
+                'rs_1st_podrinje',
+                'rs_visegrad_brigade',
+            ],
+            objectives: ['op:rogatica:varosiste_2'],
+            staging_osid: 'op:rogatica:kramer_selo_2',
+        }]);
+    });
+
     it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
         const cerskaAxis = operation.axes.find((axis) => axis.axis_id === 'cerska_pocket')!;
@@ -218,6 +237,28 @@ describe('triggered operations definitions', () => {
 });
 
 describe('checkTriggeredOperations', () => {
+    it('offers Rogatica Local Approach only on turn 12 after Podrinje Sweep completes', () => {
+        const state = makeState(12);
+        state.operation_history = [{
+            corps_id: 'vrs_drina',
+            operation_name: 'Operation Podrinje Sweep',
+        } as any];
+        state.political.political_controllers!['op:rogatica:kramer_selo_2'] = 'RS';
+        state.political.political_controllers!['op:rogatica:varosiste_2'] = 'RBiH';
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Rogatica Local Approach'));
+        const operation = state.military.corps_command!.vrs_drina!.active_operations[0]!;
+        assert.deepEqual(operation.axes?.[0]?.objectives, ['op:rogatica:varosiste_2']);
+
+        const late = makeState(13);
+        late.operation_history = state.operation_history;
+        late.political.political_controllers!['op:rogatica:kramer_selo_2'] = 'RS';
+        late.political.political_controllers!['op:rogatica:varosiste_2'] = 'RBiH';
+        assert.ok(!checkTriggeredOperations(late).includes('Operation Rogatica Local Approach'));
+    });
+
     it('offers Trnovo Local Containment from turn 6 after Prsten completes', () => {
         const state = makeState(6);
         state.operation_history = [{

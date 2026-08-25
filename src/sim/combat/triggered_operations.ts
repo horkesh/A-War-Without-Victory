@@ -337,6 +337,39 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     {
+        // Rogatica Local Approach — a one-cell, post-Podrinje-Sweep follow-on.
+        // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 187 supports the broad 1992
+        // Rogatica/upper-Drina seizure context, not Varošište as a named objective
+        // or these brigades as named participants. The exact Varošište OSID comes
+        // solely from the authoritative January 1993 painter. Kramer Selo is a
+        // graph/live-control staging choice and the roster comes from scenario OOB.
+        // Turn 12 is a scenario-cadence one-shot immediately after Podrinje Sweep,
+        // not a source-dated operation.
+        name: 'Operation Rogatica Local Approach',
+        faction: 'RS',
+        primary_corps: 'vrs_drina',
+        staging_osid: 'op:rogatica:kramer_selo_2',
+        planning_duration: 4,
+        min_attack_outcome: 'repulsed' as const,
+        trigger: (state, turn) => turn === 12
+            && corpsCompletedOp(state, 'vrs_drina', 'Operation Podrinje Sweep'),
+        axes: [
+            {
+                axis_id: 'rogatica_local',
+                name: 'Rogatica Local Approach Axis',
+                corps: 'vrs_drina',
+                brigades: [
+                    'rs_1st_podrinje' as FormationId,
+                    'rs_visegrad_brigade' as FormationId,
+                ],
+                objectives: [
+                    'op:rogatica:varosiste_2',
+                ],
+                staging_osid: 'op:rogatica:kramer_selo_2',
+            },
+        ],
+    },
+    {
         name: 'Operation Kotor Varos',
         faction: 'RS',
         primary_corps: 'vrs_1st_krajina',
