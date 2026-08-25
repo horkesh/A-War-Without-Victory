@@ -240,8 +240,13 @@ describe('checkTriggeredOperations', () => {
         const accepted = makeState(7);
         accepted.operation_history = state.operation_history;
         accepted.political.political_controllers!['op:trnovo:gornja_presjenica'] = 'RS';
-        accepted.military.triggered_operations_accepted = { 'Trnovo Local Containment': true };
+        accepted.military.triggered_operations_accepted = { 'Trnovo Local Containment': 6 };
         assert.ok(!checkTriggeredOperations(accepted).includes('Trnovo Local Containment'));
+
+        const afterWindow = makeState(15);
+        afterWindow.operation_history = state.operation_history;
+        afterWindow.political.political_controllers!['op:trnovo:gornja_presjenica'] = 'RS';
+        assert.ok(!checkTriggeredOperations(afterWindow).includes('Trnovo Local Containment'));
     });
 
     it('uses a unique live OOB alias for an authored Army-HQ participant', () => {
@@ -332,6 +337,10 @@ describe('checkTriggeredOperations', () => {
         assert.equal(op?.name, 'Operation Herzegovina Consolidation');
         assert.equal(op?.sector_id, 'sector:vrs_herzegovina:0');
         assert.equal(op?.axes?.length, 4);
+
+        const afterWindow = makeState(15);
+        afterWindow.operation_history = state.operation_history;
+        assert.ok(!checkTriggeredOperations(afterWindow).includes('Operation Herzegovina Consolidation'));
     });
 
     it('builds the Cajnice local axis only after Operation Foca completes', () => {

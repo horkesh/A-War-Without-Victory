@@ -218,8 +218,9 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         // rs_bilea_brigade (home bileca_2) needs time to disengage and march into the southern Konjic staging area.
         planning_duration: 3,
         min_attack_outcome: 'repulsed' as const,
-        trigger: (state, _turn) => {
-            return corpsCompletedOp(state, 'vrs_herzegovina', 'Operation Visegrad')
+        trigger: (state, turn) => {
+            return turn <= 14
+                && corpsCompletedOp(state, 'vrs_herzegovina', 'Operation Visegrad')
                 && corpsCompletedOp(state, 'vrs_herzegovina', 'Operation Foca')
                 && corpsOpFinished(state, 'vrs_herzegovina');
         },
@@ -268,10 +269,12 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                 brigades: [
                     'rs_ajnie_brigade' as FormationId,
                 ],
-                // HISTORICAL PROVENANCE BOUNDARY: BB1 pp. 175, 187 supports the
+                // HISTORICAL PROVENANCE BOUNDARY: BB1 pp. 175, 187 support the
                 // Čajniče/Foča theatre and local-force context, not Batotići or Miljeno
                 // as named operational targets. Both exact OSIDs come solely from the
-                // authoritative January 1993 painted-control reference.
+                // authoritative January 1993 painted-control reference. rs_ajnie_brigade
+                // is the scenario-OOB local proxy for the source-described Čajniče TO;
+                // BB1 does not name that formal brigade designation.
                 objectives: [
                     'op:cajnice:batotici',
                     'op:cajnice:miljeno_2',
@@ -287,11 +290,11 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'rs_gacko_brigade' as FormationId,
                 ],
                 // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 187 supports only the broad
-                // western Foča–Trnovo sector context. Vlaholje is an owned graph waypoint
-                // selected from verified adjacency and live control, not a BB-named target.
+                // western Foča–Trnovo sector context. Vlaholje is a graph waypoint and
+                // painter-RS cell; it is stripped only when live-owned at operation build.
                 // The exact Varos OSID comes solely from the authoritative January 1993
-                // painted-control reference. Brigade choices come from the local scenario
-                // OOB; BB1 does not name them as participants in this axis.
+                // painted-control reference. Brigade choices come from scenario OOB/corps
+                // allocation; BB1 does not name them as participants in this axis.
                 objectives: [
                     'op:kalinovik:vlaholje',
                     'op:kalinovik:varos_2',
@@ -302,21 +305,20 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
     },
     {
         // Trnovo Local Containment — a deliberately narrow post-Prsten follow-on.
-        // HISTORICAL PROVENANCE BOUNDARY: BB1 pp. 187, 204 supports the 1992
-        // Trnovo containment fighting and places the Trnovo Battalion under the
-        // 2nd Sarajevo Light Infantry Brigade. It does not identify Kijevo as an
-        // operational objective or name this axis. The 1st Sarajevo Mechanized is
-        // Kijevo comes only from the authoritative January 1993 painted reference,
-        // Gornja Presjenica from verified map adjacency and the brigade's local
-        // concentration geometry, and turn 6 is scenario cadence after Prsten rather
-        // than a sourced calendar date.
+        // HISTORICAL PROVENANCE BOUNDARY: BB1 pp. 187, 204 support 1992 Trnovo
+        // containment fighting and place the Trnovo Battalion under 2nd Sarajevo Light.
+        // BB1 p. 204 places other southeastern containment battalions under 1st Sarajevo
+        // Mechanized, which is used here only as a scenario-OOB regional support choice;
+        // BB1 does not place either brigade at Kijevo. Kijevo comes solely from the
+        // authoritative January 1993 painter; Gornja Presjenica is a verified graph/staging
+        // choice. The turn 6–14 launch window is scenario cadence, not a source-dated operation.
         name: 'Trnovo Local Containment',
         faction: 'RS',
         primary_corps: 'vrs_sarajevo_romanija',
         staging_osid: 'op:trnovo:gornja_presjenica',
         planning_duration: 6,
         min_attack_outcome: 'repulsed' as const,
-        trigger: (state, turn) => turn >= 6
+        trigger: (state, turn) => turn >= 6 && turn <= 14
             && corpsCompletedOp(state, 'vrs_sarajevo_romanija', 'Operation Prsten'),
         axes: [
             {

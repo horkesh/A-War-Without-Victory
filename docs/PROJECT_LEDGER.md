@@ -29011,5 +29011,29 @@ Operation: Prijedor, Sanski Most, and Ključ, May–July 1992"* — municipality
 Both seats agree the representational gap is real and this is an ordinary §6 ruling, not a
 bright-line crossing.
 
+## 2026-08-25 — Upper Drina January-1993 40w calibration (+5 exact, no regressions)
+
+**Scope:** the definitive April-1992 40-week scenario only, with the authoritative January-1993
+painter treated as control truth across Goražde, Foča, Rudo, Čajniče, Višegrad, Pale, Trnovo,
+Rogatica, and Kalinovik. No initial-control override and no global combat-strength lever was used.
+
+**Behavioral change:** post-Foča `Operation Herzegovina Consolidation` now carries narrow Čajniče
+and Kalinovik local axes; a bounded post-Prsten `Trnovo Local Containment` operation resolves the
+Kijevo cell through ordinary CorpsOperation combat. Exact OSIDs are painter-derived. BB1 pp.175,
+187, and 204 support only the period/theatre and force context; scenario-OOB brigade choices and
+graph-derived staging are labeled explicitly. Both 1992 follow-ons have an outer turn-14 launch
+bound to prevent an ahistorical late retry.
+
+**Measured result:** baseline n295 was 676/712 overall and 66/77 in the nine-municipality theatre
+(`ad0763075a1a2562`). Accepted state is 681/712 overall and 71/77 theatre: Batotići, Miljeno,
+Brusna, Kalinovik Varoš, and Kijevo fixed; zero previously correct January cells regressed.
+Accepted pre-hardening repeats n18/n20 were byte-identical with state hash `3768f95ee6c8f447`.
+
+**Verification:** focused triggered/pre-planned operation suites pass (70 tests); TypeScript
+typecheck passes after correcting the accepted-operation fixture to store its turn number.
+Independent scenario review reproduced the +5/zero-regression inventory. Historian review blocked
+the first wording/window draft; its provenance and chronology corrections were applied before final
+acceptance. Rejected candidates and their reverts remain in branch history for auditability.
+
 Docs reconciled to this in the same commit: the mechanism report (4 corrections), the memory
 topic file (frontmatter + 3 body corrections), and this ledger entry.

@@ -25,3 +25,11 @@
 - Compare against the current January painter and report overall/theatre scores, exact fixed and regressed sets, final hash, commit, and dirty provenance.
 - Obtain independent historian, engine/determinism, scenario-calibration, canon, and process-QA review.
 - Append the behavioral/output change and evidence to `docs/PROJECT_LEDGER.md`; do not edit canon unless review identifies a genuine canon change.
+
+### Final outcome (2026-08-25)
+
+- Accepted five exact theatre fixes with no January regression: `op:cajnice:batotici`, `op:cajnice:miljeno_2`, `op:foca:brusna_2`, `op:kalinovik:varos_2`, and `op:trnovo:kijevo_2`.
+- Final exact score: 681/712 overall and 71/77 across the nine-municipality upper-Drina/Sarajevo theatre, versus 676/712 and 66/77 at baseline.
+- Final repeated state hash: `3768f95ee6c8f447`. The two accepted-path saves were byte-identical before the final chronology-only hardening; a post-hardening repeat is the final acceptance artifact.
+- Rejected experiments included Podkožara defender restoration, Rogatica–Prača joint axes, Višegrad ripostes, Prsten axis extension, and a Trnovo/Tošići counterstroke. Each either failed to execute or displaced a correct January cell and was reverted.
+- Historian review required and received explicit painter/OOB/graph provenance boundaries plus bounded 1992 launch windows (`turn <= 14`) for the new local axes.
