@@ -34,10 +34,10 @@ function uniqueActiveParticipants(
     state: GameState,
     corpsId: string,
     brigadeIds: ReadonlyArray<FormationId> | undefined,
+    sectorClaimsByBrigade = buildSectorClaimsByBrigade(state),
 ): FormationId[] {
     const seen = new Set<FormationId>();
     const formations = state.military.formations ?? {};
-    const sectorClaimsByBrigade = buildSectorClaimsByBrigade(state);
     const active: FormationId[] = [];
 
     for (const brigadeId of brigadeIds ?? []) {
@@ -85,13 +85,41 @@ function sameFormationIds(a: ReadonlyArray<FormationId>, b: ReadonlyArray<Format
 function reconcileOperationRoster(state: GameState, corpsId: string, operation: CorpsOperation): boolean {
     const previousParticipants = [...(operation.participating_brigades ?? [])];
     const previousPhase = operation.phase;
-    const activeParticipants = uniqueActiveParticipants(state, corpsId, operation.participating_brigades);
+    const formations = state.military.formations ?? {};
+    const sectorClaimsByBrigade = buildSectorClaimsByBrigade(state);
+    const authoredCorpsByBrigade = new Map<FormationId, string>();
+    const authoredAxisBrigades = new Set<FormationId>();
+    for (const axis of operation.axes ?? []) {
+        if (!axis.corps_id) continue;
+        for (const brigadeId of axis.assigned_brigades) {
+            authoredAxisBrigades.add(brigadeId);
+            if (getFormationCorpsId(formations[brigadeId]) === axis.corps_id) {
+                authoredCorpsByBrigade.set(brigadeId, axis.corps_id);
+            }
+        }
+    }
+    const activeParticipants = [...new Set((operation.participating_brigades ?? [])
+        .filter((brigadeId) => !authoredAxisBrigades.has(brigadeId) || authoredCorpsByBrigade.has(brigadeId))
+        .flatMap((brigadeId) => uniqueActiveParticipants(
+            state,
+            authoredCorpsByBrigade.get(brigadeId) ?? corpsId,
+            [brigadeId],
+            sectorClaimsByBrigade,
+        )))]
+        .sort(strictCompare);
     const activeParticipantSet = new Set(activeParticipants);
     operation.participating_brigades = activeParticipants;
 
     if (Array.isArray(operation.axes)) {
         for (const axis of operation.axes) {
-            axis.assigned_brigades = uniqueActiveParticipants(state, corpsId, axis.assigned_brigades)
+            const axisCorpsId = axis.corps_id ?? corpsId;
+            axis.assigned_brigades = uniqueActiveParticipants(
+                state,
+                axisCorpsId,
+                axis.assigned_brigades,
+                sectorClaimsByBrigade,
+            )
+                .filter((brigadeId) => getFormationCorpsId(formations[brigadeId]) === axisCorpsId)
                 .filter((brigadeId) => activeParticipantSet.has(brigadeId));
         }
     }

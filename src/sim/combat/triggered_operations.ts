@@ -967,6 +967,7 @@ function buildOperation(
         );
         axis.axis_id = axisDef.axis_id;
         axis.name = axisDef.name;
+        axis.corps_id = axisDef.corps;
 
         builtAxes.push(axis);
         allParticipating.push(...axisBrigades);

@@ -248,6 +248,8 @@ export interface SectorIntelRecord {
 export interface OperationAxis {
     axis_id: string;
     name: string;
+    /** Authored provider corps for explicitly multi-corps operations. */
+    corps_id?: string;
     assigned_brigades: FormationId[];
     /** Designated main effort brigade — highest basePower at launch. Full combat power. */
     main_brigade?: FormationId;

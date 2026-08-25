@@ -229,6 +229,92 @@ describe('reconcileFinalOperationTruth', () => {
         expect(report.sector_reconciliation_required).toBe(true);
     });
 
+    it('rejects a participant whose formation corps disagrees with its authored axis corps', () => {
+        const state = makeState();
+        state.military.formations = {
+            b_host: makeFormation({
+                id: 'b_host',
+                faction: 'RS',
+                corps_id: 'host_corps',
+                location_osid: 'host_front',
+                home_osid: 'host_front',
+                status: 'active',
+            }),
+            b_mislabeled: makeFormation({
+                id: 'b_mislabeled',
+                faction: 'RS',
+                corps_id: 'host_corps',
+                location_osid: 'host_front',
+                home_osid: 'host_front',
+                status: 'active',
+            }),
+        };
+        state.military.corps_front_sectors = {
+            host: makeSector({
+                sector_id: 'sector:host:0',
+                corps_id: 'host_corps',
+                assigned_brigade_ids: ['b_host', 'b_mislabeled'],
+                territory_osids: ['host_front'],
+                friendly_osids: ['host_front'],
+                edge_ids: ['host_front__enemy'],
+            }),
+        };
+        state.military.corps_command = {
+            host_corps: {
+                active_operations: [{
+                    name: 'Operation Authored Corps Truth',
+                    type: 'sector_attack',
+                    phase: 'planning',
+                    started_turn: 10,
+                    phase_started_turn: 10,
+                    participating_brigades: ['b_host', 'b_mislabeled'],
+                    axes: [
+                        {
+                            axis_id: 'host_axis',
+                            name: 'Host Axis',
+                            corps_id: 'host_corps',
+                            assigned_brigades: ['b_host'],
+                            objectives: ['enemy_a'],
+                            current_objective_index: 0,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                        },
+                        {
+                            axis_id: 'foreign_axis',
+                            name: 'Foreign Axis',
+                            corps_id: 'foreign_corps',
+                            assigned_brigades: ['b_mislabeled'],
+                            objectives: ['enemy_b'],
+                            current_objective_index: 0,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                        },
+                    ],
+                    objectives: ['enemy_a', 'enemy_b'],
+                }],
+            } as any,
+        };
+
+        reconcileFinalOperationTruth(state);
+
+        const operation = state.military.corps_command!.host_corps.active_operations[0]!;
+        expect(operation.participating_brigades).toEqual(['b_host']);
+        expect(operation.axes?.[0]?.assigned_brigades).toEqual(['b_host']);
+        expect(operation.axes?.[1]?.assigned_brigades).toEqual([]);
+    });
+
     it('does not request sector reconciliation when the canonical participant roster is unchanged', () => {
         const state = makeState();
         state.military.formations = {

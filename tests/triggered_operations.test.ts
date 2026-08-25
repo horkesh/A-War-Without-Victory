@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it, vi } from 'vitest';
 
 import { checkTriggeredOperations, injectArmyHqOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
+import { reconcileFinalOperationTruth } from '../src/sim/combat/final_operation_truth_reconciliation.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type {
@@ -269,18 +270,21 @@ describe('checkTriggeredOperations', () => {
         ]);
         assert.deepEqual(operation.axes?.map((axis) => ({
             axis_id: axis.axis_id,
+            corps_id: axis.corps_id,
             assigned_brigades: axis.assigned_brigades,
             objectives: axis.objectives,
             staging_osid: axis.staging_osid,
         })), [
             {
                 axis_id: 'rogatica_local',
+                corps_id: 'vrs_drina',
                 assigned_brigades: ['rs_1st_podrinje'],
                 objectives: ['op:rogatica:varosiste_2'],
                 staging_osid: 'op:rogatica:kramer_selo_2',
             },
             {
                 axis_id: 'praca_local',
+                corps_id: 'vrs_sarajevo_romanija',
                 assigned_brigades: ['rs_1st_sarajevo_mechanized'],
                 objectives: ['op:pale:praca'],
                 staging_osid: 'op:pale:gornje_pale',
@@ -291,6 +295,42 @@ describe('checkTriggeredOperations', () => {
             destination_sids: ['op:pale:gornje_pale'],
             stance: 'column',
         });
+    });
+
+    it('preserves both authored corps axes through next-turn final operation reconciliation', () => {
+        const state = makeState(20);
+        state.operation_history = [{
+            corps_id: 'vrs_drina',
+            operation_name: 'Operation Podrinje Sweep',
+        } as any];
+        checkTriggeredOperations(state);
+        state.meta.turn = 21;
+
+        reconcileFinalOperationTruth(state);
+
+        const operation = state.military.corps_command!.vrs_drina!.active_operations
+            .find((candidate) => candidate.name === 'Operation Upper Drina Local Approaches');
+        assert.ok(operation);
+        assert.deepEqual(operation.participating_brigades, [
+            'rs_1st_podrinje',
+            'rs_1st_sarajevo_mechanized',
+        ]);
+        assert.deepEqual(operation.axes?.map((axis) => ({
+            axis_id: axis.axis_id,
+            corps_id: axis.corps_id,
+            assigned_brigades: axis.assigned_brigades,
+        })), [
+            {
+                axis_id: 'rogatica_local',
+                corps_id: 'vrs_drina',
+                assigned_brigades: ['rs_1st_podrinje'],
+            },
+            {
+                axis_id: 'praca_local',
+                corps_id: 'vrs_sarajevo_romanija',
+                assigned_brigades: ['rs_1st_sarajevo_mechanized'],
+            },
+        ]);
     });
 
     it('does not launch Upper Drina Local Approaches while the secondary SRK corps is busy', () => {
