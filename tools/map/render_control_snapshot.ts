@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '../..');
-const SUBSTRATE_PATH = resolve(ROOT, 'data/derived/settlements_substrate.geojson');
+const SUBSTRATE_PATH = resolve(ROOT, 'data/derived/operational/operational_settlements.geojson');
 
 const FACTION_COLORS: Record<string, string> = {
   RBiH: 'rgb(70, 120, 80)',
@@ -56,8 +56,10 @@ function getController(
 }
 
 async function main(): Promise<void> {
-  const runDir = process.argv[2]
-    ? resolve(process.cwd(), process.argv[2])
+  const finalOnly = process.argv.includes('--final-only');
+  const runDirArg = process.argv.slice(2).find((arg) => !arg.startsWith('--'));
+  const runDir = runDirArg
+    ? resolve(process.cwd(), runDirArg)
     : join(ROOT, 'runs', 'apr1995_start__f32b0eec74c4116b__w8');
 
   const initialPath = join(runDir, 'initial_save.json');
@@ -73,10 +75,14 @@ async function main(): Promise<void> {
 
   const { createCanvas } = await import('@napi-rs/canvas');
 
-  const initial = JSON.parse(readFileSync(initialPath, 'utf-8')) as { political_controllers?: Record<string, string | null> };
-  const final = JSON.parse(readFileSync(finalPath, 'utf-8')) as { political_controllers?: Record<string, string | null> };
-  const pcInitial = initial.political_controllers ?? {};
-  const pcFinal = final.political_controllers ?? {};
+  type SaveState = {
+    political_controllers?: Record<string, string | null>;
+    political?: { political_controllers?: Record<string, string | null> };
+  };
+  const initial = JSON.parse(readFileSync(initialPath, 'utf-8')) as SaveState;
+  const final = JSON.parse(readFileSync(finalPath, 'utf-8')) as SaveState;
+  const pcInitial = initial.political?.political_controllers ?? initial.political_controllers ?? {};
+  const pcFinal = final.political?.political_controllers ?? final.political_controllers ?? {};
 
   // Build census_id -> state sid map for substrate id alignment (substrate may use 1990 mun_id, state uses post-1995 mun_code).
   const buildCensusToSid = (pc: Record<string, string | null>): Map<string, string> => {
@@ -93,21 +99,37 @@ async function main(): Promise<void> {
   const substrate = JSON.parse(readFileSync(SUBSTRATE_PATH, 'utf-8')) as {
     features: Array<{
       type: string;
-      properties: { municipality_id?: string; census_id?: string };
-      geometry: { type: string; coordinates: number[][][] };
+      properties: { osid?: string; municipality_id?: string; census_id?: string };
+      geometry: { type: string; coordinates: unknown };
     }>;
     awwv_meta?: { bbox_world?: number[] };
   };
   const features = substrate.features ?? [];
+  const coordinatePairs: number[][] = [];
+  const collectPairs = (value: unknown): void => {
+    if (!Array.isArray(value)) return;
+    if (value.length >= 2 && typeof value[0] === 'number' && typeof value[1] === 'number') {
+      coordinatePairs.push(value as number[]);
+      return;
+    }
+    for (const child of value) collectPairs(child);
+  };
+  for (const feature of features) collectPairs(feature.geometry?.coordinates);
+  const xs = coordinatePairs.map((pair) => pair[0]);
+  const ys = coordinatePairs.map((pair) => pair[1]);
   const bbox = substrate.awwv_meta?.bbox_world;
-  const [minX, minY, maxX, maxY] = bbox ?? [0, 0, 1000, 1000];
+  const [minX, minY, maxX, maxY] = bbox ?? [
+    Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys),
+  ];
 
   const panelWidth = 1200;
   const panelHeight = 1000;
-  const width = panelWidth * 2 + 40;
+  const width = finalOnly ? panelWidth : panelWidth * 2 + 40;
   const height = panelHeight + 80;
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
 
   const pad = 40;
   const scale = Math.min(
@@ -136,16 +158,20 @@ async function main(): Promise<void> {
 
     for (const f of features) {
       const geom = f.geometry;
-      if (!geom || geom.type !== 'Polygon' || !Array.isArray(geom.coordinates)) continue;
-      const sid = featureToSid(f.properties);
+      if (!geom || !['Polygon', 'MultiPolygon'].includes(geom.type) || !Array.isArray(geom.coordinates)) continue;
+      const sid = f.properties.osid ?? featureToSid(f.properties);
       if (!sid) continue;
-      const controller = getController(politicalControllers, sid, censusToSid);
+      const controller = f.properties.osid
+        ? (politicalControllers[sid] ?? null)
+        : getController(politicalControllers, sid, censusToSid);
       const color = getColor(controller);
       ctx.fillStyle = color;
       ctx.strokeStyle = 'rgba(0,0,0,0.15)';
       ctx.lineWidth = 0.5;
-      const rings = geom.coordinates;
-      for (const ring of rings) {
+      const polygons = geom.type === 'MultiPolygon'
+        ? geom.coordinates as number[][][][]
+        : [geom.coordinates as number[][][]];
+      for (const rings of polygons) for (const ring of rings) {
         if (!ring || ring.length < 3) continue;
         ctx.beginPath();
         for (let i = 0; i < ring.length; i++) {
@@ -160,18 +186,42 @@ async function main(): Promise<void> {
     }
   }
 
-  drawPanel(pcInitial, censusToSidInitial, 0);
-  drawPanel(pcFinal, censusToSidFinal, 1);
+  if (finalOnly) {
+    drawPanel(pcFinal, censusToSidFinal, 0);
+  } else {
+    drawPanel(pcInitial, censusToSidInitial, 0);
+    drawPanel(pcFinal, censusToSidFinal, 1);
+  }
 
   ctx.fillStyle = '#333';
   ctx.font = 'bold 14px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Settlement-level control', width / 2, 24);
+  ctx.fillText(finalOnly ? 'January 1993 — operational control' : 'Settlement-level control', width / 2, 24);
   ctx.font = 'bold 18px sans-serif';
-  ctx.fillText('Initial', panelWidth / 2, 50);
-  ctx.fillText('Final', panelWidth + 20 + panelWidth / 2, 50);
+  if (finalOnly) {
+    ctx.fillText('40-week calibrated final state', panelWidth / 2, 50);
+  } else {
+    ctx.fillText('Initial', panelWidth / 2, 50);
+    ctx.fillText('Final', panelWidth + 20 + panelWidth / 2, 50);
+  }
 
-  const outPath = join(runDir, 'control_initial_vs_final.png');
+  const legend = [
+    ['RS', FACTION_COLORS.RS],
+    ['RBiH', FACTION_COLORS.RBiH],
+    ['HRHB', FACTION_COLORS.HRHB],
+  ] as const;
+  ctx.font = 'bold 13px sans-serif';
+  ctx.textAlign = 'left';
+  let legendX = width - 245;
+  for (const [label, color] of legend) {
+    ctx.fillStyle = color;
+    ctx.fillRect(legendX, 16, 14, 14);
+    ctx.fillStyle = '#333';
+    ctx.fillText(label, legendX + 19, 28);
+    legendX += label === 'HRHB' ? 0 : 76;
+  }
+
+  const outPath = join(runDir, finalOnly ? 'control_january_1993.png' : 'control_initial_vs_final.png');
   const buffer = await canvas.encode('png');
   writeFileSync(outPath, buffer);
   console.log('Wrote', outPath);
