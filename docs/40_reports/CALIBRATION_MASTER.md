@@ -85,12 +85,18 @@ Fixed by adding `rs_igman_brigade` (spawns t29, uncommitted, historically correc
 after. The change is justified by correctness — an operation authored for August 1993 no longer
 fires in 1995 — not by the score. Do not treat 650 as evidence the frozen-VRS front improved.
 
-**⚠ VERIFICATION OWED — this figure has NOT been reproduced on a clean tree.** Runs n290 and
-n293 both carry `git_dirty: true` in `run_meta.json` (the dirty state was the change under
-test, which is ordinary, but it means the committed code has not itself been measured). Per the
-2026-08-24 "A SCORE IS NOT AN IDENTITY" entry, a delta is not banked until hash +
-`git_dirty: false` + consumed digest are confirmed. **Next session: run 188w on a clean tree at
-`414ec3f61` and confirm 677/664/664/650 before this line is relied on.**
+**✅ VERIFIED ON A CLEAN TREE (2026-08-25).** Run
+`apr1992_definitive_188w__0589220209545186__w188_n294`: **`git_dirty: false`**,
+`git_commit: 180695239ba8` (docs-only above `414ec3f61`; sim code byte-identical),
+`final_state_hash: 4714d66780640887`, measuring **677 / 664 / 664 / 650** — exact match on all
+four checkpoints.
+
+The hash is the SAME one n290 and n293 produced, which is the substantive result: the earlier
+runs carried `git_dirty: true` (the change under test was uncommitted, which is ordinary), and
+this confirms the dirty state contributed nothing the commit lacks. Line banked with identity
+per the 2026-08-24 "A SCORE IS NOT AN IDENTITY" entry — hash + `git_dirty: false` + guards, not
+a score alone. Teočak holds at all four checkpoints; western-Bosnia cascade intact
+(Grahovo 4/4, Šipovo 5/5, Glamoč 6/6, Sanski Most 10/10).
 
 Guards verified in every run: Teočak holds RBiH at all four checkpoints (canon H1.8); the HRHB
 western-Bosnia cascade site is intact (Grahovo 4/4, Šipovo 5/5, Glamoč 6/6, Sanski Most 10/10).
