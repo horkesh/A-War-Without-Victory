@@ -504,12 +504,30 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // would capture trnovo/delijas before Jan 1993, breaking the 40w calibration target.
         available_from: 69,
         min_attack_outcome: 'repulsed',
+        // 3 hops from rs_igman_brigade's home (hadzici:misevici_2) to the staging OSID.
+        // Same reasoning as Operation Foca's planning_duration:6 -- the default anti-paralysis
+        // window fires before a marching brigade arrives and produces zero_eligible_axis.
+        planning_duration: 6,
         axes: [
             {
                 // gornja_presjenica → kijevo_2 (RS waypoint, strips) → delijas (RBiH-painted)
                 axis_id: 'trnovo_east',
                 name: 'Trnovo East — Delijas',
-                brigades: ['rs_trnovo_brigade'],
+                // rs_igman_brigade ADDED 2026-08-24. WHY LUKAVAC 93 NEVER FIRED ON TIME:
+                // rs_trnovo_brigade is authored mandatory with available_from 6, but it does not
+                // enter the war until t140 -- canFormEmergentBrigade gates a later-forming
+                // mandatory brigade on its home municipality's militia pool, and Trnovo's RS pool
+                // sits at available:0 / committed:4428 because rs_1st_romanija_infantry (same
+                // home_mun) absorbs it. So at t69, when available_from makes this op eligible,
+                // trnovo_east had zero valid brigades -> axis_empty -> the operation had 1 viable
+                // participant against a floor of 2 -> deferred. It finally injected at t141,
+                // seventy-two turns late, and captured nothing.
+                //
+                // The Igman Brigade is the historically correct second formation: Lukavac 93
+                // (July-August 1993) took Trnovo, Mt Igman and Bjelasnica. It spawns t29, is alive
+                // at t69, and is committed to no other operation. Keeping rs_trnovo_brigade in the
+                // list costs nothing -- it simply joins if and when it exists.
+                brigades: ['rs_trnovo_brigade', 'rs_igman_brigade'],
                 objectives: [
                     'op:trnovo:kijevo_2',   // RS waypoint (painted RS, strips at execution)
                     'op:trnovo:delijas',     // RBiH-painted, persistent RBiH mismatch
@@ -1042,6 +1060,29 @@ function prePlannedOperationAlreadyResolved(state: GameState, def: PrePlannedOp)
  * Build axes and operation from a PrePlannedOp definition.
  * Shared by both initial injection and queued operation injection.
  */
+/**
+ * Formation ids already committed to a live operation anywhere in the corps command.
+ *
+ * WHY (2026-08-25). `buildAxesFromDef` validated kind, status, personnel, disruption,
+ * transit and reachability but never commitment, so a pre-planned operation would happily
+ * claim a brigade a bot probe was already using. That trips the hard post-turn invariant
+ * `operation.participant_double_committed` and aborts the run. It had never fired only
+ * because no pre-planned op had yet injected in a turn where a probe held one of its
+ * authored brigades; adding Operation Majevica (t7) alongside `probe_vrs_east_bosnian_t6`
+ * made the collision reachable. The brigade stays with whoever holds it — a pre-planned
+ * op yields rather than crashing, and drops below its participant floor if that leaves it short.
+ */
+function collectCommittedFormationIds(state: GameState): Set<FormationId> {
+    const committed = new Set<FormationId>();
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        for (const op of corpsCommand[corpsId]?.active_operations ?? []) {
+            for (const brigadeId of op.participating_brigades ?? []) committed.add(brigadeId);
+        }
+    }
+    return committed;
+}
+
 function buildAxesFromDef(
     def: PrePlannedOp,
     state: GameState,
@@ -1053,6 +1094,7 @@ function buildAxesFromDef(
     const eliteLoans: { brigadeId: FormationId; corpsId: string }[] = [];
 
     const movementState = state.military.brigade_movement_state ?? {};
+    const committedElsewhere = collectCommittedFormationIds(state);
     for (const axisDef of def.axes) {
         const axisBrigades = axisDef.brigades.flatMap((authoredFormationId) => {
             const resolved = resolveOperationFormation(formations, authoredFormationId);
@@ -1068,6 +1110,8 @@ function buildAxesFromDef(
             // Exclude brigades currently in column-march transit — they are already
             // marching somewhere else and contribute zero eligible attackers until they arrive.
             if (movementState[fid]?.status === 'in_transit') return [];
+            // Already fighting for someone else — see collectCommittedFormationIds.
+            if (committedElsewhere.has(fid)) return [];
             if (
                 !isForwardDeployedOnAxis(formation, axisDef)
                 && !canReachAxisStaging(

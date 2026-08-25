@@ -28933,3 +28933,42 @@ it previously read only the terminal oct1995 figure, so a large jan1993 regressi
 
 Standing constraint: every VRS corps stops capturing within ~28 turns and is idle for the
 remaining 160-184. Coverage objectives must sit inside that window. Separate lane.
+
+## 2026-08-25 — Lukavac 93 fires on time; double-commit crash fixed; consolidation sweep built (OFF)
+
+**Lukavac 93 timing fix (ADOPTED, +6).** `Operation Trnovo` ran t141-159; it now runs t69-79,
+its historical August-1993 date. Cause: `rs_trnovo_brigade` is authored `mandatory,
+available_from: 6` but `canFormEmergentBrigade` gates a later-forming mandatory brigade on its
+home municipality's militia pool, and Trnovo's RS pool is `available: 0 / committed: 4428`
+because `rs_1st_romanija_infantry` (same home_mun) absorbs it. The brigade did not exist until
+t140, so the axis was empty at t69, the op fell below its 2-participant floor and deferred 72
+turns. Added `rs_igman_brigade` (spawns t29, uncommitted, historically correct — Lukavac 93 took
+Trnovo, Igman and Bjelašnica) plus `planning_duration: 6` for its 3-hop march.
+Checkpoints 677 / 664 / 664 / **650** (oct1995 a new high). NOTE: the +6 is turn-ordering
+jitter, NOT causal — RS captures after t28 are 1 both before and after.
+
+**Double-commit crash FIXED (byte-identical).** `buildAxesFromDef` validated kind, status,
+personnel, disruption, transit and reachability but never commitment, so a pre-planned op could
+claim a brigade a bot probe already held → hard invariant
+`operation.participant_double_committed` → run aborted at t7. Latent since Majevica landed;
+exposed when the sweep shifted timing. Brigades committed elsewhere are now excluded at
+axis-build time. n293 vs n290 hash-identical (`4714d66780640887`), so it is inert except when
+it prevents the crash.
+
+**Consolidation sweep BUILT, flag-gated, DEFAULT OFF, not enabled on the calibration scenario.**
+Lets the paramilitary sweep target contiguous enemy villages in municipalities a faction
+controls, not only isolated pockets — the mechanism that actually cleared the upper Drina in
+1992 (engine: 19 flips in 188 weeks; history: hundreds in 1992 alone). It WORKS: took
+`brusna_2`, `batotici`, `todorovici`, `praca`, `glamoc`, `kamen`, `sopotnica` — 7 of the 13
+jan1993 Goražde mismatches, including two that defeated six operation designs. But net −36:
+11 of 25 new flips wrong, 10 of those RBiH/HRHB taking RS ground. The predicate gate
+(`to_control === 'controlled'`) was a no-op — that field reads `'controlled'` for every
+municipality. Authored penetration data cannot separate the cases (Čajniče RS 60/85 vs Hadžići
+RBiH 60/85). Needs a faction-and-period constraint expressed as DATA, not a code-side faction
+test. Player agency reuses the existing request/policy path; each sweep sets
+`authorized_cleansing_condemnation` at threshold ONE, capping the grade at C.
+Full analysis: `docs/40_reports/20260825_CONSOLIDATION_SWEEP_MECHANISM.md`.
+
+**Also corrected today:** "an OSID flips only on decisive_victory" (false — three outcomes flip,
+absorption may cancel); "frozen = never contested" (false — `jemanlici` was attacked 10 times
+and won 10 times); a scratch file committed by `git add -A`.

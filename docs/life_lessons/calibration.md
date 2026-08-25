@@ -487,3 +487,34 @@ Applied retroactively to a seven-item queue, this screen killed **five of seven*
   t1/t2/t3 in both runs, and dragged `foca:brusna_2` and `gorazde:kolovarice` (long recorded
   as an unwinnable merge defect) in with them. They are blocked by the engine's capacity to
   absorb new combat, not by their own difficulty.
+
+### [Operations] The FIRST brigade in an authored axis is the ANCHOR — position is semantic (2026-08-25) — NEW
+- **Context**: ADR-0005 tactical groups are fully ON (all five flags in `tactical_group_config.ts`).
+  `getAnchorBrigade` returns `main_brigade ?? assigned_brigades[0]`. The anchor carries the
+  opening-attack readiness gate; every other brigade is a DONOR that satisfies
+  MIN_OPERATION_PARTICIPANTS and lends personnel/equipment but is not required to be adjacent.
+- **Wrong approach**: Writing or editing an axis `brigades: [...]` list as an unordered roster.
+  Operation Trnovo was "fixed" by APPENDING `rs_igman_brigade` after `rs_trnovo_brigade`, leaving
+  the anchor as a brigade that does not spawn until t140. The op fired only because donors met
+  the participant floor.
+- **Right approach**: Choose the anchor deliberately and put it FIRST — the brigade that exists
+  at `available_from`, is homed nearest the staging OSID, and is not committed elsewhere.
+- **Do instead**: Before editing any axis, check `getAnchorBrigade` semantics and confirm the
+  intended anchor spawns before the op's `available_from`. ADR-0005 lists four unreviewed
+  anchor-mispick cases; two (Operation Visegrad, Operation Prsten) anchor on a JNA phantom that
+  withdraws at t5–8.
+
+### [Engine] A pre-planned op can double-commit a brigade a bot probe already holds (2026-08-25) — NEW
+- **Context**: `buildAxesFromDef` validated kind, status, personnel, disruption, transit and
+  reachability — but never COMMITMENT. Operation Majevica injecting at t7 claimed
+  `rs_3rd_majevica_infantry`, already held by `probe_vrs_east_bosnian_t6`, tripping the hard
+  post-turn invariant `operation.participant_double_committed` and aborting the run at t7.
+- **Wrong approach**: Treating the crash as caused by whatever change exposed it. It was latent
+  from the moment a pre-planned op could inject on a corps with a live probe; a timing shift
+  merely made the collision reachable.
+- **Right approach**: Brigades already committed to any live operation are excluded at
+  axis-build time, so the pre-planned op yields (and drops below its participant floor if that
+  leaves it short) rather than crashing. Verified inert: hash-identical run before/after.
+- **Do instead**: When adding brigades to a pre-planned op, remember bot probes compete for the
+  same formations. Probes are NOT recorded in `operation_history`, so they are invisible to an
+  operation-type audit.

@@ -1878,6 +1878,8 @@ export interface StateMeta {
      * `getAttackerFirepowerDeficitMult` (combat_math.ts) for the mechanism.
      */
     firepower_deficit_penalty_enabled?: boolean;
+    /** See Scenario.consolidation_sweep_enabled. */
+    consolidation_sweep_enabled?: boolean;
     /** Maximum turns before game ends in stalemate. Default 208 (4 years). Set from scenario.weeks or explicit override. */
     max_turns?: number;
     /** Scenario victory conditions, stored at scenario load for pipeline evaluation. */

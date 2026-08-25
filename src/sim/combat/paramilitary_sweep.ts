@@ -40,6 +40,7 @@ import {
     PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN,
     PARAMILITARY_REAR_MIN_ORGANIZATIONAL_PENETRATION,
     PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN,
+    CONSOLIDATION_MIN_ORGANIZATIONAL_PENETRATION,
     OFFENSIVE_PARA_UNIT_SIZE,
     OFFENSIVE_PARA_FADE_WEEK,
     OFFENSIVE_PARA_MARCH_TURNS,
@@ -246,6 +247,62 @@ function buildRankedParamilitaryTarget(
     };
 }
 
+/**
+ * CONSOLIDATION SWEEP (2026-08-25, flag-gated by `meta.consolidation_sweep_enabled`).
+ *
+ * Returns enemy-held OSIDs that are NOT isolated pockets but sit inside a municipality the
+ * faction already controls politically and dominates organisationally.
+ *
+ * WHY. `enemy_pockets` models mop-up of cut-off settlements. The 1992 upper-Drina campaign
+ * was not that: it cleared minority villages that remained CONTIGUOUS with other minority
+ * ground, municipality by municipality, in areas already under Serb political control. With
+ * pocket-only targeting the engine produced 19 paramilitary flips in 188 weeks, and Čajniče's
+ * batotici/miljeno_2/todorovici, Foča's brusna_2 and Pale's prača survive to January 1993
+ * although every reference snapshot has them RS from 1992. The authored data was always
+ * there and unused: Čajniče and Foča carry paramilitary_rs 60, sds 85, to_control 'controlled'.
+ *
+ * GUARDS PRESERVED DELIBERATELY. Enclave membership is still an absolute skip, so the
+ * ENCLAVE GUARD (canon H1.8) is untouched — Goražde's own osid_list, including glamoc,
+ * kamen, sopotnica and kolovarice, remains unreachable by any sweep. Defended settlements,
+ * regular-force-claimed targets, adjacent defenders, the per-turn caps and
+ * PARAMILITARY_FADE_WEEK all continue to apply.
+ *
+ * AGENCY AND CONSEQUENCE. Candidates returned here flow into the SAME ranking and the SAME
+ * player/bot branch as pocket candidates, so a player faction is asked per deployment via
+ * `pending_paramilitary_requests` (carrying `estimated_civilian_risk`) and the choice is
+ * written to `paramilitary_decision_history`. On resolution `recordWarCrime` increments
+ * `war_crimes_events_emergent`, which sets `authorized_cleansing_condemnation` at a
+ * threshold of ONE and caps the grade at C / hollow_victory. Ground taken this way is
+ * historically reachable and never free.
+ */
+function collectConsolidationCandidates(
+    state: GameState,
+    faction: FactionId,
+    adjacency: Map<string, string[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): string[] {
+    const controllers = state.political.political_controllers ?? {};
+    const out: string[] = [];
+    for (const osid of Object.keys(controllers).sort(strictCompare)) {
+        const controller = controllers[osid];
+        if (!controller || controller === faction) continue;
+        const municipalityId = municipalityIdFromOsid(osid);
+        const penetration = state.political.municipalities?.[municipalityId]?.organizational_penetration;
+        // Political control of the municipality is required — this represents consolidating
+        // ground you already hold, not seizing a municipality by paramilitary alone.
+        if (!penetration || penetration.to_control !== 'controlled') continue;
+        const org = getFactionOrganizationScore(state, faction, osid);
+        const controllerOrg = getFactionOrganizationScore(state, controller, osid);
+        if (org.paramilitary < CONSOLIDATION_MIN_ORGANIZATIONAL_PENETRATION) continue;
+        if (org.paramilitary <= controllerOrg.paramilitary) continue;
+        // Must border ground the faction already holds: a sweep spreads outward from held
+        // territory, it does not appear in the middle of enemy country.
+        if (countFriendlyAdjacentOsids(osid, faction, adjacency, state, reverseMap) === 0) continue;
+        out.push(osid);
+    }
+    return out;
+}
+
 function compareRankedParamilitaryTargets(
     a: RankedParamilitaryTarget,
     b: RankedParamilitaryTarget,
@@ -383,7 +440,11 @@ export function detectParamilitaryTargets(
         // mutation graph state) — keep this site fresh-recompute. The G3-safe dedup ships at
         // bot_corps_ai.ts + bot_brigade_ai_osid.ts (the audit's primary 198 ms/turn target).
         const graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
-        const pockets = [...graphAnalysis.enemy_pockets].sort(strictCompare);
+        const consolidationTargets = state.meta?.consolidation_sweep_enabled === true
+            ? collectConsolidationCandidates(state, faction, adjacency, reverseMap)
+            : [];
+        const pockets = [...new Set([...graphAnalysis.enemy_pockets, ...consolidationTargets])]
+            .sort(strictCompare);
         if (pockets.length === 0) continue;
 
         let spawnIndex = 0;

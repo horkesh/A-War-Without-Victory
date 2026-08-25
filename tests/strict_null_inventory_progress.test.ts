@@ -729,19 +729,33 @@ describe('strict null inventory progress', () => {
             // `AWWV_DEBUG_REASON_CODES=axis_reject`; default saves omit both keys.
             // Their nested fact fields are required-with-null to keep the ratchet
             // limited to these two gated containers. 533->535 / sim 337->339.
-            optional_fields_game_state: 535,
+            // Consolidation sweep (2026-08-25): +1 optional field
+            // `GameStateMeta.consolidation_sweep_enabled` (game_state.ts → `state` domain).
+            // Lets the paramilitary sweep target contiguous enemy villages in municipalities a
+            // faction already controls, not only isolated pockets — the 1992 upper-Drina
+            // village-clearing mechanism the engine had no way to represent. OPTIONAL and
+            // DEFAULT OFF: the scenario flag is not set on apr1992_definitive_188w, and
+            // collectConsolidationCandidates is reached only via
+            // `state.meta?.consolidation_sweep_enabled === true` → absent on every headless
+            // /historical run → byte-identical baseline by construction (n293 reproduces
+            // n290's 4714d66780640887). No new type-escape: the candidate builder narrows via
+            // `if (!controller || controller === faction) continue` and reuses
+            // getFactionOrganizationScore, so as_factionid (3) / as_unknown (5) / as_any (0) /
+            // non_null_assertions (7) are ALL UNCHANGED — this bump is purely the
+            // optional-field ratchet. So 535 → 536 / state 186 → 187.
+            optional_fields_game_state: 536,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(535);
+        expect(current.optional_field_domains.total).toBe(536);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 339,
-            state: 186,
+            state: 187,
             ui_adapter: 0,
             unknown: 0,
         });

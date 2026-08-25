@@ -429,6 +429,25 @@ export const PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN = 2;
 export const PARAMILITARY_REAR_MIN_ORGANIZATIONAL_PENETRATION = 25;
 /** A faction may issue only one autonomous paramilitary deployment per municipality each turn. */
 export const PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN = 1;
+
+/**
+ * CONSOLIDATION SWEEP (2026-08-25) — flag-gated; see `consolidation_sweep_enabled`.
+ *
+ * WHY THIS EXISTS. The rear-pocket sweep can only target settlements the graph analysis
+ * calls an isolated `enemy_pocket`. That models mop-up. It does not model what actually
+ * happened in the upper Drina in 1992, where JNA/TO/paramilitary forces cleared minority
+ * villages that were CONTIGUOUS with other minority-held ground, municipality by
+ * municipality, in areas they already controlled politically. The engine produced 19
+ * paramilitary flips in 188 weeks; the real 1992 campaign cleared hundreds of villages
+ * across Foča, Višegrad, Čajniče, Rudo, Zvornik and Bratunac. Čajniče and Foča carry
+ * `paramilitary_rs: 60`, `sds_penetration: 85`, `to_control: 'controlled'` — the data to
+ * drive this is already authored and correct; nothing consulted it outside pocket geometry.
+ *
+ * DELIBERATELY STRICTER THAN THE REAR-POCKET SWEEP. Political control of the municipality
+ * is required, and the organisation bar is double the rear-pocket one, because this
+ * represents clearing a village that is NOT cut off — a heavier claim than mopping a pocket.
+ */
+export const CONSOLIDATION_MIN_ORGANIZATIONAL_PENETRATION = 50;
 /** Paramilitary casualty rate: fraction of unit killed in action during sweep. */
 export const PARAMILITARY_CASUALTY_RATE = 0.08;
 /** Civilian casualties inflicted by paramilitary sweep (as fraction of OSID population). War crimes implicit. */

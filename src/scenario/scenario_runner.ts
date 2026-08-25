@@ -1823,6 +1823,9 @@ export async function buildScenarioStartupState(
         state.meta.embargo_offensive_gate_enabled = true;
     }
 
+    if (scenario.consolidation_sweep_enabled) {
+        state.meta.consolidation_sweep_enabled = true;
+    }
     if (scenario.firepower_deficit_penalty_enabled) {
         state.meta.firepower_deficit_penalty_enabled = true;
     }

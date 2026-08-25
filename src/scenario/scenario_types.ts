@@ -194,6 +194,21 @@ export interface Scenario {
      */
     firepower_deficit_penalty_enabled?: boolean;
     /**
+     * When true, the paramilitary sweep may also target enemy-held settlements that are
+     * NOT isolated pockets, in municipalities the faction already controls politically and
+     * dominates organisationally. Models the 1992 upper-Drina campaign, which cleared
+     * CONTIGUOUS minority villages municipality by municipality — something the
+     * pocket-only sweep cannot represent at all. See
+     * `GameState.meta.consolidation_sweep_enabled`.
+     *
+     * Player agency is preserved unchanged: these deployments go through the same
+     * `pending_paramilitary_requests` / `paramilitary_policy` path used by every other sweep,
+     * each resolved sweep calls `recordWarCrime`, which sets
+     * `authorized_cleansing_condemnation` at a threshold of ONE and caps the grade at C.
+     * Territory taken this way costs the player the outcome class.
+     */
+    consolidation_sweep_enabled?: boolean;
+    /**
      * Stuck-in-Peace-phase fallback: after this many Peace phase turns (since war_start_turn) without transition,
      * force transition to War phase. Optional; when absent, default 52 is used for phase_0/phase_i starts. // legacy-phase-term-ok
      * See docs/30_planning/PHASE_I_II_EDGE_CASES.md.

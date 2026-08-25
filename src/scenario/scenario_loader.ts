@@ -420,6 +420,7 @@ export function normalizeScenario(raw: unknown): Scenario {
 
     // Attacker firepower-deficit penalty (independent of the two flags above)
     const firepower_deficit_penalty_enabled = o.firepower_deficit_penalty_enabled === true ? true : undefined;
+    const consolidation_sweep_enabled = o.consolidation_sweep_enabled === true ? true : undefined;
 
     // Baked initial OSID controllers (replaces runtime derivation when present)
     const initial_osid_controllers = (() => {
@@ -523,6 +524,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             supply_reserves_enabled,
             embargo_offensive_gate_enabled,
             firepower_deficit_penalty_enabled,
+            consolidation_sweep_enabled,
             initial_osid_controllers,
             osid_control_overrides,
             war_timeline,
@@ -578,6 +580,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         supply_reserves_enabled,
         embargo_offensive_gate_enabled,
         firepower_deficit_penalty_enabled,
+        consolidation_sweep_enabled,
         initial_osid_controllers,
         osid_control_overrides,
         war_timeline,
