@@ -8,10 +8,10 @@
 
 ### Task 1: Čajniče / Batotići slice
 
-- Add a failing catalog test in `tests/pre_planned_operations.test.ts` for a dedicated `cajnice_seizure` axis on `Operation Foca`.
-- Run the focused test and confirm the expected missing-axis failure.
-- Add the minimal axis in `src/sim/combat/pre_planned_operations.ts`, staged at `op:cajnice:cajnice_2`, using `rs_ajnie_brigade`, targeting only `op:cajnice:batotici`.
-- Run the focused unit test, then one 40-week candidate. Retain only a positive net January result; repeat retained candidates for the same hash.
+- Add failing behavioral tests for a neutral `cajnice_local` / `Cajnice Local Axis` on post-Foča `Operation Herzegovina Consolidation`.
+- Prove the axis cannot launch before `Operation Foca` completes and then builds with `rs_ajnie_brigade` assigned.
+- Stage at `op:cajnice:cajnice_2` and target only `op:cajnice:batotici`. BB1 pp.175 and 187 support the local-force/theatre structure; the exact Batotići OSID comes solely from the authoritative January painter.
+- Run the focused unit tests, then one 40-week candidate. Retain only a positive net January result; repeat retained candidates for the same hash.
 
 ### Task 2: Remaining independent theatre levers
 
