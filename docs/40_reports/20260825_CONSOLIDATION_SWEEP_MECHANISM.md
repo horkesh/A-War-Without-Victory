@@ -23,8 +23,10 @@ Foča's `brusna_2` and Pale's `praca` therefore survive to January 1993 although
 snapshot has them RS from 1992 — not because anything decided they should hold, but because
 no mechanism could reach them.
 
-The data to drive it was already authored and simply never consulted outside pocket geometry:
+The data to drive it already existed and was simply never consulted outside pocket geometry:
 Čajniče and Foča both carry `paramilitary_rs: 60`, `sds_penetration: 85`, `to_control: 'controlled'`.
+(These values are **derived**, not authored — see CORRECTION 1 below. An earlier draft of this
+report called them authored and that was wrong.)
 
 ## Result — the mechanism works
 
@@ -55,18 +57,43 @@ municipality". It does not — it is a single municipality-level value that read
 for *every* municipality in the game. The gate was a no-op, so any faction with organisation
 ≥ 50 could sweep anywhere it bordered.
 
-**Tightening it is not a tuning exercise.** The authored data cannot separate the cases:
+**Tightening it is not a tuning exercise** — and BOTH explanations this report originally gave
+were REFUTED by the §6 panel the same day. Corrected below; record in
+`20260825_PANEL_CONSOLIDATION_SWEEP.md`.
 
-    RIGHT: cajnice / foca / pale   RS   paramilitary 60, SDS 85   (RBiH PL 25 or 5)
-    WRONG: hadzici / olovo / vares RBiH paramilitary 60, SDA 85   (RS 5)
+**CORRECTION 1 — the data is NOT authored.** This report said "the authored data cannot separate
+the cases". `organizational_penetration` is **derived** by a fully faction-symmetric formula
+(`organizational_penetration_formula.ts:60-115`) with **no faction branch**:
 
-Both factions occupy the identical top tier. A dominance-gap threshold rescues only Brčko and
-Doboj. What actually separates them is historical rather than numerical: the 1992 consolidation
-campaign was Serb, and locally Croat in Herzegovina and Posavina, while the ARBiH spent that
-year losing villages rather than taking them. Encoding that as a faction test in engine code is
-exactly the railroad the cohesion-floor ruling warns against — a faction asymmetry belongs in
-**authored data with a stated historical rationale**, not in a predicate. That is a design
-decision for the owner and the panel, not a calibration edit.
+    paramilitary = 5  + 20 (aligned pop >= 35%) + 35 (planned war-start brigade)        -> max 60
+    party        = 20 + 35 (IS the controller, "mayor bonus") + 20 (pop) + 10 (brigade) -> max 85
+
+Čajniče-RS and Hadžići-RBiH read `60/85` identically **because both factions genuinely satisfy
+all three conditions in their own municipality**. The formula is working, not failing.
+
+**CORRECTION 2 — "the ARBiH spent that year losing villages rather than taking them" is FALSE.**
+BB1 p.187: the ARBiH ran a *"major offensive in late July"* taking Trnovo, and *"a series of
+Bosnian Army attacks from late August to November retook key territory around Višegrad."* It
+conducted successful offensives in this exact region in 1992. The Historian seat declined to
+endorse any constraint resting on that claim.
+
+**CORRECTION 3 — no available predicate separates the cases.** The Historian proposed gating on
+possession of the municipal takeover apparatus; the Red-team tested it and it **allows 17 of 17**
+— all 9 wrong flips and all 8 correct ones — because in every case the sweeping faction IS the
+mayor of that municipality. Hadžići genuinely was an RBiH municipality exactly as Čajniče was an
+RS one.
+
+**What this actually means.** The asymmetry is **not structural**. The Serb side executed a
+coordinated municipality-by-municipality campaign in 1992 and the Bosniak side did not — a fact
+about **orders and intent**, not about apparatus, population or brigades, and therefore **not
+derivable from game state**. Any constraint reproducing it must inject a fact the simulation does
+not contain: **a railroad by this repo's own taxonomy**.
+
+**CORRECTION 4 — "authored data, not a predicate" was a distinction without a difference.**
+Moving the fact into scenario data changes its location, not its nature. If this ships, it ships
+as an **explicitly declared railroad** carrying the BB citation — not dressed as derived
+behaviour. Do NOT re-attempt a numeric threshold on `organizational_penetration`: measured twice,
+on two different fields, and it does not separate the cases.
 
 ## Agency and consequence (owner requirement, satisfied by reuse)
 
@@ -93,10 +120,30 @@ GUARD (canon H1.8) is untouched — Teočak held RBiH at all four checkpoints in
 Defended settlements, adjacent defenders, regular-force-claimed targets, the per-turn caps
 (2/faction, 1/municipality) and `PARAMILITARY_FADE_WEEK = 20` all continue to apply.
 
-Note one consequence worth knowing: the skip is `enc.faction !== faction`, so a faction CAN
-sweep inside its **own** enclave. That is how `glamoc`, `kamen` and `sopotnica` returned to
-RBiH — legitimate here, since all three are painted RBiH, but it is behaviour to be aware of
-before enabling.
+**RULED AGAINST BY BOTH POLLED SEATS (2026-08-25) — this must be fixed before any enable.**
+The skip is `enc.faction !== faction`, so a faction CAN sweep inside its **own** enclave. That is
+how `glamoc`, `kamen` and `sopotnica` returned to RBiH. An earlier draft of this report called
+that "legitimate here, since all three are painted RBiH" — **both seats disagreed, on independent
+grounds**:
+
+- *Historian:* a besieged garrison consolidating its own perimeter is not the modelled
+  phenomenon, and canon H1.8 makes enclave outcomes event-owned. The right answer for those
+  three cells came out by accident.
+- *Red-team:* the guard's stated rationale ("surrounded topology is correct siege geometry, not
+  abandoned pocket") is faction-blind while the code is not — an unintended asymmetry, not a
+  design.
+
+Fix `glamoc`/`kamen`/`sopotnica` by another route; do not let a cleansing mechanism run inside an
+enclave because the arithmetic happened to come out right.
+
+## A second reward channel the grade cap does not touch (Red-team, 2026-08-25)
+
+The `authorized_cleansing_condemnation` cap at threshold ONE governs the **player**.
+`matched_osids` governs **us**. This mechanism was built because it raises a checkpoint score,
+and a full session's effort was steered by that score. A change making cleansing improve the
+project's own optimisation target creates an institutional incentive that no in-game penalty
+addresses. The "Agency and consequence" section above is accurate about the player-facing loop
+and **incomplete** about this one.
 
 ## If this is picked up again
 

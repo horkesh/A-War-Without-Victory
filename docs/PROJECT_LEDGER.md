@@ -28972,3 +28972,44 @@ Full analysis: `docs/40_reports/20260825_CONSOLIDATION_SWEEP_MECHANISM.md`.
 **Also corrected today:** "an OSID flips only on decisive_victory" (false — three outcomes flip,
 absorption may cancel); "frozen = never contested" (false — `jemanlici` was attacked 10 times
 and won 10 times); a scratch file committed by `git add -A`.
+
+## 2026-08-25 — §6 PANEL (2 of 4 seats): the consolidation sweep needs a RAILROAD, and commit 414ec3f61's rationale is refuted
+
+Panel record: `docs/40_reports/20260825_PANEL_CONSOLIDATION_SWEEP.md`. **Not a verdict —
+scenario-tester and Engine/systems are unpolled.** Mechanism stays `consolidation_sweep_enabled`
+DEFAULT OFF, unset on the calibration scenario. No behavioural change.
+
+**This entry exists because commit `414ec3f61`'s message states a rationale the panel has since
+refuted, and a commit message cannot be edited.**
+
+- **REFUTED — "the authored data cannot separate the cases."** `organizational_penetration` is
+  DERIVED, not authored: `organizational_penetration_formula.ts:60-115` has **no faction branch**
+  (`paramilitary = 5 + 20(pop≥35%) + 35(war-start brigade)`; `party = 20 + 35(is controller) +
+  20(pop) + 10(brigade)`). Čajniče-RS and Hadžići-RBiH read 60/85 identically because both
+  factions genuinely satisfy all three conditions in their own municipality. The formula works.
+- **REFUTED — "the ARBiH spent 1992 losing villages, not taking them."** BB1 p.187: ARBiH ran a
+  *"major offensive in late July"* taking Trnovo and *"a series of Bosnian Army attacks from late
+  August to November retook key territory around Višegrad."* Successful offensives, same region,
+  same year.
+- **REFUTED — the Historian's replacement proposal.** Gating on the municipal takeover apparatus
+  **allows 17 of 17** (9 wrong flips AND 8 correct ones): in every case the sweeping faction IS
+  the mayor.
+- **STANDING CONCLUSION.** The asymmetry is not structural — the Serb side ran a coordinated
+  campaign in 1992 and the Bosniak side did not, a fact about **orders and intent**, not derivable
+  from game state. Any constraint reproducing it is a **RAILROAD**; "data not code" changes its
+  location, not its nature. If it ships, it ships as an explicitly DECLARED railroad with the BB
+  citation attached.
+- **NEW — a second reward channel.** The `authorized_cleansing_condemnation` cap governs the
+  PLAYER; `matched_osids` governs US. The mechanism exists because it raises a checkpoint score —
+  an institutional incentive to cleanse that no in-game penalty touches.
+- **OWN-ENCLAVE SWEEP: NO**, both seats, independent grounds. `enc.faction !== faction` lets a
+  faction sweep inside its own enclave (how glamoc/kamen/sopotnica flipped). Must be fixed before
+  any enable.
+
+Historian upheld the premise itself: BB1 p.180 titles a chapter *"Ethnic Cleansing as a Military
+Operation: Prijedor, Sanski Most, and Ključ, May–July 1992"* — municipality-scale and systematic.
+Both seats agree the representational gap is real and this is an ordinary §6 ruling, not a
+bright-line crossing.
+
+Docs reconciled to this in the same commit: the mechanism report (4 corrections), the memory
+topic file (frontmatter + 3 body corrections), and this ledger entry.
