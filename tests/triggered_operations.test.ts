@@ -175,7 +175,10 @@ describe('triggered operations definitions', () => {
             axis_id: 'kalinovik_local',
             name: 'Kalinovik Local Axis',
             corps: 'vrs_herzegovina',
-            brigades: ['rs_kalinovik_brigade'],
+            brigades: [
+                'rs_kalinovik_brigade',
+                'rs_gacko_brigade',
+            ],
             objectives: [
                 'op:kalinovik:vlaholje',
                 'op:kalinovik:varos_2',
@@ -347,7 +350,15 @@ describe('checkTriggeredOperations', () => {
         assert.ok(injected.includes('Operation Herzegovina Consolidation'));
         const operation = state.military.corps_command!.vrs_herzegovina!.active_operations[0]!;
         const kalinovik = operation.axes?.find((axis) => axis.axis_id === 'kalinovik_local');
-        assert.deepEqual(kalinovik?.assigned_brigades, ['rs_kalinovik_brigade']);
+        // Triggered-operation building canonical-sorts assigned formation IDs with strictCompare.
+        // Authored order remains the catalog contract above; live main effort follows this
+        // shared deterministic order rather than introducing a Kalinovik-only exception.
+        assert.deepEqual(kalinovik?.assigned_brigades, [
+            'rs_gacko_brigade',
+            'rs_kalinovik_brigade',
+        ]);
+        assert.equal(kalinovik?.main_brigade, 'rs_gacko_brigade');
+        assert.deepEqual(kalinovik?.support_brigades, ['rs_kalinovik_brigade']);
         assert.deepEqual(kalinovik?.objectives, ['op:kalinovik:varos_2']);
     });
 

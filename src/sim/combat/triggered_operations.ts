@@ -284,11 +284,14 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                 corps: 'vrs_herzegovina',
                 brigades: [
                     'rs_kalinovik_brigade' as FormationId,
+                    'rs_gacko_brigade' as FormationId,
                 ],
-                // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 193 and BB2 p. 514
-                // support only broad western Foča–Trnovo sector activity, not Varoš
-                // as a named operational target. The exact Varos OSID comes solely
-                // from the authoritative January 1993 painted-control reference.
+                // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 187 supports only the broad
+                // western Foča–Trnovo sector context. Vlaholje is an owned graph waypoint
+                // selected from verified adjacency and live control, not a BB-named target.
+                // The exact Varos OSID comes solely from the authoritative January 1993
+                // painted-control reference. Brigade choices come from the local scenario
+                // OOB; BB1 does not name them as participants in this axis.
                 objectives: [
                     'op:kalinovik:vlaholje',
                     'op:kalinovik:varos_2',
