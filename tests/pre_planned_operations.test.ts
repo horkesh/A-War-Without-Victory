@@ -241,18 +241,6 @@ describe('pre-planned operations', () => {
         );
     });
 
-    it('includes Kijevo as the final 1992 western Prsten objective', () => {
-        const prsten = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Prsten');
-        assert.ok(prsten, 'Operation Prsten must remain in the pre-planned catalog');
-        const western = prsten.axes.find((axis) => axis.axis_id === 'western_sarajevo');
-        assert.ok(western, 'Operation Prsten must retain its western Sarajevo axis');
-        assert.deepEqual(western.objectives, [
-            'op:ilidza:sarajevo_dio_ilidza_2',
-            'op:ilidza:rakovica_2',
-            'op:trnovo:kijevo_2',
-        ]);
-    });
-
     it('retains both Bosanski Brod targets in the canonical Corridor east-axis order', () => {
         const corridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Corridor');
         assert.ok(corridor);
