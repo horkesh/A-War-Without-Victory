@@ -1,0 +1,27 @@
+# Upper Drina 40-Week Calibration Implementation Plan
+
+**Goal:** Improve the April 1992 definitive 40-week run against the authoritative January 1993 painter, concentrating on Goražde, Foča, Rudo, Čajniče, Višegrad, Pale, Trnovo, Rogatica, and Kalinovik.
+
+**Baseline:** Run n295/n296, final hash `ad0763075a1a2562`, overall 676/712, theatre 66/77.
+
+**Constraints:** One lever per run; no initial-control overrides; all gains through regular combat or authored defender posture; retain no candidate that regresses any previously correct January cell; painter control is truth; later-war fallout is out of scope.
+
+### Task 1: Čajniče / Batotići slice
+
+- Add a failing catalog test in `tests/pre_planned_operations.test.ts` for a dedicated `cajnice_seizure` axis on `Operation Foca`.
+- Run the focused test and confirm the expected missing-axis failure.
+- Add the minimal axis in `src/sim/combat/pre_planned_operations.ts`, staged at `op:cajnice:cajnice_2`, using `rs_ajnie_brigade`, targeting only `op:cajnice:batotici`.
+- Run the focused unit test, then one 40-week candidate. Retain only a positive net January result; repeat retained candidates for the same hash.
+
+### Task 2: Remaining independent theatre levers
+
+- Test `miljeno_2` as the follow-on on the proven Čajniče axis.
+- Test local Foča `brusna_2`, Kalinovik `vlaholje -> varos_2`, Rogatica/Pale `varosiste_2 -> praca`, early limited Trnovo `kijevo_2`, an ARBiH Višegrad/Trnovo counteroperation for `drinsko`, `medjedja_2`, and `tosici`, and an authored RS defense at `podkozara_donja_2`.
+- For each lever: write the failing test first, make the minimal change, run focused tests, run 40 weeks, compare exact fixed/regressed sets, and revert if the net score does not improve or any previously correct cell regresses.
+
+### Task 3: Final verification and review
+
+- Run typecheck, relevant Vitest suites, and two clean 40-week repeats without `--map`.
+- Compare against the current January painter and report overall/theatre scores, exact fixed and regressed sets, final hash, commit, and dirty provenance.
+- Obtain independent historian, engine/determinism, scenario-calibration, canon, and process-QA review.
+- Append the behavioral/output change and evidence to `docs/PROJECT_LEDGER.md`; do not edit canon unless review identifies a genuine canon change.
