@@ -115,6 +115,26 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash tools/hooks/guard_pipe_exit_code.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash tools/hooks/guard_scope_drift.sh"
+          }
+        ]
+      }
     ]
   }
 }
