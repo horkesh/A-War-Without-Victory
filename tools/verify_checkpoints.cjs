@@ -191,10 +191,25 @@ for (const o of Object.keys(ref.oct1995)) {
   bySection[mun][1]++;
   if (st188[o] === ref.oct1995[o]) bySection[mun][0]++;
 }
-const WATCH = ['bosansko_grahovo', 'sipovo', 'glamoc', 'drvar', 'bosanski_petrovac', 'mrkonjic_grad', 'kljuc', 'sanski_most'];
-console.log('  ' + WATCH.map((m) => `${m} ${bySection[m] ? bySection[m][0] + '/' + bySection[m][1] : '-'}`).join('  '));
+// `titov_drvar`, NOT `drvar` — the painted references are keyed on 1990 municipality names, and
+// Drvar was Titov Drvar until 1992. The first version of this list said `drvar`, matched zero
+// OSIDs, printed `-`, and contributed 0 to the gated `cascadeTotal` — a watch entry that could
+// not have found what it was looking for, inside the very block repaired to remove vacuity.
+// Verified 2026-08-26: all eight keys below exist in `painted_control_oct1995.json`.
+const WATCH = ['bosansko_grahovo', 'sipovo', 'glamoc', 'titov_drvar', 'bosanski_petrovac', 'mrkonjic_grad', 'kljuc', 'sanski_most'];
+
+// LIVENESS: a watch name matching zero OSIDs is a BROKEN WATCH LIST, not an empty municipality.
+// It must fail loudly — printing `-` and summing 0 is how the bug above survived its own review.
+const unmatched = WATCH.filter((m) => !bySection[m]);
+if (unmatched.length > 0) {
+  console.error(`  LIVENESS FAILURE — watch municipalities match zero OSIDs: ${unmatched.join(', ')}`);
+  console.error('  The painted references are keyed on 1990 municipality names. Fix the key, do not delete the row.');
+  process.exit(2);
+}
+
+console.log('  ' + WATCH.map((m) => `${m} ${bySection[m][0]}/${bySection[m][1]}`).join('  '));
 let cascadeTotal = 0;
-for (const m of WATCH) if (bySection[m]) cascadeTotal += bySection[m][0];
+for (const m of WATCH) cascadeTotal += bySection[m][0];
 console.log(`  cascade matched: ${cascadeTotal} across ${WATCH.length} municipalities`);
 if (cascadeBase != null) {
   const cd = cascadeTotal - cascadeBase;
