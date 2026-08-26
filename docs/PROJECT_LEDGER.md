@@ -29482,3 +29482,42 @@ append-only; the prior entry is retained unchanged.
 **Synchronized surfaces:** Master Roadmap, Command Board, sole RE plan, plans index, docs index,
 active task governance, current-lane pointer, and changelog. `docs/10_canon/FORAWWV.md` was not
 edited.
+
+## [2026-08-27] fix(desktop): restore campaign start — two blockers, one behind the other
+
+**Behavioral change:** the desktop app could not start a campaign at all. It now reaches the
+President's Desk. Found by the new playthrough harness (`tools/playtest/`), lane
+`lane/playtest-harness`, commits `98f54ccb4` / `e69c4d6f5` / `29655937b` / `3a4c44a9a`.
+
+**Blocker 1 — IPC validator stricter than its own callee.** `src/desktop/electron-main.cjs:2090`
+rejected any `start-new-campaign` payload without `decisionMode`, while
+`desktop_sim.startNewCampaign` declares `decisionMode: 'emergent' | 'historical' = 'emergent'`.
+The 2026-08-23 case-file commit (`72062041c`) added the field and updated
+`src/ui/map/components/MainMenu.tsx`, but not `src/ui/warroom/warroom.ts:508` — and the warroom is
+what Electron's main window loads (`electron-main.cjs:1042,1066`). Every New Campaign click
+returned "Invalid decisionMode. Use emergent or historical." to the player. The guard now mirrors
+the `scenarioKey` check above it: `undefined` passes through so the sim default applies; unknown
+values are still refused. Regression test `tests/desktop_campaign_start_decision_mode.test.ts`,
+verified to fail without the fix.
+
+**Blocker 2 — circular chunk dependency (revealed by fixing blocker 1).** `manualChunks` in
+`src/ui/map/vite.config.ts` split `components/army_hq/` four ways by filename regex. Those modules
+import one another, so both ends of a cycle landed in different chunks; the resulting TDZ error
+(`Cannot access 'ir' before initialization`, `feature-army-hq-forces-*.js`) killed the React render
+and left the player on a blank screen with no controls. Collapsed to a single chunk — correctness
+over splitting granularity, documented at the call site.
+
+**Why no existing gate caught either.** Headless paths call `desktop_sim` directly and never cross
+the IPC validation layer; dev mode does not chunk; a circular chunk dependency is legal build
+output that emits no warning; `tests/ui/warroom_launch_screen_contract.test.ts` pins launch-card
+layout and never clicks.
+
+**Open, not fixed:** the 2026-08-23 case-file opening flow (`MainMenu.tsx`) remains unreachable
+from the desktop launch path — players get the warroom instant side picker, which is what that
+plan set out to replace. Needs an owner ruling on which surface is intended. Recorded as 1b in
+`docs/40_reports/playtests/20260826_playtest_harness_first_findings.md`.
+
+**Verification:** `tsc --noEmit` clean; 29 tests pass across the campaign-start and menu slices;
+`tools/playtest/run_electron.ts` reaches the President's Desk at 6 Apr 1992 with full navigation
+(`tools/playtest/evidence/20260827_ui_presidents_desk_working.png`).
+`docs/10_canon/FORAWWV.md` was not edited.
