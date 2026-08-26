@@ -4,7 +4,7 @@
 
 > **Date:** 2026-08-26
 >
-> **Status:** READY FOR T0; implementation not started
+> **Status:** T0 COMPLETE; READY FOR T1
 >
 > **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
 >
@@ -14,9 +14,9 @@
 >
 > **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** execute T0 and bind the post-handoff integrated base
+> **Current next action:** execute T1 and establish the clean Node-22 S0
 >
-> **Execution base:** capture in T0 after the 2026-08-26 ownership-handoff sync
+> **Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
 **Goal:** Remove confirmed engine-authority, formal-battle accounting, deterministic-ordering, and locality defects without adding engine surface area or tuning historical outcomes.
 
@@ -46,7 +46,7 @@ Roadmap-phase mapping:
 
 Execution checklist:
 
-- [ ] T0 — capture integrated base and isolation
+- [x] T0 — capture integrated base and isolation
 - [ ] T1 — establish Node-22 S0
 - [ ] T2 — audit existing observation
 - [ ] T3 — repair desktop changed-path truth
@@ -67,10 +67,11 @@ Execution checklist:
 
 **Planning base audited:** `9d945566170efe252e1cc4d1960bad3a655625fc`.
 
-**Execution base:** not yet captured. The probe lane closed at
+**Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`. The probe lane closed at
 `b711cffa94029c35eac18d96db91a411eb2e7abb`: stable sector identity and
 `occupies_on_victory` landed; the fixed-home exclusion was reverted. Preserve that disposition.
-Task T0 records the post-handoff integrated commit and revalidates every path/symbol below.
+T0 bound that post-handoff integrated commit, revalidated every path/symbol below, and recorded
+the result in `docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md`.
 
 RE makes no calibration change, historical target change, combat tuning change, scenario-data
 change, map-geometry change, schema expansion, release, push, PR, or publication.
@@ -255,6 +256,7 @@ independent clone at the packet's code commit. Never overwrite Claude's or anoth
    `A4_ARMY_CO_ROSTER_DISABLED`, `ANALYZE_FACTION_GRAPH_PARITY_CHECK`,
    `ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK`, `AWWV_ARBIH_CONTAIN_POSTURE`,
    `AWWV_BRCKO_TACTICAL_GROUP`, `AWWV_CASUALTY_REALISM_FRACTION`,
+   `AWWV_CASUALTY_REALISM_V2`,
    `AWWV_CASUALTY_REALISM_RBIH`, `AWWV_CASUALTY_REALISM_RS`,
    `AWWV_CASUALTY_REALISM_HRHB`, `AWWV_COHESION_FLOOR_AT_DECREMENT`,
    `AWWV_COMMANDER_FRONT_GEOMETRY`, `AWWV_DEBUG_AXIS_READINESS`,
@@ -281,6 +283,7 @@ independent clone at the packet's code commit. Never overwrite Claude's or anoth
      "A4_ARMY_CO_ROSTER_DISABLED","ANALYZE_FACTION_GRAPH_PARITY_CHECK",
      "ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK","AWWV_ARBIH_CONTAIN_POSTURE",
      "AWWV_BRCKO_TACTICAL_GROUP","AWWV_CASUALTY_REALISM_FRACTION",
+     "AWWV_CASUALTY_REALISM_V2",
      "AWWV_CASUALTY_REALISM_RBIH","AWWV_CASUALTY_REALISM_RS",
      "AWWV_CASUALTY_REALISM_HRHB","AWWV_COHESION_FLOOR_AT_DECREMENT",
      "AWWV_COMMANDER_FRONT_GEOMETRY","AWWV_DEBUG_AXIS_READINESS",

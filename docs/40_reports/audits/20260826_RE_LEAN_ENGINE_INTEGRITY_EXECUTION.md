@@ -1,0 +1,248 @@
+# RE Lean Engine Integrity — Living Execution Audit
+
+**Date:** 2026-08-26
+
+**Status:** T0 complete; T1 is next
+
+**Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
+
+**Approved execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
+
+**Execution branch:** `codex/re-engine-integrity-execution`
+**Execution worktree:** `F:\AWWV-worktrees\re-engine-integrity`
+
+This is the single living RE evidence record. It is not a second queue. The plan remains the
+execution authority and `docs/plans/MASTER_ROADMAP.md` remains the workstream-state authority.
+
+## T0 — Integrated base and isolation
+
+### Required reading and authority
+
+The implementer read the complete ordered set in plan §2 before editing: repository/team/process
+instructions; napkin and life-lessons index; context, roadmap, board, and plan; Engine Invariants,
+Phase Specifications, Systems Manual, War Specification, CODE_CANON, Determinism Test Matrix,
+Invariant Inventory, full-team dispositions, and the cited discovery evidence. The controlling
+rules are deterministic ordering, one live mutation owner, no duplicate authority, no new engine
+surface, and no scenario claim without clean exact-commit evidence.
+
+### Base manifest
+
+| Check | Result |
+|---|---|
+| Integration checkout | `F:/A-War-Without-Victory` |
+| Integration branch | `codex/engine-integrity-docs` |
+| Approved HEAD | `38e65547882856fba07faab7a6dbcd4258da9607` |
+| Integration status | clean |
+| Probe closeout ancestor | `b711cffa94029c35eac18d96db91a411eb2e7abb`; `merge-base --is-ancestor` exited 0 |
+| Execution checkout | `F:/AWWV-worktrees/re-engine-integrity` |
+| Execution branch | `codex/re-engine-integrity-execution` |
+| Execution HEAD before T0 docs | `38e65547882856fba07faab7a6dbcd4258da9607` |
+| Execution status before edits | clean |
+| Remote/network action | none |
+| Push/PR/publication | none |
+
+The first `git worktree add` tool call yielded after 30.2 seconds while Git reported 14% checkout.
+The Git and Git-LFS child processes continued normally, completed the checkout, and removed the
+temporary `locked initializing` marker. The final worktree was independently rechecked as unlocked,
+clean, on the exact branch and approved HEAD. This was a long checkout, not a failed or recovered
+checkout; no target was deleted, reused, reset, or overwritten.
+
+### Probe handoff disposition
+
+The integrated base preserves the closed probe lane exactly:
+
+- stable sector identity landed;
+- `occupies_on_victory` landed;
+- the fixed-home exclusion was reverted after the tag was measured on 180 of 184 brigades.
+
+Evidence is recorded in `MASTER_ROADMAP.md:19-40,65-66`, the RE plan at its execution-base block,
+and closeout commit `b711cffa9`. Commits after that closeout and before the approved base are docs-only
+RE handoff commits (`ccccc489d`, `38e655478`). RE does not reopen probe work.
+
+### Active-worktree collision census
+
+Every path returned by `git worktree list --porcelain` was checked with both
+`git -C <path> status --short` and `git -C <path> diff --name-only HEAD`.
+
+- Clean: integration checkout; `docs-sync`; `engine-truth-checkpoint`;
+  `four-week-phantom-boundary`; `hv-1995-roster-calibration`; `mainstaff-fix`;
+  `test-suite-recovery`; all three `upper-drina-40w` sparse/v2/v3 worktrees; `awwv-eb1`;
+  `awwv-hv-data`; `awwv-instr`; this execution worktree; and `re-plan-refinement`.
+- Dirty: `C:/Users/User/.codex/worktrees/awwv-upper-drina`, with 20 modified paths.
+- T1 literal-boundary intersection: zero. No worktree touches this living report.
+- Future collision already visible: the dirty upper-drina tree touches T6
+  (`src/sim/combat/attack_resolution_osid.ts`) and T8
+  (`src/sim/combat/pre_planned_operations.ts`, `tests/pre_planned_operations.test.ts`). This does
+  not block T1–T3, but T6/T8 must stop unless that owner releases or rebases those exact files.
+
+No other worktree had staged or unstaged paths. This census is point-in-time evidence; the universal
+packet protocol repeats it before every packet.
+
+## T0 source inventory — T3 through T14
+
+All plan-named existing files were found. The three test paths explicitly described as new are
+correctly absent before their packets:
+`tests/commander/threat_predecessor_matching.test.ts`,
+`tests/preplanned_authorization_phase_progression.test.ts`, and
+`tests/patron_active_formation_strength.test.ts`.
+
+### T3 — desktop changed-path truth
+
+`.github/scripts/detect-changed-paths.sh:64-84` currently includes `src/desktop/`, `src/ui/`,
+`src/shared/`, and `src/runtime/` in the desktop case, but omits all seven imported bundle roots
+named by T3: `src/data/`, `src/map/`, `src/scenario/`, `src/sim/`, `src/state/`, `src/utils/`, and
+`src/validate/`. `tests/desktop_release_ci_guardrails.test.ts:74-94` only pins the existing list.
+The workflow and packaged probe remain run-only.
+
+### T4–T5 — duplicate presidential mutation authority
+
+- `stage-operation-force-launch`: handler `electron-main.cjs:2593`; preload `preload.cjs:82`;
+  caller/export path `DirectiveCard`, `useIPC`, and `desktop_sim`; AI duplicate at
+  `tools/ai_play/president_playthrough.ts:29,284,308`.
+- `interpretOperationLaunch` / `interpretOperationHalt`: live exports at
+  `order_interpretation.ts:584,716`; dead-state readers at `sector_offensive.ts:1259-1271`;
+  fields at `game_state.ts:545,615`.
+- Retained exact-ID owners: `force-launch-proposal` at `electron-main.cjs:3896` and
+  `proactive-force-launch-op` at `electron-main.cjs:3974`.
+- `stage-operation-decision`: handler `electron-main.cjs:3021`; preload `preload.cjs:83`;
+  modal mutation props/actions `OperationBriefingModal.tsx:28,359,544-584`.
+- Retained Decision Room/read-only truth: `operationBriefing.reviewReadOnly` and
+  `attention.bridgeUnavailableReadOnly`; retained channels `stage-op-halt-order` and
+  `stage-op-directive-order` are live in main/preload.
+
+### T6 — formal-battle casualty ownership
+
+- Canonical resolver: `attack_resolution_osid.ts:500` (`resolveAttackOrdersOsid`).
+- Personnel mutation: `attack_retreat_displacement.ts:500` (`applyPersonnelLoss`).
+- Ledger split/distribution: `attack_casualty_distribution.ts:43,166-167`.
+- Morale absorption independently mutates and records at
+  `attack_morale_absorption.ts:63,155-168`.
+- Duplicate post-hoc owner: import `war_phases.ts:115`, phase
+  `apply-casualty-pool-exhaustion` at `war_phases.ts:3092-3138`, calling
+  `pool_population.ts:422` after personnel was already reduced.
+- `battle_resolution.ts` has a separate SID fallback-local `applyPersonnelLoss` at line 749 and is
+  not the canonical OSID owner.
+
+### T7 — threat predecessor lineage
+
+`assess.ts:171-220` builds prior-zone sets, loops every current zone over every previous zone, and
+overwrites `osidsLost` with the last non-empty predecessor loss. The current code has no positive
+overlap selection, no one-descendant-per-predecessor rule, and no global vanished-OSID attribution.
+
+### T8 — pre-planned queues
+
+`pre_planned_operations.ts:1050` owns `ALL_PRE_PLANNED`; injection walks it at lines 1328-1497,
+but still installs five name-specific queue blocks at lines 1436-1482. `injectQueuedOperation`
+at lines 1508-1599 examines only the head and returns after a terminal shift, permitting starvation.
+The live phase callers are `war_phases.ts:1813` and `1958`.
+
+### T9 — APWB conditional cleanup
+
+`targets_friendly_overrides` is defined at `operation_opportunities.ts:247-257` and applied at
+`1251-1279`. Tigar and APWB definitions, predicates, constants, exports, and tests remain live in
+`operation_opportunity_catalog_5th_corps.ts:441-923`; `operation_names.ts:128` retains the name.
+This packet remains closed until DG-1.
+
+### T10 — emergency retreat
+
+`findEmergencyRetreatOsid` is live at `attack_retreat_displacement.ts:259`. The source permits every
+candidate when `originComponent` is absent (`:275-281`), then falls through home, fallback, HQ,
+same-component, largest-component, and any-friendly selection (`:284-340`). The current test already
+asserts remote-home and largest-component behavior. Code remains closed until DG-2.
+
+### T11 — active formation strength
+
+`getMilitaryStrengthRatio` at `patron_pressure.ts:335-356` filters faction and brigade kind, then
+excludes only destroyed/disbanded/merged/withdrawn lifecycle values. It does not require
+`status === 'active'` or active lifecycle, so inactive/forming/displaced rows remain counted.
+
+### T12 — dissolution salvage locality
+
+`dissolveCombatIneffectiveBrigades` is live at `brigade_dissolution.ts:110`. Equipment salvage at
+`:187-207` selects the first alphabetically sorted same-corps active brigade; it receives no
+adjacency. The two war-phase callers are `war_phases.ts:1206-1208` and `3185-3193`; the first precedes
+the spatial-cache construction. T12 therefore remains triage/default defer as planned.
+
+### T13–T14 — evidence-only and exit owners
+
+The garrison/fallback, prediction, strategic-reserve `committed`, five-turn reconstitution,
+ordinary replenishment, dissolution thresholds, Petkovci, and enclave-request questions all have
+live source evidence, but no T13 production boundary. T13 remains docs-only and decision-gated.
+T14 must repeat the literal deletion census for both desktop channels, interpretation exports, and
+dead state keys, plus every budget/schema/artifact check.
+
+No named line reference in the executable steps was stale enough to change a file boundary or test
+instruction. The current anchors above supersede proposal/discovery-era line numbers.
+
+## Environment-reader inventory
+
+The literal inventory covered `process.env`, optional-process access, aliased `runtimeProcess`,
+computed keys, and the reachable `src/utils/routine_console_diagnostics.ts` helper. T0 found one
+reader omitted from the plan's original T1 denylist: `AWWV_CASUALTY_REALISM_V2` at
+`src/sim/combat/casualty_realism_v2_gate.ts:109`. T1 was amended before S0; no run was attempted.
+
+### Behavior/state/outcome gates
+
+`A4_ARMY_CO_ROSTER_DISABLED`, `AWWV_ARBIH_CONTAIN_POSTURE`,
+`AWWV_BRCKO_TACTICAL_GROUP`, `AWWV_CASUALTY_REALISM_FRACTION`,
+`AWWV_CASUALTY_REALISM_RBIH`, `AWWV_CASUALTY_REALISM_RS`,
+`AWWV_CASUALTY_REALISM_HRHB`, `AWWV_CASUALTY_REALISM_V2`,
+`AWWV_COHESION_FLOOR_AT_DECREMENT`, `AWWV_COMMANDER_FRONT_GEOMETRY`,
+`AWWV_ENCLAVE_COLUMN_DISPLACEMENT`, `AWWV_INTEL_AMBUSH_DEPTH`,
+`AWWV_INTEL_AMBUSH_FRICTION`, `AWWV_MAINSTAFF_OP_AVAILABILITY`,
+`AWWV_MAINSTAFF_OP_RETENTION`, `AWWV_PDP_COHESION_CAUTION_BIAS`,
+`AWWV_PDP_INTL_STANDING_OPS_HESITATION`,
+`AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS`,
+`AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION`,
+`AWWV_POLITICAL_DIMENSION_PROPAGATION`, `AWWV_SRK_STRANGLE_POSTURE`,
+`AWWV_VRS_CONTAIN_POSTURE`, `B2_POLITICAL_LEADER_DATA_DISABLED`,
+`B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED`,
+`C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED`, `ENABLE_COLLAPSE`,
+`ENABLE_SARAJEVO_LIFELINE`, `MORALE_OVERRIDE_ENABLED`, and
+`SIEGE_MORALE_DRAIN_ENABLED`.
+
+### Output/scoring/diagnostic gates
+
+`ANALYZE_FACTION_GRAPH_PARITY_CHECK`,
+`ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK`, `AWWV_DEBUG_AXIS_READINESS`,
+`AWWV_DEBUG_REASON_CODES`, `AWWV_FORCE_ROUTINE_DIAGNOSTICS`, `AWWV_SCORING_SIMPLE`,
+`SUPPLY_BRIDGE_PARITY_CHECK`, and `VITEST`.
+
+### Provenance/input gates
+
+`AWWV_PROVENANCE_OVERRIDE` and `AWWV_STARTUP_SNAPSHOT_OVERRIDE_APR_1992`.
+
+### Profile-only gates
+
+`HEAP_PROFILE_188W`, `HEAP_PROFILE_TURNS`, and `PERF_PROFILE_SERIALIZATION`.
+
+CLI-only audit/telemetry flags and desktop-only runtime/profile flags are outside the requested
+scenario/sim/state reachability boundary and are not added to the S0 denylist. T1 must fail if any
+listed variable exists; it must not clear one silently.
+
+## Missing invariants-path ruling
+
+`Test-Path docs/PHASE_A_INVARIANTS.md` is false at the approved base. The Systems Programmer plus
+Determinism/Process seat issued **PASS with scope** at
+`38e65547882856fba07faab7a6dbcd4258da9607`:
+
+- `docs/20_engineering/INVARIANTS_IN_CODE.md` is approved only as the replacement for the stale
+  required-reading reference and as a supplemental code-enforcement inventory;
+- it is not a canonical Phase A replacement, creates no new canon, and never overrides live
+  authority;
+- ordered authority remains Engine Invariants plus Rulebook/Systems Manual/phase specs, then
+  CODE_CANON, then DETERMINISM_TEST_MATRIX; INVARIANTS_IN_CODE is supplemental only.
+
+Source anchors: `CODE_CANON.md:3-25`, `DETERMINISM_TEST_MATRIX.md:3-15,53-83`, and
+`INVARIANTS_IN_CODE.md:1-18`. No duplicate `docs/PHASE_A_INVARIANTS.md` was created.
+
+## T0 disposition
+
+**PASS for T1.** The approved base is bound, the isolated execution branch is clean and exact,
+the immediate T1 evidence boundary has no worktree collision, source anchors are live, the
+environment denylist now includes the discovered V2 gate, and the missing-doc ruling is recorded.
+T1 may provision only an owner/build-supplied Node 22 and establish S0. No T1 action occurred here.
+
+T0 changes documentation/process evidence only. They do not alter behavior, output, scenarios,
+canon, state, schemas, defaults, or workflow rules, so no PROJECT_LEDGER or knowledge-ledger entry is
+required for this commit. `docs/10_canon/FORAWWV.md` was not edited.
