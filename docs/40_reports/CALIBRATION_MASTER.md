@@ -9,7 +9,7 @@ make a gate pass.
 
 No current run satisfies lean RE-0 S0. RE-0 requires two fresh, byte-identical, distinct-output
 188-week runs on the approved integrated execution parent, clean metadata, and Node 22. T1B
-mixed-battle occupation convergence and T1C unconditional final sector owner-truth convergence are
+mixed-battle occupation convergence and T1C exact final-sector fixed-point convergence are
 ordered S0 prerequisites. The prior Node-22 pair is reproducible pre-fix evidence only. Farz remains
 separate known-red calibration; T1C is not authority to tune it. Raw artifact metadata outranks this
 catalog.

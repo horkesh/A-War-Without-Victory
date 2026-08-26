@@ -14,7 +14,7 @@
 >
 > **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** close T1B, execute T1C final-sector convergence, then establish S0
+> **Current next action:** close T1B, execute T1C exact final-sector fixed-point convergence, then establish S0
 >
 > **Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
@@ -50,7 +50,7 @@ Execution checklist:
 - [ ] T1 — establish Node-22 S0
   - [x] T1A — freeze reproducible dependency installation
   - [ ] T1B — converge mixed-battle occupation authority
-  - [ ] T1C — restore unconditional final sector owner-truth convergence
+  - [ ] T1C — restore exact final-sector fixed-point convergence
 - [ ] T2 — audit existing observation
 - [ ] T3 — repair desktop changed-path truth
 - [ ] DG-1 — APWB disposition
@@ -310,18 +310,22 @@ signature beyond removal of the mixed-battle capture, non-historical gate failur
 fingerprint drift between the fresh pair, need for a new authority surface, or production budget
 breach returns to the owner. Do not weaken the verifier or refresh a reference to pass.
 
-#### T1C / RE-0D — Restore unconditional final sector owner-truth convergence before S0
+#### T1C / RE-0D — Restore exact final-sector fixed-point convergence before S0
 
-**Unanimous ruling:** partially revert `53889f35595c917392d02c32dcea703938802cf9` only at
-`applyFinalSectorOwnerTruthPass:4`. The final owner-truth pass is a correctness seal and runs
-unconditionally after final disconnected-territory repair. Preserve the corrected prune/recovery
-receipt shortcut, every other fixed-point gate, stable ordering, and all existing owner surfaces.
+**Second unanimous ruling:** the two incomplete receipt guards introduced by the same
+`53889f35595c917392d02c32dcea703938802cf9` defect family are not admissible convergence proofs.
+Run both `applyFinalSectorOwnerTruthPass:4` and the ordered
+`sealMergedSectorTruth:3` → `pruneGhostArtifactSectors:2` → `recoverDroppedFrontEdges:2` segment
+unconditionally. Delete only those guards and bookkeeping used solely by them. Preserve stable
+ordering, the bodies/arguments/order of all four calls, and all existing owner surfaces. Do not add
+T1D; both corrections and their performance cost are one atomic T1C candidate.
 
 **Editable source/test boundary:** production may edit only
 `src/sim/combat/corps_front_sectors.ts`. The existing property already supplies RED and coverage;
-edit `tests/sector_partition_buildCorpsFrontSectors_integration.test.ts` only if a test-only
-diagnostic improvement is necessary. No other source or test file may change. No schema, persisted
-field, flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or canon change.
+tests may edit only `tests/sector_partition_buildCorpsFrontSectors_integration.test.ts` for the
+property diagnostics and `tests/sector_partition_instrumentation.test.ts` for the static
+unconditional-guard contract. No other source or test file may change. No schema, persisted field,
+flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or canon change.
 
 1. Preserve the captured RED from the existing optimized-versus-unconditional property at variant
    seed 31. It has exactly four semantic differences:
@@ -331,29 +335,41 @@ field, flag, module, cache, threshold, scenario, baseline, reference, pipeline s
    - `arbih_1st_mountain.location_osid`: optimized
      `op:novi_grad_sarajevo:novi_grad_sarajevo`, reference Centar Sarajevo.
    Do not invent or hardcode a raw Centar OSID that the retained RED output did not preserve.
-2. In `buildCorpsFrontSectors`, remove only the conditional guard around
-   `applyFinalSectorOwnerTruthPass:4` and any now-dead local receipt accumulation created solely for
-   that guard. Call the existing pass unconditionally in the same position. Do not alter the pass,
-   its arguments, `repairDisconnectedTerritory`, receipt producers, or the remaining fixed-point
-   sequence.
-3. Run focused GREEN:
+2. Preserve the second captured RED at deterministic seed 55. Optimized output assigns one otherwise
+   content-identical sector/sub-segment identity suffix `:5`, while the unconditional reference
+   assigns `:4`; all other sector content and the complete cloned `GameState` are identical. Trace
+   evidence proves that skipping `sealMergedSectorTruth:3` → `pruneGhostArtifactSectors:2` →
+   `recoverDroppedFrontEdges:2` lets a transient piece consume the stable ID before later deletion.
+   Do not pin a sector prefix that the retained RED did not preserve.
+3. In `buildCorpsFrontSectors`, remove only the conditional guards around pass 4 and the named
+   three-call convergence segment. Delete `finalTerritoryRepaired`, `prunedGhostArtifacts`,
+   `recoveredDroppedFrontEdges`, or equivalent local receipt bookkeeping only where it becomes dead
+   after both calls are unconditional. Keep both sequences in their current positions and orders.
+   Do not alter call bodies/arguments, receipt producers used elsewhere, or any other fixed-point
+   logic.
+4. Run focused GREEN:
 
    ```powershell
-   node node_modules/vitest/vitest.mjs run tests/sector_partition_buildCorpsFrontSectors_integration.test.ts --pool=forks --reporter=dot
+   node node_modules/vitest/vitest.mjs run tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/sector_partition_instrumentation.test.ts --pool=forks --reporter=dot
    ```
 
    The complete recursive property must pass all 300 candidate/reference comparisons: 100
    deterministic variants in live-war, final-turn, and final-save-projection modes, comparing every
    returned sector/sub-segment field and the entire cloned `GameState`.
-4. Mutation proof: temporarily restore the removed pass-4 condition. The property must fail at seed
-   31 with the same four semantic differences. Revert the mutation and rerun GREEN; never commit it.
-5. Run the historical seven-file convergence matrix:
+5. Run two separate mutation proofs and revert after each:
+   - restore only the pass-4 guard; seed 31 must fail with the same four semantic differences while
+     seed 55 remains green;
+   - restore only the three-call segment guard; seed 55 must fail with suffix `:5` versus `:4` while
+     seed 31 remains green.
+   Run the focused command after each mutation; the instrumentation static contract must reject
+   either guard. Never commit a mutation.
+6. Run the historical seven-file convergence matrix:
 
    ```powershell
    npm.cmd exec -- vitest run tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/final_sector_truth_reconciliation.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/final_sector_reconciliation_session.test.ts tests/sector_territory_contiguity_repair.test.ts tests/postmerge_ghost_sector_prune.test.ts --pool=forks --reporter=dot
    ```
 
-6. Run the complete required gates without refreshing a baseline:
+7. Run the complete required gates without refreshing a baseline:
 
    ```powershell
    npm.cmd run typecheck
@@ -361,12 +377,14 @@ field, flag, module, cache, threshold, scenario, baseline, reference, pipeline s
    npm.cmd run test:baselines
    ```
 
-7. Run Simplifier, Determinism, Systems, Performance, QA, Code Review, and Process QA. Production
+8. Run Simplifier, Determinism, Systems, Performance, QA, Code Review, and Process QA. Production
    scope must be a net deletion or neutral rewrite; no new scan or owner is allowed. Commit source
-   and any allowed test-only change as
-   `fix(RE-0D): restore unconditional final sector owner truth`.
-8. Measure from separate clean authoritative checkouts at the exact parent and candidate commits,
-   on the same Node 22, machine, power state, and exclusive background-load class. Run one excluded
+   and any allowed tests as
+   `fix(RE-0D): restore exact final sector fixed-point convergence`.
+9. Measure the combined pass-4 plus three-call correction atomically from separate clean
+   authoritative checkouts at the single exact pre-T1C parent and candidate commits. Do not time,
+   accept, or report either half independently. Use the same Node 22, machine, power state, and
+   exclusive background-load class. Run one excluded
    warm-up per source, then three alternating 40-week pairs in this literal order:
    `parent_1, candidate_1, parent_2, candidate_2, parent_3, candidate_3`. For every run use:
 
@@ -378,15 +396,15 @@ field, flag, module, cache, threshold, scenario, baseline, reference, pipeline s
    `totalWallMs`, affected phase totals, resolved final-save SHA-256, and
    `run_summary.json.final_state_hash`. Require exact parent/candidate scenario bytes and hashes.
    Compare paired deltas and medians; never infer a speed claim from an arithmetic mean alone.
-9. Correctness is retained even if candidate median `totalWallMs` regresses by more than 2%: do not
-   restore the faulty conditional seal. A regression above 2% requires a separately approved,
+10. Correctness is retained even if candidate median `totalWallMs` regresses by more than 2%: do not
+   restore either faulty guard. A regression above 2% requires a separately approved,
    bounded performance escalation with its own owner and evidence before T2; it does not authorize
    another truth-pass skip, a cache, or a weakened test. Zero to 2% remains watch-only.
-10. From the reviewed T1C code commit, execute the complete fresh paired Node-22 S0 procedure below.
+11. From the reviewed T1C code commit, execute the complete fresh paired Node-22 S0 procedure below.
     The prior `58f100f3` pair remains pre-fix evidence only. Commit evidence/control-plane/ledger
-    only as `docs(RE-0D): record final sector convergence and S0`. Do not start T2 first.
+    only as `docs(RE-0D): record exact final sector convergence and S0`. Do not start T2 first.
 
-**Stop:** any difference beyond the known pre-fix seed-31 RED, any failure outside the intended
+**Stop:** any difference beyond the known pre-fix seed-31 and seed-55 REDs, any failure outside the intended
 RED/mutation phase, parent/candidate output drift after the fix, test/source scope expansion, need
 for a new authority surface, or unruled performance remediation returns to the owner.
 
@@ -564,7 +582,7 @@ for a new authority surface, or unruled performance remediation returns to the o
 11. Record exact commands, commit, source hashes, elapsed wall time, file/row/byte inventory,
    checkpoints, hashes, fingerprints, and gate results in the single RE implementation report.
 12. Commit T1C/S0 evidence docs only:
-    `docs(RE-0D): record final sector convergence and clean S0`.
+    `docs(RE-0D): record exact final sector convergence and clean S0`.
 
 ### T2 — Audit existing observation; add nothing
 

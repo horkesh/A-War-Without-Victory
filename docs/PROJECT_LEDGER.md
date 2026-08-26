@@ -29610,3 +29610,37 @@ task governance, docs index, reopened Phase 2 performance evidence, Calibration 
 ledger agree. The future desktop changed-path packet is relabeled RE-0E to prevent duplicate active
 IDs. No report index changed because both affected reports were already indexed. No canon or
 knowledge-ledger update is made before code evidence.
+
+## [2026-08-27] docs(RE-0D): broaden exact sector convergence prerequisite
+
+**Type:** Documentation/process amendment only. No engine, test, scenario, save/schema, baseline,
+reference, threshold, package, canon, knowledge-ledger, push, PR, merge, tag, publication, or
+release change.
+
+**Second unanimous ruling:** T1C is broadened in place and no T1D is created. In addition to the
+seed-31 pass-4 state divergence recorded immediately above, deterministic seed 55 proves that the
+conditional seal-3/prune-2/recovery-2 segment produces one otherwise content-identical
+sector/sub-segment identity suffix `:5` where the unconditional reference produces `:4`; all other
+sector content and the entire cloned `GameState` are identical. Trace evidence shows the skipped
+segment lets a transient piece consume the stable ID before later deletion.
+
+**Exact convergence boundary:** The one T1C candidate makes both
+`applyFinalSectorOwnerTruthPass:4` and the ordered `sealMergedSectorTruth:3` →
+`pruneGhostArtifactSectors:2` → `recoverDroppedFrontEdges:2` segment unconditional, deleting only
+their incomplete guards and guard-only bookkeeping. This is one atomic partial revert of
+`53889f35595c917392d02c32dcea703938802cf9`. Production remains limited to
+`src/sim/combat/corps_front_sectors.ts`; only the integration property and instrumentation static
+guard contract may change. No new owner, scan, field, flag, cache, module, schema, canon, scenario,
+baseline, threshold, reference, or history literal is authorized.
+
+**Proof and measurement:** Pass-4 and segment guards receive separate mutation proofs at seeds 31
+and 55. The 300-comparison three-mode property, static guard, historical seven-file matrix,
+typecheck, balanced suite, and baselines-without-refresh remain mandatory. The combined correction
+is measured atomically in three alternating 40-week pairs against the single exact pre-T1C parent;
+neither half may earn an independent performance claim. Correctness remains retained above the 2%
+regression boundary, which opens a separate bounded performance escalation before T2.
+
+**Synchronization:** Sole plan/checklist, living audit, Master Roadmap, Command Board, plans index,
+active governance, docs index, reopened Phase 2 performance evidence, Calibration Master, and
+project ledger agree on exact final-sector fixed-point convergence. No report index, canon, or
+knowledge-ledger edit is required.

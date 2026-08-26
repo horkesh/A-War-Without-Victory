@@ -5,7 +5,7 @@
 **Scenario:** `data/scenarios/apr1992_definitive_40w.json`
 **Reference machine:** AMD Ryzen 7 5700X, 8 physical / 16 logical cores, Windows x64, Node v24.13.0
 **Target:** mean below 100 ms per simulated turn
-**Status:** Historical R5 performance dispositions remain closed, but RE T1C has reopened one correctness and measurement slice: `applyFinalSectorOwnerTruthPass:4` must return to unconditional execution before RE S0. Operational-graph, runtime-hardened immutable-adjacency, operational-data ownership reuse, the Phase 2c call-scoped dense formation-occupancy index, and Phase 2d Task 8A's invocation-local front-edge relation remain accepted. The Phase 2b fixed-point candidate remains performance-unaccepted and the Phase 2c reachability/sector-fact candidate remains rejected. Task 8A remains `PASS_RETAIN` at `0fd36157b`; its memory watch remains. T1C does not reopen the 100 ms target or Task 6. It requires fresh exact-parent/candidate timing, and the correctness seal is retained even if a separate performance escalation is required.
+**Status:** Historical R5 performance dispositions remain closed, but RE T1C has reopened exact final-sector fixed-point correctness and measurement: `applyFinalSectorOwnerTruthPass:4` and the ordered seal-3/prune-2/recovery-2 segment must execute unconditionally before RE S0. Operational-graph, runtime-hardened immutable-adjacency, operational-data ownership reuse, the Phase 2c call-scoped dense formation-occupancy index, and Phase 2d Task 8A's invocation-local front-edge relation remain accepted. The Phase 2b fixed-point candidate remains performance-unaccepted and the Phase 2c reachability/sector-fact candidate remains rejected. Task 8A remains `PASS_RETAIN` at `0fd36157b`; its memory watch remains. T1C does not reopen the 100 ms target or Task 6. It requires one combined exact-parent/candidate timing packet, and correctness is retained even if a separate performance escalation is required.
 
 ## Determinism boundary
 
@@ -143,7 +143,7 @@ Vitest 2.1.9 reported 7 files / 81 tests passed, started `2026-08-01 18:22:50`, 
 
 The tracked acceptance contract is this report plus the focused equivalence tests. Raw profiler products remain untracked because they are machine-local diagnostic evidence, not canonical game data.
 
-### RE T1C reopening — unconditional owner-truth pass 4
+### RE T1C reopening — exact final-sector fixed-point convergence
 
 The unanimous RE review found that the corrected 300-comparison property is now affirmative RED
 evidence against the conditional `applyFinalSectorOwnerTruthPass:4` shortcut. At deterministic
@@ -152,15 +152,24 @@ fields: SRK sectors 4 and 7 retain `threat_ratio:9999` rather than `0`, and
 `arbih_1st_mountain` retains `entrenchment_turns:12` rather than `0` plus a Novi Grad rather than
 Centar Sarajevo location. This is live final-sector/state truth, not a timing preference.
 
-T1C therefore partially reverts `53889f35595c917392d02c32dcea703938802cf9` only at pass 4. The
-prune/recovery receipt gate and all other fixed-point work remain. The source boundary is solely
-`src/sim/combat/corps_front_sectors.ts`; the existing
-`tests/sector_partition_buildCorpsFrontSectors_integration.test.ts` property is the only permitted
-test edit if diagnostic improvement is needed. The exact RED/mutation, 300-comparison property,
-historical seven-file matrix, typecheck, balanced suite, and baselines-without-refresh must pass.
+The second unanimous review found another RED in the same `53889f355` defect family. At seed 55,
+optimized output uses one otherwise content-identical sector/sub-segment suffix `:5` while the
+unconditional reference uses `:4`; the complete cloned `GameState` and all other sector content are
+identical. Trace evidence shows that skipping `sealMergedSectorTruth:3` →
+`pruneGhostArtifactSectors:2` → `recoverDroppedFrontEdges:2` lets a transient piece consume the
+stable ID before later deletion.
 
-After the correctness commit, one excluded warm-up per source and three alternating
-exact-parent/candidate 40-week pairs must be captured on Node 22 in the order parent 1, candidate 1,
+T1C therefore makes both pass 4 and that three-call segment unconditional, deleting only their
+incomplete guards and guard-only bookkeeping. This is one atomic partial revert of
+`53889f35595c917392d02c32dcea703938802cf9`, not T1D. The source boundary is solely
+`src/sim/combat/corps_front_sectors.ts`; permitted tests are the integration property and
+instrumentation static guard contract. Separate seed-31/pass-4 and seed-55/segment mutations, the
+300-comparison property, historical seven-file matrix, typecheck, balanced suite, and
+baselines-without-refresh must pass.
+
+After the combined correctness commit, one excluded warm-up per source and three alternating
+exact-parent/candidate 40-week pairs must measure both corrections atomically against the single
+pre-T1C parent on Node 22 in the order parent 1, candidate 1,
 parent 2, candidate 2, parent 3, candidate 3. Exact scenario bytes/hashes and affected phase totals
 are mandatory. A median regression above 2% opens a separate bounded performance escalation; it
 does not authorize reverting the correctness seal, accepting the old Phase 2b performance packet,

@@ -12,7 +12,7 @@ deterministic ordering, locality, and verification truth before further calibrat
 handed the repository to RE. Preserve that disposition. The execution base is bound at
 `38e65547882856fba07faab7a6dbcd4258da9607`, and T1A froze immutable dependency installation. The
 first Node-22 pair is reproducible pre-fix evidence only, not S0. Close the DG-0 ALL ruling in T1B,
-then restore unconditional final sector owner-truth convergence in T1C. Only afterward establish a
+then restore exact final-sector fixed-point convergence in T1C. Only afterward establish a
 fresh exact-code-commit S0 using the plan's source-verified authoritative run substrate.
 
 ## Canonical owner
@@ -83,8 +83,8 @@ checkpoint are not engine defects.
 - Any new overlapping engine edit stops the affected RE packet; the probe lane itself is closed.
 - T1B exclusively owns `src/sim/combat/attack_resolution_osid.ts` and
   `tests/probe_territory_flip.test.ts` for the bounded mixed-battle convergence packet.
-- T1C/RE-0D exclusively owns `src/sim/combat/corps_front_sectors.ts`; its existing integration
-  property is the sole permitted test owner if needed.
+- T1C/RE-0D exclusively owns `src/sim/combat/corps_front_sectors.ts`, its existing integration
+  property, and the sector-partition instrumentation static guard contract.
 - RE-0E/RE-1 collide with desktop/runtime/UI work; pause the relevant R7 packet.
 - RE-2/RE-3/RE-4 may overlap R7 only after exact file inspection proves ownership is disjoint.
 - Further calibration is paused until RE closes.
@@ -126,7 +126,8 @@ busier war or a better historical-fit score.
 - **2026-08-27:** the first Node-22 A/B pair proved reproducibility but exposed mixed-battle
   occupation authority and is retained only as pre-fix evidence. Farz remains separate known-red
   calibration. The owner closed DG-0 with ALL.
-- **2026-08-27:** unanimous T1C ruling reopened only the conditional skip of final sector owner-truth
-  pass 4 after the existing full property exposed a deterministic seed-31 four-field divergence.
+- **2026-08-27:** unanimous T1C rulings reopened both incomplete guards from the same fixed-point
+  family: seed 31 exposes four state fields when pass 4 skips; seed 55 exposes stable identity
+  suffix `:5` versus `:4` when the seal-3/prune-2/recovery-2 segment skips. Both are one T1C.
 - **Next:** close T1B, execute T1C code/evidence and alternating performance proof, then run a fresh
   paired Node-22 S0 at the exact T1C code commit.

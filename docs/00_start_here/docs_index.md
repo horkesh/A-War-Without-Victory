@@ -56,13 +56,14 @@ completed T0 at base `38e65547882856fba07faab7a6dbcd4258da9607`, closed T1A, and
 T1B followed by T1C before S0. The first Node-22 pair is reproducible pre-fix evidence only, not S0. Owner ruling
 ALL requires every validated battle contributor to permit occupation, with explicit `false`
 vetoes and missing declarations defaulting `true`; T1B applies that generic rule. T1C then restores
-unconditional final sector owner-truth convergence and completes exact-parent/candidate performance
+exact final-sector fixed-point convergence across the pass-4 and seal-3/prune-2/recovery-2 guards,
+and completes combined exact-parent/candidate performance
 proof before a fresh exact-code-commit S0 and serial execution through RE-6. The
 [full-team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md)
 index the review; frozen discovery remains report evidence. Further calibration and R8 wait on RE.
 No current calibration artifact satisfies RE S0.
 
-**Current control plane (synchronized 2026-08-27):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE T1 is in progress: T1A is closed, T1B mixed-battle occupation convergence is active, T1C unconditional final sector owner truth follows, and only then may the fresh Node-22 S0 run; the prior pair remains pre-fix evidence only. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
+**Current control plane (synchronized 2026-08-27):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE T1 is in progress: T1A is closed, T1B mixed-battle occupation convergence is active, T1C exact final-sector fixed-point convergence follows, and only then may the fresh Node-22 S0 run; the prior pair remains pre-fix evidence only. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
 
 The remaining files under `docs/30_planning/` are design specifications, not active execution queues: [multi-brigade operations](../30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md), [operation reevaluation](../30_planning/OPERATION_REEVALUATION_DESIGN_SPEC.md), and [spatial context](../30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md). Historical plans removed from that folder remain available through Git history and the ledgers.
 
