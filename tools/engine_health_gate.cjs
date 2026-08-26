@@ -265,10 +265,52 @@ const consistencyFailures = consistencyMatch
   ? 0
   : NaN; // unparseable non-zero exit → NaN sentinel; consistencyParseError forces a hard fail
 
+// ── CORRECTED OPERATION PREDICATES — RE Phase 0 item 0.2. REPORTED, NEVER GATED. ─────────────
+//
+// The two shipped counters below come from engine-side accumulators
+// (`invalid_operation_count`, `zero_eligible_attacker_operation_count`). They read 0 on runs where
+// operations demonstrably never attacked: measured 2026-08-26, n374 has SIX of forty operations
+// and NINE of sixty axes with `total_attacks === 0`, and n294 has NINETEEN of fifty-two — while
+// both shipped counters report 0. The gate is green on a measure that is not counting this.
+//
+// These corrected figures are computed from `operation_aars.json` and are ADVISORY ONLY. They are
+// deliberately NOT gated: blessing today's numbers as the ceiling would ratchet the defect in as
+// the floor, which is exactly what the plan warns against. Promote to a hard ceiling only after
+// the underlying tempo work (REAL_WAR_MASTER #40, raised to P0 on 2026-08-26) lands.
+//
+// ⚠ FIELD NAME: it is `total_attacks` on an axis summary, NOT `attack_attempt_count`. A first
+// version of this read the latter, got `undefined ?? 0` for every axis, and reported all 40
+// operations as dead. The `undefined` counter below exists so that failure can never be silent.
+function correctedOpPredicates(dir) {
+  const p = path.join(dir, 'operation_aars.json');
+  if (!fs.existsSync(p)) return null;
+  let list;
+  try {
+    const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
+    list = Array.isArray(raw) ? raw : (raw.aars || raw.operations || []);
+  } catch { return null; }
+  let zeroOps = 0, zeroAxes = 0, totalAxes = 0, missingField = 0;
+  for (const op of list) {
+    let opAttacks = 0;
+    for (const ax of (op.axis_summaries || [])) {
+      totalAxes++;
+      if (ax.total_attacks === undefined) missingField++;
+      const t = ax.total_attacks ?? 0;
+      opAttacks += t;
+      if (t === 0) zeroAxes++;
+    }
+    if (opAttacks === 0) zeroOps++;
+  }
+  return { ops: list.length, zeroOps, axes: totalAxes, zeroAxes, missingField };
+}
+const correctedOps = correctedOpPredicates(runDir);
+
 const measured = {
   horizon,
   weeks,
   zero_eligible_ops: cc.zero_eligible_attacker_operation_count || 0,
+  // Renamed in the REPORT (Phase 0 item 0.2) to say what it actually counts — op x turn instances,
+  // not operations. The THRESHOLD KEY stays `dead_ops_max` so no threshold file needs migrating.
   dead_ops: cc.invalid_operation_count || 0,
   ghost_destroyed: ghostDestroyed,
   stranded_brigades: stranded,
@@ -424,7 +466,27 @@ const hard = (name, ok, detail) => checks.push({ name, ok, hard: true, detail })
 const soft = (name, ok, detail) => checks.push({ name, ok, hard: false, detail });
 
 hard('zero_eligible_ops', measured.zero_eligible_ops <= band.zero_eligible_ops_max, `${measured.zero_eligible_ops} <= ${band.zero_eligible_ops_max}`);
-hard('dead_ops', measured.dead_ops <= band.dead_ops_max, `${measured.dead_ops} <= ${band.dead_ops_max}`);
+// Label says `invalid_op_weeks` because that is what the engine counter measures — op x turn
+// instances, not operations. The threshold key remains `dead_ops_max`; nothing migrates.
+hard('invalid_op_weeks', measured.dead_ops <= band.dead_ops_max, `${measured.dead_ops} <= ${band.dead_ops_max}`);
+
+// ── ADVISORY, NEVER GATED (Phase 0 item 0.2) ────────────────────────────────────────────────
+// The corrected, axis-scoped view of the same question, computed from operation_aars.json.
+// Printed beside the gated numbers precisely so the disagreement is visible: the shipped
+// counters can read 0 while operations in the same run never attacked at all.
+if (correctedOps) {
+  if (correctedOps.missingField > 0) {
+    console.log(`  [ADVISORY] corrected_ops   UNAVAILABLE — ${correctedOps.missingField}/${correctedOps.axes} axes lack \`total_attacks\`; NOT reporting a 0 that would be a lookup failure`);
+  } else if (correctedOps.axes === 0) {
+    console.log('  [ADVISORY] corrected_ops   UNAVAILABLE — run carries zero axes; a 0 here would mean nothing');
+  } else {
+    console.log(
+      `  [ADVISORY] dead_ops_corrected  ${correctedOps.zeroOps}/${correctedOps.ops} operations and `
+      + `${correctedOps.zeroAxes}/${correctedOps.axes} axes recorded ZERO attacks`
+      + `   <- reported not gated; gating today's figure would ratchet the defect in as the floor (REAL_WAR_MASTER #40, P0)`,
+    );
+  }
+}
 hard('ghost_destroyed', measured.ghost_destroyed <= band.ghost_destroyed_max, `${measured.ghost_destroyed} <= ${band.ghost_destroyed_max}`);
 hard('stranded_brigades', measured.stranded_brigades <= band.stranded_brigades_max, `${measured.stranded_brigades} <= ${band.stranded_brigades_max}`);
 hard('matched_osids', measured.matched_osids >= band.matched_osids_min, `${measured.matched_osids} >= ${band.matched_osids_min}`);
