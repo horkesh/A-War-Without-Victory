@@ -268,13 +268,77 @@ if (surplus.length === 0) {
 
 console.log('');
 console.log('OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix');
+console.log('  P1 cells — all four Ozren cells must be RBiH by w188');
 let farzBroken = 0;
 for (const [name, osid] of FARZ_CELLS) {
   const got = at188[osid];
   const ok = got === 'RBiH';
   if (!ok) farzBroken++;
-  console.log(`  ${name.padEnd(26)} ${String(got)}  ${ok ? '** TAKEN **' : '*** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***'}`);
+  console.log(`    ${name.padEnd(26)} ${String(got)}  ${ok ? '** TAKEN **' : '*** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***'}`);
 }
+
+// ── P2 + P3, added 2026-08-26 after the Historian ruled the cells-only test A TECHNICALITY ──
+//
+// WHY THE CELL LIST ALONE WAS NOT ENOUGH. Uragan 95 was a JOINT 2nd + 3rd Corps operation, and
+// **the capture of Vozuća WAS the link-up of the two corps** (BB1 printed 386): 2nd Corps' 22nd
+// Division driving east from Pribitkovići, 3rd Corps' 35th Division marching south-east from
+// Zavidovići, meeting at Vozuća on 13 September 1995. The strategic product was the Tuzla-Zenica
+// road, which requires BOTH ends by definition. A one-corps Vozuća is not a coarse rendering of the
+// event — it is a different event that fails to produce the thing that made it matter, and it drops
+// exactly what BB singles out as significant: the ARBiH's arrival at coordinated corps-level
+// operations.
+//
+// AND THE MAP IS FINE ENOUGH — the Historian checked rather than assuming: three of the four cells
+// sit in 3rd Corps sectors, but `op:lukavac:brijesnica_donja_2` sits in the TUZLA corps' sector and
+// historically flipped. So the resolution CAN distinguish "2nd Corps took part" from "2nd Corps did
+// nothing". The old condition was 2-to-1 weighted toward 3rd Corps and passed on its work alone.
+//
+// ⚠ NAME-FREE BY CONSTRUCTION, deliberately. An operation NAME must never be the test: the emergent
+// name pool collides with authored designations — n377 contains an emergent `Operacija Farz` at t70
+// AND the authored `Operation Farz 95` at t163. Test on CORPS + CELLS + TURN WINDOW only. Do not
+// reintroduce a name match here.
+const FARZ_WINDOW_START = 160;   // Uragan/Farz ran 10 Sep - 11 Oct 1995; nothing before ~w160 is it.
+const SECOND_CORPS = 'arbih_2nd_corps';
+const SECOND_CORPS_CELL = 'op:lukavac:brijesnica_donja_2';
+
+// Corps attribution needs formation -> corps, which lives in the save this tool already loaded.
+const formationsForAttribution = (save.military && save.military.formations) || {};
+const corpsOf = (brigadeId) => (formationsForAttribution[brigadeId] || {}).corps_id ?? null;
+
+const secondCorpsCellEvents = events.filter((e) => e.settlement_id === SECOND_CORPS_CELL && e.to === 'RBiH');
+const lastCapture = secondCorpsCellEvents.length ? secondCorpsCellEvents[secondCorpsCellEvents.length - 1] : null;
+const capturingCorps = lastCapture ? corpsOf(lastCapture.attacker_brigade) : null;
+
+console.log('  P2 corps attribution — the one 2nd-Corps signature cell the map affords');
+if (!lastCapture) {
+  farzBroken++;
+  console.log(`    ${SECOND_CORPS_CELL}  *** NEVER CAPTURED — not a pass ***`);
+} else {
+  const bySecond = capturingCorps === SECOND_CORPS;
+  const inWindow = (lastCapture.turn ?? -1) >= FARZ_WINDOW_START;
+  if (!bySecond) farzBroken++;
+  console.log(
+    `    taken t${lastCapture.turn} by ${lastCapture.attacker_brigade ?? '?'} (${capturingCorps ?? 'unknown corps'})`
+    + `  ${bySecond ? '** 2nd CORPS **' : '*** NOT 2nd CORPS — not a pass ***'}`,
+  );
+  if (bySecond && !inWindow) {
+    console.log(`    ⚠ but t${lastCapture.turn} is ${FARZ_WINDOW_START - lastCapture.turn} turns BEFORE the Farz window`
+      + ` — 2nd-Corps-captured, yet NOT evidence of Farz participation. P3 is what decides this case.`);
+  }
+}
+
+console.log('  P3 structural liveness — 2nd Corps must mount at least one capture-capable op after t159');
+// Measured from this run's own control events: any non-probe capture credited to a 2nd Corps brigade.
+const secondCorpsLateCaptures = events.filter((e) => (e.turn ?? -1) > 159
+  && e.mechanism === 'combat' && corpsOf(e.attacker_brigade) === SECOND_CORPS);
+if (secondCorpsLateCaptures.length === 0) {
+  farzBroken++;
+  console.log('    *** ZERO 2nd-Corps captures after t159 — NOT A PASS. History gives the Tuzla corps TWO');
+  console.log('        divisional-scale actions in that window (Baljkovica 15-16 Jul 1995; Uragan 10 Sep-11 Oct). ***');
+} else {
+  console.log(`    ${secondCorpsLateCaptures.length} capture(s) after t159 ** LIVE **`);
+}
+
 if (farzBroken > 0) breached = true;
 // LIVENESS: say how much was compared, not merely that nothing tripped.
 console.log(`  compared: ${EASTERN_SURPLUS_MUNS.length} municipalities (negative) + ${FARZ_CELLS.length} cells (positive)`);
