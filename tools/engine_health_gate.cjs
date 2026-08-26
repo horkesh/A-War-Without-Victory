@@ -305,6 +305,65 @@ function correctedOpPredicates(dir) {
 }
 const correctedOps = correctedOpPredicates(runDir);
 
+// ── PLANNING-DEATH COUNTER — owner-approved 2026-08-26. REPORTED, NOT GATED. ─────────────────
+//
+// "The counter for ops that die in planning sounds useful." — owner.
+//
+// THE BLIND SPOT IT CLOSES: every existing invalidation predicate is EXECUTION-SCOPED.
+// `combat_causality.ts` requires `operation.phase === 'execution'`, and anomaly check #12
+// (`anomaly_detector.ts`) opens with `if (!enteredExecution) continue;`. So an operation that is
+// created, sits in planning, and is killed there is invisible to `invalid_operation_count`,
+// `zero_eligible_attacker_operation_count` and the anomaly detector alike — all three report 0
+// while it happens. The engine had NO counter for "created and never executed".
+//
+// Measured 2026-08-26: n374 has 8 sector_attack + 71 probe deaths in planning out of 259 distinct
+// operations; n294 has 23 + 64 out of 255. The 8 reconciles exactly with 44 sector_attacks minus
+// the 36 that reached execution — and it sees two that the AAR-based view misses, because four
+// operations were still live at t188 and never produced an AAR at all.
+//
+// ⚠ NOT GATED, and deliberately so. Some planning deaths are CORRECT — a corps refusing an
+// unwinnable attack is the force-ratio floor doing its job. This counts them so they can be READ,
+// not so they can be minimised. Do not bless today's figure as a ceiling; that would ratchet in a
+// defect as the floor, the same trap the corrected-op predicate above avoids.
+//
+// ⚠ AND THE TEMPO ITSELF IS CORRECT MODELLING — owner ruling, same date: a besieged corps does not
+// mount offensives, and probes are a legitimate intel instrument. Do not read a high count here as
+// "the engine under-fights."
+function planningDeathCounter(dir) {
+  const p = path.join(dir, 'weekly_report.jsonl');
+  if (!fs.existsSync(p)) return null;
+  const ops = new Map();
+  let rows = 0, missingPhase = 0;
+  for (const line of fs.readFileSync(p, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    let rec;
+    try { rec = JSON.parse(line); } catch { continue; }
+    for (const od of (rec.operation_diagnostics || [])) {
+      rows++;
+      if (od.operation_phase === undefined) missingPhase++;
+      const key = `${od.corps_id ?? '?'}|${od.operation_name ?? '?'}`;
+      if (!ops.has(key)) ops.set(key, { reachedExecution: false, recovery: null, type: od.operation_type ?? 'unknown' });
+      const e = ops.get(key);
+      if (od.operation_phase === 'execution') e.reachedExecution = true;
+      if (od.recovery_reason) e.recovery = od.recovery_reason;
+    }
+  }
+  if (rows === 0) return { unavailable: 'no operation_diagnostics rows' };
+  if (missingPhase === rows) return { unavailable: `all ${rows} diagnostic rows lack operation_phase` };
+  const byType = {};
+  const totalByType = {};
+  const reasons = {};
+  for (const [, e] of ops) {
+    totalByType[e.type] = (totalByType[e.type] || 0) + 1;
+    if (!e.reachedExecution && e.recovery) {
+      byType[e.type] = (byType[e.type] || 0) + 1;
+      reasons[e.recovery] = (reasons[e.recovery] || 0) + 1;
+    }
+  }
+  return { distinctOps: ops.size, totalByType, byType, reasons };
+}
+const planningDeaths = planningDeathCounter(runDir);
+
 const measured = {
   horizon,
   weeks,
@@ -483,8 +542,25 @@ if (correctedOps) {
     console.log(
       `  [ADVISORY] dead_ops_corrected  ${correctedOps.zeroOps}/${correctedOps.ops} operations and `
       + `${correctedOps.zeroAxes}/${correctedOps.axes} axes recorded ZERO attacks`
-      + `   <- reported not gated; gating today's figure would ratchet the defect in as the floor (REAL_WAR_MASTER #40, P0)`,
+      + `   <- reported not gated; gating today's figure would ratchet the defect in as the floor (REAL_WAR_MASTER #40)`,
     );
+  }
+}
+
+// ── PLANNING-DEATH COUNTER (owner-approved 2026-08-26). ADVISORY. ───────────────────────────
+if (planningDeaths) {
+  if (planningDeaths.unavailable) {
+    console.log(`  [ADVISORY] planning_deaths  UNAVAILABLE — ${planningDeaths.unavailable}; NOT reporting a 0 that would be a lookup failure`);
+  } else {
+    const parts = Object.keys(planningDeaths.byType).sort()
+      .map((t) => `${t} ${planningDeaths.byType[t]}/${planningDeaths.totalByType[t] ?? '?'}`);
+    const top = Object.entries(planningDeaths.reasons).sort((a, b) => b[1] - a[1]).slice(0, 3)
+      .map(([r, n]) => `${r} ${n}`).join(', ');
+    console.log(
+      `  [ADVISORY] planning_deaths   ${parts.join('  ')}  of ${planningDeaths.distinctOps} distinct ops`
+      + `   <- created, never executed; INVISIBLE to every other counter`,
+    );
+    if (top) console.log(`  [ADVISORY]                   top reasons: ${top}`);
   }
 }
 hard('ghost_destroyed', measured.ghost_destroyed <= band.ghost_destroyed_max, `${measured.ghost_destroyed} <= ${band.ghost_destroyed_max}`);

@@ -1793,7 +1793,37 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 
 **Note:** This is a known design trade-off. Ops-only prevents gamey penny-packet probes. But the cure is arguably worse than the disease — 3.5 battles/week is too quiet. This will likely be addressed by the follow-on operation planning system (deferred Fix B) or by adding limited independent tactical actions (counterattacks already exist as a brigade-level exception).
 
-**Priority:** ~~P3 — known design trade-off, not a bug. Monitor.~~ → **P0 (raised 2026-08-26, RE Phase 0 item 0.5).**
+**Priority:** ~~P3 — known design trade-off, not a bug. Monitor.~~ → raised **P0** 2026-08-26 → **RE-SCOPED the same day by OWNER RULING. See the ruling box before reading anything below.**
+
+> ### ★ OWNER RULING, 2026-08-26 — THE LOW TEMPO IS CORRECT MODELLING. DO NOT "FIX" IT.
+>
+> Presented with the full measurement — 3.14 battles/week, 59% of all battles being probes, several
+> corps making zero real attacks in 188 weeks, and `arbih_1st_corps` mounting ONE offensive in the
+> whole war — the owner ruled:
+>
+> > *"None of that is issue, all of those are correct modelling of how the real war went on. …
+> > 1st corps not attacking — well of course, it's mostly Sarajevo brigades under siege."*
+>
+> **He is right and the framing below was written before the ruling.** A besieged corps does not
+> mount offensives; a war of static fronts and reconnaissance is what this war largely was. **Nobody
+> should re-raise "the war is too quiet" as a defect.** Probes are a legitimate instrument — the
+> owner's words: *"they are meant only as a tool to keep the intel value high."*
+>
+> **WHAT SURVIVES THE RULING, and it is a narrower claim than the one this entry originally made:**
+> 1. **A corps must not probe 38 times in a row.** Owner: *"corps should not do it 38 times in a
+>    row."* `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT = 2` is checked at `bot_corps_directives.ts:284`
+>    and NOT at the second probe-creation site, which consults only a 4-turn cooldown. Measured at
+>    t188: `arbih_1st_corps` **38**, `hvo_northwest_bosnia` **10**, every other corps 0-3. **That is
+>    a bypassed cap, not a tempo question.**
+> 2. **The MEASUREMENT problem is untouched by the ruling.** Whether or not the tempo is right, an
+>    enclave guard cell that is never attacked cannot distinguish "held" from "never pressed", so a
+>    §6 verdict resting on it establishes less than it claims. That is about what the instrument can
+>    prove, not about how much fighting there should be.
+> 3. **An operation that dies in planning is invisible to every engine counter.** Owner: *"The
+>    counter for ops that die in planning sounds useful."* Approved.
+>
+> **The table below stands as EVIDENCE about instrument coverage. It is NOT evidence that the engine
+> under-fights.**
 
 **Why it is not a design trade-off: low tempo is what makes the §6 guarantees UNVERIFIABLE.** This was
 filed as an aesthetic complaint about the war feeling too quiet. It is structural. Measured over 188
@@ -1831,7 +1861,7 @@ target**. A cell can be pressured through its adjacency ring without ever being 
 | ~~**P2**~~ | ~~#37 Elite loan: no cohesion recall~~ | ~~1st Guards at cohesion 9.0 after 40 turns~~ | **FIXED (n748)** |
 | ~~**P3**~~ | ~~#38 Elite tracker not updated~~ | ~~battles_fought/casualties_taken always 0~~ | **FIXED (n748)** |
 | ~~**P2**~~ | ~~#39 ARBiH suicide attacks (0.1 PR)~~ | ~~Repeat attacks at same fortified position~~ | **FIXED (n749)** |
-| **P0** | #40 Operational tempo 3.5/week | Ops-only doctrine → 180 brigades idle every turn; **8 of 9 §6 enclave cells never attacked in 188 weeks**, so the guarantees pass vacuously | **RAISED P3→P0 2026-08-26** — correctness blocker, not a trade-off |
+| **P2** | #40 ~~Operational tempo 3.5/week~~ → **probe-cap bypass + planning-death blindness** | The TEMPO is correct modelling (owner ruling 2026-08-26). What remains: `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT=2` is bypassed at the second probe-creation site (1st Corps probed **38** consecutively), and no counter can see an operation that dies in planning | **RE-SCOPED 2026-08-26** — see the ruling box in the entry |
 | **P2** | #41 ARBiH attacks HVO territory while allied (Mostar w38-39) | RBiH brigades attack op:mostar:kruzanj_2 (HRHB) at PR 0.24-0.25 before HVO-RBiH war starts (w52+). Alliance guard may not cover all attack paths. | **OPEN — investigate** |
 | **P1** | #42 Bot strategic targeting — no demographic/geometric filter | Bot targets any adjacent enemy OSID without assessing strategic value. VRS takes Žepče (7.3% Serb, creates pocket). Salient aversion (Phase C) partially addresses geometry but demographic filter still needed. | **PARTIALLY ADDRESSED (n773 salient aversion)** |
 | **P2** | #43 UI shows brigade raw power, not sector defensive power | FormationDetail/sector panel shows `brigadePower()` (~2,602 for 3000 pers motorized) instead of `sector.defensive_power` (72.5). Player sees a "strong" sector when it's actually 115:1 overmatched. Misleading. | **OPEN — UI fix** |
