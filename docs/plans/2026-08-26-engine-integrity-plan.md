@@ -131,7 +131,7 @@ recoveries, but the only consumer is probe selection.
 ⇒ **This makes Task 1.1 far safer than the panel assumed.** Letting probes write to this map is
 contained entirely within probe targeting. It cannot suppress a real operation.
 
-### 3.2 The probe cooldown is mostly WORKING — the dead scan costs about one turn
+### 3.2 The probe cooldown holds for the median probe and FAILS OUTRIGHT for short ones — and it is NOT the volume lever either
 
 The Operations seat found that `emit.ts:1067` scans `previous_state.operation_history` for
 `type === 'probe'` while both writers hardcode `'sector_attack'`. **True, and it is deader than
@@ -287,6 +287,15 @@ does not "simplify" A-3 onto `readiness` and silently rebuild the no-op.
 ```powershell
 # 1. RE branches from a CLEAN four-checkpoint pin, never from the shared tree.
 #    Precondition: Codex has landed the January lane and a git_dirty:false 188w exists.
+# WARNING: `git worktree add` on this repo CAN TIME OUT MID-CHECKOUT, leaving a partial tree whose
+#   INDEX IS MISSING ENTRIES. Committing from it records those files as DELETED -- this happened on
+#   2026-08-26 and silently removed 4,978 files from a branch before it was caught.
+#   If you create one: verify `git -C <wt> ls-files | wc -l` matches the main tree BEFORE any commit.
+#   For DOC-ONLY edits skip the worktree entirely and use an ISOLATED INDEX -- it cannot touch another
+#   agent's checkout and has no partial-checkout failure mode:
+#     export GIT_INDEX_FILE=/tmp/re.index && git read-tree <branch>
+#     git update-index --add --cacheinfo 100644,$(git hash-object -w --path <p> <p>),<p>
+#     git commit-tree $(git write-tree) -p <branch> -F msg   # then git update-ref
 git worktree add F:\awwv-re codex/engine-integrity-docs
 cd F:\awwv-re
 npm ci                       # do NOT junction node_modules — napkin 1c: worktree remove destroys the target
@@ -317,6 +326,7 @@ with no output until the end. It passes inside the full suite.
 | 0.3 | **Clean four-checkpoint baseline pin.** | `git_dirty:false`, four checkpoints, hash + digest recorded in `CALIBRATION_MASTER.md`. |
 | 0.4 | **Write the decision rule (§11) into `CALIBRATION_MASTER.md` before run 1**, unamended after. | Present and dated. |
 | 0.5 | **Correct the record.** `REAL_WAR_MASTER #40` P3 → **P0**. Project-memory KIA `~30k/24k/8k` → BB-sourced **18,543 VRS / ~6,400-6,900 HVO**. | Both corrected with citations. |
+| 0.5b | **Write `last_probe_turn` on `CommanderState` — INERT, written but never read.** Task 1.2 needs this field; landing the schema here, proven inert in Phase 0's identity run, means any failure at 1.2 is unambiguously **behavioural** rather than a migration fault. **Acceptance, pre-committed:** every artifact byte-identical **except `final_save.json`, which differs only by the added key** — plus one golden re-pin. A new serialized key moves `final_state_hash` without moving behaviour; **do not let a moved hash be read as a behavioural change** — that is the same trap B-1 carries. | added key only, zero value differences |
 | 0.6 | **Name-collision assertion test.** Zero collisions today (112 pool names vs 27 authored) but `operation_names.ts:71` carries `'Operacija Lukavac'` against an authored Lukavac 93, and the file records a prior Stupčanica-95 collision. | Test present and green. |
 
 > **Why 0.2 ships reported-not-gated.** The corrected predicate reads **`dead_ops` 11 against a
@@ -349,6 +359,27 @@ with no output until the end. It passes inside the full suite.
 > attacker casualties** — is untouched, because its probes are spaced too widely to reach two
 > failures inside the 8-turn window.
 >
+> ### ★★ AND NEITHER IS TASK 1.2. THE WHOLE OF PHASE 1 IS NOT AN ATTRITION FIX.
+>
+> The calibration seat corrected its own earlier finding after I promoted 1.2 on it. The
+> "cooldown breached 22.9% of the time" figure is a count of **re-emissions, not of volume** — and
+> the breaching ops are the *short* ones, which is *why* they breach, so they carry ~1 battle each:
+>
+> | | n | share |
+> |---|---:|---:|
+> | probe ops starting inside a breached cooldown | 43 / 200 | 21.5% |
+> | **probe BATTLES they carry** | **41 / 373** | **11.0%** |
+> | **attacker casualties in them** | **18,435 / 131,577** | **14.0%** |
+>
+> **So 1.2's ceiling is ~11% of probe battles — roughly the same size as 1.1, not an order above it.**
+> Combined ceiling for 1.1 + 1.2 ≈ 18% of probe battles ≈ 11% of all battles.
+>
+> **THE VOLUME LEVER IS THE EMISSION GATE, AND IT IS IN NEITHER TASK.** Median idle gap between one
+> probe ending and the next starting is **1 turn**; 108 of 188 re-emissions happen the very next
+> turn; probes are 62.4% of all battles and have captured **zero** ground in 188 weeks. That is
+> Task 1.3 or beyond. **If this programme needs an attrition fix, Phase 1 is not it** — do not let
+> that get discovered after two runs.
+>
 > **DO NOT SELL PHASE 1.1 AS AN ATTRITION FIX.** The attrition is cadence-driven, not
 > target-driven: the median idle gap between one probe ending and the next starting is **1 turn**,
 > and 57.4% of probes start the very turn the previous one clears. If volume reduction is the goal,
@@ -357,6 +388,41 @@ with no output until the end. It passes inside the full suite.
 > **And a skipped probe is not a deferred probe.** When the cooldown filter empties the candidate
 > list, `if (probeObjectives.length > 0)` skips emission entirely — **no op is pushed and no cooldown
 > is consumed**, so the corps may re-emit next turn. That is exactly the 25 no-alternative cases.
+
+### ★ ORDER WITHIN PHASE 1: 1.1 → 1.2 → 1.3. Confirmed by the calibration seat.
+
+**The orchestrator's original rationale for this order was WRONG and has been removed.** It argued
+that landing 1.2 first would "spend" 1.1's pre-registered prediction. It would not: the calibration
+seat wrote and ran the counterfactual replay **three times in one session off existing artifacts, at
+~10 minutes and zero runs**. Recomputation is cheap. The claim is deleted rather than softened,
+because a reviewer would have found it.
+
+**The order survives on two arguments that are stronger, and neither is mine:**
+
+**(1) Recomputation is unavoidable for whichever task goes second — so the only question is which
+prediction is worth more un-recomputed.** 1.1's is **per-cell falsifiable**: radava 26→11,
+gornja_vratnica_2 39→27, pelagicevo 24→15, gojcin_2 24→22, and **brijesnica_donja_2 12→12**. 1.2's is
+a coarse aggregate (~11% fewer probe battles) with no per-cell structure and therefore almost nothing
+to falsify. **Burn the coarse prediction on recomputation; keep the sharp one pre-registered.**
+
+**(2) ★ 1.1-first is the cheapest available test of the INSTRUMENT the rest of Phase 1 rests on.**
+The counterfactual is an *offline model of the engine*, not the engine. If radava does not land near
+11, the replay model is wrong — **and every number underneath 1.2, including the 11% ceiling above,
+comes from that same model.** Landing 1.1 first buys one run's validation of the instrument before
+the plan spends further runs trusting it. Land 1.2 first and you find out late, with a re-rolled
+campaign in the way.
+
+**(3) Small perturbation before large.** 1.1 removes ≤25 probe battles. 1.2 removes ~41 **and shifts
+43 operation start turns**, which under this repo's own ±10 attribution rule re-rolls the schedule. A
+6.8% signal measured on top of a re-rolled campaign is unreadable; the reverse is not.
+
+*Tertiary, do not lead with these:* 1.2 carries a save migration and 1.1 does not; 1.3's
+cancel/proceed decision depends on 1.1's result.
+
+**They must be measured separately regardless of order** — 1.1 changes WHICH cell a probe targets,
+1.2 changes HOW OFTEN one is emitted. Landed together their effects are unattributable, and nothing
+in the artifacts separates "never launched because its target was blocked" from "never launched
+because the cooldown held."
 
 ### Task 1.1 — let a probe that fought record an objective failure
 
@@ -420,7 +486,7 @@ plan says.**
 
 ---
 
-### Task 1.2 ★ — repair the probe cooldown  *(PROMOTED — this is the volume lever, not 1.1)*
+### Task 1.2 — repair the probe cooldown  *(CORRECTNESS fix with a modest volume dividend — NOT the volume lever; see §6 header)*
 
 **WHY — and my §3.2 claim was wrong.** I wrote that the dead `operation_history` scan "costs about one
 turn" because a probe is visible in `active_operations` for ~3 of the 4 cooldown turns. **That holds
@@ -746,6 +812,51 @@ location. A-2 could never have unfrozen operation selection.
 
 ---
 
+## 9.5 Sequencing, parallelism, and cost
+
+*(This section was LOST in the v3 restructure and is restored here. Its absence was found by grepping
+the plan for its own guidance and getting zero hits -- worth repeating as a habit.)*
+
+**Order:** Phase 0 (free) -> **Phase 1 (1.1 -> 1.2 -> 1.3)** -> Phase 2 (legibility) -> Phase 3
+(operation supply) -> Phase 4 (cost loop) -> Phase 5 (owner decisions).
+
+**Run cost, honest: ~8-10 x 188w = ~10 hours**, down from ~12-14 after the calibration seat identified
+two safe bundling shapes. Plus machine contention with Codex. A `--weeks 39` run is ~15 min but
+scores jan1993 only and is blind to Phase 1/3 effects, which compound after w100.
+
+### BUNDLING -- safe in exactly two shapes, and nowhere else
+
+**The rule, stated so it generalises: bundling is safe iff the acceptance criterion is BINARY, never
+a magnitude.** You never have to attribute a number, so nothing is lost.
+
+**Shape A -- bundle every provably-inert change into ONE identity run.** Phase 0's 0.1 + 0.2 + 0.5b,
+plus Task 2.1. The criterion is byte-identity: the bundle passes and every member is proven inert, or
+it fails and you split and re-run. **Saves ~3 runs (~3.5 h).** This is the one place the
+one-change-per-run rule was genuinely over-strict.
+
+**Shape B -- one behavioural change plus any number of STATICALLY-UNREAD emissions.** Task 2.6's
+probe-selection instrumentation may ride with Task 1.1, because "unread" is a **static** property
+verified by grep, not a measured one. **Requirement: the reader-count grep must return zero and be
+recorded in the packet** -- the way `failed_offensive_objectives` was verified to have exactly one
+reader (section 3.1). **Saves ~1 run.**
+
+**NOWHERE ELSE. Never two behavioural changes** -- not 1.1+1.2, not 1.2+1.3, not any Phase-1 item
+with any Phase-2 item. **Stop looking for further savings; there are none**, and the repo carries a
+documented n747 four-fix bundle that cost more in lost attribution than it saved in runs.
+
+### Parallelism with Codex -- decisive
+
+| Codex lane class | Carries over? | Action |
+|---|---|---|
+| Painted-reference repaints, `init_control` corrections | **YES** -- a correctly painted cell is correct under any engine | continue unimpeded |
+| Op-objective, axis, timing, roster lanes | **NO** -- their deltas are measured against combat behaviour Phases 1-4 change globally | stop, or bank as "re-measure after RE" |
+
+**Precondition:** Codex lands a clean `git_dirty:false` four-checkpoint pin; RE branches from *that*.
+There is currently **no four-checkpoint measurement of the working tree** -- every post-retraction run
+is `--weeks 39`, so apr1994/apr1995/oct1995 are **NOT ESTABLISHED**.
+
+---
+
 ## 10. Verification
 
 Global barriers from Master Roadmap §11 apply. RE adds:
@@ -771,6 +882,14 @@ Global barriers from Master Roadmap §11 apply. RE adds:
 > **S2 — Positive control.** Every instrument returns ≥1 non-zero on a case known to exist.
 > **S3 — Predicted loss set, written FIRST.** Name faction, mechanism, and the OSIDs the fix *should*
 > cost. **Adopt only if ≥2/3 of actual losses fall inside the predicted set.**
+> **S3a — the prediction is a COMMITTED ARTIFACT and the check is mechanical.** Write it to a file and
+> commit it; the run's `run_meta.provenance.git_commit` must be a **descendant** of the prediction's
+> commit. Two lines, fail-closed, same shape as the existing run-provenance binding. **An
+> uncommitted prediction does not count as a prediction.**
+> **S3b — ★ every prediction MUST name a NEGATIVE CONTROL: at least one cell predicted NOT to move.**
+> A prediction made only of positives can absorb any outcome; one carrying a negative control dies if
+> the negative moves. **This is the amendment that actually closes S6's loophole.** Task 1.1 already
+> has one by luck — `op:lukavac:brijesnica_donja_2`, 12 probe battles, 0 wins, predicted **unchanged**.
 > **S4 — Bands, per checkpoint:** **0 to −3** jitter, decide on mechanism · **−4 to −10**
 > unattributable, requires a schedule-fingerprint diff; if ≥20% of ops differ in creation turn the
 > number told you nothing · **−11 to −25** real signal, adoptable only with S3 satisfied · **worse
@@ -778,8 +897,16 @@ Global barriers from Master Roadmap §11 apply. RE adds:
 > **S5 — Tripwires override any score.** All four anchor sets (31/32/40/31); the enclave guard
 > (Srebrenica/Žepa fall; Goražde/Bihać/Teočak/Sarajevo core hold); the western-Bosnia cascade
 > (Grahovo 4/4, Šipovo 5/5, Glamoč 6/6, Sanski Most 10/10); **and §8.5.**
-> **S6 — THE DISCRIMINATOR IS LOCATION, NOT MAGNITUDE.** Fix-right ⇒ losses cluster on the
-> mechanism's causal path. Fix-wrong ⇒ losses scatter. **Never adopt or reject on the count.**
+> **S6 — CONDITIONAL. Pre-registration is what buys the right to argue from mechanism.**
+> **Where S3 was satisfied** — predicted set committed before the run, including at least one
+> negative control — the discriminator is the **LOCATION** of the losses, not their magnitude: adopt
+> if ≥2/3 of losses fall inside the predicted set **and no negative control moved**.
+> **Where S3 was NOT satisfied, S6 does not apply and the S4 bands are binding on the count alone.**
+>
+> *(Amended after a canon reviewer attacked the original wording — "never adopt or reject on the
+> count" — as unfalsifiable: any loss set has some story, and a seat motivated to ship will find one.
+> The calibration seat agreed and declined to defend it. The hole was real: nothing mechanically
+> enforced S3, so S6 was an unconditional escape hatch. It is now a reward for pre-registering.)*
 
 **The real gate is four per-checkpoint hard minimums** — `jan1993` 674 / `apr1994` 660 / `apr1995`
 659 / `oct1995` 644 — with **3-6 OSIDs of headroom**, not 622's apparent +28. When a run fails it:
