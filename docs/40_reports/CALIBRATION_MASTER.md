@@ -184,9 +184,13 @@ this confirms the dirty state contributed nothing the commit lacks. Line banked 
 per the 2026-08-24 "A SCORE IS NOT AN IDENTITY" entry — hash + `git_dirty: false` + guards, not
 a score alone. Teočak holds at all four checkpoints; western-Bosnia cascade intact
 (Grahovo 4/4, Šipovo 5/5, Glamoč 6/6, Sanski Most 10/10).
+*(Instrument note 2026-08-26: this guard evidence was Teočak-only, and the cascade figure omitted
+Titov Drvar — see "Enclave-guard instrument note" below.)*
 
 Guards verified in every run: Teočak holds RBiH at all four checkpoints (canon H1.8); the HRHB
 western-Bosnia cascade site is intact (Grahovo 4/4, Šipovo 5/5, Glamoč 6/6, Sanski Most 10/10).
+*(Instrument note 2026-08-26: "Guards verified" here means Teočak alone — the instrument asserted
+one of the nine H1.8 cells. See "Enclave-guard instrument note" below.)*
 
 Also landed: a latent `operation.participant_double_committed` crash (a pre-planned op could
 claim a brigade a bot probe held — `buildAxesFromDef` never checked commitment), fixed and
@@ -233,7 +237,9 @@ validation warning. See `20260824_SCENARIO_TESTER_N286_ASSESSMENT.md`.
 t9/t10 shift global turn ordering by ~1 turn and that capture falls off the end. The rest of
 the diff is the same jitter, netting near zero. **Owner accepted the trade (2026-08-24).**
 
-**Guards verified, not assumed.** Teočak holds RBiH at all four checkpoints (canon H1.8
+**Guards verified, not assumed.** *(Instrument note 2026-08-26: verified, but narrower than this
+phrase suggests — the instrument asserted Teočak alone of the nine H1.8 cells. See "Enclave-guard
+instrument note" below.)* Teočak holds RBiH at all four checkpoints (canon H1.8
 enclave guard). The documented HRHB western-Bosnia cascade site is intact: Grahovo 4/4,
 Šipovo 5/5, Glamoč 6/6, Petrovac 7/8, Mrkonjić 5/6, Sanski Most 9/10. This matters because
 `pre_planned_operations.ts` records a 2026-08-12 attempt (`kijevo_2` via Prsten) that read
@@ -242,7 +248,41 @@ cluster. Majevica does not reproduce that signature.
 
 **New tooling.** `tools/verify_checkpoints.cjs` replays `control_events` against the CURRENT
 painted files, so runs from different days are comparable, and checks the enclave guard and
-the cascade site unconditionally. `tools/engine_health_gate.cjs` now carries per-checkpoint
+the cascade site unconditionally. *(See the Enclave-guard instrument note below — as written on
+2026-08-24 this tool checked ONE guard cell, not the guard.)*
+
+> ### Enclave-guard instrument note (added 2026-08-26) — canonical; other entries point here
+>
+> Between **2026-08-24** (`1fc02b32c`, the commit that created `tools/verify_checkpoints.cjs`) and
+> **2026-08-26** (`0098a48fe`, the repair), every §6 enclave-guard claim produced by this tool
+> established **exactly one proposition: Teočak held RBiH at four checkpoints.** The `GUARD` array
+> held one OSID while the file's own header claimed all of them, the cascade block compared nothing,
+> and `process.exit` was driven by the Teočak loop alone — so a run could lose forty OSIDs at every
+> checkpoint and still exit 0. A §6 panel convened on 2026-08-26 found the instrument vacuous on
+> those counts.
+>
+> **The affected window is two days.** Any record dated before 2026-08-24 predates the tool entirely
+> and is untouched by this note. Records citing `anchors N/N` are also untouched: the anchor contract
+> independently covers **six of the nine H1.8 cells at all four checkpoints** — `gorazde_2`,
+> `bihac_2`, `teocak_krstac_2`, `centar_sarajevo`, `srebrenica_2`, `zepa_2` — and already encodes the
+> two-sided fall (RBiH at w39/104/156, RS at w188).
+>
+> **The recorded conclusions were substantively right; only the evidence was missing.** All nine cells
+> were replayed retroactively against `n294` on 2026-08-26: the seven holds hold at every checkpoint,
+> and Srebrenica and Žepa fall between w156 and w188 — the correct July 1995 window. The records are
+> therefore **PROVISIONAL, not void**, and are annotated rather than deleted or silently re-blessed.
+>
+> **The repair fixed one defect and widened another, and that is recorded here rather than claimed
+> away.** Fail-open is genuinely fixed — nine cells, two-sided fall assertions, a liveness count, a
+> cascade threshold, gating checkpoint scores. **Vacuous-pass is not.** On `n373`, **8 of the 9 guard
+> cells are never the target of a single battle in 188 weeks**; Teočak, the one cell the old guard
+> checked, is the only consistently contested one. The tool now labels each hold
+> `CONTESTED-AND-HELD` or `UNCONTESTED`, so it stops claiming what it did not test. That label counts
+> battles where the cell **is the target**, so a zero means "never directly attacked", **not** "never
+> threatened" — it must not be quoted as the latter.
+>
+> Grep `ENCLAVE GUARD (canon H1.8)` in `tools/verify_checkpoints.cjs`. Panel record:
+> `docs/40_reports/proposals/20260826_S6_REFERRAL_ENCLAVE_GUARD_VACUITY.md`. `tools/engine_health_gate.cjs` now carries per-checkpoint
 floors (`checkpoint_matched_min`, no headroom, `--update` refuses to lower one without
 `--force`) — before this it read only the terminal oct1995 figure and a 20-OSID jan1993
 regression would have passed green.

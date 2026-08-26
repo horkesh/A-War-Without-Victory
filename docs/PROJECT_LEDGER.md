@@ -28926,6 +28926,10 @@ Owner accepted (2026-08-24). Run `apr1992_definitive_188w__...__w188_n287`.
   baseline and slips off the end when turn ordering shifts by ~1.
 - Guards verified: Teočak holds (canon H1.8). Western-Bosnia cascade intact (Grahovo 4/4,
   Šipovo 5/5, Glamoč 6/6) — the site where a 2026-08-12 Prsten attempt cost −26 at 188w.
+  *(Instrument note 2026-08-26: "Guards verified" here means Teočak alone — the tool this entry
+  introduced asserted one of the nine H1.8 cells and could not fail. The cascade figure also omitted
+  Titov Drvar, which the WATCH list looked for as `drvar`. See "Enclave-guard instrument note" in
+  `docs/40_reports/CALIBRATION_MASTER.md`.)*
 
 Tooling: `tools/verify_checkpoints.cjs` (replay-scores a run against CURRENT painted files +
 enclave guard + cascade site). `tools/engine_health_gate.cjs` gained per-checkpoint floors —
@@ -29045,7 +29049,9 @@ rejected before composing the stabilizing package.
 
 Full master validation: run
 `apr1992_definitive_188w__185a9a09db6a03e9__w188_n308`, final hash
-`74aa4f6fb77393f0`. Checkpoints are `680 / 661 / 660 / 643`; Teočak holds, consistency and all
+`74aa4f6fb77393f0`. Checkpoints are `680 / 661 / 660 / 643`; Teočak holds *(instrument note
+2026-08-26: Teočak was the ONLY H1.8 cell the guard asserted at this date — see "Enclave-guard
+instrument note" in `docs/40_reports/CALIBRATION_MASTER.md`)*, consistency and all
 non-terminal engine-health checks pass. The terminal gate is red by one OSID (`643 >= 644`
 required). This later fallout is recorded rather than optimized because the owner explicitly
 deferred later-checkpoint repair until January is complete.
@@ -29244,7 +29250,13 @@ Acceptance run `apr1992_definitive_188w__d3464b9122c3c8e9__w39_n372`, hash
 seven-municipality focus. The only focus mismatches are Donje Žešće and Tosići (remain RS)
 and Podkozara Donja (ordinary paramilitary flip to RBiH). No calibration-authored
 `control_change` was introduced. Focused verification: 91 tests and TypeScript typecheck pass;
-the fresh week-39 checkpoint replay and enclave guard pass. The artifact records
+the fresh week-39 checkpoint replay and enclave guard pass. **Correction (2026-08-26): "enclave
+guard pass" here meant Teočak alone.** This is the one record in the affected window that claimed
+the guard unqualified without naming the cell; the instrument asserted one of the nine H1.8 cells
+and could not fail. All nine were replayed retroactively against `n294` on 2026-08-26 and hold, and
+the instrument now asserts all nine — though eight of the nine are uncontested in-run and pass
+without being pressed. See "Enclave-guard instrument note" in
+`docs/40_reports/CALIBRATION_MASTER.md`. The artifact records
 `git_dirty: true`, so it is accepted for the current working tree but is not a clean committed
 baseline.
 
