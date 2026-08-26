@@ -104,9 +104,10 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm install --legacy-peer-deps
+      - run: npm ci --legacy-peer-deps
         if: steps.changes.outputs.relevant == 'true'
-      - run: npm install --legacy-peer-deps --prefix src/ui/map
+      - run: npm ci --legacy-peer-deps
+        working-directory: src/ui/map
         if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
@@ -180,9 +181,10 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm install --legacy-peer-deps
+      - run: npm ci --legacy-peer-deps
         if: steps.changes.outputs.relevant == 'true'
-      - run: npm install --legacy-peer-deps --prefix src/ui/map
+      - run: npm ci --legacy-peer-deps
+        working-directory: src/ui/map
         if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform

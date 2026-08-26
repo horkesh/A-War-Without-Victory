@@ -65,8 +65,9 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm install --legacy-peer-deps
-      - run: npm install --legacy-peer-deps --prefix src/ui/map
+      - run: npm ci --legacy-peer-deps
+      - run: npm ci --legacy-peer-deps
+        working-directory: src/ui/map
 
       # Cache electron-builder + Electron downloads to avoid re-fetching
       # ~150-300 MiB on every release run. Key matches DRG to share cache.
@@ -119,8 +120,9 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm install --legacy-peer-deps
-      - run: npm install --legacy-peer-deps --prefix src/ui/map
+      - run: npm ci --legacy-peer-deps
+      - run: npm ci --legacy-peer-deps
+        working-directory: src/ui/map
 
       - name: Cache electron-builder and Electron downloads (Windows)
         uses: actions/cache@v4

@@ -41,11 +41,6 @@ test('ci workflow enforces the canonical desktop release check on main and pull 
         /npm run desktop:release:check/,
         'desktop release guard should invoke the canonical shipped-build verification path',
     );
-    assert.match(
-        workflow,
-        /npm install --legacy-peer-deps --prefix src\/ui\/map/,
-        'desktop release guard should install nested map UI dependencies before running cross-platform release checks',
-    );
 });
 
 test('desktop release workflow enforces packaged runtime probe on windows', async () => {

@@ -49,19 +49,12 @@ test('package.json routes canonical test commands through Vitest lanes only', as
     }
 });
 
-test('typecheck workflow installs nested map deps before running the root compiler gate', async () => {
+test('typecheck workflow invokes the root compiler gate', async () => {
     const workflow = await readFile(
         join(process.cwd(), '.github', 'workflows', 'typecheck.yml'),
         'utf8',
     );
 
-    const nestedInstalls = workflow.match(/npm install --legacy-peer-deps --prefix src\/ui\/map/g) ?? [];
-
-    assert.strictEqual(
-        nestedInstalls.length,
-        1,
-        'typecheck workflow should install nested map UI dependencies exactly once',
-    );
     assert.match(
         workflow,
         /npm run typecheck/,

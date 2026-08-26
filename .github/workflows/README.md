@@ -37,11 +37,11 @@ for `pull_request` (not `pull_request_target`) workflows.
 
 | Job | Required? | `PATH_SET` | Heavy steps gated |
 |---|---|---|---|
-| `test` (Baseline Regression) | yes | `code` | `npm install` + `test:vitest:fast` |
-| `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm install` + startup snapshot rebuild + `test:vitest:balanced` + `qa:player-experience` |
-| `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm install` + startup snapshot rebuild + fresh 40w structural-fingerprint compare |
-| `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm install` + `test:vitest:scenario:anchors` |
-| `scenarios` (Baseline Regression) | no | `sim` | `npm install` + `test:vitest:scenario` |
+| `test` (Baseline Regression) | yes | `code` | `npm ci` + `test:vitest:fast` |
+| `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + `test:vitest:balanced` + `qa:player-experience` |
+| `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + fresh 40w structural-fingerprint compare |
+| `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm ci` + `test:vitest:scenario:anchors` |
+| `scenarios` (Baseline Regression) | no | `sim` | `npm ci` + `test:vitest:scenario` |
 | `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |
 | `desktop-packaged-runtime-probe` (Desktop Release Guard) | yes | `desktop` | Windows NSIS package + runtime probe |
 
@@ -53,7 +53,7 @@ job so first-hour, live-surface, shipped-build, warning-signature, and Electron
 runtime regressions block relevant PRs immediately instead of depending on a
 separate branch-protection update. The job installs Puppeteer's Chrome binary
 explicitly before that gate because GitHub-hosted runners do not populate
-`/home/runner/.cache/puppeteer` from `npm install` alone. The
+`/home/runner/.cache/puppeteer` from dependency installation alone. The
 `full-suite` checkout deliberately does not eager-fetch Git LFS before path
 detection, so the required always-report check can still reach its skip decision
 when repository LFS bandwidth is exhausted. The player-experience gate remains
@@ -205,8 +205,8 @@ The broader `npm run test:vitest:fast` command also covers Gates 1–3 (it auto-
 ## Convention notes
 
 - Node version: **22** across all workflows. Bumping in one workflow without bumping the rest causes spurious diff between local-dev and CI behaviour.
-- Install command: `npm install --legacy-peer-deps`. `npm ci` would fail under the same peer-dep skew (`react-dom@18` vs `@testing-library/react@14`) that motivated the legacy flag.
-- Map workspace: `npm install --legacy-peer-deps --prefix src/ui/map` is required because root `tsc --noEmit` references map UI types.
+- Install command: `npm ci --legacy-peer-deps`.
+- Map workspace: run the same command with `working-directory: src/ui/map` because root `tsc --noEmit` references map UI types. Running from the workspace keeps the root package out of the map dependency graph.
 - Action versions: `actions/checkout@v5` and `actions/setup-node@v5` (matches `baseline-regression.yml`, `typecheck.yml`, `desktop-release-guard.yml`). Pinning to v4 mid-workflow set causes intermittent cache-key drift.
 
 ## Cross-references

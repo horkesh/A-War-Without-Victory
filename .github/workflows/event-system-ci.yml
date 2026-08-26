@@ -37,8 +37,8 @@ name: Event System CI
 #
 # Determinism + convention notes:
 #   - Node 22 (matches repo's other workflows; see baseline-regression.yml).
-#   - npm install --legacy-peer-deps (matches repo convention; npm ci would
-#     fail under the same peer-dep skew that motivated the legacy flag).
+#   - npm ci --legacy-peer-deps (immutable lockfile install with the legacy
+#     peer-resolution mode required by the committed dependency graph).
 #   - The map workspace also installs because the root tsc references map UI
 #     types (mirrors baseline-regression.yml).
 #   - actions/checkout@v5 + actions/setup-node@v5 (matches repo convention).
@@ -71,10 +71,11 @@ jobs:
           cache: npm
 
       - name: Install dependencies (root)
-        run: npm install --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
       - name: Install dependencies (map workspace)
-        run: npm install --legacy-peer-deps --prefix src/ui/map
+        run: npm ci --legacy-peer-deps
+        working-directory: src/ui/map
 
       - name: TypeScript typecheck
         run: npx tsc --noEmit

@@ -247,8 +247,15 @@ independent clone at the packet's code commit. Never overwrite Claude's or anoth
    if ((node -p "process.versions.node.split('.')[0]") -ne "22") { throw "Node 22 required" }
    node --version
    npm.cmd --version
-   npm.cmd install --legacy-peer-deps
-   npm.cmd install --legacy-peer-deps --prefix src/ui/map
+   npm.cmd ci --legacy-peer-deps
+   if ($LASTEXITCODE -ne 0) { throw "root npm ci failed" }
+   Push-Location -LiteralPath "src/ui/map"
+   try {
+     npm.cmd ci --legacy-peer-deps
+     if ($LASTEXITCODE -ne 0) { throw "map npm ci failed" }
+   } finally {
+     Pop-Location
+   }
    ```
 
 3. The audited-base environment variables that can change scenario behavior, output, provenance,

@@ -140,8 +140,8 @@ and upload them with the `gh` CLI.
 ```bash
 git switch main
 git pull --ff-only
-npm install --legacy-peer-deps
-npm install --legacy-peer-deps --prefix src/ui/map
+npm ci --legacy-peer-deps
+(cd src/ui/map && npm ci --legacy-peer-deps)
 npm run desktop:startup-snapshot:build
 npm run desktop:release:check
 npm run desktop:package:linux:appimage
@@ -155,8 +155,13 @@ ls -lah dist-packaged/*.AppImage
 ```powershell
 git switch main
 git pull --ff-only
-npm install --legacy-peer-deps
-npm install --legacy-peer-deps --prefix src/ui/map
+npm ci --legacy-peer-deps
+Push-Location -LiteralPath "src/ui/map"
+try {
+    npm ci --legacy-peer-deps
+} finally {
+    Pop-Location
+}
 npm run desktop:startup-snapshot:build
 npm run desktop:release:check
 npm run desktop:package:win:nsis
