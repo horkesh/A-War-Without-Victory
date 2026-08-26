@@ -239,6 +239,19 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 staging_osid: 'op:bratunac:slapasnica',
             },
+            {
+                // This is the Višegrad Brigade's own Drina Corps column. Running it
+                // in the opening approach fighting places the Čajniče road seizures
+                // before the late-July ARBiH counteroffensive.
+                axis_id: 'upper_drina_approaches',
+                name: 'Upper Drina Approaches',
+                brigades: ['rs_visegrad_brigade'],
+                objectives: [
+                    'op:cajnice:miljeno_2',
+                    'op:gorazde:podkozara_donja_2',
+                ],
+                staging_osid: 'op:cajnice:zaborak',
+            },
         ],
     },
     {
@@ -277,7 +290,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 // BROKEN AXIS — never fires. DO NOT FIX without addressing cascade coupling below.
                 // slapasnica NOT adj vranesevici (Sacred Rule 3 violation) → axis produces zero effects.
-                // Subsequent broken links: zapolje_2→mala_daljegosta_2, mala_daljegosta_2→obadi, obadi→brezovice_2.
+                // Obadi is deliberately excluded: the January painter keeps it in the RBiH
+                // high-water position, while brezovice_2 is already authored RS at initialization.
                 // R24 2026-05-25: replaced with valid chain slapasnica→donji_potocari_2→milacevici→srebrenica_2
                 //   →ljeskovik_2→sulice_2. Result: Srebrenica correctly RS (+6 OSIDs), BUT reversed the R22
                 //   bosansko_grahovo/Sipovo HRHB cascade (−6 large-area HRHB OSIDs). Net: −0.70pp REGRESSION.
@@ -287,7 +301,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:bratunac:vranesevici',
                     'op:bratunac:zapolje_2',
                     'op:srebrenica:mala_daljegosta_2',
-                    'op:srebrenica:obadi',
                     'op:srebrenica:brezovice_2',
                 ],
                 staging_osid: 'op:bratunac:slapasnica',
@@ -391,7 +404,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:visegrad:visegrad_2',
                     'op:visegrad:kamenica_2',
-                    'op:visegrad:medjedja_2',
                 ],
                 staging_osid: 'op:visegrad:okrugla',
             },
@@ -461,6 +473,39 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:ilijas:sirovine',
                 ],
                 staging_osid: 'op:ilijas:podlugovi',
+            },
+        ],
+    },
+    {
+        // Autumn 1992 SRK counterstroke closes the Kijevo shoulder after the
+        // ARBiH summer corridor offensive. It is separate from opening Prsten
+        // so the corridor fighting can occur before the approach is reclosed.
+        corps: 'vrs_sarajevo_romanija',
+        faction: 'RS',
+        name: 'Operation Kijevo',
+        staging_osid: 'op:trnovo:gornja_presjenica',
+        available_from: 24,
+        min_attack_outcome: 'repulsed',
+        axes: [
+            {
+                axis_id: 'kijevo_shoulder',
+                name: 'Kijevo Shoulder',
+                brigades: [
+                    'rs_1st_romanija_infantry',
+                    'rs_2nd_sarajevo_light_infantry',
+                ],
+                objectives: ['op:trnovo:kijevo_2'],
+                staging_osid: 'op:trnovo:gornja_presjenica',
+            },
+            {
+                // Prača is the direct eastern approach from the 4th Sarajevo Brigade's
+                // home at Bulozi. Keeping it on its own axis prevents the Kijevo column
+                // from teleporting across the SRK frontage; both seizures remain combat.
+                axis_id: 'praca_approach',
+                name: 'Prača Approach',
+                brigades: ['rs_4th_sarajevo_light_infantry'],
+                objectives: ['op:pale:praca'],
+                staging_osid: 'op:pale:bulozi',
             },
         ],
     },
@@ -644,6 +689,17 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 staging_osid: 'op:foca:foca_3',
             },
             {
+                axis_id: 'cajnice_south',
+                name: 'Čajniče Southern Approach',
+                brigades: ['rs_ajnie_brigade'],
+                objectives: [
+                    'op:cajnice:batotici',
+                    'op:foca:brusna_2',
+                    'op:gorazde:kolovarice',
+                ],
+                staging_osid: 'op:cajnice:cajnice_2',
+            },
+            {
                 axis_id: 'kalinovik',
                 name: 'Kalinovik',
                 brigades: [
@@ -817,7 +873,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // torlakovac_2 — first objective in the sweep. grdovo (Jajce) would also be
         // adjacent but starts HRHB; pribeljci_2 is always RS and safe.
         //
-        // Objectives: all 5 painted RS, all start RBiH.
+        // Objectives: the six-settlement historical sweep south through Prusac,
+        // then Korenići.  Korenići is the terminal Donji Vakuf pocket: leaving it
+        // friendly after the town and Prusac fall causes 3rd Corps to march brigades
+        // into the exposed cell several turns later instead of holding the Bugojno line.
         // Removed from triggered Op Jajce (vrs_2nd_krajina) — 1KK handles DV.
         corps: 'vrs_1st_krajina',
         faction: 'RS',
@@ -832,17 +891,39 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: [
                     'rs_19th_krajina_light_infantry' as FormationId,
                     'rs_31st_light_infantry' as FormationId,
+                    // Both are already deployed in the Donji Vakuf sector when the
+                    // queued operation injects; reserving them here prevents unrelated
+                    // same-corps probes from consuming the local follow-through force.
+                    'rs_22nd_krajina_infantry' as FormationId,
+                    'rs_5th_kozara_light_infantry' as FormationId,
                 ],
                 // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
-                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 → prusac_2
+                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 →
+                // prusac_2; Korenići is adjacent to the secured Donji Vakuf/Jemanlići line.
                 objectives: [
                     'op:donji_vakuf:torlakovac_2',
                     'op:donji_vakuf:babin_potok_2',
                     'op:donji_vakuf:oborci_2',
                     'op:donji_vakuf:donji_vakuf_2',
                     'op:donji_vakuf:prusac_2',
+                    'op:donji_vakuf:korenici',
                 ],
                 staging_osid: 'op:sipovo:pribeljci_2',
+            },
+            {
+                // Gornje Krčevine is a separate Vlašić-side pocket, not graph-adjacent
+                // to the Vrbas/Korenići chain. The local 1KK brigades already probe it
+                // from RS-held Varošluk; authoring it as a full operation axis allows a
+                // decisive result to transfer control and invoke the ordinary emergency
+                // retreat path for its isolated defender.
+                axis_id: 'vlasic_pocket',
+                name: 'Vlašić Pocket',
+                brigades: [
+                    'rs_1st_banja_luka_light_infantry' as FormationId,
+                    'rs_43rd_prijedor_motorized' as FormationId,
+                ],
+                objectives: ['op:travnik:gornje_krcevine'],
+                staging_osid: 'op:travnik:varosluk',
             },
         ],
     },
@@ -915,6 +996,46 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
 ];
 
 const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
+    {
+        // BB1 p.187: after early fighting on the Čajniče approaches, Bosnian TO/Army
+        // forces launched a major late-July counteroffensive, expanded the Goražde
+        // pocket, and opened the thread-like route through Trnovo. Political control
+        // remains battle-owned: this definition only supplies named formations,
+        // staging points, and connected objectives to the ordinary operation resolver.
+        corps: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: 'Operation Circle',
+        staging_osid: 'op:gorazde:gorazde_2',
+        // The offensive begins only once the enclave's small brigades have rebuilt
+        // above the ordinary 500-person attack floor; the combat window still falls
+        // inside the August-November series described by BB1 p.187.
+        available_from: 8,
+        min_attack_outcome: 'repulsed',
+        planning_duration: 4,
+        axes: [
+            {
+                axis_id: 'gorazde_perimeter',
+                name: 'Goražde Perimeter',
+                brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_851st_vitezka_liberation'],
+                objectives: ['op:gorazde:glamoc', 'op:gorazde:kamen', 'op:gorazde:sopotnica'],
+                staging_osid: 'op:gorazde:gorazde_2',
+            },
+            {
+                axis_id: 'foca_corridor',
+                name: 'Foča Corridor',
+                brigades: ['arbih_843rd_light', 'arbih_808th_liberation'],
+                objectives: ['op:foca:donje_zesce'],
+                staging_osid: 'op:gorazde:faocici_2',
+            },
+            {
+                axis_id: 'trnovo_corridor',
+                name: 'Trnovo Corridor',
+                brigades: ['arbih_102nd_motorized', 'arbih_109th_mountain'],
+                objectives: ['op:trnovo:tosici'],
+                staging_osid: 'op:trnovo:delijas',
+            },
+        ],
+    },
     // R28 BLOCKED: Op Sana 95 on arbih_5th_corps caused regression (−6, −1pp).
     // Root cause: triggered "Operation Sana" already runs on 5th Corps at w175-188.
     // Op Sana 95 queued behind it, stayed in planning, brigade marching from
@@ -1342,12 +1463,12 @@ export function injectPrePlannedOperations(
         }
     }
 
-    // Queue SRK: Operation Prsten → Operation Trnovo
+    // Queue SRK: Operation Prsten → autumn Kijevo shoulder → Operation Trnovo
     // Prsten completes ~w9-10; Trnovo (available_from:6) injects immediately after.
     if (injectedCorps.has('vrs_sarajevo_romanija')) {
         const cmd = corpsCommand['vrs_sarajevo_romanija'];
         if (cmd && !cmd.queued_operations) {
-            cmd.queued_operations = ['Operation Trnovo'];
+            cmd.queued_operations = ['Operation Kijevo', 'Operation Trnovo'];
         }
     }
 

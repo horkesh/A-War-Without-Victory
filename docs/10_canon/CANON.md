@@ -54,6 +54,18 @@ War begins only when the mandatory EC-coerced RBiH independence referendum has b
 - Stable ordering for all iterations affecting output
 - Deterministic serialization (reproducible outputs)
 
+### Calibration Truth Rule
+
+- `data/scenarios/apr1992_definitive_188w.json` is the only scoring calibration scenario.
+- Checkpoint calibration is evaluated on that one trajectory; January 1993 is week 39, not a
+  separate 40-week scenario.
+- Painted settlement control is checkpoint truth. Research may establish the military
+  operations that can produce it, but a calibration-only event may not manufacture territorial
+  control to improve fit.
+- Existing sensitive-history territorial receipts are separate canon exceptions governed by
+  `SENSITIVE_HISTORY_DESIGN_GATE.md`, not precedents for ordinary calibration.
+- The living result and debt record is `docs/40_reports/CALIBRATION_MASTER.md`.
+
 ### Systemic Design Insights Rule
 Systemic design insights discovered during implementation should be incorporated into `docs/10_canon/FORAWWV.md` as an addendum. Addendum edits require **Pyrrhic-panel sign-off** — convene the appropriate panel; a unanimous GO is the signature; a BLOCK or split verdict surfaces to the owner; implementer ≠ reviewer. Flag with note:
 

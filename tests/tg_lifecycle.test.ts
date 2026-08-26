@@ -110,17 +110,31 @@ describe('selectDonors v2.2-simplified', () => {
         expect(donors.map(d => d.brigade_id)).toEqual(['d_free']);
     });
 
-    it('excludes brigades that would drop below MIN_BRIGADE_PERSONNEL_AFTER_DONATION', () => {
-        // donation = floor(min(p*0.25, p*0.30)) = floor(p*0.25)
-        // p=1000 → donation 250 → residual 750 < 800 → excluded
-        // p=1200 → donation 300 → residual 900 > 800 → included
+    it('excludes brigades at the residual floor and scales stronger donors to retain it', () => {
         const state = stateWith([
             brigade('anchor'),
+            brigade('d_at_floor', { personnel: 800 }),
             brigade('d_small', { personnel: 1000 }),
             brigade('d_big', { personnel: 1200 }),
         ]);
         const donors = selectDonors(state, { anchor_brigade_id: 'anchor', staging_osid: 'op:x:y' });
-        expect(donors.map(d => d.brigade_id)).toEqual(['d_big']);
+        expect(donors.map(d => d.brigade_id)).toEqual(['d_big', 'd_small']);
+        expect(donors.find(d => d.brigade_id === 'd_small')?.personnel_lent).toBe(200);
+    });
+
+    it('scales a light-infantry loan down to its residual floor instead of rejecting it', () => {
+        const state = stateWith([
+            brigade('anchor'),
+            brigade('light_donor', { personnel: 800, equipment_class: 'light_infantry' }),
+        ]);
+
+        const donors = selectDonors(state, {
+            anchor_brigade_id: 'anchor',
+            staging_osid: 'op:x:y',
+        });
+
+        expect(donors).toHaveLength(1);
+        expect(donors[0].personnel_lent).toBe(200);
     });
 
     it('respects cooldown — excludes brigades with tg_cooldown_until_turn > current', () => {
@@ -149,6 +163,34 @@ describe('selectDonors v2.2-simplified', () => {
         ]);
         const donors = selectDonors(state, { anchor_brigade_id: 'anchor', staging_osid: 'op:x:y' });
         expect(donors.map(d => d.brigade_id)).toEqual(['aaa', 'mmm', 'zzz']);
+    });
+
+    it('routes donors across politically friendly territory without requiring a brigade on every hop', () => {
+        const state = stateWith([
+            brigade('anchor', { location_osid: 'op:test:staging' }),
+            brigade('donor', { location_osid: 'op:test:rear' }),
+        ]);
+        state.political = {
+            political_controllers: {
+                'op:test:rear': 'RBiH',
+                'op:test:middle': 'RBiH',
+                'op:test:staging': 'RBiH',
+            },
+        } as unknown as GameState['political'];
+        const adjacency = new Map([
+            ['op:test:rear', ['op:test:middle']],
+            ['op:test:middle', ['op:test:rear', 'op:test:staging']],
+            ['op:test:staging', ['op:test:middle']],
+        ]);
+
+        const donors = selectDonors(state, {
+            anchor_brigade_id: 'anchor',
+            staging_osid: 'op:test:staging',
+            adjacency,
+        });
+
+        expect(donors.map((donor) => donor.brigade_id)).toEqual(['donor']);
+        expect(donors[0].distance_hops).toBe(2);
     });
 
     it('donation_personnel matches ratified falloff model (0 hops → 30% cap)', () => {

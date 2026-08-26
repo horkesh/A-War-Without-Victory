@@ -52,6 +52,31 @@ describe('historical checkpoints', () => {
         expect(reached.map((c) => c.week)).toEqual([39, 104, 156, 188]);
     });
 
+    it('pins continuously RS-held Jemanlići, which the April initializer misclassifies', async () => {
+        const scenario = await loadScenario('apr1992_definitive_188w.json') as ScenarioLike & {
+            osid_control_overrides?: Record<string, string>;
+        };
+        expect(scenario.osid_control_overrides?.['op:donji_vakuf:jemanlici']).toBe('RS');
+    });
+
+    it('pins RS-held Paklarevo, reserved as a target for the 1995 Vlasic offensive', async () => {
+        const scenario = await loadScenario('apr1992_definitive_188w.json') as ScenarioLike & {
+            osid_control_overrides?: Record<string, string>;
+        };
+        expect(scenario.osid_control_overrides?.['op:travnik:paklarevo']).toBe('RS');
+    });
+
+    it('pins the owner-corrected January painter at Rat and Prozor town', async () => {
+        const raw = await readFile(
+            join(process.cwd(), 'data/source/calibration/painted_control_jan1993.json'),
+            'utf8'
+        );
+        const painted = (JSON.parse(raw) as { by_settlement_id: Record<string, string> })
+            .by_settlement_id;
+        expect(painted['op:novi_travnik:rat_2']).toBe('HRHB');
+        expect(painted['op:prozor:prozor_2']).toBe('HRHB');
+    });
+
     it('the terminal checkpoint agrees with the duration-based key, so historical_fit keeps its meaning', async () => {
         const scenario = await loadScenario('apr1992_definitive_188w.json');
         const reached = checkpointsForScenario(scenario);
@@ -164,6 +189,20 @@ describe('exactly one calibration scenario', () => {
         };
         expect(loaded.calibration_scenario, 'dropped by the loader = scoring silently off').toBe(true);
         expect(checkpointsForScenario(loaded as ScenarioLike)).toHaveLength(4);
+    });
+
+    it('authors the January 1993 Srebrenica–Zvornik boundary and its stabilizing cells', async () => {
+        const { loadScenario } = await import('../src/scenario/scenario_loader.js');
+        const loaded = (await loadScenario('data/scenarios/apr1992_definitive_188w.json')) as {
+            osid_control_overrides?: Record<string, string>;
+        };
+
+        expect(loaded.osid_control_overrides).toMatchObject({
+            'op:srebrenica:brezovice_2': 'RS',
+            'op:kladanj:brgule': 'RBiH',
+            'op:kladanj:vucinici_2': 'RBiH',
+            'op:zvornik:djulici': 'RS',
+        });
     });
 
     it('the declaration is what gates it — a 188w clone without the flag does not score', () => {

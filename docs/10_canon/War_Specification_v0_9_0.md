@@ -144,6 +144,24 @@ Items recorded in lane handoffs but not yet integrated into normative pipeline:
 - Per-corps `historical_axis_munis` config + off-axis duration counter on `CorpsCommandState` (R2-2 7th event `csq_corps_redeployed_off_axis` is HELD pending this).
 - Stupčanica-95 defender combat-math stack honesty for operation-health/AAR diagnostics only; not a Srebrenica/Zepa fall-delivery mechanism.
 
+### 12.8 Historical checkpoint calibration
+
+The war trajectory has one scoring calibration scenario:
+`data/scenarios/apr1992_definitive_188w.json`. January 1993 is observed at week 39 of that
+trajectory. A short scenario may prove a bounded mechanism, but it cannot create a second
+calibration number or replace the master.
+
+Painted settlement control declares the checkpoint target. Scenario initialization may correct
+an April start-state classification, and authored operations may define formations, staging,
+timing, and objectives. Subsequent ordinary territorial changes must be attributable to attack
+resolution, an authorized general control mechanism, or a separately canonical end-state/
+sensitive-history exception. A calibration-only event `control_change` is forbidden.
+
+The current January package uses ordinary combat operations in Donji Vakuf/Travnik,
+Srebrenica–Zvornik, and the Goražde/Upper Drina/Trnovo belt. Its accepted run, remaining
+mismatches, and deferred 706th retreat debt are maintained in
+`docs/40_reports/CALIBRATION_MASTER.md`.
+
 ---
 
 *War Specification v0.9.0 — Single war phase; v0.6 lifecycle baseline + v0.9 substrate amendments (must_hold variable multiplier, divergence event substrate, equipment_quality_modifier, reconstitution policy step curve, sensitive-history Ring 1 substrate, officer-quality observability) integrated.*

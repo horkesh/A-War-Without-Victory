@@ -1,6 +1,11 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** IN AUTONOMOUS EXECUTION; R1-R6 and the narrow pre-1.0 RC collapse packet are complete. R7 is the current product critical path. **RE (engine integrity) is inserted ahead of any further calibration work by owner instruction 2026-08-26** and gates R8.
+**Status:** IN AUTONOMOUS EXECUTION. **Two owner instructions are live and they compose.**
+(1) The owner temporarily reactivated the January 1993 calibration slice of R6 on the single
+188-week master; that slice landed in `92f924f9d`. (2) The owner then ruled 2026-08-26 that
+**engine health precedes further calibration**, inserting **RE (engine integrity)** ahead of any
+further op-objective / axis / timing / roster calibration and gating R8. R7 continues in
+parallel with RE (disjoint file ownership). R8 and R9 follow.
 
 **Last updated:** 2026-08-26
 
@@ -14,9 +19,27 @@
 
 ## Current Execution Snapshot (2026-08-26)
 
+- **Owner-reactivated lane:** R6 January 1993 checkpoint calibration on
+  `apr1992_definitive_188w.json`, with later-checkpoint fallout explicitly deferred. Current
+  accepted run n372 is 697/712 nationally and 59/62 in the
+  Čajniče–Foča–Goražde–Pale–Trnovo–Rudo–Višegrad focus. Direct calibration
+  `control_change` events are forbidden. The next regional calibration work remains in the
+  Srebrenica–Zvornik area after the accepted Goražde rebuild. Authority:
+  `docs/40_reports/CALIBRATION_MASTER.md`.
+- **RE engine integrity (owner-instructed 2026-08-26):** *"Engine health is sacrosanct — these
+  issues should be dealt with immediately before more calibration work."* Painted-reference and
+  `init_control` calibration continues in parallel; **op-objective, axis, timing and roster lanes
+  wait on RE**, because their deltas are measured against combat behaviour RE changes globally.
+  Plan: [Engine integrity](2026-08-26-engine-integrity-plan.md). §6 note: the enclave guard was
+  found vacuous and repaired (`0098a48fe`); the panel split 2-2 with one BLOCK and the owner ruled
+  `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` ON (`2dfe6f4e7`), **not yet validated at 188 weeks**.
+
 - **Complete:** R1, R2, R3, R4, R5, and the defined pre-1.0 scope of R6.
 - **Complete RC narrow packet:** the default-OFF v3 selector plus reversible D-shape is retained. Paired 188-week runs produced hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 bot benchmarks, 7/7 health gates, one live non-enclave HRHB damage/capacity write, and full Section 6 pass. Bucovaca peaked at strain 62 and recovered to 37; Sipovo/Drvar peaks remained 11/7.5. D-topology neighbour cascade remains owner-reserved and is post-1.0.
-- **Current lane / next action:** **R7 Phase 2 and the owner-directed opening-screen implementation are complete.** The reopened provenance/OOB lane was repaired through source-bound inventories, controlled campaign evidence, independent review, and the later HV/operation harness work. The five-beat case-file opening (landing, faction dossier, campaign mode, Field Records, command handoff) is merged and browser-proven for all factions. The complete suite is green through the deterministic balanced runner and the merged integration branch's Event System CI is green. **Next:** Phase 4 bounded audio provenance/assets, then English accessibility/readability and integrated packaged proof. Unfinished multilingual localization remains post-1.0.
+- **Next after the reactivated checkpoint lane:** R7 Phase 4 bounded audio provenance/assets,
+  then English accessibility/readability and integrated packaged proof. R7 Phase 2 and the
+  owner-directed opening-screen implementation remain complete; unfinished multilingual
+  localization remains post-1.0.
 - **Canon landed this cycle:** `SENSITIVE_HISTORY_DESIGN_GATE.md` **§10, "Provenance and the Integrity of the Historical Record"** — ratified by unanimous Pyrrhic panel (`5f462e8aa`), twelve conditions discharged across two rounds. `FORAWWV.md` §XIII temporal scope is drafted-but-**HELD** behind two engineering items (provenance channel separation + the determinism-scan pair) and is **not** canon.
 - **Measurement instrumentation is no longer the active blocker.** Run provenance now records commit/input/flag evidence, pair selection rejects incomparable artifacts, and the collapse OFF/ON comparison was rerun on same-commit evidence. Historical mixed-tree artifacts remain inadmissible; do not reinterpret them through a newer checkout.
 - **★ NEW LANE — RE ENGINE INTEGRITY, owner-instructed 2026-08-26.** *"Engine health is sacrosanct — these issues should be dealt with immediately before more calibration work."* Five days of Pyrrhic standup findings were consolidated and put to an eight-seat panel with the implementer's bias declared; **fourteen packet claims were refuted**, including both load-bearing sequencing claims, and **two seats independently converged on a root the packet never named.** **The engine records probe outcomes into a memory it cannot read.** A probe that *fights* never records an objective failure — only probes that never fought do — so `op:centar_sarajevo:radava` carries `failure_count 1, cooldown 0` after 26 attacks while a VRS objective with zero attacks carries `13 / 182`. The probe cooldown scans `operation_history` for `type:'probe'` while both writers hardcode `'sector_attack'` (91 entries, zero probes). And the anti-repetition guard is per-operation state against a per-objective problem: Radava's 26 attacks are **13 separate probe operations of exactly two attacks each**. Result: **365 of 585 battles (62%) are probes that cannot capture** — 201 wins for zero ground at 131,577 attacker casualties, more than every real operation combined — and Radava (25 catastrophic) and Gornja Vratnica (24 decisive victories, 39 attacks) run the same two code paths. **The corps AI produces 23 capture-capable attacks in 188 weeks and all 23 are RBiH**, so it is broken for all three factions and only the RS lacks a catalogue to mask it. The cost-loop root is re-identified as **`strategic_reserves`** — ungated, undecayed, faction-global, and funded by the very overflow that trips the mobilization cap. **Executable plan:** [Engine integrity](2026-08-26-engine-integrity-plan.md). **Phase 1 is roughly ten lines; Phase 0 costs zero scenario runs.** **Precedence:** op-objective/axis/timing/roster calibration pauses or banks for re-measurement; painted-reference and `init_control` lanes continue unaffected.

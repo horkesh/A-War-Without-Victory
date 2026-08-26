@@ -204,6 +204,12 @@ Political control may change **only** via:
 
 **No passive pressure flip:** Control does not change from "sustained opposing military pressure" alone; it changes only when an attack (or corps/frontline op) is resolved.
 
+**No calibration receipt:** An event must not be authored or expanded to transfer political
+control solely to make a historical checkpoint match its painted reference. Ordinary
+calibration territory must be earned by an authorized general mechanism above. Explicit
+sensitive-history fall receipts are a separately reviewed exception and remain subject to
+`SENSITIVE_HISTORY_DESIGN_GATE.md`; they do not authorize checkpoint-fitting events.
+
 ### 9.7 Null Political Control
 
 A settlement may have political_controller = null only if:
@@ -356,7 +362,11 @@ Temporary JNA/HV phantom brigades are subordinate additions to an authored milit
 
 ### 14.5 Retreat determinism
 
-When a defender retreats, valid destinations are chosen deterministically. **Tie-break:** enemy adjacency count ascending (prefer rear), then OSID string sort (stable ordering).
+When a defender retreats, valid destinations are chosen deterministically **and must remain
+geographically and organizationally meaningful**. Route reachability and distance are selection
+criteria; OSID string ordering is only the final tie-break between otherwise equivalent valid
+destinations. Deterministic lexical order by itself is never a geographic or command-routing
+rule.
 
 **Retreat destination classes (priority order):**
 1. **Friendly OSID** (safe rear retreat) -- by enemy adjacency count ascending, then OSID sort
@@ -364,6 +374,14 @@ When a defender retreats, valid destinations are chosen deterministically. **Tie
 3. **Last stand** (no retreat possible -- defenderPower x 1.5, casualty multiplier x 2)
 
 Note: per 6.2, "last stand" results in forced retreat with penalties, not destruction.
+
+**Known nonconformance (706th debt, 2026-08-26):** the terminal
+`findEmergencyRetreatOsid` fallback can currently choose the lexicographically first OSID in
+the largest friendly component when the source component has vanished and no corps formation
+has a location. This sent the 706th Muslim Mountain Brigade from Gornje Krčevine to
+`op:breza:koritnik`, followed by same-turn dissolution. That fallback is deterministic but
+violates the semantic rule above. The route and same-turn lifecycle question are open debt in
+`CALIBRATION_MASTER.md`; neither outcome is canonicalized by its current implementation.
 
 ### 14.5a Breakthrough Retreat
 

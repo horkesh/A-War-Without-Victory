@@ -6,6 +6,12 @@
 
 **Current Lifecycle Model:** Single-phase canonical lifecycle (`war`). Peace phase retired in v0.7.3; all canonical scenarios start in April 1992 directly in War phase. Early-war mechanics (militia emergence, JNA dissolution, pool population, alliance updates) run as War-phase pipeline steps during the first ~12 weeks.
 
+**Calibration authority (2026-08-26):** `data/scenarios/apr1992_definitive_188w.json` is the
+single scoring calibration scenario. Historical checkpoints, including January 1993 at week 39,
+are observations of that one trajectory. The 40-week scenario family is retired for calibration
+truth and may appear only as historical or bounded diagnostic context. Current score, accepted
+run, residuals, and debt live in `docs/40_reports/CALIBRATION_MASTER.md`.
+
 ## Authoritative Documentation Hierarchy
 
 When conflicts arise between documents, this is the resolution order. See **`docs/10_canon/CANON.md`** for the canonical list and paths.

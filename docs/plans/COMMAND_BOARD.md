@@ -19,7 +19,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **PRE-1.0 SCOPE COMPLETE -- CLOSED 2026-08-09** | None in the pre-1.0 R6 packet. Named Brcko, exhaustion re-pacing, casualty-grade, cohesion, and institutional-veto work remains post-1.0 debt unless explicitly reactivated. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
+| 6 | R6 | **JANUARY 1993 CHECKPOINT REACTIVATED BY OWNER — n372 ACCEPTED** | Continue the Srebrenica–Zvornik regional mismatch pass on week 39 of the single 188-week master. Preserve 697/712 national and 59/62 accepted Goražde-focus truth; do not use direct calibration control events or a 40-week scenario. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE -- PHASE 2 AND OPENING EXPERIENCE COMPLETE 2026-08-23** | The provenance/OOB reopening is closed with source-bound and controlled-run evidence. The case-file opening, explicit campaign mode, safe Field Records, and real browser proofs are merged. Next: audio/licensing, English accessibility/readability, then integrated packaged proof. Localization Phase 3 is post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
 | 7.5 | RE | **SCOPED 2026-08-26 — OWNER-INSTRUCTED, PRECEDES FURTHER CALIBRATION, GATES R8** | Phase 0, which costs **zero scenario runs**: build the op-schedule fingerprint, correct the health-gate predicate as reported-not-gated, land a clean four-checkpoint 188w pin, and write the pre-committed decision rule into CALIBRATION_MASTER before run 1. Then **Phase 1 — the probe memory repair (~10 lines, the highest-value change on the board)**, Phase 2 legibility, Phase 3 operation supply, Phase 4 cost loop. | [Engine integrity](2026-08-26-engine-integrity-plan.md) |
@@ -28,13 +28,19 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 
 ## Current Critical Path
 
-`R7 content/history/audio/accessibility/opening + RE engine integrity -> R8 -> R9`
+`R6 January checkpoint (LANDED 2026-08-26) -> RE engine integrity + R7 content/history/audio/accessibility -> R8 -> R9`
 
-**RE INSERTED 2026-08-26 BY OWNER INSTRUCTION** — *"engine health is sacrosanct; deal with these before more calibration work."* RE may run in parallel with R7 (disjoint ownership: engine/sim against content/audio/UI) but precedes any further calibration on combat resolution, the manpower economy, or operation injection, and gates R8. The headline measurement: **365 of 585 battles at 188 weeks (62%) are probe operations that cannot capture ground by construction** — 201 wins, zero territory, 131,577 attacker casualties, more than every real operation combined. The panel traced it to **two small defects in probe memory**: a probe that fights never records an objective failure, and the probe cooldown scans a history field nothing ever writes. Phase 1 is roughly ten lines. Scoring or diary-testing this engine ratifies the defect as the floor.
+**RE INSERTED 2026-08-26 BY OWNER INSTRUCTION** — *"engine health is sacrosanct; deal with these before more calibration work."* Codex landed the January checkpoint in `92f924f9d`; **further calibration on combat resolution, the manpower economy, or operation injection now waits on RE.** RE may run in parallel with R7 (disjoint ownership: engine/sim against content/audio/UI) and gates R8.
+
+The headline measurement: **365 of 585 battles at 188 weeks (62%) are probe operations that cannot capture ground by construction** — 201 wins, zero territory, 131,577 attacker casualties, more than every real operation combined. The panel traced it to two small defects in probe memory. Scoring or diary-testing this engine ratifies the defect as the floor.
+
+**§6 status:** the enclave guard was found vacuous (it checked one cell of nine and could not fail) and has been repaired in `0098a48fe`. The panel split 2-2 with one BLOCK; the owner ruled `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` ON, so Srebrenica and Žepa now cost their defenders what they historically cost. **That change is not yet validated at 188 weeks.**
 
 **MEASUREMENT BLOCKER CLOSED.** Run provenance now stamps commit, consumed-input evidence, and flag state; the pair selector hard-fails on incomparable artifacts. A fresh same-commit collapse OFF/ON pair passed the Section 6 discriminator with positive controls. The old mixed-tree n222/n223 pair remains permanently inadmissible and must not be reused.
 
-**CURRENT EXECUTION:** R7 audio/licensing, then English accessibility/readability and integrated packaged proof. The opening experience and test-suite recovery are complete; R8 remains gated on the remaining R7 work rather than on provenance instrumentation.
+**CURRENT EXECUTION:** owner-reactivated January 1993 calibration, currently on the
+Srebrenica–Zvornik follow-on after accepted Goražde n372. R7 audio/licensing resumes afterward,
+then English accessibility/readability and integrated packaged proof.
 
 **Canon landed 2026-08-17:** `SENSITIVE_HISTORY_DESIGN_GATE.md` §10, "Provenance and the Integrity of the Historical Record", ratified by unanimous Pyrrhic panel. `FORAWWV.md` §XIII temporal scope is drafted but **HELD** behind the provenance channel-separation and determinism-scan packets, and is not canon.
 

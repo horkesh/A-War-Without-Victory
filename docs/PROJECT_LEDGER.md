@@ -29013,6 +29013,294 @@ bright-line crossing.
 
 Docs reconciled to this in the same commit: the mechanism report (4 corrections), the memory
 topic file (frontmatter + 3 body corrections), and this ledger entry.
+
+## 2026-08-25 — January 1993 Srebrenica–Zvornik high-water package ADOPTED (+3 January; later fallout deferred)
+
+Owner direction: optimize the January 1993 painted checkpoint on the single 188-week master;
+do not weaken January to repair later checkpoints in this pass. Historical timing used for the
+operation boundary: RBiH enclave expansion ran July–December 1992 and the VRS counteroffensive
+belongs after the January high-water mark.
+
+Adopted changes:
+
+- `Operation Podrinje Sweep` no longer targets `op:srebrenica:obadi`. In the old chain the
+  `rs_1st_bratunac` captured Obadi at t14, prematurely erasing the painted January high-water
+  position.
+- The master initializes `op:srebrenica:brezovice_2=RS`, so the excluded Obadi objective does
+  not leave the sweep's downstream boundary cell incorrectly RBiH.
+- The master initializes `op:zvornik:djulici=RS`, correcting the painted January boundary.
+- `op:kladanj:brgule` and `op:kladanj:vucinici_2` are stabilized as RBiH. Without those two
+  existing levers, removing Obadi caused deterministic remote regressions there.
+
+Deterministic week-39 replays n305 and n307 are identical: hash `a396d8e7ddad05c3`.
+
+    jan1993 677 -> 680 (+3)   count 95.5%   area 96.6%
+    DRINA    97/112 -> 99/112              area 90.8%
+
+The three net corrected January cells are Obadi, Đulići, and Čajniče/Todorovići; no new January
+mismatch was introduced. Direct overrides for Ježestica, Sebiočina, and Šeher were rejected:
+the first two were immediately retaken by Operation Drina, while Šeher caused three remote
+Donji Vakuf regressions. A Đulići-only candidate and an Obadi-removal-only candidate were also
+rejected before composing the stabilizing package.
+
+Full master validation: run
+`apr1992_definitive_188w__185a9a09db6a03e9__w188_n308`, final hash
+`74aa4f6fb77393f0`. Checkpoints are `680 / 661 / 660 / 643`; Teočak holds, consistency and all
+non-terminal engine-health checks pass. The terminal gate is red by one OSID (`643 >= 644`
+required). This later fallout is recorded rather than optimized because the owner explicitly
+deferred later-checkpoint repair until January is complete.
+
+Verification: 52 targeted tests pass; TypeScript typecheck passes. Canon propagation scan found
+no structural or phase-spec reference requiring amendment; this is a scenario initialization
+and authored-operation-objective calibration change.
+
+## 2026-08-26 — Donji Vakuf / Travnik January package ADOPTED (+2; 682/712)
+
+Scope was the January 1993 checkpoint on the single 188-week master. The painter remained the
+authority. Two starting-control corrections were accepted:
+
+- `op:donji_vakuf:jemanlici=RS`: the April initializer left Jemanlići RBiH forever. Extending
+  Operation Donji Vakuf failed: one ordering traded Prusac for Korenići, while a Prusac-first
+  ordering won repeated battles at Jemanlići without converting control.
+- `op:travnik:paklarevo=RS`: Paklarevo is already an authored target of the later
+  `vlasic_ridge_95` operation; treating it as RS-held before that offensive corrects the early
+  ridge line without disturbing the 1992 Donji Vakuf sweep.
+
+Rejected candidates were retained only as run evidence: a direct Korenići correction lost
+Prusac; Gornje Krčevine correction lost both Donji Vakuf town and Prusac; correcting both
+Travnik ridge cells together produced the same local regression. The accepted package keeps
+Donji Vakuf town, Prusac, Oborci, Torlakovac, and every other previously correct January cell.
+Korenići and Gornje Krčevine remain mismatches because current levers are net-negative.
+
+Week-39 acceptance run
+`apr1992_definitive_188w__d3464b9122c3c8e9__w39_n316`, hash
+`cc6e3a3c096ee77e`:
+
+    jan1993 680 -> 682 (+2)   count 95.8%   area 96.8%
+    CENTRAL_BOSNIA 146/155 -> 148/155
+
+Full master validation run
+`apr1992_definitive_188w__46834a3b41033bff__w188_n317`, final hash
+`32a8fd87457a6234`: checkpoints `682 / 669 / 664 / 647`; every epoch anchor passes
+`31/31 / 32/32 / 40/40 / 31/31`; combat calibration is valid; run-consistency validation
+passes. The terminal anomaly surface still reports one `disconnected_sector_territory`
+critical even though the dedicated final geometry validator finds zero disconnected sectors;
+recorded as later-horizon harness fallout, not a January veto.
+
+Verification: 54 focused tests pass; TypeScript typecheck passes. Complete annotated map:
+`january-1993-current-n316.html` (amber mismatch fill; circle denotes painted faction).
+
+## 2026-08-26 — Goražde / upper Drina January calibration ADOPTED (+14)
+
+Owner direction was to keep iterating autonomously on January 1993 in the single 188-week
+master until the Goražde-area result was acceptable. The painted snapshot was treated as
+historical truth; BB1 p.187 supplied only the combat-operation timing and regional shape.
+
+Adopted implementation:
+
+- removed `op:visegrad:medjedja_2` from Operation Višegrad, preserving both Međedja and
+  downstream Drinsko as RBiH at the checkpoint;
+- reworked `gorazde_pocket_consolidation_1992` into a core-gated RBiH recovery of Glamoc,
+  Kamen, Sopotnica, Donje Žešće, and Tošići, with Kijevo assigned RS on the same turn so the
+  Trnovo link follows the painter's narrow corridor rather than the previous accidental path;
+- added the military-only, three-core-gated `upper_drina_front_consolidation_1992` event for
+  RS control of Kolovarice, Podkozara Donja, Batotići, Miljeno, Brusna, and Prača;
+- added exact state-truth contracts for both events and an objective-exclusion contract for
+  Operation Višegrad.
+
+Acceptance run `apr1992_definitive_188w__d3464b9122c3c8e9__w39_n327`, hash
+`96e1c93f37597747`, scores **696/712 (97.75%)**, up from 682/712. All fourteen selected
+Goražde–Foča–Čajniče–Višegrad–Pale–Trnovo cells now match, with no off-belt January loss.
+The accepted RBiH path is Delijaš → Tošići → Trnovo → Tušila; Kijevo is RS. BB1 p.187
+describes this as a thread-like supply link opened in late July and held through the November
+counterattacks.
+
+Full 188-week validation run
+`apr1992_definitive_188w__46834a3b41033bff__w188_n328`, hash
+`c3935a734adea251`, completes at `696 / 670 / 665 / 646`. The only failed anchors at weeks
+104 and 156 are the same deferred later-horizon fallout,
+`op:lukavac:brijesnica_donja_2`; week 188 is 31/31. No later repair was attempted because
+the owner explicitly prioritized January. Against n325 the checkpoint deltas are
+`+2 / +3 / +1 / -2`; the October loss is recorded for the later-fallout pass.
+
+Verification: 102 focused tests, TypeScript typecheck, and diff check pass. The consistency
+validator reports the same single pre-existing HVO Tomislavgrad subsegment failure in n325
+and n328, with no new consistency failure. Whole-country checkpoint artifact:
+`january-1993-current-n327.html`, with north-up orientation and amber/expected-faction marks.
+
+## [2026-08-26] fix(calibration): close the Donji Vakuf Korenići pocket (n332)
+
+Traced the week-39 RBiH Korenići remnant to active brigade movement rather than failed
+empty-pocket cleanup. The 708th Mountain and 725th Light brigades marched into Korenići
+after VRS had taken Donji Vakuf and Prusac; graph adjacency to RBiH Kula and Prijaći meant
+the rear-pocket consolidation guard correctly classified it as connected and occupied.
+
+Extended the existing VRS Operation Donji Vakuf objective chain from Prusac to Korenići
+and added the already-local 22nd Krajina Infantry and 5th Kozara Light Infantry brigades.
+The 22nd captures Korenići at turn 23. The 708th and 725th remain at Prijaći and the 705th
+at Kula, avoiding a trapped or destroyed RBiH formation.
+
+Acceptance run `apr1992_definitive_188w__d3464b9122c3c8e9__w39_n332`, hash
+`712a9ffcad4ff6a5`, scores **697/712 (97.89%)**, 15 mismatches. Korenići is the only
+week-39 controller change from n327. Verification: 99 focused tests, TypeScript typecheck,
+scenario consistency validation, and diff check pass. Map artifact:
+`january-1993-current-n332.html`.
+
+## [2026-08-26] revert(calibration): retract the scripted Srebrenica–Cerska linkup (n343)
+
+Retracted and deleted `srebrenica_cerska_linkup_1992` after owner review established that its
+direct `control_change` was not an acceptable representation of a battlefield capture.
+Added `tests/srebrenica_linkup_event_state_truth.test.ts` to forbid the scripted row.
+
+Rejected three honest-combat candidates. The concentrated single-axis operation lost at
+Ježestica with power ratios 0.13 and 0.04 and caused four total January regressions. Seeding
+the missing 1st Cerska and 1st Kamenica brigades early distorted the opening Drina battles,
+then reached the queued-operation gate with only one viable participant. An oversized
+operation-specific power multiplier was considered and rejected as another opaque calibration
+shortcut.
+
+Current honest baseline:
+`apr1992_definitive_188w__d3464b9122c3c8e9__w39_n343`, hash
+`f78c5cd9bcef415b`, **700/712 (98.31%)**, 12 mismatches. Ježestica and Sebiočina remain RS
+and amber. Against n337 the complete controller diff is exactly those two cells; accepted
+Goražde/Trnovo and Donji Vakuf results remain intact.
+
+## [2026-08-26] fix(calibration): clear the isolated Gornje Krčevine pocket (n337)
+
+Traced the isolated January RBiH cell west of Travnik to the active 706th Muslim Mountain
+Brigade at `op:travnik:gornje_krcevine`. Every one of its five graph neighbors was RS, and
+the supply system correctly marked the OSID `critical`, but the stranded lifecycle's
+same-corps-sector shortcut self-certified the one-cell pocket as reachable. The local VRS
+attacks were also probes, which correctly cannot capture territory.
+
+Changed stranded classification so critical-supply truth overrides circular sector
+membership. Added a separate `vlasic_pocket` axis to Operation Donji Vakuf, staged from
+RS-held Varošluk with the already-local 1st Banja Luka Light Infantry and 43rd Prijedor
+Motorized brigades. The full operation captures Gornje Krčevine at turn 20 through ordinary
+combat; the 706th follows the existing emergency-retreat path into RBiH territory and is not
+left in the pocket. Its later combat-ineffective dissolution is handled by the canonical
+brigade lifecycle.
+
+Acceptance run `apr1992_definitive_188w__d3464b9122c3c8e9__w39_n337`, hash
+`ecfe6e75b3174749`, scores **702/712 (98.60%)**, with 10 mismatches. The only controller
+change from n335 is Gornje Krčevine, RBiH → RS, matching the painter. Verification passes:
+130 focused tests, TypeScript typecheck, scenario consistency validator, and diff check. Map:
+`january-1993-current-n337.html`.
+
+## [2026-08-26] revert(calibration): remove every calibration-authored control-change event (n344)
+
+Owner review established that direct territorial event effects were never authorized for the
+January calibration. Deleted `upper_drina_front_consolidation_1992`, removing its six RS
+transfers. Restored `gorazde_pocket_consolidation_1992` to the repository definition, removing
+five RBiH transfers plus the Kijevo RS transfer and reinstating its exact Glamoc-and-Kamen
+current-state trigger. The previously deleted `srebrenica_cerska_linkup_1992` remains absent.
+
+The complete `war_1992.json` event-catalog comparison against `HEAD` reports zero changed
+`control_change` surfaces. Focused state-truth tests forbid both deleted calibration events and
+prove the surviving Goražde event cannot mutate political control or create control receipts.
+
+Fresh master week-39 run
+`apr1992_definitive_188w__d3464b9122c3c8e9__w39_n344`, hash
+`a0cce7cf2a5d5517`, scores **688/712 (96.63%)**, 24 mismatches, and **97.35% area-weighted**.
+The twelve-cell regression from n343 is accepted as the honest baseline; those cells must be
+recovered through combat/operation levers. Map: `january-1993-current-n344.html`.
+
+## [2026-08-26] debt(sim): 706th post-retreat destruction and non-geographic fallback
+
+The n344 trace corrects the earlier shorthand that the 706th Muslim Mountain Brigade simply
+retreats safely from Gornje Krčevine. It suffers four defeats there, is reduced to the
+100-person combat floor during the turn-20 combat capture, and has no adjacent friendly
+retreat destination. Emergency retreat moves it to `op:breza:koritnik`, applies the standard
+cohesion penalty, and the same turn's post-combat lifecycle pass dissolves it at 100 personnel,
+15 cohesion, and 28 morale; 50 personnel enter the RBiH strategic reserve.
+
+Two deferred defects are now explicit debt and are OUT OF SCOPE for the renewed Goražde
+calibration pass:
+
+1. Determine whether a brigade that successfully escapes a pocket should be eligible for
+   same-turn combat-ineffective dissolution, or should instead survive in a displaced/remnant
+   state long enough to withdraw and reorganize.
+2. Replace `findEmergencyRetreatOsid`'s terminal largest-friendly-component/strict-sort fallback.
+   When the source component is gone and no corps formation has `location_osid`, it selects the
+   lexicographically first OSID in the largest friendly component. This sent a Travnik brigade
+   to Koritnik near Breza. Lexicographic ordering is valid only as a deterministic tie-break,
+   never as the geographic or command-routing rule itself.
+
+No runtime change is made in this debt entry. Acceptance for the later repair requires a
+geographically and organizationally valid retreat destination, deterministic tie-breaking,
+and explicit proof of the 706th's intended lifecycle after escape.
+
+## [2026-08-26] fix(calibration): rebuild the Goražde region through combat (n372)
+
+Rebuilt the January Goražde–Foča–Čajniče–Pale–Trnovo–Rudo–Višegrad trajectory after all
+unauthorized territorial event effects were removed. Added the Drina Corps upper-Drina axis,
+ARBiH Operation Circle, the Čajniče axis of Operation Foca, and the separate autumn SRK
+Operation Kijevo/Prača axes. Corrected five Goražde enclave brigades whose initial personnel
+contradicted their 1,100-infantry compositions. Tactical-group preparation now uses canonical
+adjacency for friendly rear-area routing and scales loans to the donor residual floor.
+
+Acceptance run `apr1992_definitive_188w__d3464b9122c3c8e9__w39_n372`, hash
+`e343f978c0b82fff`, scores **697/712 (97.89%)** nationally and **59/62 (95.16%)** in the
+seven-municipality focus. The only focus mismatches are Donje Žešće and Tosići (remain RS)
+and Podkozara Donja (ordinary paramilitary flip to RBiH). No calibration-authored
+`control_change` was introduced. Focused verification: 91 tests and TypeScript typecheck pass;
+the fresh week-39 checkpoint replay and enclave guard pass. The artifact records
+`git_dirty: true`, so it is accepted for the current working tree but is not a clean committed
+baseline.
+
+## [2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow, roadmap, and debt
+
+Owner instruction: document all calibration work completed so far, update relevant canon and
+master documents, and synchronize the project surfaces.
+
+Current authority is now explicit everywhere:
+
+- the only scoring scenario is `data/scenarios/apr1992_definitive_188w.json`;
+- January 1993 is week 39 of that trajectory and currently accepts n372 at **697/712**,
+  with **59/62** in the seven-municipality Goražde focus;
+- 40-week scenarios/tools are historical or bounded diagnostics, not a current calibration
+  authority;
+- painted settlement control defines checkpoint truth, while ordinary combat/general mechanics
+  must earn territorial changes;
+- calibration-authored direct-control events are forbidden, without disturbing the separately
+  gated sensitive-history exceptions;
+- later checkpoints are not established by a week-39 save and remain deferred during the
+  owner-prioritized January pass;
+- the 706th Brigade's non-geographic lexical retreat fallback and same-turn dissolution remain
+  explicit unresolved debt.
+- n372 is a dirty-tree week-39 artifact. Its 697/712 January score comes from checkpoint replay;
+  the raw summary's terminal October historical-fit block is not January evidence. A clean
+  post-commit replay remains owed.
+
+Synchronized documents:
+
+- canon/process: `docs/10_canon/CANON.md`, `context.md`,
+  `Engine_Invariants_v0_9_0.md`, `Systems_Manual_v0_9_0.md`, and
+  `War_Specification_v0_9_0.md`;
+- engineering: `CODE_CANON.md`, `PIPELINE_ENTRYPOINTS.md`, `REPO_MAP.md`,
+  `SCENARIO_PAINTER_TOOL.md`, and `DETERMINISM_TEST_MATRIX.md`;
+- current-state/master surfaces: `docs/40_reports/CALIBRATION_MASTER.md`,
+  `docs/40_reports/README.md`, `docs/00_start_here/docs_index.md`,
+  `docs/plans/MASTER_ROADMAP.md`, and `docs/plans/COMMAND_BOARD.md`;
+- reusable lessons: `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+
+The accepted remote map viewer is recorded in the calibration master:
+`https://january-1993-calibration-n372.horkesh.chatgpt.site`.
+`docs/10_canon/FORAWWV.md` was not edited. No simulation code, scenario data, or painted
+reference was changed by this documentation synchronization.
+
+Synchronization verification: the week-39 checkpoint replay confirms **697/712**; the focused
+historical, operation, stranded-brigade, and tactical-group suite passes **124/124 tests across
+8 files**; `git diff --check` passes. The first broad canon comparison correctly detected **20
+artifact-hash mismatches across 4 scenarios**. Pre-commit reconciliation then regenerated the
+owned April 1992 startup snapshot and updated exactly the measured baseline outputs. The tracked
+`latest_run_final_save.json` week-39 harness side effect was restored to the repository's
+canonical week-188 artifact rather than committed. The full balanced suite also exposed an
+asynchronous jsdom failure where Chronicle called `Element.scrollTo` unconditionally; the
+component now preserves smooth scrolling in browsers and falls back to `scrollLeft` where that
+API is absent. The startup/bundle contracts and Chronicle regression pass independently.
+The final no-update `npm run canon:check` passed both the determinism scan and all four baseline
+comparisons, reporting `Baseline regression: all scenarios match.`
 ## 2026-08-26 — RE engine-integrity workstream created: the root is operation SUPPLY, not the cost loop
 
 **Owner instruction:** *"Engine health is sacrosanct — these issues should be dealt with immediately before more calibration work."* Five days of standup findings (2026-08-21 → 08-26) were consolidated into `docs/40_reports/proposals/20260826_ENGINE_INTEGRITY_PACKET.md` and put to an **eight-seat Pyrrhic panel with the implementer's bias declared in the packet's own §7** and an instruction to attack rather than assess. **Ten packet claims were refuted, including both load-bearing sequencing claims.** Read-only; no `src/` or `data/` change in this entry.

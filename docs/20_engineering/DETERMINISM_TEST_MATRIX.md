@@ -32,6 +32,24 @@
 - Commander/HV gate: `tests/commander/primary_sector_operation_objectives.test.ts` pins primary-sector objective/fallback selection and stale-target validation; `tests/hv_integration.test.ts` and `tests/fall_1995_hv_depth_priority.test.ts` pin all-or-nothing legal stationing, stable placement order, and station/home truth.
 - Bilateral-war timing gate: `tests/rear_pocket_consolidation_alliance_gate.test.ts` proves rear-pocket consolidation cannot bypass the centralized RBiH-HRHB combat gate before the canonical turn-40 floor. `tests/alliance_lifecycle.test.ts` pins the shared runtime default, and `tests/scenario_sister_parity.test.ts` requires every active definitive April 1992 scenario to carry that same floor.
 
+### Historical calibration authority and January contracts
+
+- `tests/historical_checkpoints_contract.test.ts` requires exactly one scoring calibration
+  scenario, preserves `calibration_scenario` through the real loader, binds the four painted
+  checkpoint files, and pins accepted start-control/painter corrections.
+- `tests/pre_planned_operations.test.ts` pins the Višegrad objective exclusions, Donji Vakuf
+  and Vlašić pocket axes, Srebrenica high-water exclusion, and the Operation
+  Circle/Kijevo/Upper Drina combat package.
+- `tests/gorazde_pocket_event_state_truth.test.ts`,
+  `tests/srebrenica_linkup_event_state_truth.test.ts`, and
+  `tests/upper_drina_front_event_state_truth.test.ts` forbid calibration-authored
+  territorial event receipts and prove the surviving Goražde event is control-inert.
+- `tests/stranded_brigade_lifecycle.test.ts` pins critical-supply isolation over circular
+  one-cell sector membership. `tests/tg_lifecycle.test.ts` and `tests/tg_routing.test.ts`
+  pin friendly political-graph donor routing, stable distance ordering, and residual floors.
+- A week-39 artifact establishes January only. Full-trajectory determinism or later checkpoint
+  claims require a fresh 188-week master run.
+
 ### Platform-stable structural fingerprint (CI determinism authority, C1 2026-06-09; v2 2026-06-16)
 - **Why:** the byte-hash baselines CI job was removed 2026-05-04 because
   `final_save.json` SHA256 diverges between the Windows dev box and the Linux CI runner

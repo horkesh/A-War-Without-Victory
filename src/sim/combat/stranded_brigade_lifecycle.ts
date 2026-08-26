@@ -79,6 +79,15 @@ function canReachCorpsSectorFront(
     const sectors = state.military.corps_front_sectors;
     if (!sectors) return true; // No sector data = assume reachable
 
+    // Supply reachability is computed earlier in the war pipeline from canonical
+    // faction sources over friendly-controlled graph paths. A critical OSID is
+    // therefore isolated even if sector partitioning has wrapped that pocket in
+    // a one-cell same-corps sector. Sector membership must not self-certify a
+    // surrounded brigade as reachable.
+    if (state.political.last_supply_state_by_osid?.[locationOsid] === 'critical') {
+        return false;
+    }
+
     // Build target set: all territory OSIDs from same-corps sectors
     const targetOsids = new Set<string>();
     const sectorIds = Object.keys(sectors).sort(strictCompare);

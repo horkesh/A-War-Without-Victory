@@ -121,7 +121,7 @@ export function selectDonors(
         : computeDonorCorpsSet(formations, anchorCorps, anchorFaction, adjacency);
 
     // Friendly OSIDs for BFS pathing (don't path through enemy territory).
-    const friendlyOsids = computeFriendlyOsids(formations, anchorFaction);
+    const friendlyOsids = computeFriendlyOsids(state, formations, anchorFaction);
 
     // Iterate candidates, sorted by brigade_id for a stable base order; the final
     // (distance_hops, source_corps_id, brigade_id) sort is applied after BFS below.
@@ -138,8 +138,8 @@ export function selectDonors(
         if (hops > MAX_OG_DONOR_DISTANCE) continue; // ADR §Distance falloff: skip
         // Residual-personnel floor must use the distance-scaled donation.
         const personnel = f.personnel ?? 0;
-        const donation = computeDonationPersonnel(personnel, hops);
-        if (personnel - donation < minPersonnelAfterDonation(f)) continue;
+        const donation = computeDonationPersonnel(f, hops);
+        if (donation <= 0) continue;
         scored.push({ donor: f, hops });
     }
 
@@ -252,10 +252,19 @@ function computeDonorCorpsSet(
 
 /** Friendly OSIDs (occupied by same-faction brigades) for BFS pathing. Deterministic set build. */
 function computeFriendlyOsids(
+    state: GameState,
     formations: Record<FormationId, FormationState>,
     anchorFaction: string,
 ): Set<string> {
     const friendly = new Set<string>();
+    // TG movement follows controlled rear-area routes, not a picket line made only from
+    // OSIDs that happen to contain a brigade this turn. Requiring physical occupation of
+    // every intermediate hop made otherwise connected operational groups unreachable.
+    for (const [osid, controller] of Object.entries(state.political?.political_controllers ?? {})) {
+        if (controller === anchorFaction) friendly.add(osid);
+    }
+    // Keep occupied same-faction locations as a defensive fallback for sparse fixtures and
+    // transient frontline states whose political read-model has not yet caught up.
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const f = formations[id];
         if (f.faction === anchorFaction && f.location_osid) friendly.add(f.location_osid);
@@ -268,10 +277,12 @@ function donationFactor(hops: number): number {
     return Math.max(TG_DISTANCE_FALLOFF_FLOOR, 1.0 - TG_DISTANCE_FALLOFF_PER_HOP * hops);
 }
 
-function computeDonationPersonnel(personnel: number, hops: number): number {
+function computeDonationPersonnel(f: FormationState, hops: number): number {
+    const personnel = f.personnel ?? 0;
     const factor = donationFactor(hops);
     const cap = personnel * DONATION_CAP_FRACTION;
-    return Math.floor(Math.min(personnel * factor, cap));
+    const availableAboveFloor = Math.max(0, personnel - minPersonnelAfterDonation(f));
+    return Math.floor(Math.min(personnel * factor, cap, availableAboveFloor));
 }
 
 /** Kind-scaled residual-personnel floor (ADR §Constants reference). */
@@ -308,12 +319,11 @@ function buildContribution(
     anchorCorps: FormationId,
     hops: number,
 ): TgDonorContribution {
-    const personnel = donor.personnel ?? 0;
     return {
         brigade_id: donor.id,
         source_corps_id: donor.corps_id ?? anchorCorps,
         distance_hops: hops, // frozen BFS hops at formation (ADR §Distance falloff)
-        personnel_lent: computeDonationPersonnel(personnel, hops),
+        personnel_lent: computeDonationPersonnel(donor, hops),
         heavy_equipment_lent: computeEquipmentLent(donor, hops),
         casualties_so_far: 0,
         equipment_losses_so_far: { tanks: 0, artillery: 0, aa_systems: 0 },

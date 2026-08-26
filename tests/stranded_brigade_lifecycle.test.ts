@@ -107,6 +107,7 @@ function makeState(overrides: {
     political_controllers?: Record<string, string | null>;
     corps_front_sectors?: Record<string, CorpsFrontSector>;
     corps_command?: Record<string, CorpsCommandState>;
+    last_supply_state_by_osid?: Record<string, string>;
     turn?: number;
 } = {}): GameState {
     return {
@@ -128,6 +129,7 @@ function makeState(overrides: {
         factions: [],
         political: {
             political_controllers: overrides.political_controllers ?? {},
+            last_supply_state_by_osid: overrides.last_supply_state_by_osid,
         },
     } as unknown as GameState;
 }
@@ -540,6 +542,37 @@ describe('stranded_brigade_lifecycle', () => {
 
             expect(report.newly_stranded).toEqual([]);
             expect(report.updated).toBe(0);
+        });
+
+        it('classifies a fully isolated critical-supply sector cell as stranded', () => {
+            const formations = {
+                brig_1: makeBrigade('brig_1', 'RBiH', 'corps_5', 'op:mun:pocket'),
+            };
+            const sectors = {
+                'sector:corps_5': makeSector('corps_5', 'RBiH', ['op:mun:pocket']),
+            };
+            const controllers: Record<string, string | null> = {
+                'op:mun:pocket': 'RBiH',
+                'op:mun:north': 'RS',
+                'op:mun:south': 'RS',
+            };
+            const adj = new Map<Osid, Osid[]>([
+                ['op:mun:pocket' as Osid, ['op:mun:north', 'op:mun:south'] as Osid[]],
+                ['op:mun:north' as Osid, ['op:mun:pocket'] as Osid[]],
+                ['op:mun:south' as Osid, ['op:mun:pocket'] as Osid[]],
+            ]);
+            const state = makeState({
+                formations,
+                corps_front_sectors: sectors,
+                political_controllers: controllers,
+                last_supply_state_by_osid: { 'op:mun:pocket': 'critical' },
+                turn: 5,
+            });
+
+            const report = updateStrandedBrigadeLifecycle(state, adj);
+
+            expect(report.newly_stranded).toEqual(['brig_1']);
+            expect(formations.brig_1.stranded_status).toBe('holding');
         });
     });
 

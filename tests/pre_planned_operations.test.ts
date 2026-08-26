@@ -101,6 +101,14 @@ function makeMinimalState(): GameState {
 }
 
 describe('pre-planned operations', () => {
+    it('keeps the January 1993 RBiH Višegrad bridgehead outside Operation Višegrad', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Visegrad');
+        assert.ok(operation);
+        const objectives = operation.axes.flatMap((axis) => axis.objectives);
+        assert.equal(objectives.includes('op:visegrad:medjedja_2'), false);
+        assert.equal(objectives.includes('op:visegrad:drinsko'), false);
+    });
+
     it('uses a unique live OOB alias for an authored pre-planned participant', () => {
         const state = makeMinimalState();
         const authoredId = 'rs_1st_semberija_light_infantry';
@@ -211,7 +219,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 17);
+        assert.equal(_ALL_PRE_PLANNED.length, 19);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -228,6 +236,7 @@ describe('pre-planned operations', () => {
                 'Operation Zvezda 94',
                 'Operation Visegrad',
                 'Operation Prsten',
+                'Operation Kijevo',
                 'Operation Trnovo',
                 'Operation Herzegovina',
                 'Operation Foca',
@@ -237,6 +246,7 @@ describe('pre-planned operations', () => {
                 'Operation Donji Vakuf',
                 'Operation Bosanski Novi',
                 'Operation Jackal',
+                'Operation Circle',
             ],
         );
     });
@@ -251,6 +261,43 @@ describe('pre-planned operations', () => {
             eastAxis.objectives.filter((objective) => objective.startsWith('op:bosanski_brod:')),
             ['op:bosanski_brod:novo_selo_2', 'op:bosanski_brod:brod'],
         );
+    });
+
+    it('finishes the 1992 Donji Vakuf sweep at Korenici after Prusac', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf');
+        assert.ok(operation);
+        const sweep = operation.axes.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
+        assert.ok(sweep);
+
+        assert.deepEqual(
+            sweep.objectives.slice(-2),
+            ['op:donji_vakuf:prusac_2', 'op:donji_vakuf:korenici'],
+        );
+        assert.ok(sweep.brigades.includes('rs_22nd_krajina_infantry'));
+        assert.ok(sweep.brigades.includes('rs_5th_kozara_light_infantry'));
+    });
+
+    it('uses a full-operation Vlasic axis to clear the isolated Gornje Krcevine pocket', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf');
+        assert.ok(operation);
+        const axis = operation.axes.find((candidate) => candidate.axis_id === 'vlasic_pocket');
+        assert.ok(axis);
+
+        assert.deepEqual(axis.objectives, ['op:travnik:gornje_krcevine']);
+        assert.equal(axis.staging_osid, 'op:travnik:varosluk');
+        assert.deepEqual(axis.brigades, [
+            'rs_1st_banja_luka_light_infantry',
+            'rs_43rd_prijedor_motorized',
+        ]);
+    });
+
+    it('does not spend the 1992 Podrinje Sweep on the January Srebrenica high-water cell at Obadi', () => {
+        const sweep = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Podrinje Sweep');
+        assert.ok(sweep);
+        const enclaveAxis = sweep.axes.find((axis) => axis.axis_id === 'srebrenica_ring');
+        assert.ok(enclaveAxis);
+
+        assert.ok(!enclaveAxis.objectives.includes('op:srebrenica:obadi'));
     });
 
     it('injects one active operation per corps and preserves current queue chains', () => {
@@ -683,6 +730,10 @@ describe('pre-planned operations', () => {
                 'op:foca:patkovina',
                 'op:foca:prevrac',
                 'op:gorazde:kolovarice',
+                'op:cajnice:batotici',
+                'op:foca:brusna_2',
+                'op:cajnice:miljeno_2',
+                'op:gorazde:podkozara_donja_2',
                 'op:kalinovik:vlaholje',
                 'op:kalinovik:golubici_2',
                 'op:kalinovik:sela_2',
@@ -707,6 +758,8 @@ describe('pre-planned operations', () => {
         state.military.formations['rs_bilea_brigade']!.personnel = 300;
         state.military.formations['rs_gacko_brigade']!.personnel = 300;
         state.military.formations['rs_kalinovik_brigade']!.personnel = 300;
+        state.military.formations['rs_ajnie_brigade']!.personnel = 300;
+        state.military.formations['rs_visegrad_brigade']!.personnel = 300;
         state.military.formations['jna_kalinovik_to_tg']!.status = 'inactive';
 
         const injected = injectQueuedOperation(state, 'vrs_herzegovina');
@@ -928,7 +981,7 @@ describe('pre-planned operations', () => {
         }
         const adjacency = new Map([
             ['op:foca:patkovina', ['op:foca:foca_3']],
-            ['op:foca:foca_3', ['op:foca:patkovina']],
+            ['op:foca:foca_3', ['op:foca:patkovina', 'op:test:bileca_route_5']],
             ['op:nevesinje:zovi_do', ['op:test:bileca_route_1']],
             ['op:test:bileca_route_1', ['op:nevesinje:zovi_do', 'op:test:bileca_route_2']],
             ['op:test:bileca_route_2', ['op:test:bileca_route_1', 'op:test:bileca_route_3']],
@@ -1016,6 +1069,82 @@ describe('pre-planned operations', () => {
         assert.ok(objectives.includes('op:donji_vakuf:torlakovac_2'));
         assert.ok(
             !(state.military.op_injection_warnings ?? []).some((warning) => warning.check === 'objective_overlap'),
+        );
+    });
+
+    it('authors the late-July Goražde counteroffensive as three combat axes', () => {
+        const circle = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
+        assert.ok(circle);
+        assert.equal(circle!.faction, 'RBiH');
+        assert.equal(circle!.corps, 'arbih_1st_corps');
+        assert.equal(circle!.available_from, 8);
+        assert.deepEqual(
+            circle!.axes.map((axis) => ({
+                id: axis.axis_id,
+                staging: axis.staging_osid,
+                objectives: axis.objectives,
+                brigades: axis.brigades,
+            })),
+            [
+                {
+                    id: 'gorazde_perimeter',
+                    staging: 'op:gorazde:gorazde_2',
+                    objectives: ['op:gorazde:glamoc', 'op:gorazde:kamen', 'op:gorazde:sopotnica'],
+                    brigades: ['arbih_801st_light', 'arbih_802nd_light', 'arbih_851st_vitezka_liberation'],
+                },
+                {
+                    id: 'foca_corridor',
+                    staging: 'op:gorazde:faocici_2',
+                    objectives: ['op:foca:donje_zesce'],
+                    brigades: ['arbih_843rd_light', 'arbih_808th_liberation'],
+                },
+                {
+                    id: 'trnovo_corridor',
+                    staging: 'op:trnovo:delijas',
+                    objectives: ['op:trnovo:tosici'],
+                    brigades: ['arbih_102nd_motorized', 'arbih_109th_mountain'],
+                },
+            ],
+        );
+    });
+
+    it('authors the ordinary-combat VRS approach seizures around Goražde', () => {
+        const prsten = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Prsten');
+        const foca = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
+        assert.ok(prsten);
+        assert.ok(foca);
+        const kijevo = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Kijevo');
+        assert.ok(kijevo);
+        assert.deepEqual(
+            kijevo!.axes.map((axis) => ({ id: axis.axis_id, objectives: axis.objectives })),
+            [
+                { id: 'kijevo_shoulder', objectives: ['op:trnovo:kijevo_2'] },
+                { id: 'praca_approach', objectives: ['op:pale:praca'] },
+            ],
+        );
+        assert.deepEqual(
+            foca!.axes
+                .filter((axis) => axis.axis_id.startsWith('cajnice_'))
+                .map((axis) => ({ id: axis.axis_id, staging: axis.staging_osid, objectives: axis.objectives })),
+            [
+                {
+                    id: 'cajnice_south',
+                    staging: 'op:cajnice:cajnice_2',
+                    objectives: ['op:cajnice:batotici', 'op:foca:brusna_2', 'op:gorazde:kolovarice'],
+                },
+            ],
+        );
+        const drina = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Drina');
+        assert.ok(drina);
+        assert.deepEqual(
+            drina!.axes.find((axis) => axis.axis_id === 'upper_drina_approaches'),
+            {
+                axis_id: 'upper_drina_approaches',
+                name: 'Upper Drina Approaches',
+                brigades: ['rs_visegrad_brigade'],
+                objectives: ['op:cajnice:miljeno_2', 'op:gorazde:podkozara_donja_2'],
+                staging_osid: 'op:cajnice:zaborak',
+            },
         );
     });
 });

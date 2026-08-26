@@ -477,7 +477,11 @@ export function ChronicleOverlay() {
         for (let t = minTurn; t < turn; t++) {
             offset += turnWidths.get(t) ?? EMPTY_TURN_WIDTH;
         }
-        el.scrollTo({ left: offset, behavior: 'smooth' });
+        if (typeof el.scrollTo === 'function') {
+            el.scrollTo({ left: offset, behavior: 'smooth' });
+        } else {
+            el.scrollLeft = offset;
+        }
     }, [minTurn, turnWidths]);
 
     useEffect(() => {
