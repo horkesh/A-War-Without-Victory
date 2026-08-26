@@ -89,7 +89,19 @@ interface Control {
     h: number;
 }
 
+/**
+ * Read controls across the page AND every child frame.
+ *
+ * The tactical map renders inside `#tactical-map-iframe`, so a top-document-only
+ * query reports an empty screen while the game is in fact running inside the frame.
+ * That produced a false "renders no interactive controls" critical on the first run.
+ */
 async function readControls(win: Page): Promise<Control[]> {
+    const perFrame = await Promise.all(win.frames().map((f) => readControlsIn(f).catch(() => [])));
+    return perFrame.flat();
+}
+
+async function readControlsIn(win: { $$eval: Page['$$eval'] }): Promise<Control[]> {
     return win.$$eval('button, [role="button"], a[href], [tabindex]:not([tabindex="-1"])', (els) =>
         els.map((e) => {
             const r = e.getBoundingClientRect();
@@ -183,6 +195,18 @@ async function probeSurface(win: Page, surface: string, recorder: FindingsRecord
  * validation layer that produces most of these messages.
  */
 async function probeErrorBanners(win: Page, surface: string, recorder: FindingsRecorder): Promise<void> {
+    const perFrame = await Promise.all(win.frames().map((f) => bannersIn(f).catch(() => [])));
+    for (const b of perFrame.flat()) {
+        recorder.record(
+            finding('bug', 'critical', 'ui-error-banner', `Error shown to the player on ${surface}: "${b.text.slice(0, 70)}"`,
+                `After a normal interaction on ${surface}, the app displayed an error to the player: "${b.text}". `
+                + `The action the player attempted did not complete.`,
+                `ui:${surface}`, { element_id: b.id, message: b.text }),
+        );
+    }
+}
+
+async function bannersIn(win: { $$eval: Page['$$eval'] }): Promise<Array<{ id: string; text: string }>> {
     const banners = await win.$$eval(
         '[id*="error"], [class*="error"], [role="alert"], [aria-live="assertive"]',
         (els) =>
@@ -196,14 +220,7 @@ async function probeErrorBanners(win: Page, surface: string, recorder: FindingsR
                 .map((e) => ({ id: e.id, text: (e.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 200) }))
                 .slice(0, 5),
     );
-    for (const b of banners) {
-        recorder.record(
-            finding('bug', 'critical', 'ui-error-banner', `Error shown to the player on ${surface}: "${b.text.slice(0, 70)}"`,
-                `After a normal interaction on ${surface}, the app displayed an error to the player: "${b.text}". `
-                + `The action the player attempted did not complete.`,
-                `ui:${surface}`, { element_id: b.id, message: b.text }),
-        );
-    }
+    return banners;
 }
 
 // ── Interaction ──────────────────────────────────────────────────────────────

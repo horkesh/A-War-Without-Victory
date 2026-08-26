@@ -56,7 +56,18 @@ coverage. Early 52-turn results from this session were withdrawn on that basis.
 
 ---
 
-## 1a. 🔴 CRITICAL — the desktop app cannot start a campaign
+## 1a. 🔴 CRITICAL — the desktop app cannot start a campaign — **FIXED 2026-08-27**
+
+> **Status: fixed at owner request.** Two blockers, one behind the other. The app went
+> from unable to start a campaign to reaching the President's Desk.
+> Before: `evidence/20260826_ui_campaign_start_blocked.png`
+> After: `evidence/20260827_ui_presidents_desk_working.png`
+>
+> | Fix | File | Guard |
+> | --- | --- | --- |
+> | IPC validator stricter than its own callee | `src/desktop/electron-main.cjs:2090` | `tests/desktop_campaign_start_decision_mode.test.ts` |
+> | Circular chunk dependency blanking the game screen | `src/ui/map/vite.config.ts` | `tools/playtest/run_electron.ts` |
+
 
 **Confidence: certain.** Reproduced by hand and then independently by the UI driver.
 Screenshot: `tools/playtest/evidence/20260826_ui_campaign_start_blocked.png`.
@@ -105,6 +116,48 @@ Electron's main window loads `awwv://warroom/index.html`
 - The case-file plan's own tests target the map app's boot, not the warroom's.
 
 **This is the finding that justifies the UI lane existing.**
+
+## 1a-ii. 🔴 CRITICAL — circular chunk dependency blanked the game screen
+
+**Found only after fixing 1a — the first bug was masking it.**
+
+With campaign start unblocked, the picker cleared and the player got a **black screen
+with no controls in any frame**, plus:
+
+```
+Uncaught ReferenceError: Cannot access 'ir' before initialization
+  at assets/feature-army-hq-forces-DlQM6T7s.js
+```
+
+### Mechanism
+
+`src/ui/map/vite.config.ts` split one directory — `components/army_hq/` — across four
+chunks by matching filenames against hand-maintained regexes (`-records`,
+`-operations`, `-forces`, and the remainder). Modules in that directory import one
+another, so the split placed both ends of an import cycle in different chunks. A
+circular chunk dependency evaluates in an order that leaves a binding in its temporal
+dead zone; the ReferenceError killed the React render.
+
+### Verification
+
+Hypothesis tested by experiment rather than argued: collapsing the directory to a
+single chunk and rebuilding removed the TDZ error, the screen rendered, and the driver
+began reporting ordinary UI findings (unlabelled controls) because the game had
+actually loaded. Screenshot confirms the President's Desk at 6 Apr 1992 with full
+navigation.
+
+### Why nothing caught it
+
+- Invisible in dev mode, which does not chunk.
+- Invisible to every headless and DOM test — it requires a production build in a real
+  renderer.
+- The build emitted no warning; a chunk cycle is legal output.
+
+### Residual risk
+
+A filename-regex chunk map is inherently fragile: adding a file to `army_hq/` silently
+reassigns it and can reintroduce a cycle with no warning. The fix trades code-splitting
+granularity for correctness and the config now says so at the call site.
 
 ## 1b. The case-file opening flow is unreachable from the desktop launch path
 

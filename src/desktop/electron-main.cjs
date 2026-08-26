@@ -2087,7 +2087,16 @@ app.whenReady().then(() => {
     if (scenarioKey !== undefined && scenarioKey !== 'apr_1992') {
       return { ok: false, error: 'Invalid scenarioKey. Use apr_1992.' };
     }
-    if (decisionMode !== 'emergent' && decisionMode !== 'historical') {
+    // Absence is not an invalid mode. `sim.startNewCampaign` declares
+    // `decisionMode: 'emergent' | 'historical' = 'emergent'`, and passing undefined
+    // below lets that default apply — so a caller that does not offer the player a
+    // mode choice may legitimately omit it. Mirrors the scenarioKey check above.
+    //
+    // Without the undefined allowance this handler was stricter than the function it
+    // guards, and the warroom side picker (which has no mode UI and omits the field)
+    // could not start a campaign AT ALL: every New Campaign click returned
+    // 'Invalid decisionMode' to the player. Genuinely unknown values are still refused.
+    if (decisionMode !== undefined && decisionMode !== 'emergent' && decisionMode !== 'historical') {
       return { ok: false, error: 'Invalid decisionMode. Use emergent or historical.' };
     }
     try {

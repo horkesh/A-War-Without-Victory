@@ -34,17 +34,28 @@ function tacticalMapManualChunks(id: string): string | undefined {
 
   if (normalized.includes('/src/sim/')) return 'map-sim';
   if (normalized.includes('/src/ui/map/components/warroom/')) return 'feature-warroom-ui';
+  // ONE chunk for the whole army_hq directory. Do NOT split it again by filename.
+  //
+  // This was previously split four ways (`-records`, `-operations`, `-forces`, and the
+  // rest) by matching filenames against hand-maintained regexes. Modules in this
+  // directory import one another, so that split put both ends of an import cycle in
+  // different chunks — and a circular chunk dependency is evaluated in an order that
+  // leaves a binding in its temporal dead zone. The result at runtime was:
+  //
+  //   Uncaught ReferenceError: Cannot access 'ir' before initialization
+  //     at assets/feature-army-hq-forces-*.js
+  //
+  // which killed the React render, so starting a campaign left the player on a blank
+  // screen with no controls. It reproduced on every launch and was invisible to dev
+  // mode (unchunked) and to every headless test.
+  //
+  // The split was a code-splitting optimisation; correctness outweighs it. A
+  // filename-regex chunk map is also inherently fragile — adding a file to this
+  // directory silently reassigns it and can reintroduce a cycle with no warning.
+  // If this directory ever genuinely needs splitting, split it along a verified
+  // import boundary, not by filename, and re-run tools/playtest/run_electron.ts to
+  // confirm the app still reaches the President's Desk.
   if (normalized.includes('/src/ui/map/components/army_hq/')) {
-    const fileName = normalized.slice(normalized.lastIndexOf('/') + 1);
-    if (/^(?:RecordsContent|TurnAftermathRecordsPanel|DecisionConsequenceRecordsPanel|OpportunityLedgerPanel|CombatRecordSection)\.tsx$/.test(fileName)) {
-      return 'feature-army-hq-records';
-    }
-    if (/^(?:OperationsSection|DirectiveCard|PresidentialDecisionRoomPanel|OperationOpportunityDossierPanel|PresidentialAttentionPanel|OrderInterpretationPanel|OrderInterpretationSection)\.tsx$/.test(fileName)) {
-      return 'feature-army-hq-operations';
-    }
-    if (/^(?:SectorsSection|OrbatSection|PersonnelContent|CorpsSituationSection|CommandRelationshipSection|ForceReadiness|SupplyIntelligence|StrategicPosition|FrontVisitSection|CommanderSection|ThreatAssessment)\.tsx$/.test(fileName) || fileName === 'generateThreatAssessment.ts') {
-      return 'feature-army-hq-forces';
-    }
     return 'feature-army-hq';
   }
   if (normalized.includes('/src/ui/map/components/chronicle/')) return 'feature-chronicle';
