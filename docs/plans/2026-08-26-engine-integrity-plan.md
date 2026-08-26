@@ -1354,3 +1354,43 @@ survivor-side can do. Two conditions:
   channel is for — it names a corps and a window, not an OSID or a target. **The limit is that it
   does not generalise:** another enclave falling elsewhere needs its own authored cost. **That goes
   in the ledger as a stated limit, not dressed up as emergent.**
+
+### 2026-08-26 — OWNER DIRECTIVES. These supersede seat recommendations where they conflict.
+
+**1. NO SCRIPTING — and a historical correction that makes the scripted fix WRONG, not merely inelegant.**
+
+The panel's only candidate that reached the Historian's exit condition was an authored
+`offensive_ops_suppression` on 2nd Corps, modelling the Baljkovica rescue as a cost. **The owner
+rejected it, and supplied the reason the seats did not have:**
+
+> *"2nd Corps did have an op after Srebrenica fell, operation Farz which liberated Vozuća and most
+> of Ozren, joint op with 3rd Corps."*
+
+⇒ **Suppressing 2nd Corps would have been historically FALSE.** The corps was not spent — it mounted
+a major, successful joint offensive in the months after the enclaves fell. The Historian had the axis
+right (Ozren/Vozuća, away from Majevica) but the disposition wrong: the engine must keep letting 2nd
+Corps attack. **The defect was never "the corps attacks after Srebrenica." It is "the wrong brigades
+attack the wrong ground."** Constrain WHICH brigades and WHERE — never WHETHER.
+
+**This is now the standing test for any future fix in this area:** does it still allow Operation Farz?
+A constraint that suppresses the corps fails, however green it makes the checkpoints.
+
+**2. JANUARY 1993 IS ACCEPTED. The checkpoints are calibrated IN SEQUENCE, not simultaneously.**
+
+> *"Accept that January 1993 calibration, don't worry about what it does for October 1995. Once I am
+> happy with January 1993, I will move the calibration for April 1994, and so on."*
+
+⇒ The −7 at oct1995, the −6 at the western-Bosnia cascade and the +20 stranded brigades that came in
+with the January lane are **ACCEPTED**, not owed and not charged to anyone. **This resolves the
+seats' open dispute about whose ledger they belong to: nobody's.** The later checkpoints are
+*not yet calibrated* — they are downstream of work that has not been done.
+
+**Consequences for how the gate must behave**, since this inverts its previous design assumption:
+- **jan1993 is the ACTIVE lane** and its floor should be tight — it protects work in progress.
+- **apr1994 / apr1995 / oct1995 are NOT yet calibrated.** Their floors must not block January work.
+  They still need to catch a *collapse*, but they are no longer targets to defend.
+- **A later-checkpoint regression is no longer automatically a defect.** It may simply be a lane that
+  has not had its turn. Say which, every time; do not let "regression" be assumed.
+
+**3. RESET THE GATE THRESHOLDS.** Owner-approved. Floors to be set from the run this tree actually
+keeps — never by blanket `--update`, which would also silently ratchet unrelated ceilings.
