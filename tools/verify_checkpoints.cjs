@@ -211,6 +211,73 @@ for (const [name, osid] of FALLS) {
 const guardCells = HOLDS.length + FALLS.length;
 console.log('');
 console.log(`  guard cells compared: ${guardCells} (${HOLDS.length} holds + ${FALLS.length} falls)`);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EASTERN-SURPLUS CHECK (Historian exit condition, 2026-08-26). TWO-SIDED BY DESIGN.
+//
+// WHY. Turning on enclave-column displacement produced RBiH captures around Lopare and
+// Šekovići. All were measured RS in ALL FOUR painted checkpoints — they never changed hands
+// in the war — and Lopare and Šekovići were VRS brigade HQs in 1995 (3rd Majevica, 1st Birač;
+// VRS Main Staff Directive 02/2-15, 31 March 1995). A §6 panel ruled the outcome NON-COMPLIANT:
+// the destruction of the enclave was converting into offensive capacity on ground that never fell.
+//
+// THE FIRST EXIT CONDITION WAS A CELL LIST, AND A CELL LIST IS WHACK-A-MOLE. An eligibility fix
+// removed three Lopare cells and the corps promptly took four others two valleys over — four wrong
+// cells became five. The Historian superseded the list with a REGION, which is checkable and not a
+// judgement call: the painted reference records ZERO RBiH gains in any of these nine municipalities
+// across the whole apr1995 -> oct1995 window.
+//
+// ★ THE POSITIVE HALF IS NOT OPTIONAL. The negative half alone can be satisfied by suppressing
+// 2nd Corps — which the OWNER explicitly ruled out, supplying history the panel did not have:
+// 2nd Corps mounted Operation FARZ (BB calls it "Uragan 95"; BB never uses the name Farz) jointly
+// with 3rd Corps, taking Vozuća on 13 September 1995 and ~280 km² over 30 days — "a very sizable
+// operation, well executed". The corps was NOT spent. So the fix is a TARGETING error, never a
+// CAPABILITY one, and any change that reduces this corps' tempo or operation size is fixing the
+// wrong variable. The positive half catches exactly that failure and is verified passing today.
+//
+// Scoped to FLIPS: cells already RBiH (the Sapna Thumb, the Teočak salient) are untouched here and
+// are covered by the enclave guard above.
+const EASTERN_SURPLUS_MUNS = ['sekovici', 'vlasenica', 'milici', 'zvornik', 'bratunac', 'lopare', 'ugljevik', 'kalesija', 'osmaci'];
+const FARZ_CELLS = [
+  ['Vozuća (13 Sep 1995)', 'op:zavidovici:vozuca_2'],
+  ['Maglaj — donja bočinja', 'op:maglaj:donja_bocinja_2'],
+  ['Maglaj — gornja bočinja', 'op:maglaj:gornja_bocinja'],
+  ['Spreča / north Ozren', 'op:lukavac:brijesnica_donja_2'],
+];
+
+console.log('');
+console.log('EASTERN SURPLUS — Birač / Majevica / north Podrinje (painted reference: ZERO RBiH gains)');
+// Local: the shared `st188` is declared further down, in the cascade block. Reaching it from
+// here would be a temporal-dead-zone crash — the exact error this session already made once,
+// in emit.ts, and caught only when a 188-week run died at turn 23.
+const at188 = stateAt(188);
+const surplus = [];
+for (const osid of Object.keys(ref.oct1995)) {
+  const mun = osid.split(':')[1];
+  if (!EASTERN_SURPLUS_MUNS.includes(mun)) continue;
+  // A "gain" is RBiH at w188 where the painted reference says RS.
+  if (at188[osid] === 'RBiH' && ref.oct1995[osid] === 'RS') surplus.push(osid);
+}
+if (surplus.length === 0) {
+  console.log(`  none across ${EASTERN_SURPLUS_MUNS.length} municipalities ** CLEAN **`);
+} else {
+  breached = true;
+  console.log(`  *** ${surplus.length} AHISTORICAL RBiH GAIN(S) — §6 panel matter, do not merge ***`);
+  for (const o of surplus) console.log(`      ${o}`);
+}
+
+console.log('');
+console.log('OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix');
+let farzBroken = 0;
+for (const [name, osid] of FARZ_CELLS) {
+  const got = at188[osid];
+  const ok = got === 'RBiH';
+  if (!ok) farzBroken++;
+  console.log(`  ${name.padEnd(26)} ${String(got)}  ${ok ? '** TAKEN **' : '*** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***'}`);
+}
+if (farzBroken > 0) breached = true;
+// LIVENESS: say how much was compared, not merely that nothing tripped.
+console.log(`  compared: ${EASTERN_SURPLUS_MUNS.length} municipalities (negative) + ${FARZ_CELLS.length} cells (positive)`);
 if (guardCells !== 9) {
   console.error('  LIVENESS FAILURE — guard cell count changed unexpectedly; this report is not trustworthy.');
   process.exit(2);
