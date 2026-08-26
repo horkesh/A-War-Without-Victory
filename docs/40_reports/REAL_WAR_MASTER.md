@@ -1793,12 +1793,45 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 
 **Note:** This is a known design trade-off. Ops-only prevents gamey penny-packet probes. But the cure is arguably worse than the disease — 3.5 battles/week is too quiet. This will likely be addressed by the follow-on operation planning system (deferred Fix B) or by adding limited independent tactical actions (counterattacks already exist as a brigade-level exception).
 
-**Priority:** P3 — known design trade-off, not a bug. Monitor.
+**Priority:** ~~P3 — known design trade-off, not a bug. Monitor.~~ → **P0 (raised 2026-08-26, RE Phase 0 item 0.5).**
+
+**Why it is not a design trade-off: low tempo is what makes the §6 guarantees UNVERIFIABLE.** This was
+filed as an aesthetic complaint about the war feeling too quiet. It is structural. Measured over 188
+weeks on runs `n294` / `n373` / `n374`:
+
+| enclave guard cell | battles as target |
+|---|---|
+| Goražde | **0** (in every run checked) |
+| Srebrenica | **0** |
+| Žepa | **0** |
+| Sarajevo core ×4 | **0** each |
+| Bihać | 3 in n294, **0** in n373 |
+| Teočak | 2 in n294 — **both probes, which cannot capture by construction** |
+
+**8 of the 9 canon H1.8 enclave cells are never the target of a single battle in the entire war.**
+So "Goražde held" is indistinguishable from "nothing ever attacked Goražde", and every §6 verdict
+resting on the enclave guard was established by absence of pressure rather than by defence. The
+same shape appears elsewhere: the frozen-VRS-front finding records RS receiving **zero
+capture-capable attacks from w101**, and `donji_vakuf:jemanlici` was attacked **ten times**, winning
+every one, all probes.
+
+⇒ **The consequence is not that the war feels quiet. It is that the engine's most important
+guarantees pass vacuously, and a calibration score cannot distinguish a defended line from an
+unattacked one.** That is a correctness blocker, not a monitor item. It also bounds every
+enclave-related §6 ruling until fixed.
+
+**Caveat, stated so nobody over-reads the zeros:** these counts are battles where the cell **is the
+target**. A cell can be pressured through its adjacency ring without ever being targeted, so 0 means
+"never directly attacked", **not** "never threatened". The ring version needs
+`data/derived/operational/operational_contact_graph.json`.
+
+**Instrument:** `tools/verify_checkpoints.cjs` now labels every enclave hold `CONTESTED-AND-HELD` or
+`UNCONTESTED (0 battles as target)`, so this stops being invisible.
 
 | ~~**P2**~~ | ~~#37 Elite loan: no cohesion recall~~ | ~~1st Guards at cohesion 9.0 after 40 turns~~ | **FIXED (n748)** |
 | ~~**P3**~~ | ~~#38 Elite tracker not updated~~ | ~~battles_fought/casualties_taken always 0~~ | **FIXED (n748)** |
 | ~~**P2**~~ | ~~#39 ARBiH suicide attacks (0.1 PR)~~ | ~~Repeat attacks at same fortified position~~ | **FIXED (n749)** |
-| **P3** | #40 Operational tempo 3.5/week | Ops-only doctrine → 180 brigades idle every turn | **KNOWN — design trade-off** |
+| **P0** | #40 Operational tempo 3.5/week | Ops-only doctrine → 180 brigades idle every turn; **8 of 9 §6 enclave cells never attacked in 188 weeks**, so the guarantees pass vacuously | **RAISED P3→P0 2026-08-26** — correctness blocker, not a trade-off |
 | **P2** | #41 ARBiH attacks HVO territory while allied (Mostar w38-39) | RBiH brigades attack op:mostar:kruzanj_2 (HRHB) at PR 0.24-0.25 before HVO-RBiH war starts (w52+). Alliance guard may not cover all attack paths. | **OPEN — investigate** |
 | **P1** | #42 Bot strategic targeting — no demographic/geometric filter | Bot targets any adjacent enemy OSID without assessing strategic value. VRS takes Žepče (7.3% Serb, creates pocket). Salient aversion (Phase C) partially addresses geometry but demographic filter still needed. | **PARTIALLY ADDRESSED (n773 salient aversion)** |
 | **P2** | #43 UI shows brigade raw power, not sector defensive power | FormationDetail/sector panel shows `brigadePower()` (~2,602 for 3000 pers motorized) instead of `sector.defensive_power` (72.5). Player sees a "strong" sector when it's actually 115:1 overmatched. Misleading. | **OPEN — UI fix** |
