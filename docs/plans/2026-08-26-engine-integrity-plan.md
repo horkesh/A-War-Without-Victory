@@ -1443,3 +1443,69 @@ infrastructure for a task whose premise needs revisiting — the exact "measure 
 building" failure this plan was written to avoid. It also costs a scenario run to verify inertness,
 against a declared lane of zero runs. **Unblock 0.5b by first deciding whether 1.2 covers one path
 or three; the field's shape depends on that answer.**
+
+### 2026-08-26 — OPERATIONS + PRESIDENTIAL COMMAND investigation (owner-initiated, three seats)
+
+**★ THE OWNER RULED THE QUIET WAR CORRECT. Do not re-open it.** *"None of that is issue, all of
+those are correct modelling of how the real war went on. … 1st corps not attacking — well of course,
+it's mostly Sarajevo brigades under siege."* Probes are a legitimate intel instrument, in his words
+*"meant only as a tool to keep the intel value high."* `REAL_WAR_MASTER #40` was re-scoped P0→P2 the
+same day with a ruling box; **an earlier P0 escalation by the orchestrator was wrong and is corrected
+there.**
+
+**THE PRESIDENT CAN ALREADY DIRECT OPERATIONS — the premise that he cannot was false.** Request-op
+(`presidentialDecisionRoom.ts:1517`) emits one card per player corps with a serving CO, every turn,
+unconditionally, 25 CA. The player types a settlement NAME (`DirectiveCard.tsx:747`, placeholder
+*"Target settlement (e.g. Bihać)"*); `resolveTargetOsidInput` resolves it with an ambiguity banner.
+→ `stage-op-directive-order` → `cc.pending_op_directive` → the LIVE war-phase step
+`inject-op-directive` (`war_phases.ts:2032`) → `planDirectiveOperation` auto-selects force and
+staging → CorpsOperation tagged `requested_by_president`, `phase:'planning'`. The CO objects first
+with a force ratio and casualty estimate; forcing past him costs patron confidence weighted RS 1.0 /
+RBiH 0.5 / HRHB 0.25 from data. **The full plan-your-own-axes screen was built, tested and then
+DELIBERATELY disconnected**, pinned by `tests/ui/presidential_command_model_surface.test.ts`. That is
+a design decision, not rot.
+
+**★★ §6 GAP — VERIFIED BY THE ORCHESTRATOR AT SOURCE, NOT YET REFERRED. This is the finding.**
+`planDirectiveOperation` (`war_phases.ts:737-815`) checks **only**: is the target enemy-held, is it
+reachable, are there ≥2 free brigades. `op_directive_staging.cjs` contains **no enclave reference at
+all** (grep: zero hits). **So an RS president may type "Srebrenica" and receive a planned assault**,
+routing around the event system that canon H1.8 says owns enclave outcomes. CLAUDE.md already records
+the designed rule — *"OVERRUN of a never-fell enclave = an attack order through normal combat, not
+auto-fall. §6-gated"* — and **the request-op lever is an ungated instance of exactly that decision.**
+It has never been exercised because the bot targets Srebrenica **zero times in 188 weeks**; only a
+player can reach it. **Proposed: reject an enclave-capital objective in `planDirectiveOperation` with
+its own reason code, routing the player to the §6-gated OVERRUN decision. PANEL CALL, NOT AN
+IMPLEMENTER'S.**
+
+**OPERATIONS: NOT OVER-GATED — the opposite.** Of ~35 gates, **eight never fired in 188 weeks**, and
+the execution-side zero-attack backstop never fired because it never had a customer. No operation
+that reached execution recorded zero attacks; all 8 sector-attack deaths were in PLANNING, each
+killed by ONE gate on its first or second turn. Five of six analysed were **badly formed at
+creation** (three emergent ops aimed at cells that never changed hands in the whole war; one catalog
+roster collision claiming the same corps' brigades a week apart; one triggered op aimed into a pocket
+with no approach, aborted eight turns late). **One is a real engine defect:** `targets_friendly_overrides`
+is honoured at injection (`operation_opportunities.ts:1284`) and **ignored by the per-turn planning
+re-filter** (`sector_offensive.ts:906-915`), so `Operation APWB Pressure` self-cancels the turn after
+it launches; `Operacija Tigar-Sloboda` carries the same exposure. **NOT YET FIXED.**
+
+**PROBE RUNAWAY — mechanism fully traced, fix NOT chosen, with the owner.** `consecutive_probes`
+increments on every probe and resets **only** on a real attack being created or completed
+(`commander_loop.ts:252-254`, `sector_offensive.ts:1692` — the latter deliberately does not reset on
+probe completion, to fix a prior infinite-loop bug). `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT = 2` is
+read in **exactly one place** (`bot_corps_directives.ts:284`, the plan-conversion path). The **second**
+probe-creation site (`emit.ts:1103`, "no plan but surplus and high initiative") consults only a
+4-turn cooldown. A corps that can never form a plan therefore never resets and never stops: measured
+`arbih_1st_corps` **38**, `hvo_northwest_bosnia` **10**, all others 0-3.
+**⚠ A NAIVE CAP IS THE WRONG FIX:** capping the fallback at 2 makes a besieged corps probe twice and
+then stop **forever**, since nothing will ever reset it — destroying the intel maintenance the owner
+called the whole point. The shape must be a **back-off**, or a reset keyed on something other than a
+real attack (e.g. intel recovering above threshold, which closes the loop on itself). Owner's call.
+
+**Also found, not yet fixed:** the legacy force-launch IPC reads `state.corps_command` where the
+field is `state.military.corps_command` (`electron-main.cjs:2601`), so that route always fails —
+**but it returns BEFORE the CA debit, so the player is NOT charged** (a seat reported otherwise; the
+orchestrator checked and corrected it). Consequence: `interpretOperationLaunch` — the whole system
+for a general complying badly, slow-walking or refusing — has that dead handler as its **only**
+production caller, so **no post-commit friction exists on the request-op path at all**. And
+`planDirectiveOperation` ignores the five political multipliers that raise a BOT corps's participant
+floor, so a president under total isolation orders at the same threshold as one at peak standing.
