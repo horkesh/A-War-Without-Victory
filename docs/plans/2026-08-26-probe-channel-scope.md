@@ -305,3 +305,51 @@ turn's count only.)*
   for RBiH from t13. **RS falls below `COUNTER_ATTACK_MIN_COHESION = 30` from ~t68** — a far
   better-specified hypothesis for the frozen-VRS-front lane than anything currently in it. **Do not
   follow it from here.**
+
+---
+
+## 9. STEP 0 EXECUTED — 2026-08-26. Owner assent given ("So proceed with 1").
+
+**Gate REVERTED at `9d9455661`, surgically**: only `emit.ts` went back; the **S4 precondition stays**
+in `CALIBRATION_MASTER.md` (a blanket `git revert` would have deleted a standing rule earned the same
+day). Verified both ways. tsc clean, 76 probe/intel tests green.
+
+### ★ THE §7.3 BASELINE RUN WAS UNNECESSARY, AND THE REASONING THAT DEMANDED IT WAS WRONG
+
+`n378` (post-revert) is **BYTE-IDENTICAL to `n376`** — `final_state_hash 46349028e4d8e156` on both,
+`control_delta.json` identical by sha256. **n376 already WAS the post-revert baseline.** ~70 minutes
+spent reproducing a run already on disk.
+
+**Why the argument failed, and it is checkable in one command:**
+
+```
+82c0115e6  Žepa disbanded      committed 14:33
+n376       run                            15:07   <- AFTER Žepa. n376 HAS it.
+688a3066d  eligibility fix     committed 15:53   <- AFTER the run that contains it
+```
+
+The calibration seat asserted *"n376 has only `688a3066d`"* by reading `git log` ordering **and never
+comparing run timestamps to commit timestamps.** n376 was run from a dirty tree carrying the
+eligibility fix uncommitted, so its content led its commit by 46 minutes. The orchestrator relayed
+the claim without checking.
+
+⇒ **A commit-log argument about which runs contain which changes is worthless without run
+timestamps.** `stat` the run dir against `git log --date=format:'%H:%M'` — it costs one command and
+would have saved the run.
+
+**What the run did buy, honestly:** the baseline is now *proven* identical rather than assumed, and
+T1-T3 are confirmed against a **clean committed tree** rather than a dirty one. That is real but it
+is not what it was bought for.
+
+### T1-T3 BASELINES CONFIRMED — step 0 validated
+
+| metric | post-revert (n378) | with the gate (n377) | target |
+|---|---:|---:|---|
+| **T1** max `consecutive_probes` | **38** (1st Corps; hvo_nw 10) | 1 | **≤ 10** |
+| **T2** `arbih_115th_mountain` probes | **26** | — | **0** |
+| **T3** probes with zero attempts | **70/215 = 32.6%** | — | **≤ 10%** |
+| probes / sector_attacks | **215 / 44** | 128 / 64 | N1: 44 ±3 · N2: ≥150 |
+
+**The runaway returns in full the moment the gate is removed** — 38, and probes/sector_attacks back
+to exactly the pre-gate 215/44. That is step 0 doing its job: the symptom is visible again, so the
+cause fix can be seen to work or not. **Reference for steps 1-3 is n378** (= n376, clean commit).
