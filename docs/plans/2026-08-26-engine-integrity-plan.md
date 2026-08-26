@@ -376,6 +376,93 @@ against Path A alone and say so.
 
 ---
 
+## 3.11 RE-RANK (2026-08-26, after the two-reviewer pass) — READ THIS BEFORE THE PHASE ORDER
+
+**The phase order in this document is from the first day's understanding and the evidence has moved
+under it.** Sections 1-3 were built around the five clusters the original packet happened to name.
+**Every large finding since came from REVIEWING the plan, not from the clusters:** the dissolution
+criterion being dead (3.8), three probe emission paths (3.10), the enclave guard being unfalsifiable
+(3.8), and the emission gate rather than probe memory being the volume lever (section 6 header). The
+cluster taxonomy is a map of what was understood on day one; treat it as history, and treat this
+section as the current running order.
+
+### The ranking principle, changed
+
+**Order by what must be true before other measurements MEAN anything — not by symptom size.** The
+original order put probe memory first because probes are 62% of battles. Measured, Phase 1 buys at
+most ~18% of probe battles combined and its predictions model one of three emission paths. Symptom
+size selected it; it does not survive the principle.
+
+### TIER 0 — zero scenario runs. Nothing behavioural is priced until these report.
+
+| item | gates | status |
+|---|---|---|
+| **0.0** extend the enclave guard (one OSID -> eight) | **all of Phase 3 and 4.2** — the canon seat's blocking Section-6 condition | ready |
+| **0.0b** floor-vs-dissolution diagnostic | **the Tier 1 ruling below** | **DONE — 27/27 pairs UNREACHABLE from turn 0** |
+| **0.0c** attribute every probe battle to its emission path | **Phase 1** — its numbers model one of three paths | ready |
+| 0.1 schedule fingerprint / 0.2 gate predicate / 0.6 collision test | attribution of every later delta | ready |
+| 0.3 clean four-checkpoint pin | **everything measured** | **blocked on Codex** |
+
+### TIER 1 — one ruling, and it re-prices two phases
+
+**THE DISSOLUTION-CRITERION DECISION.** 0.0b measured that `floor > threshold` for **all three
+factions at every turn from t0** — 27 of 27 pairs. Consequences already established: ordinary
+dissolution is 1-of-2, not 2-of-3; **enclave brigades need 3-of-3 and can therefore never dissolve at
+all**; and the Section-6 enclave guard has never been capable of failing.
+
+**Why this outranks every behavioural task:** Tasks 4.1 (rebuild latency) and 4.2 (reserve decay) are
+both about **brigade survival**. Restoring a dead dissolution criterion changes brigade loss globally.
+Landing either before the ruling measures it against a dissolution regime that is about to change,
+and both S3 predicted-loss sets would be void. **Rule first, then price Phase 4.**
+
+It is a panel-and-owner matter, not an implementer's: it touches the enclave guard, and the guard is
+the panel's to rule on.
+
+### TIER 2 — correctness fixes whose absence corrupts the record. Cheap, low territory.
+
+These do not wait on Tier 1 and do not compete with it.
+- **3.1** `assessThreats` zone-locality — a pure bug; one lost settlement marks every zone critical.
+- **4.3** the loss ledger — a second, divergent casualty model; adopt on mechanism, not on delta.
+- **4.2's orphan-drain sub-bug** — `committed > 0` is a monotone proxy that never resets, so any pool
+  that ever raised a brigade is permanently orphan-ineligible. Separable and non-territory-moving.
+
+### TIER 3 — behavioural levers, re-ordered by MEASURED size
+
+1. **THE EMISSION GATE — currently UNOWNED, and it is the actual volume lever.** Probes are 62% of
+   battles with zero captures ever; the median idle gap between one probe ending and the next
+   starting is **1 turn**. Phase 1 was scoped to probe *memory* and **nothing in this plan addresses
+   probe *emission***. That is the largest unclaimed lever in the document. **Scope it.**
+2. **Corps-AI real-operation path** (3.4) — 23 capture-capable attacks in 188 weeks, all RBiH.
+   Tripwire-gated by 8.5; do not implement as a volume lever.
+3. **Probe memory 1.1 -> 1.2** — kept early *only* as instrument validation (1.1's per-cell prediction
+   tests the replay model every later number depends on), **not** as the head of the programme.
+4. **4.1 rebuild latency**, reworked — see the clobber and over-fire findings.
+5. **4.2 reserve decay** — a slow, partial lever by its own arithmetic (~256k -> ~113k equilibrium).
+
+### TIER 4 — owner decisions
+
+Terrain (14.1) · mobilization ceilings (14.3) · `committed` semantics (14.4) · Petkovci (14.5) ·
+A-2's morale variant to Section 6 (14.2) · **NEW: the enclave-guard vacuity referral (3.8).**
+
+### What this re-rank DOWNGRADES, and why — stated so it is not quietly re-promoted
+
+- **Phase 1 loses its claim on being first among behavioural work.** It survives early on the
+  instrument-validation argument alone.
+- **`max_attack_share_override` (3.9) drops from "may gate Phase 3" to "a real phase railroad, but
+  NOT the gate."** MEASURED at HEAD: it is consumed via `getEffectiveAttackShare`
+  (`bot_strategy.ts:296`) at `bot_brigade_ai_osid.ts:747` as
+  `maxCorpsAttacks = Math.max(1, Math.floor(size * maxAttackShare))`. **The `max(1, ...)` floor
+  guarantees every corps at least one attack slot every turn**, so with six VRS corps across 160
+  weeks the cap **cannot** produce 12 capture-capable attacks. It roughly halves RS slots against
+  RBiH's late-war 0.35; it does not zero them. It remains a wall-clock, state-blind phase railroad
+  worth naming and worth fixing on its own merits — it is not the explanation for the frozen front,
+  and Phase 3 does not wait on it.
+  *(Method note: the first consumer search returned nothing because it looked for
+  `getEffectiveMaxAttackShare`; the function is `getEffectiveAttackShare`. Same narrow-lookup class
+  as 3.6, caught this time by broadening rather than concluding absence.)*
+
+---
+
 ## 4. Setup — do this first
 
 ```powershell
