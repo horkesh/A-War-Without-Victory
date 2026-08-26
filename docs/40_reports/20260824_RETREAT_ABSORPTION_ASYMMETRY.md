@@ -174,4 +174,6 @@ Two further corrections from the same panel, recorded here because this report i
    504th and 517th following — the equivalent manpower of three to four brigades permanently removed
    from the ARBiH order of battle by political collapse. The true count is nowhere near zero.
 
-Tracked in [`docs/plans/2026-08-26-engine-integrity-plan.md`](../plans/2026-08-26-engine-integrity-plan.md).
+This report is source evidence, not implementation authority. The
+[lean RE plan](../plans/2026-08-26-engine-integrity-plan.md) owns generic retreat routing and
+dissolution triage only; absorption redesign remains unapproved.

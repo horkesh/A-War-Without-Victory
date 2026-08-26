@@ -173,7 +173,10 @@ Treat these as backlog items for bot/brigade AI when prioritizing. ~~**Next sing
 
 **ARBiH suicide attacks at 0.1-0.2 power ratio (P2, REAL_WAR_MASTER #39, 2026-03-15):** IMPLEMENTED 2026-05-18. Execution now records objective-level catastrophic attack memory by faction/corps/objective and stalls a repeat attack when the next-turn prediction remains catastrophic below the 0.3 power-ratio guard, while preserving the first desperate attack allowance. Report: [20260518_CATASTROPHIC_ATTACK_STALL_GUARD.md](implemented/20260518_CATASTROPHIC_ATTACK_STALL_GUARD.md).
 
-**Operational tempo 3.5 battles/week (P3, REAL_WAR_MASTER #40, 2026-03-15):** 141 battles / 40 weeks = 3.5/week across 198 brigades. Known ops-only doctrine trade-off. Historically, the Bosnian War had continuous engagements on every front. May be addressed by follow-on planning (deferred Fix B) or limited independent tactical actions. **Monitor, do not fix now.**
+**REAL_WAR_MASTER #40 (P2 evidence, re-scoped 2026-08-26):** Low operational tempo is accepted
+modelling and must not be “fixed.” The surviving probe-cap/probe-memory question belongs to
+Claude's separate non-executable probe scope pending owner assent; RE explicitly excludes probe
+implementation. Observation-coverage evidence may inform RE-0C only.
 
 ---
 

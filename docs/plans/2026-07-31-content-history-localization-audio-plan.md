@@ -9,7 +9,7 @@
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** ACTIVE CURRENT LANE -- Phase 1.1 sensitive-history closeout complete; execute pre-1.0 Phases 1.2, 2, 4, and 5; Phase 3 localization deferred post-1.0 by owner decision 2026-08-15
+**Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; remaining pre-1.0 gates are human listen/sensitivity acceptance, English accessibility/readability, offline browser and packaged-runtime proof, and closeout reconciliation; Phase 3 localization deferred post-1.0
 **Roadmap workstream:** R7
 **Canonical owner:** authored JSON plus source/license manifests; `src/ui/map/i18n/` for locale; `src/ui/map/audio/` for playback
 **Collision rule:** Do not edit the same event/essay as R4. Do not edit map/Desk layout until R1/R2 finish.

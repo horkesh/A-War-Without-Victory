@@ -1,11 +1,10 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** IN AUTONOMOUS EXECUTION. **Two owner instructions are live and they compose.**
-(1) The owner temporarily reactivated the January 1993 calibration slice of R6 on the single
-188-week master; that slice landed in `92f924f9d`. (2) The owner then ruled 2026-08-26 that
-**engine health precedes further calibration**, inserting **RE (engine integrity)** ahead of any
-further op-objective / axis / timing / roster calibration and gating R8. R7 continues in
-parallel with RE (disjoint file ownership). R8 and R9 follow.
+**Status:** IN AUTONOMOUS EXECUTION. The owner ruled 2026-08-26 that **engine health is
+sacrosanct and precedes further calibration**. The accepted January-1993 slice remains historical
+evidence, but all further calibration waits on **RE — Lean Engine Integrity**. Claude's probe work
+is a separate prerequisite lane and is not RE scope. R7 may continue only where file ownership is
+actually disjoint. RE and R7 gate R8; R9 follows R8.
 
 **Last updated:** 2026-08-26
 
@@ -19,30 +18,37 @@ parallel with RE (disjoint file ownership). R8 and R9 follow.
 
 ## Current Execution Snapshot (2026-08-26)
 
-- **Owner-reactivated lane:** R6 January 1993 checkpoint calibration on
-  `apr1992_definitive_188w.json`, with later-checkpoint fallout explicitly deferred. Current
-  accepted run n372 is 697/712 nationally and 59/62 in the
-  Čajniče–Foča–Goražde–Pale–Trnovo–Rudo–Višegrad focus. Direct calibration
-  `control_change` events are forbidden. The next regional calibration work remains in the
-  Srebrenica–Zvornik area after the accepted Goražde rebuild. Authority:
-  `docs/40_reports/CALIBRATION_MASTER.md`.
-- **RE engine integrity (owner-instructed 2026-08-26):** *"Engine health is sacrosanct — these
-  issues should be dealt with immediately before more calibration work."* Painted-reference and
-  `init_control` calibration continues in parallel; **op-objective, axis, timing and roster lanes
-  wait on RE**, because their deltas are measured against combat behaviour RE changes globally.
-  Plan: [Engine integrity](2026-08-26-engine-integrity-plan.md). §6 note: the enclave guard was
-  found vacuous and repaired (`0098a48fe`); the panel split 2-2 with one BLOCK and the owner ruled
-  `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` ON (`2dfe6f4e7`), **not yet validated at 188 weeks**.
+- **Calibration:** the January-1993 slice is landed evidence. Further reference, `init_control`,
+  objective, axis, timing, roster, or outcome tuning is paused until RE closes; RE must not tune
+  outcomes itself. `docs/40_reports/CALIBRATION_MASTER.md` records that n374 is inadmissible as
+  an RE baseline because its own metadata says commit `b3d759a3…`, `git_dirty:true`, Node 24.
+- **Probe prerequisite:** Claude owns probe-channel disposition. RE does not repair probe memory,
+  change probe shape, or roll back probe work. RE starts only after that lane has an owner-approved
+  disposition and no overlapping engine edit is active.
+- **RE — Lean Engine Integrity:** preparation-ready, implementation blocked on the probe
+  prerequisite and RE-0 exact-parent S0. The execution rail corrects authority, accounting,
+  deterministic ordering, and locality through deletion/convergence. It adds no pipeline step,
+  flag, default stream, service, or unruled mechanic; production LOC must be net non-positive.
+  Plan: [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md). Planning evidence:
+  [full-team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md).
 
 - **Complete:** R1, R2, R3, R4, R5, and the defined pre-1.0 scope of R6.
 - **Complete RC narrow packet:** the default-OFF v3 selector plus reversible D-shape is retained. Paired 188-week runs produced hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 bot benchmarks, 7/7 health gates, one live non-enclave HRHB damage/capacity write, and full Section 6 pass. Bucovaca peaked at strain 62 and recovered to 37; Sipovo/Drvar peaks remained 11/7.5. D-topology neighbour cascade remains owner-reserved and is post-1.0.
-- **Next after the reactivated checkpoint lane:** R7 Phase 4 bounded audio provenance/assets,
-  then English accessibility/readability and integrated packaged proof. R7 Phase 2 and the
-  owner-directed opening-screen implementation remain complete; unfinished multilingual
-  localization remains post-1.0.
+- **Parallel non-engine lane:** R7 audio implementation landed at `2d106e5e0`. Remaining gates
+  are human listen/sensitivity acceptance, English accessibility/readability, offline browser and
+  integrated packaged-runtime proof, and closeout reconciliation. Multilingual localization
+  remains post-1.0.
 - **Canon landed this cycle:** `SENSITIVE_HISTORY_DESIGN_GATE.md` **§10, "Provenance and the Integrity of the Historical Record"** — ratified by unanimous Pyrrhic panel (`5f462e8aa`), twelve conditions discharged across two rounds. `FORAWWV.md` §XIII temporal scope is drafted-but-**HELD** behind two engineering items (provenance channel separation + the determinism-scan pair) and is **not** canon.
-- **Measurement instrumentation is no longer the active blocker.** Run provenance now records commit/input/flag evidence, pair selection rejects incomparable artifacts, and the collapse OFF/ON comparison was rerun on same-commit evidence. Historical mixed-tree artifacts remain inadmissible; do not reinterpret them through a newer checkout.
-- **★ NEW LANE — RE ENGINE INTEGRITY, owner-instructed 2026-08-26.** *"Engine health is sacrosanct — these issues should be dealt with immediately before more calibration work."* Five days of Pyrrhic standup findings were consolidated and put to an eight-seat panel with the implementer's bias declared; **fourteen packet claims were refuted**, including both load-bearing sequencing claims, and **two seats independently converged on a root the packet never named.** **The engine records probe outcomes into a memory it cannot read.** A probe that *fights* never records an objective failure — only probes that never fought do — so `op:centar_sarajevo:radava` carries `failure_count 1, cooldown 0` after 26 attacks while a VRS objective with zero attacks carries `13 / 182`. The probe cooldown scans `operation_history` for `type:'probe'` while both writers hardcode `'sector_attack'` (91 entries, zero probes). And the anti-repetition guard is per-operation state against a per-objective problem: Radava's 26 attacks are **13 separate probe operations of exactly two attacks each**. Result: **365 of 585 battles (62%) are probes that cannot capture** — 201 wins for zero ground at 131,577 attacker casualties, more than every real operation combined — and Radava (25 catastrophic) and Gornja Vratnica (24 decisive victories, 39 attacks) run the same two code paths. **The corps AI produces 23 capture-capable attacks in 188 weeks and all 23 are RBiH**, so it is broken for all three factions and only the RS lacks a catalogue to mask it. The cost-loop root is re-identified as **`strategic_reserves`** — ungated, undecayed, faction-global, and funded by the very overflow that trips the mobilization cap. **Executable plan:** [Engine integrity](2026-08-26-engine-integrity-plan.md). **Phase 1 is roughly ten lines; Phase 0 costs zero scenario runs.** **Precedence:** op-objective/axis/timing/roster calibration pauses or banks for re-measurement; painted-reference and `init_control` lanes continue unaffected.
+- **Measurement substrate exists; RE-0 evidence is still owed.** Run provenance records
+  commit/input/flag evidence and pair selection rejects incomparable artifacts, but RE needs its
+  own exact-parent clean Node-22 S0. Historical mixed-tree or Node-24 artifacts remain inadmissible.
+- **RE scope is settled by the full Pyrrhic review, not the superseded diary.** Confirmed
+  implementation packets are authority convergence/dead-path deletion, one casualty-accounting
+  owner, deterministic threat attribution and follow-on queues, and live locality/active-formation
+  corrections. APWB/friendly overrides, presidential enclave authority, and the stage-operation
+  decision path require named decisions. Reserve decay, rebuild latency, garrison fallback,
+  predictor retuning, dissolution floors, and outcome-specific immunity are evidence-only and may
+  all be deferred without blocking RE.
 - **After R7 and RE:** R8 packaged full-campaign validation, then R9 release-candidate readiness.
 - **Publication boundary:** signing, store upload, public release creation, and a public `1.0` tag still require a separate explicit `Publish 1.0` instruction.
 
@@ -58,10 +64,10 @@ without hidden required work, long unexplained decision droughts, map-entry stal
 
 The program is now finite:
 
-- nine executable product workstreams, R1–R9, plus the reactivated RC collapse gate;
-- one plan per R1–R9 workstream, with the RC scope/build/gate packet linked from the register;
+- nine product workstreams R1–R9, the closed RC gate, and the inserted RE gate;
+- one plan per R1–R9 workstream and one sole lean RE plan, with RC evidence linked separately;
 - one dependency order;
-- no unresolved owner, product, design, or canon choices;
+- unresolved choices confined to named RE decision gates and the explicit probe-owner prerequisite;
 - evidence-led adopt-or-retire branches where an experiment may legitimately fail;
 - external signing credentials and publication authority treated as inputs, not design questions.
 
@@ -69,13 +75,16 @@ Prior roadmap history remains in Git before this consolidation and in [PROJECT_L
 
 ## 2. Authority and Activation
 
-The owner activated the complete roadmap on 2026-07-31 and subsequently authorized implementation, commits, remote pushes, final merge to `main`, documentation propagation, and repository/worktree/branch cleanup. That explicit instruction supersedes the planning-pass restriction on commits and pushes for this execution program.
+The owner activated complete roadmap execution on 2026-07-31. That authorizes local implementation,
+tests, evidence, local commits, transient validation builds, documentation propagation, and
+non-destructive workspace maintenance within each plan's scope. It does not authorize remote push
+or final merge.
 
 Signing, store upload, public release creation, and a public `1.0` tag remain unauthorized until the owner separately says `Publish 1.0` (or equally explicit wording). Transient local/directory Electron builds and immutable release-candidate evidence remain authorized where R8/R9 require them.
 
 | Owner instruction | Autonomous authority granted |
 |---|---|
-| `Execute the master roadmap` | Implement R1–R9 in dependency order; create/reuse isolated `codex/` worktrees; edit source/docs/tests/data; run research and verification; make local commits; create transient unpacked/directory Electron builds needed for R8 and release dry-runs. |
+| `Execute the master roadmap` | Implement R1–R9 and the inserted RE gate in the recorded dependency order; create/reuse isolated `codex/` worktrees; edit in-scope source/docs/tests/data; run research and verification; make local commits; create transient unpacked/directory Electron builds needed for validation. |
 | An explicit named workstream, such as `Execute R3` | Perform that workstream and its required prerequisite checks only. |
 | `Publish 1.0` or equally explicit wording | After R9 readiness is green, use supplied secure credentials, sign/notarize, upload, push the release branch/tag, and change public release state. |
 
@@ -120,9 +129,14 @@ R3 Tactical Group convergence
 R4 + R6 + stable R1/R2 UI
   -> R7 Content/history/audio/accessibility/opening
 
-RE Engine integrity (cost loop, operation supply, combat truth)
-  -> precedes any further calibration; gates R8
-  -> may run in parallel with R7 (disjoint file ownership: engine/sim vs content/audio/UI)
+Claude probe lane
+  -> owner-approved disposition; no overlapping engine edits
+
+RE Lean Engine Integrity (authority, accounting, ordering, locality)
+  -> RE-0 exact-parent Node-22 baseline and CI/runtime truth
+  -> serial implementation packets; speculative mechanics remain decision-gated
+  -> precedes all further calibration; gates R8
+  -> may overlap R7 only where inspected file ownership is disjoint
 
 R1–R7 green + RE green
   -> R8 Full packaged-Electron validation
@@ -131,7 +145,9 @@ Two clean 5/5 R8 diaries + all barriers green
   -> R9 Release candidate/gold/publication readiness
 ```
 
-Execute serially in the order R1, R2, R3, R4, R5, R6, R7, R8, R9 unless file-ownership inspection proves two packets are independent. Serial execution is the default because the known collisions are more expensive than the saved wall time.
+Execute completed R1-R6/RC as history, then the probe prerequisite, RE and remaining R7 work,
+followed by R8 and R9. RE implementation packets and their 188-week pairs are strictly serial.
+R7 may proceed in parallel only after file-ownership inspection proves independence.
 
 ## 5. Workstream Register
 
@@ -144,9 +160,9 @@ Execute serially in the order R1, R2, R3, R4, R5, R6, R7, R8, R9 unless file-own
 | R5 | Engine quality, performance, and stability | **COMPLETE — CLOSED 2026-08-05 at the current performance floor (~1,086 ms/turn fresh).** Every self-executable item is done (Phases 0/1/3/4.1, Phase 2e Tasks 1-10, Task 7 baseline gate). Phase 2e's pure-solve/serial-commit extraction was proven correct but FAIL_REVERTED for a 3-7% wall-clock + ~45% heap regression; production uses the direct `buildCorpsFrontSectors` call. **Task 6 (incremental-reuse toward 100 ms/turn) is DECLINED, not deferred:** its only user-facing motivation was the warroom->map delay, which is R1's domain and already solved (~4.3 s -> ~114 ms warm; the map reads pre-computed sectors and never calls the builder). ~1 s/turn sim throughput is acceptable for a strategic game; the 100 ms/turn target is retired as aspirational. The reverted Phase 2e pipeline and its characterization suite are preserved for an optional future re-attempt (its flaky pure-solve `sectors_rebuilt` divergence test is skipped) | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
 | R6 | Historical gameplay depth and final calibration | **PRE-1.0 SCOPE COMPLETE — CLOSED 2026-08-09.** Final R6 re-floor `n163`: 634 matched OSIDs, 30/31 anchors (Brčko debt only), Section 6 correct, 40-week fingerprint `5cfcf1c8` golden-match, and all seven engine-health checks passing. Later RC-base fixes moved current HEAD to 629 matched and 31/31 anchors; do not conflate that newer integration baseline with the R6 closeout snapshot. Remaining Brčko/force-density, exhaustion re-pacing, casualty-grade, combat-earned-cohesion, and institutional-veto work is recorded post-1.0 debt unless explicitly reactivated. | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) · [exhaustion/scoring plan](2026-08-06-exhaustion-scoring-redesign-plan.md) | Calendar/weak-predicate events cannot manufacture control; experiments close by predeclared criteria; long-run evidence remains deterministic and Section 6-safe. |
 | RC | Pressure → exhaustion → **COLLAPSE** pipeline | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection plus reversible D-shape (`4.0` shock / `0.5` recovery) produced one live non-enclave HRHB write while remaining deterministic and trajectory-flat: hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 benchmarks, 7/7 health gates, and full Section 6 pass. Bucovaca peaked 62 and recovered to 37; Sipovo/Drvar peaks 11/7.5. D-topology is explicitly post-1.0/reserved. | [Scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) · [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) · [measurement plan](2026-08-15-collapse-d-selection-measurement-plan.md) · [D-shape design](2026-08-15-collapse-d-shape-design.md) · [Stage 0/2 panel record](../40_reports/20260813_RC_COLLAPSE_PANEL_FROZEN_ARTIFACT.md) | The default-OFF local collapse model measures historically discriminating combat pressure, recovers on quiet turns, reaches a bounded live writer, preserves Section 6, and leaves neighbour cascade to an explicit post-1.0 topology packet. |
-| RE | Engine integrity: probe memory, operation supply, and the cost loop | **SCOPED 2026-08-26 — owner-instructed, precedes further calibration, gates R8.** Eight-seat Pyrrhic panel; **fourteen packet claims refuted**, and two seats independently converged on a root the packet never named. **The engine records probe outcomes into a memory it cannot read.** `recordFailedObjectives` early-returns on `probe_complete`, so a probe that *fights* never records a failure — only probes that never fought do (Radava: 26 attacks, failure_count 1, cooldown 0; a VRS objective with 0 attacks: failure_count 13, cooldown 182). Separately the probe cooldown scans `operation_history` for `type:'probe'` while **both writers hardcode `'sector_attack'`** — measured 91 entries, zero probes — so the brake is disconnected. And the anti-repetition guard is per-operation state fighting a per-objective problem: Radava's 26 attacks are **13 separate probe operations of exactly 2 attacks each**, the guard firing correctly 13 times and accomplishing nothing. Result: **365 of 585 battles (62%) are probes that cannot capture**, 201 wins for zero ground at 131,577 attacker casualties. **The corps AI produces 23 capture-capable attacks in 188 weeks and all 23 are RBiH** — the ARBiH's late recovery is authored (42 of 45), so the AI is broken for all three factions and only the RS lacks a catalogue to mask it. Cost-loop root re-identified as **`strategic_reserves`** (RBiH 256,091 / HRHB 21,039 / RS 0) — ungated by exhaustion, undecayed, faction-global, fed by territorial loss; the mobilization cap *funds its own bypass*. Cohesion dilution is a **measured no-op** (floor-clamped; 57/126 RBiH brigades sit at exactly 62) and is **BLOCKED and referred to §6**. Phase 1 is ~10 lines. Phase 0 costs **zero scenario runs**. | [Engine integrity plan](2026-08-26-engine-integrity-plan.md) · [evidence packet](../40_reports/proposals/20260826_ENGINE_INTEGRITY_PACKET.md) | Probes cannot be re-issued at an objective they have already failed; the corps AI can produce capture-capable operations for factions other than RBiH; authored operations cannot vanish without a recorded reason; losses durably reduce a formation's capability; the health gate's green means operations ran. Every adoption satisfies decision rule S1-S6 and breaches no anchor set, the enclave guard, the western-Bosnia cascade, or the historian tripwire (a fix that flips Donji Vakuf or Bugojno is a failure whatever it scores). |
-| R7 | Content, historical attribution, audio, accessibility, and opening experience | **IN PROGRESS — PHASE 2 AND OPENING EXPERIENCE COMPLETE.** Phase 0 inventories, Phase 1.1 sensitive-history repair, Phase 1.2 retained Ring-2 closeout, and the corrected Phase 2 officer/OOB attribution are complete. The owner-directed five-beat case-file opening, explicit campaign mode, safe Field Records, and browser first-hour/live-surface proofs are merged. Next: Phase 4 audio provenance/assets, then English accessibility/readability and integrated packaged proof. **Localization Phase 3 is deferred post-1.0 by owner decision 2026-08-15**; existing translations and compatibility remain but multilingual completeness, `bs` migration, pseudolocalization, native LQA, and locale-specific proof do not gate 1.0. | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [opening implementation plan](2026-08-23-opening-screens-implementation-plan.md) | Claims, identities, English strings, and audio are machine-auditable; unsupported content is absent; licensing, accessibility, opening experience, and Electron proof pass. |
-| R8 | Full-campaign packaged-Electron validation and diaries | **WAITING ON RC AND R1–R7 GREEN.** The existing Electron playthrough prototype remains a short IPC-contract smoke tool; R8 full-campaign logic belongs on the determinism-proven `tools/ai_play/president_playthrough.ts` harness. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) | Fresh historical-policy RBiH, RS, and HRHB campaigns cover full duration and required surfaces; bugs and friction are separately routed; final two diaries score 5/5 with clean diagnostics. |
+| RE | Lean engine integrity: authority, accounting, ordering, and locality | **PREPARATION-READY 2026-08-26 — implementation blocked until Claude's probe lane has an owner-approved disposition and RE-0 produces a clean exact-parent Node-22 S0. Precedes all further calibration; gates R8.** The full Pyrrhic team replaces the stale investigation diary with a serial deletion/convergence rail: truthful CI/runtime substrate; one exact-ID authority route; one casualty-accounting owner with raw pool loss separated from realism-scaled K/W/M; conserved predecessor→descendant threat attribution; generic non-starving follow-on queues; and bounded locality/active-formation corrections. Complexity budget: zero new pipeline steps/flags/default streams/services, target zero persisted fields, net non-positive production LOC. Probe work is explicitly excluded. | [Lean execution plan](2026-08-26-engine-integrity-plan.md) · [team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md) · [frozen discovery](../40_reports/proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md) | RE-0 provenance/CI truth passes; dead authority and duplicate accounting paths are removed; deterministic operation/locality packets pass focused, mutation, byte-identity, performance, and serial 188-week gates; all decision gates are dispositioned; speculative mechanics are separately approved or explicitly deferred; complexity budgets hold. |
+| R7 | Content, historical attribution, audio, accessibility, and opening experience | **IN PROGRESS — AUDIO IMPLEMENTATION LANDED `2d106e5e0`.** Historical attribution, opening experience, and required ambient provenance/assets are implemented. Remaining pre-1.0 gates: human listen/sensitivity acceptance, English accessibility/readability, offline browser and integrated packaged-runtime proof, and closeout reconciliation. **Localization Phase 3 is post-1.0.** | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [opening implementation plan](2026-08-23-opening-screens-implementation-plan.md) | Claims, identities, English strings, and audio are machine-auditable; unsupported content is absent; human/audio sensitivity, accessibility, opening experience, and Electron proof pass. |
+| R8 | Full-campaign packaged-Electron validation and diaries | **WAITING ON RC, R1–R7, AND RE GREEN.** The existing Electron playthrough prototype remains a short IPC-contract smoke tool; R8 full-campaign logic belongs on the determinism-proven `tools/ai_play/president_playthrough.ts` harness. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) | Fresh historical-policy RBiH, RS, and HRHB campaigns cover full duration and required surfaces; bugs and friction are separately routed; final two diaries score 5/5 with clean diagnostics. |
 | R9 | Release candidate, gold, and publication | READY AFTER R8 | [Release plan](2026-07-31-release-candidate-gold-publication-plan.md) | One immutable RC passes clean-machine/security/license/store proofs; artifacts are reproducible; signing/upload inputs are documented; publication awaits only the explicit instruction. |
 
 The linked plan is the task-level contract for each row. A workstream may not gain a second active plan; amend the linked plan and this register together.
@@ -261,8 +277,8 @@ No experiment remains “partial” after evaluation.
 | `App.tsx`, `MapContainer.tsx`, `shellNavigation.ts`, `gameStore.ts` | R1 first; R2 FR-03 rebases on R1. |
 | Decision priority/cadence read models and authored initiatives | R2 first; R4 consumes and generalizes the accepted contract. |
 | Tactical Group/GameState lifecycle | R3 first; R5 persistence work rebases on R3 schema. |
-| Combat resolution and calibration | R3 floor, then R5 stability proof, then R6 experiments serially. **From 2026-08-26, RE precedes any further calibration on this surface.** |
-| Combat resolution, the manpower economy, and operation injection (`attack_resolution_osid.ts`, `attack_casualty_distribution.ts`, `war_phases.ts` casualty/exhaustion steps, `formation_spawn.ts`, `pre_planned_operations.ts`, `bot_corps_ai.ts`/`bot_corps_operations.ts`, `engine_health_gate.cjs`) | **RE owns these outright while it is open.** Calibration lanes touching painted references or `init_control` proceed in parallel; lanes touching op objectives, axes, operation timing, or OOB rosters pause or bank their deltas for re-measurement, because those deltas are measured against combat behaviour RE changes globally. RE branches from a clean `git_dirty:false` four-checkpoint pin in its own worktree — never from the shared tree. |
+| Combat resolution and calibration | R3/R5/R6 history is closed. **RE precedes every further calibration change.** Calibration does not run in parallel with RE. |
+| RE-owned engine/desktop surfaces | During one active packet, RE owns only the exact files listed in its file-boundary table. Packets are serial. Claude owns probes; an active probe or overlapping engine edit stops RE. R7 may overlap only on inspected disjoint content/audio files. RE branches from an owner-approved integrated parent and produces a fresh clean Node-22 S0; n374 is not admissible provenance. |
 | Event/essay authored rows | R4 inventory/convergence first; R7 attribution/content pass second. |
 | Map/Desk English layout strings | R1/R2 layout first; R7 accessibility/readability proof second. Multilingual expansion is post-1.0. |
 | Package/release configuration | R8 may create transient local validation builds; R9 owns release configuration and immutable RC artifacts. |
@@ -320,7 +336,7 @@ During R8 and R9:
 
 | Finding | Route |
 |---|---|
-| Incorrect result, broken control, crash, diagnostic error, stale save/map truth, determinism or migration failure | **Bug** -> owning R1–R7 plan -> fix/test -> restart affected fresh campaign |
+| Incorrect result, broken control, crash, diagnostic error, stale save/map truth, determinism or migration failure | **Bug** -> RE while RE is open when it concerns authority/accounting/ordering/locality, otherwise the owning R1–R7 plan -> fix/test -> restart affected fresh campaign |
 | Understandable but slow, unclear, repetitive, badly prioritized, or unpolished flow | **Friction** -> R2 for Desk/Decision/map loop, R4 for command/event truth, R7 for content/audio/accessibility, otherwise owning lane; multilingual expansion routes post-1.0 |
 | Historically unsupported or misplaced content | **Bug** if factual/chronological; **friction** if sourcing is correct but presentation is unclear -> R6/R7 |
 | Optional improvement outside 1.0 outcome and not required for 5/5 | Record in post-1.0 backlog; do not expand this roadmap |
@@ -365,7 +381,7 @@ Additional rules:
 
 The roadmap is complete only when:
 
-- RC and R1–R7 acceptance criteria and plan checklists are green;
+- RC, R1–R7, and RE acceptance criteria and plan checklists are green;
 - R8 completes fresh full-duration RBiH, RS, and HRHB coverage and the final two owner-style diaries score 5/5;
 - every R8 finding is either fixed and reverified or explicitly proven outside the 1.0 definition of done;
 - bugs and friction remain separately reported;
@@ -396,4 +412,4 @@ Remaining dependency:
 Next workstream:
 ```
 
-At program close, append one final ledger entry, link the R8 diaries and R9 manifest, mark R1–R9 complete here and on the command board, and run the full verification set. Do not publish implicitly.
+At program close, append one final ledger entry, link the R8 diaries and R9 manifest, mark R1–R9 and RE complete here and on the command board, and run the full verification set. Do not publish implicitly.

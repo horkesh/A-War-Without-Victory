@@ -1,5 +1,8 @@
 # PROBE CHANNEL — SCOPE
 
+**Status:** SCOPE COMPLETE — NON-EXECUTABLE pending owner assent to step 0. Claude owns this lane.
+This document does not authorize RE or probe implementation.
+
 **Owner direction, 2026-08-26:** *"We want to fix the cause, not the symptom. Engine health above all
 else, while remaining as mean and lean as possible. Involve all necessary Pyrrhic team specialists.
 Scope it."*
@@ -11,8 +14,8 @@ legitimate: *"a tool to keep the intel value high."* **RAISING TEMPO IS NOT A GO
 SMUGGLED IN AS A BENEFIT.** What he flagged was one thing only: *"corps should not do it 38 times in
 a row."*
 
-**Seats consulted:** Engine/Systems, Operations, Railroad-Hunter, Calibration (outstanding at time of
-writing — §7 is a placeholder and **must be filled before step 1 is built**).
+**Seats consulted:** Engine/Systems, Operations, Railroad-Hunter, Calibration. All four reported;
+§7 is filled.
 
 ---
 

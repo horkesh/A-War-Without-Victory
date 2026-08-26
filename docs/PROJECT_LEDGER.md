@@ -29393,3 +29393,39 @@ The entry above was written with five of eight seats reporting. The remaining th
 **Minor tickets:** `sector_offensive.ts:1355` omits the `op.force_launch !== true` check that guards `:1411` and `:1505`, so a player force-launch is silently overridden at the first gate. `getEligiblePopulationCount` must read `by_mun1990_id`, not `by_municipality_id` — the latter is post-1995 keyed and collides on merge (Gradačac reads 43 Bosniaks).
 
 **Revised programme:** Phase 0 (free) → **Phase 1 probe memory (~10 lines)** → Phase 2 legibility → Phase 3 operation supply → Phase 4 cost loop (A-3, the strategic-reserve lane, A-1 hygiene) → Phase 5 owner decisions (terrain, A-2→§6, mobilization ceilings, `committed` semantics, Petkovci). **Run cost down from ~19 to ~12-14 × 188w** because A-2 is dropped and A-1 demoted.
+
+## [2026-08-26] docs(roadmap): replace discovery-diary RE scope with lean full-team execution rail
+
+**Type:** Documentation/process control-plane supersession. No gameplay, engine, scenario, save,
+baseline, threshold, package version, tag, push, signing, upload, publication, or canon change.
+
+**Supersession:** The 1,511-line RE investigation diary is frozen at
+`docs/40_reports/proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md`. The sole executable
+authority is now `docs/plans/2026-08-26-engine-integrity-plan.md`, reviewed by the full Pyrrhic
+team against source HEAD `c98a704f691710002af94b606d12fcaf01e642e4` and independently passed by
+lean-engine red team and Process QA. Historical entries above remain append-only evidence; their
+probe-memory/legibility/supply/cost-loop phase sequence is no longer dispatch authority.
+
+**Roadmap state:** Claude's separate probe scope is complete but non-executable pending owner assent
+to step 0. RE excludes all probe implementation and may not capture an execution base until that
+disposition and overlapping edits land. Then RE runs RE-0–RE-6 serially: exact-parent Node-22
+baseline/observation/desktop-CI truth, authority deletion/convergence, one casualty-accounting
+owner, deterministic threat/queue corrections, live locality/active-formation corrections, and
+evidence-only mechanic triage. DG-1 APWB/friendly override, DG-2 presidential enclave authority,
+and DG-3 stage-operation decision reachability remain explicit gates.
+
+**Baseline correction:** n374 is not RE S0. Its raw `run_meta.json` records
+`b3d759a3ca413a934bd7863900be7bd444e0d7b0`, `git_dirty:true`, Node `v24.13.0`; n373 is clean
+but counterfactual and Node 24. RE-0 owes a fresh two-run exact-parent Node-22 S0. All further
+calibration is paused until RE closes, and RE performs no tuning or baseline refresh.
+
+**Lean budget:** zero new pipeline steps, flags, services, or default streams; target zero persisted
+fields; production LOC net non-positive; no per-formation full-graph scans. Reserve decay, rebuild
+latency, garrison fallback, predictor retuning, dissolution floors, and outcome-specific immunity
+default to defer unless separately approved.
+
+**Synchronized surfaces:** Master Roadmap, Command Board, plans index, docs index, active task
+governance, calibration authority, reports index/evidence links, Real War #40 routing, probe status,
+R7 landed-audio status, napkin, and knowledge ledger. `docs/10_canon/FORAWWV.md` was not edited.
+Probe commits after the preceding ledger entry remain for their owning lane to reconcile before the
+integrated RE parent is approved.

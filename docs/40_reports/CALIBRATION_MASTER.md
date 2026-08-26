@@ -1,19 +1,31 @@
 # AWWV Calibration Master Reference
 
-## ★ CLEAN FOUR-CHECKPOINT BASELINE — 2026-08-26 (RE Phase 0, item 0.3)
+## ★ CURRENT RE/CALIBRATION AUTHORITY — 2026-08-26
 
-**The first four-checkpoint 188-week pair on a clean tree at a known commit.** Both supersede n372
-for anything beyond the January lane: n372 is `--weeks 39` and `git_dirty: true`, so three of the
-four checkpoints were simply unmeasured on it.
+Further calibration is paused until [RE — Lean Engine Integrity](../plans/2026-08-26-engine-integrity-plan.md)
+closes. Claude's separate probe lane must receive an owner-approved disposition first. RE performs
+no calibration tuning and may not refresh thresholds, manifests, references, or expected hashes to
+make a gate pass.
+
+No current run satisfies lean RE-0 S0. RE-0 requires two fresh, byte-identical, distinct-output
+188-week runs on the approved integrated execution parent, clean metadata, and Node 22. Raw artifact
+metadata outranks this catalog.
+
+## HISTORICAL DISCOVERY PAIR — n373/n374 — NOT RE-0 S0
+
+These runs remain historical discovery evidence only. The n374 catalog claim was wrong: its raw
+`run_meta.json` records commit `b3d759a3ca413a934bd7863900be7bd444e0d7b0`,
+`git_dirty:true`, and Node `v24.13.0`. n373 is a counterfactual and also Node 24. Neither run
+may establish the lean RE execution baseline.
 
 | | commit | dirty | hash | jan1993 | apr1994 | apr1995 | oct1995 |
 |---|---|---|---|---:|---:|---:|---:|
-| **n374 — REFERENCE** | `3806ef08d` | **false** | `a6087550b581e3be` | **697** | **673** | **667** | **640** |
-| n373 — counterfactual | `3806ef08d` | false | `536ca5f72c2bd269` | 697 | 673 | 667 | 643 |
+| **n374 — inadmissible RE provenance** | `b3d759a3…` | **true** | `a6087550b581e3be` | **697** | **673** | **667** | **640** |
+| n373 — counterfactual / Node 24 | `3806ef08d` | false | `536ca5f72c2bd269` | 697 | 673 | 667 | 643 |
 
 `runs/apr1992_definitive_188w__46834a3b41033bff__w188_n374` (and `…_n373`).
 
-**n374 is the reference and n373 is not**, despite n373 scoring 3 higher at October. n373 was run
+**Neither is the RE reference.** n373 was run
 with `AWWV_ENCLAVE_COLUMN_DISPLACEMENT=false`; the owner ruled that mechanic **ON** on 2026-08-26, so
 n373 describes an engine configuration that no longer exists. A floor set from it would be a floor
 for a counterfactual nobody runs. The 3-cell difference is the enclave-displacement change and is
@@ -21,23 +33,24 @@ decomposed below.
 
 **Enclave guard: intact on both.** Nine cells, falls asserted two-sided (RBiH through w156, RS at
 w188). **But 8 of the 9 cells are never the target of a battle in 188 weeks** — see REAL_WAR_MASTER
-#40, raised to **P0** on this evidence. Cascade site: 36 across 8 municipalities on both.
+#40, now P2 and routed to Claude's separate probe scope. Cascade site: 36 across 8 municipalities on both.
 
 **Neither run passes `engine_health_gate` as it stood.** `stranded_brigades` 21/25 against a ceiling
 of 9, and `checkpoint_oct1995` below its floor. Both arrived with the January lane and are
-**ACCEPTED** under the owner's sequential-calibration directive (below), not owed. Thresholds were
-hand-reset accordingly on the same date; n374 now passes cleanly.
+**accepted historical calibration evidence** under the owner's sequential-calibration directive,
+not admissible RE evidence. The historical threshold reset is not permission for RE to refresh a
+gate.
 
 ---
 
-## ★ PRE-COMMITTED DECISION RULE (RE workstream) — written 2026-08-26, DO NOT AMEND AFTER SEEING A NUMBER
+## HISTORICAL DECISION RULE — SUPERSEDED DISCOVERY/PROBE-ERA EVIDENCE
 
-Copied from `docs/plans/2026-08-26-engine-integrity-plan.md` §11, per Phase 0 item 0.4. The point of
-writing it here is that it becomes unamendable in practice: a rule edited after a result is not a
-rule.
+Copied from the now-frozen discovery record §11 and retained for provenance. It is not the current
+RE execution contract. The sole executable rail and current verification matrix are in
+`docs/plans/2026-08-26-engine-integrity-plan.md`.
 
 > **S0 — Baseline.** No RE run starts until a clean `git_dirty:false` four-checkpoint 188w exists on
-> the tree RE branches from. *(Satisfied above.)*
+> the tree RE branches from. *(Not satisfied for lean RE; RE-0 must rerun at the approved parent.)*
 > **S1 — Inertness gate.** Anything claimed inert must be byte-identical except `run_meta.out_dir`.
 > Not identical ⇒ reclassified territory-moving, repriced at 3 runs.
 > **S2 — Positive control.** Every instrument must return ≥1 non-zero on a case known to exist.
@@ -59,7 +72,8 @@ rule.
 > adjudicated on a **pre-committed BEHAVIOURAL target** — a counter, a rate, a per-corps distribution
 > — never on matched OSIDs. **A structural change to operation SELECTION will always exceed 20%; that
 > is a property of the change, not a flaw in the run, and re-running will not fix it.**
-> *First application, same date:* the probe intel-gate (n374→n377) measured **61.1%** at rung 4, so
+> *Historical application only; current disposition awaits the owner's probe decision:* the probe
+> intel-gate (n374→n377) measured **61.1%** at rung 4, so
 > its jan/apr/apr/oct deltas of −1/−7/−13/−4 are **unknown, not a cost**. It was adopted on its
 > behavioural target (`consecutive_probes` 38→1) instead. **Record such numbers as "measured,
 > unattributable at N%" — never as an accepted territorial cost, and never as acceptable.**
@@ -69,7 +83,7 @@ rule.
 > **S6 — CONDITIONAL.** Where S3 was satisfied, the discriminator is the **LOCATION** of losses, not
 > the magnitude. **Where S3 was NOT satisfied, S6 does not apply** and the S4 bands bind on the count.
 
-**⚠ The plan's §11 closes by naming four hard minimums — `674 / 660 / 659 / 644`. THOSE ARE
+**⚠ The frozen discovery record's §11 closes by naming four hard minimums — `674 / 660 / 659 / 644`. THOSE ARE
 SUPERSEDED.** They were reset by hand on 2026-08-26 under the owner's directive below; the live
 values are in `data/calibration/engine_health_thresholds.json`. The *rule* above is unamended; only
 the numbers it referenced moved, and they moved by owner decision rather than by a result.
@@ -95,7 +109,7 @@ whose ledger the October/cascade/stranded regressions belonged to: **nobody's �
 > signature of a calendar offset rather than a scheduling defect. **Do not re-raise it as a defect
 > without first establishing the mapping.**
 
-## CURRENT AUTHORITY — 2026-08-26 — January 1993 on the single 188-week master
+## ACCEPTED JANUARY EVIDENCE — FURTHER CALIBRATION PAUSED ON RE
 
 The only scoring calibration scenario is
 `data/scenarios/apr1992_definitive_188w.json` (`calibration_scenario: true`).
@@ -104,14 +118,14 @@ surfaces and must not be used to quote, tune, or bless a current calibration res
 `tests/historical_checkpoints_contract.test.ts` enforces that exactly one scenario carries
 the scoring declaration.
 
-The active task checkpoint is **week 39 / January 1993**. Its settlement-level authority is
+The last accepted task checkpoint was **week 39 / January 1993**. Its settlement-level authority is
 `data/source/calibration/painted_control_jan1993.json`; the painted controller is treated as
 historical truth. Historical research may bound which combat operations existed and when,
 but may not overrule the painted target during this pass. A week-39 run does not establish
 the April 1994, April 1995, or October 1995 checkpoints; replaying its final save against
 later painted maps produces non-evidence.
 
-Current accepted run:
+Accepted historical run:
 `runs/apr1992_definitive_188w__d3464b9122c3c8e9__w39_n372`, final-state hash
 `e343f978c0b82fff`.
 

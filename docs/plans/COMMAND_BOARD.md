@@ -6,7 +6,9 @@
 
 ## Activation
 
-The owner activated full roadmap execution on 2026-07-31. Local implementation, tests, evidence, commits, approved remote pushes, final merge to `main`, documentation propagation, and repository cleanup are authorized within the roadmap.
+The owner activated full roadmap execution on 2026-07-31. Local implementation, tests, evidence,
+local commits, transient validation builds, documentation propagation, and non-destructive
+workspace maintenance are authorized within the roadmap. Remote push and final merge are not.
 
 Signing, store upload, public release creation, and a public `1.0` tag remain outside that authority and require a separate explicit `Publish 1.0` instruction.
 
@@ -19,32 +21,38 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **JANUARY 1993 CHECKPOINT REACTIVATED BY OWNER — n372 ACCEPTED** | Continue the Srebrenica–Zvornik regional mismatch pass on week 39 of the single 188-week master. Preserve 697/712 national and 59/62 accepted Goražde-focus truth; do not use direct calibration control events or a 40-week scenario. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
+| 6 | R6 | **JANUARY 1993 CHECKPOINT SLICE LANDED; FURTHER CALIBRATION PAUSED ON RE** | Preserve the landed evidence. Do not start reference, init-control, objective, axis, timing, roster, or outcome tuning until RE closes. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
-| 7 | R7 | **ACTIVE -- PHASE 2 AND OPENING EXPERIENCE COMPLETE 2026-08-23** | The provenance/OOB reopening is closed with source-bound and controlled-run evidence. The case-file opening, explicit campaign mode, safe Field Records, and real browser proofs are merged. Next: audio/licensing, English accessibility/readability, then integrated packaged proof. Localization Phase 3 is post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
-| 7.5 | RE | **SCOPED 2026-08-26 — OWNER-INSTRUCTED, PRECEDES FURTHER CALIBRATION, GATES R8** | Phase 0, which costs **zero scenario runs**: build the op-schedule fingerprint, correct the health-gate predicate as reported-not-gated, land a clean four-checkpoint 188w pin, and write the pre-committed decision rule into CALIBRATION_MASTER before run 1. Then **Phase 1 — the probe memory repair (~10 lines, the highest-value change on the board)**, Phase 2 legibility, Phase 3 operation supply, Phase 4 cost loop. | [Engine integrity](2026-08-26-engine-integrity-plan.md) |
+| 7 | R7 | **ACTIVE — AUDIO IMPLEMENTATION LANDED `2d106e5e0`** | Complete human listen/sensitivity acceptance, English accessibility/readability, offline browser and packaged-runtime proof, and closeout reconciliation. Pause any packet that collides with RE-0D/RE-1 desktop/UI files. Localization Phase 3 remains post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
+| 7.5 | RE | **PREPARATION-READY — BLOCKED ON OWNER DISPOSITION OF CLAUDE'S PROBE LANE; THEN RE-0** | Do not implement probe work under RE. After the owner resolves probe scope and overlapping edits land, capture integrated HEAD and execute RE-0 (fresh exact-parent Node-22 S0, observation audit, desktop CI truthfulness), then RE-1–RE-6 serially under decision gates. RE-5 mechanics are evidence-only/default defer. | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **WAITING ON RC, R1-R7, AND RE GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
 ## Current Critical Path
 
-`R6 January checkpoint (LANDED 2026-08-26) -> RE engine integrity + R7 content/history/audio/accessibility -> R8 -> R9`
+`Probe owner disposition/landing -> RE-0…RE-6 + remaining R7 gates -> R8 -> R9`
 
-**RE INSERTED 2026-08-26 BY OWNER INSTRUCTION** — *"engine health is sacrosanct; deal with these before more calibration work."* Codex landed the January checkpoint in `92f924f9d`; **further calibration on combat resolution, the manpower economy, or operation injection now waits on RE.** RE may run in parallel with R7 (disjoint ownership: engine/sim against content/audio/UI) and gates R8.
+**RE INSERTED 2026-08-26 BY OWNER INSTRUCTION** — *"engine health is sacrosanct; deal with these before more calibration work."* Further calibration waits on RE. R7 may overlap only after packet-level file inspection. Pause R7 during RE-0D/RE-1 or any packaged-runtime/UI collision; engine-only RE-2/3/4 may overlap only when ownership is proven disjoint.
 
-The headline measurement: **365 of 585 battles at 188 weeks (62%) are probe operations that cannot capture ground by construction** — 201 wins, zero territory, 131,577 attacker casualties, more than every real operation combined. The panel traced it to two small defects in probe memory. Scoring or diary-testing this engine ratifies the defect as the floor.
+Probe findings and acceptance belong exclusively to the separate non-executable probe scope pending owner assent; they are not RE implementation authority. RE owns confirmed non-probe authority, accounting, ordering, locality, CI/runtime-truth, and evidence-gated decision packets.
 
-**§6 status:** the enclave guard was found vacuous (it checked one cell of nine and could not fail) and has been repaired in `0098a48fe`. The panel split 2-2 with one BLOCK; the owner ruled `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` ON, so Srebrenica and Žepa now cost their defenders what they historically cost. **That change is not yet validated at 188 weeks.**
+**§6 status:** the enclave guard repair and owner ruling remain historical evidence, but no current
+full-run artifact is admissible as lean RE S0. RE-0 must establish the fresh exact-parent Node-22
+baseline before any RE behavior claim.
 
-**MEASUREMENT BLOCKER CLOSED.** Run provenance now stamps commit, consumed-input evidence, and flag state; the pair selector hard-fails on incomparable artifacts. A fresh same-commit collapse OFF/ON pair passed the Section 6 discriminator with positive controls. The old mixed-tree n222/n223 pair remains permanently inadmissible and must not be reused.
+**MEASUREMENT SUBSTRATE EXISTS; RE-0 EVIDENCE IS STILL OWED.** Run provenance can stamp commit,
+consumed-input evidence, and flag state, and the pair selector rejects incomparable artifacts.
+RE-0 must nevertheless produce its own clean exact-parent Node-22 pair. Historical mixed-tree or
+Node-24 runs cannot be reused.
 
-**CURRENT EXECUTION:** owner-reactivated January 1993 calibration, currently on the
-Srebrenica–Zvornik follow-on after accepted Goražde n372. R7 audio/licensing resumes afterward,
-then English accessibility/readability and integrated packaged proof.
+**CURRENT EXECUTION:** Claude's probe scope is complete and awaits owner assent to step 0; RE has
+not started and may not capture a base until that disposition is approved and overlapping edits
+land. R7 audio implementation has landed; remaining R7 work is human listen/sensitivity review,
+English accessibility/readability, and integrated packaged proof, subject to RE packet collisions.
 
 **Canon landed 2026-08-17:** `SENSITIVE_HISTORY_DESIGN_GATE.md` §10, "Provenance and the Integrity of the Historical Record", ratified by unanimous Pyrrhic panel. `FORAWWV.md` §XIII temporal scope is drafted but **HELD** behind the provenance channel-separation and determinism-scan packets, and is not canon.
 
-RC's narrow pre-1.0 scope is complete. Frontage-days and same-turn selection were retired; the retained v3 two-turn selector preserves the registered Sipovo/Drvar distinction. Reversible D-shape then fixed the event-only persistence clock and produced one bounded live HRHB write at Bucovaca while preserving all anchors, health gates, deterministic artifacts, and Section 6 exclusions. Neighbour-cascade D-topology is reserved post-1.0 and must not be replaced by struck breadth tuning. R7 is now the live lane.
+RC's narrow pre-1.0 scope is complete. Frontage-days and same-turn selection were retired; the retained v3 two-turn selector preserves the registered Sipovo/Drvar distinction. Reversible D-shape then fixed the event-only persistence clock and produced one bounded live HRHB write at Bucovaca while preserving all anchors, health gates, deterministic artifacts, and Section 6 exclusions. Neighbour-cascade D-topology is reserved post-1.0 and must not be replaced by struck breadth tuning. RE and the remaining R7 gates now jointly gate R8.
 
 ## Fixed Decisions
 
@@ -88,4 +96,4 @@ Do not add a competing active queue. Route new findings through [Master Roadmap 
 
 ## Completion
 
-This board becomes all green only when R1-R9 and RC satisfy the [master definition of program completion](MASTER_ROADMAP.md#12-definition-of-program-completion). Prepared for publication and published are separate states.
+This board becomes all green only when R1-R9, RC, and RE satisfy the [master definition of program completion](MASTER_ROADMAP.md#12-definition-of-program-completion). Prepared for publication and published are separate states.

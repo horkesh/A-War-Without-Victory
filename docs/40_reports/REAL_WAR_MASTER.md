@@ -1783,7 +1783,12 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 
 ---
 
-### #40 — Operational tempo too low: 3.5 battles/week across 198 brigades (P3, n747)
+### #40 — Operational tempo too low: 3.5 battles/week across 198 brigades (historical P3, now P2 evidence; n747)
+
+**Current routing (2026-08-26):** this is P2 evidence, not an RE implementation packet. Probe-cap
+and probe-memory work remains in Claude's separate non-executable probe scope pending owner assent.
+RE explicitly excludes probe implementation; only the observation-coverage finding may inform
+RE-0C's audit of existing diagnostics. The low tempo remains accepted modelling.
 
 **What we found:** 141 total battles over 40 weeks = 3.5/week. With 198 active brigades across three factions, that's one engagement per 56 brigade-weeks. The ops-only attack doctrine means only operation participants fight; the other ~180 brigades each turn sit in their sectors defending.
 
@@ -1793,7 +1798,7 @@ Dead zone: 18 weeks (3 ops) → 16 weeks (2 ops). Corps now recovers and achieve
 
 **Note:** This is a known design trade-off. Ops-only prevents gamey penny-packet probes. But the cure is arguably worse than the disease — 3.5 battles/week is too quiet. This will likely be addressed by the follow-on operation planning system (deferred Fix B) or by adding limited independent tactical actions (counterattacks already exist as a brigade-level exception).
 
-**Priority:** ~~P3 — known design trade-off, not a bug. Monitor.~~ → raised **P0** 2026-08-26 → **RE-SCOPED the same day by OWNER RULING. See the ruling box before reading anything below.**
+**Priority:** ~~P3 — known design trade-off, not a bug. Monitor.~~ → raised **P0** 2026-08-26 → **ROUTED TO CLAUDE PROBE SCOPE the same day by OWNER RULING. See the ruling box before reading anything below.**
 
 > ### ★ OWNER RULING, 2026-08-26 — THE LOW TEMPO IS CORRECT MODELLING. DO NOT "FIX" IT.
 >
@@ -1861,7 +1866,7 @@ target**. A cell can be pressured through its adjacency ring without ever being 
 | ~~**P2**~~ | ~~#37 Elite loan: no cohesion recall~~ | ~~1st Guards at cohesion 9.0 after 40 turns~~ | **FIXED (n748)** |
 | ~~**P3**~~ | ~~#38 Elite tracker not updated~~ | ~~battles_fought/casualties_taken always 0~~ | **FIXED (n748)** |
 | ~~**P2**~~ | ~~#39 ARBiH suicide attacks (0.1 PR)~~ | ~~Repeat attacks at same fortified position~~ | **FIXED (n749)** |
-| **P2** | #40 ~~Operational tempo 3.5/week~~ → **probe-cap bypass + planning-death blindness** | The TEMPO is correct modelling (owner ruling 2026-08-26). What remains: `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT=2` is bypassed at the second probe-creation site (1st Corps probed **38** consecutively), and no counter can see an operation that dies in planning | **RE-SCOPED 2026-08-26** — see the ruling box in the entry |
+| **P2** | #40 ~~Operational tempo 3.5/week~~ → **probe-cap bypass + planning-death blindness** | The TEMPO is correct modelling (owner ruling 2026-08-26). What remains: `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT=2` is bypassed at the second probe-creation site (1st Corps probed **38** consecutively), and no counter can see an operation that dies in planning | **CLAUDE PROBE SCOPE — NON-EXECUTABLE PENDING OWNER ASSENT; RE-0C MAY USE OBSERVATION-COVERAGE EVIDENCE ONLY.** |
 | **P2** | #41 ARBiH attacks HVO territory while allied (Mostar w38-39) | RBiH brigades attack op:mostar:kruzanj_2 (HRHB) at PR 0.24-0.25 before HVO-RBiH war starts (w52+). Alliance guard may not cover all attack paths. | **OPEN — investigate** |
 | **P1** | #42 Bot strategic targeting — no demographic/geometric filter | Bot targets any adjacent enemy OSID without assessing strategic value. VRS takes Žepče (7.3% Serb, creates pocket). Salient aversion (Phase C) partially addresses geometry but demographic filter still needed. | **PARTIALLY ADDRESSED (n773 salient aversion)** |
 | **P2** | #43 UI shows brigade raw power, not sector defensive power | FormationDetail/sector panel shows `brigadePower()` (~2,602 for 3000 pers motorized) instead of `sector.defensive_power` (72.5). Player sees a "strong" sector when it's actually 115:1 overmatched. Misleading. | **OPEN — UI fix** |

@@ -4479,6 +4479,21 @@ and every quoted score must include checkpoint identity.
 Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
 roadmap, and debt`.
 
+## 2026-08-26 - Discovery evidence and execution authority must remain separate
+
+An active plan is a finite executable contract, not a chronological investigation diary. Preserve
+the diary as frozen evidence, keep one canonical active plan path, and synchronize every live
+roadmap/index/governance surface in the same change. Bind execution only after parallel owner lanes
+resolve, at the approved integrated HEAD.
+
+Raw artifact metadata outranks catalog prose. A run described as clean cannot satisfy a gate when
+its own metadata says a different commit, dirty tree, or unsupported runtime. Engine-integrity work
+defaults to deletion and owner convergence under an explicit complexity budget; an observed outcome
+does not authorize a new mechanic.
+
+Applied in `[2026-08-26] docs(roadmap): replace discovery-diary RE scope with lean full-team
+execution rail`.
+
 ## 2026-08-26 - A painted target defines what; combat and general rules must define how
 
 The reference map is checkpoint truth, but it is not authorization to manufacture territory.

@@ -5,8 +5,9 @@
 **Status:** REFERRAL. Nothing implemented. No scenario run. The panel rules; per CLAUDE.md the
 enclave guard is the panel's to decide and it does not escalate this on its own.
 **Panel:** Historian · scenario-tester/calibration · Engine-systems · Red-team. Implementer excluded.
-**Evidence:** `tools/hooks/floor_vs_dissolution.ts` (this referral's diagnostic),
-`docs/plans/2026-08-26-engine-integrity-plan.md` §3.8, §3.11.
+**Evidence:** `tools/hooks/floor_vs_dissolution.ts` (this referral's diagnostic) and the frozen
+[RE discovery record](20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md) §3.8/§3.11. The lean RE plan
+does not pre-authorize the referred mechanic.
 
 ---
 

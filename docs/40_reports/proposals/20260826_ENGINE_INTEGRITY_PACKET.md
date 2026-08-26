@@ -2,6 +2,9 @@
 
 **Date:** 2026-08-26
 **Status:** EVIDENCE BRIEF + PROPOSAL SKELETON. Nothing implemented. Nothing run.
+**Authority boundary:** FROZEN CLAIM SET. It is not an executable plan. The sole RE execution
+authority is `docs/plans/2026-08-26-engine-integrity-plan.md`; the full-team dispositions and
+frozen discovery record own later corrections.
 **Owner instruction (2026-08-26):** *"Engine health is sacrosanct — these issues should be dealt
 with immediately before more calibration work."* This packet exists to turn that instruction into a
 roadmap workstream.

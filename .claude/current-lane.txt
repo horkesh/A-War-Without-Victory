@@ -1,1 +1,1 @@
-PROBE CHANNEL SCOPE COMPLETE (docs/plans/2026-08-26-probe-channel-scope.md) — all four seats reported, §7 filled, two free premise checks DONE and both hold. NOT building: step 0 reverts ef4355ee5 which the owner asked for, so it needs his assent. Cost: 2 x 188w.
+PROBE CHANNEL SCOPE COMPLETE — NON-EXECUTABLE pending owner assent to step 0. Claude retains probe ownership. RE NOT STARTED and may not capture a base until probe disposition is approved and overlapping edits land. Two premise checks hold. Estimated probe validation cost: 2 × 188w.
