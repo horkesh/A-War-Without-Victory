@@ -57,6 +57,47 @@ export function isEnclaveBrigade(f: { tags?: string[] }): boolean {
     return f.tags?.includes(ENCLAVE_TAG) === true;
 }
 
+/**
+ * SINGLE SOURCE OF TRUTH for "may this brigade join an operation against these objectives?"
+ *
+ * WHY THIS EXISTS (2026-08-26). The enclave rule — a besieged brigade may widen its own
+ * perimeter but may not march across the map — was implemented ONLY inside
+ * `sector_offensive.ts`, and the engine has FIVE places that build a `sector_attack`. The
+ * commander pipeline (`corps_operation_helpers.buildCommanderOperation`, axis id `cmd_*`)
+ * had no enclave awareness of any kind.
+ *
+ * Measured consequence: after Srebrenica fell, `arbih_284th_east_bosnian_light` — a 28th
+ * Division survivor displaced to the Tuzla basin — joined 2nd Corps operations that took
+ * Lopare, Priboj, Jablanica and Šekovići. All four are RS in EVERY painted checkpoint the
+ * project holds; both towns were VRS brigade HQs in 1995. A §6 panel ruled the result
+ * NON-COMPLIANT: the destruction of the enclave was converting into offensive capacity on
+ * ground that never changed hands. 14 of the run's 60 axes take the unfiltered path.
+ *
+ * ⚠ THE TRAP THIS FUNCTION EXISTS TO CLOSE: tightening the filter at its old site would
+ * have looked exactly like a fix and changed NOTHING, because the offending operations were
+ * never created there. A rule that lives in one caller is not a rule — it is a coincidence
+ * of which path ran. Every creation site must ask this function.
+ *
+ * Not a railroad: it names no OSID, no municipality, no brigade and no faction, and it holds
+ * symmetrically for any enclave, any destination and any war.
+ */
+export function isBrigadeEligibleForOperationObjectives(
+    brigade: { tags?: string[]; location_osid?: string } | undefined,
+    objectives: readonly string[],
+): boolean {
+    if (!brigade) return false;
+    if (!isEnclaveBrigade(brigade)) return true; // non-enclave brigades: always eligible
+    const loc = brigade.location_osid;
+    if (!loc) return true;
+    // No declared objectives => this predicate CANNOT assess the question it was asked, and a
+    // silent `false` here would exclude every enclave brigade from e.g. corridor-breach ops,
+    // which pass `[]`. An operation with no objectives captures nothing, so there is no §6
+    // exposure in answering true. Declining to answer is honest; guessing false is not.
+    if (objectives.length === 0) return true;
+    // Enclave brigade: eligible only if at least one objective lies in its own enclave.
+    return objectives.some((obj) => isOsidInSameEnclave(loc, obj));
+}
+
 export function getFormationEnclaveForMovement(
     formation: SectorTopologyWorkingFormation,
     originOsid: string,

@@ -71,7 +71,7 @@ import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from '.
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl, isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
-import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
+import { isBrigadeEligibleForOperationObjectives, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition } from './operation_preparation.js';
 // ADR-0005 v2.2b #45: TG dissolution at execution→recovery. Flag-gated.
 import {
@@ -2331,14 +2331,11 @@ export function evaluateCorpsOffensiveLaunch(
     // constraint — besieged units can raid adjacent VRS positions or expand their perimeter,
     // but cannot march through a supply corridor to attack towns 20km away.
     // This prevents Goražde brigades marching through northern Foča to attack Foča objectives.
-    corpsBrigadeIds = corpsBrigadeIds.filter(bid => {
-        const b = formations[bid];
-        if (!b || !isEnclaveBrigade(b)) return true; // Non-enclave brigades: always eligible
-        const loc = b.location_osid;
-        if (!loc) return true;
-        // Enclave brigade: include only if at least one objective is in the same enclave.
-        return objectives.some(obj => isOsidInSameEnclave(loc, obj));
-    });
+    // Predicate extracted 2026-08-26 to `isBrigadeEligibleForOperationObjectives` so that EVERY
+    // operation-creation site asks the same question. It used to live only here, and the commander
+    // pipeline — a different creation site — never asked it. See the function's header.
+    corpsBrigadeIds = corpsBrigadeIds.filter(bid =>
+        isBrigadeEligibleForOperationObjectives(formations[bid], objectives));
     if (corpsBrigadeIds.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
 
     const planningDuration = computePlanningDuration(objectives.length);

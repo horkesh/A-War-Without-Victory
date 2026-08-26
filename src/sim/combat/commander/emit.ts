@@ -42,6 +42,7 @@ import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../../sta
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
+import { isBrigadeEligibleForOperationObjectives } from '../enclave_resilience.js';
 import { pickOperationName } from '../operation_names.js';
 import { buildTerrainCache, predictCombatOutcome, type CombatPrediction } from '../combat_predictor.js';
 import { buildOfficerCombatLookup } from '../combat_math.js';
@@ -961,6 +962,30 @@ function buildOperations(
         // would immediately stall. The plan will be abandoned on the next assess cycle.
         if (objectives.length === 0) {
             return ops;
+        }
+
+        // ENCLAVE ELIGIBILITY — added 2026-08-26. This creation site had NO enclave awareness of
+        // any kind, so a besieged brigade could be committed to objectives on the far side of the
+        // map. Measured: after Srebrenica fell, a displaced 28th Division survivor joined 2nd Corps
+        // operations that took Lopare, Priboj, Jablanica and Šekovići — all RS in EVERY painted
+        // checkpoint, and both towns were VRS brigade HQs in 1995. A §6 panel ruled the result
+        // NON-COMPLIANT. The rule already existed in `sector_offensive.ts`; it was simply never
+        // asked here, and 14 of the run's 60 axes take this path.
+        //
+        // It has to sit HERE, after `objectives` is derived — the eligibility question is
+        // "eligible FOR WHAT", so it cannot be answered at participant-selection time above, where
+        // objectives do not exist yet. A first attempt placed it beside the participant list and
+        // crashed the run on the temporal dead zone. Because the `effectiveMinForOp` check has
+        // already run against the UNFILTERED list, the minimum is re-checked below: dropping under
+        // strength must abort the operation, not launch it understrength.
+        {
+            const eligibilityById = new Map(briefing.brigades.map((b) => [b.id, b]));
+            const eligible = participatingBrigades.filter((id) =>
+                isBrigadeEligibleForOperationObjectives(eligibilityById.get(id), objectives));
+            if (eligible.length < effectiveMinForOp) {
+                return ops;
+            }
+            participatingBrigades = eligible;
         }
 
         const commandState = briefing.state_ref?.military.corps_command?.[briefing.corps_id];
