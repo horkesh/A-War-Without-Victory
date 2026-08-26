@@ -353,3 +353,42 @@ is not what it was bought for.
 **The runaway returns in full the moment the gate is removed** — 38, and probes/sector_attacks back
 to exactly the pre-gate 215/44. That is step 0 doing its job: the symptom is visible again, so the
 cause fix can be seen to work or not. **Reference for steps 1-3 is n378** (= n376, clean commit).
+
+---
+
+## 10. STEPS 1-3 BUILT — 2026-08-26. Bundled validation run in flight.
+
+| step | commit | what landed |
+|---|---|---|
+| **1** | `(steps 1+2)` | **Stable sector identity.** `own_stable_key`/`enemy_stable_key` on `SectorIntelRecord`, derived from the lexicographically smallest edge id under `strictCompare` (content, never iteration order). Carry-forward matches on those; positional lookup kept as a fallback so pre-today saves behave unchanged. **Plus:** `getStalestSectorIntelConfidence` now excludes `front_edge_count === 0` ghosts (27-31% of records), falling back to including them only when every record is edgeless. |
+| **2** | `(steps 1+2)` | **Fixed-home garrisons excluded from the probe pool**, and the degenerate loop named in the code: fitness is `personnel × cohesion × fatigue`, so a brigade that never fights is permanently the fittest. Scoped to the probe pool only — N3 pins that the brigade stays active at its OSID. |
+| **3** | `(step 3)` | **`occupies_on_victory` replaces `!isProbeOp`.** Read off `activeOp` (never the phase-gated `executionOp`), default TRUE. The second special case — `sector_offensive`'s null-controlled auto-claim skip — now reads the same declaration, so the rule is stated once. |
+
+**Verification:** `tsc` clean throughout; 92 intel/probe suites green after 1+2; 11/11 in
+`probe_territory_flip` after 3, including two new assertions.
+
+### ★ A BLOCKER I RAISED WAS WRONG, and the seat caught it
+
+I argued the predicate had to be answerable **per battle** because 41 of 164 combat captures (25%)
+appeared to have **no operation**. That was measuring `activeOperationId` — which
+`attack_resolution_osid.ts:1278` writes **only when the op is in `execution` phase**. `activeOp`
+itself is not phase-gated, and the pre-existing fiat at `:1396` already read the ungated handle and
+worked. **The engine has those operations; the artifact hides them.** Had I designed around my own
+measurement I would have built something more complex for no reason.
+
+⇒ **Recorded as a lesson class: an artifact field can be a phase-gated PROJECTION of engine state,
+and reasoning about engine behaviour from it is reasoning about the projection.**
+
+### Two new tests, and what each is for
+
+- **`defaults to holding — a probe built WITHOUT the declaration FLIPS, by design.`** This is the
+  cost of default-true, made visible instead of latent. Verified at build time that no production
+  path creates a probe outside `buildProbeOperation` (the only other `type: 'probe'` sites are an
+  army-HQ **directive object that nothing converts into an operation** — read only as a boolean —
+  and a disconnected UI planner). **If a new creation site appears, that audit must be redone**, and
+  the test comment says so.
+- **`the declaration, not the type, is what withholds the ground.`** A `sector_attack` that declares
+  `occupies_on_victory: false` must behave exactly like a probe. **This is what makes the field a
+  real property rather than `op.type` renamed** — it can vary WITHIN a type. Nothing sets it in
+  production today, and that limitation is stated in the type's own header rather than left for a
+  reviewer to discover.
