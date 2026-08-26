@@ -596,3 +596,56 @@ The counterexample was in my own data: `rs_visegrad_brigade` ranks **80/81** —
 - **Do instead**: In any auto-gating script, parse `TESTS_EXIT=` (or equivalent) out of the log.
   A direct instance of the derived-signal pattern: the harness status is a derived signal about
   a pipeline, not a primary signal about the tool.
+
+### [Process] ★ A DIFF IS NOT A DIRECTIVE — check which side is AUTHORITATIVE before ingesting (2026-08-26) — NEW
+- **Context**: A published painter artifact was republished, and the harness reported the local
+  copy stale. Diffing its embedded reference against the repo produced two differences:
+  `breza:podgora` (repo RBiH / artifact RS) and `kiseljak:brnjaci_2` (repo HRHB / artifact RBiH).
+  The obvious next move — "the owner painted corrections, apply them" — would have **reverted two
+  of the owner's own decisions**. Those exact two cells were corrected by owner instruction
+  earlier the same session (*"Brnjaci should be painted as HRHB… Podgora should be painted as
+  RBiH"*), landed in `434036b35`, and are consistent across all four checkpoints. The artifact
+  was STALE, not new: its `EDITS` payload was empty and it predated the corrections.
+- **Wrong approach**: Treating "the source changed" as "the source is newer", and a difference as
+  an instruction. A republish event proves a version moved; it does not say in which direction
+  truth lies.
+- **Right approach**: For every difference, establish which side is authoritative BEFORE acting —
+  check the payload that carries intent (here `EDITS`, which was empty), the git history of the
+  cells, and whether the change matches a recorded instruction. Two of three said "repo is ahead".
+- **Do instead**: When ingesting any external artifact, ask "what would make me apply this
+  backwards?" first. For painter artifacts specifically: an empty `EDITS` block means nothing was
+  painted, regardless of what the diff shows.
+
+### [Process] A COMMIT MESSAGE CANNOT BE EDITED — a refuted rationale needs a correction where readers look (2026-08-26) — NEW
+- **Context**: `414ec3f61`'s message states, permanently, that "the authored data cannot separate
+  the cases" and that the constraint "belongs in authored data". The §6 panel refuted both the
+  next day: the data is DERIVED by a faction-symmetric formula, and "data not code" is a
+  distinction without a difference for a fact not present in game state. The commit stands with a
+  wrong rationale in it forever.
+- **Wrong approach**: Correcting only the documents, and assuming the commit history is
+  self-correcting because a later commit exists. Nobody reading `git log` for that change sees the
+  refutation.
+- **Right approach**: When a claim in a COMMITTED MESSAGE is refuted, write a ledger entry that
+  names the commit SHA and says what in it is wrong. The ledger is the searchable surface; the
+  message is immutable.
+- **Do instead**: Prefer putting contestable RATIONALE in the ledger and the docs, and keep commit
+  messages to what changed and what was measured. A measured number ages well; an explanation of
+  why the data behaves that way may not.
+
+### [Process] ★ POSITIVE PATTERN — "this is a claim to test, not a briefing to ratify" refuted the implementer TWICE and one seat refuted ITSELF (2026-08-26) — NEW
+- **Context**: A §6 panel was convened on a mechanism its implementer had built and wanted
+  enabled. Each seat was polled independently and told explicitly to correct for that bias. The
+  Historian refuted the implementer's central historical premise with a citation (BB1 p.187: the
+  ARBiH ran successful offensives in the very region and year the implementer called it passive).
+  The Red-team then refuted the IMPLEMENTER'S data claim (`organizational_penetration` is derived
+  by a faction-symmetric formula, not authored) **and falsified the Historian's replacement
+  proposal by testing it — 17 of 17 allowed, zero discriminating power** — and, having proposed
+  that test itself, reported its own hypothesis dead.
+- **Why it worked**: the packet stated the implementer's bias in its first line, and each seat was
+  asked to attack rather than assess. Continuation of the 2026-08-24 finding that *"the instrument
+  that worked was independent polling; the instrument that failed was my own confidence at the
+  moment a story became coherent."*
+- **Do instead**: Write the bias into the packet header explicitly. Poll seats on the QUESTION,
+  never on the proposal. And when a seat proposes a fix, TEST it in the same session rather than
+  recording it as the answer — the Historian's apparatus gate read as obviously correct and was
+  worth nothing.

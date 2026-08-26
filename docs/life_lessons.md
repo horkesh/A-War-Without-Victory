@@ -1,8 +1,21 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 312 lessons across 9 topic files (count verified 2026-08-25).
+> Last restructured: 2026-04-11. 315 lessons across 9 topic files (count verified 2026-08-26).
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-08-26) — §6 panel + artifact-ingest batch (a near-miss that would have reverted the owner's own decisions)
+
+> **Session shape: the panel worked and the reflexes did not.** Independent polling refuted the implementer's committed claims twice and one seat falsified its own proposal — while separately, a routine artifact diff nearly reverted two owner corrections, and a zero-from-an-empty-set slipped through again in the same hour a lesson about it was written.
+
+### [Process] ★ A DIFF IS NOT A DIRECTIVE — check which side is AUTHORITATIVE before ingesting — see `docs/life_lessons/process.md`
+- A republished painter artifact differed from the repo on two cells. The obvious move — "the owner painted corrections, apply them" — would have **reverted two of the owner's own decisions** made earlier the same session. The artifact was STALE, not new: `EDITS` was empty and it predated the fix in `434036b35`. **A republish proves a version moved; it does not say which side is true.** For painter artifacts specifically, an empty `EDITS` block means nothing was painted regardless of what the diff shows.
+
+### [Process] ★ POSITIVE PATTERN — "a claim to test, not a briefing to ratify" refuted the implementer TWICE, and one seat refuted ITSELF — see `docs/life_lessons/process.md`
+- The §6 packet named the implementer's bias in its first line and asked each seat to attack rather than assess. The Historian refuted the central historical premise with a citation; the Red-team refuted the implementer's data claim AND falsified the Historian's replacement by testing it (17/17 allowed, zero discriminating power), reporting its own hypothesis dead. **When a seat proposes a fix, TEST it in the same session** — the apparatus gate read as obviously correct and was worth nothing.
+
+### [Process] A COMMIT MESSAGE CANNOT BE EDITED — a refuted rationale needs a correction where readers look — see `docs/life_lessons/process.md`
+- `414ec3f61` permanently states a rationale the panel refuted the next day. Docs were corrected; the message cannot be. **Write a ledger entry naming the SHA and what in it is wrong**, and prefer keeping contestable rationale OUT of commit messages — a measured number ages well, an explanation of why the data behaves that way may not.
 
 ## New Lessons (2026-08-25) — jan1993 Goražde lane (a mechanism built on an unverified field, and a stale memory that steered a whole session)
 
@@ -445,6 +458,15 @@
 ---
 
 ## Recently Violated (always read these)
+
+### [Process] RE-VIOLATED 2026-08-26 — zero-from-an-empty-set, hours after writing the lesson about it — SELF-CAUGHT
+- Diffing a republished artifact's reference against the repo, the checker printed **"DIFFERENCES: 0"** while having parsed **zero OSIDs** — the regex had failed silently against the artifact's escaping. A verdict computed over an empty set, which is the 2026-08-14 entry ("a loop over an empty set is a green test that asserted nothing — assert how much was COMPARED") and also the derived-signal batch written the previous day.
+- **Caught within one step, and the reason is the mitigation working:** the script printed the parse count next to the verdict, so `parsed: 0 … DIFFERENCES: 0` was visibly absurd. The rewrite now **refuses to report a diff when it parses nothing** and prints how many cells were actually compared (712), not only the result.
+- **Standing rule reinforced: any script that reports a count must also report its denominator.** The pattern is not slowing down; the instrumentation is what catches it.
+
+### [Calibration] CLOSED 2026-08-26 — the provenance check flagged on 2026-08-25 was performed
+- The banked 677/664/664/650 line had never been measured on a clean tree; n290 and n293 both carried `git_dirty: true`. A clean-tree run at `180695239ba8` (sim code byte-identical to `414ec3f61`) reproduced it exactly with `git_dirty: false` and **the same hash `4714d66780640887`** the dirty runs produced — proving the uncommitted state contributed nothing. `CALIBRATION_MASTER.md` updated from OWED to VERIFIED. Both this and the ledger/calibration-record split flagged the same day are now closed.
+
 
 ### [Process] RE-VIOLATED 2026-08-25 — the derived-signal pattern, and one costume was a VERBATIM repeat of the 2026-08-24 entry
 - The 2026-08-24 batch records "**a mid-operation `git status` read as a failure** — caught between a background job's `add` and its `commit`". **I did it again the next day**, on the same repo, with the same background-commit design: read `git status` showing staged-not-committed, announced "HEAD hasn't moved, the commit didn't happen", and ran a manual `git commit` — which reported "nothing to commit, working tree clean" because the job had committed in the gap. No damage this time (last time a valid run was killed), but the misread was identical and the lesson was less than 24 hours old.
