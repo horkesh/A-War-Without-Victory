@@ -15,17 +15,18 @@
     "zero_eligible_ops_max": 3,
     "dead_ops_max": 6,
     "ghost_destroyed_max": 4,
-    "stranded_brigades_max": 9,
+    "stranded_brigades_max": 25,
     "consistency_failures_max": 3,
     "matched_osids_min": 622,
     "checkpoint_matched_min": {
-      "jan1993": 674,
-      "apr1994": 660,
-      "apr1995": 659,
-      "oct1995": 644
+      "jan1993": 694,
+      "apr1994": 648,
+      "apr1995": 642,
+      "oct1995": 622
     },
     "kw_ratio_lo": 3.211,
     "kw_ratio_hi": 4.345
   },
+  "_note_sequential_calibration_2026_08_26": "checkpoint_matched_min RESET BY HAND, not via --update, under the owner's 2026-08-26 sequential-calibration directive: January is calibrated first, then apr1994, then apr1995, then oct1995, so a later-checkpoint regression is not automatically a defect -- it may be a lane that has not had its turn. Floors now express that policy: the ACTIVE lane (jan1993) is pinned at measured - 3, the S4 jitter boundary; UNCALIBRATED lanes are pinned at measured - 25, the S4 escalate-to-owner boundary. Re-tighten a lane to -3 when it becomes active. Values measured on n374 (697/673/667/640), the flag-ON default. The oct1995 regression (-7), the western-Bosnia cascade regression (-6: bosansko_grahovo 4/4->2/4, mrkonjic_grad 5/6->2/6, sanski_most 10/10->9/10) and the stranded_brigades jump (5->21) all arrived with the January lane and are ACCEPTED by the same owner directive -- not owed, not deferred, not charged to any lane. stranded_brigades_max 9 -> 25 by the file's own headroom formula, ceilH(21) = max(ceil(21*1.15), 24) = 25. Done by hand because a blanket --update on n374 would ALSO have raised matched_osids_min 622 -> 640 and left ghost_destroyed_max free to loosen; neither was approved. NOTE: matched_osids_min and checkpoint_matched_min.oct1995 gate the SAME quantity -- the gate reads historical_fit.osid_pair_match.matched_osids, which IS the terminal oct1995 figure (proof: n373 reported 'matched_osids 643 >= 622' and 'checkpoint_oct1995 643 >= 644' on the same 643). They are set equal here so the binding floor is explicit rather than accidental.",
   "_note_checkpoints_2026_08_24": "checkpoint_matched_min ADDED BY HAND, not via --update. The gate previously read only historical_fit.osid_pair_match.matched_osids -- the TERMINAL (oct1995) figure -- so a change could regress jan1993 by 20 OSIDs and pass green. Values are n287 measured (677/663/662/647) minus a 3-OSID turn-boundary jitter tolerance; jitter is endemic (two captures at t9/t10 moved ~two dozen unrelated captures by one turn, and sanski_most:kljevci lands on turn 188 in one run and falls off the end in the next), and an exact pin would just teach everyone to pass --force. Done by hand because a blanket --update on n287 would ALSO have loosened ghost_destroyed_max 4 -> 5 and raised matched_osids_min 622 -> 647; the first is a silent weakening and the second is an owner posture decision. Both were declined."
 }
