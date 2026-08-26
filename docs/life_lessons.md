@@ -4,6 +4,20 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-08-26e) — probe fixes; a tag's meaning inferred from ONE instance
+
+### [Process] ★★ RE-VIOLATED, AND THE LESSON WAS ALREADY WRITTEN: A FIELD'S SEMANTICS INFERRED FROM ONE INSTANCE — see `docs/life_lessons/process.md`
+- Saw `placement:fixed_home_osid` on `arbih_115th_mountain` — a Stari Grad garrison that never moves — and built a probe-pool exclusion on it, describing it in the scope as "fixed-home garrisons." **MEASURED AFTER THE RUN: 180 of 184 brigades carry that tag.** It is the near-universal default placement, not a garrison marker. The predicate did EXACTLY what it said and swept up **71 probe-launching brigades instead of 1**, including `F_RBiH_0005`, a recruitment-generated formation that cannot have a fixed home at all. ⇒ **This is the 2026-08-25 `to_control === 'controlled'` lesson repeated verbatim** — that gate was built believing the field meant "this faction holds the municipality" when it reads `'controlled'` for every municipality. **The written rule — *print the field's distribution before gating on it; a one-bucket histogram means the clause is decoration* — was in the lessons file I read at session start, and I did it anyway.** TELL: you learned a field's meaning from the one row that made you notice it. **One `Object.values(...).filter(has tag).length` would have cost ten seconds and killed the design before it was written.**
+
+### [Process] ★ A CONTROL FROM A BASELINE IS INVALID IF THE BASELINE IS THE THING UNDER REPAIR — see `docs/life_lessons/calibration.md`
+- Two negative controls (`sector_attack` 44±3, probes ≥150) were set from a baseline produced by the very defect being fixed. Both would have **forbidden the repair from working** — the probe channel existed to compensate for the intel forgetting, so its volume was a property of the bug. The owner's ruling (*"It was blindness"*) is what exposed it. ⇒ Before pinning a control, ask whether the number it pins is a property of the war or an output of the defect.
+
+### [Calibration] ★ A TARGET SHOULD BE A COUNT OF A NAMED THING — five of seven failed this session — see `docs/life_lessons/calibration.md`
+- Of seven acceptance targets written for the probe lane, **five needed correcting after contact**: one was coupled to the variable under test (`turns_in_contact` swung 88→21 on unchanged code as probe volume moved), two were ratios whose denominator the change itself moves, one was a fraction dressed as a count (`≤8/28`), one carried a stale threshold onto a different corps than it was written for. **The two that held were `T2` (a named brigade, count zero) and `T6` (three absolute counts of named populations).** ⇒ **If a target cannot be written as a count of a named thing, the mechanism is not understood well enough to be setting a target for it yet.** Where a rate is genuinely wanted, state the POSITIVE fraction and gate the denominator, so "smaller is better with a moving denominator" cannot arise.
+
+### [Process] SPLITTING A BUNDLE IS WHAT FOUND THE OVER-BROAD PREDICATE
+- Three changes were bundled on a disjoint-metrics judgement, then split when their outcomes differed. **The split is what isolated the 71-brigade blast radius**: bundled, "probes 215→80" would have been banked as the intel fix's achievement and the over-broad predicate would have shipped invisibly inside it. ⇒ Bundling is defensible when metrics are disjoint; **splitting on divergent outcomes is what makes the bundle safe.**
+
 ## New Lessons (2026-08-26d) — probe-channel scoping (four seats; the fix was two levels below the symptom)
 
 > **Session shape: the owner diagnosed a SHAPE correctly, the shape was not the cause, and following it properly found two causes neither he nor any seat had named.** Every seat refuted part of the brief it was given, including mine.
