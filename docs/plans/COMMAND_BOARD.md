@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-08-26.
+**Status:** Derived dispatch view, synchronized 2026-08-27.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -24,7 +24,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 6 | R6 | **JANUARY 1993 CHECKPOINT SLICE LANDED; FURTHER CALIBRATION PAUSED ON RE** | Preserve the landed evidence. Do not start reference, init-control, objective, axis, timing, roster, or outcome tuning until RE closes. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE — AUDIO IMPLEMENTATION LANDED `2d106e5e0`** | Complete human listen/sensitivity acceptance, English accessibility/readability, offline browser and packaged-runtime proof, and closeout reconciliation. Pause any packet that collides with RE-0D/RE-1 desktop/UI files. Localization Phase 3 remains post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
-| 7.5 | RE | **T0 COMPLETE; READY FOR T1 — BASE `38e65547882856fba07faab7a6dbcd4258da9607`** | Hard-check the owner/build-supplied Node 22 and establish clean exact-parent S0 on a source-verified authoritative checkout, then execute the plan's two-commit packets serially. Preserve the probe disposition; DG-1/2/3 precede their conditional work; RE-5 remains evidence-only/default defer. | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) |
+| 7.5 | RE | **T1 IN PROGRESS; T1B MIXED-BATTLE OCCUPATION CONVERGENCE PRECEDES S0** | Implement owner ruling ALL over validated battle contributors: explicit false vetoes occupation and missing declaration defaults true. Use only the existing resolver/operation matches and existing probe-territory test; code then evidence commits. The first Node-22 pair is pre-fix evidence, not S0. Run a fresh exact-code-commit pair after T1B, then continue the serial rail. Preserve the probe disposition; DG-1/2/3 precede their conditional work; RE-5 remains evidence-only/default defer. | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **WAITING ON RC, R1-R7, AND RE GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
@@ -48,8 +48,9 @@ RE-0 must nevertheless produce its own clean exact-parent Node-22 pair. Historic
 Node-24 runs cannot be reused.
 
 **CURRENT EXECUTION:** The probe lane is closed and the owner handed the repository to RE. T0 is
-complete at execution base `38e65547882856fba07faab7a6dbcd4258da9607`; RE is ready for T1,
-whose next action is the clean exact-parent Node-22 S0. R7 audio implementation has landed;
+complete at execution base `38e65547882856fba07faab7a6dbcd4258da9607`; T1 is in progress.
+T1A is closed, and T1B mixed-battle occupation convergence is the next action before a fresh
+exact-code-commit Node-22 S0. R7 audio implementation has landed;
 remaining R7 work is human listen/sensitivity review,
 English accessibility/readability, and integrated packaged proof, subject to RE packet collisions.
 

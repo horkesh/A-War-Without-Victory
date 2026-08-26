@@ -4,7 +4,7 @@
 
 > **Date:** 2026-08-26
 >
-> **Status:** T1 IN PROGRESS; T1A dependency-install precondition closed
+> **Status:** T1 IN PROGRESS; T1B mixed-battle occupation convergence is the pre-S0 prerequisite
 >
 > **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
 >
@@ -14,7 +14,7 @@
 >
 > **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** complete T1 and establish the clean Node-22 S0
+> **Current next action:** execute T1B, then establish a fresh clean Node-22 S0 at its code commit
 >
 > **Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
@@ -36,7 +36,7 @@ Roadmap-phase mapping:
 | Roadmap phase | Executable tasks |
 |---|---|
 | RE-0 | T0–T3 |
-| Decision gates | DG-1, DG-2, DG-3 before their named consumers |
+| Decision gates | DG-0 before S0; DG-1, DG-2, DG-3 before their named consumers |
 | RE-1 | T4–T5 |
 | RE-2 | T6 |
 | RE-3 | T7–T9 |
@@ -49,6 +49,7 @@ Execution checklist:
 - [x] T0 — capture integrated base and isolation
 - [ ] T1 — establish Node-22 S0
   - [x] T1A — freeze reproducible dependency installation
+  - [ ] T1B — converge mixed-battle occupation authority
 - [ ] T2 — audit existing observation
 - [ ] T3 — repair desktop changed-path truth
 - [ ] DG-1 — APWB disposition
@@ -176,6 +177,7 @@ Graphics Programmer and Lua Scripting are retired roles in the current roster. C
 
 Required decision panels:
 
+- DG-0: Game Design + Gameplay + Operations + Systems + Canon + Architect + Orchestrator;
 - DG-1: Game Design + Gameplay + Canon + Architect + Orchestrator;
 - DG-2: Game Design + Formation + Map/Geometry + Historian when enclave authority is included;
 - DG-3: Product + UI/UX + Systems + Architect + Orchestrator.
@@ -238,7 +240,73 @@ independent clone at the packet's code commit. Never overwrite Claude's or anoth
 ### T1 — Provision Node 22 and establish S0
 
 **Execution status:** IN PROGRESS. T1A closed at
-`2f3d6572300dc95eeae2bc05900744d905a9adf4`; S0 has not run and T1 remains unchecked.
+`2f3d6572300dc95eeae2bc05900744d905a9adf4`. The first Node-22 pair is reproducible pre-fix
+evidence only; it exposed DG-0 and is not S0. T1B must close before this procedure resumes.
+
+#### T1B — Converge mixed-battle occupation authority before S0
+
+**Owner ruling:** ALL validated contributing attackers must permit occupation. An explicit
+`occupies_on_victory:false` from any validated contributor vetoes a territorial flip. A contributor
+whose matched operation has no declaration, or who has no matched operation, defaults to `true`.
+This is a generic battle-authority rule, not a historical special case.
+
+**May edit:** `src/sim/combat/attack_resolution_osid.ts`,
+`tests/probe_territory_flip.test.ts`, the derivative canon description in
+`docs/10_canon/Systems_Manual_v0_9_0.md` during the code packet, and evidence/control-plane docs.
+Do not edit operation factories, attacker ordering, battle aggregation, scenario data, painted
+references, checkpoint thresholds, manifests, or `docs/10_canon/FORAWWV.md`.
+
+1. Extend `tests/probe_territory_flip.test.ts` with a literal three-attacker mixed-intent fixture:
+   one validated operationless/default-occupying attacker and two validated attackers in an
+   operation declaring `occupies_on_victory:false`, all issuing attack orders against the same
+   target. Pin the Gojčin failure shape without using a place name or historical formation ID.
+2. Capture RED: the winning mixed battle currently flips because lexicographic `firstAttacker`
+   supplies the whole battle's occupation intent. Assert no control flip, no control event, and
+   zero territory-gained counters while preserving one winning battle and its casualties.
+3. Add positive controls in the same file:
+   - every validated contributor explicitly `true` permits exactly one flip;
+   - missing declarations and operationless contributors default to `true` and permit one flip;
+   - one explicit `false` vetoes a flip regardless of attacker ID and input insertion order;
+   - an inactive, missing, or non-adjacent would-be contributor is not validated and cannot veto.
+   Assert the validated attacker count is greater than one in every mixed case so the test cannot
+   pass on a single-attacker fixture.
+4. In `resolveAttackOrdersOsid`, resolve each validated `attackerFormation` through the existing
+   `findBrigadeOperationAnywhere` owner once. Reuse those matches for contributing-operation
+   attribution, first-attacker reporting, and the occupation decision. Set battle occupation to
+   `true` only when every validated contributor's declaration is
+   `match?.op.occupies_on_victory ?? true`. Add no exported helper, second lookup path, state,
+   schema, field, flag, module, history literal, attacker weight, or primary-attacker concept.
+5. Run the exact focused RED/GREEN command:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/probe_territory_flip.test.ts --reporter=dot
+   ```
+
+   Then run Core. Run the Simplifier and repeat focused + Core.
+6. Adversarial mutation: temporarily replace the all-contributors decision with the prior
+   first-attacker-only decision. The mixed false-veto test must fail while the all-true positive
+   control still passes. Revert the mutation and rerun green. Never commit the mutation.
+7. Complexity gate: one production file plus one existing test file; no new production symbol;
+   no persisted/artifact/bundle field; at most 15 net added production LOC. Record production
+   numstat and confirm no full-map or per-formation scan was introduced beyond the already validated
+   contributors to the current battle.
+8. Reviews: Game Design, Gameplay, Operations, Systems, Technical Architect, Determinism, QA, Code
+   Review, Canon Compliance, Simplifier, and Process QA. The implementer and technical reviewer
+   must differ.
+9. Code/test/canon commit:
+   `fix(RE-0C): require unanimous mixed-battle occupation intent`.
+10. From an owner-approved clean authoritative checkout at that exact code commit, run the complete
+    T1 procedure below, including the fresh Node-22 pair. The prior pair at `58f100f3` remains
+    pre-fix evidence and may not be renamed or reused as S0. The checkpoint verifier must no longer
+    report the Gojčin-class ahistorical capture. Farz remains separately classified known-red
+    calibration evidence; do not tune it under RE or describe the verifier as historically green.
+11. Commit report, plan/status, control-plane, and ledger evidence only:
+    `docs(RE-0C): record occupation convergence and clean S0`. Do not start T2 first.
+
+**Stop:** any new/different checkpoint breach, loss of the nine-cell enclave guard, changed Farz
+signature beyond removal of the mixed-battle capture, non-historical gate failure, artifact or
+fingerprint drift between the fresh pair, need for a new authority surface, or production budget
+breach returns to the owner. Do not weaken the verifier or refresh a reference to pass.
 
 1. The owner/build seat supplies an absolute path to a Node 22 installation. Do not download or
    silently switch toolchains.
@@ -352,8 +420,9 @@ independent clone at the packet's code commit. Never overwrite Claude's or anoth
 
    Do not use `--strict`; it wrongly promotes advisory K:W evidence into a fatal gate.
 
-6. Assert both `run_meta.json` files have the exact T0 commit, `git_dirty:false`, Node 22, the
-   same scenario/input digests, no provenance override, and `collapse_enabled:false`.
+6. Assert both `run_meta.json` files have the exact reviewed T1B code commit, are descendants of the
+   bound T0 execution base and T1A, and record `git_dirty:false`, Node 22, the same scenario/input
+   digests, no provenance override, and `collapse_enabled:false`.
 7. Compare `run_summary.json.historical_fit.checkpoints`; canonical checkpoints are weeks
    **39, 104, 156, and 188**. The runner does not emit standalone checkpoint saves.
 8. The exact unconditional output set is:
@@ -524,6 +593,18 @@ Performance protocol for a live affected phase:
    claim. Peak memory is descriptive only if the existing profiler already emits it.
 
 ## 6. Decision gates
+
+### DG-0 — Mixed-battle occupation authority
+
+**CLOSED by owner ruling 2026-08-27: ALL.** Every validated contributor to one aggregated battle
+must permit occupation. Any explicit `occupies_on_victory:false` vetoes the territorial flip;
+missing declarations and operationless contributors default to `true`. Validation means the
+attacker survived the resolver's existing active, located, and tactical-adjacency checks. The rule
+is evaluated over that bounded contributor set only.
+
+The panel rejected lexicographic `firstAttacker` authority and selected no primary, weighted,
+majority, any-true, or history-specific rule. T1B implements the ruling without a new owner surface.
+Decision/amendment commit: `docs(RE-0C): rule mixed-battle occupation authority`.
 
 ### DG-1 — APWB/friendly-objective contradiction
 
@@ -951,7 +1032,7 @@ Stop immediately when:
 - aggregate casualty truth, byte identity, checkpoint structure, save compatibility, package boot,
   or player authority regresses;
 - median affected-phase runtime regresses by more than 2%;
-- scope needs canon modification;
+- scope needs canon modification beyond T1B's named derivative Systems Manual propagation;
 - an evidence report attempts to become a second execution queue.
 
 Return a source-cited bounded amendment. Do not improvise.

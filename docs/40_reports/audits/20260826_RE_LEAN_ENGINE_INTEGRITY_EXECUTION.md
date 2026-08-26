@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-26
 
-**Status:** T1 in progress; T1A closed, S0 pending
+**Status:** T1 in progress; T1A closed, T1B next, S0 pending
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -339,3 +339,40 @@ T1A has no player-visible, gameplay, canon, save/schema, scenario, artifact-cont
 threshold, simulation/turn-pipeline, package-version, or runtime effect. It creates no engine module, state,
 service, channel, flag, or default stream. No knowledge-ledger or `docs/10_canon/FORAWWV.md` update
 is required.
+
+## T1 pre-fix pair — reproducible evidence, not S0
+
+**Status:** REJECTED AS S0; retained as the T1B pre-fix fixture.
+
+The first fresh pair ran under Node `22.21.1` at documentation/infrastructure HEAD
+`58f100f3f0d1dd5dcfee115ae30a316905602c9e`, with `git_dirty:false`,
+`collapse_enabled:false`, no provenance override, and distinct output roots. The two runs produced
+the same final hash `d71ff4ef4063f2ee`, structural fingerprint `a0eff7d861626c41`, checkpoint vector
+`695 / 674 / 668 / 652`, and zero operation-schedule differences across all 48 compared operations.
+Engine health and consistency passed, and the substantive artifacts were byte-identical under the
+plan's sole `run_meta.out_dir` normalization.
+
+The unmodified checkpoint verifier exited `1`. Its historical output remained RED: the nine-cell
+enclave guard held, Farz retained its known early/no-late-2nd-Corps attribution failure, and one
+RBiH capture appeared at `op:kalesija:gojcin_2`. The retained A log is
+`F:\A-War-Without-Victory\runs\re_s0_logs\a_checkpoints.log`; an independent invocation against B
+returned the same exit and signature. These ignored run files are evidence locations, not tracked
+deliverables.
+
+Source tracing found that the Gojčin capture is not solely calibration debt. The winning battle
+aggregated one operationless/default-occupying contributor and two contributors in a probe declaring
+`occupies_on_victory:false`. `resolveAttackOrdersOsid` sorted the validated attackers, selected
+lexicographic `firstAttacker`, and used only that attacker's operation declaration for the whole
+battle's occupation decision. The same mixed intents could therefore flip or withhold territory
+because formation IDs changed order.
+
+The owner ruled **ALL** on 2026-08-27: every validated contributor must permit occupation; one
+explicit false vetoes; a missing declaration or operation match defaults true. The ruling creates
+T1B/DG-0 before S0. It adds no primary attacker, weight, schema, field, flag, module, service,
+pipeline step, or historical literal. Farz remains separate known-red calibration and is not a T1B
+target.
+
+The pre-fix pair may prove reproducibility and supply the RED fixture, but it is not the clean S0
+baseline and must not be renamed, blessed, or used to start T2. T1B requires a code/test commit,
+independent review, and a new exact-code-commit Node-22 pair before the evidence/docs commit closes
+T1 and S0.

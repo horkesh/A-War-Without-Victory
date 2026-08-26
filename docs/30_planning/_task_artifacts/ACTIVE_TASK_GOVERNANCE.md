@@ -8,10 +8,12 @@ deterministic ordering, locality, and verification truth before further calibrat
 
 ## Current status and next action
 
-**T0 COMPLETE; READY FOR T1.** The separate probe lane closed at `b711cffa9`, and the owner handed
-the repository to RE. Preserve that disposition. The execution base is bound at
-`38e65547882856fba07faab7a6dbcd4258da9607`. Next, hard-check the owner/build-supplied Node 22 and
-establish the clean exact-parent S0 using the plan's source-verified authoritative run substrate.
+**T1 IN PROGRESS; T1B PRECEDES S0.** The separate probe lane closed at `b711cffa9`, and the owner
+handed the repository to RE. Preserve that disposition. The execution base is bound at
+`38e65547882856fba07faab7a6dbcd4258da9607`, and T1A froze immutable dependency installation. The
+first Node-22 pair is reproducible pre-fix evidence only, not S0. Next, implement the closed DG-0
+ALL ruling in T1B, then establish a fresh exact-code-commit S0 using the plan's source-verified
+authoritative run substrate.
 
 ## Canonical owner
 
@@ -53,9 +55,13 @@ commit followed by a clean evidence/docs commit. One behavioral long-run pair ru
 
 ## Decision boundaries
 
-DG-1 owns the contradictory APWB/friendly-override authority. DG-2 owns presidential targeting of
-event-owned Srebrenica/Žepa. DG-3 owns stage-operation decision reachability. No dependent code
-starts before the named specialists and Orchestrator record a ruling.
+DG-0 is closed by owner ruling ALL: every validated battle contributor must permit occupation,
+explicit `false` vetoes occupation, and a missing operation/declaration defaults to `true`. T1B
+must reuse the resolver's existing operation matches; it may not add a schema, field, flag, module,
+owner selector, weight, or historical literal. DG-1 owns the contradictory APWB/friendly-override
+authority. DG-2 owns presidential targeting of event-owned Srebrenica/Žepa. DG-3 owns
+stage-operation decision reachability. No dependent code starts before the named specialists and
+Orchestrator record a ruling.
 
 Unproved mechanics default to defer. Quiet fronts, siege quiet, historical surprise, or a prettier
 checkpoint are not engine defects.
@@ -75,6 +81,8 @@ checkpoint are not engine defects.
 ## Collision rules
 
 - Any new overlapping engine edit stops the affected RE packet; the probe lane itself is closed.
+- T1B exclusively owns `src/sim/combat/attack_resolution_osid.ts` and
+  `tests/probe_territory_flip.test.ts` for the bounded mixed-battle convergence packet.
 - RE-0D/RE-1 collide with desktop/runtime/UI work; pause the relevant R7 packet.
 - RE-2/RE-3/RE-4 may overlap R7 only after exact file inspection proves ownership is disjoint.
 - Further calibration is paused until RE closes.
@@ -113,4 +121,8 @@ busier war or a better historical-fit score.
   commands, two-commit evidence discipline, and deletion-first complexity gates.
 - **2026-08-26:** T0 bound execution base `38e65547882856fba07faab7a6dbcd4258da9607`
   and re-audited live boundaries, environment readers, worktree collisions, and invariant authority.
-- **Next:** T1 clean exact-parent Node-22 S0.
+- **2026-08-27:** the first Node-22 A/B pair proved reproducibility but exposed mixed-battle
+  occupation authority and is retained only as pre-fix evidence. Farz remains separate known-red
+  calibration. The owner closed DG-0 with ALL.
+- **Next:** T1B code/test commit, then a fresh paired Node-22 S0 at that exact code commit, then a
+  clean evidence/docs commit.

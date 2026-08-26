@@ -29543,3 +29543,36 @@ absent, and production/runtime LOC change is zero.
 operation-diff, byte-identity, and focused-harness gate remain to run. The Master Roadmap and
 Command Board routing are unchanged. `docs/PROJECT_LEDGER_KNOWLEDGE.md` and
 `docs/10_canon/FORAWWV.md` were not edited.
+
+## [2026-08-27] docs(RE-0C): rule mixed-battle occupation authority
+
+**Type:** Documentation/process decision and control-plane synchronization only. No gameplay,
+engine, test, scenario, save/schema, artifact contract, baseline, threshold, package, canon,
+knowledge-ledger, push, PR, merge, tag, publication, or release change.
+
+**Pre-fix evidence:** The first clean Node-22 A/B pair at
+`58f100f3f0d1dd5dcfee115ae30a316905602c9e` was reproducible: normalized substantive artifacts
+were byte-identical, final-state hash was `d71ff4ef4063f2ee`, input fingerprint was
+`a0eff7d861626c41`, checkpoints were `695/674/668/652`, and health, consistency, and
+operation-schedule comparison gates passed. It is retained as pre-fix evidence only and is not S0.
+Its checkpoint verifier exit 1 combined two separate findings: Farz remains known-red calibration,
+while Gojcin exposed mixed-battle occupation authority in the resolver.
+
+**Closed decision DG-0:** The owner selected ALL. Every contributor that already passes the
+resolver's active, located, and adjacency validation must permit occupation. Explicit `false`
+vetoes occupation; a missing operation or declaration defaults to `true`. T1B must aggregate the
+existing operation matches and may add no schema, persisted field, flag, module, owner selector,
+weight, pipeline step, or historical literal. This is a generic player-truth rule, not historical
+hardcoding, and it does not approve or tune the Farz outcome.
+
+**Execution boundary:** T1B owns only `src/sim/combat/attack_resolution_osid.ts` and
+`tests/probe_territory_flip.test.ts`. It requires the exact mixed red fixture, operationless and
+all-permitting positive controls, explicit-veto adversarial order mutation, the focused test plus
+Core/typecheck review, and the plan's lean complexity limit. Land code/tests first, run a fresh
+paired Node-22 S0 at that exact commit, then land the clean evidence/docs commit. The prior A/B pair
+may not be renamed, blessed, or used to start T2.
+
+**Synchronized surfaces:** Sole RE plan, living execution audit, Master Roadmap, Command Board,
+plans index, docs index, active task governance, and project ledger. Canon propagation is deferred
+to the T1B code packet; therefore `docs/10_canon/Systems_Manual_v0_9_0.md`,
+`docs/PROJECT_LEDGER_KNOWLEDGE.md`, and `docs/10_canon/FORAWWV.md` were not edited.
