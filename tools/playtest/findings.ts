@@ -32,7 +32,10 @@ export function normalizeSignal(title: string): string {
         .replace(/'[^']*'/g, '<id>')
         .replace(/"[^"]*"/g, '<id>')
         .replace(/\[[^\]]*\]/g, '<id>')
-        .replace(/\d+(\.\d+)?/g, '#')
+        // Match decimals BEFORE bare integers, and collapse both to the same token —
+        // otherwise '15.5/25' fingerprints as '#.#/#' and '20/25' as '#/#', splitting one
+        // defect across two ledger lines with both occurrence counts understated.
+        .replace(/\d+(?:\.\d+)?/g, '#')
         .replace(/\s+/g, ' ')
         .trim();
 }

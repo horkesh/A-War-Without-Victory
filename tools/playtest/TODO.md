@@ -21,13 +21,46 @@ to prevent.
 **Do not apply while a comparison batch is running** — the three policies must
 execute identical harness code to be comparable.
 
-## 2. Electron driver not built yet
+## 2. Electron driver not built yet — PREREQS NOW GREEN (2026-08-26)
 
 Headless cannot see the UI. Most friction is UI friction. `run_electron.ts` is the
-other half of this lane; the salvage base is
-`tools/ai_play/electron_playthrough_rs_ahistorical.mjs` (real Electron via
-Playwright, drives `window.awwv.*`) plus the UI-reading parts of
-`tools/ui/paradox_local_qa.cjs`.
+other half of this lane.
+
+Launch path is **verified working** — see
+`tools/playtest/evidence/20260826_ui_probe_mainmenu.png`. Three environment traps
+cost an hour and are recorded so the driver handles them from line one:
+
+1. **A worktree needs its own build.** `awwv://warroom/index.html` serves `Not Found`
+   until `npm run desktop:release:check` has run IN THAT WORKTREE. `dist/` is not
+   shared between worktrees.
+2. **Never `firstWindow()`.** The app opens DevTools, and `firstWindow()` returns the
+   DevTools window — its DOM has buttons, so the probe *looks* like it worked while
+   reporting on the wrong window entirely. Select by `url().startsWith('awwv://')`
+   and poll until it appears.
+3. **Do NOT junction `node_modules` to another worktree.** See item 6.
+
+**Design rule for the driver:** drive REAL DOM CLICKS, not `window.awwv.*`. Driving
+IPC is just slow headless and finds nothing the headless lane cannot. The 2026-08-05
+RS run made exactly this mistake — its own report records that the window sat on the
+main menu the whole run and the screenshots were useless as UI evidence.
+
+Shape: shallow but real. Fewer turns, every surface touched, screenshots at each.
+First target — `op_directive_rejection`: headless proved 29 rejections carry a stored
+reason with no reader in `src/ui/`; the Electron run turns that inference into a
+screenshot of what the player actually sees after spending Command Authority.
+
+## 6. Never share node_modules across worktrees (found 2026-08-26)
+
+I junctioned this worktree's `node_modules` to the main tree's to save install time.
+Mid-session it broke: `playwright/` was stripped to a bare `lib/` with no
+`package.json` and `npm ls` reported empty, because the other lane was running an
+install (version moved 0.9.6-alpha.1 to 0.9.9-beta.1 at the same time).
+
+For a lane whose entire purpose is running in parallel with another agent, sharing
+the dependency tree means their every install breaks this lane mid-run — including
+`tsx`, so the headless harness dies too. Fixed with an isolated `npm install`.
+
+Note `src/ui/map/node_modules` is a SEPARATE nested install with the same hazard.
 
 ## 3. Only RBiH exercised
 

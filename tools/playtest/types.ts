@@ -146,9 +146,13 @@ export interface EndProbeContext {
     /** Per-turn advance timings, in turn order. */
     advanceMsByTurn: number[];
     /**
-     * How many lever calls the policy actually attempted all run. Probes about the
+     * How many CA-COSTING lever calls the policy attempted all run. Probes about the
      * lever economy MUST consult this: "Command Authority never spent" means one
      * thing when the policy tried 400 times and another when it never tried at all.
+     *
+     * Counts only levers that actually charge Command Authority — request_op, stop_op,
+     * replace_co, force_launch, elite_deploy. resolve_proposal and local_support are
+     * FREE, so counting them lets a policy that never spends anything pass the gate.
      */
     leverAttempts: number;
 }
