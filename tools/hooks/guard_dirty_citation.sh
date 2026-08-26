@@ -39,6 +39,14 @@ rel="${abs#"$root"/}"
 [ -d "$path" ] && exit 0
 
 dirty="$(git -C "$repo_root" diff --name-only -- "$rel" 2>/dev/null; git -C "$repo_root" diff --cached --name-only -- "$rel" 2>/dev/null)"
+# UNTRACKED is the worse case: the file does not exist at HEAD AT ALL, so a [SOURCE-VERIFIED at
+# HEAD] citation from it is not merely off by some lines, it is fiction. (QA seat, 2026-08-26.)
+untracked="$(git -C "$repo_root" ls-files --others --exclude-standard -- "$rel" 2>/dev/null)"
+if [ -n "$untracked" ]; then
+  esc_u="$(printf '%s' "$rel" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+  printf '{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"UNTRACKED-FILE GUARD. `%s` is UNTRACKED — it does not exist at HEAD at all. A [SOURCE-VERIFIED at HEAD] citation from this file is not off by a few lines, it is fiction, and `git show HEAD:%s` will FAIL rather than correct you. It may be another agent'"'"'s in-flight work. Establish whose it is, and whether it is real, before citing it."}}\n' "$esc_u" "$esc_u"
+  exit 0
+fi
 [ -z "$dirty" ] && exit 0
 
 esc_rel="$(printf '%s' "$rel" | sed 's/\\/\\\\/g; s/"/\\"/g')"

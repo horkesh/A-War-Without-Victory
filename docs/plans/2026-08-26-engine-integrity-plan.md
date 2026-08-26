@@ -282,6 +282,100 @@ does not "simplify" A-3 onto `readiness` and silently rebuild the no-op.
 
 ---
 
+### 3.8 ★★ P0, NEW — THE COHESION FLOOR DELETES A DISSOLUTION CRITERION, AND THE ENCLAVE GUARD CANNOT FAIL
+
+**Found by the railroad-hunter seat reviewing this plan. It is the largest engine finding of the
+review and it was in none of the panel's output.**
+
+`brigade_dissolution.ts:164,171` requires **2 of 3**: `personnel < 400`, `cohesion <= T`,
+`morale <= T`. The cohesion threshold `T` is timeline-resolved — `apr1992.json:419-423` sets
+**RS cohesion threshold = 15 from t39**. The RS cohesion *floor* is **20**; RBiH's is **62**;
+HRHB's **30**. The floor clamp is unconditional (`cohesion_drift.ts:173-176`) and the dissolution
+pass runs at `war_phases.ts:3182`, **after** cohesion-drift at `:3143`.
+
+⇒ **Dissolution never observes a sub-floor cohesion value. `lowCohesion` is UNREACHABLE for every
+faction at every turn once the keyframes settle.** Dissolution has silently degraded from 2-of-3 to
+**1-of-2**: `personnel < 400` AND `morale <= T`. (`MORALE_OVERRIDE_ENABLED` defaults false,
+`brigade_dissolution.ts:142`, so the fourth path is off.)
+
+**★★ AND THE ENCLAVE GUARD IS VACUOUS.** Enclave-tagged brigades require **3 of 3**
+(`brigade_dissolution.ts:132`). One of the three is unreachable. **An enclave brigade can never
+dissolve — at any personnel, any morale, any turn.** Goražde / Bihać / Teočak / Sarajevo-core
+"holding" is *arithmetically guaranteed, not emergent*. **The guard has been passing because it
+cannot fail.** This is the 0h vacuous-guard class living inside the §6 enclave guard itself, and the
+panel that owns that guard needs to know.
+
+**A false justification, recorded so it is not inherited:** `attack_post_battle_effects.ts:143-145`
+defends its default-ON combat clamp with *"RS's late-war floor (20) equals the dissolution gate (20),
+so the historical late-war collapse is preserved rather than erased."* **The gate is 15, not 20.**
+The stated reason the clamp is safe does not hold.
+
+**What this does and does not license.** It does **not** reopen the cohesion floors — the 2026-08-12
+owner ruling stands and Task 4.4 stays BLOCKED. But that ruling settles the floors as a
+*drift-recovery* thesis (VRS professional→hollow, ARBiH irregular→professional). **It was never a
+ruling that a floored field may bind a DISSOLUTION PREDICATE.** The plan cited the ruling and never
+enumerated who reads the floored value. *That* is the launder — unexamined rather than fabricated.
+
+**ACTIONS:**
+1. **Phase 4 must enumerate the cohesion floor's downstream consumers before invoking the owner
+   ruling again.** Name `brigade_dissolution.ts` explicitly.
+2. **Cheapest instrument, zero runtime, no scenario — build it in Phase 0:** a static assertion over
+   two data tables. For each faction × turn, assert
+   `getFactionCohesionFloor(f,t) > resolveDissolutionThreshold(timeline,'dissolution_cohesion_threshold',f,t)` ⇒ **FAIL**.
+   Pure arithmetic. It would have caught this years ago.
+3. **Refer the enclave 3-of-3 finding to the §6 panel** — it owns the guard, and the guard is
+   currently unfalsifiable.
+4. Fix the false comment at `attack_post_battle_effects.ts:143-145` in whichever change lands nearest.
+
+### 3.9 ★ THE SCOPE-OUT THAT IS DOING ANALYTICAL WORK — `max_attack_share_override`
+
+Both reviewers landed on this independently. §1 scopes out the authored `aggression_modifier`
+decline. **But the field sitting beside it in the same record is never named:**
+`apr1992.json:11-33` / `bot_strategy.ts:250-262` pin RS `max_attack_share_override` at **0.20 from
+week 26 to week 9999** — a wall-clock cap on attacking share, **blind to game state**. RBiH steps to
+0.35 at w80 by the calendar.
+
+That is a textbook **phase railroad**, and it is a better suspect for the post-w101 RS drought than
+`aggression_modifier` ever was — which is a *score multiplier* (`bot_brigade_targeting.ts:136,174-178`),
+not a gate, and at 0.05 still scores targets, so it cannot produce a zero. **The plan is right to
+strike the packet's aggression claim and right that aggression is not the culprit. It is wrong to be
+silent about the sibling.**
+
+> **"Silence beside an explicitly-scoped-out sibling is the exact shape a laundered railroad takes."**
+> The floors have an owner quote. §8.5 has historian reasoning. This has a sentence.
+
+**ACTION: either investigate `max_attack_share_override` as a Phase 3 candidate, or scope it out
+EXPLICITLY with a stated reason.** Do not leave it unnamed. INFERRED, and worth testing: combined
+with the verified 0.3-vs-0.15 launch-floor asymmetry (§3.5), it may be the actual post-w101 gate.
+
+### 3.10 ★ THERE ARE THREE PROBE EMISSION PATHS, AND PHASE 1 IS MODELLED ON ONE
+
+**Found by the canon reviewer. It undercuts Phase 1's headline numbers.**
+
+- **Path A** — surplus probe, `emit.ts:1233`, single objective via `slice(0,1)`. This is the path
+  §3.1/§3.2 and the counterfactual model.
+- **Path B** — `shouldLaunchProbeInstead` (`bot_corps_directives.ts:273`, called at `emit.ts:970-990`)
+  converts a **plan** operation into a probe carrying the plan's **full multi-objective array**. It
+  sits **before** the `probeOnCooldown` gate and is never tested against it.
+- **Path C** — `army_hq_overrides.ts:158` emits `type:'probe'` overrides.
+
+**Consequences, all of which the plan currently gets wrong:**
+- Task 1.2's `last_probe_turn` does **not** cover Path B or C.
+- Task 1.1 will record objective failures on **plan objectives that were never attacked**, via Path B.
+- The counterfactual replay modelled suppression as if one cooldown map governed all probe targeting.
+  **It does not.**
+
+⇒ **Until Radava and Gornja Vratnica are attributed to a specific emission path, 1.1's `DONE WHEN`
+figures (26→11, 39→27) and the whole ~11% ceiling for 1.2 rest on a model of an engine that has three
+probe sources and is modelled with one.** The plan gives Task 4.1 an explicit "patch both sites or it
+is a no-op" warning and then fails to apply that discipline to its own Phase 1.
+
+**ACTION, and it is a Phase 0 item because it costs no runs:** attribute every probe battle in `n294`
+to its emission path, then either cover all three sites in 1.1/1.2 or restate Phase 1's predictions
+against Path A alone and say so.
+
+---
+
 ## 4. Setup — do this first
 
 ```powershell
@@ -321,6 +415,9 @@ with no output until the end. It passes inside the full suite.
 
 | # | Task | Acceptance |
 |---|---|---|
+| **0.0** | **SECTION-6 BLOCKER - EXTEND THE ENCLAVE GUARD BEFORE ANY PHASE 3 OR 4.2 RUN.** `verify_checkpoints.cjs:88` reads `GUARD = [['Teocak', 'op:ugljevik:teocak_krstac_2', 'RBiH']]` - **ONE OSID** - while that file's own header (`:17`) claims it also checks that Srebrenica and Zepa fall. Gorazde, Bihac, the Sarajevo core and the enclave *falls* are **not checked**, and `process.exit(breached ? 1 : 0)` fires on Teocak alone. Section 8.5's `jemanlici`/`medini` are absent entirely. **S5 names this tool as the instrument for a tripwire it does not implement - the guard exists in prose and not in code.** Extend GUARD to the six enclave cells plus the two 8.5 cells. | Guard covers all eight; a deliberately breached fixture exits non-zero for each. **Named by the canon seat as the blocking Section-6 condition; independently confirmed at HEAD.** |
+| 0.0b | **Static floor-vs-dissolution assertion** (3.8): for each faction x turn, assert `getFactionCohesionFloor(f,t) > dissolutionCohesionThreshold(f,t)` => FAIL. Pure arithmetic over two data tables, zero runtime. | Test present; currently RED for all three factions, which IS the finding. |
+| 0.0c | **Attribute every probe battle in `n294` to its emission path** (3.10 - three paths exist, the plan models one). No runs; artifact analysis only. | Every probe battle assigned to Path A / B / C; Radava and Gornja Vratnica attributed. **Phase 1's predictions are PROVISIONAL until this lands.** |
 | 0.1 | **Retrospective op-schedule diff** from existing `operation_aars.json`. Report the full ladder — name-only / name+corps+turn / corps+turn / **corps+objectives** / +brigades. **Never a single name-keyed number.** | Reproduces the measured n286/n287 pair: 29 / 23 / 23 / **29** / 24. |
 | 0.2 | **Corrected health-gate predicate, REPORTED-NOT-GATED.** Old `dead_ops` stays gated under a renamed `invalid_op_weeks`. | Corrected axis-scoped counts emitted beside the old ones; nothing un-gated in the interim. |
 | 0.3 | **Clean four-checkpoint baseline pin.** | `git_dirty:false`, four checkpoints, hash + digest recorded in `CALIBRATION_MASTER.md`. |
@@ -383,7 +480,7 @@ with no output until the end. It passes inside the full suite.
 > **DO NOT SELL PHASE 1.1 AS AN ATTRITION FIX.** The attrition is cadence-driven, not
 > target-driven: the median idle gap between one probe ending and the next starting is **1 turn**,
 > and 57.4% of probes start the very turn the previous one clears. If volume reduction is the goal,
-> the lever is **Task 1.2** or the emission gate — not 1.1.
+> the lever is **the EMISSION GATE** — and it is in neither 1.1 nor 1.2. See the header above.
 >
 > **And a skipped probe is not a deferred probe.** When the cooldown filter empties the candidate
 > list, `if (probeObjectives.length > 0)` skips emission entirely — **no op is pushed and no cooldown
@@ -525,7 +622,7 @@ with the field set and assert it survives. **MUTATION:** remove the write → ca
 i.e. the second probe emits; the test must catch that.
 
 **MEASURE** — territory-moving, 1 × 188w alone. **Expected direction: fewer probes.** This is the task
-to measure probe-volume reduction against, not 1.1.
+a CORRECTNESS fix; its ~11% is a CEILING, not a prediction, and it is NOT the task to measure volume reduction against. Nothing in Phase 1 is.
 
 **SEQUENCING NOTE** — 1.1 and 1.2 are independent and must be measured separately: 1.1 changes *which*
 cell a probe targets, 1.2 changes *how often* a probe is emitted. Landed together their effects are
@@ -732,27 +829,81 @@ refuse to launch and reads it as a bug rather than a cost.
 
 ---
 
-### Task 4.2 — the strategic-reserve lane
+### Task 4.2 - the strategic-reserve lane  *(OPEN-3 CLOSED; reshaped)*
 
-**WHY** — `strategic_reserves`: RBiH **256,091** · HRHB **21,039** · RS **0**. Swept from every pool
-above `OVERFLOW_THRESHOLD = 5000` into a faction-level pool that is **not** exhaustion-gated, **not**
-decayed, **not** municipality-keyed, and **fed by territorial loss** via orphan-pool drain. **The cap
-funds its own bypass:** capped-pool brigades recover 34% of the time against 3% for uncapped ones,
-because a pool passes the cap *because* it overflowed. `collectStrategicReserves` does
-`pool.committed += excess`, so **30.7% of RBiH's total `committed` sits in the reserve**.
+**OPEN-3 IS SETTLED, and neither of the plan's two framings was right.** The RS reserve was **not**
+unreachable and was **not** never-filled: it **filled and drained**. Measured on `n294` - **286 RS
+draw events from t10 to t188, MORE than RBiH's 194.** It reads 0 at t188 because it is drained to
+empty. Access is **faction-neutral**, and the only faction constants *favour* the RS
+(`FACTION_RESERVE_DRAW_RATE`: RBiH 0.15 / **RS 0.25** / HRHB 0.25). **The asymmetry is entirely
+INFLOW VOLUME**, tracing to `FACTION_MOBILIZATION_SCALE` (RBiH 0.09 / RS 0.04) acting on municipal
+populations. Corroborated independently by the railroad seat: there is no faction check anywhere on
+the reserve path. **Verdict: emergent asymmetry, not a faction gate - but a real P1 defect.**
 
-**Three candidates, cheapest first. Each territory-moving. NOT a bundle:**
-1. subject `strategic_reserves` to `POOL_DECAY_RATE` as pools already are;
-2. stop writing overflow into `pool.committed` — it corrupts the gate denominator in the donor's
-   favour;
-3. gate reserve draws on a faction-level exhaustion ratio.
+**The mechanism, stated properly: the reserve LAUNDERS MANPOWER AROUND THE EXHAUSTION GATE, in both
+directions.** Municipal mobilization *is* gated (`ongoing_mobilization.ts:284-291`). Sweeping into
+the reserve puts manpower where **no exhaustion check exists** - the draw loop performs none - while
+`collectStrategicReserves` does `pool.committed += excess`, which **inflates the donor's own
+exhaustion numerator**, pushing the source pool toward its cap faster *while the swept men become
+freely spendable*.
 
-**SETTLE FIRST (OPEN-3):** whether the RS reserve was ever non-zero and drained, or never filled. The
-t188 save shows 0 and no artifact carries a per-turn series. This decides whether the reserve is an
-RBiH-specific escape hatch or a faction-neutral mechanism the RS cannot feed — and the two imply
-different fixes.
+**INTERVENTION (2) IS STRUCK - it is directionally backwards.** The plan claimed
+`pool.committed += excess` "corrupts the gate denominator in the donor's favour." It corrupts it
+**against** the donor: higher `committed` -> higher exhaustion ratio -> the hard cap fires -> that
+municipality **stops mobilizing**. Removing the write would **un-cap** many of the 35 capped RBiH
+pools and let them mobilize **more**. **Intervention (2) alone increases ARBiH manpower.** Re-scope
+as (3), or drop it.
 
----
+**AND A SEPARATE, CHEAP, NON-TERRITORY-MOVING BUG: the orphan-pool drain is DEAD.**
+`strategic_reserve.ts:115` guards on `pool.available <= 0 || pool.committed > 0`, and `committed` is
+**monotone**. **So once a pool has ever supplied one man to one formation it is permanently
+orphan-ineligible, forever.** At t188: RS 58/110 pools (53%), RBiH 51/110 (46%), HRHB 29/104 (28%)
+excluded; only 6 RS / 4 RBiH / 3 HRHB remain eligible at all. => **The plan's premise "fed by
+territorial loss via orphan-pool drain" is largely FALSE in practice.** The guard was presumably
+meant to read "a pool no formation draws on"; `committed > 0` is a monotone proxy that never resets.
+
+**RECOMMENDED SINGLE INTERVENTION: (1) - subject `strategic_reserves` to `POOL_DECAY_RATE`.**
+`pool_decay.ts:70` touches `available` only; the reserve's exemption is an oversight, not a design.
+Faction-neutral in code, asymmetric in effect by construction of the situation - which is the framing
+that goes to the historian screen. ARBiH manpower-richness stays real (scale, pools and draw rates
+untouched); what changes is that a quarter-million men stop being immune to the war weariness every
+municipal pool already suffers.
+
+**Predicted magnitude, INFERRED (arithmetic, not simulation):** net accumulation ~ 256,091/188 ~
+**1,362/turn**; equilibrium at RBiH's own 0.012 ~ **113,500** - roughly halving the reserve, reached
+slowly and compounding from t0. **This is a slow, partial lever, not a decisive one.** A decisive one
+means intervention (3), a harder build with a bigger blast radius. **Do not bundle them.**
+
+**S3 PREDICTED LOSS SET (commit it before the run, per S3a).** A reserve nerf can only cost territory
+where an ARBiH brigade was topped up by a reserve draw: **46 distinct OSIDs, 44 brigades.** Head:
+15x `op:prozor:lug_2` - 15x `op:jablanica:slatina_2` - 15x `op:zvornik:djulici` - 14x `op:prozor:paros` -
+12x `op:bosanska_krupa:veliki_badic` - 11x `op:breza:koritnik` - 10x `op:konjic:dzepi_2` -
+9x `op:prozor:ustirama_3` - 8x `op:konjic:celebici_2` - 8x `op:konjic:jasenik_2`.
+**Shape: Neretva valley (Prozor/Jablanica/Konjic) and the Zvornik/Kamenica axis.** If losses appear
+away from these 46, S3 fails. *(Caveat from the seat that produced it: the exact-rate matcher
+over-counts, because `need = min(cap - current, rate)` lets a cap-truncated draw land on any value -
+two confirmed false positives, both enclave-tagged. Treat the 46 as an upper bound with noise.)*
+
+> ### ENCLAVE GUARD IS A NAMED HARD GATE ON THIS TASK - AND A NAMED GATE IS NOT SUFFICIENT
+>
+> Reserve-draw OSIDs include **`op:bihac:bihac_2`** - a guard anchor that must HOLD - plus
+> `op:bratunac:pobudje_2` and `op:zvornik:djulici`. At Bihac the drawing brigades are
+> `arbih_517th_light` and `hvo_101st_bihac`, **neither enclave-tagged**, so they draw from the
+> ordinary reserve for real and any nerf reaches them.
+>
+> **Structural corroboration from the canon seat:** `git grep -n enclave src/sim/combat/strategic_reserve.ts`
+> returns **zero hits**. `formation_spawn.ts:451-472` carries an explicit enclave branch with
+> per-enclave caps; `reinforceFromStrategicReserves` has **no equivalent** and is enclave-blind. And
+> `isEnclaveBrigade` reads a **data tag, not location** - so a brigade standing on a guard OSID
+> without the tag is invisible to every enclave-aware path.
+>
+> => All three candidates reduce reinforcement reaching a guard anchor **through a path that cannot
+> see it is an enclave.** Requires the guard as a hard gate **and** a pre-run statement of which
+> reserve-drawing brigades sit on guard OSIDs. **Task 0.0 is a prerequisite for this task.**
+
+**FREE INSTRUMENT, take it regardless of intervention:** add `strategic_reserves` (three integers) to
+the weekly-report emitter. It is already written every turn, costs nothing, and yields a per-turn
+series for every future run. Without it the reserve's peak balance and drain date stay NOT ESTABLISHED.
 
 ### Task 4.3 — A-1, single-source the loss ledger  *(hygiene, demoted)*
 
@@ -920,7 +1071,7 @@ disable.**
 
 | # | Risk | Likelihood | Mitigation |
 |---|---|---|---|
-| R1 | **Phase 1.1 redistributes probes rather than reducing them** | **CONFIRMED — measured** | Resolved: 1.1 is a fidelity fix (≤6.8% volume). **Task 1.2 is the volume lever.** Plan restated; do not re-sell 1.1 as attrition. |
+| R1 | **NEITHER 1.1 NOR 1.2 reduces probe volume materially** | **CONFIRMED — measured twice** | 1.1 ≤6.8% removed / 8.5% redistributed; 1.2 ceiling ~11%. The volume lever is the emission gate, in neither task. Do not sell Phase 1 as an attrition fix. |
 | R2 | **A-3 is built on `readiness` and is silently a no-op** — the obvious way to build it | **High** | §3.7 mandatory pre-implementation check. A-3 must use `disrupted_turns`, which no per-turn pass recomputes. |
 | R3 | **A fix flips Donji Vakuf or Bugojno** and the score improves for the wrong reason | Moderate on 3.3/3.4 | §8.5 tripwire, checked every run |
 | R4 | **A blanket baseline re-pin** bakes in the red `apr1992_52w` regression | Moderate on 2.2 | Re-pin only attributable artifacts, with a zero-value-change diff |
@@ -936,7 +1087,7 @@ disable.**
 | # | Question | Owner | Status |
 |---|---|---|---|
 | **OPEN-1** | Is `degraded` a one-way ratchet and the root of the RS asymmetry? | Formation seat | **CLOSED — FALSIFIED.** §3.6. Task 4.0 cancelled. |
-| **OPEN-2** | Does Phase 1.1 reduce probe volume or redistribute it? | Calibration seat | **CLOSED — redistributes.** ≤6.8% removed, 8.5% moved. Task 1.2 promoted. |
+| **OPEN-2** | Does Phase 1 reduce probe volume or redistribute it? | Calibration seat | **CLOSED — redistributes.** 1.1 ≤6.8% removed / 8.5% moved; 1.2 ceiling ~11%. **Neither is the volume lever.** |
 | **OPEN-3** | Was the RS strategic reserve ever non-zero and drained, or never filled? | Formation seat | **OPEN** — decides Task 4.2's shape |
 | **OPEN-4** | Of the 31 "alternative existed" suppressions, how many actually redistribute? `predictedViable` and `politicallyBlocked` are not reconstructible from artifacts, so the true volume drop lies in **[6.8%, 15.6%]** of probe battles. | Calibration seat | **OPEN** — needs the Phase 2 instrumentation, not another replay |
 | **OPEN-5** | Would RBiH show comparable brigade destruction under an equivalent scheduled catastrophe? | Historian + Formation | **OPEN** — nothing on disk tests it |
@@ -948,7 +1099,7 @@ disable.**
 | # | Decision | Recommendation |
 |---|---|---|
 | 14.1 | **Terrain-blind planner (D).** Six sites; panel unanimous-REFINED (no clean GO ⇒ escalates). `terrain_friction_index` is byte-identical to `slope_index` in 6,137/6,137 settlements — **must not be bundled**. | **Defer until Phase 4 lands**, with the reason recorded. Ship the fail-loud terrain loader regardless. |
-| 14.2 | **A-2 → §6 referral.** The only non-inert carrier is `morale`, inside the live absorption referral. | Refer; do not build. |
+| 14.2 | **A-2 → §6 referral.** Corrected: §9 establishes `experience` IS a live non-inert carrier (multiplicative in `basePower`, no floor clamp, no passive recovery). **Only the `morale` variant needs the §6 referral**; an experience-based A-2 does not, and the owner should not be sent a decision that is unnecessary. | Refer the morale variant only. |
 | 14.3 | **Mobilization ceilings.** 25%/50% of military-age males is **4-5× and 9-10× above the worst national reality** (1.3-1.5% of population dead ≈ 5-6% of MAM). | Do **not** lower onto a KIA-only term. The real drain was desertion, draft evasion, work deferments and refugee flight — and the VRS recorded **36,543 disabled against 18,543 dead**, so a killed+missing gate measures a third of the sink. Design pass needed. |
 | 14.4 | **Decrementing `committed` on permanent loss.** Correct ledger semantics, but **releases 66 capped pools back into mobilization** — a large move in the *opposite* direction from RE's intent. | Own lane, never bundled. |
 | 14.5 | **Petkovci §6 referral.** The engine holds an ICTY-documented July 1995 execution site in Serb-controlled Zvornik municipality as ARBiH ground. | **Separable and urgent.** Should not wait on RE. |

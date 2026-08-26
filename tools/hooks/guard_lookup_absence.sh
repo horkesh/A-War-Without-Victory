@@ -42,7 +42,10 @@ fi
 # Quote chars are matched via a bracket expression assembled to dodge shell quoting.
 SQ="'"
 DQ='"'
-if printf '%s' "$haystack" | grep -qE "(=|:)[[:space:]]*[${SQ}${DQ}]"; then
+# NARROWED 2026-08-26 (QA seat): the original `(=|:)\s*["']` matched most TypeScript greps and
+# would have been tuned out. Require a FIELD-SHAPED lookup — an identifier immediately before the
+# operator — which is the actual mistake shape (`readiness = 'active'`, `type: 'probe'`).
+if printf '%s' "$haystack" | grep -qE "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*(=|:)[[:space:]]*[${SQ}${DQ}]"; then
   cat <<'JSON'
 {"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"NARROW-LOOKUP GUARD (napkin 0m). Your search pattern looks for a field assigned a LITERAL value. That pattern CANNOT match an assignment of a computed value — `x = deriveState(y)` contains no literal, and a per-turn recompute is exactly the shape that gets missed. THIS EXACT MISS happened on 2026-08-26: searching `readiness = 'active'` returned 2 hits and produced the false conclusion 'nothing restores readiness'; the real exit was `formation.readiness = deriveReadinessState(formation)` at formation_lifecycle.ts:364, and the resulting wrong hypothesis became a plan prerequisite before 232 counter-examples killed it. ⇒ BEFORE concluding ANYTHING is absent: re-run against the bare field name (`<field> =`, `<field>:`) and READ EVERY HIT, or run `node tools/hooks/whowrites.mjs <field>` which does the exhaustive form for you and names any per-turn recompute that owns the field. ⇒ If you are NOT about to claim an absence, ignore this."}}
 JSON
