@@ -116,7 +116,12 @@ describe('enclave column displacement — default-on switch', () => {
         const f = s.military.formations!.arbih_285th as FormationState;
         expect(f.personnel).toBe(0);
         expect(f.status).toBe('inactive');
-        expect((f as { lifecycle_status?: string }).lifecycle_status).toBe('destroyed');
+        // `disbanded`, NOT `destroyed`. `brigade_reconstitution.ts` gates eligibility on the
+        // literal 'destroyed', so this assertion is what keeps the branch honouring its own
+        // "No reconstitution" comment — and what keeps reconstitution Path B from rebuilding
+        // the Žepa Brigade out of Žepa's deported population.
+        expect((f as { lifecycle_status?: string }).lifecycle_status).toBe('disbanded');
+        expect((f as { lifecycle_status?: string }).lifecycle_status).not.toBe('destroyed');
     });
 
     it('★ NEGATIVE CONTROL — a Goražde enclave brigade is UNTOUCHED', () => {

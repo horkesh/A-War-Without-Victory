@@ -1,8 +1,9 @@
 /**
  * Enclave-column displacement effect (RS brigade-attrition follow-up, 2026-08-05).
  * On an enclave-fall event, ARBiH enclave formations take heavy casualties and either
- * break out at reduced strength (Srebrenica) or are deported (Žepa). Flag-gated
- * AWWV_ENCLAVE_COLUMN_DISPLACEMENT (default OFF => no-op => byte-identical).
+ * break out at reduced strength (Srebrenica) or are deported (Žepa).
+ * AWWV_ENCLAVE_COLUMN_DISPLACEMENT is **DEFAULT-ON** since 2026-08-26 (owner decision after a
+ * §6 panel split 2-2 with one BLOCK); explicit 'false'/'0' is the rollback path.
  * Spec: docs/plans/2026-08-05-enclave-column-displacement-and-codex-lane.md.
  */
 import { describe, it, expect } from 'vitest';
@@ -43,12 +44,24 @@ const srebEffect: EventEffect = {
 };
 
 describe('enclave_formation_displacement', () => {
-    it('flag OFF (default): no-op — byte-identical', () => {
-        withFlag(undefined, () => {
+    // Was `flag OFF (default): no-op`. The default INVERTED on 2026-08-26 and this assertion
+    // went red — it was not caught at the time because the default-ON commit ran only the new
+    // test file it added. Kept as an explicit-off case rather than deleted: the rollback path
+    // is the thing worth pinning, and it is now pinned against the value that actually disables.
+    it('explicit OFF: no-op — byte-identical (rollback path)', () => {
+        withFlag('false', () => {
             const f = encFormation(); applyEventEffects(makeState(f), [srebEffect]);
             expect(f.personnel).toBe(1000);
             expect(f.location_osid).toBe('op:srebrenica:srebrenica_2');
             expect(f.status).toBe('active');
+        });
+    });
+
+    it('flag UNSET is ON — the 2026-08-26 owner decision', () => {
+        withFlag(undefined, () => {
+            const f = encFormation(); applyEventEffects(makeState(f), [srebEffect]);
+            expect(f.personnel).toBe(400);
+            expect(f.location_osid).toBe('op:zivinice:gracanica_2');
         });
     });
 
@@ -69,7 +82,11 @@ describe('enclave_formation_displacement', () => {
             applyEventEffects(makeState(f), [{ ...srebEffect, reconstitute_as: 'none', casualty_fraction: 0.15 }]);
             expect(f.status).toBe('inactive');
             expect(f.personnel).toBe(0);
-            expect(f.lifecycle_status).toBe('destroyed');
+            // `disbanded`, not `destroyed` — see the long note at the 'none' branch in
+            // apply_effects.ts. `destroyed` made the branch reconstitution-ELIGIBLE, directly
+            // contradicting its own "No reconstitution" comment, and would have let Path B
+            // rebuild the Žepa Brigade from Žepa's deported population.
+            expect(f.lifecycle_status).toBe('disbanded');
         });
     });
 

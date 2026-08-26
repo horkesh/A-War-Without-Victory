@@ -236,9 +236,37 @@ function applyEnclaveFormationDisplacement(
             (f as { assignment: unknown }).assignment = null; // re-slotted by sector assignment next turn
         } else {
             // 'none' — forcibly deported / removed from theatre (Žepa). No reconstitution.
+            //
+            // `disbanded`, NOT `destroyed`. Two reasons, and the first is that this branch used
+            // to CONTRADICT ITS OWN COMMENT. `brigade_reconstitution.ts` gates eligibility on
+            // `lifecycle_status === 'destroyed'` and on a recorded `destruction_turn` — this
+            // branch set both, so the line that says "No reconstitution" was making the formation
+            // reconstitution-ELIGIBLE. Historian seat, 2026-08-26.
+            //
+            // Second, `destroyed` asserts battlefield annihilation, and the record refutes it —
+            // that is the story the perpetrators told about Žepa. The town was ABANDONED then
+            // occupied; Mladić held surrender talks with Col. Avdo Palić, who was murdered when
+            // they failed (ICTY convicted Tolimir: Trial 2012-12-12, Appeal 2015-04-08); and
+            // "true to their word, the stubborn defenders had never formally agreed to any terms
+            // of surrender" (BB1 printed 360). The men dispersed — several hundred into Serbia,
+            // the rest to government territory or captivity. The dominant crime was FORCIBLE
+            // TRANSFER, which is why `casualty_fraction` here is 0.15 and not Srebrenica's 0.60.
+            // `destroyed` re-asserted the annihilation that the casualty fraction three lines up
+            // had deliberately declined to assert.
+            //
+            // ★ It also closes a §6 path nobody had named: reconstitution Path B rebuilds a
+            // formation "from where the displaced population went" when the home municipality is
+            // lost. Žepa's municipality was lost and its population deported — so Path B would
+            // have rebuilt the 285th "Žepa" Brigade out of Žepa's own deportees, making ethnic
+            // cleansing the recruiting mechanism that regenerates the army.
+            //
+            // NOT `displaced`: `patron_pressure.ts` skips destroyed|disbanded|merged|withdrawn but
+            // NOT displaced, so a 0-personnel `displaced` formation would still be counted in
+            // activeFormations and drag the strength ratio. NOT `withdrawn`: implies an ordered
+            // withdrawal the record does not support. (Engine/systems seat, same date.)
             (f as { personnel?: number }).personnel = 0;
             (f as { status?: string }).status = 'inactive';
-            (f as { lifecycle_status?: string }).lifecycle_status = 'destroyed';
+            (f as { lifecycle_status?: string }).lifecycle_status = 'disbanded';
             (f as { destruction_turn?: number }).destruction_turn = state.meta?.turn ?? 0;
         }
     }
