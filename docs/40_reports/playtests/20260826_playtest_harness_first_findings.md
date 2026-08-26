@@ -56,6 +56,73 @@ coverage. Early 52-turn results from this session were withdrawn on that basis.
 
 ---
 
+## 1a. 🔴 CRITICAL — the desktop app cannot start a campaign
+
+**Confidence: certain.** Reproduced by hand and then independently by the UI driver.
+Screenshot: `tools/playtest/evidence/20260826_ui_campaign_start_blocked.png`.
+
+Launch the app, click **New Campaign**, click any faction. The player is shown, in
+red, on the Choose Your Side screen:
+
+> **Invalid decisionMode. Use emergent or historical.**
+
+The picker stays up. No campaign starts. This is every faction, every launch.
+
+### Mechanism
+
+The 2026-08-23 case-file commit (`72062041c`, plan Task 3) extended
+`StartNewCampaignPayload` with `decisionMode: 'emergent' | 'historical'` and added
+validation that rejects an unknown mode:
+
+```js
+// src/desktop/electron-main.cjs:2087-2091
+if (scenarioKey !== undefined && scenarioKey !== 'apr_1992') { ... }   // tolerates undefined
+if (decisionMode !== 'emergent' && decisionMode !== 'historical') {     // does NOT
+    return { ok: false, error: 'Invalid decisionMode. Use emergent or historical.' };
+}
+```
+
+`decisionMode` has no `undefined` escape hatch, unlike `scenarioKey` directly above it.
+
+There are **two** campaign-start callers. The commit updated one:
+
+| Caller | Sends `decisionMode`? | Is it the desktop entry point? |
+| --- | --- | --- |
+| `src/ui/map/components/MainMenu.tsx` (case-file flow) | yes | **no** |
+| `src/ui/warroom/warroom.ts:508` (side picker) | **no** — `{ playerFaction, scenarioKey }` | **yes** |
+
+Electron's main window loads `awwv://warroom/index.html`
+(`electron-main.cjs:1042,1066`), so the un-updated caller is the one every player hits.
+
+### Why no existing gate caught it
+
+- **Headless cannot see it.** `president_playthrough.startCampaign` calls
+  `desktop_sim.startNewCampaign` directly, bypassing the IPC validation layer that
+  produces this error. All three 188-turn runs passed while the shipped app could not
+  begin a game.
+- `tests/ui/warroom_launch_screen_contract.test.ts` pins the launch screen's *layout*
+  (`mm-stage`, `--mm-scale`, media queries) and never clicks anything.
+- The case-file plan's own tests target the map app's boot, not the warroom's.
+
+**This is the finding that justifies the UI lane existing.**
+
+## 1b. The case-file opening flow is unreachable from the desktop launch path
+
+**Confidence: high.** Traced empirically — launch → `main-menu` → `side-picker`,
+and `MainMenu.tsx` never renders in the Electron app.
+
+The 2026-08-23 plan states its goal as *"Replace the instant faction picker with a
+functional, accessible case-file opening."* The warroom's `showSidePicker()` **is** an
+instant faction picker, and it is what the desktop app still shows. The landing →
+factions → dossier → mode sequence was built in `src/ui/map/components/MainMenu.tsx`,
+which renders only when the map app boots to `appScreen === 'mainMenu'` (`App.tsx:529`)
+— a state the packaged desktop path does not reach.
+
+Both surfaces are live and maintained, so this is not dead code on either side. It
+needs a ruling: is the warroom shell the intended entry (and the case-file flow is for
+the map-standalone context), or is the warroom menu shadowing the intended opening?
+1a is a bug under either reading.
+
 ## 2. Findings — engine and data
 
 ### 2.1 The president faces almost no decisions
