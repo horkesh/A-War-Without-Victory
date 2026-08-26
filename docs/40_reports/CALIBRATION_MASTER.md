@@ -84,6 +84,17 @@ whose ledger the October/cascade/stranded regressions belonged to: **nobody's �
 
 ---
 
+
+> **⚠ THERE IS NO TURN→DATE MAPPING IN THE SCENARIO (recorded 2026-08-26; it cost two seats a lookup).**
+> `apr1992_definitive_188w.json` carries `scenario_start_week: 0` and **no `start_date`**. So a turn
+> cannot be converted to a calendar date from the scenario file, and any claim that an event fires
+> "early" or "late" against a historical date is UNVERIFIABLE from that source. A worked example:
+> the Historian flagged `Operation Farz 95` as possibly 8-16 turns early (Uragan/Farz ran 10 Sep –
+> 11 Oct 1995 ≈ w179-183; the engine has it at t163-171) — and **withdrew the flag** on the
+> observation that the ~10-turn gap applies CONSISTENTLY to both corps' captures, which is the
+> signature of a calendar offset rather than a scheduling defect. **Do not re-raise it as a defect
+> without first establishing the mapping.**
+
 ## CURRENT AUTHORITY — 2026-08-26 — January 1993 on the single 188-week master
 
 The only scoring calibration scenario is

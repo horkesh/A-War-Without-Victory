@@ -309,34 +309,57 @@ const secondCorpsCellEvents = events.filter((e) => e.settlement_id === SECOND_CO
 const lastCapture = secondCorpsCellEvents.length ? secondCorpsCellEvents[secondCorpsCellEvents.length - 1] : null;
 const capturingCorps = lastCapture ? corpsOf(lastCapture.attacker_brigade) : null;
 
-console.log('  P2 corps attribution — the one 2nd-Corps signature cell the map affords');
-if (!lastCapture) {
-  farzBroken++;
-  console.log(`    ${SECOND_CORPS_CELL}  *** NEVER CAPTURED — not a pass ***`);
+// P-A — THE DISCRIMINATOR. One measurement, name-free. Brijesnica is the SOLE Lukavac flip in the
+// entire apr1995→oct1995 window (7 cells, 1 flip), so it is a clean signature by construction.
+console.log('  P-A discriminator — the 2nd-Corps signature cell, captured by 2nd Corps, in the window');
+const paCapture = events.find((e) => e.settlement_id === SECOND_CORPS_CELL && e.to === 'RBiH'
+  && (e.turn ?? -1) >= FARZ_WINDOW_START && corpsOf(e.attacker_brigade) === SECOND_CORPS);
+if (paCapture) {
+  console.log(`    taken t${paCapture.turn} by ${paCapture.attacker_brigade} (arbih_2nd_corps)  ** PASS **`);
 } else {
-  const bySecond = capturingCorps === SECOND_CORPS;
-  const inWindow = (lastCapture.turn ?? -1) >= FARZ_WINDOW_START;
-  if (!bySecond) farzBroken++;
-  console.log(
-    `    taken t${lastCapture.turn} by ${lastCapture.attacker_brigade ?? '?'} (${capturingCorps ?? 'unknown corps'})`
-    + `  ${bySecond ? '** 2nd CORPS **' : '*** NOT 2nd CORPS — not a pass ***'}`,
-  );
-  if (bySecond && !inWindow) {
-    console.log(`    ⚠ but t${lastCapture.turn} is ${FARZ_WINDOW_START - lastCapture.turn} turns BEFORE the Farz window`
-      + ` — 2nd-Corps-captured, yet NOT evidence of Farz participation. P3 is what decides this case.`);
-  }
+  farzBroken++;
+  const anyCap = lastCapture
+    ? `taken t${lastCapture.turn} by ${lastCapture.attacker_brigade ?? '?'} (${capturingCorps ?? 'unknown corps'})`
+    : 'never captured';
+  console.log(`    ${anyCap}  *** FAIL — needs an arbih_2nd_corps capture at t>=${FARZ_WINDOW_START} ***`);
 }
 
-console.log('  P3 structural liveness — 2nd Corps must mount at least one capture-capable op after t159');
-// Measured from this run's own control events: any non-probe capture credited to a 2nd Corps brigade.
-const secondCorpsLateCaptures = events.filter((e) => (e.turn ?? -1) > 159
-  && e.mechanism === 'combat' && corpsOf(e.attacker_brigade) === SECOND_CORPS);
-if (secondCorpsLateCaptures.length === 0) {
+// P-B — THE UNIVERSAL GUARD, and the reason it exists rather than another list.
+//
+// P-A is EXISTENTIAL over a fixed cell ("this must flip"): it can pass while the corps also does
+// five wrong things. P-B is UNIVERSAL over what the corps DOES ("every late capture must be
+// warranted"): it cannot pass while the corps does anything wrong. Different quantifiers, different
+// failure modes, no overlap — which is why P-B is NOT a restatement of the cell list.
+//
+// ★ IT IS ALSO SELF-MAINTAINING, and that is the point. A hand-enumerated municipality list has a
+// hole for every municipality nobody thought of, and BOTH halves of the previous condition already
+// had one: `gracanica` was absent from the negative list, so an ahistorical 2nd Corps capture of
+// `op:gracanica:petrovo_2` (RS at ALL FOUR painted checkpoints, and the only RS cell left in
+// Gračanica at oct1995) slipped through the negative net AND satisfied the old liveness test. The
+// guard reported LIVE on the strength of the engine doing the wrong thing.
+//
+// ★ AND IT ENFORCES THE OPERATION'S HISTORICAL STOPPING LINE FOR FREE. Uragan/Farz did not run on:
+// Doboj held — "these elite additions at last secured Doboj from the threat of further ARBiH
+// advances" (BB1 printed 388), and the painted reference agrees (13 cells, 10 still RS at oct1995,
+// ZERO flips). Petrovo held — Vozuća took the SOUTHERN Ozren tip, not the northern. The correct
+// shape of this operation is its four gains AND its two limits, and P-B checks both without either
+// being enumerated here.
+console.log('  P-B universal guard — EVERY late 2nd-Corps capture must be reference-warranted');
+const lateSecondCorps = events.filter((e) => (e.turn ?? -1) >= FARZ_WINDOW_START
+  && e.mechanism === 'combat' && corpsOf(e.attacker_brigade) === SECOND_CORPS && e.to === 'RBiH');
+const unwarranted = lateSecondCorps.filter((e) => !(ref.apr1995[e.settlement_id] === 'RS' && ref.oct1995[e.settlement_id] === 'RBiH'));
+console.log(`    ${lateSecondCorps.length} late 2nd-Corps capture(s) examined`);
+if (unwarranted.length > 0) {
   farzBroken++;
-  console.log('    *** ZERO 2nd-Corps captures after t159 — NOT A PASS. History gives the Tuzla corps TWO');
-  console.log('        divisional-scale actions in that window (Baljkovica 15-16 Jul 1995; Uragan 10 Sep-11 Oct). ***');
+  for (const e of unwarranted) {
+    console.log(`    *** t${e.turn} ${e.settlement_id} by ${e.attacker_brigade}`
+      + ` — reference says apr95=${ref.apr1995[e.settlement_id] ?? '-'} oct95=${ref.oct1995[e.settlement_id] ?? '-'}; NOT warranted ***`);
+  }
+} else if (lateSecondCorps.length > 0) {
+  console.log('    all warranted by the painted reference ** PASS **');
 } else {
-  console.log(`    ${secondCorpsLateCaptures.length} capture(s) after t159 ** LIVE **`);
+  // Zero late captures is not automatically a fail here — P-A already requires one.
+  console.log('    (none — P-A is what requires 2nd Corps to act at all)');
 }
 
 if (farzBroken > 0) breached = true;
