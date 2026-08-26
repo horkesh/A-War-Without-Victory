@@ -120,6 +120,45 @@ if (base) console.log(`  NET across checkpoints: ${net >= 0 ? '+' : ''}${net}`);
 //
 // The expected values are not invented: every cell below was read out of the CURRENT
 // painted references at all four checkpoints on 2026-08-26.
+// CONTEST COUNTS — added 2026-08-26 after the red-team seat measured that the repair which took
+// this guard from one cell to nine fixed the FAIL-OPEN defect but WIDENED the VACUOUS-PASS one.
+// On n373, 8 of the 9 guard cells are never the target of a single battle in 188 weeks. Goražde:
+// zero, in every run checked. Srebrenica: zero. Žepa: zero. The sting is that Teočak — the one
+// cell the old guard checked — is the only consistently contested one, so expanding to nine
+// surrounded the single live cell with eight that pass for free.
+//
+// "Goražde held" is currently indistinguishable from "nothing ever attacked Goražde."
+//
+// This does NOT hard-fail on zero: for Žepa and the Sarajevo core, uncontested may be correct
+// history (the SRK strangle-not-capture posture is canon; Galić Appeal §389). The value is that
+// the guard stops CLAIMING something it did not test.
+//
+// ⚠ NARROW BY CONSTRUCTION: this counts battles where the cell IS THE TARGET. A cell can be
+// pressured through its adjacency ring without ever being targeted, so 0 means "never directly
+// attacked", NOT "never threatened". Do not let these zeros be quoted as "Goražde was never under
+// threat." The ring version needs data/derived/operational/operational_contact_graph.json.
+const contestCount = {};
+try {
+  const wrPath = path.join(runDir, 'weekly_report.jsonl');
+  for (const line of fs.readFileSync(wrPath, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    let rec;
+    try { rec = JSON.parse(line); } catch { continue; }
+    for (const b of rec.battles || []) {
+      if (!b || !b.target_osid) continue;
+      contestCount[b.target_osid] = (contestCount[b.target_osid] || 0) + 1;
+    }
+  }
+} catch {
+  // weekly_report.jsonl absent => print UNKNOWN rather than a misleading 0.
+  contestCount.__missing = true;
+}
+const contestLabel = (osid) => {
+  if (contestCount.__missing) return 'contested? UNKNOWN (no weekly_report.jsonl)';
+  const n = contestCount[osid] || 0;
+  return n > 0 ? `CONTESTED-AND-HELD (${n} battles)` : 'UNCONTESTED (0 battles as target)';
+};
+
 const HOLDS = [
   ['Gorazde', 'op:gorazde:gorazde_2'],
   ['Bihac', 'op:bihac:bihac_2'],
@@ -148,6 +187,7 @@ for (const [name, osid] of HOLDS) {
     ? '*** OSID NOT IN RUN — guard cannot assert; treat as BREACH ***'
     : ok ? '** HOLDS **' : '*** BREACHED — panel matter, do not merge ***';
   console.log(`  ${name.padEnd(21)} ${prof.map((x) => String(x).padEnd(4)).join(' ')} ${verdict}`);
+  if (ok) console.log(`  ${' '.repeat(21)} ${' '.repeat(19)} ${contestLabel(osid)}`);
 }
 
 console.log('');
