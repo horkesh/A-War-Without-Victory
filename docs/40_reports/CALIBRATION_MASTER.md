@@ -53,6 +53,17 @@ rule.
 > unattributable, requires a schedule-fingerprint diff (if ≥20% of ops differ in creation turn the
 > number told you nothing) · **−11 to −25** real signal, adoptable only with S3 satisfied · **worse
 > than −25** STOP, owner decision.
+> **★ S4 PRECONDITION — added 2026-08-26, and it says what S4 silently assumed.** The bands apply
+> **only** where the op-schedule fingerprint (`tools/op_schedule_diff.cjs`, rung 4 = corps+objectives)
+> diverges **< 20%**. Above that the checkpoints are **UNATTRIBUTABLE** and the change must be
+> adjudicated on a **pre-committed BEHAVIOURAL target** — a counter, a rate, a per-corps distribution
+> — never on matched OSIDs. **A structural change to operation SELECTION will always exceed 20%; that
+> is a property of the change, not a flaw in the run, and re-running will not fix it.**
+> *First application, same date:* the probe intel-gate (n374→n377) measured **61.1%** at rung 4, so
+> its jan/apr/apr/oct deltas of −1/−7/−13/−4 are **unknown, not a cost**. It was adopted on its
+> behavioural target (`consecutive_probes` 38→1) instead. **Record such numbers as "measured,
+> unattributable at N%" — never as an accepted territorial cost, and never as acceptable.**
+>
 > **S5 — Tripwires override any score.** All four anchor sets; the enclave guard; the western-Bosnia
 > cascade; and §8.5.
 > **S6 — CONDITIONAL.** Where S3 was satisfied, the discriminator is the **LOCATION** of losses, not

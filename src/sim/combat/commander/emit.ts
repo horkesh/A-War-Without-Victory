@@ -81,6 +81,7 @@ import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmenta
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { shouldLaunchProbeInstead } from '../bot_corps_directives.js';
 import { getStalestSectorIntelConfidence } from '../sector_intel.js';
+import { INTEL_GATE_LAUNCH_THRESHOLD } from '../sector_intel_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -1130,6 +1131,42 @@ function buildOperations(
                 [probeBrigade.brigade_id],
                 Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade])),
             );
+
+            // ── INTEL GATE — owner decision, 2026-08-26: "Make it probe once intel falls below
+            //    certain threshold." ────────────────────────────────────────────────────────────
+            //
+            // WHAT WAS WRONG. This fallback probe site consulted only a 4-turn cooldown, slots,
+            // surplus and initiative — never intel, and never MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT,
+            // which is read in exactly ONE place (`bot_corps_directives.ts:284`, the
+            // plan-conversion path). `consecutive_probes` resets ONLY when a real attack is created
+            // or completes, so a corps that can never form an offensive plan never resets and never
+            // stops. Measured at t188: `arbih_1st_corps` **38** consecutive probes,
+            // `hvo_northwest_bosnia` 10, every other corps 0-3.
+            //
+            // WHY THE COUNTER WAS THE WRONG THING TO CAP. Capping this site at 2 would make a
+            // besieged corps probe twice and then stop FOREVER — nothing would ever reset it — which
+            // destroys the intel maintenance that is the whole purpose of a probe. The owner's ruling
+            // is that low tempo is CORRECT MODELLING (a Sarajevo corps under siege does not attack);
+            // probes are legitimate, the unbounded repetition is not.
+            //
+            // WHY GATING ON INTEL CLOSES THE LOOP — verified, not assumed.
+            // `updateSectorIntelFromCombat` (`sector_intel.ts:127`) is called after EVERY attack
+            // engagement (`attack_resolution_osid.ts:1611-1612`), NOT gated on probe-vs-attack, and
+            // it sets `confidence = 1.0` with `sources: ['combat']`. So a probe that fights raises
+            // its own sector to full confidence, this gate shuts, and it reopens only when intel
+            // decays. The loop terminates on its own and needs no counter.
+            //
+            // Threshold is the EXISTING per-faction one (RS 0.25 / RBiH 0.40 / HRHB 0.30) via
+            // `shouldLaunchProbeInstead`'s own constant — no new tuning value is introduced, and the
+            // gate matches the one the plan-conversion path already applies.
+            if (probeSectorId && briefing.state_ref) {
+                const probeSectorIntel = getStalestSectorIntelConfidence(briefing.state_ref, probeSectorId);
+                const intelThreshold = INTEL_GATE_LAUNCH_THRESHOLD[briefing.faction as keyof typeof INTEL_GATE_LAUNCH_THRESHOLD];
+                if (intelThreshold !== undefined && probeSectorIntel >= intelThreshold) {
+                    // Intel on this sector is already good enough. Probing it again buys nothing.
+                    return ops;
+                }
+            }
 
             // Derive probe objective: first enemy-adjacent OSID in the probe sector.
             // Without objectives the probe op has no axis targets and would be ZEA.
