@@ -29576,3 +29576,37 @@ may not be renamed, blessed, or used to start T2.
 plans index, docs index, active task governance, and project ledger. Canon propagation is deferred
 to the T1B code packet; therefore `docs/10_canon/Systems_Manual_v0_9_0.md`,
 `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and `docs/10_canon/FORAWWV.md` were not edited.
+
+## [2026-08-27] docs(RE-0D): add final sector convergence prerequisite
+
+**Type:** Documentation/process ruling and control-plane synchronization only. No engine, test,
+scenario, save/schema, baseline, reference, threshold, package, canon, knowledge-ledger, push, PR,
+merge, tag, publication, or release change.
+
+**Ruling and RED:** Unanimous review added T1C after T1B and before S0. The existing complete
+optimized/reference property exposes four deterministic semantic differences at seed 31 when
+`applyFinalSectorOwnerTruthPass:4` is conditionally skipped: SRK sectors 4 and 7 retain
+`threat_ratio:9999` rather than `0`; `arbih_1st_mountain` retains `entrenchment_turns:12` rather
+than `0` and remains at Novi Grad rather than the unconditional reference's Centar Sarajevo
+location. This is correctness evidence, not a historical-outcome or performance claim.
+
+**Bounded implementation:** T1C partially reverts
+`53889f35595c917392d02c32dcea703938802cf9` only by making final owner-truth pass 4 unconditional.
+The corrected prune/recovery receipt condition and all other fixed-point work remain. Production
+ownership is solely `src/sim/combat/corps_front_sectors.ts`; the existing integration property is
+the only permitted test owner if a diagnostic-only improvement is needed. No schema, field, flag,
+module, cache, threshold, scenario, baseline, reference, pipeline, canon, or history literal is
+authorized.
+
+**Evidence and retention:** The code packet requires the seed-31 RED/mutation, 300-comparison
+three-mode full-state property, historical seven-file matrix, typecheck, balanced suite, baselines
+without refresh, and three alternating exact-parent/candidate 40-week performance pairs under Node
+22. Correctness is retained even if median wall time regresses above 2%; that outcome opens a
+separate bounded performance escalation before T2 and never authorizes restoring the faulty skip.
+Only after T1C may the fresh exact-code-commit Node-22 S0 run.
+
+**Synchronization:** Sole RE plan, living audit, Master Roadmap, Command Board, plans index, active
+task governance, docs index, reopened Phase 2 performance evidence, Calibration Master, and project
+ledger agree. The future desktop changed-path packet is relabeled RE-0E to prevent duplicate active
+IDs. No report index changed because both affected reports were already indexed. No canon or
+knowledge-ledger update is made before code evidence.

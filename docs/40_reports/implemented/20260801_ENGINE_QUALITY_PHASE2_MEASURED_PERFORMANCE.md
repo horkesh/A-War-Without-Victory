@@ -5,7 +5,7 @@
 **Scenario:** `data/scenarios/apr1992_definitive_40w.json`
 **Reference machine:** AMD Ryzen 7 5700X, 8 physical / 16 logical cores, Windows x64, Node v24.13.0
 **Target:** mean below 100 ms per simulated turn
-**Status:** Operational-graph, runtime-hardened immutable-adjacency, operational-data ownership reuse, the Phase 2c call-scoped dense formation-occupancy index, and Phase 2d Task 8A's invocation-local front-edge relation are accepted. Same-parent control disproves the apparent committee-repair regression; the earlier `+18.155%` packet is preserved below as historical evidence but superseded as a causal timing result. The Phase 2b fixed-point candidate remains committee-blocked, and the Phase 2c reachability/sector-fact candidate remains rejected and fully reverted. Task 8A is `PASS_RETAIN` at integrated commit `0fd36157b`: all exact-output and causal-owner gates pass, while sampled peak heap movement from `215.046` to `291.752 MB` and a fresh retained-source sample of `281.242 MB` remain an explicit watch. The retained fresh profile still ranks `buildCorpsFrontSectors` first at `295.866 ms/turn`; Phase 2e pure full-solve/serial-commit extraction is therefore the next enabling packet. Task 6 remains closed. The latest retained exact-parent paired mean is `1,086.311 ms/turn`, or `10.8631x` the target, so the performance target is not met.
+**Status:** Historical R5 performance dispositions remain closed, but RE T1C has reopened one correctness and measurement slice: `applyFinalSectorOwnerTruthPass:4` must return to unconditional execution before RE S0. Operational-graph, runtime-hardened immutable-adjacency, operational-data ownership reuse, the Phase 2c call-scoped dense formation-occupancy index, and Phase 2d Task 8A's invocation-local front-edge relation remain accepted. The Phase 2b fixed-point candidate remains performance-unaccepted and the Phase 2c reachability/sector-fact candidate remains rejected. Task 8A remains `PASS_RETAIN` at `0fd36157b`; its memory watch remains. T1C does not reopen the 100 ms target or Task 6. It requires fresh exact-parent/candidate timing, and the correctness seal is retained even if a separate performance escalation is required.
 
 ## Determinism boundary
 
@@ -142,6 +142,30 @@ Vitest 2.1.9 reported 7 files / 81 tests passed, started `2026-08-01 18:22:50`, 
 `npm.cmd run typecheck` passed. `npm.cmd run test:baselines` reported `Baseline regression: all scenarios match.` Its raw stdout/stderr is preserved in the ignored diagnostic `data/derived/_debug/r5_phase2b_committee_correction_baselines.log` (63,168 bytes; SHA-256 `a908d8a8993de784c2415f2cfa8dd3d20bf35bab8cbbfe2476b7c1e9cc0d2506`). Diff hygiene and the determinism-sensitive added-line scan passed. Per `DETERMINISM_TEST_MATRIX.md`, `Engine_Invariants_v0_9_0.md`, `DETERMINISM_AUDIT.md`, `INVARIANTS_IN_CODE.md`, and `CODE_CANON.md`, the correction adds no random, time-derived, locale-dependent, filesystem-order, or persisted diagnostic input. No performance profile or new timed scenario measurement was run for the correction; the timing packet remains blocked pending an authorized fresh lane.
 
 The tracked acceptance contract is this report plus the focused equivalence tests. Raw profiler products remain untracked because they are machine-local diagnostic evidence, not canonical game data.
+
+### RE T1C reopening — unconditional owner-truth pass 4
+
+The unanimous RE review found that the corrected 300-comparison property is now affirmative RED
+evidence against the conditional `applyFinalSectorOwnerTruthPass:4` shortcut. At deterministic
+variant seed 31, optimized and unconditional-reference execution differ in exactly four semantic
+fields: SRK sectors 4 and 7 retain `threat_ratio:9999` rather than `0`, and
+`arbih_1st_mountain` retains `entrenchment_turns:12` rather than `0` plus a Novi Grad rather than
+Centar Sarajevo location. This is live final-sector/state truth, not a timing preference.
+
+T1C therefore partially reverts `53889f35595c917392d02c32dcea703938802cf9` only at pass 4. The
+prune/recovery receipt gate and all other fixed-point work remain. The source boundary is solely
+`src/sim/combat/corps_front_sectors.ts`; the existing
+`tests/sector_partition_buildCorpsFrontSectors_integration.test.ts` property is the only permitted
+test edit if diagnostic improvement is needed. The exact RED/mutation, 300-comparison property,
+historical seven-file matrix, typecheck, balanced suite, and baselines-without-refresh must pass.
+
+After the correctness commit, one excluded warm-up per source and three alternating
+exact-parent/candidate 40-week pairs must be captured on Node 22 in the order parent 1, candidate 1,
+parent 2, candidate 2, parent 3, candidate 3. Exact scenario bytes/hashes and affected phase totals
+are mandatory. A median regression above 2% opens a separate bounded performance escalation; it
+does not authorize reverting the correctness seal, accepting the old Phase 2b performance packet,
+or weakening the property. Until T1C and the subsequent fresh paired S0 close, this report is
+reopened evidence only and owns no execution queue.
 
 ### Ledger and handoff correction
 

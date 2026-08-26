@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-26
 
-**Status:** T1 in progress; T1A closed, T1B next, S0 pending
+**Status:** T1 in progress; T1A closed, T1B active, T1C ordered next, S0 pending
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -376,3 +376,25 @@ The pre-fix pair may prove reproducibility and supply the RED fixture, but it is
 baseline and must not be renamed, blessed, or used to start T2. T1B requires a code/test commit,
 independent review, and a new exact-code-commit Node-22 pair before the evidence/docs commit closes
 T1 and S0.
+
+## T1C / RE-0D ruling — final sector convergence before S0
+
+The unanimous review reopened one bounded correctness surface from historical R5 Phase 2b. The
+existing full-state, three-mode property now exposes a deterministic seed-31 divergence when
+`applyFinalSectorOwnerTruthPass:4` is conditionally skipped: two SRK sector `threat_ratio` values
+remain `9999` instead of `0`, while `arbih_1st_mountain` retains entrenchment `12` instead of `0`
+and remains at Novi Grad rather than the unconditional reference's Centar Sarajevo location.
+
+T1C partially reverts `53889f35595c917392d02c32dcea703938802cf9` only by restoring pass 4 as
+an unconditional correctness seal. It preserves the prune/recovery receipt condition and every
+other fixed-point optimization. Production ownership is only
+`src/sim/combat/corps_front_sectors.ts`; the existing integration property is the sole permitted
+test owner if a diagnostic-only improvement is needed. No canon, schema, field, flag, cache,
+threshold, scenario, baseline, reference, or historical literal changes.
+
+T1B closes first. T1C then requires the seed-31 RED/mutation, the 300-comparison full property,
+the historical seven-file convergence matrix, typecheck, balanced full suite, baselines without
+refresh, and three alternating exact-parent/candidate 40-week performance pairs. Correctness is
+retained even if median wall time regresses above 2%; that result opens a separate bounded
+performance escalation before T2 and never authorizes restoring the faulty skip. Only after T1C
+may a fresh exact-code-commit Node-22 pair establish S0.

@@ -1,15 +1,18 @@
 # AWWV Calibration Master Reference
 
-## ★ CURRENT RE/CALIBRATION AUTHORITY — 2026-08-26
+## ★ CURRENT RE/CALIBRATION AUTHORITY — 2026-08-27
 
 Further calibration is paused until [RE — Lean Engine Integrity](../plans/2026-08-26-engine-integrity-plan.md)
-closes. Claude's separate probe lane must receive an owner-approved disposition first. RE performs
-no calibration tuning and may not refresh thresholds, manifests, references, or expected hashes to
+closes. The separate probe lane is closed at `b711cffa9` and is not RE scope. RE performs no
+calibration tuning and may not refresh thresholds, manifests, references, or expected hashes to
 make a gate pass.
 
 No current run satisfies lean RE-0 S0. RE-0 requires two fresh, byte-identical, distinct-output
-188-week runs on the approved integrated execution parent, clean metadata, and Node 22. Raw artifact
-metadata outranks this catalog.
+188-week runs on the approved integrated execution parent, clean metadata, and Node 22. T1B
+mixed-battle occupation convergence and T1C unconditional final sector owner-truth convergence are
+ordered S0 prerequisites. The prior Node-22 pair is reproducible pre-fix evidence only. Farz remains
+separate known-red calibration; T1C is not authority to tune it. Raw artifact metadata outranks this
+catalog.
 
 ## PROBE-LANE CLOSING REFERENCE — clean provenance — **NOT RE-0 S0**
 
