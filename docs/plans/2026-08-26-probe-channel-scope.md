@@ -392,3 +392,50 @@ and reasoning about engine behaviour from it is reasoning about the projection.*
   real property rather than `op.type` renamed** — it can vary WITHIN a type. Nothing sets it in
   production today, and that limitation is stated in the type's own header rather than left for a
   reviewer to discover.
+
+---
+
+## 11. TARGETS RE-BASED after OWNER RULING #2 ("It was blindness") — committed BEFORE the run
+
+**Tree under test:** step 1 (stable sector identity + edgeless-ghost exclusion) **and** step 3
+(`occupies_on_victory`). **Step 2 is REVERTED** — control N3 fired.
+
+### ★ TWO CONTROLS WERE PINNING NUMBERS THE BUG PRODUCED. Both re-based, and the reasoning is the ruling.
+
+The probe channel existed **to compensate for the forgetting**. With intel memory repaired, corps
+commit instead of probing — so the old probe volume and the old attack count are both artifacts of a
+blind engine, not properties to preserve.
+
+| control | was | now | why |
+|---|---|---|---|
+| **N1** `sector_attack` 44 ±3 | gate | **REPORT ONLY, not gated** | 44 is what a BLIND engine produced. The owner ruled the tempo rise correct. Gating it would forbid the fix from working. |
+| **N2** probes ≥ 150 | gate | **probes ≥ 30** | Same error, same direction — 215 was compensation. The tool must still EXIST (owner: probes are "a tool to keep the intel value high"), so the control is now against the channel DISAPPEARING, not against it shrinking. |
+
+**This is the second time today a control has turned out to pin a defect's output.** The general form:
+**a negative control taken from a baseline is only valid if the baseline is not itself the thing under
+repair.**
+
+### T3/T5 restated as COUNTS (calibration seat's own S3b amendment)
+
+They were **ratios whose denominator the change itself moves** — the bundle removed 108 live probes
+and 27 dead ones, 4:1 backwards, so both metrics inverted meaninglessly.
+
+| | baseline (n378) | n379 | new target |
+|---|---:|---:|---|
+| **T3′** dead probes (absolute) | 61 | 34 | **≤ 45** |
+| **T5′** live probes (absolute) | 154 | 46 | **report only** — a seeing corps needs fewer; N2′ guards the floor |
+
+### The targets that carry the verdict
+
+> **T4 — PRIMARY, the cause fix.** median `turns_in_contact` **≥ 8** (baseline 1-2) **and** ARBiH
+> sectors below 0.40 **≤ 8/28** (baseline 16/28). *n379 read 88 and 7/23.*
+> **T1′ — the owner's original complaint, re-scoped.** `arbih_1st_corps` `consecutive_probes` **= 0**
+> (baseline 38). The residual maximum **moved to a different corps** (2nd Corps, 22), so it is a
+> different phenomenon and is **reported, not gated** — carrying the old ≤10 threshold onto a corps it
+> was never written for is how a stale target produces a false failure.
+> **T6 — STEP 3, and it has never been measured.** Every capture withheld by the occupation
+> declaration must belong to a **probe** operation, and **zero non-probe captures may be withheld**.
+> The C3 amendment says a bundled member needs a metric that FIRES; step 3 had none in n379 and rode
+> the bundle unmeasured. This is that metric.
+> **N4 — unchanged.** Nine-cell guard, two-sided falls, four Farz/Ozren cells, and 2nd Corps
+> conducting ≥1 capture-capable operation after t159.
