@@ -59,3 +59,37 @@ test('decisionMode validation is no stricter than the sim default it guards', as
             + 'relies on it when a caller omits decisionMode.',
     );
 });
+
+test('desktop launch routes to the case-file opening, not the warroom side picker', async () => {
+    const warroom = await readFile(join(process.cwd(), 'src', 'ui', 'warroom', 'warroom.ts'), 'utf8');
+
+    // The opening document must carry NO `view` param: App.tsx boots to appScreen
+    // 'mainMenu' by default and only skips it when `view` forces warroom/game.
+    assert.match(
+        warroom,
+        /const OPENING_SHELL_DOCUMENT = 'index\.html\?embedded=1';/,
+        'OPENING_SHELL_DOCUMENT must omit `view` so the shell boots to the case-file flow.',
+    );
+    assert.match(
+        warroom,
+        /showCaseFileOpening\(\)/,
+        'The desktop boot path must open the case-file sequence.',
+    );
+    // Desktop boots into it; browser/dev keeps the static menu (no shell iframe there).
+    assert.match(
+        warroom,
+        /if \(this\.desktopBridge\?\.startNewCampaign\) await this\.showCaseFileOpening\(\);/,
+        'Desktop must route to the case-file opening while browser/dev falls back to the static menu.',
+    );
+});
+
+test('the case-file opening hides the warroom desk chrome', async () => {
+    const warroom = await readFile(join(process.cwd(), 'src', 'ui', 'warroom', 'warroom.ts'), 'utf8');
+    const fn = warroom.slice(warroom.indexOf('private async showCaseFileOpening'));
+    const body = fn.slice(0, fn.indexOf('\n    }'));
+    assert.match(
+        body,
+        /warroom-desk-hidden/,
+        'Without this the Menu / War Map / Sandbox toolbar and date readout render on top of the opening.',
+    );
+});

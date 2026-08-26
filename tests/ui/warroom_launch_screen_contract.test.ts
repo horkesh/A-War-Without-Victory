@@ -1,3 +1,14 @@
+/**
+ * SCOPE NOTE (2026-08-27): this pins the warroom's own launch card, which since
+ * 2026-08-27 is NO LONGER the desktop launch screen. Desktop now opens the case-file
+ * sequence (src/ui/map/components/MainMenu.tsx) inside the shell iframe; this card
+ * remains the browser/dev-mode opening, which has no shell iframe to host that flow.
+ *
+ * The assertions below are still valid for that path. Do not read a pass here as
+ * evidence about what a desktop player sees — this test never clicks anything, which
+ * is why it stayed green through the period when the desktop app could not start a
+ * campaign at all. End-to-end desktop launch is covered by tools/playtest/run_electron.ts.
+ */
 import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';

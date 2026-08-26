@@ -29,6 +29,19 @@ type CampaignScenarioKey = 'apr_1992';
 const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
 const CAMPAIGN_REPLACEMENT_UPDATE: GameStateUpdateMetadata = Object.freeze({ campaignReplacement: true });
 const OPERATIONAL_SHELL_DOCUMENT = 'index.html?embedded=1&view=warroom';
+/**
+ * The case-file opening (landing -> factions -> dossier -> mode -> Begin), built
+ * 2026-08-23 in src/ui/map/components/MainMenu.tsx.
+ *
+ * No `view` param on purpose: App.tsx boots to `appScreen = 'mainMenu'` by default and
+ * only skips it when `view` forces 'warroom' or 'game' (utils/shellNavigation.ts
+ * resolveInitialShellScreen). Omitting it is what selects the case-file flow.
+ *
+ * Until 2026-08-27 the desktop launch showed this file's own static Command Post card
+ * and instant side picker instead, so the case-file sequence — the thing the plan was
+ * written to deliver — was unreachable for every desktop player.
+ */
+const OPENING_SHELL_DOCUMENT = 'index.html?embedded=1';
 const SANDBOX_DOCUMENT = 'tactical_sandbox.html?embedded=1&desktop_window=sandbox';
 
 interface DesktopBridge {
@@ -166,9 +179,12 @@ class WarroomApp {
             }
             this.showMainMenu();
         } else if (!this.gameState && !this.userNavigatedFromMenu) {
-            // Only show main menu if the user hasn't already navigated away
-            // during the async init (e.g. clicked "New Campaign" while assets loaded).
-            this.showMainMenu();
+            // Only show an opening if the user hasn't already navigated away during the
+            // async init (e.g. clicked through while assets loaded).
+            // Desktop opens the case-file flow; the browser/dev path keeps this file's
+            // static menu, which does not depend on the shell iframe.
+            if (this.desktopBridge?.startNewCampaign) await this.showCaseFileOpening();
+            else this.showMainMenu();
         }
 
     }
@@ -390,6 +406,38 @@ class WarroomApp {
                 this.showLoadedGameShellScene();
             }
         }
+    }
+
+    /**
+     * Desktop launch: hand the opening to the case-file flow inside the shell iframe.
+     *
+     * Campaign start happens INSIDE the frame — it has its own `window.awwv.startNewCampaign`
+     * (verified), so MainMenu's Begin runs App.tsx `handleSelectFaction`, which starts the
+     * campaign and moves itself to the game shell. This shell then picks the new state up
+     * through its existing game-state subscription; no extra plumbing.
+     */
+    private async showCaseFileOpening(): Promise<void> {
+        const tacticalScene = document.getElementById('tactical-map-scene');
+        if (!tacticalScene) {
+            // No scene container to host the frame — fall back rather than showing nothing.
+            this.showMainMenu();
+            return;
+        }
+        this.showScreen('none');
+        const warroomScene = document.getElementById('warroom-scene');
+        if (warroomScene) warroomScene.classList.remove('warroom-scene-hidden');
+
+        const shell = await this.ensureOperationalShellIframe(tacticalScene, OPENING_SHELL_DOCUMENT);
+        shell.hidden = false;
+        if (this.tacticalSandboxIframe) this.tacticalSandboxIframe.hidden = true;
+
+        // Same reveal that showTacticalMapScene performs. The desk MUST be hidden: it
+        // carries the Menu / War Map / Sandbox toolbar and the date readout, and those
+        // sat on top of the opening until this line existed.
+        const desk = document.getElementById('warroom-desk');
+        if (desk) desk.classList.add('warroom-desk-hidden');
+        tacticalScene.classList.remove('tactical-map-scene-hidden');
+        tacticalScene.setAttribute('aria-hidden', 'false');
     }
 
     /** STEP 1: Show the main menu title screen. */
@@ -704,13 +752,23 @@ class WarroomApp {
         this.postToOperationalShell({ type: 'awwv-shell:show-warroom' });
     }
 
-    private async ensureOperationalShellIframe(tacticalScene: HTMLElement): Promise<HTMLIFrameElement> {
+    /**
+     * `documentPath` decides which screen the shell boots to, and only the FIRST call
+     * decides it — the iframe is created once and cached. A fresh launch passes the
+     * opening document (case-file flow); a launch that already has a campaign (Continue,
+     * loaded save) passes the operational document so the player is not shown a menu
+     * over their running game.
+     */
+    private async ensureOperationalShellIframe(
+        tacticalScene: HTMLElement,
+        documentPath: string = OPERATIONAL_SHELL_DOCUMENT,
+    ): Promise<HTMLIFrameElement> {
         if (this.tacticalMapIframe) return this.tacticalMapIframe;
         if (this.tacticalMapCreation) return this.tacticalMapCreation;
 
         const creation = (async () => {
             const mapBaseUrl = await this.resolveMapBaseUrl();
-            const shellUrl = this.buildTacticalDocumentUrl(mapBaseUrl, OPERATIONAL_SHELL_DOCUMENT);
+            const shellUrl = this.buildTacticalDocumentUrl(mapBaseUrl, documentPath);
             const iframe = document.createElement('iframe');
             iframe.id = 'tactical-map-iframe';
             iframe.setAttribute('allowfullscreen', '');

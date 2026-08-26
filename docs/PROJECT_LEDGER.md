@@ -29521,3 +29521,43 @@ plan set out to replace. Needs an owner ruling on which surface is intended. Rec
 `tools/playtest/run_electron.ts` reaches the President's Desk at 6 Apr 1992 with full navigation
 (`tools/playtest/evidence/20260827_ui_presidents_desk_working.png`).
 `docs/10_canon/FORAWWV.md` was not edited.
+
+## [2026-08-27] feat(ui): desktop launch now opens the case-file sequence
+
+**Behavioral change, owner-directed.** The desktop app opens with the case-file sequence
+(landing → factions → dossier → mode → Begin) built on 2026-08-23 in
+`src/ui/map/components/MainMenu.tsx`. Until now it opened the warroom's own static Command Post
+card and instant faction picker — the flow that plan's goal statement was written to replace — and
+the case-file sequence was unreachable for every desktop player. Closes item 1b of
+`docs/40_reports/playtests/20260826_playtest_harness_first_findings.md`.
+
+**Mechanism.** The map shell already boots to `appScreen = 'mainMenu'` by default
+(`App.tsx:529`); `resolveInitialShellScreen` only skips it when `view` forces `warroom`/`game`.
+The warroom was building its shell iframe with `index.html?embedded=1&view=warroom`, which
+selected past the menu. Added `OPENING_SHELL_DOCUMENT = 'index.html?embedded=1'` (no `view`) and a
+`showCaseFileOpening()` desktop boot path. `ensureOperationalShellIframe` now takes the document
+to boot, so a launch with an existing campaign (Continue, loaded save) still opens straight to the
+operational shell rather than showing a menu over a running game. Browser/dev keeps the static
+menu — it has no shell iframe to host the flow.
+
+Campaign start happens inside the frame: it carries its own `window.awwv.startNewCampaign`
+(verified at runtime), so Begin runs `App.tsx handleSelectFaction`, which starts the campaign and
+moves itself to the game shell. This shell picks the state up through its existing subscription.
+
+**`decisionMode` is now a real player choice** rather than a silent default — "Let it run from
+here" (emergent) vs "Let history run as it did" (historical) — which is what the 2026-08-23 plan
+specified and what the 2026-08-27 IPC fix left defaulted.
+
+**Verification.** Driven end to end through real DOM clicks: landing → factions (01/02/03) →
+dossier → mode → Begin → campaign running at 6 Apr 1992 with Desk/War Map/Army HQ/Records/
+Chronicle/Codex. Zero page or console errors. `tsc --noEmit` clean; 38 tests pass across the
+launch, menu and campaign-start slices. Regression guards added to
+`tests/desktop_campaign_start_decision_mode.test.ts` (opening document carries no `view`; desktop
+routes to the case-file opening; the opening hides the desk chrome).
+
+**Scope note recorded in `tests/ui/warroom_launch_screen_contract.test.ts`:** it pins the
+browser/dev opening now, not the desktop launch screen. It never clicks anything, which is why it
+stayed green throughout the period when the desktop app could not start a campaign at all.
+
+Evidence: `tools/playtest/evidence/20260827_case_file_landing.png`,
+`20260827_case_file_mode_choice.png`. `docs/10_canon/FORAWWV.md` was not edited.
