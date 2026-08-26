@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-26
 
-**Status:** T0 complete; T1 is next
+**Status:** T1 in progress; T1A closed, S0 pending
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -254,3 +254,88 @@ state, schema, default, or workflow-architecture change. T0 did make the bounded
 execution-procedure amendment that added all four reviewed environment readers to the fail-closed
 denylist; that amendment, T0 completion, and the control-plane sync are recorded in
 `docs/PROJECT_LEDGER.md`. No knowledge-ledger or `docs/10_canon/FORAWWV.md` edit is required.
+
+## T1A — Frozen dependency-install precondition
+
+**Status:** CLOSED; T1 remains in progress and S0 has not run.
+
+### Failure, stop, and safe recovery
+
+The first exact T1 install attempt used the plan's then-current commands under the supplied npm
+10.9.4 runtime: root `npm install --legacy-peer-deps`, followed in the same shell by
+`npm install --legacy-peer-deps --prefix src/ui/map`. Both commands exited zero, but the required
+clean-tree assertion then stopped T1 before any scenario or focused harness run. The mutable install
+rewrote `package-lock.json` and `src/ui/map/package-lock.json`; the prefixed map install also added
+`"awwv": "file:../../.."` to `src/ui/map/package.json` and created
+`src/ui/map/node_modules/awwv` as a junction targeting the repository root.
+
+Recovery was link- and file-bounded. The integration checkout top-level, detached T0 HEAD, exact
+three-file dirty set, junction link type, and junction target were proved first. The junction link
+alone was removed non-recursively after its target resolved exactly to the repository root; the root
+and HEAD were then re-proved. Only the three task-generated tracked files were restored from HEAD.
+The integration checkout returned clean at the exact T0 commit. No scenario run, source edit,
+download, toolchain substitution, or destructive directory removal occurred.
+
+### Build, platform, and architecture rulings
+
+- **Build/Platform — PASS:** use the existing signed runtime at
+  `C:\Users\User\AppData\Local\Logi\LogiPluginService\PluginHosts\node22\node\node.exe` only.
+  It reports Node `22.21.1`, npm `10.9.4`, and Node executable SHA256
+  `471961CB355311C9A9DD8BA417ECA8269EAD32A2231653084112554CDA52E8B3`. No Node runtime download
+  or installation was authorized.
+- **Technical Architect + QA — PASS:** replace mutable installs at their existing seams with exact
+  `npm ci --legacy-peer-deps`; run the map command from `working-directory: src/ui/map` in CI and
+  from a literal `Push-Location` plus `try/finally` locally. Add no wrapper, dependency, config,
+  cache, job, step, trigger, permission, or alternate installer.
+- **Independent specification review — PASS:** the final contract enumerates every workflow, pins
+  exact counts and commands, and fails if a new `.yml` or `.yaml` workflow is not covered.
+- **Independent lean review — PASS:** the correction adds no engine surface or runtime code and
+  rejects both `npm install` and `npm.cmd install` without a helper or dependency.
+
+### Implementation and TDD evidence
+
+The reviewed code/test/docs commit is
+`2f3d6572300dc95eeae2bc05900744d905a9adf4` (`fix(RE-0B): freeze dependency installation`).
+It covers all six workflow files and their existing 13 root/map install pairs:
+
+| Workflow | Root/map pairs |
+|---|---:|
+| `baseline-regression.yml` | 5 |
+| `desktop-release-guard.yml` | 2 |
+| `event-system-ci.yml` | 1 |
+| `full-suite-and-fingerprint.yml` | 2 |
+| `release.yml` | 2 |
+| `typecheck.yml` | 1 |
+
+RED under Node 22 ran only `tests/ci_dependency_install_contract.test.ts`: both tests failed for
+the intended reasons, namely mutable workflow commands and stale README convention truth. GREEN
+under the same runtime ran the new owner plus
+`tests/baseline_regression_ci_guardrails.test.ts`,
+`tests/desktop_release_ci_guardrails.test.ts`, and `tests/test_runner_contract.test.ts`: four test
+files, 13 tests, all passed. `npm.cmd run typecheck` also exited zero under Node 22.
+
+The frozen dependency inputs remained byte-exact:
+
+| File | SHA256 |
+|---|---|
+| `package-lock.json` | `0EDDD5B746F0BEE4B067F9E77CFDDCD11224FAAD2E09E64F965F696A4A6B1C3E` |
+| `src/ui/map/package-lock.json` | `3A3556DC4A3DA0CCA10F14DFB328B4931129CF25A39FFE8FA8E335C33A9BC24A` |
+| `package.json` | `23410F3D436F1757F2D14805195E2FEA34E1E8E48B98A94D170150A000E6BC3B` |
+| `src/ui/map/package.json` | `F49DABF543AF35F4D6CE41C66624D3A7653BAE61CFDC4183798161467A127EF5` |
+
+Parsed workflow comparison against the predecessor proved unchanged triggers, permissions, job
+metadata, step counts and order, and cache definitions; only install commands and map-step working
+directories changed. The final execution worktree is clean, the root-targeting map junction is
+absent, locks and manifests are unchanged, and production/runtime LOC change is zero.
+
+### T1A disposition
+
+**PASS.** The dependency-install precondition is frozen and independently reviewed. T1 remains the
+next task and is still incomplete: the fail-closed 45-variable audit, two clean exact-commit Node-22
+188-week runs, 15-file manifests, checkpoint/health/consistency/fingerprint/operation-diff/byte
+checks, and focused harness tests have not yet run.
+
+T1A has no player-visible, gameplay, canon, save/schema, scenario, artifact-contract, baseline,
+threshold, simulation/turn-pipeline, package-version, or runtime effect. It creates no engine module, state,
+service, channel, flag, or default stream. No knowledge-ledger or `docs/10_canon/FORAWWV.md` update
+is required.

@@ -4,7 +4,7 @@
 
 > **Date:** 2026-08-26
 >
-> **Status:** T0 COMPLETE; READY FOR T1
+> **Status:** T1 IN PROGRESS; T1A dependency-install precondition closed
 >
 > **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
 >
@@ -14,7 +14,7 @@
 >
 > **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** execute T1 and establish the clean Node-22 S0
+> **Current next action:** complete T1 and establish the clean Node-22 S0
 >
 > **Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
@@ -48,6 +48,7 @@ Execution checklist:
 
 - [x] T0 — capture integrated base and isolation
 - [ ] T1 — establish Node-22 S0
+  - [x] T1A — freeze reproducible dependency installation
 - [ ] T2 — audit existing observation
 - [ ] T3 — repair desktop changed-path truth
 - [ ] DG-1 — APWB disposition
@@ -235,6 +236,9 @@ TypeScript. Authoritative long runs use an owner-approved clean main/integration
 independent clone at the packet's code commit. Never overwrite Claude's or another agent's checkout.
 
 ### T1 — Provision Node 22 and establish S0
+
+**Execution status:** IN PROGRESS. T1A closed at
+`2f3d6572300dc95eeae2bc05900744d905a9adf4`; S0 has not run and T1 remains unchecked.
 
 1. The owner/build seat supplies an absolute path to a Node 22 installation. Do not download or
    silently switch toolchains.

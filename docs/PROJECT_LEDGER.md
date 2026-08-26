@@ -29511,3 +29511,35 @@ source-verified authoritative checkout. No T1 action or behavior test was perfor
 **Synchronized surfaces:** Master Roadmap, Command Board, plans index, docs index, active task
 governance, living execution audit, and project ledger. The knowledge ledger and
 `docs/10_canon/FORAWWV.md` were not edited.
+
+## [2026-08-26] docs(RE-0B): record frozen dependency-install proof
+
+**Type:** T1A reproducible-build precondition evidence and plan-status synchronization. No gameplay,
+engine runtime, UI, scenario, save/schema, artifact contract, baseline, threshold, package version,
+canon, knowledge-ledger, push, PR, merge, tag, publication, or release change.
+
+**Stopped failure and recovery:** The first exact Node-22 T1 setup used npm 10.9.4 mutable
+`npm install` commands. They exited zero but rewrote both committed lockfiles; the prefixed map
+install also added a root file dependency to the map manifest and created a map-workspace junction
+back to the repository root. The mandatory clean-tree gate stopped before S0. After exact top-level,
+HEAD, dirty-set, link-type, and target checks, recovery removed only the junction link and restored
+only the three task-generated tracked files. The clean exact T0 checkout was preserved.
+
+**Frozen correction:** Commit `2f3d6572300dc95eeae2bc05900744d905a9adf4` changes the six existing
+workflow owners and 13 root/map install pairs to exact `npm ci --legacy-peer-deps`, with map installs
+executed from `working-directory: src/ui/map`. The sole contract test inventories every workflow,
+pins pair counts and exact commands, rejects mutable `npm`/`npm.cmd install` and `--prefix`, and
+fails if a new YAML workflow is not registered. Direct release, event-authoring, workflow, and RE
+T1 instructions now state the same workspace-local immutable procedure.
+
+**Evidence:** RED was 2/2 intended failures. GREEN was four test files and 13/13 tests under Node
+22.21.1; the Node-22 typecheck exited zero. Independent specification and lean reviews passed.
+Workflow triggers, permissions, job/step topology, ordering, and caches are unchanged. Both
+lockfiles and both manifests retain their recorded SHA256 values, the map-to-root junction is
+absent, and production/runtime LOC change is zero.
+
+**State and next action:** T1A is **CLOSED**. T1 remains **IN PROGRESS** and unchecked; S0 and every
+45-variable, paired-188-week, manifest, checkpoint, health, consistency, fingerprint,
+operation-diff, byte-identity, and focused-harness gate remain to run. The Master Roadmap and
+Command Board routing are unchanged. `docs/PROJECT_LEDGER_KNOWLEDGE.md` and
+`docs/10_canon/FORAWWV.md` were not edited.
