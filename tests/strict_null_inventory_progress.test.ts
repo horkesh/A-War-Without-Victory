@@ -743,18 +743,23 @@ describe('strict null inventory progress', () => {
             // getFactionOrganizationScore, so as_factionid (3) / as_unknown (5) / as_any (0) /
             // non_null_assertions (7) are ALL UNCHANGED — this bump is purely the
             // optional-field ratchet. So 535 → 536 / state 186 → 187.
-            optional_fields_game_state: 536,
+            // Probe handoff (commits df42faa86 + 33d5844a2): +3 optional sim fields.
+            // SectorIntelRecord.{own_stable_key,enemy_stable_key} preserve content-based
+            // sector identity across positional renumbering; CorpsOperation.occupies_on_victory
+            // declares whether a victory holds ground. All three are legacy-save-safe and add
+            // no type escapes. So 536 → 539 / sim 339 → 342.
+            optional_fields_game_state: 539,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(536);
+        expect(current.optional_field_domains.total).toBe(539);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 339,
+            sim: 342,
             state: 187,
             ui_adapter: 0,
             unknown: 0,
