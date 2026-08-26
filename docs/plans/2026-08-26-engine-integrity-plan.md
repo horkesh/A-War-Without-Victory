@@ -23,6 +23,34 @@ your phase.** Every task carries the same seven fields, so you can start one wit
 | **MEASURE** | run cost and acceptance criterion |
 | **DONE WHEN** | the closing condition |
 
+### 0.1 ★ ORDER OF WORK — ASK THE DOMAIN OWNER BEFORE YOU WRITE THE CLAIM
+
+**This plan was built in the wrong order and it cost roughly twenty-one wrong claims.** The evidence
+packet was written first and eight seats were asked to review it. Every error originated in the
+writing phase; every catch came from the review phase. The Formation seat needed **one question** to
+find `formation_lifecycle.ts:364`; had it been asked before §3.6 was written rather than after, that
+section would never have existed.
+
+The domain skills already say this — `formation-expert` says it must be consulted **before** changes
+to formation lifecycle, `operations-expert` **before** changes to operations. Consulting them after
+writing claims about their domain inverts the contract.
+
+**So, for every task below:**
+1. **Ask the owning seat the question. Do not send them a draft to audit.** Same agent budget,
+   opposite order. Owners: Phase 1/3 → `operations-expert` + `corps-army-commander`; Phase 4 →
+   `formation-expert`; anything scored → `scenario-creator-runner-tester`; anything historical →
+   `historian`.
+2. **Never state a code fact without the command that produced it.** Write
+   `` `git grep -n "<pattern>"` → N hits `` beside the claim. A narrow lookup then shows as a narrow
+   lookup, on the page, to you and to every reviewer.
+3. **A negative result needs a positive control.** Before writing "nothing does X", find something
+   that *does* do X and confirm your lookup catches it. napkin `00`: a probe that cannot fail is
+   indistinguishable from one that works.
+4. **Run `node tools/hooks/whowrites.mjs <field>` before hanging any mechanic on a field** (§3.7).
+
+**Three of these are now enforced mechanically, not by memory** — see `tools/hooks/README.md`. They
+exist because the written rules already existed, were read at session start, and did not fire.
+
 **Line numbers are a convenience, not an address.** Read files with
 `git show a1c10b3bd:<path>` and locate by the grep anchor. The working tree at time of writing
 carried unrelated in-flight calibration edits to `sector_offensive.ts`,
@@ -176,27 +204,81 @@ the opposite. Launch floors: `MIN_LAUNCH_FORCE_RATIO_FLOOR = 0.3` for commander 
 (`:404`). **Corps-AI operations face twice the launch standard that probes do, using an estimator
 that structurally under-states their strength.**
 
-### 3.6 `readiness` has TWO absorbing states, not one — VERIFIED, and it is bigger than A-3
+### 3.6 ★ FALSIFIED — `readiness` is NOT an absorbing state. I was wrong, and how I got it wrong matters.
 
+**The orchestrator claimed** that `degraded` is a one-way ratchet into dissolution and a candidate
+root for the RS brigade-destruction asymmetry, on the grounds that nothing in the war pipeline ever
+restores `'active'`. **The Formation seat falsified it with 232 counter-examples.**
+
+**The exit I missed:** `src/state/formation_lifecycle.ts:364`, inside `updateFormationLifecycle`:
+
+```ts
+formation.readiness = deriveReadinessState(formation);
 ```
-battle_resolution.ts   applyPersonnelLoss:  personnel < MIN_BRIGADE_SPAWN (800)  →  readiness = 'degraded'
-formation_constants.ts isEligibleForReinforcement:  'degraded' OR 'forming'      →  FALSE
-                       ↳ called by BOTH reinforceBrigadesFromPools AND reinforceFromStrategicReserves
-brigade_reconstitution.ts:415,464                                                 →  readiness = 'forming'
-```
 
-**Nothing in the war pipeline ever restores `'active'`.** The only writer is
-`promote_formations.ts:148`, and `promoteFormations` is wired into `early_war_phases.ts:199` only.
-With `DISSOLUTION_PERSONNEL_THRESHOLD = 400` and `MIN_COMBAT_PERSONNEL = 100`, the band **400-800 is
-a death corridor with no exit**: below 800 a brigade can never take replacements again, so its
-personnel can only fall, and at 400 it becomes a dissolution candidate.
+Unconditional, every formation, every turn — and `updateFormationLifecycle` **is** in the war
+pipeline (`war_phases.ts:1194`, step `'update-formation-lifecycle'`).
 
-⇒ **Candidate root for `rs_brigade_destruction_asymmetry_engine_flaw`** — open for weeks with "root
-mechanism not yet found". The RBiH avoids the corridor because its strategic reserve tops brigades
-up before they cross 800; the RS, with a reserve of **0**, has no way back out. **Empirical
-confirmation is out with the Formation seat** (§9, OPEN-1). If it holds, **Task 4.0 becomes a
-prerequisite for A-3**, because A-3 deliberately slows replacement and would push many more brigades
-into an absorbing state.
+> **★ THE METHOD ERROR, recorded because it will recur.** I searched for the literal string
+> `readiness = 'active'`. **This path assigns a function result, so the literal never appears.**
+> A grep for an assigned *value* cannot find an assignment of a *computed* value. When asking "does
+> anything restore field X", grep for **`X =`** and read every hit, not for `X = <expected value>`.
+
+**And `deriveReadinessState` reads cohesion and fatigue only — never personnel**
+(`formation_lifecycle.ts:186-208`): `degraded` if `cohesion < 15` or `fatigue > 40`; `overextended`
+if `cohesion < 30` or `fatigue > 20`; `forming` if `activation_gated`; else `active`.
+
+**So the personnel-triggered `degraded` write at `battle_resolution.ts:753-755` is overwritten on the
+next turn's lifecycle step, by a function that cannot see the personnel value that caused it.**
+
+**The punchline lands on the ruling we have now circled four times:** every faction cohesion floor
+sits **above** `DEGRADED_THRESHOLD = 15` — RBiH 62, HRHB 30, RS 20. **The cohesion floors make it
+structurally impossible for a brigade of any faction to remain `degraded` on cohesion.** Only
+`fatigue > 40` can hold it there.
+
+Measured, per brigade-turn below 800 personnel, recomputed from logged cohesion/fatigue:
+
+| faction | brigade-turns < 800 | active | overextended | **degraded** |
+|---|---:|---:|---:|---:|
+| RBiH | 3,779 | 99.4% | 0.5% | **0.1%** |
+| RS | 3,579 | 48.3% | 51.7% | **0.1%** |
+| HRHB | 671 | 96.9% | 2.5% | **0.6%** |
+
+`overextended` does **not** block reinforcement. **Zero brigades are stored `degraded` at t188. Zero
+stored `forming`.** And 92% of ARBiH brigades went below 800 at some point, of which **98% came back**
+(169 downward crossings, 167 followed by recovery).
+
+⇒ **Task 4.0 is deleted. There is no prerequisite. A-3 stands alone.**
+
+⇒ **The RS asymmetry is re-explained, and better:** **20 of 24 RS brigade destructions fall in the
+t171-t174 window** — `nato_deliberate_force_1995`, `federation_ground_offensive_1995`,
+`operation_summer_95`, `operation_storm_1995`. Week 174 from April 1992 is early August 1995; Storm
+was 4-7 August 1995. **That is modelled history, correctly dated — the same class as the cohesion
+floors, and it should not be touched.** What still needs explaining is RBiH's zero, and that is the
+ungated 256,091-man strategic reserve (§9, Task 4.2), not a destruction mechanism.
+
+### 3.7 ★ THE RULE THIS REPO KEEPS RELEARNING — check it before writing any mechanic
+
+**A field owned by a per-turn recompute cannot carry a persistent penalty.** Three instances in this
+single review:
+
+| proposed mechanic | field | the recompute that erases it |
+|---|---|---|
+| A-2 cohesion dilution | `cohesion` | `cohesion_drift.ts:170-186` faction floor clamp, applied unconditionally before the `next === prev` early-out |
+| A-3 hung on `readiness` (**the obvious way to build it**) | `readiness` | `formation_lifecycle.ts:364` `deriveReadinessState`, unconditional, every turn |
+| consolidation-sweep gate (2026-08-25) | `to_control` | the field reads `'controlled'` for every municipality in the game |
+
+**MANDATORY PRE-IMPLEMENTATION CHECK for every task in this plan:** before hanging a mechanic on a
+field, `git grep -n "<field> ="` across `src/` and identify **who rewrites it every turn**. If a
+per-turn pass owns it, the mechanic is a no-op you will not see in the result — the most expensive
+failure mode in this repo, because it costs a 188w run to discover and looks like a design failure
+rather than a plumbing one.
+
+**A-3 survives this test only because `disrupted_turns` has no per-turn recompute** — it is
+decremented by its own owner (`brigade_movement_orders.ts:85`) and cleared by reconstitution. The
+Formation seat notes this was "luck as much as judgement" and flags it explicitly so an implementer
+does not "simplify" A-3 onto `readiness` and silently rebuild the no-op.
+
 
 ---
 
@@ -246,12 +328,35 @@ with no output until the end. It passes inside the full suite.
 
 ## 6. PHASE 1 ★ — probe memory
 
-> **⚠ READ §3.2 FIRST, AND SET EXPECTATIONS HONESTLY.** Probe *volume* is governed by the emission
-> gate — `ops.length === 0 && !probeOnCooldown && can_launch_ops && surplus_pool.length > 0 &&
-> initiative > 0.3` — i.e. by cadence and surplus, **not** by target availability. A per-objective
-> cooldown stops the corps returning to the *same* cell; it does not obviously stop it probing
-> *somewhere*. **Whether Phase 1 reduces probe count and casualties, or merely redistributes them,
-> is measured and pending (§9, OPEN-2).** Until that lands, claim fidelity, not volume.
+> ### ⚠ MEASURED: PHASE 1.1 BUYS FIDELITY, NOT VOLUME. SAY SO.
+>
+> The counterfactual was replayed offline against `n294` by the calibration seat. **Probe volume does
+> not fall materially — it MOVES.**
+>
+> | | faithful op-end rule |
+> |---|---:|
+> | probe battles suppressed at their own target | **57 / 365 (15.6%)** |
+> | of those, an alternative adjacent enemy OSID existed | 31 |
+> | **no alternative existed → genuinely removed** | **25 / 365 = 6.8%** |
+> | **redistributed to another cell** | **31 / 365 = 8.5%** |
+> | attacker casualties in suppressed battles | 22,982 (10.8% of the run's 213,308) — **at most ~10,000 actually disappear** |
+>
+> **What it DOES buy, and this is worth having:** the pathological single-cell loops break.
+> `op:centar_sarajevo:radava` 26 probe battles → 11. `op:visoko:gornja_vratnica_2` 39 → 27.
+> `op:gradacac:pelagicevo` 24 → 15.
+>
+> **What it does NOT fix:** `op:lukavac:brijesnica_donja_2` — **12 probe battles, zero wins, 7,866
+> attacker casualties** — is untouched, because its probes are spaced too widely to reach two
+> failures inside the 8-turn window.
+>
+> **DO NOT SELL PHASE 1.1 AS AN ATTRITION FIX.** The attrition is cadence-driven, not
+> target-driven: the median idle gap between one probe ending and the next starting is **1 turn**,
+> and 57.4% of probes start the very turn the previous one clears. If volume reduction is the goal,
+> the lever is **Task 1.2** or the emission gate — not 1.1.
+>
+> **And a skipped probe is not a deferred probe.** When the cooldown filter empties the candidate
+> list, `if (probeObjectives.length > 0)` skips emission entirely — **no op is pushed and no cooldown
+> is consumed**, so the corps may re-emit next turn. That is exactly the 25 no-alternative cases.
 
 ### Task 1.1 — let a probe that fought record an objective failure
 
@@ -301,41 +406,64 @@ For multi-axis probes use `sumAxesField(op.axes!, 'attack_attempt_count')` — m
 **MUTATION THAT MUST FAIL IT** — restore the unconditional `return`. Test 1 must go red. Also invert
 the gate to `> 0` — test 2 must go red. Both, or the test only pins one side.
 
-**MEASURE** — territory-moving. One 188w **alone**, against §11. Predicted loss set (§11 S3): cells
-where an ARBiH corps currently probes repeatedly; the probe channel is 252/365 ARBiH.
+**MEASURE** — territory-moving. One 188w **alone**, against §11.
+**Predicted loss set (§11 S3), stated in advance and measured, not guessed:** the 51 OSIDs that
+currently receive probe battles, concentrated in the top ten (188 of 365 probe battles, 51.5%). The
+probe channel is **252/365 ARBiH**, so losses should be ARBiH-side and adjacent to existing probe
+targets. **If losses appear away from those 51 cells, S3 fails and the change is not doing what this
+plan says.**
 
-**DONE WHEN** — no objective in any run receives more than `OBJECTIVE_FAILURE_THRESHOLD` fought-probe
-attacks inside `OBJECTIVE_FAILURE_COOLDOWN_TURNS`, and Radava's attack count falls.
+**DONE WHEN** — `op:centar_sarajevo:radava` falls from 26 probe battles toward ~11 and
+`op:visoko:gornja_vratnica_2` from 39 toward ~27, with no objective receiving more than
+`OBJECTIVE_FAILURE_THRESHOLD` fought-probe attacks inside `OBJECTIVE_FAILURE_COOLDOWN_TURNS`.
+**Do not expect total probe count to move more than ~7%.**
 
 ---
 
-### Task 1.2 — probe cooldown: correctness cleanup (NOT a volume fix)
+### Task 1.2 ★ — repair the probe cooldown  *(PROMOTED — this is the volume lever, not 1.1)*
 
-**WHY** — §3.2. The `operation_history` half of the cooldown can never match, because that log
-records plan decisions (`cmd_<corps>_t<turn>`), not operations. Cost is ~1 turn of cooldown.
+**WHY — and my §3.2 claim was wrong.** I wrote that the dead `operation_history` scan "costs about one
+turn" because a probe is visible in `active_operations` for ~3 of the 4 cooldown turns. **That holds
+only for the median-length probe.** Measured probe-op lifetimes: `{2: 45, 3: 19, 4: 85, 5: 35, …}` —
+**64 of 200 probe ops (32%) live 3 turns or fewer.** For those, `active_operations` is empty before
+the 4-turn window closes and **nothing else remembers the probe at all.**
+
+**Measured consequence: the cooldown is breached 22.9% of the time.** 43 of 188 consecutive same-corps
+probe starts are **less than `PROBE_COOLDOWN_TURNS = 4` apart** — impossible if it were enforced — and
+**42 of those 43 immediately follow a probe that lived ≤3 turns.** For compliant pairs the previous op
+lasted 4+ turns in 128 of 145 cases. The correlation is not subtle.
+
+⇒ **The dead scan does not cost one turn; it voids the cooldown outright on a third of probes.** The
+effective cooldown is ~3.1 turns against a nominal 4, and this is the cadence lever the counterfactual
+says Phase 1.1 is not.
 
 **WHERE** — `src/sim/combat/commander/emit.ts:1067`. Anchor:
-`grep -n "previous_state?.operation_history ?? \[\]" ` inside the `probe.cooldown` thunk.
+`grep -n "previous_state?.operation_history ?? \[\]"` inside the `probe.cooldown` thunk.
 
-**WHAT** — **do not** start writing `type: 'probe'` rows into `operation_history`. That log feeds
-`buildUpdatedLessons` and plan.ts repeat-failure detection via `osids_lost`, and polluting it with
-probe rows is a behaviour change in a system nobody has scoped. Instead **either**:
-- **(a) preferred** — carry an explicit `last_probe_turn?: number` on `CommanderState`, written when
-  a probe operation is created, and read by the cooldown; **or**
-- **(b) minimal** — delete the dead loop and fix the comment, accepting the ~1-turn gap.
+**WHAT** — **do not** start writing `type: 'probe'` rows into `operation_history`. That log records
+*plan* decisions keyed `cmd_<corps>_t<turn>`, feeds `buildUpdatedLessons`, and drives plan.ts
+repeat-failure detection via `osids_lost`; polluting it with probe rows is a behaviour change in a
+system nobody has scoped.
 
-Choose (a) only if OPEN-2 shows cadence is a real lever; otherwise (b) is honest and free.
+**Carry an explicit `last_probe_turn?: number` on `CommanderState`**, written when a probe operation
+is created and read by the cooldown thunk alongside the existing `active_operations` scan. This closes
+the short-probe hole without touching the plan-decision log.
 
-**BLAST RADIUS** — (a) adds a serialized field ⇒ **save migration**. (b) is comment + dead-code
-removal, behaviourally inert.
+**BLAST RADIUS** — adds a serialized field ⇒ **save migration required** (`save_migration.ts`, default
+`undefined`; absent means "no probe recorded", which is the correct cold-start behaviour). No other
+consumer.
 
-**TEST** — (a): two probes 3 turns apart → second suppressed; 5 turns apart → allowed; assert across
-the recovery transition specifically. (b): a source-text pin that the comment no longer claims a
-bridge that does not exist. **MUTATION:** (a) remove the write — the 3-turn case must go red.
+**TEST** — (1) two probes 3 turns apart where the first lived **2 turns** → second suppressed. This is
+the case that fails today and is the whole point. (2) 5 turns apart → allowed. (3) round-trip a save
+with the field set and assert it survives. **MUTATION:** remove the write → case (1) goes green-wrong,
+i.e. the second probe emits; the test must catch that.
 
-**MEASURE** — (b) inert, 0 runs. (a) territory-moving, 1 × 188w.
+**MEASURE** — territory-moving, 1 × 188w alone. **Expected direction: fewer probes.** This is the task
+to measure probe-volume reduction against, not 1.1.
 
----
+**SEQUENCING NOTE** — 1.1 and 1.2 are independent and must be measured separately: 1.1 changes *which*
+cell a probe targets, 1.2 changes *how often* a probe is emitted. Landed together their effects are
+unattributable, and they are the two halves the counterfactual explicitly separates.
 
 ### Task 1.3 — move the anti-repetition guard off the operation
 
@@ -480,25 +608,31 @@ combat intel that would let it launch.
 
 ## 9. PHASE 4 — the cost loop
 
-### Task 4.0 ★ — the `degraded` / `forming` absorbing states  *(PREREQUISITE, see §3.6)*
+### Task 4.0 — ~~absorbing states~~ **CANCELLED (hypothesis falsified, §3.6)**
 
-**WHY** — §3.6. Below 800 personnel a brigade is locked out of **both** replacement paths forever,
-and the 400-800 band is a death corridor with no exit. Nothing in the war pipeline restores
-`'active'`. Reconstitution sets `'forming'`, which is blocked identically — so a reconstituted
-brigade may be frozen at its 40% spawn strength permanently.
+**Do not implement. There is no prerequisite for A-3.** The orchestrator's ratchet hypothesis was
+falsified with 232 counter-examples: `formation_lifecycle.ts:364` recomputes `readiness` every turn
+for every formation, `deriveReadinessState` never reads personnel, and every faction cohesion floor
+sits above `DEGRADED_THRESHOLD = 15`. **Zero brigades are stored `degraded` or `forming` at t188.**
 
-**WHAT** — restore `readiness` to `'active'` when personnel recovers past a threshold, **with
-hysteresis** so a brigade oscillating at 800 does not flap. Suggested: degrade at `< 800`, restore at
-`≥ 1000`. Exact thresholds pending OPEN-1.
+**OPTIONAL CLEANUP, LOW value, do not give it its own run.** The personnel-triggered write at
+`battle_resolution.ts:753-755` is incoherent — a personnel-triggered readiness change owned by a
+personnel-blind recompute — and its only live effect is to block reinforcement for the remainder of
+the same turn (~282 brigade-turns across the whole run, worth ~50-400 men each). **Deleting it makes
+`deriveReadinessState` the single owner of readiness, which it already effectively is.** If taken,
+ride an existing 188w; never claim a dedicated one.
 
-**WHY IT IS A PREREQUISITE** — A-3 deliberately slows replacement. Landing A-3 on top of an absorbing
-state would push many more brigades into a corridor they cannot leave, converting a rare latent bug
-into a common one, and the resulting brigade losses would be misattributed to A-3.
+**REJECTED, and recorded so it is not re-proposed:** adding a personnel term to
+`deriveReadinessState`. It is territory-moving, touches every brigade every turn, needs hysteresis
+(replacement delivers ~42-69 men/turn, so a single 800 threshold flaps weekly), and the corridor
+census shows **the RS would absorb the entire cost of it, on top of Storm.** Not before 1.0.
 
-**DONE WHEN** — no brigade in a 188w run is `degraded` while above the restore threshold, and the
-count of brigades stuck below 800 for more than N turns falls.
-
----
+**Memory item to rewrite** (`rs_brigade_destruction_asymmetry_engine_flaw`): *"RS destruction is
+event-concentrated (20 of 24 in the t171-t174 Deliberate Force / Summer 95 / Storm window — modelled
+history, correctly dated); RBiH survival is reserve-driven (256,091-man ungated strategic reserve,
+99% of 169 sub-800 crossings recovered). The degraded-ratchet hypothesis was tested against n294 and
+FALSIFIED."* Open remainder, INFERRED and untested: whether RBiH would show comparable destruction
+under an equivalent scheduled catastrophe. Nothing on disk tests that.
 
 ### Task 4.1 — A-3 rebuild latency
 
@@ -659,13 +793,14 @@ disable.**
 
 | # | Risk | Likelihood | Mitigation |
 |---|---|---|---|
-| R1 | **Phase 1 redistributes probes rather than reducing them**, so casualties and the 62% barely move | **Unknown — OPEN-2** | Measure before claiming volume. Fidelity is the defensible claim today. |
-| R2 | **A-3 lands on the absorbing state** and mass-kills RS/HVO brigades | High if 4.0 is skipped | 4.0 is a hard prerequisite |
+| R1 | **Phase 1.1 redistributes probes rather than reducing them** | **CONFIRMED — measured** | Resolved: 1.1 is a fidelity fix (≤6.8% volume). **Task 1.2 is the volume lever.** Plan restated; do not re-sell 1.1 as attrition. |
+| R2 | **A-3 is built on `readiness` and is silently a no-op** — the obvious way to build it | **High** | §3.7 mandatory pre-implementation check. A-3 must use `disrupted_turns`, which no per-turn pass recomputes. |
 | R3 | **A fix flips Donji Vakuf or Bugojno** and the score improves for the wrong reason | Moderate on 3.3/3.4 | §8.5 tripwire, checked every run |
 | R4 | **A blanket baseline re-pin** bakes in the red `apr1992_52w` regression | Moderate on 2.2 | Re-pin only attributable artifacts, with a zero-value-change diff |
 | R5 | **Codex file collision** on `sector_offensive.ts`, `pre_planned_operations.ts`, `operation_preparation.ts` | **High — all three are in-flight now** | RE starts only after Codex lands; own worktree; rebase before each task |
 | R6 | **Measuring against a baseline nobody has** — the tree's apr1994/apr1995/oct1995 are NOT ESTABLISHED | Certain today | S0 blocks all work until 0.3 |
-| R7 | Phase 1 and 3.1 both change operation volume; **landed together they are unattributable** | Moderate | One change per run, always |
+| R7 | Phase 1.1, 1.2 and 3.1 all change operation volume; **landed together they are unattributable** | Moderate | One change per run, always. 1.1 changes WHICH cell; 1.2 changes HOW OFTEN. |
+| R8 | **A mechanic is hung on a field a per-turn pass owns**, and dies silently | **High — three instances already** | §3.7 check is mandatory before writing any mechanic |
 
 ---
 
@@ -673,10 +808,11 @@ disable.**
 
 | # | Question | Owner | Status |
 |---|---|---|---|
-| **OPEN-1** | Is `degraded` a one-way ratchet into dissolution, and is it the root of the RS brigade-destruction asymmetry? Does 4.0 have to precede A-3? | Formation seat | **out for measurement** |
-| **OPEN-2** | Does Phase 1 reduce probe volume and casualties, or only redistribute targets? | Calibration seat | **out for measurement** |
-| **OPEN-3** | Was the RS strategic reserve ever non-zero and drained, or never filled? | Formation seat | not started — decides 4.2's shape |
-| **OPEN-4** | How much of the 62% is attributable to cadence vs target availability? | Calibration seat | folded into OPEN-2 |
+| **OPEN-1** | Is `degraded` a one-way ratchet and the root of the RS asymmetry? | Formation seat | **CLOSED — FALSIFIED.** §3.6. Task 4.0 cancelled. |
+| **OPEN-2** | Does Phase 1.1 reduce probe volume or redistribute it? | Calibration seat | **CLOSED — redistributes.** ≤6.8% removed, 8.5% moved. Task 1.2 promoted. |
+| **OPEN-3** | Was the RS strategic reserve ever non-zero and drained, or never filled? | Formation seat | **OPEN** — decides Task 4.2's shape |
+| **OPEN-4** | Of the 31 "alternative existed" suppressions, how many actually redistribute? `predictedViable` and `politicallyBlocked` are not reconstructible from artifacts, so the true volume drop lies in **[6.8%, 15.6%]** of probe battles. | Calibration seat | **OPEN** — needs the Phase 2 instrumentation, not another replay |
+| **OPEN-5** | Would RBiH show comparable brigade destruction under an equivalent scheduled catastrophe? | Historian + Formation | **OPEN** — nothing on disk tests it |
 
 ---
 
