@@ -251,19 +251,51 @@ console.log('EASTERN SURPLUS — Birač / Majevica / north Podrinje (painted ref
 // here would be a temporal-dead-zone crash — the exact error this session already made once,
 // in emit.ts, and caught only when a 188-week run died at turn 23.
 const at188 = stateAt(188);
+// ★ A GAIN IS A CAPTURE, NOT A DISAGREEMENT (corrected 2026-08-26, owner-prompted).
+//
+// This block previously flagged any cell reading RBiH at w188 where the October reference says RS,
+// and called every one an "AHISTORICAL RBiH GAIN". **Three of the four it was reporting had NO
+// CONTROL EVENT AT ALL** — `bratunac:pobudje_2`, `kalesija:seher_2`, `vlasenica:cerska_2` are RBiH
+// from t0 and were never captured by anything. The engine did not take them; it never lost them.
+//
+// That is the same defect this file was repaired to remove: **a check answering a narrower question
+// than the claim it carries.** It said "gain" and measured "disagreement at week 188".
+//
+// The distinction is load-bearing because the two have different owners:
+//   - CAPTURED ahistorically  → the engine took ground it should not have. AN ENGINE DEFECT.
+//   - NEVER LOST              → the engine is holding ground it should have lost by 1995.
+//                               **CALIBRATION for a window that is not the current target.**
+// Owner, 2026-08-26: *"that is calibration work and 1995 is not yet our calibration target."*
+// Both `pobudje_2` and `cerska_2` are painted **RBiH in jan1993** and RS by oct1995 — i.e. they are
+// correct for the checkpoint actually being calibrated.
+//
+// Only CAPTURES gate. Never-lost cells are reported so the calibration lane can see them.
 const surplus = [];
+const neverLost = [];
 for (const osid of Object.keys(ref.oct1995)) {
   const mun = osid.split(':')[1];
   if (!EASTERN_SURPLUS_MUNS.includes(mun)) continue;
-  // A "gain" is RBiH at w188 where the painted reference says RS.
-  if (at188[osid] === 'RBiH' && ref.oct1995[osid] === 'RS') surplus.push(osid);
+  if (at188[osid] !== 'RBiH' || ref.oct1995[osid] !== 'RS') continue;
+  // Did the engine ever TAKE it? A capture leaves a control event with `to: 'RBiH'`.
+  const captured = events.some((e) => e.settlement_id === osid && e.to === 'RBiH');
+  if (captured) surplus.push(osid); else neverLost.push(osid);
 }
 if (surplus.length === 0) {
-  console.log(`  none across ${EASTERN_SURPLUS_MUNS.length} municipalities ** CLEAN **`);
+  console.log(`  no ahistorical CAPTURES across ${EASTERN_SURPLUS_MUNS.length} municipalities ** CLEAN **`);
 } else {
   breached = true;
-  console.log(`  *** ${surplus.length} AHISTORICAL RBiH GAIN(S) — §6 panel matter, do not merge ***`);
+  console.log(`  *** ${surplus.length} AHISTORICAL RBiH CAPTURE(S) — the engine TOOK this ground. §6 panel matter, do not merge ***`);
   for (const o of surplus) console.log(`      ${o}`);
+}
+if (neverLost.length > 0) {
+  // NOT gating, and deliberately so — see the note above. These are cells the engine never
+  // captured and never lost; they disagree with the 1995 reference, which is a calibration
+  // question for a window that is not the current target.
+  console.log(`  ${neverLost.length} never-captured cell(s) still RBiH at w188 — CALIBRATION (1995 window), not an engine defect:`);
+  for (const o of neverLost) {
+    const j = ref.jan1993[o];
+    console.log(`      ${o}   jan1993 reference: ${j ?? '(absent)'}${j === 'RBiH' ? '  <- engine is CORRECT for the active checkpoint' : ''}`);
+  }
 }
 
 console.log('');
