@@ -1279,3 +1279,78 @@ both report.**
 
 **Price, stated plainly:** historical accuracy at Srebrenica costs **−3 at oct1995**, against a gate
 floor of 644 that was already failing at 643 before the flag.
+
+### 2026-08-26 (later still) — the four cells: three hypotheses falsified, one candidate stands
+
+**MY OBJECTION WAS RIGHT ON SUBSTANCE AND MY TEST INVERTED.** I said "if a survivor was in the
+participant list my whole objection collapses." **A survivor was.** `operation_aars.json` for n374:
+
+```
+Operacija Ponos    t162  arbih_2nd_corps  10 bde  captured sekovici:udbina_2, zvornik:krizevici
+                         ENCLAVE-TAGGED PARTICIPANT: arbih_284th_east_bosnian_light (822 men)
+Operacija Naprijed t175  arbih_2nd_corps   8 bde  captured lopare:lopare_2, lopare:priboj_2
+                         ENCLAVE-TAGGED PARTICIPANTS: none
+```
+
+But the conclusion survives the inversion: **survivor-side constraint reaches at most the two cells
+Ponos took. Naprijed has zero enclave brigades and took two more. The exit condition is four.** A
+receiving-end fix cannot get there, and the Engine seat withdrew its own design rather than defend it.
+
+**FALSIFIED, all three, all MEASURED:**
+1. **"Must-hold release" — DOES NOT EXIST.** `must_hold_osids_by_corps` is scenario data and reads
+   `vrs_drina -> ["op:zvornik:zvornik"]`. **One entry, VRS-only.** There is no RBiH must-hold pin
+   anywhere in the scenario. The 116th was never pinned, so it cannot have been unpinned. The
+   calibration seat's INFERRED step was wrong, and `op=null for 33 turns` is the symptom of never
+   being *selected*, not of a pin.
+2. **`assignCrossCorpsEnclaveDefenders` — a dead stub**, every parameter `void`ed, empty body.
+3. **Corps-average denominator — real channel, did not fire.** Ponos's AAR carries
+   `force_quality_traits_at_launch.inputs` at t160 (`active_subordinate_count: 40`,
+   `mean_cohesion_normalized: 0.69`) — direct evidence corps aggregates gate launch — but
+   `applied_gate: "none"`. Separate engine-correctness lane, **not** this fix. Risk if used as the
+   fix: excluding pocket brigades from the average in BOTH runs could make 2nd Corps offensive in
+   the baseline too, and the delta would vanish while the wrong outcome spread.
+
+**⇒ THE CAUSAL MECHANISM FOR THE FOUR CELLS IS STILL UNIDENTIFIED.** Recorded as such rather than
+filed under the most recent plausible story.
+
+**TWO REAL DEFECTS FOUND ALONG THE WAY, both stand regardless:**
+
+- **T-1 — the enclave participant filter does not run on the emergent creation path.**
+  `sector_offensive.ts:2334` excludes an enclave brigade unless an objective is in its own enclave.
+  The 284th is at Kalesija (no enclave) attacking Šekovići/Zvornik (no enclave), so
+  `isOsidInSameEnclave` is false for every objective and it should have been filtered. **It was
+  not.** `bot_corps_operations.ts:211-217` filters only on personnel ≥50% and cohesion ≥30 — **no
+  enclave filter at all.** Localise before anything else is built.
+- **T-2 — `displaced` is a latent defect in `patron_pressure.ts:344`.** It skips
+  `destroyed | disbanded | merged | withdrawn` but **not** `displaced`, so a 0-personnel `displaced`
+  formation still counts in `activeFormations` and drags the strength ratio. The value already
+  exists in the schema (`game_state.ts:1153`) and will bite whoever uses it first. **File it.**
+
+**★ WITHDRAWN ADVICE, recorded because acting on it would have made things worse:** the Engine seat
+earlier said to clear the `enclave` tag so the 3-of-3 never-dissolve rule stops migrating to Tuzla.
+**Do not do that in isolation** — the tag is the only thing nominally excluding survivors from
+offensive selection, and clearing it would unlock all five. Take the 3-of-3 fix by narrowing
+`isEnclaveBrigade`'s *dissolution consumer*, not by clearing the tag.
+
+**★ HISTORIAN, on the fix everyone was about to reach for: DO NOT MOVE THE DESTINATION.**
+`op:zivinice:gracanica_2` is **historically correct** — the column came out at Nezuk/Baljkovica in the
+Sapna Thumb and the survivors were received in the Tuzla area; Živinice is a Tuzla-area municipality.
+Relocating the arrival point to somewhere "more neutral" trades a real §6 problem for a fresh factual
+error. **The defect is not WHERE they arrive. It is WHAT they arrive as** — historically ~2,700
+disarmed, exhausted men, a reconstitution burden for the ARBiH, not an increment of usable combat
+power. **Constrain capability, not geography.**
+
+**THE ONE CANDIDATE THAT REACHES THE EXIT CONDITION — and it is a decision, not a task.**
+`state.military.offensive_ops_suppressions` already exists (`game_state.ts:2891-2895`), written by
+`applyOffensiveOpsSuppression` and consumed at `sector_offensive.ts:1520`, forcing `beginRecovery` on
+the planning→execution transition. **It would stop Ponos and Naprijed both** — which nothing
+survivor-side can do. Two conditions:
+- **It is faction-scoped, which is unusable** — it would also suppress 5th Corps at Bihać and the
+  autumn Sana/Una operations. Needs an optional `corps_id` (additive, absent = faction-wide, no
+  migration, one predicate at the consumer).
+- **It is AUTHORED, not emergent.** The fall is event-owned per H1.8, so authoring the fall's
+  documented second-order cost (the Baljkovica rescue: divisional-scale, five days after the fall,
+  for a corridor rather than for ground) beside its documented first-order effect is what the event
+  channel is for — it names a corps and a window, not an OSID or a target. **The limit is that it
+  does not generalise:** another enclave falling elsewhere needs its own authored cost. **That goes
+  in the ledger as a stated limit, not dressed up as emergent.**
