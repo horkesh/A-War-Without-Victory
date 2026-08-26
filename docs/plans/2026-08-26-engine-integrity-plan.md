@@ -4,7 +4,7 @@
 
 > **Date:** 2026-08-26
 >
-> **Status:** SOURCE-AUDITED / IMPLEMENTATION-GRADE; implementation not started
+> **Status:** READY FOR T0; implementation not started
 >
 > **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
 >
@@ -12,11 +12,11 @@
 >
 > **Workstream:** RE-0 through RE-6
 >
-> **Collision rule:** Claude owns probes; any probe or packet-file overlap stops RE
+> **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** finish independent plan review, await probe disposition, then execute T0
+> **Current next action:** execute T0 and bind the post-handoff integrated base
 >
-> **Execution base:** capture only after the probe lane is owner-dispositioned
+> **Execution base:** capture in T0 after the 2026-08-26 ownership-handoff sync
 
 **Goal:** Remove confirmed engine-authority, formal-battle accounting, deterministic-ordering, and locality defects without adding engine surface area or tuning historical outcomes.
 
@@ -67,9 +67,10 @@ Execution checklist:
 
 **Planning base audited:** `9d945566170efe252e1cc4d1960bad3a655625fc`.
 
-**Execution base:** not yet captured. Claude owns the active probe lane. Do not edit, revert,
-re-stage, test-drive, or absorb probe implementation. After that lane is owner-dispositioned and
-landed, Task T0 records the approved integrated commit and revalidates every path/symbol below.
+**Execution base:** not yet captured. The probe lane closed at
+`b711cffa94029c35eac18d96db91a411eb2e7abb`: stable sector identity and
+`occupies_on_victory` landed; the fixed-home exclusion was reverted. Preserve that disposition.
+Task T0 records the post-handoff integrated commit and revalidates every path/symbol below.
 
 RE makes no calibration change, historical target change, combat tuning change, scenario-data
 change, map-geometry change, schema expansion, release, push, PR, or publication.
@@ -184,7 +185,8 @@ be different agents.
 
 ### T0 — Capture the integrated base and prove isolation
 
-1. Wait for owner disposition and landing of Claude's probe lane.
+1. Confirm `b711cffa94029c35eac18d96db91a411eb2e7abb` is an ancestor of HEAD and the probe scope records
+   its final disposition. The user's 2026-08-26 handoff satisfies the ownership prerequisite.
 2. Fetch no remote and push nothing.
 3. In the intended integration checkout record:
 
@@ -963,8 +965,8 @@ reviewed by the full active Pyrrhic roster.
 
 Objective: Execute exactly one unchecked task from
 docs/plans/2026-08-26-engine-integrity-plan.md. Start with T0 unless the plan and living RE audit
-prove an earlier task closed. Claude owns the probe lane: do not edit, revert, test-drive, stage,
-or absorb probe work.
+prove an earlier task closed. The probe lane closed at b711cffa9; preserve its landed/reverted
+disposition and do not reopen probe work under RE.
 
 Required method:
 1. Read every document in plan §2 and record the execution commit.

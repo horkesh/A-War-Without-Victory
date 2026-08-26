@@ -29457,3 +29457,28 @@ garrison mechanics remain outside implementation absent separately approved evid
 **Synchronized surfaces:** sole RE plan, Master Roadmap, Command Board, plans index, docs index,
 active task governance, changelog, and reusable process knowledge. The probe lane remains Claude's
 separate active ownership boundary. `docs/10_canon/FORAWWV.md` was not edited.
+
+## [2026-08-26] docs(RE): integrate the reviewed rail after probe closeout
+
+**Type:** Documentation/process handoff and control-plane synchronization. No new gameplay,
+engine, scenario, save, artifact, threshold, package, canon, push, PR, merge, tag, publication, or
+release change in this entry.
+
+**Probe handoff:** The separate probe lane closed at
+`b711cffa94029c35eac18d96db91a411eb2e7abb`. Stable sector identity and
+`occupies_on_victory` landed; the fixed-home exclusion was reverted. The owner then handed the
+repository to RE. That disposition is preserved and is not reopened under RE.
+
+**RE state:** The independently reviewed implementation-grade plan was integrated as
+`ccccc489d`. The obsolete probe blocker was removed from every live control-plane surface. RE is
+now **READY FOR T0**: bind the post-handoff integrated commit, revalidate the live symbols moved by
+the probe work, then establish the exact-parent Node-22 S0.
+
+**Correction to the immediately preceding RE ledger entry:** canonical checkpoint evidence lives
+at `run_summary.json.historical_fit.checkpoints`, not `run_summary.json.checkpoints`. The
+implementation plan already uses the correct path and weeks 39/104/156/188. This correction is
+append-only; the prior entry is retained unchanged.
+
+**Synchronized surfaces:** Master Roadmap, Command Board, sole RE plan, plans index, docs index,
+active task governance, current-lane pointer, and changelog. `docs/10_canon/FORAWWV.md` was not
+edited.

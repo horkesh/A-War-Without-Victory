@@ -8,10 +8,10 @@ deterministic ordering, locality, and verification truth before further calibrat
 
 ## Current status and next action
 
-**SOURCE-AUDITED / IMPLEMENTATION-GRADE; IMPLEMENTATION NOT STARTED.** Claude owns the separate
-probe-channel scope. RE must not implement, revert, or absorb probe work. After the owner records
-that lane's final disposition and overlapping edits land, capture the approved integrated HEAD,
-hard-check Node 22, and execute RE-0 using the plan's source-verified authoritative run substrate.
+**READY FOR T0; IMPLEMENTATION NOT STARTED.** The separate probe lane closed at `b711cffa9`, and
+the owner handed the repository to RE. Preserve that disposition. Capture the post-handoff
+integrated HEAD, hard-check Node 22, and execute RE-0 using the plan's source-verified
+authoritative run substrate.
 
 ## Canonical owner
 
@@ -74,7 +74,7 @@ checkpoint are not engine defects.
 
 ## Collision rules
 
-- Active probe or overlapping engine edits stop RE base capture.
+- Any new overlapping engine edit stops RE base capture; the probe lane itself is closed.
 - RE-0D/RE-1 collide with desktop/runtime/UI work; pause the relevant R7 packet.
 - RE-2/RE-3/RE-4 may overlap R7 only after exact file inspection proves ownership is disjoint.
 - Further calibration is paused until RE closes.
@@ -101,7 +101,7 @@ Electron contract proof and a documented visual no-change result.
 
 ## Roadmap slot and unlock
 
-RE is order 7.5, after the probe prerequisite and before R8. It precedes every further calibration
+RE is order 7.5, after the now-closed probe prerequisite and before R8. It precedes every further calibration
 change. It may overlap only proven-disjoint R7 packets.
 
 RE unlocks trustworthy calibration deltas and full packaged R8 campaigns. It does not promise a
@@ -111,4 +111,4 @@ busier war or a better historical-fit score.
 
 - **2026-08-26:** live-source specialist audit refined the sole plan with exact owners, tests,
   commands, two-commit evidence discipline, and deletion-first complexity gates.
-- **Next:** owner probe disposition → integrated parent → RE-0.
+- **Next:** T0 integrated parent → RE-0.

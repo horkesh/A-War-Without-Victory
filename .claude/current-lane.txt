@@ -1,1 +1,1 @@
-CLOSING — re-running the bankable baseline. Previous attempt stamped git_dirty:true because the lane file (TRACKED) was written in the same command as the launch. Lane file committed FIRST this time.
+RE — READY FOR T0. Probe lane closed at b711cffa9; owner handed the repository to RE. Preserve the landed/reverted probe disposition. Next: bind the post-handoff integrated base, then Node-22 S0.

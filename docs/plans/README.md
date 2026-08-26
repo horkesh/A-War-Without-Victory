@@ -25,11 +25,11 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | R6 | [Historical gameplay depth and final calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) | January evidence accepted; all further calibration is paused until RE closes |
 | RC | [Collapse scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) / [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) | Pre-1.0 narrow scope complete; D-topology reserved post-1.0 |
 | R7 | [Content, history, audio, accessibility, and opening experience](2026-07-31-content-history-localization-audio-plan.md) / [case-file opening implementation](2026-08-23-opening-screens-implementation-plan.md) | Audio implementation landed `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser, packaged proof, and closeout remain |
-| RE | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) | Source-audited/implementation-grade; blocked on owner disposition of Claude's separate probe lane, then fresh exact-parent RE-0; gates calibration and R8 |
+| RE | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) | Ready for T0; probe prerequisite closed at `b711cffa9`; bind post-handoff base, then fresh exact-parent RE-0; gates calibration and R8 |
 | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | RC, R1-R7, and RE green |
 | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | R8 produces two clean 5/5 diaries |
 
-Each R1–R9 workstream has exactly one detailed plan with named files, red-first tests, commands, evidence, acceptance, collision rules, and an orchestrator closeout. RC uses its linked closed packet; RE uses the single lean execution plan above. The frozen RE discovery records and Claude-owned probe scope are evidence/prerequisite documents, not competing RE plans.
+Each R1–R9 workstream has exactly one detailed plan with named files, red-first tests, commands, evidence, acceptance, collision rules, and an orchestrator closeout. RC uses its linked closed packet; RE uses the single lean execution plan above. The frozen RE discovery records and closed probe scope are evidence/prerequisite documents, not competing RE plans.
 
 ## Activation Boundary
 
@@ -45,7 +45,7 @@ See [Master Roadmap §2](MASTER_ROADMAP.md#2-authority-and-activation) for the e
 
 ## Current State
 
-The seven RBiH/RS/HRHB owner-style Electron diaries and completed bug-first repair history are indexed in the [D2 owner-diary closeout](../40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md). The case-file opening and audio implementation have landed. Current pre-1.0 work is the owner disposition of Claude's probe prerequisite, serial RE-0–RE-6, remaining R7 human/accessibility/package gates, R8, and R9. Further calibration is paused on RE. There are no separate active RC/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, signing-credential, or release-operator queues.
+The seven RBiH/RS/HRHB owner-style Electron diaries and completed bug-first repair history are indexed in the [D2 owner-diary closeout](../40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md). The case-file opening and audio implementation have landed. The probe prerequisite closed at `b711cffa9`. Current pre-1.0 work is RE T0 then serial RE-0–RE-6, remaining R7 human/accessibility/package gates, R8, and R9. Further calibration is paused on RE. There are no separate active RC/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, signing-credential, or release-operator queues.
 
 Research has resolved the product choices. Verification barriers remain: determinism, conservation, migration, baselines, canon, historical substantiation, accessibility, security, licensing, clean package/runtime, and explicit external publication authority.
 
