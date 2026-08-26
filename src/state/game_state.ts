@@ -430,6 +430,46 @@ export interface AxisRejectionBrigadeFact {
 export interface CorpsOperation {
     name: string;
     type: 'general_offensive' | 'sector_attack' | 'strategic_defense' | 'reorganization' | 'feint' | 'probe';
+    /**
+     * Does a victory by this operation result in HOLDING the ground? Added 2026-08-26.
+     *
+     * WHY THIS EXISTS. `attack_resolution_osid.ts` used to read `flip = won && !isProbeOp` — the
+     * resolver computed a victory and a boolean deleted its consequence. Measured in n294 with the
+     * only control that settles it, the 148 decisive victories won by REAL operations in the same
+     * run: probe decisive wins are **statistically indistinguishable** from them (median power
+     * ratio 6.13 vs 6.18, median defender casualties 151 vs 144). Probes were winning the same
+     * fights, at the same odds, killing the same numbers — and **157 decisive victories were being
+     * discarded by fiat.** The probe channel also carried 61.7% of all attacker casualties in the
+     * war for zero ground.
+     *
+     * The engine had no way to say "won, but holds nothing", because occupation is a CONSEQUENCE
+     * of the flip (`:1560` walks the attacker in AFTER control changes) rather than a cause of it.
+     * This field is that missing statement.
+     *
+     * ⚠ NOT A PROXY FOR `type`, and the test is: a predicate is a proxy iff it cannot vary WITHIN
+     * a type. This can — a `sector_attack` run as a spoiling attack, a raid or a demonstration sets
+     * it false; a reconnaissance that converts to exploitation sets it true. **Stated plainly
+     * because a reviewer will spot it: TODAY exactly one factory sets it false, so its behaviour
+     * is currently identical to `op.type === 'probe'`. The payoff is structural, not immediate.**
+     *
+     * ⚠ DEFAULT TRUE at every read site (`?? true`). An attack that has not declared it does not
+     * intend to hold is an ordinary attack. Defaulting false would delete a large share of combat
+     * captures and breach the anchors — that is the one variant of this change that is
+     * unambiguously wrong.
+     *
+     * ⚠ READ IT OFF THE UN-PHASE-GATED HANDLE. In `attack_resolution_osid.ts`, `activeOp` is
+     * present for any phase but `activeOperationId` is written ONLY in `execution` — which is why
+     * 25% of combat captures LOOK opless in the artifacts while the engine has their operation
+     * perfectly well. Read `activeOp`, never `executionOp`.
+     *
+     * ⇒ THE INTENDED LONG-TERM CARRIER IS BRIGADE POSTURE, not this field. `BrigadePosture`
+     * already has a `'probe'` member and posture is per-formation and per-battle, so it answers
+     * opless battles natively and without a default. It is not usable yet: `buildProbeOperation`
+     * does not set it and the only writer is `bot_early_war.ts:141`. If this effect ever needs to
+     * reach opless battles, non-corps formations or player-ordered raids, move it to posture —
+     * a brigade's intent belongs to the brigade, not to the paperwork above it.
+     */
+    occupies_on_victory?: boolean;
     phase: 'planning' | 'execution' | 'recovery';
     started_turn: number;
     phase_started_turn: number;

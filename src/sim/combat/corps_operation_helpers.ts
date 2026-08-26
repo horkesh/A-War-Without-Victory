@@ -384,6 +384,12 @@ export function buildProbeOperation(
     return {
         name: `probe_${corpsId}_t${turn}`,
         type: 'probe',
+        // A reconnaissance-in-force does not set out to hold ground — it makes contact, learns,
+        // and disengages. This is the DECLARATION that the resolver reads instead of testing the
+        // type string; see `occupies_on_victory` in game_state.ts. Settable elsewhere by design:
+        // a probe that converts to exploitation may set it true, and a sector_attack run as a
+        // spoiling attack or demonstration may set it false. Nothing does either today.
+        occupies_on_victory: false,
         phase: 'planning',
         started_turn: turn,
         phase_started_turn: turn,

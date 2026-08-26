@@ -1393,9 +1393,19 @@ export function resolveAttackOrdersOsid(
         // Probes are recon-by-force and never capture territory. Capture
         // requires a sector_attack or other offensive op type. See
         // buildProbeOperation in corps_operation_helpers.ts.
-        const isProbeOp = activeOp?.type === 'probe';
+        // OCCUPATION, not operation TYPE. Was `flip = won && !isProbeOp` — the resolver computed a
+        // victory and a boolean deleted its consequence. Measured against the only control that
+        // settles it (the 148 decisive victories won by real operations in the same run), probe
+        // decisive wins were INDISTINGUISHABLE — median power ratio 6.13 vs 6.18, median defender
+        // casualties 151 vs 144 — so 157 decisive victories were being discarded by fiat, not by a
+        // rule about what a probe is. See `occupies_on_victory` in game_state.ts for the full note.
+        //
+        // `activeOp`, NOT `executionOp`: the latter is phase-gated to execution, which is why a
+        // quarter of combat captures look operation-less in the artifacts while the engine has
+        // their operation. Default TRUE — an attack that has not declared otherwise intends to hold.
+        const occupiesOnVictory = activeOp?.occupies_on_victory ?? true;
         let flip = (outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory')
-            && !isProbeOp;
+            && occupiesOnVictory;
 
         // === MORALE-BASED RETREAT RESISTANCE + HOMELAND DETERMINATION (extracted to attack_morale_absorption.ts) ===
         const { moraleAbsorbed, flip: updatedFlip } = evaluateAndApplyMoraleAbsorption({

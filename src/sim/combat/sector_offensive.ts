@@ -2041,10 +2041,12 @@ function updateLegacyFlatResults(
     let effectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap ?? undefined);
 
     // Null-controlled OSID: auto-claim — no enemy, no battle needed.
-    // Probes are recon-by-force and never capture territory (per n1580 fix in
-    // attack_resolution_osid.ts:778). Skip the auto-claim path for probes so
-    // the rule is consistent across all capture mechanisms.
-    if (effectiveController == null && op.type !== 'probe') {
+    // Gated on the operation's DECLARED intent to hold, not on its type. Was
+    // `op.type !== 'probe'`, a second unexplained special case alongside the one in
+    // attack_resolution_osid.ts; both now read the same declaration, so the rule is stated once.
+    // Default TRUE — an operation that has not said otherwise intends to hold.
+    // See `occupies_on_victory` in game_state.ts.
+    if (effectiveController == null && (op.occupies_on_victory ?? true)) {
         if (!state.political.political_controllers) state.political.political_controllers = {};
         state.political.political_controllers[currentObjective] = faction;
         (state.political.control_events ??= []).push({

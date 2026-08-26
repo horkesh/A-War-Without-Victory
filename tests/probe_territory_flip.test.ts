@@ -124,6 +124,13 @@ function makeScenario(opType: CorpsOperation['type']) {
     const operation: CorpsOperation = {
         name: `test_op_${opType}`,
         type: opType,
+        // 2026-08-26: the resolver no longer tests `type === 'probe'` — it reads the operation's
+        // DECLARED intent to hold (`occupies_on_victory`, default TRUE). `buildProbeOperation`
+        // sets it false in production; this fixture builds its operation literally, so it must
+        // declare the same thing. Mirroring the factory here is the point: if the factory ever
+        // stops declaring it, `defaults to holding — a probe built without the declaration FLIPS`
+        // below is the test that catches it.
+        occupies_on_victory: opType !== 'probe',
         phase: 'execution',
         started_turn: 3,
         phase_started_turn: 3,
@@ -223,6 +230,46 @@ function makeUndefendedProbeScenario() {
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
+
+describe('occupation declaration (2026-08-26)', () => {
+    it('★ defaults to holding — a probe built WITHOUT the declaration FLIPS, by design', () => {
+        // The predicate is `activeOp?.occupies_on_victory ?? true`. Default-true is deliberate and
+        // is the conservative choice: an attack that has not declared it does not intend to hold
+        // is an ordinary attack, and defaulting FALSE would silently delete a large share of
+        // combat captures and breach the anchors.
+        //
+        // THE COST OF THAT CHOICE IS THIS TEST. Any future code that builds a probe operation
+        // WITHOUT going through `buildProbeOperation` will take ground. Verified at the time of
+        // writing that no production path does: the only non-factory `type: 'probe'` sites are
+        // `army_hq_overrides.ts` (a directive object that nothing converts into a CorpsOperation —
+        // it is read only as a boolean) and a disconnected UI planner. If that ever changes, the
+        // new site must declare `occupies_on_victory: false` — and this test documents why.
+        const { state, edges } = makeScenario('probe');
+        const op = state.military.corps_command!['vrs_1st']!.active_operations[0]!;
+        delete (op as { occupies_on_victory?: boolean }).occupies_on_victory;
+
+        resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+        expect(state.political.political_controllers!['op:rbih:target'],
+            'an undeclared operation holds what it takes — if this flips to RS the default has been '
+            + 'inverted, and a quarter of combat captures are about to disappear').toBe('RS');
+    });
+
+    it('★ the declaration, not the type, is what withholds the ground', () => {
+        // A sector_attack that DECLARES it does not hold must behave exactly like a probe. This is
+        // the assertion that makes `occupies_on_victory` a real property rather than `op.type`
+        // wearing a new name: it can vary WITHIN a type. Nothing sets this in production today —
+        // the field exists so a spoiling attack, raid or demonstration can.
+        const { state, edges } = makeScenario('sector_attack');
+        const op = state.military.corps_command!['vrs_1st']!.active_operations[0]!;
+        (op as { occupies_on_victory?: boolean }).occupies_on_victory = false;
+
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+        expect(report.battles[0]?.attacker_won, 'the attack must still WIN — we are withholding the '
+            + 'ground, not the victory').toBe(true);
+        expect(state.political.political_controllers!['op:rbih:target'],
+            'a declared non-occupying sector_attack must not take ground').toBe('RBiH');
+    });
+});
 
 describe('probe territory flip gate', () => {
     it('canon determinism: decisive probes do not capture while normal attacks can', () => {
