@@ -556,3 +556,23 @@ Applied retroactively to a seven-item queue, this screen killed **five of seven*
   `battles[].target_osid` against `control_events`, not `control_events` alone.
 - **Do instead**: Never infer "no attempt" from "no result" in this engine. The battle record
   lives in the weekly report; the outcome lives in the save. Read both.
+
+### [Calibration] ABOVE ~20% SCHEDULE DIVERGENCE THE CHECKPOINTS ARE NOT NUMBERS — and re-running cannot fix it (2026-08-26) — NEW
+- **Context**: an owner-directed change was reported as costing "-13 at apr1995". `tools/op_schedule_diff.cjs` rung 4 (corps+objectives) measured **61.1%** — the operation schedule was not shifted underneath the measurement, it was **REPLACED** (2nd Corps shared not one operation between the runs).
+- **Wrong approach**: reading the checkpoint deltas as a cost, then proposing to re-run with a pre-committed prediction to make them attributable. **A structural change to operation SELECTION always exceeds the threshold** — converting ~87 probes into ~20 real attacks *is* a schedule replacement — so a re-run produces the same divergence and the same unreadable numbers.
+- **Do instead**: adjudicate such a change on a **pre-committed BEHAVIOURAL target** (a counter, a rate, a per-corps distribution), never on matched OSIDs. Now a standing **S4 PRECONDITION** in `CALIBRATION_MASTER.md`. **Record such figures as "measured, unattributable at N%" — never as an accepted cost, and never as acceptable.**
+
+### [Calibration] A CONTROL FROM A BASELINE IS INVALID IF THE BASELINE IS THE THING UNDER REPAIR (2026-08-26) — NEW
+- **Context**: two negative controls (`sector_attack` 44 +/-3, probes >=150) were set from a baseline produced by the very defect being fixed. The probe channel existed **to compensate for the intel forgetting**, so both figures were properties of a blind engine.
+- **Consequence**: both controls would have **forbidden the repair from working**. It was exposed only when the owner ruled *"It was blindness"* — that the low tempo was an artifact rather than history.
+- **Do instead**: before pinning a control, ask whether the number it pins is a property of the war or an **output of the defect**. Re-base it or downgrade it to report-only. Where the answer is unknown, state the control as "must not DISAPPEAR" rather than "must not change".
+
+### [Calibration] A TARGET SHOULD BE A COUNT OF A NAMED THING — five of seven failed (2026-08-26) — NEW
+- **Context**: seven acceptance targets were written for the probe lane. **Five needed correcting after contact**: one was coupled to the variable under test (`turns_in_contact` swung 88 to 21 on unchanged code as probe volume moved); two were ratios whose denominator the change itself moves; one was a fraction dressed as a count (`<=8/28`, denominator moved 28 to 22); one carried a stale threshold onto a different corps than it was written for.
+- **The two that held** were a named brigade with an expected count of zero, and three absolute counts of named populations. **Both were plain integers about named things.**
+- **Do instead**: **if a target cannot be written as a count of a named thing, the mechanism is not understood well enough to be setting a target for it yet.** Where a rate is genuinely wanted, state the **positive** fraction and **gate the denominator** (void the metric if it moves more than 20%), so "smaller is better with a moving denominator" cannot arise.
+
+### [Calibration] CELLS MOVING THE RIGHT WAY IS NOT EVIDENCE — three times in one day, none causal (2026-08-26) — NEW
+- **Context**: (1) an eligibility fix removed exactly the three cells it targeted and was **not causal** — `control_events` showed the same brigade, same operation, same turn, same first two captures, byte-identical. (2) A probe gate dropped the ahistorical eastern surplus 9 to 5 — also not the gate; all five were one brigade's captures and that brigade was in no operation after t160. (3) The surplus then read 9 to 4, and the four-query test showed **5 of 6 resolved cells in the earlier run were one brigade (`arbih_116th_mountain`) which simply did not draw the same operations** — a schedule lottery.
+- **What the third test also found, and this is the value**: three cells persist in EVERY configuration including the untouched baseline — `bratunac:pobudje_2`, `kalesija:seher_2`, `vlasenica:cerska_2`. **That is the durable target; the rest is noise.**
+- **Do instead**: **confirm the TRIGGER is gone, not that the symptom moved.** Cheapest test: enumerate the resolved cells and their `control_events`; if they are one brigade's captures under one emergent op, it is the lottery. Four queries, zero runs.

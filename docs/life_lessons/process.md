@@ -649,3 +649,40 @@ The counterexample was in my own data: `rs_visegrad_brigade` ranks **80/81** —
   never on the proposal. And when a seat proposes a fix, TEST it in the same session rather than
   recording it as the answer — the Historian's apparatus gate read as obviously correct and was
   worth nothing.
+
+### [Process] THE OWNER HOLDS THE MODELLING TRUTH — measurement cannot tell you what SHOULD happen (2026-08-26) — NEW
+- **Context**: measured a quiet war in detail — 3.14 battles/week, 59% of battles probes, several corps with ZERO real attacks in 188 weeks, the Sarajevo corps mounting one offensive — and escalated `REAL_WAR_MASTER #40` to **P0** on it. The owner: *"None of that is issue, all of those are correct modelling of how the real war went on. ... 1st corps not attacking — well of course, it's mostly Sarajevo brigades under siege."*
+- **And then the reverse, the same day.** When the CAUSE was found (intel identity destroyed every turn) and he was asked the sharp question — *was the low tempo history, or was it blindness?* — he ruled **"It was blindness."** Both rulings were right about different things: the besieged corps stays quiet (38 probes to 0, attacks 1 to 2), while the general quiet was an artifact.
+- **Do instead**: before escalating a **behavioural** finding, separate *"this number is surprising"* from *"this number is wrong"* — the second is a claim about history, and history is the owner's. **And when you find the cause, go back and ask again**: a ruling given on the symptom may not survive the cause.
+
+### [Process] A FIELD'S SEMANTICS INFERRED FROM ONE INSTANCE — RE-VIOLATION, lesson already in the file (2026-08-26) — NEW
+- **Context**: saw `placement:fixed_home_osid` on `arbih_115th_mountain` — a garrison that never moves — and built a probe-pool exclusion on it, describing it in the scope as "fixed-home garrisons".
+- **MEASURED AFTER THE RUN: 180 of 184 brigades carry that tag.** It is the near-universal default placement. The predicate did EXACTLY what it said and swept up **71 probe-launching brigades instead of 1** (distinct probe launchers: 90 baseline, 26 with the filter, 94 on revert), including a recruitment-generated formation that cannot have a fixed home at all. It also caused a 208 to 80 probe collapse that was then **wrongly attributed to a different change**.
+- **This is the 2026-08-25 `to_control === 'controlled'` lesson repeated verbatim** — a gate built believing a field meant "this faction holds the municipality" when it reads `controlled` for every municipality. **Its written rule — print the field's distribution before gating on it; a one-bucket histogram means the clause is decoration — was in the lessons file read at session start.**
+- **Do instead**: **the tell is that you learned a field's meaning from the one row that made you notice it.** One filter-and-count costs ten seconds and kills the design before it is written.
+
+### [Process] A REAL FINDING BECAME THE WORK — the drift had no single bad decision in it (2026-08-26) — NEW
+- **Context**: a session opened on nine cheap plan items requiring zero scenario runs. A genuine section-6 blocker was repaired (an enclave guard asserting 1 of 9 cells and unable to fail), which surfaced a switched-off mechanic, which the owner ruled ON, which produced four ahistorical cells — and the session then spent **three 188-week runs and five failed hypotheses** on a lane the plan never mentioned. **One of nine planned items got done.**
+- **Every step was individually defensible**, which is exactly why nothing stopped it. The owner had to ask *"what happened to the original plan?"* — invisible from inside, obvious from outside.
+- **Do instead**: **when a legitimate finding opens a new lane, write it down and QUEUE it; do not follow it.** A finding worth pursuing is still worth pursuing tomorrow; a plan item skipped today usually stays skipped. Mechanical guard: `tools/hooks/guard_scope_drift.sh` fires on scenario runs and threshold blessings and prints the declared lane from `.claude/current-lane.txt`.
+
+### [Process] AN ARTIFACT FIELD CAN BE A PHASE-GATED PROJECTION OF ENGINE STATE (2026-08-26) — NEW
+- **Context**: argued that a combat predicate had to be answerable **per battle** rather than per operation, because 41 of 164 combat captures (25%) appeared to have **no operation**. That was measuring `activeOperationId`, which `attack_resolution_osid.ts:1278` writes **only when the op is in `execution` phase**. `activeOp` itself is not gated — and the pre-existing code at `:1396` already read the ungated handle and worked.
+- **Consequence avoided**: designing a more complex predicate around a constraint that does not exist. Caught by a reviewing seat, not by the author.
+- **Do instead**: **reasoning about ENGINE behaviour from an ARTIFACT field is reasoning about the projection.** Before concluding something is absent from the engine, find the in-engine handle and check whether the artifact writer gates it.
+
+### [Process] SPLITTING A BUNDLE ON DIVERGENT OUTCOMES IS WHAT MAKES BUNDLING SAFE (2026-08-26) — NEW
+- **Context**: three changes were bundled into one validation run on a disjoint-metrics judgement, then split when their outcomes differed. **The split is what isolated a 71-brigade blast radius.** Bundled, "probes 215 to 80" would have been banked as the intel fix's achievement and the over-broad predicate would have shipped invisibly inside it.
+- **Do instead**: bundling is defensible when each member owns a **distinct metric that FIRES** — not merely one that exists in principle. A member with no observation in the baseline rides the bundle unmeasured (this happened: one of the three had no isolating metric and had to be re-run). **Confirm each member's metric is instrumented and non-degenerate BEFORE bundling** — the S2 positive control, applied per member.
+
+### [Process] CHECK WHETHER THE CAPABILITY EXISTS BEFORE DESIGNING THE GAP (2026-08-26) — NEW
+- **Context**: three seats were dispatched on "can the president author operations?", framed as a probable gap. **It shipped, wired end-to-end, ungated and switched ON**: a Request-op card per corps every turn, the player types a settlement NAME (not an id), the engine auto-selects force and axis, and the CO objects first with a force ratio the player may override at a faction-weighted patron cost. The real issue was DISCOVERY, not capability.
+- **Do instead**: **a design document describing a gap is not evidence of a gap**, exactly as it is not evidence of implementation. Find the consumer before scoping the build.
+
+### [Process] ROUTE AGENT WORK BY OWNERSHIP, NOT AVAILABILITY (2026-08-26) — NEW
+- **Context**: dispatched a fresh calibration agent for a scoping question while the calibration seat that **authored the decision rule and its precondition** sat idle. The fresh agent idled twice without reporting; the warm seat answered in one pass and immediately caught a four-commit baseline contamination the fresh one had no context to see.
+- **Do instead**: route to the seat that owns the artifact or rule in question. A cold spawn re-derives context the warm one already has, and cannot see what it was never told.
+
+### [Process] A REVERT DOES NOT RETURN YOU TO THE RUN YOU MEASURED (2026-08-26) — NEW
+- **Context**: assumed reverting one commit restored the last baseline. `git log <baseline>..HEAD -- src/` returned **FOUR** commits, one behavioural (a `lifecycle_status` relabel gating reconstitution eligibility). A run was spent producing a baseline that turned out **byte-identical to one already on disk** — because the argument for needing it was made from commit ordering alone, without comparing **run timestamps to commit timestamps** (the existing run was made from a dirty tree, so its contents led its commit by 46 minutes).
+- **Do instead**: before claiming *"revert X and we are back at baseline Y"*, diff the **full commit range** against Y, and `stat` the candidate run dirs against `git log --date=format:%H:%M`. One command.

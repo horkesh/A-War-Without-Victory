@@ -16,6 +16,45 @@ actually disjoint. RE and R7 gate R8; R9 follows R8.
 
 **Plan index:** [README.md](README.md)
 
+## ★ PROBE CHANNEL — CLOSED 2026-08-26. Scope: `docs/plans/2026-08-26-probe-channel-scope.md`
+
+**Owner rulings, both of which bind downstream work:**
+1. *"None of that is issue, all of those are correct modelling"* — on the quiet war. **Then, when the
+   cause was found and he was asked whether the low tempo was history or blindness:** *"It was
+   blindness."* **Ruling 2 supersedes ruling 1 on the CAUSE.** What survives from 1: a besieged corps
+   still does not mount offensives, and the data agrees (`arbih_1st_corps` 38 probes → 0, attacks
+   1 → 2 — it stopped flailing, it did not start attacking). `REAL_WAR_MASTER #40` carries both.
+2. **Do not re-raise "the war is too quiet" as a defect**, and do not treat a post-fix tempo rise as
+   a regression. Any control pinning `sector_attack` near 44 was pinning a number the BUG produced.
+
+**LANDED**
+- **Stable sector-pair identity** (`own_stable_key`/`enemy_stable_key` on `SectorIntelRecord`, derived
+  from content) **+ edgeless-ghost exclusion** in `getStalestSectorIntelConfidence`. Intel memory
+  **1-2 → 21 turns**; ARBiH sectors below the 0.40 threshold **57.1% → 36.4%**. **Step 1 alone does
+  NOT move tempo** (probes 208 vs 215, `sector_attack` 51 vs 44).
+- **`occupies_on_victory`** replaces the `!isProbeOp` fiat in `attack_resolution_osid.ts`, and the
+  duplicate special case in `sector_offensive.ts`'s auto-claim path. **186 probe wins, ground withheld
+  from every one, no ordinary attack affected.**
+
+**REVERTED** — fixed-home probe exclusion. The predicate was correct; **the tag is on 180 of 184
+brigades**, so it removed 71 probe-launching brigades instead of 1. If wanted again: rewrite against
+an explicit tag and **commit the enumerated caught set as the S3 predicted set before running**.
+
+**OPEN, QUEUED — do not chase from here**
+- **T4″ orphan-rate** never measured: fraction of `sector_intel` records whose `sector_id` no longer
+  exists this turn; target ≤5%. Step 1 landed on a metric later shown to be **coupled to probe
+  volume** (88 → 21 on unchanged code), so its proof is softer than its effect.
+- **The eastern surplus is 3 cells, not 9.** `bratunac:pobudje_2`, `kalesija:seher_2`,
+  `vlasenica:cerska_2` persist in EVERY configuration including the untouched baseline. The 9→4 drift
+  was tested and is a **schedule lottery** — 5 of 6 resolved cells were one brigade that simply did
+  not draw the same operations. **Do not report 9→4 as progress.**
+- **Probe emission Paths B and C** remain unmodelled by Phase 1 (see `20260826_S6_…` and the probe
+  scope §0.0c work): Phase 1's predictions cover at most the 302-battle Path-A bucket.
+- **§6: the request-op lever has no enclave gate.** An RS president may name Srebrenica and receive a
+  planned assault, routing around the event-owned outcome canon H1.8 specifies. **Panel matter.**
+
+---
+
 ## Current Execution Snapshot (2026-08-26)
 
 - **Calibration:** the January-1993 slice is landed evidence. Further reference, `init_control`,

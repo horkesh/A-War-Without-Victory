@@ -78,6 +78,35 @@ RE execution contract. The sole executable rail and current verification matrix 
 > behavioural target (`consecutive_probes` 38→1) instead. **Record such numbers as "measured,
 > unattributable at N%" — never as an accepted territorial cost, and never as acceptable.**
 >
+> **★ S3b AMENDMENT — A TARGET MUST BE A COUNT OF A NAMED THING (added 2026-08-26).** Of seven
+> acceptance targets written for the probe lane, **five needed correcting after contact**: one was
+> coupled to the variable under test (`turns_in_contact` swung 88→21 on unchanged code as probe volume
+> moved), **two were ratios whose denominator the change itself moves**, one was a fraction dressed as
+> a count (`≤8/28`; the denominator moved 28→22, so the count passed while the rate worsened), and one
+> carried a stale threshold onto a different corps than it was written for. **The two that held were a
+> named brigade with an expected count of zero, and three absolute counts of named populations.**
+> ⇒ **If a target cannot be written as a count of a named thing, the mechanism is not understood well
+> enough to be setting a target for it.** Where a rate is genuinely wanted, state the **positive**
+> fraction and **gate the denominator** — void the metric for that run if it moves >20% — so
+> "smaller is better with a moving denominator" cannot arise.
+>
+> **★ S3b AMENDMENT 2 — A CONTROL FROM A BASELINE IS INVALID IF THE BASELINE IS THE THING UNDER
+> REPAIR (added 2026-08-26).** Two negative controls (`sector_attack` 44±3, probes ≥150) were taken
+> from a baseline produced by the very defect being fixed — the probe channel existed to compensate
+> for an intel bug — so **both would have forbidden the repair from working.** Exposed only by the
+> owner's ruling that the low tempo was an artifact, not history. ⇒ Before pinning a control, ask
+> whether the number is a property of the war or an **output of the defect**. Where unknown, state it
+> as "must not DISAPPEAR", not "must not change".
+>
+> **★ C3 AMENDMENT — A BUNDLED MEMBER NEEDS A METRIC THAT FIRES, not one that exists (added
+> 2026-08-26).** Three changes were bundled on a disjoint-metrics judgement; one had no observation in
+> the baseline and **rode the bundle unmeasured**, and had to be re-run alone. Confirm each member's
+> metric is **instrumented and non-degenerate in the baseline** before bundling — the S2 positive
+> control, applied per member rather than per run. *(Counterpoint worth keeping: splitting that same
+> bundle on divergent outcomes is what isolated a 71-brigade blast radius that would otherwise have
+> shipped invisibly inside another change's credit. **Bundling is safe because splitting is
+> available** — not because the members are independent.)*
+>
 > **S5 — Tripwires override any score.** All four anchor sets; the enclave guard; the western-Bosnia
 > cascade; and §8.5.
 > **S6 — CONDITIONAL.** Where S3 was satisfied, the discriminator is the **LOCATION** of losses, not
