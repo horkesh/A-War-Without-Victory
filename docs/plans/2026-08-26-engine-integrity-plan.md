@@ -1394,3 +1394,52 @@ seats' open dispute about whose ledger they belong to: nobody's.** The later che
 
 **3. RESET THE GATE THRESHOLDS.** Owner-approved. Floors to be set from the run this tree actually
 keeps — never by blanket `--update`, which would also silently ratchet unrelated ceilings.
+
+### 2026-08-26 — PHASE 0 CLEARED (7 of 9 done, 1 pre-done, 1 DEFERRED with cause)
+
+| item | status |
+|---|---|
+| 0.0 §6 enclave guard | **DONE** — 9 cells, two-sided falls, liveness count, gating exit (`0098a48fe`), plus contest labels (`aa85ab45a`) and the two-sided eastern-surplus check (`673c939d6`) |
+| 0.0b floor-vs-dissolution | **DONE** — `tests/cohesion_floor_vs_dissolution.test.ts`, 27/27 unreachable |
+| 0.0c probe-path attribution | **DONE** — `tools/probe_path_attribution.cjs`, findings below |
+| 0.1 op-schedule diff | **DONE** — `tools/op_schedule_diff.cjs`, acceptance ladder reproduced exactly |
+| 0.2 corrected gate predicate | **DONE** — advisory beside gated; 6/40 ops recorded zero attacks while the shipped counter reads 0 |
+| 0.3 clean four-checkpoint baseline | **DONE** — n374 reference / n373 counterfactual, pinned in `CALIBRATION_MASTER.md` |
+| 0.4 decision rule written | **DONE** — copied into `CALIBRATION_MASTER.md`, with the superseded floors flagged |
+| 0.5 correct the record | **DONE** — RWM #40 P3→**P0**; military KIA corrected |
+| 0.5b `last_probe_turn` inert field | **DEFERRED — see below. Not skipped; blocked on its own premise.** |
+| 0.6 name-collision test | **DONE** — 112 pool / 19 authored / zero collisions |
+
+**★ 0.0c RESULT — the acceptance cells are attributed, and the answer is the one that hurts.**
+`n294`: **585 battles, 365 of them probes.**
+
+| bucket | ops | battles |
+|---|---:|---:|
+| A-or-B (single objective — **not separable in artifacts**) | 123 | 302 |
+| **B (multi-objective) — LOWER BOUND** | 12 | **63** |
+| C (army-HQ override) | 0 | 0 |
+
+**Radava and Gornja Vratnica are PATH B**, not Path A. They are hit by
+`probe_arbih_1st_corps_t<N>` operations carrying **both** targets — and **every one of the twelve
+Path-B operations in the run is 1st Corps probing those same two cells**, 63 battles, spread across
+the whole war from t74 to t186. Path B is not a scattering; it is one repeating pattern.
+
+⇒ **Phase 1 models Path A. Path B bypasses the `probeOnCooldown` gate entirely** (it sits before it
+and is never tested against it), **so Task 1.2's `last_probe_turn` cannot reach the 63 battles that
+matter most** — the ones the plan's own acceptance cells belong to.
+
+⇒ **Phase 1's headline figures apply to AT MOST the 302-battle bucket and to none of the 63.**
+Restate them against Path A alone, or cover all three sites. Do not quote them unqualified.
+
+**Stated limit, so nobody over-reads the table:** a Path-B probe converted from a *single*-objective
+plan is indistinguishable from Path A in the artifacts. The 63 is a **lower bound** and the 302 is
+"A or B", not "A". Closing that needs an emission-path marker on the operation — a code change, not
+another artifact read.
+
+**★ 0.5b DEFERRED, and the reason is 0.0c.** 0.5b exists to de-risk Task 1.2 by landing
+`last_probe_turn` as an inert schema change first. **0.0c has just shown that 1.2's design does not
+reach the probes its own acceptance cells come from.** Building the field now would be building
+infrastructure for a task whose premise needs revisiting — the exact "measure the premise before
+building" failure this plan was written to avoid. It also costs a scenario run to verify inertness,
+against a declared lane of zero runs. **Unblock 0.5b by first deciding whether 1.2 covers one path
+or three; the field's shape depends on that answer.**
