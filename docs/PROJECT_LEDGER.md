@@ -29429,3 +29429,31 @@ governance, calibration authority, reports index/evidence links, Real War #40 ro
 R7 landed-audio status, napkin, and knowledge ledger. `docs/10_canon/FORAWWV.md` was not edited.
 Probe commits after the preceding ledger entry remain for their owning lane to reconcile before the
 integrated RE parent is approved.
+
+## [2026-08-26] docs(RE): bind the lean engine rail to live code and mechanics
+
+**Type:** Documentation/process refinement only. No gameplay, engine, scenario, save, artifact,
+baseline, threshold, package, canon, probe, push, PR, merge, tag, or publication change.
+
+**Source audit:** The full Pyrrhic review was re-grounded at
+`9d945566170efe252e1cc4d1960bad3a655625fc` against live entrypoints, callers, tests, state fields,
+and runner contracts. The executable plan now centers formal-battle accounting on
+`resolveAttackOrdersOsid`, deletes rather than replaces duplicate name-keyed presidential
+mutation paths, specifies predecessor-to-descendant threat lineage and declaration-ordered
+operation queues, and decision-gates retreat breakout and event-owned enclave authority.
+
+**Execution correction:** Every behavior packet now requires a code/test commit followed by clean
+authoritative evidence and a docs/ledger commit. Worktree scenario evidence is inadmissible unless
+source resolution is proved; the default long-run substrate is an owner-approved clean checkout at
+the packet commit. S0 uses Node 22, checkpoints 39/104/156/188 from
+`run_summary.json.checkpoints`, exact machine-artifact manifests, and the health gate without
+`--strict`.
+
+**Lean correction:** RE adds no module, service, channel, pipeline step, default stream, flag, or
+persisted field. RE-1 has a hard net deletion target, the packaged runtime probe remains unchanged,
+and speculative observability, compatibility, reserve, reinforcement, estimator, dissolution, and
+garrison mechanics remain outside implementation absent separately approved evidence.
+
+**Synchronized surfaces:** sole RE plan, Master Roadmap, Command Board, plans index, docs index,
+active task governance, changelog, and reusable process knowledge. The probe lane remains Claude's
+separate active ownership boundary. `docs/10_canon/FORAWWV.md` was not edited.

@@ -24,7 +24,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 6 | R6 | **JANUARY 1993 CHECKPOINT SLICE LANDED; FURTHER CALIBRATION PAUSED ON RE** | Preserve the landed evidence. Do not start reference, init-control, objective, axis, timing, roster, or outcome tuning until RE closes. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE — AUDIO IMPLEMENTATION LANDED `2d106e5e0`** | Complete human listen/sensitivity acceptance, English accessibility/readability, offline browser and packaged-runtime proof, and closeout reconciliation. Pause any packet that collides with RE-0D/RE-1 desktop/UI files. Localization Phase 3 remains post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
-| 7.5 | RE | **PREPARATION-READY — BLOCKED ON OWNER DISPOSITION OF CLAUDE'S PROBE LANE; THEN RE-0** | Do not implement probe work under RE. After the owner resolves probe scope and overlapping edits land, capture integrated HEAD and execute RE-0 (fresh exact-parent Node-22 S0, observation audit, desktop CI truthfulness), then RE-1–RE-6 serially under decision gates. RE-5 mechanics are evidence-only/default defer. | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) |
+| 7.5 | RE | **SOURCE-AUDITED / IMPLEMENTATION-GRADE — BLOCKED ON OWNER DISPOSITION OF CLAUDE'S PROBE LANE; THEN RE-0** | Do not implement probe work under RE. After the owner resolves probe scope and overlapping edits land, bind the integrated HEAD, hard-check Node 22, establish S0 on a source-verified authoritative checkout, then execute the plan's two-commit packets serially. DG-1/2/3 precede their conditional work; RE-5 remains evidence-only/default defer. | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **WAITING ON RC, R1-R7, AND RE GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
@@ -45,9 +45,9 @@ consumed-input evidence, and flag state, and the pair selector rejects incompara
 RE-0 must nevertheless produce its own clean exact-parent Node-22 pair. Historical mixed-tree or
 Node-24 runs cannot be reused.
 
-**CURRENT EXECUTION:** Claude's probe scope is complete and awaits owner assent to step 0; RE has
-not started and may not capture a base until that disposition is approved and overlapping edits
-land. R7 audio implementation has landed; remaining R7 work is human listen/sensitivity review,
+**CURRENT EXECUTION:** Claude is working in the separate probe lane. RE is source-audited but has
+not started and may not capture a base until that lane has an owner-approved final disposition and
+overlapping edits land. R7 audio implementation has landed; remaining R7 work is human listen/sensitivity review,
 English accessibility/readability, and integrated packaged proof, subject to RE packet collisions.
 
 **Canon landed 2026-08-17:** `SENSITIVE_HISTORY_DESIGN_GATE.md` §10, "Provenance and the Integrity of the Historical Record", ratified by unanimous Pyrrhic panel. `FORAWWV.md` §XIII temporal scope is drafted but **HELD** behind the provenance channel-separation and determinism-scan packets, and is not canon.

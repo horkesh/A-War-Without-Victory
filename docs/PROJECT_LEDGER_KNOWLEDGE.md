@@ -4479,6 +4479,24 @@ and every quoted score must include checkpoint identity.
 Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
 roadmap, and debt`.
 
+## 2026-08-26 - An executable engine plan must bind to live owners and separate clean evidence
+
+A plausible subsystem name is not enough. The live formal-battle owner can differ from a legacy
+compatibility resolver, a deterministic BFS can still encode an illegal teleport, and a UI action
+can duplicate canonical authority behind a name-keyed bridge. Before scheduling implementation,
+trace the production caller, mutation seam, persisted fields, bridge, and focused tests.
+
+Clean long-run proof also cannot share a commit with the documentation written from that proof.
+Use a code/test commit first, run authoritative evidence from a clean checkout at that exact
+commit, then commit the report, ledger, and control-plane update separately. A linked worktree is
+not an authoritative scenario substrate until loaded-source identity is proved.
+
+**Reusable rule:** source-map before RED; delete duplicate owners before designing convergence
+layers; distinguish semantic routing from lexical determinism; and use a code commit followed by a
+clean evidence commit for every behavioral packet.
+
+Applied in `[2026-08-26] docs(RE): bind the lean engine rail to live code and mechanics`.
+
 ## 2026-08-26 - Discovery evidence and execution authority must remain separate
 
 An active plan is a finite executable contract, not a chronological investigation diary. Preserve

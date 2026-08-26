@@ -25,7 +25,7 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | R6 | [Historical gameplay depth and final calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) | January evidence accepted; all further calibration is paused until RE closes |
 | RC | [Collapse scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) / [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) | Pre-1.0 narrow scope complete; D-topology reserved post-1.0 |
 | R7 | [Content, history, audio, accessibility, and opening experience](2026-07-31-content-history-localization-audio-plan.md) / [case-file opening implementation](2026-08-23-opening-screens-implementation-plan.md) | Audio implementation landed `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser, packaged proof, and closeout remain |
-| RE | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) | Preparation-ready; blocked on owner disposition of Claude's separate probe lane, then fresh exact-parent RE-0; gates calibration and R8 |
+| RE | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) | Source-audited/implementation-grade; blocked on owner disposition of Claude's separate probe lane, then fresh exact-parent RE-0; gates calibration and R8 |
 | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | RC, R1-R7, and RE green |
 | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | R8 produces two clean 5/5 diaries |
 

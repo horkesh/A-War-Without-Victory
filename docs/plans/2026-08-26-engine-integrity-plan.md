@@ -1,610 +1,996 @@
-# RE — Lean Engine Integrity Execution Plan
+# RE — Lean Engine Integrity Implementation Plan
 
-> **Required execution skill:** `executing-plans`
+> **For Claude:** REQUIRED SUB-SKILL: Use `executing-plans` to implement this plan task by task.
+
 > **Date:** 2026-08-26
-> **Status:** PLAN — preparation-ready; behavior work blocked until RE-0 baseline and decision gates pass
-> **Roadmap row:** Master Roadmap §5, `RE`
+>
+> **Status:** SOURCE-AUDITED / IMPLEMENTATION-GRADE; implementation not started
+>
+> **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
+>
 > **Owner lane:** Orchestrator / RE engine-integrity lane
+>
 > **Workstream:** RE-0 through RE-6
-> **Collision rule:** Claude owns probes; active probe or overlapping engine edits stop RE
-> **Current next action:** owner-resolve the probe lane, capture the integrated parent, then execute RE-0
-> **Execution base:** capture the approved integrated HEAD at RE-0; do not bind this plan to the currently moving probe lane
-> **Probe boundary:** probe-channel work remains Claude's separate lane and is not part of RE
-> **Closeout report:** `docs/40_reports/implemented/202608XX_RE_ENGINE_INTEGRITY_IMPLEMENTATION_REPORT.md`
+>
+> **Collision rule:** Claude owns probes; any probe or packet-file overlap stops RE
+>
+> **Current next action:** finish independent plan review, await probe disposition, then execute T0
+>
+> **Execution base:** capture only after the probe lane is owner-dispositioned
 
-## Goal
+**Goal:** Remove confirmed engine-authority, formal-battle accounting, deterministic-ordering, and locality defects without adding engine surface area or tuning historical outcomes.
 
-Restore confidence in the engine's authority, accounting, deterministic ordering, and runtime boundaries with the smallest possible production surface. Prefer deletion, convergence on existing owners, and focused invariant tests. Do not add mechanics merely because a long-run outcome looks undesirable.
+**Architecture:** Converge on existing canonical owners. Delete duplicate and unreachable paths. Correct logic at the narrowest live mutation seam. Reuse existing state, ordering, diagnostics, runners, and UI authority. Every unresolved mechanic is a decision gate or evidence-only disposition, never an invitation to invent a subsystem.
 
-## Non-goals and forbidden scope
+**Tech Stack:** TypeScript, React, Electron CommonJS bridges, Vitest, existing deterministic scenario harness, PowerShell, Node 22.
 
-- No probe-channel implementation or probe rollback; Claude owns that lane.
-- No calibration tuning to make the war busier or outcomes prettier.
-- No unruled canon, historical-event, OOB, painted-target, or sensitive-history change.
-- No new GUI panel, map layer, asset, renderer, narrative subsystem, or Lua surface.
-- No save/schema change except the single optional exact exemption list if DG-1 selects Branch B and save/resume evidence proves it necessary.
-- No scenario-input, fixture-manifest, checkpoint, or expected-hash refresh merely to make a gate pass. Drift requires an explained, approved behavioral packet.
-- No reserve provenance, generalized matching framework, lifecycle service, operation telemetry architecture, or compatibility layer.
-- No version bump, release tag, publication, deployment, or master push.
+---
 
-## File and collision boundaries
+## 1. Authority, state, and non-goals
 
-All paths not listed for the active packet are read-only. Test files adjacent to an owned source and the packet's ledger/report entries are allowed. Before editing, enumerate exact test targets in the packet note.
+This is the sole executable RE plan. The Master Roadmap owns its slot and status. The frozen
+discovery record and team-disposition report are evidence, not competing queues.
 
-| Packet | May edit | Must not edit |
-|---|---|---|
-| RE-0A/B/C | this plan, `docs/40_reports/README.md`, `docs/40_reports/CALIBRATION_MASTER.md`, `docs/PROJECT_LEDGER.md`, the named RE reports; `runs/<unique-id>/` only through canonical runner | engine behavior, scenario inputs, probe files |
-| RE-0D | `.github/workflows/desktop-release-guard.yml`, existing related workflow tests/docs, `tools/desktop_packaged_runtime_probe.mjs` | launchers, packaging architecture, engine behavior |
-| RE-1 | `src/desktop/electron-main.cjs`, `src/desktop/preload.cjs`, `src/desktop/autonomy_ipc_contract.cjs`, `src/desktop/desktop_sim.ts`, `src/ui/map/desktop/useIPC.ts`, `src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/sim/combat/order_interpretation.ts`, `src/sim/combat/sector_offensive.ts`, named tests | unrelated UI, probe paths, new IPC |
-| RE-2 | `src/sim/combat/attack_casualty_distribution.ts`, `src/sim/combat/battle_resolution.ts`, `src/state/casualty_ledger.ts`, `src/sim/turn_phases/war_phases.ts`, named tests | casualty constants/tuning, scenario data; inspect-only `frontline_attrition.ts` and `siege_attrition.ts` unless change control proves duplicate ownership |
-| RE-3A | `src/sim/combat/commander/assess.ts` and focused tests | sector identity/probe lane, generic framework |
-| RE-3B | `src/sim/combat/pre_planned_operations.ts` and focused tests | catalog order/data |
-| RE-3C | `src/sim/combat/operation_opportunities.ts`, `src/sim/combat/operation_opportunity_catalog_5th_corps.ts`, `src/sim/combat/sector_offensive.ts`, and—Branch B only—`src/state/game_state.ts`, `src/state/validateGameState.ts`, named tests | both branches, replacement mechanic; DG-1 must amend this list if its proved consumer set differs |
-| RE-4A | `src/sim/combat/attack_retreat_displacement.ts`, `src/sim/combat/osid_adjacency.ts`, `tests/emergency_retreat_reachability.test.ts` | map data/geometry, centroid system |
-| RE-4B | `src/sim/negotiation/patron_pressure.ts`, `tests/patron_active_formation_strength.test.ts` | lifecycle/schema redesign |
-| RE-4C | `src/sim/combat/brigade_dissolution.ts` and its named focused test only after amendment | implementation before triage approval |
-| RE-5 | evidence report and decision/ledger docs only | production code/data |
-| RE-6 | closeout, canon/entrypoint docs affected by actual changes, roadmap/board/index/ledger | FORAWWV, unrelated backlog/rating files |
+Roadmap-phase mapping:
 
-If source movement makes a listed owner stale, Technical Architect must identify the canonical replacement and Orchestrator must amend this table before editing.
+| Roadmap phase | Executable tasks |
+|---|---|
+| RE-0 | T0–T3 |
+| Decision gates | DG-1, DG-2, DG-3 before their named consumers |
+| RE-1 | T4–T5 |
+| RE-2 | T6 |
+| RE-3 | T7–T9 |
+| RE-4 | T10–T12 |
+| RE-5 | T13 |
+| RE-6 | T14 |
 
-## Non-negotiable outcome
+Execution checklist:
 
-RE must leave the engine meaner than it found it:
+- [ ] T0 — capture integrated base and isolation
+- [ ] T1 — establish Node-22 S0
+- [ ] T2 — audit existing observation
+- [ ] T3 — repair desktop changed-path truth
+- [ ] DG-1 — APWB disposition
+- [ ] DG-2 — retreat/enclave authority
+- [ ] DG-3 — operation-briefing authority
+- [ ] T4 — delete legacy force-launch authority
+- [ ] T5 — delete duplicate briefing actions
+- [ ] T6 — converge formal-battle casualty ownership
+- [ ] T7 — correct threat lineage
+- [ ] T8 — generalize non-starving pre-planned queues
+- [ ] T9 — conditional APWB cleanup
+- [ ] T10 — conditional emergency-retreat correction
+- [ ] T11 — correct active-formation strength
+- [ ] T12 — disposition dissolution salvage locality
+- [ ] T13 — disposition evidence-only mechanics
+- [ ] T14 — verify, synchronize, and close
 
-- no new pipeline steps;
-- no new flags, services, launchers, render layers, map systems, Lua APIs, or default artifact streams;
-- no new default fields, rows, streams, or structural payload on an identical-state fixture;
-- production LOC net non-positive across RE;
-- no compatibility aliases after a path is dispositioned;
-- no full-map scan or BFS per brigade/objective;
-- no more than one persisted field, only through DG-1, with a target of zero;
-- no affected-phase runtime regression above 2% without a controlled benchmark, profiling evidence, and explicit Performance/Orchestrator approval;
-- every behavior change has a red test, positive control, adversarial or mutation test, liveness count, focused rerun, `/simplify` gate, and independent review.
+**Planning base audited:** `9d945566170efe252e1cc4d1960bad3a655625fc`.
 
-If a proposed fix cannot fit this budget, stop and return it to design.
+**Execution base:** not yet captured. Claude owns the active probe lane. Do not edit, revert,
+re-stage, test-drive, or absorb probe implementation. After that lane is owner-dispositioned and
+landed, Task T0 records the approved integrated commit and revalidates every path/symbol below.
 
-## Architecture
+RE makes no calibration change, historical target change, combat tuning change, scenario-data
+change, map-geometry change, schema expansion, release, push, PR, or publication.
 
-The engine remains a deterministic state-transition pipeline with one owner per mutation:
+Hard engine-health budget:
+
+- zero new pipeline steps, launchers, services, modules, IPC channels, flags, or default streams;
+- zero new persisted fields or defaults;
+- production LOC net non-positive overall;
+- RE-1 production LOC at most `-200` net;
+- no new full-map/per-formation scan;
+- no new generic comparator, profiler, telemetry emitter, or compatibility layer;
+- no artifact-schema growth;
+- no outcome, faction, formation, operation, settlement, or OSID special case;
+- no performance claim from a single timing sample.
+
+## 2. Canon and required reading
+
+Before T0, read in order:
+
+1. `CLAUDE.md`, `.cursor/AGENT_TEAM_ROSTER.md`,
+   `docs/20_engineering/PYRRHIC_PLANNING_RULES.md`, and
+   `docs/plans/PLAN_EXECUTION_STANDARD.md`;
+2. `.claude/napkin.md`, `docs/life_lessons.md`, and `docs/10_canon/context.md`;
+3. `docs/plans/MASTER_ROADMAP.md`, `docs/plans/COMMAND_BOARD.md`, and this plan;
+4. `docs/10_canon/Engine_Invariants_v0_9_0.md`;
+5. `docs/10_canon/Phase_Specifications_v0_9_0.md`;
+6. `docs/10_canon/Systems_Manual_v0_9_0.md`;
+7. `docs/10_canon/War_Specification_v0_9_0.md`;
+8. `docs/20_engineering/CODE_CANON.md`;
+9. `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`;
+10. `docs/20_engineering/INVARIANTS_IN_CODE.md`;
+11. `docs/40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md`;
+12. `docs/40_reports/proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md` only for cited evidence.
+
+The determinism role currently names `docs/PHASE_A_INVARIANTS.md`, which does not exist at the
+audited base. T0 must obtain a recorded process ruling that
+`docs/20_engineering/INVARIANTS_IN_CODE.md` is the approved replacement, or stop. Do not create
+a duplicate invariants document merely to satisfy a stale path.
+
+Canon constraints that govern all packets:
+
+- same input and seed produce the same ordered output;
+- `strictCompare` is the final tie-break, not a substitute for semantic routing;
+- operation changes occur in the operations subsystem;
+- formation creation requires an explicit directive;
+- raw pool depletion and realism-scaled K/W/M are distinct accounting truths;
+- the Decision Room owns presidential action; read-only surfaces do not mutate state;
+- event-owned sensitive-history receipts cannot be bypassed by an accidental generic route.
+
+## 3. Entire Pyrrhic team contract
+
+Every active seat in the authoritative `.cursor/AGENT_TEAM_ROSTER.md` participates, but only where
+its authority applies. A packet does not pass on silence.
+
+| Seat | Required contribution |
+|---|---|
+| Orchestrator | owns sequence, collisions, stop/go, and completion block |
+| Product Manager | guards scope, roadmap order, and explicit deferrals |
+| Architect | rejects parallel owners, new services, and unnecessary state |
+| Technical Architect | validates entrypoints, file boundary, ADR need, and dead exports |
+| Systems Programmer | invariants, exact mutation owner, state/save implications |
+| Gameplay Programmer | live phase mechanics and focused red/green implementation |
+| Game Designer | rules on player agency, retreat semantics, APWB, and speculative mechanics |
+| Operations Expert | mandatory owner for operation lifecycle, objectives, queues, and authority |
+| War or Game | mandatory realism sign-off on every 188-week comparison |
+| BB Extractor | supplies cited BB evidence to Historian when a historical ruling needs it |
+| Scenario Author/Runner/Tester | runs candidates and flags ahistorical or mechanically impossible output |
+| Modern Wargame Expert | command-chain and information-authority review |
+| Formation Expert | casualty, readiness, retreat, dissolution, and pool ownership |
+| Scenario Harness Engineer | authoritative run substrate and artifact inventory |
+| Determinism Auditor | ordering, byte identity, fingerprints, save/replay |
+| Performance Engineer | existing-profiler protocol and regression ruling |
+| QA Engineer | red/green/adversarial matrix and regression sufficiency |
+| Integration Tester | end-to-end UI + IPC + save/load verification |
+| Code Reviewer | independent correctness and deletion/simplicity review |
+| Canon Compliance Reviewer | checks behavior and output against canon/spec precedence |
+| UI/UX Developer | Decision Room ownership and read-only briefing truth |
+| Narrative Designer | confirms deletion does not create contradictory player-facing copy |
+| Platform Specialist | Windows command/toolchain and packaged-runtime review |
+| Data Pipeline Engineer | mandatory if a tool writes derived data; otherwise records N/A |
+| Historian | Petkovci and sensitive-history boundary; no mechanics by analogy |
+| Map/Geometry Reviewer | inspect-only on locality unless DG-2 opens geometry work |
+| Documentation Specialist | exact owner docs, indexes, reports, no canon edits |
+| Ledger/Process Scribe | two-commit discipline, ledger, evidence provenance |
+| Process QA | final process pass/fail; never self-certifies technical truth |
+| Retrospective Analyst | records only genuinely reusable closeout lessons |
+
+Supplementary technical reviewers, not current roster seats:
+
+| Reviewer | Contribution |
+|---|---|
+| Build Engineer | Node/toolchain, desktop build, packaged boot |
+| DevOps Specialist | changed-path detector and local workflow selection proof |
+| Asset Integration | confirms no data/asset mutation entered a packet |
+| Reports Custodian | report classification, move, and index discipline |
+| Code Simplifier | mandatory post-green reduction pass |
+
+Graphics Programmer and Lua Scripting are retired roles in the current roster. Closeout records
+`NO IMPACT`; do not dispatch them or imply they are active seats.
+
+Required decision panels:
+
+- DG-1: Game Design + Gameplay + Canon + Architect + Orchestrator;
+- DG-2: Game Design + Formation + Map/Geometry + Historian when enclave authority is included;
+- DG-3: Product + UI/UX + Systems + Architect + Orchestrator.
+
+Required implementation reviews are stated per task. The implementer and independent reviewer must
+be different agents.
+
+## 4. Safe execution substrate
+
+### T0 — Capture the integrated base and prove isolation
+
+1. Wait for owner disposition and landing of Claude's probe lane.
+2. Fetch no remote and push nothing.
+3. In the intended integration checkout record:
+
+   ```powershell
+   git rev-parse --show-toplevel
+   git branch --show-current
+   git rev-parse HEAD
+   git status --short
+   git worktree list --porcelain
+   git show-ref --verify --quiet refs/heads/codex/re-engine-integrity-execution
+   if ($LASTEXITCODE -eq 0) { throw "branch collision: codex/re-engine-integrity-execution" }
+   ```
+
+4. Stop if the tree is dirty, the branch exists, or any active worktree overlaps the next packet's
+   exact file list.
+5. Create an isolated branch/worktree from the approved commit:
+
+   ```powershell
+   git worktree add -b codex/re-engine-integrity-execution F:\AWWV-worktrees\re-engine-integrity <approved-commit>
+   ```
+
+   Stop if either the branch or literal target already exists; do not reuse or delete it.
+6. In the worktree assert its resolved top-level, branch, and HEAD match the recorded values.
+7. Run a literal `rg -n` inventory for every named symbol/path in Tasks T3–T14. Amend stale line
+   references before any red test.
+   For every active worktree path returned by `git worktree list --porcelain`, run
+   `git -C <worktree-path> status --short` and
+   `git -C <worktree-path> diff --name-only HEAD`; intersect both outputs with the next task's
+   literal boundary. Any match, staged or unstaged, stops execution until that owner releases it.
+8. Record the approved replacement for missing `docs/PHASE_A_INVARIANTS.md`; stop without it.
+9. Inventory every `process.env` reader reachable from `src/scenario`, `src/sim`, and
+   `src/state`; classify behavior, output, provenance, diagnostic, and profile gates in the
+   living audit. Re-run this inventory after the final probe base lands; if it differs from the T1
+   literal list, amend T1 before S0 rather than guessing.
+10. Create the living audit
+   `docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md` with the T0 manifest,
+   source inventory, and missing-invariants-path ruling. Index it in
+   `docs/40_reports/README.md`; no `CONSOLIDATED_*` index applies until implementation closes.
+   Commit only that report, its index entry, and any required plan line-reference amendment:
+   `docs(RE-0): bind integrated execution base`.
+
+**Worktree rule:** editing and focused tests may occur in the isolated worktree. No linked-worktree
+scenario run is authoritative; repository experience shows it can resolve main-checkout
+TypeScript. Authoritative long runs use an owner-approved clean main/integration checkout or an
+independent clone at the packet's code commit. Never overwrite Claude's or another agent's checkout.
+
+### T1 — Provision Node 22 and establish S0
+
+1. The owner/build seat supplies an absolute path to a Node 22 installation. Do not download or
+   silently switch toolchains.
+2. Activate and hard-check it:
+
+   ```powershell
+   $env:RE_NODE22 = "<owner-provided absolute path to node.exe>"
+   if (-not (Test-Path -LiteralPath $env:RE_NODE22)) { throw "Node 22 path missing" }
+   $env:Path = "$(Split-Path -Parent $env:RE_NODE22);$env:Path"
+   if ((node -p "process.versions.node.split('.')[0]") -ne "22") { throw "Node 22 required" }
+   node --version
+   npm.cmd --version
+   npm.cmd install --legacy-peer-deps
+   npm.cmd install --legacy-peer-deps --prefix src/ui/map
+   ```
+
+3. The audited-base environment variables that can change scenario behavior, output, provenance,
+   diagnostics, or profiling are:
+   `A4_ARMY_CO_ROSTER_DISABLED`, `ANALYZE_FACTION_GRAPH_PARITY_CHECK`,
+   `ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK`, `AWWV_ARBIH_CONTAIN_POSTURE`,
+   `AWWV_BRCKO_TACTICAL_GROUP`, `AWWV_CASUALTY_REALISM_FRACTION`,
+   `AWWV_CASUALTY_REALISM_RBIH`, `AWWV_CASUALTY_REALISM_RS`,
+   `AWWV_CASUALTY_REALISM_HRHB`, `AWWV_COHESION_FLOOR_AT_DECREMENT`,
+   `AWWV_COMMANDER_FRONT_GEOMETRY`, `AWWV_DEBUG_AXIS_READINESS`,
+   `AWWV_DEBUG_REASON_CODES`, `AWWV_ENCLAVE_COLUMN_DISPLACEMENT`,
+   `AWWV_FORCE_ROUTINE_DIAGNOSTICS`,
+   `AWWV_INTEL_AMBUSH_DEPTH`, `AWWV_INTEL_AMBUSH_FRICTION`,
+   `AWWV_MAINSTAFF_OP_AVAILABILITY`, `AWWV_MAINSTAFF_OP_RETENTION`,
+   `AWWV_PDP_COHESION_CAUTION_BIAS`,
+   `AWWV_PDP_INTL_STANDING_OPS_HESITATION`,
+   `AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS`,
+   `AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION`,
+   `AWWV_POLITICAL_DIMENSION_PROPAGATION`, `AWWV_PROVENANCE_OVERRIDE`,
+   `AWWV_SCORING_SIMPLE`, `AWWV_SRK_STRANGLE_POSTURE`,
+   `AWWV_STARTUP_SNAPSHOT_OVERRIDE_APR_1992`, `AWWV_VRS_CONTAIN_POSTURE`,
+   `B2_POLITICAL_LEADER_DATA_DISABLED`, `B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED`,
+   `C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED`, `ENABLE_COLLAPSE`,
+   `ENABLE_SARAJEVO_LIFELINE`, `HEAP_PROFILE_188W`, `HEAP_PROFILE_TURNS`,
+   `MORALE_OVERRIDE_ENABLED`, `PERF_PROFILE_SERIALIZATION`,
+   `SIEGE_MORALE_DRAIN_ENABLED`, `SUPPLY_BRIDGE_PARITY_CHECK`, and `VITEST`.
+   Before S0, fail if any is present; do not clear it silently:
+
+   ```powershell
+   $forbiddenEnv = @(
+     "A4_ARMY_CO_ROSTER_DISABLED","ANALYZE_FACTION_GRAPH_PARITY_CHECK",
+     "ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK","AWWV_ARBIH_CONTAIN_POSTURE",
+     "AWWV_BRCKO_TACTICAL_GROUP","AWWV_CASUALTY_REALISM_FRACTION",
+     "AWWV_CASUALTY_REALISM_RBIH","AWWV_CASUALTY_REALISM_RS",
+     "AWWV_CASUALTY_REALISM_HRHB","AWWV_COHESION_FLOOR_AT_DECREMENT",
+     "AWWV_COMMANDER_FRONT_GEOMETRY","AWWV_DEBUG_AXIS_READINESS",
+     "AWWV_DEBUG_REASON_CODES","AWWV_ENCLAVE_COLUMN_DISPLACEMENT",
+     "AWWV_FORCE_ROUTINE_DIAGNOSTICS",
+     "AWWV_INTEL_AMBUSH_DEPTH","AWWV_INTEL_AMBUSH_FRICTION",
+     "AWWV_MAINSTAFF_OP_AVAILABILITY","AWWV_MAINSTAFF_OP_RETENTION",
+     "AWWV_PDP_COHESION_CAUTION_BIAS","AWWV_PDP_INTL_STANDING_OPS_HESITATION",
+     "AWWV_PDP_MILITARY_CREDIBILITY_CAUTION_BIAS",
+     "AWWV_PDP_PATRON_CONFIDENCE_OPS_HESITATION",
+     "AWWV_POLITICAL_DIMENSION_PROPAGATION","AWWV_PROVENANCE_OVERRIDE",
+     "AWWV_SCORING_SIMPLE","AWWV_SRK_STRANGLE_POSTURE",
+     "AWWV_STARTUP_SNAPSHOT_OVERRIDE_APR_1992","AWWV_VRS_CONTAIN_POSTURE",
+     "B2_POLITICAL_LEADER_DATA_DISABLED","B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED",
+     "C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED","ENABLE_COLLAPSE",
+     "ENABLE_SARAJEVO_LIFELINE","HEAP_PROFILE_188W","HEAP_PROFILE_TURNS",
+     "MORALE_OVERRIDE_ENABLED","PERF_PROFILE_SERIALIZATION",
+     "SIEGE_MORALE_DRAIN_ENABLED","SUPPLY_BRIDGE_PARITY_CHECK","VITEST"
+   )
+   $leaked = $forbiddenEnv | Where-Object { Test-Path "Env:$_" }
+   if ($leaked) { throw "noncanonical S0 environment: $($leaked -join ', ')" }
+   ```
+
+4. From the authoritative clean checkout, run the canonical 188-week scenario twice into distinct
+   roots using the installed JS entrypoint:
+
+   ```powershell
+   $env:AWWV_S6_GRADE_RUN = "true"
+   if ($env:AWWV_S6_GRADE_RUN -ne "true") { throw "§6 grade gate not active" }
+   try {
+     node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs/re_s0_a
+     if ($LASTEXITCODE -ne 0) { throw "S0 run A failed" }
+     node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs/re_s0_b
+     if ($LASTEXITCODE -ne 0) { throw "S0 run B failed" }
+   } finally {
+     Remove-Item Env:AWWV_S6_GRADE_RUN -ErrorAction SilentlyContinue
+   }
+   ```
+
+5. Preserve both run logs and require each to contain
+   `Tactical map copy SKIPPED (AWWV_S6_GRADE_RUN=true)`. Confirm the variable is absent from the
+   current environment after the `finally` block. Do not add it to run provenance. For each
+   resolved run directory:
+
+   ```powershell
+   node tools/verify_checkpoints.cjs <run-dir>
+   node tools/engine_health_gate.cjs <run-dir> --horizon 188w --json
+   node tools/validate_run_consistency.cjs <run-dir>
+   node tools/diagnostics/structural_fingerprint.cjs <run-dir> --json --full
+   ```
+
+   Do not use `--strict`; it wrongly promotes advisory K:W evidence into a fatal gate.
+
+6. Assert both `run_meta.json` files have the exact T0 commit, `git_dirty:false`, Node 22, the
+   same scenario/input digests, no provenance override, and `collapse_enabled:false`.
+7. Compare `run_summary.json.historical_fit.checkpoints`; canonical checkpoints are weeks
+   **39, 104, 156, and 188**. The runner does not emit standalone checkpoint saves.
+8. The exact unconditional output set is:
+   `activity_summary.json`, `brigade_temporal_log.jsonl`, `control_delta.json`,
+   `destroyed_brigades.json`, `displacement_event_log.jsonl`, `final_save.json`,
+   `end_report.md`, `formation_delta.json`, `initial_save.json`, `operation_aars.json`,
+   `replay_save_manifest.json`, `run_meta.json`, `run_summary.json`,
+   `watched_operations.json`, and `weekly_report.jsonl`. Assert this literal sorted set—15
+   files—has no missing member and no extra unconditional output.
+9. Resolve `$runA` and `$runB` to the two leaf run directories, then execute:
+
+   ```powershell
+   $artifacts = @(
+     "activity_summary.json","brigade_temporal_log.jsonl","control_delta.json",
+     "destroyed_brigades.json","displacement_event_log.jsonl","end_report.md","final_save.json",
+     "formation_delta.json","initial_save.json","operation_aars.json",
+     "replay_save_manifest.json","run_meta.json","run_summary.json",
+     "watched_operations.json","weekly_report.jsonl"
+   )
+   $actualA = Get-ChildItem -LiteralPath $runA -File | ForEach-Object Name | Sort-Object
+   $actualB = Get-ChildItem -LiteralPath $runB -File | ForEach-Object Name | Sort-Object
+   $expected = $artifacts | Sort-Object
+   if (($actualA -join "`n") -cne ($expected -join "`n")) { throw "run A file-set drift" }
+   if (($actualB -join "`n") -cne ($expected -join "`n")) { throw "run B file-set drift" }
+   foreach ($name in $artifacts) {
+     if (-not (Test-Path (Join-Path $runA $name)) -or -not (Test-Path (Join-Path $runB $name))) {
+       throw "missing artifact: $name"
+     }
+     if ($name -ne "run_meta.json") {
+       $a = (Get-FileHash -Algorithm SHA256 (Join-Path $runA $name)).Hash
+       $b = (Get-FileHash -Algorithm SHA256 (Join-Path $runB $name)).Hash
+       if ($a -ne $b) { throw "byte drift: $name" }
+     }
+   }
+   $metaA = Get-Content -Raw (Join-Path $runA "run_meta.json") | ConvertFrom-Json -AsHashtable
+   $metaB = Get-Content -Raw (Join-Path $runB "run_meta.json") | ConvertFrom-Json -AsHashtable
+   $metaA.Remove("out_dir"); $metaB.Remove("out_dir")
+   $normA = $metaA | ConvertTo-Json -Depth 100 -Compress
+   $normB = $metaB | ConvertTo-Json -Depth 100 -Compress
+   if ($normA -cne $normB) { throw "normalized run_meta drift" }
+   $fpA = node tools/diagnostics/structural_fingerprint.cjs $runA --json --full
+   if ($LASTEXITCODE -ne 0) { throw "fingerprint A failed" }
+   $fpB = node tools/diagnostics/structural_fingerprint.cjs $runB --json --full
+   if ($LASTEXITCODE -ne 0) { throw "fingerprint B failed" }
+   if (($fpA -join "`n") -cne ($fpB -join "`n")) { throw "fingerprint drift" }
+   node tools/op_schedule_diff.cjs $runA $runB
+   if ($LASTEXITCODE -ne 0) { throw "operation schedule drift" }
+   ```
+
+   A second normalized field requires separately recorded proof that it is path-derived.
+10. Run:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/scenario_harness_contracts.test.ts tests/run_provenance_stamp.test.ts tests/scenario_anchor_contract.test.ts --reporter=dot
+   ```
+
+11. Record exact commands, commit, source hashes, elapsed wall time, file/row/byte inventory,
+   checkpoints, hashes, fingerprints, and gate results in the single RE implementation report.
+12. Commit evidence/docs only: `docs(RE-0): record clean Node-22 S0`.
+
+### T2 — Audit existing observation; add nothing
+
+1. Inventory constructors, state mutations, existing run artifacts, checkpoints, AARs, and
+   diagnostics needed by T3–T14.
+2. Record each packet's measurable positive fixture and pre-fix occurrence count.
+3. Do not create an emitter, stream, manifest field, state field, sidechannel, timer, or generic
+   comparison tool. If existing evidence cannot establish a packet's premise, return a separately
+   bounded proposal; do not widen RE.
+4. Commit the audit: `docs(RE-0): bind packet evidence to existing surfaces`.
+
+### T3 — Repair desktop changed-path truth
+
+**May edit:** `.github/scripts/detect-changed-paths.sh`,
+`tests/desktop_release_ci_guardrails.test.ts`, and evidence docs. The workflow and packaged probe
+are run-only unless a newly proved defect obtains separate scope.
+
+1. Add positive tests for every currently imported desktop bundle root omitted by the detector:
+   `src/data/`, `src/map/`, `src/scenario/`, `src/sim/`, `src/state/`, `src/utils/`,
+   and `src/validate/`.
+2. Run the focused test and capture RED.
+3. Extend the existing desktop prefix case with those exact roots. Do not add a mode, env flag,
+   CI job, or broad `src/` catch-all.
+4. In the focused test's temporary Git repositories, make one source-only commit per new prefix
+   and call the actual detector with `PATH_SET=desktop`, `GITHUB_EVENT_NAME=push`,
+   `GITHUB_EVENT_BEFORE=<fixture parent>`, and `GITHUB_OUTPUT=<fixture output file>`. Assert
+   stdout names the changed file, contains neither `WARN` nor `fail-safe`, and the output file
+   contains `relevant=true`; add one unrelated-doc commit with the same no-warning assertions and
+   `relevant=false`. Invoke
+   `bash` on `.github/scripts/detect-changed-paths.sh` copied from the packet source; do not reimplement
+   its matching logic in the test.
+5. Run:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/desktop_release_ci_guardrails.test.ts --reporter=dot
+   npm.cmd run desktop:sim:build
+   npm.cmd run desktop:package:probe
+   ```
+
+6. Complexity gate: at most one script + one existing test, no probe edit, no workflow edit unless
+   the focused proof requires it, and at most 40 changed production/script LOC.
+7. Code/test commit: `fix(RE-0D): make desktop dependency selection truthful`.
+8. From that clean commit, repeat the focused test/build/package proof; obtain Build, DevOps,
+   Platform, QA, and Simplifier reviews.
+9. Evidence commit: `docs(RE-0D): record local workflow selection proof`.
+
+No remote push or PR is authorized. Prepare a PR body locally only.
+
+## 5. Universal behavior-packet protocol
+
+For every implementation packet:
+
+1. Re-check branch, HEAD, clean tree, Node 22, active worktrees, and packet file overlap.
+2. Re-run its literal source inventory.
+3. State one failing behavior and one non-goal.
+4. Add or extend the named focused test. Run it and capture the expected RED.
+5. Implement the smallest live-owner correction.
+6. Run the focused set and exact Core:
+
+   ```powershell
+   npm.cmd run typecheck
+   npm.cmd run test:vitest:balanced
+   ```
+7. Run the Code Simplifier; accept reductions that preserve behavior and budgets.
+8. Run focused + Core again.
+9. Record `git diff --numstat` over the named production files, persisted-key delta, artifact
+   delta, and bundle delta where applicable.
+10. Commit code/tests only: `fix(RE-x): ...` or `refactor(RE-x): ...`.
+11. On the authoritative clean checkout at that exact commit, run the required deterministic pair
+    and performance protocol.
+12. Obtain the named independent specialist reviews. Fix findings through another code/test commit
+    and repeat clean evidence if behavior changed.
+13. Update the RE report, plan status, roadmap/board only if routing changed, and ledger.
+14. Commit docs/evidence only: `docs(RE-x): record verified evidence`.
+15. Do not start the next packet before the evidence commit.
+
+Deletion-only packets need a source/reachability negative assertion, not a mutation test.
+Behavior-changing fixes need one explicit one-line adversarial mutation: name the mutation, run the
+exact test that fails, revert the mutation, and rerun green. Never commit the mutation.
+
+Long-run rule:
+
+- RE-2, RE-3A, and RE-3B each require Core plus a clean 188-week pair before the next packet.
+- Conditional territory/operation packets require the same.
+- RE-1 requires no 188-week pair only when literal caller census, focused exact-ID authority tests,
+  the named old-save load/turn equivalence test, and an identical-state serialization comparison
+  prove the deleted paths absent/inert. Otherwise run the clean 188-week pair. Desktop
+  build/package proof is mandatory either way.
+- RE-4B requires a pair only when T1/T2 finds excluded formations live or downstream output moves.
+
+Same-platform same-commit runs must be byte-identical after the one allowed path normalization.
+Cross-platform evidence compares the platform-stable structural fingerprint defined by the
+determinism matrix, not raw bytes.
+
+Performance protocol for a live affected phase:
+
+1. Same Node 22, machine, power state, background-load class, scenario, and commit cleanliness.
+2. One warm-up plus three measured 40-week runs before and after.
+3. Use the existing profiler:
+
+   ```powershell
+   node node_modules/tsx/dist/cli.mjs tools/perf/profile_scenario.ts --scenario data/scenarios/apr1992_definitive_40w.json --out runs_perf/re_<packet>_<n> --report data/derived/_debug/re_<packet>_<n>.json
+   ```
+
+4. Record the exact pre/post commit IDs, median `totalWallMs`, affected phase totals, and
+   `run_summary.json.final_state_hash` from each resolved profiler run directory. The profiler
+   report itself does not own the final hash. Reports stay uncommitted.
+5. More than 2% median regression stops the packet. Zero to 2% is watch-only, not an improvement
+   claim. Peak memory is descriptive only if the existing profiler already emits it.
+
+## 6. Decision gates
+
+### DG-1 — APWB/friendly-objective contradiction
+
+Read `src/sim/combat/operation_opportunities.ts` and the 5th Corps catalog. The field
+`targets_friendly_overrides` is definition-only, while application is hardcoded to T1/5th Corps
+and later friendly-objective stripping makes the operations self-cancel.
+
+Default lean ruling for panel consideration: delete Tigar/APWB definitions, private
+predicates/constants, catalog exports, field, override block, operation name, and scoped tests.
+Do not implement Branch B without explicit owner approval because it threads a new exception into
+live operation/save state. DG-1 must choose exactly whether an already-active normal
+`CorpsOperation` from an old save finishes unchanged or is handled by a separately bounded
+normalization packet. Prefer unchanged completion; do not add a compatibility reader.
+
+Decision commit: `docs(DG-1): rule APWB friendly-objective disposition`.
+
+### DG-2 — Retreat breakout and event-owned enclave authority
+
+Rule retreat semantics before T10. Rule or explicitly defer the enclave sub-question before T13:
+
+1. Emergency retreat from newly enemy territory with no adjacent friendly destination:
+   - A: friendly-only traversal means no route; return `null`, then existing displacement applies;
+   - B: hostile breakout is an explicit bounded raw-graph mechanic with defined legality/cost.
+2. Whether president-requested ordinary operations may target event-owned Srebrenica/Žepa before
+   their event receipts. If prohibited, require one generic event-ownership predicate shared with
+   operation validation; no target-name literals.
+
+Historian participates only in the enclave ruling. No code until the panel and owner decide.
+Decision commit: `docs(DG-2): rule retreat and enclave authority`.
+
+### DG-3 — Duplicate stage-operation UI authority
+
+Source evidence fixes the disposition: Decision Room is the only action surface. The Operation
+Briefing modal describes itself as read-only but exposes Launch/Probe/Postpone/Abort through a
+name-keyed IPC that mutates state, including illegal recovery/probe writes. Panel records DELETE:
+remove handler, bridge, App callback, action props/buttons; retain the modal as read-only. Do not
+replace it with an exact-ID channel, service, or enum.
+
+Decision commit: `docs(DG-3): confirm read-only operation briefing`.
+
+## 7. Implementation tasks
+
+### T4 — RE-1A delete legacy force-launch authority
+
+**Production boundary:** `src/desktop/electron-main.cjs`, `src/desktop/preload.cjs`,
+`src/desktop/autonomy_ipc_contract.cjs`, `src/desktop/desktop_sim.ts`,
+`src/ui/map/desktop/useIPC.ts`,
+`src/ui/map/components/army_hq/DirectiveCard.tsx`,
+`src/sim/combat/order_interpretation.ts`, `src/sim/combat/sector_offensive.ts`,
+`src/sim/turn_phases/war_phases.ts`, `src/state/game_state.ts`,
+`tools/ai_play/president_playthrough.ts`, and
+`tools/ai_play/run_rbih_best_outcome.ts`.
+
+1. Extend `tests/ui/directive_card_stop_op_action.test.ts`: an opName-only force-launch must fail
+   loud and invoke no IPC. Capture RED.
+2. Delete `stage-operation-force-launch` handler, preload exposure, useIPC declaration/wrapper,
+   DirectiveCard fallback, and stale autonomy-contract comment.
+3. Preserve exact-ID owners `force-launch-proposal` and `proactive-force-launch-op`.
+4. Delete the duplicate `forceLaunch` function in the AI playthrough and its unused import.
+5. Repair `tests/logistics_priority_ipc_path.test.ts` so it no longer uses the deleted handler as
+   a source-slice delimiter.
+6. Re-run literal caller census. If no production caller remains, delete
+   `interpretOperationLaunch`, `interpretOperationHalt`, their result types/export, and the
+   obsolete `tests/sim/command/phase2_operation_interpretation.test.ts`. Retain
+   `tests/sim/combat/order_interpretation.test.ts`, `recordPresidentialOverride`, and
+   `overrideInterpretation`.
+7. Delete dead `dig_in_on_halt` and `halt_delay_turns_remaining` state fields, the
+   `src/sim/combat/sector_offensive.ts` reader, and stale comment/test sections. Extend
+   `tests/sector_offensive.test.ts` with two otherwise identical operations, one deserialized
+   with both old keys. Assert deserialization succeeds; advance both through the same turn; compare
+   return values and every canonical operation/state field after removing only
+   `dig_in_on_halt` and `halt_delay_turns_remaining` from the comparison projection. Assert
+   production never reads or rewrites those keys. The current-state serialization fixture must
+   contain neither key and gain no new key/default byte. Do not add a migration merely to strip
+   inert unknown nested input.
+8. Focused command:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/ui/directive_card_stop_op_action.test.ts tests/ui/presidential_decision_room.test.ts tests/desktop_persistence_contract.test.ts tests/back_the_officer_human_only_determinism.test.ts tests/logistics_priority_ipc_path.test.ts tests/sim/combat/order_interpretation.test.ts tests/sector_offensive.test.ts --reporter=dot
+   ```
+
+9. Exit census must show zero live hits under `src tools tests` for
+   `stage-operation-force-launch|interpretOperationLaunch|interpretOperationHalt|halt_delay_turns_remaining|dig_in_on_halt`,
+   except the named old-save fixture in `tests/sector_offensive.test.ts`. Stale production comments
+   are not exempt.
+10. Reviews: Technical Architect, Systems, UI/UX authority perspective, QA, Determinism,
+    independent Code Review, and Simplifier.
+
+### T5 — RE-1B delete duplicate briefing actions
+
+**Additional boundary:** `src/ui/map/App.tsx`,
+`src/ui/map/components/OperationBriefingModal.tsx`, `src/ui/map/i18n/messages.en.ts`,
+`src/ui/map/i18n/messages.bcs.ts`, `tests/ui/oob_operations_panel.test.ts`, and
+`tests/desktop_persistence_contract.test.ts`.
+
+1. Complete DG-3.
+2. Extend `tests/ui/oob_operations_panel.test.ts` to prove neither decision-ready nor review state
+   renders Launch, Probe, Postpone, or Abort controls. Extend
+   `tests/desktop_persistence_contract.test.ts` to prove main/preload/useIPC/App expose no
+   `stage-operation-decision` surface. Capture RED.
+3. Delete `stage-operation-decision` handler and bridge, App mutation callback, modal action props,
+   `commandBridgeAvailable` prop/branch, and the Launch/Probe/Postpone/Abort action footer.
+   Delete only the now-single-use paired i18n keys `operationBriefing.launchOperation`,
+   `orderProbe`, `postpone`, `maxReached`, and `abortOperation`. Retain
+   `reviewReadOnly` and shared `attention.bridgeUnavailableReadOnly`.
+4. Keep inspection content unchanged; intentionally remove the action footer and update the stale
+   modal comment that calls the callbacks passive.
+5. Run T4 focused set plus:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/ui/oob_operations_panel.test.ts tests/desktop_persistence_contract.test.ts tests/desktop_packaged_runtime_probe.test.ts --reporter=dot
+   ```
+
+   Then run Core, `desktop:sim:build`, and the unchanged packaged probe. Obtain one screenshot of
+   the existing real Electron QA/harness showing the decision-ready modal without the action
+   footer, or a UI/UX visual sign-off on that live surface. Add no screenshot/probe harness.
+6. Exit census: zero live `stage-operation-decision`; retained channels are explicitly inventoried
+   (`force-launch-proposal`, `proactive-force-launch-op`, `stage-op-halt-order`,
+   `stage-op-directive-order`, subject to recorded rulings).
+7. Assert no new serialized keys/default bytes, no bundle growth, no new channel/module, and RE-1
+   production delta at most `-200` LOC.
+8. Reviews: Architect, Systems, UI/UX, Modern Wargame, Build, QA, Code Review, Simplifier.
+
+### T6 — RE-2 formal-battle casualty ownership
+
+**Code/test boundary:** `src/sim/combat/attack_resolution_osid.ts`,
+`src/sim/combat/attack_casualty_distribution.ts`,
+`src/sim/combat/tactical_group_casualties.ts`,
+`src/sim/combat/attack_morale_absorption.ts`,
+`src/sim/combat/attack_retreat_displacement.ts`,
+`src/state/casualty_ledger.ts`, `src/sim/early_war/pool_population.ts`,
+`src/sim/turn_phases/war_phases.ts`, and named tests.
+`src/sim/combat/battle_resolution.ts` is a SID
+compatibility fallback, not the canonical owner; do not center or casually edit it. Frontline and
+siege attrition remain separate legitimate owners and are inspect-only.
+
+**Evidence/docs boundary:** `docs/10_canon/PLAYER_TURN_GUIDE.md`, the single RE report, this plan,
+roadmap/board only if routing changes, and ledgers. The Player Turn Guide is derivative pipeline
+documentation, not authority to alter canon mechanics; Canon Compliance must approve that its
+evidence-commit edit only removes a deleted step.
+
+1. Add `tests/casualty_pool_attribution.test.ts` with a TG anchor and donors from different
+   `origin_mun` pools plus a primary defender and distributed sector defenders from distinct
+   pools. Cover present, zero, and missing pools on both sides. Capture RED.
+2. Tighten attacker share conservation from ±1 to exact deterministic conservation.
+3. At `resolveAttackOrdersOsid`, measure each absorber's actual loss as pre-personnel minus
+   post-personnel. Requested TG shares are not authoritative because `applyPersonnelLoss` clamps
+   at minimum personnel.
+4. “Absorber” means attacker anchor, TG donor, primary defender, and distributed sector defender.
+   For each original attacker or defender casualty group, sort positive-loss absorbers by formation
+   ID with `strictCompare`; the row sum for each absorber is its actual personnel delta.
+5. Derive one raw group K/W/M column total by calling `splitKiaWiaMia` once on the group's total
+   actual loss. Allocate raw KIA first across absorber rows in proportion to original row loss
+   using deterministic largest remainder, capped by each row's remaining capacity; allocate raw
+   MIA next in proportion to remaining row capacity with the same tie rule; set each row's WIA to
+   its remaining capacity. This fixes every row sum and all three raw column totals exactly.
+6. Derive each pre-fix realism-scaled K/W/M column total by summing what the current code would
+   record at its existing rounding boundaries: per original attacker anchor/share, per existing
+   defender share, and per existing morale-absorption row. This preserves current multi-defender
+   rounding. Allocate each scaled KIA, WIA, and MIA column independently across positive
+   actual-loss absorbers using actual-loss weights and deterministic largest remainder with
+   `strictCompare` ties. Do not capacity-cap scaled ledger rows: supported realism overrides may
+   exceed 1, and ledger reporting truth is distinct from raw personnel capacity. Never reapply
+   realism scaling to the newly attributed rows.
+7. Change `evaluateAndApplyMoraleAbsorption` to return its local actual personnel-loss rows in
+   addition to its existing result. Include those rows in resolver-side raw K/M pool charges,
+   while preserving its current aggregate ledger K/W/M exactly. Add no state or report field.
+8. Call the existing pool-exhaustion owner once from the live resolver using every ordinary and
+   morale-absorption row's raw KIA + MIA. Sort rows by formation ID before the helper. Never charge
+   pools from scaled ledger values. Do not touch ordinary frontline or siege attrition.
+9. Delete the post-hoc `apply-casualty-pool-exhaustion` phase/import in
+   `src/sim/turn_phases/war_phases.ts`, which
+   re-derives losses from post-loss personnel and stale constants.
+10. Focused command:
+
+    ```powershell
+    node node_modules/vitest/vitest.mjs run tests/casualty_pool_attribution.test.ts tests/attack_casualty_distribution.test.ts tests/tg_casualty_distribution.test.ts tests/casualty_realism_v2_gate.test.ts tests/integration_pool_integrity.test.ts --reporter=dot
+    ```
+
+11. Positive counts: actual-loss sum equals personnel delta on both sides; pool charges conserve raw
+    ownership; ledger categories conserve the pre-fix faction totals. Target duplicate post-hoc
+    charges: zero. Include a realism override greater than 1 and a multi-defender rounding case.
+12. Code/test commit first. During the later T6 evidence commit, remove only the deleted named
+    pipeline step from `docs/10_canon/PLAYER_TURN_GUIDE.md`.
+13. Reviews: Systems, Formation, Gameplay, Determinism, QA, Code Review, Canon, Simplifier.
+
+### T7 — RE-3A conserved threat lineage
+
+**Boundary:** `src/sim/combat/commander/assess.ts` and new
+`tests/commander/threat_predecessor_matching.test.ts`.
+
+1. Add merge, split, equal-overlap tie, reordered-input, and zero-overlap fixtures. Capture the
+   current last-loss overwrite RED.
+2. For each previous zone, select at most one current descendant: exact ID only with positive
+   overlap; otherwise maximum positive OSID overlap; `strictCompare` last.
+3. Allow multiple predecessors to feed one merged current zone.
+4. Attribute every vanished previous OSID at most once globally; aggregate one loss row per current
+   zone. Zero-overlap losses remain unlocalized.
+5. Run:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/commander/threat_predecessor_matching.test.ts --reporter=dot
+   ```
+
+   Then run Core, adversarial mutation, clean 188-week pair, and phase performance
+   protocol if T2 proves the path live.
+6. Reviews: Gameplay, Operations, Determinism, Performance, QA, Simplifier.
+
+### T8 — RE-3B generic, non-starving pre-planned queues
+
+**Boundary:** `src/sim/combat/pre_planned_operations.ts`,
+`src/sim/turn_phases/war_phases.ts`, `tests/pre_planned_operations.test.ts`, and new
+`tests/preplanned_authorization_phase_progression.test.ts`.
+
+1. Extend the existing test with two declaration-order assertions: output chains exactly equal raw
+   `ALL_PRE_PLANNED` filtering, and reordering formation/corps-state insertion does not change
+   them. Also cover first-decline preserves followers, permanent structural invalidity advances,
+   transient conditions retain, and moot/unknown advances in the same bounded call. Capture RED.
+2. For each corps derive `defsForCorps = ALL_PRE_PLANNED.filter(...)` in raw declaration order.
+   Never sort by name or availability. Delete the five hardcoded named blocks and redundant
+   deferred append. Add no state machine.
+3. During initial injection, walk that fixed list at most once:
+   - resolved, all-owned, declined, and proved `staging_adjacency` invalid are consumed and scan
+     continues;
+   - pending stops with no persisted future-name queue; reconstruct followers from the catalog
+     after the pending decision is accepted or declined;
+   - pre-availability becomes the queued head with every later definition behind it;
+   - `objective_overlap`, probe overlap, temporarily missing/ineligible/committed formations,
+     participant floor, and cause-dependent `op_empty` retain the head and all followers;
+   - the first accepted injectable definition becomes active and every unconsumed later name
+     becomes `queued_operations`.
+4. Treat `staging_adjacency` as terminal only when adjacency data exists and the authored staging
+   to first-objective edge is absent. Treat no-hostile-objective as terminal only through the
+   existing explicit all-objectives-owned check. Unknown control retains the head. Do not infer
+   terminality from a generic `op_empty`.
+5. In `injectQueuedOperation`, capture queue length on entry and loop no more than that count.
+   Terminal heads shift and continue in the same call; a retained head returns false; the first
+   successful injection returns true.
+6. Pending hides future operation names. Declined consumes its head and makes the next definition
+   eligible on the next bounded reconstruction/injection.
+7. In the existing `inject-player-pre-planned-operations` war-phase step, replace the
+   accepted-only gate with a resolved historical-preplanned-authorization gate: player faction,
+   `isHistoricalOperationAuthorizationReview(review)`,
+   `review.proposed_action.startsWith('HISTORICAL_OP:preplanned:')`, and
+   `accepted === true || accepted === false`. Do not trigger on unresolved, nonhistorical,
+   triggered-operation, or Army-HQ reviews.
+8. Add `tests/preplanned_authorization_phase_progression.test.ts` as a live phase/caller proof:
+   decline the first head; on the next turn expose only the next authorization review with no
+   future-name queue; accept that review; on the following turn inject it and queue the remaining
+   names in raw declaration order.
+9. Run:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/pre_planned_operations.test.ts tests/preplanned_authorization_phase_progression.test.ts --reporter=dot
+   ```
+
+   Then run Core, adversarial mutation, clean 188-week pair, and performance protocol if live.
+10. Net production target: at least 30 LOC deleted.
+11. Reviews: Operations, Gameplay, Determinism, QA, Code Review, Simplifier.
+
+### T9 — RE-3C conditional APWB cleanup
+
+Open only if DG-1 approves deletion.
+
+**Production boundary:** `src/sim/combat/operation_opportunities.ts`,
+`src/sim/combat/operation_opportunity_catalog_5th_corps.ts`,
+`src/sim/combat/operation_names.ts`, and only the four tests below.
+
+1. Extend:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/operation_objective_hostility.test.ts tests/operation_opportunities_substrate.test.ts tests/operation_opportunities_catalog.test.ts tests/operation_opportunity_state_validation.test.ts --reporter=dot
+   ```
+
+2. Delete the two dead/self-cancelling definitions, private predicates/constants, exports,
+   `targets_friendly_overrides`, override block, operation name, and scoped expectations.
+3. Keep a positive generic hostility test. Add no replacement mechanic or compatibility reader.
+4. Run focused, Core, clean 188-week pair, and normal packet reviews.
+
+### T10 — RE-4A conditional emergency-retreat correction
+
+**Boundary:** `src/sim/combat/attack_retreat_displacement.ts` and
+`tests/emergency_retreat_reachability.test.ts`.
+`src/sim/combat/osid_adjacency.ts` is inspect-only unless the
+approved DG-2 algorithm proves a change necessary.
+
+1. Complete DG-2. Do not “fix” the current BFS by merely populating `next`: friendly-only
+   traversal cannot leave an enemy source with no adjacent friendly cell.
+2. Extend the existing test with enemy source/no adjacent friendly, configured remote home,
+   configured remote HQ, disconnected graph, cycle, deterministic equal candidates, and the 706th
+   topology. Capture RED.
+3. If ruling A: this helper is reached only after adjacent-friendly retreat already failed, so
+   return `null` before home/fallback, attempted BFS, HQ, same-component, largest-component, or
+   any-friendly selection. Remove the `originComponent === undefined => true` reachability rule.
+   Existing inactive/displaced handling remains the sole result.
+4. If ruling B: return for a bounded plan amendment defining raw-graph hostile-route legality,
+   maximum hops, penalties, organizational validity, and complexity. Do not infer them.
+5. Run:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/emergency_retreat_reachability.test.ts --reporter=dot
+   ```
+
+   Then run Core, adversarial mutation, candidate/search counts, clean 188-week pair if live,
+   and performance protocol.
+6. Observe the 706th's later dissolution separately; add no immunity.
+7. Reviews: Formation, Gameplay, Map/Geometry, Determinism, Performance, QA, Simplifier.
+
+### T11 — RE-4B active formation strength
+
+**Boundary:** `src/sim/negotiation/patron_pressure.ts`,
+`tests/negotiation_patron_pressure.test.ts`, and new
+`tests/patron_active_formation_strength.test.ts`.
+
+1. Add table cases: active; inactive status; forming, displaced, destroyed, disbanded, merged,
+   withdrawn lifecycle; absent lifecycle as legacy-active; wrong faction; wrong kind. Assert
+   downstream override authority. Capture RED.
+2. Use the minimal local predicate:
+   `status === 'active' && (lifecycle_status ?? 'active') === 'active'`, retaining existing
+   faction and brigade-kind filters.
+3. Update old fixtures to explicit active status and delete the unused local.
+4. Run:
+
+   ```powershell
+   node node_modules/vitest/vitest.mjs run tests/patron_active_formation_strength.test.ts tests/negotiation_patron_pressure.test.ts --reporter=dot
+   ```
+
+   Then run Core and the liveness-conditioned pair.
+5. Reviews: Systems, Formation, Gameplay, Determinism, QA, Simplifier.
+
+### T12 — RE-4C dissolution salvage triage only
+
+Read `src/sim/combat/brigade_dissolution.ts` and both war-phase call sites. The current caller has no adjacency
+and its first call precedes spatial-cache construction, so RE-4A reuse is not free.
+
+Default disposition: defer. If evidence opens it, stop and amend this plan with signature/call-site
+ownership, an adjacency source, a red test in `tests/brigade_dissolution_paths.test.ts`, budgets,
+and long-run gates before code.
+
+### T13 — RE-5 evidence-only mechanics dispositions
+
+Write seven short, source-cited dispositions in the single RE report. Production code/data remains
+untouched.
+
+1. Garrison timer/fallback formation creation: reject/defer; no current mechanic and formation
+   creation requires a directive.
+2. Planner estimator: defer formula; live canonical prediction already aggregates participants.
+   A stale comment is a separate docs/code-comment correction only with authority.
+3. Strategic reserve orphan: record that `committed` is cumulative, not current ownership;
+   redesign is gameplay/reinforcement scope and needs separate 188-week evidence.
+4. Rebuild/reinforcement latency: distinguish five-turn reconstitution from same-turn ordinary
+   replenishment; disruption gating is a new mechanic, so defer.
+5. Dissolution floors: audit all writers and observed paths; do not tune thresholds.
+6. Petkovci: route to operation-authoring/historian decision; no engine or place-name special case.
+7. Presidential enclave requests: close only through DG-2; if prohibited, schedule the generic
+   authority predicate as a separately bounded conditional packet.
+
+Reviews: Product, Game Design, Gameplay, Formation, Historian, Canon, Architect, Orchestrator.
+Commit: `docs(RE-5): disposition speculative mechanics without engine growth`.
+
+## 8. Per-packet evidence record
+
+Use one living report:
+`docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md`. At T14, after every
+implementation gate passes, move that same file to
+`docs/40_reports/implemented/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md`; update
+`docs/40_reports/README.md` and `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md` atomically.
+Do not create a second RE report.
+
+Each section contains:
+
+- packet and exact code commit;
+- branch, clean status, Node/npm, OS, machine/power/load class;
+- changed files and `git diff --numstat`;
+- pre-fix positive-fixture occurrence count and post-fix target count;
+- RED command/result, implementation summary, focused/Core results;
+- adversarial mutation or deletion census;
+- serialized-key/default-byte and artifact field/row/byte deltas;
+- same-platform pair manifest, normalized-meta rule, hashes, checkpoints, health results;
+- performance samples/median when applicable;
+- Simplifier result and independent specialist rulings;
+- player-visible/UI effect or explicit “none”;
+- deviations, stop decisions, and follow-up authority.
+
+## 9. T14 — Closeout and synchronization
+
+1. Re-run every affected focused test, Core, final clean 188-week pair, checkpoint verifier, and
+   health gate without `--strict`.
+2. Re-run source census for every deleted symbol and budget check for every changed production
+   file.
+3. Confirm no new persisted fields, artifacts, channels, modules, services, flags, pipeline steps,
+   or default streams.
+4. Run final same-platform determinism and applicable performance protocol.
+5. Obtain final reviews from every Pyrrhic seat in §3; seats may mark N/A only with one sentence of
+   authority reasoning.
+6. Process QA verifies context/napkin reading, two-commit packet discipline, ledger, canon and
+   determinism treatment, clean evidence, and that `docs/10_canon/FORAWWV.md` was not edited.
+7. Update atomically:
+   - this plan;
+   - `docs/plans/MASTER_ROADMAP.md`;
+   - `docs/plans/COMMAND_BOARD.md`;
+   - `docs/plans/README.md`;
+   - `docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md`;
+   - `docs/00_start_here/docs_index.md`;
+   - report indexes/calibration pause status if their truth changed;
+   - `docs/PROJECT_LEDGER.md`;
+   - `docs/PROJECT_LEDGER_KNOWLEDGE.md` only for a reusable lesson.
+8. Move the living audit from `audits/` to `implemented/`; update the reports README and
+   consolidated implemented index in the same change.
+9. Commit docs/control plane only: `docs(RE-6): close lean engine integrity rail`.
+10. Push, PR creation, merge, tag, publication, and release remain separately authorized actions.
+
+## 10. Stop conditions
+
+Stop immediately when:
+
+- probe or another worktree overlaps the next packet;
+- execution HEAD differs from the recorded approved base without amendment;
+- Node major is not 22;
+- an authoritative scenario resolves sources outside the packet commit;
+- tree/run metadata is dirty or commit/input digests disagree;
+- a decision-gated mechanic lacks its ruling;
+- the proposed fix needs a new state field, stream, service, module, flag, pipeline step, or
+  special case;
+- aggregate casualty truth, byte identity, checkpoint structure, save compatibility, package boot,
+  or player authority regresses;
+- median affected-phase runtime regresses by more than 2%;
+- scope needs canon modification;
+- an evidence report attempts to become a second execution queue.
+
+Return a source-cited bounded amendment. Do not improvise.
+
+## 11. Completion block
+
+**Canonical owner:** `docs/plans/MASTER_ROADMAP.md` for workstream state; this file for execution.
+
+**Demoted paths:** frozen discovery, team dispositions, historical ledger entries, and evidence
+reports are inputs only.
+
+**Player-visible truth:** RE deletes duplicate presidential mutation routes and preserves the
+Decision Room as the action owner. Other packets change internal correctness only unless their
+verified report states otherwise.
+
+**Canonical UI surface:** Decision Room for presidential action; Operation Briefing for read-only
+inspection; existing deterministic receipts for outcomes/refusals.
+
+**Done means:** every T0–T14 task is closed or explicitly deferred by its allowed gate; all code
+packets have separate clean evidence commits; focused/Core/determinism/performance/package gates
+applicable to each packet pass; all specialists sign or record N/A; budgets hold; control-plane
+docs and ledger agree; no probe work or speculative mechanic entered RE.
+
+## 12. Copy-ready external-agent execution prompt
 
 ```text
-intent / scenario input
-        |
-        v
-canonical authority seam ---- refusal before debit/mutation
-        |
-        v
-canonical resolver ---------- exact per-formation result
-        |
-        v
-single accounting seam ------ K/W/M, equipment, pools, receipts
-        |
-        v
-existing weekly diagnostics / AAR / save
+Role: You are the RE Lean Engine Integrity implementing agent, coordinated by the Orchestrator and
+reviewed by the full active Pyrrhic roster.
+
+Objective: Execute exactly one unchecked task from
+docs/plans/2026-08-26-engine-integrity-plan.md. Start with T0 unless the plan and living RE audit
+prove an earlier task closed. Claude owns the probe lane: do not edit, revert, test-drive, stage,
+or absorb probe work.
+
+Required method:
+1. Read every document in plan §2 and record the execution commit.
+2. Use the plan's exact file boundary, RED test, command, complexity budget, specialist reviews,
+   and stop conditions. Do not substitute a legacy owner or invent a mechanism.
+3. Apply Engine Invariants, Phase Specifications, Systems Manual, CODE_CANON, and the determinism
+   matrix in precedence order. Use Node 22 and the plan's exact Core commands.
+4. For a behavior packet, commit code/tests first. Run authoritative clean evidence at that exact
+   commit. Then commit report/ledger/control-plane evidence separately.
+5. Preserve deterministic ordering, same-platform byte identity, save compatibility, player
+   authority, and engine-health/performance budgets. Update docs/PROJECT_LEDGER.md; update
+   PROJECT_LEDGER_KNOWLEDGE.md only for a reusable rule. Never edit FORAWWV.md.
+6. STOP AND ASK with a source-cited bounded amendment if any decision gate is unresolved, a named
+   owner/path moved, another worktree overlaps, Node/provenance is wrong, a new field/channel/
+   service/module/flag/stream/pipeline step appears necessary, canon would change, or a gate fails.
+
+Required output:
+- task and exact commit;
+- files changed and production numstat;
+- RED and GREEN commands/results;
+- Core, determinism, save/schema, package/UI, long-run, and performance evidence as applicable;
+- Simplifier and independent specialist verdicts;
+- code/test commit and evidence/docs commit;
+- player-visible impact or explicit none;
+- ledger/report/control-plane updates;
+- remaining stop, decision, or next unchecked task.
+
+Do not push, create a PR, merge, tag, publish, or start the next packet.
 ```
-
-RE corrects seams; it does not create a second observation or orchestration architecture.
-
-## Source authority and required reading
-
-Before execution, read these in order and record the exact commit in the execution report:
-
-1. `CLAUDE.md`
-2. `.claude/AGENT_TEAM_ROSTER.md`
-3. `docs/20_engineering/PYRRHIC_RULES.md`
-4. `docs/20_engineering/PYRRHIC_PLANNING_RULES.md`
-5. `docs/plans/PLAN_EXECUTION_STANDARD.md`
-6. `docs/10_canon/Engine_Invariants_v0_9_0.md`
-7. `docs/10_canon/Systems_Manual_v0_9_0.md`
-8. `docs/20_engineering/CODE_CANON.md`
-9. `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`
-10. `docs/plans/MASTER_ROADMAP.md` and `docs/plans/COMMAND_BOARD.md`
-11. `docs/40_reports/proposals/20260826_ENGINE_INTEGRITY_PACKET.md`
-12. `docs/40_reports/proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md`
-13. `docs/plans/2026-05-21-apwb-cut-and-debuff-replacement-plan.md`
-14. `docs/40_reports/audits/20260521_APWB_CUT_SUBSTRATE_CONSUMER_PRECLEAR.md`
-15. `docs/40_reports/CALIBRATION_MASTER.md`
-16. `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`
-17. `.claude/napkin.md`, `docs/life_lessons.md`, current `docs/PROJECT_LEDGER.md` tail, and `docs/PROJECT_LEDGER_KNOWLEDGE.md`
-18. `docs/20_engineering/VERSIONING.md` (version bump/tag are N/A: RE is not a version milestone)
-
-Where documents disagree, do not select the convenient answer. Open a named decision gate below.
-
-## External-agent session start
-
-```powershell
-git status --short
-git rev-parse HEAD
-git worktree list
-node --version
-npm.cmd --version
-git ls-files | Measure-Object
-```
-
-After owner approval, set `$env:RE_EXECUTION_PARENT` to the approved `git rev-parse HEAD`, confirm `F:\AWWV-worktrees\re-engine-integrity` does not exist, then create the isolated branch/worktree with `git worktree add -b codex/re-engine-integrity-execution F:\AWWV-worktrees\re-engine-integrity $env:RE_EXECUTION_PARENT`. Stop instead of reusing or deleting an existing target.
-
-## Options considered
-
-1. **Execute the old investigation sequentially — rejected.** It is a valuable discovery record, but its stale commit binding, contradictory status, broad hypotheses, and absent simplify gates make it unsafe as execution authority.
-2. **Treat calibration symptoms as a mechanics redesign — rejected.** Reserve decay, rebuild delay, garrison fallback, predictor retuning, and dissolution immunity are not established engine-integrity fixes.
-3. **Lean seam correction — selected.** Prove reachability and liveness; delete duplicate/dead paths; converge authority; consolidate accounting; run one behavioral packet at a time.
-
-## Full Pyrrhic team contract
-
-The entire roster was consulted during planning. Execution uses the following seats; “consult” means a written disposition in the packet or closeout report, including **NO IMPACT**.
-
-Planning dispositions are indexed in `docs/40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md`; the source investigation remains in the discovery record and evidence packet.
-
-| Seat | Required responsibility |
-|---|---|
-| Orchestrator | scope, ordering, stop/go, roadmap and Command Board |
-| Technical Architect | single-owner seams, entrypoints, CODE_CANON |
-| Architect | cross-system impact and complexity budget |
-| Product Manager | pre-1.0 cutoff and deferred backlog |
-| Systems Programmer | invariants, state writers, deterministic implementation |
-| Gameplay Programmer | phase/resolver correctness |
-| Formation Expert | formation lifecycle, pools, retreat/dissolution |
-| Performance Engineer | profile, artifact/runtime budget |
-| Game Designer | mechanic-vs-defect classification |
-| Historian | historical claim boundaries; no tuning by anecdote |
-| Canon Compliance Reviewer | §6 rulings and canon propagation |
-| General Code Review | correctness/security/maintainability review |
-| QA Engineer | red/positive/adversarial tests and suite gates |
-| Determinism Auditor | ordering, allocation, byte identity |
-| Scenario Harness Engineer | clean run provenance and tooling |
-| Scenario Creator/Runner/Tester | 188-week candidates and report |
-| Integration perspective | cross-packet collision and merge audit |
-| UI/UX Developer | refusal visibility through existing surfaces |
-| Graphics Programmer | render impact; expected NO IMPACT |
-| Lua Scripting | scripting impact; expected NO IMPACT |
-| Asset Integration | data/asset impact; expected NO IMPACT |
-| Map Geometry Reviewer | graph/geometry integrity; no new spatial system |
-| Modern Wargame Expert | player intent versus institutional authority |
-| Platform Specialist | Windows/Node/runtime parity |
-| Build Engineer | reproducible build and worktree substrate |
-| DevOps | CI path detection and actual job execution |
-| Operations Expert | operation lifecycle, threat matching, queues |
-| Corps/Army Commander Expert | command authority and refusal semantics |
-| War-or-Game | simulation legitimacy; avoid outcome chasing |
-| Narrative Designer | existing receipt/AAR language only |
-| Authority Auditor | debit/mutation ordering and path convergence |
-| Documentation Specialist | executable docs and propagation |
-| Ledger Scribe | decision/implementation ledger entries |
-| Reports Custodian | archive/index/closeout placement |
-| Process QA | protocol audit at every phase exit |
-| Retrospective Analyst | closeout lessons, only reusable knowledge |
-| Code Simplifier | packet-level deletion and clarity gate |
-| Refactor Pass | final net-complexity audit |
-
-No seat may silently expand scope. A specialist finding becomes work only through this plan's change-control gate.
-
-## Execution protocol
-
-### Isolation and base
-
-- [ ] Wait until the probe lane has an owner-approved disposition and no active overlapping engine work.
-- [ ] Record `$env:RE_EXECUTION_PARENT = (git rev-parse HEAD).Trim()`; bind all evidence to that exact parent.
-- [ ] Confirm the only allowed pre-existing dirt is named by the owner. Never absorb generated `data/derived/latest_run_final_save.json`.
-- [ ] Create an isolated worktree and `codex/re-engine-integrity-execution` branch from the approved parent.
-- [ ] Compare `git ls-files` counts between root and worktree; stop on mismatch.
-- [ ] Install exactly as CI: `npm.cmd install --legacy-peer-deps`, then `npm.cmd install --legacy-peer-deps --prefix src/ui/map`.
-- [ ] Use Node 22 for authoritative baseline, fingerprints, package checks, and performance evidence. Node 24 local results are exploratory only.
-- [ ] Draft the PR early so required heavy jobs can be observed; branch-push success alone is not evidence.
-
-No version bump, tag, publication, deployment, or push to master is authorized by RE.
-
-### Per-packet micro-cycle
-
-Every implementation packet follows this sequence:
-
-1. Re-read the owning source and all writers/readers.
-2. Record liveness/reachability and artifact evidence.
-3. Add a failing focused test and a positive control.
-4. Add an adversarial/mutation test that proves the test can fail.
-5. Implement the minimum single-owner correction.
-6. Run focused tests, typecheck, and the relevant invariant suite.
-7. Run `/simplify`; delete dead paths and compatibility scaffolding.
-8. Re-run the focused and balanced gates.
-9. Commit only explicit packet paths.
-10. Obtain owning specialist, QA, determinism, simplifier, and independent code review.
-11. For behavior-changing operation/territory packets, run a fresh clean 188-week candidate and its byte-identical repeat before opening the next behavioral packet.
-12. Append the slice to `docs/PROJECT_LEDGER.md`; update `docs/PROJECT_LEDGER_KNOWLEDGE.md` only for a reusable rule; scan `.claude/napkin.md` and `docs/life_lessons.md` and curate rather than append session narrative.
-13. Record `/simplify: PASSED` or the fixes made in the packet commit/report before phase exit.
-
-Execution is serial: RE-0, decision packets, RE-1, RE-2, RE-3A, RE-3B, conditional RE-3C, RE-4A, RE-4B, optional RE-4C, RE-5, RE-6. Decision research may proceed without code, but only one implementation packet owns files or produces long-run evidence at a time.
-
-### Determinism and save/schema gate
-
-- No timestamps, unseeded randomness, environment-dependent branches, locale ordering, or unordered iteration.
-- Persisted arrays, emitted rows, queues, maps, allocation remainders, and diagnostics use explicit stable ordering.
-- Any persisted field—even optional—requires load default, migration/normalization, validator, fixture update, stable-order test, old-save test, and save/load round trip.
-- Scenario/checkpoint/hash or manifest refresh is forbidden unless the packet predicts and explains the behavioral drift and Orchestrator, QA, and Determinism approve it.
-- Architect or Technical Architect decisions with multiple valid architectures must be flagged for user review, not silently selected.
-
-### UI and player-truth gate
-
-- The existing Directive/Decision Room and existing receipt/AAR are the only canonical player surfaces.
-- No duplicate queue, ledger, resolver authority, hidden force ID, or newly exposed fog-sensitive formation/target detail.
-- Reuse existing localized refusal vocabulary; new player text requires the repo's localization path and UI/UX plus Narrative review.
-- RE-1 requires packaged Electron interaction proof and a screenshot only if visible output changes; pure deletion with identical visible behavior requires a documented visual NO CHANGE result.
-- Any overlapping GUI branch stops RE-1 until its owner releases the files.
-
-### Historical and sensitive-history gate
-
-- Source order: canon/Rulebook and approved scenario/event records; then cited archival/scholarly sources; unsupported recollection is not authority.
-- Historian and Canon Compliance assign the repo's sensitive-history ring before DG-1 or DG-2 is ruled.
-- Unsupported claims are removed or explicitly marked unresolved; they never become engine predicates.
-- Live-state conditions control emergence; calendar/event ownership is used only where canon explicitly requires it.
-- Atrocity, protected-population status, or enclave suffering may never become a player optimization lever.
-
-### Slice closeout documents
-
-Every slice updates this plan's checkbox/status and `docs/PROJECT_LEDGER.md`. Update `docs/PROJECT_LEDGER_KNOWLEDGE.md` only for reusable rules. Update `docs/plans/COMMAND_BOARD.md` at packet handoff; update `docs/plans/MASTER_ROADMAP.md` only at phase/RE closure. Append evidence to the named RE implementation report and index it in `docs/40_reports/README.md`. Touch `docs/40_reports/CONSOLIDATED_BACKLOG.md` or `docs/40_reports/GAME_STATE_RATING_MASTER.md` only if the corresponding status/rating actually changes.
-
-### Universal stop conditions
-
-Stop the lane immediately for:
-
-- dirty or mismatched run provenance;
-- missing checkpoints, fingerprints, or digest;
-- non-byte-identical repeat candidates;
-- invariant or engine-health failure;
-- negative-control movement not predicted before the run;
-- new default diagnostic stream or artifact-size growth;
-- faction aggregate casualty totals changing during the attribution-only packet;
-- command-authority cost debited on refusal;
-- a schedule divergence of 20% or more being presented as attributable territory;
-- production LOC becoming net positive without an approved deletion plan;
-- a requested semantic ruling not answered by canon authority.
-
-## Packet execution contracts
-
-The implementation report is the expected durable artifact for every row; long-run rows also produce two distinct `runs/<unique-id>/` directories. “Core” verification means `typecheck` plus `test:vitest:balanced`.
-
-| Packet | Tests written/run first | Estimated scope | Phase-local proof and handoff |
-|---|---|---|---|
-| RE-0A–C | `tests/scenario_operation_diagnostics.test.ts`, `tests/scenario_anchor_contract.test.ts`, `tests/desktop_calibration_compare.test.ts` | docs/run evidence; 0 production LOC | clean S0 pair, normalized fingerprint manifest, artifact inventory; Scenario Harness + Process QA sign |
-| RE-0D | `tests/desktop_release_ci_guardrails.test.ts`, `tests/desktop_packaged_runtime_probe.test.ts` | 2 production/tool files + workflow/test, ≤40 LOC | focused tests, desktop build/release/package commands, synthetic changed-path proof; Build + DevOps sign |
-| DG-1/2/3 | positive/negative source reachability fixtures where needed | one decision record each; 0 production LOC | source-cited ruling, consumer/writer list, `/simplify: PASSED`; Canon + Orchestrator sign |
-| RE-1 | `tests/commander_override_reachability.test.ts`, `tests/commander_override.test.ts`, desktop IPC mutation/policy tests | named desktop/UI files, net deletion expected | focused tests, Core, all desktop commands, old-save disposition, packaged proof; Authority + UI/UX + independent review sign |
-| RE-2 | add `tests/casualty_pool_attribution.test.ts`; run `tests/attack_casualty_distribution.test.ts`, `tests/casualty_realism_v2_gate.test.ts`, `tests/integration_pool_integrity.test.ts` | `src/sim/combat/attack_casualty_distribution.ts`, `src/sim/combat/battle_resolution.ts`, `src/state/casualty_ledger.ts`, `src/sim/turn_phases/war_phases.ts`; net deletion | focused tests, Core, 188w pair, aggregate K/W/M lock; Systems + Formation + Determinism sign |
-| RE-3A | add `tests/commander/threat_predecessor_matching.test.ts` | `commander/assess.ts` + test, ≤35 production LOC | focused test, Core, 188w pair; Operations + Determinism sign |
-| RE-3B | `tests/pre_planned_operations.test.ts` | one source/test; net −30 production LOC target | focused test, Core, 188w pair; Operations + QA sign |
-| RE-3C | `tests/operation_objective_hostility.test.ts`, opportunity state/save tests | branch A net deletion; branch B ≤25 LOC + at most 1 field | focused/save tests, Core, 188w pair; Canon + Authority + Determinism sign |
-| RE-4A | `tests/emergency_retreat_reachability.test.ts` | `attack_retreat_displacement.ts`, existing adjacency owner/test; no module, ≤60 LOC | focused test, Core, profiled search count, 188w pair if live; Formation + Map + Performance sign |
-| RE-4B | add `tests/patron_active_formation_strength.test.ts` | `src/sim/negotiation/patron_pressure.ts` + existing predicate/test, ≤25 LOC | focused test, Core; 188w pair only if live; Systems + Formation sign |
-| RE-4C | focused salvage locality test only if triage opens packet | decision-only or bounded reuse of RE-4A primitive | return bounded amendment before code; no implicit implementation |
-| RE-5 | no production tests unless a premise probe needs one | seven one-page dispositions; 0 production LOC | Game Design/Historian/War-or-Game/Canon/Product disposition; `/simplify: PASSED` |
-| RE-6 | all affected focused tests and full named gates | docs/report only | clean tree, CI jobs observed, closeout report and atomic control-plane update |
-
-If an estimate is exceeded, stop before implementation and submit change control. Test names marked “add” are the approved new targets; do not create additional test frameworks.
-
-For every row, the exact focused-test invocation is:
-
-```powershell
-npx.cmd vitest run <space-separated exact test paths listed in that row> --reporter=dot
-```
-
-Replace the bracketed argument only with that row's literal test paths; record the expanded command in the implementation report. Rows with no production test state that explicitly and do not run this template.
-
-## RE-0 — Control plane, clean baseline, and observation audit
-
-**Owners:** Orchestrator, Build, DevOps, Platform, Scenario Harness, QA, Process QA
-**Behavior:** none
-**Exit:** trustworthy execution substrate and exact-parent S0
-
-### RE-0A — Documentation and provenance reconciliation
-
-- [ ] Preserve the old investigation as the discovery record; keep this file as the only executable RE plan.
-- [ ] Index the evidence packet and discovery record in `docs/40_reports/README.md`.
-- [ ] Reconcile missing/recent ledger dispositions before declaring RE ready.
-- [ ] Confirm the planning-sync correction remains: n374 is marked non-authoritative because its own `run_meta.json` records `b3d759a3…` and `git_dirty:true`; never rewrite raw evidence.
-
-### RE-0B — Fresh S0
-
-- [ ] At the exact execution parent, generate a clean 188-week baseline with required 52/104/156/188 checkpoints.
-- [ ] Run an identical repeat to a distinct output directory; require identity of checkpoint saves and canonical result artifacts after excluding only documented `run_meta.out_dir`/path metadata.
-- [ ] Record wall time, peak memory if available, artifact sizes, operation schedule, engine-health output, and provenance.
-- [ ] Use S0 only as comparison evidence, not as permission to tune outcomes.
-
-### RE-0C — Existing-observation audit
-
-- [ ] Inventory weekly diagnostics, AAR, operation queue/result/warning records, and save fields across every operation constructor, including commander, probe, emergency, and `buildCorpsOperation` paths.
-- [ ] Add no creation emitter. The current 188-week weekly report is already operation-heavy; measure exact bytes/rows in S0.
-- [ ] If and only if a positive-controlled audit proves a lifecycle blind spot, return with a proposal for one opt-in external sidechannel covering all constructors. It is not pre-approved.
-
-### RE-0D — Desktop CI truthfulness
-
-Files to inspect: workflow changed-path detector, desktop build/package scripts, preload/IPC contract tests.
-
-- [ ] Expand existing desktop changed-path prefixes to include bundled simulation/state/scenario sources where presently omitted.
-- [ ] Extend the existing packaged runtime probe only enough to prove retained operation IPC contracts.
-- [ ] Do not add a launcher, service, or second package probe.
-- [ ] Prove a source-only change under each newly covered prefix selects the desktop jobs.
-
-**Simplify gate:** zero new infrastructure components; reuse existing jobs and probe.
-
-## Decision gates — no implementation before ruling
-
-Each decision packet is source-cited, names the canon owner, states the minimal options, and records the ruling in the ledger.
-
-### DG-1 — APWB/friendly override contradiction
-
-The current record is contradictory: an APWB cut plan is explicitly a draft awaiting review, while ledger/docs variously describe the substrate as withdrawn and canonical.
-
-- [ ] Prove the complete current consumer/writer set.
-- [ ] Canon Compliance, Game Design, Historian, Operations, Authority Auditor, Product, and Orchestrator choose:
-  - **A:** approve deletion of the shadow/fake-combat substrate and separately re-review any proposed replacement; or
-  - **B:** retain the historical operation semantic and persist only an exact deterministic exemption set through operation lifecycle.
-- [ ] Do not implement both. Do not invent a faction-wide debuff or provenance schema by implication.
-
-### DG-2 — Presidential enclave authority
-
-- [ ] Decide whether a presidential request-operation may target event-owned Srebrenica/Žepa before the fall receipt.
-- [ ] Include an ordinary-enclave negative control; reject a blanket all-enclave rule.
-- [ ] If prohibited, specify one shared query/consume predicate, a non-leaking refusal reason through existing UI/receipt surfaces, and refusal before debit.
-
-### DG-3 — Stage-operation decision reachability
-
-- [ ] Prove whether `stage-operation-decision` has a live canonical consumer.
-- [ ] If noncanonical, delete it. If live, converge it onto the exact-ID canonical owner.
-- [ ] Never restore stale `state.corps_command` semantics or create replacement IPC.
-
-Unanswered decision gates do not block unrelated packets, but the dependent packet remains closed.
-
-## RE-1 — Authority convergence and dead-path deletion
-
-**Owners:** Authority Auditor, Operations, Corps/Army Command, UI/UX, Technical Architect, Systems, QA
-**Long run:** required if a live behavior path changes
-
-### RE-1A — Delete legacy force-launch path
-
-Files to inspect: main-process handlers, preload exposure, `DirectiveCard`, `interpretOperationLaunch`, halt machinery, canonical exact-ID force launch.
-
-- [ ] Prove reachability of `stage-operation-force-launch` and its name-based fallback.
-- [ ] Preserve the exact-ID canonical route.
-- [ ] Delete the legacy handler, preload/useIPC exposure, UI fallback, and newly unreachable interpretation/halt code.
-- [ ] Audit old saves containing `halt_delay_turns_remaining` or `dig_in_on_halt`; choose tested migration/conversion or documented normalization/clearing. Do not retain live compatibility readers indefinitely.
-- [ ] Test that no refusal path can charge command authority before acceptance.
-- [ ] Test duplicate operation names and stale IDs; require fail-loud behavior without hidden force IDs in UI.
-
-### RE-1B — Resolve decision path
-
-- [ ] Execute DG-3 disposition.
-- [ ] If retained, replace illegal `recovery_reason='commander_abort'` with the already canonical transition/reason; add no enum unless replacing an unvalidated string with an existing canonical value is impossible.
-- [ ] Prove query and mutation share one owner.
-
-**Exit evidence:** fewer IPC paths and production lines; all retained desktop contracts packaged and tested.
-
-## RE-2 — One casualty accounting owner
-
-**Owners:** Systems, Gameplay, Formation, Determinism, QA, Performance
-**Files:** resolver casualty shares, `war_phases.ts`, pool exhaustion, task-group ledger
-**Long run:** required
-
-- [ ] Capture current faction aggregate K/W/M totals as a locked control.
-- [ ] Add focused tests for attacker, defender, task-group anchor/donors, zero pool, exhaustion, and deterministic remainder ties.
-- [ ] At one resolver allocation boundary, produce two explicitly separate outputs: raw per-formation permanent personnel loss for pool charging, and realism-scaled per-formation K/W/M for the casualty ledger.
-- [ ] Never source pool exhaustion from realism-scaled casualty-ledger values. The outputs may share deterministic allocation infrastructure, but not numerical inputs.
-- [ ] Allocate ledger K/W/M independently with deterministic largest remainder and `strictCompare` final tie-break.
-- [ ] Record task-group casualties against the formations that actually absorb personnel loss; do not charge the anchor the full pre-redistribution casualty object.
-- [ ] Delete duplicate `apply-casualty-pool-exhaustion` re-derivation and its divergent constants.
-- [ ] Require exact conservation: allocated formation K/W/M equals the resolver's faction aggregate K/W/M.
-- [ ] Require faction aggregate casualty totals to remain unchanged in this packet. Pool-exhaustion distribution may change and must be called out before the long run.
-
-**Simplify gate:** one accounting owner, one allocation algorithm, net deletion.
-
-## RE-3 — Operation ordering and queue correctness
-
-Run RE-3A and RE-3B as separate behavioral packets and separate long-run pairs.
-
-### RE-3A — Conserved predecessor-to-descendant threat attribution
-
-**Owners:** Operations, Determinism, Systems, QA
-
-- [ ] Reproduce last-loss contamination with multiple current/previous zones.
-- [ ] Sort previous/current zones by `zone_id` with `strictCompare`; build the current global OSID union once.
-- [ ] For each predecessor with vanished OSIDs, select at most one current descendant: exact ID only with positive overlap, otherwise maximum positive overlap, then current `zone_id` tie-break. Multiple predecessors may feed one merged current zone.
-- [ ] Aggregate sorted vanished OSIDs per current zone and emit at most one loss row. Attribute every vanished OSID from a matched predecessor exactly once; zero-overlap predecessors remain unmatched.
-- [ ] Use `strictCompare` only as final tie-break; zero overlap is no match.
-- [ ] Test merge conservation, split single-descendant attribution, ID churn, exact-ID positive-overlap precedence, equal overlap, reordered input, unrelated-zone negative control, and flattened duplicate conservation.
-- [ ] Count fully vanished zero-overlap components in S0. If live and a corps-level pressure signal is required, stop for a separate authority decision; do not invent lexical/spatial locality.
-- [ ] Do not create a generic matching framework.
-
-### RE-3B — Generic pre-planned follow-on queue
-
-**Owners:** Operations, Gameplay, Determinism, QA
-
-- [ ] Reproduce the five named queue branches and lock raw `ALL_PRE_PLANNED` declaration order.
-- [ ] Replace named blocks with one traversal in raw declaration order.
-- [ ] Validation-invalid operations do not queue.
-- [ ] A declined first operation does not erase valid followers.
-- [ ] Classify queued-head failure without a new state machine: unknown, resolved, declined, or permanently moot entries advance; temporarily unavailable formation/readiness entries retry.
-- [ ] Prove one invalid head cannot erase or permanently starve valid followers.
-- [ ] Do not sort by availability date.
-- [ ] Delete named special cases and prove net code reduction.
-
-### RE-3C — APWB branch, conditional on DG-1
-
-- [ ] Execute exactly the approved branch.
-- [ ] Branch A deletes proven-dead substrate; any replacement mechanic is a separate approved plan.
-- [ ] Branch B uses one exact, sorted, persisted exemption list only if save/resume tests prove transient state insufficient.
-- [ ] Run save/resume, byte-identity, non-exempt friendly control, and operation lifecycle tests.
-
-## RE-4 — Locality and active-formation correctness
-
-### RE-4A — Generic emergency-retreat routing
-
-**Owners:** Formation, Map Geometry, Systems, Determinism, QA, Performance
-**Long run:** required if S0 proves live
-
-- [ ] Reproduce lexical/largest-component fallback and the BFS frontier defect.
-- [ ] Reuse the existing operational contact graph/`osid_adjacency.ts`; do not add centroid or spatial systems.
-- [ ] Use a bounded graph search or a reusable battle/corps/faction-scoped distance result: finite distance first, organizational validity next, `strictCompare` last.
-- [ ] A per-formation full-graph BFS is forbidden unless profiling proves necessity and Performance plus Systems approve the exception.
-- [ ] Test disconnected graphs, cycles, multiple valid destinations, reorder stability, and the 706th only as a regression fixture—not a hardcoded rule.
-- [ ] Measure same-turn dissolution separately. Do not add immunity: a shattered remnant may legitimately dissolve.
-
-### RE-4B — Active formation predicate
-
-**Owners:** Systems, Formation, QA
-**Long run:** conditional on S0 liveness
-
-- [ ] Audit all readers of patron/military strength and current formation lifecycle/status rules.
-- [ ] Prove whether nonzero displaced/inactive formations affect the ratio.
-- [ ] If live, correct `getMilitaryStrengthRatio` in `src/sim/negotiation/patron_pressure.ts` with the canonical lifecycle-status exclusions. Add no helper unless the audit proves a second live caller needs the identical invariant; add no lifecycle.
-- [ ] If byte-inert in S0, close with focused tests and a future-safety note.
-
-### RE-4C — Dissolution salvage locality triage
-
-- [ ] Prove whether “nearest same-corps” equipment salvage currently selects alphabetically.
-- [ ] If live and invariant-relevant, return a bounded packet using the same graph primitive as RE-4A.
-- [ ] Otherwise defer explicitly. Do not silently add it to RE-4A.
-
-## RE-5 — Evidence-only mechanic triage
-
-**Owners:** Product, Game Design, Historian, War-or-Game, Systems, Performance, Canon
-**Default result:** defer
-
-These are not implementation tasks. Each gets a one-page evidence disposition: defect/invariant, approved mechanic, post-1.0 calibration, or close.
-
-- [ ] Garrison “minimum surplus after N” and force-creation fallback.
-- [ ] Planner-estimator versus resolver mismatch; comments may be corrected, formula changes require approval.
-- [ ] Strategic-reserve decay and orphan predicates.
-- [ ] Rebuild/reinforcement latency. `disrupted_turns` has broad readers/writers and is forbidden as a narrow carrier; a dedicated scalar is allowed only after explicit mechanic approval.
-- [ ] Dissolution floors. Audit actual runtime writers/skip paths before claiming the threshold is unreachable.
-- [ ] Petkovci/enclave downstream behavior after DG-2.
-- [ ] 706th same-turn dissolution after generic routing is corrected.
-
-Quiet fronts, siege quiet, or historically surprising outputs are not engine defects by themselves. RE may close with all seven deferred.
-
-## Verification matrix
-
-Run commands from the isolated worktree with Node 22:
-
-```powershell
-npm.cmd run typecheck
-npm.cmd run test:vitest:balanced
-npm.cmd run desktop:map:build
-npm.cmd run desktop:sim:build
-npm.cmd run qa:electron-runtime-contracts
-npm.cmd run desktop:release:check
-npm.cmd run desktop:package:probe
-```
-
-For each behavioral packet:
-
-```powershell
-$env:AWWV_S6_GRADE_RUN='true'
-npm.cmd run sim:scenario:run:188w
-npm.cmd run sim:scenario:run:188w
-```
-
-After each runner prints its unique output path, set `$env:RE_RUN_A` and `$env:RE_RUN_B` to the two distinct directories and execute:
-
-```powershell
-node tools/op_schedule_diff.cjs $env:RE_RUN_A $env:RE_RUN_B --list
-node tools/engine_health_gate.cjs $env:RE_RUN_A --horizon 188w --strict
-node tools/engine_health_gate.cjs $env:RE_RUN_B --horizon 188w --strict
-node tools/validate_run_consistency.cjs $env:RE_RUN_A
-node tools/validate_run_consistency.cjs $env:RE_RUN_B
-node tools/verify_checkpoints.cjs $env:RE_RUN_A
-node tools/verify_checkpoints.cjs $env:RE_RUN_B
-node tools/diagnostics/structural_fingerprint.cjs $env:RE_RUN_A --json --full
-node tools/diagnostics/structural_fingerprint.cjs $env:RE_RUN_B --json --full
-$reFingerprintFiles = @('activity_summary.json','brigade_temporal_log.jsonl','control_delta.json','destroyed_brigades.json','displacement_event_log.jsonl','final_save.json','formation_delta.json','initial_save.json','operation_aars.json','replay_save_manifest.json','run_summary.json','watched_operations.json','weekly_report.jsonl')
-$reHashA = $reFingerprintFiles | ForEach-Object { [pscustomobject]@{File=$_; Hash=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $env:RE_RUN_A $_)).Hash} }
-$reHashB = $reFingerprintFiles | ForEach-Object { [pscustomobject]@{File=$_; Hash=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $env:RE_RUN_B $_)).Hash} }
-Compare-Object $reHashA $reHashB -Property File,Hash
-```
-
-`Compare-Object` must emit no rows. `run_meta.json` and `end_report.md` are excluded because output-path/prose metadata may differ; all state and canonical machine artifacts above remain byte-bound. If a named script or artifact no longer exists, stop and amend the plan through Technical Architect/Orchestrator review—do not substitute by guess.
-
-Determinism uses two distinct-output 188-week candidates. Performance uses either a five-sample focused benchmark or at least three controlled timed candidates, with machine/load conditions recorded and the affected phase profiled. Two-run wall-clock medians cannot enforce the 2% budget.
-
-“No artifact growth” means no new default field, row, stream, or structural payload on an identical-state fixture. Incidental digit/string-length movement caused by an approved behavior correction is a behavioral diff, not telemetry bloat.
-
-### Required comparisons
-
-| Packet | Locked positives | Allowed movement |
-|---|---|---|
-| RE-0 | exact parent, clean metadata, 4 checkpoints, byte identity | none |
-| RE-1 | refusal before debit, exact-ID route, packaged IPC | removal of legacy path only |
-| RE-2 | faction aggregate K/W/M | per-formation/pool attribution |
-| RE-3A | deterministic ordering and unrelated zones | corrected threat/loss ownership |
-| RE-3B | raw declaration order and valid followers | removal of named special cases |
-| RE-3C | non-exempt friendly control | only approved APWB branch |
-| RE-4A | graph integrity and unrelated retreats | corrected reachable destination |
-| RE-4B | active formations and unrelated factions | exclusion of proven inactive strength |
-
-Long runs are serial. Never combine two behavior changes into one attribution candidate.
-
-## Phase-exit review
-
-At every phase exit:
-
-- [ ] Owning domain specialist signs the semantic result.
-- [ ] QA supplies red/positive/adversarial evidence.
-- [ ] Determinism Auditor signs ordering and byte evidence.
-- [ ] Performance signs runtime/artifact deltas where relevant.
-- [ ] Code Simplifier confirms no avoidable layer or abstraction.
-- [ ] Process QA confirms plan protocol, assignments, commits, and evidence.
-- [ ] Orchestrator records GO, REWORK, DEFER, or STOP.
-
-## RE-6 — Closeout and propagation
-
-- [ ] Run all verification gates from a clean tree.
-- [ ] Confirm production LOC net non-positive, no new default stream, and no unapproved persisted field.
-- [ ] Confirm required PR jobs actually ran, not merely that the workflow passed.
-- [ ] Run independent General Code Review, Canon Compliance, Refactor Pass, and retrospective.
-- [ ] Update CODE_CANON/entrypoint docs only for changed ownership or deleted paths.
-- [ ] Update Master Roadmap, Command Board, report indexes, ledger, and governance references atomically.
-- [ ] Publish the implementation report at the path named in this plan.
-- [ ] Put only durable reusable rules in repo knowledge; keep run narrative in the report.
-- [ ] Do not edit FORAWWV.
-
-## Minimum viable RE cutoff
-
-RE is complete when:
-
-1. RE-0 proves a clean exact-parent baseline and truthful CI/runtime substrate;
-2. authority has one canonical route and dead legacy paths are removed;
-3. casualty accounting has one owner with exact conservation;
-4. threat matching and pre-planned queues are deterministic and generic;
-5. live routing/active-formation defects are corrected or evidence-closed;
-6. all decision gates have recorded dispositions;
-7. speculative mechanics are either separately approved or explicitly deferred;
-8. all universal budgets and closeout gates pass.
-
-The cutoff does **not** require prettier 188-week outcomes. It requires a smaller, more trustworthy engine.
-
-## Change control
-
-New evidence may alter sequencing, not silently broaden scope. Any new task must state:
-
-- violated invariant or proven blind spot;
-- exact owner and consumer set;
-- deletion/convergence alternative considered;
-- production LOC, state, artifact, and runtime cost;
-- tests and negative controls;
-- owning Pyrrhic seats;
-- Orchestrator approval.
-
-Absent those fields, the finding goes to the future backlog, not RE.
-
-## Copy-ready execution prompt
-
-> **Role and objective:** You are the implementation agent for RE engine integrity. Execute `docs/plans/2026-08-26-engine-integrity-plan.md` with the `executing-plans` skill, one checked packet and one commit at a time, starting with the next unfinished Command Board phase.
->
-> **Canon and process:** Read `CLAUDE.md`, `.claude/napkin.md`, `docs/20_engineering/PYRRHIC_RULES.md`, `docs/20_engineering/PYRRHIC_PLANNING_RULES.md`, `docs/plans/PLAN_EXECUTION_STANDARD.md`, `docs/10_canon/Engine_Invariants_v0_9_0.md`, `docs/10_canon/Systems_Manual_v0_9_0.md`, `docs/20_engineering/CODE_CANON.md`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, the Master Roadmap/Command Board, and this plan's evidence records before editing.
->
-> **Start contract:** Start only after the probe lane is owner-resolved. Capture the approved integrated HEAD, create the named isolated worktree, verify tracked-file parity, and use Node 22 for authoritative evidence. Complete RE-0 before behavior changes. Claude-owned probe files and unrelated dirty `data/derived/latest_run_final_save.json` are forbidden.
->
-> **Determinism and ledger:** No timestamps, randomness, environment-dependent behavior, unordered output, unexplained hash drift, or save field without migration/default/validator/fixture/round-trip tests. Append `docs/PROJECT_LEDGER.md` for each behavior/output slice; update `docs/PROJECT_LEDGER_KNOWLEDGE.md` only for reusable rules. Do not edit `docs/10_canon/FORAWWV.md`.
->
-> **Lean-engine constraint:** Zero new pipeline steps, flags, default streams, services, or compatibility layers; target zero persisted fields; production LOC net non-positive. Work serially, one behavioral long-run pair at a time. Do not implement unresolved decision gates or RE-5 mechanics.
->
-> **STOP AND ASK:** Stop for any universal stop condition; canon conflict/silence; sensitive-history judgment without a ruling; branch/file collision; unapproved schema or GUI expansion; nondeterministic ordering; unexplained scenario/hash drift; scope/estimate overrun; or an Architect choice with multiple valid architectures.
->
-> **Handoff format:** Report packet/commit, exact changed files, tests and commands with pass/fail, `/simplify` result, liveness/mutation evidence, distinct run directories and fingerprints, runtime/artifact deltas, drift explanation, specialist/reviewer sign-offs, ledger/docs updates, deferred findings, and the next unfinished phase.

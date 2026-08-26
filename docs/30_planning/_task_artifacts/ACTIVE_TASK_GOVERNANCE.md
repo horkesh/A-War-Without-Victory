@@ -8,10 +8,10 @@ deterministic ordering, locality, and verification truth before further calibrat
 
 ## Current status and next action
 
-**PREPARATION-READY; IMPLEMENTATION NOT STARTED.** Claude owns the separate probe-channel scope,
-which is non-executable pending owner assent to its step 0. RE must not implement, revert, or absorb
-probe work. After the owner dispositions that lane and overlapping edits land, capture the approved
-integrated HEAD and execute RE-0 from an isolated worktree under Node 22.
+**SOURCE-AUDITED / IMPLEMENTATION-GRADE; IMPLEMENTATION NOT STARTED.** Claude owns the separate
+probe-channel scope. RE must not implement, revert, or absorb probe work. After the owner records
+that lane's final disposition and overlapping edits land, capture the approved integrated HEAD,
+hard-check Node 22, and execute RE-0 using the plan's source-verified authoritative run substrate.
 
 ## Canonical owner
 
@@ -28,14 +28,15 @@ No second RE plan or report-level queue may be opened.
 RE-0 through RE-6:
 
 1. exact-parent Node-22 baseline, observation audit, and desktop CI/runtime truth;
-2. exact-ID authority convergence and dead desktop/IPC path deletion;
-3. one casualty-accounting owner, preserving separate raw pool loss and realism-scaled K/W/M;
+2. deletion of duplicate name-keyed desktop/IPC authority and dead persisted state;
+3. one formal-battle OSID casualty-accounting owner, preserving actual raw pool loss and exactly
+   conserved realism-scaled K/W/M;
 4. conserved predecessor-to-descendant threat attribution and non-starving follow-on queues;
-5. bounded retreat/locality and active-formation corrections where S0 proves liveness;
+5. decision-gated retreat/enclave semantics and active-formation corrections where S0 proves liveness;
 6. evidence-only mechanic triage and atomic closeout.
 
-The plan's file-boundary table owns exact editable paths. One implementation packet and one
-behavioral long-run pair run at a time.
+The plan's task boundaries own exact editable paths. Each implementation packet has a code/test
+commit followed by a clean evidence/docs commit. One behavioral long-run pair runs at a time.
 
 ## Explicitly out of scope
 
@@ -62,13 +63,14 @@ checkpoint are not engine defects.
 ## Complexity and engine-health budget
 
 - zero new pipeline steps, flags, default streams, services, or launchers;
-- target zero persisted fields; maximum one only if DG-1 Branch B and save evidence require it;
+- zero new persisted fields;
 - production LOC net non-positive;
 - no new full-map/per-formation scan;
 - no structural default-artifact growth;
 - no affected-phase runtime regression above the plan's profiled budget without explicit approval;
-- every behavior change gets red, positive-control, adversarial/mutation, liveness, simplify,
-  independent-review, and deterministic long-run evidence.
+- every behavior change gets red, positive-control, liveness, simplify, independent review, and
+  deterministic long-run evidence; behavior fixes add an adversarial mutation, while deletion-only
+  packets use a source/reachability negative assertion.
 
 ## Collision rules
 
@@ -107,6 +109,6 @@ busier war or a better historical-fit score.
 
 ## Checkpoint
 
-- **2026-08-26:** full Pyrrhic planning complete; lean plan and team dispositions independently
-  passed lean-engine and Process-QA review.
+- **2026-08-26:** live-source specialist audit refined the sole plan with exact owners, tests,
+  commands, two-commit evidence discipline, and deletion-first complexity gates.
 - **Next:** owner probe disposition → integrated parent → RE-0.
