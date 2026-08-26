@@ -165,14 +165,30 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
  *  reformed) or are forcibly deported (Žepa: ICTY Tolimir). Victim-side consequence
  *  only; the perpetrator gains nothing here (its costs live on the fall event's other
  *  effects — §6). Deterministic (sorted by formation id, no RNG). Flag-gated
- *  `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` (default OFF => no-op => byte-identical).
+ *  `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` — **DEFAULT-ON since 2026-08-26** (owner decision on
+ *  an escalated split §6 panel); explicit 'false'/'0' disables it for rollback.
  *  Panel-reviewed spec: docs/plans/2026-08-05-enclave-column-displacement-and-codex-lane.md. */
 function applyEnclaveFormationDisplacement(
     state: GameState,
     effect: Extract<EventEffect, { kind: 'enclave_formation_displacement' }>,
 ): void {
+    // DEFAULT-ON since 2026-08-26 by explicit owner decision, on a split §6 panel
+    // (2 NON-COMPLIANT / 2 COMPLIANT, one BLOCK) escalated per CLAUDE.md.
+    //
+    // WHY: while this was default-OFF the engine flipped Srebrenica and Žepa on schedule
+    // and left their defenders untouched — all six brigades `status: active`, five at full
+    // establishment, morale up to 100, two still standing inside Srebrenica municipality
+    // four months after the fall. Against the record (~2,700 reconstituted of the 28th
+    // Division, ~3,200 unaccounted for, the victims ICTY-documented), the simulation was
+    // asserting in its own saved state that the defenders of Srebrenica were not killed.
+    // The Historian seat blocked any further §6 claim on exactly that.
+    //
+    // The mechanism below was already built, panel-reviewed and historically calibrated;
+    // it was only switched off. Turning it on is what the block asked for.
+    // Explicit 'false'/'0' still disables it, for rollback and for the flag-OFF
+    // byte-identity test. Mirrors the SRK-strangle activation idiom.
     const raw = process.env.AWWV_ENCLAVE_COLUMN_DISPLACEMENT;
-    if (raw !== 'true' && raw !== '1') return; // default OFF => byte-identical no-op
+    if (raw === 'false' || raw === '0') return; // explicit OFF => byte-identical no-op
 
     // Guards (engine condition 2, handler backstop): malformed payload = safe no-op.
     const frac = effect.casualty_fraction;
