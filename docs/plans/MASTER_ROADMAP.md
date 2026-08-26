@@ -1,8 +1,10 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** IN AUTONOMOUS EXECUTION; R1-R6 and the narrow pre-1.0 RC collapse packet are complete. R7 is the current critical path, followed by R8 and R9.
+**Status:** IN AUTONOMOUS EXECUTION; the owner has temporarily reactivated the January 1993
+calibration slice of R6 on the single 188-week master. R7 resumes after that accepted checkpoint,
+followed by R8 and R9.
 
-**Last updated:** 2026-08-23
+**Last updated:** 2026-08-26
 
 **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
 
@@ -12,11 +14,22 @@
 
 **Plan index:** [README.md](README.md)
 
-## Current Execution Snapshot (2026-08-23)
+## Current Execution Snapshot (2026-08-26)
+
+- **Owner-reactivated lane:** R6 January 1993 checkpoint calibration on
+  `apr1992_definitive_188w.json`, with later-checkpoint fallout explicitly deferred. Current
+  accepted run n372 is 697/712 nationally and 59/62 in the
+  Čajniče–Foča–Goražde–Pale–Trnovo–Rudo–Višegrad focus. Direct calibration
+  `control_change` events are forbidden. The next regional calibration work remains in the
+  Srebrenica–Zvornik area after the accepted Goražde rebuild. Authority:
+  `docs/40_reports/CALIBRATION_MASTER.md`.
 
 - **Complete:** R1, R2, R3, R4, R5, and the defined pre-1.0 scope of R6.
 - **Complete RC narrow packet:** the default-OFF v3 selector plus reversible D-shape is retained. Paired 188-week runs produced hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 bot benchmarks, 7/7 health gates, one live non-enclave HRHB damage/capacity write, and full Section 6 pass. Bucovaca peaked at strain 62 and recovered to 37; Sipovo/Drvar peaks remained 11/7.5. D-topology neighbour cascade remains owner-reserved and is post-1.0.
-- **Current lane / next action:** **R7 Phase 2 and the owner-directed opening-screen implementation are complete.** The reopened provenance/OOB lane was repaired through source-bound inventories, controlled campaign evidence, independent review, and the later HV/operation harness work. The five-beat case-file opening (landing, faction dossier, campaign mode, Field Records, command handoff) is merged and browser-proven for all factions. The complete suite is green through the deterministic balanced runner and the merged integration branch's Event System CI is green. **Next:** Phase 4 bounded audio provenance/assets, then English accessibility/readability and integrated packaged proof. Unfinished multilingual localization remains post-1.0.
+- **Next after the reactivated checkpoint lane:** R7 Phase 4 bounded audio provenance/assets,
+  then English accessibility/readability and integrated packaged proof. R7 Phase 2 and the
+  owner-directed opening-screen implementation remain complete; unfinished multilingual
+  localization remains post-1.0.
 - **Canon landed this cycle:** `SENSITIVE_HISTORY_DESIGN_GATE.md` **§10, "Provenance and the Integrity of the Historical Record"** — ratified by unanimous Pyrrhic panel (`5f462e8aa`), twelve conditions discharged across two rounds. `FORAWWV.md` §XIII temporal scope is drafted-but-**HELD** behind two engineering items (provenance channel separation + the determinism-scan pair) and is **not** canon.
 - **Measurement instrumentation is no longer the active blocker.** Run provenance now records commit/input/flag evidence, pair selection rejects incomparable artifacts, and the collapse OFF/ON comparison was rerun on same-commit evidence. Historical mixed-tree artifacts remain inadmissible; do not reinterpret them through a newer checkout.
 - **After R7:** R8 packaged full-campaign validation, then R9 release-candidate readiness.

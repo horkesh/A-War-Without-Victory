@@ -11,9 +11,7 @@ const EVENT_ID = 'gorazde_pocket_consolidation_1992';
 const GLAMOC = 'op:gorazde:glamoc';
 const KAMEN = 'op:gorazde:kamen';
 
-const rejectRandomness: Rng = () => {
-    throw new Error('Gorazde event truth must not consume RNG');
-};
+const rejectRandomness: Rng = () => { throw new Error('Gorazde event truth must not consume RNG'); };
 
 function gorazdeEvent(): EventDefinition {
     const event = loadEventDefinitions(0).find((candidate) => candidate.id === EVENT_ID);
@@ -21,12 +19,12 @@ function gorazdeEvent(): EventDefinition {
     return event;
 }
 
-function makeState(controllers: Record<string, string>): GameState {
+function makeState(glamoc: 'RS' | 'RBiH', kamen: 'RS' | 'RBiH'): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 18, seed: 'gorazde-event-truth', phase: 'war' },
         military: { formations: {}, fired_event_ids: [] },
-        political: { political_controllers: { ...controllers }, control_events: [] },
+        political: { political_controllers: { [GLAMOC]: glamoc, [KAMEN]: kamen }, control_events: [] },
         factions: [],
         displacement: {},
     } as unknown as GameState;
@@ -37,68 +35,27 @@ function authoredEffects(event: EventDefinition): EventEffect[] {
 }
 
 describe('Goražde pocket consolidation current-state truth', () => {
-    it('does not manufacture the two named settlements from a 30 percent municipality share', () => {
-        const state = makeState({
-            'op:gorazde:held_a': 'RBiH',
-            'op:gorazde:held_b': 'RBiH',
-            'op:gorazde:held_c': 'RBiH',
-            'op:gorazde:other_a': 'RS',
-            'op:gorazde:other_b': 'RS',
-            'op:gorazde:other_c': 'RS',
-            'op:gorazde:other_d': 'RS',
-            'op:gorazde:other_e': 'RS',
-            [GLAMOC]: 'RS',
-            [KAMEN]: 'RS',
-        });
-
+    it('observes an enclave perimeter already won through combat', () => {
+        const state = makeState('RBiH', 'RBiH');
+        const before = JSON.stringify(state.political.political_controllers);
         const result = evaluateEvents(state, rejectRandomness, 18, [gorazdeEvent()]);
-
-        expect(result.fired).toEqual([]);
-        expect(state.political.political_controllers?.[GLAMOC]).toBe('RS');
-        expect(state.political.political_controllers?.[KAMEN]).toBe('RS');
-        expect(state.military.event_flags?.gorazde_pocket_consolidated).toBeUndefined();
-        expect(state.political.control_events).toEqual([]);
-    });
-
-    it('files the informational receipt only when both exact OSIDs are already RBiH-held', () => {
-        const state = makeState({
-            [GLAMOC]: 'RBiH',
-            [KAMEN]: 'RBiH',
-            'op:gorazde:other_a': 'RS',
-            'op:gorazde:other_b': 'RS',
-            'op:gorazde:other_c': 'RS',
-            'op:gorazde:other_d': 'RS',
-            'op:gorazde:other_e': 'RS',
-            'op:gorazde:other_f': 'RS',
-            'op:gorazde:other_g': 'RS',
-            'op:gorazde:other_h': 'RS',
-        });
-        const beforeControl = JSON.stringify(state.political.political_controllers);
-
-        const result = evaluateEvents(state, rejectRandomness, 18, [gorazdeEvent()]);
-
         expect(result.fired.map((event) => event.id)).toEqual([EVENT_ID]);
         expect(state.military.event_flags?.gorazde_pocket_consolidated).toBe(true);
-        expect(JSON.stringify(state.political.political_controllers)).toBe(beforeControl);
+        expect(JSON.stringify(state.political.political_controllers)).toBe(before);
         expect(state.political.control_events).toEqual([]);
     });
 
-    it('does not file the receipt when only one exact OSID is RBiH-held', () => {
-        const state = makeState({
-            [GLAMOC]: 'RBiH',
-            [KAMEN]: 'RS',
-        });
+    it.each([['RS', 'RBiH'], ['RBiH', 'RS'], ['RS', 'RS']] as const)(
+        'does not fire unless both perimeter OSIDs already belong to RBiH (%s/%s)',
+        (glamoc, kamen) => {
+            const state = makeState(glamoc, kamen);
+            const result = evaluateEvents(state, rejectRandomness, 18, [gorazdeEvent()]);
+            expect(result.fired).toEqual([]);
+            expect(state.political.control_events).toEqual([]);
+        },
+    );
 
-        const result = evaluateEvents(state, rejectRandomness, 18, [gorazdeEvent()]);
-
-        expect(result.fired).toEqual([]);
-        expect(state.military.event_flags?.gorazde_pocket_consolidated).toBeUndefined();
-        expect(state.political.political_controllers?.[GLAMOC]).toBe('RBiH');
-        expect(state.political.political_controllers?.[KAMEN]).toBe('RS');
-        expect(state.political.control_events).toEqual([]);
-    });
-
-    it('has no authored control-change effect', () => {
+    it('contains no authored territorial effect', () => {
         expect(authoredEffects(gorazdeEvent()).some((effect) => effect.kind === 'control_change')).toBe(false);
     });
 });

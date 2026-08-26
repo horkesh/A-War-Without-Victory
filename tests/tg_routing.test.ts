@@ -142,6 +142,39 @@ describe('formTgsAtReadyTransition routing (flag-on)', () => {
         expect(tgs[0].donor_contributions.length).toBe(3);
     });
 
+    it('uses the canonical rear-area adjacency supplied by the war pipeline', async () => {
+        const { formTgsAtReadyTransition } = await withFormationFlagOn();
+        const state = stateWith([
+            brigade('anchor', { location_osid: 'op:m:front' }),
+            brigade('d1', { location_osid: 'op:m:rear' }),
+        ]);
+        state.political = {
+            political_controllers: {
+                'op:m:front': 'RBiH',
+                'op:m:middle': 'RBiH',
+                'op:m:rear': 'RBiH',
+            },
+        } as unknown as GameState['political'];
+        const adjacency = new Map<string, string[]>([
+            ['op:m:front', ['op:m:middle']],
+            ['op:m:middle', ['op:m:front', 'op:m:rear']],
+            ['op:m:rear', ['op:m:middle']],
+        ]);
+        const op = baseOp({
+            type: 'sector_attack',
+            participating_brigades: ['anchor'],
+            staging_osid: 'op:m:front',
+        });
+
+        formTgsAtReadyTransition(state, op, 5, adjacency);
+
+        const tgs = Object.values(state.military!.tactical_groups!);
+        expect(tgs).toHaveLength(1);
+        expect(tgs[0].donor_contributions).toEqual([
+            expect.objectContaining({ brigade_id: 'd1', distance_hops: 2 }),
+        ]);
+    });
+
     it('probe op (none) forms NO TG', async () => {
         const { formTgsAtReadyTransition } = await withFormationFlagOn();
         const state = stateWith([

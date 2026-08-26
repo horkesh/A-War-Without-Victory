@@ -4467,3 +4467,38 @@ Recruitment may preserve a historical OOB identity in `oob:<authored id>` while 
 **Judicial canon is not confined to the ICTY docket.** Judgments of the Court of Bosnia and Herzegovina are accepted alongside ICTY judgments for AWWV historical grounding, sensitive-history narrative, and historian review. A final Court of BiH conviction of equivalent subject-matter weight may satisfy the authoritative-legal-finding limb of rupture eligibility, but it does not waive the other rupture criteria.
 
 **Procedural posture is part of the fact.** A citation must state what the source actually is: indictment, trial judgment, final judgment, conviction, acquittal, or other disposition. An indictment cannot be promoted into a verdict or conviction, and a non-final judgment cannot be described as final. The existing event `source_tier: icty_icj_un` remains the backward-compatible adjudicative/public-law bucket for Court of BiH judgments; no schema migration is implied. Applied in `[2026-08-23] Canon source policy: Court of BiH judgments accepted alongside ICTY judgments`.
+
+## 2026-08-26 - One trajectory owns calibration truth
+
+A shorter run is a checkpoint observation, not a second scenario authority. The durable
+calibration identity is the declared 188-week master plus the checkpoint week and painted
+reference. A week-39 save establishes January 1993 only; replaying it against later painted
+maps produces arithmetic, not evidence. Exactly one scenario must carry the scoring declaration,
+and every quoted score must include checkpoint identity.
+
+Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
+roadmap, and debt`.
+
+## 2026-08-26 - A painted target defines what; combat and general rules must define how
+
+The reference map is checkpoint truth, but it is not authorization to manufacture territory.
+Historical research may identify operations, dates, axes, and formations; it may not become a
+calibration-only `control_change` receipt. If an ordinary combat candidate fails, the cell
+remains visibly mismatched until an honest general mechanism succeeds. Separately reviewed
+sensitive-history receipts remain exceptions under their own gate, not precedents.
+
+Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
+roadmap, and debt`.
+
+## 2026-08-26 - Deterministic ordering is not semantic routing
+
+Lexical ordering is a valid final tie-break only after geography, reachability, distance, and
+command validity have selected an equivalent candidate set. Choosing the first OSID in the
+largest friendly component is reproducible but not a military retreat rule. The 706th Brigade
+trace is the concrete counterexample and remains explicit debt rather than accepted behavior.
+
+The same distinction applies to sector topology: a one-cell same-corps sector cannot certify
+reachability when canonical supply truth marks the cell critical.
+
+Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
+roadmap, and debt`.

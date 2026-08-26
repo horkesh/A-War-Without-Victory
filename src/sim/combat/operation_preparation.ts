@@ -644,6 +644,7 @@ export function formTgsAtReadyTransition(
     state: GameState,
     op: CorpsOperation,
     currentTurn: number,
+    adjacency?: Map<string, string[]>,
 ): void {
     if (!ENABLE_TG_FORMATION) return;
 
@@ -679,6 +680,7 @@ export function formTgsAtReadyTransition(
                 anchor_brigade_id: anchorId,
                 staging_osid: stagingOsid,
                 army_hq_op_id: op.army_hq_op_id,
+                adjacency,
                 max_donors: maxDonors,
             });
             // Codex P2 #46: a zero-donor anchor must NOT form a phantom TG (consuming TG
@@ -712,6 +714,7 @@ export function formTgsAtReadyTransition(
         anchor_brigade_id: anchorId,
         staging_osid: op.staging_osid,
         army_hq_op_id: op.army_hq_op_id,
+        adjacency,
         max_donors: maxDonors,
     });
     // Codex P2 #46: a zero-donor anchor must NOT form a phantom TG (consuming TG caps +
@@ -805,6 +808,7 @@ export function tickPreparation(
     supplyReadiness: number,
     supplyByOsid?: SupplyStateByOsidReport | null, // LANE-2026-05-02
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
+    adjacency?: Map<string, string[]>,
 ): PreparationTickResult {
     const commander = getOpsCommander(state, op);
     const competence = commander?.data.competence ?? 3;
@@ -868,7 +872,7 @@ export function tickPreparation(
             result.assessment = 'launch';
             op.commander_assessment = 'launch';
             // ADR-0005 v2.2b: form TG at first-arrival to sub_phase='ready'. Flag-gated.
-            formTgsAtReadyTransition(state, op, state.meta?.turn ?? 0);
+            formTgsAtReadyTransition(state, op, state.meta?.turn ?? 0, adjacency);
         } else {
             // Cautious commanders auto-abort
             result.sub_phase = op.preparation_sub_phase;
@@ -983,7 +987,7 @@ export function tickPreparation(
                     result.ready = true;
                     result.assessment = 'launch';
                     // ADR-0005 v2.2b: form TG at first-arrival to sub_phase='ready'. Flag-gated.
-                    formTgsAtReadyTransition(state, op, state.meta?.turn ?? 0);
+                    formTgsAtReadyTransition(state, op, state.meta?.turn ?? 0, adjacency);
                 } else if (assessmentScore >= goThreshold - 0.15 && (op.postponement_count ?? 0) < MAX_POSTPONEMENTS) {
                     op.preparation_sub_phase = 'intel_gathering';
                     op.postponement_count = (op.postponement_count ?? 0) + 1;

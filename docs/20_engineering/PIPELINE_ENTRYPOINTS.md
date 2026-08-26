@@ -26,6 +26,20 @@ Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline
   - Benchmark contract (2026-03-06): bot benchmark rows are validated by `validateBotBenchmarkSummary()` in `src/scenario/scenario_end_report.ts`; fraction/share fields must remain fractional through summary serialization.
   - **War timeline loading:** When `scenario.war_timeline` is set (e.g. `"apr1992"`), loads `data/scenarios/timelines/{id}.json`, validates via `validateWarTimeline()`, stores on `state.war_timeline`. All consumer functions read from timeline first, fall back to hardcoded. Type definitions and resolvers in `src/state/war_timeline.ts`.
 
+### Historical calibration and map publication
+
+- Master scenario: `data/scenarios/apr1992_definitive_188w.json`; it is the only scenario
+  permitted to set `calibration_scenario: true`.
+- Checkpoint scorer/replay validator: `tools/verify_checkpoints.cjs <run-dir>`. Only
+  checkpoints actually reached by the run are evidence; a week-39 save must not be quoted as
+  an April 1994/1995 or October 1995 result.
+- Painted references: `data/source/calibration/painted_control_{jan1993,apr1994,apr1995,oct1995}.json`.
+- Self-contained mobile map wrapper:
+  `node tools/build_calibration_map_html.mjs <map.png> <out.html> <title> <score> [footer]`.
+  The map must be north-up; amber marks actual/painted disagreement, and outline plus center
+  circle denote the painted faction.
+- Living authority: `docs/40_reports/CALIBRATION_MASTER.md`.
+
 ### Scenario CLI (Scripted)
 - `src/cli/sim_scenario.ts`
   - Deterministic multi-turn run from a saved state + script.

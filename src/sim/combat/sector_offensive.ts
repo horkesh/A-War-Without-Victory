@@ -1321,7 +1321,7 @@ export function advanceSectorOffensives(
 
                 // LANE-2026-05-02: thread supplyByOsid + terrainMultByOsid into preparation
                 // for honest defender-modifier-aware force-ratio estimation.
-                const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0, supplyByOsid, terrainMultByOsid);
+                const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0, supplyByOsid, terrainMultByOsid, staticAdjacency);
 
                 // Synthesis §3 E-B2: Operation Una negative-control penalty.
                 // HV-only thrusts without HVO-native co-deployment historically
@@ -1529,7 +1529,7 @@ export function advanceSectorOffensives(
                 // here. The `none` policy forms no TG; zero-donor fallback remains an ordinary operation.
                 // The ready-path may already have formed the TG;
                 // formTgsAtReadyTransition is idempotent.
-                formTgsAtReadyTransition(state, op, turn);
+                formTgsAtReadyTransition(state, op, turn, staticAdjacency);
                 markOperationExecuting(state, corpsId, op);
 
                 if (multiAxis) {

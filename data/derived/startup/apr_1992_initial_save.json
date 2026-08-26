@@ -1148,6 +1148,9 @@
         "command_span": 5,
         "corps_exhaustion": 0,
         "og_slots": 2,
+        "queued_operations": [
+          "Operation Circle"
+        ],
         "stance": "balanced",
         "subordinate_count": 34
       },
@@ -1484,6 +1487,27 @@
                   "rs_1st_milii",
                   "rs_1st_vlasenica"
                 ]
+              },
+              {
+                "assigned_brigades": [
+                  "rs_visegrad_brigade"
+                ],
+                "attack_attempt_count": 0,
+                "axis_id": "upper_drina_approaches",
+                "consecutive_failures_on_current": 0,
+                "current_objective_index": 0,
+                "failure_count": 0,
+                "idle_execution_turn_streak": 0,
+                "main_brigade": "rs_visegrad_brigade",
+                "momentum": 0,
+                "movement_only_execution_turns": 0,
+                "name": "Upper Drina Approaches",
+                "objective_capture_count": 0,
+                "objectives": [
+                  "op:cajnice:miljeno_2"
+                ],
+                "staging_osid": "op:cajnice:zaborak",
+                "status": "executing"
               }
             ],
             "commander_officer_id": "vrs_pandurevic",
@@ -1500,14 +1524,16 @@
               "op:zvornik:donja_kamenica",
               "op:bratunac:bratunac_2",
               "op:bratunac:glogova",
-              "op:vlasenica:vlasenica_2"
+              "op:vlasenica:vlasenica_2",
+              "op:cajnice:miljeno_2"
             ],
             "participating_brigades": [
               "rs_1st_birac",
               "rs_1st_bratunac",
               "rs_1st_milii",
               "rs_1st_vlasenica",
-              "rs_1st_zvornik"
+              "rs_1st_zvornik",
+              "rs_visegrad_brigade"
             ],
             "phase": "planning",
             "phase_started_turn": 0,
@@ -1644,7 +1670,6 @@
             "axes": [
               {
                 "assigned_brigades": [
-                  "rs_visegrad_brigade",
                   "rs_ajnie_brigade",
                   "jna_uzice_corps_tg",
                   "jna_visegrad_local_to_tg",
@@ -1656,23 +1681,21 @@
                 "current_objective_index": 0,
                 "failure_count": 0,
                 "idle_execution_turn_streak": 0,
-                "main_brigade": "rs_visegrad_brigade",
+                "main_brigade": "rs_ajnie_brigade",
                 "momentum": 0,
                 "movement_only_execution_turns": 0,
                 "name": "Visegrad Seizure",
                 "objective_capture_count": 0,
                 "objectives": [
                   "op:visegrad:visegrad_2",
-                  "op:visegrad:kamenica_2",
-                  "op:visegrad:medjedja_2"
+                  "op:visegrad:kamenica_2"
                 ],
                 "staging_osid": "op:visegrad:okrugla",
                 "status": "executing",
                 "support_brigades": [
                   "jna_rudo_to_tg",
                   "jna_uzice_corps_tg",
-                  "jna_visegrad_local_to_tg",
-                  "rs_ajnie_brigade"
+                  "jna_visegrad_local_to_tg"
                 ]
               }
             ],
@@ -1686,15 +1709,13 @@
             "name": "Operation Visegrad",
             "objectives": [
               "op:visegrad:visegrad_2",
-              "op:visegrad:kamenica_2",
-              "op:visegrad:medjedja_2"
+              "op:visegrad:kamenica_2"
             ],
             "participating_brigades": [
               "jna_rudo_to_tg",
               "jna_uzice_corps_tg",
               "jna_visegrad_local_to_tg",
-              "rs_ajnie_brigade",
-              "rs_visegrad_brigade"
+              "rs_ajnie_brigade"
             ],
             "phase": "planning",
             "phase_started_turn": 0,
@@ -1852,6 +1873,7 @@
         "corps_exhaustion": 0,
         "og_slots": 1,
         "queued_operations": [
+          "Operation Kijevo",
           "Operation Trnovo"
         ],
         "stance": "offensive",
@@ -2215,7 +2237,7 @@
           "arbih_808th_liberation"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 14.399999999999999,
+        "defensive_power": 26.399999999999995,
         "density": 0.08333333333333333,
         "edge_ids": [
           "op:cajnice:batotici__op:cajnice:cajnice_2",
@@ -2289,7 +2311,7 @@
           "op:visegrad:velji_lug",
           "op:visegrad:visegrad_2"
         ],
-        "threat_ratio": 125.00000000000001
+        "threat_ratio": 68.1818181818182
       },
       "sector:arbih_1st_corps:14": {
         "assigned_brigade_ids": [
@@ -2350,7 +2372,7 @@
           "arbih_801st_light"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 17.632653061224488,
+        "defensive_power": 48.48979591836735,
         "density": 0.14285714285714285,
         "edge_ids": [
           "op:cajnice:batotici__op:gorazde:podkozara_donja_2",
@@ -2651,7 +2673,7 @@
           "arbih_843rd_light"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 17.112465373961218,
+        "defensive_power": 24.890858725761774,
         "density": 0.10526315789473684,
         "edge_ids": [
           "op:cajnice:batotici__op:foca:prevrac",
@@ -2750,7 +2772,7 @@
           "op:trnovo:kijevo_2",
           "op:trnovo:trnovo"
         ],
-        "threat_ratio": 58.436933436933444
+        "threat_ratio": 40.17539173789174
       },
       "sector:arbih_1st_corps:3": {
         "assigned_brigade_ids": [
@@ -2827,7 +2849,7 @@
           "arbih_851st_vitezka_liberation"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 10.06094517958412,
+        "defensive_power": 27.667599243856333,
         "density": 0.08695652173913043,
         "edge_ids": [
           "op:gorazde:bacci__op:gorazde:glamoc",
@@ -2935,7 +2957,7 @@
           "op:rogatica:kramer_selo_2",
           "op:rogatica:rogatica_2"
         ],
-        "threat_ratio": 119.27308802308804
+        "threat_ratio": 43.37203200839564
       },
       "sector:arbih_1st_corps:5": {
         "assigned_brigade_ids": [
@@ -11245,7 +11267,7 @@
           "op:foca:velenici_2",
           "op:foca:zavait_3"
         ],
-        "threat_ratio": 31.7975340687865
+        "threat_ratio": 58.29547912610858
       },
       "sector:vrs_herzegovina:5": {
         "assigned_brigade_ids": [
@@ -11633,7 +11655,7 @@
           "op:cajnice:zaborak",
           "op:rudo:gornja_strmica"
         ],
-        "threat_ratio": 17.057569296375267
+        "threat_ratio": 31.27221037668799
       },
       "sector:vrs_sarajevo_romanija:0": {
         "assigned_brigade_ids": [],
@@ -12173,7 +12195,7 @@
           "op:pale:vrazalice",
           "op:rogatica:varosiste_2"
         ],
-        "threat_ratio": 125.808599695586
+        "threat_ratio": 307.5321325892102
       },
       "sector:vrs_sarajevo_romanija:7": {
         "assigned_brigade_ids": [],
@@ -17722,7 +17744,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "gorazde",
-        "personnel": 400,
+        "personnel": 1100,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -17797,7 +17819,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "gorazde",
-        "personnel": 400,
+        "personnel": 1100,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -17874,7 +17896,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "gorazde",
-        "personnel": 600,
+        "personnel": 1100,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -17951,7 +17973,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "gorazde",
-        "personnel": 600,
+        "personnel": 1100,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -18028,7 +18050,7 @@
           "last_supplied_turn": null
         },
         "origin_mun": "gorazde",
-        "personnel": 400,
+        "personnel": 1100,
         "readiness": "active",
         "status": "active",
         "tags": [
@@ -28356,7 +28378,7 @@
       },
       "gorazde:RBiH": {
         "available": 0,
-        "committed": 2239,
+        "committed": 4639,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,

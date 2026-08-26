@@ -94,6 +94,26 @@
             "statusMessage": "Checking orchestrator enforcement..."
           }
         ]
+      },
+      {
+        "matcher": "Grep|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash F:/A-War-Without-Victory/tools/hooks/guard_lookup_absence.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash F:/A-War-Without-Victory/tools/hooks/guard_dirty_citation.sh",
+            "timeout": 10
+          }
+        ]
       }
     ]
   }

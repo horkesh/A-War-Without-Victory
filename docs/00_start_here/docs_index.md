@@ -11,6 +11,7 @@
 - **Pyrrhic roster and handoffs:** [.cursor/AGENT_TEAM_ROSTER.md](../../.cursor/AGENT_TEAM_ROSTER.md) — Pyrrhic Games (subagent collective); when to invoke which specialist; clarification-first and handoff rules.
 - **Canon (game truth):** [docs/10_canon/CANON.md](../10_canon/CANON.md) — canonical doc index and precedence order; includes industry mapping (GDD / TDD / process) for readers used to standard game-dev docs.
 - **Project state:** [docs/PROJECT_LEDGER.md](../PROJECT_LEDGER.md) — changelog and current state (at docs root).
+- **Calibration authority:** [CALIBRATION_MASTER.md](../40_reports/CALIBRATION_MASTER.md) — current checkpoint, accepted run, retired surfaces, residuals, and calibration debt. The sole scoring scenario is `data/scenarios/apr1992_definitive_188w.json`; January 1993 is evaluated at week 39 of that master, never in a separate 40-week scenario.
 
 ## Canon set (docs/10_canon/)
 
@@ -48,6 +49,11 @@
 - [PYRRHIC_PLANNING_RULES.md](../20_engineering/PYRRHIC_PLANNING_RULES.md) — mandatory plan compliance rules (includes night shift handoff requirements)
 
 ## Planning (docs/plans/)
+
+**Current override (2026-08-26):** the owner has temporarily reactivated the January 1993
+checkpoint slice of R6 on the single 188-week master. This supersedes the 2026-08-23
+"R1–R6 complete" sentence below for current dispatch. R7 audio/licensing and English
+accessibility/readability resume after the checkpoint lane, before R8 and R9.
 
 **Current control plane (synchronized 2026-08-23):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and the narrow pre-1.0 RC collapse packet are complete; R7 Phase 2 and the case-file opening experience are complete, while audio/licensing, English accessibility/readability, and integrated packaged proof remain before R8 and R9. Collapse D-topology and unfinished multilingual localization are post-1.0. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is a derived dispatch view only, and the [plans index](../plans/README.md) links the executable packets. The seven RBiH/RS/HRHB Electron diaries from 10 to 104 turns remain indexed by the [D2 owner-diary closeout](../40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md). Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate planning authorities.
 

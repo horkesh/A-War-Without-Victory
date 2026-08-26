@@ -62,6 +62,13 @@ describe('Gorazde enclave defender contract', () => {
         }
     });
 
+    it('fields the full enclave infantry establishment needed for the 1992 counteroffensive', () => {
+        for (const id of GORAZDE_EARLY_BRIGADES) {
+            const bde = oob.find(b => b.id === id)!;
+            expect(bde.initial_personnel, `${id} should field its 1,100-man enclave establishment`).toBe(1100);
+        }
+    });
+
     it('all 5 Gorazde brigades have home_osid in gorazde municipality', () => {
         for (const id of GORAZDE_EARLY_BRIGADES) {
             const bde = oob.find(b => b.id === id)!;

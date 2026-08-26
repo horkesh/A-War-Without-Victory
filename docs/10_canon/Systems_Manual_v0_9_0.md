@@ -182,6 +182,12 @@ When staff execution controls a faction in War phase, corps and brigade AI gener
 
 Attack-order eligibility uses the posture selected in the same pass. Strategic objectives, corridor needs, home recapture, enemy defense, consolidation value, supply state, corps directives, operation state, and commander constraints feed deterministic target selection with stable ID tie-breaks. Home-defense formations ordinarily defend or counterattack; active operation participants follow operation objectives; critical supply suppresses voluntary attacks. Corps sectors constrain frontage and assignment. Empty reachable same-corps sectors receive explicit reassignment intent that becomes delayed column movement; no phase directly rewrites a donor brigade's location. When enclave restrictions, connectivity, or donor commitments make staffing impossible, the sector remains truthfully marked `unstaffed_front`.
 
+**Critical-supply stranded truth (2026-08-26):** sector membership cannot self-certify
+reachability. If the canonical supply pass marks an OSID `critical`, a one-cell same-corps
+sector wrapped around that isolated pocket does not make its brigade connected to the corps
+front. The stranded-brigade lifecycle therefore treats the location as unreachable and invokes
+the ordinary deterministic emergency-retreat/lifecycle path when combat removes the pocket.
+
 The command hierarchy remains army standing orders → corps AI and commander intent → brigade routing and execution. Shared targeting helpers live in `src/sim/combat/war_adjacency.ts`; the current movement authority contract is `docs/20_engineering/MOVEMENT_AUTHORITY.md`.
 
 ### 6.6 Graz Accords (RS-HRHB Non-Aggression)
@@ -431,6 +437,13 @@ Before launching any new operation, the corps AI checks intel confidence across 
 **Combat Effectiveness Display (2026-03-20):** `combatEffectiveness.ts` computes a composite combat power number visible at every hierarchy level. **Brigade:** `base (personnel x equipment x experience x cohesion x honor) x fatigue x officer x homeDistance x morale x disruption x supply` — displayed with worst-modifier callout. **Sector:** aggregate of assigned brigades. **Corps:** total + letter grade (A ≥85% avg mod, B ≥70%, C ≥55%, D ≥40%, F <40%) + weak/disrupted counts. **Army:** whole-army aggregate. Personnel always visible alongside. **Terrain info** merged into `osidPropertiesMap` at map init: elevation, slope, friction, road access, river penalty. Settlement panel shows terrain type badge with defense modifier.
 
 Report and surviving implementation authority: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md). The earlier `OFFICERS_SYSTEM_COMPREHENSIVE_PLAN.md` is no longer present in the current tree.
+
+**Tactical-group donor routing (2026-08-26):** preparation receives the canonical operational
+adjacency graph. A donor may route through politically friendly-controlled rear-area OSIDs;
+an intermediate OSID need not contain a brigade. Donor iteration and BFS remain stable.
+Personnel lent is distance-scaled and capped at the strength above the formation-kind residual
+floor. A donor at the floor lends zero; a stronger donor may lend a reduced amount rather than
+being rejected wholesale.
 
 ### 7.7 Army HQ Reserve Pool (Elite Brigade Loans)
 
@@ -715,6 +728,11 @@ Militia emerge early with low cohesion. Formation of organized brigades requires
 **Implementation-note (paramilitary rear pocket cleanup 2026-03-08 update; truth guards clarified 2026-07-17):** A new `'paramilitary'` FormationKind models autonomous rear pocket cleanup. Small units (PARAMILITARY_UNIT_SIZE=150) spawn when graph analysis detects enemy OSID clusters (1-6 connected same-controller OSIDs where ALL external neighbors are faction-controlled) via BFS cluster detection. Only `op:`-prefixed nodes considered (canonical `S:` nodes filtered out). Scans ALL controlled OSIDs (not just front OSIDs) to find interior pockets. Rear cleanup requires local attacking-faction paramilitary penetration at least 25; offensive deployment requires at least 60; both require attacker penetration to exceed the current controller's local paramilitary penetration. Eligible targets rank by attacker paramilitary penetration, attacker party penetration, adjacent friendly support, dominance margin, municipality, and OSID. Explicit caps allow at most two deployments per faction and mode per turn and one deployment per municipality per turn, without a pseudo-random probability gate. Instant capture (PARAMILITARY_MARCH_TURNS=0) — rear pockets are already surrounded; prevents bot brigade AI from racing paramilitaries. Bot corps AI excludes active paramilitary target OSIDs from opportunistic targeting. Paramilitary requests and automatic deployments are generated only for undefended targets: an exact organized defender or an organized defender adjacent to the target for its current controller excludes the target, and a defended connected pocket is not rear-pocket cleanup. There is no light-defense capture threshold. If organized defense reaches the target after dispatch, the paramilitary unit takes heavy retreat casualties, dissolves, and causes neither a control change nor defender losses. Every dissolution sets inactive/disbanded/degraded state and zero personnel. Casualties use the standard KIA/WIA/MIA split. Civilian killings (PARAMILITARY_CIVILIAN_CASUALTY_RATE=0.02 of average population) are recorded as war crimes against the losing faction in `civilian_casualties`, `displacement_event_log`, and target-municipality `displacement_state.lost_population`, preserving population availability. Captures emit `control_events` with `mechanism: 'paramilitary'`, separate from battle-combat attribution. Active weeks 0-20 only (PARAMILITARY_FADE_WEEK); formations found active after week 20 dissolve before acting. Starting after week 20, deterministic `rear-pocket-consolidation` runs immediately after `paramilitary-advance`: it may consolidate an undefended, fully surrounded cluster of one to six OSIDs only when the surrounding-faction, enclave, and centralized RBiH-HRHB combat-permission guards pass, emits `mechanism: 'consolidation'`, and seeds the ordinary displacement timer. It cannot transfer RBiH-HRHB territory before the bilateral-war floor, during mobilization or ceasefire, or after Washington. Definitive April 1992 scenarios and runtime fallbacks use turn 40 as the earliest floor. Larger, defended, or politically blocked pockets require military action. Player faction: `paramilitary_policy` ('ask'/'always_allow'/'always_deny') + per-request decisions via `pending_paramilitary_requests`. Bot factions auto-approve. `paramilitary_deployment_count` tracks cumulative deployments for future IVP/legitimacy consequences. Excluded from reinforcement, bot AI, formation spawn. Pipeline: `paramilitary-detect`, `paramilitary-advance`, then post-fade `rear-pocket-consolidation` after `partition-corps-front-sectors`. Constants in `formation_constants.ts`. Reports: `docs/40_reports/implemented/20260307_PARAMILITARY_SWEEP_FEATURE.md`, `docs/40_reports/implemented/20260713_PARAMILITARY_TRUTH_FIXES.md`, `docs/40_reports/implemented/20260717_CAMPAIGN_QA_CANON_INTEGRATION.md`.
 
 Desertion increases under exhaustion, legitimacy collapse, and command degradation.
+
+**Superseding calibration note (2026-08-26):** the 40-week calibration wording above describes
+the 2026-02 experiment only. The sole current scoring trajectory is
+`apr1992_definitive_188w.json`; January 1993 is its week-39 checkpoint. Do not use a 40-week
+scenario or its recruitment behavior to quote or tune the current calibration.
 
 ## 14. Logistics, supply, and corridors
 

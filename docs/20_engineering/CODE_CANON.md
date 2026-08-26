@@ -44,6 +44,17 @@ If you are changing war behavior, start at `src/sim/turn_pipeline.ts`. If you ar
 - Product architecture authority: `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`.
 - Complete-suite test runner: `tools/test/run_vitest_balanced.mjs` (`npm run test:vitest:balanced`), backed by the deterministic hazard inventory in `tools/test/test_suite_inventory.mjs`. Fast/scenario slices are diagnostic subsets, not complete pre-merge proof.
 
+### Master calibration contract
+
+- Sole scoring scenario: `data/scenarios/apr1992_definitive_188w.json`.
+- Checkpoints: week 39 January 1993, week 104 April 1994, week 156 April 1995, and week 188
+  October 1995, each scored against `data/source/calibration/painted_control_<key>.json`.
+- `tests/historical_checkpoints_contract.test.ts` enforces checkpoint availability, loader
+  preservation of `calibration_scenario`, and exactly one scoring scenario.
+- The 40-week scenario family and `tools/calibrate_40w.cjs` are legacy diagnostics, not a
+  calibration authority.
+- Current accepted evidence and debt: `docs/40_reports/CALIBRATION_MASTER.md`.
+
 ### Bounded variant (not co-equal with canonical pipelines)
 - `src/sim/run_combat_browser.ts` — `runPhaseIITurn()`. Browser-safe war-phase turn advance (no Node/fs). Increments the turn counter only; does not run supply pressure or exhaustion. Used by the warroom when advancing a turn in war phase. Full war-phase behavior comes from `runTurn()` in Node; do not treat this file as equivalent to `src/sim/turn_pipeline.ts`.
 

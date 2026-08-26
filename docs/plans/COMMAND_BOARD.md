@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-08-23.
+**Status:** Derived dispatch view, synchronized 2026-08-26.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -19,7 +19,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **PRE-1.0 SCOPE COMPLETE -- CLOSED 2026-08-09** | None in the pre-1.0 R6 packet. Named Brcko, exhaustion re-pacing, casualty-grade, cohesion, and institutional-veto work remains post-1.0 debt unless explicitly reactivated. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
+| 6 | R6 | **JANUARY 1993 CHECKPOINT REACTIVATED BY OWNER — n372 ACCEPTED** | Continue the Srebrenica–Zvornik regional mismatch pass on week 39 of the single 188-week master. Preserve 697/712 national and 59/62 accepted Goražde-focus truth; do not use direct calibration control events or a 40-week scenario. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE -- PHASE 2 AND OPENING EXPERIENCE COMPLETE 2026-08-23** | The provenance/OOB reopening is closed with source-bound and controlled-run evidence. The case-file opening, explicit campaign mode, safe Field Records, and real browser proofs are merged. Next: audio/licensing, English accessibility/readability, then integrated packaged proof. Localization Phase 3 is post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
 | 8 | R8 | **WAITING ON RC AND R1-R7 GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
@@ -27,11 +27,13 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 
 ## Current Critical Path
 
-`R7 content/history/audio/accessibility/opening -> R8 -> R9`
+`R6 January checkpoint -> R7 content/history/audio/accessibility -> R8 -> R9`
 
 **MEASUREMENT BLOCKER CLOSED.** Run provenance now stamps commit, consumed-input evidence, and flag state; the pair selector hard-fails on incomparable artifacts. A fresh same-commit collapse OFF/ON pair passed the Section 6 discriminator with positive controls. The old mixed-tree n222/n223 pair remains permanently inadmissible and must not be reused.
 
-**CURRENT EXECUTION:** R7 audio/licensing, then English accessibility/readability and integrated packaged proof. The opening experience and test-suite recovery are complete; R8 remains gated on the remaining R7 work rather than on provenance instrumentation.
+**CURRENT EXECUTION:** owner-reactivated January 1993 calibration, currently on the
+Srebrenica–Zvornik follow-on after accepted Goražde n372. R7 audio/licensing resumes afterward,
+then English accessibility/readability and integrated packaged proof.
 
 **Canon landed 2026-08-17:** `SENSITIVE_HISTORY_DESIGN_GATE.md` §10, "Provenance and the Integrity of the Historical Record", ratified by unanimous Pyrrhic panel. `FORAWWV.md` §XIII temporal scope is drafted but **HELD** behind the provenance channel-separation and determinism-scan packets, and is not canon.
 
