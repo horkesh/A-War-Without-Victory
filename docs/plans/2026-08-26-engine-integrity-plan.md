@@ -1236,3 +1236,46 @@ seat has twice caught brigade-name fields being non-injective over stacks — th
 **territorially inert inside the 188-week window**, and the acceptance criterion becomes byte-identity
 on `control_delta` with the casualty ledger and formation states differing. That is a *binary* claim
 and therefore stronger than a delta band, not weaker.
+
+### 2026-08-26 (later) — Run B: the flag is NOT territorially inert. P1 failed, P3/P5 held.
+
+**The pair, one commit (`3806ef08d`), clean tree, flag the only difference.**
+
+| | A — flag OFF (n373) | B — flag ON (n374) |
+|---|---|---|
+| `final_state_hash` | `536ca5f72c2bd269` | `a6087550b581e3be` |
+| checkpoints | 697 / 673 / 667 / **643** | 697 / 673 / 667 / **640** |
+| total flips | 183 | 186 |
+| net after | HRHB 102 / RBiH 302 / RS 308 | HRHB 102 / **RBiH 305 / RS 305** |
+| `engine_health_gate` | FAIL (stranded 25, oct 643) | FAIL (stranded **21**, oct 640) |
+
+**P1 FAILED — `control_delta` is not byte-identical. Seven cells move:**
+```
+only OFF:  op:srebrenica:obadi RS->RBiH      op:zvornik:krizevici RBiH->RS
+only ON:   op:lopare:jablanica_2 / lopare_2 / priboj_2  RS->RBiH
+           op:sekovici:udbina_2 RS->RBiH     op:srebrenica:osmace_2 RBiH->RS
+```
+
+**P3 LIVENESS — PASSES hard.** 280th–283rd 1,500 → **566** at `op:zivinice:gracanica_2`; 284th 1,500
+→ 822 at Kalesija; **285th (Žepa) 100 active → 0, `inactive`, `lifecycle_status: destroyed`.**
+
+**P5 ERASURE — PASSES.** They do **not** refill to the 1,500 cap. The seat predicted this might erase
+the effect and priced an INVESTIGATE on it; it did not happen, and the prediction survived contact.
+
+**★ THE FINDING WITH THE MOST WEIGHT, and it is not the score.** With the flag OFF the 280th sits at
+`op:srebrenica:obadi` and the 284th at `op:srebrenica:osmace_2` — **inside a fallen Srebrenica, at
+full 1,500 establishment, months after the fall.** That is what was holding `osmace_2` RBiH and
+flipping `obadi`. Turning the flag on deletes a garrison that should never have existed, and both
+cells resolve to RS. **Part of this change is a correctness gain that costs matched OSIDs.**
+
+**★ AND THE PART THAT IS A §6 MATTER, referred and NOT interpreted here.** The massacre is now
+causally upstream of the **victim faction gaining four cells** at Lopare and Šekovići — the chain
+runs *fall → column displaced to Živinice/Gračanica → 2nd Corps sector strengthened → Lopare taken*.
+The perpetrator loses ground, so "atrocity rewards the perpetrator" is not engaged on its face, but
+"the victim gained, so it is fine" is not obviously the right reading of the bright line either.
+**With the Historian (permissibility + whether Lopare/Majevica is defensible history at all) and the
+calibration seat (whether the causal chain is real or a second-order artifact). No disposition until
+both report.**
+
+**Price, stated plainly:** historical accuracy at Srebrenica costs **−3 at oct1995**, against a gate
+floor of 644 that was already failing at 643 before the flag.
