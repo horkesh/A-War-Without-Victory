@@ -183,19 +183,106 @@ non-probe generalisation of the occupation predicate (**own lane, own measuremen
 
 ---
 
-## 7. COST AND ACCEPTANCE — **OUTSTANDING. DO NOT BUILD STEP 1 UNTIL THIS IS FILLED.**
+## 7. COST AND ACCEPTANCE — **FILLED** (calibration seat, 2026-08-26). Commit this block BEFORE any run.
 
-The calibration seat has not reported. What it owes, and none of it may be improvised:
+### 7.1 Pre-committed behavioural target (S3a). Baselines are the POST-REVERT run of §7.3, not n374.
 
-- **A PRE-COMMITTED BEHAVIOURAL acceptance target**, per S3a. Territory deltas will be
-  **unattributable**: the S4 precondition (added today) says the bands apply only below 20% rung-4
-  op-schedule divergence, and a change to operation selection always exceeds it — the intel gate
-  measured **61.1%**. Candidate targets: max `consecutive_probes` per corps; probes-with-zero-battles
-  as a fraction launched (today 63/215 all-corps, 29/38 for 1st Corps); probe contact rate (68.0%).
-- **Negative controls**, per S3b — including that `sector_attack` count must **NOT** rise materially,
-  or the fix is the symptom fix wearing the cause fix's clothes.
-- **The baseline.** Measure against **n377** (post-gate), not n374 — *unless* step 0 reverts the gate,
-  in which case a fresh baseline is required and that is a run to be costed.
+> **T1 — the owner's target, and the one that proves cause over symptom.** `max consecutive_probes`
+> across all corps **≤ 10** (baseline 38), **with the intel gate REVERTED.** *If the cause fix cannot
+> hold this without the gate, it is not a cause fix.*
+> **T2 — dead probes.** `arbih_115th_mountain` launches **exactly 0** probes. Binary, no threshold to
+> argue about.
+> **T3 — waste.** probes-with-zero-battles **≤ 10%** of probes launched (baseline 63/215 = 29.3%).
+> **T4 — the forgetting.** median sector `turns_in_contact` **≥ 8** (baseline 1-2) **and** ARBiH
+> sectors below their 0.40 threshold **≤ 8/28**.
+> **T5 — contact rate ≥ 80%** (baseline 68.0%).
+> **LIVENESS (S2):** every counter must be non-degenerate — probes launched **> 0**, sectors compared
+> **= the full set**. A zero from an uninstrumented metric is worthless.
+
+**T1 and T2 are the pass/fail pair. T3-T5 corroborate — a fix that moves T1/T2 but not T4 has treated
+the symptom.**
+
+### 7.2 Negative controls (S3b) — each with a real failure mode
+
+> **N1 — `sector_attack` count stays within ±3 of 44** (the PRE-gate baseline, *not* the gate run's
+> 64). A rise means the cause fix is the symptom fix in different clothes and breaks the owner's
+> tempo ruling.
+> **N2 — probes must not VANISH.** Total probes launched **≥ 150** (baseline 215). The owner defended
+> probes as *"a tool to keep the intel value high"*; dropping the channel below ~120 kills the tool
+> rather than repairing it. **This is the control for "fixed the waste by removing the activity."**
+> **N3 — `arbih_115th_mountain` remains active, at `op:stari_grad_sarajevo:*`, personnel > 0, at
+> t188.** Excluding a fixed-home brigade from the *surplus pool* must not remove it from the OOB or
+> from garrison duty. **A plausible WRONG implementation — exclude fixed-home brigades from
+> everything — moves this; the right one cannot.**
+> **N4 — nine-cell enclave guard, two-sided falls, all four Farz/Ozren cells taken, AND the 2nd Corps
+> conducts ≥1 capture-capable operation after t159.** The last clause is load-bearing: n377 silenced
+> 2nd Corps entirely after t159 while still passing the cell check, because the authored 3rd Corps op
+> carried it. Farz was **joint**.
+
+### 7.3 ★ THE BASELINE FORK — RESOLVED: A FRESH POST-REVERT RUN IS REQUIRED. Cost it.
+
+**Reverting `ef4355ee5` does NOT return the tree to n374.** `git log --oneline 3806ef08d..HEAD -- src/`
+returns **FOUR** commits, verified:
+
+```
+ef4355ee5  probe intel gate                      <- the revert target
+688a3066d  enclave participation rule (n376)
+82c0115e6  Žepa `disbanded` not `destroyed`      <- BEHAVIOURAL
+f2d5fa149  rationale comment                      <- inert
+```
+
+`82c0115e6` changes `lifecycle_status` from `destroyed` to `disbanded`, and
+`brigade_reconstitution.ts` gates eligibility on `=== 'destroyed'` plus a recorded
+`destruction_turn` — so it can add or remove a reconstituted 285th. **A state change with a plausible
+territorial path.**
+
+**No run on disk has this combination.** n373/n374 have none of the three; n376 has only `688a3066d`;
+n377 has all four including the gate. **Measuring probe work against any of them charges Žepa's
+change to the probe lane.** ⇒ **1 × 188w ≈ 70 min, non-negotiable.** Cheaper than spending three runs
+discovering the attribution was contaminated.
+
+### 7.4 Run cost — **2 × 188w total ≈ 2.3 h**
+
+| step | validates from disk? | run |
+|---|---|---|
+| 0 revert | — | none — the §7.3 baseline **is** its validation |
+| 1 sector identity | **yes, free** (done — see 7.5) | shared |
+| 2 fixed-home exclusion | **yes, fully** (done — see 7.5) | shared |
+| 3 occupation predicate | partly | shared |
+
+**Steps 1-3 share ONE run**, and this is principled rather than a shortcut: the C3 rule permits
+bundling when the acceptance criterion is binary and the members' metrics are **disjoint**. They are,
+by construction — step 1 is judged on T4 (sector-scoped), step 2 on T2 (one named brigade), step 3 on
+its own occupation counter. **None can be mistaken for another**, and territory is unattributable for
+all three regardless. If the bundle fails one metric, split that one and re-run it alone.
+
+*Insisting on one-change-per-run here would cost 4 runs to buy attribution the S4 precondition already
+says we cannot have.*
+
+### 7.5 THE TWO FREE CHECKS — **DONE. Both premises hold, and both are stronger than the seats had.**
+
+**Step 1's premise, now on a THIRD provenance-stamped run.** Three independent runs agree:
+
+| run | median `turns_in_contact` | edgeless records | ARBiH sectors below 0.40 |
+|---|---:|---:|---:|
+| n373 | **2** | 27% | 12/27 |
+| n374 | **2** | 29% | 16/28 |
+| n294 | **1** | 31% | 22/30 |
+
+**Unarguable before a line is written.**
+
+**Step 2's predicted set, computed with ZERO runs** — every probe `arbih_115th_mountain` launched in
+n374:
+
+> **26 probes launched. 25 with ZERO cumulative attack attempts.** Terminal reasons:
+> `probe_complete` 20, `zero_eligible_axis` 6.
+
+**That is the S3 predicted set for step 2 and it is nearly total futility — 25 of 26.** Note this is
+LARGER than the 19-of-21 the Operations seat reported, because that figure counted only the
+`probe_complete`-without-contact subset; the full launch count is 26.
+
+*(Use `objective_attempt_count` — the CUMULATIVE field. `attack_attempt_count` in diagnostics is this
+turn's count only.)*
 
 ---
 

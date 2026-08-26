@@ -1,1 +1,1 @@
-PROBE CHANNEL SCOPE delivered (docs/plans/2026-08-26-probe-channel-scope.md). NOT building — §7 cost/acceptance outstanding from the calibration seat, and step 0 (revert ef4355ee5) needs owner assent. Do not start step 1 until §7 is filled.
+PROBE CHANNEL SCOPE COMPLETE (docs/plans/2026-08-26-probe-channel-scope.md) — all four seats reported, §7 filled, two free premise checks DONE and both hold. NOT building: step 0 reverts ef4355ee5 which the owner asked for, so it needs his assent. Cost: 2 x 188w.
