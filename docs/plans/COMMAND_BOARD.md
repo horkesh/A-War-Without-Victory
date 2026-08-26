@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-08-23.
+**Status:** Derived dispatch view, synchronized 2026-08-26.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -22,12 +22,15 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 6 | R6 | **PRE-1.0 SCOPE COMPLETE -- CLOSED 2026-08-09** | None in the pre-1.0 R6 packet. Named Brcko, exhaustion re-pacing, casualty-grade, cohesion, and institutional-veto work remains post-1.0 debt unless explicitly reactivated. | [Historical gameplay/calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE -- PHASE 2 AND OPENING EXPERIENCE COMPLETE 2026-08-23** | The provenance/OOB reopening is closed with source-bound and controlled-run evidence. The case-file opening, explicit campaign mode, safe Field Records, and real browser proofs are merged. Next: audio/licensing, English accessibility/readability, then integrated packaged proof. Localization Phase 3 is post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
-| 8 | R8 | **WAITING ON RC AND R1-R7 GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
+| 7.5 | RE | **SCOPED 2026-08-26 — OWNER-INSTRUCTED, PRECEDES FURTHER CALIBRATION, GATES R8** | Phase 0, which costs **zero scenario runs**: build the op-schedule fingerprint, correct the health-gate predicate as reported-not-gated, land a clean four-checkpoint 188w pin, and write the pre-committed decision rule into CALIBRATION_MASTER before run 1. Then **Phase 1 — the probe memory repair (~10 lines, the highest-value change on the board)**, Phase 2 legibility, Phase 3 operation supply, Phase 4 cost loop. | [Engine integrity](2026-08-26-engine-integrity-plan.md) |
+| 8 | R8 | **WAITING ON RC, R1-R7, AND RE GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
 ## Current Critical Path
 
-`R7 content/history/audio/accessibility/opening -> R8 -> R9`
+`R7 content/history/audio/accessibility/opening + RE engine integrity -> R8 -> R9`
+
+**RE INSERTED 2026-08-26 BY OWNER INSTRUCTION** — *"engine health is sacrosanct; deal with these before more calibration work."* RE may run in parallel with R7 (disjoint ownership: engine/sim against content/audio/UI) but precedes any further calibration on combat resolution, the manpower economy, or operation injection, and gates R8. The headline measurement: **365 of 585 battles at 188 weeks (62%) are probe operations that cannot capture ground by construction** — 201 wins, zero territory, 131,577 attacker casualties, more than every real operation combined. The panel traced it to **two small defects in probe memory**: a probe that fights never records an objective failure, and the probe cooldown scans a history field nothing ever writes. Phase 1 is roughly ten lines. Scoring or diary-testing this engine ratifies the defect as the floor.
 
 **MEASUREMENT BLOCKER CLOSED.** Run provenance now stamps commit, consumed-input evidence, and flag state; the pair selector hard-fails on incomparable artifacts. A fresh same-commit collapse OFF/ON pair passed the Section 6 discriminator with positive controls. The old mixed-tree n222/n223 pair remains permanently inadmissible and must not be reused.
 

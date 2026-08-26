@@ -133,3 +133,45 @@ that municipality is what the 1992 operation was conducted to eliminate.
 
 **Route any proposed change through the Pyrrhic panel under `SENSITIVE_HISTORY_DESIGN_GATE.md`.**
 This document proposes none.
+
+---
+
+## CORRECTION 2026-08-26 — the baseline citation in §2 is wrong
+
+**Raised by the scenario-tester/calibration seat during the RE engine-integrity panel; independently
+verified by the orchestrator against the run artifacts.**
+
+§2 above cites its baseline as **`…w188_n1` (commit `cd0228c37`, `git_dirty:false`, 639/712, hash
+`cc88344e922ac8b4`)**. That identifier does not exist and the figures do not belong together:
+
+- **There is no `w188_n1` run directory in the repo.**
+- Hash `cc88344e922ac8b4` belongs to
+  `runs/apr1992_definitive_188w__9e902ad68783fbe7__w188_n273/run_summary.json` — commit `99bc0cf62`,
+  which scored **637/712, not 639**.
+
+Everything in §2 and §3.1 that rests on that run — the 132/132-RBiH-above-floor table, the 100%
+won-battle absorption figure, the 0/25/4 destroyed-brigade counts, and the 97/42/90 morale medians —
+is therefore **provenance-broken and must be re-derived before being cited again**. The clean
+four-checkpoint baseline available today is
+`runs/apr1992_definitive_188w__0589220209545186__w188_n294` (commit `180695239`, `git_dirty:false`,
+hash `4714d66780640887`, 677/664/664/650).
+
+**The mechanism described in §1 is unaffected** — it was read from source, not from a run.
+
+Two further corrections from the same panel, recorded here because this report is where readers look:
+
+1. **The absorption picture in §1 is incomplete in a way that matters.** `attack_morale_absorption.ts`
+   has a **morale-independent** branch above `professionalResilience` — `homelandLastStand`
+   (`defenderFaction === 'RBiH' && coEthnicShare >= 0.50`) — and `decisive_victory` is excluded from
+   **all three** absorb branches (Engine Invariants §9.6: *"decisive_victory ALWAYS flips — no
+   exception"*). On the clean run, **74 of 95 RS-vs-RBiH wins are decisive**, and 60 of 585 battles
+   have no defender formation at all, so absorption's `if (defenderFormation)` never runs. Absorption
+   is materially narrower than "the VRS cannot take ARBiH ground".
+2. **"RBiH 0 brigades destroyed" is a history violation, not only an engine anomaly.** The 28th
+   Division's 280th-284th Brigades and the 28th Mountain Battalion ceased to exist at Srebrenica in
+   July 1995; the Cerska-Kamenica pocket was stormed in Feb-Mar 1993; and at Bihać in Sept-Oct 1993
+   the 521st and 527th Brigades **defected virtually wholesale** to Abdić, with parts of the 503rd,
+   504th and 517th following — the equivalent manpower of three to four brigades permanently removed
+   from the ARBiH order of battle by political collapse. The true count is nowhere near zero.
+
+Tracked in [`docs/plans/2026-08-26-engine-integrity-plan.md`](../plans/2026-08-26-engine-integrity-plan.md).
