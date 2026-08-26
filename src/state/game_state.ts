@@ -238,6 +238,27 @@ export interface SectorIntelRecord {
     osid_confidence?: SectorIntelOsidConfidence[];
     /** Turn this record was last updated. */
     last_updated_turn: number;
+    /**
+     * STABLE IDENTITY of the two sectors in this pair, added 2026-08-26.
+     *
+     * WHY. `sector_id` and `enemy_sector_id` are POSITIONAL indices re-minted every turn
+     * (`corps_front_sectors.ts`, `` `sector:${corpsId}:${nextIndex++}` ``). One edge appearing,
+     * one split or merge, renumbers every later sector of that corps — and this record was keyed
+     * on those numbers on BOTH sides, so the carry-forward in `deriveSectorIntel` silently failed
+     * and `FACTION_INITIAL_INTEL_CONFIDENCE` was reinstated.
+     *
+     * MEASURED on three provenance-stamped 188-week runs: median `turns_in_contact` of **1-2**
+     * after four years of continuous front-line contact. RBiH needs ~18 uninterrupted turns to
+     * reach its 0.40 launch threshold, so intel was UNREACHABLE BY CONSTRUCTION — which made
+     * `shouldLaunchProbeInstead` permanently true and produced a 38-probe streak that looked like
+     * a broken counter.
+     *
+     * These keys are derived from sector CONTENT (the lexicographically smallest edge id), so they
+     * survive renumbering. OPTIONAL so pre-2026-08-26 saves load unchanged and fall back to the
+     * positional path.
+     */
+    own_stable_key?: string;
+    enemy_stable_key?: string;
 }
 
 /**

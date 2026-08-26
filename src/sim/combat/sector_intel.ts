@@ -60,10 +60,22 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
         if (!profile) continue;
 
         const enemySectorEdgeCounts = findEnemySectorEdgeCounts(sector, edgeToSectors, sectors);
-        const prevRecords = prevIntel[sectorId] ?? [];
+
+        // ── STABLE-IDENTITY CARRY-FORWARD (2026-08-26) ────────────────────────────────────────
+        // `prevIntel[sectorId]` and `rec.enemy_sector_id` are BOTH positional indices re-minted
+        // this turn, so the old lookup failed on both sides whenever the front re-partitioned and
+        // silently reinstated FACTION_INITIAL_INTEL_CONFIDENCE. Measured consequence: median
+        // `turns_in_contact` of 1-2 after 188 weeks of continuous contact, against a threshold
+        // needing ~18 — intel was unreachable by construction.
+        //
+        // We now match on CONTENT. Positional lookup is retained as a fallback so saves written
+        // before this change (no stable keys on their records) behave exactly as before.
+        const ownStable = stableSectorKey(sector);
+        const prevRecords = collectPreviousRecords(prevIntel, sectorId, ownStable);
         const prevByEnemySector = new Map<string, SectorIntelRecord>();
         for (const rec of prevRecords) {
-            prevByEnemySector.set(rec.enemy_sector_id, rec);
+            // Prefer the stable enemy key; fall back to the positional one for legacy records.
+            prevByEnemySector.set(rec.enemy_stable_key ?? rec.enemy_sector_id, rec);
         }
 
         const newRecords: SectorIntelRecord[] = [];
@@ -74,7 +86,8 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
             const edgeCount = enemySectorEdgeCounts.get(enemySectorId) ?? 0;
             const enemySector = sectors[enemySectorId];
             if (!enemySector) continue;
-            const prev = prevByEnemySector.get(enemySectorId);
+            const enemyStable = stableSectorKey(enemySector);
+            const prev = prevByEnemySector.get(enemyStable) ?? prevByEnemySector.get(enemySectorId);
             const prevConfidence = prev?.confidence ?? initialFloor;
             const prevTurnsInContact = prev?.turns_in_contact ?? 0;
             const passiveBuildup = (state.military.opsec_sectors ?? []).includes(enemySectorId)
@@ -194,6 +207,10 @@ function buildRecord(
         visible_brigade_ids: computeVisibleBrigades(enemySector, confidence, reconRange).sort(strictCompare),
         osid_confidence: computeOsidConfidence(friendlySector, enemySector, confidence, reconRange),
         last_updated_turn: turn,
+        // Content-derived identity for BOTH sides of the pair, so next turn's carry-forward can
+        // find this record after the front is renumbered. See SectorIntelRecord's header.
+        own_stable_key: stableSectorKey(friendlySector),
+        enemy_stable_key: stableSectorKey(enemySector),
     };
 }
 
@@ -291,6 +308,53 @@ function computeVisibleBrigades(sector: CorpsFrontSector, confidence: number, re
 // Utility Helpers
 // ===============================================================
 
+/**
+ * A sector identity derived from CONTENT rather than position, so it survives the per-turn
+ * renumbering in `corps_front_sectors.ts`.
+ *
+ * The lexicographically smallest edge id is the anchor: `edge_ids` is sector content, and taking
+ * the min under `strictCompare` is deterministic and independent of iteration order (napkin: a
+ * stable key must never be derived from iteration order). Corps id is included so two corps that
+ * happen to share an edge id cannot collide.
+ *
+ * LIMIT, stated rather than discovered later: when a sector SPLITS, only the half retaining the
+ * old minimum edge inherits the intel; the other half starts fresh. That is strictly better than
+ * today, where BOTH halves start fresh along with every later sector of that corps — but it is not
+ * a full re-partition match, and if split-heavy fronts turn out to matter, the upgrade is
+ * edge-overlap matching, not a different anchor.
+ */
+function stableSectorKey(sector: CorpsFrontSector): string {
+    let min: string | null = null;
+    for (const edgeId of sector.edge_ids) {
+        if (min === null || strictCompare(edgeId, min) < 0) min = edgeId;
+    }
+    // A sector with no edges has no content to key on; fall back to its positional id so the
+    // caller degrades to old behaviour rather than colliding every edgeless sector onto one key.
+    return min === null ? `noedge:${sector.sector_id}` : `${sector.corps_id}|${min}`;
+}
+
+/**
+ * Previous-turn records for this sector, matched on stable identity with a positional fallback.
+ *
+ * The fallback is what keeps pre-2026-08-26 saves behaving exactly as before: their records carry
+ * no `own_stable_key`, so nothing matches on content and the positional lookup is used unchanged.
+ */
+function collectPreviousRecords(
+    prevIntel: Record<string, SectorIntelRecord[]>,
+    positionalId: string,
+    ownStable: string,
+): SectorIntelRecord[] {
+    const byStable: SectorIntelRecord[] = [];
+    // Deterministic: iterate the previous map in sorted key order.
+    for (const key of Object.keys(prevIntel).sort(strictCompare)) {
+        for (const rec of prevIntel[key] ?? []) {
+            if (rec.own_stable_key === ownStable) byStable.push(rec);
+        }
+    }
+    if (byStable.length > 0) return byStable;
+    return prevIntel[positionalId] ?? [];
+}
+
 function buildEdgeToSectorsMap(sectors: Record<string, CorpsFrontSector>): Map<string, string[]> {
     const map = new Map<string, string[]>();
     for (const [sectorId, sector] of Object.entries(sectors)) {
@@ -361,9 +425,24 @@ export function getSectorIntelConfidence(state: GameState, sectorId: string): nu
 export function getStalestSectorIntelConfidence(state: GameState, sectorId: string): number {
     const records = state.military.sector_intel?.[sectorId];
     if (!records || records.length === 0) return 0;
+    // EDGELESS GHOSTS ARE EXCLUDED (2026-08-26). `deriveSectorIntel` retains a decaying record for
+    // an enemy sector this one no longer shares any front edge with. Those describe ground the
+    // corps has NO FRONT AGAINST, yet this is a MINIMUM, so a single ghost pinned the whole
+    // sector's staleness down and drove the launch gate. Measured across three 188-week runs:
+    // 27-31% of all intel records are edgeless. A corps is not "blind on this front" because it
+    // has a fading memory of a front it no longer holds.
+    //
+    // Falls back to including them only if EVERY record is edgeless — otherwise a sector that has
+    // just lost all contact would report 0 and read as maximum ignorance rather than no front.
     let min = Infinity;
     for (const rec of records) {
+        if (rec.front_edge_count === 0) continue;
         if (rec.confidence < min) min = rec.confidence;
+    }
+    if (min === Infinity) {
+        for (const rec of records) {
+            if (rec.confidence < min) min = rec.confidence;
+        }
     }
     return min === Infinity ? 0 : min;
 }
