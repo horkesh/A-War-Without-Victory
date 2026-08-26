@@ -4,6 +4,28 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-08-26d) — probe-channel scoping (four seats; the fix was two levels below the symptom)
+
+> **Session shape: the owner diagnosed a SHAPE correctly, the shape was not the cause, and following it properly found two causes neither he nor any seat had named.** Every seat refuted part of the brief it was given, including mine.
+
+### [Engine] ★★ AN IDENTITY REGENERATED EVERY TURN DESTROYS EVERY MEMORY KEYED ON IT — see `docs/life_lessons/architecture.md`
+- Sector ids are positional indices re-minted each turn (`corps_front_sectors.ts:1643`, `` `sector:${corpsId}:${nextIndex++}` ``) and `sector_intel` is keyed on them **on both sides**. One edge appearing renumbers every later sector and orphans its intel, which then falls back to the initial floor. **Measured on THREE provenance-stamped runs: median `turns_in_contact` is 1-2 after 188 weeks of continuous front-line contact.** The threshold needs ~18 uninterrupted turns, so it is **unreachable by construction** — which made the launch gate permanently say "probe first" and produced a 38-probe streak that looked like a broken counter. ⇒ **Before treating a runaway counter as a counter problem, ask what its input is keyed on and whether that key survives a turn.** Anything else keyed on `sector_id` across turns has the same bug.
+
+### [Engine] ★★ A FITNESS RANKING CAN SELECT FOR THE UNIT LEAST ABLE TO DO THE JOB — see `docs/life_lessons/architecture.md`
+- The probe selector takes the highest `fitness_offense` surplus brigade, and fitness is `personnel × cohesion × fatigue`. **A fixed-home garrison brigade that never fights keeps perfect cohesion, full strength and zero fatigue, so it is PERMANENTLY the fittest.** Measured: `arbih_115th_mountain` (Stari Grad, `placement:fixed_home_osid`, same OSID t0→t188, 800→1800 men, morale 100, cohesion 100, **2 battles in 188 weeks**) launched **26 probes, 25 with zero attack attempts**. ⇒ **Not doing the thing is what kept it looking best qualified to do the thing.** TELL: a selector whose input is degraded BY the activity it selects for. Check whether the winner's score is high *because* it has never been used.
+
+### [Process] ★ A CONTROL TURNS AN UNINTERPRETABLE NUMBER INTO A DECISIVE ONE — see `docs/life_lessons/process.md`
+- "157 probe victories are discarded by fiat" was challenged as possibly recon-farming of empty cells, and a threshold argument (*is ratio 6 "defended"?*) could not settle it. **Comparing against the 148 decisive victories won by REAL operations in the same run settled it in one query:** median odds 6.13 vs 6.18, median defender dead 151 vs 144 — indistinguishable. ⇒ **When a distribution is unreadable alone, the answer is usually a control from the same run, not a better threshold.** It also closed the opposite-direction risk (removing the flag would not hand out free territory) which no threshold could have addressed.
+
+### [Process] ★ AN INFERENCE PRESENTED AS ESTABLISHED PROPAGATES INTO EVERY BRIEF — mine, this session
+- I told four seats that "12 Path B multi-objective probes, 63 battles" existed. **12 probe operations DO fight at 2 distinct cells (verified) — but no artifact carries a probe's objective array**, so "multi-objective Path B" was an inference. My own tool had labelled it a LOWER BOUND with the limit stated; the brief dropped the qualifier. One seat spent effort failing to reproduce it and correctly reported it unreproduced rather than refuted. ⇒ **A qualifier that survives in the tool and dies in the summary is worse than no measurement** — the tool is read once, the summary is read by everyone.
+
+### [Process] SPAWNING A FRESH AGENT FOR A ROLE THAT ALREADY HAS A WARM TEAMMATE COSTS MORE THAN IT SAVES
+- Dispatched a new calibration agent for the probe scope while the calibration seat that **authored the decision rule and the S4 precondition** was idle and available. The fresh agent idled twice without reporting; the warm seat answered in one pass and immediately caught a four-commit baseline contamination the fresh one had no context to see. ⇒ **Route by ownership, not availability.**
+
+### [Calibration] A REVERT DOES NOT RETURN YOU TO THE RUN YOU MEASURED — check the whole commit range
+- Reverting one commit was assumed to restore the last baseline. `git log <baseline>..HEAD -- src/` returned **FOUR** commits, one of them behavioural (a `lifecycle_status` relabel that gates reconstitution eligibility). **No run on disk had the resulting combination**, so any measurement would have charged an unrelated change to the lane under test. ⇒ **Before claiming "revert X and we are back at baseline Y", diff the full range against Y, not just X.**
+
 ## New Lessons (2026-08-26c) — operations + presidential command (three seats, one owner ruling that reversed an escalation)
 
 > **Session shape: the orchestrator escalated a priority on evidence the owner then ruled CORRECT MODELLING, and separately reported a territorial "cost" that measurement showed was not a number at all.** Both were caught by asking rather than concluding.
