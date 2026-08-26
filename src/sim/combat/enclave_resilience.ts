@@ -1,9 +1,23 @@
 /**
  * B4 + Phase C: Enclave resilience system.
  *
- * Known enclaves that historically held despite isolation:
- * RBiH: Bihać pocket, Srebrenica, Žepa, Goražde, Sarajevo (1992-1995)
+ * Known enclaves that sustained themselves under prolonged isolation:
+ * RBiH: Bihać pocket, Goražde, Sarajevo (1992-1995)
  * HRHB: Kiseljak, Lašva Valley (Vitez/Busovača), Žepče (April 1993 – March 1994)
+ *
+ * `teocak` is registered below but is deliberately NOT in that list — it is the tip of the
+ * connected Sapna salient, held overland via the rastošnica corridor, and its entry says so
+ * (grep `CALIBRATION-PIN`). It is a pin for the 188w anchor, not an enclave.
+ *
+ * ⚠ SREBRENICA AND ŽEPA ALSO CARRY RESILIENCE, AND THEY DID NOT HOLD. They fell in July 1995.
+ * This list said "enclaves that historically held" and named them among the survivors until
+ * 2026-08-26, when a §6 panel caught it: the sentence justifying the whole protection cited as
+ * its examples the two enclaves that fell. Resilience models the *capacity to endure siege* —
+ * smuggling, local production, tunnels, accumulated defensive expertise — which Srebrenica and
+ * Žepa genuinely had for three years. It does not model, and must never be read as modelling,
+ * an outcome. Their fall is EVENT-OWNED per canon H1.8, and the defending formations are removed
+ * by `applyEnclaveFormationDisplacement` (grep `enclave_formation_displacement` in
+ * `src/sim/events/apply_effects.ts`) — not by anything in this file.
  *
  * Mechanics:
  * - Resilience value [0, MAX_ENCLAVE_RESILIENCE] per enclave, grows under isolation, decays under adequate supply.
