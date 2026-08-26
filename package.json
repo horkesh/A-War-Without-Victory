@@ -103,6 +103,8 @@
     "desktop:startup-snapshot:build": "tsx tools/scenario_runner/build_startup_snapshot.ts --write",
     "desktop:startup-snapshot:check": "tsx tools/scenario_runner/build_startup_snapshot.ts --check",
     "qa:desktop-calibration": "tsx tools/ai_play/desktop_calibration_compare.ts",
+    "playtest": "tsx tools/playtest/run_headless.ts",
+    "playtest:rollup": "tsx tools/playtest/rollup.ts",
     "desktop:release:check": "npm run desktop:map:build && npm run desktop:sim:build && npm run warroom:build",
     "desktop:package:dir": "npm run desktop:release:check && electron-builder --dir --publish never",
     "desktop:package:probe": "npm run desktop:package:dir && node tools/desktop_packaged_runtime_probe.mjs",

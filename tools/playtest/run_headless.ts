@@ -1,0 +1,413 @@
+/**
+ * Headless playthrough driver.
+ *
+ * Plays a full campaign through the REAL player-decision seam — the same
+ * `resolveEventDecision` / `advanceTurn` path the Electron IPC handlers call —
+ * with a swappable policy, running the probe set every turn and recording every
+ * finding.
+ *
+ * WHAT THIS LANE CAN AND CANNOT SEE
+ *   CAN: engine defects, malformed event data, dead levers, deadlocks, missing
+ *        player-facing text, turn cost, resource-economy failures.
+ *   CANNOT: anything about the actual UI — layout, clipping, discoverability,
+ *        whether a value is even rendered. Most *friction* is UI friction. This
+ *        driver is the cheap, high-volume half; `run_electron.ts` is the other
+ *        half and neither substitutes for the other.
+ *
+ * RECORD-ONLY. This lane never edits engine source.
+ *
+ * Usage:
+ *   node node_modules/tsx/dist/cli.mjs tools/playtest/run_headless.ts \
+ *     --faction RS --policy counterfactual --turns 188
+ *
+ *   --faction   RBiH | RS | HRHB              (default RBiH)
+ *   --policy    historical | counterfactual | staff | passive | seeded:<n>
+ *   --turns     N                             (default 188)
+ *   --out       output dir                    (default tmp-playtest/<runId>)
+ *   --run-id    stable id for the ledger      (default <faction>-<policy>-<turns>w)
+ *   --turn-budget-ms  turn-time budget        (default 4000)
+ *   --no-ledger       write the run log but leave the shared ledger untouched
+ *   --skip-probe <id> (repeatable)
+ */
+
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import {
+    startCampaign,
+    advance,
+    serializeDecisionContext,
+    injectDecision,
+    stateHash,
+    requestOp,
+    stopOp,
+    replaceCo,
+    forceLaunch,
+    localSupport,
+    resolvePeacePlanChoice,
+    resolveParamilitary,
+    resolveDayton,
+    resolveProposal,
+    blockingDecisions,
+    REPO_BASE_DIR,
+    type DecisionLogEntry,
+} from '../ai_play/president_playthrough.js';
+import type { DesktopScenarioKey } from '../../src/desktop/desktop_sim.js';
+import type { FactionId, GameState } from '../../src/state/game_state.js';
+import { FindingsRecorder } from './findings.js';
+import { resolvePolicy } from './policies.js';
+import { defaultProbes } from './probes.js';
+import type { DecisionChoice, LeverProbeContext, Probe, RunConfig } from './types.js';
+
+/**
+ * The desktop campaign has exactly ONE start — `DesktopScenarioKey` is a
+ * single-member union (src/desktop/desktop_sim.ts). There is deliberately no
+ * `--scenario` flag: the retired `apr1992_definitive_{40,52,104}w.json` files
+ * belong to the scenario-runner pipeline, which this harness does not use.
+ */
+const DESKTOP_SCENARIO: DesktopScenarioKey = 'apr_1992';
+
+/**
+ * The full war. Anything shorter is a BUILD-LOOP run, not a findings run: the
+ * late-war window (Srebrenica, Storm, Deliberate Force, Dayton) is where attrition
+ * compounds and where most defects surface, so a short run that finds nothing has
+ * proved nothing. Mirrors the repo's standing "40w GO is a false-green" rule.
+ */
+const FULL_CAMPAIGN_TURNS = 188;
+
+const LEDGER_PATH = join(REPO_BASE_DIR, 'docs/40_reports/playtests/findings/FINDINGS.jsonl');
+
+// ── CLI ──────────────────────────────────────────────────────────────────────
+
+function arg(name: string, fallback?: string): string | undefined {
+    const hit = process.argv.find((a) => a === `--${name}` || a.startsWith(`--${name}=`));
+    if (!hit) return fallback;
+    if (hit.includes('=')) return hit.slice(hit.indexOf('=') + 1);
+    const idx = process.argv.indexOf(hit);
+    return process.argv[idx + 1] ?? fallback;
+}
+function flag(name: string): boolean {
+    return process.argv.includes(`--${name}`);
+}
+function repeatedArg(name: string): string[] {
+    const out: string[] = [];
+    for (let i = 0; i < process.argv.length; i++) {
+        if (process.argv[i] === `--${name}` && process.argv[i + 1]) out.push(process.argv[i + 1]);
+        else if (process.argv[i].startsWith(`--${name}=`)) out.push(process.argv[i].slice(name.length + 3));
+    }
+    return out;
+}
+
+function buildConfig(): RunConfig {
+    const faction = (arg('faction', 'RBiH') as FactionId) ?? 'RBiH';
+    const policyId = arg('policy', 'historical')!;
+    const turns = Number(arg('turns', String(FULL_CAMPAIGN_TURNS)));
+    const runId = arg('run-id') ?? `${faction}-${policyId.replace(':', '')}-${turns}w`;
+    return {
+        runId,
+        faction,
+        policyId,
+        turns,
+        scenario: DESKTOP_SCENARIO,
+        outDir: arg('out') ?? join(REPO_BASE_DIR, 'tmp-playtest', runId),
+        updateLedger: !flag('no-ledger'),
+        disabledProbes: repeatedArg('skip-probe'),
+    };
+}
+
+// ── Lever firing, wrapped so every call is probed ────────────────────────────
+
+/**
+ * Fire one lever and hand the before/after hashes to the lever probes. Hashing
+ * the whole state per lever call is not cheap, which is exactly why lever probes
+ * only run when a policy actually asks for levers.
+ */
+function fireLever(
+    state: GameState,
+    turn: number,
+    faction: FactionId,
+    probes: Probe[],
+    recorder: FindingsRecorder,
+    lever: string,
+    payload: Record<string, unknown>,
+    call: () => { ok: boolean; error?: string; [k: string]: unknown },
+): void {
+    const hashBefore = stateHash(state);
+    let result: { ok: boolean; error?: string; [k: string]: unknown };
+    try {
+        result = call();
+    } catch (e) {
+        recorder.record({
+            kind: 'bug',
+            severity: 'critical',
+            probe: 'lever-throw',
+            title: `Lever \`${lever}\` threw`,
+            detail: `Calling \`${lever}\` raised: ${String((e as Error)?.message ?? e)}. A lever the player can press must never throw.`,
+            surface: `lever:${lever}`,
+            turn,
+            faction,
+            evidence: { lever, payload, stack: String((e as Error)?.stack ?? e).split('\n').slice(0, 4) },
+        });
+        return;
+    }
+    const hashAfter = stateHash(state);
+    const ctx: LeverProbeContext = { lever, payload, result, hashBefore, hashAfter, turn, faction };
+    for (const p of probes) if (p.onLever) recorder.recordAll(p.onLever(ctx));
+}
+
+function applyLevers(
+    state: GameState,
+    faction: FactionId,
+    turn: number,
+    probes: Probe[],
+    recorder: FindingsRecorder,
+    plan: ReturnType<NonNullable<import('./types.js').Policy['levers']>>,
+): number {
+    for (const p of plan.proposals ?? []) {
+        fireLever(state, turn, faction, probes, recorder, 'resolve_proposal', { ...p }, () =>
+            resolveProposal(state, p.proposalId, p.accept),
+        );
+    }
+    for (const p of plan.request_op ?? []) {
+        fireLever(state, turn, faction, probes, recorder, 'request_op', { ...p }, () =>
+            requestOp(state, p.corpsId, p.targetOsid),
+        );
+    }
+    for (const p of plan.stop_op ?? []) {
+        fireLever(state, turn, faction, probes, recorder, 'stop_op', { ...p }, () => stopOp(state, p.corpsId, p.opName));
+    }
+    for (const p of plan.replace_co ?? []) {
+        fireLever(state, turn, faction, probes, recorder, 'replace_co', { ...p }, () =>
+            replaceCo(state, p.corpsId, p.replacementOfficerId),
+        );
+    }
+    for (const p of plan.force_launch ?? []) {
+        fireLever(state, turn, faction, probes, recorder, 'force_launch', { ...p }, () =>
+            forceLaunch(state, p.corpsId, p.operationName),
+        );
+    }
+    for (const p of plan.local_support ?? []) {
+        fireLever(state, turn, faction, probes, recorder, 'local_support', { ...p }, () =>
+            localSupport(state, faction, p.munId, p.type),
+        );
+    }
+    return (
+        (plan.proposals?.length ?? 0) +
+        (plan.request_op?.length ?? 0) +
+        (plan.stop_op?.length ?? 0) +
+        (plan.replace_co?.length ?? 0) +
+        (plan.force_launch?.length ?? 0) +
+        (plan.local_support?.length ?? 0)
+    );
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+
+async function main(): Promise<void> {
+    const cfg = buildConfig();
+    const policy = resolvePolicy(cfg.policyId);
+    const probes = defaultProbes(Number(arg('turn-budget-ms', '4000'))).filter(
+        (p) => !cfg.disabledProbes.includes(p.id),
+    );
+
+    mkdirSync(cfg.outDir, { recursive: true });
+    const recorder = new FindingsRecorder(cfg.runId, join(cfg.outDir, 'findings.jsonl'));
+
+    console.log(`▶ ${cfg.runId} — ${cfg.faction}, policy "${policy.id}", ${cfg.turns} turns`);
+    console.log(`  ${policy.description}`);
+    console.log(`  probes: ${probes.map((p) => p.id).join(', ')}`);
+    if (cfg.turns < FULL_CAMPAIGN_TURNS) {
+        console.log(
+            `
+  ⚠ SHORT RUN (${cfg.turns} < ${FULL_CAMPAIGN_TURNS} turns). This is a build-loop run.
+` +
+            `    It stops before the late-war window where most defects surface, so "few findings"
+` +
+            `    here means nothing. Findings runs are ${FULL_CAMPAIGN_TURNS} turns.
+`,
+        );
+    }
+
+    let state = await startCampaign(cfg.faction, DESKTOP_SCENARIO, REPO_BASE_DIR);
+    const decisionLog: DecisionLogEntry[] = [];
+    const advanceMsByTurn: number[] = [];
+    let turnsPlayed = 0;
+    let leverAttempts = 0;
+    let stoppedBecause = 'reached turn cap';
+
+    for (let i = 0; i < cfg.turns; i++) {
+        const prevState = state;
+        const turnBefore = state.meta?.turn ?? 0;
+
+        // 1. Read the context a player would read, and decide.
+        const decisionContext = serializeDecisionContext(state, cfg.faction);
+        let choices: DecisionChoice[] = [];
+        try {
+            choices = policy.decide(decisionContext, state).filter((c) => c.responseId);
+        } catch (e) {
+            recorder.record({
+                kind: 'bug',
+                severity: 'critical',
+                probe: 'policy-throw',
+                title: 'Policy threw while reading the decision context',
+                detail: `Policy "${policy.id}" could not choose: ${String((e as Error)?.message ?? e)}. Usually means a decision reached the player in a shape nothing can consume.`,
+                surface: 'engine:pending_event_decisions',
+                turn: turnBefore,
+                faction: cfg.faction,
+            });
+        }
+
+        // 2. Inject each choice through the same path the Electron IPC uses.
+        for (const c of choices) {
+            try {
+                decisionLog.push(injectDecision(state, c.eventId, c.responseId, c.rationale));
+            } catch (e) {
+                recorder.record({
+                    kind: 'bug',
+                    severity: 'critical',
+                    probe: 'decision-inject-throw',
+                    title: `Resolving decision \`${c.eventId}\` threw`,
+                    detail: `Choosing option "${c.responseId}" raised: ${String((e as Error)?.message ?? e)}. This option is unreachable for a real player.`,
+                    surface: `event:${c.eventId}`,
+                    turn: turnBefore,
+                    faction: cfg.faction,
+                    evidence: { event_id: c.eventId, response_id: c.responseId },
+                    repro_note: `Play ${cfg.faction} to turn ${turnBefore} and choose ${c.responseId} on ${c.eventId}.`,
+                });
+            }
+        }
+
+        // 3. Peace plans and paramilitary requests.
+        const planId = ((state.military as any)?.negotiation?.pending_peace_plan)?.plan_id;
+        if (planId) {
+            const response = policy.peacePlan?.(planId, state) ?? 'rejected';
+            resolvePeacePlanChoice(state, planId, response);
+        }
+        const paraReqs = ((state as any).pending_paramilitary_requests ?? []).filter(
+            (r: any) => r.faction === cfg.faction && !r.decision,
+        );
+        if (paraReqs.length > 0) {
+            const targets = paraReqs.map((r: any) => r.target_osid as string);
+            const decisions =
+                policy.paramilitary?.(targets, state) ??
+                Object.fromEntries(targets.map((t: string) => [t, 'deny' as const]));
+            resolveParamilitary(state, decisions);
+        }
+
+        // 4. Levers.
+        if (policy.levers) {
+            leverAttempts += applyLevers(
+                state, cfg.faction, turnBefore, probes, recorder, policy.levers(state, cfg.faction),
+            );
+        }
+
+        // 4b. Dayton. Without this the campaign runs PAST the historical week-182
+        // settlement and never terminates, so the endgame/verdict path is never
+        // exercised at all — the run looks complete while silently testing less.
+        if ((state.military as any)?.negotiation?.pending_dayton) {
+            const proposal = policy.dayton?.(state) ?? {
+                territorial_demands: [],
+                territorial_concessions: [],
+                institutional_choices: {},
+            };
+            const { state: roundTripped } = resolveDayton(state, proposal);
+            state = roundTripped;
+        }
+
+        // 5. Advance. Wall-clock here is a MEASUREMENT in a tool — it never reaches the sim.
+        const t0 = process.hrtime.bigint();
+        let advanced = false;
+        try {
+            state = await advance(state, REPO_BASE_DIR);
+            advanced = true;
+        } catch (e) {
+            const blocked = blockingDecisions(state, cfg.faction);
+            recorder.record({
+                kind: 'bug',
+                severity: 'critical',
+                probe: 'advance-throw',
+                title: 'Turn advance threw',
+                detail: `advanceTurn failed at turn ${turnBefore}: ${String((e as Error)?.message ?? e)}. ${blocked.length} blocking decision(s) outstanding. For a real player this is a campaign that cannot continue.`,
+                surface: 'engine:turn_pipeline',
+                turn: turnBefore,
+                faction: cfg.faction,
+                evidence: { blocking: (blocked as any[]).map((b) => b.family_id ?? b) },
+                repro_note: `${cfg.faction} / policy ${policy.id} / turn ${turnBefore}.`,
+            });
+        }
+        const advanceMs = Number(process.hrtime.bigint() - t0) / 1e6;
+
+        if (!advanced) {
+            stoppedBecause = `advance failed at turn ${turnBefore}`;
+            break;
+        }
+        advanceMsByTurn.push(advanceMs);
+        turnsPlayed++;
+
+        // 6. Probe the turn.
+        const turnCtx = {
+            prevState,
+            state,
+            turn: state.meta?.turn ?? turnBefore + 1,
+            faction: cfg.faction,
+            advanceMs,
+            decisionContext,
+            choices,
+        };
+        for (const p of probes) if (p.onTurn) recorder.recordAll(p.onTurn(turnCtx));
+
+        if ((state.meta as any)?.game_over) {
+            stoppedBecause = `game over at turn ${state.meta?.turn}`;
+            break;
+        }
+        if (i > 0 && i % 20 === 0) {
+            console.log(`  turn ${state.meta?.turn}  findings ${recorder.count} (${recorder.distinctCount} distinct)`);
+        }
+    }
+
+    // 7. End-of-run probes.
+    for (const p of probes) {
+        if (p.onEnd) recorder.recordAll(p.onEnd({ state, faction: cfg.faction, turnsPlayed, advanceMsByTurn, leverAttempts }));
+    }
+
+    // 8. Artifacts.
+    const summary = {
+        run_id: cfg.runId,
+        faction: cfg.faction,
+        policy: policy.id,
+        scenario: cfg.scenario,
+        turns_requested: cfg.turns,
+        turns_played: turnsPlayed,
+        full_campaign: cfg.turns >= FULL_CAMPAIGN_TURNS,
+        stopped_because: stoppedBecause,
+        final_turn: state.meta?.turn ?? null,
+        game_over: (state.meta as any)?.game_over ?? false,
+        final_state_hash: stateHash(state),
+        lever_attempts: leverAttempts,
+        decisions_made: decisionLog.length,
+        decisions_diverged: decisionLog.filter((d) => d.diverged_from_historical).length,
+        findings_total: recorder.count,
+        findings_distinct: recorder.distinctCount,
+    };
+    writeFileSync(join(cfg.outDir, 'summary.json'), JSON.stringify(summary, null, 2) + '\n', 'utf8');
+    writeFileSync(join(cfg.outDir, 'decision_log.json'), JSON.stringify(decisionLog, null, 2) + '\n', 'utf8');
+
+    console.log(`\n■ ${turnsPlayed} turns played — ${stoppedBecause}`);
+    console.log(`  ${recorder.count} findings, ${recorder.distinctCount} distinct`);
+
+    if (cfg.updateLedger) {
+        const { added, repeated } = recorder.mergeIntoLedger(LEDGER_PATH);
+        console.log(`  ledger: ${added.length} NEW, ${repeated.length} already known`);
+        for (const f of added.slice(0, 15)) {
+            console.log(`    + [${f.severity}] ${f.title}  (${f.surface})`);
+        }
+        if (added.length > 15) console.log(`    … and ${added.length - 15} more`);
+    } else {
+        console.log('  ledger untouched (--no-ledger)');
+    }
+    console.log(`  artifacts: ${cfg.outDir}`);
+}
+
+main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+});
