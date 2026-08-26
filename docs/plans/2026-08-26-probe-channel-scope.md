@@ -439,3 +439,50 @@ and 27 dead ones, 4:1 backwards, so both metrics inverted meaninglessly.
 > the bundle unmeasured. This is that metric.
 > **N4 — unchanged.** Nine-cell guard, two-sided falls, four Farz/Ozren cells, and 2nd Corps
 > conducting ≥1 capture-capable operation after t159.
+
+---
+
+## 12. FINAL DISPOSITION — 2026-08-26
+
+| step | verdict | evidence |
+|---|---|---|
+| **1 · stable sector identity** | **LANDS** | Intel memory 1-2 → 21 (n380) and → 88 (n379); ARBiH sectors below threshold 16/28 → 8/22, i.e. the rate improves 57.1% → 36.4% against its own baseline. **And step 1 ALONE does not move tempo**: probes 208 vs 215, sector_attacks 51 vs 44. |
+| **2 · fixed-home exclusion** | **REVERTED** | See below — the predicate is 71× its stated scope. |
+| **3 · `occupies_on_victory`** | **LANDS** | T6: 186 probe wins, ground withheld from every one, 174 combat captures against 185 non-probe wins — no probe flip, no ordinary attack affected. **The first change this session to pass a target designed to isolate it.** |
+
+### ★ WHY STEP 2 DIED — and it was my error, not a broken predicate
+
+The filter keyed on `placement:fixed_home_osid` exactly as written. **180 of 184 brigades carry that
+tag.** It is the near-universal default placement, not a garrison marker. I inferred its meaning from
+the ONE brigade that made me notice it and wrote "fixed-home garrisons" into this scope.
+
+Measured consequence — distinct probe-launching brigades: **90 (baseline) → 26 (with step 2) → 94
+(reverted).** The exclusion removed **71 brigades**, including `F_RBiH_0005`, a recruitment-generated
+formation that cannot have a fixed home at all.
+
+**This is why probes fell 208 → 80, and it is why I wrongly attributed that fall to step 1.**
+
+**If a fixed-home exclusion is still wanted:** rewrite it against an explicit tag, **enumerate the
+caught set BEFORE running**, and commit that enumeration as the S3 predicted set.
+
+### ★ THE EASTERN-SURPLUS IMPROVEMENT IS A SCHEDULE LOTTERY, NOT A FIX — tested, not assumed
+
+9 → 5 → 4 across three configurations looked suspiciously monotone, so the four-query test was run
+before the number went anywhere.
+
+```
+n374 (surplus 9): 5 of 6 resolved cells are ONE brigade — arbih_116th_mountain
+                  (lopare_2 t178, lopare_selo_2 t59, priboj_2 t179, udbina_2 t164, krizevici t165)
+n380 (surplus 4): that brigade takes NONE of them
+```
+
+By the seat's own criterion — *"if the resolved ones are again all one brigade's captures, it is the
+schedule lottery"* — **it is the lottery.** The 116th simply did not draw the same operations.
+
+**But the test also found the part that IS structural.** Three cells persist in EVERY configuration
+measured, including the flag-OFF baseline: **`bratunac:pobudje_2`, `kalesija:seher_2`,
+`vlasenica:cerska_2`.** Those are the durable core; the Lopare cluster is volatile.
+
+⇒ **Do not report 9 → 4 as progress.** The real, stable target is those three cells.
+**oct1995 652 (+13) is likewise unattributable** — rung 4 measures 55.7% (n378 vs n380) and 57.5%
+(n379 vs n380).
