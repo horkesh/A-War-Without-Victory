@@ -229,3 +229,162 @@ The referral overstated its mechanism in the direction that made the finding loo
 bias §5 declared, expressed in the evidence rather than in the recommendation. **Treat §1's
 "arithmetically guaranteed" language as retracted; the measured 27/27 table and the one-cell GUARD
 are unaffected and remain exactly as stated.**
+
+---
+
+# §6 PANEL — RESULT. SPLIT VERDICT + ONE BLOCK ⇒ ESCALATES TO THE OWNER.
+
+**All four seats reported. Polled independently; no seat saw another's answer.**
+
+| seat | §6 verdict | blocking | disposition |
+|---|---|---|---|
+| Engine / Systems | **NON-COMPLIANT** (on evidence) | no | **(D)** — fix the no-§6-content items, then rule |
+| Historian | **NON-COMPLIANT** | **YES** | **(C)** + a fourth item the referral did not offer |
+| Calibration / scenario-tester | **COMPLIANT** | no | **(D)** = (B) + make the guard real |
+| Red team | **COMPLIANT** | no | **(D)** then (C) |
+
+**2 NON-COMPLIANT / 2 COMPLIANT, and one BLOCK.** Per CLAUDE.md a split verdict *or* a block
+escalates. This does both. **It is the owner's.**
+
+---
+
+## ★★ THE FINDING THAT RESOLVES THE SUBSTANCE — found after the poll closed
+
+The seats split on whether the engine's *order of battle* is a §6 matter. The Historian measured that
+Srebrenica and Žepa fall territorially in the correct window **while all six defending brigades stand
+at `status: active`, five at exactly 1,500 personnel — full establishment — with morale up to 100,
+two of them still inside Srebrenica municipality four months after the fall.** Against the record:
+~2,700 survivors reconstituted, ~3,200 unaccounted for, the victims ICTY-documented.
+
+Calibration and Red-team ruled COMPLIANT on the ground that H1.8 constrains **territory**, not
+formation lifecycle — falls are authored, and they fired in the right window.
+
+**Both are right, and the resolution is neither a canon change nor a new mechanism.**
+
+`apply_effects.ts` — `applyEnclaveFormationDisplacement`, line 174:
+
+```ts
+const raw = process.env.AWWV_ENCLAVE_COLUMN_DISPLACEMENT;
+if (raw !== 'true' && raw !== '1') return;   // default OFF => byte-identical no-op
+```
+
+**The mechanism that applies casualties to the enclave defenders is BUILT, PANEL-REVIEWED, SPEC'D —
+AND DEFAULT-OFF.** In every calibration run it is a no-op. That is precisely why the 28th Division is
+alive at establishment.
+
+And it is built *correctly*, to the record:
+- **Srebrenica** — `reconstitute_as: 'reduced'`: survivors take `casualty_fraction` losses and reform
+  at the destination. The column reached Tuzla; 2,700 reconstituted. **Matches BB.**
+- **Žepa** — `'none'`: personnel zeroed, `status: 'inactive'`, **`lifecycle_status: 'destroyed'`**.
+  Forcible deportation. **Matches ICTY (Tolimir).**
+- Casualty split is execution-skewed (55% killed / 5% wounded / 40% missing-captured), explicitly
+  *not* the battle-calibrated split, and the comment records the §6 reasoning: victim-side
+  consequence only, the perpetrator gains nothing.
+
+⇒ **The Historian's C-3 — "the fall event must destroy the defending formations" — is ALREADY
+IMPLEMENTED. It is switched off.** The referral's claim that `apply_effects.ts` writes
+`lifecycle_status: 'destroyed'` was correct, but only on the `'none'` branch and only when the flag is
+on. The Historian's observation that no enclave formation carries that value is fully explained.
+
+⇒ **This reduces the panel's central disagreement from a canon question to a FLAG DECISION.**
+
+---
+
+## What all four seats agree on, despite the split
+
+**The instrument is broken and no further §6 claim may rest on it.** Unanimous, from four seats that
+disagree on the verdict. The Red-team seat enumerated **five independent layers, every one failing
+open**, all in `tools/verify_checkpoints.cjs` at HEAD:
+
+1. the cohesion arithmetic (the referred finding);
+2. `GUARD` is **one OSID** of the eight the file's own header claims;
+3. the western-Bosnia cascade block is **print-only** — builds a string, prints it, no comparison, no
+   threshold, no exit path;
+4. **the four checkpoint scores are NON-GATING** — `process.exit(breached ? 1 : 0)` and `breached` is
+   set by the Teočak loop alone, so a run can lose forty OSIDs at every checkpoint and exit 0;
+5. and the one live cell is one **nothing attacks** — `pre_planned_operations.ts:186` says Teočak is
+   *deliberately not an objective*, `enclave_resilience.ts:265` calls it a *"CALIBRATION-PIN (not a
+   true enclave)"*, and Calibration measured its only two attacks in 188 weeks were **both probes**,
+   which cannot flip control by construction.
+
+**That is the finding to record — not the arithmetic.** A guard nobody could fail, inside an
+instrument that exits 0 on everything except a cell no attack is aimed at.
+
+**Disposition (D) is effectively unanimous:** fix the instrument first, touching no engine code. You
+cannot evaluate any of A/B/C with an instrument that checks one OSID.
+
+---
+
+## Corrections to the referral, from the seats — recorded because it was mine
+
+1. **"The clamp is unconditional" — FALSE.** `cohesion_drift.ts` skips every formation *engaged in
+   combat this turn*, and a `kind` mismatch (`'og'` vs `'operational_group'`) leaves live OGs
+   unclamped and dissolvable.
+2. **"Ordinary dissolution degraded 2-of-3 → 1-of-2" — FALSIFIED.** Calibration measured **37 rows at
+   or below the cohesion threshold across 21 brigades, all three factions**. The criterion is live
+   and fires. **There is no ordinary-brigade defect**, so Q4's answer is that there was nothing to
+   separate.
+3. **The mechanism I named is the wrong one.** Enclave brigades are protected by the *combat-decrement*
+   clamp (`attack_post_battle_effects.ts:174-177`, `COMBAT_COHESION_FLOOR_CAP = 35`), **not** by the
+   drift clamp the referral names. **Load-bearing: a fix aimed at the drift clamp would leave the
+   guard exactly as vacuous and would measure a delta that means nothing.**
+4. **Morale is an independent second barrier.** `arbih_285th_light` (Žepa) is personnel-low on 186 of
+   188 turns and cohesion-low on **0** — permanently **1-of-3**, not 2-of-3.
+5. **The enclave headline survives** — enclave brigades really cannot dissolve — **but by a different
+   argument than the one referred.**
+6. **`enclave_resilience.ts:5` is factually wrong** and should be corrected regardless of disposition:
+   it lists *"enclaves that historically held despite isolation: … Srebrenica, Žepa …"*. **They did
+   not hold.** The rationale sentence justifying the whole protection names as examples the two
+   enclaves that fell.
+
+---
+
+## Q1 — disposition of past §6 records: **PROVISIONAL, not void.** Three seats concur.
+
+Calibration replayed all eight cells against `n294`: the six holds hold at every checkpoint, and
+**Srebrenica and Žepa fall between w156 and w188 — the correct July 1995 window.** The recorded
+conclusions were substantively right; only the evidence was missing.
+
+**Named class to annotate: 9 occurrences in `PROJECT_LEDGER.md` and 3 in `CALIBRATION_MASTER.md`** —
+including the RC collapse packet's "full Section 6 pass" and the SRK strangle "§6 all PASS".
+**Annotate, do not delete and do not silently re-bless:** one line at each site recording that the
+enclave-guard evidence was Teočak only, and that the other seven cells were verified retroactively
+against `n294` on 2026-08-26 and hold.
+
+---
+
+## ★ AND THE FINDING THE PANEL WAS NOT CONVENED ON, which may matter more
+
+Calibration's acceptance test — "held" vs "never pressed" — **does not pass today**:
+
+| enclave | battles as defender | capture-capable attacks |
+|---|---:|---|
+| Goražde | 3 | 3 |
+| Bihać | 7 | 2 |
+| **Teočak** | 2 | **0 — both probes** |
+| Srebrenica | 6 | 6 |
+| **Žepa** | **0** | 0 |
+| **Sarajevo core** | **0** | 0 |
+
+**Žepa and the Sarajevo core are attacked zero times in 188 weeks. Teočak faces no capture-capable
+attack at all.** Three of six holds are currently held by *absence of pressure*, and the one cell the
+guard checks is one of them.
+
+---
+
+## THE OWNER'S DECISION
+
+**D1 — the flag.** `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` is default-OFF, and that is why Srebrenica's
+defenders survive at establishment. Turn it on? It is behaviour-changing (a 188w), and it is the
+difference between an engine that says the fall cost the ARBiH nothing and one that says what the
+record says.
+
+**D2 — the split.** Historian blocks any further §6 PASS claim until either the defenders die at the
+fall, or the panel rules on the record that an engine in which the 28th Division survives Srebrenica
+at full establishment is §6-compliant. Two seats ruled exactly that, on the ground that H1.8 governs
+territory. **D1 may dissolve this**: if the flag goes on, the block's condition is satisfied and the
+question is moot.
+
+**D3 — (D) first, unanimous.** Fix the instrument — eight cells, two-sided fall assertions, a real
+threshold and exit code on the cascade block, checkpoint scores made gating. No engine change, no run,
+no §6 risk. **Every seat supports this and it is a precondition for ruling on anything else.**
