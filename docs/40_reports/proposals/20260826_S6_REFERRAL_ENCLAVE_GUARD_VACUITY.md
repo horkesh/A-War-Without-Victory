@@ -136,3 +136,96 @@ node_modules/.bin/tsx tools/hooks/floor_vs_dissolution.ts   # exits 1, prints th
 git show HEAD:tools/verify_checkpoints.cjs | sed -n '86,92p' # the one-cell GUARD
 git show HEAD:src/sim/combat/brigade_dissolution.ts | sed -n '125,175p'  # 2-of-3 and the enclave 3-of-3
 ```
+
+---
+
+# ★★ CORRECTION — ISSUED MID-POLL, 2026-08-26. READ BEFORE RULING.
+
+**The Engine/Systems seat refuted this referral's central mechanism claim. The orchestrator
+independently confirmed the refutation at source. §1 above is WRONG in a way that matters, and the
+correction is issued to every seat mid-poll rather than after, because three seats are ruling on it
+now.**
+
+## What is wrong
+
+**"The clamp is unconditional" — FALSE. "An enclave brigade CAN NEVER dissolve" — FALSE.**
+
+Three escape paths, all reachable, all confirmed by the orchestrator at HEAD:
+
+1. **`cohesion_drift.ts:139` — `if (engagedSet.has(id)) continue;`** The clamp is **skipped entirely
+   for every formation engaged in combat this turn**, and the module header says so. Combat writes
+   cohesion *down* immediately before (`COHESION_ATTACKER` repulsed −8 / catastrophic −15;
+   `COHESION_DEFENDER` decisive −15). **So an engaged brigade reaches the post-combat dissolution
+   pass carrying an unclamped, combat-reduced value.**
+2. **`morale_drift.ts:306` — `f.cohesion = Math.max(0, cohesion − 2)`** when morale is below the
+   critical threshold. That step runs at `war_phases.ts:3151`, **after** the clamp at `:3143` and
+   **before** dissolution at `:3182`. Post-clamp, pre-dissolution, unconditional.
+3. **Kind mismatch.** `cohesion_drift.ts:142` accepts `'brigade' | 'operational_group'`;
+   `brigade_dissolution.ts:124` accepts `'brigade' | 'og'`. OGs are created as `kind: 'og'`.
+   **An OG is dissolvable and never clamped.** A plain bug, and separable from every §6 question here.
+
+**Empirically, the clamp does not dominate:** on the t39 save, **4 of 221 active brigades sit BELOW
+their faction floor** (`arbih_244th_mountain` 48/56, `arbih_286th_mountain` 48/56,
+`arbih_9th_muslim_liberation` 52/56, `rs_2nd_banja_luka_light_infantry` 33/35).
+
+## What survives
+
+**But 0 of 221 sit at or below the dissolution threshold**, because the floor-to-threshold gap
+(36pp RBiH, 20pp RS at t39) exceeds any single-turn decrement (max −15), and the clamp restores on
+the first unengaged turn.
+
+⇒ **The correct claim is "EFFECTIVELY UNREACHABLE IN PRACTICE", not "arithmetically impossible".**
+The referral's *conclusion* stands — the criterion is not doing work, and the guard has not been
+tested. Its *mechanism* was wrong, and **the fix follows from the mechanism, so this changes what
+disposition (A) would even mean.**
+
+## A SECOND arithmetic guarantee the referral missed — and it is §6-material
+
+**`LAST_STAND_COHESION_MIN = 40`** (`battle_resolution.ts:126,581`). The RBiH floor is ≥42 from turn
+13 and ≥56 from turn 39. **So a surrounded RBiH brigade takes the last-stand branch ALWAYS and the
+surrender branch NEVER** — a second enclave guarantee, independent of dissolution, that no seat had
+found. Surrender is degraded the same way: `SURRENDER_COHESION_MAX = 15` sits below *every* faction
+floor at *every* turn.
+
+**Consequence for the panel: disposition (B) as written is INCOMPLETE.** Documenting the dissolution
+guarantee while leaving `LAST_STAND_COHESION_MIN` undocumented re-creates the identical defect one
+door down. **(B) must cover both or it is not (B).**
+
+## Two more corrections to the referral's framing
+
+- **Q4 is answered NO: the ordinary half is NOT separable from the enclave half.** `lowCohesion` is
+  computed **once** (`brigade_dissolution.ts:170`) and both paths read it; only `requiredCriteria`
+  differs. The ordinary fix necessarily changes the enclave predicate's input. **It does not proceed
+  without the panel.** The only genuinely separable item is the kind mismatch.
+- **Disposition (A) is strictly dissolution-INCREASING for every faction, never neutral.** Today
+  `criteriaCount = lowPersonnel + lowMorale`, requiring **both**. Making cohesion reachable adds two
+  new 2-of-3 combinations. Fewer defenders, more OSID flips. Territory-moving, requiring a 188w
+  **and a paired threshold re-tune the referral did not cost in.** The crux — that fixing this could
+  breach the guard — is *more* live than stated, not less.
+
+## And the fall assertion in Q3 must be two-sided
+
+Extending `verify_checkpoints.cjs` is mechanically trivial, but a **hold** is "== want at all four
+checkpoints" while a **fall** is a *transition*. Asserting `== 'RS'` at all four is historically
+wrong (Srebrenica is RBiH until ~w168); asserting only at w188 passes a scenario where the cell was
+never RBiH — **vacuous in exactly the way this referral is about.** Correct form: **RBiH at w104 and
+w156 AND RS at w188.**
+
+## A fourth disposition is now on the table
+
+**(D) — fix the two items carrying no §6 content, then rule.** (i) the `'og'`/`'operational_group'`
+kind mismatch; (ii) extend the guard to eight cells with two-sided fall assertions. **Then** take
+A/B/C with a working instrument.
+
+> The Engine seat's argument for (D), which the orchestrator adopts as well-founded: **ruling A or B
+> today means ruling without the instrument that would tell you whether the ruling was right — which
+> is the same failure mode as the vacuous guard itself.**
+
+**Seats may still rule A, B or C.** (D) is added to the ballot, not substituted for it.
+
+## Orchestrator's note on its own referral
+
+The referral overstated its mechanism in the direction that made the finding look bigger — the same
+bias §5 declared, expressed in the evidence rather than in the recommendation. **Treat §1's
+"arithmetically guaranteed" language as retracted; the measured 27/27 table and the one-cell GUARD
+are unaffected and remain exactly as stated.**
