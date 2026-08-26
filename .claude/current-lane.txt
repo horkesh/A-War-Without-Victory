@@ -1,1 +1,1 @@
-PROBE CHANNEL SCOPE COMPLETE — NON-EXECUTABLE pending owner assent to step 0. Claude retains probe ownership. RE NOT STARTED and may not capture a base until probe disposition is approved and overlapping edits land. Two premise checks hold. Estimated probe validation cost: 2 × 188w.
+IDLE — probe lane closed. Steps 1+3 landed, step 2 reverted. Open: T4-orphan-rate never measured; runs dirty (not bankable as a floor); 3 persistent eastern cells (pobudje/seher/cerska) queued; nothing merged.
