@@ -1196,3 +1196,43 @@ first of three abort gates, so a player force-launch is silently overridden.
 `getEligiblePopulationCount` must read `by_mun1990_id`, not `by_municipality_id` — the latter is
 post-1995 keyed and collides on merge (Gradačac reads 43 Bosniaks). The `probe_complete` check in the
 officer-defeatism block is dead code (that block is `sector_attack`-only).
+
+---
+
+## 15. LIVE STATE — running checkpoint log
+
+> Newest first. This section exists because §9's sequencing was lost once in a restructure and the
+> plan could not answer questions about its own status. Anything here that hardens into a rule
+> belongs upstream in the numbered sections, not here.
+
+### 2026-08-26 — the enclave flag is ON, the guard is real, and the baseline run is in flight
+
+**Landed, on `codex/engine-integrity-docs`, tree clean at `3806ef08d` (merge of Codex's `92f924f9d`):**
+
+| commit | what |
+|---|---|
+| `2dfe6f4e7` | `AWWV_ENCLAVE_COLUMN_DISPLACEMENT` **default-ON** — owner decision after the §6 panel split 2-2 with one BLOCK and escalated. Explicit `false`/`0` still disables it, so the rollback path survives. The stale "default OFF" docstring is corrected in the same commit. |
+| `0098a48fe` | **Enclave guard repaired.** `tools/verify_checkpoints.cjs` checked ONE cell (Teočak) while its own header claimed nine; the cascade block was print-only; and `process.exit` was driven by the Teočak loop alone, so a run could lose forty OSIDs at every checkpoint and exit 0. Now: 7 holds + 2 falls, falls asserted **two-sided** (RBiH through w156 AND RS at w188), a liveness count that hard-fails if the cell count moves, a cascade threshold, and checkpoint scores made gating. Exit-code behaviour verified 6/6 against mutated copies of `n294`. |
+| — | `tests/enclave_displacement_default_on.test.ts` — 5 tests, green, mutation-verified, carrying a **negative control** (a Goražde enclave brigade must NOT move; a fix that widens matching kills the test). |
+
+**Why the flag mattered.** The mechanism that applies casualties to Srebrenica's and Žepa's defenders
+was already built, panel-reviewed and calibrated to the record — and switched off. That is the whole
+reason the 28th Division stood at `status: active`, five brigades at full establishment, two of them
+still inside Srebrenica municipality four months after the fall.
+
+**IN FLIGHT:** Run A — `AWWV_ENCLAVE_COLUMN_DISPLACEMENT=false npm run sim:scenario:run:188w` — the
+clean four-checkpoint baseline S0 requires. Run B (flag default-ON) follows, and **the S3a predicted
+loss set must be committed before it**, not after.
+
+**BLOCKER S0 IS STILL UNMET.** `CALIBRATION_MASTER` now records **n372 at 697/712 for January**, but
+n372 is `--weeks 39` **and `git_dirty: true`** — so apr1994 / apr1995 / oct1995 on the current tree are
+**NOT ESTABLISHED**, and the 677 this plan is priced against is stale in the other direction. Run A is
+what closes this.
+
+**OPEN, awaiting the calibration seat — may change the whole prediction.** Measured in `n294`: the six
+enclave defenders (`arbih_280th`–`284th_east_bosnian_light`, `arbih_285th_light`) appear in **ZERO
+battles from week 160 onward**, and 7 distinct target cells before it. If that survives scrutiny — the
+seat has twice caught brigade-name fields being non-injective over stacks — then the flag may be
+**territorially inert inside the 188-week window**, and the acceptance criterion becomes byte-identity
+on `control_delta` with the casualty ledger and formation states differing. That is a *binary* claim
+and therefore stronger than a delta band, not weaker.
