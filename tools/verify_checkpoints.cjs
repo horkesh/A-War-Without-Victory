@@ -3,7 +3,7 @@
  * verify_checkpoints.cjs — score a run against ALL FOUR historical checkpoints,
  * check the enclave guard, and check the documented cascade blast radius.
  *
- *   node tools/verify_checkpoints.cjs <run_dir> [--base jan=N,apr94=N,apr95=N,oct=N]
+ *   node tools/verify_checkpoints.cjs <run_dir> [--base jan=N,apr94=N,apr95=N,oct=N] [--cascade-base N]
  *
  * WHY THIS EXISTS. `historical_fit` in a run's own summary is scored against the painted
  * references AS THEY WERE WHEN THE RUN EXECUTED. After the 2026-08-24 owner reference
@@ -14,9 +14,13 @@
  *
  * It also checks two things a raw score cannot show:
  *
- *  - ENCLAVE GUARD (canon H1.8). Teočak must hold RBiH. Srebrenica and Žepa fall;
- *    Goražde, Bihać, Teočak and the Sarajevo core hold. A change that buys matched OSIDs
- *    by breaching the guard is not a gain, and the guard is the Pyrrhic panel's to rule on.
+ *  - ENCLAVE GUARD (canon H1.8) — NINE cells, REPAIRED 2026-08-26. Until then this
+ *    block checked ONE cell while this header claimed all of them, the cascade block
+ *    compared nothing, and the exit code ignored both. Now: Goražde, Bihać, Teočak and
+ *    the four Sarajevo-core municipalities must HOLD; Srebrenica and Žepa must FALL,
+ *    asserted two-sided so an early fall fails as loudly as a missing one. A change that
+ *    buys matched OSIDs by breaching the guard is not a gain, and the guard is the
+ *    Pyrrhic panel's to rule on. See 20260826_S6_REFERRAL_ENCLAVE_GUARD_VACUITY.md.
  *
  *  - HRHB WESTERN-BOSNIA CASCADE. life_lessons/calibration.md (2026-05-26) records five
  *    consecutive additive pre-planned op changes that all regressed via this site, and
@@ -30,7 +34,7 @@ const path = require('path');
 
 const runDir = process.argv[2];
 if (!runDir) {
-  console.error('usage: node tools/verify_checkpoints.cjs <run_dir> [--base jan=N,apr94=N,apr95=N,oct=N]');
+  console.error('usage: node tools/verify_checkpoints.cjs <run_dir> [--base jan=N,apr94=N,apr95=N,oct=N] [--cascade-base N]');
   process.exit(2);
 }
 
@@ -49,6 +53,20 @@ if (baseArg) {
     const key = { jan: 'jan1993', apr94: 'apr1994', apr95: 'apr1995', oct: 'oct1995' }[k.trim()];
     if (key) base[key] = Number(v);
   }
+}
+
+// Tolerances. A guard that fires on jitter gets disabled, and a permanently-red gate is
+// worse than a missing one — this repo's own lesson. -3 matches the decision rule's
+// JITTER band; the cascade site is smaller and tighter.
+const SCORE_TOLERANCE = 3;
+const CASCADE_TOLERANCE = 2;
+
+let cascadeBase = null;
+const cbArg = process.argv.find((x) => x.startsWith('--cascade-base'));
+if (cbArg) {
+  const raw = cbArg.includes('=') ? cbArg.split('=')[1] : process.argv[process.argv.indexOf(cbArg) + 1];
+  const n = Number(raw);
+  if (Number.isFinite(n)) cascadeBase = n;
 }
 
 const save = JSON.parse(fs.readFileSync(path.join(runDir, 'final_save.json'), 'utf8'));
@@ -85,18 +103,86 @@ for (const k of KEYS) {
 if (base) console.log(`  NET across checkpoints: ${net >= 0 ? '+' : ''}${net}`);
 
 // ---- enclave guard (canon H1.8) ----
-const GUARD = [['Teocak', 'op:ugljevik:teocak_krstac_2', 'RBiH']];
-console.log('\nENCLAVE GUARD (canon H1.8) — these must hold');
+//
+// REPAIRED 2026-08-26 after a §6 panel found this instrument vacuous on four counts.
+// It checked ONE cell (Teočak) while this file's own header claimed all nine; the
+// cascade block below printed a string and compared nothing; and `process.exit` was
+// driven by the Teočak loop alone, so a run could lose forty OSIDs at every checkpoint
+// and still exit 0. Every §6 verdict citing this tool established exactly one
+// proposition: Teočak held RBiH at four checkpoints.
+//
+// A HOLD is "== RBiH at all four checkpoints".
+// A FALL is a TRANSITION and is asserted TWO-SIDED — RBiH through w156 AND RS at w188.
+// Asserting `== 'RS'` at all four would be historically wrong (Srebrenica is RBiH until
+// ~w168); asserting only at w188 would pass a scenario where the cell was never RBiH,
+// vacuous in exactly the way this repair exists to prevent. An early fall is an
+// atrocity-rewarded breach and fails as loudly as a missing one.
+//
+// The expected values are not invented: every cell below was read out of the CURRENT
+// painted references at all four checkpoints on 2026-08-26.
+const HOLDS = [
+  ['Gorazde', 'op:gorazde:gorazde_2'],
+  ['Bihac', 'op:bihac:bihac_2'],
+  ['Teocak', 'op:ugljevik:teocak_krstac_2'],
+  ['Sarajevo-centar', 'op:centar_sarajevo:sarajevo_dio_centar_sajarevo'],
+  ['Sarajevo-stari grad', 'op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo'],
+  ['Sarajevo-novo', 'op:novo_sarajevo:sarajevo_dio_novo_sarajevo'],
+  ['Sarajevo-novi grad', 'op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo'],
+];
+const FALLS = [
+  ['Srebrenica', 'op:srebrenica:srebrenica_2'],
+  ['Zepa', 'op:rogatica:zepa_2'],
+];
+
 let breached = false;
-for (const [name, osid, want] of GUARD) {
-  const prof = [39, 104, 156, 188].map((w) => stateAt(w)[osid]);
-  const ok = prof.every((x) => x === want);
+const CPS = [39, 104, 156, 188];
+
+console.log('');
+console.log('ENCLAVE GUARD (canon H1.8) — holds');
+for (const [name, osid] of HOLDS) {
+  const prof = CPS.map((w) => stateAt(w)[osid]);
+  const missing = prof.some((x) => x === undefined);
+  const ok = !missing && prof.every((x) => x === 'RBiH');
   if (!ok) breached = true;
-  console.log(`  ${name.padEnd(10)} ${prof.join(' ')}  ${ok ? '** HOLDS **' : '*** BREACHED — panel matter, do not merge ***'}`);
+  const verdict = missing
+    ? '*** OSID NOT IN RUN — guard cannot assert; treat as BREACH ***'
+    : ok ? '** HOLDS **' : '*** BREACHED — panel matter, do not merge ***';
+  console.log(`  ${name.padEnd(21)} ${prof.map((x) => String(x).padEnd(4)).join(' ')} ${verdict}`);
+}
+
+console.log('');
+console.log('ENCLAVE GUARD (canon H1.8) — falls (two-sided: RBiH through w156, RS at w188)');
+for (const [name, osid] of FALLS) {
+  const prof = CPS.map((w) => stateAt(w)[osid]);
+  const missing = prof.some((x) => x === undefined);
+  const heldBefore = prof.slice(0, 3).every((x) => x === 'RBiH');
+  const fellBy188 = prof[3] === 'RS';
+  const ok = !missing && heldBefore && fellBy188;
+  if (!ok) breached = true;
+  let verdict = '** FALLS ON SCHEDULE **';
+  if (missing) verdict = '*** OSID NOT IN RUN — guard cannot assert; treat as BREACH ***';
+  else if (!heldBefore) verdict = '*** FELL EARLY — atrocity rewarded ahead of schedule; panel matter ***';
+  else if (!fellBy188) verdict = '*** DID NOT FALL — event-owned outcome suppressed; panel matter ***';
+  console.log(`  ${name.padEnd(21)} ${prof.map((x) => String(x).padEnd(4)).join(' ')} ${verdict}`);
+}
+
+// LIVENESS: assert how much was COMPARED, not only that nothing tripped. A guard that
+// silently checks zero cells prints a clean board — this repair is its own case study.
+const guardCells = HOLDS.length + FALLS.length;
+console.log('');
+console.log(`  guard cells compared: ${guardCells} (${HOLDS.length} holds + ${FALLS.length} falls)`);
+if (guardCells !== 9) {
+  console.error('  LIVENESS FAILURE — guard cell count changed unexpectedly; this report is not trustworthy.');
+  process.exit(2);
 }
 
 // ---- documented cascade blast radius ----
-console.log('\nHRHB WESTERN-BOSNIA CASCADE (documented regression site) — at oct1995');
+// Was PRINT-ONLY: it built the counts, printed them, and compared nothing. It now has a
+// threshold and feeds the exit code. The baseline is supplied, never hardcoded — a
+// literal here would silently misreport every future run, the defect the score baseline
+// already avoids.
+console.log('');
+console.log('HRHB WESTERN-BOSNIA CASCADE (documented regression site) — at oct1995');
 const st188 = stateAt(188);
 const bySection = {};
 for (const o of Object.keys(ref.oct1995)) {
@@ -107,5 +193,42 @@ for (const o of Object.keys(ref.oct1995)) {
 }
 const WATCH = ['bosansko_grahovo', 'sipovo', 'glamoc', 'drvar', 'bosanski_petrovac', 'mrkonjic_grad', 'kljuc', 'sanski_most'];
 console.log('  ' + WATCH.map((m) => `${m} ${bySection[m] ? bySection[m][0] + '/' + bySection[m][1] : '-'}`).join('  '));
+let cascadeTotal = 0;
+for (const m of WATCH) if (bySection[m]) cascadeTotal += bySection[m][0];
+console.log(`  cascade matched: ${cascadeTotal} across ${WATCH.length} municipalities`);
+if (cascadeBase != null) {
+  const cd = cascadeTotal - cascadeBase;
+  console.log(`  cascade base ${cascadeBase}   ${cd >= 0 ? '+' : ''}${cd}`);
+  if (cd < -CASCADE_TOLERANCE) {
+    breached = true;
+    console.log(`  *** CASCADE REGRESSION worse than -${CASCADE_TOLERANCE} at the documented 2026-05-26 site — do not merge on this evidence ***`);
+  }
+} else {
+  console.log('  (no --cascade-base supplied — reported, not gated)');
+}
 
-process.exit(breached ? 1 : 0);
+// ---- exit status ----
+// Previously `process.exit(breached ? 1 : 0)` with `breached` set by the Teočak loop
+// alone, so checkpoint scores and the cascade were NON-GATING. Scores now gate whenever
+// a baseline is supplied.
+let regressed = false;
+if (base) {
+  for (const k of KEYS) {
+    if (base[k] == null) continue;
+    const st = stateAt(WEEK[k]);
+    const matched = Object.keys(ref[k]).filter((o) => st[o] === ref[k][o]).length;
+    const d = matched - base[k];
+    if (d < -SCORE_TOLERANCE) {
+      regressed = true;
+      console.log('');
+      console.log(`  *** ${k} REGRESSED ${d} against base ${base[k]} (tolerance -${SCORE_TOLERANCE}) ***`);
+    }
+  }
+}
+
+console.log('');
+if (breached) console.log('RESULT: GUARD BREACHED — §6 panel matter. Do not merge.');
+else if (regressed) console.log('RESULT: SCORE REGRESSION beyond tolerance. Not a guard breach; explain or revert.');
+else console.log('RESULT: guard intact.');
+
+process.exit(breached || regressed ? 1 : 0);
