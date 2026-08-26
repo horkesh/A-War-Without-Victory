@@ -81,7 +81,6 @@ import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmenta
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { shouldLaunchProbeInstead } from '../bot_corps_directives.js';
 import { getStalestSectorIntelConfidence } from '../sector_intel.js';
-import { FIXED_HOME_OSID_TAG } from '../enclave_resilience.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -1117,28 +1116,6 @@ function buildOperations(
             () => allocation.surplus_pool
                 .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
                 .filter(ev => isCombatReadyParticipant(briefing, ev.brigade_id))
-                // ── FIXED-HOME GARRISONS CANNOT PROBE (2026-08-26) ──────────────────────────
-                // A `placement:fixed_home_osid` brigade is pinned to its home cell by design — a
-                // besieged-city garrison, correctly modelled. It cannot go anywhere, so a probe
-                // built around it dies in planning every time.
-                //
-                // ★ AND THE SELECTOR ABOVE ACTIVELY PREFERS IT. `fitness_offense` is
-                // personnel × cohesion × fatigue (`force_eval.ts:114`), so a brigade that never
-                // fights keeps full strength, perfect cohesion and zero fatigue and is therefore
-                // PERMANENTLY the fittest thing in the surplus pool. Not probing is exactly what
-                // kept it looking best qualified to probe. A degenerate feedback loop.
-                //
-                // MEASURED, n374/n378: `arbih_115th_mountain` (Stari Grad, fixed home, same OSID
-                // at t0 and t188, 800→1800 men, morale 100, cohesion 100, TWO battles in 188
-                // weeks) launched **26 probes, 25 with zero attack attempts** — and accounted for
-                // 19 of the 21 no-contact `probe_complete` probes.
-                //
-                // ⚠ SCOPE: the PROBE POOL ONLY. This must not remove the brigade from the OOB,
-                // from its sector, or from garrison defence — it is doing its actual job by
-                // standing where it stands. Negative control N3 pins that it is still active, at
-                // `op:stari_grad_sarajevo:*`, personnel > 0, at t188.
-                .filter(ev => !(briefing.brigades.find(b => b.id === ev.brigade_id)?.tags ?? [])
-                    .includes(FIXED_HOME_OSID_TAG))
                 .sort((a, b) => {
                     const fitDiff = b.fitness_offense - a.fitness_offense;
                     if (fitDiff !== 0) return fitDiff;

@@ -1800,7 +1800,34 @@ RE-0C's audit of existing diagnostics. The low tempo remains accepted modelling.
 
 **Priority:** ~~P3 — known design trade-off, not a bug. Monitor.~~ → raised **P0** 2026-08-26 → **ROUTED TO CLAUDE PROBE SCOPE the same day by OWNER RULING. See the ruling box before reading anything below.**
 
-> ### ★ OWNER RULING, 2026-08-26 — THE LOW TEMPO IS CORRECT MODELLING. DO NOT "FIX" IT.
+> ### ★★ SUPERSEDED THE SAME DAY — OWNER RULING #2: **"It was blindness."**
+>
+> The ruling below was given on the *symptom*. When the cause was found and the owner was asked the
+> sharp question — **was the low tempo history, or was it the engine being blind?** — he ruled:
+>
+> > **"It was blindness."**
+>
+> **THE CAUSE, MEASURED.** `sector_intel` was keyed on POSITIONAL sector ids that are re-minted every
+> turn, so intel was orphaned constantly: median `turns_in_contact` of **1-2** after 188 weeks of
+> continuous front-line contact, against an RBiH launch threshold needing **~18 uninterrupted turns**.
+> Confidence could never accumulate, so corps could never commit, so they probed instead — forever.
+> **The probe channel existed to compensate for the forgetting.**
+>
+> With the identity fixed (stable content-derived keys), median `turns_in_contact` goes **1-2 → 88**,
+> ARBiH sectors below threshold **16/28 → 7/23**, probes **215 → 80** and real attacks **44 → 61**.
+>
+> ⇒ **THE QUIET WAR WAS AN ARTIFACT, NOT HISTORY. A tempo rise following the intel fix is the engine
+> working, not a regression.** Any negative control pinning `sector_attack` near 44 was pinning a
+> number the BUG produced and must be re-based.
+>
+> **WHAT SURVIVES FROM RULING #1, unchanged and still correct:** a besieged corps does not mount
+> offensives — and the data agrees, because `arbih_1st_corps` goes from **38 probes to 0** while its
+> attacks move only **1 → 2**. It stopped flailing; it did not start attacking. Probes remain a
+> legitimate instrument; it was their VOLUME that was compensation.
+>
+> ---
+>
+> ### ~~★ OWNER RULING #1, 2026-08-26 — THE LOW TEMPO IS CORRECT MODELLING. DO NOT "FIX" IT.~~ (superseded above)
 >
 > Presented with the full measurement — 3.14 battles/week, 59% of all battles being probes, several
 > corps making zero real attacks in 188 weeks, and `arbih_1st_corps` mounting ONE offensive in the
