@@ -11,6 +11,48 @@ No current run satisfies lean RE-0 S0. RE-0 requires two fresh, byte-identical, 
 188-week runs on the approved integrated execution parent, clean metadata, and Node 22. Raw artifact
 metadata outranks this catalog.
 
+## PROBE-LANE CLOSING REFERENCE — clean provenance — **NOT RE-0 S0**
+
+```
+runs/apr1992_definitive_188w__46834a3b41033bff__w188_n382
+  final_state_hash   d71ff4ef4063f2ee
+  git_commit         92e4df660
+  git_dirty          FALSE        <- first clean-provenance run of the probe lane
+  node               v24.13.0
+  checkpoints        jan1993 695 · apr1994 674 · apr1995 668 · oct1995 652
+  engine_health_gate PASS
+```
+
+**★ THIS DOES NOT SATISFY RE-0 S0, and must not be read as doing so.** Against the bar stated above
+it fails two conditions: it is **Node 24, not Node 22**, and it is **a single run, not two fresh
+byte-identical distinct-output runs**. It is offered only as the probe lane's closing artifact — a
+run whose provenance is clean enough to compare against — and RE must still capture its own S0.
+
+**⚠ THE `nNNN` SUFFIX IS NOT UNIQUE — CITE THE FULL DIRECTORY NAME.** A different `n382` already
+appears in this file (scenario hash `205b3676c8fe3ce4`, 753-cell scoring, "88.3% match") from an
+unrelated series. Always carry the scenario hash `46834a3b41033bff`, or quote the whole path.
+
+**Contains:** stable sector-pair identity + edgeless-ghost exclusion in
+`getStalestSectorIntelConfidence`; `occupies_on_victory` replacing the `!isProbeOp` fiat; the Žepa
+`disbanded` relabel; the enclave participation rule reaching all creation sites; enclave-column
+displacement default-ON. **Does NOT contain** the reverted probe intel gate or the reverted
+fixed-home probe exclusion.
+
+**Why every earlier probe-lane run reads `git_dirty: true`, including one launched from a
+verified-clean tree:** `.claude/current-lane.txt` is TRACKED, so writing the lane declaration in the
+same command as the launch dirties the tree before provenance is captured. **Commit the lane file
+first.** Output was byte-identical either way (`d71ff4ef4063f2ee`); only the stamp differed.
+
+**Merge status here:** `verify_checkpoints` exits 1 on **one** ahistorical capture,
+`op:kalesija:gojcin_2` (t45) — which reads **RS at w39, matching the jan1993 reference**, so it does
+not touch the active checkpoint. The cells previously reported beside it were never captured at all;
+owner ruling 2026-08-26: *"that is calibration work and 1995 is not yet our calibration target."*
+**Known-open, explicitly not an engine defect:** `op:kalesija:seher_2` is painted RS for jan1993 but
+is RBiH from t0 with **zero control events** — an initial-control disagreement, and initial OSID
+control is sacrosanct, so any fix belongs at the census/referendum source, never in an override.
+
+---
+
 ## HISTORICAL DISCOVERY PAIR — n373/n374 — NOT RE-0 S0
 
 These runs remain historical discovery evidence only. The n374 catalog claim was wrong: its raw
