@@ -176,10 +176,15 @@ instruction. The current anchors above supersede proposal/discovery-era line num
 
 ## Environment-reader inventory
 
-The literal inventory covered `process.env`, optional-process access, aliased `runtimeProcess`,
-computed keys, and the reachable `src/utils/routine_console_diagnostics.ts` helper. T0 found one
-reader omitted from the plan's original T1 denylist: `AWWV_CASUALTY_REALISM_V2` at
-`src/sim/combat/casualty_realism_v2_gate.ts:109`. T1 was amended before S0; no run was attempted.
+The literal inventory covered `process.env`, optional-process access, aliased process objects,
+computed keys, and the reachable `src/utils/routine_console_diagnostics.ts` helper. Initial T0
+inspection found `AWWV_CASUALTY_REALISM_V2` at
+`src/sim/combat/casualty_realism_v2_gate.ts:109`. Independent lean review then caught three more
+reachable readers before S0: `C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED` at
+`src/sim/combat/army_order_interpretation.ts:196`, `PERF_PROFILE_SECTOR_PARTITION` at
+`src/sim/combat/corps_front_sectors.ts:151`, and computed-key `PERF_PROFILE_BOT_ORDERS` in
+`src/sim/combat/_perf_profile_bot_orders.ts:1,44`. Both T1 denylist copies were amended; no run was
+attempted.
 
 ### Behavior/state/outcome gates
 
@@ -201,12 +206,12 @@ reader omitted from the plan's original T1 denylist: `AWWV_CASUALTY_REALISM_V2` 
 `ENABLE_SARAJEVO_LIFELINE`, `MORALE_OVERRIDE_ENABLED`, and
 `SIEGE_MORALE_DRAIN_ENABLED`.
 
-### Output/scoring/diagnostic gates
+### Output/scoring/diagnostic/telemetry gates
 
 `ANALYZE_FACTION_GRAPH_PARITY_CHECK`,
 `ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK`, `AWWV_DEBUG_AXIS_READINESS`,
 `AWWV_DEBUG_REASON_CODES`, `AWWV_FORCE_ROUTINE_DIAGNOSTICS`, `AWWV_SCORING_SIMPLE`,
-`SUPPLY_BRIDGE_PARITY_CHECK`, and `VITEST`.
+`C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED`, `SUPPLY_BRIDGE_PARITY_CHECK`, and `VITEST`.
 
 ### Provenance/input gates
 
@@ -214,11 +219,12 @@ reader omitted from the plan's original T1 denylist: `AWWV_CASUALTY_REALISM_V2` 
 
 ### Profile-only gates
 
-`HEAP_PROFILE_188W`, `HEAP_PROFILE_TURNS`, and `PERF_PROFILE_SERIALIZATION`.
+`HEAP_PROFILE_188W`, `HEAP_PROFILE_TURNS`, `PERF_PROFILE_BOT_ORDERS`,
+`PERF_PROFILE_SECTOR_PARTITION`, and `PERF_PROFILE_SERIALIZATION`.
 
-CLI-only audit/telemetry flags and desktop-only runtime/profile flags are outside the requested
-scenario/sim/state reachability boundary and are not added to the S0 denylist. T1 must fail if any
-listed variable exists; it must not clear one silently.
+Reachability, not a categorical telemetry or profile exclusion, controls the S0 denylist.
+Independent lean review closed the aliased/computed-reader gap before S0. T1 must fail if any listed
+variable exists; it must not clear one silently.
 
 ## Missing invariants-path ruling
 
@@ -239,10 +245,12 @@ Source anchors: `CODE_CANON.md:3-25`, `DETERMINISM_TEST_MATRIX.md:3-15,53-83`, a
 ## T0 disposition
 
 **PASS for T1.** The approved base is bound, the isolated execution branch is clean and exact,
-the immediate T1 evidence boundary has no worktree collision, source anchors are live, the
-environment denylist now includes the discovered V2 gate, and the missing-doc ruling is recorded.
+the immediate T1 evidence boundary has no worktree collision, source anchors are live, all four
+denylist discoveries are included, and the missing-doc ruling is recorded.
 T1 may provision only an owner/build-supplied Node 22 and establish S0. No T1 action occurred here.
 
-T0 changes documentation/process evidence only. They do not alter behavior, output, scenarios,
-canon, state, schemas, defaults, or workflow rules, so no PROJECT_LEDGER or knowledge-ledger entry is
-required for this commit. `docs/10_canon/FORAWWV.md` was not edited.
+T0 changes documentation/process evidence only. It makes no gameplay, output, scenario, canon,
+state, schema, default, or workflow-architecture change. T0 did make the bounded T1
+execution-procedure amendment that added all four reviewed environment readers to the fail-closed
+denylist; that amendment, T0 completion, and the control-plane sync are recorded in
+`docs/PROJECT_LEDGER.md`. No knowledge-ledger or `docs/10_canon/FORAWWV.md` edit is required.

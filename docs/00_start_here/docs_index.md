@@ -52,12 +52,13 @@
 
 **Current override (2026-08-26):** engine health precedes further calibration. The separate probe
 prerequisite closed at `b711cffa9`; it is not part of RE. [Lean Engine Integrity](../plans/2026-08-26-engine-integrity-plan.md)
-is ready for T0, then starts fresh exact-parent RE-0 and executes serially through RE-6. The
+completed T0 at base `38e65547882856fba07faab7a6dbcd4258da9607` and is ready for T1: the
+clean exact-parent Node-22 S0, followed by serial execution through RE-6. The
 [full-team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md)
 index the review; frozen discovery remains report evidence. Further calibration and R8 wait on RE.
 No current calibration artifact satisfies RE S0.
 
-**Current control plane (synchronized 2026-08-26):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE is ready for T0 after the closed probe handoff; exact-parent Node-22 RE-0 follows. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
+**Current control plane (synchronized 2026-08-26):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE T0 is complete at base `38e65547882856fba07faab7a6dbcd4258da9607`; T1 next establishes the clean exact-parent Node-22 S0. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
 
 The remaining files under `docs/30_planning/` are design specifications, not active execution queues: [multi-brigade operations](../30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md), [operation reevaluation](../30_planning/OPERATION_REEVALUATION_DESIGN_SPEC.md), and [spatial context](../30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md). Historical plans removed from that folder remain available through Git history and the ledgers.
 

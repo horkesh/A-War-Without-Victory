@@ -8,10 +8,10 @@ deterministic ordering, locality, and verification truth before further calibrat
 
 ## Current status and next action
 
-**READY FOR T0; IMPLEMENTATION NOT STARTED.** The separate probe lane closed at `b711cffa9`, and
-the owner handed the repository to RE. Preserve that disposition. Capture the post-handoff
-integrated HEAD, hard-check Node 22, and execute RE-0 using the plan's source-verified
-authoritative run substrate.
+**T0 COMPLETE; READY FOR T1.** The separate probe lane closed at `b711cffa9`, and the owner handed
+the repository to RE. Preserve that disposition. The execution base is bound at
+`38e65547882856fba07faab7a6dbcd4258da9607`. Next, hard-check the owner/build-supplied Node 22 and
+establish the clean exact-parent S0 using the plan's source-verified authoritative run substrate.
 
 ## Canonical owner
 
@@ -74,7 +74,7 @@ checkpoint are not engine defects.
 
 ## Collision rules
 
-- Any new overlapping engine edit stops RE base capture; the probe lane itself is closed.
+- Any new overlapping engine edit stops the affected RE packet; the probe lane itself is closed.
 - RE-0D/RE-1 collide with desktop/runtime/UI work; pause the relevant R7 packet.
 - RE-2/RE-3/RE-4 may overlap R7 only after exact file inspection proves ownership is disjoint.
 - Further calibration is paused until RE closes.
@@ -111,4 +111,6 @@ busier war or a better historical-fit score.
 
 - **2026-08-26:** live-source specialist audit refined the sole plan with exact owners, tests,
   commands, two-commit evidence discipline, and deletion-first complexity gates.
-- **Next:** T0 integrated parent → RE-0.
+- **2026-08-26:** T0 bound execution base `38e65547882856fba07faab7a6dbcd4258da9607`
+  and re-audited live boundaries, environment readers, worktree collisions, and invariant authority.
+- **Next:** T1 clean exact-parent Node-22 S0.

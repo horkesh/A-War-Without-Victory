@@ -29482,3 +29482,32 @@ append-only; the prior entry is retained unchanged.
 **Synchronized surfaces:** Master Roadmap, Command Board, sole RE plan, plans index, docs index,
 active task governance, current-lane pointer, and changelog. `docs/10_canon/FORAWWV.md` was not
 edited.
+
+## [2026-08-26] docs(RE-0): bind and synchronize the integrated execution base
+
+**Type:** T0 documentation/process evidence and control-plane synchronization only. No gameplay,
+engine, scenario, save, artifact, baseline, threshold, package, canon, knowledge-ledger, push, PR,
+merge, tag, publication, or release change.
+
+**Bound base:** RE execution is isolated on `codex/re-engine-integrity-execution` with approved
+parent `38e65547882856fba07faab7a6dbcd4258da9607`. Probe closeout
+`b711cffa94029c35eac18d96db91a411eb2e7abb` is an ancestor; stable sector identity and
+`occupies_on_victory` remain landed, and the fixed-home exclusion remains reverted. T0 evidence was
+committed as `cfd43776c` with the exact T3–T14 path/symbol audit and active-worktree collision census.
+
+**T0 findings:** The immediate T1 boundary has zero active-worktree overlap. A dirty upper-drina
+worktree has future T6/T8 overlaps that must be rechecked before those packets. Initial inventory
+found `AWWV_CASUALTY_REALISM_V2`; independent lean review closed the remaining aliased/computed-reader
+gap by finding `C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED`, `PERF_PROFILE_SECTOR_PARTITION`, and
+`PERF_PROFILE_BOT_ORDERS`. Both copies of the T1 fail-closed denylist now contain all four discoveries
+before any S0 run. `docs/PHASE_A_INVARIANTS.md` remains absent; the Systems Programmer plus
+Determinism/Process seat approved `docs/20_engineering/INVARIANTS_IN_CODE.md` only as the stale-path
+replacement and supplemental inventory, subordinate to live canon and engineering authority.
+
+**State and next action:** **T0 COMPLETE; READY FOR T1.** T1 must use an owner/build-supplied Node 22,
+fail on any audited environment gate, and establish the clean exact-parent S0 on the plan's
+source-verified authoritative checkout. No T1 action or behavior test was performed during T0.
+
+**Synchronized surfaces:** Master Roadmap, Command Board, plans index, docs index, active task
+governance, living execution audit, and project ledger. The knowledge ledger and
+`docs/10_canon/FORAWWV.md` were not edited.
