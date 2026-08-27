@@ -21,6 +21,9 @@ function makeRunDir(opts: {
     benchmark: { evaluated: number; passed: number; failed: number; not_reached: number };
     formationsActive?: number;
     weeks?: number;
+    omitAnchorContractEvaluation?: boolean;
+    anchorContractEvaluation?: unknown;
+    legacyAnchorChecks?: unknown;
 }): string {
     const dir = mkdtempSync(join(tmpdir(), 'fp-'));
     writeFileSync(
@@ -28,19 +31,10 @@ function makeRunDir(opts: {
         JSON.stringify({ net_control_counts_after: opts.controlAfter, flips: opts.flips ?? [] }),
         'utf8',
     );
-    writeFileSync(
-        join(dir, 'run_summary.json'),
-        JSON.stringify({
+    const runSummary: Record<string, unknown> = {
             scenario_id: 'fixture',
             weeks: opts.weeks ?? 40,
             summary: { final_turn: opts.weeks ?? 40 },
-            anchor_checks: opts.anchors.map((a) => ({
-                anchor_id: a.anchor_id,
-                anchor_type: 'osid',
-                expected_controller: 'RS',
-                actual_controller: 'RS',
-                passed: a.passed,
-            })),
             bot_benchmark_evaluation: opts.benchmark,
             // formations are DELIBERATELY excluded from the fingerprint; include a
             // varying value to prove it does NOT affect the result.
@@ -49,7 +43,30 @@ function makeRunDir(opts: {
                     { faction: 'RS', brigades_total: 80, brigades_active: opts.formationsActive ?? 80 },
                 ],
             },
-        }),
+        };
+    const defaultAnchors = opts.anchors.map((a) => ({
+        anchor_id: a.anchor_id,
+        anchor_type: 'osid',
+        expected_controller: 'RS',
+        actual_controller: 'RS',
+        passed: a.passed,
+    }));
+    if (!opts.omitAnchorContractEvaluation) {
+        runSummary.anchor_contract_evaluation = opts.anchorContractEvaluation ?? {
+            schema_version: 1,
+            epoch: 'jan1993',
+            source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1',
+            anchors_passed: defaultAnchors.filter((anchor) => anchor.passed).length,
+            anchors_total: defaultAnchors.length,
+            anchor_checks: defaultAnchors,
+        };
+    }
+    if (opts.legacyAnchorChecks !== undefined) {
+        runSummary.anchor_checks = opts.legacyAnchorChecks;
+    }
+    writeFileSync(
+        join(dir, 'run_summary.json'),
+        JSON.stringify(runSummary),
         'utf8',
     );
     return dir;
@@ -165,6 +182,177 @@ describe('structural_fingerprint', () => {
         } finally {
             rmSync(a, { recursive: true, force: true });
             rmSync(b, { recursive: true, force: true });
+        }
+    });
+
+    it('throws when anchor contract evaluation is missing', () => {
+        const dir = makeRunDir({ ...BASE, omitAnchorContractEvaluation: true });
+        try {
+            expect(() => fp.buildStructuralFields(dir)).toThrow(/anchor contract.*missing/i);
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('throws when anchor contract evaluation is empty', () => {
+        const dir = makeRunDir({
+            ...BASE,
+            anchorContractEvaluation: {
+                schema_version: 1,
+                epoch: 'jan1993',
+                source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1',
+                anchors_passed: 0,
+                anchors_total: 0,
+                anchor_checks: [],
+            },
+        });
+        try {
+            expect(() => fp.buildStructuralFields(dir)).toThrow(/anchor contract.*empty/i);
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('throws when an anchor contract entry is malformed', () => {
+        const dir = makeRunDir({
+            ...BASE,
+            anchorContractEvaluation: {
+                schema_version: 1,
+                epoch: 'jan1993',
+                source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1',
+                anchors_passed: 0,
+                anchors_total: 1,
+                anchor_checks: [{ anchor_id: 'op:a:a', passed: 'yes' }],
+            },
+        });
+        try {
+            expect(() => fp.buildStructuralFields(dir)).toThrow(/anchor contract.*malformed/i);
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('throws when an anchor contract entry has no ID', () => {
+        const dir = makeRunDir({
+            ...BASE,
+            anchorContractEvaluation: {
+                schema_version: 1,
+                epoch: 'jan1993',
+                source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1',
+                anchors_passed: 1,
+                anchors_total: 1,
+                anchor_checks: [{ passed: true }],
+            },
+        });
+        try {
+            expect(() => fp.buildStructuralFields(dir)).toThrow(/anchor contract.*missing.*id/i);
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('throws when anchor contract IDs are duplicated', () => {
+        const dir = makeRunDir({
+            ...BASE,
+            anchorContractEvaluation: {
+                schema_version: 1,
+                epoch: 'jan1993',
+                source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1',
+                anchors_passed: 1,
+                anchors_total: 2,
+                anchor_checks: [
+                    { anchor_id: 'op:a:a', passed: true },
+                    { anchor_id: 'op:a:a', passed: false },
+                ],
+            },
+        });
+        try {
+            expect(() => fp.buildStructuralFields(dir)).toThrow(/anchor contract.*duplicate/i);
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('throws when anchor contract metadata is malformed', () => {
+        const dir = makeRunDir({
+            ...BASE,
+            anchorContractEvaluation: {
+                schema_version: 2,
+                epoch: 'jan1993',
+                source: 'wrong-source',
+                anchors_passed: 2,
+                anchors_total: 2,
+                anchor_checks: [
+                    { anchor_id: 'op:a:a', passed: true },
+                    { anchor_id: 'op:b:b', passed: true },
+                ],
+            },
+        });
+        try {
+            expect(() => fp.buildStructuralFields(dir)).toThrow(/anchor contract.*metadata.*malformed/i);
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('throws when anchor contract totals disagree with its checks', () => {
+        const dir = makeRunDir({
+            ...BASE,
+            anchorContractEvaluation: {
+                schema_version: 1,
+                epoch: 'jan1993',
+                source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1',
+                anchors_passed: 0,
+                anchors_total: 99,
+                anchor_checks: [
+                    { anchor_id: 'op:a:a', passed: true },
+                    { anchor_id: 'op:b:b', passed: true },
+                ],
+            },
+        });
+        try {
+            expect(() => fp.buildStructuralFields(dir)).toThrow(/anchor contract.*totals.*inconsistent/i);
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('uses explicit well-formed legacy anchor_checks only when the new field is absent', () => {
+        const dir = makeRunDir({
+            ...BASE,
+            omitAnchorContractEvaluation: true,
+            legacyAnchorChecks: [
+                { anchor_id: 'op:a:a', passed: true },
+                { anchor_id: 'op:b:b', passed: false },
+            ],
+        });
+        try {
+            expect(fp.buildStructuralFields(dir)).toMatchObject({
+                anchors_passed: 1,
+                anchors_total: 2,
+            });
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('does not fall back to legacy anchor_checks when the new field is invalid', () => {
+        const dir = makeRunDir({
+            ...BASE,
+            anchorContractEvaluation: {
+                schema_version: 1,
+                epoch: 'jan1993',
+                source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1',
+                anchors_passed: 0,
+                anchors_total: 0,
+                anchor_checks: [],
+            },
+            legacyAnchorChecks: [{ anchor_id: 'op:a:a', passed: true }],
+        });
+        try {
+            expect(() => fp.buildStructuralFields(dir)).toThrow(/anchor contract.*empty/i);
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
         }
     });
 

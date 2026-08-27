@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
+import { createRequire } from 'node:module';
 import { runScenario } from '../src/scenario/scenario_runner.js';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 
@@ -10,7 +11,15 @@ const OUT_DIR = join(process.cwd(), '.tmp_integration_run_summary');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let summary: any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let runMeta: any;
+let runDir: string;
 let skipped = false;
+const require = createRequire(import.meta.url);
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const structuralFingerprint = require('../tools/diagnostics/structural_fingerprint.cjs') as {
+    buildStructuralFields: (outputDir: string) => Record<string, unknown>;
+};
 
 describe('run summary diagnostics (40w)', () => {
     beforeAll(async () => {
@@ -22,8 +31,10 @@ describe('run summary diagnostics (40w)', () => {
         if (existsSync(OUT_DIR)) await rm(OUT_DIR, { recursive: true });
 
         const result = await runScenario({ scenarioPath: SCENARIO_40W, outDirBase: OUT_DIR });
+        runDir = result.outDir;
         const summaryJson = await readFile(result.paths.run_summary, 'utf8');
         summary = JSON.parse(summaryJson);
+        runMeta = JSON.parse(await readFile(join(result.outDir, 'run_meta.json'), 'utf8'));
     }, 600_000);
 
     afterAll(async () => {
@@ -93,24 +104,39 @@ describe('run summary diagnostics (40w)', () => {
         expect(passed).toBeGreaterThanOrEqual(3);
     });
 
-    it('anchor checks all present and evaluated', () => {
+    it('emits the complete non-scoring anchor contract evaluation', () => {
         if (skipped) return;
-        const anchors = summary.historical_fit?.anchor_checks
-            ?? summary.anchor_checks;
+        const evaluation = summary.anchor_contract_evaluation;
 
-        // Anchor checks may be absent if scenario doesn't match apr1992 init_control
-        if (!anchors) {
-            console.log('No anchor checks present (scenario may not use apr1992 init_control)');
-            return;
-        }
-
+        expect(evaluation).toBeDefined();
+        expect({
+            schema_version: evaluation.schema_version,
+            epoch: evaluation.epoch,
+            source: evaluation.source,
+        }).toEqual({
+            schema_version: runMeta.anchor_contract.schema_version,
+            epoch: runMeta.anchor_contract.epoch,
+            source: runMeta.anchor_contract.source,
+        });
+        expect(evaluation.anchors_total).toBe(31);
+        const anchors = evaluation.anchor_checks;
         expect(anchors).toBeInstanceOf(Array);
-        expect(anchors.length).toBeGreaterThan(0);
+        expect(anchors).toHaveLength(31);
+        expect(new Set(anchors.map((anchor: { anchor_id: string }) => anchor.anchor_id)).size).toBe(31);
+        expect(evaluation.anchors_passed).toBe(anchors.filter((anchor: { passed: boolean }) => anchor.passed).length);
+        expect(anchors.map((anchor: { anchor_id: string; anchor_type: string; expected_controller: string }) => ({
+            anchor_id: anchor.anchor_id,
+            anchor_type: anchor.anchor_type,
+            expected_controller: anchor.expected_controller,
+        }))).toEqual(runMeta.anchor_contract.anchors);
+        expect(summary.anchor_checks).toBeUndefined();
+        expect(summary.historical_fit?.anchor_checks).toBeUndefined();
 
         let passCount = 0;
         let failCount = 0;
         for (const anchor of anchors) {
-            expect(anchor.anchor_id ?? anchor.osid).toBeDefined();
+            expect(typeof anchor.anchor_id).toBe('string');
+            expect(anchor.anchor_id.length).toBeGreaterThan(0);
             expect(anchor.expected_controller).toBeDefined();
             expect(typeof anchor.passed).toBe('boolean');
 
@@ -127,7 +153,13 @@ describe('run summary diagnostics (40w)', () => {
 
         console.log(`Anchor checks: ${passCount} passed, ${failCount} failed out of ${anchors.length}`);
         // Expect majority of anchors to pass
-        expect(passCount).toBeGreaterThan(failCount);
+        expect(passCount).toBe(31);
+        expect(failCount).toBe(0);
+    });
+
+    it('provides a valid anchor contract to the structural fingerprint', () => {
+        if (skipped) return;
+        expect(() => structuralFingerprint.buildStructuralFields(runDir)).not.toThrow();
     });
 
     it('behavioral health — scenario produces battles', () => {

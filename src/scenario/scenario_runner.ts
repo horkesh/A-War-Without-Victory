@@ -3324,6 +3324,19 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // are not measured against 1992 expectations.
             historicalAnchorChecks = computeHistoricalAnchorChecks(finalControlSnapshot, referenceKey);
         }
+        const anchorContractChecks = usesHistoricalAnchorContract
+            ? historicalAnchorChecks ?? computeHistoricalAnchorChecks(finalControlSnapshot, anchorEpoch)
+            : undefined;
+        const anchorContractEvaluation = anchorContractChecks
+            ? {
+                schema_version: 1,
+                epoch: anchorEpoch,
+                source: 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1' as const,
+                anchors_passed: anchorContractChecks.filter((anchor) => anchor.passed).length,
+                anchors_total: anchorContractChecks.length,
+                anchor_checks: anchorContractChecks,
+            }
+            : undefined;
         // One definitive scenario, many snapshots: score every checkpoint this run
         // reached, each against its own painted reference and its own anchor epoch.
         // `historical_fit` above remains the TERMINAL result and is unchanged, so the
@@ -3418,6 +3431,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 control_change_attribution:
                     controlChangeAttributionSummary ?? summarizeControlChangeAttribution([], initOverrideChangeCount)
             },
+            ...(anchorContractEvaluation
+                ? { anchor_contract_evaluation: anchorContractEvaluation }
+                : {}),
             historical_fit: {
                 historical_alignment: historicalAlignmentDiagnostics,
                 ...(historicalControlAlignment

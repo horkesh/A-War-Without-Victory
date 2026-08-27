@@ -14,7 +14,7 @@
  * This tool replaces the byte-hash with a fingerprint over MEANINGFUL, platform-stable
  * fields only — integers, strings, and booleans that are invariant across Win/Linux:
  *   - per-faction OSID control counts + sorted OSID flips      <- control_delta.json
- *   - anchor pass/fail map (the calibration anchors)           <- run_summary.anchor_checks
+ *   - anchor pass/fail map (the historical anchor contract)    <- run_summary.anchor_contract_evaluation
  *   - bot benchmark pass/fail/not_reached/evaluated            <- run_summary.bot_benchmark_evaluation
  *   - run shape (scenario_id, weeks, final_turn)
  *
@@ -92,6 +92,67 @@ function sortControlFlips(flips) {
     ));
 }
 
+const ANCHOR_CONTRACT_SOURCE = 'src/scenario/historical_anchors.ts#canonical-anchor-contract-v1';
+
+function validateAnchorChecks(source) {
+  if (!Array.isArray(source)) {
+    throw new Error('Anchor contract evaluation is malformed: expected anchor_checks array');
+  }
+  if (source.length === 0) {
+    throw new Error('Anchor contract evaluation is empty');
+  }
+
+  const seenIds = new Set();
+  let passed = 0;
+  for (const entry of source) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      throw new Error('Anchor contract evaluation contains a malformed entry');
+    }
+    if (typeof entry.anchor_id !== 'string' || entry.anchor_id.trim().length === 0) {
+      throw new Error('Anchor contract evaluation entry is missing an anchor ID');
+    }
+    if (typeof entry.passed !== 'boolean') {
+      throw new Error(`Anchor contract evaluation contains a malformed entry for ${entry.anchor_id}`);
+    }
+    if (seenIds.has(entry.anchor_id)) {
+      throw new Error(`Anchor contract evaluation contains duplicate anchor ID ${entry.anchor_id}`);
+    }
+    seenIds.add(entry.anchor_id);
+    if (entry.passed) passed += 1;
+  }
+  return { source, passed };
+}
+
+function readAnchorContractEvaluation(runSummary) {
+  const hasEvaluation = Object.prototype.hasOwnProperty.call(runSummary, 'anchor_contract_evaluation');
+  const hasLegacyChecks = Object.prototype.hasOwnProperty.call(runSummary, 'anchor_checks');
+  if (!hasEvaluation && !hasLegacyChecks) {
+    throw new Error('Anchor contract evaluation is missing from run_summary.json');
+  }
+
+  if (!hasEvaluation) {
+    return validateAnchorChecks(runSummary.anchor_checks).source;
+  }
+
+  const evaluation = runSummary.anchor_contract_evaluation;
+  if (!evaluation || typeof evaluation !== 'object' || Array.isArray(evaluation)) {
+    throw new Error('Anchor contract evaluation is malformed: expected an object');
+  }
+  if (evaluation.schema_version !== 1
+      || typeof evaluation.epoch !== 'string' || evaluation.epoch.trim().length === 0
+      || evaluation.source !== ANCHOR_CONTRACT_SOURCE
+      || !Number.isInteger(evaluation.anchors_passed) || evaluation.anchors_passed < 0
+      || !Number.isInteger(evaluation.anchors_total) || evaluation.anchors_total < 0) {
+    throw new Error('Anchor contract evaluation metadata is malformed');
+  }
+  const validated = validateAnchorChecks(evaluation.anchor_checks);
+  if (evaluation.anchors_total !== validated.source.length
+      || evaluation.anchors_passed !== validated.passed) {
+    throw new Error('Anchor contract evaluation totals are inconsistent');
+  }
+  return validated.source;
+}
+
 /**
  * Build the canonical structural object from a run directory's artifacts.
  * Throws if a required artifact is missing (a missing artifact IS a regression).
@@ -120,9 +181,7 @@ function buildStructuralFields(runDir) {
 
   // --- Anchor pass/fail map (sorted by anchor_id) ---
   const anchorChecks = {};
-  const rawAnchors = runSummary.anchor_checks
-    ? Object.values(runSummary.anchor_checks)
-    : [];
+  const rawAnchors = readAnchorContractEvaluation(runSummary);
   let anchorsPassed = 0;
   for (const a of sortByKey(rawAnchors, 'anchor_id')) {
     anchorChecks[a.anchor_id] = a.passed === true;
