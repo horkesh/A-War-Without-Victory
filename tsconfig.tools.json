@@ -1,0 +1,33 @@
+{
+  // Typecheck for the playtest harness.
+  //
+  // WHY THIS FILE EXISTS
+  // The root `tsconfig.json` sets `include: ["src","tests"]`, and nothing under
+  // `src/` or `tests/` imports `tools/playtest`. TypeScript therefore never loads
+  // these files, so `npx tsc --noEmit` reports SUCCESS no matter what is in them.
+  //
+  // That was not a theory. On 2026-08-27 a whole session of harness edits was
+  // committed on the strength of repeated "tsc --noEmit exits 0" checks that had
+  // never opened a single one of the edited files. Proven by appending
+  // `const __proof: number = "definitely not a number";` to tools/playtest/types.ts
+  // and observing the root config still exit 0 with no diagnostics.
+  //
+  // SCOPE, and why it is not `tools/**`
+  // The rest of `tools/` carries 471 pre-existing errors (measured 2026-08-27,
+  // across ai_play, asset_worker, map, engineering, dev_runner and others). Widening
+  // this include would turn a green check red for reasons unrelated to whoever next
+  // touches it, so this config deliberately covers ONLY the harness. TypeScript still
+  // follows imports, so `tools/ai_play/president_playthrough.ts` and the `src/`
+  // modules the harness depends on ARE checked transitively.
+  //
+  // Widening to the rest of `tools/` is worth doing; it is a separate cleanup with a
+  // 471-error budget, not a side effect of this one.
+  //
+  // HOW TO VERIFY THIS CONFIG STILL WORKS
+  // Do not trust it because it exits 0. Break something on purpose:
+  //   printf '\nconst __x: number = "no";\n' >> tools/playtest/types.ts
+  //   npx tsc -p tsconfig.tools.json --noEmit   # MUST exit 2 and name types.ts
+  //   git checkout -- tools/playtest/types.ts
+  "extends": "./tsconfig.json",
+  "include": ["tools/playtest"]
+}

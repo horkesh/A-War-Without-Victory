@@ -77,6 +77,34 @@ the cheap high-volume half; an Electron driver is the other half, and neither
 substitutes for the other. Do not let the fast lane's finding count be mistaken for
 coverage.
 
+## Typechecking this directory
+
+```bash
+npm run typecheck:tools          # tsc -p tsconfig.tools.json --noEmit
+```
+
+**`npm run typecheck` does NOT cover this directory.** The root `tsconfig.json` sets
+`include: ["src","tests"]`, and nothing under `src/` or `tests/` imports `tools/playtest`,
+so TypeScript never loads these files and the root check passes regardless of what is in
+them. On 2026-08-27 a whole session of harness edits was committed behind repeated
+"tsc --noEmit exits 0" runs that had never opened one of the edited files.
+
+`tsconfig.tools.json` closes that, and `.husky/pre-commit` runs it automatically whenever a
+`tools/playtest/*.ts` file is staged. Scope is deliberately this directory only — the rest
+of `tools/` carries 471 pre-existing errors (measured 2026-08-27) and would fail unrelated
+commits.
+
+**Do not trust the check because it exits 0** — that is exactly how the original gap hid.
+Verify it still bites:
+
+```bash
+printf '
+const __x: number = "no";
+' >> tools/playtest/types.ts
+npx tsc -p tsconfig.tools.json --noEmit   # MUST exit 2 and name types.ts
+git checkout -- tools/playtest/types.ts
+```
+
 ## Where findings live
 
 **The diary is the record**: `docs/40_reports/playtests/YYYYMMDD_ui_playtest_diary.md`.

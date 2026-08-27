@@ -11,6 +11,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:tools": "tsc -p tsconfig.tools.json --noEmit",
     "start": "tsx src/index.ts",
     "test": "npm run test:vitest:fast",
     "test:engine": "npm run test:vitest:fast",

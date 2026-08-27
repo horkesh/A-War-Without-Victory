@@ -27,6 +27,31 @@ fi
 # Typecheck code/data changes (fast fail ~15s)
 npx tsc --noEmit
 
+# The line above uses tsconfig.json, whose `include` is ["src","tests"]. Nothing under
+# src/ or tests/ imports tools/playtest, so TypeScript never loads the harness and the
+# check above passes no matter what is in it. On 2026-08-27 a full session of harness
+# edits was committed behind repeated "tsc --noEmit exits 0" runs that had never opened
+# one of the edited files. So: when harness files are staged, check them too.
+# Scoped to tools/playtest on purpose -- the rest of tools/ carries 471 pre-existing
+# errors and would fail every unrelated commit.
+staged_tools_list="${TMPDIR:-/tmp}/awwv-precommit-tools-$$.txt"
+git diff --cached --name-only --diff-filter=ACMR > "$staged_tools_list"
+needs_tools_typecheck=0
+while IFS= read -r staged_file; do
+  case "$staged_file" in
+    tools/playtest/*.ts)
+      needs_tools_typecheck=1
+      break
+      ;;
+  esac
+done < "$staged_tools_list"
+rm -f "$staged_tools_list"
+
+if [ "$needs_tools_typecheck" -eq 1 ]; then
+  echo "pre-commit: harness files staged; running tsc -p tsconfig.tools.json"
+  npx tsc -p tsconfig.tools.json --noEmit
+fi
+
 # Baseline regression removed from pre-commit (runs 3 full scenarios, 5+ min).
 # Now checked in CI: .github/workflows/baseline-regression.yml
 # Run manually: npm run test:baselines
