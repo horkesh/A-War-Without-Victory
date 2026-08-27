@@ -498,6 +498,22 @@ async function main(): Promise<void> {
         }]),
     );
 
+    // ENCLAVE GUARD provenance. compute_capital.ts:322 FAILS OPEN: when
+    // `state.military.enclave_state` is absent it returns every known enclave as HELD
+    // and none lost — indistinguishable in the verdict from a genuinely intact war.
+    // On the single most §6-sensitive field in the game, "I don't know" must not render
+    // as "Srebrenica held". Capture the provenance so a run can tell the two apart.
+    const enclaveState = (state as any).military?.enclave_state ?? null;
+    const controllers = (state as any).political?.political_controllers ?? {};
+    const enclaveProvenance = {
+        enclave_state_present: enclaveState !== null && enclaveState !== undefined,
+        enclave_state_keys: enclaveState ? Object.keys(enclaveState).sort() : [],
+        // Ground truth, independent of the capital breakdown.
+        srebrenica_2_controller: controllers['op:srebrenica:srebrenica_2'] ?? null,
+        zepa_2_controller: controllers['op:rogatica:zepa_2'] ?? null,
+        gorazde_2_controller: controllers['op:gorazde:gorazde_2'] ?? null,
+    };
+
     const ledger = tryBuildCostLedger(state);
     const humanCost = ledger ? {
         total_military_killed: ledger.total_military_killed,
@@ -539,6 +555,7 @@ async function main(): Promise<void> {
         decisions_diverged: decisionLog.filter((d) => d.diverged_from_historical).length,
         dayton_resolved: daytonResolved,
         operations_by_faction: opsByFaction,
+        enclave_provenance: enclaveProvenance,
         human_cost: humanCost,
         endgame: endgame ? {
             // The grade is per-faction, inside faction_verdicts — NOT a top-level field.

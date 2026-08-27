@@ -717,7 +717,10 @@ grounds that fixing operations alone reduces an exploit rather than removing it,
 build currently teaches its player the inverse of its thesis. **I concur and record the
 blocking condition as binding on this lane's recommendations.**
 
-### Serb civilian deaths undercounted by half — flagged for owner escalation independently
+### Serb civilian deaths — WITHDRAWN as framed, see §3s
+
+**This subsection is superseded.** The claim below was tested by a Historian seat and does not survive: it is not player-ethnicity-specific, the ~4,000 figure is the engine own tuning target, and the comparison is invalid because the civilian model has no siege or execution pathway. Full reframing in **§3s**. Retained only so the escalation is traceable to its withdrawal.
+
 
 1,910 in the RBiH-player run against an RDC-shaped expectation near ~4,000 (seat confidence:
 medium-high on the ~10% share). The seat's argument for escalating this outside the
@@ -972,6 +975,165 @@ blocking condition as *not sustained on the evidence*, and noting that I concurr
 earlier report before measuring — that concurrence was premature and is withdrawn.
 
 Recorded, not fixed.
+
+## 3s. Serb civilian deaths — the finding is WITHDRAWN as framed, and reframed
+
+Historian seat verdict, 2026-08-27. **The claim "the engine under-counts Serb civilian deaths by
+roughly half, specifically when the player is Bosniak" is wrong in three independent ways and
+must not reach the owner in that form.** It is also, as the seat noted, the exact sentence a
+bad-faith reader would quote.
+
+### Correction to MY premise first
+
+I reported that the engine's civilian total (31,335) matched the blessed checkpoint's 31,115
+within 1%, and concluded the defect was one of *share* rather than *volume*.
+
+**`REAL_WAR_MASTER.md`'s 31,115 is not a historical baseline — it is a prior run of the same
+engine**, on a page that labels civilian coverage NOT ESTABLISHED. Matching it demonstrates
+run-to-run reproducibility, not historical validity. Against history (RDC 39,199) the run is
+**20% low**. Both statements are true; only the second bears on the finding, and I quoted the
+one that does not.
+
+Decomposition of the 1,990 shortfall, from the seat:
+
+    volume: 31,335 / 39,199 = 0.799
+    share:      6.1% / 10%  = 0.610
+    product:  0.799 x 0.610 = 0.487  =  1,910 / 3,920  (exact)
+
+Attribution: share ~61%, volume ~24%, interaction ~14%. **Neither factor alone is "half."**
+
+### The baseline is contested, by a factor of two
+
+| source | civ total | Bosniak | Serb | Croat | Serb share |
+| --- | --- | --- | --- | --- | --- |
+| RDC *Book of the Dead* (2007) | 39,199 | ~32,500 (83%) | **~3,920 (10%)** | ~2,000 (>5%) | 10% |
+| ICTY OTP (Zwierzchowski & Tabeau 2010, Tbl 6a) | 36,700 | 25,609 (69.8%) | **7,480 (20.4%)** | 1,675 (4.6%) | 20.4% |
+
+The ICTY figures were extracted verbatim from the primary PDF by the seat (Civilians Men
+19,715 / 6,299 / 1,230 / 1,482; Civilians Women 5,894 / 1,181 / 445 / 453). **Confidence: HIGH.**
+
+They diverge for one arithmetic reason: both classify by military-list membership, RDC held the
+RS army registries (20,665 Serb dead assigned to JNA-VRS formations) and ICTY's database assigns
+only 15,299. The ~5,400 difference is the same people binned differently — Serb dead absent from
+the military lists ICTY holds **default to civilian**.
+
+**A consistency point that decides which source AWWV should use.** `REAL_WAR_MASTER.md:44`
+records the owner's rejection of the Tabeau ethnicity split for the army-of-service question, on
+the ground that *"it undercounts the VRS (late/incomplete RS registries)."* You cannot reject
+Tabeau's Serb **soldier** count as registry-driven and simultaneously adopt Tabeau's Serb
+**civilian** count, which is inflated by the same missing registries. Consistency points to RDC —
+**but that is a prior decision, not independent evidence**, and it should be surfaced as such.
+
+### "~4,000" is the engine's own tuning target
+
+`src/state/displacement_loss_constants.ts:16-17`:
+
+```ts
+/** RS civilian departure from RBiH/HRHB was mostly voluntary flight (~1% lethality).
+ * Historical: sim was producing ~10,860 RS civ killed vs ~4k actual (n159 audit B2). */
+export const DISPLACEMENT_KILLED_FRACTION_RS_FROM_NON_RS = 0.01;
+```
+
+Commit `fcc184696` (2026-03-06) cut the Serb civilian kill fraction **4% → 1%, deliberately, to
+hit the ~4,000 RDC anchor**, because the engine had been producing 10,860. Bosniak was separately
+raised to 4% because "Bosniak ethnic cleansing was uniquely severe."
+
+**The finding was using the engine's calibration target as evidence that the engine misses that
+target.** The real open question is not a bug but **source selection**: tuned to RDC (~4,000), the
+parameter is under-set ~1.9× against ICTY (7,480). That is a Historian/panel decision.
+
+### It is not player-ethnicity-specific — it tracks war intensity
+
+Every 188w run in the worktree, tabulated by the seat:
+
+| run | player | ops | total civ | Bosniak | Serb | Croat | Serb % |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| au-RBiH-0 | RBiH aut0 | 2 | 31,335 | 27,610 | 1,910 | 1,815 | 6.1% |
+| au-RBiH-1 | RBiH aut1 | 11 | 31,771 | 27,080 | 2,410 | 2,281 | 7.6% |
+| hc-HRHB | HRHB | 1 | 32,541 | 27,327 | 2,838 | 2,376 | 8.7% |
+| au-RS-1 | RS aut1 | 15 | 32,244 | 26,781 | 3,179 | 2,284 | 9.9% |
+| au-RS-0 | RS aut0 | 16 | 34,687 | 28,527 | 3,596 | 2,564 | **10.4%** |
+
+- **The RS-player run reproduces the historical shape almost exactly** — 82.2/10.4/7.4 against
+  RDC's 83/10/>5. The engine is fully capable of the historical share.
+- **Bosniak civilian dead are nearly invariant** (26,781-28,527, ±3.2%) while Serb varies **1.88×**
+  and Croat 1.41×. Serb and Croat deaths are the only variable component of the model.
+- The variation is **monotone in war intensity, not player ethnicity.** Serb civilian deaths in
+  this engine require RS-held ground changing hands; in a run with two Federation operations,
+  almost none did. An engine that killed 3,900 Serb civilians in that run would be the defect.
+
+### The comparison is invalid regardless — no siege, no execution pathway
+
+Exactly two civilian-death pathways exist, and both require territory changing hands or hostile
+occupation: `recordCivilianDisplacementCasualties` (`displacement.ts:558,565,854,862`;
+`displacement_takeover.ts:771,894`) and `paramilitary_sweep.ts:950`. **There is no siege pathway,
+no shelling-under-static-front pathway, and no mass-execution pathway.**
+
+The war's two largest civilian-death events therefore sit entirely outside the model:
+- **Sarajevo siege — 4,954 civilians** (ICTY, Tabeau 2003), 44 months, no control change, ~13% of
+  all civilian dead.
+- **Srebrenica, July 1995 — ~8,000.** The takeover is modelled; the executions are not. Per canon
+  H1.8 the enclave outcome is deliberately event-owned.
+
+Both are overwhelmingly Bosniak. So the engine is missing **~13,000 real Bosniak civilian deaths**
+and still reports 27,610 against a historical Bosniak civilian total of ~32,500 — its displacement
+pathway alone produces roughly **1.4× the historical takeover-pathway Bosniak subtotal**. The
+numerator is over-produced *and* the denominator is missing 13k deaths from unmodelled causes.
+**A percentage built on that denominator cannot be scored against RDC percentages at all.** That
+does not qualify the finding; it invalidates it.
+
+### Srebrenica classification cuts against the comparison, hard
+
+RDC's own assessors (HRDAG, rdn5.pdf §1.5) state that BBD "Status in War" is set by military-list
+membership only and that *"civilians are in our opinion underrepresented"* — families registered
+dead relatives as soldiers to obtain post-mortem benefits. The combat/non-combat field built to
+fix this is **96.4% missing** and "of no use at all." ICTY's Srebrenica finding is ~⅓ 28th
+Division, ~⅔ civilians, and the classification is contested in live proceedings. Reclassifying
+toward military lowers the Bosniak civilian count and **raises the Serb share toward ICTY's 20%**;
+toward civilian does the reverse. **Any Serb-share finding must state which convention it
+assumes.** The original claim stated none.
+
+### LATENT TRAP — worth its own ticket
+
+`scenario_runner.ts:1554-1556` sets the census to `undefined` inside a **silent catch**. The census
+currently loads clean (110 municipalities, 0 missing breakdowns, 4,360,093 / 43.3% Bosniak /
+31.3% Serb / 17.5% Croat — matching the real 1991 census to a tenth of a point). But
+`displacement.ts:565` and `:862` carry a hardcoded
+`recordCivilianDisplacementCasualties(state, 'RBiH', lostAmount, 0)` fallback. **If that data file
+ever moves, every civilian death in the game silently becomes Bosniak, with no error.** Not
+firing today; one file-move away from firing.
+
+### What should reach the owner instead
+
+> The engine's civilian-casualty model has no siege pathway and no mass-execution pathway — only
+> takeover and displacement. Historically those two missing pathways produced roughly 13,000
+> deaths (Sarajevo 4,954, Srebrenica ~8,000), so neither the engine's civilian total nor its
+> ethnic shares are comparable to the historical record yet. `REAL_WAR_MASTER` already records
+> this as NOT ESTABLISHED; the code confirms why. **Per-nationality civilian comparisons should
+> not be run until that gap closes, because every such comparison currently measures the coverage
+> gap rather than the model.**
+>
+> Underneath it, one genuine structural property: **Serb and Croat civilian deaths are the only
+> variable component.** Bosniak deaths vary ±3.2% across all outcomes; Serb deaths vary 1.88× —
+> because Bosniak deaths come from the invariant 1992 takeover wave while non-Bosniak deaths
+> require Federation counter-offensives. A statement about mechanism, not about ethnic accounting.
+>
+> And one decision for the Historian/panel, not a bug: the Serb civilian rate is calibrated to
+> RDC (~4,000); ICTY's figure is 7,480. The preference for RDC rests on the owner's rejection of
+> the Tabeau split over incomplete RS registries — coherent and consistent, but it should be
+> **recorded as the explicit reason** rather than left implicit, precisely because this is the
+> number that will be contested.
+
+### Housekeeping from the same seat
+
+- `tmp-playtest/hc/summary.json` reports a civilian total with NULL per-faction figures (older
+  schema). Do not read per-faction numbers from it.
+- The prior Historian verdict's "BB1 pp.189-363 not extracted" is **imprecise**: pp.189-213 and
+  215-225 ARE extracted. Actual BB1 gaps: 1-37, 78-155, 214, 226-400, 502-505, 546+.
+- `HISTORICAL_TIMELINE_MASTER.md` contains **no** civilian casualty statistics and is not a source
+  for this question. The BB knowledge base carries narrative references but no aggregate
+  civilian-casualty-by-ethnicity data — it is a CIA operational military history, the wrong
+  instrument here.
 
 ## 4. Fixed this session (recorded, not open)
 
