@@ -52,7 +52,17 @@ function enemyHeldOsids(state: GameState, faction: FactionId): string[] {
  * inherits this so that mistake cannot recur by omission.
  */
 function acceptOperationAuthorizations(state: GameState): LeverPlan['proposals'] {
-    return [...pendingProposals(state, 'HISTORICAL_OP:'), ...pendingProposals(state, 'APPROVE_OP:')]
+    // OPPORTUNITY: was missing until 2026-08-27 and that mattered. The Federation
+    // opportunity catalogs (5th Corps, Central Bosnia, Federation Western Bosnia —
+    // 10 RBiH and 5 HRHB entries) are delivered ONLY through this channel, and it is
+    // itself gated on autonomy_level === 1. With the prefix unhandled and autonomy at
+    // its default 0, every one of those operations was dormant in every run, and the
+    // resulting silence was misread as "ARBiH/HVO have almost no operations authored".
+    return [
+        ...pendingProposals(state, 'HISTORICAL_OP:'),
+        ...pendingProposals(state, 'APPROVE_OP:'),
+        ...pendingProposals(state, 'OPPORTUNITY:'),
+    ]
         .map((p) => ({ proposalId: (p.proposal_id ?? p.id) as string, accept: true }))
         .sort((a, b) => a.proposalId.localeCompare(b.proposalId));
 }

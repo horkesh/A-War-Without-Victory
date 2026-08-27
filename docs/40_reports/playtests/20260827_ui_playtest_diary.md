@@ -1250,6 +1250,147 @@ Highest-value fix in the lane, and cheap: the fallback at `compute_capital.ts:32
 
 Recorded, not fixed.
 
+## 3q. RS t42 cliff — ROOT-CAUSED. One unbuildable queue entry sterilizes a corps for the rest of the war.
+
+Scenario-tester seat verdict, verified independently against source. **Two defects stack; t42 is
+not a threshold, it is simply where the last still-launchable pre-planned operation happened to
+start.**
+
+### The third case — offered, ACCEPTED, and still never launched
+
+I framed this as not-offered vs offered-and-not-taken. It is neither. From the seat's
+instrumented trace of `state.meta.pending_proposal_reviews`:
+
+```
+HISTORICAL_OP:preplanned:vrs_sarajevo_romanija:Operation Trnovo |t69 |acc=true |res=69
+HISTORICAL_OP:preplanned:vrs_drina:Operation Zvezda 94          |t100|acc=true |res=100
+```
+
+**The player authorized both. Neither ever launched.** The harness is behaving correctly — this
+is not a probe artifact, which is the first thing I asked to be checked given this lane's history.
+
+### SUPPRESSION A — the permanent head-of-queue block
+
+`src/sim/combat/pre_planned_operations.ts:1581-1593`, verified verbatim:
+
+```ts
+// Build axes — brigades may not exist yet; keep queue entry for retry
+const result = buildAxesFromDef(effectiveDef, state, adjacency);
+if (!result) return false;
+if (result.participating.length < MIN_OPERATION_PARTICIPANTS) {   // = 2
+    collectOpInjectionWarnings(state, [{ ... check: 'participants_below_attack_floor' ... }]);
+    return false;
+}
+```
+
+**Three paths return false without shifting the queue** (`:1579`, `:1582`, `:1584-1593`). The
+shift happens only on success, at `:1598`. The other shift sites (`:1521`, `:1527`, `:1551`,
+`:1571`) cover `declined` and `all_objectives_owned` — **a failed BUILD never shifts.**
+
+The retention is deliberate and the comment says so: *"brigades may not exist yet; keep queue
+entry for retry."* That is sound for a transient miss. **There is no staleness bound and no
+abandonment path**, so a permanently-unsatisfiable head entry retries forever.
+
+It then stacks with `:1382`:
+
+```ts
+if ((cmd.queued_operations?.length ?? 0) > 0) continue;
+```
+
+which refuses every *other* pre-planned operation for a corps whose queue is non-empty.
+**One unbuildable head entry therefore sterilizes the entire corps for the remainder of the
+war.** Measured — both queues frozen identically from t50 through t188:
+
+```
+vrs_drina             queued=["Operation Zvezda 94","Operation Pracha River"]
+vrs_sarajevo_romanija queued=["Operation Trnovo","Operation Kijevo"]
+```
+
+The proximate trigger is missing brigades:
+
+```
+t70 |Operation Trnovo   |brigade_missing|Brigade "rs_igman_brigade" not found in formations
+t70 |Operation Trnovo   |brigade_missing|Brigade "rs_trnovo_brigade" not found in formations
+t70 |Operation Trnovo   |axis_empty     |Axis would be empty: 0 valid brigades
+t70 |Operation Trnovo   |participants_below_attack_floor|1 viable participant(s); 2 required
+t101|Operation Zvezda 94|participants_below_attack_floor|1 viable participant(s); 2 required
+```
+
+The bot launched exactly these two operations at t69 and t100 — the same turns — because in its
+world the brigades existed.
+
+### SUPPRESSION B — the emergent channel is off for the player
+
+`selectBotBrigadeOrderFactions` (`war_phases.ts:928-939`) filters the player faction out of
+`generateAllCorpsOrders`, the sole path to `evaluateCorpsOffensiveLaunch` /
+`evaluateSectorOffensiveLaunch` → `pickOperationName` — the source of every `Operacija *` name in
+the bot's list. **My read of this one was right.**
+
+### The autonomy tension, resolved — and it corrects the Operations seat
+
+Autonomy 1 **does** restore the emergent channel. It simply does not help. RS corps stances over
+the 146 turns after t42:
+
+| | offensive | defensive | balanced | reorganize |
+| --- | --- | --- | --- | --- |
+| autonomy 0 | 876 | 0 | 292 | 0 |
+| autonomy 1 | 333 | 435 | 397 | 3 |
+
+At autonomy 0 the stances are frozen leftovers — the bot AI never runs for RS. At autonomy 1 it
+demonstrably does, and what it emits after t42 is:
+
+```
+probe_vrs_2nd_krajina_t52, probe_vrs_2nd_krajina_t65, probe_vrs_2nd_krajina_t70
+```
+
+**Probes only. Zero capture-capable emergent operations.**
+
+So the Operations seat's proposed explanation — *"RS's operations arrive through the
+authorization channel, which is not autonomy-gated, and that asymmetry is the whole story"* — is
+**not what the instrument shows.** The emergent channel genuinely switches on and yields nothing
+but probes. The autonomy-invariance is caused by the probe defect, not by authorization routing.
+
+### Two of my candidate mechanisms are REFUTED
+
+- **`deferUnauthorizedHistoricalOperationsForPlayer`** (`historical_operation_authorization.ts:159-161`)
+  is called from exactly two sites — `desktop_sim.ts:293` and `campaignRecruitmentActions.ts:308`
+  — **both at campaign start, before any operation exists.** It never runs inside the headless
+  turn loop, so its `delete command.queued_operations` is not in play at all. The Operations
+  seat's claim that it wipes the 1KK / Drina / SRK / EBC follow-on chains is **wrong for the
+  headless harness**, and I relayed it without checking the call sites.
+- **`deferredCorps`** (`:1384`, `:1397`) is a within-pass set rebuilt on each call. It is not what
+  persists. What persists is the unshifted queue entry.
+
+### Relation to the known w101 probe finding — stacked, not identical
+
+`memory/frozen_vrs_front_probe_root_cause` is what you hit *after* clearing this one. At autonomy
+0 the emergent channel is off entirely, so the probe defect is invisible; turn autonomy on and it
+becomes the binding constraint. **Fixing the queue block alone will not restore RS's late war,
+and neither will fixing probes alone.** That is the single most important sentence for whoever
+picks this up.
+
+### Open — the trigger, not the defect
+
+Why `rs_igman_brigade` (documented at `pre_planned_operations.ts:568-577` as spawning t29 and
+alive at t69) does not exist at t70 in the player run when it does in the bot run. The seat
+flagged honestly that it *inferred* the brigade's presence in the bot run from the fact that the
+bot launched Trnovo at t69 (which requires ≥2 participants) rather than observing it directly.
+**Next experiment.** Note the separation: the missing brigade is the trigger; **the permanent
+block is the defect** that turns one missed spawn into 146 silent weeks.
+
+### Harness instrumentation — verified before acceptance
+
+The seat added an `ops-trace` probe (`tools/playtest/probes.ts:512`, `:526`). I verified rather
+than accepted: `npx tsc --noEmit` exits 0; no `Math.random` / `Date.now` / `new Date` /
+`performance.now` anywhere in the file; output is sorted; the probe reads `ctx.state`, returns no
+findings, and is inert unless `PLAYTEST_OPS_TRACE` names a path. **Decisive check:**
+`trace-RS-0b` (instrumented) and `au-RS-0-named` (un-instrumented) produce **byte-identical**
+summaries. No engine source modified. Accepted.
+
+Runs: `tmp-playtest/trace-RS-0` (aut 0, 16 ops / t42), `trace-RS-0b` (aut 0, widened capture,
+identical), `trace-RS-1` (aut 1, 15 ops / t86 — the one late op is *triggered*, not emergent, so
+the emergent cliff does not move).
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |
@@ -1317,6 +1458,7 @@ UNDOCUMENTED. Fingerprints are what is read; titles are for humans.
 40cebc4589ae  [medium] Decision `decorate_a_unit_hrhb` has no authored historical default
 410897e96e98  [low] Lever `request_op` refused: insufficient_command_authority (#.#/#)
 448a72521b99  [medium] Decision `milosevic_drina_warning` has no authored historical default
+471db488caa5  [medium] Decision `us_halts_federation_advance_1995` has no authored historical default
 50b8dda5812e  [medium] Interactive control with no accessible label
 50bb59700448  [medium] Typography is inconsistent across surfaces
 56b6bda5d71e  [medium] Interactive control with no accessible label

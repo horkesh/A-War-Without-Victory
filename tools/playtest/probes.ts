@@ -9,6 +9,7 @@
  * Probes observe only. They never mutate state.
  */
 
+import { appendFileSync } from 'node:fs';
 import type { Finding, Probe } from './types.js';
 
 // ── Shared walker ────────────────────────────────────────────────────────────
@@ -509,5 +510,58 @@ export function defaultProbes(turnTimeBudgetMs: number): Probe[] {
         discardedExplanation,
         advanceDeadlock,
         decisionCadence(Number(process.env.PLAYTEST_DECISION_FLOOR ?? 2)),
+        opsTrace(),
     ];
+}
+
+// ── Ops trace (diagnostic, env-gated) ────────────────────────────────────────
+
+/**
+ * LANE-RS-T42-CLIFF (2026-08-27): read-only per-turn trace of the operation
+ * pipeline for one faction. Inert unless PLAYTEST_OPS_TRACE names an output
+ * path, so it cannot perturb any other run.
+ *
+ * Observes only: reads `ctx.state`, appends one JSON line per turn, returns no
+ * findings. No state is written, no RNG, no wall-clock.
+ */
+function opsTrace(): Probe {
+    const out = process.env.PLAYTEST_OPS_TRACE;
+    return {
+        id: 'ops-trace',
+        description: 'Diagnostic per-turn trace of corps operations and op authorizations (env-gated).',
+        onTurn(ctx): Finding[] {
+            if (!out) return [];
+            const st = ctx.state as any;
+            const forms = st?.military?.formations ?? {};
+            const cc = st?.military?.corps_command ?? {};
+            const corps: Record<string, unknown> = {};
+            for (const id of Object.keys(cc).sort()) {
+                if (forms[id]?.faction !== ctx.faction) continue;
+                const cmd = cc[id] ?? {};
+                corps[id] = {
+                    active: (cmd.active_operations ?? []).map((o: any) => `${o?.name}|${o?.status ?? ''}`),
+                    queued: cmd.queued_operations ?? null,
+                    stance: cmd.stance ?? null,
+                };
+            }
+            const reviews = (st?.meta?.pending_proposal_reviews ?? [])
+                .filter((r: any) => typeof r?.proposed_action === 'string'
+                    && /^(HISTORICAL_OP:|APPROVE_OP:|OPPORTUNITY:)/.test(r.proposed_action))
+                .map((r: any) => `${r.proposed_action}|t${r.turn}|acc=${String(r.accepted)}|res=${String(r.resolved_turn)}`)
+                .sort();
+            const warns = (st?.military?.op_injection_warnings ?? [])
+                .map((w: any) => `t${w.turn}|${w.op_name}|${w.check}|${w.detail}`)
+                .sort();
+            appendFileSync(out, JSON.stringify({
+                turn: ctx.turn,
+                faction: ctx.faction,
+                autonomy: st?.meta?.autonomy_level ?? null,
+                player: st?.meta?.player_faction ?? null,
+                corps,
+                reviews,
+                warns,
+            }) + '\n');
+            return [];
+        },
+    };
 }

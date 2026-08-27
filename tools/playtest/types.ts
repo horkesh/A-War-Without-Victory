@@ -184,6 +184,12 @@ export interface RunConfig {
      * through the political scorer, so the run is not calibration-comparable.
      */
     decisionMode: 'emergent' | 'historical';
+    /**
+     * Gates the player faction's opportunity and proposal channels. 0 (the engine
+     * default) switches them off entirely; 1 is assisted execution. Runs at 0 cannot
+     * see the Federation opportunity catalogs at all.
+     */
+    autonomyLevel: 0 | 1 | 2 | 3;
     outDir: string;
     /** When false, the run writes only its own log and leaves the shared ledger alone. */
     updateLedger: boolean;
