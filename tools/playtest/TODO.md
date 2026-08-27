@@ -179,3 +179,32 @@ window, where the driver starts clearing blockers before the shell has settled.
 Not chased further today — the harness-improvement task took priority and the 8/8 run is
 reproducible often enough to be useful. Fix by waiting on a positive READY signal after
 Begin (a specific control appearing) rather than a fixed timeout.
+
+## 9. Turn-9 ceiling: the blocking item cannot be reached in the Decision Room
+
+RBiH stalls at turn 9 (1 Jun 1992) on an outstanding presidential signature. Six
+routes tried; the room OPENS but the blocking item is never reached.
+
+Evidence: `tools/playtest/evidence/20260827_turn9_decision_room_blocker.png`
+
+State at the stall — Decision Room open, `ALL 13 ITEMS · REQ 1 · REC 3 · MON 4 ·
+RECORD 5`, `DECISION 1 ITEM · REQ 1`, and the visible list shows only optional
+leadership gestures (Visit the front, Address the nation, Decorate a unit), each with
+its own REVIEW button. The one REQ item is not among them.
+
+Routes tried and what each did:
+1. `REVIEW BLOCKERS` — absent in this state (already consumed).
+2. `SIGNATURE REQUIRED` badge — DO NOT USE. Present from turn 1; clicking it took a
+   working 8-turn driver to 0 turns, twice.
+3. `Open required signature` — not rendered once the inbox card is consumed.
+4. `Command Surface` nav — WORKS, opens the room. Kept.
+5. `REVIEW BEFORE ADVANCE` — clicked; the list does not narrow. No visible effect.
+6. First-match `Review` — opens a leadership gesture, not the blocker.
+
+Next thing to try, NOT yet attempted: click the `DECISION 1 ITEM` tab chip itself by
+its own role/position rather than by a text regex, then take the single Review beneath
+it. The tab text is `Decision1 itemREQ 1 · REC 0 · MON 0 · RECORD 0` with no separators,
+so the current regex almost certainly fails to match it.
+
+Do NOT keep guessing routes. Instrument which element the click lands on, and confirm
+the list contents CHANGE before assuming a tab switch happened.

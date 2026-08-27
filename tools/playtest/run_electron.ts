@@ -446,7 +446,31 @@ async function clearReviewQueue(frame: Frame): Promise<boolean> {
     // A "COMMAND BRIEFING — N warnings need review" banner can sit over the shell with
     // its own REVIEW / x controls; clear it before opening the room.
     await clickIfPresent(frame, /^[×✕✖]$/i, 1200);
-    if (!(await clickIfPresent(frame, /REVIEW BLOCKERS/i, 3000))) return false;
+
+    // Work the queue whether the room is already open or still behind the badge.
+    // Gating on a REVIEW BLOCKERS click meant that once the room WAS open — which is the
+    // state at the turn-9 signature blocker — this returned false immediately and the
+    // Review items were never touched.
+    const alreadyOpen = (await frame.getByRole('button', { name: /^Review$/i }).count().catch(() => 0)) > 0;
+    if (!alreadyOpen && !(await clickIfPresent(frame, /REVIEW BLOCKERS/i, 3000))) {
+        // Turn-9 shape: an outstanding signature, the room CLOSED, and no REVIEW BLOCKERS
+        // badge to open it — the only way in is the Desk's Command Surface nav.
+        // Gated on SIGNATURE REQUIRED so this never fires on an ordinary turn: clicking
+        // navigation unconditionally is what broke turn 1 twice before.
+        const sigOutstanding = (await frame.getByRole('button', { name: /^SIGNATURE REQUIRED$/i }).count().catch(() => 0)) > 0;
+        if (!sigOutstanding) return false;
+        if (!(await clickIfPresent(frame, /^Command Surface$/i, 3000))) return false;
+        if ((await frame.getByRole('button', { name: /^Review$/i }).count().catch(() => 0)) === 0) return false;
+    }
+    // Filter to what actually blocks the turn BEFORE touching any Review button.
+    // The ALL tab lists optional leadership gestures (Visit the front, Address the
+    // nation, Decorate a unit) above the blocking item, so a first-match Review click
+    // opens a gesture and the blocker is never reached. "REVIEW BEFORE ADVANCE" and the
+    // DECISION tab both narrow the list to the item that is holding the turn.
+    if (!(await clickIfPresent(frame, /REVIEW BEFORE ADVANCE/i, 2500))) {
+        await clickIfPresent(frame, /^Decision\s*\d*\s*items?/i, 2000);
+    }
+
     let acted = false;
     for (let i = 0; i < 6; i++) {
         const item = frame.getByRole('button', { name: /^REVIEW$/i }).first();
@@ -454,8 +478,16 @@ async function clearReviewQueue(frame: Frame): Promise<boolean> {
         await item.click({ timeout: 8000 }).catch(() => undefined);
         await frame.page().waitForTimeout(2000);
         acted = true;
-        // Whatever the review opened: take the historical option if offered, else close.
-        if (!(await resolveOpenDecisionModal(frame))) await dismissModal(frame);
+        // Whatever the review opened: historical option, else a signature/approval, else close.
+        if (await resolveOpenDecisionModal(frame)) continue;
+        let signed = false;
+        for (const re of [/^Sign$/i, /Sign and authorize/i, /^Approve$/i, /Authorize/i, /Grant/i, /^Accept$/i]) {
+            if (await clickIfPresent(frame, re, 2000)) { signed = true; break; }
+        }
+        if (!signed) {
+            console.log('      [review-item] unresolved:', JSON.stringify((await screenState(frame)).buttons));
+            await dismissModal(frame);
+        }
     }
     await dismissModal(frame);
     return acted;
