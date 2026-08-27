@@ -42,6 +42,9 @@ handoff; it returns to the owner and does not authorize automatic diagnosis.
   `docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md`. Bundle the reviewed lock
   and compact audit row with that packet. Do not edit current-lane, active governance, roadmap,
   board, indexes, calibration master, or ledgers per packet; those synchronize once at final handoff.
+- P2B alone may additionally allowlist the existing engineering contract
+  `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md` as a named contract/evidence file. This grants
+  no authority for any other documentation change.
 - One implementer, one relevant domain reviewer, and one independent QA reviewer. Review permits
   one consolidated correction pass and one confirmation pass. New non-critical findings go to the
   backlog.
@@ -73,8 +76,8 @@ handoff; it returns to the owner and does not authorize automatic diagnosis.
 | Order | Packet | Outcome | State |
 |---:|---|---|---|
 | 1 | P1 | Release-path truth | Accepted / complete |
-| 2 | P2A | Delete legacy force-launch authority | NEXT |
-| 3 | P2B | Delete Operation Briefing mutation authority | Waiting |
+| 2 | P2A | Delete legacy force-launch authority | Accepted / complete |
+| 3 | P2B | Delete Operation Briefing mutation authority | NEXT |
 | 4 | P3 | Conserved threat lineage | Waiting |
 | 5 | P4 | Non-starving pre-planned queues | Waiting |
 | 6 | P5 | Delete APWB/Tigar exception | Waiting |
@@ -131,6 +134,8 @@ deleted symbol outside the named old-save fixture; current serialization contain
 **Tests:** `tests/ui/oob_operations_panel.test.ts`,
 `tests/desktop_persistence_contract.test.ts`,
 `tests/desktop_packaged_runtime_probe.test.ts`.
+
+**Contract/evidence:** `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`.
 
 **Change:** delete `stage-operation-decision`, its bridge/callback/action props, and the
 Launch/Probe/Postpone/Abort footer. Retain the read-only modal and Decision Room as the sole action

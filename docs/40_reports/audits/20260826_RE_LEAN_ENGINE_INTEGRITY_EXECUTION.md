@@ -804,3 +804,16 @@ exclusion, production LOC reduction, old-save/current-serialization determinism 
 census are verified. The balanced receipt contains exactly the frozen three failures:
 `integration_deployment_health` `3 > 2`, `integration_run_diagnostics` `3 > 2`, and the Cutileiro
 RBiH response mismatch in `peace_plans`; it contains no new failure.
+
+## P2B boundary correction
+
+P2A is accepted and complete; P2B is next. Architect review found that P2B must name the existing
+`docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md` as an exact contract/evidence file so removal of
+the Operation Briefing mutation authority cannot leave the engineering contract stale. This is a
+P2B-only documentation exception and authorizes no other document.
+
+The packaged-runtime precondition is binding. Run the unchanged packaged probe once on clean P2B
+base `a3f14d7f44da38b62cb82ef49d0462d164a1f1da` before implementation. A missing verdict stops P2B
+without rerun, diagnosis, repair, or implementation. Only a green base verdict permits the
+candidate: it receives one unchanged packaged probe and one bounded live visual session, with no
+retry campaign or probe modification.
