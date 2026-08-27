@@ -197,18 +197,6 @@ function getAvailableElites(state: GameState, faction: string, turn: number): Fo
         .sort(strictCompare);
 }
 
-/**
- * Returns true if a corps already has an elite brigade loaned to it this turn.
- */
-function corpsHasLoanedElite(state: GameState, corpsId: string): boolean {
-    const formations = state.military.formations ?? {};
-    for (const fid of Object.keys(formations).sort(strictCompare)) {
-        const f = formations[fid];
-        if (f.elite_loan_state?.on_loan && f.elite_loan_state.loaned_to_corps === corpsId) return true;
-    }
-    return false;
-}
-
 function describeCorpsNeed(
     reason: ReserveRequestReason,
     description: string
@@ -644,8 +632,11 @@ export function holdReserveAtMainStaff(
 
 export function generateArmyReserveRequests(
     state: GameState,
-    adjacency: Map<Osid, Osid[]>
+    adjacency?: Map<Osid, Osid[]>
 ): void {
+    const corpsWithLoanedElite = reconcileEliteLoanOperationCommitments(state);
+    if (!adjacency) return;
+
     const formations = state.military.formations ?? {};
     const corpsCommand = state.military.corps_command ?? {};
     const corpsSectors = state.military.corps_front_sectors ?? {};
@@ -682,7 +673,7 @@ export function generateArmyReserveRequests(
         if (!corpsFaction) continue;
 
         // Skip if already has a loaned elite
-        if (corpsHasLoanedElite(state, corpsId)) continue;
+        if (corpsWithLoanedElite.has(corpsId)) continue;
 
         const cmd = corpsCommand[corpsId];
         const sector = Object.keys(corpsSectors).sort(strictCompare).map(k => corpsSectors[k]).find(s => s.corps_id === corpsId);
@@ -1253,6 +1244,31 @@ export function evaluateArmyReserveAssignments(
 
 // ─── Per-turn tick ────────────────────────────────────────────────────────────
 
+/** Reconcile live loan commitments before brigade orders and return their receiving corps. */
+function reconcileEliteLoanOperationCommitments(state: GameState): Set<string> {
+    const formations = state.military.formations ?? {};
+    const corpsCommand = state.military.corps_command ?? {};
+    const corpsWithLoanedElite = new Set<string>();
+    for (const bid of Object.keys(formations).sort(strictCompare)) {
+        const loan = formations[bid].elite_loan_state;
+        if (!loan?.on_loan || !loan.loaned_to_corps) continue;
+        corpsWithLoanedElite.add(loan.loaned_to_corps);
+
+        const alreadyCommitted = Object.keys(corpsCommand)
+            .sort(strictCompare)
+            .some((corpsId) => (corpsCommand[corpsId]?.active_operations ?? []).some((operation) =>
+                operation.participating_brigades.includes(bid)
+                || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
+            ));
+        const targetCommand = corpsCommand[loan.loaned_to_corps];
+        if (!targetCommand || alreadyCommitted) continue;
+
+        const operation = (targetCommand.active_operations ?? []).find((candidate) => candidate.phase === 'execution');
+        if (operation) attachEliteToOperation(operation, bid);
+    }
+    return corpsWithLoanedElite;
+}
+
 /**
  * Runs each turn after battles.
  *  - Force-recalls on casualty/morale thresholds
@@ -1276,25 +1292,6 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         if (tracker) tracker.total_turns_deployed++;
         // Episode battles_fought, casualties_taken, osids_captured, kia_inflicted_est
         // are updated in real-time by recordBrigadeEngagement() in brigade_history_recorder.ts.
-
-        // ── Auto-join target corps operation (standing rule) ──
-        // If the target corps launched a NEW operation since deployment, join it.
-        // This handles operation transitions: old op ends, new op launches, elite joins.
-        const targetCmd = corpsCommand[ls.loaned_to_corps];
-        const alreadyCommittedToLiveOperation = Object.keys(corpsCommand)
-            .sort(strictCompare)
-            .some((corpsId) => (corpsCommand[corpsId]?.active_operations ?? []).some((operation) =>
-                operation.participating_brigades.includes(bid)
-                || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
-            ));
-        // Auto-join any execution-phase operation the target corps is running
-        if (targetCmd && !alreadyCommittedToLiveOperation) {
-            for (const activeOp of targetCmd.active_operations ?? []) {
-                if (activeOp.phase !== 'execution') continue;
-                attachEliteToOperation(activeOp, bid);
-                break; // Join the first execution-phase op found
-            }
-        }
 
         const turnsSinceLoan = ls.loan_start_turn != null ? turn - ls.loan_start_turn : 0;
         const personnel = f.personnel ?? 0;

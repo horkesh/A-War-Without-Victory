@@ -815,7 +815,7 @@ describe('recallEliteLoan', () => {
 
 // ── tickEliteLoans — force recalls ────────────────────────────────────────────
 
-describe('tickEliteLoans', () => {
+describe('elite loan per-turn reconciliation and tick', () => {
     function makeOnLoanBrigade(id: string, opts: {
         personnel?: number;
         startPersonnel?: number;
@@ -1186,7 +1186,7 @@ describe('tickEliteLoans', () => {
         brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
         brigade.elite_loan_state!.loan_start_turn = 0;
 
-        tickEliteLoans(state, 10);
+        generateArmyReserveRequests(state, chainAdj(3));
 
         const activeOp = state.military.corps_command!.vrs_drina.active_operations[0];
         expect(activeOp.participating_brigades).toEqual(['rs_1st_guards', 'rs_line_1']);
@@ -1230,13 +1230,46 @@ describe('tickEliteLoans', () => {
         brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
         brigade.elite_loan_state!.loan_start_turn = 0;
 
-        tickEliteLoans(state, 10);
+        generateArmyReserveRequests(state, chainAdj(3));
 
         const [oldOperation, authoredOperation] = state.military.corps_command!.vrs_drina.active_operations;
         expect(oldOperation.participating_brigades).toEqual(['rs_line_1']);
         expect(oldOperation.axes?.[0]?.assigned_brigades).toEqual(['rs_line_1']);
         expect(authoredOperation.participating_brigades).toContain('rs_1st_guards');
         expect(authoredOperation.axes?.[0]?.assigned_brigades).toContain('rs_1st_guards');
+    });
+
+    it('does not rewrite operation membership during the post-combat loan tick', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation New',
+                        phase: 'execution',
+                        participating_brigades: ['rs_line_1'],
+                        axes: [{
+                            axis_id: 'axis:new',
+                            assigned_brigades: ['rs_line_1'],
+                            objectives: ['enemy_a'],
+                            status: 'executing',
+                        }],
+                    }],
+                },
+            },
+            turn: 10,
+        });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        brigade.elite_loan_state!.loan_start_turn = 0;
+
+        tickEliteLoans(state, 10);
+
+        const operation = state.military.corps_command!.vrs_drina.active_operations[0];
+        expect(operation.participating_brigades).toEqual(['rs_line_1']);
+        expect(operation.axes?.[0]?.assigned_brigades).toEqual(['rs_line_1']);
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
     });
 });
 

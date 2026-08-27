@@ -102,6 +102,44 @@ describe('war-phase step ordering', () => {
         }
     });
 
+    it('reconciles elite-loan operation commitments before orders and combat', () => {
+        assertBefore('generate-army-reserve-requests', 'generate-bot-brigade-orders');
+        assertBefore('generate-army-reserve-requests', 'resolve-attack-orders');
+        assertBefore('generate-bot-brigade-orders', 'resolve-attack-orders');
+        assertBefore('resolve-attack-orders', 'tick-elite-loans');
+    });
+
+    it('reconciles elite-loan operation commitments without spatial context', () => {
+        const step = warPhases.find(candidate => candidate.name === 'generate-army-reserve-requests');
+        const state = {
+            meta: { phase: 'war', turn: 10 },
+            military: {
+                formations: {
+                    elite: {
+                        id: 'elite',
+                        elite_loan_state: { on_loan: true, loaned_to_corps: 'receiving_corps' },
+                    },
+                },
+                corps_command: {
+                    receiving_corps: {
+                        active_operations: [{
+                            name: 'Operation Test',
+                            phase: 'execution',
+                            participating_brigades: ['line'],
+                            axes: [{ assigned_brigades: ['line'] }],
+                        }],
+                    },
+                },
+            },
+        };
+
+        step!.run({ state } as any);
+
+        const operation = state.military.corps_command.receiving_corps.active_operations[0];
+        expect(operation.participating_brigades).toEqual(['elite', 'line']);
+        expect(operation.axes[0].assigned_brigades).toEqual(['elite', 'line']);
+    });
+
     it('extracted helper families compose into contiguous ordered slices', () => {
         const helperFamilies = [
             warPhaseReconciliationSteps,

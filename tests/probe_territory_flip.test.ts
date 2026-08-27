@@ -10,6 +10,8 @@
 import { describe, it, expect } from 'vitest';
 import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
 import { updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
+import { generateArmyReserveRequests } from '../src/sim/combat/army_reserve_system.js';
+import { generateAllBotOrdersOsid } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import type {
     FactionId,
@@ -283,6 +285,51 @@ function makeMixedOccupationScenario(
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe('occupation declaration (2026-08-26)', () => {
+    it('commits an on-loan contributor before bot order generation and combat', () => {
+        const { state, edges, operation } = makeScenario('probe');
+        const operationless = state.military.formations!['brig_rs_1']!;
+        const loaned = makeFormation('loaned_attacker', 'RS', 'brigade', 'op:rs:staging', {
+            ...operationless,
+            id: 'loaned_attacker',
+            name: 'loaned_attacker',
+            elite_loan_state: {
+                on_loan: true,
+                loaned_to_corps: 'vrs_1st',
+            } as FormationState['elite_loan_state'],
+        });
+        const line = makeFormation('probe_line', 'RS', 'brigade', 'op:rs:hq', {
+            corps_id: 'vrs_1st',
+        });
+        state.military.formations!.loaned_attacker = loaned;
+        state.military.formations!.probe_line = line;
+        operation.participating_brigades = ['probe_line'];
+        operation.axes![0]!.assigned_brigades = ['probe_line'];
+        generateArmyReserveRequests(state, new Map());
+        const adjacency = new Map([
+            ['op:rs:staging', ['op:rbih:target']],
+            ['op:rbih:target', ['op:rs:staging', 'op:rbih:rear']],
+            ['op:rbih:rear', ['op:rbih:target']],
+        ]);
+        generateAllBotOrdersOsid(state, ['RS'], {
+            edges,
+            reverseMap: {} as never,
+            adjacency,
+        });
+        expect(state.military.brigade_attack_orders?.loaned_attacker).toBe('op:rbih:target');
+
+        const report = resolveAttackOrdersOsid(state, edges, adjacency);
+
+        expect(operation.participating_brigades).toContain('loaned_attacker');
+        expect(operation.axes![0]!.assigned_brigades).toContain('loaned_attacker');
+        expect(state.military.brigade_attack_orders?.loaned_attacker).toBeUndefined();
+        expect(report.orders_seen_by_brigade?.loaned_attacker).toBe('op:rbih:target');
+        expect(report.battles[0]?.attacker_brigades).toContain('loaned_attacker');
+        expect(report.battles[0]?.attacker_won).toBe(true);
+        expect(state.political.political_controllers!['op:rbih:target']).toBe('RBiH');
+        expect(report.flips_applied).toBe(0);
+        expect(state.political.control_events).toHaveLength(0);
+    });
+
     it('requires every validated mixed-battle contributor to permit occupation', () => {
         const { state, edges, operation } = makeMixedOccupationScenario('mixed');
 

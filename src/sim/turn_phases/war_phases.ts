@@ -2613,10 +2613,9 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const spatial = getSpatialContextCache(context);
-            if (!spatial) return;
-            const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
+            const adjacency = spatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined;
             generateArmyReserveRequests(context.state, adjacency);
-            evaluateArmyReserveAssignments(context.state, adjacency);
+            if (adjacency) evaluateArmyReserveAssignments(context.state, adjacency);
         }
     },
     {
