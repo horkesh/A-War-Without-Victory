@@ -48,6 +48,6 @@ describe('capture provenance classifier', () => {
         expect(classifyCombatCapture(event, { ...battle, attacker_won: false }))
             .toMatchObject({ kind: 'contradictory_battle_receipt', gates: true });
         expect(classifyCombatCapture({ ...event, mechanism: 'consolidation' }, battle))
-            .toMatchObject({ kind: 'non_combat', gates: true });
+            .toEqual({ kind: 'non_combat_mechanism', gates: false, operation_ids: [] });
     });
 });

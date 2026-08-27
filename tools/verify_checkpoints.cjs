@@ -307,7 +307,10 @@ if (provenanceStops.length === 0) {
 if (operationOwnedVariance.length > 0) {
   console.log(`  ${operationOwnedVariance.length} operation-owned eastern capture(s) — CALIBRATION VARIANCE, not by itself an engine defect:`);
   for (const row of operationOwnedVariance) {
-    console.log(`      ${row.osid}  t${row.capture.turn ?? '?'}  ${row.provenance.operation_ids.join(', ')}`);
+    const owner = row.provenance.kind === 'operation_owned'
+      ? row.provenance.operation_ids.join(', ')
+      : row.provenance.kind;
+    console.log(`      ${row.osid}  t${row.capture.turn ?? '?'}  ${owner}`);
   }
 }
 if (neverLost.length > 0) {

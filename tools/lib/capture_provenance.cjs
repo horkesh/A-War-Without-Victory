@@ -2,7 +2,7 @@
 
 function classifyCombatCapture(event, battle) {
   if (!event || event.mechanism !== 'combat') {
-    return { kind: 'non_combat', gates: true };
+    return { kind: 'non_combat_mechanism', gates: false, operation_ids: [] };
   }
   if (!event.battle_id || !battle) {
     return { kind: 'missing_battle_receipt', gates: true };
