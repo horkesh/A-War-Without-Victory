@@ -2,12 +2,10 @@
   "schema_version": 1,
   "status": "active",
   "lane": "RE",
-  "task": "RE-P1-RELEASE-PATH-TRUTH",
-  "packet": "desktop-imported-root-selection",
-  "base_commit": "34373d5ba1e75c1099042ea9167175c3b5fdca0f",
+  "task": "RE-P1-NODE22-EVIDENCE-CORRECTION",
+  "packet": "record-contract-node22-proof",
+  "base_commit": "3b8add78adfa6f15fafa4c273483c82cc0562d2a",
   "allowlist": [
-    ".github/scripts/detect-changed-paths.sh",
-    "tests/desktop_release_ci_guardrails.test.ts",
     "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
     "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md"
   ],

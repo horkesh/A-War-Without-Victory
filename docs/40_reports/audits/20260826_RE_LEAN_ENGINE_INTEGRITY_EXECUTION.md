@@ -696,6 +696,12 @@ are unchanged. Build implementer verdict: the P1 change is minimal and focused p
 final packet disposition remains with independent review because Core is not all-green and the
 packaged-runtime probe produced no verdict.
 
+The preceding `npm.cmd` results used the machine-default Node 24 runtime and are supplemental, not
+the Node-22 contract proof. `npx.cmd --yes node@22` resolved Node `v22.23.2`; under that executable,
+the focused real-detector suite passed 8/8, the TypeScript no-emit typecheck exited zero, and
+`tools/desktop_bundle_sim.mjs` exited zero. The code/test payload is unchanged and retains staged
+implementation digest `9043eb89018b9d669354875ce46e412f98815f4d5948120d4c787f4bc33d2e5e`.
+
 Architect/domain review: **GO**. A real esbuild metafile trace contains 492 inputs across source
 roots `data`, `desktop`, `map`, `scenario`, `shared`, `sim`, `state`, `ui`, `utils`, and `validate`;
 the prior detector covered `desktop`, `ui`, and `shared`, and P1 adds exactly the seven missing
