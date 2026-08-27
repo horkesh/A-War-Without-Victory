@@ -627,20 +627,54 @@ precision.
 
 **The §6 escalation is withdrawn. Nothing here goes to the enclave-guard panel.**
 
-### What is actually true about Krivaja-95 — smaller, and not a player defect
+### What is actually true about Krivaja-95 — the design is deliberate and §6-compliant
 
-`Krivaja-95` appears in **no run I have**, player or bot:
+Traced to the source. **Krivaja-95 is not the authored mechanism by which Srebrenica falls, and
+was explicitly built so that it could never become one.** `triggered_operations.ts:334-338`:
 
-| run | RS operations | latest START |
-| --- | --- | --- |
-| RS as **player** (au-RS-0-named) | 16 | **t42** |
-| RS as **bot** (inside the RBiH-player run) | 25 | t164 |
+> Current contract: Srebrenica/Zepa fall receipts are **event-owned** by `srebrenica_falls_1995`
+> / `zepa_falls_1995`. Krivaja/Stupcanica are **chronology/AAR context only and must not become
+> alternate fall-delivery mechanics if the event path misses.**
 
-RS-as-bot reaches t164 with 25 operations and still never fires Krivaja-95. So its absence is
-**not** caused by being the player — it is a trigger/frequency-gate question affecting every
-run equally, and Srebrenica falls in these runs by the event-owned path canon **H1.8** already
-specifies rather than by this operation. That is consistent with canon, not a breach of it.
-Open, low-severity, and *not* enclave-guard business.
+The trigger implements exactly that (`triggered_operations.ts:463`):
+
+```ts
+trigger: (state, turn) => turn >= 170 && srebrenicaFallReceiptFired(state),
+```
+
+`srebrenicaFallReceiptFired` (`:144`) reads the `srebrenica_falls_1995` event receipt. **The
+operation requires the fall to have ALREADY happened** — it is the after-action representation
+of Krivaja-95, not its cause. The `t>=170` floor is itself a §6 canonical floor
+(`LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX`, 2026-05-06, bumped 168→170 per
+`Engine_Invariants_v0_9_0.md §6` + `SENSITIVE_HISTORY_DESIGN_GATE.md`, sign-off precedent
+`b03333af` / `bc44ddec`). The fall itself is anchored as an event, not an operation outcome:
+`historical_anchors.ts:296` (`expected_week_max: 170`, XOR with `csq_srebrenica_stalemate_1995`)
+and `:330` (*"Srebrenica fell to RS (forced by srebrenica_falls_1995 event)"*).
+
+**This is canon H1.8 working as designed.** Enclave outcomes are event-owned. The Operations
+seat's finding inverted it: it read a deliberate §6 safeguard as a defect, and I nearly escalated
+that safeguard to the §6 panel as a breach of itself. Its non-firing in my runs is therefore
+**not a defect at any severity** — it is chronology context that requires a receipt plus a free
+`vrs_drina`, and nothing depends on it.
+
+### And `army_hq_only` is a routing flag, not a disable
+
+`triggered_operations.ts:525`, with the authoring comment intact:
+
+```ts
+army_hq_only: true, // net-new: never fires via legacy triggered path (inert flag-off)
+```
+
+It means *this def routes exclusively through `injectArmyHqOperations`, never through the legacy
+`checkTriggeredOperations` path.* The skip the Operations seat found at `:1019-1020` **is that
+routing**, not a suppression — which is why Farz 95 launched normally for a player. Krivaja-95
+carries no `army_hq_only`, so it remains eligible on both paths; its blocker is the receipt, not
+a flag.
+
+**All four questions I sent to a verification seat are now answered from source:** the
+two-subsystem reading is correct, there is no `player_faction` gate on the army-HQ launch path,
+Krivaja-95's non-firing is the event-owned contract working, and `army_hq_only` routes rather
+than disables. Nothing here goes to the §6 panel.
 
 ### THE ACTUAL SEVERE FINDING — an RS player's army goes silent for 146 weeks
 
