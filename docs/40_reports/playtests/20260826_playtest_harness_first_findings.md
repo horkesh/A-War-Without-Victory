@@ -369,3 +369,91 @@ uses an explicit mulberry32 whose seed is recorded. The ledger carries no wall-c
 timestamps and sorts by (severity, surface, fingerprint), so a re-run that finds the
 same things produces a byte-identical file — a clean `git diff` after a run means
 nothing new broke.
+
+---
+
+# Addendum — 2026-08-27: UI playthroughs, all three factions
+
+Everything above predates the UI lane being able to play a turn. This records what
+changed and what the campaigns found. Ledger:
+`docs/40_reports/playtests/findings/FINDINGS.jsonl` (58 distinct).
+
+## Campaign results
+
+| Faction | Turns advanced | Stall | Note |
+| --- | --- | --- | --- |
+| RBiH | **8/8** | turn 9 (1 Jun 1992) | stability proven 3 consecutive runs |
+| HRHB | 8/10 | turn 9 (1 Jun 1992) | identical state to RBiH |
+| RS | 0/10 | turn 1 (6 Apr 1992) | same state, reached immediately |
+
+All through real DOM clicks on the packaged-shape Electron app.
+
+## Findings
+
+### RS opens with six required decisions; RBiH opens with one
+`design:opening_decision_load` — recorded as a **question, not a defect**. A heavier
+opening for RS may be deliberate, but the asymmetry is not stated anywhere. Only TWO of
+the six appear as Presidential Inbox cards; the other four exist solely inside the
+Decision Room, so a player who clears the inbox and presses Advance is refused with no
+visible cause on that screen.
+
+### The turn ceiling is structural, not faction- or event-specific
+Two factions reach the identical state at different turns. At the stall: ADVANCE is
+present and does nothing, a SIGNATURE REQUIRED badge is shown, no REVIEW BLOCKERS
+affordance exists, and the Decision Room's ALL tab lists optional leadership gestures
+(Visit the front, Address the nation, Decorate a unit) **above** the single blocking
+item. Screenshot: `tools/playtest/evidence/20260827_turn9_decision_room_blocker.png`.
+
+### An enabled Advance that silently does nothing
+The engine is correct to refuse while a required decision is outstanding. But an enabled
+control that registers clicks and changes nothing, with no message, is indistinguishable
+from a broken one — it cost this harness several hours of misdiagnosis for exactly that
+reason, which is itself the evidence for how it reads to a player.
+
+## Harness changes
+
+**Content-correctness detection added.** The probes previously only caught BROKEN
+rendering. The owner read one screenshot and found eight defects, every one of them
+content that rendered perfectly and said the wrong thing.
+- `tools/playtest/copy_audit.ts` — static; retired vocabulary in display text, and the
+  same sentence maintained in two places where a rename updated only one. Reproduced
+  both hand-found sector→OG defects and found two more missed by grep. Zero false
+  positives over 5,588 strings.
+- `tools/playtest/ui_content_probes.ts` — runtime; place-name casing, allied ground
+  counted as hostile, front pairs resolving to one municipality through a 1990↔RS rename
+  table, font-family drift. All three mechanically detectable owner findings were caught
+  unprompted on first run.
+- Per-run contact sheet — one page, every screenshot in capture order. Aesthetic quality
+  is the one category no probe covers.
+
+## Ledger hygiene, 2026-08-27
+
+Audited on the question "is everything documented?" and it was not:
+- **21 duplicate rows folded** (76 → 55). Content findings had been keyed to the screen
+  that happened to show them, so one defect occupied seven ledger lines.
+- **Three findings existed only in commit messages and TODO.md** — the RS decision load
+  and both turn-ceiling findings. Now recorded.
+- **Two driver artifacts** left as `open` are now `unconfirmed` with the cause noted.
+
+## Driver defects, and the habit behind them
+
+Ten driver defects were found and fixed. Four share one root: **the harness took an
+action that changed app state, then measured the state it had just changed.**
+
+| Action | Consequence | Reported as |
+| --- | --- | --- |
+| blind `Escape` fallback | paused the game | "ADVANCE does not move the date" |
+| `Open Decision Room` on every pass | navigated away from the decision | "0 decision cards" |
+| surface tour before the turn loop | stranded the shell in Army HQ | "no ADVANCE control" |
+| bare `×` to clear a banner | closed the Decision Room | queue never worked |
+
+Every one produced a false critical about the app. All are marked `unconfirmed` in the
+ledger rather than deleted. The rule now recorded in `TODO.md`: any new interaction must
+state what it perturbs before it is added.
+
+## Open
+
+`clearReviewQueue` is never *called* on RS — something returns true on all 20 clearing
+passes, prime suspect `resolveOpenDecisionModal` looping on a modal that does not close.
+`TODO.md` item 10 states the next step: log which clearer returns true per pass, and do
+not add another route. Handed over deliberately after ten attempts.

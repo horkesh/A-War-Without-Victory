@@ -194,6 +194,79 @@ const BATCHES: Record<string, Finding[]> = {
             },
         },
     ],
+
+    // ── 2026-08-27, faction playthrough campaign (RBiH / RS / HRHB) ─────────
+    'playthrough-20260827': [
+        {
+            kind: 'question',
+            severity: 'high',
+            probe: 'playthrough-observation',
+            title: 'RS opens with six required presidential decisions; RBiH opens with one',
+            detail:
+                'Measured on the first turn of each campaign through the real UI. RS shows '
+                + '"Decision 6 items - REQ 6" in the Decision Room at 6 Apr 1992; RBiH shows one '
+                + 'required decision ("What Is Bosnia?"). HRHB behaves like RBiH. '
+                + 'Compounding it, only TWO of the six surface as Presidential Inbox cards — the '
+                + 'other four exist solely inside the Decision Room, so a player who works the inbox '
+                + 'and presses Advance is refused with no visible reason on that screen. '
+                + 'Recorded as a QUESTION, not a defect: a heavier opening for RS may be deliberate. '
+                + 'But the six-to-one asymmetry has never been stated anywhere, and the split between '
+                + 'inbox-visible and room-only decisions is a discoverability problem regardless of '
+                + 'whether the count is intended.',
+            surface: 'design:opening_decision_load',
+            turn: 1,
+            faction: 'RS',
+            evidence: {
+                RS: 'Decision 6 items - REQ 6 at 6 Apr 1992; 2 of 6 visible as inbox cards',
+                RBiH: '1 required decision (What Is Bosnia?)',
+                HRHB: 'behaves like RBiH',
+                method: 'real Electron UI, DOM clicks, tools/playtest/run_electron.ts',
+            },
+        },
+        {
+            kind: 'friction',
+            severity: 'high',
+            probe: 'playthrough-observation',
+            title: 'Decision Room room-only blockers are unreachable from the screen that refuses the turn',
+            detail:
+                'RBiH and HRHB both stall at turn 9 (1 Jun 1992) and RS at turn 1, on the same shape: '
+                + 'a required item that exists ONLY inside the Decision Room while the turn surface '
+                + 'shows nothing that leads to it. At the stall the shell offers ADVANCE (which does '
+                + 'nothing), a SIGNATURE REQUIRED badge, and no REVIEW BLOCKERS affordance. '
+                + 'The ALL tab then lists optional leadership gestures (Visit the front, Address the '
+                + 'nation, Decorate a unit) ABOVE the single blocking item, so the first thing a player '
+                + 'sees in the room is not what is holding their turn. '
+                + 'Two factions reaching the identical state at different turns establishes this as '
+                + 'structural rather than faction-specific or event-specific.',
+            surface: 'ui:decision_room',
+            turn: 9,
+            faction: 'RBiH',
+            evidence: {
+                RBiH: 'stalls turn 9 (1 Jun 1992)',
+                HRHB: 'stalls turn 9 (1 Jun 1992) — same state',
+                RS: 'stalls turn 1 (6 Apr 1992) — same state, reached sooner via 6 opening decisions',
+                screenshot: 'tools/playtest/evidence/20260827_turn9_decision_room_blocker.png',
+                room_state: 'ALL 13 items - REQ 1 - REC 3 - MON 4 - RECORD 5; DECISION 1 item - REQ 1',
+            },
+            repro_note: 'Play RBiH or HRHB to turn 9, or RS to turn 1, through the UI.',
+        },
+        {
+            kind: 'friction',
+            severity: 'medium',
+            probe: 'playthrough-observation',
+            title: 'Advance is offered and does nothing when a room-only blocker is outstanding',
+            detail:
+                'At every stall the ADVANCE control is present and enabled, clicks register, and the '
+                + 'date does not move. No message explains why. The engine is correct to refuse — a '
+                + 'required decision is outstanding — but to the player an enabled button '
+                + 'that silently does nothing is indistinguishable from a broken one. It cost this '
+                + 'harness several hours of misdiagnosis for exactly that reason.',
+            surface: 'ui:turn_loop',
+            turn: 9,
+            faction: 'RBiH',
+            evidence: { observed: 'ADVANCE TURN -> enabled and clickable; date unchanged after four clicks and ~4 minutes' },
+        },
+    ],
 };
 
 const batch = process.argv[2];

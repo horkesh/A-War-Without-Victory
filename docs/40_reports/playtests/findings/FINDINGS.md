@@ -11,40 +11,47 @@ listed is not a claim that anyone has triaged it.
 
 | | Count |
 | --- | --- |
-| Runs contributing | 6 |
-| Distinct findings | 47 |
-| 🔴 Critical | 6 |
-| 🟠 High | 8 |
-| Bugs | 14 |
-| Friction | 28 |
+| Runs contributing | 10 |
+| Distinct findings | 58 |
+| 🔴 Critical | 7 |
+| 🟠 High | 13 |
+| Bugs | 21 |
+| Friction | 31 |
 | Anomalies | 0 |
-| Open questions | 5 |
-| ⚠ Unconfirmed (suspected harness artefact) | 3 |
+| Open questions | 6 |
+| ⚠ Unconfirmed (suspected harness artefact) | 4 |
 
-**Runs:** `RBiH-counterfactual-188w`, `RBiH-historical-188w`, `RBiH-passive-188w`, `owner-review-20260827`, `owner-review-20260827-og`, `ui-RBiH`
+**Runs:** `RBiH-counterfactual-188w`, `RBiH-historical-188w`, `RBiH-passive-188w`, `copy-audit-2026-08-27`, `owner-review-20260827`, `owner-review-20260827-og`, `playthrough-20260827`, `ui-HRHB`, `ui-RBiH`, `ui-RS`
 
 ## Three worst friction moments
 
 1. 🟠 **Player faces almost no decisions across the campaign** — `design:decision_cadence`, 3× · `07ddb9a5fad8`
 2. 🟠 **Opening screen needs a complete redesign to match the game aesthetic** — `ui:case_file_opening`, 1× · `0ac8f0df01a3`
-3. 🟡 **Interactive control with no accessible label** — `ui:army_hq`, 2322× · `1bc0a56b95c2`
+3. 🟠 **Decision Room room-only blockers are unreachable from the screen that refuses the turn** — `ui:decision_room`, 1× · `ae77d671480f`
 
 ## Bugs
 
 | Severity | Finding | Surface | Hits | Runs | ID |
 | --- | --- | --- | --- | --- | --- |
+| 🔴 critical | Turn cannot be advanced after four attempts | `ui:turn_loop` | 25× | ui-RBiH, ui-RS, ui-HRHB | `6cd4fa018f9a` |
 | 🔴 critical | ⚠ _(unconfirmed)_ No enabled ADVANCE control on the turn surface | `ui:turn_loop` | 15× | ui-RBiH | `fd61eb5e0970` |
-| 🔴 critical | Clicking ADVANCE does not move the date | `ui:turn_loop` | 8× | ui-RBiH | `5cd22877eff8` |
-| 🔴 critical | Turn cannot be advanced after four attempts | `ui:turn_loop` | 8× | ui-RBiH | `6cd4fa018f9a` |
+| 🔴 critical | Campaign shell never becomes ready after Begin | `ui:campaign_start` | 8× | ui-RBiH | `f24f6c4f0c0f` |
+| 🔴 critical | ⚠ _(unconfirmed)_ Clicking ADVANCE does not move the date | `ui:turn_loop` | 8× | ui-RBiH | `5cd22877eff8` |
 | 🔴 critical | Surface `campaign_start` renders no interactive controls | `ui:campaign_start` | 2× | ui-RBiH | `b81eaea102a2` |
 | 🔴 critical | Error shown to the player on campaign_start: "Invalid decisionMode. Use emergent or historical." | `ui:campaign_start` | 1× | ui-RBiH | `0bb0b0c943ba` |
 | 🔴 critical | Selecting a faction does not start a campaign | `ui:side_picker` | 1× | ui-RBiH | `a22af3625aa4` |
+| 🟠 high | A "front" has both sides in the same municipality | `content:priority_fronts` | 88× | ui-RBiH, ui-RS, ui-HRHB | `072256b5b4e9` |
+| 🟠 high | Territory bar counts allied ground as "hostile-held" | `content:territory_bar` | 51× | ui-RBiH, ui-RS, ui-HRHB | `6c6f24ff39fa` |
+| 🟠 high | The same sentence is maintained in two files and they disagree: "A thinly held front OG needs staff review." | `copy:duplicate_sources` | 5× | copy-audit-2026-08-27 | `102752f61718` |
 | 🟠 high | Uncaught page error: Cannot access 'ir' before initialization | `ui:renderer` | 2× | ui-RBiH | `6502868f6e7d` |
 | 🟠 high | Copy says a formation group is "thinly held" — an OG holds ground, it is not held | `ui:operational_sitrep` | 1× | owner-review-20260827-og | `78cd60d64f40` |
 | 🟠 high | Two sources for the same sitrep copy disagree: i18n says "OGs", the hardcoded fallback says "sectors" | `ui:operational_sitrep` | 1× | owner-review-20260827-og | `7c85fee759a7` |
 | 🟠 high | Priority-front labels pair a settlement with its own municipality under two names | `ui:situation_panel` | 1× | owner-review-20260827 | `d5daa3a10f94` |
 | 🟠 high | Territory bar counts allied HVO ground as "hostile-held" | `ui:territory_bar` | 1× | owner-review-20260827 | `ab660671b06e` |
+| 🟡 medium | Place names rendered with lower-case words after the first | `content:place_names` | 54× | ui-RBiH, ui-RS, ui-HRHB | `f832cc39d03a` |
 | 🟡 medium | Operation directive rejected with a reason the player is never shown | `ui:op_directive_rejection` | 29× | RBiH-counterfactual-188w | `ff048ab927a1` |
+| 🟡 medium | Retired term "sector" still in player-visible copy in ui\map\i18n\messages.en.ts | `copy:map/i18n/messages.en.ts` | 1× | copy-audit-2026-08-27 | `ad599a9641f7` |
+| 🟡 medium | Retired term "sector" still in player-visible copy in ui\shared\operational_sitrep_views.ts | `copy:shared/operational_sitrep_views.ts` | 1× | copy-audit-2026-08-27 | `764fd700316e` |
 | 🟡 medium | The Sector Attack operation type still says "Sector" in player-facing text | `ui:ops_planning` | 1× | owner-review-20260827-og | `2bfd8975d35e` |
 | 🟡 medium | Place names are lower-cased after the first word | `ui:place_name_formatting` | 1× | owner-review-20260827 | `919e8513877e` |
 
@@ -55,15 +62,17 @@ listed is not a claim that anyone has triaged it.
 | 🟠 high | Player faces almost no decisions across the campaign | `design:decision_cadence` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `07ddb9a5fad8` |
 | 🟠 high | ⚠ _(unconfirmed)_ Command Authority never spent across the whole campaign | `engine:command_authority` | 1× | RBiH-historical-188w | `ab8f0ac92d5c` |
 | 🟠 high | Opening screen needs a complete redesign to match the game aesthetic | `ui:case_file_opening` | 1× | owner-review-20260827 | `0ac8f0df01a3` |
-| 🟡 medium | Interactive control with no accessible label | `ui:army_hq` | 2322× | ui-RBiH | `1bc0a56b95c2` |
-| 🟡 medium | Interactive control with no accessible label | `ui:chronicle` | 2322× | ui-RBiH | `5ff0afb189d7` |
-| 🟡 medium | Interactive control with no accessible label | `ui:codex` | 2314× | ui-RBiH | `850a3806cfbc` |
-| 🟡 medium | Interactive control with no accessible label | `ui:desk` | 2314× | ui-RBiH | `1e2303120fe2` |
-| 🟡 medium | Interactive control with no accessible label | `ui:records` | 2314× | ui-RBiH | `fc75f83f7348` |
-| 🟡 medium | Interactive control with no accessible label | `ui:campaign_start` | 2271× | ui-RBiH | `56b6bda5d71e` |
-| 🟡 medium | Interactive control with no accessible label | `ui:war_map` | 1919× | ui-RBiH | `b615fa723d8f` |
-| 🟡 medium | Interactive control with no accessible label | `ui:in_game` | 459× | ui-RBiH | `50b8dda5812e` |
-| 🟡 medium | Peace-plan modal offers no historical default and no per-option stakes | `ui:peace_plan_modal` | 12× | ui-RBiH | `182e6e7f012e` |
+| 🟠 high | Decision Room room-only blockers are unreachable from the screen that refuses the turn | `ui:decision_room` | 1× | playthrough-20260827 | `ae77d671480f` |
+| 🟡 medium | Interactive control with no accessible label | `ui:campaign_start` | 4686× | ui-RBiH, ui-RS, ui-HRHB | `56b6bda5d71e` |
+| 🟡 medium | Interactive control with no accessible label | `ui:army_hq` | 4384× | ui-RBiH, ui-RS, ui-HRHB | `1bc0a56b95c2` |
+| 🟡 medium | Interactive control with no accessible label | `ui:chronicle` | 4384× | ui-RBiH, ui-RS, ui-HRHB | `5ff0afb189d7` |
+| 🟡 medium | Interactive control with no accessible label | `ui:codex` | 4376× | ui-RBiH, ui-RS, ui-HRHB | `850a3806cfbc` |
+| 🟡 medium | Interactive control with no accessible label | `ui:desk` | 4376× | ui-RBiH, ui-RS, ui-HRHB | `1e2303120fe2` |
+| 🟡 medium | Interactive control with no accessible label | `ui:records` | 4376× | ui-RBiH, ui-RS, ui-HRHB | `fc75f83f7348` |
+| 🟡 medium | Interactive control with no accessible label | `ui:war_map` | 3478× | ui-RBiH, ui-RS, ui-HRHB | `b615fa723d8f` |
+| 🟡 medium | Interactive control with no accessible label | `ui:in_game` | 1426× | ui-RBiH, ui-HRHB | `50b8dda5812e` |
+| 🟡 medium | Peace-plan modal offers no historical default and no per-option stakes | `ui:peace_plan_modal` | 25× | ui-RBiH, ui-HRHB | `182e6e7f012e` |
+| 🟡 medium | Surface "in_game" renders text in 5 different font families | `content:typography` | 13× | ui-RBiH, ui-HRHB | `35b2632dfcf3` |
 | 🟡 medium | Surface "codex" has no reachable control | `ui:codex` | 5× | ui-RBiH | `e4b031f59b77` |
 | 🟡 medium | Surface "desk" has no reachable control | `ui:desk` | 5× | ui-RBiH | `81513817311f` |
 | 🟡 medium | Surface "records" has no reachable control | `ui:records` | 5× | ui-RBiH | `9a16b34a3a19` |
@@ -71,6 +80,7 @@ listed is not a claim that anyone has triaged it.
 | 🟡 medium | Surface "chronicle" has no reachable control | `ui:chronicle` | 4× | ui-RBiH | `a1259f689f15` |
 | 🟡 medium | Surface "war_map" has no reachable control | `ui:war_map` | 4× | ui-RBiH | `6f579329b22e` |
 | 🟡 medium | ⚠ _(unconfirmed)_ Command Authority sitting at cap at end of campaign | `engine:command_authority` | 1× | RBiH-historical-188w | `45e315b15082` |
+| 🟡 medium | Advance is offered and does nothing when a room-only blocker is outstanding | `ui:turn_loop` | 1× | playthrough-20260827 | `582f880d10c1` |
 | 🟡 medium | Typography is inconsistent across surfaces | `ui:typography` | 1× | owner-review-20260827 | `50bb59700448` |
 | ⚪ low | Lever `replace_co` refused: insufficient_command_authority (#.#/#) | `lever:replace_co` | 705× | RBiH-counterfactual-188w | `adf0fc5fc3d4` |
 | ⚪ low | Lever `request_op` refused: insufficient_command_authority (#.#/#) | `lever:request_op` | 685× | RBiH-counterfactual-188w | `410897e96e98` |
@@ -89,6 +99,7 @@ _None recorded._
 
 | Severity | Finding | Surface | Hits | Runs | ID |
 | --- | --- | --- | --- | --- | --- |
+| 🟠 high | RS opens with six required presidential decisions; RBiH opens with one | `design:opening_decision_load` | 1× | playthrough-20260827 | `7afde0e4e2d4` |
 | 🟡 medium | Decision `address_to_nation_rbih` has no authored historical default | `event:address_to_nation_rbih` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `071aa478b1c1` |
 | 🟡 medium | Decision `decorate_a_unit_rbih` has no authored historical default | `event:decorate_a_unit_rbih` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `a3d3e77f12f8` |
 | 🟡 medium | Decision `strategic_posture_review_rbih` has no authored historical default | `event:strategic_posture_review_rbih` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `681d5f62ef1f` |
@@ -130,6 +141,24 @@ After a normal interaction on campaign_start, the app displayed an error to the 
 | Runs | ui-RBiH |
 | Status | fixed |
 The campaign_start screen mounted but exposes nothing clickable. A player reaching this screen cannot proceed. [FIXED 2026-08-27: decisionMode IPC validator now tolerates undefined (electron-main.cjs); army_hq chunk cycle collapsed to one chunk (vite.config.ts).]
+### 🔴 Campaign shell never becomes ready after Begin
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `f24f6c4f0c0f` |
+| Kind / severity | bug / critical |
+| Surface | `ui:campaign_start` |
+| Probe | `ui-campaign-never-ready` |
+| Occurrences | 8 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+Begin was clicked and neither a dated turn readout nor the in-game navigation appeared within 120s. The player is left on a screen that never finishes loading.
+```json
+{
+  "faction": "RBiH"
+}
+```
+
 ### 🔴 Selecting a faction does not start a campaign
 | Field | Entry |
 | --- | --- |
@@ -158,8 +187,8 @@ The faction was clicked on the side picker and the picker is still on screen aft
 | Occurrences | 8 across 1 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH |
-| Status | open |
-ADVANCE was clicked at 6 Apr 1992 and the date readout was unchanged 30s later. The turn did not advance.
+| Status | unconfirmed |
+ADVANCE was clicked at 6 Apr 1992 and the date readout was unchanged 30s later. The turn did not advance. [DRIVER ARTIFACT: the driver had paused the game with a blind Escape, or was looking for ADVANCE from a surface that has none. Both fixed; see tools/playtest/TODO.md. Not an app defect.]
 ```json
 {
   "turn": 1,
@@ -174,9 +203,9 @@ ADVANCE was clicked at 6 Apr 1992 and the date readout was unchanged 30s later. 
 | Kind / severity | bug / critical |
 | Surface | `ui:turn_loop` |
 | Probe | `ui-turn-blocked` |
-| Occurrences | 8 across 1 run(s) |
+| Occurrences | 25 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
 At 1 Jun 1992 the driver cleared every known blocker four times and the date never moved. Either a blocker type is unhandled or ADVANCE is genuinely inert. Screen state attached.
 ```json
@@ -229,6 +258,88 @@ At turn 1 (6 APR 1992) there is no clickable ADVANCE. The player cannot move the
 }
 ```
 
+### 🟠 A "front" has both sides in the same municipality
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `072256b5b4e9` |
+| Kind / severity | bug / high |
+| Surface | `content:priority_fronts` |
+| Probe | `ui-front-pair-self-reference` |
+| Occurrences | 88 across 3 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
+| Status | open |
+On campaign_start, the priority front "Aginci (bosanska dubica) - Kozarska dubica (bosanska dubica)" names two places that resolve to the same municipality ("bosanska dubica") once 1990 and RS names are reconciled. A front between a municipality and itself is not a front. Expected reading: one place — "Aginci in Kozarska dubica".
+```json
+{
+  "pair": "Aginci (bosanska dubica) - Kozarska dubica (bosanska dubica)",
+  "resolved_municipality": "bosanska dubica",
+  "places": [
+    {
+      "settlement": "Aginci",
+      "municipality": "bosanska dubica"
+    },
+    {
+      "settlement": "Kozarska dubica",
+      "municipality": "bosanska dubica"
+    }
+  ],
+  "seen_on": "campaign_start"
+}
+```
+
+### 🟠 Territory bar counts allied ground as "hostile-held"
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `6c6f24ff39fa` |
+| Kind / severity | bug / high |
+| Surface | `content:territory_bar` |
+| Probe | `ui-alliance-hostile-accounting` |
+| Occurrences | 51 across 3 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
+| Status | open |
+On campaign_start the bar reads Friendly 31.5% / Hostile-held 68.5% while an alliance is active ("close coordination"). An ally's territory is not hostile. Friendly + hostile sums to 100%, so this is a binary player-vs-everyone-else split that ignores alliance state entirely. The alliance changes over a campaign, so the split has to track the relationship, not a fixed faction list.
+```json
+{
+  "friendly_pct": "31.5",
+  "hostile_pct": "68.5",
+  "alliance_posture": "close coordination",
+  "sums_to_100": true,
+  "seen_on": "campaign_start"
+}
+```
+
+### 🟠 The same sentence is maintained in two files and they disagree: "A thinly held front OG needs staff review."
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `102752f61718` |
+| Kind / severity | bug / high |
+| Surface | `copy:duplicate_sources` |
+| Probe | `copy-divergent-duplicate` |
+| Occurrences | 5 across 1 run(s) |
+| First seen | run `copy-audit-2026-08-27`, turn 0 |
+| Runs | copy-audit-2026-08-27 |
+| Status | open |
+Two sources render what is structurally the same sentence with different wording, so which words the player sees depends on which code path runs. This is the signature of a rename that updated one copy and missed the other.
+
+Variants:
+  - "A thinly held front OG needs staff review."
+  - "A thinly held front sector needs staff review."
+```json
+{
+  "shape": "a thinly held front <term> needs staff review.",
+  "locations": [
+    "src/ui/map/i18n/messages.en.ts:3745 operationalSitrep.headline.frontExposed.one",
+    "src/ui/shared/operational_sitrep_views.ts:178 (hardcoded)"
+  ],
+  "variants": [
+    "A thinly held front OG needs staff review.",
+    "A thinly held front sector needs staff review."
+  ]
+}
+```
+
 ### 🟠 Player faces almost no decisions across the campaign
 | Field | Entry |
 | --- | --- |
@@ -247,6 +358,27 @@ At turn 1 (6 APR 1992) there is no clickable ADVANCE. The player cannot move the
   "turns": 188,
   "per_ten_turns": 1.38,
   "floor": 2
+}
+```
+
+### 🟠 RS opens with six required presidential decisions; RBiH opens with one
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `7afde0e4e2d4` |
+| Kind / severity | question / high |
+| Surface | `design:opening_decision_load` |
+| Probe | `playthrough-observation` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `playthrough-20260827`, turn 1 |
+| Runs | playthrough-20260827 |
+| Status | open |
+Measured on the first turn of each campaign through the real UI. RS shows "Decision 6 items - REQ 6" in the Decision Room at 6 Apr 1992; RBiH shows one required decision ("What Is Bosnia?"). HRHB behaves like RBiH. Compounding it, only TWO of the six surface as Presidential Inbox cards — the other four exist solely inside the Decision Room, so a player who works the inbox and presses Advance is refused with no visible reason on that screen. Recorded as a QUESTION, not a defect: a heavier opening for RS may be deliberate. But the six-to-one asymmetry has never been stated anywhere, and the split between inbox-visible and room-only decisions is a discoverability problem regardless of whether the count is intended.
+```json
+{
+  "RS": "Decision 6 items - REQ 6 at 6 Apr 1992; 2 of 6 visible as inbox cards",
+  "RBiH": "1 required decision (What Is Bosnia?)",
+  "HRHB": "behaves like RBiH",
+  "method": "real Electron UI, DOM clicks, tools/playtest/run_electron.ts"
 }
 ```
 
@@ -287,6 +419,30 @@ Owner on the case-file opening, verbatim: it "screams AI slop design with big it
   "owner_quote": "screams AI slop design with big italic letters for highlight and so on",
   "current_screen": "tools/playtest/evidence/20260827_case_file_landing.png",
   "note": "The opening was made reachable by commit 554e89377; before that players never saw it."
+}
+```
+
+### 🟠 Decision Room room-only blockers are unreachable from the screen that refuses the turn
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `ae77d671480f` |
+| Kind / severity | friction / high |
+| Surface | `ui:decision_room` |
+| Probe | `playthrough-observation` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `playthrough-20260827`, turn 9 |
+| Runs | playthrough-20260827 |
+| Status | open |
+RBiH and HRHB both stall at turn 9 (1 Jun 1992) and RS at turn 1, on the same shape: a required item that exists ONLY inside the Decision Room while the turn surface shows nothing that leads to it. At the stall the shell offers ADVANCE (which does nothing), a SIGNATURE REQUIRED badge, and no REVIEW BLOCKERS affordance. The ALL tab then lists optional leadership gestures (Visit the front, Address the nation, Decorate a unit) ABOVE the single blocking item, so the first thing a player sees in the room is not what is holding their turn. Two factions reaching the identical state at different turns establishes this as structural rather than faction-specific or event-specific.
+**Repro:** Play RBiH or HRHB to turn 9, or RS to turn 1, through the UI.
+
+```json
+{
+  "RBiH": "stalls turn 9 (1 Jun 1992)",
+  "HRHB": "stalls turn 9 (1 Jun 1992) — same state",
+  "RS": "stalls turn 1 (6 Apr 1992) — same state, reached sooner via 6 opening decisions",
+  "screenshot": "tools/playtest/evidence/20260827_turn9_decision_room_blocker.png",
+  "room_state": "ALL 13 items - REQ 1 - REC 3 - MON 4 - RECORD 5; DECISION 1 item - REQ 1"
 }
 ```
 
@@ -393,6 +549,109 @@ The status bar reads "Friendly 31.5% | Hostile-held 68.5%" while the same bar sh
 {
   "observed": "Friendly 31.5% | Hostile-held 68.5%, with ALLIED shown on the same bar",
   "alliance_state": "Bosniak-Croat Coordination: close coordination (t1) -> strained (t9)"
+}
+```
+
+### 🟡 Place names rendered with lower-case words after the first
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `f832cc39d03a` |
+| Kind / severity | bug / medium |
+| Surface | `content:place_names` |
+| Probe | `ui-place-name-casing` |
+| Occurrences | 54 across 3 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
+| Status | open |
+On campaign_start, 4 place-name fragment(s) capitalise only the first word. Bosnian place names capitalise every word: "Donji Dubovik (Bosanska Krupa)", not "Donji dubovik (bosanska krupa)". Signature of a capitalise-first-letter transform over an id-derived string rather than a display name.
+```json
+{
+  "samples": [
+    "(bosanska dubica)",
+    "(bosanska krupa)",
+    "Kozarska dubica",
+    "Donji dubovik"
+  ],
+  "count": 4,
+  "seen_on": "campaign_start"
+}
+```
+
+### 🟡 Surface "in_game" renders text in 5 different font families
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `35b2632dfcf3` |
+| Kind / severity | friction / medium |
+| Surface | `content:typography` |
+| Probe | `ui-font-family-drift` |
+| Occurrences | 13 across 2 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH, ui-HRHB |
+| Status | open |
+5 distinct primary font families are in use on one surface (budget 3): Helvetica Neue, IBM Plex Mono, IBM Plex Sans Condensed, Courier New, Georgia. Typography inconsistency across surfaces was raised by the owner as a defect rather than deliberate contrast. Once a typographic system is agreed, set the budget to it and this becomes a regression guard.
+```json
+{
+  "families": [
+    "Courier New",
+    "Georgia",
+    "Helvetica Neue",
+    "IBM Plex Mono",
+    "IBM Plex Sans Condensed"
+  ],
+  "budget": 3,
+  "seen_on": "in_game"
+}
+```
+
+### 🟡 Retired term "sector" still in player-visible copy in ui\map\i18n\messages.en.ts
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `ad599a9641f7` |
+| Kind / severity | bug / medium |
+| Surface | `copy:map/i18n/messages.en.ts` |
+| Probe | `copy-retired-vocabulary` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `copy-audit-2026-08-27`, turn 0 |
+| Runs | copy-audit-2026-08-27 |
+| Status | open |
+6 display string(s) in src/ui/map/i18n/messages.en.ts still say "sector" after the rename to OG / Operational Group. Placeholders like {sector} are excluded — these are words the player reads. A player who sees both vocabularies for one concept has to work out that they are the same thing.
+```json
+{
+  "count": 6,
+  "strings": [
+    "119: opsPlanning.param.opType.sector_attack => Sector Attack",
+    "133: opsPlanning.param.subtitle.sector_attack => One sector push",
+    "3981: opsPlanning.param.label.sectorAttack => Sector Attack",
+    "3995: opsPlanning.param.subtitle.sectorAttack => One sector push",
+    "4001: opsPlanning.param.title.sectorAttack => Sector Attack — Commits 3-8 brigades to push on a single sector front.",
+    "4002: opsPlanning.param.title.generalOffensive => General Offensive — Corps-wide multi-axis assault. High risk, high rew"
+  ]
+}
+```
+
+### 🟡 Retired term "sector" still in player-visible copy in ui\shared\operational_sitrep_views.ts
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `764fd700316e` |
+| Kind / severity | bug / medium |
+| Surface | `copy:shared/operational_sitrep_views.ts` |
+| Probe | `copy-retired-vocabulary` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `copy-audit-2026-08-27`, turn 0 |
+| Runs | copy-audit-2026-08-27 |
+| Status | open |
+6 display string(s) in src/ui/shared/operational_sitrep_views.ts still say "sector" after the rename to OG / Operational Group. Placeholders like {sector} are excluded — these are words the player reads. A player who sees both vocabularies for one concept has to work out that they are the same thing.
+```json
+{
+  "count": 6,
+  "strings": [
+    "175: (hardcoded) => Widespread thinly held front sectors need staff review.",
+    "176: (hardcoded) => Many thinly held front sectors need staff review.",
+    "177: (hardcoded) => Several thinly held front sectors need staff review.",
+    "178: (hardcoded) => A thinly held front sector needs staff review.",
+    "179: (hardcoded) => No thinly held front sectors are currently reported.",
+    "356: (hardcoded) => Staff handoff: inspect front sectors in War Summary; no direct preside"
+  ]
 }
 ```
 
@@ -540,9 +799,9 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 | Kind / severity | friction / medium |
 | Surface | `ui:army_hq` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 2322 across 1 run(s) |
+| Occurrences | 4384 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
 A control on army_hq has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
 ```json
@@ -570,9 +829,9 @@ The top-level "army_hq" navigation control was absent or disabled during normal 
 | Kind / severity | friction / medium |
 | Surface | `ui:campaign_start` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 2271 across 1 run(s) |
+| Occurrences | 4686 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
 A control on campaign_start has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
 ```json
@@ -588,9 +847,9 @@ A control on campaign_start has no text content and no accessible name — unrea
 | Kind / severity | friction / medium |
 | Surface | `ui:chronicle` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 2322 across 1 run(s) |
+| Occurrences | 4384 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
 A control on chronicle has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
 ```json
@@ -618,9 +877,9 @@ The top-level "chronicle" navigation control was absent or disabled during norma
 | Kind / severity | friction / medium |
 | Surface | `ui:codex` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 2314 across 1 run(s) |
+| Occurrences | 4376 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
 A control on codex has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
 ```json
@@ -648,9 +907,9 @@ The top-level "codex" navigation control was absent or disabled during normal pl
 | Kind / severity | friction / medium |
 | Surface | `ui:desk` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 2314 across 1 run(s) |
+| Occurrences | 4376 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
 A control on desk has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
 ```json
@@ -678,9 +937,9 @@ The top-level "desk" navigation control was absent or disabled during normal pla
 | Kind / severity | friction / medium |
 | Surface | `ui:in_game` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 459 across 1 run(s) |
+| Occurrences | 1426 across 2 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-HRHB |
 | Status | open |
 A control on in_game has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
 ```json
@@ -747,9 +1006,9 @@ Measured across `messages.en.ts`: 104 keys have display text already renamed to 
 | Kind / severity | friction / medium |
 | Surface | `ui:peace_plan_modal` |
 | Probe | `ui-peace-plan-unmarked` |
-| Occurrences | 12 across 1 run(s) |
+| Occurrences | 25 across 2 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-HRHB |
 | Status | open |
 The diplomatic peace-plan modal presents Accept / Review Later / Reject with no HISTORICAL DEFAULT marker and no dimension shifts, unlike event decisions which show both. The player cannot tell what history did or what any choice costs. Driver policy for this run: reject.
 ```json
@@ -807,14 +1066,32 @@ The top-level "records" navigation control was absent or disabled during normal 
 | Kind / severity | friction / medium |
 | Surface | `ui:records` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 2314 across 1 run(s) |
+| Occurrences | 4376 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
 A control on records has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
 ```json
 {
   "size": "43x24"
+}
+```
+
+### 🟡 Advance is offered and does nothing when a room-only blocker is outstanding
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `582f880d10c1` |
+| Kind / severity | friction / medium |
+| Surface | `ui:turn_loop` |
+| Probe | `playthrough-observation` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `playthrough-20260827`, turn 9 |
+| Runs | playthrough-20260827 |
+| Status | open |
+At every stall the ADVANCE control is present and enabled, clicks register, and the date does not move. No message explains why. The engine is correct to refuse — a required decision is outstanding — but to the player an enabled button that silently does nothing is indistinguishable from a broken one. It cost this harness several hours of misdiagnosis for exactly that reason.
+```json
+{
+  "observed": "ADVANCE TURN -> enabled and clickable; date unchanged after four clicks and ~4 minutes"
 }
 ```
 
@@ -858,9 +1135,9 @@ The top-level "war_map" navigation control was absent or disabled during normal 
 | Kind / severity | friction / medium |
 | Surface | `ui:war_map` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 1919 across 1 run(s) |
+| Occurrences | 3478 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
-| Runs | ui-RBiH |
+| Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
 A control on war_map has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
 ```json
