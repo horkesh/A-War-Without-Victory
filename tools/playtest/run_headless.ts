@@ -405,6 +405,28 @@ async function main(): Promise<void> {
         console.log('  ledger untouched (--no-ledger)');
     }
     console.log(`  artifacts: ${cfg.outDir}`);
+
+    // Documentation is part of the run, not an afterthought. On 2026-08-27 three real
+    // findings lived only in commit messages because "I wrote it down" felt true.
+    try {
+        const { checkCoverage } = await import('./diary_check.js');
+        const cov = checkCoverage();
+        if (!cov.diaryPath) {
+            console.log('  DIARY: none found — findings have nowhere to be documented.');
+        } else if (cov.undocumented.length > 0) {
+            console.log(`  DIARY: ${cov.undocumented.length} finding(s) NOT in the diary:`);
+            for (const f of cov.undocumented.slice(0, 8)) {
+                console.log(`    ! ${f.fingerprint} [${f.severity}] ${f.title.slice(0, 76)}`);
+            }
+            if (cov.undocumented.length > 8) console.log(`    ! … and ${cov.undocumented.length - 8} more`);
+            console.log('    Write them up in the diary, then: diary_check.ts --update');
+        } else {
+            console.log(`  DIARY: all ${cov.documented.length} open findings documented.`);
+        }
+    } catch (e) {
+        console.log(`  DIARY: coverage check failed — ${String((e as Error)?.message ?? e).slice(0, 120)}`);
+    }
+
 }
 
 main().catch((e) => {

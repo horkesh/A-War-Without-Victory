@@ -169,3 +169,60 @@ regex literal is valid TypeScript.
 - **Turn 9 ceiling** unbroken on RBiH and HRHB.
 - **Nothing beyond 1 Jun 1992 has been played through the UI**, so no claim in this diary
   extends to the middle or end of the war.
+
+
+<!--
+Coverage block. Every OPEN finding must appear here, or diary_check reports it
+UNDOCUMENTED. Fingerprints are what is read; titles are for humans.
+-->
+<!-- diary-coverage
+071aa478b1c1  [medium] Decision `address_to_nation_rbih` has no authored historical default
+072256b5b4e9  [high] A "front" has both sides in the same municipality
+07ddb9a5fad8  [high] Player faces almost no decisions across the campaign
+0a33a4fe74ef  [low] Lever `replace_co` refused: no_current_co
+0ac8f0df01a3  [high] Opening screen needs a complete redesign to match the game aesthetic
+102752f61718  [high] The same sentence is maintained in two files and they disagree: "A thinly held front OG needs st
+121de4b137cf  [medium] Decision `csq_third_party_mediation_offered` has no authored historical default
+182e6e7f012e  [medium] Peace-plan modal offers no historical default and no per-option stakes
+1bc0a56b95c2  [medium] Interactive control with no accessible label
+1e2303120fe2  [medium] Interactive control with no accessible label
+2bfd8975d35e  [medium] The Sector Attack operation type still says "Sector" in player-facing text
+35b2632dfcf3  [medium] Surface "in_game" renders text in 5 different font families
+410897e96e98  [low] Lever `request_op` refused: insufficient_command_authority (#.#/#)
+50b8dda5812e  [medium] Interactive control with no accessible label
+50bb59700448  [medium] Typography is inconsistent across surfaces
+56b6bda5d71e  [medium] Interactive control with no accessible label
+582f880d10c1  [medium] Advance is offered and does nothing when a room-only blocker is outstanding
+5ff0afb189d7  [medium] Interactive control with no accessible label
+681d5f62ef1f  [medium] Decision `strategic_posture_review_rbih` has no authored historical default
+6c2feb3668af  [low] Decision `contact_group_plan_1994` shows no stakes on any option
+6c6f24ff39fa  [high] Territory bar counts allied ground as "hostile-held"
+6cd4fa018f9a  [critical] Turn cannot be advanced after four attempts
+6f579329b22e  [medium] Surface "war_map" has no reachable control
+72962be702b1  [medium] Surface "army_hq" has no reachable control
+764fd700316e  [medium] Retired term "sector" still in player-visible copy in ui\shared\operational_sitrep_views.ts
+78be3027390d  [low] Decision `vance_owen_plan_1993` shows no stakes on any option
+78cd60d64f40  [high] Copy says a formation group is "thinly held" — an OG holds ground, it is not held
+7afde0e4e2d4  [high] RS opens with six required presidential decisions; RBiH opens with one
+7c85fee759a7  [high] Two sources for the same sitrep copy disagree: i18n says "OGs", the hardcoded fallback says "sec
+81513817311f  [medium] Surface "desk" has no reachable control
+850a3806cfbc  [medium] Interactive control with no accessible label
+919e8513877e  [medium] Place names are lower-cased after the first word
+91b00300864a  [low] Lever `replace_co` refused: insufficient_command_authority (#/#)
+9a16b34a3a19  [medium] Surface "records" has no reachable control
+a0ccbbe32a3a  [low] Decision `owen_stoltenberg_plan_1993` shows no stakes on any option
+a1259f689f15  [medium] Surface "chronicle" has no reachable control
+a3d3e77f12f8  [medium] Decision `decorate_a_unit_rbih` has no authored historical default
+ab660671b06e  [high] Territory bar counts allied HVO ground as "hostile-held"
+ad599a9641f7  [medium] Retired term "sector" still in player-visible copy in ui\map\i18n\messages.en.ts
+adf0fc5fc3d4  [low] Lever `replace_co` refused: insufficient_command_authority (#.#/#)
+ae77d671480f  [high] Decision Room room-only blockers are unreachable from the screen that refuses the turn
+b615fa723d8f  [medium] Interactive control with no accessible label
+b9ce83d06de9  [medium] Decision `visit_to_front_rbih` has no authored historical default
+d5daa3a10f94  [high] Priority-front labels pair a settlement with its own municipality under two names
+e4b031f59b77  [medium] Surface "codex" has no reachable control
+ea9d210f3201  [low] Lever `request_op` refused: insufficient_command_authority (#/#)
+f832cc39d03a  [medium] Place names rendered with lower-case words after the first
+fc75f83f7348  [medium] Interactive control with no accessible label
+ff048ab927a1  [medium] Operation directive rejected with a reason the player is never shown
+-->
