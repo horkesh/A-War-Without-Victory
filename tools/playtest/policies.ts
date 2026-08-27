@@ -27,6 +27,10 @@ function corpsIds(state: GameState, faction: FactionId): string[] {
     const formations = (state as any).military?.formations ?? {};
     return Object.keys(cc)
         .filter((id) => formations[id]?.faction === faction)
+        // Skip army-level staffs. `vrs_main_staff` sits in corps_command but is not a
+        // field command, so the engine correctly refuses every lever aimed at it —
+        // 376 `not_a_field_command` refusals per RS counterfactual run, all harness noise.
+        .filter((id) => !/_main_staff$|_staff$|_hq$/.test(id))
         .sort();
 }
 

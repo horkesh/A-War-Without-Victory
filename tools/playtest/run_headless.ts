@@ -369,6 +369,80 @@ async function main(): Promise<void> {
         }
     }
 
+    // 6b. Resolve Dayton if the final advance created it.
+    //
+    // DAYTON_TRIGGER_WEEK is 188 and war_start_turn is 0, so `shouldInitiateDayton`
+    // becomes true DURING the last advance of a 188-turn run. The loop above checks
+    // `pending_dayton` at the TOP of each turn, so it exits without ever seeing the
+    // packet — and every run all session ended `game_over: false` with the endgame,
+    // verdict and cost-ledger paths completely unexercised while the summary read
+    // `turns_played: 188, full_campaign: true`.
+    let daytonResolved = false;
+    if ((state.military as any)?.negotiation?.pending_dayton) {
+        const proposal = policy.dayton?.(state) ?? {
+            territorial_demands: [],
+            territorial_concessions: [],
+            institutional_choices: {},
+        };
+        try {
+            const { state: roundTripped } = resolveDayton(state, proposal);
+            state = roundTripped;
+            daytonResolved = true;
+        } catch (e) {
+            recorder.record({
+                kind: 'bug',
+                severity: 'critical',
+                probe: 'dayton-resolve-throw',
+                title: 'Resolving Dayton threw at the end of the campaign',
+                detail: `The war reached its settlement and resolving it raised: ${String((e as Error)?.message ?? e)}. `
+                    + 'The campaign cannot conclude.',
+                surface: 'engine:dayton',
+                turn: state.meta?.turn ?? turnsPlayed,
+                faction: cfg.faction,
+            });
+        }
+    } else if (turnsPlayed >= FULL_CAMPAIGN_TURNS) {
+        recorder.record({
+            kind: 'bug',
+            severity: 'high',
+            probe: 'dayton-never-offered',
+            title: 'A full campaign ended with no Dayton settlement offered',
+            detail: `${turnsPlayed} turns played and no \`pending_dayton\` packet exists. The war `
+                + 'reaches its historical end date without the settlement that ends it, so the endgame, '
+                + 'verdict and cost-ledger paths are never reached.',
+            surface: 'engine:dayton',
+            turn: turnsPlayed,
+            faction: cfg.faction,
+        });
+    }
+
+    // 6c. The endgame is new territory: until the Dayton off-by-one was fixed, no run
+    // ever reached it. Capture what the settlement produced and check it is populated.
+    const endgame = (state.meta as any)?.endgame_snapshot;
+    const verdict = endgame?.verdict;
+    const comparison = endgame?.historical_comparison;
+    if (daytonResolved) {
+        if (!endgame) {
+            recorder.record({
+                kind: 'bug', severity: 'critical', probe: 'endgame-missing',
+                title: 'Dayton resolved but no endgame snapshot was frozen',
+                detail: 'The campaign concluded and `meta.endgame_snapshot` is absent, so the player is '
+                    + 'given no verdict, no cost ledger and no historical comparison at the end of the war.',
+                surface: 'engine:endgame', turn: turnsPlayed, faction: cfg.faction,
+            });
+        } else if (!comparison) {
+            recorder.record({
+                kind: 'bug', severity: 'high', probe: 'endgame-no-comparison',
+                title: 'Endgame snapshot has no historical_comparison',
+                detail: 'The settlement froze an endgame snapshot but `historical_comparison` is absent. '
+                    + 'This is the block that tells the player how their war differed from the real one — '
+                    + "the game's whole closing statement.",
+                surface: 'engine:endgame', turn: turnsPlayed, faction: cfg.faction,
+                evidence: { verdict_present: !!verdict },
+            });
+        }
+    }
+
     // 7. End-of-run probes.
     for (const p of probes) {
         if (p.onEnd) recorder.recordAll(p.onEnd({ state, faction: cfg.faction, turnsPlayed, advanceMsByTurn, leverAttempts }));
@@ -390,6 +464,18 @@ async function main(): Promise<void> {
         lever_attempts: leverAttempts,
         decisions_made: decisionLog.length,
         decisions_diverged: decisionLog.filter((d) => d.diverged_from_historical).length,
+        dayton_resolved: daytonResolved,
+        endgame: endgame ? {
+            // The grade is per-faction, inside faction_verdicts — NOT a top-level field.
+            // Reading verdict.grade returned null on three runs and nearly became a
+            // "the endgame has no verdict" finding; the verdict was there the whole time.
+            outcome: verdict?.outcome_label ?? verdict?.outcome_type ?? null,
+            player_verdict: verdict?.faction_verdicts?.[cfg.faction] ?? null,
+            divergence_notes: comparison?.divergence_notes ?? null,
+            milestones_absent: Array.isArray(comparison?.milestone_comparison)
+                ? comparison.milestone_comparison.filter((m: any) => m.status === 'absent').map((m: any) => m.id)
+                : null,
+        } : null,
         findings_total: recorder.count,
         findings_distinct: recorder.distinctCount,
     };

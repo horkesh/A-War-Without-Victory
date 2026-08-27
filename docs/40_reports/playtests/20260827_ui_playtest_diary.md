@@ -227,6 +227,64 @@ remain unexercised on every run**, and no finding in this diary covers them.
 
 ---
 
+## 3x. The endgame — first data, and a misreported casualty figure
+
+The Dayton off-by-one is fixed (harness), so campaigns now reach their settlement.
+**This is the first endgame data this lane has produced.** All three factions:
+`game_over: true`, `dayton_resolved: true`, no absent milestones, Srebrenica genocide
+recorded as occurring in every run.
+
+### The casualty comparison divides military dead by TOTAL war dead
+
+The closing statement tells the player, e.g.: *"Total military casualties were 32% of
+historical levels"* (RBiH run; RS 54%, HRHB 51%).
+
+`endgame_comparison.ts:159` computes it as:
+
+```ts
+costLedger.total_military_killed / baseline.total_killed
+```
+
+The numerator is **military** dead. The denominator, `total_killed: 97207`, is **all**
+war dead. `data/reference/historical_baseline.json` carries the correct denominator in
+the same file, unused for this note:
+
+```json
+"military_killed": { "RBiH": 31270, "RS": 21173, "HRHB": 7788 }   // sum 60,231
+"civilian_killed": 38476
+```
+
+Against the right denominator the figures become roughly **52% / 87% / 82%** rather than
+32% / 54% / 51% — understated by a factor of about 1.61 across the board.
+
+This is not an internal diagnostic. It is a sentence the game shows the player at the end
+of their war, and it tells them their war was far less lethal than it was.
+
+### Territory outcome moves with the player's faction
+
+Same scenario, same `historical` policy, same decision mode — only the player faction
+differs:
+
+| Player faction | Federation territory | vs historical 51% |
+| --- | --- | --- |
+| RBiH | 36.9% | −14.1 |
+| HRHB | 44.1% | −6.9 |
+
+A 7-point swing in the Federation's final share from player-faction choice alone, while
+every side plays the authored historical default. Recorded as a measurement; whether it
+is expected is a calibration question.
+
+### Not a finding — my own field path
+
+`verdict_grade` came back null on three runs and I nearly recorded "the endgame produces
+no verdict". The verdict was present the whole time
+(`outcome_type`, `outcome_label`, `faction_verdicts`, `dayton_result`, …); the grade is
+**per-faction inside `faction_verdicts`**, not a top-level field. Harness path corrected.
+Recorded here because it would have been the fifth false critical of the session from the
+same habit — reporting a harness defect as an app defect.
+
+---
+
 ## 3a. Cutileiro Plan — pre-war, and it ends the war at turn 2
 
 **Owner ruling 2026-08-27: "Cutileiro is ahistorical anyway so it should be cut out
@@ -380,6 +438,7 @@ UNDOCUMENTED. Fingerprints are what is read; titles are for humans.
 50bb59700448  [medium] Typography is inconsistent across surfaces
 56b6bda5d71e  [medium] Interactive control with no accessible label
 582f880d10c1  [medium] Advance is offered and does nothing when a room-only blocker is outstanding
+5dcd7a783734  [low] Lever `replace_co` refused: not_a_field_command
 5ff0afb189d7  [medium] Interactive control with no accessible label
 681d5f62ef1f  [medium] Decision `strategic_posture_review_rbih` has no authored historical default
 6c2feb3668af  [low] Decision `contact_group_plan_1994` shows no stakes on any option
@@ -416,6 +475,7 @@ bea6d0522e3e  [low] Decision `hrhb_washington_agreement_1994` shows no stakes on
 c019b7857b38  [medium] Decision `milosevic_vopp_pressure` has no authored historical default
 d4d184df999e  [medium] Decision `address_to_nation_hrhb` has no authored historical default
 d5daa3a10f94  [high] Priority-front labels pair a settlement with its own municipality under two names
+e341d4e3cfc7  [low] Lever `request_op` refused: not_a_field_command
 e4b031f59b77  [medium] Surface "codex" has no reachable control
 ea9d210f3201  [low] Lever `request_op` refused: insufficient_command_authority (#/#)
 f832cc39d03a  [medium] Place names rendered with lower-case words after the first
