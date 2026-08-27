@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 338 lessons across 9 topic files (counts RE-MEASURED 2026-08-27 via `grep -c '^### '` per file).
+> Last restructured: 2026-04-11. 340 lessons across 9 topic files (counts RE-MEASURED 2026-08-27 via `grep -c '^### '` per file).
 > **Correction:** the previous header said 315 while the table below summed to 278 and the files
 > actually held 329 — three different numbers, both stale despite a "count verified" stamp.
 > Counts below are measured, not carried forward. Re-measure rather than increment.
@@ -8,6 +8,12 @@
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
 ## New Lessons (2026-08-27) — playthrough-harness lane (a UI lane found in one hour what 3x188w runs could not see)
+
+### [Process] ★★ A PRECISE file:line CITATION FROM A REVIEWER IS A HYPOTHESIS, NOT EVIDENCE — see `docs/life_lessons/process.md`
+- A four-seat panel gave four confidently-cited verdicts; THREE had a wrong load-bearing claim. One nearly escalated a deliberate §6 safeguard to the §6 panel as a breach of itself. **Precision of citation correlates with persuasiveness, not correctness.** Verify anything you will act on or relay; the cheapest disproof is a run, not a re-read. **Corollary: honour a seat’s own flagged residual — closing it is what disproved its claim.**
+
+### [Process] ★★ “IT DEMONSTRABLY WORKS” REQUIRES PROVING THE CODE PATH EXECUTED — see `docs/life_lessons/process.md`
+- Wrote that the atrocity bright line “demonstrably works” after seeing RS graded D on 50% territory. The genocide path (event-gated) fired; the authorized-cleansing path is emergent-only and `run_headless.ts:114` defaults to `historical`, so it **never executed in any run in the diary**. A correct-looking outcome proves only that SOME path produced it. **Inert-by-design is not correct.**
 
 ### [Process] ★★ AN ABSENCE AT THE CALLEE PROVES NOTHING ABOUT THE CALLER — the gate was at the dispatch site — see `docs/life_lessons/process.md`
 - Grepped `sector_offensive.ts` for `player_faction`, got zero hits, told the owner emergent ops run for the player. The gate is `selectBotBrigadeOrderFactions` (`war_phases.ts:928`), which filters the faction out one level up so the file never executes. **Reachability is a property of the call chain, not the function body.** Narrow-lookup guard, one level out.

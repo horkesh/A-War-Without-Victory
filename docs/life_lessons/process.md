@@ -747,3 +747,62 @@ against the historical ~60,231 when the engine's own blessed 188w checkpoint rea
 wrong baseline AND wrong instrument, compounding.
 ⇒ **TELL:** a seat has just refuted your measurement and you are about to strike the whole
 finding. Ask first which comparisons in it were internally controlled.
+
+### [Process] ★★ A PRECISE file:line CITATION FROM A REVIEWER IS A HYPOTHESIS, NOT EVIDENCE
+
+**2026-08-27.** A four-seat Pyrrhic panel produced four confident, precisely-cited verdicts. **Three
+of the four contained a wrong load-bearing claim**, and each was wrong in a way its own citations
+made *more* persuasive, not less:
+
+- Operations seat: *"`Krivaja-95`'s only delivery path is `evaluateArmyHQGathering`, whose sole
+  call site `war_phases.ts:2335` sits behind a player_faction skip — an RS player can never launch
+  the Srebrenica operation."* Every line number correct; the conclusion false. It matched
+  `army_hq_op_id` to the file whose *name* matched and never walked the call graph.
+  `injectArmyHqOperations` (`triggered_operations.ts:1249`, dispatched `war_phases.ts:2063`) is the
+  real launcher and has no player gate — proven because **Farz 95 launched in a player run**.
+  I was one step from escalating a deliberate §6 safeguard to the §6 panel as a breach of itself.
+- War-or-Game seat: computed a casualty ratio from *killed only* when the function is fed
+  killed+wounded+missing. Wrong by ~5×; the "abdication is rewarded" headline did not survive
+  measurement — the active player grades a full letter *higher*.
+- Historian seat: called three ARBiH catalog entries "misfiled Serb operations." They are named
+  `Operation Una 94 **Defense**` etc. — correctly-attributed ARBiH defensive responses.
+
+⇒ **Reviewers are not more reliable than you are; they are differently wrong.** Precision of
+citation correlates with persuasiveness, not correctness. A seat that cites four line numbers has
+demonstrated it read four lines.
+⇒ **Verify every load-bearing claim you intend to ACT on or RELAY**, especially one that flatters
+your existing hypothesis. I relayed all three to the owner before checking, and had to retract all
+three.
+⇒ **The cheapest disproof is usually a run, not a re-read.** Every one of the three fell to
+measured output — an operation name, a ratio, a field value — not to further source reading.
+⇒ **Corollary — the residual is the thread.** The Operations seat flagged an unexplained residual
+("the mechanism allows 1 operation, the run reports 2 — close this before building on it").
+Closing it named the second operation as the very one it had declared unreachable. **A seat that
+refuses to round away its own loose end hands you the disproof of its own claim.** Honour that
+flag every time.
+
+### [Process] ★★ "IT DEMONSTRABLY WORKS" REQUIRES PROVING THE CODE PATH EXECUTED
+
+**2026-08-27.** I measured RS holding 50% of Bosnia and graded **D**, and wrote that AWWV's
+atrocity bright line "demonstrably works in the default build." Half of that was true and I could
+not tell which half.
+
+`capGradeByCondemnation` recognises two flags and its own header states the split:
+`genocide_condemnation` is **event-gated to the Srebrenica path**; `authorized_cleansing_condemnation`
+is **emergent-only**. The emergent block (`scoring.ts:819`) requires
+`state.meta.decision_mode === 'emergent'`, and my harness (`run_headless.ts:114`) **defaults to
+`'historical'`**. So the D grade proved the genocide path works — and the entire emergent atrocity
+system, the mechanism that makes atrocity grade-decisive, **had never executed in a single run in
+the whole diary.**
+
+⇒ **A correct-looking outcome proves only that SOME path produced it.** Before writing
+"demonstrably works", identify which branch fired and prove that branch was reachable under the
+run's configuration.
+⇒ **Inert-by-design is not the same as correct.** A gate that never evaluates cannot be evidence
+for or against itself.
+⇒ **TELL:** you are about to make a reassuring claim about a safety mechanism from a run whose
+config you did not check against that mechanism's own gate condition. Check the default the
+harness passes, not the default you assume.
+⇒ Cost here was low because a red-teamer caught it. The general shape — an entire subsystem
+silently unexercised while a test lane implicitly claims coverage of it — is how false confidence
+gets recorded as a finding.
