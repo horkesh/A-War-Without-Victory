@@ -725,3 +725,15 @@ preserves `halt_delay_turns_remaining`, and `tests/ui/lever_single_host_guard.te
 behavioral surface without widening production scope. The three known balanced-suite failures and
 the unresolved packaged-runtime probe remain frozen evidence: neither authorizes diagnosis,
 repair, reruns, or any expansion of P2A.
+
+## P2A strict-null proof-surface correction
+
+Architect review found that deleting the two optional simulation fields changes the strict-null
+inventory by construction: `optional_fields_game_state` moves from 539 to 537, the optional-domain
+total moves from 539 to 537, and the `sim` domain moves from 342 to 340; every other domain is
+unchanged. `tests/strict_null_inventory_progress.test.ts` is therefore added to P2A's named tests.
+This is a proof-surface correction, not production-scope expansion. In the full balanced run, that
+strict-null expectation requires the bounded amendment, the exact frozen failures remain the two
+40-week empty-large-sector assertions in `integration_deployment_health` and
+`integration_run_diagnostics` plus the queued Cutileiro assertion in `peace_plans`, and all other
+tests passed. No failure diagnosis or unrelated repair is authorized.

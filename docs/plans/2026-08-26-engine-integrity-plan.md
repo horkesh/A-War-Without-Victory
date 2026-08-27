@@ -110,7 +110,7 @@ change, broad `src/` catch-all, mode, or job.
 `tests/logistics_priority_ipc_path.test.ts`, `tests/sim/combat/order_interpretation.test.ts`,
 `tests/sim/combat/phase3_reliability_decay.test.ts`,
 `tests/sim/command/phase2_operation_interpretation.test.ts`, `tests/sector_offensive.test.ts`,
-`tests/ui/lever_single_host_guard.test.ts`.
+`tests/strict_null_inventory_progress.test.ts`, `tests/ui/lever_single_host_guard.test.ts`.
 
 **Change:** delete `stage-operation-force-launch`, `interpretOperationLaunch`,
 `interpretOperationHalt`, the duplicate AI path, `dig_in_on_halt`, and

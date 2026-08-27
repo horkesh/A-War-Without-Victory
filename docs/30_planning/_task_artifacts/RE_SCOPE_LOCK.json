@@ -2,9 +2,9 @@
   "schema_version": 1,
   "status": "active",
   "lane": "RE",
-  "task": "RE-P2A-BOUNDARY-CORRECTION",
-  "packet": "add-two-deletion-surface-tests",
-  "base_commit": "16ac3667cc38c24c1f2ac9f71099d8cf2cac0574",
+  "task": "RE-P2A-STRICT-NULL-BOUNDARY-CORRECTION",
+  "packet": "add-schema-ratchet-proof",
+  "base_commit": "ec4ee48657c9b5e6d3c587da330bd6b6a9f5a64d",
   "allowlist": [
     "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
     "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
