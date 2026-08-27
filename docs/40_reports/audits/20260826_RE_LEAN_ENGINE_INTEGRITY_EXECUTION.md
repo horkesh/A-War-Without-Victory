@@ -405,3 +405,21 @@ candidate 40-week performance pairs measured atomically against the one pre-T1C 
 retained even if median wall time regresses above 2%; that result opens a separate bounded
 performance escalation before T2 and never authorizes restoring the faulty skip. Only after T1C
 may a fresh exact-code-commit Node-22 pair establish S0.
+
+### T1C one-time stale baseline reconciliation
+
+Unanimous attribution permits one manifest-only reconciliation on the reviewed exact T1C candidate
+under Node 22. The manifest predates accepted probe stable-key work. Parent/candidate comparison is
+28/32 identical; every 52-week and 4-week artifact is identical. Only the 188-week
+`end_report.md`, `final_save.json`, `run_summary.json`, and `weekly_report.jsonl` differ from
+truthful transient HVO sector identity/location and one same-target/same-outcome battle with 15
+fewer casualties. Control, 31/31 endpoint anchors, 6/6 bot benchmarks, checkpoints, watched
+operations, operation schedule, and in-band KIA are unchanged. Historian has no block and makes no
+claim that exact Ruda control is historical fact.
+
+The update must replace exactly 19 existing hashes and track only the baseline manifest. It may not
+change artifacts, expected files, ordering, paths, weeks, scenario keys, or schema; `_baseline_tmp`
+and run outputs remain uncommitted. Two clean baseline reruns, guardrail/ownership tests, unchanged
+structural fingerprint check, diff/EOL, and independent review are mandatory. The parent's 26
+stranded formations are pre-existing engine-health evidence, separate from this reconciliation and
+not accepted as S0.

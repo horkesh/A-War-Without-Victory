@@ -369,7 +369,8 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
    npm.cmd exec -- vitest run tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/final_sector_truth_reconciliation.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/final_sector_reconciliation_session.test.ts tests/sector_territory_contiguity_repair.test.ts tests/postmerge_ghost_sector_prune.test.ts --pool=forks --reporter=dot
    ```
 
-7. Run the complete required gates without refreshing a baseline:
+7. Run typecheck, balanced, and the baseline check without refresh. The baseline check may report
+   only the unanimously attributed stale 19-hash set described in step 9:
 
    ```powershell
    npm.cmd run typecheck
@@ -381,7 +382,42 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
    scope must be a net deletion or neutral rewrite; no new scan or owner is allowed. Commit source
    and any allowed tests as
    `fix(RE-0D): restore exact final sector fixed-point convergence`.
-9. Measure the combined pass-4 plus three-call correction atomically from separate clean
+9. **One-time stale-baseline reconciliation:** only on the reviewed exact T1C candidate under Node
+   22, reconcile `data/derived/scenario/baselines/manifest.json`. Attribution is closed: the
+   manifest predates accepted probe stable-key work; parent and candidate match 28/32 artifacts,
+   and every 52-week and 4-week artifact is identical. Only the 188-week `end_report.md`,
+   `final_save.json`, `run_summary.json`, and `weekly_report.jsonl` differ, caused by truthful
+   transient HVO sector identity/location plus one same-target/same-outcome battle with 15 fewer
+   casualties. Control, 31/31 endpoint anchors, 6/6 bot benchmarks, checkpoints, watched
+   operations, operation schedule, and KIA band are unchanged. Historian has no block and makes no
+   claim that exact Ruda control is a historical fact.
+
+   Run exactly once:
+
+   ```powershell
+   $env:UPDATE_BASELINES = "1"
+   try { npm.cmd run test:baselines } finally { Remove-Item Env:UPDATE_BASELINES -ErrorAction SilentlyContinue }
+   ```
+
+   Require exactly 19 existing hash-value replacements and
+   `data/derived/scenario/baselines/manifest.json` as the only tracked change from this command. No
+   artifact, `expected_files`, array order, path, week, scenario key, or schema may change. Do not
+   commit `_baseline_tmp`, run outputs, or generated artifacts. Then run twice, without the update
+   variable, and require both green:
+
+   ```powershell
+   npm.cmd run test:baselines
+   npm.cmd run test:baselines
+   node node_modules/vitest/vitest.mjs run tests/baseline_regression_ci_guardrails.test.ts tests/baseline_artifact_ownership.test.ts --reporter=dot
+   npm.cmd run ci:structural-fingerprint:check
+   ```
+
+   Do not refresh the structural fingerprint. Diff/EOL plus Build, Determinism, QA, Artifact
+   Ownership, and Process review must confirm the boundary. The parent engine-health result of 26
+   stranded formations is pre-existing and separate: this reconciliation neither causes, accepts,
+   nor clears it, and it is not S0 evidence. Commit the manifest alone as
+   `test(RE-0D): reconcile stale scenario baseline hashes`.
+10. Measure the combined pass-4 plus three-call correction atomically from separate clean
    authoritative checkouts at the single exact pre-T1C parent and candidate commits. Do not time,
    accept, or report either half independently. Use the same Node 22, machine, power state, and
    exclusive background-load class. Run one excluded
@@ -396,11 +432,12 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
    `totalWallMs`, affected phase totals, resolved final-save SHA-256, and
    `run_summary.json.final_state_hash`. Require exact parent/candidate scenario bytes and hashes.
    Compare paired deltas and medians; never infer a speed claim from an arithmetic mean alone.
-10. Correctness is retained even if candidate median `totalWallMs` regresses by more than 2%: do not
+11. Correctness is retained even if candidate median `totalWallMs` regresses by more than 2%: do not
    restore either faulty guard. A regression above 2% requires a separately approved,
    bounded performance escalation with its own owner and evidence before T2; it does not authorize
    another truth-pass skip, a cache, or a weakened test. Zero to 2% remains watch-only.
-11. From the reviewed T1C code commit, execute the complete fresh paired Node-22 S0 procedure below.
+12. After the one-time manifest reconciliation commit, execute the complete fresh paired Node-22
+    S0 procedure below from the reviewed T1C code commit.
     The prior `58f100f3` pair remains pre-fix evidence only. Commit evidence/control-plane/ledger
     only as `docs(RE-0D): record exact final sector convergence and S0`. Do not start T2 first.
 

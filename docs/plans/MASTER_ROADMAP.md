@@ -72,8 +72,10 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
   implements that generic convergence first. T1C then restores exact final-sector fixed-point
   convergence: owner-truth pass 4 and the seal-3/prune-2/recovery-2 segment run unconditionally
   after deterministic seed-31 state and seed-55 stable-identity REDs. Both changes and their
-  exact-parent/candidate performance cost are one atomic candidate. Only then may a fresh paired S0
-  run. The execution rail corrects
+  exact-parent/candidate performance cost are one atomic candidate. A one-time Node-22 reconciliation
+  may replace exactly 19 stale hashes in the baseline manifest only after reviewed candidate proof;
+  it cannot refresh artifacts, structure, or the structural fingerprint. Only then may a fresh
+  paired S0 run. The execution rail corrects
   authority, formal-battle accounting, deterministic ordering, and ruled locality through
   deletion/convergence. It adds no pipeline step, flag, default stream, service, persisted field,
   or unruled mechanic; production LOC must be net non-positive.

@@ -29644,3 +29644,29 @@ regression boundary, which opens a separate bounded performance escalation befor
 active governance, docs index, reopened Phase 2 performance evidence, Calibration Master, and
 project ledger agree on exact final-sector fixed-point convergence. No report index, canon, or
 knowledge-ledger edit is required.
+
+## [2026-08-27] docs(RE-0D): authorize stale baseline reconciliation
+
+**Type:** Documentation/process authorization only. No engine, test, scenario, artifact, manifest,
+baseline, structural fingerprint, canon, knowledge-ledger, push, PR, merge, tag, publication, or
+release change in this commit.
+
+**Attribution:** The baseline manifest is stale from before accepted probe stable-key work.
+Parent/candidate comparison is 28/32 identical, with every 52-week and 4-week artifact identical.
+Only 188-week `end_report.md`, `final_save.json`, `run_summary.json`, and `weekly_report.jsonl`
+differ: truthful transient HVO sector identity/location and one same-target/same-outcome battle with
+15 fewer casualties. Control, 31/31 endpoint anchors, 6/6 bot benchmarks, checkpoints, watched
+operations, operation schedule, and in-band KIA are unchanged. Historian has no block and does not
+claim exact Ruda control as historical fact.
+
+**One-time boundary:** Only the reviewed exact T1C candidate under Node 22 may run
+`UPDATE_BASELINES=1`. Expected output is exactly 19 existing hash replacements and only
+`data/derived/scenario/baselines/manifest.json` tracked. Artifacts, expected-file set/order, paths,
+weeks, scenario keys, schema, structural fingerprint, `_baseline_tmp`, and run outputs may not
+change. Two baseline reruns, baseline guardrail and ownership tests, structural-fingerprint check
+without refresh, diff/EOL, and independent Build/Determinism/QA/Ownership/Process review must pass.
+
+**Separation:** The parent's engine-health stranded-26 result is pre-existing and neither caused,
+accepted, nor cleared by this manifest reconciliation. It is not S0 evidence. The synchronized
+plan, living audit, roadmap, board, governance, performance report, calibration blocker, and ledger
+retain the normal S0 and engine-health gates. No canon or knowledge-ledger edit is required.

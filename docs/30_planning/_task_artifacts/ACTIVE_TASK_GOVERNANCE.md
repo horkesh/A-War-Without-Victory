@@ -129,5 +129,8 @@ busier war or a better historical-fit score.
 - **2026-08-27:** unanimous T1C rulings reopened both incomplete guards from the same fixed-point
   family: seed 31 exposes four state fields when pass 4 skips; seed 55 exposes stable identity
   suffix `:5` versus `:4` when the seal-3/prune-2/recovery-2 segment skips. Both are one T1C.
+- **2026-08-27:** one-time stale-baseline reconciliation is limited to exactly 19 hash replacements
+  in the manifest on the reviewed Node-22 T1C candidate, with no artifact/structure/fingerprint
+  refresh. The parent's stranded-26 engine-health result remains separate and is not S0 evidence.
 - **Next:** close T1B, execute T1C code/evidence and alternating performance proof, then run a fresh
   paired Node-22 S0 at the exact T1C code commit.

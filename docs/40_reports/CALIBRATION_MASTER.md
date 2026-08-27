@@ -14,6 +14,12 @@ ordered S0 prerequisites. The prior Node-22 pair is reproducible pre-fix evidenc
 separate known-red calibration; T1C is not authority to tune it. Raw artifact metadata outranks this
 catalog.
 
+T1C has one-time authority on its reviewed exact Node-22 candidate to reconcile exactly 19 stale
+hashes in `data/derived/scenario/baselines/manifest.json`. This is provenance maintenance, not
+calibration: no artifact, expected-file set/order, path, week, scenario key, schema, or structural
+fingerprint may change. The parent engine-health stranded-26 finding is pre-existing, separate, and
+not accepted or cleared by baseline reconciliation or S0.
+
 ## PROBE-LANE CLOSING REFERENCE — clean provenance — **NOT RE-0 S0**
 
 ```

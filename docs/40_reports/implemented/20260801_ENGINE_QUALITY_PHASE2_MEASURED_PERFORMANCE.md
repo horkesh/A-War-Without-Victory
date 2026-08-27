@@ -176,6 +176,21 @@ does not authorize reverting the correctness seal, accepting the old Phase 2b pe
 or weakening the property. Until T1C and the subsequent fresh paired S0 close, this report is
 reopened evidence only and owns no execution queue.
 
+#### One-time stale baseline reconciliation
+
+The reviewed exact Node-22 T1C candidate may run `UPDATE_BASELINES=1` once. Attribution is closed:
+the manifest predates accepted probe stable-key work; parent and candidate are identical for 28/32
+artifacts and for all 52-week/4-week outputs. Only four 188-week outputs differ, from truthful
+transient HVO sector identity/location and one same-target/same-outcome battle with 15 fewer
+casualties. Control, 31/31 endpoint anchors, 6/6 bot benchmarks, checkpoints, watched operations,
+operation schedule, and in-band KIA remain unchanged; no exact-Ruda historical claim is made.
+
+Acceptance is exactly 19 existing hash replacements with only the manifest tracked, two subsequent
+green baseline runs, baseline guardrail/ownership tests, and structural-fingerprint check without
+refresh. Any artifact, expected-file/order/path/week/schema change or `_baseline_tmp` inclusion
+blocks. The parent's 26 stranded formations remain separate pre-existing engine-health evidence,
+not baseline or S0 acceptance.
+
 ### Ledger and handoff correction
 
 Commit `a7b417c0f` remains the blocked initial fixed-point candidate; commit `65b7b072e` is its correctness correction with prune and recovery receipts plus the 300 full-state, three-mode comparison matrix. Neither prior commit body contained the required ledger reference. They were not amended or rewritten; this separate docs-only correction closes that process gap without changing source, tests, baselines, or timing evidence. The canonical record is [2026-08-01 - Engine quality Phase 2b fixed-point mutation-receipt correction](../../PROJECT_LEDGER.md#2026-08-01---engine-quality-phase-2b-fixed-point-mutation-receipt-correction). The non-authoritative 20-pair result and Phase 2b performance acceptance remain blocked exactly as stated above; no unavailable napkin evidence is claimed.
