@@ -958,6 +958,49 @@ common factor in both factions is that **player-faction casualty totals are not 
 with bot totals**, so a threshold calibrated on history discriminates player-vs-bot rather than
 well-played-vs-badly-played.
 
+### CLOSED — territory compensates, and the exploit does not exist
+
+The gap in my own analysis was question 5: is there a compensating term? **There is, it is
+territory, and it more than offsets the cost bonus.** Measured across the RBiH A/B:
+
+| run | ops | territory | territory anchor | REPORTED grade |
+| --- | --- | --- | --- | --- |
+| RBiH autonomy 0 (passive) | 2 | 23.41% | C | **B** |
+| RBiH autonomy 1 (active) | 11 | 32.02% | A | **A** |
+
+The active president holds **8.6 more points of territory**, worth two anchor tiers (C → A),
+while both receive the same +1 cost shift. **The active player strictly dominates the passive
+one by a full letter grade.**
+
+**So the War-or-Game seat's finding is REFUTED, not merely overstated — and my own softened
+restatement of it was also wrong.** I reported that abdication "buys you nothing over playing
+actively." It is stronger than that: abdication *costs* you a letter grade. There is no
+abdication exploit in this build. The game rewards fighting the war, which is what it should do.
+
+What remains true, and is a much narrower claim: the +1 shift **is** grade-decisive in absolute
+terms (it turns an earned C into a reported B), and player runs receive it while bot runs do not,
+because the operations-suppression defect depresses player casualties. That inflates player
+grades against the historical scale. **It does not create a perverse incentive.** Fixing the
+operations suppression remains the correct action, for accuracy rather than for exploit-closure.
+
+### The atrocity bright line demonstrably WORKS
+
+Unlooked-for, and the most reassuring result in this diary:
+
+| run | territory | territory anchor | war_crimes_events | REPORTED grade |
+| --- | --- | --- | --- | --- |
+| RS autonomy 0 | **49.56%** | A+ candidate | 53 | **D** |
+| RS autonomy 1 | **50.09%** | A+ candidate | 35 | **D** |
+
+**RS holds half of Bosnia and is graded D.** A faction that achieves its maximal territorial war
+aim through mass atrocity is graded near the bottom of the scale. That is AWWV's stated thesis —
+atrocity is never rewarded — working in the default build, measured, not asserted.
+
+This also resolves the question I had flagged as open: RBiH's `war_crimes_events: 10` did not cap
+its grade while RS's 53 capped it to D. The gate is threshold/flag-driven rather than a raw
+count, consistent with `memory/s6_liveness_authorized_cleansing_flag`. **Not a bright-line
+failure.** The question is closed.
+
 ### This reverses the seat's recommended sequence
 
 War-or-Game made closing the scoring interaction a **blocking condition** on the operations fix,
