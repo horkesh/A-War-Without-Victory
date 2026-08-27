@@ -2,13 +2,23 @@
   "schema_version": 1,
   "status": "active",
   "lane": "RE",
-  "task": "RE-P2B-BOUNDARY-CORRECTION",
-  "packet": "add-ipc-contract-and-probe-precondition",
-  "base_commit": "a3f14d7f44da38b62cb82ef49d0462d164a1f1da",
+  "task": "RE-P2B-OPERATION-BRIEFING-AUTHORITY-DELETION",
+  "packet": "delete-briefing-mutation-surface",
+  "base_commit": "bd61a37a3d5eff89613f171edb23496d11fd06f3",
   "allowlist": [
+    "docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md",
     "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
     "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
-    "docs/plans/2026-08-26-engine-integrity-plan.md"
+    "src/desktop/electron-main.cjs",
+    "src/desktop/preload.cjs",
+    "src/ui/map/App.tsx",
+    "src/ui/map/components/OperationBriefingModal.tsx",
+    "src/ui/map/desktop/useIPC.ts",
+    "src/ui/map/i18n/messages.bcs.ts",
+    "src/ui/map/i18n/messages.en.ts",
+    "tests/desktop_packaged_runtime_probe.test.ts",
+    "tests/desktop_persistence_contract.test.ts",
+    "tests/ui/oob_operations_panel.test.ts"
   ],
   "denylist": [
     "data/scenarios/**",

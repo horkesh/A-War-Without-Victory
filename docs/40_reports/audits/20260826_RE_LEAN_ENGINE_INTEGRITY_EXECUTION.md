@@ -812,8 +812,38 @@ P2A is accepted and complete; P2B is next. Architect review found that P2B must 
 the Operation Briefing mutation authority cannot leave the engineering contract stale. This is a
 P2B-only documentation exception and authorizes no other document.
 
-The packaged-runtime precondition is binding. Run the unchanged packaged probe once on clean P2B
-base `a3f14d7f44da38b62cb82ef49d0462d164a1f1da` before implementation. A missing verdict stops P2B
+The packaged-runtime precondition is binding. Following the separate provenance-rule correction,
+run the unchanged packaged probe once on exact clean P2B base
+`bd61a37a3d5eff89613f171edb23496d11fd06f3` before implementation. A missing verdict stops P2B
 without rerun, diagnosis, repair, or implementation. Only a green base verdict permits the
 candidate: it receives one unchanged packaged probe and one bounded live visual session, with no
 retry campaign or probe modification.
+
+## P2B — packaged-runtime precondition evidence
+
+The one authorized unchanged clean-base probe was consumed on exact P2B base
+`bd61a37a3d5eff89613f171edb23496d11fd06f3`. `npx.cmd -y node@22.23.0` resolved the executable and
+the invoking process confirmed Node `v22.23.0` before starting
+`npm.cmd run desktop:package:probe` exactly once. The wrapper command started at
+`2026-08-27T23:05:17.6646476Z`; packaging time was excluded from the runtime limit. The packaged
+executable `F:\AWWV-worktrees\re-engine-integrity\dist-packaged\win-unpacked\A War Without Victory.exe`
+launched at `2026-08-27T23:12:41.1986877Z` as PID `21136`, starting the hard 15-minute clock.
+
+The packaged runtime remained alive at the cutoff and emitted no wrapper verdict. At
+`2026-08-27T23:27:42.6202593Z`, the coordinator issued the single permitted full-process-tree
+termination; the wrapper ended at `2026-08-27T23:27:43.3372027Z` with recorded exit code `124`.
+The expected manifest was absent at
+`F:\AWWV-worktrees\re-engine-integrity\dist-packaged\win-unpacked\awwv_desktop_runtime_probe_manifest.json`.
+The last captured stdout line was electron-builder's
+`updating asar integrity executable resource` line for the packaged executable; the captured
+stderr ended with the existing Vite circular-chunk warning for
+`map-rendering -> feature-army-hq -> feature-army-hq-records -> map-rendering`. No stable receipt,
+manifest, route/window/state-push/turn-report/endgame proof, or ignorable-failure evaluation was
+available, so this result is **NO VERDICT**, never PASS.
+
+Per the binding precondition, P2B stops before implementation. There is no RED/GREEN cycle,
+production/test/IPC-contract edit, candidate probe, live visual session, payload digest, or player-
+visible change. No rerun, diagnosis, probe repair, or reinterpretation is authorized. The generated
+ignored `dist/` and `dist-packaged/` trees were removed after process termination; no generated
+probe/build artifact is tracked. Only the P2B scope lock and this evidence row are staged for the
+coordinator's disposition.
