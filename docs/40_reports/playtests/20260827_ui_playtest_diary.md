@@ -983,7 +983,7 @@ because the operations-suppression defect depresses player casualties. That infl
 grades against the historical scale. **It does not create a perverse incentive.** Fixing the
 operations suppression remains the correct action, for accuracy rather than for exploit-closure.
 
-### The atrocity bright line demonstrably WORKS
+### The atrocity bright line works ON THE SREBRENICA PATH (narrowed — see §3p)
 
 Unlooked-for, and the most reassuring result in this diary:
 
@@ -1433,6 +1433,124 @@ summaries. No engine source modified. Accepted.
 Runs: `tmp-playtest/trace-RS-0` (aut 0, 16 ops / t42), `trace-RS-0b` (aut 0, widened capture,
 identical), `trace-RS-1` (aut 1, 15 ops / t86 — the one late op is *triggered*, not emergent, so
 the emergent cliff does not move).
+
+## 3p. Red-team closure — my attribution was wrong, and the ops fix is what makes scoring bite
+
+Gap-finder seat, returned last. It reproduced the grade ordering independently, confirmed two of
+my readings, and **contradicted my attribution in a way that changes what should happen next.**
+
+Independent reproduction (its own runs, not mine):
+
+```
+rt-passive   passive,        autonomy 0, 0 levers,    0 ops,  territory 22.42%  earned C -> emitted B
+rt-active    counterfactual, autonomy 1, 1899 levers, 16 ops, territory 32.08%  earned A -> emitted A
+```
+
+Ratios verified by calling `humanCostGradeShift` directly and bracketing MIA at 0-10%: passive
+0.457 → +1, active 0.604 → +1, verdict identical throughout. **The active president grades a full
+letter higher**, matching the au-RBiH-0 / au-RBiH-1 pair. My withdrawal of the abdication finding
+stands.
+
+### CORRECTION 1 — the letter grade has exactly three terms
+
+Confirmed and worth recording as a fact about the model:
+
+    grade = capGradeByCondemnation( applyHumanCostShift( anchorGrade ) )
+
+`computeFactionGrade` reads **nothing** but the anchors, and the RBiH anchors test only
+`territory_controlled_pct`, `enclaves_lost` and `war_crimes_events`. **There is no exhaustion
+term, no political-collapse term, and no manpower term in the letter grade at all.** Abdication
+costs ~10 points of territory = two anchor bands; the +1 gives back one. Net −1 for the
+abdicator. The shift narrows a two-letter gap to one; it never closes or inverts it.
+
+### CORRECTION 2 — "the atrocity bright line demonstrably works" was TOO BROAD
+
+I wrote that after seeing RS graded D on 50% territory. **Half of it is demonstrated and half of
+it was never executed.**
+
+`capGradeByCondemnation` (`scoring.ts:418-425`) recognises two flags, and its own header states
+the split: *"genocide is event-gated to the Srebrenica path; authorized_cleansing is
+emergent-only."*
+
+- **`genocide_condemnation` → cap D.** Event-gated to Srebrenica, **not** emergent-gated. This is
+  the path that produced RS→D in every RS run. **Genuinely demonstrated working on the default
+  path.** That result stands.
+- **`authorized_cleansing_condemnation` → cap C.** Emergent-only. The emergent atrocity block at
+  `scoring.ts:819` is gated on `state.meta.decision_mode === 'emergent'`, and
+  `run_headless.ts:114` **defaults decision-mode to `'historical'`**. So in `enc-probe` and in
+  every run this lane has produced, that path **was never executed at all**.
+
+**This is a coverage hole in my own playtesting, not just a caveat.** Every run in this diary is
+historical decision mode, so the entire emergent atrocity system — the §2a condemnation mechanism
+that `memory/s6_liveness_authorized_cleansing_flag` records as making atrocity grade-decisive —
+is **untested by this lane**. It is inert-by-design in these runs, which is not the same as
+correct. **Next: re-run with `--decision-mode emergent`.**
+
+Also recorded: RBiH's `war_crimes_events: 10` is **identical across every RBiH run, passive and
+active**. It is scripted, not player-caused — and it permanently blocks RBiH's A+ anchor, which
+tests `war_crimes_events === 0`. Worth knowing before anyone treats A+ as reachable for RBiH.
+
+### CORRECTION 3 — my attribution is REFUTED, and the sequencing reasoning with it
+
+I claimed the +1 is a player-vs-bot artifact: "every player gets +1 and the bot gets 0." **That
+is not what the data shows.** Measured shifts:
+
+| run | player faction shift | bot faction shift |
+| --- | --- | --- |
+| RBiH-player | RBiH **+1** | RS bot **+1** |
+| RS-player | RS 0 | RBiH bot 0 |
+| HRHB-player | — | RBiH bot 0 |
+
+**The RS bot receives the +1 too, inside an RBiH-player run.** The term cannot see the player.
+What it sees is that when RBiH is the player the whole war is ~35% less lethal *for everyone*,
+and all factions fall into the +1 band together. **It is a run-level constant that currently
+cancels** — which is precisely why it is harmless today.
+
+And the consequence inverts my recommendation's reasoning:
+
+> `rt-active` launched 16 operations and fired 1,899 levers and still only reached ratio 0.604 —
+> nowhere near the 0.75 boundary. **Maximal player activity does not lift RBiH out of the +1 band
+> today.** Now fix operations suppression: the active player moves toward the bot's ~0.80 and
+> **crosses 0.75, losing the +1**, while the passive player launches nothing, stays at ~0.457, and
+> **keeps it**. Fixing operations does not remove the differential — it **creates** it.
+
+**So "operations first" survives as a priority and dies as a justification.** I reversed the
+War-or-Game seat's blocking condition on the reasoning that the scoring term is merely downstream
+and would self-correct. That reasoning does not survive: the ops fix is what makes the scoring
+term start discriminating, and it would then discriminate *against fighting*.
+
+**Revised integrator ruling.** Operations first, as before — but the scoring item is **OPEN and
+gated on the ops fix**, not closed, with a mandatory re-test of the passive/active grade ordering
+once operations land. The seat notes the inversion window is narrow and it has **not** measured
+one: it needs an active president who crosses 0.75 on casualties while gaining less than a full
+anchor band of territory (e.g. active 24% → C with shift 0, against passive 22% → C with +1 → B).
+Off the observed trend, not obviously impossible.
+
+### A lead, explicitly NOT a finding
+
+The Pyrrhic score runs the other way: `rt-passive` 74.7 against `rt-active` 14.2, a 60-point gap
+in the abdicator's favour, on a metric the VerdictScreen shows next to the grade. The passive
+president ends with military credibility, international standing and negotiating leverage all
+pinned at A+.
+
+**The seat disclaimed its own result and it was right to.** au-RBiH-0 vs au-RBiH-1 — same policy,
+autonomy 0 vs 1 — score **74.4 vs 74.6**, essentially identical. The collapse is specific to the
+`counterfactual` policy's 1,899 lever attempts, which spam CO replacements and attack orders and
+*should* plausibly wreck patron confidence and cohesion. **Recorded as a lead for a separate
+look, not as a finding, and not for the owner yet.** It does not touch the letter grade.
+
+### Housekeeping
+
+The seat flagged `tools/playtest/probes.ts` appearing modified mid-session in this shared
+worktree. **Accounted for:** that is the scenario-tester seat's env-gated `ops-trace` probe, which
+I verified independently (tsc clean, no RNG or wall-clock, sorted output, and the instrumented run
+byte-identical to the un-instrumented one) and committed in `e8e54f2cb`. Not an unexplained edit.
+
+### Still not determined, stated plainly
+
+- The emergent-mode atrocity gate — never executed; needs `--decision-mode emergent`.
+- Whether the Pyrrhic collapse is lever-spam or genuine activity punishment.
+- Whether the post-ops-fix inversion window is actually reachable.
 
 ## 4. Fixed this session (recorded, not open)
 
