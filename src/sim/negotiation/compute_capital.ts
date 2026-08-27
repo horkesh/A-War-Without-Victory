@@ -15,6 +15,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import type { ParamilitarySeverityBand } from '../combat/paramilitary_sweep.js';
 
 import { getOsidAreas } from '../osid_areas.js';
+import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from '../combat/enclave_resilience.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -307,10 +308,25 @@ function computeEnclaveData(state: GameState, faction: FactionId): {
     held: string[];
     lost: string[];
 } {
-    // Known enclaves for tracking — RBiH and HRHB both have besieged pockets
-    const FACTION_ENCLAVES: Record<string, string[]> = {
-        RBiH: ['sarajevo', 'srebrenica', 'zepa', 'gorazde', 'bihac'],
-        HRHB: ['kiseljak', 'lasva_valley', 'zepce'],
+    // Known enclaves for tracking - RBiH and HRHB both have besieged pockets.
+    // Ids are the VERDICT-FACING labels and are deliberately unchanged; `registry_id`
+    // maps each to its ENCLAVE_DEFINITIONS entry (which calls the Bihac pocket
+    // `bihac_pocket`). `teocak` is intentionally absent: the registry documents it as a
+    // calibration pin rather than a true enclave, and adding it here would change what
+    // the verdict reports, which is beyond the defect being fixed.
+    const FACTION_ENCLAVES: Record<string, { id: string; registry_id: string }[]> = {
+        RBiH: [
+            { id: 'sarajevo', registry_id: 'sarajevo' },
+            { id: 'srebrenica', registry_id: 'srebrenica' },
+            { id: 'zepa', registry_id: 'zepa' },
+            { id: 'gorazde', registry_id: 'gorazde' },
+            { id: 'bihac', registry_id: 'bihac_pocket' },
+        ],
+        HRHB: [
+            { id: 'kiseljak', registry_id: 'kiseljak' },
+            { id: 'lasva_valley', registry_id: 'lasva_valley' },
+            { id: 'zepce', registry_id: 'zepce' },
+        ],
     };
     const KNOWN_ENCLAVES = FACTION_ENCLAVES[faction];
     const held: string[] = [];
@@ -319,17 +335,41 @@ function computeEnclaveData(state: GameState, faction: FactionId): {
     if (!KNOWN_ENCLAVES) return { held: [], lost: [] };
 
     const enclaveState = state.military.enclave_state;
-    if (!enclaveState) return { held: KNOWN_ENCLAVES, lost: [] };
+    const controllers = state.political?.political_controllers ?? {};
 
-    for (const eid of KNOWN_ENCLAVES) {
-        const e = enclaveState[eid];
-        if (e?.fallen) {
-            lost.push(eid);
-        } else {
-            held.push(eid);
+    for (const { id, registry_id } of KNOWN_ENCLAVES) {
+        // `enclave_state` remains authoritative when a writer exists. As of 2026-08-28
+        // NOTHING in src/ writes it (verified exhaustively: one type declaration, three
+        // validator lines, two readers, zero assignments), so in practice every run takes
+        // the derived path below.
+        const e = enclaveState?.[registry_id] ?? enclaveState?.[id];
+        if (e?.fallen !== undefined) {
+            (e.fallen ? lost : held).push(id);
+            continue;
         }
+
+        // DERIVE from ground truth instead of assuming survival.
+        //
+        // The previous fallback was `if (!enclaveState) return { held: KNOWN_ENCLAVES,
+        // lost: [] }` - every enclave reported HELD whenever the field was missing, which
+        // is always. A 188w run whose map showed srebrenica_2 = RS and zepa_2 = RS still
+        // told the player he had held Srebrenica and Zepa. On the most sensitive field in
+        // this game, absent data must not read as the reassuring answer; `enclaves_lost`
+        // also gates four of six RBiH grade tiers, so the old default handed out an
+        // unearned A+ eligibility condition.
+        const def = ENCLAVE_DEFINITIONS.find((d) => d.id === registry_id);
+        if (!def) { held.push(id); continue; }   // unknown to the registry: no basis to call it lost
+
+        // An enclave survives while its owning faction still holds ANY of its ground.
+        // Capital-only would be harsher and is a separate design question; "any OSID" is
+        // the conservative reading of "the pocket still exists".
+        const stillHolds = Object.keys(controllers)
+            .some((osid) => controllers[osid] === def.faction && osidBelongsToEnclave(osid, def));
+        (stillHolds ? held : lost).push(id);
     }
 
+    held.sort(strictCompare);
+    lost.sort(strictCompare);
     return { held, lost };
 }
 
