@@ -1,7 +1,23 @@
 import assert from 'node:assert';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { execFile as execFileCallback } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import { promisify } from 'node:util';
 import { test } from 'vitest';
+
+const execFile = promisify(execFileCallback);
+
+async function git(cwd: string, args: string[]): Promise<string> {
+    const { stdout } = await execFile('git', args, { cwd });
+    return stdout.trim();
+}
+
+function toBashPath(path: string): string {
+    const normalized = path.replaceAll('\\', '/');
+    if (process.platform !== 'win32') return normalized;
+    return normalized.replace(/^([A-Za-z]):\//, (_, drive: string) => `/mnt/${drive.toLowerCase()}/`);
+}
 
 test('package.json exposes one canonical desktop release check script', async () => {
     const packageJson = JSON.parse(await readFile(join(process.cwd(), 'package.json'), 'utf8')) as {
@@ -88,6 +104,59 @@ test('desktop path filter watches packaged dependencies and runtime resources', 
     assert.match(desktopCase, /"src\/runtime\/"/, 'runtime module changes used by packaged bundles should run desktop package/probe gates');
     assert.match(desktopCase, /"build\/icon\.png"/, 'packaged icon changes should run desktop package/probe gates');
 });
+
+test('desktop path detector selects every source root imported by the packaged sim bundle', async () => {
+    const detectorPath = toBashPath(resolve('.github', 'scripts', 'detect-changed-paths.sh'));
+    const fixtures = [
+        ['src/data/release-path-fixture.ts', 'true'],
+        ['src/map/release-path-fixture.ts', 'true'],
+        ['src/scenario/release-path-fixture.ts', 'true'],
+        ['src/sim/release-path-fixture.ts', 'true'],
+        ['src/state/release-path-fixture.ts', 'true'],
+        ['src/utils/release-path-fixture.ts', 'true'],
+        ['src/validate/release-path-fixture.ts', 'true'],
+        ['docs/release-path-fixture.md', 'false'],
+    ] as const;
+
+    for (const [fixturePath, expected] of fixtures) {
+        const repo = await mkdtemp(join(tmpdir(), 'awwv-desktop-path-detector-'));
+        try {
+            await git(repo, ['init', '--quiet']);
+            await writeFile(join(repo, 'README.md'), 'base\n', 'utf8');
+            await git(repo, ['add', 'README.md']);
+            await git(repo, ['-c', 'user.name=AWWV Test', '-c', 'user.email=test@awwv.invalid', 'commit', '--quiet', '-m', 'base']);
+            const base = await git(repo, ['rev-parse', 'HEAD']);
+
+            const fixtureFile = join(repo, ...fixturePath.split('/'));
+            await mkdir(dirname(fixtureFile), { recursive: true });
+            await writeFile(fixtureFile, 'fixture\n', 'utf8');
+            await git(repo, ['add', fixturePath]);
+            await git(repo, ['-c', 'user.name=AWWV Test', '-c', 'user.email=test@awwv.invalid', 'commit', '--quiet', '-m', 'child']);
+
+            const outputPath = join(repo, 'github-output.txt');
+            const wslEnv = process.platform === 'win32'
+                ? [process.env.WSLENV, 'PATH_SET', 'GITHUB_EVENT_NAME', 'GITHUB_EVENT_BEFORE', 'GITHUB_OUTPUT'].filter(Boolean).join(':')
+                : process.env.WSLENV;
+            const { stdout, stderr } = await execFile('bash', [detectorPath], {
+                cwd: repo,
+                env: {
+                    ...process.env,
+                    ...(wslEnv ? { WSLENV: wslEnv } : {}),
+                    PATH_SET: 'desktop',
+                    GITHUB_EVENT_NAME: 'push',
+                    GITHUB_EVENT_BEFORE: base,
+                    GITHUB_OUTPUT: toBashPath(outputPath),
+                },
+            });
+
+            assert.match(stdout, new RegExp(`(^|\\n)${fixturePath.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}(\\n|$)`));
+            assert.doesNotMatch(`${stdout}\n${stderr}`, /WARN|fail-safe/i);
+            assert.strictEqual(await readFile(outputPath, 'utf8'), `relevant=${expected}\n`);
+        } finally {
+            await rm(repo, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+        }
+    }
+}, 60_000);
 
 test('trusted detector checkout is restored before tests and builds run', async () => {
     const workflowPaths = [

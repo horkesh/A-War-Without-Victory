@@ -667,3 +667,45 @@ real bucket, territory, sector-key, and formation-location mutation barriers; co
 does not justify consolidating them. No guard restoration, cache/state/flag/module/service/scan/
 threshold/history special case, additional diagnosis, retry, or second pair is authorized before
 the reduced rail's single final A/B closeout.
+
+## P1 — release-path truth implementation evidence
+
+Base `34373d5ba1e75c1099042ea9167175c3b5fdca0f`; canonical staged implementation payload SHA-256
+`9043eb89018b9d669354875ce46e412f98815f4d5948120d4c787f4bc33d2e5e` over byte-order-sorted
+Git-index rows for `.github/scripts/detect-changed-paths.sh` and
+`tests/desktop_release_ci_guardrails.test.ts`. The packet changes those two paths plus
+`docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json` and this audit. Production numstat is
+`.github/scripts/detect-changed-paths.sh +9/-2` (P1 and cumulative reduced-RE production net
+`+7`; later deletion packets must bring the final rail to net non-positive).
+
+After correcting Windows-only test-harness cleanup/path/environment failures, the valid RED named
+the real push-range `src/data/release-path-fixture.ts` with no warning or fail-safe but received
+`relevant=false` instead of `relevant=true`. Minimal GREEN adds only the seven literal imported
+roots; the real-detector suite passes 8/8, including seven independent positive Git repositories
+and one docs-only negative. `npm.cmd run typecheck` and `npm.cmd run desktop:sim:build` pass.
+`npm.cmd run test:vitest:balanced` exits one only on two matching 40-week empty-large-sector
+assertions (`integration_deployment_health`, `integration_run_diagnostics`) and the already queued
+Cutileiro assertion in `peace_plans`; the P1 file passes 8/8 inside that run. No out-of-scope
+diagnosis or edit followed. `npm.cmd run desktop:package:probe` completed its map/sim/Warroom
+release builds, Windows x64 packaging, and packaged-executable launch, but emitted no verdict or
+manifest before the coordinator's approximately 15-minute live-probe cutoff; it is recorded as
+unresolved, was not rerun, and all probe processes were terminated. No generated build artifact is
+tracked. Player-visible effect: changes beneath every source root imported by the packaged desktop
+simulation can no longer silently skip desktop release/package CI; gameplay and engine execution
+are unchanged. Build implementer verdict: the P1 change is minimal and focused proof is green, but
+final packet disposition remains with independent review because Core is not all-green and the
+packaged-runtime probe produced no verdict.
+
+Architect/domain review: **GO**. A real esbuild metafile trace contains 492 inputs across source
+roots `data`, `desktop`, `map`, `scenario`, `shared`, `sim`, `state`, `ui`, `utils`, and `validate`;
+the prior detector covered `desktop`, `ui`, and `shared`, and P1 adds exactly the seven missing
+roots. Exact lock, staged digest, TDD sequence, and minimality are verified. The balanced failures
+are unrelated. The packaged-runtime probe remains unresolved and is not a PASS, but does not block
+this CI-selection-only packet. P1's production net `+7` remains a final-rail obligation. No probe
+repair, rerun, or scope expansion is authorized.
+
+Independent Process QA: **GO**. Exact base, four-file lock, denylist, staged-index digest,
+real-detector TDD, focused GREEN, typecheck, and desktop build are verified. The unrelated balanced
+failures remain recorded debt. Probe build, package, and executable launch completed, but the probe
+produced no verdict and remains unresolved—not PASS. No diagnosis, rerun campaign, or P1 expansion
+is authorized.

@@ -2,16 +2,14 @@
   "schema_version": 1,
   "status": "active",
   "lane": "RE",
-  "task": "RE-1.0-PAYLOAD-DIGEST-CORRECTION",
-  "packet": "canonicalize-staged-implementation-payload-digest",
-  "base_commit": "3ffbcb2b394f9d173584bd0c1df3a54d0b70c827",
+  "task": "RE-P1-RELEASE-PATH-TRUTH",
+  "packet": "desktop-imported-root-selection",
+  "base_commit": "34373d5ba1e75c1099042ea9167175c3b5fdca0f",
   "allowlist": [
-    ".claude/current-lane.txt",
+    ".github/scripts/detect-changed-paths.sh",
+    "tests/desktop_release_ci_guardrails.test.ts",
     "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
-    "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
-    "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
-    "docs/PROJECT_LEDGER.md",
-    "docs/plans/2026-08-26-engine-integrity-plan.md"
+    "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md"
   ],
   "denylist": [
     "data/scenarios/**",

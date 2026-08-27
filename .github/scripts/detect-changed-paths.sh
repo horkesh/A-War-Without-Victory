@@ -26,8 +26,8 @@
 #
 #   desktop  Desktop packaging / Electron / UI / runtime surfaces, per the blessed
 #            2026-06-05 CI/PR-batching policy ("desktop packaging required only for
-#            desktop/package/UI/runtime paths"). Covers src/desktop, src/ui, all of
-#            tools/ (the packaged-runtime probe + startup-snapshot builders live there
+#            desktop/package/UI/runtime paths"). Covers the desktop sim bundle's
+#            imported src roots, src/desktop, src/ui, and all of tools/ (the probe and builders live there
 #            — superset, never shrinks), package.json (electron-builder `build` block
 #            + desktop:* scripts), and the Desktop Release Guard workflow itself.
 #
@@ -63,8 +63,15 @@ case "${PATH_SET}" in
     ;;
   desktop)
     PREFIXES=(
+      "src/data/"
       "src/desktop/"
+      "src/map/"
+      "src/scenario/"
+      "src/sim/"
+      "src/state/"
       "src/ui/"
+      "src/utils/"
+      "src/validate/"
       "tools/"
       "data/derived/"
       "data/source/"
