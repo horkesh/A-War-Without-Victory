@@ -8,9 +8,9 @@ deterministic ordering, locality, and verification truth before further calibrat
 
 ## Current status and next action
 
-**T1C CORRECTNESS PASS; BOUNDED PERFORMANCE ESCALATION ACTIVE.** The fail-closed guardrail is
-installed and the repaired branch is sealed. The current no-run packet records the isolated
-Node-22 T1C performance red before any remediation or S0.
+**S0 AUTHORIZATION PACKET ACTIVE.** The fail-closed guardrail is installed. This synchronized
+docs/control packet is the reviewed successor of `99d7bcbb6`; after commit, its clean sealed HEAD
+authorizes exactly one Node-22 S0 A/B pair with production engine bytes unchanged.
 The authoritative execution branch is `codex/re-engine-integrity-repaired`; `7c472e065` retains
 only the approved seven-file planning-credit packet. Mixed commit `63671dd8c` is preserved on
 `codex/re-mixed-scope-quarantine-20260827`, and its scenario/event half is excluded from RE.
@@ -51,10 +51,11 @@ new packet lock is approved with, not before or after, its packet. Do not activa
 unreviewed staged bytes.
 
 The global denylist covers scenario data, calibration data, painted calibration sources,
-historical reference surfaces, and `docs/10_canon/FORAWWV.md`. The current lock forbids long runs.
-A later packet may permit no more than one clean same-commit A/B pair. A replicated
+historical reference surfaces, and `docs/10_canon/FORAWWV.md`. The current lock authorizes exactly
+one clean same-commit S0 A/B pair after its packet commits. A replicated
 parent/candidate performance packet is a distinct explicitly reviewed measurement packet; neither
-kind is authorized by the current no-run lock.
+kind shares authorization, and each requires its own explicit packet. The current S0 authorization permits only the one named
+same-commit A/B pair and no other long run.
 That policy is schema-validated, but scenario-command interception itself remains advisory; the
 external hook blocks unreviewed mutations, not command launch.
 
@@ -209,6 +210,6 @@ busier war or a better historical-fit score.
   candidate median is provisionally `+3.62853%`. The one permitted diagnosis localizes roughly
   79% of sector-profile delta to the required unconditional passes. Environmental conditions were
   not encoded, so this is an escalation-opening red, not final performance acceptance.
-- **Next:** independently review and authorize one exact-commit S0 pair. The bounded remediation
-  remains mandatory before T2; do not restore a guard, add cache/state/surface area, or run another
-  diagnosis.
+- **Next:** commit this reviewed authorization packet, prove its production tree equals
+  `99d7bcbb6`, then run exactly A followed by B once. The bounded remediation remains mandatory
+  before T2; do not restore a guard, add cache/state/surface area, or run another diagnosis.

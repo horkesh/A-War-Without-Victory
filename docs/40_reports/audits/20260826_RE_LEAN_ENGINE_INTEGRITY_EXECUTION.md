@@ -2,7 +2,8 @@
 
 **Date:** 2026-08-26
 
-**Status:** T1C performance provisionally RED; evidence packet active; S0 pending; T2 blocked
+**Status:** reviewed S0 authorization packet active; exactly one clean Node-22 A/B pair pending;
+T2 blocked
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -468,8 +469,8 @@ is non-regression evidence only, and direct consistency exit zero remains separa
 Verification before this record: 25/25 scope cases, external-hook integration, and 5/5 engine-mode
 tests passed; the focused retained operation packet passed 151/151 cases. One related
 `peace_plans` assertion is pre-existing red at both `63671dd8c` and the repaired tree and is queued,
-not repaired in RE. Scenario/event exclusion diff is empty. The next RE change requires a newly
-reviewed and externally pinned exact-file lock; no long run is authorized by the current lock.
+not repaired in RE. Scenario/event exclusion diff is empty. At that checkpoint, the next RE change
+required a newly reviewed and externally pinned exact-file lock and no long run was authorized.
 
 ## T1C exact isolated performance disposition
 
@@ -485,8 +486,8 @@ Parent wall samples are `72,110.1475 / 71,646.3147 / 72,574.3934 ms`; candidate 
 the 100-record sector sidecars rise `17,740.59 → 19,377.48 ms`; pass-4, seal-3, prune-2, and
 recovery-2 account for `1,294.21 ms` (about 79%) of that increase. Candidate-only CPU evidence is
 locality support, not comparative proof. Machine/power/background-load conditions were not encoded,
-so final performance acceptance remains blocked. Correctness is retained. The next packet may only
-seek no-growth reuse inside the existing sector owner and tests; it may not restore guards, add
+so final performance acceptance remains blocked. Correctness is retained. Before T2, remediation
+may only seek no-growth reuse inside the existing sector owner and tests; it may not restore guards, add
 cache/state/flags/modules/services/scans, or run a second diagnosis. Per plan step 14, one separately
 authorized exact-commit S0 pair follows this evidence packet; remediation must close before T2.
 
@@ -497,3 +498,13 @@ Report SHA-256 values in P1/C1/P2/C2/P3/C3 order are
 `cb7b7acff2c2769305b8131c10785bab07b97ad122bd7c5ab13dd02bbd478314`,
 `f290ef31de80c57e9afc1f444acd7fa88c060954e0ffcc0299b500cf7523205f`, and
 `8c5655aece27dc3181b5f3ee9cea70a30078b78c988f9531ce831bd7bf8891df`.
+
+## S0 clean authorization lifecycle
+
+The reviewed run-only packet binds parent `99d7bcbb6`, changes only synchronized control docs and
+the scope lock, and sets `long_run_policy.permitted:true` with maximum one pair. Its committed clean
+sealed HEAD is the S0 execution commit. Before launch, the production engine tree must be
+byte-identical to `99d7bcbb6`; both runs must record that authorization HEAD and `git_dirty:false`.
+Only A then B may run. Any launch consumes the authorization; pass, failure, or partial/abort goes
+directly to the successor no-run evidence packet, which restores permission to false. No retry,
+second pair, other long run, or engine/scenario/calibration/reference change is authorized.

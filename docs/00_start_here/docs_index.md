@@ -56,7 +56,8 @@ completed T0 at base `38e65547882856fba07faab7a6dbcd4258da9607`. The machine-enf
 guard is installed on `codex/re-engine-integrity-repaired`; the scenario/event half of `63671dd8c`
 remains quarantined. T1C correctness, RE-0D2 fingerprint truth, and both stale-golden
 reconciliations are complete. Exact isolated performance is provisionally RED at `+3.62853%`.
-After this evidence packet, one exact-commit S0 pair runs; bounded remediation must close before T2.
+The reviewed docs/control successor of `99d7bcbb6` authorizes one clean exact-commit S0 pair;
+bounded remediation must close before T2.
 The first Node-22 pair is reproducible pre-fix evidence only, not S0. Owner ruling
 ALL requires every validated battle contributor to permit occupation, with explicit `false`
 vetoes and missing declarations defaulting `true`; T1B applies that generic rule. T1C then restores
@@ -68,7 +69,7 @@ Historical fit is a separately labelled non-authorizing calibration observation.
 index the review; frozen discovery remains report evidence. Further calibration and R8 wait on RE.
 No current calibration artifact satisfies RE S0.
 
-**Current control plane (synchronized 2026-08-27):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE T1C performance is provisionally RED; the current evidence-only packet forbids long runs, its successor authorizes one exact-commit S0 pair, and bounded remediation must close before T2. The prior pair remains pre-fix evidence only. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
+**Current control plane (synchronized 2026-08-27):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE T1C performance is provisionally RED; the current reviewed docs/control successor of `99d7bcbb6` authorizes exactly one clean S0 pair, and bounded remediation must close before T2. The prior pair remains pre-fix evidence only. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
 
 The remaining files under `docs/30_planning/` are design specifications, not active execution queues: [multi-brigade operations](../30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md), [operation reevaluation](../30_planning/OPERATION_REEVALUATION_DESIGN_SPEC.md), and [spatial context](../30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md). Historical plans removed from that folder remain available through Git history and the ledgers.
 

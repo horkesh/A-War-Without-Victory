@@ -4,9 +4,8 @@
 
 > **Date:** 2026-08-26
 >
-> **Status:** T1C correctness, fingerprint truth, and stale goldens are complete. Exact isolated
-> performance is provisionally RED at `+3.62853%`; S0 follows the evidence packet and bounded lean
-> remediation must close before T2
+> **Status:** S0 authorization packet active. After its reviewed docs/control successor commits,
+> exactly one clean Node-22 A/B pair runs; bounded lean remediation must close before T2
 >
 > **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
 >
@@ -16,8 +15,8 @@
 >
 > **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** record/review the isolated performance red, then authorize one exact-
-> commit S0 pair; independently reviewed no-growth remediation must close before T2
+> **Current next action:** commit the reviewed docs-only S0 authorization successor of `99d7bcbb6`,
+> then execute its sole clean Node-22 A/B pair; no-growth remediation must close before T2
 >
 > **Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
@@ -97,6 +96,13 @@ authorized. Staged checks require the lock blob in the index and never consult a
 working-copy substitute. The lock update is reviewed and staged **with the packet it authorizes**;
 it is not a separate activation commit. After that packet commits, a clean tree is a sealed state.
 Any next change requires the next packet's staged lock to bind the then-current HEAD.
+
+For a run-only packet, the synchronized lock and control-plane docs are the packet: clean
+provenance forbids running from an uncommitted permission change. Its committed clean sealed HEAD
+is the reviewed execution commit, and its production engine tree must equal the named parent unless
+a separately approved engine packet intervenes. After the sole pair, one reviewed evidence packet
+both records the result and restores `long_run_policy.permitted:false`. This is not a lock-only
+activation commit and does not relax the bundling rule above.
 
 Advancing packets requires a reviewed lock amendment whose `base_commit` equals the then-current
 HEAD. Only one packet is active. The lock globally excludes `data/scenarios/**`,
@@ -282,10 +288,9 @@ independent clone at the packet's code commit. Never overwrite Claude's or anoth
 
 ### T1 — Provision Node 22 and establish engine-integrity S0
 
-**Execution status:** IN PROGRESS. T1A closed at
-`2f3d6572300dc95eeae2bc05900744d905a9adf4`. The first Node-22 pair is reproducible pre-fix
-evidence only; it exposed DG-0 and is not S0. T1B and then T1C must close before this procedure
-resumes.
+**Execution status:** IN PROGRESS. T1A, T1B, T1C correctness, fingerprint truth, and stale-golden
+reconciliation are complete. The first Node-22 pair remains reproducible pre-fix evidence only.
+The current reviewed docs/control packet authorizes the sole clean S0 A/B pair after commit.
 
 #### T1B — Converge mixed-battle occupation authority before S0
 
@@ -520,8 +525,33 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
    newly unconditional calls. Machine/power/background-load class was not encoded, so this opens
    the bounded escalation but does not constitute final performance acceptance. No second
    diagnosis or new run is authorized by the evidence packet.
-14. After the manifest and structural-reference reconciliation commits, execute the complete fresh paired Node-22
-    engine-integrity S0 procedure below from the reviewed T1C code commit.
+14. After the manifest, structural-reference, and performance-evidence commits, commit the reviewed
+    S0 authorization/control packet. Execute the complete fresh paired Node-22 engine-integrity S0
+    procedure below from that clean sealed authorization commit. Its production engine tree must
+    equal `99d7bcbb6`, and both `run_meta.git_commit` values must equal the full authorization hash.
+    Before launch, require a clean tree and prove that the authorization commit changed exactly its
+    reviewed ten control paths and no other tracked byte:
+
+    ```powershell
+    $s0Auth = (git rev-parse HEAD).Trim()
+    if (git status --porcelain) { throw "S0 authorization tree is dirty" }
+    $authorizedControlPaths = @(
+      ".claude/current-lane.txt",
+      "docs/00_start_here/docs_index.md",
+      "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
+      "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
+      "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
+      "docs/PROJECT_LEDGER.md",
+      "docs/plans/2026-08-26-engine-integrity-plan.md",
+      "docs/plans/COMMAND_BOARD.md",
+      "docs/plans/MASTER_ROADMAP.md",
+      "docs/plans/README.md"
+    ) | Sort-Object
+    $actualAuthPaths = git diff --name-only 99d7bcbb6704398ec39565c87dc00cf6d07c6029..$s0Auth | Sort-Object
+    if (($actualAuthPaths -join "`n") -cne ($authorizedControlPaths -join "`n")) {
+      throw "S0 authorization changed an unreviewed path"
+    }
+    ```
     The prior `58f100f3` pair remains pre-fix evidence only. Commit evidence/control-plane/ledger
     only as `docs(RE-0D): record exact final sector convergence and S0`. Do not start T2 first.
 
@@ -666,8 +696,9 @@ RE remedy.
    `validate_run_consistency.cjs` command above to exit zero; the embedded parsed count is not a
    substitute. Do not use `--strict`.
 
-6. Assert both `run_meta.json` files have the exact reviewed T1C code commit, are descendants of the
-   bound T0 execution base, T1A, and T1B, and record `git_dirty:false`, Node 22, the same scenario/input
+6. Assert both `run_meta.json` files have the full exact clean S0 authorization commit captured in
+   step 14, are descendants of the bound T0 execution base, T1A, T1B, and T1C, and record
+   `git_dirty:false`, Node 22, the same scenario/input
    digests, no provenance override, and `collapse_enabled:false`.
 7. Record, without tuning, `run_summary.json.historical_fit.checkpoints`; canonical observation
    weeks are **39, 104, 156, and 188**. These are calibration observations, not S0 engine-integrity
@@ -732,6 +763,11 @@ RE remedy.
     observations subsection; queue any red without following it.
 12. Commit T1C/S0 evidence docs only:
     `docs(RE-0D): record exact final sector convergence and clean S0`.
+
+Any S0 launch consumes this exact-commit authorization attempt. Pass, failure, or partial/aborted
+launch proceeds directly to the reviewed no-run evidence/closeout packet and restores
+`long_run_policy.permitted:false`. There is no retry or second pair without a new explicit owner-
+approved authorization commit.
 
 ### T2 — Audit existing observation; add nothing
 

@@ -29767,3 +29767,17 @@ separately authorized exact-commit S0 pair follows this evidence packet, while t
 no-growth remediation must close before T2. It may not restore a guard or add a cache,
 state, flag, module, service, scan, threshold, historical special case, or new owner. The current
 lock forbids long runs. `docs/10_canon/FORAWWV.md` remains untouched.
+
+## [2026-08-27] docs(RE-0D): authorize one clean S0 pair
+
+**Type:** Run authorization and control-plane lifecycle clarification only. No engine, test,
+scenario, calibration, reference, canon, map, release, or publication change.
+
+The reviewed docs/control successor binds clean parent `99d7bcbb6`, permits exactly one same-commit
+Node-22 S0 A/B pair, and retains the mandatory denylist, one-diagnosis stop-and-queue policy, and
+maximum-one-pair limit. Its committed clean sealed HEAD is the exact run commit; production engine
+bytes must equal the parent, and both run metadata records must name that HEAD with
+`git_dirty:false`. Any launch consumes the authorization: pass, failure, or partial/abort proceeds
+directly to the no-run evidence packet, which restores long-run permission to false. No lock-only
+commit, retry, second pair, calibration interpretation, or scenario change is authorized.
+`docs/10_canon/FORAWWV.md` remains untouched.
