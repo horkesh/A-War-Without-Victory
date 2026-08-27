@@ -77,12 +77,21 @@ the cheap high-volume half; an Electron driver is the other half, and neither
 substitutes for the other. Do not let the fast lane's finding count be mistaken for
 coverage.
 
-## The ledger
+## Where findings live
 
-- `docs/40_reports/playtests/findings/FINDINGS.jsonl` — one line per distinct
-  finding, sorted by (severity, surface, fingerprint). **Committed.**
-- `docs/40_reports/playtests/findings/FINDINGS.md` — the rollup, generated.
-- `tmp-playtest/<runId>/` — per-run raw log, summary, decision log. Not committed.
+**The diary is the record**: `docs/40_reports/playtests/YYYYMMDD_ui_playtest_diary.md`.
+Curated, human-readable, one per session. That is what gets read and what a finding is
+considered documented in.
+
+Do NOT write this lane's findings into `docs/PROJECT_LEDGER.md`.
+
+- `docs/40_reports/playtests/findings/FINDINGS.jsonl` — the harness's internal DEDUP
+  INDEX. It exists so a defect seen 88 times is not reported 88 times, and so a re-run
+  can tell new from known. **It is not the record.** Raw occurrence counts here are
+  badly misleading on their own: one accessibility defect counted per-surface reached
+  ~31,000 hits and swamped everything real.
+- `docs/40_reports/playtests/findings/FINDINGS.md` — generated rollup of the index.
+- `tmp-playtest/<runId>/` — per-run log, summary, screenshots, contact sheet. Not committed.
 
 The ledger holds **no wall-clock timestamps**, so a re-run that finds the same
 things produces a byte-identical file. A clean `git diff` after a run means nothing
