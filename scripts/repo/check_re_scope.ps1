@@ -233,12 +233,9 @@ try {
     }
     $approvedCheckerHash = Get-OptionalWorktreeConfig "awwv.reScope.approvedCheckerSha256"
     if ($approvedCheckerHash) {
-        $checkerBytes = if ($Staged) {
-            Get-GitBlobBytes ":scripts/repo/check_re_scope.ps1"
-        }
-        else {
-            [System.IO.File]::ReadAllBytes((Join-Path $RepoRoot "scripts/repo/check_re_scope.ps1"))
-        }
+        # Approval binds the repository object, not the platform-specific working-tree EOL form.
+        # The external hook separately executes these exact staged/index bytes at commit time.
+        $checkerBytes = Get-GitBlobBytes ":scripts/repo/check_re_scope.ps1"
         if ((Get-Sha256Hex $checkerBytes) -cne $approvedCheckerHash.ToLowerInvariant()) {
             Stop-ScopeCheck "approved checker SHA-256 mismatch"
         }

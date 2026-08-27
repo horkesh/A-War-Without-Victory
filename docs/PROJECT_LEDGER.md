@@ -29728,3 +29728,21 @@ determinism scan. One `peace_plans` expectation remains red at both the original
 the repaired tree; the one permitted read-only classification established it as pre-existing, so
 it is queued and untouched. The current lock forbids long runs. `docs/10_canon/FORAWWV.md` was not
 edited.
+
+## [2026-08-27] fix(RE-guard): bind approved checker verification to Git index bytes
+
+**Type:** Guard-maintenance correction and regression coverage only. No engine, scenario,
+calibration, canon, historical reference, map, release, or publication change.
+
+**Finding:** the installed external hook correctly pinned and executed the reviewed LF checker blob,
+but the post-commit manual command compared that approved hash with the Windows CRLF working-tree
+form. It therefore reported a false checker-hash mismatch after the guardrail commit.
+
+**Correction and evidence:** non-staged approval verification now hashes
+`:scripts/repo/check_re_scope.ps1` from the Git index, matching the trust object used by staged and
+external-hook enforcement. Checker approval is index-bound; manual mode still executes the
+working-tree checker, reads the working-tree lock, and inventories working changes. A focused
+regression stages LF checker bytes, rewrites the working copy with CRLF, and requires the approved
+index hash to pass. The packet remains `RE-GUARDRAIL`, binds parent `58099e3e7`, retains the full
+mandatory denylist and no-long-run policy, and authorizes only the lock, checker, regression, and
+this ledger entry.

@@ -215,6 +215,18 @@ Assert-Guard "rejects a lock that differs from the approved worktree hash" {
     Invoke-Git $fixture.Root config --worktree awwv.reScope.approvedLockSha256 "0000000000000000000000000000000000000000000000000000000000000000" | Out-Null
 } 1 @("approved lock SHA-256 mismatch")
 
+Assert-Guard "approved checker binds index bytes despite working-tree EOL conversion" {
+    param($fixture)
+    $fixture.Lock.task = "RE-GUARDRAIL"
+    Write-TextFile $fixture.Root "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json" ($fixture.Lock | ConvertTo-Json -Depth 5)
+    Write-TextFile $fixture.Root "scripts/repo/check_re_scope.ps1" "reviewed`n"
+    Invoke-Git $fixture.Root add scripts/repo/check_re_scope.ps1 | Out-Null
+    $approvedHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $fixture.Root "scripts/repo/check_re_scope.ps1")).Hash.ToLowerInvariant()
+    Invoke-Git $fixture.Root config extensions.worktreeConfig true | Out-Null
+    Invoke-Git $fixture.Root config --worktree awwv.reScope.approvedCheckerSha256 $approvedHash | Out-Null
+    Write-TextFile $fixture.Root "scripts/repo/check_re_scope.ps1" "reviewed`r`n"
+} 0 @("RE scope check: OK")
+
 Assert-Guard "accepts an explicit future long-run permission while retaining the one-pair limit" {
     param($fixture)
     $fixture.Lock.long_run_policy.permitted = $true
