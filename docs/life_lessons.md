@@ -1,8 +1,41 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 315 lessons across 9 topic files (count verified 2026-08-26).
+> Last restructured: 2026-04-11. 336 lessons across 9 topic files (counts RE-MEASURED 2026-08-27 via `grep -c '^### '` per file).
+> **Correction:** the previous header said 315 while the table below summed to 278 and the files
+> actually held 329 — three different numbers, both stale despite a "count verified" stamp.
+> Counts below are measured, not carried forward. Re-measure rather than increment.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-08-27) — playthrough-harness lane (a UI lane found in one hour what 3x188w runs could not see)
+
+> **Session shape: the engine lane was green all day while the shipped app could not start a campaign.** Three 188-turn
+> headless campaigns passed and produced 19 findings; the first end-to-end UI run found a blocker that made the product
+> unusable, and fixing it revealed a second one behind it. Both were structurally unreachable from every existing gate.
+
+### [Process] **A TEST LANE THAT BYPASSES THE LAYER THE DEFECT LIVES IN IS STRUCTURALLY BLIND** — see `docs/life_lessons/process.md`
+- Three 188-turn headless campaigns green, 19 findings, while every New Campaign click in the shipped app returned `Invalid decisionMode` to the player. The headless lane calls `desktop_sim.startNewCampaign` directly and **never crosses the IPC layer where the validation lived** — it could not have found this at any turn count. `warroom_launch_screen_contract.test.ts` was green throughout too: it asserts launch-card CSS and **never clicks**. ⇒ **TELL: ask "if the app could not start at all, would this lane still be green?" If yes, it is not evidence about the product.** The same failure appeared inside one lane: the harness reported `turns_played: 188, full_campaign: true` while Dayton went unresolved and the entire endgame path was never exercised.
+
+### [Architecture] **A VALIDATOR STRICTER THAN THE FUNCTION IT GUARDS** — and only one of two callers updated — see `docs/life_lessons/architecture.md`
+- The IPC handler refused any payload without `decisionMode` while its own callee declares `= 'emergent'`; the adjacent `scenarioKey` line had the `!== undefined` allowance and the new one did not — **an inconsistency between two consecutive lines was the tell.** Two callers start campaigns; the commit updated `MainMenu.tsx` but not `warroom.ts`, and the warroom is what Electron loads. ⇒ Enumerate every caller by grepping the **channel name**, not the component you happen to be editing. Prefer the fix that removes the class (tolerate absence) over the one that repairs the single broken caller.
+
+### [UI] **SPLITTING ONE DIRECTORY ACROSS CHUNKS BY FILENAME CREATES A CHUNK CYCLE** — see `docs/life_lessons/ui_map.md`
+- `manualChunks` split `components/army_hq/` four ways by filename regex; those modules import one another, so both ends of a cycle landed in different chunks and the TDZ error `Cannot access 'ir' before initialization` killed the React render — **black screen, no controls, every launch.** Invisible to dev mode (no chunking), to every DOM test, and to the build itself (a chunk cycle is legal output). ⇒ A filename regex carries no information about the import graph, so it cannot avoid cutting a cycle. Settled by experiment, not argument.
+
+### [Process] A PROBE THAT SWALLOWS ITS OWN ERRORS REPORTS "NOTHING FOUND" AND "NOTHING WRONG" IDENTICALLY — see `docs/life_lessons/process.md`
+- `.catch(() => [])` in a frame reader made "I failed to look" and "there is nothing here" the same value, and the convenient direction won. Only an explicit per-frame `ACCESS_ERROR` vs `[]` probe established the finding was real. ⇒ Zero-from-an-empty-set, in detector costume.
+
+### [UI] `firstWindow()` RETURNS DEVTOOLS — a probe confidently describing the wrong window — see `docs/life_lessons/ui_map.md`
+- Reported `buttonCount: 0` and console errors that were all true **of the DevTools window**. Its DOM has buttons and its own console noise, so the output looks like a real measurement and never errors. ⇒ Select by URL, and print the inspected window's URL beside the result. Adjacent trap: a worktree needs its own `dist/` — `awwv://warroom/index.html` serves `Not Found` until `desktop:release:check` runs there, which looks exactly like an app crash.
+
+### [Platform] NEVER JUNCTION `node_modules` ACROSS WORKTREES WHILE ANOTHER AGENT IS ACTIVE — see `docs/life_lessons/platform.md`
+- Junctioned to save a 3-minute install; the other lane's `npm install` stripped `playwright` mid-session and killed both drivers. ⇒ For a lane whose whole purpose is running in parallel, a shared dependency tree guarantees breakage at an unpredictable moment with confusing symptoms.
+
+### [Process] A MEASUREMENT TAKEN FOR BUILD-LOOP SPEED, QUOTED AS A RESULT — see `docs/life_lessons/process.md`
+- `--turns 52` was chosen so the debug loop was fast, then its "5 distinct findings" was reported as a result; the owner caught it. 52 turns stops before Srebrenica, Storm, Deliberate Force and Dayton. ⇒ Add the provisional marker to the **artifact** in the same edit, not to your memory of it. The driver now stamps `full_campaign: false`.
+
+### [Process] POSITIVE — the regression test was mutation-checked before being trusted
+- The `decisionMode` guard was verified by reverting the fix, watching the test go red with the intended message, then restoring. **A guard only ever observed passing on fixed code is not known to guard anything.** Cost: one revert-and-rerun cycle.
 
 ## New Lessons (2026-08-26e) — probe fixes; a tag's meaning inferred from ONE instance
 
@@ -542,6 +575,15 @@
 
 ## Recently Violated (always read these)
 
+### [Process] RE-VIOLATED 2026-08-27 — pipe exit-code, WITH THE HOOK WARNING ON SCREEN
+- Ran `npm run desktop:release:check 2>&1 | tail -25; echo "BUILD_EXIT=$?"`. That `$?` is `tail`s. **The PIPE EXIT-CODE GUARD hook fired on that exact call and I proceeded anyway.** No damage — the build genuinely succeeded and `dist/` appeared — but the check was vacuous, and later commands in the same session used the correct `> log 2>&1; echo $?` form, so the knowledge was present and simply not applied under momentum. This repeats the 2026-08-26b entry (costume 3: `node ... | sed; echo $?` reporting exit 0 for three runs that all exit 1) one day later.
+- The hook is doing its job; the gap is that a warning arriving **with** the result reads as commentary on work already done. Treat a fired guard as a stop, not a footnote.
+
+### [Testing] RE-VIOLATED 2026-08-27 — focused-suite false green on TWO shared surfaces
+- Changed `src/desktop/electron-main.cjs` (IPC validation for every campaign start) and `src/ui/map/vite.config.ts` (chunking for the entire map bundle), then validated with a **38-test, 6-file slice** plus `tsc --noEmit`. The standing rule is explicit: a change touching a SHARED surface must run the FULL relevant suite. A `manualChunks` edit is about as shared as a change gets — it re-partitions every module in the bundle.
+- Mitigating but not exculpating: the end-to-end UI driver was run and reached the President's Desk, which is stronger evidence than any unit slice for this particular change. **It is not the same coverage**, and the full suite was never run before commit.
+- Third instance of this lesson family. Before committing a shared-surface change, run the full suite even when a targeted slice and an end-to-end check both pass.
+
 ### [Process] RE-VIOLATED 2026-08-26 — zero-from-an-empty-set, hours after writing the lesson about it — SELF-CAUGHT
 - Diffing a republished artifact's reference against the repo, the checker printed **"DIFFERENCES: 0"** while having parsed **zero OSIDs** — the regex had failed silently against the artifact's escaping. A verdict computed over an empty set, which is the 2026-08-14 entry ("a loop over an empty set is a green test that asserted nothing — assert how much was COMPARED") and also the derived-signal batch written the previous day.
 - **Caught within one step, and the reason is the mitigation working:** the script printed the parse count next to the verdict, so `parsed: 0 … DIFFERENCES: 0` was visibly absurd. The rewrite now **refuses to report a diff when it parses nothing** and prints how many cells were actually compared (712), not only the result.
@@ -831,12 +873,12 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 64 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 80 | Running calibration scenarios, tuning parameters, OOB changes |
 | [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 6 | Combat resolution, brigade movement, march/distribution system |
-| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 77 | Changing engine structure, state, pipeline, adding systems |
+| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 83 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 13 | Modifying derived data, running data scripts, geometry work |
-| [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 79 | General development process (skim at session start) |
+| [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 16 | Frontend, map, tactical overlay, modal work |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 111 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 16 | Sector system, front lines, territory assignment, sub-segments |
-| [platform.md](life_lessons/platform.md) | Platform, Tooling | 7 | Build issues, platform-specific bugs, tooling |
+| [platform.md](life_lessons/platform.md) | Platform, Tooling | 9 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 2 | Event system, flag gates, triggers |
