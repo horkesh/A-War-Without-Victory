@@ -266,47 +266,69 @@ Against the right denominator the figures become roughly **52% / 87% / 82%** rat
 This is not an internal diagnostic. It is a sentence the game shows the player at the end
 of their war, and it tells them their war was far less lethal than it was.
 
-### Territory outcome moves with the player's faction
+### Territory — a CALIBRATION item, deprioritised (owner, 2026-08-27)
 
-**CORRECTED 2026-08-27 after owner review. My original framing was wrong and is struck
-through below.**
+**Two corrections to this section, the second undoing the first.**
 
-~~| Player faction | Federation territory | vs historical 51% |~~
-~~| RBiH | 36.9% | −14.1 |  HRHB | 44.1% | −6.9 |~~
+Owner's first correction was right: *"51% for FBiH was after the Dayton and it includes
+for ARBiH and HVO held territories."* Composition checks out — `endgame_comparison.ts`
+sums RBiH + HRHB and the baseline field is `RBiH_HRHB_Federation`.
 
-Owner: *"You are not reading territory right. 51% for FBiH was after the Dayton and it
-includes for ARBiH and HVO held territories."*
+**I then over-corrected**, striking the comparison entirely on the grounds that a
+ceasefire line and a Dayton settlement are incomparable. That was wrong. The autumn 1995
+offensives had already pushed RS to roughly 45-46%, and Dayton adjusted to 49% — about
+three points apart, not a gulf. Comparing end-of-war territory to 51/49 is broadly fair.
 
-Both halves check out against the data:
+So the divergence is real on either baseline:
 
-- **Composition is fine.** `endgame_comparison.ts:138-140` sums RBiH + HRHB, and the
-  baseline field is literally named `RBiH_HRHB_Federation`. So the sim's "Federation"
-  does mean ARBiH + HVO combined.
-- **The comparison is not.** The baseline key is `territory_final` — the **post-Dayton
-  negotiated settlement**, not a line anyone held when the shooting stopped. Dayton moved
-  territory relative to the ceasefire line; measuring one against the other is comparing
-  a battlefield outcome to a diplomatic one.
+| Run | RS share at week 188 | vs ~46% ceasefire | vs 49% Dayton |
+| --- | ---: | ---: | ---: |
+| Playing RBiH | 63.1% | +17 | +14 |
+| Playing HRHB | 55.9% | +10 | +7 |
 
-**And the harness makes it worse.** The `historical` policy tables an EMPTY Dayton
-proposal — `{ territorial_demands: [], territorial_concessions: [], institutional_choices: {} }`
-— so no territorial package is applied at the settlement. The figure the run produces is
-therefore the **turn-188 ceasefire line**, which is precisely the quantity that should NOT
-be compared against `territory_final`.
+**Owner ruling: this is calibration work and not a priority now.** Recorded and parked.
+Note the two percentages are from SEPARATE RUNS and are not additive — an earlier
+phrasing of mine invited reading them as one picture, which would imply a nonsensical
+81% Federation share.
 
-**What survives:** the RELATIVE difference between two runs. 36.9% playing RBiH vs 44.1%
-playing HRHB is a 7-point swing in the ceasefire line from player-faction choice alone,
-with every side taking authored historical defaults. That comparison is like-for-like and
-still stands. What does not stand is either number as a "divergence from history".
+### THE ENGINE FINDING: a faction behaves differently as player than as bot
 
-**Two things for later, one engine and one harness:**
+**Owner: "The discrepancies however are engine work."** This is the part that matters.
 
-1. `endgame_comparison` compares `territory_controlled_pct` (held) against
-   `territory_final` (settled) with no distinction between them. For a player who
-   negotiates real territorial packages at Dayton the comparison may be fair; for one who
-   tables nothing it is structurally unfair, and the note does not say which case it is
-   reporting. Worth a Historian and calibration eye.
-2. The harness needs a Dayton policy that tables something historically shaped, or every
-   run it produces will keep measuring ceasefire lines against a settlement.
+Same scenario, same `historical` policy, same decision mode, every side taking authored
+historical defaults. Only which faction the PLAYER controls differs:
+
+| Player | Total military dead | Total civilian dead |
+| --- | ---: | ---: |
+| RBiH | **31,365** | 31,335 |
+| RS | **52,318** | 34,687 |
+| HRHB | **49,494** | 32,541 |
+
+**Military dead swing by 67%** on player-faction choice alone. Civilian dead are stable
+within 5%, and the ethnic distribution of civilian death barely moves (Bosniak 27.3-28.5k,
+Serb 1.9-3.6k, Croat 1.8-2.6k) — so whatever this is, it is specific to military
+attrition.
+
+Per faction, as player versus as bot:
+
+| Faction | As PLAYER | As bot (run A) | As bot (run B) |
+| --- | ---: | ---: | ---: |
+| RBiH | **11,892** | 22,150 | 23,940 |
+| RS | 18,051 | 12,717 | 18,729 |
+| HRHB | 6,825 | 6,756 | 12,117 |
+
+RBiH is the clearest: **roughly half the military dead as player than as bot.** RS and
+HRHB are mixed, so "the player always fights less" is NOT established.
+
+**Leading hypothesis, being measured, NOT yet established:** player operations require
+presidential authorization while bot operations do not, and the `historical` policy
+accepted only 2 authorizations as RBiH against 19 as RS. If a faction's operations are
+gated behind an authorization the player rarely grants, that faction fights less as
+player — and everyone it would have fought loses fewer troops too, which would explain
+the whole-war totals moving rather than just one side's.
+
+This is the `Player/headless equivalence requires bound inputs, not matching labels`
+guardrail: the labels match (both "historical"), the inputs do not.
 
 ### Not a finding — my own field path
 

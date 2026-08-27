@@ -460,6 +460,17 @@ async function main(): Promise<void> {
     //   civilian_casualties_caused — civilians that faction killed (perpetrator)
     // The cost ledger sources the first from `displacement.civilian_casualties`, which
     // the code calls ethnicity-aligned (RBiH~Bosniak, RS~Serb, HRHB~Croat).
+    // Operations per faction. This is the leading hypothesis for why a faction's
+    // casualties change depending on whether it is the player: player operations need
+    // presidential authorization, bot operations do not.
+    const capital = (state.military as any)?.negotiation?.capital ?? {};
+    const opsByFaction = Object.fromEntries(
+        ['RBiH', 'RS', 'HRHB'].map((f) => [f, {
+            operations_launched: capital[f]?.operations_launched ?? null,
+            operations_successful: capital[f]?.operations_successful ?? null,
+        }]),
+    );
+
     const ledger = tryBuildCostLedger(state);
     const humanCost = ledger ? {
         total_military_killed: ledger.total_military_killed,
@@ -499,6 +510,7 @@ async function main(): Promise<void> {
         decisions_made: decisionLog.length,
         decisions_diverged: decisionLog.filter((d) => d.diverged_from_historical).length,
         dayton_resolved: daytonResolved,
+        operations_by_faction: opsByFaction,
         human_cost: humanCost,
         endgame: endgame ? {
             // The grade is per-faction, inside faction_verdicts — NOT a top-level field.
