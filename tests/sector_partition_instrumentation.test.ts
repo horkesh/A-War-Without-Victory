@@ -25,6 +25,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import ts from 'typescript';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import {
@@ -939,25 +940,46 @@ describe('sector-partition instrumentation — env-flag gating', () => {
     });
 
     it('final fixed-point convergence runs both correctness seals unconditionally in stable order', () => {
-        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
-        const buildStart = raw.indexOf('export function buildCorpsFrontSectors(');
-        const buildEnd = raw.indexOf('/** @internal Exact legacy fixed-point sequence', buildStart);
-        const buildSource = raw.slice(buildStart, buildEnd);
+        const sourcePath = resolve('src/sim/combat/corps_front_sectors.ts');
+        const raw = readFileSync(sourcePath, 'utf8');
+        const sourceFile = ts.createSourceFile(sourcePath, raw, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
         const orderedStages = [
-            "_perfTime('sealMergedSectorTruth:3'",
-            "_perfTime('pruneGhostArtifactSectors:2'",
-            "_perfTime('recoverDroppedFrontEdges:2'",
-            "_perfTime('applyFinalSectorOwnerTruthPass:4'",
+            'sealMergedSectorTruth:3',
+            'pruneGhostArtifactSectors:2',
+            'recoverDroppedFrontEdges:2',
+            'applyFinalSectorOwnerTruthPass:4',
         ];
 
-        const stageIndexes = orderedStages.map((stage) => buildSource.indexOf(stage));
-        expect(stageIndexes.every((index) => index >= 0)).toBe(true);
-        expect(stageIndexes).toEqual([...stageIndexes].sort((a, b) => a - b));
-        for (const stage of orderedStages) {
-            expect(buildSource.split(stage)).toHaveLength(2);
+        let buildFunction: ts.FunctionDeclaration | undefined;
+        ts.forEachChild(sourceFile, (node) => {
+            if (ts.isFunctionDeclaration(node) && node.name?.text === 'buildCorpsFrontSectors') {
+                buildFunction = node;
+            }
+        });
+        expect(buildFunction?.body).toBeDefined();
+
+        const stages: Array<{ name: string; call: ts.CallExpression }> = [];
+        const visit = (node: ts.Node): void => {
+            if (
+                ts.isCallExpression(node)
+                && ts.isIdentifier(node.expression)
+                && node.expression.text === '_perfTime'
+                && ts.isStringLiteral(node.arguments[0])
+                && orderedStages.includes(node.arguments[0].text)
+            ) {
+                stages.push({ name: node.arguments[0].text, call: node });
+            }
+            ts.forEachChild(node, visit);
+        };
+        visit(buildFunction!.body!);
+
+        expect(stages.map(({ name }) => name)).toEqual(orderedStages);
+        for (const { name, call } of stages) {
+            expect(ts.isExpressionStatement(call.parent), `${name} must be a standalone statement`).toBe(true);
+            expect(call.parent.parent === buildFunction!.body, `${name} must be unguarded in the function body`).toBe(true);
         }
-        expect(buildSource).not.toContain('prunedGhostArtifacts');
-        expect(buildSource).not.toContain('recoveredDroppedFrontEdges');
-        expect(buildSource).not.toContain('finalTerritoryRepaired');
+        expect(raw).not.toContain('prunedGhostArtifacts');
+        expect(raw).not.toContain('recoveredDroppedFrontEdges');
+        expect(raw).not.toContain('finalTerritoryRepaired');
     });
 });

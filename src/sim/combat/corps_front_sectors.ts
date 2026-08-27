@@ -365,9 +365,9 @@ export const __sectorPartitionPerfTestHooks = {
  *   brigades that later repair passes resolve. Only the genuinely final invocation
  *   (reconcile-final-sector-truth-after-ops) should set this to true.
  * @param finalSaveGeometryProjection - Enable final-save-only geometry projection.
- * @param useFixedPointShortcuts - Consume deterministic mutation receipts to skip only
- *   convergence work whose producer reported no change. False is reserved for the
- *   test-only exact reference sequence.
+ * @param useFixedPointShortcuts - Retained compatibility seam for exact-reference,
+ *   regression, and mutation tests. True and false are behaviorally equivalent in
+ *   clean production now that correctness seals always run to fixed-point convergence.
  * @param occupancyStrategy - Production uses the dense call-scoped occupancy index.
  *   The legacy scan path exists only for exact candidate/reference test comparison.
  * @param frontEdgeAdjacencyStrategy - Production reuses one immutable relation per
@@ -798,7 +798,10 @@ export function buildCorpsFrontSectors(
     return result;
 }
 
-/** @internal Exact legacy fixed-point sequence retained for equivalence/property tests. */
+/** @internal Exact legacy fixed-point sequence entrypoint retained as a compatibility,
+ * regression, and mutation-test seam. Clean production behavior is equivalent for both
+ * values of `useFixedPointShortcuts`.
+ */
 export function __buildCorpsFrontSectorsWithoutFixedPointShortcuts(
     state: SectorTopologyNarrowReadState,
     edges: EdgeRecord[],
