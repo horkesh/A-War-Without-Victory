@@ -55,10 +55,15 @@ handoff; it returns to the owner and does not authorize automatic diagnosis.
   `strictCompare`. Add no clock, RNG, or environment-dependent simulation branch.
 - Do not touch scenarios, calibration data, references, or canon. No calibration result authorizes
   an RE change.
-- Record one compact row in the existing RE audit: exact base, staged candidate tree SHA, changed
-  files and production numstat, RED/GREEN, Core result, reviewer verdicts, and player-visible
-  effect. The packet cannot record its own not-yet-created commit ID; backfill resulting commit IDs
-  only in the single final documentation sync, or omit them.
+- Record one compact row in the existing RE audit: exact base, canonical staged implementation
+  payload SHA-256 and exact payload path list, changed files and production numstat, RED/GREEN, Core
+  result, reviewer verdicts, and player-visible effect. The payload includes named production/test
+  paths only and excludes the lock, audit, control, and documentation files. Build a
+  repository-relative byte-order-sorted UTF-8 LF manifest from Git-index values, never worktree
+  bytes: each staged blob row is `<path>\t<staged-mode>\t<staged-blob-id>\n`; each staged deletion is
+  `<path>\tDELETE\t-\n`. The identifier is the SHA-256 of that full manifest. The packet cannot
+  record its own not-yet-created commit ID; the final documentation sync may map the digest to the
+  resulting commit, but need not.
 - No packet runs a 188-week campaign. RE gets one final clean Node-22 A/B pair after all eight
   packets are committed.
 - Stop after each packet. Report the outcome plainly; do not start the next packet automatically.

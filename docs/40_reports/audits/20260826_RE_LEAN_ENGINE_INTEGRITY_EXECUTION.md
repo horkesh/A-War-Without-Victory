@@ -32,12 +32,16 @@ future authority.
 | 7 | P6 | Formal-battle casualty and pool accounting has one owner |
 | 8 | P7 | No-route retreat returns `null` to existing displacement |
 
-Each future row in this audit is compact: exact base, staged candidate tree SHA, changed
-files/production numstat, focused RED/GREEN, typecheck/balanced, applicable save/package proof,
-implementer/domain/QA verdict, and player-visible effect. A packet cannot record its own
-not-yet-created commit ID; backfill resulting commit IDs only in the final documentation sync, or
-omit them. One correction pass and one confirmation pass are permitted. There are no per-packet
-campaigns or duplicate evidence commits.
+Each future row in this audit is compact: exact base, canonical staged implementation payload
+SHA-256 plus its exact path list, changed files/production numstat, focused RED/GREEN,
+typecheck/balanced, applicable save/package proof, implementer/domain/QA verdict, and player-visible
+effect. The payload contains named production/test paths only, excluding lock/audit/control/docs.
+Its repository-relative paths are byte-order sorted; Git-index values, not worktree bytes, produce
+UTF-8 LF rows `<path>\t<staged-mode>\t<staged-blob-id>\n`, with staged deletions encoded
+`<path>\tDELETE\t-\n`; SHA-256 covers the full manifest. A packet cannot record its own
+not-yet-created commit ID. Final docs sync may map the digest to the resulting commit, but need not.
+One correction pass and one confirmation pass are permitted. There are no per-packet campaigns or
+duplicate evidence commits.
 
 The already-measured `+3.62853%` mandatory-correctness cost is watch-only, not a 1.0 gate. No
 further pre-1.0 diagnosis or optimization is authorized. Deferred: active-formation strength pending

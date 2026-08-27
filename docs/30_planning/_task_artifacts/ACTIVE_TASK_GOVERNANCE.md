@@ -26,6 +26,12 @@ packet. No long run is authorized until the one final RE A/B pair.
 - Each implementation allowlist contains only the packet's named code/tests plus the scope lock and
   living audit. The lock and compact audit row are bundled with the implementation; current-lane,
   active governance, roadmap, board, indexes, calibration master, and ledgers wait for final sync.
+- Identify the staged implementation with the canonical payload SHA-256 defined below.
+  Include named production/test paths only; exclude lock/audit/control/docs. Sort repository-relative
+  paths by byte order and build UTF-8 LF rows from Git-index values, never worktree bytes:
+  `<path>\t<staged-mode>\t<staged-blob-id>\n`, or `<path>\tDELETE\t-\n` for a staged deletion. Hash
+  the full manifest and record the digest plus exact path list in the audit. Final docs sync may map
+  the digest to a resulting commit but need not.
 - Each packet has one implementer, one domain reviewer, and one independent QA reviewer, with one
   consolidated correction pass and one confirmation pass.
 - Each implementation packet requires focused RED/GREEN, typecheck, balanced tests, and one compact
@@ -39,10 +45,9 @@ packet. No long run is authorized until the one final RE A/B pair.
 
 ## Active machine lock
 
-The current lock is the docs-only packet `RE-1.0-SCOPE-REDUCTION` /
-`replace-monolithic-re-with-seven-release-outcomes`, based on
-`bc3cdf4e8d69a4d5caf9b97f936f6d52fc370da3`. Its allowlist is exactly the 14 synchronized control
-documents. `long_run_policy.permitted` is false. The existing fail-closed scope checker, staged
+The current lock is the six-file docs-only packet `RE-1.0-PAYLOAD-DIGEST-CORRECTION` /
+`canonicalize-staged-implementation-payload-digest`, based on
+`3ffbcb2b394f9d173584bd0c1df3a54d0b70c827`. `long_run_policy.permitted` is false. The existing fail-closed scope checker, staged
 check, and worktree-local pinned hook remain authoritative; only a reviewed lock amendment against
 the then-current HEAD can open P1.
 

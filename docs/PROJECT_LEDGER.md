@@ -29877,3 +29877,24 @@ scenarios, calibration data, references, or canon changed.
 
 **Next:** seal this docs-only packet, then open P1 release-path truth against its exact two-file
 implementation boundary. Do not start P2A automatically.
+
+## [2026-08-27] docs(RE): canonicalize staged implementation payload identity
+
+**Reason:** Architect confirmation found that the candidate-tree identifier was not a complete or
+reproducible identity for a packet whose lock and audit are staged alongside its implementation.
+It also invited an impossible self-commit reference in the audit.
+
+**Correction:** Future implementation packets identify only their named production/test payload.
+The audit records the exact base, exact payload path list, and SHA-256 of a repository-relative
+byte-order-sorted UTF-8 LF manifest built from Git-index values: staged blobs use
+`<path>\t<staged-mode>\t<staged-blob-id>\n`; staged deletions use `<path>\tDELETE\t-\n`. Lock,
+audit, control, and documentation paths are excluded. The final documentation sync may map this
+digest to the resulting commit, but need not.
+
+**Boundary:** Six docs/control files only: current lane, scope lock, active governance, sole RE
+contract, living audit, and this ledger. Base
+`3ffbcb2b394f9d173584bd0c1df3a54d0b70c827`; long runs remain disabled. No roadmap routing,
+outcome, code, test, scenario, calibration, reference, canon, or release state changed.
+
+**Next:** review and seal this bounded correction before opening P1. This packet does not authorize
+P1 implementation.
