@@ -94,6 +94,16 @@ const ghostDestroyed = destroyed.filter(
 const mil = save.military || {};
 const formationsRaw = mil.formations || {};
 const formations = Array.isArray(formationsRaw) ? formationsRaw : Object.values(formationsRaw);
+const activeOperationFormationIds = new Set();
+for (const corpsId of Object.keys(mil.corps_command || {}).sort()) {
+  const operations = mil.corps_command[corpsId] && mil.corps_command[corpsId].active_operations;
+  for (const operation of Array.isArray(operations) ? operations : []) {
+    for (const id of operation.participating_brigades || []) activeOperationFormationIds.add(id);
+    for (const axis of operation.axes || []) {
+      for (const id of axis.assigned_brigades || []) activeOperationFormationIds.add(id);
+    }
+  }
+}
 // M3: count only GENUINELY-stranded-alive brigades ('holding', plus the transient
 // 'reconnected'). 'collapsed' is the TERMINAL dead-stranded marker (load-bearing
 // permanent-death state per EH-3 2026-06-11) — those are intentional, numerous, and
@@ -106,13 +116,15 @@ const formations = Array.isArray(formationsRaw) ? formationsRaw : Object.values(
 // longer being destroyed. Living formations carry `lifecycle_status: undefined`
 // and `status: 'active'`; the dead ones carry `lifecycle_status: 'destroyed'`
 // and `status: 'inactive'` — both are checked because neither field alone is
-// reliably populated across the formation set.
+// reliably populated across the formation set. The lifecycle also suspends this
+// status while a brigade belongs to a live operation, so mirror that same domain.
 const isAliveFormation = (f) =>
   f.lifecycle_status !== 'destroyed' && f.status !== 'inactive';
 const stranded = formations.filter(
   (f) => f
     && (f.stranded_status === 'holding' || f.stranded_status === 'reconnected')
     && isAliveFormation(f)
+    && !activeOperationFormationIds.has(f.id)
 ).length;
 
 // K:W from faction-level casualty_ledger (fall back to summing per_formation).
