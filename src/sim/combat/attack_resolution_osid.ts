@@ -656,6 +656,10 @@ export function resolveAttackOrdersOsid(
         if (attackerFormations.length === 0) continue;
 
         const firstAttacker = attackerFormations[0]!;
+        const attackerOperationMatches = new Map(attackerFormations.map((attacker) => [
+            attacker.id,
+            findBrigadeOperationAnywhere(state, attacker.id),
+        ]));
         const firstAttackerPreBattleOsid = firstAttacker.location_osid;
         const attackerFaction = firstAttacker.faction;
 
@@ -933,7 +937,7 @@ export function resolveAttackOrdersOsid(
         // the existing CONCENTRATION_BONUS_CAP=0.30. Same-axis (not whole op)
         // scope prevents cross-axis amplification on Sarajevo ring / Drina.
         let effectiveAttackerCount = attackerFormations.length;
-        const opMatch = findBrigadeOperationAnywhere(state, firstAttacker.id);
+        const opMatch = attackerOperationMatches.get(firstAttacker.id);
         if (opMatch) {
             const axis = getBrigadeAxis(opMatch.op, firstAttacker.id);
             const sameAxisBrigades = axis?.assigned_brigades ?? opMatch.op.participating_brigades ?? [];
@@ -1265,13 +1269,13 @@ export function resolveAttackOrdersOsid(
             .sort(strictCompare);
         const contributingOperationIds = Array.from(new Set(
             attackerFormations.flatMap((attacker) => {
-                const match = findBrigadeOperationAnywhere(state, attacker.id);
+                const match = attackerOperationMatches.get(attacker.id);
                 return match?.op.phase === 'execution'
                     ? [`${match.corps_id}:${match.op.name}:t${match.op.started_turn}`]
                     : [];
             }),
         )).sort(strictCompare);
-        const activeOpMatch = findBrigadeOperationAnywhere(state, firstAttacker.id);
+        const activeOpMatch = attackerOperationMatches.get(firstAttacker.id);
         const activeOp = activeOpMatch?.op ?? null;
         const attackerCorpsId = activeOpMatch?.corps_id ?? firstAttacker.corps_id;
         const executionOp = activeOp?.phase === 'execution' ? activeOp : null;
@@ -1400,10 +1404,11 @@ export function resolveAttackOrdersOsid(
         // casualties 151 vs 144 — so 157 decisive victories were being discarded by fiat, not by a
         // rule about what a probe is. See `occupies_on_victory` in game_state.ts for the full note.
         //
-        // `activeOp`, NOT `executionOp`: the latter is phase-gated to execution, which is why a
-        // quarter of combat captures look operation-less in the artifacts while the engine has
-        // their operation. Default TRUE — an attack that has not declared otherwise intends to hold.
-        const occupiesOnVictory = activeOp?.occupies_on_victory ?? true;
+        // Every validated contributor must permit occupation. An operationless attacker or an
+        // operation without a declaration defaults TRUE; an explicit FALSE vetoes the shared flip.
+        const occupiesOnVictory = attackerFormations.every((attacker) =>
+            attackerOperationMatches.get(attacker.id)?.op.occupies_on_victory ?? true
+        );
         let flip = (outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory')
             && occupiesOnVictory;
 

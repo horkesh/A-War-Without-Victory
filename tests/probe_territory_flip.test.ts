@@ -229,11 +229,145 @@ function makeUndefendedProbeScenario() {
     return { state, edges };
 }
 
+type MixedOccupationMode = 'mixed' | 'all_true' | 'all_default';
+
+function makeMixedOccupationScenario(
+    mode: MixedOccupationMode,
+    operationlessId = 'aaa_default_attacker',
+    reverseOrderInsertion = false,
+) {
+    const { state, edges, operation } = makeScenario('sector_attack');
+    const original = state.military.formations!['brig_rs_1']!;
+    delete state.military.formations!['brig_rs_1'];
+
+    const attackers = [
+        makeFormation(operationlessId, 'RS', 'brigade', 'op:rs:staging', {
+            ...original,
+            id: operationlessId,
+            name: operationlessId,
+            corps_id: mode === 'all_true' ? 'vrs_1st' : undefined,
+        }),
+        makeFormation('mid_declared_attacker', 'RS', 'brigade', 'op:rs:staging', {
+            ...original,
+            id: 'mid_declared_attacker',
+            name: 'mid_declared_attacker',
+            corps_id: 'vrs_1st',
+        }),
+        makeFormation('zzz_declared_attacker', 'RS', 'brigade', 'op:rs:staging', {
+            ...original,
+            id: 'zzz_declared_attacker',
+            name: 'zzz_declared_attacker',
+            corps_id: 'vrs_1st',
+        }),
+    ];
+    for (const attacker of attackers) {
+        state.military.formations![attacker.id] = attacker;
+    }
+
+    operation.participating_brigades = mode === 'all_true'
+        ? attackers.map(attacker => attacker.id)
+        : attackers.slice(1).map(attacker => attacker.id);
+    operation.axes![0]!.assigned_brigades = [...operation.participating_brigades];
+    if (mode === 'mixed') operation.occupies_on_victory = false;
+    if (mode === 'all_true') operation.occupies_on_victory = true;
+    if (mode === 'all_default') delete operation.occupies_on_victory;
+
+    const orderedAttackers = reverseOrderInsertion ? [...attackers].reverse() : attackers;
+    state.military.brigade_attack_orders = Object.fromEntries(
+        orderedAttackers.map(attacker => [attacker.id, 'op:rbih:target']),
+    ) as GameState['military']['brigade_attack_orders'];
+
+    return { state, edges, operation };
+}
+
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe('occupation declaration (2026-08-26)', () => {
+    it('requires every validated mixed-battle contributor to permit occupation', () => {
+        const { state, edges, operation } = makeMixedOccupationScenario('mixed');
+
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+
+        expect(report.battles[0]?.attacker_brigades?.length).toBeGreaterThan(1);
+        expect(report.battles[0]?.attacker_won).toBe(true);
+        expect(report.casualty_attacker + report.casualty_defender).toBeGreaterThan(0);
+        expect(state.political.political_controllers!['op:rbih:target']).toBe('RBiH');
+        expect(report.flips_applied).toBe(0);
+        expect(state.political.control_events).toHaveLength(0);
+        expect(operation.territory_gained_this_turn ?? 0).toBe(0);
+        expect(operation.total_territory_gained ?? 0).toBe(0);
+    });
+
+    it('is invariant to contributor ID renaming and attack-order insertion order', () => {
+        const run = (operationlessId: string, reverseOrderInsertion: boolean) => {
+            const { state, edges } = makeMixedOccupationScenario(
+                'mixed',
+                operationlessId,
+                reverseOrderInsertion,
+            );
+            const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+            expect(report.battles[0]?.attacker_brigades?.length).toBeGreaterThan(1);
+            return {
+                control: state.political.political_controllers!['op:rbih:target'],
+                flips: report.flips_applied,
+            };
+        };
+
+        expect(run('aaa_default_attacker', false)).toEqual({ control: 'RBiH', flips: 0 });
+        expect(run('zzz_default_attacker', true)).toEqual({ control: 'RBiH', flips: 0 });
+    });
+
+    it('permits occupation when every validated contributor explicitly permits it', () => {
+        const { state, edges } = makeMixedOccupationScenario('all_true');
+
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+
+        expect(report.battles[0]?.attacker_brigades?.length).toBeGreaterThan(1);
+        expect(state.political.political_controllers!['op:rbih:target']).toBe('RS');
+        expect(report.flips_applied).toBe(1);
+    });
+
+    it('defaults undeclared and operationless contributors to permitting occupation', () => {
+        const { state, edges } = makeMixedOccupationScenario('all_default');
+
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+
+        expect(report.battles[0]?.attacker_brigades?.length).toBeGreaterThan(1);
+        expect(state.political.political_controllers!['op:rbih:target']).toBe('RS');
+        expect(report.flips_applied).toBe(1);
+    });
+
+    it('does not let a nonadjacent contributor veto occupation', () => {
+        const { state, edges } = makeMixedOccupationScenario('all_default');
+        const invalid = makeFormation('invalid_veto_attacker', 'RS', 'brigade', 'op:rs:remote', {
+            corps_id: 'vrs_1st',
+        });
+        state.military.formations![invalid.id] = invalid;
+        state.military.brigade_attack_orders![invalid.id] = 'op:rbih:target';
+        const corpsCommand = state.military.corps_command!['vrs_1st']!;
+        const defaultOperation = corpsCommand.active_operations[0]!;
+        corpsCommand.active_operations.push({
+            ...defaultOperation,
+            name: 'invalid_nonoccupying_operation',
+            occupies_on_victory: false,
+            participating_brigades: [invalid.id],
+            axes: [{
+                ...defaultOperation.axes![0]!,
+                axis_id: 'invalid_nonoccupying_axis',
+                assigned_brigades: [invalid.id],
+            }],
+        });
+
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+
+        expect(report.battles[0]?.attacker_brigades?.length).toBeGreaterThan(1);
+        expect(report.battles[0]?.attacker_brigades).not.toContain(invalid.id);
+        expect(state.political.political_controllers!['op:rbih:target']).toBe('RS');
+        expect(report.flips_applied).toBe(1);
+    });
+
     it('★ defaults to holding — a probe built WITHOUT the declaration FLIPS, by design', () => {
-        // The predicate is `activeOp?.occupies_on_victory ?? true`. Default-true is deliberate and
+        // Each contributor's predicate is `matchedOp?.occupies_on_victory ?? true`. Default-true is deliberate and
         // is the conservative choice: an attack that has not declared it does not intend to hold
         // is an ordinary attack, and defaulting FALSE would silently delete a large share of
         // combat captures and breach the anchors.
