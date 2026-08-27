@@ -796,6 +796,59 @@ building on this" was, correctly, the thread that unravelled its own severest cl
 the seat refused to round its own residual away. That discipline is the reusable part of this
 panel, more than any individual verdict in it.
 
+## 3u. Historical operation codenames are drawn with no date gate — and the Historian's fix would re-open a closed bug
+
+Found while verifying the Historian seat's "`Uragan 95` is missing" claim. The claim is correct
+about authored operations and incomplete about the engine: `Uragan`, `Neretva` and `Ljeto` all
+exist in `src/sim/combat/operation_names.ts` — the **codename pool for emergent bot operations**
+— annotated with their real historical referents:
+
+```
+'Operacija Neretva',   // Neretva 93 — anti-HVO, Sep 1993
+'Operacija Uragan',    // Hurricane — 2nd Corps Vozuca, Sep 1995
+'Operacija Ljeto',     // Summer 95 — Grahovo/Glamoc, Jul 1995
+```
+
+**`pickOperationName` (`operation_names.ts:251`) accepts `turn` and uses it only as hash input**
+(`key = \`${corpsId}:${turn}\``) and as the value written into `used_operation_names`. Selection
+is `simpleHash(key) % pool.length` then scan-forward for the first unused name. **There is no
+date constraint and no theatre constraint on which codename a given operation receives.**
+
+So an emergent ARBiH operation in autumn 1992 can be issued the name `Operacija Uragan` — a real
+September 1995 offensive — or `Operacija Neretva`, a real September 1993 operation against the
+HVO, possibly while the operation in question is fighting the VRS. My own runs show the pool in
+use: `Operacija Stjena`, `Bedem`, `Čelik`, `Odmazda`, `Javor`, `Hrast`, `Zvijezda`, `Kiša`,
+`Džihad`, `Sjena`, `Ihlas`, `Strijela`, `Hajka`, `Grad`, `Odluka` are all pool draws.
+
+### This bug class is already known, and was closed for four names only
+
+`LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX` (2026-05-07) removed **Krivaja**, **Stupčanica**,
+**Sana** and **Maestral** from the pools. The commit's own rationale, quoted from the file header:
+
+> Bot ops were picking up names like "Operacija Stupčanica" / "Operacija Krivaja" / "Operacija
+> Sana" / "Operacija Maestral" at any turn (e.g. w27 …), **masquerading as the canonical
+> sensitive-history operations and tripping AAR scans + war-or-game scrutiny.**
+
+**The filter's criterion was name COLLISION with an authored operation, not historicity.**
+Neretva, Uragan and Ljeto are real named operations with real dates and real targets, but
+because nothing authored elsewhere in the engine carries those names, they were never
+candidates for exclusion. The masquerade the 2026-05-07 fix was written to stop is still
+available through them — it is simply less visible, because there is no canonical operation
+sitting next to them to make the collision obvious.
+
+### The dependency the Historian seat could not see
+
+The Historian recommends authoring **`Neretva 93`**, **`Uragan 95`**, and renaming the t160-170
+Grahovo/Glamoč operation to **`Ljeto 95`**. All three names are currently live in the bot pool.
+
+**Authoring them without removing them from the pool in the same change reproduces the exact
+2026-05-07 defect for three more names** — a canonical operation and a randomly-dated bot
+operation sharing a name in the same run. Anyone actioning the Historian's composition fix must
+also extend the exclusion list; the two findings are a single change, not two.
+
+Recorded, not fixed. Severity: low on its own, **medium as a trap laid across the Historian's
+recommendation** — which is the reason it is written up here rather than filed as cosmetic.
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |
