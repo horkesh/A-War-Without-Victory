@@ -514,6 +514,30 @@ async function main(): Promise<void> {
         gorazde_2_controller: controllers['op:gorazde:gorazde_2'] ?? null,
     };
 
+    // §6 ATROCITY LIVENESS, per faction — not just the player's.
+    // `war_crimes_events_emergent` (paramilitary_sweep.ts:831, its SOLE writer) is the
+    // input to the authorized_cleansing_condemnation flag at a threshold of 1. Bots
+    // auto-approve paramilitary sweeps; the PLAYER gets `pending_paramilitary_requests`
+    // and must answer them — a lever this harness does not yet fire. So a player faction
+    // may be structurally unable to accrue the emergent counter that a bot accrues freely.
+    // Capture per faction so "does being the player exempt you from the atrocity
+    // mechanism?" is answerable from a run instead of argued from source.
+    const negCap = (state as any).military?.negotiation?.capital ?? {};
+    const atrocityByFaction = Object.fromEntries(
+        ['RBiH', 'RS', 'HRHB'].map((f) => [f, {
+            war_crimes_events: negCap[f]?.war_crimes_events ?? null,
+            war_crimes_events_emergent: negCap[f]?.war_crimes_events_emergent ?? null,
+            civilian_casualties_caused: negCap[f]?.civilian_casualties_caused ?? null,
+            is_player: f === ((state as any).meta?.player_faction ?? null),
+            // The flags are what the §6 cap actually reads. Capturing the counter without
+            // them answers "did atrocity happen" but not "did the engine condemn it".
+            condemnation_flags: [...(negCap[f]?.condemnation_flags ?? [])].sort(),
+        }]),
+    );
+    const pendingParamilitary = Array.isArray((state as any).pending_paramilitary_requests)
+        ? (state as any).pending_paramilitary_requests.length
+        : null;
+
     const ledger = tryBuildCostLedger(state);
     const humanCost = ledger ? {
         total_military_killed: ledger.total_military_killed,
@@ -556,6 +580,8 @@ async function main(): Promise<void> {
         dayton_resolved: daytonResolved,
         operations_by_faction: opsByFaction,
         enclave_provenance: enclaveProvenance,
+        atrocity_by_faction: atrocityByFaction,
+        pending_paramilitary_requests_at_end: pendingParamilitary,
         human_cost: humanCost,
         endgame: endgame ? {
             // The grade is per-faction, inside faction_verdicts — NOT a top-level field.
@@ -563,6 +589,23 @@ async function main(): Promise<void> {
             // "the endgame has no verdict" finding; the verdict was there the whole time.
             outcome: verdict?.outcome_label ?? verdict?.outcome_type ?? null,
             player_verdict: verdict?.faction_verdicts?.[cfg.faction] ?? null,
+            // The engine grades EVERY faction (scoring.ts:921); narrowing to the player
+            // hid that. It is the bot factions that answer the §6-liveness question —
+            // authorized_cleansing_condemnation can only be observed on a faction that
+            // accrues emergent war crimes WITHOUT tripping genocide_condemnation first,
+            // and in practice that is never the player. Grade + flags only; the full
+            // verdict objects would bloat the summary.
+            all_faction_verdicts: Object.fromEntries(
+                Object.entries((verdict?.faction_verdicts ?? {}) as Record<string, any>)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([f, v]) => [f, {
+                        grade: v?.grade ?? null,
+                        outcome_class: v?.outcome_class ?? null,
+                        condemnation_flags: [...(v?.condemnation_flags ?? [])].sort(),
+                        territory_controlled_pct: v?.capital_breakdown?.territory_controlled_pct ?? null,
+                        war_crimes_events: v?.capital_breakdown?.war_crimes_events ?? null,
+                    }]),
+            ),
             divergence_notes: comparison?.divergence_notes ?? null,
             milestones_absent: Array.isArray(comparison?.milestone_comparison)
                 ? comparison.milestone_comparison.filter((m: any) => m.status === 'absent').map((m: any) => m.id)

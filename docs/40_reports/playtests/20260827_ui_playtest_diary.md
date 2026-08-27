@@ -1552,6 +1552,80 @@ byte-identical to the un-instrumented one) and committed in `e8e54f2cb`. Not an 
 - Whether the Pyrrhic collapse is lever-spam or genuine activity punishment.
 - Whether the post-ops-fix inversion window is actually reachable.
 
+## 3o. §6 LIVENESS — VERIFIED END TO END IN EMERGENT MODE. Both condemnation paths fire.
+
+The coverage hole identified in §3p is now closed. Run `fv-RS` (RS player, historical policy,
+autonomy 0, **`--decision-mode emergent`**, 188 turns), all three faction verdicts:
+
+| faction | | territory | territory anchor | emergent war crimes | condemnation flag | **GRADE** |
+| --- | --- | --- | --- | --- | --- | --- |
+| RS | *player* | **46.7%** | A+ candidate | 28 | `genocide_condemnation` | **D** |
+| RBiH | bot | **32.2%** | **A** | 4 | `authorized_cleansing_condemnation` | **C** |
+| HRHB | bot | 21.1% | C | 0 | — | C |
+
+**Both condemnation flags fire. Both caps apply. Territory does not buy a good grade when
+atrocity is present.**
+
+- **RS holds 46.7% of Bosnia — its maximal war aim — and is graded D.**
+- **RBiH earns an A on territory (32.2%, anchor threshold 30%) and is capped to C** by four
+  authorized paramilitary sweeps. Four. The threshold is 1, and it bites at 4.
+- HRHB, with no emergent war crimes, keeps the grade its territory earned.
+
+This is AWWV's central ethical thesis — atrocity is never rewarded — **working end to end in the
+default emergent build, measured across all three factions rather than inferred from one.**
+
+### Correction: "the flag never fires" was MY HARNESS, not the engine
+
+Everything I reported earlier about `authorized_cleansing_condemnation` never firing was a
+**capture gap in my own harness.** `run_headless.ts:591` read:
+
+```ts
+player_verdict: verdict?.faction_verdicts?.[cfg.faction] ?? null,
+```
+
+The engine grades **every** faction (`scoring.ts:921` builds `faction_verdicts`); my summary
+narrowed that to the player's entry and discarded the rest. The flag had been firing on RBiH the
+whole time — I simply never wrote it down.
+
+**And the faction it fires on is never the player**, which is why the narrowed capture hid it so
+completely:
+
+- RS is the only faction that accrues emergent war crimes heavily as a player (28), and it trips
+  `genocide_condemnation` first — which correctly short-circuits the weaker check (`scoring.ts:819`
+  skips authorized-cleansing when genocide is present, because D is a harsher cap than C).
+- RBiH and HRHB as players launch too few operations to take ground, so they generate no rear
+  pockets, no sweep requests, and no emergent war crimes at all.
+
+So the flag is observable **only on bot factions** in every run this lane can currently produce.
+That is a property of the operations-suppression defect (§3q), not of the §6 system.
+
+### Two of my own claims, corrected
+
+- **"The player may be structurally exempt from the atrocity mechanism" — REFUTED.** I raised it
+  as a hypothesis and flagged it unconfirmed; good, because it is wrong. RS-as-player accrues
+  **28** emergent war crimes against RS-as-bot's 11, and `pending_paramilitary_requests` is **0**
+  at end in every run, so nothing piled up unanswered. The harness's missing paramilitary lever
+  did not produce the signature I feared.
+- **§3t's "the bright line works on the Srebrenica path" was too narrow** in the opposite
+  direction from §3p's correction. Both paths work: `genocide_condemnation` (event-gated) and
+  `authorized_cleansing_condemnation` (emergent-gated). §3p correctly narrowed an over-broad
+  claim; this run lets it be broadened again, on evidence this time.
+
+### Harness changes, all capture-only
+
+- `all_faction_verdicts` — grade, outcome class, condemnation flags, territory, war crimes, for
+  every faction. Sorted. This is the fix for the gap above.
+- `atrocity_by_faction` — `war_crimes_events`, `war_crimes_events_emergent`,
+  `civilian_casualties_caused`, `is_player`, per faction.
+- `pending_paramilitary_requests_at_end` — so an unanswered-request backlog can never again be
+  confused with an engine property.
+
+**Known harness gap, recorded rather than fixed:** `LeverPlan` still has no lever for
+`pending_paramilitary_requests`. A player faction cannot yet be made to authorize or refuse a
+sweep from this harness, so the *player's own* authorized-cleansing path remains untested even
+though the mechanism is now proven live. That is the next harness lever to build, and it is the
+one that would let a playthrough actually exercise the choice §6 exists to govern.
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |
