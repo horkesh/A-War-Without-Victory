@@ -262,6 +262,18 @@ async function clickByText(
 
 // ── The turn loop ────────────────────────────────────────────────────────────
 
+
+/**
+ * Re-resolve the embedded game frame on every use.
+ *
+ * A Frame handle captured once goes stale when the shell re-creates or re-navigates the
+ * iframe, and a stale handle answers queries with ZERO MATCHES rather than throwing —
+ * so the driver reported "0 decision cards" while the card was plainly on screen.
+ */
+function gameFrame(win: Page, fallback: Frame): Frame {
+    return win.frames().find((f) => f.url().includes('embedded=1')) ?? fallback;
+}
+
 /** Read the in-game date readout. It is the only reliable "did the turn advance" signal. */
 async function readDate(frame: Frame): Promise<string> {
     return frame
@@ -297,9 +309,169 @@ async function returnToShell(frame: Frame): Promise<void> {
  * the driver's own doing.
  */
 async function dismissModal(frame: Frame): Promise<void> {
-    await clickIfPresent(frame, /^Close$/i, 1200);
+    // Close the button that belongs to the OPEN DIALOG, not the first "Close" anywhere
+    // on the page. The Authority & Directives explainer stayed up for eight clearing
+    // passes because a same-named control elsewhere was being clicked instead.
+    const dialog = frame.locator('[role="dialog"], [aria-modal="true"]').last();
+    if ((await dialog.count().catch(() => 0)) > 0) {
+        for (const re of [/^Close$/i, /^[×✕✖]$/i, /^Dismiss$/i]) {
+            const btn = dialog.getByRole('button', { name: re }).first();
+            if ((await btn.count().catch(() => 0)) > 0) {
+                await btn.click({ timeout: 6000 }).catch(() => undefined);
+                await frame.page().waitForTimeout(1000);
+                return;
+            }
+        }
+    }
+    for (const re of [/^Close$/i, /^[×✕✖]$/i, /^Dismiss$/i, /^Continue$/i]) {
+        if (await clickIfPresent(frame, re, 1000)) return;
+    }
     await frame.page().keyboard.press('Escape').catch(() => undefined);
-    await frame.page().waitForTimeout(1200);
+    await frame.page().waitForTimeout(1000);
+}
+
+
+/**
+ * What is actually on screen right now. Attached to every stuck-turn finding so a
+ * stall is diagnosable from the ledger alone — repeatedly writing a throwaway recon
+ * script per stall is how most of this driver's build time was spent.
+ */
+async function screenState(frame: Frame): Promise<Record<string, unknown>> {
+    // NOTE: no `const fn = () => {}` inside evaluate(). tsx/esbuild runs with keepNames,
+    // which wraps named function expressions in a `__name(...)` helper that does not
+    // exist in the page context — the call then dies with "__name is not defined".
+    // Inline every predicate.
+    return frame
+        .evaluate(() => ({
+            date: (document.body.innerText.match(/\d+\s+\w+\s+\d{4}/) ?? [''])[0],
+            modals: [...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')]
+                .filter((e) => window.getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0)
+                .map((e) => (e.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 90)),
+            buttons: [...document.querySelectorAll('button,[role="button"]')]
+                .filter((e) => window.getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0)
+                .map((e) => (e.textContent ?? '').replace(/\s+/g, ' ').trim())
+                .filter(Boolean)
+                .slice(0, 30),
+        }))
+        .catch((e: unknown) => ({ error: String((e as Error)?.message ?? e).slice(0, 300) }));
+}
+
+/** Is any blocking overlay still on screen? */
+async function hasOpenModal(frame: Frame): Promise<boolean> {
+    return frame
+        .evaluate(() =>
+            [...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')].some((e) => {
+                const r = e.getBoundingClientRect();
+                return window.getComputedStyle(e).display !== 'none' && r.width > 0 && r.height > 0;
+            }),
+        )
+        .catch(() => false);
+}
+
+
+/**
+ * Answer a decision that is presented DIRECTLY as a modal rather than through the
+ * Presidential Inbox card (paramilitary authorization does this, and it blocks the turn
+ * identically). Detected structurally: an open modal plus an option carrying the
+ * HISTORICAL DEFAULT marker.
+ */
+async function resolveOpenDecisionModal(frame: Frame): Promise<boolean> {
+    if (!(await hasOpenModal(frame))) return false;
+    const preferred = frame.locator('button').filter({ hasText: /Historical default/i }).first();
+    if ((await preferred.count().catch(() => 0)) === 0) return false;
+    await preferred.click({ timeout: 8000 }).catch(() => undefined);
+    await frame.page().waitForTimeout(2500);
+    await dismissModal(frame);
+    return true;
+}
+
+
+/**
+ * Work the Decision Room review queue.
+ *
+ * Not every turn blocker is a decision or a modal: some turns block on a command-review
+ * item that only exists behind REVIEW BLOCKERS, where each entry has its own REVIEW
+ * button. With none of these actioned, ADVANCE TURN is simply absent from the shell and
+ * the turn looks broken.
+ */
+async function clearReviewQueue(frame: Frame): Promise<boolean> {
+    // A "COMMAND BRIEFING — N warnings need review" banner can sit over the shell with
+    // its own REVIEW / x controls; clear it before opening the room.
+    await clickIfPresent(frame, /^[×✕✖]$/i, 1200);
+    if (!(await clickIfPresent(frame, /REVIEW BLOCKERS/i, 3000))) return false;
+    let acted = false;
+    for (let i = 0; i < 6; i++) {
+        const item = frame.getByRole('button', { name: /^REVIEW$/i }).first();
+        if ((await item.count().catch(() => 0)) === 0) break;
+        await item.click({ timeout: 8000 }).catch(() => undefined);
+        await frame.page().waitForTimeout(2000);
+        acted = true;
+        // Whatever the review opened: take the historical option if offered, else close.
+        if (!(await resolveOpenDecisionModal(frame))) await dismissModal(frame);
+    }
+    await dismissModal(frame);
+    return acted;
+}
+
+
+/**
+ * The President's Desk surface has its own blockers, distinct from the shell's:
+ * an "Open required signature" route for proposals awaiting a signature, and
+ * "Acknowledge" buttons on staff notices. Neither is a modal, neither appears on the
+ * map shell, and ADVANCE (labelled "Advance" here, not "ADVANCE TURN") stays inert
+ * until the signature is given.
+ */
+async function clearDeskBlockers(frame: Frame): Promise<boolean> {
+    let acted = false;
+    // NOTE: do NOT add a "click the SIGNATURE REQUIRED badge" route here. The badge is
+    // present from turn 1 (it sits in the status bar), so clicking it derails the very
+    // first decision and the campaign never starts. Two attempts at this each took a
+    // working 8-turn driver to 0 turns. The turn-9 Operation Circle signature needs a
+    // route that is scoped to the inbox card, not the global badge.
+    if (await clickIfPresent(frame, /Open required signature/i, 2500)) {
+        acted = true;
+        console.log('      [signature] opened:', JSON.stringify((await screenState(frame)).buttons));
+        for (const re of [/^Sign$/i, /Sign and authorize/i, /^Approve$/i, /Authorize/i, /Grant/i, /Confirm/i]) {
+            if (await clickIfPresent(frame, re, 2500)) break;
+        }
+        await dismissModal(frame);
+    }
+    for (let i = 0; i < 6; i++) {
+        if (!(await clickIfPresent(frame, /^Acknowledge$/i, 1200))) break;
+        acted = true;
+    }
+    return acted;
+}
+
+/**
+ * Clear everything standing between the player and ADVANCE.
+ *
+ * A single turn can stack several surfaces: a required presidential decision, then a
+ * diplomatic peace plan, then one or more narrative event modals. Each one covers the
+ * navigation, so any of them left up makes ADVANCE unfindable — which reads from the
+ * outside as a missing control rather than an unread modal.
+ */
+async function clearBlockingOverlays(frame: Frame, recorder: FindingsRecorder): Promise<void> {
+    const win = frame.page();
+    for (let pass = 0; pass < 8; pass++) {
+        frame = gameFrame(win, frame);
+        const didOpen = await resolveOpenDecisionModal(frame);
+        const didDecision = await resolveOneDecision(frame);
+        const didPeace = await resolvePeacePlan(frame, recorder);
+        let didModal = false;
+        if (!didOpen && !didDecision && !didPeace && (await hasOpenModal(frame))) {
+            await dismissModal(frame);
+            // Only count it as progress if the modal ACTUALLY closed; otherwise an
+            // un-closable overlay burns every pass and the desk/review routes never run.
+            didModal = !(await hasOpenModal(frame));
+        }
+        if (!didOpen && !didDecision && !didPeace && !didModal) {
+            if (await clearDeskBlockers(frame)) continue;
+            // Last resort: a blocker that only lives in the Decision Room queue.
+            if (await clearReviewQueue(frame)) continue;
+            return;
+        }
+    }
 }
 
 
@@ -344,7 +516,11 @@ async function resolvePeacePlan(frame: Frame, recorder: FindingsRecorder): Promi
 async function resolveOneDecision(frame: Frame): Promise<boolean> {
     // The Presidential Inbox card reads "Required DECISION <title> ...". Matched on the
     // Required/DECISION badge pair rather than a title, so it works for any event.
-    const card = frame.getByRole('button', { name: /Required\s*DECISION/i }).first();
+    // The inbox carries at least two blocking card types: "Required DECISION" (an event
+    // decision) and "Required PROPOSAL" (an operation awaiting presidential signature,
+    // e.g. Operation Circle). Both state "required before advance"; matching only
+    // DECISION left proposal turns permanently stuck.
+    const card = frame.getByRole('button', { name: /Required\s*(DECISION|PROPOSAL)/i }).first();
     const nCards = await card.count().catch(() => 0);
     console.log(`      [decision] inbox cards matching Required/DECISION: ${nCards}`);
     if (nCards === 0) return false;
@@ -356,6 +532,13 @@ async function resolveOneDecision(frame: Frame): Promise<boolean> {
     // first option. (Verified by dumping the modal: three buttons, no confirm.)
     // hasText matches textContent; getByRole matches the ACCESSIBLE NAME, which for
     // these option cards is not the same string and matched nothing.
+    // A proposal is signed/approved rather than chosen between; try that first.
+    for (const re of [/^Sign$/i, /^Approve$/i, /Sign and authorize/i, /Authorize/i, /Approve operation/i]) {
+        if (await clickIfPresent(frame, re, 2500)) {
+            await dismissModal(frame);
+            return true;
+        }
+    }
     const preferred = frame.locator('button').filter({ hasText: /Historical default/i }).first();
     const nPref = await preferred.count().catch(() => 0);
     console.log(`      [decision] historical-default options visible: ${nPref}`);
@@ -387,57 +570,42 @@ async function resolveOneDecision(frame: Frame): Promise<boolean> {
 async function advanceOneTurn(
     win: Page, frame: Frame, turn: number, recorder: FindingsRecorder,
 ): Promise<{ advanced: boolean; from: string; to: string }> {
-    // Get back to the turn surface FIRST. Deep surfaces (Army HQ Main Staff, the
-    // Decision Room) have no ADVANCE of their own, so arriving from a surface tour and
-    // reporting "no ADVANCE control" measures the driver's own navigation, not the app.
-    // That exact false critical was emitted on the first playthrough run.
-    // Resolve decisions from wherever we are; the Presidential Inbox is present on the
-    // post-Begin shell and navigating first was losing it.
+    frame = gameFrame(win, frame);
     const from = await readDate(frame);
     console.log(`    [turn ${turn}] at ${from}`);
 
-    // 1. Answer every required decision. The app REFUSES to advance while one is
-    //    outstanding — correct behaviour, and the reason an unanswered decision looks
-    //    exactly like a broken ADVANCE button from the outside.
-    for (let attempt = 0; attempt < 5; attempt++) {
-        const didDecision = await resolveOneDecision(frame);
-        const didPeace = await resolvePeacePlan(frame, recorder);
-        if (!didDecision && !didPeace) break;
+    // RETRY, do not single-shot. Blockers arrive asynchronously — a decision, a peace
+    // plan, an event, a signature, a staff notice — and clearing one can reveal another
+    // a beat later. A single clear-then-click races that and reports a stuck turn on
+    // what is really a timing gap; this was the driver's main source of flakiness.
+    for (let attempt = 1; attempt <= 4; attempt++) {
+        await clearBlockingOverlays(frame, recorder);
+        const clicked = await clickIfPresent(frame, /ADVANCE\s*TURN|^ADVANCE/i, 5000);
+        console.log(`    [turn ${turn}] attempt ${attempt} advance clicked: ${clicked}`);
+
+        if (clicked) {
+            let to = from;
+            for (let i = 0; i < 24 && to === from; i++) {
+                await win.waitForTimeout(2500);
+                to = await readDate(frame);
+                if (to === from && i % 6 === 5) await clearBlockingOverlays(frame, recorder);
+            }
+            if (to !== from) {
+                await clearBlockingOverlays(frame, recorder);
+                return { advanced: true, from, to };
+            }
+        }
+        await win.waitForTimeout(2000);
     }
 
-    // 2. Advance. ADVANCE lives on the PRESIDENT'S DESK surface, not the map shell —
-    //    the shell nav is DESK/WAR MAP/ARMY HQ/RECORDS/CHRONICLE/CODEX with no ADVANCE,
-    //    so looking for it from there finds nothing and looks like a missing control.
-    await clickIfPresent(frame, /^PRESIDENT.S DESK$/i, 2500);
-    // The control is labelled "ADVANCE TURN ->", not "ADVANCE". An anchored /^ADVANCE$/
-    // matched nothing and looked exactly like a missing control for several runs.
-    const clicked = await clickIfPresent(frame, /ADVANCE\s*TURN|^ADVANCE/i, 6000);
-    console.log(`    [turn ${turn}] advance clicked: ${clicked}`);
-    if (!clicked) {
-        recorder.record(
-            finding('bug', 'critical', 'ui-no-advance-control', 'No enabled ADVANCE control on the turn surface',
-                `At turn ${turn} (${from}) there is no clickable ADVANCE. The player cannot move the war forward.`,
-                'ui:turn_loop', { turn, date: from }),
-        );
-        return { advanced: false, from, to: from };
-    }
-
-    // 3. Confirm the date actually moved. A click that returns without advancing is the
-    //    failure this lane exists to catch, and it is silent.
-    let to = from;
-    for (let i = 0; i < 12 && to === from; i++) {
-        await win.waitForTimeout(2500);
-        to = await readDate(frame);
-    }
-    if (to === from) {
-        recorder.record(
-            finding('bug', 'critical', 'ui-advance-noop', 'Clicking ADVANCE does not move the date',
-                `ADVANCE was clicked at ${from} and the date readout was unchanged 30s later. The turn did not advance.`,
-                'ui:turn_loop', { turn, date: from }),
-        );
-        return { advanced: false, from, to };
-    }
-    return { advanced: true, from, to };
+    const screen = await screenState(frame);
+    recorder.record(
+        finding('bug', 'critical', 'ui-turn-blocked', 'Turn cannot be advanced after four attempts',
+            `At ${from} the driver cleared every known blocker four times and the date never moved. `
+            + `Either a blocker type is unhandled or ADVANCE is genuinely inert. Screen state attached.`,
+            'ui:turn_loop', { turn, date: from, screen }),
+    );
+    return { advanced: false, from, to: from };
 }
 
 /** Visit each top-level surface once and probe it. Breadth, not depth. */
@@ -474,7 +642,17 @@ async function main(): Promise<void> {
     const recorder = new FindingsRecorder(runId, join(outDir, 'findings.jsonl'));
     console.log(`▶ ${runId} — real Electron UI, faction ${faction}`);
 
-    const app = await electron.launch({ args: ['.'], cwd: REPO_BASE_DIR, timeout: 120_000 });
+    // FRESH PROFILE PER RUN. Electron otherwise reuses one persistent userData
+    // directory, so every run inherits the previous run's saves and settings — a
+    // playtest is supposed to be a new player, and accumulated state silently changes
+    // the launch path and turn behaviour between otherwise identical runs.
+    const userDataDir = join(outDir, 'user-data');
+    mkdirSync(userDataDir, { recursive: true });
+    const app = await electron.launch({
+        args: [`--user-data-dir=${userDataDir}`, '.'],
+        cwd: REPO_BASE_DIR,
+        timeout: 120_000,
+    });
     let shot = 0;
     const capture = async (win: Page, name: string): Promise<void> => {
         await win.screenshot({ path: join(shotDir, `${String(++shot).padStart(2, '0')}_${name}.png`) }).catch(() => undefined);
