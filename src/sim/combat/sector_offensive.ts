@@ -1457,7 +1457,15 @@ export function advanceSectorOffensives(
             // Keep existing elapsed/staged/forcedLaunch gates for non-preparation ops.
             //
             const preparationReady = op.type === 'sector_attack' && op.preparation_sub_phase === 'ready';
-            const plannedLaunchReady = elapsed >= planDuration && (preparationReady || stagedEarly);
+            // A staged historical plan present at scenario birth already represents
+            // pre-scenario staff work. Credit only that opening seam; later queued or
+            // newly planned operations still owe their full declared planning clock.
+            const openingPlanReady = op.is_pre_planned === true
+                && op.started_turn === 0
+                && elapsed === 1
+                && stagedEarly;
+            const plannedLaunchReady = openingPlanReady
+                || (elapsed >= planDuration && (preparationReady || stagedEarly));
             if (plannedLaunchReady || elapsed > planDuration || forcedLaunch) {
                 if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
                     beginRecovery(op, turn, 'political_blocked', state);

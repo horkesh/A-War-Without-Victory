@@ -318,6 +318,8 @@ Corps operations are the primary mechanism through which offensive action occurs
 
 Before an operation executes, it passes through a **five-phase preparation state machine**:
 
+Ordinary and newly queued operations must serve their declared planning duration. A historical operation already staged when the scenario begins represents staff work completed before play and may enter execution on the first advance; this does not waive readiness requirements, and only an explicit player force-launch can bypass preparation for any other operation.
+
 1. **Intel Gathering:** The corps collects intelligence on the target sector. Sector intel confidence must reach the commander's threshold before proceeding. During this phase, the player may order **reconnaissance-in-force probes** — limited engagements (max 2 brigades at 40% combat power) that test enemy defenses and improve intelligence confidence. Probes cost 5 corps exhaustion. The enemy may detect incoming probes and gain a counter-probe confidence boost (+0.15).
 
 2. **Force Staging:** Participating brigades move into position. The operation cannot proceed until sufficient forces are staged near the objective.

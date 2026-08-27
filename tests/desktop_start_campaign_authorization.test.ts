@@ -126,7 +126,7 @@ describe('desktop startNewCampaign historical operation authorization', () => {
     expect(resolvedReview?.resolved_turn).toBe(authorizedTurn);
   });
 
-  it('honors the same declared planning clock for accepted and preserved startup operations', async () => {
+  it('gives accepted and preserved staged opening operations the same first-advance planning credit', async () => {
     const startupPath = `${process.cwd()}/data/derived/startup/apr_1992_initial_save.json`;
     const preserved = (await loadStateFromPath(startupPath)).state;
     preserved.meta.player_faction = 'RS';
@@ -163,43 +163,28 @@ describe('desktop startNewCampaign historical operation authorization', () => {
 
     const authorizedDrina = findOperation(authorizedTurn.state, 'vrs_drina', 'Operation Drina');
     expect(authorizedDrina?.started_turn).toBe(0);
-    expect(authorizedDrina?.phase).toBe('planning');
+    expect(authorizedDrina?.phase).toBe('execution');
 
     const planningDuration = authorizedDrina?.planning_duration;
     expect(planningDuration).toBeGreaterThan(1);
     expect(findOperation(preservedTurn.state, 'vrs_drina', 'Operation Drina')?.planning_duration)
       .toBe(planningDuration);
-
-    while (authorizedTurn.state.meta.turn < authorizedDrina.started_turn + planningDuration) {
-      [preservedTurn, authorizedTurn] = await Promise.all([
-        advanceTurn(preservedTurn.state, process.cwd()),
-        advanceTurn(authorizedTurn.state, process.cwd()),
-      ]);
-    }
-
     expect(findOperation(preservedTurn.state, 'vrs_drina', 'Operation Drina')?.phase).toBe('execution');
-    expect(findOperation(authorizedTurn.state, 'vrs_drina', 'Operation Drina')?.phase).toBe('execution');
-    expect(authorizedTurn.state.meta.turn).toBe(authorizedDrina.started_turn + planningDuration);
+    expect(authorizedTurn.state.meta.turn).toBe(1);
   });
 
   it('assists only participants of accepted selected player-faction historical operations', async () => {
     const { state } = await startNewCampaign(process.cwd(), 'RS', 'apr_1992');
+    state.meta.autonomy_level = 0;
     const review = state.meta.pending_proposal_reviews?.find((proposal) =>
       proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
     );
     expect(review).toBeDefined();
     review!.accepted = true;
     review!.resolved_turn = state.meta.turn;
-
-    let assisted = await advanceTurn(state, process.cwd());
+    const assisted = await advanceTurn(state, process.cwd());
     const injectedDrina = findOperation(assisted.state, 'vrs_drina', 'Operation Drina');
-    expect(injectedDrina?.phase).toBe('planning');
-    expect((assisted.report?.details as any)?.player_historical_operation_assist)
-      .toEqual({ eligible_attackers_by_corps: {} });
-
-    while (assisted.state.meta.turn < injectedDrina.started_turn + injectedDrina.planning_duration) {
-      assisted = await advanceTurn(assisted.state, process.cwd());
-    }
+    expect(injectedDrina?.phase).toBe('execution');
 
     const drina = findOperation(assisted.state, 'vrs_drina', 'Operation Drina');
     expect(drina).toBeDefined();
@@ -207,22 +192,23 @@ describe('desktop startNewCampaign historical operation authorization', () => {
     const participants = new Set<string>(drina?.participating_brigades ?? []);
     expect(participants.size).toBeGreaterThan(0);
 
-    const movementOrders = assisted.state.military.brigade_movement_orders ?? {};
-    const attackOrders = assisted.state.military.brigade_attack_orders ?? {};
-    const assistedOrderIds = new Set<string>([
-      ...Object.keys(movementOrders),
-      ...Object.keys(attackOrders),
-    ]);
-
     const assistDiagnostics = (assisted.report?.details as any)?.player_historical_operation_assist;
     expect(Object.keys(assistDiagnostics?.eligible_attackers_by_corps ?? {})).toEqual(['vrs_drina']);
     expect(assistDiagnostics.eligible_attackers_by_corps.vrs_drina).toBeGreaterThan(0);
     expect(assistDiagnostics.eligible_attackers_by_corps.vrs_drina).toBeLessThanOrEqual(participants.size);
 
-    const nonParticipantPlayerOrderIds = [...assistedOrderIds].filter((brigadeId) =>
-      assisted.state.military.formations?.[brigadeId]?.faction === 'RS' &&
-      !participants.has(brigadeId)
+    const ordersSeenByResolver = (assisted.report?.details as any)?.attack_resolution_osid
+      ?.orders_seen_by_brigade ?? {};
+    const playerAttackers = Object.keys(ordersSeenByResolver).filter((brigadeId) =>
+      assisted.state.military.formations?.[brigadeId]?.faction === 'RS'
     );
-    expect(nonParticipantPlayerOrderIds).toEqual([]);
+    expect(playerAttackers.length).toBeGreaterThan(0);
+    expect(playerAttackers.every((brigadeId) => participants.has(brigadeId))).toBe(true);
+
+    const nonParticipant = Object.values(assisted.state.military.formations ?? {}).find((formation: any) =>
+      formation.faction === 'RS' && formation.kind === 'brigade' && !participants.has(formation.id)
+    ) as any;
+    expect(nonParticipant).toBeDefined();
+    expect(ordersSeenByResolver).not.toHaveProperty(nonParticipant.id);
   });
 });
