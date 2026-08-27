@@ -2,12 +2,13 @@
   "schema_version": 1,
   "status": "active",
   "lane": "RE",
-  "task": "RE-P1-NODE22-EVIDENCE-CORRECTION",
-  "packet": "record-contract-node22-proof",
-  "base_commit": "3b8add78adfa6f15fafa4c273483c82cc0562d2a",
+  "task": "RE-P2A-BOUNDARY-CORRECTION",
+  "packet": "add-two-deletion-surface-tests",
+  "base_commit": "16ac3667cc38c24c1f2ac9f71099d8cf2cac0574",
   "allowlist": [
     "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
-    "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md"
+    "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
+    "docs/plans/2026-08-26-engine-integrity-plan.md"
   ],
   "denylist": [
     "data/scenarios/**",

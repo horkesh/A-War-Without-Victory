@@ -72,8 +72,8 @@ handoff; it returns to the owner and does not authorize automatic diagnosis.
 
 | Order | Packet | Outcome | State |
 |---:|---|---|---|
-| 1 | P1 | Release-path truth | NEXT |
-| 2 | P2A | Delete legacy force-launch authority | Waiting |
+| 1 | P1 | Release-path truth | Accepted / complete |
+| 2 | P2A | Delete legacy force-launch authority | NEXT |
 | 3 | P2B | Delete Operation Briefing mutation authority | Waiting |
 | 4 | P3 | Conserved threat lineage | Waiting |
 | 5 | P4 | Non-starving pre-planned queues | Waiting |
@@ -108,7 +108,9 @@ change, broad `src/` catch-all, mode, or job.
 `tests/ui/presidential_decision_room.test.ts`, `tests/desktop_persistence_contract.test.ts`,
 `tests/back_the_officer_human_only_determinism.test.ts`,
 `tests/logistics_priority_ipc_path.test.ts`, `tests/sim/combat/order_interpretation.test.ts`,
-`tests/sim/command/phase2_operation_interpretation.test.ts`, `tests/sector_offensive.test.ts`.
+`tests/sim/combat/phase3_reliability_decay.test.ts`,
+`tests/sim/command/phase2_operation_interpretation.test.ts`, `tests/sector_offensive.test.ts`,
+`tests/ui/lever_single_host_guard.test.ts`.
 
 **Change:** delete `stage-operation-force-launch`, `interpretOperationLaunch`,
 `interpretOperationHalt`, the duplicate AI path, `dig_in_on_halt`, and

@@ -715,3 +715,13 @@ real-detector TDD, focused GREEN, typecheck, and desktop build are verified. The
 failures remain recorded debt. Probe build, package, and executable launch completed, but the probe
 produced no verdict and remains unresolved—not PASS. No diagnosis, rerun campaign, or P1 expansion
 is authorized.
+
+## P2A boundary correction
+
+P1 is accepted and complete; P2A is next. Architect review found two existing deletion-surface
+tests omitted from P2A's named test boundary: `tests/sim/combat/phase3_reliability_decay.test.ts`
+preserves `halt_delay_turns_remaining`, and `tests/ui/lever_single_host_guard.test.ts` preserves
+`stageOperationForceLaunch`. They are added to P2A so its deletion proof covers the existing
+behavioral surface without widening production scope. The three known balanced-suite failures and
+the unresolved packaged-runtime probe remain frozen evidence: neither authorizes diagnosis,
+repair, reruns, or any expansion of P2A.
