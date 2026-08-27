@@ -320,15 +320,40 @@ Per faction, as player versus as bot:
 RBiH is the clearest: **roughly half the military dead as player than as bot.** RS and
 HRHB are mixed, so "the player always fights less" is NOT established.
 
-**Leading hypothesis, being measured, NOT yet established:** player operations require
-presidential authorization while bot operations do not, and the `historical` policy
-accepted only 2 authorizations as RBiH against 19 as RS. If a faction's operations are
-gated behind an authorization the player rarely grants, that faction fights less as
-player — and everyone it would have fought loses fewer troops too, which would explain
-the whole-war totals moving rather than just one side's.
+### MECHANISM ESTABLISHED — the player is offered far fewer operations than the bot launches
+
+Measured directly. Operations launched across the full 188 weeks, same faction, differing
+only in whether it was player-controlled:
+
+| Faction | Ops as PLAYER | Ops as BOT | Military dead as player | as bot |
+| --- | ---: | ---: | ---: | ---: |
+| RBiH | **2** | **14** | 11,892 | 22,150 |
+| RS | **16** | **25** | 18,051 | 12,717 / 18,729 |
+
+**RBiH launches SEVEN TIMES fewer operations as player than as bot**, and loses roughly
+half as many soldiers. RS launches 16 against 25 — the same direction, less extreme.
+
+**The gap is in what is OFFERED, not what is accepted.** The `historical` policy accepts
+*every* `HISTORICAL_OP:` / `APPROVE_OP:` proposal it is shown — that is unconditional in
+`acceptOperationAuthorizations`. It accepted 2 as RBiH and 19 as RS, which means only 2
+were ever presented to a player RBiH across the entire war, while the same faction under
+bot control mounted 14 operations needing no authorization at all.
+
+So a faction's offensive tempo collapses the moment a human takes it over, not because
+the human refuses operations but because the authorization pipeline never offers them.
 
 This is the `Player/headless equivalence requires bound inputs, not matching labels`
-guardrail: the labels match (both "historical"), the inputs do not.
+guardrail: both paths are labelled "historical", and the inputs are not the same.
+
+**Knock-on:** whole-war military dead move 31,365 / 52,318 / 49,494 by player faction,
+because the sides the player's faction would have fought also take fewer casualties. The
+civilian toll and its ethnic distribution barely move, which fits — this is an offensive
+tempo effect, not a general reduction in violence.
+
+**What is NOT established:** whether the shortfall is missing proposals, proposals that
+are generated but filtered before display, or a catalog authored per-faction with far
+fewer player-eligible entries for RBiH. That is the next question and it is engine work,
+not calibration.
 
 ### Not a finding — my own field path
 
