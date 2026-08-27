@@ -7,14 +7,16 @@ closes. The separate probe lane is closed at `b711cffa9` and is not RE scope. RE
 calibration tuning and may not refresh thresholds, manifests, references, or expected hashes to
 make a gate pass.
 
-No current run satisfies lean RE-0 S0. RE-0 requires two fresh, byte-identical, distinct-output
-188-week runs on one approved clean exact commit and Node 22. T1B, T1C correctness, RE-0D2
-fingerprint truth, and both stale-golden reconciliations are closed. Exact isolated T1C performance
-output is identical, but its provisional candidate median is `+3.62853%`; a bounded lean
-performance escalation must close before T2. One fresh exact-commit S0 pair follows the reviewed
-evidence packet. The prior Node-22 pair is reproducible pre-fix evidence only. Farz remains
-separate known-red calibration; T1C is not authority to tune it. Raw artifact metadata outranks this
-catalog.
+The clean lean RE-0 baseline pair is now captured by the fresh distinct-output Node-22 runs at exact commit
+`177882fc28ec2eaee2d2ecdc015a5a06c99ee06b`. Both 188-week runs have identical 15-file inventories,
+all 14 non-metadata artifacts byte-identical, fingerprint `6f2b4a10126a980e`, and green engine-only
+plus direct-consistency gates; save/replay compatibility is separately green. Their checkpoint observations are identically
+`688 / 656 / 654 / 633`. The checkpoint verifier's Farz late-capture timing discriminator remains
+red (turn 62 rather than the late window); this is calibration observation only and authorizes no RE
+change. Full S0 is not yet satisfied because exact isolated T1C performance remains provisionally
+`+3.62853%`; the proposed reuse cannot meet the measured recovery floor, so an owner-ratified
+bounded-diagnosis-or-policy decision gates further T1C work and T2. The earlier Node-22 pair remains pre-fix evidence only. Raw
+artifact metadata outranks this catalog.
 
 T1C reconciled exactly 19 stale manifest hashes after RE-0D2 restored the non-scoring 31-anchor
 contract; the structural golden was separately attributed, reviewed, and committed. This was

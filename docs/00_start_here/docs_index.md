@@ -11,7 +11,7 @@
 - **Pyrrhic roster and handoffs:** [.cursor/AGENT_TEAM_ROSTER.md](../../.cursor/AGENT_TEAM_ROSTER.md) — Pyrrhic Games (subagent collective); when to invoke which specialist; clarification-first and handoff rules.
 - **Canon (game truth):** [docs/10_canon/CANON.md](../10_canon/CANON.md) — canonical doc index and precedence order; includes industry mapping (GDD / TDD / process) for readers used to standard game-dev docs.
 - **Project state:** [docs/PROJECT_LEDGER.md](../PROJECT_LEDGER.md) — changelog and current state (at docs root).
-- **Calibration authority:** [CALIBRATION_MASTER.md](../40_reports/CALIBRATION_MASTER.md) — current checkpoint, accepted run, retired surfaces, residuals, and calibration debt. Further calibration is paused until RE closes, and no current run satisfies lean RE S0. The sole scoring scenario is `data/scenarios/apr1992_definitive_188w.json`; January 1993 is evaluated at week 39 of that master, never in a separate 40-week scenario.
+- **Calibration authority:** [CALIBRATION_MASTER.md](../40_reports/CALIBRATION_MASTER.md) — current checkpoint, accepted run, retired surfaces, residuals, and calibration debt. Further calibration is paused until RE closes. The clean lean RE baseline pair is captured separately at `177882fc2`; full S0 remains performance-blocked and its historical-fit fields remain non-authorizing observations. The sole scoring scenario is `data/scenarios/apr1992_definitive_188w.json`; January 1993 is evaluated at week 39 of that master, never in a separate 40-week scenario.
 
 ## Canon set (docs/10_canon/)
 
@@ -55,9 +55,12 @@ prerequisite closed at `b711cffa9`; it is not part of RE. [Lean Engine Integrity
 completed T0 at base `38e65547882856fba07faab7a6dbcd4258da9607`. The machine-enforced
 guard is installed on `codex/re-engine-integrity-repaired`; the scenario/event half of `63671dd8c`
 remains quarantined. T1C correctness, RE-0D2 fingerprint truth, and both stale-golden
-reconciliations are complete. Exact isolated performance is provisionally RED at `+3.62853%`.
-The reviewed docs/control successor of `99d7bcbb6` authorizes one clean exact-commit S0 pair;
-bounded remediation must close before T2.
+reconciliations are complete. A clean Node-22 baseline pair is captured at `177882fc2`: both runs pass the
+engine-only and direct-consistency gates, all 14 non-metadata artifacts are byte-identical, and the
+shared fingerprint is `6f2b4a10126a980e`; save/replay is also green. Long runs are disabled. Full
+S0 remains blocked because exact isolated performance
+remains provisionally RED at `+3.62853%`; the proposed reuse is quantitatively insufficient and an
+owner-ratified diagnosis-or-policy decision now gates further T1C work and T2.
 The first Node-22 pair is reproducible pre-fix evidence only, not S0. Owner ruling
 ALL requires every validated battle contributor to permit occupation, with explicit `false`
 vetoes and missing declarations defaulting `true`; T1B applies that generic rule. T1C then restores
@@ -67,9 +70,10 @@ truth calls may not be skipped or replaced by new cache/state/surface area.
 Historical fit is a separately labelled non-authorizing calibration observation. The
 [full-team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md)
 index the review; frozen discovery remains report evidence. Further calibration and R8 wait on RE.
-No current calibration artifact satisfies RE S0.
+The clean RE baseline pair is captured at `177882fc2`; full S0 remains performance-blocked, and no
+historical calibration artifact substitutes for the pair.
 
-**Current control plane (synchronized 2026-08-27):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE T1C performance is provisionally RED; the current reviewed docs/control successor of `99d7bcbb6` authorizes exactly one clean S0 pair, and bounded remediation must close before T2. The prior pair remains pre-fix evidence only. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
+**Current control plane (synchronized 2026-08-27):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. The clean RE baseline pair and save/replay proof are captured at `177882fc2`; long-run permission is false and full S0 remains blocked on provisionally RED exact isolated performance. The proposed SpatialContext reuse cannot meet the measured recovery floor, so an owner-ratified bounded-diagnosis-or-policy decision gates further T1C work and T2. The earlier pair remains pre-fix evidence only. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
 
 The remaining files under `docs/30_planning/` are design specifications, not active execution queues: [multi-brigade operations](../30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md), [operation reevaluation](../30_planning/OPERATION_REEVALUATION_DESIGN_SPEC.md), and [spatial context](../30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md). Historical plans removed from that folder remain available through Git history and the ledgers.
 

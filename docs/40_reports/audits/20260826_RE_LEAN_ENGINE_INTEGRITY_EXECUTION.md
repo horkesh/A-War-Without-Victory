@@ -2,8 +2,8 @@
 
 **Date:** 2026-08-26
 
-**Status:** reviewed S0 authorization packet active; exactly one clean Node-22 A/B pair pending;
-T2 blocked
+**Status:** clean Node-22 baseline pair and save/replay proof captured at `177882fc2`; authorization
+consumed; full S0 performance-blocked; long runs disabled; owner performance decision next; T2 blocked
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -488,8 +488,9 @@ recovery-2 account for `1,294.21 ms` (about 79%) of that increase. Candidate-onl
 locality support, not comparative proof. Machine/power/background-load conditions were not encoded,
 so final performance acceptance remains blocked. Correctness is retained. Before T2, remediation
 may only seek no-growth reuse inside the existing sector owner and tests; it may not restore guards, add
-cache/state/flags/modules/services/scans, or run a second diagnosis. Per plan step 14, one separately
-authorized exact-commit S0 pair follows this evidence packet; remediation must close before T2.
+cache/state/flags/modules/services/scans, or run a second diagnosis. Per plan step 14, the separately
+authorized exact-commit baseline pair subsequently ran cleanly; full S0 remains blocked and the
+owner-ratified diagnosis-or-policy decision must close before further implementation or T2.
 
 Report SHA-256 values in P1/C1/P2/C2/P3/C3 order are
 `e3f720ed03b98539eb75f4b1d73438feb624283e885498ed354e47e818db3ccb`,
@@ -513,3 +514,120 @@ Preflight found preserved clean Node-22 evidence at the original `runs/re_s0_a` 
 commit `8511512f`. No scenario process launched, so authorization was not consumed; those roots are
 not deleted or reused. The reviewed successor instead names fresh absent roots
 `runs/re_s0_integrity_a` and `runs/re_s0_integrity_b`.
+
+## S0 baseline-pair result and consumed-authorization closeout
+
+The sole pair ran A then B at clean sealed HEAD
+`177882fc28ec2eaee2d2ecdc015a5a06c99ee06b` under Node `v22.21.1`; both commands exited zero. Both
+logs contain `Tactical map copy SKIPPED (AWWV_S6_GRADE_RUN=true)` and final-save seal receipts at
+turn 188 with assignment `unresolved=0`; the serialized saves intentionally omit that transient
+field. The grade-run variable was absent after `finally`. Observed UTC
+log-write windows were `15:33:31.1396577–15:39:07.8890444` (336,749.3867 ms) for A and
+`15:39:12.6779628–15:45:06.5868324` (353,908.8696 ms) for B.
+The wrapper's exact pair interval was `2026-08-27T17:33:25.8006107+02:00` through
+`2026-08-27T17:45:06.7258364+02:00` (700,925.2257 ms). It invoked the plan's literal
+`run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique
+--map --out <root>` command with the pinned Node-22 executable, first for A and then for B.
+
+Exact launch commands were:
+
+```powershell
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs/re_s0_integrity_a
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs/re_s0_integrity_b
+```
+
+The exact HEAD tree is `463525b4b5a14c5c7dea7aa45c52847465127f14`. Executed-source
+SHA-256 values are:
+
+| Executed source | SHA-256 |
+|---|---|
+| `tools/scenario_runner/run_scenario_with_preflight.ts` | `d184a0aaaa0f7ee724b8ed75f5b62dca5171d25c4c2d8fd1c2b717947816e218` |
+| `tools/verify_checkpoints.cjs` | `bbaa8e0f880e48cdc6cfd91a8b550d249311398c061fb51c24426ab0e1211af8` |
+| `tools/engine_health_gate.cjs` | `14998592daaec1ee4f98063f3d1d3f5b50ccff1c81a6f79cf2f4619d9eebd2a5` |
+| `tools/validate_run_consistency.cjs` | `b291446215fe22752dca799c97c7d0b16a5379747ac2a3779770e4b0f28a6519` |
+| `tools/diagnostics/structural_fingerprint.cjs` | `a2f94f5fbfbc75657681bb16c08585cb4265344a984824ccef0c8fcfc6e2c15b` |
+| `tools/op_schedule_diff.cjs` | `43073f1196a2bc51cec798da9832060f20ef5705b4835909dedeb4841c71b50b` |
+| `node_modules/tsx/dist/cli.mjs` | `8729ecfb90d9d568939e4190e6f1d3317c946583b7d37a776e0c23a21c021cf8` |
+| `node_modules/vitest/vitest.mjs` | `39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6` |
+
+Each leaf has the literal 15-file inventory. All 14 non-`run_meta` artifacts are byte-identical;
+metadata differs only at path-derived `out_dir` and is otherwise identical. Shared final-save
+SHA-256 is `75eb15152c7bde318a6ecf2befba1b9b3e62e3f85e3161dc89cff3b7774b7556`; shared fingerprint is
+`6f2b4a10126a980e`; all 40 operation schedules match at all five rungs. Metadata proves the full
+authorization commit, `git_dirty:false`, Node 22, `collapse_enabled:false`, and identical consumed
+input digest `95628a5bd1c4096ad95c63bda2fe60be5b970f10cfca8c5fe225420962ea53d6`.
+
+| Artifact | bytes | JSONL rows | A SHA-256 | B SHA-256 |
+|---|---:|---:|---|---|
+| `activity_summary.json` | 453 | — | `92bb49101d4aed98b2a300b1b16460c82b4f44850c500b361917b5b1ded2d4aa` | same |
+| `brigade_temporal_log.jsonl` | 23,665,845 | 44,533 | `e273021eebfcd4bbb4171d678eb81082ec49ad58bc8f52975c97aed404346189` | same |
+| `control_delta.json` | 27,734 | — | `0f074c4c3c4fd0da577822b03f387dabbc3f1efcea696483b35aa78ef2de4dc9` | same |
+| `destroyed_brigades.json` | 10,733 | — | `8d11887a1198ef5a4a09c32d3876f297801b81eacd2aed3359e6d409e887e1c2` | same |
+| `displacement_event_log.jsonl` | 15,262,075 | 86,385 | `2900ada9e5793b2ad0226d1e227501dc177744f61d99e633cce226cbc080de8a` | same |
+| `end_report.md` | 48,915 | — | `42c29742e302dd9b4745cc3ab36c65b67fa7b2ae60edc906020d143747ffa507` | same |
+| `final_save.json` | 10,056,229 | — | `75eb15152c7bde318a6ecf2befba1b9b3e62e3f85e3161dc89cff3b7774b7556` | same |
+| `formation_delta.json` | 3,805 | — | `2df3cd806c94a579cb677728f852d5d4bb4447979849547c479d8f161184ee50` | same |
+| `initial_save.json` | 1,353,384 | — | `e7b678524962ec0256a66a6a0fbc3b0950ee5cd63a2b6929c087922289c17b11` | same |
+| `operation_aars.json` | 499,062 | — | `17f2adc3d23d439c3e6bd3c41dbe62ad55c2e6ff6b8b33f0b8c02441a670f0aa` | same |
+| `replay_save_manifest.json` | 37,184 | — | `2cb28d9842d186e32577813324d90f5afd41888e243824b882f393feac328c0f` | same |
+| `run_meta.json` | 10,489 | — | `83b1fad662b302f1f4ba92693c72441a73935f26f5940764effe931efe5b3bad` | `7d12a074f4685a612161b72ab913112b68c2eb87bc2b643ceec6dbe31e84ae31` |
+| `run_summary.json` | 623,618 | — | `ee18ccc0e44b286502fcdda0d14ba281baa7aedf30d9ccba59d9cd6b21da1eed` | same |
+| `watched_operations.json` | 6,895 | — | `82bed205e765a3efeb9348111fc251aa13e1166d9e24fbb74567a0fd2aa39a48` | same |
+| `weekly_report.jsonl` | 2,276,423 | 188 | `d71d03425c5575323fc15aa8a0877580bcc355568a9ba71bb4d0a7c04ce9c911` | same |
+
+The preserved console logs are each 145,554 bytes; A SHA-256 is
+`71283a65466e524b94b97ab089f28c4c049a63665ba005ca019ef5edf4c2480b`, and B SHA-256 is
+`685172a8fc4744a7f167e865120105d4523294077e8e10cd64e13f67c4089519`.
+
+Both engine-only gates pass all five authorizing checks with identical measurements:
+zero-eligible `0`, invalid operation-weeks `0`, ghost-destroyed `1`, stranded `18`, consistency
+failures `0`. Both direct consistency commands pass. The focused harness/provenance/anchor pack
+passes 3 files / 55 tests. The Node-22 save/replay compatibility pack passes 7 files / 68 tests with
+2 intentional skips: continue-from-save equivalence, real-save deterministic roundtrip, adapter
+parity/boundary, and replay emit/consume are green. The checkpoint verifier identically reports `688 / 656 / 654 / 633` and
+exits one only for the existing Farz late-capture timing discriminator (capture turn 62 versus its
+late-window expectation). That is non-authorizing calibration evidence; it triggers no RE tuning.
+
+The save/replay command was:
+
+```powershell
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" node_modules/vitest/vitest.mjs run tests/scenario_continue_from_save_equivalence.test.ts tests/save_load_real_roundtrip.test.ts tests/save_load_real_roundtrip_adapter.test.ts tests/adapter_field_completeness.test.ts tests/ui_adapter_boundary.test.ts tests/replay_save_emit.test.ts tests/replay_player.test.ts
+```
+
+The exact resolved post-run verification commands were:
+
+```powershell
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" tools/verify_checkpoints.cjs runs/re_s0_integrity_a/apr1992_definitive_188w__46834a3b41033bff__w188_n0
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" tools/engine_health_gate.cjs runs/re_s0_integrity_a/apr1992_definitive_188w__46834a3b41033bff__w188_n0 --horizon 188w --engine-integrity-only --json
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" tools/validate_run_consistency.cjs runs/re_s0_integrity_a/apr1992_definitive_188w__46834a3b41033bff__w188_n0
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" tools/diagnostics/structural_fingerprint.cjs runs/re_s0_integrity_a/apr1992_definitive_188w__46834a3b41033bff__w188_n0 --json --full
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" tools/verify_checkpoints.cjs runs/re_s0_integrity_b/apr1992_definitive_188w__46834a3b41033bff__w188_n0
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" tools/engine_health_gate.cjs runs/re_s0_integrity_b/apr1992_definitive_188w__46834a3b41033bff__w188_n0 --horizon 188w --engine-integrity-only --json
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" tools/validate_run_consistency.cjs runs/re_s0_integrity_b/apr1992_definitive_188w__46834a3b41033bff__w188_n0
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" tools/diagnostics/structural_fingerprint.cjs runs/re_s0_integrity_b/apr1992_definitive_188w__46834a3b41033bff__w188_n0 --json --full
+```
+
+The cross-run schedule command was:
+
+```powershell
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" tools/op_schedule_diff.cjs runs/re_s0_integrity_a/apr1992_definitive_188w__46834a3b41033bff__w188_n0 runs/re_s0_integrity_b/apr1992_definitive_188w__46834a3b41033bff__w188_n0
+```
+
+The focused 55-test command was:
+
+```powershell
+& "C:/Users/User/AppData/Local/Logi/LogiPluginService/PluginHosts/node22/node/node.exe" node_modules/vitest/vitest.mjs run tests/scenario_harness_contracts.test.ts tests/run_provenance_stamp.test.ts tests/scenario_anchor_contract.test.ts
+```
+
+The clean deterministic/correctness baseline pair and save/replay gate are captured, and the one-pair
+authorization is consumed. This successor restores long-run permission to false. Full S0 remains
+blocked by the provisional `+3.62853%` performance disposition. The proposed SpatialContext reuse
+cannot recover the required `1,174.3330 ms`: its consumed-profile ceiling is `320.931 ms`, or
+`628.100 ms` even under an unrealistically broad deletion assumption. It is rejected as the S0
+remedy. Follow-up code review found several safe small deletions, but even pretending their whole
+containing labels cost zero totals only `975.466 ms`, still `198.867 ms` short. Larger stages cross
+real bucket, territory, sector-key, and formation-location mutation barriers; consumed evidence
+does not justify consolidating them. An owner-ratified bounded-diagnosis-or-policy decision gates
+further implementation and T2. No guard
+restoration, cache/state/flag/module/service/scan/threshold/history special case, additional
+diagnosis, retry, or second pair is authorized.

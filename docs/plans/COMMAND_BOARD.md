@@ -24,7 +24,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 6 | R6 | **JANUARY 1993 CHECKPOINT SLICE LANDED; FURTHER CALIBRATION PAUSED ON RE** | Preserve the landed evidence. Do not start reference, init-control, objective, axis, timing, roster, or outcome tuning until RE closes. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE — AUDIO IMPLEMENTATION LANDED `2d106e5e0`** | Complete human listen/sensitivity acceptance, English accessibility/readability, offline browser and packaged-runtime proof, and closeout reconciliation. Pause any packet that collides with RE-0E/RE-1 desktop/UI files. Localization Phase 3 remains post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
-| 7.5 | RE | **S0 AUTHORIZATION PACKET ACTIVE** | Commit the reviewed docs/control successor of `99d7bcbb6`, prove production bytes unchanged, then run exactly one clean Node-22 A/B pair at its sealed HEAD. No-growth remediation must close before T2; scenario/event/calibration work is excluded. | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) |
+| 7.5 | RE | **BASELINE PAIR + SAVE/REPLAY GREEN; FULL S0 PERFORMANCE-BLOCKED** | Preserve the clean `177882fc2` Node-22 pair and its matching fingerprint/engine gates. Long runs are disabled. The proposed reuse cannot meet the recovery floor; obtain the owner-ratified bounded-diagnosis-or-policy decision before further T1C work or T2. Scenario/event/calibration work remains excluded. | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **WAITING ON RC, R1-R7, AND RE GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
@@ -38,14 +38,13 @@ Probe findings and acceptance belong exclusively to the closed probe scope at `b
 not RE implementation authority. RE owns confirmed non-probe authority, accounting, ordering,
 locality, CI/runtime-truth, and evidence-gated decision packets.
 
-**§6 status:** the enclave guard repair and owner ruling remain historical evidence, but no current
-full-run artifact is admissible as lean RE S0. RE-0 must establish the fresh exact-parent Node-22
-baseline before any RE behavior claim.
+**§6 status:** the clean lean RE baseline pair is captured at `177882fc2`. Both Node-22 runs preserve
+the enclave guard, pass engine-only and direct-consistency gates, and reproduce the same artifacts/fingerprint.
+The checkpoint tool's Farz timing red remains non-authorizing calibration observation.
 
-**MEASUREMENT SUBSTRATE EXISTS; RE-0 EVIDENCE IS STILL OWED.** Run provenance can stamp commit,
-consumed-input evidence, and flag state, and the pair selector rejects incomparable artifacts.
-RE-0 must nevertheless produce its own clean exact-parent Node-22 pair. Historical mixed-tree or
-Node-24 runs cannot be reused.
+**RE-0 BASELINE EVIDENCE EXISTS.** Run provenance stamps exact commit, consumed-input evidence, and flag
+state; the clean Node-22 A/B pair is byte-identical outside path-derived metadata. Historical
+mixed-tree or Node-24 runs remain inadmissible and cannot replace it.
 
 **CURRENT EXECUTION:** The probe lane is closed and the owner handed the repository to RE. The
 authoritative line is `codex/re-engine-integrity-repaired`; staged planning credit is retained at
@@ -53,8 +52,9 @@ authoritative line is `codex/re-engine-integrity-repaired`; staged planning cred
 The guard is installed. T1C correctness, RE-0D2 fingerprint truth, and both stale goldens pass.
 Exact isolated Node-22 output is byte-identical, but its provisional median regresses `+3.62853%`;
 the consumed diagnosis localizes roughly 79% of sector-profile delta to required unconditional
-passes. One exact-commit S0 pair follows this evidence packet; exact-file no-growth remediation
-must close before T2. R7 audio implementation has landed;
+passes. The baseline pair at `177882fc2` is deterministic and engine-green, and save/replay is green;
+full S0 remains performance-blocked. Long runs are disabled; the proposed reuse is quantitatively
+insufficient, and an owner-ratified diagnosis-or-policy decision gates further T1C work and T2. R7 audio implementation has landed;
 remaining R7 work is human listen/sensitivity review,
 English accessibility/readability, and integrated packaged proof, subject to RE packet collisions.
 

@@ -29764,7 +29764,7 @@ attributes `1,294.21 ms` of the `1,636.89 ms` instrumented sector-builder increa
 newly unconditional pass-4/seal-3/prune-2/recovery-2 owners. Environmental conditions were not
 encoded, so this opens but does not close performance acceptance. Per the controlling plan, one
 separately authorized exact-commit S0 pair follows this evidence packet, while the exact-file,
-no-growth remediation must close before T2. It may not restore a guard or add a cache,
+no-growth remediation was initially queued before T2. It may not restore a guard or add a cache,
 state, flag, module, service, scan, threshold, historical special case, or new owner. The current
 lock forbids long runs. `docs/10_canon/FORAWWV.md` remains untouched.
 
@@ -29789,3 +29789,56 @@ commit `8511512f`. No scenario process launched, so the authorization attempt wa
 Nothing was deleted or reused. The reviewed successor retains identical production bytes and the
 one-pair limit but names fresh absent roots `runs/re_s0_integrity_a` and
 `runs/re_s0_integrity_b`.
+
+## [2026-08-27] docs(RE-0D): record clean S0 baseline evidence
+
+**Type:** Consumed run-authorization closeout, deterministic engine evidence, and synchronized
+control-plane propagation. No engine, test, scenario, calibration, reference, canon, historical
+target, map, release, publication, push, PR, merge, or tag change.
+
+**Execution:** after a clean-tree, ancestry, exact-control-diff, deny-environment, absent-root,
+exclusive-process, governance-hook, and sealed-scope preflight, the sole authorized pair ran A then
+B at exact clean HEAD `177882fc28ec2eaee2d2ecdc015a5a06c99ee06b` under Node `v22.21.1`. Both
+commands exited zero into `runs/re_s0_integrity_a` and `runs/re_s0_integrity_b`; both logs contain
+the required grade-run tactical-map skip and final-save seal receipts at turn 188 with assignment
+`unresolved=0`; serialized saves intentionally omit that transient field. `AWWV_S6_GRADE_RUN` was
+removed afterward. The authorization is consumed and
+the successor lock restores `long_run_policy.permitted:false`.
+The exact wrapper interval was `2026-08-27T17:33:25.8006107+02:00` through
+`2026-08-27T17:45:06.7258364+02:00` (700,925.2257 ms); the living implementation report records
+the per-run log windows and complete file/row/byte/hash inventory.
+
+**Determinism and provenance:** both leaves contain the literal 15-file inventory. All 14
+non-`run_meta` artifacts are byte-identical; normalized metadata differs only by removing the
+path-derived `out_dir`. Shared final-save SHA-256 is
+`75eb15152c7bde318a6ecf2befba1b9b3e62e3f85e3161dc89cff3b7774b7556`; shared structural
+fingerprint is `6f2b4a10126a980e`; all 40 operation schedules match at all five comparison rungs.
+Both metadata records prove the full authorization commit, `git_dirty:false`, Node 22,
+`collapse_enabled:false`, and consumed-input digest
+`95628a5bd1c4096ad95c63bda2fe60be5b970f10cfca8c5fe225420962ea53d6`.
+
+**Authorizing gates:** both engine-integrity-only invocations pass their five checks with identical
+measurements: zero eligible operations `0`, invalid operation-weeks `0`, ghost-destroyed `1`,
+stranded brigades `18`, and parsed consistency failures `0`. Both direct consistency commands exit
+zero. The focused harness/provenance/anchor suite passes 3 files / 55 tests. The Node-22
+save/replay compatibility suite passes 7 files / 68 tests with 2 intentional skips, including two
+uninterrupted-versus-resumed equivalence cases, real-save roundtrip, adapter boundary/parity, and
+replay emit/consume coverage.
+
+**Non-authorizing calibration observation:** both checkpoint commands identically report
+`688 / 656 / 654 / 633` and exit one on the existing Farz late-capture timing discriminator (turn
+62 versus the late window). This is recorded without tuning, reference refresh, threshold change,
+or RE follow-up. It cannot fail engine-only S0 and authorizes no engine change.
+
+**Next gate:** the deterministic/correctness baseline pair and save/replay proof are captured, but
+full S0 remains blocked by the provisional T1C performance result of `+3.62853%`. Specialist review
+rejects the proposed SpatialContext reuse as the remedy: at most `320.931 ms` of measured work is
+available against a required `1,174.3330 ms` recovery, and even an unrealistically broad
+`628.100 ms` ceiling remains insufficient. The owner must authorize one newly bounded read-only
+deletion-first diagnosis or explicitly amend performance policy before further implementation or
+T2. Follow-up mechanics review found safe small deletions, but an impossible zero-cost sum of their
+entire containing labels reaches only `975.466 ms`, still `198.867 ms` short; larger bodies cross
+real mutation barriers and are not justified by the consumed evidence. RE may not restore a guard
+or add a cache, state,
+flag, module, service, scan, threshold, historical special case, or new owner. No second diagnosis,
+retry, pair, or other long run is authorized. `docs/10_canon/FORAWWV.md` remains untouched.

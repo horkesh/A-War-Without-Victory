@@ -8,9 +8,10 @@ deterministic ordering, locality, and verification truth before further calibrat
 
 ## Current status and next action
 
-**S0 AUTHORIZATION PACKET ACTIVE.** The fail-closed guardrail is installed. This synchronized
-docs/control packet is the reviewed successor of `99d7bcbb6`; after commit, its clean sealed HEAD
-authorizes exactly one Node-22 S0 A/B pair with production engine bytes unchanged.
+**S0 BASELINE EVIDENCE CLOSEOUT ACTIVE; FULL S0 PERFORMANCE-BLOCKED; LONG RUNS FORBIDDEN.** The
+fail-closed guardrail is installed. The sole authorized Node-22 baseline A/B pair completed at clean
+sealed HEAD `177882fc2` with production engine bytes unchanged; the successor packet restores
+`long_run_policy.permitted:false`.
 The authoritative execution branch is `codex/re-engine-integrity-repaired`; `7c472e065` retains
 only the approved seven-file planning-credit packet. Mixed commit `63671dd8c` is preserved on
 `codex/re-mixed-scope-quarantine-20260827`, and its scenario/event half is excluded from RE.
@@ -22,8 +23,14 @@ fingerprint truth, and both stale-golden reconciliations are complete. Exact iso
 evidence at `7c631a95f` versus `fa6357833` preserves byte-identical output but records a provisional
 `+3.62853%` candidate median. The single permitted diagnosis attributes about 79% of the
 sector-profile delta to the four newly unconditional correctness owners. Preserve those owners.
-After this evidence packet, the plan authorizes one exact-commit S0 pair. The separately reviewed
-lean remediation must close before T2.
+The baseline pair is clean and deterministic: 15/15 file inventories, 14/14 non-metadata artifacts byte-identical,
+normalized metadata identical, fingerprint `6f2b4a10126a980e`, five engine-only checks green, direct
+consistency green, 55/55 focused harness tests green, and save/replay compatibility green at 68
+passed / 2 intentional skips. Full S0 remains blocked on the approved performance budget. Review
+rejects the proposed SpatialContext reuse as quantitatively insufficient: `320.931 ms` maximum
+recovery cannot meet the required `1,174.3330 ms`. The next gate is an owner ruling on exactly one
+newly bounded read-only deletion-first diagnosis or an explicit performance-policy amendment. No
+implementation, second run, or diagnosis is authorized meanwhile.
 
 ## Machine-enforced packet lock
 
@@ -51,11 +58,11 @@ new packet lock is approved with, not before or after, its packet. Do not activa
 unreviewed staged bytes.
 
 The global denylist covers scenario data, calibration data, painted calibration sources,
-historical reference surfaces, and `docs/10_canon/FORAWWV.md`. The current lock authorizes exactly
-one clean same-commit S0 A/B pair after its packet commits. A replicated
+historical reference surfaces, and `docs/10_canon/FORAWWV.md`. The consumed authorization allowed
+exactly one clean same-commit S0 A/B pair. A replicated
 parent/candidate performance packet is a distinct explicitly reviewed measurement packet; neither
-kind shares authorization, and each requires its own explicit packet. The current S0 authorization permits only the one named
-same-commit A/B pair and no other long run.
+kind shares authorization, and each requires its own explicit packet. The current evidence packet
+permits no long run.
 That policy is schema-validated, but scenario-command interception itself remains advisory; the
 external hook blocks unreviewed mutations, not command launch.
 
@@ -210,7 +217,8 @@ busier war or a better historical-fit score.
   candidate median is provisionally `+3.62853%`. The one permitted diagnosis localizes roughly
   79% of sector-profile delta to the required unconditional passes. Environmental conditions were
   not encoded, so this is an escalation-opening red, not final performance acceptance.
-- **Next:** commit this reviewed authorization packet, prove its production tree equals
-  `99d7bcbb6`, require fresh absent roots `runs/re_s0_integrity_a` and `_b`, then run exactly A
-  followed by B once. The bounded remediation remains mandatory
-  before T2; do not restore a guard, add cache/state/surface area, or run another diagnosis.
+- **Next:** commit this no-run baseline-evidence closeout, then obtain the owner ruling required to
+  authorize one newly bounded read-only deletion-first diagnosis or amend performance policy. Full
+  S0 remains performance-blocked. Do not implement the known-insufficient reuse, restore a guard,
+  add cache/state/surface area, diagnose again, or launch another long run without a new reviewed
+  authorization packet.

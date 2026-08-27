@@ -4,8 +4,8 @@
 
 > **Date:** 2026-08-26
 >
-> **Status:** S0 authorization packet active. After its reviewed docs/control successor commits,
-> exactly one clean Node-22 A/B pair runs; bounded lean remediation must close before T2
+> **Status:** Clean Node-22 S0 baseline pair captured at `177882fc2`; save/replay green; full T1/S0
+> remains blocked on the performance budget. No-run evidence closeout active
 >
 > **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
 >
@@ -15,8 +15,9 @@
 >
 > **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** commit the reviewed docs-only S0 authorization successor of `99d7bcbb6`,
-> then execute its sole clean Node-22 A/B pair; no-growth remediation must close before T2
+> **Current next action:** obtain an owner ruling on one newly bounded read-only deletion-first
+> diagnosis or an explicit performance-policy amendment; do not implement the known-insufficient
+> SpatialContext reuse, start T2, diagnose again, or launch another long run
 >
 > **Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
@@ -49,10 +50,10 @@ Roadmap-phase mapping:
 Execution checklist:
 
 - [x] T0 — capture integrated base and isolation
-- [ ] T1 — establish Node-22 S0
+- [ ] T1 — establish Node-22 S0 and close mandatory lean remediation
   - [x] T1A — freeze reproducible dependency installation
   - [x] T1B — converge mixed-battle occupation authority
-  - [ ] T1C — correctness/fingerprint/goldens complete; bounded performance escalation active
+  - [ ] T1C — correctness/fingerprint/goldens/baseline pair/save-replay green; performance remediation open
 - [ ] T2 — audit existing observation
 - [ ] T3 — repair desktop changed-path truth
 - [ ] DG-1 — APWB disposition
@@ -288,9 +289,12 @@ independent clone at the packet's code commit. Never overwrite Claude's or anoth
 
 ### T1 — Provision Node 22 and establish engine-integrity S0
 
-**Execution status:** IN PROGRESS. T1A, T1B, T1C correctness, fingerprint truth, and stale-golden
-reconciliation are complete. The first Node-22 pair remains reproducible pre-fix evidence only.
-The current reviewed docs/control packet authorizes the sole clean S0 A/B pair after commit.
+**Execution status:** IN PROGRESS. T1A, T1B, T1C correctness, fingerprint truth, stale-golden
+reconciliation, the clean baseline pair at `177882fc2`, and save/replay compatibility are green.
+The first Node-22 pair remains reproducible pre-fix evidence only. The sole baseline-pair
+authorization is consumed; long runs are disabled. Atomic T1C remains open on the approved
+performance budget. Specialist review proves the proposed exact-file SpatialContext reuse cannot
+close that budget, so an owner-ratified decision gate is next before any implementation or T2.
 
 #### T1B — Converge mixed-battle occupation authority before S0
 
@@ -525,6 +529,27 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
    newly unconditional calls. Machine/power/background-load class was not encoded, so this opens
    the bounded escalation but does not constitute final performance acceptance. No second
    diagnosis or new run is authorized by the evidence packet.
+   **Candidate sufficiency ruling (2026-08-27):** the parent-derived +2% ceiling is
+   `73,552.3505 ms`, so the measured candidate must recover at least `1,174.3330 ms`. The proposed
+   reuse of the already-built `SpatialContext` faction OSID/component maps is mechanically
+   byte-equivalent, but the consumed 100-call profile puts its absolute zero-cost ceiling at only
+   `320.931 ms`. Even unrealistically deleting the entire `relocate-misassigned` label raises the
+   ceiling only to `628.100 ms`, leaving theoretical residuals of about `+3.18%` or `+2.76%`.
+   Therefore it is rejected as the S0 remedy and must not consume an implementation/performance
+   packet. No honest acceptance sequence exists under the current lock. Before further T1C work,
+   the owner must either authorize exactly one newly bounded read-only diagnosis aimed at finding
+   at least `1,174.3330 ms` of deletion-first savings inside the mandatory call bodies, or
+   explicitly amend the S0 performance policy. Until then, no implementation, diagnosis, or run
+   is authorized.
+   Follow-up mechanics review also rejects a deletion-first implementation selected from the
+   consumed aggregate labels. Reusing the existing faction grouping, passing the original sector
+   record to synchronization, reusing spatial maps, and eliminating normalization precompute are
+   individually safe cleanup ideas; even the impossible assumption that their entire containing
+   labels cost zero totals only `975.466 ms`, still `198.867 ms` short. The remaining relocation,
+   rehome, coverage, normalization, sealing, recovery, and synchronization stages cross real
+   mutations to sector buckets, territory, sector keys, or formation locations. Consolidating
+   them would require an unproved semantic rewrite or the forbidden new cached fact context.
+   Consumed evidence therefore supports no executable S0-closing candidate.
 14. After the manifest, structural-reference, and performance-evidence commits, commit the reviewed
     S0 authorization/control packet. Execute the complete fresh paired Node-22 engine-integrity S0
     procedure below from that clean sealed authorization commit. Its production engine tree must
@@ -553,7 +578,7 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
     }
     ```
     The prior `58f100f3` pair remains pre-fix evidence only. Commit evidence/control-plane/ledger
-    only as `docs(RE-0D): record exact final sector convergence and S0`. Do not start T2 first.
+    only as `docs(RE-0D): record clean S0 baseline evidence`. Do not start T2 first.
 
 **Stop:** any difference beyond the known pre-fix seed-31 and seed-55 REDs, any failure outside the intended
 RED/mutation phase, parent/candidate output drift after the fix, test/source scope expansion, need
@@ -762,12 +787,50 @@ RE remedy.
     checkpoint and historical-fit values in a separately labelled non-authorizing calibration
     observations subsection; queue any red without following it.
 12. Commit T1C/S0 evidence docs only:
-    `docs(RE-0D): record exact final sector convergence and clean S0`.
+    `docs(RE-0D): record clean S0 baseline evidence`.
 
 Any S0 launch consumes this exact-commit authorization attempt. Pass, failure, or partial/aborted
 launch proceeds directly to the reviewed no-run evidence/closeout packet and restores
 `long_run_policy.permitted:false`. There is no retry or second pair without a new explicit owner-
 approved authorization commit.
+
+#### S0 baseline-pair result — clean deterministic engine evidence captured
+
+The sole authorization was consumed at clean sealed HEAD
+`177882fc28ec2eaee2d2ecdc015a5a06c99ee06b` using Node `v22.21.1`. A then B exited zero at fresh
+roots `runs/re_s0_integrity_a` and `runs/re_s0_integrity_b`; both logs contain the required
+tactical-map skip receipt and final-save seal receipt at turn 188 with `unresolved=0`, and
+`AWWV_S6_GRADE_RUN` was removed afterward. The logs' observed UTC write windows were
+`15:33:31.1396577–15:39:07.8890444` (336,749.3867 ms) and
+`15:39:12.6779628–15:45:06.5868324` (353,908.8696 ms).
+The wrapper's exact pair interval was `2026-08-27T17:33:25.8006107+02:00` through
+`2026-08-27T17:45:06.7258364+02:00` (700,925.2257 ms); the living implementation report owns the
+full file/row/byte/hash inventory.
+
+Both leaf directories contain exactly the required 15 files. All 14 non-`run_meta` files are
+byte-identical; `run_meta` becomes identical after removing only path-derived `out_dir`. The shared
+final-save SHA-256 is `75eb15152c7bde318a6ecf2befba1b9b3e62e3f85e3161dc89cff3b7774b7556`,
+the structural fingerprint is `6f2b4a10126a980e`, and all 40 operation schedules match through all
+five comparison rungs. Both metadata records name the full authorization commit, Node 22,
+`git_dirty:false`, `collapse_enabled:false`, and consumed-input digest
+`95628a5bd1c4096ad95c63bda2fe60be5b970f10cfca8c5fe225420962ea53d6`.
+
+For each run, all five authorizing engine-integrity checks pass: zero eligible operations `0`,
+invalid operation-weeks `0`, ghost-destroyed `1`, stranded brigades `18`, and parsed consistency
+failures `0`. Direct consistency also exits zero. The focused harness/provenance/anchor suite passes
+3 files and 55 tests. The bounded save/replay suite passes 7 files / 68 tests with 2 intentional
+skips, including two uninterrupted-versus-resumed 52-week equivalence proofs, real-save deterministic
+roundtrip, adapter parity, and replay emit/consume contracts. The checkpoint tool reports identical `688 / 656 / 654 / 633` observations
+and exits one on the existing Farz late-capture timing discriminator; this is separately recorded as
+non-authorizing calibration evidence and authorizes no RE change.
+
+This captures the clean deterministic/correctness baseline pair and closes save/replay compatibility;
+it does not close full S0 because the approved performance budget remains red. Quantitative review
+rejects the proposed SpatialContext reuse as incapable of closing that budget: its `320.931 ms`
+absolute ceiling is below the required `1,174.3330 ms`. The next step is an owner ruling on one
+newly bounded read-only deletion-first diagnosis or an explicit performance-policy amendment. No
+implementation, further diagnosis, long run, guard restoration, cache, state field, flag, module,
+service, scan, threshold, historical special case, or new owner is authorized meanwhile.
 
 ### T2 — Audit existing observation; add nothing
 
