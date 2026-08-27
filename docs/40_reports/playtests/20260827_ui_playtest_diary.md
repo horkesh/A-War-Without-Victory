@@ -1135,6 +1135,121 @@ firing today; one file-move away from firing.
   civilian-casualty-by-ethnicity data — it is a CIA operational military history, the wrong
   instrument here.
 
+## 3r. The endgame tells the player he HELD Srebrenica and Žepa. The map says both fell.
+
+**This is the strongest finding of the lane and it is player-facing.** Measured, not inferred,
+in run `enc-probe` (RBiH player, historical policy, autonomy 0, 188 turns).
+
+### The measurement
+
+Harness now captures enclave provenance alongside the verdict:
+
+```json
+"enclave_provenance": {
+  "enclave_state_present": false,
+  "enclave_state_keys": [],
+  "srebrenica_2_controller": "RS",
+  "zepa_2_controller":       "RS",
+  "gorazde_2_controller":    "RBiH"
+}
+```
+
+against what the endgame reported to the player:
+
+```
+reported held: ["sarajevo","srebrenica","zepa","gorazde","bihac"]
+reported lost: []
+```
+
+**Ground truth and the verdict disagree on the two most consequential outcomes in the game.**
+
+### GOOD NEWS FIRST — the enclave guard is NOT breached
+
+`op:srebrenica:srebrenica_2 = RS`, `op:rogatica:zepa_2 = RS`, `op:gorazde:gorazde_2 = RBiH`.
+**Srebrenica and Žepa fell; Goražde held.** That is exactly what the ENCLAVE GUARD requires and
+what canon H1.8 specifies. The simulation is behaving correctly. Nothing here goes to the §6
+panel as a breach — I checked precisely because it looked like one.
+
+### The defect is the REPORT, and it fails open
+
+`src/sim/negotiation/compute_capital.ts:321-322`:
+
+```ts
+const enclaveState = state.military.enclave_state;
+if (!enclaveState) return { held: KNOWN_ENCLAVES, lost: [] };
+```
+
+`enclave_state` is **absent** in this run (`enclave_state_present: false`, zero keys). The
+function therefore returns every known enclave as HELD and none as lost — a result
+indistinguishable, in the verdict, from a war in which the player genuinely saved every pocket.
+
+**On the single most §6-sensitive field in the game, "I do not know" renders as "Srebrenica
+held."** That is the wrong direction to fail. In a game whose stated thesis is that the player
+authors the tragedy, the end-of-campaign screen currently absolves him of the two outcomes the
+war is remembered for.
+
+### It also feeds the grade, and gates four tiers
+
+`RBIH_GRADE_ANCHORS` (`scoring.ts:504-535`) tests `enclaves_lost` in four of six tiers:
+
+| grade | enclave condition |
+| --- | --- |
+| A+ | `enclaves_lost.length === 0` |
+| A | `length <= 1` and not `sarajevo` |
+| B | not `sarajevo` |
+| C | `length <= 3` |
+
+The fail-open sets `enclaves_lost = []`, which satisfies **every one of them unconditionally**.
+
+**Precision, because this matters:** in *this* run the fail-open was **not grade-decisive** —
+territory (23.4%) was the binding constraint, and C's `<= 3` test would have passed even with
+Srebrenica and Žepa correctly listed. **The defect is live but latent here.** It becomes
+grade-decisive at territory ≥ 25%, where the A/A+ tiers turn on exactly the field that is being
+reported wrong. Recorded as live-and-latent, not as "it inflated this grade."
+
+### What DID move the grade — the +1 shift, confirmed end-to-end
+
+Walking the anchors against measured capital (territory 23.41%, war_crimes_events 10):
+
+    A+  needs > 33   -> no
+    A   needs >= 30  -> no
+    B   needs >= 25  -> no   (23.41 < 25)
+    C   needs >= 18  -> YES  => earned grade C
+
+**Reported grade: B.** The one-step gap is `humanCostGradeShift`, which I independently computed
+at **+1** for this run from its casualty ratio (61,425 / 140,000 = 0.439, threshold ≤ 0.75).
+Two independent derivations agree.
+
+**So §3t's mechanism is now confirmed end-to-end, not just in source:** the human-cost shift is
+live, default-ON, and grade-decisive. A player run that earns C is reported as B, on the strength
+of casualty totals that are low because the player's operations were suppressed.
+
+### One open question, deliberately not answered here
+
+`war_crimes_events: 10` and the grade still improved by a step. The atrocity gate
+(`capGradeByCondemnation`) keys on the emergent `authorized_cleansing_condemnation` flag rather
+than on a raw war-crimes count (per `memory/s6_liveness_authorized_cleansing_flag`), so this is
+**not** evidence the bright line failed — the two are different quantities. But "ten war-crimes
+events, grade improved" is a sentence that needs an owner-legible answer before 1.0, and I am
+recording the question rather than guessing at it.
+
+### Why Krivaja-95 still did not fire — narrowed, still open
+
+§3v established that Krivaja-95 requires `srebrenicaFallReceiptFired`. Srebrenica **did** fall
+here (controller = RS), so the fall is real; either the `srebrenica_falls_1995` event receipt
+never fired and the fall arrived by another path, or it fired and Krivaja was blocked downstream
+by corps availability or the frequency gate. `enclave_state` being absent entirely suggests the
+enclave subsystem is not participating in this pipeline at all, which would be the common cause
+of both. **Not determined. Next experiment: capture event receipts in the summary.**
+
+### Disposition
+
+Highest-value fix in the lane, and cheap: the fallback at `compute_capital.ts:322` should fail
+**closed** (or report unknown), never report the §6 outcomes as held. Whether `enclave_state`
+*should* be populated in this pipeline is the larger question underneath it.
+
+Recorded, not fixed.
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |
