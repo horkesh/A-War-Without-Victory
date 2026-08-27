@@ -64,13 +64,19 @@
   `final_save.json` byte-hash and per-faction brigade/formation counts (the latter vary
   run-to-run even at identical territory, so they are a run-snapshot artifact, not
   territory truth).
+- **Anchor authority (RE-0D2):** the 40-week fixture is not a painted-control scoring scenario and
+  therefore must not emit top-level or `historical_fit.anchor_checks`. Its run summary instead
+  carries the distinct non-scoring `anchor_contract_evaluation`, derived from the existing
+  canonical anchor contract. The fingerprint consumes that evaluation and fails closed when it is
+  absent, empty, malformed, or has duplicate/missing anchor IDs; missing coverage is never 0/0.
 - **Gate:** CI job `structural-fingerprint` in `.github/workflows/full-suite-and-fingerprint.yml`
   runs a fresh 40w and compares against committed `data/calibration/structural_fingerprint_40w.json`
   via `npm run ci:structural-fingerprint:check`. A structural move without a deliberate
   `npm run ci:structural-fingerprint:update` fails the gate.
 - **Tool self-test:** `tests/structural_fingerprint.test.ts` (determinism, order-independence,
-  formation-exclusion, and positive sensitivity to control-count/OSID-flip/anchor/benchmark
-  changes).
+  formation-exclusion, fail-closed anchor coverage, and positive sensitivity to
+  control-count/OSID-flip/anchor/benchmark changes). `tests/integration_run_summary.test.ts`
+  proves the live 40-week contract while preserving the sole 188-week scorer.
 - **Reference platform = Linux/Node 22 (DoD C2):** Windows==Linux byte-hashes are NOT
   promised; the structural fingerprint IS the cross-platform determinism authority.
 

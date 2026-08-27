@@ -4,7 +4,8 @@
 
 > **Date:** 2026-08-26
 >
-> **Status:** T1 IN PROGRESS; T1B then T1C are the ordered pre-S0 prerequisites
+> **Status:** T1 IN PROGRESS; T1B/T1C code is closed, and T1C fingerprint-contract repair,
+> golden reconciliation, performance proof, and fresh S0 remain
 >
 > **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
 >
@@ -14,7 +15,8 @@
 >
 > **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** close T1B, execute T1C exact final-sector fixed-point convergence, then establish S0
+> **Current next action:** execute T1C/RE-0D2 fail-closed fingerprint truth and attribution, then
+> complete T1C performance proof and establish S0
 >
 > **Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
@@ -49,8 +51,8 @@ Execution checklist:
 - [x] T0 — capture integrated base and isolation
 - [ ] T1 — establish Node-22 S0
   - [x] T1A — freeze reproducible dependency installation
-  - [ ] T1B — converge mixed-battle occupation authority
-  - [ ] T1C — restore exact final-sector fixed-point convergence
+  - [x] T1B — converge mixed-battle occupation authority
+  - [ ] T1C — restore exact final-sector fixed-point convergence and truthful fingerprint evidence
 - [ ] T2 — audit existing observation
 - [ ] T3 — repair desktop changed-path truth
 - [ ] DG-1 — APWB disposition
@@ -412,12 +414,45 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
    npm.cmd run ci:structural-fingerprint:check
    ```
 
-   Do not refresh the structural fingerprint. Diff/EOL plus Build, Determinism, QA, Artifact
-   Ownership, and Process review must confirm the boundary. The parent engine-health result of 26
+   The structural-fingerprint check exposed a separate stale observer contract after this step:
+   commit `8ab3e29b9` intentionally restricted painted-reference scoring to the sole declared 188-week
+   calibration scenario, but the 40-week fingerprint reader still treated missing top-level
+   `anchor_checks` as an empty, passing `0/0` map. Do not commit the manifest or refresh fingerprint
+   `c9749738d279fd4f` while that false-green is possible. First execute the fail-closed repair below,
+   attribute the real control drift, and obtain independent review. Diff/EOL plus Build,
+   Determinism, QA, Artifact Ownership, and Process review must confirm the boundary. The parent engine-health result of 26
    stranded formations is pre-existing and separate: this reconciliation neither causes, accepts,
    nor clears it, and it is not S0 evidence. Commit the manifest alone as
    `test(RE-0D): reconcile stale scenario baseline hashes`.
-10. Measure the combined pass-4 plus three-call correction atomically from separate clean
+10. **T1C / RE-0D2 — fail-closed 40-week fingerprint contract repair:** this is a post-code,
+    pre-S0 diagnostic prerequisite discovered by T1C's required gate, not a new engine task or a
+    reuse of the reserved RE-0E label. Preserve `usesPaintedControlReference`
+    and the exactly-one scoring-scenario contract. Do not restore `historical_fit.anchor_checks` or
+    top-level `anchor_checks` on the 40-week fixture. Instead:
+    - in `src/scenario/scenario_runner.ts`, emit a distinct non-scoring
+      `anchor_contract_evaluation` by reusing `usesHistoricalAnchorContract`, `anchorEpoch`, and
+      `computeHistoricalAnchorChecks(finalControlSnapshot, anchorEpoch)`;
+    - in `tools/diagnostics/structural_fingerprint.cjs`, require a non-empty, well-formed,
+      unique-ID contract and throw when it is absent or invalid;
+    - TDD `tests/structural_fingerprint.test.ts` so absence/emptiness is RED rather than `0/0`, and
+      `tests/integration_run_summary.test.ts` so the real 40-week run has 31 evaluated anchors while
+      painted scoring fields remain absent;
+    - update `docs/20_engineering/DETERMINISM_TEST_MATRIX.md` and `REPO_MAP.md` with the exact source.
+    This diagnostic is output-only: no state, input, pipeline step, flag, service, scorer, or
+    gameplay read may be added. Run Node-22 focused RED/GREEN, typecheck, Core, mutation proofs,
+    and two fresh fingerprint runs before any golden update. Commit code/tests/engineering contract
+    as `fix(RE-0D): make structural fingerprint anchors fail closed`.
+11. **Attribute the real 40-week structural drift before refresh:** compare fresh exact-commit
+    Node-22 artifacts at `7c631a95f` (pre-T1C/pre-T1B), `fa6357833` (post-T1C/pre-T1B), and the
+    repaired `2e9e4acd3` combined candidate. T1C
+    must be byte-identical through week 40 because its first attributed divergence is week 50; any
+    T1C-attributable 40-week drift blocks. Separately rule every T1B-attributable mixed-battle
+    control change. If 87/250/375 and the 107-flip set already exist at `58f100f3`, classify the old
+    87/255/370 reference as stale accepted-work debt. Record exact control-count, full flip,
+    31-anchor, and 6-benchmark diffs. Only after independent Scenario, Determinism, QA, Historian,
+    and Process rulings may `data/calibration/structural_fingerprint_40w.json` be regenerated and
+    committed by itself, followed by two Node-22 checks.
+12. Measure the combined pass-4 plus three-call correction atomically from separate clean
    authoritative checkouts at the single exact pre-T1C parent and candidate commits. Do not time,
    accept, or report either half independently. Use the same Node 22, machine, power state, and
    exclusive background-load class. Run one excluded
@@ -432,11 +467,11 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
    `totalWallMs`, affected phase totals, resolved final-save SHA-256, and
    `run_summary.json.final_state_hash`. Require exact parent/candidate scenario bytes and hashes.
    Compare paired deltas and medians; never infer a speed claim from an arithmetic mean alone.
-11. Correctness is retained even if candidate median `totalWallMs` regresses by more than 2%: do not
+13. Correctness is retained even if candidate median `totalWallMs` regresses by more than 2%: do not
    restore either faulty guard. A regression above 2% requires a separately approved,
    bounded performance escalation with its own owner and evidence before T2; it does not authorize
    another truth-pass skip, a cache, or a weakened test. Zero to 2% remains watch-only.
-12. After the one-time manifest reconciliation commit, execute the complete fresh paired Node-22
+14. After the manifest and structural-reference reconciliation commits, execute the complete fresh paired Node-22
     S0 procedure below from the reviewed T1C code commit.
     The prior `58f100f3` pair remains pre-fix evidence only. Commit evidence/control-plane/ledger
     only as `docs(RE-0D): record exact final sector convergence and S0`. Do not start T2 first.

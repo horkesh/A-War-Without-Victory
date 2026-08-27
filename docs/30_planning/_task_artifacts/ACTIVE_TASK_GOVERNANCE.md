@@ -8,11 +8,13 @@ deterministic ordering, locality, and verification truth before further calibrat
 
 ## Current status and next action
 
-**T1 IN PROGRESS; T1B THEN T1C PRECEDE S0.** The separate probe lane closed at `b711cffa9`, and the owner
+**T1 IN PROGRESS; T1B/T1C CODE CLOSED, EVIDENCE PRECEDES S0.** The separate probe lane closed at `b711cffa9`, and the owner
 handed the repository to RE. Preserve that disposition. The execution base is bound at
 `38e65547882856fba07faab7a6dbcd4258da9607`, and T1A froze immutable dependency installation. The
-first Node-22 pair is reproducible pre-fix evidence only, not S0. Close the DG-0 ALL ruling in T1B,
-then restore exact final-sector fixed-point convergence in T1C. Only afterward establish a
+first Node-22 pair is reproducible pre-fix evidence only, not S0. T1B and T1C code are independently
+approved. Before S0, T1C/RE-0D2 repairs the structural fingerprint's silent missing-anchor 0/0
+acceptance, attributes its real territory drift, reconciles its golden and the authorized manifest
+separately, completes T1C performance proof, and only afterward establishes a
 fresh exact-code-commit S0 using the plan's source-verified authoritative run substrate.
 
 ## Canonical owner
@@ -85,6 +87,10 @@ checkpoint are not engine defects.
   `tests/probe_territory_flip.test.ts` for the bounded mixed-battle convergence packet.
 - T1C/RE-0D exclusively owns `src/sim/combat/corps_front_sectors.ts`, its existing integration
   property, and the sector-partition instrumentation static guard contract.
+- T1C/RE-0D2 exclusively owns `src/scenario/scenario_runner.ts`,
+  `tools/diagnostics/structural_fingerprint.cjs`, `tests/structural_fingerprint.test.ts`,
+  `tests/integration_run_summary.test.ts`, and its engineering-doc contracts. It may add only a
+  non-scoring run-summary diagnostic and must preserve the one definitive scoring scenario.
 - RE-0E/RE-1 collide with desktop/runtime/UI work; pause the relevant R7 packet.
 - RE-2/RE-3/RE-4 may overlap R7 only after exact file inspection proves ownership is disjoint.
 - Further calibration is paused until RE closes.
@@ -132,5 +138,8 @@ busier war or a better historical-fit score.
 - **2026-08-27:** one-time stale-baseline reconciliation is limited to exactly 19 hash replacements
   in the manifest on the reviewed Node-22 T1C candidate, with no artifact/structure/fingerprint
   refresh. The parent's stranded-26 engine-health result remains separate and is not S0 evidence.
-- **Next:** close T1B, execute T1C code/evidence and alternating performance proof, then run a fresh
-  paired Node-22 S0 at the exact T1C code commit.
+- **2026-08-27:** baseline validation exposed that `8ab3e29b9` correctly removed 40-week painted
+  scoring while the structural reader silently normalized missing anchors to 0/0. RE-0D2 repairs
+  that fail-closed and attributes real control drift before a separately reviewed golden refresh.
+- **Next:** repair and review the fingerprint contract, attribute and reconcile both stale goldens,
+  execute T1C alternating performance proof, then run fresh paired Node-22 S0.

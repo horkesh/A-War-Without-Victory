@@ -423,3 +423,22 @@ and run outputs remain uncommitted. Two clean baseline reruns, guardrail/ownersh
 structural fingerprint check, diff/EOL, and independent review are mandatory. The parent's 26
 stranded formations are pre-existing engine-health evidence, separate from this reconciliation and
 not accepted as S0.
+
+### T1C / RE-0D2 fingerprint-contract prerequisite — fail closed before structural re-floor
+
+The authorized Node-22 manifest refresh and both clean baseline validations succeeded, but the
+required structural-fingerprint check exposed two distinct facts. First, `8ab3e29b9` deliberately
+made `apr1992_definitive_188w` the sole painted-control scorer, so the 40-week fixture correctly no
+longer emits top-level or `historical_fit.anchor_checks`. Second, the v2 fingerprint reader and its
+fixture retained that obsolete shape and silently converted absence to an empty `0/0` anchor map.
+The fresh `c9749738d279fd4f` result is therefore inadmissible even though its 6/6 bot benchmark and
+control fields are real.
+
+RE-0D2 repairs this observer before either golden is committed. The runner emits a distinct
+non-scoring `anchor_contract_evaluation` through the existing canonical anchor evaluator; it does
+not restore a second calibration score. The fingerprint reader requires a non-empty, well-formed,
+unique-ID contract and fails closed otherwise. A real 40-week integration test proves 31
+evaluations while painted scoring fields remain absent. Only after two Node-22 passes may actual
+territory drift be attributed across `7c631a95f`, `fa6357833`, and `2e9e4acd3`. T1C must remain
+byte-identical through week 40. Structural and manifest goldens then receive separate review and
+commits before performance and S0.

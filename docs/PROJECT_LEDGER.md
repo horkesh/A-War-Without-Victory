@@ -29670,3 +29670,20 @@ without refresh, diff/EOL, and independent Build/Determinism/QA/Ownership/Proces
 accepted, nor cleared by this manifest reconciliation. It is not S0 evidence. The synchronized
 plan, living audit, roadmap, board, governance, performance report, calibration blocker, and ledger
 retain the normal S0 and engine-health gates. No canon or knowledge-ledger edit is required.
+
+### 2026-08-27 — RE T1C structural fingerprint contract amended fail-closed
+
+**Finding:** the authorized Node-22 baseline-manifest reconciliation completed within its exact
+19-hash boundary and validated twice, but `ci:structural-fingerprint:check` exposed an observer
+contract defect. Commit `8ab3e29b9` intentionally restricted painted-control scoring to the sole
+188-week calibration scenario. The 40-week fingerprint reader still expected the removed top-level
+`anchor_checks` field and silently normalized absence to a passing 0/0 anchor map. Its fresh
+`c9749738d279fd4f` output cannot be blessed.
+
+**Ruling:** T1C/RE-0D2 repairs the fingerprint contract before either golden commit. The 40-week run
+emits a distinct non-scoring canonical anchor evaluation; the reader rejects missing, empty,
+malformed, or duplicate-ID contracts. This preserves the exactly-one scoring scenario and adds no
+gameplay state, input, pipeline step, flag, service, or calibration mechanic. Exact-commit Node-22
+comparisons at `7c631a95f`, `fa6357833`, and `2e9e4acd3` must then attribute all real control drift.
+The structural golden and already-authorized manifest reconciliation are reviewed and committed
+separately. Performance and fresh S0 remain blocked until both are truthful.
