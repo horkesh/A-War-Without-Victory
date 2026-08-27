@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 336 lessons across 9 topic files (counts RE-MEASURED 2026-08-27 via `grep -c '^### '` per file).
+> Last restructured: 2026-04-11. 338 lessons across 9 topic files (counts RE-MEASURED 2026-08-27 via `grep -c '^### '` per file).
 > **Correction:** the previous header said 315 while the table below summed to 278 and the files
 > actually held 329 — three different numbers, both stale despite a "count verified" stamp.
 > Counts below are measured, not carried forward. Re-measure rather than increment.
@@ -8,6 +8,12 @@
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
 ## New Lessons (2026-08-27) — playthrough-harness lane (a UI lane found in one hour what 3x188w runs could not see)
+
+### [Process] ★★ AN ABSENCE AT THE CALLEE PROVES NOTHING ABOUT THE CALLER — the gate was at the dispatch site — see `docs/life_lessons/process.md`
+- Grepped `sector_offensive.ts` for `player_faction`, got zero hits, told the owner emergent ops run for the player. The gate is `selectBotBrigadeOrderFactions` (`war_phases.ts:928`), which filters the faction out one level up so the file never executes. **Reachability is a property of the call chain, not the function body.** Narrow-lookup guard, one level out.
+
+### [Process] ★ A CONTROLLED COMPARISON CAN SURVIVE THE INSTRUMENT BEING BROKEN — see `docs/life_lessons/process.md`
+- Panel refuted "RBiH launches 2 ops at autonomy 0" as a harness artifact. The **ratio** survived: the same deaf probe read RS-as-player 16 vs RBiH-as-player 2, and a constant instrument defect cannot explain a difference between two measurements taken with it. **Check what was internally controlled before striking a refuted finding.**
 
 > **Session shape: the engine lane was green all day while the shipped app could not start a campaign.** Three 188-turn
 > headless campaigns passed and produced 19 findings; the first end-to-end UI run found a blocker that made the product

@@ -704,3 +704,46 @@ The counterexample was in my own data: `rs_visegrad_brigade` ranks **80/81** —
 - **Wrong approach**: Letting a parameter chosen for iteration speed silently become the parameter of record. Nothing marked the run as provisional, so the number travelled.
 - **Right approach**: Runs shortened for development must announce themselves. The driver now prints a build-loop warning below the full horizon and stamps `full_campaign: false` into its summary, so a short run cannot later be quoted as coverage.
 - **Do instead**: When shortening any horizon for speed, add the marker to the artifact **in the same edit** — not to your memory of it. Then before quoting any figure, check the marker rather than recalling why the run was made.
+
+### [Process] ★★ AN ABSENCE AT THE CALLEE PROVES NOTHING ABOUT THE CALLER — the gate was at the dispatch site
+
+**2026-08-27.** Asked whether emergent sector offensives run for the player faction, I grepped
+`sector_offensive.ts` and `bot_corps_directives.ts` for `player_faction` and `autonomy`, got
+**zero hits in both**, and reported to the owner that emergent operations DO run for the player.
+**Wrong.** The gate is `selectBotBrigadeOrderFactions` (`war_phases.ts:928-939`), which filters
+the player's faction out of the `generate-bot-corps-orders` step *before* either file is ever
+reached. No corps orders → no `commander_state` → no plans → **zero emergent offensives**. The
+implementation is genuinely unaware of `player_faction`; it never runs.
+
+⇒ **A clean grep of the implementation is evidence about the implementation, not about whether
+it executes.** Reachability is a property of the call chain, not of the function body.
+⇒ **TELL:** you are about to say "there is no X check in this code" as an answer to "does this
+code run for X". Those are different questions and the second one is the one that was asked.
+⇒ **FIX, and it is cheap:** find the call sites (`grep -rn "<fnName>(" src/`), and walk *up*
+until you reach a scheduler, pipeline step, or dispatch table. In this repo that is almost
+always `war_phases.ts`, and it is almost always where the faction filtering lives.
+⇒ This is the **narrow-lookup guard in a new shape**: the existing guard warns that a literal
+pattern misses a computed assignment. This is the same error one level out — a *body* search
+missing a *dispatch* gate. Both are absence-claims made without exhausting the search space.
+⇒ Cost: an owner-facing correction, and a four-seat panel briefed on a mechanism that was not
+the real one. The Operations seat found it in one grep of the call graph.
+
+### [Process] ★ A CONTROLLED COMPARISON CAN SURVIVE THE INSTRUMENT BEING BROKEN
+
+**2026-08-27, same lane, and it is the reason the finding was not lost.** Two panel seats
+independently showed my harness could not fire two of the four offensive channels — so
+"RBiH launches 2 operations at autonomy 0" measured a president who did nothing, not the
+engine. The single-faction number was invalid. **The cross-faction comparison was not.** The
+same deaf probe measured RS-as-player at **16** operations and RBiH-as-player at **2**. A
+constant defect in the instrument cannot explain a difference *between two measurements taken
+with it* — so the 8× asymmetry survived the refutation of the number it was derived from.
+
+⇒ **When a measurement is refuted, check whether a RATIO built on it still holds before
+discarding the finding.** Systematic instrument error cancels in a within-instrument
+comparison; it does not cancel in an absolute one.
+⇒ **Inverse, and the trap:** an absolute figure quoted against an EXTERNAL baseline inherits
+every instrument defect in full. In the same session I compared player-run military dead
+against the historical ~60,231 when the engine's own blessed 188w checkpoint reads **56,553** —
+wrong baseline AND wrong instrument, compounding.
+⇒ **TELL:** a seat has just refuted your measurement and you are about to strike the whole
+finding. Ask first which comparisons in it were internally controlled.

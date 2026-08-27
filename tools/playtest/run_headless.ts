@@ -112,6 +112,7 @@ function buildConfig(): RunConfig {
         scenario: DESKTOP_SCENARIO,
         outDir: arg('out') ?? join(REPO_BASE_DIR, 'tmp-playtest', runId),
         decisionMode: (arg('decision-mode', 'historical') === 'emergent' ? 'emergent' : 'historical'),
+        autonomyLevel: Number(arg('autonomy', '0')) as 0 | 1 | 2 | 3,
         updateLedger: !flag('no-ledger'),
         disabledProbes: repeatedArg('skip-probe'),
     };
@@ -227,6 +228,10 @@ async function main(): Promise<void> {
 
     console.log(`▶ ${cfg.runId} — ${cfg.faction}, policy "${policy.id}", ${cfg.turns} turns`);
     console.log(`  ${policy.description}`);
+    console.log(`  autonomy_level: ${cfg.autonomyLevel}`
+        + (cfg.autonomyLevel === 0
+            ? '  (opportunity + proposal channels OFF — Federation catalogs dormant)'
+            : '  (assisted execution: opportunity + proposal channels live)'));
     console.log(`  decision_mode: ${cfg.decisionMode}`
         + (cfg.decisionMode === 'historical'
             ? '  (matches the calibration scenarios: bots take authored AI defaults)'
@@ -245,6 +250,15 @@ async function main(): Promise<void> {
     }
 
     let state = await startCampaign(cfg.faction, DESKTOP_SCENARIO, REPO_BASE_DIR, cfg.decisionMode);
+
+    // autonomy_level gates whole operation channels for the PLAYER's faction:
+    // proposal_generation.ts:123,186 and operation_opportunities.ts:1662 all return []
+    // unless it is exactly 1. The default is 0, so every run before 2026-08-27 had the
+    // Federation opportunity catalogs switched off and reported the silence as missing
+    // content. Level 1 is "assisted execution — explicit broad staff control".
+    if (cfg.autonomyLevel !== 0) {
+        (state.meta as any).autonomy_level = cfg.autonomyLevel;
+    }
     const decisionLog: DecisionLogEntry[] = [];
     const advanceMsByTurn: number[] = [];
     let turnsPlayed = 0;
@@ -464,10 +478,23 @@ async function main(): Promise<void> {
     // casualties change depending on whether it is the player: player operations need
     // presidential authorization, bot operations do not.
     const capital = (state.military as any)?.negotiation?.capital ?? {};
+    // NAME the operations, do not just count them. The 2026-08-27 Operations-seat review
+    // could not close its own residual — a level-0 RBiH run reported 2 operations where
+    // the traced mechanism allowed at most 1 — because nothing persisted WHICH ones ran.
+    // A bare count cannot distinguish "the mechanism is understood" from "there is a
+    // channel nobody has listed". `operation_history` carries the AARs; keep the names.
+    const aars: any[] = ((state as any).operation_history ?? []) as any[];
+    const namesFor = (f: string) =>
+        aars
+            .filter((a) => a?.faction === f)
+            .map((a) => `t${a.started_turn}-${a.ended_turn} ${a.operation_name ?? a.operation_id} [${a.corps_id}] ${a.outcome}`)
+            .sort();
     const opsByFaction = Object.fromEntries(
         ['RBiH', 'RS', 'HRHB'].map((f) => [f, {
             operations_launched: capital[f]?.operations_launched ?? null,
             operations_successful: capital[f]?.operations_successful ?? null,
+            // Sorted, turn-tagged, no wall-clock: two identical runs produce identical text.
+            operations_named: namesFor(f),
         }]),
     );
 
@@ -507,6 +534,7 @@ async function main(): Promise<void> {
         game_over: (state.meta as any)?.game_over ?? false,
         final_state_hash: stateHash(state),
         lever_attempts: leverAttempts,
+        autonomy_level: cfg.autonomyLevel,
         decisions_made: decisionLog.length,
         decisions_diverged: decisionLog.filter((d) => d.diverged_from_historical).length,
         dayton_resolved: daytonResolved,

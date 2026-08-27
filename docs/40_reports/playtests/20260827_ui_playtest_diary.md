@@ -541,6 +541,261 @@ mode is comparable.
 
 ---
 
+## 3v. PYRRHIC PANEL — four seats on the player-vs-bot operations gap
+
+Convened 2026-08-27 on two questions: what autonomy level a president is meant to play at,
+and whether operation content is distributed consistently across factions. Four seats polled
+independently, each briefed with measured data and file:line claims and told explicitly to
+test the claim rather than ratify the briefing. I am the named integrator; the reconciliation
+below is mine and is marked where it goes beyond what any single seat said.
+
+**Verdicts: Game Designer PARTLY AGREE · Operations REFUTES THE MECHANISM · Historian
+DEFENSIBLE ON TOTALS, NOT ON COMPOSITION · War-or-Game NON-COMPLIANT (refuses sign-off).**
+
+**This is a split verdict, not a unanimous GO. Per CLAUDE.md it escalates to the owner.**
+Nothing here is authorized. This section is the evidence package for that escalation.
+
+### What survives — the narrowed finding
+
+The original claim ("the player is offered ~7× fewer operations because of the autonomy
+proposal gates") does not survive. Two seats independently showed the measurement was a
+harness artifact: my `historical` policy fires only `acceptOperationAuthorizations` and never
+`request_op`, and `LeverPlan` has no authored-op lever at all — so the run measured a
+president who authorized the slate and then issued no orders for 188 weeks.
+
+**But a narrower version does survive, and the A/B that landed after the panel is what
+saves it.** The harness's silence is a *constant across factions*: the same policy, the same
+levers, the same unfired channels. Under that identical instrument —
+
+| player faction | autonomy 0 | autonomy 1 | same faction as bot |
+| --- | --- | --- | --- |
+| RBiH | **2** ops | 11 ops | **14** ops |
+| RS | **16** ops | 15 ops | 25 ops |
+
+RS loses 36% of its operations to being played. RBiH loses 86%. Both were measured by the
+same deaf probe, so the probe cannot explain the gap between them. **The 8× asymmetry between
+RS-as-player and RBiH-as-player is real and is not a harness artifact.** Note also that RS is
+nearly autonomy-invariant (16 vs 15) while RBiH is not (2 vs 11) — consistent with RS's
+operations arriving through the authorization channel, which is not autonomy-gated, and
+RBiH's through the bot pipeline, which is.
+
+### The mechanism I named was the wrong one
+
+**`war_phases.ts:928-939` — `selectBotBrigadeOrderFactions` — is the dominant gate, and it
+was absent from my analysis.** It filters the player's faction out of BOTH
+`generate-bot-corps-orders` and `generate-bot-brigade-orders` unless `autonomy_level >= 1`.
+No corps orders → no `commander_state` → no plans → zero emergent sector offensives. That
+single line is the bulk of 2 → 11, not the proposal channels.
+
+I had checked `sector_offensive.ts` and `bot_corps_directives.ts` for a `player_faction`
+check, found none, and concluded emergent operations run for the player. **The gate is at the
+dispatch site, not the implementation.** Absence at the callee proves nothing about the caller;
+I recorded an absence without tracing the call chain upward. This is the narrow-lookup failure
+mode in a new shape and belongs in life-lessons.
+
+### FALSIFIED BY MEASUREMENT — the Operations seat's severe defect is not real
+
+**The seat's claim:** `Krivaja-95` and `Farz 95` carry `army_hq_op_id`; their only delivery
+path is `evaluateArmyHQGathering`, whose sole call site (`war_phases.ts:2335`) sits behind a
+`player_faction` skip; therefore an RS player can never launch the Srebrenica operation, and
+an RBiH player can never launch Farz 95.
+
+**I was about to escalate that to the §6 panel. It is wrong, and my own run disproves it:**
+
+    RBiH-as-PLAYER, autonomy 0, 188w:
+      t9-16    Operation Circle  [arbih_1st_corps]  partial
+      t161-171 Operation Farz 95 [arbih_3rd_corps]  SUCCESS
+
+**Farz 95 launched, for a player, and succeeded.** Source confirms why. There are two
+unrelated subsystems, and the seat conflated them by name:
+
+- `injectArmyHqOperations` (`triggered_operations.ts:1249`), pipeline step
+  `inject-army-hq-operations` (`war_phases.ts:2063`) — **this is the launcher.** Gated on
+  `ENABLE_TG_ARMY_HQ_OPS`, the trigger predicate, `armyHqFrequencyGateOpen`, and primary-corps
+  availability. **No `player_faction` check, at either the function or the dispatch site.**
+- `evaluateArmyHQGathering` (`army_hq_gathering.ts:993`), pipeline step
+  `evaluate-army-hq-gathering` (`war_phases.ts:2329`) — a **separate brigade-concentration
+  planner**, documented in its own header as *"Called once per turn per bot faction."* Bot-only
+  by design, and not the delivery path for either operation.
+
+The seat traced `army_hq_op_id` to the file whose name matched and stopped there. **This is the
+same error I made and the same error the panel caught me in — an absence claimed from one file
+without walking the call graph — committed by the seat that caught me.** Recorded because a
+review process that produces confident file:line citations is exactly the one where an unchecked
+citation travels furthest: this one was one step from a §6 escalation on the strength of its
+precision.
+
+**The §6 escalation is withdrawn. Nothing here goes to the enclave-guard panel.**
+
+### What is actually true about Krivaja-95 — smaller, and not a player defect
+
+`Krivaja-95` appears in **no run I have**, player or bot:
+
+| run | RS operations | latest START |
+| --- | --- | --- |
+| RS as **player** (au-RS-0-named) | 16 | **t42** |
+| RS as **bot** (inside the RBiH-player run) | 25 | t164 |
+
+RS-as-bot reaches t164 with 25 operations and still never fires Krivaja-95. So its absence is
+**not** caused by being the player — it is a trigger/frequency-gate question affecting every
+run equally, and Srebrenica falls in these runs by the event-owned path canon **H1.8** already
+specifies rather than by this operation. That is consistent with canon, not a breach of it.
+Open, low-severity, and *not* enclave-guard business.
+
+### THE ACTUAL SEVERE FINDING — an RS player's army goes silent for 146 weeks
+
+This is what naming the operations bought, and no seat had it because no seat had the names.
+
+    RS as PLAYER : 16 operations, the last one STARTS at t42
+    RS as BOT    : 25 operations, the last one STARTS at t164
+
+**An RS player mounts his final operation in early 1993 and then conducts none at all for the
+remaining 146 weeks of the war** — through Srebrenica, through Deliberate Force, through Storm,
+to Dayton. The bot in the same seat is still launching operations at t164.
+
+The two factions therefore fail in *different shapes*, which the aggregate counts hid:
+
+- **RBiH-as-player is sparse but not truncated** — 2 operations, yet one of them is at t161.
+- **RS-as-player is dense then truncated** — 16 operations, all of them by t42, then nothing.
+
+A single "player launches fewer operations" finding covers both and explains neither. This
+supersedes the shape of the finding this panel was convened on, and it lands next to the known
+frozen-VRS-front result (`memory/frozen_vrs_front_probe_root_cause`: RS gets zero
+capture-capable attacks from w101) — plausibly the same root, now visible 59 weeks earlier and
+in the player seat specifically. **Not yet root-caused. Recorded, not fixed.**
+
+### The scoring model rewards abdication — found by the seat looking at none of this
+
+`src/sim/negotiation/scoring.ts:462` — `humanCostGradeShift` is a step function against a
+frozen 140,000 baseline for RBiH. At ratio ≤ 0.75 the player gains **+1 letter grade**.
+
+RBiH's military dead roughly halve under player control (11,892 vs 22,150 as bot). A player
+who authorizes nothing and lets his army sit for 188 weeks crosses that threshold and is
+**graded a full step higher** than the same war fought by the bot.
+
+AWWV's stated thesis is that the player authors the tragedy and that the war is negative-sum.
+The current build's dominant RBiH strategy is to decline to fight the war of national survival
+and collect a better score for it. **Atrocity is gated; abdication is rewarded.** Default-ON,
+live today.
+
+The War-or-Game seat refuses to sign off on any operations fix until this is closed, on the
+grounds that fixing operations alone reduces an exploit rather than removing it, and that the
+build currently teaches its player the inverse of its thesis. **I concur and record the
+blocking condition as binding on this lane's recommendations.**
+
+### Serb civilian deaths undercounted by half — flagged for owner escalation independently
+
+1,910 in the RBiH-player run against an RDC-shaped expectation near ~4,000 (seat confidence:
+medium-high on the ~10% share). The seat's argument for escalating this outside the
+engineering queue: the civilian model is decoupled from the military one, so the finding
+survives whether or not the operations bug is fixed — and a build that halves Serb civilian
+dead specifically when the player is Bosniak is not a calibration ticket.
+
+### Content composition — Historian
+
+Totals are **defensible**; composition is not. Verified against BB2 directly:
+
+- **Three of the twelve "ARBiH" operations are Serb operations** — `Una 94` (VRS 2nd Krajina,
+  11–15 July 1994, BB2 p.534/540), `Breza 94` (VRS 1st+2nd Krajina with SVK, 30 Aug–~15 Sept
+  1994, BB2 p.535/542), and `Pauk`/Spider (VRS+SVK+APWB, BB1 p.417) — all authored
+  `faction: 'RBiH'` in `operation_opportunity_catalog_5th_corps.ts` as defensive-commitment
+  authorizations. Defensible as modelling; it makes the true ratio **23 : 9 : 6**, not 23:12:7.
+- **`Mistral 2` is authored twice** — `triggered_operations.ts` at t≥175 and
+  `operation_opportunity_catalog_federation_western_bosnia.ts` at t175–190. HVO's 7 is really 6.
+- **1993 is empty for both non-Serb factions** — ~15:1:1 in 1992, **~4:0:0 in 1993**, 2:5:2 in
+  1994, 2:6:4 in 1995. The catalog is *not* flat and already reverses tempo in roughly the right
+  direction; the hole is that the single year of the Croat-Bosniak war contains no named ARBiH
+  or HVO operation at all. `Neretva 93` (BB1 index p.202) at minimum.
+- **`Uragan 95` missing** — ARBiH 2nd+3rd Corps, Ozren salient, 10–14 Sept / 5–7 Oct 1995
+  (BB1 p.421–425, 460). The largest ARBiH operation conducted without Croat help: *"No HV or
+  HVO forces assisted the Bosnian Army in the Ozren area"* (BB1 p.425). AWWV's `Farz 95` covers
+  only the Vozuća wing.
+- **`Mistral 1` does not exist.** The t160–170 Grahovo/Glamoč operation is **`Ljeto 95`**, late
+  July 1995, Gotovina (BB1 p.402–407). `Maestral` was one operation with two phases, not a pair.
+- **Cuts the other way:** BB names VRS operations AWWV also lacks — `Lukavac 93`, `Kladanj 93`,
+  `Brgule 94`, `Štit 94`, `Zima 94`, `Zvezda 95`. Filling history on all sides *widens* the VRS
+  lead rather than narrowing it. **The ratio is not the defect. The composition is.**
+- Verified-correct attributions, checked and not gaps: `Grmeč 94` is ARBiH 5th Corps (BB2 p.546,
+  p.555), `Tigar-Sloboda 94` is Dudaković's ruse against Abdić (BB2 p.534), `Cincar` is HVO
+  (BB2 p.527), `Una 95` was **HV** not HVO (BB1 p.420) so its absence is correct.
+- Seat's own limit, flagged by the seat: BB1 pp.189–363 are not extracted in this repo, which
+  covers most of 1993–early 1995.
+
+### The canon question — Game Designer
+
+`FORAWWV.md:353` defines the president as commanding through five levers including *"authorize
+op — approve an operation a commander **proposes**"*, with **no autonomy qualifier**. The
+Systems Manual defines autonomy as an *execution* boundary — who moves the brigades — not an
+*information* one. Gating proposal supply on `autonomy_level === 1` therefore contradicts canon.
+
+And the opportunity path is a **silent dead channel**: `generateOpportunityProposalReviews`
+returns `[]` at level 0, `applyBotOpportunityDecisions` (`operation_opportunities.ts:1630`)
+skips proposals whose approver is the player, and the row is then flipped to `expired`. Ten
+authored RBiH and five HVO operations become eligible, are shown to nobody, are decided by
+nobody, and expire with no receipt. The gate is `!== 1`, so they die at Levels 2–3 too.
+`messages.en.ts:1730` meanwhile promises Level-0 players *"Full Control — all orders yours."*
+
+The seat also blocked the obvious fix: **authoring twenty more ARBiH pre-planned operations to
+level the count is mechanics-change-to-move-match-%** and would make the 1992 board
+ahistorical. The player-facing content already exists as the 10+5 opportunity entries. It is
+not missing; it is misfiled behind a gate canon does not authorize.
+
+### Reconciled disposition — sequence, not conflict
+
+The four seats' recommendations read as a conflict and are not one. In dependency order:
+
+1. **Close the scoring inversion first.** War-or-Game's blocking condition. Everything below
+   is an exploit-reduction rather than a fix until this is done.
+2. **Root-cause the RS-player 146-week operational silence** (last op starts t42 vs t164 as
+   bot). This replaces the withdrawn `Krivaja-95` §6 item; check it against the known
+   frozen-VRS-front result before treating it as new.
+3. **Decouple proposal supply from the autonomy ladder** — gate on "a human player faction
+   exists", leaving `selectBotBrigadeOrderFactions`'s `>= 1` execution gate intact. Player-only,
+   so the 188w baseline stays byte-identical.
+4. **Fix composition, not totals** — refile the three Serb operations, de-duplicate `Mistral 2`,
+   rename `Mistral 1` → `Ljeto 95`, add `Neretva 93` and `Uragan 95`.
+5. **Serb civilian undercount** — escalate independently; decoupled from all of the above.
+
+**Separate lane, do not bundle:** `deferUnauthorizedHistoricalOperationsForPlayer`
+(`historical_operation_authorization.ts:159-161`) does `delete command.queued_operations`,
+wiping the 1KK 4-op, Drina 3-op, SRK 2-op and EBC 1-op follow-on chains for an RS player. Real,
+expensive, and autonomy-invariant — which is precisely why it cannot explain the level-0 delta
+this panel was convened on.
+
+### Corrections to my own prior entries in this diary
+
+- **Section 3y's "RS 19 / RBiH 2 / HRHB 1 authorizations" is a count of what the harness
+  accepted, not of what is authored.** Real catalogs: pre-planned RS 17 / RBiH 1 / HRHB 1,
+  triggered RS 6 / RBiH 1 / HRHB 1, opportunity RBiH 10 / HRHB 5.
+- **"The army effectively stops mounting operations" was right about the outcome and wrong
+  about the cause** — and my subsequent correction ("emergent operations run for the player
+  anyway") was itself wrong. Superseded by the dispatch-gate finding above.
+- **My casualty comparator was wrong.** I benchmarked 31,365 against the ~60,231 historical
+  figure. The engine's own blessed 188w checkpoint (`REAL_WAR_MASTER.md`, commit `26929e6b8`)
+  produced **56,553** and was signed off as inside the band. The player run deletes **45% of
+  the deaths from the engine's own accepted baseline** while RS-as-player retains 92.5%.
+- **My "all three factions follow authored historical defaults" premise is false, and section
+  3z of this same diary is why.** ~20 decisions have no authored default, including
+  `strategic_posture_review_rbih` and `drina_cleansing_decision_1992`. I recorded that finding
+  and then built a controlled-experiment claim on top of it without connecting the two. The
+  experiment has more than one uncontrolled variable.
+- **Engine Invariants §14.10a does not support the argument I cited it for.** Withdrawn.
+
+### Residual — CLOSED, and closing it overturned the panel's severest finding
+
+The level-0 RBiH run reports `operations_launched: 2`; the traced mechanism allows at most one
+(`Operation Circle`, `pre_planned_operations.ts:998`, the entire `ARBIH_PRE_PLANNED` catalog).
+**Closed 2026-08-27.** The harness now persists `operation_history` AAR names per faction; the
+rerun names the two operations as `Operation Circle` (t9-16) and **`Operation Farz 95`
+(t161-171, success)**. The second one is the operation the Operations seat had just declared
+unreachable for a player — so the residual it flagged as "cheap to close, close it before
+building on this" was, correctly, the thread that unravelled its own severest claim.
+
+**The seat was right to flag it and right about why.** A count of 2 where the mechanism allowed
+1 was the only visible symptom that the mechanism was wrong, and it was visible only because
+the seat refused to round its own residual away. That discipline is the reusable part of this
+panel, more than any individual verdict in it.
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |
