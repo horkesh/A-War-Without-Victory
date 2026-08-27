@@ -11,17 +11,17 @@ listed is not a claim that anyone has triaged it.
 
 | | Count |
 | --- | --- |
-| Runs contributing | 5 |
-| Distinct findings | 44 |
+| Runs contributing | 6 |
+| Distinct findings | 47 |
 | 🔴 Critical | 6 |
-| 🟠 High | 6 |
-| Bugs | 11 |
+| 🟠 High | 8 |
+| Bugs | 14 |
 | Friction | 28 |
 | Anomalies | 0 |
 | Open questions | 5 |
 | ⚠ Unconfirmed (suspected harness artefact) | 3 |
 
-**Runs:** `RBiH-counterfactual-188w`, `RBiH-historical-188w`, `RBiH-passive-188w`, `owner-review-20260827`, `ui-RBiH`
+**Runs:** `RBiH-counterfactual-188w`, `RBiH-historical-188w`, `RBiH-passive-188w`, `owner-review-20260827`, `owner-review-20260827-og`, `ui-RBiH`
 
 ## Three worst friction moments
 
@@ -40,9 +40,12 @@ listed is not a claim that anyone has triaged it.
 | 🔴 critical | Error shown to the player on campaign_start: "Invalid decisionMode. Use emergent or historical." | `ui:campaign_start` | 1× | ui-RBiH | `0bb0b0c943ba` |
 | 🔴 critical | Selecting a faction does not start a campaign | `ui:side_picker` | 1× | ui-RBiH | `a22af3625aa4` |
 | 🟠 high | Uncaught page error: Cannot access 'ir' before initialization | `ui:renderer` | 2× | ui-RBiH | `6502868f6e7d` |
+| 🟠 high | Copy says a formation group is "thinly held" — an OG holds ground, it is not held | `ui:operational_sitrep` | 1× | owner-review-20260827-og | `78cd60d64f40` |
+| 🟠 high | Two sources for the same sitrep copy disagree: i18n says "OGs", the hardcoded fallback says "sectors" | `ui:operational_sitrep` | 1× | owner-review-20260827-og | `7c85fee759a7` |
 | 🟠 high | Priority-front labels pair a settlement with its own municipality under two names | `ui:situation_panel` | 1× | owner-review-20260827 | `d5daa3a10f94` |
 | 🟠 high | Territory bar counts allied HVO ground as "hostile-held" | `ui:territory_bar` | 1× | owner-review-20260827 | `ab660671b06e` |
 | 🟡 medium | Operation directive rejected with a reason the player is never shown | `ui:op_directive_rejection` | 29× | RBiH-counterfactual-188w | `ff048ab927a1` |
+| 🟡 medium | The Sector Attack operation type still says "Sector" in player-facing text | `ui:ops_planning` | 1× | owner-review-20260827-og | `2bfd8975d35e` |
 | 🟡 medium | Place names are lower-cased after the first word | `ui:place_name_formatting` | 1× | owner-review-20260827 | `919e8513877e` |
 
 ## Friction
@@ -284,6 +287,56 @@ Owner on the case-file opening, verbatim: it "screams AI slop design with big it
   "owner_quote": "screams AI slop design with big italic letters for highlight and so on",
   "current_screen": "tools/playtest/evidence/20260827_case_file_landing.png",
   "note": "The opening was made reachable by commit 554e89377; before that players never saw it."
+}
+```
+
+### 🟠 Copy says a formation group is "thinly held" — an OG holds ground, it is not held
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `78cd60d64f40` |
+| Kind / severity | bug / high |
+| Surface | `ui:operational_sitrep` |
+| Probe | `owner-review` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `owner-review-20260827-og`, turn 1 |
+| Runs | owner-review-20260827-og |
+| Status | open |
+The Situation panel reads "Widespread thinly held front OGs need staff review." and "Front posture: widespread contact; thinly held OGs: widespread". Owner: an Operational Group is itself a COLLECTION OF FORMATIONS, so it cannot be "thinly held" — you hold ground, not a formation group. The phrasing should describe the group's dispersion, e.g. "OG XXY is spread out" / overextended / dispersed.
+
+MECHANISM: sectors were renamed to OGs as a naming-only change (see the standing note that sectors ARE standing OGs). The rename substituted the NOUN everywhere but left the adjective that only made sense for terrain. "Thinly held sector" was correct English; "thinly held OG" is a category error produced by a find-and-replace.
+
+This is a copy/design fix, NOT a sector-removal refactor — that is explicitly out of bounds.
+```json
+{
+  "strings": [
+    "operationalSitrep.headline.frontExposed.widespread",
+    "operationalSitrep.headline.frontExposed.many",
+    "operationalSitrep.headline.frontExposed.several",
+    "operationalSitrep.headline.frontExposed.one",
+    "operationalSitrep.headline.frontExposed.none",
+    "situation.frontsLine"
+  ],
+  "file": "src/ui/map/i18n/messages.en.ts:3693,3742-3746",
+  "owner_suggestion": "OG XXY is spread out (or similar)"
+}
+```
+
+### 🟠 Two sources for the same sitrep copy disagree: i18n says "OGs", the hardcoded fallback says "sectors"
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `7c85fee759a7` |
+| Kind / severity | bug / high |
+| Surface | `ui:operational_sitrep` |
+| Probe | `owner-review` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `owner-review-20260827-og`, turn 1 |
+| Runs | owner-review-20260827-og |
+| Status | open |
+The same five sitrep headlines exist twice. `messages.en.ts:3742-3746` says "thinly held front OGs"; the hardcoded English fallback in `operational_sitrep_views.ts:174-179` still says "thinly held front sectors". Whichever path renders the fallback shows the pre-rename term, so the player can see BOTH vocabularies for the same concept depending on code path. The rename updated the i18n table and missed the fallback beside it.
+```json
+{
+  "i18n": "src/ui/map/i18n/messages.en.ts:3742-3746 — \"thinly held front OGs\"",
+  "fallback": "src/ui/shared/operational_sitrep_views.ts:174-179 — \"thinly held front sectors\""
 }
 ```
 
@@ -654,6 +707,36 @@ Corps arbih_1st_corps rejected a directive toward op:banja_luka:banja_luka_2 for
   "target_osid": "op:banja_luka:banja_luka_2",
   "reason": "objective_unreachable",
   "turn": 1
+}
+```
+
+### 🟡 The Sector Attack operation type still says "Sector" in player-facing text
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `2bfd8975d35e` |
+| Kind / severity | bug / medium |
+| Surface | `ui:ops_planning` |
+| Probe | `owner-review` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `owner-review-20260827-og`, turn 1 |
+| Runs | owner-review-20260827-og |
+| Status | open |
+Measured across `messages.en.ts`: 104 keys have display text already renamed to OG, while 17 display strings still contain "sector". Most of those 17 are `{sector}` interpolation placeholders, which are harmless variable names. FIVE are genuinely player-visible and all belong to one family — the Sector Attack operation type: "Sector Attack", "One sector push", and "Sector Attack — Commits 3-8 brigades to push on a single sector". So the player is offered an operation named for the old concept while every other surface calls it an OG.
+```json
+{
+  "keys": [
+    "opsPlanning.param.opType.sector_attack",
+    "opsPlanning.param.subtitle.sector_attack",
+    "opsPlanning.param.label.sectorAttack",
+    "opsPlanning.param.subtitle.sectorAttack",
+    "opsPlanning.param.title.sectorAttack"
+  ],
+  "counts": {
+    "display_renamed_to_og": 104,
+    "display_still_sector": 17,
+    "genuinely_visible": 5
+  },
+  "note": "The engine identifier `sector_attack` is a separate question and is NOT part of this finding."
 }
 ```
 

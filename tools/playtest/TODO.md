@@ -147,3 +147,24 @@ already looked at. The probes were checking for *broken* things — empty surfac
 controls, clipped text, error banners — and none of these five are broken in that sense.
 They are **wrong content rendered correctly**, which is a whole detection category the
 probe set does not cover.
+
+### `ui-vocabulary-drift` (detectable, easy) — from the 2026-08-27 OG review
+Two checks the harness should have caught without a human reading the panel:
+
+1. **Duplicate copy that disagrees.** The same five sitrep headlines exist in
+   `messages.en.ts` (saying "OGs") and as a hardcoded English fallback in
+   `operational_sitrep_views.ts` (still saying "sectors"). A static check can find
+   near-duplicate sentences across the i18n table and any hardcoded fallback and flag
+   where they diverge. This class recurs whenever a rename touches one of two copies.
+2. **Retired vocabulary in display text.** Once a term is renamed, scan display VALUES
+   (not keys, not `{placeholders}`) for the retired word. Measured today: 104 display
+   strings renamed to OG, 17 still containing "sector", of which 5 are genuinely
+   player-visible. A one-line rule would have surfaced those 5 the day the rename landed.
+
+Needs a retired-term list to check against — `sector -> OG` is the first entry.
+
+### Category note
+Both of these, and all five findings from the earlier screenshot review, are **wrong
+content rendered correctly**. The probe set only detects BROKEN rendering. Until that
+category is covered, the UI lane depends on a human reading screenshots — which is what
+produced every content finding so far.
