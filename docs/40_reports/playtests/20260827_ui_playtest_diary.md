@@ -185,6 +185,48 @@ stakes — the Washington Agreement being the event that ended the Croat-Bosniak
 
 ---
 
+## 3y. Cross-faction measurements from the three 188-week runs
+
+Same policy (`historical`), same mode (`historical`), same scenario, 188 turns each.
+Differences below are the factions, not the harness.
+
+| | RBiH | RS | HRHB |
+| --- | --- | --- | --- |
+| Turns played | 188 | 188 | 188 |
+| Presidential decisions | 26 | 24 | 24 |
+| Operation authorizations accepted | **2** | **19** | **1** |
+| Diverged from historical default | 0 | 0 | 0 |
+| `game_over` at turn 188 | false | false | false |
+
+### Operation authorizations are wildly asymmetric — RS 19, RBiH 2, HRHB 1
+
+The `historical` policy's only lever is accepting pre-planned operation authorizations
+(`HISTORICAL_OP:` / `APPROVE_OP:` proposals), so this counts how many the faction was
+offered across the entire war.
+
+**RS is offered nineteen; HRHB is offered one.** Directionally this matches history — the
+VRS ran far more set-piece offensives than the HVO — but an order-of-magnitude gap is
+worth someone confirming is intended rather than an artefact of how the operation catalog
+was authored per faction. Recorded as a measurement, not a defect.
+
+It also reframes the presidential-agency picture: for HRHB, a full historical playthrough
+involves **one** operation authorization in 188 weeks.
+
+### Decision cadence holds across all three factions
+
+26 / 24 / 24 decisions in 188 turns — roughly 1.3 per ten turns each. The sparse cadence
+recorded for RBiH is not faction-specific.
+
+### Dayton never resolves — affects all three
+
+Every run ends `game_over: false` at turn 188. `DAYTON_TRIGGER_WEEK` is 188 and
+`war_start_turn` is 0, so the trigger fires during the LAST advance, after which the loop
+exits without seeing `pending_dayton`. This is the harness off-by-one recorded in
+`tools/playtest/TODO.md` item 4, still open — **the endgame, verdict and cost-ledger paths
+remain unexercised on every run**, and no finding in this diary covers them.
+
+---
+
 ## 3a. Cutileiro Plan — pre-war, and it ends the war at turn 2
 
 **Owner ruling 2026-08-27: "Cutileiro is ahistorical anyway so it should be cut out
