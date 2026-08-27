@@ -109,6 +109,7 @@ function buildConfig(): RunConfig {
         turns,
         scenario: DESKTOP_SCENARIO,
         outDir: arg('out') ?? join(REPO_BASE_DIR, 'tmp-playtest', runId),
+        decisionMode: (arg('decision-mode', 'historical') === 'emergent' ? 'emergent' : 'historical'),
         updateLedger: !flag('no-ledger'),
         disabledProbes: repeatedArg('skip-probe'),
     };
@@ -214,6 +215,10 @@ async function main(): Promise<void> {
 
     console.log(`▶ ${cfg.runId} — ${cfg.faction}, policy "${policy.id}", ${cfg.turns} turns`);
     console.log(`  ${policy.description}`);
+    console.log(`  decision_mode: ${cfg.decisionMode}`
+        + (cfg.decisionMode === 'historical'
+            ? '  (matches the calibration scenarios: bots take authored AI defaults)'
+            : '  (NOT calibration-comparable: other factions run the political scorer)'));
     console.log(`  probes: ${probes.map((p) => p.id).join(', ')}`);
     if (cfg.turns < FULL_CAMPAIGN_TURNS) {
         console.log(
@@ -227,7 +232,7 @@ async function main(): Promise<void> {
         );
     }
 
-    let state = await startCampaign(cfg.faction, DESKTOP_SCENARIO, REPO_BASE_DIR);
+    let state = await startCampaign(cfg.faction, DESKTOP_SCENARIO, REPO_BASE_DIR, cfg.decisionMode);
     const decisionLog: DecisionLogEntry[] = [];
     const advanceMsByTurn: number[] = [];
     let turnsPlayed = 0;

@@ -178,6 +178,12 @@ export interface RunConfig {
     policyId: string;
     turns: number;
     scenario: string;
+    /**
+     * 'historical' makes the OTHER factions' bots take authored AI defaults, matching
+     * the calibration scenarios. 'emergent' routes every faction-attributed event
+     * through the political scorer, so the run is not calibration-comparable.
+     */
+    decisionMode: 'emergent' | 'historical';
     outDir: string;
     /** When false, the run writes only its own log and leaves the shared ledger alone. */
     updateLedger: boolean;

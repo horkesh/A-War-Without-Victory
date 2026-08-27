@@ -135,6 +135,7 @@ export async function startCampaign(
     faction: FactionId,
     scenarioKey: DesktopScenarioKey = 'apr_1992',
     baseDir: string = REPO_BASE_DIR,
+    decisionMode: 'emergent' | 'historical' = 'emergent',
 ): Promise<GameState> {
     // Fixed 2026-08-06 per Pyrrhic panel review (Determinism Auditor,
     // docs/40_reports/20260806_RBIH_PYRRHIC_PANEL_SYNTHESIS.md Part 5 item 1):
@@ -145,7 +146,9 @@ export async function startCampaign(
     // back-to-back in one process, so a prior campaign's unsupplied-turn counters were
     // silently bleeding into the next one's displacement/internal_cohesion numbers.
     resetDisplacementPressureCache();
-    const { state } = await startNewCampaign(baseDir, faction as 'RBiH' | 'RS' | 'HRHB', scenarioKey);
+    const { state } = await startNewCampaign(
+        baseDir, faction as 'RBiH' | 'RS' | 'HRHB', scenarioKey, decisionMode,
+    );
     if (state.meta) state.meta.headless_scenario_auto_control = false;
     return state;
 }

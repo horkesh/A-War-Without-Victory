@@ -126,6 +126,88 @@ refusal is wrong.
 
 ---
 
+## 3a. Cutileiro Plan — pre-war, and it ends the war at turn 2
+
+**Owner ruling 2026-08-27: "Cutileiro is ahistorical anyway so it should be cut out
+completely." NOT IMPLEMENTED — recorded only. No engine change was made.**
+
+### Measured
+
+| decision_mode | player response | result |
+| --- | --- | --- |
+| historical | accept Cutileiro | **game over at turn 2** |
+| historical | reject Cutileiro | war continues normally |
+
+Reproduced directly against `startCampaign` + `advance`, RBiH, `apr_1992`.
+
+### Why it happens, from the code itself
+
+`peace_plan_data.ts` gives Cutileiro `trigger_week: 0` and comments it as *"pre-war, but
+included for completeness in Apr 1992 scenarios"*. It is the ONLY plan at week 0; the
+others are 40 / 70 / 118 / 185. The plan was signed 18 March 1992 and Izetbegović
+withdrew on 28 March — both before this scenario's 6 April start.
+
+**Three subsystems carry special cases for it**, which is the strongest evidence that it
+does not fit:
+
+1. `peace_plans.ts` — an `openingPlanCatchUp` scheduling exception, because week 0 does
+   not exist in a model whose turn advances before war phases run, plus a `turn_offered`
+   back-dating branch.
+2. `peace_plans.ts` — a `replayDocumentedCutileiroOutcome` guard whose own comment says
+   it exists to stop week-one signals *"manufactur[ing] an ahistorical unanimous
+   settlement before play begins."*
+3. `political_peace_plan.ts` — a hard exclusion from political personality scoring:
+   *"pre-war plan with non-genuine acceptance dynamics."*
+
+**The guard only holds when the player's response matches the documented one.** RBiH's
+documented response is `rejected`; accepting bypasses the guard, every faction is
+re-derived, and the unanimous settlement the comment warns about is exactly what occurs.
+There is even an existing test named *"keeps an HRHB historical campaign running when
+HRHB accepts Cutileiro"* — the failure mode was known.
+
+### Scope if it is actioned
+
+Removing the plan would also delete the scheduling exception, the back-dating branch,
+the replay guard and the personality-scoring exclusion — a net simplification, since all
+four exist only to contain this one plan. It touches ~10 assertions in
+`tests/peace_plans.test.ts`, where Cutileiro is also used as the generic fixture for
+tests that are not about it.
+
+**Constraints on landing it:** behaviour-changing, so it needs a 188-week validation;
+calibration is currently PAUSED and Codex owns the RE lane. Separately, the Codex essay
+`data/scenarios/essays/cutileiro_plan_lisbon_1992.json` is history and arguably should
+survive the mechanic — Cutileiro happened, it just did not happen during the war this
+campaign simulates. That is a call for whoever actions this.
+
+### Harness consequence, already applied
+
+The `historical` policy now REJECTS peace plans. Accepting ended the baseline campaign at
+turn 2, which measures nothing. Rejecting reproduces the historical *trajectory* (the war
+continued) though not the historical *signature* (it was signed, then withdrawn).
+
+---
+
+## 3b. Player runs were never calibration-comparable
+
+`desktop_sim.startNewCampaign` defaults to `decisionMode: 'emergent'`. The 188w
+calibration scenario sets no `decision_mode` and takes the engine default, `historical`.
+
+In emergent mode **every faction-attributed event routes through the political scorer**,
+so the two non-player factions behave differently from a calibration run regardless of
+what the player does. Any divergence measured this way would have been dominated by that.
+
+Also worth recording: the bot's "historical" is not simply the historical default. It is
+a ladder — authored AI default, then the political scorer for `POLITICAL_LOGICS` events,
+then `pickBotResponseV1` (`historical` / `accept_first` / `reject_all` /
+personality-weighted). "Historical" means different things on the player and bot paths.
+
+**Harness change applied:** `decisionMode` is plumbed through `startCampaign`, exposed as
+`--decision-mode`, and the headless driver now DEFAULTS to `historical` so runs are
+calibration-comparable by default. Each run prints which mode it is in and whether that
+mode is comparable.
+
+---
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |

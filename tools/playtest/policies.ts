@@ -96,7 +96,21 @@ export const historical: Policy = {
     levers(state) {
         return { proposals: acceptOperationAuthorizations(state) };
     },
-    peacePlan: () => 'accepted',
+    /**
+     * REJECT, despite this being the "historical" policy — and the reason matters.
+     *
+     * Accepting the Cutileiro Plan in `historical` decision mode ENDS THE CAMPAIGN at
+     * turn 2 (measured: accept -> game_over at turn 2; reject -> war continues). A
+     * baseline that stops in April 1992 measures nothing.
+     *
+     * Historically Cutileiro WAS signed on 18 March 1992 and then Izetbegović withdrew,
+     * and the war happened anyway. The engine has no withdrawal path, so "accept" and
+     * "the historical outcome" are not the same thing here. Rejecting reproduces the
+     * historical TRAJECTORY (war continues) even though it does not reproduce the
+     * historical SIGNATURE. Recorded in the diary as an open question rather than
+     * silently encoded here.
+     */
+    peacePlan: () => 'rejected',
 };
 
 /**
@@ -158,7 +172,8 @@ export const staffRec: Policy = {
     levers(state) {
         return { proposals: acceptOperationAuthorizations(state) };
     },
-    peacePlan: () => 'accepted',
+    // Same reason as `historical`: accepting ends the campaign at turn 2.
+    peacePlan: () => 'rejected',
 };
 
 /**
