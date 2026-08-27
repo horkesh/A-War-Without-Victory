@@ -11,21 +11,21 @@ listed is not a claim that anyone has triaged it.
 
 | | Count |
 | --- | --- |
-| Runs contributing | 10 |
-| Distinct findings | 58 |
+| Runs contributing | 13 |
+| Distinct findings | 72 |
 | 🔴 Critical | 7 |
 | 🟠 High | 13 |
 | Bugs | 21 |
-| Friction | 31 |
+| Friction | 33 |
 | Anomalies | 0 |
-| Open questions | 6 |
-| ⚠ Unconfirmed (suspected harness artefact) | 4 |
+| Open questions | 18 |
+| ⚠ Unconfirmed (suspected harness artefact) | 5 |
 
-**Runs:** `RBiH-counterfactual-188w`, `RBiH-historical-188w`, `RBiH-passive-188w`, `copy-audit-2026-08-27`, `owner-review-20260827`, `owner-review-20260827-og`, `playthrough-20260827`, `ui-HRHB`, `ui-RBiH`, `ui-RS`
+**Runs:** `HRHB-hist188-calib`, `RBiH-counterfactual-188w`, `RBiH-hist188-calib`, `RBiH-historical-188w`, `RBiH-passive-188w`, `RS-hist188-calib`, `copy-audit-2026-08-27`, `owner-review-20260827`, `owner-review-20260827-og`, `playthrough-20260827`, `ui-HRHB`, `ui-RBiH`, `ui-RS`
 
 ## Three worst friction moments
 
-1. 🟠 **Player faces almost no decisions across the campaign** — `design:decision_cadence`, 3× · `07ddb9a5fad8`
+1. 🟠 **Player faces almost no decisions across the campaign** — `design:decision_cadence`, 6× · `07ddb9a5fad8`
 2. 🟠 **Opening screen needs a complete redesign to match the game aesthetic** — `ui:case_file_opening`, 1× · `0ac8f0df01a3`
 3. 🟠 **Decision Room room-only blockers are unreachable from the screen that refuses the turn** — `ui:decision_room`, 1× · `ae77d671480f`
 
@@ -35,20 +35,20 @@ listed is not a claim that anyone has triaged it.
 | --- | --- | --- | --- | --- | --- |
 | 🔴 critical | Turn cannot be advanced after four attempts | `ui:turn_loop` | 25× | ui-RBiH, ui-RS, ui-HRHB | `6cd4fa018f9a` |
 | 🔴 critical | ⚠ _(unconfirmed)_ No enabled ADVANCE control on the turn surface | `ui:turn_loop` | 15× | ui-RBiH | `fd61eb5e0970` |
-| 🔴 critical | Campaign shell never becomes ready after Begin | `ui:campaign_start` | 8× | ui-RBiH | `f24f6c4f0c0f` |
+| 🔴 critical | ⚠ _(unconfirmed)_ Campaign shell never becomes ready after Begin | `ui:campaign_start` | 8× | ui-RBiH | `f24f6c4f0c0f` |
 | 🔴 critical | ⚠ _(unconfirmed)_ Clicking ADVANCE does not move the date | `ui:turn_loop` | 8× | ui-RBiH | `5cd22877eff8` |
 | 🔴 critical | Surface `campaign_start` renders no interactive controls | `ui:campaign_start` | 2× | ui-RBiH | `b81eaea102a2` |
 | 🔴 critical | Error shown to the player on campaign_start: "Invalid decisionMode. Use emergent or historical." | `ui:campaign_start` | 1× | ui-RBiH | `0bb0b0c943ba` |
 | 🔴 critical | Selecting a faction does not start a campaign | `ui:side_picker` | 1× | ui-RBiH | `a22af3625aa4` |
-| 🟠 high | A "front" has both sides in the same municipality | `content:priority_fronts` | 88× | ui-RBiH, ui-RS, ui-HRHB | `072256b5b4e9` |
-| 🟠 high | Territory bar counts allied ground as "hostile-held" | `content:territory_bar` | 51× | ui-RBiH, ui-RS, ui-HRHB | `6c6f24ff39fa` |
+| 🟠 high | A "front" has both sides in the same municipality | `content:priority_fronts` | 91× | ui-RBiH, ui-RS, ui-HRHB | `072256b5b4e9` |
+| 🟠 high | Territory bar counts allied ground as "hostile-held" | `content:territory_bar` | 53× | ui-RBiH, ui-RS, ui-HRHB | `6c6f24ff39fa` |
 | 🟠 high | The same sentence is maintained in two files and they disagree: "A thinly held front OG needs staff review." | `copy:duplicate_sources` | 5× | copy-audit-2026-08-27 | `102752f61718` |
 | 🟠 high | Uncaught page error: Cannot access 'ir' before initialization | `ui:renderer` | 2× | ui-RBiH | `6502868f6e7d` |
 | 🟠 high | Copy says a formation group is "thinly held" — an OG holds ground, it is not held | `ui:operational_sitrep` | 1× | owner-review-20260827-og | `78cd60d64f40` |
 | 🟠 high | Two sources for the same sitrep copy disagree: i18n says "OGs", the hardcoded fallback says "sectors" | `ui:operational_sitrep` | 1× | owner-review-20260827-og | `7c85fee759a7` |
 | 🟠 high | Priority-front labels pair a settlement with its own municipality under two names | `ui:situation_panel` | 1× | owner-review-20260827 | `d5daa3a10f94` |
 | 🟠 high | Territory bar counts allied HVO ground as "hostile-held" | `ui:territory_bar` | 1× | owner-review-20260827 | `ab660671b06e` |
-| 🟡 medium | Place names rendered with lower-case words after the first | `content:place_names` | 54× | ui-RBiH, ui-RS, ui-HRHB | `f832cc39d03a` |
+| 🟡 medium | Place names rendered with lower-case words after the first | `content:place_names` | 56× | ui-RBiH, ui-RS, ui-HRHB | `f832cc39d03a` |
 | 🟡 medium | Operation directive rejected with a reason the player is never shown | `ui:op_directive_rejection` | 29× | RBiH-counterfactual-188w | `ff048ab927a1` |
 | 🟡 medium | Retired term "sector" still in player-visible copy in ui\map\i18n\messages.en.ts | `copy:map/i18n/messages.en.ts` | 1× | copy-audit-2026-08-27 | `ad599a9641f7` |
 | 🟡 medium | Retired term "sector" still in player-visible copy in ui\shared\operational_sitrep_views.ts | `copy:shared/operational_sitrep_views.ts` | 1× | copy-audit-2026-08-27 | `764fd700316e` |
@@ -59,37 +59,39 @@ listed is not a claim that anyone has triaged it.
 
 | Severity | Finding | Surface | Hits | Runs | ID |
 | --- | --- | --- | --- | --- | --- |
-| 🟠 high | Player faces almost no decisions across the campaign | `design:decision_cadence` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `07ddb9a5fad8` |
-| 🟠 high | ⚠ _(unconfirmed)_ Command Authority never spent across the whole campaign | `engine:command_authority` | 1× | RBiH-historical-188w | `ab8f0ac92d5c` |
+| 🟠 high | Player faces almost no decisions across the campaign | `design:decision_cadence` | 6× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib, RS-hist188-calib, HRHB-hist188-calib | `07ddb9a5fad8` |
+| 🟠 high | ⚠ _(unconfirmed)_ Command Authority never spent across the whole campaign | `engine:command_authority` | 4× | RBiH-historical-188w, RBiH-hist188-calib, RS-hist188-calib, HRHB-hist188-calib | `ab8f0ac92d5c` |
 | 🟠 high | Opening screen needs a complete redesign to match the game aesthetic | `ui:case_file_opening` | 1× | owner-review-20260827 | `0ac8f0df01a3` |
 | 🟠 high | Decision Room room-only blockers are unreachable from the screen that refuses the turn | `ui:decision_room` | 1× | playthrough-20260827 | `ae77d671480f` |
-| 🟡 medium | Interactive control with no accessible label | `ui:campaign_start` | 4686× | ui-RBiH, ui-RS, ui-HRHB | `56b6bda5d71e` |
-| 🟡 medium | Interactive control with no accessible label | `ui:army_hq` | 4384× | ui-RBiH, ui-RS, ui-HRHB | `1bc0a56b95c2` |
-| 🟡 medium | Interactive control with no accessible label | `ui:chronicle` | 4384× | ui-RBiH, ui-RS, ui-HRHB | `5ff0afb189d7` |
-| 🟡 medium | Interactive control with no accessible label | `ui:codex` | 4376× | ui-RBiH, ui-RS, ui-HRHB | `850a3806cfbc` |
-| 🟡 medium | Interactive control with no accessible label | `ui:desk` | 4376× | ui-RBiH, ui-RS, ui-HRHB | `1e2303120fe2` |
-| 🟡 medium | Interactive control with no accessible label | `ui:records` | 4376× | ui-RBiH, ui-RS, ui-HRHB | `fc75f83f7348` |
-| 🟡 medium | Interactive control with no accessible label | `ui:war_map` | 3478× | ui-RBiH, ui-RS, ui-HRHB | `b615fa723d8f` |
-| 🟡 medium | Interactive control with no accessible label | `ui:in_game` | 1426× | ui-RBiH, ui-HRHB | `50b8dda5812e` |
-| 🟡 medium | Peace-plan modal offers no historical default and no per-option stakes | `ui:peace_plan_modal` | 25× | ui-RBiH, ui-HRHB | `182e6e7f012e` |
-| 🟡 medium | Surface "in_game" renders text in 5 different font families | `content:typography` | 13× | ui-RBiH, ui-HRHB | `35b2632dfcf3` |
+| 🟡 medium | Interactive control with no accessible label | `ui:campaign_start` | 4784× | ui-RBiH, ui-RS, ui-HRHB | `56b6bda5d71e` |
+| 🟡 medium | Interactive control with no accessible label | `ui:army_hq` | 4483× | ui-RBiH, ui-RS, ui-HRHB | `1bc0a56b95c2` |
+| 🟡 medium | Interactive control with no accessible label | `ui:chronicle` | 4483× | ui-RBiH, ui-RS, ui-HRHB | `5ff0afb189d7` |
+| 🟡 medium | Interactive control with no accessible label | `ui:codex` | 4475× | ui-RBiH, ui-RS, ui-HRHB | `850a3806cfbc` |
+| 🟡 medium | Interactive control with no accessible label | `ui:desk` | 4475× | ui-RBiH, ui-RS, ui-HRHB | `1e2303120fe2` |
+| 🟡 medium | Interactive control with no accessible label | `ui:records` | 4475× | ui-RBiH, ui-RS, ui-HRHB | `fc75f83f7348` |
+| 🟡 medium | Interactive control with no accessible label | `ui:war_map` | 3553× | ui-RBiH, ui-RS, ui-HRHB | `b615fa723d8f` |
+| 🟡 medium | Interactive control with no accessible label | `ui:in_game` | 1501× | ui-RBiH, ui-HRHB | `50b8dda5812e` |
+| 🟡 medium | Peace-plan modal offers no historical default and no per-option stakes | `ui:peace_plan_modal` | 26× | ui-RBiH, ui-HRHB | `182e6e7f012e` |
+| 🟡 medium | Surface "in_game" renders text in 5 different font families | `content:typography` | 14× | ui-RBiH, ui-HRHB | `35b2632dfcf3` |
 | 🟡 medium | Surface "codex" has no reachable control | `ui:codex` | 5× | ui-RBiH | `e4b031f59b77` |
 | 🟡 medium | Surface "desk" has no reachable control | `ui:desk` | 5× | ui-RBiH | `81513817311f` |
 | 🟡 medium | Surface "records" has no reachable control | `ui:records` | 5× | ui-RBiH | `9a16b34a3a19` |
+| 🟡 medium | ⚠ _(unconfirmed)_ Command Authority sitting at cap at end of campaign | `engine:command_authority` | 4× | RBiH-historical-188w, RBiH-hist188-calib, RS-hist188-calib, HRHB-hist188-calib | `45e315b15082` |
 | 🟡 medium | Surface "army_hq" has no reachable control | `ui:army_hq` | 4× | ui-RBiH | `72962be702b1` |
 | 🟡 medium | Surface "chronicle" has no reachable control | `ui:chronicle` | 4× | ui-RBiH | `a1259f689f15` |
 | 🟡 medium | Surface "war_map" has no reachable control | `ui:war_map` | 4× | ui-RBiH | `6f579329b22e` |
-| 🟡 medium | ⚠ _(unconfirmed)_ Command Authority sitting at cap at end of campaign | `engine:command_authority` | 1× | RBiH-historical-188w | `45e315b15082` |
 | 🟡 medium | Advance is offered and does nothing when a room-only blocker is outstanding | `ui:turn_loop` | 1× | playthrough-20260827 | `582f880d10c1` |
 | 🟡 medium | Typography is inconsistent across surfaces | `ui:typography` | 1× | owner-review-20260827 | `50bb59700448` |
 | ⚪ low | Lever `replace_co` refused: insufficient_command_authority (#.#/#) | `lever:replace_co` | 705× | RBiH-counterfactual-188w | `adf0fc5fc3d4` |
 | ⚪ low | Lever `request_op` refused: insufficient_command_authority (#.#/#) | `lever:request_op` | 685× | RBiH-counterfactual-188w | `410897e96e98` |
 | ⚪ low | Lever `replace_co` refused: insufficient_command_authority (#/#) | `lever:replace_co` | 233× | RBiH-counterfactual-188w | `91b00300864a` |
 | ⚪ low | Lever `request_op` refused: insufficient_command_authority (#/#) | `lever:request_op` | 225× | RBiH-counterfactual-188w | `ea9d210f3201` |
-| ⚪ low | Decision `contact_group_plan_1994` shows no stakes on any option | `event:contact_group_plan_1994` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `6c2feb3668af` |
-| ⚪ low | Decision `owen_stoltenberg_plan_1993` shows no stakes on any option | `event:owen_stoltenberg_plan_1993` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `a0ccbbe32a3a` |
-| ⚪ low | Decision `vance_owen_plan_1993` shows no stakes on any option | `event:vance_owen_plan_1993` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `78be3027390d` |
+| ⚪ low | Decision `contact_group_plan_1994` shows no stakes on any option | `event:contact_group_plan_1994` | 4× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib | `6c2feb3668af` |
+| ⚪ low | Decision `owen_stoltenberg_plan_1993` shows no stakes on any option | `event:owen_stoltenberg_plan_1993` | 4× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib | `a0ccbbe32a3a` |
+| ⚪ low | Decision `vance_owen_plan_1993` shows no stakes on any option | `event:vance_owen_plan_1993` | 4× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib | `78be3027390d` |
 | ⚪ low | Lever `replace_co` refused: no_current_co | `lever:replace_co` | 2× | RBiH-counterfactual-188w | `0a33a4fe74ef` |
+| ⚪ low | Decision `gornji_vakuf_clashes_1993` shows no stakes on any option | `event:gornji_vakuf_clashes_1993` | 1× | HRHB-hist188-calib | `7269b4bdc6f0` |
+| ⚪ low | Decision `hrhb_washington_agreement_1994` shows no stakes on any option | `event:hrhb_washington_agreement_1994` | 1× | HRHB-hist188-calib | `bea6d0522e3e` |
 
 ## Anomalies
 
@@ -100,11 +102,23 @@ _None recorded._
 | Severity | Finding | Surface | Hits | Runs | ID |
 | --- | --- | --- | --- | --- | --- |
 | 🟠 high | RS opens with six required presidential decisions; RBiH opens with one | `design:opening_decision_load` | 1× | playthrough-20260827 | `7afde0e4e2d4` |
-| 🟡 medium | Decision `address_to_nation_rbih` has no authored historical default | `event:address_to_nation_rbih` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `071aa478b1c1` |
-| 🟡 medium | Decision `decorate_a_unit_rbih` has no authored historical default | `event:decorate_a_unit_rbih` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `a3d3e77f12f8` |
-| 🟡 medium | Decision `strategic_posture_review_rbih` has no authored historical default | `event:strategic_posture_review_rbih` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `681d5f62ef1f` |
-| 🟡 medium | Decision `visit_to_front_rbih` has no authored historical default | `event:visit_to_front_rbih` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `b9ce83d06de9` |
+| 🟡 medium | Decision `address_to_nation_rbih` has no authored historical default | `event:address_to_nation_rbih` | 4× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib | `071aa478b1c1` |
+| 🟡 medium | Decision `decorate_a_unit_rbih` has no authored historical default | `event:decorate_a_unit_rbih` | 4× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib | `a3d3e77f12f8` |
+| 🟡 medium | Decision `strategic_posture_review_rbih` has no authored historical default | `event:strategic_posture_review_rbih` | 4× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib | `681d5f62ef1f` |
+| 🟡 medium | Decision `visit_to_front_rbih` has no authored historical default | `event:visit_to_front_rbih` | 4× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib | `b9ce83d06de9` |
+| 🟡 medium | Decision `address_to_nation_hrhb` has no authored historical default | `event:address_to_nation_hrhb` | 1× | HRHB-hist188-calib | `d4d184df999e` |
+| 🟡 medium | Decision `address_to_nation_rs` has no authored historical default | `event:address_to_nation_rs` | 1× | RS-hist188-calib | `a89743c17ab3` |
 | 🟡 medium | Decision `csq_third_party_mediation_offered` has no authored historical default | `event:csq_third_party_mediation_offered` | 1× | RBiH-counterfactual-188w | `121de4b137cf` |
+| 🟡 medium | Decision `decorate_a_unit_hrhb` has no authored historical default | `event:decorate_a_unit_hrhb` | 1× | HRHB-hist188-calib | `40cebc4589ae` |
+| 🟡 medium | Decision `decorate_a_unit_rs` has no authored historical default | `event:decorate_a_unit_rs` | 1× | RS-hist188-calib | `fb548f6d5e27` |
+| 🟡 medium | Decision `drina_cleansing_decision_1992` has no authored historical default | `event:drina_cleansing_decision_1992` | 1× | RS-hist188-calib | `82d7f0d636aa` |
+| 🟡 medium | Decision `milosevic_drina_warning` has no authored historical default | `event:milosevic_drina_warning` | 1× | RS-hist188-calib | `448a72521b99` |
+| 🟡 medium | Decision `milosevic_isolation_warning_aug92` has no authored historical default | `event:milosevic_isolation_warning_aug92` | 1× | RS-hist188-calib | `36f51e543f63` |
+| 🟡 medium | Decision `milosevic_owen_stoltenberg_distancing` has no authored historical default | `event:milosevic_owen_stoltenberg_distancing` | 1× | RS-hist188-calib | `ad92ce300e18` |
+| 🟡 medium | Decision `milosevic_vopp_pressure` has no authored historical default | `event:milosevic_vopp_pressure` | 1× | RS-hist188-calib | `c019b7857b38` |
+| 🟡 medium | Decision `strategic_posture_review_rs` has no authored historical default | `event:strategic_posture_review_rs` | 1× | RS-hist188-calib | `14db02d9277d` |
+| 🟡 medium | Decision `visit_to_front_hrhb` has no authored historical default | `event:visit_to_front_hrhb` | 1× | HRHB-hist188-calib | `864769f1dd1d` |
+| 🟡 medium | Decision `visit_to_front_rs` has no authored historical default | `event:visit_to_front_rs` | 1× | RS-hist188-calib | `7a0d6330c9bc` |
 
 ---
 
@@ -151,8 +165,8 @@ The campaign_start screen mounted but exposes nothing clickable. A player reachi
 | Occurrences | 8 across 1 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH |
-| Status | open |
-Begin was clicked and neither a dated turn readout nor the in-game navigation appeared within 120s. The player is left on a screen that never finishes loading.
+| Status | unconfirmed |
+Begin was clicked and neither a dated turn readout nor the in-game navigation appeared within 120s. The player is left on a screen that never finishes loading. [DRIVER ARTIFACT: fired only while the readiness regex was corrupt (a shell heredoc turned  into a literal backspace), so the predicate could never match. Fixed; re-verify before treating as an app defect.]
 ```json
 {
   "faction": "RBiH"
@@ -265,7 +279,7 @@ At turn 1 (6 APR 1992) there is no clickable ADVANCE. The player cannot move the
 | Kind / severity | bug / high |
 | Surface | `content:priority_fronts` |
 | Probe | `ui-front-pair-self-reference` |
-| Occurrences | 88 across 3 run(s) |
+| Occurrences | 91 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -295,7 +309,7 @@ On campaign_start, the priority front "Aginci (bosanska dubica) - Kozarska dubic
 | Kind / severity | bug / high |
 | Surface | `content:territory_bar` |
 | Probe | `ui-alliance-hostile-accounting` |
-| Occurrences | 51 across 3 run(s) |
+| Occurrences | 53 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -347,9 +361,9 @@ Variants:
 | Kind / severity | friction / high |
 | Surface | `design:decision_cadence` |
 | Probe | `decision-cadence` |
-| Occurrences | 3 across 3 run(s) |
+| Occurrences | 6 across 6 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 188 |
-| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w |
+| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib, RS-hist188-calib, HRHB-hist188-calib |
 | Status | open |
 26 decision(s) in 188 turns — 1.4 per 10 turns, against a 2 floor. The president spends most of the war pressing Advance with nothing to weigh, which is the opposite of the surface's stated premise.
 ```json
@@ -389,9 +403,9 @@ Measured on the first turn of each campaign through the real UI. RS shows "Decis
 | Kind / severity | friction / high |
 | Surface | `engine:command_authority` |
 | Probe | `command-authority` |
-| Occurrences | 1 across 1 run(s) |
+| Occurrences | 4 across 4 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 188 |
-| Runs | RBiH-historical-188w |
+| Runs | RBiH-historical-188w, RBiH-hist188-calib, RS-hist188-calib, HRHB-hist188-calib |
 | Status | unconfirmed |
 188 turns, 2 lever attempt(s), and lifetime_spent is 0. The policy DID reach for levers and every one of them was gated shut — the presidential surface is unreachable on this path. [HARNESS DEFECT — UNCONFIRMED: the policy never attempted a CA-costing lever, so this measures the policy, not the engine. See tools/playtest/TODO.md item 5.]
 ```json
@@ -559,7 +573,7 @@ The status bar reads "Friendly 31.5% | Hostile-held 68.5%" while the same bar sh
 | Kind / severity | bug / medium |
 | Surface | `content:place_names` |
 | Probe | `ui-place-name-casing` |
-| Occurrences | 54 across 3 run(s) |
+| Occurrences | 56 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -584,7 +598,7 @@ On campaign_start, 4 place-name fragment(s) capitalise only the first word. Bosn
 | Kind / severity | friction / medium |
 | Surface | `content:typography` |
 | Probe | `ui-font-family-drift` |
-| Occurrences | 13 across 2 run(s) |
+| Occurrences | 14 across 2 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-HRHB |
 | Status | open |
@@ -662,15 +676,39 @@ On campaign_start, 4 place-name fragment(s) capitalise only the first word. Bosn
 | Kind / severity | friction / medium |
 | Surface | `engine:command_authority` |
 | Probe | `command-authority` |
-| Occurrences | 1 across 1 run(s) |
+| Occurrences | 4 across 4 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 188 |
-| Runs | RBiH-historical-188w |
+| Runs | RBiH-historical-188w, RBiH-hist188-calib, RS-hist188-calib, HRHB-hist188-calib |
 | Status | unconfirmed |
 Ended at 100/100. Income above the cap is wasted; a resource the player cannot spend is not a constraint, it is decoration. [HARNESS DEFECT — UNCONFIRMED: the policy never attempted a CA-costing lever, so this measures the policy, not the engine. See tools/playtest/TODO.md item 5.]
 ```json
 {
   "current": 100,
   "max": 100
+}
+```
+
+### 🟡 Decision `address_to_nation_hrhb` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `d4d184df999e` |
+| Kind / severity | question / medium |
+| Surface | `event:address_to_nation_hrhb` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `HRHB-hist188-calib`, turn 91 |
+| Runs | HRHB-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "address_to_nation_hrhb",
+  "option_ids": [
+    "address_defiance_hrhb",
+    "address_endurance_hrhb",
+    "address_conciliation_hrhb",
+    "address_stay_silent_hrhb"
+  ]
 }
 ```
 
@@ -681,9 +719,9 @@ Ended at 100/100. Income above the cap is wasted; a resource the player cannot s
 | Kind / severity | question / medium |
 | Surface | `event:address_to_nation_rbih` |
 | Probe | `decision-shape` |
-| Occurrences | 3 across 3 run(s) |
+| Occurrences | 4 across 4 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 91 |
-| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w |
+| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib |
 | Status | open |
 No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
 ```json
@@ -694,6 +732,30 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
     "address_endurance_rbih",
     "address_appeal_world_rbih",
     "address_stay_silent_rbih"
+  ]
+}
+```
+
+### 🟡 Decision `address_to_nation_rs` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `a89743c17ab3` |
+| Kind / severity | question / medium |
+| Surface | `event:address_to_nation_rs` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `RS-hist188-calib`, turn 97 |
+| Runs | RS-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "address_to_nation_rs",
+  "option_ids": [
+    "address_defiance_rs",
+    "address_endurance_rs",
+    "address_reassure_patron_rs",
+    "address_stay_silent_rs"
   ]
 }
 ```
@@ -720,6 +782,29 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 }
 ```
 
+### 🟡 Decision `decorate_a_unit_hrhb` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `40cebc4589ae` |
+| Kind / severity | question / medium |
+| Surface | `event:decorate_a_unit_hrhb` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `HRHB-hist188-calib`, turn 97 |
+| Runs | HRHB-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "decorate_a_unit_hrhb",
+  "option_ids": [
+    "decorate_steadfast_hrhb",
+    "decorate_broadly_hrhb",
+    "decorate_decline_hrhb"
+  ]
+}
+```
+
 ### 🟡 Decision `decorate_a_unit_rbih` has no authored historical default
 | Field | Entry |
 | --- | --- |
@@ -727,9 +812,9 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 | Kind / severity | question / medium |
 | Surface | `event:decorate_a_unit_rbih` |
 | Probe | `decision-shape` |
-| Occurrences | 3 across 3 run(s) |
+| Occurrences | 4 across 4 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 97 |
-| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w |
+| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib |
 | Status | open |
 No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
 ```json
@@ -743,6 +828,139 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 }
 ```
 
+### 🟡 Decision `decorate_a_unit_rs` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `fb548f6d5e27` |
+| Kind / severity | question / medium |
+| Surface | `event:decorate_a_unit_rs` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `RS-hist188-calib`, turn 97 |
+| Runs | RS-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "decorate_a_unit_rs",
+  "option_ids": [
+    "decorate_steadfast_rs",
+    "decorate_broadly_rs",
+    "decorate_decline_rs"
+  ]
+}
+```
+
+### 🟡 Decision `drina_cleansing_decision_1992` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `82d7f0d636aa` |
+| Kind / severity | question / medium |
+| Surface | `event:drina_cleansing_decision_1992` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `RS-hist188-calib`, turn 13 |
+| Runs | RS-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "drina_cleansing_decision_1992",
+  "option_ids": [
+    "systematic",
+    "restrained"
+  ]
+}
+```
+
+### 🟡 Decision `milosevic_drina_warning` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `448a72521b99` |
+| Kind / severity | question / medium |
+| Surface | `event:milosevic_drina_warning` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `RS-hist188-calib`, turn 111 |
+| Runs | RS-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "milosevic_drina_warning",
+  "option_ids": [
+    "acknowledge_pressure",
+    "resist_patron"
+  ]
+}
+```
+
+### 🟡 Decision `milosevic_isolation_warning_aug92` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `36f51e543f63` |
+| Kind / severity | question / medium |
+| Surface | `event:milosevic_isolation_warning_aug92` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `RS-hist188-calib`, turn 19 |
+| Runs | RS-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "milosevic_isolation_warning_aug92",
+  "option_ids": [
+    "acknowledge_pressure",
+    "resist_patron"
+  ]
+}
+```
+
+### 🟡 Decision `milosevic_owen_stoltenberg_distancing` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `ad92ce300e18` |
+| Kind / severity | question / medium |
+| Surface | `event:milosevic_owen_stoltenberg_distancing` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `RS-hist188-calib`, turn 69 |
+| Runs | RS-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "milosevic_owen_stoltenberg_distancing",
+  "option_ids": [
+    "acknowledge_pressure",
+    "resist_patron"
+  ]
+}
+```
+
+### 🟡 Decision `milosevic_vopp_pressure` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `c019b7857b38` |
+| Kind / severity | question / medium |
+| Surface | `event:milosevic_vopp_pressure` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `RS-hist188-calib`, turn 55 |
+| Runs | RS-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "milosevic_vopp_pressure",
+  "option_ids": [
+    "acknowledge_pressure",
+    "resist_patron"
+  ]
+}
+```
+
 ### 🟡 Decision `strategic_posture_review_rbih` has no authored historical default
 | Field | Entry |
 | --- | --- |
@@ -750,9 +968,9 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 | Kind / severity | question / medium |
 | Surface | `event:strategic_posture_review_rbih` |
 | Probe | `decision-shape` |
-| Occurrences | 3 across 3 run(s) |
+| Occurrences | 4 across 4 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 95 |
-| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w |
+| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib |
 | Status | open |
 No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
 ```json
@@ -767,6 +985,55 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 }
 ```
 
+### 🟡 Decision `strategic_posture_review_rs` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `14db02d9277d` |
+| Kind / severity | question / medium |
+| Surface | `event:strategic_posture_review_rs` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `RS-hist188-calib`, turn 95 |
+| Runs | RS-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "strategic_posture_review_rs",
+  "option_ids": [
+    "press_gains",
+    "consolidate_holdings",
+    "negotiate_strength",
+    "accept_partition_framework"
+  ]
+}
+```
+
+### 🟡 Decision `visit_to_front_hrhb` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `864769f1dd1d` |
+| Kind / severity | question / medium |
+| Surface | `event:visit_to_front_hrhb` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `HRHB-hist188-calib`, turn 91 |
+| Runs | HRHB-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "visit_to_front_hrhb",
+  "option_ids": [
+    "visit_mostar_front",
+    "visit_central_bosnia",
+    "visit_posavina_hrhb",
+    "stay_mostar_hrhb",
+    "visit_press_hrhb"
+  ]
+}
+```
+
 ### 🟡 Decision `visit_to_front_rbih` has no authored historical default
 | Field | Entry |
 | --- | --- |
@@ -774,9 +1041,9 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 | Kind / severity | question / medium |
 | Surface | `event:visit_to_front_rbih` |
 | Probe | `decision-shape` |
-| Occurrences | 3 across 3 run(s) |
+| Occurrences | 4 across 4 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 92 |
-| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w |
+| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib |
 | Status | open |
 No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
 ```json
@@ -792,6 +1059,31 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 }
 ```
 
+### 🟡 Decision `visit_to_front_rs` has no authored historical default
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `7a0d6330c9bc` |
+| Kind / severity | question / medium |
+| Surface | `event:visit_to_front_rs` |
+| Probe | `decision-shape` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `RS-hist188-calib`, turn 98 |
+| Runs | RS-hist188-calib |
+| Status | open |
+No `historical_default_response_id`. The R8 choice policy cannot rank this decision, so a "historical" playthrough is silently guessing here. Needs an authored default or an explicit note that history offers none.
+```json
+{
+  "event_id": "visit_to_front_rs",
+  "option_ids": [
+    "visit_posavina",
+    "visit_sarajevo_lines",
+    "visit_drina_front",
+    "stay_pale_rs",
+    "visit_press_rs"
+  ]
+}
+```
+
 ### 🟡 Interactive control with no accessible label
 | Field | Entry |
 | --- | --- |
@@ -799,7 +1091,7 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 | Kind / severity | friction / medium |
 | Surface | `ui:army_hq` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 4384 across 3 run(s) |
+| Occurrences | 4483 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -829,7 +1121,7 @@ The top-level "army_hq" navigation control was absent or disabled during normal 
 | Kind / severity | friction / medium |
 | Surface | `ui:campaign_start` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 4686 across 3 run(s) |
+| Occurrences | 4784 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -847,7 +1139,7 @@ A control on campaign_start has no text content and no accessible name — unrea
 | Kind / severity | friction / medium |
 | Surface | `ui:chronicle` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 4384 across 3 run(s) |
+| Occurrences | 4483 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -877,7 +1169,7 @@ The top-level "chronicle" navigation control was absent or disabled during norma
 | Kind / severity | friction / medium |
 | Surface | `ui:codex` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 4376 across 3 run(s) |
+| Occurrences | 4475 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -907,7 +1199,7 @@ The top-level "codex" navigation control was absent or disabled during normal pl
 | Kind / severity | friction / medium |
 | Surface | `ui:desk` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 4376 across 3 run(s) |
+| Occurrences | 4475 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -937,7 +1229,7 @@ The top-level "desk" navigation control was absent or disabled during normal pla
 | Kind / severity | friction / medium |
 | Surface | `ui:in_game` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 1426 across 2 run(s) |
+| Occurrences | 1501 across 2 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-HRHB |
 | Status | open |
@@ -1006,7 +1298,7 @@ Measured across `messages.en.ts`: 104 keys have display text already renamed to 
 | Kind / severity | friction / medium |
 | Surface | `ui:peace_plan_modal` |
 | Probe | `ui-peace-plan-unmarked` |
-| Occurrences | 25 across 2 run(s) |
+| Occurrences | 26 across 2 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-HRHB |
 | Status | open |
@@ -1066,7 +1358,7 @@ The top-level "records" navigation control was absent or disabled during normal 
 | Kind / severity | friction / medium |
 | Surface | `ui:records` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 4376 across 3 run(s) |
+| Occurrences | 4475 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -1135,7 +1427,7 @@ The top-level "war_map" navigation control was absent or disabled during normal 
 | Kind / severity | friction / medium |
 | Surface | `ui:war_map` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 3478 across 3 run(s) |
+| Occurrences | 3553 across 3 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH, ui-RS, ui-HRHB |
 | Status | open |
@@ -1153,14 +1445,50 @@ A control on war_map has no text content and no accessible name — unreadable t
 | Kind / severity | friction / low |
 | Surface | `event:contact_group_plan_1994` |
 | Probe | `option-stakes-gap` |
-| Occurrences | 3 across 3 run(s) |
+| Occurrences | 4 across 4 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 118 |
-| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w |
+| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib |
 | Status | open |
 No option on "Contact Group Plan Presented" carries `dimension_shifts`, so the modal can quantify nothing. The player chooses blind and learns the cost only afterwards.
 ```json
 {
   "event_id": "contact_group_plan_1994"
+}
+```
+
+### ⚪ Decision `gornji_vakuf_clashes_1993` shows no stakes on any option
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `7269b4bdc6f0` |
+| Kind / severity | friction / low |
+| Surface | `event:gornji_vakuf_clashes_1993` |
+| Probe | `option-stakes-gap` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `HRHB-hist188-calib`, turn 37 |
+| Runs | HRHB-hist188-calib |
+| Status | open |
+No option on "HVO-ARBiH Fighting Erupts at Gornji Vakuf" carries `dimension_shifts`, so the modal can quantify nothing. The player chooses blind and learns the cost only afterwards.
+```json
+{
+  "event_id": "gornji_vakuf_clashes_1993"
+}
+```
+
+### ⚪ Decision `hrhb_washington_agreement_1994` shows no stakes on any option
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `bea6d0522e3e` |
+| Kind / severity | friction / low |
+| Surface | `event:hrhb_washington_agreement_1994` |
+| Probe | `option-stakes-gap` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `HRHB-hist188-calib`, turn 103 |
+| Runs | HRHB-hist188-calib |
+| Status | open |
+No option on "Washington Agreement Signed" carries `dimension_shifts`, so the modal can quantify nothing. The player chooses blind and learns the cost only afterwards.
+```json
+{
+  "event_id": "hrhb_washington_agreement_1994"
 }
 ```
 
@@ -1171,9 +1499,9 @@ No option on "Contact Group Plan Presented" carries `dimension_shifts`, so the m
 | Kind / severity | friction / low |
 | Surface | `event:owen_stoltenberg_plan_1993` |
 | Probe | `option-stakes-gap` |
-| Occurrences | 3 across 3 run(s) |
+| Occurrences | 4 across 4 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 71 |
-| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w |
+| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib |
 | Status | open |
 No option on "Owen-Stoltenberg: Presidency Review" carries `dimension_shifts`, so the modal can quantify nothing. The player chooses blind and learns the cost only afterwards.
 ```json
@@ -1189,9 +1517,9 @@ No option on "Owen-Stoltenberg: Presidency Review" carries `dimension_shifts`, s
 | Kind / severity | friction / low |
 | Surface | `event:vance_owen_plan_1993` |
 | Probe | `option-stakes-gap` |
-| Occurrences | 3 across 3 run(s) |
+| Occurrences | 4 across 4 run(s) |
 | First seen | run `RBiH-historical-188w`, turn 40 |
-| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w |
+| Runs | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w, RBiH-hist188-calib |
 | Status | open |
 No option on "Vance-Owen Peace Plan Presented" carries `dimension_shifts`, so the modal can quantify nothing. The player chooses blind and learns the cost only afterwards.
 ```json

@@ -126,6 +126,65 @@ refusal is wrong.
 
 ---
 
+## 3z. RS / HRHB 188-week runs — 12 events have no authored historical default
+
+All three factions completed **188 turns** in calibration-comparable mode
+(`decision_mode: historical`). RS and HRHB surfaced 14 findings RBiH never reached.
+
+Twelve events carry no `historical_default_response_id`. **When that field is absent the
+`historical` policy falls through to `options[0]` — and so does the bot**, because
+`pickBotResponseV1` with `bot_response_logic: 'historical'` and no default returns the
+first option. So "historical" silently means "whatever was authored first" on these.
+
+Six are recurring leadership gestures (`address_to_nation_*`, `visit_to_front_*`,
+`decorate_a_unit_*`, `strategic_posture_review_rs`), matching RBiH — history plausibly
+offers no default for "did the president visit the front in week 44".
+
+**The other six are dated, consequential, documented events, and those are different.**
+
+### The Milošević pressure series — four events, no default
+
+`milosevic_vopp_pressure`, `milosevic_drina_warning`,
+`milosevic_isolation_warning_aug92`, `milosevic_owen_stoltenberg_distancing`.
+
+Worked example, `milosevic_vopp_pressure` — *"Milošević Orders Karadžić: Accept
+Vance-Owen"*, options `acknowledge_pressure` / `resist_patron`, no default. The run took
+`acknowledge_pressure` **by fallback**, logged as *"no authored default and no staff
+recommendation; took first option"*.
+
+**This needs the Historian, not me.** My understanding is that the Bosnian Serb Assembly
+rejected Vance-Owen at Bijeljina in May 1993 despite Milošević's pressure — which would
+make `resist_patron` the historical outcome and the fallback the ahistorical one. I have
+not verified that against ICTY or BB and am not asserting it. What is verified: the event
+has no authored default, and both the player-historical path and the bot take the first
+option regardless of which is right.
+
+### `drina_cleansing_decision_1992` — §6-sensitive, and I am not ruling on it
+
+*"The Drina Valley Question"*, faction RS, `bot_response_logic: 'historical'`, **no
+`historical_default_response_id`**. The run took `systematic` at turn 12, by fallback.
+
+**Two things to flag and nothing more — this is the panel's to rule on:**
+
+1. A cleansing decision with no authored historical default resolves, for both the bot
+   and a historical playthrough, to whichever option was written first.
+2. **The option id and its label disagree.** `systematic` is labelled *"Open
+   command-accountability proceedings"*; `restrained` is labelled *"Impose immediate
+   civilian-protection restraints"*. Read by id, `systematic` is the permissive branch;
+   read by label, it is the accountability branch. One of the two is stale, and on a §6
+   surface that is not a cosmetic discrepancy — anything reasoning over ids (including
+   the `options[0]` fallback above) may be selecting the opposite of what the label says.
+
+I have not determined which is correct and have made no change. Recorded for the §6 panel
+per the standing delegation.
+
+### Stakes gaps
+
+`gornji_vakuf_clashes_1993` and `hrhb_washington_agreement_1994` show no per-option
+stakes — the Washington Agreement being the event that ended the Croat-Bosniak war.
+
+---
+
 ## 3a. Cutileiro Plan — pre-war, and it ends the war at turn 2
 
 **Owner ruling 2026-08-27: "Cutileiro is ahistorical anyway so it should be cut out
@@ -265,12 +324,16 @@ UNDOCUMENTED. Fingerprints are what is read; titles are for humans.
 0ac8f0df01a3  [high] Opening screen needs a complete redesign to match the game aesthetic
 102752f61718  [high] The same sentence is maintained in two files and they disagree: "A thinly held front OG needs st
 121de4b137cf  [medium] Decision `csq_third_party_mediation_offered` has no authored historical default
+14db02d9277d  [medium] Decision `strategic_posture_review_rs` has no authored historical default
 182e6e7f012e  [medium] Peace-plan modal offers no historical default and no per-option stakes
 1bc0a56b95c2  [medium] Interactive control with no accessible label
 1e2303120fe2  [medium] Interactive control with no accessible label
 2bfd8975d35e  [medium] The Sector Attack operation type still says "Sector" in player-facing text
 35b2632dfcf3  [medium] Surface "in_game" renders text in 5 different font families
+36f51e543f63  [medium] Decision `milosevic_isolation_warning_aug92` has no authored historical default
+40cebc4589ae  [medium] Decision `decorate_a_unit_hrhb` has no authored historical default
 410897e96e98  [low] Lever `request_op` refused: insufficient_command_authority (#.#/#)
+448a72521b99  [medium] Decision `milosevic_drina_warning` has no authored historical default
 50b8dda5812e  [medium] Interactive control with no accessible label
 50bb59700448  [medium] Typography is inconsistent across surfaces
 56b6bda5d71e  [medium] Interactive control with no accessible label
@@ -281,30 +344,40 @@ UNDOCUMENTED. Fingerprints are what is read; titles are for humans.
 6c6f24ff39fa  [high] Territory bar counts allied ground as "hostile-held"
 6cd4fa018f9a  [critical] Turn cannot be advanced after four attempts
 6f579329b22e  [medium] Surface "war_map" has no reachable control
+7269b4bdc6f0  [low] Decision `gornji_vakuf_clashes_1993` shows no stakes on any option
 72962be702b1  [medium] Surface "army_hq" has no reachable control
 764fd700316e  [medium] Retired term "sector" still in player-visible copy in ui\shared\operational_sitrep_views.ts
 78be3027390d  [low] Decision `vance_owen_plan_1993` shows no stakes on any option
 78cd60d64f40  [high] Copy says a formation group is "thinly held" — an OG holds ground, it is not held
+7a0d6330c9bc  [medium] Decision `visit_to_front_rs` has no authored historical default
 7afde0e4e2d4  [high] RS opens with six required presidential decisions; RBiH opens with one
 7c85fee759a7  [high] Two sources for the same sitrep copy disagree: i18n says "OGs", the hardcoded fallback says "sec
 81513817311f  [medium] Surface "desk" has no reachable control
+82d7f0d636aa  [medium] Decision `drina_cleansing_decision_1992` has no authored historical default
 850a3806cfbc  [medium] Interactive control with no accessible label
+864769f1dd1d  [medium] Decision `visit_to_front_hrhb` has no authored historical default
 919e8513877e  [medium] Place names are lower-cased after the first word
 91b00300864a  [low] Lever `replace_co` refused: insufficient_command_authority (#/#)
 9a16b34a3a19  [medium] Surface "records" has no reachable control
 a0ccbbe32a3a  [low] Decision `owen_stoltenberg_plan_1993` shows no stakes on any option
 a1259f689f15  [medium] Surface "chronicle" has no reachable control
 a3d3e77f12f8  [medium] Decision `decorate_a_unit_rbih` has no authored historical default
+a89743c17ab3  [medium] Decision `address_to_nation_rs` has no authored historical default
 ab660671b06e  [high] Territory bar counts allied HVO ground as "hostile-held"
 ad599a9641f7  [medium] Retired term "sector" still in player-visible copy in ui\map\i18n\messages.en.ts
+ad92ce300e18  [medium] Decision `milosevic_owen_stoltenberg_distancing` has no authored historical default
 adf0fc5fc3d4  [low] Lever `replace_co` refused: insufficient_command_authority (#.#/#)
 ae77d671480f  [high] Decision Room room-only blockers are unreachable from the screen that refuses the turn
 b615fa723d8f  [medium] Interactive control with no accessible label
 b9ce83d06de9  [medium] Decision `visit_to_front_rbih` has no authored historical default
+bea6d0522e3e  [low] Decision `hrhb_washington_agreement_1994` shows no stakes on any option
+c019b7857b38  [medium] Decision `milosevic_vopp_pressure` has no authored historical default
+d4d184df999e  [medium] Decision `address_to_nation_hrhb` has no authored historical default
 d5daa3a10f94  [high] Priority-front labels pair a settlement with its own municipality under two names
 e4b031f59b77  [medium] Surface "codex" has no reachable control
 ea9d210f3201  [low] Lever `request_op` refused: insufficient_command_authority (#/#)
 f832cc39d03a  [medium] Place names rendered with lower-case words after the first
+fb548f6d5e27  [medium] Decision `decorate_a_unit_rs` has no authored historical default
 fc75f83f7348  [medium] Interactive control with no accessible label
 ff048ab927a1  [medium] Operation directive rejected with a reason the player is never shown
 -->
