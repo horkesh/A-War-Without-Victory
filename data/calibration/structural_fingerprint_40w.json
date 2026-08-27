@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "fingerprint": "5cfcf1c840bae488",
+  "fingerprint": "f3ef9fad99b0771a",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_40w",
@@ -8,8 +8,8 @@
     "final_turn": 40,
     "control_counts": {
       "HRHB": 87,
-      "RBiH": 255,
-      "RS": 370
+      "RBiH": 250,
+      "RS": 375
     },
     "control_flips": [
       {
@@ -139,6 +139,12 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:bratunac:pobudje_2",
+        "municipality_id": "bratunac",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:brcko:bukvik_gornji_2",
         "municipality_id": "brcko",
         "from": "RS",
@@ -153,6 +159,12 @@
       {
         "settlement_id": "op:brcko:skakava_donja",
         "municipality_id": "brcko",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:cajnice:batotici",
+        "municipality_id": "cajnice",
         "from": "RBiH",
         "to": "RS"
       },
@@ -217,6 +229,12 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:foca:brusna_2",
+        "municipality_id": "foca",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:foca:patkovina",
         "municipality_id": "foca",
         "from": "RBiH",
@@ -251,12 +269,6 @@
         "municipality_id": "gorazde",
         "from": "RS",
         "to": "RBiH"
-      },
-      {
-        "settlement_id": "op:gorazde:kolovarice",
-        "municipality_id": "gorazde",
-        "from": "RBiH",
-        "to": "RS"
       },
       {
         "settlement_id": "op:gorazde:podkozara_donja_2",
@@ -457,6 +469,12 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:pale:praca",
+        "municipality_id": "pale",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:prijedor:kamicani",
         "municipality_id": "prijedor",
         "from": "RBiH",
@@ -553,12 +571,6 @@
         "to": "RS"
       },
       {
-        "settlement_id": "op:srebrenica:obadi",
-        "municipality_id": "srebrenica",
-        "from": "RBiH",
-        "to": "RS"
-      },
-      {
         "settlement_id": "op:stolac:rotimlja_2",
         "municipality_id": "stolac",
         "from": "RS",
@@ -583,10 +595,28 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:trnovo:kijevo_2",
+        "municipality_id": "trnovo",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:tuzla:simin_han_2",
         "municipality_id": "tuzla",
         "from": "RS",
         "to": "RBiH"
+      },
+      {
+        "settlement_id": "op:ugljevik:jasikovac",
+        "municipality_id": "ugljevik",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:ugljevik:srednja_trnova_2",
+        "municipality_id": "ugljevik",
+        "from": "RBiH",
+        "to": "RS"
       },
       {
         "settlement_id": "op:vlasenica:cerska_2",
