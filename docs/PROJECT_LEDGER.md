@@ -29842,3 +29842,38 @@ real mutation barriers and are not justified by the consumed evidence. RE may no
 or add a cache, state,
 flag, module, service, scan, threshold, historical special case, or new owner. No second diagnosis,
 retry, pair, or other long run is authorized. `docs/10_canon/FORAWWV.md` remains untouched.
+
+## [2026-08-27] docs(RE): reduce engine integrity to seven 1.0 outcomes
+
+**Owner decision:** The owner delegated RE scope to Architect and Orchestrator and approved their
+binding release contract. RE is no longer a general cleanup, optimization, or audit programme.
+
+**Scope:** Replaced the old T0–T14 monolithic execution authority with seven release outcomes
+delivered through eight serial packets: release-path truth; two command-authority deletions;
+conserved threat lineage; non-starving pre-planned queues; APWB/Tigar deletion; one formal-battle
+casualty owner; and no retreat teleport. Exact production/test boundaries and proofs now live only
+in `docs/plans/2026-08-26-engine-integrity-plan.md`.
+
+**Performance disposition:** The previously measured `+3.62853%` mandatory-correctness cost is a
+watch item, not a 1.0 gate. No further pre-1.0 performance diagnosis or optimization is authorized.
+Only a new unexplained regression above 2% from the corrected baseline stops the final handoff when
+workload and output are comparable; otherwise the delta is descriptive. Only player-visible latency
+in R8 may open future bounded performance work, and no measurement grants automatic diagnosis.
+
+**Process:** One packet, exact lock/base, one implementer + domain reviewer + QA, one consolidated
+correction pass and one confirmation pass, focused RED/GREEN + typecheck + balanced tests, one
+compact audit row, and no per-packet campaign. After all eight packets, one final clean Node-22 A/B
+pair and one 40-week profile precede a single documentation sync and R8 handoff.
+
+**Deferred/retired:** Deferred active-formation strength pending live evidence, dissolution
+salvage, enclave targeting, hostile breakout, and speculative mechanics. Retired the broad T2
+audit, T13 essays, standalone T14, repeated full-team reviews, duplicate evidence commits,
+per-packet campaigns, and the pre-1.0 performance-remediation queue.
+
+**Files:** Exactly 14 docs/control files: `.claude/current-lane.txt`, `.claude/napkin.md`, docs
+index, active governance, RE scope lock, calibration master, reports README, living RE audit, both
+ledgers, sole RE contract, command board, master roadmap, and plans index. No code, tests,
+scenarios, calibration data, references, or canon changed.
+
+**Next:** seal this docs-only packet, then open P1 release-path truth against its exact two-file
+implementation boundary. Do not start P2A automatically.

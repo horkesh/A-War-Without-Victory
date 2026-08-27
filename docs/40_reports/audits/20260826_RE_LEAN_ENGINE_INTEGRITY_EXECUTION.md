@@ -1,9 +1,9 @@
-# RE Lean Engine Integrity — Living Execution Audit
+# RE 1.0 Engine Integrity — Living Audit
 
 **Date:** 2026-08-26
 
-**Status:** clean Node-22 baseline pair and save/replay proof captured at `177882fc2`; authorization
-consumed; full S0 performance-blocked; long runs disabled; owner performance decision next; T2 blocked
+**Status:** corrected Node-22 baseline and save/replay proof captured; owner-approved scope reduced
+to seven release outcomes/eight packets; P1 follows this docs-only amendment; long runs disabled
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -14,6 +14,36 @@ consumed; full S0 performance-blocked; long runs disabled; owner performance dec
 
 This is the single living RE evidence record. It is not a second queue. The plan remains the
 execution authority and `docs/plans/MASTER_ROADMAP.md` remains the workstream-state authority.
+
+## 2026-08-27 owner-approved 1.0 scope reduction
+
+Architect and Orchestrator now own RE scope. The owner approved their binding release contract. The
+old T0–T14 execution rail is superseded; its historical evidence below remains valid but grants no
+future authority.
+
+| Order | Packet | Required outcome |
+|---:|---|---|
+| 1 | P1 | Desktop release path detection covers all seven imported roots |
+| 2 | P2A | Legacy force-launch authority and stale state are deleted |
+| 3 | P2B | Operation Briefing is read-only; Decision Room solely mutates |
+| 4 | P3 | Threat lineage conserves vanished OSIDs through split/merge |
+| 5 | P4 | Catalogue-ordered pre-planned queues cannot starve followers |
+| 6 | P5 | APWB/Tigar friendly-objective exception is deleted |
+| 7 | P6 | Formal-battle casualty and pool accounting has one owner |
+| 8 | P7 | No-route retreat returns `null` to existing displacement |
+
+Each future row in this audit is compact: exact base, staged candidate tree SHA, changed
+files/production numstat, focused RED/GREEN, typecheck/balanced, applicable save/package proof,
+implementer/domain/QA verdict, and player-visible effect. A packet cannot record its own
+not-yet-created commit ID; backfill resulting commit IDs only in the final documentation sync, or
+omit them. One correction pass and one confirmation pass are permitted. There are no per-packet
+campaigns or duplicate evidence commits.
+
+The already-measured `+3.62853%` mandatory-correctness cost is watch-only, not a 1.0 gate. No
+further pre-1.0 diagnosis or optimization is authorized. Deferred: active-formation strength pending
+a live artifact, dissolution salvage, enclave targeting, hostile breakout, and speculative
+mechanics. Retired: broad T2 audit, T13 essays, standalone T14, repeated full-team review, and the
+old performance-remediation queue.
 
 ## T0 — Integrated base and isolation
 
@@ -486,11 +516,14 @@ Parent wall samples are `72,110.1475 / 71,646.3147 / 72,574.3934 ms`; candidate 
 the 100-record sector sidecars rise `17,740.59 → 19,377.48 ms`; pass-4, seal-3, prune-2, and
 recovery-2 account for `1,294.21 ms` (about 79%) of that increase. Candidate-only CPU evidence is
 locality support, not comparative proof. Machine/power/background-load conditions were not encoded,
-so final performance acceptance remains blocked. Correctness is retained. Before T2, remediation
-may only seek no-growth reuse inside the existing sector owner and tests; it may not restore guards, add
-cache/state/flags/modules/services/scans, or run a second diagnosis. Per plan step 14, the separately
-authorized exact-commit baseline pair subsequently ran cleanly; full S0 remains blocked and the
-owner-ratified diagnosis-or-policy decision must close before further implementation or T2.
+so the original performance packet could not claim an unconditional pass. Correctness is retained.
+The 2026-08-27 owner-approved reduced contract now disposes this measured cost as watch-only for
+1.0 and retires further pre-1.0 diagnosis or remediation. The separately authorized exact-commit
+baseline pair subsequently ran cleanly. Future performance comparison occurs once at final RE
+integration against this corrected baseline. A new unexplained regression above 2% stops for owner
+disposition only when workload and output are comparable; otherwise the delta is descriptive. Only
+player-visible latency in R8 may open future bounded performance work, and no result grants
+automatic diagnosis.
 
 Report SHA-256 values in P1/C1/P2/C2/P3/C3 order are
 `e3f720ed03b98539eb75f4b1d73438feb624283e885498ed354e47e818db3ccb`,
@@ -620,14 +653,13 @@ The focused 55-test command was:
 ```
 
 The clean deterministic/correctness baseline pair and save/replay gate are captured, and the one-pair
-authorization is consumed. This successor restores long-run permission to false. Full S0 remains
-blocked by the provisional `+3.62853%` performance disposition. The proposed SpatialContext reuse
+authorization is consumed. Long-run permission is false. The `+3.62853%` performance disposition is
+accepted as a watch item for the corrected baseline and no longer blocks 1.0. The proposed SpatialContext reuse
 cannot recover the required `1,174.3330 ms`: its consumed-profile ceiling is `320.931 ms`, or
 `628.100 ms` even under an unrealistically broad deletion assumption. It is rejected as the S0
-remedy. Follow-up code review found several safe small deletions, but even pretending their whole
+remedy and remains retired. Follow-up code review found several safe small deletions, but even pretending their whole
 containing labels cost zero totals only `975.466 ms`, still `198.867 ms` short. Larger stages cross
 real bucket, territory, sector-key, and formation-location mutation barriers; consumed evidence
-does not justify consolidating them. An owner-ratified bounded-diagnosis-or-policy decision gates
-further implementation and T2. No guard
-restoration, cache/state/flag/module/service/scan/threshold/history special case, additional
-diagnosis, retry, or second pair is authorized.
+does not justify consolidating them. No guard restoration, cache/state/flag/module/service/scan/
+threshold/history special case, additional diagnosis, retry, or second pair is authorized before
+the reduced rail's single final A/B closeout.

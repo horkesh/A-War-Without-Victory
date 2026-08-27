@@ -2,26 +2,27 @@
 
 ## ★ CURRENT RE/CALIBRATION AUTHORITY — 2026-08-27
 
-Further calibration is paused until [RE — Lean Engine Integrity](../plans/2026-08-26-engine-integrity-plan.md)
+Further calibration is paused until [RE — 1.0 Engine Integrity](../plans/2026-08-26-engine-integrity-plan.md)
 closes. The separate probe lane is closed at `b711cffa9` and is not RE scope. RE performs no
 calibration tuning and may not refresh thresholds, manifests, references, or expected hashes to
 make a gate pass.
 
-The clean lean RE-0 baseline pair is now captured by the fresh distinct-output Node-22 runs at exact commit
+The clean corrected RE baseline pair is captured by the fresh distinct-output Node-22 runs at exact commit
 `177882fc28ec2eaee2d2ecdc015a5a06c99ee06b`. Both 188-week runs have identical 15-file inventories,
 all 14 non-metadata artifacts byte-identical, fingerprint `6f2b4a10126a980e`, and green engine-only
 plus direct-consistency gates; save/replay compatibility is separately green. Their checkpoint observations are identically
 `688 / 656 / 654 / 633`. The checkpoint verifier's Farz late-capture timing discriminator remains
 red (turn 62 rather than the late window); this is calibration observation only and authorizes no RE
-change. Full S0 is not yet satisfied because exact isolated T1C performance remains provisionally
-`+3.62853%`; the proposed reuse cannot meet the measured recovery floor, so an owner-ratified
-bounded-diagnosis-or-policy decision gates further T1C work and T2. The earlier Node-22 pair remains pre-fix evidence only. Raw
+change. By owner approval on 2026-08-27, the measured `+3.62853%` mandatory-correctness cost is a
+watch item, not a 1.0 gate. No further pre-1.0 performance diagnosis or optimization is authorized.
+Reduced RE now closes seven release outcomes through eight packets, then runs one final pair/profile
+before R8. The earlier Node-22 pair remains pre-fix evidence only. Raw
 artifact metadata outranks this catalog.
 
 T1C reconciled exactly 19 stale manifest hashes after RE-0D2 restored the non-scoring 31-anchor
 contract; the structural golden was separately attributed, reviewed, and committed. This was
 provenance maintenance, not calibration. The parent engine-health stranded-26 finding is pre-existing, separate, and
-not accepted or cleared by baseline reconciliation or S0.
+not accepted or cleared by baseline reconciliation or the reduced RE contract.
 
 ## PROBE-LANE CLOSING REFERENCE — clean provenance — **NOT RE-0 S0**
 
@@ -35,10 +36,10 @@ runs/apr1992_definitive_188w__46834a3b41033bff__w188_n382
   engine_health_gate PASS
 ```
 
-**★ THIS DOES NOT SATISFY RE-0 S0, and must not be read as doing so.** Against the bar stated above
-it fails two conditions: it is **Node 24, not Node 22**, and it is **a single run, not two fresh
-byte-identical distinct-output runs**. It is offered only as the probe lane's closing artifact — a
-run whose provenance is clean enough to compare against — and RE must still capture its own S0.
+**Historical-at-that-time disposition:** this probe artifact did not satisfy the then-active RE-0
+baseline rule because it used Node 24 and was one run rather than two fresh byte-identical
+distinct-output runs. The later clean Node-22 pair at `177882fc2` discharged that baseline
+obligation. This paragraph carries no present RE action.
 
 **⚠ THE `nNNN` SUFFIX IS NOT UNIQUE — CITE THE FULL DIRECTORY NAME.** A different `n382` already
 appears in this file (scenario hash `205b3676c8fe3ce4`, 753-cell scoring, "88.3% match") from an
@@ -99,12 +100,13 @@ gate.
 
 ## HISTORICAL DECISION RULE — SUPERSEDED DISCOVERY/PROBE-ERA EVIDENCE
 
-Copied from the now-frozen discovery record §11 and retained for provenance. It is not the current
-RE execution contract. The sole executable rail and current verification matrix are in
+Copied from the now-frozen discovery record §11 and retained for provenance. Its old S0 obligation
+was discharged by the clean pair at `177882fc2` and then superseded by the reduced 1.0 contract; no
+present-tense action follows from the quoted text. The sole executable rail and current verification matrix are in
 `docs/plans/2026-08-26-engine-integrity-plan.md`.
 
 > **S0 — Baseline.** No RE run starts until a clean `git_dirty:false` four-checkpoint 188w exists on
-> the tree RE branches from. *(Not satisfied for lean RE; RE-0 must rerun at the approved parent.)*
+> the tree RE branches from. *(Historical obligation: discharged at `177882fc2`.)*
 > **S1 — Inertness gate.** Anything claimed inert must be byte-identical except `run_meta.out_dir`.
 > Not identical ⇒ reclassified territory-moving, repriced at 3 runs.
 > **S2 — Positive control.** Every instrument must return ≥1 non-zero on a case known to exist.

@@ -2,8 +2,8 @@
 
 **Status:** IN AUTONOMOUS EXECUTION. The owner ruled 2026-08-26 that **engine health is
 sacrosanct and precedes further calibration**. The accepted January-1993 slice remains historical
-evidence, but all further calibration waits on **RE — Lean Engine Integrity**. The separate probe
-prerequisite closed at `b711cffa9` and is not RE scope. R7 may continue only where file ownership is
+evidence, but all further calibration waits on **RE — 1.0 Engine Integrity**. The probe lane is
+closed history at `b711cffa9` and is not RE scope. R7 may continue only where file ownership is
 actually disjoint. RE is scope-locked on `codex/re-engine-integrity-repaired`; the superseded mixed
 line is quarantined. RE and R7 gate R8; R9 follows R8.
 
@@ -41,7 +41,7 @@ line is quarantined. RE and R7 gate R8; R9 follows R8.
 brigades**, so it removed 71 probe-launching brigades instead of 1. If wanted again: rewrite against
 an explicit tag and **commit the enumerated caught set as the S3 predicted set before running**.
 
-**OPEN, QUEUED — do not chase from here**
+**HISTORICAL, NON-BLOCKING PROBE FOLLOW-UPS — not an active queue**
 - **T4″ orphan-rate** never measured: fraction of `sector_intel` records whose `sector_id` no longer
   exists this turn; target ≤5%. Step 1 landed on a metric later shown to be **coupled to probe
   volume** (88 → 21 on unchanged code), so its proof is softer than its effect.
@@ -52,11 +52,12 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
 - **Probe emission Paths B and C** remain unmodelled by Phase 1 (see `20260826_S6_…` and the probe
   scope §0.0c work): Phase 1's predictions cover at most the 302-battle Path-A bucket.
 - **§6: the request-op lever has no enclave gate.** An RS president may name Srebrenica and receive a
-  planned assault, routing around the event-owned outcome canon H1.8 specifies. **Panel matter.**
+  planned assault, routing around the event-owned outcome canon H1.8 specifies. Presidential
+  enclave targeting is explicitly deferred post-1.0 and does not block RE or R8.
 
 ---
 
-## Current Execution Snapshot (2026-08-26)
+## Current Execution Snapshot (2026-08-27)
 
 - **Calibration:** the January-1993 slice is landed evidence. Further reference, `init_control`,
   objective, axis, timing, roster, or outcome tuning is paused until RE closes; RE must not tune
@@ -65,38 +66,21 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
 - **Probe prerequisite:** **CLOSED at `b711cffa9`.** Stable sector identity and
   `occupies_on_victory` landed; the fixed-home exclusion was reverted. RE preserves that
   disposition and does not reopen probe work.
-- **RE — Lean Engine Integrity:** **BASELINE PAIR + SAVE/REPLAY GREEN; FULL S0 PERFORMANCE-BLOCKED.** The repaired execution line is
-  machine-guarded, contains the approved operation-lifecycle packet at `7c472e065`, and excludes
-  the scenario/event changes from superseded mixed commit `63671dd8c`. Every next packet still
-  requires an independently reviewed exact-file lock and worktree-local external hook re-arm.
-  T0 bound execution base
-  `38e65547882856fba07faab7a6dbcd4258da9607`; T1A froze dependency installation. The first
-  Node-22 pair is reproducible pre-fix evidence, not S0: it exposed mixed-battle occupation
-  authority selected by lexicographic first attacker. The owner ruled ALL validated contributors
-  must permit occupation, with explicit false veto and missing declarations defaulting true. T1B
-  implemented that generic convergence. T1C restored exact final-sector fixed-point
-  convergence: owner-truth pass 4 and the seal-3/prune-2/recovery-2 segment run unconditionally
-  after deterministic seed-31 state and seed-55 stable-identity REDs. Both changes and their
-  exact-parent/candidate performance cost are one atomic candidate. The authorized manifest-only
-  reconciliation exposed a stale fingerprint observer: after scoring was correctly restricted to
-  the sole 188-week calibration scenario, the 40-week reader silently accepted missing anchors as
-  0/0. T1C/RE-0D2 now emits and fails closed on a distinct non-scoring 31-anchor contract; exact
-  drift attribution and both stale-golden commits are complete. The exact isolated Node-22
-  performance packet preserves byte-identical output but is provisionally RED at `+3.62853%`
-  median. Its one allowed diagnosis localizes roughly 79% of the sector-profile delta to the newly
-  unconditional correctness calls. The sole clean Node-22 baseline pair at `177882fc2` passes both
-  engine-only gates and direct consistency, has 14/14 byte-identical non-metadata artifacts, shares
-  fingerprint `6f2b4a10126a980e`, and has green save/replay compatibility. Full S0 remains blocked on
-  the performance budget. Long runs are disabled. The proposed SpatialContext reuse has a
-  `320.931 ms` consumed-profile zero-cost ceiling against a required `1,174.3330 ms`, so it is rejected as the S0
-  remedy. An owner-ratified bounded-diagnosis-or-policy decision gates further T1C work and T2. No
-  guard may be restored and no cache/state/surface
-  added. Historical-fit fields remain
-  non-authorizing calibration observations. The execution rail corrects
-  authority, formal-battle accounting, deterministic ordering, and ruled locality through
-  deletion/convergence. It adds no pipeline step, flag, default stream, service, persisted field,
-  or unruled mechanic; production LOC must be net non-positive.
-  Plan: [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md). Planning evidence:
+- **RE — 1.0 Engine Integrity:** **REDUCED TO SEVEN RELEASE OUTCOMES / EIGHT PACKETS.** The owner
+  delegated scope ownership to Architect and Orchestrator and approved the reduced contract on
+  2026-08-27. The old T0–T14 monolith is superseded. The remaining packets are: release-path truth;
+  two deletions that leave one player command authority; conserved threat lineage; non-starving
+  pre-planned queues; deletion of the APWB/Tigar exception; one formal-battle casualty owner; and
+  no retreat teleport. Each packet is exact-file locked, uses one implementer + domain reviewer +
+  QA, and permits one correction/confirmation cycle. There are no per-packet campaigns; one final
+  clean Node-22 A/B pair and one profile precede R8. The corrected baseline remains deterministic,
+  engine-green, and save/replay-green. Its measured `+3.62853%` mandatory-correctness cost is
+  watch-only, not a 1.0 gate; no further pre-1.0 diagnosis or optimization is authorized. Active
+  formation strength and dissolution salvage are deferred; presidential enclave targeting and
+  hostile breakout are explicitly post-1.0; speculative mechanics are deferred. Broad audit/essay tasks, standalone closeout machinery, repeated
+  full-team review, and the old performance-remediation queue are retired. Production LOC must be
+  net non-positive and no engine surface may grow.
+  Plan: [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md). Planning evidence:
   [full-team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md).
 
 - **Complete:** R1, R2, R3, R4, R5, and the defined pre-1.0 scope of R6.
@@ -106,17 +90,12 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
   integrated packaged-runtime proof, and closeout reconciliation. Multilingual localization
   remains post-1.0.
 - **Canon landed this cycle:** `SENSITIVE_HISTORY_DESIGN_GATE.md` **§10, "Provenance and the Integrity of the Historical Record"** — ratified by unanimous Pyrrhic panel (`5f462e8aa`), twelve conditions discharged across two rounds. `FORAWWV.md` §XIII temporal scope is drafted-but-**HELD** behind two engineering items (provenance channel separation + the determinism-scan pair) and is **not** canon.
-- **Measurement substrate and clean RE-0 baseline pair exist.** Run provenance records
+- **Measurement substrate and a clean corrected RE baseline pair exist.** Run provenance records
   commit/input/flag evidence and pair selection rejects incomparable artifacts. The exact-commit
-  Node-22 pair at `177882fc2` is the clean deterministic/correctness baseline; full S0 remains
-  performance-blocked. Historical mixed-tree or Node-24 artifacts remain inadmissible.
-- **RE scope is settled by the full Pyrrhic review, not the superseded diary.** Confirmed
-  implementation packets are authority convergence/dead-path deletion, one casualty-accounting
-  owner, deterministic threat attribution and follow-on queues, and live locality/active-formation
-  corrections. APWB/friendly overrides, presidential enclave authority, and the stage-operation
-  decision path require named decisions. Reserve decay, rebuild latency, garrison fallback,
-  predictor retuning, dissolution floors, and outcome-specific immunity are evidence-only and may
-  all be deferred without blocking RE.
+  Node-22 pair at `177882fc2` is the clean deterministic/correctness baseline. Its accepted
+  correction cost is watch-only. Historical mixed-tree or Node-24 artifacts remain inadmissible.
+- **RE scope is finite and release-specific.** Only the seven outcomes in the executable contract
+  block R8. Deferred and retired findings do not silently re-enter the critical path.
 - **After R7 and RE:** R8 packaged full-campaign validation, then R9 release-candidate readiness.
 - **Publication boundary:** signing, store upload, public release creation, and a public `1.0` tag still require a separate explicit `Publish 1.0` instruction.
 
@@ -133,9 +112,9 @@ without hidden required work, long unexplained decision droughts, map-entry stal
 The program is now finite:
 
 - nine executable product workstreams, R1–R9, the closed RC gate, and the inserted RE gate;
-- one plan per R1–R9 workstream and one sole lean RE plan, with RC evidence linked separately;
+- one plan per R1–R9 workstream and one sole reduced RE contract, with RC evidence linked separately;
 - one dependency order;
-- unresolved choices confined to named RE decision gates and the explicit probe-owner prerequisite;
+- no unresolved RE or probe choice silently blocks execution; deferred items are explicit;
 - evidence-led adopt-or-retire branches where an experiment may legitimately fail;
 - external signing credentials and publication authority treated as inputs, not design questions.
 
@@ -200,9 +179,9 @@ R4 + R6 + stable R1/R2 UI
 Probe lane CLOSED at b711cffa9
   -> landed/reverted disposition preserved
 
-RE Lean Engine Integrity (authority, accounting, ordering, locality)
-  -> RE-0 exact-parent Node-22 baseline and CI/runtime truth
-  -> serial implementation packets; speculative mechanics remain decision-gated
+RE 1.0 Engine Integrity
+  -> seven release outcomes through eight serial packets
+  -> one final Node-22 A/B pair and profile
   -> precedes all further calibration; gates R8
   -> may overlap R7 only where inspected file ownership is disjoint
 
@@ -213,8 +192,9 @@ Two clean 5/5 R8 diaries + all barriers green
   -> R9 Release candidate/gold/publication readiness
 ```
 
-Execute completed R1-R6/RC as history, then the probe prerequisite, RE and remaining R7 work,
-followed by R8 and R9. RE implementation packets and their 188-week pairs are strictly serial.
+With the probe lane closed as history, execute reduced RE and remaining R7 work,
+followed by R8 and R9. RE implementation packets are serial; only the final closeout gets a
+188-week pair.
 R7 may proceed in parallel only after file-ownership inspection proves independence.
 
 ## 5. Workstream Register
@@ -228,7 +208,7 @@ R7 may proceed in parallel only after file-ownership inspection proves independe
 | R5 | Engine quality, performance, and stability | **COMPLETE — CLOSED 2026-08-05 at the current performance floor (~1,086 ms/turn fresh).** Every self-executable item is done (Phases 0/1/3/4.1, Phase 2e Tasks 1-10, Task 7 baseline gate). Phase 2e's pure-solve/serial-commit extraction was proven correct but FAIL_REVERTED for a 3-7% wall-clock + ~45% heap regression; production uses the direct `buildCorpsFrontSectors` call. **Task 6 (incremental-reuse toward 100 ms/turn) is DECLINED, not deferred:** its only user-facing motivation was the warroom->map delay, which is R1's domain and already solved (~4.3 s -> ~114 ms warm; the map reads pre-computed sectors and never calls the builder). ~1 s/turn sim throughput is acceptable for a strategic game; the 100 ms/turn target is retired as aspirational. The reverted Phase 2e pipeline and its characterization suite are preserved for an optional future re-attempt (its flaky pure-solve `sectors_rebuilt` divergence test is skipped) | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
 | R6 | Historical gameplay depth and final calibration | **PRE-1.0 SCOPE COMPLETE — CLOSED 2026-08-09.** Final R6 re-floor `n163`: 634 matched OSIDs, 30/31 anchors (Brčko debt only), Section 6 correct, 40-week fingerprint `5cfcf1c8` golden-match, and all seven engine-health checks passing. Later RC-base fixes moved current HEAD to 629 matched and 31/31 anchors; do not conflate that newer integration baseline with the R6 closeout snapshot. Remaining Brčko/force-density, exhaustion re-pacing, casualty-grade, combat-earned-cohesion, and institutional-veto work is recorded post-1.0 debt unless explicitly reactivated. | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) · [exhaustion/scoring plan](2026-08-06-exhaustion-scoring-redesign-plan.md) | Calendar/weak-predicate events cannot manufacture control; experiments close by predeclared criteria; long-run evidence remains deterministic and Section 6-safe. |
 | RC | Pressure → exhaustion → **COLLAPSE** pipeline | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection plus reversible D-shape (`4.0` shock / `0.5` recovery) produced one live non-enclave HRHB write while remaining deterministic and trajectory-flat: hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 benchmarks, 7/7 health gates, and full Section 6 pass. Bucovaca peaked 62 and recovered to 37; Sipovo/Drvar peaks 11/7.5. D-topology is explicitly post-1.0/reserved. | [Scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) · [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) · [measurement plan](2026-08-15-collapse-d-selection-measurement-plan.md) · [D-shape design](2026-08-15-collapse-d-shape-design.md) · [Stage 0/2 panel record](../40_reports/20260813_RC_COLLAPSE_PANEL_FROZEN_ARTIFACT.md) | The default-OFF local collapse model measures historically discriminating combat pressure, recovers on quiet turns, reaches a bounded live writer, preserves Section 6, and leaves neighbour cascade to an explicit post-1.0 topology packet. |
-| RE | Lean engine integrity: authority, accounting, ordering, and locality | **BASELINE PAIR + SAVE/REPLAY GREEN; FULL S0 PERFORMANCE-BLOCKED.** The repaired branch is guarded and mixed scenario/event work remains quarantined. The sole Node-22 baseline pair at clean sealed HEAD `177882fc2` passes the five engine-only checks and direct consistency in both runs; 14/14 non-metadata artifacts are byte-identical, fingerprint `6f2b4a10126a980e` matches, and save/replay compatibility is green. Exact isolated performance remains provisionally RED. Long runs are disabled. The proposed reuse cannot meet the measured recovery floor; an owner-ratified bounded-diagnosis-or-policy decision gates further T1C work and T2. Scenario/calibration/reference/FORAWWV paths remain denied. | [Lean execution plan](2026-08-26-engine-integrity-plan.md) · [team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md) · [frozen discovery](../40_reports/proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md) | RE-0 provenance/CI truth passes; mixed-battle occupation and exact final-sector fixed-point truth converge before S0; duplicate authority and duplicate formal-battle accounting paths are deleted; deterministic operation/locality packets pass their exact focused, Core, byte-identity, performance, and serial 188-week gates; all decisions are recorded; speculative mechanics are separately approved or explicitly deferred; complexity budgets hold. |
+| RE | 1.0 engine integrity: seven outcomes, no general cleanup | **ACTIVE — SCOPE REDUCED 2026-08-27.** Corrected baseline and save/replay are green. Execute eight exact-file packets: P1 release-path truth; P2A/P2B one command authority; P3 threat lineage; P4 queue progress; P5 APWB/Tigar deletion; P6 casualty ownership; P7 retreat locality. The accepted `+3.62853%` correction cost is watch-only; no further pre-1.0 diagnosis. One final pair/profile only. | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md) · [frozen discovery](../40_reports/proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md) | All seven outcomes pass focused/Core/save/package proof as applicable; net production LOC is non-positive; one final clean Node-22 A/B pair is byte-identical and engine-green; deferred/retired work stays out; then hand off to R8. |
 | R7 | Content, historical attribution, audio, accessibility, and opening experience | **IN PROGRESS — AUDIO IMPLEMENTATION LANDED `2d106e5e0`.** Historical attribution, opening experience, and required ambient provenance/assets are implemented. Remaining pre-1.0 gates: human listen/sensitivity acceptance, English accessibility/readability, offline browser and integrated packaged-runtime proof, and closeout reconciliation. **Localization Phase 3 is post-1.0.** | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [opening implementation plan](2026-08-23-opening-screens-implementation-plan.md) | Claims, identities, English strings, and audio are machine-auditable; unsupported content is absent; human/audio sensitivity, accessibility, opening experience, and Electron proof pass. |
 | R8 | Full-campaign packaged-Electron validation and diaries | **WAITING ON RC, R1–R7, AND RE GREEN.** The existing Electron playthrough prototype remains a short IPC-contract smoke tool; R8 full-campaign logic belongs on the determinism-proven `tools/ai_play/president_playthrough.ts` harness. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) | Fresh historical-policy RBiH, RS, and HRHB campaigns cover full duration and required surfaces; bugs and friction are separately routed; final two diaries score 5/5 with clean diagnostics. |
 | R9 | Release candidate, gold, and publication | READY AFTER R8 | [Release plan](2026-07-31-release-candidate-gold-publication-plan.md) | One immutable RC passes clean-machine/security/license/store proofs; artifacts are reproducible; signing/upload inputs are documented; publication awaits only the explicit instruction. |
@@ -346,7 +326,7 @@ No experiment remains “partial” after evaluation.
 | Decision priority/cadence read models and authored initiatives | R2 first; R4 consumes and generalizes the accepted contract. |
 | Tactical Group/GameState lifecycle | R3 first; R5 persistence work rebases on R3 schema. |
 | Combat resolution and calibration | R3/R5/R6 history is closed. **RE precedes every further calibration change.** Calibration does not run in parallel with RE. |
-| RE-owned engine/desktop surfaces | RE owns only exact files in the reviewed `RE_SCOPE_LOCK.json`; wildcard allowlists fail and the external worktree hook pins reviewed lock/checker bytes. Packets are serial. Scenario, calibration, reference, and FORAWWV paths are denied. The authoritative branch is `codex/re-engine-integrity-repaired`; the mixed line remains quarantined. R7 may overlap only on inspected disjoint files. A fresh clean Node-22 engine-integrity S0 follows the remaining T1 truth/performance work; historical fit is observation only. |
+| RE-owned engine/desktop surfaces | RE owns only exact files in the reviewed `RE_SCOPE_LOCK.json`; wildcard allowlists fail and the external worktree hook pins reviewed lock/checker bytes. Packets are serial. Scenario, calibration, reference, and FORAWWV paths are denied. The authoritative branch is `codex/re-engine-integrity-repaired`; the mixed line remains quarantined. R7 may overlap only on inspected disjoint files. No per-packet campaign; one final clean Node-22 A/B pair/profile hands the reduced rail to R8. |
 | Event/essay authored rows | R4 inventory/convergence first; R7 attribution/content pass second. |
 | Map/Desk English layout strings | R1/R2 layout first; R7 accessibility/readability proof second. Multilingual expansion is post-1.0. |
 | Package/release configuration | R8 may create transient local validation builds; R9 owns release configuration and immutable RC artifacts. |

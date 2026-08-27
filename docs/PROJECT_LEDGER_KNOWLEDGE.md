@@ -4479,6 +4479,23 @@ and every quoted score must include checkpoint identity.
 Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
 roadmap, and debt`.
 
+## 2026-08-27 - A release integrity lane must end at named product outcomes
+
+A broad engine-health instruction can turn into an indefinite audit, optimization, and review
+programme even after its original correctness defect is fixed. Process rigor does not make
+unbounded scope release-critical. A relative performance threshold also cannot substitute for a
+demonstrated player-facing release floor, especially when the measured cost belongs to mandatory
+correctness and the proposed recovery cannot meet its own target.
+
+**Reusable rule:** define the release lane as a finite list of observable outcomes, split them into
+one-defect exact-file packets, and retire every audit, essay, speculative mechanic, and optimization
+that does not prove a release need. Use one implementer, one domain reviewer, and QA with one
+correction/confirmation cycle. Run focused/Core proof per packet and one campaign pair at final
+integration, not repeated campaigns and full-team panels after every edit. A new R8 bug receives a
+new bounded packet; it never reopens the whole lane.
+
+Applied in `[2026-08-27] docs(RE): reduce engine integrity to seven 1.0 outcomes`.
+
 ## 2026-08-27 - A prose scope boundary is not a guardrail
 
 An allowlist written only in a plan can coexist with a commit that mixes engine mechanics and
