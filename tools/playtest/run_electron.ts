@@ -445,7 +445,14 @@ async function resolveOpenDecisionModal(frame: Frame): Promise<boolean> {
 async function clearReviewQueue(frame: Frame): Promise<boolean> {
     // A "COMMAND BRIEFING — N warnings need review" banner can sit over the shell with
     // its own REVIEW / x controls; clear it before opening the room.
-    await clickIfPresent(frame, /^[×✕✖]$/i, 1200);
+    // Do NOT dismiss anything before checking whether the room is open. This used to
+    // click a bare × to clear the "COMMAND BRIEFING - N warnings" banner, but the same
+    // glyph CLOSES THE DECISION ROOM. On RS, which opens with six required decisions and
+    // the room already up, every pass closed the room, reopened it via Command Surface,
+    // and reset the list to ALL — so the queue could never be worked. Diagnosed from
+    // `[queue-entry] review=3`: the room was open on entry and shut immediately after.
+    const roomOpen = (await frame.getByRole('button', { name: /^Review$/i }).count().catch(() => 0)) > 0;
+    if (!roomOpen) await clickIfPresent(frame, /^[×✕✖]$/i, 1200);
 
     // Work the queue whether the room is already open or still behind the badge.
     // Gating on a REVIEW BLOCKERS click meant that once the room WAS open — which is the
@@ -467,8 +474,15 @@ async function clearReviewQueue(frame: Frame): Promise<boolean> {
     // nation, Decorate a unit) above the blocking item, so a first-match Review click
     // opens a gesture and the blocker is never reached. "REVIEW BEFORE ADVANCE" and the
     // DECISION tab both narrow the list to the item that is holding the turn.
-    if (!(await clickIfPresent(frame, /REVIEW BEFORE ADVANCE/i, 2500))) {
-        await clickIfPresent(frame, /^Decision\s*\d*\s*items?/i, 2000);
+    // Select the DECISION tab UNCONDITIONALLY. It was previously only tried when
+    // REVIEW BEFORE ADVANCE was absent — but that button IS present and does not filter
+    // the list, so the tab was never reached and the ALL tab's optional leadership
+    // gestures kept absorbing the first Review click.
+    // Tab label has no separators: "Decision6 itemsREQ 6 · REC 0 · MON 0 · RECORD 0".
+    const decisionTab = frame.getByRole('button', { name: /^Decision\s*\d+\s*items?/i }).first();
+    if ((await decisionTab.count().catch(() => 0)) > 0) {
+        await decisionTab.click({ timeout: 6000 }).catch(() => undefined);
+        await frame.page().waitForTimeout(2000);
     }
 
     let acted = false;
@@ -552,7 +566,7 @@ async function clearPauseMenu(frame: Frame): Promise<boolean> {
  */
 async function clearBlockingOverlays(frame: Frame, recorder: FindingsRecorder): Promise<void> {
     const win = frame.page();
-    for (let pass = 0; pass < 8; pass++) {
+    for (let pass = 0; pass < 20; pass++) {
         frame = gameFrame(win, frame);
         const didPause = await clearPauseMenu(frame);
         const didOpen = await resolveOpenDecisionModal(frame);
@@ -567,9 +581,14 @@ async function clearBlockingOverlays(frame: Frame, recorder: FindingsRecorder): 
         }
         if (didPause) continue;
         if (!didOpen && !didDecision && !didPeace && !didModal) {
-            if (await clearDeskBlockers(frame)) continue;
-            // Last resort: a blocker that only lives in the Decision Room queue.
-            if (await clearReviewQueue(frame)) continue;
+            // Run BOTH, and do not let the first short-circuit the second. Desk blockers
+            // used to `continue` on success, and its Acknowledge loop can succeed every
+            // pass on fresh staff notices — so the review queue was never reached. RS
+            // opens with SIX required decisions of which only two appear as inbox cards;
+            // the rest live solely in the Decision Room, so that path is not optional.
+            const desk = await clearDeskBlockers(frame);
+            const queue = await clearReviewQueue(frame);
+            if (desk || queue) continue;
             return;
         }
     }

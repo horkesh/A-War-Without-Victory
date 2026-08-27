@@ -208,3 +208,49 @@ so the current regex almost certainly fails to match it.
 
 Do NOT keep guessing routes. Instrument which element the click lands on, and confirm
 the list contents CHANGE before assuming a tab switch happened.
+
+## 10. RS is blocked at turn 1 — handover diagnosis (2026-08-27)
+
+RS advances 0 turns. RBiH and HRHB reach 8. Ten fix attempts; stopping and handing over
+rather than proposing an eleventh.
+
+### What is established, with evidence
+
+- **RS opens with SIX required presidential decisions** (`Decision 6 items · REQ 6`)
+  against RBiH's one. This is a finding in its own right, independent of the driver.
+- Only TWO of the six appear as Presidential Inbox cards. The other four exist solely
+  inside the Decision Room.
+- At the stall the Decision Room is ALREADY OPEN: `[queue-entry] review=3` — three
+  Review buttons visible, `blockers=false sig=true cmdSurface=true`.
+- The turn-9 ceiling on RBiH and HRHB is the SAME navigation problem, reached later
+  because those factions start with one decision instead of six.
+
+### Fixed along the way (all real, none sufficient)
+
+1. `clearDeskBlockers` short-circuited with `continue` before `clearReviewQueue` ever
+   ran; its Acknowledge loop succeeds most passes on fresh staff notices, so the queue
+   was permanently starved. Both clearers now run per pass.
+2. Clearing passes raised 8 -> 20 (RS needs roughly one per decision).
+3. A bare `×` click at the top of `clearReviewQueue`, intended to dismiss the
+   "COMMAND BRIEFING" banner, CLOSES THE DECISION ROOM. Now gated on the room not
+   already being open.
+4. The DECISION tab is selected unconditionally instead of only when
+   REVIEW BEFORE ADVANCE is absent — that button is present and does not filter.
+
+### The open question, precisely stated
+
+`clearReviewQueue` is now never CALLED on RS: no `[queue-entry]` line appears at all.
+That branch runs only when `!didOpen && !didDecision && !didPeace && !didModal`, so
+something is returning true on all 20 passes. Prime suspect is
+`resolveOpenDecisionModal`, which fires whenever a modal is open AND a
+"Historical default" option exists — if clicking the option does not close the modal,
+or it immediately reopens, it will loop forever and starve everything after it.
+
+**Next step: log which clearer returns true on each pass.** Do not add another route.
+
+### The behavioural pattern behind four of these
+
+Escape paused the game. `Open Decision Room` navigated away. The surface tour stranded
+the shell in Army HQ. `×` closed the room. Every one: the harness took an action that
+changed app state, then measured the state it had just changed. Any new interaction must
+state what it perturbs before it is added.
