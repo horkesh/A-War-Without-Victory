@@ -52,23 +52,23 @@
 
 **Current override (2026-08-27):** engine health precedes further calibration. The separate probe
 prerequisite closed at `b711cffa9`; it is not part of RE. [Lean Engine Integrity](../plans/2026-08-26-engine-integrity-plan.md)
-completed T0 at base `38e65547882856fba07faab7a6dbcd4258da9607`. RE is paused at the
-machine-enforced packet gate on `codex/re-engine-integrity-repaired`; `7c472e065` retains the
-approved seven-file planning-credit boundary and the scenario/event half of `63671dd8c` is quarantined.
-Before S0, T1C/RE-0D2 repairs the 40-week fingerprint's missing-anchor false green, attributes its
-real territory drift, reconciles the two stale goldens separately, and completes performance proof.
+completed T0 at base `38e65547882856fba07faab7a6dbcd4258da9607`. The machine-enforced
+guard is installed on `codex/re-engine-integrity-repaired`; the scenario/event half of `63671dd8c`
+remains quarantined. T1C correctness, RE-0D2 fingerprint truth, and both stale-golden
+reconciliations are complete. Exact isolated performance is provisionally RED at `+3.62853%`.
+After this evidence packet, one exact-commit S0 pair runs; bounded remediation must close before T2.
 The first Node-22 pair is reproducible pre-fix evidence only, not S0. Owner ruling
 ALL requires every validated battle contributor to permit occupation, with explicit `false`
 vetoes and missing declarations defaulting `true`; T1B applies that generic rule. T1C then restores
 exact final-sector fixed-point convergence across the pass-4 and seal-3/prune-2/recovery-2 guards.
-RE-0D2 restores a distinct non-scoring 31-anchor fingerprint contract and completes combined exact-parent/candidate performance
-proof before one fresh exact-code-commit engine-integrity S0 and serial execution through RE-6.
+RE-0D2 restores a distinct non-scoring 31-anchor fingerprint contract. The retained unconditional
+truth calls may not be skipped or replaced by new cache/state/surface area.
 Historical fit is a separately labelled non-authorizing calibration observation. The
 [full-team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md)
 index the review; frozen discovery remains report evidence. Further calibration and R8 wait on RE.
 No current calibration artifact satisfies RE S0.
 
-**Current control plane (synchronized 2026-08-27):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE T1 is paused at its externally pinned exact-file scope gate on the repaired branch; fail-closed fingerprint truth, drift attribution, baseline reconciliation, performance proof, and fresh Node-22 engine-integrity S0 remain. The prior pair remains pre-fix evidence only. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
+**Current control plane (synchronized 2026-08-27):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE T1C performance is provisionally RED; the current evidence-only packet forbids long runs, its successor authorizes one exact-commit S0 pair, and bounded remediation must close before T2. The prior pair remains pre-fix evidence only. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the sole executable packets. Collapse D-topology and multilingual localization remain post-1.0. Old WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
 
 The remaining files under `docs/30_planning/` are design specifications, not active execution queues: [multi-brigade operations](../30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md), [operation reevaluation](../30_planning/OPERATION_REEVALUATION_DESIGN_SPEC.md), and [spatial context](../30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md). Historical plans removed from that folder remain available through Git history and the ledgers.
 

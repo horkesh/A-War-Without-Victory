@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-26
 
-**Status:** T1 paused at the machine-enforced packet gate; repaired branch authoritative; S0 pending
+**Status:** T1C performance provisionally RED; evidence packet active; S0 pending; T2 blocked
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -470,3 +470,30 @@ tests passed; the focused retained operation packet passed 151/151 cases. One re
 `peace_plans` assertion is pre-existing red at both `63671dd8c` and the repaired tree and is queued,
 not repaired in RE. Scenario/event exclusion diff is empty. The next RE change requires a newly
 reviewed and externally pinned exact-file lock; no long run is authorized by the current lock.
+
+## T1C exact isolated performance disposition
+
+The retained exact Node-22 packet compares clean parent `7c631a95f` with post-T1C/pre-T1B
+candidate `fa6357833`. Both used Node `v22.21.1`, scenario SHA-256 `00570a56…c0ea`, consumed-input
+digest `5d70963e…273f2`, one excluded warm-up per source, and literal P1/C1/P2/C2/P3/C3 order. Every
+pair has the same 15-file inventory; all 14 non-`run_meta` artifacts are byte-identical. Every final
+save is SHA-256 `542dd4e…035be`, with final-state hash `542dd4e8070d9140`.
+
+Parent wall samples are `72,110.1475 / 71,646.3147 / 72,574.3934 ms`; candidate samples are
+`74,726.6835 / 77,951.5258 / 74,139.3005 ms`. The candidate median is provisionally
+`+3.62853%`, and every paired delta exceeds 2%. The one permitted read-only diagnosis is consumed:
+the 100-record sector sidecars rise `17,740.59 → 19,377.48 ms`; pass-4, seal-3, prune-2, and
+recovery-2 account for `1,294.21 ms` (about 79%) of that increase. Candidate-only CPU evidence is
+locality support, not comparative proof. Machine/power/background-load conditions were not encoded,
+so final performance acceptance remains blocked. Correctness is retained. The next packet may only
+seek no-growth reuse inside the existing sector owner and tests; it may not restore guards, add
+cache/state/flags/modules/services/scans, or run a second diagnosis. Per plan step 14, one separately
+authorized exact-commit S0 pair follows this evidence packet; remediation must close before T2.
+
+Report SHA-256 values in P1/C1/P2/C2/P3/C3 order are
+`e3f720ed03b98539eb75f4b1d73438feb624283e885498ed354e47e818db3ccb`,
+`d1777fdfe8a5c2099e1d76b490969636c1e11014e6d41e48e6e0a8fdc318b21b`,
+`b1adba95eb5feb5aa3ba3ae75a06def737776d67af02bde224ec27c027febbe4`,
+`cb7b7acff2c2769305b8131c10785bab07b97ad122bd7c5ab13dd02bbd478314`,
+`f290ef31de80c57e9afc1f444acd7fa88c060954e0ffcc0299b500cf7523205f`, and
+`8c5655aece27dc3181b5f3ee9cea70a30078b78c988f9531ce831bd7bf8891df`.

@@ -2,14 +2,22 @@
   "schema_version": 1,
   "status": "active",
   "lane": "RE",
-  "task": "RE-GUARDRAIL",
-  "packet": "bind-approved-checker-to-index-bytes",
-  "base_commit": "58099e3e7d3f4139452d3446c6ae6e637a5b0902",
+  "task": "RE-0D-PERF-EVIDENCE",
+  "packet": "record-fixed-point-performance-escalation",
+  "base_commit": "b2d622ac3d83c9b1585bcf07b0621a133cee8e7c",
   "allowlist": [
-    "scripts/repo/check_re_scope.ps1",
-    "tests/re_scope_guard.test.ps1",
+    ".claude/current-lane.txt",
+    "docs/00_start_here/docs_index.md",
     "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
-    "docs/PROJECT_LEDGER.md"
+    "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
+    "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
+    "docs/40_reports/implemented/20260801_ENGINE_QUALITY_PHASE2_MEASURED_PERFORMANCE.md",
+    "docs/40_reports/CALIBRATION_MASTER.md",
+    "docs/PROJECT_LEDGER.md",
+    "docs/plans/2026-08-26-engine-integrity-plan.md",
+    "docs/plans/MASTER_ROADMAP.md",
+    "docs/plans/COMMAND_BOARD.md",
+    "docs/plans/README.md"
   ],
   "denylist": [
     "data/scenarios/**",

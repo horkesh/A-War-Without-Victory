@@ -29746,3 +29746,24 @@ regression stages LF checker bytes, rewrites the working copy with CRLF, and req
 index hash to pass. The packet remains `RE-GUARDRAIL`, binds parent `58099e3e7`, retains the full
 mandatory denylist and no-long-run policy, and authorizes only the lock, checker, regression, and
 this ledger entry.
+
+## [2026-08-27] docs(RE-0D): record fixed-point performance escalation
+
+**Type:** RE performance evidence, scope disposition, and control-plane synchronization only. No
+engine, test, scenario, calibration, reference, canon, historical target, map, release, or
+publication change.
+
+**Evidence:** the exact isolated Node-22 comparison uses clean parent `7c631a95f` and post-T1C/
+pre-T1B candidate `fa6357833`, identical scenario/input bytes, excluded warm-ups, and three literal
+alternating pairs. All 14 non-provenance artifacts are byte-identical per pair; all six final saves
+are SHA-256 `542dd4e…035be`, final-state hash `542dd4e8070d9140`. Parent/candidate wall medians are
+`72,110.1475 / 74,726.6835 ms`, a provisional `+3.62853%`; all three paired deltas exceed 2%.
+
+**Disposition:** correctness remains mandatory. The sole read-only diagnosis is consumed and
+attributes `1,294.21 ms` of the `1,636.89 ms` instrumented sector-builder increase to the four
+newly unconditional pass-4/seal-3/prune-2/recovery-2 owners. Environmental conditions were not
+encoded, so this opens but does not close performance acceptance. Per the controlling plan, one
+separately authorized exact-commit S0 pair follows this evidence packet, while the exact-file,
+no-growth remediation must close before T2. It may not restore a guard or add a cache,
+state, flag, module, service, scan, threshold, historical special case, or new owner. The current
+lock forbids long runs. `docs/10_canon/FORAWWV.md` remains untouched.

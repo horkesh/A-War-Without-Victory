@@ -4,8 +4,9 @@
 
 > **Date:** 2026-08-26
 >
-> **Status:** T1 PAUSED behind the approved RE scope-lock packet; no further RE implementation or
-> long run starts until that packet is reviewed and the next exact packet lock is activated
+> **Status:** T1C correctness, fingerprint truth, and stale goldens are complete. Exact isolated
+> performance is provisionally RED at `+3.62853%`; S0 follows the evidence packet and bounded lean
+> remediation must close before T2
 >
 > **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
 >
@@ -15,8 +16,8 @@
 >
 > **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** install and independently review the machine-enforced RE scope lock, then
-> activate one exact allowlisted packet before resuming T1
+> **Current next action:** record/review the isolated performance red, then authorize one exact-
+> commit S0 pair; independently reviewed no-growth remediation must close before T2
 >
 > **Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
@@ -52,7 +53,7 @@ Execution checklist:
 - [ ] T1 — establish Node-22 S0
   - [x] T1A — freeze reproducible dependency installation
   - [x] T1B — converge mixed-battle occupation authority
-  - [ ] T1C — restore exact final-sector fixed-point convergence and truthful fingerprint evidence
+  - [ ] T1C — correctness/fingerprint/goldens complete; bounded performance escalation active
 - [ ] T2 — audit existing observation
 - [ ] T3 — repair desktop changed-path truth
 - [ ] DG-1 — APWB disposition
@@ -510,6 +511,15 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
    restore either faulty guard. A regression above 2% requires a separately approved,
    bounded performance escalation with its own owner and evidence before T2; it does not authorize
    another truth-pass skip, a cache, or a weakened test. Zero to 2% remains watch-only.
+
+   **Measured disposition (2026-08-27):** exact isolated Node-22 parent `7c631a95f` and candidate
+   `fa6357833` produced byte-identical non-provenance artifacts and final-save SHA-256
+   `542dd4e…035be`. Parent/candidate wall medians are `72,110.1475 / 74,726.6835 ms`, a provisional
+   `+3.62853%`; all three paired deltas exceed 2%. The one permitted read-only diagnosis attributes
+   `1,294.21 ms` of the `1,636.89 ms` instrumented sector-builder increase to the four required
+   newly unconditional calls. Machine/power/background-load class was not encoded, so this opens
+   the bounded escalation but does not constitute final performance acceptance. No second
+   diagnosis or new run is authorized by the evidence packet.
 14. After the manifest and structural-reference reconciliation commits, execute the complete fresh paired Node-22
     engine-integrity S0 procedure below from the reviewed T1C code commit.
     The prior `58f100f3` pair remains pre-fix evidence only. Commit evidence/control-plane/ledger

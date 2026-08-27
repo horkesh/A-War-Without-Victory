@@ -3,9 +3,49 @@
 **Date:** 2026-08-01
 **Roadmap:** R5, Phase 2
 **Scenario:** `data/scenarios/apr1992_definitive_40w.json`
-**Reference machine:** AMD Ryzen 7 5700X, 8 physical / 16 logical cores, Windows x64, Node v24.13.0
+**Historical R5 reference machine (not RE T1C evidence):** AMD Ryzen 7 5700X, 8 physical / 16 logical cores, Windows x64, Node v24.13.0
 **Target:** mean below 100 ms per simulated turn
-**Status:** Historical R5 performance dispositions remain closed, but RE T1C has reopened exact final-sector fixed-point correctness and measurement: `applyFinalSectorOwnerTruthPass:4` and the ordered seal-3/prune-2/recovery-2 segment must execute unconditionally before RE S0. Operational-graph, runtime-hardened immutable-adjacency, operational-data ownership reuse, the Phase 2c call-scoped dense formation-occupancy index, and Phase 2d Task 8A's invocation-local front-edge relation remain accepted. The Phase 2b fixed-point candidate remains performance-unaccepted and the Phase 2c reachability/sector-fact candidate remains rejected. Task 8A remains `PASS_RETAIN` at `0fd36157b`; its memory watch remains. T1C does not reopen the 100 ms target or Task 6. It requires one combined exact-parent/candidate timing packet, and correctness is retained even if a separate performance escalation is required.
+**Status:** Historical R5 dispositions remain closed. RE T1C correctness is retained, but its exact
+isolated Node-22 measurement is a provisional `+3.62853%` median regression and has opened a
+bounded lean performance escalation before T2. One separately authorized exact-commit S0 pair
+follows this evidence packet. T1C does not
+reopen the retired 100 ms target or Task 6.
+
+## RE T1C isolated fixed-point measurement — 2026-08-27
+
+The exact clean comparison is parent `7c631a95f` versus post-T1C/pre-T1B candidate `fa6357833`,
+Node `v22.21.1`, identical scenario SHA-256 `00570a56…c0ea`, identical consumed-input digest
+`5d70963e…273f2`, one excluded warm-up per source, and literal alternation P1/C1/P2/C2/P3/C3.
+All 14 non-`run_meta` artifacts are byte-identical in every pair. All six final saves have SHA-256
+`542dd4e…035be` and final-state hash `542dd4e8070d9140`.
+
+Evidence roots are `F:\AWWV-perf\re_0d_parent_7c631a95f` and
+`F:\AWWV-perf\re_0d_candidate_fa6357833`. Each measured source ran:
+
+```powershell
+node node_modules/tsx/dist/cli.mjs tools/perf/profile_scenario.ts --scenario data/scenarios/apr1992_definitive_40w.json --out runs_perf/re_0d_<source>_<n> --report data/derived/_debug/re_0d_<source>_<n>.json
+```
+
+| Sample | Wall ms | Partition ms | Reconcile ms | After-ops ms | Report SHA-256 |
+|---|---:|---:|---:|---:|---|
+| P1 | 72,110.1475 | 6,875.0718 | 7,170.0270 | 3,384.0697 | `e3f720ed…3ccb` |
+| C1 | 74,726.6835 | 7,288.9708 | 7,695.6691 | 3,618.8240 | `d1777fdf…b21b` |
+| P2 | 71,646.3147 | 6,612.4295 | 7,135.9240 | 3,447.0557 | `b1adba95…bbe4` |
+| C2 | 77,951.5258 | 7,701.6151 | 8,307.1758 | 3,804.1148 | `cb7b7acf…8314` |
+| P3 | 72,574.3934 | 6,778.9839 | 7,245.9422 | 3,461.0423 | `f290ef31…205f` |
+| C3 | 74,139.3005 | 7,366.0825 | 7,687.4034 | 3,638.3637 | `8c5655ae…91df` |
+
+Parent/candidate wall medians are `72,110.1475 / 74,726.6835 ms` (`+3.62853%`). Paired wall
+deltas are `+3.62853% / +8.80047% / +2.15628%`. Affected-phase aggregate medians are
+`17,429.1685 / 18,691.8496 ms` (`+7.24464%`). Full report hashes are retained in the living audit.
+
+The one permitted read-only diagnosis used the retained 100-record sector sidecars. Sector-profile
+time rose `17,740.59 → 19,377.48 ms` (`+1,636.89 ms`, `+9.23%`). The newly unconditional pass-4,
+seal-3, prune-2, and recovery-2 labels account for `1,294.21 ms` (about 79%) of that delta.
+Candidate-only CPU evidence is corroborative only because no parent CPU peer exists. The four
+correctness calls remain mandatory; no skipped pass, cache, state, module, flag, scan, or new owner
+is authorized. Machine/power/background-load conditions were not encoded in the artifacts, so the
+packet opens remediation but is not final performance acceptance.
 
 ## Determinism boundary
 

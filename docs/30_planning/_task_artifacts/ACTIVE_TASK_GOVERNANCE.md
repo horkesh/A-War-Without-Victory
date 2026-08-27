@@ -8,19 +8,22 @@ deterministic ordering, locality, and verification truth before further calibrat
 
 ## Current status and next action
 
-**T1 PAUSED BEHIND THE APPROVED RE SCOPE LOCK.** No further RE implementation or long run starts
-until the guardrail packet is independently reviewed and the next exact packet lock is activated.
+**T1C CORRECTNESS PASS; BOUNDED PERFORMANCE ESCALATION ACTIVE.** The fail-closed guardrail is
+installed and the repaired branch is sealed. The current no-run packet records the isolated
+Node-22 T1C performance red before any remediation or S0.
 The authoritative execution branch is `codex/re-engine-integrity-repaired`; `7c472e065` retains
 only the approved seven-file planning-credit packet. Mixed commit `63671dd8c` is preserved on
 `codex/re-mixed-scope-quarantine-20260827`, and its scenario/event half is excluded from RE.
 The separate probe lane closed at `b711cffa9`, and the owner
 handed the repository to RE. Preserve that disposition. The execution base is bound at
 `38e65547882856fba07faab7a6dbcd4258da9607`, and T1A froze immutable dependency installation. The
-first Node-22 pair is reproducible pre-fix evidence only, not S0. T1B and T1C code are independently
-approved. Before S0, T1C/RE-0D2 repairs the structural fingerprint's silent missing-anchor 0/0
-acceptance, attributes its real territory drift, reconciles its golden and the authorized manifest
-separately, completes T1C performance proof, and only afterward establishes a
-fresh exact-code-commit S0 using the plan's source-verified authoritative run substrate.
+first Node-22 pair is reproducible pre-fix evidence only, not S0. T1B, T1C correctness, RE-0D2
+fingerprint truth, and both stale-golden reconciliations are complete. Exact isolated performance
+evidence at `7c631a95f` versus `fa6357833` preserves byte-identical output but records a provisional
+`+3.62853%` candidate median. The single permitted diagnosis attributes about 79% of the
+sector-profile delta to the four newly unconditional correctness owners. Preserve those owners.
+After this evidence packet, the plan authorizes one exact-commit S0 pair. The separately reviewed
+lean remediation must close before T2.
 
 ## Machine-enforced packet lock
 
@@ -49,7 +52,9 @@ unreviewed staged bytes.
 
 The global denylist covers scenario data, calibration data, painted calibration sources,
 historical reference surfaces, and `docs/10_canon/FORAWWV.md`. The current lock forbids long runs.
-A later packet may permit no more than one clean A/B pair for one exact commit.
+A later packet may permit no more than one clean same-commit A/B pair. A replicated
+parent/candidate performance packet is a distinct explicitly reviewed measurement packet; neither
+kind is authorized by the current no-run lock.
 That policy is schema-validated, but scenario-command interception itself remains advisory; the
 external hook blocks unreviewed mutations, not command launch.
 
@@ -199,6 +204,11 @@ busier war or a better historical-fit score.
   scoring while the structural reader silently normalized missing anchors to 0/0. RE-0D2 repairs
   that fail-closed and attributes real control drift before a separately reviewed golden refresh.
 - **2026-08-27 guardrail ruling:** S0 is split into engine-integrity acceptance and non-authorizing
-  calibration observations. RE is paused until the machine-enforced packet lock is reviewed.
-- **Next:** independently review the guardrail packet, activate the next exact lock, and only then
-  resume the still-open T1 work without historical tuning.
+  calibration observations. The machine-enforced packet lock is installed and sealed.
+- **2026-08-27 performance ruling:** exact isolated Node-22 output is byte-identical, but the
+  candidate median is provisionally `+3.62853%`. The one permitted diagnosis localizes roughly
+  79% of sector-profile delta to the required unconditional passes. Environmental conditions were
+  not encoded, so this is an escalation-opening red, not final performance acceptance.
+- **Next:** independently review and authorize one exact-commit S0 pair. The bounded remediation
+  remains mandatory before T2; do not restore a guard, add cache/state/surface area, or run another
+  diagnosis.

@@ -8,19 +8,17 @@ calibration tuning and may not refresh thresholds, manifests, references, or exp
 make a gate pass.
 
 No current run satisfies lean RE-0 S0. RE-0 requires two fresh, byte-identical, distinct-output
-188-week runs on the approved integrated execution parent, clean metadata, and Node 22. T1B and
-T1C code are closed, but T1C/RE-0D2 must repair the 40-week fingerprint's false-green 0/0 anchor
-contract, attribute its real territory drift, reconcile the structural golden and authorized
-manifest separately, and complete performance proof before S0. The prior Node-22 pair is reproducible pre-fix evidence only. Farz remains
+188-week runs on one approved clean exact commit and Node 22. T1B, T1C correctness, RE-0D2
+fingerprint truth, and both stale-golden reconciliations are closed. Exact isolated T1C performance
+output is identical, but its provisional candidate median is `+3.62853%`; a bounded lean
+performance escalation must close before T2. One fresh exact-commit S0 pair follows the reviewed
+evidence packet. The prior Node-22 pair is reproducible pre-fix evidence only. Farz remains
 separate known-red calibration; T1C is not authority to tune it. Raw artifact metadata outranks this
 catalog.
 
-T1C has one-time authority on its reviewed exact Node-22 candidate to reconcile exactly 19 stale
-hashes in `data/derived/scenario/baselines/manifest.json`. The refreshed manifest remains uncommitted
-until RE-0D2 makes the fingerprint contract truthful. This is provenance maintenance, not
-calibration: no artifact, expected-file set/order, path, week, scenario key, or schema may change.
-The structural golden may change only in its own exact-commit attribution/review packet after the
-non-scoring 31-anchor contract is restored. The parent engine-health stranded-26 finding is pre-existing, separate, and
+T1C reconciled exactly 19 stale manifest hashes after RE-0D2 restored the non-scoring 31-anchor
+contract; the structural golden was separately attributed, reviewed, and committed. This was
+provenance maintenance, not calibration. The parent engine-health stranded-26 finding is pre-existing, separate, and
 not accepted or cleared by baseline reconciliation or S0.
 
 ## PROBE-LANE CLOSING REFERENCE — clean provenance — **NOT RE-0 S0**
