@@ -271,6 +271,40 @@ async function clickByText(
 }
 
 
+
+/**
+ * Wait for a POSITIVE signal that the campaign shell is live, instead of assuming a
+ * fixed pause after Begin was long enough.
+ *
+ * Campaign construction is slow and variable. A fixed 16s wait made turn 1
+ * non-deterministic: identical code advanced 8/8 turns on one run and stalled on the
+ * next, because the driver started clearing blockers while the shell was still
+ * assembling and consumed clicks that went nowhere.
+ *
+ * Ready means BOTH a dated turn readout and the in-game navigation are present.
+ */
+async function waitForCampaignReady(win: Page, frame: Frame, timeoutMs = 120_000): Promise<boolean> {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+        const f = gameFrame(win, frame);
+        const ready = await f
+            .evaluate(() => {
+                const text = document.body.innerText || '';
+                const dated = /\d+\s+\w+\s+\d{4}/.test(text);
+                const nav = /WAR MAP/i.test(text) && /ARMY HQ/i.test(text);
+                return dated && nav;
+            })
+            .catch(() => false);
+        if (ready) {
+            // One settle beat so late-mounting panels finish before anything is clicked.
+            await win.waitForTimeout(2500);
+            return true;
+        }
+        await win.waitForTimeout(1500);
+    }
+    return false;
+}
+
 // ── The turn loop ────────────────────────────────────────────────────────────
 
 
@@ -337,8 +371,11 @@ async function dismissModal(frame: Frame): Promise<void> {
     for (const re of [/^Close$/i, /^[×✕✖]$/i, /^Dismiss$/i, /^Continue$/i]) {
         if (await clickIfPresent(frame, re, 1000)) return;
     }
-    await frame.page().keyboard.press('Escape').catch(() => undefined);
-    await frame.page().waitForTimeout(1000);
+    // DO NOT press Escape as a blind fallback. Escape TOGGLES the pause menu, so
+    // pressing it when nothing needs dismissing PAUSES THE GAME — and the pause overlay
+    // is not role="dialog", so hasOpenModal cannot see it. That is exactly what made
+    // turn 1 fail on 2 of 3 runs: the driver paused the game and then reported that
+    // ADVANCE TURN did nothing.
 }
 
 
@@ -454,6 +491,25 @@ async function clearDeskBlockers(frame: Frame): Promise<boolean> {
     return acted;
 }
 
+
+/**
+ * Clear the pause overlay if it is up.
+ *
+ * It is NOT role="dialog" and NOT aria-modal, so `hasOpenModal` returns false while it
+ * covers the screen. Detected by its own copy instead.
+ */
+async function clearPauseMenu(frame: Frame): Promise<boolean> {
+    const paused = await frame
+        .evaluate(() => /PAUSED/.test(document.body.innerText || '')
+            && /Command paused/i.test(document.body.innerText || ''))
+        .catch(() => false);
+    if (!paused) return false;
+    if (await clickIfPresent(frame, /^RESUME$/i, 1500)) return true;
+    await frame.page().keyboard.press('Escape').catch(() => undefined); // toggles back off
+    await frame.page().waitForTimeout(1000);
+    return true;
+}
+
 /**
  * Clear everything standing between the player and ADVANCE.
  *
@@ -466,16 +522,18 @@ async function clearBlockingOverlays(frame: Frame, recorder: FindingsRecorder): 
     const win = frame.page();
     for (let pass = 0; pass < 8; pass++) {
         frame = gameFrame(win, frame);
+        const didPause = await clearPauseMenu(frame);
         const didOpen = await resolveOpenDecisionModal(frame);
         const didDecision = await resolveOneDecision(frame);
         const didPeace = await resolvePeacePlan(frame, recorder);
         let didModal = false;
-        if (!didOpen && !didDecision && !didPeace && (await hasOpenModal(frame))) {
+        if (!didPause && !didOpen && !didDecision && !didPeace && (await hasOpenModal(frame))) {
             await dismissModal(frame);
             // Only count it as progress if the modal ACTUALLY closed; otherwise an
             // un-closable overlay burns every pass and the desk/review routes never run.
             didModal = !(await hasOpenModal(frame));
         }
+        if (didPause) continue;
         if (!didOpen && !didDecision && !didPeace && !didModal) {
             if (await clearDeskBlockers(frame)) continue;
             // Last resort: a blocker that only lives in the Decision Room queue.
@@ -754,7 +812,7 @@ async function main(): Promise<void> {
                 ['factions', /New War/i, 3000],
                 ['dossier', factionLabels[faction] ?? new RegExp(faction, 'i'), 3000],
                 ['mode', /Take command/i, 3000],
-                ['campaign_start', /^Begin$/i, 16000],
+                ['campaign_start', /^Begin$/i, 1000],
             ];
             let reached = true;
             for (const [label, re, settle] of beats) {
@@ -770,6 +828,17 @@ async function main(): Promise<void> {
                 }
                 await capture(win, label);
                 await probeSurface(win, label, recorder);
+            }
+
+            if (reached && !(await waitForCampaignReady(win, frame))) {
+                recorder.record(
+                    finding('bug', 'critical', 'ui-campaign-never-ready',
+                        'Campaign shell never becomes ready after Begin',
+                        'Begin was clicked and neither a dated turn readout nor the in-game navigation '
+                        + 'appeared within 120s. The player is left on a screen that never finishes loading.',
+                        'ui:campaign_start', { faction }),
+                );
+                reached = false;
             }
 
             if (reached) {
