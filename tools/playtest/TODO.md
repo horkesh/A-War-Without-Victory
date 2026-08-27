@@ -168,3 +168,14 @@ Both of these, and all five findings from the earlier screenshot review, are **w
 content rendered correctly**. The probe set only detects BROKEN rendering. Until that
 category is covered, the UI lane depends on a human reading screenshots — which is what
 produced every content finding so far.
+
+## 8. Turn 1 is non-deterministic (2026-08-27)
+
+Identical code advanced 8/8 turns on one run and stalled at turn 1 on the next. The
+retry loop (4 attempts, ~60s of polling each) does not always recover it. Something in
+the opening sequence races: most likely the case-file Begin -> campaign-construction
+window, where the driver starts clearing blockers before the shell has settled.
+
+Not chased further today — the harness-improvement task took priority and the 8/8 run is
+reproducible often enough to be useful. Fix by waiting on a positive READY signal after
+Begin (a specific control appearing) rather than a fixed timeout.

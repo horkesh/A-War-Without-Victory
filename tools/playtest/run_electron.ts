@@ -24,17 +24,20 @@
  *   node node_modules/tsx/dist/cli.mjs tools/playtest/run_electron.ts --faction RBiH
  */
 
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { _electron as electron, type ElectronApplication, type Frame, type Page } from 'playwright';
 import { REPO_BASE_DIR } from '../ai_play/president_playthrough.js';
 import { FindingsRecorder } from './findings.js';
 import type { Finding, Severity } from './types.js';
+import { runContentProbes } from './ui_content_probes.js';
 
 const LEDGER_PATH = join(REPO_BASE_DIR, 'docs/40_reports/playtests/findings/FINDINGS.jsonl');
 const APP_URL_PREFIX = 'awwv://';
 /** A click that takes longer than this to produce a visible change is friction. */
 const INTERACTION_BUDGET_MS = 1500;
+/** Surfaces worth reading for CONTENT. The opening beats show no game data. */
+const CONTENT_PROBE_SURFACES = new Set(['campaign_start', 'in_game', 'turn_loop']);
 
 function arg(name: string, fallback?: string): string | undefined {
     const hit = process.argv.find((a) => a === `--${name}` || a.startsWith(`--${name}=`));
@@ -177,6 +180,14 @@ async function probeSurface(win: Page, surface: string, recorder: FindingsRecord
     }
 
     await probeErrorBanners(win, surface, recorder);
+
+    // Content correctness: what the screen SAYS, not whether it rendered. Everything the
+    // owner found on 2026-08-27 was in this category and the harness could not see it.
+    // Opt-in per surface: these walk every element in every frame, and running them on
+    // each of the opening beats both cost turn-loop timing and said nothing new.
+    if (CONTENT_PROBE_SURFACES.has(surface)) {
+        for (const f of await runContentProbes(win, surface)) recorder.record(f);
+    }
 
     for (const clip of await readClipped(win)) {
         recorder.record(
@@ -628,6 +639,45 @@ async function tourSurfaces(win: Page, frame: Frame, recorder: FindingsRecorder,
     }
 }
 
+
+/**
+ * Write a contact sheet of every screenshot the run captured.
+ *
+ * Aesthetic quality is the one finding category no probe will ever cover — "screams AI
+ * slop design" is a judgement, not a predicate. The only mechanism that catches it is a
+ * human looking at the screen, and the owner found eight defects in ONE screenshot the
+ * harness had already captured and nobody had looked at. This makes looking cheap:
+ * one page, every surface, in order.
+ */
+function writeContactSheet(outDir: string, shotDir: string, runId: string, shots: string[]): string {
+    const cards = shots
+        .map((name) => `    <figure><img src="screenshots/${name}" alt="${name}" loading="lazy"><figcaption>${name}</figcaption></figure>`)
+        .join('\n');
+    const html = `<!doctype html>
+<meta charset="utf-8">
+<title>Playtest contact sheet — ${runId}</title>
+<style>
+  :root { color-scheme: dark; }
+  body { background:#12141a; color:#e8e6df; font:14px/1.5 ui-monospace,Consolas,monospace; margin:0; padding:24px; }
+  h1 { font-size:18px; letter-spacing:.14em; text-transform:uppercase; color:#d9c27a; margin:0 0 4px; }
+  p.sub { color:#8b8f9a; margin:0 0 24px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(460px,1fr)); gap:20px; }
+  figure { margin:0; background:#1a1d25; border:1px solid #2b2f3a; border-radius:6px; overflow:hidden; }
+  img { width:100%; display:block; border-bottom:1px solid #2b2f3a; }
+  figcaption { padding:8px 10px; color:#a8adb8; font-size:12px; letter-spacing:.06em; }
+</style>
+<h1>Playtest contact sheet — ${runId}</h1>
+<p class="sub">${shots.length} surfaces, in capture order. Look for what is WRONG, not what is broken —
+the probes already cover broken. Wrong content rendered correctly is the category they miss.</p>
+<div class="grid">
+${cards}
+</div>
+`;
+    const path = join(outDir, 'contact_sheet.html');
+    writeFileSync(path, html, 'utf8');
+    return path;
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -750,7 +800,9 @@ async function main(): Promise<void> {
         }
 
         console.log(`\n■ ${recorder.count} findings, ${recorder.distinctCount} distinct`);
-        console.log(`  screenshots: ${shotDir}`);
+        const shots = readdirSync(shotDir).filter((f) => f.endsWith('.png')).sort();
+        console.log(`  screenshots: ${shotDir} (${shots.length})`);
+        console.log(`  contact sheet: ${writeContactSheet(outDir, shotDir, runId, shots)}`);
     } finally {
         // Merge in `finally` — a driver that crashes mid-run must still contribute
         // everything it found up to that point.
