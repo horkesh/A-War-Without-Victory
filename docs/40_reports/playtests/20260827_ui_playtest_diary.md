@@ -883,6 +883,96 @@ also extend the exclusion list; the two findings are a single change, not two.
 Recorded, not fixed. Severity: low on its own, **medium as a trap laid across the Historian's
 recommendation** — which is the reason it is written up here rather than filed as cosmetic.
 
+## 3t. The grade shift is real, but it is NOT an abdication reward — it is the operations bug reaching the scorer
+
+Verified from source and from four measured runs. **The War-or-Game seat's mechanism is
+confirmed; its interpretation and its recommended sequence are both wrong.**
+
+### The mechanism, confirmed
+
+`src/sim/negotiation/scoring.ts:447-471`:
+
+```ts
+const HISTORICAL_CASUALTY_BASELINE = Object.freeze({ RBiH: 140000, RS: 95000, HRHB: 35000 });
+
+export function humanCostGradeShift(faction: string, casualties: number): number {
+    const ratio = casualties / hist;
+    if (ratio <= 0.75) return 1;   // materially less bloody than history
+    if (ratio < 1.33) return 0;    // historical-level (par)
+    if (ratio < 2.0) return -1;
+    return -2;
+}
+```
+
+Default-ON (`scoringSimpleEnabled`, owner-adopted 2026-08-10). Reached at `:782` via
+`applyHumanCostShift(earned.grade, faction, factionTotalCasualties(state, faction))`.
+
+**Correction to the seat's arithmetic.** It computed the ratio from *killed only* (11,892 /
+140,000 = 0.085). The function is fed `factionTotalCasualties` (`:485-488`) = **killed + wounded
++ missing_captured**, matching the baseline's stated KIA+WIA+MIA definition. The seat's input was
+wrong by roughly 5×. Its conclusion nevertheless survives — see below — but the number it quoted
+does not.
+
+### What the measurements actually show
+
+| run | RBiH K+W | ratio | shift |
+| --- | --- | --- | --- |
+| RBiH as **player**, autonomy 0 (2 operations) | 61,425 | 0.439 | **+1** |
+| RBiH as **player**, autonomy 1 (11 operations) | 78,523 | 0.561 | **+1** |
+| RBiH as **bot** (inside the RS-player run) | 107,559 | 0.768 | **0** |
+
+**The passive player and the active player both get +1.** An RBiH player who launches 11
+operations — 5.5× the activity — lands at 0.561, still comfortably under the 0.75 threshold. He
+would have to roughly double his casualties again to lose the bonus.
+
+**So abdication is not rewarded relative to fighting.** The seat's headline — *"the dominant
+RBiH strategy is to decline to fight the war of national survival and collect a better score for
+it"* — is **overstated and I should not have relayed it in that form.** Playing passively buys
+you nothing over playing actively.
+
+### The real finding, which is worse in a more interesting way
+
+**Every RBiH player gets +1 while the RBiH bot gets 0, regardless of how the player plays.**
+
+That is not a scoring defect. It is the operations-suppression defect arriving at the scorer:
+
+    player faction filtered out of bot corps/brigade order generation
+      (selectBotBrigadeOrderFactions, war_phases.ts:928)
+        -> far fewer operations launched
+          -> far fewer casualties taken and inflicted
+            -> ratio falls under the 0.75 threshold
+              -> +1 letter grade, free, to any player
+
+The scoring model is not inverted. **It is being fed a broken input and faithfully rewarding
+it.** The frozen 140k/95k/35k baseline is explicitly documented as "a HISTORICAL FACT … not fit
+to sim output" — which is correct design, and precisely why it cannot absorb a sim that
+under-produces casualties by 45% in the player seat.
+
+RS shows the same root through a different sign: autonomy 0 → 0.890 → shift 0; autonomy 1 →
+0.730 → shift **+1**. Being *more* active moved RS across the threshold in the favourable
+direction, because autonomy 1 restores the bot pipeline and changes the whole war. The
+common factor in both factions is that **player-faction casualty totals are not commensurable
+with bot totals**, so a threshold calibrated on history discriminates player-vs-bot rather than
+well-played-vs-badly-played.
+
+### This reverses the seat's recommended sequence
+
+War-or-Game made closing the scoring interaction a **blocking condition** on the operations fix,
+reasoning that fixing operations first "merely reduces an exploit rather than removing it."
+
+**The evidence says the dependency runs the other way.** The grade shift is downstream of the
+casualty totals, which are downstream of operation suppression. Fix the suppression and player
+casualties rise toward the bot's 0.768 — the free +1 disappears without touching `scoring.ts` at
+all. Closing the scoring side first would mean re-tuning a threshold against numbers that are
+about to move, which is the "calibrate the floor rather than a healthy engine" trap this project
+has an explicit lesson about.
+
+**Integrator ruling: operations first, then re-measure the shift.** I am recording the seat's
+blocking condition as *not sustained on the evidence*, and noting that I concurred with it in an
+earlier report before measuring — that concurrence was premature and is withdrawn.
+
+Recorded, not fixed.
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |
