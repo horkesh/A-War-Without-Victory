@@ -198,6 +198,12 @@ Differences below are the factions, not the harness.
 | Diverged from historical default | 0 | 0 | 0 |
 | `game_over` at turn 188 | false | false | false |
 
+**Note on any territory figure in this diary:** the baseline's `territory_final`
+(RS 49 / Federation 51) is the POST-DAYTON negotiated settlement, and the runs measure
+the turn-188 ceasefire line with an empty Dayton proposal. Those are different
+quantities. See §3x for the correction; do not read any run's territory percentage as a
+divergence from history.
+
 ### Operation authorizations are wildly asymmetric — RS 19, RBiH 2, HRHB 1
 
 The `historical` policy's only lever is accepting pre-planned operation authorizations
@@ -262,17 +268,45 @@ of their war, and it tells them their war was far less lethal than it was.
 
 ### Territory outcome moves with the player's faction
 
-Same scenario, same `historical` policy, same decision mode — only the player faction
-differs:
+**CORRECTED 2026-08-27 after owner review. My original framing was wrong and is struck
+through below.**
 
-| Player faction | Federation territory | vs historical 51% |
-| --- | --- | --- |
-| RBiH | 36.9% | −14.1 |
-| HRHB | 44.1% | −6.9 |
+~~| Player faction | Federation territory | vs historical 51% |~~
+~~| RBiH | 36.9% | −14.1 |  HRHB | 44.1% | −6.9 |~~
 
-A 7-point swing in the Federation's final share from player-faction choice alone, while
-every side plays the authored historical default. Recorded as a measurement; whether it
-is expected is a calibration question.
+Owner: *"You are not reading territory right. 51% for FBiH was after the Dayton and it
+includes for ARBiH and HVO held territories."*
+
+Both halves check out against the data:
+
+- **Composition is fine.** `endgame_comparison.ts:138-140` sums RBiH + HRHB, and the
+  baseline field is literally named `RBiH_HRHB_Federation`. So the sim's "Federation"
+  does mean ARBiH + HVO combined.
+- **The comparison is not.** The baseline key is `territory_final` — the **post-Dayton
+  negotiated settlement**, not a line anyone held when the shooting stopped. Dayton moved
+  territory relative to the ceasefire line; measuring one against the other is comparing
+  a battlefield outcome to a diplomatic one.
+
+**And the harness makes it worse.** The `historical` policy tables an EMPTY Dayton
+proposal — `{ territorial_demands: [], territorial_concessions: [], institutional_choices: {} }`
+— so no territorial package is applied at the settlement. The figure the run produces is
+therefore the **turn-188 ceasefire line**, which is precisely the quantity that should NOT
+be compared against `territory_final`.
+
+**What survives:** the RELATIVE difference between two runs. 36.9% playing RBiH vs 44.1%
+playing HRHB is a 7-point swing in the ceasefire line from player-faction choice alone,
+with every side taking authored historical defaults. That comparison is like-for-like and
+still stands. What does not stand is either number as a "divergence from history".
+
+**Two things for later, one engine and one harness:**
+
+1. `endgame_comparison` compares `territory_controlled_pct` (held) against
+   `territory_final` (settled) with no distinction between them. For a player who
+   negotiates real territorial packages at Dayton the comparison may be fair; for one who
+   tables nothing it is structurally unfair, and the note does not say which case it is
+   reporting. Worth a Historian and calibration eye.
+2. The harness needs a Dayton policy that tables something historically shaped, or every
+   run it produces will keep measuring ceasefire lines against a settlement.
 
 ### Not a finding — my own field path
 
