@@ -31,6 +31,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { classifyCombatCapture } = require('./lib/capture_provenance.cjs');
 
 const runDir = process.argv[2];
 if (!runDir) {
@@ -138,6 +139,7 @@ if (base) console.log(`  NET across checkpoints: ${net >= 0 ? '+' : ''}${net}`);
 // attacked", NOT "never threatened". Do not let these zeros be quoted as "Goražde was never under
 // threat." The ring version needs data/derived/operational/operational_contact_graph.json.
 const contestCount = {};
+const battleById = new Map();
 try {
   const wrPath = path.join(runDir, 'weekly_report.jsonl');
   for (const line of fs.readFileSync(wrPath, 'utf8').split('\n')) {
@@ -147,6 +149,7 @@ try {
     for (const b of rec.battles || []) {
       if (!b || !b.target_osid) continue;
       contestCount[b.target_osid] = (contestCount[b.target_osid] || 0) + 1;
+      if (typeof b.battle_id === 'string' && b.battle_id.length > 0) battleById.set(b.battle_id, b);
     }
   }
 } catch {
@@ -213,7 +216,7 @@ console.log('');
 console.log(`  guard cells compared: ${guardCells} (${HOLDS.length} holds + ${FALLS.length} falls)`);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// EASTERN-SURPLUS CHECK (Historian exit condition, 2026-08-26). TWO-SIDED BY DESIGN.
+// EASTERN-CAPTURE PROVENANCE CHECK. TWO-SIDED BY DESIGN.
 //
 // WHY. Turning on enclave-column displacement produced RBiH captures around Lopare and
 // Šekovići. All were measured RS in ALL FOUR painted checkpoints — they never changed hands
@@ -246,7 +249,7 @@ const FARZ_CELLS = [
 ];
 
 console.log('');
-console.log('EASTERN SURPLUS — Birač / Majevica / north Podrinje (painted reference: ZERO RBiH gains)');
+console.log('EASTERN CAPTURE PROVENANCE — Birač / Majevica / north Podrinje');
 // Local: the shared `st188` is declared further down, in the cascade block. Reaching it from
 // here would be a temporal-dead-zone crash — the exact error this session already made once,
 // in emit.ts, and caught only when a 188-week run died at turn 23.
@@ -262,30 +265,50 @@ const at188 = stateAt(188);
 // than the claim it carries.** It said "gain" and measured "disagreement at week 188".
 //
 // The distinction is load-bearing because the two have different owners:
-//   - CAPTURED ahistorically  → the engine took ground it should not have. AN ENGINE DEFECT.
-//   - NEVER LOST              → the engine is holding ground it should have lost by 1995.
-//                               **CALIBRATION for a window that is not the current target.**
+//   - CAPTURED                → inspect exact battle/operation provenance; geography alone does
+//                               not establish an engine defect.
+//   - NEVER LOST              → calibration for a window that is not the current target.
 // Owner, 2026-08-26: *"that is calibration work and 1995 is not yet our calibration target."*
 // Both `pobudje_2` and `cerska_2` are painted **RBiH in jan1993** and RS by oct1995 — i.e. they are
 // correct for the checkpoint actually being calibrated.
 //
-// Only CAPTURES gate. Never-lost cells are reported so the calibration lane can see them.
-const surplus = [];
+// Captures gate only when their battle causality is missing, contradictory, or not operation-owned.
+// An operation-owned capture is mechanically admissible and is reported as calibration variance;
+// geography alone cannot prove an engine defect. Counterattacks are a valid operationless exception,
+// but the default artifact does not carry their order reason, so an operationless receipt remains a
+// fail-closed review stop rather than being mislabeled as a proven defect.
+const provenanceStops = [];
+const operationOwnedVariance = [];
 const neverLost = [];
 for (const osid of Object.keys(ref.oct1995)) {
   const mun = osid.split(':')[1];
   if (!EASTERN_SURPLUS_MUNS.includes(mun)) continue;
   if (at188[osid] !== 'RBiH' || ref.oct1995[osid] !== 'RS') continue;
   // Did the engine ever TAKE it? A capture leaves a control event with `to: 'RBiH'`.
-  const captured = events.some((e) => e.settlement_id === osid && e.to === 'RBiH');
-  if (captured) surplus.push(osid); else neverLost.push(osid);
+  const captures = events.filter((e) => e.settlement_id === osid && e.to === 'RBiH');
+  if (captures.length === 0) {
+    neverLost.push(osid);
+    continue;
+  }
+  const capture = captures[captures.length - 1];
+  const provenance = classifyCombatCapture(capture, battleById.get(capture.battle_id));
+  if (provenance.gates) provenanceStops.push({ osid, capture, provenance });
+  else operationOwnedVariance.push({ osid, capture, provenance });
 }
-if (surplus.length === 0) {
-  console.log(`  no ahistorical CAPTURES across ${EASTERN_SURPLUS_MUNS.length} municipalities ** CLEAN **`);
+if (provenanceStops.length === 0) {
+  console.log(`  no unattributed/off-operation capture stops across ${EASTERN_SURPLUS_MUNS.length} municipalities ** CLEAN **`);
 } else {
   breached = true;
-  console.log(`  *** ${surplus.length} AHISTORICAL RBiH CAPTURE(S) — the engine TOOK this ground. §6 panel matter, do not merge ***`);
-  for (const o of surplus) console.log(`      ${o}`);
+  console.log(`  *** ${provenanceStops.length} CAPTURE PROVENANCE STOP(S) — §6 attribution required; do not merge ***`);
+  for (const row of provenanceStops) {
+    console.log(`      ${row.osid}  t${row.capture.turn ?? '?'}  ${row.provenance.kind}`);
+  }
+}
+if (operationOwnedVariance.length > 0) {
+  console.log(`  ${operationOwnedVariance.length} operation-owned eastern capture(s) — CALIBRATION VARIANCE, not by itself an engine defect:`);
+  for (const row of operationOwnedVariance) {
+    console.log(`      ${row.osid}  t${row.capture.turn ?? '?'}  ${row.provenance.operation_ids.join(', ')}`);
+  }
 }
 if (neverLost.length > 0) {
   // NOT gating, and deliberately so — see the note above. These are cells the engine never
