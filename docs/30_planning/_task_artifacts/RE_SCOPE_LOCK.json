@@ -3,19 +3,15 @@
   "status": "active",
   "lane": "RE",
   "task": "RE-0D-S0-AUTH",
-  "packet": "authorize-one-clean-s0-pair",
-  "base_commit": "99d7bcbb6704398ec39565c87dc00cf6d07c6029",
+  "packet": "authorize-fresh-s0-roots-after-collision",
+  "base_commit": "ae36d40111d7ee23930235c689c418cb09fd38a7",
   "allowlist": [
     ".claude/current-lane.txt",
-    "docs/00_start_here/docs_index.md",
     "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
     "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
     "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
     "docs/PROJECT_LEDGER.md",
-    "docs/plans/2026-08-26-engine-integrity-plan.md",
-    "docs/plans/MASTER_ROADMAP.md",
-    "docs/plans/COMMAND_BOARD.md",
-    "docs/plans/README.md"
+    "docs/plans/2026-08-26-engine-integrity-plan.md"
   ],
   "denylist": [
     "data/scenarios/**",

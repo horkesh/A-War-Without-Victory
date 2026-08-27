@@ -508,3 +508,8 @@ byte-identical to `99d7bcbb6`; both runs must record that authorization HEAD and
 Only A then B may run. Any launch consumes the authorization; pass, failure, or partial/abort goes
 directly to the successor no-run evidence packet, which restores permission to false. No retry,
 second pair, other long run, or engine/scenario/calibration/reference change is authorized.
+
+Preflight found preserved clean Node-22 evidence at the original `runs/re_s0_a` and `_b` roots from
+commit `8511512f`. No scenario process launched, so authorization was not consumed; those roots are
+not deleted or reused. The reviewed successor instead names fresh absent roots
+`runs/re_s0_integrity_a` and `runs/re_s0_integrity_b`.

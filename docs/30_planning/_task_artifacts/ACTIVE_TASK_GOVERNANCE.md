@@ -211,5 +211,6 @@ busier war or a better historical-fit score.
   79% of sector-profile delta to the required unconditional passes. Environmental conditions were
   not encoded, so this is an escalation-opening red, not final performance acceptance.
 - **Next:** commit this reviewed authorization packet, prove its production tree equals
-  `99d7bcbb6`, then run exactly A followed by B once. The bounded remediation remains mandatory
+  `99d7bcbb6`, require fresh absent roots `runs/re_s0_integrity_a` and `_b`, then run exactly A
+  followed by B once. The bounded remediation remains mandatory
   before T2; do not restore a guard, add cache/state/surface area, or run another diagnosis.

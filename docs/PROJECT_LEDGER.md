@@ -29781,3 +29781,11 @@ bytes must equal the parent, and both run metadata records must name that HEAD w
 directly to the no-run evidence packet, which restores long-run permission to false. No lock-only
 commit, retry, second pair, calibration interpretation, or scenario change is authorized.
 `docs/10_canon/FORAWWV.md` remains untouched.
+
+### S0 authorization root amendment
+
+Preflight found that the literal `runs/re_s0_a` and `_b` roots preserve clean Node-22 evidence from
+commit `8511512f`. No scenario process launched, so the authorization attempt was not consumed.
+Nothing was deleted or reused. The reviewed successor retains identical production bytes and the
+one-pair limit but names fresh absent roots `runs/re_s0_integrity_a` and
+`runs/re_s0_integrity_b`.

@@ -666,9 +666,9 @@ RE remedy.
    $env:AWWV_S6_GRADE_RUN = "true"
    if ($env:AWWV_S6_GRADE_RUN -ne "true") { throw "§6 grade gate not active" }
    try {
-     node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs/re_s0_a
+     node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs/re_s0_integrity_a
      if ($LASTEXITCODE -ne 0) { throw "S0 run A failed" }
-     node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs/re_s0_b
+     node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs/re_s0_integrity_b
      if ($LASTEXITCODE -ne 0) { throw "S0 run B failed" }
    } finally {
      Remove-Item Env:AWWV_S6_GRADE_RUN -ErrorAction SilentlyContinue
