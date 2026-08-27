@@ -15,7 +15,25 @@ describe('tactical map build warning contracts', () => {
 
     expect(config).toContain('manualChunks');
     expect(config).toContain('vendor-maplibre');
-    expect(config).toContain('feature-command-ui');
+    expect(config).toContain('feature-warroom-ui');
+    // ONE army_hq chunk, and it must STAY one.
+    //
+    // This test previously required four: feature-army-hq{,-records,-operations,-forces}.
+    // That layout split one directory across chunks by FILENAME, which produced a
+    // circular chunk dependency and a TDZ crash -- the tactical map rendered a blank
+    // screen on launch (fixed 2026-08-27 by collapsing them). The old assertions
+    // therefore pinned the broken arrangement in place.
+    //
+    // Two of them had also stopped testing anything: this contract greps the config
+    // TEXT, so `-forces` and `-operations` were still satisfied by the explanatory
+    // COMMENT left behind by the fix. A string-presence check cannot tell code from
+    // prose, so assert on the returned chunk names specifically.
+    expect(config).toContain("return 'feature-army-hq'");
+    expect(config).not.toContain("return 'feature-army-hq-records'");
+    expect(config).not.toContain("return 'feature-army-hq-operations'");
+    expect(config).not.toContain("return 'feature-army-hq-forces'");
+    expect(config).toContain('feature-chronicle');
+    expect(config).not.toContain("return 'feature-command-ui'");
     expect(config).toContain('map-rendering');
     expect(config).toContain('map-sim');
   });
