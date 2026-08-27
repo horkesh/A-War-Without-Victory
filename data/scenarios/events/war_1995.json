@@ -392,6 +392,11 @@
             "type": "flag_equals",
             "flag": "srebrenica_demilitarized",
             "value": true
+          },
+          {
+            "type": "territory_control",
+            "osid": "op:srebrenica:srebrenica_2",
+            "faction": "RBiH"
           }
         ]
       }
@@ -500,9 +505,9 @@
         "srebrenica_falls_1995"
       ],
       "condition": {
-        "type": "flag_equals",
-        "flag": "srebrenica_enclave_formed",
-        "value": true
+        "type": "territory_control",
+        "osid": "op:rogatica:zepa_2",
+        "faction": "RBiH"
       }
     },
     "pressure": {

@@ -85,7 +85,7 @@ describe('equipment offensive priority', () => {
 });
 
 describe('sector offensive idle recovery', () => {
-    it('honours the planning-duration floor before launching a staged multi-axis operation', () => {
+    it('gives only a staged scenario-birth plan opening credit against the planning-duration floor', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,
   meta: { turn: 3, phase: 'war', seed: 'multi-axis-axis-local-readiness' } as any,
@@ -209,6 +209,33 @@ describe('sector offensive idle recovery', () => {
             }
   } as any,
 } as unknown as GameState;
+
+        const openingState = structuredClone(state);
+        openingState.meta.turn = 1;
+        openingState.military.corps_command!.rs_corps!.active_operations[0]!.started_turn = 0;
+        advanceSectorOffensives(openingState, null);
+        expect(openingState.military.corps_command?.rs_corps?.active_operations[0]?.phase).toBe('execution');
+
+        const unstagedOpeningState = structuredClone(state);
+        unstagedOpeningState.meta.turn = 1;
+        unstagedOpeningState.military.corps_command!.rs_corps!.active_operations[0]!.started_turn = 0;
+        for (const brigadeId of ['a1', 'a2', 'b1', 'b2']) {
+            unstagedOpeningState.military.formations[brigadeId]!.location_osid = 'op:rear:assembly';
+        }
+        advanceSectorOffensives(unstagedOpeningState, null);
+        expect(unstagedOpeningState.military.corps_command?.rs_corps?.active_operations[0]?.phase).toBe('planning');
+
+        unstagedOpeningState.meta.turn = 2;
+        for (const brigadeId of ['a1', 'a2', 'b1', 'b2']) {
+            unstagedOpeningState.military.formations[brigadeId]!.location_osid =
+                state.military.formations[brigadeId]!.location_osid;
+        }
+        advanceSectorOffensives(unstagedOpeningState, null);
+        expect(unstagedOpeningState.military.corps_command?.rs_corps?.active_operations[0]?.phase).toBe('planning');
+
+        unstagedOpeningState.meta.turn = 4;
+        advanceSectorOffensives(unstagedOpeningState, null);
+        expect(unstagedOpeningState.military.corps_command?.rs_corps?.active_operations[0]?.phase).toBe('execution');
 
         const forcedState = structuredClone(state);
         forcedState.meta.turn = 1;
