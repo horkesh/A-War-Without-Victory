@@ -11,33 +11,39 @@ listed is not a claim that anyone has triaged it.
 
 | | Count |
 | --- | --- |
-| Runs contributing | 4 |
-| Distinct findings | 22 |
-| 🔴 Critical | 3 |
-| 🟠 High | 3 |
-| Bugs | 5 |
-| Friction | 12 |
+| Runs contributing | 5 |
+| Distinct findings | 44 |
+| 🔴 Critical | 6 |
+| 🟠 High | 6 |
+| Bugs | 11 |
+| Friction | 28 |
 | Anomalies | 0 |
 | Open questions | 5 |
-| ⚠ Unconfirmed (suspected harness artefact) | 2 |
+| ⚠ Unconfirmed (suspected harness artefact) | 3 |
 
-**Runs:** `RBiH-counterfactual-188w`, `RBiH-historical-188w`, `RBiH-passive-188w`, `ui-RBiH`
+**Runs:** `RBiH-counterfactual-188w`, `RBiH-historical-188w`, `RBiH-passive-188w`, `owner-review-20260827`, `ui-RBiH`
 
 ## Three worst friction moments
 
 1. 🟠 **Player faces almost no decisions across the campaign** — `design:decision_cadence`, 3× · `07ddb9a5fad8`
-2. 🟡 **Interactive control with no accessible label** — `ui:campaign_start`, 8× · `56b6bda5d71e`
-3. ⚪ **Lever `replace_co` refused: insufficient_command_authority (#.#/#)** — `lever:replace_co`, 705× · `adf0fc5fc3d4`
+2. 🟠 **Opening screen needs a complete redesign to match the game aesthetic** — `ui:case_file_opening`, 1× · `0ac8f0df01a3`
+3. 🟡 **Interactive control with no accessible label** — `ui:army_hq`, 2322× · `1bc0a56b95c2`
 
 ## Bugs
 
 | Severity | Finding | Surface | Hits | Runs | ID |
 | --- | --- | --- | --- | --- | --- |
+| 🔴 critical | ⚠ _(unconfirmed)_ No enabled ADVANCE control on the turn surface | `ui:turn_loop` | 15× | ui-RBiH | `fd61eb5e0970` |
+| 🔴 critical | Clicking ADVANCE does not move the date | `ui:turn_loop` | 8× | ui-RBiH | `5cd22877eff8` |
+| 🔴 critical | Turn cannot be advanced after four attempts | `ui:turn_loop` | 8× | ui-RBiH | `6cd4fa018f9a` |
 | 🔴 critical | Surface `campaign_start` renders no interactive controls | `ui:campaign_start` | 2× | ui-RBiH | `b81eaea102a2` |
 | 🔴 critical | Error shown to the player on campaign_start: "Invalid decisionMode. Use emergent or historical." | `ui:campaign_start` | 1× | ui-RBiH | `0bb0b0c943ba` |
 | 🔴 critical | Selecting a faction does not start a campaign | `ui:side_picker` | 1× | ui-RBiH | `a22af3625aa4` |
 | 🟠 high | Uncaught page error: Cannot access 'ir' before initialization | `ui:renderer` | 2× | ui-RBiH | `6502868f6e7d` |
+| 🟠 high | Priority-front labels pair a settlement with its own municipality under two names | `ui:situation_panel` | 1× | owner-review-20260827 | `d5daa3a10f94` |
+| 🟠 high | Territory bar counts allied HVO ground as "hostile-held" | `ui:territory_bar` | 1× | owner-review-20260827 | `ab660671b06e` |
 | 🟡 medium | Operation directive rejected with a reason the player is never shown | `ui:op_directive_rejection` | 29× | RBiH-counterfactual-188w | `ff048ab927a1` |
+| 🟡 medium | Place names are lower-cased after the first word | `ui:place_name_formatting` | 1× | owner-review-20260827 | `919e8513877e` |
 
 ## Friction
 
@@ -45,8 +51,24 @@ listed is not a claim that anyone has triaged it.
 | --- | --- | --- | --- | --- | --- |
 | 🟠 high | Player faces almost no decisions across the campaign | `design:decision_cadence` | 3× | RBiH-historical-188w, RBiH-counterfactual-188w, RBiH-passive-188w | `07ddb9a5fad8` |
 | 🟠 high | ⚠ _(unconfirmed)_ Command Authority never spent across the whole campaign | `engine:command_authority` | 1× | RBiH-historical-188w | `ab8f0ac92d5c` |
-| 🟡 medium | Interactive control with no accessible label | `ui:campaign_start` | 8× | ui-RBiH | `56b6bda5d71e` |
+| 🟠 high | Opening screen needs a complete redesign to match the game aesthetic | `ui:case_file_opening` | 1× | owner-review-20260827 | `0ac8f0df01a3` |
+| 🟡 medium | Interactive control with no accessible label | `ui:army_hq` | 2322× | ui-RBiH | `1bc0a56b95c2` |
+| 🟡 medium | Interactive control with no accessible label | `ui:chronicle` | 2322× | ui-RBiH | `5ff0afb189d7` |
+| 🟡 medium | Interactive control with no accessible label | `ui:codex` | 2314× | ui-RBiH | `850a3806cfbc` |
+| 🟡 medium | Interactive control with no accessible label | `ui:desk` | 2314× | ui-RBiH | `1e2303120fe2` |
+| 🟡 medium | Interactive control with no accessible label | `ui:records` | 2314× | ui-RBiH | `fc75f83f7348` |
+| 🟡 medium | Interactive control with no accessible label | `ui:campaign_start` | 2271× | ui-RBiH | `56b6bda5d71e` |
+| 🟡 medium | Interactive control with no accessible label | `ui:war_map` | 1919× | ui-RBiH | `b615fa723d8f` |
+| 🟡 medium | Interactive control with no accessible label | `ui:in_game` | 459× | ui-RBiH | `50b8dda5812e` |
+| 🟡 medium | Peace-plan modal offers no historical default and no per-option stakes | `ui:peace_plan_modal` | 12× | ui-RBiH | `182e6e7f012e` |
+| 🟡 medium | Surface "codex" has no reachable control | `ui:codex` | 5× | ui-RBiH | `e4b031f59b77` |
+| 🟡 medium | Surface "desk" has no reachable control | `ui:desk` | 5× | ui-RBiH | `81513817311f` |
+| 🟡 medium | Surface "records" has no reachable control | `ui:records` | 5× | ui-RBiH | `9a16b34a3a19` |
+| 🟡 medium | Surface "army_hq" has no reachable control | `ui:army_hq` | 4× | ui-RBiH | `72962be702b1` |
+| 🟡 medium | Surface "chronicle" has no reachable control | `ui:chronicle` | 4× | ui-RBiH | `a1259f689f15` |
+| 🟡 medium | Surface "war_map" has no reachable control | `ui:war_map` | 4× | ui-RBiH | `6f579329b22e` |
 | 🟡 medium | ⚠ _(unconfirmed)_ Command Authority sitting at cap at end of campaign | `engine:command_authority` | 1× | RBiH-historical-188w | `45e315b15082` |
+| 🟡 medium | Typography is inconsistent across surfaces | `ui:typography` | 1× | owner-review-20260827 | `50bb59700448` |
 | ⚪ low | Lever `replace_co` refused: insufficient_command_authority (#.#/#) | `lever:replace_co` | 705× | RBiH-counterfactual-188w | `adf0fc5fc3d4` |
 | ⚪ low | Lever `request_op` refused: insufficient_command_authority (#.#/#) | `lever:request_op` | 685× | RBiH-counterfactual-188w | `410897e96e98` |
 | ⚪ low | Lever `replace_co` refused: insufficient_command_authority (#/#) | `lever:replace_co` | 233× | RBiH-counterfactual-188w | `91b00300864a` |
@@ -123,6 +145,87 @@ The faction was clicked on the side picker and the picker is still on screen aft
 }
 ```
 
+### 🔴 Clicking ADVANCE does not move the date
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `5cd22877eff8` |
+| Kind / severity | bug / critical |
+| Surface | `ui:turn_loop` |
+| Probe | `ui-advance-noop` |
+| Occurrences | 8 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+ADVANCE was clicked at 6 Apr 1992 and the date readout was unchanged 30s later. The turn did not advance.
+```json
+{
+  "turn": 1,
+  "date": "6 Apr 1992"
+}
+```
+
+### 🔴 Turn cannot be advanced after four attempts
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `6cd4fa018f9a` |
+| Kind / severity | bug / critical |
+| Surface | `ui:turn_loop` |
+| Probe | `ui-turn-blocked` |
+| Occurrences | 8 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+At 1 Jun 1992 the driver cleared every known blocker four times and the date never moved. Either a blocker type is unhandled or ADVANCE is genuinely inert. Screen state attached.
+```json
+{
+  "turn": 9,
+  "date": "1 Jun 1992",
+  "screen": {
+    "date": "1 Jun 1992",
+    "modals": [],
+    "buttons": [
+      "5",
+      "2",
+      "5",
+      "2",
+      "2",
+      "2",
+      "2",
+      "2",
+      "President's Desk",
+      "Command Surface",
+      "Diplomacy",
+      "Intelligence",
+      "Army HQ",
+      "Chronicle",
+      "Faction",
+      "War Map",
+      "Advance",
+      "SIGNATURE REQUIRED"
+    ]
+  }
+}
+```
+
+### 🔴 No enabled ADVANCE control on the turn surface
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `fd61eb5e0970` |
+| Kind / severity | bug / critical |
+| Surface | `ui:turn_loop` |
+| Probe | `ui-no-advance-control` |
+| Occurrences | 15 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | unconfirmed |
+At turn 1 (6 APR 1992) there is no clickable ADVANCE. The player cannot move the war forward. [DRIVER ARTIFACT — the surface tour left the app inside Army HQ Main Staff, which has no ADVANCE of its own. Driver now returns to the shell before advancing. Re-verify.]
+```json
+{
+  "turn": 1,
+  "date": "6 APR 1992"
+}
+```
+
 ### 🟠 Player faces almost no decisions across the campaign
 | Field | Entry |
 | --- | --- |
@@ -164,6 +267,26 @@ The faction was clicked on the side picker and the picker is still on screen aft
 }
 ```
 
+### 🟠 Opening screen needs a complete redesign to match the game aesthetic
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `0ac8f0df01a3` |
+| Kind / severity | friction / high |
+| Surface | `ui:case_file_opening` |
+| Probe | `owner-review` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `owner-review-20260827`, turn 0 |
+| Runs | owner-review-20260827 |
+| Status | open |
+Owner on the case-file opening, verbatim: it "screams AI slop design with big italic letters for highlight and so on. We need to rework it completely so it has the same aesthetic as the rest of the game." This is a REDESIGN, not a tweak — the current screen is the 2026-08-23 case-file flow that was routed to the desktop launch on 2026-08-27, so it is newly the first thing every player sees. Not to be actioned without a design pass.
+```json
+{
+  "owner_quote": "screams AI slop design with big italic letters for highlight and so on",
+  "current_screen": "tools/playtest/evidence/20260827_case_file_landing.png",
+  "note": "The opening was made reachable by commit 554e89377; before that players never saw it."
+}
+```
+
 ### 🟠 Uncaught page error: Cannot access 'ir' before initialization
 | Field | Entry |
 | --- | --- |
@@ -176,6 +299,50 @@ The faction was clicked on the side picker and the picker is still on screen aft
 | Runs | ui-RBiH |
 | Status | fixed |
 The renderer threw during normal play: Cannot access 'ir' before initialization [FIXED 2026-08-27: decisionMode IPC validator now tolerates undefined (electron-main.cjs); army_hq chunk cycle collapsed to one chunk (vite.config.ts).]
+### 🟠 Priority-front labels pair a settlement with its own municipality under two names
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `d5daa3a10f94` |
+| Kind / severity | bug / high |
+| Surface | `ui:situation_panel` |
+| Probe | `owner-review` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `owner-review-20260827`, turn 1 |
+| Runs | owner-review-20260827 |
+| Status | open |
+The Situation panel reads "Priority fronts: Aginci (bosanska dubica) - Kozarska dubica (bosanska dubica); Arapusa (bosanska krupa) - Donji dubovik (bosanska krupa)". Owner: it should read as one place — Aginci in Kozarska Dubica — not as a front between two. HYPOTHESIS, NOT VERIFIED: Bosanska Dubica was renamed Kozarska Dubica by RS, so both sides of the pair may be resolving to the SAME municipality under its 1990 name and its RS name, producing a front against itself. Needs verification against the front-pair source before anyone acts on that reading.
+**Repro:** Start any RBiH campaign; read the Situation panel on the Desk at 6 Apr 1992.
+
+```json
+{
+  "observed": "Aginci (bosanska dubica) - Kozarska dubica (bosanska dubica)",
+  "owner_expectation": "Aginci in Kozarska Dubica",
+  "second_instance": "Arapusa (bosanska krupa) - Donji dubovik (bosanska krupa)",
+  "screenshot": "tools/playtest/evidence/20260827_owner_review_situation_panel.png"
+}
+```
+
+### 🟠 Territory bar counts allied HVO ground as "hostile-held"
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `ab660671b06e` |
+| Kind / severity | bug / high |
+| Surface | `ui:territory_bar` |
+| Probe | `owner-review` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `owner-review-20260827`, turn 1 |
+| Runs | owner-review-20260827 |
+| Status | open |
+The status bar reads "Friendly 31.5% | Hostile-held 68.5%" while the same bar shows ALLIED and the Situation panel reports "Bosniak-Croat Coordination — Alliance posture: close coordination". If HVO is an ally, HVO-held territory is not hostile. The split appears to be a binary player-vs-everyone-else computation that ignores alliance state, so the player is shown a strategic picture that is wrong in their own favour-reading. Note the alliance later degrades ("Alliance posture: strained" by 1 Jun 1992), so any fix has to track a CHANGING relationship, not a fixed faction list.
+**Repro:** Read the bottom status bar during any RBiH campaign while the HVO alliance holds.
+
+```json
+{
+  "observed": "Friendly 31.5% | Hostile-held 68.5%, with ALLIED shown on the same bar",
+  "alliance_state": "Bosniak-Croat Coordination: close coordination (t1) -> strained (t9)"
+}
+```
+
 ### 🟡 Command Authority sitting at cap at end of campaign
 | Field | Entry |
 | --- | --- |
@@ -316,11 +483,41 @@ No `historical_default_response_id`. The R8 choice policy cannot rank this decis
 ### 🟡 Interactive control with no accessible label
 | Field | Entry |
 | --- | --- |
+| Fingerprint | `1bc0a56b95c2` |
+| Kind / severity | friction / medium |
+| Surface | `ui:army_hq` |
+| Probe | `ui-unlabelled-control` |
+| Occurrences | 2322 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+A control on army_hq has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
+```json
+{
+  "size": "43x24"
+}
+```
+
+### 🟡 Surface "army_hq" has no reachable control
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `72962be702b1` |
+| Kind / severity | friction / medium |
+| Surface | `ui:army_hq` |
+| Probe | `ui-surface-unreachable` |
+| Occurrences | 4 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+The top-level "army_hq" navigation control was absent or disabled during normal play.
+### 🟡 Interactive control with no accessible label
+| Field | Entry |
+| --- | --- |
 | Fingerprint | `56b6bda5d71e` |
 | Kind / severity | friction / medium |
 | Surface | `ui:campaign_start` |
 | Probe | `ui-unlabelled-control` |
-| Occurrences | 8 across 1 run(s) |
+| Occurrences | 2271 across 1 run(s) |
 | First seen | run `ui-RBiH`, turn 0 |
 | Runs | ui-RBiH |
 | Status | open |
@@ -328,6 +525,114 @@ A control on campaign_start has no text content and no accessible name — unrea
 ```json
 {
   "size": "87x318"
+}
+```
+
+### 🟡 Interactive control with no accessible label
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `5ff0afb189d7` |
+| Kind / severity | friction / medium |
+| Surface | `ui:chronicle` |
+| Probe | `ui-unlabelled-control` |
+| Occurrences | 2322 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+A control on chronicle has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
+```json
+{
+  "size": "43x24"
+}
+```
+
+### 🟡 Surface "chronicle" has no reachable control
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `a1259f689f15` |
+| Kind / severity | friction / medium |
+| Surface | `ui:chronicle` |
+| Probe | `ui-surface-unreachable` |
+| Occurrences | 4 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+The top-level "chronicle" navigation control was absent or disabled during normal play.
+### 🟡 Interactive control with no accessible label
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `850a3806cfbc` |
+| Kind / severity | friction / medium |
+| Surface | `ui:codex` |
+| Probe | `ui-unlabelled-control` |
+| Occurrences | 2314 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+A control on codex has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
+```json
+{
+  "size": "43x24"
+}
+```
+
+### 🟡 Surface "codex" has no reachable control
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `e4b031f59b77` |
+| Kind / severity | friction / medium |
+| Surface | `ui:codex` |
+| Probe | `ui-surface-unreachable` |
+| Occurrences | 5 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+The top-level "codex" navigation control was absent or disabled during normal play.
+### 🟡 Interactive control with no accessible label
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `1e2303120fe2` |
+| Kind / severity | friction / medium |
+| Surface | `ui:desk` |
+| Probe | `ui-unlabelled-control` |
+| Occurrences | 2314 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+A control on desk has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
+```json
+{
+  "size": "43x24"
+}
+```
+
+### 🟡 Surface "desk" has no reachable control
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `81513817311f` |
+| Kind / severity | friction / medium |
+| Surface | `ui:desk` |
+| Probe | `ui-surface-unreachable` |
+| Occurrences | 5 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+The top-level "desk" navigation control was absent or disabled during normal play.
+### 🟡 Interactive control with no accessible label
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `50b8dda5812e` |
+| Kind / severity | friction / medium |
+| Surface | `ui:in_game` |
+| Probe | `ui-unlabelled-control` |
+| Occurrences | 459 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+A control on in_game has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
+```json
+{
+  "size": "43x24"
 }
 ```
 
@@ -349,6 +654,135 @@ Corps arbih_1st_corps rejected a directive toward op:banja_luka:banja_luka_2 for
   "target_osid": "op:banja_luka:banja_luka_2",
   "reason": "objective_unreachable",
   "turn": 1
+}
+```
+
+### 🟡 Peace-plan modal offers no historical default and no per-option stakes
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `182e6e7f012e` |
+| Kind / severity | friction / medium |
+| Surface | `ui:peace_plan_modal` |
+| Probe | `ui-peace-plan-unmarked` |
+| Occurrences | 12 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+The diplomatic peace-plan modal presents Accept / Review Later / Reject with no HISTORICAL DEFAULT marker and no dimension shifts, unlike event decisions which show both. The player cannot tell what history did or what any choice costs. Driver policy for this run: reject.
+```json
+{
+  "policy": "reject"
+}
+```
+
+### 🟡 Place names are lower-cased after the first word
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `919e8513877e` |
+| Kind / severity | bug / medium |
+| Surface | `ui:place_name_formatting` |
+| Probe | `owner-review` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `owner-review-20260827`, turn 1 |
+| Runs | owner-review-20260827 |
+| Status | open |
+Labels render "Donji dubovik (bosanska krupa)" where every word of a proper place name should be capitalised: "Donji Dubovik (Bosanska Krupa)". Also seen in "Kozarska dubica", "bosanska dubica", "Arapusa (bosanska krupa)". Looks like a single capitalise-first-letter transform applied to an id-derived string rather than a display name. Affects every multi-word Bosnian place name in the UI, which is most of them.
+**Repro:** Any surface listing settlements or municipalities.
+
+```json
+{
+  "observed": [
+    "Donji dubovik (bosanska krupa)",
+    "Kozarska dubica",
+    "Arapusa (bosanska krupa)"
+  ],
+  "expected": [
+    "Donji Dubovik (Bosanska Krupa)",
+    "Kozarska Dubica",
+    "Arapuša (Bosanska Krupa)"
+  ],
+  "note": "Diacritics also worth checking separately — \"Arapusa\" vs \"Arapuša\" was not raised by the owner and is NOT claimed here."
+}
+```
+
+### 🟡 Surface "records" has no reachable control
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `9a16b34a3a19` |
+| Kind / severity | friction / medium |
+| Surface | `ui:records` |
+| Probe | `ui-surface-unreachable` |
+| Occurrences | 5 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+The top-level "records" navigation control was absent or disabled during normal play.
+### 🟡 Interactive control with no accessible label
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `fc75f83f7348` |
+| Kind / severity | friction / medium |
+| Surface | `ui:records` |
+| Probe | `ui-unlabelled-control` |
+| Occurrences | 2314 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+A control on records has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
+```json
+{
+  "size": "43x24"
+}
+```
+
+### 🟡 Typography is inconsistent across surfaces
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `50bb59700448` |
+| Kind / severity | friction / medium |
+| Surface | `ui:typography` |
+| Probe | `owner-review` |
+| Occurrences | 1 across 1 run(s) |
+| First seen | run `owner-review-20260827`, turn 0 |
+| Runs | owner-review-20260827 |
+| Status | open |
+The game mixes font families between surfaces — the case-file opening uses a serif display face and large italics, while the in-game shell uses monospace and condensed sans. Owner raised this as a defect, not a deliberate contrast. Needs a single typographic system decided and applied, rather than per-surface choices.
+```json
+{
+  "surfaces": [
+    "case-file opening (serif + large italic)",
+    "in-game shell (monospace / condensed sans)"
+  ]
+}
+```
+
+### 🟡 Surface "war_map" has no reachable control
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `6f579329b22e` |
+| Kind / severity | friction / medium |
+| Surface | `ui:war_map` |
+| Probe | `ui-surface-unreachable` |
+| Occurrences | 4 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+The top-level "war_map" navigation control was absent or disabled during normal play.
+### 🟡 Interactive control with no accessible label
+| Field | Entry |
+| --- | --- |
+| Fingerprint | `b615fa723d8f` |
+| Kind / severity | friction / medium |
+| Surface | `ui:war_map` |
+| Probe | `ui-unlabelled-control` |
+| Occurrences | 1919 across 1 run(s) |
+| First seen | run `ui-RBiH`, turn 0 |
+| Runs | ui-RBiH |
+| Status | open |
+A control on war_map has no text content and no accessible name — unreadable to a screen reader and ambiguous to everyone else.
+```json
+{
+  "size": "43x24"
 }
 ```
 

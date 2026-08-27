@@ -98,3 +98,52 @@ Fix: count only CA-COSTING attempts (`request_op`, `stop_op`, `replace_co`,
 
 Until this lands, treat both `engine:command_authority` findings in the current
 ledger as UNCONFIRMED.
+
+---
+
+## 7. Probe specs from the 2026-08-27 owner screenshot review — DESIGNED, NOT BUILT
+
+The owner reviewed one screenshot and found five defects the harness missed entirely.
+Four of the five are mechanically detectable; they are specified here so the classes get
+caught automatically rather than needing a human to look at each screenshot.
+
+**These are specs. Do not implement them while the instruction is record-only.**
+
+### `ui-place-name-casing` (detectable, easy)
+Scan rendered text for place-name patterns where a word after the first is lower-case:
+`/\b[A-ZŠĐČĆŽ][a-zšđčćž]+ [a-zšđčćž]{3,}\b/` inside settlement/municipality labels, and
+any `(all lower case)` parenthetical. Observed: "Donji dubovik (bosanska krupa)",
+"Kozarska dubica". Expected: every word capitalised. Low false-positive risk if scoped to
+labelled place fields rather than free prose.
+
+### `ui-front-pair-self-reference` (detectable, medium)
+A "front" whose two sides resolve to the same municipality is not a front. Parse the
+priority-fronts string into `(settlement, municipality)` pairs and flag any pair where the
+municipalities match — including across the 1990/RS rename map (bosanska dubica ==
+kozarska dubica, bosanski novi == novi grad, and the rest). The rename table is the part
+that needs care; without it this probe would miss the exact instance that prompted it.
+
+### `ui-alliance-vs-hostile-accounting` (detectable, medium)
+When the UI shows an alliance as active, assert that no allied faction's territory is
+counted in a "hostile" total. Concretely: if the status bar shows ALLIED and friendly +
+hostile == 100%, the hostile figure is a binary player-vs-rest computation and is wrong.
+Must track a CHANGING relationship — the same campaign moves from "close coordination"
+to "strained" within nine turns.
+
+### `ui-font-family-drift` (detectable, easy)
+Per surface, collect `getComputedStyle(el).fontFamily` over visible text nodes and report
+the distinct count and the outliers. A surface using a display serif while its siblings
+use monospace is the signal. Needs an allowed-set once the typographic system is decided,
+otherwise it reports intentional contrast as a defect.
+
+### Aesthetic quality — NOT detectable
+"Screams AI slop design" is a judgement no probe will make. The only mechanism that
+catches it is a human looking at the screen. This is an argument for the UI lane
+producing a screenshot contact sheet per run for review, not for a cleverer probe.
+
+### The general lesson
+Every one of these was visible in a screenshot the harness had already captured and I had
+already looked at. The probes were checking for *broken* things — empty surfaces, dead
+controls, clipped text, error banners — and none of these five are broken in that sense.
+They are **wrong content rendered correctly**, which is a whole detection category the
+probe set does not cover.
