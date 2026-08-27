@@ -29687,3 +29687,44 @@ gameplay state, input, pipeline step, flag, service, or calibration mechanic. Ex
 comparisons at `7c631a95f`, `fa6357833`, and `2e9e4acd3` must then attribute all real control drift.
 The structural golden and already-authorized manifest reconciliation are reviewed and committed
 separately. Performance and fresh S0 remain blocked until both are truthful.
+
+## [2026-08-27] guard(RE): quarantine mixed scope and install fail-closed packet authority
+
+**Type:** RE branch-boundary repair, repository governance, diagnostic classification, tests, and
+control-plane synchronization. No scenario, calibration, historical reference, FORAWWV, map,
+release, push, PR, merge, tag, or publication change.
+
+**Incident and branch repair:** Commit `63671dd8c` combined a legitimate seven-file operation-
+lifecycle packet (`+62/-37`) with four unrelated scenario/event files (`+110/-10`). The mixed line
+is preserved at `codex/re-mixed-scope-quarantine-20260827`. The authoritative
+`codex/re-engine-integrity-repaired` branch was reconstructed from `037396e3c` without reset,
+rebase, or force movement. Commit `7c472e065` retains exactly the staged scenario-birth planning
+credit, its two test owners, and four aligned canon/process documents. The four excluded event
+files are byte-identical to `037396e3c`; their findings are routed from RE and not adopted.
+
+**Guardrail contract:** `RE_SCOPE_LOCK.json` binds lane, task, packet, exact parent, exact-file
+allowlist, and mandatory denylist. Scenario, calibration, reference, and FORAWWV paths are denied;
+deny wins. The checker counts rename sources and destinations, requires the staged lock blob,
+rejects wildcard allowlists and unapproved policy changes, and accepts a clean committed packet as
+sealed while rejecting any later change until a new reviewed lock binds HEAD. A worktree-local
+external hook pins reviewed staged lock/checker/project-hook SHA-256 plus its generated
+runner/wrapper hashes outside the tracked tree and executes the pinned staged checker before the
+pinned project hook. `--no-verify` and direct Git-admin tampering remain
+outside this accidental-drift guard's threat model.
+
+**S0 separation:** `engine_health_gate.cjs --engine-integrity-only` now has exactly five
+authorizing non-regression checks: zero-eligible operations, invalid operation-weeks,
+ghost-destroyed formations, stranded brigades, and consistency failures. Matched OSIDs,
+checkpoints, K:W, and casualty totals are explicitly non-authorizing observations. The inherited
+stranded ceiling has calibration-contaminated provenance and cannot prove a clean engine; direct
+`validate_run_consistency.cjs` exit zero, A/B identity, schedule/fingerprint, provenance,
+save/replay, and performance gates remain separately mandatory. No threshold was changed.
+
+**Evidence:** Independent review first blocked the happy-path-only draft on rename, staged-lock,
+self-protection, wildcard, lifecycle, EOL, control-plane, and S0-classification gaps. Remediation
+passes 25/25 scope cases, the external-hook integration test, and 5/5 engine-mode tests under exact
+Node 22. The retained operation boundary passes 151/151 focused cases, typecheck, and the static
+determinism scan. One `peace_plans` expectation remains red at both the original mixed commit and
+the repaired tree; the one permitted read-only classification established it as pre-existing, so
+it is queued and untouched. The current lock forbids long runs. `docs/10_canon/FORAWWV.md` was not
+edited.

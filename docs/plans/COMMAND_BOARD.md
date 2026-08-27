@@ -24,7 +24,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 6 | R6 | **JANUARY 1993 CHECKPOINT SLICE LANDED; FURTHER CALIBRATION PAUSED ON RE** | Preserve the landed evidence. Do not start reference, init-control, objective, axis, timing, roster, or outcome tuning until RE closes. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE — AUDIO IMPLEMENTATION LANDED `2d106e5e0`** | Complete human listen/sensitivity acceptance, English accessibility/readability, offline browser and packaged-runtime proof, and closeout reconciliation. Pause any packet that collides with RE-0E/RE-1 desktop/UI files. Localization Phase 3 remains post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
-| 7.5 | RE | **T1 IN PROGRESS; T1B/T1C CODE CLOSED, EVIDENCE PRECEDES S0** | Execute T1C/RE-0D2: repair the 40-week fingerprint's false-green 0/0 anchor contract without re-enabling calibration scoring, attribute real territory drift across exact Node-22 commits, then commit the reviewed structural golden and authorized 19-hash manifest reconciliation separately. Complete the atomic performance packet and fresh paired S0. | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) |
+| 7.5 | RE | **T1 PAUSED AT MACHINE-ENFORCED PACKET GATE** | On `codex/re-engine-integrity-repaired`, independently review and re-arm one exact-file lock for the next T1 packet. Scenario/event/calibration work is excluded. Then complete fingerprint truth, performance proof, and one paired engine-integrity S0; record historical fit separately without tuning. | [Lean Engine Integrity](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **WAITING ON RC, R1-R7, AND RE GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
@@ -47,9 +47,10 @@ consumed-input evidence, and flag state, and the pair selector rejects incompara
 RE-0 must nevertheless produce its own clean exact-parent Node-22 pair. Historical mixed-tree or
 Node-24 runs cannot be reused.
 
-**CURRENT EXECUTION:** The probe lane is closed and the owner handed the repository to RE. T0 is
-complete at execution base `38e65547882856fba07faab7a6dbcd4258da9607`; T1 is in progress.
-T1A and T1B are closed, and T1C code is independently approved. T1C/RE-0D2 now repairs a stale
+**CURRENT EXECUTION:** The probe lane is closed and the owner handed the repository to RE. The
+authoritative line is `codex/re-engine-integrity-repaired`; staged planning credit is retained at
+`7c472e065`, while the scenario/event half of mixed commit `63671dd8c` is quarantined and excluded.
+T1 is paused until the next exact-file lock is independently reviewed and externally pinned. T1C/RE-0D2 then repairs a stale
 40-week fingerprint observer that silently accepted absent anchors as 0/0, attributes the actual
 territory drift, completes the atomic performance proof, and only then establishes fresh S0. R7 audio implementation has landed;
 remaining R7 work is human listen/sensitivity review,

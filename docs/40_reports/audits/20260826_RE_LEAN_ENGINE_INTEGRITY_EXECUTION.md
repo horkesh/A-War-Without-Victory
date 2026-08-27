@@ -2,13 +2,13 @@
 
 **Date:** 2026-08-26
 
-**Status:** T1 in progress; T1A closed, T1B active, T1C ordered next, S0 pending
+**Status:** T1 paused at the machine-enforced packet gate; repaired branch authoritative; S0 pending
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
 **Approved execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
-**Execution branch:** `codex/re-engine-integrity-execution`
+**Execution branch:** `codex/re-engine-integrity-repaired`
 **Execution worktree:** `F:\AWWV-worktrees\re-engine-integrity`
 
 This is the single living RE evidence record. It is not a second queue. The plan remains the
@@ -35,7 +35,7 @@ surface, and no scenario claim without clean exact-commit evidence.
 | Integration status | clean |
 | Probe closeout ancestor | `b711cffa94029c35eac18d96db91a411eb2e7abb`; `merge-base --is-ancestor` exited 0 |
 | Execution checkout | `F:/AWWV-worktrees/re-engine-integrity` |
-| Execution branch | `codex/re-engine-integrity-execution` |
+| Initial execution branch | `codex/re-engine-integrity-execution` (superseded and preserved) |
 | Execution HEAD before T0 docs | `38e65547882856fba07faab7a6dbcd4258da9607` |
 | Execution status before edits | clean |
 | Remote/network action | none |
@@ -442,3 +442,31 @@ evaluations while painted scoring fields remain absent. Only after two Node-22 p
 territory drift be attributed across `7c631a95f`, `fa6357833`, and `2e9e4acd3`. T1C must remain
 byte-identical through week 40. Structural and manifest goldens then receive separate review and
 commits before performance and S0.
+
+## 2026-08-27 — Scope-drift incident, non-destructive branch repair, and guardrail gate
+
+Commit `63671dd8c` mixed two independent packets. The legitimate RE half was seven files
+(`+62/-37`): the narrow first-advance planning-credit predicate, its two test owners, and four
+aligned canon/process descriptions. The excluded half was four scenario/event files (`+110/-10`):
+`war_1992.json`, `war_1995.json`, `event_timeline_integrity.test.ts`, and
+`events_evaluate.test.ts`. Those event findings are **routed from RE — not adopted**; they authorize
+no scenario, historical outcome, threshold, or calibration change.
+
+The mixed line is preserved at `codex/re-mixed-scope-quarantine-20260827`. The authoritative branch
+was reconstructed non-destructively from `037396e3c`; commit `7c472e065` applies exactly the seven
+approved RE files, while all four excluded files are byte-identical to `037396e3c`. No reset,
+rebase, force-move, push, PR, or merge occurred.
+
+The guardrail packet adds an exact-file `RE_SCOPE_LOCK.json`, absolute scenario/calibration/
+reference/FORAWWV deny rules, source-and-destination rename census, strict staged-lock presence,
+sealed post-commit lifecycle, policy-schema checks, stable EOL rules, and an external per-worktree
+hook that pins reviewed staged lock/checker hashes outside the tracked tree. The executable
+`--engine-integrity-only` health-gate mode has exactly five authorizing checks; painted fit,
+checkpoints, K:W, and casualties are non-authorizing observations. The inherited stranded ceiling
+is non-regression evidence only, and direct consistency exit zero remains separately mandatory.
+
+Verification before this record: 25/25 scope cases, external-hook integration, and 5/5 engine-mode
+tests passed; the focused retained operation packet passed 151/151 cases. One related
+`peace_plans` assertion is pre-existing red at both `63671dd8c` and the repaired tree and is queued,
+not repaired in RE. Scenario/event exclusion diff is empty. The next RE change requires a newly
+reviewed and externally pinned exact-file lock; no long run is authorized by the current lock.

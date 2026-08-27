@@ -4479,6 +4479,23 @@ and every quoted score must include checkpoint identity.
 Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
 roadmap, and debt`.
 
+## 2026-08-27 - A prose scope boundary is not a guardrail
+
+An allowlist written only in a plan can coexist with a commit that mixes engine mechanics and
+scenario outcome edits. A checker inside the same working tree is also not independently trusted:
+it can miss rename sources, accept an unstaged lock, widen itself with wildcard scope, or execute a
+modified working-copy checker while reporting green.
+
+**Reusable rule:** bind each packet to the current HEAD and exact file paths; deny sensitive owner
+families absolutely; census renames as delete plus add; require the lock in the index; keep the
+committed packet as a sealed state; and pin reviewed lock/checker blobs in a per-worktree hook
+outside the tracked tree. Lock review and external re-arm are the approval step. Preserve mixed
+history on a quarantine branch and reconstruct the authoritative line non-destructively from the
+last clean parent. A historical-fit red is an observation, never implicit authority to edit an
+engine packet.
+
+Applied in `[2026-08-27] guard(RE): quarantine mixed scope and install fail-closed packet authority`.
+
 ## 2026-08-26 - An executable engine plan must bind to live owners and separate clean evidence
 
 A plausible subsystem name is not enough. The live formal-battle owner can differ from a legacy

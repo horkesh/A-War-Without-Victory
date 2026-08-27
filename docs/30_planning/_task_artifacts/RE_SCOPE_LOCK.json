@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "status": "active",
+  "lane": "RE",
+  "task": "RE-GUARDRAIL",
+  "packet": "install-machine-enforced-scope-lock",
+  "base_commit": "7c472e065c46113d39960383ca4f7caea6b41ca0",
+  "allowlist": [
+    ".gitattributes",
+    ".husky/pre-commit",
+    ".claude/current-lane.txt",
+    "package.json",
+    "scripts/repo/check_re_scope.ps1",
+    "scripts/repo/install_re_scope_hook.ps1",
+    "tests/re_scope_guard.test.ps1",
+    "tests/re_scope_external_hook.test.ps1",
+    "tools/engine_health_gate.cjs",
+    "tests/engine_health_gate.test.ts",
+    "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
+    "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
+    "docs/plans/2026-08-26-engine-integrity-plan.md",
+    "docs/plans/MASTER_ROADMAP.md",
+    "docs/plans/COMMAND_BOARD.md",
+    "docs/plans/README.md",
+    "docs/00_start_here/docs_index.md",
+    "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
+    "docs/PROJECT_LEDGER.md",
+    "docs/PROJECT_LEDGER_KNOWLEDGE.md"
+  ],
+  "denylist": [
+    "data/scenarios/**",
+    "data/calibration/**",
+    "data/source/calibration/**",
+    "data/reference/**",
+    "data/refs/**",
+    "docs/10_canon/FORAWWV.md"
+  ],
+  "long_run_policy": {
+    "permitted": false,
+    "maximum_clean_pairs_per_exact_commit": 1
+  },
+  "failure_policy": {
+    "read_only_diagnoses_per_failure": 1,
+    "out_of_scope_implementation": "stop-and-queue",
+    "calibration_result_authorizes_re_fix": false
+  }
+}

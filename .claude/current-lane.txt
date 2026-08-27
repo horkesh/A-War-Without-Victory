@@ -1,1 +1,1 @@
-RE — READY FOR T0. Probe lane closed at b711cffa9; owner handed the repository to RE. Preserve the landed/reverted probe disposition. Next: bind the post-handoff integrated base, then Node-22 S0.
+RE — T1 PAUSED AT MACHINE-ENFORCED PACKET GATE on codex/re-engine-integrity-repaired. Planning-credit packet retained at 7c472e065; mixed 63671dd8c quarantined with scenario/event half excluded. Next: independently review and externally pin one exact-file lock before any further RE edit or long run.

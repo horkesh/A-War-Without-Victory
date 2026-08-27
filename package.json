@@ -9,6 +9,9 @@
     "node": ">=20"
   },
   "scripts": {
+    "governance:re:scope": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/repo/check_re_scope.ps1",
+    "governance:re:hook:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/repo/install_re_scope_hook.ps1 -Mode Install",
+    "governance:re:hook:verify": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/repo/install_re_scope_hook.ps1 -Mode Verify",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "start": "tsx src/index.ts",

@@ -4,8 +4,8 @@
 
 > **Date:** 2026-08-26
 >
-> **Status:** T1 IN PROGRESS; T1B/T1C code is closed, and T1C fingerprint-contract repair,
-> golden reconciliation, performance proof, and fresh S0 remain
+> **Status:** T1 PAUSED behind the approved RE scope-lock packet; no further RE implementation or
+> long run starts until that packet is reviewed and the next exact packet lock is activated
 >
 > **Roadmap row:** Master Roadmap §5, `RE` (order 7.5)
 >
@@ -15,8 +15,8 @@
 >
 > **Collision rule:** probe lane closed at `b711cffa9`; any new packet-file overlap stops RE
 >
-> **Current next action:** execute T1C/RE-0D2 fail-closed fingerprint truth and attribution, then
-> complete T1C performance proof and establish S0
+> **Current next action:** install and independently review the machine-enforced RE scope lock, then
+> activate one exact allowlisted packet before resuming T1
 >
 > **Execution base:** `38e65547882856fba07faab7a6dbcd4258da9607`
 
@@ -80,6 +80,45 @@ the result in `docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTIO
 
 RE makes no calibration change, historical target change, combat tuning change, scenario-data
 change, map-geometry change, schema expansion, release, push, PR, or publication.
+
+### Machine-enforced packet boundary
+
+`docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json` is the active machine-readable packet
+contract. Before and after every edit batch run `npm run governance:re:scope`; every commit must pass
+the staged form from `.husky/pre-commit` before its typecheck decision. The lock must name the RE
+lane, exact task and packet, exact current HEAD as `base_commit`, a finite allowlist, and the global
+denylist. A missing, stale, malformed, wrong-base, or weakened lock fails closed. The denylist always
+wins over an allowlist entry.
+
+Every allowlist entry is one exact repository file; wildcard allowlists are invalid. Rename
+detection is disabled during path census so both the deleted source and added destination must be
+authorized. Staged checks require the lock blob in the index and never consult an untracked or
+working-copy substitute. The lock update is reviewed and staged **with the packet it authorizes**;
+it is not a separate activation commit. After that packet commits, a clean tree is a sealed state.
+Any next change requires the next packet's staged lock to bind the then-current HEAD.
+
+Advancing packets requires a reviewed lock amendment whose `base_commit` equals the then-current
+HEAD. Only one packet is active. The lock globally excludes `data/scenarios/**`,
+`data/calibration/**`, `data/source/calibration/**`, historical reference surfaces under
+`data/reference/**` and `data/refs/**`, and `docs/10_canon/FORAWWV.md`. No RE finding can implicitly
+expand that boundary.
+
+The tracked Husky hook is the project/typecheck delegate, not the final trust anchor. After this
+guard packet is staged and independently reviewed, the owner runs
+`npm run governance:re:hook:install` in the authoritative worktree. Repeat that explicit approval
+after review of every later staged lock amendment. The installer creates a
+worktree-local external hook outside the tracked tree, pins SHA-256 for the reviewed lock, checker,
+and staged project hook plus its generated runner/wrapper, and configures that worktree only. The
+external hook extracts the staged lock/checker/project-hook bytes, verifies the pins, executes the
+staged checker, and only then delegates to the pinned staged project hook/typecheck.
+`npm run governance:re:hook:verify` is mandatory at session start and before commit.
+Do not activate it for unreviewed staged bytes. Normal checker runs also enforce the
+approved hashes once the installer has populated worktree config. Hook/checker edits are rejected
+unless the explicit task is `RE-GUARDRAIL`.
+
+`.husky/*` is normalized to LF and `*.ps1` to CRLF by `.gitattributes`. The long-run permission and
+one-pair maximum are validated lock fields, but shell-command interception remains advisory; the
+external hook enforces repository mutations, not whether an agent launches a scenario command.
 
 Hard engine-health budget:
 
@@ -240,7 +279,7 @@ scenario run is authoritative; repository experience shows it can resolve main-c
 TypeScript. Authoritative long runs use an owner-approved clean main/integration checkout or an
 independent clone at the packet's code commit. Never overwrite Claude's or another agent's checkout.
 
-### T1 — Provision Node 22 and establish S0
+### T1 — Provision Node 22 and establish engine-integrity S0
 
 **Execution status:** IN PROGRESS. T1A closed at
 `2f3d6572300dc95eeae2bc05900744d905a9adf4`. The first Node-22 pair is reproducible pre-fix
@@ -472,13 +511,30 @@ flag, module, cache, threshold, scenario, baseline, reference, pipeline step, or
    bounded performance escalation with its own owner and evidence before T2; it does not authorize
    another truth-pass skip, a cache, or a weakened test. Zero to 2% remains watch-only.
 14. After the manifest and structural-reference reconciliation commits, execute the complete fresh paired Node-22
-    S0 procedure below from the reviewed T1C code commit.
+    engine-integrity S0 procedure below from the reviewed T1C code commit.
     The prior `58f100f3` pair remains pre-fix evidence only. Commit evidence/control-plane/ledger
     only as `docs(RE-0D): record exact final sector convergence and S0`. Do not start T2 first.
 
 **Stop:** any difference beyond the known pre-fix seed-31 and seed-55 REDs, any failure outside the intended
 RED/mutation phase, parent/candidate output drift after the fix, test/source scope expansion, need
 for a new authority surface, or unruled performance remediation returns to the owner.
+
+#### S0 gate separation and failure protocol
+
+S0 is an **engine-integrity acceptance**, not a calibration acceptance. Its authorizing gates are
+exact-commit clean provenance, identical artifact inventory and bytes under the normalization rule,
+deterministic operation schedules and structural fingerprints, consistency, engine invariants,
+save/replay compatibility, and the approved performance budget. Historical checkpoint scores,
+painted-target fit, Farz, faction outcome fit, 1995 territorial fit, and other historical endpoint
+measures are calibration observations. Record them exactly, but they neither fail engine-integrity
+S0 nor authorize an RE change, threshold edit, reference refresh, scenario edit, or historical
+special case. They may block a later calibration promotion in its own lane.
+
+For any failing RE gate, perform at most one read-only root-cause diagnosis. If the cause is outside
+the active lock, stop and queue a separate finding; do not implement it. A second diagnosis,
+hypothesis, long run, or scope expansion requires an owner-approved lock amendment. Run at most one
+clean A/B pair for an exact commit. Never lower or refresh a historical threshold/reference as an
+RE remedy.
 
 1. The owner/build seat supplies an absolute path to a Node 22 installation. Do not download or
    silently switch toolchains.
@@ -563,7 +619,8 @@ for a new authority surface, or unruled performance remediation returns to the o
    ```
 
 4. From the authoritative clean checkout, run the canonical 188-week scenario twice into distinct
-   roots using the installed JS entrypoint:
+   roots using the installed JS entrypoint. This is the sole clean A/B pair permitted for that exact
+   commit:
 
    ```powershell
    $env:AWWV_S6_GRADE_RUN = "true"
@@ -585,18 +642,26 @@ for a new authority surface, or unruled performance remediation returns to the o
 
    ```powershell
    node tools/verify_checkpoints.cjs <run-dir>
-   node tools/engine_health_gate.cjs <run-dir> --horizon 188w --json
+    node tools/engine_health_gate.cjs <run-dir> --horizon 188w --engine-integrity-only --json
    node tools/validate_run_consistency.cjs <run-dir>
    node tools/diagnostics/structural_fingerprint.cjs <run-dir> --json --full
    ```
 
-   Do not use `--strict`; it wrongly promotes advisory K:W evidence into a fatal gate.
+   `--engine-integrity-only` rejects `--update`, `--force`, and `--strict`. It has exactly five
+   authorizing checks: zero-eligible operations, invalid operation-weeks, ghost-destroyed
+   formations, stranded brigades, and parsed consistency failures. Matched OSIDs, checkpoint match,
+   K:W, and casualty totals are labelled calibration observations and cannot fail this mode. The
+   stranded ceiling is an inherited non-regression bound with calibration-contaminated provenance;
+   passing it is never proof of a clean engine. Independently require the direct
+   `validate_run_consistency.cjs` command above to exit zero; the embedded parsed count is not a
+   substitute. Do not use `--strict`.
 
 6. Assert both `run_meta.json` files have the exact reviewed T1C code commit, are descendants of the
    bound T0 execution base, T1A, and T1B, and record `git_dirty:false`, Node 22, the same scenario/input
    digests, no provenance override, and `collapse_enabled:false`.
-7. Compare `run_summary.json.historical_fit.checkpoints`; canonical checkpoints are weeks
-   **39, 104, 156, and 188**. The runner does not emit standalone checkpoint saves.
+7. Record, without tuning, `run_summary.json.historical_fit.checkpoints`; canonical observation
+   weeks are **39, 104, 156, and 188**. These are calibration observations, not S0 engine-integrity
+   acceptance. The runner does not emit standalone checkpoint saves.
 8. The exact unconditional output set is:
    `activity_summary.json`, `brigade_temporal_log.jsonl`, `control_delta.json`,
    `destroyed_brigades.json`, `displacement_event_log.jsonl`, `final_save.json`,
@@ -652,7 +717,9 @@ for a new authority surface, or unruled performance remediation returns to the o
    ```
 
 11. Record exact commands, commit, source hashes, elapsed wall time, file/row/byte inventory,
-   checkpoints, hashes, fingerprints, and gate results in the single RE implementation report.
+    hashes, fingerprints, and engine gate results in the single RE implementation report. Put
+    checkpoint and historical-fit values in a separately labelled non-authorizing calibration
+    observations subsection; queue any red without following it.
 12. Commit T1C/S0 evidence docs only:
     `docs(RE-0D): record exact final sector convergence and clean S0`.
 

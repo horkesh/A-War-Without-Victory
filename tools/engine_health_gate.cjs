@@ -13,7 +13,7 @@
  * is a separate, owner-gated step.
  *
  * USAGE:
- *   node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--update] [--force] [--strict] [--json]
+ *   node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--update] [--force] [--strict] [--engine-integrity-only] [--json]
  *
  *   <run_dir>     a dir containing run_summary.json AND final_save.json
  *   --horizon     which threshold band to check against. Default inferred from weeks
@@ -51,7 +51,7 @@ function die(msg, code) {
 
 // ---- args ----
 const args = process.argv.slice(2);
-const flags = { update: false, strict: false, json: false, force: false, horizon: null };
+const flags = { update: false, strict: false, json: false, force: false, engineIntegrityOnly: false, horizon: null };
 const positionals = [];
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
@@ -59,11 +59,17 @@ for (let i = 0; i < args.length; i++) {
   else if (a === '--strict') flags.strict = true;
   else if (a === '--json') flags.json = true;
   else if (a === '--force') flags.force = true;
+  else if (a === '--engine-integrity-only') flags.engineIntegrityOnly = true;
   else if (a === '--horizon') flags.horizon = args[++i];
   else positionals.push(a);
 }
 const runDir = positionals[0];
-if (!runDir) die('usage: node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--update] [--strict] [--json]', 2);
+if (!runDir) die('usage: node tools/engine_health_gate.cjs <run_dir> [--horizon 40w|188w] [--update] [--strict] [--engine-integrity-only] [--json]', 2);
+if (flags.engineIntegrityOnly) {
+  for (const [name, enabled] of [['--update', flags.update], ['--force', flags.force], ['--strict', flags.strict]]) {
+    if (enabled) die(`${name} is incompatible with --engine-integrity-only`, 2);
+  }
+}
 
 const summaryPath = path.join(runDir, 'run_summary.json');
 const savePath = path.join(runDir, 'final_save.json');
@@ -577,19 +583,21 @@ if (planningDeaths) {
 }
 hard('ghost_destroyed', measured.ghost_destroyed <= band.ghost_destroyed_max, `${measured.ghost_destroyed} <= ${band.ghost_destroyed_max}`);
 hard('stranded_brigades', measured.stranded_brigades <= band.stranded_brigades_max, `${measured.stranded_brigades} <= ${band.stranded_brigades_max}`);
-hard('matched_osids', measured.matched_osids >= band.matched_osids_min, `${measured.matched_osids} >= ${band.matched_osids_min}`);
-// One hard check per checkpoint the band knows about. A band predating this feature has
-// no checkpoint_matched_min, so nothing is checked and the gate stays green until blessed.
-for (const key of Object.keys((band && band.checkpoint_matched_min) || {}).sort()) {
-  const floor = band.checkpoint_matched_min[key];
-  const got = measured.checkpoint_matched[key];
-  hard(
-    `checkpoint_${key}`,
-    got != null && got >= floor,
-    got == null
-      ? `run emitted no ${key} checkpoint (expected >= ${floor}) — scoring may be off`
-      : `${got} >= ${floor}`
-  );
+if (!flags.engineIntegrityOnly) {
+  hard('matched_osids', measured.matched_osids >= band.matched_osids_min, `${measured.matched_osids} >= ${band.matched_osids_min}`);
+  // One hard check per checkpoint the band knows about. A band predating this feature has
+  // no checkpoint_matched_min, so nothing is checked and the gate stays green until blessed.
+  for (const key of Object.keys((band && band.checkpoint_matched_min) || {}).sort()) {
+    const floor = band.checkpoint_matched_min[key];
+    const got = measured.checkpoint_matched[key];
+    hard(
+      `checkpoint_${key}`,
+      got != null && got >= floor,
+      got == null
+        ? `run emitted no ${key} checkpoint (expected >= ${floor}) — scoring may be off`
+        : `${got} >= ${floor}`
+    );
+  }
 }
 
 hard(
@@ -599,7 +607,9 @@ hard(
     ? `validate_run_consistency exited ${consistency.status} with no parseable "N failure(s) detected" summary — cannot trust count (hard fail)`
     : `${measured.consistency_failures} <= ${band.consistency_failures_max} (validate_run_consistency)`,
 );
-soft('kw_ratio', measured.kw_ratio >= band.kw_ratio_lo && measured.kw_ratio <= band.kw_ratio_hi, `${measured.kw_ratio} in [${band.kw_ratio_lo}, ${band.kw_ratio_hi}]`);
+if (!flags.engineIntegrityOnly) {
+  soft('kw_ratio', measured.kw_ratio >= band.kw_ratio_lo && measured.kw_ratio <= band.kw_ratio_hi, `${measured.kw_ratio} in [${band.kw_ratio_lo}, ${band.kw_ratio_hi}]`);
+}
 
 const hardFail = checks.some((c) => c.hard && !c.ok);
 const softFail = checks.some((c) => !c.hard && !c.ok);
@@ -607,9 +617,27 @@ const fail = hardFail || (flags.strict && softFail);
 
 // ---- report ----
 if (flags.json) {
-  console.log(JSON.stringify({ horizon, measured, band, checks, pass: !fail }, null, 0));
+  if (flags.engineIntegrityOnly) {
+    console.log(JSON.stringify({
+      mode: 'engine-integrity-only',
+      horizon,
+      measured,
+      band,
+      checks,
+      calibration_observations: {
+        matched_osids: measured.matched_osids,
+        checkpoint_matched: measured.checkpoint_matched,
+        kw_ratio: measured.kw_ratio,
+        total_killed: measured.total_killed,
+        total_wounded: measured.total_wounded,
+      },
+      pass: !fail,
+    }, null, 0));
+  } else {
+    console.log(JSON.stringify({ horizon, measured, band, checks, pass: !fail }, null, 0));
+  }
 } else {
-  console.log(`[engine_health_gate] horizon=${horizon} weeks=${weeks}`);
+  console.log(`[engine_health_gate]${flags.engineIntegrityOnly ? ' mode=engine-integrity-only' : ''} horizon=${horizon} weeks=${weeks}`);
   for (const c of checks) {
     const tag = c.ok ? 'PASS' : c.hard ? 'FAIL' : 'WARN';
     console.log(`  [${tag}] ${c.name.padEnd(18)} ${c.detail}`);
@@ -622,6 +650,15 @@ if (flags.json) {
     .join('  ');
   console.log(`  [ADVISORY] hollow_ratio     ${hollow}   <- combat-effective / active; falling while active rises = hollow ledger`);
   console.log(`  metrics: ${JSON.stringify(measured)}`);
+  if (flags.engineIntegrityOnly) {
+    console.log(`  [CALIBRATION OBSERVATION — NON-AUTHORIZING] ${JSON.stringify({
+      matched_osids: measured.matched_osids,
+      checkpoint_matched: measured.checkpoint_matched,
+      kw_ratio: measured.kw_ratio,
+      total_killed: measured.total_killed,
+      total_wounded: measured.total_wounded,
+    })}`);
+  }
   if (measured.consistency_failures > band.consistency_failures_max) {
     console.log('  --- validate_run_consistency output (tail) — failures exceeded ceiling ---');
     if (consistency.stdout) console.log(consistency.stdout.split('\n').slice(-14).join('\n'));

@@ -5,6 +5,7 @@
 .gitattributes text eol=lf
 .gitignore text eol=lf
 .editorconfig text eol=lf
+.claude/current-lane.txt text eol=lf
 *.ts text eol=lf
 *.tsx text eol=lf
 *.js text eol=lf
@@ -18,6 +19,8 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 *.sh text eol=lf
+.husky/* text eol=lf
+*.ps1 text eol=lf
 
 data/derived/startup/*.json text eol=lf
 *.pmtiles filter=lfs diff=lfs merge=lfs -text

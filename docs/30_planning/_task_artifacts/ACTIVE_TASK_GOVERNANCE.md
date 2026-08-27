@@ -8,7 +8,12 @@ deterministic ordering, locality, and verification truth before further calibrat
 
 ## Current status and next action
 
-**T1 IN PROGRESS; T1B/T1C CODE CLOSED, EVIDENCE PRECEDES S0.** The separate probe lane closed at `b711cffa9`, and the owner
+**T1 PAUSED BEHIND THE APPROVED RE SCOPE LOCK.** No further RE implementation or long run starts
+until the guardrail packet is independently reviewed and the next exact packet lock is activated.
+The authoritative execution branch is `codex/re-engine-integrity-repaired`; `7c472e065` retains
+only the approved seven-file planning-credit packet. Mixed commit `63671dd8c` is preserved on
+`codex/re-mixed-scope-quarantine-20260827`, and its scenario/event half is excluded from RE.
+The separate probe lane closed at `b711cffa9`, and the owner
 handed the repository to RE. Preserve that disposition. The execution base is bound at
 `38e65547882856fba07faab7a6dbcd4258da9607`, and T1A froze immutable dependency installation. The
 first Node-22 pair is reproducible pre-fix evidence only, not S0. T1B and T1C code are independently
@@ -16,6 +21,37 @@ approved. Before S0, T1C/RE-0D2 repairs the structural fingerprint's silent miss
 acceptance, attributes its real territory drift, reconciles its golden and the authorized manifest
 separately, completes T1C performance proof, and only afterward establishes a
 fresh exact-code-commit S0 using the plan's source-verified authoritative run substrate.
+
+## Machine-enforced packet lock
+
+`RE_SCOPE_LOCK.json` is the active packet authority. It binds lane, task, packet, exact HEAD,
+allowlist, and global denylist. `npm run governance:re:scope` checks working-tree plus staged changes;
+the active Husky pre-commit runs the staged form before any docs-only/typecheck decision. Missing,
+stale, malformed, wrong-base, out-of-allowlist, or denied changes fail closed. Denylist precedence is
+absolute. One packet and one implementer are active at a time; advancing requires a reviewed lock
+amendment against the then-current HEAD.
+
+All allowlist entries are exact files; wildcards fail. Rename census uses both source and
+destination. Staged mode requires the lock in the index. A reviewed lock amendment is bundled and
+staged with its authorized packet, never committed as a separate activation. A clean committed
+packet is sealed; the next change requires a lock binding the new HEAD.
+
+After independent review of this packet, install the worktree-local external trust anchor with
+`npm run governance:re:hook:install`, then require `npm run governance:re:hook:verify` at session
+start and before commit. It lives outside the tracked tree, pins the reviewed lock, checker, and
+project-hook SHA-256 values plus its generated runner/wrapper hashes in worktree config, executes
+verified staged checker bytes, and only then delegates to the pinned staged project hook/typecheck.
+Normal checker runs enforce the approved lock/checker hashes once
+configured. Only an explicit `RE-GUARDRAIL` maintenance packet may alter the checker or project
+hook. Re-run installation only after independent review of each later staged lock amendment so the
+new packet lock is approved with, not before or after, its packet. Do not activate the installer for
+unreviewed staged bytes.
+
+The global denylist covers scenario data, calibration data, painted calibration sources,
+historical reference surfaces, and `docs/10_canon/FORAWWV.md`. The current lock forbids long runs.
+A later packet may permit no more than one clean A/B pair for one exact commit.
+That policy is schema-validated, but scenario-command interception itself remains advisory; the
+external hook blocks unreviewed mutations, not command launch.
 
 ## Canonical owner
 
@@ -96,6 +132,27 @@ checkpoint are not engine defects.
 - Further calibration is paused until RE closes.
 - The unrelated generated `data/derived/latest_run_final_save.json` is never staged.
 
+## S0 engine acceptance versus calibration observation
+
+RE S0 accepts only engine integrity: exact clean provenance, deterministic artifact inventory and
+bytes under the approved normalization, operation-schedule and structural-fingerprint identity,
+consistency, engine invariants, save/replay compatibility, and the performance budget. Painted
+checkpoint scores, Farz, historical endpoint/territorial fit, and 1995 outcomes are calibration
+observations. Record them under a separate non-authorizing heading. They do not fail RE S0 and may
+never authorize RE implementation, threshold/reference refresh, scenario edits, or special cases.
+
+For S0 invoke `engine_health_gate.cjs --engine-integrity-only`. Its only authorizing checks are
+zero-eligible operations, invalid operation-weeks, ghost-destroyed formations, stranded brigades,
+and consistency failures. It rejects `--update`, `--force`, and `--strict`; matched OSIDs,
+checkpoint match, K:W, and casualties are labelled non-authorizing calibration observations. The
+stranded ceiling is inherited from calibration-contaminated provenance and proves only
+non-regression, never engine cleanliness. A separate direct `validate_run_consistency.cjs` exit zero
+remains mandatory.
+
+After a failed RE gate, one read-only root-cause diagnosis is allowed. If its cause is outside the
+lock, stop and queue it. A second hypothesis, diagnosis, long run, or scope expansion requires owner
+approval and a new exact lock. At most one clean pair may run per exact commit.
+
 ## Done means
 
 - RE-0 establishes admissible exact-parent provenance and truthful CI/runtime proof;
@@ -141,5 +198,7 @@ busier war or a better historical-fit score.
 - **2026-08-27:** baseline validation exposed that `8ab3e29b9` correctly removed 40-week painted
   scoring while the structural reader silently normalized missing anchors to 0/0. RE-0D2 repairs
   that fail-closed and attributes real control drift before a separately reviewed golden refresh.
-- **Next:** repair and review the fingerprint contract, attribute and reconcile both stale goldens,
-  execute T1C alternating performance proof, then run fresh paired Node-22 S0.
+- **2026-08-27 guardrail ruling:** S0 is split into engine-integrity acceptance and non-authorizing
+  calibration observations. RE is paused until the machine-enforced packet lock is reviewed.
+- **Next:** independently review the guardrail packet, activate the next exact lock, and only then
+  resume the still-open T1 work without historical tuning.
