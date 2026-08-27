@@ -285,6 +285,53 @@ same habit — reporting a harness defect as an app defect.
 
 ---
 
+## 3w. Human cost — civilian deaths by nationality
+
+Owner asked for civilian deaths reported separately and by nationality, noting they
+"used to be much higher". First measurement this lane has produced. **RBiH, `historical`
+policy, `historical` decision mode, 188 weeks.**
+
+| Nationality | Civilians killed | Military killed | Civilians caused | Refugees created |
+| --- | ---: | ---: | ---: | ---: |
+| Bosniak (RBiH) | **27,610** | 11,892 | 1,472 | 298,071 |
+| Serb (RS) | **1,910** | 12,717 | **29,315** | 1,129,259 |
+| Croat (HRHB) | **1,815** | 6,756 | 548 | 75,234 |
+| **Total** | **31,335** | **31,365** | — | 1,502,564 |
+
+Baseline `civilian_killed` is 38,476, so the run reaches **81%** of historical civilian
+deaths. Military dead reach 31,365 against a 60,231 military baseline — **52%**.
+
+The SHAPE is right and worth saying so: Bosniaks are 88% of civilian dead, and RS forces
+caused 94% of them. Both match the documented record.
+
+### Open questions for whoever picks this up
+
+**1. Is this a regression?** Cannot be answered from this lane. Every earlier run stopped
+at turn 188 without resolving Dayton, so no cost ledger was ever built and there is NO
+prior civilian-death measurement here to compare against. If a higher figure is
+remembered it comes from runs outside this lane; a specific prior run id is needed rather
+than an inference.
+
+**2. Civilian and military dead are almost equal — 31,335 vs 31,365.** Historically
+civilians were ~38.5k against ~60k military, a ratio near 0.64, not 1.00. Either
+civilians are over-represented, military dead are under-represented, or both. Note the
+military figure is separately depressed (52% of baseline), which points at the military
+side. Needs the Historian and the casualty model, not a harness change.
+
+**3. The cost ledger computes the by-nationality breakdown and discards it.**
+`buildCostLedger` reads `civCasualties[faction].killed`, adds it to `total_civilian_killed`,
+and never stores it on the `CostLedgerEntry` — the entry carries
+`civilian_casualties_caused` (perpetrator) but not `civilian_killed` (victim). The
+breakdown exists in memory for one loop iteration and is thrown away. Anything downstream
+that wants civilian deaths by nationality — the Cost Ledger surface, the verdict, any §6
+assessment — cannot get it from the ledger that is supposed to own it. The harness reads
+`displacement.civilian_casualties` directly as a workaround.
+
+**4. Only RBiH measured.** Territory varied with player faction (36.9% vs 44.1%
+Federation), so human cost may vary too. RS and HRHB not yet run for this breakdown.
+
+---
+
 ## 3a. Cutileiro Plan — pre-war, and it ends the war at turn 2
 
 **Owner ruling 2026-08-27: "Cutileiro is ahistorical anyway so it should be cut out

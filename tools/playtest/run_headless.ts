@@ -54,6 +54,8 @@ import {
 import type { DesktopScenarioKey } from '../../src/desktop/desktop_sim.js';
 import type { FactionId, GameState } from '../../src/state/game_state.js';
 import { FindingsRecorder } from './findings.js';
+// @ts-ignore -- cost ledger is engine-internal; read defensively for reporting only.
+import { buildCostLedger } from '../../src/sim/endgame/cost_ledger.js';
 import { resolvePolicy } from './policies.js';
 import { defaultProbes } from './probes.js';
 import type { DecisionChoice, LeverProbeContext, Probe, RunConfig } from './types.js';
@@ -199,6 +201,16 @@ function applyLevers(
         (plan.force_launch?.length ?? 0) +
         (plan.local_support?.length ?? 0)
     );
+}
+
+
+/** Cost ledger for reporting. Never let a reporting failure kill a completed run. */
+function tryBuildCostLedger(state: GameState): any {
+    try {
+        return buildCostLedger(state as never);
+    } catch {
+        return null;
+    }
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
@@ -443,6 +455,28 @@ async function main(): Promise<void> {
         }
     }
 
+    // 6d. Human cost, broken out. Two DIFFERENT quantities, easy to conflate:
+    //   civilian_killed          — civilians OF that nationality who died (victims)
+    //   civilian_casualties_caused — civilians that faction killed (perpetrator)
+    // The cost ledger sources the first from `displacement.civilian_casualties`, which
+    // the code calls ethnicity-aligned (RBiH~Bosniak, RS~Serb, HRHB~Croat).
+    const ledger = tryBuildCostLedger(state);
+    const humanCost = ledger ? {
+        total_military_killed: ledger.total_military_killed,
+        total_civilian_killed: ledger.total_civilian_killed,
+        by_faction: Object.fromEntries((ledger.entries ?? []).map((e: any) => [e.faction, {
+            military_killed: e.military_killed,
+            military_wounded: e.military_wounded,
+            // NOT on the ledger entry: buildCostLedger reads civCasualties[faction].killed,
+            // adds it to the total, and never stores it per faction. The breakdown is
+            // computed and thrown away, so it is read from displacement state instead.
+            civilian_killed_of_this_nationality:
+                (state as any).displacement?.civilian_casualties?.[e.faction]?.killed ?? null,
+            civilian_casualties_caused: e.civilian_casualties_caused,
+            refugees_created: e.refugees_created,
+        }])),
+    } : null;
+
     // 7. End-of-run probes.
     for (const p of probes) {
         if (p.onEnd) recorder.recordAll(p.onEnd({ state, faction: cfg.faction, turnsPlayed, advanceMsByTurn, leverAttempts }));
@@ -465,6 +499,7 @@ async function main(): Promise<void> {
         decisions_made: decisionLog.length,
         decisions_diverged: decisionLog.filter((d) => d.diverged_from_historical).length,
         dayton_resolved: daytonResolved,
+        human_cost: humanCost,
         endgame: endgame ? {
             // The grade is per-faction, inside faction_verdicts — NOT a top-level field.
             // Reading verdict.grade returned null on three runs and nearly became a
