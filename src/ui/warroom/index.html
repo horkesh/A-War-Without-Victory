@@ -188,7 +188,17 @@
     </div>
 
     <!-- STEP 1: Main Menu title screen -->
-    <div id="main-menu" class="mm-overlay" aria-live="polite">
+    <!--
+      Starts HIDDEN. Each boot path shows its own opening explicitly: desktop calls
+      showCaseFileOpening(), browser/dev calls showMainMenu().
+
+      This card used to be visible by default, which meant it painted immediately while
+      the desktop path was still awaiting map data, the map server URL, current state and
+      the shell iframe — so every desktop launch flashed the OLD Command Post menu for
+      about a second before the case-file opening replaced it. Do not remove mm-hidden
+      without giving the desktop path a synchronous way to suppress it.
+    -->
+    <div id="main-menu" class="mm-overlay mm-hidden" aria-live="polite">
         <div class="mm-stage">
             <div class="mm-brand" aria-hidden="true">
                 <div class="mm-brand-kicker">Bosnia-Herzegovina, 1992&ndash;1995</div>

@@ -26,7 +26,7 @@
 
 import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { _electron as electron, type ElectronApplication, type Page } from 'playwright';
+import { _electron as electron, type ElectronApplication, type Frame, type Page } from 'playwright';
 import { REPO_BASE_DIR } from '../ai_play/president_playthrough.js';
 import { FindingsRecorder } from './findings.js';
 import type { Finding, Severity } from './types.js';
@@ -259,6 +259,207 @@ async function clickByText(
     return true;
 }
 
+
+// ── The turn loop ────────────────────────────────────────────────────────────
+
+/** Read the in-game date readout. It is the only reliable "did the turn advance" signal. */
+async function readDate(frame: Frame): Promise<string> {
+    return frame
+        .evaluate(() => (document.body.innerText.match(/\d+\s+\w+\s+\d{4}/) ?? [''])[0])
+        .catch(() => '');
+}
+
+async function clickIfPresent(frame: Frame, name: RegExp, settleMs = 2000): Promise<boolean> {
+    const el = frame.getByRole('button', { name }).first();
+    if ((await el.count().catch(() => 0)) === 0) return false;
+    if (!(await el.isEnabled().catch(() => false))) return false;
+    await el.click({ timeout: 10_000 }).catch(() => undefined);
+    await frame.page().waitForTimeout(settleMs);
+    return true;
+}
+
+
+/** Walk back out of any deep surface to the main turn shell. */
+async function returnToShell(frame: Frame): Promise<void> {
+    // ONLY dismiss overlays and take the DESK nav. Earlier this also clicked
+    // PRESIDENT'S DESK / WARROOM / BACK-TO-FIELD, which navigate INTO sub-scenes —
+    // the Presidential Inbox was then absent and the driver reported "0 decision
+    // cards" while the decision was sitting one screen away.
+    await clickIfPresent(frame, /^Close$/i, 1000);
+    await clickIfPresent(frame, /^DESK$/i, 1800);
+}
+
+
+
+/**
+ * Close whatever overlay is open. A decision modal left up covers the top navigation,
+ * so ADVANCE becomes unfindable and the turn looks stuck for a reason that is purely
+ * the driver's own doing.
+ */
+async function dismissModal(frame: Frame): Promise<void> {
+    await clickIfPresent(frame, /^Close$/i, 1200);
+    await frame.page().keyboard.press('Escape').catch(() => undefined);
+    await frame.page().waitForTimeout(1200);
+}
+
+
+/**
+ * Answer a diplomatic peace-plan modal (Cutileiro, Vance-Owen, Owen-Stoltenberg,
+ * Contact Group). These block the turn the same way a required decision does, but they
+ * are a DIFFERENT surface: a modal with Accept / Review Later / Reject and — unlike an
+ * event decision — no "HISTORICAL DEFAULT" marker and no per-option stakes. The driver
+ * therefore cannot choose historically here; it takes `--peace` and records the choice
+ * so a diary says what was picked rather than implying history picked it.
+ *
+ * "Review Later" is deliberately never used: it defers without clearing the block.
+ */
+async function resolvePeacePlan(frame: Frame, recorder: FindingsRecorder): Promise<boolean> {
+    const accept = (arg('peace', 'reject') ?? 'reject').toLowerCase() === 'accept';
+    const target = accept ? /Accept Plan/i : /Reject Plan/i;
+    const btn = frame.getByRole('button', { name: target }).first();
+    if ((await btn.count().catch(() => 0)) === 0) return false;
+
+    recorder.record(
+        finding('friction', 'medium', 'ui-peace-plan-unmarked',
+            'Peace-plan modal offers no historical default and no per-option stakes',
+            'The diplomatic peace-plan modal presents Accept / Review Later / Reject with no '
+            + 'HISTORICAL DEFAULT marker and no dimension shifts, unlike event decisions which show both. '
+            + 'The player cannot tell what history did or what any choice costs. '
+            + `Driver policy for this run: ${accept ? 'accept' : 'reject'}.`,
+            'ui:peace_plan_modal', { policy: accept ? 'accept' : 'reject' }),
+    );
+    await btn.click({ timeout: 10_000 }).catch(() => undefined);
+    await frame.page().waitForTimeout(3000);
+    await dismissModal(frame);
+    return true;
+}
+
+/**
+ * Open and answer one pending presidential decision. Returns false when none is open.
+ *
+ * Matched structurally rather than by title: the card carries "Pending since <date>",
+ * and options carry a "Historical default" marker. Hardcoding the event name would
+ * make the driver work for exactly one turn of one campaign.
+ */
+async function resolveOneDecision(frame: Frame): Promise<boolean> {
+    // The Presidential Inbox card reads "Required DECISION <title> ...". Matched on the
+    // Required/DECISION badge pair rather than a title, so it works for any event.
+    const card = frame.getByRole('button', { name: /Required\s*DECISION/i }).first();
+    const nCards = await card.count().catch(() => 0);
+    console.log(`      [decision] inbox cards matching Required/DECISION: ${nCards}`);
+    if (nCards === 0) return false;
+    await card.click({ timeout: 10_000 }).catch(() => undefined);
+    await frame.page().waitForTimeout(2500);
+
+    // The modal contains exactly the response options and NO confirm button — clicking
+    // an option IS the decision. Prefer the authored historical default; else take the
+    // first option. (Verified by dumping the modal: three buttons, no confirm.)
+    // hasText matches textContent; getByRole matches the ACCESSIBLE NAME, which for
+    // these option cards is not the same string and matched nothing.
+    const preferred = frame.locator('button').filter({ hasText: /Historical default/i }).first();
+    const nPref = await preferred.count().catch(() => 0);
+    console.log(`      [decision] historical-default options visible: ${nPref}`);
+    if (nPref > 0) {
+        await preferred.click({ timeout: 8000 }).catch(() => undefined);
+        await frame.page().waitForTimeout(2500);
+        await dismissModal(frame);
+        return true;
+    }
+    const anyOption = frame.locator('button.w-full.text-left').first();
+    if ((await anyOption.count().catch(() => 0)) > 0) {
+        await anyOption.click({ timeout: 8000 }).catch(() => undefined);
+        await frame.page().waitForTimeout(2500);
+        await dismissModal(frame);
+        return true;
+    }
+    await clickIfPresent(frame, /^Close$/i, 1200);
+    return false;
+}
+
+/**
+ * Clear whatever is blocking the turn, then advance.
+ *
+ * The gate is real and layered: ADVANCE is not directly available while a required
+ * decision is outstanding. The player must go REVIEW BLOCKERS -> Decision Room ->
+ * OPEN PRESIDENT'S DESK -> answer the decision, and only then can the turn move.
+ * Each step here mirrors a click a human makes.
+ */
+async function advanceOneTurn(
+    win: Page, frame: Frame, turn: number, recorder: FindingsRecorder,
+): Promise<{ advanced: boolean; from: string; to: string }> {
+    // Get back to the turn surface FIRST. Deep surfaces (Army HQ Main Staff, the
+    // Decision Room) have no ADVANCE of their own, so arriving from a surface tour and
+    // reporting "no ADVANCE control" measures the driver's own navigation, not the app.
+    // That exact false critical was emitted on the first playthrough run.
+    // Resolve decisions from wherever we are; the Presidential Inbox is present on the
+    // post-Begin shell and navigating first was losing it.
+    const from = await readDate(frame);
+    console.log(`    [turn ${turn}] at ${from}`);
+
+    // 1. Answer every required decision. The app REFUSES to advance while one is
+    //    outstanding — correct behaviour, and the reason an unanswered decision looks
+    //    exactly like a broken ADVANCE button from the outside.
+    for (let attempt = 0; attempt < 5; attempt++) {
+        const didDecision = await resolveOneDecision(frame);
+        const didPeace = await resolvePeacePlan(frame, recorder);
+        if (!didDecision && !didPeace) break;
+    }
+
+    // 2. Advance. ADVANCE lives on the PRESIDENT'S DESK surface, not the map shell —
+    //    the shell nav is DESK/WAR MAP/ARMY HQ/RECORDS/CHRONICLE/CODEX with no ADVANCE,
+    //    so looking for it from there finds nothing and looks like a missing control.
+    await clickIfPresent(frame, /^PRESIDENT.S DESK$/i, 2500);
+    // The control is labelled "ADVANCE TURN ->", not "ADVANCE". An anchored /^ADVANCE$/
+    // matched nothing and looked exactly like a missing control for several runs.
+    const clicked = await clickIfPresent(frame, /ADVANCE\s*TURN|^ADVANCE/i, 6000);
+    console.log(`    [turn ${turn}] advance clicked: ${clicked}`);
+    if (!clicked) {
+        recorder.record(
+            finding('bug', 'critical', 'ui-no-advance-control', 'No enabled ADVANCE control on the turn surface',
+                `At turn ${turn} (${from}) there is no clickable ADVANCE. The player cannot move the war forward.`,
+                'ui:turn_loop', { turn, date: from }),
+        );
+        return { advanced: false, from, to: from };
+    }
+
+    // 3. Confirm the date actually moved. A click that returns without advancing is the
+    //    failure this lane exists to catch, and it is silent.
+    let to = from;
+    for (let i = 0; i < 12 && to === from; i++) {
+        await win.waitForTimeout(2500);
+        to = await readDate(frame);
+    }
+    if (to === from) {
+        recorder.record(
+            finding('bug', 'critical', 'ui-advance-noop', 'Clicking ADVANCE does not move the date',
+                `ADVANCE was clicked at ${from} and the date readout was unchanged 30s later. The turn did not advance.`,
+                'ui:turn_loop', { turn, date: from }),
+        );
+        return { advanced: false, from, to };
+    }
+    return { advanced: true, from, to };
+}
+
+/** Visit each top-level surface once and probe it. Breadth, not depth. */
+async function tourSurfaces(win: Page, frame: Frame, recorder: FindingsRecorder,
+                            capture: (w: Page, n: string) => Promise<void>): Promise<void> {
+    for (const [label, re] of [
+        ['war_map', /^WAR MAP$/i], ['army_hq', /^ARMY HQ$/i], ['records', /^RECORDS$/i],
+        ['chronicle', /^CHRONICLE$/i], ['codex', /^CODEX$/i], ['desk', /^DESK$/i],
+    ] as Array<[string, RegExp]>) {
+        if (!(await clickIfPresent(frame, re, 3500))) {
+            recorder.record(
+                finding('friction', 'medium', 'ui-surface-unreachable', `Surface "${label}" has no reachable control`,
+                    `The top-level "${label}" navigation control was absent or disabled during normal play.`,
+                    `ui:${label}`),
+            );
+            continue;
+        }
+        await capture(win, `tour_${label}`);
+        await probeSurface(win, label, recorder);
+    }
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
@@ -306,45 +507,67 @@ async function main(): Promise<void> {
         await capture(win, 'main_menu');
         await probeSurface(win, 'main_menu', recorder);
 
-        // ── Surface 2: new campaign / faction select ──
-        if (!(await clickByText(win, 'New Campaign', 'main_menu', recorder))) {
+        // ── The case-file opening, which lives INSIDE the shell iframe ──
+        // (Desktop launch has routed here since 2026-08-27; the warroom's own static
+        // Command Post + side picker is now the browser/dev opening only.)
+        const frame = win.frames().find((f) => f.url().includes('embedded=1'));
+        if (!frame) {
             recorder.record(
-                finding('bug', 'critical', 'ui-missing-control', 'No enabled "New Campaign" control on the main menu',
-                    'The primary entry point into the game is absent or disabled on a fresh launch.', 'ui:main_menu'),
+                finding('bug', 'critical', 'ui-no-game-frame', 'No embedded shell frame at launch',
+                    'The iframe hosting the case-file opening was not created, so the game cannot be entered.',
+                    'ui:main_menu'),
             );
         } else {
-            await capture(win, 'faction_select');
-            await probeSurface(win, 'faction_select', recorder);
-
-            // ── Surface 3: in-campaign ──
-            const factionLabels: Record<string, string> = {
-                RBiH: 'Republic of Bosnia and Herzegovina',
-                RS: 'Republika Srpska',
-                HRHB: 'Croatian Republic of Herzeg-Bosnia',
+            const factionLabels: Record<string, RegExp> = {
+                RBiH: /Republic of Bosnia/i, RS: /Republika Srpska/i, HRHB: /Herzeg-Bosnia/i,
             };
-            if (await clickByText(win, factionLabels[faction] ?? faction, 'faction_select', recorder)) {
-                await win.waitForTimeout(8000); // campaign construction; not a DOM-diff event
-                await capture(win, 'campaign_start');
-                await probeSurface(win, 'campaign_start', recorder);
-                // Did the campaign actually start, or are we still staring at the picker?
-                const stillPicking = await win
-                    .$$eval('#side-picker', (els) => els.some((e) => window.getComputedStyle(e).display !== 'none'))
-                    .catch(() => false);
-                if (stillPicking) {
+            // landing -> factions -> dossier -> mode -> Begin. Each is a click a human makes.
+            const beats: Array<[string, RegExp, number]> = [
+                ['factions', /New War/i, 3000],
+                ['dossier', factionLabels[faction] ?? new RegExp(faction, 'i'), 3000],
+                ['mode', /Take command/i, 3000],
+                ['campaign_start', /^Begin$/i, 16000],
+            ];
+            let reached = true;
+            for (const [label, re, settle] of beats) {
+                if (!(await clickIfPresent(frame, re, settle))) {
                     recorder.record(
-                        finding('bug', 'critical', 'ui-campaign-start-blocked',
-                            'Selecting a faction does not start a campaign',
-                            'The faction was clicked on the side picker and the picker is still on screen afterwards. '
-                            + 'The player cannot begin a game from the desktop UI.',
-                            'ui:side_picker', { faction }),
+                        finding('bug', 'critical', 'ui-opening-beat-unreachable',
+                            `Case-file opening stalls before "${label}"`,
+                            `No enabled control matching ${re} on the preceding beat, so the opening cannot proceed to ${label}.`,
+                            'ui:case_file_opening', { beat: label, faction }),
                     );
+                    reached = false;
+                    break;
                 }
-            } else {
-                recorder.record(
-                    finding('bug', 'critical', 'ui-missing-control', `No enabled control to select faction ${faction}`,
-                        `"${factionLabels[faction] ?? faction}" was not clickable on the faction-select surface.`,
-                        'ui:faction_select', { faction }),
-                );
+                await capture(win, label);
+                await probeSurface(win, label, recorder);
+            }
+
+            if (reached) {
+                // ── Play. This is the part that makes it a playtest rather than a launch check.
+                const turnsWanted = Number(arg('turns', '0'));
+                if (turnsWanted > 0) {
+                    let played = 0;
+                    for (let t = 1; t <= turnsWanted; t++) {
+                        const r = await advanceOneTurn(win, frame, t, recorder);
+                        if (!r.advanced) {
+                            console.log(`  turn ${t}: STUCK at ${r.from}`);
+                            await capture(win, `stuck_turn_${t}`);
+                            break;
+                        }
+                        played++;
+                        console.log(`  turn ${t}: ${r.from} -> ${r.to}`);
+                        if (t % 5 === 0 || t === turnsWanted) {
+                            await capture(win, `turn_${String(t).padStart(3, '0')}`);
+                            await probeSurface(win, 'in_game', recorder);
+                        }
+                    }
+                    console.log(`  turns advanced through the UI: ${played}/${turnsWanted}`);
+                    // Tour LAST: it navigates into deep surfaces, and doing it before the
+                    // turn loop left the shell somewhere the Presidential Inbox is absent.
+                    await tourSurfaces(win, frame, recorder, capture);
+                }
             }
         }
 
