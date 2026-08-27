@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import {
     computePlanningDuration,
+    advanceSectorOffensives,
     evaluateSectorOffensiveLaunch,
     getMomentumAggressionBonus,
     getMomentumMinOutcome,
@@ -11,6 +14,35 @@ import { OPERATION_NAMES, pickOperationName } from '../src/sim/combat/operation_
 import { _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
 import type { SupplyStateByOsidReport } from '../src/state/supply_state_derivation.js';
+import { deserializeState, serializeState } from '../src/state/serialize.js';
+
+const retiredDelayKey = ['halt', 'delay', 'turns', 'remaining'].join('_');
+const retiredDigInKey = ['dig', 'in', 'on', 'halt'].join('_');
+
+function firstOperation(state: GameState): Record<string, unknown> {
+    for (const command of Object.values(state.military.corps_command ?? {})) {
+        const operation = command.active_operations?.[0];
+        if (operation) return operation as unknown as Record<string, unknown>;
+    }
+    throw new Error('fixture must contain an active operation');
+}
+
+function withoutRetiredOperationKeys<T>(value: T): T {
+    const copy = structuredClone(value) as unknown;
+    const visit = (node: unknown): void => {
+        if (Array.isArray(node)) {
+            node.forEach(visit);
+            return;
+        }
+        if (node == null || typeof node !== 'object') return;
+        const record = node as Record<string, unknown>;
+        delete record[retiredDelayKey];
+        delete record[retiredDigInKey];
+        Object.values(record).forEach(visit);
+    };
+    visit(copy);
+    return copy as T;
+}
 
 function makeMinimalState(turn: number, formations: Record<string, Partial<FormationState>>): GameState {
     const fmts: Record<string, FormationState> = {};
@@ -128,6 +160,29 @@ describe('pre-planned operations', () => {
                 `Operation "${op.name}" assigned to exempt corps "${op.corps}"`,
             ).toBe(false);
         }
+    });
+});
+
+describe('retired operation halt state', () => {
+    it('loads an old save and advances identically when unknown retired keys are present', () => {
+        const fixture = readFileSync(
+            resolve(process.cwd(), 'data/derived/startup/apr_1992_initial_save.json'),
+            'utf8',
+        );
+        const cleanState = deserializeState(fixture);
+        const oldSave = JSON.parse(fixture) as GameState;
+        const oldOperation = firstOperation(oldSave);
+        oldOperation[retiredDelayKey] = 2;
+        oldOperation[retiredDigInKey] = true;
+        const oldState = deserializeState(JSON.stringify(oldSave));
+
+        advanceSectorOffensives(cleanState);
+        advanceSectorOffensives(oldState);
+
+        expect(withoutRetiredOperationKeys(oldState)).toEqual(withoutRetiredOperationKeys(cleanState));
+        const currentSave = serializeState(cleanState);
+        expect(currentSave).not.toContain(retiredDelayKey);
+        expect(currentSave).not.toContain(retiredDigInKey);
     });
 });
 

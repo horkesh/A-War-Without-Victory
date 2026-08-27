@@ -1076,14 +1076,6 @@ function applyCohesionDelta(state: GameState, brigadeIds: FormationId[], delta: 
     }
 }
 
-function applyDigInOnHalt(state: GameState, brigadeIds: FormationId[]): void {
-    for (const brigadeId of [...brigadeIds].sort(strictCompare)) {
-        const brigade = state.military.formations?.[brigadeId];
-        if (!brigade || brigade.status !== 'active') continue;
-        brigade.posture = 'dig_in';
-    }
-}
-
 function applyArtilleryPreparation(
     state: GameState,
     faction: FactionId,
@@ -1247,21 +1239,7 @@ export function advanceSectorOffensives(
         // Recompute supply readiness
         op.supply_readiness = computeSupplyReadiness(state, allBrigades, faction, supplyByOsid);
 
-        // Tick down player-ordered halt delay (set by interpretOperationHalt via IPC).
-        // Phase 3 will own the full decay pipeline; this gate must exist now.
-        if (op.halt_delay_turns_remaining != null && op.halt_delay_turns_remaining > 0) {
-            op.halt_delay_turns_remaining--;
-            if (op.halt_delay_turns_remaining === 0) {
-                op.recovery_reason = 'manual_termination';
-            }
-            // Do not advance attack this turn while delay is counting down
-            continue;
-        }
-
         if (op.recovery_reason === 'manual_termination' && op.phase !== 'recovery') {
-            if (op.dig_in_on_halt) {
-                applyDigInOnHalt(state, allBrigades);
-            }
             beginRecovery(op, turn, 'manual_termination', state);
             continue;
         }

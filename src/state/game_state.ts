@@ -541,8 +541,6 @@ export interface CorpsOperation {
     force_launch_consequence_applied?: boolean;
     /** Internal consumption flag for artillery preparation. */
     artillery_preparation_consumed?: boolean;
-    /** Dig in participating brigades when manually halted. */
-    dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
     recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
     /** Named officer commanding this operation (if any). */
@@ -608,11 +606,6 @@ export interface CorpsOperation {
 
     /** True when this is an emergency defensive operation (bypasses slot limit, max 1). */
     is_emergency?: boolean;
-
-    /** Turns remaining before a player-ordered halt takes effect.
-     *  Set by interpretOperationHalt. Decremented per-turn in Phase 3 decay step.
-     *  When it reaches 0, recovery_reason = 'manual_termination' is written. */
-    halt_delay_turns_remaining?: number;
 
     // --- Synchronized operation fields (Army HQ Gathering v0.4.7) ---
     /** If part of a synchronized operation, the sync op name */

@@ -1931,7 +1931,6 @@ export const warPhases: NamedPhase[] = [
             }
 
             // 2. Clean stale acknowledged officer events (acknowledged + older than 8 turns).
-            // NOTE: halt_delay_turns_remaining countdown stays in sector_offensive.ts (must run pre-combat).
             if (state.military.pending_officer_events) {
                 state.military.pending_officer_events = state.military.pending_officer_events.filter(
                     evt => !(evt.acknowledged && evt.turn < turn - 8)

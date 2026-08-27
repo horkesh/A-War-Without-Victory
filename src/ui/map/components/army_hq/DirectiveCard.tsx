@@ -9,11 +9,10 @@
  *     stageOpDirectiveOrder({ forced_over_objection: true }). Honors the IMPOSSIBLE /
  *     rejectionReason "cannot issue" path (never stages / debits CA).
  *   - force_launch: no objection re-query — the officer already surfaced (or never
- *     surfaced) the plan. stageForceLaunch routes by payload discriminator:
+ *     surfaced) the plan. stageForceLaunch requires an exact-ID discriminator:
  *     proposalId → forceLaunchProposal (resolves the pending review, 15 CA);
- *     planId → proactiveForceLaunchOp (held-ready plan, 25 CA); else opName →
- *     stageOperationForceLaunch (legacy active-op). The card-declared cost matches
- *     the IPC that its discriminator selects.
+ *     planId → proactiveForceLaunchOp (held-ready plan, 25 CA). The card-declared
+ *     cost matches the IPC that its discriminator selects.
  *   - stop_op / authorize_op: no objection — confirm calls stageOpHaltOrder /
  *     acceptProposal directly.
  *
@@ -441,14 +440,12 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
     else { resetTransient(); setTargetOsidInput(''); markIssued(); }
   };
 
-  /** Force-launch an operation (no objection query — the officer never surfaced a
-   *  no-go, or already offered an override). Routes by the payload discriminator so
-   *  each of the three distinct force-launch flows reaches its OWN IPC + cost:
+  /** Force-launch an operation through an exact operation identifier. Routes by
+   *  the payload discriminator so each retained flow reaches its OWN IPC + cost:
    *    - proposalId → forceLaunchProposal (proposal-override; resolves the pending
    *      review so it does not reappear; debits FORCE_LAUNCH_COST/15),
    *    - planId → proactiveForceLaunchOp (held-ready plan with no proposal; resolves
-   *      from commander_state.current_plan; debits PROACTIVE_FORCE_LAUNCH_COST/25),
-   *    - else opName → stageOperationForceLaunch (legacy active_operations-by-name). */
+   *      from commander_state.current_plan; debits PROACTIVE_FORCE_LAUNCH_COST/25). */
   const stageForceLaunch = async () => {
     if (!directive.corpsId) {
       setLoadError('Directive is missing its corps/operation context.');
@@ -462,9 +459,8 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
     } else if (planId) {
       result = await ipc.proactiveForceLaunchOp(directive.corpsId, planId);
     } else {
-      const opName = typeof directive.payload.opName === 'string' ? directive.payload.opName : '';
-      if (!opName) { setLoadError('Directive is missing its corps/operation context.'); return; }
-      result = await ipc.stageOperationForceLaunch({ corpsId: directive.corpsId, operationName: opName });
+      markFailed('Force launch requires an exact operation ID');
+      return;
     }
     if (!result.ok) markFailed(result.error ?? 'Failed to force-launch operation.');
     else { resetTransient(); markIssued(); }

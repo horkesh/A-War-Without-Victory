@@ -63,7 +63,7 @@ import { resolvePlayerParamilitaryDecisions } from '../sim/combat/paramilitary_s
 
 // Electron main consumes simulation code through this built bundle. Direct
 // source-relative imports from electron-main.cjs do not exist in packaged output.
-export { interpretOperationLaunch, overrideInterpretation } from '../sim/combat/order_interpretation.js';
+export { overrideInterpretation } from '../sim/combat/order_interpretation.js';
 export { dismissEventNotification } from '../sim/events/dismiss_notifications.js';
 export { resolvePeacePlan } from '../sim/negotiation/peace_plans.js';
 export { submitPlayerCounterOffer } from '../sim/negotiation/counter_offer_generator.js';

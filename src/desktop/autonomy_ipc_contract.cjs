@@ -111,7 +111,7 @@ function resolveOpportunityDecisionPayload(proposals, payload, playerFaction) {
 
 // Phase 2 slice 1 "Back the Officer": force-launch (Level 3 Direct Intervention)
 // command-authority cost. MUST match src/ui/map/utils/commandAuthority.ts
-// (FORCE_LAUNCH_COST = 15) and the stage-operation-force-launch handler.
+// (FORCE_LAUNCH_COST = 15) and the force-launch-proposal handler.
 const FORCE_LAUNCH_COST = 15;
 // Proactive presidential force-launch (override-without-proposal) command-authority
 // cost. MUST match src/ui/map/utils/commandAuthority.ts (PROACTIVE_FORCE_LAUNCH_COST

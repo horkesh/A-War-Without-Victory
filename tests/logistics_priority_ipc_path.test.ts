@@ -78,7 +78,7 @@ describe('stage-logistics-priority IPC path', () => {
     it('electron handler writes logistics priority only under state.military', () => {
         const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
         const handlerStart = source.indexOf("ipcMain.handle('stage-logistics-priority'");
-        const handlerEnd = source.indexOf("ipcMain.handle('stage-operation-force-launch'");
+        const handlerEnd = source.indexOf("ipcMain.handle('acknowledge-friction-event'");
         const handler = source.slice(handlerStart, handlerEnd);
 
         expect(handler).toContain('state.military.logistics_priority');

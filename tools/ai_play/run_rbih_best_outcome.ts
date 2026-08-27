@@ -17,7 +17,7 @@ import { writeFileSync, appendFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
     startCampaign, advance, serializeDecisionContext, injectDecision, stateHash,
-    requestOp, stopOp, replaceCo, forceLaunch, eliteDeploy, localSupport,
+    requestOp, stopOp, replaceCo, eliteDeploy, localSupport,
     resolvePeacePlanChoice, resolveParamilitary, resolveDayton, blockingDecisions,
     resolveProposal, pendingProposals, REPO_BASE_DIR,
     type DecisionLogEntry,

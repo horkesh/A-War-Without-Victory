@@ -14,7 +14,6 @@ describe('desktop persistence contract', () => {
     );
 
     const requiredExports = [
-      'interpretOperationLaunch',
       'overrideInterpretation',
       'dismissEventNotification',
       'resolvePeacePlan',
@@ -30,6 +29,24 @@ describe('desktop persistence contract', () => {
       expect(electronMain).toContain(`sim.${exportName}`);
     }
     expect(electronMain).not.toMatch(/(?:require\(|import\()[^\n]*\.\.\/sim\//);
+  });
+
+  it('does not expose the retired operation-name launch authority through the desktop bridge', () => {
+    const retiredHandler = ['stage', 'operation', 'force', 'launch'].join('-');
+    const retiredBridgeMethod = ['stage', 'Operation', 'Force', 'Launch'].join('');
+    const retiredSimExport = ['interpret', 'Operation', 'Launch'].join('');
+    const sources = [
+      'src/desktop/electron-main.cjs',
+      'src/desktop/preload.cjs',
+      'src/desktop/desktop_sim.ts',
+      'src/ui/map/desktop/useIPC.ts',
+    ].map((path) => readFileSync(resolve(process.cwd(), path), 'utf8'));
+
+    for (const source of sources) {
+      expect(source).not.toContain(retiredHandler);
+      expect(source).not.toContain(retiredBridgeMethod);
+      expect(source).not.toContain(retiredSimExport);
+    }
   });
 
   it('autosaves every canonical presidential mutation after serialization', () => {

@@ -737,3 +737,70 @@ strict-null expectation requires the bounded amendment, the exact frozen failure
 40-week empty-large-sector assertions in `integration_deployment_health` and
 `integration_run_diagnostics` plus the queued Cutileiro assertion in `peace_plans`, and all other
 tests passed. No failure diagnosis or unrelated repair is authorized.
+
+## P2A — legacy force-launch and halt-authority deletion evidence
+
+Base `5b8ad68f606499459d591b1528e83bd07455f021`; canonical staged implementation
+payload SHA-256 `c713c5800e7d717ba45d5abec29f6ae09be31f67ea76b2a7cbb039e91c8e004c`
+over 20 byte-order-sorted Git-index rows for the twelve changed production paths
+`src/desktop/autonomy_ipc_contract.cjs`, `src/desktop/desktop_sim.ts`,
+`src/desktop/electron-main.cjs`, `src/desktop/preload.cjs`,
+`src/sim/combat/order_interpretation.ts`, `src/sim/combat/sector_offensive.ts`,
+`src/sim/turn_phases/war_phases.ts`, `src/state/game_state.ts`,
+`src/ui/map/components/army_hq/DirectiveCard.tsx`, `src/ui/map/desktop/useIPC.ts`,
+`tools/ai_play/president_playthrough.ts`, and `tools/ai_play/run_rbih_best_outcome.ts`;
+and the eight changed test paths `tests/desktop_persistence_contract.test.ts`,
+`tests/logistics_priority_ipc_path.test.ts`, `tests/sector_offensive.test.ts`,
+`tests/sim/combat/phase3_reliability_decay.test.ts`,
+`tests/sim/command/phase2_operation_interpretation.test.ts`,
+`tests/strict_null_inventory_progress.test.ts`,
+`tests/ui/directive_card_stop_op_action.test.ts`,
+and `tests/ui/lever_single_host_guard.test.ts`. Focused verification also covered the three named,
+unchanged files `tests/back_the_officer_human_only_determinism.test.ts`,
+`tests/sim/combat/order_interpretation.test.ts`, and
+`tests/ui/presidential_decision_room.test.ts`; unchanged files are excluded from the staged
+implementation payload. Production numstat is `+13/-445`, net
+`-432`; cumulative reduced-RE production is net `-425` after P1's `+7`.
+
+The valid tests-first RED passed 73 assertions and failed five deletion-authority/state
+expectations: the legacy desktop handler/bridge/export remained, op-name-only UI still emitted
+IPC and reported success, the launch/halt interpreters and stale state remained, and injected
+old-save keys changed advance behavior. Minimal production deletion then produced Node-22 focused
+GREEN for all 11 named files, 248/248 tests. The Node-22 no-emit typecheck and desktop simulation
+build both exit zero. The Node-22 balanced run exits one only on the frozen failures:
+`integration_deployment_health` empty large sectors `3 > 2`,
+`integration_run_diagnostics` empty large sectors `3 > 2`, and `peace_plans` Cutileiro RBiH
+expected `rejected` but actual `accepted`; no other test fails.
+
+Exit census finds no live `stage-operation-force-launch`, `stageOperationForceLaunch`,
+`interpretOperationLaunch`, `interpretOperationHalt`, `dig_in_on_halt`, or
+`halt_delay_turns_remaining` authority/state symbol in production or tools; the two retired field
+names remain only in the approved strict-null historical explanation. Generic `forceLaunch`
+localization/read-model references are the preserved exact-ID proposal authority, not the deleted
+op-name path. The real startup-save proof injects the two retired unknown nested keys, advances
+both forms identically after removing those unknown keys, and current clean serialization omits
+both. Directive-card proof shows an op-name-only request fails locally with
+`Force launch requires an exact operation ID` and emits no IPC. Exact-ID
+`force-launch-proposal` and `proactive-force-launch-op` remain green. Player-visible effect: a
+stale operation-name-only force-launch attempt is rejected locally instead of invoking ambiguous
+desktop authority; valid exact-ID force-launch decisions are unchanged. Systems implementer
+verdict: **GO** — the packet is deletion-only, deterministic, materially shrinks production, adds
+no replacement API/state/flag/module/service/scan/migration/history case, and has no new balanced
+failure.
+
+Architect review: **GO** after the two exact provenance corrections. The packet restores one
+exact-ID authority for force launch, keeps old saves absent-safe without a compatibility reader,
+preserves the `force-launch-proposal` and `proactive-force-launch-op` paths, introduces no
+replacement authority or state, and delivers the required net production deletion.
+
+Independent code-quality review: **GO**. The deletion is coherent across desktop, preload, UI,
+simulation, state, and AI tooling; no dangling caller or accidental exact-ID authority loss
+remains, and the focused structural and behavioral tests adequately cover the removed surface.
+
+Independent Process QA and determinism review: **GO; commit authorized**. Fresh Node-22 evidence
+passes all 11 focused files (248/248), the no-emit typecheck, and the desktop simulation build.
+The exact base, 20-row staged implementation digest, 25-path lock, staged scope, forbidden-path
+exclusion, production LOC reduction, old-save/current-serialization determinism proof, and exit
+census are verified. The balanced receipt contains exactly the frozen three failures:
+`integration_deployment_health` `3 > 2`, `integration_run_diagnostics` `3 > 2`, and the Cutileiro
+RBiH response mismatch in `peace_plans`; it contains no new failure.

@@ -21,10 +21,6 @@
  *   D1. acknowledged event from turn=1, current turn=12 → removed (>8 turns ago)
  *   D2. acknowledged event from turn=5, current turn=12 → NOT removed (7 turns ago)
  *   D3. unacknowledged event from turn=1, current turn=12 → NOT removed
- *
- * Suite E — halt_delay sanity: decay step does NOT touch halt_delay (1 test):
- *   E1. Decay step body does not reference halt_delay_turns_remaining
- *
  * Deterministic: no Math.random(), no Date.now().
  */
 
@@ -509,38 +505,5 @@ describe('Phase 3 Suite D: decay — stale acknowledged event cleanup', () => {
         expect(state.military.narrative_queue).toHaveLength(128);
         expect(state.military.narrative_queue?.[0]?.input.targetOsid).toBe('op:test:004');
         expect(state.military.narrative_queue?.[127]?.input.targetOsid).toBe('op:test:131');
-    });
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Suite E — halt_delay sanity: decay step does NOT touch halt_delay
-// ═══════════════════════════════════════════════════════════════════════════
-
-describe('Phase 3 Suite E: halt_delay sanity — decay step scope guard', () => {
-    it('E1. Decay step does not decrement halt_delay_turns_remaining (belongs to sector_offensive)', () => {
-        // The decay step comment explicitly states:
-        // "NOTE: halt_delay_turns_remaining countdown stays in sector_offensive.ts (must run pre-combat)."
-        // We verify that after running decay, a halt_delay_turns_remaining on an active operation
-        // is left completely untouched.
-        const data = makeOfficerData({ id: 'off_e1' });
-        const officerState = makeOfficerState({ officer_id: 'off_e1', assigned_corps_id: 'corps_e1' });
-        const state = makeMinimalState('corps_e1', data, officerState, 10);
-
-        // Inject a fake operation with halt_delay_turns_remaining
-        const corpsCmd = state.military.corps_command!['corps_e1']!;
-        (corpsCmd as unknown as Record<string, unknown>).active_operations = [
-            {
-                name: 'op_test',
-                phase: 'execution',
-                momentum: 3,
-                halt_delay_turns_remaining: 2,
-            },
-        ];
-
-        runDecayStep(state);
-
-        // The decay step must not have touched halt_delay_turns_remaining
-        const ops = (corpsCmd as unknown as { active_operations: Array<{ halt_delay_turns_remaining: number }> }).active_operations;
-        expect(ops[0]!.halt_delay_turns_remaining).toBe(2);
     });
 });

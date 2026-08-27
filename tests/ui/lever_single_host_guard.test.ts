@@ -8,7 +8,6 @@ const uiRoot = join(repoRoot, 'src/ui/map');
 const LEVER_METHODS = [
   'stageOpDirectiveOrder',
   'stageOpHaltOrder',
-  'stageOperationForceLaunch',
   'stageCoReplacementOrder',
   'approveReserveRequest',
 ] as const;

@@ -26,7 +26,6 @@ import {
     resolvePeacePlan,
     resolveDaytonNegotiation,
     resolvePlayerParamilitaryDecisions,
-    interpretOperationLaunch,
     listBlockingPlayerDecisions,
     type DesktopScenarioKey,
 } from '../../src/desktop/desktop_sim.js';
@@ -61,7 +60,6 @@ import { stageCoReplacement } from '../../src/desktop/co_replacement.cjs';
 // @ts-ignore
 import { stageMunicipalitySupportOrderOnState } from '../../src/desktop/municipality_support_staging.cjs';
 // @ts-ignore
-import { FORCE_LAUNCH_COST } from '../../src/desktop/autonomy_ipc_contract.cjs';
 
 // ── Repo base dir ────────────────────────────────────────────────────────────
 // This file lives at <repo>/tools/ai_play/. baseDir is the repo root.
@@ -277,42 +275,6 @@ export function stopOp(state: GameState, corpsId: string, opName: string): Lever
 /** REPLACE-CO: sack + install (auto-pick if replacementOfficerId omitted). CA 25. */
 export function replaceCo(state: GameState, corpsId: string, replacementOfficerId?: string): LeverResult {
     return stageCoReplacement(state, { corpsId, ...(replacementOfficerId ? { replacementOfficerId } : {}) });
-}
-
-/**
- * FORCE-LAUNCH: override a corps commander's go/no-go on a named active operation.
- * Replicates the small inline logic in electron-main.cjs's `stage-operation-force-launch`
- * handler (never factored into a standalone .cjs module) rather than duplicating a new
- * mechanism. CA 15.
- */
-export function forceLaunch(state: GameState, corpsId: string, operationName: string): LeverResult {
-    // Fixed 2026-08-06 per Pyrrhic panel review (Scenario Harness Engineer): this read
-    // `state.corps_command` (always undefined — corps_command lives on `state.military`),
-    // so forceLaunch unconditionally returned {ok:false} and never actually fired.
-    // NOTE: the identical bug exists in the shipped src/desktop/electron-main.cjs:2571 —
-    // a separate, real, player-facing production defect, out of scope for this harness
-    // fix pass; documented in docs/40_reports/20260806_RBIH_PYRRHIC_PANEL_SYNTHESIS.md
-    // Part 5 item 9 for its own dedicated fix.
-    const cc = (state as any).military?.corps_command?.[corpsId];
-    const op = (cc?.active_operations ?? []).find((o: any) => o.name === operationName);
-    if (!op) return { ok: false, error: 'Operation not found' };
-    const auth = state.military.command_authority as any;
-    if (auth) {
-        if (auth.current < FORCE_LAUNCH_COST) {
-            return { ok: false, error: `insufficient_command_authority (${auth.current}/${FORCE_LAUNCH_COST})` };
-        }
-        auth.current -= FORCE_LAUNCH_COST;
-        auth.spent_this_turn += FORCE_LAUNCH_COST;
-        auth.lifetime_spent += FORCE_LAUNCH_COST;
-    }
-    const launchResult: any = interpretOperationLaunch(state, corpsId, op.name);
-    if (launchResult.compliance === 'refused') return { ok: true, refused: true };
-    if (launchResult.effective_planning_duration != null) op.planning_duration = launchResult.effective_planning_duration;
-    if (launchResult.effective_objectives != null) op.objectives = launchResult.effective_objectives;
-    op.force_launch = true;
-    op.was_force_launched = true;
-    op.commander_assessment_at_launch = op.commander_assessment;
-    return { ok: true };
 }
 
 /** ELITE-DEPLOY: release an elite/reserve brigade to a corps. CA 25. Async (desktop_sim). */

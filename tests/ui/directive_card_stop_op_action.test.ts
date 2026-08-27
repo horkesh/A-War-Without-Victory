@@ -84,6 +84,7 @@ const frontVisitDirective: PresidentialDecisionRoomDirective = {
 };
 
 function installIpc(overrides: Record<string, unknown> = {}) {
+  const unexpectedInvocations: string[] = [];
   const bridge = {
     stageOpHaltOrder: vi.fn(async () => ({ ok: true })),
     acceptProposal: vi.fn(async () => ({ ok: true })),
@@ -92,7 +93,6 @@ function installIpc(overrides: Record<string, unknown> = {}) {
       data: { forceRatio: 1.4, estimatedCasualties: 120, recommendedAction: 'launch' },
     })),
     stageOpDirectiveOrder: vi.fn(async () => ({ ok: true })),
-    stageOperationForceLaunch: vi.fn(async () => ({ ok: true })),
     forceLaunchProposal: vi.fn(async () => ({ ok: true })),
     proactiveForceLaunchOp: vi.fn(async () => ({ ok: true })),
     resolveOperationOpportunityDecision: vi.fn(async () => ({ ok: true })),
@@ -106,11 +106,21 @@ function installIpc(overrides: Record<string, unknown> = {}) {
       unreachableBranchIds: [],
     })),
     initiateFrontVisit: vi.fn(async () => ({ ok: true })),
+    _unexpectedInvocations: unexpectedInvocations,
     ...overrides,
   };
+  const proxiedBridge = new Proxy(bridge, {
+    get(target, property, receiver) {
+      if (Reflect.has(target, property)) return Reflect.get(target, property, receiver);
+      return vi.fn(async () => {
+        unexpectedInvocations.push(String(property));
+        return { ok: true };
+      });
+    },
+  });
   Object.defineProperty(window, 'awwv', {
     configurable: true,
-    value: bridge,
+    value: proxiedBridge,
   });
   return bridge;
 }
@@ -448,13 +458,6 @@ describe('DirectiveCard stop-op action host', () => {
 
   it.each([
     {
-      label: 'force launch',
-      directive: forceLaunchDirective,
-      button: 'Issue (15)',
-      method: 'stageOperationForceLaunch',
-      payload: { corpsId: 'arbih_3rd_corps', operationName: 'Operation Holdfast' },
-    },
-    {
       label: 'replace commander',
       directive: replaceCoDirective,
       button: 'Issue (25)',
@@ -487,6 +490,18 @@ describe('DirectiveCard stop-op action host', () => {
     );
   });
 
+  it('rejects an operation-name-only force launch locally without invoking any IPC method', async () => {
+    const bridge = installIpc();
+
+    render(React.createElement(DirectiveCard, { directive: forceLaunchDirective, gameState: baseGameState }));
+    fireEvent.click(screen.getByRole('button', { name: 'Issue (15)' }));
+
+    expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toMatch(/exact operation id/i);
+    expect(bridge.forceLaunchProposal).not.toHaveBeenCalled();
+    expect(bridge.proactiveForceLaunchOp).not.toHaveBeenCalled();
+    expect(bridge._unexpectedInvocations).toEqual([]);
+  });
+
   it('keeps a suggested elite at Main Staff without approving its deployment', async () => {
     const bridge = installIpc();
 
@@ -502,7 +517,7 @@ describe('DirectiveCard stop-op action host', () => {
 
   // Batch A — command-card routing (#126 / #119 / #274). Force-launch directives
   // carry a payload discriminator so each of the three flows reaches its OWN IPC at
-  // the OWN cost; the legacy opName-only path (asserted above) is the fallback.
+  // the OWN cost; opName-only payloads are rejected locally above.
   it('routes a proposal-override force-launch through forceLaunchProposal (not the legacy name lookup)', async () => {
     const bridge = installIpc();
     const directive: PresidentialDecisionRoomDirective = {
@@ -518,7 +533,7 @@ describe('DirectiveCard stop-op action host', () => {
     await waitFor(() => {
       expect(bridge.forceLaunchProposal).toHaveBeenCalledWith('APPROVE_OP:arbih_3rd_corps:plan_alpha');
     });
-    expect(bridge.stageOperationForceLaunch).not.toHaveBeenCalled();
+    expect(bridge._unexpectedInvocations).toEqual([]);
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
       'Directive staged for next turn',
     );
@@ -539,7 +554,7 @@ describe('DirectiveCard stop-op action host', () => {
     await waitFor(() => {
       expect(bridge.proactiveForceLaunchOp).toHaveBeenCalledWith('arbih_3rd_corps', 'plan_alpha');
     });
-    expect(bridge.stageOperationForceLaunch).not.toHaveBeenCalled();
+    expect(bridge._unexpectedInvocations).toEqual([]);
     expect(bridge.forceLaunchProposal).not.toHaveBeenCalled();
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
       'Directive staged for next turn',

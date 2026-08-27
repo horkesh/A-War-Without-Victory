@@ -2584,59 +2584,6 @@ app.whenReady().then(() => {
     }
   });
 
-  // NOTE: the legacy `stage-operation-halt` handler (officer-compliance halt via
-  // interpretOperationHalt — dig-in, halt delays, NO command-authority cost, and it
-  // never removed the op) was REMOVED. Its sole caller was the player Stand Down button
-  // in OperationsSection, which now routes through the CA-costed STOP-OP staged path
-  // (`stage-op-halt-order` → op_halt.cjs → apply-op-halts). One canonical halt path only.
-
-  ipcMain.handle('stage-operation-force-launch', async (_event, payload) => {
-    const { corpsId, operationName } = payload || {};
-    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const op = (state.corps_command?.[corpsId]?.active_operations ?? []).find(o => o.name === operationName);
-      if (!op) {
-        return { ok: false, error: 'Operation not found' };
-      }
-      // Level 3 Direct Intervention: deduct command authority.
-      const auth = state.military.command_authority;
-      if (auth) {
-        if (auth.current < FORCE_LAUNCH_COST) {
-          return { ok: false, error: `Insufficient command authority (${auth.current}/${FORCE_LAUNCH_COST} needed)` };
-        }
-        auth.current -= FORCE_LAUNCH_COST;
-        auth.spent_this_turn += FORCE_LAUNCH_COST;
-        auth.lifetime_spent += FORCE_LAUNCH_COST;
-      }
-      const launchResult = sim.interpretOperationLaunch(state, corpsId, op.name);
-      // Event (if any) already pushed to state.military.pending_officer_events by interpretOperationLaunch
-      if (launchResult.compliance === 'refused') {
-        // Officer aborted the operation — do not force-launch
-        // recovery_reason is already set to 'manual_termination' by interpretOperationLaunch
-        writeCanonicalCurrentState(sim, state);
-        return { ok: true };
-      }
-      // full / modified / partial: apply any modifications then force-launch
-      if (launchResult.effective_planning_duration != null) {
-        op.planning_duration = launchResult.effective_planning_duration;
-      }
-      if (launchResult.effective_objectives != null) {
-        op.objectives = launchResult.effective_objectives;
-      }
-      op.force_launch = true;
-      op.was_force_launched = true;
-      op.commander_assessment_at_launch = op.commander_assessment;
-      writeCanonicalCurrentState(sim, state);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
   // Level 2 — Presidential acknowledgement of a warlord friction event.
   // Sets resolved: true on the matching friction event, reducing command strain over time.
   // Payload: { corpsId, officerId, eventTurn, eventType }
@@ -3616,7 +3563,7 @@ app.whenReady().then(() => {
           evt.acknowledged = true;
           let decision = 'acknowledged';
           if (evt.override_action === 'override-officer-interpretation') {
-            // Look up the corps_id from the event (set by interpretStanceOrder / interpretOperationLaunch / interpretOperationHalt)
+            // Look up the corps_id from the stance-interpretation event.
             const corpsId = evt.corps_id;
             if (corpsId) {
               sim.overrideInterpretation(state, corpsId, eventId);

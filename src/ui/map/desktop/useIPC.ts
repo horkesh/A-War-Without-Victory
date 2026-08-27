@@ -249,7 +249,6 @@ interface WindowAwwv {
      *  a cohesion/morale cost. Supersedes the removed broken assignCommander/dismissOfficer. */
     stageCoReplacementOrder: (payload: { corpsId: string; replacementOfficerId?: string }) => Promise<{ ok: boolean; error?: string; replacementOfficerId?: string }>;
     dismissEventNotification: (notificationId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageOperationForceLaunch: (payload: { corpsId: string; operationName: string }) => Promise<{ ok: boolean; error?: string }>;
     stageOperationDecision: (payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => Promise<{ ok: boolean; error?: string }>;
     stageAirdropAllocation: (allocations: Record<string, number>) => Promise<{ ok: boolean; error?: string }>;
     respondToEventDecision: (eventId: string, responseId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -547,10 +546,6 @@ export function useIPC() {
             dismissEventNotification: awwv
                 ? (notificationId: string) => awwv.dismissEventNotification(notificationId)
                 : (_notificationId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
-
-            stageOperationForceLaunch: awwv
-                ? (payload: { corpsId: string; operationName: string }) => awwv.stageOperationForceLaunch(payload)
-                : (_payload: { corpsId: string; operationName: string }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             stageOperationDecision: awwv
                 ? (payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => awwv.stageOperationDecision(payload)
