@@ -171,10 +171,24 @@ export function isSupportBrigadeOnActiveOp(
     return false;
 }
 
-/** Compute planning duration for multi-axis ops: based on longest axis. */
+/** Minimum extra turns added to planning for an operation march. */
+export const PLANNING_MARCH_BUFFER = 2;
+
+/** Hard cap preventing long idle planning periods for large operations. */
+export const MAX_PLANNING_DURATION = 4;
+
+/** Compute a planning window from objective count, including the march buffer. */
+export function computePlanningDuration(objectiveCount: number): number {
+    let base: number;
+    if (objectiveCount <= 2) base = 1;
+    else if (objectiveCount <= 5) base = Math.ceil(objectiveCount * 0.6);
+    else base = Math.min(5, Math.ceil(objectiveCount * 0.8));
+    return Math.min(MAX_PLANNING_DURATION, base + PLANNING_MARCH_BUFFER);
+}
+
+/** Compute planning duration for multi-axis ops from the longest axis. */
 export function computeMultiAxisPlanningDuration(
     axes: OperationAxis[],
-    computePlanningDuration: (objectiveCount: number) => number,
 ): number {
     let maxLen = 0;
     for (const axis of axes) {

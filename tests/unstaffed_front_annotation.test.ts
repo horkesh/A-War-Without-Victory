@@ -206,6 +206,7 @@ describe('annotateUnstaffedFrontSectors', () => {
                     primary_brigade_ids: [],
                 }],
                 edge_ids: ['edge:hrhb:outside-zepce'],
+                reserve_brigade_ids: ['hrhb_111th_brigade'],
             }),
         } as Record<string, any>;
 
@@ -241,5 +242,52 @@ describe('annotateUnstaffedFrontSectors', () => {
         annotateUnstaffedFrontSectors(sectors, state, formations, adjacency);
 
         expect(sectors['sector:hrhb:outside-zepce']!.unstaffed_front).toBe(true);
+    });
+
+    it('does not mark a reserve-only front unstaffed when its reserve can legally reach the line', () => {
+        const sector = makeSector({
+            sector_id: 'sector:rs:reserve-reachable',
+            territory_osids: ['op:rs:front', 'op:rs:reserve'],
+            reserve_brigade_ids: ['rs_reachable_reserve'],
+            edge_ids: ['edge:rs:reserve-reachable'],
+            sub_segments: [{
+                sub_segment_id: 'subseg:rs:reserve-reachable:0',
+                friendly_osids: ['op:rs:front'],
+                enemy_osids: ['op:enemy:front'],
+                edge_ids: ['edge:rs:reserve-reachable'],
+                length_edges: 1,
+                primary_brigade_ids: [],
+            }],
+        }) as any;
+        const sectors = { [sector.sector_id]: sector } as Record<string, any>;
+        const state = {
+            factions: [{ id: 'RS' }],
+            military: {},
+            political: {
+                political_controllers: {
+                    'op:rs:front': 'RS',
+                    'op:rs:reserve': 'RS',
+                    'op:enemy:front': 'RBiH',
+                },
+            },
+        } as any;
+        const formations = {
+            rs_reachable_reserve: {
+                id: 'rs_reachable_reserve',
+                kind: 'brigade',
+                faction: 'RS',
+                corps_id: 'corps:test',
+                status: 'active',
+                location_osid: 'op:rs:reserve',
+            },
+        } as any;
+        const adjacency = makeAdjacency([
+            ['op:rs:reserve', 'op:rs:front'],
+            ['op:rs:front', 'op:enemy:front'],
+        ]);
+
+        annotateUnstaffedFrontSectors(sectors, state, formations, adjacency);
+
+        expect(sector.unstaffed_front).toBeUndefined();
     });
 });

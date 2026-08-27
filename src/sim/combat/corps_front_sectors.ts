@@ -1417,7 +1417,10 @@ export function annotateUnstaffedFrontSectors(
                 && formation.location_osid);
         for (const sector of factionSectors) {
             if (sector.edge_ids.length === 0) continue;
-            if ((sector.assigned_brigade_ids?.length ?? 0) + (sector.reserve_brigade_ids?.length ?? 0) > 0) continue;
+            // Reserves do not staff the line. A reserve-only sector still needs the
+            // legality-aware donor check below: enclave or fixed-home constraints
+            // can make its front genuinely unstaffable even when a reserve is near.
+            if ((sector.assigned_brigade_ids?.length ?? 0) > 0) continue;
             if (!isSectorUnstaffableByFaction(
                 sector,
                 factionSectors,

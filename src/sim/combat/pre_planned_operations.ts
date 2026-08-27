@@ -49,6 +49,7 @@ import {
 } from './historical_operation_authorization.js';
 import { resolveOperationFormation } from './operation_formation_resolver.js';
 import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
+import { computeMultiAxisPlanningDuration } from './sector_offensive_axis_helpers.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -1228,8 +1229,9 @@ function buildAxesFromDef(
             // eligible attackers per turn.
             if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return [];
             if ((formation.disrupted_turns ?? 0) > 0) return [];
-            // Exclude brigades currently in column-march transit — they are already
-            // marching somewhere else and contribute zero eligible attackers until they arrive.
+            // Existing movement owners retain authority. Injection cannot prove
+            // whether transit is player-, recall-, loan-, or bot-authored, so it
+            // must not claim or reset a brigade already in column movement.
             if (movementState[fid]?.status === 'in_transit') return [];
             // Already fighting for someone else — see collectCommittedFormationIds.
             if (committedElsewhere.has(fid)) return [];
@@ -1317,7 +1319,9 @@ function deployPrePlannedEliteLoans(
 // All CorpsOperation objects must be built via buildCorpsOperation() in corps_operation_helpers.ts.
 /**
  * Inject pre-planned VRS operations into corps_command at scenario start.
- * Each operation starts in planning phase with planning_duration: 1.
+ * Each operation starts in planning phase. Explicit authored durations are
+ * preserved; otherwise injection uses the lifecycle planning-window rule and
+ * persists the result from the number and shape of its axes.
  *
  * Note: Herzegovina corps gets TWO operations (Visegrad + Foca). The second
  * will be injected only if the first corps slot is already taken, using a
@@ -1415,8 +1419,11 @@ export function injectPrePlannedOperations(
         const authorizedTurn = options?.faction
             ? getAcceptedHistoricalOperationAuthorizationTurn(state, authorizationInput)
             : null;
+        const operationDef = def.planning_duration != null
+            ? def
+            : { ...def, planning_duration: computeMultiAxisPlanningDuration(result.axes) };
         const op = buildCorpsOperation(
-            def,
+            operationDef,
             result.axes,
             result.participating,
             authorizedTurn ?? turn,
@@ -1604,7 +1611,10 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
         result.participating,
         state.military.formations ?? {},
     );
-    const op = buildCorpsOperation(effectiveDef, result.axes, result.participating, turn, true, primarySectorId);
+    const operationDef = effectiveDef.planning_duration != null
+        ? effectiveDef
+        : { ...effectiveDef, planning_duration: computeMultiAxisPlanningDuration(result.axes) };
+    const op = buildCorpsOperation(operationDef, result.axes, result.participating, turn, true, primarySectorId);
     cmd.active_operations.push(op);
     assignOperationCommander(state, op, corpsId, effectiveDef.faction);
     cmd.stance = 'offensive';

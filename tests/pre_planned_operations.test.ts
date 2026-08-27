@@ -5,6 +5,7 @@ import { deferUnauthorizedHistoricalOperationsForPlayer } from '../src/sim/comba
 import { injectPrePlannedOperations, injectQueuedOperation, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { getSectorOffensiveApproachOsids } from '../src/sim/combat/bot_brigade_ai_osid.js';
+import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
 import { collectOpInjectionWarnings } from '../src/sim/combat/operation_validation.js';
 import type { OpInjectionWarning } from '../src/sim/combat/operation_validation.js';
 import type {
@@ -791,6 +792,84 @@ describe('pre-planned operations', () => {
         assert.equal(injected, true);
         assert.equal(command.active_operations[0]?.name, 'Operation Corridor');
         assert.deepEqual(command.queued_operations, ['Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi']);
+    });
+
+    it('preserves unrelated transit while injecting the remaining viable operation axes', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 18;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Jajce'];
+        const jajce = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Jajce')!;
+        const southBrigade = jajce.axes.find((axis) => axis.axis_id === 'vrbas_south')!.brigades[0]!;
+        const transit = {
+            status: 'in_transit' as const,
+            stance: 'column' as const,
+            destination_sids: ['op:test:unrelated'],
+            turns_remaining: 4,
+        };
+        const order = {
+            stance: 'column' as const,
+            destination_sids: ['op:test:unrelated'],
+        };
+        state.military.brigade_movement_state = { [southBrigade]: structuredClone(transit) };
+        state.military.brigade_movement_orders = { [southBrigade]: structuredClone(order) };
+
+        const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
+
+        assert.equal(injected, true);
+        const operation = command.active_operations.find((op) => op.name === 'Operation Jajce');
+        assert.ok(operation);
+        assert.equal(
+            operation!.planning_duration,
+            4,
+            'an unauthored pre-planned duration must persist the longest-axis march buffer',
+        );
+        assert.deepEqual(
+            [...operation!.participating_brigades].sort(),
+            jajce.axes.find((axis) => axis.axis_id === 'vrbas_west')!.brigades,
+        );
+        assert.deepEqual(state.military.brigade_movement_state?.[southBrigade], transit);
+        assert.deepEqual(state.military.brigade_movement_orders?.[southBrigade], order);
+
+        for (const brigadeId of operation!.participating_brigades) {
+            state.military.formations[brigadeId]!.location_osid = 'op:test:far_from_jajce';
+        }
+        state.political.political_controllers!['op:test:far_from_jajce'] = 'RS';
+        state.meta.turn = 22;
+        advanceSectorOffensives(state, null);
+        assert.equal(
+            operation!.phase,
+            'planning',
+            'the persisted four-turn window must prevent former one-turn early invalidation',
+        );
+    });
+
+    it('does not mutate movement records when queued injection has no uncommitted participants', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 18;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Jajce'];
+        const jajce = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Jajce')!;
+        const participantIds = jajce.axes.flatMap((axis) => axis.brigades);
+        state.military.brigade_movement_state = Object.fromEntries(participantIds.map((brigadeId) => [brigadeId, {
+            status: 'in_transit',
+            stance: 'column',
+            destination_sids: [`op:test:${brigadeId}`],
+            turns_remaining: 4,
+        }]));
+        state.military.brigade_movement_orders = Object.fromEntries(participantIds.map((brigadeId) => [brigadeId, {
+            stance: 'column',
+            destination_sids: [`op:test:${brigadeId}`],
+        }]));
+        const movementBefore = structuredClone(state.military.brigade_movement_state);
+        const ordersBefore = structuredClone(state.military.brigade_movement_orders);
+
+        assert.equal(injectQueuedOperation(state, 'vrs_1st_krajina'), false);
+        assert.deepEqual(state.military.brigade_movement_state, movementBefore);
+        assert.deepEqual(state.military.brigade_movement_orders, ordersBefore);
+        assert.deepEqual(command.queued_operations, ['Operation Jajce']);
     });
 
     it('keeps Corridor participants viable when already forward-deployed in an objective municipality', () => {

@@ -132,15 +132,19 @@ function printOperationState(state: GameState, turn: number, diagnostics: Return
     for (const row of rsDiagnostics) {
         const brigadeStates = row.participating_brigades
             .map((brigadeId) => {
-                const brigade = state.formations?.[brigadeId];
+                const brigade = state.military.formations?.[brigadeId];
+                const movement = state.military.brigade_movement_state?.[brigadeId];
                 return {
                     brigadeId,
                     loc: brigade?.location_osid ?? null,
                     posture: brigade?.posture ?? null,
                     homeDefense: brigade?.home_defense_active ?? null,
                     fatigue: brigade?.fatigue ?? null,
+                    movement: movement ?? null,
                 };
             });
+        const liveOperation = state.military.corps_command?.[row.corps_id]?.active_operations
+            ?.find((operation) => operation.name === row.operation_name);
         console.log(JSON.stringify({
             corps_id: row.corps_id,
             operation_name: row.operation_name,
@@ -150,6 +154,7 @@ function printOperationState(state: GameState, turn: number, diagnostics: Return
             battle_count: row.battle_count,
             current_objective_attack_count: row.current_objective_attack_count,
             invalidation_reasons: row.invalidation_reasons,
+            axes: liveOperation?.axes ?? [],
             brigade_states: brigadeStates,
         }));
     }

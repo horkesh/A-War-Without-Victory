@@ -105,6 +105,7 @@ import {
     allAxesTerminal,
     assignBrigadeRoles,
     computeMultiAxisPlanningDuration,
+    computePlanningDuration,
     createSingleAxis,
     getAllAxisBrigades,
     getAllAxisObjectives,
@@ -114,6 +115,12 @@ import {
     resetAxisForExecution,
     sumAxesField,
     validateAxisContiguity,
+} from './sector_offensive_axis_helpers.js';
+
+export {
+    MAX_PLANNING_DURATION,
+    PLANNING_MARCH_BUFFER,
+    computePlanningDuration,
 } from './sector_offensive_axis_helpers.js';
 import {
     areParticipantsReadyForExecution,
@@ -820,22 +827,6 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
 // Planning duration
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Minimum extra turns added to planning for bot-generated ops (brigade march buffer). */
-export const PLANNING_MARCH_BUFFER = 2;
-
-/** Compute planning duration from number of objectives.
- *  Adds PLANNING_MARCH_BUFFER turns so brigades can march to staging before execution.
- *  Capped at MAX_PLANNING_DURATION to prevent long idle periods for large operations. */
-export const MAX_PLANNING_DURATION = 4;
-export function computePlanningDuration(objectiveCount: number): number {
-    let base: number;
-    if (objectiveCount <= 2) base = 1;
-    else if (objectiveCount <= 5) base = Math.ceil(objectiveCount * 0.6);
-    else base = Math.min(5, Math.ceil(objectiveCount * 0.8));
-    return Math.min(MAX_PLANNING_DURATION, base + PLANNING_MARCH_BUFFER);
-}
-
-
 /**
  * Record failed objectives for a corps when an operation ends without success.
  * After OBJECTIVE_FAILURE_THRESHOLD failures, the objective enters a cooldown period.
@@ -1298,7 +1289,7 @@ export function advanceSectorOffensives(
             // RS blitz phase (w0-12): pre-planned JNA-style ops skip preparation.
             const earlyElapsed = turn - op.phase_started_turn;
             const earlyPlanDuration = op.planning_duration
-                ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!, computePlanningDuration) : 1);
+                ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!) : 1);
             if (
                 op.force_launch !== true &&
                 earlyElapsed > earlyPlanDuration + PLANNING_INVALIDATION_GRACE_TURNS
@@ -1406,7 +1397,7 @@ export function advanceSectorOffensives(
 
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration
-                ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!, computePlanningDuration) : 1);
+                ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!) : 1);
             if (
                 op.force_launch !== true
                 && typeof op.force_ratio_estimate === 'number'
