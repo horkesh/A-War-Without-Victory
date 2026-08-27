@@ -317,7 +317,7 @@ describe('deployEliteLoan', () => {
         expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['arbih_guards']);
     });
 
-    it('adds offensive loan elites to planning operations that drive deployment staging', () => {
+    it('stages offensive loans toward planning operations without changing their launch quorum', () => {
         const brigade = makeElite('arbih_guards', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
         const state = makeState({
             formations: { arbih_guards: brigade },
@@ -355,8 +355,8 @@ describe('deployEliteLoan', () => {
         deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5, undefined, undefined, 'army_ai', chainAdj(4));
 
         const activeOp = state.military.corps_command!.arbih_1st_corps.active_operations[0];
-        expect(activeOp.participating_brigades).toEqual(['arbih_guards', 'arbih_line_1']);
-        expect(activeOp.axes?.[0]?.assigned_brigades).toEqual(['arbih_guards', 'arbih_line_1']);
+        expect(activeOp.participating_brigades).toEqual(['arbih_line_1']);
+        expect(activeOp.axes?.[0]?.assigned_brigades).toEqual(['arbih_line_1']);
         expect(state.military.brigade_movement_orders?.arbih_guards).toEqual({
             destination_sids: ['op:mun:o2'],
             stance: 'column',

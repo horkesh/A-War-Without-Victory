@@ -489,7 +489,7 @@ describe('Bot response logic', () => {
         expect(advanced.state.military.negotiation?.pending_peace_plan).toMatchObject({
             plan_id: 'cutileiro',
             bot_responses: {
-                RBiH: 'accepted',
+                RBiH: 'rejected',
                 RS: 'accepted',
             },
         });

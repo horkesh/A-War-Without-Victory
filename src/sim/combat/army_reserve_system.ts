@@ -997,11 +997,12 @@ export function deployEliteLoan(
     ls.current_episode_id = episodeId;
 
     // ── Auto-join target corps's active operation ──
-    // If deployed for offensive reasons and the corps has an active operation,
-    // add the elite to participating_brigades so march-first logic moves it to the front.
+    // Planning operations may route the loan toward their staging axis, but only
+    // an executing operation owns combat-roster admission. The existing pre-order
+    // reconciliation attaches a staged loan on the launch turn.
     if ((reason === 'offensive_support' || reason === 'exploitation') && options?.auto_join_operation !== false) {
         const activeOp = pickActiveOperation(state, corpsId, brigadeId);
-        if (activeOp) {
+        if (activeOp?.phase === 'execution') {
             attachEliteToOperation(activeOp, brigadeId);
         }
     }

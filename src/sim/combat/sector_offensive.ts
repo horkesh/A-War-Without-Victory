@@ -1457,7 +1457,8 @@ export function advanceSectorOffensives(
             // Keep existing elapsed/staged/forcedLaunch gates for non-preparation ops.
             //
             const preparationReady = op.type === 'sector_attack' && op.preparation_sub_phase === 'ready';
-            if (preparationReady || elapsed > planDuration || stagedEarly || forcedLaunch) {
+            const plannedLaunchReady = elapsed >= planDuration && (preparationReady || stagedEarly);
+            if (plannedLaunchReady || elapsed > planDuration || forcedLaunch) {
                 if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
                     beginRecovery(op, turn, 'political_blocked', state);
                     continue;

@@ -85,10 +85,10 @@ describe('equipment offensive priority', () => {
 });
 
 describe('sector offensive idle recovery', () => {
-    it('launches a multi-axis operation when each axis is staged on its own approach', () => {
+    it('honours the planning-duration floor before launching a staged multi-axis operation', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 4, phase: 'war', seed: 'multi-axis-axis-local-readiness' } as any,
+  meta: { turn: 3, phase: 'war', seed: 'multi-axis-axis-local-readiness' } as any,
   military: {
     formations: {
                 rs_corps: {
@@ -137,7 +137,8 @@ describe('sector offensive idle recovery', () => {
                         phase_started_turn: 0,
                         participating_brigades: ['a1', 'a2', 'b1', 'b2'],
                         objectives: ['op:target:objective_a', 'op:target:objective_b'],
-                        planning_duration: 1,
+                        planning_duration: 4,
+                        is_pre_planned: true,
                         current_objective_index: 0,
                         attack_attempt_count: 0,
                         objective_capture_count: 0,
@@ -209,9 +210,21 @@ describe('sector offensive idle recovery', () => {
   } as any,
 } as unknown as GameState;
 
+        const forcedState = structuredClone(state);
+        forcedState.meta.turn = 1;
+        forcedState.military.corps_command!.rs_corps!.active_operations[0]!.force_launch = true;
+        advanceSectorOffensives(forcedState, null);
+        expect(forcedState.military.corps_command?.rs_corps?.active_operations[0]?.phase).toBe('execution');
+
         advanceSectorOffensives(state, null);
 
-        const op = state.military.corps_command?.rs_corps?.active_operations[0];
+        let op = state.military.corps_command?.rs_corps?.active_operations[0];
+        expect(op?.phase).toBe('planning');
+
+        state.meta.turn = 4;
+        advanceSectorOffensives(state, null);
+
+        op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('execution');
         expect(op?.recovery_reason).toBeUndefined();
     });

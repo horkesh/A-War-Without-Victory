@@ -126,7 +126,7 @@ describe('desktop startNewCampaign historical operation authorization', () => {
     expect(resolvedReview?.resolved_turn).toBe(authorizedTurn);
   });
 
-  it('executes accepted opening operations on the same first-turn clock as preserved startup operations', async () => {
+  it('honors the same declared planning clock for accepted and preserved startup operations', async () => {
     const startupPath = `${process.cwd()}/data/derived/startup/apr_1992_initial_save.json`;
     const preserved = (await loadStateFromPath(startupPath)).state;
     preserved.meta.player_faction = 'RS';
@@ -138,7 +138,7 @@ describe('desktop startNewCampaign historical operation authorization', () => {
     authorized.meta.autonomy_level = 1;
     acceptOpeningHistoricalOperations(authorized, 'RS');
 
-    const [preservedTurn, authorizedTurn] = await Promise.all([
+    let [preservedTurn, authorizedTurn] = await Promise.all([
       advanceTurn(preserved, process.cwd()),
       advanceTurn(authorized, process.cwd()),
     ]);
@@ -163,7 +163,23 @@ describe('desktop startNewCampaign historical operation authorization', () => {
 
     const authorizedDrina = findOperation(authorizedTurn.state, 'vrs_drina', 'Operation Drina');
     expect(authorizedDrina?.started_turn).toBe(0);
-    expect(authorizedDrina?.phase).toBe('execution');
+    expect(authorizedDrina?.phase).toBe('planning');
+
+    const planningDuration = authorizedDrina?.planning_duration;
+    expect(planningDuration).toBeGreaterThan(1);
+    expect(findOperation(preservedTurn.state, 'vrs_drina', 'Operation Drina')?.planning_duration)
+      .toBe(planningDuration);
+
+    while (authorizedTurn.state.meta.turn < authorizedDrina.started_turn + planningDuration) {
+      [preservedTurn, authorizedTurn] = await Promise.all([
+        advanceTurn(preservedTurn.state, process.cwd()),
+        advanceTurn(authorizedTurn.state, process.cwd()),
+      ]);
+    }
+
+    expect(findOperation(preservedTurn.state, 'vrs_drina', 'Operation Drina')?.phase).toBe('execution');
+    expect(findOperation(authorizedTurn.state, 'vrs_drina', 'Operation Drina')?.phase).toBe('execution');
+    expect(authorizedTurn.state.meta.turn).toBe(authorizedDrina.started_turn + planningDuration);
   });
 
   it('assists only participants of accepted selected player-faction historical operations', async () => {
@@ -175,11 +191,19 @@ describe('desktop startNewCampaign historical operation authorization', () => {
     review!.accepted = true;
     review!.resolved_turn = state.meta.turn;
 
-    const injected = await advanceTurn(state, process.cwd());
-    const assisted = await advanceTurn(injected.state, process.cwd());
+    let assisted = await advanceTurn(state, process.cwd());
+    const injectedDrina = findOperation(assisted.state, 'vrs_drina', 'Operation Drina');
+    expect(injectedDrina?.phase).toBe('planning');
+    expect((assisted.report?.details as any)?.player_historical_operation_assist)
+      .toEqual({ eligible_attackers_by_corps: {} });
+
+    while (assisted.state.meta.turn < injectedDrina.started_turn + injectedDrina.planning_duration) {
+      assisted = await advanceTurn(assisted.state, process.cwd());
+    }
 
     const drina = findOperation(assisted.state, 'vrs_drina', 'Operation Drina');
     expect(drina).toBeDefined();
+    expect(drina?.phase).toBe('execution');
     const participants = new Set<string>(drina?.participating_brigades ?? []);
     expect(participants.size).toBeGreaterThan(0);
 
@@ -190,7 +214,10 @@ describe('desktop startNewCampaign historical operation authorization', () => {
       ...Object.keys(attackOrders),
     ]);
 
-    expect([...participants].some((brigadeId) => assistedOrderIds.has(brigadeId))).toBe(true);
+    const assistDiagnostics = (assisted.report?.details as any)?.player_historical_operation_assist;
+    expect(Object.keys(assistDiagnostics?.eligible_attackers_by_corps ?? {})).toEqual(['vrs_drina']);
+    expect(assistDiagnostics.eligible_attackers_by_corps.vrs_drina).toBeGreaterThan(0);
+    expect(assistDiagnostics.eligible_attackers_by_corps.vrs_drina).toBeLessThanOrEqual(participants.size);
 
     const nonParticipantPlayerOrderIds = [...assistedOrderIds].filter((brigadeId) =>
       assisted.state.military.formations?.[brigadeId]?.faction === 'RS' &&
