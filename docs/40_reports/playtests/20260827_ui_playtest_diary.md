@@ -350,10 +350,56 @@ because the sides the player's faction would have fought also take fewer casualt
 civilian toll and its ethnic distribution barely move, which fits — this is an offensive
 tempo effect, not a general reduction in violence.
 
-**What is NOT established:** whether the shortfall is missing proposals, proposals that
-are generated but filtered before display, or a catalog authored per-faction with far
-fewer player-eligible entries for RBiH. That is the next question and it is engine work,
-not calibration.
+### ROOT CAUSE — two causes, and the second is the severe one
+
+Traced in source on owner instruction. Of the three candidates, it is **not** "never
+generated"; it is **suppression plus an unpopulated substitute**.
+
+**Cause 1 — bot-only generation channels are switched off for whoever you play.**
+
+- `historical_operation_authorization.ts:60` —
+  `if (state.meta?.player_faction !== input.faction) return 'not_required';`
+  Bots bypass presidential authorization entirely. Only the player's faction pays the
+  authorize-then-inject cost.
+- `war_phases.ts:2334` — the `evaluate-army-hq-gathering` step does
+  `if (faction === context.state.meta.player_faction) continue;`, disabling an entire
+  operation-generation channel for the player's faction alone.
+- Player-facing proposal channels (`proposal_generation.ts:123,186`,
+  `operation_opportunities.ts:1662`) are gated on `autonomy_level === 1`, and the
+  default is 0.
+- `pre_planned_operations.ts:1397` — a pending authorization calls
+  `deferredCorps.add(def.corps)`, and line 1385 then blocks every other operation for
+  that corps in the same pass. One unresolved authorization freezes a whole corps.
+
+**Cause 2 — the substitute catalog is authored 17 / 1 / 1.**
+
+```
+ALL_PRE_PLANNED = [...VRS_PRE_PLANNED, ...HRHB_PRE_PLANNED, ...ARBIH_PRE_PLANNED]
+  faction: 'RS'    x17
+  faction: 'RBiH'  x1
+  faction: 'HRHB'  x1
+```
+
+The suppressed autonomous channels are meant to be replaced by pre-planned operations the
+player authorizes. **For RS that works** — 17 definitions, 16 operations launched as
+player against 25 as bot. **For RBiH the replacement is a single definition**, so it loses
+roughly thirteen autonomous operations and gets one authored operation back. That is the
+2-versus-14, and it is why RS barely suffers while RBiH is crippled.
+
+*(Counted from the array composition after two different regexes disagreed — 17 vs 2 —
+so neither was trusted.)*
+
+### What it means
+
+The design intent is coherent: the player's faction should not run itself, it should act
+through presidential authorization. The implementation only holds for RS, because only RS
+has a populated catalog. **Play RBiH or HRHB and your army effectively stops mounting
+operations** — not because you declined anything, but because there is nothing to
+authorize.
+
+Engine and content work, not calibration. Two possible directions, not a recommendation:
+give the suppressed channels a player-facing equivalent, or author the ARBiH and HVO
+catalogs toward parity with the VRS's 17.
 
 ### Not a finding — my own field path
 
