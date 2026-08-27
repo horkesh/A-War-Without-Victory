@@ -938,15 +938,26 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(isSectorPartitionPerfEnabled()).toBe(v1);
     });
 
-    it('fixed-point shortcut consumes both prune and recovery mutation receipts', () => {
+    it('final fixed-point convergence runs both correctness seals unconditionally in stable order', () => {
         const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
-        const compact = raw.replace(/\s+/g, ' ');
+        const buildStart = raw.indexOf('export function buildCorpsFrontSectors(');
+        const buildEnd = raw.indexOf('/** @internal Exact legacy fixed-point sequence', buildStart);
+        const buildSource = raw.slice(buildStart, buildEnd);
+        const orderedStages = [
+            "_perfTime('sealMergedSectorTruth:3'",
+            "_perfTime('pruneGhostArtifactSectors:2'",
+            "_perfTime('recoverDroppedFrontEdges:2'",
+            "_perfTime('applyFinalSectorOwnerTruthPass:4'",
+        ];
 
-        expect(compact).toContain(
-            "const prunedGhostArtifacts = _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));",
-        );
-        expect(compact).toContain(
-            'if (!useFixedPointShortcuts || prunedGhostArtifacts || recoveredDroppedFrontEdges)',
-        );
+        const stageIndexes = orderedStages.map((stage) => buildSource.indexOf(stage));
+        expect(stageIndexes.every((index) => index >= 0)).toBe(true);
+        expect(stageIndexes).toEqual([...stageIndexes].sort((a, b) => a - b));
+        for (const stage of orderedStages) {
+            expect(buildSource.split(stage)).toHaveLength(2);
+        }
+        expect(buildSource).not.toContain('prunedGhostArtifacts');
+        expect(buildSource).not.toContain('recoveredDroppedFrontEdges');
+        expect(buildSource).not.toContain('finalTerritoryRepaired');
     });
 });

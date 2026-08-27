@@ -584,8 +584,8 @@ export function buildCorpsFrontSectors(
     _perfTime('sealMergedSectorTruth:1', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
     _perfTime('relocateMisassignedBrigadesToTruthfulOwners', () => relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency));
     _perfTime('sealMergedSectorTruth:2', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
-    const prunedGhostArtifacts = _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));
-    const recoveredDroppedFrontEdges = _perfTime('recoverDroppedFrontEdges:1', () => recoverDroppedFrontEdges(
+    _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));
+    _perfTime('recoverDroppedFrontEdges:1', () => recoverDroppedFrontEdges(
         result,
         state,
         osidFrontEdges,
@@ -603,14 +603,9 @@ export function buildCorpsFrontSectors(
         mutationRecorder,
         diagnosticCollector,
     ));
-    // Skip the convergence segment only when every producer since seal pass 2
-    // reports no mutation. A prune deletion is independently dirty even when
-    // edge recovery has nothing eligible to rebuild.
-    if (!useFixedPointShortcuts || prunedGhostArtifacts || recoveredDroppedFrontEdges) {
-        _perfTime('sealMergedSectorTruth:3', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
-        _perfTime('pruneGhostArtifactSectors:2', () => pruneGhostArtifactSectors(result));
-        _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache, { occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
-    }
+    _perfTime('sealMergedSectorTruth:3', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
+    _perfTime('pruneGhostArtifactSectors:2', () => pruneGhostArtifactSectors(result));
+    _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache, { occupancyStrategy }, frontEdgeRelationForFaction, mutationRecorder, diagnosticCollector));
 
     // Final geometry barrier: late recovery and seal passes can still leave
     // duplicate same-corps front ownership on sibling fragments. Resolve those
@@ -712,7 +707,6 @@ export function buildCorpsFrontSectors(
         });
         _perfTime('applyFinalSectorOwnerTruthPass:3', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder, diagnosticCollector));
     }
-    let finalTerritoryRepaired = false;
     _perfTime('repairDisconnectedTerritory:final', () => {
         for (const faction of getFactions(state)) {
             const factionSectors = Object.values(result).filter((sector) => sector.faction === faction);
@@ -720,18 +714,14 @@ export function buildCorpsFrontSectors(
             const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
                 ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
                 : buildFriendlyOsidsFromState(state, adjacency, faction);
-            finalTerritoryRepaired = repairDisconnectedTerritory(
+            repairDisconnectedTerritory(
                 factionSectors,
                 sharedBoundaryAdj,
                 friendlyOsids,
-            ) || finalTerritoryRepaired;
+            );
         }
     });
-    // Owner truth was already sealed by pass 2 (or pass 3 after absorption).
-    // Re-run it only when final territory repair exercised a mutation path.
-    if (!useFixedPointShortcuts || finalTerritoryRepaired) {
-        _perfTime('applyFinalSectorOwnerTruthPass:4', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder, diagnosticCollector));
-    }
+    _perfTime('applyFinalSectorOwnerTruthPass:4', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency, { allowCollapsedRearGuardAbsorption: isFinalPass, occupancyStrategy }, mutationRecorder, diagnosticCollector));
     _perfTime('sealWarFrontFactionSideCoverage:final', () => sealWarFrontFactionSideCoverage(result, osidFrontEdges, adjacency, globalEdgeMeta));
     const _postCoverageAbsorbed = _perfTime('absorbUnstaffedSiblingFrontSectors:post-side-coverage', () => {
         let changed = false;
