@@ -528,6 +528,7 @@ class WarroomApp {
                 // Disable all faction buttons during loading
                 for (const b of factionButtons) b.disabled = true;
                 this.legacyRecoveryCampaignMutationInFlight = true;
+                let campaignMutationSucceeded = false;
 
                 try {
                     this.freshCampaignIntroPending = true;
@@ -556,13 +557,16 @@ class WarroomApp {
                         );
                     }
                     this.showScreen('none');
+                    campaignMutationSucceeded = true;
                 } catch (error) {
                     this.freshCampaignIntroPending = false;
                     await this.pullLatestGameState({ showShell: false });
                     showError(error instanceof Error ? error.message : String(error));
                 } finally {
                     this.legacyRecoveryCampaignMutationInFlight = false;
-                    this.flushReactOpeningReadyDeferredByRecoveryMutation();
+                    if (campaignMutationSucceeded) {
+                        this.flushReactOpeningReadyDeferredByRecoveryMutation();
+                    }
                     for (const b of factionButtons) b.disabled = false;
                 }
             };
@@ -788,7 +792,7 @@ class WarroomApp {
     }
 
     private handleReactOpeningReady(iframe: HTMLIFrameElement): void {
-        if (this.legacyRecoveryCampaignMutationInFlight) {
+        if (this.legacyRecoveryCampaignMutationInFlight || this.reactReadyDeferredByRecoveryMutation) {
             this.reactReadyDeferredByRecoveryMutation = true;
             return;
         }

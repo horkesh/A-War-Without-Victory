@@ -244,14 +244,15 @@ describe('desktop React opening lifecycle', () => {
     expect(document.getElementById('side-picker')!.inert).toBe(true);
   });
 
-  it('settles a failed recovery mutation before deferred readiness can claim React', async () => {
+  it('keeps failed recovery authoritative and consumes deferred readiness on a successful retry', async () => {
     const campaign = deferred<{ ok: boolean; error?: string }>();
     const startNewCampaign = vi.fn().mockReturnValue(campaign.promise);
     const { iframe } = await bootHost({ startNewCampaign });
     const postMessage = vi.spyOn(iframe.contentWindow!, 'postMessage');
     vi.advanceTimersByTime(8000);
     document.getElementById('mm-new-campaign')!.click();
-    (document.querySelector('.sp-faction-option') as HTMLButtonElement).click();
+    const factionButton = document.querySelector('.sp-faction-option') as HTMLButtonElement;
+    factionButton.click();
     await flushMicrotasks();
 
     sendReady(iframe);
@@ -262,18 +263,33 @@ describe('desktop React opening lifecycle', () => {
     await flushMicrotasks();
 
     expect(document.getElementById('sp-error')!.textContent).toBe('campaign rejected');
-    expect(iframe.hidden).toBe(false);
-    expect(document.getElementById('side-picker')!.inert).toBe(true);
+    expect(document.getElementById('sp-error')!.classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('side-picker')!.classList.contains('mm-hidden')).toBe(false);
+    expect(document.getElementById('side-picker')!.inert).toBe(false);
+    expect(iframe.hidden).toBe(true);
     expect(postMessage).not.toHaveBeenCalled();
 
-    window.dispatchEvent(new MessageEvent('message', {
-      data: { type: 'awwv-back-to-hq' },
-      source: iframe.contentWindow,
-      origin: 'https://map.local',
-    }));
+    sendReady(iframe);
+    expect(document.getElementById('side-picker')!.inert).toBe(false);
+    expect(iframe.hidden).toBe(true);
+    expect(postMessage).not.toHaveBeenCalled();
+
+    const retry = deferred<{ ok: boolean; stateJson?: string }>();
+    startNewCampaign.mockReturnValue(retry.promise);
+    factionButton.click();
     await flushMicrotasks();
-    expect(postMessage.mock.calls.filter(
-      ([message]) => (message as { type?: string }).type === 'awwv-shell:fresh-campaign-started',
-    )).toHaveLength(0);
+    retry.resolve({ ok: true, stateJson: '{}' });
+    await flushMicrotasks();
+
+    expect(startNewCampaign).toHaveBeenCalledTimes(2);
+    expect(document.getElementById('sp-error')!.textContent).toBe('');
+    expect(document.getElementById('sp-error')!.classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('side-picker')!.classList.contains('mm-hidden')).toBe(true);
+    expect(document.getElementById('side-picker')!.inert).toBe(true);
+    expect(iframe.hidden).toBe(false);
+    expect(postMessage.mock.calls.map(([message]) => (message as { type?: string }).type)).toEqual([
+      'awwv-shell:fresh-campaign-started',
+      'awwv-shell:show-warroom',
+    ]);
   });
 });
