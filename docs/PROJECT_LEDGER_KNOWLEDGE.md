@@ -4510,6 +4510,21 @@ and every quoted score must include checkpoint identity.
 Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
 roadmap, and debt`.
 
+## 2026-08-28 - Cross-origin renderer readiness must be post-commit and source-bound
+
+An iframe `load` event proves transport completion, not that the child application's committed UI
+can own the screen. In a cross-origin desktop host, the embedded child should accept its proxy only
+from `window.parent`; the host should accept readiness only from the current iframe window and its
+expected origin. Emit readiness after the framework commits, not from document parsing or load.
+
+Recovery is a serial ownership transfer, not a parallel second UI. A recovery mutation must defer
+the healthy-ready handoff, leave failure visible, and consume its latch only after retry succeeds.
+Likewise, publish a lazy recovery dependency only after successful construction and clear a rejected
+setup promise so retry can actually rebuild it. This keeps healthy startup lean while preserving a
+bounded, observable recovery path.
+
+Applied in `[2026-08-28] docs: close cinematic opening implementation`.
+
 ## 2026-08-28 - Passing tests are not proof when the tests encode an incomplete settlement
 
 A green focused suite can still certify the wrong contract. For a coordinator/wrapper boundary,

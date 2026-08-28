@@ -4,7 +4,8 @@
 **Source tree:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
 **Build:** `npm run build` → `dist/tactical-map/`
-**Last updated:** 2026-07-15
+**Last updated:** 2026-08-28
+**Opening/typography contract (2026-08-28):** The canonical browser entry is `index.html` → `main.tsx` → `App.tsx`. `MainMenu.tsx` owns one cinematic opening in browser and in the Electron outer Warroom host: dismissible splash, neutral monitoring-room selector, deliberate faction-room preview, dossier/mode, and Begin into the same selected 1992 room. `WarroomScenePlate.tsx` supplies the shared 2752×1536 aspect-fit geometry for preview and play. The outer legacy menu/desk is bounded error/timeout recovery only. Active interface/prose uses bundled IBM Plex Sans Condensed; data, dates, codes, and status use bundled IBM Plex Mono. Map glyph PBF, painter/debug/story surfaces, and truly standalone renderers remain explicit audit exclusions rather than third interface families.
 **Front staffing truth (2026-07-15):** Formation counters continue to represent physical `location_osid`, never sector-assignment metadata. A sector marked `unstaffed_front` has no legal roster-eligible donor under current corps, connectivity, enclave, and commitment rules; the map and Army HQ must present that as an empty/front-gap advisory and must not imply that an assigned brigade exists. Reachable relief arrives through delayed column movement before a counter appears at the destination.
 **Dev/live mode (2026-03-10; demarcation removal 2026-05-16):** Single codebase with `devMode` boolean in `gameStore.ts`. `isDevMode()`: auto-ON in Vite dev, `?dev=1` in production, `?live=1` forces live. Dev mode shows full load/run toolbar + DEV badge; separate Fronts/Sectors toggles; offset sector glow. Live mode auto-loads `latest_run_final_save.json` as RBiH; merged "Front" toggle (controls `sectorsVisible`); sector glow centered on front line (no offset, wider, `line-blur`). Lateral same-faction sector demarcation lines are removed from the tactical map entirely; sector readability is carried by front edges, selected-sector fill/glow, and brigade rings. Front line features carry `sector_id`; merge key by sector creates natural visual breaks at sector boundaries.
 
@@ -85,7 +86,9 @@ src/ui/map/
 │   ├── BrigadeRow.tsx             Compact brigade list item in OOBSidebar
 │   ├── CorpsCard.tsx              Corps card in OOBSidebar accordion
 │   ├── SettlementDetailContent.tsx Reusable settlement info (used in SelectionPanel + Tooltip)
-│   ├── MainMenu.tsx               Mounted case-file opening: New War faction/mode dossiers + Field Records
+│   ├── MainMenu.tsx               Mounted cinematic opening: splash, neutral selector, faction-room preview, dossier/mode + Field Records
+│   ├── opening/                   Splash, scene registry, cancellable transition controller/layer
+│   ├── warroom/                   Shared 2752×1536 scene plate plus playable Warroom shell/overlays
 │   ├── SidePickerOverlay.tsx      Retained compatibility component; not the mounted opening flow
 │   ├── RecruitmentModal.tsx       Brigade recruitment modal: catalog, eligibility, recruit action (Phase 4)
 │   ├── WarSummaryModal.tsx        War Summary modal: area-weighted territory, military strength, displacement (Phase 5)

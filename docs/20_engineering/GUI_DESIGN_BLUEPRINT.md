@@ -1145,7 +1145,7 @@ Full-screen. Dark background with subtle topographic map texture. Center-aligned
 
 ### 19.2 New War (desktop)
 
-**New War** opens the case-file campaign flow inside the main menu. The player first chooses one of three faction dossiers — **RBiH (ARBiH)**, **RS (VRS)**, or **HRHB (HVO)** — and then explicitly chooses **Emergent** or **Historical** decision mode. Beginning the war invokes `start-new-campaign` with both `playerFaction` and `decisionMode`; the desktop loads the canonical April 1992 start, records those choices in state metadata, and hands the resulting state to the map. Other factions run on bot AI. The adjacent **Field Records** flow lists canonical save records and loads the selected record through the desktop IPC instead of opening an operating-system file picker.
+**New War** opens the React-owned cinematic campaign flow inside the main menu. After the dismissible splash, the player sees a neutral monitoring room, deliberately previews the exact 1992 Warroom for **RBiH (ARBiH)**, **RS (VRS)**, or **HRHB (HVO)**, reviews its dossier, and chooses **Emergent** or **Historical** decision mode. Beginning the war invokes `start-new-campaign` exactly once with both `playerFaction` and `decisionMode`; the desktop loads the canonical April 1992 start, records those choices, and reveals the same selected Warroom before the date sting and opening brief. Other factions run on bot AI. The adjacent **Field Records** flow is unchanged and loads only canonical save records through desktop IPC.
 
 ### 19.3 Scenario Selection Screen (Load scenario…)
 

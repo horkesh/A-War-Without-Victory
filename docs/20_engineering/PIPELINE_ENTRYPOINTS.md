@@ -63,10 +63,11 @@ Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline
 - **Contract:** Warroom and map UIs must use this file for initial control display; no alternate source for that purpose. When the artifact includes `control_status` or contested flags, those drive contested overlays (e.g. crosshatch) in map UIs.
 - **OSID-keyed init (dev runner, scenario with operational data):** When the settlement graph is OSID-keyed (712 entries), political control init uses `data/derived/operational/operational_initial_master.json`. **After any OSID merge** run `npm run map:derive:operational-initial-master` so this file matches `operational_settlements.geojson` (see MAP_BUILD_SYSTEM.md §Operational (OSID) layer).
 
-### Tactical Map System (standalone map GUI)
+### React player GUI and tactical map
 - **Engineering reference:** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
-- **Code:** `src/ui/map/` (Vite app; entry: `tactical_map.html` → `main.ts` → `MapApp.ts`)
-- **Dev server:** `npm run dev:map` — Vite on port 3002; open `http://localhost:3002/tactical_map.html`. Direct Playwright/Electron QA starts it explicitly with `npm.cmd run dev:map -- --port 3002 --strictPort` and verifies HTTP readiness before launching Electron.
+- **Code:** `src/ui/map/` (Vite/React app; canonical browser entry: `index.html` → `main.tsx` → `App.tsx`; `MainMenu.tsx` owns the normal opening and the same app owns the playable Warroom and tactical map).
+- **Dev server:** `npm run dev:map` — Vite on port 3002; open `http://127.0.0.1:3002/`. Direct Playwright/Electron QA starts it explicitly with `npm.cmd run dev:map -- --port 3002 --strictPort` and verifies HTTP readiness before launching Electron.
+- **Desktop host:** Electron still loads `awwv://warroom/index.html`, whose normal path embeds the React entry from the loopback HTTP map server with `?embedded=1`. The outer document owns IPC proxying and bounded recovery, not a second healthy opening. Its legacy menu/desk becomes interactive only after the React frame fails or does not emit its post-commit readiness signal within eight seconds.
 - **Canonical map data:** The set of files the Tactical Map loads defines the canonical map data. Full list: TACTICAL_MAP_SYSTEM.md §5 (required: `settlements_a1_viewer.geojson`, `political_control_data.json`; optional: A1_BASE_MAP, settlement_edges, settlement_names, mun1990_names, settlement_ethnicity_data; on-demand: political_control_data_sep1992.json). Served via custom Vite plugin from project root (`/data/derived/`). For repo cleanup 2026, other map assets may be moved to `data/_deprecated/` (move only, no delete); this list is never moved.
 
 ### Knowledge Base Ingest (Historical Canon)

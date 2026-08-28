@@ -37,6 +37,10 @@ It is one command experience with specialized shells:
 
 If any shell starts behaving like a second owner of another shell's job, the product drifts.
 
+### Opening ownership
+
+The healthy opening is part of the same command experience. React `MainMenu` owns splash, neutral monitoring-room selection, faction-room preview, dossier/mode, and campaign confirmation in both browser and Electron-hosted play. The selected 1992 Warroom then remains the visual substrate for the date sting, opening brief, foundational decision, and active campaign. The outer Warroom document owns hosting and IPC relay; its legacy menu/desk is bounded error/timeout recovery only and must not race or duplicate the healthy opening.
+
 ## Presidential campaign loop
 
 The v0.9 product spine is the campaign loop, not any individual shell.

@@ -1,6 +1,6 @@
 # AWWV Warroom Master Reference
 
-**Updated:** 2026-08-23 (stable campaign shell plus merged case-file opening, explicit campaign mode, Field Records, and real-flow browser proof)
+**Updated:** 2026-08-28 (React-owned cinematic opening, exact Warroom continuity, unified typography, and fallback-art browser proof)
 
 ## Current shell-transition contract
 
@@ -8,7 +8,7 @@ The operational iframe document remains stable across Command Room and War Map r
 
 ## Current opening contract
 
-The campaign shell begins with the case-file flow owned by `MainMenu.tsx`: landing, faction dossier, four-slot briefing, historical/emergent mode choice, then Begin Campaign. Electron Field Records is an inventory-backed load path rather than an arbitrary pathname field. Successful start performs one date handoff and one opening brief before the foundational decision; it does not replay a second war-start briefing. The first-hour and live-surface browser gates traverse this exact route and verify cleanup. See [the 2026-08-23 opening implementation plan](../plans/2026-08-23-opening-screens-implementation-plan.md) and [DESKTOP_GUI_IPC_CONTRACT.md](../20_engineering/DESKTOP_GUI_IPC_CONTRACT.md).
+The campaign shell now begins with the React-owned cinematic flow in `MainMenu.tsx`: dismissible splash, neutral monitoring room, deliberate faction preview in that faction's exact 1992 Warroom, dossier, historical/emergent mode choice, then Begin Campaign exactly once. The shared `WarroomScenePlate` owns the aspect-fit room substrate in both preview and play, so the selected room persists through a translucent date sting, opening brief, and foundational decision. Continue and Field Records retain their prior routes. In Electron, the outer Warroom document is only the IPC/postMessage host and bounded eight-second recovery owner; its legacy menu and `WarPlanningMap` are not constructed on healthy startup. See [the cinematic implementation plan](../plans/2026-08-28-cinematic-opening-typography-implementation-plan.md) and [DESKTOP_GUI_IPC_CONTRACT.md](../20_engineering/DESKTOP_GUI_IPC_CONTRACT.md).
 
 **Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
 
@@ -65,12 +65,15 @@ The campaign shell begins with the case-file flow owned by `MainMenu.tsx`: landi
 | **GUI expert advice (what to change)** | [handovers/GUI_EXPERT_ADVICE_WHAT_TO_CHANGE.md](handovers/GUI_EXPERT_ADVICE_WHAT_TO_CHANGE.md) — P0/P1 recommendations including IVP breakdown |
 | **Code entrypoints** | `src/ui/warroom/` — warroom.ts, ClickableRegionManager.ts, components/*.ts, data/*.ts |
 | **React dynamic board overlays** | [implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md](implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md), `src/ui/map/components/warroom/WarroomShellLayer.tsx` - React Warroom renders the authored dynamic `desk_map`/`wall_cork_board` and `wall_calendar_area`/`wall_calendar` surfaces under their hotspots: player-faction-only paper map, current front lines, and blue marker date. |
+| **Cinematic opening design and owner-asset prompts** | [2026-08-28 cinematic design](../plans/2026-08-28-cinematic-opening-typography-design.md) and [implementation plan](../plans/2026-08-28-cinematic-opening-typography-implementation-plan.md) — neutral splash/monitoring room, faction-room continuity, four owner-art prompts, typography, and acceptance gates. |
 
 ---
 
 ## Current status (summary)
 
 - **Scene:** Fixed plate **2752×1536**; faction-keyed background image. Current direction: **15 room images total** (`prewar/year1/year2/year3/year4` × 3 factions), **flag baked into room art**, **desk map projected as runtime overlay**, **date / next-turn board projected as runtime overlay**. Ticker/UI chrome remains engine-side as needed.
+- **Opening continuity (2026-08-28):** `WarroomScenePlate` is the single aspect-fit room substrate for opening preview and playable Warroom. Healthy browser and desktop-host startup is React-owned; the outer legacy composition exists only as bounded load/error recovery. Readiness requires a trusted, post-commit `awwv-shell:ready` from the current iframe/source/origin; iframe `load` alone never transfers ownership.
+- **Typography (2026-08-28):** bundled IBM Plex Sans Condensed owns command/prose UI and IBM Plex Mono owns data, dates, codes, and status. Latin-1 plus Latin-2 subsets cover Bosnian glyphs; provenance and hashes are recorded in `assets/ui/fonts/README.md`. Map glyph PBF, debug/painter/story/standalone surfaces are deliberately outside this active-player contract.
 - **Hotspots:** Physical anchors drive routing; **twelve-anchor contract** for baked plates (see [20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) §3a). Implemented today: `wall_flag_area`, `desk_map`, `wall_calendar_area`, `command_briefing_folio`, `newspaper_stack`, `intelligence_journal`, `diplomatic_telephone`, `desk_radio`. **Planned anchors** (region JSON + ClickableRegionManager when modals land): `commander_coatrack`, `enclave_dispatch_folder`, `intelligence_packet`, `honors_memorial`. Legacy action strings kept for compatibility.
 
 **Canonical anchor → modal mapping (definitive).** Room art must show **twelve distinct physical anchors** on the first bake so hotspot outlining never merges props. Items 1–8 are implemented; 9–12 are prompt-ready for P1 modals.
@@ -151,6 +154,8 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 | Gap | Description | Where |
 |-----|-------------|--------|
 | Warroom smoke automation | “Load warroom → select map → no crash” is covered by unit test (desk_map click invokes tactical-map handler). Full browser/Electron smoke is manual or e2e. | Phase E deliverable |
+| Final opening art | Temporary splash reuses `hq_presidential_desk_1992.webp`; the neutral monitoring room is a CSS fallback, and foreground/portal art is absent. Existing faction plates remain. Validate the RBiH final replacement against the 2752-wide scene contract (current source is 2750×1536); this is an asset check, not a mechanics defect. | R7 Task 9 / owner asset drop |
+| Packaged first paint | Five-viewport browser fallback-art proof is green, but live packaged-Electron first-paint and acceptance were not run. The blocked probe/RE route is separate and earns no credit here. | R7 packaged acceptance gate |
 
 ---
 
@@ -167,6 +172,7 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-08-28 | **Cinematic React opening and typography:** one healthy opening owner now carries neutral selection through exact faction-room preview into the same playable Warroom. Browser fallback-art proof is complete; owner art and live packaged acceptance remain open. | [Cinematic implementation plan](../plans/2026-08-28-cinematic-opening-typography-implementation-plan.md) |
 | 2026-06-06 | **Native overlay residue batch:** Intelligence, Staff, and Faction are the only native Warroom preview overlays; their drill-ins route to existing Army HQ owner surfaces, while retired StrategicDashboard/EventLog local command variants are gone from live source. | [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) |
 | 2026-05-16 | **React Warroom dynamic board overlays restored:** the React shell now honors dynamic board regions under their hotspots, projecting a player-faction-only paper map with current front lines onto the corkboard/desk-map and rendering the current date on the wall board in blue marker. | [implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md](implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md) |
 | 2026-05-02 | **Warroom priority docket:** the Warroom status bar now opens a compact `Review Before Advance` tray with source-backed rows and deep links to existing Decision Room targets, while Army HQ remains the command-review owner. | [implemented/20260502_WARROOM_PRIORITY_DOCKET.md](implemented/20260502_WARROOM_PRIORITY_DOCKET.md) |

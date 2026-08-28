@@ -3,7 +3,7 @@
 ## Core Flow
 
 1. Launch desktop map (`npm run desktop`).
-2. Open `Menu` -> **New War** or **Field Records**. **New War:** follow the case-file sequence through faction dossier, four-slot briefing, and explicit historical/emergent campaign mode, then Begin Campaign. The app consumes the baked `apr_1992` startup artifact (`data/derived/startup/apr_1992_initial_save.json`), a one-way derived copy of canonical builder truth, sets `meta.player_faction` and `meta.decision_mode`, initializes recruitment, and queues the selected faction's foundational opening decision. First-hour order is one date handoff, one opening brief, foundational decision, then the ordinary command map/tutorial loop. **Field Records** lists validated saves newest-first and loads only an exact currently listed filename; the legacy arbitrary state-file picker remains a separate engineering load path, not the case-file Records UX.
+2. Open `Menu` -> **New War** or **Field Records**. **New War:** dismiss the splash, select from the neutral monitoring room, deliberately preview the faction's exact 1992 Warroom, review its dossier, choose historical/emergent mode, then Begin exactly once. The app consumes the baked `apr_1992` startup artifact (`data/derived/startup/apr_1992_initial_save.json`), sets `meta.player_faction` and `meta.decision_mode`, initializes recruitment, and reveals that same selected Warroom. First-hour order is translucent date sting, one opening brief, foundational decision, then the ordinary command map/tutorial loop. **Field Records** lists validated saves newest-first and loads only an exact currently listed filename; the legacy arbitrary state-file picker remains a separate engineering load path.
 3. Use `Advance turn` from the play controls in Layers panel.
 4. Review:
    - Left sidebar `WAR STATUS` + `ORDER OF BATTLE`
@@ -14,7 +14,7 @@
 ## New UI Elements
 
 - Toolbar: `Menu`, `Summary`, `Settings`, `Help`.
-- Main menu overlay: five-beat case-file campaign entry plus inventory-backed Field Records.
+- Main menu overlay: React-owned cinematic splash/monitoring-room/faction-Warroom entry plus inventory-backed Field Records.
 - AAR modal: auto-opens when turn-to-turn control events are detected.
 - Settings modal:
   - CRT visual pass (optional)

@@ -189,6 +189,8 @@ Three HRHB decisions had exact pages, judgment sections, a resolved tier, and a 
    Do instead: run rg on roots or use targeted file lists when the repo has huge generated/vendor directories.
 6. **[2026-07-17] Poll browser-owned fixture status**
    Do instead: start large renderer save loads behind a unique token and poll synchronous browser-owned status from Node; do not directly await a churn-prone renderer promise through `Runtime.callFunctionOn`.
+7. **[2026-08-28] Iframe transport readiness is not committed shell ownership**
+   Do instead: let the child emit readiness only after React commit; accept proxy messages only from `window.parent`, and let the host trust only the current iframe/source/origin. A load event never claims readiness. During recovery mutation, defer handover; keep failure visible; consume the recovery latch only after retry succeeds. Publish lazy recovery dependencies only after successful load and clear rejected setup so retry remains possible.
 
 ## User Directives
 1. **[2026-08-15] Do not stop for routine implementation decisions**

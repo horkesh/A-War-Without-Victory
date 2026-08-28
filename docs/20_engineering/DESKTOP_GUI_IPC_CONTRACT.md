@@ -2,11 +2,11 @@
 
 ## Scope
 
-This document defines the Electron main <-> renderer IPC used by the desktop app (warroom-first launcher flow). The tactical map is embedded as an iframe in the warroom window (same-origin, `awwv://warroom/tactical-map/...`), not a separate `BrowserWindow`. **Map assets (PMTiles, style, GeoJSON, Load run):** MapLibre blob workers do not work under `awwv://`; the main process starts a local HTTP server (127.0.0.1, random port) and exposes `getMapServerUrl` via preload. The map and warroom load map data from `http://127.0.0.1:<port>/data/source/...` and `/data/runs/<id>/final_save.json`. See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §0 and [20260303_MAP_RUNTIME_CONTRACT_FIXES.md](../40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md).
+This document defines the Electron main <-> renderer IPC used by the desktop app (warroom-first launcher flow). Electron loads the outer Warroom document at `awwv://warroom/index.html`; its normal player surface is the React app embedded from the loopback HTTP map server, not a second `BrowserWindow` and not a same-origin child. **Map assets (PMTiles, style, GeoJSON, Load run):** MapLibre blob workers do not work under `awwv://`; the main process starts a local HTTP server (127.0.0.1, random port) and exposes `getMapServerUrl` via preload. The React app and map data load from `http://127.0.0.1:<port>/`; the outer document relays the preload bridge through a source-bound `postMessage` proxy. See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §0 and [20260303_MAP_RUNTIME_CONTRACT_FIXES.md](../40_reports/implemented/20260303_MAP_RUNTIME_CONTRACT_FIXES.md).
 
 - Main process: `src/desktop/electron-main.cjs`
 - Preload bridge: `src/desktop/preload.cjs`
-- Renderer consumers: `src/ui/warroom/warroom.ts`, `src/ui/map/MapApp.ts` (via embedded iframe)
+- Renderer consumers: `src/ui/warroom/warroom.ts` (outer host/recovery) and `src/ui/map/` (`index.html` → `main.tsx` → `App.tsx`, via embedded iframe)
 - Sim adapter: `src/desktop/desktop_sim.ts`
 
 **State contract (current player shell):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. The raw payload may still contain compatibility-era state such as `assignable_front_segments`, `brigade_front_assignment`, `brigade_sector_override`, `theatres`, and `army_theatre_assignment`, but the live tactical-map `LoadedGameState` treats those as compatibility/history or read-only assignment context rather than active presidential controls. The current player shell centers on canonical front edges, corps sectors, presidential directives, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for current single-source notes.
@@ -24,7 +24,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `start-new-campaign` (invoke)
   - Payload: `{ playerFaction: 'RBiH' | 'RS' | 'HRHB', decisionMode: 'emergent' | 'historical', scenarioKey?: 'apr_1992' }`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
-  - Behavior: for `apr_1992`, consumes the baked startup artifact via `loadStartupSnapshotState(...)` (`data/derived/startup/apr_1992_initial_save.json`), which is a one-way derived copy of canonical builder truth from `data/scenarios/apr1992_definitive_52w.json`; then validates and persists the explicit `decisionMode` as `meta.decision_mode`, sets `meta.player_faction`, initializes `recruitment_state` if missing, clears startup control-history noise for the player-authored campaign path, queues exactly the selected faction's opening foundational decision, and serializes + pushes state via `game-state-updated`. Non-baked scenario keys continue through `createStateFromScenario(...)`. Called after the case-file landing -> faction dossier -> campaign-mode sequence. (Note: legacy `sep_1991` scenario decommissioned in v0.7.0). The renderer handoff is date transition -> one opening brief -> foundational decision -> command map/tutorial; the duplicate war-start briefing is retired.
+  - Behavior: for `apr_1992`, consumes the baked startup artifact via `loadStartupSnapshotState(...)` (`data/derived/startup/apr_1992_initial_save.json`), which is a one-way derived copy of canonical builder truth from `data/scenarios/apr1992_definitive_52w.json`; then validates and persists the explicit `decisionMode` as `meta.decision_mode`, sets `meta.player_faction`, initializes `recruitment_state` if missing, clears startup control-history noise for the player-authored campaign path, queues exactly the selected faction's opening foundational decision, and serializes + pushes state via `game-state-updated`. Non-baked scenario keys continue through `createStateFromScenario(...)`. Called after the cinematic neutral opening, deliberate faction-room preview, dossier, and campaign-mode sequence. (Note: legacy `sep_1991` scenario decommissioned in v0.7.0). On success the React app enters the selected 1992 Warroom, shows the translucent date sting, then one opening brief and the foundational decision; the duplicate war-start briefing is retired.
 
 - `load-state-dialog` (invoke)
   - Returns: `{ ok: boolean, error?: string, stateJson?: string, replaySequenceJson?: string | null, replayManifestJson?: string | null }`
@@ -290,11 +290,18 @@ The `awwv` custom protocol is registered as standard+privileged with `supportFet
 | `awwv://warroom/data/derived/*` | `data/derived/` | Derived map/control data |
 | `awwv://warroom/data/source/*` | `data/source/` | Source data files |
 | `awwv://warroom/assets/*` | `assets/` | Crests, flags, scenario images |
-| `awwv://warroom/tactical-map/*` | `dist/tactical-map/` | Tactical map files under warroom origin (same-origin for iframe) |
+| `awwv://warroom/tactical-map/*` | `dist/tactical-map/` | Retained protocol route for legacy/standalone tactical documents; the normal React opening uses the loopback HTTP server |
 | `awwv://app/*` | `dist/tactical-map/` | Standalone tactical map (legacy, still available from Electron menu) |
 | `awwv://app/data/derived/*` | `data/derived/` | Map data for standalone mode |
 
-**Note:** The `awwv://warroom/tactical-map/*` route exists so the tactical map iframe is same-origin with the warroom and can inherit `window.parent.awwv` for IPC bridge access. See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §21.1.
+### Embedded React opening ownership and bridge
+
+- The outer Warroom creates one `index.html?embedded=1` React iframe from the resolved loopback HTTP base. The child is cross-origin relative to `awwv://warroom`; it does not inherit `window.parent.awwv`.
+- `src/ui/map/index.html` installs a proxy only when `embedded=1` and accepts bridge responses/events only from `window.parent`. The parent accepts readiness, invoke, and subscription messages only from the current trusted iframe/source and allowed origin.
+- Iframe `load` is transport evidence only. React emits `awwv-shell:ready` from an effect after the embedded root commits; only that trusted signal claims healthy opening ownership. The legacy menu/desk stays hidden and inert while React loads and during healthy operation.
+- One eight-second error/timeout window may expose legacy recovery. Healthy startup constructs or loads no `WarPlanningMap`; recovery initializes it lazily, publishes it only after `loadData()` succeeds, leaves failure visible, and clears a rejected setup so Retry can attempt it again.
+- A late trusted ready signal normally reclaims React ownership. If legacy recovery is inside a campaign mutation, readiness is deferred until that mutation settles; failed mutation keeps recovery visible, while successful mutation consumes the latch. A fresh-campaign reset is sent before `awwv-shell:show-warroom` so stale intro state cannot leak into the new room.
+- The legacy recovery start payload is exactly `{ playerFaction, decisionMode: 'emergent', scenarioKey: 'apr_1992' }`. This fallback does not alter channel names or the canonical `start-new-campaign` contract.
 
 ## Determinism Notes
 

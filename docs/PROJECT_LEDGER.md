@@ -30085,3 +30085,59 @@ no packaged-proof route active. P3 waits, calibration remains paused, and disjoi
 The auxiliary work earns no RE credit. No run, retry, diagnosis, instrumentation, supervisor
 redesign, correction, recovery route, or successor authority follows. `docs/10_canon/FORAWWV.md`
 was not edited.
+
+## 2026-08-28 — Close cinematic opening implementation slice; retain art and packaged gates
+
+**Scope and result:** The R7 presentation amendment now has one healthy opening owner. Browser and
+desktop-host startup enter React `MainMenu`; the outer Warroom document owns IPC/postMessage and a
+bounded eight-second error/timeout recovery only. Shared `WarroomScenePlate` preserves exact room
+geometry from deliberate faction preview into play. The player path is splash → neutral monitoring
+room → faction preview → dossier/mode → Begin exactly once → the same 1992 room → translucent date
+sting → opening brief → foundational decision. Continue and load routes are unchanged.
+
+**Readiness and recovery:** React emits post-commit `awwv-shell:ready`; iframe `load` never claims
+ownership. The host validates the current iframe/source/origin, and the embedded child accepts only
+its parent. Recovery mutation defers ready, failure stays visible, retry success consumes the latch,
+and fresh reset precedes `show-warroom`. The legacy recovery start payload includes
+`decisionMode: 'emergent'`. Healthy startup constructs and loads zero legacy `WarPlanningMap`
+instances; lazy recovery setup publishes only after success and clears rejection for retry.
+
+**Typography and assets:** IBM Plex Sans Condensed owns command/prose and IBM Plex Mono Latin-1 plus
+Latin-2 owns data/code/status with Bosnian glyph coverage. Exact upstream provenance and hashes are
+in `assets/ui/fonts/README.md`. A positive recursive audit covers 254 shipped map-UI TS/TSX/JS/JSX
+sources, including Deck/canvas constants, with narrow debug/painter/story/standalone/map-glyph-PBF
+exclusions. Owner art is not yet supplied: the splash temporarily uses
+`hq_presidential_desk_1992.webp`, the neutral room uses CSS fallback, and foreground/portal art is
+absent. Existing faction plates remain; the RBiH source is 2750×1536 against the 2752-wide scene
+contract and must be validated when final art lands. This is an asset item, not a mechanics defect.
+
+**Material commits:** design/roadmap `3fd1a15b5`, `b67925484`, `9c8f34332`, `892909ca9`,
+`2af6aeba1`; typography `84828e9a5`, `079470d96`, `47e878a3c`, `44b42f28b`, `5a9244215`;
+scene/transition/menu/handoff `14b139cd6`, `8fd70ebca`, `8718f17b0`, `8a89d5930`, `65994aa90`,
+`3e9c8541b`, `5151dae6a`, `bc4c837a1`; host/readiness/recovery `1c2055751`, `c68755deb`,
+`a8e04ca28`, `5f8bef696`, `02aaf45a9`, `44d6aeaed`, `bdcab07fe`, `6c0055295`; verification and
+harness `2299c4299`, `7f2e7dd31`, `aaa737491`.
+
+**Verification:** Separate overlapping focused gates passed: architecture 27/27; host/Warroom
+199/199, then lazy-map 268/268; responsive 51/51; Task 10 139/139 before later fixes. Typecheck and
+both builds passed. The ignored receipt
+`.tmp_first_hour_browser_gate/first_hour_browser_gate.json` records 83+ screenshots over
+1920×1080, 1366×768, 1024×768, 700×900, and 1024×560: exact 0px continuity, no black/uncovered
+frames, overflow, or occlusion, 9.61:1 minimum contrast, 2px focus, transform-free 155ms reduced
+motion, and local fonts with no remote references. The harness is tracked at
+`tools/ui/first_hour_browser_gate.cjs`.
+
+**Full-suite boundary:** Canonical `npm run test:vitest:balanced` is **RED**: 1335 files / 13273
+tests; 1325 files pass, 5 fail, 5 skip; 13231 tests pass, 6 fail, 36 skip. Three former UI/docs
+assertions were corrected and separately pass. Remaining inherited failures are deterministic
+40-week deployment-health/run-diagnostics expectations around the same three unstaffed sectors and
+the Cutileiro RBiH accepted-control expectation (43.6798% current vs 44% offer). The authorized-base
+delta contains no relevant engine/canon paths. Plain `test:vitest` was interrupted after more than
+30 minutes on an unsharded property file; CODE_CANON names the balanced command as full-suite
+authority. No engine-health blessing follows from this UI receipt.
+
+**Open gates and exclusions:** Final splash/neutral/foreground/portal art and live packaged-Electron
+first-paint/acceptance remain open. The blocked packaged probe/RE path was not run, diagnosed, or
+changed and earns no credit. Mechanics/state/IPC contract names, engine, simulation, calibration,
+RE, probes, localization Phase 3, and canon were outside scope. R8, RE, release, and R7 overall are
+not complete. `docs/10_canon/FORAWWV.md` was not edited.

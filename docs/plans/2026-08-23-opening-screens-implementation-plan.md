@@ -2,25 +2,29 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use `executing-plans` to implement this plan task-by-task.
 
-**Goal:** Replace the instant faction picker with a functional, accessible case-file opening that carries the player from landing screen through faction dossier and campaign mode into the command desk, while consolidating the existing duplicate war briefing.
+**Goal:** Replace the instant faction picker with a functional, accessible campaign opening that carries the player through faction dossier and campaign mode into the command shell, while consolidating the existing duplicate war briefing. The 2026-08-28 amendment supersedes this plan's original case-file presentation with the cinematic monitoring-room/faction-Warroom composition while retaining these mechanics.
 
 **Architecture:** Keep the sequence local to `MainMenu` until the final Begin action, then pass one typed campaign-start payload through the existing desktop/browser campaign start boundary. Reuse the current loaded save as Continue and add a records surface for available desktop saves without exposing filesystem paths. The existing post-start transition becomes a short handoff instead of repeating the faction dossier.
 
 **Tech Stack:** React 18, TypeScript, Tailwind/CSS, Electron IPC, Vitest, Testing Library.
 
-## Active R7 Presentation Amendment — 2026-08-28
+## R7 Presentation Amendment Status — 2026-08-28
 
 The functional opening mechanics delivered by this plan remain accepted: landing, faction selection,
 dossier, campaign-mode selection, Field Records, campaign-start payload, and the consolidated
 post-start handoff are not reopened.
 
-The active presentation-only amendment is
+The presentation-only amendment is
 [Cinematic Opening and Typography Implementation Plan](2026-08-28-cinematic-opening-typography-implementation-plan.md).
-Its exact scope is a cinematic neutral splash/monitoring room, faction Warroom preview/continuity,
-two-family typography, and browser/host verification.
+Its mechanics, two-family typography, host ownership, and five-viewport fallback-art browser proof
+are complete. React `MainMenu` now owns healthy browser and desktop-host opening; the outer legacy
+menu is bounded recovery only. Final owner splash/neutral/foreground/portal art and live packaged-
+Electron first-paint acceptance remain open.
 
-RE remains blocked and untouched. Browser/build/unit work proceeds independently; actual packaged
-acceptance waits for an authorized non-conflicting packaged-runtime verification route. This
+RE remains blocked and untouched. Actual packaged acceptance waits for an authorized non-conflicting
+packaged-runtime verification route. The canonical balanced suite was run and remains red only on
+inherited deployment-health/run-diagnostics and Cutileiro expectation residuals; that does not
+reopen this UI implementation or authorize engine/canon repair. This
 amendment does not authorize a packaged probe, RE diagnosis, or changes to engine, simulation,
 state, calibration, canon, IPC, campaign payloads, or save behavior.
 
@@ -39,7 +43,7 @@ state, calibration, canon, IPC, campaign payloads, or save behavior.
 5. Prove Back returns one beat without starting and focus moves to the primary action on each beat.
 6. Run the focused tests and confirm the failures are caused by the missing sequence.
 
-### Task 2: Build the case-file menu and faction dossier
+### Task 2: Build the functional menu and faction dossier
 
 **Files:**
 - Modify: `src/ui/map/components/MainMenu.tsx`
@@ -96,7 +100,7 @@ state, calibration, canon, IPC, campaign payloads, or save behavior.
 **Files:**
 - Modify: `src/ui/map/components/PeaceWarTransitionOverlay.tsx`
 - Modify: `src/ui/map/components/WarHasBegunSplash.tsx`
-- Modify: `tests/ui/peace_war_transition_overlay.test.tsx` (or nearest existing transition test)
+- Modify: `tests/ui/peace_war_transition_overlay.test.ts` (or nearest existing transition test)
 
 1. Write a failing test proving a campaign started through the new opening does not repeat a second faction dossier.
 2. Reduce the overlay to one short, dismissible date handoff and route directly to the command desk.

@@ -9,6 +9,10 @@
 
 **Source of truth:** The **React + MapLibre map app** in `src/ui/map/` (Vite, React, Tailwind, Zustand, MapContainer) is the **canonical GUI**. All GUI work must be applied to this app. Run it via `npm run dev:map`. The legacy HoI 3D stack (`map_hoi.html`), tactical map (`tactical_map.html`), and other archived renderers are **not** targets for new work.
 
+**Current opening integration (2026-08-28):** The canonical browser entry is `index.html` → `main.tsx` → `App.tsx`. React `MainMenu` owns the healthy opening in browser and in the Electron outer Warroom host: dismissible splash, neutral monitoring-room selector, deliberate faction-room preview, dossier/mode, and Begin into that exact selected 1992 room. `WarroomScenePlate` is the shared 2752×1536 aspect-fit substrate for preview and play. The outer `src/ui/warroom/` document remains the IPC/iframe host; its legacy menu, desk, and `WarPlanningMap` are lazy eight-second error/timeout recovery only. This renderer integration changed no engine, state, Electron main/preload, IPC channel/payload, save, or campaign mechanics.
+
+**Current type contract (2026-08-28):** Active interface/prose uses bundled IBM Plex Sans Condensed; data, dates, codes, and status use bundled IBM Plex Mono with Latin-1/Latin-2 coverage for Bosnian glyphs. The recursive source audit covers shipped TS/TSX/JS/JSX map UI and deliberately excludes debug/painter/story/standalone surfaces and MapLibre glyph PBF handling.
+
 > **2026-04-03 shell authority note:** This document remains a useful rework/history reference, but it is no longer the canonical owner of live shell hierarchy. For current top-level shell authority, use [PRODUCT_SHELL_HIERARCHY.md](PRODUCT_SHELL_HIERARCHY.md) and [UI_OWNERSHIP_MATRIX.md](UI_OWNERSHIP_MATRIX.md). In live runtime, `PresidentialToolbar.tsx` is the mounted tactical-map top shell; `TopToolbar.tsx` is legacy/reference only.
 
 ---
@@ -24,7 +28,7 @@
 | **Phase 1 (Scaffold + Map)** | Vite + React + MapLibre; `awwv_map_style.json`; MapContainer; OSID control layer; front lines; formations; order arrows; PMTiles/base map | — |
 | **Phase 2 (Game state)** | Load save → store; GeoJSON builders (control, front lines, formations, order arrows); formations + orders on map | — |
 | **Phase 3 (UI panels)** | TopToolbar, BottomStatusStrip, SelectionPanel (Settlement Info, OSID humanized), FormationDetail, OOBSidebar, CorpsCard, BrigadeRow; click OSID/formation → panels; Storybook. **Phase A complete:** §9.2 panel palette, headers, faction gradient TopToolbar, BrigadeRow cohesion bars + supply dots. **Phase B complete:** tabbed sidebar (Army/Situation), Situation tab, front on CorpsCard, Reserve, stance controls, hover preview, Escape clears selection. **Phase C complete (2026-02-28):** Rich tooltips (§7), MapModeToolbar + MapLayerToggles (bottom-right), useKeyboardShortcuts (Enter, 1–4, Escape), AttackConfirmation modal, OrderQueue. **Phase 3 expansion (2026-03-02):** Tooltip fix (stripFactionSuffix), sector fill + edge glow on map, brigade↔sector bidirectional sync, CorpsDetail panel, density map mode (5th mode). Report: [20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md](../40_reports/implemented/20260302_GUI_PHASE3_EXPANSION_SECTOR_VISUALIZATION.md). **Phase 3 remainder (2026-03-02):** ArmyDetail panel (faction-level stats, drill-down to corps), Minimap (second MapLibre, viewport sync, click-to-pan, toggle in Layers), MovementPreview (move mode + green OSID highlight), ZoomControls (satisfied by existing NavigationControl). **Progressive war stories in FormationDetail (2026-03-02):** Color-coded arc badge (veteran/green, bloodied/amber, shattered/red, risen/emerald, destroyed/gray, garrison/neutral), italic narrative paragraph, bulleted notable moments with turn numbers. Data from `FormationState.war_story` via `GameStateAdapter`. Report: [20260302_PROGRESSIVE_WAR_STORIES_IMPLEMENTATION.md](../40_reports/implemented/20260302_PROGRESSIVE_WAR_STORIES_IMPLEMENTATION.md). **Corps & army combat summaries (2026-03-02):** CombatSummaryPanel in CorpsDetail, ArmyDetail, FormationDetail. Data from FormationState.combat_summary via GameStateAdapter. Pipeline step `compute-combat-summaries`. **Phase 3 COMPLETE.** | — |
-| **Phase 4 (Desktop)** | useIPC hook, case-file **New War** faction/mode flow, **Field Records** save browser, RecruitmentModal, useDesktopSession, desktop/orderActions + campaignRecruitmentActions, fog-of-war layer (`buildFogOfWarGeoJSON`, `fog-fill` in MapContainer). As of 2026-03-06, fog reads `LoadedGameState.fogOfWar`, projected from live `sector_intel` by `GameStateAdapter`, not deleted `recon_intelligence`. Move orders staged via IPC. Fog toggle button (`fogVisible` store field). `stageCorpsOperationOrder` IPC backend (electron-main handler + preload bridge). Reports: [20260304_GUI_PHASE4_ELECTRON_DESKTOP_INTEGRATION.md](../40_reports/implemented/20260304_GUI_PHASE4_ELECTRON_DESKTOP_INTEGRATION.md), [20260306_RECOVERY_PLAN_REPORTING_UI_AND_BENCHMARK_HARDENING.md](../40_reports/implemented/20260306_RECOVERY_PLAN_REPORTING_UI_AND_BENCHMARK_HARDENING.md) | PMTiles manual smoke test |
+| **Phase 4 (Desktop)** | useIPC hook, cinematic React-owned **New War** faction/mode flow, **Field Records** save browser, same-room Warroom handoff, RecruitmentModal, useDesktopSession, desktop/orderActions + campaignRecruitmentActions, fog-of-war layer (`buildFogOfWarGeoJSON`, `fog-fill` in MapContainer). The outer desktop document hosts and proxies the loopback HTTP React iframe; its legacy opening is recovery only. As of 2026-03-06, fog reads `LoadedGameState.fogOfWar`, projected from live `sector_intel` by `GameStateAdapter`, not deleted `recon_intelligence`. Move orders staged via IPC. Fog toggle button (`fogVisible` store field). `stageCorpsOperationOrder` IPC backend (electron-main handler + preload bridge). Reports: [20260304_GUI_PHASE4_ELECTRON_DESKTOP_INTEGRATION.md](../40_reports/implemented/20260304_GUI_PHASE4_ELECTRON_DESKTOP_INTEGRATION.md), [20260306_RECOVERY_PLAN_REPORTING_UI_AND_BENCHMARK_HARDENING.md](../40_reports/implemented/20260306_RECOVERY_PLAN_REPORTING_UI_AND_BENCHMARK_HARDENING.md); amendment: [2026-08-28 cinematic opening and typography plan](../plans/2026-08-28-cinematic-opening-typography-implementation-plan.md). | Live packaged Electron first-paint/acceptance remains open |
 | **Phase 5 (Polish)** | Formation markers: corps/army_hq removed from map; HoI-style rectangular counters; front-distributed placement; `icon-allow-overlap: true`. Posture stripes on counters. Enclave visualization. Direct move preview retired 2026-06-19 with the dead direct brigade move affordance. Battle markers: `GameState.control_events` + `buildBattleMarkersGeoJSON.ts` + `battle-markers-pulse` layer. War Summary modal (`WarSummaryModal.tsx`): area-weighted territory, personnel, casualties, displacement. Layer toggles: Fog/Battles (strategic “Points” layer removed 2026-03-20). **Deck.gl (2026-03-20, default):** `src/ui/map/layers/` + `MapboxOverlay` in `MapContainer`; **`deckFormationCounters` default true** — Deck.gl formation counters with enrichments (health bar, supply dot, status icons, stack badges, op/disrupted glow rings) are the default render path; MapLibre `formation-markers` / `formation-labels` hidden when active. Major-mun labels: `major-city-labels`. Report: [20260304_GUI_PHASE5_BATTLE_MARKERS_FOG_STRATEGIC_CORPS_OP_WAR_SUMMARY.md](../40_reports/implemented/20260304_GUI_PHASE5_BATTLE_MARKERS_FOG_STRATEGIC_CORPS_OP_WAR_SUMMARY.md). **Orchestrated GUI polish (2026-03-05):** Authoritative **Consolidated Phase List (A–F)** — Arrow overhaul, Ops Planning modal rework, Map mode toolbar (pressure/supply, 1–5 shortcuts), Battle marker pulse, Bottom status strip enrichment, General polish — in [20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md](../40_reports/implemented/20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md). **Sector visualization fix (2026-03-06):** Per-segment hover features with per-segment offset; sector-based hover highlight (filter by sector_id, replaces feature-state); hostile-side OSID adjacency for cross-corps consolidation; authoritative contact-graph pair filtering removes phantom edges. Report: [20260306_SECTOR_VISUALIZATION_HOVER_CLICK_FIX.md](../40_reports/implemented/20260306_SECTOR_VISUALIZATION_HOVER_CLICK_FIX.md). | Replay scrubber (requires --video flag, 13.6 GB/run — deferred); visual sign-off |
 
 **Presidential toolbar + Command rail (2026-03-27):** Production map uses **PresidentialToolbar** + fixed **OOBSidebar** (`Command`). Shared **`--awwv-toolbar-clearance`** clears the **centered** crest; the left column can show a **large gap** below the 48px bar — documented UX debt and options: [20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md](../40_reports/implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md).
@@ -103,7 +107,7 @@ Everything under `src/ui/map/` is replaced. The following are **archived, not de
 | Electron main process (`src/desktop/electron-main.cjs`) | **Untouched** — IPC contract stays identical |
 | IPC contract (`DESKTOP_GUI_IPC_CONTRACT.md`) | **Untouched** — all channel names, payloads, and behaviors preserved |
 | Data pipeline (`scripts/map/`, `data/derived/`) | **Extended** — new tile generation step added (see §4.4) |
-| Warroom (`src/ui/warroom/`) | **Separate effort** — not part of this rework |
+| Warroom (`src/ui/warroom/`) | **Outer host/recovery integration only** — normal opening and playable Warroom live in React; legacy DOM/canvas remains bounded recovery |
 | `src/map/nato_tokens.ts` | **Untouched** — canonical color source |
 
 ---
@@ -741,7 +745,7 @@ Same as v1 §5.3. Full component list:
 **Right panel:** `SelectionPanel`, `SettlementDetail`, `FormationDetail`, `CorpsDetail`, `ArmyDetail`, `CombatSummaryPanel`  
 **Left sidebar:** `OOBSidebar`, `CorpsCard`, `BrigadeRow`  
 **Orders:** `OrderQueue`, `AttackConfirmation`, `MovementPreview`  
-**Modals/opening:** `WarSummaryModal`, `RecruitmentModal`, `MainMenu` (mounted case-file opening), `SidePickerOverlay` (retained compatibility component)
+**Modals/opening:** `WarSummaryModal`, `RecruitmentModal`, `MainMenu` (mounted cinematic opening), `opening/OpeningSplash`, `opening/OpeningCinematicLayer`, `warroom/WarroomScenePlate`, `SidePickerOverlay` (retained compatibility component)
 **Replay:** `ReplayScrubber`
 
 ### 5.3 Tailwind Theme
@@ -1060,7 +1064,7 @@ scripts/map/
 1. Wire `useIPC.ts` to all existing IPC channels
 2. Wire `advance-turn`, attack/move/posture order staging
 3. Wire recruitment modal
-4. Wire the case-file **New War** faction and decision-mode choices → `start-new-campaign`; wire **Field Records** → `list-save-records` / `load-save-record`
+4. Wire cinematic **New War** faction-room previews and decision-mode choices → `start-new-campaign`; wire **Field Records** → `list-save-records` / `load-save-record`
 5. Wire fog-of-war (filter formations by `player_faction`)
 6. Configure PMTiles serving in Electron (local file protocol)
 7. Test full gameplay loop: choose faction and mode → advance turns → stage orders → see results; separately load a Field Record
@@ -1124,10 +1128,11 @@ scripts/map/
 
 ### 10.1 For the Desktop Agent (Electron)
 
-**Almost nothing changes.** `electron-main.cjs` stays the same. All IPC channels stay the same. Two small additions:
+**Current result:** `electron-main.cjs`, preload, channel names, and payloads stay unchanged. The renderer/host integration is:
 
-1. The `awwv://` protocol handler may need a route for tile files if not using PMTiles protocol directly.
-2. The renderer HTML entry point changes from `tactical_map.html` to the new React app's `index.html`.
+1. Electron loads `awwv://warroom/index.html`; the outer document resolves the existing loopback map server and embeds `index.html?embedded=1`.
+2. The child installs a parent-only `postMessage` bridge proxy and emits post-commit `awwv-shell:ready`; iframe load alone does not claim ownership.
+3. The parent accepts only the current trusted iframe/source/origin and exposes the legacy menu/desk only after bounded error/timeout recovery.
 
 ### 10.2 For the Simulation / Engine Agent
 
@@ -1160,7 +1165,7 @@ This rework is **Phase 1 priority** for the GUI track. It supersedes:
 - Any further Three.js / HoI renderer improvements
 - Any further class-based UI component development
 
-The warroom (`src/ui/warroom/`) continues independently.
+The playable Warroom and opening now compose inside the canonical React app. `src/ui/warroom/` continues as the Electron host and bounded recovery surface; it is not an independent healthy product flow.
 
 ---
 
