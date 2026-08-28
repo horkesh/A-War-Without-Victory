@@ -1813,6 +1813,141 @@ Removing the flip's unconditionality before (2) does not make the outcome emerge
 
 H1.8 amended to say it governs *cause*, not *certainty*; `VICTORY_AND_PYRRHIC_SCORING.md` §6 Non-Goal #3 made outcome-constant; the `contain_posture_gate.ts` and `verify_checkpoints.cjs` comment corrections; `srebrenica_falls_1995` has **no `family` field**, so the Ring-3 validator does not protect the most sensitive row in the game; and both gate docs self-assert Tier-2 rank while appearing in neither stated hierarchy.
 
+## 3l. ROOT CAUSE — the VRS cannot convert victories, and the chain starts at equipment class
+
+Traced end to end 2026-08-28 against `runs/apr1992_definitive_188w__46834a3b41033bff__w188_n1`.
+This is the defect the whole Srebrenica lane was standing on, and it is one chain.
+
+### FIRST, A CORRECTION — RS never stops attacking
+
+**199 RS battles across 188 weeks, present in every 20-week bucket through w181.** What dies at
+t73 is **capture, not aggression**. After w73 RS records **5 `decisive_victory` + 2
+`costly_victory`** (w79/80/81 medini, w128, w156, w157) and **captures nothing.**
+
+The VRS is winning battles it is structurally forbidden to convert. Everything this diary and
+project memory said about "RS stops attacking" is wrong — including my own relay of it.
+
+### The chain
+
+**1. `main_effort` is gated on EQUIPMENT CLASS, not strength.** `force_eval.ts:135-143`:
+
+```ts
+if (isElite && equipPriority >= MAIN_EFFORT_EQUIPMENT_PRIORITY) tier = 'main_effort';
+else if (equipPriority >= MAIN_EFFORT_EQUIPMENT_PRIORITY && fitnessOffense >= MAIN_EFFORT_FITNESS_THRESHOLD) tier = 'main_effort';
+```
+
+`MAIN_EFFORT_EQUIPMENT_PRIORITY = 2` (`:29`), `MAIN_EFFORT_FITNESS_THRESHOLD = 0.4` (`:32`), and
+`getEquipmentOffensivePriority` (`sector_offensive_launch_helpers.ts:84-91`) returns mechanized 3,
+motorized 2, **mountain 1**, everything else 0. **A mountain or light-infantry brigade can never
+be main_effort — at any strength, morale, or artillery holding.**
+
+**2. Every VRS FIELD corps has `main_effort: 0`.** From `commander_state.force_assessment.tier_counts`
+at t188:
+
+```
+vrs_1st_krajina        {active_defense 3,  garrison 19, main_effort 0}
+vrs_drina              {active_defense 1,  garrison  8, main_effort 0}
+vrs_east_bosnian       {active_defense 0,  garrison  9, main_effort 0}
+vrs_herzegovina        {active_defense 0,  garrison  8, main_effort 0}
+vrs_sarajevo_romanija  {active_defense 0,  garrison 10, main_effort 0}
+vrs_2nd_krajina        {active_defense 0,  garrison  3, main_effort 0}
+vrs_main_staff         {active_defense 0,  garrison  0, main_effort 2}   <- the only one
+arbih_2nd_corps        {active_defense 30, garrison  8, main_effort 1}
+```
+
+RS is **not short of motorised units** — 12 mot/mech active at t188 vs RBiH's 9. Every one in a
+field corps fails the 0.4 bar; the only two that clear it are at Main Staff
+(`rs_1st_guards_motorized` 0.569, `rs_65th_protection_regiment` 0.516). The field brigades sit at
+0.069-0.292.
+
+**3. Zero main_effort caps the corps at `defensive`** — `bot_corps_stance.ts:145-150`, the N1297
+organizational-readiness gate.
+
+**4. A defensive corps emits no plans** — `plan.ts:832-847`. The engine records it verbatim;
+`last_plan_reason` at t188 reads *"corps in defensive stance — no new plans"* for Drina, East
+Bosnian, Herzegovina and Sarajevo-Romanija.
+
+**5. What remains is probes, and probes cannot take ground.** `corps_operation_helpers.ts:392`
+sets `occupies_on_victory: false`; `attack_resolution_osid.ts:1406` reads
+`activeOp?.occupies_on_victory ?? true` into the flip.
+
+### The enclave was NOT excluded — it was attempted and the corps burned out
+
+No enclave-specific exclusion exists in the organic path. Both candidate sites checked:
+`bot_brigade_eval_front.ts:609-614` prevents *friendly* pocket evacuation (wrong direction), and
+`operation_preparation.ts:224-244` `allObjectivesInOneEnclave` scopes *defender* aggregation only.
+
+Operation **Cerska-Kamenica**, `vrs_drina`, t40-t49:
+```
+objectives_targeted: [op:vlasenica:cerska_2, op:srebrenica:osmace_2,
+                      op:srebrenica:radovcici, op:srebrenica:sulice_2]
+total_attacks: 2   captured: []   recovery_reason: "max_failures"
+grade: 3 stars "Indecisive"   objective_completion: 0
+```
+Its sibling (Pracha River, t41-48, `ustipraca_2` on the Goražde corridor) failed identically:
+3 attacks, 0 captures, `max_failures`, "Catastrophic Failure". **`vrs_drina` never launched
+another operation for the remaining 140 weeks.**
+
+**And `vrs_drina` is the only VRS corps that emits ZERO probes in the whole run:**
+```
+vrs_1st_krajina        21 probe launches (t4 … t170)
+vrs_sarajevo_romanija  13
+vrs_herzegovina         5
+vrs_east_bosnian        3
+vrs_2nd_krajina         2
+vrs_drina               NONE
+```
+Probes emit through a gate separate from `managePlan` (`emit.ts:1102-1108`) requiring
+`allocation.surplus_pool.length > 0`. Drina has 8 of 9 brigades at garrison tier and one
+active_defense — no surplus to probe with. It is not sector-less: 3 sectors, 26 friendly OSIDs at
+t188. **So Srebrenica is the one front where the VRS emits no combat activity of any kind after
+t41.**
+
+### The `attacks: 0` operations
+
+All five (Soko t105, Munja t114, Odmazda t128, Breza t147, Javor t176) are `vrs_1st_krajina`,
+verdict *"No Assault Attempted"*, all targeting the same two OSIDs (`op:doboj:klokotnica_2`,
+`op:lukavac:brijesnica_donja_2`). Predicate is **`defender_power_too_high`**
+(`sector_offensive_launch_helpers.ts:227-229`), `ratio >= VICTORY_THRESHOLD_COSTLY` where the
+constant is **1.0** (`combat_math.ts:126`). Third symptom of the same weakness — 1st Krajina is
+the one corps still allowed to plan, and when it plans it cannot reach parity.
+
+### WHAT THIS PROBABLY IS — and where it stops being an engine question
+
+Force balance at t188: **RS 70 brigades / 79,435 men vs RBiH 130 / 214,912 — 1:2.7.**
+
+Against the reference figures in `CLAUDE.md` (VRS 250k→**155k**, ARBiH 60-80k→180-200k), **RS is at
+roughly HALF its historical end-state strength while RBiH is at or above its.** Since
+`fitnessOffense = personnel/2500 × supplyMult × cohesionNorm × (1 + equipPriority×0.25) ×
+fatigueMult`, an army at half establishment cannot clear a 0.4 offensive bar however the commander
+AI is tuned.
+
+**This reads as an OOB / attrition / reinforcement problem surfacing as a commander-AI symptom.**
+The Engine seat explicitly declined to adjudicate it — strength trajectories and cohesion floors
+are calibration and Historian territory. Two flags carried forward:
+- **Cohesion floors are settled modelled history** (VRS professional→hollow, per the standing
+  note), so the cohesion half may be correct and **personnel is the open question**.
+- `personnelNorm` normalises against a fixed `STANDARD_PERSONNEL = 2500` (`force_eval.ts:23`), so
+  **a light brigade at full historical establishment scores as a half-strength one.**
+
+### Two traps recorded
+
+- **`DEFAULT_PERSONALITY.initiative = 0.3`** (`commander/briefing.ts:76`) and the probe gate is
+  **`initiative > 0.3` — strictly greater.** Any corps falling back to the default personality can
+  never probe. Not what blocks vrs_drina (the surplus pool is), but an exact-boundary defect one
+  condition away.
+- **`memory/frozen_vrs_front_probe_root_cause` is stale in BOTH particulars.** Its conclusion
+  ("probes can never capture") holds, but the mechanism changed under commit `33d5844a2` —
+  `flip = won && !isProbeOp` was replaced by the `occupies_on_victory` declaration, so anyone
+  grepping the old fiat will not find it. And **the wall is t73, not w101.**
+
+### What it means for the Srebrenica lane
+
+The tenability gate scoped in §3m stays blocked exactly where it was left: **the board cannot
+produce a contested enclave until the VRS can field a main_effort brigade**, and that is upstream
+of anything in the event catalog. Sequence is unchanged — green baseline, then this, then a
+conditional fall.
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |
