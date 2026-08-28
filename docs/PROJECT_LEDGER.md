@@ -1,5 +1,59 @@
 <!-- LEDGER ARCHIVE POINTERS -->
 
+## [2026-08-28] Dayton negotiation depth: painted pieces, population-weighted value, Dimensions 6-7; Krivaja/Stupčanica removed; §6 panel SPLIT on enclave reachability
+
+**Type:** Behavioral (ops catalog, negotiation dimensions, grade-adjacent scoring inputs), data (new derived lookup), governance (§6 panel ruling), and two pre-existing test repairs. Branch `lane/playtest-harness`, commits `d76c2bd62`, `9d699fe1b`, `f3afda323`, `a3308d62e`, `91bf36263`.
+
+### Krivaja-95 and Stupčanica-95 REMOVED (`d76c2bd62`)
+
+Owner ruling: *"Krivaja needs to be removed completely. Fall of Srebrenica is the only scripted event on 1995 that changes territory, not real military op."* Both triggered operations deleted (`triggered_operations.ts` 1399 → 1214), with `srebrenicaFallReceiptFired` / `zepaFallReceiptFired` and four newly-unreachable switch arms. Territory byte-identical, 0 settlements differ; only `watched_operations` moves.
+
+Two false comments corrected while removing their subject. `contain_posture_gate.ts` carried a **"§6 HARD INVARIANT"** header claiming canon requires the enclaves to fall — **no canon document makes that commitment**, and canon contemplates the opposite in three places. `operation_names.ts` justified its exclusion list by a name collision with the two definitions; that justification died with them and is re-grounded on historicity. Both errors named in place rather than deleted.
+
+`tests/triggered_op_prestage_contract.test.ts` replaces three deleted Krivaja tests, built on a **synthetic** definition rather than a catalog lookup, so it cannot be silently voided the way its predecessors were. Mutation-tested.
+
+### Two pre-existing test failures repaired (`9d699fe1b`)
+
+Both confirmed failing on clean HEAD in a separate worktree before attribution. `docs_desktop_v09_truth`: `66d809b2f` dropped "executable" from the roadmap's programme summary while the test pinned the phrase — wording restored with the new RC/RE gate information kept. `strict_null_inventory_progress`: ratchet 536 → 539 / sim 339 → 342 for three probe-channel fields (`CorpsOperation.occupies_on_victory`, `SectorIntelRecord.own_stable_key`/`.enemy_stable_key`). **The justification deliberately does not reuse the "byte-identical by construction" boilerplate every prior entry carries** — `occupies_on_victory` reads `?? true` so old saves load unchanged, but `buildProbeOperation` sets it FALSE and live runs genuinely move. That is the lane's purpose.
+
+A third failure (`sector_partition` G1.5) is pre-existing and NOT fixed — RE-lane territory. Root cause recorded: `brigade_assignment.ts:2678` gives an unstaffed sector `threat_ratio` 9999 on the optimized path and 0 on the legacy reference, because the two derive different `sub_segments[].enemy_osids`. Not cosmetic — `army_reserve_system.ts:737` reinforces on `threat_ratio > 2.0`, so cache-on and cache-off send the operational reserve to different places. Repro: mode war, seed 31. **Separately: `SECTOR_COLDSTART_CACHE_DISABLED` has no reader in `src/` or `tools/`, so the "cache ON vs OFF byte-equality" test in that file compares two identical configurations and cannot fail.**
+
+### Dayton negotiation (`f3afda323`)
+
+**Painted packages.** `TerritorialPackage` gains `osids?` and `alternative_group?`; `osid_keywords` becomes optional; a package defines its extent exactly one way. The keyword rule matched a fragment anywhere in an OSID key, so `sarajevo_suburbs`'s `hadzici` also matched `op:kljuc:hadzici` — 180 km away — and `ilidza` matched `op:sanski_most:ilidza_2`; both were double-counted into `western_bosnia`, whose own municipalities they are. Four packages converted to owner-painted settlement lists, seven added: **8 → 19**. Package definitions were GENERATED from the saved painter state, not transcribed; every resolved area matches to the decimal. Area percentage moves from one decimal to **three** — at one decimal the 91.1 km² Sarajevo airport strip priced as 0.2% and anything under 0.05% priced at 0.0%, free to demand.
+
+**Population weighting.** Owner: *"Scoring for territories should not be based on m2 only. It should also weight in pre-war population."* New `tools/generate_osid_population.cjs` → `data/derived/operational/osid_population_1991.json` (744 OSIDs, 26 KB, total 4,375,078). `package_value.ts` blends 0.5 area + 0.5 population. Measured: `sarajevo_corridor` 0.177% of area / 1.521% of people (8.6×), `prijedor` 3.1×, `mrkonjic_sipovo` 0.42×, `grahovo_glamoc_drvar` 0.17×. **Value is kept SEPARATE from area**: `getPackageAreaPct` still drives the 51/49 entity split, because moving a package shifts the map by its actual area and that is a physical fact. **Population is 1991, PRE-war**, deliberately — pricing the post-war population would make an enclave cheaper the more thoroughly it had been emptied. Test pinned.
+
+**DIMENSION 6 — autonomy instruments.** Four Annex-4 rights outside the 16-competency matrix: special parallel relationships (III(2)(a)), entity treaty power (III(2)(d)), entity citizenship (I(7)(b)), entity constitutional conformity (III(3)(b)+XII(2)). Priced above the dearest competency deviation (20). Every default is the as-signed 1995 text and free.
+
+**DIMENSION 7 — territorial ambition.** Owner: *"A player should be able to expend his capital to achieve a more than 51-49 split, if he has enough of it and if he does not invest in centralization or autonomy."* Territory was previously capped by the PACKAGE LIST rather than by the war. Superlinear cost (18/30/48/74/110, cap 5), same capital pool as the institutional dimensions, bought one point at a time through the ordinary objection gate so an over-reach truncates rather than being refused whole; taken pro rata from other holders.
+
+**BUG — `federalized` had its sovereignty grain inverted.** `dayton_dial_cost.ts` asserted both directions in one file: `DIAL_DECLARATION` charged `federalized` to RS as a centralizing frame, `dialGrain()` returned `entity_ward`. RS paid 14 to declare centralization and was then given a **0.7× discount on devolving competencies to the entities** and a 1.6× penalty on centralizing them — a faction could buy the centralizing frame precisely in order to decentralize cheaply. The existing test asserted the inverted numbers with a comment repeating the same wrong premise, so it had locked the bug in rather than catching it. Fixed with an invariant test that fails if the grain table and the declaration table diverge again.
+
+### §6 panel — SPLIT, escalates to owner (`a3308d62e`)
+
+Convened on owner request ("Cap coha_expired and make the stalemate reachable... We need a way for RS player to get an A grade"). Four seats polled independently on a frozen pack: Historian COMPLIANT (3 merge gates), Calibration and Engine NON-COMPLIANT *as specified*, Red-team NON-COMPLIANT on principle. **Ring 3 splits 2-2**, and Ring 3 is not among the bright line's three limbs and was never delegated to this panel, which forces escalation on its own.
+
+Verified mechanism findings: the fall is **unconditional** — `pressure_system.ts` applies decay only in the ELSE branch, so readiness climbs with nothing pulling it back and every modifier combination fires (real engine minimum rate 2.5, only reachable outcome t162). The `genocide_condemnation` predicate is **CONTROL-keyed, not event-keyed** (`rupture_consequences.ts:57-66`), so a non-fall yields no flag automatically. `csq_srebrenica_stalemate_1995` already exists and is XOR-anchored at `historical_anchors.ts:298` citing canon §3.3 — this closes a reachability gap in an approved design.
+
+**Three convener errors are recorded in the pack itself**, because it was frozen and circulated to every seat carrying them: the load-bearing writer of `genocide_condemnation` was marked UNVERIFIED when one grep would have confirmed it; the bright-line question asked limb 1 (the comfortable one) rather than limb 2, which is the limb actually engaged; and the cited `war_1993` precedent is **inert** — `sets_flags` sits at row level so all three options set the flag, including "refuse".
+
+### Ring-3 hardening (`91bf36263`)
+
+`srebrenica_falls_1995`, `zepa_falls_1995` and `srebrenica_column_breakout_1995` carried **no `family`**, so `isRing3SensitiveFamily` returned false on its first line and `validateRing3EnablingRejection` could not see them — nothing stopped a response option from runtime-enabling the genocide-producing event. Assigned `un_safe_area_enforcement`; verified beforehand that nothing runtime-enables any of the three, so the assignment is inert at load. `pressure_system.ts`'s accumulate branch had no zero floor while the decay branch did; floored, verified behaviour-neutral (no shipped event can reach a negative rate).
+
+### Verification
+
+`tsc --noEmit` clean throughout. 270 tests across 23 Dayton/negotiation suites; 507 across 37 event/pressure/§6 suites; 99 across the 4 suites the Krivaja removal touches. **Not run:** the full 3,513-test suite and `desktop:map:build`. Dimensions 6/7 changed `DaytonProposal` and `ResolvedDimensions`, which the desktop and UI layers read, and only one UI suite was exercised — a focused UI slice is a known false-green in this repo.
+
+### Open
+
+Owner decision on the §6 escalation. `sector_partition` G1.5 divergence (RE lane). RS grade ladder is territory-only below A+, so an A is purchasable with an unlimited atrocity record — recorded in the panel doc, not acted on.
+
+---
+
+
+
 ## [2026-08-23] Canon source policy: Court of BiH judgments accepted alongside ICTY judgments
 
 **Type:** Owner-directed canon and process clarification; documentation-only, no simulation or schema behavior change.
