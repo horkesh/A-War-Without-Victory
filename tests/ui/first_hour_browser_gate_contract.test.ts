@@ -122,6 +122,8 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain("HRHB: 'hq_hrhb_1992'");
     expect(tool).toContain('dateStingBackgroundAlpha');
     expect(tool).toContain('selectedWarroomVisibleBeneathDateStingByFaction');
+    expect(tool).toContain('openingBriefPresentDuringDateSting');
+    expect(tool).toContain('openingBriefAbsentDuringDateStingByFaction');
   });
 
   it('keeps the date sting, opening brief, and foundational decision in authored order', () => {

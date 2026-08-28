@@ -480,6 +480,8 @@ async function assertSelectedWarroomVisibleBeneathDateSting(page, summary, flow)
     const image = plate?.querySelector('img');
     const dateSting = Array.from(document.querySelectorAll('[role="dialog"]'))
       .find((element) => (element.textContent ?? '').includes('WAR HAS STARTED'));
+    const openingBriefPresentDuringDateSting = document
+      .querySelector('[data-testid="presidential-inbox-opening-brief"]') !== null;
     const dateStingStyle = dateSting ? window.getComputedStyle(dateSting) : null;
     const backgroundParts = dateStingStyle?.backgroundColor
       .match(/rgba?\(([^)]+)\)/)?.[1]
@@ -493,6 +495,7 @@ async function assertSelectedWarroomVisibleBeneathDateSting(page, summary, flow)
       sceneImageDecoded: image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
       sceneImageMatchesFaction: image instanceof HTMLImageElement && image.src.includes(imageNeedle),
       dateStingPresent: dateSting !== undefined,
+      openingBriefPresentDuringDateSting,
       dateStingBackgroundAlpha,
       dateStingBackdropFilter: dateStingStyle?.backdropFilter ?? null,
     };
@@ -500,12 +503,15 @@ async function assertSelectedWarroomVisibleBeneathDateSting(page, summary, flow)
 
   summary.evidence.selectedWarroomVisibleBeneathDateStingByFaction ??= {};
   summary.evidence.selectedWarroomVisibleBeneathDateStingByFaction[flow.faction] = evidence;
+  summary.evidence.openingBriefAbsentDuringDateStingByFaction ??= {};
+  summary.evidence.openingBriefAbsentDuringDateStingByFaction[flow.faction] = !evidence.openingBriefPresentDuringDateSting;
   if (
     !evidence.warroomShellPresent
     || !evidence.scenePlatePresent
     || !evidence.sceneImageDecoded
     || !evidence.sceneImageMatchesFaction
     || !evidence.dateStingPresent
+    || evidence.openingBriefPresentDuringDateSting
     || evidence.dateStingBackgroundAlpha > 0.72
     || evidence.dateStingBackdropFilter !== 'none'
   ) {

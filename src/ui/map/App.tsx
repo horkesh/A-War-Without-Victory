@@ -2095,7 +2095,7 @@ function App() {
               }
             }}
           />
-          {openingBriefPending && (
+          {!peaceWarTransitionActive && openingBriefPending && (
             <PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} />
           )}
           {warroomDeskOpen && (
