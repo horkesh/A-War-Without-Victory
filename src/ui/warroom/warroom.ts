@@ -340,16 +340,23 @@ class WarroomApp {
         if (this.legacyWarPlanningMapSetup) return this.legacyWarPlanningMapSetup;
 
         const map = new WarPlanningMap();
-        const mapScene = document.getElementById('map-scene');
-        if (mapScene) mapScene.appendChild(map.getContainer());
-        map.setCloseCallback(() => { void this.showWarroomScene(); });
-
-        this.legacyWarPlanningMapSetup = map.loadData().then(() => {
-            this.warPlanningMap = map;
-            this.updateUIOverlay();
-            return map;
-        });
-        return this.legacyWarPlanningMapSetup;
+        const setup: Promise<WarPlanningMap> = map.loadData()
+            .then(() => {
+                const mapScene = document.getElementById('map-scene');
+                if (mapScene) mapScene.appendChild(map.getContainer());
+                map.setCloseCallback(() => { void this.showWarroomScene(); });
+                this.warPlanningMap = map;
+                this.updateUIOverlay();
+                return map;
+            })
+            .catch((error: unknown) => {
+                if (this.legacyWarPlanningMapSetup === setup) {
+                    this.legacyWarPlanningMapSetup = null;
+                }
+                throw error;
+            });
+        this.legacyWarPlanningMapSetup = setup;
+        return setup;
     }
 
     private getDesktopBridge(): DesktopBridge | null {

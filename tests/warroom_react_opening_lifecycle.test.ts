@@ -17,7 +17,7 @@ vi.mock('../src/ui/warroom/components/WarPlanningMap.js', () => ({
     setCloseCallback() {}
     async loadData() { await warPlanningMapMetrics.loadData(); }
     setControlFromState() {}
-    setGameState() { warPlanningMapMetrics.setGameState(); }
+    setGameState(state: unknown) { warPlanningMapMetrics.setGameState(state); }
     setPlayerFaction() {}
   },
 }));
@@ -79,8 +79,12 @@ async function flushMicrotasks(): Promise<void> {
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((settle) => { resolve = settle; });
-  return { promise, resolve };
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((settle, fail) => {
+    resolve = settle;
+    reject = fail;
+  });
+  return { promise, resolve, reject };
 }
 
 function sendReady(iframe: HTMLIFrameElement, source: MessageEventSource | null = iframe.contentWindow): void {
@@ -104,6 +108,7 @@ describe('desktop React opening lifecycle', () => {
   afterEach(() => {
     vi.clearAllTimers();
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('keeps recovery armed when transport loads without a committed React ready signal', async () => {
@@ -178,6 +183,60 @@ describe('desktop React opening lifecycle', () => {
     expect(loadStateDialog).toHaveBeenCalledTimes(1);
     expect(warPlanningMapMetrics.construct).toHaveBeenCalledTimes(1);
     expect(warPlanningMapMetrics.loadData).toHaveBeenCalledTimes(1);
+  });
+
+  it('discards a failed provisional map and retries with the latest recovery state', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const firstLoad = deferred<void>();
+    const retryLoad = deferred<void>();
+    warPlanningMapMetrics.loadData
+      .mockReturnValueOnce(firstLoad.promise)
+      .mockReturnValueOnce(retryLoad.promise);
+    const startNewCampaign = vi.fn().mockResolvedValue({ ok: true, stateJson: '{}' });
+    const { iframe } = await bootHost({ startNewCampaign });
+    const mapScene = document.getElementById('map-scene')!;
+    const desk = document.getElementById('warroom-desk')!;
+
+    vi.advanceTimersByTime(8000);
+    firstLoad.reject(new Error('legacy map unavailable'));
+    await flushMicrotasks();
+
+    expect(warPlanningMapMetrics.construct).toHaveBeenCalledTimes(1);
+    expect(warPlanningMapMetrics.loadData).toHaveBeenCalledTimes(1);
+    expect(warPlanningMapMetrics.setGameState).not.toHaveBeenCalled();
+    expect(mapScene.children).toHaveLength(0);
+    expect(desk.classList.contains('warroom-desk-hidden')).toBe(true);
+    expect(consoleError).toHaveBeenCalledWith(
+      '[warroom] Failed to initialize the legacy recovery map:',
+      expect.objectContaining({ message: 'legacy map unavailable' }),
+    );
+
+    document.getElementById('mm-new-campaign')!.click();
+    (document.querySelector('.sp-faction-option') as HTMLButtonElement).click();
+    await flushMicrotasks();
+    vi.advanceTimersByTime(0);
+
+    expect(warPlanningMapMetrics.construct).toHaveBeenCalledTimes(2);
+    expect(warPlanningMapMetrics.loadData).toHaveBeenCalledTimes(2);
+    expect(warPlanningMapMetrics.setGameState).not.toHaveBeenCalled();
+    expect(mapScene.children).toHaveLength(0);
+    expect(desk.classList.contains('warroom-desk-hidden')).toBe(true);
+
+    retryLoad.resolve();
+    await flushMicrotasks();
+
+    expect(mapScene.children).toHaveLength(1);
+    expect(warPlanningMapMetrics.setGameState).toHaveBeenCalledTimes(1);
+    expect(warPlanningMapMetrics.setGameState.mock.calls[0]?.[0]).toMatchObject({
+      meta: { player_faction: 'RBiH' },
+    });
+    expect(desk.classList.contains('warroom-desk-hidden')).toBe(false);
+
+    iframe.dispatchEvent(new Event('error'));
+    await flushMicrotasks();
+    expect(warPlanningMapMetrics.construct).toHaveBeenCalledTimes(2);
+    expect(warPlanningMapMetrics.loadData).toHaveBeenCalledTimes(2);
+    expect(mapScene.children).toHaveLength(1);
   });
 
   it('ignores ready signals from the wrong or a stale iframe window', async () => {

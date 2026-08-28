@@ -31,7 +31,11 @@ describe('desktop host React opening ownership', () => {
       'private getDesktopBridge',
     );
     expect(legacySetup).toContain('const map = new WarPlanningMap();');
-    expect(legacySetup).toContain('this.legacyWarPlanningMapSetup = map.loadData().then');
+    expect(legacySetup).toContain('const setup: Promise<WarPlanningMap> = map.loadData()');
+    expect(legacySetup).toContain('this.legacyWarPlanningMapSetup = null;');
+    expect(legacySetup.indexOf('map.loadData()')).toBeLessThan(
+      legacySetup.indexOf('mapScene.appendChild(map.getContainer())'),
+    );
 
     const recovery = method(
       warroomSource,
