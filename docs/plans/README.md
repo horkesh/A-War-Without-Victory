@@ -29,7 +29,8 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | RC, R1-R7, and RE green |
 | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | R8 produces two clean 5/5 diaries |
 
-Each R1–R9 workstream occupies exactly one roadmap lane. Its row links the controlling plan and any
+Each R1–R9 workstream has exactly one detailed plan that controls its roadmap lane.
+Its row links the controlling plan and any
 explicitly subordinate implementation or amendment packets with named files, tests, evidence,
 acceptance, and collision rules. Those extensions do not create competing roadmap authority; the
 Master Roadmap workstream register remains definitive. RC uses its linked closed packet; RE uses
