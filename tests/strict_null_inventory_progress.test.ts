@@ -743,18 +743,38 @@ describe('strict null inventory progress', () => {
             // getFactionOrganizationScore, so as_factionid (3) / as_unknown (5) / as_any (0) /
             // non_null_assertions (7) are ALL UNCHANGED — this bump is purely the
             // optional-field ratchet. So 535 → 536 / state 186 → 187.
-            optional_fields_game_state: 536,
+            // Probe channel close-out (owner-ratified 2026-08-26, `b711cffa9`): +3 optional
+            // fields, ALL sim domain. UNLIKE EVERY ENTRY ABOVE, THESE ARE NOT
+            // BYTE-IDENTICAL-BY-CONSTRUCTION, and this ratchet must not pretend otherwise.
+            //   * `CorpsOperation.occupies_on_victory` (/Corps|Operation/ -> sim). Read as
+            //     `activeOp?.occupies_on_victory ?? true` in attack_resolution_osid.ts:1406 and
+            //     sector_offensive.ts:2049, so ABSENT == capture == the pre-fix behaviour, and
+            //     legacy saves load unchanged. But buildProbeOperation
+            //     (corps_operation_helpers.ts:389) sets it FALSE, which is the whole point of
+            //     the lane: a probe stops taking ground. Live runs DO move.
+            //   * `SectorIntelRecord.own_stable_key` / `.enemy_stable_key` (/Sector/ -> sim).
+            //     Content-derived sector keys (smallest edge id) that survive renumbering.
+            //     Absent on pre-2026-08-26 saves -> the positional lookup path is used
+            //     unchanged, so load is compatible; but on live runs they let intel actually
+            //     accumulate, which is what ended the 38-probe streak that
+            //     `turns_in_contact` median 1-2 had made unreachable by construction.
+            // The owner ruled the pre-fix tempo was "blindness", and MASTER_ROADMAP records
+            // that a post-fix tempo rise is NOT a regression -- so the moved baseline is the
+            // intended outcome, not drift to be pinned back. No new type-escape: as_factionid
+            // (3) / as_unknown (5) / as_any (0) / non_null_assertions_dot (7) ALL UNCHANGED.
+            // So 536 -> 539 / sim 339 -> 342 / state UNCHANGED at 187.
+            optional_fields_game_state: 539,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(536);
+        expect(current.optional_field_domains.total).toBe(539);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 339,
+            sim: 342,
             state: 187,
             ui_adapter: 0,
             unknown: 0,

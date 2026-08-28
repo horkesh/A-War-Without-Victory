@@ -105,7 +105,7 @@ without hidden required work, long unexplained decision droughts, map-entry stal
 
 The program is now finite:
 
-- nine product workstreams R1–R9, the closed RC gate, and the inserted RE gate;
+- nine executable product workstreams, R1–R9, the closed RC gate, and the inserted RE gate;
 - one plan per R1–R9 workstream and one sole lean RE plan, with RC evidence linked separately;
 - one dependency order;
 - unresolved choices confined to named RE decision gates and the explicit probe-owner prerequisite;
