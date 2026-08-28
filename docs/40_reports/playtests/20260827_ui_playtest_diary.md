@@ -1728,6 +1728,8 @@ write the lookup** — and reconcile every derived number against one you alread
 
 ## 3m. BROADER PANEL — RS Srebrenica decision. EIGHT SEATS, EIGHT NO-GO. Refused unanimously.
 
+> **PARTLY SUPERSEDED BY §3k.** The corridor in the owner proposal is established AFTER DAYTON; I briefed all eight seats as though it were a wartime corridor. Most corridor-specific objections below are void against the actual proposal. The refusal STANDS — see §3k, where the corrected mechanism makes the case stronger.
+
 Owner proposal, 2026-08-28: an event lets the RS player decide whether to take Srebrenica. The
 event does not mention genocide; taking it produces the genocide as consequence; declining leaves
 the enclave standing and grants it a corridor to RBiH territory, severing RS in two.
@@ -1947,6 +1949,128 @@ The tenability gate scoped in §3m stays blocked exactly where it was left: **th
 produce a contested enclave until the VRS can field a main_effort brigade**, and that is upstream
 of anything in the event catalog. Sequence is unchanged — green baseline, then this, then a
 conditional fall.
+
+## 3k. CORRECTION TO §3m — the corridor is POST-DAYTON, I briefed the panel wrong, and the re-ruling is worse for the proposal
+
+**My error.** The owner's proposal said declining grants the enclave "a corridor to main RBiH
+territory so RS is cut in two." I briefed all eight seats as though this were a **wartime**
+corridor opened by ARBiH in 1995. The owner clarified 2026-08-28: **the corridor is established
+after Dayton.** It is a settlement outcome, not a military one.
+
+Most of §3m's corridor objections were therefore aimed at a proposal nobody made — War-or-Game's
+35 km feasibility measurement, the Historian's "no source connects RS restraint to ARBiH
+corridor-opening", Calibration's mid-run component split and 106 exposed OSIDs, Engine's
+"no persistence, sits in RS's target list". All void against the actual proposal.
+
+**And the mechanism already exists.** `src/sim/negotiation/territorial_packages.ts:19`:
+
+```ts
+id: 'gorazde_corridor',
+'Land corridor connecting the Goražde enclave to Federation territory. Historically,
+ RBiH demanded and received this at Dayton despite RS holding surrounding territory.'
+default_holder: 'RS',  capital_cost_to_demand: 15,  capital_cost_to_concede: 10,
+```
+
+`TERRITORIAL_PACKAGES` already models Brčko, Posavina and the Sarajevo suburbs the same way. The
+Goražde corridor is a genuine historical precedent for negotiating over a surviving enclave.
+
+### The re-ruling: NO-GO stands, and the corrected mechanism STRENGTHENS it
+
+**Dayton never writes the graded field.** `territory_controlled_pct` — the only territorial input
+the RS anchors read — is set at `compute_capital.ts:141` from `political_controllers`. Dayton
+writes `final_territory_split` (`dayton_negotiation.ts:433`), whose consumers were traced
+exhaustively: `peace_dysfunction.ts:168` (post-war index), `VerdictScreen.tsx:926,929` and
+`decisionConsequenceLedger.ts:379-396` (display). **`scoring.ts` is not among them.** And
+`whowrites political_controllers` returns 21 production writers plus 4 aliased — **none in
+`src/sim/negotiation/`**.
+
+**So a negotiated corridor changes what the Verdict screen prints and nothing the grade reads.**
+
+| branch | graded territory | earned | final |
+| --- | --- | --- | --- |
+| Take | 49.1% | A (≥49 + cohesion ≥30) | **D** (genocide cap, `scoring.ts:420`) |
+| Decline, as proposed | 49.1 − 0.710 − 0.127 = **48.26%** | B (≥45) | **B — corridor costs nothing** |
+| Decline, *if* wired at `srebrenica_area` scale | 46.53% | B | B |
+| Decline, *if* wired at `gorazde_corridor` scale | 44.09% | C | C |
+
+**Two tiers at zero price.** Under the wartime reading declining at least cost RS 3-4 real points;
+the Dayton reading makes the decline branch **strictly free**. The correction widened the gap.
+
+For scale, conceding **all five** RS-held packages (dedup union 115 OSIDs, 5,542.0 km², 10.795%)
+lands RS at 37.47% — grade D. **Surrendering the entire Dayton negotiation only TIES the take
+branch.** It never beats it.
+
+**My own scale estimate was ~7× low.** I put a "Goražde-scale corridor" at ~0.56%. Measured
+through the shipped keyword resolver (`package_area_resolver.ts`) against `osid_areas.json`:
+
+| package | OSIDs | km² | % BiH |
+| --- | --- | --- | --- |
+| `gorazde_corridor` | 40 | 2,141.9 | **4.172** |
+| `srebrenica_area` | 22 | 890.2 | 1.734 |
+| `sarajevo_suburbs` | 25 | 1,022.9 | 1.993 |
+| `posavina_pocket` | 15 | 1,001.4 | 1.951 |
+| `brcko_district` | 13 | 485.6 | 0.946 |
+
+The keywords are whole municipalities (`gorazde`, `foca`, `visegrad`, `ustikolina`), so the
+package is the Drina block, not a corridor.
+
+### Contestability does not rescue it
+
+Capital is not a *weaker* currency — it is one **the verdict does not read**. It feeds
+`pyrrhic_score`, which canon itself calls *"supporting context, not sovereign truth"*
+(`VICTORY_AND_PYRRHIC_SCORING.md` §0, §3.1). The RS anchors read territory, `internal_cohesion`
+and `war_crimes_events`; a package concession touches none of them. Making the price negotiated
+relocates it into a layer that cannot reach the decision — **worse than a weak cost, because it
+looks like a real stake on the Verdict screen while being inert.**
+
+### The Goražde precedent supports the negotiation, not the decision
+
+Goražde survived **on its own military merits** and was negotiated over afterwards. The proposal
+conditions a corridor on *a decision not to commit genocide* — the trigger is the decision, not
+the survival. And the negotiation half **already ships**: `srebrenica_area`, demand 25 / concede
+15, explicitly scoped *"If fallen: demands return of Srebrenica and Žepa enclaves."*
+
+### The question is already answered inside the event the proposal routes into
+
+`csq_srebrenica_stalemate_1995`'s own `historical_source` field, verbatim:
+
+> *"Per SENSITIVE_HISTORY_DESIGN_GATE.md §L60, the absence of the genocide rupture is itself the
+> canon-legal upside; **no additional standing bonus is awarded.**"*
+
+A corridor granted for declining is an additional standing bonus. Routing it through Dayton does
+not change what it is. (The §L60 pointer is off by one — line 60 is Ring-3 #9; the substance is
+Ring-3 #10 at line 61. Right rule, wrong line.)
+
+### The price the design wanted is ALREADY AUTHORED
+
+`csq_enclave_drain_continues_1995` (`requires_events: ["csq_srebrenica_stalemate_1995"]`) —
+*"the forces Drina Corps tasked against Srebrenica cannot be withdrawn without collapsing the
+siege perimeter… The formations remain in place: fixed, frustrated, and unavailable to the wider
+war."* Brigades locked on interior lines through Deliberate Force and the Krajina collapse: a
+real operational price across the final ~18 weeks that **costs the verdict nothing**, which is
+exactly correct under Ring-3 #10.
+
+And `historical_anchors.ts:298` already carries `xor_with: ['csq_srebrenica_stalemate_1995']` —
+the calibration harness already treats the stalemate as the legitimate alternative branch.
+
+**The whole apparatus exists; only reachability is missing.** The fall is overdetermined —
+pressure `base_rate 1 / threshold 8 / decay 0.5` (net 0.5/turn → fires ~t176 inside `turn_max`
+185), with `coha_expired` at **+2** swamping every other term. Cap it so it accelerates rather
+than overdetermines, let RS's upstream posture choices (hostage policy, Deliberate Force
+response, patron relations) move the remainder, and the stalemate becomes reachable **by the
+route canon already blessed** — no new event, no branch at the fall, no Dayton bonus, no crossing.
+
+Two standing conditions on that path: the pressure terms must be historically sourced and never
+curve-fit to a target grade; and if re-balancing makes the enclave routinely holdable in emergent
+mode, that is its own §6 question — the seat wants it hard, not merely possible.
+
+### Unrelated defect found while measuring — worth its own ticket
+
+`computeTerritorySplit` (`dayton_negotiation.ts:549-568`) documents itself as *"counted by area,
+not by OSID count"* with an inline *"Area-weighted current control"* — but the loop body is
+`split[faction] += 1`. It is **OSID-count-weighted**, while the package shifts applied to it
+(`getPackageAreaPct`) and the verdict's own `territory_controlled_pct` are both area-weighted.
+**Three-way basis mismatch.**
 
 ## 4. Fixed this session (recorded, not open)
 
