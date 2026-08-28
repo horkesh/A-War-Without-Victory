@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const warroomSource = readFileSync('src/ui/warroom/warroom.ts', 'utf8');
 const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+const mainSource = readFileSync('src/ui/map/main.tsx', 'utf8');
 const profilerSource = readFileSync('tools/ui/map_transition_profile.cjs', 'utf8');
 
 function method(source: string, startMarker: string, endMarker: string): string {
@@ -71,6 +72,8 @@ describe('Warroom tactical shell document lifecycle', () => {
     expect(warroomSource).not.toContain('iframeWindow.document');
     expect(warroomSource).not.toContain('contentWindow.document');
     expect(appSource).toContain('if (window.parent !== window && event.source !== window.parent) return;');
+    expect(mainSource).toContain("type: 'awwv-shell:ready'");
+    expect(warroomSource).toContain('private isTrustedOperationalShellMessage(event: MessageEvent): boolean');
   });
 
   it('profiles the canonical document from creation instead of reassigning iframe.src', () => {

@@ -90,7 +90,10 @@ describe('desktop host React opening ownership', () => {
       'private async ensureSandboxIframe',
     );
     expect(ensure).toContain('iframe.onerror = () => this.activateLegacyOpeningRecovery');
-    expect(ensure).toContain('this.claimReactOpeningOwnership(iframe);');
+    expect(ensure).not.toContain('this.claimReactOpeningOwnership(iframe);');
+    expect(warroomSource).toContain("e.data?.type === 'awwv-shell:ready'");
+    expect(warroomSource).toContain('this.isTrustedOperationalShellMessage(e)');
+    expect(warroomSource).toContain('this.claimReactOpeningOwnership(this.tacticalMapIframe);');
 
     const recovery = method(
       warroomSource,
@@ -106,8 +109,7 @@ describe('desktop host React opening ownership', () => {
     expect(showScreen).toContain('el.inert = !isActive;');
     expect(showScreen).toContain("el.setAttribute('aria-hidden', isActive ? 'false' : 'true');");
 
-    // A late load always re-enters claimReactOpeningOwnership, which hides/inerts recovery.
-    expect(ensure.indexOf('this.claimReactOpeningOwnership(iframe);')).toBeGreaterThanOrEqual(0);
+    // A late trusted readiness signal claims ownership; transport load alone cannot.
     expect(recovery).not.toContain('iframe.onload = null');
   });
 

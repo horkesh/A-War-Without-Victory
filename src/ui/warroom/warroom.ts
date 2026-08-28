@@ -110,6 +110,11 @@ class WarroomApp {
 
         // Listen for "back to HQ" messages from the embedded tactical map iframe
         window.addEventListener('message', (e) => {
+            if (e.data?.type === 'awwv-shell:ready') {
+                if (!this.tacticalMapIframe || !this.isTrustedOperationalShellMessage(e)) return;
+                this.claimReactOpeningOwnership(this.tacticalMapIframe);
+                return;
+            }
             if (e.data?.type === 'awwv-back-to-hq') {
                 if (!this.isTrustedTacticalFrameMessage(e)) return;
                 void this.returnToOperationalWarroomShell();
@@ -701,6 +706,14 @@ class WarroomApp {
         );
     }
 
+    private isTrustedOperationalShellMessage(event: MessageEvent): boolean {
+        return isTrustedTacticalFrameMessageEvent(
+            event,
+            [this.tacticalMapIframe],
+            window.location.href,
+        );
+    }
+
     private postToOperationalShell(message: unknown): boolean {
         const iframe = this.tacticalMapIframe;
         if (!this.tacticalMapReady || !iframe?.contentWindow) return false;
@@ -738,6 +751,7 @@ class WarroomApp {
     }
 
     private claimReactOpeningOwnership(iframe: HTMLIFrameElement): void {
+        if (this.openingOwner === 'react') return;
         const tacticalScene = document.getElementById('tactical-map-scene');
         const warroomScene = document.getElementById('warroom-scene');
         const desk = document.getElementById('warroom-desk');
@@ -753,6 +767,7 @@ class WarroomApp {
             tacticalScene.classList.remove('tactical-map-scene-hidden');
             tacticalScene.setAttribute('aria-hidden', 'false');
         }
+        this.promoteFreshCampaignIntro();
         if (this.pendingShowWarroom || recoveringLoadedCampaign) {
             this.postToOperationalShell({ type: 'awwv-shell:show-warroom' });
             this.pendingShowWarroom = false;
@@ -795,6 +810,12 @@ class WarroomApp {
         this.openingFallbackTimer = null;
     }
 
+    private promoteFreshCampaignIntro(): void {
+        if (!this.freshCampaignIntroPending) return;
+        this.freshCampaignResetPending = true;
+        this.freshCampaignIntroPending = false;
+    }
+
     private async returnToOperationalWarroomShell(): Promise<void> {
         await this.showTacticalMapScene('warroom');
         if (!this.postToOperationalShell({ type: 'awwv-shell:show-warroom' })) {
@@ -814,9 +835,6 @@ class WarroomApp {
             iframe.title = 'A War Without Victory';
             iframe.setAttribute('allowfullscreen', '');
             iframe.hidden = true;
-            iframe.onload = () => {
-                this.claimReactOpeningOwnership(iframe);
-            };
             iframe.onerror = () => this.activateLegacyOpeningRecovery();
             iframe.src = shellUrl;
             this.tacticalMapIframe = iframe;
@@ -878,10 +896,7 @@ class WarroomApp {
             sandbox.hidden = false;
             if (this.tacticalMapIframe) this.tacticalMapIframe.hidden = true;
         } else {
-            if (this.freshCampaignIntroPending) {
-                this.freshCampaignResetPending = true;
-                this.freshCampaignIntroPending = false;
-            }
+            this.promoteFreshCampaignIntro();
             const shell = await this.ensureOperationalShellIframe(tacticalScene);
             shell.hidden = false;
             if (this.tacticalSandboxIframe) this.tacticalSandboxIframe.hidden = true;
