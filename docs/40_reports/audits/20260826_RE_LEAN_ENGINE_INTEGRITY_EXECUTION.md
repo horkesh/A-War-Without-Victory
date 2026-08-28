@@ -3,9 +3,10 @@
 **Date:** 2026-08-26
 
 **Status:** P1/P2A accepted; P2B HELD before implementation after packaged-probe NO VERDICT; P3
-waiting; auxiliary probe instrumentation stopped at final R2 RED before production, with no R3;
-alternate packaged-proof discovery CLOSED/BLOCKED at `C_P2B_BLOCKED`, with no successor authority;
-calibration pause and long-run denial unchanged
+waiting; alternate packaged-proof discovery CLOSED/BLOCKED at `C_P2B_BLOCKED`; owner-approved
+Army-HQ chunk prerequisite authorization transition active, with no implementation or command
+authority until its successor lock is separately reviewed, pinned, and accepted; calibration pause
+and long-run denial unchanged
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -1150,3 +1151,35 @@ Process QA read only `C:\Users\User\.codex\skills\quality-assurance-process\SKIL
 ### Process-custody failure
 
 > **Process-custody failure — discovery evidence excluded:** QA disclosed a read of `tests/desktop_persistence_contract.test.ts`, which was outside the lock’s 24-path inspection boundary, and reported operating from `F:\A-War-Without-Victory` rather than the locked worktree `F:\AWWV-worktrees\re-engine-integrity`. Build disclosed `git log --all` inspection that surfaced `bb7e93d75` and `4cd599058`, beyond the lock’s four authorized history anchors; some exact Build command literals were also unavailable after compaction. These are custody failures, not accepted exceptions. They caused no mutation, generated output, project execution, build, package, Electron launch, probe, test, or network access. All claims derived solely from those unauthorized or unauditable inspections are excluded from route acceptance. The terminal `C_P2B_BLOCKED` disposition remains independently supported by authorized evidence: route A does not execute the literal required `npm.cmd run desktop:package:probe`, while route B lacks causal proof and would require forbidden unchanged rerun churn or hypothesis-driven remediation. No implementation, rerun, remediation, P2B restart, P3 start, or successor authority follows from this receipt.
+
+## Owner-approved Army-HQ chunk prerequisite authorization — 2026-08-28
+
+- Exact transition base: `2fb583c5ef22253a8bd0dc18ed60e90293ab8acb`.
+- Task/packet: `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-AUTHORIZATION` /
+  `authorize-army-hq-chunk-prerequisite-lock-draft`.
+- This seven-file docs-only transition has zero project-command, test, build, package, Electron,
+  probe, retry, diagnosis, correction, and replacement authority.
+- One disclosed unauthorized read-only `git diff --check` passed after the draft. It caused no
+  mutation or product/test/build/package/Electron/probe execution, is excluded from acceptance
+  evidence, is nontransferable and nonreusable, and does not change the zero authorized diff-check
+  budget.
+- After review and commit, it permits only drafting, exact-byte review, pinning, and acceptance of
+  `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE` /
+  `collapse-army-hq-manual-chunk-and-reprove-canonical-package` at its fresh exact base.
+- The successor scope is fixed to `src/ui/map/vite.config.ts` and
+  `tests/desktop_packaged_runtime_probe.test.ts`. Its complete command budget is one focused RED,
+  one focused GREEN, one `npm.cmd run desktop:map:build`, and one clean-candidate unchanged
+  `npm.cmd run desktop:package:probe`, under the pinned Node `22.21.1` executable and sibling
+  `npm.cmd`. External package/runtime clocks are 1,200,000/900,000 ms. No retries, diagnoses,
+  corrections, or clock extensions exist.
+- The successor permits one standalone map-build command and necessarily performs one nested map
+  build inside the canonical composite, for two actual map builds. Nested release, simulation,
+  Warroom, and package descendants are composite-internal and grant no separate authority.
+- The pinned Node22 directory must be prepended to child `PATH` for the literal probe invocation;
+  default or fallback npm/Node is prohibited. The package clock begins at npm-root launch and the
+  runtime clock only on positive expected packaged-executable descendant observation. Natural exit
+  before the active cutoff wins. A live-root timeout permits exactly one npm-root tree cleanup and
+  one bounded 5,000 ms census. Ambiguity, timeout, or cleanup uncertainty is `NO VERDICT`; there is
+  no second kill, retry, or diagnosis.
+- P2B remains HELD; P3 waits; calibration remains paused; no RE credit or later-packet authority is
+  granted.

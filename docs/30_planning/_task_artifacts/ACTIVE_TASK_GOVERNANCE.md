@@ -21,8 +21,13 @@ by its packaged-probe NO VERDICT; P3 waits. Final R2 instrumentation is CLOSED/R
 sole RED. There was no production edit, GREEN, syntax check, diff verification, packaged invocation,
 candidate, or R3; packaged invocation count remains zero. The consumed RED and unused package
 authority are nontransferable. The separately locked alternate-proof discovery is CLOSED/BLOCKED
-at `C_P2B_BLOCKED`; its result is `RECOMMENDATION_ONLY_NOT_AUTHORIZED`, and there is no active
-successor. No long run is authorized until the one final
+at `C_P2B_BLOCKED`. The owner subsequently approved one standalone Army-HQ manual-chunk packaging
+prerequisite. Its active docs-only transition authorizes only drafting, reviewing, pinning, and
+accepting a fresh successor lock after the transition commits; it authorizes no implementation or
+project command. One unauthorized read-only `git diff --check` passed after the draft; it caused no
+mutation or product/test/build/package/Electron/probe execution, is excluded from acceptance
+evidence, and is nontransferable and nonreusable. The authorized diff-check budget remains zero.
+No long run is authorized until the one final
 RE A/B pair, and calibration remains paused until reduced RE closes.
 
 ## Packet governance
@@ -59,19 +64,30 @@ historical custody/evidence only. R2's valid sole RED closed the instrumentation
 candidate or packaged invocation; there is no R3. The discovery contract required Technical
 Architect, Orchestrator, Platform, Build, QA, and Process to choose unanimously among an external
 proof route, a root-cause prerequisite, or an explicit blocker. It terminated at
-`C_P2B_BLOCKED`; the result is `RECOMMENDATION_ONLY_NOT_AUTHORIZED`. There is no active successor
-and no code, test, build, package, Electron/probe, TDZ/chunk, R2/R3, P2B, or P3 authority.
+`C_P2B_BLOCKED`; the result remains `RECOMMENDATION_ONLY_NOT_AUTHORIZED`. The owner's later,
+standalone prerequisite approval does not reopen discovery or R2/R3. The current docs-only
+transition grants no code, test, build, package, Electron/probe, TDZ/chunk, P2B, or P3 authority;
+only a separately reviewed and accepted successor lock may activate the fixed prerequisite.
 
 ## Active machine lock
 
-The current receipt-only lock is `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` /
-`select-no-instrumentation-p2b-proof-route`, based on
-`816b4ea6f8e4618465abacc50b860ac827c49154`. Every execution-budget value is zero;
-`long_run_policy.permitted` is false and the checker-required maximum-pairs value `1` is inert. The
-discovery is CLOSED/BLOCKED at `C_P2B_BLOCKED`, with terminal authority
-`RECOMMENDATION_ONLY_NOT_AUTHORIZED`. The lock now governs only this finite receipt; it grants no
-continuing inspection, implementation, execution, rerun, remediation, transition, or successor
-authority.
+The active lock is `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-AUTHORIZATION` /
+`authorize-army-hq-chunk-prerequisite-lock-draft`, based on exact commit
+`2fb583c5ef22253a8bd0dc18ed60e90293ab8acb`. Every execution-budget value is zero;
+`long_run_policy.permitted` is false and the checker-required maximum-pairs value `1` is inert.
+After this seven-file docs-only transition is reviewed and committed, its sole successor authority
+is to draft, exact-byte review, pin, and accept a fresh lock for
+`RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE` /
+`collapse-army-hq-manual-chunk-and-reprove-canonical-package`. It grants no code/test edit or
+project command itself. The successor must use the pinned sibling `npm.cmd` with its exact Node22
+directory prepended to child `PATH`; default or fallback npm/Node is prohibited. It permits one
+standalone map-build command plus the one unavoidable nested map build inside the sole canonical
+composite, for two actual map builds; all other nested release/sim/warroom/package descendants are
+composite-internal only. The 1,200,000 ms package clock starts at npm-root launch and yields to the
+900,000 ms runtime clock only upon positive observation of the expected packaged-executable
+descendant. Natural exit before the active cutoff wins. A live-root timeout permits one npm-root
+process-tree cleanup and one bounded 5,000 ms census only; ambiguity, timeout, or cleanup uncertainty
+is `NO VERDICT`, with no second kill, retry, or diagnosis.
 
 ## Deferred and retired
 

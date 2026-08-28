@@ -1,5 +1,42 @@
 # Packaged Probe Recovery Implementation Plan
 
+## Owner-approved standalone chunk prerequisite authorization — 2026-08-28
+
+The terminal discovery receipt below remains true historical custody. The owner subsequently
+approved one separate, auxiliary prerequisite with fixed production/test scope:
+`src/ui/map/vite.config.ts` and `tests/desktop_packaged_runtime_probe.test.ts` only. The successor
+identity is `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE` /
+`collapse-army-hq-manual-chunk-and-reprove-canonical-package`.
+
+This docs-only transition authorizes only drafting, exact-byte review, pinning, and acceptance of
+that successor lock after the transition commits. It authorizes no edit, test, build, package,
+Electron, or probe execution itself. The future lock must bind Node `22.21.1` at
+`C:\Users\User\AppData\Local\Logi\LogiPluginService\PluginHosts\node22\node\node.exe` (SHA-256
+`471961CB355311C9A9DD8BA417ECA8269EAD32A2231653084112554CDA52E8B3`) and its sibling `npm.cmd`.
+Its entire sequence is one focused RED, minimal Army-HQ manual-chunk collapse, one focused GREEN,
+one `npm.cmd run desktop:map:build`, candidate commit, then one unchanged
+`npm.cmd run desktop:package:probe` against the clean candidate. The external package and runtime
+clocks are 1,200,000 ms and 900,000 ms respectively, without extension. No retry, diagnosis,
+correction, replacement approach, engine, Electron, wrapper, IPC, gameplay, calibration, or
+package-script change is authorized.
+
+The single standalone map-build command and the composite's unavoidable nested map build produce
+two actual map builds. Nested release, simulation, Warroom, and package descendants exist only
+inside the single canonical composite and grant no separate authority. The literal probe must use
+the pinned sibling `npm.cmd` with its exact Node22 directory prepended to child `PATH`; default or
+fallback npm/Node is prohibited. The package clock starts at npm-root launch. The runtime clock
+starts only upon positive expected packaged-executable descendant observation. Natural root exit
+before the active cutoff wins. A timeout with the npm root alive permits exactly one process-tree
+cleanup at that root and one bounded 5,000 ms census. Ambiguity, timeout, or cleanup uncertainty is
+`NO VERDICT`; no second kill, retry, or diagnosis follows.
+
+One unauthorized read-only `git diff --check` passed after this draft. It caused no mutation or
+product/test/build/package/Electron/probe execution, is excluded from acceptance evidence, and is
+nontransferable and nonreusable. The authorized diff-check budget remains zero.
+
+P2B remains HELD; P3 waits; calibration remains paused; this prerequisite earns no RE credit and
+cannot itself authorize a later packet.
+
 ## Terminal alternate-proof discovery receipt — 2026-08-28
 
 The separately locked `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` / `select-no-instrumentation-p2b-proof-route` task is **CLOSED/BLOCKED** at `C_P2B_BLOCKED`. This receipt is outside the historical rejected instrumentation design below and supersedes no P2B obligation. Its authority is exactly `RECOMMENDATION_ONLY_NOT_AUTHORIZED`.

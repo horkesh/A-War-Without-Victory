@@ -1,8 +1,51 @@
 # RE — 1.0 Engine Integrity Contract
 
-**Status:** HELD AT P2B — instrumentation closed; read-only alternate-proof discovery is the sole auxiliary next route, 2026-08-28
+**Status:** HELD AT P2B — owner-approved Army-HQ chunk prerequisite authorization transition active; no implementation authority yet, 2026-08-28
 **Purpose:** Reach 1.0 with one truthful engine owner for each affected responsibility.
 **Not the purpose:** general cleanup, optimization, calibration, or speculative mechanic design.
+
+## 0. Owner-approved packaging prerequisite authorization — 2026-08-28
+
+The terminal alternate-proof discovery remains closed at `C_P2B_BLOCKED`, but the owner has now
+approved one standalone auxiliary prerequisite: collapse only the manual Army-HQ chunk split in
+`src/ui/map/vite.config.ts` and extend only the existing
+`tests/desktop_packaged_runtime_probe.test.ts` contract. This docs-only transition does not execute
+that prerequisite. After this transition is reviewed and committed, it authorizes only drafting,
+reviewing, pinning, and accepting a fresh exact-base lock for
+`RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE` /
+`collapse-army-hq-manual-chunk-and-reprove-canonical-package`.
+
+The successor lock must bind Node `22.21.1` at
+`C:\Users\User\AppData\Local\Logi\LogiPluginService\PluginHosts\node22\node\node.exe`, SHA-256
+`471961CB355311C9A9DD8BA417ECA8269EAD32A2231653084112554CDA52E8B3`, and its sibling `npm.cmd`.
+Its complete command budget is one focused RED, one focused GREEN, one standalone literal
+`npm.cmd run desktop:map:build`, and—only after a clean candidate commit—one unchanged literal
+`npm.cmd run desktop:package:probe`. The external coordinator owns a 1,200,000 ms package clock
+followed by a 900,000 ms runtime clock. There are no retries, diagnoses, corrections, replacement
+approaches, or clock extensions. No engine, Electron, wrapper, IPC, gameplay, calibration, package
+script, scenario, reference, or canon change is permitted.
+
+The standalone map-build command count is one. The sole canonical package composite necessarily
+contains one further nested map build, so total actual map builds are two; its nested release,
+simulation, Warroom, and packaging descendants are included only within that composite and grant
+no separate command authority. Invoke the literal probe through the pinned sibling `npm.cmd` with
+`C:\Users\User\AppData\Local\Logi\LogiPluginService\PluginHosts\node22\node` prepended to child
+`PATH`; default or fallback npm/Node is prohibited. The package clock begins at npm-root launch.
+The runtime clock begins only after positive observation of the expected packaged-executable
+descendant. Natural root exit before the active cutoff wins. If the root remains alive at timeout,
+perform exactly one process-tree cleanup at the npm root and one bounded 5,000 ms census. There is
+no second kill. Ambiguity, timeout, or cleanup uncertainty is `NO VERDICT` and permits no retry or
+diagnosis.
+
+Process QA records one unauthorized read-only `git diff --check` after the transition draft. It
+passed, caused no mutation or product/test/build/package/Electron/probe execution, is excluded from
+acceptance evidence, and is nontransferable and nonreusable. The authorized diff-check budget
+remains zero. No typecheck or balanced-test command is authorized for this auxiliary prerequisite;
+the broader gates remain with later P2B and final verification.
+
+The prerequisite remains auxiliary and non-crediting. P2B stays HELD before implementation, P3
+waits, and calibration remains paused. A prerequisite receipt cannot itself start P2B; any
+successor requires its own fresh reviewed exact-base lock.
 
 ## 1. The plain-language contract
 

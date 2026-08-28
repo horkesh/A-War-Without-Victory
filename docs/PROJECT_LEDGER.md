@@ -29999,3 +29999,44 @@ content.
 - Route A failed the literal canonical-command contract; route B lacked causal proof and would require unchanged rerun churn or hypothesis-driven remediation. Orchestrator bound C under unanimous fail-closed governance.
 - Process QA excluded unauthorized QA/Build inspection claims; no mutation or project execution occurred.
 - P2B remains held before implementation; P3 waits; calibration remains paused; auxiliary recovery earns no RE credit. No successor task or implementation/run authority exists.
+
+## 2026-08-28 — Authorize standalone Army-HQ chunk prerequisite lock drafting
+
+**Owner decision:** After the alternate-proof discovery closed at `C_P2B_BLOCKED`, the owner
+approved one standalone auxiliary packaging prerequisite. The implementation boundary is fixed to
+collapsing the manual Army-HQ chunk split in `src/ui/map/vite.config.ts` and extending the existing
+`tests/desktop_packaged_runtime_probe.test.ts` contract.
+
+**This transition:** At exact base `2fb583c5ef22253a8bd0dc18ed60e90293ab8acb`, this seven-file
+docs-only packet authorizes only drafting, reviewing, pinning, and accepting the fresh successor
+lock after this transition commits. It runs no project command and authorizes no code/test edit.
+
+**Successor boundary:** `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE` /
+`collapse-army-hq-manual-chunk-and-reprove-canonical-package` must bind Node `22.21.1` at
+`C:\Users\User\AppData\Local\Logi\LogiPluginService\PluginHosts\node22\node\node.exe`, SHA-256
+`471961CB355311C9A9DD8BA417ECA8269EAD32A2231653084112554CDA52E8B3`, and its sibling `npm.cmd`.
+The complete budget is one focused RED, one minimal fix, one focused GREEN, one
+`npm.cmd run desktop:map:build`, a clean candidate commit, and one unchanged
+`npm.cmd run desktop:package:probe`, with 1,200,000 ms package and 900,000 ms runtime clocks. No
+retry, diagnosis, correction, replacement approach, or clock extension is authorized. Engine,
+Electron, wrapper, IPC, gameplay, calibration, package scripts, scenarios, references, and canon
+remain outside scope.
+
+One standalone map build plus the unavoidable nested map build inside the sole canonical composite
+means two actual map builds; all nested release/sim/Warroom/package descendants are
+composite-internal only. The literal probe must use the pinned sibling `npm.cmd` with the exact
+Node22 directory prepended to child `PATH`; default or fallback npm/Node is prohibited. The package
+clock starts at npm-root launch and the runtime clock only after positive expected
+packaged-executable descendant observation. Natural exit before the active cutoff wins. A live-root
+timeout permits one npm-root tree cleanup and one bounded 5,000 ms census. Ambiguity, timeout, or
+cleanup uncertainty is `NO VERDICT`, with no second kill, retry, or diagnosis.
+
+**Process correction:** One unauthorized read-only `git diff --check` passed after the draft. It
+caused no mutation or product/test/build/package/Electron/probe execution, is excluded from
+acceptance evidence, and is nontransferable and nonreusable. The authorized diff-check budget
+remains zero. No typecheck or balanced-test command is authorized for this auxiliary prerequisite;
+the broader gates remain with later P2B and final verification.
+
+**Release state:** P2B remains HELD before implementation; P3 waits; calibration remains paused.
+The prerequisite is auxiliary, earns no RE completion credit, and cannot itself authorize P2B or
+any other successor packet. `docs/10_canon/FORAWWV.md` was not edited.

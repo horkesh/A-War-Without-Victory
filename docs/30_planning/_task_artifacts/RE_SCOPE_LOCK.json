@@ -2,14 +2,15 @@
   "schema_version": 1,
   "status": "active",
   "lane": "RE",
-  "task": "RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY",
-  "packet": "select-no-instrumentation-p2b-proof-route",
-  "base_commit": "816b4ea6f8e4618465abacc50b860ac827c49154",
-  "namespace_note": "RE safety-control namespace only; this auxiliary read-only discovery remains outside the seven RE outcomes and eight RE packets, earns no RE completion credit, and grants no P2B or execution authority",
+  "task": "RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-AUTHORIZATION",
+  "packet": "authorize-army-hq-chunk-prerequisite-lock-draft",
+  "base_commit": "2fb583c5ef22253a8bd0dc18ed60e90293ab8acb",
+  "namespace_note": "RE safety-control namespace only; this docs-only authorization transition and its successor packaging prerequisite remain auxiliary, earn no RE completion credit, and do not authorize P2B implementation",
   "allowlist": [
     ".claude/current-lane.txt",
     "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
     "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
+    "docs/plans/2026-08-26-engine-integrity-plan.md",
     "docs/plans/2026-08-28-packaged-probe-recovery-plan.md",
     "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
     "docs/PROJECT_LEDGER.md"
@@ -25,6 +26,7 @@
   "execution_budget": {
     "focused_red_runs": 0,
     "focused_green_runs": 0,
+    "desktop_map_build_runs": 0,
     "syntax_check_commands": [],
     "git_diff_check_runs": 0,
     "packaged_probe_invocations": 0,
@@ -34,96 +36,87 @@
     "packaged_probe_retries": 0,
     "replacement_attempts": 0
   },
-  "discovery_policy": {
-    "inspection_mode": "read-only tracked source/index/object/history inspection at the exact base",
-    "inspection_paths": [
-      "docs/plans/2026-08-26-engine-integrity-plan.md",
-      "docs/plans/2026-08-28-packaged-probe-recovery-plan.md",
-      "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
-      "package.json",
-      "package-lock.json",
-      ".github/workflows/desktop-release-guard.yml",
-      ".github/workflows/release.yml",
-      ".github/workflows/README.md",
-      ".github/scripts/detect-changed-paths.sh",
-      "tools/desktop_packaged_runtime_probe.mjs",
-      "src/desktop/electron-main.cjs",
-      "src/desktop/preload.cjs",
-      "src/desktop/README.md",
-      "src/ui/map/hooks/useDesktopSession.ts",
-      "src/ui/map/index.html",
-      "src/ui/map/vite.config.ts",
-      "tests/desktop_packaged_runtime_probe.test.ts",
-      "tests/desktop_packaging_contract.test.ts",
-      "tools/ui/map_transition_profile.cjs",
-      "tests/map_transition_profile_harness.test.ts",
-      "tools/ui/paradox_local_qa.cjs",
-      "tests/paradox_local_qa_harness.test.ts",
-      "tools/ui/r4_phase5_visual_inspection_capture.cjs",
-      "tools/build/win_nsis_smoke.cjs"
-    ],
-    "history_anchors": [
-      "816b4ea6f8e4618465abacc50b860ac827c49154",
-      "bd61a37a3d5eff89613f171edb23496d11fd06f3",
-      "b711cffa94029c35eac18d96db91a411eb2e7abb",
-      "98f54ccb4"
-    ],
-    "history_scope": "path-limited history for inspection_paths only",
-    "broad_repo_audit_permitted": false,
-    "git_diff_semantics": "path-limited history inspection only; not a diff check or verification run",
-    "permitted_read_only_command_families": [
-      "Get-Content",
-      "rg",
-      "git show",
-      "git log",
-      "git ls-files",
-      "git status --short",
-      "git rev-parse",
-      "git cat-file",
-      "git diff --no-ext-diff"
-    ],
-    "project_commands_permitted": false,
-    "network_access_permitted": false,
-    "generated_output_permitted": false,
-    "implementation_permitted": false,
-    "preserved_negative_evidence_only": [
-      "F:\\A-War-Without-Victory\\.git\\worktrees\\re-engine-integrity\\rejected-lock2-20260828.patch",
-      "F:\\A-War-Without-Victory\\.git\\worktrees\\re-engine-integrity\\rejected-r2-red-20260828.patch"
-    ],
-    "specialists": [
-      "technical-architect",
-      "orchestrator",
-      "platform-specialist",
-      "build-engineer",
-      "qa-engineer",
-      "quality-assurance-process"
-    ],
-    "receipt_writer": "product-manager",
-    "unanimous_route_acceptance_required": true,
-    "terminal_outputs": [
-      "A_EXTERNAL_PROOF_ROUTE_RECOMMENDED",
-      "B_ROOT_CAUSE_PREREQUISITE_RECOMMENDED",
-      "C_P2B_BLOCKED"
-    ],
-    "terminal_authority": "RECOMMENDATION_ONLY_NOT_AUTHORIZED",
-    "failure_or_ambiguity_terminal_output": "C_P2B_BLOCKED",
-    "actual_failure_triggered_diagnoses": 0,
-    "checker_required_diagnosis_value_is_inert": true,
-    "diagnosis_authority_transferable": false,
-    "diagnosis_authority_reusable": false,
-    "forbidden_actions": [
-      "project command execution",
-      "network access",
-      "generated output",
-      "working-tree or index mutation outside the exact receipt allowlist",
-      "code, test, build-config, package-script, Electron, scenario, calibration, reference, or canon edit",
-      "test, syntax check, diff check, build, package, server, Electron, or probe execution",
-      "TDZ or chunk fix",
-      "R2 or R3 revival",
-      "P2B implementation"
-    ]
+  "process_exception": {
+    "command": "git diff --check",
+    "occurrences": 1,
+    "authorization_status": "unauthorized",
+    "result": "PASS",
+    "read_only": true,
+    "mutation_or_project_execution": false,
+    "acceptance_evidence": false,
+    "transferable": false,
+    "reusable": false,
+    "budget_effect": "git_diff_check_runs remains 0"
   },
-  "constraint_enforcement": "manual hash-bound exact-byte review and receipt; check_re_scope.ps1 enforces file scope but does not enforce execution_budget or discovery_policy; read_only_diagnoses_per_failure=1 is checker-required inert schema only; actual failure-triggered diagnosis budget is 0 and grants no transferable or reusable authority",
+  "transition_policy": {
+    "successor_task": "RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE",
+    "successor_packet": "collapse-army-hq-manual-chunk-and-reprove-canonical-package",
+    "authority_granted_now": "draft-review-pin-and-accept-successor-lock-only-after-this-transition-commits",
+    "successor_implementation_boundary": [
+      "src/ui/map/vite.config.ts",
+      "tests/desktop_packaged_runtime_probe.test.ts"
+    ],
+    "successor_execution_sequence": [
+      "focused RED once",
+      "minimal Army-HQ manual-chunk collapse",
+      "focused GREEN once",
+      "npm.cmd run desktop:map:build once",
+      "candidate commit",
+      "literal npm.cmd run desktop:package:probe once on the clean candidate using the pinned sibling npm.cmd with its Node22 directory prepended to child PATH"
+    ],
+    "successor_execution_budget": {
+      "focused_red_runs": 1,
+      "focused_green_runs": 1,
+      "desktop_map_build_runs": 1,
+      "packaged_probe_invocations": 1,
+      "additional_test_runs": 0,
+      "additional_verification_commands": 0,
+      "correction_passes": 0,
+      "packaged_probe_retries": 0,
+      "replacement_attempts": 0
+    },
+    "map_build_accounting": {
+      "standalone_desktop_map_build_commands": 1,
+      "unavoidable_nested_desktop_map_builds_inside_canonical_composite": 1,
+      "total_actual_desktop_map_builds": 2,
+      "nested_release_sim_warroom_and_package_descendants": "included only inside the sole canonical composite and grant no separate command authority"
+    },
+    "runtime": {
+      "node_executable": "C:\\Users\\User\\AppData\\Local\\Logi\\LogiPluginService\\PluginHosts\\node22\\node\\node.exe",
+      "node_version": "22.21.1",
+      "node_sha256": "471961CB355311C9A9DD8BA417ECA8269EAD32A2231653084112554CDA52E8B3",
+      "npm_command": "C:\\Users\\User\\AppData\\Local\\Logi\\LogiPluginService\\PluginHosts\\node22\\node\\npm.cmd",
+      "child_path_prefix": "C:\\Users\\User\\AppData\\Local\\Logi\\LogiPluginService\\PluginHosts\\node22\\node",
+      "child_path_rule": "prepend exact child_path_prefix while invoking the literal npm.cmd run desktop:package:probe",
+      "default_or_fallback_npm_node_permitted": false
+    },
+    "external_clocks": {
+      "package_clock_ms": 1200000,
+      "runtime_clock_ms": 900000,
+      "package_clock_starts": "npm root launch",
+      "runtime_clock_starts": "positive observation of the expected packaged-executable descendant only",
+      "active_cutoff_rule": "natural root exit before the active cutoff wins",
+      "timeout_cleanup": "if npm root remains alive at the active cutoff, perform exactly one process-tree cleanup at the npm root, then one bounded 5000 ms process census",
+      "second_kill_permitted": false,
+      "extension_permitted": false,
+      "timeout_ambiguity_or_cleanup_uncertainty_result": "NO VERDICT"
+    },
+    "forbidden_successor_scope": [
+      "engine",
+      "Electron",
+      "wrapper",
+      "IPC",
+      "gameplay",
+      "calibration",
+      "package scripts",
+      "retry",
+      "diagnosis",
+      "correction",
+      "replacement approach"
+    ],
+    "successor_is_not_active_until_fresh_lock_accepted": true
+  },
+  "constraint_enforcement": "manual hash-bound exact-byte review and receipt; check_re_scope.ps1 enforces file scope but does not enforce execution_budget or transition_policy; read_only_diagnoses_per_failure=1 is checker-required inert schema only and actual diagnosis authority is zero",
   "long_run_policy": {
     "permitted": false,
     "maximum_clean_pairs_per_exact_commit": 1
