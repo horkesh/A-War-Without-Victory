@@ -21,9 +21,12 @@ import hqHrhb1992 from '../../../warroom/assets/hq_hrhb_1992.webp';
 import hqHrhb1993 from '../../../warroom/assets/hq_hrhb_1993.webp';
 import hqHrhb1994 from '../../../warroom/assets/hq_hrhb_1994.webp';
 import hqHrhb1995 from '../../../warroom/assets/hq_hrhb_1995.webp';
+import type { PlayerFacingFaction } from '../../../shared/playerFacingLabels';
 
-/** faction slug → year → bundled asset URL */
-export const WARROOM_SCENE_URLS: Record<string, Record<number, string>> = {
+export type WarroomSceneYear = 1991 | 1992 | 1993 | 1994 | 1995;
+
+/** Canonical faction → year → bundled asset URL. */
+export const WARROOM_SCENE_URLS: Record<PlayerFacingFaction, Record<WarroomSceneYear, string>> = {
   RBiH: {
     1991: hqRbih1991,
     1992: hqRbih1992,
@@ -46,3 +49,10 @@ export const WARROOM_SCENE_URLS: Record<string, Record<number, string>> = {
     1995: hqHrhb1995,
   },
 };
+
+/** Exact campaign-opening scene for each canonical faction. */
+export const WARROOM_1992_SCENE_URLS = {
+  RBiH: WARROOM_SCENE_URLS.RBiH[1992],
+  RS: WARROOM_SCENE_URLS.RS[1992],
+  HRHB: WARROOM_SCENE_URLS.HRHB[1992],
+} satisfies Record<PlayerFacingFaction, string>;

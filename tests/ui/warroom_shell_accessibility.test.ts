@@ -235,7 +235,7 @@ describe('WarroomShellLayer accessibility proof', () => {
         const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
         const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
         const statusSource = readFileSync('src/ui/map/components/warroom/WarroomStatusBar.tsx', 'utf8');
-        const sceneFrameIndex = source.indexOf('aspectRatio: `${CANVAS_ASPECT}`');
+        const sceneFrameIndex = source.indexOf('<WarroomScenePlate src={scenePlateUrl}>');
         const toolbarRenderIndex = source.indexOf('<WarroomToolbar onNavigate={onNavigate} />');
         const statusDockRenderIndex = source.indexOf('{statusDock}');
         const projectedMapIndex = source.indexOf('<WarroomProjectedMap');

@@ -28,7 +28,12 @@ import {
   type WarroomNavigationCommand,
 } from '../../utils/warroomNavigation';
 import { t } from '../../i18n';
-import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
+import { WARROOM_SCENE_URLS, type WarroomSceneYear } from './warroom-asset-urls';
+import {
+  WARROOM_SCENE_HEIGHT,
+  WARROOM_SCENE_WIDTH,
+  WarroomScenePlate,
+} from './WarroomScenePlate';
 import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
 import fallbackRsRegions from '../../../warroom/assets/hq_rs_regions.json';
 import fallbackHrhbRegions from '../../../warroom/assets/hq_hrhb_regions.json';
@@ -69,9 +74,8 @@ interface WarroomMapOverlayModel {
 }
 
 // Authoring canvas dimensions (schema v2.1)
-const CANVAS_W = 2752;
-const CANVAS_H = 1536;
-const CANVAS_ASPECT = CANVAS_W / CANVAS_H;
+const CANVAS_W = WARROOM_SCENE_WIDTH;
+const CANVAS_H = WARROOM_SCENE_HEIGHT;
 
 // ── Region → Warroom navigation mapping ────────────────────────────────────
 
@@ -712,7 +716,13 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
   // metadata is optional and only present when a game is loaded.
   const dateString = loadedGameState?.metadata?.date ?? '';
   const parsedYear = parseInt(dateString.slice(-4), 10);
-  const year = isNaN(parsedYear) ? 1992 : Math.max(1992, Math.min(1995, parsedYear));
+  const year: WarroomSceneYear = parsedYear <= 1992 || isNaN(parsedYear)
+    ? 1992
+    : parsedYear === 1993
+      ? 1993
+      : parsedYear === 1994
+        ? 1994
+        : 1995;
 
   const scenePlateUrl = playerFaction
     ? (WARROOM_SCENE_URLS[playerFaction]?.[year] ?? WARROOM_SCENE_URLS[playerFaction]?.[1992])
@@ -849,30 +859,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
         overflow: 'hidden',
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          width: `min(100%, calc(100vh * ${CANVAS_ASPECT}))`,
-          height: `min(100%, calc(100vw / ${CANVAS_ASPECT}))`,
-          aspectRatio: `${CANVAS_ASPECT}`,
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <img
-          src={scenePlateUrl}
-          alt=""
-          draggable={false}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            display: 'block',
-            userSelect: 'none',
-          }}
-        />
+      <WarroomScenePlate src={scenePlateUrl}>
         <WarroomToolbar onNavigate={onNavigate} />
         {statusDock}
         {deskMapRegion ? (
@@ -892,7 +879,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
             onClick={() => handleRegionClick(region)}
           />
         ))}
-      </div>
+      </WarroomScenePlate>
     </div>
   );
 }
