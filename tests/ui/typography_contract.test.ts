@@ -7,13 +7,19 @@ const repoRoot = resolve(__dirname, '../..');
 const fontsDirectory = resolve(repoRoot, 'assets/ui/fonts');
 const globalsPath = resolve(repoRoot, 'src/ui/map/styles/globals.css');
 const tailwindPath = resolve(repoRoot, 'src/ui/map/tailwind.config.ts');
+const upstreamMonoRanges = {
+  Latin1: 'U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2013-2014, U+2018-201A, U+201C-201E, U+2020-2022, U+2026, U+2030, U+2039-203A, U+2044, U+20AC, U+2122, U+2212, U+FB01-FB02',
+  Latin2: 'U+0100-0101, U+0104-0130, U+0132-0151, U+0154-017F, U+018F, U+0192, U+01A0-01A1, U+01AF-01B0, U+01FA-01FF, U+0218-021B, U+0237, U+0259, U+1E80-1E85, U+1E9E, U+20A1, U+20A4, U+20A6, U+20A8-20AA, U+20AD-20AE, U+20B1-20B2, U+20B4-20B5, U+20B8-20BA, U+20BD, U+20BF',
+} as const;
 
 const bundledFonts = [
   'IBMPlexSans_Condensed-Regular.ttf',
   'IBMPlexSans_Condensed-SemiBold.ttf',
   'IBMPlexSans_Condensed-Bold.ttf',
   'IBMPlexMono-Regular-Latin1.woff2',
+  'IBMPlexMono-Regular-Latin2.woff2',
   'IBMPlexMono-SemiBold-Latin1.woff2',
+  'IBMPlexMono-SemiBold-Latin2.woff2',
 ] as const;
 
 function escaped(value: string): string {
@@ -28,6 +34,25 @@ function expectNoExternalRuntimeFont(source: string): void {
   expect(source).not.toMatch(/https?:\/\/fonts\.(?:googleapis|gstatic)\.com/i);
   expect(source).not.toMatch(/@import\s+(?:url\()?\s*['"]?https?:\/\//i);
   expect(source).not.toMatch(/@font-face\s*{[^}]*url\(\s*['"]?https?:\/\//is);
+}
+
+function fontFaceFor(css: string, file: string): string {
+  return css.match(new RegExp(`@font-face\\s*{[^}]*${escaped(file)}[^}]*}`, 's'))?.[0] ?? '';
+}
+
+function unicodeRangeCovers(range: string, codePoint: number): boolean {
+  return range.split(',').some((token) => {
+    const match = token.trim().match(/^U\+([0-9a-f?]+)(?:-([0-9a-f]+))?$/i);
+    if (!match) return false;
+    if (match[1].includes('?')) {
+      const low = Number.parseInt(match[1].replaceAll('?', '0'), 16);
+      const high = Number.parseInt(match[1].replaceAll('?', 'f'), 16);
+      return codePoint >= low && codePoint <= high;
+    }
+    const low = Number.parseInt(match[1], 16);
+    const high = match[2] ? Number.parseInt(match[2], 16) : low;
+    return codePoint >= low && codePoint <= high;
+  });
 }
 
 describe('canonical UI typography contract', () => {
@@ -50,7 +75,9 @@ describe('canonical UI typography contract', () => {
       ['IBM Plex Sans Condensed', 'IBMPlexSans_Condensed-SemiBold.ttf', '600'],
       ['IBM Plex Sans Condensed', 'IBMPlexSans_Condensed-Bold.ttf', '700'],
       ['IBM Plex Mono', 'IBMPlexMono-Regular-Latin1.woff2', '400'],
+      ['IBM Plex Mono', 'IBMPlexMono-Regular-Latin2.woff2', '400'],
       ['IBM Plex Mono', 'IBMPlexMono-SemiBold-Latin1.woff2', '600'],
+      ['IBM Plex Mono', 'IBMPlexMono-SemiBold-Latin2.woff2', '600'],
     ] as const;
 
     for (const [family, file, weight] of expectedFaces) {
@@ -64,6 +91,25 @@ describe('canonical UI typography contract', () => {
     expect(css).toMatch(/--font-command:\s*["']IBM Plex Sans Condensed["']/);
     expect(css).toMatch(/--font-data:\s*["']IBM Plex Mono["']/);
     expectNoExternalRuntimeFont(css);
+  });
+
+  it('routes Bosnian Latin Extended-A glyphs through both Latin-2 weights', () => {
+    const css = readFileSync(globalsPath, 'utf8');
+    const bosnianCodePoints = [0x0106, 0x010c, 0x0110, 0x0160, 0x017d];
+
+    for (const weight of ['Regular', 'SemiBold']) {
+      for (const subset of ['Latin1', 'Latin2']) {
+        const face = fontFaceFor(css, `IBMPlexMono-${weight}-${subset}.woff2`);
+        const range = face.match(/unicode-range:\s*([^;]+);/i)?.[1].trim() ?? '';
+        expect(range, `${weight} ${subset}`).toBe(upstreamMonoRanges[subset as keyof typeof upstreamMonoRanges]);
+      }
+
+      const latin2Face = fontFaceFor(css, `IBMPlexMono-${weight}-Latin2.woff2`);
+      const range = latin2Face.match(/unicode-range:\s*([^;]+);/i)?.[1] ?? '';
+      for (const codePoint of bosnianCodePoints) {
+        expect(unicodeRangeCovers(range, codePoint), `${weight} U+${codePoint.toString(16)}`).toBe(true);
+      }
+    }
   });
 
   it('maps Tailwind sans and serif to command, and mono to data', () => {
@@ -85,8 +131,15 @@ describe('canonical UI typography contract', () => {
     expect(readme).toContain(
       'IBM-Plex-Mono/fonts/split/woff2/IBMPlexMono-SemiBold-Latin1.woff2',
     );
+    expect(readme).toContain(
+      'IBM-Plex-Mono/fonts/split/woff2/IBMPlexMono-Regular-Latin2.woff2',
+    );
+    expect(readme).toContain(
+      'IBM-Plex-Mono/fonts/split/woff2/IBMPlexMono-SemiBold-Latin2.woff2',
+    );
 
     for (const file of bundledFonts) {
+      expect(existsSync(resolve(fontsDirectory, file)), file).toBe(true);
       expect(readme, `${file} SHA-256`).toContain(`${file}: ${sha256(resolve(fontsDirectory, file))}`);
     }
   });
