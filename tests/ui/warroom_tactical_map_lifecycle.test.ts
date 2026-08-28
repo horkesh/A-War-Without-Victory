@@ -15,7 +15,7 @@ function method(source: string, startMarker: string, endMarker: string): string 
 
 describe('Warroom tactical shell document lifecycle', () => {
   it('uses one deterministic canonical document for every operational shell entry', () => {
-    expect(warroomSource).toContain("const OPERATIONAL_SHELL_DOCUMENT = 'index.html?embedded=1&view=warroom';");
+    expect(warroomSource).toContain("const OPERATIONAL_SHELL_DOCUMENT = 'index.html?embedded=1';");
     expect(warroomSource).not.toMatch(/Date\.now\(|Math\.random\(|cacheBuster/);
     expect(warroomSource).not.toContain('intro=war_start');
 

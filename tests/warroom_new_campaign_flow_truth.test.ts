@@ -46,7 +46,8 @@ describe('warroom new campaign flow truth', () => {
 
     expect(warroomSource).toContain('if (this.desktopBridge?.getCurrentGameState) {');
     expect(warroomSource).not.toContain('if (!this.userNavigatedFromMenu && this.desktopBridge?.getCurrentGameState) {');
-    expect(warroomSource).toContain('{ showShell: !this.userNavigatedFromMenu }');
+    expect(warroomSource).toContain('this.applyGameStateFromJson(existingStateJson, { showShell: false });');
+    expect(warroomSource).toContain('if (!this.userNavigatedFromMenu) void this.returnToOperationalWarroomShell();');
     expect(warroomSource).toContain("private async pullLatestGameState(options?: { showShell?: boolean })");
   });
 
@@ -60,9 +61,15 @@ describe('warroom new campaign flow truth', () => {
     const loadEnd = warroomSource.indexOf('};', loadStart);
     expect(loadStart).toBeGreaterThanOrEqual(0);
     expect(loadEnd).toBeGreaterThan(loadStart);
-    expect(warroomSource.slice(loadStart, loadEnd)).toContain('this.postFreshCampaignStartedToTacticalMap();');
+    expect(warroomSource.slice(loadStart, loadEnd)).toContain('this.claimReactOpeningOwnership(iframe);');
+    const claimStart = warroomSource.indexOf('private claimReactOpeningOwnership');
+    const claimEnd = warroomSource.indexOf('private hideLegacyOpeningRecovery', claimStart);
+    expect(claimStart).toBeGreaterThanOrEqual(0);
+    expect(claimEnd).toBeGreaterThan(claimStart);
+    expect(warroomSource.slice(claimStart, claimEnd)).toContain('this.postFreshCampaignStartedToTacticalMap();');
 
-    const reuseStart = warroomSource.indexOf('const shell = await this.ensureOperationalShellIframe(tacticalScene);');
+    const showTacticalStart = warroomSource.indexOf('private async showTacticalMapScene');
+    const reuseStart = warroomSource.indexOf('const shell = await this.ensureOperationalShellIframe(tacticalScene);', showTacticalStart);
     const reuseEnd = warroomSource.indexOf("const desk = document.getElementById('warroom-desk');", reuseStart);
     expect(reuseStart).toBeGreaterThanOrEqual(0);
     expect(reuseEnd).toBeGreaterThan(reuseStart);

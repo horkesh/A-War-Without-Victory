@@ -187,8 +187,8 @@
         <div id="tactical-map-scene" class="tactical-map-scene-hidden" aria-hidden="true"></div>
     </div>
 
-    <!-- STEP 1: Main Menu title screen -->
-    <div id="main-menu" class="mm-overlay" aria-live="polite">
+    <!-- Load-failure recovery only. The embedded React application owns normal startup. -->
+    <div id="main-menu" class="mm-overlay mm-hidden" inert aria-hidden="true" aria-live="polite">
         <div class="mm-stage">
             <div class="mm-brand" aria-hidden="true">
                 <div class="mm-brand-kicker">Bosnia-Herzegovina, 1992&ndash;1995</div>
@@ -209,8 +209,8 @@
         </div>
     </div>
 
-    <!-- STEP 2: Side Picker (faction selection) -->
-    <div id="side-picker" class="mm-overlay mm-hidden" aria-live="polite">
+    <!-- Second step of the bounded legacy recovery path. -->
+    <div id="side-picker" class="mm-overlay mm-hidden" inert aria-hidden="true" aria-live="polite">
         <div class="side-picker-card">
             <div class="side-picker-header">
                 <span>Choose Your Side</span>

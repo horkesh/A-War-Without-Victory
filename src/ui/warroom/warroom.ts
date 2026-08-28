@@ -28,8 +28,10 @@ import {
 type CampaignScenarioKey = 'apr_1992';
 const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
 const CAMPAIGN_REPLACEMENT_UPDATE: GameStateUpdateMetadata = Object.freeze({ campaignReplacement: true });
-const OPERATIONAL_SHELL_DOCUMENT = 'index.html?embedded=1&view=warroom';
+const OPERATIONAL_SHELL_DOCUMENT = 'index.html?embedded=1';
 const SANDBOX_DOCUMENT = 'tactical_sandbox.html?embedded=1&desktop_window=sandbox';
+/** One bounded recovery window; the legacy selector is not a parallel opening owner. */
+const REACT_OPENING_FALLBACK_MS = 8000;
 
 interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{
@@ -70,9 +72,12 @@ class WarroomApp {
     private unsubscribeDesktopGameState: (() => void) | null = null;
     private unsubscribeDesktopTurnReport: (() => void) | null = null;
     private pendingShellHandoff: ShellHandoffCommand | null = null;
+    private pendingShowWarroom = false;
     private freshCampaignIntroPending = false;
     private freshCampaignResetPending = false;
     private readonly desktopStateGate = createLatestGameStateApplicationGate();
+    private openingOwner: 'react-loading' | 'react' | 'legacy-recovery' = 'react-loading';
+    private openingFallbackTimer: number | null = null;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
 
@@ -121,6 +126,11 @@ class WarroomApp {
             }
         });
 
+        // The embedded React application is the normal desktop opening owner. The
+        // retained host menu is enabled only if this one frame cannot load in time.
+        void this.beginReactOpeningOwnership();
+        window.addEventListener('beforeunload', () => this.cancelReactOpeningFallback(), { once: true });
+
         await this.warPlanningMap.loadData();
 
         // Resolve tactical map HTTP server URL (set by Electron main process).
@@ -157,7 +167,8 @@ class WarroomApp {
             && existingStateReservation
             && this.desktopStateGate.admitReserved(existingStateJson, existingStateReservation)
         ) {
-            this.applyGameStateFromJson(existingStateJson, { showShell: !this.userNavigatedFromMenu });
+            this.applyGameStateFromJson(existingStateJson, { showShell: false });
+            if (!this.userNavigatedFromMenu) void this.returnToOperationalWarroomShell();
         } else if (!this.gameState && !this.desktopBridge?.startNewCampaign) {
             // Browser/dev mode fallback: prefer the same baked startup artifact as desktop.
             const loadedSnapshot = await this.loadStartupSnapshotFallback();
@@ -363,7 +374,7 @@ class WarroomApp {
 
     /** Loaded games should enter the React warroom shell instead of the legacy desk scene. */
     private showLoadedGameShellScene(): void {
-        if (this.gameState) {
+        if (this.gameState && this.openingOwner !== 'legacy-recovery') {
             // React shell owns room navigation; keep the iframe loaded for the session.
             void this.returnToOperationalWarroomShell();
             return;
@@ -373,12 +384,15 @@ class WarroomApp {
 
     /** Show a specific overlay screen and hide others. */
     private showScreen(screenId: 'main-menu' | 'side-picker' | 'none'): void {
+        if (screenId !== 'none' && this.openingOwner !== 'legacy-recovery') return;
         const screens = ['main-menu', 'side-picker'];
         for (const id of screens) {
             const el = document.getElementById(id);
             if (!el) continue;
-            if (id === screenId) el.classList.remove('mm-hidden');
-            else el.classList.add('mm-hidden');
+            const isActive = id === screenId;
+            el.classList.toggle('mm-hidden', !isActive);
+            el.inert = !isActive;
+            el.setAttribute('aria-hidden', isActive ? 'false' : 'true');
         }
 
         const warroomScene = document.getElementById('warroom-scene');
@@ -699,9 +713,93 @@ class WarroomApp {
         }
     }
 
+    private async beginReactOpeningOwnership(): Promise<void> {
+        const tacticalScene = document.getElementById('tactical-map-scene');
+        const warroomScene = document.getElementById('warroom-scene');
+        const desk = document.getElementById('warroom-desk');
+        if (!tacticalScene) {
+            this.activateLegacyOpeningRecovery();
+            return;
+        }
+
+        this.hideLegacyOpeningRecovery();
+        this.armReactOpeningFallback();
+        if (warroomScene) warroomScene.classList.remove('warroom-scene-hidden');
+        if (desk) desk.classList.add('warroom-desk-hidden');
+        tacticalScene.classList.remove('tactical-map-scene-hidden');
+        tacticalScene.setAttribute('aria-hidden', 'false');
+
+        try {
+            const shell = await this.ensureOperationalShellIframe(tacticalScene);
+            shell.hidden = false;
+        } catch {
+            this.activateLegacyOpeningRecovery();
+        }
+    }
+
+    private claimReactOpeningOwnership(iframe: HTMLIFrameElement): void {
+        const tacticalScene = document.getElementById('tactical-map-scene');
+        const warroomScene = document.getElementById('warroom-scene');
+        const desk = document.getElementById('warroom-desk');
+        const recoveringLoadedCampaign = this.openingOwner === 'legacy-recovery' && this.gameState !== null;
+        this.openingOwner = 'react';
+        this.tacticalMapReady = true;
+        this.cancelReactOpeningFallback();
+        this.hideLegacyOpeningRecovery();
+        iframe.hidden = false;
+        if (warroomScene) warroomScene.classList.remove('warroom-scene-hidden');
+        if (desk) desk.classList.add('warroom-desk-hidden');
+        if (tacticalScene) {
+            tacticalScene.classList.remove('tactical-map-scene-hidden');
+            tacticalScene.setAttribute('aria-hidden', 'false');
+        }
+        if (this.pendingShowWarroom || recoveringLoadedCampaign) {
+            this.postToOperationalShell({ type: 'awwv-shell:show-warroom' });
+            this.pendingShowWarroom = false;
+        }
+        this.postFreshCampaignStartedToTacticalMap();
+        this.flushPendingShellHandoff();
+    }
+
+    private hideLegacyOpeningRecovery(): void {
+        for (const id of ['main-menu', 'side-picker']) {
+            const element = document.getElementById(id);
+            if (!element) continue;
+            element.classList.add('mm-hidden');
+            element.inert = true;
+            element.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    /** Bounded recovery only: React takes ownership again if a late load succeeds. */
+    private activateLegacyOpeningRecovery(): void {
+        if (this.openingOwner === 'react') return;
+        this.openingOwner = 'legacy-recovery';
+        this.cancelReactOpeningFallback();
+        if (this.tacticalMapIframe) this.tacticalMapIframe.hidden = true;
+        this.showScreen('main-menu');
+        this.syncContinueAvailability();
+    }
+
+    private armReactOpeningFallback(): void {
+        this.cancelReactOpeningFallback();
+        this.openingFallbackTimer = window.setTimeout(
+            () => this.activateLegacyOpeningRecovery(),
+            REACT_OPENING_FALLBACK_MS,
+        );
+    }
+
+    private cancelReactOpeningFallback(): void {
+        if (this.openingFallbackTimer === null) return;
+        window.clearTimeout(this.openingFallbackTimer);
+        this.openingFallbackTimer = null;
+    }
+
     private async returnToOperationalWarroomShell(): Promise<void> {
         await this.showTacticalMapScene('warroom');
-        this.postToOperationalShell({ type: 'awwv-shell:show-warroom' });
+        if (!this.postToOperationalShell({ type: 'awwv-shell:show-warroom' })) {
+            this.pendingShowWarroom = true;
+        }
     }
 
     private async ensureOperationalShellIframe(tacticalScene: HTMLElement): Promise<HTMLIFrameElement> {
@@ -713,13 +811,13 @@ class WarroomApp {
             const shellUrl = this.buildTacticalDocumentUrl(mapBaseUrl, OPERATIONAL_SHELL_DOCUMENT);
             const iframe = document.createElement('iframe');
             iframe.id = 'tactical-map-iframe';
+            iframe.title = 'A War Without Victory';
             iframe.setAttribute('allowfullscreen', '');
             iframe.hidden = true;
             iframe.onload = () => {
-                this.tacticalMapReady = true;
-                this.postFreshCampaignStartedToTacticalMap();
-                this.flushPendingShellHandoff();
+                this.claimReactOpeningOwnership(iframe);
             };
+            iframe.onerror = () => this.activateLegacyOpeningRecovery();
             iframe.src = shellUrl;
             this.tacticalMapIframe = iframe;
             tacticalScene.appendChild(iframe);
