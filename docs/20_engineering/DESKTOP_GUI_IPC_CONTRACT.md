@@ -32,7 +32,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 
 - `list-save-records` (invoke)
   - Returns: `{ ok: boolean, error?: string, records?: Array<{ filename: string, turn: number, faction: 'RBiH' | 'RS' | 'HRHB' | null, modifiedAtMs: number }> }`
-  - Behavior: enumerates validated JSON records from the desktop saves directory in deterministic newest-first order. The renderer uses this for the case-file **Field Records** view; arbitrary paths are never returned.
+  - Behavior: enumerates validated JSON records from the desktop saves directory in deterministic newest-first order. The renderer uses this for the opening's **Field Records** view; arbitrary paths are never returned.
 
 - `load-save-record` (invoke)
   - Payload: `{ filename: string }`

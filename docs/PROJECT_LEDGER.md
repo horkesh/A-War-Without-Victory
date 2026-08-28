@@ -30141,3 +30141,26 @@ first-paint/acceptance remain open. The blocked packaged probe/RE path was not r
 changed and earns no credit. Mechanics/state/IPC contract names, engine, simulation, calibration,
 RE, probes, localization Phase 3, and canon were outside scope. R8, RE, release, and R7 overall are
 not complete. `docs/10_canon/FORAWWV.md` was not edited.
+
+## 2026-08-28 — Correct cinematic-opening control references after documentation review
+
+**Correction receipt:** Living docs now match the actual implementation seams and current control
+plane. Task 9 requires two neutral images only: `OpeningSplash.tsx` owns the splash import/constant,
+and `MainMenu.tsx` owns the monitoring-room import/constant. `openingScenes.ts` remains faction
+metadata/transform-origin ownership, not a neutral registry. Foreground and portal prompts are
+optional later enhancements with no current registry and require a separate tiny tested integration
+if selected. The existing three faction plates remain; retained RBiH 2750×1536 versus the 2752-wide
+scene contract is a separate validation/re-export/canvas-normalization item, not a new creative
+deliverable or mechanics defect.
+
+The current Electron contract is loopback HTTP `index.html?embedded=1` with source/origin-bound
+`postMessage`; the former same-origin operational-3D route is explicitly historical. First-hour and
+decision-mode descriptions now follow splash → neutral monitoring room → deliberate faction preview
+→ dossier/mode. The docs index now records terminal packaged-proof discovery/prerequisite closure,
+exact rollback `48909e1d6`, and RE blocked at P2B with no proof route. Opening keyboard, focus, and
+reduced-motion proof is complete; broader R7 English accessibility/readability remains open.
+
+**Scope:** Documentation and whitespace correction only. No code, tests, assets, simulation, engine,
+state, IPC implementation, RE, probe, calibration, or canon content changed. The preceding ledger
+entry remains append-only historical record and is corrected by this receipt. `FORAWWV.md` was not
+edited.

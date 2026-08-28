@@ -53,17 +53,11 @@
 **Current override (2026-08-28):** engine health precedes further calibration, but RE is finite.
 The original probe channel is closed history at `b711cffa9`; it is not RE. The owner-approved
 [1.0 Engine Integrity contract](../plans/2026-08-26-engine-integrity-plan.md) supersedes the old
-T0–T14 monolith with seven outcomes/eight packets. P1/P2A are accepted; P2B is HELD before
-implementation and P3 waits. The owner-authorized
-[auxiliary packaged-probe recovery](../plans/2026-08-28-packaged-probe-recovery-plan.md) is active
-outside those outcomes only to close the stop receipt; read-only alternate-proof discovery is
-queued and unauthorized until its fresh lock is accepted. Recovery earns no RE credit or
-automatic P2B proof. R2 instrumentation is CLOSED/REJECTED at its valid sole RED: no production edit,
-GREEN, syntax/diff, package/probe invocation, candidate, or R3 occurred; packaged invocation count
-is zero and unused package authority is nontransferable. Current zero-execution stop receipt
-`RE-PROBE-RECOVERY-STOP-RECEIPT` / `record-r2-red-rejection-and-close-instrumentation` is based on
-`f674ff0e…`. After it closes, discovery requires a separate fresh docs-only lock; the calibration
-pause is unchanged.
+T0–T14 monolith with seven outcomes/eight packets. P1/P2A are accepted; RE is blocked at P2B and P3
+waits. The auxiliary packaged-proof discovery and prerequisite are terminally closed at
+`NO_VERDICT`; their exact unproven hypothesis was rolled back at `48909e1d6`. No packaged-proof
+route, retry, diagnosis, instrumentation, or successor proof route is active or implied. The
+auxiliary work earns no RE credit or automatic P2B proof, and the calibration pause is unchanged.
 The corrected
 Node-22 baseline at `177882fc2` is deterministic, engine-green, byte-identical outside normalized
 metadata, and save/replay-green. Its `+3.62853%` mandatory-correctness cost is watch-only, not a
@@ -73,7 +67,7 @@ targeting, hostile breakout, and speculative mechanics are deferred. Broad audit
 standalone closeout machinery, and repeated full-team review are retired. Historical fit remains
 non-authorizing calibration observation.
 
-**Current control plane (synchronized 2026-08-28):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE P2B is held and P3 waits. Instrumentation is closed with no R3; alternate-proof discovery is queued and unauthorized until a fresh exact-base docs-only lock is reviewed, pinned, and accepted. Once active, it may only discover, without runs or implementation, either a zero-in-app external proof route, an exact separately authorized root-cause prerequisite, or an explicit P2B blocker. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the executable contracts. Collapse D-topology and multilingual localization remain post-1.0. Old RE T-tasks, performance-remediation, WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
+**Current control plane (synchronized 2026-08-28):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 cinematic-opening mechanics, typography, and fallback-art browser proof are complete; required owner splash/neutral art, live packaged acceptance, human listen/sensitivity, broader English accessibility/readability, and closeout remain. RE is blocked at P2B with no proof route; P3 waits. The terminal discovery/prerequisite and exact rollback at `48909e1d6` are closed history, not an active queue. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the executable contracts. Collapse D-topology and multilingual localization remain post-1.0. Old RE T-tasks, performance-remediation, WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
 
 The remaining files under `docs/30_planning/` are design specifications, not active execution queues: [multi-brigade operations](../30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md), [operation reevaluation](../30_planning/OPERATION_REEVALUATION_DESIGN_SPEC.md), and [spatial context](../30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md). Historical plans removed from that folder remain available through Git history and the ledgers.
 

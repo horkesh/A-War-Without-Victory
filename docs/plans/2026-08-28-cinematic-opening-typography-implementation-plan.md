@@ -18,7 +18,7 @@
 |---:|---|---|
 | 1 | Complete | R7 amendment registered in roadmap, command board, and accepted functional-opening plan. |
 | 2–8 | Complete | Scene substrate, transition state machine, React opening, exact-room handoff, desktop host ownership/recovery, and recursive typography enforcement landed. Healthy startup constructs/loads no legacy `WarPlanningMap`. |
-| 9 | **Open — owner art** | Temporary splash is `hq_presidential_desk_1992.webp`; neutral room is CSS fallback; foreground/portal art is absent. Integrate the four owner surfaces without reopening mechanics. Validate the final RBiH plate against the 2752-wide contract; the retained source is 2750×1536 and this is an asset-validation item, not a mechanics defect. |
+| 9 | **Open — two required neutral owner assets** | Replace the splash constant/import in `OpeningSplash.tsx` and the neutral-room constant/import in `MainMenu.tsx`. Existing faction plates remain. Foreground/portal prompts are optional later enhancements with no current registry and require their own tiny tested integration if chosen. Separately validate/re-export or canvas-normalize the retained 2750×1536 RBiH plate against the 2752-wide scene contract; it is not a new creative deliverable or mechanics defect. |
 | 10 | Browser/build/focused proof complete; packaged open | Five viewports and 83+ screenshots pass the fallback-art matrix. Live packaged-Electron first-paint/acceptance was not run. The blocked packaged probe/RE route was untouched and earns no credit. |
 | 11 | Complete | Focused corrections, recovery retry semantics, source-bound readiness, short-screen coverage, and lazy legacy-map simplification landed. |
 | 12 | Complete in documentation commit | Living architecture, GUI/Warroom masters, roadmap/control docs, ledger, knowledge, and napkin synchronized without editing canon. |
@@ -536,20 +536,22 @@ git commit -m "refactor(ui): unify active interface typography"
 
 **Files:**
 
-- Modify: `src/ui/map/components/opening/openingScenes.ts`
+- Modify: `src/ui/map/components/opening/OpeningSplash.tsx` — replace `OPENING_SPLASH_ART` fallback import/value
+- Modify: `src/ui/map/components/MainMenu.tsx` — replace `OPENING_MONITORING_ROOM_ASSET` transparent fallback value/import
 - Add when supplied: `src/ui/map/assets/opening/opening_splash_neutral.webp`
 - Add when supplied: `src/ui/map/assets/opening/opening_monitoring_room_neutral.webp`
-- Add optionally: `src/ui/map/assets/opening/opening_monitoring_foreground.webp`
-- Add optionally: `src/ui/map/assets/opening/opening_map_portal.webp`
 - Modify: `assets/manifests/assets_manifest.json` if required by its schema/current practice
+
+`openingScenes.ts` is not a neutral-asset registry. It owns faction scene metadata and transform
+origins and must not be changed for this two-image replacement.
 
 **Step 1: Validate each supplied asset**
 
-Verify dimensions, color space, alpha, file size, safe zones, and absence of baked text/logos/faction truth. Reject any room art that moves existing faction hotspots.
+Verify dimensions, color space, alpha, file size, safe zones, and absence of baked text/logos/faction truth. The two required inputs are the splash and neutral monitoring room. Existing RBiH/RS/HRHB faction plates are retained and are not part of this creative drop.
 
 **Step 2: Replace only registry entries**
 
-Swap the neutral fallback imports for the owner assets. Do not change state, timings, UI layout, or faction room assets.
+Import `opening_splash_neutral.webp` in `OpeningSplash.tsx` and point `OPENING_SPLASH_ART` to it. Import `opening_monitoring_room_neutral.webp` in `MainMenu.tsx` and point `OPENING_MONITORING_ROOM_ASSET` to it. Do not change state, timings, UI layout, `openingScenes.ts`, or faction room assets.
 
 **Step 3: Verify fallback behavior**
 
@@ -558,11 +560,16 @@ Temporarily force an image error in the focused test and prove the neutral CSS/r
 **Step 4: Commit assets separately**
 
 ```powershell
-git add src/ui/map/assets/opening src/ui/map/components/opening/openingScenes.ts assets/manifests/assets_manifest.json
+git add src/ui/map/assets/opening src/ui/map/components/opening/OpeningSplash.tsx src/ui/map/components/MainMenu.tsx assets/manifests/assets_manifest.json
 git commit -m "assets(ui): add cinematic opening plates"
 ```
 
-If the owner assets have not yet been supplied, leave this task explicitly open; all mechanics and typography can still complete, but visual-art acceptance cannot be claimed.
+If the two required owner assets have not yet been supplied, leave this task explicitly open; all mechanics and typography can still complete, but visual-art acceptance cannot be claimed.
+
+The existing prompts for `opening_monitoring_foreground` and `opening_map_portal` are optional later
+presentation enhancements, not required replacement mechanics. Neither has a current registry. If
+the owner elects to use either, open a tiny integration task naming its component seam, add focused
+fallback/reduced-motion proof, and keep it independent from Task 9 acceptance.
 
 ## Task 10: Browser and Build Verification
 
@@ -675,7 +682,7 @@ New campaign Begin enters the selected Warroom; the existing date handoff/openin
 
 **Step 4: Update R7 status honestly**
 
-- If code/tests/build/browser proof are green but owner art is absent: mark mechanics/typography complete and art acceptance waiting on the four-file asset drop.
+- If code/tests/build/browser proof are green but owner art is absent: mark mechanics/typography complete and art acceptance waiting on the two required neutral images.
 - If owner art is integrated and browser proof is green: mark browser presentation complete, with actual packaged first-paint acceptance still open if it could not be run.
 - Never mark RE, R8, or release completion from this work.
 

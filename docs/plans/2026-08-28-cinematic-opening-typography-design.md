@@ -1,7 +1,8 @@
 # Cinematic Opening and Typography Design
 
-**Status:** Owner-approved design, 2026-08-28  
-**Roadmap lane:** R7 presentation amendment  
+**Status:** Owner-approved design, 2026-08-28
+
+**Roadmap lane:** R7 presentation amendment
 **Base:** `8420aad135c15330f3378b563b00428b5149a792`
 
 ## Objective
@@ -102,6 +103,11 @@ The transform origin for each existing faction room is derived from its canonica
 
 All masters should be authored at 3840 x 2160 or the generator's native 16:9 size, then cropped/exported to 2752 x 1536 WebP. Do not bake UI, title text, flags, emblems, dates, document copy, or generated labels into the neutral assets.
 
+**Acceptance split:** A and B are the two required owner-art deliverables and replace the temporary
+splash and CSS monitoring-room fallbacks. C and D retain useful prompts but are optional later
+enhancements; they have no current registry and require a separate small tested integration if used.
+The three existing faction Warroom plates are retained and are not part of this creative manifest.
+
 ### A. Main splash: `opening_splash_neutral_master`
 
 **Protected zones:** left 8-42%, y 18-72% dark and low-detail for title; bottom-right 12% quiet for version; focus right of center.
@@ -197,4 +203,3 @@ The shipped app must bundle and load the selected faces locally. Naming a missin
 - Reduced-motion and keyboard routes are complete.
 - Active player-facing UI resolves to the two bundled families with no live serif/typewriter/Arial override.
 - No engine, state, IPC, simulation, calibration, canon, or RE file changes occur.
-
