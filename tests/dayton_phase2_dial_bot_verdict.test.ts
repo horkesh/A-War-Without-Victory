@@ -78,10 +78,29 @@ describe('dayton_dial_cost: deviation multiplier (cross vs with grain)', () => {
     });
 
     it('federalized multipliers (cross 1.6 / with 0.7) on a constitutional option', () => {
-        // simple_majority is state-ward; federalized is entity-ward → CROSS → ×1.6.
-        expect(finalConstitutionalCost('arch_veto_regime', 'simple_majority', 'RS', 'federalized')).toBe(35); // round(22*1.6)
-        // frozen_lines is entity-ward; federalized entity-ward → WITH → ×0.7.
-        expect(finalReturnJusticeCost('rj_refugee_return', 'frozen_lines', 'RBiH', 'federalized')).toBe(6); // round(8*0.7)
+        // `federalized` is STATE-ward. This test previously asserted the opposite
+        // ("federalized is entity-ward"), matching a bug in dialGrain rather than the
+        // declaration table in the same file, which charges RS 14 for federalized and
+        // 24 for unitary — a monotonic centralization scale. The old expectations were
+        // the inverted multiplier, not an independent derivation.
+        // simple_majority is state-ward; federalized state-ward → WITH grain → ×0.7.
+        expect(finalConstitutionalCost('arch_veto_regime', 'simple_majority', 'RS', 'federalized')).toBe(15); // round(22*0.7)
+        // frozen_lines is entity-ward; under a state-ward federalized dial → CROSS → ×1.6.
+        expect(finalReturnJusticeCost('rj_refugee_return', 'frozen_lines', 'RBiH', 'federalized')).toBe(13); // round(8*1.6)
+    });
+
+    it('the dial grain agrees with who the declaration charges', () => {
+        // The invariant the old bug broke: a frame that charges RS is centralizing, so
+        // centralizing sub-choices run WITH its grain and are discounted. A frame that
+        // charges RBiH is devolving, and the reverse holds. If these two tables ever
+        // disagree again, a faction can buy a frame in order to get a discount on
+        // moving the opposite way.
+        //   federalized charges RS → state-ward → state-ward flip is discounted.
+        expect(finalCompetencyCost('comp_foreign_policy', 'entity', 'RBiH', 'federalized'))
+            .toBeGreaterThan(finalCompetencyCost('comp_foreign_policy', 'entity', 'RBiH', 'confederation'));
+        //   confederation charges RBiH → entity-ward → entity flip is discounted there.
+        expect(finalCompetencyCost('comp_defense', 'state', 'RS', 'federalized'))
+            .toBeLessThan(finalCompetencyCost('comp_defense', 'state', 'RS', 'confederation'));
     });
 
     it('default option is always free regardless of dial', () => {

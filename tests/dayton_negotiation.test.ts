@@ -130,9 +130,10 @@ function makeSimpleProposal(): DaytonProposal {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('Territorial Packages', () => {
-    it('defines 8 territorial packages', () => {
+    it('defines 19 territorial packages', () => {
         const packages = getAllTerritorialPackages();
-        expect(packages.length).toBe(8);
+        // 8 legacy keyword packages + 11 painted pieces (owner, 2026-08-28).
+        expect(packages.length).toBe(19);
     });
 
     it('each package has required fields', () => {
@@ -143,7 +144,10 @@ describe('Territorial Packages', () => {
             expect(pkg.default_holder).toBeTruthy();
             expect(pkg.capital_cost_to_demand).toBeGreaterThan(0);
             expect(pkg.capital_cost_to_concede).toBeGreaterThan(0);
-            expect(pkg.osid_keywords.length).toBeGreaterThan(0);
+            // A package defines its extent EITHER by painted settlement ids or by
+            // legacy keywords — `territorial_package_osids.test.ts` enforces exactly
+            // one. Requiring keywords here would fail every painted piece.
+            expect((pkg.osids?.length ?? 0) + (pkg.osid_keywords?.length ?? 0)).toBeGreaterThan(0);
         }
     });
 
@@ -445,7 +449,7 @@ describe('Dayton Initiation', () => {
         const state = makeState({ capital: { RBiH: highCapital(), RS: highCapital(), HRHB: highCapital() } });
         const info = initiateDaytonNegotiation(state);
 
-        expect(info.territorial_packages.length).toBe(8);
+        expect(info.territorial_packages.length).toBe(19);
         expect(info.institutional_packages.length).toBe(6);
         expect(info.faction_capital.RBiH).toBeGreaterThan(0);
         expect(info.faction_capital.RS).toBeGreaterThan(0);
@@ -471,7 +475,7 @@ describe('Dayton trigger ownership', () => {
 
         // Verify the persisted packet has the expected shape
         const pd = state.military.negotiation!.pending_dayton as any;
-        expect(pd.territorial_packages).toHaveLength(8);
+        expect(pd.territorial_packages).toHaveLength(19);
         expect(pd.institutional_packages).toHaveLength(6);
         expect(pd.faction_capital.RBiH).toBeGreaterThan(0);
         expect(pd.patron_override).toBeDefined();
@@ -490,7 +494,7 @@ describe('Dayton trigger ownership', () => {
         const restored = JSON.parse(json);
 
         const pd = restored.military.negotiation.pending_dayton;
-        expect(pd.territorial_packages).toHaveLength(8);
+        expect(pd.territorial_packages).toHaveLength(19);
         expect(pd.institutional_packages).toHaveLength(6);
         expect(pd.faction_capital.RBiH).toBeGreaterThan(0);
     });

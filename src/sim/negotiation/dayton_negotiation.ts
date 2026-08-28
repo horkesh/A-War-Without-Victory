@@ -37,6 +37,11 @@ import type { CompetencyOwnerChoice, EntityAutonomySetting } from '../../state/n
 import { strictCompare } from '../../state/validateGameState.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { computePeaceDysfunctionBreakdown } from './peace_dysfunction.js';
+import { finalAutonomyCost, getAutonomyChoiceById } from './dayton_dial_cost.js';
+import {
+    clampAmbition,
+    getMarginalAmbitionCost,
+} from './territorial_ambition.js';
 import { getPackageAreaPct } from './package_area_resolver.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -426,6 +431,13 @@ export function resolveDaytonNegotiation(
     //    empty constitutional choices read as the historical maximal-gridlock=100.
     const finalDimensions = resolveInstitutionalDimensions(neg, proposal, botFactions, patronOverrides);
 
+    // DIMENSION 7 — apply the territorial ambition the table actually GRANTED (not
+    // what the proposal asked for): the points survived the objection gate above and
+    // were paid for there. Applied after the package arithmetic so it is a demand on
+    // top of the map, and taken from the other factions in proportion to what they
+    // hold, so a point off a 49%-holder and a 2%-holder is not the same seizure.
+    applyTerritorialAmbition(territorySplit, playerFaction, finalDimensions.territorial_ambition ?? 0);
+
     const result: DaytonResult = {
         territorial_packages_accepted: acceptedTerritorial.sort(strictCompare),
         territorial_packages_rejected: rejectedTerritorial.sort(strictCompare),
@@ -546,6 +558,38 @@ function resolveBrckoStatus(
  *
  * Pure & deterministic: sorted iteration, integer-rounded percentages.
  */
+/**
+ * Move `points` percentage points of BiH to `gainer`, taken from the other factions
+ * PRO RATA of what they currently hold. Mutates `split` in place.
+ *
+ * Pro-rata rather than flat: at 51/49/0 a two-point demand should come almost
+ * entirely off the 49% holder, not half off a faction holding nothing. A faction is
+ * never driven below zero, and if the others together hold less than `points` the
+ * transfer is truncated to what exists — the map cannot be over-drawn.
+ *
+ * Pure arithmetic over a sorted faction list; no RNG/clock.
+ */
+function applyTerritorialAmbition(
+    split: Record<string, number>,
+    gainer: FactionId,
+    points: number,
+): void {
+    if (points <= 0) return;
+    const losers = CANONICAL_FACTIONS.filter(f => f !== gainer && (split[f] ?? 0) > 0);
+    const pool = losers.reduce((sum, f) => sum + (split[f] ?? 0), 0);
+    if (pool <= 0) return;
+
+    const take = Math.min(points, pool);
+    let moved = 0;
+    for (const f of [...losers].sort(strictCompare)) {
+        const share = (split[f] / pool) * take;
+        const actual = Math.min(share, split[f]);
+        split[f] -= actual;
+        moved += actual;
+    }
+    split[gainer] = (split[gainer] ?? 0) + moved;
+}
+
 function computeTerritorySplit(
     state: GameState,
     acceptedPackages: string[],
@@ -686,14 +730,16 @@ interface ResolvedDimensions {
     competency_allocation?: Record<string, CompetencyOwnerChoice>;
     constitutional_choices?: Record<string, string>;
     return_justice?: Record<string, string>;
+    autonomy_instruments?: Record<string, string>;
+    territorial_ambition?: number;
 }
 
 /** Patron-override threshold (mirrors the territorial/institutional ≥75 rule). */
 const PATRON_OVERRIDE_THRESHOLD = 75;
 
 /**
- * Resolve + persist the Phase-2 institutional dimensions (Dim 2 dial, Dim 3
- * competencies, Dim 4 constitutional, Dim 5 return/justice).
+ * Resolve + persist the institutional dimensions (Dim 2 dial, Dim 3 competencies,
+ * Dim 4 constitutional, Dim 5 return/justice, Dim 6 autonomy instruments).
  *
  * For each deviating sub-choice we test whether ANY bot faction objects (its
  * post-dial IDEOLOGICALLY-ADJUSTED cost exceeds 30% of its composite capital). The
@@ -803,6 +849,48 @@ function resolveInstitutionalDimensions(
             if (survived) kept[slotId] = optionId;
         }
         if (Object.keys(kept).length > 0) out.return_justice = kept;
+    }
+
+    // DIMENSION 6 — autonomy instruments (Annex-4 rights that sit outside the
+    // competency matrix: parallel relationships, entity treaty power, entity
+    // citizenship, entity constitutions). Same survives() gate as Dim 4/5, and the
+    // same dial multiplier — a centralizing frame makes granting these dear.
+    if (proposal.autonomy_instruments) {
+        const kept: Record<string, string> = {};
+        for (const slotId of Object.keys(proposal.autonomy_instruments).sort(strictCompare)) {
+            const optionId = proposal.autonomy_instruments[slotId];
+            if (!optionId) continue;
+            const order = getAutonomyChoiceById(slotId)?.options.map(o => o.id) ?? [];
+            const survived = survives(
+                bot => adjustedCost(finalAutonomyCost(slotId, optionId, bot, dial), constitutionalPrefDelta(bot, slotId, optionId, order)),
+                bot => `autonomy:${slotId}:${bot}`,
+            );
+            if (survived) kept[slotId] = optionId;
+        }
+        if (Object.keys(kept).length > 0) out.autonomy_instruments = kept;
+    }
+
+    // DIMENSION 7 — territorial ambition, bought ONE POINT AT A TIME. Each point is
+    // charged and objected to separately, so a demand that outruns the proposer's
+    // capital (or the table's tolerance) is TRUNCATED rather than refused whole: ask
+    // for five points with three points of standing and you leave with three. The
+    // loop stops at the first point that fails, because the costs are superlinear —
+    // granting a later point after an earlier one was refused would sell the dear
+    // points while skipping the cheap ones.
+    const wanted = clampAmbition(proposal.territorial_ambition ?? 0);
+    if (wanted > 0) {
+        let granted = 0;
+        while (granted < wanted) {
+            const marginal = getMarginalAmbitionCost(granted);
+            if (marginal <= 0) break;
+            const survived = survives(
+                () => marginal,
+                bot => `ambition:${granted + 1}:${bot}`,
+            );
+            if (!survived) break;
+            granted += 1;
+        }
+        if (granted > 0) out.territorial_ambition = granted;
     }
 
     return out;

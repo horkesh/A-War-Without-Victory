@@ -209,8 +209,31 @@ export interface TerritorialPackage {
     capital_cost_to_demand: number;
     /** Capital cost for the holder to concede this package. */
     capital_cost_to_concede: number;
-    /** OSID keyword fragments for map matching. */
-    osid_keywords: string[];
+    /**
+     * Explicit operational settlement ids this package covers. PREFERRED over
+     * `osid_keywords`: the keyword rule matches a fragment anywhere in the OSID
+     * key, so `sarajevo_suburbs`'s `hadzici` also matched `op:kljuc:hadzici`, a
+     * village 180 km away in the Krajina, and `ilidza` matched
+     * `op:sanski_most:ilidza_2`. Both were silently counted into the Sarajevo
+     * package's area AND into `western_bosnia`, whose own municipalities they are.
+     * A hand-painted piece names its settlements and cannot drift.
+     */
+    osids?: string[];
+    /**
+     * OSID keyword fragments for map matching. LEGACY — substring matching over
+     * the whole OSID key, retained for packages not yet painted explicitly.
+     * Ignored when `osids` is present.
+     */
+    osid_keywords?: string[];
+    /**
+     * Pieces sharing a group are MUTUALLY EXCLUSIVE at the table: a negotiator
+     * takes one of them or none, never two. This is how a minimal ask and a
+     * maximal ask over the same ground coexist — `sarajevo_corridor` (the airport
+     * strip alone) is entirely contained in `sarajevo_suburbs`, and
+     * `posavina_historical` is entirely contained in `posavina_pocket`. Without
+     * the group the shared ground would be bought twice in one settlement.
+     */
+    alternative_group?: string;
 }
 
 /** An institutional negotiation point at Dayton. */
@@ -258,6 +281,18 @@ export interface DaytonProposal {
     constitutional_choices?: Record<string, string>;
     /** DIMENSION 5: return/justice choice id -> option id. Absent ⇒ historical default. */
     return_justice?: Record<string, string>;
+    /**
+     * DIMENSION 6: autonomy-instrument slot id -> option id. Absent ⇒ the as-signed
+     * Annex-4 baseline, which is free — so an untouched proposal is unchanged.
+     */
+    autonomy_instruments?: Record<string, string>;
+    /**
+     * DIMENSION 7: whole percentage points of BiH demanded OUTRIGHT, beyond what the
+     * accepted packages move. Absent/0 ⇒ the settlement is exactly the package
+     * arithmetic, as before. Capped at MAX_AMBITION_POINTS and paid out of the same
+     * capital as the institutional dimensions.
+     */
+    territorial_ambition?: number;
 }
 
 /** Bot response to a Dayton proposal. */

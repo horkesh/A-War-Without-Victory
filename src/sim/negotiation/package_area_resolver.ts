@@ -69,6 +69,34 @@ export function resolveAreaKm2ForKeywords(keywords: readonly string[]): number {
     return sum;
 }
 
+/**
+ * The OSIDs a package covers. An explicit `osids` list WINS over `osid_keywords`
+ * — a painted piece names its settlements, so it cannot pick up a same-named
+ * village in another municipality the way substring matching does. Unknown ids
+ * are dropped here rather than silently contributing 0 km², and
+ * `territorial_package_osids.test.ts` fails the build if any package names one,
+ * so a stale id is caught at test time instead of quietly shrinking a package.
+ */
+export function resolveOsidsForPackage(pkg: {
+    osids?: readonly string[];
+    osid_keywords?: readonly string[];
+}): string[] {
+    if (pkg.osids && pkg.osids.length > 0) {
+        return [...new Set(pkg.osids.filter((o) => AREAS.areas[o] !== undefined))].sort(strictCompare);
+    }
+    return resolveOsidsForKeywords(pkg.osid_keywords ?? []);
+}
+
+/** Sum of km² across the OSIDs a package covers (explicit list or keywords). */
+export function resolveAreaKm2ForPackage(pkg: {
+    osids?: readonly string[];
+    osid_keywords?: readonly string[];
+}): number {
+    let sum = 0;
+    for (const key of resolveOsidsForPackage(pkg)) sum += AREAS.areas[key] ?? 0;
+    return sum;
+}
+
 // ── Per-package memoized area share ───────────────────────────────────────────
 
 const packageAreaPctCache = new Map<string, number>();
@@ -87,8 +115,13 @@ export function getPackageAreaPct(pkgId: string): number {
         packageAreaPctCache.set(pkgId, 0);
         return 0;
     }
-    const areaKm2 = resolveAreaKm2ForKeywords(pkg.osid_keywords);
-    const pct = Math.round((areaKm2 / TOTAL_AREA_KM2) * 100 * 10) / 10;
+    const areaKm2 = resolveAreaKm2ForPackage(pkg);
+    // THREE decimals, not one. The painted pieces are deliberately small — the
+    // Sarajevo airport strip is 91.1 km² = 0.177% of BiH — and one-decimal
+    // rounding turned that into 0.2% while anything under 0.05% became 0.0%,
+    // i.e. free to demand. The negotiation prices ground; it must not price a
+    // real piece at nothing.
+    const pct = Math.round((areaKm2 / TOTAL_AREA_KM2) * 100 * 1000) / 1000;
     packageAreaPctCache.set(pkgId, pct);
     return pct;
 }

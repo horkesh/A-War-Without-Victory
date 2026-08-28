@@ -42,6 +42,7 @@ import {
     CONSTITUTIONAL_CHOICES,
     RETURN_JUSTICE_CHOICES,
 } from './constitutional_packages.js';
+import { getAutonomyCost, getAutonomyChoiceById } from './autonomy_instruments.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ── (a) One-time DECLARATION cost ─────────────────────────────────────────────
@@ -104,15 +105,25 @@ const DIAL_MULTIPLIERS: Readonly<Record<EntityAutonomySetting, DialMultiplierPai
 
 /**
  * The grain of the DIAL itself: which way the frame pushes sovereignty.
- *   - confederation / federalized → ENTITY-ward (devolve toward the entities).
- *   - unitary                     → STATE-ward (centralize toward the state).
- *   - dayton-historical           → neutral.
+ *   - confederation           → ENTITY-ward (devolve toward the entities).
+ *   - federalized / unitary   → STATE-ward (centralize toward the state).
+ *   - dayton-historical       → neutral.
+ *
+ * `federalized` WAS classified entity-ward here while DIAL_DECLARATION charged it
+ * to RS as a state-ward frame — the same file asserting both. The declaration table
+ * is the correct one: the four settings are a monotonic centralization scale
+ * (confederation < dayton-historical < federalized < unitary) and the declaration
+ * costs rise with it (RS pays 14 for federalized, 24 for unitary). The old grain
+ * inverted the multiplier for every sub-choice under a federalized dial: RS paid 14
+ * to declare a CENTRALIZING frame and was then given a 0.7x DISCOUNT on devolving
+ * competencies to the entities and a 1.6x penalty on centralizing them. A faction
+ * could buy the centralizing frame precisely in order to decentralize cheaply.
  */
 type Grain = 'entity_ward' | 'state_ward' | 'neutral';
 
 function dialGrain(dial: EntityAutonomySetting): Grain {
-    if (dial === 'unitary') return 'state_ward';
-    if (dial === 'confederation' || dial === 'federalized') return 'entity_ward';
+    if (dial === 'unitary' || dial === 'federalized') return 'state_ward';
+    if (dial === 'confederation') return 'entity_ward';
     return 'neutral';
 }
 
@@ -162,6 +173,34 @@ const CONSTITUTIONAL_OPTION_GRAIN: Readonly<Record<string, Grain>> = Object.free
 
 function optionGrain(optionId: string): Grain {
     return CONSTITUTIONAL_OPTION_GRAIN[optionId] ?? 'neutral';
+}
+
+// DIMENSION 6 — autonomy instruments, by the sovereignty grain each expresses.
+// Entity-ward = the entity holds more in its own right; state-ward = the state
+// reclaims it. Defaults are neutral and free.
+const AUTONOMY_OPTION_GRAIN: Readonly<Record<string, Grain>> = Object.freeze({
+    // aut_parallel_relations
+    special_parallel: 'neutral', // as-signed default
+    none: 'state_ward', // NB: shares an option id with arch_ohr_authority's `none`,
+                        // which is also state-ward — the collision is harmless today
+                        // and `autonomyOptionGrain` is kept separate so it stays so.
+    defence_and_security: 'entity_ward',
+    // aut_entity_agreements
+    assembly_consent: 'neutral',
+    notification_only: 'entity_ward',
+    state_monopoly: 'state_ward',
+    // aut_entity_citizenship
+    dual_citizenship: 'neutral',
+    state_only: 'state_ward',
+    entity_primary: 'entity_ward',
+    // aut_constitutional_supremacy
+    state_supremacy: 'neutral',
+    entity_carve_outs: 'entity_ward',
+    full_conformity_review: 'state_ward',
+});
+
+function autonomyOptionGrain(optionId: string): Grain {
+    return AUTONOMY_OPTION_GRAIN[optionId] ?? 'neutral';
 }
 
 /**
@@ -324,4 +363,20 @@ export function reachableOptions(
 }
 
 // ── Lookup re-exports for callers that only need the choice metadata ──────────
+/**
+ * Final (post-dial) capital cost of a DIMENSION-6 autonomy instrument: the base
+ * cost x the dial deviation multiplier. 0 at the as-signed default. Pure.
+ */
+export function finalAutonomyCost(
+    choiceId: string,
+    optionId: string,
+    faction: string,
+    dial: EntityAutonomySetting,
+): number {
+    const base = getAutonomyCost(choiceId, optionId, faction);
+    if (base <= 0) return 0;
+    return Math.round(base * dialMultiplierForGrain(dial, autonomyOptionGrain(optionId)));
+}
+
 export { getConstitutionalChoiceById };
+export { getAutonomyChoiceById };
