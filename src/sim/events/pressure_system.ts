@@ -50,7 +50,17 @@ export function updateEventReadiness(
                     }
                 }
             }
-            readiness[def.id] = (readiness[def.id] ?? 0) + rate;
+            // FLOORED AT ZERO. The accumulate branch previously had no floor while
+            // the decay branch did, so a modifier set summing negative drove
+            // readiness arbitrarily far below 0 — and every turn spent climbing back
+            // out is a turn the event silently cannot fire, long after the condition
+            // that suppressed it has gone. No event in data/scenarios/events can
+            // reach a negative rate today (verified 2026-08-28: for every pressure
+            // row, base_rate + the sum of all negative rate_bonuses is >= 0), so
+            // this is behaviour-neutral now. It is here because the §6 panel's
+            // compliant shape for enclave reachability is precisely "add one large
+            // negative modifier", which is the input that would have found this.
+            readiness[def.id] = Math.max(0, (readiness[def.id] ?? 0) + rate);
         } else {
             if (readiness[def.id] != null && readiness[def.id] > 0) {
                 readiness[def.id] = Math.max(0, readiness[def.id] - decay_rate);

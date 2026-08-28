@@ -369,6 +369,7 @@
   },
   {
     "id": "srebrenica_falls_1995",
+    "family": "un_safe_area_enforcement",
     "image": "event_srebrenica_falls_1995.webp",
     "title": "Srebrenica Falls",
     "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, over 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
@@ -485,6 +486,7 @@
   },
   {
     "id": "zepa_falls_1995",
+    "family": "un_safe_area_enforcement",
     "image": "event_zepa_falls_1995.webp",
     "title": "Zepa Enclave Overrun",
     "narrative": "Following the fall of Srebrenica, the VRS turns its attention to the neighboring Zepa enclave. Despite desperate resistance by the small garrison, the enclave falls within two weeks. The civilian population is forcibly expelled. The international community, still reeling from Srebrenica, watches another safe area collapse.",
@@ -551,6 +553,7 @@
   },
   {
     "id": "srebrenica_column_breakout_1995",
+    "family": "un_safe_area_enforcement",
     "title": "The Column Leaves Srebrenica",
     "narrative": "As the safe area falls, a column of Bosniak men and boys gathers near Susnjari and sets out on foot through the forests toward the front lines at Tuzla. The route is ambushed along its length. ICTY judgments in the Krstic, Popovic et al., and Mladic cases establish the column's flight and the killings that followed as part of the genocide at Srebrenica. The fate of the column is recorded here as historical fact.",
     "source_note": "This row is an informational timeline record. The ICTY Krstic (IT-98-33), Popovic et al. (IT-05-88), and Mladic (IT-09-92) judgments and the UN Secretary-General's Srebrenica report (A/54/549) ground the row's provenance and institutional context. This sensitive genocide subject is canon-gated: it is a record only and must not be re-authored as a player choice, a prevent-or-save mechanic, or an alternate-outcome path. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
