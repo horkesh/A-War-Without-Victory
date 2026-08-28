@@ -1,12 +1,28 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 340 lessons across 9 topic files (counts RE-MEASURED 2026-08-27 via `grep -c '^### '` per file).
+> Last restructured: 2026-04-11. 345 lessons across 9 topic files (counts RE-MEASURED 2026-08-28 via `grep -c '^### '` per file).
 > **Correction:** the previous header said 315 while the table below summed to 278 and the files
 > actually held 329 — three different numbers, both stale despite a "count verified" stamp.
 > Counts below are measured, not carried forward. Re-measure rather than increment.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-08-28) — fixes + calibration validation (a +5 that was 5-for-4 churn)
+
+### [Process] ★★ FOUR AD-HOC PARSERS, FOUR CONFIDENT WRONG ANSWERS — read the shape, THEN write the lookup — see `docs/life_lessons/process.md`
+- Four throwaway scripts in one afternoon, four clean plausible WRONG tables: a year-tally that found 7 of ~40 entries (eight different date-window field names), an enclave scan reporting "(none)" for values I had just read, an anchor diff reporting "0 of 31 passing" for BOTH runs (field is `passed`), and a painted-reference lookup reporting all nine cells absent (data is under `by_settlement_id`). **The fourth decided a revert** — trusting it would have hidden the two Ključ regressions that justified it. **A wrong parser returns a well-formatted answer, not a crash.** Print one sample record first; reconcile every derived number against one you already know.
+
+### [Calibration] ★★ A NET CHECKPOINT GAIN CAN BE CHURN — diff CELLS against the painted reference, never totals — see `docs/life_lessons/calibration.md`
+- Paired 188w runs read 695/674/668/652 → 695/675/671/653: +5, nothing lost, anchors 31/31 in both. Cell-by-cell, the oct1995 +1 was NINE settlements moving both ways — **five improved, four regressed** — two regressions at `kljuc_2`/`hadzici`, a known-open site where RS is the DEFECT. **+1 net is indistinguishable from +1 clean and from +5/−4 churn.** Anchor stability did not protect this; all nine moved cells were non-anchor.
+
+### [Architecture] ★★ A FIELD WITH NO WRITER MAKES ITS FALLBACK THE ONLY PATH — and fallbacks default to the reassuring answer — see `docs/life_lessons/architecture.md`
+- `if (!enclaveState) return { held: KNOWN_ENCLAVES, lost: [] }` read as an edge case. `enclave_state` has **no writer anywhere in src/** (seven occurrences: one declaration, three validator lines, two readers, one comment), so it was the ONLY path — every campaign ever played told the player he held Srebrenica while the map showed it RS. **A declared-and-validated field is not a written field**, and "I have no data" must not render as the comfortable answer, least of all one that satisfies a scoring gate.
+
+### [Testing] ★ A CONTRACT TEST CAN PIN THE DEFECT IN PLACE — and a text-grep assertion can be satisfied by a COMMENT — see `docs/life_lessons/process.md`
+- The map chunk contract REQUIRED the four-chunk layout that caused a circular chunk dependency and a blank screen, so fixing the bug turned the suite red. Two of its four assertions had also gone decorative: the contract greps config TEXT, and the fix's own explanatory COMMENT satisfied them. Assert on the operative form (`return 'feature-army-hq'`), not the substring.
+
+### [Process] ★ A FIX THAT MISSED ITS TARGET HAS NO CLAIM ON SUNK COST — see `docs/life_lessons/process.md`
+- A correct, tested fix for a real defect did not move the thing it was built for. Its only remaining argument was an incidental calibration delta, which then measured as churn. **State the target before measuring, then ask only whether the target moved** — everything after that is negotiation with yourself.
 ## New Lessons (2026-08-27) — playthrough-harness lane (a UI lane found in one hour what 3x188w runs could not see)
 
 ### [Process] ★★ A PRECISE file:line CITATION FROM A REVIEWER IS A HYPOTHESIS, NOT EVIDENCE — see `docs/life_lessons/process.md`
@@ -587,6 +603,11 @@
 
 ## Recently Violated (always read these)
 
+### [Process] RE-VIOLATED 2026-08-28 — pipe exit-code, third consecutive day, on `git push`
+- `git push -q origin lane/playtest-harness 2>&1 | tail -3; echo "PUSH_LANE=$?"` and the same shape on a second push. That `$?` is `tail`'s. **Third consecutive day** (2026-08-26 sed/verify_checkpoints, 2026-08-27 desktop:release:check, now this).
+- No damage — both pushes genuinely succeeded, confirmed independently by `git status` reporting 0 unpushed — but the checks were vacuous, and I used the CORRECT `${PIPESTATUS[0]}` form on an adjacent push in the same session. The knowledge is present; it lapses specifically on commands I consider routine.
+- **New observation: the lapse is not random. It happens on plumbing (`git push`, `git commit`) rather than on the command under test.** I was careful with every `tsc`, `vitest` and scenario run all day and sloppy with the pushes, because those did not feel like measurements. They are — a failed push that reports success is exactly the silent-loss case.
+- ⇒ Extend the rule explicitly to git plumbing: **any command whose exit code you print gets the safe form, including pushes and commits.**
 ### [Process] RE-VIOLATED 2026-08-27 — pipe exit-code, WITH THE HOOK WARNING ON SCREEN
 - Ran `npm run desktop:release:check 2>&1 | tail -25; echo "BUILD_EXIT=$?"`. That `$?` is `tail`s. **The PIPE EXIT-CODE GUARD hook fired on that exact call and I proceeded anyway.** No damage — the build genuinely succeeded and `dist/` appeared — but the check was vacuous, and later commands in the same session used the correct `> log 2>&1; echo $?` form, so the knowledge was present and simply not applied under momentum. This repeats the 2026-08-26b entry (costume 3: `node ... | sed; echo $?` reporting exit 0 for three runs that all exit 1) one day later.
 - The hook is doing its job; the gap is that a warning arriving **with** the result reads as commentary on work already done. Treat a fired guard as a stop, not a footnote.

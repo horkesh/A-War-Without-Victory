@@ -505,3 +505,35 @@
 - **Wrong approach**: Adding a required field to a payload contract and updating the caller you are working in. The un-updated caller is silent until someone runs the product. Also wrong: writing a validator without checking the defaulting behaviour of the function beneath it — "reject unknown values" and "reject absence" are different rules, and absence is not an unknown value.
 - **Right approach**: A validator should be no stricter than its callee. Where the callee defaults, the validator passes `undefined` through and lets it default. Mirror the allowance pattern already used by adjacent fields in the same block — an inconsistency between two consecutive lines is the tell.
 - **Do instead**: When extending a payload contract, enumerate **every** caller (`grep` the IPC channel name and the bridge method, not just the component you are editing) and state in the commit which callers were updated and why any were not. For fixes, prefer the change that removes the whole class — tolerating absence fixed all present and future callers, where hardcoding a value in the one broken caller would have fixed exactly one. Guard added at `tests/desktop_campaign_start_decision_mode.test.ts`, **verified to fail without the fix** before being trusted.
+
+### [Architecture] ★★ A FIELD WITH NO WRITER MAKES ITS FALLBACK THE ONLY PATH — and fallbacks default to the reassuring answer
+
+**2026-08-28.** `computeEnclaveData` (`src/sim/negotiation/compute_capital.ts:322`) read:
+
+```ts
+const enclaveState = state.military.enclave_state;
+if (!enclaveState) return { held: KNOWN_ENCLAVES, lost: [] };
+```
+
+Read as an edge case that is defensible. It is not an edge case. **`enclave_state` has no writer
+anywhere in `src/`** — seven occurrences total: one type declaration, three validator lines, two
+readers, one comment. The field is always undefined, so the fallback was **the only path, in every
+campaign ever played**, and every player was told he held all five enclaves. Measured: ground truth
+`srebrenica_2 = RS` and `zepa_2 = RS` while the end-of-campaign verdict reported both HELD.
+
+It also fed scoring — `enclaves_lost` gates four of six RBiH grade tiers, and an empty list
+satisfies all four including the A+ test `enclaves_lost.length === 0`.
+
+⇒ **A declared-and-validated field is not a written field.** A type declaration plus a validator
+plus readers looks like a complete system and proves nothing about population. **Grep for the
+assignment specifically, and if there is none, the guard clause IS the behaviour** — read it as
+the primary implementation and judge it on those terms.
+⇒ **A fallback encodes a default answer; pick the one that fails toward alarm, not comfort.**
+"I have no data" rendered as "Srebrenica held" on the most sensitive field in this game. Absent
+data should never produce the reassuring result — and never a result that satisfies a scoring
+gate.
+⇒ **TELL:** `if (!x) return <complete plausible answer>` where `x` is optional state. Check who
+writes `x` before trusting anything downstream of it.
+⇒ Correct repair was available and cheap: derive from ground truth (`political_controllers` via the
+existing `ENCLAVE_DEFINITIONS` registry) rather than invent a second hardcoded map. The authoritative
+data usually already exists somewhere — look before adding a parallel source of truth.

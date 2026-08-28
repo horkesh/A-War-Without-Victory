@@ -576,3 +576,35 @@ Applied retroactively to a seven-item queue, this screen killed **five of seven*
 - **Context**: (1) an eligibility fix removed exactly the three cells it targeted and was **not causal** — `control_events` showed the same brigade, same operation, same turn, same first two captures, byte-identical. (2) A probe gate dropped the ahistorical eastern surplus 9 to 5 — also not the gate; all five were one brigade's captures and that brigade was in no operation after t160. (3) The surplus then read 9 to 4, and the four-query test showed **5 of 6 resolved cells in the earlier run were one brigade (`arbih_116th_mountain`) which simply did not draw the same operations** — a schedule lottery.
 - **What the third test also found, and this is the value**: three cells persist in EVERY configuration including the untouched baseline — `bratunac:pobudje_2`, `kalesija:seher_2`, `vlasenica:cerska_2`. **That is the durable target; the rest is noise.**
 - **Do instead**: **confirm the TRIGGER is gone, not that the symptom moved.** Cheapest test: enumerate the resolved cells and their `control_events`; if they are one brigade's captures under one emergent op, it is the lottery. Four queries, zero runs.
+
+### [Calibration] ★★ A NET CHECKPOINT GAIN CAN BE CHURN — diff CELLS against the painted reference, never totals
+
+**2026-08-28.** A change produced this across two paired 188w runs, one variable:
+
+    jan1993  695 -> 695   apr1994  674 -> 675   apr1995  668 -> 671   oct1995  652 -> 653
+
+Read as totals that is unambiguous: nothing lost, +5 across three checkpoints, anchors 31/31 with
+zero differences in both runs, enclave guard clean in both. It looks like a free win.
+
+Diffing `control_delta.json.flips` cell-by-cell against
+`data/source/calibration/painted_control_oct1995.json` (`by_settlement_id`), the oct1995 **+1** is
+NINE settlements moving in BOTH directions — **five improved, four regressed** — and two of the
+four regressions are `op:kljuc:kljuc_2` and `op:kljuc:hadzici`, a site project memory records as
+KNOWN-OPEN where RS control is the DEFECT, not the target.
+
+So the aggregate rose while the change made a known-bad site worse. That is buying score with
+wrong behaviour, and the totals could not show it: **+1 net is indistinguishable from +1 clean and
+from +5/−4 churn.**
+
+⇒ **RULE: a calibration delta is not evidence until you have named the cells that moved and
+scored each against the painted reference.** `matched_osids` totals, checkpoint scores, and even
+anchor pass-rates all survive compensating errors.
+⇒ **Anchors passing 31/31 in both runs did NOT protect this.** All nine moved cells were
+non-anchor. Anchor stability is a floor, not a verdict — it is exactly the mask the existing
+"NET matched masks anchor flips" lesson warns about, in the opposite direction.
+⇒ **TELL:** you are about to keep a change because "no checkpoint went down." Ask instead which
+cells went down and which went up, and whether the winners are historically warranted at that date.
+⇒ **Watch the known-open sites specifically.** Ključ moved first and moved the wrong way; it was
+the sentinel that decided the revert. Keep a list of them and check it by name.
+⇒ Cost avoided: a change that failed its own purpose would have merged on a fabricated +5, degrading
+a site already flagged as broken.

@@ -806,3 +806,70 @@ harness passes, not the default you assume.
 ⇒ Cost here was low because a red-teamer caught it. The general shape — an entire subsystem
 silently unexercised while a test lane implicitly claims coverage of it — is how false confidence
 gets recorded as a finding.
+
+### [Process] ★★ FOUR AD-HOC PARSERS, FOUR CONFIDENT WRONG ANSWERS — read the shape, THEN write the lookup
+
+**2026-08-28.** In one afternoon I wrote four throwaway scripts to read repo data. **Every one
+returned a confident, plausible, wrong answer**, and each was wrong for the same reason: I guessed
+a field name or a file shape instead of printing it first.
+
+| what I asked | what it answered | why it was wrong |
+| --- | --- | --- |
+| operations per year per faction | 7 entries, "1992: RS 1" | catalogs use **eight** different date-window field names; my regex knew one |
+| which enclaves have a `capital_osid` | "(none)" for all nine | chunking bug; the values were plainly visible in the file I had just read |
+| anchor pass-rate diff between two runs | "0 of 31 passing" in BOTH | field is `passed`; I guessed `pass`/`ok`/`result` |
+| painted reference for 9 moved cells | "(not in ref)" for all nine | reference is `{meta, by_settlement_id}`; I indexed the root |
+
+**The fourth one decided a revert.** Had I trusted it, the answer would have been "no reference
+data exists for these cells" — and the two Ključ regressions that actually justified reverting
+would have been invisible. I only caught it because "all nine absent" was too tidy to believe.
+
+⇒ **A wrong parser does not fail loudly. It returns a clean, well-formatted, wrong table**, which
+is far more dangerous than a crash — a crash would have sent me to read the file.
+⇒ **TELL:** you are about to write `x.foo || x.bar || x.baz` across candidate field names. That
+chain is a confession that you have not looked. One `console.log(JSON.stringify(sample))` costs
+five seconds and removes the guess entirely.
+⇒ **RULE: print one sample record before writing any lookup over unfamiliar data.** Then reconcile
+the derived number against one you already know — the 5-improved/4-regressed split had to sum to
+the +1 the checkpoint report already showed, and that reconciliation is what proved the fourth
+parser correct.
+⇒ Same family as the narrow-lookup guard (a literal pattern missing a computed assignment) and the
+callee/caller lesson (an absence at the wrong level), one step further out: **an absence produced
+by your own instrument.**
+
+### [Testing] ★ A CONTRACT TEST CAN PIN THE DEFECT IN PLACE — and a text-grep assertion can be satisfied by a COMMENT
+
+**2026-08-28.** `ui_map_build_warning_contract.test.ts` required four army_hq chunks:
+`feature-army-hq{,-records,-operations,-forces}`. That layout split ONE directory across chunks by
+filename, produced a circular chunk dependency, and rendered the tactical map as a blank screen.
+**The test required the arrangement that caused the bug**, so fixing the bug turned the suite red
+and the "safe" move was to put the defect back.
+
+Worse, two of its four assertions had silently stopped testing anything. The contract greps the
+config **text**, so after the fix collapsed the chunks, `-forces` and `-operations` were still
+satisfied by the explanatory **comment the fix left behind**. A string-presence check cannot
+distinguish code from prose, so the contract was passing on its own documentation.
+
+⇒ **When a fix turns a contract test red, ask which of the two encodes the defect** before assuming
+the fix is wrong. A test that pins a layout is only as good as the layout was.
+⇒ **Assert on the operative form, not the substring.** `toContain("return 'feature-army-hq'")`
+cannot be satisfied by a comment; `toContain('feature-army-hq')` can.
+⇒ **TELL:** a contract test that reads a source file as TEXT. Every assertion in it is one comment
+away from becoming decorative, and it will not tell you when that happens.
+
+### [Process] ★ A FIX THAT MISSED ITS TARGET HAS NO CLAIM ON SUNK COST
+
+**2026-08-28.** Built a real fix for a real defect (an unbuildable head entry sterilizing a corps'
+operation queue for the rest of the war). It typechecked, its tests went green, and it was
+correct in isolation. **It did not do what it was built to do** — the RS t42 cliff it targeted was
+unchanged, because by late war those queues held a single entry and there was nothing to iterate.
+
+At that point its only remaining argument was a +1/+3/+1 calibration delta. Measuring that delta
+cell-by-cell showed 5 improved / 4 regressed, two regressions at a known-open site. Reverted.
+
+⇒ **A change that fails its stated purpose starts the merge argument from zero, not from "well, it
+also does X."** Incidental benefits discovered after the fact deserve the scrutiny of a new
+proposal, not the momentum of a finished one.
+⇒ **TELL:** you are describing a change by what it turned out to help rather than what it was for.
+⇒ The disciplined form is cheap: state the target BEFORE measuring, then ask only whether the
+target moved. Mine did not, and everything after that was negotiation with myself.
