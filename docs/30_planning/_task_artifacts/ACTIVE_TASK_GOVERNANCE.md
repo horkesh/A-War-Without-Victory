@@ -22,9 +22,10 @@ sole RED. There was no production edit, GREEN, syntax check, diff verification, 
 candidate, or R3; packaged invocation count remains zero. The consumed RED and unused package
 authority are nontransferable. The separately locked alternate-proof discovery is CLOSED/BLOCKED
 at `C_P2B_BLOCKED`. The owner subsequently approved one standalone Army-HQ manual-chunk packaging
-prerequisite. Its active docs-only transition authorizes only drafting, reviewing, pinning, and
-accepting a fresh successor lock after the transition commits; it authorizes no implementation or
-project command. One unauthorized read-only `git diff --check` passed after the draft; it caused no
+prerequisite. Its literal canonical command was invoked once on candidate
+`d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac` and ended at
+`NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`. Its implementation and
+run authority are consumed. One unauthorized read-only `git diff --check` passed after the earlier draft; it caused no
 mutation or product/test/build/package/Electron/probe execution, is excluded from acceptance
 evidence, and is nontransferable and nonreusable. The authorized diff-check budget remains zero.
 No long run is authorized until the one final
@@ -65,29 +66,20 @@ candidate or packaged invocation; there is no R3. The discovery contract require
 Architect, Orchestrator, Platform, Build, QA, and Process to choose unanimously among an external
 proof route, a root-cause prerequisite, or an explicit blocker. It terminated at
 `C_P2B_BLOCKED`; the result remains `RECOMMENDATION_ONLY_NOT_AUTHORIZED`. The owner's later,
-standalone prerequisite approval does not reopen discovery or R2/R3. The current docs-only
-transition grants no code, test, build, package, Electron/probe, TDZ/chunk, P2B, or P3 authority;
-only a separately reviewed and accepted successor lock may activate the fixed prerequisite.
+standalone prerequisite approval did not reopen discovery or R2/R3. That prerequisite is now
+terminally closed at `NO_VERDICT` after its consumed one-shot. There is no code, test, build,
+package, Electron/probe, TDZ/chunk, P2B, P3, rerun, diagnosis, correction, or successor authority.
 
 ## Active machine lock
 
-The active lock is `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-AUTHORIZATION` /
-`authorize-army-hq-chunk-prerequisite-lock-draft`, based on exact commit
-`2fb583c5ef22253a8bd0dc18ed60e90293ab8acb`. Every execution-budget value is zero;
-`long_run_policy.permitted` is false and the checker-required maximum-pairs value `1` is inert.
-After this seven-file docs-only transition is reviewed and committed, its sole successor authority
-is to draft, exact-byte review, pin, and accept a fresh lock for
-`RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE` /
-`collapse-army-hq-manual-chunk-and-reprove-canonical-package`. It grants no code/test edit or
-project command itself. The successor must use the pinned sibling `npm.cmd` with its exact Node22
-directory prepended to child `PATH`; default or fallback npm/Node is prohibited. It permits one
-standalone map-build command plus the one unavoidable nested map build inside the sole canonical
-composite, for two actual map builds; all other nested release/sim/warroom/package descendants are
-composite-internal only. The 1,200,000 ms package clock starts at npm-root launch and yields to the
-900,000 ms runtime clock only upon positive observation of the expected packaged-executable
-descendant. Natural exit before the active cutoff wins. A live-root timeout permits one npm-root
-process-tree cleanup and one bounded 5,000 ms census only; ambiguity, timeout, or cleanup uncertainty
-is `NO VERDICT`, with no second kill, retry, or diagnosis.
+The active receipt-only lock is `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-RECEIPT` /
+`record-consumed-one-shot-supervisor-custody-no-verdict`, based on exact clean candidate
+`d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac`. Every project/test/build/package/probe/diff/syntax/
+diagnosis/retry/correction budget is zero; `long_run_policy.permitted` is false and the
+checker-required maximum-pairs value `1` is inert. It records terminal
+`NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT` only. It grants no
+continuing implementation, execution, receipt mutation, rerun, diagnosis, correction, P2B, P3, or
+successor authority.
 
 ## Deferred and retired
 

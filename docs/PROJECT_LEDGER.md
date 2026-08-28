@@ -30040,3 +30040,29 @@ the broader gates remain with later P2B and final verification.
 **Release state:** P2B remains HELD before implementation; P3 waits; calibration remains paused.
 The prerequisite is auxiliary, earns no RE completion credit, and cannot itself authorize P2B or
 any other successor packet. `docs/10_canon/FORAWWV.md` was not edited.
+
+## 2026-08-28 — Close Army-HQ chunk prerequisite at supervisor-custody NO VERDICT
+
+**Terminal result:** On exact clean candidate
+`d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac`, the literal canonical packaged-probe command was
+invoked once. Package and the expected packaged executable were positively observed, but no
+manifest was observed before cutoff. The binding result is
+`NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`; no cause is inferred.
+
+**Cleanup custody:** The canonical npm root and packaged executable are gone, all four generated
+roots are absent, no relevant process remains, and tracked status is clean. External supervisor
+PID `2312` remained stuck after packaged cleanup with no children and approximately 4 GB resident
+memory. Architect and Process authorized one direct termination without tree semantics. There was
+no second packaged-tree kill and no supervisor receipt or manifest copy.
+
+**Preserved external evidence:** Supervisor: 17,799 bytes, SHA-256
+`FE7CD470D6685B99DEFED0D624E2C7AC8DC2F0B923C45C48F4F9CB35112AC702`. Stdout: 22,338 bytes,
+SHA-256 `FED4ABE135F2AF8841612DDD918F0755176D7EA0A4C3445D211C0B0EE5F2D850`, last UTC
+`2026-08-28T06:02:38.2998749Z`, ending at electron-builder asar integrity update. Stderr: 1,224
+bytes, SHA-256 `8D46478D032013D36AB2AE9C3A6BF4F205CD08E96DD21F15BFE456F52387BAFC`, last UTC
+`2026-08-28T05:55:48.7482127Z`, containing only the known circular-chunk and size warnings.
+
+**Authority:** The one-shot is consumed. This seven-document receipt has zero execution budget and
+is terminally closed. P2B remains HELD, P3 waits, calibration remains paused, and the auxiliary
+prerequisite earns no RE credit. No successor, rerun, diagnosis, correction, implementation,
+build, package, Electron, or probe authority follows. `docs/10_canon/FORAWWV.md` was not edited.

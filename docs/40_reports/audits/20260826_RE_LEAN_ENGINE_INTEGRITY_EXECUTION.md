@@ -1255,6 +1255,38 @@ candidate commit, package command, Electron launch, or packaged probe has occurr
   four-file custody payload.
 - Every probe result—including PASS, failure, timeout, or ambiguity—immediately consumes and ends
   all implementation and run authority. This lock permits no post-probe audit or control edit. Only
-  a separately reviewed fresh six-document receipt transition may record and route the result.
+  a separately reviewed fresh receipt transition may record and route the result; owner all-docs
+  synchronization subsequently expanded the terminal receipt from six to seven paths to include
+  the controlling recovery plan.
   PASS does not start P2B; after receipt acceptance it may only permit drafting a later fresh
   exact-base P2B lock.
+
+## Terminal Army-HQ chunk prerequisite receipt — 2026-08-28
+
+**Result:** `NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`.
+
+- Receipt task/packet: `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-RECEIPT` /
+  `record-consumed-one-shot-supervisor-custody-no-verdict`.
+- Exact clean candidate: `d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac`; tracked status is clean.
+- The literal canonical command was invoked exactly once. Package and the expected packaged
+  executable were positively observed. No manifest was observed before cutoff.
+- At receipt, the canonical npm root and packaged executable are gone, all four generated roots
+  are absent, and no relevant process remains.
+- External supervisor PID `2312` remained stuck after packaged cleanup, with no children and
+  approximately 4 GB resident memory. After Architect and Process authorization it was directly
+  terminated once without process-tree semantics. No second packaged-tree kill occurred. No
+  supervisor receipt or manifest copy exists.
+- Preserved external evidence:
+  - Supervisor: 17,799 bytes; SHA-256
+    `FE7CD470D6685B99DEFED0D624E2C7AC8DC2F0B923C45C48F4F9CB35112AC702`.
+  - Stdout: 22,338 bytes; SHA-256
+    `FED4ABE135F2AF8841612DDD918F0755176D7EA0A4C3445D211C0B0EE5F2D850`; last UTC
+    `2026-08-28T06:02:38.2998749Z`; ends at electron-builder asar integrity update.
+  - Stderr: 1,224 bytes; SHA-256
+    `8D46478D032013D36AB2AE9C3A6BF4F205CD08E96DD21F15BFE456F52387BAFC`; last UTC
+    `2026-08-28T05:55:48.7482127Z`; contains only the known circular-chunk and size warnings.
+- These facts do not establish cause. No causal inference is accepted.
+- The one-shot implementation/run authority is consumed. Every receipt execution budget is zero.
+  P2B remains HELD, P3 waits, calibration remains paused, and this auxiliary work earns no RE
+  credit. No successor, rerun, diagnosis, correction, implementation, build, package, Electron, or
+  probe authority follows. This receipt is terminally closed.

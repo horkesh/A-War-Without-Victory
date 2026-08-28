@@ -1,6 +1,6 @@
 # RE — 1.0 Engine Integrity Contract
 
-**Status:** HELD AT P2B — owner-approved Army-HQ chunk prerequisite authorization transition active; no implementation authority yet, 2026-08-28
+**Status:** HELD AT P2B — Army-HQ chunk prerequisite terminal NO VERDICT after consumed one-shot; no successor authority, 2026-08-28
 **Purpose:** Reach 1.0 with one truthful engine owner for each affected responsibility.
 **Not the purpose:** general cleanup, optimization, calibration, or speculative mechanic design.
 
@@ -46,6 +46,31 @@ the broader gates remain with later P2B and final verification.
 The prerequisite remains auxiliary and non-crediting. P2B stays HELD before implementation, P3
 waits, and calibration remains paused. A prerequisite receipt cannot itself start P2B; any
 successor requires its own fresh reviewed exact-base lock.
+
+### Terminal prerequisite receipt
+
+Candidate `d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac` remains the exact clean candidate. The literal
+`npm.cmd run desktop:package:probe` was invoked once; the package process and expected packaged
+executable were positively observed, but no manifest arrived before the active cutoff. The
+canonical npm root and executable are gone, all four generated roots are absent, no relevant
+process remains, and tracked status is clean.
+
+The external supervisor PID `2312` remained stuck after packaged cleanup with no children and
+approximately 4 GB resident memory. After Architect and Process authorization it was directly
+terminated once without tree semantics. There was no second packaged-tree kill and no supervisor
+receipt or manifest copy. This is terminal
+`NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`; no cause is inferred.
+
+Preserved external evidence is: supervisor 17,799 bytes, SHA-256
+`FE7CD470D6685B99DEFED0D624E2C7AC8DC2F0B923C45C48F4F9CB35112AC702`; stdout 22,338 bytes,
+SHA-256 `FED4ABE135F2AF8841612DDD918F0755176D7EA0A4C3445D211C0B0EE5F2D850`, last UTC
+`2026-08-28T06:02:38.2998749Z`, ending at electron-builder asar integrity update; stderr 1,224
+bytes, SHA-256 `8D46478D032013D36AB2AE9C3A6BF4F205CD08E96DD21F15BFE456F52387BAFC`, last UTC
+`2026-08-28T05:55:48.7482127Z`, containing only the known circular-chunk and size warnings.
+
+Every implementation and run authority is consumed. No rerun, diagnosis, correction, successor,
+or P2B-start authority follows. P2B remains HELD, P3 waits, calibration remains paused, and this
+auxiliary prerequisite earns no RE credit.
 
 ## 1. The plain-language contract
 
@@ -196,14 +221,12 @@ RED. No production edit, GREEN, syntax check, diff verification, package/probe i
 or R3 occurred; packaged invocation count is zero. The consumed RED and unused package authority are
 nontransferable.
 
-P3 remains waiting while P2B is held. The only auxiliary next route is a separately fresh-locked,
-docs-only/read-only `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` /
-`select-no-instrumentation-p2b-proof-route` packet owned by Technical Architect, Orchestrator,
-Platform, Build, QA, and Process. It must return exactly one of: (a) a zero-in-app-instrumentation
-external proof route preserving every P2B obligation; (b) a separately scoped root-cause-remediation
-prerequisite naming exact files, tests, and required authorization; or (c) an explicit P2B blocker.
-Discovery authorizes no code/test edit, build, package, Electron/probe execution, TDZ/chunk fix, or
-R3. Any later execution requires its own exact-base reviewed lock and authority.
+P3 remains waiting while P2B is held. The alternate-proof discovery closed at `C_P2B_BLOCKED`.
+The owner then approved the standalone Army-HQ chunk prerequisite, which consumed its sole
+canonical packaged-probe invocation and ended at
+`NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`. There is no auxiliary
+next route and no later implementation, test, build, package, Electron/probe, rerun, diagnosis,
+correction, P2B, P3, R2/R3, or successor authority.
 
 ### P3 — Conserved threat lineage
 

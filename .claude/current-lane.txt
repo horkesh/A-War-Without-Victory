@@ -1,3 +1,3 @@
-RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-AUTHORIZATION is the active docs-only transition at exact base 2fb583c5ef22253a8bd0dc18ed60e90293ab8acb.
-It authorizes only drafting, exact-byte review, pinning, and acceptance of the successor lock for RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE / collapse-army-hq-manual-chunk-and-reprove-canonical-package after this transition commits.
-This transition authorizes no code/test edit or project command. One disclosed unauthorized read-only `git diff --check` passed after the draft; it caused no mutation or product execution, is excluded from acceptance evidence, and grants no reusable authority. P2B remains HELD; P3 waits; calibration remains paused; no RE credit is earned.
+RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-RECEIPT is CLOSED at NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT on candidate d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac.
+The literal canonical command was invoked once and its authority is consumed. No rerun, diagnosis, correction, implementation, build, package, probe, or successor authority remains.
+P2B remains HELD; P3 waits; calibration remains paused; this auxiliary prerequisite earns no RE credit.

@@ -1,41 +1,35 @@
 # Packaged Probe Recovery Implementation Plan
 
-## Owner-approved standalone chunk prerequisite authorization — 2026-08-28
+## Terminal standalone chunk prerequisite receipt — 2026-08-28
 
-The terminal discovery receipt below remains true historical custody. The owner subsequently
-approved one separate, auxiliary prerequisite with fixed production/test scope:
-`src/ui/map/vite.config.ts` and `tests/desktop_packaged_runtime_probe.test.ts` only. The successor
-identity is `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE` /
-`collapse-army-hq-manual-chunk-and-reprove-canonical-package`.
+> **ARCHIVED — NO FUTURE EXECUTION AUTHORITY:** All earlier authorization and execution language
+> for the Army-HQ chunk prerequisite is consumed historical custody. It grants no retry, diagnosis,
+> correction, implementation, build, package, Electron/probe, P2B/P3, R2/R3, or successor route.
 
-This docs-only transition authorizes only drafting, exact-byte review, pinning, and acceptance of
-that successor lock after the transition commits. It authorizes no edit, test, build, package,
-Electron, or probe execution itself. The future lock must bind Node `22.21.1` at
-`C:\Users\User\AppData\Local\Logi\LogiPluginService\PluginHosts\node22\node\node.exe` (SHA-256
-`471961CB355311C9A9DD8BA417ECA8269EAD32A2231653084112554CDA52E8B3`) and its sibling `npm.cmd`.
-Its entire sequence is one focused RED, minimal Army-HQ manual-chunk collapse, one focused GREEN,
-one `npm.cmd run desktop:map:build`, candidate commit, then one unchanged
-`npm.cmd run desktop:package:probe` against the clean candidate. The external package and runtime
-clocks are 1,200,000 ms and 900,000 ms respectively, without extension. No retry, diagnosis,
-correction, replacement approach, engine, Electron, wrapper, IPC, gameplay, calibration, or
-package-script change is authorized.
+The alternate-proof discovery first closed at `C_P2B_BLOCKED`. The owner subsequently approved the
+standalone Army-HQ chunk prerequisite. Candidate
+`d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac` remains clean, and its literal canonical packaged-probe
+command was invoked exactly once. Package and the expected packaged executable were positively
+observed, but no manifest was observed before cutoff.
 
-The single standalone map-build command and the composite's unavoidable nested map build produce
-two actual map builds. Nested release, simulation, Warroom, and package descendants exist only
-inside the single canonical composite and grant no separate authority. The literal probe must use
-the pinned sibling `npm.cmd` with its exact Node22 directory prepended to child `PATH`; default or
-fallback npm/Node is prohibited. The package clock starts at npm-root launch. The runtime clock
-starts only upon positive expected packaged-executable descendant observation. Natural root exit
-before the active cutoff wins. A timeout with the npm root alive permits exactly one process-tree
-cleanup at that root and one bounded 5,000 ms census. Ambiguity, timeout, or cleanup uncertainty is
-`NO VERDICT`; no second kill, retry, or diagnosis follows.
+The canonical npm root and packaged executable are gone, all four generated roots are absent, and
+no relevant process remains. External supervisor PID `2312` remained stuck after packaged cleanup
+with no children and approximately 4 GB resident memory. After Architect and Process authorization
+it was directly terminated once without process-tree semantics. No second packaged-tree kill
+occurred, and no supervisor receipt or manifest copy exists.
 
-One unauthorized read-only `git diff --check` passed after this draft. It caused no mutation or
-product/test/build/package/Electron/probe execution, is excluded from acceptance evidence, and is
-nontransferable and nonreusable. The authorized diff-check budget remains zero.
+Preserved external evidence is: supervisor 17,799 bytes, SHA-256
+`FE7CD470D6685B99DEFED0D624E2C7AC8DC2F0B923C45C48F4F9CB35112AC702`; stdout 22,338 bytes,
+SHA-256 `FED4ABE135F2AF8841612DDD918F0755176D7EA0A4C3445D211C0B0EE5F2D850`, last UTC
+`2026-08-28T06:02:38.2998749Z`, ending at electron-builder asar integrity update; stderr 1,224
+bytes, SHA-256 `8D46478D032013D36AB2AE9C3A6BF4F205CD08E96DD21F15BFE456F52387BAFC`, last UTC
+`2026-08-28T05:55:48.7482127Z`, containing only the known circular-chunk and size warnings.
 
-P2B remains HELD; P3 waits; calibration remains paused; this prerequisite earns no RE credit and
-cannot itself authorize a later packet.
+The binding result is
+`NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`. These facts establish no
+cause. The one-shot is consumed and no retry, diagnosis, correction, or successor follows. P2B
+remains HELD, P3 waits, calibration remains paused, and this auxiliary prerequisite earns no RE
+credit.
 
 ## Terminal alternate-proof discovery receipt — 2026-08-28
 
