@@ -345,9 +345,8 @@ body {
 .main-menu-opening__console,
 .main-menu-opening__faction-rail {
   border: 1px solid rgba(197, 207, 197, 0.18);
-  background: rgba(7, 12, 12, 0.88);
+  background: #080d0d;
   box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.48);
-  backdrop-filter: blur(5px);
 }
 .main-menu-opening__console { width: min(100%, 35rem); min-height: 27rem; padding: clamp(1.25rem, 3vw, 2rem); }
 .main-menu-opening__workspace:not(.main-menu-opening__workspace--campaign) .main-menu-opening__console { width: min(28rem, 100%); }

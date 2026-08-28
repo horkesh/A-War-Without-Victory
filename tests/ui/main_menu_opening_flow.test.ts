@@ -3,6 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createElement } from 'react';
+import { readFileSync } from 'node:fs';
 import { MainMenu } from '../../src/ui/map/components/MainMenu';
 import { setLocale } from '../../src/ui/map/i18n';
 
@@ -37,6 +38,15 @@ describe('MainMenu cinematic opening flow', () => {
         cleanup();
         setLocale('en');
         window.localStorage.clear();
+    });
+
+    it('uses opaque institutional command surfaces rather than glass cards', () => {
+        const css = readFileSync('src/ui/map/styles/globals.css', 'utf8');
+        const surfaces = css.match(/\.main-menu-opening__console,\s*\.main-menu-opening__faction-rail\s*\{([^}]*)\}/)?.[1] ?? '';
+
+        expect(surfaces).toContain('background: #080d0d;');
+        expect(surfaces).not.toContain('backdrop-filter');
+        expect(surfaces).not.toMatch(/background:\s*rgba/);
     });
 
     it('shows the splash before exposing the menu', () => {
