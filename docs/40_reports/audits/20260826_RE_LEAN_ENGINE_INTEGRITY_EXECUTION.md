@@ -1290,3 +1290,34 @@ candidate commit, package command, Electron launch, or packaged probe has occurr
   P2B remains HELD, P3 waits, calibration remains paused, and this auxiliary work earns no RE
   credit. No successor, rerun, diagnosis, correction, implementation, build, package, Electron, or
   probe authority follows. This receipt is terminally closed.
+
+## Army-HQ chunk prerequisite rollback — pre-proof row — 2026-08-28
+
+**Status:** STAGED IDENTITY PROOF ACCEPTED; ROLLBACK COMMIT PENDING. The owner authorized exact
+topology rollback after the packaged proof remained unaccepted. Architect and Process returned GO
+on identity only. No project execution, rollback commit, test, build, package, Electron, probe,
+diagnosis, or runtime verification is claimed by this row.
+
+- Task/packet: `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-ROLLBACK` /
+  `restore-pre-candidate-topology-after-unaccepted-proof`.
+- Exact clean base: `4a9a416eac0b8f5343ab7e05c3a92224b21fe563`.
+- Exact allowlist: active lock, this living audit, `src/ui/map/vite.config.ts`, and
+  `tests/desktop_packaged_runtime_probe.test.ts`.
+- Config source blob `dbf7c2bdbe038b31be54b8fbf62433762bb0afd8` must restore exactly to
+  pre-candidate blob `7a098b350461cdbb47ec94d453ff35ec655c7b91` from
+  `bb97f789d94afb09332666938fe25bcfd07310bf`.
+- Test source blob `02b11c79d73f03297c8df82c81b382e03c37d367` must restore exactly to
+  pre-candidate blob `29194ca0844acb8ac6cfb7dff6f1cb17f9513157` from the same target commit.
+- The staged config blob is exactly `7a098b350461cdbb47ec94d453ff35ec655c7b91`; the staged test blob
+  is exactly `29194ca0844acb8ac6cfb7dff6f1cb17f9513157`.
+- The canonical two-row staged implementation payload SHA-256 is
+  `0fb9fb8be187021cbe8af078ec253f92a362e2018d3c9c5df2d68febbffb71c3`.
+- Exact staged paths are `docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json`,
+  `docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md`,
+  `src/ui/map/vite.config.ts`, and `tests/desktop_packaged_runtime_probe.test.ts`.
+- Acceptance is Git-object and staged-index identity only. Every test, build, package, probe,
+  typecheck, balanced-test, syntax, diff-check, diagnosis, retry, correction, replacement, and
+  additional-verification budget is zero.
+- The candidate topology/test hypothesis is removed byte-identically. This makes no packaged,
+  runtime, TDZ-safety, behavior, causality, P2B, or RE-credit claim. The rollback commit remains
+  pending and, once created, grants no automatic receipt or successor authority.

@@ -34,7 +34,19 @@ function tacticalMapManualChunks(id: string): string | undefined {
 
   if (normalized.includes('/src/sim/')) return 'map-sim';
   if (normalized.includes('/src/ui/map/components/warroom/')) return 'feature-warroom-ui';
-  if (normalized.includes('/src/ui/map/components/army_hq/')) return 'feature-army-hq';
+  if (normalized.includes('/src/ui/map/components/army_hq/')) {
+    const fileName = normalized.slice(normalized.lastIndexOf('/') + 1);
+    if (/^(?:RecordsContent|TurnAftermathRecordsPanel|DecisionConsequenceRecordsPanel|OpportunityLedgerPanel|CombatRecordSection)\.tsx$/.test(fileName)) {
+      return 'feature-army-hq-records';
+    }
+    if (/^(?:OperationsSection|DirectiveCard|PresidentialDecisionRoomPanel|OperationOpportunityDossierPanel|PresidentialAttentionPanel|OrderInterpretationPanel|OrderInterpretationSection)\.tsx$/.test(fileName)) {
+      return 'feature-army-hq-operations';
+    }
+    if (/^(?:SectorsSection|OrbatSection|PersonnelContent|CorpsSituationSection|CommandRelationshipSection|ForceReadiness|SupplyIntelligence|StrategicPosition|FrontVisitSection|CommanderSection|ThreatAssessment)\.tsx$/.test(fileName) || fileName === 'generateThreatAssessment.ts') {
+      return 'feature-army-hq-forces';
+    }
+    return 'feature-army-hq';
+  }
   if (normalized.includes('/src/ui/map/components/chronicle/')) return 'feature-chronicle';
   if (normalized.includes('/src/ui/map/components/ops_modal/')) return 'feature-ops-planning';
   if (normalized.includes('/src/ui/map/components/presidential_desk/')) return 'feature-presidential-desk';
