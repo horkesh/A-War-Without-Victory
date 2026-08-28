@@ -22,9 +22,23 @@ describe('desktop host React opening ownership', () => {
 
     const init = method(warroomSource, 'async init()', 'async loadMockState');
     expect(init).toContain('void this.beginReactOpeningOwnership();');
-    expect(init.indexOf('void this.beginReactOpeningOwnership();')).toBeLessThan(
-      init.indexOf('await this.warPlanningMap.loadData();'),
+    expect(init).not.toContain('new WarPlanningMap()');
+    expect(init).not.toContain('warPlanningMap.loadData()');
+
+    const legacySetup = method(
+      warroomSource,
+      'private ensureLegacyWarPlanningMap',
+      'private getDesktopBridge',
     );
+    expect(legacySetup).toContain('const map = new WarPlanningMap();');
+    expect(legacySetup).toContain('this.legacyWarPlanningMapSetup = map.loadData().then');
+
+    const recovery = method(
+      warroomSource,
+      'private activateLegacyOpeningRecovery',
+      'private armReactOpeningFallback',
+    );
+    expect(recovery).toContain('this.ensureLegacyWarPlanningMap()');
 
     const begin = method(
       warroomSource,

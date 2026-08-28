@@ -55,7 +55,8 @@ interface DesktopBridge {
 class WarroomApp {
     private gameState: GameState | null = null;
 
-    private warPlanningMap = new WarPlanningMap();
+    private warPlanningMap: WarPlanningMap | null = null;
+    private legacyWarPlanningMapSetup: Promise<WarPlanningMap> | null = null;
     private modalManager = new ModalManager();
 
     private desktopBridge: DesktopBridge | null = null;
@@ -108,11 +109,6 @@ class WarroomApp {
         // Wire overlay buttons immediately so "New Campaign" etc. work before assets finish loading
         this.wireMainMenuButtons();
         this.wireSidePickerButtons();
-        const mapScene = document.getElementById('map-scene');
-        if (mapScene) {
-            mapScene.appendChild(this.warPlanningMap.getContainer());
-            this.warPlanningMap.setCloseCallback(() => this.showWarroomScene());
-        }
         this.wireToolbar();
 
         // Listen for "back to HQ" messages from the embedded tactical map iframe
@@ -142,8 +138,6 @@ class WarroomApp {
         // retained host menu is enabled only if this one frame cannot load in time.
         void this.beginReactOpeningOwnership();
         window.addEventListener('beforeunload', () => this.cancelReactOpeningFallback(), { once: true });
-
-        await this.warPlanningMap.loadData();
 
         // Resolve tactical map HTTP server URL (set by Electron main process).
         // MapLibre requires http:// origin; its Web Workers don't work under awwv://.
@@ -332,12 +326,30 @@ class WarroomApp {
     updateUIOverlay() {
         if (!this.gameState) return;
         const playerFaction = getPlayerFacingFaction(this.gameState.meta.player_faction);
-        this.warPlanningMap.setControlFromState(this.gameState);
-        this.warPlanningMap.setGameState(this.gameState);
-        if (playerFaction) {
-            this.warPlanningMap.setPlayerFaction(playerFaction);
+        if (this.warPlanningMap) {
+            this.warPlanningMap.setControlFromState(this.gameState);
+            this.warPlanningMap.setGameState(this.gameState);
+            if (playerFaction) {
+                this.warPlanningMap.setPlayerFaction(playerFaction);
+            }
         }
         this.updateToolbarTurnDisplay();
+    }
+
+    private ensureLegacyWarPlanningMap(): Promise<WarPlanningMap> {
+        if (this.legacyWarPlanningMapSetup) return this.legacyWarPlanningMapSetup;
+
+        const map = new WarPlanningMap();
+        const mapScene = document.getElementById('map-scene');
+        if (mapScene) mapScene.appendChild(map.getContainer());
+        map.setCloseCallback(() => { void this.showWarroomScene(); });
+
+        this.legacyWarPlanningMapSetup = map.loadData().then(() => {
+            this.warPlanningMap = map;
+            this.updateUIOverlay();
+            return map;
+        });
+        return this.legacyWarPlanningMapSetup;
     }
 
     private getDesktopBridge(): DesktopBridge | null {
@@ -391,7 +403,7 @@ class WarroomApp {
             void this.returnToOperationalWarroomShell();
             return;
         }
-        this.showWarroomScene();
+        void this.showWarroomScene();
     }
 
     /** Show a specific overlay screen and hide others. */
@@ -659,7 +671,12 @@ class WarroomApp {
     }
 
     /** Scene swap: show warroom desk, hide map and tactical scenes. */
-    private showWarroomScene(): void {
+    private async showWarroomScene(): Promise<void> {
+        try {
+            await this.ensureLegacyWarPlanningMap();
+        } catch {
+            return;
+        }
         const desk = document.getElementById('warroom-desk');
         const warroomScene = document.getElementById('warroom-scene');
         const mapScene = document.getElementById('map-scene');
@@ -822,6 +839,9 @@ class WarroomApp {
         this.openingOwner = 'legacy-recovery';
         this.cancelReactOpeningFallback();
         if (this.tacticalMapIframe) this.tacticalMapIframe.hidden = true;
+        void this.ensureLegacyWarPlanningMap().catch((error) => {
+            console.error('[warroom] Failed to initialize the legacy recovery map:', error);
+        });
         this.showScreen('main-menu');
         this.syncContinueAvailability();
     }

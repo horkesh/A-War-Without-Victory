@@ -3,14 +3,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 
+const warPlanningMapMetrics = vi.hoisted(() => ({
+  construct: vi.fn(),
+  loadData: vi.fn().mockResolvedValue(undefined),
+  setGameState: vi.fn(),
+}));
+
 vi.mock('../src/ui/warroom/components/WarPlanningMap.js', () => ({
   WarPlanningMap: class {
     private readonly container = document.createElement('div');
+    constructor() { warPlanningMapMetrics.construct(); }
     getContainer() { return this.container; }
     setCloseCallback() {}
-    async loadData() {}
+    async loadData() { await warPlanningMapMetrics.loadData(); }
     setControlFromState() {}
-    setGameState() {}
+    setGameState() { warPlanningMapMetrics.setGameState(); }
     setPlayerFaction() {}
   },
 }));
@@ -87,6 +94,9 @@ function sendReady(iframe: HTMLIFrameElement, source: MessageEventSource | null 
 describe('desktop React opening lifecycle', () => {
   beforeEach(() => {
     vi.resetModules();
+    warPlanningMapMetrics.construct.mockClear();
+    warPlanningMapMetrics.loadData.mockReset().mockResolvedValue(undefined);
+    warPlanningMapMetrics.setGameState.mockClear();
     vi.useFakeTimers();
     installHostDom();
   });
@@ -126,6 +136,48 @@ describe('desktop React opening lifecycle', () => {
     expect(mainMenu.classList.contains('mm-hidden')).toBe(true);
     expect(mainMenu.inert).toBe(true);
     expect(iframe.hidden).toBe(false);
+    expect(warPlanningMapMetrics.construct).not.toHaveBeenCalled();
+    expect(warPlanningMapMetrics.loadData).not.toHaveBeenCalled();
+  });
+
+  it('initializes the legacy map once on recovery and waits for it before showing the desk', async () => {
+    const legacyMapLoad = deferred<void>();
+    warPlanningMapMetrics.loadData.mockReturnValue(legacyMapLoad.promise);
+    const startNewCampaign = vi.fn().mockResolvedValue({ ok: true, stateJson: '{}' });
+    await bootHost({ startNewCampaign });
+
+    vi.advanceTimersByTime(8000);
+    expect(warPlanningMapMetrics.construct).toHaveBeenCalledTimes(1);
+    expect(warPlanningMapMetrics.loadData).toHaveBeenCalledTimes(1);
+
+    document.getElementById('mm-new-campaign')!.click();
+    (document.querySelector('.sp-faction-option') as HTMLButtonElement).click();
+    await flushMicrotasks();
+    vi.advanceTimersByTime(0);
+    expect(document.getElementById('warroom-desk')!.classList.contains('warroom-desk-hidden')).toBe(true);
+    expect(warPlanningMapMetrics.setGameState).not.toHaveBeenCalled();
+
+    legacyMapLoad.resolve();
+    await flushMicrotasks();
+    expect(document.getElementById('warroom-desk')!.classList.contains('warroom-desk-hidden')).toBe(false);
+    expect(warPlanningMapMetrics.setGameState).toHaveBeenCalledTimes(1);
+    expect(warPlanningMapMetrics.construct).toHaveBeenCalledTimes(1);
+    expect(warPlanningMapMetrics.loadData).toHaveBeenCalledTimes(1);
+  });
+
+  it('reuses one legacy map setup across repeated fallback signals and recovery load paths', async () => {
+    const loadStateDialog = vi.fn().mockResolvedValue({ ok: true });
+    const { iframe } = await bootHost({ loadStateDialog });
+
+    iframe.dispatchEvent(new Event('error'));
+    iframe.dispatchEvent(new Event('error'));
+    vi.advanceTimersByTime(8000);
+    document.getElementById('mm-load-save')!.click();
+    await flushMicrotasks();
+
+    expect(loadStateDialog).toHaveBeenCalledTimes(1);
+    expect(warPlanningMapMetrics.construct).toHaveBeenCalledTimes(1);
+    expect(warPlanningMapMetrics.loadData).toHaveBeenCalledTimes(1);
   });
 
   it('ignores ready signals from the wrong or a stale iframe window', async () => {

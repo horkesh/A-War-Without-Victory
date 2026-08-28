@@ -38,7 +38,7 @@ describe('warroom date localization', () => {
   it('shows the campaign date in the toolbar without leaking an internal phase label', () => {
     const source = readFileSync('src/ui/warroom/warroom.ts', 'utf8');
     const start = source.indexOf('private updateToolbarTurnDisplay');
-    const end = source.indexOf('private showWarroomScene', start);
+    const end = source.indexOf('private async showWarroomScene', start);
     expect(start).toBeGreaterThanOrEqual(0);
     expect(end).toBeGreaterThan(start);
     const block = source.slice(start, end);
