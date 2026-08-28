@@ -92,6 +92,66 @@ describe('opening transition controller', () => {
     controller.dispose();
   });
 
+  it.each(['ready', 'fail'] as const)(
+    'ignores a stale %s callback fired synchronously by replacement cleanup',
+    (outcome) => {
+      const controller = createOpeningTransitionController({
+        loadScene: (scene, handlers) => (
+          scene === 'RS' ? () => handlers[outcome]() : vi.fn()
+        ),
+      });
+      controller.request('RS');
+
+      expect(() => controller.request('HRHB')).not.toThrow();
+
+      expect(controller.getState()).toMatchObject({
+        displayedScene: 'neutral',
+        requestedScene: 'HRHB',
+        phase: 'push',
+      });
+      expect(controller.getFailedScene()).toBeNull();
+      controller.dispose();
+    },
+  );
+
+  it.each(['ready', 'fail'] as const)(
+    'ignores a stale %s callback fired synchronously by cancellation cleanup',
+    (outcome) => {
+      const controller = createOpeningTransitionController({
+        loadScene: (_scene, handlers) => () => handlers[outcome](),
+      });
+      controller.request('RS');
+
+      expect(() => controller.cancel()).not.toThrow();
+
+      expect(controller.getState()).toMatchObject({
+        displayedScene: 'neutral',
+        requestedScene: 'neutral',
+        phase: 'idle',
+      });
+      expect(controller.getFailedScene()).toBeNull();
+      controller.dispose();
+    },
+  );
+
+  it.each(['ready', 'fail'] as const)(
+    'ignores a stale %s callback fired synchronously by disposal cleanup',
+    (outcome) => {
+      const cleanup = vi.fn();
+      const controller = createOpeningTransitionController({
+        loadScene: (_scene, handlers) => () => {
+          cleanup();
+          handlers[outcome]();
+        },
+      });
+      controller.request('RS');
+
+      expect(() => controller.dispose()).not.toThrow();
+      expect(cleanup).toHaveBeenCalledOnce();
+      expect(controller.getFailedScene()).toBeNull();
+    },
+  );
+
   it('retains the displayed scene and clears busy state when decode fails', () => {
     const { load, pending } = controlledLoader();
     const controller = createOpeningTransitionController({ loadScene: load });
@@ -270,6 +330,28 @@ describe('OpeningCinematicLayer', () => {
       '(prefers-reduced-motion: reduce), (max-width: 720px), (max-height: 600px)',
     );
     expect(pending.get('HRHB')!.cancel).toHaveBeenCalledOnce();
+    window.matchMedia = originalMatchMedia;
+  });
+
+  it('ignores a stale decode failure fired synchronously during unmount cleanup', () => {
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = vi.fn().mockReturnValue({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+    const cleanup = vi.fn();
+    const view = render(createElement(OpeningCinematicLayer, {
+      scene: 'RS',
+      neutralSrc: '/neutral.webp',
+      loadScene: (_scene, handlers) => () => {
+        cleanup();
+        handlers.fail();
+      },
+    }));
+
+    expect(() => view.unmount()).not.toThrow();
+    expect(cleanup).toHaveBeenCalledOnce();
     window.matchMedia = originalMatchMedia;
   });
 

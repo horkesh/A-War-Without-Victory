@@ -113,11 +113,13 @@ export function createOpeningTransitionController({
   };
   const clearWork = () => {
     if (timer !== null) {
-      clearTimeout(timer);
+      const timerToClear = timer;
       timer = null;
+      clearTimeout(timerToClear);
     }
-    releaseLoad?.();
+    const release = releaseLoad;
     releaseLoad = null;
+    release?.();
   };
   const schedule = (token: number, delay: number, work: () => void) => {
     timer = setTimeout(() => {
@@ -128,21 +130,24 @@ export function createOpeningTransitionController({
 
   const request = (scene: OpeningScene) => {
     if (disposed) return;
+    const token = state.token + 1;
+    state = { ...state, token };
     clearWork();
     failedScene = null;
-    const token = state.token + 1;
     reduce({ type: 'request', scene, token });
     if (scene === state.displayedScene) return;
 
     let decoded = false;
     let pushElapsed = state.reducedMotion;
     let loaderAttached = false;
+    let loadSettled = false;
 
     const detachLoader = () => {
       if (!loaderAttached) return;
-      releaseLoad?.();
-      releaseLoad = null;
       loaderAttached = false;
+      const release = releaseLoad;
+      releaseLoad = null;
+      release?.();
     };
     const beginHandoff = () => {
       if (!decoded || !pushElapsed || disposed || token !== state.token) return;
@@ -164,12 +169,14 @@ export function createOpeningTransitionController({
     };
     const handlers: OpeningSceneLoadHandlers = {
       ready: () => {
-        if (disposed || token !== state.token) return;
+        if (disposed || token !== state.token || loadSettled) return;
+        loadSettled = true;
         decoded = true;
         if (loaderAttached) beginHandoff();
       },
       fail: () => {
-        if (disposed || token !== state.token) return;
+        if (disposed || token !== state.token || loadSettled) return;
+        loadSettled = true;
         clearWork();
         failedScene = scene;
         reduce({ type: 'abort', token });
@@ -193,17 +200,21 @@ export function createOpeningTransitionController({
 
   const cancel = () => {
     if (disposed) return;
+    const token = state.token + 1;
+    state = { ...state, token };
     clearWork();
     failedScene = null;
-    reduce({ type: 'abort', token: state.token + 1 });
+    reduce({ type: 'abort', token });
   };
 
   const setReducedMotion = (value: boolean) => {
     if (disposed || value === state.reducedMotion) return;
     const pendingScene = state.requestedScene;
     const wasActive = state.phase !== 'idle';
+    const token = state.token + 1;
+    state = { ...state, token };
     clearWork();
-    reduce({ type: 'abort', token: state.token + 1 });
+    reduce({ type: 'abort', token });
     reduce({ type: 'reduced-motion', reducedMotion: value });
     if (wasActive && pendingScene !== state.displayedScene) request(pendingScene);
   };
@@ -221,8 +232,9 @@ export function createOpeningTransitionController({
     setReducedMotion,
     dispose: () => {
       if (disposed) return;
-      clearWork();
       disposed = true;
+      state = { ...state, token: state.token + 1 };
+      clearWork();
       listeners.clear();
     },
   };
