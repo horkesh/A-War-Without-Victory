@@ -768,11 +768,11 @@ class WarroomApp {
             tacticalScene.setAttribute('aria-hidden', 'false');
         }
         this.promoteFreshCampaignIntro();
+        this.postFreshCampaignStartedToTacticalMap();
         if (this.pendingShowWarroom || recoveringLoadedCampaign) {
             this.postToOperationalShell({ type: 'awwv-shell:show-warroom' });
             this.pendingShowWarroom = false;
         }
-        this.postFreshCampaignStartedToTacticalMap();
         this.flushPendingShellHandoff();
     }
 

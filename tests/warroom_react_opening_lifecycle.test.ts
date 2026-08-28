@@ -162,6 +162,14 @@ describe('desktop React opening lifecycle', () => {
 
     sendReady(iframe);
     await flushMicrotasks();
+    const routingMessages = postMessage.mock.calls
+      .map(([message]) => (message as { type?: string })?.type)
+      .filter((type) => type === 'awwv-shell:fresh-campaign-started' || type === 'awwv-shell:show-warroom');
+    expect(routingMessages).toEqual([
+      'awwv-shell:fresh-campaign-started',
+      'awwv-shell:show-warroom',
+    ]);
+    expect(routingMessages.at(-1)).toBe('awwv-shell:show-warroom');
     const freshMessages = () => postMessage.mock.calls.filter(
       ([message]) => (message as { type?: string })?.type === 'awwv-shell:fresh-campaign-started',
     );
