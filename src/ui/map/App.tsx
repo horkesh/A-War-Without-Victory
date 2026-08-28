@@ -1057,7 +1057,7 @@ function App() {
     setCampaignStarting(false);
     if (ok) {
       useGameStore.getState().setPeaceWarTransitionSeen(false);
-      setAppScreen('game');
+      setAppScreen('warroom');
       setSidePickerOpen(false);
       setSidePickerDismissed(false);
       setRecruitmentCatalog([]);

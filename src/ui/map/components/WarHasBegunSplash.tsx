@@ -1,12 +1,13 @@
 /**
  * WarHasBegunSplash — the live game-start handoff.
  *
- * A full-screen overlay that announces "WAR HAS STARTED" at the live
- * peace→war handoff, then fades into the command room. The faction dossier is
- * presented before campaign creation and is intentionally not repeated here.
+ * A translucent full-screen overlay that announces "WAR HAS STARTED" at the
+ * live peace→war handoff while retaining the selected command room beneath it.
+ * The faction dossier is presented before campaign creation and is
+ * intentionally not repeated here.
  *
- * Uses the same restrained paper-and-wood visual language as the opening
- * case file, with a short fade and an explicit acknowledge control.
+ * Uses a restrained date-sting treatment with a short fade and an explicit
+ * acknowledge control.
  *
  * Dismiss paths: a timed auto-advance, or click / any key to skip. All paths
  * resolve through onDismiss exactly once (guarded), which the caller uses to
@@ -89,9 +90,9 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
             className="fixed inset-0 flex flex-col items-center justify-center"
             style={{
                 zIndex: Z.TURN_AFTERMATH,
-                backgroundColor: 'rgba(18, 16, 12, 0.97)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
+                backgroundColor: 'rgba(8, 11, 14, 0.68)',
+                backdropFilter: 'none',
+                WebkitBackdropFilter: 'none',
                 opacity: visible ? 1 : 0,
                 transition: reducedMotion ? 'none' : `opacity ${FADE_MS}ms ease-in-out`,
                 cursor: 'pointer',
@@ -103,7 +104,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
             >
                 <div
                     style={{
-                        fontFamily: "Georgia, 'Times New Roman', serif",
+                        fontFamily: 'var(--font-command)',
                         fontSize: '32px',
                         fontWeight: 700,
                         letterSpacing: '8px',
@@ -117,7 +118,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                 </div>
                 <div
                     style={{
-                        fontFamily: "'IBM Plex Sans Condensed', Arial, sans-serif",
+                        fontFamily: 'var(--font-data)',
                         fontSize: '14px',
                         fontWeight: 400,
                         letterSpacing: '4px',
@@ -142,7 +143,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                     onClick={skip}
                     style={{
                         padding: '12px 40px',
-                        fontFamily: "'IBM Plex Sans Condensed', Arial, sans-serif",
+                        fontFamily: 'var(--font-command)',
                         fontSize: '12px',
                         fontWeight: 600,
                         letterSpacing: '3px',
@@ -159,7 +160,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                 <div
                     style={{
                         marginTop: '20px',
-                        fontFamily: "'IBM Plex Sans Condensed', Arial, sans-serif",
+                        fontFamily: 'var(--font-command)',
                         fontSize: '12px',
                         letterSpacing: '2px',
                         textTransform: 'uppercase',

@@ -9,7 +9,7 @@ export function PeaceWarTransitionOverlay() {
   const shouldShow = state != null && shouldShowPeaceWarTransition(state, seen);
   if (!shouldShow) return null;
 
-  // The faction dossier now lives before campaign creation. At the live handoff
-  // we announce the date once, then reveal the command room without repeating it.
+  // The selected command room is already mounted beneath this overlay. Announce
+  // the date once without replacing that room or repeating the faction dossier.
   return <WarHasBegunSplash onDismiss={() => setSeen(true)} />;
 }

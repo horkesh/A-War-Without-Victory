@@ -34,7 +34,7 @@ describe('WarHasBegunSplash (game-start intro — step 1)', () => {
         expect(screen.getByRole('button', { name: 'Acknowledge' })).toBeTruthy();
     });
 
-    it('is readable on the first rendered frame instead of exposing the map-loading backdrop', () => {
+    it('is readable on the first rendered frame while retaining the selected Warroom below', () => {
         render(createElement(WarHasBegunSplash, { onDismiss: vi.fn() }));
 
         const dialog = screen.getByRole('dialog');
@@ -42,7 +42,8 @@ describe('WarHasBegunSplash (game-start intro — step 1)', () => {
         const acknowledge = screen.getByRole('button', { name: 'Acknowledge' });
 
         expect(dialog.style.opacity).toBe('1');
-        expect(dialog.style.backgroundColor).toBe('rgba(18, 16, 12, 0.97)');
+        expect(dialog.style.backgroundColor).toBe('rgba(8, 11, 14, 0.68)');
+        expect(dialog.style.backdropFilter).toBe('none');
         expect(getComputedStyle(title).color).toBe('rgb(255, 244, 222)');
         expect(getComputedStyle(acknowledge).backgroundColor).toBe('rgb(255, 244, 222)');
     });

@@ -103,6 +103,25 @@ describe('first-hour browser QA gate contract', () => {
     expect(beginClick).toBeGreaterThan(dossierClick);
     expect(warStartWait).toBeGreaterThan(beginClick);
   });
+
+  it('keeps the date sting, opening brief, and foundational decision in authored order', () => {
+    const tool = read('tools/ui/first_hour_browser_gate.cjs');
+    const flowStart = tool.indexOf('async function runFoundationalFlow');
+    const flowEnd = tool.indexOf('\nasync function', flowStart + 1);
+    const flow = tool.slice(flowStart, flowEnd);
+
+    const warStartWait = flow.indexOf("waitForVisibleText(page, 'WAR HAS STARTED')");
+    const acknowledge = flow.indexOf("clickByText(page, 'Acknowledge')");
+    const openingBrief = flow.indexOf("captureEvidence(page, summary, `${flow.faction.toLowerCase()}_opening_brief`)");
+    const openDesk = flow.indexOf("clickFirstMatchingText(page, ['Open Desk'");
+    const foundationalDecision = flow.indexOf("captureEvidence(page, summary, `${flow.faction.toLowerCase()}_foundational_decision`)");
+
+    expect(warStartWait).toBeGreaterThan(-1);
+    expect(acknowledge).toBeGreaterThan(warStartWait);
+    expect(openingBrief).toBeGreaterThan(acknowledge);
+    expect(openDesk).toBeGreaterThan(openingBrief);
+    expect(foundationalDecision).toBeGreaterThan(openDesk);
+  });
 });
 
 describe('live surface browser sweep contract', () => {

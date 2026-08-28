@@ -119,7 +119,7 @@ describe('Track D onboarding consolidation', () => {
 
     const block = source.slice(start, end);
     expect(block).toContain('useGameStore.getState().setPeaceWarTransitionSeen(false)');
-    expect(block.indexOf('setPeaceWarTransitionSeen(false)')).toBeLessThan(block.indexOf("setAppScreen('game')"));
+    expect(block.indexOf('setPeaceWarTransitionSeen(false)')).toBeLessThan(block.indexOf("setAppScreen('warroom')"));
   });
 
   it('uses one war-start handoff and does not repeat the faction dossier after dismissal', () => {

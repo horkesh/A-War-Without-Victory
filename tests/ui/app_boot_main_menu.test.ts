@@ -86,13 +86,40 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
         expect(warroom).toContain(`v${packageVersion}`);
     });
 
-    it('enters the game only after a campaign side successfully starts', () => {
+    it('enters the selected Warroom only after a campaign side successfully starts', () => {
         const startIdx = app.indexOf('const handleSelectFaction = async');
+        const endIdx = app.indexOf('const handleMainMenuLoadGame', startIdx);
+        const startBlock = app.slice(startIdx, endIdx);
         const okIdx = app.indexOf('if (ok) {', startIdx);
-        const routeIdx = app.indexOf("setAppScreen('game');", okIdx);
+        const routeIdx = app.indexOf("setAppScreen('warroom');", okIdx);
         expect(startIdx).toBeGreaterThan(-1);
+        expect(endIdx).toBeGreaterThan(startIdx);
         expect(okIdx).toBeGreaterThan(startIdx);
         expect(routeIdx).toBeGreaterThan(okIdx);
+        expect(routeIdx).toBeLessThan(endIdx);
+        expect(startBlock).not.toContain("setAppScreen('game')");
+    });
+
+    it('leaves a failed campaign start on the selected Main Menu preview', () => {
+        const startIdx = app.indexOf('const handleSelectFaction = async');
+        const endIdx = app.indexOf('const handleMainMenuLoadGame', startIdx);
+        const startBlock = app.slice(startIdx, endIdx);
+        const okIdx = startBlock.indexOf('if (ok) {');
+
+        expect(okIdx).toBeGreaterThan(-1);
+        expect(startBlock.slice(0, okIdx)).not.toContain('setAppScreen(');
+        expect(startBlock.slice(okIdx)).not.toContain('else');
+    });
+
+    it('starts one campaign from the already-confirmed menu dossier', () => {
+        const startIdx = app.indexOf('const handleSelectFaction = async');
+        const endIdx = app.indexOf('const handleMainMenuLoadGame', startIdx);
+        const startBlock = app.slice(startIdx, endIdx);
+        const menu = read('src/ui/map/components/MainMenu.tsx');
+
+        expect(startBlock.match(/startCampaignFromSidePicker/g)).toHaveLength(1);
+        expect(menu.match(/onNewGame\(\{ playerFaction: selectedFaction, decisionMode \}\)/g)).toHaveLength(1);
+        expect(startBlock).not.toContain('setSelectedFaction');
     });
 
     it('resets the opening brief before a fresh same-faction New Game load', () => {
@@ -106,6 +133,15 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
 
     it('keeps Continue gated on a loaded save (does not clear it)', () => {
         expect(app).toContain("onContinue={() => setAppScreen('game')}");
+    });
+
+    it('keeps manual load routed to the tactical game screen', () => {
+        const startIdx = app.indexOf('const handleMainMenuLoadGame = async');
+        const endIdx = app.indexOf('const dismissActiveEventDecisionError', startIdx);
+        const loadBlock = app.slice(startIdx, endIdx);
+
+        expect(loadBlock).toContain("setAppScreen('game');");
+        expect(loadBlock).not.toContain("setAppScreen('warroom');");
     });
 
     it('honors ?view=game and ?view=warroom deep-link overrides for dev/automation', () => {
