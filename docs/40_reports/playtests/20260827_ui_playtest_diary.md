@@ -1726,6 +1726,93 @@ name or the file shape instead of reading it first. The last one mattered: it wo
 "no reference data" for the exact cells that decided this revert. **Inspect the shape, then
 write the lookup** — and reconcile every derived number against one you already know.
 
+## 3m. BROADER PANEL — RS Srebrenica decision. EIGHT SEATS, EIGHT NO-GO. Refused unanimously.
+
+Owner proposal, 2026-08-28: an event lets the RS player decide whether to take Srebrenica. The
+event does not mention genocide; taking it produces the genocide as consequence; declining leaves
+the enclave standing and grants it a corridor to RBiH territory, severing RS in two.
+
+Convened per CLAUDE.md's broader-panel rule — the §6 four (Historian, scenario-tester/calibration,
+Engine/systems, Red-team) plus Game Designer, Narrative Designer, Canon Compliance Reviewer,
+War-or-Game. Eight seats, polled independently, implementer excluded. **All eight returned NO-GO,
+for eight different sufficient reasons.**
+
+### The verdicts
+
+| seat | ruling |
+| --- | --- |
+| Narrative | Cannot be written honestly. Directive 7 names the population as the objective, so an accurate option breaches Ring 3 #1 and a neutral one makes the GAME the author of the euphemism. Refused to supply event text — per its brief, itself decisive. |
+| Game Designer | Priced both branches. The 10 fall OSIDs are **364.4 km² = 0.71% of Bosnia**. Max punitive corridor = 4.25 points. Take → D (capped); decline → C or B. **Declining dominates by 1-2 grades.** Price it realistically and it is theatre; price it to bite and you have built "commit genocide or your state dies". |
+| Calibration | Baseline is RED today; corridor route is 2 cells and cheap only because `luka_2`/`pomol_2` are held ahistorically; adding options **reclassifies the row for every run** (`isPlayerDecisionEvent` = presence of options); in emergent mode the RS **bot** could decline. |
+| War-or-Game | The decision was taken **8 March 1995 in Directive 7**, not July. Measured corridor: 3 RS OSIDs / 35.2 km through the Drina Corps rear in the one month of 1995 with no exogenous enabler. 2nd Corps attacked that axis six times in 1994 — "advanced marginally if at all". |
+| Canon | **JURISDICTION.** Ring 3 #1 is not one of the bright line's three named limbs and was never delegated. **Eight unanimous seats cannot cross a line the owner did not delegate.** Owner amendment required; panel verdict cannot substitute. |
+| Engine | Decision half cheap and its counterfactual branch already built; **corridor fails** — severing RS costs **zero** supply isolation (1 isolated OSID before and after; RS holds sources in both halves). |
+| Historian | The decision is historically sound — **the VRS declined twice on this enclave** (Srebrenica Apr 1993, Žepa May 1993). The corridor is fantasy and **manufactures a military necessity the perpetrators did not have**. |
+| Red-team | **Decline strictly dominates on every axis the game scores.** Degenerate line named. And it refuted the evidence the proposal was built on — see below. |
+
+### MY EVIDENCE WAS WRONG — five corrections, all mine
+
+I built the case for this proposal on a measured run and read it incorrectly at nearly every point.
+
+- **"Zero authorized sweeps."** The field is `null`, not `0` — *never written*, not *written and stayed zero*. A bot in the same run incremented it four times. **The harness's own source documents this as unmeasurable, in a comment I wrote the previous day**: *"a lever this harness does not yet fire… a player faction may be structurally unable to accrue the emergent counter."* I cited a number my own instrument says cannot be read.
+- **"He refused every historical default."** He was never asked. `pending_paramilitary_requests_at_end: 0`; zero paramilitary findings across 2,640 records. The 15 off-default choices were all diplomatic (`defy_nato`, `maintain_hostages`, `remove_mladic`). **No atrocity was ever offered to refuse.**
+- **"2,652 lever attempts"** — 2,597 are *rejections* for `insufficient_command_authority`. The run's own recorded finding: *"Player faces almost no decisions across the campaign."* I read effort; it was paralysis.
+- **"The scripted war crimes should still bite."** They cannot. `RS_GRADE_ANCHORS` reads `war_crimes_events` at exactly one tier (A+, >55% + ≤2), and RS cannot reach A+ anyway. At A/B/C/D/F it is never read.
+- **"Earned D."** Earned **B**. `grade_description` is the B anchor text; one flag dropped it four tiers.
+
+Also corrected by the panel: **H1.8 does not say what I told all eight seats it says.** Its text is *"Consequences require explicit cause… adjacency or activity alone is insufficient"* — it forbids emergent/proximity falls, not player-caused ones. Both Game Designer and Canon caught this independently. And I quoted `contain_posture_gate.ts`'s "§6 HARD INVARIANT" as canon; **no canon document makes that commitment**, and canon contemplates the opposite in three places (Ring 3 #11, §2 criterion 3, the `enclave_defended` register).
+
+### THE FINDING THAT SURVIVES — and it is bigger than the proposal
+
+Three seats measured the same thing independently.
+
+**The fall is a hardcoded write onto a board nobody contests.**
+
+```
+All ten OSIDs flip in ONE tick at t162, mechanism `event`, no attacker:
+  op:srebrenica:brezovice_2   t162   RS -> RS   [event]   <-- writes RS onto a cell ALREADY RS
+```
+
+- **Zero of 599 battles** across 188 weeks target ANY of the eleven Srebrenica enclave OSIDs.
+- The Drina Corps attacks the enclave **once in the entire war**, t45, and is destroyed: power ratio 0.35, 482 attacker casualties vs 102, RS loses 2 tanks + 1 artillery and RBiH **captures** 3 tanks + 2 artillery.
+- Drina Corps mounts **four operations in 188 weeks**, last starting **t41**. Nothing t49→t188.
+- **RS's last combat capture anywhere on the map is t73.** Zero after t100. Every RS operation from t105 records `attacks=0, outcome=failure`. In 1995 RS gains ground by eleven `event` writes and three `consolidation` writes — **it does not fight for any of it.**
+
+**This corrects project memory:** `frozen_vrs_front_probe_root_cause` records the wall at w101. Measured at cell level it is **t73**.
+
+**And `srebrenica_demilitarized` is a fire receipt, not an outcome** — the same defect one link up the chain, and cleaner. `srebrenica_demilitarization_1993` offers RBiH three options including `refuse` ("keep the enclave armed"); the flag sits in the row's **top-level** `sets_flags`, **none of the three options carries it**, and `applyDefinitionFlags` runs at fire time before the options branch. The player refuses and the flag is set anyway. Its own gate is vacuous too: `rbih_state_identity ∈ {civic, bosniak_national, pragmatic}` against an event that fires turn 2-5 unconditionally with exactly those three options — **the OR covers the entire value space.**
+
+**Two canon claims are false in code:**
+- `contain_posture_gate.ts` claims the fall flows through the scripted events **AND** Krivaja-95/Stupčanica-95. **The AND is false.** Krivaja is gated on `srebrenicaFallReceiptFired` at t≥170; the event fires t162. It launches onto ground the event already took and produces no AAR at all. `enclave_resilience.ts` states the true version — the two comments contradict.
+- **Canon Ring 3 #10 describes a mechanic the engine does not have.** *"The player can only keep the enclave intact through ordinary military means"* — there is no ordinary military contest at Srebrenica for either side. Keeping it requires nothing; taking it is impossible.
+
+### The question now upstream of everything
+
+`srebrenica` **is** in RS's `DRINA_VALLEY` offensive objectives (`bot_strategy.ts:95-101`, `:203`). The contain posture is DEFAULT-OFF. The release backstop fires unconditionally at t≥160. **And still 0 of 599 battles land there.**
+
+**Why does the VRS never attack an enclave that sits on its own target list?** Engine flagged this as upstream of the entire lane and did not chase it. It is the next thing to answer.
+
+### Traps recorded for whoever implements a tenability gate
+
+- `evaluateCondition` ends in **`default: return true`** — a typo'd condition kind passes silently, producing a vacuous gate with no error.
+- `pressure_system.ts:29,48` call `evaluateCondition` **without `edges`**, so `corridor_severed` evaluates false on the accumulation path and would **silently disable the event entirely**.
+- `enclave_supply_status` matches if ANY OSID is at-or-worse, and `adequate` is severity 0 — the obvious predicate is vacuous.
+- **`zepa_falls_1995` carries `requires_events: ["srebrenica_falls_1995"]`.** Making Srebrenica conditional silently makes Žepa conditional and breaches the guard twice. Least visible dependent, most dangerous.
+- `HistoricalEpochOsidAnchor` has **no `xor_with`** — the event anchor has an escape hatch, the OSID anchor does not. Blocking either way.
+- At t188 all 13 Srebrenica cells read supply `adequate`; **t160 was not measurable** from existing artifacts. That measurement gates predicate choice — gate on `critical` while the enclave reads `adequate` and an unconditional fall becomes an unconditional NON-fall.
+
+### Sequence the panel converged on
+
+1. **Get the baseline green.** `verify_checkpoints.cjs` exits 1 today — `op:kalesija:gojcin_2` plus an unflagged **FARZ P-A** failure (`op:lukavac:brijesnica_donja_2` taken t57, ~100 weeks before the t≥160 window).
+2. **Diagnose the post-t73 RS capability collapse** — why the VRS stops fighting, and why it never attacks a target on its own list.
+3. **Only then** consider making the fall consult the board — cheap, possibly zero production LOC, no bright-line crossing.
+
+Removing the flip's unconditionality before (2) does not make the outcome emergent. It makes Srebrenica never fall.
+
+### Also worth adopting regardless (Canon)
+
+H1.8 amended to say it governs *cause*, not *certainty*; `VICTORY_AND_PYRRHIC_SCORING.md` §6 Non-Goal #3 made outcome-constant; the `contain_posture_gate.ts` and `verify_checkpoints.cjs` comment corrections; `srebrenica_falls_1995` has **no `family` field**, so the Ring-3 validator does not protect the most sensitive row in the game; and both gate docs self-assert Tier-2 rank while appearing in neither stated hierarchy.
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |
