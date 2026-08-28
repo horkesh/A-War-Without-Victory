@@ -272,7 +272,7 @@ export function ArmyHQCorpsCard({
 
             <div className="px-4 py-4 flex-1 flex flex-col">
                 {/* Line 1: Corps name */}
-                <div className="text-[16px] font-bold text-amber-400 uppercase tracking-widest leading-tight pr-24" style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
+                <div className="text-[16px] font-bold text-amber-400 uppercase tracking-widest leading-tight pr-24" style={{ fontFamily: 'var(--font-command)' }}>
                     {displayName}
                 </div>
 
@@ -483,7 +483,7 @@ export function ArmyHQCorpsCard({
                     className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                 >
                     <span className="text-[12px] text-text-secondary font-mono">&larr; {t('armyHqCorps.back')}</span>
-                    <div className="text-[18px] font-bold text-amber-400 uppercase tracking-widest" style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
+                    <div className="text-[18px] font-bold text-amber-400 uppercase tracking-widest" style={{ fontFamily: 'var(--font-command)' }}>
                         {displayName}
                     </div>
                     <span className={`text-[14px] font-bold font-mono px-2 py-0.5 border border-panel-border bg-panel-bg ${gradeColor}`}>

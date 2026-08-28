@@ -9,6 +9,7 @@ import { IconLayer, TextLayer } from '@deck.gl/layers';
 import type { FeatureCollection, Feature } from 'geojson';
 import { getIconDataUrl } from '../map/formationIcons';
 import { getFormationStackPixelOffset } from '../map/clickSelectionPriority';
+import { UI_COMMAND_FONT_FAMILY, UI_DATA_FONT_FAMILY } from '../styles/typography';
 
 export { getFormationStackPixelOffset } from '../map/clickSelectionPriority';
 
@@ -363,7 +364,7 @@ export function buildTacticalDeckLayers(
                 getColor: [235, 225, 205, 240],
                 outlineColor: [10, 8, 6, 230],
                 outlineWidth: 3,
-                fontFamily: 'IBM Plex Sans Condensed',
+                fontFamily: UI_COMMAND_FONT_FAMILY,
                 fontWeight: 'bold',
                 fontSettings: { sdf: true },
                 characterSet: 'auto',
@@ -489,7 +490,7 @@ export function buildTacticalDeckLayers(
                 outlineWidth: 1,
                 fontSettings: { sdf: true },
                 characterSet: ['\u25cf'],
-                fontFamily: 'IBM Plex Mono',
+                fontFamily: UI_DATA_FONT_FAMILY,
                 fontWeight: 'bold',
                 getTextAnchor: 'middle',
                 getAlignmentBaseline: 'center',
@@ -506,7 +507,7 @@ export function buildTacticalDeckLayers(
                 getText: (d: Feature) => String(d.properties?.stack_count ?? ''),
                 getSize: Math.max(10, Math.round(iconHeight * 0.28)),
                 getColor: [255, 255, 255, 255],
-                fontFamily: 'IBM Plex Mono',
+                fontFamily: UI_DATA_FONT_FAMILY,
                 fontWeight: 'bold',
                 getTextAnchor: 'middle',
                 getAlignmentBaseline: 'center',

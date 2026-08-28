@@ -1,5 +1,6 @@
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import { normalizeFactionId } from '../../../state/identity.js';
+import { UI_DATA_FONT_FAMILY } from '../styles/typography';
 
 // Spec §2.4: rectangular HoI-style counters — faction-colored fill, white abbreviation.
 // Canvas is 160×80 at pixelRatio 2 → displayed as 80×40 CSS px per icon-size unit.
@@ -73,7 +74,7 @@ export function drawTacticalSymbol(ctx: CanvasRenderingContext2D, kind: string, 
     ctx.fill();
   } else {
     // Fallback: abbreviated text
-    ctx.font = `bold ${h * 0.42}px "IBM Plex Mono", monospace`;
+    ctx.font = `bold ${h * 0.42}px "${UI_DATA_FONT_FAMILY}"`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(normalized.slice(0, 2).toUpperCase(), centerX, centerY);
@@ -205,7 +206,7 @@ export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string)
 
   if (forming) {
     ctx.fillStyle = symbolColor;
-    ctx.font = 'bold 13px "IBM Plex Mono", monospace';
+    ctx.font = `bold 13px "${UI_DATA_FONT_FAMILY}"`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('FORMING', ICON_WIDTH / 2, COUNTER_BODY_Y + COUNTER_BODY_HEIGHT - 8);

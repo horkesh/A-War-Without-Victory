@@ -25,6 +25,7 @@ import type { AxisState } from './types';
 import { getPlayerSafePoliticalFactionName, getPlayerSafeSettlementName } from '../../utils/playerSafeText';
 import { t } from '../../i18n';
 import { releaseMapWebGlContext, safeScalarMapPadding } from '../../map/mapContextLifecycle';
+import { UI_COMMAND_FONT_FAMILY } from '../../styles/typography';
 
 // Faction-colored axis palettes
 const AXIS_PALETTES: Record<string, string[]> = {
@@ -730,7 +731,7 @@ function updateDeckArrows(
             getPixelOffset: [0, -16],
             outlineColor: [0, 0, 0, 200],
             outlineWidth: 2,
-            fontFamily: 'sans-serif',
+            fontFamily: UI_COMMAND_FONT_FAMILY,
             fontWeight: 700,
             parameters: { depthTest: false },
         }));

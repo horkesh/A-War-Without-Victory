@@ -33,7 +33,7 @@ export function CollapsibleSection({ sectionKey, title, count, children, default
             >
                 <div className="flex items-center gap-2.5">
                     <span className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400 group-hover:text-amber-300"
-                        style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
+                        style={{ fontFamily: 'var(--font-command)' }}>
                         {title}
                     </span>
                     {count != null && (

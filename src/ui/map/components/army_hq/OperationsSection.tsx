@@ -780,7 +780,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                 }`} title={formatReadinessTitle(op.readiness)} />
                                             )}
                                             <span className="text-[14px] font-bold text-text-primary uppercase font-mono tracking-wider"
-                                                style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
+                                                style={{ fontFamily: 'var(--font-command)' }}>
                                                 {safeOperationDisplayName(op)}
                                             </span>
                                         </div>

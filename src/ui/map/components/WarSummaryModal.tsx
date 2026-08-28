@@ -41,7 +41,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
                 boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
                 backdropFilter: 'blur(8px)',
                 color: '#d5c9bc',
-                fontFamily: 'inherit',
+                fontFamily: 'var(--font-command)',
             }}
         >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>

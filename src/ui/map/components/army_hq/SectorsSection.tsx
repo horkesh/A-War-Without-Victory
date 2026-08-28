@@ -589,7 +589,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                                 className={`block h-0 w-0 border-y-[4px] border-y-transparent border-l-[6px] border-l-text-secondary/60 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
                                             />
                                             <span className="text-[12px] font-bold text-text-primary uppercase font-mono truncate"
-                                                style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
+                                                style={{ fontFamily: 'var(--font-command)' }}>
                                                 {sectorLabel}
                                             </span>
                                             {hasBattle && (

@@ -130,7 +130,7 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
                 <text
                   x={padding.left - 4} y={y + 3}
                   textAnchor="end" fill="rgba(255,255,255,0.65)"
-                  fontSize={12} fontFamily="monospace"
+                  fontSize={12} fontFamily="var(--font-data)"
                 >
                   {pct}%
                 </text>
@@ -178,7 +178,7 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
               x={l.x} y={chartHeight - 4}
               textAnchor={i === 0 ? 'start' : i === xLabels.length - 1 ? 'end' : 'middle'}
               fill="rgba(255,255,255,0.65)"
-              fontSize={12} fontFamily="monospace"
+              fontSize={12} fontFamily="var(--font-data)"
             >
               {l.label}
             </text>

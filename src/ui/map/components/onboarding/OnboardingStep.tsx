@@ -45,7 +45,7 @@ export function OnboardingStep(props: OnboardingStepProps): JSX.Element {
                 color: '#f3ead0',
                 padding: '20px 24px',
                 maxWidth: 520,
-                fontFamily: 'inherit',
+                fontFamily: 'var(--font-command)',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)',
             }}
         >

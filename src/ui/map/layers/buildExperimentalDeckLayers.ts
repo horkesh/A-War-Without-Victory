@@ -7,6 +7,7 @@ import { ArcLayer, ScatterplotLayer, PathLayer, TextLayer } from '@deck.gl/layer
 import type { LoadedGameState } from '../data/types';
 import type { OsidCentroidLookup } from '../map/builders/geojsonLookup';
 import { resolveOsidKey } from '../map/builders/geojsonLookup';
+import { UI_COMMAND_FONT_FAMILY } from '../styles/typography';
 import type { DeckLayerCapabilities } from './deckLayerCapabilities';
 
 const FACTION_COLORS: Record<string, [number, number, number]> = {
@@ -288,7 +289,7 @@ export function buildExperimentalDeckLayers(
         getTextAnchor: 'start',
         getAlignmentBaseline: 'center',
         getPixelOffset: [10, 0],
-        fontFamily: 'monospace',
+        fontFamily: UI_COMMAND_FONT_FAMILY,
         fontWeight: 'bold',
         outlineWidth: 2,
         outlineColor: [0, 0, 0, 200],

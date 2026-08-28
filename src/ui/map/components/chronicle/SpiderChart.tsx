@@ -139,7 +139,7 @@ export const SpiderChart = React.memo(function SpiderChart({
                         dominantBaseline="central"
                         fill="rgba(255,255,255,0.55)"
                         fontSize={size * 0.045}
-                        fontFamily="monospace"
+                        fontFamily="var(--font-data)"
                         fontWeight="bold"
                         letterSpacing="0.05em"
                     >
