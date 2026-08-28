@@ -487,3 +487,141 @@ body {
   pointer-events: none;
   z-index: 1; /* canonical: Z.BACKDROP_GRAIN = 1 (src/ui/shared/zIndex.ts) */
 }
+
+/* Cinematic opening: a lightweight, presentation-only camera through the map. */
+.opening-cinematic {
+  --opening-map-portal-image: none;
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  overflow: hidden;
+  background: #090b0b;
+}
+
+.opening-cinematic__plate {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  transform: none;
+  transition-property: transform, opacity;
+  transition-duration: 340ms;
+  transition-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+.opening-cinematic__plate--incoming {
+  opacity: 0;
+  transform: scale(1.055);
+}
+
+.opening-cinematic__portal {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.02);
+  transform-origin: var(--opening-current-map-origin, 50% 50%);
+  transition-property: transform, opacity;
+  transition-duration: 340ms;
+  transition-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+  background-color: #222824;
+  background-image:
+    var(--opening-map-portal-image),
+    radial-gradient(circle at 50% 45%, rgba(126, 132, 112, 0.9), rgba(42, 48, 42, 0.98) 52%, #141816 76%),
+    repeating-linear-gradient(8deg, rgba(224, 218, 184, 0.05) 0 1px, transparent 1px 7px);
+}
+
+.opening-cinematic[data-opening-phase="push"] .opening-cinematic__plate--current {
+  transform: scale(1.58);
+}
+
+.opening-cinematic[data-opening-phase="push"] .opening-cinematic__portal {
+  opacity: 0.72;
+  transform: scale(0.13);
+}
+
+.opening-cinematic:not([data-opening-phase="idle"]) .opening-cinematic__plate,
+.opening-cinematic:not([data-opening-phase="idle"]) .opening-cinematic__portal {
+  will-change: transform, opacity;
+}
+
+.opening-cinematic[data-opening-phase="masked"] .opening-cinematic__plate,
+.opening-cinematic[data-opening-phase="masked"] .opening-cinematic__portal {
+  transition-duration: 280ms;
+}
+
+.opening-cinematic[data-opening-phase="masked"] .opening-cinematic__plate--current {
+  opacity: 0;
+  transform: scale(1.68);
+}
+
+.opening-cinematic[data-opening-phase="masked"] .opening-cinematic__portal {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.opening-cinematic[data-opening-phase="resolve"] .opening-cinematic__plate,
+.opening-cinematic[data-opening-phase="resolve"] .opening-cinematic__portal {
+  transition-duration: 480ms;
+}
+
+.opening-cinematic[data-opening-phase="resolve"] .opening-cinematic__plate--current {
+  opacity: 0;
+}
+
+.opening-cinematic[data-opening-phase="resolve"] .opening-cinematic__plate--incoming {
+  opacity: 1;
+  transform: none;
+}
+
+.opening-cinematic[data-opening-phase="resolve"] .opening-cinematic__portal {
+  opacity: 0;
+  transform: scale(1.08);
+  transform-origin: var(--opening-incoming-map-origin, 50% 50%);
+}
+
+.opening-cinematic[data-reduced-motion="true"] .opening-cinematic__plate,
+.opening-cinematic[data-reduced-motion="true"] .opening-cinematic__portal {
+  transition-duration: 155ms !important;
+  transform: none !important;
+}
+
+.opening-cinematic[data-reduced-motion="true"] .opening-cinematic__portal {
+  opacity: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opening-cinematic__plate,
+  .opening-cinematic__portal {
+    transform: none !important;
+    transition-duration: 155ms !important;
+  }
+
+  .opening-cinematic__portal {
+    opacity: 0 !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .opening-cinematic__plate,
+  .opening-cinematic__portal {
+    transform: none;
+    transition-duration: 155ms;
+  }
+
+  .opening-cinematic__portal {
+    opacity: 0 !important;
+  }
+}
+
+@media (max-height: 600px) {
+  .opening-cinematic__plate,
+  .opening-cinematic__portal {
+    transform: none;
+    transition-duration: 155ms;
+  }
+
+  .opening-cinematic__portal {
+    opacity: 0 !important;
+  }
+}
