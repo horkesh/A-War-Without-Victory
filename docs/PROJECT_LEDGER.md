@@ -29898,3 +29898,41 @@ outcome, code, test, scenario, calibration, reference, canon, or release state c
 
 **Next:** review and seal this bounded correction before opening P1. This packet does not authorize
 P1 implementation.
+
+## [2026-08-28] docs(RE): authorize bounded packaged-probe recovery control lane
+
+**Summary:** The owner accepted the Orchestrator/Architect recommendation to open an
+auxiliary packaged-runtime-probe recovery after P2B's clean-base probe produced NO VERDICT. The
+original probe channel remains closed at `b711cffa9`. P1/P2A are accepted; P2B is HELD before
+implementation and P3 waits.
+
+**Change:** Recovery is outside RE's seven outcomes/eight packets, earns no outcome
+credit, and uses three exact locks: 14-document transition, six-path Platform-only instrumentation,
+and mandatory five-file receipt. Product Manager drafts each successor lock at clean HEAD;
+Orchestrator, Architect, and Process QA approve exact bytes/hash; the existing hook is re-pinned and
+working/staged checks pass before payload editing. Lock 3 custody precedes every receipt edit.
+Lock 1 itself is bootstrapped by staging all 14 synchronized documents, exact-byte/hash review,
+hook re-pin, working/staged checks, and only then the transition commit.
+
+**Failure mode prevented:** The external coordinator owns a 1,200,000 ms npm-root-to-wrapper-sentinel timer
+and 960,000 ms post-sentinel fail-safe; the wrapper owns a 900,000 ms post-executable-spawn
+watchdog. Exact sentinel, 43 ordered phase markers, eight terminal classes, behavioral import-safe
+wrapper tests, independent LOC caps, one RED/one GREEN, two `node --check` commands, one
+`git diff --check`, one packaged invocation, and no retry bind the packet. Only after QA accepts the
+Lock-3 receipt and both Architect and Orchestrator explicitly accept `NONREPRODUCIBLE_GREEN` may
+Product Manager draft a fresh exact-base P2B lock through ordinary review/re-pin/check custody; the
+other seven classes cannot open P2B and permit one bounded proposal after receipt closeout.
+Wrapper terminal settlement freezes classification; the coordinator never reclassifies it and uses
+a 5,000 ms natural-close grace plus separate 5,000 ms forced-cleanup verification. Without a
+wrapper terminal, drained npm close or the 960,000 ms fail-safe owns one coordinator receipt.
+`PACKAGE_FAILURE` requires positive package-step failure proof; PACKAGE_NO_VERDICT records the last
+proven npm stage without guessing a hang.
+
+**Files modified:** Exactly 14 synchronized docs/control paths: current lane, scope lock, RE plan,
+recovery plan, living audit, calibration master, reports index, master roadmap, command board, plans
+index, docs index, active governance, project ledger, and knowledge ledger.
+
+**Mistake guard:** No product behavior, code, test, scenario, calibration value/reference, canon,
+or historical target changes in this transition.
+
+**FORAWWV note:** `docs/10_canon/FORAWWV.md` was not edited; this process/probe-custody decision introduces no game-design canon amendment.

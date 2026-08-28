@@ -2,12 +2,13 @@
 
 **Status:** IN AUTONOMOUS EXECUTION. The owner ruled 2026-08-26 that **engine health is
 sacrosanct and precedes further calibration**. The accepted January-1993 slice remains historical
-evidence, but all further calibration waits on **RE — 1.0 Engine Integrity**. The probe lane is
-closed history at `b711cffa9` and is not RE scope. R7 may continue only where file ownership is
+evidence, but all further calibration waits on **RE — 1.0 Engine Integrity**. The original probe
+channel is closed history at `b711cffa9`. A distinct owner-authorized packaged-probe recovery is
+active outside RE outcomes; P2B is held and P3 waits. R7 may continue only where file ownership is
 actually disjoint. RE is scope-locked on `codex/re-engine-integrity-repaired`; the superseded mixed
 line is quarantined. RE and R7 gate R8; R9 follows R8.
 
-**Last updated:** 2026-08-27
+**Last updated:** 2026-08-28
 
 **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
 
@@ -57,19 +58,28 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
 
 ---
 
-## Current Execution Snapshot (2026-08-27)
+## Current Execution Snapshot (2026-08-28)
 
 - **Calibration:** the January-1993 slice is landed evidence. Further reference, `init_control`,
   objective, axis, timing, roster, or outcome tuning is paused until RE closes; RE must not tune
   outcomes itself. `docs/40_reports/CALIBRATION_MASTER.md` records that n374 is inadmissible as
   an RE baseline because its own metadata says commit `b3d759a3…`, `git_dirty:true`, Node 24.
-- **Probe prerequisite:** **CLOSED at `b711cffa9`.** Stable sector identity and
+- **Original probe channel:** **CLOSED at `b711cffa9`.** Stable sector identity and
   `occupies_on_victory` landed; the fixed-home exclusion was reverted. RE preserves that
   disposition and does not reopen probe work.
-- **RE — 1.0 Engine Integrity:** **REDUCED TO SEVEN RELEASE OUTCOMES / EIGHT PACKETS.** The owner
+- **Auxiliary packaged-probe recovery:** **ACTIVE OUTSIDE RE OUTCOMES.** The owner authorized the
+  Orchestrator/Architect three-lock safety-control lane after P2B's clean-base NO VERDICT. It earns
+  no RE credit; P2B remains held and P3 waits. Only independently accepted
+  `NONREPRODUCIBLE_GREEN` may be considered for a fresh P2B lock. Current Lock 1 is
+  `RE-PROBE-RECOVERY-TRANSITION` / `authorize-auxiliary-packaged-probe-recovery` at
+  `c57ecffaf4774b9801d8ef6f4774463f7c0ef52e`; calibration remains paused and recovery is
+  non-calibrating.
+- **RE — 1.0 Engine Integrity:** **REDUCED TO SEVEN RELEASE OUTCOMES / EIGHT PACKETS; HELD AT
+  P2B.** The owner
   delegated scope ownership to Architect and Orchestrator and approved the reduced contract on
-  2026-08-27. The old T0–T14 monolith is superseded. The remaining packets are: release-path truth;
-  two deletions that leave one player command authority; conserved threat lineage; non-starving
+  2026-08-27. The old T0–T14 monolith is superseded. P1 release-path truth and P2A's first command-
+  authority deletion are accepted. The remaining packets are: held P2B's second authority deletion;
+  conserved threat lineage; non-starving
   pre-planned queues; deletion of the APWB/Tigar exception; one formal-battle casualty owner; and
   no retreat teleport. Each packet is exact-file locked, uses one implementer + domain reviewer +
   QA, and permits one correction/confirmation cycle. There are no per-packet campaigns; one final
@@ -176,8 +186,12 @@ R3 Tactical Group convergence
 R4 + R6 + stable R1/R2 UI
   -> R7 Content/history/audio/accessibility/opening
 
-Probe lane CLOSED at b711cffa9
+Original probe channel CLOSED at b711cffa9
   -> landed/reverted disposition preserved
+
+Auxiliary packaged-probe recovery ACTIVE outside RE outcomes
+  -> bounded three-lock safety-control lane
+  -> P2B HELD; P3 waiting
 
 RE 1.0 Engine Integrity
   -> seven release outcomes through eight serial packets
@@ -192,9 +206,11 @@ Two clean 5/5 R8 diaries + all barriers green
   -> R9 Release candidate/gold/publication readiness
 ```
 
-With the probe lane closed as history, execute reduced RE and remaining R7 work,
-followed by R8 and R9. RE implementation packets are serial; only the final closeout gets a
-188-week pair.
+With the original probe channel closed as history, execute the bounded auxiliary packaged-probe
+recovery before resuming reduced RE, while remaining R7 work may continue where disjoint. RE P2B is
+held and P3 waits. Recovery is outside the seven outcomes/eight packets and earns no outcome credit;
+only an independently accepted `NONREPRODUCIBLE_GREEN` may be considered for a fresh P2B lock.
+Only the final RE closeout gets a 188-week pair.
 R7 may proceed in parallel only after file-ownership inspection proves independence.
 
 ## 5. Workstream Register
@@ -208,7 +224,7 @@ R7 may proceed in parallel only after file-ownership inspection proves independe
 | R5 | Engine quality, performance, and stability | **COMPLETE — CLOSED 2026-08-05 at the current performance floor (~1,086 ms/turn fresh).** Every self-executable item is done (Phases 0/1/3/4.1, Phase 2e Tasks 1-10, Task 7 baseline gate). Phase 2e's pure-solve/serial-commit extraction was proven correct but FAIL_REVERTED for a 3-7% wall-clock + ~45% heap regression; production uses the direct `buildCorpsFrontSectors` call. **Task 6 (incremental-reuse toward 100 ms/turn) is DECLINED, not deferred:** its only user-facing motivation was the warroom->map delay, which is R1's domain and already solved (~4.3 s -> ~114 ms warm; the map reads pre-computed sectors and never calls the builder). ~1 s/turn sim throughput is acceptable for a strategic game; the 100 ms/turn target is retired as aspirational. The reverted Phase 2e pipeline and its characterization suite are preserved for an optional future re-attempt (its flaky pure-solve `sectors_rebuilt` divergence test is skipped) | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
 | R6 | Historical gameplay depth and final calibration | **PRE-1.0 SCOPE COMPLETE — CLOSED 2026-08-09.** Final R6 re-floor `n163`: 634 matched OSIDs, 30/31 anchors (Brčko debt only), Section 6 correct, 40-week fingerprint `5cfcf1c8` golden-match, and all seven engine-health checks passing. Later RC-base fixes moved current HEAD to 629 matched and 31/31 anchors; do not conflate that newer integration baseline with the R6 closeout snapshot. Remaining Brčko/force-density, exhaustion re-pacing, casualty-grade, combat-earned-cohesion, and institutional-veto work is recorded post-1.0 debt unless explicitly reactivated. | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) · [exhaustion/scoring plan](2026-08-06-exhaustion-scoring-redesign-plan.md) | Calendar/weak-predicate events cannot manufacture control; experiments close by predeclared criteria; long-run evidence remains deterministic and Section 6-safe. |
 | RC | Pressure → exhaustion → **COLLAPSE** pipeline | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection plus reversible D-shape (`4.0` shock / `0.5` recovery) produced one live non-enclave HRHB write while remaining deterministic and trajectory-flat: hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 benchmarks, 7/7 health gates, and full Section 6 pass. Bucovaca peaked 62 and recovered to 37; Sipovo/Drvar peaks 11/7.5. D-topology is explicitly post-1.0/reserved. | [Scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) · [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) · [measurement plan](2026-08-15-collapse-d-selection-measurement-plan.md) · [D-shape design](2026-08-15-collapse-d-shape-design.md) · [Stage 0/2 panel record](../40_reports/20260813_RC_COLLAPSE_PANEL_FROZEN_ARTIFACT.md) | The default-OFF local collapse model measures historically discriminating combat pressure, recovers on quiet turns, reaches a bounded live writer, preserves Section 6, and leaves neighbour cascade to an explicit post-1.0 topology packet. |
-| RE | 1.0 engine integrity: seven outcomes, no general cleanup | **ACTIVE — SCOPE REDUCED 2026-08-27.** Corrected baseline and save/replay are green. Execute eight exact-file packets: P1 release-path truth; P2A/P2B one command authority; P3 threat lineage; P4 queue progress; P5 APWB/Tigar deletion; P6 casualty ownership; P7 retreat locality. The accepted `+3.62853%` correction cost is watch-only; no further pre-1.0 diagnosis. One final pair/profile only. | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md) · [frozen discovery](../40_reports/proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md) | All seven outcomes pass focused/Core/save/package proof as applicable; net production LOC is non-positive; one final clean Node-22 A/B pair is byte-identical and engine-green; deferred/retired work stays out; then hand off to R8. |
+| RE | 1.0 engine integrity: seven outcomes, no general cleanup | **HELD AT P2B — AUXILIARY PACKAGED-PROBE RECOVERY ACTIVE 2026-08-28.** P1 and P2A are accepted. P2B's clean-base probe returned NO VERDICT before implementation; P3 waits. The owner authorized a distinct three-lock recovery lane outside the seven outcomes/eight packets. It earns no RE credit and cannot retroactively satisfy P2B. | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [recovery plan](2026-08-28-packaged-probe-recovery-plan.md) · [living audit](../40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) | Recovery closes through mandatory receipt custody; only accepted `NONREPRODUCIBLE_GREEN` may be considered for a fresh P2B lock. Then P2B–P7 and the one final pair/profile retain their original gates. |
 | R7 | Content, historical attribution, audio, accessibility, and opening experience | **IN PROGRESS — AUDIO IMPLEMENTATION LANDED `2d106e5e0`.** Historical attribution, opening experience, and required ambient provenance/assets are implemented. Remaining pre-1.0 gates: human listen/sensitivity acceptance, English accessibility/readability, offline browser and integrated packaged-runtime proof, and closeout reconciliation. **Localization Phase 3 is post-1.0.** | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [opening implementation plan](2026-08-23-opening-screens-implementation-plan.md) | Claims, identities, English strings, and audio are machine-auditable; unsupported content is absent; human/audio sensitivity, accessibility, opening experience, and Electron proof pass. |
 | R8 | Full-campaign packaged-Electron validation and diaries | **WAITING ON RC, R1–R7, AND RE GREEN.** The existing Electron playthrough prototype remains a short IPC-contract smoke tool; R8 full-campaign logic belongs on the determinism-proven `tools/ai_play/president_playthrough.ts` harness. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) | Fresh historical-policy RBiH, RS, and HRHB campaigns cover full duration and required surfaces; bugs and friction are separately routed; final two diaries score 5/5 with clean diagnostics. |
 | R9 | Release candidate, gold, and publication | READY AFTER R8 | [Release plan](2026-07-31-release-candidate-gold-publication-plan.md) | One immutable RC passes clean-machine/security/license/store proofs; artifacts are reproducible; signing/upload inputs are documented; publication awaits only the explicit instruction. |

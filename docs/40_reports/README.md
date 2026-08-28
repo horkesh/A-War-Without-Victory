@@ -2,14 +2,17 @@
 
 **Purpose:** Single entrypoint for implementation reports, handovers, convenes, investigations, and audits. Use consolidated summaries for quick reference; use individual reports for detail.
 
-**2026-08-27 RE 1.0 engine-integrity execution:** The sole executable authority is the
+**2026-08-28 RE 1.0 engine-integrity execution:** The sole RE authority remains the
 [seven-outcome/eight-packet 1.0 contract](../plans/2026-08-26-engine-integrity-plan.md). The
-[single living audit](audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) preserves completed
-foundation evidence and receives one compact row per packet; it is not a queue. The
-[original packet](proposals/20260826_ENGINE_INTEGRITY_PACKET.md),
+original probe channel closed at `b711cffa9` and is historical evidence. The owner-authorized
+[auxiliary packaged-probe recovery](../plans/2026-08-28-packaged-probe-recovery-plan.md) is active
+outside those RE outcomes; P2B is HELD and P3 waits. The
+[single living audit](audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) preserves the evidence
+record and may hold the recovery transition and receipt as well as packet rows; it is not a queue.
+The [original packet](proposals/20260826_ENGINE_INTEGRITY_PACKET.md),
 [frozen discovery record](proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md), and
 [full-team dispositions](proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md) are historical
-evidence only. The probe scope closed separately at `b711cffa9` and is non-blocking history.
+evidence only.
 
 **2026-08-14 — root investigation index added; read this before trusting the bulletins below.** The 26 root-level investigation, panel, first-fire, and root-cause reports dated **2026-06-02 → 2026-08-13** appeared in no index in this folder and were reachable only through `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`, or session memory. They are now indexed in **[§1A](#1a-investigations-panels-and-evidence-records-root-level)**, grouped by lane, each carrying **its standing today rather than the status it claimed when written**. The dated bulletins below this line stop at **2026-08-04** and are a historical stack, not a current-state feed — for current state use §1A, [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md), and `docs/PROJECT_LEDGER.md`.
 

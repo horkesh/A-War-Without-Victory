@@ -2,8 +2,9 @@
 
 **Date:** 2026-08-26
 
-**Status:** corrected Node-22 baseline and save/replay proof captured; owner-approved scope reduced
-to seven release outcomes/eight packets; P1 follows this docs-only amendment; long runs disabled
+**Status:** P1/P2A accepted; P2B HELD before implementation after packaged-probe NO VERDICT; P3
+waiting; owner-authorized auxiliary packaged-probe recovery active outside the seven outcomes/eight
+packets under Lock 1 `RE-PROBE-RECOVERY-TRANSITION`; calibration pause and long-run denial unchanged
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -847,3 +848,109 @@ visible change. No rerun, diagnosis, probe repair, or reinterpretation is author
 ignored `dist/` and `dist-packaged/` trees were removed after process termination; no generated
 probe/build artifact is tracked. Only the P2B scope lock and this evidence row are staged for the
 coordinator's disposition.
+
+## 2026-08-28 — owner-authorized auxiliary packaged-probe recovery transition
+
+P2B remains **HELD** before implementation. The owner accepted the Orchestrator/Architect
+recommendation to open a bounded packaged-probe recovery lane while remaining AFK; this is not an
+ordinary owner checkpoint. The transition is recorded under the RE safety-control namespace only
+so one lock continues to prevent overlap. Recovery is outside the seven RE outcomes and eight RE
+packets, earns no RE completion credit, and cannot automatically or retroactively satisfy P2B's
+clean-base or candidate probe. P3 remains waiting. A successful recovery closes only the auxiliary
+packet. Fresh P2B drafting remains governed by the QA + Architect + Orchestrator acceptance rule
+below; no recovery result reopens RE automatically.
+
+The preserved P2B receipt above is unchanged and remains authoritative: one invocation on exact
+base `bd61a37a3d5eff89613f171edb23496d11fd06f3`, executable launch at
+`2026-08-27T23:12:41.1986877Z`, one full-tree termination at
+`2026-08-27T23:27:42.6202593Z`, wrapper end at `2026-08-27T23:27:43.3372027Z`, exit `124`, expected
+manifest absent, classification **NO VERDICT**, and no P2B code/test/contract edit or rerun.
+
+Specialist findings bound the recovery plan:
+
+- **Platform Specialist:** the current wrapper has no timeout, full-tree termination, live output
+  forwarding, phase receipt, or partial manifest; the manifest is written only at the end. The
+  exact base also emits the Army-HQ manual-chunk cycle warning. Non-ancestor commit `98f54ccb4`
+  records packaged `Cannot access 'ir' before initialization`, which is the leading trigger
+  hypothesis but is **not proof** of this hang and grants no chunk/UI/build repair authority.
+- **Build Engineer:** the live chain is `desktop:package:probe` → `desktop:package:dir` →
+  `tools/desktop_packaged_runtime_probe.mjs`. Unbounded observation boundaries include
+  `sim.startNewCampaign`, `startMapServer`/`server.listen`,
+  `waitForTacticalMapInteraction` renderer execution/IPC, and the wrapper's wait for child close.
+  Current tests are source-contract tests and cannot identify the last reached packaged phase.
+- **Technical Architect:** Electron changes are limited to one guarded emitter adjacent to
+  `getRuntimeProbeManifestPath` plus literal calls inside `runPackagedRuntimeProbe`; no wait/arm/
+  collect helper, constructor, app branch, IPC, state, lifecycle, map-server implementation, UI, or
+  build-config hunk is allowed. The wrapper becomes import-safe in place and exposes behavioral
+  supervisor/parser/classifier/unchanged-validator seams to its existing test. Exact-file locking
+  is insufficient: Architect must approve the symbol/hunk map and independent LOC caps.
+
+Lock 1 is `RE-PROBE-RECOVERY-TRANSITION` / `authorize-auxiliary-packaged-probe-recovery` on exact
+base `c57ecffaf4774b9801d8ef6f4774463f7c0ef52e`, with exactly 14 synchronized control documents:
+current lane, lock, RE plan, recovery plan, living audit, calibration master, reports index, master
+roadmap, command board, plans index, docs index, active-task governance, project ledger, and
+knowledge ledger. Long runs remain false and
+out-of-scope work remains stop-and-queue. Orchestrator, Architect, Process QA, and Reports
+Custodian review this transition.
+Lock 1 bootstraps by staging all 14 synchronized documents, reviewing their exact staged bytes and
+hashes, re-pinning the existing hook, passing working/staged checks, and only then committing.
+After it is accepted and committed, Product Manager installs Lock 2 exactly as
+`RE-PROBE-RECOVERY-INSTRUMENTATION` / `one-shot-packaged-runtime-phase-localization` on that exact
+commit, with only `src/desktop/electron-main.cjs`, `tools/desktop_packaged_runtime_probe.mjs`,
+`tests/desktop_packaged_runtime_probe.test.ts`, the lock, recovery plan, and this audit. Platform
+Specialist is the sole implementer; Build Engineer, Architect, and QA are independent reviewers.
+No implementation begins under Lock 1. Every successor lock is drafted by Product Manager at clean
+HEAD, reviewed by Orchestrator/Architect/Process QA as exact bytes and SHA-256, re-pinned into the
+existing hook, and passed through working/staged checks before any payload edit.
+
+The executable recovery authority is
+`docs/plans/2026-08-28-packaged-probe-recovery-plan.md`. Its direct-main wrapper first emits exact
+sentinel `AWWV_DESKTOP_RUNTIME_PROBE_WRAPPER_STARTED {"schema_version":1}` with LF. The external
+coordinator owns 1,200,000 ms from npm-root start to sentinel and a 960,000 ms post-sentinel
+fail-safe; the wrapper arms its 900,000 ms watchdog only from the child process `'spawn'` event,
+never from `spawn()` return. A valid wrapper terminal freezes its class and cancels classification;
+the coordinator records it without reclassification, allows 5,000 ms natural npm-root close, then
+kills the root tree once if needed and verifies exit under a separate 5,000 ms bound. Forced or
+failed cleanup records `post_terminal_cleanup_forced` / `post_terminal_cleanup_failure` and is
+custody evidence, not a new class. If no wrapper terminal exists, drained npm
+close or the 960,000 ms fail-safe settles one coordinator receipt; the fail-safe kills the npm tree
+once and records `wrapper_terminal_present: false` and `coordinator_fail_safe_triggered: true`.
+It requires 43 exact
+deterministic `{ sequence, phase }` marker rows from `probe-enter` through
+`probe-body-complete`, live stdout/stderr, and one owning full-process-tree kill without extension,
+race, or retry. Its exact classes are `PACKAGE_FAILURE`, `PACKAGE_NO_VERDICT`,
+`NONREPRODUCIBLE_GREEN`, `LOCALIZED_FAILURE`, `PRE_MARKER_FAILURE`, `LOCALIZED_NO_VERDICT`,
+`PRE_MARKER_NO_VERDICT`, and `INSTRUMENTATION_INVALID`. Every class stops. Only after QA accepts
+the Lock-3 receipt and both Architect and Orchestrator explicitly accept
+`NONREPRODUCIBLE_GREEN` may Product Manager draft a fresh exact-base P2B lock through ordinary
+review/re-pin/check custody; this is not retroactive proof. The other seven cannot open P2B, keep it
+held, and allow one bounded proposal after receipt closeout. Verification is bounded to provisioned
+Node `v22.23.0`, one focused RED, one focused GREEN, `node --check` on both JavaScript files, and
+`git diff --check`; no `npx`, typecheck, desktop
+sim build, balanced run, duplicate focused run, or campaign is authorized. The checker-required
+maximum-clean-pairs value `1` is inert while long-run `permitted` is false; actual campaign
+runs/pairs are zero and the one packaged invocation is not a clean pair.
+
+`PACKAGE_FAILURE` requires captured npm output/exit positively proving
+`desktop:package:dir` failed before wrapper entry. Packaging-complete or wrapper-entered output with
+missing sentinel is `INSTRUMENTATION_INVALID`, even on npm nonzero. `PACKAGE_NO_VERDICT` records the
+last proven npm stage at 1,200,000 ms and makes no unsupported package-hang claim. Build Engineer,
+Architect, and QA independently review the coordinator attribution and race/cleanup tests.
+
+After the one shot and cleanup, Product Manager must install Lock 3 exactly as
+`RE-PROBE-RECOVERY-RECEIPT` / `record-one-shot-packaged-probe-recovery-result` on the exact
+candidate commit, allowlisting exactly the lock, recovery plan, this audit,
+`src/desktop/README.md`, and `docs/PROJECT_LEDGER.md`. Its lock is reviewed/re-pinned before any
+receipt edit. The receipt records ordered marker rows, sequence validity, `last_observed_marker`,
+`last_completed_stage`, `next_expected_marker`, exact package/child/wrapper/coordinator results,
+manifest validation, sentinel/package attribution, terminal owner/presence and settlement event,
+classification fail-safe state, 5,000 ms natural-close grace, forced cleanup and separate 5,000 ms
+verification, timeout/kill evidence, invocation count, and final immutable class. Lock 3
+is mandatory, docs-only, and authorizes no second probe or remediation.
+
+This 14-document transition synchronizes current lane, calibration pause, roadmap, board, indexes,
+governance, and both ledgers.
+It changes operator control and reusable custody rules only; there is no product behavior, canon,
+scenario, calibration, reference, or historical-target change. The original probe channel remains
+closed at `b711cffa9`; the auxiliary recovery is a distinct active safety-control lane and this
+living audit remains its single evidence record.

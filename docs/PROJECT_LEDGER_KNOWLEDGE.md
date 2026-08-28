@@ -4206,6 +4206,37 @@ The original candidate named in `[2026-08-01] R7 historical-claim and localizati
 
 **A non-empty enum field is not a resolved claim:** loader-valid workflow sentinels such as `pending` and invalid near-synonyms such as `tribunal` must not satisfy provenance. Durable rule: centralize the runtime vocabulary, retain the raw value and a resolution status in inventory rows, and allow only resolved tiers to produce `documented`.
 
+## 2026-08-28 — Bounded external probes need two clock domains and two process custodians
+
+When a root command performs a long package/build step before starting an inner executable probe,
+one timeout cannot distinguish package silence from runtime silence and one owner cannot reliably
+clean both process trees. Durable rule: the external coordinator owns the npm/root process tree and
+an outer two-phase envelope (pre-sentinel package timer, then post-sentinel fail-safe); the wrapper
+owns the packaged child tree and a shorter child watchdog armed only from the child process
+`'spawn'` event, never from `spawn()` return.
+An exact first-action sentinel transfers observation into the runtime phase. Each custodian kills
+only its owned full tree, exactly once; the outer fail-safe exceeds the inner watchdog by a fixed
+cleanup margin; neither clock extends, restarts, retries, or changes acceptance. Terminal evidence
+must distinguish package failure/no-verdict, pre-marker failure/no-verdict, localized failure/no-
+verdict, invalid instrumentation, and a nonreproducible green. Applied in the
+[2026-08-28 ledger entry](PROJECT_LEDGER.md#2026-08-28-docsre-authorize-bounded-packaged-probe-recovery-control-lane).
+
+Terminal ownership is first-settlement and immutable. A valid wrapper terminal freezes the class;
+the coordinator records it without reclassification, allows the evidence-backed 5,000 ms natural-
+exit grace, then kills the root tree once if needed and verifies cleanup under a separate 5,000 ms
+bound. Cleanup failure is custody evidence, not a new diagnostic class. Only when no wrapper
+terminal settles may drained root close or the outer fail-safe own the terminal receipt. Package
+failure requires positive package-step failure proof; absence at the package timer records the last
+proven stage without guessing which process hung.
+
+Lock custody follows the same separation: Product Manager drafts at clean HEAD; independent
+Orchestrator, Architect, and Process QA approve exact lock bytes/hash; the existing hook is re-pinned
+and scope checks pass before the implementer receives payload custody. A receipt lock must complete
+that sequence before evidence is edited, preventing results from retroactively rewriting their own
+authority. A synchronized bootstrap differs only in that its full transition is staged first, then
+exact-byte reviewed, re-pinned, scope-checked, and committed; successor locks remain lock-only until
+their pin is green.
+
 **Ring-3 enforcement must be semantic, shared, and bounded to player choice prose:** broad keyword scans turn history, source notes, and guard clauses into false positives; inventory-only flags leave genuine violations outside CI. Durable rule: one classifier handles direct refused verbs/constructions in response label/description/text/narrative fields, the canon audit makes matches blocking, and only the exact canonical paramilitary-policy surface receives the section-3 carve-out.
 
 **Historical record and player authorization are separate content owners:** preserving a sourced narrative does not require presenting the documented atrocity as a selectable order. Durable rule: retain the event trigger, record, citation, and non-player consequence while rewriting the player surface around policy, constraint, accountability, or response to an already-existing state; remove response effects/flags that let the player control the refused act directly.
