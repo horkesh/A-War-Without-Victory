@@ -29561,3 +29561,70 @@ stayed green throughout the period when the desktop app could not start a campai
 
 Evidence: `tools/playtest/evidence/20260827_case_file_landing.png`,
 `20260827_case_file_mode_choice.png`. `docs/10_canon/FORAWWV.md` was not edited.
+
+---
+
+## 2026-08-28 — Verdict reported fallen enclaves as HELD; tactical-map chunk cycle; harness typecheck
+
+Three engine/tooling fixes shipped, and one calibration change built, measured and **reverted**.
+Findings from the playthrough lane stay in `docs/40_reports/playtests/20260827_ui_playtest_diary.md`;
+this entry records only what changed in behaviour.
+
+**The verdict told every player he held Srebrenica.** `computeEnclaveData`
+(`src/sim/negotiation/compute_capital.ts`) fell back to
+`if (!enclaveState) return { held: KNOWN_ENCLAVES, lost: [] }`, reporting every enclave HELD
+whenever `state.military.enclave_state` was absent. It is ALWAYS absent: `enclave_state` has seven
+occurrences in `src/` — one type declaration (`game_state.ts:3022`), three validator lines, two
+readers, one comment — and **no writer anywhere**. The fallback was not an edge case; it was the
+only path, in every campaign ever played.
+
+Measured, RBiH player, 188 turns: ground truth `srebrenica_2 = RS` and `zepa_2 = RS`, while the
+end-of-campaign verdict reported held `[sarajevo, srebrenica, zepa, gorazde, bihac]` with
+`enclaves_lost` empty. It also fed scoring — `enclaves_lost` gates four of six RBiH grade tiers
+(`scoring.ts:504-535`) and an empty list satisfies all four, including the A+ test
+`enclaves_lost.length === 0`.
+
+Now derived from `political_controllers` via the existing `ENCLAVE_DEFINITIONS` registry and
+`osidBelongsToEnclave`; `enclave_state` stays authoritative if a writer ever appears. An enclave
+counts as held while its owning faction holds ANY of its ground. Verdict-facing ids deliberately
+unchanged (`bihac` not `bihac_pocket`; `teocak` stays out, being a documented calibration pin).
+After: held `[bihac, gorazde, sarajevo]`, lost `[srebrenica, zepa]` — matching ground truth and the
+ENCLAVE GUARD. **Reporting only**: territory identical at 23.41% and grade identical at B across
+both runs.
+
+**Tactical map chunk cycle.** `src/ui/map/vite.config.ts` split one directory across chunks by
+filename, producing a circular chunk dependency and a TDZ crash that rendered a blank screen on
+launch. Collapsed to a single `feature-army-hq` chunk.
+`tests/ui_map_build_warning_contract.test.ts` had REQUIRED the broken four-chunk layout, so it
+pinned the defect in place; two of its four assertions had also stopped testing anything, because
+the contract greps config TEXT and two chunk names were satisfied by an explanatory COMMENT. It
+now asserts on returned chunk names, which a comment cannot satisfy.
+
+**`npm run typecheck` never checked `tools/`.** The root `tsconfig.json` sets
+`include: ["src","tests"]` and nothing imports `tools/playtest`, so `tsc --noEmit` reported success
+regardless of content — including from the pre-commit hook, which runs exactly that command. Proven
+by appending a deliberate type error and observing exit 0. Added `tsconfig.tools.json`,
+`npm run typecheck:tools`, and a pre-commit branch that runs it when a `tools/playtest/*.ts` file is
+staged; verified by staging a broken file and watching a real commit be rejected. Scoped to
+`tools/playtest` because the rest of `tools/` carries 471 pre-existing errors.
+
+**REVERTED — queued-operation head-of-queue block.** `injectQueuedOperation` attempted only the
+head entry; an unbuildable head returned false without shifting, and `injectPrePlannedOperations`
+skips any corps with a non-empty queue, so one stuck entry sterilized the corps. A fix that
+iterated the queue was built, typechecked and tested green — then reverted on two measured grounds.
+It did not lift the RS t42 cliff it was built for (16 ops, last start t42, unchanged: by late war
+each queue holds a single unbuildable entry, so there was nothing to iterate). And its calibration
+"gain" was churn: two 188w runs gave 695/674/668/652 → 695/675/671/653, but the oct1995 +1 is nine
+settlements moving both ways — five improved, four regressed — and two of the regressions are
+`op:kljuc:kljuc_2` and `op:kljuc:hadzici`, a known-open site where RS control is the defect.
+Anchors 31/31 with zero differences in both runs; `op:kalesija:gojcin_2` and the Farz P-A failure
+appear identically in both and are pre-existing. Full record in diary §3n.
+
+**Verification.** `tsc --noEmit` clean; `tsc -p tsconfig.tools.json` clean; `tests/ui` 333/333;
+`tests/pre_planned_operations.test.ts` green; two paired 188w calibration runs with a cell-by-cell
+diff against `data/source/calibration/painted_control_oct1995.json`.
+
+**Review note:** the enclave change alters what the verdict says about Srebrenica and Žepa and can
+change grades. It makes behaviour match canon rather than depart from it, but it touches the
+enclave-guard surface, which per CLAUDE.md is the Pyrrhic panel's to rule on.
+`docs/10_canon/FORAWWV.md` was not edited.
