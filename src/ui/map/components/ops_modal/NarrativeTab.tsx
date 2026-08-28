@@ -49,7 +49,7 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
     const recommendedActionLabel = formatPlanningRecommendation(prediction.overall.recommendedAction);
 
     return (
-        <div className="relative" style={{ fontFamily: "'Courier New', monospace" }}>
+        <div className="relative" style={{ fontFamily: 'var(--font-command)' }}>
             {/* Classified stamp */}
             <div className="absolute top-4 right-4 rotate-[-12deg] text-red-600/20 text-2xl font-bold uppercase tracking-[0.3em]
                             border-2 border-red-600/20 px-3 py-1 rounded pointer-events-none select-none">

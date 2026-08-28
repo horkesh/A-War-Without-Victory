@@ -243,7 +243,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                     <h3
                         id="event-modal-title"
                         className="text-lg font-bold mb-3"
-                        style={{ color: '#3a3228', fontFamily: 'Georgia, serif' }}
+                        style={{ color: '#3a3228', fontFamily: 'var(--font-command)' }}
                     >
                         {event.title}
                     </h3>
@@ -251,7 +251,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                     {/* Narrative body — field report style */}
                     <p
                         className="text-sm leading-relaxed mb-4"
-                        style={{ color: '#4a4438', fontFamily: "'Courier New', monospace", lineHeight: '1.7' }}
+                        style={{ color: '#4a4438', fontFamily: 'var(--font-command)', lineHeight: '1.7' }}
                     >
                         {event.narrative}
                     </p>
@@ -307,7 +307,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                         backgroundColor: 'rgba(60,80,50,0.12)',
                         color: '#5a6a4a',
                         border: '1px solid rgba(60,80,50,0.25)',
-                        fontFamily: 'Georgia, serif',
+                        fontFamily: 'var(--font-command)',
                     }}
                     onMouseEnter={e => {
                         (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.22)';

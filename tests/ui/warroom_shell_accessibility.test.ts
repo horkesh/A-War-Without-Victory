@@ -221,14 +221,14 @@ describe('WarroomShellLayer accessibility proof', () => {
         })).toMatch(/\d{1,2} \w{3} 1993/);
     });
 
-    it('renders the Warroom calendar without Comic Sans fallback or ellipsis truncation', () => {
+    it('renders the Warroom calendar in the canonical data family without ellipsis truncation', () => {
         const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
         expect(source).not.toContain('Comic Sans MS');
         expect(source).not.toContain('Segoe Print');
         expect(source).not.toContain("textOverflow: 'ellipsis'");
         expect(source).not.toMatch(/fontSize:\s*['"][^'"]*vw/i);
         expect(source).toContain('data-testid="warroom-date-board-label"');
-        expect(source).toContain('fontFamily: \'"IBM Plex Sans Condensed", "Segoe UI", Arial, sans-serif\'');
+        expect(source).toContain("fontFamily: 'var(--font-data)'");
     });
 
     it('keeps the Warroom dock and projected map attached to the scene plate', () => {

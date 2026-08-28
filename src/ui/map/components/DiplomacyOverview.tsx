@@ -42,14 +42,14 @@ function PatronGauge({ faction, authority }: { faction: string; authority: numbe
     return (
         <div className="flex items-center gap-3">
             <div className="w-24 text-xs text-[#6a5a40] font-bold uppercase shrink-0"
-                 style={{ fontFamily: 'Courier New, monospace' }}>
+                 style={{ fontFamily: 'var(--font-command)' }}>
                 {PATRON_LABELS[faction] ?? getPlayerSafeMilitaryFactionName(faction)}
             </div>
             <div className="flex-1 h-3 bg-[#d8d0c4] rounded overflow-hidden border border-[#c8b898]/50">
                 <div className="h-full rounded transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: color }} />
             </div>
             <div className="w-16 text-right">
-                <span className="text-xs font-bold uppercase" style={{ color, fontFamily: 'Courier New, monospace' }}>
+                <span className="text-xs font-bold uppercase" style={{ color, fontFamily: 'var(--font-data)' }}>
                     {level}
                 </span>
             </div>
@@ -67,13 +67,13 @@ function DimensionBar({ dimKey, value, playerFaction }: { dimKey: string; value:
 
     return (
         <div className="flex items-center gap-2">
-            <div className="w-28 text-xs text-[#6a5a40] shrink-0" style={{ fontFamily: 'Courier New, monospace' }}>
+            <div className="w-28 text-xs text-[#6a5a40] shrink-0" style={{ fontFamily: 'var(--font-command)' }}>
                 {t(labelKey)}
             </div>
             <div className="flex-1 h-2.5 bg-[#d8d0c4] rounded overflow-hidden border border-[#c8b898]/50">
                 <div className="h-full rounded transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: dim.color }} />
             </div>
-            <div className="w-8 text-right text-xs tabular-nums text-[#2a2016]" style={{ fontFamily: 'Courier New, monospace' }}>
+            <div className="w-8 text-right text-xs tabular-nums text-[#2a2016]" style={{ fontFamily: 'var(--font-data)' }}>
                 {Math.round(pct)}
             </div>
         </div>

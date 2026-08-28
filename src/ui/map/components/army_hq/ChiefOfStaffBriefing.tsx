@@ -464,7 +464,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
             {/* Body — missive text with inline links */}
             <div className="px-3 py-1.5 flex-1 overflow-y-auto">
                 {paragraphs.map((segments, i) => (
-                    <p key={i} className="text-[12px] text-neutral-700 leading-relaxed mb-2 last:mb-0" style={{ fontFamily: 'Georgia, serif' }}>
+                    <p key={i} className="text-[12px] text-neutral-700 leading-relaxed mb-2 last:mb-0" style={{ fontFamily: 'var(--font-command)' }}>
                         {i === 0 && <>&ldquo;</>}
                         {segments.map((seg, j) =>
                             seg.type === 'link' && onCorpsClick ? (
@@ -473,7 +473,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
                                     type="button"
                                     onClick={() => onCorpsClick(seg.corpsId)}
                                     className="underline decoration-amber-700/40 hover:decoration-amber-700 text-amber-900 font-semibold hover:text-amber-700 transition-colors cursor-pointer"
-                                    style={{ fontFamily: 'Georgia, serif' }}
+                                    style={{ fontFamily: 'var(--font-command)' }}
                                 >
                                     {seg.label}
                                 </button>
@@ -490,7 +490,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
                     <div className="mt-2 pt-2 border-t border-neutral-300/40">
                         <p
                             className="text-xs text-neutral-700 leading-relaxed italic"
-                            style={{ fontFamily: 'Georgia, serif', borderLeft: '2px solid #b8860b44', paddingLeft: '8px' }}
+                            style={{ fontFamily: 'var(--font-command)', borderLeft: '2px solid #b8860b44', paddingLeft: '8px' }}
                         >
                             {letterHomeText}
                         </p>

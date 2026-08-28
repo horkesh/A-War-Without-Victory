@@ -144,7 +144,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             )}
 
             {/* Brigade name */}
-            <div className="text-xs font-bold text-white truncate" style={{ fontFamily: "'Courier New', monospace" }}>
+            <div className="text-xs font-bold text-white truncate" style={{ fontFamily: 'var(--font-command)' }}>
                 {brigadeName}
             </div>
 

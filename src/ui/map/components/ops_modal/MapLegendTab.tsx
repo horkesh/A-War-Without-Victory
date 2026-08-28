@@ -53,7 +53,7 @@ function LineSwatch({ color, width, dashed }: { color: string; width?: number; d
 
 export function MapLegendTab() {
     return (
-        <div className="space-y-4" style={{ fontFamily: "'Courier New', monospace" }}>
+        <div className="space-y-4" style={{ fontFamily: 'var(--font-command)' }}>
             {/* Territory Colors */}
             <div>
                 <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">

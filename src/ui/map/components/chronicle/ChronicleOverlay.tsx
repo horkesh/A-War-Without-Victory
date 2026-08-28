@@ -212,7 +212,7 @@ function ChronicleChapterView({
                             </div>
                             <h2
                                 className="mt-1 text-base font-semibold text-amber-200"
-                                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+                                style={{ fontFamily: 'var(--font-command)' }}
                             >
                                 {chapter.title}
                             </h2>
@@ -655,7 +655,7 @@ export function ChronicleOverlay() {
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
                     <h1
                         className="text-xs font-bold uppercase tracking-[0.25em] text-amber-400/90 shrink-0"
-                        style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+                        style={{ fontFamily: 'var(--font-command)' }}
                     >
                         {t('chronicle.title')}
                     </h1>

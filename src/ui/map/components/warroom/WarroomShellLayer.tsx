@@ -439,7 +439,7 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontFamily: '"Courier New", Courier, monospace',
+              fontFamily: 'var(--font-data)',
               fontSize: '12px',
               letterSpacing: '0.12em',
               color: 'rgba(55,45,34,0.58)',
@@ -491,7 +491,7 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
           // note rather than a billboarded UI label. Less luminous blue
           // (was rgba(28,84,172,0.86)) → dark navy ink at higher opacity.
           color: 'rgba(21, 35, 58, 0.88)',
-          fontFamily: '"IBM Plex Sans Condensed", "Segoe UI", Arial, sans-serif',
+          fontFamily: 'var(--font-data)',
           fontSize: '13px',
           fontWeight: 600,
           letterSpacing: '0.02em',
@@ -544,7 +544,7 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
             background: 'rgba(15,18,22,0.96)',
             color: 'rgba(245,197,90,0.98)',
             padding: '4px 7px',
-            fontFamily: '"Courier New", Courier, monospace',
+            fontFamily: 'var(--font-command)',
             fontSize: '12px',
             fontWeight: 700,
             letterSpacing: '0.12em',
@@ -692,7 +692,7 @@ function WarroomToolbar({ onNavigate }: { onNavigate: (command?: WarroomNavigati
             background: 'rgba(0,0,0,0.24)',
             color: entry.id === 'advance' ? 'rgba(255,214,190,0.96)' : 'rgba(236,220,174,0.96)',
             padding: '7px 9px',
-            fontFamily: '"IBM Plex Sans Condensed", "Segoe UI", Arial, sans-serif',
+            fontFamily: 'var(--font-command)',
             fontSize: '12px',
             fontWeight: 700,
             letterSpacing: '0.04em',
@@ -809,7 +809,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
           aria-live="polite"
           style={{
             color: 'rgba(255,255,255,0.72)',
-            fontFamily: '"Courier New", Courier, monospace',
+            fontFamily: 'var(--font-data)',
             fontSize: '12px',
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
@@ -826,7 +826,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
             background: 'rgba(18,22,28,0.92)',
             color: 'rgba(245,197,90,0.98)',
             padding: '10px 14px',
-            fontFamily: '"Courier New", Courier, monospace',
+            fontFamily: 'var(--font-command)',
             fontSize: '12px',
             fontWeight: 700,
             letterSpacing: '0.14em',

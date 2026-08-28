@@ -136,7 +136,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
             panelClassName="w-[95%] max-w-[640px] max-h-[90vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
             panelStyle={{
                 background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
-                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontFamily: 'var(--font-command)',
             }}
         >
             <>
@@ -173,7 +173,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             {plan.planName}
                         </h2>
                         <div className="text-xs text-[#6a5a40] mt-1"
-                             style={{ fontFamily: 'Courier New, monospace' }}>
+                             style={{ fontFamily: 'var(--font-data)' }}>
                             {t('peacePlan.proposedDate', { date: turnToDateString(plan.turnOffered) })}
                         </div>
                     </div>
@@ -229,7 +229,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         ))}
                     </div>
                     <div className="flex justify-between text-xs text-[#6a5a40]"
-                         style={{ fontFamily: 'Courier New, monospace' }}>
+                         style={{ fontFamily: 'var(--font-data)' }}>
                         {splitRows.map((row) => (
                             <span key={row.faction}>{row.label} {formatPercent(row.displayPercent)}%</span>
                         ))}
@@ -272,7 +272,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             onClick={() => void handleRespond('accepted')}
                             disabled={isSubmitting}
                             className="px-6 py-2.5 rounded border-2 border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#b8d8b8] transition-colors"
-                            style={{ fontFamily: 'Courier New, monospace' }}
+                            style={{ fontFamily: 'var(--font-command)' }}
                         >
                             {t('peacePlan.acceptPlan')}
                         </button>
@@ -281,7 +281,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             onClick={onDismiss}
                             disabled={isSubmitting}
                             className="px-6 py-2.5 rounded border-2 border-[#6a5a40]/35 bg-[#d8ceb8] text-[#4a3a24] font-bold text-[13px] uppercase tracking-wider hover:bg-[#c8b898] transition-colors"
-                            style={{ fontFamily: 'Courier New, monospace' }}
+                            style={{ fontFamily: 'var(--font-command)' }}
                         >
                             {t('peacePlan.reviewLater')}
                         </button>
@@ -290,7 +290,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             onClick={() => void handleRespond('rejected')}
                             disabled={isSubmitting}
                             className="px-6 py-2.5 rounded border-2 border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#6a1a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#d8b8b8] transition-colors"
-                            style={{ fontFamily: 'Courier New, monospace' }}
+                            style={{ fontFamily: 'var(--font-command)' }}
                         >
                             {t('peacePlan.rejectPlan')}
                         </button>

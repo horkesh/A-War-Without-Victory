@@ -7,6 +7,35 @@ const repoRoot = resolve(__dirname, '../..');
 const fontsDirectory = resolve(repoRoot, 'assets/ui/fonts');
 const globalsPath = resolve(repoRoot, 'src/ui/map/styles/globals.css');
 const tailwindPath = resolve(repoRoot, 'src/ui/map/tailwind.config.ts');
+// Explicitly bounded to player-facing surfaces reachable from App.tsx and their
+// direct runtime children. Debug painters, stories, standalone tools, and map
+// glyph-PBF configuration are intentionally outside this authored UI audit.
+const activeSurfaceTypographyInventory = [
+  'src/ui/map/components/MainMenu.tsx',
+  'src/ui/map/components/CodexPanel.tsx',
+  'src/ui/map/components/EventModal.tsx',
+  'src/ui/map/components/chronicle/ChronicleOverlay.tsx',
+  'src/ui/map/components/chronicle/ChronicleCard.tsx',
+  'src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx',
+  'src/ui/map/components/army_hq/CombatRecordSection.tsx',
+  'src/ui/map/components/WarHasBegunSplash.tsx',
+  'src/ui/map/components/SettingsScreen.tsx',
+  'src/ui/map/components/CreditsScreen.tsx',
+  'src/ui/map/components/PeacePlanModal.tsx',
+  'src/ui/map/components/DaytonNegotiationModal.tsx',
+  'src/ui/map/components/DaytonInstitutionalDimensions.tsx',
+  'src/ui/map/components/DiplomacyOverview.tsx',
+  'src/ui/map/components/TerritoryOverTimeChart.tsx',
+  'src/ui/map/components/ops_modal/BrigadeCard.tsx',
+  'src/ui/map/components/ops_modal/MapLegendTab.tsx',
+  'src/ui/map/components/ops_modal/NarrativeTab.tsx',
+  'src/ui/map/components/ops_modal/OpordDocument.tsx',
+  'src/ui/map/components/ops_modal/OpsMap.tsx',
+  'src/ui/map/components/ops_modal/PlanParameters.tsx',
+  'src/ui/map/components/warroom/WarroomShellLayer.tsx',
+  'src/ui/map/layers/buildTacticalDeckLayers.ts',
+  'src/ui/map/map/formationIcons.ts',
+] as const;
 const upstreamMonoRanges = {
   Latin1: 'U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2013-2014, U+2018-201A, U+201C-201E, U+2020-2022, U+2026, U+2030, U+2039-203A, U+2044, U+20AC, U+2122, U+2212, U+FB01-FB02',
   Latin2: 'U+0100-0101, U+0104-0130, U+0132-0151, U+0154-017F, U+018F, U+0192, U+01A0-01A1, U+01AF-01B0, U+01FA-01FF, U+0218-021B, U+0237, U+0259, U+1E80-1E85, U+1E9E, U+20A1, U+20A4, U+20A6, U+20A8-20AA, U+20AD-20AE, U+20B1-20B2, U+20B4-20B5, U+20B8-20BA, U+20BD, U+20BF',
@@ -118,6 +147,22 @@ describe('canonical UI typography contract', () => {
     expect(config).toMatch(/serif:\s*\[\s*['"]var\(--font-command\)['"]/);
     expect(config).toMatch(/mono:\s*\[\s*['"]var\(--font-data\)['"]/);
     expectNoExternalRuntimeFont(config);
+  });
+
+  it('keeps active authored surfaces on the canonical command and data families', () => {
+    const authoredForbiddenFamily =
+      /fontFamily\s*(?::|=)[^\r\n]*(?:Georgia|Times New Roman|Courier New|Arial|Helvetica|Segoe UI)[^\r\n]*|\bfont-serif\b/g;
+    const offenders: string[] = [];
+
+    for (const relativePath of activeSurfaceTypographyInventory) {
+      const source = readFileSync(resolve(repoRoot, relativePath), 'utf8');
+      for (const match of source.matchAll(authoredForbiddenFamily)) {
+        const line = source.slice(0, match.index).split('\n').length;
+        offenders.push(`${relativePath}:${line}: ${match[0]}`);
+      }
+    }
+
+    expect(offenders, offenders.join('\n')).toEqual([]);
   });
 
   it('records the pinned upstream revision, raw paths, and font hashes', () => {

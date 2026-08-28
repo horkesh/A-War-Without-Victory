@@ -196,7 +196,7 @@ export function DaytonInstitutionalDimensions({
                                             ? 'text-[#6a5a40] border-[#8a7a60]/40 hover:bg-[#e8dcc4]'
                                             : 'text-[#b0a890] border-[#c8b898]/30 bg-[#e8dcc4]/20 cursor-not-allowed line-through'
                                 }`}
-                                style={{ fontFamily: 'Courier New, monospace' }}
+                                style={{ fontFamily: 'var(--font-command)' }}
                                 title={!reachable && !active ? t('dayton.optionLocked') : undefined}
                             >
                                 {t(DIAL_LABEL_KEY[setting])}
@@ -243,7 +243,7 @@ export function DaytonInstitutionalDimensions({
                                                             ? 'text-[#b0a890] border-[#c8b898]/30 cursor-not-allowed'
                                                             : 'text-[#4a5a8a] border-[#4a5a8a]/40 hover:bg-[#d0d8e8]'
                                                 }`}
-                                                style={{ fontFamily: 'Courier New, monospace' }}
+                                                style={{ fontFamily: 'var(--font-command)' }}
                                                 title={locked ? t('dayton.optionLocked') : isDefault ? t('dayton.historicalDefault') : undefined}
                                             >
                                                 {t(OWNER_LABEL_KEY[owner])}
@@ -341,7 +341,7 @@ function ChoiceSection({
                                                         ? 'text-[#b0a890] border-[#c8b898]/30 cursor-not-allowed'
                                                         : 'text-[#8a6a3a] border-[#8a6a3a]/40 hover:bg-[#e8dcc4]'
                                             }`}
-                                            style={{ fontFamily: 'Courier New, monospace' }}
+                                            style={{ fontFamily: 'var(--font-command)' }}
                                             title={locked ? t('dayton.optionLocked') : opt.is_default ? t('dayton.historicalDefault') : undefined}
                                         >
                                             {opt.label}

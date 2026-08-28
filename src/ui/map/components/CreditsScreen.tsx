@@ -24,7 +24,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
             <div className="w-[90%] max-w-[480px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-8"
                  style={{
                      background: 'rgba(26, 24, 21, 0.97)',
-                     fontFamily: 'Georgia, "Times New Roman", serif',
+                     fontFamily: 'var(--font-command)',
                  }}
             >
 
@@ -65,7 +65,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
                 <div className="text-center mt-6">
                     <button type="button" onClick={onClose}
                         className="text-xs uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10 transition-colors"
-                        style={{ fontFamily: 'Courier New, monospace' }}>
+                        style={{ fontFamily: 'var(--font-command)' }}>
                         {t('common.close')}
                     </button>
                 </div>

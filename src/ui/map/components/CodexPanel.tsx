@@ -832,7 +832,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                             </span>
                                         )}
                                     </div>
-                                    <div className="text-[12px] font-bold text-neutral-800 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
+                                    <div className="text-[12px] font-bold text-neutral-800 leading-tight" style={{ fontFamily: 'var(--font-command)' }}>
                                         {selectedResolvedEssay.title}
                                     </div>
                                     <div className="text-xs text-neutral-500 mt-1 italic">
@@ -846,7 +846,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                     data-awwv-codex-selected-state={selectedResolvedEssay.isGhost ? 'ghost' : 'unlocked'}
                                 >
                                     {selectedResolvedEssay.paragraphs.length > 0 ? (
-                                        <div className="text-xs text-neutral-700 leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
+                                        <div className="text-xs text-neutral-700 leading-relaxed" style={{ fontFamily: 'var(--font-command)' }}>
                                             {selectedResolvedEssay.paragraphs.map((paragraph, index) => (
                                                 paragraph.kind === 'canonical' ? (
                                                     <p key={index} className="mb-2 last:mb-0">{paragraph.text}</p>
@@ -872,7 +872,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="text-xs text-neutral-400 italic text-center py-3" style={{ fontFamily: 'Georgia, serif' }}>
+                                        <div className="text-xs text-neutral-400 italic text-center py-3" style={{ fontFamily: 'var(--font-command)' }}>
                                             {t('codex.contentPending')}
                                         </div>
                                     )}

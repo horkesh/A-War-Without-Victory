@@ -263,7 +263,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
             panelClassName="w-[95%] max-w-[800px] max-h-[92vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
             panelStyle={{
                 background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
-                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontFamily: 'var(--font-command)',
             }}
         >
             <>
@@ -286,14 +286,14 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                     <h2 id="dayton-negotiation-title" className="text-[22px] font-bold text-[#2a2016] leading-tight">
                         {t('dayton.title')}
                     </h2>
-                    <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'Courier New, monospace' }}>
+                    <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'var(--font-command)' }}>
                         {t('dayton.location')}
                     </div>
                 </div>
 
                 {/* Capital budget */}
                 <div className="px-8 py-3 border-b border-[#c8b898]/40 flex items-center justify-between">
-                    <div className="text-xs text-[#6a5a40]" style={{ fontFamily: 'Courier New, monospace' }}>
+                    <div className="text-xs text-[#6a5a40]" style={{ fontFamily: 'var(--font-data)' }}>
                         <span className="font-bold text-[#2a2016]">{t('peace.negotiationCapital')}</span>{' '}
                         <span className={overBudget ? 'text-red-700 font-bold' : 'text-[#2a6a2a]'}>
                             {capitalSpent}
@@ -366,7 +366,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                                             <button type="button" onClick={() => toggleDemand(pkg.id)}
                                                 className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                                     isDemand ? 'bg-[#2a6a2a] text-white border-[#2a6a2a]' : 'text-[#2a6a2a] border-[#2a6a2a]/40 hover:bg-[#d0e8d0]'
-                                                }`} style={{ fontFamily: 'Courier New, monospace' }}>
+                                                }`} style={{ fontFamily: 'var(--font-command)' }}>
                                                 {t('dayton.demand', { cost: pkg.demandCost })}
                                             </button>
                                         )}
@@ -374,7 +374,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                                             <button type="button" onClick={() => toggleConcession(pkg.id)}
                                                 className={`text-xs px-2 py-1 rounded border font-bold uppercase ${
                                                     isConcession ? 'bg-[#8a2a2a] text-white border-[#8a2a2a]' : 'text-[#8a2a2a] border-[#8a2a2a]/40 hover:bg-[#e8d0d0]'
-                                                }`} style={{ fontFamily: 'Courier New, monospace' }}>
+                                                }`} style={{ fontFamily: 'var(--font-command)' }}>
                                                 {t('dayton.concede', { cost: pkg.concedeCost })}
                                             </button>
                                         )}
@@ -425,13 +425,13 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                                         <button type="button" onClick={() => setInstitution(pkg.id, 'centralized')}
                                             className={`text-xs px-2 py-1 rounded border font-bold ${
                                                 choice === 'centralized' ? 'bg-[#4a5a8a] text-white border-[#4a5a8a]' : 'text-[#4a5a8a] border-[#4a5a8a]/40 hover:bg-[#d0d8e8]'
-                                            }`} style={{ fontFamily: 'Courier New, monospace' }}>
+                                            }`} style={{ fontFamily: 'var(--font-command)' }}>
                                             {t('dayton.central', { cost: pkg.centralizedCost })}
                                         </button>
                                         <button type="button" onClick={() => setInstitution(pkg.id, 'decentralized')}
                                             className={`text-xs px-2 py-1 rounded border font-bold ${
                                                 choice === 'decentralized' ? 'bg-[#8a6a3a] text-white border-[#8a6a3a]' : 'text-[#8a6a3a] border-[#8a6a3a]/40 hover:bg-[#e8dcc4]'
-                                            }`} style={{ fontFamily: 'Courier New, monospace' }}>
+                                            }`} style={{ fontFamily: 'var(--font-command)' }}>
                                             {t('dayton.decentral', { cost: pkg.decentralizedCost })}
                                         </button>
                                     </div>
@@ -466,7 +466,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                                     ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
                                     : 'border-[#4a5a8a]/50 bg-[#d0d8e8] text-[#2a3a6a] hover:bg-[#b8c8e0]'
                             }`}
-                            style={{ fontFamily: 'Courier New, monospace' }}
+                            style={{ fontFamily: 'var(--font-command)' }}
                         >
                             {probing ? t('dayton.probing') : t('dayton.probePositions')}
                         </button>
@@ -508,7 +508,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                                         ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
                                         : 'border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] hover:bg-[#b8d8b8]'
                             }`}
-                            style={{ fontFamily: 'Courier New, monospace' }}
+                            style={{ fontFamily: 'var(--font-command)' }}
                         >
                             {submitting ? 'Negotiating...' : overBudget ? 'Over Budget' : 'Submit Proposal'}
                         </button>
@@ -522,7 +522,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                                     ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
                                     : 'border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#5a1a1a] hover:bg-[#d8b8b8]'
                             }`}
-                            style={{ fontFamily: 'Courier New, monospace' }}
+                            style={{ fontFamily: 'var(--font-command)' }}
                         >
                             Decline Talks
                         </button>
@@ -532,7 +532,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                             Reduce demands — capital spent ({capitalSpent}) exceeds available ({Math.round(capitalAvailable)})
                         </div>
                     )}
-                    <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'Courier New, monospace' }}>
+                    <div className="text-xs text-[#6a5a40] mt-1" style={{ fontFamily: 'var(--font-command)' }}>
                         Submit a proposal to negotiate, or Decline Talks to refuse meaningful negotiation.
                     </div>
                 </div>
@@ -548,7 +548,7 @@ function ReadoutBar({ label, value, color, hint }: { label: string; value: numbe
         <div title={hint}>
             <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-bold text-[#2a2016]">{label}</span>
-                <span className="text-[12px] font-bold" style={{ color, fontFamily: 'Courier New, monospace' }}>
+                <span className="text-[12px] font-bold" style={{ color, fontFamily: 'var(--font-data)' }}>
                     {Math.round(value)}
                 </span>
             </div>
@@ -624,7 +624,7 @@ function BotResponseRow({
                         type="button"
                         onClick={onAdopt}
                         className="mt-1.5 text-xs px-2 py-1 rounded border font-bold uppercase text-[#8a6a3a] border-[#8a6a3a]/40 hover:bg-[#e8dcc4]"
-                        style={{ fontFamily: 'Courier New, monospace' }}
+                        style={{ fontFamily: 'var(--font-command)' }}
                     >
                         {t('dayton.adoptCounter')}
                     </button>
@@ -633,4 +633,3 @@ function BotResponseRow({
         </div>
     );
 }
-

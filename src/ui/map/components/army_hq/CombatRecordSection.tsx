@@ -29,7 +29,7 @@ export function CombatRecordSection({ corpsId, corps }: CombatRecordSectionProps
                     density="compact"
                 />
             ) : (
-                <div className="space-y-1 text-xs tabular-nums" style={{ fontFamily: 'Courier New, monospace' }}>
+                <div className="space-y-1 text-xs tabular-nums" style={{ fontFamily: 'var(--font-data)' }}>
                     <div className="flex justify-between">
                         <span className="text-text-secondary">{t('combatRecord.battles')}</span>
                         <span className="text-text-primary font-bold">{cs.battles_fought}</span>

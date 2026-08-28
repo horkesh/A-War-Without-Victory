@@ -154,7 +154,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                     onChange={(e) => onUpdate({ opName: e.target.value })}
                     className="bg-[rgba(40,36,30,0.5)] border border-[rgba(180,160,130,0.1)] rounded px-2 py-0.5
                                text-xs text-white w-52 focus:border-accent-gold/40 focus:outline-none"
-                    style={{ fontFamily: "'Courier New', monospace" }}
+                    style={{ fontFamily: 'var(--font-command)' }}
                 />
             </div>
 

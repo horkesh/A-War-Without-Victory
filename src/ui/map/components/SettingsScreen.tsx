@@ -245,7 +245,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             >
 
                 <h2 className="text-[16px] text-[#c4a35a] font-bold tracking-wider text-center mb-4"
-                    style={{ fontFamily: 'Georgia, serif' }}>
+                    style={{ fontFamily: 'var(--font-command)' }}>
                     {t('settings.title')}
                 </h2>
 
@@ -259,7 +259,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                     ? 'text-[#c4a35a] border-[#c4a35a]/40 bg-[#c4a35a]/10'
                                     : 'text-[#8a7a60] border-[#8a7a60]/20 hover:bg-[#8a7a60]/10'
                             }`}
-                            style={{ fontFamily: 'Courier New, monospace' }}>
+                            style={{ fontFamily: 'var(--font-command)' }}>
                             {sec.title}
                         </button>
                     ))}
@@ -377,7 +377,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                         type="button"
                                         onClick={exportCrashReports}
                                         className="text-xs uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
-                                        style={{ fontFamily: 'Courier New, monospace' }}
+                                        style={{ fontFamily: 'var(--font-command)' }}
                                     >
                                         {t('settings.crashDiagnostics.export')}
                                     </button>
@@ -385,7 +385,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                         type="button"
                                         onClick={exportPlaytestEvidence}
                                         className="text-xs uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
-                                        style={{ fontFamily: 'Courier New, monospace' }}
+                                        style={{ fontFamily: 'var(--font-command)' }}
                                     >
                                         {t('settings.playtestEvidence.export')}
                                     </button>
@@ -393,7 +393,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                         type="button"
                                         onClick={clearCrashReports}
                                         className="text-xs uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-2 py-1 rounded hover:bg-[#8a7a60]/10"
-                                        style={{ fontFamily: 'Courier New, monospace' }}
+                                        style={{ fontFamily: 'var(--font-command)' }}
                                     >
                                         {t('settings.crashDiagnostics.clear')}
                                     </button>
@@ -427,7 +427,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 <div className="flex justify-center gap-3">
                     <button type="button" onClick={onClose}
                         className="text-xs uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10"
-                        style={{ fontFamily: 'Courier New, monospace' }}>
+                        style={{ fontFamily: 'var(--font-command)' }}>
                         {t('settings.close')}
                     </button>
                 </div>

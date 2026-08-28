@@ -70,7 +70,7 @@ export const ChronicleCard = React.memo(function ChronicleCard({ entry }: Chroni
                             ? 'text-xs font-semibold text-amber-200/90 leading-tight'
                             : 'text-xs text-stone-200/80 leading-tight'
                     }
-                    style={entry.headline ? { fontFamily: 'Georgia, "Times New Roman", serif' } : {}}
+                    style={entry.headline ? { fontFamily: 'var(--font-command)' } : {}}
                 >
                     {entry.title}
                 </div>
