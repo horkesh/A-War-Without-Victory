@@ -41,6 +41,7 @@ describe('MainMenu Field Records', () => {
             onQuit: vi.fn(),
         }));
 
+        fireEvent.click(screen.getByRole('button', { name: 'Assume responsibility' }));
         fireEvent.click(screen.getByRole('button', { name: 'Field Records' }));
         expect(await screen.findByText('quicksave')).toBeTruthy();
         expect(screen.getByText(/Week 12/)).toBeTruthy();

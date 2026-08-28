@@ -18,6 +18,7 @@ function renderMainMenu(hasSave = true, errorMessage?: string) {
         onCredits: noop,
         onQuit: noop,
     }));
+    fireEvent.click(screen.getByRole('button'));
 }
 
 describe('MainMenu localization', () => {

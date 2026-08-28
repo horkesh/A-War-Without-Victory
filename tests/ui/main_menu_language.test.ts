@@ -25,6 +25,8 @@ describe('MainMenu language control', () => {
             onQuit: noop,
         }));
 
+        fireEvent.click(screen.getByRole('button', { name: 'Assume responsibility' }));
+
         expect(screen.getByRole('combobox', { name: 'Language' })).toBeTruthy();
     });
 
@@ -38,6 +40,8 @@ describe('MainMenu language control', () => {
             onCredits: noop,
             onQuit: noop,
         }));
+
+        fireEvent.click(screen.getByRole('button', { name: 'Assume responsibility' }));
 
         fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), {
             target: { value: 'bcs' },
