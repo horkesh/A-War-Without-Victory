@@ -93,7 +93,16 @@ describe('desktop host React opening ownership', () => {
     expect(ensure).not.toContain('this.claimReactOpeningOwnership(iframe);');
     expect(warroomSource).toContain("e.data?.type === 'awwv-shell:ready'");
     expect(warroomSource).toContain('this.isTrustedOperationalShellMessage(e)');
-    expect(warroomSource).toContain('this.claimReactOpeningOwnership(this.tacticalMapIframe);');
+    expect(warroomSource).toContain('this.handleReactOpeningReady(this.tacticalMapIframe);');
+
+    const handleReady = method(
+      warroomSource,
+      'private handleReactOpeningReady',
+      'private flushReactOpeningReadyDeferredByRecoveryMutation',
+    );
+    expect(handleReady).toContain('this.legacyRecoveryCampaignMutationInFlight');
+    expect(handleReady).toContain('this.reactReadyDeferredByRecoveryMutation = true;');
+    expect(handleReady).toContain('this.claimReactOpeningOwnership(iframe);');
 
     const recovery = method(
       warroomSource,

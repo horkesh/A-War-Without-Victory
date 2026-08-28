@@ -70,6 +70,12 @@ async function flushMicrotasks(): Promise<void> {
   for (let i = 0; i < 8; i += 1) await Promise.resolve();
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((settle) => { resolve = settle; });
+  return { promise, resolve };
+}
+
 function sendReady(iframe: HTMLIFrameElement, source: MessageEventSource | null = iframe.contentWindow): void {
   window.dispatchEvent(new MessageEvent('message', {
     data: { type: 'awwv-shell:ready' },
@@ -159,6 +165,11 @@ describe('desktop React opening lifecycle', () => {
     (document.querySelector('.sp-faction-option') as HTMLButtonElement).click();
     await flushMicrotasks();
     expect(startNewCampaign).toHaveBeenCalledTimes(1);
+    expect(startNewCampaign).toHaveBeenCalledWith({
+      playerFaction: 'RBiH',
+      decisionMode: 'emergent',
+      scenarioKey: 'apr_1992',
+    });
 
     sendReady(iframe);
     await flushMicrotasks();
@@ -199,5 +210,70 @@ describe('desktop React opening lifecycle', () => {
     sendReady(iframe);
 
     expect(showWarroomMessages()).toHaveLength(1);
+  });
+
+  it('defers late readiness until a recovery campaign mutation succeeds', async () => {
+    const campaign = deferred<{ ok: boolean; stateJson?: string }>();
+    const startNewCampaign = vi.fn().mockReturnValue(campaign.promise);
+    const { iframe } = await bootHost({ startNewCampaign });
+    const postMessage = vi.spyOn(iframe.contentWindow!, 'postMessage');
+    vi.advanceTimersByTime(8000);
+    document.getElementById('mm-new-campaign')!.click();
+    (document.querySelector('.sp-faction-option') as HTMLButtonElement).click();
+    await flushMicrotasks();
+
+    sendReady(iframe);
+    expect(document.getElementById('side-picker')!.classList.contains('mm-hidden')).toBe(false);
+    expect(document.getElementById('side-picker')!.inert).toBe(false);
+    expect(iframe.hidden).toBe(true);
+    expect(postMessage).not.toHaveBeenCalled();
+
+    campaign.resolve({ ok: true, stateJson: '{}' });
+    await flushMicrotasks();
+
+    expect(startNewCampaign).toHaveBeenCalledWith({
+      playerFaction: 'RBiH',
+      decisionMode: 'emergent',
+      scenarioKey: 'apr_1992',
+    });
+    expect(postMessage.mock.calls.map(([message]) => (message as { type?: string }).type)).toEqual([
+      'awwv-shell:fresh-campaign-started',
+      'awwv-shell:show-warroom',
+    ]);
+    expect(iframe.hidden).toBe(false);
+    expect(document.getElementById('side-picker')!.inert).toBe(true);
+  });
+
+  it('settles a failed recovery mutation before deferred readiness can claim React', async () => {
+    const campaign = deferred<{ ok: boolean; error?: string }>();
+    const startNewCampaign = vi.fn().mockReturnValue(campaign.promise);
+    const { iframe } = await bootHost({ startNewCampaign });
+    const postMessage = vi.spyOn(iframe.contentWindow!, 'postMessage');
+    vi.advanceTimersByTime(8000);
+    document.getElementById('mm-new-campaign')!.click();
+    (document.querySelector('.sp-faction-option') as HTMLButtonElement).click();
+    await flushMicrotasks();
+
+    sendReady(iframe);
+    expect(document.getElementById('side-picker')!.classList.contains('mm-hidden')).toBe(false);
+    expect(iframe.hidden).toBe(true);
+
+    campaign.resolve({ ok: false, error: 'campaign rejected' });
+    await flushMicrotasks();
+
+    expect(document.getElementById('sp-error')!.textContent).toBe('campaign rejected');
+    expect(iframe.hidden).toBe(false);
+    expect(document.getElementById('side-picker')!.inert).toBe(true);
+    expect(postMessage).not.toHaveBeenCalled();
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: 'awwv-back-to-hq' },
+      source: iframe.contentWindow,
+      origin: 'https://map.local',
+    }));
+    await flushMicrotasks();
+    expect(postMessage.mock.calls.filter(
+      ([message]) => (message as { type?: string }).type === 'awwv-shell:fresh-campaign-started',
+    )).toHaveLength(0);
   });
 });

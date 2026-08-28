@@ -34,7 +34,11 @@ const SANDBOX_DOCUMENT = 'tactical_sandbox.html?embedded=1&desktop_window=sandbo
 const REACT_OPENING_FALLBACK_MS = 8000;
 
 interface DesktopBridge {
-    startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{
+    startNewCampaign?: (payload: {
+        playerFaction: FactionId;
+        decisionMode: 'emergent' | 'historical';
+        scenarioKey: CampaignScenarioKey;
+    }) => Promise<{
         ok: boolean;
         error?: string;
         stateJson?: string;
@@ -75,6 +79,9 @@ class WarroomApp {
     private pendingShowWarroom = false;
     private freshCampaignIntroPending = false;
     private freshCampaignResetPending = false;
+    /** Keep the recovery UI authoritative until its campaign mutation has fully settled. */
+    private legacyRecoveryCampaignMutationInFlight = false;
+    private reactReadyDeferredByRecoveryMutation = false;
     private readonly desktopStateGate = createLatestGameStateApplicationGate();
     private openingOwner: 'react-loading' | 'react' | 'legacy-recovery' = 'react-loading';
     private openingFallbackTimer: number | null = null;
@@ -112,7 +119,7 @@ class WarroomApp {
         window.addEventListener('message', (e) => {
             if (e.data?.type === 'awwv-shell:ready') {
                 if (!this.tacticalMapIframe || !this.isTrustedOperationalShellMessage(e)) return;
-                this.claimReactOpeningOwnership(this.tacticalMapIframe);
+                this.handleReactOpeningReady(this.tacticalMapIframe);
                 return;
             }
             if (e.data?.type === 'awwv-back-to-hq') {
@@ -520,12 +527,14 @@ class WarroomApp {
 
                 // Disable all faction buttons during loading
                 for (const b of factionButtons) b.disabled = true;
+                this.legacyRecoveryCampaignMutationInFlight = true;
 
                 try {
                     this.freshCampaignIntroPending = true;
                     const campaignReservation = this.desktopStateGate.reserveReplacement();
                     const result = await this.desktopBridge.startNewCampaign({
                         playerFaction: faction,
+                        decisionMode: 'emergent',
                         scenarioKey: 'apr_1992',
                     });
                     if (!result?.ok) {
@@ -552,6 +561,8 @@ class WarroomApp {
                     await this.pullLatestGameState({ showShell: false });
                     showError(error instanceof Error ? error.message : String(error));
                 } finally {
+                    this.legacyRecoveryCampaignMutationInFlight = false;
+                    this.flushReactOpeningReadyDeferredByRecoveryMutation();
                     for (const b of factionButtons) b.disabled = false;
                 }
             };
@@ -774,6 +785,21 @@ class WarroomApp {
             this.pendingShowWarroom = false;
         }
         this.flushPendingShellHandoff();
+    }
+
+    private handleReactOpeningReady(iframe: HTMLIFrameElement): void {
+        if (this.legacyRecoveryCampaignMutationInFlight) {
+            this.reactReadyDeferredByRecoveryMutation = true;
+            return;
+        }
+        this.claimReactOpeningOwnership(iframe);
+    }
+
+    private flushReactOpeningReadyDeferredByRecoveryMutation(): void {
+        if (!this.reactReadyDeferredByRecoveryMutation) return;
+        this.reactReadyDeferredByRecoveryMutation = false;
+        const iframe = this.tacticalMapIframe;
+        if (iframe) this.claimReactOpeningOwnership(iframe);
     }
 
     private hideLegacyOpeningRecovery(): void {
