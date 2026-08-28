@@ -5,10 +5,11 @@
 **2026-08-28 RE 1.0 engine-integrity execution:** The sole RE authority remains the
 [seven-outcome/eight-packet 1.0 contract](../plans/2026-08-26-engine-integrity-plan.md). The
 original probe channel closed at `b711cffa9` and is historical evidence. The owner-authorized
-[auxiliary packaged-probe recovery](../plans/2026-08-28-packaged-probe-recovery-plan.md) is active
-outside those RE outcomes; P2B is HELD and P3 waits. The
+[auxiliary packaged-probe recovery](../plans/2026-08-28-packaged-probe-recovery-plan.md) remains
+outside those RE outcomes, but instrumentation stopped at final R2 RED before production and there
+is no R3. Read-only alternate packaged-proof discovery is next after a fresh lock; P2B is HELD and P3 waits. The
 [single living audit](audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) preserves the evidence
-record and may hold the recovery transition and receipt as well as packet rows; it is not a queue.
+record, including the terminal R2 receipt; it is not a queue and no new report was created.
 The [original packet](proposals/20260826_ENGINE_INTEGRITY_PACKET.md),
 [frozen discovery record](proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md), and
 [full-team dispositions](proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md) are historical

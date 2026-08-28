@@ -29963,3 +29963,32 @@ scope, review, or custody failure abandons instrumentation; there is no R3.
 
 **Boundary:** This records probe-process custody only. It changes no canon, roadmap outcome,
 calibration authority, product behavior, or RE credit, and it does not reopen P2B or P3.
+
+## [2026-08-28] guard(RE): terminate packaged-probe instrumentation R2 before production
+
+**Terminal result:** The sole authorized R2 RED ran under Node 22 and was valid: 7 inherited tests
+remained green and 4 new tests failed. Dual Architect/specification review of the exact test bytes
+then found material omissions from the frozen behavioral matrix. The binding disposition is
+`R2_TERMINAL_NO_GO_BEFORE_PRODUCTION`.
+
+**Execution boundary:** No production implementation, GREEN, static check, package command,
+packaged-probe invocation, or candidate commit followed. No correction or rerun is authorized,
+there is no R3, and packaged-probe `invocation_count` remains `0`. P2B remains HELD, P3 continues
+to wait, calibration remains paused, and this work earns no RE credit.
+
+**Preserved negative evidence and restoration:** The rejected RED-only patch is retained outside
+the checkout as `rejected-r2-red-20260828.patch` (56,104 bytes), SHA-256
+`a258b5f36543a303442c2cd2ac2b297df562e579e4882fd265fbe027d9ddde0e`. All four packet paths were
+restored clean; restoration identity is `f674ff0e`. The full raw test output is unavailable because
+the 50,027-token stream was truncated; the retained receipt states that limitation and makes no
+stronger claim.
+
+**Only continuing work:** After this stop receipt commits, the read-only alternate-proof discovery
+task `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` / packet
+`select-no-instrumentation-p2b-proof-route` may be proposed. No discovery authority exists until a
+fresh exact-base docs-only lock is reviewed, pinned, and accepted. It inherits no implementation,
+execution, probe, retry, P2B, calibration, or other authority from R2.
+
+**Boundary:** This is probe-process custody and negative-evidence bookkeeping only. It changes no
+canon, roadmap outcome, calibration authority, product behavior, release credit, or FORAWWV
+content.

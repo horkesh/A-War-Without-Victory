@@ -4521,6 +4521,21 @@ around incomplete behavior are a rejected candidate, not implementation evidence
 Applied in `[2026-08-28] guard(RE): reject packaged-probe Lock 2 and authorize one behavior-first
 R2`.
 
+## 2026-08-28 - A valid RED is not implementation authority until its exact test bytes are accepted
+
+A RED can prove that selected assertions fail while still omitting required rows from the frozen
+behavioral matrix. Grouped early failures are especially hazardous because they can mask absent
+ownership, race, cleanup, or diagnostic assertions behind a superficially correct failing count.
+
+**Reusable rule:** review the exact test bytes against every frozen-matrix row before permitting
+production edits. RED validity establishes only that the executed tests failed as expected; it does
+not establish assertion completeness or implementation authority. When a packet has an explicit
+no-correction budget, a material test-byte omission is terminal: preserve the negative patch,
+restore the authorized paths cleanly, and do not spend an unapproved correction, rerun, GREEN, or
+successor round.
+
+Applied in `[2026-08-28] guard(RE): terminate packaged-probe instrumentation R2 before production`.
+
 ## 2026-08-27 - A release integrity lane must end at named product outcomes
 
 A broad engine-health instruction can turn into an indefinite audit, optimization, and review

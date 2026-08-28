@@ -1,6 +1,6 @@
 # RE — 1.0 Engine Integrity Contract
 
-**Status:** HELD AT P2B — auxiliary packaged-probe recovery authorized outside RE, 2026-08-28
+**Status:** HELD AT P2B — instrumentation closed; read-only alternate-proof discovery is the sole auxiliary next route, 2026-08-28
 **Purpose:** Reach 1.0 with one truthful engine owner for each affected responsibility.
 **Not the purpose:** general cleanup, optimization, calibration, or speculative mechanic design.
 
@@ -146,20 +146,21 @@ expose no deleted surface; Core, desktop sim build, unchanged packaged probe, an
 confirmation pass. No replacement channel or service.
 
 P2B is held before implementation by the clean-base packaged-probe **NO VERDICT** recorded in the
-living audit. The owner has authorized the bounded
-[packaged-probe recovery plan](2026-08-28-packaged-probe-recovery-plan.md) as an auxiliary
-safety-control lane. That lane is outside the seven RE outcomes and eight RE packets, earns no RE
-completion credit, and cannot automatically or retroactively satisfy P2B's base or candidate probe.
-Current Lock 1 is `RE-PROBE-RECOVERY-TRANSITION` /
-`authorize-auxiliary-packaged-probe-recovery` on exact base
-`c57ecffaf4774b9801d8ef6f4774463f7c0ef52e`.
-P2B may resume only through the fresh-lock rule below after the recovery packet and mandatory
-receipt close. P3 remains waiting while P2B is held.
-All eight recovery diagnostic classes are stop results and grant no automatic or retroactive P2B
-proof. Only after QA accepts the mandatory recovery receipt and both Architect and Orchestrator
-explicitly accept `NONREPRODUCIBLE_GREEN` may Product Manager draft a fresh exact-base P2B lock;
-that lock follows ordinary exact-byte review, re-pin, and working/staged checks. The other seven
-classes cannot open P2B and authorize only one bounded next-packet proposal after receipt closeout.
+living audit. The auxiliary [packaged-probe recovery plan](2026-08-28-packaged-probe-recovery-plan.md)
+remains outside the seven RE outcomes/eight packets, earns no RE credit, and cannot automatically
+or retroactively satisfy P2B. Its final R2 instrumentation attempt is CLOSED/REJECTED at a valid sole
+RED. No production edit, GREEN, syntax check, diff verification, package/probe invocation, candidate,
+or R3 occurred; packaged invocation count is zero. The consumed RED and unused package authority are
+nontransferable.
+
+P3 remains waiting while P2B is held. The only auxiliary next route is a separately fresh-locked,
+docs-only/read-only `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` /
+`select-no-instrumentation-p2b-proof-route` packet owned by Technical Architect, Orchestrator,
+Platform, Build, QA, and Process. It must return exactly one of: (a) a zero-in-app-instrumentation
+external proof route preserving every P2B obligation; (b) a separately scoped root-cause-remediation
+prerequisite naming exact files, tests, and required authorization; or (c) an explicit P2B blocker.
+Discovery authorizes no code/test edit, build, package, Electron/probe execution, TDZ/chunk fix, or
+R3. Any later execution requires its own exact-base reviewed lock and authority.
 
 ### P3 — Conserved threat lineage
 

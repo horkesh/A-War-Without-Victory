@@ -25,14 +25,16 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | R6 | [Historical gameplay depth and final calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) | January evidence accepted; all further calibration is paused until RE closes |
 | RC | [Collapse scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) / [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) | Pre-1.0 narrow scope complete; D-topology reserved post-1.0 |
 | R7 | [Content, history, audio, accessibility, and opening experience](2026-07-31-content-history-localization-audio-plan.md) / [case-file opening implementation](2026-08-23-opening-screens-implementation-plan.md) | Audio implementation landed `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser, packaged proof, and closeout remain |
-| RE | [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) / [auxiliary packaged-probe recovery](2026-08-28-packaged-probe-recovery-plan.md) | P1/P2A accepted; P2B HELD and P3 waiting. Execute the owner-authorized three-lock recovery outside the seven outcomes/eight packets; only accepted `NONREPRODUCIBLE_GREEN` may be considered for a fresh P2B lock. |
+| RE | [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) / [auxiliary packaged-proof recovery](2026-08-28-packaged-probe-recovery-plan.md) | P1/P2A accepted; P2B HELD and P3 waiting. R2 instrumentation closed/rejected at its valid sole RED with zero packaged invocations and no R3. Close the zero-run receipt, then separately lock read-only alternate-proof discovery. |
 | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | RC, R1-R7, and RE green |
 | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | R8 produces two clean 5/5 diaries |
 
 Each R1–R9 workstream has exactly one detailed plan with named files, red-first tests, evidence,
 acceptance, and collision rules. RC uses its linked closed packet; RE uses the single reduced
-contract above. The original probe channel remains closed at `b711cffa9`; the active auxiliary
-packaged-probe recovery is a bounded safety-control exception, not a competing outcome plan. Frozen
+contract above. The original probe channel remains closed at `b711cffa9`; auxiliary packaged-proof
+recovery currently remains active only to close its zero-execution receipt, not as a competing
+outcome plan. Read-only discovery is queued and unauthorized until its fresh exact-base docs-only
+lock is reviewed, pinned, and accepted. Its instrumentation path is closed. Frozen
 RE discovery records and old T0–T14 text remain evidence only.
 
 ## Activation Boundary
@@ -49,7 +51,7 @@ See [Master Roadmap §2](MASTER_ROADMAP.md#2-authority-and-activation) for the e
 
 ## Current State
 
-The seven RBiH/RS/HRHB owner-style Electron diaries and completed bug-first repair history are indexed in the [D2 owner-diary closeout](../40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md). The case-file opening and audio implementation have landed. The original probe channel is closed history at `b711cffa9`. RE's corrected foundation and clean Node-22 baseline pair at `177882fc2` pass engine-only health, direct consistency, byte identity outside normalized metadata, and save/replay. P1 and P2A are accepted; P2B is held before implementation by its packaged-probe NO VERDICT and P3 waits. The owner-authorized auxiliary recovery uses three exact locks and earns no RE credit; current Lock 1 is `RE-PROBE-RECOVERY-TRANSITION` / `authorize-auxiliary-packaged-probe-recovery` at `c57ecffaf…`. The measured `+3.62853%` correction cost remains watch-only; further calibration stays paused. There are no separate active old-T-task, performance-remediation, RC/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, signing-credential, or release-operator queues.
+The seven RBiH/RS/HRHB owner-style Electron diaries and completed bug-first repair history are indexed in the [D2 owner-diary closeout](../40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md). The case-file opening and audio implementation have landed. The original probe channel is closed history at `b711cffa9`. RE's corrected foundation and clean Node-22 baseline pair at `177882fc2` pass engine-only health, direct consistency, byte identity outside normalized metadata, and save/replay. P1 and P2A are accepted; P2B is held before implementation by its packaged-probe NO VERDICT and P3 waits. R2 instrumentation is closed/rejected at its valid sole RED: no production edit, GREEN, syntax/diff, package/probe invocation, candidate, or R3 occurred; invocation count is zero and unused package authority is nontransferable. The current zero-execution stop receipt is on `f674ff0e…`; after it closes, only a separately locked read-only alternate-proof discovery may route P2B. Recovery earns no RE credit. The measured `+3.62853%` correction cost remains watch-only; further calibration stays paused. There are no separate active old-T-task, performance-remediation, RC/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, signing-credential, or release-operator queues.
 
 Research has resolved the product choices. Verification barriers remain: determinism, conservation, migration, baselines, canon, historical substantiation, accessibility, security, licensing, clean package/runtime, and explicit external publication authority.
 

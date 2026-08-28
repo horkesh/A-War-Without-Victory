@@ -17,10 +17,12 @@ P7 no retreat teleport.
 The corrected Node-22 baseline is deterministic, engine-green, and save/replay-green. Its measured
 `+3.62853%` mandatory-correctness cost is watch-only, not a 1.0 gate. No further pre-1.0 performance
 diagnosis or optimization is authorized. P1 and P2A are accepted. P2B is HELD before implementation
-by its packaged-probe NO VERDICT; P3 waits. The first auxiliary Lock 2 instrumentation was rejected
-before candidate commit or packaged invocation, so the invocation count is zero. Its unconsumed
-one-shot is not transferable or reusable. The current docs-only amendment binds one final fresh-base
-R2 attempt outside the seven outcomes/eight packets. No long run is authorized until the one final
+by its packaged-probe NO VERDICT; P3 waits. Final R2 instrumentation is CLOSED/REJECTED at its valid
+sole RED. There was no production edit, GREEN, syntax check, diff verification, packaged invocation,
+candidate, or R3; packaged invocation count remains zero. The consumed RED and unused package
+authority are nontransferable. Auxiliary recovery is active only for the zero-execution stop
+receipt; read-only alternate-proof discovery is queued and unauthorized pending its fresh accepted
+lock. No long run is authorized until the one final
 RE A/B pair, and calibration remains paused until reduced RE closes.
 
 ## Packet governance
@@ -40,8 +42,9 @@ RE A/B pair, and calibration remains paused until reduced RE closes.
   independent QA reviewer, with one consolidated correction pass and one confirmation pass. Final
   auxiliary R2 is the explicit exception: it has no correction or rerun.
 - Each reduced-RE implementation packet requires focused RED/GREEN, typecheck, balanced tests, and
-  one compact audit row. Auxiliary R2 instead uses only the recovery plan's exact bounded RED,
-  GREEN, two syntax checks, and diff check. No per-packet campaign or repeated whole-team review.
+  one compact audit row. Historical auxiliary R2 had its own bounded budget but closed at RED; none
+  of its unused GREEN/syntax/diff/package authority survives. No per-packet campaign or repeated
+  whole-team review.
 - Production LOC across reduced RE must be net non-positive.
 - No new persisted/default/migration/IPC/pipeline/module/service/flag/artifact/cache/scan/
   compatibility/history-special-case surface.
@@ -50,30 +53,26 @@ RE A/B pair, and calibration remains paused until reduced RE closes.
 - Scenarios, calibration data, historical references, and canon remain denied.
 
 Auxiliary packaged-probe recovery is the sole temporary exception to final-only control sync. It
-earns no RE completion credit and cannot satisfy P2B retroactively. For
-Lock 1 bootstrap, Product Manager stages all 14 synchronized documents; exact-byte/hash reviews,
-hook re-pin, and working/staged checks precede the transition commit. The rejected first Lock 2
-opens no candidate or run. After this amendment commits, successor R2/Lock 3 custody requires that
-Product Manager drafts only the exact lock at clean HEAD; Orchestrator, Architect, and Process QA
-approve exact bytes/hash; the existing hook is re-pinned; working/staged checks pass; only then may
-payload editing start. Platform Specialist alone implements final R2 against the jointly frozen
-Architect/original-spec-reviewer behavioral matrix. Lock 3 is mandatory after an accepted candidate
-and its five-file lock must be reviewed/re-pinned before any receipt edit. Any R2 failure abandons
-the instrumentation approach; there is no R3.
+earns no RE completion credit and cannot satisfy P2B retroactively. Lock 1 and both rejected
+instrumentation attempts are historical custody/evidence only. R2's valid sole RED closed the
+instrumentation approach with no candidate or packaged invocation; there is no R3. The sole
+surviving authority is a separately locked docs-only/read-only discovery packet,
+`RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` / `select-no-instrumentation-p2b-proof-route`. Technical
+Architect, Orchestrator, Platform, Build, QA, and Process own that discovery. It may return only:
+(a) zero-in-app-instrumentation external proof preserving every P2B obligation; (b) a separately
+scoped root-cause-remediation prerequisite with exact files/tests/authorization; or an explicit
+P2B blocker. It authorizes no code, test, build, package, Electron/probe execution, TDZ/chunk fix,
+or R3.
 
 ## Active machine lock
 
-The current docs-only lock is `RE-PROBE-RECOVERY-AMENDMENT` /
-`record-rejected-lock2-and-bind-final-instrumentation-attempt`, based on
-`9d23044e1253bbd0d5b66e2ee45cb7081d7e884d`. `long_run_policy.permitted` is false; the checker-
-required maximum-pairs value `1` is inert and actual campaign runs/pairs are zero. The existing
-fail-closed scope checker, staged check, and worktree-local pinned hook remain authoritative. After
-the amendment commits, only a fresh exact-base reviewed/re-pinned
-`RE-PROBE-RECOVERY-INSTRUMENTATION-R2` / `behavior-first-coordinator-and-wrapper-settlement` lock may
-open the final six-path implementation attempt. It retains the existing boundaries, clocks, eight
-classes, and size caps; permits exactly one focused RED before production, one GREEN, two syntax
-checks, and `git diff --check`; and permits no correction or rerun. Unanimous review is required
-before candidate commit. Lock 3 closes an accepted one-shot receipt before any fresh P2B disposition.
+The current docs-only lock is `RE-PROBE-RECOVERY-STOP-RECEIPT` /
+`record-r2-red-rejection-and-close-instrumentation`, based on
+`f674ff0efe663432628a44b9134070fca5bd608e`. Every execution-budget value is zero;
+`long_run_policy.permitted` is false and the checker-required maximum-pairs value `1` is inert. The
+existing fail-closed scope checker, staged check, and worktree-local pinned hook remain authoritative.
+No discovery begins under this receipt lock. Product Manager must draft a fresh exact-base docs-only
+lock for `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` before the read-only owners inspect or record a route.
 
 ## Deferred and retired
 

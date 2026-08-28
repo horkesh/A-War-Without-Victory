@@ -3,8 +3,9 @@
 **Status:** IN AUTONOMOUS EXECUTION. The owner ruled 2026-08-26 that **engine health is
 sacrosanct and precedes further calibration**. The accepted January-1993 slice remains historical
 evidence, but all further calibration waits on **RE — 1.0 Engine Integrity**. The original probe
-channel is closed history at `b711cffa9`. A distinct owner-authorized packaged-probe recovery is
-active outside RE outcomes; P2B is held and P3 waits. R7 may continue only where file ownership is
+channel is closed history at `b711cffa9`. Distinct auxiliary packaged-proof recovery remains active
+outside RE outcomes only to close its receipt and then route freshly locked read-only alternate-proof
+discovery; P2B is held and P3 waits. R7 may continue only where file ownership is
 actually disjoint. RE is scope-locked on `codex/re-engine-integrity-repaired`; the superseded mixed
 line is quarantined. RE and R7 gate R8; R9 follows R8.
 
@@ -67,13 +68,15 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
 - **Original probe channel:** **CLOSED at `b711cffa9`.** Stable sector identity and
   `occupies_on_victory` landed; the fixed-home exclusion was reverted. RE preserves that
   disposition and does not reopen probe work.
-- **Auxiliary packaged-probe recovery:** **ACTIVE OUTSIDE RE OUTCOMES.** The owner authorized the
-  Orchestrator/Architect three-lock safety-control lane after P2B's clean-base NO VERDICT. It earns
-  no RE credit; P2B remains held and P3 waits. Only independently accepted
-  `NONREPRODUCIBLE_GREEN` may be considered for a fresh P2B lock. Current Lock 1 is
-  `RE-PROBE-RECOVERY-TRANSITION` / `authorize-auxiliary-packaged-probe-recovery` at
-  `c57ecffaf4774b9801d8ef6f4774463f7c0ef52e`; calibration remains paused and recovery is
-  non-calibrating.
+- **Auxiliary packaged-proof recovery:** **STOP-RECEIPT ACTIVE; DISCOVERY QUEUED/NOT AUTHORIZED.** Final
+  R2 instrumentation is CLOSED/REJECTED at its valid sole RED. No production edit, GREEN, syntax,
+  diff, package/probe invocation, candidate, or R3 occurred; packaged invocation count is zero.
+  The consumed RED and unused package authority are nontransferable. The current zero-execution
+  stop receipt is `RE-PROBE-RECOVERY-STOP-RECEIPT` /
+  `record-r2-red-rejection-and-close-instrumentation` on `f674ff0e…`. After it closes, only a fresh
+  docs-only/read-only alternate-proof discovery lock may be proposed; discovery starts only after
+  that lock is reviewed, pinned, and accepted. Recovery earns no RE credit;
+  P2B remains held, P3 waits, and calibration remains paused.
 - **RE — 1.0 Engine Integrity:** **REDUCED TO SEVEN RELEASE OUTCOMES / EIGHT PACKETS; HELD AT
   P2B.** The owner
   delegated scope ownership to Architect and Orchestrator and approved the reduced contract on
@@ -189,8 +192,9 @@ R4 + R6 + stable R1/R2 UI
 Original probe channel CLOSED at b711cffa9
   -> landed/reverted disposition preserved
 
-Auxiliary packaged-probe recovery ACTIVE outside RE outcomes
-  -> bounded three-lock safety-control lane
+Auxiliary packaged-proof recovery ACTIVE outside RE outcomes
+  -> instrumentation CLOSED at valid sole RED; no R3
+  -> read-only alternate-proof discovery after a fresh docs-only lock
   -> P2B HELD; P3 waiting
 
 RE 1.0 Engine Integrity
@@ -206,10 +210,10 @@ Two clean 5/5 R8 diaries + all barriers green
   -> R9 Release candidate/gold/publication readiness
 ```
 
-With the original probe channel closed as history, execute the bounded auxiliary packaged-probe
-recovery before resuming reduced RE, while remaining R7 work may continue where disjoint. RE P2B is
-held and P3 waits. Recovery is outside the seven outcomes/eight packets and earns no outcome credit;
-only an independently accepted `NONREPRODUCIBLE_GREEN` may be considered for a fresh P2B lock.
+With the original probe channel closed as history and R2 instrumentation rejected at RED, close the
+zero-execution stop receipt and route only the separately locked read-only alternate-proof discovery
+before any P2B disposition. RE P2B is held and P3 waits. Recovery is outside the seven outcomes/eight
+packets and earns no outcome credit.
 Only the final RE closeout gets a 188-week pair.
 R7 may proceed in parallel only after file-ownership inspection proves independence.
 
@@ -224,7 +228,7 @@ R7 may proceed in parallel only after file-ownership inspection proves independe
 | R5 | Engine quality, performance, and stability | **COMPLETE — CLOSED 2026-08-05 at the current performance floor (~1,086 ms/turn fresh).** Every self-executable item is done (Phases 0/1/3/4.1, Phase 2e Tasks 1-10, Task 7 baseline gate). Phase 2e's pure-solve/serial-commit extraction was proven correct but FAIL_REVERTED for a 3-7% wall-clock + ~45% heap regression; production uses the direct `buildCorpsFrontSectors` call. **Task 6 (incremental-reuse toward 100 ms/turn) is DECLINED, not deferred:** its only user-facing motivation was the warroom->map delay, which is R1's domain and already solved (~4.3 s -> ~114 ms warm; the map reads pre-computed sectors and never calls the builder). ~1 s/turn sim throughput is acceptable for a strategic game; the 100 ms/turn target is retired as aspirational. The reverted Phase 2e pipeline and its characterization suite are preserved for an optional future re-attempt (its flaky pure-solve `sectors_rebuilt` divergence test is skipped) | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
 | R6 | Historical gameplay depth and final calibration | **PRE-1.0 SCOPE COMPLETE — CLOSED 2026-08-09.** Final R6 re-floor `n163`: 634 matched OSIDs, 30/31 anchors (Brčko debt only), Section 6 correct, 40-week fingerprint `5cfcf1c8` golden-match, and all seven engine-health checks passing. Later RC-base fixes moved current HEAD to 629 matched and 31/31 anchors; do not conflate that newer integration baseline with the R6 closeout snapshot. Remaining Brčko/force-density, exhaustion re-pacing, casualty-grade, combat-earned-cohesion, and institutional-veto work is recorded post-1.0 debt unless explicitly reactivated. | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) · [exhaustion/scoring plan](2026-08-06-exhaustion-scoring-redesign-plan.md) | Calendar/weak-predicate events cannot manufacture control; experiments close by predeclared criteria; long-run evidence remains deterministic and Section 6-safe. |
 | RC | Pressure → exhaustion → **COLLAPSE** pipeline | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection plus reversible D-shape (`4.0` shock / `0.5` recovery) produced one live non-enclave HRHB write while remaining deterministic and trajectory-flat: hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 benchmarks, 7/7 health gates, and full Section 6 pass. Bucovaca peaked 62 and recovered to 37; Sipovo/Drvar peaks 11/7.5. D-topology is explicitly post-1.0/reserved. | [Scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) · [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) · [measurement plan](2026-08-15-collapse-d-selection-measurement-plan.md) · [D-shape design](2026-08-15-collapse-d-shape-design.md) · [Stage 0/2 panel record](../40_reports/20260813_RC_COLLAPSE_PANEL_FROZEN_ARTIFACT.md) | The default-OFF local collapse model measures historically discriminating combat pressure, recovers on quiet turns, reaches a bounded live writer, preserves Section 6, and leaves neighbour cascade to an explicit post-1.0 topology packet. |
-| RE | 1.0 engine integrity: seven outcomes, no general cleanup | **HELD AT P2B — AUXILIARY PACKAGED-PROBE RECOVERY ACTIVE 2026-08-28.** P1 and P2A are accepted. P2B's clean-base probe returned NO VERDICT before implementation; P3 waits. The owner authorized a distinct three-lock recovery lane outside the seven outcomes/eight packets. It earns no RE credit and cannot retroactively satisfy P2B. | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [recovery plan](2026-08-28-packaged-probe-recovery-plan.md) · [living audit](../40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) | Recovery closes through mandatory receipt custody; only accepted `NONREPRODUCIBLE_GREEN` may be considered for a fresh P2B lock. Then P2B–P7 and the one final pair/profile retain their original gates. |
+| RE | 1.0 engine integrity: seven outcomes, no general cleanup | **HELD AT P2B — INSTRUMENTATION CLOSED; AUXILIARY READ-ONLY DISCOVERY NEXT 2026-08-28.** P1/P2A are accepted. R2 was rejected at its valid sole RED with no production edit or packaged invocation; no R3. P3 waits. Recovery remains outside the outcomes and earns no credit. | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [recovery plan](2026-08-28-packaged-probe-recovery-plan.md) · [living audit](../40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) | Close the zero-run receipt, then separately lock read-only discovery to select: zero-in-app external proof, an exact separately authorized root-cause prerequisite, or an explicit P2B blocker. P2B–P7 and the final pair/profile retain their original gates. |
 | R7 | Content, historical attribution, audio, accessibility, and opening experience | **IN PROGRESS — AUDIO IMPLEMENTATION LANDED `2d106e5e0`.** Historical attribution, opening experience, and required ambient provenance/assets are implemented. Remaining pre-1.0 gates: human listen/sensitivity acceptance, English accessibility/readability, offline browser and integrated packaged-runtime proof, and closeout reconciliation. **Localization Phase 3 is post-1.0.** | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [opening implementation plan](2026-08-23-opening-screens-implementation-plan.md) | Claims, identities, English strings, and audio are machine-auditable; unsupported content is absent; human/audio sensitivity, accessibility, opening experience, and Electron proof pass. |
 | R8 | Full-campaign packaged-Electron validation and diaries | **WAITING ON RC, R1–R7, AND RE GREEN.** The existing Electron playthrough prototype remains a short IPC-contract smoke tool; R8 full-campaign logic belongs on the determinism-proven `tools/ai_play/president_playthrough.ts` harness. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) | Fresh historical-policy RBiH, RS, and HRHB campaigns cover full duration and required surfaces; bugs and friction are separately routed; final two diaries score 5/5 with clean diagnostics. |
 | R9 | Release candidate, gold, and publication | READY AFTER R8 | [Release plan](2026-07-31-release-candidate-gold-publication-plan.md) | One immutable RC passes clean-machine/security/license/store proofs; artifacts are reproducible; signing/upload inputs are documented; publication awaits only the explicit instruction. |

@@ -24,22 +24,22 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 6 | R6 | **JANUARY 1993 CHECKPOINT SLICE LANDED; FURTHER CALIBRATION PAUSED ON RE** | Preserve the landed evidence. Do not start reference, init-control, objective, axis, timing, roster, or outcome tuning until RE closes. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE — AUDIO IMPLEMENTATION LANDED `2d106e5e0`** | Complete human listen/sensitivity acceptance, English accessibility/readability, offline browser and packaged-runtime proof, and closeout reconciliation. Pause only a packet whose exact files collide with active RE. Localization Phase 3 remains post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [opening implementation](2026-08-23-opening-screens-implementation-plan.md) |
-| 7.5 | RE | **HELD AT P2B — AUXILIARY PACKAGED-PROBE RECOVERY ACTIVE** | P1/P2A are accepted. Execute the owner-authorized three-lock recovery outside RE outcomes; P2B code remains untouched and P3 waits. Only an accepted `NONREPRODUCIBLE_GREEN` may be considered for a fresh P2B lock; all other classes keep P2B held and allow one bounded proposal after receipt closeout. | [Recovery plan](2026-08-28-packaged-probe-recovery-plan.md) / [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) |
+| 7.5 | RE | **HELD AT P2B — INSTRUMENTATION CLOSED; READ-ONLY DISCOVERY NEXT** | P1/P2A are accepted. R2 was rejected at its valid sole RED: no production edit, GREEN, syntax/diff, packaged invocation, candidate, or R3; invocation count is zero and unused package authority is nontransferable. Close the zero-run stop receipt, then separately lock read-only alternate-proof discovery. P2B code remains untouched and P3 waits. | [Recovery plan](2026-08-28-packaged-probe-recovery-plan.md) / [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **WAITING ON RC, R1-R7, AND RE GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
 ## Current Critical Path
 
-`auxiliary packaged-probe recovery -> fresh P2B disposition -> RE P2B–P7 + remaining R7 gates -> one RE final pair/profile -> R8 -> R9`
+`zero-run R2 stop receipt -> read-only alternate-proof discovery -> P2B disposition -> RE P2B–P7 + remaining R7 gates -> one RE final pair/profile -> R8 -> R9`
 
 **RE INSERTED 2026-08-26 AND REDUCED 2026-08-27 BY OWNER APPROVAL.** Engine health remains
 sacrosanct, but RE is not a general cleanup or optimization lane. Further calibration waits on the
 seven release outcomes. R7 may overlap only after exact file inspection proves disjoint ownership.
 
 The original probe channel remains closed at `b711cffa9`; its findings are not RE implementation
-authority. The active packaged-probe recovery is a distinct auxiliary safety-control lane, outside
-the seven outcomes/eight packets, created only to localize the P2B package gate. It grants no RE
-credit or automatic P2B satisfaction.
+authority. Auxiliary packaged-proof recovery remains outside the seven outcomes/eight packets and
+grants no RE credit or automatic P2B satisfaction. Its instrumentation approach is closed; only
+read-only, docs-only alternate-proof discovery may proceed after a fresh exact-base lock.
 
 **§6 status:** the clean lean RE baseline pair is captured at `177882fc2`. Both Node-22 runs preserve
 the enclave guard, pass engine-only and direct-consistency gates, and reproduce the same artifacts/fingerprint.
@@ -50,11 +50,16 @@ state; the clean Node-22 A/B pair is byte-identical outside path-derived metadat
 mixed-tree or Node-24 runs remain inadmissible and cannot replace it.
 
 **CURRENT EXECUTION:** P1 and P2A are accepted; P2B is held before implementation by the recorded
-packaged-probe NO VERDICT, and P3 waits. The owner authorized Orchestrator/Architect's bounded
-three-lock recovery plan without reopening the original probe channel. Platform is sole
-implementer; Build, Architect, and QA review independently. Current Lock 1 is
-`RE-PROBE-RECOVERY-TRANSITION` / `authorize-auxiliary-packaged-probe-recovery` on `c57ecffaf…`;
-the calibration pause is unchanged. Production LOC stays net
+packaged-probe NO VERDICT, and P3 waits. R2 instrumentation is CLOSED/REJECTED at its valid sole RED.
+No production edit, GREEN, syntax/diff, package/probe invocation, candidate, or R3 occurred;
+packaged invocation count is zero. The consumed RED and unused package authority are nontransferable.
+Current Lock `RE-PROBE-RECOVERY-STOP-RECEIPT` /
+`record-r2-red-rejection-and-close-instrumentation` on `f674ff0e…` has zero execution budget. After
+receipt close, the next recovery action is a fresh docs-only lock for
+`RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` / `select-no-instrumentation-p2b-proof-route`, owned by
+Technical Architect, Orchestrator, Platform, Build, QA, and Process. It must select zero-in-app
+external proof, an exact separately authorized root-cause prerequisite, or an explicit blocker;
+it authorizes no run or implementation. The calibration pause is unchanged. Production LOC stays net
 non-positive; forbidden engine surfaces cannot grow. The `+3.62853%` mandatory-correctness cost is
 watch-only, not a 1.0 blocker, and no further pre-1.0 performance diagnosis is authorized. Active
 formation strength, dissolution salvage, enclave targeting, hostile breakout, and speculative

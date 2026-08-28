@@ -56,9 +56,14 @@ The original probe channel is closed history at `b711cffa9`; it is not RE. The o
 T0–T14 monolith with seven outcomes/eight packets. P1/P2A are accepted; P2B is HELD before
 implementation and P3 waits. The owner-authorized
 [auxiliary packaged-probe recovery](../plans/2026-08-28-packaged-probe-recovery-plan.md) is active
-outside those outcomes under an exact three-lock safety-control sequence; it earns no RE credit or
-automatic P2B proof. Current Lock 1 is `RE-PROBE-RECOVERY-TRANSITION` /
-`authorize-auxiliary-packaged-probe-recovery` at `c57ecffaf…`; the calibration pause is unchanged.
+outside those outcomes only to close the stop receipt; read-only alternate-proof discovery is
+queued and unauthorized until its fresh lock is accepted. Recovery earns no RE credit or
+automatic P2B proof. R2 instrumentation is CLOSED/REJECTED at its valid sole RED: no production edit,
+GREEN, syntax/diff, package/probe invocation, candidate, or R3 occurred; packaged invocation count
+is zero and unused package authority is nontransferable. Current zero-execution stop receipt
+`RE-PROBE-RECOVERY-STOP-RECEIPT` / `record-r2-red-rejection-and-close-instrumentation` is based on
+`f674ff0e…`. After it closes, discovery requires a separate fresh docs-only lock; the calibration
+pause is unchanged.
 The corrected
 Node-22 baseline at `177882fc2` is deterministic, engine-green, byte-identical outside normalized
 metadata, and save/replay-green. Its `+3.62853%` mandatory-correctness cost is watch-only, not a
@@ -68,7 +73,7 @@ targeting, hostile breakout, and speculative mechanics are deferred. Broad audit
 standalone closeout machinery, and repeated full-team review are retired. Historical fit remains
 non-authorizing calibration observation.
 
-**Current control plane (synchronized 2026-08-28):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE P2B is held while the auxiliary recovery runs under three exact locks; only independently accepted `NONREPRODUCIBLE_GREEN` may be considered for a fresh P2B lock. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the executable contracts. Collapse D-topology and multilingual localization remain post-1.0. Old RE T-tasks, performance-remediation, WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
+**Current control plane (synchronized 2026-08-28):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 audio implementation landed at `2d106e5e0`; human listen/sensitivity, English accessibility/readability, offline browser and packaged proof remain. RE P2B is held and P3 waits. Instrumentation is closed with no R3; alternate-proof discovery is queued and unauthorized until a fresh exact-base docs-only lock is reviewed, pinned, and accepted. Once active, it may only discover, without runs or implementation, either a zero-in-app external proof route, an exact separately authorized root-cause prerequisite, or an explicit P2B blocker. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the executable contracts. Collapse D-topology and multilingual localization remain post-1.0. Old RE T-tasks, performance-remediation, WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
 
 The remaining files under `docs/30_planning/` are design specifications, not active execution queues: [multi-brigade operations](../30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md), [operation reevaluation](../30_planning/OPERATION_REEVALUATION_DESIGN_SPEC.md), and [spatial context](../30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md). Historical plans removed from that folder remain available through Git history and the ledgers.
 

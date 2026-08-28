@@ -6,11 +6,11 @@ Further calibration is paused until [RE — 1.0 Engine Integrity](../plans/2026-
 closes. The original probe channel is closed at `b711cffa9`. P1/P2A are accepted; P2B is HELD before
 implementation and P3 waits. The owner-authorized
 [auxiliary packaged-probe recovery](../plans/2026-08-28-packaged-probe-recovery-plan.md) is a
-separate, non-calibrating safety-control lane outside RE's seven outcomes/eight packets. Current
-Lock 1 is `RE-PROBE-RECOVERY-TRANSITION` / `authorize-auxiliary-packaged-probe-recovery` on base
-`c57ecffaf4774b9801d8ef6f4774463f7c0ef52e`. It grants no calibration tuning, threshold/manifest/
-reference/hash refresh, long run, RE outcome credit, or automatic P2B proof. The calibration pause
-is unchanged.
+separate, non-calibrating safety-control lane outside RE's seven outcomes/eight packets.
+Instrumentation stopped at final R2 RED before production and there is no R3; only read-only
+alternate packaged-proof discovery may follow under a fresh lock. It grants no calibration tuning,
+threshold/manifest/reference/hash refresh, long run, RE outcome credit, or automatic P2B proof.
+The calibration pause is unchanged.
 
 The clean corrected RE baseline pair is captured by the fresh distinct-output Node-22 runs at exact commit
 `177882fc28ec2eaee2d2ecdc015a5a06c99ee06b`. Both 188-week runs have identical 15-file inventories,

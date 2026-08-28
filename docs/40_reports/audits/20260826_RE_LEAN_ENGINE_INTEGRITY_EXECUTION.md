@@ -3,8 +3,9 @@
 **Date:** 2026-08-26
 
 **Status:** P1/P2A accepted; P2B HELD before implementation after packaged-probe NO VERDICT; P3
-waiting; owner-authorized auxiliary packaged-probe recovery active outside the seven outcomes/eight
-packets under Lock 1 `RE-PROBE-RECOVERY-TRANSITION`; calibration pause and long-run denial unchanged
+waiting; auxiliary probe instrumentation stopped at final R2 RED before production, with no R3;
+alternate packaged-proof discovery queued behind a fresh docs-only lock; calibration pause and
+long-run denial unchanged
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -1015,3 +1016,68 @@ There is no correction pass or rerun. Any RED mismatch or regression, GREEN/stat
 boundary/cap/class/clock/manifest/normal-runtime violation, second edit or run, or final NO-GO
 abandons instrumentation and closes recovery to a receipt lock plus an alternate packaged-proof
 strategy. There is no R3, no package/probe execution, and no P2B resumption from a failed R2.
+
+### R2 terminal receipt — NO-GO before production
+
+Final R2 closes as `R2_TERMINAL_NO_GO_BEFORE_PRODUCTION`, a process disposition outside the eight
+packaged-runtime diagnostic classes. The exact base was
+`f674ff0efe663432628a44b9134070fca5bd608e`; the reviewed R2 lock SHA-256 was
+`3c376c51e1a4cf36e3cd336daa866ef0ab0515dfab19d474089aeadc28bfbe16`; and the pre-RED staged control
+manifest SHA-256 was `241e46b669e468babd2ea9427fe39305e7fac944988a28dcf2b79e35126b4f85`.
+The staged blobs were lock `f66f1755e93da04bdf45d6a0044e82cba4ef4a00`, audit
+`d81237420ff739104248fa3664eb73a23d7b3295`, and plan
+`2d27213e43ca8e808b63e5260eaa0a16ad2c8930`; the test remained at index/base blob
+`29194ca0844acb8ac6cfb7dff6f1cb17f9513157` before its tests-only worktree edit.
+
+The sole authorized command was
+`node node_modules/vitest/vitest.mjs run tests/desktop_packaged_runtime_probe.test.ts` under exact
+Node `v22.23.0` and Vitest `2.1.9`. It exited `1` after `1.05s`: 11 tests comprised seven inherited
+passes and four intentional new failures:
+
+- `R2 tracker and classifier implement every frozen MKR and CLS row`;
+- `R2 coordinator reducer implements every frozen COR and race row`;
+- `R2 supervisor, import, main, and manifest matrix is behaviorally frozen`;
+- `R2 Electron marker helper, ordering, and diff confinement are frozen`.
+
+The tests-only worktree delta was `+215/-0`, blob
+`5ac145657a5b538e3aee44110568e26ab10357a0`. The RED is valid but insufficient: it omitted material
+rows of the jointly frozen matrix. Architect's **NO-GO** census found incomplete coordinator
+reverse-fail-safe race, duplicate-event ownership/progress/root-state assertions; `SUP-09` lacked a
+controllable pending-kill promise, terminal-absence proof, and late-close ownership; stderr/live
+forwarding and terminal/CLI order were incomplete; `SUP-01` did not use the real validator;
+`MAN-01` did not prove filesystem/spawn/timer side-effect absence; `MAN-07` did not prove direct
+failure order, exit 124, one write, and green direct behavior; and Electron row-2 placement was
+absent.
+
+The original specification reviewer's **NO-GO** census independently identified: `COR-03`
+fail-safe-false; `COR-04` error class, no-grace, and late-event single-settlement omissions;
+`COR-05` flags/class/progress; `COR-06` count/class/progress and sticky later-clear handling;
+`COR-07` repeat handling; `COR-08` terminal absence, no grace, and immutability; `COR-09`
+owner/terminal/no-grace; `COR-10` owner/terminal/root/error/no-grace/immutability; `R02` close/cancel;
+`R03` reverse ordering; `R04` reverse invariants; and `R05` no-second-terminal/count. Supervisor
+coverage also omitted forwarding, `SUP-02/03` terminal/clear behavior, `SUP-05` through `SUP-08`
+progress, `SUP-09` pending settlement, and `SUP-11` LF/once; manifest/main coverage omitted
+`MAN-01` import side effects, `MAN-08` timeout launch/no-retry, and `MAN-07` direct behavior; and
+Electron proof omitted row 2 and the complete send/collect push brackets.
+
+No correction or rerun was permitted. There was no production edit, GREEN, syntax check, diff
+check, package, packaged probe, or Electron execution. The full raw test output is unavailable: it
+was truncated at 50,027 tokens after including the complete Electron source; only this retained
+receipt is authoritative. No runtime/package artifact or live process remained; the two preserved
+negative-evidence patches are custody artifacts outside the checkout.
+
+The rejected R2 negative patch is retained outside the checkout at
+`F:\A-War-Without-Victory\.git\worktrees\re-engine-integrity\rejected-r2-red-20260828.patch`,
+56,104 bytes, SHA-256
+`a258b5f36543a303442c2cd2ac2b297df562e579e4882fd265fbe027d9ddde0e`. Its exact numstat is lock
+`+36/-7`, audit `+17/-0`, recovery plan `+204/-3`, and test `+215/-0`. The four paths were restored
+clean to exact HEAD; the earlier rejected-Lock2 patch remains separately preserved.
+
+Instrumentation is stopped and there is no R3. The auxiliary lane remains active only to close
+this stop receipt; read-only alternate packaged-proof discovery is queued and unauthorized until
+its fresh exact-base docs-only lock is reviewed, pinned, and accepted. P2B stays **HELD**, P3 waits, calibration remains
+paused, recovery earns no RE credit, and packaged-probe invocation count remains `0`.
+
+During stop-receipt review, Process QA ran one unauthorized read-only
+`git diff --cached --check`. It is excluded from acceptance evidence; it caused no mutation, test,
+build, package, probe, or Electron execution and does not change the terminal disposition.

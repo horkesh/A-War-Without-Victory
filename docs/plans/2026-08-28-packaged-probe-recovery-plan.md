@@ -1,12 +1,19 @@
 # Packaged Probe Recovery Implementation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+> **ARCHIVED — DO NOT EXECUTE:** This rejected instrumentation plan is retained only as negative evidence. Continuing authority is limited to the separately locked alternate-proof discovery contract in section 3.
 
-**Goal:** Make the existing packaged-runtime probe bounded and phase-observable so one authorized run yields one of eight exact diagnostic classes without changing the game engine or normal desktop runtime.
+**Historical rejected goal:** Make the existing packaged-runtime probe bounded and phase-observable so one authorized run yields one of eight exact diagnostic classes without changing the game engine or normal desktop runtime. This goal is closed and grants no authority.
 
-**Architecture:** Keep the existing executable, runtime-probe branch, manifest, and validation owner. Add deterministic probe-only phase markers around the current linear awaits in `electron-main.cjs`; make the existing wrapper forward output live, retain the last marker, enforce one 900,000 ms executable watchdog, and terminate the full process tree on timeout. An external coordinator owns the 1,200,000 ms pre-sentinel and 960,000 ms post-sentinel clocks. This is auxiliary release instrumentation outside RE, not a new launch path or a repair to normal application behavior.
+**Historical rejected architecture:** Keep the existing executable, runtime-probe branch, manifest, and validation owner. Add deterministic probe-only phase markers around the current linear awaits in `electron-main.cjs`; make the existing wrapper forward output live, retain the last marker, enforce one 900,000 ms executable watchdog, and terminate the full process tree on timeout. An external coordinator owns the 1,200,000 ms pre-sentinel and 960,000 ms post-sentinel clocks. This rejected design is retained only as negative evidence and is not executable authority.
 
-**Tech Stack:** Electron main process (CommonJS), Node.js 22 wrapper (ES module), Vitest contract tests, Windows `taskkill.exe` for bounded packaged-process-tree termination.
+**Historical rejected tech stack:** Electron main process (CommonJS), Node.js 22 wrapper (ES module), Vitest contract tests, Windows `taskkill.exe` for bounded packaged-process-tree termination.
+
+**Terminal status:** Instrumentation is CLOSED/REJECTED at the valid sole R2 RED. The frozen matrix
+and implementation tasks below are retained as negative evidence and historical design, not
+executable authority. No production edit, GREEN, syntax check, diff verification, package/probe
+invocation, candidate, or R3 occurred. Packaged invocation count is zero; the consumed RED and
+unused package authority are nontransferable. Auxiliary recovery may proceed only to a
+separately locked, docs-only/read-only alternate-proof discovery after this receipt closes.
 
 ---
 
@@ -18,7 +25,7 @@ owns symbol/hunk boundaries. Platform Specialist is the sole implementation owne
 Architect, and QA are independent reviewers; none may co-implement. Product Manager owns every
 lock transition and the living-audit update.
 
-This lane:
+The rejected instrumentation lane:
 
 - is recorded under the `RE` safety-control namespace only;
 - is outside RE's seven outcomes and eight packets;
@@ -27,7 +34,7 @@ This lane:
 - does not authorize P2B implementation, P3, long campaigns, calibration, performance work, or
   ordinary desktop/runtime changes.
 
-The only implementation paths are:
+Its historical implementation allowlist was:
 
 - `src/desktop/electron-main.cjs`
 - `tools/desktop_packaged_runtime_probe.mjs`
@@ -67,9 +74,9 @@ hypothesis.
 
 ## 3. Exact lock sequence and amendment
 
-### Lock 1 — authorization transition (this document set)
+### Lock 1 — historical authorization transition
 
-The active lock is:
+The historical Lock 1 was:
 
 - task: `RE-PROBE-RECOVERY-TRANSITION`
 - packet: `authorize-auxiliary-packaged-probe-recovery`
@@ -80,20 +87,19 @@ The active lock is:
 - long runs: false
 - out-of-scope implementation: stop-and-queue
 
-Orchestrator, Architect, Process QA, and Reports Custodian review the 14-file staged transition
-before its single docs commit. No implementation work may begin under Lock 1.
+Orchestrator, Architect, Process QA, and Reports Custodian reviewed that 14-file staged transition
+before its single docs commit. It is retained only as custody history.
 
-### Rejected Lock 2 and final Lock 2 R2
+### Rejected Lock 2 and rejected final Lock 2 R2 (historical)
 
 The first Lock 2, `RE-PROBE-RECOVERY-INSTRUMENTATION` /
 `one-shot-packaged-runtime-phase-localization`, was rejected at specification review before a
-candidate commit or packaged invocation. Invocation count is zero. Its unconsumed one-shot authority
-is not transferable, reusable, or evidence for R2.
+candidate commit or packaged invocation. Final R2 then used the historical lock below:
 
 The docs-only amendment `RE-PROBE-RECOVERY-AMENDMENT` /
 `record-rejected-lock2-and-bind-final-instrumentation-attempt`, based on
-`9d23044e1253bbd0d5b66e2ee45cb7081d7e884d`, must commit before Product Manager may draft the final
-Lock 2 R2. R2 requires a fresh exact-base lock and the full successor-lock review/re-pin/check custody:
+`9d23044e1253bbd0d5b66e2ee45cb7081d7e884d`, committed before Product Manager drafted the final
+Lock 2 R2. R2 used a fresh exact-base lock and the full successor-lock review/re-pin/check custody:
 
 - task: `RE-PROBE-RECOVERY-INSTRUMENTATION-R2`
 - packet: `behavior-first-coordinator-and-wrapper-settlement`
@@ -112,22 +118,15 @@ Lock 2 R2. R2 requires a fresh exact-base lock and the full successor-lock revie
 - one packaged invocation on the exact candidate commit; no retry
 - out-of-scope implementation: stop-and-queue
 
-R2 preserves without expansion the six paths, symbol/hunk boundaries, clocks, eight diagnostic
-classes, and independent LOC caps in this plan. Before RED, Architect and the original specification
-reviewer must jointly freeze one complete behavioral matrix covering coordinator and wrapper
-settlement. The implementer must prove a clean exact base and have Architect approve the staged
-symbol/hunk map. An exact-file lock is necessary but not sufficient.
+R2 reached its valid sole RED and was rejected there. Its RED is consumed; its unused package
+authority is nontransferable. No production file was edited, no GREEN/syntax/diff/package/probe was
+run, no candidate exists, and no R3 is authorized. The six paths, symbol/hunk boundaries, clocks,
+eight classes, LOC caps, and frozen matrix remain historical negative evidence only.
 
-R2 permits exactly one focused RED before production code, one focused GREEN, both named syntax
-checks, and `git diff --check`. There is no correction pass, test rerun, or replacement attempt.
-Orchestrator, Architect, original specification reviewer, Build Engineer, QA, and Process QA must
-unanimously accept the exact candidate. Any failed gate or review abandons this instrumentation
-approach, keeps P2B held/P3 waiting, and authorizes no R3.
+### Lock 3 — historical intended receipt, not reached
 
-### Lock 3 — docs-only one-shot receipt
-
-Immediately after the single packaged invocation and cleanup, Product Manager re-pins a docs-only
-lock before recording the result:
+This intended post-invocation lock was never reached because R2 stopped at RED and packaged
+invocation count remained zero:
 
 - task: `RE-PROBE-RECOVERY-RECEIPT`
 - packet: `record-one-shot-packaged-probe-recovery-result`
@@ -138,10 +137,29 @@ lock before recording the result:
 - long runs false; checker-required maximum clean pairs `1`, actual run/pair budget zero
 - out-of-scope implementation: stop-and-queue
 
-Orchestrator, Architect, QA, and Reports Custodian review Lock 3 and its receipt. Lock 3 authorizes
-no second probe, remediation, P2B restart, or P3 work.
+These retained Lock-3 terms are historical only and authorize no probe, remediation, P2B restart,
+or P3 work.
 
-### Mandatory custody sequence for every lock transition
+### Surviving alternate-proof discovery contract
+
+After the zero-execution stop receipt closes, Product Manager may draft a separate fresh exact-base
+docs-only lock only for:
+
+- task: `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY`
+- packet: `select-no-instrumentation-p2b-proof-route`
+- owners: Technical Architect, Orchestrator, Platform, Build, QA, and Process
+- execution: read-only inspection and docs-only receipt; no run
+
+The discovery must return exactly one result: (a) a zero-in-app-instrumentation external proof route
+that preserves every P2B obligation; (b) a separately scoped root-cause-remediation prerequisite
+with exact files, tests, and required authorization; or (c) an explicit P2B blocker. It authorizes
+no code or test edit, build, package, Electron/probe execution, TDZ/chunk fix, or R3. Any route beyond
+discovery requires its own exact-base reviewed lock and authority.
+
+### Historical instrumentation custody sequence — not executable
+
+The following sequence records how the rejected instrumentation locks were governed. It grants no
+current transition, implementation, test, or run authority.
 
 Lock 1 is the bootstrap transition and uses this exact order:
 
@@ -167,7 +185,11 @@ Lock 3 is not a retrospective formality: its lock bytes must be reviewed and re-
 receipt, `src/desktop/README.md`, or ledger edit. A payload edit before pin acceptance invalidates
 custody and stops the lane.
 
-## 4. Current terminal and observability contract
+## 4. Historical rejected terminal and observability contract
+
+Sections 4–6 record the superseded R2 design only. They grant no current classification, receipt,
+implementation, P2B-transition, or Architect-decision authority; the terminal R2 receipt and the
+fresh-lock alternate-discovery contract in section 3 control all continuing work.
 
 | Boundary | Current evidence | Current bound | Required recovery behavior |
 |---|---|---:|---|
@@ -245,16 +267,14 @@ before any marker, and `INSTRUMENTATION_INVALID` for an invalid stream or a zero
 required terminal. The post-sentinel fail-safe yields `LOCALIZED_NO_VERDICT` for a valid stream,
 `PRE_MARKER_NO_VERDICT` for no marker, or `INSTRUMENTATION_INVALID` for an invalid stream.
 
-Every class stops. Only after QA accepts the Lock-3 receipt and both Architect and Orchestrator
-explicitly accept `NONREPRODUCIBLE_GREEN` may Product Manager draft a fresh exact-base P2B lock;
-that lock still follows ordinary exact-byte review, re-pin, and working/staged checks and does not
-retroactively satisfy P2B. The other seven classes
-keep P2B held and permit only one bounded source-cited next-packet proposal after Lock 3 closes.
+The rejected design required every class to stop. Its conditional `NONREPRODUCIBLE_GREEN` route to
+Lock 3 or a fresh P2B lock was never reached and is now superseded; it grants no current transition
+authority. P2B remains held pending the separately locked alternate-proof discovery.
 For a valid stream plus child nonzero, malformed or invalid manifest, or existing validation failure before cutoff, the class is
 `LOCALIZED_FAILURE`, with `last_observed_marker`, `last_completed_stage`,
 `next_expected_marker`, exact child/wrapper result, error, and manifest presence/validation recorded.
 
-## 5. Deterministic phase-marker protocol
+## 5. Historical rejected deterministic phase-marker protocol
 
 Add one probe-only emitter adjacent to the existing runtime-probe helpers in
 `src/desktop/electron-main.cjs`:
@@ -324,7 +344,7 @@ stdout/stderr and the thrown error; the terminal receipt gains no timestamp or u
 `PACKAGE_FAILURE` and `PACKAGE_NO_VERDICT` occur before the wrapper sentinel, so their coordinator
 receipts record `wrapper_started: false` and terminal line absent by design.
 
-## 6. Architect-owned symbol/hunk boundary
+## 6. Historical rejected Architect-owned symbol/hunk boundary
 
 Allowed hunks in `src/desktop/electron-main.cjs` are limited to one guarded marker emitter adjacent
 to `getRuntimeProbeManifestPath` and literal marker calls inside `runPackagedRuntimeProbe`. Do not
@@ -332,10 +352,10 @@ edit `RUNTIME_PROBE_MODE`, any wait/arm/collect helper, shared constructor, prob
 function, or the `app.whenReady` terminal branch. The Electron path may add no helper beyond the
 single emitter and no control-flow change.
 
-No hunk is allowed in normal IPC handlers, simulation code, UI/renderers, `startMapServer`, normal
+No hunk was allowed in normal IPC handlers, simulation code, UI/renderers, `startMapServer`, normal
 application startup/quit behavior, map-server routing, package configuration, or shared runtime
-logic. If literal instrumentation cannot fit this boundary, stop and queue a new Architect
-decision.
+logic. Inability to fit the boundary would have stopped R2; it does not queue another
+instrumentation decision now.
 
 The same wrapper file must become import-safe and expose behavioral seams for an imported
 supervisor, incremental marker parser, diagnostic classifier, and the unchanged manifest validator.
@@ -351,9 +371,13 @@ Hard size caps are independent and cannot be offset by deletions elsewhere:
 - three-file combined net addition ≤665 lines;
 - deletion headroom is zero: deleting unrelated or pre-existing code never raises a cap.
 
-## 7. Linear implementation tasks
+## 7. Rejected R2 matrix and implementation tasks — historical negative evidence only
 
-### Task 1: Install final Lock 2 R2 and prove the exact boundary
+The jointly frozen matrix embodied by the valid sole RED and every step below are non-executable
+history. They must not be dispatched, resumed, corrected, rerun, or used to claim authority for
+production work, a package/probe invocation, candidate acceptance, or R3.
+
+### Historical Task 1 record: install final Lock 2 R2 and prove the exact boundary
 
 **Files:**
 
@@ -378,7 +402,7 @@ rg -n "RUNTIME_PROBE_MODE|function getRuntimeProbeManifestPath|function waitFor|
 matrix and return GO before tests or implementation. Any ambiguity or normal-runtime hunk abandons
 the instrumentation approach; no R3 is authorized.
 
-### Task 2: Write the failing marker and wrapper-bound tests
+### Historical Task 2 record: write the failing marker and wrapper-bound tests
 
 **Files:**
 
@@ -435,7 +459,7 @@ Expected: FAIL only on the new marker/live-forwarding/watchdog/tree-kill/termina
 pre-existing packaged-probe assertions remain green. Record failing assertion names in the audit
 draft. If an old assertion fails, stop and resolve provenance rather than changing it.
 
-### Task 3: Add probe-only phase markers
+### Historical Task 3 record: add probe-only phase markers
 
 **Files:**
 
@@ -451,7 +475,7 @@ manifest construction, failure filtering, or teardown order.
 **Step 3:** Do not run the test yet. The packet budget permits one RED and one GREEN only; continue
 directly to the wrapper implementation.
 
-### Task 4: Bound and expose the existing wrapper
+### Historical Task 4 record: bound and expose the existing wrapper
 
 **Files:**
 
@@ -491,7 +515,7 @@ node node_modules/vitest/vitest.mjs run tests/desktop_packaged_runtime_probe.tes
 
 Expected: all tests pass. No correction or rerun is permitted.
 
-### Task 5: Static verification before consuming the run
+### Historical Task 5 record: static verification before consuming the run
 
 **Files:** the exact three implementation paths only.
 
@@ -521,7 +545,7 @@ occurs during review. Any rejection abandons this instrumentation approach and a
 run the repository staged-scope checks. Any extra path, cap breach, or forbidden hunk stops the
 packet.
 
-### Task 6: Commit candidate, consume the one-shot proof, and clean up
+### Historical Task 6 record: commit candidate, consume the one-shot proof, and clean up
 
 **Files:** no new source path.
 
@@ -568,7 +592,7 @@ other seven classes keep P2B held and, only after Lock 3 review, permit one boun
 source-cited proposal. A normal-mode failure, TDZ evidence, or required
 out-of-scope hunk does not authorize a fix here.
 
-### Task 7: Mandatory Lock 3 closeout and P2B disposition
+### Historical Task 7 record: mandatory Lock 3 closeout and P2B disposition
 
 **Files:**
 
