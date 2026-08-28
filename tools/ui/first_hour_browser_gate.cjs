@@ -354,8 +354,8 @@ async function waitUntilDialogTextAbsent(page, text, timeout = 15000) {
   );
 }
 
-async function clickByText(page, text) {
-  const clicked = await page.evaluate((needle) => {
+async function clickByTextIfVisible(page, text) {
+  return page.evaluate((needle) => {
     const normalizedNeedle = needle.toLowerCase();
     const candidates = Array.from(document.querySelectorAll('button, [role="button"], a'))
       .map((el) => {
@@ -381,6 +381,10 @@ async function clickByText(page, text) {
     target.click();
     return true;
   }, text);
+}
+
+async function clickByText(page, text) {
+  const clicked = await clickByTextIfVisible(page, text);
   if (!clicked) throw new Error(`No visible clickable control matched "${text}"`);
 }
 
@@ -434,6 +438,79 @@ async function clickSelectorIfVisible(page, selector) {
     target.click();
     return true;
   }, selector);
+}
+
+async function assertSelectedWarroomVisibleBeneathDateSting(page, summary, flow) {
+  const imageNeedleByFaction = {
+    RBiH: 'hq_rbih_1992',
+    RS: 'hq_rs_1992',
+    HRHB: 'hq_hrhb_1992',
+  };
+  const expectedImageNeedle = imageNeedleByFaction[flow.faction];
+  if (!expectedImageNeedle) throw new Error(`No opening Warroom image contract for ${flow.faction}`);
+
+  await page.waitForFunction((imageNeedle) => {
+    const visible = (element) => {
+      if (!(element instanceof HTMLElement)) return false;
+      const rect = element.getBoundingClientRect();
+      const style = window.getComputedStyle(element);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const shell = document.querySelector('[data-testid="warroom-shell"]');
+    const plate = shell?.querySelector('[data-testid="warroom-scene-plate"]');
+    const image = plate?.querySelector('img');
+    const dateSting = Array.from(document.querySelectorAll('[role="dialog"]'))
+      .find((element) => visible(element) && (element.textContent ?? '').includes('WAR HAS STARTED'));
+    return visible(shell)
+      && visible(plate)
+      && image instanceof HTMLImageElement
+      && image.src.includes(imageNeedle)
+      && image.complete
+      && image.naturalWidth > 0
+      && visible(dateSting);
+  }, { timeout: 30000 }, expectedImageNeedle);
+
+  const evidence = await page.evaluate((imageNeedle) => {
+    const shell = document.querySelector('[data-testid="warroom-shell"]');
+    const plate = shell?.querySelector('[data-testid="warroom-scene-plate"]');
+    const image = plate?.querySelector('img');
+    const dateSting = Array.from(document.querySelectorAll('[role="dialog"]'))
+      .find((element) => (element.textContent ?? '').includes('WAR HAS STARTED'));
+    const dateStingStyle = dateSting ? window.getComputedStyle(dateSting) : null;
+    const backgroundParts = dateStingStyle?.backgroundColor
+      .match(/rgba?\(([^)]+)\)/)?.[1]
+      .split(',')
+      .map((part) => Number(part.trim())) ?? [];
+    const dateStingBackgroundAlpha = backgroundParts.length === 4 ? backgroundParts[3] : 1;
+    return {
+      warroomShellPresent: shell !== null,
+      scenePlatePresent: plate !== null,
+      sceneImageSrc: image instanceof HTMLImageElement ? image.src : null,
+      sceneImageDecoded: image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
+      sceneImageMatchesFaction: image instanceof HTMLImageElement && image.src.includes(imageNeedle),
+      dateStingPresent: dateSting !== undefined,
+      dateStingBackgroundAlpha,
+      dateStingBackdropFilter: dateStingStyle?.backdropFilter ?? null,
+    };
+  }, expectedImageNeedle);
+
+  summary.evidence.selectedWarroomVisibleBeneathDateStingByFaction ??= {};
+  summary.evidence.selectedWarroomVisibleBeneathDateStingByFaction[flow.faction] = evidence;
+  if (
+    !evidence.warroomShellPresent
+    || !evidence.scenePlatePresent
+    || !evidence.sceneImageDecoded
+    || !evidence.sceneImageMatchesFaction
+    || !evidence.dateStingPresent
+    || evidence.dateStingBackgroundAlpha > 0.72
+    || evidence.dateStingBackdropFilter !== 'none'
+  ) {
+    throw new Error(`${flow.faction} Warroom continuity beneath date sting failed: ${JSON.stringify(evidence)}`);
+  }
 }
 
 async function assertToolbarRoutesDisabled(page, summary, flow) {
@@ -660,6 +737,9 @@ async function runFoundationalFlow(page, summary, flow) {
   });
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
   await waitForVisibleText(page, 'A WAR WITHOUT VICTORY');
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_opening_splash`);
+  await clickByText(page, 'Assume Responsibility');
+  await waitForVisibleText(page, 'New War');
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_main_menu`);
 
   await clickByText(page, 'New War');
@@ -678,14 +758,31 @@ async function runFoundationalFlow(page, summary, flow) {
 
   await clickByText(page, 'Begin');
   await waitForVisibleText(page, 'WAR HAS STARTED');
+  await assertSelectedWarroomVisibleBeneathDateSting(page, summary, flow);
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_war_start_splash`);
 
-  await clickByText(page, 'Acknowledge');
+  const acknowledgedDateSting = await clickByTextIfVisible(page, 'Acknowledge');
+  summary.evidence.dateStingDismissalByFaction ??= {};
+  summary.evidence.dateStingDismissalByFaction[flow.faction] = acknowledgedDateSting ? 'acknowledged' : 'auto';
   await waitUntilTextAbsent(page, 'WAR HAS STARTED');
-  await waitForVisibleText(page, 'President');
+  await page.waitForSelector('[data-testid="presidential-inbox-opening-brief"]', { visible: true, timeout: 30000 });
+  const openingBriefText = await visibleSelectorText(
+    page,
+    '[data-testid="presidential-inbox-opening-brief"]',
+    `${flow.faction} opening brief`,
+  );
+  summary.evidence.openingBriefVisibleInSelectedWarroomByFaction ??= {};
+  summary.evidence.openingBriefVisibleInSelectedWarroomByFaction[flow.faction] = {
+    visible: true,
+    textSample: openingBriefText.replace(/\s+/g, ' ').slice(0, 800),
+  };
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_opening_brief`);
 
-  await clickFirstMatchingText(page, ['Open Desk', 'President', 'Desk', 'Begin at Desk', 'Open President']);
+  await clickSelector(
+    page,
+    '[data-testid="presidential-inbox-opening-brief-open-desk"]',
+    `${flow.faction} opening brief desk action`,
+  );
   await page.waitForFunction((title, response) => {
     const text = document.body?.innerText ?? '';
     return text.includes(response)

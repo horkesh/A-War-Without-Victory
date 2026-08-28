@@ -82,6 +82,10 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
     }, [view]);
 
     useEffect(() => {
+        if (!starting && errorMessage) setSubmitted(false);
+    }, [errorMessage, starting]);
+
+    useEffect(() => {
         if (view !== 'records' || !ipc.isAvailable) return;
         let active = true;
         setRecordsLoading(true);

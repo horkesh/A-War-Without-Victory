@@ -144,6 +144,17 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
         expect(loadBlock).not.toContain("setAppScreen('warroom');");
     });
 
+    it('presents the existing opening brief from the selected Warroom before foundational decisions', () => {
+        const warroomStart = app.indexOf("{appScreen === 'warroom' && (");
+        const menuStart = app.indexOf("{appScreen === 'mainMenu' && (", warroomStart);
+        const warroomBlock = app.slice(warroomStart, menuStart);
+
+        expect(warroomStart).toBeGreaterThan(-1);
+        expect(menuStart).toBeGreaterThan(warroomStart);
+        expect(warroomBlock).toContain('openingBriefPending && (');
+        expect(warroomBlock).toContain('<PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} />');
+    });
+
     it('honors ?view=game and ?view=warroom deep-link overrides for dev/automation', () => {
         expect(app).toContain('resolveInitialShellScreen(window.location.search)');
     });

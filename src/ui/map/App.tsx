@@ -2095,6 +2095,9 @@ function App() {
               }
             }}
           />
+          {openingBriefPending && (
+            <PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} />
+          )}
           {warroomDeskOpen && (
             <PresidentDeskShell
               state={loadedGameState}

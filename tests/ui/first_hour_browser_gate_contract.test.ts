@@ -92,16 +92,36 @@ describe('first-hour browser QA gate contract', () => {
     const flowEnd = tool.indexOf('\nasync function', flowStart + 1);
     const flow = tool.slice(flowStart, flowEnd);
 
+    const splashClick = flow.indexOf("clickByText(page, 'Assume Responsibility')");
     const newWarClick = flow.indexOf("clickByText(page, 'New War')");
     const factionClick = flow.indexOf('main-menu-faction-${flow.faction}');
     const dossierClick = flow.indexOf("clickByText(page, 'Take command')");
     const beginClick = flow.indexOf("clickByText(page, 'Begin')");
     const warStartWait = flow.indexOf("waitForVisibleText(page, 'WAR HAS STARTED')");
-    expect(newWarClick).toBeGreaterThan(-1);
+    expect(splashClick).toBeGreaterThan(-1);
+    expect(newWarClick).toBeGreaterThan(splashClick);
     expect(factionClick).toBeGreaterThan(newWarClick);
     expect(dossierClick).toBeGreaterThan(factionClick);
     expect(beginClick).toBeGreaterThan(dossierClick);
     expect(warStartWait).toBeGreaterThan(beginClick);
+    expect(flow).toContain('await assertSelectedWarroomVisibleBeneathDateSting(page, summary, flow);');
+    expect(flow).toContain("await clickByTextIfVisible(page, 'Acknowledge')");
+    expect(tool).toContain('dateStingDismissalByFaction');
+    expect(flow).toContain("'[data-testid=\"presidential-inbox-opening-brief\"]'");
+    expect(flow).toContain("'[data-testid=\"presidential-inbox-opening-brief-open-desk\"]'");
+  });
+
+  it('proves the faction-matched Warroom remains visible beneath the translucent date sting', () => {
+    const tool = read('tools/ui/first_hour_browser_gate.cjs');
+
+    expect(tool).toContain('async function assertSelectedWarroomVisibleBeneathDateSting');
+    expect(tool).toContain("'[data-testid=\"warroom-shell\"]'");
+    expect(tool).toContain("'[data-testid=\"warroom-scene-plate\"]'");
+    expect(tool).toContain("RBiH: 'hq_rbih_1992'");
+    expect(tool).toContain("RS: 'hq_rs_1992'");
+    expect(tool).toContain("HRHB: 'hq_hrhb_1992'");
+    expect(tool).toContain('dateStingBackgroundAlpha');
+    expect(tool).toContain('selectedWarroomVisibleBeneathDateStingByFaction');
   });
 
   it('keeps the date sting, opening brief, and foundational decision in authored order', () => {
@@ -111,9 +131,9 @@ describe('first-hour browser QA gate contract', () => {
     const flow = tool.slice(flowStart, flowEnd);
 
     const warStartWait = flow.indexOf("waitForVisibleText(page, 'WAR HAS STARTED')");
-    const acknowledge = flow.indexOf("clickByText(page, 'Acknowledge')");
+    const acknowledge = flow.indexOf("clickByTextIfVisible(page, 'Acknowledge')");
     const openingBrief = flow.indexOf("captureEvidence(page, summary, `${flow.faction.toLowerCase()}_opening_brief`)");
-    const openDesk = flow.indexOf("clickFirstMatchingText(page, ['Open Desk'");
+    const openDesk = flow.indexOf("'[data-testid=\"presidential-inbox-opening-brief-open-desk\"]'");
     const foundationalDecision = flow.indexOf("captureEvidence(page, summary, `${flow.faction.toLowerCase()}_foundational_decision`)");
 
     expect(warStartWait).toBeGreaterThan(-1);

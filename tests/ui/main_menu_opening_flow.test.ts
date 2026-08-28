@@ -2,7 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { createElement } from 'react';
+import { createElement, useState, type ComponentProps } from 'react';
 import { readFileSync } from 'node:fs';
 import { MainMenu } from '../../src/ui/map/components/MainMenu';
 import { setLocale } from '../../src/ui/map/i18n';
@@ -18,6 +18,32 @@ function renderMenu(onNewGame = vi.fn()) {
         onQuit: vi.fn(),
     }));
     return { onNewGame };
+}
+
+function FailedStartHarness({ onAttempt }: { onAttempt: ReturnType<typeof vi.fn> }) {
+    const [starting, setStarting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    const onNewGame = (payload: Parameters<ComponentProps<typeof MainMenu>['onNewGame']>[0]) => {
+        onAttempt(payload);
+        setStarting(true);
+        void Promise.resolve().then(() => {
+            setErrorMessage('Campaign start failed.');
+            setStarting(false);
+        });
+    };
+
+    return createElement(MainMenu, {
+        hasSave: false,
+        starting,
+        errorMessage,
+        onNewGame,
+        onContinue: vi.fn(),
+        onLoadGame: vi.fn(),
+        onSettings: vi.fn(),
+        onCredits: vi.fn(),
+        onQuit: vi.fn(),
+    });
 }
 
 function dismissSplash() {
@@ -156,5 +182,24 @@ describe('MainMenu cinematic opening flow', () => {
             playerFaction: 'RBiH',
             decisionMode: 'historical',
         });
+    });
+
+    it('re-enables Begin after a failed parent start sequence and permits one retry', async () => {
+        const onAttempt = vi.fn();
+        render(createElement(FailedStartHarness, { onAttempt }));
+        dismissSplash();
+        fireEvent.click(screen.getByRole('button', { name: 'New War' }));
+        fireEvent.click(screen.getByTestId('main-menu-faction-RBiH'));
+        fireEvent.click(screen.getByRole('button', { name: 'Take command' }));
+
+        fireEvent.click(screen.getByRole('button', { name: 'Begin' }));
+
+        expect((await screen.findByRole('alert')).textContent).toContain('Campaign start failed.');
+        const retry = await screen.findByRole('button', { name: 'Begin' });
+        expect((retry as HTMLButtonElement).disabled).toBe(false);
+        expect(onAttempt).toHaveBeenCalledTimes(1);
+
+        fireEvent.click(retry);
+        expect(onAttempt).toHaveBeenCalledTimes(2);
     });
 });
