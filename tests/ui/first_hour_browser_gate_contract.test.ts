@@ -126,6 +126,31 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain('openingBriefAbsentDuringDateStingByFaction');
   });
 
+  it('pins the optional cinematic-opening visual matrix to semantic, measurable browser evidence', () => {
+    const tool = read('tools/ui/first_hour_browser_gate.cjs');
+
+    expect(tool).toContain("AWWV_FIRST_HOUR_OPENING_MATRIX === 'true'");
+    expect(tool).toContain("id: 'desktop-1920x1080'");
+    expect(tool).toContain("id: 'desktop-1366x768'");
+    expect(tool).toContain("id: 'tablet-1024x768'");
+    expect(tool).toContain("id: 'narrow-700x900'");
+    expect(tool).toContain("id: 'short-1024x560'");
+    expect(tool).toContain("artStatus: 'fallback-art'");
+    expect(tool).toContain('startOpeningPhaseTrace');
+    expect(tool).toContain('requestAnimationFrame(sample)');
+    expect(tool).toContain('assertOpeningTraceCoverage');
+    expect(tool).toContain('horizontalOverflow');
+    expect(tool).toContain('contrastFor');
+    expect(tool).toContain('interactiveHitTests');
+    expect(tool).toContain('opening scene/scrim/content stack is not canonical');
+    expect(tool).toContain('visible >=2px keyboard focus ring');
+    expect(tool).toContain('assertSceneContinuity');
+    expect(tool).toContain('waitForOpeningSceneGeometryStable');
+    expect(tool).toContain('maxAllowedRectDeltaPx: 0.5');
+    expect(tool).toContain("transitionDuration !== '0.155s'");
+    expect(tool).toContain("prefers-reduced-motion', value: 'reduce'");
+  });
+
   it('keeps the date sting, opening brief, and foundational decision in authored order', () => {
     const tool = read('tools/ui/first_hour_browser_gate.cjs');
     const flowStart = tool.indexOf('async function runFoundationalFlow');

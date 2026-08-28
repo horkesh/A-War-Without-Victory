@@ -12,6 +12,15 @@ const URL = process.env.AWWV_FIRST_HOUR_BROWSER_URL || `http://127.0.0.1:${PORT}
 const OUT_DIR = process.env.AWWV_FIRST_HOUR_BROWSER_OUT_DIR
   || path.join(ROOT, '.tmp_first_hour_browser_gate');
 const SCREENSHOT_DIR = path.join(OUT_DIR, 'screenshots');
+const RUN_OPENING_VISUAL_MATRIX = process.env.AWWV_FIRST_HOUR_OPENING_MATRIX === 'true';
+
+const OPENING_VISUAL_VIEWPORTS = [
+  { id: 'desktop-1920x1080', width: 1920, height: 1080, confirmFaction: 'RBiH' },
+  { id: 'desktop-1366x768', width: 1366, height: 768, confirmFaction: 'RS' },
+  { id: 'tablet-1024x768', width: 1024, height: 768, confirmFaction: 'HRHB' },
+  { id: 'narrow-700x900', width: 700, height: 900, confirmFaction: 'RBiH' },
+  { id: 'short-1024x560', width: 1024, height: 560, confirmFaction: 'RS' },
+];
 
 const RAW_FIRST_HOUR_LABELS = [
   'rbih_state_identity',
@@ -605,6 +614,421 @@ async function captureEvidence(page, summary, id) {
   return step;
 }
 
+async function waitForOpeningScene(page, scene, timeout = 30000) {
+  await page.waitForFunction((expectedScene) => {
+    const menu = document.querySelector('.main-menu-opening');
+    const layer = document.querySelector('.opening-cinematic');
+    const plate = layer?.querySelector('[data-scene-state="current"]');
+    const image = plate?.querySelector('img');
+    return menu?.getAttribute('data-opening-scene') === expectedScene
+      && layer?.getAttribute('data-opening-phase') === 'idle'
+      && layer?.getAttribute('aria-busy') === 'false'
+      && image instanceof HTMLImageElement
+      && image.complete
+      && image.naturalWidth > 0;
+  }, { timeout }, scene);
+}
+
+async function waitForOpeningSceneGeometryStable(page, timeout = 5000) {
+  await page.evaluate((timeoutMs) => new Promise((resolve, reject) => {
+    const deadline = performance.now() + timeoutMs;
+    let previous = null;
+    let stableFrames = 0;
+    const sample = () => {
+      const wrapper = document.querySelector('.opening-cinematic__plate--current');
+      const plate = wrapper?.querySelector('[data-scene-state="current"]');
+      if (!(wrapper instanceof HTMLElement) || !(plate instanceof HTMLElement)) {
+        reject(new Error('opening scene geometry unavailable while waiting for a stable frame'));
+        return;
+      }
+      const rect = plate.getBoundingClientRect();
+      const current = [rect.x, rect.y, rect.width, rect.height, getComputedStyle(wrapper).transform];
+      const stable = previous !== null && current.every((value, index) => (
+        typeof value === 'number'
+          ? Math.abs(value - previous[index]) <= 0.01
+          : value === previous[index]
+      ));
+      stableFrames = stable ? stableFrames + 1 : 0;
+      previous = current;
+      if (stableFrames >= 3) {
+        resolve();
+        return;
+      }
+      if (performance.now() >= deadline) {
+        reject(new Error(`opening scene geometry did not settle: ${JSON.stringify(current)}`));
+        return;
+      }
+      requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }), timeout);
+}
+
+async function startOpeningPhaseTrace(page) {
+  await page.evaluate(() => {
+    const trace = { active: true, samples: [] };
+    window.__awwvOpeningPhaseTrace = trace;
+    const sample = () => {
+      if (!trace.active) return;
+      const layer = document.querySelector('.opening-cinematic');
+      const monitor = document.querySelector('.main-menu-opening__monitor');
+      const plates = Array.from(layer?.querySelectorAll('.opening-cinematic__plate') ?? []);
+      const portal = layer?.querySelector('.opening-cinematic__portal');
+      const images = plates.map((plate) => {
+        const image = plate.querySelector('img');
+        const style = getComputedStyle(plate);
+        return {
+          state: plate.querySelector('[data-scene-state]')?.getAttribute('data-scene-state') ?? null,
+          decoded: image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
+          opacity: Number(style.opacity),
+          transform: style.transform,
+          transitionDuration: style.transitionDuration,
+        };
+      });
+      const monitorStyle = monitor ? getComputedStyle(monitor) : null;
+      const portalStyle = portal ? getComputedStyle(portal) : null;
+      trace.samples.push({
+        phase: layer?.getAttribute('data-opening-phase') ?? null,
+        reducedMotion: layer?.getAttribute('data-reduced-motion') ?? null,
+        monitorBackgroundImage: monitorStyle?.backgroundImage ?? null,
+        layerBackgroundColor: layer ? getComputedStyle(layer).backgroundColor : null,
+        portalOpacity: portalStyle ? Number(portalStyle.opacity) : null,
+        portalTransform: portalStyle?.transform ?? null,
+        portalTransitionDuration: portalStyle?.transitionDuration ?? null,
+        images,
+      });
+      requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+}
+
+async function stopOpeningPhaseTrace(page) {
+  return page.evaluate(() => {
+    const trace = window.__awwvOpeningPhaseTrace;
+    if (!trace) return [];
+    trace.active = false;
+    return trace.samples;
+  });
+}
+
+function assertOpeningTraceCoverage(trace, label, reducedMotion) {
+  if (trace.length === 0) throw new Error(`${label} opening trace captured no animation frames`);
+  const uncovered = trace.filter((sample) => {
+    const monitorCoversFrame = sample.monitorBackgroundImage && sample.monitorBackgroundImage !== 'none';
+    const decodedPlateCoversFrame = sample.images.some((image) => image.decoded && image.opacity > 0.01);
+    return !monitorCoversFrame && !decodedPlateCoversFrame;
+  });
+  if (uncovered.length > 0) {
+    throw new Error(`${label} exposed ${uncovered.length} frame(s) without a decoded plate or monitoring-room backdrop`);
+  }
+  if (trace.some((sample) => sample.images.length > 2)) {
+    throw new Error(`${label} mounted more than current plus incoming scene plates`);
+  }
+  if (reducedMotion) {
+    const transformed = trace.filter((sample) => sample.images.some((image) => image.transform !== 'none')
+      || (sample.portalTransform !== null && sample.portalTransform !== 'none'));
+    const wrongDuration = trace.filter((sample) => sample.images.some((image) => image.transitionDuration !== '0.155s')
+      || (sample.portalTransitionDuration !== null && sample.portalTransitionDuration !== '0.155s'));
+    if (transformed.length > 0 || wrongDuration.length > 0) {
+      throw new Error(`${label} reduced-motion path was not transform-free at exactly 155ms`);
+    }
+  }
+}
+
+async function openingStateEvidence(page, label) {
+  const evidence = await page.evaluate(() => {
+    const parseColor = (value) => {
+      const parts = value.match(/rgba?\(([^)]+)\)/)?.[1].split(',').map((part) => Number(part.trim()));
+      if (!parts || parts.length < 3) return null;
+      return { r: parts[0], g: parts[1], b: parts[2], a: parts.length === 4 ? parts[3] : 1 };
+    };
+    const composite = (front, back) => ({
+      r: front.r * front.a + back.r * (1 - front.a),
+      g: front.g * front.a + back.g * (1 - front.a),
+      b: front.b * front.a + back.b * (1 - front.a),
+      a: 1,
+    });
+    const luminance = (color) => {
+      const channel = (value) => {
+        const normalized = value / 255;
+        return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+      };
+      return 0.2126 * channel(color.r) + 0.7152 * channel(color.g) + 0.0722 * channel(color.b);
+    };
+    const ratio = (front, back) => {
+      const a = luminance(front);
+      const b = luminance(back);
+      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    };
+    const contrastFor = (textSelector, backgroundSelector) => {
+      const text = document.querySelector(textSelector);
+      const background = document.querySelector(backgroundSelector);
+      if (!(text instanceof HTMLElement) || !(background instanceof HTMLElement)) return null;
+      const foreground = parseColor(getComputedStyle(text).color);
+      const backgroundColor = parseColor(getComputedStyle(background).backgroundColor);
+      const rootColor = parseColor(getComputedStyle(document.body).backgroundColor);
+      if (!foreground || !backgroundColor || !rootColor) return null;
+      const opaqueBackground = backgroundColor.a < 1 ? composite(backgroundColor, rootColor) : backgroundColor;
+      return {
+        foreground: getComputedStyle(text).color,
+        background: getComputedStyle(background).backgroundColor,
+        ratio: ratio(foreground, opaqueBackground),
+      };
+    };
+    const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const focusStyle = active ? getComputedStyle(active) : null;
+    const mainMenu = document.querySelector('.main-menu-opening');
+    const layerStyle = (selector) => {
+      const element = document.querySelector(selector);
+      if (!(element instanceof HTMLElement)) return null;
+      const style = getComputedStyle(element);
+      return { zIndex: style.zIndex, pointerEvents: style.pointerEvents };
+    };
+    const interactiveHitTests = Array.from(document.querySelectorAll(
+      '.opening-splash button, .main-menu-opening button, .main-menu-opening select',
+    )).flatMap((element) => {
+      if (!(element instanceof HTMLElement)) return [];
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const centerInViewport = x >= 0 && x < innerWidth && y >= 0 && y < innerHeight;
+      if (
+        rect.width <= 0
+        || rect.height <= 0
+        || style.display === 'none'
+        || style.visibility === 'hidden'
+        || Number(style.opacity || '1') <= 0
+        || !centerInViewport
+      ) return [];
+      const hit = document.elementFromPoint(x, y);
+      return [{
+        testId: element.getAttribute('data-testid'),
+        tag: element.tagName,
+        text: (element.innerText || element.getAttribute('aria-label') || '').trim().slice(0, 100),
+        hitTag: hit?.tagName ?? null,
+        hitTestId: hit instanceof HTMLElement ? hit.getAttribute('data-testid') : null,
+        hitClass: hit instanceof HTMLElement ? hit.className : null,
+        hitText: hit instanceof HTMLElement ? (hit.innerText || '').trim().slice(0, 100) : null,
+        rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+        center: { x, y },
+        centerHit: hit === element || (hit instanceof Node && element.contains(hit)),
+      }];
+    });
+    return {
+      viewport: { width: innerWidth, height: innerHeight },
+      horizontalOverflow: {
+        document: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        body: document.body.scrollWidth - document.body.clientWidth,
+      },
+      focus: active ? {
+        tag: active.tagName,
+        text: (active.innerText || active.getAttribute('aria-label') || '').trim().slice(0, 160),
+        outlineStyle: focusStyle?.outlineStyle ?? null,
+        outlineWidth: focusStyle?.outlineWidth ?? null,
+        outlineColor: focusStyle?.outlineColor ?? null,
+      } : null,
+      contrast: {
+        heading: contrastFor('.command-heading h2', '.main-menu-opening__console'),
+        body: contrastFor('.command-console-copy, .command-console-thesis', '.main-menu-opening__console'),
+        data: contrastFor('.command-eyebrow', '.main-menu-opening__console'),
+      },
+      scene: document.querySelector('.main-menu-opening')?.getAttribute('data-opening-scene') ?? null,
+      phase: document.querySelector('.opening-cinematic')?.getAttribute('data-opening-phase') ?? null,
+      reducedMotion: document.querySelector('.opening-cinematic')?.getAttribute('data-reduced-motion') ?? null,
+      openingLayerOrder: mainMenu ? {
+        scene: layerStyle('.opening-cinematic.main-menu-opening__scene'),
+        scrim: layerStyle('.main-menu-opening__scrim'),
+        header: layerStyle('.main-menu-opening__header'),
+        workspace: layerStyle('.main-menu-opening__workspace'),
+        version: layerStyle('.main-menu-opening__version'),
+        portal: layerStyle('.opening-cinematic__portal'),
+      } : null,
+      interactiveHitTests,
+      fontFamilies: Array.from(document.querySelectorAll('.main-menu-opening, .command-eyebrow, .main-menu-opening__version'))
+        .map((element) => getComputedStyle(element).fontFamily),
+    };
+  });
+  if (evidence.horizontalOverflow.document > 0 || evidence.horizontalOverflow.body > 0) {
+    throw new Error(`${label} has horizontal overflow: ${JSON.stringify(evidence.horizontalOverflow)}`);
+  }
+  for (const [role, contrast] of Object.entries(evidence.contrast)) {
+    if (contrast && contrast.ratio < 4.5) {
+      throw new Error(`${label} ${role} contrast is ${contrast.ratio.toFixed(2)}:1, below WCAG AA`);
+    }
+  }
+  const occluded = evidence.interactiveHitTests.filter((entry) => !entry.centerHit);
+  if (occluded.length > 0) {
+    throw new Error(`${label} has occluded visible opening controls: ${JSON.stringify(occluded)}`);
+  }
+  if (evidence.openingLayerOrder) {
+    const { scene, scrim, header, workspace, version } = evidence.openingLayerOrder;
+    if (
+      scene?.zIndex !== '0'
+      || scrim?.zIndex !== '1'
+      || scrim?.pointerEvents !== 'none'
+      || header?.zIndex !== '2'
+      || workspace?.zIndex !== '2'
+      || version?.zIndex !== '2'
+    ) {
+      throw new Error(`${label} opening scene/scrim/content stack is not canonical: ${JSON.stringify(evidence.openingLayerOrder)}`);
+    }
+  }
+  return evidence;
+}
+
+async function sceneGeometry(page, kind) {
+  return page.evaluate((sceneKind) => {
+    const selector = sceneKind === 'preview'
+      ? '.opening-cinematic [data-scene-state="current"]'
+      : '[data-testid="warroom-shell"] [data-testid="warroom-scene-plate"]';
+    const plate = document.querySelector(selector);
+    const image = plate?.querySelector('img');
+    if (!(plate instanceof HTMLElement) || !(image instanceof HTMLImageElement)) return null;
+    const rect = plate.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
+    const style = getComputedStyle(plate);
+    const imageStyle = getComputedStyle(image);
+    return {
+      src: image.src,
+      naturalWidth: image.naturalWidth,
+      naturalHeight: image.naturalHeight,
+      rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+      imageRect: { x: imageRect.x, y: imageRect.y, width: imageRect.width, height: imageRect.height },
+      objectFit: imageStyle.objectFit,
+      transform: style.transform,
+      transformOrigin: style.transformOrigin,
+    };
+  }, kind);
+}
+
+function assertSceneContinuity(preview, confirmed, label) {
+  if (!preview || !confirmed) throw new Error(`${label} is missing preview or confirmed scene geometry`);
+  const delta = (a, b) => Math.abs(a - b);
+  const rectKeys = ['x', 'y', 'width', 'height'];
+  const geometryMismatch = rectKeys.some((key) => delta(preview.rect[key], confirmed.rect[key]) > 0.5)
+    || rectKeys.some((key) => delta(preview.imageRect[key], confirmed.imageRect[key]) > 0.5);
+  if (
+    preview.src !== confirmed.src
+    || preview.naturalWidth <= 0
+    || preview.naturalHeight <= 0
+    || confirmed.naturalWidth !== preview.naturalWidth
+    || confirmed.naturalHeight !== preview.naturalHeight
+    || preview.objectFit !== confirmed.objectFit
+    || preview.transform !== confirmed.transform
+    || geometryMismatch
+  ) {
+    throw new Error(`${label} preview-to-confirmed crop continuity failed: ${JSON.stringify({ preview, confirmed })}`);
+  }
+}
+
+async function enterOpeningLanding(page) {
+  await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.evaluate(() => {
+    window.localStorage?.clear();
+    window.sessionStorage?.clear();
+  });
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForSelector('.opening-splash', { visible: true, timeout: 30000 });
+  await page.waitForFunction(() => {
+    const image = document.querySelector('[data-testid="opening-splash-art"]');
+    return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
+  }, { timeout: 30000 });
+}
+
+async function runOpeningVisualMatrix(page, summary) {
+  summary.evidence.openingVisualMatrix = { artStatus: 'fallback-art', viewports: {}, reducedMotion: null };
+  for (const viewport of OPENING_VISUAL_VIEWPORTS) {
+    await page.setViewport({ width: viewport.width, height: viewport.height, deviceScaleFactor: 1 });
+    await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
+    await enterOpeningLanding(page);
+    const viewportEvidence = { states: {}, transitionTraces: {}, previews: {}, continuity: null };
+    summary.evidence.openingVisualMatrix.viewports[viewport.id] = viewportEvidence;
+
+    viewportEvidence.states.splash = await openingStateEvidence(page, `${viewport.id} splash`);
+    await captureEvidence(page, summary, `${viewport.id}_splash`);
+    await clickByText(page, 'Assume Responsibility');
+    await waitForOpeningScene(page, 'neutral');
+    viewportEvidence.states.landing = await openingStateEvidence(page, `${viewport.id} neutral landing`);
+    await captureEvidence(page, summary, `${viewport.id}_neutral_landing`);
+
+    await clickByText(page, 'New War');
+    await page.waitForSelector('[data-testid="main-menu-faction-RBiH"]', { visible: true, timeout: 15000 });
+    await page.keyboard.press('Tab');
+    viewportEvidence.states.factionSelector = await openingStateEvidence(page, `${viewport.id} faction selector`);
+    const focus = viewportEvidence.states.factionSelector.focus;
+    if (!focus || focus.outlineStyle === 'none' || Number.parseFloat(focus.outlineWidth ?? '0') < 2) {
+      throw new Error(`${viewport.id} faction selector has no visible >=2px keyboard focus ring: ${JSON.stringify(focus)}`);
+    }
+    await captureEvidence(page, summary, `${viewport.id}_neutral_faction_selector_focus`);
+
+    for (const faction of ['RBiH', 'RS', 'HRHB']) {
+      await startOpeningPhaseTrace(page);
+      await clickSelector(page, `[data-testid="main-menu-faction-${faction}"]`, `${faction} matrix faction`);
+      await waitForOpeningScene(page, faction);
+      await waitForOpeningSceneGeometryStable(page);
+      const trace = await stopOpeningPhaseTrace(page);
+      assertOpeningTraceCoverage(trace, `${viewport.id} ${faction}`, false);
+      viewportEvidence.transitionTraces[faction] = trace;
+      viewportEvidence.previews[faction] = await sceneGeometry(page, 'preview');
+      viewportEvidence.states[`${faction}Preview`] = await openingStateEvidence(page, `${viewport.id} ${faction} preview`);
+      await captureEvidence(page, summary, `${viewport.id}_${faction.toLowerCase()}_preview`);
+    }
+
+    if (viewport.confirmFaction !== 'HRHB') {
+      await clickSelector(page, `[data-testid="main-menu-faction-${viewport.confirmFaction}"]`, `${viewport.confirmFaction} confirmed faction`);
+      await waitForOpeningScene(page, viewport.confirmFaction);
+      await waitForOpeningSceneGeometryStable(page);
+    }
+    await clickByText(page, 'Take command');
+    await waitForVisibleText(page, 'How should the war unfold?');
+    viewportEvidence.states.mode = await openingStateEvidence(page, `${viewport.id} mode`);
+    const confirmedPreview = await sceneGeometry(page, 'preview');
+    await captureEvidence(page, summary, `${viewport.id}_mode`);
+    await clickByText(page, 'Begin');
+    await waitForVisibleText(page, 'WAR HAS STARTED');
+    await assertSelectedWarroomVisibleBeneathDateSting(
+      page,
+      summary,
+      { faction: viewport.confirmFaction },
+    );
+    const confirmed = await sceneGeometry(page, 'confirmed');
+    assertSceneContinuity(confirmedPreview, confirmed, `${viewport.id} ${viewport.confirmFaction}`);
+    viewportEvidence.continuity = {
+      faction: viewport.confirmFaction,
+      preview: confirmedPreview,
+      confirmed,
+      maxAllowedRectDeltaPx: 0.5,
+      transformOriginNote: 'Recorded numerically; identical translation means origin does not alter the settled crop.',
+    };
+    viewportEvidence.states.confirmedWarroom = await openingStateEvidence(page, `${viewport.id} confirmed Warroom`);
+    await captureEvidence(page, summary, `${viewport.id}_${viewport.confirmFaction.toLowerCase()}_confirmed_warroom`);
+  }
+
+  await page.setViewport({ width: 1366, height: 768, deviceScaleFactor: 1 });
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  await enterOpeningLanding(page);
+  await clickByText(page, 'Assume Responsibility');
+  await waitForOpeningScene(page, 'neutral');
+  await clickByText(page, 'New War');
+  await page.waitForSelector('[data-testid="main-menu-faction-RBiH"]', { visible: true, timeout: 15000 });
+  await startOpeningPhaseTrace(page);
+  await clickSelector(page, '[data-testid="main-menu-faction-RBiH"]', 'reduced-motion RBiH faction');
+  await waitForOpeningScene(page, 'RBiH');
+  await waitForOpeningSceneGeometryStable(page);
+  const reducedTrace = await stopOpeningPhaseTrace(page);
+  assertOpeningTraceCoverage(reducedTrace, 'reduced-motion RBiH', true);
+  summary.evidence.openingVisualMatrix.reducedMotion = {
+    state: await openingStateEvidence(page, 'reduced-motion preview'),
+    trace: reducedTrace,
+  };
+  await captureEvidence(page, summary, 'reduced_motion_1366x768_rbih_preview');
+
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
+  await page.setViewport({ width: 1440, height: 1000, deviceScaleFactor: 1 });
+}
+
 function isIgnoredConsoleError(message) {
   const url = message.location?.url ?? '';
   if (/Failed to load resource/i.test(message.text) && /\/favicon\.ico$/i.test(url)) return true;
@@ -1079,6 +1503,11 @@ async function run() {
           });
         }
       });
+
+      if (RUN_OPENING_VISUAL_MATRIX) {
+        summary.browserGatePhase = 'opening-visual-matrix';
+        await runOpeningVisualMatrix(page, summary);
+      }
 
       for (const flow of FACTION_OPENING_FLOWS) {
         summary.browserGatePhase = `proof:${flow.faction}`;
