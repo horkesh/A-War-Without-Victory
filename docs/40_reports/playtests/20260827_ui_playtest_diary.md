@@ -1626,6 +1626,106 @@ sweep from this harness, so the *player's own* authorized-cleansing path remains
 though the mechanism is now proven live. That is the next harness lever to build, and it is the
 one that would let a playthrough actually exercise the choice §6 exists to govern.
 
+## 3n. Queue-block fix — BUILT, MEASURED, REVERTED. Do not re-attempt without reading this.
+
+The §3q root cause was real and the fix was correct in isolation. **It was reverted anyway**, on
+two independent grounds. Recorded in full so the next person does not rebuild it.
+
+### What was built
+
+`injectQueuedOperation` (`pre_planned_operations.ts`) attempted only the HEAD entry of
+`cmd.queued_operations`; a head that could not build returned false without shifting, and
+`injectPrePlannedOperations` skips any corps whose queue is non-empty — so one unbuildable entry
+sterilized the corps permanently.
+
+The change iterated the queue: `injected` consumes and returns true; `consume` (moot / unknown /
+declined) drops the entry and returns false, **deliberately preserving the pre-fix cadence**;
+`retry` leaves the entry queued and tries the NEXT one; a pending authorization returns `halt` so
+a later op can never jump ahead of a decision the president is being asked. Nothing was discarded
+that was not already discarded.
+
+`tsc` clean, `tests/pre_planned_operations.test.ts` green.
+
+### Ground 1 — it did not do what it was built to do
+
+**RS as player, 188 turns: 16 operations, last starting t42 — identical to before.**
+
+The ops-trace shows why. By late war those queues hold a SINGLE entry each
+(`["Operation Zvezda 94"]`, `["Operation Trnovo"]`); the later entries the root-cause seat saw
+stacked behind them — Pracha River, Kijevo — had already run at t42 and t25. **There was nothing
+for the loop to try.** The multi-entry queues in that seat's trace were an early-war snapshot; by
+the time the cliff forms the queues are already down to one permanently-unbuildable op:
+
+```
+t70 |Operation Trnovo   |brigade_missing|Brigade "rs_igman_brigade" not found in formations
+t101|Operation Zvezda 94|participants_below_attack_floor|1 viable participant(s); 2 required
+```
+
+### Ground 2 — the calibration "gain" was churn, and it worsened a known-bad site
+
+Two full 188w calibration runs, one variable:
+
+| checkpoint | without | with | delta |
+| --- | --- | --- | --- |
+| jan1993 | 695 | 695 | 0 |
+| apr1994 | 674 | 675 | +1 |
+| apr1995 | 668 | 671 | +3 |
+| oct1995 | 652 | 653 | **+1** |
+
+Anchors 31/31 in both, zero differences. Enclave guard clean in both. `op:kalesija:gojcin_2` and
+the Farz P-A failure appear identically in both, so both are **pre-existing** and not caused by
+the change.
+
+But the oct1995 +1 is nine settlements moving in both directions, scored against
+`data/source/calibration/painted_control_oct1995.json` (`by_settlement_id`):
+
+| cell | ref | without | with | |
+| --- | --- | --- | --- | --- |
+| `op:bihac:trubar` | RBiH | RS | RBiH | improved |
+| `op:bugojno:medini` | RBiH | HRHB | RBiH | improved |
+| `op:centar_sarajevo:radava` | RS | RBiH | RS | improved |
+| `op:ilidza:sarajevo_dio_ilidza_2` | RS | RBiH | RS | improved |
+| `op:mrkonjic_grad:gerzovo_2` | HRHB | RS | HRHB | improved |
+| `op:bosanski_petrovac:jasenovac_2` | RBiH | RBiH | HRHB | REGRESSED |
+| `op:sanski_most:kljevci` | RBiH | RBiH | RS | REGRESSED |
+| **`op:kljuc:hadzici`** | **RBiH** | RBiH | **RS** | **REGRESSED** |
+| **`op:kljuc:kljuc_2`** | **RBiH** | RBiH | **RS** | **REGRESSED** |
+
+**5 improved, 4 regressed — netting exactly the +1.** And two of the four regressions are at
+**Ključ**, which `memory/brcko_firepower_deficit_fix_adopted` records as a known-open site where
+RS control is the DEFECT, not the target. The change was worsening a known-bad site while the
+aggregate ticked upward: buying score with wrong behaviour, which this project has an explicit
+rule against.
+
+**Reverted.** A change that misses its purpose and regresses a known-open site has no claim on
+having been built.
+
+### What this leaves
+
+The queue-block defect in §3q is **still real and still unfixed**. Anyone fixing it should know:
+
+- Fixing it does NOT lift the RS t42 cliff. The cliff's dominant cause is that at
+  `autonomy_level === 0` the bot corps/brigade pipeline does not run for the player faction at
+  all — and `docs/plans/2026-07-11-broader-assisted-execution-plan.md:7` says that is deliberate
+  ("keeping `meta.autonomy_level === 0` as manual control"). At autonomy 1 the channel switches
+  on and emits only probes, which is the separate w101 probe defect
+  (`memory/frozen_vrs_front_probe_root_cause`). **Two defects stacked plus a design decision.**
+- Any fix in this area moves bot behaviour, so it needs a paired 188w run and a
+  cell-by-cell reference diff — the aggregate delta is not sufficient evidence. This one looked
+  like +5 across the board and was 5-for-4 churn underneath.
+- The Ključ pair (`kljuc_2`, `hadzici`) is the sentinel to watch: it moved first and it moved the
+  wrong way.
+
+### Process note, recorded against myself
+
+Four ad-hoc parsers written during this analysis returned confident wrong answers — a catalog
+year-tally that found 7 of ~40 entries, an enclave-definition scan that missed every
+`capital_osid`, an anchor diff that reported "0 of 31 passing" for both runs, and a painted-
+reference lookup that reported all nine cells absent. Each was wrong because I guessed the field
+name or the file shape instead of reading it first. The last one mattered: it would have shown
+"no reference data" for the exact cells that decided this revert. **Inspect the shape, then
+write the lookup** — and reconcile every derived number against one you already know.
+
 ## 4. Fixed this session (recorded, not open)
 
 | What | Detail |
