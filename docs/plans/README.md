@@ -25,7 +25,7 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | R6 | [Historical gameplay depth and final calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) | January evidence accepted; all further calibration is paused until RE closes |
 | RC | [Collapse scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) / [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) | Pre-1.0 narrow scope complete; D-topology reserved post-1.0 |
 | R7 | [Content, history, audio, accessibility, and opening experience](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography extension](2026-08-28-cinematic-opening-typography-implementation-plan.md) | Cinematic opening mechanics, faction-room continuity, two-family typography, and five-viewport fallback-art browser proof are complete. Two required neutral images, live packaged-Electron acceptance, human listen/sensitivity, broader English accessibility/readability, and closeout remain. Optional foreground/portal prompts do not gate Task 9. RE is untouched. |
-| RE | [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) / [auxiliary packaged-proof recovery](2026-08-28-packaged-probe-recovery-plan.md) | P1/P2A accepted; P2B HELD and P3 waiting. R2 instrumentation closed/rejected at its valid sole RED with zero packaged invocations and no R3. Close the zero-run receipt, then separately lock read-only alternate-proof discovery. |
+| RE | [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) / [historical packaged-proof recovery record](2026-08-28-packaged-probe-recovery-plan.md) | P1/P2A accepted; RE blocked at P2B with no proof route active, and P3 waits. Packaged-proof prerequisite/discovery concluded `NO_VERDICT`; the unproven hypothesis was rolled back at `48909e1d6`. No recovery/discovery successor is a current action. |
 | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | RC, R1-R7, and RE green |
 | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | R8 produces two clean 5/5 diaries |
 
@@ -34,12 +34,11 @@ Its row links the controlling plan and any
 explicitly subordinate implementation or amendment packets with named files, tests, evidence,
 acceptance, and collision rules. Those extensions do not create competing roadmap authority; the
 Master Roadmap workstream register remains definitive. RC uses its linked closed packet; RE uses
-the single reduced contract above. The original probe channel remains closed at `b711cffa9`;
-auxiliary packaged-proof
-recovery currently remains active only to close its zero-execution receipt, not as a competing
-outcome plan. Read-only discovery is queued and unauthorized until its fresh exact-base docs-only
-lock is reviewed, pinned, and accepted. Its instrumentation path is closed. Frozen
-RE discovery records and old T0–T14 text remain evidence only.
+the single reduced contract above. The original probe channel remains closed at `b711cffa9`.
+Packaged-proof recovery, prerequisite, and discovery concluded `NO_VERDICT`; the exact unproven
+hypothesis was rolled back at `48909e1d6`. They are terminal historical evidence, not active or
+queued work. RE remains blocked at P2B with no proof route active; P3 waits. Frozen RE discovery
+records and old T0–T14 text remain evidence only.
 
 ## Activation Boundary
 

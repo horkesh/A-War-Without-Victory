@@ -99,8 +99,8 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
   mechanics, unified typography, and five-viewport fallback-art browser proof are complete. Final
   required owner splash/neutral art and live packaged-Electron first-paint acceptance are open;
   foreground/portal prompts are optional later enhancements. Human listen/sensitivity, broader
-  English accessibility/readability, and
-  closeout reconciliation. Multilingual localization remains post-1.0.
+  English accessibility/readability, and closeout reconciliation remain open. Multilingual
+  localization remains post-1.0.
 - **Full-suite residual outside the R7 UI slice:** the canonical balanced run is red only on five
   inherited files (six tests): three deployment-health/run-diagnostics expectations around the same
   three unstaffed sectors, plus the Cutileiro RBiH accepted-control expectation (43.6798% current vs

@@ -30164,3 +30164,11 @@ reduced-motion proof is complete; broader R7 English accessibility/readability r
 state, IPC implementation, RE, probe, calibration, or canon content changed. The preceding ledger
 entry remains append-only historical record and is corrected by this receipt. `FORAWWV.md` was not
 edited.
+
+## 2026-08-28 — Align terminal RE status in the plans index
+
+**Correction receipt:** Removed the last obsolete plans-index instruction to close a zero-run receipt
+and queue alternate-proof discovery. Packaged-proof recovery/prerequisite/discovery are terminal
+`NO_VERDICT` history, the unproven hypothesis was rolled back at `48909e1d6`, and RE remains blocked
+at P2B with no proof route active. Also completed the R7 open-gates sentence in the master roadmap.
+Documentation only; no RE investigation or implementation occurred. `FORAWWV.md` was not edited.
