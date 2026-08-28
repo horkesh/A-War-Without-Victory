@@ -42,8 +42,9 @@ export default {
         'faction-hrhb-subtle': '#6d99c3',
       },
       fontFamily: {
-        mono: ['IBM Plex Mono', 'monospace'],
-        sans: ['IBM Plex Sans Condensed', 'sans-serif'],
+        sans: ['var(--font-command)'],
+        serif: ['var(--font-command)'],
+        mono: ['var(--font-data)'],
       },
       dropShadow: {
         'glow-sm': '0 0 4px rgba(180, 160, 130, 0.25)',
