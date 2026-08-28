@@ -30066,3 +30066,22 @@ bytes, SHA-256 `8D46478D032013D36AB2AE9C3A6BF4F205CD08E96DD21F15BFE456F52387BAFC
 is terminally closed. P2B remains HELD, P3 waits, calibration remains paused, and the auxiliary
 prerequisite earns no RE credit. No successor, rerun, diagnosis, correction, implementation,
 build, package, Electron, or probe authority follows. `docs/10_canon/FORAWWV.md` was not edited.
+
+## 2026-08-28 — Roll back unaccepted Army-HQ prerequisite hypothesis exactly
+
+**Owner disposition:** The auxiliary prerequisite remained terminal `NO_VERDICT` after its consumed
+one-shot. The owner authorized exact removal of the unaccepted config/test hypothesis without test,
+build, package, probe, diagnosis, or runtime claim.
+
+**Identity receipt:** Commit `48909e1d693035b49e9c78ce823da227f1956dcb` restores
+`src/ui/map/vite.config.ts` to blob `7a098b350461cdbb47ec94d453ff35ec655c7b91` and
+`tests/desktop_packaged_runtime_probe.test.ts` to blob
+`29194ca0844acb8ac6cfb7dff6f1cb17f9513157`, exactly matching the pre-candidate identities from
+`bb97f789d94afb09332666938fe25bcfd07310bf`.
+
+**Disposition:** This rollback proves identity only. It supplies no packaged/runtime or TDZ-safety
+claim; known historical TDZ risk remains unresolved and non-authorizing. RE is BLOCKED at P2B with
+no packaged-proof route active. P3 waits, calibration remains paused, and disjoint R7 may continue.
+The auxiliary work earns no RE credit. No run, retry, diagnosis, instrumentation, supervisor
+redesign, correction, recovery route, or successor authority follows. `docs/10_canon/FORAWWV.md`
+was not edited.

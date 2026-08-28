@@ -1,6 +1,6 @@
 # RE — 1.0 Engine Integrity Contract
 
-**Status:** HELD AT P2B — Army-HQ chunk prerequisite terminal NO VERDICT after consumed one-shot; no successor authority, 2026-08-28
+**Status:** BLOCKED AT P2B — terminal NO VERDICT prerequisite rolled back exactly; no packaged-proof route active, 2026-08-28
 **Purpose:** Reach 1.0 with one truthful engine owner for each affected responsibility.
 **Not the purpose:** general cleanup, optimization, calibration, or speculative mechanic design.
 
@@ -43,7 +43,7 @@ acceptance evidence, and is nontransferable and nonreusable. The authorized diff
 remains zero. No typecheck or balanced-test command is authorized for this auxiliary prerequisite;
 the broader gates remain with later P2B and final verification.
 
-The prerequisite remains auxiliary and non-crediting. P2B stays HELD before implementation, P3
+Under that authorization, the prerequisite remained auxiliary and non-crediting. P2B stayed HELD before implementation, P3
 waits, and calibration remains paused. A prerequisite receipt cannot itself start P2B; any
 successor requires its own fresh reviewed exact-base lock.
 
@@ -69,8 +69,16 @@ bytes, SHA-256 `8D46478D032013D36AB2AE9C3A6BF4F205CD08E96DD21F15BFE456F52387BAFC
 `2026-08-28T05:55:48.7482127Z`, containing only the known circular-chunk and size warnings.
 
 Every implementation and run authority is consumed. No rerun, diagnosis, correction, successor,
-or P2B-start authority follows. P2B remains HELD, P3 waits, calibration remains paused, and this
+or P2B-start authority follows. At that terminal prerequisite receipt, P2B remained HELD; P3 waits, calibration remains paused, and this
 auxiliary prerequisite earns no RE credit.
+
+The exact unproven config/test hypothesis was rolled back at
+`48909e1d693035b49e9c78ce823da227f1956dcb`: config blob
+`7a098b350461cdbb47ec94d453ff35ec655c7b91` and test blob
+`29194ca0844acb8ac6cfb7dff6f1cb17f9513157`, matching the pre-candidate identities. This identity
+restoration supplies no packaged/runtime proof and does not resolve or authorize work on the known
+historical TDZ risk. RE is BLOCKED at P2B with no proof route active; P3 waits, calibration remains
+paused, and disjoint R7 may continue.
 
 ## 1. The plain-language contract
 
@@ -213,7 +221,7 @@ owner. Delete only action strings that become unused.
 expose no deleted surface; Core, desktop sim build, unchanged packaged probe, and one live visual
 confirmation pass. No replacement channel or service.
 
-P2B is held before implementation by the clean-base packaged-probe **NO VERDICT** recorded in the
+P2B is BLOCKED before implementation with no packaged-proof route active after the clean-base packaged-probe **NO VERDICT** recorded in the
 living audit. The auxiliary [packaged-probe recovery plan](2026-08-28-packaged-probe-recovery-plan.md)
 remains outside the seven RE outcomes/eight packets, earns no RE credit, and cannot automatically
 or retroactively satisfy P2B. Its final R2 instrumentation attempt is CLOSED/REJECTED at a valid sole
@@ -221,12 +229,14 @@ RED. No production edit, GREEN, syntax check, diff verification, package/probe i
 or R3 occurred; packaged invocation count is zero. The consumed RED and unused package authority are
 nontransferable.
 
-P3 remains waiting while P2B is held. The alternate-proof discovery closed at `C_P2B_BLOCKED`.
+P2B is BLOCKED before implementation with no packaged-proof route active; P3 remains waiting. The alternate-proof discovery closed at `C_P2B_BLOCKED`.
 The owner then approved the standalone Army-HQ chunk prerequisite, which consumed its sole
 canonical packaged-probe invocation and ended at
 `NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`. There is no auxiliary
-next route and no later implementation, test, build, package, Electron/probe, rerun, diagnosis,
-correction, P2B, P3, R2/R3, or successor authority.
+next route. Its exact unproven config/test hypothesis was rolled back at `48909e1d6` to the
+pre-candidate blobs. Known historical TDZ risk remains unresolved and non-authorizing. There is no
+later implementation, test, build, package, Electron/probe, rerun, diagnosis, instrumentation,
+supervisor redesign, correction, P2B, P3, R2/R3, or successor authority.
 
 ### P3 — Conserved threat lineage
 

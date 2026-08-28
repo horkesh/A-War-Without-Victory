@@ -27,9 +27,17 @@ bytes, SHA-256 `8D46478D032013D36AB2AE9C3A6BF4F205CD08E96DD21F15BFE456F52387BAFC
 
 The binding result is
 `NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`. These facts establish no
-cause. The one-shot is consumed and no retry, diagnosis, correction, or successor follows. P2B
-remains HELD, P3 waits, calibration remains paused, and this auxiliary prerequisite earns no RE
+cause. The one-shot is consumed and no retry, diagnosis, correction, or successor follows. At that
+terminal prerequisite receipt, P2B remained HELD; P3 waits, calibration remains paused, and this auxiliary prerequisite earns no RE
 credit.
+
+The exact unproven config/test hypothesis was rolled back at
+`48909e1d693035b49e9c78ce823da227f1956dcb` to config blob
+`7a098b350461cdbb47ec94d453ff35ec655c7b91` and test blob
+`29194ca0844acb8ac6cfb7dff6f1cb17f9513157`, the exact pre-candidate identities. This is identity
+restoration only: it proves no packaged/runtime outcome and does not resolve or authorize work on
+the known historical TDZ risk. No packaged-proof route is active or implied. RE is BLOCKED at P2B,
+P3 waits, calibration remains paused, and disjoint R7 may continue.
 
 ## Terminal alternate-proof discovery receipt — 2026-08-28
 
@@ -45,7 +53,7 @@ All terminal routes were considered:
 
 The consumed clean-base invocation remains **NO VERDICT**; 21 non-document mechanics are unchanged at this base. The wrapper still has no watchdog or live stdout/stderr forwarding. Nothing in this receipt converts timeout, manifest presence, split commands, historical causality, or external observation into packaged-probe success.
 
-P2B remains **HELD** before implementation; P3 waits; calibration remains paused; recovery remains auxiliary and earns no RE credit. There is no active successor and no authority for implementation, diagnosis, rerun, build, package, Electron/probe execution, TDZ/chunk remediation, P2B/P3 work, or R2/R3 revival. The remainder of this plan stays **ARCHIVED — DO NOT EXECUTE** as historical negative evidence.
+At discovery close, P2B remained **HELD** before implementation; P3 waits; calibration remains paused; recovery remains auxiliary and earns no RE credit. There is no active successor and no authority for implementation, diagnosis, rerun, build, package, Electron/probe execution, TDZ/chunk remediation, P2B/P3 work, or R2/R3 revival. The remainder of this plan stays **ARCHIVED — DO NOT EXECUTE** as historical negative evidence.
 
 
 > **ARCHIVED — DO NOT EXECUTE:** This rejected instrumentation plan is retained only as negative evidence. The separately locked alternate-proof discovery contract is closed at `C_P2B_BLOCKED`; there is no continuing authority.
@@ -317,7 +325,7 @@ required terminal. The post-sentinel fail-safe yields `LOCALIZED_NO_VERDICT` for
 
 The rejected design required every class to stop. Its conditional `NONREPRODUCIBLE_GREEN` route to
 Lock 3 or a fresh P2B lock was never reached and is now superseded; it grants no current transition
-authority. P2B remains held pending the separately locked alternate-proof discovery.
+authority. At that rejected-design point, P2B remained held pending the then-future separately locked alternate-proof discovery; that discovery later closed and this archived sentence grants no current authority.
 For a valid stream plus child nonzero, malformed or invalid manifest, or existing validation failure before cutoff, the class is
 `LOCALIZED_FAILURE`, with `last_observed_marker`, `last_completed_stage`,
 `next_expected_marker`, exact child/wrapper result, error, and manifest presence/validation recorded.

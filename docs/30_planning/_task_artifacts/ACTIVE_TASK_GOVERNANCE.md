@@ -16,7 +16,7 @@ P7 no retreat teleport.
 
 The corrected Node-22 baseline is deterministic, engine-green, and save/replay-green. Its measured
 `+3.62853%` mandatory-correctness cost is watch-only, not a 1.0 gate. No further pre-1.0 performance
-diagnosis or optimization is authorized. P1 and P2A are accepted. P2B is HELD before implementation
+diagnosis or optimization is authorized. P1 and P2A are accepted. P2B is BLOCKED before implementation with no packaged-proof route active
 by its packaged-probe NO VERDICT; P3 waits. Final R2 instrumentation is CLOSED/REJECTED at its valid
 sole RED. There was no production edit, GREEN, syntax check, diff verification, packaged invocation,
 candidate, or R3; packaged invocation count remains zero. The consumed RED and unused package
@@ -24,8 +24,9 @@ authority are nontransferable. The separately locked alternate-proof discovery i
 at `C_P2B_BLOCKED`. The owner subsequently approved one standalone Army-HQ manual-chunk packaging
 prerequisite. Its literal canonical command was invoked once on candidate
 `d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac` and ended at
-`NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`. Its implementation and
-run authority are consumed. One unauthorized read-only `git diff --check` passed after the earlier draft; it caused no
+`NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`. Its exact unproven
+config/test hypothesis was then rolled back at `48909e1d693035b49e9c78ce823da227f1956dcb`
+to the pre-candidate blobs. Its implementation and run authority are consumed. One unauthorized read-only `git diff --check` passed after the earlier draft; it caused no
 mutation or product/test/build/package/Electron/probe execution, is excluded from acceptance
 evidence, and is nontransferable and nonreusable. The authorized diff-check budget remains zero.
 No long run is authorized until the one final
@@ -66,20 +67,22 @@ candidate or packaged invocation; there is no R3. The discovery contract require
 Architect, Orchestrator, Platform, Build, QA, and Process to choose unanimously among an external
 proof route, a root-cause prerequisite, or an explicit blocker. It terminated at
 `C_P2B_BLOCKED`; the result remains `RECOMMENDATION_ONLY_NOT_AUTHORIZED`. The owner's later,
-standalone prerequisite approval did not reopen discovery or R2/R3. That prerequisite is now
-terminally closed at `NO_VERDICT` after its consumed one-shot. There is no code, test, build,
-package, Electron/probe, TDZ/chunk, P2B, P3, rerun, diagnosis, correction, or successor authority.
+standalone prerequisite approval did not reopen discovery or R2/R3. That prerequisite is terminal
+`NO_VERDICT`; its exact hypothesis is rolled back. Known historical TDZ risk remains unresolved and
+non-authorizing. RE is blocked at P2B with no packaged-proof route active; P3 waits and calibration
+remains paused. Disjoint R7 may continue. There is no rerun, diagnosis, instrumentation, supervisor
+redesign, correction, P2B/P3 execution, or successor authority.
 
 ## Active machine lock
 
-The active receipt-only lock is `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-RECEIPT` /
-`record-consumed-one-shot-supervisor-custody-no-verdict`, based on exact clean candidate
-`d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac`. Every project/test/build/package/probe/diff/syntax/
-diagnosis/retry/correction budget is zero; `long_run_policy.permitted` is false and the
-checker-required maximum-pairs value `1` is inert. It records terminal
-`NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT` only. It grants no
-continuing implementation, execution, receipt mutation, rerun, diagnosis, correction, P2B, P3, or
-successor authority.
+The active receipt-only lock is `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-ROLLBACK-RECEIPT` /
+`record-exact-rollback-and-synchronize-roadmap-disposition`, based on exact rollback commit
+`48909e1d693035b49e9c78ce823da227f1956dcb`. Every execution and verification budget is zero;
+`long_run_policy.permitted` is false and the checker-required maximum-pairs value `1` is inert. It
+records the exact restored config blob `7a098b350461cdbb47ec94d453ff35ec655c7b91` and test blob
+`29194ca0844acb8ac6cfb7dff6f1cb17f9513157`, terminal historical `NO_VERDICT`, and no active
+packaged-proof route. It grants no continuing implementation, execution, rerun, diagnosis,
+instrumentation, supervisor redesign, P2B/P3, or successor authority.
 
 ## Deferred and retired
 
@@ -121,4 +124,4 @@ Remote push, merge, release, tag, signing, upload, and publication remain unauth
 - Route B was not unanimous because causality is unproven; observing it would repeat substantially unchanged churn, while editing first would be hypothesis-driven remediation.
 - Orchestrator therefore bound route C under the unanimous-route and fail-closed rules.
 
-P2B remains **HELD** before implementation; P3 waits; calibration remains paused; this auxiliary discovery earns no RE credit. No implementation, diagnosis, rerun, build, package, Electron/probe execution, P2B restart, P3 start, R2/R3 revival, or successor task is authorized.
+At discovery close, P2B remained **HELD** before implementation; P3 waits; calibration remains paused; this auxiliary discovery earns no RE credit. No implementation, diagnosis, rerun, build, package, Electron/probe execution, P2B restart, P3 start, R2/R3 revival, or successor task is authorized.

@@ -1,3 +1,3 @@
-RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-RECEIPT is CLOSED at NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT on candidate d2cbd31e4670dfc437af622c2ad97ca1e1dad4ac.
-The literal canonical command was invoked once and its authority is consumed. No rerun, diagnosis, correction, implementation, build, package, probe, or successor authority remains.
-P2B remains HELD; P3 waits; calibration remains paused; this auxiliary prerequisite earns no RE credit.
+RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE-ROLLBACK-RECEIPT is CLOSED on exact rollback commit 48909e1d693035b49e9c78ce823da227f1956dcb.
+The auxiliary prerequisite remains historical NO_VERDICT after its consumed one-shot; its exact unproven config/test hypothesis was rolled back to the pre-candidate blobs. Known historical TDZ risk remains unresolved and non-authorizing.
+RE is BLOCKED at P2B with no packaged-proof route active; P3 waits; calibration remains paused. Disjoint R7 may continue. No RE credit, rerun, diagnosis, recovery redesign, or successor authority exists.

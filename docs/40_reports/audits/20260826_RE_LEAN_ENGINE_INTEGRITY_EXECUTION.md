@@ -2,11 +2,7 @@
 
 **Date:** 2026-08-26
 
-**Status:** P1/P2A accepted; P2B HELD before implementation after packaged-probe NO VERDICT; P3
-waiting; alternate packaged-proof discovery CLOSED/BLOCKED at `C_P2B_BLOCKED`; owner-approved
-Army-HQ chunk prerequisite authorization transition active, with no implementation or command
-authority until its successor lock is separately reviewed, pinned, and accepted; calibration pause
-and long-run denial unchanged
+**Status:** P1/P2A accepted; RE BLOCKED at P2B with no packaged-proof route active; auxiliary prerequisite historical NO_VERDICT and exact hypothesis rolled back at `48909e1d6`; P3 waiting; calibration paused; disjoint R7 may continue; no successor authority.
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -1321,3 +1317,19 @@ diagnosis, or runtime verification is claimed by this row.
 - The candidate topology/test hypothesis is removed byte-identically. This makes no packaged,
   runtime, TDZ-safety, behavior, causality, P2B, or RE-credit claim. The rollback commit remains
   pending and, once created, grants no automatic receipt or successor authority.
+
+## Terminal Army-HQ prerequisite rollback receipt — 2026-08-28
+
+- Rollback commit: `48909e1d693035b49e9c78ce823da227f1956dcb`.
+- Restored exact pre-candidate identities: config
+  `7a098b350461cdbb47ec94d453ff35ec655c7b91`; test
+  `29194ca0844acb8ac6cfb7dff6f1cb17f9513157`.
+- The auxiliary prerequisite remains historical
+  `NO_VERDICT — EXTERNAL_SUPERVISOR_CUSTODY_FAILURE_AFTER_CONSUMED_ONE_SHOT`; its proof was not
+  accepted and supplies no P2B evidence or RE credit.
+- Restoration is identity-only. It makes no packaged/runtime/TDZ-safety claim. The known historical
+  TDZ risk remains unresolved and non-authorizing.
+- RE is BLOCKED at P2B with no packaged-proof route active; P3 waits and calibration remains paused.
+  Disjoint R7 may continue under its existing roadmap authority.
+- No run, retry, diagnosis, instrumentation, supervisor redesign, correction, recovery route, or
+  successor authority follows. Every receipt execution and verification budget is zero.
