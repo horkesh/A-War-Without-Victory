@@ -431,6 +431,14 @@ body {
 .record-list__empty { border: 1px dashed rgba(203, 211, 202, 0.24); color: #aab2aa; padding: 1.5rem; text-align: center; }
 .command-error { margin-top: 1rem; border: 1px solid rgba(190, 69, 58, 0.48); background: rgba(85, 23, 20, 0.45); color: #f2c7c1; padding: 0.65rem; font-size: 0.72rem; }
 
+@media (max-width: 820px), (max-height: 760px) {
+  .main-menu-opening__version {
+    top: 4.25rem;
+    right: 1rem;
+    bottom: auto;
+  }
+}
+
 @media (max-width: 820px) {
   .main-menu-opening { overflow-y: auto; }
   .main-menu-opening__header,
