@@ -665,6 +665,21 @@ test('tactical map build copies packaged MapLibre glyph fonts', async () => {
     );
 });
 
+test('tactical map build keeps Army-HQ in one manual chunk', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'ui', 'map', 'vite.config.ts'), 'utf8');
+
+    assert.doesNotMatch(
+        source,
+        /feature-army-hq-(?:records|operations|forces)/,
+        'Army-HQ modules must not be partitioned by filename',
+    );
+    assert.match(
+        source,
+        /if \(normalized\.includes\('\/src\/ui\/map\/components\/army_hq\/'\)\) return 'feature-army-hq';/,
+        'the complete Army-HQ directory must map directly to one chunk',
+    );
+});
+
 test('renderer reaction proof instruments the real tactical-map session/store path in probe-safe form', async () => {
     const useDesktopSession = await readFile(join(process.cwd(), 'src', 'ui', 'map', 'hooks', 'useDesktopSession.ts'), 'utf8');
     const gameStore = await readFile(join(process.cwd(), 'src', 'ui', 'map', 'store', 'gameStore.ts'), 'utf8');

@@ -1183,3 +1183,78 @@ Process QA read only `C:\Users\User\.codex\skills\quality-assurance-process\SKIL
   no second kill, retry, or diagnosis.
 - P2B remains HELD; P3 waits; calibration remains paused; no RE credit or later-packet authority is
   granted.
+
+## Army-HQ chunk prerequisite — pre-proof lock row — 2026-08-28
+
+**Status:** PRE-CANDIDATE EVIDENCE ONLY. The sole RED, minimal production edit, sole GREEN, and sole
+standalone map build are complete. Architect review is GO and Process/Build review is GO; no
+candidate commit, package command, Electron launch, or packaged probe has occurred under this lock.
+
+- Exact clean base: `bb97f789d94afb09332666938fe25bcfd07310bf`.
+- Task/packet: `RE-PACKAGED-RUNTIME-CHUNK-PREREQUISITE` /
+  `collapse-army-hq-manual-chunk-and-reprove-canonical-package`.
+- Exact allowlist: the active lock, this living audit, `src/ui/map/vite.config.ts`, and
+  `tests/desktop_packaged_runtime_probe.test.ts` only.
+- Production scope is exactly one direct Army-HQ return of `feature-army-hq`; the existing packaged
+  runtime contract receives the exact focused title `tactical map build keeps Army-HQ in one manual
+  chunk`. Config additions are capped at gross 2/net 0; test net additions are capped at 20.
+- Exact focused command for the sole RED and sole GREEN:
+  `node node_modules/vitest/vitest.mjs run tests/desktop_packaged_runtime_probe.test.ts -t "tactical map build keeps Army-HQ in one manual chunk"`.
+- Under the pinned Node `22.21.1` runtime, the sole focused RED exited `1`: `1 failed / 7 skipped`.
+  Only the new assertion failed, on the retained suffixed Army-HQ chunk labels. The exact same
+  focused command then supplied the sole GREEN, exiting `0`: `1 passed / 7 skipped`.
+- Production numstat is `+1/-13` (net `-12`) in `src/ui/map/vite.config.ts`; test numstat is
+  `+15/-0` in `tests/desktop_packaged_runtime_probe.test.ts`. The complete production mapping is
+  one line: `if (normalized.includes('/src/ui/map/components/army_hq/')) return 'feature-army-hq';`.
+- The canonical staged implementation payload SHA-256 is
+  `38a8ed117270f73c800fd7595417876b9cce201ce8d3362f3c6fb4f3dc0994a8`, over these exact UTF-8 LF
+  Git-index rows, in byte order:
+
+  ```text
+  src/ui/map/vite.config.ts\t100644\tdbf7c2bdbe038b31be54b8fbf62433762bb0afd8\n
+  tests/desktop_packaged_runtime_probe.test.ts\t100644\t02b11c79d73f03297c8df82c81b382e03c37d367\n
+  ```
+
+  The implementation payload numstat remains config `+1/-13` and test `+15/-0`.
+- Exact staged paths are `docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json`,
+  `docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md`,
+  `src/ui/map/vite.config.ts`, and `tests/desktop_packaged_runtime_probe.test.ts`.
+- After GREEN, one standalone `npm.cmd run desktop:map:build` is permitted. The one unavoidable
+  nested map build inside the sole canonical composite makes two actual map builds; nested
+  release/sim/Warroom/package descendants grant no separate authority.
+- The sole standalone `npm.cmd run desktop:map:build` ran under the pinned runtime and exited `0`.
+  Vite transformed `1,368` modules and completed in `39.82s`; output contained one
+  `feature-army-hq` chunk of `1,520.27 kB`. Non-failing warnings still reported cycles among
+  `feature-army-hq`, `map-rendering`, `feature-warroom-ui`, and `map-geometry`, plus chunk size above
+  `1,200 kB`. These warnings are build observations only: they are not packaged-success proof and
+  grant no follow-on authority.
+- The ignored `dist/tactical-map` output was removed only after its path was verified inside the
+  worktree. An initial `Remove-Item` cleanup was rejected by shell policy before execution; the
+  exact pinned-Node `fs.rmSync` cleanup then succeeded. No test or build was rerun.
+- The candidate must be committed and clean before the one literal unchanged
+  `npm.cmd run desktop:package:probe`. All commands bind Node `22.21.1` at
+  `C:\Users\User\AppData\Local\Logi\LogiPluginService\PluginHosts\node22\node\node.exe`, SHA-256
+  `471961CB355311C9A9DD8BA417ECA8269EAD32A2231653084112554CDA52E8B3`, its sibling `npm.cmd`, and
+  that exact Node22 directory prepended to child `PATH`; default or fallback npm/Node is prohibited.
+- The package clock starts at npm-root launch and is 1,200,000 ms. Positive observation of the
+  exact expected packaged-executable descendant atomically stops and cancels that clock and starts
+  one fresh 900,000 ms runtime clock whose cutoff is the observation timestamp plus 900,000 ms;
+  only one cutoff is active. Natural root exit before the active cutoff wins. A live-root timeout permits exactly one npm-root
+  process-tree cleanup and one bounded 5,000 ms census. Ambiguity, timeout, or cleanup uncertainty
+  is `NO VERDICT`; no second kill, retry, diagnosis, or correction follows.
+- Typecheck, balanced tests, additional tests, syntax checks, diff checks, corrections, retries,
+  replacements, and operational diagnoses all have budget zero. No engine, Electron, wrapper, IPC,
+  gameplay, calibration, package-script, scenario, reference, or canon edit is permitted.
+- The prior transition-draft process exception remains recorded once in the immediately preceding
+  authorization row. It is not acceptance evidence and grants no authority under this lock.
+- Architect and Process/Build accepted the staged candidate evidence. The remaining cycle and size
+  warnings are nonblocking observations whose packaged disposition can be adjudicated only by the
+  one canonical probe.
+- The candidate commit has not yet been created. Canonical packaged-probe invocation count remains
+  `0`. No provisional four-file custody hash is recorded because this audit edit changes that
+  four-file custody payload.
+- Every probe result—including PASS, failure, timeout, or ambiguity—immediately consumes and ends
+  all implementation and run authority. This lock permits no post-probe audit or control edit. Only
+  a separately reviewed fresh six-document receipt transition may record and route the result.
+  PASS does not start P2B; after receipt acceptance it may only permit drafting a later fresh
+  exact-base P2B lock.
