@@ -8,6 +8,22 @@
 
 **Tech Stack:** React 18, TypeScript, Tailwind/CSS, Electron IPC, Vitest, Testing Library.
 
+## Active R7 Presentation Amendment — 2026-08-28
+
+The functional opening mechanics delivered by this plan remain accepted: landing, faction selection,
+dossier, campaign-mode selection, Field Records, campaign-start payload, and the consolidated
+post-start handoff are not reopened.
+
+The active presentation-only amendment is
+[Cinematic Opening and Typography Implementation Plan](2026-08-28-cinematic-opening-typography-implementation-plan.md).
+Its exact scope is a cinematic neutral splash/monitoring room, faction Warroom preview/continuity,
+two-family typography, and browser/host verification.
+
+RE remains blocked and untouched. Browser/build/unit work proceeds independently; actual packaged
+acceptance waits for an authorized non-conflicting packaged-runtime verification route. This
+amendment does not authorize a packaged probe, RE diagnosis, or changes to engine, simulation,
+state, calibration, canon, IPC, campaign payloads, or save behavior.
+
 ---
 
 ### Task 1: Pin the opening interaction contract
