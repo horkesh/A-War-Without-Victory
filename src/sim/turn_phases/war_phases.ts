@@ -1335,8 +1335,9 @@ export const warPhases: NamedPhase[] = [
             // final_save.json) byte-identical. The 1995-pivot release empties the
             // eastern-enclave entries before the historical fall window, so the
             // event-owned *_falls_1995 receipts still flip Srebrenica/Žepa to RS
-            // and the genocide rupture still records. Krivaja-95/Stupčanica-95
-            // remain chronology/AAR context, not the fall-delivery calibration path.
+            // and the genocide rupture still records. Those events are the only
+            // fall-delivery path; the Krivaja-95/Stupčanica-95 chronology rows were
+            // removed 2026-08-28 (gated on the fall receipts; could never deliver a fall).
             if (isVrsContainPostureEnabled()) {
                 const containedRs = computeContainedOsidsForFaction(context.state, 'RS', osidReach);
                 if (containedRs.length > 0) {

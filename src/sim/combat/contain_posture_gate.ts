@@ -10,12 +10,29 @@
  * — it is safe-by-construction (only ever REMOVES an attack the bot would have
  * generated; never creates an attack, a reward, or a control flip).
  *
- * §6 HARD INVARIANT: the 1995-pivot RELEASE must reliably fire so Srebrenica and
- * Žepa STILL FALL and `srebrenica_genocide_1995` is STILL RECORDED. This gate
- * only suppresses the AHISTORICAL pre-1995 organic over-capture; the historical
- * fall flows through the scripted `*_falls_1995` control_change events AND the
- * Krivaja-95 / Stupčanica-95 triggered ops, NEITHER of which this posture touches
- * (they inject objectives directly, bypassing the organic targeting path).
+ * SCOPE CONTRACT: this gate must not suppress the fall path. It only removes the
+ * AHISTORICAL pre-1995 organic over-capture; the fall itself is delivered solely by
+ * the scripted `srebrenica_falls_1995` / `zepa_falls_1995` control_change events,
+ * which this posture does not touch.
+ *
+ * CORRECTED 2026-08-28. This block previously read "§6 HARD INVARIANT: … Srebrenica
+ * and Žepa STILL FALL and `srebrenica_genocide_1995` is STILL RECORDED", and said the
+ * fall flowed through the scripted events "AND the Krivaja-95 / Stupčanica-95 triggered
+ * ops". Both halves were wrong:
+ *
+ *   1. NO CANON DOCUMENT ASSERTS A MUST-FALL. Canon contemplates the opposite in three
+ *      places — SENSITIVE_HISTORY_DESIGN_GATE.md §1 Ring 3 #11 ("no rupture flag" in
+ *      campaigns where the condition is not mechanically satisfied), §2 criterion 3
+ *      ("counterfactual silence … is canonically correct"), and the §5
+ *      `enclave_defended` ghost register that exists to record exactly that divergence.
+ *      A comment must not carry a canon commitment in canon's voice, with canon's
+ *      section number, that canon does not make — it was quoted as canon and it drifted.
+ *   2. THE "AND" WAS FALSE. Krivaja-95 and Stupčanica-95 were gated on the fall RECEIPT
+ *      having already fired, so they could never deliver the fall. Measured on the clean
+ *      188w baseline: zero AARs, never accepted, Stupčanica recorded launch_status
+ *      "not_launched" with blocker "already_owned_objectives". Both defs were REMOVED on
+ *      2026-08-28 (owner decision). There is exactly one delivery mechanism, and it is
+ *      the scripted event.
  *
  * DEFAULT-OFF contract (calibration-LAST): when OFF, the containment set is never
  * written to state and the suppression filter is never reached → 40w + 188w

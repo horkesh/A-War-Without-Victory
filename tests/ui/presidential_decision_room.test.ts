@@ -2522,15 +2522,21 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
     expect(dossierText).toContain('Source: scenario triggered-operation definition');
   });
 
+  // Re-pointed 2026-08-28 from Operation Krivaja-95 to Operation Farz 95. The subject of
+  // this test is the Army-HQ authorization PROVENANCE LABEL, not the operation it happens
+  // to use as a fixture. Krivaja-95 was removed by owner decision (it was gated on the
+  // Srebrenica fall receipt having already fired, so it could never deliver the fall and
+  // never launched). Farz 95 is the other army_hq op and still ships, so the test keeps
+  // its purpose with a live fixture.
   it('labels Army HQ operation authorization provenance separately from triggered operations', () => {
     const state = makeState({
-      player_faction: 'RS',
-      turn: 170,
+      player_faction: 'RBiH',
+      turn: 165,
       formations: [
         {
-          id: 'vrs_drina',
-          name: 'Drina Corps',
-          faction: 'RS',
+          id: 'arbih_3rd_corps',
+          name: '3rd Corps',
+          faction: 'RBiH',
           kind: 'corps',
           readiness: 'ready',
           status: 'active',
@@ -2538,38 +2544,38 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
           tags: [],
         },
         {
-          id: 'rs_1st_zvornik',
-          name: '1st Zvornik Brigade',
-          faction: 'RS',
+          id: 'arbih_351st_liberation',
+          name: '351st Liberation Brigade',
+          faction: 'RBiH',
           kind: 'brigade',
           readiness: 'ready',
           status: 'active',
           createdTurn: 0,
           tags: [],
-          corps_id: 'vrs_drina',
+          corps_id: 'arbih_3rd_corps',
           personnel: 1800,
         },
         {
-          id: 'rs_1st_bratunac',
-          name: '1st Bratunac Brigade',
-          faction: 'RS',
+          id: 'arbih_328th_mountain',
+          name: '328th Mountain Brigade',
+          faction: 'RBiH',
           kind: 'brigade',
           readiness: 'ready',
           status: 'active',
           createdTurn: 0,
           tags: [],
-          corps_id: 'vrs_drina',
+          corps_id: 'arbih_3rd_corps',
           personnel: 1300,
         },
       ],
       pendingProposalReviews: [
         {
-          id: 'rev_krivaja',
-          turn: 170,
-          faction: 'RS',
+          id: 'rev_farz',
+          turn: 165,
+          faction: 'RBiH',
           domain: 'ops',
-          description: 'Operation Krivaja-95 - staff requests authorization to proceed.',
-          proposed_action: 'HISTORICAL_OP:army_hq:vrs_drina:Operation Krivaja-95',
+          description: 'Operation Farz 95 - staff requests authorization to proceed.',
+          proposed_action: 'HISTORICAL_OP:army_hq:arbih_3rd_corps:Operation Farz 95',
           current_value: 'awaiting_authorization',
           proposed_value: 'authorize',
         },
@@ -2577,18 +2583,17 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
     });
 
     const osidNameMap = {
-      'op:srebrenica:donji_potocari_2': 'Donji Potocari',
-      'op:srebrenica:srebrenica_2': 'Srebrenica',
-      'op:srebrenica:bostahovine_2': 'Bostahovine',
-      'op:srebrenica:milacevici': 'Milacevici',
-      'op:srebrenica:suceska': 'Suceska',
-      'op:bratunac:bratunac_2': 'Bratunac',
+      'op:zavidovici:vozuca_2': 'Vozuca',
+      'op:maglaj:gornja_bocinja': 'Gornja Bocinja',
+      'op:maglaj:donja_bocinja_2': 'Donja Bocinja',
+      'op:lukavac:brijesnica_donja_2': 'Brijesnica Donja',
+      'op:zavidovici:hajderovici_2': 'Hajderovici',
     };
 
     const view = buildPresidentialDecisionRoomView({
       state,
       osidNameMap,
-      selectedCardId: 'command:review-proposal:rev_krivaja',
+      selectedCardId: 'command:review-proposal:rev_farz',
     });
 
     const dossierText = [
@@ -2596,14 +2601,12 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
       ...(view.activeDossier?.evidence ?? []),
     ].join(' ');
 
-    expect(dossierText).toContain('Srebrenica Enclave: Donji Potocari -> Srebrenica -> Bostahovine -> Milacevici -> Suceska');
-    expect(dossierText).toContain('Command: Drina Corps');
-    expect(dossierText).toContain('Force: 5 assigned formations; 3,100 reported personnel');
-    expect(dossierText).toContain('Staging: Bratunac');
-    expect(dossierText).toContain('Timing: available now; 3-turn planning period');
-    expect(dossierText).toContain('Launch floor: repulsed');
+    // The assertion that carries this test: army_hq provenance, not triggered-op provenance.
     expect(dossierText).toContain('Source: scenario Army HQ operation definition');
     expect(dossierText).not.toContain('Source: scenario triggered-operation definition');
+    expect(dossierText).toContain('Command: 3rd Corps');
+    expect(dossierText).toContain('Staging: Hajderovici');
+    expect(dossierText).toContain('Launch floor: repulsed');
   });
 
   it('omits resolved operation authorization reviews from Decision Room priorities', () => {

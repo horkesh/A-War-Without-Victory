@@ -121,10 +121,15 @@ describe('triggered operations definitions', () => {
         // tests/operation_opportunities_5th_corps_sana.test.ts.
         // ADR-0005 v3.0 (2026-05-29): Farz 95 (Vozuća, codename Farz, Sept 1995) added
         // as an army_hq_only RBiH def (net-new; only fires via the inject-army-hq-operations
-        // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
-        // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
-        // the real VRS operation_lukavac_93 event).
-        assert.equal(_TRIGGERED_OPS.length, 7);
+        // step when ENABLE_TG_ARMY_HQ_OPS is on).
+        //
+        // 2026-08-28 (owner decision): Krivaja-95 and Stupčanica-95 REMOVED. They were
+        // gated on the Srebrenica/Žepa fall RECEIPTS having already fired, so they could
+        // never deliver the outcome they described, and never launched — zero AARs on the
+        // clean 188w baseline, and Stupčanica recorded blocker "already_owned_objectives".
+        // The enclave falls are delivered solely by the scripted `*_falls_1995`
+        // control_change events. Do not re-add a triggered op implying otherwise.
+        assert.equal(_TRIGGERED_OPS.length, 5);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
@@ -132,9 +137,7 @@ describe('triggered operations definitions', () => {
                 'Operation Herzegovina Consolidation',
                 'Operation Kotor Varos',
                 'Operation Cerska-Kamenica',
-                'Operation Krivaja-95',
                 'Operation Farz 95',
-                'Operation Stupčanica-95',
             ],
         );
     });

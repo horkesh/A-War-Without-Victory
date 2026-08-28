@@ -181870,13 +181870,14 @@
           "civilians_under_protection": 2983542,
           "combat_effective_brigades": 119,
           "enclaves_held": [
-            "sarajevo",
-            "srebrenica",
-            "zepa",
+            "bihac",
             "gorazde",
-            "bihac"
+            "sarajevo"
           ],
-          "enclaves_lost": [],
+          "enclaves_lost": [
+            "srebrenica",
+            "zepa"
+          ],
           "military_casualties_inflicted": 114408,
           "military_casualties_taken": 382398,
           "operations_launched": 21,
@@ -211187,18 +211188,6 @@
         "typed_blocker": "build_defender_power_too_high"
       },
       {
-        "blocker_code": "",
-        "canonical_window": "51",
-        "catalog_status": "present",
-        "delivery_status": "unknown",
-        "eligibility_status": "eligible",
-        "launch_status": "launched",
-        "operation_id": "Operation Herzegovina Consolidation",
-        "operation_name": "Operation Herzegovina Consolidation",
-        "turn": 51,
-        "typed_blocker": ""
-      },
-      {
         "blocker_code": "already_owned_objectives",
         "canonical_window": "10",
         "catalog_status": "present",
@@ -211211,16 +211200,16 @@
         "typed_blocker": "already_owned_objectives"
       },
       {
-        "blocker_code": "already_owned_objectives",
-        "canonical_window": "172-180",
+        "blocker_code": "",
+        "canonical_window": "51",
         "catalog_status": "present",
         "delivery_status": "unknown",
-        "eligibility_status": "unknown",
-        "launch_status": "not_launched",
-        "operation_id": "",
-        "operation_name": "Operation Stupčanica-95",
-        "turn": 188,
-        "typed_blocker": "already_owned_objectives"
+        "eligibility_status": "eligible",
+        "launch_status": "launched",
+        "operation_id": "Operation Herzegovina Consolidation",
+        "operation_name": "Operation Herzegovina Consolidation",
+        "turn": 51,
+        "typed_blocker": ""
       }
     ]
   },

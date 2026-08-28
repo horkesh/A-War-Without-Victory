@@ -86,14 +86,14 @@ interface TriggeredOpDef {
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
     /** ADR-0005 v3.0: when set, this triggered op is an Army HQ operation marker
      *  (faction-wide cross-corps donor pool, doubled cohesion bleed, frequency-capped).
-     *  Marker slug (e.g. "krivaja_95"); the full ArmyHqOpId
+     *  Marker slug (e.g. "farz_95"); the full ArmyHqOpId
      *  ("ahq:<faction>:<scenario_year>:<slug>") is composed at injection. Injected by the
      *  `inject-army-hq-operations` war-phase step (gated by ENABLE_TG_ARMY_HQ_OPS). */
     army_hq_op_id?: string;
     /** ADR-0005 v3.0: true for defs that exist ONLY for the Army HQ path (net-new ops like
      *  Vozuća-94 / Lukavac-93). These must NEVER fire via the legacy triggered path — flag-on
      *  they inject via the AHQ step; flag-off they stay fully inert (the AHQ step early-returns).
-     *  PROMOTED pre-existing defs (Krivaja-95) leave this UNSET so they keep their legacy
+     *  PROMOTED pre-existing defs leave this UNSET so they keep their legacy
      *  flag-off behavior (188w byte-identity) and only move to the AHQ path when the flag is on. */
     army_hq_only?: boolean;
 }
@@ -141,13 +141,7 @@ function eventReceiptFired(state: GameState, eventId: string): boolean {
     return military.event_last_fired_turn?.[eventId] != null;
 }
 
-function srebrenicaFallReceiptFired(state: GameState): boolean {
-    return eventReceiptFired(state, 'srebrenica_falls_1995');
-}
 
-function zepaFallReceiptFired(state: GameState): boolean {
-    return eventReceiptFired(state, 'zepa_falls_1995');
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Definitions
@@ -330,161 +324,20 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     // ═════════════════════════════════════════════════════════════════════════
-    // Late-1995 historical reversal operation-context rows.
+    // Late-1995 enclave outcomes are EVENT-OWNED, and there is no operation behind them.
     //
-    // Current contract: Srebrenica/Zepa fall receipts are event-owned by
-    // `srebrenica_falls_1995` / `zepa_falls_1995`. Krivaja/Stupcanica are
-    // chronology/AAR context only and must not become alternate fall-delivery
-    // mechanics if the event path misses.
+    // Krivaja-95 and Stupčanica-95 were removed 2026-08-28 (owner decision). They were
+    // authored as "chronology/AAR context" for the Srebrenica and Žepa falls, gated on the
+    // fall receipts having ALREADY fired — so they could never deliver the outcome they
+    // described, and in practice never launched at all. Measured on the clean 188w baseline
+    // (n1): zero AARs, absent from triggered_operations_accepted, absent from all 48
+    // operation_history entries; Stupčanica recorded launch_status "not_launched" with
+    // blocker "already_owned_objectives" because the event had taken Žepa first.
     //
-    // Source: docs/40_reports/implemented/20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md
-    // identified four missing scripted ops as the dominant Family-1 (missing
-    // scenario content) gap at oct1995. These four operations close those gaps
-    // by adding turn-gated triggered ops at week >= 170 (Krivaja-95) through
-    // week >= 175 (Sana). They do not affect early-war runs (104w n1588, 156w
-    // n1589 hashes preserved by gate ≥ 170).
-    //
-    // LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX (2026-05-06): Krivaja-95 +
-    // Stupčanica-95 trigger floors enforce the §6 sensitive-history canonical
-    // floor of t≥170 (Engine_Invariants_v0_9_0.md §6 + SENSITIVE_HISTORY_
-    // DESIGN_GATE.md). Prior threshold of t≥168 was a pre-existing canon
-    // violation surfaced by 188w A/B (n1705 + n1707). Sign-off precedent:
-    // Stupčanica SHAPE B b03333af; Krivaja Phase 1 bc44ddec. Mechanism is
-    // faction-symmetric (a generic numeric-turn-gate predicate); only the
-    // canon Krivaja-95 data row threshold is bumped. 40w window (t≤40)
-    // unaffected; 188w first-fire shifts t168→t170 by design.
-    //
-    // Date math (Apr 1 1992 = w0):
-    //   w170 ≈ July 8 1995   → Krivaja-95 (Srebrenica fall, July 6–11 1995)
-    //   w172 ≈ July 22 1995  → Stupčanica-95 (Žepa fall, July 14–25 1995)
-    //   w175 ≈ Aug 12 1995   → Mistral 2 (Drvar/Šipovo/Mrkonjić push, Sep 8–15)
-    //   w175 ≈ Aug 12 1995   → Operation Sana (5th Corps liberation, Sep–Oct 1995)
-    //
-    // Objective OSIDs are constrained to the 712-OSID universe and are validated
-    // against `data/source/calibration/painted_control_oct1995.json` so that
-    // each objective is painted = the operation's faction at oct1995. OSID
-    // adjacency was verified against `data/derived/operational/operational_contact_graph.json`.
-    //
-    // Sensitive-history note: Krivaja-95 and Stupčanica-95 are TERRITORIAL
-    // representations of the operations that captured the Srebrenica and Žepa
-    // safe areas in July 1995. They require event-owned fall receipts first.
-    // Atrocity, narrative, and consequence mechanics are explicitly out of
-    // scope for this packet and require a separate /historian + /game-designer
-    // sign-off (see docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md).
-    //
-    // Known scope limitation: `checkTriggeredOperations` calls
-    // `assignOperationCommander(..., 'RS')` with a hardcoded faction. For RS
-    // ops (Krivaja-95, Stupčanica-95) this is correct. For RBiH (Sana) and
-    // HRHB (Mistral 2) the commander assignment returns no candidate (no RS
-    // officer matches a Federation corps), so those ops fire without an
-    // assigned named commander — territorial behavior is unaffected; officer
-    // effects default to neutral. Repairing this hardcode is engine code,
-    // explicitly out of this packet's scope.
+    // The falls are delivered solely by the scripted `srebrenica_falls_1995` /
+    // `zepa_falls_1995` control_change events. That is the whole mechanism; nothing else
+    // takes those OSIDs, and no triggered operation should be re-added to imply otherwise.
     // ═════════════════════════════════════════════════════════════════════════
-    {
-        // Operation Krivaja-95 — VRS Drina Corps captures the Srebrenica
-        // safe area, July 6–11 1995. Territorial outcome: srebrenica_2 town
-        // + Potočari + surrounding enclave OSIDs flip RBiH→RS.
-        //
-        // LANE-2026-05-02-KRIVAJA (REVISED 2026-05-02 follow-up after Codex
-        // review found the prior catalog comment cited Krstić §123 for a
-        // brigade attack-axis claim that paragraph does not actually make,
-        // and asserted a Zvornik-LIB-not-in-opening-assault claim that
-        // contradicts Popović §245 fn 757 + §247):
-        //
-        // The Drina Corps preparatory order for Krivaja-95 (issued 2 July
-        // 1995 in the name of Drina Corps Commander Živanović) was addressed
-        // to "the Zvornik, Birac, Romanija, Vlasenica, Podrinje, Bratunac,
-        // Milici and Skelani brigades of the Drina Corps" — ICTY Popović
-        // IT-05-88-T Trial Judgment §244 (verbatim), citing Ex. 5DP00106
-        // "Drina Corps Order No. 01/04-156-1 Preparatory Order No. 1, 2 July
-        // 1995". Specific opening-assault tasks per the combat order
-        // (Ex. P00107 "Operations Order No. 1 Krivaja-95, 2 July 1995"),
-        // ICTY Popović §245 fn 757 verbatim: "a part of the Bratunac Brigade
-        // was given the task to prevent the intervention of the ABiH from
-        // Potočari towards Srebrenica, and the Battalion of the Zvornik
-        // Brigade was given the task to attack ABiH forces along the axis
-        // of three wooded hills (500 metres north of Zeleni Jadar) –
-        // Pusmulići village – Bojna – Srebrenica." Tactical Group 1, the
-        // principal opening-assault tactical group, was commanded by
-        // Pandurević, Commander of the Zvornik Brigade; TG-1 left the
-        // Standard Barracks in Zvornik 4 July and arrived in Zeleni Jadar
-        // 5 July; opening assault commenced 6 July 0400 hrs (ICTY Popović
-        // §247 + §249 verbatim). The Zvornik Brigade is therefore
-        // documented as an opening-assault participant — at battalion
-        // level along the southern Zeleni Jadar–Pusmulići–Bojna axis, and
-        // through TG-1 command at brigade level.
-        //
-        // Catalog brigades reflect a defensible Drina Corps subset of
-        // Popović §244's eight named brigades, mapped to existing OOB
-        // formation_ids: rs_1st_zvornik (Battalion-of-Zvornik per §245 fn
-        // 757; Pandurević / TG-1 per §247), rs_1st_bratunac (Bratunac
-        // Brigade Potočari-blocking task per §245 fn 757), rs_1st_milii
-        // (Milici brigade per §244), rs_5th_podrinje (Podrinje brigade per
-        // §244), rs_skelani_battalion (Skelani brigade per §244). 1st Birac
-        // and Romanija Brigade (also in §244) are not added: 1st Birac was
-        // in the Krivaja-95 preparatory list but engine integration would
-        // require a separate Birac OOB cross-corps audit; the Romanija
-        // Brigade (TG-2 commander Trivić per §247) belongs to
-        // vrs_sarajevo_romanija corps and is out of vrs_drina scope.
-        //
-        // NOTE: ICTY Krstić IT-98-33-T §§122–123, contrary to a prior
-        // version of this comment, do NOT name brigades or assign attack
-        // axes — those paragraphs discuss only Krivaja-95's STRATEGIC
-        // OBJECTIVES (split the enclaves; reduce them to urban cores).
-        // Brigade-granularity citations are in Popović, not Krstić §123.
-        //
-        // Objectives are the five srebrenica:* OSIDs that flipped RBiH→RS
-        // between apr1995 and oct1995 painted truth (donji_potocari_2,
-        // srebrenica_2, bostahovine_2, milacevici, suceska). Other srebrenica
-        // OSIDs (luka_2, ljeskovik_2, obadi) were already RS-painted at apr1995
-        // — already captured under earlier ops (Cerska-Kamenica) or never RBiH.
-        //
-        // Staging at op:bratunac:bratunac_2 (RS-painted at all dates; physical
-        // VRS Drina Corps HQ proximity for the operation; 1 hop from
-        // donji_potocari_2). Adjacency: bratunac_2 ↔ donji_potocari_2 ↔
-        // srebrenica_2 ↔ {luka_2, ljeskovik_2, obadi, suceska, milacevici} ↔
-        // bostahovine_2.
-        name: 'Operation Krivaja-95',
-        faction: 'RS',
-        // ADR-0005 v3.0 D1: PROMOTE the existing Krivaja-95 triggered def to an Army HQ
-        // operation (do NOT add a parallel def — that would double-fire vrs_drina). The
-        // promotion marker spans the donor pool to all same-faction (RS) corps; the existing
-        // t>=170 §6 canonical floor + objectives are unchanged. The full ArmyHqOpId (with
-        // scenario_year) is composed at injection by the inject-army-hq-operations step.
-        army_hq_op_id: 'krivaja_95',
-        primary_corps: 'vrs_drina',
-        staging_osid: 'op:bratunac:bratunac_2',
-        planning_duration: 3,
-        min_attack_outcome: 'repulsed',
-        // LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX (2026-05-06): bumped 168→170
-        // to enforce §6 canonical floor (Engine_Invariants_v0_9_0.md §6 +
-        // SENSITIVE_HISTORY_DESIGN_GATE.md). Sign-off precedent: b03333af / bc44ddec.
-        trigger: (state, turn) => turn >= 170 && srebrenicaFallReceiptFired(state),
-        axes: [
-            {
-                axis_id: 'srebrenica_enclave',
-                name: 'Srebrenica Enclave',
-                corps: 'vrs_drina',
-                brigades: [
-                    // LANE-2026-05-02-KRIVAJA: per Popović §244 + §245 fn 757 + §247.
-                    'rs_1st_zvornik' as FormationId,
-                    'rs_1st_bratunac' as FormationId,
-                    'rs_1st_milii' as FormationId,
-                    'rs_5th_podrinje' as FormationId,
-                    'rs_skelani_battalion' as FormationId,
-                ],
-                objectives: [
-                    'op:srebrenica:donji_potocari_2',
-                    'op:srebrenica:srebrenica_2',
-                    'op:srebrenica:bostahovine_2',
-                    'op:srebrenica:milacevici',
-                    'op:srebrenica:suceska',
-                ],
-                staging_osid: 'op:bratunac:bratunac_2',
-            },
-        ],
-    },
     {
         // Operation Farz 95 — ADR-0005 v3.0 D4. ARBiH Army HQ-conducted offensive
         // (codename "Farz", Sept 1995) against the VRS-held Vozuća pocket (Zavidovići),
@@ -553,44 +406,6 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'op:lukavac:brijesnica_donja_2',
                 ],
                 staging_osid: 'op:zavidovici:hajderovici_2',
-            },
-        ],
-    },
-    {
-        // Operation Stupčanica-95 — VRS Drina Corps captures the Žepa safe
-        // area, July 14–25 1995, immediately after Krivaja-95. Historical
-        // force: VRS 1st Bircac/Milici/Vlasenica brigades + Drina Corps
-        // detachments. Territorial outcome: zepa_2 (the only Žepa-area
-        // OSID that flipped RBiH→RS in this op per painted truth).
-        // (BB2 p.611, ICTY Krstić verdict.)
-        //
-        // Single-objective op (zepa_2 was apr1995=RBiH, oct1995=RS). Other
-        // rogatica OSIDs were already RS at apr1995.
-        //
-        // Staging at op:vlasenica:grabovica (RS-painted at all dates;
-        // rs_1st_milii home; adjacent to vlasenica:bacici → pomol_2 → zepa_2).
-        // Adjacency chain verified: grabovica ↔ bacici ↔ pomol_2 ↔ zepa_2.
-        name: 'Operation Stupčanica-95',
-        faction: 'RS',
-        primary_corps: 'vrs_drina',
-        staging_osid: 'op:vlasenica:grabovica',
-        planning_duration: 3,
-        min_attack_outcome: 'repulsed',
-        trigger: (state, turn) => turn >= 172 && zepaFallReceiptFired(state),
-        axes: [
-            {
-                axis_id: 'zepa_pocket',
-                name: 'Žepa Pocket',
-                corps: 'vrs_drina',
-                brigades: [
-                    'rs_1st_vlasenica' as FormationId,
-                    'rs_1st_milii' as FormationId,
-                    'rs_1st_podrinje' as FormationId,
-                ],
-                objectives: [
-                    'op:rogatica:zepa_2',
-                ],
-                staging_osid: 'op:vlasenica:grabovica',
             },
         ],
     },
@@ -707,10 +522,6 @@ function canonicalWindowForTriggeredOp(def: TriggeredOpDef, turn: number): strin
             return '10';
         case 'Operation Cerska-Kamenica':
             return '40';
-        case 'Operation Krivaja-95':
-            return '170-178';
-        case 'Operation Stupčanica-95':
-            return '172-180';
         default:
             return String(turn);
     }
@@ -722,10 +533,6 @@ function triggeredOpWindowReached(def: TriggeredOpDef, state: GameState, turn: n
             return turn >= 10;
         case 'Operation Cerska-Kamenica':
             return turn >= 40;
-        case 'Operation Krivaja-95':
-            return turn >= 170;
-        case 'Operation Stupčanica-95':
-            return turn >= 172;
         default:
             return def.trigger(state, turn);
     }
@@ -1013,7 +820,7 @@ export function checkTriggeredOperations(state: GameState): string[] {
         //  (a) army_hq_only defs (net-new Vozuća-94 / Lukavac-93) NEVER fire here, in either
         //      flag state. Flag-on they inject via the AHQ step; flag-off the AHQ step early-
         //      returns so they stay fully inert. This keeps 188w flag-off byte-identical.
-        //  (b) PROMOTED pre-existing defs (Krivaja-95: army_hq_op_id set, army_hq_only UNSET)
+        //  (b) PROMOTED pre-existing defs (army_hq_op_id set, army_hq_only UNSET)
         //      are skipped here ONLY when the flag is on (then the AHQ step owns them). Flag-off
         //      they keep firing via this legacy path exactly as before (188w 940251e4acaff3d4).
         if (def.army_hq_only) continue;
@@ -1232,7 +1039,7 @@ function armyHqFrequencyGateOpen(state: GameState, faction: FactionId, turn: num
  *
  * Runs as the `inject-army-hq-operations` war-phase step, immediately AFTER
  * `inject-queued-operations` and BEFORE `check-triggered-operations`. Iterates the
- * Army-HQ-promoted defs (Krivaja-95, Farz 95) in sorted army_hq_op_id
+ * Army-HQ-promoted defs (Farz 95) in sorted army_hq_op_id
  * order; injects the FIRST def that clears the frequency gate (Phase C) and the same
  * launch gates the regular triggered path uses. On injection it:
  *   - builds the op via the shared buildOperation machinery,

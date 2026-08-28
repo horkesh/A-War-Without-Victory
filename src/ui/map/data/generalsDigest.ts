@@ -117,7 +117,7 @@ export function assertDigestProseClean(text: string): void {
  *
  * §6 RUNTIME SCRUB: the op name is live, author-supplied data interpolated VERBATIM
  * into the digest prose. Today no top-level `CorpsOperation.name` carries a forbidden
- * token (the Srebrenica rupture op is "Operation Krivaja-95"; the sensitive
+ * token (the Krivaja-95 / Stupcanica-95 rows were removed 2026-08-28; the sensitive
  * "Srebrenica Enclave/Ring" / "Žepa Pocket" strings live only in AXIS names the digest
  * never reads). But this surface fires on turns ≥170 (the rupture window), so the
  * bright line must be CODE-enforced, not naming-dependent: any forbidden token in a

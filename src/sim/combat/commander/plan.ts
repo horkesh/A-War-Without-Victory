@@ -1359,8 +1359,9 @@ function createOpportunityPlan(
     // `avoided_osids_by_faction` (banned) — it filters target generation. The
     // 1995-pivot release empties the eastern-enclave set before the historical
     // fall window, so event-owned *_falls_1995 receipts can still flip Srebrenica
-    // and Zepa control and the genocide rupture can still record. Krivaja-95 and
-    // Stupcanica-95 are chronology/AAR context rows and do not deliver the fall.
+    // and Zepa control and the genocide rupture can still record. Those events are
+    // the only fall-delivery mechanism; the Krivaja-95 / Stupcanica-95 chronology
+    // rows were removed 2026-08-28 (gated on the fall receipts; could never deliver a fall).
     // DEFAULT-OFF PURITY: only honor the contained set when THIS faction's contain
     // flag is enabled. A save written with a contain flag ON serializes
     // `last_contained_osids_by_faction`; if the flag is then OFF on resume, the

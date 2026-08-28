@@ -19,6 +19,12 @@
  * Stupčanica" — masquerading as the canonical Stupčanica-95 in AAR scans
  * and weekly reports.
  *
+ * NOTE 2026-08-28: the Krivaja-95 / Stupčanica-95 defs referenced throughout this
+ * header were REMOVED (owner decision — the enclave falls are event-owned and no
+ * operation delivers them). T1-T3 went with them; T4-T7 remain and are now the
+ * primary guard on the name-pool exclusions, re-justified on historicity rather
+ * than on collision. Do not delete them as "obsolete with the ops".
+ *
  * The fix is a single-file data edit (operation_names.ts): remove the four
  * colliding canonical names from the bot pool. The block-level comment in
  * that file ALREADY claimed these names were excluded ("Pre-planned and
@@ -63,53 +69,20 @@ function stateWithZepaFallReceipt(turn: number): GameState {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// T1 — Stupčanica-95 trigger evaluates to false at turn=27 (canon floor t≥172).
-// Pin the canonical floor; regression-guards d622b762.
-// ═══════════════════════════════════════════════════════════════════════════
-describe('Stupčanica-95 trigger — canonical floor t≥172', () => {
-    it('T1: trigger evaluates to false at turn=27 (canon-violation regression pin)', () => {
-        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Stupčanica-95');
-        assert.ok(def, 'expected Operation Stupčanica-95 in triggered ops catalog');
-        assert.equal(
-            def!.trigger(trivialState(27), 27),
-            false,
-            'Stupčanica-95 must NOT trigger at turn=27 (canon floor t≥172).',
-        );
-        // Also verify the trigger is false at every turn 0..171, not just 27.
-        for (const t of [0, 10, 27, 40, 100, 168, 170, 171]) {
-            assert.equal(
-                def!.trigger(trivialState(t), t),
-                false,
-                `Stupčanica-95 must NOT trigger at turn=${t} (below t≥172 floor).`,
-            );
-        }
-    });
-
-    it('T2: trigger evaluates to true after the Zepa fall receipt at turn=172+', () => {
-        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Stupčanica-95');
-        assert.ok(def);
-        // First true at canon floor t=172, then 173, 174, 175, ...
-        assert.equal(def!.trigger(stateWithZepaFallReceipt(172), 172), true);
-        assert.equal(def!.trigger(stateWithZepaFallReceipt(174), 174), true);
-        assert.equal(def!.trigger(stateWithZepaFallReceipt(175), 175), true);
-        assert.equal(def!.trigger(stateWithZepaFallReceipt(200), 200), true);
-    });
-
-    it('T3: trigger evaluation is deterministic — re-eval byte-identical', () => {
-        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Stupčanica-95');
-        assert.ok(def);
-        // Same (state, turn) must return the same boolean every call.
-        for (const t of [27, 100, 171, 172, 174, 200]) {
-            const state = t >= 172 ? stateWithZepaFallReceipt(t) : trivialState(t);
-            const a = def!.trigger(state, t);
-            const b = def!.trigger(state, t);
-            const c = def!.trigger(state, t);
-            assert.equal(a, b, `non-deterministic trigger at turn=${t}: call1≠call2`);
-            assert.equal(b, c, `non-deterministic trigger at turn=${t}: call2≠call3`);
-        }
-    });
-});
-
+// T1-T3 REMOVED 2026-08-28. They pinned the Stupčanica-95 trigger predicate,
+// and that def no longer exists: Krivaja-95 and Stupčanica-95 were removed by
+// owner decision because they were gated on the Srebrenica/Žepa fall RECEIPTS
+// having already fired, so they could never deliver the falls they described,
+// and never launched in any run. The enclave falls are delivered solely by the
+// scripted `srebrenica_falls_1995` / `zepa_falls_1995` control_change events.
+//
+// T4-T7 BELOW REMAIN LOAD-BEARING AND MUST NOT BE DELETED WITH THEM. They guard
+// the bot-name-pool exclusions, and the original justification for those
+// exclusions — collision with the canonical triggered ops — died with the defs.
+// The exclusions are now justified on HISTORICITY instead (see the re-justified
+// header in src/sim/combat/operation_names.ts): "Operacija Krivaja" attached to
+// an unrelated 1992 skirmish is wrong whether or not a canonical op exists to
+// collide with. These tests are the only thing stopping that regression.
 // ═══════════════════════════════════════════════════════════════════════════
 // T4 — Bot operation name pool does NOT collide with canonical sensitive-
 // history op names. This is the actual mechanism fix; without it, the

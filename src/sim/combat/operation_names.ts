@@ -28,9 +28,27 @@
  * above ALREADY claimed these names were excluded — this fix makes the
  * code match the documented intent.
  *
- * Excluded RS canonical names: Krivaja, Stupčanica (trigger ops); Vrbas
+ * Excluded RS canonical names: Krivaja, Stupčanica; Vrbas
  * is preserved (not currently a triggered op, BB1 Vrbas 92 = pre-planned
  * "Operation Jajce" which uses a DIFFERENT name, so no collision).
+ *
+ * ⚠ RE-JUSTIFIED 2026-08-28 — DO NOT RESTORE KRIVAJA OR STUPČANICA TO THE POOL.
+ * The triggered-op defs of those names were REMOVED on 2026-08-28 (owner decision:
+ * the enclave falls are event-owned and there is no operation behind them). The
+ * original 2026-05-07 exclusion was justified on COLLISION with those defs — and that
+ * justification is now gone, so the exclusion looks obsolete and is one cleanup away
+ * from being reverted.
+ *
+ * It must stay, on a DIFFERENT ground: these are the codenames of the operations that
+ * killed the Srebrenica and Žepa enclaves. A bot operation drawing "Operacija Krivaja"
+ * at w27 in central Bosnia does not collide with anything any more — it simply attaches
+ * the name of a genocide to an unrelated 1992 skirmish. The test is HISTORICITY, not
+ * collision: a real operation name with a real date and a real target does not belong in
+ * a pool that assigns names at random turns.
+ *
+ * The same reasoning covers Sana and Maestral below, and applies to any historical
+ * codename still in the pools (Uragan, Neretva, Ljeto are known instances — see the
+ * playtest diary §3u; they are NOT yet excluded and that is an open finding).
  *
  * Excluded RBiH canonical names: Sana (opportunity catalog op).
  *

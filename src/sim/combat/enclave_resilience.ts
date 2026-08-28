@@ -731,7 +731,7 @@ export function isEnclaveContainable(
  * Turn-number BACKSTOP for the VRS contain-posture release. Once the war reaches
  * this turn, RS-vs-eastern-enclave containment is LIFTED unconditionally — even
  * if the scripted `srebrenica_falls_1995` event has not yet fired — so the bot's
- * own Krivaja-95 / organic targeting is NEVER throttled inside the historical
+ * own organic targeting is NEVER throttled inside the historical
  * 1995 fall window. Aligned to the `srebrenica_falls_1995` event window floor
  * (turn_min 160) so contain releases BEFORE the fall window opens.
  *
@@ -802,9 +802,9 @@ export function isEnclaveContainmentReleased(
  * §6 SAFETY: because the release fires at the latest by t160 (the event-window
  * floor) and the historical fall is owned by the `srebrenica_falls_1995` /
  * `zepa_falls_1995` event receipts, this set is EMPTY for the eastern enclaves
- * throughout the fall window. Krivaja-95/Stupčanica-95 triggered operations are
- * chronology/AAR context only and must not become fallback fall-delivery
- * mechanics if the event receipt path misses.
+ * throughout the fall window. The scripted events are the ONLY fall-delivery
+ * mechanism. The Krivaja-95 / Stupčanica-95 triggered ops that once sat beside them
+ * as chronology/AAR context were removed 2026-08-28 (gated on the fall receipts; could never deliver a fall).
  *
  * Deterministic: sorted iteration (enclave id, then OSID); set membership only.
  *

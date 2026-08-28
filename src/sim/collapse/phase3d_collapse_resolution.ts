@@ -104,8 +104,8 @@ const SPATIAL_IMPACT = 0.4;   // spec C17 — supply_mult = 1 - SPATIAL_IMPACT *
  * Phase 3D never flips `political_controllers`; the only §6 risk is INDIRECT
  * ACCELERATION (a degraded supply_mult softening a defender so a scripted fall lands
  * before turn 160 → rupture fails to record). With G1, fall timing is driven exclusively
- * by event-owned enclave receipts. Krivaja-95 / Stupčanica-95 remain chronology/AAR
- * context gated on those receipts; they are not the fall-delivery mechanism.
+ * by event-owned enclave receipts, which are the ONLY fall-delivery mechanism. The
+ * Krivaja-95 / Stupčanica-95 chronology rows were removed 2026-08-28 (gated on the fall receipts; could never deliver a fall).
  *
  * Broad PREFIX exclusion of Bihać + Sarajevo is the ratified first-build choice (panel
  * O-4 = confirm-broad). Velika Kladuša (`op:velika_kladusa:*`) is the top "relax-later
@@ -527,8 +527,8 @@ export function applyPhase3DCollapseResolution(
         // Together: the enclave is provably absent from BOTH maps. Damage is NOT accumulated
         // for guarded OSIDs (a will_not_recover false-positive on a §6 enclave is not worth a
         // diagnostic). Fall timing is driven solely by event-owned enclave receipts.
-        // Krivaja-95 / Stupčanica-95 are chronology/AAR context gated on those receipts,
-        // not the fall-delivery mechanism.
+        // The events are the only fall-delivery mechanism; the Krivaja-95 /
+        // Stupčanica-95 chronology rows were removed 2026-08-28 (gated on the fall receipts; could never deliver a fall).
         if (isPhase3DEnclaveGuarded(entityId)) {
             // Count once per guarded OSID that WOULD have collapsed in ≥1 domain.
             let wouldCollapse = false;
