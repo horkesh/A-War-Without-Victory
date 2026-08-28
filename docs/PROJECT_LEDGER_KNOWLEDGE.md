@@ -4510,6 +4510,17 @@ and every quoted score must include checkpoint identity.
 Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
 roadmap, and debt`.
 
+## 2026-08-28 - Passing tests are not proof when the tests encode an incomplete settlement
+
+A green focused suite can still certify the wrong contract. For a coordinator/wrapper boundary,
+implementation must not begin until a frozen behavioral matrix names ownership of every terminal
+event, race precedence, cleanup settlement, and required diagnostics. Tests derived from that
+matrix must prove the contract's failure paths as well as its nominal path; green tests written
+around incomplete behavior are a rejected candidate, not implementation evidence.
+
+Applied in `[2026-08-28] guard(RE): reject packaged-probe Lock 2 and authorize one behavior-first
+R2`.
+
 ## 2026-08-27 - A release integrity lane must end at named product outcomes
 
 A broad engine-health instruction can turn into an indefinite audit, optimization, and review

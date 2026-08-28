@@ -17,8 +17,11 @@ P7 no retreat teleport.
 The corrected Node-22 baseline is deterministic, engine-green, and save/replay-green. Its measured
 `+3.62853%` mandatory-correctness cost is watch-only, not a 1.0 gate. No further pre-1.0 performance
 diagnosis or optimization is authorized. P1 and P2A are accepted. P2B is HELD before implementation
-by its packaged-probe NO VERDICT; P3 waits. The owner authorized a bounded auxiliary recovery
-outside the seven outcomes/eight packets. No long run is authorized until the one final RE A/B pair.
+by its packaged-probe NO VERDICT; P3 waits. The first auxiliary Lock 2 instrumentation was rejected
+before candidate commit or packaged invocation, so the invocation count is zero. Its unconsumed
+one-shot is not transferable or reusable. The current docs-only amendment binds one final fresh-base
+R2 attempt outside the seven outcomes/eight packets. No long run is authorized until the one final
+RE A/B pair, and calibration remains paused until reduced RE closes.
 
 ## Packet governance
 
@@ -33,10 +36,12 @@ outside the seven outcomes/eight packets. No long run is authorized until the on
   `<path>\t<staged-mode>\t<staged-blob-id>\n`, or `<path>\tDELETE\t-\n` for a staged deletion. Hash
   the full manifest and record the digest plus exact path list in the audit. Final docs sync may map
   the digest to a resulting commit but need not.
-- Each packet has one implementer, one domain reviewer, and one independent QA reviewer, with one
-  consolidated correction pass and one confirmation pass.
-- Each implementation packet requires focused RED/GREEN, typecheck, balanced tests, and one compact
-  audit row. No per-packet campaign or repeated whole-team review.
+- Each reduced-RE implementation packet has one implementer, one domain reviewer, and one
+  independent QA reviewer, with one consolidated correction pass and one confirmation pass. Final
+  auxiliary R2 is the explicit exception: it has no correction or rerun.
+- Each reduced-RE implementation packet requires focused RED/GREEN, typecheck, balanced tests, and
+  one compact audit row. Auxiliary R2 instead uses only the recovery plan's exact bounded RED,
+  GREEN, two syntax checks, and diff check. No per-packet campaign or repeated whole-team review.
 - Production LOC across reduced RE must be net non-positive.
 - No new persisted/default/migration/IPC/pipeline/module/service/flag/artifact/cache/scan/
   compatibility/history-special-case surface.
@@ -45,25 +50,30 @@ outside the seven outcomes/eight packets. No long run is authorized until the on
 - Scenarios, calibration data, historical references, and canon remain denied.
 
 Auxiliary packaged-probe recovery is the sole temporary exception to final-only control sync. It
-uses three exact locks, earns no RE completion credit, and cannot satisfy P2B retroactively. For
+earns no RE completion credit and cannot satisfy P2B retroactively. For
 Lock 1 bootstrap, Product Manager stages all 14 synchronized documents; exact-byte/hash reviews,
-hook re-pin, and working/staged checks precede the transition commit. For successor Lock 2/3,
+hook re-pin, and working/staged checks precede the transition commit. The rejected first Lock 2
+opens no candidate or run. After this amendment commits, successor R2/Lock 3 custody requires that
 Product Manager drafts only the exact lock at clean HEAD; Orchestrator, Architect, and Process QA
 approve exact bytes/hash; the existing hook is re-pinned; working/staged checks pass; only then may
-payload editing start. Platform Specialist alone implements Lock 2. Lock 3 is mandatory and its
-five-file lock must be reviewed/re-pinned before any receipt edit.
+payload editing start. Platform Specialist alone implements final R2 against the jointly frozen
+Architect/original-spec-reviewer behavioral matrix. Lock 3 is mandatory after an accepted candidate
+and its five-file lock must be reviewed/re-pinned before any receipt edit. Any R2 failure abandons
+the instrumentation approach; there is no R3.
 
 ## Active machine lock
 
-The current lock is the 14-document transition `RE-PROBE-RECOVERY-TRANSITION` /
-`authorize-auxiliary-packaged-probe-recovery`, based on
-`c57ecffaf4774b9801d8ef6f4774463f7c0ef52e`. `long_run_policy.permitted` is false; the checker-
+The current docs-only lock is `RE-PROBE-RECOVERY-AMENDMENT` /
+`record-rejected-lock2-and-bind-final-instrumentation-attempt`, based on
+`9d23044e1253bbd0d5b66e2ee45cb7081d7e884d`. `long_run_policy.permitted` is false; the checker-
 required maximum-pairs value `1` is inert and actual campaign runs/pairs are zero. The existing
 fail-closed scope checker, staged check, and worktree-local pinned hook remain authoritative. After
-this transition closes, only reviewed/re-pinned Lock 2
-`RE-PROBE-RECOVERY-INSTRUMENTATION` / `one-shot-packaged-runtime-phase-localization` may open code;
-Lock 3 `RE-PROBE-RECOVERY-RECEIPT` / `record-one-shot-packaged-probe-recovery-result` closes the
-one-shot receipt before any fresh P2B disposition.
+the amendment commits, only a fresh exact-base reviewed/re-pinned
+`RE-PROBE-RECOVERY-INSTRUMENTATION-R2` / `behavior-first-coordinator-and-wrapper-settlement` lock may
+open the final six-path implementation attempt. It retains the existing boundaries, clocks, eight
+classes, and size caps; permits exactly one focused RED before production, one GREEN, two syntax
+checks, and `git diff --check`; and permits no correction or rerun. Unanimous review is required
+before candidate commit. Lock 3 closes an accepted one-shot receipt before any fresh P2B disposition.
 
 ## Deferred and retired
 

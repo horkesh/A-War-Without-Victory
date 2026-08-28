@@ -29936,3 +29936,30 @@ index, docs index, active governance, project ledger, and knowledge ledger.
 or historical target changes in this transition.
 
 **FORAWWV note:** `docs/10_canon/FORAWWV.md` was not edited; this process/probe-custody decision introduces no game-design canon amendment.
+
+## [2026-08-28] guard(RE): reject packaged-probe Lock 2 and authorize one behavior-first R2
+
+**Rejected candidate:** The first packaged-probe instrumentation Lock 2 was rejected before any
+candidate commit or packaged invocation. Its focused suite was green, but the tests encoded an
+incomplete settlement contract: coordinator ownership, terminal races, cleanup, and diagnostic
+semantics were not proved. Architect and specification review both returned NO-GO.
+
+**Preserved evidence and restoration:** The rejected patch is held outside the checkout at
+`F:\A-War-Without-Victory\.git\worktrees\re-engine-integrity\rejected-lock2-20260828.patch`
+(49,583 bytes), SHA-256
+`37e242835941acb379445e4f1bfd869b0c6f4f017229954355d89ffb7344535d`. The worktree was restored
+clean at `9d23044e1253bbd0d5b66e2ee45cb7081d7e884d`. A duplicate read-only `git diff --check` process
+exception is explicitly excluded from probe invocation accounting. Packaged-probe
+`invocation_count` remains `0`; its one-shot authority is nontransferable. P2B remains HELD and P3
+continues to wait.
+
+**Final Orchestrator R2 rule:** One fresh lock may use task
+`RE-PROBE-RECOVERY-INSTRUMENTATION-R2` and packet
+`behavior-first-coordinator-and-wrapper-settlement`. Before RED, freeze the complete behavioral
+matrix for ownership, races, cleanup, and diagnostics. Reimplement cleanly from that matrix; do
+not copy or apply the rejected patch. The packet permits exactly one RED, one GREEN, syntax checks,
+and one diff check, with no correction cycle. Acceptance requires unanimous review. Any test,
+scope, review, or custody failure abandons instrumentation; there is no R3.
+
+**Boundary:** This records probe-process custody only. It changes no canon, roadmap outcome,
+calibration authority, product behavior, or RE credit, and it does not reopen P2B or P3.

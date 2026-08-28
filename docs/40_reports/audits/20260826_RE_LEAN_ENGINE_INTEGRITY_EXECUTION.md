@@ -954,3 +954,64 @@ It changes operator control and reusable custody rules only; there is no product
 scenario, calibration, reference, or historical-target change. The original probe channel remains
 closed at `b711cffa9`; the auxiliary recovery is a distinct active safety-control lane and this
 living audit remains its single evidence record.
+
+## 2026-08-28 — Lock 2 rejection and terminal recovery amendment
+
+The attempted Lock 2 instrumentation is rejected on frozen base and HEAD
+`9d23044e1253bbd0d5b66e2ee45cb7081d7e884d`. Its external, non-candidate metadata copy is
+`F:\A-War-Without-Victory\.git\worktrees\re-engine-integrity\rejected-lock2-20260828.patch`,
+49,583 bytes, SHA-256
+`37e242835941acb379445e4f1bfd869b0c6f4f017229954355d89ffb7344535d`. The patch contains exactly
+`docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json` `+6/-14`,
+`src/desktop/electron-main.cjs` `+48/-0`,
+`tests/desktop_packaged_runtime_probe.test.ts` `+337/-0`, and
+`tools/desktop_packaged_runtime_probe.mjs` `+225/-37`. Initial QA under exact Node `v22.23.0`
+reported focused 20/20 GREEN, both JavaScript syntax checks GREEN, and `git diff --check` GREEN.
+Those results do not overcome the independent Architect and specification-review **NO-GO**.
+
+The first specification review found behavioral, not cosmetic, defects in coordinator settlement,
+tree-kill custody, validation failure exits/diagnostics, marker tracking, package attribution,
+emitter shape, and their tests. One allowed correction fixed the emitter boundary, last-valid/
+stdout-only/`probe-body` tracking, late child-event ownership, non-green exit computation, and part
+of async kill settlement. Final Architect and specification review still found the candidate
+invalid: post-sentinel fail-safe attribution and timeout/close cleanup actions were wrong; package
+contradictions and wrapper-terminal class exclusions were incomplete; synchronous and nonzero
+`taskkill` failures were unsafe; direct execution suppressed validation diagnostics; exact marker
+object shape/key order was not enforced; and real-validator plus one-launch/no-retry behavioral
+proof remained absent. Those remaining gaps control the rejection.
+
+After review confirmation, the specification reviewer accidentally repeated read-only
+`git diff --check` and cached diff-check inspection. Both are excluded from acceptance evidence.
+They caused no mutation and no test, build, package, probe, or Electron execution. Process QA's
+disposition is **PASS WITH EXCEPTION** for that redundant inspection only. There were zero packaged
+invocations: the authorized one-shot remains unconsumed but is nontransferable from rejected Lock
+2. All rejected files were restored clean to HEAD. Lock 2 produced no candidate, commit, recovery
+credit, or P2B proof. P2B remains **HELD** and P3 remains waiting.
+
+Orchestrator authorizes one final behavior-first attempt only after this amendment commits. Product
+Manager must then install and obtain exact-byte review/re-pin acceptance for
+`RE-PROBE-RECOVERY-INSTRUMENTATION-R2` / `behavior-first-coordinator-and-wrapper-settlement`, with
+the same six paths as Lock 2: the lock, recovery plan, this living audit, Electron main, wrapper,
+and existing packaged-probe test. The same denylist, failure policy, no-credit rule, false long-run
+permission, clocks, eight classes, narrow Electron boundary, and LOC caps remain binding. No
+package execution is permitted before a reviewed clean candidate.
+
+Before production code, Architect and the original specification reviewer jointly freeze an exact
+behavioral matrix covering atomic coordinator ownership/precedence; the 1,200,000/960,000 ms
+clocks; 5,000 ms natural-close grace plus separate 5,000 ms cleanup verification; positive package
+attribution and contradictory evidence; exclusion of package classes after wrapper terminal;
+awaited tree-kill success, nonzero result, synchronous error, and late close; validation diagnostics
+with nonzero exit; exact marker key order, shape, valid-only and stdout-only tracking; exact emitter
+and bracketing; real-validator present, malformed, success, and failure cases; terminal order; and
+no retry. The implementer edits only the existing test and runs one focused RED under exact Node
+`v22.23.0`; inherited tests must remain green, and Architect plus the reviewer inspect that RED
+before any production edit. The implementer then rebuilds production from clean HEAD design—never
+by applying the rejected patch—and may edit only Electron main and the wrapper within the existing
+caps. Verification is exactly one focused GREEN, two `node --check` commands, and one
+`git diff --check`, followed by fresh read-only specification, Architect, Build, QA, and Process QA
+review. Acceptance requires unanimous GO.
+
+There is no correction pass or rerun. Any RED mismatch or regression, GREEN/static failure,
+boundary/cap/class/clock/manifest/normal-runtime violation, second edit or run, or final NO-GO
+abandons instrumentation and closes recovery to a receipt lock plus an alternate packaged-proof
+strategy. There is no R3, no package/probe execution, and no P2B resumption from a failed R2.

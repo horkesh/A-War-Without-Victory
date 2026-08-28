@@ -15,8 +15,8 @@
 Owner authorization on 2026-08-28 opens one auxiliary recovery lane because P2B's mandatory
 clean-base packaged probe ended **NO VERDICT**. Orchestrator owns sequencing and scope; Architect
 owns symbol/hunk boundaries. Platform Specialist is the sole implementation owner. Build Engineer,
-Architect, and QA are independent reviewers; none may co-implement. Product Manager owns all three
-locks and the living-audit update.
+Architect, and QA are independent reviewers; none may co-implement. Product Manager owns every
+lock transition and the living-audit update.
 
 This lane:
 
@@ -65,7 +65,7 @@ authority to edit chunking, UI code, build configuration, or normal runtime. The
 receipt decides where any subsequent packet would begin; this packet does not guess or repair the
 hypothesis.
 
-## 3. Exact three-lock sequence
+## 3. Exact lock sequence and amendment
 
 ### Lock 1 — authorization transition (this document set)
 
@@ -83,13 +83,21 @@ The active lock is:
 Orchestrator, Architect, Process QA, and Reports Custodian review the 14-file staged transition
 before its single docs commit. No implementation work may begin under Lock 1.
 
-### Lock 2 — probe instrumentation and one-shot proof
+### Rejected Lock 2 and final Lock 2 R2
 
-After Lock 1 is committed, Product Manager must replace the lock before any code edit:
+The first Lock 2, `RE-PROBE-RECOVERY-INSTRUMENTATION` /
+`one-shot-packaged-runtime-phase-localization`, was rejected at specification review before a
+candidate commit or packaged invocation. Invocation count is zero. Its unconsumed one-shot authority
+is not transferable, reusable, or evidence for R2.
 
-- task: `RE-PROBE-RECOVERY-INSTRUMENTATION`
-- packet: `one-shot-packaged-runtime-phase-localization`
-- base: the exact Lock-1 transition commit (no placeholder may remain)
+The docs-only amendment `RE-PROBE-RECOVERY-AMENDMENT` /
+`record-rejected-lock2-and-bind-final-instrumentation-attempt`, based on
+`9d23044e1253bbd0d5b66e2ee45cb7081d7e884d`, must commit before Product Manager may draft the final
+Lock 2 R2. R2 requires a fresh exact-base lock and the full successor-lock review/re-pin/check custody:
+
+- task: `RE-PROBE-RECOVERY-INSTRUMENTATION-R2`
+- packet: `behavior-first-coordinator-and-wrapper-settlement`
+- base: the exact amendment commit (no placeholder may remain)
 - exact allowlist:
   - `src/desktop/electron-main.cjs`
   - `tools/desktop_packaged_runtime_probe.mjs`
@@ -104,8 +112,17 @@ After Lock 1 is committed, Product Manager must replace the lock before any code
 - one packaged invocation on the exact candidate commit; no retry
 - out-of-scope implementation: stop-and-queue
 
-The implementer must prove a clean exact base and have Architect approve the staged symbol/hunk map
-before RED. An exact-file lock is necessary but not sufficient.
+R2 preserves without expansion the six paths, symbol/hunk boundaries, clocks, eight diagnostic
+classes, and independent LOC caps in this plan. Before RED, Architect and the original specification
+reviewer must jointly freeze one complete behavioral matrix covering coordinator and wrapper
+settlement. The implementer must prove a clean exact base and have Architect approve the staged
+symbol/hunk map. An exact-file lock is necessary but not sufficient.
+
+R2 permits exactly one focused RED before production code, one focused GREEN, both named syntax
+checks, and `git diff --check`. There is no correction pass, test rerun, or replacement attempt.
+Orchestrator, Architect, original specification reviewer, Build Engineer, QA, and Process QA must
+unanimously accept the exact candidate. Any failed gate or review abandons this instrumentation
+approach, keeps P2B held/P3 waiting, and authorizes no R3.
 
 ### Lock 3 — docs-only one-shot receipt
 
@@ -114,7 +131,7 @@ lock before recording the result:
 
 - task: `RE-PROBE-RECOVERY-RECEIPT`
 - packet: `record-one-shot-packaged-probe-recovery-result`
-- base: the exact Lock-2 candidate commit that consumed the invocation
+- base: the exact Lock-2-R2 candidate commit that consumed the invocation
 - exact five-file allowlist: `docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json`, this recovery
   plan, `docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md`,
   `src/desktop/README.md`, and `docs/PROJECT_LEDGER.md`
@@ -136,7 +153,7 @@ Lock 1 is the bootstrap transition and uses this exact order:
 4. Run the existing working-tree and staged-scope checks against that pin; both must pass.
 5. Commit the reviewed transition. No Lock-2 payload edit is permitted during bootstrap.
 
-For successor Lock 1 → Lock 2 and Lock 2 → Lock 3 custody, use this order without overlap:
+For successor amendment → Lock 2 R2 and Lock 2 R2 → Lock 3 custody, use this order without overlap:
 
 1. Product Manager proves a clean HEAD and drafts only the successor lock against that exact HEAD.
 2. Orchestrator, Architect, and Process QA review the exact proposed lock bytes and SHA-256.
@@ -336,16 +353,16 @@ Hard size caps are independent and cannot be offset by deletions elsewhere:
 
 ## 7. Linear implementation tasks
 
-### Task 1: Install Lock 2 and prove the exact boundary
+### Task 1: Install final Lock 2 R2 and prove the exact boundary
 
 **Files:**
 
 - Modify: `docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json`
 - Modify later for evidence only: `docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md`
 
-**Step 1:** At clean HEAD, Product Manager drafts only Lock 2 with its exact task/packet, transition
-commit as `base_commit`, six-path allowlist, denylist, no-long-run rule, one-shot budget, LOC caps,
-and stop-and-queue policy from section 3.
+**Step 1:** After the amendment commit, at clean HEAD, Product Manager drafts only Lock 2 R2 with
+the exact task/packet in section 3, amendment commit as `base_commit`, six-path allowlist, denylist,
+no-long-run rule, one-shot budget, LOC caps, and stop-and-queue policy.
 
 **Step 2:** Orchestrator, Architect, and Process QA approve the exact proposed lock bytes and
 SHA-256. Re-pin the existing worktree-local hook, then run the existing working-tree and staged
@@ -357,7 +374,9 @@ scope checks. Do not touch payload files before all three reviews and both check
 rg -n "RUNTIME_PROBE_MODE|function getRuntimeProbeManifestPath|function waitFor|function arm|function collect|async function runPackagedRuntimeProbe|AWWV_DESKTOP_RUNTIME_PROBE_(?:OK|FAIL)" src/desktop/electron-main.cjs tools/desktop_packaged_runtime_probe.mjs
 ```
 
-**Step 4:** Architect returns GO before tests or implementation. Any normal-runtime hunk is a stop.
+**Step 4:** Architect and the original specification reviewer jointly freeze the complete behavioral
+matrix and return GO before tests or implementation. Any ambiguity or normal-runtime hunk abandons
+the instrumentation approach; no R3 is authorized.
 
 ### Task 2: Write the failing marker and wrapper-bound tests
 
@@ -399,8 +418,9 @@ chunk, malformed/duplicate/skipped/out-of-order rows, child-close versus watchdo
 orders, kill success/failure/late-close with exactly one kill and one terminal receipt, no-marker
 and localized timeouts, nonzero child, malformed/invalid/valid manifests, unchanged validator
 success/failure, import without launching a process, wrapper-terminal/npm-close/fail-safe races,
-and every coordinator attribution row above. Build Engineer, Architect, and QA independently review
-the coordinator contract and test expectations before GREEN.
+and every coordinator attribution row above. The RED test bytes must implement the jointly frozen
+matrix; production work may begin only after Architect and the original specification reviewer
+confirm that exact correspondence.
 
 **Step 2:** Prepend the coordinator-provisioned Node directory to `PATH`; do not download or resolve
 Node through `npx`. Run `node --version` and require exactly `v22.23.0`. Any other output stops.
@@ -469,8 +489,7 @@ failure.
 node node_modules/vitest/vitest.mjs run tests/desktop_packaged_runtime_probe.test.ts
 ```
 
-Expected: all tests pass. One corrective GREEN rerun is allowed only for a mechanical typo in a new
-test assertion; it grants no implementation correction or broader rerun.
+Expected: all tests pass. No correction or rerun is permitted.
 
 ### Task 5: Static verification before consuming the run
 
@@ -491,12 +510,14 @@ other verification command. This auxiliary packet's bounded budget is the sole R
 both `node --check` commands, and `git diff --check`.
 
 **Step 3:** Platform Specialist is the sole implementer. Orchestrator reviews scope/sequencing;
-Architect reviews exact hunks and proves normal mode remains inert; Build Engineer independently
-reviews command chain/live forwarding; QA independently reviews TDD/classifications. No reviewer
-co-implements and no packaged execution occurs during review.
+Architect reviews exact hunks and proves normal mode remains inert; the original specification
+reviewer verifies the frozen behavioral matrix; Build Engineer independently reviews command
+chain/live forwarding; QA independently reviews TDD/classifications; Process QA verifies custody
+and budget. Acceptance must be unanimous. No reviewer co-implements and no packaged execution
+occurs during review. Any rejection abandons this instrumentation approach and authorizes no R3.
 
 **Step 4:** Enforce every independent LOC cap, then stage only changed paths from the six-path Lock
-2 allowlist. Compute the normal canonical staged payload digest over the three code/test paths and
+2 R2 allowlist. Compute the normal canonical staged payload digest over the three code/test paths and
 run the repository staged-scope checks. Any extra path, cap breach, or forbidden hunk stops the
 packet.
 
@@ -504,7 +525,7 @@ packet.
 
 **Files:** no new source path.
 
-**Step 1:** Commit the reviewed Lock-2 packet. The one-shot run is permitted only on that exact
+**Step 1:** Commit the reviewed Lock-2-R2 packet. The one-shot run is permitted only on that exact
 clean commit with the provisioned Node `v22.23.0` first in `PATH`; verify the version again and do
 not use `npx`.
 
@@ -520,7 +541,7 @@ executable separately. The exact sentinel switches the coordinator atomically to
 post-sentinel fail-safe. The wrapper arms its 900,000 ms watchdog only from the child process
 `'spawn'` event, never from `spawn()` return. No timeout extends or races into retry/acceptance.
 
-**Step 3:** Classify only by section 4. The receipt must capture: exact Lock-2 candidate commit;
+**Step 3:** Classify only by section 4. The receipt must capture: exact Lock-2-R2 candidate commit;
 clean-tree status before invocation; exact Node version; literal command; package start/result and
 whether/when the exact sentinel was observed; pre-sentinel timer result; post-sentinel fail-safe
 result and `coordinator_fail_safe_triggered`; `last_proven_npm_stage`; whether captured output
@@ -608,5 +629,7 @@ behavioral change, package-script/build-config/UI/map-server/IPC/state/simulatio
 the circular chunk or TDZ hypothesis, inability to kill the full process tree deterministically,
 test requiring an environment-dependent branch, marker reordering of current work, new packaged
 failure outside this scope, absent Node 22, second-run request, generated tracked artifact, or any
-canon/scenario/calibration/reference need. Record the evidence and queue one bounded amendment;
-do not improvise.
+canon/scenario/calibration/reference need. Outside final R2, record the evidence and queue one bounded
+amendment; do not improvise. Any R2 stop or failed gate abandons this instrumentation approach and
+authorizes no R3 implementation attempt; only a docs-only stop receipt and an Architect/Orchestrator-
+owned alternate packaged-proof strategy may follow.
