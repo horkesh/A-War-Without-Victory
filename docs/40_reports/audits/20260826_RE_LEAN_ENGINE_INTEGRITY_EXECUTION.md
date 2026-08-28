@@ -4,8 +4,8 @@
 
 **Status:** P1/P2A accepted; P2B HELD before implementation after packaged-probe NO VERDICT; P3
 waiting; auxiliary probe instrumentation stopped at final R2 RED before production, with no R3;
-alternate packaged-proof discovery queued behind a fresh docs-only lock; calibration pause and
-long-run denial unchanged
+alternate packaged-proof discovery CLOSED/BLOCKED at `C_P2B_BLOCKED`, with no successor authority;
+calibration pause and long-run denial unchanged
 
 **Plan:** `docs/plans/2026-08-26-engine-integrity-plan.md`
 
@@ -1081,3 +1081,72 @@ paused, recovery earns no RE credit, and packaged-probe invocation count remains
 During stop-receipt review, Process QA ran one unauthorized read-only
 `git diff --cached --check`. It is excluded from acceptance evidence; it caused no mutation, test,
 build, package, probe, or Electron execution and does not change the terminal disposition.
+
+## Terminal alternate-proof discovery receipt — 2026-08-28
+
+### Custody and authority
+
+`RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` / `select-no-instrumentation-p2b-proof-route` is closed at `C_P2B_BLOCKED` with terminal authority `RECOMMENDATION_ONLY_NOT_AUTHORIZED`.
+
+- Exact base: `816b4ea6f8e4618465abacc50b860ac827c49154`.
+- Accepted lock: 5,488 bytes; SHA-256 `d5972d4fd318abc124bf9cedff9479c1fe28cf51bddb5824118ca0e97f8adef3`.
+- Exact receipt allowlist: `.claude/current-lane.txt`; `docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json`; `docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md`; `docs/plans/2026-08-28-packaged-probe-recovery-plan.md`; this living audit; `docs/PROJECT_LEDGER.md`.
+- Inspection boundary: the lock's exact 24 paths; no broad repository audit.
+- Authorized history anchors only: `816b4ea6f8e4618465abacc50b860ac827c49154`, `bd61a37a3d5eff89613f171edb23496d11fd06f3`, `b711cffa94029c35eac18d96db91a411eb2e7abb`, and `98f54ccb4`.
+- Named roles: Technical Architect, Orchestrator, Platform Specialist, Build Engineer, QA Engineer, and Process QA.
+- Execution budget consumed by discovery: zero. No mutation outside the receipt allowlist, project execution, generated output, network access, test, build, package, Electron launch, or probe invocation occurred.
+
+### Authorized evidence and terminal adjudication
+
+P2B requires one literal `npm.cmd run desktop:package:probe` on the exact base. Its consumed clean-base invocation was **NO VERDICT**, and 21 non-document mechanics remain identical now. The existing wrapper launches the fixed unpacked executable with the probe environment, buffers child stdout/stderr until close, and has neither a watchdog nor live forwarding. The substantive file, route, IPC, renderer, session, and endgame facts are produced inside Electron and accepted only after the unchanged wrapper validates the terminal manifest.
+
+The exact current Vite blob still contains the four-way filename-selected Army-HQ chunk split. A matching warning was captured, and the authorized nonancestor `98f54ccb4` history records an actual `Cannot access 'ir' before initialization` TDZ failure and a one-chunk repair. That is strong historical correspondence but not causal proof of this specific no-verdict. The probe calls `sim.startNewCampaign` directly; it bypasses the separate `decisionMode` IPC validation used by the Warroom path.
+
+`A_EXTERNAL_PROOF_ROUTE_RECOMMENDED` was proposed through Build/QA command decomposition. It failed unanimity because separately running package and wrapper stages is not the literal composite P2B command. An external supervisor can bound and observe a process, but cannot turn a timeout into proof or replace the canonical validator.
+
+`B_ROOT_CAUSE_PREREQUISITE_RECOMMENDED` was supported by Technical Architect and Platform reasoning and conditionally by Process QA, but failed unanimity. The evidence establishes a plausible defect, not causality for this no-verdict. A causal observation pass would repeat substantially unchanged packaged churn; editing before that proof would be hypothesis-driven remediation. Both violate the controlling safeguards.
+
+The Orchestrator therefore bound `C_P2B_BLOCKED` under the unanimous-route and fail-closed rules. P2B remains held before implementation; P3 waits; calibration remains paused; this auxiliary work earns no RE credit. There is no successor authority.
+
+### Retained exact command ledger
+
+The receipt lists exact command literals only where they were retained. It does not claim a complete cross-role command transcript. Product commands were never executed, and no unavailable literal is reconstructed.
+
+Orchestrator custody inspection:
+
+```text
+Get-Content -Raw -LiteralPath 'C:\Users\User\.codex\skills\orchestrator\SKILL.md'
+git show :docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json
+git ls-files --error-unmatch -- 'docs/plans/2026-08-26-engine-integrity-plan.md' 'docs/plans/2026-08-28-packaged-probe-recovery-plan.md' 'docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md' 'package.json' 'package-lock.json' '.github/workflows/desktop-release-guard.yml' '.github/workflows/release.yml' '.github/workflows/README.md' '.github/scripts/detect-changed-paths.sh' 'tools/desktop_packaged_runtime_probe.mjs' 'src/desktop/electron-main.cjs' 'src/desktop/preload.cjs' 'src/desktop/README.md' 'src/ui/map/hooks/useDesktopSession.ts' 'src/ui/map/index.html' 'src/ui/map/vite.config.ts' 'tests/desktop_packaged_runtime_probe.test.ts' 'tests/desktop_packaging_contract.test.ts' 'tools/ui/map_transition_profile.cjs' 'tests/map_transition_profile_harness.test.ts' 'tools/ui/paradox_local_qa.cjs' 'tests/paradox_local_qa_harness.test.ts' 'tools/ui/r4_phase5_visual_inspection_capture.cjs' 'tools/build/win_nsis_smoke.cjs'
+```
+
+Platform raw reads used the exact command form `Get-Content -Raw -LiteralPath '<path>'` for these exact paths: `package.json`; `tools/desktop_packaged_runtime_probe.mjs`; `src/desktop/electron-main.cjs`; `src/desktop/preload.cjs`; `src/desktop/README.md`; `src/ui/map/hooks/useDesktopSession.ts`; `src/ui/map/index.html`; `src/ui/map/vite.config.ts`; `tests/desktop_packaged_runtime_probe.test.ts`; `tests/desktop_packaging_contract.test.ts`; `tools/ui/map_transition_profile.cjs`; `tests/map_transition_profile_harness.test.ts`; `tools/ui/paradox_local_qa.cjs`; `tests/paradox_local_qa_harness.test.ts`; `tools/ui/r4_phase5_visual_inspection_capture.cjs`; `tools/build/win_nsis_smoke.cjs`; `.github/workflows/desktop-release-guard.yml`; `.github/workflows/release.yml`; `.github/workflows/README.md`; and `.github/scripts/detect-changed-paths.sh`. Exact retained targeted commands were:
+
+```text
+rg -n -C 5 -- 'AWWV_DESKTOP_RUNTIME_PROBE|runtimeProbe|probeManifest|manifest|BrowserWindow|app\.whenReady|app\.quit|window-all-closed|did-fail-load|loadURL|loadFile|webContents|child_process|spawn' 'src/desktop/electron-main.cjs'
+rg -n -C 3 -- 'desktop:package:dir|desktop:package:probe|desktop:release:check|electron-builder|"build"|"files"|extraResources|dist-packaged|win"|target' 'package.json'
+rg -n -C 12 -- 'async function runPackagedRuntimeProbe|function runPackagedRuntimeProbe|AWWV_DESKTOP_RUNTIME_PROBE_OK|getRuntimeProbeManifestPath|writeFileSync\(getRuntimeProbeManifestPath|process\.stdout\.write' 'src/desktop/electron-main.cjs'
+rg -n -C 10 -- 'app\.whenReady|RUNTIME_PROBE_MODE|app\.quit\(|mainWindow\.close|tacticalMapWindow\.close|close\(\)|destroy\(\)|mapServer\.close|server\.close' 'src/desktop/electron-main.cjs'
+rg -n -C 10 -- 'createWindow|createTactical|loadURL|loadFile|did-finish-load|executeJavaScript|game-state-updated|turn-report-updated|endgame_checks|window_checks|tactical_interactions|renderer_reaction_checks' 'src/desktop/electron-main.cjs'
+rg -n -C 8 -- 'contextBridge|ipcRenderer|game-state-updated|turn-report-updated|load-game-state|desktopAPI' 'src/desktop/preload.cjs'
+rg -n -C 6 -- 'AWWV_DESKTOP_RUNTIME_PROBE|recordDesktopProbeReaction|awwvDesktopSessionReady|awwvProbeGameState|awwvProbeTurnReport|onGameStateUpdated|onTurnReportUpdated' 'src/ui/map/hooks/useDesktopSession.ts'
+rg -n -C 8 -- 'R2|REJECT|alternate|external|P2B|manifest|supervisor|instrumentation|RED|root cause|blocked|proof route' 'docs/plans/2026-08-28-packaged-probe-recovery-plan.md'
+rg -n -C 8 -- 'R2|REJECT|alternate|external|P2B|manifest|supervisor|instrumentation|RED|root cause|blocked|proof route' 'docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md'
+rg -n -C 12 -- 'P2B|packaged|probe|proof|manifest|candidate|clean-base|runtime' 'docs/plans/2026-08-26-engine-integrity-plan.md'
+rg -n -C 15 -- 'manualChunks|army_hq|feature-army|chunk|vendor' 'src/ui/map/vite.config.ts'
+rg -n -C 12 -- 'startNewCampaign|decisionMode|scenarioKey' 'src/desktop/electron-main.cjs'
+rg -n -C 8 -- 'manualChunks|army_hq|feature-army|vite\.config' 'tests/desktop_packaged_runtime_probe.test.ts' 'tests/desktop_packaging_contract.test.ts'
+rg -n -C 12 -- 'new BrowserWindow|createMainWindow|createTacticalMapWindow|show: false|probeWindow|sandboxProbeWindow|endgameProbeWindow' 'src/desktop/electron-main.cjs'
+git log --oneline --decorate --no-abbrev-commit -- 'tools/desktop_packaged_runtime_probe.mjs' 'src/desktop/electron-main.cjs' 'src/desktop/preload.cjs' 'src/ui/map/hooks/useDesktopSession.ts' 'tests/desktop_packaged_runtime_probe.test.ts' 'tests/desktop_packaging_contract.test.ts'
+git show --format=fuller --stat --no-ext-diff bd61a37a3d5eff89613f171edb23496d11fd06f3 -- 'tools/desktop_packaged_runtime_probe.mjs' 'src/desktop/electron-main.cjs' 'src/desktop/preload.cjs' 'src/ui/map/hooks/useDesktopSession.ts' 'tests/desktop_packaged_runtime_probe.test.ts' 'tests/desktop_packaging_contract.test.ts'
+git show --format=fuller --stat --no-ext-diff b711cffa94029c35eac18d96db91a411eb2e7abb -- 'tools/desktop_packaged_runtime_probe.mjs' 'src/desktop/electron-main.cjs' 'src/desktop/preload.cjs' 'src/ui/map/hooks/useDesktopSession.ts' 'tests/desktop_packaged_runtime_probe.test.ts' 'tests/desktop_packaging_contract.test.ts'
+git show --format=fuller --stat --no-ext-diff 98f54ccb4 -- 'tools/desktop_packaged_runtime_probe.mjs' 'src/desktop/electron-main.cjs' 'src/desktop/preload.cjs' 'src/ui/map/hooks/useDesktopSession.ts' 'tests/desktop_packaged_runtime_probe.test.ts' 'tests/desktop_packaging_contract.test.ts'
+git show --no-ext-diff 98f54ccb4 -- 'src/ui/map/vite.config.ts'
+git show --no-ext-diff 98f54ccb4 -- 'src/desktop/electron-main.cjs'
+```
+
+Process QA read only `C:\Users\User\.codex\skills\quality-assurance-process\SKILL.md` after the retained discovery evidence. Exact Technical Architect command literals were unavailable to this receipt writer after compaction; none are reconstructed, and claims dependent solely on those unavailable commands are excluded. Exact coordinator command literals beyond the retained Orchestrator custody commands above were likewise unavailable; permitted command families and path-limited comparison policy are not misreported as commands actually run, and claims dependent solely on an unavailable coordinator literal are excluded. Some exact Build command literals were also unavailable after compaction and are not reconstructed or guessed.
+
+### Process-custody failure
+
+> **Process-custody failure — discovery evidence excluded:** QA disclosed a read of `tests/desktop_persistence_contract.test.ts`, which was outside the lock’s 24-path inspection boundary, and reported operating from `F:\A-War-Without-Victory` rather than the locked worktree `F:\AWWV-worktrees\re-engine-integrity`. Build disclosed `git log --all` inspection that surfaced `bb7e93d75` and `4cd599058`, beyond the lock’s four authorized history anchors; some exact Build command literals were also unavailable after compaction. These are custody failures, not accepted exceptions. They caused no mutation, generated output, project execution, build, package, Electron launch, probe, test, or network access. All claims derived solely from those unauthorized or unauditable inspections are excluded from route acceptance. The terminal `C_P2B_BLOCKED` disposition remains independently supported by authorized evidence: route A does not execute the literal required `npm.cmd run desktop:package:probe`, while route B lacks causal proof and would require forbidden unchanged rerun churn or hypothesis-driven remediation. No implementation, rerun, remediation, P2B restart, P3 start, or successor authority follows from this receipt.

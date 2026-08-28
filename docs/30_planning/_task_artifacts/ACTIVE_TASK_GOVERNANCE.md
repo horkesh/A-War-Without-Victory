@@ -20,9 +20,9 @@ diagnosis or optimization is authorized. P1 and P2A are accepted. P2B is HELD be
 by its packaged-probe NO VERDICT; P3 waits. Final R2 instrumentation is CLOSED/REJECTED at its valid
 sole RED. There was no production edit, GREEN, syntax check, diff verification, packaged invocation,
 candidate, or R3; packaged invocation count remains zero. The consumed RED and unused package
-authority are nontransferable. Auxiliary recovery is active only for the zero-execution stop
-receipt; read-only alternate-proof discovery is queued and unauthorized pending its fresh accepted
-lock. No long run is authorized until the one final
+authority are nontransferable. The separately locked alternate-proof discovery is CLOSED/BLOCKED
+at `C_P2B_BLOCKED`; its result is `RECOMMENDATION_ONLY_NOT_AUTHORIZED`, and there is no active
+successor. No long run is authorized until the one final
 RE A/B pair, and calibration remains paused until reduced RE closes.
 
 ## Packet governance
@@ -52,27 +52,26 @@ RE A/B pair, and calibration remains paused until reduced RE closes.
   simulation branch.
 - Scenarios, calibration data, historical references, and canon remain denied.
 
-Auxiliary packaged-probe recovery is the sole temporary exception to final-only control sync. It
-earns no RE completion credit and cannot satisfy P2B retroactively. Lock 1 and both rejected
-instrumentation attempts are historical custody/evidence only. R2's valid sole RED closed the
-instrumentation approach with no candidate or packaged invocation; there is no R3. The sole
-surviving authority is a separately locked docs-only/read-only discovery packet,
-`RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` / `select-no-instrumentation-p2b-proof-route`. Technical
-Architect, Orchestrator, Platform, Build, QA, and Process own that discovery. It may return only:
-(a) zero-in-app-instrumentation external proof preserving every P2B obligation; (b) a separately
-scoped root-cause-remediation prerequisite with exact files/tests/authorization; or an explicit
-P2B blocker. It authorizes no code, test, build, package, Electron/probe execution, TDZ/chunk fix,
-or R3.
+Auxiliary packaged-probe recovery was the sole temporary exception to final-only control sync. It
+earned no RE completion credit and cannot satisfy P2B retroactively. Lock 1, both rejected
+instrumentation attempts, and the separately locked docs-only/read-only discovery packet are
+historical custody/evidence only. R2's valid sole RED closed the instrumentation approach with no
+candidate or packaged invocation; there is no R3. The discovery contract required Technical
+Architect, Orchestrator, Platform, Build, QA, and Process to choose unanimously among an external
+proof route, a root-cause prerequisite, or an explicit blocker. It terminated at
+`C_P2B_BLOCKED`; the result is `RECOMMENDATION_ONLY_NOT_AUTHORIZED`. There is no active successor
+and no code, test, build, package, Electron/probe, TDZ/chunk, R2/R3, P2B, or P3 authority.
 
 ## Active machine lock
 
-The current docs-only lock is `RE-PROBE-RECOVERY-STOP-RECEIPT` /
-`record-r2-red-rejection-and-close-instrumentation`, based on
-`f674ff0efe663432628a44b9134070fca5bd608e`. Every execution-budget value is zero;
+The current receipt-only lock is `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` /
+`select-no-instrumentation-p2b-proof-route`, based on
+`816b4ea6f8e4618465abacc50b860ac827c49154`. Every execution-budget value is zero;
 `long_run_policy.permitted` is false and the checker-required maximum-pairs value `1` is inert. The
-existing fail-closed scope checker, staged check, and worktree-local pinned hook remain authoritative.
-No discovery begins under this receipt lock. Product Manager must draft a fresh exact-base docs-only
-lock for `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` before the read-only owners inspect or record a route.
+discovery is CLOSED/BLOCKED at `C_P2B_BLOCKED`, with terminal authority
+`RECOMMENDATION_ONLY_NOT_AUTHORIZED`. The lock now governs only this finite receipt; it grants no
+continuing inspection, implementation, execution, rerun, remediation, transition, or successor
+authority.
 
 ## Deferred and retired
 
@@ -100,3 +99,18 @@ automatic diagnosis. R8 bugs receive their own bounded packet and never reopen R
 - The existing RE audit records evidence; frozen discovery and team reports are not queues.
 
 Remote push, merge, release, tag, signing, upload, and publication remain unauthorized.
+
+## Authoritative terminal discovery receipt — 2026-08-28
+
+`RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` / `select-no-instrumentation-p2b-proof-route` is **CLOSED/BLOCKED** at `C_P2B_BLOCKED`. The result is `RECOMMENDATION_ONLY_NOT_AUTHORIZED`; there is no active successor.
+
+- Exact base: `816b4ea6f8e4618465abacc50b860ac827c49154`.
+- Accepted lock: 5,488 bytes; SHA-256 `d5972d4fd318abc124bf9cedff9479c1fe28cf51bddb5824118ca0e97f8adef3`.
+- Receipt allowlist: `.claude/current-lane.txt`, the lock, this governance file, the archived recovery plan, the living audit, and `docs/PROJECT_LEDGER.md`.
+- Discovery boundary: exactly 24 lock-listed inspection paths and only history anchors `816b4ea6f8e4618465abacc50b860ac827c49154`, `bd61a37a3d5eff89613f171edb23496d11fd06f3`, `b711cffa94029c35eac18d96db91a411eb2e7abb`, and `98f54ccb4`.
+- Named roles: Technical Architect, Orchestrator, Platform Specialist, Build Engineer, QA Engineer, and Process QA.
+- Route A was not unanimous because command decomposition is not the literal required `npm.cmd run desktop:package:probe`.
+- Route B was not unanimous because causality is unproven; observing it would repeat substantially unchanged churn, while editing first would be hypothesis-driven remediation.
+- Orchestrator therefore bound route C under the unanimous-route and fail-closed rules.
+
+P2B remains **HELD** before implementation; P3 waits; calibration remains paused; this auxiliary discovery earns no RE credit. No implementation, diagnosis, rerun, build, package, Electron/probe execution, P2B restart, P3 start, R2/R3 revival, or successor task is authorized.

@@ -1,6 +1,23 @@
 # Packaged Probe Recovery Implementation Plan
 
-> **ARCHIVED — DO NOT EXECUTE:** This rejected instrumentation plan is retained only as negative evidence. Continuing authority is limited to the separately locked alternate-proof discovery contract in section 3.
+## Terminal alternate-proof discovery receipt — 2026-08-28
+
+The separately locked `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` / `select-no-instrumentation-p2b-proof-route` task is **CLOSED/BLOCKED** at `C_P2B_BLOCKED`. This receipt is outside the historical rejected instrumentation design below and supersedes no P2B obligation. Its authority is exactly `RECOMMENDATION_ONLY_NOT_AUTHORIZED`.
+
+The discovery ran against base `816b4ea6f8e4618465abacc50b860ac827c49154` under the accepted 5,488-byte lock with SHA-256 `d5972d4fd318abc124bf9cedff9479c1fe28cf51bddb5824118ca0e97f8adef3`. The lock limited receipt mutation to six files, inspection to its exact 24 paths, and history to the base plus `bd61a37a3d5eff89613f171edb23496d11fd06f3`, `b711cffa94029c35eac18d96db91a411eb2e7abb`, and `98f54ccb4`. Technical Architect, Orchestrator, Platform Specialist, Build Engineer, QA Engineer, and Process QA participated under a unanimous-route rule.
+
+All terminal routes were considered:
+
+- `A_EXTERNAL_PROOF_ROUTE_RECOMMENDED` failed unanimity. The proposed Build/QA split decomposed packaging and wrapper execution and therefore did not execute the literal P2B command `npm.cmd run desktop:package:probe` once on the exact base. Semantic equivalence cannot waive that contract.
+- `B_ROOT_CAUSE_PREREQUISITE_RECOMMENDED` failed unanimity. The exact current four-way Army-HQ chunk split, matching captured warning, and nonancestor `98f54ccb4` TDZ repair are relevant evidence, but remain a hypothesis for this specific no-verdict. Causal observation would repeat substantially unchanged packaged churn; editing first would be hypothesis-driven remediation. The probe directly calls `sim.startNewCampaign`, so the separate omitted-`decisionMode` Warroom defect is bypassed by the probe and is not accepted as probe-hang causality.
+- `C_P2B_BLOCKED` is binding. No route both preserved the literal P2B contract and satisfied the no-repeat/no-hypothesis safeguards.
+
+The consumed clean-base invocation remains **NO VERDICT**; 21 non-document mechanics are unchanged at this base. The wrapper still has no watchdog or live stdout/stderr forwarding. Nothing in this receipt converts timeout, manifest presence, split commands, historical causality, or external observation into packaged-probe success.
+
+P2B remains **HELD** before implementation; P3 waits; calibration remains paused; recovery remains auxiliary and earns no RE credit. There is no active successor and no authority for implementation, diagnosis, rerun, build, package, Electron/probe execution, TDZ/chunk remediation, P2B/P3 work, or R2/R3 revival. The remainder of this plan stays **ARCHIVED — DO NOT EXECUTE** as historical negative evidence.
+
+
+> **ARCHIVED — DO NOT EXECUTE:** This rejected instrumentation plan is retained only as negative evidence. The separately locked alternate-proof discovery contract is closed at `C_P2B_BLOCKED`; there is no continuing authority.
 
 **Historical rejected goal:** Make the existing packaged-runtime probe bounded and phase-observable so one authorized run yields one of eight exact diagnostic classes without changing the game engine or normal desktop runtime. This goal is closed and grants no authority.
 
@@ -188,8 +205,8 @@ custody and stops the lane.
 ## 4. Historical rejected terminal and observability contract
 
 Sections 4–6 record the superseded R2 design only. They grant no current classification, receipt,
-implementation, P2B-transition, or Architect-decision authority; the terminal R2 receipt and the
-fresh-lock alternate-discovery contract in section 3 control all continuing work.
+implementation, P2B-transition, or Architect-decision authority; the terminal discovery receipt
+controls current status and grants no continuing work.
 
 | Boundary | Current evidence | Current bound | Required recovery behavior |
 |---|---|---:|---|

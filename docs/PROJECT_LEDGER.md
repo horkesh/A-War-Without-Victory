@@ -29992,3 +29992,10 @@ execution, probe, retry, P2B, calibration, or other authority from R2.
 **Boundary:** This is probe-process custody and negative-evidence bookkeeping only. It changes no
 canon, roadmap outcome, calibration authority, product behavior, release credit, or FORAWWV
 content.
+
+## 2026-08-28 — RE alternate packaged-proof discovery closed blocked
+
+- Closed `RE-PACKAGED-PROOF-ALTERNATE-DISCOVERY` at `C_P2B_BLOCKED` on exact base `816b4ea6f8e4618465abacc50b860ac827c49154` under accepted lock SHA-256 `d5972d4fd318abc124bf9cedff9479c1fe28cf51bddb5824118ca0e97f8adef3`.
+- Route A failed the literal canonical-command contract; route B lacked causal proof and would require unchanged rerun churn or hypothesis-driven remediation. Orchestrator bound C under unanimous fail-closed governance.
+- Process QA excluded unauthorized QA/Build inspection claims; no mutation or project execution occurred.
+- P2B remains held before implementation; P3 waits; calibration remains paused; auxiliary recovery earns no RE credit. No successor task or implementation/run authority exists.
