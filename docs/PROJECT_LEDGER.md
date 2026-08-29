@@ -30394,3 +30394,39 @@ fixed one. `tests/ui/tactical_map_chunking_contract.test.ts` adds three static g
 never manually chunked, the cycle check stays on the packaging path, and every `src/desktop` module
 the packaged main process requires is on the `build.files` allow-list. Each was mutation-tested and
 each fails when its invariant is broken.
+
+## 2026-08-29 — CI red on push: inherited baseline drift, NOT this branch
+
+`codex/ui-typography-overhaul` was pushed and `Event System CI` run `33251709205` failed at the
+**Baseline regression** step. Typecheck, the event-system/Phase E/F/H suite, and the Phase F2
+canon-compliance hard rail all passed; only the baseline comparison failed.
+
+**Raw result.** Five `apr1992_52w` artifacts mismatch `data/derived/scenario/baselines/manifest.json`:
+`final_save.json` (`1f87f86b…` → `fa3ee223…`), `formation_delta.json` (`53cd5e43…` → `01902382…`),
+`run_summary.json` (`eb6b399b…` → `e3b35119…`), `watched_operations.json` (`020c8c95…` → `c7b88114…`),
+`weekly_report.jsonl` (`e68a97a9…` → `c0acc9d7…`).
+
+**Attribution — not this branch.** The manifest was last reconciled at `8511512f9`
+"test(RE-0D): reconcile stale scenario baseline hashes". Six sim-affecting commits landed after it
+and before this branch's start `188f6e5d6`: `a3f14d7f4` (RE-P2A, delete legacy force-launch
+authority), `7c472e065`, `037396e3c`, `0f341929a` (RE-0D planning/movement ownership), `175bea593`
+(RE-0C ops-only attack doctrine), `5a2e152e3` (RE-0C elite commitments before combat). Between them
+they changed `army_reserve_system.ts`, `bot_brigade_eval_attack.ts`, `corps_front_sectors.ts`,
+`order_interpretation.ts`, `pre_planned_operations.ts`, `sector_offensive.ts`,
+`sector_offensive_axis_helpers.ts` and `war_phases.ts`, and **none of them updated the manifest**.
+The eight commits on this branch touch zero files under `src/sim`, `src/state`, `src/scenario`,
+`data/`, or `tools/scenario_runner`.
+
+**Why it surfaced only now.** Every `Event System CI` run on `main` since 2026-08-07 failed at job
+start on GitHub billing ("recent account payments have failed or your spending limit needs to be
+increased") and never executed. This push is the first run in roughly three weeks that actually ran
+the step, so the red is newly *observed*, not newly *caused*.
+
+**Scenario-tester verdict: do NOT reconcile the baseline from here.** Re-blessing the hashes would
+bundle six behavioural changes into a single reconcile, which violates one-change-per-run; it would
+convert unverified movement into the new truth without anyone confirming the six changes produce the
+*intended* behaviour; and calibration is paused with RE blocked at P2B, so reconciliation is neither
+this branch's authority nor currently authorized for the RE lane. The reconcile — or an
+investigation, if the movement turns out to be unintended — belongs to the RE lane owner, one change
+at a time, validated at 188w rather than 40w. Recorded here so the next person does not re-diagnose
+it or silently re-bless it.
