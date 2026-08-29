@@ -401,13 +401,13 @@ body {
 .faction-rail__marker { color: #929d94; font-family: var(--font-data); font-size: 0.66rem; }
 /* Crests are 1:1 with alpha, unlike the 3:2 flags they replaced: a square box with
    object-fit: contain, and no border, which would draw a rectangle around a shield. */
-.faction-rail__crest { width: 2.5rem; height: 2.5rem; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55)); }
+.faction-rail__crest { width: 2rem; height: 2rem; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55)); }
 .faction-rail__label { min-width: 0; }
 .faction-rail__label strong { display: block; overflow: hidden; color: #e5e8e1; font-size: 0.78rem; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
 .faction-rail__label small { display: block; overflow: hidden; margin-top: 0.25rem; color: #929c94; font-family: var(--font-data); font-size: 0.58rem; letter-spacing: 0.06em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 
 .command-dossier__header { display: flex; align-items: flex-start; gap: 1rem; border-bottom: 1px solid rgba(207, 215, 207, 0.16); padding-bottom: 1rem; }
-.command-dossier__crest { width: 3.6rem; height: 3.6rem; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
+.command-dossier__crest { width: 2.8rem; height: 2.8rem; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
 .command-dossier__header h2 { margin: 0.25rem 0 0; color: #eff1eb; font-size: 1.45rem; font-weight: 600; line-height: 1; }
 .command-dossier__header p { margin: 0.4rem 0 0; color: #aab2aa; font-size: 0.7rem; }
 .command-dossier__rows { display: grid; max-height: 46vh; gap: 1rem; margin-top: 1rem; overflow-y: auto; padding-right: 0.5rem; }

@@ -139,6 +139,7 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).not.toContain("artStatus: 'fallback-art'");
     expect(tool).toContain('assertOpeningArt');
     expect(tool).toContain('is still a placeholder data URI, not owner art');
+    expect(tool).toContain('the selector no longer matches');
     expect(tool).toContain('portal lost its gradient fallback');
     expect(tool).toContain('assertPortalVisibilityGate');
     expect(tool).toContain('must keep the map portal invisible');

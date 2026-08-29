@@ -981,9 +981,17 @@ function assertPortalVisibilityGate(trace, label, portalSuppressed) {
   return { peakPortalOpacity: peak, expectation: 'visible' };
 }
 
-function assertOpeningArt(evidence, label) {
+// `required` names the roles this state must actually render, so a selector that
+// stops matching fails loudly instead of skipping its own assertions. The splash
+// state has no scene plate or portal; the landing/preview states have no splash.
+function assertOpeningArt(evidence, label, required) {
   const art = evidence.openingArt;
   if (!art) throw new Error(`${label} captured no opening art evidence`);
+  for (const role of required) {
+    if (!art[role]) {
+      throw new Error(`${label} expected to render its ${role} but none was found — the selector no longer matches`);
+    }
+  }
   for (const [role, image] of Object.entries({ splash: art.splash, scenePlate: art.scenePlate })) {
     if (!image) continue;
     if (!image.complete || image.naturalWidth <= 0) {
@@ -994,7 +1002,7 @@ function assertOpeningArt(evidence, label) {
     }
   }
   const portal = art.portal;
-  if (!portal) return;
+  if (!portal) return; // Not mounted in this state; presence is enforced via `required` above.
   if (!portal.hasGradientFallback) {
     throw new Error(`${label} portal lost its gradient fallback: ${portal.backgroundImage}`);
   }
@@ -1017,12 +1025,12 @@ async function runOpeningVisualMatrix(page, summary) {
     summary.evidence.openingVisualMatrix.viewports[viewport.id] = viewportEvidence;
 
     viewportEvidence.states.splash = await openingStateEvidence(page, `${viewport.id} splash`);
-    assertOpeningArt(viewportEvidence.states.splash, `${viewport.id} splash`);
+    assertOpeningArt(viewportEvidence.states.splash, `${viewport.id} splash`, ['splash']);
     await captureEvidence(page, summary, `${viewport.id}_splash`);
     await clickByText(page, 'Assume Responsibility');
     await waitForOpeningScene(page, 'neutral');
     viewportEvidence.states.landing = await openingStateEvidence(page, `${viewport.id} neutral landing`);
-    assertOpeningArt(viewportEvidence.states.landing, `${viewport.id} neutral landing`);
+    assertOpeningArt(viewportEvidence.states.landing, `${viewport.id} neutral landing`, ['scenePlate', 'portal']);
     await captureEvidence(page, summary, `${viewport.id}_neutral_landing`);
 
     await clickByText(page, 'New War');
@@ -1050,7 +1058,7 @@ async function runOpeningVisualMatrix(page, summary) {
       viewportEvidence.transitionTraces[faction] = trace;
       viewportEvidence.previews[faction] = await sceneGeometry(page, 'preview');
       viewportEvidence.states[`${faction}Preview`] = await openingStateEvidence(page, `${viewport.id} ${faction} preview`);
-      assertOpeningArt(viewportEvidence.states[`${faction}Preview`], `${viewport.id} ${faction} preview`);
+      assertOpeningArt(viewportEvidence.states[`${faction}Preview`], `${viewport.id} ${faction} preview`, ['scenePlate', 'portal']);
       await captureEvidence(page, summary, `${viewport.id}_${faction.toLowerCase()}_preview`);
     }
 
@@ -1098,7 +1106,7 @@ async function runOpeningVisualMatrix(page, summary) {
   const reducedTrace = await stopOpeningPhaseTrace(page);
   assertOpeningTraceCoverage(reducedTrace, 'reduced-motion RBiH', true);
   const reducedState = await openingStateEvidence(page, 'reduced-motion preview');
-  assertOpeningArt(reducedState, 'reduced-motion preview');
+  assertOpeningArt(reducedState, 'reduced-motion preview', ['scenePlate', 'portal']);
   summary.evidence.openingVisualMatrix.reducedMotion = {
     state: reducedState,
     trace: reducedTrace,
