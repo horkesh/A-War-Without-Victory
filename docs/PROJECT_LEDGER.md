@@ -30287,3 +30287,27 @@ mutation: deleting any one of the three suppression rules now fails the suite.
 `assertNoConsoleErrors` on `deck: Failed to fetch` from the Vite deck.gl dep bundle during its
 per-viewport reloads. A control run on the authorized base commit `188f6e5d6` reproduced the same
 failure, so it is pre-existing and was deliberately not "fixed" here; a later re-run passed clean.
+
+## 2026-08-29 — Faction crests replace flags in the opening
+
+**Behavioral/output change:** The opening's faction selector rail and dossier header now show the
+faction crests (`crest_RBiH`, `crest_RS`, `crest_HRHB`) instead of the flags. `MainMenu.tsx` swaps
+`getFactionFlag` for the already-existing `getFactionCrest`; no new lookup, registry, or asset was
+added, and the crest files were already bundled.
+
+**Why the CSS moved too:** the crests are 1:1 with alpha (1024×1024) where the flags were 3:2
+(1536×1024). The existing boxes were ~1.6:1 with `object-fit: cover`, which would have cropped
+roughly a third off the top and bottom of each shield. `.faction-rail__flag` and
+`.command-dossier__flag` are therefore renamed to `__crest` and reshaped to square with
+`object-fit: contain`, and their borders are dropped — a hairline rectangle around a transparent
+shield reads as a box rather than a crest — with a small drop-shadow instead so they sit on the dark
+panel. No test referenced the old class names.
+
+**Scope:** the opening only. `SidePickerOverlay.tsx`, `WarSummaryContent.tsx` and
+`SelectionPanel.tsx` still use `getFactionFlag` and are unchanged; the map's settlement-control
+indicator in particular is better served by a wide flag at that size than by a shield.
+
+**Verification:** whole `tests/ui` boundary 340 files / 2901 tests, exit 0; `npx tsc --noEmit`
+exit 0; `npm run desktop:map:build` exit 0. Rendered and measured in headless Chrome: rail crest
+40×40 CSS px and dossier crest 58×58, both `object-fit: contain` over 1024×1024 sources, drawing
+`crest_RBiH.webp` and `crest_RS.webp` respectively — confirmed uncropped rather than assumed.

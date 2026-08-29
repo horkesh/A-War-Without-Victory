@@ -3,7 +3,7 @@ import { Z } from '../../shared/zIndex';
 import { SUPPORTED_LOCALES, t, useLocale, type Locale, type MessageKey } from '../i18n';
 import { useIPC } from '../desktop/useIPC';
 import type { SaveRecord, StartNewCampaignPayload } from '../desktop/types';
-import { getArmyName, getFactionFlag } from '../utils/factionAssets';
+import { getArmyName, getFactionCrest } from '../utils/factionAssets';
 import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
 import { turnToDateString } from '../utils/formatters';
@@ -224,7 +224,7 @@ function FactionChoices({ starting, selectedFaction, showBack, onSelect, onBack 
         <p className="faction-rail__help">{t('mainMenu.chooseFactionHelp')}</p>
         <div className="faction-rail__choices">{FACTIONS.map((faction, index) => <button key={faction} type="button" data-testid={`main-menu-faction-${faction}`} disabled={starting} aria-pressed={selectedFaction === faction} onClick={() => onSelect(faction)} className="faction-rail__choice" aria-label={`${sidePickerFactionLabel(faction)} — ${t(DOSSIERS[faction].descriptor)}`}>
             <span className="faction-rail__index">0{index + 1}</span>
-            {getFactionFlag(faction) && <img src={getFactionFlag(faction)} alt="" className="faction-rail__flag" />}
+            {getFactionCrest(faction) && <img src={getFactionCrest(faction)} alt="" className="faction-rail__crest" />}
             <span className="faction-rail__label"><strong>{sidePickerFactionLabel(faction)}</strong><small>{getArmyName(faction)}</small></span>
             <span aria-hidden="true" className="faction-rail__marker">{selectedFaction === faction ? '●' : '○'}</span>
         </button>)}</div>
@@ -245,7 +245,7 @@ function FactionDossier({ faction, onBack, onTakeCommand, primaryActionRef }: { 
     const rows = [['mainMenu.dossier.yourWar', dossier.war], ['mainMenu.dossier.youBegin', dossier.begin], ['mainMenu.dossier.constraint', dossier.constraint], ['mainMenu.dossier.arc', dossier.arc]] as const;
     return <article className="command-dossier">
         <div className="command-dossier__header">
-            {getFactionFlag(faction) && <img src={getFactionFlag(faction)} alt="" className="command-dossier__flag" />}
+            {getFactionCrest(faction) && <img src={getFactionCrest(faction)} alt="" className="command-dossier__crest" />}
             <div><div className="command-eyebrow">{t('mainMenu.commandBrief')}</div><h2>{sidePickerFactionLabel(faction)}</h2><p>{t(dossier.descriptor)}</p></div>
         </div>
         <div className="command-dossier__rows">{rows.map(([label, body]) => <section key={label}><h3>{t(label)}</h3><p>{t(body)}</p></section>)}</div>
