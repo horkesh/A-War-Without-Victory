@@ -30510,3 +30510,65 @@ unproven mechanism is precisely the move the stop conditions exist to prevent.
 **Next step, precisely scoped:** settling this needs one instrumented probe run capturing per-request
 cache state from inside probe mode. That is a retry, which the lane forbids without a deliberate
 amendment, so it is an owner decision rather than something to slip in. Parked, not abandoned.
+
+## 2026-08-29 — Baseline drift attributed; jan1993 lane is BELOW its floor
+
+Local `npm run test:baselines` on pinned Node 22.21.1 at `47d6d9358`, exit 1. Independently
+verified, not relayed.
+
+**Raw result.** `apr1992_188w` 8/8 artifacts mismatch; `apr1992_52w` 8/8; `baseline_ops_4w` and
+`noop_4w` clean. The master 188w is drifted, not only the second-horizon 52w — an earlier note in
+this ledger framed it as 52w-centric and that framing was wrong.
+
+**Mechanism, committed rather than inferred.** `037396e3c` ("enforce operation planning ownership")
+also regenerated `data/derived/startup/apr_1992_initial_save.json`, changing five
+`planning_duration` values `1 -> 3` or `1 -> 4`: Operations Herzegovina, Prijedor, Drina, Višegrad
+and Prsten. That is the whole VRS April–May 1992 opening with its planning window multiplied 3–4x at
+turn 0, on both apr1992 scenarios. Only Operation Koridor (9) is unchanged. The file is an OUTPUT
+with no headless consumer, so it did not cause the drift — it is a committed photograph of it.
+
+**FLOOR BREACH — the actual finding.** `tools/engine_health_gate.cjs --horizon 188w` on the fresh
+run: **`[FAIL] checkpoint_jan1993 688 >= 694`**, gate FAIL. Everything else passes — matched_osids
+633, apr1994 656, apr1995 654, oct1995 633, stranded 18, ghost 1, consistency 0, k:w 3.683. jan1993
+is the ACTIVE lane under the 2026-08-26 sequential-calibration directive and the one pinned tight;
+the other three pass only because they are pinned loose as uncalibrated. So the gate fails exactly
+where it is built to be sensitive. Against the reference the floors were set from (n374, 697) it is
+-9.
+
+**Enclave guard INTACT.** `verify_checkpoints.cjs` records 9/9: Goražde, Bihać, Teočak and all four
+Sarajevo-core cells hold; Srebrenica and Žepa fall on schedule. Its exit 1 comes solely from the
+Operation Farz / "Uragan 95" discriminator, which CALIBRATION_MASTER already carves out as separate
+known-red. **This is not a §6 breach** and must not be reported as one — the tool's result string is
+generic and in this case it is Farz speaking.
+
+**Attribution is unavailable at rung 4.** `op_schedule_diff` against n382 reports 48 vs 40
+operations and 44/66 differing at corps+objectives = 66.7%, far past the 20% threshold at which
+CALIBRATION_MASTER declares a checkpoint delta unattributable. Ops-only attack doctrine plus
+planning-ownership IS a structural change to operation selection, so this is expected and re-running
+will not fix it. Caveat: n382 is Node 24 at `92e4df660`, so that pair spans more than the six
+commits and 66.7% is an upper bound.
+
+**Ruling: do NOT re-reconcile the manifest, and specifically not from this branch.** The one-time
+reconcile authority was spent at `8511512f9` (exactly 19 hashes, 2026-08-27); all six sim commits
+land after it. CALIBRATION_MASTER line 11 grants RE no calibration tuning. Refreshing a golden from
+a UI branch that touches zero sim files would launder six commits' behavioural change into a place
+nobody would look for it. The UI branch red is INHERITED and the branch is not blocked on an engine
+attribution it cannot perform.
+
+**Correction to the analysis received.** The scenario ruling quoted CALIBRATION_MASTER as saying
+verbatim "RE performs no calibration tuning and may not refresh thresholds, manifests, references,
+or expected hashes to make a gate pass." **That sentence is not in the file** — greps for "may not
+refresh", "expected hashes" and "RE performs no" return nothing. The conclusion survives on line 11
+plus the spent authority, but the quotation is a paraphrase presented as a quote and is recorded
+here as such.
+
+**52w stays.** Only `apr1992_definitive_188w.json` carries `calibration_scenario`, so 188w is
+already the sole master and 52w costs it nothing. The 52w FILE cannot be retired at all:
+`src/scenario/startup_snapshot.ts:18` pins it and that snapshot is what the desktop New Campaign
+path loads. Its manifest entry is the only one besides 188w that exercises combat — `baseline_ops_4w`
+and `noop_4w` carry no `init_control`, formations or territory, so their green detects nothing.
+
+**Next step is attribution, not tuning**, which plan step 11 requires, so the calibration pause does
+not block it: one 188w pair around `0f341929a` / `037396e3c`, then `op_schedule_diff` and
+`verify_checkpoints` between them, to settle whether those five planning windows are the whole -6.
+Held pending owner authorisation; two 188-week runs is a real commitment.
