@@ -73,12 +73,31 @@ describe('Event timeline historical integrity', () => {
         expect(zepa.trigger.requires_events).toContain('srebrenica_falls_1995');
     });
 
+    it('forms the Srebrenica pocket from local Drina control truth, not a global share or withdrawal flag', () => {
+        const formation = allEvents.find((e: any) => e.id === 'srebrenica_enclave_forms_1992');
+        expect(formation.trigger.condition).toEqual({
+            type: 'and',
+            conditions: [
+                { type: 'territory_control', osid: 'op:srebrenica:srebrenica_2', faction: 'RBiH' },
+                { type: 'territory_control', osid: 'op:zvornik:zvornik', faction: 'RS' },
+                { type: 'territory_control', osid: 'op:bratunac:bratunac_2', faction: 'RS' },
+            ],
+        });
+        expect(JSON.stringify(formation.trigger.condition)).not.toContain('territory_percentage');
+        expect(JSON.stringify(formation.trigger.condition)).not.toContain('jna_withdrawn');
+    });
+
     it('Srebrenica and Zepa fall rows are event-authored territorial receipts', () => {
         const srebrenica = allEvents.find((e: any) => e.id === 'srebrenica_falls_1995');
         const zepa = allEvents.find((e: any) => e.id === 'zepa_falls_1995');
 
         expect(srebrenica.trigger.turn_min).toBe(160);
         expect(srebrenica.pressure?.threshold).toBe(8);
+        expect(srebrenica.trigger.condition.conditions).toContainEqual({
+            type: 'territory_control',
+            osid: 'op:srebrenica:srebrenica_2',
+            faction: 'RBiH',
+        });
         const srebrenicaControl = (srebrenica.effects ?? []).find((effect: any) => effect.kind === 'control_change');
         expect(srebrenicaControl?.faction).toBe('RS');
         expect(srebrenicaControl?.osids).toContain('op:srebrenica:srebrenica_2');
@@ -87,6 +106,11 @@ describe('Event timeline historical integrity', () => {
 
         expect(zepa.trigger.turn_min).toBe(160);
         expect(zepa.pressure?.threshold).toBe(6);
+        expect(zepa.trigger.condition).toEqual({
+            type: 'territory_control',
+            osid: 'op:rogatica:zepa_2',
+            faction: 'RBiH',
+        });
         const zepaControl = (zepa.effects ?? []).find((effect: any) => effect.kind === 'control_change');
         expect(zepaControl?.faction).toBe('RS');
         expect(zepaControl?.osids).toEqual(['op:rogatica:zepa_2']);

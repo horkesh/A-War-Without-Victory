@@ -436,6 +436,73 @@ test('evaluateEvents: Srebrenica and Zepa falls write event-owned control receip
     assert.strictEqual(state.operation_history, undefined);
 });
 
+test('evaluateEvents: Srebrenica pocket formation uses local control truth below 48 percent RS', () => {
+    const formation = loadedEventById('srebrenica_enclave_forms_1992');
+    const state = minimalState('war', 6);
+    state.political.political_controllers = {
+        'op:srebrenica:srebrenica_2': 'RBiH',
+        'op:zvornik:zvornik': 'RS',
+        'op:bratunac:bratunac_2': 'RS',
+        ...Object.fromEntries(Array.from({ length: 20 }, (_, index) => [`op:test:r${index}`, 'RBiH'])),
+    };
+    seedEventReadiness(state, formation);
+
+    const result = evaluateEvents(state, rejectRandomness, 6, [formation]);
+
+    assert.deepStrictEqual(result.fired.map((event) => event.id), ['srebrenica_enclave_forms_1992']);
+    assert.strictEqual(state.military.event_flags?.srebrenica_enclave_formed, true);
+});
+
+test('evaluateEvents: each local Srebrenica pocket fact is required', () => {
+    const formation = loadedEventById('srebrenica_enclave_forms_1992');
+    const canonical = {
+        'op:srebrenica:srebrenica_2': 'RBiH',
+        'op:zvornik:zvornik': 'RS',
+        'op:bratunac:bratunac_2': 'RS',
+    } as const;
+    const mutations = [
+        ['op:srebrenica:srebrenica_2', 'RS'],
+        ['op:zvornik:zvornik', 'RBiH'],
+        ['op:bratunac:bratunac_2', 'RBiH'],
+    ] as const;
+
+    for (const [osid, controller] of mutations) {
+        const state = minimalState('war', 6);
+        state.political.political_controllers = { ...canonical, [osid]: controller };
+        seedEventReadiness(state, formation);
+        const result = evaluateEvents(state, rejectRandomness, 6, [formation]);
+        assert.deepStrictEqual(result.fired, [], `${osid} mutation must block formation`);
+    }
+});
+
+test('evaluateEvents: safe-area fall receipts require the enclave capital still be RBiH-held', () => {
+    const srebrenica = loadedEventById('srebrenica_falls_1995');
+    const zepa = loadedEventById('zepa_falls_1995');
+
+    const srebrenicaState = minimalState('war', 160);
+    srebrenicaState.military.event_flags = {
+        srebrenica_enclave_formed: true,
+        srebrenica_demilitarized: true,
+    };
+    srebrenicaState.political.political_controllers = {
+        'op:srebrenica:srebrenica_2': 'RS',
+    };
+    seedEventReadiness(srebrenicaState, srebrenica);
+    assert.deepStrictEqual(
+        evaluateEvents(srebrenicaState, rejectRandomness, 160, [srebrenica]).fired,
+        [],
+    );
+
+    const zepaState = minimalState('war', 161);
+    zepaState.military.fired_event_ids = ['srebrenica_falls_1995'];
+    zepaState.political.political_controllers = { 'op:rogatica:zepa_2': 'RS' };
+    seedEventReadiness(zepaState, zepa);
+    assert.deepStrictEqual(
+        evaluateEvents(zepaState, rejectRandomness, 161, [zepa]).fired,
+        [],
+    );
+});
+
 test('evaluateEvents: recurrence cooldown-blocked event is excluded before overflow accounting', () => {
     const state = minimalState('war', 30);
     state.military.event_last_fired_turn = { blocked_by_cooldown: 29 };

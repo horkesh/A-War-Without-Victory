@@ -3974,15 +3974,19 @@
         "type": "and",
         "conditions": [
           {
-            "type": "territory_percentage",
-            "faction": "RS",
-            "comparator": "above",
-            "threshold": 0.48
+            "type": "territory_control",
+            "osid": "op:srebrenica:srebrenica_2",
+            "faction": "RBiH"
           },
           {
-            "type": "flag_equals",
-            "flag": "jna_withdrawn",
-            "value": true
+            "type": "territory_control",
+            "osid": "op:zvornik:zvornik",
+            "faction": "RS"
+          },
+          {
+            "type": "territory_control",
+            "osid": "op:bratunac:bratunac_2",
+            "faction": "RS"
           }
         ]
       }
