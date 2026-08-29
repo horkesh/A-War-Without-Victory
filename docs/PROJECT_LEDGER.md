@@ -30477,3 +30477,36 @@ amendment to consider is narrow: either the probe ignores `net::ERR_CACHE_MISS` 
 font`, or its session is given a cache so the revalidation can succeed. Recorded, not actioned.
 
 No engine, scenario, calibration, canon or RE governance file was modified.
+
+## 2026-08-29 — RE font-failure mechanism: hypotheses tested and FALSIFIED, question parked
+
+Follow-up to the packaged-probe verdict above. The 8 `net::ERR_CACHE_MISS` font failures remain
+**unexplained**; two candidate mechanisms were tested and both failed.
+
+**Hypothesis 1 — two documents request the same fonts.** The probe labelled the failures
+`webContents:2`, and 8 failures against 4 mono `.woff2` files suggested one fetch per document, with
+the second document hitting a 304 (`buildPackagedFileCacheHeaders` marks `/assets/` content-hashed
+files `public, max-age=31536000, immutable`, and `buildStaticFileResponseMetadata` returns 304 on a
+matching `If-None-Match`) while its own cache partition lacked the body. **FALSIFIED:** only
+`dist/tactical-map/assets/tactical_map-*.css` declares the IBM Plex faces. The warroom shell loads
+`main-*.css`, which does not. There is no second declaring document.
+
+**Hypothesis 2 — probe mode loads the window twice.** **FALSIFIED:** `runPackagedRuntimeProbe`
+creates one window via `createMainWindow` and one `waitForWindowLoad`. `webContents:2` is the
+embedded tactical-map iframe, not a second load.
+
+**Instrumentation that produced nothing, recorded so it is not repeated.** Three harnesses returned
+no usable data and their silence must not be read as evidence: a synthetic-span width comparison and
+a real-element width comparison both measured 0 px for every element including a known-rendered
+title; a `page.on('response'/'requestfailed')` listener on the top page observed 0 font events,
+because the tactical-map iframe is a separate target its listeners never reach.
+
+**Position.** The packaged runtime is healthy on the evidence that does hold — `document.fonts.load()`
+reports `1 face(s) loaded` for both families, status flips `unloaded → loaded`, a plain launch shows
+0 font request failures, and first-paint renders correct IBM Plex. But the probe's failure is real
+and its cause is unknown, so **no amendment was written**. Weakening the probe's criterion on an
+unproven mechanism is precisely the move the stop conditions exist to prevent.
+
+**Next step, precisely scoped:** settling this needs one instrumented probe run capturing per-request
+cache state from inside probe mode. That is a retry, which the lane forbids without a deliberate
+amendment, so it is an owner decision rather than something to slip in. Parked, not abandoned.
