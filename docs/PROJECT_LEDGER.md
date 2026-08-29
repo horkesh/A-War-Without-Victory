@@ -30187,3 +30187,15 @@ cassette/reel recorder, and analogue clocks.
 rooms already follow the selected analogue direction and remain unchanged. No code, assets,
 mechanics, tests, simulation, engine, state, IPC, RE, probe, calibration, or canon content changed.
 `FORAWWV.md` was not edited.
+
+## 2026-08-29 — Reserve prompt B upper-right language-control safe zone
+
+**Owner review correction:** The neutral monitoring-room prompt now reserves upper-right x 78–96%,
+y 5–24% as uninterrupted plain low-contrast matte wall for the language UI. That zone rejects wall
+clocks, lamps, antennas, frames, shelving, cables, equipment, fixtures, highlights, bright circular
+objects, ornaments, and other UI-safe-zone clutter. Analogue clocks remain permitted elsewhere.
+Composition, equipment, physical map, practical lighting, analogue-first direction, and prompts A,
+C, and D are unchanged.
+
+Documentation-only owner-art guidance; no code, assets, mechanics, roadmap status, engine, state,
+IPC, RE, probe, calibration, or canon content changed. `FORAWWV.md` was not edited.
