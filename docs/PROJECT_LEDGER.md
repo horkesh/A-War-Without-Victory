@@ -30311,3 +30311,46 @@ indicator in particular is better served by a wide flag at that size than by a s
 exit 0; `npm run desktop:map:build` exit 0. Rendered and measured in headless Chrome: rail crest
 40×40 CSS px and dossier crest 58×58, both `object-fit: contain` over 1024×1024 sources, drawing
 `crest_RBiH.webp` and `crest_RS.webp` respectively — confirmed uncropped rather than assumed.
+
+## 2026-08-29 — R7 packaged first-paint attempted: one defect fixed, one deeper defect found and NOT fixed
+
+**Authorization and route.** The owner authorized closing the two gates left open by the
+opening-art packet. This used `npm run desktop:package:dir` (plain `electron-builder --dir`) plus a
+direct launch of the resulting executable. It is **not** the RE packaged-probe route:
+`tools/desktop_packaged_runtime_probe.mjs` was never run, `AWWV_DESKTOP_RUNTIME_PROBE` was never
+set, no probe manifest was produced, and RE remains BLOCKED at P2B with no credit from this.
+
+**Defect 1 — packaged app dead on startup. FIXED.** The main process threw
+`Error: Cannot find module './field_command.cjs'` before creating any window, showing only a
+JavaScript-error dialog. `src/desktop/field_command.cjs` was absent from the electron-builder
+`build.files` allow-list while `op_halt.cjs`, `op_directive_staging.cjs` and `co_replacement.cjs`
+all require it. Pre-existing: the file is present at the authorized base and was never listed, and
+the opening-art work touched neither `package.json` nor `src/desktop/`. Fixed by adding the entry,
+then verified by walking the require closure of every listed `src/desktop` entry — no module now
+exists on disk while absent from the allow-list.
+
+**Defect 2 — the production bundle does not boot. NOT FIXED; packaged first-paint REMAINS OPEN.**
+With the app launching, the tactical-map iframe serves its built bundle correctly (HTTP 200,
+741,115 bytes) but `#root` stays empty and React never mounts, so after its eight-second timeout the
+host falls back to the legacy "Command Post" menu. The player never sees the cinematic opening in a
+packaged build. Forcing the bundle to import surfaces the cause:
+`ReferenceError: Cannot access 'ir' before initialization` at
+`assets/feature-army-hq-forces-*.js`, a temporal-dead-zone fault from a circular dependency across
+Vite's manual chunk split. **Confirmed pre-existing by control:** checking out the authorized base
+`188f6e5d6`, rebuilding (`desktop:map:build` exit 0) and loading the built bundle over a plain
+static server reproduces the identical error with React unmounted. Root-causing the chunk cycle is
+a separate lane and was not attempted here.
+
+**Correction to this packet's earlier verification claims.** The five-viewport browser matrix runs
+against the **Vite dev server**, which does not chunk-split, so it exercised dev, not the production
+bundle. `npm run desktop:map:build` exiting 0 means the bundle **built**, not that it **runs** —
+this entry is the first evidence that it does not. The browser-gate evidence for the opening art
+stands on its own terms and is unaffected by defect 2, but it must not be read as production-bundle
+proof. A build-output boot check is the missing gate.
+
+**Independent architecture review — COMPLETE, verdict GO.** Two earlier reviewers never returned a
+verdict; a third did. It verified import-path resolution, single-source-of-truth for each art
+constant, unchanged state/timing ownership, determinism, and the crest swap's completeness, and
+found no blocking defects. Its one non-blocking finding — that `assertOpeningArt` skipped its own
+checks when a selector matched nothing — is fixed in `1a5237e7e`. The earlier ledger text recording
+that gate as open is superseded by this entry.

@@ -99,8 +99,10 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
   mechanics, unified typography, and the five-viewport browser proof are complete, and the two
   required analogue-first owner plates (splash and neutral monitoring room) are integrated, so that
   art gate is CLOSED. The separately approved atmospheric map-portal texture is also integrated; it
-  is decorative terrain relief, not a gameplay map and not faction/control truth. Live
-  packaged-Electron first-paint acceptance remains open. Human listen/sensitivity, broader
+  is decorative terrain relief, not a gameplay map and not faction/control truth. Live packaged-Electron first-paint acceptance was RUN on 2026-08-29 and FAILS: the packaged app
+  was dead on startup on a missing `build.files` entry (fixed), and under it the production bundle
+  does not boot (`Cannot access 'ir' before initialization`), so the opening never renders in a
+  packaged build. Both pre-existing; the second is confirmed at base and unfixed. Human listen/sensitivity, broader
   English accessibility/readability, and closeout reconciliation remain open. Multilingual
   localization remains post-1.0.
 - **Full-suite residual outside the R7 UI slice:** the canonical balanced run is red only on five
