@@ -30430,3 +30430,50 @@ this branch's authority nor currently authorized for the RE lane. The reconcile 
 investigation, if the movement turns out to be unintended — belongs to the RE lane owner, one change
 at a time, validated at 188w rather than 40w. Recorded here so the next person does not re-diagnose
 it or silently re-bless it.
+
+## 2026-08-29 — RE: packaged probe RUN and returned a real verdict; fails on font ERR_CACHE_MISS
+
+**Owner change.** RE lane ownership passed to this session. First act was to settle the base
+question and spend one packaged-probe invocation.
+
+**Base decision.** `codex/re-engine-integrity-repaired` sits at `8420aad13`, which is a strict
+ancestor of `codex/ui-typography-overhaul` (36 commits of prior UI work, then 9 of this packet).
+**RE's next lock must bind the UI branch tip, not `8420aad13`**, for two independent reasons: the
+Army-HQ chunk fix that satisfies RE's prerequisite lives only on the UI branch, and `src/ui/map/App.tsx`
+— a named P2B production file — has already moved under `3e9c8541b`, `5151dae6a`, `bc4c837a1`
+(campaign-opening handoff, none of them this packet's). A lock bound to the old base would be
+pinned to a stale `App.tsx` and would conflict on contact. P2B itself is confirmed unimplemented:
+`OperationBriefingModal.tsx` still exists and `stage-operation-decision` still has two references.
+
+**Prerequisite hypothesis CONFIRMED, and its scope was right.** The plan recorded "known historical
+TDZ risk remains unresolved and non-authorizing". That TDZ is now proven: the Army-HQ manual chunk
+split produced `Cannot access 'ir' before initialization`, and collapsing it makes the bundle boot.
+Proven from the UI lane at zero probe cost. An explicit control was run against RE's *authorised*
+narrow scope — collapse the Army-HQ split only, leave every other source chunk — and it **boots**,
+with 7 latent cycles remaining that do not throw. So the prerequisite was correctly scoped; a
+prediction that it was too narrow was tested and **falsified**.
+
+**Probe result — one invocation, no retries.** Pinned Node `22.21.1`, SHA-256 verified
+`471961cb…52e8b3`, invoked through the pinned sibling `npm.cmd` with that directory prepended to
+`PATH`; `node` confirmed resolving to the pinned binary. Base `94fb3b832`. The probe **ran to a real
+verdict rather than another `NO_VERDICT`** — a material improvement on the consumed prerequisite,
+which never got a manifest. It exited 1 with
+`AWWV_DESKTOP_RUNTIME_PROBE_FAIL packaged runtime probe captured renderer/network failures`:
+**8 failures, all `net::ERR_CACHE_MISS`, all `resource_type: font`**, on the bundled IBM Plex woff2
+files.
+
+**Those failures do not reproduce outside the probe.** A plain packaged launch of the same build
+observed **0** font request failures, and `document.fonts.load()` returned `1 face(s) loaded` for
+both `400 16px "IBM Plex Mono"` and `600 16px "IBM Plex Sans Condensed"`, with their `FontFace`
+status flipping `unloaded → loaded`. First-paint screenshots of the same build show correctly
+typeset IBM Plex. A width-comparison test was attempted as further proof and is **discarded as
+inconclusive** — the harness returned 0 for every element measured, including a known-rendered
+title, so it measured nothing.
+
+**Reading:** the packaged runtime is healthy; the probe's pass criterion currently treats
+cache-dependent font revalidation in its own session as a runtime failure. This is a stop condition
+("scope outside a packet boundary … need for amendment"), so no fix was improvised. The bounded
+amendment to consider is narrow: either the probe ignores `net::ERR_CACHE_MISS` for `resource_type:
+font`, or its session is given a cache so the revalidation can succeed. Recorded, not actioned.
+
+No engine, scenario, calibration, canon or RE governance file was modified.
