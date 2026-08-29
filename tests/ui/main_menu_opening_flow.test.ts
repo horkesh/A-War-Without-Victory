@@ -4,8 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createElement, useState, type ComponentProps } from 'react';
 import { readFileSync } from 'node:fs';
-import { MainMenu } from '../../src/ui/map/components/MainMenu';
+import { MainMenu, OPENING_MONITORING_ROOM_ASSET } from '../../src/ui/map/components/MainMenu';
 import { setLocale } from '../../src/ui/map/i18n';
+import { OPENING_WARROOM_SCENES } from '../../src/ui/map/components/opening/openingScenes';
 
 function renderMenu(onNewGame = vi.fn()) {
     render(createElement(MainMenu, {
@@ -95,6 +96,38 @@ describe('MainMenu cinematic opening flow', () => {
         fireEvent.click(screen.getByRole('button', { name: /Back/ }));
         fireEvent.click(screen.getByRole('button', { name: 'New War' }));
         expect(openingScene()).toBe('neutral');
+    });
+
+    it('shows the approved neutral monitoring room rather than the retired transparent placeholder', () => {
+        renderMenu();
+        dismissSplash();
+
+        expect(OPENING_MONITORING_ROOM_ASSET).toContain('opening_monitoring_room_neutral');
+        expect(OPENING_MONITORING_ROOM_ASSET).not.toContain('data:image/gif;base64');
+        expect(openingScene()).toBe('neutral');
+        const plate = screen.getByTestId('warroom-scene-plate').querySelector('img');
+        expect(plate?.getAttribute('src')).toBe(OPENING_MONITORING_ROOM_ASSET);
+
+        const source = readFileSync('src/ui/map/components/MainMenu.tsx', 'utf8');
+        expect(source).toContain('assets/opening/opening_monitoring_room_neutral.webp');
+        expect(source).not.toContain('R0lGODlhAQABAAD');
+    });
+
+    it('keeps the selected faction plate after selection and never shows it before', () => {
+        renderMenu();
+        dismissSplash();
+        const neutralPlate = () => screen.getAllByTestId('warroom-scene-plate')[0].querySelector('img');
+        expect(neutralPlate()?.getAttribute('src')).toBe(OPENING_MONITORING_ROOM_ASSET);
+
+        fireEvent.click(screen.getByRole('button', { name: 'New War' }));
+        expect(openingScene()).toBe('neutral');
+        expect(neutralPlate()?.getAttribute('src')).toBe(OPENING_MONITORING_ROOM_ASSET);
+
+        fireEvent.click(screen.getByTestId('main-menu-faction-RS'));
+        expect(openingScene()).toBe('RS');
+        const sources = screen.getAllByTestId('warroom-scene-plate')
+            .map((plate) => plate.querySelector('img')?.getAttribute('src'));
+        expect(sources).toContain(OPENING_WARROOM_SCENES.RS.src);
     });
 
     it('preserves canonical faction order and explicit selected semantics', () => {

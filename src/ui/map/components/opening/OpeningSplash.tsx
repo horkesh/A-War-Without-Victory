@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import splashFallback from '../../../warroom/assets/hq_presidential_desk_1992.webp';
+import openingSplashNeutral from '../../assets/opening/opening_splash_neutral.webp';
 
-// Owner art gate: replace this single value with opening_splash_neutral_master.
-export const OPENING_SPLASH_ART = splashFallback;
+// Approved owner art (opening_splash_neutral_master, 2752x1536). Closes the splash art gate.
+export const OPENING_SPLASH_ART = openingSplashNeutral;
 
 interface OpeningSplashProps {
   title: string;

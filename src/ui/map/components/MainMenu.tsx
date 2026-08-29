@@ -10,6 +10,7 @@ import { turnToDateString } from '../utils/formatters';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 import { OpeningCinematicLayer } from './opening/OpeningCinematicLayer';
 import { OpeningSplash } from './opening/OpeningSplash';
+import openingMonitoringRoomNeutral from '../assets/opening/opening_monitoring_room_neutral.webp';
 
 interface MainMenuProps {
     hasSave: boolean;
@@ -29,9 +30,9 @@ type DecisionMode = StartNewCampaignPayload['decisionMode'];
 
 const FACTIONS: PlayerFaction[] = ['RBiH', 'RS', 'HRHB'];
 
-// Owner art gate: replace this single transparent source with opening_monitoring_room_neutral_master.
-// The visible interim monitoring room is deliberately CSS-built in globals.css.
-export const OPENING_MONITORING_ROOM_ASSET = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+// Approved owner art (opening_monitoring_room_neutral_master, 2752x1536). Closes the neutral-room art gate.
+// The CSS-built monitoring room in globals.css stays underneath as recovery-only fallback.
+export const OPENING_MONITORING_ROOM_ASSET = openingMonitoringRoomNeutral;
 
 const DOSSIERS: Record<PlayerFaction, {
     descriptor: MessageKey;
