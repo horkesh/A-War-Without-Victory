@@ -1526,6 +1526,52 @@ function detectCrossCorpsSectorAssignment(state: GameState): AnomalyReport[] {
  *   for non-apr1992 starts WITHOUT mutating GameState (which would change final_state_hash).
  *   Defaults to 0 (apr1992 / unit-test fixtures), preserving existing behavior.
  */
+/**
+ * #26 — the Srebrenica/Zepa atrocity chain must not die silently.
+ *
+ * `srebrenica_enclave_formed` has exactly one setter: `sets_flags` on
+ * `srebrenica_enclave_forms_1992`, which can only fire inside turn_min 6 / turn_max 20.
+ * Every later link depends on it — the 1993 demilitarization arc, `srebrenica_falls_1995`,
+ * `zepa_falls_1995` (via requires_events), and `evaluateRuptureConsequences`, whose first
+ * statement is an unconditional early return on that flag. So if the window closes without
+ * the event, the genocide rupture becomes UNREACHABLE for the rest of the run: no fall, no
+ * condemnation, no grade cap — and no "Srebrenica Survives" counter-narrative either, since
+ * `csq_srebrenica_stalemate_1995` needs the same flag. The run contains only absence.
+ *
+ * That is not hypothetical. At `037396e3c` an operations-timing change dropped RS territory
+ * to 47.61% at w20 against a 48% threshold — short by three OSIDs and one week — and
+ * Srebrenica and Zepa stopped falling. Nothing detected it: no test, no typecheck, no CI
+ * gate. Only a hand-run `verify_checkpoints.cjs` caught it, and only because someone chose
+ * to run it. This detector exists so that failure is loud the next time.
+ */
+export function detectSrebrenicaChainBroken(state: GameState, scenarioStartWeek: number): AnomalyReport[] {
+    const ENCLAVE_EVENT = 'srebrenica_enclave_forms_1992';
+    const WINDOW_MAX_TURN = 20;
+
+    // Only meaningful once the run is past the window it could have fired in.
+    if (state.meta.turn <= WINDOW_MAX_TURN) return [];
+
+    const fired = state.military?.fired_event_ids ?? [];
+    if (fired.includes(ENCLAVE_EVENT)) return [];
+
+    // The apr1992 scenarios own this arc. A mid-war start that begins after the window
+    // never had the opportunity to fire it and must not be reported as broken.
+    if (scenarioStartWeek > WINDOW_MAX_TURN) return [];
+
+    return [{
+        category: 'timeline',
+        severity: 'critical',
+        type: 'srebrenica_chain_broken',
+        turn: state.meta.turn,
+        entities: [ENCLAVE_EVENT],
+        description: `${ENCLAVE_EVENT} never fired inside its turn 6-20 window, so `
+            + 'srebrenica_enclave_formed is unset and the entire Srebrenica/Zepa arc is now '
+            + 'unreachable for this run: no fall, no genocide rupture, no condemnation, no '
+            + 'grade cap, and no stalemate counter-narrative. This is silent by construction '
+            + '— check RS territory share across turns 6-20 against the event trigger.',
+    }];
+}
+
 export function runAnomalyDetection(state: GameState, scenarioStartWeek: number = 0): AnomalyReport[] {
     // Load OSID adjacency graph once for checks that need it (#13, #17).
     const adjacency = loadOsidAdjacency();
@@ -1543,6 +1589,8 @@ export function runAnomalyDetection(state: GameState, scenarioStartWeek: number 
         detectCasualtyRatio,
         detectPhantomSectorAdvantage,
         detectOperationZeroEligibleExecution,
+        // #26 — needs scenarioStartWeek; wrapped to preserve standard signature + output ordering
+        (s: GameState) => detectSrebrenicaChainBroken(s, scenarioStartWeek),
         // #13 and #17 need adjacency — handled separately below
         detectUnassignedFrontlineBrigades,
         detectRearBrigadesInSector,
