@@ -816,8 +816,30 @@ async function openingStateEvidence(page, label) {
         centerHit: hit === element || (hit instanceof Node && element.contains(hit)),
       }];
     });
+    const imageEvidence = (selector) => {
+      const image = document.querySelector(selector);
+      if (!(image instanceof HTMLImageElement)) return null;
+      return {
+        src: image.currentSrc || image.src,
+        complete: image.complete,
+        naturalWidth: image.naturalWidth,
+        naturalHeight: image.naturalHeight,
+      };
+    };
+    const portalElement = document.querySelector('.opening-cinematic__portal');
+    const portalStyle = portalElement instanceof HTMLElement ? getComputedStyle(portalElement) : null;
     return {
       viewport: { width: innerWidth, height: innerHeight },
+      openingArt: {
+        splash: imageEvidence('[data-testid="opening-splash-art"]'),
+        scenePlate: imageEvidence('[data-scene-state="current"] img'),
+        portal: portalStyle ? {
+          opacity: Number(portalStyle.opacity),
+          hasTexture: /url\(/.test(portalStyle.backgroundImage),
+          hasGradientFallback: /radial-gradient\(/.test(portalStyle.backgroundImage),
+          backgroundImage: portalStyle.backgroundImage.slice(0, 400),
+        } : null,
+      },
       horizontalOverflow: {
         document: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         body: document.body.scrollWidth - document.body.clientWidth,
@@ -937,9 +959,57 @@ async function enterOpeningLanding(page) {
   }, { timeout: 30000 });
 }
 
+function assertPortalVisibilityGate(trace, label, portalSuppressed) {
+  const opacities = trace
+    .map((sample) => sample.portalOpacity)
+    .filter((value) => typeof value === 'number');
+  if (opacities.length === 0) {
+    throw new Error(`${label} captured no portal opacity samples`);
+  }
+  const peak = Math.max(...opacities);
+  if (portalSuppressed) {
+    if (peak !== 0) {
+      throw new Error(`${label} must keep the map portal invisible but it reached opacity ${peak}`);
+    }
+    return { peakPortalOpacity: peak, expectation: 'suppressed' };
+  }
+  // Non-vacuity control: where the portal is enabled it must actually become visible,
+  // otherwise the suppressed-viewport assertion above proves nothing.
+  if (peak <= 0) {
+    throw new Error(`${label} never revealed the map portal, so the suppression gates are untested`);
+  }
+  return { peakPortalOpacity: peak, expectation: 'visible' };
+}
+
+function assertOpeningArt(evidence, label) {
+  const art = evidence.openingArt;
+  if (!art) throw new Error(`${label} captured no opening art evidence`);
+  for (const [role, image] of Object.entries({ splash: art.splash, scenePlate: art.scenePlate })) {
+    if (!image) continue;
+    if (!image.complete || image.naturalWidth <= 0) {
+      throw new Error(`${label} ${role} plate failed to load: ${JSON.stringify(image)}`);
+    }
+    if (/^data:/.test(image.src)) {
+      throw new Error(`${label} ${role} is still a placeholder data URI, not owner art`);
+    }
+  }
+  const portal = art.portal;
+  if (!portal) return;
+  if (!portal.hasGradientFallback) {
+    throw new Error(`${label} portal lost its gradient fallback: ${portal.backgroundImage}`);
+  }
+  if (!portal.hasTexture) {
+    throw new Error(`${label} portal is missing the map texture layer: ${portal.backgroundImage}`);
+  }
+  // Portal visibility is phase-dependent, so it is asserted from the animation
+  // trace in assertPortalVisibilityGate, not from this settled snapshot.
+}
+
 async function runOpeningVisualMatrix(page, summary) {
-  summary.evidence.openingVisualMatrix = { artStatus: 'fallback-art', viewports: {}, reducedMotion: null };
+  summary.evidence.openingVisualMatrix = { artStatus: 'owner-art', viewports: {}, reducedMotion: null };
   for (const viewport of OPENING_VISUAL_VIEWPORTS) {
+    // 700x900 trips max-width:720px; 1024x560 trips max-height:600px. Both suppress the portal.
+    const portalSuppressed = viewport.width <= 720 || viewport.height <= 600;
     await page.setViewport({ width: viewport.width, height: viewport.height, deviceScaleFactor: 1 });
     await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
     await enterOpeningLanding(page);
@@ -947,10 +1017,12 @@ async function runOpeningVisualMatrix(page, summary) {
     summary.evidence.openingVisualMatrix.viewports[viewport.id] = viewportEvidence;
 
     viewportEvidence.states.splash = await openingStateEvidence(page, `${viewport.id} splash`);
+    assertOpeningArt(viewportEvidence.states.splash, `${viewport.id} splash`);
     await captureEvidence(page, summary, `${viewport.id}_splash`);
     await clickByText(page, 'Assume Responsibility');
     await waitForOpeningScene(page, 'neutral');
     viewportEvidence.states.landing = await openingStateEvidence(page, `${viewport.id} neutral landing`);
+    assertOpeningArt(viewportEvidence.states.landing, `${viewport.id} neutral landing`);
     await captureEvidence(page, summary, `${viewport.id}_neutral_landing`);
 
     await clickByText(page, 'New War');
@@ -970,9 +1042,15 @@ async function runOpeningVisualMatrix(page, summary) {
       await waitForOpeningSceneGeometryStable(page);
       const trace = await stopOpeningPhaseTrace(page);
       assertOpeningTraceCoverage(trace, `${viewport.id} ${faction}`, false);
+      viewportEvidence.portalGate = assertPortalVisibilityGate(
+        trace,
+        `${viewport.id} ${faction}`,
+        portalSuppressed,
+      );
       viewportEvidence.transitionTraces[faction] = trace;
       viewportEvidence.previews[faction] = await sceneGeometry(page, 'preview');
       viewportEvidence.states[`${faction}Preview`] = await openingStateEvidence(page, `${viewport.id} ${faction} preview`);
+      assertOpeningArt(viewportEvidence.states[`${faction}Preview`], `${viewport.id} ${faction} preview`);
       await captureEvidence(page, summary, `${viewport.id}_${faction.toLowerCase()}_preview`);
     }
 
@@ -1019,9 +1097,12 @@ async function runOpeningVisualMatrix(page, summary) {
   await waitForOpeningSceneGeometryStable(page);
   const reducedTrace = await stopOpeningPhaseTrace(page);
   assertOpeningTraceCoverage(reducedTrace, 'reduced-motion RBiH', true);
+  const reducedState = await openingStateEvidence(page, 'reduced-motion preview');
+  assertOpeningArt(reducedState, 'reduced-motion preview');
   summary.evidence.openingVisualMatrix.reducedMotion = {
-    state: await openingStateEvidence(page, 'reduced-motion preview'),
+    state: reducedState,
     trace: reducedTrace,
+    portalGate: assertPortalVisibilityGate(reducedTrace, 'reduced-motion RBiH', true),
   };
   await captureEvidence(page, summary, 'reduced_motion_1366x768_rbih_preview');
 

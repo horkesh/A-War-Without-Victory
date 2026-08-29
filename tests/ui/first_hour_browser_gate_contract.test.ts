@@ -135,7 +135,14 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain("id: 'tablet-1024x768'");
     expect(tool).toContain("id: 'narrow-700x900'");
     expect(tool).toContain("id: 'short-1024x560'");
-    expect(tool).toContain("artStatus: 'fallback-art'");
+    expect(tool).toContain("artStatus: 'owner-art'");
+    expect(tool).not.toContain("artStatus: 'fallback-art'");
+    expect(tool).toContain('assertOpeningArt');
+    expect(tool).toContain('is still a placeholder data URI, not owner art');
+    expect(tool).toContain('portal lost its gradient fallback');
+    expect(tool).toContain('assertPortalVisibilityGate');
+    expect(tool).toContain('must keep the map portal invisible');
+    expect(tool).toContain('never revealed the map portal, so the suppression gates are untested');
     expect(tool).toContain('startOpeningPhaseTrace');
     expect(tool).toContain('requestAnimationFrame(sample)');
     expect(tool).toContain('assertOpeningTraceCoverage');

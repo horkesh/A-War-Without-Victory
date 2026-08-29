@@ -1,6 +1,6 @@
 # AWWV Warroom Master Reference
 
-**Updated:** 2026-08-28 (React-owned cinematic opening, exact Warroom continuity, unified typography, and fallback-art browser proof)
+**Updated:** 2026-08-29 (React-owned cinematic opening, exact Warroom continuity, unified typography, approved owner art, and the atmospheric map-portal texture)
 
 ## Current shell-transition contract
 
@@ -155,7 +155,7 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 |-----|-------------|--------|
 | Warroom smoke automation | “Load warroom → select map → no crash” is covered by unit test (desk_map click invokes tactical-map handler). Full browser/Electron smoke is manual or e2e. | Phase E deliverable |
 | Final opening art | Two required analogue-first neutral owner images remain: replace the splash constant/import in `OpeningSplash.tsx` and the monitoring-room constant/import in `MainMenu.tsx`. Use physical maps, paper records, telephones/radios/typewriter and practical map lighting; reject computers, CRTs, terminals, television displays, video walls, laptops, and futuristic display equipment. Foreground/portal prompts are optional later enhancements with no current registry. Existing faction plates remain unchanged; separately validate/re-export or canvas-normalize retained `hq_rbih_1992.webp` (2750×1536) against the 2752-wide scene contract. It is not a new creative deliverable or mechanics defect. | R7 Task 9 / two-image owner drop; separate retained-asset validation |
-| Packaged first paint | Five-viewport browser fallback-art proof is green, but live packaged-Electron first-paint and acceptance were not run. The blocked probe/RE route is separate and earns no credit here. | R7 packaged acceptance gate |
+| Packaged first paint | The five-viewport browser proof is green on the approved owner art, but live packaged-Electron first-paint and acceptance were not run and must not be claimed complete. The blocked probe/RE route is separate and earns no credit here. | R7 packaged acceptance gate |
 
 ---
 
@@ -172,7 +172,8 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
-| 2026-08-28 | **Cinematic React opening and typography:** one healthy opening owner now carries neutral selection through exact faction-room preview into the same playable Warroom. Browser fallback-art proof is complete; the two required neutral images and live packaged acceptance remain open. | [Cinematic implementation plan](../plans/2026-08-28-cinematic-opening-typography-implementation-plan.md) |
+| 2026-08-29 | **Opening owner art integrated:** the approved splash and neutral monitoring-room plates replace their placeholders through the existing seams, and the approved map-portal texture feeds the existing custom property as atmospheric terrain only. The selected faction's war-room plate still appears only after selection and is what the confirmed game opens into. Live packaged acceptance remains open. | [Cinematic implementation plan](../plans/2026-08-28-cinematic-opening-typography-implementation-plan.md) |
+| 2026-08-28 | **Cinematic React opening and typography:** one healthy opening owner now carries neutral selection through exact faction-room preview into the same playable Warroom. Browser proof is complete; the two required neutral images and live packaged acceptance remained open at that date. | [Cinematic implementation plan](../plans/2026-08-28-cinematic-opening-typography-implementation-plan.md) |
 | 2026-06-06 | **Native overlay residue batch:** Intelligence, Staff, and Faction are the only native Warroom preview overlays; their drill-ins route to existing Army HQ owner surfaces, while retired StrategicDashboard/EventLog local command variants are gone from live source. | [implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md](implemented/20260606_WARROOM_NATIVE_OVERLAY_RESIDUE_BATCH.md) |
 | 2026-05-16 | **React Warroom dynamic board overlays restored:** the React shell now honors dynamic board regions under their hotspots, projecting a player-faction-only paper map with current front lines onto the corkboard/desk-map and rendering the current date on the wall board in blue marker. | [implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md](implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md) |
 | 2026-05-02 | **Warroom priority docket:** the Warroom status bar now opens a compact `Review Before Advance` tray with source-backed rows and deep links to existing Decision Room targets, while Army HQ remains the command-review owner. | [implemented/20260502_WARROOM_PRIORITY_DOCKET.md](implemented/20260502_WARROOM_PRIORITY_DOCKET.md) |

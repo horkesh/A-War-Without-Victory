@@ -4641,3 +4641,70 @@ reachability when canonical supply truth marks the cell critical.
 
 Applied in `[2026-08-26] docs(calibration): synchronize January n372 authority, canon, workflow,
 roadmap, and debt`.
+
+## 2026-08-29 - A visibility assertion needs an enabled control or it proves nothing
+
+The opening portal is `opacity: 0` at rest and only becomes visible mid-transition. A first pass
+asserted "the portal stays suppressed in narrow, short, and reduced-motion layouts" from the settled
+landing snapshot, where the value is 0 in every viewport including the ones where suppression is
+*not* in force. The assertion passed everywhere and measured nothing.
+
+The repair is not a better selector but a control: sample the value across the animation trace, and
+in the viewports where the feature is *enabled*, require it to actually reach a non-zero peak. The
+suppressed-viewport claim only carries weight because the enabled viewports demonstrably reach ~1.0.
+
+Generalized: before asserting that something is absent, suppressed, or zero under condition X, prove
+the same probe reports present, visible, or non-zero when X does not hold. A gate whose pass looks
+identical with and without the mechanism is decoration — the same shape as gating on a field whose
+histogram has one bucket.
+
+Applied in `[2026-08-29] docs(ui): close opening owner-art gate`.
+
+## 2026-08-29 - A focused suite containing the right test is still false-green if it ran too early
+
+The standing rule is that focused suites are a false-green and the whole `tests/ui` boundary is the
+gate. This packet found the sharper version of that failure. The eight-file focused list *did*
+include `tests/ui/first_hour_browser_gate_contract.test.ts`, the exact test that would catch the
+regression, and it passed 90/90. It passed because it ran before the last edit in the same commit —
+an edit to `tools/ui/first_hour_browser_gate.cjs`, which that test asserts on by source text.
+
+Two properties made the gap invisible. A *tool* is not a test, so no focused test-file list
+mechanically follows edits to it. And a contract test that reads another file's source can be broken
+from entirely outside its own directory, by a change that looks like tooling or documentation.
+
+So the ordering rule is not "run the focused suite" but **re-run after the last edit in the commit,
+not after the last edit you judged behavioural**.
+
+And choose the boundary by which FILES the commit touches, not by which AREA you think you are
+working in. The first draft of this very lesson said "for anything touching `src/ui/` or
+`tools/ui/`, let the whole `tests/ui` boundary say green" — which would not have covered its own
+commit, because that commit also edits `docs/`, and the gates that assert on ledger content live in
+the `tests/` root, outside `tests/ui`, where `npx vitest run tests/ui` never reaches them:
+`docs_desktop_v09_truth` and `oob_elite_commander_contract` both read `PROJECT_LEDGER_KNOWLEDGE.md`.
+A docs-only edit is not test-free.
+
+The asymmetry is the part worth carrying: **no gate reads `PROJECT_LEDGER.md`** —
+`lifecycle_legacy_terms_gate` names it only inside an `excluded` array, asserting
+`shouldSkipPath('docs/PROJECT_LEDGER.md') === true`, which is the opposite of reading it. The ledger
+IS read at runtime — `tools/assistant/project_ledger_guard.ts` resolves and parses it, and the
+map-pipeline tools reach it through `assertLedgerFresh` — just never by a test. So the two ledger
+files are not interchangeable: editing KNOWLEDGE can break two gates, editing LEDGER can break none.
+Which file you touch decides whether a gate exists at all.
+
+That distinction cost a correction here. The first draft of this paragraph listed five gates across
+both files. Three were wrong — two mentions were a comment and an assertion-message string naming a
+different archive file entirely, and the third was the backwards `excluded` case above. Every one of
+those came from trusting a `grep` hit for the filename instead of opening the file to see what it
+actually reads. That is this repo's oldest lesson arriving inside the lesson written to prevent it.
+
+It then happened once more, in this very paragraph. The sentence above began as "no test reads
+`PROJECT_LEDGER.md`", which is what was measured, and was tightened for emphasis into "nothing reads
+it", which was not — and which is false, as `project_ledger_guard.ts` shows. The qualifier survived
+the measurement and died in the summary. Watch for that specific move: a universal negative is
+almost never what you checked.
+
+The mislabel is worth noticing too: an 85-line behavioural harness change landed under a `docs(ui):`
+commit type, and that framing is what made "docs only, no re-run needed" feel safe — the same
+instinct that then made the docs edit itself look gate-free.
+
+Applied in `[2026-08-29] docs(ui): close opening owner-art gate`.

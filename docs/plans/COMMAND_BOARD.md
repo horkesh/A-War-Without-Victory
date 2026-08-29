@@ -30,7 +30,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 
 ## Current Critical Path
 
-`RE P2B BLOCKED (no proof route active) + R7 owner art/live packaged/human-review gates + inherited balanced-suite residual -> owner decision on P2B proof policy/route -> RE P2B–P7 -> final RE pair/profile -> R8 -> R9`
+`RE P2B BLOCKED (no proof route active) + R7 live-packaged/human-review gates (owner art CLOSED 2026-08-29) + inherited balanced-suite residual -> owner decision on P2B proof policy/route -> RE P2B–P7 -> final RE pair/profile -> R8 -> R9`
 
 The R7 implementation slice is not the source of the current full-suite red. The canonical balanced
 run passes 1325/1335 files and 13231/13273 tests; five inherited files (six tests) remain red around

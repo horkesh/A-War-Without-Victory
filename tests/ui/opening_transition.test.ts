@@ -403,10 +403,38 @@ describe('OpeningCinematicLayer', () => {
   it('suppresses the portal texture in reduced-motion, narrow, and short layouts', () => {
     const css = readFileSync(resolve(repoRoot, 'src/ui/map/styles/globals.css'), 'utf8');
 
+    // Each gate must be proven inside its OWN at-rule body. An unbounded [\s\S]*?
+    // walks out of its block and satisfies itself on a later one, passing even when
+    // the rule it names has been deleted. The query can also appear more than once
+    // (globals.css has two prefers-reduced-motion blocks), so scan every body.
+    const atRuleBodies = (query: string): string[] => {
+      const bodies: string[] = [];
+      const needle = `@media ${query}`;
+      for (let from = css.indexOf(needle); from !== -1; from = css.indexOf(needle, from + needle.length)) {
+        const open = css.indexOf('{', from);
+        let depth = 0;
+        for (let i = open; i < css.length; i += 1) {
+          if (css[i] === '{') depth += 1;
+          else if (css[i] === '}') {
+            depth -= 1;
+            if (depth === 0) {
+              bodies.push(css.slice(open + 1, i));
+              break;
+            }
+          }
+        }
+      }
+      expect(bodies.length).toBeGreaterThan(0);
+      return bodies;
+    };
+    const suppressesPortal = (query: string) => atRuleBodies(query).some(
+      (body) => /\.opening-cinematic__portal\s*\{[^}]*opacity:\s*0\s*!important/.test(body),
+    );
+
     expect(css).toMatch(/data-reduced-motion="true"[^}]*\.opening-cinematic__portal\s*\{[^}]*opacity:\s*0\s*!important/);
-    expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.opening-cinematic__portal\s*\{[^}]*opacity:\s*0\s*!important/);
-    expect(css).toMatch(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.opening-cinematic__portal\s*\{[^}]*opacity:\s*0\s*!important/);
-    expect(css).toMatch(/@media\s*\(max-height:\s*600px\)[\s\S]*?\.opening-cinematic__portal\s*\{[^}]*opacity:\s*0\s*!important/);
+    expect(suppressesPortal('(prefers-reduced-motion: reduce)')).toBe(true);
+    expect(suppressesPortal('(max-width: 720px)')).toBe(true);
+    expect(suppressesPortal('(max-height: 600px)')).toBe(true);
   });
 
   it('keeps the portal presentational and leaves transition ownership unchanged', () => {

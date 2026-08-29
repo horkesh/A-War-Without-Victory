@@ -30199,3 +30199,91 @@ C, and D are unchanged.
 
 Documentation-only owner-art guidance; no code, assets, mechanics, roadmap status, engine, state,
 IPC, RE, probe, calibration, or canon content changed. `FORAWWV.md` was not edited.
+
+## 2026-08-29 — Integrate approved cinematic opening art and the atmospheric map portal
+
+**Behavioral/output change:** The opening now presents approved owner art instead of placeholders.
+`OPENING_SPLASH_ART` imports `src/ui/map/assets/opening/opening_splash_neutral.webp`
+(2752×1536, SHA-256 `D7328E8D5411E28C468AAE106D935F13757A6184E8D120301BC5AF0785F92FD9`),
+replacing the `hq_presidential_desk_1992` splash fallback. `OPENING_MONITORING_ROOM_ASSET` imports
+`src/ui/map/assets/opening/opening_monitoring_room_neutral.webp`
+(2752×1536, SHA-256 `CEF8772559CBA17846FF8F6C79D9C177868266745E695DA58DD0A8AD863A5349`),
+replacing the transparent-GIF neutral source. Both plates were inspected positively for
+analogue-first compliance and carry no computer/CRT/terminal imagery, baked text, logo, or
+faction/control truth. The required owner-art gate is CLOSED.
+
+`OpeningCinematicLayer.tsx` additionally imports
+`src/ui/map/assets/opening/opening_map_portal.webp`
+(2048×1152, SHA-256 `454E8218012921DCF5E23D40BFB9E0745D0A07C5340325709D0B146067441ABA`)
+and assigns it to the existing `--opening-map-portal-image` custom property in `layerStyle`.
+`globals.css` gains per-layer `background-size`/`position`/`repeat` so the texture covers as layer 1
+while the radial and repeating gradients underneath keep their existing rendering and remain the
+fallback; the CSS default stays `none`. The portal texture was built deterministically (seed
+`19920406`) from NOAA ETOPO 2022 relief plus Natural Earth coastline and river centerlines, with no
+administrative, national, disputed-boundary, label, road, settlement, or gameplay-control layer
+loaded. It is atmospheric texture only — not a gameplay map, and not part of faction/control truth.
+
+**Player-visible truth:** A is the splash; B is the neutral room before faction selection; the
+selected faction's existing war-room plate appears only after selection and is what the confirmed
+game opens into; D is decorative terrain.
+
+**Boundary:** No new component, registry, animation layer, state machine, or rendering system. No
+opening state, timings, sequencing, masking, cancellation, reduced-motion behavior, failure
+recovery, layout ownership, or `openingScenes.ts` faction metadata changed. The CSS monitoring room
+and the portal gradients remain recovery fallbacks, not a second opening owner. No engine,
+simulation, scenario, calibration, probe, RE, save-format, or canon content was touched;
+`FORAWWV.md` was not edited and is byte-identical to the authorized base.
+
+**Verification:** the whole `tests/ui` boundary — **340 files / 2901 tests, exit 0** — not the
+eight-file focused list, which is recorded below as insufficient for this change. Because this entry
+edits `PROJECT_LEDGER_KNOWLEDGE.md`, the two gates outside `tests/ui` that actually read it
+(`docs_desktop_v09_truth`, `oob_elite_commander_contract`) were run, together with three adjacent
+docs gates as a cheap superset: 5 files / 33 tests, exit 0. Nothing reads `PROJECT_LEDGER.md`
+itself. `npx tsc --noEmit` exit 0; `npm run desktop:map:build`
+exit 0 with all three assets emitted content-hashed. The five-viewport
+browser matrix (1920×1080, 1366×768, 1024×768, 700×900, 1024×560) plus a reduced-motion pass records
+`artStatus: owner-art`, the approved plate filenames at every viewport, gradient fallback present
+everywhere, and portal peak opacity ~1.0 at the three enabled viewports versus exactly 0 at
+700×900, 1024×560, and under reduced motion. **Live packaged-Electron first-paint acceptance was not
+run and remains open.** Human listen/sensitivity, broader English accessibility/readability, and
+closeout reconciliation remain open. RE remains untouched and blocked at P2B.
+
+**Process miss, recorded because the evidence of record would otherwise overstate itself:** the
+first focused run of the eight named files passed 90/90 but was **stale** — it executed before the
+`tools/ui/first_hour_browser_gate.cjs` edit in the same commit. `first_hour_browser_gate_contract.test.ts`
+asserts on that tool's *source text* and pins its `artStatus` literal, so when the harness began
+reporting the measured `owner-art` the contract test still demanded `fallback-art`. Running the full
+`tests/ui` boundary afterwards exposed it: 1 failed / 2900 passed. The assertion was corrected and
+strengthened to also pin `assertOpeningArt` and `assertPortalVisibilityGate`, so deleting any of the
+new harness guards now fails it. Note the shape: the right test file *was* in the focused list. The
+list was not the defect; running it before the last edit was.
+
+**Independent review — one of two obtained; the architecture gate is OPEN.** Independent process-QA
+review was obtained and returned GO; its findings and their fixes are recorded below, so the
+implementer did not self-approve on process. An independent **technical-architecture review was
+commissioned twice and did not complete** — both reviewers repeatedly reported idle without ever
+returning a verdict, which is a reviewer failure, not a clean result. **No architecture sign-off
+backs this change.** The implementer's own architecture checks are recorded as self-checks and are
+explicitly *not* a substitute for that review: all three asset import specifiers resolve from their
+importing file's directory; exactly one definition exists per art constant, so there is no second
+source of truth; the determinism scan over the three touched components finds no `Math.random`,
+`Date.now`, `new Date(`, `fetch(`, or `performance.now`; the portal's z-index comments still match
+`MAP_HUD_LOW = 2` and `BACKDROP_GRAIN = 1` in `src/ui/shared/zIndex.ts`; and headless Chrome resolves
+the portal to three `background-image` layers against three `background-size` layers in both the
+texture and `none` states, with the two gradient layers retaining the `auto` / `repeat` / `0px 0px`
+values they had before this change. Anyone picking this up should treat the architecture review as
+outstanding work, not as a formality already discharged.
+
+Process QA returned GO conditional on this ledger correction, and additionally
+found that two of the four portal-suppression regexes in `tests/ui/opening_transition.test.ts` were
+**vacuous** — an unbounded `[\s\S]*?` escaped its own `@media` block and satisfied itself on a later
+one, so the `prefers-reduced-motion` and `max-width: 720px` assertions passed with the rule they
+named deleted. Confirmed by independent mutation test, then fixed by matching braces to bound each
+assertion to its own at-rule body and scanning *every* body for the query (globals.css contains two
+`prefers-reduced-motion` blocks, so a first-match lookup read the wrong one). Re-verified by
+mutation: deleting any one of the three suppression rules now fails the suite.
+
+**Inherited residual:** the opening-visual-matrix browser mode intermittently trips
+`assertNoConsoleErrors` on `deck: Failed to fetch` from the Vite deck.gl dep bundle during its
+per-viewport reloads. A control run on the authorized base commit `188f6e5d6` reproduced the same
+failure, so it is pre-existing and was deliberately not "fixed" here; a later re-run passed clean.
