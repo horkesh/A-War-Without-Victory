@@ -30354,3 +30354,43 @@ constant, unchanged state/timing ownership, determinism, and the crest swap's co
 found no blocking defects. Its one non-blocking finding — that `assertOpeningArt` skipped its own
 checks when a selector matched nothing — is fixed in `1a5237e7e`. The earlier ledger text recording
 that gate as open is superseded by this entry.
+
+## 2026-08-29 — Chunk cycle fixed: the packaged opening paints, R7 first-paint gate CLOSED
+
+**Root cause.** `manualChunks` in `src/ui/map/vite.config.ts` cut through a strongly-connected set
+of app modules. `src/ui/map/components/army_hq/` was split across four chunks by filename, and
+`map-rendering` / `map-geometry` / `feature-warroom-ui` were split from the components that import
+them. Analysis of the built output found **26 import cycles across 30 chunks**, including
+`feature-army-hq-forces -> feature-army-hq -> feature-army-hq-forces` and
+`feature-army-hq -> map-rendering -> map-geometry -> feature-army-hq`. A cyclic chunk graph breaks
+ES module initialisation order, which is what produced
+`ReferenceError: Cannot access 'ir' before initialization` before React could mount.
+
+**Fix.** App source is no longer manually chunked; only third-party packages and the large static
+JSON payloads are, and neither can import back into app source. Rollup's automatic chunking keeps
+cyclic modules in one chunk, which is what keeps the graph acyclic. Result: **18 chunks, zero
+cycles**, bundle boots. The rationale is written into the config beside the code, including the
+symptom, so the next person to add a source chunk sees why not.
+
+Cost: the entry chunk grows from ~741 KB to ~2,720 KB because app source now lands together. Total
+JS is ~6.7 MB across 18 chunks. Accepted — the desktop app loads this from localhost, and a bundle
+that boots beats a smaller one that does not.
+
+**R7 packaged first-paint acceptance: PASS.** The packaged Electron app (41.0.3) now paints the
+real cinematic opening rather than falling back to the legacy Command Post menu. Measured in the
+packaged build: splash `opening_splash_neutral-DyLg9h1c.webp` decoded at 2752×1536 with the title
+rendered and a non-blank painted body; neutral room `opening_monitoring_room_neutral-CnVq0PKX.webp`
+decoded at 2752×1536; all three crests decoded at 32×32; **zero console errors**. This gate has been
+open since the packet began and is now closed.
+
+**Not the RE route, proven rather than asserted.** The acceptance run asserts
+`probeManifestCreated: false` — `tools/desktop_packaged_runtime_probe.mjs` was never invoked and
+`AWWV_DESKTOP_RUNTIME_PROBE` was never set. RE remains BLOCKED at P2B and earns nothing from this.
+
+**New gates, both mutation-verified.** `tools/ui/check_chunk_cycles.cjs` fails the build output when
+the chunk graph is cyclic, and is wired into `desktop:release:check`, so `desktop:package:dir` cannot
+ship a cyclic bundle. Negative control: it exits 1 with 26 cycles on the old config and 0 on the
+fixed one. `tests/ui/tactical_map_chunking_contract.test.ts` adds three static guards — app source is
+never manually chunked, the cycle check stays on the packaging path, and every `src/desktop` module
+the packaged main process requires is on the `build.files` allow-list. Each was mutation-tested and
+each fails when its invariant is broken.

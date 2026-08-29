@@ -4708,3 +4708,27 @@ commit type, and that framing is what made "docs only, no re-run needed" feel sa
 instinct that then made the docs edit itself look gate-free.
 
 Applied in `[2026-08-29] docs(ui): close opening owner-art gate`.
+
+## 2026-08-29 - A build that exits 0 is not a build that runs
+
+`vite build` exiting 0 means the bundle was written. It says nothing about whether the bundle
+executes. This project had every gate on one side of that line: unit tests run on source, the
+five-viewport browser matrix runs against the Vite **dev** server, and `desktop:map:build` was
+checked only for its exit code. So a production bundle that threw before React mounted —
+`Cannot access 'ir' before initialization` — passed every gate and shipped, and the packaged
+desktop app silently fell back to its legacy recovery menu.
+
+The specific trap is `manualChunks`. Dev does not chunk-split, so any fault created by chunking is
+invisible until a production build is actually executed. And manual chunks that cut through a
+strongly-connected set of modules produce a cyclic chunk graph, which breaks ES module
+initialisation order. Rollup's automatic chunking keeps cyclic modules together and does not have
+this failure mode; naming chunks by hand overrides that protection. Only leaves — third-party
+packages, static data — are safe to name manually.
+
+The general rule: for any artifact that is *built*, at least one gate must **run the built output**,
+not inspect the sources it was built from. Exit codes and file sizes are not execution. The cheap
+version here is a static server plus a headless load asserting the app actually mounted; the
+structural version is `tools/ui/check_chunk_cycles.cjs` on the emitted chunks, wired into
+`desktop:release:check` so packaging cannot ship a cyclic bundle.
+
+Applied in `[2026-08-29] fix(build): break the tactical-map chunk cycle`.

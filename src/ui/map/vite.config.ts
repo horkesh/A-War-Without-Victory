@@ -32,30 +32,25 @@ function tacticalMapManualChunks(id: string): string | undefined {
     return 'vendor-misc';
   }
 
-  if (normalized.includes('/src/sim/')) return 'map-sim';
-  if (normalized.includes('/src/ui/map/components/warroom/')) return 'feature-warroom-ui';
-  if (normalized.includes('/src/ui/map/components/army_hq/')) {
-    const fileName = normalized.slice(normalized.lastIndexOf('/') + 1);
-    if (/^(?:RecordsContent|TurnAftermathRecordsPanel|DecisionConsequenceRecordsPanel|OpportunityLedgerPanel|CombatRecordSection)\.tsx$/.test(fileName)) {
-      return 'feature-army-hq-records';
-    }
-    if (/^(?:OperationsSection|DirectiveCard|PresidentialDecisionRoomPanel|OperationOpportunityDossierPanel|PresidentialAttentionPanel|OrderInterpretationPanel|OrderInterpretationSection)\.tsx$/.test(fileName)) {
-      return 'feature-army-hq-operations';
-    }
-    if (/^(?:SectorsSection|OrbatSection|PersonnelContent|CorpsSituationSection|CommandRelationshipSection|ForceReadiness|SupplyIntelligence|StrategicPosition|FrontVisitSection|CommanderSection|ThreatAssessment)\.tsx$/.test(fileName) || fileName === 'generateThreatAssessment.ts') {
-      return 'feature-army-hq-forces';
-    }
-    return 'feature-army-hq';
-  }
-  if (normalized.includes('/src/ui/map/components/chronicle/')) return 'feature-chronicle';
-  if (normalized.includes('/src/ui/map/components/ops_modal/')) return 'feature-ops-planning';
-  if (normalized.includes('/src/ui/map/components/presidential_desk/')) return 'feature-presidential-desk';
-  if (normalized.includes('/src/ui/map/components/onboarding/')) return 'feature-onboarding';
-  if (normalized.includes('/src/ui/map/components/plan_ui/')) return 'feature-plan-ui';
-  if (normalized.includes('/src/ui/map/components/verdict/')) return 'feature-verdict';
-  if (normalized.includes('/src/ui/map/map/builders/')) return 'map-geometry';
-  if (normalized.endsWith('/src/ui/map/map/generateFactionBorders.ts')) return 'map-geometry';
-  if (normalized.includes('/src/ui/map/map/')) return 'map-rendering';
+  // App source is deliberately NOT manually chunked.
+  //
+  // The tactical map's own modules form a strongly-connected component: army_hq,
+  // map-rendering, map-geometry and the warroom UI all import one another. Manual
+  // chunks that cut through an SCC produce a CYCLIC chunk graph, and ES module
+  // initialisation order then throws a temporal-dead-zone ReferenceError at runtime.
+  // That is exactly what shipped: splitting src/ui/map/components/army_hq/ across
+  // four chunks by filename gave 26 chunk cycles and a production bundle that died
+  // with "Cannot access 'ir' before initialization" before React could mount, so the
+  // packaged desktop app fell back to its legacy recovery menu. The dev server never
+  // saw it because dev does not chunk-split.
+  //
+  // Rollup's automatic chunking keeps modules that are cyclic in the same chunk, so
+  // leaving app source alone is what keeps the chunk graph acyclic. Only leaves are
+  // safe to name manually: third-party packages and the large static JSON payloads
+  // handled above, none of which can import back into app source.
+  //
+  // If you add a manual chunk here for anything under /src/, re-run
+  // `node tools/ui/check_chunk_cycles.cjs` after a build and expect it to fail.
   return undefined;
 }
 
@@ -185,7 +180,12 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, '../../../dist/tactical-map'),
     emptyOutDir: true,
-    chunkSizeWarningLimit: 1200,
+    // Raised from 1200 when source-level manualChunks were removed. Splitting app
+    // source produced a cyclic chunk graph and a bundle that did not boot at all, so
+    // the entry chunk is now large (~2.7 MB) by design. The desktop app loads it from
+    // localhost, where that costs little. This is an accepted trade, not a silenced
+    // warning: a bundle that runs beats a smaller one that throws before React mounts.
+    chunkSizeWarningLimit: 3000,
     rollupOptions: {
       input: {
         tactical_map: path.resolve(__dirname, 'index.html'),
