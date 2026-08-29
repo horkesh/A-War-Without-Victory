@@ -30555,12 +30555,17 @@ a UI branch that touches zero sim files would launder six commits' behavioural c
 nobody would look for it. The UI branch red is INHERITED and the branch is not blocked on an engine
 attribution it cannot perform.
 
-**Correction to the analysis received.** The scenario ruling quoted CALIBRATION_MASTER as saying
-verbatim "RE performs no calibration tuning and may not refresh thresholds, manifests, references,
-or expected hashes to make a gate pass." **That sentence is not in the file** — greps for "may not
-refresh", "expected hashes" and "RE performs no" return nothing. The conclusion survives on line 11
-plus the spent authority, but the quotation is a paraphrase presented as a quote and is recorded
-here as such.
+**Correction to the analysis received — WITHDRAWN, the accusation was mine and it was wrong.** This
+entry originally recorded that the scenario ruling had presented a paraphrase as a verbatim
+CALIBRATION_MASTER quote. **That is false.** The sentence "RE performs no calibration tuning and may
+not refresh thresholds, manifests, references, or expected hashes to make a gate pass" exists
+verbatim in `F:\A-War-Without-Victory\docs _reports\CALIBRATION_MASTER.md` (grep count 1) and is
+absent from this worktree's copy (count 0), because the two trees hold different revisions of that
+paragraph. It was a real citation from a superseded revision, cited without naming the revision. The
+current line 11 in this worktree is the one to use and its prohibition is stronger, naming hash
+refresh explicitly. Recorded prominently because the error is the same class this packet has been
+correcting all day — text that reads as verified when it was not checked against the reader's own
+tree — and here the implementer committed it while accusing someone else of it.
 
 **52w stays.** Only `apr1992_definitive_188w.json` carries `calibration_scenario`, so 188w is
 already the sole master and 52w costs it nothing. The 52w FILE cannot be retired at all:
