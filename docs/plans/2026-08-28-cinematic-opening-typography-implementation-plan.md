@@ -18,7 +18,7 @@
 |---:|---|---|
 | 1 | Complete | R7 amendment registered in roadmap, command board, and accepted functional-opening plan. |
 | 2–8 | Complete | Scene substrate, transition state machine, React opening, exact-room handoff, desktop host ownership/recovery, and recursive typography enforcement landed. Healthy startup constructs/loads no legacy `WarPlanningMap`. |
-| 9 | **Open — two required neutral owner assets** | Replace the splash constant/import in `OpeningSplash.tsx` and the neutral-room constant/import in `MainMenu.tsx`. Existing faction plates remain. Foreground/portal prompts are optional later enhancements with no current registry and require their own tiny tested integration if chosen. Separately validate/re-export or canvas-normalize the retained 2750×1536 RBiH plate against the 2752-wide scene contract; it is not a new creative deliverable or mechanics defect. |
+| 9 | **Open — two required analogue-first neutral owner assets** | Replace the splash constant/import in `OpeningSplash.tsx` and the neutral-room constant/import in `MainMenu.tsx`; reject computers/screens and use physical paper-map observation-office material. Existing faction plates remain unchanged. Foreground/portal prompts are optional later enhancements with no current registry and require their own tiny tested integration if chosen. Separately validate/re-export or canvas-normalize the retained 2750×1536 RBiH plate against the 2752-wide scene contract; it is not a new creative deliverable or mechanics defect. |
 | 10 | Browser/build/focused proof complete; packaged open | Five viewports and 83+ screenshots pass the fallback-art matrix. Live packaged-Electron first-paint/acceptance was not run. The blocked packaged probe/RE route was untouched and earns no credit. |
 | 11 | Complete | Focused corrections, recovery retry semantics, source-bound readiness, short-screen coverage, and lazy legacy-map simplification landed. |
 | 12 | Complete in documentation commit | Living architecture, GUI/Warroom masters, roadmap/control docs, ledger, knowledge, and napkin synchronized without editing canon. |
@@ -547,7 +547,7 @@ origins and must not be changed for this two-image replacement.
 
 **Step 1: Validate each supplied asset**
 
-Verify dimensions, color space, alpha, file size, safe zones, and absence of baked text/logos/faction truth. The two required inputs are the splash and neutral monitoring room. Existing RBiH/RS/HRHB faction plates are retained and are not part of this creative drop.
+Verify dimensions, color space, alpha, file size, safe zones, and absence of baked text/logos/faction truth. Inspect both required images positively for analogue-first compliance: reject computers, CRT monitors, electronic terminals, television displays, video walls, laptops, digital screens/glow, or futuristic display equipment. Accept only credible period analogue communications such as wired telephones, HF/VHF radios, teleprinter/telex, manual typewriter, non-computer-like fax, cassette/reel recorder, and analogue clocks. Prefer paper folders, carbon-copy forms, pencils, a physical cork/paper/relief map, map lamp, and fluorescent/tungsten practical lighting. The two required inputs are the splash and neutral monitoring room. Existing RBiH/RS/HRHB faction plates are retained and unchanged; they are not part of this creative drop.
 
 **Step 2: Replace only registry entries**
 

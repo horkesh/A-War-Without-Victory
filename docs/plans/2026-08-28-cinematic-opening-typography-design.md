@@ -46,7 +46,8 @@ Maintaining two redesigned openings is explicitly rejected.
 ### Monitoring-room landing
 
 - Empty early-1990s international monitoring room.
-- Central physical map/display is the spatial portal for faction transitions.
+- Central physical paper, cork, or relief map is the spatial portal for faction transitions.
+- **Analogue-first acceptance:** the neutral opening uses paper command material and credible period analogue communications. It contains no computers, CRT monitors, electronic terminals, television displays, video walls, laptops, or futuristic display equipment. Wired telephones, HF/VHF radio sets, a credible teleprinter/telex, manual typewriter, non-computer-like fax, cassette/reel recorder, and analogue clocks are permitted.
 - Compact, left-aligned action rail; the room remains the dominant image.
 - Language control remains top-right and version remains bottom-right.
 - No floating cream paper, giant title, italic slogan, glass cards, fake stamps, or luxury-brand gold treatment.
@@ -103,6 +104,14 @@ The transform origin for each existing faction room is derived from its canonica
 
 All masters should be authored at 3840 x 2160 or the generator's native 16:9 size, then cropped/exported to 2752 x 1536 WebP. Do not bake UI, title text, flags, emblems, dates, document copy, or generated labels into the neutral assets.
 
+**Analogue material rule:** Prefer paper folders, carbon-copy forms, pencils, physical cork/paper
+relief maps, map lamps, and fluorescent/tungsten practical lighting. Electronic communications are
+limited to credible period analogue equipment such as wired telephones, HF/VHF radios,
+teleprinter/telex, non-computer-like fax, cassette/reel recorder, and analogue clocks. Reject every
+computer, CRT monitor, electronic terminal, television display, video wall, laptop, digital glow,
+or futuristic command-center shorthand. The retained 1992 faction rooms already satisfy this
+direction and remain unchanged.
+
 **Acceptance split:** A and B are the two required owner-art deliverables and replace the temporary
 splash and CSS monitoring-room fallbacks. C and D retain useful prompts but are optional later
 enhancements; they have no current registry and require a separate small tested integration if used.
@@ -114,11 +123,11 @@ The three existing faction Warroom plates are retained and are not part of this 
 
 **Prompt:**
 
-> Cinematic documentary establishing image for a morally serious political command strategy game set in Bosnia and Herzegovina, early spring 1992 before dawn, seen from inside an anonymous international observation post through rain-streaked glass; a dark Dinaric river valley and scattered town lights beyond, first distant columns of smoke but no spectacle; foreground edge of a plain metal desk with a wired telephone, closed briefing folder and folded regional map, practical tungsten interior light against cold blue-grey dawn, authentic late-1980s and early-1990s equipment, restrained 35mm photojournalism, natural film grain, imperfect practical lighting, sober and ominous, human scale, deep readable shadows; composition keeps the left forty percent dark and uncluttered and places the landscape focus right of center; no people, no faction symbols, no readable writing, no title, no logo, no UI, 16:9.
+> Cinematic documentary establishing image for a morally serious political command strategy game set in Bosnia and Herzegovina, early spring 1992 before dawn, seen from inside an anonymous international observation office through rain-streaked glass; a dark Dinaric river valley and scattered town lights beyond, first distant columns of smoke but no spectacle; foreground edge of a plain metal desk with only a wired telephone, closed paper briefing folder, pencils and folded physical regional map, practical tungsten interior light against cold blue-grey dawn, authentic late-1980s and early-1990s analogue equipment, restrained 35mm photojournalism, natural film grain, imperfect practical lighting, sober and ominous, human scale, deep readable shadows; composition keeps the left forty percent dark and uncluttered and places the landscape focus right of center; no computers or screens, no people, no faction symbols, no readable writing, no title, no logo, no UI, 16:9.
 
 **Negative prompt:**
 
-> movie poster, heroic soldiers, posed weapons, explosions, burning entire city, gore, propaganda, national flags, modern flat screens, modern LED lighting, teal-orange blockbuster grade, glossy concept art, fantasy, symmetrical centered composition, collage, floating papers, fake stamps, legible generated text, watermark, duplicated phones, malformed maps, excessive smoke.
+> computer, desktop computer, laptop, CRT monitor, electronic terminal, television display, video wall, digital screen, futuristic display equipment, glowing interface, movie poster, heroic soldiers, posed weapons, explosions, burning entire city, gore, propaganda, national flags, modern LED lighting, teal-orange blockbuster grade, glossy concept art, fantasy, symmetrical centered composition, collage, floating papers, fake stamps, legible generated text, watermark, duplicated phones, malformed maps, excessive smoke. Do not remove credible wired telephones or analogue radios if naturally present.
 
 ### B. Neutral landing: `opening_monitoring_room_neutral_master`
 
@@ -126,11 +135,11 @@ The three existing faction Warroom plates are retained and are not part of this 
 
 **Prompt:**
 
-> Empty international crisis-monitoring operations room in Europe, early 1992 at night, period-accurate and modest rather than futuristic; central wall-mounted physical relief map or display of Yugoslavia and Bosnia in a clean rectangular frame, map surface neutral and without readable labels; side desks with beige CRT monitors, teleprinter, fax machine, binders, analogue clocks and wired telephones, fluorescent ceiling spill mixed with one warm desk lamp, signs of recent use but no people, sober institutional documentary realism, 35mm lens, subtle film grain, layered depth with a dark foreground console edge; strictly faction-neutral, no flags or emblems; central map unobstructed, left third dark and low-detail for menu UI, right upper corner uncluttered; 16:9, no text, no logo, no UI.
+> Empty international crisis-monitoring observation office in Europe, early 1992 at night, period-accurate, modest and entirely analogue; central wall-mounted physical paper, cork, or shallow relief map of Yugoslavia and Bosnia in a clean rectangular wooden or metal frame, neutral map surface without readable labels, illuminated by an ordinary angled map lamp; side tables hold wired telephones, one or two credible HF/VHF radio receiver or transceiver sets with physical dials, a manual typewriter, paper logs, carbon-copy forms, pencils, folders and binders, with an optional credible teleprinter/telex, non-computer-like fax or cassette/reel recorder; analogue wall clocks; fluorescent ceiling spill mixed with tungsten desk and map lamps; signs of recent use but no people; sober institutional documentary realism, 35mm lens, subtle film grain, layered depth with a dark foreground table edge; strictly faction-neutral, no flags or emblems; central physical map unobstructed, left third dark and low-detail for menu UI, right upper corner uncluttered; no screens, 16:9, no text, no logo, no UI.
 
 **Negative prompt:**
 
-> science-fiction command center, giant video wall, holograms, blue neon, futuristic touchscreens, NATO or UN logos, flags, people, soldiers, weapons, dramatic explosion, luxury boardroom, glassmorphism, symmetrical showroom, cinematic teal-orange, legible generated labels, watermark, duplicated monitors, impossible cables.
+> computer, desktop computer, laptop, CRT monitor, electronic terminal, television display, video wall, digital screen, futuristic display equipment, touchscreen, hologram, digital glow, science-fiction command center, blue neon, NATO or UN logos, flags, people, soldiers, weapons, dramatic explosion, luxury boardroom, glassmorphism, symmetrical showroom, cinematic teal-orange, legible generated labels, watermark, duplicated equipment, impossible cables. Do not reject credible wired telephones, analogue HF/VHF radios, teleprinter/telex, manual typewriter or analogue clocks.
 
 ### C. Optional foreground: `opening_monitoring_foreground`
 
@@ -138,7 +147,11 @@ Create only if the alpha extraction is clean. Otherwise omit it rather than simu
 
 **Prompt using B as the reference image:**
 
-> Isolate only the nearest dark console edge, one out-of-focus telephone silhouette and monitor bezel from the supplied monitoring room; preserve the source camera, perspective and lighting exactly; transparent background; no new objects and no text.
+> Isolate only the nearest dark table or console edge, one out-of-focus wired telephone handset and cable, and a partial analogue radio casing or tuning-dial silhouette from the supplied monitoring room; preserve the source camera, perspective and lighting exactly; transparent background; no new objects and no text.
+
+**Negative prompt:**
+
+> computer, desktop computer, laptop, CRT monitor, electronic terminal, television display, video wall, digital screen, monitor bezel, futuristic display equipment, touchscreen, hologram, digital glow. Preserve credible telephone and analogue-radio shapes.
 
 **Output:** 2752 x 1536 transparent PNG or lossless WebP.
 
@@ -148,11 +161,11 @@ This is an atmospheric mask, not a control or historical map. It must not imply 
 
 **Prompt:**
 
-> Close study of an early-1990s operations-room wall map surface, Yugoslavia and Bosnia recognizable only through coastline, rivers and restrained relief linework, grey-green paper under low CRT-like illumination, subtle registration marks at the edges, documentary physical texture, no labels, no colored front lines, no flags, no symbols, no text, frame-filling.
+> Close study of an early-1990s physical operations-room wall map surface, Yugoslavia and Bosnia recognizable only through coastline, rivers and restrained relief linework, grey-green paper under ordinary angled tungsten/fluorescent map-lamp illumination, subtle registration marks at the edges, documentary physical texture, no labels, no colored front lines, no flags, no symbols, no text, frame-filling.
 
 **Negative prompt:**
 
-> modern satellite map, Google Maps, glowing tactical icons, faction colors, borders presented as gameplay truth, readable labels, fantasy terrain, neon HUD.
+> computer, desktop computer, laptop, CRT monitor, electronic terminal, television display, video wall, digital screen, futuristic display equipment, screen glow, digital glow, modern satellite map, Google Maps, glowing tactical icons, faction colors, borders presented as gameplay truth, readable labels, fantasy terrain, neon HUD. Do not reject ordinary tungsten or fluorescent light falling on physical paper.
 
 **Output:** 2048 x 1152 WebP.
 

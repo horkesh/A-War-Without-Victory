@@ -18,7 +18,7 @@ The presentation-only amendment is
 [Cinematic Opening and Typography Implementation Plan](2026-08-28-cinematic-opening-typography-implementation-plan.md).
 Its mechanics, two-family typography, host ownership, and five-viewport fallback-art browser proof
 are complete. React `MainMenu` now owns healthy browser and desktop-host opening; the outer legacy
-menu is bounded recovery only. The two required owner images (splash and neutral monitoring room)
+menu is bounded recovery only. The two required analogue-first owner images (splash and neutral monitoring room; no computers/screens)
 and live packaged-Electron first-paint acceptance remain open; foreground/portal prompts are
 optional later enhancements.
 

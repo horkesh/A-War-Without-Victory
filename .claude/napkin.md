@@ -195,6 +195,10 @@ Three HRHB decisions had exact pages, judgment sections, a resolved tier, and a 
 ## User Directives
 1. **[2026-08-15] Do not stop for routine implementation decisions**
    Do instead: decide from canon/evidence or convene the Pyrrhic panel; continue until a genuine authority/safety blocker or the active roadmap outcome is complete.
+
+## Visual Art Direction
+1. **[2026-08-29] Neutral opening imagery is an analogue observation office**
+   Do instead: use physical maps, paper records, practical map lamps, wired telephones and credible period radios/typewriters; reject computer, CRT, terminal, television, video-wall, laptop and futuristic command-center shorthand. This rule is scoped to the neutral/opening owner art; retained faction rooms remain unchanged.
 2. **[2026-06-20] Do not edit FORAWWV automatically**
    Do instead: flag design insights for a Pyrrhic panel; only edit canon with explicit approval.
 3. **[2026-06-26] Packaging remains paused until owner satisfaction**

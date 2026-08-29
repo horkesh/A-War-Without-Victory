@@ -30172,3 +30172,18 @@ and queue alternate-proof discovery. Packaged-proof recovery/prerequisite/discov
 `NO_VERDICT` history, the unproven hypothesis was rolled back at `48909e1d6`, and RE remains blocked
 at P2B with no proof route active. Also completed the R7 open-gates sentence in the master roadmap.
 Documentation only; no RE investigation or implementation occurred. `FORAWWV.md` was not edited.
+
+## 2026-08-29 — Lock neutral opening art to an analogue observation office
+
+**Owner direction:** The two required neutral owner images now use an analogue international
+observation-office brief. Splash, monitoring-room, optional foreground, and optional portal prompts
+reject computers, CRT monitors, electronic terminals, television displays, video walls, laptops,
+digital glow, and futuristic display equipment. They prefer physical paper/cork/relief maps, paper
+folders and carbon-copy forms, pencils, practical tungsten/fluorescent map lighting, wired
+telephones, credible HF/VHF radios, manual typewriter, teleprinter/telex, non-computer-like fax,
+cassette/reel recorder, and analogue clocks.
+
+**Boundary:** This is an owner-art production-brief change only. The three retained 1992 faction
+rooms already follow the selected analogue direction and remain unchanged. No code, assets,
+mechanics, tests, simulation, engine, state, IPC, RE, probe, calibration, or canon content changed.
+`FORAWWV.md` was not edited.
