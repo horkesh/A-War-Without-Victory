@@ -4,6 +4,7 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
+import openingMapPortal from '../../assets/opening/opening_map_portal.webp';
 import { WarroomScenePlate } from '../warroom/WarroomScenePlate';
 import { OPENING_WARROOM_SCENES } from './openingScenes';
 import {
@@ -21,6 +22,13 @@ export interface OpeningCinematicLayerProps {
 }
 
 const OPENING_DISSOLVE_QUERY = '(prefers-reduced-motion: reduce), (max-width: 720px), (max-height: 600px)';
+
+/**
+ * Atmospheric terrain texture for the existing portal seam. Deterministic relief
+ * imagery only: it carries no political border, control, ownership, or gameplay
+ * state, and the gradient underneath it in globals.css remains the fallback.
+ */
+const OPENING_MAP_PORTAL_IMAGE = `url(${openingMapPortal})`;
 
 function sceneSource(scene: OpeningScene, neutralSrc: string): string {
   return scene === 'neutral' ? neutralSrc : OPENING_WARROOM_SCENES[scene].src;
@@ -116,6 +124,7 @@ export function OpeningCinematicLayer({
   const layerStyle = {
     '--opening-current-map-origin': currentOrigin,
     '--opening-incoming-map-origin': incomingOrigin,
+    '--opening-map-portal-image': OPENING_MAP_PORTAL_IMAGE,
   } as CSSProperties;
   const failedScene = controller.getFailedScene();
 

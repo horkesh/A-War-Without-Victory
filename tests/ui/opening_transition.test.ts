@@ -355,6 +355,79 @@ describe('OpeningCinematicLayer', () => {
     window.matchMedia = originalMatchMedia;
   });
 
+  it('feeds the approved terrain texture to the portal through the existing custom property', () => {
+    const { load } = controlledLoader();
+    const view = render(createElement(OpeningCinematicLayer, {
+      scene: 'neutral',
+      neutralSrc: '/neutral.webp',
+      loadScene: load,
+    }));
+
+    const layer = view.container.querySelector('.opening-cinematic') as HTMLElement;
+    const portalImage = layer.style.getPropertyValue('--opening-map-portal-image');
+    expect(portalImage).toMatch(/^url\(.*opening_map_portal.*\)$/);
+    expect(view.container.querySelector('.opening-cinematic__portal')).toBeTruthy();
+
+    const source = readFileSync(
+      resolve(repoRoot, 'src/ui/map/components/opening/OpeningCinematicLayer.tsx'),
+      'utf8',
+    );
+    expect(source).toContain('assets/opening/opening_map_portal.webp');
+    expect(source).toContain("'--opening-map-portal-image'");
+  });
+
+  it('keeps the portal texture atmospheric rather than political or gameplay truth', () => {
+    const source = readFileSync(
+      resolve(repoRoot, 'src/ui/map/components/opening/OpeningCinematicLayer.tsx'),
+      'utf8',
+    );
+
+    // The texture is a static import: no gameplay-state read reaches this component.
+    expect(source).not.toMatch(/\bosid\b/i);
+    expect(source).not.toMatch(/faction_control|control_delta|painted_control|init_control/i);
+    expect(source).not.toMatch(/\buseGameState\b|\bGameStateAdapter\b|\bgame_state\b/);
+    expect(source).not.toMatch(/\bRBiH\b|\bHRHB\b/);
+  });
+
+  it('keeps the gradient portal fallback underneath the texture and as the no-texture default', () => {
+    const css = readFileSync(resolve(repoRoot, 'src/ui/map/styles/globals.css'), 'utf8');
+
+    expect(css).toMatch(/\.opening-cinematic\s*\{[^}]*--opening-map-portal-image:\s*none/);
+    const portalRule = css.slice(css.indexOf('.opening-cinematic__portal {'));
+    const portalBlock = portalRule.slice(0, portalRule.indexOf('}'));
+    expect(portalBlock).toMatch(/background-image:[\s\S]*var\(--opening-map-portal-image\),[\s\S]*radial-gradient\(circle at 50% 45%/);
+    expect(portalBlock).toMatch(/repeating-linear-gradient\(8deg/);
+    expect(portalBlock).toMatch(/background-size:\s*cover,\s*auto,\s*auto/);
+  });
+
+  it('suppresses the portal texture in reduced-motion, narrow, and short layouts', () => {
+    const css = readFileSync(resolve(repoRoot, 'src/ui/map/styles/globals.css'), 'utf8');
+
+    expect(css).toMatch(/data-reduced-motion="true"[^}]*\.opening-cinematic__portal\s*\{[^}]*opacity:\s*0\s*!important/);
+    expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.opening-cinematic__portal\s*\{[^}]*opacity:\s*0\s*!important/);
+    expect(css).toMatch(/@media\s*\(max-width:\s*720px\)[\s\S]*?\.opening-cinematic__portal\s*\{[^}]*opacity:\s*0\s*!important/);
+    expect(css).toMatch(/@media\s*\(max-height:\s*600px\)[\s\S]*?\.opening-cinematic__portal\s*\{[^}]*opacity:\s*0\s*!important/);
+  });
+
+  it('keeps the portal presentational and leaves transition ownership unchanged', () => {
+    const source = readFileSync(
+      resolve(repoRoot, 'src/ui/map/components/opening/OpeningCinematicLayer.tsx'),
+      'utf8',
+    );
+
+    // The portal remains one decorative div with no state, timers, or handlers.
+    expect(source).toMatch(/<div\s+className="opening-cinematic__portal"\s+aria-hidden="true"\s*\/>/);
+    expect(source).not.toContain('setTimeout');
+    expect(source).not.toContain('setInterval');
+    expect(source).not.toContain('requestAnimationFrame');
+    expect(OPENING_TRANSITION_TIMINGS).toEqual({
+      push: 340,
+      masked: 280,
+      resolve: 480,
+      reduced: 155,
+    });
+  });
+
   it('defines transform/opacity-only cinematic motion and transform-free fallback gates', () => {
     const css = readFileSync(resolve(repoRoot, 'src/ui/map/styles/globals.css'), 'utf8');
     expect(css).toMatch(/\.opening-cinematic__plate\s*{[\s\S]*?transition-property:\s*transform,\s*opacity/);
