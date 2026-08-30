@@ -30666,3 +30666,33 @@ enclave items there are explicitly deferred post-1.0.
   governance commits behind and its checkpoint advantage is inadmissible at 53.6% rung-4 divergence.
 - **Two-family typography does not cover `src/ui/warroom`** — 11 non-canonical declarations, mostly
   in the legacy recovery path, one Courier New in a reachable modal.
+
+## 2026-08-30 — Planning-duration budget semantics restored and Node-22 validated
+
+**Owner disposition implemented at `6da16cef6`.** `planning_duration` again owns deterministic
+march/preparation slack and the anti-paralysis deadline; it is no longer a mandatory delay after a
+`CorpsOperation` is genuinely prepared/staged. Every operation still spends one full planning turn
+and must pass political, force-ratio, participant-readiness, and opening-attack gates. Brigades still
+cannot attack outside operations, and planning-phase elite routing still does not grant execution
+combat-roster membership.
+
+**TDD and static verification.** The corrected later-staged-operation assertion failed before the
+code change and passed afterward. The focused lifecycle/reserve/ops-only/provenance/temporal set
+passed 92/92; typecheck exited zero. Balanced and fast-suite invocations emitted no assertion
+failure but hung during process teardown and were interrupted, so neither is recorded as passing.
+
+**Single authorized 188-week run:**
+`F:\A-War-Without-Victory\runs\re_planning_budget_6da16cef6\apr1992_definitive_188w__46834a3b41033bff__w188_n0`.
+Provenance: Node `v22.21.1`, commit `6da16cef689fc95cfa89d36eab5e278136675173`,
+`git_dirty:false`, scenario hash `46834a3b41033bff`, final hash `c0d234f075cec562`.
+
+Measured outcome: **55,915 killed / 205,278 wounded / 865 attack orders / 659 battles / 37 AAR
+operations**; planning deaths 74 with `political_blocked` 38. This recovers the pre-`037396e3c`
+behavioral envelope almost exactly and reverses the commit's throughput suppression. All 659 battles
+and all 125 combat control events are operation-attributed. Enclave guard holds 9/9, including
+Srebrenica t162 and Žepa t164; the verifier's generic red remains the known Farz P-A discriminator.
+
+**Floor disposition:** January remains 688 against the contaminated 694 threshold. The established
+measured-minus-three convention yields a replacement of **685**. It was not written here because
+the RE scope checker mandates `data/calibration/**` in every denylist; changing or bypassing that
+guard would be a separate guardrail task. Scenario files and the baseline manifest were untouched.

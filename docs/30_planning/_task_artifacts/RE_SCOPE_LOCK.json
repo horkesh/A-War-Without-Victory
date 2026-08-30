@@ -4,7 +4,7 @@
   "lane": "RE",
   "task": "RE-PLANNING-DURATION-BUDGET-OWNER-DISPOSITION",
   "packet": "owner-authorized-amend-validate-and-rebaseline",
-  "base_commit": "0a2026173237f44d0733684935562f25f97a936e",
+  "base_commit": "6da16cef689fc95cfa89d36eab5e278136675173",
   "namespace_note": "Owner-directed successor disposition accepted 2026-08-30; this is not a continuation of the closed packaged-probe packet and grants no P2B/P3 authority",
   "allowlist": [
     ".claude/current-lane.txt",
@@ -49,8 +49,29 @@
     "actual_failure_triggered_diagnoses": 1
   },
   "terminal_receipt": {
-    "status": "pending",
+    "status": "implementation_validated_calibration_handoff_pending",
     "owner_authorization": "Accepted recommendation and explicitly authorized implementation, governance-lock supersession, one 188-week run, and conditional January-threshold rebaseline in this thread on 2026-08-30",
+    "implementation_commit": "6da16cef689fc95cfa89d36eab5e278136675173",
+    "run_dir": "F:\\A-War-Without-Victory\\runs\\re_planning_budget_6da16cef6\\apr1992_definitive_188w__46834a3b41033bff__w188_n0",
+    "run_provenance": {
+      "node_version": "v22.21.1",
+      "git_dirty": false,
+      "final_state_hash": "c0d234f075cec562"
+    },
+    "validation": {
+      "total_killed": 55915,
+      "total_wounded": 205278,
+      "attack_orders": 865,
+      "battles": 659,
+      "operations": 37,
+      "political_blocked_planning_deaths": 38,
+      "checkpoint_jan1993": 688,
+      "proposed_jan1993_floor": 685,
+      "operationless_battles": 0,
+      "unattributed_combat_control_events": 0,
+      "enclave_guard_cells_correct": 9
+    },
+    "calibration_handoff": "engine_health_thresholds jan1993 694->685 is required by measured-minus-three but remains unmodified because the RE checker mandates data/calibration/** in every denylist",
     "retained_rules": [
       "all attacks remain CorpsOperation-owned",
       "planning-phase elite movement does not grant execution combat-roster membership",
@@ -58,9 +79,9 @@
       "baseline manifest remains immutable"
     ]
   },
-  "constraint_enforcement": "exact-path allowlist; one owner-authorized deterministic long run; scenario and baseline-manifest denylist retained",
+  "constraint_enforcement": "exact-path allowlist; the single owner-authorized deterministic long run is consumed; scenario, calibration, and baseline-manifest denylist retained",
   "long_run_policy": {
-    "permitted": true,
+    "permitted": false,
     "maximum_clean_pairs_per_exact_commit": 1
   },
   "failure_policy": {

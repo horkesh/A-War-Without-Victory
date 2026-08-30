@@ -1333,3 +1333,36 @@ diagnosis, or runtime verification is claimed by this row.
   Disjoint R7 may continue under its existing roadmap authority.
 - No run, retry, diagnosis, instrumentation, supervisor redesign, correction, recovery route, or
   successor authority follows. Every receipt execution and verification budget is zero.
+
+## Owner disposition — planning-duration budget validation — 2026-08-30
+
+- Owner-authorized task: `RE-PLANNING-DURATION-BUDGET-OWNER-DISPOSITION` /
+  `owner-authorized-amend-validate-and-rebaseline`; exact implementation commit `6da16cef6`.
+- Production change: `sector_offensive.ts` now permits a prepared/staged `CorpsOperation` to enter
+  execution after one full planning turn; `planning_duration` remains the deterministic
+  march/preparation and anti-paralysis budget. Ops-only brigade attack authority and
+  execution-only elite combat-roster admission are unchanged.
+- TDD receipt: corrected focused test failed at the later staged operation (`planning` received,
+  `execution` expected), then passed after the production change. Focused ownership/provenance set:
+  5 files / 92 tests, exit 0. Typecheck exit 0.
+- Suite limitation: `test:vitest:balanced` and `npm test` both emitted no assertion failure but did
+  not terminate after their workers became CPU-idle; each was interrupted and is not a pass.
+- Single long run consumed at
+  `F:\A-War-Without-Victory\runs\re_planning_budget_6da16cef6\apr1992_definitive_188w__46834a3b41033bff__w188_n0`:
+  Node `v22.21.1`, `git_dirty:false`, scenario hash `46834a3b41033bff`, final hash
+  `c0d234f075cec562`.
+- Measured: 55,915 killed; 205,278 wounded; 865 attack orders; 659 battles; 37 AAR operations;
+  corrected inert operations 5/37 and axes 8/55; planning deaths 74; `political_blocked` 38.
+  Compared with `037396e3c`, this is +7,832 killed, +23,883 wounded, +181 orders, +167 battles,
+  and 20 fewer political-blocked planning deaths. It reproduces the pre-`037` `0f341929a`
+  behavioral counts within 7 killed and 11 wounded.
+- Provenance: 0/659 battles lack `operation_id`; all 125 combat control events join to an
+  operation-owned battle. Enclave guard is 9/9; Srebrenica falls t162 and Žepa t164. The generic
+  verifier remains red solely on the known Farz P-A discriminator and is not a §6 enclave breach.
+- Historical/cadence falsifiers did not fire: 55,915 is within the accepted 55k-62k KIA band and
+  legal operation throughput materially recovered. One invalid operation remains, matching the
+  pre-`037` artifact; `valid_for_combat_calibration` is therefore false and is retained as a caveat.
+- January measured 688. The established measured-minus-three convention proposes 685, replacing
+  the contaminated 694 floor. No calibration file changed: `check_re_scope.ps1` hard-requires
+  `data/calibration/**` in every RE denylist. Threshold application is a separate calibration
+  governance handoff. Scenario files and the baseline manifest remained byte-untouched.
