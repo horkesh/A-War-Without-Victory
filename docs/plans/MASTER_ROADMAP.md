@@ -94,6 +94,23 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
   [full-team dispositions](../40_reports/proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md).
 
 - **Complete:** R1, R2, R3, R4, R5, and the defined pre-1.0 scope of R6.
+- **Unscheduled work landed 2026-08-29/30, recorded so it is not mistaken for roadmap progress.**
+  Verifying the R7 opening art in a packaged build exposed three pre-existing defects, all now fixed:
+  the packaged app was dead on startup on a missing `build.files` entry; beneath it the production
+  tactical-map bundle never booted at all (cyclic chunk graph from source-level `manualChunks`, 26
+  cycles); and `srebrenica_enclave_forms_1992` gated the whole atrocity chain on a global territory
+  share that had already failed silently at `037396e3c` by three OSIDs and one week. The enclave
+  re-gating was owner-approved after a split four-seat panel
+  ([record](../40_reports/proposals/20260830_PANEL_63671dd8c_ENCLAVE_TRIGGER_AND_PLANNING_CANON.md)),
+  and carries a new anomaly detector proven against the original failing run. **None of this was
+  scheduled**; the only enclave items on this roadmap are deferred post-1.0. R7's own open gates and
+  RE's packet queue are untouched by it.
+- **Open and unrepaired:** the jan1993 checkpoint floor is BREACHED at **688 against 694**, attributed
+  to `175bea593` (ops-only attack doctrine); no commit in the RE-0C/0D chain repairs it, and the
+  baseline manifest must not be re-reconciled to hide it. `037396e3c` additionally cut `total_killed`
+  by 24% and tripled `political_blocked` planning deaths, and warrants reconsideration on its own.
+  Per-commit evidence:
+  [S0 ladder](../40_reports/20260829_RE_S0_CHECKPOINT_LADDER_AND_FLOOR_BREACH.md).
 - **Complete RC narrow packet:** the default-OFF v3 selector plus reversible D-shape is retained. Paired 188-week runs produced hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 bot benchmarks, 7/7 health gates, one live non-enclave HRHB damage/capacity write, and full Section 6 pass. Bucovaca peaked at strain 62 and recovered to 37; Sipovo/Drvar peaks remained 11/7.5. D-topology neighbour cascade remains owner-reserved and is post-1.0.
 - **Parallel non-engine lane:** R7 audio implementation landed at `2d106e5e0`. Cinematic-opening
   mechanics, unified typography, and the five-viewport browser proof are complete, and the two

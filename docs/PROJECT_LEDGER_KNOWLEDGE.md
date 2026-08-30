@@ -4732,3 +4732,34 @@ structural version is `tools/ui/check_chunk_cycles.cjs` on the emitted chunks, w
 `desktop:release:check` so packaging cannot ship a cyclic bundle.
 
 Applied in `[2026-08-29] fix(build): break the tactical-map chunk cycle`.
+
+## 2026-08-30 - A decisive outcome must not hang from a global aggregate
+
+`srebrenica_enclave_forms_1992` gated the entire Srebrenica/Žepa atrocity chain on
+`RS territory_percentage > 0.48` inside a 14-turn window. Territory share is a property of the whole
+map, so every change to operational tempo, OOB, exhaustion or launch timing moves it. One did: an
+operations-timing change left RS at 47.61% at w20 against the 48% line — **three settlements and one
+week short** — the flag never set, and the game silently stopped recording the genocide.
+
+The failure had three properties that made it invisible. It was **non-local**: the cause was an
+operations change, the symptom was an enclave 200km away. It was **total**: one unset flag removed
+the fall, the rupture, the condemnation, the grade cap, *and* the "Srebrenica Survives" counter-path,
+because they all keyed off the same flag. And it was **silent**: no test, typecheck or CI gate covered
+it; only a hand-run guard did, and only because someone chose to run it.
+
+The repair is to gate on the local facts that constitute the outcome — Srebrenica RBiH, Zvornik RS,
+Bratunac RS, which is *why* it was an enclave — rather than on a proxy that correlates with them. A
+local condition cannot be pushed below a threshold by unrelated work, because there is no threshold.
+
+Generalise: **when an outcome matters, gate it on the specific facts that make it true, never on an
+aggregate that merely tends to accompany them.** And where a chain hangs from one flag with one
+setter inside a bounded window, add a detector for the window closing unset — the absence of an event
+is not self-reporting, and a chain that dies produces silence rather than an error.
+
+A second, sharper lesson from the same investigation: **a guard whose sensitivity depends on engine
+health cannot certify engine health.** The enclave guard's only non-vacuous cell (Teočak) decayed
+5 → 2 → 2 → 0 → 1 battles across the RE-0C/0D chain, tracking the same tempo collapse that caused the
+breach. At `037396e3c` the guard was simultaneously **fully vacuous and breached** — one suppression,
+two symptoms. Six of its seven hold-cells are UNCONTESTED today; the falls half does all the work.
+
+Applied in `[2026-08-30] fix(events): gate the Srebrenica chain on local control, not a territory share`.

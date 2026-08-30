@@ -30577,3 +30577,92 @@ and `noop_4w` carry no `init_control`, formations or territory, so their green d
 not block it: one 188w pair around `0f341929a` / `037396e3c`, then `op_schedule_diff` and
 `verify_checkpoints` between them, to settle whether those five planning windows are the whole -6.
 Held pending owner authorisation; two 188-week runs is a real commitment.
+
+## 2026-08-30 — Srebrenica chain re-gated on local control, and a detector so it cannot fail silently
+
+**Owner-approved** after a four-seat Pyrrhic panel returned a split verdict. Full record:
+`docs/40_reports/proposals/20260830_PANEL_63671dd8c_ENCLAVE_TRIGGER_AND_PLANNING_CANON.md`.
+
+**Behavioural change (`501bb4ad9`).** `srebrenica_enclave_forms_1992` was gated on
+`RS territory_percentage > 0.48 AND flag jna_withdrawn` inside `turn_min 6 / turn_max 20`. It is now
+gated on three local control facts: `op:srebrenica:srebrenica_2` RBiH, `op:zvornik:zvornik` RS,
+`op:bratunac:bratunac_2` RS. The 1995 fall receipts additionally require the enclave capital still be
+RBiH-held, so a pre-window combat capture no longer suppresses the humanitarian receipt.
+
+**Why.** A §6-decisive outcome was coupled to a global territory aggregate that any engine change can
+move, and it had already failed: at `037396e3c` an operations-timing change left RS at **47.61% at
+w20** against a 48% threshold — short by **three OSIDs and one week** — the flag never set, and
+Srebrenica and Žepa stopped falling. Historically the enclave formed because the VRS took the Drina
+valley around it (Zvornik 8–9 April 1992, Bratunac that month), so the new condition is also the
+correct 1992 configuration. It makes the falls half of the enclave guard **tempo-independent**.
+
+**Detector (`65c64482c`).** `detectSrebrenicaChainBroken` in `src/scenario/anomaly_detector.ts`
+reports `critical` when a run passes turn 20 without the enclave event, and stays silent for mid-war
+scenarios starting after the window. It exists because the failure mode is total and silent:
+`srebrenica_enclave_formed` has exactly one setter, and `evaluateRuptureConsequences` opens with an
+unconditional early return on it, so a missed window means no fall, no genocide rupture, no
+condemnation, no grade cap — and no "Srebrenica Survives" counter-narrative either, since
+`csq_srebrenica_stalemate_1995` needs the same flag. Before this, nothing detected it:
+`anomaly_detector.ts` had zero matches for "rupture" or "enclave", `run_summary.json` carries no
+rupture field, and the precise guard exists as data at `historical_anchors.ts:186` (cited BB1 p.187)
+with **no evaluator** — `HISTORICAL_EVENT_ANCHORS_*` is imported only by a contract test that checks
+id uniqueness and citations, never `fired_event_ids`.
+
+**Proven against the real failure, not only fixtures.** Pointed at the `037396e3c` run the detector
+**fires**; at the `63671dd8c` run it stays **silent**. It would have caught the original breach on the
+day. Five unit tests cover fire, healthy path, both sides of the boundary turn, and mid-war starts.
+
+**Taken from `63671dd8c`: event data and its tests ONLY.** Its code and canon halves were already
+merged via `7c472e065` (`sector_offensive.ts` byte-identical, blob `36be99cda7428fe6`). **The panel
+rejected its four canon edits** — they write into Engine Invariants a reading of `planning_duration`
+that the operation catalog's own comments contradict, every documented value there being a march
+budget rather than a staff minimum.
+
+**NOT done, deliberately.** `csq_enclave_held_alt_intervention` gates on `flag_not_set`
+`srebrenica_fallen` / `zepa_fallen` / `gorazde_fallen`, and **none of those three names is ever
+written** — all three conditions are vacuously true and the event fired at w145. It is not a rename:
+`zepa_falls_1995` sets no flags at all and there is no `gorazde_fell`, because Goražde never falls.
+Correcting it would change *when* a consequence event fires, which is a gameplay change and needs its
+own review. Left as-is and recorded here.
+
+**Verified:** `tests/ui` boundary plus event, anchor and detector suites — **345 files / 3018 tests,
+exit 0**; `npx tsc --noEmit` exit 0.
+
+## 2026-08-30 — Session closeout: what was asked, what happened, and the scope drift
+
+**The task was:** integrate three approved images into the cinematic opening. That is `c95f337ed`,
+`106be487b`, `91784d275`, and it was complete and pushed early.
+
+**Everything after came from verifying it, then from owner direction.** Verifying the art in a
+packaged build found the packaged app dead on startup (missing `build.files` entry, `07977ca98`);
+fixing that found the production bundle never booted at all (cyclic chunk graph, `ccc98891f`);
+pushing that turned CI red (inherited baseline drift, `94fb3b832`); diagnosing that led to RE
+ownership passing to this session, a lane question, a canon panel, and finally the Srebrenica fix.
+
+**The drift should have been surfaced earlier.** The honest checkpoint was after the CI diagnosis:
+*the UI task is done and pushed; separately the packaged app has never worked and CI has not executed
+since 2026-08-07 — continue?* That question was not asked, and the work continued into event triggers
+and §6 canon, which no roadmap item schedules. Steps from RE ownership onward were owner-directed;
+the path to them was not deliberately chosen. Recorded so the next session does not read this
+sequence as a precedent for open-ended thread-pulling.
+
+**Roadmap position is unchanged by any of it.** R7's open gates — human/audio sensitivity review,
+broader English accessibility/readability, closeout reconciliation — were not touched. RE's P2B
+remains unimplemented and P3–P7 remain queued. The enclave work is not on the roadmap; the only
+enclave items there are explicitly deferred post-1.0.
+
+**Still open, carried forward:**
+- **jan1993 floor breach**: 688 vs 694, attributed to `175bea593` (ops-only attack doctrine); no
+  commit in the RE-0C/0D chain repairs it. Baseline manifest must not be re-reconciled.
+- **`037396e3c` should be reconsidered**: it cut `total_killed` 24% (62,958 → 48,083), tripled
+  `political_blocked` planning deaths (17 → 58), and is what broke the enclave chain.
+- **RE probe font failure**: 8 `ERR_CACHE_MISS`, mechanism unknown, two hypotheses falsified. Needs
+  one instrumented probe run, which is a retry and requires a deliberate amendment.
+- **`verify_checkpoints.cjs` prints `RESULT: GUARD BREACHED` on runs whose enclave guard is 9/9
+  correct** — it is the carved-out Farz discriminator. Misleading on the most sensitive gate in the
+  project; fix the result string.
+- **Three dead flag names** above.
+- **Lane divergence** `63671dd8c` vs `47d6d9358` remains unresolved; the sibling lane is ~25
+  governance commits behind and its checkpoint advantage is inadmissible at 53.6% rung-4 divergence.
+- **Two-family typography does not cover `src/ui/warroom`** — 11 non-canonical declarations, mostly
+  in the legacy recovery path, one Courier New in a reachable modal.
