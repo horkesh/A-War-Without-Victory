@@ -866,8 +866,11 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         // Operation Donji Vakuf — 1KK secures the Vrbas valley south of Jajce.
         // Historically the 19th and 31st Krajina brigades were organic to Donji Vakuf
-        // (BB1 p.498). Seven turns cover the 31st's measured six-hop displacement plus
-        // the mandatory planning turn, preserving the authored march-budget semantics.
+        // and the 16th Krajina Motorized was a 1KK formation (BB1 p.498). The 16th
+        // supplies the heavy follow-through after its preceding Corridor commitment;
+        // in the measured handoff it is rested and already on the Donji Vakuf front.
+        // Seven turns cover the 31st's measured six-hop displacement plus the mandatory
+        // planning turn, preserving the authored march-budget semantics.
         //
         // Fires after Op Jajce completes (queued 4th in 1KK chain).
         // Staging pribeljci_2: Sipovo municipality (RS initial + RS painted), adjacent to
@@ -897,6 +900,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     // same-corps probes from consuming the local follow-through force.
                     'rs_22nd_krajina_infantry' as FormationId,
                     'rs_5th_kozara_light_infantry' as FormationId,
+                    'rs_16th_krajina_motorized' as FormationId,
                 ],
                 // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
                 // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 →

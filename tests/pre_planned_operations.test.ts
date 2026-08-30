@@ -277,6 +277,7 @@ describe('pre-planned operations', () => {
         );
         assert.ok(sweep.brigades.includes('rs_22nd_krajina_infantry'));
         assert.ok(sweep.brigades.includes('rs_5th_kozara_light_infantry'));
+        assert.ok(sweep.brigades.includes('rs_16th_krajina_motorized'));
     });
 
     it('uses a full-operation Vlasic axis to clear the isolated Gornje Krcevine pocket', () => {

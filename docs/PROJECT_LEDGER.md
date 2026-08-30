@@ -30733,3 +30733,37 @@ suite reported no assertion failure after the strict-null inventory was updated,
 to terminate during its serial teardown tail and was interrupted, so it is not recorded as passing.
 The referenced determinism skill file `docs/PHASE_A_INVARIANTS.md` is absent in this worktree;
 DETERMINISM_TEST_MATRIX, CODE_CANON, and Engine Invariants §14.2/§14.9 were reviewed instead.
+
+## 2026-08-30 — Donji Vakuf follow-through restored with the 16th Krajina Motorized
+
+**Owner direction:** after correcting movement-order ownership, address the remaining January 1KK
+regression without calibrating over an engine defect. The corrected engine handed Operation Jajce
+to Operation Donji Vakuf normally, but the original Donji Vakuf roster captured only Oborci and
+failed repeatedly at the town. At turn 28 the 16th Krajina Motorized was active, rested, uncommitted,
+and already at `op:donji_vakuf:kutanja`; BB1 p.498 identifies it as a 1KK formation. It is now an
+authored participant on the operation's main sweep. No new operation or exceptional control path
+was added.
+
+**Measured bounded result:** against the movement-provenance baseline at
+`F:\A-War-Without-Victory\runs\codex_1kk_movement_provenance\apr1992_definitive_188w__4908593adc34e5a1__w40_n0`,
+the retained 40-week run at
+`F:\A-War-Without-Victory\runs\codex_1kk_dv_16th_repeat\apr1992_definitive_188w__4908593adc34e5a1__w40_n0`
+raises January matched control from **691 to 693**. By turn 40 its only controller differences are
+Donji Vakuf town, Prusac, and Korenići changing from RBiH to RS; Korenići falls on turn 40 after the
+week-39 January checkpoint. Operation Jajce is unchanged. Donji Vakuf records ten attacks and four
+main-axis captures; the separate Vlašić axis still fails Gornje Krčevine. Total 40-week killed and
+wounded are 9,940 and 38,631, with 16 operations and one dead operation. Two identical runs produced
+the same final-state hash, `b0cfa41e0b774fc4`.
+
+**Falsified alternatives, fully reverted:** replacing the sweep's 22nd/5th formations with the 11th
+Mrkonji/1st Šipovo local pair stalled after Oborci and destroyed the 31st. Assigning the local 12th
+Kotorsko to Vlašić committed it at morale 23 and destroyed it by turn 31 without a capture. Adding
+the rested 2nd Krajina to Vlašić likewise produced no checkpoint or controller gain and increased
+40-week killed to 10,190. These results reject both blanket localism and feeding more formations into
+the side axis. The remaining 694-versus-693 point is not repaired by force inflation.
+
+**Verification and scope:** pre-planned, multi-axis, and in-transit predictor suites passed 94/94;
+typecheck exited zero; `git diff --check` was clean. The generic 40-week health invocation passes
+operation causality, consistency, ghost-destruction, and K/W-ratio checks but reports the known
+inapplicable 188-week matched-control floor and pre-existing stranded-brigade debt. No 188-week run
+was started. No scenario, calibration data, canon, or baseline manifest changed.
