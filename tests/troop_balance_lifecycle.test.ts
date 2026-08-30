@@ -10,6 +10,7 @@ import {
     MAX_BRIGADE_PERSONNEL,
 } from '../src/state/formation_constants.js';
 import { reinforceBrigadesFromPools } from '../src/sim/formation_spawn.js';
+import { reinforceFromStrategicReserves } from '../src/sim/combat/strategic_reserve.js';
 import { processLifecycleEvents, type LifecycleEventDef } from '../src/sim/formation_lifecycle_events.js';
 import type { GameState, FormationState } from '../src/state/game_state.js';
 
@@ -113,6 +114,48 @@ describe('emergent growth - no hardcoded ceilings', () => {
         const report = reinforceBrigadesFromPools(state);
         expect(report.formations_reinforced).toBe(0);
         expect(report.manpower_added).toBe(0);
+    });
+
+    it('reinforcement cannot enter a critical or stranded pocket', () => {
+        const state = makeState({
+            b1: {
+                faction: 'RBiH', personnel: 1500, tags: ['mun:sarajevo_centar'],
+                location_osid: 'op:test:pocket', stranded_status: 'holding',
+            },
+        }, {
+            political: { last_supply_state_by_osid: { 'op:test:pocket': 'critical' } } as any,
+        });
+        state.military.militia_pools = {
+            'sarajevo_centar:RBiH': {
+                mun_id: 'sarajevo_centar', faction: 'RBiH', available: 500,
+                committed: 0, exhausted: 0, updated_turn: 10,
+            },
+        } as any;
+
+        const report = reinforceBrigadesFromPools(state);
+
+        expect(report.formations_reinforced).toBe(0);
+        expect(report.manpower_added).toBe(0);
+        expect(state.military.formations.b1.personnel).toBe(1500);
+    });
+
+    it('strategic reserves cannot enter a critical or stranded pocket', () => {
+        const state = makeState({
+            b1: {
+                faction: 'RBiH', personnel: 1500, tags: ['mun:sarajevo_centar'],
+                location_osid: 'op:test:pocket', stranded_status: 'holding',
+            },
+        }, {
+            political: { last_supply_state_by_osid: { 'op:test:pocket': 'critical' } } as any,
+            military: { strategic_reserves: { RBiH: 500 } } as any,
+        });
+
+        const report = reinforceFromStrategicReserves(state);
+
+        expect(report.formations_reinforced).toBe(0);
+        expect(report.manpower_distributed).toBe(0);
+        expect(state.military.formations.b1.personnel).toBe(1500);
+        expect(state.military.strategic_reserves?.RBiH).toBe(500);
     });
 
     it('reinforcement stops at MAX_BRIGADE_PERSONNEL', () => {

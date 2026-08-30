@@ -20,6 +20,7 @@ import type { GameState, FormationId, FactionId } from '../../state/game_state.j
 import { isEnclaveBrigade } from './enclave_resilience.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { Osid } from './osid_adjacency.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -36,8 +37,47 @@ export interface StrandedBrigadeReport {
     newly_stranded: string[];
     still_holding: string[];
     reconnected: string[];
+    /** Brigades moved intact from a critical salient to a supplied corps line. */
+    orderly_withdrawals: string[];
     /** Retained for report compatibility; canonical dissolution owns removal. */
     collapsed: string[];
+}
+
+function findOrderlyWithdrawalDestination(
+    locationOsid: string,
+    faction: FactionId,
+    corpsId: string,
+    state: GameState,
+    adjacency: ReadonlyMap<Osid, readonly Osid[]>,
+): string | null {
+    if (state.political.last_supply_state_by_osid?.[locationOsid] !== 'critical') return null;
+    const controllers = state.political.political_controllers ?? {};
+    const sectors = state.military.corps_front_sectors ?? {};
+    const suppliedTargets = new Set<string>();
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        for (const osid of sector.territory_osids) {
+            if (controllers[osid] !== faction) continue;
+            if (state.political.last_supply_state_by_osid?.[osid] === 'critical') continue;
+            suppliedTargets.add(osid);
+        }
+    }
+    if (suppliedTargets.size === 0) return null;
+
+    const visited = new Set<string>([locationOsid]);
+    const queue = [locationOsid];
+    for (let i = 0; i < queue.length; i += 1) {
+        const current = queue[i]!;
+        if (suppliedTargets.has(current)) return current;
+        for (const neighbor of adjacency.get(current as Osid) ?? []) {
+            if (visited.has(neighbor)) continue;
+            if (!isFriendlyFaction(controllers[neighbor], faction, state)) continue;
+            visited.add(neighbor);
+            queue.push(neighbor);
+        }
+    }
+    return null;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -152,6 +192,7 @@ export function updateStrandedBrigadeLifecycle(
         newly_stranded: [],
         still_holding: [],
         reconnected: [],
+        orderly_withdrawals: [],
         collapsed: [],
     };
 
@@ -194,6 +235,24 @@ export function updateStrandedBrigadeLifecycle(
         // --- Phase 4: Reachability check ---
         const corpsId = f.corps_id;
         if (!corpsId) continue; // Unattached brigades are not subject to stranded lifecycle
+
+        const withdrawalDestination = findOrderlyWithdrawalDestination(
+            f.location_osid, f.faction, corpsId, state, adjacency,
+        );
+        if (withdrawalDestination && withdrawalDestination !== f.location_osid) {
+            f.location_osid = withdrawalDestination;
+            f.assignment = null;
+            f.entrenchment_turns = 0;
+            f.stranded_status = 'reconnected';
+            f.stranded_since_turn = undefined;
+            f.last_reachable_turn = turn;
+            delete state.military.brigade_movement_orders?.[fid];
+            delete state.military.brigade_movement_state?.[fid];
+            report.orderly_withdrawals.push(fid);
+            report.reconnected.push(fid);
+            report.updated++;
+            continue;
+        }
 
         const reachable = canReachCorpsSectorFront(
             f.location_osid, f.faction, corpsId, state, adjacency,

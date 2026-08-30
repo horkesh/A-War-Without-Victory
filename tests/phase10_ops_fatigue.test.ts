@@ -3,7 +3,7 @@ import { test } from 'vitest';
 import type { FrontEdge } from '../src/map/front_edges.js';
 import type { FrontRegionsFile } from '../src/map/front_regions.js';
 import type { EdgeRecord, SettlementRecord } from '../src/map/settlements.js';
-import { updateFormationFatigue } from '../src/state/formation_fatigue.js';
+import { isFormationSupplied, updateFormationFatigue } from '../src/state/formation_fatigue.js';
 import { applyFormationCommitment } from '../src/state/front_posture_commitment.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
 import { updateMilitiaFatigue } from '../src/state/militia_fatigue.js';
@@ -32,6 +32,35 @@ function edge(edge_id: string, side_a: string, side_b: string): FrontEdge {
 // ============================================================================
 // A) Formation fatigue update rules
 // ============================================================================
+
+test('formation supply: critical physical OSID overrides a sector assignment', () => {
+    const state = {
+        schema_version: CURRENT_SCHEMA_VERSION,
+        meta: { turn: 5, seed: 'sector-critical-supply' },
+        factions: [],
+        military: { formations: {}, front_segments: {}, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {} } as any,
+        political: {
+            political_controllers: { 'op:test:pocket': 'RBiH' },
+            last_supply_state_by_osid: { 'op:test:pocket': 'critical' },
+        } as any,
+        displacement: {} as any,
+    } as unknown as GameState;
+    const formation = {
+        id: 'pocket_brigade', faction: 'RBiH', name: 'Pocket Brigade', kind: 'brigade',
+        created_turn: 1, status: 'active', location_osid: 'op:test:pocket',
+        assignment: { kind: 'sector', sector_id: 'sector:test' },
+    } as any;
+
+    const supplied = isFormationSupplied(
+        state,
+        formation,
+        new Map(),
+        { schema: 1, turn: 5, regions: [] },
+        [],
+    );
+
+    assert.strictEqual(supplied, false, 'a sector roster must not manufacture supply inside a critical pocket');
+});
 
 test('formation fatigue: assigned + unsupplied => fatigue increments by 1 per turn', () => {
     const state = {

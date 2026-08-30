@@ -30767,3 +30767,33 @@ typecheck exited zero; `git diff --check` was clean. The generic 40-week health 
 operation causality, consistency, ghost-destruction, and K/W-ratio checks but reports the known
 inapplicable 188-week matched-control floor and pre-existing stranded-brigade debt. No 188-week run
 was started. No scenario, calibration data, canon, or baseline manifest changed.
+
+## 2026-08-30 — Critical-salient withdrawal and physical supply truth
+
+**Owner direction:** a field brigade must not remain in a temporary salient until it is encircled;
+commanders withdraw it to the main line, while the historically persistent enclave exceptions remain.
+The January map exposed the 706th Muslim Mountain at Gornje Krčevine as `holding` from turn 1 while
+sector assignment falsely advanced `last_supplied_turn` every week and ordinary plus strategic-reserve
+reinforcement rebuilt it from 440 to 1,800 personnel inside a critical pocket.
+
+**Engine correction:** physical critical-OSID supply now overrides administrative edge/region/sector
+assignment. Critical or `holding` formations cannot receive external municipality-pool or strategic-
+reserve manpower; authored enclave-local recruitment remains separate. The stranded lifecycle now
+withdraws a non-enclave critical brigade intact along a deterministic friendly/allied path to the
+nearest supplied same-corps line, clearing obsolete entrenchment, assignment, and movement state.
+When a combat capture newly severs a smaller component, the resolver likewise permits orderly escape
+through the just-collapsed neck; it does not invent casualties. Hard-coded enclave brigades are excluded.
+
+**TDD and verification:** new supply, both reinforcement paths, proactive allied-corridor withdrawal,
+capture-time severance, enclave exclusion, and resolver-integration assertions failed before their
+owners changed and pass afterward. Focused and adjacent lifecycle/combat/territory suites passed
+129/129; typecheck exited zero; `git diff --check` was clean.
+
+**Bounded measurement:** no 188-week run was started. The retained 39-week diagnostic is
+`F:\A-War-Without-Victory\runs\codex_proactive_withdrawal_jan1993\apr1992_definitive_188w__d3464b9122c3c8e9__w39_n0`
+(`git_dirty:true`, owner-authorized provenance override, final hash `12b36431805242df`). The 706th
+withdraws on turn 1 through the allied corridor, ends active at `op:travnik:gluha_bukovica` with
+1,798 personnel and current supply, while Gornje Krčevine is RS. January control is **694/712**.
+The remaining 14 active `holding` records are HVO formations in the persistent Orašje/Posavina and
+Central Bosnia pockets, not transient Jajce-style salients. No scenario, calibration data, canon, or
+baseline manifest changed.

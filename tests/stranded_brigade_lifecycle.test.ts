@@ -139,6 +139,33 @@ function makeState(overrides: {
 describe('stranded_brigade_lifecycle', () => {
 
     describe('newly stranded detection', () => {
+        it('withdraws a critical brigade through allied territory to its supplied corps line', () => {
+            const formations = {
+                brig_1: makeBrigade('brig_1', 'RBiH', 'corps_5', 'pocket'),
+            };
+            const sectors = {
+                'sector:corps_5': makeSector('corps_5', 'RBiH', ['rear']),
+            };
+            const controllers: Record<string, string | null> = {
+                pocket: 'RBiH', corridor: 'HRHB', rear: 'RBiH',
+            };
+            const state = makeState({
+                formations,
+                corps_front_sectors: sectors,
+                political_controllers: controllers,
+                last_supply_state_by_osid: { pocket: 'critical', corridor: 'adequate', rear: 'adequate' },
+                turn: 5,
+            });
+            state.political.war_alliance_rbih_hrhb = 0.75;
+
+            const report = updateStrandedBrigadeLifecycle(state, chainAdj(['pocket', 'corridor', 'rear']));
+
+            expect(report.orderly_withdrawals).toEqual(['brig_1']);
+            expect(formations.brig_1.location_osid).toBe('rear');
+            expect(formations.brig_1.personnel).toBe(1500);
+            expect(formations.brig_1.stranded_status).toBe('reconnected');
+        });
+
         it('classifies an unreachable brigade as holding', () => {
             // Layout: sector at o1, brigade at o3, enemy at o2 blocks path
             const formations = {

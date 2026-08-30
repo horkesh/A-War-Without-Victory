@@ -3,7 +3,7 @@
  * Large-settlement list for control flip resistance; max brigades per municipality.
  */
 
-import type { MunicipalityId } from './game_state.js';
+import type { FormationState, GameState, MunicipalityId } from './game_state.js';
 import type { WarTimeline } from './war_timeline.js';
 import { lookupStepCurve } from './war_timeline.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
@@ -189,6 +189,22 @@ export function isEligibleForReinforcement(f: { kind?: string; readiness?: strin
     if (f.kind === 'paramilitary') return false;
     if (f.readiness === 'degraded' || f.readiness === 'forming') return false;
     if (Array.isArray(f.tags) && f.tags.includes('enclave')) return false;
+    return true;
+}
+
+/**
+ * Whether manpower outside the formation's pocket can reach it.
+ *
+ * Administrative assignment is not a logistics route: a brigade physically at
+ * a critical OSID, or already classified as stranded, cannot draw from either a
+ * municipality pool or the faction strategic reserve. Hard-coded enclave local
+ * recruitment is handled separately by the enclave reinforcement pass.
+ */
+export function isEligibleForExternalReinforcement(state: GameState, f: FormationState): boolean {
+    if (!isEligibleForReinforcement(f)) return false;
+    if (f.stranded_status === 'holding' || f.stranded_status === 'collapsed') return false;
+    const location = f.location_osid;
+    if (location && state.political.last_supply_state_by_osid?.[location] === 'critical') return false;
     return true;
 }
 

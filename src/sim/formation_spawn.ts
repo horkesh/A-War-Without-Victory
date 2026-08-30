@@ -14,7 +14,7 @@ import {
     getFactionReinforcementMult,
     getMaxBrigadesPerMun,
     getMaxPersonnel,
-    isEligibleForReinforcement,
+    isEligibleForExternalReinforcement,
     isInCombat,
     MAX_BRIGADE_PERSONNEL,
     MAX_TO_PER_MUN,
@@ -302,6 +302,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
 
         for (const id of formationIds) {
             const f = formations[id] as FormationState;
+            if (!isEligibleForExternalReinforcement(state, f)) continue;
             const mun_id = getMunIdFromFormation(f);
             const faction = f.faction;
             if (!mun_id || !faction) continue;
@@ -313,7 +314,6 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             let tierCap: number;
             if (kind === 'brigade') {
                 tierCap = getMaxPersonnel(f);
-                if (!isEligibleForReinforcement(f)) continue;
             } else {
                 // militia-kind: detachment or battalion — derive tier from personnel
                 if (current >= MIN_BATTALION_THRESHOLD) {
@@ -400,7 +400,7 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         const faction = f.faction;
         if (!mun_id || !faction) continue;
 
-        if (!isEligibleForReinforcement(f)) continue;
+        if (!isEligibleForExternalReinforcement(state, f)) continue;
 
         const current = f.personnel ?? MIN_BRIGADE_SPAWN;
         const cap = getMaxPersonnel(f);

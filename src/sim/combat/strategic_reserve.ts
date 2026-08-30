@@ -25,7 +25,7 @@ import {
     COMBAT_REINFORCEMENT_RATE,
     getFactionReinforcementMult,
     getMaxPersonnel,
-    isEligibleForReinforcement,
+    isEligibleForExternalReinforcement,
     isInCombat,
     MAX_BRIGADE_PERSONNEL,
     MIN_BRIGADE_SPAWN,
@@ -191,7 +191,7 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
 
         // Only brigades (not militia detachments/battalions — those are local by nature)
         if (f.kind !== 'brigade') continue;
-        if (!isEligibleForReinforcement(f)) continue;
+        if (!isEligibleForExternalReinforcement(state, f)) continue;
 
         const faction = f.faction;
         if (!faction) continue;

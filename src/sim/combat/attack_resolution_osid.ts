@@ -65,6 +65,7 @@ import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
 import { findBrigadeOperationAnywhere, countAxisConcentrationSupport } from './corps_operation_helpers.js';
 import { getBrigadeAxis } from './bot_brigade_ai_osid.js';
+import { evacuateFormationsSeveredByCapture } from './salient_withdrawal.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
@@ -1482,6 +1483,14 @@ export function resolveAttackOrdersOsid(
             // Otherwise adjacent prevController defenders would be weakened for a territory
             // loss that was immediately rolled back and never actually occurred.
             if (flip) {
+                if (prevController) {
+                    evacuateFormationsSeveredByCapture(
+                        state,
+                        targetOsid,
+                        prevController,
+                        adjacency,
+                    );
+                }
                 emitCascadePenaltiesOnFlip(state, targetOsid, prevController, adjacency);
             }
         }

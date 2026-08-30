@@ -60,6 +60,14 @@ export function isFormationSupplied(
     frontRegions: FrontRegionsFile,
     derivedFrontEdges: FrontEdge[]
 ): boolean {
+    // Physical supply truth outranks administrative assignment. In particular,
+    // sector assignments previously fell through as supplied even while their
+    // brigade's OSID was marked critical by the canonical supply pass.
+    const locationOsid = formation.location_osid;
+    if (locationOsid && state.political.last_supply_state_by_osid?.[locationOsid] === 'critical') {
+        return false;
+    }
+
     const assignment = formation?.assignment;
     if (!assignment || typeof assignment !== 'object') {
         // Unassigned: treat as supplied

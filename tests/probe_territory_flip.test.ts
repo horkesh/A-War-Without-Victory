@@ -512,6 +512,35 @@ describe('probe territory flip gate', () => {
         expect(report.flips_applied).toBe(1);
     });
 
+    it('a standing capture evacuates a newly severed brigade through an allied corridor', () => {
+        const { state, edges } = makeScenario('sector_attack');
+        state.factions.push({ id: 'HRHB' as FactionId } as any);
+        state.political.war_alliance_rbih_hrhb = 0.75;
+        state.political.political_controllers!['op:rbih:pocket'] = 'RBiH';
+        state.political.political_controllers!['op:hrhb:corridor'] = 'HRHB';
+        state.political.political_controllers!['op:rbih:rear2'] = 'RBiH';
+        state.political.last_supply_state_by_osid = {
+            'op:rbih:pocket': 'critical',
+            'op:rbih:rear': 'adequate',
+            'op:rbih:rear2': 'adequate',
+        } as any;
+        state.military.formations!['brig_rbih_pocket'] = makeFormation(
+            'brig_rbih_pocket', 'RBiH', 'brigade', 'op:rbih:pocket',
+            { personnel: 1200, posture: 'defend' as any },
+        );
+        edges.push(
+            { edge_id: 'e3', a: 'op:rbih:pocket', b: 'op:hrhb:corridor' } as EdgeRecord,
+            { edge_id: 'e4', a: 'op:hrhb:corridor', b: 'op:rbih:target' } as EdgeRecord,
+            { edge_id: 'e5', a: 'op:rbih:rear', b: 'op:rbih:rear2' } as EdgeRecord,
+        );
+
+        resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+
+        expect(state.political.political_controllers!['op:rbih:target']).toBe('RS');
+        expect(state.military.formations.brig_rbih_pocket.location_osid).toBe('op:rbih:rear');
+        expect(state.military.formations.brig_rbih_pocket.personnel).toBe(1200);
+    });
+
     it('a general_offensive that wins tactically DOES flip political_controllers', () => {
         const { state, edges } = makeScenario('general_offensive');
         const reverseMap = new Map<string, string[]>();
