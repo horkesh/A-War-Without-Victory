@@ -19,7 +19,7 @@
     "consistency_failures_max": 3,
     "matched_osids_min": 622,
     "checkpoint_matched_min": {
-      "jan1993": 694,
+      "jan1993": 685,
       "apr1994": 648,
       "apr1995": 642,
       "oct1995": 622

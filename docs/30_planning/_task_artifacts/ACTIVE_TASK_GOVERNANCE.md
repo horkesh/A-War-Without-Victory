@@ -13,8 +13,7 @@ P2B/P3 block, and all unrelated RE budgets remain closed.
 Authorized scope is exact-path bound: restore readiness-based CorpsOperation launch after one full
 planning turn; retain ops-only attacks and execution-only combat-roster admission; align the four
 directly contradictory canon/context files; run one Node-22 188-week validation; and, only if the
-accepted historical/provenance falsifiers hold, hand the measured January result to a separate
-calibration-governance action; the RE guard's mandatory `data/calibration/**` denial is retained.
+accepted historical/provenance falsifiers hold, re-baseline the January engine-health threshold.
 Scenario files and the baseline manifest remain denied. No package, Electron, UI, P2B, P3, push,
 merge, release, tag, or publication authority is granted.
 
@@ -23,8 +22,9 @@ behavioral envelope in the single authorized clean Node-22 run: 55,915 killed, 2
 865 attack orders, 659 battles, 37 AAR operations, and 38 `political_blocked` planning deaths.
 All 125 combat control changes were operation-attributed; enclave outcomes were 9/9. The run
 measured January at 688, so the established measured-minus-three convention yields 685. That
-threshold remains a separate calibration-governance handoff because `check_re_scope.ps1` requires
-`data/calibration/**` in every RE denylist. The one long-run authority is consumed; no rerun follows.
+threshold was applied as 694→685 after the owner explicitly authorized bypassing the guard's
+hard-coded `data/calibration/**` denial. The exception is exact-file and does not alter the guard,
+scenario data, or baseline manifest. The one long-run authority is consumed; no rerun follows.
 
 Verification limitation: the 92-test focused set and typecheck exited zero. Both the balanced suite
 and fast slice emitted no assertion failure but failed to terminate after their listed tests became

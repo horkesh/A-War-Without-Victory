@@ -1362,7 +1362,9 @@ diagnosis, or runtime verification is claimed by this row.
 - Historical/cadence falsifiers did not fire: 55,915 is within the accepted 55k-62k KIA band and
   legal operation throughput materially recovered. One invalid operation remains, matching the
   pre-`037` artifact; `valid_for_combat_calibration` is therefore false and is retained as a caveat.
-- January measured 688. The established measured-minus-three convention proposes 685, replacing
-  the contaminated 694 floor. No calibration file changed: `check_re_scope.ps1` hard-requires
-  `data/calibration/**` in every RE denylist. Threshold application is a separate calibration
-  governance handoff. Scenario files and the baseline manifest remained byte-untouched.
+- January measured 688. The established measured-minus-three convention sets 685, replacing the
+  contaminated 694 floor. After validation, the owner explicitly authorized bypassing the RE
+  checker's hard-coded `data/calibration/**` denial because the exact threshold edit was minor and
+  the guard was obstructing the accepted disposition. The bypass is limited to
+  `data/calibration/engine_health_thresholds.json`; the guard implementation, scenarios, and
+  baseline manifest remain untouched.

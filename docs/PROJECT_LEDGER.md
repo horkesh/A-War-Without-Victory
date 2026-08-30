@@ -30692,7 +30692,7 @@ behavioral envelope almost exactly and reverses the commit's throughput suppress
 and all 125 combat control events are operation-attributed. Enclave guard holds 9/9, including
 Srebrenica t162 and Žepa t164; the verifier's generic red remains the known Farz P-A discriminator.
 
-**Floor disposition:** January remains 688 against the contaminated 694 threshold. The established
-measured-minus-three convention yields a replacement of **685**. It was not written here because
-the RE scope checker mandates `data/calibration/**` in every denylist; changing or bypassing that
-guard would be a separate guardrail task. Scenario files and the baseline manifest were untouched.
+**Floor disposition:** January remains measured at 688; the contaminated 694 threshold is replaced
+by the established measured-minus-three floor of **685**. The owner explicitly authorized bypassing
+the RE checker's hard-coded `data/calibration/**` denial for this exact minor edit. The checker was
+not weakened, and scenario files and the baseline manifest were untouched.

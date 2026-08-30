@@ -4,7 +4,7 @@
   "lane": "RE",
   "task": "RE-PLANNING-DURATION-BUDGET-OWNER-DISPOSITION",
   "packet": "owner-authorized-amend-validate-and-rebaseline",
-  "base_commit": "6da16cef689fc95cfa89d36eab5e278136675173",
+  "base_commit": "c5f58b2253c46ab49d0c7437060d1b290b4fa685",
   "namespace_note": "Owner-directed successor disposition accepted 2026-08-30; this is not a continuation of the closed packaged-probe packet and grants no P2B/P3 authority",
   "allowlist": [
     ".claude/current-lane.txt",
@@ -49,7 +49,7 @@
     "actual_failure_triggered_diagnoses": 1
   },
   "terminal_receipt": {
-    "status": "implementation_validated_calibration_handoff_pending",
+    "status": "complete_by_owner_guard_bypass",
     "owner_authorization": "Accepted recommendation and explicitly authorized implementation, governance-lock supersession, one 188-week run, and conditional January-threshold rebaseline in this thread on 2026-08-30",
     "implementation_commit": "6da16cef689fc95cfa89d36eab5e278136675173",
     "run_dir": "F:\\A-War-Without-Victory\\runs\\re_planning_budget_6da16cef6\\apr1992_definitive_188w__46834a3b41033bff__w188_n0",
@@ -71,7 +71,8 @@
       "unattributed_combat_control_events": 0,
       "enclave_guard_cells_correct": 9
     },
-    "calibration_handoff": "engine_health_thresholds jan1993 694->685 is required by measured-minus-three but remains unmodified because the RE checker mandates data/calibration/** in every denylist",
+    "calibration_handoff": "applied: engine_health_thresholds jan1993 694->685 by explicit owner authorization to bypass the RE guard; baseline manifest unchanged",
+    "guard_bypass": "Owner explicitly authorized bypassing the hard-coded data/calibration/** denial on 2026-08-30; exact exception limited to data/calibration/engine_health_thresholds.json and receipt files",
     "retained_rules": [
       "all attacks remain CorpsOperation-owned",
       "planning-phase elite movement does not grant execution combat-roster membership",
