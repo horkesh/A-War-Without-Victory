@@ -229,4 +229,33 @@ describe('findEmergencyRetreatOsid reachability', () => {
         // Step 5 finds E itself.
         expect(result).toBe('op:test:e');
     });
+
+    it('returns no destination instead of teleporting a fully cut-off brigade to the main body', () => {
+        const { state, adjacency, reverseMap, friendlyOsids } = buildLinearTopology();
+
+        // C has just fallen. Both adjacent cells are now enemy-held, so there is no
+        // geographically reachable friendly retreat destination from the lost cell.
+        (state.political!.political_controllers as Record<string, string>)['op:test:b'] = 'RS';
+        (state.political!.political_controllers as Record<string, string>)['op:test:d'] = 'RS';
+        friendlyOsids.delete('op:test:b');
+        friendlyOsids.delete('op:test:d');
+
+        const formation: FormationState = {
+            id: 'brig_cut_off',
+            faction: 'RBiH',
+            corps_id: 'corps_test',
+            status: 'active',
+            kind: 'brigade',
+            name: 'Cut-off Brigade',
+            personnel: 500,
+            morale: 50,
+            cohesion: 50,
+            home_osid: 'op:test:a',
+            location_osid: 'op:test:c',
+        } as unknown as FormationState;
+
+        expect(findEmergencyRetreatOsid(
+            state, formation, reverseMap, adjacency, 'op:test:c', friendlyOsids
+        )).toBeNull();
+    });
 });

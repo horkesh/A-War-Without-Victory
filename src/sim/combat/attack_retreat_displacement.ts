@@ -220,7 +220,7 @@ export function getFriendlyRetreatDestinations(
 
 /**
  * Find any friendly OSID for a faction as an emergency retreat destination.
- * Priority: home_osid → fallback_osid → BFS nearest (8 hops) → corps HQ → any friendly.
+ * Priority: home_osid → fallback_osid → adjacent friendly territory → corps HQ.
  * BFS step keeps enclave brigades in their pocket instead of teleporting to corps HQ.
  */
 export function allocateIntegerByWeights(
@@ -276,7 +276,11 @@ export function findEmergencyRetreatOsid(
 
     /** Check if a candidate OSID is reachable from origin through friendly territory. */
     const isReachable = (osid: string): boolean => {
-        if (originComponent === undefined) return true; // no adjacency → can't verify, allow
+        if (originComponent === undefined) {
+            // A just-lost source cell is no longer in a friendly component. With
+            // topology available, home/HQ cannot therefore be presumed reachable.
+            return !(adjacency && origin);
+        }
         const comp = componentOf.get(osid);
         return comp !== undefined && comp === originComponent;
     };
@@ -332,19 +336,13 @@ export function findEmergencyRetreatOsid(
         }
     }
 
-    // 6. Largest friendly component fallback
-    const largestComp = findLargestComponent(componentOf);
-    if (largestComp !== -1) {
-        const compOsids = Array.from(componentOf.entries())
-            .filter(([, comp]) => comp === largestComp)
-            .map(([osid]) => osid)
-            .sort(strictCompare);
-        for (const osid of compOsids) {
-            if (friendly.has(osid)) return osid;
-        }
-    }
+    // A topology-aware retreat may not jump to another connected component. If
+    // the lost cell has no reachable friendly destination, the caller must apply
+    // the cut-off outcome instead of teleporting the formation to the faction's
+    // largest territorial component (the former path sent Cerska units to Kakanj).
+    if (adjacency && origin) return null;
 
-    // 7. Any friendly OSID (sorted for determinism) — absolute last resort
+    // Compatibility fallback for callers that genuinely have no topology.
     const osids = Object.keys(pc).sort(strictCompare);
     for (const osid of osids) {
         if (pc[osid] === factionId) return osid;
