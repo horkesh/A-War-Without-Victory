@@ -17,6 +17,29 @@ export interface SalientWithdrawalReport {
     evacuated_formation_ids: string[];
 }
 
+function operationPocketHolders(state: GameState, faction: FactionId): {
+    participants: Set<string>;
+    stagingOsids: Set<string>;
+} {
+    const participants = new Set<string>();
+    const stagingOsids = new Set<string>();
+    const commands = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        for (const operation of commands[corpsId]?.active_operations ?? []) {
+            if (operation.faction !== faction) continue;
+            if (operation.phase !== 'planning' && operation.phase !== 'execution') continue;
+            for (const brigadeId of operation.participating_brigades ?? []) {
+                participants.add(brigadeId);
+            }
+            if (operation.staging_osid) stagingOsids.add(operation.staging_osid);
+            for (const axis of operation.axes ?? []) {
+                if (axis.staging_osid) stagingOsids.add(axis.staging_osid);
+            }
+        }
+    }
+    return { participants, stagingOsids };
+}
+
 function ownComponents(
     controllers: Readonly<Record<string, string | null>>,
     faction: FactionId,
@@ -118,6 +141,7 @@ export function evacuateFormationsSeveredByCapture(
         return strictCompare(a[0]!, b[0]!);
     });
     const main = new Set(components[0]!);
+    const operationHolders = operationPocketHolders(state, displacedFaction);
 
     const formations = state.military.formations ?? {};
     for (const id of Object.keys(formations).sort(strictCompare)) {
@@ -126,6 +150,10 @@ export function evacuateFormationsSeveredByCapture(
         if (formation.faction !== displacedFaction || isEnclaveBrigade(formation)) continue;
         const start = formation.location_osid;
         if (!start || start === capturedOsid || main.has(start) || controllers[start] !== displacedFaction) continue;
+        // The operation commander owns formations committed to a live plan and
+        // local troops physically holding its assembly area. Generic salient
+        // evacuation must not silently cancel that deliberate pocket defense.
+        if (operationHolders.participants.has(id) || operationHolders.stagingOsids.has(start)) continue;
         const destination = findEvacuationDestination(
             state, start, capturedOsid, displacedFaction, main, adjacency,
         );

@@ -57,4 +57,45 @@ describe('salient withdrawal on a collapsing neck', () => {
         expect(report.evacuated_formation_ids).toEqual([]);
         expect(state.military.formations.enclave.location_osid).toBe('pocket');
     });
+
+    it('does not evacuate a brigade committed to an active operation in the pocket', () => {
+        const state = stateWith({ committed: brigade('committed', 'pocket') });
+        state.military.corps_command = {
+            arbih_2nd_corps: {
+                corps_id: 'arbih_2nd_corps',
+                stance: 'offensive',
+                active_operations: [{
+                    id: 'op_link', name: 'Pocket Link', corps_id: 'arbih_2nd_corps',
+                    faction: 'RBiH', type: 'sector_attack', phase: 'planning',
+                    participating_brigades: ['committed'], axes: [], objectives: [],
+                } as any],
+            } as any,
+        };
+
+        const report = evacuateFormationsSeveredByCapture(state, 'neck', 'RBiH', adjacency);
+
+        expect(report.evacuated_formation_ids).toEqual([]);
+        expect(state.military.formations.committed.location_osid).toBe('pocket');
+    });
+
+    it('does not evacuate a local brigade holding an active operation staging cell', () => {
+        const state = stateWith({ local_guard: brigade('local_guard', 'pocket') });
+        state.military.corps_command = {
+            arbih_2nd_corps: {
+                corps_id: 'arbih_2nd_corps',
+                stance: 'offensive',
+                active_operations: [{
+                    id: 'op_link', name: 'Pocket Link', corps_id: 'arbih_2nd_corps',
+                    faction: 'RBiH', type: 'sector_attack', phase: 'planning',
+                    participating_brigades: ['other'],
+                    staging_osid: 'pocket', axes: [], objectives: [],
+                } as any],
+            } as any,
+        };
+
+        const report = evacuateFormationsSeveredByCapture(state, 'neck', 'RBiH', adjacency);
+
+        expect(report.evacuated_formation_ids).toEqual([]);
+        expect(state.military.formations.local_guard.location_osid).toBe('pocket');
+    });
 });
