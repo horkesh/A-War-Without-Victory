@@ -818,8 +818,8 @@ export function tickPreparation(
     if (!op.preparation_sub_phase) {
         op.preparation_sub_phase = 'intel_gathering';
         op.preparation_turns_elapsed = 0;
-        // If the op definition specifies planning_duration, honour it as a minimum —
-        // an aggressive commander cannot auto-launch before the planned window.
+        // If the op definition specifies planning_duration, preserve it as the full
+        // march/preparation budget before the anti-paralysis timeout can fire.
         const aggressivenessMaxTurns = getPreparationMaxTurns(aggressiveness);
         op.preparation_max_turns = op.planning_duration != null
             ? Math.max(aggressivenessMaxTurns, op.planning_duration)
@@ -830,8 +830,8 @@ export function tickPreparation(
     op.preparation_turns_elapsed = (op.preparation_turns_elapsed ?? 0) + 1;
 
     // Pre-planned ops bypass the preparation state machine — objectives, staging,
-    // and timing are author-validated. Skip straight to 'ready' so the outer
-    // planning_duration gate in sector_offensive.ts is the sole launch gate.
+    // and timing are author-validated. Skip straight to 'ready'; the outer lifecycle
+    // owner still enforces one planning turn plus participant/opening-attack readiness.
     if (op.is_pre_planned === true) {
         op.preparation_sub_phase = 'ready';
         op.commander_assessment = 'launch';

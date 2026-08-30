@@ -20,8 +20,9 @@
  * - Launch: Corps may launch when sector has >= MIN_BRIGADES_FOR_OFFENSIVE (2) assigned,
  *   no existing sector op for that corps, and sector has valid offensive targets. Planning
  *   duration is computed from objective count; force_launch can shorten.
- * - Transition to execution: when planning_elapsed >= planning_duration (or force_launch
- *   and elapsed >= 1). Supply readiness is recorded but does not block launch.
+ * - Transition to execution: after one planning turn when the operation is prepared/staged,
+ *   when the planning-duration budget expires, or through force_launch. Supply readiness is
+ *   recorded but does not block launch.
  * - Eligible attacker: a brigade that may actually attack in execution is one that is in
  *   participating_brigades, assigned to the operation's sector (or explicitly in the op),
  *   can adopt attack/assault posture (not blocked by home_defense_active unless exempt as
@@ -1435,15 +1436,10 @@ export function advanceSectorOffensives(
             // Keep existing elapsed/staged/forcedLaunch gates for non-preparation ops.
             //
             const preparationReady = op.type === 'sector_attack' && op.preparation_sub_phase === 'ready';
-            // A staged historical plan present at scenario birth already represents
-            // pre-scenario staff work. Credit only that opening seam; later queued or
-            // newly planned operations still owe their full declared planning clock.
-            const openingPlanReady = op.is_pre_planned === true
-                && op.started_turn === 0
-                && elapsed === 1
-                && stagedEarly;
-            const plannedLaunchReady = openingPlanReady
-                || (elapsed >= planDuration && (preparationReady || stagedEarly));
+            // planning_duration is the deterministic march/preparation budget, not a
+            // mandatory delay after the operation is ready. Preserve one full planning
+            // turn, then let the existing readiness and opening-attack gates decide.
+            const plannedLaunchReady = elapsed >= 1 && (preparationReady || stagedEarly);
             if (plannedLaunchReady || elapsed > planDuration || forcedLaunch) {
                 if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
                     beginRecovery(op, turn, 'political_blocked', state);

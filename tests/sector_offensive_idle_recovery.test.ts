@@ -85,7 +85,7 @@ describe('equipment offensive priority', () => {
 });
 
 describe('sector offensive idle recovery', () => {
-    it('gives only a staged scenario-birth plan opening credit against the planning-duration floor', () => {
+    it('uses planning duration as a staging budget and launches any ready operation after one planning turn', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,
   meta: { turn: 3, phase: 'war', seed: 'multi-axis-axis-local-readiness' } as any,
@@ -231,7 +231,7 @@ describe('sector offensive idle recovery', () => {
                 state.military.formations[brigadeId]!.location_osid;
         }
         advanceSectorOffensives(unstagedOpeningState, null);
-        expect(unstagedOpeningState.military.corps_command?.rs_corps?.active_operations[0]?.phase).toBe('planning');
+        expect(unstagedOpeningState.military.corps_command?.rs_corps?.active_operations[0]?.phase).toBe('execution');
 
         unstagedOpeningState.meta.turn = 4;
         advanceSectorOffensives(unstagedOpeningState, null);
@@ -246,7 +246,7 @@ describe('sector offensive idle recovery', () => {
         advanceSectorOffensives(state, null);
 
         let op = state.military.corps_command?.rs_corps?.active_operations[0];
-        expect(op?.phase).toBe('planning');
+        expect(op?.phase).toBe('execution');
 
         state.meta.turn = 4;
         advanceSectorOffensives(state, null);

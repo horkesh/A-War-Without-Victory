@@ -1,5 +1,23 @@
 # Active Task Governance
 
+## Owner override — planning-duration disposition (2026-08-30)
+
+The owner accepted the RE S0 historical/casualty investigation recommendation and explicitly
+authorized its implementation, one controlled 188-week validation, conditional January-threshold
+re-baselining, and replacement of the terminal receipt-only scope lock. This narrow successor is
+`RE-PLANNING-DURATION-BUDGET-OWNER-DISPOSITION` /
+`owner-authorized-amend-validate-and-rebaseline`, based on `0a2026173`. It supersedes only the
+statements below that deny this specific successor authority; the closed packaged-probe receipt,
+P2B/P3 block, and all unrelated RE budgets remain closed.
+
+Authorized scope is exact-path bound: restore readiness-based CorpsOperation launch after one full
+planning turn; retain ops-only attacks and execution-only combat-roster admission; align the four
+directly contradictory canon/context files; run one Node-22 188-week validation; and, only if the
+accepted historical/provenance falsifiers hold, hand the measured January result to a separate
+calibration-governance action; the RE guard's mandatory `data/calibration/**` denial is retained.
+Scenario files and the baseline manifest remain denied. No package, Electron, UI, P2B, P3, push,
+merge, release, tag, or publication authority is granted.
+
 ## Task
 
 **Name:** RE — 1.0 Engine Integrity

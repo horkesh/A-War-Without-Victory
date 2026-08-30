@@ -438,7 +438,7 @@ Recruitment catalog visibility and recruitment application must evaluate the sam
 
 ### 14.11 Operation lifecycle and AAR causality
 
-An operation with `planning_duration` must serve that minimum before ordinary execution. The only non-force exception is a staged historical pre-planned operation with `started_turn === 0`, which carries pre-scenario staff-work credit and may enter execution on the first advance; an unstaged opening operation and every later or newly queued operation still owe the full floor. Readiness and attack-executability gates remain binding, and `force_launch` is the sole player-directed bypass.
+An operation must spend at least one full turn in planning before ordinary execution. After that turn, a prepared or staged operation may execute before `planning_duration` expires, but readiness and attack-executability gates remain binding. `planning_duration` is the deterministic march/preparation and anti-paralysis budget: it bounds how long the operation may wait for assembly, and expiry opens the existing forced-attempt or named-recovery path. `force_launch` remains the sole player-directed readiness bypass. None of these transitions grant brigades independent attack authority; attacks still require an executing `CorpsOperation`.
 
 Operation truth is projected from active operations and raw operation history into labeled `proposed`, `planning`, `executing`, `recovery`, `completed`, and `archived` counts. Active and history rows require stable IDs; every raw history row must be visible or have an explicit exclusion reason. Player-generated operations follow the same projection.
 
