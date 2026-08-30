@@ -11,6 +11,7 @@ import type { OpInjectionWarning } from '../src/sim/combat/operation_validation.
 import type {
     CorpsCommandState,
     CorpsFrontSector,
+    CorpsOperation,
     FactionId,
     FormationState,
     GameState,
@@ -842,6 +843,76 @@ describe('pre-planned operations', () => {
             operation!.phase,
             'planning',
             'the persisted four-turn window must prevent former one-turn early invalidation',
+        );
+    });
+
+    it('reclaims bot-discretionary transit when its queued historical operation injects', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 18;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Jajce'];
+        const jajce = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Jajce')!;
+        const southBrigade = jajce.axes.find((axis) => axis.axis_id === 'vrbas_south')!.brigades[0]!;
+        state.military.brigade_movement_state = {
+            [southBrigade]: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:test:unrelated'],
+                turns_remaining: 4,
+                owner: 'bot_discretionary',
+            },
+        };
+        state.military.brigade_movement_orders = {
+            [southBrigade]: {
+                stance: 'column',
+                destination_sids: ['op:test:unrelated'],
+                owner: 'bot_discretionary',
+            },
+        };
+
+        assert.equal(injectQueuedOperation(state, 'vrs_1st_krajina'), true);
+
+        const operation = command.active_operations.find((op) => op.name === 'Operation Jajce');
+        assert.ok(operation);
+        assert.equal(operation.participating_brigades.includes(southBrigade), true);
+        assert.equal(operation.axes?.some((axis) => axis.axis_id === 'vrbas_south'), true);
+        assert.equal(state.military.brigade_movement_state?.[southBrigade], undefined);
+        assert.equal(state.military.brigade_movement_orders?.[southBrigade], undefined);
+    });
+
+    it('does not reclaim bot transit still committed to another active operation', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 18;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        const jajce = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Jajce')!;
+        const southBrigade = jajce.axes.find((axis) => axis.axis_id === 'vrbas_south')!.brigades[0]!;
+        const existingOperation: CorpsOperation = {
+            name: 'Existing bot operation',
+            type: 'probe',
+            phase: 'execution',
+            started_turn: 17,
+            phase_started_turn: 17,
+            participating_brigades: [southBrigade],
+            objectives: ['op:test:other'],
+        };
+        command.active_operations = [existingOperation];
+        command.queued_operations = ['Operation Jajce'];
+        const transit = {
+            status: 'in_transit' as const,
+            stance: 'column' as const,
+            destination_sids: ['op:test:other'],
+            turns_remaining: 2,
+            owner: 'bot_discretionary' as const,
+        };
+        state.military.brigade_movement_state = { [southBrigade]: structuredClone(transit) };
+
+        assert.equal(injectQueuedOperation(state, 'vrs_1st_krajina'), true);
+        assert.deepEqual(state.military.brigade_movement_state?.[southBrigade], transit);
+        assert.equal(
+            command.active_operations.find((op) => op.name === 'Operation Jajce')
+                ?.participating_brigades.includes(southBrigade),
+            false,
         );
     });
 

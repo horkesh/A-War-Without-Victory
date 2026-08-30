@@ -111,6 +111,9 @@ export interface BrigadePostureOrder {
 /** Brigade movement status (Brigade AoR Redesign Phase C: pack/unpack cycle). */
 export type BrigadeMovementStatus = 'deployed' | 'packing' | 'in_transit' | 'unpacking';
 
+/** Authority that created a brigade movement record. Untagged legacy records are protected. */
+export type BrigadeMovementOwner = 'bot_discretionary';
+
 /** Deployment posture action staged by UI/IPC. */
 export type BrigadeDeployAction = 'deploy' | 'undeploy';
 
@@ -125,6 +128,8 @@ export interface BrigadeMovementState {
     path?: SettlementId[];
     /** Turns remaining in transit. Decremented each turn. */
     turns_remaining?: number;
+    /** Present only when the transit may be superseded by a higher operation owner. */
+    owner?: BrigadeMovementOwner;
 }
 
 /** Pending movement order consumed by combat/column movement systems. */
@@ -133,6 +138,8 @@ export interface BrigadeMovementOrder {
     destination_sids: SettlementId[];
     /** Movement posture. Column orders are undeployed operational marches. */
     stance?: 'combat' | 'column';
+    /** Present only when the order may be superseded by a higher operation owner. */
+    owner?: BrigadeMovementOwner;
 }
 
 /** Corps standing stance (always active, modifies subordinate brigades). */

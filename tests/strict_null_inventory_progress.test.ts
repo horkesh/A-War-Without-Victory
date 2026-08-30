@@ -753,18 +753,22 @@ describe('strict null inventory progress', () => {
             // No compatibility reader or replacement state is introduced: unknown keys in old
             // saves remain ignored by ordinary structural loading, while current serialization
             // can no longer emit either field. So 539 → 537 / sim 342 → 340.
-            optional_fields_game_state: 537,
+            // Queued-operation movement ownership: +2 optional sim fields,
+            // BrigadeMovementOrder.owner and BrigadeMovementState.owner. Untagged
+            // legacy/player/recall/loan movement remains protected; only unified
+            // bot routing writes `bot_discretionary`. So 537 → 539 / sim 340 → 342.
+            optional_fields_game_state: 539,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(537);
+        expect(current.optional_field_domains.total).toBe(539);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 340,
+            sim: 342,
             state: 187,
             ui_adapter: 0,
             unknown: 0,

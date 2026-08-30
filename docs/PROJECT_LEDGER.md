@@ -30696,3 +30696,40 @@ Srebrenica t162 and Žepa t164; the verifier's generic red remains the known Far
 by the established measured-minus-three floor of **685**. The owner explicitly authorized bypassing
 the RE checker's hard-coded `data/calibration/**` denial for this exact minor edit. The checker was
 not weakened, and scenario files and the baseline manifest were untouched.
+
+## 2026-08-30 — Queued historical operations may reclaim only bot-discretionary transit
+
+**Owner direction:** engine defects take priority over calibration. The January 1KK investigation
+showed Operation Jajce omitted its authored south axis because `osid-column-movement` consumed a bot
+column order before `inject-queued-operations` and discarded the order's authority. Injection then
+saw an anonymous `in_transit` brigade and correctly treated it as protected movement.
+
+**Engine correction:** `BrigadeMovementOrder` and `BrigadeMovementState` now carry an optional,
+validated `owner: 'bot_discretionary'`. Unified bot routing is the only writer of that tag; column
+movement preserves it when creating transit state. A queued pre-planned operation may admit and,
+only after every injection gate succeeds, clear transit carrying that tag. Untagged movement remains
+protected, preserving player staging, emergency movement, reserve recall, elite-loan routing, and
+legacy saves. Reclaimed IDs are cleared in `strictCompare` order. No random or wall-clock input was
+added, and no scenario, calibration reference, baseline manifest, or canon file changed.
+
+**TDD:** the column-provenance test first failed because transit lost the owner; the queued Jajce
+test first failed because 1st Šipovo and `vrbas_south` were omitted. Both passed after the minimal
+change. The pre-existing unrelated-transit and no-viable-participant tests continue to prove that
+untagged movement is neither claimed nor mutated.
+
+**Bounded measurement:** Node 22.21.1, 40 weeks,
+`F:\A-War-Without-Victory\runs\codex_1kk_movement_provenance\apr1992_definitive_188w__4908593adc34e5a1__w40_n0`.
+Jajce injects at turn 18 with 1st Šipovo, both axes, and five attacks; `vrbas_south` captures
+Kruščica. January remains 691, while 40-week killed/wounded are 9,621/37,523. The accepted preceding
+probe was 691 and 9,724/37,800. Donji Vakuf's remaining shortfall is therefore post-correction
+calibration evidence, not justification for restoring anonymous movement ownership. No 188-week run
+was started. An identical second Node 22 probe at
+`F:\A-War-Without-Victory\runs\codex_1kk_movement_provenance_repeat\apr1992_definitive_188w__4908593adc34e5a1__w40_n0`
+produced the same final-state hash, `76d53317f9836f0e`.
+
+**Verification:** focused movement, operation, reserve, transit, save-validation, and strict-null
+suites passed 469/469; typecheck exited zero; `git diff --check` was clean. The balanced complete
+suite reported no assertion failure after the strict-null inventory was updated, but twice failed
+to terminate during its serial teardown tail and was interrupted, so it is not recorded as passing.
+The referenced determinism skill file `docs/PHASE_A_INVARIANTS.md` is absent in this worktree;
+DETERMINISM_TEST_MATRIX, CODE_CANON, and Engine Invariants §14.2/§14.9 were reviewed instead.

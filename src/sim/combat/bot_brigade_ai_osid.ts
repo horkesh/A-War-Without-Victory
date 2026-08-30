@@ -927,12 +927,16 @@ export function generateAllBotOrdersOsid(
     // Movement orders: merge regular moves + column march destinations
     const mergedMovement: Record<FormationId, BrigadeMovementOrder> = {};
     for (const [bid, dest] of Object.entries(allMovementOrders)) {
-        mergedMovement[bid as FormationId] = { destination_sids: [dest] };
+        mergedMovement[bid as FormationId] = { destination_sids: [dest], owner: 'bot_discretionary' };
     }
     for (const [bid, dest] of Object.entries(allColumnMarchOrders)) {
         // Column march: write to movement orders with stance:'column' so the
         // column movement processor (processOsidColumnMovement) picks them up.
-        mergedMovement[bid as FormationId] = { destination_sids: [dest], stance: 'column' };
+        mergedMovement[bid as FormationId] = {
+            destination_sids: [dest],
+            stance: 'column',
+            owner: 'bot_discretionary',
+        };
     }
     if (Object.keys(mergedMovement).length > 0) {
         const preservedMovementOrders: Record<FormationId, BrigadeMovementOrder> = {};

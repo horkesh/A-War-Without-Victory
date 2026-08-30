@@ -268,7 +268,7 @@ describe('processOsidColumnMovement', () => {
                     },
                 },
                 brigade_movement_orders: {
-                    brig1: { destination_sids: ['C'], stance: 'column' },
+                    brig1: { destination_sids: ['C'], stance: 'column', owner: 'bot_discretionary' },
                 },
             } as any,
         });
@@ -279,6 +279,7 @@ describe('processOsidColumnMovement', () => {
         expect(report.column_advances).toBe(0);
         expect(state.military.brigade_movement_state?.brig1?.status).toBe('in_transit');
         expect(state.military.brigade_movement_state?.brig1?.destination_sids).toEqual(['C']);
+        expect(state.military.brigade_movement_state?.brig1?.owner).toBe('bot_discretionary');
         expect(state.military.formations?.brig1?.location_osid).toBe('A');
         expect(state.military.brigade_movement_orders?.brig1).toBeUndefined();
     });

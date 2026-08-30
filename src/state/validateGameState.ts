@@ -1822,6 +1822,9 @@ function validateBrigadeMovementState(value: unknown, errors: string[]): void {
         if ('turns_remaining' in entry && entry.turns_remaining !== undefined && !isNonNegativeInteger(entry.turns_remaining)) {
             errors.push(`${path}.turns_remaining must be a non-negative integer when present`);
         }
+        if ('owner' in entry && entry.owner !== undefined && entry.owner !== 'bot_discretionary') {
+            errors.push(`${path}.owner must be bot_discretionary when present`);
+        }
     }
 }
 
@@ -1842,6 +1845,9 @@ function validateBrigadeMovementOrders(value: unknown, errors: string[]): void {
         }
         if ('stance' in entry && entry.stance !== undefined && !isBrigadeMovementStance(entry.stance)) {
             errors.push(`${path}.stance must be one of: combat, column when present`);
+        }
+        if ('owner' in entry && entry.owner !== undefined && entry.owner !== 'bot_discretionary') {
+            errors.push(`${path}.owner must be bot_discretionary when present`);
         }
     }
 }

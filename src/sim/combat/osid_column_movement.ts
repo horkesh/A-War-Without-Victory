@@ -46,7 +46,7 @@
 
 import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { getTerrainScalarsForSid, type TerrainScalars } from '../../map/terrain_scalars.js';
-import type { FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
+import type { BrigadeMovementOrder, FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
@@ -420,7 +420,7 @@ export function processOsidColumnMovement(
     // Pass 2: Process new column march orders
     const orderIds = Object.keys(movementOrders).sort(strictCompare) as FormationId[];
     for (const formationId of orderIds) {
-        const order = movementOrders[formationId] as { destination_sids?: string[]; stance?: string } | undefined;
+        const order = movementOrders[formationId] as BrigadeMovementOrder | undefined;
         if (!order || order.stance !== 'column') continue;
 
         const f = formations[formationId];
@@ -524,7 +524,8 @@ export function processOsidColumnMovement(
             stance: 'column',
             destination_sids: [destOsid],
             path: result.path,
-            turns_remaining: transitTurns
+            turns_remaining: transitTurns,
+            owner: order.owner,
         };
 
         // Remove consumed order

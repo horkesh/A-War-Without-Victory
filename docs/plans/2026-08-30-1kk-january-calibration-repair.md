@@ -35,3 +35,10 @@
 
 - If Donji Vakuf improves as predicted, document the remaining Jajce and Skender Vakuf discrepancies as a separate one-variable hypothesis.
 - Do not combine another calibration lever with this run.
+
+### Task 6: Correct queued-operation movement ownership
+
+- Persist provenance when unified bot routing becomes column transit.
+- Let a successfully injecting queued historical operation reclaim only `bot_discretionary` transit for its authored brigades.
+- Preserve untagged player, emergency, recall, loan, legacy, and current-operation movement.
+- Verify with focused red-green tests and one Node 22, 40-week probe; do not run 188 weeks without owner authorization.

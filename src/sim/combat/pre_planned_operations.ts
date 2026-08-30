@@ -1209,11 +1209,17 @@ function buildAxesFromDef(
     def: PrePlannedOp,
     state: GameState,
     adjacency?: Map<Osid, Osid[]>,
-): { axes: OperationAxis[]; participating: FormationId[]; eliteLoans: { brigadeId: FormationId; corpsId: string }[] } | null {
+): {
+    axes: OperationAxis[];
+    participating: FormationId[];
+    eliteLoans: { brigadeId: FormationId; corpsId: string }[];
+    reclaimedBotTransit: FormationId[];
+} | null {
     const formations = state.military.formations ?? {};
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
     const eliteLoans: { brigadeId: FormationId; corpsId: string }[] = [];
+    const reclaimedBotTransit: FormationId[] = [];
 
     const movementState = state.military.brigade_movement_state ?? {};
     const committedElsewhere = collectCommittedFormationIds(state);
@@ -1232,7 +1238,9 @@ function buildAxesFromDef(
             // Existing movement owners retain authority. Injection cannot prove
             // whether transit is player-, recall-, loan-, or bot-authored, so it
             // must not claim or reset a brigade already in column movement.
-            if (movementState[fid]?.status === 'in_transit') return [];
+            if (movementState[fid]?.status === 'in_transit') {
+                if (movementState[fid]?.owner !== 'bot_discretionary') return [];
+            }
             // Already fighting for someone else — see collectCommittedFormationIds.
             if (committedElsewhere.has(fid)) return [];
             if (
@@ -1258,6 +1266,7 @@ function buildAxesFromDef(
                 if (adjacency && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)) return [];
                 eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
             }
+            if (movementState[fid]?.status === 'in_transit') reclaimedBotTransit.push(fid);
             return [fid];
         });
 
@@ -1282,7 +1291,7 @@ function buildAxesFromDef(
     }
 
     if (builtAxes.length === 0) return null;
-    return { axes: builtAxes, participating: allParticipating, eliteLoans };
+    return { axes: builtAxes, participating: allParticipating, eliteLoans, reclaimedBotTransit };
 }
 
 /** Deploy elite loans for exempt-corps brigades named in a pre-planned operation. */
@@ -1600,6 +1609,14 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
     }
 
     deployPrePlannedEliteLoans(state, result.eliteLoans, effectiveDef, turn, adjacency);
+
+    // A queued historical operation outranks only tagged bot routing. Clear
+    // the consumed transit after every injection gate has passed; player and
+    // other engine-owned movement is untagged and was excluded above.
+    for (const brigadeId of [...new Set(result.reclaimedBotTransit)].sort(strictCompare)) {
+        delete state.military.brigade_movement_state?.[brigadeId];
+        delete state.military.brigade_movement_orders?.[brigadeId];
+    }
 
     // Success — consume queue entry
     cmd.queued_operations.shift();
