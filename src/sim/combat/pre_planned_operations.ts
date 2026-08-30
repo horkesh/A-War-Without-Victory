@@ -866,8 +866,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
         // Operation Donji Vakuf — 1KK secures the Vrbas valley south of Jajce.
         // Historically the 19th and 31st Krajina brigades were organic to Donji Vakuf
-        // municipality (both homed at babin_potok_2 / komar_2) and participated in the
-        // VRS push that seized Donji Vakuf in late 1992 (BB1 p.177).
+        // (BB1 p.498). Seven turns cover the 31st's measured six-hop displacement plus
+        // the mandatory planning turn, preserving the authored march-budget semantics.
         //
         // Fires after Op Jajce completes (queued 4th in 1KK chain).
         // Staging pribeljci_2: Sipovo municipality (RS initial + RS painted), adjacent to
@@ -884,7 +884,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         name: 'Operation Donji Vakuf',
         staging_osid: 'op:sipovo:pribeljci_2',
         min_attack_outcome: 'repulsed',
-        planning_duration: 4,
+        planning_duration: 7,
         axes: [
             {
                 axis_id: 'donji_vakuf_sweep',

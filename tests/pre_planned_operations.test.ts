@@ -943,6 +943,41 @@ describe('pre-planned operations', () => {
         assert.deepEqual(injectedEastAxis?.assigned_brigades, eastAxis.brigades);
     });
 
+    it('keeps the displaced 31st Brigade eligible for the Donji Vakuf sweep', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 27;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Donji Vakuf'];
+
+        const donjiVakuf = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf')!;
+        const sweep = donjiVakuf.axes.find((axis) => axis.axis_id === 'donji_vakuf_sweep')!;
+        const staging = sweep.staging_osid ?? donjiVakuf.staging_osid;
+        const route = [
+            'op:test:displaced_31st_start',
+            'op:test:displaced_31st_route_1',
+            'op:test:displaced_31st_route_2',
+            'op:test:displaced_31st_route_3',
+            'op:test:displaced_31st_route_4',
+            'op:test:displaced_31st_route_5',
+            staging,
+        ];
+        const adjacency = new Map<string, string[]>();
+        for (let i = 0; i < route.length; i++) {
+            adjacency.set(route[i]!, [route[i - 1], route[i + 1]].filter((osid): osid is string => osid !== undefined));
+            state.political.political_controllers![route[i]!] = 'RS';
+        }
+        state.military.formations.rs_31st_light_infantry!.location_osid = route[0];
+
+        const injected = injectQueuedOperation(state, 'vrs_1st_krajina', adjacency as any);
+
+        assert.equal(injected, true);
+        const operation = command.active_operations.find((op) => op.name === 'Operation Donji Vakuf');
+        assert.ok(operation);
+        const injectedSweep = operation!.axes?.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
+        assert.ok(injectedSweep?.assigned_brigades.includes('rs_31st_light_infantry'));
+    });
+
     it('keeps Trnovo kijevo_2 as a friendly approach waypoint after stripping it as a capture objective', () => {
         const state = makeMinimalState();
         state.meta.turn = 69;
