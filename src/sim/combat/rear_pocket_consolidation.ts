@@ -25,6 +25,9 @@ import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 /** Max cluster size for auto-flip. Clusters > 6 are too large to flip without military action. */
 const MAX_POCKET_CLUSTER = 6;
 
+/** Minimum share of controlled external neighbors required for an abandonment claimant. */
+const ABANDONMENT_DOMINANCE_SHARE = 2 / 3;
+
 /** Check if two factions are co-belligerent (allied) at the given turn. */
 function areCobelligerent(state: GameState, factionA: string, factionB: string): boolean {
     return isRbihHrhbCombatBlocked(state, factionA, factionB);
@@ -70,12 +73,16 @@ export function consolidateRearPockets(
     const adjacency = buildOsidAdjacency(edges);
     const formations = state.military.formations ?? {};
 
-    // Build set of OSIDs that have an active brigade present
+    // Build set of OSIDs that have an active brigade present, plus faction/location
+    // keys used to prove that a mixed-ring abandonment claimant has organized forces
+    // physically adjacent to the pocket.
     const defendedOsids = new Set<string>();
+    const activeBrigadeFactionLocations = new Set<string>();
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid]!;
         if (f.status === 'active' && f.location_osid && f.kind === 'brigade') {
             defendedOsids.add(f.location_osid);
+            activeBrigadeFactionLocations.add(`${f.faction}:${f.location_osid}`);
         }
     }
 
@@ -141,7 +148,55 @@ export function consolidateRearPockets(
             if (!allSurrounded) break;
         }
 
-        if (!allSurrounded || !surroundingFaction || surroundingFaction === controller) continue;
+        let mechanism: 'consolidation' | 'abandoned' = 'consolidation';
+
+        // A small, empty, critically supplied pocket can also be abandoned when its
+        // external ring is mixed. This is deliberately stricter than homogeneous rear
+        // consolidation: one legally hostile faction must dominate the ring and have an
+        // active brigade on an adjacent OSID. A minority third-party boundary therefore
+        // cannot preserve a military vacuum indefinitely, but a mere map-color majority
+        // without organized forces cannot seize it either.
+        if (!allSurrounded) {
+            const externalNeighbors = new Map<string, string>();
+            let hasUncontrolledBoundary = false;
+            for (const c of cluster) {
+                for (const n of (adjacency.get(c) ?? []).filter(x => x.startsWith('op:'))) {
+                    if (clusterSet.has(n)) continue;
+                    const nCtrl = pc[n] as string | undefined;
+                    if (!nCtrl) {
+                        hasUncontrolledBoundary = true;
+                        continue;
+                    }
+                    externalNeighbors.set(n, nCtrl);
+                }
+            }
+
+            const claimantCounts = new Map<string, number>();
+            for (const nCtrl of externalNeighbors.values()) {
+                if (nCtrl === controller || isRbihHrhbCombatBlocked(state, nCtrl, controller)) continue;
+                claimantCounts.set(nCtrl, (claimantCounts.get(nCtrl) ?? 0) + 1);
+            }
+            const rankedClaimants = [...claimantCounts.entries()].sort((a, b) =>
+                b[1] - a[1] || strictCompare(a[0], b[0]));
+            const dominant = rankedClaimants[0];
+            const isCritical = cluster.every(c =>
+                state.political.last_supply_state_by_osid?.[c] === 'critical');
+            const hasAdjacentOrganizedForce = dominant !== undefined
+                && [...externalNeighbors.entries()].some(([n, nCtrl]) =>
+                    nCtrl === dominant[0]
+                    && activeBrigadeFactionLocations.has(`${dominant[0]}:${n}`));
+            const hasDominantShare = dominant !== undefined
+                && externalNeighbors.size > 0
+                && dominant[1] / externalNeighbors.size >= ABANDONMENT_DOMINANCE_SHARE;
+
+            if (hasUncontrolledBoundary || !isCritical || !hasDominantShare || !hasAdjacentOrganizedForce) {
+                continue;
+            }
+            surroundingFaction = dominant![0];
+            mechanism = 'abandoned';
+        }
+
+        if (!surroundingFaction || surroundingFaction === controller) continue;
         if (isRbihHrhbCombatBlocked(state, surroundingFaction, controller)) continue;
 
         // Enclave guard: siege geometry produces topologically surrounded clusters.
@@ -161,7 +216,7 @@ export function consolidateRearPockets(
             (state.political.control_events ??= []).push({
                 turn: state.meta?.turn ?? 0,
                 settlement_id: c,
-                mechanism: 'consolidation',
+                mechanism,
                 from: controller as string | null,
                 to: surroundingFaction,
                 mun_id: c.split(':')[1],

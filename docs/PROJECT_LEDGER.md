@@ -30797,3 +30797,39 @@ withdraws on turn 1 through the allied corridor, ends active at `op:travnik:gluh
 The remaining 14 active `holding` records are HVO formations in the persistent Orašje/Posavina and
 Central Bosnia pockets, not transient Jajce-style salients. No scenario, calibration data, canon, or
 baseline manifest changed.
+
+## 2026-08-30 — Empty critically supplied mixed-ring pockets may be abandoned
+
+**Engine defect:** `op:skender_vakuf:donji_koricani` began inside a five-OSID HRHB component with no
+HRHB brigade anywhere in the component and no connection to an HRHB supply source. After the other
+four cells changed hands it remained an empty singleton behind a 10-RS/1-RBiH boundary. Three
+decisive VRS probe victories could not occupy it by design, while rear-pocket consolidation rejected
+every mixed-faction external ring. This left an empty, critically supplied OSID permanently controlled
+by a faction with no physical force or access. The `abandoned` control-event mechanism existed in the
+schema but had no production writer.
+
+**Engine correction:** post-fade rear-pocket resolution now permits deterministic abandonment of an
+undefended one-to-six-OSID cluster only when every cluster cell is in critical physical supply, one
+legally hostile claimant controls at least two thirds of the unique controlled external neighbors,
+and an active claimant brigade is physically present on an adjacent OSID. Uncontrolled boundaries,
+RBiH-HRHB combat blocks, active defenders, adequate supply, and enclave guards still prevent transfer.
+Stable claimant tie-breaking and unique-neighbor counting make contact-edge order irrelevant. The new
+path emits `mechanism: 'abandoned'`; homogeneous rear consolidation and reconnaissance probe
+non-occupation are unchanged.
+
+**TDD and verification:** the mixed 10-RS/1-RBiH regression first failed with zero target transfers.
+Negative tests cover absent adjacent claimant forces, adequate supply, and an active pocket defender;
+an edge-order permutation test covers determinism. The focused probe, enclave, alliance, salient, and
+stranded-lifecycle set passes 51/51; typecheck exits zero; `git diff --check` is clean. Applying the
+resolver read-only to the preceding January final save changes exactly Donji Korićani and no other
+OSID.
+
+**Bounded measurement:** no 188-week run was started. Node 22.23.2 ran the canonical 188-week master
+scenario for 39 weeks only at
+`F:\A-War-Without-Victory\runs\codex_donji_koricani_abandonment_jan1993\apr1992_definitive_188w__d3464b9122c3c8e9__w39`
+with an owner-authorized dirty-tree provenance override; final hash `e32e3e3b3431b115`. At turn 21 the
+whole empty, critical five-cell component transfers HRHB→RS as `abandoned`, including Donji Korićani.
+January control improves from 694 to **695/712**. Against the preceding 39-week diagnostic, killed and
+wounded decline 9,439→9,037 and 36,135→34,715, attacks 215→192, and battles 151→141; the removed local
+battles were against population-derived militia ghosts, while downstream schedule deltas are not
+attributable after divergence. No scenario, calibration data, canon, or baseline manifest changed.
