@@ -148,6 +148,21 @@ describe('triggered operations definitions', () => {
         assert.deepEqual(new Set(herzegovina.axes.map((axis) => axis.corps)), new Set(['vrs_herzegovina']));
     });
 
+    it('contracts the Orašje perimeter without targeting the two-cell enclave core', () => {
+        const posavina = _TRIGGERED_OPS.find((def) => def.name === 'Operation Posavina Corridor')!;
+        const axis = posavina.axes.find((candidate) => candidate.axis_id === 'orasje_pocket')!;
+
+        assert.deepEqual(
+            axis.objectives,
+            ['op:bosanski_samac:domaljevac_2', 'op:orasje:ostra_luka'],
+        );
+        assert.equal(axis.objectives.includes('op:orasje:donja_mahala'), false);
+        assert.equal(axis.objectives.includes('op:orasje:orasje'), false);
+        assert.equal(posavina.min_attack_outcome, 'repulsed');
+        assert.ok(axis.brigades.includes('rs_1st_doboj_light_infantry'));
+        assert.ok(axis.brigades.includes('rs_1st_prnjavor_light_infantry'));
+    });
+
     it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
         const cerskaAxis = operation.axes.find((axis) => axis.axis_id === 'cerska_pocket')!;
@@ -205,28 +220,29 @@ describe('checkTriggeredOperations', () => {
         assert.equal(posavina?.preserve_objective_sequence, true);
     });
 
-    it('does not inject Posavina when the primary corps already has an active operation', () => {
+    it('injects Posavina beside an unrelated operation when the corps has another slot', () => {
         const state = makeState(5);
         state.operation_history = [{
             corps_id: 'vrs_1st_krajina',
             operation_name: 'Operation Corridor',
         } as any];
-        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'Test Op', type: 'sector_attack', phase: 'execution' } as any];
+        for (let index = 0; index < 18; index++) {
+            const id = `rs_test_1kk_${index}`;
+            state.military.formations![id] = makeFormation(id, 'vrs_1st_krajina');
+        }
+        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{
+            name: 'Test Op',
+            type: 'sector_attack',
+            phase: 'execution',
+            participating_brigades: [],
+        } as any];
 
         const injected = checkTriggeredOperations(state);
-        assert.ok(!injected.includes('Operation Posavina Corridor'));
-        assert.deepEqual(state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Posavina Corridor'), {
-            operation_id: '',
-            operation_name: 'Operation Posavina Corridor',
-            canonical_window: '5',
-            catalog_status: 'present',
-            eligibility_status: 'unknown',
-            launch_status: 'not_launched',
-            delivery_status: 'unknown',
-            blocker_code: 'active_primary_corps',
-            typed_blocker: 'active_primary_corps',
-            turn: 5,
-        });
+        assert.ok(injected.includes('Operation Posavina Corridor'));
+        assert.deepEqual(
+            state.military.corps_command!['vrs_1st_krajina']!.active_operations.map((op) => op.name),
+            ['Test Op', 'Operation Posavina Corridor'],
+        );
     });
 
     it('injects Herzegovina Consolidation once the corps finishes its earlier chain', () => {

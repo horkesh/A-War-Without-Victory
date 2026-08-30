@@ -109,6 +109,14 @@ function corpsOpFinished(state: GameState, corpsId: string): boolean {
     return !hasActiveOperation(cmd) && (!cmd.queued_operations || cmd.queued_operations.length === 0);
 }
 
+function activeCorpsBrigadeCount(state: GameState, corpsId: string): number {
+    return Object.values(state.military.formations ?? {}).filter((formation) =>
+        formation.corps_id === corpsId
+        && formation.status === 'active'
+        && ((formation.kind ?? 'brigade') === 'brigade' || formation.kind === 'hv_phantom')
+    ).length;
+}
+
 /** Check whether a corps has completed a specific operation (by name) in the AAR history. */
 function corpsCompletedOp(state: GameState, corpsId: string, opName: string): boolean {
     const history = state.operation_history;
@@ -155,28 +163,18 @@ function zepaFallReceiptFired(state: GameState): boolean {
 
 const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
     {
-        // Operation Posavina Corridor — 1KK reduces the HRHB Orašje pocket (~w31+).
-        // Historically VRS isolated then squeezed the Croatian Orašje enclave (BB1 p.182).
-        //
-        // Root causes of 0 attacks (history):
-        //   1. Cross-corps eastern axis (vrs_east_bosnian): EBK brigades invisible to
-        //      brigade AI when op lives on 1KK. Sacred Rule: never share brigades across corps.
-        //   2. Western_corridor staging (derventa_2): starts HRHB — invalid staging.
-        //   3. Western_corridor objectives (misinci_2, zivinice, novo_selo_2, brod): all RS
-        //      by trigger time → 0 valid objectives.
-        //   4. op:orasje:domaljevac_2 does NOT EXIST in the graph — only
-        //      op:bosanski_samac:domaljevac_2 exists (RS-painted, not a valid objective).
-        //   5. op:orasje:ostra_luka is RS-painted at Jan 1993 → filtered by buildOperation.
-        //   6. planning_duration=4 insufficient: rs_27th_derventa is 7 hops from new staging.
-        //
-        // Fix: staging = domaljevac_2 (RS, adjacent to donja_mahala HRHB).
-        //   Only two valid HRHB objectives exist: donja_mahala, orasje.
-        //   planning_duration=9: rs_27th (7 hops) + 2-turn buffer.
+        // Operation Posavina Corridor — 1KK contracts the surviving HVO Orašje
+        // bridgehead without overrunning its two-cell core (~w31+; BB1 pp.182-184).
+        // The painted Jan-1993 perimeter is the operational-cell authority here:
+        // Domaljevac and Oštra Luka aggregate Serb-held settlements beyond the compact
+        // Donja Mahala–Orašje core. Named HVO positions in those localities do not imply
+        // control of their entire aggregate OSIDs.
         name: 'Operation Posavina Corridor',
         faction: 'RS',
         primary_corps: 'vrs_1st_krajina',
-        staging_osid: 'op:bosanski_samac:domaljevac_2',
+        staging_osid: 'op:bosanski_samac:tisina',
         planning_duration: 9,
+        min_attack_outcome: 'repulsed',
         trigger: (state, _turn) => {
             // 1KK must have completed Op Corridor
             return corpsCompletedOp(state, 'vrs_1st_krajina', 'Operation Corridor');
@@ -190,16 +188,18 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'rs_27th_derventa_motorized' as FormationId,
                     'rs_1st_trebava_infantry' as FormationId,
                     'rs_1st_vujak_light_infantry' as FormationId,
+                    // Corridor veterans retained for the immediate Posavina follow-on.
+                    'rs_1st_doboj_light_infantry' as FormationId,
+                    'rs_1st_prnjavor_light_infantry' as FormationId,
                 ],
-                // domaljevac_2 (RS, adjacent to donja_mahala) is the staging.
-                // ostra_luka is RS-painted (filtered out by buildOperation).
-                // Valid HRHB objectives from staging: donja_mahala → orasje.
-                // planning_duration=9: rs_27th_derventa is 7 hops from staging + 2 buffer.
+                // Tišina is the RS approach. The objectives narrow the inherited
+                // municipality-derived frontage while deliberately excluding the
+                // Donja Mahala–Orašje enclave core.
                 objectives: [
-                    'op:orasje:donja_mahala',
-                    'op:orasje:orasje',
+                    'op:bosanski_samac:domaljevac_2',
+                    'op:orasje:ostra_luka',
                 ],
-                staging_osid: 'op:bosanski_samac:domaljevac_2',
+                staging_osid: 'op:bosanski_samac:tisina',
             },
         ],
     },
@@ -1055,9 +1055,11 @@ export function checkTriggeredOperations(state: GameState): string[] {
             continue;
         }
 
-        // Primary corps must not have an active operation
+        // Triggered operations use ordinary concurrent corps capacity. They are
+        // explicitly non-slot-0 operations, so an unrelated probe or queued campaign
+        // must not suppress them when the corps still has another operation slot.
         const primaryCmd = cc[def.primary_corps];
-        if (!primaryCmd || hasActiveOperation(primaryCmd)) {
+        if (!primaryCmd || !hasAvailableSlot(primaryCmd, activeCorpsBrigadeCount(state, def.primary_corps))) {
             recordWatchedOperationTrace(state, def, turn, {
                 launch_status: 'not_launched',
                 blocker_code: 'active_primary_corps',
@@ -1070,7 +1072,7 @@ export function checkTriggeredOperations(state: GameState): string[] {
         let secondaryBlocked = false;
         for (const secCorpsId of secondaryCorps) {
             const secCmd = cc[secCorpsId];
-            if (secCmd && hasActiveOperation(secCmd)) {
+            if (secCmd && !hasAvailableSlot(secCmd, activeCorpsBrigadeCount(state, secCorpsId))) {
                 secondaryBlocked = true;
                 break;
             }
