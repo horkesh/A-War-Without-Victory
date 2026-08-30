@@ -30833,3 +30833,40 @@ January control improves from 694 to **695/712**. Against the preceding 39-week 
 wounded decline 9,439→9,037 and 36,135→34,715, attacks 215→192, and battles 151→141; the removed local
 battles were against population-derived militia ghosts, while downstream schedule deltas are not
 attributable after divergence. No scenario, calibration data, canon, or baseline manifest changed.
+
+## 2026-08-30 — Srebrenica–Cerska convergence restored through operation-owned combat
+
+**Engine defects corrected first:** authored mandatory formations were incorrectly delayed by the
+elective municipality-capacity gate, later formations could not join a pre-planned operation already
+assembling for them, and the launch predictor plus brigade order generator evaluated two axes aimed
+at the same objective as separate attacks. Standing reactive defense could also borrow formations
+already committed to movement or another operation. Mandatory OOB timing now bypasses only the
+elective capacity gate; authored reinforcements materialize at and join a live/queued assembly plan;
+and both readiness and execution deterministically aggregate every live axis sharing the same current
+objective. Brigades still attack only through `CorpsOperation`.
+
+**Owner-scoped operation:** `Srebrenica–Cerska Link-Up` enters RBiH 2nd Corps planning at turn 4 with
+one viable-participant assembly authority. Understrength named formations remain rostered but do not
+count toward that floor. Later local Cerska/Kamenica and Srebrenica formations join during planning,
+then both columns converge on Ježestica. Sebiočina is deliberately excluded per owner direction; the
+later VRS spring offensive is a separate task. No direct controller write or checkpoint-conditioned
+effect exists.
+
+**Bounded measurement:** no 188-week run was started. Node 22.21.1 ran the canonical 188-week master
+scenario for 39 weeks at
+`F:\A-War-Without-Victory\runs\codex_srebrenica_linkup_jan1993_v2\apr1992_definitive_188w__d3464b9122c3c8e9__w39`
+with the owner-authorized dirty-tree provenance override; final hash `f75160aea47a3383`. The operation
+starts at turn 4, attacks once at turn 16 as one physical stack, and captures Ježestica exactly once
+with a 1.19 costly-victory ratio. Its AAR records 110 RBiH killed / 371 wounded against 7 / 24, eight
+local participating brigades, and 100% objective completion. Cerska, Pobuđe, and Ježestica are RBiH
+at week 39; Sebiočina remains RS. January fit is **699/712**, +4 against the preceding 695 run. The
+active January hold guard is intact, eastern capture provenance is operation-owned, and combat
+causality reports 0 invalid operations, 0 zero-eligible operations, 220 attack orders, and 153 battles.
+
+**Health interpretation and verification:** the generic 40-week health command passes operation
+causality, ghost destruction, consistency, and K/W-ratio checks. Its hard red remains inapplicable to
+this partial save because it scores the terminal October reference and a pre-existing stranded ceiling;
+the 18 reported `holding` formations are the preceding 14 persistent HVO pocket formations plus three
+Cerska/Srebrenica enclave formations and the newly admitted mandatory Herceg Stjepan brigade. Focused
+changed-area suites pass 182/182 and typecheck exits zero; the final three operation suites pass
+100/100. No scenario, calibration data, canon, or baseline manifest changed.

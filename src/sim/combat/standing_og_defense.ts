@@ -1,4 +1,6 @@
 import type { CorpsFrontSector, FormationId, FormationState, GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
+import { getQueuedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 
 /**
  * ADR-0007 live Phase B. Each threatened-sector distribution pass commits at
@@ -22,8 +24,21 @@ export function getStandingOgEngagedDefenseBrigadeIds(
 }
 
 export function isStandingOgDefenseBrigadeAvailable(
-    _state: Pick<GameState, 'military'>,
-    _brigadeId: FormationId,
+    state: Pick<GameState, 'military'>,
+    brigadeId: FormationId,
 ): boolean {
+    const formation = state.military.formations?.[brigadeId];
+    if (!formation || formation.status !== 'active') return false;
+    if ((formation.disrupted_turns ?? 0) > 0) return false;
+    if (state.military.brigade_movement_state?.[brigadeId]?.status === 'in_transit') return false;
+    if (state.military.brigade_movement_orders?.[brigadeId]) return false;
+    if (getQueuedPrePlannedBrigadeIds(state).has(brigadeId)) return false;
+
+    const corpsCommands = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(corpsCommands).sort(strictCompare)) {
+        for (const operation of corpsCommands[corpsId]?.active_operations ?? []) {
+            if (operation.participating_brigades?.includes(brigadeId)) return false;
+        }
+    }
     return true;
 }

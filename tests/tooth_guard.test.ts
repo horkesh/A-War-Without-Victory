@@ -715,6 +715,30 @@ describe('evaluatePocketEvacuation', () => {
         expect(ctx.result.posture_orders).toEqual([]);
     });
 
+    it('does not evacuate a local brigade from its corps active-operation staging cell', () => {
+        const loc = 'op:test:pocket' as Osid;
+        const home = 'op:test:home' as Osid;
+        const subSegments: CorpsFrontSector['sub_segments'] = [{
+            sub_segment_id: 'subseg:vrs_test_corps:pocket', edge_ids: ['e1'],
+            enemy_osids: ['op:rbih:enemy_1'], friendly_osids: [loc], primary_brigade_ids: [],
+            length_edges: 1,
+        }];
+        const state = makeState('brig_test', loc, subSegments, { [loc]: FACTION, [home]: FACTION });
+        const sector = state.military.corps_front_sectors![`sector:${CORPS_ID}:0`]!;
+        sector.territory_osids = [loc];
+        const ctx = makeCtx({ loc, state, subSegments });
+        ctx.brigade.home_osid = home;
+        ctx.isActiveSectorOperationParticipant = false;
+        ctx.cmd = { active_operations: [{
+            name: 'Pocket Link', type: 'sector_attack', phase: 'planning',
+            started_turn: 0, phase_started_turn: 0, participating_brigades: ['other'],
+            staging_osid: loc,
+        } as any] } as any;
+
+        expect(evaluatePocketEvacuation(ctx)).toBe(false);
+        expect(state.military.brigade_movement_orders?.brig_test).toBeUndefined();
+    });
+
     it('uses cached sector assignment instead of rescanning sector rosters', () => {
         const loc = 'op:test:pocket' as Osid;
         const home = 'op:test:home' as Osid;

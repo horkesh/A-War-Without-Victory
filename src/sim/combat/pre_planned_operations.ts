@@ -78,6 +78,8 @@ export interface PrePlannedOp {
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
     /** Planning duration override — gives brigades time to march to staging. */
     planning_duration?: number;
+    /** Authored assembly floor; launch readiness remains separately enforced. */
+    minimum_viable_participants?: number;
 }
 
 export interface PrePlannedOperationInjectionOptions {
@@ -1041,6 +1043,60 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
             },
         ],
     },
+    {
+        // Owner-directed chronology: the Cerska/Srebrenica contact is established
+        // during summer 1992 and must still be present at the January checkpoint.
+        // This is deliberately an ordinary operation: no scripted control change,
+        // no checkpoint-conditioned effect, and no immunity from later VRS action.
+        corps: 'arbih_2nd_corps',
+        faction: 'RBiH',
+        name: 'Srebrenica–Cerska Link-Up',
+        // Queue when the first Cerska formation appears. This plan may claim its
+        // assembly area with one attack-capable field brigade while the named
+        // understrength formations continue to assemble during planning.
+        available_from: 4,
+        staging_osid: 'op:vlasenica:cerska_2',
+        // A historical link-up is not a reconnaissance-in-force. Hold launch
+        // until at least one assembled axis predicts an actual breakthrough.
+        min_attack_outcome: 'victory',
+        minimum_viable_participants: 1,
+        // Marching budget with slack for both the Sapna/Cerska/Kamenica and
+        // Srebrenica columns to assemble at attack-capable strength. It is not
+        // a mandatory staff delay.
+        planning_duration: 14,
+        axes: [
+            {
+                axis_id: 'srebrenica_cerska_link',
+                name: 'Cerska Column',
+                brigades: [
+                    'arbih_246th_vitezka_mountain',
+                    'arbih_1st_cerska',
+                    'arbih_1st_kamenica',
+                ],
+                objectives: [
+                    'op:bratunac:pobudje_2',
+                    'op:bratunac:jezestica_2',
+                ],
+                staging_osid: 'op:vlasenica:cerska_2',
+            },
+            {
+                // Local enclave formations converge from the opposite side of
+                // Ježestica. Bostahovine is directly adjacent in the operational
+                // graph, so both columns resolve through ordinary stacked combat.
+                axis_id: 'srebrenica_convergence',
+                name: 'Srebrenica Column',
+                brigades: [
+                    'arbih_280th_east_bosnian_light',
+                    'arbih_281st_east_bosnian_light',
+                    'arbih_282nd_east_bosnian_light',
+                    'arbih_283rd_east_bosnian_light',
+                    'arbih_284th_east_bosnian_light',
+                ],
+                objectives: ['op:bratunac:jezestica_2'],
+                staging_osid: 'op:srebrenica:bostahovine_2',
+            },
+        ],
+    },
     // R28 BLOCKED: Op Sana 95 on arbih_5th_corps caused regression (−6, −1pp).
     // Root cause: triggered "Operation Sana" already runs on 5th Corps at w175-188.
     // Op Sana 95 queued behind it, stayed in planning, brigade marching from
@@ -1216,6 +1272,7 @@ function buildAxesFromDef(
 ): {
     axes: OperationAxis[];
     participating: FormationId[];
+    viableParticipating: number;
     eliteLoans: { brigadeId: FormationId; corpsId: string }[];
     reclaimedBotTransit: FormationId[];
 } | null {
@@ -1224,6 +1281,7 @@ function buildAxesFromDef(
     const allParticipating: FormationId[] = [];
     const eliteLoans: { brigadeId: FormationId; corpsId: string }[] = [];
     const reclaimedBotTransit: FormationId[] = [];
+    let viableParticipating = 0;
 
     const movementState = state.military.brigade_movement_state ?? {};
     const committedElsewhere = collectCommittedFormationIds(state);
@@ -1234,10 +1292,6 @@ function buildAxesFromDef(
             const formation = resolved.formation;
             if (!fid || !formation) return [];
             if (!isEligibleOperationFormation(formation)) return [];
-            // Exclude combat-ineffective brigades — they pass isEligibleOperationFormation
-            // (which only checks kind/status) but will fail at execution, causing zero
-            // eligible attackers per turn.
-            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return [];
             if ((formation.disrupted_turns ?? 0) > 0) return [];
             // Existing movement owners retain authority. Injection cannot prove
             // whether transit is player-, recall-, loan-, or bot-authored, so it
@@ -1271,6 +1325,7 @@ function buildAxesFromDef(
                 eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
             }
             if (movementState[fid]?.status === 'in_transit') reclaimedBotTransit.push(fid);
+            if ((formation.personnel ?? 0) >= MIN_ATTACK_PERSONNEL) viableParticipating += 1;
             return [fid];
         });
 
@@ -1295,7 +1350,13 @@ function buildAxesFromDef(
     }
 
     if (builtAxes.length === 0) return null;
-    return { axes: builtAxes, participating: allParticipating, eliteLoans, reclaimedBotTransit };
+    return {
+        axes: builtAxes,
+        participating: allParticipating,
+        viableParticipating,
+        eliteLoans,
+        reclaimedBotTransit,
+    };
 }
 
 /** Deploy elite loans for exempt-corps brigades named in a pre-planned operation. */
@@ -1419,7 +1480,7 @@ export function injectPrePlannedOperations(
         // Build axes with validated brigades and objectives
         const result = buildAxesFromDef(def, state, adjacency);
         if (!result) continue;
-        if (result.participating.length < MIN_OPERATION_PARTICIPANTS) continue;
+        if (result.viableParticipating < (def.minimum_viable_participants ?? MIN_OPERATION_PARTICIPANTS)) continue;
 
         deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn, adjacency);
 
@@ -1601,11 +1662,12 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
     // Build axes — brigades may not exist yet; keep queue entry for retry
     const result = buildAxesFromDef(effectiveDef, state, adjacency);
     if (!result) return false;
-    if (result.participating.length < MIN_OPERATION_PARTICIPANTS) {
+    const minimumViableParticipants = effectiveDef.minimum_viable_participants ?? MIN_OPERATION_PARTICIPANTS;
+    if (result.viableParticipating < minimumViableParticipants) {
         collectOpInjectionWarnings(state, [{
             op_name: effectiveDef.name,
             check: 'participants_below_attack_floor',
-            detail: `Queued operation has ${result.participating.length} viable participant(s); ${MIN_OPERATION_PARTICIPANTS} required`,
+            detail: `Queued operation has ${result.viableParticipating} viable participant(s); ${minimumViableParticipants} required`,
             severity: 'warning',
             turn,
         }]);
@@ -1642,6 +1704,124 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
     return true;
 }
 
+/**
+ * Admit a later-authored formation that materializes at its pre-planned assembly
+ * area while the operation is still planning.
+ *
+ * Initial injection cannot roster a mandatory brigade that does not exist yet.
+ * The authored identity is nevertheless part of the plan, so once recruitment
+ * creates it at the exact staging OSID the operation—not generic routing—owns it.
+ */
+export function admitAuthoredPrePlannedReinforcements(state: GameState): number {
+    const formations = state.military.formations ?? {};
+    const commands = state.military.corps_command ?? {};
+    let admitted = 0;
+
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        const operations = [...(commands[corpsId]?.active_operations ?? [])]
+            .sort((a, b) => strictCompare(a.name, b.name) || a.started_turn - b.started_turn);
+        for (const operation of operations) {
+            if (!operation.is_pre_planned || operation.phase !== 'planning') continue;
+            const def = ALL_PRE_PLANNED.find(candidate => (
+                candidate.corps === corpsId && candidate.name === operation.name
+            ));
+            if (!def) continue;
+
+            const committedElsewhere = new Set<FormationId>();
+            for (const otherCorpsId of Object.keys(commands).sort(strictCompare)) {
+                for (const otherOperation of commands[otherCorpsId]?.active_operations ?? []) {
+                    if (otherOperation === operation) continue;
+                    for (const brigadeId of otherOperation.participating_brigades ?? []) {
+                        committedElsewhere.add(brigadeId);
+                    }
+                }
+            }
+
+            for (const axisDef of def.axes) {
+                const operationAxis = operation.axes?.find(axis => axis.axis_id === axisDef.axis_id);
+                if (!operationAxis) continue;
+                const stagingOsid = axisDef.staging_osid ?? def.staging_osid;
+                for (const authoredId of axisDef.brigades) {
+                    const resolved = resolveOperationFormation(formations, authoredId);
+                    const brigadeId = resolved.formation_id;
+                    const formation = resolved.formation;
+                    if (!brigadeId || !formation) continue;
+                    if (operation.participating_brigades.includes(brigadeId)) continue;
+                    if (committedElsewhere.has(brigadeId)) continue;
+                    if (!isEligibleOperationFormation(formation)) continue;
+                    if ((formation.disrupted_turns ?? 0) > 0) continue;
+                    if (getFormationCorpsId(formation) !== corpsId) continue;
+                    if (formation.location_osid !== stagingOsid) continue;
+
+                    const strengthBeforeAdmission = operation.initial_strength
+                        ?? operation.participating_brigades.reduce(
+                            (sum, id) => sum + (formations[id]?.personnel ?? 0),
+                            0,
+                        );
+                    operation.participating_brigades.push(brigadeId);
+                    operation.participating_brigades.sort(strictCompare);
+                    operationAxis.assigned_brigades.push(brigadeId);
+                    operationAxis.assigned_brigades.sort(strictCompare);
+                    operationAxis.support_brigades = operationAxis.assigned_brigades
+                        .filter(id => id !== operationAxis.main_brigade)
+                        .sort(strictCompare);
+                    operation.initial_strength = strengthBeforeAdmission + (formation.personnel ?? 0);
+                    admitted += 1;
+                }
+            }
+        }
+    }
+
+    return admitted;
+}
+
+/**
+ * Return the assembly OSID owned by a live authored plan for a formation that
+ * has not materialized yet. Recruitment uses this before generic home placement
+ * so a named mandatory brigade joins the operation that is already waiting for
+ * it instead of appearing on a transiently held home OSID elsewhere.
+ */
+export function getActiveAuthoredAssemblyOsid(
+    state: Pick<GameState, 'military'>,
+    corpsId: string,
+    brigadeId: FormationId,
+): string | undefined {
+    const operations = [...(state.military.corps_command?.[corpsId]?.active_operations ?? [])]
+        .filter(operation => operation.is_pre_planned === true && operation.phase === 'planning')
+        .sort((a, b) => strictCompare(a.name, b.name) || a.started_turn - b.started_turn);
+
+    for (const operation of operations) {
+        const def = ALL_PRE_PLANNED.find(candidate => (
+            candidate.corps === corpsId && candidate.name === operation.name
+        ));
+        if (!def) continue;
+        const axes = [...def.axes].sort((a, b) => strictCompare(a.axis_id, b.axis_id));
+        for (const axis of axes) {
+            if (!axis.brigades.includes(brigadeId)) continue;
+            return axis.staging_osid ?? def.staging_osid;
+        }
+    }
+
+    // A head-of-queue historical plan also owns its authored assembly area.
+    // This lets mandatory formations materialize where the waiting operation
+    // needs them instead of at a transiently controlled home OSID. Only the
+    // head entry is eligible because queued operations execute sequentially.
+    const queuedName = state.military.corps_command?.[corpsId]?.queued_operations?.[0];
+    if (queuedName) {
+        const def = ALL_PRE_PLANNED.find(candidate => (
+            candidate.corps === corpsId && candidate.name === queuedName
+        ));
+        if (def) {
+            const axes = [...def.axes].sort((a, b) => strictCompare(a.axis_id, b.axis_id));
+            for (const axis of axes) {
+                if (!axis.brigades.includes(brigadeId)) continue;
+                return axis.staging_osid ?? def.staging_osid;
+            }
+        }
+    }
+    return undefined;
+}
+
 export const _ALL_PRE_PLANNED = ALL_PRE_PLANNED;
 
 /**
@@ -1651,7 +1831,7 @@ export const _ALL_PRE_PLANNED = ALL_PRE_PLANNED;
  * During that wait, generic routing must not remove already-present named
  * participants from the local assembly area.
  */
-export function getQueuedPrePlannedBrigadeIds(state: GameState): Set<FormationId> {
+export function getQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'military'>): Set<FormationId> {
     const reserved = new Set<FormationId>();
     const corpsCommand = state.military.corps_command ?? {};
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {

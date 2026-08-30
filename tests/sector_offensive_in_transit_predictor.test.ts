@@ -506,6 +506,61 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T7: stale TG anchor fallback', () => 
 });
 
 describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launch gate', () => {
+    it('evaluates distinct axes sharing one objective as a converging attack', () => {
+        const state = buildState({
+            synth_west: { location_osid: 'op:test:staging_a', personnel: 900 },
+            synth_east: { location_osid: 'op:test:approach_b', personnel: 900 },
+            synth_enemy: {
+                location_osid: 'op:test:objective_a',
+                personnel: 3000,
+                faction: 'RIVAL_FACTION',
+                corps_id: 'rival_corps',
+            },
+        });
+        const adjacency = buildOsidAdjacencyFromFrontEdges(state);
+        const solo = predictCombatOutcome(
+            state,
+            'synth_west' as FormationId,
+            'op:test:objective_a',
+            adjacency,
+            new Map(),
+            {},
+            'attack',
+        );
+        const converged = predictCombatOutcome(
+            state,
+            'synth_west' as FormationId,
+            'op:test:objective_a',
+            adjacency,
+            new Map(),
+            {},
+            'attack',
+            ['synth_east' as FormationId],
+        );
+        assert.ok(solo && converged);
+        assert.notEqual(solo.predicted_outcome, converged.predicted_outcome);
+        if (converged.predicted_outcome === 'catastrophic') {
+            assert.fail('converged attacking power must produce a valid operation launch threshold');
+        }
+
+        const op = makeOp(['synth_west', 'synth_east'] as FormationId[], { multiAxis: true });
+        op.min_attack_outcome = converged.predicted_outcome;
+        op.axes = [
+            { ...op.axes![0], axis_id: 'west', assigned_brigades: ['synth_west' as FormationId] },
+            { ...op.axes![0], axis_id: 'east', assigned_brigades: ['synth_east' as FormationId] },
+        ];
+
+        assert.deepEqual(
+            evaluateOpeningAttackReadiness(
+                state,
+                'synth_corps' as FormationId,
+                'TEST_FACTION' as never,
+                op,
+            ),
+            { executable: true },
+        );
+    });
+
     it('uses the same contextual prediction as brigade order generation', () => {
         const state = buildState({
             synth_alpha: {
@@ -574,6 +629,70 @@ describe('LANE-2026-06-03-STANDING-OG-Foca T8: static approach overlay for launc
             direct.power_ratio,
             'positive control: stripping terrain context must change this prediction',
         );
+    });
+
+    it('predicts physically staged operation brigades as one attacking stack', () => {
+        const state = buildState({
+            synth_alpha: {
+                location_osid: 'op:test:staging_a',
+                personnel: 900,
+            },
+            synth_beta: {
+                location_osid: 'op:test:staging_a',
+                personnel: 900,
+            },
+            synth_enemy: {
+                location_osid: 'op:test:objective_a',
+                personnel: 3000,
+                faction: 'RIVAL_FACTION',
+                corps_id: 'rival_corps',
+            },
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:test:staging_a__op:test:objective_a',
+            a: 'op:test:staging_a',
+            b: 'op:test:objective_a',
+            side_a: 'TEST_FACTION' as never,
+            side_b: 'RIVAL_FACTION' as never,
+        }];
+        const adjacency = buildOsidAdjacencyFromFrontEdges(state);
+        const context = { adjacency, reverseMap: new Map(), terrainMultByOsid: {} };
+        const solo = predictCombatOutcome(
+            state,
+            'synth_alpha' as FormationId,
+            'op:test:objective_a',
+            adjacency,
+            context.reverseMap,
+            context.terrainMultByOsid,
+            'attack',
+        );
+        const stack = predictCombatOutcome(
+            state,
+            'synth_alpha' as FormationId,
+            'op:test:objective_a',
+            adjacency,
+            context.reverseMap,
+            context.terrainMultByOsid,
+            'attack',
+            ['synth_beta' as FormationId],
+        );
+        assert.ok(solo && stack);
+        assert.ok(stack.power_ratio > solo.power_ratio);
+
+        const facts = { gate_adjacent: 0, staged_adjacent: 0, brigades: [] as BrigadePredictionFact[] };
+        axisHasExecutableOpeningAttack(
+            state,
+            'TEST_FACTION' as never,
+            'op:test:objective_a',
+            ['synth_alpha', 'synth_beta'] as FormationId[],
+            adjacency,
+            'decisive_victory',
+            undefined,
+            facts,
+            context,
+        );
+
+        assert.equal(facts.brigades[0]?.power_ratio, stack.power_ratio);
     });
 
     it('does not fabricate an executable attack from ordinary sector metadata without a live contact edge', () => {

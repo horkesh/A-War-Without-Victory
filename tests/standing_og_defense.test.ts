@@ -1,74 +1,134 @@
 import { describe, expect, it } from 'vitest';
 
-import type { CorpsFrontSector, GameState } from '../src/state/game_state.js';
-import {
-    getStandingOgDefenseBrigadeIds,
-    getStandingOgEngagedDefenseBrigadeIds,
-    isStandingOgDefenseBrigadeAvailable,
-} from '../src/sim/combat/standing_og_defense.js';
+import { isStandingOgDefenseBrigadeAvailable } from '../src/sim/combat/standing_og_defense.js';
+import type { FormationId, GameState } from '../src/state/game_state.js';
 
-function makeSector(overrides: Partial<CorpsFrontSector>): CorpsFrontSector {
+function makeState(): GameState {
     return {
-        sector_id: 'sector:arbih_3rd_corps:0',
-        corps_id: 'arbih_3rd_corps',
-        faction: 'RBiH',
-        opposing_factions: ['RS'],
-        edge_ids: [],
-        sub_segments: [],
-        length_edges: 1,
-        territory_osids: [],
-        assigned_brigade_ids: [],
-        reserve_brigade_ids: [],
-        density: 0,
-        threat_ratio: 0,
-        defensive_power: 0,
-        sector_stance: 'defend',
-        stance_source: 'bot',
-        ...overrides,
-    };
-}
-
-describe('getStandingOgDefenseBrigadeIds', () => {
-    it('returns the assigned-only roster (reserve/rear brigades are not commited to defense)', () => {
-        const sector = makeSector({
-            assigned_brigade_ids: ['b2', 'b1'],
-            reserve_brigade_ids: ['r1'],
-            rear_brigade_ids: ['z1'],
-        });
-
-        expect(getStandingOgDefenseBrigadeIds(sector)).toEqual(['b2', 'b1']);
-    });
-});
-
-describe('getStandingOgEngagedDefenseBrigadeIds', () => {
-    it('returns the primary defender only', () => {
-        const primary = { id: 'primary' };
-
-        expect(getStandingOgEngagedDefenseBrigadeIds(primary)).toEqual(['primary']);
-    });
-
-    it('returns an empty list when there is no defender', () => {
-        expect(getStandingOgEngagedDefenseBrigadeIds(null)).toEqual([]);
-    });
-});
-
-describe('isStandingOgDefenseBrigadeAvailable', () => {
-    it('always reports brigades as available', () => {
-        const state = {
-            military: {
-                corps_command: {
-                    corps_a: {
-                        active_operations: [
-                            {
-                                participating_brigades: ['brigade_a'],
-                            },
-                        ],
-                    },
+        meta: { turn: 5, phase: 'war', seed: 'standing-og-availability' },
+        factions: [],
+        military: {
+            formations: {
+                available: {
+                    id: 'available',
+                    name: 'Available',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 1000,
+                    cohesion: 60,
+                    morale: 60,
+                    experience: 0.3,
+                    location_osid: 'op:test:home',
+                },
+                arbih_246th_vitezka_mountain: {
+                    id: 'arbih_246th_vitezka_mountain',
+                    name: '246th Vitezka Mountain',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 600,
+                    cohesion: 60,
+                    morale: 60,
+                    experience: 0.3,
+                    location_osid: 'op:zvornik:sapna',
+                },
+                operation_participant: {
+                    id: 'operation_participant',
+                    name: 'Operation participant',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 1000,
+                    cohesion: 60,
+                    morale: 60,
+                    experience: 0.3,
+                    location_osid: 'op:test:assembly',
+                },
+                disrupted: {
+                    id: 'disrupted',
+                    name: 'Disrupted',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 1000,
+                    cohesion: 60,
+                    morale: 60,
+                    experience: 0.3,
+                    disrupted_turns: 1,
+                    location_osid: 'op:test:home',
+                },
+                moving: {
+                    id: 'moving',
+                    name: 'Moving',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 1000,
+                    cohesion: 60,
+                    morale: 60,
+                    experience: 0.3,
+                    location_osid: 'op:test:home',
+                },
+                ordered: {
+                    id: 'ordered',
+                    name: 'Ordered',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 1000,
+                    cohesion: 60,
+                    morale: 60,
+                    experience: 0.3,
+                    location_osid: 'op:test:home',
                 },
             },
-        } as unknown as GameState;
+            corps_command: {
+                arbih_test_corps: {
+                    corps_id: 'arbih_test_corps',
+                    faction: 'RBiH',
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Assembly operation',
+                        type: 'sector_attack',
+                        phase: 'planning',
+                        started_turn: 0,
+                        participating_brigades: ['operation_participant'],
+                    }],
+                },
+                arbih_2nd_corps: {
+                    corps_id: 'arbih_2nd_corps',
+                    faction: 'RBiH',
+                    stance: 'offensive',
+                    active_operations: [],
+                    queued_operations: ['Srebrenica–Cerska Link-Up'],
+                },
+            },
+            brigade_movement_state: {
+                moving: {
+                    status: 'in_transit',
+                    destination_sids: ['op:test:assembly'],
+                },
+            },
+            brigade_movement_orders: {
+                ordered: {
+                    destination_sids: ['op:test:assembly'],
+                },
+            },
+        },
+        political: {},
+    } as unknown as GameState;
+}
 
-        expect(isStandingOgDefenseBrigadeAvailable(state, 'brigade_a')).toBe(true);
-        expect(isStandingOgDefenseBrigadeAvailable(state, 'brigade_b')).toBe(true);
+describe('standing OG reactive-defense availability', () => {
+    it('does not borrow formations already committed to another action', () => {
+        const state = makeState();
+
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'available' as FormationId)).toBe(true);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'operation_participant' as FormationId)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'disrupted' as FormationId)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'moving' as FormationId)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'ordered' as FormationId)).toBe(false);
+        expect(isStandingOgDefenseBrigadeAvailable(state, 'arbih_246th_vitezka_mountain' as FormationId)).toBe(false);
     });
 });

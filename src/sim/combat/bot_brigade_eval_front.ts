@@ -574,9 +574,17 @@ const POCKET_EVACUATION_MAX_TERRITORY = 2;
  * Placed after evaluateReturnToCorps and before hold/defense evaluations.
  */
 export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, result, sectorAssignment, isActiveSectorOperationParticipant } = ctx;
+    const { brigade, state, loc, result, sectorAssignment, isActiveSectorOperationParticipant, cmd } = ctx;
 
     if (isActiveSectorOperationParticipant) return false;
+    const isOperationStagingCell = (cmd?.active_operations ?? []).some(operation => (
+        (operation.phase === 'planning' || operation.phase === 'execution')
+        && (
+            operation.staging_osid === loc
+            || (operation.axes ?? []).some(axis => axis.staging_osid === loc)
+        )
+    ));
+    if (isOperationStagingCell) return false;
 
     if (!state.military.corps_front_sectors) return false;
 

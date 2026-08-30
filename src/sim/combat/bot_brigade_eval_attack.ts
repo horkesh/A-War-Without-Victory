@@ -61,10 +61,10 @@ import {
     getSectorOffensiveApproachOsids,
     getSectorOffensiveProbeThreshold,
     applySectorOffensiveDirectiveOverride,
-    getBrigadeAxis
+    getBrigadeAxis,
 } from './bot_brigade_ai_osid.js'; // Will need to export these from bot_brigade_ai_osid.ts
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
-import { countAxisConcentrationSupport } from './corps_operation_helpers.js';
+import { countAxisConcentrationSupport, getConvergingOperationBrigades } from './corps_operation_helpers.js';
 import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
 
 export function recordAxisOrderGenerationDetail(
@@ -335,9 +335,9 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 const probeThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
                 directAttackThreshold = probeThreshold;
                 const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
-                const axisBrigades = getBrigadeAxis(activeOp, brigade.id)?.assigned_brigades
-                    ?? activeOp.participating_brigades ?? [];
-                // R13b op-level concentration: count same-axis op-mates within 2 hops
+                const axisBrigades = getConvergingOperationBrigades(activeOp, brigade.id);
+                // R13b op-level concentration: count op-mates on every axis sharing
+                // this current objective within 2 hops
                 // of the objective with distance weighting (1-hop=1.0, 2-hop=0.5,
                 // floored). Replaces prior tactical-adjacency check which excluded
                 // op-mates staged 2+ hops away (e.g. HV phantoms at livno/duvno

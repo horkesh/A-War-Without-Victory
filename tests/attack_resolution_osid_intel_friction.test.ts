@@ -360,6 +360,42 @@ describe('attack resolution intel execution friction', () => {
         expect(report.battles[0]?.defender_brigade).toBe('brig_rbih_1');
     });
 
+    it('does not borrow an adjacent operation participant into an empty sector defense', () => {
+        const { state, edges } = makeScenario();
+        const adjacentDefender = state.military.formations.brig_rbih_1!;
+        adjacentDefender.location_osid = 'op:rbih:rear';
+        adjacentDefender.personnel = 1200;
+        state.political.political_controllers!['op:rbih:rear'] = 'RBiH';
+        const defenderSector = state.military.corps_front_sectors!['sector:rbih_defense:0']!;
+        defenderSector.assigned_brigade_ids = [];
+        defenderSector.reserve_brigade_ids = [];
+        defenderSector.sub_segments[0]!.friendly_osids = ['op:rbih:target', 'op:rbih:rear'];
+        defenderSector.territory_osids = ['op:rbih:target', 'op:rbih:rear'] as any;
+        edges.push({ edge_id: 'e2', a: 'op:rbih:target', b: 'op:rbih:rear' } as EdgeRecord);
+        state.military.corps_command!.rbih_corps = {
+            stance: 'offensive',
+            active_operations: [{
+                name: 'RBiH assembly operation',
+                type: 'sector_attack',
+                phase: 'planning',
+                started_turn: 0,
+                participating_brigades: ['brig_rbih_1'],
+            }],
+        } as any;
+
+        const report = resolveAttackOrdersOsid(
+            state,
+            edges,
+            new Map<string, string[]>(),
+            null,
+            undefined,
+            new Map(),
+        );
+
+        expect(report.battles[0]?.defender_brigade).toBeNull();
+        expect(state.military.formations.brig_rbih_1?.personnel).toBe(1200);
+    });
+
     it('computes deterministic stale-intel attack and OPSEC defense multipliers', () => {
         expect(getIntelExecutionFrictionMultipliers(1, false)).toEqual({
             attackerPowerMult: 1,

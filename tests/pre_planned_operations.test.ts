@@ -2,7 +2,12 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../src/sim/combat/historical_operation_authorization.js';
-import { injectPrePlannedOperations, injectQueuedOperation, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import {
+    admitAuthoredPrePlannedReinforcements,
+    injectPrePlannedOperations,
+    injectQueuedOperation,
+    _ALL_PRE_PLANNED,
+} from '../src/sim/combat/pre_planned_operations.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { getSectorOffensiveApproachOsids } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
@@ -221,7 +226,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 19);
+        assert.equal(_ALL_PRE_PLANNED.length, 20);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -249,8 +254,98 @@ describe('pre-planned operations', () => {
                 'Operation Bosanski Novi',
                 'Operation Jackal',
                 'Operation Circle',
+                'Srebrenica–Cerska Link-Up',
             ],
         );
+    });
+
+    it('defines the summer 1992 Srebrenica-Cerska link-up as ordinary combat', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Srebrenica–Cerska Link-Up');
+        assert.ok(operation);
+        assert.equal(operation.corps, 'arbih_2nd_corps');
+        assert.equal(operation.faction, 'RBiH');
+        assert.equal(operation.staging_osid, 'op:vlasenica:cerska_2');
+        assert.equal(operation.planning_duration, 14);
+        assert.equal(operation.min_attack_outcome, 'victory');
+        assert.equal(operation.minimum_viable_participants, 1);
+        assert.equal(operation.available_from, 4);
+        assert.deepEqual(operation.axes, [
+            {
+                axis_id: 'srebrenica_cerska_link',
+                name: 'Cerska Column',
+                brigades: [
+                    'arbih_246th_vitezka_mountain',
+                    'arbih_1st_cerska',
+                    'arbih_1st_kamenica',
+                ],
+                objectives: [
+                    'op:bratunac:pobudje_2',
+                    'op:bratunac:jezestica_2',
+                ],
+                staging_osid: 'op:vlasenica:cerska_2',
+            },
+            {
+                axis_id: 'srebrenica_convergence',
+                name: 'Srebrenica Column',
+                brigades: [
+                    'arbih_280th_east_bosnian_light',
+                    'arbih_281st_east_bosnian_light',
+                    'arbih_282nd_east_bosnian_light',
+                    'arbih_283rd_east_bosnian_light',
+                    'arbih_284th_east_bosnian_light',
+                ],
+                objectives: ['op:bratunac:jezestica_2'],
+                staging_osid: 'op:srebrenica:bostahovine_2',
+            },
+        ]);
+    });
+
+    it('lets the link-up claim its assembly area with one viable participant', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 4;
+        const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Srebrenica–Cerska Link-Up');
+        assert.ok(definition);
+        const authoredIds = definition.axes.flatMap((axis) => axis.brigades);
+        for (const brigadeId of authoredIds) {
+            state.military.formations![brigadeId]!.personnel = 100;
+        }
+        state.military.formations!.arbih_246th_vitezka_mountain!.personnel = 1000;
+
+        injectPrePlannedOperations(state);
+
+        const operation = state.military.corps_command!.arbih_2nd_corps!.active_operations
+            .find((candidate) => candidate.name === definition.name);
+        assert.ok(operation);
+        assert.deepEqual([...operation.participating_brigades].sort(), [...authoredIds].sort());
+    });
+
+    it('admits an authored mandatory brigade that forms at the staging area during planning', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 4;
+        delete state.military.formations!.arbih_1st_cerska;
+        injectPrePlannedOperations(state);
+
+        const operation = state.military.corps_command!.arbih_2nd_corps!.active_operations
+            .find((candidate) => candidate.name === 'Srebrenica–Cerska Link-Up');
+        assert.ok(operation);
+        assert.equal(operation.participating_brigades.includes('arbih_1st_cerska'), false);
+        const initialStrengthBeforeAdmission = operation.participating_brigades.reduce(
+            (sum, brigadeId) => sum + (state.military.formations?.[brigadeId]?.personnel ?? 0),
+            0,
+        );
+
+        state.meta.turn = 4;
+        state.military.formations!.arbih_1st_cerska = {
+            id: 'arbih_1st_cerska', name: '1st Cerska Brigade', faction: 'RBiH',
+            corps_id: 'arbih_2nd_corps', kind: 'brigade', status: 'active',
+            personnel: 600, cohesion: 48, morale: 50,
+            location_osid: 'op:vlasenica:cerska_2',
+        } as FormationState;
+
+        assert.equal(admitAuthoredPrePlannedReinforcements(state), 1);
+        assert.ok(operation.participating_brigades.includes('arbih_1st_cerska'));
+        assert.ok(operation.axes![0]!.assigned_brigades.includes('arbih_1st_cerska'));
+        assert.equal(operation.initial_strength, initialStrengthBeforeAdmission + 600);
     });
 
     it('retains both Bosanski Brod targets in the canonical Corridor east-axis order', () => {
@@ -944,7 +1039,7 @@ describe('pre-planned operations', () => {
         assert.deepEqual(command.queued_operations, ['Operation Jajce']);
     });
 
-    it('keeps Corridor participants viable when already forward-deployed in an objective municipality', () => {
+    it('keeps understrength authored Corridor formations in planning without counting them toward injection viability', () => {
         const state = makeMinimalState();
         state.meta.turn = 10;
         const command = state.military.corps_command!.vrs_1st_krajina!;
@@ -966,7 +1061,7 @@ describe('pre-planned operations', () => {
         assert.ok(operation);
         assert.deepEqual(
             [...operation!.participating_brigades].sort(),
-            [...forwardIds].sort(),
+            corridor.axes.flatMap((axis) => axis.brigades).sort(),
         );
     });
 

@@ -18,6 +18,7 @@ import {
 } from '../src/sim/combat/sector_offensive.js';
 import {
     applySectorOffensiveDirectiveOverride,
+    getConvergingOperationBrigades,
 } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import type { CorpsOperation, OperationAxis, FormationId } from '../src/state/game_state.js';
 
@@ -203,6 +204,37 @@ describe('Multi-Axis — Contiguity Validation', () => {
 });
 
 describe('Multi-Axis — Brigade Directive Override', () => {
+    it('groups brigades from every axis converging on the same current objective', () => {
+        const op = makeOp({
+            axes: [
+                makeAxis({
+                    axis_id: 'west', name: 'West',
+                    assigned_brigades: ['brig_a', 'brig_b'] as FormationId[],
+                    objectives: ['op:shared'],
+                }),
+                makeAxis({
+                    axis_id: 'east', name: 'East',
+                    assigned_brigades: ['brig_c'] as FormationId[],
+                    objectives: ['op:shared', 'op:east:follow_on'],
+                }),
+                makeAxis({
+                    axis_id: 'north', name: 'North',
+                    assigned_brigades: ['brig_d'] as FormationId[],
+                    objectives: ['op:north:other'],
+                }),
+            ],
+        });
+
+        assert.deepEqual(
+            getConvergingOperationBrigades(op, 'brig_c' as FormationId),
+            ['brig_a', 'brig_b', 'brig_c'],
+        );
+        assert.deepEqual(
+            getConvergingOperationBrigades(op, 'brig_d' as FormationId),
+            ['brig_d'],
+        );
+    });
+
     it('uses axis objectives for brigade in multi-axis op', () => {
         const op = makeOp({
             phase: 'execution',

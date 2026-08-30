@@ -39,6 +39,7 @@ import { selectDonors } from './tactical_group_selection.js';
 // ADR-0005 Phase 4: phantom-aware anchor (gate must score donors against the SAME
 // persistent anchor that formTgsAtReadyTransition will actually use, not a phantom).
 import { resolveTgAnchor } from './tactical_group_anchor.js';
+import { getOperationBrigadesAtCurrentObjective } from './corps_operation_helpers.js';
 
 // BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
 // to query whether the brigade has a direct-objective adjacency entry; they do
@@ -696,6 +697,7 @@ export function axisHasExecutableOpeningAttack(
     // `estimateConcentratedOutcome(...)`.
     const stagedAdjacent = countAdjacentStagedParticipants(state, brigadeIds, adjacency, objective);
     if (factsOut) factsOut.staged_adjacent = stagedAdjacent;
+    const objectiveApproaches = objectiveAdjacentOsids(adjacency, objective);
 
     for (const brigadeId of brigadeIds) {
         const brigade = state.military.formations?.[brigadeId];
@@ -718,6 +720,18 @@ export function axisHasExecutableOpeningAttack(
             continue;
         }
 
+        const stagedSupportingBrigades = predictionContext
+            ? brigadeIds
+                .filter((candidateId) => candidateId !== brigadeId)
+                .filter((candidateId) => {
+                    const candidate = state.military.formations?.[candidateId];
+                    if (!candidate || candidate.faction !== faction || candidate.status !== 'active') return false;
+                    if ((candidate.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
+                    if ((candidate.disrupted_turns ?? 0) > 0) return false;
+                    return !!candidate.location_osid && objectiveApproaches.has(candidate.location_osid);
+                })
+                .sort(strictCompare)
+            : undefined;
         const contextualPrediction = predictionContext
             ? predictCombatOutcome(
                 state,
@@ -727,7 +741,7 @@ export function axisHasExecutableOpeningAttack(
                 predictionContext.reverseMap,
                 predictionContext.terrainMultByOsid,
                 'attack',
-                undefined,
+                stagedSupportingBrigades,
                 predictionContext.supplyStateByOsid,
                 predictionContext.osidPopulationMap,
                 undefined,
@@ -753,7 +767,11 @@ export function axisHasExecutableOpeningAttack(
             continue;
         }
 
-        const concentratedOutcome = stagedAdjacent > 1
+        // The contextual predictor has already summed every physically staged
+        // participant. The legacy band estimate remains only for callers that
+        // do not provide the real combat context; applying both would count the
+        // same concentration twice.
+        const concentratedOutcome = !predictionContext && stagedAdjacent > 1
             ? estimateConcentratedOutcome(directObjectiveAttack.prediction.power_ratio, stagedAdjacent - 1)
             : null;
         debugFacts?.push({
@@ -952,6 +970,7 @@ function classifyAxisOpeningAttack(
     // TEMPORARY DIAGNOSTIC — remove with axis_readiness_debug.ts.
     debugOpName?: string,
     predictionContext?: OpeningAttackPredictionContext,
+    convergingBrigades?: readonly FormationId[],
 ): OpeningAttackReadinessResult {
     // REASON-CODE INSTRUMENTATION (topic `axis_reject`): clear any detail from a
     // PREVIOUS evaluation before this one decides anything.
@@ -1022,9 +1041,12 @@ function classifyAxisOpeningAttack(
     // adjacency internally, so this only RESTORES legacy reachability semantics; it does
     // NOT let a non-anchor brigade gate the floor check (that stays anchor-aware above).
     // Flag-off: `gateBrigades` already equals `assigned_brigades`, so byte-identical.
-    const executabilityBrigades = ENABLE_TACTICAL_GROUPS
+    const axisExecutabilityBrigades = ENABLE_TACTICAL_GROUPS
         ? axis.assigned_brigades
         : gateBrigades;
+    const executabilityBrigades = convergingBrigades && convergingBrigades.length > 0
+        ? [...convergingBrigades]
+        : axisExecutabilityBrigades;
     const openingAttackAdjacency = buildOpeningAttackAdjacency(
         state,
         corpsId,
@@ -1248,7 +1270,23 @@ export function evaluateOpeningAttackReadiness(
         let anyApproaching = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
-            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold, operationStaticAdjacency, op.army_hq_op_id, op.name, predictionContext);
+            const objective = axis.objectives[axis.current_objective_index ?? 0];
+            const convergingBrigades = typeof objective === 'string'
+                ? getOperationBrigadesAtCurrentObjective(op, objective)
+                : axis.assigned_brigades;
+            const result = classifyAxisOpeningAttack(
+                state,
+                corpsId,
+                faction,
+                axis,
+                adjacency,
+                threshold,
+                operationStaticAdjacency,
+                op.army_hq_op_id,
+                op.name,
+                predictionContext,
+                convergingBrigades,
+            );
             // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts. Inert
             // unless AWWV_DEBUG_AXIS_READINESS is set; remove with that file.
             emitAxisReadinessTrace(state, corpsId, op, axis, result.executable, result.blocker);

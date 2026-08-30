@@ -165,7 +165,11 @@ import { buildTerrainCache } from '../combat/combat_predictor.js';
 import { buildOfficerCombatLookup } from '../combat/combat_math.js';
 import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
 import { runJNATransition } from '../early_war/jna_transition.js';
-import { injectPrePlannedOperations, injectQueuedOperation } from '../combat/pre_planned_operations.js';
+import {
+    admitAuthoredPrePlannedReinforcements,
+    injectPrePlannedOperations,
+    injectQueuedOperation,
+} from '../combat/pre_planned_operations.js';
 import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation, findBrigadeOperationAnywhere, removeOperation } from '../combat/corps_operation_helpers.js';
 import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat/operation_validation.js';
 import { createSingleAxis } from '../combat/sector_offensive_axis_helpers.js';
@@ -1958,6 +1962,13 @@ export const warPhases: NamedPhase[] = [
                 }
             }
         }
+    },
+    {
+        name: 'admit-authored-pre-planned-reinforcements',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            admitAuthoredPrePlannedReinforcements(context.state);
+        },
     },
     {
         // Free War Phase 4 (#67): consume player-authored operations staged by the

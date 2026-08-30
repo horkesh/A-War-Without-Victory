@@ -384,6 +384,7 @@ function findEmptySectorAdjacentDefenders(
             if (!formation || formation.status !== 'active') return false;
             if (formation.faction !== controller) return false;
             if (!formationBelongsToCorps(formation, sector.corps_id)) return false;
+            if (!isStandingOgDefenseBrigadeAvailable(state, formation.id)) return false;
             if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
             const locOsid = (formation as { location_osid?: string }).location_osid;
             if (!locOsid || locOsid === targetOsid) return false;

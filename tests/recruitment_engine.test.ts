@@ -4,6 +4,7 @@ import type { OobBrigade, OobCorps } from '../src/scenario/oob_loader.js';
 import { createOobFormations } from '../src/scenario/oob_early_war_entry.js';
 import {
     applyRecruitment,
+    canFormMandatoryHistoricalBrigade,
     evaluateRecruitmentEligibility,
     initializeRecruitmentResources,
     isEmergentFormationSuppressed,
@@ -52,6 +53,17 @@ function makeState(overrides?: Partial<GameState>): GameState {
   ...Object.fromEntries(Object.entries(overrides ?? {}).filter(([key]) => key !== 'military' && key !== 'political')),
 } as unknown as GameState;
 }
+
+describe('mandatory historical formation timing', () => {
+    test('does not postpone an authored formation because an existing local brigade is understrength', () => {
+        expect(canFormMandatoryHistoricalBrigade(
+            [{ personnel: 200, max_personnel: 3000 }],
+            6,
+            6,
+        )).toBe(true);
+        expect(canFormMandatoryHistoricalBrigade([], 5, 6)).toBe(false);
+    });
+});
 
 describe('initializeRecruitmentResources', () => {
     test('creates default resources for all factions', () => {
@@ -758,6 +770,93 @@ describe('runBotRecruitment', () => {
         expect(state.military.militia_pools![poolKey]).toEqual(beforePool);
         expect(resources.recruited_brigade_ids).not.toContain(brigade.id);
     });
+
+    test.each(['active', 'queued'] as const)(
+        '%s authored operation staging takes precedence for its mandatory formation',
+        (operationState) => {
+        const poolKey = militiaPoolKey('vlasenica', 'RBiH');
+        const state = makeState({
+            meta: { turn: 4, seed: 'authored-operation-assembly' },
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'vlasenica', faction: 'RBiH', available: 600, committed: 0, exhausted: 0, updated_turn: 4 },
+                },
+                corps_command: {
+                    arbih_2nd_corps: {
+                        corps_id: 'arbih_2nd_corps',
+                        faction: 'RBiH',
+                        stance: 'offensive',
+                        active_operations: operationState === 'active' ? [{
+                            name: 'Srebrenica–Cerska Link-Up',
+                            type: 'sector_attack',
+                            phase: 'planning',
+                            started_turn: 0,
+                            is_pre_planned: true,
+                            participating_brigades: [
+                                'arbih_246th_vitezka_mountain',
+                                'arbih_1st_kamenica',
+                            ],
+                            axes: [{
+                                axis_id: 'srebrenica_cerska_link',
+                                name: 'Srebrenica–Cerska Link',
+                                assigned_brigades: [
+                                    'arbih_246th_vitezka_mountain',
+                                    'arbih_1st_kamenica',
+                                ],
+                                support_brigades: ['arbih_1st_kamenica'],
+                                main_brigade: 'arbih_246th_vitezka_mountain',
+                                objectives: ['op:bratunac:jezestica_2'],
+                                staging_osid: 'op:vlasenica:cerska_2',
+                                status: 'active',
+                            }],
+                        }] : [],
+                        ...(operationState === 'queued'
+                            ? { queued_operations: ['Srebrenica–Cerska Link-Up'] }
+                            : {}),
+                    },
+                },
+            } as never,
+            political: {
+                political_controllers: {
+                    'op:vlasenica:vlasenica_2': 'RBiH',
+                    'op:vlasenica:cerska_2': 'RBiH',
+                },
+            } as never,
+        });
+        const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 });
+        const brigade = makeBrigade({
+            id: 'arbih_1st_cerska',
+            faction: 'RBiH',
+            name: '1st Cerska Brigade',
+            home_mun: 'vlasenica',
+            home_osid: 'op:vlasenica:vlasenica_2',
+            corps: 'arbih_2nd_corps',
+            mandatory: true,
+            initial_personnel: 600,
+            manpower_cost: 600,
+        });
+
+        const report = runBotRecruitment(
+            state,
+            [],
+            [brigade],
+            resources,
+            new Map([
+                ['op:vlasenica:vlasenica_2', 'vlasenica'],
+                ['op:vlasenica:cerska_2', 'vlasenica'],
+            ]),
+            { vlasenica: 'op:vlasenica:vlasenica_2' },
+            { includeCorps: false, includeMandatory: true },
+        );
+
+        expect(report.mandatory_recruited).toBe(1);
+        expect(state.military.formations?.arbih_1st_cerska?.location_osid).toBe('op:vlasenica:cerska_2');
+        if (operationState === 'active') {
+            expect(state.military.corps_command?.arbih_2nd_corps?.active_operations[0]
+                ?.participating_brigades).toContain('arbih_1st_cerska');
+        }
+        },
+    );
 
     test('legacy OOB recruitment leaves formation and pool untouched without exact-control placement', () => {
         const poolKey = militiaPoolKey('srebrenica', 'RBiH');

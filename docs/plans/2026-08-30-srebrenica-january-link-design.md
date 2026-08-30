@@ -5,17 +5,17 @@
 
 ## Outcome
 
-RBiH holds Cerska, Pobuđe, Ježestica, and Sebiočina at the January 1993 checkpoint. Ježestica does not change hands repeatedly. Its summer-1992 acquisition is represented by an ordinary `CorpsOperation`; the later VRS spring offensive is a separate future task.
+RBiH holds Cerska, Pobuđe, and Ježestica at the January 1993 checkpoint. Ježestica does not change hands repeatedly. Its summer-1992 acquisition is represented by an ordinary `CorpsOperation`; Sebiočina and the later VRS spring offensive are separate future tasks.
 
 ## Engine repairs first
 
 1. A critical brigade may be ordered from a salient to a supplied same-corps line, but the stranded lifecycle must not directly rewrite `location_osid`. It emits a normal column-movement order, leaving packing, transit, arrival, and entrenchment reset to the canonical movement owner (Systems Manual §6.2.1; Engine Invariants §§14.5, 14.9).
 2. A brigade named in a queued historical operation remains reserved while that operation waits for its authored formation roster. Generic stranded withdrawal must not remove a named participant from the operation's local assembly area.
-3. A later mandatory historical brigade that otherwise passes control and formation-capacity eligibility must reach the existing mandatory force-seeding path even when its municipality pool is below the authored initial personnel. Elective formations remain pool-gated (Systems Manual §13; Engine Invariants §§14.10–14.10a).
+3. A mandatory historical brigade that passes its authored date and control gates must not be suppressed by the elective municipality-capacity gate or by a depleted militia pool. Elective formations remain capacity- and pool-gated (Systems Manual §13; Engine Invariants §§14.10–14.10a).
 
 ## Historical operation
 
-Add one deferred RBiH 2nd Corps operation using the local Cerska/Kamenica formations. It has a connected, battle-resolved axis ending at Ježestica and Sebiočina. It changes no controller directly and creates no independent brigade attack authority (War Specification §2; Engine Invariants §§9.6, 14.1, 14.11).
+Add one deferred RBiH 2nd Corps operation using the local Cerska/Kamenica formations. Its two local columns converge on Ježestica through ordinary stacked combat. It changes no controller directly and creates no independent brigade attack authority (War Specification §2; Engine Invariants §§9.6, 14.1, 14.11).
 
 ## Rejected alternatives
 
@@ -26,4 +26,4 @@ Add one deferred RBiH 2nd Corps operation using the local Cerska/Kamenica format
 
 ## Proof and falsification
 
-Each engine repair receives a red/green unit test. Behavioral changes are then run sequentially to week 39 on `apr1992_definitive_188w.json`. The design is falsified if the operation does not causally capture both objectives, if Cerska/Pobuđe lose control by January, if any named brigade teleports instead of entering movement state, or if the change creates a new cut-off brigade or breaks the 9/9 enclave guard.
+Each engine repair receives a red/green unit test. Behavioral changes are then run sequentially to week 39 on `apr1992_definitive_188w.json`. The design is falsified if the operation does not causally capture Ježestica, if Cerska/Pobuđe lose control by January, if any named brigade teleports instead of entering movement state, or if the change creates a new non-enclave cut-off brigade or breaks the active January enclave guard.

@@ -24,16 +24,21 @@ function operationPocketHolders(state: GameState, faction: FactionId): {
     const participants = new Set<string>();
     const stagingOsids = new Set<string>();
     const commands = state.military.corps_command ?? {};
+    const formations = state.military.formations ?? {};
+    const controllers = state.political.political_controllers ?? {};
     for (const corpsId of Object.keys(commands).sort(strictCompare)) {
         for (const operation of commands[corpsId]?.active_operations ?? []) {
-            if (operation.faction !== faction) continue;
             if (operation.phase !== 'planning' && operation.phase !== 'execution') continue;
             for (const brigadeId of operation.participating_brigades ?? []) {
-                participants.add(brigadeId);
+                if (formations[brigadeId]?.faction === faction) participants.add(brigadeId);
             }
-            if (operation.staging_osid) stagingOsids.add(operation.staging_osid);
+            if (operation.staging_osid && controllers[operation.staging_osid] === faction) {
+                stagingOsids.add(operation.staging_osid);
+            }
             for (const axis of operation.axes ?? []) {
-                if (axis.staging_osid) stagingOsids.add(axis.staging_osid);
+                if (axis.staging_osid && controllers[axis.staging_osid] === faction) {
+                    stagingOsids.add(axis.staging_osid);
+                }
             }
         }
     }

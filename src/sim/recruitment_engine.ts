@@ -47,6 +47,10 @@ import { getRsJnaHeavyComposition, getRsMountainComposition } from './combat/equ
 import { isEnclaveBrigade } from './combat/enclave_resilience.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
 import { effectivePersonnel } from './combat/tactical_group_personnel.js';
+import {
+    admitAuthoredPrePlannedReinforcements,
+    getActiveAuthoredAssemblyOsid,
+} from './combat/pre_planned_operations.js';
 import { initializeDoctrineStateForFormation } from '../state/doctrine.js';
 import { initializeEquipmentStateForFormation } from '../state/heavy_equipment.js';
 
@@ -478,23 +482,19 @@ export function canFormEmergentBrigade(
 }
 
 /**
- * Mandatory historical formations use the same availability and municipal
- * capacity gates as emergent brigades, but not the pool-sufficiency gate. The
- * mandatory application path below owns deterministic force-seeding when the
- * local pool is below the historical formation minimum.
+ * Mandatory historical formations obey their authored availability date, not
+ * the elective municipality-capacity gate. A bleeding municipality must not
+ * be prevented from raising a formation that the OOB marks as historical and
+ * mandatory. The mandatory application path below owns deterministic
+ * force-seeding when the local pool is below the historical formation minimum.
  */
 export function canFormMandatoryHistoricalBrigade(
-    existingBrigades: Array<{ personnel: number; max_personnel?: number }>,
+    _existingBrigades: Array<{ personnel: number; max_personnel?: number }>,
     currentTurn: number,
     availableFrom: number,
-    capacityThreshold: number = FORMATION_CAPACITY_THRESHOLD,
+    _capacityThreshold: number = FORMATION_CAPACITY_THRESHOLD,
 ): boolean {
-    if (currentTurn < availableFrom) return false;
-    for (const brigade of existingBrigades) {
-        const max = brigade.max_personnel ?? 3000;
-        if (brigade.personnel < max * capacityThreshold) return false;
-    }
-    return true;
+    return currentTurn >= availableFrom;
 }
 
 /**
@@ -919,6 +919,9 @@ export function runBotRecruitment(
                 continue;
             }
             const hq_sid = resolveValidHqSid(state, faction, brigade.home_mun, municipalityHqSettlement, sidToMun);
+            const authoredAssemblyOsid = brigade.corps
+                ? getActiveAuthoredAssemblyOsid(state, brigade.corps, brigade.id as FormationId)
+                : undefined;
             const location_osid = resolveFactionControlledFormationPlacement(
                 state,
                 faction,
@@ -926,7 +929,7 @@ export function runBotRecruitment(
                 municipalityHqSettlement,
                 sidToMun,
                 options?.canonicalToOperational,
-                [brigade.deployment_osid, brigade.home_osid],
+                [authoredAssemblyOsid, brigade.deployment_osid, brigade.home_osid],
                 true,
             );
             if (!location_osid) {
@@ -1078,6 +1081,12 @@ export function runBotRecruitment(
             }
         }
     }
+
+    // Recruitment is later in the turn than the ordinary authored-roster
+    // admission phase. Hand formations created directly at a live assembly
+    // area to that operation now, before generic late-turn sector ownership can
+    // claim or move them.
+    admitAuthoredPrePlannedReinforcements(state);
 
     // Record remaining resources
     for (const faction of factions) {

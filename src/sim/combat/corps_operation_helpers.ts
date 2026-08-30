@@ -49,6 +49,38 @@ export function findBrigadeOperation(cmd: CorpsCommandState, brigadeId: string):
     return null;
 }
 
+/** Brigades on all live axes whose current objective matches brigadeId's axis. */
+export function getConvergingOperationBrigades(
+    op: CorpsOperation,
+    brigadeId: FormationId,
+): FormationId[] {
+    const axes = op.axes;
+    if (!Array.isArray(axes) || axes.length === 0) {
+        return [...(op.participating_brigades ?? [])].sort(strictCompare);
+    }
+    const brigadeAxis = axes.find((axis) => axis.assigned_brigades.includes(brigadeId));
+    if (!brigadeAxis) return [...(op.participating_brigades ?? [])].sort(strictCompare);
+    const objective = brigadeAxis.objectives[brigadeAxis.current_objective_index ?? 0];
+    if (typeof objective !== 'string' || objective.length === 0) {
+        return [...brigadeAxis.assigned_brigades].sort(strictCompare);
+    }
+    return getOperationBrigadesAtCurrentObjective(op, objective);
+}
+
+/** All brigades assigned to live axes currently aimed at `objective`. */
+export function getOperationBrigadesAtCurrentObjective(
+    op: CorpsOperation,
+    objective: string,
+): FormationId[] {
+    const axes = op.axes;
+    if (!Array.isArray(axes) || axes.length === 0) return [];
+    return [...new Set(axes
+        .filter((axis) => axis.status !== 'complete' && axis.status !== 'stalled')
+        .filter((axis) => axis.objectives[axis.current_objective_index ?? 0] === objective)
+        .flatMap((axis) => axis.assigned_brigades))]
+        .sort(strictCompare);
+}
+
 /**
  * State-wide variant of findBrigadeOperation. Searches every corps's
  * active_operations and returns the first match in deterministic

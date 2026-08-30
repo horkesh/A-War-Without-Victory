@@ -1,3 +1,13 @@
+## 2026-08-30 - Converging operation axes must share one physical combat truth
+
+**An operation axis is a planning partition, not an independent battle.** When two live axes have the
+same current objective, launch readiness and brigade order generation must evaluate the union of their
+physically staged, attack-capable formations. Evaluating each axis alone can reject a historically and
+mechanically valid convergence—or launch piecemeal attacks—even though the battle resolver later stacks
+those same orders. Keep the grouping deterministic, objective-local, and operation-owned; do not turn it
+into corps-wide concentration or independent brigade attack authority. Applied in `[2026-08-30] fix(engine):
+restore operation-axis convergence at Ježestica`.
+
 ## 2026-08-30 - Planning duration is a marching/preparation budget, not a readiness penalty
 
 **Do not overload authored route slack as a mandatory staff delay.** Historical and triggered operation catalogs use `planning_duration` to give assigned brigades enough deterministic time to march and stage before the anti-paralysis path acts. Every operation still spends at least one full turn in planning and must pass political, force-ratio, participant-readiness, and opening-attack gates. Once those gates are ready, delaying execution solely because `elapsed < planning_duration` suppresses legal CorpsOperation throughput and contradicts the catalog's authored contract. Preserve operation-only attack authority and execution-only combat-roster admission; let genuine readiness end planning, keep the duration as the march/preparation budget, and use an explicit separate field if a future mechanic truly requires a staff minimum. Applied in `[2026-08-30] fix(RE-0D): restore planning-duration budget semantics`.
