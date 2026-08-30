@@ -478,6 +478,26 @@ export function canFormEmergentBrigade(
 }
 
 /**
+ * Mandatory historical formations use the same availability and municipal
+ * capacity gates as emergent brigades, but not the pool-sufficiency gate. The
+ * mandatory application path below owns deterministic force-seeding when the
+ * local pool is below the historical formation minimum.
+ */
+export function canFormMandatoryHistoricalBrigade(
+    existingBrigades: Array<{ personnel: number; max_personnel?: number }>,
+    currentTurn: number,
+    availableFrom: number,
+    capacityThreshold: number = FORMATION_CAPACITY_THRESHOLD,
+): boolean {
+    if (currentTurn < availableFrom) return false;
+    for (const brigade of existingBrigades) {
+        const max = brigade.max_personnel ?? 3000;
+        if (brigade.personnel < max * capacityThreshold) return false;
+    }
+    return true;
+}
+
+/**
  * REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
  *
  * THE PROBLEM THIS SOLVES. `canFormEmergentBrigade` collapses FOUR materially
@@ -858,12 +878,23 @@ export function runBotRecruitment(
                     const pool = pools?.[militiaPoolKey(b.home_mun, b.recruit_pool_faction ?? faction)];
                     const threshold = ENCLAVE_MUNICIPALITY_IDS.has(b.home_mun) ? ENCLAVE_FORMATION_CAPACITY_THRESHOLD : FORMATION_CAPACITY_THRESHOLD;
                     const required = b.initial_personnel ?? b.manpower_cost ?? 500;
-                    // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
-                    // Observation only: the `canFormEmergentBrigade` call below is the
-                    // decision, unchanged. The classifier runs BESIDE it, not instead of
-                    // it, and only when the topic is on.
-                    recordEmergentRefusal(report, 'mandatory', b, faction, munBrigades, pool, required, currentTurn, threshold);
-                    return canFormEmergentBrigade(munBrigades, pool, required, currentTurn, b.available_from, threshold);
+                    const permitted = canFormMandatoryHistoricalBrigade(
+                        munBrigades, currentTurn, b.available_from, threshold,
+                    );
+                    if (!permitted && isReasonCodeTopicEnabled('formation_refusal')) {
+                        (report.emergent_formation_refusals ??= []).push({
+                            brigade_id: b.id,
+                            faction,
+                            home_mun: b.home_mun,
+                            pass: 'mandatory',
+                            reason: currentTurn < b.available_from
+                                ? 'not_yet_available'
+                                : 'existing_brigade_below_capacity',
+                            required_personnel: required,
+                            pool_available: pool ? pool.available : null,
+                        });
+                    }
+                    return permitted;
                 })
                 .sort((a, b) => a.priority - b.priority || strictCompare(a.id, b.id))
             : [];
@@ -929,10 +960,11 @@ export function runBotRecruitment(
                 effectiveManpower = Math.min(mandatoryDrain, manpowerAvailable);
 
                 // Mandatory brigades represent historically existing formations.
-                // If the pool doesn't exist or is empty, force-create it and seed
-                // with enough manpower. These men existed — they were mobilized from
-                // day one. The pool system catches up later via ongoing_mobilization.
-                if (manpowerAvailable < MIN_MANDATORY_SPAWN) {
+                // Mandatory formations carry an authored historical starting
+                // strength. If the derived local pool is short, force-create or
+                // top it up only by that shortfall so the brigade forms at its
+                // authored strength without leaving phantom manpower behind.
+                if (manpowerAvailable < mandatoryDrain) {
                     // Force-create pool if missing
                     if (!state.military.militia_pools) state.military.militia_pools = {};
                     const pools = state.military.militia_pools as Record<string, any>;
@@ -948,8 +980,8 @@ export function runBotRecruitment(
                     }
                     const seededPool = pools[poolKey];
                     pool = seededPool;
-                    // Seed with enough for this brigade
-                    seededPool.available += mandatoryDrain;
+                    // Seed exactly the missing men for this brigade.
+                    seededPool.available += mandatoryDrain - manpowerAvailable;
                     effectiveManpower = mandatoryDrain;
                 }
             }

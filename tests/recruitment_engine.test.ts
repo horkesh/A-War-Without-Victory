@@ -414,6 +414,54 @@ describe('runBotRecruitment', () => {
         assert.strictEqual(resources.equipment_pools.RBiH.points, 0);
     });
 
+    test('later mandatory historical brigade reaches force-seeding when its local pool is below the spawn floor', () => {
+        const poolKey = militiaPoolKey('vlasenica', 'RBiH');
+        const state = makeState({
+            meta: { turn: 4, seed: 'test' },
+            military: {
+                militia_pools: {
+                    [poolKey]: {
+                        mun_id: 'vlasenica', faction: 'RBiH', available: 129,
+                        committed: 0, exhausted: 0, updated_turn: 4,
+                    },
+                },
+            } as never,
+            political: {
+                political_controllers: { 'op:vlasenica:cerska_2': 'RBiH' },
+            } as never,
+        });
+        const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 });
+        state.military.recruitment_state = resources;
+        const brigade = makeBrigade({
+            id: 'arbih_1st_cerska',
+            faction: 'RBiH',
+            name: '1st Cerska Brigade',
+            home_mun: 'vlasenica',
+            home_osid: 'op:vlasenica:sebiocina',
+            corps: 'arbih_2nd_corps',
+            available_from: 4,
+            mandatory: true,
+            manpower_cost: 200,
+            initial_personnel: 600,
+        });
+
+        const report = runBotRecruitment(
+            state,
+            [],
+            [brigade],
+            resources,
+            new Map([['op:vlasenica:cerska_2', 'vlasenica']]),
+            { vlasenica: 'op:vlasenica:cerska_2' },
+            { includeCorps: false, includeMandatory: true },
+        );
+
+        expect(report.mandatory_recruited).toBe(1);
+        expect(state.military.formations.arbih_1st_cerska?.location_osid).toBe('op:vlasenica:cerska_2');
+        expect(state.military.formations.arbih_1st_cerska?.personnel).toBe(600);
+        expect(state.military.militia_pools?.[poolKey]?.available).toBe(0);
+        expect(state.military.militia_pools?.[poolKey]?.committed).toBe(600);
+    });
+
     test('mandatory recruitment uses a friendly operational HQ fallback instead of an enemy-controlled fixed home osid', () => {
         const poolKey = militiaPoolKey('donji_vakuf', 'RBiH');
         const state = makeState({
