@@ -79,6 +79,18 @@ test('canonical save round-trip preserves faction paramilitary deployment counts
     expect(hydrated.paramilitary_deployment_count).toEqual({ HRHB: 9, RBiH: 7, RS: 44 });
 });
 
+test('canonical HRHB birth state includes the cross-Sava Orašje supply head', { timeout: 120000 }, async () => {
+    const prereq = checkDataPrereqs({ baseDir: process.cwd() });
+    if (!prereq.ok) return;
+
+    const raw = await createInitialGameState('orasje-cross-sava-supply');
+    const hrhb = raw.factions.find((faction) => faction.id === 'HRHB');
+
+    // Vidovice is the canonical settlement mapped to op:orasje:orasje; the
+    // Orašje town SID itself is not present in the operational roll-up.
+    expect(hrhb?.supply_sources).toContain('S136042');
+});
+
 test('same-version saves with the corrupted scalar count reconstruct deployments from formations', { timeout: 120000 }, async () => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });
     if (!prereq.ok) return;

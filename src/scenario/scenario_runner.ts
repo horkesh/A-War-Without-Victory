@@ -283,7 +283,7 @@ export async function createInitialGameState(
         let supply_sources: string[] = [];
         if (id === 'RBiH') supply_sources = ['S166499', 'S162973', 'S155551', 'S100838', 'S158275', 'S127477']; // Sarajevo, Zenica, Tuzla, Bihac, Visoko, Konjic
         if (id === 'RS') supply_sources = ['S200026', 'S216984', 'S200891', 'S208019', 'S230545', 'S226084']; // Banja Luka, Pale, Bijeljina, Doboj, Zvornik, Trebinje
-        if (id === 'HRHB') supply_sources = ['S166090', 'S120880', 'S130486', 'S110442', 'S113611']; // Mostar, Grude, Livno, Capljina, Tomislavgrad
+        if (id === 'HRHB') supply_sources = ['S166090', 'S120880', 'S130486', 'S110442', 'S113611', 'S136042']; // Mostar, Grude, Livno, Capljina, Tomislavgrad, Orašje/Vidovice (cross-Sava supply head)
 
         return {
             id,
