@@ -1645,6 +1645,31 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
 export const _ALL_PRE_PLANNED = ALL_PRE_PLANNED;
 
 /**
+ * Formation identities owned by queued historical operations.
+ *
+ * A deferred operation can wait for a later mandatory formation to appear.
+ * During that wait, generic routing must not remove already-present named
+ * participants from the local assembly area.
+ */
+export function getQueuedPrePlannedBrigadeIds(state: GameState): Set<FormationId> {
+    const reserved = new Set<FormationId>();
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const queuedNames = corpsCommand[corpsId]?.queued_operations ?? [];
+        for (const operationName of queuedNames) {
+            const def = ALL_PRE_PLANNED.find(candidate => (
+                candidate.corps === corpsId && candidate.name === operationName
+            ));
+            if (!def) continue;
+            for (const axis of def.axes) {
+                for (const brigadeId of axis.brigades) reserved.add(brigadeId);
+            }
+        }
+    }
+    return reserved;
+}
+
+/**
  * ADR-0005 v2.2c (issue #40): brigade IDs reserved by pre-planned ops that have NOT yet
  * injected (`available_from > currentTurn`). These brigades are op-critical anchors/participants
  * referenced by hardcoded ID; excluding them from TG donor selection prevents donor consumption

@@ -21,6 +21,8 @@ import { isEnclaveBrigade } from './enclave_resilience.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { Osid } from './osid_adjacency.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
+import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
+import { getQueuedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -37,8 +39,8 @@ export interface StrandedBrigadeReport {
     newly_stranded: string[];
     still_holding: string[];
     reconnected: string[];
-    /** Brigades moved intact from a critical salient to a supplied corps line. */
-    orderly_withdrawals: string[];
+    /** Brigades given canonical column orders from a critical salient to a supplied corps line. */
+    orderly_withdrawal_orders: string[];
     /** Retained for report compatibility; canonical dissolution owns removal. */
     collapsed: string[];
 }
@@ -192,13 +194,14 @@ export function updateStrandedBrigadeLifecycle(
         newly_stranded: [],
         still_holding: [],
         reconnected: [],
-        orderly_withdrawals: [],
+        orderly_withdrawal_orders: [],
         collapsed: [],
     };
 
     const turn = state.meta?.turn ?? 0;
     const formations = state.military.formations ?? {};
     const formationIds = Object.keys(formations).sort(strictCompare);
+    const queuedOperationBrigades = getQueuedPrePlannedBrigadeIds(state);
 
     for (const fid of formationIds) {
         const f = formations[fid];
@@ -232,6 +235,11 @@ export function updateStrandedBrigadeLifecycle(
         // Exclude brigades in active operations
         if (isInActiveOperation(state, fid, f.corps_id)) continue;
 
+        // A queued historical operation may be waiting for another authored
+        // formation to appear. Preserve its already-present local participants
+        // so generic salient routing cannot dismantle the assembly meanwhile.
+        if (queuedOperationBrigades.has(fid)) continue;
+
         // --- Phase 4: Reachability check ---
         const corpsId = f.corps_id;
         if (!corpsId) continue; // Unattached brigades are not subject to stranded lifecycle
@@ -239,19 +247,17 @@ export function updateStrandedBrigadeLifecycle(
         const withdrawalDestination = findOrderlyWithdrawalDestination(
             f.location_osid, f.faction, corpsId, state, adjacency,
         );
-        if (withdrawalDestination && withdrawalDestination !== f.location_osid) {
-            f.location_osid = withdrawalDestination;
-            f.assignment = null;
-            f.entrenchment_turns = 0;
-            f.stranded_status = 'reconnected';
-            f.stranded_since_turn = undefined;
-            f.last_reachable_turn = turn;
-            delete state.military.brigade_movement_orders?.[fid];
-            delete state.military.brigade_movement_state?.[fid];
-            report.orderly_withdrawals.push(fid);
-            report.reconnected.push(fid);
-            report.updated++;
-            continue;
+        if (
+            withdrawalDestination
+            && withdrawalDestination !== f.location_osid
+            && !state.military.brigade_movement_orders?.[fid]
+            && !state.military.brigade_movement_state?.[fid]
+        ) {
+            if (!state.military.brigade_movement_orders) {
+                state.military.brigade_movement_orders = {};
+            }
+            state.military.brigade_movement_orders[fid] = createColumnMovementOrder(withdrawalDestination);
+            report.orderly_withdrawal_orders.push(fid);
         }
 
         const reachable = canReachCorpsSectorFront(

@@ -139,7 +139,7 @@ function makeState(overrides: {
 describe('stranded_brigade_lifecycle', () => {
 
     describe('newly stranded detection', () => {
-        it('withdraws a critical brigade through allied territory to its supplied corps line', () => {
+        it('orders a critical brigade through allied territory without teleporting it', () => {
             const formations = {
                 brig_1: makeBrigade('brig_1', 'RBiH', 'corps_5', 'pocket'),
             };
@@ -160,10 +160,41 @@ describe('stranded_brigade_lifecycle', () => {
 
             const report = updateStrandedBrigadeLifecycle(state, chainAdj(['pocket', 'corridor', 'rear']));
 
-            expect(report.orderly_withdrawals).toEqual(['brig_1']);
-            expect(formations.brig_1.location_osid).toBe('rear');
+            expect(report.orderly_withdrawal_orders).toEqual(['brig_1']);
+            expect(formations.brig_1.location_osid).toBe('pocket');
             expect(formations.brig_1.personnel).toBe(1500);
-            expect(formations.brig_1.stranded_status).toBe('reconnected');
+            expect(formations.brig_1.stranded_status).toBe('holding');
+            expect(state.military.brigade_movement_orders?.brig_1).toEqual({
+                destination_sids: ['rear'],
+                stance: 'column',
+            });
+            expect(state.military.brigade_movement_state?.brig_1).toBeUndefined();
+        });
+
+        it('does not withdraw a brigade reserved by a queued historical operation', () => {
+            const brigadeId = 'rs_19th_krajina_light_infantry';
+            const corpsId = 'vrs_1st_krajina';
+            const formations = {
+                [brigadeId]: makeBrigade(brigadeId, 'RS', corpsId, 'pocket'),
+            };
+            const command = makeCorpsCommand();
+            command.queued_operations = ['Operation Donji Vakuf'];
+            const state = makeState({
+                formations,
+                corps_front_sectors: {
+                    [`sector:${corpsId}`]: makeSector(corpsId, 'RS', ['rear']),
+                },
+                corps_command: { [corpsId]: command },
+                political_controllers: { pocket: 'RS', corridor: 'RS', rear: 'RS' },
+                last_supply_state_by_osid: { pocket: 'critical', corridor: 'adequate', rear: 'adequate' },
+                turn: 20,
+            });
+
+            const report = updateStrandedBrigadeLifecycle(state, chainAdj(['pocket', 'corridor', 'rear']));
+
+            expect(report.orderly_withdrawal_orders).toEqual([]);
+            expect(state.military.brigade_movement_orders?.[brigadeId]).toBeUndefined();
+            expect(formations[brigadeId].location_osid).toBe('pocket');
         });
 
         it('classifies an unreachable brigade as holding', () => {
