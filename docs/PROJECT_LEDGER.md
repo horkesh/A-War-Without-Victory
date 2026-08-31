@@ -31266,3 +31266,36 @@ deny patterns retained. The same commit removes the scope-check invocation from 
 receipt are preserved verbatim under `superseded_packet` in the lock. A future RE packet reinstates
 the lane via `scripts/repo/install_re_scope_hook.ps1` plus a fresh lock. The pre-commit typecheck
 stage is untouched and still gates code/data commits.
+
+### 2026-08-31 — Node toolchain pinned to 22 and gated at run launch
+
+**Finding:** the repo contradicted itself on Node version. `.nvmrc` said **24**, while
+`.github/workflows/*.yml` used `node-version: 22` and every blessed calibration baseline
+(n387/n388) was Node **22.23.2**. `package.json` engines said only `>=20`, so nothing caught it.
+A local run therefore came up on Node 24 and was un-comparable to the baselines.
+
+**Why it matters:** the sim has no RNG or clock, but that is not the same as being identical
+across Node majors. ECMAScript specifies `Math.pow`, `Math.exp`, `Math.log` and `Math.atan2` as
+IMPLEMENTATION-APPROXIMATED, and V8 has changed those routines between majors (`Math.sqrt` is
+exempt — IEEE-754 pins it). The sim calls the approximated ones in combat hot paths:
+`combat_math.ts:236` and `:422`, `frontline_attrition.ts:343`, `phase3a_pressure_eligibility.ts`,
+`sector_edge_adjacency.ts`. A single differing final bit can flip a battle comparison, then a
+capture, then a front.
+
+**Change:** `.nvmrc` 24 -> 22; `engines.node` `>=20` -> `>=22 <23`; and a NODE-MAJOR GATE added to
+`run_scenario_with_preflight.ts`. `run_provenance.ts` already hard-failed on a node-major mismatch,
+but only when two runs were COMPARED — i.e. after both had cost their full wall-clock. The new gate
+refuses at launch, following the existing §6 dirty-tree gate's pattern and reusing its
+`AWWV_PROVENANCE_OVERRIDE` escape hatch (the reason is stamped into `run_meta.json` and
+disqualifies the run from a §6 verdict). Unlike the §6 gate it is NOT opt-in: an off-major run is
+un-comparable for any purpose. Both paths verified — refusal on Node 24, and the hatch letting a
+1-week run proceed.
+
+**NOT done, queued:** removing the dependency outright by replacing those call sites with
+deterministic implementations. That is the only fix that makes results Node-version-independent by
+construction, but it changes combat math, will move the floor, and needs its own lane and re-bless.
+
+**Correction to the record:** the 2026-08-31 Cutileiro entry says four exact checkpoint matches
+argue Node does not move these figures. That is weaker than stated — n388 and n389 differ in BOTH
+Node major and the Cutileiro change, so neither variable is isolated. A clean test needs one commit
+run on both majors, which has never been done.
