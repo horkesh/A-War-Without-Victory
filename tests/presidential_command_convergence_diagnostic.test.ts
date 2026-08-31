@@ -59,7 +59,10 @@ describe('presidential command convergence diagnostic', () => {
     ]));
     expect(report.rows.find((row) => row.familyId === 'event_decision')).toMatchObject({
       producer: 'src/sim/events/evaluate_events.ts -> military.pending_event_decisions',
-      blockerPredicate: 'requires_player_response === true',
+      // `mustShowPlayer` replaced `requires_player_response === true` as the blocking predicate
+      // on 2026-08-31: Observer (Level 3) resolves the player's decisions to their authored
+      // historical response, so the flag is stamped for the UI but no longer gates the queue.
+      blockerPredicate: 'mustShowPlayer === true',
       actionSurface: 'desk:event_modal',
       receiptOwner: 'military.event_decision_log',
       receiptDurability: 'durable',

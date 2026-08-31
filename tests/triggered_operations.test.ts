@@ -304,59 +304,72 @@ describe('checkTriggeredOperations', () => {
         assert.ok(injected.includes('Operation Kotor Varos'));
     });
 
-    it('requires player authorization before injecting player-faction triggered operations', () => {
+    // CONTRACT INVERTED 2026-08-31 (owner: "Auto-authorize. It should be the same as headless
+    // calibration runs, which do run those ops."). Triggered historical operations for the
+    // player's own faction previously waited on a review nothing in a headless run answers.
+    // They now launch under standing authorization; the receipt is still recorded.
+    it('auto-authorizes player-faction triggered operations and records the receipt', () => {
         const state = makeState(10);
         state.meta.player_faction = 'RS' as FactionId;
 
-        const first = checkTriggeredOperations(state);
+        const launched = checkTriggeredOperations(state);
 
-        assert.ok(!first.includes('Operation Kotor Varos'));
-        assert.equal(state.military.corps_command!['vrs_1st_krajina']!.active_operations.length, 0);
+        assert.ok(launched.includes('Operation Kotor Varos'));
+        assert.equal(state.military.corps_command!['vrs_1st_krajina']!.active_operations[0]?.name, 'Operation Kotor Varos');
         const review = state.meta.pending_proposal_reviews?.find((proposal) =>
             proposal.proposed_action === 'HISTORICAL_OP:triggered:vrs_1st_krajina:Operation Kotor Varos'
         );
-        assert.ok(review);
+        assert.ok(review, 'the authorization receipt is still recorded for the president');
         assert.equal(review.faction, 'RS');
-
-        review!.accepted = true;
-        review!.resolved_turn = state.meta.turn;
-
-        const second = checkTriggeredOperations(state);
-
-        assert.ok(second.includes('Operation Kotor Varos'));
-        assert.equal(state.military.corps_command!['vrs_1st_krajina']!.active_operations[0]?.name, 'Operation Kotor Varos');
+        assert.equal(review.accepted, true, 'standing authorization: born accepted');
     });
 
-    it('retains accepted authorization through a temporary launch blocker and retries without reauthorization', async () => {
+    it('still honours an explicit decline and withholds a triggered operation', () => {
         const state = makeState(10);
         state.meta.player_faction = 'RS' as FactionId;
-        checkTriggeredOperations(state);
+        state.meta.pending_proposal_reviews = [{
+            id: 'PROP_0_historical_op_triggered_vrs_1st_krajina_operation_kotor_varos',
+            turn: state.meta.turn,
+            faction: 'RS' as FactionId,
+            domain: 'ops',
+            description: 'Operation Kotor Varos - declined by the president.',
+            proposed_action: 'HISTORICAL_OP:triggered:vrs_1st_krajina:Operation Kotor Varos',
+            current_value: 'awaiting_authorization',
+            proposed_value: 'authorize',
+            accepted: false,
+            resolved_turn: state.meta.turn,
+        } as never];
+
+        const launched = checkTriggeredOperations(state);
+
+        assert.ok(!launched.includes('Operation Kotor Varos'), 'a declined operation must not launch');
+        assert.equal(state.military.corps_command!['vrs_1st_krajina']!.active_operations.length, 0);
+    });
+
+    it('keeps a resolved authorization receipt durable across turns and autonomy transitions', async () => {
+        const state = makeState(10);
+        state.meta.player_faction = 'RS' as FactionId;
+        // Standing authorization launches on the first evaluation, so there is no
+        // wait-then-retry phase left to exercise. What this test still protects is the
+        // durability of the RECEIPT: once resolved it is never re-prompted and its
+        // resolved_turn does not drift as turns and autonomy transitions pass.
+        assert.ok(checkTriggeredOperations(state).includes('Operation Kotor Varos'));
         const review = state.meta.pending_proposal_reviews?.find((proposal) =>
             proposal.proposed_action === 'HISTORICAL_OP:triggered:vrs_1st_krajina:Operation Kotor Varos'
         );
         assert.ok(review);
-        review.accepted = true;
-        review.resolved_turn = state.meta.turn;
-        const authorizedTurn = state.meta.turn;
+        assert.equal(review.accepted, true);
+        const authorizedTurn = review.resolved_turn!;
 
-        const command = state.military.corps_command!.vrs_1st_krajina!;
-        command.active_operations = [{
-            name: 'Temporary Corps Task',
-            type: 'sector_attack',
-            phase: 'planning',
-        } as any];
         state.meta.turn = 11;
-        assert.ok(!checkTriggeredOperations(state).includes('Operation Kotor Varos'));
-
         await applyAutonomyTransition(state);
         assert.equal(
             state.meta.pending_proposal_reviews?.find((proposal) => proposal.id === review.id)?.accepted,
             true,
         );
 
-        command.active_operations = [];
         state.meta.turn = 12;
-        assert.ok(checkTriggeredOperations(state).includes('Operation Kotor Varos'));
+        checkTriggeredOperations(state);
 
         state.meta.turn = 13;
         await applyAutonomyTransition(state);
@@ -365,17 +378,19 @@ describe('checkTriggeredOperations', () => {
         assert.equal(resolvedReview?.resolved_turn, authorizedTurn);
     });
 
-    it('retains accepted authorization when objectives are temporarily owned and launches if they become relevant again', async () => {
+    it('keeps the authorization receipt when objectives change hands', async () => {
         const state = makeState(10);
         state.meta.player_faction = 'RS' as FactionId;
-        checkTriggeredOperations(state);
+        assert.ok(checkTriggeredOperations(state).includes('Operation Kotor Varos'));
         const review = state.meta.pending_proposal_reviews?.find((proposal) =>
             proposal.proposed_action === 'HISTORICAL_OP:triggered:vrs_1st_krajina:Operation Kotor Varos'
         );
         assert.ok(review);
-        review.accepted = true;
-        review.resolved_turn = state.meta.turn;
+        assert.equal(review.accepted, true);
 
+        // Objectives falling under RS control does not revoke the receipt. (Whether the
+        // operation is OFFERED when every objective is already held is owned by the
+        // "does not inject Kotor Varos once every objective is already RS-controlled" test.)
         const objectives = _TRIGGERED_OPS
             .find((def) => def.name === 'Operation Kotor Varos')!
             .axes.flatMap((axis) => axis.objectives);
@@ -383,16 +398,13 @@ describe('checkTriggeredOperations', () => {
             state.political.political_controllers![objective] = 'RS';
         }
         state.meta.turn = 11;
-        assert.ok(!checkTriggeredOperations(state).includes('Operation Kotor Varos'));
+        checkTriggeredOperations(state);
         await applyAutonomyTransition(state);
         assert.equal(
             state.meta.pending_proposal_reviews?.find((proposal) => proposal.id === review.id)?.accepted,
             true,
+            'a resolved authorization survives its objectives changing hands',
         );
-
-        state.political.political_controllers![objectives[0]!] = 'RBiH';
-        state.meta.turn = 12;
-        assert.ok(checkTriggeredOperations(state).includes('Operation Kotor Varos'));
     });
 
     it('does not inject Kotor Varos once every objective is already RS-controlled', () => {

@@ -125,7 +125,11 @@ export const PRESIDENTIAL_DECISION_OWNERSHIP: readonly PresidentialDecisionOwner
   {
     familyId: 'event_decision',
     producer: 'src/sim/events/evaluate_events.ts -> military.pending_event_decisions',
-    blockerPredicate: 'requires_player_response === true',
+    // The gate is now `mustShowPlayer`, which blocks at Levels 0-2 and, at Level 3 (Observer),
+    // only where no authored historical default exists. `requires_player_response` is still
+    // stamped onto the queued decision for the UI, but it stopped being the blocking predicate
+    // on 2026-08-31 when Observer was made to resolve the player's decisions historically.
+    blockerPredicate: 'mustShowPlayer === true',
     receiptOwner: 'military.event_decision_log',
     receiptDurability: 'durable',
     receiptDisposition: 'Append-only player and bot response log retained in the canonical save.',
@@ -207,7 +211,7 @@ export const PRESIDENTIAL_DECISION_SOURCE_PROOFS: readonly PresidentialDecisionS
     familyId: 'event_decision',
     producer: [{
       path: 'src/sim/events/evaluate_events.ts',
-      anchors: ['def.requires_player_response === true', 'state.military.pending_event_decisions.push({'],
+      anchors: ['const mustShowPlayer = isPlayerRespondent', 'state.military.pending_event_decisions.push({'],
     }],
     action: [{ path: 'src/ui/map/App.tsx', anchors: ["if (action === 'event_modal')"] }],
     receipt: [{

@@ -406,18 +406,31 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
             // `sidToMun` is OSID-keyed, matching `scenario_runner`, which rebuilds it
             // via `buildOsidToMunFromReverseMap` once operational data is present —
             // passing the canonical SID map here would silently mis-key the bots.
+            // MUTATION BOUNDARY. `runBots` writes postures and formation assignments straight
+            // into the state it is given, and `advanceTurn`'s contract is that it does NOT
+            // mutate its argument (see the doc comment above; `turn_result_production_callers`
+            // pins it, and caught this). `scenario_runner` can call `runBots(state)` directly
+            // because it owns its loop variable; here the state belongs to the caller — Electron
+            // holds it and re-serializes it on failure. So the bot pass runs against a canonical
+            // clone, and that clone is what `runTurn` advances.
+            // structuredClone, NOT a serialize/deserialize round-trip: `serializeState` VALIDATES,
+            // so cloning that way turns a deliberately-invalid input into "State failed
+            // validation before serialize" and swallows the actionable post-turn invariant error
+            // the desktop is supposed to surface (turn_result_production_callers pins that
+            // message). structuredClone copies the shape without judging it.
+            const turnState = structuredClone(state);
             const botManager = new BotManager({ seed: `${seed}:smart-bots` });
             const canonicalSidToMun = buildSidToMunFromSettlements(graph.settlements);
             const sidToMun = operationalData?.operationalToCanonical
                 ? buildOsidToMunFromReverseMap(operationalData.operationalToCanonical, canonicalSidToMun)
                 : canonicalSidToMun;
-            botManager.runBots(state, computeFrontEdges(state, graph.edges), {
+            botManager.runBots(turnState, computeFrontEdges(turnState, graph.edges), {
                 edges: graph.edges,
                 sidToMun,
                 settlementsByMun: buildSettlementsByMun(graph.settlements),
             });
 
-            const result = await runTurn(state, {
+            const result = await runTurn(turnState, {
                 seed,
                 settlementGraph: graphForBrowser,
                 operationalSettlementGraph,

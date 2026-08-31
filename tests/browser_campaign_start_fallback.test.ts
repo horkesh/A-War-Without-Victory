@@ -122,8 +122,12 @@ describe('browser new-campaign fallback', () => {
           || (faction === 'HRHB' && corpsId.startsWith('hvo_'))
           || (faction === 'RBiH' && corpsId.startsWith('arbih_'))
         );
-      expect(playerCorpsOps).toEqual([]);
       if (faction === 'RS') {
+        // Standing authorization (2026-08-31): the player's historical operations are live at
+        // campaign birth in the browser fallback too, matching the Electron path and the
+        // calibration line. Previously they were withheld pending an authorization review.
+        // Asserted for RS only — it is the faction with pre-planned operations in this fixture.
+        expect(playerCorpsOps.length).toBeGreaterThan(0);
         expect(state.meta.pending_proposal_reviews).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
@@ -132,7 +136,10 @@ describe('browser new-campaign fallback', () => {
             }),
           ]),
         );
-        expect(state.military.corps_command?.vrs_drina?.queued_operations).toBeUndefined();
+        // The old assertion here was `queued_operations` === undefined, proving the deferral
+        // had DELETED the queue while withholding the live operation. Standing authorization
+        // removed that deletion, so the assertion has no subject left; the meaningful contract
+        // is the live-operations check above.
       }
     }
   });

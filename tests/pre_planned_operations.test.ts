@@ -575,39 +575,58 @@ describe('pre-planned operations', () => {
         assert.equal(state.military.corps_command?.hvo_southeast_herzegovina?.queued_operations?.[0], 'Operation Jackal');
     });
 
-    it('requires player authorization before injecting player-faction pre-planned operations', () => {
+    // CONTRACT INVERTED 2026-08-31 (owner: "Auto-authorize. It should be the same as headless
+    // calibration runs, which do run those ops."). This previously asserted that a player-faction
+    // pre-planned operation is WITHHELD until the player authorizes it. Nothing in a headless or
+    // LLM playthrough ever answers a review, so those operations never launched: measured as RS
+    // over 40 turns, 9 authorizations unresolved and RS 50 OSIDs short of the calibration line.
+    // The review is now born accepted and staff proceed under standing authorization.
+    //
+    // The mechanism keeps its teeth — see the decline test below. Only the DEFAULT moved.
+    it('auto-authorizes player-faction pre-planned operations and records the receipt', () => {
         const state = makeMinimalState();
         state.meta.player_faction = 'RS' as FactionId;
 
         injectPrePlannedOperations(state);
 
-        assert.equal(state.military.corps_command?.vrs_drina?.active_operations.length, 0);
+        assert.equal(state.military.corps_command?.vrs_drina?.active_operations[0]?.name, 'Operation Drina');
         const review = state.meta.pending_proposal_reviews?.find((proposal) =>
             proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
         );
-        assert.ok(review);
+        assert.ok(review, 'the authorization receipt is still recorded for the president');
         assert.equal(review.faction, 'RS');
         assert.equal(review.domain, 'ops');
-        assert.ok(
-            state.meta.pending_proposal_reviews?.some((proposal) =>
-                proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Visegrad'
-            ),
-            'the live Herzegovina operation should require authorization'
-        );
-        assert.ok(
-            !state.meta.pending_proposal_reviews?.some((proposal) =>
-                proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Foca'
-            ),
-            'later same-corps operations must not be revealed while the live operation awaits authorization'
-        );
-        assert.deepEqual(state.military.corps_command?.vrs_herzegovina?.queued_operations, undefined);
+        assert.equal(review.accepted, true, 'standing authorization: born accepted');
+        assert.equal(review.resolved_turn, state.meta.turn);
+    });
 
-        review!.accepted = true;
-        review!.resolved_turn = state.meta.turn;
+    it('still honours an explicit decline and withholds the operation', () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RS' as FactionId;
+
+        // A president who countermands BEFORE the operation is offered: pre-seed a declined
+        // review. `ensureHistoricalOperationAuthorizationReview` returns 'declined' for it, and
+        // pre_planned_operations defers on 'declined' exactly as it did on 'pending'.
+        state.meta.pending_proposal_reviews = [{
+            id: 'PROP_0_historical_op_preplanned_vrs_drina_operation_drina',
+            turn: state.meta.turn,
+            faction: 'RS' as FactionId,
+            domain: 'ops',
+            description: 'Operation Drina - declined by the president.',
+            proposed_action: 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina',
+            current_value: 'awaiting_authorization',
+            proposed_value: 'authorize',
+            accepted: false,
+            resolved_turn: state.meta.turn,
+        } as never];
 
         injectPrePlannedOperations(state);
 
-        assert.equal(state.military.corps_command?.vrs_drina?.active_operations[0]?.name, 'Operation Drina');
+        assert.equal(
+            state.military.corps_command?.vrs_drina?.active_operations.length,
+            0,
+            'a declined operation must not launch',
+        );
     });
 
     it('retains accepted authorization through temporary corps work and retries without reauthorization', async () => {
@@ -615,14 +634,18 @@ describe('pre-planned operations', () => {
         state.meta.player_faction = 'RS' as FactionId;
         const command = state.military.corps_command!.vrs_drina!;
         command.queued_operations = ['Operation Drina'];
-        assert.equal(injectQueuedOperation(state, 'vrs_drina'), false);
+        // Standing authorization: the operation injects immediately and the receipt is accepted.
+        assert.equal(injectQueuedOperation(state, 'vrs_drina'), true);
         const review = state.meta.pending_proposal_reviews?.find((proposal) =>
             proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
         );
         assert.ok(review);
-        review.accepted = true;
-        review.resolved_turn = state.meta.turn;
+        assert.equal(review.accepted, true);
 
+        // The first inject consumed the queue under standing authorization. Re-queue so the
+        // retry sequence still exercises what this test protects: a RESOLVED authorization is
+        // not revoked or re-prompted when a transient corps task blocks the injection.
+        command.queued_operations = ['Operation Drina'];
         command.active_operations = [{
             name: 'Temporary Corps Task',
             type: 'sector_attack',
@@ -656,13 +679,13 @@ describe('pre-planned operations', () => {
         state.meta.player_faction = 'RS' as FactionId;
         const command = state.military.corps_command!.vrs_drina!;
         command.queued_operations = ['Operation Drina'];
-        assert.equal(injectQueuedOperation(state, 'vrs_drina'), false);
+        // Standing authorization: the operation injects immediately and the receipt is accepted.
+        assert.equal(injectQueuedOperation(state, 'vrs_drina'), true);
         const review = state.meta.pending_proposal_reviews?.find((proposal) =>
             proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
         );
         assert.ok(review);
-        review.accepted = true;
-        review.resolved_turn = state.meta.turn;
+        assert.equal(review.accepted, true);
 
         const drina = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Drina')!;
         for (const objective of drina.axes.flatMap((axis) => axis.objectives)) {
@@ -679,16 +702,18 @@ describe('pre-planned operations', () => {
         );
     });
 
-    it('normalizes baked startup snapshots so selected player operations become authorization reviews', () => {
+    it('normalizes baked startup snapshots into ACCEPTED authorization receipts and keeps the operations live', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);
         state.meta.player_faction = 'RS' as FactionId;
 
         deferUnauthorizedHistoricalOperationsForPlayer(state);
 
-        assert.equal(state.military.corps_command?.vrs_drina?.active_operations.length, 0);
-        assert.equal(state.military.corps_command?.vrs_herzegovina?.active_operations.length, 0);
-        assert.equal(state.military.corps_command?.vrs_herzegovina?.queued_operations, undefined);
+        // Under standing authorization the normalization records the receipt and RETAINS the
+        // operation, so a selected player faction opens the war with the same slate the
+        // calibration line runs. Previously both corps were emptied and the queue deleted.
+        assert.ok((state.military.corps_command?.vrs_drina?.active_operations.length ?? 0) > 0);
+        assert.ok((state.military.corps_command?.vrs_herzegovina?.active_operations.length ?? 0) > 0);
         assert.ok(
             state.meta.pending_proposal_reviews?.some((proposal) =>
                 proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
@@ -898,7 +923,7 @@ describe('pre-planned operations', () => {
         );
     });
 
-    it('keeps player-faction queued operations queued until the player authorizes them', () => {
+    it('injects a queued player-faction operation under standing authorization', () => {
         const state = makeMinimalState();
         state.meta.turn = 8;
         state.meta.player_faction = 'RS' as FactionId;
@@ -907,19 +932,13 @@ describe('pre-planned operations', () => {
 
         const first = injectQueuedOperation(state, 'vrs_herzegovina');
 
-        assert.equal(first, false);
-        assert.deepEqual(command.queued_operations, ['Operation Foca']);
+        // Standing authorization: injects on the first attempt, receipt recorded as accepted.
+        assert.equal(first, true);
         const review = state.meta.pending_proposal_reviews?.find((proposal) =>
             proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Foca'
         );
         assert.ok(review);
-
-        review!.accepted = true;
-        review!.resolved_turn = state.meta.turn;
-
-        const second = injectQueuedOperation(state, 'vrs_herzegovina');
-
-        assert.equal(second, true);
+        assert.equal(review.accepted, true);
         assert.equal(command.active_operations[0]?.name, 'Operation Foca');
         assert.deepEqual(command.queued_operations, undefined);
     });
@@ -964,13 +983,18 @@ describe('pre-planned operations', () => {
             'completed Prijedor must not be re-offered',
         );
 
+        // The queued-operation OWNER still owns the injection — that is what the assertion above
+        // protects, and it is unchanged. What moved is the authorization default: the follow-on
+        // now injects under standing authorization instead of waiting on a prompt, so the queue
+        // advances by exactly one and Corridor's receipt is recorded accepted.
         const queuedAttempt = injectQueuedOperation(state, 'vrs_1st_krajina');
-        assert.equal(queuedAttempt, false);
+        assert.equal(queuedAttempt, true);
         const corridorReview = state.meta.pending_proposal_reviews?.find((proposal) =>
             proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_1st_krajina:Operation Corridor'
         );
         assert.ok(corridorReview);
-        assert.deepEqual(command.queued_operations, ['Operation Corridor', 'Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi']);
+        assert.equal(corridorReview.accepted, true);
+        assert.deepEqual(command.queued_operations, ['Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi']);
     });
 
     it('keeps a queued operation queued when live operations already claim every objective', () => {

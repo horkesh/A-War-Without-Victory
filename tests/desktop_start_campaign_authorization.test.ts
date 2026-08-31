@@ -64,10 +64,14 @@ describe('desktop startNewCampaign historical operation authorization', () => {
     expect(selectBotBrigadeOrderFactions(baseState)).toEqual(['HRHB', 'RBiH', 'RS']);
   });
 
-  it('does not silently launch selected player-faction historical operations from the baked startup snapshot', async () => {
+  // CONTRACT INVERTED 2026-08-31 (owner: "Auto-authorize. It should be the same as headless
+  // calibration runs, which do run those ops."). A selected player faction now opens the war
+  // with the same operation slate the calibration line runs; the receipt is still recorded so
+  // the president can countermand via stop-op.
+  it('launches selected player-faction historical operations under standing authorization', async () => {
     const { state } = await startNewCampaign(process.cwd(), 'RS', 'apr_1992');
 
-    expect(activePlayerPreplannedOperations(state, 'RS')).toEqual([]);
+    expect(activePlayerPreplannedOperations(state, 'RS').length).toBeGreaterThan(0);
     expect(state.meta.pending_proposal_reviews).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -80,10 +84,12 @@ describe('desktop startNewCampaign historical operation authorization', () => {
         }),
       ]),
     );
-    expect(state.military.corps_command?.vrs_drina?.queued_operations).toBeUndefined();
+    // The queue is no longer deleted: the deferral only removed it because it was withholding
+    // the live operation. Follow-ons stay queued for their own turn.
+    expect(state.military.corps_command?.vrs_drina?.queued_operations?.length ?? 0).toBeGreaterThan(0);
   });
 
-  it('keeps unresolved selected player-faction historical operation reviews after advance', async () => {
+  it('carries resolved historical operation receipts through an advance', async () => {
     const { state } = await startNewCampaign(process.cwd(), 'RS', 'apr_1992');
 
     const advanced = await advanceTurn(state, process.cwd());
@@ -91,10 +97,11 @@ describe('desktop startNewCampaign historical operation authorization', () => {
       proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
     );
 
-    expect(activePlayerPreplannedOperations(advanced.state, 'RS')).toEqual([]);
+    expect(activePlayerPreplannedOperations(advanced.state, 'RS').length).toBeGreaterThan(0);
     expect(drinaReview).toBeDefined();
     expect(drinaReview?.faction).toBe('RS');
-    expect(drinaReview?.accepted).toBeUndefined();
+    // Standing authorization: resolved on arrival, never left awaiting an answer nobody gives.
+    expect(drinaReview?.accepted).toBe(true);
   });
 
   it('launches an accepted selected player-faction historical operation on advance', async () => {
@@ -180,8 +187,7 @@ describe('desktop startNewCampaign historical operation authorization', () => {
       proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
     );
     expect(review).toBeDefined();
-    review!.accepted = true;
-    review!.resolved_turn = state.meta.turn;
+    expect(review?.accepted).toBe(true);
     const assisted = await advanceTurn(state, process.cwd());
     const injectedDrina = findOperation(assisted.state, 'vrs_drina', 'Operation Drina');
     expect(injectedDrina?.phase).toBe('execution');
@@ -189,11 +195,26 @@ describe('desktop startNewCampaign historical operation authorization', () => {
     const drina = findOperation(assisted.state, 'vrs_drina', 'Operation Drina');
     expect(drina).toBeDefined();
     expect(drina?.phase).toBe('execution');
-    const participants = new Set<string>(drina?.participating_brigades ?? []);
+    // Every player historical operation now carries standing authorization, so the assist
+    // covers the union of their participants rather than Operation Drina's alone. The contract
+    // under test is unchanged: ONLY participants of accepted operations are assisted.
+    const participants = new Set<string>();
+    for (const corpsId of Object.keys(assisted.state.military.corps_command ?? {})) {
+      const cmd = (assisted.state.military.corps_command ?? {})[corpsId] as
+        { active_operations?: Array<{ is_pre_planned?: boolean; participating_brigades?: string[] }> };
+      for (const op of cmd?.active_operations ?? []) {
+        if (op.is_pre_planned !== true) continue;
+        for (const b of op.participating_brigades ?? []) {
+          if (assisted.state.military.formations?.[b]?.faction === 'RS') participants.add(b);
+        }
+      }
+    }
     expect(participants.size).toBeGreaterThan(0);
 
     const assistDiagnostics = (assisted.report?.details as any)?.player_historical_operation_assist;
-    expect(Object.keys(assistDiagnostics?.eligible_attackers_by_corps ?? {})).toEqual(['vrs_drina']);
+    // Every accepted player historical operation is assisted now that all of them carry
+    // standing authorization — previously only the one manually accepted above was.
+    expect(Object.keys(assistDiagnostics?.eligible_attackers_by_corps ?? {})).toContain('vrs_drina');
     expect(assistDiagnostics.eligible_attackers_by_corps.vrs_drina).toBeGreaterThan(0);
     expect(assistDiagnostics.eligible_attackers_by_corps.vrs_drina).toBeLessThanOrEqual(participants.size);
 
