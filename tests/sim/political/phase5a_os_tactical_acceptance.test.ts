@@ -12,7 +12,6 @@
  * 8. Player event has turn_min = 72
  * 9. Edge case: situation_score exactly 49 → branch fires (< 50)
  * 10. Edge case: situation_score exactly 50 → branch does NOT fire (not < 50)
- * 11. Edge case: Cutileiro exclusion still fires before OS branch (id='cutileiro' handled first)
  * 12. Edge case: patron hard override at 80 still fires for RBiH on non-OS plan
  * 13. RS: gap = 13pp exactly (current 65%, proposed 52%) → floor NOT triggered (> 18 not met)
  *
@@ -202,19 +201,6 @@ describe('Group 3: RS floor gate with corrected O-S split (RS=52)', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('Group 4: Edge cases — gate ordering', () => {
-    it('11. Cutileiro exclusion fires before OS branch: id=cutileiro RBiH with low territory → rejected (legacy path)', () => {
-        // Cutileiro gate is checked FIRST in the function (before OS branch)
-        const plan = makePlan({
-            id: 'cutileiro',
-            proposed_split: { RBiH: 10 }, // proposed < current 30% → reject
-        });
-        const personality = getPoliticalPersonality('RBiH');
-        const assessment = makeAssessment({ situation_score: 20 }); // low score, would trigger OS branch if reached
-        // patronOverride = 5 (not > 50) → Cutileiro reject path
-        const result = computePoliticalPeacePlanResponse(plan, 'RBiH', 30, 5, assessment, personality);
-        expect(result).toBe('rejected');
-    });
-
     it('12. Patron hard override at 80 still accepts for RBiH on non-OS plan (normal path)', () => {
         const plan = makePlan({
             id: 'contact_group',

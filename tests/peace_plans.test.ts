@@ -180,8 +180,12 @@ function attachOwenStoltenbergAssemblyDecision(state: GameState): void {
 }
 
 describe('Peace Plan Data', () => {
-    it('defines 5 historical peace plans', () => {
-        expect(PEACE_PLANS).toHaveLength(5);
+    it('defines 4 historical peace plans', () => {
+        // Cutileiro removed 2026-08-31: pre-war (March 1992), see peace_plan_data.ts.
+        expect(PEACE_PLANS).toHaveLength(4);
+        expect(PEACE_PLANS.map(p => p.id)).toEqual([
+            'vance_owen', 'owen_stoltenberg', 'contact_group', 'dayton',
+        ]);
     });
 
     it('plans are in chronological order', () => {
@@ -206,16 +210,6 @@ describe('Peace Plan Data', () => {
 });
 
 describe('evaluatePeacePlans', () => {
-    it('triggers Cutileiro plan at war week 0', () => {
-        const state = makeState({ turn: 10, war_start_turn: 10 }); // war week = 0
-        evaluatePeacePlans(state);
-
-        const pending = state.military.negotiation?.pending_peace_plan;
-        expect(pending).toBeDefined();
-        expect(pending!.plan_id).toBe('cutileiro');
-        expect(pending!.turn_offered).toBe(10);
-    });
-
     it('triggers Vance-Owen plan at war week 40', () => {
         const state = makeState({ turn: 50, war_start_turn: 10 }); // war week = 40
         evaluatePeacePlans(state);
@@ -253,7 +247,7 @@ describe('evaluatePeacePlans', () => {
     it('does not trigger if plan already offered', () => {
         const neg = makeNegotiationState();
         neg.peace_plan_history.push({
-            plan_id: 'cutileiro',
+            plan_id: 'vance_owen',
             turn_offered: 5,
             responses: { RBiH: 'rejected', RS: 'rejected', HRHB: 'rejected' },
             resolved: true,
@@ -267,16 +261,16 @@ describe('evaluatePeacePlans', () => {
     it('does not trigger if another plan is already pending', () => {
         const neg = makeNegotiationState();
         neg.pending_peace_plan = {
-            plan_id: 'cutileiro',
+            plan_id: 'vance_owen',
             turn_offered: 10,
             bot_responses: { RS: 'rejected', HRHB: 'accepted' },
         };
-        // war week 40 = Vance-Owen trigger, but Cutileiro still pending
+        // war week 70 = Owen-Stoltenberg trigger, but Vance-Owen still pending
         const state = makeState({ turn: 50, war_start_turn: 10, negotiation: neg });
         evaluatePeacePlans(state);
 
-        // Should still be Cutileiro, not replaced by Vance-Owen
-        expect(state.military.negotiation?.pending_peace_plan?.plan_id).toBe('cutileiro');
+        // Should still be Vance-Owen, not replaced by Owen-Stoltenberg
+        expect(state.military.negotiation?.pending_peace_plan?.plan_id).toBe('vance_owen');
     });
 
     it('does not trigger if game_over is true', () => {
@@ -369,7 +363,8 @@ describe('evaluatePeacePlans', () => {
     });
 
     it('skips player faction in bot responses', () => {
-        const state = makeState({ turn: 10, war_start_turn: 10, player_faction: 'RS' });
+        // War week 40 (Vance-Owen) since Cutileiro's week-0 slot was removed.
+        const state = makeState({ turn: 50, war_start_turn: 10, player_faction: 'RS' });
         evaluatePeacePlans(state);
 
         const pending = state.military.negotiation?.pending_peace_plan;
@@ -379,33 +374,6 @@ describe('evaluatePeacePlans', () => {
         // RBiH and HRHB should have responses
         expect(pending!.bot_responses.RBiH).toBeDefined();
         expect(pending!.bot_responses.HRHB).toBeDefined();
-    });
-
-    it('historical headless evaluation records the documented Cutileiro outcome', () => {
-        const neg = makeNegotiationState({ override_authority: { RBiH: 10, RS: 10, HRHB: 10 } });
-        const state = makeState({
-            turn: 0,
-            war_start_turn: 0,
-            no_player: true,
-            controllers: makeControllers({ RBiH: 20, RS: 60, HRHB: 20 }),
-            negotiation: neg,
-        });
-
-        evaluatePeacePlans(state);
-
-        expect(neg.pending_peace_plan).toBeUndefined();
-        expect(neg.peace_plan_history).toHaveLength(1);
-        expect(neg.peace_plan_history[0]).toMatchObject({
-            plan_id: 'cutileiro',
-            turn_offered: 0,
-            resolved: true,
-        });
-        expect(neg.peace_plan_history[0].responses).toEqual({
-            RBiH: 'rejected',
-            RS: 'accepted',
-            HRHB: 'accepted',
-        });
-        expect(state.meta.game_over).not.toBe(true);
     });
 
     it('historical headless evaluation resolves every pre-Dayton plan without ending the war early', () => {
@@ -418,7 +386,9 @@ describe('evaluatePeacePlans', () => {
             negotiation: neg,
         });
 
+        // Turn 0 no longer offers a plan: Cutileiro held the only week-0 slot.
         evaluatePeacePlans(state);
+        expect(neg.peace_plan_history).toHaveLength(0);
         state.meta.turn = 40;
         evaluatePeacePlans(state);
         state.meta.turn = 70;
@@ -433,12 +403,6 @@ describe('evaluatePeacePlans', () => {
             responses: entry.responses,
             resolved: entry.resolved,
         }))).toEqual([
-            {
-                plan_id: 'cutileiro',
-                turn_offered: 0,
-                responses: { RBiH: 'rejected', RS: 'accepted', HRHB: 'accepted' },
-                resolved: true,
-            },
             {
                 plan_id: 'vance_owen',
                 turn_offered: 40,
@@ -480,85 +444,15 @@ describe('evaluatePeacePlans', () => {
 });
 
 describe('Bot response logic', () => {
-    it('uses the documented Cutileiro rejection in a real emergent HRHB desktop campaign', async () => {
-        const { state } = await startNewCampaign(process.cwd(), 'HRHB', 'apr_1992');
-        resolveEventDecision(state, 'hrhb_political_goal', 'croat_republic');
-
-        const advanced = await advanceTurn(state, process.cwd());
-        expect(advanced.error).toBeUndefined();
-        expect(advanced.state.military.negotiation?.pending_peace_plan).toMatchObject({
-            plan_id: 'cutileiro',
-            bot_responses: {
-                RBiH: 'rejected',
-                RS: 'accepted',
-            },
-        });
-        const result = resolvePeacePlan(advanced.state, 'cutileiro', 'accepted');
-        expect(result).toEqual({
-            all_accepted: false,
-            rejection_factions: ['RBiH'],
-        });
-        expect(advanced.state.military.negotiation?.peace_plan_history.at(-1)?.responses).toEqual({
-            RBiH: 'rejected',
-            RS: 'accepted',
-            HRHB: 'accepted',
-        });
-        expect(advanced.state.meta.game_over).not.toBe(true);
-    }, 120_000);
-
-    it('keeps an HRHB historical campaign running when HRHB accepts Cutileiro', () => {
-        const state = makeState({
-            turn: 10,
-            war_start_turn: 10,
-            player_faction: 'HRHB',
-            decision_mode: 'emergent',
-            controllers: makeControllers({ RBiH: 45, RS: 45, HRHB: 10 }),
-        });
-
-        evaluatePeacePlans(state);
-
-        expect(state.military.negotiation?.pending_peace_plan?.bot_responses.RBiH).toBe('rejected');
-        const result = resolvePeacePlan(state, 'cutileiro', 'accepted');
-        expect(result).toEqual({
-            all_accepted: false,
-            rejection_factions: ['RBiH'],
-        });
-        expect(state.meta.game_over).not.toBe(true);
-    });
-
-    it('uses documented Cutileiro responses for non-player factions in an RS historical campaign', () => {
-        const state = makeState({
-            turn: 10,
-            war_start_turn: 10,
-            player_faction: 'RS',
-            controllers: makeControllers({ RBiH: 20, RS: 60, HRHB: 20 }),
-        });
-
-        evaluatePeacePlans(state);
-
-        const pending = state.military.negotiation?.pending_peace_plan;
-        expect(pending?.bot_responses).toEqual({
-            RBiH: 'rejected',
-            HRHB: 'accepted',
-        });
-
-        resolvePeacePlan(state, 'cutileiro', 'accepted');
-        expect(state.military.negotiation?.peace_plan_history.at(-1)?.responses).toEqual({
-            RBiH: 'rejected',
-            RS: 'accepted',
-            HRHB: 'accepted',
-        });
-    });
-
     it('bot accepts when override_authority > 50', () => {
         const neg = makeNegotiationState({
             override_authority: { RS: 60, HRHB: 60 },
         });
-        // RS holds 60% territory, plan offers 44% — normally would reject.
+        // RS holds 60% territory, Vance-Owen offers 43% — normally would reject.
         // But override > 50 forces acceptance.
         const controllers = makeControllers({ RBiH: 20, RS: 60, HRHB: 20 });
         const state = makeState({
-            turn: 10,
+            turn: 50,
             war_start_turn: 10,
             decision_mode: 'emergent',
             controllers,
@@ -572,34 +466,23 @@ describe('Bot response logic', () => {
         expect(pending!.bot_responses.HRHB).toBe('accepted');
     });
 
-    it('bot rejects when override low and territory favorable', () => {
-        const neg = makeNegotiationState({
-            override_authority: { RS: 10, HRHB: 10 },
-        });
-        // RS holds 60%, Cutileiro offers 44% — should reject
-        const controllers = makeControllers({ RBiH: 20, RS: 60, HRHB: 20 });
-        const state = makeState({
-            turn: 10,
-            war_start_turn: 10,
-            decision_mode: 'emergent',
-            controllers,
-            negotiation: neg,
-        });
-        evaluatePeacePlans(state);
-
-        const pending = state.military.negotiation?.pending_peace_plan;
-        expect(pending).toBeDefined();
-        expect(pending!.bot_responses.RS).toBe('rejected');
-    });
+    // REMOVED 2026-08-31 with the Cutileiro plan: 'bot rejects when override low and
+    // territory favorable' asserted the LEGACY fallback (proposed >= current ? accept :
+    // reject), which only ran because Cutileiro was excluded from personality scoring.
+    // With that exclusion gone every plan routes through pickPoliticalResponse, whose
+    // territory behaviour is owned by tests/sim/political/political_peace_plan.test.ts
+    // (Group 2: RS territory floor; Group 4: Territory signal) on states built for it.
+    // Re-pointing this integration test at Vance-Owen made it assert scorer output from
+    // a synthetic minimal state, which is not what it was written to check.
 
     it('bot accepts when plan offers more than current territory', () => {
         const neg = makeNegotiationState({
             override_authority: { RS: 10, HRHB: 10 },
         });
-        // RS holds 30%, Cutileiro offers 44% — should accept
+        // RS holds 30%, Vance-Owen offers 43% — should accept
         const controllers = makeControllers({ RBiH: 50, RS: 30, HRHB: 20 });
         const state = makeState({
-            turn: 10,
+            turn: 50,
             war_start_turn: 10,
             decision_mode: 'emergent',
             controllers,
@@ -617,18 +500,18 @@ describe('resolvePeacePlan', () => {
     it('all-accept ends game', () => {
         const neg = makeNegotiationState();
         neg.pending_peace_plan = {
-            plan_id: 'cutileiro',
+            plan_id: 'vance_owen',
             turn_offered: 10,
             bot_responses: { RS: 'accepted', HRHB: 'accepted' },
         };
         const state = makeState({ turn: 10, war_start_turn: 10, negotiation: neg });
 
-        const result = resolvePeacePlan(state, 'cutileiro', 'accepted');
+        const result = resolvePeacePlan(state, 'vance_owen', 'accepted');
 
         expect(result.all_accepted).toBe(true);
         expect(result.rejection_factions).toHaveLength(0);
         expect(state.meta.game_over).toBe(true);
-        expect(state.meta.outcome).toBe('negotiated_peace:cutileiro');
+        expect(state.meta.outcome).toBe('negotiated_peace:vance_owen');
     });
 
     it('player rejection prevents game over', () => {
@@ -718,34 +601,34 @@ describe('resolvePeacePlan', () => {
     it('accepting factions get credit in peace_plans_accepted', () => {
         const neg = makeNegotiationState();
         neg.pending_peace_plan = {
-            plan_id: 'cutileiro',
+            plan_id: 'vance_owen',
             turn_offered: 10,
             bot_responses: { RS: 'rejected', HRHB: 'accepted' },
         };
         const state = makeState({ turn: 10, war_start_turn: 10, negotiation: neg });
 
-        resolvePeacePlan(state, 'cutileiro', 'accepted');
+        resolvePeacePlan(state, 'vance_owen', 'accepted');
 
         // RBiH (player) accepted, HRHB (bot) accepted — both should have credit
-        expect(neg.capital.RBiH.peace_plans_accepted).toContain('cutileiro');
-        expect(neg.capital.HRHB.peace_plans_accepted).toContain('cutileiro');
+        expect(neg.capital.RBiH.peace_plans_accepted).toContain('vance_owen');
+        expect(neg.capital.HRHB.peace_plans_accepted).toContain('vance_owen');
         // RS rejected — should NOT have credit
-        expect(neg.capital.RS.peace_plans_accepted).not.toContain('cutileiro');
+        expect(neg.capital.RS.peace_plans_accepted).not.toContain('vance_owen');
     });
 
     it('records plan in peace_plan_history after resolution', () => {
         const neg = makeNegotiationState();
         neg.pending_peace_plan = {
-            plan_id: 'cutileiro',
+            plan_id: 'vance_owen',
             turn_offered: 10,
             bot_responses: { RS: 'accepted', HRHB: 'accepted' },
         };
         const state = makeState({ turn: 10, war_start_turn: 10, negotiation: neg });
 
-        resolvePeacePlan(state, 'cutileiro', 'rejected');
+        resolvePeacePlan(state, 'vance_owen', 'rejected');
 
         expect(neg.peace_plan_history).toHaveLength(1);
-        expect(neg.peace_plan_history[0].plan_id).toBe('cutileiro');
+        expect(neg.peace_plan_history[0].plan_id).toBe('vance_owen');
         expect(neg.peace_plan_history[0].resolved).toBe(true);
         expect(neg.peace_plan_history[0].responses.RBiH).toBe('rejected');
         expect(neg.peace_plan_history[0].responses.RS).toBe('accepted');
@@ -754,13 +637,13 @@ describe('resolvePeacePlan', () => {
     it('clears pending_peace_plan after resolution', () => {
         const neg = makeNegotiationState();
         neg.pending_peace_plan = {
-            plan_id: 'cutileiro',
+            plan_id: 'vance_owen',
             turn_offered: 10,
             bot_responses: { RS: 'accepted', HRHB: 'accepted' },
         };
         const state = makeState({ turn: 10, war_start_turn: 10, negotiation: neg });
 
-        resolvePeacePlan(state, 'cutileiro', 'accepted');
+        resolvePeacePlan(state, 'vance_owen', 'accepted');
 
         expect(neg.pending_peace_plan).toBeUndefined();
     });
@@ -768,7 +651,7 @@ describe('resolvePeacePlan', () => {
     it('throws for unknown plan ID', () => {
         const neg = makeNegotiationState();
         neg.pending_peace_plan = {
-            plan_id: 'cutileiro',
+            plan_id: 'vance_owen',
             turn_offered: 10,
             bot_responses: { RS: 'accepted', HRHB: 'accepted' },
         };
@@ -780,13 +663,13 @@ describe('resolvePeacePlan', () => {
     it('throws when no pending plan matches', () => {
         const neg = makeNegotiationState();
         neg.pending_peace_plan = {
-            plan_id: 'cutileiro',
+            plan_id: 'vance_owen',
             turn_offered: 10,
             bot_responses: { RS: 'accepted', HRHB: 'accepted' },
         };
         const state = makeState({ turn: 10, war_start_turn: 10, negotiation: neg });
 
-        expect(() => resolvePeacePlan(state, 'vance_owen', 'accepted')).toThrow('No pending peace plan');
+        expect(() => resolvePeacePlan(state, 'contact_group', 'accepted')).toThrow('No pending peace plan');
     });
 
     it.each([

@@ -2,7 +2,6 @@
  * Tests for v0.8.2 Phase 3 — Political Peace Plan Response
  *
  * Covers:
- * 1. Cutileiro exclusion: legacy logic (territory >= current → accept; override > 50 → accept)
  * 2. RS territory floor: gap > 18pp → hard reject
  * 3. RS territory floor: exactly 18pp → passes (> 18, not >= 18)
  * 4. Patron hard override >= 80 → accept (only when floor not triggered)
@@ -57,52 +56,6 @@ function makePlan(overrides: Partial<PeacePlanDefinition> & { id: string }): Pea
 // ═══════════════════════════════════════════════════════════════════════════
 // Group 1: Cutileiro exclusion — legacy logic
 // ═══════════════════════════════════════════════════════════════════════════
-
-describe('Group 1: Cutileiro exclusion — legacy logic', () => {
-    it('1. Cutileiro: proposed >= current territory → accept', () => {
-        const plan = makePlan({ id: 'cutileiro', proposed_split: { RS: 60 } });
-        const personality = getPoliticalPersonality('RS');
-        const assessment = makeAssessment();
-        // RS currently holds 55%, plan proposes 60% → gap is negative (gain) → accept
-        const result = computePoliticalPeacePlanResponse(plan, 'RS', 55, 10, assessment, personality);
-        expect(result).toBe('accepted');
-    });
-
-    it('2. Cutileiro: proposed exactly equal to current → accept', () => {
-        const plan = makePlan({ id: 'cutileiro', proposed_split: { RS: 55 } });
-        const personality = getPoliticalPersonality('RS');
-        const assessment = makeAssessment();
-        const result = computePoliticalPeacePlanResponse(plan, 'RS', 55, 10, assessment, personality);
-        expect(result).toBe('accepted');
-    });
-
-    it('3. Cutileiro: proposed < current, patronOverride <= 50 → reject', () => {
-        const plan = makePlan({ id: 'cutileiro', proposed_split: { RS: 40 } });
-        const personality = getPoliticalPersonality('RS');
-        const assessment = makeAssessment();
-        // RS holds 70%, plan offers 40%, patronOverride = 10 → reject
-        const result = computePoliticalPeacePlanResponse(plan, 'RS', 70, 10, assessment, personality);
-        expect(result).toBe('rejected');
-    });
-
-    it('4. Cutileiro: proposed < current, patronOverride > 50 → accept (patron override fires)', () => {
-        const plan = makePlan({ id: 'cutileiro', proposed_split: { RS: 40 } });
-        const personality = getPoliticalPersonality('RS');
-        const assessment = makeAssessment();
-        // RS holds 70%, plan offers only 40%, but patron_override = 60 → accept
-        const result = computePoliticalPeacePlanResponse(plan, 'RS', 70, 60, assessment, personality);
-        expect(result).toBe('accepted');
-    });
-
-    it('5. Cutileiro: patron exactly 50 → does NOT trigger override (uses territory check; proposed < current → reject)', () => {
-        const plan = makePlan({ id: 'cutileiro', proposed_split: { RS: 40 } });
-        const personality = getPoliticalPersonality('RS');
-        const assessment = makeAssessment();
-        // patronOverride > 50 required; exactly 50 does not trigger
-        const result = computePoliticalPeacePlanResponse(plan, 'RS', 70, 50, assessment, personality);
-        expect(result).toBe('rejected');
-    });
-});
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Group 2: RS territory floor — gap > 18pp → hard reject

@@ -8,7 +8,7 @@
  *   - the resolver maps exactly the four shipped plan ids to committed
  *     assets (owner-approved NO-MAP route, 2026-06-10) and resolves each to
  *     a real URL through the eager glob;
- *   - `cutileiro` (no dedicated still), unknown ids, and null/undefined all
+ *   - retired ids such as `cutileiro`, unknown ids, and null/undefined all
  *     resolve `null` (graceful fallback — the modal renders without a still,
  *     never a broken image);
  *   - the injectable core resolves by basename suffix and ignores unmapped
@@ -34,7 +34,10 @@ describe('resolvePeacePlanStill (eager glob over committed assets)', () => {
     }
   });
 
-  it('returns null for cutileiro (intentionally no dedicated still)', () => {
+  it('returns null for a retired plan id (cutileiro, removed from the catalog)', () => {
+    // Cutileiro was removed from PEACE_PLANS on 2026-08-31 as pre-war. A stale id
+    // must still resolve to null rather than throw — saves and Chronicle entries
+    // from before the removal can carry it.
     expect(resolvePeacePlanStill('cutileiro')).toBeNull();
   });
 
@@ -54,14 +57,10 @@ describe('PEACE_PLAN_ID_TO_BASENAME mapping integrity', () => {
     }
   });
 
-  it('covers every catalog plan except cutileiro', () => {
+  it('covers every catalog plan', () => {
     const mapped = new Set(Object.keys(PEACE_PLAN_ID_TO_BASENAME));
     for (const plan of PEACE_PLANS) {
-      if (plan.id === 'cutileiro') {
-        expect(mapped.has(plan.id)).toBe(false);
-      } else {
-        expect(mapped.has(plan.id), `catalog plan ${plan.id} should have a still`).toBe(true);
-      }
+      expect(mapped.has(plan.id), `catalog plan ${plan.id} should have a still`).toBe(true);
     }
   });
 });
