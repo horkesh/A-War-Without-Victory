@@ -1932,6 +1932,16 @@ function updateMultiAxisResults(
     op.objective_capture_count = totalCaptures;
     op.attack_attempt_count = totalAttempts;
 
+    // Factory-built probes carry a single axis, so they take the multi-axis
+    // result path. Reconnaissance is complete after the first resolved contact:
+    // sector intel has already been fully revealed above, and another attack
+    // would turn a disposable probe into an unbounded offensive commitment.
+    // Match the legacy flat-probe lifecycle enforced in advanceSectorOffensives.
+    if (op.type === 'probe' && totalAttempts > 0) {
+        beginRecovery(op, turn, 'probe_complete', state);
+        return;
+    }
+
     // Zero-progress early abort — now PER-AXIS for true parallel execution.
     // Each axis stalls from its own zero-progress failures, not contaminated
     // by other axes. A stalled Foča Valley axis won't kill a progressing Kalinovik axis.

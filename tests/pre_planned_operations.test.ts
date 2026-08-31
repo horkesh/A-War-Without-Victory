@@ -4,6 +4,7 @@ import { describe, it } from 'vitest';
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../src/sim/combat/historical_operation_authorization.js';
 import {
     admitAuthoredPrePlannedReinforcements,
+    getHeadQueuedPrePlannedBrigadeIds,
     injectPrePlannedOperations,
     injectQueuedOperation,
     _ALL_PRE_PLANNED,
@@ -333,6 +334,19 @@ describe('pre-planned operations', () => {
                 'Maglaj Local Counterattack',
             ],
         );
+    });
+
+    it('reserves probe participants only for the head queued historical operation', () => {
+        const state = makeMinimalState();
+        state.military.corps_command!.vrs_sarajevo_romanija!.queued_operations = [
+            'Operation Kijevo',
+            'Operation Trnovo',
+        ];
+
+        const reserved = getHeadQueuedPrePlannedBrigadeIds(state);
+
+        assert.ok(reserved.has('rs_4th_sarajevo_light_infantry'));
+        assert.ok(!reserved.has('rs_trnovo_brigade'));
     });
 
     it('authors the April Bosanska Krupa takeover as a narrow 2KK operation', () => {
@@ -1466,6 +1480,7 @@ describe('pre-planned operations', () => {
         assert.equal(circle!.faction, 'RBiH');
         assert.equal(circle!.corps, 'arbih_1st_corps');
         assert.equal(circle!.available_from, 8);
+        assert.equal(circle!.planning_duration, 4);
         assert.deepEqual(
             circle!.axes.map((axis) => ({
                 id: axis.axis_id,

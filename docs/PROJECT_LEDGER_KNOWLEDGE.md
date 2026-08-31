@@ -4798,3 +4798,24 @@ only exact endpoint occupancy. Defaults apply only when an authored value is abs
 sector ownership must remain separate from political control.
 
 Applied in `[2026-08-31] fix(RE): restore Bosanska Krupa opening takeover`.
+
+## 2026-08-31 - Ownership horizons and factory-shaped lifecycle tests
+
+A generic reconnaissance operation consumed formations that the historical-operation queue had
+already named. One brigade was destroyed before Operation Circle could use it; another was still
+probe-committed when Operation Kijevo injected, so both authored axes silently disappeared. The
+correct ownership horizon was neither "currently active only" nor "every operation in the future
+queue": probes must yield to each corps' **next** queued operation, while later campaigns must not
+freeze their formations months early.
+
+A separate representation boundary compounded the fault. Legacy flat probes had a one-contact
+recovery rule, but normal factory-built probes contain an axis and therefore execute through the
+multi-axis result path. Tests of the legacy shape proved nothing about the production shape, and
+factory probes could keep attacking after reconnaissance was already complete.
+
+**Reusable rule:** state ownership horizons explicitly—active, head queued, and entire future queue
+are different contracts—and test the object shape the production factory actually emits. Whenever
+a factory changes representation, trace which lifecycle branch that representation selects; a rule
+covered only for a legacy shape is not an engine invariant.
+
+Applied in `[2026-08-31] fix(engine): preserve queued operation brigades from probes`.

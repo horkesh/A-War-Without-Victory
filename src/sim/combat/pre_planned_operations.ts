@@ -1958,6 +1958,30 @@ export function getQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'military'>
 }
 
 /**
+ * Formation identities owned by each corps' next queued historical operation.
+ *
+ * Probe selection needs the narrower reservation: protect the plan that can
+ * inject next without freezing formations authored only for later campaigns.
+ * Other generic-routing owners deliberately use the full-queue helper above.
+ */
+export function getHeadQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'military'>): Set<FormationId> {
+    const reserved = new Set<FormationId>();
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const operationName = corpsCommand[corpsId]?.queued_operations?.[0];
+        if (!operationName) continue;
+        const def = ALL_PRE_PLANNED.find(candidate => (
+            candidate.corps === corpsId && candidate.name === operationName
+        ));
+        if (!def) continue;
+        for (const axis of def.axes) {
+            for (const brigadeId of axis.brigades) reserved.add(brigadeId);
+        }
+    }
+    return reserved;
+}
+
+/**
  * ADR-0005 v2.2c (issue #40): brigade IDs reserved by pre-planned ops that have NOT yet
  * injected (`available_from > currentTurn`). These brigades are op-critical anchors/participants
  * referenced by hardcoded ID; excluding them from TG donor selection prevents donor consumption

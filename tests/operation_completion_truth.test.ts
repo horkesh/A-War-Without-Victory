@@ -195,6 +195,48 @@ describe('operation completion truth', () => {
         expect(op?.recovery_reason).toBe('probe_complete');
     });
 
+    it('ends a multi-axis probe after its first resolved contact', () => {
+        const state = makeStateWithOperation({
+            name: 'probe_corps_1_t40',
+            type: 'probe',
+            phase: 'execution',
+            started_turn: 40,
+            phase_started_turn: 40,
+            participating_brigades: ['b1'],
+            objectives: ['op:enemy:objective'],
+            objective_capture_count: 0,
+            attack_attempt_count: 0,
+            battles_this_turn: 1,
+            objective_battles_this_turn: 1,
+            sector_id: 'sector:corps_1:0',
+            axes: [{
+                axis_id: 'probe_corps_1_t40',
+                name: 'Probe',
+                assigned_brigades: ['b1'],
+                objectives: ['op:enemy:objective'],
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+                battles_this_turn: 1,
+                objective_battles_this_turn: 1,
+            }],
+        });
+        state.military.formations!.b1!.posture = 'attack';
+
+        updateSectorOffensiveResults(state);
+
+        const op = state.military.corps_command?.corps_1?.active_operations[0];
+        expect(op?.attack_attempt_count).toBe(1);
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('probe_complete');
+    });
+
     it('does not mark a legacy operation completed when failures merely skipped past the objective list', () => {
         const state = makeStateWithOperation({
             name: 'Operacija Test',

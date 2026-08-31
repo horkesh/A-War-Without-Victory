@@ -64,6 +64,49 @@ logged captures during turns 8–12; the January checkpoint is 694/712. This dir
 40-week development run does **not** supersede clean baseline `n388`, reconcile the manifest, or
 authorize new floors. A clean owner-authorized 188-week run is still required for adoption.
 
+### Goražde/Foča engine correction candidate — probe ownership and lifecycle
+
+The 694 Foča candidate exposed an engine ownership defect before further regional calibration was
+attempted. Generic probes could consume or destroy brigades already authored for the next queued
+historical operation, and factory-built multi-axis probes did not obey the legacy one-contact probe
+lifecycle. In the measured artifact, `arbih_102nd_motorized` was destroyed by a probe before
+Operation Circle and `rs_4th_sarajevo_light_infantry` was still probe-committed when Operation
+Kijevo injected. Their authored axes consequently vanished.
+
+The candidate engine correction reserves only each corps' head queued operation participants from
+generic probe selection and sends a factory-built probe to `probe_complete` recovery after its first
+resolved contact. It does not change combat odds, control rules, initial control, painted control,
+operation rosters/objectives, or enclave rules. Reserving the entire future queue was rejected as
+over-broad; head-only ownership preserves the next plan without freezing later campaign brigades.
+
+Final bounded Node 22.23.2 evidence is
+`F:\A-War-Without-Victory\runs\codex_gorazde_engine_fix\apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n3`
+(40-week override, dirty development provenance, final hash `0030aaf43578c06f`). January measures
+**699/712**, versus 694 in the preceding Foča candidate. Operation Circle captures
+`op:gorazde:glamoc` and `op:gorazde:sopotnica` (two captures, eight attacks); Operation Kijevo
+retains its Prača participant and captures both `op:trnovo:kijevo_2` and `op:pale:praca` (two
+captures, two attacks). Operation Foca retains 14 attacks and earns all five former start overrides
+through ordinary combat. Rung-4 corps-plus-objectives divergence is 4/25 (**16.0%**), below the
+20% attribution ceiling, so the 694→699 bounded checkpoint movement is readable.
+
+Applicable bounded health fields remain green: zero zero-eligible operations, zero invalid-op
+weeks, zero ghost destructions, 15 stranded brigades, zero consistency failures, K:W 3.864,
+10,876 killed and 42,024 wounded. The health script exits nonzero only because a 40-week run lacks
+the later canonical checkpoints and terminal floor. Its `planning_deaths.probe = 72/74` advisory
+now includes successful one-contact probes closed as `probe_complete`; that figure must not be read
+as 72 probes making no contact. The AAR schema still needs a distinct completed-recon category.
+
+Two scenario experiments were measured and rejected. Raising Circle's marching budget 4→6 restored
+only one Trnovo participant, produced zero captures and 652 attacker deaths, and lowered January to
+696. Moving Kolovarice ahead of Ustikolina failed to capture Kolovarice and lost the required
+Ustikolina takeover. Both catalog changes were reverted. Kolovarice and the residual Goražde/Foča
+mismatches therefore remain open calibration targets; they are not disguised by this aggregate
+improvement. This bounded candidate does not supersede clean baseline `n388`, reconcile the
+manifest, or change floors. A clean owner-authorized 188-week adoption run remains separate work.
+An identical bounded replay at
+`F:\A-War-Without-Victory\runs\codex_gorazde_engine_fix\apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n4`
+reproduced final hash `0030aaf43578c06f`.
+
 ### Previous RE reference — historical lineage, superseded for current calibration
 
 The clean corrected RE baseline pair was captured by the fresh distinct-output Node-22 runs at exact commit

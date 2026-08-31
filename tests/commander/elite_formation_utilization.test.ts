@@ -1411,6 +1411,84 @@ describe('empty-objective probe guard', () => {
         expect(probeOps[0]!.axes![0]!.objectives).toContain('op:enemy:target');
     });
 
+    it('does not assign a queued historical-operation participant to a probe', () => {
+        const reservedBrigadeId = 'rs_4th_sarajevo_light_infantry' as FormationId;
+        const corpsId = 'vrs_sarajevo_romanija' as FormationId;
+        const briefing = makeBriefing({
+            corps_id: corpsId,
+            turn: 23,
+            active_operations: [],
+            sectors: [{
+                sector_id: 'sector:vrs_sarajevo_romanija:0',
+                corps_id: corpsId,
+                faction: 'RS' as FactionId,
+                sub_segments: [{
+                    sub_segment_id: 'subseg:vrs_sarajevo_romanija:0:0',
+                    edge_ids: ['e1'],
+                    friendly_osids: ['op:near:b'],
+                    enemy_osids: ['op:enemy:target'],
+                    length_edges: 1,
+                    primary_brigade_ids: [],
+                }],
+                edge_ids: ['e1'],
+                territory_osids: ['op:near:a', 'op:near:b'],
+                length_edges: 1,
+                assigned_brigade_ids: [reservedBrigadeId],
+                reserve_brigade_ids: [],
+                opposing_factions: ['RBiH' as FactionId],
+                density: 1,
+                defensive_power: 100,
+                threat_ratio: 1,
+                sector_stance: 'balanced',
+                stance_source: 'bot',
+            }] as any[],
+            brigades: [{
+                id: reservedBrigadeId,
+                faction: 'RS' as FactionId,
+                corps_id: corpsId,
+                kind: 'brigade',
+                status: 'active',
+                personnel: 1200,
+                cohesion: 80,
+                location_osid: 'op:near:b',
+            }] as any[],
+            state_ref: {
+                military: {
+                    corps_command: {
+                        [corpsId]: {
+                            active_operations: [],
+                            queued_operations: ['Operation Kijevo'],
+                        },
+                    },
+                },
+            } as unknown as GameState,
+        });
+        const reservedBrigade = makeEval({
+            brigade_id: reservedBrigadeId,
+            is_combat_effective: true,
+            is_disrupted: false,
+            fitness_offense: 0.9,
+        });
+
+        const output = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId })],
+            makeForces([reservedBrigade]),
+            {
+                zones: [],
+                garrison_locks: [],
+                surplus_pool: [reservedBrigade],
+                total_garrison_budget: 1,
+                can_launch_ops: true,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+
+        expect(output.operations.filter(op => op.type === 'probe')).toHaveLength(0);
+    });
+
     it('empty probeObjectives array does not create axis-less probe', () => {
         // Call buildProbeOperation directly with empty objectives array.
         // This is a backward-compat regression guard — the factory should

@@ -31072,3 +31072,46 @@ Operation Foca's logged captures in turns 8–12. The operation made 14 attacks;
 checkpoint is 694/712. Focused suites pass 67/67 and typecheck passes. This is candidate evidence
 only: clean 188-week adoption, full health comparison, and any baseline reconciliation await
 separate owner authorization.
+
+## 2026-08-31 — Goražde/Foča queued-operation ownership engine correction (candidate)
+
+**Owner direction:** improve the Goražde/Foča area, correcting any engine defect before further
+calibration. The preceding bounded Foča candidate measured January at 694/712 and showed authored
+Operation Circle and Operation Kijevo axes disappearing.
+
+**Engine finding and correction:** generic probes could take brigades already owned by the next
+queued historical operation, while factory-built multi-axis probes bypassed the legacy one-contact
+recovery rule. Probe selection now reserves only each corps' head queued operation participants;
+after its first resolved contact, a multi-axis probe enters `probe_complete` recovery. Regression
+tests cover Kijevo participant ownership, head-only queue scope, and the factory-shaped lifecycle.
+No initial control, painted control, combat odds, enclave logic, operation objective, scenario,
+canon, calibration data, baseline manifest, or floor was changed.
+
+**Measured bounded result:** Node 22.23.2 run
+`F:\A-War-Without-Victory\runs\codex_gorazde_engine_fix\apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n3`
+(40-week development override, dirty provenance, final hash `0030aaf43578c06f`) measures January
+699/712. Operation Circle again captures Goražde Glamoč and Sopotnica; Operation Kijevo retains the
+4th Sarajevo Light Infantry and captures both Kijevo and Prača. Operation Foca retains its 14
+attacks and all five former start overrides remain battle-earned. Rung-4 schedule divergence from
+the 694 candidate is 16.0%, below the 20% attribution ceiling. Applicable bounded health fields are
+green: zero zero-eligible operations, zero invalid-op weeks, zero ghost destructions, 15 stranded
+brigades, zero consistency failures, K:W 3.864.
+
+**Rejected alternatives and limit:** Circle planning duration 4→6 produced zero captures, 652
+attacker deaths, and January 696; putting Kolovarice before Ustikolina failed to capture Kolovarice
+and lost Ustikolina. Both scenario experiments were reverted. The bounded health script's red exit
+is only missing post-40w checkpoints/terminal floor. Its probe planning-death advisory now counts
+successful one-contact `probe_complete` exits and is not a no-contact count. This candidate does
+not supersede clean 188-week baseline `n388`; adoption, manifest reconciliation, and floor changes
+require separate owner-authorized full-run evidence.
+
+An identical bounded replay at
+`F:\A-War-Without-Victory\runs\codex_gorazde_engine_fix\apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n4`
+reproduced final hash `0030aaf43578c06f`, confirming deterministic output.
+
+**Verification:** seven focused suites pass 194/194, typecheck passes, the production tactical-map
+build passes via the available root Vite runtime, `git diff --check` passes, and the EOL policy check
+passes. The unsharded full Vitest command was interrupted after a CPU-active integration worker
+returned no result for 30 minutes; no assertion failed before interruption, so it is recorded as a
+timeout rather than a pass. `canon:check` was stopped when its wrapper unexpectedly invoked a
+baseline regression and reached turn 108; that incomplete run is discarded and is not evidence.

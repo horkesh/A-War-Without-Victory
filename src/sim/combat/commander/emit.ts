@@ -36,6 +36,7 @@
 import type {
     CorpsDirective,
     CorpsOperation,
+    FormationId,
     SectorStance,
 } from '../../../state/game_state.js';
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../../state/formation_constants.js';
@@ -56,6 +57,7 @@ import {
 } from '../sector_offensive.js';
 import { getPoliticalControllerOSID } from '../../../state/settlement_control.js';
 import { shouldGrazBlockAttack } from '../../local_truces.js';
+import { getHeadQueuedPrePlannedBrigadeIds } from '../pre_planned_operations.js';
 import type {
     CommanderBeliefState,
     CommanderBriefing,
@@ -1113,14 +1115,20 @@ function buildOperations(
         // we just create the shell operation so the pipeline knows to attempt it.
         const probeBrigade = botOrdersPerfTime(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.selectBrigade`,
-            () => allocation.surplus_pool
-                .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
-                .filter(ev => isCombatReadyParticipant(briefing, ev.brigade_id))
-                .sort((a, b) => {
-                    const fitDiff = b.fitness_offense - a.fitness_offense;
-                    if (fitDiff !== 0) return fitDiff;
-                    return strictCompare(a.brigade_id, b.brigade_id);
-                })[0],
+            () => {
+                const queuedHistoricalParticipants = briefing.state_ref
+                    ? getHeadQueuedPrePlannedBrigadeIds(briefing.state_ref)
+                    : new Set<FormationId>();
+                return allocation.surplus_pool
+                    .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
+                    .filter(ev => !queuedHistoricalParticipants.has(ev.brigade_id))
+                    .filter(ev => isCombatReadyParticipant(briefing, ev.brigade_id))
+                    .sort((a, b) => {
+                        const fitDiff = b.fitness_offense - a.fitness_offense;
+                        if (fitDiff !== 0) return fitDiff;
+                        return strictCompare(a.brigade_id, b.brigade_id);
+                    })[0];
+            },
         );
 
         if (probeBrigade) {
