@@ -31242,3 +31242,27 @@ change surface, not measurement, and must not be quoted as a no-move proof.
 **Open:** whether `autonomy_level = 1` is the right shipped default for a human player (it delegates
 brigade placement and recruitment while retaining the accept/reject proposal loop) is an owner
 posture decision, recorded here rather than assumed settled.
+
+### 2026-08-31 — RE scope guard retired by owner direction
+
+**Finding:** `docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json` remained `status: "active"` with
+`base_commit c5f58b225` long after its own `terminal_receipt.status` recorded
+`complete_by_owner_guard_bypass` (2026-08-30). The checker (`scripts/repo/check_re_scope.ps1`, run
+from `.husky/pre-commit`) hard-fails on `base_commit != HEAD` whenever any file is staged, and its
+SEALED branch exits 0 only on a clean tree. With the line 23 commits past that base, the guard
+rejected every file-changing commit in the repository — including the calibration-reopen and
+housekeeping work that had to land past it.
+
+**Ruling (owner, 2026-08-31):** *"Close the lock, not needed any more."*
+
+**Change:** retired through the guard's OWN maintenance route rather than bypassed. The checker
+permits edits to `.husky/pre-commit` and `scripts/repo/check_re_scope.ps1` only under
+`task: "RE-GUARDRAIL"`, so the lock was rewritten as an RE-GUARDRAIL packet based at the then-HEAD
+`85aa0ef1a`, with those two paths plus the lock and this ledger on its allowlist and the required
+deny patterns retained. The same commit removes the scope-check invocation from the pre-commit hook.
+`AWWV_RE_EXTERNAL_SCOPE_VERIFIED=1` was NOT used; nothing was committed with `--no-verify`.
+
+**Retained:** the checker script stays on disk, and the superseded packet's task, base and terminal
+receipt are preserved verbatim under `superseded_packet` in the lock. A future RE packet reinstates
+the lane via `scripts/repo/install_re_scope_hook.ps1` plus a fresh lock. The pre-commit typecheck
+stage is untouched and still gates code/data commits.

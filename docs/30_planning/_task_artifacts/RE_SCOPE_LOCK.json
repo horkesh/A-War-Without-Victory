@@ -2,25 +2,15 @@
   "schema_version": 1,
   "status": "active",
   "lane": "RE",
-  "task": "RE-PLANNING-DURATION-BUDGET-OWNER-DISPOSITION",
-  "packet": "owner-authorized-amend-validate-and-rebaseline",
-  "base_commit": "c5f58b2253c46ab49d0c7437060d1b290b4fa685",
-  "namespace_note": "Owner-directed successor disposition accepted 2026-08-30; this is not a continuation of the closed packaged-probe packet and grants no P2B/P3 authority",
+  "task": "RE-GUARDRAIL",
+  "packet": "owner-directed-retirement-of-the-re-scope-guard",
+  "base_commit": "85aa0ef1a796859e4cc0da87f83983de1b91dbc2",
+  "namespace_note": "Owner direction 2026-08-31: \"Close the lock, not needed any more.\" The prior packet (RE-PLANNING-DURATION-BUDGET-OWNER-DISPOSITION) already carried terminal_receipt.status=complete_by_owner_guard_bypass, but the lock remained status=active pinned to base c5f58b225, which sat 23 commits behind the current line. In that state the guard rejects EVERY file-changing commit (base_commit mismatch) while its SEALED branch passes only on a clean tree, so the repository could not be committed to at all. This packet uses the guard's own maintenance route -- task RE-GUARDRAIL is the only task the checker permits to modify .husky/pre-commit and scripts/repo/check_re_scope.ps1 -- to retire the scope-check invocation. The checker script is retained on disk so the lane can be reinstated via scripts/repo/install_re_scope_hook.ps1 if a future RE packet needs it.",
   "allowlist": [
-    ".claude/current-lane.txt",
-    "docs/10_canon/Engine_Invariants_v0_9_0.md",
-    "docs/10_canon/Rulebook_v0_9_0.md",
-    "docs/10_canon/Systems_Manual_v0_9_0.md",
-    "docs/10_canon/context.md",
-    "docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md",
+    ".husky/pre-commit",
     "docs/30_planning/_task_artifacts/RE_SCOPE_LOCK.json",
-    "docs/40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md",
     "docs/PROJECT_LEDGER.md",
-    "docs/PROJECT_LEDGER_KNOWLEDGE.md",
-    "src/sim/combat/operation_preparation.ts",
-    "src/sim/combat/sector_offensive.ts",
-    "tests/engine_health_gate.test.ts",
-    "tests/sector_offensive_idle_recovery.test.ts"
+    "scripts/repo/check_re_scope.ps1"
   ],
   "denylist": [
     "data/scenarios/**",
@@ -32,62 +22,40 @@
     "data/refs/**",
     "docs/10_canon/FORAWWV.md"
   ],
-  "execution_budget": {
-    "focused_red_runs": 2,
-    "focused_green_runs": 2,
-    "desktop_map_build_runs": 0,
-    "packaged_probe_invocations": 0,
-    "typecheck_runs": 1,
-    "balanced_test_runs": 1,
-    "syntax_check_commands": ["git diff --check"],
-    "git_diff_check_runs": 1,
-    "additional_test_runs": 4,
-    "additional_verification_commands": 12,
-    "correction_passes": 1,
-    "packaged_probe_retries": 0,
-    "replacement_attempts": 0,
-    "actual_failure_triggered_diagnoses": 1
-  },
-  "terminal_receipt": {
-    "status": "complete_by_owner_guard_bypass",
-    "owner_authorization": "Accepted recommendation and explicitly authorized implementation, governance-lock supersession, one 188-week run, and conditional January-threshold rebaseline in this thread on 2026-08-30",
-    "implementation_commit": "6da16cef689fc95cfa89d36eab5e278136675173",
-    "run_dir": "F:\\A-War-Without-Victory\\runs\\re_planning_budget_6da16cef6\\apr1992_definitive_188w__46834a3b41033bff__w188_n0",
-    "run_provenance": {
-      "node_version": "v22.21.1",
-      "git_dirty": false,
-      "final_state_hash": "c0d234f075cec562"
-    },
-    "validation": {
-      "total_killed": 55915,
-      "total_wounded": 205278,
-      "attack_orders": 865,
-      "battles": 659,
-      "operations": 37,
-      "political_blocked_planning_deaths": 38,
-      "checkpoint_jan1993": 688,
-      "proposed_jan1993_floor": 685,
-      "operationless_battles": 0,
-      "unattributed_combat_control_events": 0,
-      "enclave_guard_cells_correct": 9
-    },
-    "calibration_handoff": "applied: engine_health_thresholds jan1993 694->685 by explicit owner authorization to bypass the RE guard; baseline manifest unchanged",
-    "guard_bypass": "Owner explicitly authorized bypassing the hard-coded data/calibration/** denial on 2026-08-30; exact exception limited to data/calibration/engine_health_thresholds.json and receipt files",
-    "retained_rules": [
-      "all attacks remain CorpsOperation-owned",
-      "planning-phase elite movement does not grant execution combat-roster membership",
-      "scenario files remain immutable",
-      "baseline manifest remains immutable"
-    ]
-  },
-  "constraint_enforcement": "exact-path allowlist; the single owner-authorized deterministic long run is consumed; scenario, calibration, and baseline-manifest denylist retained",
-  "long_run_policy": {
-    "permitted": false,
-    "maximum_clean_pairs_per_exact_commit": 1
-  },
-  "failure_policy": {
-    "read_only_diagnoses_per_failure": 1,
-    "out_of_scope_implementation": "stop-and-queue",
-    "calibration_result_authorizes_re_fix": false
+  "superseded_packet": {
+    "task": "RE-PLANNING-DURATION-BUDGET-OWNER-DISPOSITION",
+    "base_commit": "c5f58b2253c46ab49d0c7437060d1b290b4fa685",
+    "terminal_receipt": {
+      "status": "complete_by_owner_guard_bypass",
+      "owner_authorization": "Accepted recommendation and explicitly authorized implementation, governance-lock supersession, one 188-week run, and conditional January-threshold rebaseline in this thread on 2026-08-30",
+      "implementation_commit": "6da16cef689fc95cfa89d36eab5e278136675173",
+      "run_dir": "F:\\A-War-Without-Victory\\runs\\re_planning_budget_6da16cef6\\apr1992_definitive_188w__46834a3b41033bff__w188_n0",
+      "run_provenance": {
+        "node_version": "v22.21.1",
+        "git_dirty": false,
+        "final_state_hash": "c0d234f075cec562"
+      },
+      "validation": {
+        "total_killed": 55915,
+        "total_wounded": 205278,
+        "attack_orders": 865,
+        "battles": 659,
+        "operations": 37,
+        "political_blocked_planning_deaths": 38,
+        "checkpoint_jan1993": 688,
+        "proposed_jan1993_floor": 685,
+        "operationless_battles": 0,
+        "unattributed_combat_control_events": 0,
+        "enclave_guard_cells_correct": 9
+      },
+      "calibration_handoff": "applied: engine_health_thresholds jan1993 694->685 by explicit owner authorization to bypass the RE guard; baseline manifest unchanged",
+      "guard_bypass": "Owner explicitly authorized bypassing the hard-coded data/calibration/** denial on 2026-08-30; exact exception limited to data/calibration/engine_health_thresholds.json and receipt files",
+      "retained_rules": [
+        "all attacks remain CorpsOperation-owned",
+        "planning-phase elite movement does not grant execution combat-roster membership",
+        "scenario files remain immutable",
+        "baseline manifest remains immutable"
+      ]
+    }
   }
 }
